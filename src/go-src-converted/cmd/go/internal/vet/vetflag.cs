@@ -2,45 +2,46 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package vet -- go2cs converted at 2022 March 06 23:17:46 UTC
+// package vet -- go2cs converted at 2022 March 13 06:31:06 UTC
 // import "cmd/go/internal/vet" ==> using vet = go.cmd.go.@internal.vet_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\vet\vetflag.go
-using bytes = go.bytes_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cmdflag = go.cmd.go.@internal.cmdflag_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cmdflag = cmd.go.@internal.cmdflag_package;
+using work = cmd.go.@internal.work_package;
+
+
+// go vet flag processing
+//
+// We query the flags of the tool specified by -vettool and accept any
+// of those flags plus any flag valid for 'go build'. The tool must
+// support -flags, which prints a description of its flags in JSON to
+// stdout.
+
+// vetTool specifies the vet command to run.
+// Any tool that supports the (still unpublished) vet
+// command-line protocol may be supplied; see
+// golang.org/x/tools/go/analysis/unitchecker for one
+// implementation. It is also used by tests.
+//
+// The default behavior (vetTool=="") runs 'go tool vet'.
+//
+
+using System;
 public static partial class vet_package {
 
-    // go vet flag processing
-    //
-    // We query the flags of the tool specified by -vettool and accept any
-    // of those flags plus any flag valid for 'go build'. The tool must
-    // support -flags, which prints a description of its flags in JSON to
-    // stdout.
-
-    // vetTool specifies the vet command to run.
-    // Any tool that supports the (still unpublished) vet
-    // command-line protocol may be supplied; see
-    // golang.org/x/tools/go/analysis/unitchecker for one
-    // implementation. It is also used by tests.
-    //
-    // The default behavior (vetTool=="") runs 'go tool vet'.
-    //
 private static @string vetTool = default; // -vettool
 
 private static void init() {
@@ -104,7 +105,6 @@ private static (slice<@string>, slice<@string>) vetFlags(slice<@string> args) {
         err = err__prev1;
 
     }
-
     ref slice<object> analysisFlags = ref heap(out ptr<slice<object>> _addr_analysisFlags);
     {
         error err__prev1 = err;
@@ -141,9 +141,7 @@ private static (slice<@string>, slice<@string>) vetFlags(slice<@string> args) {
  {
                     cf.String(f.Name, "", "");
                 }
-
             }
-
         }
         f = f__prev1;
     }
@@ -168,7 +166,6 @@ private static (slice<@string>, slice<@string>) vetFlags(slice<@string> args) {
             // not included.
             packageNames = remainingArgs;
             break;
-
         }
         {
             ref cmdflag.NonFlagError nf = ref heap((new cmdflag.NonFlagError()), out ptr<cmdflag.NonFlagError> _addr_nf);
@@ -178,11 +175,9 @@ private static (slice<@string>, slice<@string>) vetFlags(slice<@string> args) {
                 // must be a package name.
                 packageNames = args;
                 break;
-
             }
 
         }
-
 
         if (err != null) {
             fmt.Fprintln(os.Stderr, err);
@@ -196,10 +191,8 @@ private static (slice<@string>, slice<@string>) vetFlags(slice<@string> args) {
             // This flag has been overridden explicitly, so don't forward its implicit
             // value from GOFLAGS.
             delete(addFromGOFLAGS, f.Name);
-
         }
         args = remainingArgs;
-
     } 
 
     // Prepend arguments from GOFLAGS before other arguments.
@@ -210,7 +203,6 @@ private static (slice<@string>, slice<@string>) vetFlags(slice<@string> args) {
     });
     passToVet = append(passToVet, explicitFlags);
     return (passToVet, packageNames);
-
 }
 
 private static void exitWithUsage() {
@@ -227,7 +219,6 @@ private static void exitWithUsage() {
 
     @base.SetExitStatus(2);
     @base.Exit();
-
 }
 
 } // end vet_package

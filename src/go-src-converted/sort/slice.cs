@@ -2,26 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sort -- go2cs converted at 2022 March 06 22:12:31 UTC
+// package sort -- go2cs converted at 2022 March 13 05:27:34 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Program Files\Go\src\sort\slice.go
-
-using System;
-
-
 namespace go;
 
+using System;
 public static partial class sort_package {
 
-    // Slice sorts the slice x given the provided less function.
-    // It panics if x is not a slice.
-    //
-    // The sort is not guaranteed to be stable: equal elements
-    // may be reversed from their original order.
-    // For a stable sort, use SliceStable.
-    //
-    // The less function must satisfy the same requirements as
-    // the Interface type's Less method.
+// Slice sorts the slice x given the provided less function.
+// It panics if x is not a slice.
+//
+// The sort is not guaranteed to be stable: equal elements
+// may be reversed from their original order.
+// For a stable sort, use SliceStable.
+//
+// The less function must satisfy the same requirements as
+// the Interface type's Less method.
 public static bool Slice(object x, Func<nint, nint, bool> less) {
     var rv = reflectValueOf(x);
     var swap = reflectSwapper(x);
@@ -52,7 +49,6 @@ public static bool SliceIsSorted(object x, Func<nint, nint, bool> less) {
         }
     }
     return true;
-
 }
 
 } // end sort_package

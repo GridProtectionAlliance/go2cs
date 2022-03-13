@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:15 UTC
+//     Generated on 2022 March 13 05:37:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace http
 {
     public static partial class @internal_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct chunkedWriter
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace http
             public static implicit operator chunkedWriter(NilType nil) => default(chunkedWriter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static chunkedWriter chunkedWriter_cast(dynamic value)
         {
             return new chunkedWriter(value.Wire);

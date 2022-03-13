@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:40 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:25 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\float.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -19,7 +19,6 @@ private static bool isNaN(double f) {
  
     // IEEE 754 says that only NaNs satisfy f != f.
     return f != f;
-
 }
 
 // isFinite reports whether f is neither NaN nor an infinity.

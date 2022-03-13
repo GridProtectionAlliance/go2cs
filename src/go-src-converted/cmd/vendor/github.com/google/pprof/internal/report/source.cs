@@ -12,38 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package report -- go2cs converted at 2022 March 06 23:23:48 UTC
+// package report -- go2cs converted at 2022 March 13 06:36:54 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\report\source.go
+namespace go.cmd.vendor.github.com.google.pprof.@internal;
 // This file contains routines related to the generation of annotated
 // source listings.
 
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using template = go.html.template_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
 
-using graph = go.github.com.google.pprof.@internal.graph_package;
-using measurement = go.github.com.google.pprof.@internal.measurement_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using profile = go.github.com.google.pprof.profile_package;
+using bufio = bufio_package;
+using fmt = fmt_package;
+using template = html.template_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using graph = github.com.google.pprof.@internal.graph_package;
+using measurement = github.com.google.pprof.@internal.measurement_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using profile = github.com.google.pprof.profile_package;
+
+
+// printSource prints an annotated source listing, include all
+// functions with samples that match the regexp rpt.options.symbol.
+// The sources are sorted by function name and then by filename to
+// eliminate potential nondeterminism.
+
 using System;
-
-
-namespace go.cmd.vendor.github.com.google.pprof.@internal;
-
 public static partial class report_package {
 
-    // printSource prints an annotated source listing, include all
-    // functions with samples that match the regexp rpt.options.symbol.
-    // The sources are sorted by function name and then by filename to
-    // eliminate potential nondeterminism.
 private static error printSource(io.Writer w, ptr<Report> _addr_rpt) {
     ref Report rpt = ref _addr_rpt.val;
 
@@ -66,7 +67,6 @@ private static error printSource(io.Writer w, ptr<Report> _addr_rpt) {
                 functions = append(functions, n);
             }
             functionNodes[n.Info.Name] = append(functionNodes[n.Info.Name], n);
-
         }
         n = n__prev1;
     }
@@ -80,7 +80,6 @@ private static error printSource(io.Writer w, ptr<Report> _addr_rpt) {
             return error.As(fmt.Errorf("could not stat current dir: %v", err))!;
         }
         sourcePath = wd;
-
     }
     var reader = newSourceReader(sourcePath, o.TrimPath);
 
@@ -108,7 +107,6 @@ private static error printSource(io.Writer w, ptr<Report> _addr_rpt) {
                         sourceFiles = append(sourceFiles, n);
                     }
                     fileNodes[n.Info.File] = append(fileNodes[n.Info.File], n);
-
                 }
                 n = n__prev2;
             }
@@ -148,7 +146,6 @@ private static error printSource(io.Writer w, ptr<Report> _addr_rpt) {
     }
 
     return error.As(null!)!;
-
 }
 
 // printWebSource prints an annotated source listing, include all
@@ -164,10 +161,8 @@ private static error printWebSource(io.Writer w, ptr<Report> _addr_rpt, plugin.O
             return error.As(err)!;
         }
     }
-
     printPageClosing(w);
     return error.As(null!)!;
-
 }
 
 // sourcePrinter holds state needed for generating source+asm HTML listing.
@@ -249,13 +244,11 @@ public static error PrintWebList(io.Writer w, ptr<Report> _addr_rpt, plugin.ObjT
             return error.As(fmt.Errorf("could not stat current dir: %v", err))!;
         }
         sourcePath = wd;
-
     }
     var sp = newSourcePrinter(_addr_rpt, obj, sourcePath);
     sp.print(w, maxFiles, rpt);
     sp.close();
     return error.As(null!)!;
-
 }
 
 private static ptr<sourcePrinter> newSourcePrinter(ptr<Report> _addr_rpt, plugin.ObjTool obj, @string sourcePath) {
@@ -275,7 +268,6 @@ private static ptr<sourcePrinter> newSourcePrinter(ptr<Report> _addr_rpt, plugin
             }
 
         }
-
     }
     map addrs = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ulong, addrInfo>{};
     map flat = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ulong, long>{};
@@ -297,7 +289,6 @@ private static ptr<sourcePrinter> newSourcePrinter(ptr<Report> _addr_rpt, plugin
             }
 
         }
-
     }; 
 
     // See if sp.sym matches line.
@@ -306,7 +297,6 @@ private static ptr<sourcePrinter> newSourcePrinter(ptr<Report> _addr_rpt, plugin
             return _addr_false!;
         }
         return _addr_sp.sym.MatchString(line.Function.Name) || sp.sym.MatchString(line.Function.SystemName) || sp.sym.MatchString(line.Function.Filename)!;
-
     }; 
 
     // Extract sample counts and compute set of interesting functions.
@@ -338,22 +328,17 @@ private static ptr<sourcePrinter> newSourcePrinter(ptr<Report> _addr_rpt, plugin
             if (addr == 0) { 
                 // Some profiles are missing valid addresses.
                 addr = sp.synth.address(loc);
-
             }
-
             cum[addr] += value;
             if (i == 0) {
                 flat[addr] += value;
             }
-
             if (sp.sym == null || (address != null && addr == address.val)) { 
                 // Interested in top-level entry of stack.
                 if (len(loc.Line) > 0) {
                     markInterest(addr, loc, len(loc.Line) - 1);
                 }
-
                 continue;
-
             } 
 
             // Seach in inlined stack for a match.
@@ -372,11 +357,9 @@ private static ptr<sourcePrinter> newSourcePrinter(ptr<Report> _addr_rpt, plugin
                 line = line__prev3;
             }
         }
-
     }    sp.expandAddresses(rpt, addrs, flat);
     sp.initSamples(flat, cum);
     return _addr_sp!;
-
 }
 
 private static void close(this ptr<sourcePrinter> _addr_sp) {
@@ -401,9 +384,7 @@ private static void expandAddresses(this ptr<sourcePrinter> _addr_sp, ptr<Report
     // Trim ranges if there are too many.
     const nint maxRanges = 25;
 
-    sort.Slice(ranges, (i, j) => {
-        return ranges[i].score > ranges[j].score;
-    });
+    sort.Slice(ranges, (i, j) => ranges[i].score > ranges[j].score);
     if (len(ranges) > maxRanges) {
         ranges = ranges[..(int)maxRanges];
     }
@@ -423,7 +404,6 @@ private static void expandAddresses(this ptr<sourcePrinter> _addr_sp, ptr<Report
         if (err != null) { 
             // TODO(sanjay): Report that the covered addresses are missing.
             continue;
-
         }
         slice<plugin.Frame> lastFrames = default;
         ulong lastAddr = default;        ulong maxAddr = default;
@@ -435,14 +415,12 @@ private static void expandAddresses(this ptr<sourcePrinter> _addr_sp, ptr<Report
             if (addr <= maxAddr) {
                 continue;
             }
-
             maxAddr = addr;
 
             nint length = 1;
             if (i + 1 < len(insts) && insts[i + 1].Addr > inst.Addr) { 
                 // Extend to next instruction.
                 length = int(insts[i + 1].Addr - inst.Addr);
-
             } 
 
             // Get inlined-call-stack for address.
@@ -450,9 +428,7 @@ private static void expandAddresses(this ptr<sourcePrinter> _addr_sp, ptr<Report
             if (err != null) { 
                 // Construct a frame from disassembler output.
                 frames = new slice<plugin.Frame>(new plugin.Frame[] { {Func:inst.Function,File:inst.File,Line:inst.Line} });
-
             }
-
             instructionInfo x = new instructionInfo(objAddr:inst.Addr,length:length,disasm:inst.Text);
             if (len(frames) > 0) { 
                 // We could consider using the outer-most caller's source
@@ -471,9 +447,7 @@ private static void expandAddresses(this ptr<sourcePrinter> _addr_sp, ptr<Report
                 nint index = 0; // Inner-most frame
                 x.file = frames[index].File;
                 x.line = frames[index].Line;
-
             }
-
             sp.insts[addr] = x; 
 
             // We sometimes get instructions with a zero reported line number.
@@ -488,9 +462,7 @@ private static void expandAddresses(this ptr<sourcePrinter> _addr_sp, ptr<Report
             else if ((addr - lastAddr <= neighborhood) && lastFrames != null) {
                 frames = lastFrames;
             }
-
             sp.addStack(addr, frames);
-
         }
     }
 }
@@ -513,7 +485,6 @@ private static void addStack(this ptr<sourcePrinter> _addr_sp, ulong addr, slice
         var stack = make_slice<callID>(0, len(callees));
         for (var j = len(callees) - 1; j >= 0; j--) { // Reverse so caller is first
             stack = append(stack, new callID(file:callees[j].File,line:callees[j].Line,));
-
         }
         file.lines[f.Line] = append(file.lines[f.Line], new sourceInst(addr,stack)); 
 
@@ -527,7 +498,6 @@ private static void addStack(this ptr<sourcePrinter> _addr_sp, ulong addr, slice
             }
 
         }
-
     }
 }
 
@@ -568,7 +538,6 @@ private static void handleUnprocessed(this ptr<sourcePrinter> _addr_sp, map<ulon
         sp.insts[addr] = x;
 
         sp.addStack(addr, frames);
-
     }
 }
 
@@ -597,7 +566,6 @@ private static (slice<addressRange>, slice<ulong>) splitIntoRanges(this ptr<sour
  {
                 unprocessed = append(unprocessed, addr);
             }
-
         }
         info = info__prev1;
     }
@@ -628,7 +596,6 @@ private static (slice<addressRange>, slice<ulong>) splitIntoRanges(this ptr<sour
                 end = addrs[i];
                 sum += flat[end];
                 i++;
-
             }
 
             if (m.Start - begin >= expand) {
@@ -638,7 +605,6 @@ private static (slice<addressRange>, slice<ulong>) splitIntoRanges(this ptr<sour
  {
                 begin = m.Start;
             }
-
             if (m.Limit - end >= expand) {
                 end += expand;
             }
@@ -646,13 +612,10 @@ private static (slice<addressRange>, slice<ulong>) splitIntoRanges(this ptr<sour
  {
                 end = m.Limit;
             }
-
             result = append(result, new addressRange(begin,end,obj,m,sum));
-
         }
     }
     return (result, unprocessed);
-
 }
 
 private static void initSamples(this ptr<sourcePrinter> _addr_sp, map<ulong, long> flat, map<ulong, long> cum) {
@@ -668,7 +631,6 @@ private static void initSamples(this ptr<sourcePrinter> _addr_sp, map<ulong, lon
             inst.cum += cum[p];
         }
         sp.insts[addr] = inst;
-
     }
 }
 
@@ -686,16 +648,12 @@ private static void print(this ptr<sourcePrinter> _addr_sp, io.Writer w, nint ma
                     // (e.g., if we show multiple inlined functions).
                     // Avoid double-counting samples in this case.
                     continue;
-
                 }
-
                 seen[x.addr] = true;
                 var inst = sp.insts[x.addr];
                 file.cum += inst.cum;
                 file.flat += inst.flat;
-
             }
-
         }
     }    slice<ptr<sourceFile>> files = default;
     {
@@ -713,7 +671,6 @@ private static void print(this ptr<sourcePrinter> _addr_sp, io.Writer w, nint ma
         // Order by name for compatibility with old code.
         order = (i, j) => files[i].fname < files[j].fname;
         maxFiles = len(files);
-
     }
     sort.Slice(files, order);
     {
@@ -747,21 +704,16 @@ private static void printFile(this ptr<sourcePrinter> _addr_sp, io.Writer w, ptr
                 if (len(f.lines[l]) == 0) { 
                     // Outside of range of valid lines and nothing to print.
                     continue;
-
                 }
-
                 if (l == 0) { 
                     // Line number 0 shows up if line number is not known.
                     lineContents = "<instructions with unknown line numbers>";
-
                 }
                 else
  { 
                     // Past end of file, but have data to print.
                     lineContents = "???";
-
                 }
-
             } 
 
             // Make list of assembly instructions.
@@ -779,13 +731,10 @@ private static void printFile(this ptr<sourcePrinter> _addr_sp, io.Writer w, ptr
 
                 // divisors already applied, so leave flatDiv,cumDiv as 0
                 asm = append(asm, new assemblyInstruction(address:x.objAddr,instruction:x.disasm,function:fn.name,file:x.file,line:x.line,flat:x.flat,cum:x.cum,startsBlock:startsBlock,inlineCalls:inst.stack,));
-
             }
             printFunctionSourceLine(w, l, flatSum, cumSum, lineContents, asm, _addr_sp.reader, _addr_rpt);
-
         }
         printFunctionClosing(w);
-
     }
 }
 
@@ -825,11 +774,9 @@ private static slice<sourceFunction> functions(this ptr<sourcePrinter> _addr_sp,
                 if (ok) { 
                     // Use demangled name if available.
                     name = pretty;
-
                 }
 
             }
-
 
             sourceFunction fn = new sourceFunction(name:name,begin:l,end:l+1);
             foreach (var (_, x) in f.lines[l]) {
@@ -852,7 +799,6 @@ private static slice<sourceFunction> functions(this ptr<sourcePrinter> _addr_sp,
 
             // Add new function.
             funcs = append(funcs, fn);
-
         }
         l = l__prev1;
     }
@@ -870,7 +816,6 @@ private static slice<sourceFunction> functions(this ptr<sourcePrinter> _addr_sp,
             else if (f.begin > 1) {
                 f.begin = 1;
             }
-
         }
         else
  { 
@@ -879,18 +824,14 @@ private static slice<sourceFunction> functions(this ptr<sourcePrinter> _addr_sp,
             if (halfGap > expand) {
                 halfGap = expand;
             }
-
             funcs[i - 1].end += halfGap;
             f.begin -= halfGap;
-
         }
         funcs[i] = f;
-
     }    if (len(funcs) > 0) {
         funcs[len(funcs) - 1].end += expand;
     }
     return funcs;
-
 }
 
 // objectFile return the object for the specified mapping, opening it if necessary.
@@ -913,14 +854,12 @@ private static plugin.ObjFile objectFile(this ptr<sourcePrinter> _addr_sp, ptr<p
         object = object__prev1;
 
     }
-
     var (object, err) = sp.objectTool.Open(m.File, m.Start, m.Limit, m.Offset);
     if (err != null) {
         object = null;
     }
     sp.objects[m.File] = object; // Cache even on error.
     return object;
-
 }
 
 // printHeader prints the page header for a weblist report.
@@ -937,7 +876,6 @@ private static void printHeader(io.Writer w, ptr<Report> _addr_rpt) {
     foreach (var (_, l) in ProfileLabels(rpt)) {
         labels = append(labels, template.HTMLEscapeString(l));
     }    fmt.Fprintf(w, "<div class=\"legend\">%s<br>Total: %s</div>", strings.Join(labels, "<br>\n"), rpt.formatValue(rpt.total));
-
 }
 
 // printFunctionHeader prints a function header for a weblist report.
@@ -946,7 +884,6 @@ private static void printFunctionHeader(io.Writer w, @string name, @string path,
 
     fmt.Fprintf(w, "<h2>%s</h2><p class=\"filename\">%s</p>\n<pre onClick=\"pprof_toggle_asm(event)\">\n  T" +
     "otal:  %10s %10s (flat, cum) %s\n", template.HTMLEscapeString(name), template.HTMLEscapeString(path), rpt.formatValue(flatSum), rpt.formatValue(cumSum), measurement.Percentage(cumSum, rpt.total));
-
 }
 
 // printFunctionSourceLine prints a source line and the corresponding assembly.
@@ -971,7 +908,6 @@ private static void printFunctionSourceLine(io.Writer w, nint lineNo, long flat,
         printNested(w, srcIndent, assembly, _addr_reader, _addr_rpt);
     }
     fmt.Fprintln(w);
-
 }
 
 private static void printNested(io.Writer w, nint srcIndent, slice<assemblyInstruction> assembly, ptr<sourceReader> _addr_reader, ptr<Report> _addr_rpt) {
@@ -984,7 +920,6 @@ private static void printNested(io.Writer w, nint srcIndent, slice<assemblyInstr
         if (an.startsBlock && i != 0) { 
             // Insert a separator between discontiguous blocks.
             fmt.Fprintf(w, " %8s %28s\n", "", "⋮");
-
         }
         @string fileline = default;
         if (an.file != "") {
@@ -998,27 +933,21 @@ private static void printNested(io.Writer w, nint srcIndent, slice<assemblyInstr
             if (j < len(curCalls) && curCalls[j] == c) { 
                 // Skip if same as previous instruction.
                 continue;
-
             }
-
             curCalls = null;
             var (fline, ok) = reader.line(c.file, c.line);
             if (!ok) {
                 fline = "";
             }
-
             var text = strings.Repeat(" ", srcIndent + 4 + 4 * j) + strings.TrimSpace(fline);
             fmt.Fprintf(w, " %8s %10s %10s %8s  <span class=inlinesrc>%s</span> <span class=unimportant>%s:%d</span>\n", "", "", "", "", template.HTMLEscapeString(rightPad(text, 80)), template.HTMLEscapeString(filepath.Base(c.file)), c.line);
-
         }        curCalls = an.inlineCalls;
         if (an.instruction == synthAsm) {
             continue;
         }
         text = strings.Repeat(" ", srcIndent + 4 + 4 * len(curCalls)) + an.instruction;
         fmt.Fprintf(w, " %8s %10s %10s %8x: %s <span class=unimportant>%s</span>\n", "", valueOrDot(flat, rpt), valueOrDot(cum, rpt), an.address, template.HTMLEscapeString(rightPad(text, 80)), fileline);
-
     }    fmt.Fprint(w, "</span>");
-
 }
 
 // printFunctionClosing prints the end of a function in a weblist report.
@@ -1076,7 +1005,6 @@ private static (graph.Nodes, @string, error) getSourceFromFile(@string file, ptr
             end = nodeEnd;
         }
         lineNodes[lineno] = append(lineNodes[lineno], n);
-
     }    if (start < 1) {
         start = 1;
     }
@@ -1102,9 +1030,7 @@ private static (graph.Nodes, @string, error) getSourceFromFile(@string file, ptr
             return (null, file, error.As(err)!);
         }
     }
-
     return (src, file, error.As(null!)!);
-
 }
 
 // sourceReader provides access to source code with caching of file contents.
@@ -1154,13 +1080,11 @@ private static (@string, bool) line(this ptr<sourceReader> _addr_reader, @string
             }
         }
         reader.files[path] = lines;
-
     }
     if (lineno <= 0 || lineno >= len(lines)) {
         return ("", false);
     }
     return (lines[lineno], true);
-
 }
 
 // openSourceFile opens a source file from a name encoded in a profile. File
@@ -1195,18 +1119,13 @@ private static (ptr<os.File>, error) openSourceFile(@string path, @string search
                 f = f__prev1;
 
             }
-
             var parent = filepath.Dir(dir);
             if (parent == dir) {
                 break;
             }
-
             dir = parent;
-
         }
-
     }    return (_addr_null!, error.As(fmt.Errorf("could not find file %s on path %s", path, searchPath))!);
-
 }
 
 // trimPath cleans up a path by removing prefixes that are commonly
@@ -1234,7 +1153,6 @@ private static @string trimPath(@string path, @string trimPath, @string searchPa
                 }
 
             }
-
         }
     }
     var trimPaths = append(filepath.SplitList(filepath.ToSlash(trimPath)), "/proc/self/cwd/./", "/proc/self/cwd/");
@@ -1246,7 +1164,6 @@ private static @string trimPath(@string path, @string trimPath, @string searchPa
             return path[(int)len(trimPath)..];
         }
     }    return path;
-
 }
 
 private static nint indentation(@string line) {
@@ -1261,13 +1178,10 @@ private static nint indentation(@string line) {
                 column++;
             }
         else
-
-
         } {
             break;
         }
     }    return column;
-
 }
 
 // rightPad pads the input with spaces on the right-hand-side to make it have
@@ -1288,8 +1202,6 @@ private static @string rightPad(@string s, nint n) {
                 str.WriteRune(' ');
             }
         else
-
-
         } {
             str.WriteRune(c);
         }
@@ -1298,7 +1210,6 @@ private static @string rightPad(@string s, nint n) {
         str.WriteRune(' ');
     }
     return str.String();
-
 }
 
 private static @string canonicalizeFileName(@string fname) {

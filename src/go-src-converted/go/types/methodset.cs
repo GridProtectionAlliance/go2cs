@@ -4,22 +4,23 @@
 
 // This file implements method sets.
 
-// package types -- go2cs converted at 2022 March 06 22:42:05 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:12 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\methodset.go
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.go;
 
+using fmt = fmt_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// A MethodSet is an ordered set of concrete or abstract (interface) methods;
+// a method is a MethodVal selection, and they are ordered by ascending m.Obj().Id().
+// The zero value for a MethodSet is a ready-to-use empty method set.
+
+using System;
 public static partial class types_package {
 
-    // A MethodSet is an ordered set of concrete or abstract (interface) methods;
-    // a method is a MethodVal selection, and they are ordered by ascending m.Obj().Id().
-    // The zero value for a MethodSet is a ready-to-use empty method set.
 public partial struct MethodSet {
     public slice<ptr<Selection>> list;
 }
@@ -36,7 +37,6 @@ private static @string String(this ptr<MethodSet> _addr_s) {
         fmt.Fprintf(_addr_buf, "\t%s\n", f);
     }    fmt.Fprintln(_addr_buf, "}");
     return buf.String();
-
 }
 
 // Len returns the number of methods in s.
@@ -73,7 +73,6 @@ private static ptr<Selection> Lookup(this ptr<MethodSet> _addr_s, ptr<Package> _
         }
     }
     return _addr_null!;
-
 }
 
 // Shared empty method set.
@@ -137,13 +136,10 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
                         // this same type at the current depth, so we can ignore
                         // this one.
                         continue;
-
                     }
-
                     if (seen == null) {
                         seen = make_map<ptr<Named>, bool>();
                     }
-
                     seen[named] = true;
 
                     mset = mset.add(named.methods, e.index, e.indirect, e.multiples); 
@@ -159,11 +155,9 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
                         }
 
                     }
-
                 }
 
             }
-
 
             switch (typ.type()) {
                 case ptr<Struct> t:
@@ -183,9 +177,7 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
                             // have fields or methods (only Named, Struct, and
                             // Interface types need to be considered).
                             next = append(next, new embeddedType(typ,concat(e.index,i),e.indirect||isPtr,e.multiples));
-
                         }
-
                     }
                     break;
                 case ptr<Interface> t:
@@ -195,7 +187,6 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
                     mset = mset.add(t.Bound().allMethods, e.index, true, e.multiples);
                     break;
             }
-
         }        {
             var k__prev2 = k;
             var m__prev2 = m;
@@ -211,17 +202,13 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
                         if (fset[k]) {
                             m = null; // collision
                         }
-
                         if (base == null) {
                             base = make(methodSet);
                         }
-
                         base[k] = m;
-
                     }
 
                 }
-
             } 
 
             // Add all (remaining) fields at this depth as collisions (since they will
@@ -247,7 +234,6 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
                     }
 
                 }
-
             } 
 
             // It's ok to call consolidateMultiples with a nil *Checker because
@@ -260,7 +246,6 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
         }
 
         current = (Checker.val)(null).consolidateMultiples(next);
-
     }
 
     if (len(base) == 0) {
@@ -280,11 +265,8 @@ public static ptr<MethodSet> NewMethodSet(Type T) {
         m = m__prev1;
     }
 
-    sort.Slice(list, (i, j) => {
-        return _addr_list[i].obj.Id() < list[j].obj.Id()!;
-    });
+    sort.Slice(list, (i, j) => _addr_list[i].obj.Id() < list[j].obj.Id()!);
     return addr(new MethodSet(list));
-
 }
 
 // A methodSet is a set of methods and name collisions.
@@ -320,11 +302,9 @@ private static methodSet add(this methodSet s, slice<ptr<Func>> list, slice<nint
                 }
 
             }
-
         }
         s[key] = null; // collision
     }    return s;
-
 }
 
 // ptrRecv reports whether the receiver is of the form *T.
@@ -350,7 +330,6 @@ private static bool ptrRecv(ptr<Func> _addr_f) {
     // For case 1) we can't do anything; the client must know what they are doing.
     // For case 2) we can use the information gathered by the resolver.
     return f.hasPtrRecv;
-
 }
 
 } // end types_package

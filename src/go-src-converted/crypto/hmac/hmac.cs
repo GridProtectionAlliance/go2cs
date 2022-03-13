@@ -19,29 +19,31 @@ timing side-channels:
         return hmac.Equal(messageMAC, expectedMAC)
     }
 */
-// package hmac -- go2cs converted at 2022 March 06 22:19:21 UTC
+
+// package hmac -- go2cs converted at 2022 March 13 05:34:18 UTC
 // import "crypto/hmac" ==> using hmac = go.crypto.hmac_package
 // Original source: C:\Program Files\Go\src\crypto\hmac\hmac.go
-using subtle = go.crypto.subtle_package;
-using hash = go.hash_package;
-using System;
-
-
 namespace go.crypto;
 
+using subtle = crypto.subtle_package;
+using hash = hash_package;
+
+
+// FIPS 198-1:
+// https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
+
+// key is zero padded to the block size of the hash function
+// ipad = 0x36 byte repeated for key length
+// opad = 0x5c byte repeated for key length
+// hmac = H([key ^ opad] H([key ^ ipad] text))
+
+// Marshalable is the combination of encoding.BinaryMarshaler and
+// encoding.BinaryUnmarshaler. Their method definitions are repeated here to
+// avoid a dependency on the encoding package.
+
+using System;
 public static partial class hmac_package {
 
-    // FIPS 198-1:
-    // https://csrc.nist.gov/publications/fips/fips198-1/FIPS-198-1_final.pdf
-
-    // key is zero padded to the block size of the hash function
-    // ipad = 0x36 byte repeated for key length
-    // opad = 0x5c byte repeated for key length
-    // hmac = H([key ^ opad] H([key ^ ipad] text))
-
-    // Marshalable is the combination of encoding.BinaryMarshaler and
-    // encoding.BinaryUnmarshaler. Their method definitions are repeated here to
-    // avoid a dependency on the encoding package.
 private partial interface marshalable {
     error MarshalBinary();
     error UnmarshalBinary(slice<byte> _p0);
@@ -74,7 +76,6 @@ private static slice<byte> Sum(this ptr<hmac> _addr_h, slice<byte> @in) => func(
             }
 
         }
-
     }
     else
  {
@@ -83,7 +84,6 @@ private static slice<byte> Sum(this ptr<hmac> _addr_h, slice<byte> @in) => func(
     }
     h.outer.Write(in[(int)origLen..]);
     return h.outer.Sum(in[..(int)origLen]);
-
 });
 
 private static (nint, error) Write(this ptr<hmac> _addr_h, slice<byte> p) {
@@ -117,9 +117,7 @@ private static void Reset(this ptr<hmac> _addr_h) => func((_, panic, _) => {
             }
 
         }
-
         return ;
-
     }
     h.inner.Reset();
     h.inner.Write(h.ipad); 
@@ -151,7 +149,6 @@ private static void Reset(this ptr<hmac> _addr_h) => func((_, panic, _) => {
     h.ipad = imarshal;
     h.opad = omarshal;
     h.marshaled = true;
-
 });
 
 // New returns a new HMAC hash using the given hash.Hash type and key.
@@ -169,7 +166,6 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) => func((defer, 
         defer(() => { 
             // The comparison might panic if the underlying types are not comparable.
             _ = recover();
-
         }());
         if (hm.outer == hm.inner) {
             unique = false;
@@ -185,7 +181,6 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) => func((defer, 
         // If key is too big, hash it.
         hm.outer.Write(key);
         key = hm.outer.Sum(null);
-
     }
     copy(hm.ipad, key);
     copy(hm.opad, key);
@@ -212,7 +207,6 @@ public static hash.Hash New(Func<hash.Hash> h, slice<byte> key) => func((defer, 
     hm.inner.Write(hm.ipad);
 
     return hm;
-
 });
 
 // Equal compares two MACs for equality without leaking timing information.
@@ -221,7 +215,6 @@ public static bool Equal(slice<byte> mac1, slice<byte> mac2) {
     // different as that suggests that a completely different hash function
     // was used.
     return subtle.ConstantTimeCompare(mac1, mac2) == 1;
-
 }
 
 } // end hmac_package

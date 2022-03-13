@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2022 March 06 22:15:04 UTC
+// package flate -- go2cs converted at 2022 March 13 05:29:10 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Program Files\Go\src\compress\flate\huffman_bit_writer.go
-using io = go.io_package;
-
 namespace go.compress;
+
+using io = io_package;
 
 public static partial class flate_package {
 
@@ -35,7 +35,6 @@ private static readonly nint bufferFlushSize = 240;
 // It must have additional headroom for a flush
 // which can contain up to 8 bytes.
 private static readonly var bufferSize = bufferFlushSize + 8;
-
 
 // The number of extra bits needed by length code X - LENGTH_CODES_START.
 private static sbyte lengthExtraBits = new slice<sbyte>(new sbyte[] { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0 });
@@ -93,19 +92,16 @@ private static void flush(this ptr<huffmanBitWriter> _addr_w) {
         w.bits>>=8;
         if (w.nbits > 8) { // Avoid underflow
             w.nbits -= 8;
-
         }
         else
  {
             w.nbits = 0;
         }
         n++;
-
     }
     w.bits = 0;
     w.write(w.bytes[..(int)n]);
     w.nbytes = 0;
-
 }
 
 private static void write(this ptr<huffmanBitWriter> _addr_w, slice<byte> b) {
@@ -115,7 +111,6 @@ private static void write(this ptr<huffmanBitWriter> _addr_w, slice<byte> b) {
         return ;
     }
     _, w.err = w.writer.Write(b);
-
 }
 
 private static void writeBits(this ptr<huffmanBitWriter> _addr_w, int b, nuint nb) {
@@ -144,7 +139,6 @@ private static void writeBits(this ptr<huffmanBitWriter> _addr_w, int b, nuint n
             n = 0;
         }
         w.nbytes = n;
-
     }
 }
 
@@ -170,7 +164,6 @@ private static void writeBytes(this ptr<huffmanBitWriter> _addr_w, slice<byte> b
     }
     w.nbytes = 0;
     w.write(bytes);
-
 }
 
 // RFC 1951 3.2.7 specifies a special run-length encoding for specifying
@@ -255,8 +248,6 @@ private static void generateCodegen(this ptr<huffmanBitWriter> _addr_w, nint num
                 count -= n;
             }
         else
-
-
         } {
             while (count >= 11) {
                 n = 138;
@@ -279,9 +270,7 @@ private static void generateCodegen(this ptr<huffmanBitWriter> _addr_w, nint num
                 outIndex++;
                 w.codegenFreq[17]++;
                 count = 0;
-
             }
-
         }
         count--;
         while (count >= 0) {
@@ -293,11 +282,9 @@ private static void generateCodegen(this ptr<huffmanBitWriter> _addr_w, nint num
         // Set up invariant for next time through the loop.
         size = nextSize;
         count = 1;
-
     } 
     // Marker indicating the end of the codegen.
     codegen[outIndex] = badCode;
-
 }
 
 // dynamicSize returns the size of dynamically encoded data in bits.
@@ -340,7 +327,6 @@ private static (nint, bool) storedSize(this ptr<huffmanBitWriter> _addr_w, slice
         return ((len(in) + 5) * 8, true);
     }
     return (0, false);
-
 }
 
 private static void writeCode(this ptr<huffmanBitWriter> _addr_w, hcode c) {
@@ -369,7 +355,6 @@ private static void writeCode(this ptr<huffmanBitWriter> _addr_w, hcode c) {
             n = 0;
         }
         w.nbytes = n;
-
     }
 }
 
@@ -430,9 +415,7 @@ private static void writeDynamicHeader(this ptr<huffmanBitWriter> _addr_w, nint 
                 break;
                 break;
         }
-
     }
-
 }
 
 private static void writeStoredHeader(this ptr<huffmanBitWriter> _addr_w, nint length, bool isEof) {
@@ -449,7 +432,6 @@ private static void writeStoredHeader(this ptr<huffmanBitWriter> _addr_w, nint l
     w.flush();
     w.writeBits(int32(length), 16);
     w.writeBits(int32(~uint16(length)), 16);
-
 }
 
 private static void writeFixedHeader(this ptr<huffmanBitWriter> _addr_w, bool isEof) {
@@ -463,7 +445,6 @@ private static void writeFixedHeader(this ptr<huffmanBitWriter> _addr_w, bool is
         value = 3;
     }
     w.writeBits(value, 3);
-
 }
 
 // writeBlock will write a block of tokens with the smallest encoding.
@@ -490,14 +471,11 @@ private static void writeBlock(this ptr<huffmanBitWriter> _addr_w, slice<token> 
         for (var lengthCode = lengthCodesStart + 8; lengthCode < numLiterals; lengthCode++) { 
             // First eight length codes have extra size = 0.
             extraBits += int(w.literalFreq[lengthCode]) * int(lengthExtraBits[lengthCode - lengthCodesStart]);
-
         }
         for (nint offsetCode = 4; offsetCode < numOffsets; offsetCode++) { 
             // First four offset codes have extra size = 0.
             extraBits += int(w.offsetFreq[offsetCode]) * int(offsetExtraBits[offsetCode]);
-
         }
-
     }
     var literalEncoding = fixedLiteralEncoding;
     var offsetEncoding = fixedOffsetEncoding;
@@ -530,7 +508,6 @@ private static void writeBlock(this ptr<huffmanBitWriter> _addr_w, slice<token> 
         w.writeDynamicHeader(numLiterals, numOffsets, numCodegens, eof);
     }
     w.writeTokens(tokens, literalEncoding.codes, offsetEncoding.codes);
-
 }
 
 // writeBlockDynamic encodes a block using a dynamic Huffman table.
@@ -569,7 +546,6 @@ private static void writeBlockDynamic(this ptr<huffmanBitWriter> _addr_w, slice<
 
     // Write the tokens.
     w.writeTokens(tokens, w.literalEncoding.codes, w.offsetEncoding.codes);
-
 }
 
 // indexTokens indexes a slice of tokens, and updates
@@ -610,7 +586,6 @@ private static (nint, nint) indexTokens(this ptr<huffmanBitWriter> _addr_w, slic
         var offset = t.offset();
         w.literalFreq[lengthCodesStart + lengthCode(length)]++;
         w.offsetFreq[offsetCode(offset)]++;
-
     }    numLiterals = len(w.literalFreq);
     while (w.literalFreq[numLiterals - 1] == 0) {
         numLiterals--;
@@ -625,12 +600,10 @@ private static (nint, nint) indexTokens(this ptr<huffmanBitWriter> _addr_w, slic
         // we should count at least one offset to be sure that the offset huffman tree could be encoded.
         w.offsetFreq[0] = 1;
         numOffsets = 1;
-
     }
     w.literalEncoding.generate(w.literalFreq, 15);
     w.offsetEncoding.generate(w.offsetFreq, 15);
     return ;
-
 }
 
 // writeTokens writes a slice of tokens to the output.
@@ -752,10 +725,8 @@ private static void writeBlockHuff(this ptr<huffmanBitWriter> _addr_w, bool eof,
             return ; // Return early in the event of write failures
         }
         n = 0;
-
     }    w.nbytes = n;
     w.writeCode(encoding[endBlockMarker]);
-
 }
 
 // histogram accumulates a histogram of b in h.

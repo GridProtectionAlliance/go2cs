@@ -10,17 +10,17 @@
 // translating the Stdout and Stderr handles into FDs 1 and 2.
 // (See CL 192739 PS 3.)
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:15 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:19 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\time_fake.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    // faketime is the simulated time in nanoseconds since 1970 for the
-    // playground.
+// faketime is the simulated time in nanoseconds since 1970 for the
+// playground.
 private static long faketime = (nint)1257894000000000000L;
 
 private static var faketimeState = default;
@@ -43,7 +43,6 @@ private static int write(System.UIntPtr fd, unsafe.Pointer p, int n) {
     if (!(fd == 1 || fd == 2)) { 
         // Do an ordinary write.
         return write1(fd, p, n);
-
     }
     lock(_addr_faketimeState.@lock); 
 
@@ -85,7 +84,6 @@ private static int write(System.UIntPtr fd, unsafe.Pointer p, int n) {
 
     unlock(_addr_faketimeState.@lock);
     return res;
-
 }
 
 } // end runtime_package

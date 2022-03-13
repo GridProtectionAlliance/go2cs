@@ -2,33 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:05 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:32 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\noder.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
+namespace go.cmd.compile.@internal;
 
-using @base = go.cmd.compile.@internal.@base_package;
-using dwarfgen = go.cmd.compile.@internal.dwarfgen_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using dwarfgen = cmd.compile.@internal.dwarfgen_package;
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
 using System;
 using System.Threading;
-
-
-namespace go.cmd.compile.@internal;
 
 public static partial class noder_package {
 
@@ -71,7 +70,6 @@ public static void LoadPackage(slice<@string> filenames) => func((defer, _, _) =
 
                 p.file, _ = syntax.Parse(fbase, f, p.error, p.pragma, mode); // errors are tracked via p.error
             }());
-
         }
         i = i__prev1;
         filename = filename__prev1;
@@ -89,7 +87,6 @@ public static void LoadPackage(slice<@string> filenames) => func((defer, _, _) =
                 @base.ErrorExit();
             }
             lines += p.file.EOF.Line();
-
         }
         p = p__prev1;
     }
@@ -100,7 +97,6 @@ public static void LoadPackage(slice<@string> filenames) => func((defer, _, _) =
         // Use types2 to type-check and possibly generate IR.
         check2(noders);
         return ;
-
     }
     {
         noder p__prev1 = p;
@@ -160,7 +156,6 @@ public static void LoadPackage(slice<@string> filenames) => func((defer, _, _) =
                 op = op__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -187,7 +182,6 @@ public static void LoadPackage(slice<@string> filenames) => func((defer, _, _) =
                 op = op__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -213,7 +207,6 @@ public static void LoadPackage(slice<@string> filenames) => func((defer, _, _) =
                     ir.Dump(s, n);
                 }
                 fcount++;
-
             }
         }
 
@@ -242,7 +235,6 @@ public static void LoadPackage(slice<@string> filenames) => func((defer, _, _) =
     typecheck.CheckMapKeys();
     CheckDotImports();
     @base.ExitIfErrors();
-
 });
 
 private static void errorAt(this ptr<noder> _addr_p, syntax.Pos pos, @string format, params object[] args) {
@@ -300,12 +292,10 @@ private static void funcBody(this ptr<noder> _addr_p, ptr<ir.Func> _addr_fn, ptr
 
         @base.Pos = p.makeXPos(block.Rbrace);
         fn.Endlineno = @base.Pos;
-
     }
     typecheck.FinishFuncBody();
     p.funcState.marker.WriteTo(fn);
     p.funcState = outerFuncState;
-
 }
 
 private static void openScope(this ptr<noder> _addr_p, syntax.Pos pos) {
@@ -333,7 +323,6 @@ private static void closeScope(this ptr<noder> _addr_p, syntax.Pos pos) {
         if (scopeVars == len(ir.CurFunc.Dcl)) { 
             // no variables were declared in this scope, so we can retract it.
             fs.marker.Unpush();
-
         }
         else
  {
@@ -377,12 +366,10 @@ private static void node(this ptr<noder> _addr_p) {
         }
     }
 
-
     typecheck.Target.Decls = append(typecheck.Target.Decls, p.decls(p.file.DeclList));
 
     @base.Pos = src.NoXPos;
     clearImports();
-
 }
 
 private static void processPragmas(this ptr<noder> _addr_p) {
@@ -398,16 +385,13 @@ private static void processPragmas(this ptr<noder> _addr_p) {
             // TODO(mdempsky): Change to p.errorAt before Go 1.17 release.
             // base.WarnfAt(p.makeXPos(l.pos), "//go:linkname must refer to declared function or variable (will be an error in Go 1.17)")
             continue;
-
         }
         if (n.Sym().Linkname != "") {
             p.errorAt(l.pos, "duplicate //go:linkname for %s", l.local);
             continue;
         }
         n.Sym().Linkname = l.remote;
-
     }    typecheck.Target.CgoPragmas = append(typecheck.Target.CgoPragmas, p.pragcgobuf);
-
 }
 
 private static slice<ir.Node> decls(this ptr<noder> _addr_p, slice<syntax.Decl> decls) => func((_, panic, _) => {
@@ -445,13 +429,11 @@ private static slice<ir.Node> decls(this ptr<noder> _addr_p, slice<syntax.Decl> 
                     break;
                 }
             }
-
         }
         decl = decl__prev1;
     }
 
     return ;
-
 });
 
 private static void importDecl(this ptr<noder> _addr_p, ptr<syntax.ImportDecl> _addr_imp) {
@@ -469,14 +451,12 @@ private static void importDecl(this ptr<noder> _addr_p, ptr<syntax.ImportDecl> _
         }
     }
 
-
     var ipkg = importfile(imp);
     if (ipkg == null) {
         if (@base.Errors() == 0) {
             @base.Fatalf("phase error in import");
         }
         return ;
-
     }
     if (ipkg == ir.Pkgs.Unsafe) {
         p.importedUnsafe = true;
@@ -532,7 +512,6 @@ private static slice<ir.Node> varDecl(this ptr<noder> _addr_p, ptr<syntax.VarDec
         }
     }
 
-
     slice<ir.Node> init = default;
     p.setlineno(decl);
 
@@ -556,7 +535,6 @@ private static slice<ir.Node> varDecl(this ptr<noder> _addr_p, ptr<syntax.VarDec
         }
 
         return append(init, as2);
-
     }
     {
         var v__prev1 = v;
@@ -587,7 +565,6 @@ private static slice<ir.Node> varDecl(this ptr<noder> _addr_p, ptr<syntax.VarDec
         @base.Errorf("assignment mismatch: %d variables but %d values", len(names), len(exprs));
     }
     return init;
-
 }
 
 // constState tracks state between constant specifiers within a
@@ -615,7 +592,6 @@ private static slice<ir.Node> constDecl(this ptr<noder> _addr_p, ptr<syntax.Cons
             p.checkUnused(pragma);
         }
     }
-
 
     var names = p.declNames(ir.OLITERAL, decl.NameList);
     var typ = p.typeExprOrNil(decl.Type);
@@ -649,14 +625,12 @@ private static slice<ir.Node> constDecl(this ptr<noder> _addr_p, ptr<syntax.Cons
         n.SetIota(cs.iota);
 
         nn = append(nn, ir.NewDecl(p.pos(decl), ir.ODCLCONST, n));
-
     }    if (len(values) > len(names)) {
         @base.Errorf("extra expression in const declaration");
     }
     cs.iota++;
 
     return nn;
-
 }
 
 private static ir.Node typeDecl(this ptr<noder> _addr_p, ptr<syntax.TypeDecl> _addr_decl) {
@@ -683,13 +657,11 @@ private static ir.Node typeDecl(this ptr<noder> _addr_p, ptr<syntax.TypeDecl> _a
         }
     }
 
-
     var nod = ir.NewDecl(p.pos(decl), ir.ODCLTYPE, n);
     if (n.Alias() && !types.AllowsGoVersion(types.LocalPkg, 1, 9)) {
         @base.ErrorfAt(nod.Pos(), "type aliases only supported as of -lang=go1.9");
     }
     return nod;
-
 }
 
 private static slice<ptr<ir.Name>> declNames(this ptr<noder> _addr_p, ir.Op op, slice<ptr<syntax.Name>> names) {
@@ -753,7 +725,6 @@ private static ir.Node funcDecl(this ptr<noder> _addr_p, ptr<syntax.FuncDecl> _a
         }
     }
 
-
     if (fun.Recv == null) {
         typecheck.Declare(f.Nname, ir.PFUNC);
     }
@@ -779,11 +750,9 @@ private static ir.Node funcDecl(this ptr<noder> _addr_p, ptr<syntax.FuncDecl> _a
             if (!isLinknamed) {
                 @base.ErrorfAt(f.Pos(), "missing function body");
             }
-
         }
     }
     return f;
-
 }
 
 private static ptr<ir.FuncType> signature(this ptr<noder> _addr_p, ptr<syntax.Field> _addr_recv, ptr<syntax.FuncType> _addr_typ) {
@@ -796,7 +765,6 @@ private static ptr<ir.FuncType> signature(this ptr<noder> _addr_p, ptr<syntax.Fi
         rcvr = p.param(recv, false, false);
     }
     return _addr_ir.NewFuncType(p.pos(typ), rcvr, p.@params(typ.ParamList, true), p.@params(typ.ResultList, false))!;
-
 }
 
 private static slice<ptr<ir.Field>> @params(this ptr<noder> _addr_p, slice<ptr<syntax.Field>> @params, bool dddOk) {
@@ -831,7 +799,6 @@ private static ptr<ir.Field> param(this ptr<noder> _addr_p, ptr<syntax.Field> _a
                 // We mark these as syntax errors to get automatic elimination
                 // of multiple such errors per line (see ErrorfAt in subr.go).
                 @base.Errorf("syntax error: cannot use ... in receiver or result parameter list");
-
             }
             else if (!final) {
                 if (param.Name == null) {
@@ -841,20 +808,15 @@ private static ptr<ir.Field> param(this ptr<noder> _addr_p, ptr<syntax.Field> _a
  {
                     p.errorAt(param.Name.Pos(), "syntax error: cannot use ... with non-final parameter %s", param.Name.Value);
                 }
-
             }
-
             typ.DDD = false;
             n.IsDDD = true;
-
         }
         typ = typ__prev1;
 
     }
 
-
     return _addr_n!;
-
 }
 
 private static slice<ir.Node> exprList(this ptr<noder> _addr_p, syntax.Expr expr) {
@@ -874,7 +836,6 @@ private static slice<ir.Node> exprList(this ptr<noder> _addr_p, syntax.Expr expr
             break;
         }
     }
-
 }
 
 private static slice<ir.Node> exprs(this ptr<noder> _addr_p, slice<syntax.Expr> exprs) {
@@ -989,9 +950,7 @@ private static ir.Node expr(this ptr<noder> _addr_p, syntax.Expr expr) => func((
                 else if (op == ir.ODEREF) 
                     return ir.NewStarExpr(pos, x);
                                 return ir.NewUnaryExpr(pos, op, x);
-
             }
-
             pos = p.pos(expr);
             op = p.binOp(expr.Op);
             var y = p.expr(expr.Y);
@@ -1047,7 +1006,6 @@ private static ir.Node expr(this ptr<noder> _addr_p, syntax.Expr expr) => func((
             break;
     }
     panic("unhandled Expr");
-
 });
 
 // sum efficiently handles very large summation expressions (such as
@@ -1069,7 +1027,6 @@ private static ir.Node sum(this ptr<noder> _addr_p, syntax.Expr x) {
         }
         adds = append(adds, add);
         x = add.X;
-
     } 
 
     // nstr is the current rightmost string literal in the
@@ -1108,12 +1065,9 @@ private static ir.Node sum(this ptr<noder> _addr_p, syntax.Expr x) {
                 // Collapse r into nstr instead of adding to n.
                 chunks = append(chunks, ir.StringVal(r));
                 continue;
-
             }
-
             nstr = r;
             chunks = append(chunks, ir.StringVal(nstr));
-
         }
         else
  {
@@ -1124,13 +1078,11 @@ private static ir.Node sum(this ptr<noder> _addr_p, syntax.Expr x) {
             chunks = chunks[..(int)0];
         }
         n = ir.NewBinaryExpr(p.pos(add), ir.OADD, n, r);
-
     }
     if (len(chunks) > 1) {
         nstr.SetVal(constant.MakeString(strings.Join(chunks, "")));
     }
     return n;
-
 }
 
 private static ir.Ntype typeExpr(this ptr<noder> _addr_p, syntax.Expr typ) {
@@ -1142,7 +1094,6 @@ private static ir.Ntype typeExpr(this ptr<noder> _addr_p, syntax.Expr typ) {
         return null;
     }
     return n._<ir.Ntype>();
-
 }
 
 private static ir.Ntype typeExprOrNil(this ptr<noder> _addr_p, syntax.Expr typ) {
@@ -1152,7 +1103,6 @@ private static ir.Ntype typeExprOrNil(this ptr<noder> _addr_p, syntax.Expr typ) 
         return p.typeExpr(typ);
     }
     return null;
-
 }
 
 private static types.ChanDir chanDir(this ptr<noder> _addr_p, syntax.ChanDir dir) => func((_, panic, _) => {
@@ -1166,7 +1116,6 @@ private static types.ChanDir chanDir(this ptr<noder> _addr_p, syntax.ChanDir dir
     else if (dir == syntax.RecvOnly) 
         return types.Crecv;
         panic("unhandled ChanDir");
-
 });
 
 private static ir.Node structType(this ptr<noder> _addr_p, ptr<syntax.StructType> _addr_expr) {
@@ -1188,10 +1137,8 @@ private static ir.Node structType(this ptr<noder> _addr_p, ptr<syntax.StructType
             n.Note = constant.StringVal(p.basicLit(expr.TagList[i]));
         }
         l = append(l, n);
-
     }    p.setlineno(expr);
     return ir.NewStructType(p.pos(expr), l);
-
 }
 
 private static ir.Node interfaceType(this ptr<noder> _addr_p, ptr<syntax.InterfaceType> _addr_expr) {
@@ -1217,9 +1164,7 @@ private static ir.Node interfaceType(this ptr<noder> _addr_p, ptr<syntax.Interfa
             n = ir.NewField(p.pos(method), mname, sig, null);
         }
         l = append(l, n);
-
     }    return ir.NewInterfaceType(p.pos(expr), l);
-
 }
 
 private static ptr<types.Sym> packname(this ptr<noder> _addr_p, syntax.Expr expr) => func((_, panic, _) => {
@@ -1236,7 +1181,6 @@ private static ptr<types.Sym> packname(this ptr<noder> _addr_p, syntax.Expr expr
                 }
 
             }
-
             return _addr_name!;
             break;
         case ptr<syntax.SelectorExpr> expr:
@@ -1257,12 +1201,10 @@ private static ptr<types.Sym> packname(this ptr<noder> _addr_p, syntax.Expr expr
                 def.Used = true;
                 pkg = def.Pkg;
             }
-
             return _addr_pkg.Lookup(expr.Sel.Value)!;
             break;
     }
     panic(fmt.Sprintf("unexpected packname: %#v", expr));
-
 });
 
 private static ptr<ir.Field> embedded(this ptr<noder> _addr_p, syntax.Expr typ) => func((_, panic, _) => {
@@ -1274,7 +1216,6 @@ private static ptr<ir.Field> embedded(this ptr<noder> _addr_p, syntax.Expr typ) 
             panic("unexpected Operation");
         }
         typ = op.X;
-
     }
     var sym = p.packname(typ);
     var n = ir.NewField(p.pos(typ), typecheck.Lookup(sym.Name), importName(sym)._<ir.Ntype>(), null);
@@ -1284,7 +1225,6 @@ private static ptr<ir.Field> embedded(this ptr<noder> _addr_p, syntax.Expr typ) 
         n.Ntype = ir.NewStarExpr(p.pos(op), n.Ntype);
     }
     return _addr_n!;
-
 });
 
 private static slice<ir.Node> stmts(this ptr<noder> _addr_p, slice<syntax.Stmt> stmts) {
@@ -1299,19 +1239,18 @@ private static slice<ir.Node> stmtsFall(this ptr<noder> _addr_p, slice<syntax.St
     slice<ir.Node> nodes = default;
     foreach (var (i, stmt) in stmts) {
         var s = p.stmtFall(stmt, fallOK && i + 1 == len(stmts));
-        if (s == null)         }
+        if (s == null) {
+        }
         else if (s.Op() == ir.OBLOCK && len(s._<ptr<ir.BlockStmt>>().List) > 0) { 
             // Inline non-empty block.
             // Empty blocks must be preserved for CheckReturn.
             nodes = append(nodes, s._<ptr<ir.BlockStmt>>().List);
-
         }
         else
  {
             nodes = append(nodes, s);
         }
     }    return nodes;
-
 }
 
 private static ir.Node stmt(this ptr<noder> _addr_p, syntax.Stmt stmt) {
@@ -1336,9 +1275,7 @@ private static ir.Node stmtFall(this ptr<noder> _addr_p, syntax.Stmt stmt, bool 
             if (len(l) == 0) { 
                 // TODO(mdempsky): Line number?
                 return ir.NewBlockStmt(@base.Pos, null);
-
             }
-
             return ir.NewBlockStmt(src.NoXPos, l);
             break;
         case ptr<syntax.ExprStmt> stmt:
@@ -1375,7 +1312,6 @@ private static ir.Node stmtFall(this ptr<noder> _addr_p, syntax.Stmt stmt, bool 
 
             }
 
-
             n = ir.NewAssignStmt(p.pos(stmt), null, null);
             n.Def = stmt.Op == syntax.Def;
             n.X = p.assignList(stmt.Lhs, n, n.Def)[0];
@@ -1402,7 +1338,6 @@ private static ir.Node stmtFall(this ptr<noder> _addr_p, syntax.Stmt stmt, bool 
             if (stmt.Label != null) {
                 sym = p.name(stmt.Label);
             }
-
             return ir.NewBranchStmt(p.pos(stmt), op, sym);
             break;
         case ptr<syntax.CallStmt> stmt:
@@ -1447,7 +1382,6 @@ private static ir.Node stmtFall(this ptr<noder> _addr_p, syntax.Stmt stmt, bool 
             break;
     }
     panic("unhandled Stmt");
-
 });
 
 private static slice<ir.Node> assignList(this ptr<noder> _addr_p, syntax.Expr expr, ir.InitNode defn, bool colas) {
@@ -1468,7 +1402,6 @@ private static slice<ir.Node> assignList(this ptr<noder> _addr_p, syntax.Expr ex
             exprs = new slice<syntax.Expr>(new syntax.Expr[] { expr });
         }
     }
-
 
     var res = make_slice<ir.Node>(len(exprs));
     var seen = make_map<ptr<types.Sym>, bool>(len(exprs));
@@ -1505,12 +1438,10 @@ private static slice<ir.Node> assignList(this ptr<noder> _addr_p, syntax.Expr ex
         n.Defn = defn;
         defn.PtrInit().Append(ir.NewDecl(@base.Pos, ir.ODCL, n));
         res[i] = n;
-
     }    if (!newOrErr) {
         @base.ErrorfAt(defn.Pos(), "no new variables on left side of :=");
     }
     return res;
-
 }
 
 private static slice<ir.Node> blockStmt(this ptr<noder> _addr_p, ptr<syntax.BlockStmt> _addr_stmt) {
@@ -1546,7 +1477,6 @@ private static ir.Node ifStmt(this ptr<noder> _addr_p, ptr<syntax.IfStmt> _addr_
     }
     p.closeAnotherScope();
     return n;
-
 }
 
 private static ir.Node forStmt(this ptr<noder> _addr_p, ptr<syntax.ForStmt> _addr_stmt) => func((_, panic, _) => {
@@ -1576,11 +1506,9 @@ private static ir.Node forStmt(this ptr<noder> _addr_p, ptr<syntax.ForStmt> _add
         }
     }
 
-
     n = ir.NewForStmt(p.pos(stmt), p.stmt(stmt.Init), p.expr(stmt.Cond), p.stmt(stmt.Post), p.blockStmt(stmt.Body));
     p.closeAnotherScope();
     return n;
-
 });
 
 private static ir.Node switchStmt(this ptr<noder> _addr_p, ptr<syntax.SwitchStmt> _addr_stmt) {
@@ -1602,12 +1530,10 @@ private static ir.Node switchStmt(this ptr<noder> _addr_p, ptr<syntax.SwitchStmt
             tswitch = l._<ptr<ir.TypeSwitchGuard>>();
         }
     }
-
     n.Cases = p.caseClauses(stmt.Body, tswitch, stmt.Rbrace);
 
     p.closeScope(stmt.Rbrace);
     return n;
-
 }
 
 private static slice<ptr<ir.CaseClause>> caseClauses(this ptr<noder> _addr_p, slice<ptr<syntax.CaseClause>> clauses, ptr<ir.TypeSwitchGuard> _addr_tswitch, syntax.Pos rbrace) {
@@ -1629,7 +1555,6 @@ private static slice<ptr<ir.CaseClause>> caseClauses(this ptr<noder> _addr_p, sl
             n.Var = nn; 
             // keep track of the instances for reporting unused
             nn.Defn = tswitch;
-
         }
         var body = clause.Body;
         while (len(body) > 0) {
@@ -1641,9 +1566,7 @@ private static slice<ptr<ir.CaseClause>> caseClauses(this ptr<noder> _addr_p, sl
                 }
 
             }
-
             body = body[..(int)len(body) - 1];
-
         }
 
         n.Body = p.stmtsFall(body, true);
@@ -1661,14 +1584,11 @@ private static slice<ptr<ir.CaseClause>> caseClauses(this ptr<noder> _addr_p, sl
 
         }
 
-
         nodes = append(nodes, n);
-
     }    if (len(clauses) > 0) {
         p.closeScope(rbrace);
     }
     return nodes;
-
 }
 
 private static ir.Node selectStmt(this ptr<noder> _addr_p, ptr<syntax.SelectStmt> _addr_stmt) {
@@ -1690,12 +1610,10 @@ private static slice<ptr<ir.CommClause>> commClauses(this ptr<noder> _addr_p, sl
         p.openScope(clause.Pos());
 
         nodes[i] = ir.NewCommStmt(p.pos(clause), p.stmt(clause.Comm), p.stmts(clause.Body));
-
     }    if (len(clauses) > 0) {
         p.closeScope(rbrace);
     }
     return nodes;
-
 }
 
 private static ir.Node labeledStmt(this ptr<noder> _addr_p, ptr<syntax.LabeledStmt> _addr_label, bool fallOK) {
@@ -1723,8 +1641,7 @@ private static ir.Node labeledStmt(this ptr<noder> _addr_p, ptr<syntax.LabeledSt
             else if (ls.Op() == ir.OSELECT) 
                 ls = ls._<ptr<ir.SelectStmt>>();
                 ls.Label = sym;
-            
-        }
+                    }
     }
     ir.Node l = new slice<ir.Node>(new ir.Node[] { lhs });
     if (ls != null) {
@@ -1738,7 +1655,6 @@ private static ir.Node labeledStmt(this ptr<noder> _addr_p, ptr<syntax.LabeledSt
         }
     }
     return ir.NewBlockStmt(src.NoXPos, l);
-
 }
 
 private static array<ir.Op> unOps = new array<ir.Op>(InitKeyedValues<ir.Op>((syntax.Recv, ir.ORECV), (syntax.Mul, ir.ODEREF), (syntax.And, ir.OADDR), (syntax.Not, ir.ONOT), (syntax.Xor, ir.OBITNOT), (syntax.Add, ir.OPLUS), (syntax.Sub, ir.ONEG)));
@@ -1750,7 +1666,6 @@ private static ir.Op unOp(this ptr<noder> _addr_p, syntax.Operator op) => func((
         panic("invalid Operator");
     }
     return unOps[op];
-
 });
 
 private static array<ir.Op> binOps = new array<ir.Op>(InitKeyedValues<ir.Op>((syntax.OrOr, ir.OOROR), (syntax.AndAnd, ir.OANDAND), (syntax.Eql, ir.OEQ), (syntax.Neq, ir.ONE), (syntax.Lss, ir.OLT), (syntax.Leq, ir.OLE), (syntax.Gtr, ir.OGT), (syntax.Geq, ir.OGE), (syntax.Add, ir.OADD), (syntax.Sub, ir.OSUB), (syntax.Or, ir.OOR), (syntax.Xor, ir.OXOR), (syntax.Mul, ir.OMUL), (syntax.Div, ir.ODIV), (syntax.Rem, ir.OMOD), (syntax.And, ir.OAND), (syntax.AndNot, ir.OANDNOT), (syntax.Shl, ir.OLSH), (syntax.Shr, ir.ORSH)));
@@ -1762,7 +1677,6 @@ private static ir.Op binOp(this ptr<noder> _addr_p, syntax.Operator op) => func(
         panic("invalid Operator");
     }
     return binOps[op];
-
 });
 
 // checkLangCompat reports an error if the representation of a numeric
@@ -1828,10 +1742,8 @@ private static constant.Value basicLit(this ptr<noder> _addr_p, ptr<syntax.Basic
     if (v.Kind() == constant.Unknown) { 
         // TODO(mdempsky): Better error message?
         p.errorAt(lit.Pos(), "malformed constant: %s", lit.Value);
-
     }
     return v;
-
 }
 
 private static array<token.Token> tokenForLitKind = new array<token.Token>(InitKeyedValues<token.Token>((syntax.IntLit, token.INT), (syntax.RuneLit, token.CHAR), (syntax.FloatLit, token.FLOAT), (syntax.ImagLit, token.IMAG), (syntax.StringLit, token.STRING)));
@@ -1849,7 +1761,6 @@ private static ir.Node mkname(this ptr<noder> _addr_p, ptr<syntax.Name> _addr_na
  
     // TODO(mdempsky): Set line number?
     return mkname(_addr_p.name(name));
-
 }
 
 private static ir.Node wrapname(this ptr<noder> _addr_p, syntax.Node n, ir.Node x) {
@@ -1875,7 +1786,6 @@ private static ir.Node wrapname(this ptr<noder> _addr_p, syntax.Node n, ir.Node 
 
     __switch_break0:;
     return x;
-
 }
 
 private static void setlineno(this ptr<noder> _addr_p, syntax.Node n) {
@@ -1956,18 +1866,15 @@ private static syntax.Pragma pragma(this ptr<noder> _addr_p, syntax.Pos pos, boo
         // unused pragma; only called with old != nil.
         p.checkUnusedDuringParse(pragma);
         return null;
-
     }
     if (strings.HasPrefix(text, "line ")) { 
         // line directives are handled by syntax package
         panic("unreachable");
-
     }
     if (!blankLine) { 
         // directive must be on line by itself
         p.error(new syntax.Error(Pos:pos,Msg:"misplaced compiler directive"));
         return pragma;
-
     }
 
     if (strings.HasPrefix(text, "go:linkname "))
@@ -1985,7 +1892,6 @@ private static syntax.Pragma pragma(this ptr<noder> _addr_p, syntax.Pos pos, boo
             // Use the default object symbol name if the
             // user didn't provide one.
             target = objabi.PathToPrefix(@base.Ctxt.Pkgpath) + "." + f[1];
-
         }
         else
  {
@@ -2044,7 +1950,6 @@ private static syntax.Pragma pragma(this ptr<noder> _addr_p, syntax.Pos pos, boo
             }
 
         }
-
         var flag = pragmaFlag(verb);
         const var runtimePragmas = ir.Systemstack | ir.Nowritebarrier | ir.Nowritebarrierrec | ir.Yeswritebarrierrec;
 
@@ -2060,7 +1965,6 @@ private static syntax.Pragma pragma(this ptr<noder> _addr_p, syntax.Pos pos, boo
     __switch_break1:;
 
     return pragma;
-
 });
 
 // isCgoGeneratedFile reports whether pos is in a file
@@ -2083,7 +1987,6 @@ private static bool safeArg(@string name) {
     }
     var c = name[0];
     return '0' <= c && c <= '9' || 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || c == '.' || c == '_' || c == '/' || c >= utf8.RuneSelf;
-
 }
 
 private static ir.Node mkname(ptr<types.Sym> _addr_sym) {
@@ -2094,7 +1997,6 @@ private static ir.Node mkname(ptr<types.Sym> _addr_sym) {
         n.Name().PkgName.Used = true;
     }
     return n;
-
 }
 
 // parseGoEmbed parses the text following "//go:embed" to extract the glob patterns.
@@ -2128,7 +2030,6 @@ Switch:
                         continue;
                     i++;
                     }
-
                     if (args[i] == '"') {
                         var (q, err) = strconv.Unquote(args[..(int)i + 1]);
                         if (err != null) {
@@ -2139,13 +2040,11 @@ Switch:
                         _breakSwitch = true;
                         break;
                     }
-
                 }
 
                 if (i >= len(args)) {
                     return (null, error.As(fmt.Errorf("invalid quoted string in //go:embed: %s", args))!);
                 }
-
                 break;
             default: 
                         var i = len(args);
@@ -2158,7 +2057,6 @@ Switch:
                         }
                         path = args[..(int)i];
                         args = args[(int)i..];
-
                 break;
         }
         if (args != "") {
@@ -2168,10 +2066,8 @@ Switch:
             }
         }
         list = append(list, path);
-
     }
     return (list, error.As(null!)!);
-
 }
 
 private static ptr<ir.Field> fakeRecv() {
@@ -2200,7 +2096,6 @@ private static ir.Node funcLit(this ptr<noder> _addr_p, ptr<syntax.FuncLit> _add
     ir.FinishCaptureNames(@base.Pos, ir.CurFunc, fn);
 
     return clo;
-
 }
 
 // A function named init is a special case.
@@ -2231,7 +2126,6 @@ private static ir.Node oldname(ptr<types.Sym> _addr_s) {
         // define s. resolve will check s.Def again once all input
         // source has been processed.
         return ir.NewIdent(@base.Pos, s);
-
     }
     {
         var n__prev1 = n;
@@ -2244,15 +2138,12 @@ private static ir.Node oldname(ptr<types.Sym> _addr_s) {
             // the := it looks like a reference to the outer x so we'll
             // make x a closure variable unnecessarily.
             return ir.CaptureName(@base.Pos, ir.CurFunc, n);
-
         }
         n = n__prev1;
 
     }
 
-
     return n;
-
 }
 
 private static src.XPos varEmbed(Func<syntax.Pos, src.XPos> makeXPos, ptr<ir.Name> _addr_name, ptr<syntax.VarDecl> _addr_decl, ptr<pragmas> _addr_pragma, bool haveEmbed) {
@@ -2283,7 +2174,6 @@ private static src.XPos varEmbed(Func<syntax.Pos, src.XPos> makeXPos, ptr<ir.Nam
         // Should not happen, since Values == nil now.
         @base.ErrorfAt(pos, "go:embed cannot apply to var without type");
         return ;
-
     }
     if (typecheck.DeclContext != ir.PEXTERN) {
         @base.ErrorfAt(pos, "go:embed cannot apply to var inside func");
@@ -2295,7 +2185,6 @@ private static src.XPos varEmbed(Func<syntax.Pos, src.XPos> makeXPos, ptr<ir.Nam
     }    typecheck.Target.Embeds = append(typecheck.Target.Embeds, name);
     _addr_name.Embed = _addr_embeds;
     name.Embed = ref _addr_name.Embed.val;
-
 }
 
 } // end noder_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:08 UTC
+//     Generated on 2022 March 13 05:40:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class time_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ParseError
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace go
             public static implicit operator ParseError(NilType nil) => default(ParseError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ParseError ParseError_cast(dynamic value)
         {
             return new ParseError(value.Layout, value.Value, value.LayoutElem, value.ValueElem, value.Message);

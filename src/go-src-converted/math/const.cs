@@ -5,16 +5,15 @@
 // Package math provides basic constants and mathematical functions.
 //
 // This package does not guarantee bit-identical results across architectures.
-// package math -- go2cs converted at 2022 March 06 22:31:03 UTC
+
+// package math -- go2cs converted at 2022 March 13 05:41:55 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\const.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Mathematical constants.
+// Mathematical constants.
 public static readonly float E = 2.71828182845904523536028747135266249775724709369995957496696763F; // https://oeis.org/A001113
 public static readonly float Pi = 3.14159265358979323846264338327950288419716939937510582097494459F; // https://oeis.org/A000796
 public static readonly float Phi = 1.61803398874989484820458683436563811772030917980576286213544862F; // https://oeis.org/A001622
@@ -28,7 +27,6 @@ public static readonly float Ln2 = 0.6931471805599453094172321214581765680755001
 public static readonly nint Log2E = 1 / Ln2;
 public static readonly float Ln10 = 2.30258509299404568401799145468436420760110148862877297603332790F; // https://oeis.org/A002392
 public static readonly nint Log10E = 1 / Ln10;
-
 
 // Floating-point limit values.
 // Max is the largest finite value representable by the type.
@@ -50,6 +48,5 @@ public static readonly nint MaxUint8 = 1 << 8 - 1;
 public static readonly nint MaxUint16 = 1 << 16 - 1;
 public static readonly nint MaxUint32 = 1 << 32 - 1;
 public static readonly nint MaxUint64 = 1 << 64 - 1;
-
 
 } // end math_package

@@ -5,33 +5,34 @@
 // Indexed package import.
 // See iexport.go for the export data format.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:38 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:58 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\iimport.go
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using io = go.io_package;
-using big = go.math.big_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using bio = go.cmd.@internal.bio_package;
-using goobj = go.cmd.@internal.goobj_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using io = io_package;
+using big = math.big_package;
+using os = os_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using bio = cmd.@internal.bio_package;
+using goobj = cmd.@internal.goobj_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+
+
+// An iimporterAndOffset identifies an importer and an offset within
+// its data section.
+
+using System;
 public static partial class typecheck_package {
 
-    // An iimporterAndOffset identifies an importer and an offset within
-    // its data section.
 private partial struct iimporterAndOffset {
     public ptr<iimporter> p;
     public ulong off;
@@ -58,7 +59,6 @@ private static ir.Node expandDecl(ir.Node n) {
 
     }
 
-
     ptr<ir.Ident> id = n._<ptr<ir.Ident>>();
     {
         ptr<ir.Name> n__prev1 = n;
@@ -72,15 +72,12 @@ private static ir.Node expandDecl(ir.Node n) {
 
     }
 
-
     var r = importReaderFor(_addr_id.Sym(), DeclImporter);
     if (r == null) { 
         // Can happen if user tries to reference an undeclared name.
         return n;
-
     }
     return r.doDecl(n.Sym());
-
 }
 
 // ImportBody reads in the dcls and body of an imported function (which should not
@@ -101,7 +98,6 @@ public static void ImportBody(ptr<ir.Func> _addr_fn) {
     inimport = true;
     r.doInline(fn);
     inimport = false;
-
 }
 
 private static ptr<importReader> importReaderFor(ptr<types.Sym> _addr_sym, map<ptr<types.Sym>, iimporterAndOffset> importers) {
@@ -112,7 +108,6 @@ private static ptr<importReader> importReaderFor(ptr<types.Sym> _addr_sym, map<p
         return _addr_null!;
     }
     return _addr_x.p.newReader(x.off, sym.Pkg)!;
-
 }
 
 private partial struct intReader {
@@ -129,7 +124,6 @@ private static long int64(this ptr<intReader> _addr_r) {
         @base.ErrorExit();
     }
     return i;
-
 }
 
 private static ulong uint64(this ptr<intReader> _addr_r) {
@@ -141,7 +135,6 @@ private static ulong uint64(this ptr<intReader> _addr_r) {
         @base.ErrorExit();
     }
     return i;
-
 }
 
 public static goobj.FingerprintType ReadImports(ptr<types.Pkg> _addr_pkg, ptr<bio.Reader> _addr_@in) {
@@ -189,10 +182,9 @@ public static goobj.FingerprintType ReadImports(ptr<types.Pkg> _addr_pkg, ptr<bi
                 types.NumImport[pkgName]++; 
 
                 // TODO(mdempsky): This belongs somewhere else.
-                pkg.Lookup("_").Def;
+                pkg.Lookup;
 
-                ir.BlankNode;
-
+                ("_").Def = ir.BlankNode;
             }
             else
  {
@@ -203,7 +195,6 @@ public static goobj.FingerprintType ReadImports(ptr<types.Pkg> _addr_pkg, ptr<bi
                     @base.Fatalf("conflicting package heights %v and %v for path %q", pkg.Height, pkgHeight, pkg.Path);
                 }
             }
-
             {
                 var nSyms__prev2 = nSyms;
 
@@ -219,13 +210,11 @@ public static goobj.FingerprintType ReadImports(ptr<types.Pkg> _addr_pkg, ptr<bi
                         }
 
                     }
-
                 }
 
 
                 nSyms = nSyms__prev2;
             }
-
         }
 
         nPkgs = nPkgs__prev1;
@@ -253,13 +242,11 @@ public static goobj.FingerprintType ReadImports(ptr<types.Pkg> _addr_pkg, ptr<bi
                         }
 
                     }
-
                 }
 
 
                 nSyms = nSyms__prev2;
             }
-
         }
 
         nPkgs = nPkgs__prev1;
@@ -272,7 +259,6 @@ public static goobj.FingerprintType ReadImports(ptr<types.Pkg> _addr_pkg, ptr<bi
         @base.ErrorExit();
     }
     return fingerprint;
-
 }
 
 private partial struct iimporter {
@@ -296,7 +282,6 @@ private static @string stringAt(this ptr<iimporter> _addr_p, ulong off) {
     }
     var spos = off + uint64(n);
     return p.stringData[(int)spos..(int)spos + slen];
-
 }
 
 private static ptr<src.PosBase> posBaseAt(this ptr<iimporter> _addr_p, ulong off) {
@@ -314,12 +299,10 @@ private static ptr<src.PosBase> posBaseAt(this ptr<iimporter> _addr_p, ulong off
 
     }
 
-
     var file = p.stringAt(off);
     var posBase = src.NewFileBase(file, file);
     p.posBaseCache[off] = posBase;
     return _addr_posBase!;
-
 }
 
 private static ptr<types.Pkg> pkgAt(this ptr<iimporter> _addr_p, ulong off) {
@@ -337,7 +320,6 @@ private static ptr<types.Pkg> pkgAt(this ptr<iimporter> _addr_p, ulong off) {
 
     }
 
-
     var pkg = p.ipkg;
     {
         var pkgPath = p.stringAt(off);
@@ -346,10 +328,8 @@ private static ptr<types.Pkg> pkgAt(this ptr<iimporter> _addr_p, ulong off) {
             pkg = types.NewPkg(pkgPath, "");
         }
     }
-
     p.pkgCache[off] = pkg;
     return _addr_pkg!;
-
 }
 
 // An importReader keeps state for reading an individual imported
@@ -375,7 +355,6 @@ private static ptr<importReader> newReader(this ptr<iimporter> _addr_p, ulong of
     // need to build with Go 1.4.
     r.Reader = new ptr<ptr<strings.NewReader>>(p.declData[(int)off..]);
     return _addr_r!;
-
 }
 
 private static @string @string(this ptr<importReader> _addr_r) {
@@ -463,7 +442,6 @@ private static ptr<ir.Name> doDecl(this ptr<importReader> _addr_r, ptr<types.Sym
                 var f = types.NewField(mpos, msym, mtyp);
                 f.Nname = m;
                 ms[i] = f;
-
             }        t.Methods().Set(ms);
 
             r.typeExt(t);
@@ -479,7 +457,6 @@ private static ptr<ir.Name> doDecl(this ptr<importReader> _addr_r, ptr<types.Sym
             }
 
             return _addr_n!;
-
             break;
         case 'V': 
             typ = r.typ();
@@ -493,7 +470,6 @@ private static ptr<ir.Name> doDecl(this ptr<importReader> _addr_r, ptr<types.Sym
             panic("unreachable");
             break;
     }
-
 });
 
 private static constant.Value value(this ptr<importReader> _addr_p, ptr<types.Type> _addr_typ) => func((_, panic, _) => {
@@ -515,7 +491,6 @@ private static constant.Value value(this ptr<importReader> _addr_p, ptr<types.Ty
         return makeComplex(p.@float(typ), p.@float(typ));
         @base.Fatalf("unexpected value type: %v", typ);
     panic("unreachable");
-
 });
 
 private static void mpint(this ptr<importReader> _addr_p, ptr<big.Int> _addr_x, ptr<types.Type> _addr_typ) {
@@ -543,7 +518,6 @@ private static void mpint(this ptr<importReader> _addr_p, ptr<big.Int> _addr_x, 
         }
         x.SetInt64(v);
         return ;
-
     }
     v = -n;
     if (signed) {
@@ -572,7 +546,6 @@ private static constant.Value @float(this ptr<importReader> _addr_p, ptr<types.T
         f.SetMantExp(_addr_f, int(p.int64()));
     }
     return constant.Make(_addr_f);
-
 }
 
 private static constant.Value mprat(this ptr<importReader> _addr_p, constant.Value orig) {
@@ -584,7 +557,6 @@ private static constant.Value mprat(this ptr<importReader> _addr_p, constant.Val
     ref big.Rat rat = ref heap(out ptr<big.Rat> _addr_rat);
     rat.SetString(p.@string());
     return constant.Make(_addr_rat);
-
 }
 
 private static ptr<types.Sym> ident(this ptr<importReader> _addr_r, bool selector) {
@@ -599,7 +571,6 @@ private static ptr<types.Sym> ident(this ptr<importReader> _addr_r, bool selecto
         pkg = types.LocalPkg;
     }
     return _addr_pkg.Lookup(name)!;
-
 }
 
 private static ptr<types.Sym> localIdent(this ptr<importReader> _addr_r) {
@@ -638,14 +609,12 @@ private static src.XPos pos(this ptr<importReader> _addr_r) {
         // TODO(mdempsky): Remove once we reliably write
         // position information for all nodes.
         return src.NoXPos;
-
     }
     if (r.prevBase == null) {
         @base.Fatalf("missing posbase");
     }
     var pos = src.MakePos(r.prevBase, uint(r.prevLine), uint(r.prevColumn));
     return @base.Ctxt.PosTable.XPos(pos);
-
 }
 
 private static ptr<types.Type> typ(this ptr<importReader> _addr_r) {
@@ -680,7 +649,6 @@ private static ptr<types.Type> exoticType(this ptr<importReader> _addr_r) {
                         var typ = r.typ();
             var f = types.NewField(pos, sym, typ);
             fs[i] = f;
-
         }        var t = types.NewStruct(types.NoPkg, fs);
         t.StructType().Funarg = funarg;
         return _addr_t!;
@@ -688,7 +656,6 @@ private static ptr<types.Type> exoticType(this ptr<importReader> _addr_r) {
         ptr<types.Field> rcvr;
         if (r.@bool()) { // isFakeRecv
             rcvr = fakeRecvField();
-
         }
         else
  {
@@ -700,8 +667,7 @@ private static ptr<types.Type> exoticType(this ptr<importReader> _addr_r) {
     else 
         @base.Fatalf("bad kind of call type");
         return _addr_null!;
-    
-}
+    }
 
 private static ptr<types.Sym> exoticSelector(this ptr<importReader> _addr_r) {
     ref importReader r = ref _addr_r.val;
@@ -718,7 +684,6 @@ private static ptr<types.Sym> exoticSelector(this ptr<importReader> _addr_r) {
         pkg = r.pkg();
     }
     return _addr_pkg.Lookup(name)!;
-
 }
 
 private static ptr<types.Type> exoticSignature(this ptr<importReader> _addr_r, ptr<types.Field> _addr_recv) {
@@ -728,12 +693,10 @@ private static ptr<types.Type> exoticSignature(this ptr<importReader> _addr_r, p
     ptr<types.Pkg> pkg;
     if (r.@bool()) { // hasPkg
         pkg = r.pkg();
-
     }
     var @params = r.exoticParamList();
     var results = r.exoticParamList();
     return _addr_types.NewSignature(pkg, recv, null, params, results)!;
-
 }
 
 private static slice<ptr<types.Field>> exoticParamList(this ptr<importReader> _addr_r) {
@@ -761,7 +724,6 @@ private static ptr<types.Field> exoticParam(this ptr<importReader> _addr_r) {
     }
     f.SetIsDDD(ddd);
     return _addr_f!;
-
 }
 
 private static ptr<types.Field> exoticField(this ptr<importReader> _addr_r) {
@@ -779,7 +741,6 @@ private static ptr<types.Field> exoticField(this ptr<importReader> _addr_r) {
     }
     f.Note = note;
     return _addr_f!;
-
 }
 
 private static ptr<types.Sym> exoticSym(this ptr<importReader> _addr_r) {
@@ -798,7 +759,6 @@ private static ptr<types.Sym> exoticSym(this ptr<importReader> _addr_r) {
         pkg = r.pkg();
     }
     return _addr_pkg.Lookup(name)!;
-
 }
 
 private static ptr<types.Type> typAt(this ptr<iimporter> _addr_p, ulong off) {
@@ -817,10 +777,8 @@ private static ptr<types.Type> typAt(this ptr<iimporter> _addr_p, ulong off) {
         // calculating size during SSA generation anymore. See issue #44732.
         types.CheckSize(t);
         p.typCache[off] = t;
-
     }
     return _addr_t!;
-
 }
 
 private static ptr<types.Type> typ1(this ptr<importReader> _addr_r) {
@@ -928,7 +886,6 @@ private static ptr<types.Type> typ1(this ptr<importReader> _addr_r) {
             return _addr_null!;
 
     }
-
 }
 
 private static itag kind(this ptr<importReader> _addr_r) {
@@ -950,9 +907,7 @@ private static ptr<types.Type> signature(this ptr<importReader> _addr_r, ptr<typ
             params[n - 1].SetIsDDD(r.@bool());
         }
     }
-
     return _addr_types.NewSignature(r.currPkg, recv, null, params, results)!;
-
 }
 
 private static slice<ptr<types.Field>> paramList(this ptr<importReader> _addr_r) {
@@ -984,7 +939,6 @@ private static long int64(this ptr<importReader> _addr_r) {
         @base.Fatalf("readVarint: %v", err);
     }
     return n;
-
 }
 
 private static ulong uint64(this ptr<importReader> _addr_r) {
@@ -995,7 +949,6 @@ private static ulong uint64(this ptr<importReader> _addr_r) {
         @base.Fatalf("readVarint: %v", err);
     }
     return n;
-
 }
 
 private static byte @byte(this ptr<importReader> _addr_r) {
@@ -1006,7 +959,6 @@ private static byte @byte(this ptr<importReader> _addr_r) {
         @base.Fatalf("declReader.ReadByte: %v", err);
     }
     return x;
-
 }
 
 // Compiler-specific extensions.
@@ -1023,8 +975,7 @@ private static void constExt(this ptr<importReader> _addr_r, ptr<ir.Name> _addr_
         var re = r.mprat(constant.Real(v));
         var im = r.mprat(constant.Imag(v));
         n.SetVal(makeComplex(re, im));
-    
-}
+    }
 
 private static void varExt(this ptr<importReader> _addr_r, ptr<ir.Name> _addr_n) {
     ref importReader r = ref _addr_r.val;
@@ -1058,7 +1009,6 @@ private static void funcExt(this ptr<importReader> _addr_r, ptr<ir.Name> _addr_n
             n.Func.Endlineno = r.pos();
         }
     }
-
 }
 
 private static void methExt(this ptr<importReader> _addr_r, ptr<types.Field> _addr_m) {
@@ -1069,7 +1019,6 @@ private static void methExt(this ptr<importReader> _addr_r, ptr<types.Field> _ad
         m.SetNointerface(true);
     }
     r.funcExt(m.Nname._<ptr<ir.Name>>());
-
 }
 
 private static void linkname(this ptr<importReader> _addr_r, ptr<types.Sym> _addr_s) {
@@ -1091,7 +1040,6 @@ private static void symIdx(this ptr<importReader> _addr_r, ptr<types.Sym> _addr_
         }
         lsym.SymIdx = idx;
         lsym.Set(obj.AttrIndexed, true);
-
     }
 }
 
@@ -1126,7 +1074,6 @@ public static long BaseTypeIndex(ptr<types.Type> _addr_t) {
         return i[1];
     }
     return i[0];
-
 }
 
 private static void doInline(this ptr<importReader> _addr_r, ptr<ir.Func> _addr_fn) {
@@ -1185,7 +1132,6 @@ private static void funcBody(this ptr<importReader> _addr_r, ptr<ir.Func> _addr_
         // degradation due to unnecessary calls to empty
         // functions).
         body = new slice<ir.Node>(new ir.Node[] {  });
-
     }
     if (go117ExportTypes) {
         ir.VisitList(body, n => {
@@ -1195,7 +1141,6 @@ private static void funcBody(this ptr<importReader> _addr_r, ptr<ir.Func> _addr_
     fn.Inl.Body = body;
 
     r.curfn = outerfn;
-
 }
 
 private static slice<ptr<ir.Name>> readNames(this ptr<importReader> _addr_r, ptr<ir.Func> _addr_fn) {
@@ -1209,10 +1154,8 @@ private static slice<ptr<ir.Name>> readNames(this ptr<importReader> _addr_r, ptr
         n.Curfn = fn;
         n.SetType(r.typ());
         dcls[i] = n;
-
     }    r.allDcls = append(r.allDcls, dcls);
     return dcls;
-
 }
 
 private static slice<ptr<ir.Name>> readFuncDcls(this ptr<importReader> _addr_r, ptr<ir.Func> _addr_fn) {
@@ -1232,7 +1175,6 @@ private static slice<ptr<ir.Name>> readFuncDcls(this ptr<importReader> _addr_r, 
         n.Class = class;
         f.Nname = n;
         i++;
-
     };
 
     var typ = fn.Type();
@@ -1243,7 +1185,6 @@ private static slice<ptr<ir.Name>> readFuncDcls(this ptr<importReader> _addr_r, 
             fix(recv, ir.PPARAM);
         }
     }
-
     {
         var f__prev1 = f;
 
@@ -1265,7 +1206,6 @@ private static slice<ptr<ir.Name>> readFuncDcls(this ptr<importReader> _addr_r, 
     }
 
     return dcls;
-
 }
 
 private static ptr<ir.Name> localName(this ptr<importReader> _addr_r) {
@@ -1279,7 +1219,6 @@ private static ptr<ir.Name> localName(this ptr<importReader> _addr_r) {
         return _addr_r.allClosureVars[-i - 2]!;
     }
     return _addr_r.allDcls[i]!;
-
 }
 
 private static slice<ir.Node> stmtList(this ptr<importReader> _addr_r) {
@@ -1301,7 +1240,6 @@ private static slice<ir.Node> stmtList(this ptr<importReader> _addr_r) {
         }
     }
     return list;
-
 }
 
 private static slice<ptr<ir.CaseClause>> caseList(this ptr<importReader> _addr_r, ir.Node switchExpr) {
@@ -1319,9 +1257,7 @@ private static slice<ptr<ir.CaseClause>> caseList(this ptr<importReader> _addr_r
         }
         cas.Body = r.stmtList();
         cases[i] = cas;
-
     }    return cases;
-
 }
 
 private static slice<ptr<ir.CommClause>> commList(this ptr<importReader> _addr_r) {
@@ -1343,10 +1279,8 @@ private static slice<ir.Node> exprList(this ptr<importReader> _addr_r) {
             break;
         }
         list = append(list, n);
-
     }
     return list;
-
 }
 
 private static ir.Node expr(this ptr<importReader> _addr_r) {
@@ -1358,7 +1292,6 @@ private static ir.Node expr(this ptr<importReader> _addr_r) {
         @base.Fatalf("unexpected block node: %v", n);
     }
     return n;
-
 }
 
 // TODO(gri) split into expr and stmt
@@ -1414,7 +1347,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
             }
 
         }
-
         return ir.NewTypeSwitchGuard(pos, tag, r.expr()); 
 
         // case OTARRAY, OTMAP, OTCHAN, OTSTRUCT, OTINTER, OTFUNC:
@@ -1444,9 +1376,7 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
                 // Closure variable should have Defn set, which is its captured
                 // variable, and it gets the same type as the captured variable.
                 cvars[i].SetType(cvars[i].Defn.Type());
-
             }
-
         }        fn.ClosureVars = cvars;
         r.allClosureVars = append(r.allClosureVars, cvars);
 
@@ -1460,7 +1390,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
             // An empty closure must be represented as a single empty
             // block statement, else it will be dropped.
             fn.Body = new slice<ir.Node>(new ir.Node[] { ir.NewBlockStmt(src.NoXPos,nil) });
-
         }
         fn.Inl = null;
 
@@ -1488,7 +1417,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
         if (!go117ExportTypes) { 
             // unreachable - mapped to OCOMPLIT by exporter
             goto error;
-
         }
         pos = r.pos();
         typ = r.typ();
@@ -1514,7 +1442,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
         if (!go117ExportTypes) { 
             // unreachable - mapped to case OXDOT by exporter
             goto error;
-
         }
         pos = r.pos();
         var expr = r.expr();
@@ -1535,9 +1462,7 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
                 // Lookdot clobbers the opcode and type, undo that.
                 n.SetOp(op);
                 n.SetType(typ);
-
             }
-
                 return n;
     else if (op == ir.ODOTTYPE || op == ir.ODOTTYPE2) 
         n = ir.NewTypeAssertExpr(r.pos(), r.expr(), null);
@@ -1573,7 +1498,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
         if (!go117ExportTypes && op != ir.OCONV) { 
             //     unreachable - mapped to OCONV case by exporter
             goto error;
-
         }
         return ir.NewConvExpr(r.pos(), op, r.typ(), r.expr());
     else if (op == ir.OCOPY || op == ir.OCOMPLEX || op == ir.OREAL || op == ir.OIMAG || op == ir.OAPPEND || op == ir.OCAP || op == ir.OCLOSE || op == ir.ODELETE || op == ir.OLEN || op == ir.OMAKE || op == ir.ONEW || op == ir.OPANIC || op == ir.ORECOVER || op == ir.OPRINT || op == ir.OPRINTN || op == ir.OUNSAFEADD || op == ir.OUNSAFESLICE) 
@@ -1600,7 +1524,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
                 return n;
             // ir.OMAKE
             goto error;
-
         }
         n = builtinCall(r.pos(), op);
         n.Args = r.exprList();
@@ -1721,7 +1644,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
         if (!go117ExportTypes && op != ir.OAS2) { 
             // unreachable - mapped to case OAS2 by exporter
             goto error;
-
         }
         return ir.NewAssignListStmt(r.pos(), op, r.exprList(), r.exprList());
     else if (op == ir.ORETURN) 
@@ -1780,7 +1702,6 @@ private static ir.Node node(this ptr<importReader> _addr_r) => func((_, panic, _
             }
 
         }
-
         return ir.NewBranchStmt(pos, op, sym);
     else if (op == ir.OLABEL) 
         return ir.NewLabelStmt(r.pos(), Lookup(r.@string()));
@@ -1801,7 +1722,6 @@ private static ir.Op op(this ptr<importReader> _addr_r) {
         @base.Fatalf("import stream has desynchronized");
     }
     return ir.Op(r.uint64());
-
 }
 
 private static slice<ir.Node> fieldList(this ptr<importReader> _addr_r) {
@@ -1814,9 +1734,7 @@ private static slice<ir.Node> fieldList(this ptr<importReader> _addr_r) {
             x.Offset = int64(r.uint64());
         }
         list[i] = x;
-
     }    return list;
-
 }
 
 private static (ir.Node, ir.Node) exprsOrNil(this ptr<importReader> _addr_r) {
@@ -1832,17 +1750,14 @@ private static (ir.Node, ir.Node) exprsOrNil(this ptr<importReader> _addr_r) {
         b = r.node();
     }
     return ;
-
 }
 
 private static ptr<ir.CallExpr> builtinCall(src.XPos pos, ir.Op op) {
     if (go117ExportTypes) { 
         // These should all be encoded as direct ops, not OCALL.
         @base.Fatalf("builtinCall should not be invoked when types are included in import/export");
-
     }
     return _addr_ir.NewCallExpr(pos, ir.OCALL, ir.NewIdent(@base.Pos, types.BuiltinPkg.Lookup(ir.OpNames[op])), null)!;
-
 }
 
 } // end typecheck_package

@@ -18,35 +18,37 @@
 //     https://cs.nyu.edu/~dodis/ps/merkle.pdf
 //   [Larsson]
 //     https://web.archive.org/web/20040719170906/https://www.nada.kth.se/kurser/kth/2D1441/semteo03/lecturenotes/assump.pdf
-// package ecdsa -- go2cs converted at 2022 March 06 22:17:08 UTC
+
+// package ecdsa -- go2cs converted at 2022 March 13 05:30:28 UTC
 // import "crypto/ecdsa" ==> using ecdsa = go.crypto.ecdsa_package
 // Original source: C:\Program Files\Go\src\crypto\ecdsa\ecdsa.go
+namespace go.crypto;
 // Further references:
 //   [NSA]: Suite B implementer's guide to FIPS 186-3
 //     https://apps.nsa.gov/iaarchive/library/ia-guidance/ia-solutions-for-classified/algorithm-guidance/suite-b-implementers-guide-to-fips-186-3-ecdsa.cfm
 //   [SECG]: SECG, SEC1
 //     http://www.secg.org/sec1-v2.pdf
 
-using crypto = go.crypto_package;
-using aes = go.crypto.aes_package;
-using cipher = go.crypto.cipher_package;
-using elliptic = go.crypto.elliptic_package;
-using randutil = go.crypto.@internal.randutil_package;
-using sha512 = go.crypto.sha512_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using big = go.math.big_package;
 
-using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
-using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
+using crypto = crypto_package;
+using aes = crypto.aes_package;
+using cipher = crypto.cipher_package;
+using elliptic = crypto.elliptic_package;
+using randutil = crypto.@internal.randutil_package;
+using sha512 = crypto.sha512_package;
+using errors = errors_package;
+using io = io_package;
+using big = math.big_package;
+
+using cryptobyte = golang.org.x.crypto.cryptobyte_package;
+using asn1 = golang.org.x.crypto.cryptobyte.asn1_package;
+
+
+// A invertible implements fast inverse mod Curve.Params().N
+
 using System;
-
-
-namespace go.crypto;
-
 public static partial class ecdsa_package {
 
-    // A invertible implements fast inverse mod Curve.Params().N
 private partial interface invertible {
     ptr<big.Int> Inverse(ptr<big.Int> k);
 }
@@ -57,7 +59,6 @@ private partial interface combinedMult {
 }
 
 private static readonly @string aesIV = "IV for ECDSA CTR";
-
 
 // PublicKey represents an ECDSA public key.
 public partial struct PublicKey : elliptic.Curve {
@@ -82,7 +83,6 @@ private static bool Equal(this ptr<PublicKey> _addr_pub, crypto.PublicKey x) {
         return false;
     }
     return pub.X.Cmp(xx.X) == 0 && pub.Y.Cmp(xx.Y) == 0 && pub.Curve == xx.Curve;
-
 }
 
 // PrivateKey represents an ECDSA private key.
@@ -109,7 +109,6 @@ private static bool Equal(this ptr<PrivateKey> _addr_priv, crypto.PrivateKey x) 
         return false;
     }
     return priv.PublicKey.Equal(_addr_xx.PublicKey) && priv.D.Cmp(xx.D) == 0;
-
 }
 
 // Sign signs digest with priv, reading randomness from rand. The opts argument
@@ -134,7 +133,6 @@ private static (slice<byte>, error) Sign(this ptr<PrivateKey> _addr_priv, io.Rea
         b.AddASN1BigInt(s);
     });
     return b.Bytes();
-
 }
 
 private static ptr<big.Int> one = @new<big.Int>().SetInt64(1);
@@ -156,7 +154,6 @@ private static (ptr<big.Int>, error) randFieldElement(elliptic.Curve c, io.Reade
     k.Mod(k, n);
     k.Add(k, one);
     return ;
-
 }
 
 // GenerateKey generates a public and private key pair.
@@ -173,7 +170,6 @@ public static (ptr<PrivateKey>, error) GenerateKey(elliptic.Curve c, io.Reader r
     priv.D = k;
     priv.PublicKey.X, priv.PublicKey.Y = c.ScalarBaseMult(k.Bytes());
     return (_addr_priv!, error.As(null!)!);
-
 }
 
 // hashToInt converts a hash value to an integer. There is some disagreement
@@ -194,7 +190,6 @@ private static ptr<big.Int> hashToInt(slice<byte> hash, elliptic.Curve c) {
         ret.Rsh(ret, uint(excess));
     }
     return _addr_ret!;
-
 }
 
 // fermatInverse calculates the inverse of k in GF(P) using Fermat's method.
@@ -252,7 +247,6 @@ public static (ptr<big.Int>, ptr<big.Int>, error) Sign(io.Reader rand, ptr<Priva
     // See [NSA] 3.4.1
     var c = priv.PublicKey.Curve;
     return _addr_sign(priv, _addr_csprng, c, hash)!;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>, error) signGeneric(ptr<PrivateKey> _addr_priv, ptr<cipher.StreamReader> _addr_csprng, elliptic.Curve c, slice<byte> hash) {
@@ -288,13 +282,11 @@ private static (ptr<big.Int>, ptr<big.Int>, error) signGeneric(ptr<PrivateKey> _
 
             }
 
-
             r, _ = priv.Curve.ScalarBaseMult(k.Bytes());
             r.Mod(r, N);
             if (r.Sign() != 0) {
                 break;
             }
-
         }
 
         var e = hashToInt(hash, c);
@@ -308,7 +300,6 @@ private static (ptr<big.Int>, ptr<big.Int>, error) signGeneric(ptr<PrivateKey> _
     }
 
     return ;
-
 }
 
 // SignASN1 signs a hash (which should be the result of hashing a larger message)
@@ -342,7 +333,6 @@ public static bool Verify(ptr<PublicKey> _addr_pub, slice<byte> hash, ptr<big.In
         return false;
     }
     return verify(pub, c, hash, r, s);
-
 }
 
 private static bool verifyGeneric(ptr<PublicKey> _addr_pub, elliptic.Curve c, slice<byte> hash, ptr<big.Int> _addr_r, ptr<big.Int> _addr_s) {
@@ -364,7 +354,6 @@ private static bool verifyGeneric(ptr<PublicKey> _addr_pub, elliptic.Curve c, sl
             w = @new<big.Int>().ModInverse(s, N);
         }
     }
-
 
     var u1 = e.Mul(e, w);
     u1.Mod(u1, N);
@@ -388,13 +377,11 @@ private static bool verifyGeneric(ptr<PublicKey> _addr_pub, elliptic.Curve c, sl
         }
     }
 
-
     if (x.Sign() == 0 && y.Sign() == 0) {
         return false;
     }
     x.Mod(x, N);
     return x.Cmp(r) == 0;
-
 }
 
 // VerifyASN1 verifies the ASN.1 encoded signature, sig, of hash using the
@@ -409,7 +396,6 @@ public static bool VerifyASN1(ptr<PublicKey> _addr_pub, slice<byte> hash, slice<
         return false;
     }
     return Verify(_addr_pub, hash, _addr_r, _addr_s);
-
 }
 
 private partial struct zr : io.Reader {

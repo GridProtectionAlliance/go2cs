@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:22 UTC
+//     Generated on 2022 March 13 05:38:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace html
 {
     public static partial class template_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct context
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace html
             public static implicit operator context(NilType nil) => default(context);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static context context_cast(dynamic value)
         {
             return new context(value.state, value.delim, value.urlPart, value.jsCtx, value.attr, value.element, ref value.err);

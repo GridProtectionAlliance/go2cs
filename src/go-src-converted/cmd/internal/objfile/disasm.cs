@@ -2,37 +2,38 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objfile -- go2cs converted at 2022 March 06 22:31:47 UTC
+// package objfile -- go2cs converted at 2022 March 13 05:42:42 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\disasm.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using src = go.cmd.@internal.src_package;
-using list = go.container.list_package;
-using gosym = go.debug.gosym_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using tabwriter = go.text.tabwriter_package;
-
-using armasm = go.golang.org.x.arch.arm.armasm_package;
-using arm64asm = go.golang.org.x.arch.arm64.arm64asm_package;
-using ppc64asm = go.golang.org.x.arch.ppc64.ppc64asm_package;
-using x86asm = go.golang.org.x.arch.x86.x86asm_package;
-using System;
-
-
 namespace go.cmd.@internal;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using src = cmd.@internal.src_package;
+using list = container.list_package;
+using gosym = debug.gosym_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strings = strings_package;
+using tabwriter = text.tabwriter_package;
+
+using armasm = golang.org.x.arch.arm.armasm_package;
+using arm64asm = golang.org.x.arch.arm64.arm64asm_package;
+using ppc64asm = golang.org.x.arch.ppc64.ppc64asm_package;
+using x86asm = golang.org.x.arch.x86.x86asm_package;
+
+
+// Disasm is a disassembler for a given File.
+
+using System;
 public static partial class objfile_package {
 
-    // Disasm is a disassembler for a given File.
 public partial struct Disasm {
     public slice<Sym> syms; //symbols in file, sorted by address
     public Liner pcln; // pcln table
@@ -88,12 +89,10 @@ private static (ptr<Disasm>, error) Disasm(this ptr<Entry> _addr_e) {
                 keep = append(keep, sym);
                 break;
         }
-
     }    syms = keep;
     ptr<Disasm> d = addr(new Disasm(syms:syms,pcln:pcln,text:textBytes,textStart:textStart,textEnd:textStart+uint64(len(textBytes)),goarch:goarch,disasm:disasm,byteOrder:byteOrder,));
 
     return (_addr_d!, error.As(null!)!);
-
 }
 
 // lookup finds the symbol name containing addr.
@@ -110,7 +109,6 @@ private static (@string, ulong) lookup(this ptr<Disasm> _addr_d, ulong addr) {
         }
     }
     return ("", 0);
-
 }
 
 // base returns the final element in the path.
@@ -189,7 +187,6 @@ private static (slice<byte>, error) Line(this ptr<FileCache> _addr_fc, @string f
         return (null, error.As(null!)!);
     }
     return (cf.Lines[line - 1], error.As(null!)!);
-
 }
 
 // Print prints a disassembly of the file to w.
@@ -251,22 +248,17 @@ private static void Print(this ptr<Disasm> _addr_d, io.Writer w, ptr<regexp.Rege
 
                     }
 
-
                     (lastFile, lastLine) = (file, line);
                 }
-
                 fmt.Fprintf(tw, "  %#x\t", pc);
-
             }
             else
  {
                 fmt.Fprintf(tw, "  %s:%d\t%#x\t", base(file), line, pc);
             }
-
             if (size % 4 != 0 || d.goarch == "386" || d.goarch == "amd64") { 
                 // Print instruction as bytes.
                 fmt.Fprintf(tw, "%x", code[(int)i..(int)i + size]);
-
             }
             else
  { 
@@ -279,22 +271,15 @@ private static void Print(this ptr<Disasm> _addr_d, io.Writer w, ptr<regexp.Rege
                             fmt.Fprintf(tw, " ");
                         j += 4;
                         }
-
                         fmt.Fprintf(tw, "%08x", d.byteOrder.Uint32(code[(int)i + j..]));
-
                     }
 
                 }
-
             }
-
             fmt.Fprintf(tw, "\t%s\t\n", text);
-
         });
         tw.Flush();
-
     }    bw.Flush();
-
 }
 
 // Decode disassembles the text segment range [start, end), calling f for each instruction.
@@ -327,7 +312,6 @@ private static void Decode(this ptr<Disasm> _addr_d, ulong start, ulong end, sli
             pc += uint64(size);
         }
     }
-
 }
 
 public delegate  ulong) lookupFunc(ulong,  (@string);
@@ -369,7 +353,6 @@ private static (@string, nint) disasm_x86(slice<byte> code, ulong pc, lookupFunc
         }
     }
     return (text, size);
-
 }
 
 private partial struct textReader {
@@ -393,7 +376,6 @@ private static (nint, error) ReadAt(this textReader r, slice<byte> data, long of
         err = io.ErrUnexpectedEOF;
     }
     return ;
-
 }
 
 private static (@string, nint) disasm_arm(slice<byte> code, ulong pc, lookupFunc lookup, binary.ByteOrder _, bool gnuAsm) {
@@ -415,7 +397,6 @@ private static (@string, nint) disasm_arm(slice<byte> code, ulong pc, lookupFunc
         text = armasm.GoSyntax(inst, pc, lookup, new textReader(code,pc));
     }
     return (text, size);
-
 }
 
 private static (@string, nint) disasm_arm64(slice<byte> code, ulong pc, lookupFunc lookup, binary.ByteOrder byteOrder, bool gnuAsm) {
@@ -435,7 +416,6 @@ private static (@string, nint) disasm_arm64(slice<byte> code, ulong pc, lookupFu
         text = arm64asm.GoSyntax(inst, pc, lookup, new textReader(code,pc));
     }
     return (text, 4);
-
 }
 
 private static (@string, nint) disasm_ppc64(slice<byte> code, ulong pc, lookupFunc lookup, binary.ByteOrder byteOrder, bool gnuAsm) {
@@ -460,7 +440,6 @@ private static (@string, nint) disasm_ppc64(slice<byte> code, ulong pc, lookupFu
         }
     }
     return (text, size);
-
 }
 
 private static map disasms = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, disasmFunc>{"386":disasm_386,"amd64":disasm_amd64,"arm":disasm_arm,"arm64":disasm_arm64,"ppc64":disasm_ppc64,"ppc64le":disasm_ppc64,};

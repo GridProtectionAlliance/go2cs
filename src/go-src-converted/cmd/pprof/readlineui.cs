@@ -10,19 +10,18 @@
 // +build !appengine
 // +build !android
 
-// package main -- go2cs converted at 2022 March 06 23:22:40 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:44 UTC
 // Original source: C:\Program Files\Go\src\cmd\pprof\readlineui.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using driver = go.github.com.google.pprof.driver_package;
-using term = go.golang.org.x.term_package;
-using System;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+
+using driver = github.com.google.pprof.driver_package;
+using term = golang.org.x.term_package;
+using System;
 
 public static partial class main_package {
 
@@ -57,7 +56,6 @@ private static driver.UI newReadlineUI() {
 
     struct{io.Readerio.Writer} rw = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{io.Readerio.Writer}{os.Stdin,os.Stderr};
     return addr(new readlineUI(term:term.NewTerminal(rw,"")));
-
 }
 
 // Read returns a line of text (a command) read from the user.
@@ -76,7 +74,6 @@ private static (@string, error) ReadLine(this ptr<readlineUI> _addr_r, @string p
 
     var (s, err) = r.term.ReadLine();
     return (s, error.As(err)!);
-
 });
 
 // Print shows a message to the user.
@@ -112,7 +109,6 @@ private static void print(this ptr<readlineUI> _addr_r, bool withColor, params o
         text = colorize(text);
     }
     fmt.Fprint(r.term, text);
-
 }
 
 // colorize prints the msg in red using ANSI color escapes.

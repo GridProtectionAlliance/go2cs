@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:10:45 UTC
+//     Generated on 2022 March 13 06:24:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace @internal
 {
     public static partial class liveness_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Map
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace @internal
             public static implicit operator Map(NilType nil) => default(Map);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Map Map_cast(dynamic value)
         {
             return new Map(value.Vals, value.DeferReturn);

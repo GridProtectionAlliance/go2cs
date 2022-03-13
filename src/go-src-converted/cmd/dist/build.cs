@@ -2,33 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:18 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:47 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\build.go
-using bytes = go.bytes_package;
-using json = go.encoding.json_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using bytes = bytes_package;
+using json = encoding.json_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// Initialization for any invocation.
+
+// The usual variables.
+
+using System;
+using System.Threading;
 public static partial class main_package {
 
-    // Initialization for any invocation.
-
-    // The usual variables.
 private static @string goarch = default;private static @string gobin = default;private static @string gohostarch = default;private static @string gohostos = default;private static @string goos = default;private static @string goarm = default;private static @string go386 = default;private static @string gomips = default;private static @string gomips64 = default;private static @string goppc64 = default;private static @string goroot = default;private static @string goroot_final = default;private static @string goextlinkenabled = default;private static @string gogcflags = default;private static @string goldflags = default;private static @string goexperiment = default;private static @string workdir = default;private static @string tooldir = default;private static @string oldgoos = default;private static @string oldgoarch = default;private static @string exe = default;private static map<@string, @string> defaultcc = default;private static map<@string, @string> defaultcxx = default;private static @string defaultcflags = default;private static @string defaultldflags = default;private static @string defaultpkgconfig = default;private static @string defaultldso = default;private static bool rebuildall = default;private static bool defaultclang = default;private static nint vflag = default;
 
 // The known architectures.
@@ -44,7 +45,6 @@ private static nint find(@string p, slice<@string> l) {
             return i;
         }
     }    return -1;
-
 }
 
 // xinit handles initialization of the various global state, like goroot and goarch.
@@ -113,7 +113,6 @@ private static void xinit() {
         }
     }
 
-
     b = os.Getenv("GOHOSTARCH");
     if (b != "") {
         gohostarch = b;
@@ -135,7 +134,6 @@ private static void xinit() {
             fatalf("unknown $GO_EXTLINK_ENABLED %s", b);
         }
         goextlinkenabled = b;
-
     }
     goexperiment = os.Getenv("GOEXPERIMENT"); 
     // TODO(mdempsky): Validate known experiments?
@@ -192,11 +190,9 @@ private static void xinit() {
             fatalf("cannot write stub go.mod: %s", err);
         }
     }
-
     xatexit(rmworkdir);
 
     tooldir = pathf("%s/pkg/tool/%s_%s", goroot, gohostos, gohostarch);
-
 }
 
 // compilerEnv returns a map from "goos/goarch" to the
@@ -230,7 +226,6 @@ private static map<@string, @string> compilerEnv(@string envName, @string def) {
         env = env__prev1;
 
     }
-
     {
         var env__prev1 = env;
 
@@ -246,7 +241,6 @@ private static map<@string, @string> compilerEnv(@string envName, @string def) {
 
     }
 
-
     foreach (var (_, goos) in okgoos) {
         foreach (var (_, goarch) in okgoarch) {
             {
@@ -261,10 +255,8 @@ private static map<@string, @string> compilerEnv(@string envName, @string def) {
                 env = env__prev1;
 
             }
-
         }
     }    return m;
-
 }
 
 // compilerEnvLookup returns the compiler settings for goos/goarch in map m.
@@ -276,9 +268,7 @@ private static @string compilerEnvLookup(map<@string, @string> m, @string goos, 
             return cc;
         }
     }
-
     return m[""];
-
 }
 
 // rmworkdir deletes the work directory.
@@ -287,7 +277,6 @@ private static void rmworkdir() {
         errprintf("rm -rf %s\n", workdir);
     }
     xremoveall(workdir);
-
 }
 
 // Remove trailing spaces.
@@ -322,9 +311,7 @@ private static (@string, bool) branchtag(@string branch) {
             precise = true; // tag denotes HEAD
         }
         break;
-
     }    return ;
-
 }
 
 // findgoversion determines the Go version to use in the version string.
@@ -364,11 +351,8 @@ private static @string findgoversion() {
                     }
 
                 }
-
             }
-
             return b;
-
         }
     }
     path = pathf("%s/VERSION.cache", goroot);
@@ -406,12 +390,10 @@ private static @string findgoversion() {
         tag += fmt.Sprintf(" go1.%s-", m[1]);
 
         tag += chomp(run(goroot, CheckExit, "git", "log", "-n", "1", "--format=format:%h %cd", "HEAD"));
-
     }
     writefile(tag, path, 0);
 
     return tag;
-
 }
 
 // isGitRepo reports whether the working directory is inside a Git repository.
@@ -424,7 +406,6 @@ private static bool isGitRepo() {
         gitDir = filepath.Join(goroot, gitDir);
     }
     return isdir(gitDir);
-
 }
 
 /*
@@ -466,7 +447,6 @@ private static void setup() {
 
     }
 
-
     p = pathf("%s/pkg/%s_%s", goroot, gohostos, gohostarch);
     if (rebuildall) {
         xremoveall(p);
@@ -479,7 +459,6 @@ private static void setup() {
             xremoveall(p);
         }
         xmkdirall(p);
-
     }
     p = pathf("%s/pkg/obj/go-build", goroot);
     if (rebuildall) {
@@ -525,7 +504,6 @@ private static void setup() {
             }
 
             break;
-
         }
     }    var goversion = findgoversion();
     if (strings.HasPrefix(goversion, "release.") || (strings.HasPrefix(goversion, "go") && !strings.Contains(goversion, "beta"))) {
@@ -542,7 +520,6 @@ private static void setup() {
                 p = p__prev2;
 
             }
-
         }
     }
 }
@@ -583,7 +560,6 @@ private static channel<object> startInstall(@string dir) {
     }
     installedMu.Unlock();
     return ch;
-
 }
 
 // runInstall installs the library, package, or binary associated with dir,
@@ -641,7 +617,6 @@ private static void runInstall(@string pkg, channel<object> ch) => func((defer, 
         link = new slice<@string>(new @string[] { "pack", packagefile(pkg) });
         targ = len(link) - 1;
         xmkdirall(filepath.Dir(link[targ]));
-
     }
     else
  { 
@@ -660,7 +635,6 @@ private static void runInstall(@string pkg, channel<object> ch) => func((defer, 
         link = append(link, "-extld=" + compilerEnvLookup(defaultcc, goos, goarch));
         link = append(link, "-o", pathf("%s/%s%s", tooldir, elem, exe));
         targ = len(link) - 1;
-
     }
     var ttarg = mtime(link[targ]); 
 
@@ -674,9 +648,7 @@ private static void runInstall(@string pkg, channel<object> ch) => func((defer, 
     // This is the same heuristic build.ScanDir uses.
     // There do exist real C files beginning with _,
     // so limit that check to just Go files.
-    files = filter(files, p => {
-        return !strings.HasPrefix(p, ".") && (!strings.HasPrefix(p, "_") || !strings.HasSuffix(p, ".go"));
-    });
+    files = filter(files, p => !strings.HasPrefix(p, ".") && (!strings.HasPrefix(p, "_") || !strings.HasSuffix(p, ".go")));
 
     foreach (var (_, dt) in deptab) {
         if (pkg == dt.prefix || strings.HasSuffix(dt.prefix, "/") && strings.HasPrefix(pkg, dt.prefix)) {
@@ -735,7 +707,6 @@ ok:
             missing = append(missing, p);
         }
         return true;
-
     }); 
 
     // If there are no files to compile, we're done.
@@ -751,7 +722,6 @@ ok:
         copyfile(pathf("%s/pkg/include/textflag.h", goroot), pathf("%s/src/runtime/textflag.h", goroot), 0);
         copyfile(pathf("%s/pkg/include/funcdata.h", goroot), pathf("%s/src/runtime/funcdata.h", goroot), 0);
         copyfile(pathf("%s/pkg/include/asm_ppc64x.h", goroot), pathf("%s/src/runtime/asm_ppc64x.h", goroot), 0);
-
     }
     {
         var p__prev1 = p;
@@ -776,17 +746,13 @@ ok:
                     // The 'clean' command can remove
                     // the generated files.
                     goto built;
-
                 }
-
             } 
             // Did not rebuild p.
             if (find(p, missing) >= 0) {
                 fatalf("missing file %s", p);
             }
-
 built:
-
         }
         p = p__prev1;
     }
@@ -850,18 +816,15 @@ built:
             errprintf("skip build for cross-compile %s\n", pkg);
         }
         return ;
-
     }
     @string asmArgs = new slice<@string>(new @string[] { pathf("%s/asm",tooldir), "-I", workdir, "-I", pathf("%s/pkg/include",goroot), "-D", "GOOS_"+goos, "-D", "GOARCH_"+goarch, "-D", "GOOS_GOARCH_"+goos+"_"+goarch, "-p", pkg });
     if (goarch == "mips" || goarch == "mipsle") { 
         // Define GOMIPS_value from gomips.
         asmArgs = append(asmArgs, "-D", "GOMIPS_" + gomips);
-
     }
     if (goarch == "mips64" || goarch == "mips64le") { 
         // Define GOMIPS64_value from gomips64.
         asmArgs = append(asmArgs, "-D", "GOMIPS64_" + gomips64);
-
     }
     var goasmh = pathf("%s/go_asm.h", workdir);
     if (IsRuntimePackagePath(pkg)) {
@@ -885,10 +848,8 @@ built:
             err = err__prev2;
 
         }
-
         bgrun(_addr_wg, dir, asmabis);
         bgwait(_addr_wg);
-
     }
     ptr<bytes.Buffer> buf = addr(new bytes.Buffer());
     {
@@ -920,7 +881,6 @@ built:
         err = err__prev1;
 
     }
-
 
     @string archive = default; 
     // The next loop will compile individual non-Go files.
@@ -985,7 +945,6 @@ built:
             if (doclean) {
                 clean = append(clean, b);
             }
-
         }
         p = p__prev1;
     }
@@ -1000,7 +959,6 @@ built:
     xremove(link[targ]);
     bgrun(_addr_wg, "", link);
     bgwait(_addr_wg);
-
 });
 
 // packagefile returns the path to a compiled .a file for the given package
@@ -1017,7 +975,6 @@ private static bool matchfield(@string f) {
             return false;
         }
     }    return true;
-
 }
 
 // matchtag reports whether the tag (x or !x) matches this build.
@@ -1030,10 +987,8 @@ private static bool matchtag(@string tag) {
             return false;
         }
         return !matchtag(tag[(int)1..]);
-
     }
     return tag == "gc" || tag == goos || tag == goarch || tag == "cmd_go_bootstrap" || tag == "go1.1" || (goos == "android" && tag == "linux") || (goos == "illumos" && tag == "solaris") || (goos == "ios" && tag == "darwin");
-
 }
 
 // shouldbuild reports whether we should build this file.
@@ -1111,13 +1066,11 @@ private static bool shouldbuild(@string file, @string pkg) {
 
             return false;
 fieldmatch:
-
         }
         p = p__prev1;
     }
 
     return true;
-
 }
 
 // copy copies the file src to dst, via memory (so only good for small files).
@@ -1126,7 +1079,6 @@ private static void copyfile(@string dst, @string src, nint flag) {
         errprintf("cp %s %s\n", src, dst);
     }
     writefile(readfile(src), dst, flag);
-
 }
 
 // dopack copies the package src to dst,
@@ -1148,7 +1100,6 @@ private static void dopack(@string dst, @string src, slice<@string> extra) {
             bdst.WriteByte(0);
         }
     }    writefile(bdst.String(), dst, 0);
-
 }
 
 private static @string runtimegen = new slice<@string>(new @string[] { "zaexperiment.h", "zversion.go" });
@@ -1203,7 +1154,6 @@ private static void clean() {
 
         // Remove cached version info.
         xremove(pathf("%s/VERSION.cache", goroot));
-
     }
 }
 
@@ -1256,7 +1206,6 @@ private static void cmdenv() {
             sep = ";";
         }
         xprintf(format, "PATH", fmt.Sprintf("%s%s%s", gobin, sep, os.Getenv("PATH")));
-
     }
 }
 
@@ -1288,7 +1237,6 @@ private static void timelog(@string op, @string name) => func((defer, _, _) => {
             i = i__prev2;
 
         }
-
         i = strings.Index(s, " start");
         if (i < 0) {
             log.Fatalf("time log %s does not begin with start line", os.Getenv("GOBUILDTIMELOGFILE"));
@@ -1299,11 +1247,9 @@ private static void timelog(@string op, @string name) => func((defer, _, _) => {
         }
         timeLogStart = t;
         timeLogFile = f;
-
     }
     var t = time.Now();
     fmt.Fprintf(timeLogFile, "%s %+.1fs %s %s\n", t.Format(time.UnixDate), t.Sub(timeLogStart).Seconds(), op, name);
-
 });
 
 private static @string toolchain = new slice<@string>(new @string[] { "cmd/asm", "cmd/cgo", "cmd/compile", "cmd/link" });
@@ -1357,7 +1303,6 @@ private static void cmdbootstrap() => func((defer, _, _) => {
     if (debug) { 
         // cmd/buildid is used in debug mode.
         toolchain = append(toolchain, "cmd/buildid");
-
     }
     if (isdir(pathf("%s/src/pkg", goroot))) {
         fatalf("\n\n" + "The Go package sources have moved to $GOROOT/src.\n" + "*** %s still exists. ***\n" + "It probably contains stale files that may confuse the build.\n" + "Please (check what's there and) remove it and try again.\n" + "See https://golang.org/s/go14nopkg\n", pathf("%s/src/pkg", goroot));
@@ -1433,7 +1378,6 @@ private static void cmdbootstrap() => func((defer, _, _) => {
             xprintf("\n");
         }
         xprintf("Building packages and commands for %s/%s.\n", goos, goarch);
-
     }
     else
  { 
@@ -1459,13 +1403,11 @@ private static void cmdbootstrap() => func((defer, _, _) => {
         os.Setenv("GOARCH", goarch);
         os.Setenv("CC", compilerEnvLookup(defaultcc, goos, goarch));
         xprintf("Building packages and commands for target, %s/%s.\n", goos, goarch);
-
     }
     @string targets = new slice<@string>(new @string[] { "std", "cmd" });
     if (goos == "js" && goarch == "wasm") { 
         // Skip the cmd tools for js/wasm. They're not usable.
         targets = targets[..(int)1];
-
     }
     goInstall(goBootstrap, targets);
     checkNotStale(goBootstrap, targets);
@@ -1506,7 +1448,6 @@ private static void cmdbootstrap() => func((defer, _, _) => {
     if (goos == "android") { 
         // Make sure the exec wrapper will sync a fresh $GOROOT to the device.
         xremove(pathf("%s/go_android_exec-adb-sync-status", os.TempDir()));
-
     }
     {
         var wrapperPath = wrapperPathFor(goos, goarch);
@@ -1522,7 +1463,6 @@ private static void cmdbootstrap() => func((defer, _, _) => {
             os.Setenv("GOOS", goos);
             os.Setenv("GOARCH", goarch);
             os.Setenv("CC", oldcc);
-
         }
     } 
 
@@ -1543,7 +1483,6 @@ private static @string wrapperPathFor(@string goos, @string goarch) {
             return pathf("%s/misc/ios/go_ios_exec.go", goroot);
         }
         return "";
-
 }
 
 private static void goInstall(@string goBinary, params @string[] args) {
@@ -1563,7 +1502,6 @@ private static void goCmd(@string goBinary, @string cmd, params @string[] args) 
         goCmd = append(goCmd, "-p=1");
     }
     run(workdir, ShowOutput | CheckExit, append(goCmd, args));
-
 }
 
 private static void checkNotStale(@string goBinary, params @string[] targets) {
@@ -1607,7 +1545,6 @@ private static bool needCC() {
             break;
     }
     return cgoEnabled[gohostos + "/" + gohostarch];
-
 }
 
 private static void checkCC() {
@@ -1625,7 +1562,6 @@ private static void checkCC() {
             fatalf("cannot invoke C compiler %q: %v\n\n" + "Go needs a system C compiler for use with cgo.\n" + "To set a C compiler, set CC=the-compiler.\n" + "To disable cgo, set CGO_ENABLED=0.\n%s%s", defaultcc[""], err, outputHdr, output);
         }
     }
-
 }
 
 private static @string defaulttarg() { 
@@ -1644,7 +1580,6 @@ private static @string defaulttarg() {
     pwd = strings.TrimPrefix(pwd, "/");
 
     return pwd;
-
 }
 
 // Install installs the list of packages named on the command line.
@@ -1747,7 +1682,6 @@ private static void cmdlist() {
         }
 
         return ;
-
     }
     private partial struct jsonResult {
         public @string GOOS;
@@ -1778,7 +1712,6 @@ private static void cmdlist() {
             fatalf("write failed: %v", err);
         }
     }
-
 }
 
 // IsRuntimePackagePath examines 'pkgpath' and returns TRUE if it
@@ -1807,7 +1740,6 @@ public static bool IsRuntimePackagePath(@string pkgpath) {
             break;
     }
     return rval;
-
 }
 
 } // end main_package

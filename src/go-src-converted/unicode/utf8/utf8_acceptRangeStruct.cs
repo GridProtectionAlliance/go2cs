@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:05 UTC
+//     Generated on 2022 March 13 05:23:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace unicode
 {
     public static partial class utf8_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct acceptRange
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace unicode
             public static implicit operator acceptRange(NilType nil) => default(acceptRange);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static acceptRange acceptRange_cast(dynamic value)
         {
             return new acceptRange(value.lo, value.hi);

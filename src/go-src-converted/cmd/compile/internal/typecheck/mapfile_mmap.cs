@@ -5,25 +5,26 @@
 //go:build darwin || dragonfly || freebsd || linux || netbsd || openbsd
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:38 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:58 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\mapfile_mmap.go
-using os = go.os_package;
-using reflect = go.reflect_package;
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using os = os_package;
+using reflect = reflect_package;
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
+
+
+// TODO(mdempsky): Is there a higher-level abstraction that still
+// works well for iimport?
+
+// mapFile returns length bytes from the file starting at the
+// specified offset as a string.
+
+using System;
 public static partial class typecheck_package {
 
-    // TODO(mdempsky): Is there a higher-level abstraction that still
-    // works well for iimport?
-
-    // mapFile returns length bytes from the file starting at the
-    // specified offset as a string.
 private static (@string, error) mapFile(ptr<os.File> _addr_f, long offset, long length) {
     @string _p0 = default;
     error _p0 = default!;
@@ -50,7 +51,6 @@ private static (@string, error) mapFile(ptr<os.File> _addr_f, long offset, long 
     pString.Len = pSlice.Len;
 
     return (res, error.As(null!)!);
-
 }
 
 // keepAlive is a reimplementation of runtime.KeepAlive, which wasn't

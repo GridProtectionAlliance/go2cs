@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:09 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:33 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\likelyadjust.go
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
 
 public static partial class ssa_package {
 
@@ -52,7 +52,6 @@ public static void outerinner(this SparseTree sdom, ptr<loop> _addr_outer, ptr<l
     }
     inner.outer = outer;
     outer.isInner = false;
-
 }
 
 private static bool checkContainsCall(ptr<Block> _addr_bb) {
@@ -66,7 +65,6 @@ private static bool checkContainsCall(ptr<Block> _addr_bb) {
             return true;
         }
     }    return false;
-
 }
 
 private partial struct loopnest {
@@ -88,7 +86,6 @@ private static sbyte min8(sbyte a, sbyte b) {
         return a;
     }
     return b;
-
 }
 
 private static sbyte max8(sbyte a, sbyte b) {
@@ -96,7 +93,6 @@ private static sbyte max8(sbyte a, sbyte b) {
         return a;
     }
     return b;
-
 }
 
 private static readonly nint blDEFAULT = 0;
@@ -104,7 +100,6 @@ private static readonly var blMin = blDEFAULT;
 private static readonly nint blCALL = 1;
 private static readonly nint blRET = 2;
 private static readonly nint blEXIT = 3;
-
 
 private static array<@string> bllikelies = new array<@string>(new @string[] { "default", "call", "ret", "exit" });
 
@@ -119,7 +114,6 @@ private static @string describePredictionAgrees(ptr<Block> _addr_b, BranchPredic
         s = " (disagrees with previous, ignored)";
     }
     return s;
-
 }
 
 private static void describeBranchPrediction(ptr<Func> _addr_f, ptr<Block> _addr_b, sbyte likely, sbyte not, BranchPrediction prediction) {
@@ -203,7 +197,6 @@ private static void likelyadjust(ptr<Func> _addr_f) {
                                         if (f.pass.debug > 0 && !noprediction) {
                         f.Warnl(b.Pos, "Branch prediction rule stay in loop%s", describePredictionAgrees(_addr_b, prediction));
                     }
-
                 }
                 else
  { 
@@ -232,15 +225,12 @@ private static void likelyadjust(ptr<Func> _addr_f) {
                             describeBranchPrediction(_addr_f, _addr_b, local[b1], local[b0], prediction);
                         }
                     }
-
                 }
-
                 if (b.Likely != prediction) {
                     if (b.Likely == BranchUnknown) {
                         b.Likely = prediction;
                     }
                 }
-
             } 
             // Look for calls in the block.  If there is one, make this block unlikely.
             foreach (var (_, v) in b.Values) {
@@ -274,7 +264,6 @@ private static @string LongString(this ptr<loop> _addr_l) {
         o = ", o=" + l.outer.header.String();
     }
     return fmt.Sprintf("hdr:%s%s%s", l.header, i, o);
-
 }
 
 private static bool isWithinOrEq(this ptr<loop> _addr_l, ptr<loop> _addr_ll) {
@@ -283,7 +272,6 @@ private static bool isWithinOrEq(this ptr<loop> _addr_l, ptr<loop> _addr_ll) {
 
     if (ll == null) { // nil means whole program
         return true;
-
     }
     while (l != null) {
         if (l == ll) {
@@ -292,7 +280,6 @@ private static bool isWithinOrEq(this ptr<loop> _addr_l, ptr<loop> _addr_ll) {
         }
     }
     return false;
-
 }
 
 // nearestOuterLoop returns the outer loop of loop most nearly
@@ -310,7 +297,6 @@ private static ptr<loop> nearestOuterLoop(this ptr<loop> _addr_l, SparseTree sdo
         o = o.outer;
     }
     return _addr_o!;
-
 }
 
 private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
@@ -354,20 +340,17 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
                     if (f.pass != null && f.pass.debug > 4) {
                         fmt.Printf("loop finding    succ %s of %s is header\n", bb.String(), b.String());
                     }
-
                     if (l == null) {
                         l = addr(new loop(header:bb,isInner:true));
                         loops = append(loops, l);
                         b2l[bb.ID] = l;
                     }
-
                 }
                 else if (!visited[bb.ID]) { // Found an irreducible loop
                     sawIrred = true;
                     if (f.pass != null && f.pass.debug > 4) {
                         fmt.Printf("loop finding    succ %s of %s is IRRED, in %s\n", bb.String(), b.String(), f.Name);
                     }
-
                 }
                 else if (l != null) { 
                     // TODO handle case where l is irreducible.
@@ -377,7 +360,6 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
                     if (!sdom.IsAncestorEq(l.header, b)) {
                         l = l.nearestOuterLoop(sdom, b);
                     }
-
                     if (f.pass != null && f.pass.debug > 4) {
                         if (l == null) {
                             fmt.Printf("loop finding    succ %s of %s has no loop\n", bb.String(), b.String());
@@ -386,27 +368,21 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
  {
                             fmt.Printf("loop finding    succ %s of %s provides loop with header %s\n", bb.String(), b.String(), l.header.String());
                         }
-
                     }
-
                 }
                 else
  { // No loop
                     if (f.pass != null && f.pass.debug > 4) {
                         fmt.Printf("loop finding    succ %s of %s has no loop\n", bb.String(), b.String());
                     }
-
                 }
-
                 if (l == null || innermost == l) {
                     continue;
                 }
-
                 if (innermost == null) {
                     innermost = l;
                     continue;
                 }
-
                 if (sdom.isAncestor(innermost.header, l.header)) {
                     sdom.outerinner(innermost, l);
                     innermost = l;
@@ -414,15 +390,12 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
                 else if (sdom.isAncestor(l.header, innermost.header)) {
                     sdom.outerinner(l, innermost);
                 }
-
             }
             if (innermost != null) {
                 b2l[b.ID] = innermost;
                 innermost.nBlocks++;
             }
-
             visited[b.ID] = true;
-
         }
         b = b__prev1;
     }
@@ -453,7 +426,6 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
                 l.containsUnavoidableCall = true;
                 continue;
             }
-
             var callfreepath = false;
             var tovisit = make_slice<ptr<Block>>(0, len(l.header.Succs)); 
             // Push all non-loop non-exit successors of header onto toVisit.
@@ -467,7 +439,6 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
                     if (!l.iterationEnd(nb, b2l)) {
                         tovisit = append(tovisit, nb);
                     }
-
                 }
 
                 s = s__prev2;
@@ -501,13 +472,11 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
                 if (callfreepath) {
                     break;
                 }
-
             }
 
             if (!callfreepath) {
                 l.containsUnavoidableCall = true;
             }
-
         }
         l = l__prev1;
     }
@@ -562,7 +531,6 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
                 }
 
                 fmt.Print("\n");
-
             }
 
             l = l__prev1;
@@ -583,10 +551,8 @@ private static ptr<loopnest> loopnestfor(ptr<Func> _addr_f) {
         }
 
         fmt.Print("\n");
-
     }
     return _addr_ln!;
-
 }
 
 // assembleChildren initializes the children field of each
@@ -604,7 +570,6 @@ private static void assembleChildren(this ptr<loopnest> _addr_ln) {
             l.outer.children = append(l.outer.children, l);
         }
     }    ln.initializedChildren = true;
-
 }
 
 // calculateDepths uses the children field of loops
@@ -622,7 +587,6 @@ private static void calculateDepths(this ptr<loopnest> _addr_ln) {
             l.setDepth(1);
         }
     }    ln.initializedDepth = true;
-
 }
 
 // findExits uses loop depth information to find the
@@ -648,7 +612,6 @@ private static void findExits(this ptr<loopnest> _addr_ln) {
             }
         }
     }    ln.initializedExits = true;
-
 }
 
 // depth returns the loop nesting level of block b.
@@ -662,9 +625,7 @@ private static short depth(this ptr<loopnest> _addr_ln, ID b) {
             return l.depth;
         }
     }
-
     return 0;
-
 }
 
 // recordIfExit checks sl (the loop containing b) to see if it
@@ -689,7 +650,6 @@ private static bool recordIfExit(ptr<loop> _addr_l, ptr<loop> _addr_sl, ptr<Bloc
         }
     }
     return false;
-
 }
 
 private static void setDepth(this ptr<loop> _addr_l, short d) {

@@ -5,24 +5,25 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:47 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:00 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\signal_unix.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// sigTabT is the type of an entry in the global sigtable array.
+// sigtable is inherently system dependent, and appears in OS-specific files,
+// but sigTabT is the same for all Unixy systems.
+// The sigtable array is indexed by a system signal number to get the flags
+// and printable name of each signal.
+
+using System;
+using System.Threading;
 public static partial class runtime_package {
 
-    // sigTabT is the type of an entry in the global sigtable array.
-    // sigtable is inherently system dependent, and appears in OS-specific files,
-    // but sigTabT is the same for all Unixy systems.
-    // The sigtable array is indexed by a system signal number to get the flags
-    // and printable name of each signal.
 private partial struct sigTabT {
     public int flags;
     public @string name;
@@ -38,12 +39,10 @@ private static @string signame(uint sig) {
         return "";
     }
     return sigtable[sig].name;
-
 }
 
 private static readonly System.UIntPtr _SIG_DFL = 0;
 private static readonly System.UIntPtr _SIG_IGN = 1;
-
 
 // sigPreempt is the signal used for non-cooperative preemption.
 //
@@ -124,7 +123,6 @@ private static void initsig(bool preinit) {
     if (!preinit) { 
         // It's now OK for signal handlers to run.
         signalsOK = true;
-
     }
     if ((isarchive || islibrary) && !preinit) {
         return ;
@@ -145,15 +143,11 @@ private static void initsig(bool preinit) {
             else if (fwdSig[i] == _SIG_IGN) {
                 sigInitIgnored(i);
             }
-
             continue;
-
         }
         handlingSig[i] = 1;
         setsig(i, funcPC(sighandler));
-
     }
-
 }
 
 //go:nosplit
@@ -175,7 +169,6 @@ private static bool sigInstallGoHandler(uint sig) {
         return false;
     }
     return true;
-
 }
 
 // sigenable enables the Go signal handler to catch the signal sig.
@@ -255,7 +248,6 @@ private static void clearSignalHandlers() {
             setsig(i, _SIG_DFL);
         }
     }
-
 }
 
 // setProcessCPUProfiler is called when the profiling timer changes.
@@ -274,7 +266,6 @@ private static void setProcessCPUProfiler(int hz) {
         it.it_interval.set_usec(1000000 / hz);
         it.it_value = it.it_interval;
         setitimer(_ITIMER_PROF, _addr_it, null);
-
     }
     else
  {
@@ -318,7 +309,6 @@ private static void sigpipe() {
         return ;
     }
     dieFromSignal(_SIGPIPE);
-
 }
 
 // doSigPreempt handles a preemption signal on gp.
@@ -335,11 +325,9 @@ private static void doSigPreempt(ptr<g> _addr_gp, ptr<sigctxt> _addr_ctxt) {
             if (ok) { 
                 // Adjust the PC and inject a call to asyncPreempt.
                 ctxt.pushCall(funcPC(asyncPreempt), newpc);
-
             }
 
         }
-
     }
     atomic.Xadd(_addr_gp.m.preemptGen, 1);
     atomic.Store(_addr_gp.m.signalPending, 0);
@@ -378,7 +366,6 @@ private static void preemptM(ptr<m> _addr_mp) {
             atomic.Xadd(_addr_pendingPreemptSignals, 1);
         }
         signalM(mp, sigPreempt);
-
     }
     if (GOOS == "darwin" || GOOS == "ios") {
         execLock.runlock();
@@ -414,14 +401,11 @@ private static ptr<g> sigFetchG(ptr<sigctxt> _addr_c) {
                     ptr<ptr<ptr<g>>> gp = new ptr<ptr<ptr<ptr<g>>>>(@unsafe.Pointer(s.@base()));
                     return _addr_gp!;
                 }
-
                 return _addr_null!;
-
             }
             break;
     }
     return _addr_getg()!;
-
 }
 
 // sigtrampgo is called from the signal handler function, sigtramp,
@@ -460,14 +444,11 @@ private static void sigtrampgo(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer
             if (GOOS == "darwin" || GOOS == "ios") {
                 atomic.Xadd(_addr_pendingPreemptSignals, -1);
             }
-
             return ;
-
         }
         c.fixsigcode(sig);
         badsignal(uintptr(sig), c);
         return ;
-
     }
     setg(g.m.gsignal); 
 
@@ -524,7 +505,6 @@ private static bool adjustSignalStack(uint sig, ptr<m> _addr_mp, ptr<gsignalStac
         setSignalstackSP(_addr_st, mp.g0.stack.lo);
         setGsignalStack(_addr_st, _addr_gsigStack);
         return true;
-
     }
     setg(null);
     needm();
@@ -537,7 +517,6 @@ private static bool adjustSignalStack(uint sig, ptr<m> _addr_mp, ptr<gsignalStac
     }
     dropm();
     return false;
-
 }
 
 // crashing is the number of m's we have waited for when implementing
@@ -593,13 +572,11 @@ private static void sighandler(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer
         // We can't safely sigpanic because it may grow the
         // stack. Abort in the signal handler instead.
         flags = _SigThrow;
-
     }
     if (isAbortPC(c.sigpc())) { 
         // On many architectures, the abort function just
         // causes a memory fault. Don't turn that into a panic.
         flags = _SigThrow;
-
     }
     if (c.sigcode() != _SI_USER && flags & _SigPanic != 0) { 
         // The signal is going to cause a panic.
@@ -617,7 +594,6 @@ private static void sighandler(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer
 
         c.preparePanic(sig, gp);
         return ;
-
     }
     if (c.sigcode() == _SI_USER || flags & _SigNotify != 0) {
         if (sigsend(sig)) {
@@ -675,7 +651,6 @@ private static void sighandler(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer
             print(" ", hex(b[i]));
         }
         println();
-
     }
     print("\n");
 
@@ -687,14 +662,12 @@ private static void sighandler(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer
             // tracebackothers on original m skipped this one; trace it now.
             goroutineheader(_g_.m.curg);
             traceback(~uintptr(0), ~uintptr(0), 0, _g_.m.curg);
-
         }
         else if (crashing == 0) {
             tracebackothers(gp);
             print("\n");
         }
         dumpregs(c);
-
     }
     if (docrash) {
         crashing++;
@@ -712,15 +685,12 @@ private static void sighandler(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer
             print("\n-----\n\n");
             raiseproc(_SIGQUIT);
             usleep(5 * 1000 * 1000);
-
         }
         crash();
-
     }
     printDebugLog();
 
     exit(2);
-
 }
 
 // sigpanic turns a synchronous signal into a run-time panic.
@@ -773,10 +743,8 @@ private static void sigpanic() => func((_, panic, _) => {
         if (g.sig >= uint32(len(sigtable))) { 
         // can't happen: we looked up g.sig in sigtable to decide to call sigpanic
         throw("unexpected signal value");
-
     }
     panic(errorString(sigtable[g.sig].name));
-
 });
 
 // dieFromSignal kills the program with a signal.
@@ -809,7 +777,6 @@ private static void dieFromSignal(uint sig) {
 
     // If we are still somehow running, just exit with the wrong status.
     exit(2);
-
 }
 
 // raisebadsignal is called when a signal is received on a non-Go
@@ -821,7 +788,6 @@ private static void raisebadsignal(uint sig, ptr<sigctxt> _addr_c) {
     if (sig == _SIGPROF) { 
         // Ignore profiling signals that arrive on non-Go threads.
         return ;
-
     }
     System.UIntPtr handler = default;
     if (sig >= _NSIG) {
@@ -861,7 +827,6 @@ private static void raisebadsignal(uint sig, ptr<sigctxt> _addr_c) {
     // restore the Go handler, but that is not so bad: we know
     // that the Go program has been ignoring the signal.
     setsig(sig, funcPC(sighandler));
-
 }
 
 //go:nosplit
@@ -876,7 +841,6 @@ private static void crash() {
         return ;
     }
     dieFromSignal(_SIGABRT);
-
 }
 
 // ensureSigM starts one global, sleeping thread to make sure at least one thread
@@ -913,9 +877,7 @@ private static void ensureSigM() => func((defer, _, _) => {
             sigprocmask(_SIG_SETMASK, _addr_sigBlocked, null);
             maskUpdatedChan.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
         }
-
     }());
-
 });
 
 // This is called when we receive a signal when there is no signal stack.
@@ -959,20 +921,17 @@ private static void badsignal(System.UIntPtr sig, ptr<sigctxt> _addr_c) {
         // Cannot call split-stack function as there is no G.
         var s = stringStructOf(_addr_badginsignalMsg);
         write(2, s.str, int32(s.len));
-        exit(2) * (uintptr.val)(@unsafe.Pointer(uintptr(123)));
+        exit(2) * (uintptr.val);
 
-        2;
-
+        (@unsafe.Pointer(uintptr(123))) = 2;
     }
     needm();
     if (!sigsend(uint32(sig))) { 
         // A foreign thread received the signal sig, and the
         // Go code does not want to handle it.
         raisebadsignal(uint32(sig), _addr_c);
-
     }
     dropm();
-
 }
 
 //go:noescape
@@ -1006,7 +965,6 @@ private static bool sigfwdgo(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer c
         }
         sigfwd(fwdFn, sig, _addr_info, ctx);
         return true;
-
     }
     if ((GOOS == "darwin" || GOOS == "ios") && sig == _SIGPIPE) {
         return true;
@@ -1030,7 +988,6 @@ private static bool sigfwdgo(uint sig, ptr<siginfo> _addr_info, unsafe.Pointer c
         sigfwd(fwdFn, sig, _addr_info, ctx);
     }
     return true;
-
 }
 
 // sigsave saves the current thread's signal mask into *p.
@@ -1078,7 +1035,6 @@ private static void sigblock(bool exiting) {
         return ;
     }
     sigprocmask(_SIG_SETMASK, _addr_sigset_all, null);
-
 }
 
 // unblocksig removes sig from the current thread's signal mask.
@@ -1140,7 +1096,6 @@ private static void minitSignalMask() {
             sigdelset(_addr_nmask, i);
         }
     }    sigprocmask(_SIG_SETMASK, _addr_nmask, null);
-
 }
 
 // unminitSignals is called from dropm, via unminit, to undo the
@@ -1160,7 +1115,6 @@ private static void unminitSignals() {
         // threads, so it's important to restore the Go stack
         // even on Go-created threads so we can free it.
         restoreGsignalStack(_addr_getg().m.goSigStack);
-
     }
 }
 
@@ -1181,7 +1135,6 @@ private static bool blockableSig(uint sig) {
         return true;
     }
     return flags & (_SigKill | _SigThrow) == 0;
-
 }
 
 // gsignalStack saves the fields of the gsignal stack changed by
@@ -1216,7 +1169,6 @@ private static void setGsignalStack(ptr<stackt> _addr_st, ptr<gsignalStack> _add
     g.m.gsignal.stack.hi = stsp + st.ss_size;
     g.m.gsignal.stackguard0 = stsp + _StackGuard;
     g.m.gsignal.stackguard1 = stsp + _StackGuard;
-
 }
 
 // restoreGsignalStack restores the gsignal stack to the value it had

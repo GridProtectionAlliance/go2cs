@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2022 March 06 22:42:56 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:05 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\commentmap.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using token = go.token_package;
+using sort = sort_package;
+using System;
 
 public static partial class ast_package {
 
@@ -42,7 +41,6 @@ private static void sortComments(slice<ptr<CommentGroup>> list) {
             sort.Sort(orderedList);
         }
     }
-
 }
 
 // A CommentMap maps an AST node to a list of comment groups
@@ -64,7 +62,6 @@ public static void addComment(this CommentMap cmap, Node n, ptr<CommentGroup> _a
         list = append(list, c);
     }
     cmap[n] = list;
-
 }
 
 private partial struct byInterval { // : slice<Node>
@@ -77,7 +74,6 @@ private static bool Less(this byInterval a, nint i, nint j) {
     var pi = a[i].Pos();
     var pj = a[j].Pos();
     return pi < pj || pi == pj && a[i].End() > a[j].End();
-
 }
 private static void Swap(this byInterval a, nint i, nint j) {
     (a[i], a[j]) = (a[j], a[i]);
@@ -99,7 +95,6 @@ private static slice<Node> nodeList(Node n) {
         }
         list = append(list, n);
         return true;
-
     }); 
     // Note: The current implementation assumes that Inspect traverses the
     //       AST in depth-first and thus _source_ order. If AST traversal
@@ -107,7 +102,6 @@ private static slice<Node> nodeList(Node n) {
     //       required.
     // sort.Sort(byInterval(list))
     return list;
-
 }
 
 // A commentListReader helps iterating through a list of comment groups.
@@ -222,7 +216,6 @@ public static CommentMap NewCommentMap(ptr<token.FileSet> _addr_fset, Node node,
 
             qpos.Offset = infinity;
             qpos.Line = infinity;
-
         }
         while (r.end.Offset <= qpos.Offset) { 
             // determine recent node group
@@ -264,17 +257,13 @@ public static CommentMap NewCommentMap(ptr<token.FileSet> _addr_fset, Node node,
                     // we can only reach here if there was no p
                     // which would imply that there were no nodes
                     panic("internal error: no comments should be associated with sentinel");
-
                 }
-
                 assoc = q;
                         cmap.addComment(assoc, r.comment);
             if (r.eol()) {
                 return cmap;
             }
-
             r.next();
-
         } 
 
         // update previous node
@@ -299,9 +288,7 @@ public static CommentMap NewCommentMap(ptr<token.FileSet> _addr_fset, Node node,
                 stack.push(q);
                 break;
         }
-
     }    return cmap;
-
 });
 
 // Update replaces an old node in the comment map with the new node
@@ -317,9 +304,7 @@ public static Node Update(this CommentMap cmap, Node old, Node @new) {
             cmap[new] = append(cmap[new], list);
         }
     }
-
     return new;
-
 }
 
 // Filter returns a new comment map consisting of only those
@@ -337,12 +322,9 @@ public static CommentMap Filter(this CommentMap cmap, Node node) {
             }
 
         }
-
         return true;
-
     });
     return umap;
-
 }
 
 // Comments returns the list of comment groups in the comment map.
@@ -374,9 +356,7 @@ loop:
                 _breakloop = true;
                 break;
             }
-
             buf.WriteString(comment.Text);
-
         }
     }    if (buf.Len() > maxLen) {
         buf.Truncate(maxLen - 3);
@@ -393,9 +373,7 @@ loop:
                 bytes[i] = ' ';
                 break;
         }
-
     }    return string(bytes);
-
 }
 
 public static @string String(this CommentMap cmap) { 
@@ -435,16 +413,13 @@ public static @string String(this CommentMap cmap) {
                 }
 
             }
-
             fmt.Fprintf(_addr_buf, "\t%p  %20s:  %s\n", node, s, summary(comment));
-
         }
         node = node__prev1;
     }
 
     fmt.Fprintln(_addr_buf, "}");
     return buf.String();
-
 }
 
 } // end ast_package

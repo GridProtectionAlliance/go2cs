@@ -2,35 +2,37 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:11 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:52 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\iprawsock.go
-using context = go.context_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using context = context_package;
+using syscall = syscall_package;
+
+
+// BUG(mikio): On every POSIX platform, reads from the "ip4" network
+// using the ReadFrom or ReadFromIP method might not return a complete
+// IPv4 packet, including its header, even if there is space
+// available. This can occur even in cases where Read or ReadMsgIP
+// could return a complete packet. For this reason, it is recommended
+// that you do not use these methods if it is important to receive a
+// full packet.
+//
+// The Go 1 compatibility guidelines make it impossible for us to
+// change the behavior of these methods; use Read or ReadMsgIP
+// instead.
+
+// BUG(mikio): On JS and Plan 9, methods and functions related
+// to IPConn are not implemented.
+
+// BUG(mikio): On Windows, the File method of IPConn is not
+// implemented.
+
+// IPAddr represents the address of an IP end point.
 
 public static partial class net_package {
 
-    // BUG(mikio): On every POSIX platform, reads from the "ip4" network
-    // using the ReadFrom or ReadFromIP method might not return a complete
-    // IPv4 packet, including its header, even if there is space
-    // available. This can occur even in cases where Read or ReadMsgIP
-    // could return a complete packet. For this reason, it is recommended
-    // that you do not use these methods if it is important to receive a
-    // full packet.
-    //
-    // The Go 1 compatibility guidelines make it impossible for us to
-    // change the behavior of these methods; use Read or ReadMsgIP
-    // instead.
-
-    // BUG(mikio): On JS and Plan 9, methods and functions related
-    // to IPConn are not implemented.
-
-    // BUG(mikio): On Windows, the File method of IPConn is not
-    // implemented.
-
-    // IPAddr represents the address of an IP end point.
 public partial struct IPAddr {
     public IP IP;
     public @string Zone; // IPv6 scoped addressing zone
@@ -54,7 +56,6 @@ private static @string String(this ptr<IPAddr> _addr_a) {
         return ip + "%" + a.Zone;
     }
     return ip;
-
 }
 
 private static bool isWildcard(this ptr<IPAddr> _addr_a) {
@@ -64,7 +65,6 @@ private static bool isWildcard(this ptr<IPAddr> _addr_a) {
         return true;
     }
     return a.IP.IsUnspecified();
-
 }
 
 private static Addr opAddr(this ptr<IPAddr> _addr_a) {
@@ -74,7 +74,6 @@ private static Addr opAddr(this ptr<IPAddr> _addr_a) {
         return null;
     }
     return a;
-
 }
 
 // ResolveIPAddr returns an address of IP end point.
@@ -96,7 +95,6 @@ public static (ptr<IPAddr>, error) ResolveIPAddr(@string network, @string addres
 
     if (network == "") { // a hint wildcard for Go 1.0 undocumented behavior
         network = "ip";
-
     }
     var (afnet, _, err) = parseNetwork(context.Background(), network, false);
     if (err != null) {
@@ -119,7 +117,6 @@ public static (ptr<IPAddr>, error) ResolveIPAddr(@string network, @string addres
         return (_addr_null!, error.As(err)!);
     }
     return (addrs.forResolve(network, address)._<ptr<IPAddr>>(), error.As(null!)!);
-
 }
 
 // IPConn is the implementation of the Conn and PacketConn interfaces
@@ -139,7 +136,6 @@ private static (syscall.RawConn, error) SyscallConn(this ptr<IPConn> _addr_c) {
         return (null, error.As(syscall.EINVAL)!);
     }
     return newRawConn(c.fd);
-
 }
 
 // ReadFromIP acts like ReadFrom but returns an IPAddr.
@@ -157,7 +153,6 @@ private static (nint, ptr<IPAddr>, error) ReadFromIP(this ptr<IPConn> _addr_c, s
         err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return (n, _addr_addr!, error.As(err)!);
-
 }
 
 // ReadFrom implements the PacketConn ReadFrom method.
@@ -178,7 +173,6 @@ private static (nint, Addr, error) ReadFrom(this ptr<IPConn> _addr_c, slice<byte
         return (n, null, error.As(err)!);
     }
     return (n, addr, error.As(err)!);
-
 }
 
 // ReadMsgIP reads a message from c, copying the payload into b and
@@ -204,7 +198,6 @@ private static (nint, nint, nint, ptr<IPAddr>, error) ReadMsgIP(this ptr<IPConn>
         err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return ;
-
 }
 
 // WriteToIP acts like WriteTo but takes an IPAddr.
@@ -222,7 +215,6 @@ private static (nint, error) WriteToIP(this ptr<IPConn> _addr_c, slice<byte> b, 
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // WriteTo implements the PacketConn WriteTo method.
@@ -243,7 +235,6 @@ private static (nint, error) WriteTo(this ptr<IPConn> _addr_c, slice<byte> b, Ad
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:a.opAddr(),Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // WriteMsgIP writes a message to addr via c, copying the payload from
@@ -267,7 +258,6 @@ private static (nint, nint, error) WriteMsgIP(this ptr<IPConn> _addr_c, slice<by
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
     }
     return ;
-
 }
 
 private static ptr<IPConn> newIPConn(ptr<netFD> _addr_fd) {
@@ -298,7 +288,6 @@ public static (ptr<IPConn>, error) DialIP(@string network, ptr<IPAddr> _addr_lad
         return (_addr_null!, error.As(addr(new OpError(Op:"dial",Net:network,Source:laddr.opAddr(),Addr:raddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // ListenIP acts like ListenPacket for IP networks.
@@ -322,7 +311,6 @@ public static (ptr<IPConn>, error) ListenIP(@string network, ptr<IPAddr> _addr_l
         return (_addr_null!, error.As(addr(new OpError(Op:"listen",Net:network,Source:nil,Addr:laddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 } // end net_package

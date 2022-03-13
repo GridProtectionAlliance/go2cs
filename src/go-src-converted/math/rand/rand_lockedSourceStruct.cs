@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:53 UTC
+//     Generated on 2022 March 13 05:32:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace math
 {
     public static partial class rand_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lockedSource
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace math
             public static implicit operator lockedSource(NilType nil) => default(lockedSource);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lockedSource lockedSource_cast(dynamic value)
         {
             return new lockedSource(value.lk, ref value.src);

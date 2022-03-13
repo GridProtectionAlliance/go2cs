@@ -2,67 +2,68 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package astutil -- go2cs converted at 2022 March 06 23:34:58 UTC
+// package astutil -- go2cs converted at 2022 March 13 06:42:31 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/astutil" ==> using astutil = go.cmd.vendor.golang.org.x.tools.go.ast.astutil_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\ast\astutil\enclosing.go
+namespace go.cmd.vendor.golang.org.x.tools.go.ast;
 // This file defines utilities for working with source positions.
 
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using sort = go.sort_package;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using sort = sort_package;
+
+
+// PathEnclosingInterval returns the node that encloses the source
+// interval [start, end), and all its ancestors up to the AST root.
+//
+// The definition of "enclosing" used by this function considers
+// additional whitespace abutting a node to be enclosed by it.
+// In this example:
+//
+//              z := x + y // add them
+//                   <-A->
+//                  <----B----->
+//
+// the ast.BinaryExpr(+) node is considered to enclose interval B
+// even though its [Pos()..End()) is actually only interval A.
+// This behaviour makes user interfaces more tolerant of imperfect
+// input.
+//
+// This function treats tokens as nodes, though they are not included
+// in the result. e.g. PathEnclosingInterval("+") returns the
+// enclosing ast.BinaryExpr("x + y").
+//
+// If start==end, the 1-char interval following start is used instead.
+//
+// The 'exact' result is true if the interval contains only path[0]
+// and perhaps some adjacent whitespace.  It is false if the interval
+// overlaps multiple children of path[0], or if it contains only
+// interior whitespace of path[0].
+// In this example:
+//
+//              z := x + y // add them
+//                <--C-->     <---E-->
+//                  ^
+//                  D
+//
+// intervals C, D and E are inexact.  C is contained by the
+// z-assignment statement, because it spans three of its children (:=,
+// x, +).  So too is the 1-char interval D, because it contains only
+// interior whitespace of the assignment.  E is considered interior
+// whitespace of the BlockStmt containing the assignment.
+//
+// Precondition: [start, end) both lie within the same file as root.
+// TODO(adonovan): return (nil, false) in this case and remove precond.
+// Requires FileSet; see loader.tokenFileContainsPos.
+//
+// Postcondition: path is never nil; it always contains at least 'root'.
+//
+
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.ast;
-
 public static partial class astutil_package {
 
-    // PathEnclosingInterval returns the node that encloses the source
-    // interval [start, end), and all its ancestors up to the AST root.
-    //
-    // The definition of "enclosing" used by this function considers
-    // additional whitespace abutting a node to be enclosed by it.
-    // In this example:
-    //
-    //              z := x + y // add them
-    //                   <-A->
-    //                  <----B----->
-    //
-    // the ast.BinaryExpr(+) node is considered to enclose interval B
-    // even though its [Pos()..End()) is actually only interval A.
-    // This behaviour makes user interfaces more tolerant of imperfect
-    // input.
-    //
-    // This function treats tokens as nodes, though they are not included
-    // in the result. e.g. PathEnclosingInterval("+") returns the
-    // enclosing ast.BinaryExpr("x + y").
-    //
-    // If start==end, the 1-char interval following start is used instead.
-    //
-    // The 'exact' result is true if the interval contains only path[0]
-    // and perhaps some adjacent whitespace.  It is false if the interval
-    // overlaps multiple children of path[0], or if it contains only
-    // interior whitespace of path[0].
-    // In this example:
-    //
-    //              z := x + y // add them
-    //                <--C-->     <---E-->
-    //                  ^
-    //                  D
-    //
-    // intervals C, D and E are inexact.  C is contained by the
-    // z-assignment statement, because it spans three of its children (:=,
-    // x, +).  So too is the 1-char interval D, because it contains only
-    // interior whitespace of the assignment.  E is considered interior
-    // whitespace of the BlockStmt containing the assignment.
-    //
-    // Precondition: [start, end) both lie within the same file as root.
-    // TODO(adonovan): return (nil, false) in this case and remove precond.
-    // Requires FileSet; see loader.tokenFileContainsPos.
-    //
-    // Postcondition: path is never nil; it always contains at least 'root'.
-    //
 public static (slice<ast.Node>, bool) PathEnclosingInterval(ptr<ast.File> _addr_root, token.Pos start, token.Pos end) {
     slice<ast.Node> path = default;
     bool exact = default;
@@ -154,16 +155,13 @@ public static (slice<ast.Node>, bool) PathEnclosingInterval(ptr<ast.File> _addr_
             i = i__prev1;
             l = l__prev1;
         }
-
     } { 
         // Selection lies within whitespace preceding the
         // first (or following the last) declaration in the file.
         // The result nonetheless always includes the ast.File.
         path = append(path, root);
-
     }
     return ;
-
 }
 
 // tokenNode is a dummy implementation of ast.Node for a single token.
@@ -201,7 +199,6 @@ private static slice<ast.Node> childrenOf(ast.Node n) {
         }
         if (node != null) { // push child
             children = append(children, node);
-
         }
         return false; // no recursion
     }); 
@@ -240,7 +237,6 @@ private static slice<ast.Node> childrenOf(ast.Node n) {
  {
                 children = append(children, tok(n.Case, len("case")));
             }
-
             children = append(children, tok(n.Colon, len(":")));
             break;
         case ptr<ast.ChanType> n:
@@ -260,7 +256,6 @@ private static slice<ast.Node> childrenOf(ast.Node n) {
  {
                 children = append(children, tok(n.Case, len("case")));
             }
-
             children = append(children, tok(n.Colon, len(":")));
             break;
         case ptr<ast.Comment> n:
@@ -299,20 +294,16 @@ private static slice<ast.Node> childrenOf(ast.Node n) {
             if (n.Recv != null) {
                 children = append(children, n.Recv);
             }
-
             children = append(children, n.Name);
             if (n.Type.Params != null) {
                 children = append(children, n.Type.Params);
             }
-
             if (n.Type.Results != null) {
                 children = append(children, n.Type.Results);
             }
-
             if (n.Body != null) {
                 children = append(children, n.Body);
             }
-
             break;
         case ptr<ast.FuncLit> n:
             break;
@@ -418,7 +409,6 @@ private static slice<ast.Node> childrenOf(ast.Node n) {
     sort.Sort(byPos(children));
 
     return children;
-
 }
 
 private partial struct byPos { // : slice<ast.Node>
@@ -632,7 +622,6 @@ public static @string NodeDescription(ast.Node n) => func((_, panic, _) => {
             break;
     }
     panic(fmt.Sprintf("unexpected node type: %T", n));
-
 });
 
 } // end astutil_package

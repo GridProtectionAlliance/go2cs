@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:31:06 UTC
+//     Generated on 2022 March 13 06:41:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace tools
 {
     public static partial class cover_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ProfileBlock
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace tools
             public static implicit operator ProfileBlock(NilType nil) => default(ProfileBlock);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ProfileBlock ProfileBlock_cast(dynamic value)
         {
             return new ProfileBlock(value.StartLine, value.StartCol, value.EndLine, value.EndCol, value.NumStmt, value.Count);

@@ -5,14 +5,14 @@
 //go:build !aix && !darwin && !dragonfly && !freebsd && !linux && !netbsd && !openbsd && !solaris
 // +build !aix,!darwin,!dragonfly,!freebsd,!linux,!netbsd,!openbsd,!solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:46 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:05 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\removeall_noat.go
-using io = go.io_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using io = io_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class os_package {
 
@@ -21,7 +21,6 @@ private static error removeAll(@string path) {
         // fail silently to retain compatibility with previous behavior
         // of RemoveAll. See issue 28830.
         return error.As(null!)!;
-
     }
     if (endsWithDot(path)) {
         return error.As(addr(new PathError(Op:"RemoveAll",Path:path,Err:syscall.EINVAL))!)!;
@@ -39,14 +38,11 @@ private static error removeAll(@string path) {
                 return error.As(null!)!;
             }
         }
-
         return error.As(serr)!;
-
     }
     if (!dir.IsDir()) { 
         // Not a directory; return the error from Remove.
         return error.As(err)!;
-
     }
     err = null;
     while (true) {
@@ -55,10 +51,8 @@ private static error removeAll(@string path) {
             if (IsNotExist(err)) { 
                 // Already deleted by someone else.
                 return error.As(null!)!;
-
             }
             return error.As(err)!;
-
         }
         const nint reqSize = 1024;
 
@@ -112,7 +106,6 @@ private static error removeAll(@string path) {
                 // the directory again. We'll probably
                 // just get the same error.
                 return error.As(err)!;
-
             }
         }
     } 
@@ -134,13 +127,11 @@ private static error removeAll(@string path) {
                 }
             }
         }
-
     }
     if (err == null) {
         err = err1;
     }
     return error.As(err)!;
-
 }
 
 } // end os_package

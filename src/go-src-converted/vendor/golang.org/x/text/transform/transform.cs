@@ -6,19 +6,19 @@
 // bytes passing through as well as various transformations. Example
 // transformations provided by other packages include normalization and
 // conversion between character sets.
-// package transform -- go2cs converted at 2022 March 06 23:38:24 UTC
+
+// package transform -- go2cs converted at 2022 March 13 06:46:37 UTC
 // import "vendor/golang.org/x/text/transform" ==> using transform = go.vendor.golang.org.x.text.transform_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\transform\transform.go
+namespace go.vendor.golang.org.x.text;
 // import "golang.org/x/text/transform"
 
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using utf8 = go.unicode.utf8_package;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using io = io_package;
+using utf8 = unicode.utf8_package;
 using System;
-
-
-namespace go.vendor.golang.org.x.text;
 
 public static partial class transform_package {
 
@@ -125,18 +125,14 @@ private static (nint, error) Read(this ptr<Reader> _addr_r, slice<byte> p) {
                 if (r.err == null || r.err == io.EOF) {
                     r.err = err;
                 }
-
                 continue;
-            
-        }
+                    }
         if (r.src0 != 0) {
             (r.src0, r.src1) = (0, copy(r.src, r.src[(int)r.src0..(int)r.src1]));
         }
         n, r.err = r.r.Read(r.src[(int)r.src1..]);
         r.src1 += n;
-
     }
-
 }
 
 // TODO: implement ReadByte (and ReadRune??).
@@ -174,7 +170,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> data) {
         n = copy(w.src[(int)w.n..], data);
         w.n += n;
         src = w.src[..(int)w.n];
-
     }
     while (true) {
         var (nDst, nSrc, err) = w.t.Transform(w.dst, src, false);
@@ -186,7 +181,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> data) {
             }
 
         }
-
         src = src[(int)nSrc..];
         if (w.n == 0) {
             n += nSrc;
@@ -200,7 +194,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> data) {
             if (n < len(data) && (err == null || err == ErrShortSrc)) {
                 continue;
             }
-
         }
 
         if (err == ErrShortDst) 
@@ -216,10 +209,8 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> data) {
                 if (w.n == 0) {
                     n += m;
                 }
-
                 w.n = m;
                 err = null;
-
             }
             else if (nDst > 0 || nSrc > 0) { 
                 // Not enough buffer to store the remainder. Keep processing as
@@ -229,17 +220,13 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> data) {
                 // practice, but it may occur when buffers are set to small
                 // sizes during testing.
                 continue;
-
             }
-
         else if (err == null) 
             if (w.n > 0) {
                 err = errInconsistentByteCount;
             }
                 return (n, error.As(err)!);
-
     }
-
 }
 
 // Close implements the io.Closer interface.
@@ -257,14 +244,11 @@ private static error Close(this ptr<Writer> _addr_w) {
             }
 
         }
-
         if (err != ErrShortDst) {
             return error.As(err)!;
         }
         src = src[(int)nSrc..];
-
     }
-
 }
 
 private partial struct nop {
@@ -281,7 +265,6 @@ private static (nint, nint, error) Transform(this nop _p0, slice<byte> dst, slic
         err = ErrShortDst;
     }
     return (n, n, error.As(err)!);
-
 }
 
 private static (nint, error) Span(this nop _p0, slice<byte> src, bool atEOF) {
@@ -333,7 +316,6 @@ private static void fatalError(this ptr<chain> _addr_c, nint errIndex, error err
             c.err = err;
         }
     }
-
 }
 
 private partial struct link {
@@ -386,7 +368,6 @@ public static Transformer Chain(params Transformer[] t) {
     }
 
     return c;
-
 }
 
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
@@ -443,7 +424,6 @@ private static (nint, nint, error) Transform(this ptr<chain> _addr_c, slice<byte
             if (i > 0 && @in.p == @in.n) {
                 (@in.p, @in.n) = (0, 0);
             }
-
             (needProgress, lastFull) = (lastFull, false);
             if (err0 == ErrShortDst) 
             {
@@ -460,7 +440,6 @@ private static (nint, nint, error) Transform(this ptr<chain> _addr_c, slice<byte
                     // detect this and break out of the loop with a fatal error.
                     lastFull = true;
                     continue;
-
                 } 
                 // The destination buffer was too small, but is completely empty.
                 // Return a fatal error as this transformation can never complete.
@@ -473,7 +452,6 @@ private static (nint, nint, error) Transform(this ptr<chain> _addr_c, slice<byte
                     // Save ErrShortSrc in err. All other errors take precedence.
                     err = ErrShortSrc;
                     break;
-
                 } 
                 // Source bytes were depleted before filling up the destination buffer.
                 // Verify we made some progress, move the remaining bytes to the errStart
@@ -484,7 +462,6 @@ private static (nint, nint, error) Transform(this ptr<chain> _addr_c, slice<byte
                     // transformation can never complete.
                     c.fatalError(i, errShortInternal);
                     break;
-
                 } 
                 // in.b is an internal buffer and we can make progress.
                 (@in.p, @in.n) = (0, copy(@in.b, @in.src()));                fallthrough = true;
@@ -508,7 +485,6 @@ private static (nint, nint, error) Transform(this ptr<chain> _addr_c, slice<byte
             // to process the bytes accepted so far.
             i++;
             low = i;
-
         }
 
         i = i__prev1;
@@ -531,7 +507,6 @@ private static (nint, nint, error) Transform(this ptr<chain> _addr_c, slice<byte
         (err, c.errStart, c.err) = (c.err, 0, null);
     }
     return (dstL.n, srcL.p, error.As(err)!);
-
 }
 
 // Deprecated: Use runes.Remove instead.
@@ -582,14 +557,10 @@ private static (nint, nint, error) Transform(this removeF t, slice<byte> dst, sl
                         }
                         nDst += copy(dst[(int)nDst..], "\uFFFD");
                     }
-
                     nSrc++;
                     continue;
-
                 }
-
             }
-
             if (!t(r)) {
                 if (nDst + sz > len(dst)) {
                     err = ErrShortDst;
@@ -597,13 +568,10 @@ private static (nint, nint, error) Transform(this removeF t, slice<byte> dst, sl
                 }
                 nDst += copy(dst[(int)nDst..], src[..(int)sz]);
             }
-
             nSrc += sz;
-
         }
     }
     return ;
-
 }
 
 // grow returns a new []byte that is longer than b, and copies the first n bytes
@@ -623,7 +591,6 @@ private static slice<byte> grow(slice<byte> b, nint n) {
     var buf = make_slice<byte>(m);
     copy(buf, b[..(int)n]);
     return buf;
-
 }
 
 private static readonly nint initialBufSize = 128;
@@ -651,7 +618,6 @@ public static (@string, nint, error) String(Transformer t, @string s) {
             }
 
         }
-
     }
     array<byte> buf = new array<byte>(new byte[] {  });
     var dst = buf.slice(-1, initialBufSize, initialBufSize);
@@ -689,13 +655,11 @@ public static (@string, nint, error) String(Transformer t, @string s) {
         if (err == ErrShortDst) { 
             // A buffer can only be short if a transformer modifies its input.
             break;
-
         }
         else if (err == ErrShortSrc) {
             if (nSrc == 0) { 
                 // No progress was made.
                 break;
-
             } 
             // Equal so far and !atEOF, so continue checking.
         }
@@ -718,7 +682,6 @@ public static (@string, nint, error) String(Transformer t, @string s) {
         copy(newDst[(int)pPrefix..(int)pDst], dst[..(int)nDst]);
         copy(newDst[..(int)pPrefix], s[..(int)pPrefix]);
         dst = newDst;
-
     }
     if ((err == null && pSrc == len(s)) || (err != null && err != ErrShortDst && err != ErrShortSrc)) {
         return (string(dst[..(int)pDst]), pSrc, error.As(err)!);
@@ -749,7 +712,6 @@ public static (@string, nint, error) String(Transformer t, @string s) {
             return (string(dst[..(int)pDst]), pSrc, error.As(err)!);
         }
     }
-
 }
 
 // Bytes returns a new byte slice with the result of converting b[:n] using t,
@@ -773,10 +735,8 @@ public static (slice<byte>, nint, error) Append(Transformer t, slice<byte> dst, 
         var n = len(src) + len(dst); // It is okay for this to be 0.
         var b = make_slice<byte>(n);
         dst = b[..(int)copy(b, dst)];
-
     }
     return doAppend(t, len(dst), dst[..(int)cap(dst)], src);
-
 }
 
 private static (slice<byte>, nint, error) doAppend(Transformer t, nint pDst, slice<byte> dst, slice<byte> src) {
@@ -797,7 +757,6 @@ private static (slice<byte>, nint, error) doAppend(Transformer t, nint pDst, sli
             dst = grow(dst, pDst);
         }
     }
-
 }
 
 } // end transform_package

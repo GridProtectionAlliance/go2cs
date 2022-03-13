@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package str -- go2cs converted at 2022 March 06 23:16:29 UTC
+// package str -- go2cs converted at 2022 March 13 06:29:59 UTC
 // import "cmd/go/internal/str" ==> using str = go.cmd.go.@internal.str_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\str\path.go
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go.cmd.go.@internal;
+
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// HasPathPrefix reports whether the slash-separated path s
+// begins with the elements in prefix.
 
 public static partial class str_package {
 
-    // HasPathPrefix reports whether the slash-separated path s
-    // begins with the elements in prefix.
 public static bool HasPathPrefix(@string s, @string prefix) {
     if (len(s) == len(prefix)) {
         return s == prefix;
@@ -27,7 +29,6 @@ public static bool HasPathPrefix(@string s, @string prefix) {
         }
     }
     return false;
-
 }
 
 // HasFilePathPrefix reports whether the filesystem path s
@@ -51,7 +52,6 @@ public static bool HasFilePathPrefix(@string s, @string prefix) {
         return s[len(prefix)] == filepath.Separator && s[..(int)len(prefix)] == prefix;
     else 
         return false;
-    
-}
+    }
 
 } // end str_package

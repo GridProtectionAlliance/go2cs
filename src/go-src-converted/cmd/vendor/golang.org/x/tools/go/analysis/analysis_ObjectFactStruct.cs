@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:31:06 UTC
+//     Generated on 2022 March 13 06:41:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace go
 {
     public static partial class analysis_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ObjectFact
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace go
             public static implicit operator ObjectFact(NilType nil) => default(ObjectFact);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ObjectFact ObjectFact_cast(dynamic value)
         {
             return new ObjectFact(value.Object, value.Fact);

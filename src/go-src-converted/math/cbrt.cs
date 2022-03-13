@@ -2,39 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:03 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:55 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\cbrt.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // The go code is a modified version of the original C code from
-    // http://www.netlib.org/fdlibm/s_cbrt.c and came with this notice.
-    //
-    // ====================================================
-    // Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
-    //
-    // Developed at SunSoft, a Sun Microsystems, Inc. business.
-    // Permission to use, copy, modify, and distribute this
-    // software is freely granted, provided that this notice
-    // is preserved.
-    // ====================================================
+// The go code is a modified version of the original C code from
+// http://www.netlib.org/fdlibm/s_cbrt.c and came with this notice.
+//
+// ====================================================
+// Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+//
+// Developed at SunSoft, a Sun Microsystems, Inc. business.
+// Permission to use, copy, modify, and distribute this
+// software is freely granted, provided that this notice
+// is preserved.
+// ====================================================
 
-    // Cbrt returns the cube root of x.
-    //
-    // Special cases are:
-    //    Cbrt(±0) = ±0
-    //    Cbrt(±Inf) = ±Inf
-    //    Cbrt(NaN) = NaN
+// Cbrt returns the cube root of x.
+//
+// Special cases are:
+//    Cbrt(±0) = ±0
+//    Cbrt(±Inf) = ±Inf
+//    Cbrt(NaN) = NaN
 public static double Cbrt(double x) {
     if (haveArchCbrt) {
         return archCbrt(x);
     }
     return cbrt(x);
-
 }
 
 private static double cbrt(double x) {
@@ -61,7 +58,6 @@ private static double cbrt(double x) {
         t = float64(1 << 54); // set t= 2**54
         t *= x;
         t = Float64frombits(Float64bits(t) / 3 + B2 << 32);
-
     }
     var r = t * t / x;
     var s = C + r * t;
@@ -82,7 +78,6 @@ private static double cbrt(double x) {
         t = -t;
     }
     return t;
-
 }
 
 } // end math_package

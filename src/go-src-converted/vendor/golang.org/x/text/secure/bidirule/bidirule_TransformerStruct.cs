@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:22 UTC
+//     Generated on 2022 March 13 06:46:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace secure
 {
     public static partial class bidirule_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Transformer
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace secure
             public static implicit operator Transformer(NilType nil) => default(Transformer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Transformer Transformer_cast(dynamic value)
         {
             return new Transformer(value.state, value.hasRTL, value.seen);

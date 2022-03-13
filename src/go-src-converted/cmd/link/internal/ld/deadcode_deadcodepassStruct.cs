@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:56 UTC
+//     Generated on 2022 March 13 06:33:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct deadcodePass
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace @internal
             public static implicit operator deadcodePass(NilType nil) => default(deadcodePass);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static deadcodePass deadcodePass_cast(dynamic value)
         {
             return new deadcodePass(ref value.ctxt, ref value.ldr, value.wq, value.ifaceMethod, value.markableMethods, value.reflectSeen, value.dynlink, value.methodsigstmp);

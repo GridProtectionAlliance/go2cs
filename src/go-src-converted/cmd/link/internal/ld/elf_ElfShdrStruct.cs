@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:23 UTC
+//     Generated on 2022 March 13 06:34:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(elf.Section64))]
         public partial struct ElfShdr
         {
@@ -96,7 +96,7 @@ namespace @internal
             public static implicit operator ElfShdr(NilType nil) => default(ElfShdr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ElfShdr ElfShdr_cast(dynamic value)
         {
             return new ElfShdr(value.Section64, value.shnum);

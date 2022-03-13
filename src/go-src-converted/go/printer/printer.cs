@@ -3,29 +3,28 @@
 // license that can be found in the LICENSE file.
 
 // Package printer implements printing of AST nodes.
-// package printer -- go2cs converted at 2022 March 06 22:47:09 UTC
+
+// package printer -- go2cs converted at 2022 March 13 05:58:24 UTC
 // import "go/printer" ==> using printer = go.go.printer_package
 // Original source: C:\Program Files\Go\src\go\printer\printer.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using constraint = go.go.build.constraint_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using tabwriter = go.text.tabwriter_package;
-using unicode = go.unicode_package;
-using System;
-
-
 namespace go.go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using constraint = go.build.constraint_package;
+using token = go.token_package;
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+using tabwriter = text.tabwriter_package;
+using unicode = unicode_package;
+using System;
 
 public static partial class printer_package {
 
 private static readonly nint maxNewlines = 2; // max. number of newlines between source text
 private static readonly var debug = false; // enable for debugging
 private static readonly nint infinity = 1 << 30;
-
 
 private partial struct whiteSpace { // : byte
 }
@@ -37,7 +36,6 @@ private static readonly var newline = whiteSpace('\n');
 private static readonly var formfeed = whiteSpace('\f');
 private static readonly var indent = whiteSpace('>');
 private static readonly var unindent = whiteSpace('<');
-
 
 // A pmode value represents the current printer mode.
 private partial struct pmode { // : nint
@@ -102,7 +100,6 @@ private static void init(this ptr<printer> _addr_p, ptr<Config> _addr_cfg, ptr<t
     p.wsbuf = make_slice<whiteSpace>(0, 16); // whitespace sequences are short
     p.nodeSizes = nodeSizes;
     p.cachedPos = -1;
-
 }
 
 private static void internalError(this ptr<printer> _addr_p, params object[] msg) => func((_, panic, _) => {
@@ -128,7 +125,6 @@ private static bool commentsHaveNewline(this ptr<printer> _addr_p, slice<ptr<ast
         if (i > 0 && p.lineFor(list[i].Pos()) != line) { 
             // not all comments on the same line
             return true;
-
         }
         {
             var t = c.Text;
@@ -138,10 +134,8 @@ private static bool commentsHaveNewline(this ptr<printer> _addr_p, slice<ptr<ast
             }
 
         }
-
     }    _ = line;
     return false;
-
 }
 
 private static void nextComment(this ptr<printer> _addr_p) {
@@ -168,7 +162,6 @@ private static void nextComment(this ptr<printer> _addr_p) {
     } 
     // no more comments
     p.commentOffset = infinity;
-
 }
 
 // commentBefore reports whether the current comment group occurs
@@ -199,7 +192,6 @@ private static nint commentSizeBefore(this ptr<printer> _addr_p, token.Position 
         }        p.nextComment();
     }
     return size;
-
 });
 
 // recordLine records the output line number for the next non-whitespace
@@ -230,7 +222,6 @@ private static token.Position posFor(this ptr<printer> _addr_p, token.Pos pos) {
  
     // not used frequently enough to cache entire token.Position
     return p.fset.PositionFor(pos, false);
-
 }
 
 private static nint lineFor(this ptr<printer> _addr_p, token.Pos pos) {
@@ -241,7 +232,6 @@ private static nint lineFor(this ptr<printer> _addr_p, token.Pos pos) {
         p.cachedLine = p.fset.PositionFor(pos, false).Line;
     }
     return p.cachedLine;
-
 }
 
 // writeLineDirective writes a //line directive if necessary.
@@ -255,7 +245,6 @@ private static void writeLineDirective(this ptr<printer> _addr_p, token.Position
         // p.out must match the //line directive
         p.@out.Filename = pos.Filename;
         p.@out.Line = pos.Line;
-
     }
 }
 
@@ -274,7 +263,6 @@ private static void writeIndent(this ptr<printer> _addr_p) {
     p.pos.Offset += n;
     p.pos.Column += n;
     p.@out.Column += n;
-
 }
 
 // writeByte writes ch n times to p.output and updates p.pos.
@@ -300,12 +288,10 @@ private static void writeByte(this ptr<printer> _addr_p, byte ch, nint n) {
                 p.endAlignment = false;
                 break;
         }
-
     }
     if (p.@out.Column == 1) { 
         // no need to write line directives before white space
         p.writeIndent();
-
     }
     for (nint i = 0; i < n; i++) {
         p.output = append(p.output, ch);
@@ -322,7 +308,6 @@ private static void writeByte(this ptr<printer> _addr_p, byte ch, nint n) {
     }
     p.pos.Column += n;
     p.@out.Column += n;
-
 }
 
 // writeString writes the string s to p.output and updates p.pos, p.out,
@@ -344,7 +329,6 @@ private static void writeString(this ptr<printer> _addr_p, token.Position pos, @
             p.writeLineDirective(pos);
         }
         p.writeIndent();
-
     }
     if (pos.IsValid()) { 
         // update p.pos (if pos is invalid, continue with existing p.pos)
@@ -352,7 +336,6 @@ private static void writeString(this ptr<printer> _addr_p, token.Position pos, @
         // writeIndent updates p.pos if there's indentation, but p.pos
         // is the position of s.
         p.pos = pos;
-
     }
     if (isLit) { 
         // Protect s such that is passes through the tabwriter
@@ -360,7 +343,6 @@ private static void writeString(this ptr<printer> _addr_p, token.Position pos, @
         // tabwriter.Escape bytes since they do not appear in legal
         // UTF-8 sequences.
         p.output = append(p.output, tabwriter.Escape);
-
     }
     if (debug) {
         p.output = append(p.output, fmt.Sprintf("/*%s*/", pos)); // do not update p.pos!
@@ -383,11 +365,9 @@ private static void writeString(this ptr<printer> _addr_p, token.Position pos, @
                 // formatting is in place; ignore any further alignment through
                 // the end of the line.
                 p.endAlignment = true;
-
             }
 
         }
-
     }
     p.pos.Offset += len(s);
     if (nlines > 0) {
@@ -406,7 +386,6 @@ private static void writeString(this ptr<printer> _addr_p, token.Position pos, @
         p.output = append(p.output, tabwriter.Escape);
     }
     p.last = p.pos;
-
 }
 
 // writeCommentPrefix writes the whitespace before a comment.
@@ -423,13 +402,11 @@ private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position
     if (len(p.output) == 0) { 
         // the comment is the first item to be printed - don't write any whitespace
         return ;
-
     }
     if (pos.IsValid() && pos.Filename != p.last.Filename) { 
         // comment in a different file - separate with newlines
         p.writeByte('\f', maxNewlines);
         return ;
-
     }
     if (pos.Line == p.last.Line && (prev == null || prev.Text[1] != '/')) { 
         // comment on the same line as last item:
@@ -460,7 +437,6 @@ private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position
                         continue;
                                         j = i;
                     break;
-
                 }
 
                 i = i__prev1;
@@ -468,7 +444,6 @@ private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position
             }
 
             p.writeWhitespace(j);
-
         }
     else
         if (!hasSep) {
@@ -478,11 +453,8 @@ private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position
                 // (which must be a /*-style comment): separate
                 // with a blank instead of a tab
                 sep = ' ';
-
             }
-
             p.writeByte(sep, 1);
-
         }
     } { 
         // comment on a different line:
@@ -521,13 +493,11 @@ private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position
                     if (tok != token.RBRACE && pos.Column == next.Column) {
                         continue;
                     }
-
                 else if (ch == newline || ch == formfeed) 
                     p.wsbuf[i] = ignore;
                     droppedLinebreak = prev == null; // record only if first comment of a group
                                 j = i;
                 break;
-
             }
 
             i = i__prev1;
@@ -542,9 +512,7 @@ private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position
             n = pos.Line - p.last.Line;
             if (n < 0) { // should never happen
                 n = 0;
-
             }
-
         }
         if (p.indent == 0 && droppedLinebreak) {
             n++;
@@ -557,7 +525,6 @@ private static void writeCommentPrefix(this ptr<printer> _addr_p, token.Position
             // this is analogous to using formfeeds to separate
             // individual lines of /*-style comments
             p.writeByte('\f', nlimit(n));
-
         }
     }
 }
@@ -572,7 +539,6 @@ private static bool isBlank(@string s) {
         }
     }
     return true;
-
 }
 
 // commonPrefix returns the common prefix of a and b.
@@ -620,7 +586,6 @@ private static void stripCommonPrefix(slice<@string> lines) {
                     }
                     prefix = commonPrefix(prefix, line);
                 }
-
             }
 
             i = i__prev1;
@@ -642,10 +607,8 @@ private static void stripCommonPrefix(slice<@string> lines) {
             if (i > 0 && prefix[i - 1] == ' ') {
                 i--; // remove trailing blank from prefix so stars remain aligned
             }
-
             prefix = prefix[(int)0..(int)i];
             lineOfStars = true;
-
         }
         else
  { 
@@ -678,9 +641,7 @@ private static void stripCommonPrefix(slice<@string> lines) {
                 if (i == len(prefix) && i > 0 && prefix[i - 1] == '\t') {
                     i--;
                 }
-
                 prefix = prefix[(int)0..(int)i];
-
             } { 
                 // comment text on the first line
                 var suffix = make_slice<byte>(len(first));
@@ -693,20 +654,16 @@ private static void stripCommonPrefix(slice<@string> lines) {
                 if (n > 2 && suffix[2] == '\t') { 
                     // assume the '\t' compensates for the /*
                     suffix = suffix[(int)2..(int)n];
-
                 }
                 else
  { 
                     // otherwise assume two blanks
                     (suffix[0], suffix[1]) = (' ', ' ');                    suffix = suffix[(int)0..(int)n];
-
                 } 
                 // Shorten the computed common prefix by the length of
                 // suffix, if it is found as suffix of the prefix.
                 prefix = strings.TrimSuffix(prefix, string(suffix));
-
             }
-
         }
         i = i__prev1;
 
@@ -724,7 +681,6 @@ private static void stripCommonPrefix(slice<@string> lines) {
             closing = " */"; // add blank to align final star
         }
         lines[len(lines) - 1] = prefix + closing;
-
     }
     else
  { 
@@ -732,7 +688,6 @@ private static void stripCommonPrefix(slice<@string> lines) {
         // it is aligned like the other lines and include
         // in prefix computation
         prefix = commonPrefix(prefix, last);
-
     }
     {
         var i__prev1 = i;
@@ -766,7 +721,6 @@ private static void writeComment(this ptr<printer> _addr_p, ptr<ast.Comment> _ad
             p.indent = indent;
         }(p.indent));
         p.indent = 0;
-
     }
     if (text[1] == '/') {
         if (constraint.IsGoBuild(text)) {
@@ -777,7 +731,6 @@ private static void writeComment(this ptr<printer> _addr_p, ptr<ast.Comment> _ad
         }
         p.writeString(pos, trimRight(text), true);
         return ;
-
     }
     var lines = strings.Split(text, "\n"); 
 
@@ -857,7 +810,6 @@ private static (bool, bool) writeCommentSuffix(this ptr<printer> _addr_p, bool n
                 }
                 p.wsbuf[i] = ignore;
             }
-
             }    p.writeWhitespace(len(p.wsbuf)); 
 
     // make sure we have a line break
@@ -866,7 +818,6 @@ private static (bool, bool) writeCommentSuffix(this ptr<printer> _addr_p, bool n
         wroteNewline = true;
     }
     return ;
-
 }
 
 // containsLinebreak reports whether the whitespace buffer contains any line breaks.
@@ -878,7 +829,6 @@ private static bool containsLinebreak(this ptr<printer> _addr_p) {
             return true;
         }
     }    return false;
-
 }
 
 // intersperseComments consumes all comments that appear before the next token
@@ -921,17 +871,14 @@ private static (bool, bool) intersperseComments(this ptr<printer> _addr_p, token
  {
                 p.writeByte(' ', 1);
             }
-
         }
         if (last.Text[1] == '/' || tok == token.EOF || tok == token.RBRACE && p.mode & noExtraLinebreak == 0) {
             needsLinebreak = true;
         }
         return p.writeCommentSuffix(needsLinebreak);
-
     }
     p.internalError("intersperseComments called without pending comments");
     return ;
-
 }
 
 // whiteWhitespace writes the first n whitespace entries.
@@ -978,22 +925,18 @@ private static void writeWhitespace(this ptr<printer> _addr_p, nint n) {
                     // indentation.
                     (p.wsbuf[i], p.wsbuf[i + 1]) = (unindent, formfeed);                    i--; // do it again
                     continue;
-
                 }
-
             }
             // default: 
                 p.writeByte(byte(ch), 1);
 
             __switch_break0:;
         }
-
     } 
 
     // shift remaining entries down
     var l = copy(p.wsbuf, p.wsbuf[(int)n..]);
     p.wsbuf = p.wsbuf[..(int)l];
-
 }
 
 // ----------------------------------------------------------------------------
@@ -1005,7 +948,6 @@ private static nint nlimit(nint n) {
         n = maxNewlines;
     }
     return n;
-
 }
 
 private static bool mayCombine(token.Token prev, byte next) {
@@ -1025,7 +967,6 @@ private static bool mayCombine(token.Token prev, byte next) {
     else if (prev == token.AND) 
         b = next == '&' || next == '^'; // && or &^
         return ;
-
 }
 
 // print prints a list of "items" (roughly corresponding to syntactic
@@ -1067,9 +1008,7 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                     // may screw up "correcting" unindents (see
                     // LabeledStmt)
                     continue;
-
                 }
-
                 var i = len(p.wsbuf);
                 if (i == cap(p.wsbuf)) { 
                     // Whitespace sequences are very short so this should
@@ -1077,9 +1016,7 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                     // bad comment placement) if it does happen.
                     p.writeWhitespace(i);
                     i = 0;
-
                 }
-
                 p.wsbuf = p.wsbuf[(int)0..(int)i + 1];
                 p.wsbuf[i] = x;
                 if (x == newline || x == formfeed) { 
@@ -1088,9 +1025,7 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                     // because comments can be interspersed before the arg
                     // in this case
                     p.impliedSemi = false;
-
                 }
-
                 p.lastTok = token.ILLEGAL;
                 continue;
                 break;
@@ -1117,12 +1052,9 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                     if (len(p.wsbuf) != 0) {
                         p.internalError("whitespace buffer not empty");
                     }
-
                     p.wsbuf = p.wsbuf[(int)0..(int)1];
                     p.wsbuf[0] = ' ';
-
                 }
-
                 data = s; 
                 // some keywords followed by a newline imply a semicolon
 
@@ -1134,7 +1066,6 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                 if (x.IsValid()) {
                     p.pos = p.posFor(x); // accurate position of next item
                 }
-
                 continue;
                 break;
             case @string x:
@@ -1167,18 +1098,14 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
             if (wroteNewline && n == maxNewlines) {
                 n = maxNewlines - 1;
             }
-
             if (n > 0) {
                 var ch = byte('\n');
                 if (droppedFF) {
                     ch = '\f'; // use formfeed since we dropped one before
                 }
-
                 p.writeByte(ch, n);
                 impliedSemi = false;
-
             }
-
         }
         if (p.linePtr != null) {
             p.linePtr.val = p.@out.Line;
@@ -1186,7 +1113,6 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
         }
         p.writeString(next, data, isLit);
         p.impliedSemi = impliedSemi;
-
     }
 });
 
@@ -1203,16 +1129,13 @@ private static (bool, bool) flush(this ptr<printer> _addr_p, token.Position next
     if (p.commentBefore(next)) { 
         // if there are comments before the next item, intersperse them
         wroteNewline, droppedFF = p.intersperseComments(next, tok);
-
     }
     else
  { 
         // otherwise, write any leftover whitespace
         p.writeWhitespace(len(p.wsbuf));
-
     }
     return ;
-
 }
 
 // getNode returns the ast.CommentGroup associated with n, if any.
@@ -1241,7 +1164,6 @@ private static ptr<ast.CommentGroup> getDoc(ast.Node n) {
             break;
     }
     return _addr_null!;
-
 }
 
 private static ptr<ast.CommentGroup> getLastComment(ast.Node n) {
@@ -1270,7 +1192,6 @@ private static ptr<ast.CommentGroup> getLastComment(ast.Node n) {
             break;
     }
     return _addr_null!;
-
 }
 
 private static error printNode(this ptr<printer> _addr_p, object node) {
@@ -1286,7 +1207,6 @@ private static error printNode(this ptr<printer> _addr_p, object node) {
             comments = cnode.Comments;
         }
     }
-
 
     if (comments != null) { 
         // commented node - restrict comment list to relevant range
@@ -1308,7 +1228,6 @@ private static error printNode(this ptr<printer> _addr_p, object node) {
             }
 
         }
-
         {
             var com = getLastComment(n);
 
@@ -1321,7 +1240,6 @@ private static error printNode(this ptr<printer> _addr_p, object node) {
                     }
 
                 }
-
             } 
             // token.Pos values are global offsets, we can
             // compare them directly
@@ -1349,7 +1267,6 @@ private static error printNode(this ptr<printer> _addr_p, object node) {
         else if (ok) { 
             // use ast.File comments, if any
             p.comments = n.Comments;
-
         }
         n = n__prev2;
 
@@ -1377,7 +1294,6 @@ private static error printNode(this ptr<printer> _addr_p, object node) {
                 }
 
             }
-
             p.stmt(n, false);
             break;
         case ast.Decl n:
@@ -1396,7 +1312,6 @@ private static error printNode(this ptr<printer> _addr_p, object node) {
                     }
 
                 }
-
             }
             p.stmtList(n, 0, false);
             break;
@@ -1419,7 +1334,6 @@ private static error printNode(this ptr<printer> _addr_p, object node) {
 
 unsupported:
     return error.As(fmt.Errorf("go/printer: unsupported node type %T", node))!;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -1526,7 +1440,6 @@ private static (nint, error) Write(this ptr<trimmer> _addr_p, slice<byte> data) 
         _, err = p.output.Write(data[(int)m..(int)n]);
         p.resetSpace();
         return ;
-
 });
 
 // ----------------------------------------------------------------------------
@@ -1555,7 +1468,6 @@ public static readonly var SourcePos = 2; // emit //line directives to preserve 
 // packages to apply number normalization during printing,
 // rather than by modifying the AST in advance.
 private static readonly Mode normalizeNumbers = 1 << 30;
-
 
 // A Config node controls the output of Fprint.
 public partial struct Config {
@@ -1605,7 +1517,6 @@ private static error fprint(this ptr<Config> _addr_cfg, io.Writer output, ptr<to
             twmode |= tabwriter.TabIndent;
         }
         output = tabwriter.NewWriter(output, minwidth, cfg.Tabwidth, 1, padchar, twmode);
-
     }
     _, err = output.Write(p.output);
 
@@ -1620,9 +1531,7 @@ private static error fprint(this ptr<Config> _addr_cfg, io.Writer output, ptr<to
         }
     }
 
-
     return ;
-
 }
 
 // A CommentedNode bundles an AST node and corresponding comments.

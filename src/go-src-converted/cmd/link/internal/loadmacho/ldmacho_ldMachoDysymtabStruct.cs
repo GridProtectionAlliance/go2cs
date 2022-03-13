@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:45 UTC
+//     Generated on 2022 March 13 06:34:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class loadmacho_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct ldMachoDysymtab
         {
             // Constructors
@@ -98,7 +98,7 @@ namespace @internal
             public static implicit operator ldMachoDysymtab(NilType nil) => default(ldMachoDysymtab);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ldMachoDysymtab ldMachoDysymtab_cast(dynamic value)
         {
             return new ldMachoDysymtab(value.ilocalsym, value.nlocalsym, value.iextdefsym, value.nextdefsym, value.iundefsym, value.nundefsym, value.tocoff, value.ntoc, value.modtaboff, value.nmodtab, value.extrefsymoff, value.nextrefsyms, value.indirectsymoff, value.nindirectsyms, value.extreloff, value.nextrel, value.locreloff, value.nlocrel, value.indir);

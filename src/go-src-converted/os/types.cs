@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2022 March 06 22:13:55 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:06 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\types.go
-using fs = go.io.fs_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using fs = io.fs_package;
+using syscall = syscall_package;
+
+
+// Getpagesize returns the underlying system's memory page size.
 
 public static partial class os_package {
 
-    // Getpagesize returns the underlying system's memory page size.
 public static nint Getpagesize() {
     return syscall.Getpagesize();
 }
@@ -85,7 +87,6 @@ public static bool SameFile(FileInfo fi1, FileInfo fi2) {
         return false;
     }
     return sameFile(fs1, fs2);
-
 }
 
 } // end os_package

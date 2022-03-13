@@ -7,18 +7,19 @@
 // of the code, and name the measurements during that stage. There is also
 // optional GCs that can be performed at the end of each stage, so you
 // can get an accurate measurement of how each stage changes live memory.
-// package benchmark -- go2cs converted at 2022 March 06 23:22:02 UTC
+
+// package benchmark -- go2cs converted at 2022 March 13 06:35:05 UTC
 // import "cmd/link/internal/benchmark" ==> using benchmark = go.cmd.link.@internal.benchmark_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\benchmark\bench.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using pprof = go.runtime.pprof_package;
-using time = go.time_package;
-using unicode = go.unicode_package;
-
 namespace go.cmd.link.@internal;
+
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using runtime = runtime_package;
+using pprof = runtime.pprof_package;
+using time = time_package;
+using unicode = unicode_package;
 
 public static partial class benchmark_package {
 
@@ -27,7 +28,6 @@ public partial struct Flags { // : nint
 
 public static readonly nint GC = 1 << (int)(iota);
 public static readonly Flags NoGC = 0;
-
 
 public partial struct Metrics {
     public Flags gc;
@@ -79,7 +79,6 @@ public static ptr<Metrics> New(Flags gc, @string filebase) {
         runtime.GC();
     }
     return addr(new Metrics(gc:gc,filebase:filebase));
-
 }
 
 // Report reports the metrics.
@@ -111,9 +110,7 @@ private static void Report(this ptr<Metrics> _addr_m, io.Writer w) {
             fmt.Fprintf(w, "\t%d heap-B", curMark.endM.HeapAlloc);
         }
         fmt.Fprintf(w, "\n");
-
     }    fmt.Fprintf(w, "%s 1 %d ns/op\n", makeBenchString("total time" + gcString), totTime.Nanoseconds());
-
 }
 
 // Starts marks the beginning of a new measurement phase.
@@ -141,7 +138,6 @@ private static void Start(this ptr<Metrics> _addr_m, @string name) => func((_, p
     }
     runtime.ReadMemStats(_addr_m.curMark.startM);
     m.curMark.startT = time.Now();
-
 });
 
 private static void closeMark(this ptr<Metrics> _addr_m) => func((_, panic, _) => {
@@ -170,22 +166,18 @@ private static void closeMark(this ptr<Metrics> _addr_m) => func((_, panic, _) =
             if (err != null) {
                 panic(err);
             }
-
             err = pprof.WriteHeapProfile(f);
             if (err != null) {
                 panic(err);
             }
-
             err = f.Close();
             if (err != null) {
                 panic(err);
             }
-
         }
     }
     m.marks = append(m.marks, m.curMark);
     m.curMark = null;
-
 });
 
 // shouldPProf returns true if we should be doing pprof runs.
@@ -209,9 +201,7 @@ private static @string makeBenchString(@string name) {
             needCap = false;
         }
         ret = append(ret, r);
-
     }    return string(ret);
-
 }
 
 private static @string makePProfFilename(@string filebase, @string name, @string typ) {

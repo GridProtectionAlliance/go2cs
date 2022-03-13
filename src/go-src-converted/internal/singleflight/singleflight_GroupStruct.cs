@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:16:17 UTC
+//     Generated on 2022 March 13 05:29:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace @internal
 {
     public static partial class singleflight_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Group
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace @internal
             public static implicit operator Group(NilType nil) => default(Group);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Group Group_cast(dynamic value)
         {
             return new Group(value.mu, value.m);

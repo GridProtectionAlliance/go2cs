@@ -3,20 +3,23 @@
 // license that can be found in the LICENSE file.
 
 // Package iotest implements Readers and Writers useful mainly for testing.
-// package iotest -- go2cs converted at 2022 March 06 23:19:30 UTC
+
+// package iotest -- go2cs converted at 2022 March 13 06:43:15 UTC
 // import "testing/iotest" ==> using iotest = go.testing.iotest_package
 // Original source: C:\Program Files\Go\src\testing\iotest\reader.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.testing;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// OneByteReader returns a Reader that implements
+// each non-empty Read by reading one byte from r.
 
 public static partial class iotest_package {
 
-    // OneByteReader returns a Reader that implements
-    // each non-empty Read by reading one byte from r.
 public static io.Reader OneByteReader(io.Reader r) {
     return addr(new oneByteReader(r));
 }
@@ -34,7 +37,6 @@ private static (nint, error) Read(this ptr<oneByteReader> _addr_r, slice<byte> p
         return (0, error.As(null!)!);
     }
     return r.r.Read(p[(int)0..(int)1]);
-
 }
 
 // HalfReader returns a Reader that implements Read
@@ -88,10 +90,8 @@ private static (nint, error) Read(this ptr<dataErrReader> _addr_r, slice<byte> p
         }
         n = copy(p, r.unread);
         r.unread = r.unread[(int)n..];
-
     }
     return ;
-
 }
 
 // ErrTimeout is a fake timeout error.
@@ -118,7 +118,6 @@ private static (nint, error) Read(this ptr<timeoutReader> _addr_r, slice<byte> p
         return (0, error.As(ErrTimeout)!);
     }
     return r.r.Read(p);
-
 }
 
 // ErrReader returns an io.Reader that returns 0, err from all Read calls.
@@ -163,7 +162,6 @@ private static (nint, error) Read(this ptr<smallByteReader> _addr_r, slice<byte>
     }
     r.off += n;
     return (n, error.As(err)!);
-
 }
 
 // TestReader tests that reading from r returns the expected file content.
@@ -230,7 +228,6 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                     off = off__prev3;
 
                 }
-
                 {
                     var off__prev3 = off;
 
@@ -243,7 +240,6 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                     off = off__prev3;
 
                 }
-
                 {
                     var off__prev3 = off;
 
@@ -256,7 +252,6 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                     off = off__prev3;
 
                 }
-
             } 
 
             // Seek(0, 1) should report the current file position (middle).
@@ -280,7 +275,6 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             if (err != null) {
                 return error.As(fmt.Errorf("ReadAll from offset %d: %v", middle, err))!;
             }
-
             if (!bytes.Equal(data, content[(int)middle..])) {
                 return error.As(fmt.Errorf("ReadAll from offset %d = %q\n\twant %q", middle, data, content[(int)middle..]))!;
             } 
@@ -298,7 +292,6 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                 off = off__prev2;
 
             }
-
             {
                 var off__prev2 = off;
 
@@ -319,7 +312,6 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             if (err != null) {
                 return error.As(fmt.Errorf("ReadAll from offset %d: %v", middle, err))!;
             }
-
             if (!bytes.Equal(data, content[(int)middle..])) {
                 return error.As(fmt.Errorf("ReadAll from offset %d = %q\n\twant %q", middle, data, content[(int)middle..]))!;
             } 
@@ -337,21 +329,17 @@ public static error TestReader(io.Reader r, slice<byte> content) {
                 off = off__prev2;
 
             }
-
             data, err = io.ReadAll(r);
             if (err != null) {
                 return error.As(fmt.Errorf("ReadAll from offset %d: %v", middle / 2, err))!;
             }
-
             if (!bytes.Equal(data, content[(int)middle / 2..])) {
                 return error.As(fmt.Errorf("ReadAll from offset %d = %q\n\twant %q", middle / 2, data, content[(int)middle / 2..]))!;
             }
-
         }
         r = r__prev1;
 
     }
-
 
     {
         io.ReadSeeker r__prev1 = r;
@@ -375,16 +363,13 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             if (n != len(data) || err != null && err != io.EOF) {
                 return error.As(fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, nil or EOF", len(data), n, err, len(data)))!;
             }
-
             if (!bytes.Equal(data, content)) {
                 return error.As(fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q", len(data), data, content))!;
             }
-
             n, err = r.ReadAt(data[..(int)1], int64(len(data)));
             if (n != 0 || err != io.EOF) {
                 return error.As(fmt.Errorf("ReadAt(1, %d) = %v, %v, want 0, EOF", len(data), n, err))!;
             }
-
             {
                 var i__prev1 = i;
 
@@ -400,11 +385,9 @@ public static error TestReader(io.Reader r, slice<byte> content) {
             if (n != len(data) || err != io.EOF) {
                 return error.As(fmt.Errorf("ReadAt(%d, 0) = %v, %v, want %d, EOF", cap(data), n, err, len(data)))!;
             }
-
             if (!bytes.Equal(data, content)) {
                 return error.As(fmt.Errorf("ReadAt(%d, 0) = %q\n\twant %q", len(data), data, content))!;
             }
-
             {
                 var i__prev1 = i;
 
@@ -440,9 +423,7 @@ public static error TestReader(io.Reader r, slice<byte> content) {
         r = r__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 } // end iotest_package

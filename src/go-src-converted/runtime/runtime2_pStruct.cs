@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:17 UTC
+//     Generated on 2022 March 13 05:26:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct p
         {
             // Constructors
@@ -135,7 +135,7 @@ namespace go
             public static implicit operator p(NilType nil) => default(p);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static p p_cast(dynamic value)
         {
             return new p(value.id, value.status, value.link, value.schedtick, value.syscalltick, value.sysmontick, value.m, ref value.mcache, value.pcache, value.raceprocctx, value.deferpool, value.deferpoolbuf, value.goidcache, value.goidcacheend, value.runqhead, value.runqtail, value.runq, value.runnext, value.sudogcache, value.sudogbuf, value.tracebuf, value.traceSweep, value.traceSwept, value.traceReclaimed, value.palloc, value._, value.timer0When, value.timerModifiedEarliest, value.gcAssistTime, value.gcFractionalMarkTime, value.gcMarkWorkerMode, value.gcMarkWorkerStartTime, value.gcw, value.wbBuf, value.runSafePointFn, value.statsSeq, value.timersLock, value.timers, value.numTimers, value.deletedTimers, value.timerRaceCtx, value.preempt);

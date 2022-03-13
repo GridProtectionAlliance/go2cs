@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lostcancel -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package lostcancel -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata/lostcancel" ==> using lostcancel = go.cmd.vet.testdata.lostcancel_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\lostcancel\lostcancel.go
-using context = go.context_package;
-
 namespace go.cmd.vet.testdata;
+
+using context = context_package;
 
 public static partial class lostcancel_package {
 

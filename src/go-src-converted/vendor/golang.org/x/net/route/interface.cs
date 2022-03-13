@@ -5,16 +5,14 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:12 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:31 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\interface.go
-
-
 namespace go.vendor.golang.org.x.net;
 
 public static partial class route_package {
 
-    // An InterfaceMessage represents an interface message.
+// An InterfaceMessage represents an interface message.
 public partial struct InterfaceMessage {
     public nint Version; // message version
     public nint Type; // message type

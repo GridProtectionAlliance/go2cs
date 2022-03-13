@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:33 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:31 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\cert_pool.go
-using bytes = go.bytes_package;
-using sha256 = go.crypto.sha256_package;
-using pem = go.encoding.pem_package;
-using errors = go.errors_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.crypto;
+
+using bytes = bytes_package;
+using sha256 = crypto.sha256_package;
+using pem = encoding.pem_package;
+using errors = errors_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using System;
 
 public static partial class x509_package {
 
@@ -63,7 +62,6 @@ private static nint len(this ptr<CertPool> _addr_s) {
         return 0;
     }
     return len(s.lazyCerts);
-
 }
 
 // cert returns cert index n in s.
@@ -104,7 +102,6 @@ private static ptr<CertPool> copy(this ptr<CertPool> _addr_s) {
 
     copy(p.lazyCerts, s.lazyCerts);
     return _addr_p!;
-
 }
 
 // SystemCertPool returns a copy of the system cert pool.
@@ -125,7 +122,6 @@ public static (ptr<CertPool>, error) SystemCertPool() {
     if (runtime.GOOS == "windows") { 
         // Issue 16736, 18609:
         return (_addr_null!, error.As(errors.New("crypto/x509: system root pool is not available on Windows"))!);
-
     }
     {
         var sysRoots = systemRootsPool();
@@ -135,9 +131,7 @@ public static (ptr<CertPool>, error) SystemCertPool() {
         }
     }
 
-
     return _addr_loadSystemRoots()!;
-
 }
 
 // findPotentialParents returns the indexes of certificates in s which might
@@ -164,8 +158,7 @@ private static slice<ptr<Certificate>> findPotentialParents(this ptr<CertPool> _
             oneKeyID = append(oneKeyID, candidate);
         else 
             mismatchKeyID = append(mismatchKeyID, candidate);
-        
-    }    var found = len(matchingKeyID) + len(oneKeyID) + len(mismatchKeyID);
+            }    var found = len(matchingKeyID) + len(oneKeyID) + len(mismatchKeyID);
     if (found == 0) {
         return null;
     }
@@ -174,7 +167,6 @@ private static slice<ptr<Certificate>> findPotentialParents(this ptr<CertPool> _
     candidates = append(candidates, oneKeyID);
     candidates = append(candidates, mismatchKeyID);
     return candidates;
-
 }
 
 private static bool contains(this ptr<CertPool> _addr_s, ptr<Certificate> _addr_cert) {
@@ -185,7 +177,6 @@ private static bool contains(this ptr<CertPool> _addr_s, ptr<Certificate> _addr_
         return false;
     }
     return s.haveSum[sha256.Sum224(cert.Raw)];
-
 }
 
 // AddCert adds a certificate to a pool.
@@ -196,10 +187,7 @@ private static void AddCert(this ptr<CertPool> _addr_s, ptr<Certificate> _addr_c
     if (cert == null) {
         panic("adding nil Certificate to CertPool");
     }
-    s.addCertFunc(sha256.Sum224(cert.Raw), string(cert.RawSubject), () => {
-        return (cert, null);
-    });
-
+    s.addCertFunc(sha256.Sum224(cert.Raw), string(cert.RawSubject), () => (cert, null));
 });
 
 // addCertFunc adds metadata about a certificate to a pool, along with
@@ -221,7 +209,6 @@ private static (ptr<Certificate>, error) addCertFunc(this ptr<CertPool> _addr_s,
     s.haveSum[rawSum224] = true;
     s.lazyCerts = append(s.lazyCerts, new lazyCert(rawSubject:[]byte(rawSubject),getCert:getCert,));
     s.byName[rawSubject] = append(s.byName[rawSubject], len(s.lazyCerts) - 1);
-
 });
 
 // AppendCertsFromPEM attempts to parse a series of PEM encoded certificates.
@@ -254,17 +241,13 @@ private static bool AppendCertsFromPEM(this ptr<CertPool> _addr_s, slice<byte> p
                 // This can't fail, as the same bytes already parsed above.
                 lazyCert.v, _ = ParseCertificate(certBytes);
                 certBytes = null;
-
             });
             return (lazyCert.v, null);
-
         });
         ok = true;
-
     }
 
     return ok;
-
 }
 
 // Subjects returns a list of the DER-encoded subjects of

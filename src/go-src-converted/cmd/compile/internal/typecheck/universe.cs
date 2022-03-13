@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:56 UTC
+// package typecheck -- go2cs converted at 2022 March 13 06:00:16 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\universe.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class typecheck_package {
 
@@ -66,7 +65,6 @@ public static void InitUniverse() {
             types.CalcSize(t);
         }
         return t;
-
     };
 
     {
@@ -296,7 +294,6 @@ public static void InitUniverse() {
     iscmp[ir.OLE] = true;
     iscmp[ir.OEQ] = true;
     iscmp[ir.ONE] = true;
-
 }
 
 private static ptr<types.Type> makeErrorInterface() {
@@ -321,7 +318,6 @@ public static void DeclareUniverse() {
         }
         s1.Def = s.Def;
         s1.Block = s.Block;
-
     }
 }
 

@@ -4,25 +4,25 @@
 
 // Package structtag defines an Analyzer that checks struct field tags
 // are well formed.
-// package structtag -- go2cs converted at 2022 March 06 23:34:48 UTC
+
+// package structtag -- go2cs converted at 2022 March 13 06:42:05 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/structtag" ==> using structtag = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.structtag_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\structtag\structtag.go
-using errors = go.errors_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using errors = errors_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class structtag_package {
 
@@ -53,10 +53,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             var tag = styp.Tag(i);
             checkCanonicalFieldTag(_addr_pass, _addr_field, tag, _addr_seen);
         }
-
     });
     return (null, error.As(null!)!);
-
 }
 
 // namesSeen keeps track of encoding tags by their key, name, and nested level
@@ -82,7 +80,6 @@ private static (token.Pos, bool) Get(this ptr<namesSeen> _addr_s, @string key, @
     }
     var (pos, ok) = (s.val)[new uniqueName(key,name,level)];
     return (pos, ok);
-
 }
 
 private static void Set(this ptr<namesSeen> _addr_s, @string key, @string name, nint level, token.Pos pos) {
@@ -92,7 +89,6 @@ private static void Set(this ptr<namesSeen> _addr_s, @string key, @string name, 
         s.val = make_map<uniqueName, token.Pos>();
     }
     (s.val)[new uniqueName(key,name,level)] = pos;
-
 }
 
 private static @string checkTagDups = new slice<@string>(new @string[] { "json", "xml" });
@@ -151,7 +147,6 @@ private static void checkCanonicalFieldTag(ptr<analysis.Pass> _addr_pass, ptr<ty
                 return ;
                 break;
         }
-
     }
 }
 
@@ -168,13 +163,11 @@ private static void checkTagDuplicates(ptr<analysis.Pass> _addr_pass, @string ta
     if (val == "-") { 
         // Ignored, even if the field is anonymous.
         return ;
-
     }
     if (val == "" || val[0] == ',') {
         if (!field.Anonymous()) { 
             // Ignored if the field isn't anonymous.
             return ;
-
         }
         ptr<types.Struct> (typ, ok) = field.Type().Underlying()._<ptr<types.Struct>>();
         if (!ok) {
@@ -196,7 +189,6 @@ private static void checkTagDuplicates(ptr<analysis.Pass> _addr_pass, @string ta
             i = i__prev1;
         }
         return ;
-
     }
     if (key == "xml" && field.Name() == "XMLName") { 
         // XMLName defines the XML element name of the struct being
@@ -205,7 +197,6 @@ private static void checkTagDuplicates(ptr<analysis.Pass> _addr_pass, @string ta
         // check for untagged fields of type struct defining their own name
         // by containing a field named XMLName; see issue 18256.
         return ;
-
     }
     {
         nint i__prev1 = i;
@@ -219,20 +210,14 @@ private static void checkTagDuplicates(ptr<analysis.Pass> _addr_pass, @string ta
                     if (opt == "attr") {
                         key += " attribute"; // Key is part of the error message.
                         break;
-
                     }
-
                 }
-
             }
-
             val = val[..(int)i];
-
         }
         i = i__prev1;
 
     }
-
     {
         var (pos, ok) = seen.Get(key, val, level);
 
@@ -254,16 +239,13 @@ private static void checkTagDuplicates(ptr<analysis.Pass> _addr_pass, @string ta
  {
                 alsoPos.Filename = rel;
             }
-
             pass.Reportf(nearest.Pos(), "struct field %s repeats %s tag %q also at %s", field.Name(), key, val, alsoPos);
-
         }
         else
  {
             seen.Set(key, val, level, field.Pos());
         }
     }
-
 }
 
 private static var errTagSyntax = errors.New("bad syntax for struct tag pair");private static var errTagKeySyntax = errors.New("bad syntax for struct tag key");private static var errTagValueSyntax = errors.New("bad syntax for struct tag value");private static var errTagValueSpace = errors.New("suspicious space in struct tag value");private static var errTagSpace = errors.New("key:\"value\" pairs not separated by spaces");
@@ -350,9 +332,7 @@ private static error validateStructTag(@string tag) {
                 if (comma > 0 && value[comma - 1] == ' ') {
                     return error.As(errTagValueSpace)!;
                 }
-
                 value = value[(int)comma + 1..];
-
                 break;
             case "json": 
                 // JSON allows using spaces in the name, so skip it.
@@ -369,7 +349,6 @@ private static error validateStructTag(@string tag) {
         }
     }
     return error.As(null!)!;
-
 }
 
 } // end structtag_package

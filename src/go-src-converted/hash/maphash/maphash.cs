@@ -11,29 +11,31 @@
 // The hash functions are not cryptographically secure.
 // (See crypto/sha256 and crypto/sha512 for cryptographic use.)
 //
-// package maphash -- go2cs converted at 2022 March 06 22:14:59 UTC
+
+// package maphash -- go2cs converted at 2022 March 13 05:29:04 UTC
 // import "hash/maphash" ==> using maphash = go.hash.maphash_package
 // Original source: C:\Program Files\Go\src\hash\maphash\maphash.go
-using unsafeheader = go.@internal.unsafeheader_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.hash;
 
+using unsafeheader = @internal.unsafeheader_package;
+using @unsafe = @unsafe_package;
+
+
+// A Seed is a random value that selects the specific hash function
+// computed by a Hash. If two Hashes use the same Seeds, they
+// will compute the same hash values for any given input.
+// If two Hashes use different Seeds, they are very likely to compute
+// distinct hash values for any given input.
+//
+// A Seed must be initialized by calling MakeSeed.
+// The zero seed is uninitialized and not valid for use with Hash's SetSeed method.
+//
+// Each Seed value is local to a single process and cannot be serialized
+// or otherwise recreated in a different process.
+
+using System;
 public static partial class maphash_package {
 
-    // A Seed is a random value that selects the specific hash function
-    // computed by a Hash. If two Hashes use the same Seeds, they
-    // will compute the same hash values for any given input.
-    // If two Hashes use different Seeds, they are very likely to compute
-    // distinct hash values for any given input.
-    //
-    // A Seed must be initialized by calling MakeSeed.
-    // The zero seed is uninitialized and not valid for use with Hash's SetSeed method.
-    //
-    // Each Seed value is local to a single process and cannot be serialized
-    // or otherwise recreated in a different process.
 public partial struct Seed {
     public ulong s;
 }
@@ -108,7 +110,6 @@ private static error WriteByte(this ptr<Hash> _addr_h, byte b) {
     h.buf[h.n] = b;
     h.n++;
     return error.As(null!)!;
-
 }
 
 // Write adds b to the sequence of bytes hashed by h.
@@ -128,7 +129,6 @@ private static (nint, error) Write(this ptr<Hash> _addr_h, slice<byte> b) {
         if (h.n < bufSize) { 
             // Copied the entirety of b to h.buf.
             return (size, error.As(null!)!);
-
         }
         b = b[(int)k..];
         h.flush(); 
@@ -144,7 +144,6 @@ private static (nint, error) Write(this ptr<Hash> _addr_h, slice<byte> b) {
     copy(h.buf[..], b);
     h.n = len(b);
     return (size, error.As(null!)!);
-
 }
 
 // WriteString adds the bytes of s to the sequence of bytes hashed by h.
@@ -164,7 +163,6 @@ private static (nint, error) WriteString(this ptr<Hash> _addr_h, @string s) {
         }
         s = s[(int)k..];
         h.flush();
-
     }
     if (len(s) > bufSize) {
         h.initSeed();
@@ -177,7 +175,6 @@ private static (nint, error) WriteString(this ptr<Hash> _addr_h, @string s) {
     copy(h.buf[..], s);
     h.n = len(s);
     return (size, error.As(null!)!);
-
 }
 
 // Seed returns h's seed value.
@@ -202,7 +199,6 @@ private static void SetSeed(this ptr<Hash> _addr_h, Seed seed) => func((_, panic
     h.seed = seed;
     h.state = seed;
     h.n = 0;
-
 });
 
 // Reset discards all bytes added to h.
@@ -225,7 +221,6 @@ private static void flush(this ptr<Hash> _addr_h) => func((_, panic, _) => {
     h.initSeed();
     h.state.s = rthash(_addr_h.buf[0], h.n, h.state.s);
     h.n = 0;
-
 });
 
 // Sum64 returns h's current 64-bit value, which depends on
@@ -256,7 +251,6 @@ public static Seed MakeSeed() {
         }
     }
     return new Seed(s:s1<<32+s2);
-
 }
 
 //go:linkname runtime_fastrand runtime.fastrand
@@ -274,7 +268,6 @@ private static ulong rthash(ptr<byte> _addr_ptr, nint len, ulong seed) {
     var lo = runtime_memhash(@unsafe.Pointer(ptr), uintptr(seed), uintptr(len));
     var hi = runtime_memhash(@unsafe.Pointer(ptr), uintptr(seed >> 32), uintptr(len));
     return uint64(hi) << 32 | uint64(lo);
-
 }
 
 //go:linkname runtime_memhash runtime.memhash

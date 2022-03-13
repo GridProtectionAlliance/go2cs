@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2022 March 06 22:17:22 UTC
+// package rand -- go2cs converted at 2022 March 13 05:30:42 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Program Files\Go\src\crypto\rand\util.go
-using errors = go.errors_package;
-using io = go.io_package;
-using big = go.math.big_package;
-
 namespace go.crypto;
+
+using errors = errors_package;
+using io = io_package;
+using big = math.big_package;
+
+
+// smallPrimes is a list of small, prime numbers that allows us to rapidly
+// exclude some fraction of composite candidates when searching for a random
+// prime. This list is truncated at the point where smallPrimesProduct exceeds
+// a uint64. It does not include two because we ensure that the candidates are
+// odd by construction.
 
 public static partial class rand_package {
 
-    // smallPrimes is a list of small, prime numbers that allows us to rapidly
-    // exclude some fraction of composite candidates when searching for a random
-    // prime. This list is truncated at the point where smallPrimesProduct exceeds
-    // a uint64. It does not include two because we ensure that the candidates are
-    // odd by construction.
 private static byte smallPrimes = new slice<byte>(new byte[] { 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53 });
 
 // smallPrimesProduct is the product of the values in smallPrimes and allows us
@@ -66,7 +68,6 @@ public static (ptr<big.Int>, error) Prime(io.Reader rand, nint bits) {
             if (len(bytes) > 1) {
                 bytes[1] |= 0x80;
             }
-
         }
         bytes[len(bytes) - 1] |= 1;
 
@@ -94,16 +95,13 @@ NextDelta:
                         _continueNextDelta = true;
                         break;
                     }
-
                 delta += 2;
                 }
                 if (delta > 0) {
                     bigMod.SetUint64(delta);
                     p.Add(p, bigMod);
                 }
-
                 break;
-
             } 
 
             // There is a tiny possibility that, by adding delta, we caused
@@ -119,7 +117,6 @@ NextDelta:
             return ;
         }
     }
-
 }
 
 // Int returns a uniform random value in [0, max). It panics if max <= 0.
@@ -138,7 +135,6 @@ public static (ptr<big.Int>, error) Int(io.Reader rand, ptr<big.Int> _addr_max) 
     if (bitLen == 0) { 
         // the only valid result is 0
         return ;
-
     }
     var k = (bitLen + 7) / 8; 
     // b is the number of bits in the most significant byte of max-1.
@@ -160,7 +156,6 @@ public static (ptr<big.Int>, error) Int(io.Reader rand, ptr<big.Int> _addr_max) 
             return ;
         }
     }
-
 });
 
 } // end rand_package

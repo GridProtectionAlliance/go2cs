@@ -5,17 +5,19 @@
 //go:build darwin || dragonfly || freebsd || illumos || linux || netbsd || openbsd
 // +build darwin dragonfly freebsd illumos linux netbsd openbsd
 
-// package poll -- go2cs converted at 2022 March 06 22:13:23 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:54 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\writev.go
-using io = go.io_package;
-using syscall = go.syscall_package;
-
 namespace go.@internal;
+
+using io = io_package;
+using syscall = syscall_package;
+
+
+// Writev wraps the writev system call.
 
 public static partial class poll_package {
 
-    // Writev wraps the writev system call.
 private static (long, error) Writev(this ptr<FD> _addr_fd, ptr<slice<slice<byte>>> _addr_v) => func((defer, _, _) => {
     long _p0 = default;
     error _p0 = default!;
@@ -33,7 +35,6 @@ private static (long, error) Writev(this ptr<FD> _addr_fd, ptr<slice<slice<byte>
         err = err__prev1;
 
     }
-
     defer(fd.writeUnlock());
     {
         var err__prev1 = err;
@@ -46,7 +47,6 @@ private static (long, error) Writev(this ptr<FD> _addr_fd, ptr<slice<slice<byte>
         err = err__prev1;
 
     }
-
 
     slice<syscall.Iovec> iovecs = default;
     if (fd.iovecs != null) {
@@ -101,7 +101,6 @@ private static (long, error) Writev(this ptr<FD> _addr_fd, ptr<slice<slice<byte>
                 }
             }
             break;
-
         }
         if (n == 0) {
             err = io.ErrUnexpectedEOF;
@@ -109,7 +108,6 @@ private static (long, error) Writev(this ptr<FD> _addr_fd, ptr<slice<slice<byte>
         }
     }
     return (n, error.As(err)!);
-
 });
 
 } // end poll_package

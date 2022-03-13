@@ -28,80 +28,81 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:21:36 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:36 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\lib.go
-using bytes = go.bytes_package;
-using bio = go.cmd.@internal.bio_package;
-using goobj = go.cmd.@internal.goobj_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loadelf = go.cmd.link.@internal.loadelf_package;
-using loader = go.cmd.link.@internal.loader_package;
-using loadmacho = go.cmd.link.@internal.loadmacho_package;
-using loadpe = go.cmd.link.@internal.loadpe_package;
-using loadxcoff = go.cmd.link.@internal.loadxcoff_package;
-using sym = go.cmd.link.@internal.sym_package;
-using sha1 = go.crypto.sha1_package;
-using elf = go.debug.elf_package;
-using macho = go.debug.macho_package;
-using base64 = go.encoding.base64_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.link.@internal;
 
+using bytes = bytes_package;
+using bio = cmd.@internal.bio_package;
+using goobj = cmd.@internal.goobj_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loadelf = cmd.link.@internal.loadelf_package;
+using loader = cmd.link.@internal.loader_package;
+using loadmacho = cmd.link.@internal.loadmacho_package;
+using loadpe = cmd.link.@internal.loadpe_package;
+using loadxcoff = cmd.link.@internal.loadxcoff_package;
+using sym = cmd.link.@internal.sym_package;
+using sha1 = crypto.sha1_package;
+using elf = debug.elf_package;
+using macho = debug.macho_package;
+using base64 = encoding.base64_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// Data layout and relocation.
+
+// Derived from Inferno utils/6l/l.h
+// https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
+//
+//    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
+//    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
+//    Portions Copyright © 1997-1999 Vita Nuova Limited
+//    Portions Copyright © 2000-2007 Vita Nuova Holdings Limited (www.vitanuova.com)
+//    Portions Copyright © 2004,2006 Bruce Ellis
+//    Portions Copyright © 2005-2007 C H Forsyth (forsyth@terzarima.net)
+//    Revisions Copyright © 2000-2007 Lucent Technologies Inc. and others
+//    Portions Copyright © 2009 The Go Authors. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+// ArchSyms holds a number of architecture specific symbols used during
+// relocation.  Rather than allowing them universal access to all symbols,
+// we keep a subset for relocation application.
+
+using System;
+using System.Threading;
 public static partial class ld_package {
 
-    // Data layout and relocation.
-
-    // Derived from Inferno utils/6l/l.h
-    // https://bitbucket.org/inferno-os/inferno-os/src/master/utils/6l/l.h
-    //
-    //    Copyright © 1994-1999 Lucent Technologies Inc.  All rights reserved.
-    //    Portions Copyright © 1995-1997 C H Forsyth (forsyth@terzarima.net)
-    //    Portions Copyright © 1997-1999 Vita Nuova Limited
-    //    Portions Copyright © 2000-2007 Vita Nuova Holdings Limited (www.vitanuova.com)
-    //    Portions Copyright © 2004,2006 Bruce Ellis
-    //    Portions Copyright © 2005-2007 C H Forsyth (forsyth@terzarima.net)
-    //    Revisions Copyright © 2000-2007 Lucent Technologies Inc. and others
-    //    Portions Copyright © 2009 The Go Authors. All rights reserved.
-    //
-    // Permission is hereby granted, free of charge, to any person obtaining a copy
-    // of this software and associated documentation files (the "Software"), to deal
-    // in the Software without restriction, including without limitation the rights
-    // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    // copies of the Software, and to permit persons to whom the Software is
-    // furnished to do so, subject to the following conditions:
-    //
-    // The above copyright notice and this permission notice shall be included in
-    // all copies or substantial portions of the Software.
-    //
-    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-    // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    // THE SOFTWARE.
-
-    // ArchSyms holds a number of architecture specific symbols used during
-    // relocation.  Rather than allowing them universal access to all symbols,
-    // we keep a subset for relocation application.
 public partial struct ArchSyms {
     public loader.Sym Rel;
     public loader.Sym Rela;
@@ -168,13 +169,9 @@ private static void setArchSyms(this ptr<Link> _addr_ctxt) {
         for (nint i = 0; i <= ctxt.MaxVersion(); i++) {
             if (i >= 2 && i < sym.SymVerStatic) { // these versions are not used currently
                 continue;
-
             }
-
             ctxt.mkArchSymVec(".TOC.", i, ctxt.DotTOC);
-
         }
-
     }
     if (ctxt.IsElf()) {
         ctxt.mkArchSym(".rel", 0, _addr_ctxt.Rel);
@@ -276,7 +273,6 @@ private static bool DynlinkingGo(this ptr<Link> _addr_ctxt) => func((_, panic, _
         panic("DynlinkingGo called before all symbols loaded");
     }
     return ctxt.BuildMode == BuildModeShared || ctxt.linkShared || ctxt.BuildMode == BuildModePlugin || ctxt.canUsePlugins;
-
 });
 
 // CanUsePlugins reports whether a plugins can be used
@@ -287,7 +283,6 @@ private static bool CanUsePlugins(this ptr<Link> _addr_ctxt) => func((_, panic, 
         panic("CanUsePlugins called before all symbols loaded");
     }
     return ctxt.canUsePlugins;
-
 });
 
 // NeedCodeSign reports whether we need to code-sign the output binary.
@@ -331,9 +326,7 @@ private static void mayberemoveoutfile() {
             return ;
         }
     }
-
     os.Remove(flagOutfile.val);
-
 }
 
 private static void libinit(ptr<Link> _addr_ctxt) {
@@ -369,7 +362,6 @@ private static void libinit(ptr<Link> _addr_ctxt) {
         }
     }
 
-
     if (flagEntrySymbol == "".val) {
 
         if (ctxt.BuildMode == BuildModeCShared || ctxt.BuildMode == BuildModeCArchive) 
@@ -378,8 +370,7 @@ private static void libinit(ptr<Link> _addr_ctxt) {
             flagEntrySymbol.val = fmt.Sprintf("_rt0_%s_%s", buildcfg.GOARCH, buildcfg.GOOS);
         else if (ctxt.BuildMode == BuildModeShared || ctxt.BuildMode == BuildModePlugin)         else 
             Errorf(null, "unknown *flagEntrySymbol for buildmode %v", ctxt.BuildMode);
-        
-    }
+            }
 }
 
 private static void exitIfErrors() {
@@ -407,7 +398,6 @@ private static ptr<sym.Library> loadinternal(ptr<Link> _addr_ctxt, @string name)
             }
 
         }
-
     }
     if (ctxt.PackageFile != null) {
         {
@@ -422,10 +412,8 @@ private static ptr<sym.Library> loadinternal(ptr<Link> _addr_ctxt, @string name)
             pname = pname__prev2;
 
         }
-
         ctxt.Logf("loadinternal: cannot find %s\n", name);
         return _addr_null!;
-
     }
     foreach (var (_, libdir) in ctxt.Libdir) {
         if (ctxt.linkShared) {
@@ -441,7 +429,6 @@ private static ptr<sym.Library> loadinternal(ptr<Link> _addr_ctxt, @string name)
                 }
 
             }
-
         }
         pname = filepath.Join(libdir, name + ".a");
         if (ctxt.Debugvlog != 0) {
@@ -455,10 +442,8 @@ private static ptr<sym.Library> loadinternal(ptr<Link> _addr_ctxt, @string name)
             }
 
         }
-
     }    ctxt.Logf("warning: unable to find %s.a\n", name);
     return _addr_null!;
-
 }
 
 // extld returns the current external linker.
@@ -469,7 +454,6 @@ private static @string extld(this ptr<Link> _addr_ctxt) {
         flagExtld.val = "gcc";
     }
     return flagExtld.val;
-
 }
 
 // findLibPathCmd uses cmd command to find gcc library libname.
@@ -489,10 +473,8 @@ private static @string findLibPathCmd(this ptr<Link> _addr_ctxt, @string cmd, @s
             ctxt.Logf("not using a %s file because compiler failed\n%v\n%s\n", libname, err, out);
         }
         return "none";
-
     }
     return strings.TrimSpace(string(out));
-
 }
 
 // findLibPath searches for library libname.
@@ -523,15 +505,12 @@ private static void loadlib(this ptr<Link> _addr_ctxt) {
     if (!buildcfg.Experiment.RegabiWrappers) { 
         // Use ABI aliases if ABI wrappers are not used.
         flags |= loader.FlagUseABIAlias;
-
     }
     Action<@string, nint> elfsetstring1 = (str, off) => {
         elfsetstring(ctxt, 0, str, off);
     };
     ctxt.loader = loader.NewLoader(flags, elfsetstring1, _addr_ctxt.ErrorReporter.ErrorReporter);
-    ctxt.ErrorReporter.SymName = s => {
-        return ctxt.loader.SymName(s);
-    }; 
+    ctxt.ErrorReporter.SymName = s => ctxt.loader.SymName(s); 
 
     // ctxt.Library grows during the loop, so not a range loop.
     nint i = 0;
@@ -542,9 +521,7 @@ private static void loadlib(this ptr<Link> _addr_ctxt) {
                 ctxt.Logf("autolib: %s (from %s)\n", lib.File, lib.Objref);
         i++;
             }
-
             loadobjfile(_addr_ctxt, _addr_lib);
-
         }
     } 
 
@@ -596,16 +573,12 @@ private static void loadlib(this ptr<Link> _addr_ctxt) {
                         loadobjfile(_addr_ctxt, _addr_lib);
                     i++;
                     }
-
                 }
-
-
             }
 
             lib = lib__prev2;
 
         }
-
     }
     ctxt.loader.LoadSyms(ctxt.Arch); 
 
@@ -648,9 +621,7 @@ private static void loadlib(this ptr<Link> _addr_ctxt) {
                 // In this case we fail to load libgcc.a and can encounter link
                 // errors - see if we can find libcompiler_rt.a instead.
                 flagLibGCC.val = ctxt.findLibPathCmd("--print-file-name=libcompiler_rt.a", "libcompiler_rt");
-
             }
-
             if (ctxt.HeadType == objabi.Hwindows) {
                 {
                     var p__prev4 = p;
@@ -664,7 +635,6 @@ private static void loadlib(this ptr<Link> _addr_ctxt) {
                     p = p__prev4;
 
                 }
-
                 {
                     var p__prev4 = p;
 
@@ -710,11 +680,9 @@ private static void loadlib(this ptr<Link> _addr_ctxt) {
                                     libmsvcrt.a libm.a
                                 */
             }
-
             if (flagLibGCC != "none".val) {
                 hostArchive(ctxt, flagLibGCC.val);
             }
-
         }
     }
     ctxt.Loaded = true;
@@ -722,7 +690,6 @@ private static void loadlib(this ptr<Link> _addr_ctxt) {
     importcycles();
 
     strictDupMsgCount = ctxt.loader.NStrictDupMsgs();
-
 }
 
 // loadcgodirectives reads the previously discovered cgo directives, creating
@@ -753,9 +720,7 @@ private static void loadcgodirectives(this ptr<Link> _addr_ctxt) {
  {
                     su.SetType(0);
                 }
-
             }
-
         }
     }
 }
@@ -808,7 +773,6 @@ private static void linksetup(this ptr<Link> _addr_ctxt) {
         }
         ctxt.loader.SetAttrReachable(tlsg, true);
         ctxt.Tlsg = tlsg;
-
     }
     loader.Sym moduledata = default;
     ptr<loader.SymbolBuilder> mdsb;
@@ -855,7 +819,6 @@ private static void linksetup(this ptr<Link> _addr_ctxt) {
         moduledata = ctxt.loader.LookupOrCreateSym("local.moduledata", 0);
         mdsb = ctxt.loader.MakeSymbolUpdater(moduledata);
         ctxt.loader.SetAttrLocal(moduledata, true);
-
     }
     mdsb.SetType(sym.SNOPTRDATA);
     ctxt.loader.SetAttrReachable(moduledata, true);
@@ -874,7 +837,6 @@ private static void linksetup(this ptr<Link> _addr_ctxt) {
     foreach (var (_, lib) in ctxt.Library) {
         intlibs = append(intlibs, isRuntimeDepPkg(lib.Pkg));
     }    ctxt.Textp = ctxt.loader.AssignTextSymbolOrder(ctxt.Library, intlibs, ctxt.Textp);
-
 }
 
 // mangleTypeSym shortens the names of symbols that represent Go types
@@ -905,7 +867,6 @@ private static void mangleTypeSym(this ptr<Link> _addr_ctxt) {
             // (therefore not reachable). We still need to mangle its name,
             // so it is consistent with the one stored in the shared library.
             continue;
-
         }
         var name = ldr.SymName(s);
         var newName = typeSymbolMangle(name);
@@ -925,10 +886,8 @@ private static void mangleTypeSym(this ptr<Link> _addr_ctxt) {
                     ldr.CopySym(dup, s);
                 }
             }
-
         }
     }
-
 }
 
 // typeSymbolMangle mangles the given symbol name into something shorter.
@@ -946,7 +905,6 @@ private static @string typeSymbolMangle(@string name) {
     }
     if (len(name) <= 14 && !strings.Contains(name, "@")) { // Issue 19529
         return name;
-
     }
     var hash = sha1.Sum((slice<byte>)name);
     @string prefix = "type.";
@@ -954,7 +912,6 @@ private static @string typeSymbolMangle(@string name) {
         prefix = "type..";
     }
     return prefix + base64.StdEncoding.EncodeToString(hash[..(int)6]);
-
 }
 
 /*
@@ -981,7 +938,6 @@ private static long nextar(ptr<bio.Reader> _addr_bp, long off, ptr<ArHdr> _addr_
         }
     }
 
-
     a.name = artrim(buf[(int)0..(int)16]);
     a.date = artrim(buf[(int)16..(int)28]);
     a.uid = artrim(buf[(int)28..(int)34]);
@@ -995,7 +951,6 @@ private static long nextar(ptr<bio.Reader> _addr_bp, long off, ptr<ArHdr> _addr_
         arsize++;
     }
     return arsize + SAR_HDR;
-
 }
 
 private static void loadobjfile(ptr<Link> _addr_ctxt, ptr<sym.Library> _addr_lib) => func((defer, _, _) => {
@@ -1035,7 +990,6 @@ private static void loadobjfile(ptr<Link> _addr_ctxt, ptr<sym.Library> _addr_lib
         f.MustSeek(0, 0);
         ldobj(_addr_ctxt, _addr_f, _addr_lib, l, lib.File, lib.File);
         return ;
-
     }
 
     /*
@@ -1078,14 +1032,11 @@ private static void loadobjfile(ptr<Link> _addr_ctxt, ptr<sym.Library> _addr_lib
                 }
 
             }
-
         }
         var pname = fmt.Sprintf("%s(%s)", lib.File, arhdr.name);
         l = atolwhex(arhdr.size);
         ldobj(_addr_ctxt, _addr_f, _addr_lib, l, pname, lib.File);
-
     }
-
 });
 
 public partial struct Hostobj {
@@ -1129,7 +1080,6 @@ private static ptr<Hostobj> ldhostobj(Action<ptr<Link>, ptr<bio.Reader>, @string
     h.off = f.Offset();
     h.length = length;
     return _addr_h!;
-
 }
 
 private static void hostobjs(ptr<Link> _addr_ctxt) {
@@ -1153,9 +1103,7 @@ private static void hostobjs(ptr<Link> _addr_ctxt) {
         }
         h.ld(ctxt, f, h.pkg, h.length, h.pn);
         f.Close();
-
     }
-
 }
 
 private static void hostlinksetup(ptr<Link> _addr_ctxt) {
@@ -1179,7 +1127,6 @@ private static void hostlinksetup(ptr<Link> _addr_ctxt) {
             ctxt.Out.Close();
             os.RemoveAll(flagTmpdir.val);
         });
-
     }
     {
         var err__prev1 = err;
@@ -1192,7 +1139,6 @@ private static void hostlinksetup(ptr<Link> _addr_ctxt) {
         err = err__prev1;
 
     }
-
     mayberemoveoutfile();
 
     var p = filepath.Join(flagTmpdir.val, "go.o");
@@ -1207,7 +1153,6 @@ private static void hostlinksetup(ptr<Link> _addr_ctxt) {
         err = err__prev1;
 
     }
-
 }
 
 // hostobjCopy creates a copy of the object files in hostobj in a
@@ -1248,12 +1193,10 @@ private static slice<@string> hostobjCopy() => func((defer, _, _) => {
 
                 }
 
-
                 var (w, err) = os.Create(dst);
                 if (err != null) {
                     Exitf("cannot create %s: %v", dst, err);
                 }
-
                 {
                     (_, err) = io.CopyN(w, f, h.length);
 
@@ -1262,7 +1205,6 @@ private static slice<@string> hostobjCopy() => func((defer, _, _) => {
                     }
 
                 }
-
                 {
                     var err = w.Close();
 
@@ -1271,16 +1213,13 @@ private static slice<@string> hostobjCopy() => func((defer, _, _) => {
                     }
 
                 }
-
             }());
-
         }
         h = h__prev1;
     }
 
     wg.Wait();
     return paths;
-
 });
 
 // writeGDBLinkerScript creates gcc linker script file in temp
@@ -1297,7 +1236,6 @@ private static @string writeGDBLinkerScript() {
         Errorf(null, "WriteFile %s failed: %v", name, err);
     }
     return path;
-
 }
 
 // archive builds a .a archive from the hostobj object files.
@@ -1324,7 +1262,6 @@ private static void archive(this ptr<Link> _addr_ctxt) => func((_, panic, _) => 
         }
     }
 
-
     @string argv = new slice<@string>(new @string[] { *flagExtar, "-q", "-c", "-s" });
     if (ctxt.HeadType == objabi.Haix) {
         argv = append(argv, "-X64");
@@ -1348,7 +1285,6 @@ private static void archive(this ptr<Link> _addr_ctxt) => func((_, panic, _) => 
             Exitf("running %s failed: %v\n%s", argv[0], err, out);
         }
     }
-
 });
 
 private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) => {
@@ -1383,13 +1319,11 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
             // Leave room for DWARF combining.
             // -headerpad is incompatible with -fembed-bitcode.
             argv = append(argv, "-Wl,-headerpad,1144");
-
         }
         if (ctxt.DynlinkingGo() && buildcfg.GOOS != "ios") { 
             // -flat_namespace is deprecated on iOS.
             // It is useful for supporting plugins. We don't support plugins on iOS.
             argv = append(argv, "-Wl,-flat_namespace");
-
         }
         if (!combineDwarf) {
             argv = append(argv, "-Wl,-S"); // suppress STAB (symbolic debugging) symbols
@@ -1432,7 +1366,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
             argv = append(argv, "-Wl,--high-entropy-va");
         }
         return argv;
-
     };
 
 
@@ -1475,9 +1408,7 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
                 argv = append(argv, "-Wl,-z,nodelete"); 
                 // Only pass Bsymbolic on non-Windows.
                 argv = append(argv, "-Wl,-Bsymbolic");
-
             }
-
         }
     else if (ctxt.BuildMode == BuildModeShared) 
         if (ctxt.UseRelro()) {
@@ -1510,7 +1441,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
         if (buildcfg.GOOS == "android") { 
             // Use lld to avoid errors from default linker (issue #38838)
             altLinker = "lld";
-
         }
         if (ctxt.Arch.InFamily(sys.ARM, sys.ARM64) && buildcfg.GOOS == "linux") { 
             // On ARM, the GNU linker will generate COPY relocations
@@ -1543,7 +1473,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
                 err = err__prev3;
 
             }
-
         }
     }
     if (ctxt.Arch.Family == sys.ARM64 && buildcfg.GOOS == "freebsd") { 
@@ -1568,7 +1497,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
             err = err__prev2;
 
         }
-
     }
     if (altLinker != "") {
         argv = append(argv, "-fuse-ld=" + altLinker);
@@ -1592,7 +1520,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
         // --dynamic-linker so prefer that (ld on very old Solaris only
         // supports -I but that seems less important).
         argv = append(argv, fmt.Sprintf("-Wl,--dynamic-linker,%s", flagInterpreter.val));
-
     }
     if (ctxt.IsELF) {
         argv = append(argv, "-rdynamic");
@@ -1631,7 +1558,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
         };
         argv = append(argv, getPathFile("crtcxa.o"));
         argv = append(argv, getPathFile("crtdbase.o"));
-
     }
     if (ctxt.linkShared) {
         var seenDirs = make_map<@string, bool>();
@@ -1739,7 +1665,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
         }
         argv = append(argv, "-Wl,--start-group", "-lmingwex", "-lmingw32", "-Wl,--end-group");
         argv = append(argv, peimporteddlls());
-
     }
     if (ctxt.Debugvlog != 0) {
         ctxt.Logf("host link:");
@@ -1767,14 +1692,12 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
             continue;
         }
         save = append(save, line);
-
     }    out = bytes.Join(save, null);
 
     if (len(out) > 0) { 
         // always print external output even if the command is successful, so that we don't
         // swallow linker warnings (see https://golang.org/issue/17935).
         ctxt.Logf("%s", out);
-
     }
     if (combineDwarf) {
         var dsym = filepath.Join(flagTmpdir.val, "go.dwarf");
@@ -1848,7 +1771,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
             err = err__prev2;
 
         }
-
         os.Remove(flagOutfile.val);
         {
             var err__prev2 = err;
@@ -1862,7 +1784,6 @@ private static void hostlink(this ptr<Link> _addr_ctxt) => func((defer, _, _) =>
             err = err__prev2;
 
         }
-
     }
     if (ctxt.NeedCodeSign()) {
         err = machoCodeSign(ctxt, flagOutfile.val);
@@ -1887,7 +1808,6 @@ private static bool linkerFlagSupported(ptr<sys.Arch> _addr_arch, @string linker
             }
 
         }
-
     });
 
     @string flagsWithNextArgSkip = new slice<@string>(new @string[] { "-F", "-l", "-L", "-framework", "-Wl,-framework", "-Wl,-rpath", "-Wl,-undefined" });
@@ -1906,7 +1826,8 @@ private static bool linkerFlagSupported(ptr<sys.Arch> _addr_arch, @string linker
         else if (skip) {
             skip = false;
         }
-        else if (f == "" || f[0] != '-')         }
+        else if (f == "" || f[0] != '-') {
+        }
         else if (contains(flagsWithNextArgSkip, f)) {
             skip = true;
         }
@@ -1935,7 +1856,6 @@ private static bool linkerFlagSupported(ptr<sys.Arch> _addr_arch, @string linker
     // GCC says "unrecognized command line option ‘-no-pie’"
     // clang says "unknown argument: '-no-pie'"
     return err == null && !bytes.Contains(out, (slice<byte>)"unrecognized") && !bytes.Contains(out, (slice<byte>)"unknown");
-
 }
 
 // hostlinkArchArgs returns arguments to pass to the external linker
@@ -1972,7 +1892,6 @@ private static slice<@string> hostlinkArchArgs(ptr<sys.Arch> _addr_arch) {
             return new slice<@string>(new @string[] { "-m64" });
         }
         return null;
-
 }
 
 private static var wantHdr = objabi.HeaderString();
@@ -2010,7 +1929,6 @@ private static ptr<Hostobj> ldobj(ptr<Link> _addr_ctxt, ptr<bio.Reader> _addr_f,
             ctxt.Textp = append(ctxt.Textp, textp);
         };
         return _addr_ldhostobj(ldelf, ctxt.HeadType, _addr_f, pkg, length, pn, file)!;
-
     }
     if (magic & ~1 == 0xfeedface || magic & ~0x01000000 == 0xcefaedfe) {
         Action<ptr<Link>, ptr<bio.Reader>, @string, long, @string> ldmacho = (ctxt, f, pkg, length, pn) => {
@@ -2063,7 +1981,6 @@ private static ptr<Hostobj> ldobj(ptr<Link> _addr_ctxt, ptr<bio.Reader> _addr_f,
         // report an error at that time.
         unknownObjFormat = true;
         return _addr_ldhostobj(null, ctxt.HeadType, _addr_f, pkg, length, pn, file)!;
-
     }
     var (line, err) = f.ReadString('\n');
     if (err != null) {
@@ -2079,11 +1996,9 @@ private static ptr<Hostobj> ldobj(ptr<Link> _addr_ctxt, ptr<bio.Reader> _addr_f,
             // old header format: just $GOOS
             Errorf(null, "%s: stale object file", pn);
             return _addr_null!;
-
         }
         Errorf(null, "%s: not an object file: @%d %q", pn, start, line);
         return _addr_null!;
-
     }
     if (line != wantHdr) {
         Errorf(null, "%s: linked object header mismatch:\nhave %q\nwant %q\n", pn, line, wantHdr);
@@ -2127,14 +2042,11 @@ private static ptr<Hostobj> ldobj(ptr<Link> _addr_ctxt, ptr<bio.Reader> _addr_f,
         // Check it here to be sure.
         if (lib.Fingerprint.IsZero()) { // Not yet imported. Update its fingerprint.
             lib.Fingerprint = fingerprint;
-
         }
         checkFingerprint(_addr_lib, fingerprint, lib.Srcref, lib.Fingerprint);
-
     }
     addImports(ctxt, lib, pn);
     return _addr_null!;
-
 }
 
 private static void checkFingerprint(ptr<sym.Library> _addr_lib, goobj.FingerprintType libfp, @string src, goobj.FingerprintType srcfp) {
@@ -2160,7 +2072,6 @@ private static slice<byte> readelfsymboldata(ptr<Link> _addr_ctxt, ptr<elf.File>
         Errorf(null, "reading contents of %s: %v", sym.Name, err);
     }
     return data;
-
 }
 
 private static (slice<byte>, error) readwithpad(io.Reader r, int sz) {
@@ -2174,7 +2085,6 @@ private static (slice<byte>, error) readwithpad(io.Reader r, int sz) {
     }
     data = data[..(int)sz];
     return (data, error.As(null!)!);
-
 }
 
 private static (slice<byte>, error) readnote(ptr<elf.File> _addr_f, slice<byte> name, int typ) {
@@ -2217,9 +2127,7 @@ private static (slice<byte>, error) readnote(ptr<elf.File> _addr_f, slice<byte> 
                 return (desc, error.As(null!)!);
             }
         }
-
     }    return (null, error.As(null!)!);
-
 }
 
 private static @string findshlib(ptr<Link> _addr_ctxt, @string shlib) {
@@ -2238,10 +2146,8 @@ private static @string findshlib(ptr<Link> _addr_ctxt, @string shlib) {
             }
 
         }
-
     }    Errorf(null, "cannot find shared library: %s", shlib);
     return "";
-
 }
 
 private static void ldshlibsyms(ptr<Link> _addr_ctxt, @string shlib) {
@@ -2299,10 +2205,8 @@ private static void ldshlibsyms(ptr<Link> _addr_ctxt, @string shlib) {
                 }
 
             }
-
         }
         deps = append(deps, dep);
-
     }    var (syms, err) = f.DynamicSymbols();
     if (err != null) {
         Errorf(null, "cannot read symbols from shared library: %s", libpath);
@@ -2327,7 +2231,6 @@ private static void ldshlibsyms(ptr<Link> _addr_ctxt, @string shlib) {
                 ver = 0;
                 symname = strings.TrimSuffix(elfsym.Name, ".abi0");
             }
-
         }
         var l = ctxt.loader;
         var s = l.LookupOrCreateSym(symname, ver); 
@@ -2353,7 +2256,6 @@ private static void ldshlibsyms(ptr<Link> _addr_ctxt, @string shlib) {
             if (strings.HasPrefix(sname, "type.") && !strings.HasPrefix(sname, "type..")) {
                 su.SetData(readelfsymboldata(_addr_ctxt, _addr_f, _addr_elfsym));
             }
-
         }
         if (symname != elfsym.Name) {
             l.SetSymExtname(s, elfsym.Name);
@@ -2367,10 +2269,8 @@ private static void ldshlibsyms(ptr<Link> _addr_ctxt, @string shlib) {
             su.SetType(sym.SABIALIAS);
             var (r, _) = su.AddRel(0); // type doesn't matter
             r.SetSym(s);
-
         }
     }    ctxt.Shlibs = append(ctxt.Shlibs, new Shlib(Path:libpath,Hash:hash,Deps:deps,File:f));
-
 }
 
 private static ptr<sym.Section> addsection(ptr<loader.Loader> _addr_ldr, ptr<sys.Arch> _addr_arch, ptr<sym.Segment> _addr_seg, @string name, nint rwx) {
@@ -2385,7 +2285,6 @@ private static ptr<sym.Section> addsection(ptr<loader.Loader> _addr_ldr, ptr<sys
     sect.Align = int32(arch.PtrSize); // everything is at least pointer-aligned
     seg.Sections = append(seg.Sections, sect);
     return _addr_sect!;
-
 }
 
 private partial struct chain {
@@ -2407,7 +2306,6 @@ private static nint callsize(ptr<Link> _addr_ctxt) {
         return 0;
     }
     return ctxt.Arch.RegSize;
-
 }
 
 private partial struct stkChk {
@@ -2437,7 +2335,6 @@ private static void dostkcheck(this ptr<Link> _addr_ctxt) {
     if (buildcfg.GOARCH == "arm64") { 
         // need extra 8 bytes below SP to save FP
         ch.limit -= 8;
-
     }
     {
         var s__prev1 = s;
@@ -2483,7 +2380,6 @@ private static nint check(this ptr<stkChk> _addr_sc, ptr<chain> _addr_up, nint d
             return 0;
         }
         sc.done.Set(s);
-
     }
     if (depth > 500) {
         sc.ctxt.Errorf(s, "nosplit stack check too deep");
@@ -2502,12 +2398,10 @@ private static nint check(this ptr<stkChk> _addr_sc, ptr<chain> _addr_up, nint d
         //    Errorf(s, "call to external function")
         //}
         return -1;
-
     }
     var info = ldr.FuncInfo(s);
     if (!info.Valid()) { // external function. see above.
         return -1;
-
     }
     if (limit < 0) {
         sc.broke(up, limit);
@@ -2531,7 +2425,6 @@ private static nint check(this ptr<stkChk> _addr_sc, ptr<chain> _addr_up, nint d
         }
         var locals = info.Locals();
         limit = objabi.StackLimit + int(locals) + int(ctxt.FixedFrameSize());
-
     }
     var relocs = ldr.Relocs(s);
     ref chain ch1 = ref heap(out ptr<chain> _addr_ch1);
@@ -2554,7 +2447,6 @@ private static nint check(this ptr<stkChk> _addr_sc, ptr<chain> _addr_up, nint d
                 break;
             ri++;
             }
-
             var t = r.Type();
 
             if (t.IsDirectCall()) 
@@ -2578,13 +2470,10 @@ private static nint check(this ptr<stkChk> _addr_sc, ptr<chain> _addr_up, nint d
                 if (sc.check(_addr_ch1, depth + 2) < 0) {
                     return -1;
                 }
-
                     }
-
     }
 
     return 0;
-
 }
 
 private static void broke(this ptr<stkChk> _addr_sc, ptr<chain> _addr_ch, nint limit) {
@@ -2657,7 +2546,6 @@ public static readonly SymbolType AutoSym = 'a';
 // Deleted auto (not a real sym, just placeholder for type)
 public static readonly char DeletedAutoSym = 'x';
 
-
 // defineInternal defines a symbol used internally by the go runtime.
 private static loader.Sym defineInternal(this ptr<Link> _addr_ctxt, @string p, sym.SymKind t) {
     ref Link ctxt = ref _addr_ctxt.val;
@@ -2688,7 +2576,6 @@ private static long datoff(ptr<loader.Loader> _addr_ldr, loader.Sym s, long addr
     }
     ldr.Errorf(s, "invalid datoff %#x", addr);
     return 0;
-
 }
 
 public static long Entryvalue(ptr<Link> _addr_ctxt) {
@@ -2708,7 +2595,6 @@ public static long Entryvalue(ptr<Link> _addr_ctxt) {
         ldr.Errorf(s, "entry not text");
     }
     return ldr.SymValue(s);
-
 }
 
 private static void callgraph(this ptr<Link> _addr_ctxt) {
@@ -2744,7 +2630,6 @@ public static long Rnd(long v, long r) {
     }
     v -= c;
     return v;
-
 }
 
 private static nint bgetc(ptr<bio.Reader> _addr_r) {
@@ -2756,10 +2641,8 @@ private static nint bgetc(ptr<bio.Reader> _addr_r) {
             log.Fatalf("reading input: %v", err);
         }
         return -1;
-
     }
     return int(c);
-
 }
 
 private partial struct markKind { // : byte
@@ -2768,14 +2651,12 @@ private static readonly markKind _ = iota;
 private static readonly var visiting = 0;
 private static readonly var visited = 1;
 
-
 private static slice<ptr<sym.Library>> postorder(slice<ptr<sym.Library>> libs) {
     ref var order = ref heap(make_slice<ptr<sym.Library>>(0, len(libs)), out ptr<var> _addr_order); // hold the result
     var mark = make_map<ptr<sym.Library>, markKind>(len(libs));
     foreach (var (_, lib) in libs) {
         dfs(_addr_lib, mark, _addr_order);
     }    return order;
-
 }
 
 private static void dfs(ptr<sym.Library> _addr_lib, map<ptr<sym.Library>, markKind> mark, ptr<slice<ptr<sym.Library>>> _addr_order) => func((_, panic, _) => {
@@ -2793,7 +2674,6 @@ private static void dfs(ptr<sym.Library> _addr_lib, map<ptr<sym.Library>, markKi
         dfs(_addr_i, mark, _addr_order);
     }    mark[lib] = visited;
     order.val = append(order.val, lib);
-
 });
 
 public static int ElfSymForReloc(ptr<Link> _addr_ctxt, loader.Sym s) {
@@ -2846,7 +2726,6 @@ public static void AddGotSym(ptr<Target> _addr_target, ptr<loader.Loader> _addr_
             // They use a compact stateful bytecode representation.
             // Here we record what are needed and encode them later.
             MachoAddBind(int64(ldr.SymGot(s)), s);
-
         }
     }
     else

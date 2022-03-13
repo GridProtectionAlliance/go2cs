@@ -5,23 +5,25 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package os -- go2cs converted at 2022 March 06 22:13:29 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:55 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\exec_posix.go
-using itoa = go.@internal.itoa_package;
-using execenv = go.@internal.syscall.execenv_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using itoa = @internal.itoa_package;
+using execenv = @internal.syscall.execenv_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// The only signal values guaranteed to be present in the os package on all
+// systems are os.Interrupt (send the process an interrupt) and os.Kill (force
+// the process to exit). On Windows, sending os.Interrupt to a process with
+// os.Process.Signal is not implemented; it will return an error instead of
+// sending a signal.
 
 public static partial class os_package {
 
-    // The only signal values guaranteed to be present in the os package on all
-    // systems are os.Interrupt (send the process an interrupt) and os.Kill (force
-    // the process to exit). On Windows, sending os.Interrupt to a process with
-    // os.Process.Signal is not implemented; it will return an error instead of
-    // sending a signal.
 public static Signal Interrupt = syscall.SIGINT;public static Signal Kill = syscall.SIGKILL;
 
 private static (ptr<Process>, error) startProcess(@string name, slice<@string> argv, ptr<ProcAttr> _addr_attr) {
@@ -43,7 +45,6 @@ private static (ptr<Process>, error) startProcess(@string name, slice<@string> a
             }
 
         }
-
     }
     ptr<syscall.ProcAttr> sysattr = addr(new syscall.ProcAttr(Dir:attr.Dir,Env:attr.Env,Sys:attr.Sys,));
     if (sysattr.Env == null) {
@@ -64,7 +65,6 @@ private static (ptr<Process>, error) startProcess(@string name, slice<@string> a
         return (_addr_null!, error.As(addr(new PathError(Op:"fork/exec",Path:name,Err:e))!)!);
     }
     return (_addr_newProcess(pid, h)!, error.As(null!)!);
-
 }
 
 private static error kill(this ptr<Process> _addr_p) {
@@ -124,7 +124,6 @@ private static @string String(this ptr<ProcessState> _addr_p) {
         var code = status.ExitStatus();
         if (runtime.GOOS == "windows" && uint(code) >= 1 << 16) { // windows uses large hex numbers
             res = "exit status " + uitox(uint(code));
-
         }
         else
  { // unix systems use small decimal integers
@@ -143,7 +142,6 @@ private static @string String(this ptr<ProcessState> _addr_p) {
         res += " (core dumped)";
     }
     return res;
-
 }
 
 // ExitCode returns the exit code of the exited process, or -1
@@ -156,7 +154,6 @@ private static nint ExitCode(this ptr<ProcessState> _addr_p) {
         return -1;
     }
     return p.status.ExitStatus();
-
 }
 
 } // end os_package

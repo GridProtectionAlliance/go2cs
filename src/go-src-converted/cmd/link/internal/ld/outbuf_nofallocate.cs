@@ -5,11 +5,9 @@
 //go:build !darwin && !linux
 // +build !darwin,!linux
 
-// package ld -- go2cs converted at 2022 March 06 23:22:04 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:06 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\outbuf_nofallocate.go
-
-
 namespace go.cmd.link.@internal;
 
 public static partial class ld_package {

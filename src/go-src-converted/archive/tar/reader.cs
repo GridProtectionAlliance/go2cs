@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2022 March 06 22:31:31 UTC
+// package tar -- go2cs converted at 2022 March 13 05:42:26 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Program Files\Go\src\archive\tar\reader.go
-using bytes = go.bytes_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.archive;
 
+using bytes = bytes_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// Reader provides sequential access to the contents of a tar archive.
+// Reader.Next advances to the next file in the archive (including the first),
+// and then Reader can be treated as an io.Reader to access the file's data.
+
+using System;
 public static partial class tar_package {
 
-    // Reader provides sequential access to the contents of a tar archive.
-    // Reader.Next advances to the next file in the archive (including the first),
-    // and then Reader can be treated as an io.Reader to access the file's data.
 public partial struct Reader {
     public io.Reader r;
     public long pad; // Amount of padding (ignored) after current file entry
@@ -57,7 +58,6 @@ private static (ptr<Header>, error) Next(this ptr<Reader> _addr_tr) {
     var (hdr, err) = tr.next();
     tr.err = err;
     return (_addr_hdr!, error.As(err)!);
-
 }
 
 private static (ptr<Header>, error) next(this ptr<Reader> _addr_tr) {
@@ -95,7 +95,6 @@ private static (ptr<Header>, error) next(this ptr<Reader> _addr_tr) {
             err = err__prev1;
 
         }
-
         {
             var err__prev1 = err;
 
@@ -108,7 +107,6 @@ private static (ptr<Header>, error) next(this ptr<Reader> _addr_tr) {
             err = err__prev1;
 
         }
-
         tr.pad = 0;
 
         var (hdr, rawHdr, err) = tr.readHeader();
@@ -127,7 +125,6 @@ private static (ptr<Header>, error) next(this ptr<Reader> _addr_tr) {
             err = err__prev1;
 
         }
-
         format.mayOnlyBe(hdr.Format); 
 
         // Check for PAX/GNU special headers and files.
@@ -172,15 +169,12 @@ private static (ptr<Header>, error) next(this ptr<Reader> _addr_tr) {
                 err = err__prev1;
 
             }
-
             if (gnuLongName != "") {
                 hdr.Name = gnuLongName;
             }
-
             if (gnuLongLink != "") {
                 hdr.Linkname = gnuLongLink;
             }
-
             if (hdr.Typeflag == TypeRegA) {
                 if (strings.HasSuffix(hdr.Name, "/")) {
                     hdr.Typeflag = TypeDir; // Legacy archives use trailing slash for directories
@@ -189,7 +183,6 @@ private static (ptr<Header>, error) next(this ptr<Reader> _addr_tr) {
  {
                     hdr.Typeflag = TypeReg;
                 }
-
             } 
 
             // The extended headers may have updated the size.
@@ -231,11 +224,9 @@ private static (ptr<Header>, error) next(this ptr<Reader> _addr_tr) {
             if (format.has(FormatUSTAR) && format.has(FormatPAX)) {
                 format.mayOnlyBe(FormatUSTAR);
             }
-
             hdr.Format = format;
             return (_addr_hdr!, error.As(null!)!); // This is a file, so stop
             }
-
 }
 
 // handleRegularFile sets up the current file reader and padding such that it
@@ -255,7 +246,6 @@ private static error handleRegularFile(this ptr<Reader> _addr_tr, ptr<Header> _a
     tr.pad = blockPadding(nb);
     tr.curr = addr(new regFileReader(r:tr.r,nb:nb));
     return error.As(null!)!;
-
 }
 
 // handleSparseFile checks if the current file is a sparse format of any type
@@ -280,10 +270,8 @@ private static error handleSparseFile(this ptr<Reader> _addr_tr, ptr<Header> _ad
         }
         var sph = invertSparseEntries(spd, hdr.Size);
         tr.curr = addr(new sparseFileReader(tr.curr,sph,0));
-
     }
     return error.As(err)!;
-
 }
 
 // readGNUSparsePAXHeaders checks the PAX headers for GNU sparse headers.
@@ -321,7 +309,6 @@ private static (sparseDatas, error) readGNUSparsePAXHeaders(this ptr<Reader> _ad
             hdr.Name = name;
         }
     }
-
     var size = hdr.PAXRecords[paxGNUSparseSize];
     if (size == "") {
         size = hdr.PAXRecords[paxGNUSparseRealSize];
@@ -332,13 +319,11 @@ private static (sparseDatas, error) readGNUSparsePAXHeaders(this ptr<Reader> _ad
             return (null, error.As(ErrHeader)!);
         }
         hdr.Size = n;
-
     }
     if (is1x0) {
         return readGNUSparseMap1x0(tr.curr);
     }
     return readGNUSparseMap0x1(hdr.PAXRecords);
-
 }
 
 // mergePAX merges paxHdrs into hdr for all relevant fields of Header.
@@ -386,7 +371,6 @@ private static error mergePAX(ptr<Header> _addr_hdr, map<@string, @string> paxHd
         }
     }    hdr.PAXRecords = paxHdrs;
     return error.As(null!)!;
-
 }
 
 // parsePAX parses PAX headers.
@@ -423,13 +407,11 @@ private static (map<@string, @string>, error) parsePAX(io.Reader r) {
             sparseMap = append(sparseMap, value);
         else 
             paxHdrs[key] = value;
-        
-    }
+            }
     if (len(sparseMap) > 0) {
         paxHdrs[paxGNUSparseMap] = strings.Join(sparseMap, ",");
     }
     return (paxHdrs, error.As(null!)!);
-
 }
 
 // readHeader reads the next block header and assumes that the underlying reader
@@ -454,7 +436,6 @@ private static (ptr<Header>, ptr<block>, error) readHeader(this ptr<Reader> _add
             return (_addr_null!, _addr_null!, error.As(err)!); // EOF is okay here; exactly 0 bytes read
         }
     }
-
     if (bytes.Equal(tr.blk[..], zeroBlock[..])) {
         {
             (_, err) = io.ReadFull(tr.r, tr.blk[..]);
@@ -464,7 +445,6 @@ private static (ptr<Header>, ptr<block>, error) readHeader(this ptr<Reader> _add
             }
 
         }
-
         if (bytes.Equal(tr.blk[..], zeroBlock[..])) {
             return (_addr_null!, _addr_null!, error.As(io.EOF)!); // normal EOF; exactly 2 block of zeros read
         }
@@ -509,12 +489,10 @@ private static (ptr<Header>, ptr<block>, error) readHeader(this ptr<Reader> _add
             if (bytes.IndexFunc(tr.blk[..], notASCII) >= 0) {
                 hdr.Format = FormatUnknown; // Non-ASCII characters in block.
             }
-
             Func<slice<byte>, bool> nul = b => _addr_int(b[len(b) - 1]) == 0!;
             if (!(nul(v7.Size()) && nul(v7.Mode()) && nul(v7.UID()) && nul(v7.GID()) && nul(v7.ModTime()) && nul(ustar.DevMajor()) && nul(ustar.DevMinor()))) {
                 hdr.Format = FormatUnknown; // Numeric fields must end in NUL
             }
-
         else if (format.has(formatSTAR)) 
             var star = tr.blk.STAR();
             prefix = p.parseString(star.Prefix());
@@ -536,7 +514,6 @@ private static (ptr<Header>, ptr<block>, error) readHeader(this ptr<Reader> _add
                 b = b__prev2;
 
             }
-
             {
                 var b__prev2 = b;
 
@@ -603,16 +580,13 @@ private static (ptr<Header>, ptr<block>, error) readHeader(this ptr<Reader> _add
                     }
 
                 }
-
                 hdr.Format = FormatUnknown; // Buggy file is not GNU
             }
-
                 if (len(prefix) > 0) {
             hdr.Name = prefix + "/" + hdr.Name;
         }
     }
     return (_addr_hdr!, _addr__addr_tr.blk!, error.As(p.err)!);
-
 }
 
 // readOldGNUSparseMap reads the sparse map from the old GNU sparse format.
@@ -651,15 +625,12 @@ private static (sparseDatas, error) readOldGNUSparseMap(this ptr<Reader> _addr_t
             if (s.Entry(i).Offset()[0] == 0x00) {
                 break; // Don't return, need to process extended headers (even if empty)
             }
-
             var offset = p.parseNumeric(s.Entry(i).Offset());
             var length = p.parseNumeric(s.Entry(i).Length());
             if (p.err != null) {
                 return (null, error.As(p.err)!);
             }
-
             spd = append(spd, new sparseEntry(Offset:offset,Length:length));
-
         }
 
         if (s.IsExtended()[0] > 0) { 
@@ -672,14 +643,11 @@ private static (sparseDatas, error) readOldGNUSparseMap(this ptr<Reader> _addr_t
                 }
 
             }
-
             s = blk.Sparse();
             continue;
-
         }
         return (spd, error.As(null!)!); // Done
     }
-
 }
 
 // readGNUSparseMap1x0 reads the sparse map as stored in GNU's PAX sparse format
@@ -714,17 +682,14 @@ private static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
                 err = err__prev1;
 
             }
-
             buf.Write(blk[..]);
             foreach (var (_, c) in blk) {
                 if (c == '\n') {
                     cntNewline++;
                 }
             }
-
         }
         return null;
-
     }; 
 
     // nextToken gets the next token delimited by a newline. This assumes that
@@ -748,7 +713,6 @@ private static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
         err = err__prev1;
 
     }
-
     var (numEntries, err) = strconv.ParseInt(nextToken(), 10, 0); // Intentionally parse as native int
     if (err != null || numEntries < 0 || int(2 * numEntries) < int(numEntries)) {
         return (null, error.As(ErrHeader)!);
@@ -764,7 +728,6 @@ private static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
         err = err__prev1;
 
     }
-
     var spd = make(sparseDatas, 0, numEntries);
     for (var i = int64(0); i < numEntries; i++) {
         var (offset, err1) = strconv.ParseInt(nextToken(), 10, 64);
@@ -773,10 +736,8 @@ private static (sparseDatas, error) readGNUSparseMap1x0(io.Reader r) {
             return (null, error.As(ErrHeader)!);
         }
         spd = append(spd, new sparseEntry(Offset:offset,Length:length));
-
     }
     return (spd, error.As(null!)!);
-
 }
 
 // readGNUSparseMap0x1 reads the sparse map as stored in GNU's PAX sparse format
@@ -808,10 +769,8 @@ private static (sparseDatas, error) readGNUSparseMap0x1(map<@string, @string> pa
         }
         spd = append(spd, new sparseEntry(Offset:offset,Length:length));
         sparseMap = sparseMap[(int)2..];
-
     }
     return (spd, error.As(null!)!);
-
 }
 
 // Read reads from the current file in the tar archive.
@@ -837,7 +796,6 @@ private static (nint, error) Read(this ptr<Reader> _addr_tr, slice<byte> b) {
         tr.err = err;
     }
     return (n, error.As(err)!);
-
 }
 
 // writeTo writes the content of the current file to w.
@@ -863,7 +821,6 @@ private static (long, error) writeTo(this ptr<Reader> _addr_tr, io.Writer w) {
         tr.err = err;
     }
     return (n, error.As(err)!);
-
 }
 
 // regFileReader is a fileReader for reading data from a regular file entry.
@@ -891,8 +848,7 @@ private static (nint, error) Read(this ptr<regFileReader> _addr_fr, slice<byte> 
         return (n, error.As(io.EOF)!);
     else 
         return (n, error.As(err)!);
-    
-}
+    }
 
 private static (long, error) WriteTo(this ptr<regFileReader> _addr_fr, io.Writer w) {
     long _p0 = default;
@@ -935,13 +891,11 @@ private static (nint, error) Read(this ptr<sparseFileReader> _addr_sr, slice<byt
         if (sr.pos < holeStart) { // In a data fragment
             var bf = b[..(int)min(int64(len(b)), holeStart - sr.pos)];
             nf, err = tryReadFull(sr.fr, bf);
-
         }
         else
  { // In a hole fragment
             bf = b[..(int)min(int64(len(b)), holeEnd - sr.pos)];
             nf, err = tryReadFull(new zeroReader(), bf);
-
         }
         b = b[(int)nf..];
         sr.pos += int64(nf);
@@ -962,8 +916,7 @@ private static (nint, error) Read(this ptr<sparseFileReader> _addr_sr, slice<byt
         return (n, error.As(io.EOF)!);
     else 
         return (n, error.As(null!)!);
-    
-}
+    }
 
 private static (long, error) WriteTo(this ptr<sparseFileReader> _addr_sr, io.Writer w) {
     long n = default;
@@ -980,7 +933,6 @@ private static (long, error) WriteTo(this ptr<sparseFileReader> _addr_sr, io.Wri
             }
 
         }
-
     }
     if (!ok) {
         return io.Copy(w, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{io.Reader}{sr});
@@ -994,7 +946,6 @@ private static (long, error) WriteTo(this ptr<sparseFileReader> _addr_sr, io.Wri
         if (sr.pos < holeStart) { // In a data fragment
             nf = holeStart - sr.pos;
             nf, err = io.CopyN(ws, sr.fr, nf);
-
         }
         else
  { // In a hole fragment
@@ -1003,9 +954,7 @@ private static (long, error) WriteTo(this ptr<sparseFileReader> _addr_sr, io.Wri
                 writeLastByte = true;
                 nf--;
             }
-
             _, err = ws.Seek(nf, io.SeekCurrent);
-
         }
         sr.pos += nf;
         if (sr.pos >= holeEnd && len(sr.sp) > 1) {
@@ -1029,8 +978,7 @@ private static (long, error) WriteTo(this ptr<sparseFileReader> _addr_sr, io.Wri
         return (n, error.As(errUnrefData)!); // More data in dense file than sparse file
     else 
         return (n, error.As(null!)!);
-    
-}
+    }
 
 private static long LogicalRemaining(this sparseFileReader sr) {
     return sr.sp[len(sr.sp) - 1].endOffset() - sr.pos;
@@ -1062,7 +1010,6 @@ private static (nint, error) mustReadFull(io.Reader r, slice<byte> b) {
         err = io.ErrUnexpectedEOF;
     }
     return (n, error.As(err)!);
-
 }
 
 // tryReadFull is like io.ReadFull except it returns
@@ -1080,7 +1027,6 @@ private static (nint, error) tryReadFull(io.Reader r, slice<byte> b) {
         err = null;
     }
     return (n, error.As(err)!);
-
 }
 
 // discard skips n bytes in r, reporting an error if unable to do so.
@@ -1105,21 +1051,16 @@ private static error discard(io.Reader r, long n) {
                 if (pos2 < 0 || err != null) {
                     return error.As(err)!;
                 }
-
                 seekSkipped = pos2 - pos1;
-
             }
-
         }
     }
-
 
     var (copySkipped, err) = io.CopyN(io.Discard, r, n - seekSkipped);
     if (err == io.EOF && seekSkipped + copySkipped < n) {
         err = io.ErrUnexpectedEOF;
     }
     return error.As(err)!;
-
 }
 
 } // end tar_package

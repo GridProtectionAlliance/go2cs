@@ -5,18 +5,17 @@
 //go:build windows || darwin
 // +build windows darwin
 
-// package robustio -- go2cs converted at 2022 March 06 23:18:39 UTC
+// package robustio -- go2cs converted at 2022 March 13 06:32:02 UTC
 // import "cmd/go/internal/robustio" ==> using robustio = go.cmd.go.@internal.robustio_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\robustio\robustio_flaky.go
-using errors = go.errors_package;
-using rand = go.math.rand_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using errors = errors_package;
+using rand = math.rand_package;
+using os = os_package;
+using syscall = syscall_package;
+using time = time_package;
+using System;
 
 public static partial class robustio_package {
 
@@ -54,14 +53,11 @@ private static error retry(Func<(error, bool)> f) {
             }
 
         }
-
         time.Sleep(nextSleep);
         nextSleep += time.Duration(rand.Int63n(int64(nextSleep)));
-
     }
 
     return error.As(bestErr)!;
-
 }
 
 // rename is like os.Rename, but retries ephemeral errors.
@@ -97,10 +93,8 @@ private static (slice<byte>, error) readFile(@string filename) {
         // as a spurious error, but the file may also genuinely not exist, so the
         // increase in robustness is probably not worth the extra latency.
         return (err, error.As(isEphemeralError(err) && !errors.Is(err, errFileNotFound))!);
-
     });
     return (b, error.As(err)!);
-
 }
 
 private static error removeAll(@string path) {

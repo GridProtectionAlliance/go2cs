@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2022 March 06 23:23:15 UTC
+// package binutils -- go2cs converted at 2022 March 13 06:36:19 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\addr2liner_llvm.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using exec = go.os.exec_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+using exec = os.exec_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
 
 public static partial class binutils_package {
 
 private static readonly @string defaultLLVMSymbolizer = "llvm-symbolizer";
-
 
 // llvmSymbolizer is a connection to an llvm-symbolizer command for
 // obtaining address and line number information from a binary.
@@ -65,7 +64,6 @@ private static (@string, error) readLine(this ptr<llvmSymbolizerJob> _addr_a) {
         return ("", error.As(err)!);
     }
     return (strings.TrimSpace(s), error.As(null!)!);
-
 }
 
 // close releases any resources used by the llvmSymbolizer object.
@@ -114,11 +112,9 @@ private static (ptr<llvmSymbolizer>, error) newLLVMSymbolizer(@string cmd, @stri
 
     }
 
-
     ptr<llvmSymbolizer> a = addr(new llvmSymbolizer(filename:file,rw:j,base:base,));
 
     return (_addr_a!, error.As(null!)!);
-
 }
 
 // readFrame parses the llvm-symbolizer output for a single address. It
@@ -180,17 +176,14 @@ private static (plugin.Frame, bool) readFrame(this ptr<llvmSymbolizer> _addr_d) 
                         }
 
                     }
-
                     break;
                 default: 
 
                     break;
             }
         }
-
     }
     return (new plugin.Frame(Func:funcname,File:fileline,Line:linenumber), false);
-
 }
 
 // addrInfo returns the stack frame information for a specific program
@@ -211,7 +204,6 @@ private static (slice<plugin.Frame>, error) addrInfo(this ptr<llvmSymbolizer> _a
         }
     }
 
-
     slice<plugin.Frame> stack = default;
     while (true) {
         var (frame, end) = d.readFrame();
@@ -224,7 +216,6 @@ private static (slice<plugin.Frame>, error) addrInfo(this ptr<llvmSymbolizer> _a
     }
 
     return (stack, error.As(null!)!);
-
 });
 
 } // end binutils_package

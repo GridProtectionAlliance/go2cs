@@ -6,19 +6,17 @@
 // +build linux
 // +build mips64 mips64le
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:05 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:36 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\syscall_linux_mips64x.go
-
-
 namespace go;
 
 public static partial class syscall_package {
 
-    // archHonorsR2 captures the fact that r2 is honored by the
-    // runtime.GOARCH.  Syscall conventions are generally r1, r2, err :=
-    // syscall(trap, ...).  Not all architectures define r2 in their
-    // ABI. See "man syscall".
+// archHonorsR2 captures the fact that r2 is honored by the
+// runtime.GOARCH.  Syscall conventions are generally r1, r2, err :=
+// syscall(trap, ...).  Not all architectures define r2 in their
+// ABI. See "man syscall".
 private static readonly var archHonorsR2 = true;
 
 
@@ -140,7 +138,6 @@ public static (nint, error) Select(nint nfd, ptr<FdSet> _addr_r, ptr<FdSet> _add
         ts = addr(new Timespec(Sec:timeout.Sec,Nsec:timeout.Usec*1000));
     }
     return pselect(nfd, r, w, e, ts, null);
-
 }
 
 //sys    futimesat(dirfd int, path string, times *[2]Timeval) (err error)
@@ -160,7 +157,6 @@ public static (Time_t, error) Time(ptr<Time_t> _addr_t) {
         t = Time_t(tv.Sec);
     }
     return (Time_t(tv.Sec), error.As(null!)!);
-
 }
 
 //sys    Utime(path string, buf *Utimbuf) (err error)
@@ -185,7 +181,6 @@ public static error Pipe(slice<nint> p) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 //sysnb pipe2(p *[2]_C_int, flags int) (err error)
@@ -201,7 +196,6 @@ public static error Pipe2(slice<nint> p, nint flags) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 public static error Ioperm(nint from, nint num, nint on) {

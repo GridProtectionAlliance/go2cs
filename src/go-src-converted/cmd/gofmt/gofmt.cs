@@ -2,29 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:19:45 UTC
+// package main -- go2cs converted at 2022 March 13 06:32:34 UTC
 // Original source: C:\Program Files\Go\src\cmd\gofmt\gofmt.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using printer = go.go.printer_package;
-using scanner = go.go.scanner_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using pprof = go.runtime.pprof_package;
-using strings = go.strings_package;
-
-using diff = go.cmd.@internal.diff_package;
-using System;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using printer = go.printer_package;
+using scanner = go.scanner_package;
+using token = go.token_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using pprof = runtime.pprof_package;
+using strings = strings_package;
+
+using diff = cmd.@internal.diff_package;
+using System;
 
 public static partial class main_package {
 
@@ -41,7 +40,6 @@ private static readonly var printerMode = printer.UseSpaces | printer.TabIndent 
 //
 // This value is defined in go/printer specifically for go/format and cmd/gofmt.
 private static readonly nint printerNormalizeNumbers = 1 << 30;
-
 
 private static var fileSet = token.NewFileSet();private static nint exitCode = 0;private static Func<ptr<ast.File>, ptr<ast.File>> rewrite = default;private static parser.Mode parserMode = default;
 
@@ -66,7 +64,6 @@ private static bool isGoFile(fs.DirEntry f) {
     // ignore non-Go files
     var name = f.Name();
     return !f.IsDir() && !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".go");
-
 }
 
 // If in == nil, the source is the contents of the file with the given filename.
@@ -84,7 +81,6 @@ private static error processFile(@string filename, io.Reader @in, io.Writer @out
         }
         in = f;
         perm = fi.Mode().Perm();
-
     }
     var (src, err) = io.ReadAll(in);
     if (err != null) {
@@ -123,18 +119,15 @@ private static error processFile(@string filename, io.Reader @in, io.Writer @out
             if (err != null) {
                 return error.As(err)!;
             }
-
             err = os.WriteFile(filename, res, perm);
             if (err != null) {
                 os.Rename(bakname, filename);
                 return error.As(err)!;
             }
-
             err = os.Remove(bakname);
             if (err != null) {
                 return error.As(err)!;
             }
-
         }
         if (doDiff.val) {
             var (data, err) = diffWithReplaceTempFile(src, res, filename);
@@ -149,7 +142,6 @@ private static error processFile(@string filename, io.Reader @in, io.Writer @out
         _, err = @out.Write(res);
     }
     return error.As(err)!;
-
 });
 
 private static error visitFile(@string path, fs.DirEntry f, error err) {
@@ -163,9 +155,7 @@ private static error visitFile(@string path, fs.DirEntry f, error err) {
             report(err);
         }
     }
-
     return error.As(null!)!;
-
 }
 
 private static void Main() { 
@@ -174,7 +164,6 @@ private static void Main() {
     // run before the exit.
     gofmtMain();
     os.Exit(exitCode);
-
 }
 
 private static void gofmtMain() => func((defer, _, _) => {
@@ -191,7 +180,6 @@ private static void gofmtMain() => func((defer, _, _) => {
         defer(f.Close());
         pprof.StartCPUProfile(f);
         defer(pprof.StopCPUProfile());
-
     }
     initParserMode();
     initRewrite();
@@ -215,9 +203,7 @@ private static void gofmtMain() => func((defer, _, _) => {
             err = err__prev2;
 
         }
-
         return ;
-
     }
     foreach (var (_, arg) in args) {
         {
@@ -242,7 +228,6 @@ private static void gofmtMain() => func((defer, _, _) => {
                     err = err__prev1;
 
                 }
-
             else 
                 // Directories are walked, ignoring non-Go files.
                 {
@@ -259,10 +244,8 @@ private static void gofmtMain() => func((defer, _, _) => {
                 }
 
 
-
             err = err__prev1;
         }
-
     }
 });
 
@@ -275,7 +258,6 @@ private static (slice<byte>, error) diffWithReplaceTempFile(slice<byte> b1, slic
         return replaceTempFilename(data, filename);
     }
     return (data, error.As(err)!);
-
 }
 
 // replaceTempFilename replaces temporary filenames in diff with actual one.
@@ -308,7 +290,6 @@ private static (slice<byte>, error) replaceTempFilename(slice<byte> diff, @strin
         i = i__prev1;
 
     }
-
     {
         var i__prev1 = i;
 
@@ -325,7 +306,6 @@ private static (slice<byte>, error) replaceTempFilename(slice<byte> diff, @strin
     bs[0] = (slice<byte>)fmt.Sprintf("--- %s%s", f + ".orig", t0);
     bs[1] = (slice<byte>)fmt.Sprintf("+++ %s%s", f, t1);
     return (bytes.Join(bs, new slice<byte>(new byte[] { '\n' })), error.As(null!)!);
-
 }
 
 private static readonly var chmodSupported = runtime.GOOS != "windows";
@@ -365,9 +345,7 @@ private static (@string, error) backupFile(@string filename, slice<byte> data, f
         }
     }
 
-
     return (bakname, error.As(err)!);
-
 }
 
 } // end main_package

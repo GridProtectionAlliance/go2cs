@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package multipart -- go2cs converted at 2022 March 06 22:21:09 UTC
+// package multipart -- go2cs converted at 2022 March 13 05:36:16 UTC
 // import "mime/multipart" ==> using multipart = go.mime.multipart_package
 // Original source: C:\Program Files\Go\src\mime\multipart\formdata.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using math = go.math_package;
-using textproto = go.net.textproto_package;
-using os = go.os_package;
-using System;
-
-
 namespace go.mime;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using io = io_package;
+using math = math_package;
+using textproto = net.textproto_package;
+using os = os_package;
+
+
+// ErrMessageTooLarge is returned by ReadForm if the message form
+// data is too large to be processed.
+
+using System;
 public static partial class multipart_package {
 
-    // ErrMessageTooLarge is returned by ReadForm if the message form
-    // data is too large to be processed.
 public static var ErrMessageTooLarge = errors.New("multipart: message too large");
 
 // TODO(adg,bradfitz): find a way to unify the DoS-prevention strategy here
@@ -85,15 +86,12 @@ private static (ptr<Form>, error) readForm(this ptr<Reader> _addr_r, long maxMem
             if (err != null && err != io.EOF) {
                 return (_addr_null!, error.As(err)!);
             }
-
             maxValueBytes -= n;
             if (maxValueBytes < 0) {
                 return (_addr_null!, error.As(ErrMessageTooLarge)!);
             }
-
             form.Value[name] = append(form.Value[name], b.String());
             continue;
-
         }
         ptr<FileHeader> fh = addr(new FileHeader(Filename:filename,Header:p.Header,));
         (n, err) = io.CopyN(_addr_b, p, maxMemory + 1);
@@ -106,7 +104,6 @@ private static (ptr<Form>, error) readForm(this ptr<Reader> _addr_r, long maxMem
             if (err != null) {
                 return (_addr_null!, error.As(err)!);
             }
-
             var (size, err) = io.Copy(file, io.MultiReader(_addr_b, p));
             {
                 var cerr = file.Close();
@@ -116,15 +113,12 @@ private static (ptr<Form>, error) readForm(this ptr<Reader> _addr_r, long maxMem
                 }
 
             }
-
             if (err != null) {
                 os.Remove(file.Name());
                 return (_addr_null!, error.As(err)!);
             }
-
             fh.tmpfile = file.Name();
             fh.Size = size;
-
         }
         else
  {
@@ -134,11 +128,9 @@ private static (ptr<Form>, error) readForm(this ptr<Reader> _addr_r, long maxMem
             maxValueBytes -= n;
         }
         form.File[name] = append(form.File[name], fh);
-
     }
 
     return (_addr_form!, error.As(null!)!);
-
 });
 
 // Form is a parsed multipart form.
@@ -166,7 +158,6 @@ private static error RemoveAll(this ptr<Form> _addr_f) {
             }
         }
     }    return error.As(err)!;
-
 }
 
 // A FileHeader describes a file part of a multipart request.
@@ -192,9 +183,7 @@ private static (File, error) Open(this ptr<FileHeader> _addr_fh) {
             return (new sectionReadCloser(r), error.As(null!)!);
         }
     }
-
     return os.Open(fh.tmpfile);
-
 }
 
 // File is an interface to access the file part of a multipart message.

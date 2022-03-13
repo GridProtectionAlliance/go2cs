@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:15:42 UTC
+//     Generated on 2022 March 13 06:29:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace cmd
 {
     public static partial class pkg_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ExportedStructOneField
         {
             // Constructors
@@ -53,7 +53,7 @@ namespace cmd
             public static implicit operator ExportedStructOneField(NilType nil) => default(ExportedStructOneField);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ExportedStructOneField ExportedStructOneField_cast(dynamic value)
         {
             return new ExportedStructOneField(value.OnlyField);

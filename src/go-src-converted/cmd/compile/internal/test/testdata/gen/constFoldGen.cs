@@ -8,15 +8,15 @@
 // launch with `go run constFoldGen.go` a file called constFold_test.go
 // will be written into the grandparent directory containing the tests.
 
-// package main -- go2cs converted at 2022 March 06 23:15:03 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:33 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\test\testdata\gen\constFoldGen.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using format = go.go.format_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using format = go.format_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
 
 public static partial class main_package {
 
@@ -77,7 +77,6 @@ private static @string ansU(ulong i, ulong j, @string t, @string op) {
             break;
     }
     return fmt.Sprintf("%d", ans);
-
 }
 
 // compute the result of i op j, cast as type t.
@@ -122,7 +121,6 @@ private static @string ansS(long i, long j, @string t, @string op) {
             break;
     }
     return fmt.Sprintf("%d", ans);
-
 }
 
 private static void Main() => func((_, panic, _) => {
@@ -146,9 +144,7 @@ private static void Main() => func((_, panic, _) => {
                         // shifts handled separately below, as they can have
                         // different types on the LHS and RHS.
                         continue;
-
                     }
-
                     fmt.Fprintf(w, "func TestConstFold%s%s(t *testing.T) {\n", s.name, o.name);
                     fmt.Fprintf(w, "\tvar x, y, r %s\n", s.name); 
                     // unsigned test cases
@@ -212,7 +208,6 @@ private static void Main() => func((_, panic, _) => {
                     }
 
                     fmt.Fprintf(w, "}\n");
-
                 }
 
                 o = o__prev2;
@@ -292,7 +287,6 @@ private static void Main() => func((_, panic, _) => {
                     }
 
                     fmt.Fprintf(w, "}\n");
-
                 }
 
                 o = o__prev3;
@@ -324,7 +318,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x == y { t.Errorf(\"%%d == %%d\", x, y) }\n");
                             }
-
                             if (x != y) {
                                 fmt.Fprintf(w, "\t\tif !(x != y) { t.Errorf(\"!(%%d != %%d)\", x, y) }\n");
                             }
@@ -332,7 +325,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x != y { t.Errorf(\"%%d != %%d\", x, y) }\n");
                             }
-
                             if (x < y) {
                                 fmt.Fprintf(w, "\t\tif !(x < y) { t.Errorf(\"!(%%d < %%d)\", x, y) }\n");
                             }
@@ -340,7 +332,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x < y { t.Errorf(\"%%d < %%d\", x, y) }\n");
                             }
-
                             if (x > y) {
                                 fmt.Fprintf(w, "\t\tif !(x > y) { t.Errorf(\"!(%%d > %%d)\", x, y) }\n");
                             }
@@ -348,7 +339,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x > y { t.Errorf(\"%%d > %%d\", x, y) }\n");
                             }
-
                             if (x <= y) {
                                 fmt.Fprintf(w, "\t\tif !(x <= y) { t.Errorf(\"!(%%d <= %%d)\", x, y) }\n");
                             }
@@ -356,7 +346,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x <= y { t.Errorf(\"%%d <= %%d\", x, y) }\n");
                             }
-
                             if (x >= y) {
                                 fmt.Fprintf(w, "\t\tif !(x >= y) { t.Errorf(\"!(%%d >= %%d)\", x, y) }\n");
                             }
@@ -364,9 +353,7 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x >= y { t.Errorf(\"%%d >= %%d\", x, y) }\n");
                             }
-
                             fmt.Fprintf(w, "\t}\n");
-
                         }
 
                         y = y__prev3;
@@ -396,7 +383,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x == y { t.Errorf(\"%%d == %%d\", x, y) }\n");
                             }
-
                             if (x != y) {
                                 fmt.Fprintf(w, "\t\tif !(x != y) { t.Errorf(\"!(%%d != %%d)\", x, y) }\n");
                             }
@@ -404,7 +390,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x != y { t.Errorf(\"%%d != %%d\", x, y) }\n");
                             }
-
                             if (x < y) {
                                 fmt.Fprintf(w, "\t\tif !(x < y) { t.Errorf(\"!(%%d < %%d)\", x, y) }\n");
                             }
@@ -412,7 +397,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x < y { t.Errorf(\"%%d < %%d\", x, y) }\n");
                             }
-
                             if (x > y) {
                                 fmt.Fprintf(w, "\t\tif !(x > y) { t.Errorf(\"!(%%d > %%d)\", x, y) }\n");
                             }
@@ -420,7 +404,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x > y { t.Errorf(\"%%d > %%d\", x, y) }\n");
                             }
-
                             if (x <= y) {
                                 fmt.Fprintf(w, "\t\tif !(x <= y) { t.Errorf(\"!(%%d <= %%d)\", x, y) }\n");
                             }
@@ -428,7 +411,6 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x <= y { t.Errorf(\"%%d <= %%d\", x, y) }\n");
                             }
-
                             if (x >= y) {
                                 fmt.Fprintf(w, "\t\tif !(x >= y) { t.Errorf(\"!(%%d >= %%d)\", x, y) }\n");
                             }
@@ -436,9 +418,7 @@ private static void Main() => func((_, panic, _) => {
  {
                                 fmt.Fprintf(w, "\t\tif x >= y { t.Errorf(\"%%d >= %%d\", x, y) }\n");
                             }
-
                             fmt.Fprintf(w, "\t}\n");
-
                         }
 
                         y = y__prev3;
@@ -449,7 +429,6 @@ private static void Main() => func((_, panic, _) => {
             }
 
             fmt.Fprintf(w, "}\n");
-
         }
         s = s__prev1;
     }

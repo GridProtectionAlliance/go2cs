@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2022 March 06 23:22:58 UTC
+// package trace -- go2cs converted at 2022 March 13 06:36:02 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Program Files\Go\src\internal\trace\parser.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using rand = go.math.rand_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using _@unsafe_ = go.@unsafe_package;
-using System;
-
-
 namespace go.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using rand = math.rand_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using _@unsafe_ = @unsafe_package;
+using System;
 
 public static partial class trace_package {
 
@@ -37,9 +36,7 @@ private static @string goCmd() {
             return path;
         }
     }
-
     return "go";
-
 }
 
 // Event describes one event in the trace.
@@ -106,7 +103,6 @@ public static (ParseResult, error) Parse(io.Reader r, @string bin) {
         return (new ParseResult(), error.As(fmt.Errorf("for traces produced by go 1.6 or below, the binary argument must be provided"))!);
     }
     return (res, error.As(null!)!);
-
 }
 
 // parse parses, post-processes and verifies the trace. It returns the
@@ -142,10 +138,8 @@ private static (nint, ParseResult, error) parse(io.Reader r, @string bin) {
             }
 
         }
-
     }
     return (ver, new ParseResult(Events:events,Stacks:stacks), error.As(null!)!);
-
 }
 
 // rawEvent is a helper type used during parsing.
@@ -241,33 +235,27 @@ private static (nint, slice<rawEvent>, map<ulong, @string>, error) readTrace(io.
             if (err != null) {
                 return ;
             }
-
             if (id == 0) {
                 err = fmt.Errorf("string at offset %d has invalid id 0", off);
                 return ;
             }
-
             if (strings[id] != "") {
                 err = fmt.Errorf("string at offset %d has duplicate id %v", off, id);
                 return ;
             }
-
             ulong ln = default;
             ln, off, err = readVal(r, off);
             if (err != null) {
                 return ;
             }
-
             if (ln == 0) {
                 err = fmt.Errorf("string at offset %d has invalid length 0", off);
                 return ;
             }
-
             if (ln > 1e6F) {
                 err = fmt.Errorf("string at offset %d has too large length %v", off, ln);
                 return ;
             }
-
             buf = make_slice<byte>(ln);
             n = default;
             n, err = io.ReadFull(r, buf);
@@ -275,11 +263,9 @@ private static (nint, slice<rawEvent>, map<ulong, @string>, error) readTrace(io.
                 err = fmt.Errorf("failed to read trace at offset %d: read %v, want %v, error %v", off, n, ln, err);
                 return ;
             }
-
             off += n;
             strings[id] = string(buf);
             continue;
-
         }
         rawEvent ev = new rawEvent(typ:typ,off:off0);
         if (narg < inlineArgs) {
@@ -293,8 +279,6 @@ private static (nint, slice<rawEvent>, map<ulong, @string>, error) readTrace(io.
                 ev.args = append(ev.args, v);
             }
         else
-
-
         } { 
             // More than inlineArgs args, the first value is length of the event in bytes.
             v = default;
@@ -303,7 +287,6 @@ private static (nint, slice<rawEvent>, map<ulong, @string>, error) readTrace(io.
                 err = fmt.Errorf("failed to read event %v argument at offset %v (%v)", typ, off, err);
                 return ;
             }
-
             var evLen = v;
             var off1 = off;
             while (evLen > uint64(off - off1)) {
@@ -319,7 +302,6 @@ private static (nint, slice<rawEvent>, map<ulong, @string>, error) readTrace(io.
                 err = fmt.Errorf("event has wrong length at offset 0x%x: want %v, got %v", off0, evLen, off - off1);
                 return ;
             }
-
         }
 
         if (ev.typ == EvUserLog) // EvUserLog records are followed by a value string of length ev.args[len(ev.args)-1]
@@ -327,10 +309,8 @@ private static (nint, slice<rawEvent>, map<ulong, @string>, error) readTrace(io.
             s, off, err = readStr(r, off);
             ev.sargs = append(ev.sargs, s);
                 events = append(events, ev);
-
     }
     return ;
-
 }
 
 private static (@string, nint, error) readStr(io.Reader r, nint off0) {
@@ -352,7 +332,6 @@ private static (@string, nint, error) readStr(io.Reader r, nint off0) {
         return ("", off + n, error.As(fmt.Errorf("failed to read trace at offset %d: read %v, want %v, error %v", off, n, sz, err))!);
     }
     return (string(buf), off + n, error.As(null!)!);
-
 }
 
 // parseHeader parses trace header of the form "go 1.7 trace\x00\x00\x00\x00"
@@ -378,7 +357,6 @@ private static (nint, error) parseHeader(slice<byte> buf) {
         return (0, error.As(fmt.Errorf("not a trace file"))!);
     }
     return (ver, error.As(null!)!);
-
 }
 
 // Parse events transforms raw events into events.
@@ -420,7 +398,6 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
  {
                 lastTs = int64(raw.args[1]);
             }
-
         else if (raw.typ == EvFrequency) 
             ticksPerSec = int64(raw.args[0]);
             if (ticksPerSec <= 0) { 
@@ -429,9 +406,7 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
                 // ticks on different CPUs.
                 err = ErrTimeOrder;
                 return ;
-
             }
-
         else if (raw.typ == EvTimerGoroutine) 
             timerGoids[raw.args[0]] = true;
         else if (raw.typ == EvStack) 
@@ -470,16 +445,13 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
                             var line = raw.args[2 + i * 4 + 3];
                             stk[i] = addr(new Frame(PC:pc,Fn:strings[fn],File:strings[file],Line:int(line)));
                         }
-
                     }
 
 
                     i = i__prev2;
                 }
                 stacks[id] = stk;
-
             }
-
         else 
             ptr<Event> e = addr(new Event(Off:raw.off,Type:raw.typ,P:lastP,G:lastG));
             nint argOffset = default;
@@ -494,7 +466,6 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
                 e.Ts = lastTs + int64(raw.args[0]);
                 argOffset = 1;
             }
-
             lastTs = e.Ts;
             {
                 nint i__prev2 = i;
@@ -507,7 +478,6 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
  {
                         e.Args[i - argOffset] = raw.args[i];
                     }
-
                 }
 
 
@@ -550,8 +520,7 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
                 // e.Args 0: taskID, 1:keyID, 2: stackID
                 e.SArgs = new slice<@string>(new @string[] { strings[e.Args[1]], raw.sargs[0] });
                         batches[lastP] = append(batches[lastP], e);
-        
-    }    if (len(batches) == 0) {
+            }    if (len(batches) == 0) {
         err = fmt.Errorf("trace is empty");
         return ;
     }
@@ -583,7 +552,6 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
 
             i = i__prev1;
         }
-
     }
     if (ver < 1007) {
         events, err = order1005(batches);
@@ -608,7 +576,6 @@ private static (slice<ptr<Event>>, map<ulong, slice<ptr<Frame>>>, error) parseEv
             ev.P = SyscallP;
         }
     }    return ;
-
 }
 
 // removeFutile removes all constituents of futile wakeups (block, unblock, start).
@@ -657,8 +624,7 @@ private static slice<ptr<Event>> removeFutile(slice<ptr<Event>> events) {
                     }
                 }
                 delete(gs, ev.G);
-            
-        }
+                    }
         ev = ev__prev1;
     }
 
@@ -676,7 +642,6 @@ private static slice<ptr<Event>> removeFutile(slice<ptr<Event>> events) {
     }
 
     return newEvents;
-
 }
 
 // ErrTimeOrder is returned by Parse when the trace contains
@@ -727,7 +692,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
             return error.As(fmt.Errorf("g 0 did %v (offset %v, time %v)", EventDescriptions[ev.Type].Name, ev.Off, ev.Ts))!;
         }
         return error.As(null!)!;
-
     };
 
     foreach (var (_, ev) in events) {
@@ -766,26 +730,20 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
             if (ver < 1010) { 
                 // Before 1.10, EvGCSTWStart was per-P.
                 evp = _addr_p.evSTW;
-
             }
-
             if (evp != null.val) {
                 return error.As(fmt.Errorf("previous STW is not ended before a new one (offset %v, time %v)", ev.Off, ev.Ts))!;
             }
-
             evp.val = ev;
         else if (ev.Type == EvGCSTWDone) 
             evp = _addr_evSTW;
             if (ver < 1010) { 
                 // Before 1.10, EvGCSTWDone was per-P.
                 evp = _addr_p.evSTW;
-
             }
-
             if (evp == null.val) {
                 return error.As(fmt.Errorf("bogus STW end (offset %v, time %v)", ev.Off, ev.Ts))!;
             }
-
             (evp.val).Link = ev;
             evp.val = null;
         else if (ev.Type == EvGCSweepStart) 
@@ -836,7 +794,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 err = err__prev1;
 
             }
-
             {
                 var (_, ok) = gs[ev.Args[0]];
 
@@ -845,7 +802,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 }
 
             }
-
             gs[ev.Args[0]] = new gdesc(state:gRunnable,ev:ev,evCreate:ev);
         else if (ev.Type == EvGoStart || ev.Type == EvGoStartLabel) 
             if (g.state != gRunnable) {
@@ -861,22 +817,17 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 if (ver < 1007) { 
                     // +1 because symbolizer expects return pc.
                     ev.Stk = new slice<ptr<Frame>>(new ptr<Frame>[] { {PC:g.evCreate.Args[1]+1} });
-
                 }
                 else
  {
                     ev.StkID = g.evCreate.Args[1];
                 }
-
                 g.evCreate = null;
-
             }
-
             if (g.ev != null) {
                 g.ev.Link = ev;
                 g.ev = null;
             }
-
         else if (ev.Type == EvGoEnd || ev.Type == EvGoStop) 
             {
                 var err__prev1 = err;
@@ -890,7 +841,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 err = err__prev1;
 
             }
-
             g.evStart.Link = ev;
             g.evStart = null;
             g.state = gDead;
@@ -910,9 +860,7 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 }
 
                 delete(activeRegions, ev.G);
-
             }
-
         else if (ev.Type == EvGoSched || ev.Type == EvGoPreempt) 
             {
                 var err__prev1 = err;
@@ -926,7 +874,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 err = err__prev1;
 
             }
-
             g.state = gRunnable;
             g.evStart.Link = ev;
             g.evStart = null;
@@ -965,7 +912,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 err = err__prev1;
 
             }
-
             g.ev = ev;
         else if (ev.Type == EvGoSysBlock) 
             {
@@ -980,7 +926,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 err = err__prev1;
 
             }
-
             g.state = gWaiting;
             g.evStart.Link = ev;
             g.evStart = null;
@@ -1007,7 +952,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 err = err__prev1;
 
             }
-
             g.state = gWaiting;
             g.ev = ev;
             g.evStart.Link = ev;
@@ -1023,7 +967,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 }
 
             }
-
             tasks[ev.Args[0]] = ev;
         else if (ev.Type == EvUserTaskEnd) 
             taskid = ev.Args[0];
@@ -1036,7 +979,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                 }
 
             }
-
         else if (ev.Type == EvUserRegion) 
             var mode = ev.Args[1];
             regions = activeRegions[ev.G];
@@ -1049,7 +991,6 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
                     var s = regions[n - 1];
                     if (s.Args[0] != ev.Args[0] || s.SArgs[0] != ev.SArgs[0]) { // task id, region name mismatch
                         return error.As(fmt.Errorf("misuse of region in goroutine %d: span end %q when the inner-most active span start event is %q", ev.G, ev, s))!;
-
                     } 
                     // Link region start event with span end event
                     s.Link = ev;
@@ -1061,20 +1002,15 @@ private static error postProcessTrace(nint ver, slice<ptr<Event>> events) {
  {
                         delete(activeRegions, ev.G);
                     }
-
                 }
-
             }
             else
  {
                 return error.As(fmt.Errorf("invalid user region mode: %q", ev))!;
             }
-
                 gs[ev.G] = g;
         ps[ev.P] = p;
-
     }    return error.As(null!)!;
-
 }
 
 // symbolize attaches func/file/line info to stack traces.
@@ -1164,9 +1100,7 @@ private static error symbolize(slice<ptr<Event>> events, @string bin) {
                 }
 
             }
-
             pcs[pc] = f;
-
         }
         pc = pc__prev1;
     }
@@ -1195,7 +1129,6 @@ private static error symbolize(slice<ptr<Event>> events, @string bin) {
     }
 
     return error.As(null!)!;
-
 }
 
 // readVal reads unsigned base-128 value from r.
@@ -1219,7 +1152,6 @@ private static (ulong, nint, error) readVal(io.Reader r, nint off0) {
         }
     }
     return (0, 0, error.As(fmt.Errorf("bad value at offset 0x%x", off0))!);
-
 }
 
 // Print dumps events to stdout. For debugging.
@@ -1269,7 +1201,6 @@ private static @string String(this ptr<Event> _addr_ev) {
     }
 
     return w.String();
-
 }
 
 // argNum returns total number of args for the event accounting for timestamps,
@@ -1307,7 +1238,6 @@ private static nint argNum(rawEvent raw, nint ver) {
             narg--; // 1.10 added an argument
         }
         return narg;
-
 }
 
 // BreakTimestampsForTesting causes the parser to randomly alter timestamps (for testing of broken cputicks).
@@ -1365,7 +1295,6 @@ public static readonly nint EvUserTaskEnd = 46; // end of task [timestamp, inter
 public static readonly nint EvUserRegion = 47; // trace.WithRegion [timestamp, internal task id, mode(0:start, 1:end), stack, name string]
 public static readonly nint EvUserLog = 48; // trace.Log [timestamp, internal id, key string id, stack, value string]
 public static readonly nint EvCount = 49;
-
 
 
 

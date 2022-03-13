@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:31 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:54 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\copyelim.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // copyelim removes all uses of OpCopy values from f.
-    // A subsequent deadcode pass is needed to actually remove the copies.
+// copyelim removes all uses of OpCopy values from f.
+// A subsequent deadcode pass is needed to actually remove the copies.
 private static void copyelim(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
  
@@ -105,7 +103,6 @@ private static ptr<Value> copySource(ptr<Value> _addr_v) {
             slow = slow.Args[0];
         }
         advance = !advance;
-
     } 
 
     // The answer is w.  Update all the copies we saw
@@ -118,7 +115,6 @@ private static ptr<Value> copySource(ptr<Value> _addr_v) {
         v = x;
     }
     return _addr_w!;
-
 }
 
 // copyelimValue ensures that no args of v are copies.

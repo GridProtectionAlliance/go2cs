@@ -8,29 +8,32 @@
 // It is an internal package because these details are specific
 // to the Go team's test setup (on build.golang.org) and not
 // fundamental to tests in general.
-// package testenv -- go2cs converted at 2022 March 06 23:36:29 UTC
+
+// package testenv -- go2cs converted at 2022 March 13 06:44:33 UTC
 // import "internal/testenv" ==> using testenv = go.@internal.testenv_package
 // Original source: C:\Program Files\Go\src\internal\testenv\testenv.go
-using errors = go.errors_package;
-using flag = go.flag_package;
-using cfg = go.@internal.cfg_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using testing = go.testing_package;
-
 namespace go.@internal;
+
+using errors = errors_package;
+using flag = flag_package;
+using cfg = @internal.cfg_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using testing = testing_package;
+
+
+// Builder reports the name of the builder running this test
+// (for example, "linux-amd64" or "windows-386-gce").
+// If the test is not running on the build infrastructure,
+// Builder returns the empty string.
 
 public static partial class testenv_package {
 
-    // Builder reports the name of the builder running this test
-    // (for example, "linux-amd64" or "windows-386-gce").
-    // If the test is not running on the build infrastructure,
-    // Builder returns the empty string.
 public static @string Builder() {
     return os.Getenv("GO_BUILDER_NAME");
 }
@@ -44,7 +47,6 @@ public static bool HasGoBuild() {
         // For now, if $GO_GCFLAGS is set, report that we simply can't
         // run go build.
         return false;
-
     }
     switch (runtime.GOOS) {
         case "android": 
@@ -56,7 +58,6 @@ public static bool HasGoBuild() {
             break;
     }
     return true;
-
 }
 
 // MustHaveGoBuild checks that the current system can build programs with ``go build''
@@ -75,7 +76,6 @@ public static void MustHaveGoBuild(testing.TB t) {
 public static bool HasGoRun() { 
     // For now, having go run and having go build are the same.
     return HasGoBuild();
-
 }
 
 // MustHaveGoRun checks that the current system can run programs with ``go run.''
@@ -99,7 +99,6 @@ public static @string GoToolPath(testing.TB t) {
     foreach (var (_, envVar) in strings.Fields(cfg.KnownEnv)) {
         os.Getenv(envVar);
     }    return path;
-
 }
 
 // GoTool reports the path to the Go tool.
@@ -122,13 +121,11 @@ public static (@string, error) GoTool() {
             return (path, error.As(null!)!);
         }
     }
-
     var (goBin, err) = exec.LookPath("go" + exeSuffix);
     if (err != null) {
         return ("", error.As(errors.New("cannot find go tool: " + err.Error()))!);
     }
     return (goBin, error.As(null!)!);
-
 }
 
 // HasExec reports whether the current system can start new processes
@@ -142,7 +139,6 @@ public static bool HasExec() {
             break;
     }
     return true;
-
 }
 
 // HasSrc reports whether the entire source tree is available under GOROOT.
@@ -153,7 +149,6 @@ public static bool HasSrc() {
             break;
     }
     return true;
-
 }
 
 // MustHaveExec checks that the current system can start new processes
@@ -232,7 +227,6 @@ public static bool CanInternalLink() {
             break;
     }
     return true;
-
 }
 
 // MustInternalLink checks that the current system can link programs with internal
@@ -265,7 +259,6 @@ public static bool HasLink() {
     // and an attempt to call link() on a file will return EACCES.
     // - https://code.google.com/p/android-developer-preview/issues/detail?id=3150
     return runtime.GOOS != "plan9" && runtime.GOOS != "android";
-
 }
 
 // MustHaveLink reports whether the current system can use os.Link.
@@ -294,7 +287,6 @@ public static void SkipFlakyNet(testing.TB t) {
             t.Skip("skipping test on builder known to have frequent network failures");
         }
     }
-
 }
 
 // CleanCmdEnv will fill cmd.Env with the environment, excluding certain
@@ -316,9 +308,7 @@ public static ptr<exec.Cmd> CleanCmdEnv(ptr<exec.Cmd> _addr_cmd) => func((_, pan
             continue;
         }
         cmd.Env = append(cmd.Env, env);
-
     }    return _addr_cmd!;
-
 });
 
 // CPUIsSlow reports whether the CPU running the test is suspected to be slow.
@@ -337,7 +327,6 @@ public static bool CPUIsSlow() {
             break;
     }
     return false;
-
 }
 
 // SkipIfShortAndSlow skips t if -short is set and the CPU running the test is

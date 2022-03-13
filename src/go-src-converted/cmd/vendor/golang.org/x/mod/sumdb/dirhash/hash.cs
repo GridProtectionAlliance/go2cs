@@ -5,27 +5,29 @@
 // Package dirhash defines hashes over directory trees.
 // These hashes are recorded in go.sum files and in the Go checksum database,
 // to allow verifying that a newly-downloaded module has the expected content.
-// package dirhash -- go2cs converted at 2022 March 06 23:26:14 UTC
+
+// package dirhash -- go2cs converted at 2022 March 13 06:41:05 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/dirhash" ==> using dirhash = go.cmd.vendor.golang.org.x.mod.sumdb.dirhash_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\dirhash\hash.go
-using zip = go.archive.zip_package;
-using sha256 = go.crypto.sha256_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.mod.sumdb;
 
+using zip = archive.zip_package;
+using sha256 = crypto.sha256_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// DefaultHash is the default hash function used in new go.sum entries.
+
+using System;
 public static partial class dirhash_package {
 
-    // DefaultHash is the default hash function used in new go.sum entries.
 public static Hash DefaultHash = Hash1;
 
 // A Hash is a directory hash function.
@@ -68,9 +70,7 @@ public static (@string, error) Hash1(slice<@string> files, Func<@string, (io.Rea
             return ("", error.As(err)!);
         }
         fmt.Fprintf(h, "%x  %s\n", hf.Sum(null), file);
-
     }    return ("h1:" + base64.StdEncoding.EncodeToString(h.Sum(null)), error.As(null!)!);
-
 }
 
 // HashDir returns the hash of the local file system directory dir,
@@ -84,11 +84,8 @@ public static (@string, error) HashDir(@string dir, @string prefix, Hash hash) {
     if (err != null) {
         return ("", error.As(err)!);
     }
-    Func<@string, (io.ReadCloser, error)> osOpen = name => {
-        return os.Open(filepath.Join(dir, strings.TrimPrefix(name, prefix)));
-    };
+    Func<@string, (io.ReadCloser, error)> osOpen = name => os.Open(filepath.Join(dir, strings.TrimPrefix(name, prefix)));
     return hash(files, osOpen);
-
 }
 
 // DirFiles returns the list of files in the tree rooted at dir,
@@ -114,13 +111,11 @@ public static (slice<@string>, error) DirFiles(@string dir, @string prefix) {
         var f = filepath.Join(prefix, rel);
         files = append(files, filepath.ToSlash(f));
         return null;
-
     });
     if (err != null) {
         return (null, error.As(err)!);
     }
     return (files, error.As(null!)!);
-
 }
 
 // HashZip returns the hash of the file content in the named zip file.
@@ -147,10 +142,8 @@ public static (@string, error) HashZip(@string zipfile, Hash hash) => func((defe
             return (null, error.As(fmt.Errorf("file %q not found in zip", name))!); // should never happen
         }
         return f.Open();
-
     };
     return hash(files, zipOpen);
-
 });
 
 } // end dirhash_package

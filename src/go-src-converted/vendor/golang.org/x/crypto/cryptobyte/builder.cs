@@ -2,29 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cryptobyte -- go2cs converted at 2022 March 06 23:36:38 UTC
+// package cryptobyte -- go2cs converted at 2022 March 13 06:44:41 UTC
 // import "vendor/golang.org/x/crypto/cryptobyte" ==> using cryptobyte = go.vendor.golang.org.x.crypto.cryptobyte_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\cryptobyte\builder.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.crypto;
 
+using errors = errors_package;
+using fmt = fmt_package;
+
+
+// A Builder builds byte strings from fixed-length and length-prefixed values.
+// Builders either allocate space as needed, or are ‘fixed’, which means that
+// they write into a given buffer and produce an error if it's exhausted.
+//
+// The zero value is a usable Builder that allocates space as needed.
+//
+// Simple values are marshaled and appended to a Builder using methods on the
+// Builder. Length-prefixed values are marshaled by providing a
+// BuilderContinuation, which is a function that writes the inner contents of
+// the value to a given Builder. See the documentation for BuilderContinuation
+// for details.
+
+using System;
 public static partial class cryptobyte_package {
 
-    // A Builder builds byte strings from fixed-length and length-prefixed values.
-    // Builders either allocate space as needed, or are ‘fixed’, which means that
-    // they write into a given buffer and produce an error if it's exhausted.
-    //
-    // The zero value is a usable Builder that allocates space as needed.
-    //
-    // Simple values are marshaled and appended to a Builder using methods on the
-    // Builder. Length-prefixed values are marshaled by providing a
-    // BuilderContinuation, which is a function that writes the inner contents of
-    // the value to a given Builder. See the documentation for BuilderContinuation
-    // for details.
 public partial struct Builder {
     public error err;
     public slice<byte> result;
@@ -69,7 +70,6 @@ private static (slice<byte>, error) Bytes(this ptr<Builder> _addr_b) {
         return (null, error.As(b.err)!);
     }
     return (b.result[(int)b.offset..], error.As(null!)!);
-
 }
 
 // BytesOrPanic returns the bytes written by the builder or panics if an error
@@ -81,7 +81,6 @@ private static slice<byte> BytesOrPanic(this ptr<Builder> _addr_b) => func((_, p
         panic(b.err);
     }
     return b.result[(int)b.offset..];
-
 });
 
 // AddUint8 appends an 8-bit value to the byte string.
@@ -205,12 +204,9 @@ private static void callContinuation(this ptr<Builder> _addr_b, BuilderContinuat
                 }
 
             }
-
         }());
-
     }
     f(arg);
-
 });
 
 private static void addLengthPrefixed(this ptr<Builder> _addr_b, nint lenLen, bool isASN1, BuilderContinuation f) => func((_, panic, _) => {
@@ -298,7 +294,6 @@ private static void flushChild(this ptr<Builder> _addr_b) => func((_, panic, _) 
         }
         child.offset++;
         child.pendingLenLen = extraBytes;
-
     }
     var l = length;
     for (var i = child.pendingLenLen - 1; i >= 0; i--) {
@@ -313,7 +308,6 @@ private static void flushChild(this ptr<Builder> _addr_b) => func((_, panic, _) 
         panic("cryptobyte: BuilderContinuation reallocated a fixed-size buffer");
     }
     b.result = child.result;
-
 });
 
 private static void add(this ptr<Builder> _addr_b, params byte[] bytes) => func((_, panic, _) => {
@@ -334,7 +328,6 @@ private static void add(this ptr<Builder> _addr_b, params byte[] bytes) => func(
         return ;
     }
     b.result = append(b.result, bytes);
-
 });
 
 // Unwrite rolls back n bytes written directly to the Builder. An attempt by a
@@ -357,7 +350,6 @@ private static void Unwrite(this ptr<Builder> _addr_b, nint n) => func((_, panic
         panic("cryptobyte: attempted to unwrite more than was written");
     }
     b.result = b.result[..(int)len(b.result) - n];
-
 });
 
 // A MarshalingValue marshals itself into a Builder.

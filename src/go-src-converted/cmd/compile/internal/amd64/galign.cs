@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package amd64 -- go2cs converted at 2022 March 06 22:47:33 UTC
+// package amd64 -- go2cs converted at 2022 March 13 05:58:48 UTC
 // import "cmd/compile/internal/amd64" ==> using amd64 = go.cmd.compile.@internal.amd64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\amd64\galign.go
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using x86 = go.cmd.@internal.obj.x86_package;
-
 namespace go.cmd.compile.@internal;
+
+using ssagen = cmd.compile.@internal.ssagen_package;
+using x86 = cmd.@internal.obj.x86_package;
 
 public static partial class amd64_package {
 

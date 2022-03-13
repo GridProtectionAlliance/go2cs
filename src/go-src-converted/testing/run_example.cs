@@ -9,19 +9,18 @@
 // example.go when js/wasm gets an os.Pipe implementation
 // and no longer needs this separation.
 
-// package testing -- go2cs converted at 2022 March 06 23:19:16 UTC
+// package testing -- go2cs converted at 2022 March 13 06:43:02 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Program Files\Go\src\testing\run_example.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using time = go.time_package;
+namespace go;
+
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class testing_package {
 
@@ -48,7 +47,6 @@ private static bool runExample(InternalExample eg) => func((defer, _, _) => {
             os.Exit(1);
         }
         outC.Send(buf.String());
-
     }());
 
     var finished = false;
@@ -65,14 +63,12 @@ private static bool runExample(InternalExample eg) => func((defer, _, _) => {
 
         var err = recover();
         ok = eg.processRunResult(out, timeSpent, finished, err);
-
     }()); 
 
     // Run example.
     eg.F();
     finished = true;
     return ;
-
 });
 
 } // end testing_package

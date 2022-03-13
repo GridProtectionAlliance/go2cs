@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:43 UTC
+//     Generated on 2022 March 13 06:01:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct debugState
         {
             // Constructors
@@ -106,7 +106,7 @@ namespace @internal
             public static implicit operator debugState(NilType nil) => default(debugState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static debugState debugState_cast(dynamic value)
         {
             return new debugState(value.slots, value.vars, value.varSlots, value.lists, value.slotVars, ref value.f, value.loggingEnabled, value.registers, value.stackOffset, ref value.ctxt, value.valueNames, value.currentState, value.liveCount, ref value.changedVars, value.pendingEntries, value.varParts, value.blockDebug, value.pendingSlotLocs, value.liveSlots, value.liveSlotSliceBegin, value.partsByVarOffset);

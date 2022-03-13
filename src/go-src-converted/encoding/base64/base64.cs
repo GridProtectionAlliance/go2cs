@@ -3,26 +3,29 @@
 // license that can be found in the LICENSE file.
 
 // Package base64 implements base64 encoding as specified by RFC 4648.
-// package base64 -- go2cs converted at 2022 March 06 22:17:01 UTC
+
+// package base64 -- go2cs converted at 2022 March 13 05:30:20 UTC
 // import "encoding/base64" ==> using base64 = go.encoding.base64_package
 // Original source: C:\Program Files\Go\src\encoding\base64\base64.go
-using binary = go.encoding.binary_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-
 namespace go.encoding;
+
+using binary = encoding.binary_package;
+using io = io_package;
+using strconv = strconv_package;
+
+
+/*
+ * Encodings
+ */
+
+// An Encoding is a radix 64 encoding/decoding scheme, defined by a
+// 64-character alphabet. The most common encoding is the "base64"
+// encoding defined in RFC 4648 and used in MIME (RFC 2045) and PEM
+// (RFC 1421).  RFC 4648 also defines an alternate encoding, which is
+// the standard encoding with - and _ substituted for + and /.
 
 public static partial class base64_package {
 
-    /*
-     * Encodings
-     */
-
-    // An Encoding is a radix 64 encoding/decoding scheme, defined by a
-    // 64-character alphabet. The most common encoding is the "base64"
-    // encoding defined in RFC 4648 and used in MIME (RFC 2045) and PEM
-    // (RFC 1421).  RFC 4648 also defines an alternate encoding, which is
-    // the standard encoding with - and _ substituted for + and /.
 public partial struct Encoding {
     public array<byte> encode;
     public array<byte> decodeMap;
@@ -88,7 +91,6 @@ public static ptr<Encoding> NewEncoding(@string encoder) => func((_, panic, _) =
         i = i__prev1;
     }
     return _addr_e!;
-
 });
 
 // WithPadding creates a new encoding identical to enc except
@@ -108,7 +110,6 @@ public static ptr<Encoding> WithPadding(this Encoding enc, int padding) => func(
 
     enc.padChar = padding;
     return _addr__addr_enc!;
-
 });
 
 // Strict creates a new encoding identical to enc except with
@@ -172,7 +173,6 @@ private static void Encode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<
 
         si += 3;
         di += 4;
-
     }
 
     var remain = len(src) - si;
@@ -200,7 +200,6 @@ private static void Encode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<
             }
             break;
     }
-
 }
 
 // EncodeToString returns the base64 encoding of src.
@@ -247,7 +246,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
             return (n, error.As(e.err)!);
         }
         e.nbuf = 0;
-
     }
     while (len(p) >= 3) {
         var nn = len(e.@out) / 4 * 3;
@@ -263,7 +261,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
         }
         n += nn;
         p = p[(int)nn..];
-
     } 
 
     // Trailing fringe.
@@ -279,7 +276,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
     e.nbuf = len(p);
     n += len(p);
     return ;
-
 }
 
 // Close flushes any pending output from the encoder.
@@ -294,7 +290,6 @@ private static error Close(this ptr<encoder> _addr_e) {
         e.nbuf = 0;
     }
     return error.As(e.err)!;
-
 }
 
 // NewEncoder returns a new base64 stream encoder. Data written to
@@ -357,7 +352,6 @@ private static (nint, nint, error) decodeQuantum(this ptr<Encoding> _addr_enc, s
                 return (si, 0, error.As(CorruptInputError(si - j))!);
                         dlen = j;
             break;
-
         }
         var @in = src[si];
         si++;
@@ -392,17 +386,12 @@ private static (nint, nint, error) decodeQuantum(this ptr<Encoding> _addr_enc, s
                 if (si == len(src)) { 
                     // not enough padding
                     return (si, 0, error.As(CorruptInputError(len(src)))!);
-
                 }
-
                 if (rune(src[si]) != enc.padChar) { 
                     // incorrect padding
                     return (si, 0, error.As(CorruptInputError(si - 1))!);
-
                 }
-
                 si++;
-
                 break;
         } 
 
@@ -413,11 +402,9 @@ private static (nint, nint, error) decodeQuantum(this ptr<Encoding> _addr_enc, s
         if (si < len(src)) { 
             // trailing garbage
             err = CorruptInputError(si);
-
         }
         dlen = j;
         break;
-
     } 
 
     // Convert 4x 6bit source bytes into 3 bytes
@@ -450,7 +437,6 @@ private static (nint, nint, error) decodeQuantum(this ptr<Encoding> _addr_enc, s
     __switch_break0:;
 
     return (si, dlen - 1, error.As(err)!);
-
 }
 
 // DecodeString returns the bytes represented by the base64 string s.
@@ -499,7 +485,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
         }
         nn, d.readErr = d.r.Read(d.buf[(int)d.nbuf..(int)nn]);
         d.nbuf += nn;
-
     }
 
     if (d.nbuf < 4) {
@@ -514,18 +499,15 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
             if (n > 0 || len(p) == 0 && len(d.@out) > 0) {
                 return (n, error.As(null!)!);
             }
-
             if (d.err != null) {
                 return (0, error.As(d.err)!);
             }
-
         }
         d.err = d.readErr;
         if (d.err == io.EOF && d.nbuf > 0) {
             d.err = io.ErrUnexpectedEOF;
         }
         return (0, error.As(d.err)!);
-
     }
     var nr = d.nbuf / 4 * 4;
     nw = d.nbuf / 4 * 3;
@@ -542,7 +524,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
     d.nbuf -= nr;
     copy(d.buf[..(int)d.nbuf], d.buf[(int)nr..]);
     return (n, error.As(d.err)!);
-
 }
 
 // Decode decodes src using the encoding enc. It writes at most
@@ -586,7 +567,6 @@ private static (nint, error) Decode(this ptr<Encoding> _addr_enc, slice<byte> ds
             dn = dn__prev1;
 
         }
-
     }
 
     while (len(src) - si >= 4 && len(dst) - n >= 4) {
@@ -614,7 +594,6 @@ private static (nint, error) Decode(this ptr<Encoding> _addr_enc, slice<byte> ds
             dn = dn__prev1;
 
         }
-
     }
 
     while (si < len(src)) {
@@ -626,7 +605,6 @@ private static (nint, error) Decode(this ptr<Encoding> _addr_enc, slice<byte> ds
         }
     }
     return (n, error.As(err)!);
-
 }
 
 // assemble32 assembles 4 base64 digits into 3 bytes.
@@ -642,7 +620,6 @@ private static (uint, bool) assemble32(byte n1, byte n2, byte n3, byte n4) {
         return (0, false);
     }
     return (uint32(n1) << 26 | uint32(n2) << 20 | uint32(n3) << 14 | uint32(n4) << 8, true);
-
 }
 
 // assemble64 assembles 8 base64 digits into 6 bytes.
@@ -658,7 +635,6 @@ private static (ulong, bool) assemble64(byte n1, byte n2, byte n3, byte n4, byte
         return (0, false);
     }
     return (uint64(n1) << 58 | uint64(n2) << 52 | uint64(n3) << 46 | uint64(n4) << 40 | uint64(n5) << 34 | uint64(n6) << 28 | uint64(n7) << 22 | uint64(n8) << 16, true);
-
 }
 
 private partial struct newlineFilteringReader {
@@ -684,10 +660,8 @@ private static (nint, error) Read(this ptr<newlineFilteringReader> _addr_r, slic
             return (offset, error.As(err)!);
         }
         n, err = r.wrapped.Read(p);
-
     }
     return (n, error.As(err)!);
-
 }
 
 // NewDecoder constructs a new base64 stream decoder.
@@ -705,10 +679,8 @@ private static nint DecodedLen(this ptr<Encoding> _addr_enc, nint n) {
     if (enc.padChar == NoPadding) { 
         // Unpadded data may end with partial block of 2-3 characters.
         return n * 6 / 8;
-
     }
     return n / 4 * 3;
-
 }
 
 } // end base64_package

@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:12:09 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:31 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\walk.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using errors = errors_package;
+using fmt = fmt_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// The constant is known to runtime.
+
+using System;
 public static partial class walk_package {
 
-    // The constant is known to runtime.
 private static readonly nint tmpstringbufsize = 32;
 
 private static readonly nint zeroValSize = 1024; // must match value of runtime/map.go:maxZero
@@ -73,7 +74,6 @@ private static ir.Node walkRecv(ptr<ir.UnaryExpr> _addr_n) {
     n.X = walkExpr(n.X, _addr_init);
     var call = walkExpr(mkcall1(chanfn("chanrecv1", 2, _addr_n.X.Type()), _addr_null, _addr_init, n.X, typecheck.NodNil()), _addr_init);
     return ir.InitExpr(init, call);
-
 }
 
 private static ptr<ir.AssignStmt> convas(ptr<ir.AssignStmt> _addr_n, ptr<ir.Nodes> _addr_init) {
@@ -104,7 +104,6 @@ private static ptr<ir.AssignStmt> convas(ptr<ir.AssignStmt> _addr_n, ptr<ir.Node
     types.CalcSize(n.Y.Type());
 
     return _addr_n!;
-
 }
 
 private static var stop = errors.New("stop");
@@ -127,7 +126,6 @@ private static ptr<ir.CallExpr> vmkcall(ir.Node fn, ptr<types.Type> _addr_t, ptr
     typecheck.Call(call);
     call.SetType(t);
     return walkExpr(call, init)._<ptr<ir.CallExpr>>();
-
 }
 
 private static ptr<ir.CallExpr> mkcall(@string name, ptr<types.Type> _addr_t, ptr<ir.Nodes> _addr_init, params ir.Node[] args) {
@@ -162,7 +160,6 @@ private static ir.Node mkcallstmt1(ir.Node fn, params ir.Node[] args) {
     }
     init.Append(n);
     return ir.NewBlockStmt(n.Pos(), init);
-
 }
 
 private static ir.Node chanfn(@string name, nint n, ptr<types.Type> _addr_t) {
@@ -184,7 +181,6 @@ private static ir.Node chanfn(@string name, nint n, ptr<types.Type> _addr_t) {
             break;
     }
     return fn;
-
 }
 
 private static ir.Node mapfn(@string name, ptr<types.Type> _addr_t, bool isfat) {
@@ -202,7 +198,6 @@ private static ir.Node mapfn(@string name, ptr<types.Type> _addr_t, bool isfat) 
         fn = typecheck.SubstArgTypes(fn, t.Key(), t.Elem(), t.Elem());
     }
     return fn;
-
 }
 
 private static ir.Node mapfndel(@string name, ptr<types.Type> _addr_t) {
@@ -220,7 +215,6 @@ private static ir.Node mapfndel(@string name, ptr<types.Type> _addr_t) {
         fn = typecheck.SubstArgTypes(fn, t.Key(), t.Elem());
     }
     return fn;
-
 }
 
 private static readonly var mapslow = iota;
@@ -230,7 +224,6 @@ private static readonly var mapfast64 = 2;
 private static readonly var mapfast64ptr = 3;
 private static readonly var mapfaststr = 4;
 private static readonly var nmapfast = 5;
-
 
 private partial struct mapnames { // : array<@string>
 }
@@ -270,7 +263,6 @@ private static nint mapfast(ptr<types.Type> _addr_t) {
     else if (reflectdata.AlgType(t.Key()) == types.ASTRING) 
         return mapfaststr;
         return mapslow;
-
 }
 
 private static void walkAppendArgs(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
@@ -300,14 +292,12 @@ private static void appendWalkStmt(ptr<ir.Nodes> _addr_init, ir.Node stmt) {
         // We need to append them directly.
         // TODO(rsc): Clean this up.
         n = walkExpr(n, init);
-
     }
     else
  {
         n = walkStmt(n);
     }
     init.Append(n);
-
 }
 
 // The max number of defers in a function using open-coded defers. We enforce this
@@ -340,7 +330,6 @@ private static (ir.Node, ir.Node) backingArrayPtrLen(ir.Node n) {
     length = ir.NewUnaryExpr(@base.Pos, ir.OLEN, n);
     length.SetType(types.Types[types.TINT]);
     return (ptr, length);
-
 }
 
 // mayCall reports whether evaluating expression n may require
@@ -351,9 +340,7 @@ private static bool mayCall(ir.Node n) {
     if (@base.Flag.Cfg.Instrumenting) {
         return true;
     }
-    Func<ptr<types.Type>, bool> isSoftFloat = typ => {
-        return types.IsFloat[typ.Kind()] || types.IsComplex[typ.Kind()];
-    };
+    Func<ptr<types.Type>, bool> isSoftFloat = typ => types.IsFloat[typ.Kind()] || types.IsComplex[typ.Kind()];
 
     return ir.Any(n, n => { 
         // walk should have already moved any Init blocks off of
@@ -389,9 +376,7 @@ private static bool mayCall(ir.Node n) {
         else if (n.Op() == ir.OLITERAL || n.Op() == ir.ONIL || n.Op() == ir.ONAME || n.Op() == ir.OLINKSYMOFFSET || n.Op() == ir.OMETHEXPR || n.Op() == ir.OAND || n.Op() == ir.OANDNOT || n.Op() == ir.OLSH || n.Op() == ir.OOR || n.Op() == ir.ORSH || n.Op() == ir.OXOR || n.Op() == ir.OCOMPLEX || n.Op() == ir.OEFACE || n.Op() == ir.OADDR || n.Op() == ir.OBITNOT || n.Op() == ir.ONOT || n.Op() == ir.OPLUS || n.Op() == ir.OCAP || n.Op() == ir.OIMAG || n.Op() == ir.OLEN || n.Op() == ir.OREAL || n.Op() == ir.OCONVNOP || n.Op() == ir.ODOT || n.Op() == ir.OCFUNC || n.Op() == ir.OIDATA || n.Op() == ir.OITAB || n.Op() == ir.OSPTR || n.Op() == ir.OBYTES2STRTMP || n.Op() == ir.OGETG || n.Op() == ir.OSLICEHEADER)         else 
             @base.FatalfAt(n.Pos(), "mayCall %+v", n);
                 return false;
-
     });
-
 }
 
 // itabType loads the _type field from a runtime.itab struct.
@@ -399,10 +384,8 @@ private static ir.Node itabType(ir.Node itab) {
     if (itabTypeField == null) { 
         // runtime.itab's _type field
         itabTypeField = runtimeField("_type", int64(types.PtrSize), _addr_types.NewPtr(types.Types[types.TUINT8]));
-
     }
     return boundedDotPtr(@base.Pos, itab, _addr_itabTypeField);
-
 }
 
 private static ptr<types.Field> itabTypeField;
@@ -418,7 +401,6 @@ private static ptr<ir.SelectorExpr> boundedDotPtr(src.XPos pos, ir.Node ptr, ptr
     sel.SetTypecheck(1);
     sel.SetBounded(true); // guaranteed not to fault
     return _addr_sel!;
-
 }
 
 private static ptr<types.Field> runtimeField(@string name, long offset, ptr<types.Type> _addr_typ) {
@@ -451,7 +433,6 @@ private static ir.Node ifaceData(src.XPos pos, ir.Node n, ptr<types.Type> _addr_
     ind.SetTypecheck(1);
     ind.SetBounded(true);
     return ind;
-
 }
 
 } // end walk_package

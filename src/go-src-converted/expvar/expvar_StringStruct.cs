@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:44 UTC
+//     Generated on 2022 March 13 06:43:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace go
 {
     public static partial class expvar_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct String
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace go
             public static implicit operator String(NilType nil) => default(String);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static String String_cast(dynamic value)
         {
             return new String(value.s);

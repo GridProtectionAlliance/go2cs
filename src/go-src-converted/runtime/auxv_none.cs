@@ -5,11 +5,9 @@
 //go:build !linux && !darwin && !dragonfly && !freebsd && !netbsd && !solaris
 // +build !linux,!darwin,!dragonfly,!freebsd,!netbsd,!solaris
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:20 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\auxv_none.go
-
-
 namespace go;
 
 public static partial class runtime_package {

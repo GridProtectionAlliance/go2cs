@@ -10,18 +10,21 @@
 //
 // This implementation is designed to minimize heap allocations and avoid
 // unnecessary packing and unpacking as much as possible.
-// package dnsmessage -- go2cs converted at 2022 March 06 23:37:10 UTC
+
+// package dnsmessage -- go2cs converted at 2022 March 13 06:45:25 UTC
 // import "vendor/golang.org/x/net/dns/dnsmessage" ==> using dnsmessage = go.vendor.golang.org.x.net.dns.dnsmessage_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\dns\dnsmessage\message.go
-using errors = go.errors_package;
-
 namespace go.vendor.golang.org.x.net.dns;
+
+using errors = errors_package;
+
+
+// Message formats
+
+// A Type is a type of DNS request and response.
 
 public static partial class dnsmessage_package {
 
-    // Message formats
-
-    // A Type is a type of DNS request and response.
 public partial struct Type { // : ushort
 }
 
@@ -45,7 +48,6 @@ public static readonly Type TypeMINFO = 14;
 public static readonly Type TypeAXFR = 252;
 public static readonly Type TypeALL = 255;
 
-
 private static map typeNames = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<Type, @string>{TypeA:"TypeA",TypeNS:"TypeNS",TypeCNAME:"TypeCNAME",TypeSOA:"TypeSOA",TypePTR:"TypePTR",TypeMX:"TypeMX",TypeTXT:"TypeTXT",TypeAAAA:"TypeAAAA",TypeSRV:"TypeSRV",TypeOPT:"TypeOPT",TypeWKS:"TypeWKS",TypeHINFO:"TypeHINFO",TypeMINFO:"TypeMINFO",TypeAXFR:"TypeAXFR",TypeALL:"TypeALL",};
 
 // String implements fmt.Stringer.String.
@@ -57,9 +59,7 @@ public static @string String(this Type t) {
             return n;
         }
     }
-
     return printUint16(uint16(t));
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -71,9 +71,7 @@ public static @string GoString(this Type t) {
             return "dnsmessage." + n;
         }
     }
-
     return printUint16(uint16(t));
-
 }
 
 // A Class is a type of network.
@@ -90,7 +88,6 @@ public static readonly Class ClassHESIOD = 4;
 // Question.Class
 public static readonly Class ClassANY = 255;
 
-
 private static map classNames = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<Class, @string>{ClassINET:"ClassINET",ClassCSNET:"ClassCSNET",ClassCHAOS:"ClassCHAOS",ClassHESIOD:"ClassHESIOD",ClassANY:"ClassANY",};
 
 // String implements fmt.Stringer.String.
@@ -102,9 +99,7 @@ public static @string String(this Class c) {
             return n;
         }
     }
-
     return printUint16(uint16(c));
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -116,9 +111,7 @@ public static @string GoString(this Class c) {
             return "dnsmessage." + n;
         }
     }
-
     return printUint16(uint16(c));
-
 }
 
 // An OpCode is a DNS operation code.
@@ -143,7 +136,6 @@ public static readonly RCode RCodeNameError = 3;
 public static readonly RCode RCodeNotImplemented = 4;
 public static readonly RCode RCodeRefused = 5;
 
-
 private static map rCodeNames = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<RCode, @string>{RCodeSuccess:"RCodeSuccess",RCodeFormatError:"RCodeFormatError",RCodeServerFailure:"RCodeServerFailure",RCodeNameError:"RCodeNameError",RCodeNotImplemented:"RCodeNotImplemented",RCodeRefused:"RCodeRefused",};
 
 // String implements fmt.Stringer.String.
@@ -155,9 +147,7 @@ public static @string String(this RCode r) {
             return n;
         }
     }
-
     return printUint16(uint16(r));
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -169,9 +159,7 @@ public static @string GoString(this RCode r) {
             return "dnsmessage." + n;
         }
     }
-
     return printUint16(uint16(r));
-
 }
 
 private static @string printPaddedUint8(byte i) {
@@ -188,7 +176,6 @@ private static slice<byte> printUint8Bytes(slice<byte> buf, byte i) {
         buf = append(buf, b / 10 % 10 + '0');
     }
     return append(buf, b % 10 + '0');
-
 }
 
 private static @string printByteSlice(slice<byte> b) {
@@ -201,7 +188,6 @@ private static @string printByteSlice(slice<byte> b) {
         buf = append(buf, ',', ' ');
         buf = printUint8Bytes(buf, uint8(n));
     }    return string(buf);
-
 }
 
 private static readonly @string hexDigits = "0123456789abcdef";
@@ -219,10 +205,8 @@ private static @string printString(slice<byte> str) {
         var upper = c >> 4;
         var lower = (c << 4) >> 4;
         buf = append(buf, '\\', 'x', hexDigits[upper], hexDigits[lower]);
-
     }
     return string(buf);
-
 }
 
 private static @string printUint16(ushort i) {
@@ -242,14 +226,11 @@ private static @string printUint32(uint i) {
                 buf = buf[(int)1..];
             d /= 10;
             }
-
             b = b[(int)1..];
             i %= d;
-
         }
     }
     return string(buf);
-
 }
 
 private static @string printBool(bool b) {
@@ -257,7 +238,6 @@ private static @string printBool(bool b) {
         return "true";
     }
     return "false";
-
 }
 
  
@@ -285,7 +265,6 @@ private static readonly nint uint32Len = 4;
 //
 // A header is comprised of 6 uint16s and no padding.
 private static readonly nint headerLen = 6 * uint16Len;
-
 
 private partial struct nestedError {
     public @string s; // err is the nested error.
@@ -334,7 +313,6 @@ private static (ushort, ushort) pack(this ptr<Header> _addr_m) {
         bits |= headerBitQR;
     }
     return ;
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -393,7 +371,6 @@ private static ushort count(this ptr<header> _addr_h, section sec) {
     else if (sec == sectionAdditionals) 
         return h.additionals;
         return 0;
-
 }
 
 // pack appends the wire format of the header to msg.
@@ -446,7 +423,6 @@ private static (nint, error) unpack(this ptr<header> _addr_h, slice<byte> msg, n
         return (off, error.As(addr(new nestedError("additionals",err))!)!);
     }
     return (newOff, error.As(null!)!);
-
 }
 
 private static Header header(this ptr<header> _addr_h) {
@@ -502,9 +478,7 @@ private static (slice<byte>, error) pack(this ptr<Resource> _addr_r, slice<byte>
             return (oldMsg, error.As(err)!);
         }
     }
-
     return (msg, error.As(null!)!);
-
 }
 
 // A Parser allows incrementally parsing a DNS message.
@@ -547,7 +521,6 @@ private static (Header, error) Start(this ptr<Parser> _addr_p, slice<byte> msg) 
     }
     p.section = sectionQuestions;
     return (p.header.header(), error.As(null!)!);
-
 }
 
 private static error checkAdvance(this ptr<Parser> _addr_p, section sec) {
@@ -566,7 +539,6 @@ private static error checkAdvance(this ptr<Parser> _addr_p, section sec) {
         return error.As(ErrSectionDone)!;
     }
     return error.As(null!)!;
-
 }
 
 private static (Resource, error) resource(this ptr<Parser> _addr_p, section sec) {
@@ -587,7 +559,6 @@ private static (Resource, error) resource(this ptr<Parser> _addr_p, section sec)
     }
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 private static (ResourceHeader, error) resourceHeader(this ptr<Parser> _addr_p, section sec) {
@@ -605,7 +576,6 @@ private static (ResourceHeader, error) resourceHeader(this ptr<Parser> _addr_p, 
             return (new ResourceHeader(), error.As(err)!);
         }
     }
-
     ResourceHeader hdr = default;
     var (off, err) = hdr.unpack(p.msg, p.off);
     if (err != null) {
@@ -615,7 +585,6 @@ private static (ResourceHeader, error) resourceHeader(this ptr<Parser> _addr_p, 
     p.resHeader = hdr;
     p.off = off;
     return (hdr, error.As(null!)!);
-
 }
 
 private static error skipResource(this ptr<Parser> _addr_p, section sec) {
@@ -630,7 +599,6 @@ private static error skipResource(this ptr<Parser> _addr_p, section sec) {
         p.resHeaderValid = false;
         p.index++;
         return error.As(null!)!;
-
     }
     {
         var err__prev1 = err;
@@ -643,7 +611,6 @@ private static error skipResource(this ptr<Parser> _addr_p, section sec) {
         err = err__prev1;
 
     }
-
     err = default!;
     p.off, err = skipResource(p.msg, p.off);
     if (err != null) {
@@ -651,7 +618,6 @@ private static error skipResource(this ptr<Parser> _addr_p, section sec) {
     }
     p.index++;
     return error.As(null!)!;
-
 }
 
 // Question parses a single Question.
@@ -667,7 +633,6 @@ private static (Question, error) Question(this ptr<Parser> _addr_p) {
             return (new Question(), error.As(err)!);
         }
     }
-
     Name name = default;
     var (off, err) = name.unpack(p.msg, p.off);
     if (err != null) {
@@ -684,7 +649,6 @@ private static (Question, error) Question(this ptr<Parser> _addr_p) {
     p.off = off;
     p.index++;
     return (new Question(name,typ,class), error.As(null!)!);
-
 }
 
 // AllQuestions parses all Questions.
@@ -709,9 +673,7 @@ private static (slice<Question>, error) AllQuestions(this ptr<Parser> _addr_p) {
             return (null, error.As(err)!);
         }
         qs = append(qs, q);
-
     }
-
 }
 
 // SkipQuestion skips a single Question.
@@ -725,7 +687,6 @@ private static error SkipQuestion(this ptr<Parser> _addr_p) {
             return error.As(err)!;
         }
     }
-
     var (off, err) = skipName(p.msg, p.off);
     if (err != null) {
         return error.As(addr(new nestedError("skipping Question Name",err))!)!;
@@ -743,7 +704,6 @@ private static error SkipQuestion(this ptr<Parser> _addr_p) {
     p.off = off;
     p.index++;
     return error.As(null!)!;
-
 }
 
 // SkipAllQuestions skips all Questions.
@@ -761,11 +721,8 @@ private static error SkipAllQuestions(this ptr<Parser> _addr_p) {
                 return error.As(err)!;
             }
 
-
         }
-
     }
-
 }
 
 // AnswerHeader parses a single Answer ResourceHeader.
@@ -811,9 +768,7 @@ private static (slice<Resource>, error) AllAnswers(this ptr<Parser> _addr_p) {
             return (null, error.As(err)!);
         }
         as = append(as, a);
-
     }
-
 }
 
 // SkipAnswer skips a single Answer Resource.
@@ -838,11 +793,8 @@ private static error SkipAllAnswers(this ptr<Parser> _addr_p) {
                 return error.As(err)!;
             }
 
-
         }
-
     }
-
 }
 
 // AuthorityHeader parses a single Authority ResourceHeader.
@@ -888,9 +840,7 @@ private static (slice<Resource>, error) AllAuthorities(this ptr<Parser> _addr_p)
             return (null, error.As(err)!);
         }
         as = append(as, a);
-
     }
-
 }
 
 // SkipAuthority skips a single Authority Resource.
@@ -915,11 +865,8 @@ private static error SkipAllAuthorities(this ptr<Parser> _addr_p) {
                 return error.As(err)!;
             }
 
-
         }
-
     }
-
 }
 
 // AdditionalHeader parses a single Additional ResourceHeader.
@@ -965,9 +912,7 @@ private static (slice<Resource>, error) AllAdditionals(this ptr<Parser> _addr_p)
             return (null, error.As(err)!);
         }
         as = append(as, a);
-
     }
-
 }
 
 // SkipAdditional skips a single Additional Resource.
@@ -992,11 +937,8 @@ private static error SkipAllAdditionals(this ptr<Parser> _addr_p) {
                 return error.As(err)!;
             }
 
-
         }
-
     }
-
 }
 
 // CNAMEResource parses a single CNAMEResource.
@@ -1019,7 +961,6 @@ private static (CNAMEResource, error) CNAMEResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // MXResource parses a single MXResource.
@@ -1042,7 +983,6 @@ private static (MXResource, error) MXResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // NSResource parses a single NSResource.
@@ -1065,7 +1005,6 @@ private static (NSResource, error) NSResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // PTRResource parses a single PTRResource.
@@ -1088,7 +1027,6 @@ private static (PTRResource, error) PTRResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // SOAResource parses a single SOAResource.
@@ -1111,7 +1049,6 @@ private static (SOAResource, error) SOAResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // TXTResource parses a single TXTResource.
@@ -1134,7 +1071,6 @@ private static (TXTResource, error) TXTResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // SRVResource parses a single SRVResource.
@@ -1157,7 +1093,6 @@ private static (SRVResource, error) SRVResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // AResource parses a single AResource.
@@ -1180,7 +1115,6 @@ private static (AResource, error) AResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // AAAAResource parses a single AAAAResource.
@@ -1203,7 +1137,6 @@ private static (AAAAResource, error) AAAAResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // OPTResource parses a single OPTResource.
@@ -1226,7 +1159,6 @@ private static (OPTResource, error) OPTResource(this ptr<Parser> _addr_p) {
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // UnknownResource parses a single UnknownResource.
@@ -1249,7 +1181,6 @@ private static (UnknownResource, error) UnknownResource(this ptr<Parser> _addr_p
     p.resHeaderValid = false;
     p.index++;
     return (r, error.As(null!)!);
-
 }
 
 // Unpack parses a full Message.
@@ -1284,7 +1215,6 @@ private static error Unpack(this ptr<Message> _addr_m, slice<byte> msg) {
         return error.As(err)!;
     }
     return error.As(null!)!;
-
 }
 
 // Pack packs a full Message.
@@ -1350,7 +1280,6 @@ private static (slice<byte>, error) AppendPack(this ptr<Message> _addr_m, slice<
             if (err != null) {
                 return (null, error.As(addr(new nestedError("packing Question",err))!)!);
             }
-
         }
         i = i__prev1;
     }
@@ -1366,7 +1295,6 @@ private static (slice<byte>, error) AppendPack(this ptr<Message> _addr_m, slice<
             if (err != null) {
                 return (null, error.As(addr(new nestedError("packing Answer",err))!)!);
             }
-
         }
         i = i__prev1;
     }
@@ -1382,7 +1310,6 @@ private static (slice<byte>, error) AppendPack(this ptr<Message> _addr_m, slice<
             if (err != null) {
                 return (null, error.As(addr(new nestedError("packing Authority",err))!)!);
             }
-
         }
         i = i__prev1;
     }
@@ -1398,13 +1325,11 @@ private static (slice<byte>, error) AppendPack(this ptr<Message> _addr_m, slice<
             if (err != null) {
                 return (null, error.As(addr(new nestedError("packing Additional",err))!)!);
             }
-
         }
         i = i__prev1;
     }
 
     return (msg, error.As(null!)!);
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -1461,7 +1386,6 @@ private static @string GoString(this ptr<Message> _addr_m) {
         }
     }
     return s + "}}";
-
 }
 
 // A Builder allows incrementally packing a DNS message.
@@ -1504,7 +1428,6 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
     b.msg = append(b.msg, hb[..]);
     b.section = sectionHeader;
     return b;
-
 }
 
 // EnableCompression enables compression in the Builder.
@@ -1534,7 +1457,6 @@ private static error startCheck(this ptr<Builder> _addr_b, section s) {
         return error.As(ErrSectionDone)!;
     }
     return error.As(null!)!;
-
 }
 
 // StartQuestions prepares the builder for packing Questions.
@@ -1548,10 +1470,8 @@ private static error StartQuestions(this ptr<Builder> _addr_b) {
             return error.As(err)!;
         }
     }
-
     b.section = sectionQuestions;
     return error.As(null!)!;
-
 }
 
 // StartAnswers prepares the builder for packing Answers.
@@ -1565,10 +1485,8 @@ private static error StartAnswers(this ptr<Builder> _addr_b) {
             return error.As(err)!;
         }
     }
-
     b.section = sectionAnswers;
     return error.As(null!)!;
-
 }
 
 // StartAuthorities prepares the builder for packing Authorities.
@@ -1582,10 +1500,8 @@ private static error StartAuthorities(this ptr<Builder> _addr_b) {
             return error.As(err)!;
         }
     }
-
     b.section = sectionAuthorities;
     return error.As(null!)!;
-
 }
 
 // StartAdditionals prepares the builder for packing Additionals.
@@ -1599,10 +1515,8 @@ private static error StartAdditionals(this ptr<Builder> _addr_b) {
             return error.As(err)!;
         }
     }
-
     b.section = sectionAdditionals;
     return error.As(null!)!;
-
 }
 
 private static error incrementSectionCount(this ptr<Builder> _addr_b) {
@@ -1628,7 +1542,6 @@ private static error incrementSectionCount(this ptr<Builder> _addr_b) {
     }
     count.val++;
     return error.As(null!)!;
-
 }
 
 // Question adds a single Question.
@@ -1652,10 +1565,8 @@ private static error Question(this ptr<Builder> _addr_b, Question q) {
             return error.As(err)!;
         }
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 private static error checkResourceSection(this ptr<Builder> _addr_b) {
@@ -1668,7 +1579,6 @@ private static error checkResourceSection(this ptr<Builder> _addr_b) {
         return error.As(ErrSectionDone)!;
     }
     return error.As(null!)!;
-
 }
 
 // CNAMEResource adds a single CNAMEResource.
@@ -1686,7 +1596,6 @@ private static error CNAMEResource(this ptr<Builder> _addr_b, ResourceHeader h, 
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -1709,7 +1618,6 @@ private static error CNAMEResource(this ptr<Builder> _addr_b, ResourceHeader h, 
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -1721,10 +1629,8 @@ private static error CNAMEResource(this ptr<Builder> _addr_b, ResourceHeader h, 
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // MXResource adds a single MXResource.
@@ -1742,7 +1648,6 @@ private static error MXResource(this ptr<Builder> _addr_b, ResourceHeader h, MXR
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -1765,7 +1670,6 @@ private static error MXResource(this ptr<Builder> _addr_b, ResourceHeader h, MXR
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -1777,10 +1681,8 @@ private static error MXResource(this ptr<Builder> _addr_b, ResourceHeader h, MXR
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // NSResource adds a single NSResource.
@@ -1798,7 +1700,6 @@ private static error NSResource(this ptr<Builder> _addr_b, ResourceHeader h, NSR
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -1821,7 +1722,6 @@ private static error NSResource(this ptr<Builder> _addr_b, ResourceHeader h, NSR
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -1833,10 +1733,8 @@ private static error NSResource(this ptr<Builder> _addr_b, ResourceHeader h, NSR
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // PTRResource adds a single PTRResource.
@@ -1854,7 +1752,6 @@ private static error PTRResource(this ptr<Builder> _addr_b, ResourceHeader h, PT
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -1877,7 +1774,6 @@ private static error PTRResource(this ptr<Builder> _addr_b, ResourceHeader h, PT
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -1889,10 +1785,8 @@ private static error PTRResource(this ptr<Builder> _addr_b, ResourceHeader h, PT
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // SOAResource adds a single SOAResource.
@@ -1910,7 +1804,6 @@ private static error SOAResource(this ptr<Builder> _addr_b, ResourceHeader h, SO
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -1933,7 +1826,6 @@ private static error SOAResource(this ptr<Builder> _addr_b, ResourceHeader h, SO
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -1945,10 +1837,8 @@ private static error SOAResource(this ptr<Builder> _addr_b, ResourceHeader h, SO
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // TXTResource adds a single TXTResource.
@@ -1966,7 +1856,6 @@ private static error TXTResource(this ptr<Builder> _addr_b, ResourceHeader h, TX
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -1989,7 +1878,6 @@ private static error TXTResource(this ptr<Builder> _addr_b, ResourceHeader h, TX
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -2001,10 +1889,8 @@ private static error TXTResource(this ptr<Builder> _addr_b, ResourceHeader h, TX
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // SRVResource adds a single SRVResource.
@@ -2022,7 +1908,6 @@ private static error SRVResource(this ptr<Builder> _addr_b, ResourceHeader h, SR
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -2045,7 +1930,6 @@ private static error SRVResource(this ptr<Builder> _addr_b, ResourceHeader h, SR
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -2057,10 +1941,8 @@ private static error SRVResource(this ptr<Builder> _addr_b, ResourceHeader h, SR
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // AResource adds a single AResource.
@@ -2078,7 +1960,6 @@ private static error AResource(this ptr<Builder> _addr_b, ResourceHeader h, ARes
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -2101,7 +1982,6 @@ private static error AResource(this ptr<Builder> _addr_b, ResourceHeader h, ARes
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -2113,10 +1993,8 @@ private static error AResource(this ptr<Builder> _addr_b, ResourceHeader h, ARes
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // AAAAResource adds a single AAAAResource.
@@ -2134,7 +2012,6 @@ private static error AAAAResource(this ptr<Builder> _addr_b, ResourceHeader h, A
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -2157,7 +2034,6 @@ private static error AAAAResource(this ptr<Builder> _addr_b, ResourceHeader h, A
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -2169,10 +2045,8 @@ private static error AAAAResource(this ptr<Builder> _addr_b, ResourceHeader h, A
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // OPTResource adds a single OPTResource.
@@ -2190,7 +2064,6 @@ private static error OPTResource(this ptr<Builder> _addr_b, ResourceHeader h, OP
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -2213,7 +2086,6 @@ private static error OPTResource(this ptr<Builder> _addr_b, ResourceHeader h, OP
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -2225,10 +2097,8 @@ private static error OPTResource(this ptr<Builder> _addr_b, ResourceHeader h, OP
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // UnknownResource adds a single UnknownResource.
@@ -2246,7 +2116,6 @@ private static error UnknownResource(this ptr<Builder> _addr_b, ResourceHeader h
         err = err__prev1;
 
     }
-
     h.Type = r.realType();
     var (msg, lenOff, err) = h.pack(b.msg, b.compression, b.start);
     if (err != null) {
@@ -2269,7 +2138,6 @@ private static error UnknownResource(this ptr<Builder> _addr_b, ResourceHeader h
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -2281,10 +2149,8 @@ private static error UnknownResource(this ptr<Builder> _addr_b, ResourceHeader h
         err = err__prev1;
 
     }
-
     b.msg = msg;
     return error.As(null!)!;
-
 }
 
 // Finish ends message building and generates a binary message.
@@ -2300,7 +2166,6 @@ private static (slice<byte>, error) Finish(this ptr<Builder> _addr_b) {
     // Space for the header was allocated in NewBuilder.
     b.header.pack(b.msg[(int)b.start..(int)b.start]);
     return (b.msg, error.As(null!)!);
-
 }
 
 // A ResourceHeader is the header of a DNS resource record. There are
@@ -2348,7 +2213,6 @@ private static (slice<byte>, nint, error) pack(this ptr<ResourceHeader> _addr_h,
     lenOff = len(msg);
     msg = packUint16(msg, h.Length);
     return (msg, lenOff, error.As(null!)!);
-
 }
 
 private static (nint, error) unpack(this ptr<ResourceHeader> _addr_h, slice<byte> msg, nint off) {
@@ -2384,7 +2248,6 @@ private static (nint, error) unpack(this ptr<ResourceHeader> _addr_h, slice<byte
         return (off, error.As(addr(new nestedError("Length",err))!)!);
     }
     return (newOff, error.As(null!)!);
-
 }
 
 // fixLen updates a packed ResourceHeader to include the length of the
@@ -2404,7 +2267,6 @@ private static error fixLen(this ptr<ResourceHeader> _addr_h, slice<byte> msg, n
     h.Length = uint16(conLen);
 
     return error.As(null!)!;
-
 }
 
 // EDNS(0) wire constants.
@@ -2413,7 +2275,6 @@ private static readonly nint edns0Version = 0;
 private static readonly nuint edns0DNSSECOK = 0x00008000;
 private static readonly nuint ednsVersionMask = 0x00ff0000;
 private static readonly nuint edns0DNSSECOKMask = 0x00ff8000;
-
 
 // SetEDNS0 configures h for EDNS(0).
 //
@@ -2429,7 +2290,6 @@ private static error SetEDNS0(this ptr<ResourceHeader> _addr_h, nint udpPayloadL
         h.TTL |= edns0DNSSECOK;
     }
     return error.As(null!)!;
-
 }
 
 // DNSSECAllowed reports whether the DNSSEC OK bit is set.
@@ -2447,10 +2307,8 @@ private static RCode ExtendedRCode(this ptr<ResourceHeader> _addr_h, RCode rcode
 
     if (h.TTL & ednsVersionMask == edns0Version) { // RFC 6891 section 6.1.3
         return RCode(h.TTL >> 24 << 4) | rcode;
-
     }
     return rcode;
-
 }
 
 private static (nint, error) skipResource(slice<byte> msg, nint off) {
@@ -2486,7 +2344,6 @@ private static (nint, error) skipResource(slice<byte> msg, nint off) {
         return (off, error.As(errResourceLen)!);
     }
     return (newOff, error.As(null!)!);
-
 }
 
 // packUint16 appends the wire format of field to msg.
@@ -2503,7 +2360,6 @@ private static (ushort, nint, error) unpackUint16(slice<byte> msg, nint off) {
         return (0, off, error.As(errBaseLen)!);
     }
     return (uint16(msg[off]) << 8 | uint16(msg[off + 1]), off + uint16Len, error.As(null!)!);
-
 }
 
 private static (nint, error) skipUint16(slice<byte> msg, nint off) {
@@ -2514,7 +2370,6 @@ private static (nint, error) skipUint16(slice<byte> msg, nint off) {
         return (off, error.As(errBaseLen)!);
     }
     return (off + uint16Len, error.As(null!)!);
-
 }
 
 // packType appends the wire format of field to msg.
@@ -2574,7 +2429,6 @@ private static (uint, nint, error) unpackUint32(slice<byte> msg, nint off) {
     }
     var v = uint32(msg[off]) << 24 | uint32(msg[off + 1]) << 16 | uint32(msg[off + 2]) << 8 | uint32(msg[off + 3]);
     return (v, off + uint32Len, error.As(null!)!);
-
 }
 
 private static (nint, error) skipUint32(slice<byte> msg, nint off) {
@@ -2585,7 +2439,6 @@ private static (nint, error) skipUint32(slice<byte> msg, nint off) {
         return (off, error.As(errBaseLen)!);
     }
     return (off + uint32Len, error.As(null!)!);
-
 }
 
 // packText appends the wire format of field to msg.
@@ -2601,7 +2454,6 @@ private static (slice<byte>, error) packText(slice<byte> msg, @string field) {
     msg = append(msg, field);
 
     return (msg, error.As(null!)!);
-
 }
 
 private static (@string, nint, error) unpackText(slice<byte> msg, nint off) {
@@ -2618,7 +2470,6 @@ private static (@string, nint, error) unpackText(slice<byte> msg, nint off) {
         return ("", off, error.As(errCalcLen)!);
     }
     return (string(msg[(int)beginOff..(int)endOff]), endOff, error.As(null!)!);
-
 }
 
 // packBytes appends the wire format of field to msg.
@@ -2636,7 +2487,6 @@ private static (nint, error) unpackBytes(slice<byte> msg, nint off, slice<byte> 
     }
     copy(field, msg[(int)off..(int)newOff]);
     return (newOff, error.As(null!)!);
-
 }
 
 private static readonly nint nameLen = 255;
@@ -2663,7 +2513,6 @@ public static (Name, error) NewName(@string name) {
     Name n = new Name(Length:uint8(len(name)));
     copy(n.Data[..], (slice<byte>)name);
     return (n, error.As(null!)!);
-
 }
 
 // MustNewName creates a new Name from a string and panics on error.
@@ -2673,7 +2522,6 @@ public static Name MustNewName(@string name) => func((_, panic, _) => {
         panic("creating name: " + err.Error());
     }
     return n;
-
 });
 
 // String implements fmt.Stringer.String.
@@ -2724,7 +2572,6 @@ private static (slice<byte>, error) pack(this ptr<Name> _addr_n, slice<byte> msg
             if (i - begin == 0) {
                 return (oldMsg, error.As(errZeroSegLen)!);
             }
-
             msg = append(msg, byte(i - begin));
 
             for (var j = begin; j < i; j++) {
@@ -2734,7 +2581,6 @@ private static (slice<byte>, error) pack(this ptr<Name> _addr_n, slice<byte> msg
 
             begin = i + 1;
             continue;
-
         }
         if ((i == 0 || n.Data[i - 1] == '.') && compression != null) {
             {
@@ -2744,7 +2590,6 @@ private static (slice<byte>, error) pack(this ptr<Name> _addr_n, slice<byte> msg
                     // Hit. Emit a pointer instead of the rest of
                     // the domain.
                     return (append(msg, byte(ptr >> 8 | 0xC0), byte(ptr)), error.As(null!)!);
-
                 } 
 
                 // Miss. Add the suffix to the compression table if the
@@ -2757,11 +2602,9 @@ private static (slice<byte>, error) pack(this ptr<Name> _addr_n, slice<byte> msg
             if (len(msg) <= int(~uint16(0) >> 2)) {
                 compression[string(n.Data[(int)i..])] = len(msg) - compressionOff;
             }
-
         }
     }
     return (append(msg, 0), error.As(null!)!);
-
 }
 
 // unpack unpacks a domain name.
@@ -2806,16 +2649,13 @@ Loop:
                     _breakLoop = true;
                     break;
                 }
-
                 var endOff = currOff + c;
                 if (endOff > len(msg)) {
                     return (off, error.As(errCalcLen)!);
                 }
-
                 name = append(name, msg[(int)currOff..(int)endOff]);
                 name = append(name, '.');
                 currOff = endOff;
-
                 break;
             case 0xC0: // Pointer
                 if (!allowCompression) {
@@ -2835,16 +2675,13 @@ Loop:
                 if (ptr > 10) {
                     return (off, error.As(errTooManyPtr)!);
                 }
-
                 currOff = (c ^ 0xC0) << 8 | int(c1);
-
                 break;
             default: 
                 // Prefixes 0x80 and 0x40 are reserved.
                 return (off, error.As(errReserved)!);
                 break;
         }
-
     }
     if (len(name) == 0) {
         name = append(name, '.');
@@ -2857,7 +2694,6 @@ Loop:
         newOff = currOff;
     }
     return (newOff, error.As(null!)!);
-
 }
 
 private static (nint, error) skipName(slice<byte> msg, nint off) {
@@ -2889,7 +2725,6 @@ Loop:
                 if (newOff > len(msg)) {
                     return (off, error.As(errCalcLen)!);
                 }
-
                 break;
             case 0xC0: 
                 // Pointer to somewhere else in msg.
@@ -2906,10 +2741,8 @@ Loop:
                 return (off, error.As(errReserved)!);
                 break;
         }
-
     }
     return (newOff, error.As(null!)!);
-
 }
 
 // A Question is a DNS query.
@@ -2931,7 +2764,6 @@ private static (slice<byte>, error) pack(this ptr<Question> _addr_q, slice<byte>
     }
     msg = packType(msg, q.Type);
     return (packClass(msg, q.Class), error.As(null!)!);
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -3007,7 +2839,6 @@ private static (ResourceBody, nint, error) unpackResourceBody(slice<byte> msg, n
         return (null, off, error.As(addr(new nestedError(name+" record",err))!)!);
     }
     return (r, off + int(hdr.Length), error.As(null!)!);
-
 }
 
 // A CNAMEResource is a CNAME Resource record.
@@ -3049,9 +2880,7 @@ private static (CNAMEResource, error) unpackCNAMEResource(slice<byte> msg, nint 
             return (new CNAMEResource(), error.As(err)!);
         }
     }
-
     return (new CNAMEResource(cname), error.As(null!)!);
-
 }
 
 // An MXResource is an MX Resource record.
@@ -3079,7 +2908,6 @@ private static (slice<byte>, error) pack(this ptr<MXResource> _addr_r, slice<byt
         return (oldMsg, error.As(addr(new nestedError("MXResource.MX",err))!)!);
     }
     return (msg, error.As(null!)!);
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -3105,9 +2933,7 @@ private static (MXResource, error) unpackMXResource(slice<byte> msg, nint off) {
             return (new MXResource(), error.As(addr(new nestedError("MX",err))!)!);
         }
     }
-
     return (new MXResource(pref,mx), error.As(null!)!);
-
 }
 
 // An NSResource is an NS Resource record.
@@ -3149,9 +2975,7 @@ private static (NSResource, error) unpackNSResource(slice<byte> msg, nint off) {
             return (new NSResource(), error.As(err)!);
         }
     }
-
     return (new NSResource(ns), error.As(null!)!);
-
 }
 
 // A PTRResource is a PTR Resource record.
@@ -3193,9 +3017,7 @@ private static (PTRResource, error) unpackPTRResource(slice<byte> msg, nint off)
             return (new PTRResource(), error.As(err)!);
         }
     }
-
     return (new PTRResource(ptr), error.As(null!)!);
-
 }
 
 // An SOAResource is an SOA Resource record.
@@ -3237,7 +3059,6 @@ private static (slice<byte>, error) pack(this ptr<SOAResource> _addr_r, slice<by
     msg = packUint32(msg, r.Retry);
     msg = packUint32(msg, r.Expire);
     return (packUint32(msg, r.MinTTL), error.As(null!)!);
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -3283,7 +3104,6 @@ private static (SOAResource, error) unpackSOAResource(slice<byte> msg, nint off)
         return (new SOAResource(), error.As(addr(new nestedError("MinTTL",err))!)!);
     }
     return (new SOAResource(ns,mbox,serial,refresh,retry,expire,minTTL), error.As(null!)!);
-
 }
 
 // A TXTResource is a TXT Resource record.
@@ -3311,7 +3131,6 @@ private static (slice<byte>, error) pack(this ptr<TXTResource> _addr_r, slice<by
             return (oldMsg, error.As(err)!);
         }
     }    return (msg, error.As(null!)!);
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -3326,7 +3145,6 @@ private static @string GoString(this ptr<TXTResource> _addr_r) {
     foreach (var (_, t) in r.TXT[(int)1..]) {
         s += "\", \"" + printString((slice<byte>)t);
     }    return s + "\"}}";
-
 }
 
 private static (TXTResource, error) unpackTXTResource(slice<byte> msg, nint off, ushort length) {
@@ -3349,14 +3167,11 @@ private static (TXTResource, error) unpackTXTResource(slice<byte> msg, nint off,
             if (length - n < uint16(len(t)) + 1) {
                 return (new TXTResource(), error.As(errCalcLen)!);
             }
-
             n += uint16(len(t)) + 1;
             txts = append(txts, t);
-
         }
     }
     return (new TXTResource(txts), error.As(null!)!);
-
 }
 
 // An SRVResource is an SRV Resource record.
@@ -3388,7 +3203,6 @@ private static (slice<byte>, error) pack(this ptr<SRVResource> _addr_r, slice<by
         return (oldMsg, error.As(addr(new nestedError("SRVResource.Target",err))!)!);
     }
     return (msg, error.As(null!)!);
-
 }
 
 // GoString implements fmt.GoStringer.GoString.
@@ -3422,9 +3236,7 @@ private static (SRVResource, error) unpackSRVResource(slice<byte> msg, nint off)
             return (new SRVResource(), error.As(addr(new nestedError("Target",err))!)!);
         }
     }
-
     return (new SRVResource(priority,weight,port,target), error.As(null!)!);
-
 }
 
 // An AResource is an A Resource record.
@@ -3466,9 +3278,7 @@ private static (AResource, error) unpackAResource(slice<byte> msg, nint off) {
             return (new AResource(), error.As(err)!);
         }
     }
-
     return (new AResource(a), error.As(null!)!);
-
 }
 
 // An AAAAResource is an AAAA Resource record.
@@ -3510,9 +3320,7 @@ private static (AAAAResource, error) unpackAAAAResource(slice<byte> msg, nint of
             return (new AAAAResource(), error.As(err)!);
         }
     }
-
     return (new AAAAResource(aaaa), error.As(null!)!);
-
 }
 
 // An OPTResource is an OPT pseudo Resource record.
@@ -3570,7 +3378,6 @@ private static @string GoString(this ptr<OPTResource> _addr_r) {
     foreach (var (_, o) in r.Options[(int)1..]) {
         s += ", " + o.GoString();
     }    return s + "}}";
-
 }
 
 private static (OPTResource, error) unpackOPTResource(slice<byte> msg, nint off, ushort length) {
@@ -3602,7 +3409,6 @@ private static (OPTResource, error) unpackOPTResource(slice<byte> msg, nint off,
         }
     }
     return (new OPTResource(opts), error.As(null!)!);
-
 }
 
 // An UnknownResource is a catch-all container for unknown record types.
@@ -3645,9 +3451,7 @@ private static (UnknownResource, error) unpackUnknownResource(Type recordType, s
             return (new UnknownResource(), error.As(err)!);
         }
     }
-
     return (parsed, error.As(null!)!);
-
 }
 
 } // end dnsmessage_package

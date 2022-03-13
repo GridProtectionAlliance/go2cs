@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httpguts -- go2cs converted at 2022 March 06 23:37:10 UTC
+// package httpguts -- go2cs converted at 2022 March 13 06:45:26 UTC
 // import "vendor/golang.org/x/net/http/httpguts" ==> using httpguts = go.vendor.golang.org.x.net.http.httpguts_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\http\httpguts\httplex.go
-using net = go.net_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
-using idna = go.golang.org.x.net.idna_package;
-
 namespace go.vendor.golang.org.x.net.http;
+
+using net = net_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+using idna = golang.org.x.net.idna_package;
 
 public static partial class httpguts_package {
 
@@ -34,7 +34,6 @@ public static bool HeaderValuesContainsToken(slice<@string> values, @string toke
             return true;
         }
     }    return false;
-
 }
 
 // isOWS reports whether b is an optional whitespace byte, as defined
@@ -57,7 +56,6 @@ private static @string trimOWS(@string x) {
         x = x[..(int)len(x) - 1];
     }
     return x;
-
 }
 
 // headerValueContainsToken reports whether v (assumed to be a
@@ -73,13 +71,10 @@ private static bool headerValueContainsToken(@string v, @string token) {
                 return true;
             comma = strings.IndexByte(v, ',');
             }
-
             v = v[(int)comma + 1..];
-
         }
     }
     return tokenEqual(trimOWS(v), token);
-
 }
 
 // lowerASCII returns the ASCII lowercase version of b.
@@ -88,7 +83,6 @@ private static byte lowerASCII(byte b) {
         return b + ('a' - 'A');
     }
     return b;
-
 }
 
 // tokenEqual reports whether t1 and t2 are equal, ASCII case-insensitively.
@@ -100,13 +94,11 @@ private static bool tokenEqual(@string t1, @string t2) {
         if (b >= utf8.RuneSelf) { 
             // No UTF-8 or non-ASCII allowed in tokens.
             return false;
-
         }
         if (lowerASCII(byte(b)) != lowerASCII(t2[i])) {
             return false;
         }
     }    return true;
-
 }
 
 // isLWS reports whether b is linear white space, according
@@ -124,7 +116,6 @@ private static bool isCTL(byte b) {
     const nuint del = 0x7f; // a CTL
  // a CTL
     return b < ' ' || b == del;
-
 }
 
 // ValidHeaderFieldName reports whether v is a valid HTTP/1.x header name.
@@ -146,7 +137,6 @@ public static bool ValidHeaderFieldName(@string v) {
             return false;
         }
     }    return true;
-
 }
 
 // ValidHostHeader reports whether h is a valid host header.
@@ -168,7 +158,6 @@ public static bool ValidHostHeader(@string h) {
         }
     }
     return true;
-
 }
 
 // See the validHostHeader comment.
@@ -219,7 +208,6 @@ public static bool ValidHeaderFieldValue(@string v) {
         }
     }
     return true;
-
 }
 
 private static bool isASCII(@string s) {
@@ -229,7 +217,6 @@ private static bool isASCII(@string s) {
         }
     }
     return true;
-
 }
 
 // PunycodeHostPort returns the IDNA Punycode version
@@ -248,20 +235,17 @@ public static (@string, error) PunycodeHostPort(@string v) {
         // to the caller.
         host = v;
         port = "";
-
     }
     host, err = idna.ToASCII(host);
     if (err != null) { 
         // Non-UTF-8? Not representable in Punycode, in any
         // case.
         return ("", error.As(err)!);
-
     }
     if (port == "") {
         return (host, error.As(null!)!);
     }
     return (net.JoinHostPort(host, port), error.As(null!)!);
-
 }
 
 } // end httpguts_package

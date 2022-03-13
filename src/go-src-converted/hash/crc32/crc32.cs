@@ -10,21 +10,23 @@
 //
 // See https://en.wikipedia.org/wiki/Mathematics_of_cyclic_redundancy_checks#Reversed_representations_and_reciprocal_polynomials
 // for information.
-// package crc32 -- go2cs converted at 2022 March 06 22:14:53 UTC
+
+// package crc32 -- go2cs converted at 2022 March 13 05:28:56 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Program Files\Go\src\hash\crc32\crc32.go
-using errors = go.errors_package;
-using hash = go.hash_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using System;
-
-
 namespace go.hash;
 
+using errors = errors_package;
+using hash = hash_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+
+// The size of a CRC-32 checksum in bytes.
+
+using System;
 public static partial class crc32_package {
 
-    // The size of a CRC-32 checksum in bytes.
 public static readonly nint Size = 4;
 
 // Predefined polynomials.
@@ -45,7 +47,6 @@ public static readonly nuint Castagnoli = 0x82f63b78;
 // Also has better error detection characteristics than IEEE.
 // https://dx.doi.org/10.1109/DSN.2002.1028931
 public static readonly nuint Koopman = 0xeb31d82e;
-
 
 // Table is a 256-word table representing the polynomial for efficient processing.
 public partial struct Table { // : array<uint>
@@ -102,13 +103,9 @@ private static void castagnoliInit() {
  { 
         // Initialize the slicing-by-8 table.
         castagnoliTable8 = slicingMakeTable(Castagnoli);
-        updateCastagnoli = (crc, p) => {
-            return slicingUpdate(crc, castagnoliTable8, p);
-        };
-
+        updateCastagnoli = (crc, p) => slicingUpdate(crc, castagnoliTable8, p);
     }
     atomic.StoreUint32(_addr_haveCastagnoli, 1);
-
 }
 
 // IEEETable is the table for the IEEE polynomial.
@@ -131,10 +128,7 @@ private static void ieeeInit() {
  { 
         // Initialize the slicing-by-8 table.
         ieeeTable8 = slicingMakeTable(IEEE);
-        updateIEEE = (crc, p) => {
-            return slicingUpdate(crc, ieeeTable8, p);
-        };
-
+        updateIEEE = (crc, p) => slicingUpdate(crc, ieeeTable8, p);
     }
 }
 
@@ -149,7 +143,6 @@ public static ptr<Table> MakeTable(uint poly) {
         castagnoliOnce.Do(castagnoliInit);
         return _addr_castagnoliTable!;
         return _addr_simpleMakeTable(poly)!;
-
 }
 
 // digest represents the partial evaluation of a checksum.
@@ -170,7 +163,6 @@ public static hash.Hash32 New(ptr<Table> _addr_tab) {
         ieeeOnce.Do(ieeeInit);
     }
     return addr(new digest(0,tab));
-
 }
 
 // NewIEEE creates a new hash.Hash32 computing the CRC-32 checksum using
@@ -203,7 +195,6 @@ private static void Reset(this ptr<digest> _addr_d) {
 private static readonly @string magic = "crc\x01";
 private static readonly var marshaledSize = len(magic) + 4 + 4;
 
-
 private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -230,7 +221,6 @@ private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
     }
     d.crc = readUint32(b[(int)8..]);
     return error.As(null!)!;
-
 }
 
 private static slice<byte> appendUint32(slice<byte> b, uint x) {
@@ -257,8 +247,7 @@ public static uint Update(uint crc, ptr<Table> _addr_tab, slice<byte> p) {
         return updateIEEE(crc, p);
     else 
         return simpleUpdate(crc, tab, p);
-    
-}
+    }
 
 private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
     nint n = default;
@@ -275,7 +264,6 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
     else 
         d.crc = simpleUpdate(d.crc, d.tab, p);
         return (len(p), error.As(null!)!);
-
 }
 
 private static uint Sum32(this ptr<digest> _addr_d) {
@@ -318,7 +306,6 @@ private static uint tableSum(ptr<Table> _addr_t) {
         }
     }
     return ChecksumIEEE(b);
-
 }
 
 } // end crc32_package

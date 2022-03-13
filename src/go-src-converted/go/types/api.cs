@@ -24,25 +24,27 @@
 //
 // For a tutorial, see https://golang.org/s/types-tutorial.
 //
-// package types -- go2cs converted at 2022 March 06 22:41:18 UTC
+
+// package types -- go2cs converted at 2022 March 13 05:52:23 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\api.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.go;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+
+// An Error describes a type-checking error; it implements the error interface.
+// A "soft" error is an error that still permits a valid interpretation of a
+// package (such as "unused variable"); "hard" errors may lead to unpredictable
+// behavior if ignored.
+
+using System;
 public static partial class types_package {
 
-    // An Error describes a type-checking error; it implements the error interface.
-    // A "soft" error is an error that still permits a valid interpretation of a
-    // package (such as "unused variable"); "hard" errors may lead to unpredictable
-    // behavior if ignored.
 public partial struct Error {
     public ptr<token.FileSet> Fset; // file set for interpretation of Pos
     public token.Pos Pos; // error position
@@ -145,7 +147,6 @@ private static Type TypeOf(this ptr<Info> _addr_info, ast.Expr e) {
             return t.Type;
         }
     }
-
     {
         ptr<ast.Ident> (id, _) = e._<ptr<ast.Ident>>();
 
@@ -158,12 +159,9 @@ private static Type TypeOf(this ptr<Info> _addr_info, ast.Expr e) {
                 }
 
             }
-
         }
     }
-
     return null;
-
 }
 
 // ObjectOf returns the object denoted by the specified id,
@@ -185,9 +183,7 @@ private static Object ObjectOf(this ptr<Info> _addr_info, ptr<ast.Ident> _addr_i
             return obj;
         }
     }
-
     return info.Uses[id];
-
 }
 
 // TypeAndValue reports the type and value (for constants)
@@ -223,7 +219,6 @@ public static bool IsValue(this TypeAndValue tv) {
     if (tv.mode == constant_ || tv.mode == variable || tv.mode == mapindex || tv.mode == value || tv.mode == commaok || tv.mode == commaerr) 
         return true;
         return false;
-
 }
 
 // IsNil reports whether the corresponding expression denotes the
@@ -274,11 +269,9 @@ private static @string String(this ptr<Initializer> _addr_init) {
             buf.WriteString(", ");
         }
         buf.WriteString(lhs.Name());
-
     }    buf.WriteString(" = ");
     WriteExpr(_addr_buf, init.Rhs);
     return buf.String();
-
 }
 
 // Check type-checks a package and returns the resulting package object and
@@ -316,7 +309,6 @@ public static bool AssignableTo(Type V, Type T) {
     operand x = new operand(mode:value,typ:V);
     var (ok, _) = x.assignableTo(null, T, null); // check not needed for non-constant x
     return ok;
-
 }
 
 // ConvertibleTo reports whether a value of type V is convertible to a value of type T.

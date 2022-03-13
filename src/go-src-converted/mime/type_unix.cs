@@ -5,14 +5,14 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package mime -- go2cs converted at 2022 March 06 22:21:18 UTC
+// package mime -- go2cs converted at 2022 March 13 05:36:25 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Program Files\Go\src\mime\type_unix.go
-using bufio = go.bufio_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
 namespace go;
+
+using bufio = bufio_package;
+using os = os_package;
+using strings = strings_package;
 
 public static partial class mime_package {
 
@@ -53,14 +53,11 @@ private static error loadMimeGlobsFile(@string filename) => func((defer, panic, 
                 // The file is in weight order, so we keep
                 // the first entry that we see.
                 continue;
-
             }
 
         }
 
-
         setExtensionType(extension, fields[1]);
-
     }
     {
         var err = scanner.Err();
@@ -69,9 +66,7 @@ private static error loadMimeGlobsFile(@string filename) => func((defer, panic, 
             panic(err);
         }
     }
-
     return error.As(null!)!;
-
 });
 
 private static void loadMimeFile(@string filename) => func((defer, panic, _) => {
@@ -102,7 +97,6 @@ private static void loadMimeFile(@string filename) => func((defer, panic, _) => 
             panic(err);
         }
     }
-
 });
 
 private static void initMimeUnix() {
@@ -119,7 +113,6 @@ private static void initMimeUnix() {
                 }
 
             }
-
         }
         filename = filename__prev1;
     }

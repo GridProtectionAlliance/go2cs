@@ -7,37 +7,39 @@
 //go:generate go test -tags test
 
 // Package norm contains types and functions for normalizing Unicode strings.
-// package norm -- go2cs converted at 2022 March 06 23:38:55 UTC
+
+// package norm -- go2cs converted at 2022 March 13 06:47:09 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\normalize.go
+namespace go.vendor.golang.org.x.text.unicode;
 // import "golang.org/x/text/unicode/norm"
 
-using utf8 = go.unicode.utf8_package;
 
-using transform = go.golang.org.x.text.transform_package;
+using utf8 = unicode.utf8_package;
+
+using transform = golang.org.x.text.transform_package;
+
+
+// A Form denotes a canonical representation of Unicode code points.
+// The Unicode-defined normalization and equivalence forms are:
+//
+//   NFC   Unicode Normalization Form C
+//   NFD   Unicode Normalization Form D
+//   NFKC  Unicode Normalization Form KC
+//   NFKD  Unicode Normalization Form KD
+//
+// For a Form f, this documentation uses the notation f(x) to mean
+// the bytes or string x converted to the given form.
+// A position n in x is called a boundary if conversion to the form can
+// proceed independently on both sides:
+//   f(x) == append(f(x[0:n]), f(x[n:])...)
+//
+// References: https://unicode.org/reports/tr15/ and
+// https://unicode.org/notes/tn5/.
+
 using System;
-
-
-namespace go.vendor.golang.org.x.text.unicode;
-
 public static partial class norm_package {
 
-    // A Form denotes a canonical representation of Unicode code points.
-    // The Unicode-defined normalization and equivalence forms are:
-    //
-    //   NFC   Unicode Normalization Form C
-    //   NFD   Unicode Normalization Form D
-    //   NFKC  Unicode Normalization Form KC
-    //   NFKD  Unicode Normalization Form KD
-    //
-    // For a Form f, this documentation uses the notation f(x) to mean
-    // the bytes or string x converted to the given form.
-    // A position n in x is called a boundary if conversion to the form can
-    // proceed independently on both sides:
-    //   f(x) == append(f(x[0:n]), f(x[n:])...)
-    //
-    // References: https://unicode.org/reports/tr15/ and
-    // https://unicode.org/notes/tn5/.
 public partial struct Form { // : nint
 }
 
@@ -45,7 +47,6 @@ public static readonly Form NFC = iota;
 public static readonly var NFD = 0;
 public static readonly var NFKC = 1;
 public static readonly var NFKD = 2;
-
 
 // Bytes returns f(b). May return b if f(b) = b.
 public static slice<byte> Bytes(this Form f, slice<byte> b) {
@@ -59,7 +60,6 @@ public static slice<byte> Bytes(this Form f, slice<byte> b) {
     copy(out, b[(int)0..(int)n]);
     ref reorderBuffer rb = ref heap(new reorderBuffer(f:*ft,src:src,nsrc:len(b),out:out,flushF:appendFlush), out ptr<reorderBuffer> _addr_rb);
     return doAppendInner(_addr_rb, n);
-
 }
 
 // String returns f(s).
@@ -74,7 +74,6 @@ public static @string String(this Form f, @string s) {
     copy(out, s[(int)0..(int)n]);
     ref reorderBuffer rb = ref heap(new reorderBuffer(f:*ft,src:src,nsrc:len(s),out:out,flushF:appendFlush), out ptr<reorderBuffer> _addr_rb);
     return string(doAppendInner(_addr_rb, n));
-
 }
 
 // IsNormal returns true if b == f(b).
@@ -95,10 +94,8 @@ public static bool IsNormal(this Form f, slice<byte> b) {
             return false;
         }
         bp, _ = rb.f.quickSpan(rb.src, bp, len(b), true);
-
     }
     return true;
-
 }
 
 private static bool cmpNormalBytes(ptr<reorderBuffer> _addr_rb) {
@@ -117,14 +114,10 @@ private static bool cmpNormalBytes(ptr<reorderBuffer> _addr_rb) {
                 return false;
             p++;
             }
-
             b = b[(int)1..];
-
         }
-
     }
     return true;
-
 }
 
 // IsNormalString returns true if s == f(s).
@@ -149,15 +142,10 @@ public static bool IsNormalString(this Form f, @string s) {
                     return false;
                 p++;
                 }
-
                 bp++;
-
             }
-
-
         }
         return true;
-
     });
     while (bp < len(s)) {
         bp = decomposeSegment(_addr_rb, bp, true);
@@ -166,10 +154,8 @@ public static bool IsNormalString(this Form f, @string s) {
             return false;
         }
         bp, _ = rb.f.quickSpan(rb.src, bp, len(s), true);
-
     }
     return true;
-
 }
 
 // patchTail fixes a case where a rune may be incorrectly normalized
@@ -194,7 +180,6 @@ private static bool patchTail(ptr<reorderBuffer> _addr_rb) {
         rb.doFlush();
         rb.@out = append(rb.@out, x);
         return false;
-
     }
     var buf = rb.@out[(int)p..];
     rb.@out = rb.@out[..(int)p];
@@ -213,10 +198,8 @@ private static bool patchTail(ptr<reorderBuffer> _addr_rb) {
         }
 
     }
-
     rb.insertUnsafe(inputBytes(buf), 0, info);
     return true;
-
 }
 
 private static nint appendQuick(ptr<reorderBuffer> _addr_rb, nint i) {
@@ -228,7 +211,6 @@ private static nint appendQuick(ptr<reorderBuffer> _addr_rb, nint i) {
     var (end, _) = rb.f.quickSpan(rb.src, i, rb.nsrc, true);
     rb.@out = rb.src.appendSlice(rb.@out, i, end);
     return end;
-
 }
 
 // Append returns f(append(out, b...)).
@@ -253,11 +235,9 @@ public static slice<byte> doAppend(this Form f, slice<byte> @out, input src, nin
         }
         ref reorderBuffer rb = ref heap(new reorderBuffer(f:*ft,src:src,nsrc:n,out:out,flushF:appendFlush), out ptr<reorderBuffer> _addr_rb);
         return doAppendInner(_addr_rb, p);
-
     }
     rb = new reorderBuffer(f:*ft,src:src,nsrc:n);
     return doAppend(_addr_rb, out, 0);
-
 }
 
 private static slice<byte> doAppend(ptr<reorderBuffer> _addr_rb, slice<byte> @out, nint p) {
@@ -275,10 +255,8 @@ private static slice<byte> doAppend(ptr<reorderBuffer> _addr_rb, slice<byte> @ou
             rb.@out = src.appendSlice(rb.@out, p, q);
             p = q;
             doMerge = patchTail(_addr_rb);
-
         }
     }
-
     var fd = _addr_rb.f;
     if (doMerge) {
         Properties info = default;
@@ -295,7 +273,6 @@ private static slice<byte> doAppend(ptr<reorderBuffer> _addr_rb, slice<byte> @ou
             rb.doFlush(); 
             // Append incomplete UTF-8 encoding.
             return src.appendSlice(rb.@out, p, n);
-
         }
         if (rb.nrune > 0) {
             return doAppendInner(_addr_rb, p);
@@ -303,7 +280,6 @@ private static slice<byte> doAppend(ptr<reorderBuffer> _addr_rb, slice<byte> @ou
     }
     p = appendQuick(_addr_rb, p);
     return doAppendInner(_addr_rb, p);
-
 }
 
 private static slice<byte> doAppendInner(ptr<reorderBuffer> _addr_rb, nint p) {
@@ -318,7 +294,6 @@ private static slice<byte> doAppendInner(ptr<reorderBuffer> _addr_rb, nint p) {
         }
     }
     return rb.@out;
-
 }
 
 // AppendString returns f(append(out, []byte(s))).
@@ -351,7 +326,6 @@ public static (nint, error) Span(this Form f, slice<byte> b, bool atEOF) {
         }
     }
     return (n, error.As(err)!);
-
 }
 
 // SpanString returns a boundary n such that s[0:n] == f(s[0:n]).
@@ -371,7 +345,6 @@ public static (nint, error) SpanString(this Form f, @string s, bool atEOF) {
         }
     }
     return (n, error.As(err)!);
-
 }
 
 // quickSpan returns a boundary n such that src[0:n] == f(src[0:n]) and
@@ -401,17 +374,13 @@ private static (nint, bool) quickSpan(this ptr<formInfo> _addr_f, input src, nin
             }
 
         }
-
         var info = f.info(src, i);
         if (info.size == 0) {
             if (atEOF) { 
                 // include incomplete runes
                 return (n, true);
-
             }
-
             return (lastSegStart, true);
-
         }
 
         if (ss.next(info) == ssStarter) 
@@ -435,17 +404,14 @@ private static (nint, bool) quickSpan(this ptr<formInfo> _addr_f, input src, nin
         }
         lastCC = info.ccc;
         i += int(info.size);
-
     }
     if (i == n) {
         if (!atEOF) {
             n = lastSegStart;
         }
         return (n, true);
-
     }
     return (lastSegStart, false);
-
 }
 
 // QuickSpanString returns a boundary n such that s[0:n] == f(s[0:n]).
@@ -484,7 +450,6 @@ public static nint firstBoundary(this Form f, input src, nint nsrc) {
             }
 
         }
-
         i += int(info.size);
         if (i >= nsrc) {
             if (!info.BoundaryAfter() && !ss.isMax()) {
@@ -493,7 +458,6 @@ public static nint firstBoundary(this Form f, input src, nint nsrc) {
             return nsrc;
         }
     }
-
 }
 
 // FirstBoundaryInString returns the position i of the first boundary in s
@@ -522,7 +486,6 @@ public static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF) {
             return 0;
         }
         return -1;
-
     }
     var fd = formTable[f];
     var info = fd.info(src, 0);
@@ -531,7 +494,6 @@ public static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF) {
             return 1;
         }
         return -1;
-
     }
     var ss = streamSafe(0);
     ss.first(info);
@@ -546,9 +508,7 @@ public static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF) {
                     return i;
             i += int(info.size);
                 }
-
                 return -1;
-
             } 
             // TODO: Using streamSafe to determine the boundary isn't the same as
             // using BoundaryBefore. Determine which should be used.
@@ -560,14 +520,12 @@ public static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF) {
                 }
 
             }
-
         }
     }
     if (!atEOF && !info.BoundaryAfter() && !ss.isMax()) {
         return -1;
     }
     return nsrc;
-
 }
 
 // LastBoundary returns the position i of the last boundary in b
@@ -587,18 +545,15 @@ private static nint lastBoundary(ptr<formInfo> _addr_fd, slice<byte> b) {
     if (info.size == 0) { // ends with incomplete rune
         if (p == 0) { // starts with incomplete rune
             return -1;
-
         }
         i = p;
         info, p = lastRuneStart(_addr_fd, b[..(int)i]);
         if (p == -1) { // incomplete UTF-8 encoding or non-starter bytes without a starter
             return i;
-
         }
     }
     if (p + int(info.size) != i) { // trailing non-starter bytes: illegal UTF-8
         return i;
-
     }
     if (info.BoundaryAfter()) {
         return i;
@@ -618,14 +573,11 @@ private static nint lastBoundary(ptr<formInfo> _addr_fd, slice<byte> b) {
         if (p + int(info.size) != i) {
             if (p == -1) { // no boundary found
                 return -1;
-
             }
-
             return i; // boundary after an illegal UTF-8 encoding
         }
     }
     return i;
-
 }
 
 // decomposeSegment scans the first segment in src into rb. It inserts 0x034f
@@ -649,7 +601,6 @@ private static nint decomposeSegment(ptr<reorderBuffer> _addr_rb, nint sp, bool 
             if (rb.nrune > 0) {
                 goto end;
             }
-
         }
         else if (s == ssOverflow) {
             rb.insertCGJ();
@@ -659,7 +610,6 @@ private static nint decomposeSegment(ptr<reorderBuffer> _addr_rb, nint sp, bool 
         s = s__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -671,7 +621,6 @@ private static nint decomposeSegment(ptr<reorderBuffer> _addr_rb, nint sp, bool 
         err = err__prev1;
 
     }
-
     while (true) {
         sp += int(info.size);
         if (sp >= rb.nsrc) {
@@ -700,11 +649,9 @@ private static nint decomposeSegment(ptr<reorderBuffer> _addr_rb, nint sp, bool 
                 break;
             }
 
-
             s = s__prev1;
 
         }
-
         {
             var err__prev1 = err;
 
@@ -717,14 +664,12 @@ private static nint decomposeSegment(ptr<reorderBuffer> _addr_rb, nint sp, bool 
             err = err__prev1;
 
         }
-
     }
 end:
     if (!rb.doFlush()) {
         return int(iShortDst);
     }
     return sp;
-
 }
 
 // lastRuneStart returns the runeInfo and position of the last
@@ -742,7 +687,6 @@ private static (Properties, nint) lastRuneStart(ptr<formInfo> _addr_fd, slice<by
         return (new Properties(), -1);
     }
     return (fd.info(inputBytes(buf), p), p);
-
 }
 
 // decomposeToLastBoundary finds an open segment at the end of the buffer
@@ -755,7 +699,6 @@ private static void decomposeToLastBoundary(ptr<reorderBuffer> _addr_rb) {
     if (int(info.size) != len(rb.@out) - i) { 
         // illegal trailing continuation bytes
         return ;
-
     }
     if (info.BoundaryAfter()) {
         return ;
@@ -771,7 +714,6 @@ private static void decomposeToLastBoundary(ptr<reorderBuffer> _addr_rb) {
             // Note that if we have an overflow, it the string we are appending to
             // is not correctly normalized. In this case the behavior is undefined.
             break;
-
         }
         padd++;
         p -= int(info.size);
@@ -796,7 +738,6 @@ private static void decomposeToLastBoundary(ptr<reorderBuffer> _addr_rb) {
         cp = cp[(int)info.size..];
         padd--;
     }
-
 }
 
 } // end norm_package

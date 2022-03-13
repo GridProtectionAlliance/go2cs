@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:52 UTC
+//     Generated on 2022 March 13 05:38:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace http
 {
     public static partial class fcgi_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct envVarsContextKey
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace http
             public static implicit operator envVarsContextKey(NilType nil) => default(envVarsContextKey);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static envVarsContextKey envVarsContextKey_cast(dynamic value)
         {
             return new envVarsContextKey();

@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zlib -- go2cs converted at 2022 March 06 22:32:04 UTC
+// package zlib -- go2cs converted at 2022 March 13 05:43:02 UTC
 // import "compress/zlib" ==> using zlib = go.compress.zlib_package
 // Original source: C:\Program Files\Go\src\compress\zlib\writer.go
-using flate = go.compress.flate_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using adler32 = go.hash.adler32_package;
-using io = go.io_package;
-
 namespace go.compress;
+
+using flate = compress.flate_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using adler32 = hash.adler32_package;
+using io = io_package;
+
+
+// These constants are copied from the flate package, so that code that imports
+// "compress/zlib" does not also have to import "compress/flate".
 
 public static partial class zlib_package {
 
-    // These constants are copied from the flate package, so that code that imports
-    // "compress/zlib" does not also have to import "compress/flate".
 public static readonly var NoCompression = flate.NoCompression;
 public static readonly var BestSpeed = flate.BestSpeed;
 public static readonly var BestCompression = flate.BestCompression;
 public static readonly var DefaultCompression = flate.DefaultCompression;
 public static readonly var HuffmanOnly = flate.HuffmanOnly;
-
 
 // A Writer takes data written to it and writes the compressed
 // form of that data to an underlying writer (see NewWriter).
@@ -74,7 +75,6 @@ public static (ptr<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, s
         return (_addr_null!, error.As(fmt.Errorf("zlib: invalid compression level: %d", level))!);
     }
     return (addr(new Writer(w:w,level:level,dict:dict,)), error.As(null!)!);
-
 }
 
 // Reset clears the state of the Writer z such that it is equivalent to its
@@ -94,7 +94,6 @@ private static void Reset(this ptr<Writer> _addr_z, io.Writer w) {
     z.err = null;
     z.scratch = new array<byte>(new byte[] {  });
     z.wroteHeader = false;
-
 }
 
 // writeHeader writes the ZLIB header.
@@ -170,10 +169,8 @@ private static error writeHeader(this ptr<Writer> _addr_z) => func((_, panic, _)
             return error.As(err)!;
         }
         z.digest = adler32.New();
-
     }
     return error.As(null!)!;
-
 });
 
 // Write writes a compressed form of p to the underlying io.Writer. The
@@ -200,7 +197,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_z, slice<byte> p) {
     }
     z.digest.Write(p);
     return ;
-
 }
 
 // Flush flushes the Writer to its underlying io.Writer.
@@ -215,7 +211,6 @@ private static error Flush(this ptr<Writer> _addr_z) {
     }
     z.err = z.compressor.Flush();
     return error.As(z.err)!;
-
 }
 
 // Close closes the Writer, flushing any unwritten data to the underlying
@@ -238,7 +233,6 @@ private static error Close(this ptr<Writer> _addr_z) {
     binary.BigEndian.PutUint32(z.scratch[..], checksum);
     _, z.err = z.w.Write(z.scratch[(int)0..(int)4]);
     return error.As(z.err)!;
-
 }
 
 } // end zlib_package

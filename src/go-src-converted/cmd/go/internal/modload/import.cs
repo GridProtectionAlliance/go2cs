@@ -2,33 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:06 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:29 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\import.go
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using goroot = go.@internal.goroot_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using pathpkg = go.path_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using par = go.cmd.go.@internal.par_package;
-using search = go.cmd.go.@internal.search_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using goroot = @internal.goroot_package;
+using fs = io.fs_package;
+using os = os_package;
+using pathpkg = path_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using par = cmd.go.@internal.par_package;
+using search = cmd.go.@internal.search_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using System;
 
 public static partial class modload_package {
 
@@ -71,13 +70,11 @@ private static @string Error(this ptr<ImportMissingError> _addr_e) {
             return fmt.Sprintf("%s: %v", message, e.QueryErr);
         }
         return fmt.Sprintf("%s; to add it:\n\tgo get %s", message, e.Path);
-
     }
     if (e.newMissingVersion != "") {
         return fmt.Sprintf("package %s provided by %s at latest version %s but not at required version %s", e.Path, e.Module.Path, e.Module.Version, e.newMissingVersion);
     }
     return fmt.Sprintf("missing module for import: %s@%s provides %s", e.Module.Path, e.Module.Version, e.Path);
-
 }
 
 private static error Unwrap(this ptr<ImportMissingError> _addr_e) {
@@ -132,7 +129,6 @@ private static @string Error(this ptr<AmbiguousImportError> _addr_e) {
             buf.WriteString(dir);
         }
     }    return buf.String();
-
 }
 
 // A DirectImportFromImplicitDependencyError indicates a package directly
@@ -214,10 +210,8 @@ private static @string Error(this ptr<ImportMissingSumError> _addr_e) {
             version = "@" + e.importerVersion;
         }
         hint = fmt.Sprintf("; to add:\n\tgo get%s %s%s", tFlag, e.importer, version);
-
     }
     return message + hint;
-
 }
 
 private static @string ImportPath(this ptr<ImportMissingSumError> _addr_e) {
@@ -281,7 +275,6 @@ private static (module.Version, @string, error) importFromModules(context.Contex
     if (path == "C") { 
         // There's no directory for import "C".
         return (new module.Version(), "", error.As(null!)!);
-
     }
     {
         var err = module.CheckImportPath(path);
@@ -307,15 +300,12 @@ private static (module.Version, @string, error) importFromModules(context.Contex
                     return (Target, dir, error.As(null!)!);
                 }
 
-
                 dir = dir__prev3;
 
             }
-
         }
         var dir = filepath.Join(cfg.GOROOT, "src", path);
         return (new module.Version(), dir, error.As(null!)!);
-
     }
     if (cfg.BuildMod == "vendor") {
         var (mainDir, mainOK, mainErr) = dirInModule(path, targetPrefix, ModRoot(), true);
@@ -331,7 +321,6 @@ private static (module.Version, @string, error) importFromModules(context.Contex
         }
         readVendorList();
         return (vendorPkgModule[path], vendorDir, error.As(null!)!);
-
     }
     slice<@string> dirs = default;
     slice<module.Version> mods = default; 
@@ -364,11 +353,9 @@ private static (module.Version, @string, error) importFromModules(context.Contex
  {
                     (v, ok) = (mg.Selected(prefix), true);
                 }
-
                 if (!ok || v == "none") {
                     continue;
                 }
-
                 module.Version m = new module.Version(Path:prefix,Version:v);
 
                 var needSum = true;
@@ -385,7 +372,6 @@ private static (module.Version, @string, error) importFromModules(context.Contex
                             // multiple nested modules to resolve the import; we'll report them all.
                             sumErrMods = append(sumErrMods, m);
                             continue;
-
                         } 
                         // Report fetch error.
                         // Note that we don't know for sure this module is necessary,
@@ -402,9 +388,7 @@ private static (module.Version, @string, error) importFromModules(context.Contex
                     // we need to look at this module to make sure the import is
                     // not ambiguous.
                     return (new module.Version(), "", error.As(err)!);
-
                 }
-
                 {
                     var dir__prev1 = dir;
 
@@ -418,11 +402,9 @@ private static (module.Version, @string, error) importFromModules(context.Contex
                         dirs = append(dirs, dir);
                     }
 
-
                     dir = dir__prev1;
 
                 }
-
             }
 
         }
@@ -443,7 +425,6 @@ private static (module.Version, @string, error) importFromModules(context.Contex
                 i = i__prev2;
             }
             return (new module.Version(), "", error.As(addr(new AmbiguousImportError(importPath:path,Dirs:dirs,Modules:mods))!)!);
-
         }
         if (len(sumErrMods) > 0) {
             {
@@ -458,7 +439,6 @@ private static (module.Version, @string, error) importFromModules(context.Contex
                 i = i__prev2;
             }
             return (new module.Version(), "", error.As(addr(new ImportMissingSumError(importPath:path,mods:sumErrMods,found:len(mods)>0,))!)!);
-
         }
         if (len(mods) == 1) {
             return (mods[0], dirs[0], error.As(null!)!);
@@ -470,9 +450,7 @@ private static (module.Version, @string, error) importFromModules(context.Contex
             if (!HasModRoot()) {
                 queryErr = error.As(ErrNoModRoot)!;
             }
-
             return (new module.Version(), "", error.As(addr(new ImportMissingError(Path:path,QueryErr:queryErr,isStd:pathIsStd))!)!);
-
         }
         mg, err = rs.Graph(ctx);
         if (err != null) { 
@@ -481,10 +459,8 @@ private static (module.Version, @string, error) importFromModules(context.Contex
             // of the missing modules might actually contain the package in question,
             // in which case we shouldn't go looking for it in some new dependency.
             return (new module.Version(), "", error.As(err)!);
-
         }
     }
-
 }
 
 // queryImport attempts to locate a module that can be added to the current
@@ -523,26 +499,18 @@ private static (module.Version, error) queryImport(context.Context ctx, @string 
                     }
 
                 }
-
             }
-
             var (mg, err) = rs.Graph(ctx);
             if (err != null) {
                 return (new module.Version(), error.As(err)!);
             }
-
             if (cmpVersion(mg.Selected(mp), mv) >= 0) { 
                 // We can't resolve the import by adding mp@mv to the module graph,
                 // because the selected version of mp is already at least mv.
                 continue;
-
             }
-
             mods = append(mods, new module.Version(Path:mp,Version:mv));
-
-        }        sort.Slice(mods, (i, j) => {
-            return len(mods[i].Path) > len(mods[j].Path);
-        });
+        }        sort.Slice(mods, (i, j) => len(mods[i].Path) > len(mods[j].Path));
         foreach (var (_, m) in mods) {
             var needSum = true;
             var (root, isLocal, err) = fetch(ctx, m, needSum);
@@ -555,11 +523,8 @@ private static (module.Version, error) queryImport(context.Context ctx, @string 
                     }
 
                 }
-
                 return (new module.Version(), error.As(err)!);
-
             }
-
             {
                 var (_, ok, err) = dirInModule(path, m.Path, root, isLocal);
 
@@ -573,15 +538,12 @@ private static (module.Version, error) queryImport(context.Context ctx, @string 
                     return (m, error.As(null!)!);
                 }
 
-
             }
-
         }        if (len(mods) > 0 && module.CheckPath(path) != null) { 
             // The package path is not valid to fetch remotely,
             // so it can only exist in a replaced module,
             // and we know from the above loop that it is not.
             return (new module.Version(), error.As(addr(new PackageNotInModuleError(Mod:mods[0],Query:"latest",Pattern:path,Replacement:Replacement(mods[0]),))!)!);
-
         }
     }
     if (search.IsStandardImportPath(path)) { 
@@ -593,7 +555,6 @@ private static (module.Version, error) queryImport(context.Context ctx, @string 
         //
         // Instead of trying QueryPattern, report an ImportMissingError immediately.
         return (new module.Version(), error.As(addr(new ImportMissingError(Path:path,isStd:true))!)!);
-
     }
     if (cfg.BuildMod == "readonly" && !allowMissingModuleImports) { 
         // In readonly mode, we can't write go.mod, so we shouldn't try to look up
@@ -607,7 +568,6 @@ private static (module.Version, error) queryImport(context.Context ctx, @string 
             queryErr = error.As(fmt.Errorf("import lookup disabled by -mod=%s\n\t(%s)", cfg.BuildMod, cfg.BuildModReason))!;
         }
         return (new module.Version(), error.As(addr(new ImportMissingError(Path:path,QueryErr:queryErr))!)!);
-
     }
     fmt.Fprintf(os.Stderr, "go: finding module for package %s\n", path);
 
@@ -621,7 +581,6 @@ private static (module.Version, error) queryImport(context.Context ctx, @string 
             // Return "cannot find module providing package […]" instead of whatever
             // low-level error QueryPattern produced.
             return (new module.Version(), error.As(addr(new ImportMissingError(Path:path,QueryErr:err))!)!);
-
         }
         else
  {
@@ -645,17 +604,12 @@ private static (module.Version, error) queryImport(context.Context ctx, @string 
                 if (i == 0) {
                     candidate0MissingVersion = v;
                 }
-
                 continue;
-
             }
 
         }
-
         return (c.Mod, error.As(null!)!);
-
     }    return (new module.Version(), error.As(addr(new ImportMissingError(Path:path,Module:candidates[0].Mod,newMissingVersion:candidate0MissingVersion,))!)!);
-
 }
 
 // maybeInModule reports whether, syntactically,
@@ -695,7 +649,6 @@ private static (@string, bool, error) dirInModule(@string path, @string mpath, @
     }
     else if (mpath == "") { // vendor directory
         dir = filepath.Join(mdir, path);
-
     }
     else if (len(path) > len(mpath) && path[len(mpath)] == '/' && path[..(int)len(mpath)] == mpath) {
         dir = filepath.Join(mdir, path[(int)len(mpath) + 1..]);
@@ -722,15 +675,11 @@ private static (@string, bool, error) dirInModule(@string path, @string mpath, @
                     // Break the loop, as otherwise we'd loop
                     // forever if d=="." and mdir=="".
                     break;
-
                 }
-
                 d = parent;
-
             }
 
         }
-
     }
     goFilesEntry res = haveGoFilesCache.Do(dir, () => {
         var (ok, err) = fsys.IsDirWithGoFiles(dir);
@@ -738,7 +687,6 @@ private static (@string, bool, error) dirInModule(@string path, @string mpath, @
     })._<goFilesEntry>();
 
     return (dir, res.haveGoFiles, error.As(res.err)!);
-
 }
 
 // fetch downloads the given module (or its replacement)
@@ -781,35 +729,26 @@ private static (@string, bool, error) fetch(context.Context ctx, module.Version 
                             // have its source code. Remove the equivalence to os.ErrNotExist,
                             // and make the message more concise while we're at it.
                             err = fmt.Errorf("replacement directory %s does not exist", r.Path);
-
                         }
                         else
  {
                             err = fmt.Errorf("replacement directory %s: %w", r.Path, err);
                         }
-
                         return (dir, true, error.As(module.VersionError(mod, err))!);
-
                     }
 
                 }
-
                 return (dir, true, error.As(null!)!);
-
             }
-
             mod = r;
-
         }
     }
-
 
     if (HasModRoot() && cfg.BuildMod == "readonly" && needSum && !modfetch.HaveSum(mod)) {
         return ("", false, error.As(module.VersionError(mod, addr(new sumMissingError())))!);
     }
     dir, err = modfetch.Download(ctx, mod);
     return (dir, false, error.As(err)!);
-
 }
 
 private partial struct sumMissingError {

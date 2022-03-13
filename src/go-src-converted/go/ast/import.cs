@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2022 March 06 22:42:58 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:07 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\import.go
-using token = go.go.token_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using System;
-
-
 namespace go.go;
 
+using token = go.token_package;
+using sort = sort_package;
+using strconv = strconv_package;
+
+
+// SortImports sorts runs of consecutive import lines in import blocks in f.
+// It also removes duplicate imports when it is possible to do so without data loss.
+
+using System;
 public static partial class ast_package {
 
-    // SortImports sorts runs of consecutive import lines in import blocks in f.
-    // It also removes duplicate imports when it is possible to do so without data loss.
 public static void SortImports(ptr<token.FileSet> _addr_fset, ptr<File> _addr_f) {
     ref token.FileSet fset = ref _addr_fset.val;
     ref File f = ref _addr_f.val;
@@ -31,12 +32,10 @@ public static void SortImports(ptr<token.FileSet> _addr_fset, ptr<File> _addr_f)
                 // Not an import declaration, so we're done.
                 // Imports are always first.
                 break;
-
             }
             if (!d.Lparen.IsValid()) { 
                 // Not a block: sorted by default.
                 continue;
-
             }
             nint i = 0;
             var specs = d.Specs[..(int)0];
@@ -45,7 +44,6 @@ public static void SortImports(ptr<token.FileSet> _addr_fset, ptr<File> _addr_f)
                     // j begins a new run. End this one.
                     specs = append(specs, sortSpecs(_addr_fset, _addr_f, d.Specs[(int)i..(int)j]));
                     i = j;
-
                 }
             }            specs = append(specs, sortSpecs(_addr_fset, _addr_f, d.Specs[(int)i..]));
             d.Specs = specs; 
@@ -77,7 +75,6 @@ private static @string importPath(Spec s) {
         return t;
     }
     return "";
-
 }
 
 private static @string importName(Spec s) {
@@ -86,7 +83,6 @@ private static @string importName(Spec s) {
         return "";
     }
     return n.Name;
-
 }
 
 private static @string importComment(Spec s) {
@@ -95,7 +91,6 @@ private static @string importComment(Spec s) {
         return "";
     }
     return c.Text();
-
 }
 
 // collapse indicates whether prev may be removed, leaving only next.
@@ -104,7 +99,6 @@ private static bool collapse(Spec prev, Spec next) {
         return false;
     }
     return prev._<ptr<ImportSpec>>().Comment == null;
-
 }
 
 private partial struct posSpan {
@@ -172,13 +166,10 @@ private static slice<Spec> sortSpecs(ptr<token.FileSet> _addr_fset, ptr<File> _a
                 if (i < first) {
                     first = i;
                 }
-
                 if (i > last) {
                     last = i;
                 }
-
             }
-
         }
         i = i__prev1;
         g = g__prev1;
@@ -208,10 +199,8 @@ private static slice<Spec> sortSpecs(ptr<token.FileSet> _addr_fset, ptr<File> _a
                 specIndex++;
                 left = true;
             }
-
             ptr<ImportSpec> s = specs[specIndex]._<ptr<ImportSpec>>();
             importComments[s] = append(importComments[s], new cgPos(left:left,cg:g));
-
         }
         g = g__prev1;
     }
@@ -228,7 +217,6 @@ private static slice<Spec> sortSpecs(ptr<token.FileSet> _addr_fset, ptr<File> _a
             return iname < jname;
         }
         return importComment(specs[i]) < importComment(specs[j]);
-
     }); 
 
     // Dedup. Thanks to our sorting, we can just consider
@@ -249,7 +237,6 @@ private static slice<Spec> sortSpecs(ptr<token.FileSet> _addr_fset, ptr<File> _a
                 var p = s.Pos();
                 fset.File(p).MergeLine(lineAt(_addr_fset, p));
             }
-
         }
         i = i__prev1;
         s = s__prev1;
@@ -287,11 +274,8 @@ private static slice<Spec> sortSpecs(ptr<token.FileSet> _addr_fset, ptr<File> _a
                             // But while formatting the AST, the line comment gets moved to
                             // after the block comment.
                             c.Slash = pos[i].End;
-
                         }
-
                     }
-
                 }
 
                 g = g__prev2;
@@ -301,12 +285,9 @@ private static slice<Spec> sortSpecs(ptr<token.FileSet> _addr_fset, ptr<File> _a
         s = s__prev1;
     }
 
-    sort.Slice(comments, (i, j) => {
-        return comments[i].Pos() < comments[j].Pos();
-    });
+    sort.Slice(comments, (i, j) => comments[i].Pos() < comments[j].Pos());
 
     return specs;
-
 }
 
 } // end ast_package

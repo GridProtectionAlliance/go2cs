@@ -5,22 +5,25 @@
 // Package fs defines basic interfaces to a file system.
 // A file system can be provided by the host operating system
 // but also by other packages.
-// package fs -- go2cs converted at 2022 March 06 22:08:01 UTC
+
+// package fs -- go2cs converted at 2022 March 13 05:23:49 UTC
 // import "io/fs" ==> using fs = go.io.fs_package
 // Original source: C:\Program Files\Go\src\io\fs\fs.go
-using oserror = go.@internal.oserror_package;
-using time = go.time_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.io;
+
+using oserror = @internal.oserror_package;
+using time = time_package;
+using utf8 = unicode.utf8_package;
+
+
+// An FS provides access to a hierarchical file system.
+//
+// The FS interface is the minimum implementation required of the file system.
+// A file system may implement additional interfaces,
+// such as ReadFileFS, to provide additional or optimized functionality.
 
 public static partial class fs_package {
 
-    // An FS provides access to a hierarchical file system.
-    //
-    // The FS interface is the minimum implementation required of the file system.
-    // A file system may implement additional interfaces,
-    // such as ReadFileFS, to provide additional or optimized functionality.
 public partial interface FS {
     (File, error) Open(@string name);
 }
@@ -45,7 +48,6 @@ public static bool ValidPath(@string name) {
     if (name == ".") { 
         // special case
         return true;
-
     }
     while (true) {
         nint i = 0;
@@ -60,9 +62,7 @@ public static bool ValidPath(@string name) {
             return true; // reached clean ending
         }
         name = name[(int)i + 1..];
-
     }
-
 }
 
 // A File provides access to a single file.
@@ -202,16 +202,13 @@ public static @string String(this FileMode m) {
  {
                 buf[w] = '-';
             }
-
             w++;
-
         }
         i = i__prev1;
         c = c__prev1;
     }
 
     return string(buf[..(int)w]);
-
 }
 
 // IsDir reports whether m describes a directory.

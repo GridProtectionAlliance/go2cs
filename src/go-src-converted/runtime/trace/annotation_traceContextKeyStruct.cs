@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:12 UTC
+//     Generated on 2022 March 13 05:38:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace runtime
 {
     public static partial class trace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct traceContextKey
         {
             // Constructors
@@ -49,7 +49,7 @@ namespace runtime
             public static implicit operator traceContextKey(NilType nil) => default(traceContextKey);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static traceContextKey traceContextKey_cast(dynamic value)
         {
             return new traceContextKey();

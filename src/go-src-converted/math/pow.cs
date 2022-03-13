@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:10 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:04 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\pow.go
-
-
 namespace go;
 
 public static partial class math_package {
@@ -47,7 +45,6 @@ public static double Pow(double x, double y) {
         return archPow(x, y);
     }
     return pow(x, y);
-
 }
 
 private static double pow(double x, double y) {
@@ -105,8 +102,7 @@ private static double pow(double x, double y) {
             return 0;
         else 
             return Inf(1);
-        
-    }
+            }
     float a1 = 1.0F;
     nint ae = 0; 
 
@@ -117,7 +113,6 @@ private static double pow(double x, double y) {
             yi++;
         }
         a1 = Exp(yf * Log(x));
-
     }
     var (x1, xe) = Frexp(x);
     {
@@ -134,19 +129,16 @@ private static double pow(double x, double y) {
                 break;
             i>>=1;
             }
-
             if (i & 1 == 1) {
                 a1 *= x1;
                 ae += xe;
             }
-
             x1 *= x1;
             xe<<=1;
             if (x1 < .5F) {
                 x1 += x1;
                 xe--;
             }
-
         }
     } 
 
@@ -158,7 +150,6 @@ private static double pow(double x, double y) {
         ae = -ae;
     }
     return Ldexp(a1, ae);
-
 }
 
 } // end math_package

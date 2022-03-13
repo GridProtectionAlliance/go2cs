@@ -3,26 +3,28 @@
 // license that can be found in the LICENSE file.
 
 // Package vet implements the ``go vet'' command.
-// package vet -- go2cs converted at 2022 March 06 23:16:24 UTC
+
+// package vet -- go2cs converted at 2022 March 13 06:29:54 UTC
 // import "cmd/go/internal/vet" ==> using vet = go.cmd.go.@internal.vet_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\vet\vet.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using filepath = go.path.filepath_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using trace = go.cmd.go.@internal.trace_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using context = context_package;
+using fmt = fmt_package;
+using filepath = path.filepath_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using trace = cmd.go.@internal.trace_package;
+using work = cmd.go.@internal.work_package;
+
+
+// Break init loop.
+
+using System;
 public static partial class vet_package {
 
-    // Break init loop.
 private static void init() {
     CmdVet.Run = runVet;
 }
@@ -77,9 +79,7 @@ private static void runVet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
                 err = err__prev2;
 
             }
-
         }());
-
     }
     var (ctx, span) = trace.StartSpan(ctx, fmt.Sprint("Running ", cmd.Name(), " command"));
     defer(span.Done());
@@ -123,7 +123,6 @@ private static void runVet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
             root.Deps = append(root.Deps, b.VetAction(work.ModeBuild, work.ModeBuild, pxtest));
         }
     }    b.Do(ctx, root);
-
 });
 
 } // end vet_package

@@ -6,11 +6,10 @@
 
 // Package bits implements bit counting and manipulation
 // functions for the predeclared unsigned integer types.
-// package bits -- go2cs converted at 2022 March 06 22:14:59 UTC
+
+// package bits -- go2cs converted at 2022 March 13 05:29:03 UTC
 // import "math/bits" ==> using bits = go.math.bits_package
 // Original source: C:\Program Files\Go\src\math\bits\bits.go
-
-
 namespace go.math;
 
 public static partial class bits_package {
@@ -76,7 +75,6 @@ public static nint TrailingZeros(nuint x) {
         return TrailingZeros32(uint32(x));
     }
     return TrailingZeros64(uint64(x));
-
 }
 
 // TrailingZeros8 returns the number of trailing zero bits in x; the result is 8 for x == 0.
@@ -90,7 +88,6 @@ public static nint TrailingZeros16(ushort x) {
         return 16;
     }
     return int(deBruijn32tab[uint32(x & -x) * deBruijn32 >> (int)((32 - 5))]);
-
 }
 
 // TrailingZeros32 returns the number of trailing zero bits in x; the result is 32 for x == 0.
@@ -99,7 +96,6 @@ public static nint TrailingZeros32(uint x) {
         return 32;
     }
     return int(deBruijn32tab[(x & -x) * deBruijn32 >> (int)((32 - 5))]);
-
 }
 
 // TrailingZeros64 returns the number of trailing zero bits in x; the result is 64 for x == 0.
@@ -108,7 +104,6 @@ public static nint TrailingZeros64(ulong x) {
         return 64;
     }
     return int(deBruijn64tab[(x & -x) * deBruijn64 >> (int)((64 - 6))]);
-
 }
 
 // --- OnesCount ---
@@ -132,7 +127,6 @@ public static nint OnesCount(nuint x) {
         return OnesCount32(uint32(x));
     }
     return OnesCount64(uint64(x));
-
 }
 
 // OnesCount8 returns the number of one bits ("population count") in x.
@@ -180,7 +174,6 @@ public static nint OnesCount64(ulong x) {
     x += x >> 16;
     x += x >> 32;
     return int(x) & (1 << 7 - 1);
-
 }
 
 // --- RotateLeft ---
@@ -194,7 +187,6 @@ public static nuint RotateLeft(nuint x, nint k) {
         return uint(RotateLeft32(uint32(x), k));
     }
     return uint(RotateLeft64(uint64(x), k));
-
 }
 
 // RotateLeft8 returns the value of x rotated left by (k mod 8) bits.
@@ -249,7 +241,6 @@ public static nuint Reverse(nuint x) {
         return uint(Reverse32(uint32(x)));
     }
     return uint(Reverse64(uint64(x)));
-
 }
 
 // Reverse8 returns the value of x with its bits in reversed order.
@@ -292,7 +283,6 @@ public static nuint ReverseBytes(nuint x) {
         return uint(ReverseBytes32(uint32(x)));
     }
     return uint(ReverseBytes64(uint64(x)));
-
 }
 
 // ReverseBytes16 returns the value of x with its bytes in reversed order.
@@ -331,7 +321,6 @@ public static nint Len(nuint x) {
         return Len32(uint32(x));
     }
     return Len64(uint64(x));
-
 }
 
 // Len8 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
@@ -348,7 +337,6 @@ public static nint Len16(ushort x) {
         n = 8;
     }
     return n + int(len8tab[x]);
-
 }
 
 // Len32 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
@@ -364,7 +352,6 @@ public static nint Len32(uint x) {
         n += 8;
     }
     return n + int(len8tab[x]);
-
 }
 
 // Len64 returns the minimum number of bits required to represent x; the result is 0 for x == 0.
@@ -384,7 +371,6 @@ public static nint Len64(ulong x) {
         n += 8;
     }
     return n + int(len8tab[x]);
-
 }
 
 // --- Add with carry ---
@@ -404,7 +390,6 @@ public static (nuint, nuint) Add(nuint x, nuint y, nuint carry) {
     }
     var (s64, c64) = Add64(uint64(x), uint64(y), uint64(carry));
     return (uint(s64), uint(c64));
-
 }
 
 // Add32 returns the sum with carry of x, y and carry: sum = x + y + carry.
@@ -437,7 +422,6 @@ public static (ulong, ulong) Add64(ulong x, ulong y, ulong carry) {
     // happens, the top bit will be 1 + 0 + 1 = 0 (&^ sum).
     carryOut = ((x & y) | ((x | y) & ~sum)) >> 63;
     return ;
-
 }
 
 // --- Subtract with borrow ---
@@ -457,7 +441,6 @@ public static (nuint, nuint) Sub(nuint x, nuint y, nuint borrow) {
     }
     var (d64, b64) = Sub64(uint64(x), uint64(y), uint64(borrow));
     return (uint(d64), uint(b64));
-
 }
 
 // Sub32 returns the difference of x, y and borrow, diff = x - y - borrow.
@@ -476,7 +459,6 @@ public static (uint, uint) Sub32(uint x, uint y, uint borrow) {
     // 1 - 1 - 1 = 0 - 0 - 1 = 1 (& diff).
     borrowOut = ((~x & y) | (~(x ^ y) & diff)) >> 31;
     return ;
-
 }
 
 // Sub64 returns the difference of x, y and borrow: diff = x - y - borrow.
@@ -492,7 +474,6 @@ public static (ulong, ulong) Sub64(ulong x, ulong y, ulong borrow) {
     // See Sub32 for the bit logic.
     borrowOut = ((~x & y) | (~(x ^ y) & diff)) >> 63;
     return ;
-
 }
 
 // --- Full-width multiply ---
@@ -512,7 +493,6 @@ public static (nuint, nuint) Mul(nuint x, nuint y) {
     }
     (h, l) = Mul64(uint64(x), uint64(y));
     return (uint(h), uint(l));
-
 }
 
 // Mul32 returns the 64-bit product of x and y: (hi, lo) = x * y
@@ -569,7 +549,6 @@ public static (nuint, nuint) Div(nuint hi, nuint lo, nuint y) {
     }
     (q, r) = Div64(uint64(hi), uint64(lo), uint64(y));
     return (uint(q), uint(r));
-
 }
 
 // Div32 returns the quotient and remainder of (hi, lo) divided by y:
@@ -585,7 +564,6 @@ public static (uint, uint) Div32(uint hi, uint lo, uint y) => func((_, panic, _)
     }
     var z = uint64(hi) << 32 | uint64(lo);
     (quo, rem) = (uint32(z / uint64(y)), uint32(z % uint64(y)));    return ;
-
 });
 
 // Div64 returns the quotient and remainder of (hi, lo) divided by y:
@@ -637,7 +615,6 @@ public static (ulong, ulong) Div64(ulong hi, ulong lo, ulong y) => func((_, pani
     }
 
     return (q1 * two32 + q0, (un21 * two32 + un0 - q0 * y) >> (int)(s));
-
 });
 
 // Rem returns the remainder of (hi, lo) divided by y. Rem panics for
@@ -648,7 +625,6 @@ public static nuint Rem(nuint hi, nuint lo, nuint y) {
         return uint(Rem32(uint32(hi), uint32(lo), uint32(y)));
     }
     return uint(Rem64(uint64(hi), uint64(lo), uint64(y)));
-
 }
 
 // Rem32 returns the remainder of (hi, lo) divided by y. Rem32 panics
@@ -670,7 +646,6 @@ public static ulong Rem64(ulong hi, ulong lo, ulong y) {
     //   hi<<64 + lo ≡ (hi%y)<<64 + lo    (mod y)
     var (_, rem) = Div64(hi % y, lo, y);
     return rem;
-
 }
 
 } // end bits_package

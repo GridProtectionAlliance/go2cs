@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zip -- go2cs converted at 2022 March 06 22:31:42 UTC
+// package zip -- go2cs converted at 2022 March 13 05:42:36 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Program Files\Go\src\archive\zip\register.go
-using flate = go.compress.flate_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.archive;
 
+using flate = compress.flate_package;
+using errors = errors_package;
+using io = io_package;
+using sync = sync_package;
+
+
+// A Compressor returns a new compressing writer, writing to w.
+// The WriteCloser's Close method must be used to flush pending data to w.
+// The Compressor itself must be safe to invoke from multiple goroutines
+// simultaneously, but each returned writer will be used only by
+// one goroutine at a time.
+
+using System;
 public static partial class zip_package {
 
-    // A Compressor returns a new compressing writer, writing to w.
-    // The WriteCloser's Close method must be used to flush pending data to w.
-    // The Compressor itself must be safe to invoke from multiple goroutines
-    // simultaneously, but each returned writer will be used only by
-    // one goroutine at a time.
 public delegate  error) Compressor(io.Writer,  (io.WriteCloser);
 
 // A Decompressor returns a new decompressing reader, reading from r.
@@ -42,7 +43,6 @@ private static io.WriteCloser newFlateWriter(io.Writer w) {
         fw, _ = flate.NewWriter(w, 5);
     }
     return addr(new pooledFlateWriter(fw:fw));
-
 }
 
 private partial struct pooledFlateWriter {
@@ -61,7 +61,6 @@ private static (nint, error) Write(this ptr<pooledFlateWriter> _addr_w, slice<by
         return (0, error.As(errors.New("Write after Close"))!);
     }
     return w.fw.Write(p);
-
 });
 
 private static error Close(this ptr<pooledFlateWriter> _addr_w) => func((defer, _, _) => {
@@ -76,7 +75,6 @@ private static error Close(this ptr<pooledFlateWriter> _addr_w) => func((defer, 
         w.fw = null;
     }
     return error.As(err)!;
-
 });
 
 private static sync.Pool flateReaderPool = default;
@@ -91,7 +89,6 @@ private static io.ReadCloser newFlateReader(io.Reader r) {
         fr = flate.NewReader(r);
     }
     return addr(new pooledFlateReader(fr:fr));
-
 }
 
 private partial struct pooledFlateReader {
@@ -110,7 +107,6 @@ private static (nint, error) Read(this ptr<pooledFlateReader> _addr_r, slice<byt
         return (0, error.As(errors.New("Read after Close"))!);
     }
     return r.fr.Read(p);
-
 });
 
 private static error Close(this ptr<pooledFlateReader> _addr_r) => func((defer, _, _) => {
@@ -125,7 +121,6 @@ private static error Close(this ptr<pooledFlateReader> _addr_r) => func((defer, 
         r.fr = null;
     }
     return error.As(err)!;
-
 });
 
 private static sync.Map compressors = default;private static sync.Map decompressors = default;
@@ -148,7 +143,6 @@ public static void RegisterDecompressor(ushort method, Decompressor dcomp) => fu
             panic("decompressor already registered");
         }
     }
-
 });
 
 // RegisterCompressor registers custom compressors for a specified method ID.
@@ -161,7 +155,6 @@ public static void RegisterCompressor(ushort method, Compressor comp) => func((_
             panic("compressor already registered");
         }
     }
-
 });
 
 private static Compressor compressor(ushort method) {
@@ -170,7 +163,6 @@ private static Compressor compressor(ushort method) {
         return null;
     }
     return ci._<Compressor>();
-
 }
 
 private static Decompressor decompressor(ushort method) {
@@ -179,7 +171,6 @@ private static Decompressor decompressor(ushort method) {
         return null;
     }
     return di._<Decompressor>();
-
 }
 
 } // end zip_package

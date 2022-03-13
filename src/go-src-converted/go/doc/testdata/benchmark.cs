@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2022 March 06 22:41:34 UTC
+// package testing -- go2cs converted at 2022 March 13 05:52:39 UTC
 // import "go/doc.testing" ==> using testing = go.go.doc.testing_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\benchmark.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using time = go.time_package;
+namespace go.go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go.go;
 
 public static partial class testing_package {
 
@@ -72,7 +71,6 @@ private static void ResetTimer(this ptr<B> _addr_b) {
         b.start = time.Now();
     }
     b.duration = 0;
-
 }
 
 // SetBytes records the number of bytes processed in a single operation.
@@ -90,7 +88,6 @@ private static long nsPerOp(this ptr<B> _addr_b) {
         return 0;
     }
     return b.duration.Nanoseconds() / int64(b.N);
-
 }
 
 // runN runs a single benchmark for the specified number of iterations.
@@ -105,7 +102,6 @@ private static void runN(this ptr<B> _addr_b, nint n) {
     b.StartTimer();
     b.benchmark.F(b);
     b.StopTimer();
-
 }
 
 private static nint min(nint x, nint y) {
@@ -113,7 +109,6 @@ private static nint min(nint x, nint y) {
         return y;
     }
     return x;
-
 }
 
 private static nint max(nint x, nint y) {
@@ -121,7 +116,6 @@ private static nint max(nint x, nint y) {
         return y;
     }
     return x;
-
 }
 
 // roundDown10 rounds a number down to the nearest power of 10.
@@ -138,7 +132,6 @@ private static nint roundDown10(nint n) {
         result *= 10;
     }
     return result;
-
 }
 
 // roundUp rounds x up to a number of the form [1eX, 2eX, 5eX].
@@ -151,7 +144,6 @@ private static nint roundUp(nint n) {
         return 5 * base;
     }
     return 10 * base;
-
 }
 
 // run times the benchmark function in a separate goroutine.
@@ -197,10 +189,8 @@ private static void launch(this ptr<B> _addr_b) => func((defer, _, _) => {
         // Round up to something easy to read.
         n = roundUp(n);
         b.runN(n);
-
     }
     b.result = new BenchmarkResult(b.N,b.duration,b.bytes);
-
 });
 
 // The results of a benchmark run.
@@ -215,7 +205,6 @@ public static long NsPerOp(this BenchmarkResult r) {
         return 0;
     }
     return r.T.Nanoseconds() / int64(r.N);
-
 }
 
 public static double mbPerSec(this BenchmarkResult r) {
@@ -223,7 +212,6 @@ public static double mbPerSec(this BenchmarkResult r) {
         return 0;
     }
     return (float64(r.Bytes) * float64(r.N) / 1e6F) / r.T.Seconds();
-
 }
 
 public static @string String(this BenchmarkResult r) {
@@ -246,7 +234,6 @@ public static @string String(this BenchmarkResult r) {
         }
     }
     return fmt.Sprintf("%8d\t%s%s", r.N, ns, mb);
-
 }
 
 // An internal function but exported because it is cross-package; part of the implementation
@@ -283,9 +270,7 @@ public static (bool, error) RunBenchmarks(Func<@string, @string, (bool, error)> 
                 // the benchmark failed.
                 fmt.Printf("--- FAIL: %s\n%s", benchName, b.output);
                 continue;
-
             }
-
             fmt.Printf("%v\n", r); 
             // Unlike with tests, we ignore the -chatty flag and always print output for
             // benchmarks since the output generation time will skew the results.
@@ -293,7 +278,6 @@ public static (bool, error) RunBenchmarks(Func<@string, @string, (bool, error)> 
                 b.trimOutput();
                 fmt.Printf("--- BENCH: %s\n%s", benchName, b.output);
             }
-
             {
                 var p = runtime.GOMAXPROCS(-1);
 
@@ -302,7 +286,6 @@ public static (bool, error) RunBenchmarks(Func<@string, @string, (bool, error)> 
                 }
 
             }
-
         }
     }
 }
@@ -326,7 +309,6 @@ private static void trimOutput(this ptr<B> _addr_b) {
             }
         }
     }
-
 }
 
 // Benchmark benchmarks a single function. Useful for creating

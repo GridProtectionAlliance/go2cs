@@ -5,26 +5,27 @@
 // This file will evolve, since we plan to do a mix of stenciling and passing
 // around dictionaries.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:13 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:40 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\stencil.go
-using bytes = go.bytes_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// For catching problems as we add more features
+// TODO(danscales): remove assertions or replace with base.FatalfAt()
+
+using System;
 public static partial class noder_package {
 
-    // For catching problems as we add more features
-    // TODO(danscales): remove assertions or replace with base.FatalfAt()
 private static void assert(bool p) => func((_, panic, _) => {
     if (!p) {
         panic("assertion failed");
@@ -58,7 +59,6 @@ private static void stencil(this ptr<irgen> _addr_g) {
             if (decl.Type().HasTParam()) { 
                 // Skip any generic functions
                 continue;
-
             } 
             // transformCall() below depends on CurFunc being set.
             ir.CurFunc = decl._<ptr<ir.Func>>();
@@ -78,9 +78,7 @@ private static void stencil(this ptr<irgen> _addr_g) {
                 // We found a function instantiation that is not
                 // immediately called.
                 foundFuncInst = true;
-
             }
-
             if (n.Op() != ir.OCALL || n._<ptr<ir.CallExpr>>().X.Op() != ir.OFUNCINST) {
                 return ;
             } 
@@ -102,13 +100,11 @@ private static void stencil(this ptr<irgen> _addr_g) {
                 withRecv[0] = dot.X;
                 copy(withRecv[(int)1..], call.Args);
                 call.Args = withRecv;
-
             } 
             // Transform the Call now, which changes OCALL
             // to OCALLFUNC and does typecheckaste/assignconvfn.
             transformCall(call);
             modified = true;
-
         }); 
 
         // If we found an OFUNCINST without a corresponding call in the
@@ -140,10 +136,7 @@ private static void stencil(this ptr<irgen> _addr_g) {
         // function. If so, instantiate all the methods of those types
         // (which will then lead to more function/methods to scan in the loop).
         g.instantiateMethods();
-
     }
-
-
 }
 
 // instantiateMethods instantiates all the methods of all fully-instantiated
@@ -168,8 +161,6 @@ private static void instantiateMethods(this ptr<irgen> _addr_g) {
         }
     }
     g.instTypeList = null;
-
-
 }
 
 // genericSym returns the name of the base generic type for the type named by
@@ -198,7 +189,6 @@ private static ptr<ir.Func> getInstantiationForNode(this ptr<irgen> _addr_g, ptr
             return _addr_g.getInstantiation(inst.X._<ptr<ir.Name>>(), inst.Targs, false)!;
         }
     }
-
 }
 
 // getInstantiation gets the instantiantion of the function or method nameNode
@@ -221,7 +211,6 @@ private static ptr<ir.Func> getInstantiation(this ptr<irgen> _addr_g, ptr<ir.Nam
         }
     }
     return _addr_st!;
-
 }
 
 // makeInstName makes the unique name for a stenciled generic function or method,
@@ -273,7 +262,6 @@ private static ptr<types.Sym> makeInstName(ptr<types.Sym> _addr_fnsym, slice<ir.
         b.WriteString(name[(int)i + i2 + 1..]);
     }
     return _addr_typecheck.Lookup(b.String())!;
-
 }
 
 // Struct containing info needed for doing the substitution as we create the
@@ -365,7 +353,6 @@ private static ptr<ir.Func> genericSubst(this ptr<irgen> _addr_g, ptr<types.Sym>
     ir.CurFunc = savef;
 
     return _addr_newf!;
-
 }
 
 // node is like DeepCopy(), but creates distinct ONAME nodes, and also descends
@@ -390,12 +377,10 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
                 }
 
             }
-
             var m = ir.NewNameAt(name.Pos(), name.Sym());
             if (name.IsClosureVar()) {
                 m.SetIsClosureVar(true);
             }
-
             var t = x.Type();
             if (t == null) {
                 assert(name.BuiltinOp != 0);
@@ -405,7 +390,6 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
                 var newt = subst.typ(t);
                 m.SetType(newt);
             }
-
             m.BuiltinOp = name.BuiltinOp;
             m.Curfn = subst.newf;
             m.Class = name.Class;
@@ -432,16 +416,13 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
                     if (!isCallExpr && !isStructKeyExpr && x.Op() != ir.OPANIC && x.Op() != ir.OCLOSE) {
                         @base.Fatalf(fmt.Sprintf("Nil type for %v", x));
                     }
-
                 }
                 else if (x.Op() != ir.OCLOSURE) {
                     m.SetType(subst.typ(x.Type()));
                 }
-
             }
 
         }
-
         ir.EditChildren(m, edit);
 
         if (x.Typecheck() == 3) { 
@@ -477,9 +458,7 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
                     transformSend(m._<ptr<ir.SendStmt>>());
                 else 
                     @base.Fatalf("Unexpected node with Typecheck() == 3");
-                
-            }
-
+                            }
         }
 
         if (x.Op() == ir.OLITERAL) 
@@ -496,9 +475,7 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
                 // constant).
                 m.SetType(types.UntypedInt); // use any untyped type for DefaultLit to work
                 m = typecheck.DefaultLit(m, t);
-
             }
-
         else if (x.Op() == ir.OXDOT) 
             // A method value/call via a type param will have been
             // left as an OXDOT. When we see this during stenciling,
@@ -542,17 +519,14 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
                         m = transformBuiltin(call);
                     else 
                         @base.FatalfAt(call.Pos(), "Unexpected builtin op");
-                    
-                }
+                                    }
                 else
  { 
                     // This is the case of a function value that was a
                     // type parameter (implied to be a function via a
                     // structural constraint) which is now resolved.
                     transformCall(call);
-
                 }
-
             else if (call.X.Op() == ir.OCLOSURE) 
                 transformCall(call);
             else if (call.X.Op() == ir.OFUNCINST)             else 
@@ -566,7 +540,6 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
             if (oldfn.ClosureCalled()) {
                 newfn.SetClosureCalled(true);
             }
-
             newfn.SetIsHiddenClosure(true);
             m._<ptr<ir.ClosureExpr>>().Func = newfn; 
             // Closure name can already have brackets, if it derives
@@ -595,11 +568,9 @@ private static ir.Node node(this ptr<subster> _addr_subst, ir.Node n) {
 
             subst.g.target.Decls = append(subst.g.target.Decls, newfn);
                 return m;
-
     };
 
     return edit(n);
-
 }
 
 private static slice<ptr<ir.Name>> namelist(this ptr<subster> _addr_subst, slice<ptr<ir.Name>> l) {
@@ -615,7 +586,6 @@ private static slice<ptr<ir.Name>> namelist(this ptr<subster> _addr_subst, slice
             s[i].Outer = subst.node(n.Outer)._<ptr<ir.Name>>();
         }
     }    return s;
-
 }
 
 private static slice<ir.Node> list(this ptr<subster> _addr_subst, slice<ir.Node> l) {
@@ -642,10 +612,8 @@ private static ptr<types.Type> tstruct(this ptr<subster> _addr_subst, ptr<types.
             // since it may now be fully instantiated (HasTParam
             // becomes false).
             return _addr_types.NewStruct(t.Pkg(), null)!;
-
         }
         return _addr_t!;
-
     }
     slice<ptr<types.Field>> newfields = default;
     if (force) {
@@ -675,16 +643,12 @@ private static ptr<types.Type> tstruct(this ptr<subster> _addr_subst, ptr<types.
                 if (v != null) {
                     newfields[i].Nname = v;
                 }
-
             }
-
         }
     }    if (newfields != null) {
         return _addr_types.NewStruct(t.Pkg(), newfields)!;
     }
     return _addr_t!;
-
-
 }
 
 // tinter substitutes type params in types of the methods of an interface type.
@@ -711,7 +675,6 @@ private static ptr<types.Type> tinter(this ptr<subster> _addr_subst, ptr<types.T
         return _addr_types.NewInterface(t.Pkg(), newfields)!;
     }
     return _addr_t!;
-
 }
 
 // instTypeName creates a name for an instantiated type, based on the name of the
@@ -724,10 +687,8 @@ private static @string instTypeName(@string name, slice<ptr<types.Type>> targs) 
             b.WriteByte(',');
         }
         b.WriteString(targ.String());
-
     }    b.WriteByte(']');
     return b.String();
-
 }
 
 // typ computes the type obtained by substituting any type parameter in t with the
@@ -743,7 +704,6 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
         // types of closures may contain declarations that need
         // to be copied. See #45738.
         return _addr_t!;
-
     }
     if (t.Kind() == types.TTYPEPARAM) {
         {
@@ -775,10 +735,8 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
         if (t.Underlying() == t) { 
             // t is a simple typeparam that didn't match anything in tparam
             return _addr_t!;
-
         }
         assert(t.Sym() != null);
-
     }
     ptr<types.Sym> newsym;
     slice<ptr<types.Type>> neededTargs = default;
@@ -809,12 +767,10 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
         if (newsym.Def != null) { 
             // We've already created this instantiated defined type.
             return _addr_newsym.Def.Type()!;
-
         }
         forw = newIncompleteNamedType(t.Pos(), newsym); 
         //println("Creating new type by sub", newsym.Name, forw.HasTParam())
         forw.SetRParams(neededTargs);
-
     }
     ptr<types.Type> newt;
 
@@ -823,7 +779,6 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
         if (t.Sym() == newsym) { 
             // The substitution did not change the type.
             return _addr_t!;
-
         }
         newt = subst.typ(t.Underlying());
         assert(newt != t);
@@ -866,17 +821,13 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
                 }
                 newrecv = newrecvs.Field(0);
             }
-
             if (newparams == t.Params()) {
                 newparams = subst.tstruct(t.Params(), true);
             }
-
             if (newresults == t.Results()) {
                 newresults = subst.tstruct(t.Results(), true);
             }
-
             newt = types.NewSignature(t.Pkg(), newrecv, t.TParams().FieldSlice(), newparams.FieldSlice(), newresults.FieldSlice());
-
         }
     else if (t.Kind() == types.TINTER) 
         newt = subst.tinter(t);
@@ -898,23 +849,19 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
                 // TODO(danscales): not sure why I have to do this
                 // only for channels.....
                 types.CheckSize(newt);
-
             }
-
         }
         if (newt == null) { 
         // Even though there were typeparams in the type, there may be no
         // change if this is a function type for a function call (which will
         // have its own tparams/targs in the function instantiation).
         return _addr_t!;
-
     }
     if (t.Sym() == null) { 
         // Not a named type, so there was no forwarding type and there are
         // no methods to substitute.
         assert(t.Methods().Len() == 0);
         return _addr_newt!;
-
     }
     forw.SetUnderlying(newt);
     newt = addr(forw);
@@ -942,10 +889,8 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
                     nname.SetType(t2);
                     newsym.Def = nname;
                 }
-
                 newfields[i] = types.NewField(f.Pos, f.Sym, t2);
                 newfields[i].Nname = nname;
-
             }
 
             i = i__prev1;
@@ -955,11 +900,9 @@ private static ptr<types.Type> typ(this ptr<subster> _addr_subst, ptr<types.Type
         if (!newt.HasTParam()) { 
             // Generate all the methods for a new fully-instantiated type.
             subst.g.instTypeList = append(subst.g.instTypeList, newt);
-
         }
     }
     return _addr_newt!;
-
 }
 
 // fields sets the Nname field for the Field nodes inside a type signature, based
@@ -990,7 +933,6 @@ private static slice<ptr<types.Field>> fields(this ptr<subster> _addr_subst, ir.
             i++;
         }
     }    return newfields;
-
 }
 
 // defer does a single defer of type t, if it is a pointer type.
@@ -1001,7 +943,6 @@ private static ptr<types.Type> deref(ptr<types.Type> _addr_t) {
         return _addr_t.Elem()!;
     }
     return _addr_t!;
-
 }
 
 // newIncompleteNamedType returns a TFORW type t with name specified by sym, such

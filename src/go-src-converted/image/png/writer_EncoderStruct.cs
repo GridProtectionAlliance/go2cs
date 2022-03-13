@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:21 UTC
+//     Generated on 2022 March 13 06:44:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace image
 {
     public static partial class png_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct encoder
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace image
             public static implicit operator encoder(NilType nil) => default(encoder);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static encoder encoder_cast(dynamic value)
         {
             return new encoder(ref value.enc, value.w, value.m, value.cb, value.err, value.header, value.footer, value.tmp, value.cr, value.pr, ref value.zw, value.zwLevel, ref value.bw);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:20 UTC
+//     Generated on 2022 March 13 06:31:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace @internal
 {
     public static partial class modload_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PackageOpts
         {
             // Constructors
@@ -108,7 +108,7 @@ namespace @internal
             public static implicit operator PackageOpts(NilType nil) => default(PackageOpts);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static PackageOpts PackageOpts_cast(dynamic value)
         {
             return new PackageOpts(value.GoVersion, value.Tags, value.Tidy, value.TidyCompatibleVersion, value.VendorModulesInGOROOTSrc, value.ResolveMissingImports, value.AssumeRootsImported, value.AllowPackage, value.LoadTests, value.UseVendorAll, value.AllowErrors, value.SilencePackageErrors, value.SilenceMissingStdImports, value.SilenceNoGoErrors, value.SilenceUnmatchedWarnings);

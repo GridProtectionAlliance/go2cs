@@ -7,19 +7,21 @@
 // This is used by the net and os packages.
 // It uses a poller built into the runtime, with support from the
 // runtime scheduler.
-// package poll -- go2cs converted at 2022 March 06 22:12:58 UTC
+
+// package poll -- go2cs converted at 2022 March 13 05:27:49 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\fd.go
-using errors = go.errors_package;
-using System;
-
-
 namespace go.@internal;
 
+using errors = errors_package;
+
+
+// errNetClosing is the type of the variable ErrNetClosing.
+// This is used to implement the net.Error interface.
+
+using System;
 public static partial class poll_package {
 
-    // errNetClosing is the type of the variable ErrNetClosing.
-    // This is used to implement the net.Error interface.
 private partial struct errNetClosing {
 }
 
@@ -56,7 +58,6 @@ private static error errClosing(bool isFile) {
         return error.As(ErrFileClosing)!;
     }
     return error.As(ErrNetClosing)!;
-
 }
 
 // ErrDeadlineExceeded is returned for an expired deadline.
@@ -103,9 +104,7 @@ private static void consume(ptr<slice<slice<byte>>> _addr_v, long n) {
         }
         n -= ln0;
         v = (v)[(int)1..];
-
     }
-
 }
 
 // TestHookDidWritev is a hook for testing writev.

@@ -4,17 +4,16 @@
 
 // This file implements the Check function, which drives type-checking.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:27 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:25:49 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\check.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using syntax = cmd.compile.@internal.syntax_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using System;
 
 public static partial class types2_package {
 
@@ -152,9 +151,7 @@ private static void addDeclDep(this ptr<Checker> _addr_check, Object to) {
             return ; // to is not a package-level object
         }
     }
-
     from.addDep(to);
-
 }
 
 private static void rememberUntyped(this ptr<Checker> _addr_check, syntax.Expr e, bool lhs, operandMode mode, ptr<Basic> _addr_typ, constant.Value val) {
@@ -167,7 +164,6 @@ private static void rememberUntyped(this ptr<Checker> _addr_check, syntax.Expr e
         check.untyped = m;
     }
     m[e] = new exprInfo(lhs,mode,typ,val);
-
 }
 
 // later pushes f on to the stack of actions that will be processed later;
@@ -218,7 +214,6 @@ public static ptr<Checker> NewChecker(ptr<Config> _addr_conf, ptr<Package> _addr
         panic(fmt.Sprintf("invalid Go version %q (%v)", conf.GoVersion, err));
     }
     return addr(new Checker(conf:conf,pkg:pkg,Info:info,version:version,objMap:make(map[Object]*declInfo),impMap:make(map[importKey]*Package),posMap:make(map[*Interface][]syntax.Pos),typMap:make(map[string]*Named),));
-
 });
 
 // initFiles initializes the files-specific portion of checker.
@@ -252,7 +247,6 @@ private static void initFiles(this ptr<Checker> _addr_check, slice<ptr<syntax.Fi
  {
                     check.error(file.PkgName, "invalid package name _");
                 }
-
                 fallthrough = true;
 
             }
@@ -267,7 +261,6 @@ private static void initFiles(this ptr<Checker> _addr_check, slice<ptr<syntax.Fi
 
             __switch_break0:;
         }
-
     }
 }
 
@@ -290,7 +283,6 @@ private static void handleBailout(this ptr<Checker> _addr_check, ptr<error> _add
             break;
         }
     }
-
 });
 
 // Files checks the provided files as part of the checker's package.
@@ -354,7 +346,6 @@ private static error checkFiles(this ptr<Checker> _addr_check, slice<ptr<syntax.
     // TODO(gri) There's more memory we should release at this point.
 
     return ;
-
 });
 
 // processDelayed processes all delayed actions pushed after top.
@@ -372,7 +363,6 @@ private static void processDelayed(this ptr<Checker> _addr_check, nint top) {
     }
     assert(top <= len(check.delayed)); // stack must not have shrunk
     check.delayed = check.delayed[..(int)top];
-
 }
 
 private static void record(this ptr<Checker> _addr_check, ptr<operand> _addr_x) {
@@ -399,7 +389,6 @@ private static void record(this ptr<Checker> _addr_check, ptr<operand> _addr_x) 
         // delay type and value recording until we know the type
         // or until the end of type checking
         check.rememberUntyped(x.expr, false, x.mode, typ._<ptr<Basic>>(), val);
-
     }
     else
  {
@@ -419,7 +408,6 @@ private static void recordUntyped(this ptr<Checker> _addr_check) {
             unreachable();
         }
         check.recordTypeAndValue(x, info.mode, info.typ, info.val);
-
     }
 }
 
@@ -436,7 +424,6 @@ private static void recordTypeAndValue(this ptr<Checker> _addr_check, syntax.Exp
         // We check is(typ, IsConstType) here as constant expressions may be
         // recorded as type parameters.
         assert(typ == Typ[Invalid] || is(typ, IsConstType));
-
     }
     {
         var m = check.Types;
@@ -445,7 +432,6 @@ private static void recordTypeAndValue(this ptr<Checker> _addr_check, syntax.Exp
             m[x] = new TypeAndValue(mode,typ,val);
         }
     }
-
 }
 
 private static void recordBuiltinType(this ptr<Checker> _addr_check, syntax.Expr f, ptr<Signature> _addr_sig) {
@@ -475,9 +461,7 @@ private static void recordBuiltinType(this ptr<Checker> _addr_check, syntax.Expr
                 break;
             }
         }
-
     }
-
 }
 
 private static void recordCommaOkTypes(this ptr<Checker> _addr_check, syntax.Expr x, array<Type> a) {
@@ -504,15 +488,10 @@ private static void recordCommaOkTypes(this ptr<Checker> _addr_check, syntax.Exp
                 if (p == null) {
                     break;
                 }
-
                 x = p.X;
-
             }
-
-
         }
     }
-
 }
 
 private static void recordInferred(this ptr<Checker> _addr_check, syntax.Expr call, slice<Type> targs, ptr<Signature> _addr_sig) {
@@ -528,7 +507,6 @@ private static void recordInferred(this ptr<Checker> _addr_check, syntax.Expr ca
             m[call] = new Inferred(targs,sig);
         }
     }
-
 }
 
 private static void recordDef(this ptr<Checker> _addr_check, ptr<syntax.Name> _addr_id, Object obj) {
@@ -543,7 +521,6 @@ private static void recordDef(this ptr<Checker> _addr_check, ptr<syntax.Name> _a
             m[id] = obj;
         }
     }
-
 }
 
 private static void recordUse(this ptr<Checker> _addr_check, ptr<syntax.Name> _addr_id, Object obj) {
@@ -559,7 +536,6 @@ private static void recordUse(this ptr<Checker> _addr_check, ptr<syntax.Name> _a
             m[id] = obj;
         }
     }
-
 }
 
 private static void recordImplicit(this ptr<Checker> _addr_check, syntax.Node node, Object obj) {
@@ -574,7 +550,6 @@ private static void recordImplicit(this ptr<Checker> _addr_check, syntax.Node no
             m[node] = obj;
         }
     }
-
 }
 
 private static void recordSelection(this ptr<Checker> _addr_check, ptr<syntax.SelectorExpr> _addr_x, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
@@ -590,7 +565,6 @@ private static void recordSelection(this ptr<Checker> _addr_check, ptr<syntax.Se
             m[x] = addr(new Selection(kind,recv,obj,index,indirect));
         }
     }
-
 }
 
 private static void recordScope(this ptr<Checker> _addr_check, syntax.Node node, ptr<Scope> _addr_scope) {
@@ -606,7 +580,6 @@ private static void recordScope(this ptr<Checker> _addr_check, syntax.Node node,
             m[node] = scope;
         }
     }
-
 }
 
 } // end types2_package

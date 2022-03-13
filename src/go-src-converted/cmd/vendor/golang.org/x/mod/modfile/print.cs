@@ -4,18 +4,20 @@
 
 // Module file printer.
 
-// package modfile -- go2cs converted at 2022 March 06 23:25:57 UTC
+// package modfile -- go2cs converted at 2022 March 13 06:40:48 UTC
 // import "cmd/vendor/golang.org/x/mod/modfile" ==> using modfile = go.cmd.vendor.golang.org.x.mod.modfile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\modfile\print.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.golang.org.x.mod;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// Format returns a go.mod file as a byte slice, formatted in standard style.
 
 public static partial class modfile_package {
 
-    // Format returns a go.mod file as a byte slice, formatted in standard style.
 public static slice<byte> Format(ptr<FileSyntax> _addr_f) {
     ref FileSyntax f = ref _addr_f.val;
 
@@ -76,18 +78,14 @@ private static void newline(this ptr<printer> _addr_p) {
 
                         i = i__prev2;
                     }
-
                 }
-
                 p.printf("%s", strings.TrimSpace(com.Token));
-
             }
 
             i = i__prev1;
         }
 
         p.comment = p.comment[..(int)0];
-
     }
     p.trim();
     p.printf("\n");
@@ -100,7 +98,6 @@ private static void newline(this ptr<printer> _addr_p) {
 
         i = i__prev1;
     }
-
 }
 
 // trim removes trailing spaces and tabs from the current line.
@@ -114,7 +111,6 @@ private static void trim(this ptr<printer> _addr_p) {
         n--;
     }
     p.Truncate(n);
-
 }
 
 // file formats the given file into the print buffer.
@@ -180,7 +176,6 @@ private static void expr(this ptr<printer> _addr_p, Expr x) => func((_, panic, _
             if (p.indent() > 0) { 
                 // There's other text on the line. Start a new line.
                 p.printf("\n");
-
             } 
             // Re-indent to margin.
             for (nint i = 0; i < p.margin; i++) {
@@ -191,10 +186,8 @@ private static void expr(this ptr<printer> _addr_p, Expr x) => func((_, panic, _
                 p.printf("%s", strings.TrimSpace(com.Token));
                 p.newline();
             }
-
         }
     }
-
 
     switch (x.type()) {
         case ptr<CommentBlock> x:
@@ -235,7 +228,6 @@ private static void expr(this ptr<printer> _addr_p, Expr x) => func((_, panic, _
     // Queue end-of-line comments for printing when we
     // reach the end of the line.
     p.comment = append(p.comment, x.Comment().Suffix);
-
 });
 
 private static void tokens(this ptr<printer> _addr_p, slice<@string> tokens) {

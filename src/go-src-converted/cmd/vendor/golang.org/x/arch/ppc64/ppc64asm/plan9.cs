@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2022 March 06 23:25:07 UTC
+// package ppc64asm -- go2cs converted at 2022 March 13 06:38:21 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\plan9.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.arch.ppc64;
 
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// GoSyntax returns the Go assembler syntax for the instruction.
+// The pc is the program counter of the first instruction, used for expanding
+// PC-relative addresses into absolute ones.
+// The symname function queries the symbol table for the program
+// being disassembled. It returns the name and base address of the symbol
+// containing the target, if any; otherwise it returns "", 0.
+
+using System;
 public static partial class ppc64asm_package {
 
-    // GoSyntax returns the Go assembler syntax for the instruction.
-    // The pc is the program counter of the first instruction, used for expanding
-    // PC-relative addresses into absolute ones.
-    // The symname function queries the symbol table for the program
-    // being disassembled. It returns the name and base address of the symbol
-    // containing the target, if any; otherwise it returns "", 0.
 public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)> symname) {
     if (symname == null) {
         symname = _p0 => ("", 0);
@@ -55,7 +56,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                 }
             }
         }
-
     }    @string op = default;
     op = plan9OpMap[inst.Op];
     if (op == "") {
@@ -122,7 +122,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
     else if (inst.Op == BCLR) 
         if (int(inst.Args[0]._<Imm>()) & 20 == 20) { // unconditional
             return "RET";
-
         }
         return op + " " + strings.Join(args, ", ");
     else if (inst.Op == BC) 
@@ -131,26 +130,22 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                 return fmt.Sprintf("B%s %s,%s", args[1], args[2], args[3]);
             }
             return fmt.Sprintf("B%s %s", args[1], args[2]);
-
         }
         else if (int(inst.Args[0]._<Imm>()) & 0x1c == 4 && revCondMap[args[1]] != "") { // jump on cond bit not set
             if (len(args) == 4) {
                 return fmt.Sprintf("B%s %s,%s", revCondMap[args[1]], args[2], args[3]);
             }
             return fmt.Sprintf("B%s %s", revCondMap[args[1]], args[2]);
-
         }
         return op + " " + strings.Join(args, ",");
     else if (inst.Op == BCCTR) 
         if (int(inst.Args[0]._<Imm>()) & 20 == 20) { // unconditional
             return "BR (CTR)";
-
         }
         return op + " " + strings.Join(args, ", ");
     else if (inst.Op == BCCTRL) 
         if (int(inst.Args[0]._<Imm>()) & 20 == 20) { // unconditional
             return "BL (CTR)";
-
         }
         return op + " " + strings.Join(args, ",");
     else if (inst.Op == BCA || inst.Op == BCL || inst.Op == BCLA || inst.Op == BCLRL || inst.Op == BCTAR || inst.Op == BCTARL) 
@@ -168,7 +163,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                     return op + " " + args[0] + "," + args[1];
                 }
                 return op + " " + args[1] + "," + args[0];
-
                 break;
             case 3: 
                 if (reverseOperandOrder(inst.Op)) {
@@ -183,8 +177,7 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
         }
         args = append(args, args[0]);
         return op + " " + strings.Join(args[(int)1..], ",");
-    
-}
+    }
 
 // plan9Arg formats arg (which is the argIndex's arg in inst) according to Plan 9 rules.
 // NOTE: because Plan9Syntax is the only caller of this func, and it receives a copy
@@ -202,7 +195,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, nint argIndex, ulong pc, A
             }
         }
     }
-
     switch (arg.type()) {
         case Reg arg:
             if (isLoadStoreOp(inst.Op) && argIndex == 1 && arg == R0) {
@@ -223,16 +215,13 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, nint argIndex, ulong pc, A
             else if (arg >= CR0) {
                 return fmt.Sprintf("CR%d", int(arg - CR0));
             }
-
             array<@string> bit = new array<@string>(new @string[] { "LT", "GT", "EQ", "SO" })[(arg - Cond0LT) % 4];
             if (strings.HasPrefix(inst.Op.String(), "cr")) {
                 return fmt.Sprintf("CR%d%s", int(arg - Cond0LT) / 4, bit);
             }
-
             if (arg <= Cond0SO) {
                 return bit;
             }
-
             return fmt.Sprintf("%s CR%d", bit, int(arg - Cond0LT) / 4);
             break;
         case Imm arg:
@@ -259,7 +248,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, nint argIndex, ulong pc, A
                 }
 
             }
-
             return fmt.Sprintf("%#x", addr);
             break;
         case Label arg:
@@ -275,7 +263,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, nint argIndex, ulong pc, A
             break;
     }
     return fmt.Sprintf("???(%v)", arg);
-
 });
 
 private static bool reverseMiddleOps(Op op) {
@@ -283,7 +270,6 @@ private static bool reverseMiddleOps(Op op) {
     if (op == FMADD || op == FMADDCC || op == FMADDS || op == FMADDSCC || op == FMSUB || op == FMSUBCC || op == FMSUBS || op == FMSUBSCC || op == FNMADD || op == FNMADDCC || op == FNMADDS || op == FNMADDSCC || op == FNMSUB || op == FNMSUBCC || op == FNMSUBS || op == FNMSUBSCC || op == FSEL || op == FSELCC) 
         return true;
         return false;
-
 }
 
 private static bool reverseOperandOrder(Op op) {
@@ -306,7 +292,6 @@ private static bool reverseOperandOrder(Op op) {
     else if (op == SLW || op == SLWCC || op == SLD || op == SLDCC || op == SRW || op == SRAW || op == SRWCC || op == SRAWCC || op == SRD || op == SRDCC || op == SRAD || op == SRADCC) 
         return true;
         return false;
-
 }
 
 // revCondMap maps a conditional register bit to its inverse, if possible.

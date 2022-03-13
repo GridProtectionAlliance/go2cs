@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:27:05 UTC
+//     Generated on 2022 March 13 05:40:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct stat_t
         {
             // Constructors
@@ -87,7 +87,7 @@ namespace go
             public static implicit operator stat_t(NilType nil) => default(stat_t);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static stat_t stat_t_cast(dynamic value)
         {
             return new stat_t(value.Dev, value.Pad0, value.Ino, value.Mode, value.Nlink, value.Uid, value.Gid, value.Rdev, value.Pad1, value.Size, value.Atime, value.Atime_nsec, value.Mtime, value.Mtime_nsec, value.Ctime, value.Ctime_nsec, value.Blksize, value.Pad2, value.Blocks);

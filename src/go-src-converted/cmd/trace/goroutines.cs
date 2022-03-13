@@ -4,22 +4,21 @@
 
 // Goroutine-related profiles.
 
-// package main -- go2cs converted at 2022 March 06 23:23:02 UTC
+// package main -- go2cs converted at 2022 March 13 06:36:06 UTC
 // Original source: C:\Program Files\Go\src\cmd\trace\goroutines.go
-using fmt = go.fmt_package;
-using template = go.html.template_package;
-using trace = go.@internal.trace_package;
-using log = go.log_package;
-using http = go.net.http_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using template = html.template_package;
+using trace = @internal.trace_package;
+using log = log_package;
+using http = net.http_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using sync = sync_package;
+using time = time_package;
+using System;
 
 public static partial class main_package {
 
@@ -77,7 +76,6 @@ private static void httpGoroutines(http.ResponseWriter w, ptr<http.Request> _add
             return ;
         }
     }
-
 }
 
 private static var templGoroutines = template.Must(template.New("").Parse("\n<html>\n<body>\nGoroutines: <br>\n{{range $}}\n  <a href=\"/goroutine?id={{.ID}}\">{{." +
@@ -120,9 +118,7 @@ private static void httpGoroutine(http.ResponseWriter w, ptr<http.Request> _addr
         execTimePercent = fmt.Sprintf("%.2f%%", float64(execTime) / float64(totalExecTime) * 100);
     }
     var sortby = r.FormValue("sortby");
-    var (_, ok) = reflect.TypeOf(new trace.GDesc()).FieldByNameFunc(s => {
-        return s == sortby;
-    });
+    var (_, ok) = reflect.TypeOf(new trace.GDesc()).FieldByNameFunc(s => s == sortby);
     if (!ok) {
         sortby = "TotalTime";
     }

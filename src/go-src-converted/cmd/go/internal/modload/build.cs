@@ -2,35 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:16:19 UTC
+// package modload -- go2cs converted at 2022 March 13 06:29:49 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\build.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using hex = go.encoding.hex_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using goroot = go.@internal.goroot_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modinfo = go.cmd.go.@internal.modinfo_package;
-using search = go.cmd.go.@internal.search_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
-public static partial class modload_package {
+using bytes = bytes_package;
+using context = context_package;
+using hex = encoding.hex_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using goroot = @internal.goroot_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
 
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modinfo = cmd.go.@internal.modinfo_package;
+using search = cmd.go.@internal.search_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using System;
+
+public static partial class modload_package {
 
 
 private static bool isStandardImportPath(@string path) {
@@ -47,7 +45,6 @@ private static @string findStandardImportPath(@string path) => func((_, panic, _
         }
     }
     return "";
-
 });
 
 // PackageModuleInfo returns information about the module that provides
@@ -64,7 +61,6 @@ public static ptr<modinfo.ModulePublic> PackageModuleInfo(context.Context ctx, @
     }
     var rs = LoadModFile(ctx);
     return _addr_moduleInfo(ctx, _addr_rs, m, 0)!;
-
 }
 
 public static ptr<modinfo.ModulePublic> ModuleInfo(context.Context ctx, @string path) {
@@ -80,7 +76,6 @@ public static ptr<modinfo.ModulePublic> ModuleInfo(context.Context ctx, @string 
         }
     }
 
-
     var rs = LoadModFile(ctx);
 
     @string v = default;    bool ok = default;
@@ -93,13 +88,11 @@ public static ptr<modinfo.ModulePublic> ModuleInfo(context.Context ctx, @string 
             @base.Fatalf("go: %v", err);
         }
         v = mg.Selected(path);
-
     }
     if (v == "none") {
         return addr(new modinfo.ModulePublic(Path:path,Error:&modinfo.ModuleError{Err:"module not in current build",},));
     }
     return _addr_moduleInfo(ctx, _addr_rs, new module.Version(Path:path,Version:v), 0)!;
-
 }
 
 // addUpdate fills in m.Update if an updated version is available.
@@ -121,14 +114,12 @@ private static void addUpdate(context.Context ctx, ptr<modinfo.ModulePublic> _ad
         // hide versions, since the "list" and "latest" endpoints are not
         // authenticated.
         return ;
-
     }
     else if (err != null) {
         if (m.Error == null) {
             m.Error = addr(new modinfo.ModuleError(Err:err.Error()));
         }
         return ;
-
     }
     if (semver.Compare(info.Version, m.Version) > 0) {
         m.Update = addr(new modinfo.ModulePublic(Path:m.Path,Version:info.Version,Time:&info.Time,));
@@ -173,7 +164,6 @@ private static void addRetraction(context.Context ctx, ptr<modinfo.ModulePublic>
         // hide versions, since the "list" and "latest" endpoints are not
         // authenticated.
         return ;
-
     }
     else if (errors.As(err, _addr_retractErr)) {
         if (len(retractErr.Rationale) == 0) {
@@ -206,17 +196,14 @@ private static void addDeprecation(context.Context ctx, ptr<modinfo.ModulePublic
         // hide versions, since the "list" and "latest" endpoints are not
         // authenticated.
         return ;
-
     }
     if (err != null) {
         if (m.Error == null) {
             m.Error = addr(new modinfo.ModuleError(Err:err.Error()));
         }
         return ;
-
     }
     m.Deprecated = deprecation;
-
 }
 
 // moduleInfo returns information about module m, loaded from the requirements
@@ -243,13 +230,11 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
             v = v__prev2;
 
         }
-
         if (HasModRoot()) {
             info.Dir = ModRoot();
             info.GoMod = ModFilePath();
         }
         return _addr_info!;
-
     }
     info = addr(new modinfo.ModulePublic(Path:m.Path,Version:m.Version,Indirect:rs!=nil&&!rs.direct[m.Path],));
     {
@@ -266,9 +251,7 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
 
     // completeFromModCache fills in the extra fields in m using the module cache.
     Action<ptr<modinfo.ModulePublic>> completeFromModCache = m => {
-        Func<@string, bool> checksumOk = suffix => {
-            return _addr_rs == null || m.Version == "" || cfg.BuildMod == "mod" || modfetch.HaveSum(new module.Version(Path:m.Path,Version:m.Version+suffix))!;
-        };
+        Func<@string, bool> checksumOk = suffix => _addr_rs == null || m.Version == "" || cfg.BuildMod == "mod" || modfetch.HaveSum(new module.Version(Path:m.Path,Version:m.Version+suffix))!;
 
         if (m.Version != "") {
             {
@@ -284,7 +267,6 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
                 }
 
             }
-
         }
         module.Version mod = new module.Version(Path:m.Path,Version:m.Version);
 
@@ -299,7 +281,6 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
                 }
 
             }
-
         }
         if (m.Version != "") {
             if (checksumOk("/go.mod")) {
@@ -317,22 +298,17 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
                         info = info__prev4;
 
                     }
-
                 }
-
             }
-
             if (checksumOk("")) {
                 var (dir, err) = modfetch.DownloadDir(mod);
                 if (err == null) {
                     m.Dir = dir;
                 }
             }
-
             if (mode & ListRetracted != 0) {
                 addRetraction(ctx, _addr_m);
             }
-
         }
     };
 
@@ -341,7 +317,6 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
         // 'go list -m', report the actual requested version, not its replacement.
         completeFromModCache(info); // Will set m.Error in vendor mode.
         return _addr_info!;
-
     }
     var r = Replacement(m);
     if (r.Path == "") {
@@ -357,7 +332,6 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
             completeFromModCache(info);
         }
         return _addr_info!;
-
     }
     info.Replace = addr(new modinfo.ModulePublic(Path:r.Path,Version:r.Version,));
     {
@@ -371,7 +345,6 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
         v = v__prev1;
 
     }
-
     if (r.Version == "") {
         if (filepath.IsAbs(r.Path)) {
             info.Replace.Dir = r.Path;
@@ -381,7 +354,6 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
             info.Replace.Dir = filepath.Join(ModRoot(), r.Path);
         }
         info.Replace.GoMod = filepath.Join(info.Replace.Dir, "go.mod");
-
     }
     if (cfg.BuildMod != "vendor") {
         completeFromModCache(info.Replace);
@@ -391,7 +363,6 @@ private static ptr<modinfo.ModulePublic> moduleInfo(context.Context ctx, ptr<Req
     }
     info.GoVersion = info.Replace.GoVersion;
     return _addr_info!;
-
 });
 
 // PackageBuildInfo returns a string containing module version information
@@ -442,7 +413,6 @@ public static @string PackageBuildInfo(@string path, slice<@string> deps) {
             }
 
         }
-
     };
 
     writeEntry("mod", target);
@@ -457,7 +427,6 @@ public static @string PackageBuildInfo(@string path, slice<@string> deps) {
     }
 
     return buf.String();
-
 }
 
 // mustFindModule is like findModule, but it calls base.Fatalf if the
@@ -474,14 +443,12 @@ private static module.Version mustFindModule(ptr<loader> _addr_ld, @string targe
             @base.Fatalf("build %v: cannot load %v: %v", target, path, pkg.err);
         }
         return pkg.mod;
-
     }
     if (path == "command-line-arguments") {
         return Target;
     }
     @base.Fatalf("build %v: cannot find module for path %v", target, path);
     panic("unreachable");
-
 });
 
 // findModule searches for the module that contains the package at path.
@@ -499,12 +466,10 @@ private static (module.Version, bool) findModule(ptr<loader> _addr_ld, @string p
             return (pkg.mod, pkg.mod != new module.Version());
         }
     }
-
     if (path == "command-line-arguments") {
         return (Target, true);
     }
     return (new module.Version(), false);
-
 }
 
 public static slice<byte> ModInfoProg(@string info, bool isgccgo) { 
@@ -526,14 +491,12 @@ public static slice<byte> ModInfoProg(@string info, bool isgccgo) {
     if (!isgccgo) {
         return (slice<byte>)fmt.Sprintf("package main\nimport _ \"unsafe\"\n//go:linkname __debug_modinfo__ runtime.modinfo\nva" +
     "r __debug_modinfo__ = %q\n", string(infoStart) + info + string(infoEnd));
-
     }
     else
  {
         return (slice<byte>)fmt.Sprintf("package main\nimport _ \"unsafe\"\n//go:linkname __set_debug_modinfo__ runtime.setmod" +
     "info\nfunc __set_debug_modinfo__(string)\nfunc init() { __set_debug_modinfo__(%q) " +
     "}\n", string(infoStart) + info + string(infoEnd));
-
     }
 }
 

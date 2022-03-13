@@ -1,19 +1,19 @@
-// package html -- go2cs converted at 2022 March 06 23:15:13 UTC
+// package html -- go2cs converted at 2022 March 13 06:28:41 UTC
 // import "cmd/cover/testdata/html" ==> using html = go.cmd.cover.testdata.html_package
 // Original source: C:\Program Files\Go\src\cmd\cover\testdata\html\html.go
-using fmt = go.fmt_package;
-
 namespace go.cmd.cover.testdata;
+
+using fmt = fmt_package;
 
 public static partial class html_package {
 
-    // This file is tested by html_test.go.
-    // The comments below are markers for extracting the annotated source
-    // from the HTML output.
+// This file is tested by html_test.go.
+// The comments below are markers for extracting the annotated source
+// from the HTML output.
 
-    // This is a regression test for incorrect sorting of boundaries
-    // that coincide, specifically for empty select clauses.
-    // START f
+// This is a regression test for incorrect sorting of boundaries
+// that coincide, specifically for empty select clauses.
+// START f
 private static void f() {
     var ch = make_channel<nint>();
 }

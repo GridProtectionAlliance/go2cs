@@ -4,15 +4,15 @@
 
 // Package randutil contains internal randomness utilities for various
 // crypto packages.
-// package randutil -- go2cs converted at 2022 March 06 22:17:14 UTC
+
+// package randutil -- go2cs converted at 2022 March 13 05:30:35 UTC
 // import "crypto/internal/randutil" ==> using randutil = go.crypto.@internal.randutil_package
 // Original source: C:\Program Files\Go\src\crypto\internal\randutil\randutil.go
-using io = go.io_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.crypto.@internal;
+
+using io = io_package;
+using sync = sync_package;
+using System;
 
 public static partial class randutil_package {
 

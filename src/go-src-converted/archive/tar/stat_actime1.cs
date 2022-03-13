@@ -5,13 +5,13 @@
 //go:build aix || linux || dragonfly || openbsd || solaris
 // +build aix linux dragonfly openbsd solaris
 
-// package tar -- go2cs converted at 2022 March 06 22:31:31 UTC
+// package tar -- go2cs converted at 2022 March 13 05:42:26 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Program Files\Go\src\archive\tar\stat_actime1.go
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go.archive;
+
+using syscall = syscall_package;
+using time = time_package;
 
 public static partial class tar_package {
 

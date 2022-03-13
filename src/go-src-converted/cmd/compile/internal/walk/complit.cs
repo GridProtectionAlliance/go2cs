@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:40 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:00 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\complit.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using staticdata = go.cmd.compile.@internal.staticdata_package;
-using staticinit = go.cmd.compile.@internal.staticinit_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using staticdata = cmd.compile.@internal.staticdata_package;
+using staticinit = cmd.compile.@internal.staticinit_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+
+
+// walkCompLit walks a composite literal node:
+// OARRAYLIT, OSLICELIT, OMAPLIT, OSTRUCTLIT (all CompLitExpr), or OPTRLIT (AddrExpr).
+
+using System;
 public static partial class walk_package {
 
-    // walkCompLit walks a composite literal node:
-    // OARRAYLIT, OSLICELIT, OMAPLIT, OSTRUCTLIT (all CompLitExpr), or OPTRLIT (AddrExpr).
 private static ir.Node walkCompLit(ir.Node n, ptr<ir.Nodes> _addr_init) {
     ref ir.Nodes init = ref _addr_init.val;
 
@@ -32,12 +33,10 @@ private static ir.Node walkCompLit(ir.Node n, ptr<ir.Nodes> _addr_init) {
         var vstat = readonlystaticname(_addr_n.Type());
         fixedlit(inInitFunction, initKindStatic, n, vstat, _addr_init);
         return typecheck.Expr(vstat);
-
     }
     var var_ = typecheck.Temp(n.Type());
     anylit(n, var_, _addr_init);
     return var_;
-
 }
 
 // initContext is the context in which static data is populated.
@@ -56,13 +55,11 @@ private partial struct initContext { // : byte
 private static readonly initContext inInitFunction = iota;
 private static readonly var inNonInitFunction = 0;
 
-
 private static @string String(this initContext c) {
     if (c == inInitFunction) {
         return "inInitFunction";
     }
     return "inNonInitFunction";
-
 }
 
 // readonlystaticname returns a name backed by a read-only static data symbol.
@@ -82,7 +79,6 @@ private static bool isSimpleName(ir.Node nn) {
     }
     ptr<ir.Name> n = nn._<ptr<ir.Name>>();
     return n.OnStack();
-
 }
 
 private static void litas(ir.Node l, ir.Node r, ptr<ir.Nodes> _addr_init) {
@@ -115,7 +111,6 @@ private static initGenType getdyn(ir.Node n, bool top) {
             // smaller than the static value.
             // See issue 23780.
             return initDynamic;
-
         }
     else if (n.Op() == ir.OARRAYLIT || n.Op() == ir.OSTRUCTLIT)     else 
         if (ir.IsConstNode(n)) {
@@ -136,7 +131,6 @@ private static initGenType getdyn(ir.Node n, bool top) {
             break;
         }
     }    return mode;
-
 }
 
 // isStaticCompositeLiteral reports whether n is a compile-time constant.
@@ -197,7 +191,6 @@ private static bool isStaticCompositeLiteral(ir.Node n) {
         }
         return isStaticCompositeLiteral(val);
         return false;
-
 }
 
 // initKind is a kind of static initialization: static, dynamic, or local.
@@ -215,7 +208,6 @@ private partial struct initKind { // : byte
 private static readonly initKind initKindStatic = iota + 1;
 private static readonly var initKindDynamic = 0;
 private static readonly var initKindLocalCode = 1;
-
 
 // fixedlit handles struct, array, and slice literals.
 // TODO: expand documentation.
@@ -264,9 +256,7 @@ private static void fixedlit(initContext ctxt, initKind kind, ptr<ir.CompLitExpr
             if (a == ir.BlankNode && !staticinit.AnySideEffects(value)) { 
                 // Discard.
                 continue;
-
             }
-
 
             if (value.Op() == ir.OSLICELIT) 
                 ptr<ir.CompLitExpr> value = value._<ptr<ir.CompLitExpr>>();
@@ -296,8 +286,7 @@ private static void fixedlit(initContext ctxt, initKind kind, ptr<ir.CompLitExpr
                 init.Append(a);
             else 
                 @base.Fatalf("fixedlit: bad kind %d", kind);
-            
-        }
+                    }
         r = r__prev1;
     }
 }
@@ -309,7 +298,6 @@ private static bool isSmallSliceLit(ptr<ir.CompLitExpr> _addr_n) {
         return false;
     }
     return n.Type().Elem().Width == 0 || n.Len <= ir.MaxSmallArraySize / n.Type().Elem().Width;
-
 }
 
 private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.Node var_, ptr<ir.Nodes> _addr_init) => func((_, panic, _) => {
@@ -335,7 +323,6 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
         }
         staticdata.InitSlice(name, offset, vstat.Linksym(), t.NumElem());
         return ;
-
     }
     vstat = default;
 
@@ -349,7 +336,6 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
             vstat = staticinit.StaticName(t);
         }
         fixedlit(ctxt, initKindStatic, _addr_n, vstat, _addr_init);
-
     }
     var vauto = typecheck.Temp(types.NewPtr(t)); 
 
@@ -363,9 +349,7 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
             if (!types.Identical(t, x.Type())) {
                 panic("dotdotdot base type does not match order's assigned type");
             }
-
             a = initStackTemp(init, x, vstat);
-
         }
         else if (n.Esc() == ir.EscNone) {
             a = initStackTemp(init, typecheck.Temp(t), vstat);
@@ -376,7 +360,6 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
         }
 
     }
-
     appendWalkStmt(init, ir.NewAssignStmt(@base.Pos, vauto, a));
 
     if (vstat != null && n.Prealloc == null && n.Esc() != ir.EscNone) { 
@@ -385,7 +368,6 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
         // initStackTemp already handled the copy.
         a = ir.NewStarExpr(@base.Pos, vauto);
         appendWalkStmt(init, ir.NewAssignStmt(@base.Pos, a, vstat));
-
     }
     long index = default;
     {
@@ -417,14 +399,11 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
                     // Generate both static and dynamic initializations.
                     // See issue #31987.
                     k = initKindLocalCode;
-
                 }
-
                 fixedlit(ctxt, k, _addr_value, a, _addr_init);
                 continue;
                         if (vstat != null && ir.IsConstNode(value)) { // already set by copy from static value
                 continue;
-
             } 
 
             // build list of vauto[c] = expr
@@ -433,7 +412,6 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
             as = orderStmtInPlace(as, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<ptr<ir.Name>>>{});
             as = walkStmt(as);
             init.Append(as);
-
         }
         value = value__prev1;
     }
@@ -444,7 +422,6 @@ private static void slicelit(initContext ctxt, ptr<ir.CompLitExpr> _addr_n, ir.N
     a = orderStmtInPlace(a, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<ptr<ir.Name>>>{});
     a = walkStmt(a);
     init.Append(a);
-
 });
 
 private static void maplit(ptr<ir.CompLitExpr> _addr_n, ir.Node m, ptr<ir.Nodes> _addr_init) {
@@ -535,7 +512,6 @@ private static void maplit(ptr<ir.CompLitExpr> _addr_n, ir.Node m, ptr<ir.Nodes>
 
         appendWalkStmt(init, loop);
         return ;
-
     }
     var tmpkey = typecheck.Temp(m.Type().Key());
     var tmpelem = typecheck.Temp(m.Type().Elem());
@@ -560,14 +536,12 @@ private static void maplit(ptr<ir.CompLitExpr> _addr_n, ir.Node m, ptr<ir.Nodes>
             a = typecheck.Stmt(a); // typechecker rewrites OINDEX to OINDEXMAP
             a = orderStmtInPlace(a, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<ptr<ir.Name>>>{});
             appendWalkStmt(init, a);
-
         }
         r = r__prev1;
     }
 
     appendWalkStmt(init, ir.NewUnaryExpr(@base.Pos, ir.OVARKILL, tmpkey));
     appendWalkStmt(init, ir.NewUnaryExpr(@base.Pos, ir.OVARKILL, tmpelem));
-
 }
 
 private static void anylit(ir.Node n, ir.Node var_, ptr<ir.Nodes> _addr_init) {
@@ -590,7 +564,6 @@ private static void anylit(ir.Node n, ir.Node var_, ptr<ir.Nodes> _addr_init) {
         if (n.Prealloc != null) { 
             // n.Prealloc is stack temporary used as backing store.
             r = initStackTemp(init, n.Prealloc, null);
-
         }
         else
  {
@@ -615,7 +588,6 @@ private static void anylit(ir.Node n, ir.Node var_, ptr<ir.Nodes> _addr_init) {
             if (n.Op() == ir.OARRAYLIT) {
                 ctxt = inNonInitFunction;
             }
-
             fixedlit(ctxt, initKindStatic, n, vstat, _addr_init); 
 
             // copy static to var
@@ -624,7 +596,6 @@ private static void anylit(ir.Node n, ir.Node var_, ptr<ir.Nodes> _addr_init) {
             // add expressions to automatic
             fixedlit(inInitFunction, initKindDynamic, n, var_, _addr_init);
             break;
-
         }
         long components = default;
         if (n.Op() == ir.OARRAYLIT) {
@@ -649,8 +620,7 @@ private static void anylit(ir.Node n, ir.Node var_, ptr<ir.Nodes> _addr_init) {
         maplit(n, var_, _addr_init);
     else 
         @base.Fatalf("anylit: not lit, op=%v node=%v", n.Op(), n);
-    
-}
+    }
 
 // oaslit handles special composite literal assignments.
 // It returns true if n's effects have been added to init,
@@ -662,37 +632,31 @@ private static bool oaslit(ptr<ir.AssignStmt> _addr_n, ptr<ir.Nodes> _addr_init)
     if (n.X == null || n.Y == null) { 
         // not a special composite literal assignment
         return false;
-
     }
     if (n.X.Type() == null || n.Y.Type() == null) { 
         // not a special composite literal assignment
         return false;
-
     }
     if (!isSimpleName(n.X)) { 
         // not a special composite literal assignment
         return false;
-
     }
     ptr<ir.Name> x = n.X._<ptr<ir.Name>>();
     if (!types.Identical(n.X.Type(), n.Y.Type())) { 
         // not a special composite literal assignment
         return false;
-
     }
 
     if (n.Y.Op() == ir.OSTRUCTLIT || n.Y.Op() == ir.OARRAYLIT || n.Y.Op() == ir.OSLICELIT || n.Y.Op() == ir.OMAPLIT) 
         if (ir.Any(n.Y, y => ir.Uses(y, x))) { 
             // not a special composite literal assignment
             return false;
-
         }
         anylit(n.Y, n.X, _addr_init);
     else 
         // not a special composite literal assignment
         return false;
         return true;
-
 }
 
 private static void genAsStatic(ptr<ir.AssignStmt> _addr_@as) {
@@ -732,7 +696,6 @@ private static void genAsStatic(ptr<ir.AssignStmt> _addr_@as) {
         r = r__prev1;
     }
     @base.Fatalf("genAsStatic: rhs %v", @as.Y);
-
 }
 
 } // end walk_package

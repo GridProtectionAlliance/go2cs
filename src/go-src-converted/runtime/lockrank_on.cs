@@ -5,20 +5,21 @@
 //go:build goexperiment.staticlockranking
 // +build goexperiment.staticlockranking
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:50 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:37 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\lockrank_on.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// worldIsStopped is accessed atomically to track world-stops. 1 == world
+// stopped.
+
+using System;
 public static partial class runtime_package {
 
-    // worldIsStopped is accessed atomically to track world-stops. 1 == world
-    // stopped.
 private static uint worldIsStopped = default;
 
 // lockRankStruct is embedded in mutex
@@ -68,7 +69,6 @@ private static void lockWithRank(ptr<mutex> _addr_l, lockRank rank) {
         // the partial order doesn't cover.
         lock2(l);
         return ;
-
     }
     if (rank == 0) {
         rank = lockRankLeafRank;
@@ -89,9 +89,7 @@ private static void lockWithRank(ptr<mutex> _addr_l, lockRank rank) {
             checkRanks(_addr_gp, gp.m.locksHeld[i - 1].rank, rank);
         }
         lock2(l);
-
     });
-
 }
 
 // nosplit to ensure it can be called in as many contexts as possible.
@@ -129,7 +127,6 @@ private static void acquireLockRank(lockRank rank) {
             checkRanks(_addr_gp, gp.m.locksHeld[i - 1].rank, rank);
         }
     });
-
 }
 
 // checkRanks checks if goroutine g, which has mostly recently acquired a lock
@@ -143,13 +140,11 @@ private static void checkRanks(ptr<g> _addr_gp, lockRank prevRank, lockRank rank
     if (rank < prevRank) { 
         // If rank < prevRank, then we definitely have a rank error
         rankOK = false;
-
     }
     else if (rank == lockRankLeafRank) { 
         // If new lock is a leaf lock, then the preceding lock can
         // be anything except another leaf lock.
         rankOK = prevRank < lockRankLeafRank;
-
     }
     else
  { 
@@ -182,7 +177,6 @@ private static void unlockWithRank(ptr<mutex> _addr_l) {
         // See comment at beginning of lockWithRank.
         unlock2(l);
         return ;
-
     }
     var gp = getg();
     systemstack(() => {
@@ -200,9 +194,7 @@ private static void unlockWithRank(ptr<mutex> _addr_l) {
             throw("unlock without matching lock acquire");
         }
         unlock2(l);
-
     });
-
 }
 
 // releaseLockRank releases a rank which is not associated with a mutex lock
@@ -226,7 +218,6 @@ private static void releaseLockRank(lockRank rank) {
             throw("lockRank release without matching lockRank acquire");
         }
     });
-
 }
 
 // See comment on lockWithRank regarding stack splitting.
@@ -237,7 +228,6 @@ private static void lockWithRankMayAcquire(ptr<mutex> _addr_l, lockRank rank) {
     if (gp.m.locksHeldLen == 0) { 
         // No possibility of lock ordering problem if no other locks held
         return ;
-
     }
     systemstack(() => {
         var i = gp.m.locksHeldLen;
@@ -249,9 +239,7 @@ private static void lockWithRankMayAcquire(ptr<mutex> _addr_l, lockRank rank) {
         gp.m.locksHeldLen++;
         checkRanks(_addr_gp, gp.m.locksHeld[i - 1].rank, rank);
         gp.m.locksHeldLen--;
-
     });
-
 }
 
 // nosplit to ensure it can be called in as many contexts as possible.
@@ -266,7 +254,6 @@ private static bool checkLockHeld(ptr<g> _addr_gp, ptr<mutex> _addr_l) {
         }
     }
     return false;
-
 }
 
 // assertLockHeld throws if l is not held by the caller.
@@ -288,7 +275,6 @@ private static void assertLockHeld(ptr<mutex> _addr_l) {
         printHeldLocks(_addr_gp);
         throw("not holding required lock!");
     });
-
 }
 
 // assertRankHeld throws if a mutex with rank r is not held by the caller.
@@ -315,7 +301,6 @@ private static void assertRankHeld(lockRank r) {
         printHeldLocks(_addr_gp);
         throw("not holding required lock!");
     });
-
 }
 
 // worldStopped notes that the world is stopped.
@@ -335,7 +320,6 @@ private static void worldStopped() {
             });
         }
     }
-
 }
 
 // worldStarted that the world is starting.
@@ -355,7 +339,6 @@ private static void worldStarted() {
             });
         }
     }
-
 }
 
 // nosplit to ensure it can be called in as many contexts as possible.
@@ -369,7 +352,6 @@ private static bool checkWorldStopped() {
         });
     }
     return stopped == 1;
-
 }
 
 // assertWorldStopped throws if the world is not stopped. It does not check
@@ -382,7 +364,6 @@ private static void assertWorldStopped() {
         return ;
     }
     throw("world not stopped");
-
 }
 
 // assertWorldStoppedOrLockHeld throws if the world is not stopped and the
@@ -408,7 +389,6 @@ private static void assertWorldStoppedOrLockHeld(ptr<mutex> _addr_l) {
         printHeldLocks(_addr_gp);
         throw("no world stop or required lock!");
     });
-
 }
 
 } // end runtime_package

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package doc -- go2cs converted at 2022 March 06 22:41:30 UTC
+// package doc -- go2cs converted at 2022 March 13 05:52:36 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Program Files\Go\src\go\doc\filter.go
-using ast = go.go.ast_package;
-
 namespace go.go;
+
+using ast = go.ast_package;
 
 public static partial class doc_package {
 
@@ -26,7 +26,6 @@ private static bool matchFields(ptr<ast.FieldList> _addr_fields, Filter f) {
         }
     }
     return false;
-
 }
 
 private static bool matchDecl(ptr<ast.GenDecl> _addr_d, Filter f) {
@@ -59,9 +58,7 @@ private static bool matchDecl(ptr<ast.GenDecl> _addr_d, Filter f) {
                 }
                 break;
         }
-
     }    return false;
-
 }
 
 private static slice<ptr<Value>> filterValues(slice<ptr<Value>> a, Filter f) {
@@ -72,7 +69,6 @@ private static slice<ptr<Value>> filterValues(slice<ptr<Value>> a, Filter f) {
             w++;
         }
     }    return a[(int)0..(int)w];
-
 }
 
 private static slice<ptr<Func>> filterFuncs(slice<ptr<Func>> a, Filter f) {
@@ -83,7 +79,6 @@ private static slice<ptr<Func>> filterFuncs(slice<ptr<Func>> a, Filter f) {
             w++;
         }
     }    return a[(int)0..(int)w];
-
 }
 
 private static slice<ptr<Type>> filterTypes(slice<ptr<Type>> a, Filter f) {
@@ -101,14 +96,12 @@ private static slice<ptr<Type>> filterTypes(slice<ptr<Type>> a, Filter f) {
             td.Funcs = filterFuncs(td.Funcs, f);
             td.Methods = filterFuncs(td.Methods, f);
             n += len(td.Consts) + len(td.Vars) + len(td.Funcs) + len(td.Methods);
-
         }
         if (n > 0) {
             a[w] = td;
             w++;
         }
     }    return a[(int)0..(int)w];
-
 }
 
 // Filter eliminates documentation for names that don't pass through the filter f.

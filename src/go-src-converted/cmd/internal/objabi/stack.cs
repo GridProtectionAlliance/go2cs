@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:22 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\stack.go
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.@internal;
+
+using buildcfg = @internal.buildcfg_package;
 
 public static partial class objabi_package {
 
-    // For the linkers. Must match Go definitions.
+// For the linkers. Must match Go definitions.
+
 public static readonly nint STACKSYSTEM = 0;
 public static readonly var StackSystem = STACKSYSTEM;
 public static readonly nint StackBig = 4096;
 public static readonly nint StackSmall = 128;
-
 
 // Initialize StackGuard and StackLimit according to target system.
 public static nint StackGuard = 928 * stackGuardMultiplier() + StackSystem;
@@ -31,7 +31,6 @@ private static nint stackGuardMultiplier() {
         return 2;
     }
     return stackGuardMultiplierDefault;
-
 }
 
 } // end objabi_package

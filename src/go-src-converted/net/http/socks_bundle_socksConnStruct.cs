@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:11 UTC
+//     Generated on 2022 March 13 05:37:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct socksConn
         {
             // Conn.Read function promotion
@@ -227,7 +227,7 @@ namespace net
             public static implicit operator socksConn(NilType nil) => default(socksConn);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static socksConn socksConn_cast(dynamic value)
         {
             return new socksConn(value.Conn, value.boundAddr);

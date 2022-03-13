@@ -12,22 +12,25 @@
 // For example, pre-submit checks that use this package directly would behave
 // differently depending on what Go version each developer uses, causing the
 // check to be inherently fragile.
-// package format -- go2cs converted at 2022 March 06 23:09:31 UTC
+
+// package format -- go2cs converted at 2022 March 13 06:22:51 UTC
 // import "go/format" ==> using format = go.go.format_package
 // Original source: C:\Program Files\Go\src\go\format\format.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using io = go.io_package;
-
 namespace go.go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using io = io_package;
+
+
+// Keep these in sync with cmd/gofmt/gofmt.go.
 
 public static partial class format_package {
 
-    // Keep these in sync with cmd/gofmt/gofmt.go.
 private static readonly nint tabWidth = 8;
 private static readonly var printerMode = printer.UseSpaces | printer.TabIndent | printerNormalizeNumbers; 
 
@@ -36,7 +39,6 @@ private static readonly var printerMode = printer.UseSpaces | printer.TabIndent 
 //
 // This value is defined in go/printer specifically for go/format and cmd/gofmt.
 private static readonly nint printerNormalizeNumbers = 1 << 30;
-
 
 private static printer.Config config = new printer.Config(Mode:printerMode,Tabwidth:tabWidth);
 
@@ -86,7 +88,6 @@ public static error Node(io.Writer dst, ptr<token.FileSet> _addr_fset, object no
                 }
 
             }
-
             break; 
 
         // Sort imports if necessary.
@@ -105,7 +106,6 @@ public static error Node(io.Writer dst, ptr<token.FileSet> _addr_fset, object no
         if (err != null) { 
             // We should never get here. If we do, provide good diagnostic.
             return error.As(fmt.Errorf("format.Node internal error (%s)", err))!;
-
         }
         ast.SortImports(fset, file); 
 
@@ -116,7 +116,6 @@ public static error Node(io.Writer dst, ptr<token.FileSet> _addr_fset, object no
         }
     }
     return error.As(config.Fprint(dst, fset, node))!;
-
 }
 
 // Source formats src in canonical gofmt style and returns the result
@@ -141,10 +140,8 @@ public static (slice<byte>, error) Source(slice<byte> src) {
         // Complete source file.
         // TODO(gri) consider doing this always.
         ast.SortImports(fset, file);
-
     }
     return format(fset, file, sourceAdj, indentAdj, src, config);
-
 }
 
 private static bool hasUnsortedImports(ptr<ast.File> _addr_file) {
@@ -160,14 +157,11 @@ private static bool hasUnsortedImports(ptr<ast.File> _addr_file) {
                 // Not an import declaration, so we're done.
                 // Imports are always first.
                 return false;
-
             }
-
             if (d.Lparen.IsValid()) { 
                 // For now assume all grouped imports are unsorted.
                 // TODO(gri) Should check if they are sorted already.
                 return true;
-
             } 
             // Ungrouped imports are sorted by default.
         }
@@ -175,7 +169,6 @@ private static bool hasUnsortedImports(ptr<ast.File> _addr_file) {
     }
 
     return false;
-
 }
 
 } // end format_package

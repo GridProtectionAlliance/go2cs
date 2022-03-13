@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:47:41 UTC
+// package ssa -- go2cs converted at 2022 March 13 05:58:57 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\addressingmodes.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // addressingModes combines address calculations into memory operations
-    // that can perform complicated addressing modes.
+// addressingModes combines address calculations into memory operations
+// that can perform complicated addressing modes.
 private static void addressingModes(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -98,7 +96,6 @@ private static void addressingModes(ptr<Func> _addr_f) {
                 // (CMPBconstload c (ADDQ x y)) -> (CMPBconstloadidx1 c x y) -> (CMPB c (MOVBloadidx1 x y))
                 // The final pair of instructions turns out to be notably faster, at least in some benchmarks.
                 f.Config.splitLoad(v);
-
             }
         }
     }

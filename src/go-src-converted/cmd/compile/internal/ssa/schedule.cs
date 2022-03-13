@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:40 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:21:57 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\schedule.go
-using types = go.cmd.compile.@internal.types_package;
-using heap = go.container.heap_package;
-using sort = go.sort_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
+using heap = container.heap_package;
+using sort = sort_package;
 
 public static partial class ssa_package {
 
@@ -45,7 +45,6 @@ private static void Push(this ptr<ValHeap> _addr_h, object x) {
     // not just its contents.
     ptr<Value> v = x._<ptr<Value>>();
     h.a = append(h.a, v);
-
 }
 private static void Pop(this ptr<ValHeap> _addr_h) {
     ref ValHeap h = ref _addr_h.val;
@@ -72,10 +71,8 @@ public static bool Less(this ValHeap h, nint i, nint j) {
         c = c__prev1;
 
     }
-
     if (x.Pos != y.Pos) { // Favor in-order line stepping
         return x.Pos.After(y.Pos);
-
     }
     if (x.Op != OpPhi) {
         {
@@ -90,7 +87,6 @@ public static bool Less(this ValHeap h, nint i, nint j) {
             c = c__prev2;
 
         }
-
     }
     {
         var c__prev1 = c;
@@ -117,7 +113,6 @@ public static bool Less(this ValHeap h, nint i, nint j) {
         c = c__prev1;
 
     }
-
     {
         var cmp = x.Type.Compare(y.Type);
 
@@ -125,9 +120,7 @@ public static bool Less(this ValHeap h, nint i, nint j) {
             return cmp == types.CMPgt;
         }
     }
-
     return x.ID > y.ID;
-
 }
 
 public static bool isLoweredGetClosurePtr(this Op op) {
@@ -135,7 +128,6 @@ public static bool isLoweredGetClosurePtr(this Op op) {
     if (op == OpAMD64LoweredGetClosurePtr || op == OpPPC64LoweredGetClosurePtr || op == OpARMLoweredGetClosurePtr || op == OpARM64LoweredGetClosurePtr || op == Op386LoweredGetClosurePtr || op == OpMIPS64LoweredGetClosurePtr || op == OpS390XLoweredGetClosurePtr || op == OpMIPSLoweredGetClosurePtr || op == OpRISCV64LoweredGetClosurePtr || op == OpWasmLoweredGetClosurePtr) 
         return true;
         return false;
-
 }
 
 // Schedule the Values in each Block. After this phase returns, the
@@ -273,7 +265,6 @@ private static void schedule(ptr<Func> _addr_f) {
                             w = w__prev3;
                         }
                     }
-
                 } 
 
                 // Compute uses.
@@ -291,9 +282,7 @@ private static void schedule(ptr<Func> _addr_f) {
                         // a scheduling edge because that use is from the
                         // previous iteration.
                         continue;
-
                     }
-
                     {
                         var w__prev3 = w;
 
@@ -309,12 +298,9 @@ private static void schedule(ptr<Func> _addr_f) {
                                 if (s == null || s.Block != b) {
                                     continue;
                                 }
-
                                 additionalArgs[s.ID] = append(additionalArgs[s.ID], v);
                                 uses[v.ID]++;
-
                             }
-
                         }
 
                         w = w__prev3;
@@ -332,7 +318,6 @@ private static void schedule(ptr<Func> _addr_f) {
                 if (c.Op == OpPhi || c.Op == OpArg) {
                     continue;
                 }
-
                 score[c.ID] = ScoreControl; 
 
                 // Schedule values dependent on the control values at the end.
@@ -359,7 +344,6 @@ private static void schedule(ptr<Func> _addr_f) {
                                 a = a__prev4;
                             }
                         }
-
                     }
 
                     v = v__prev3;
@@ -470,9 +454,7 @@ private static void schedule(ptr<Func> _addr_f) {
                         if (uses[w.ID] == 0) { 
                             // All uses scheduled, w is now schedulable.
                             heap.Push(priq, w);
-
                         }
-
                     }
 
                     w = w__prev3;
@@ -487,9 +469,7 @@ private static void schedule(ptr<Func> _addr_f) {
                         if (uses[w.ID] == 0) { 
                             // All uses scheduled, w is now schedulable.
                             heap.Push(priq, w);
-
                         }
-
                     }
 
                     w = w__prev3;
@@ -499,7 +479,6 @@ private static void schedule(ptr<Func> _addr_f) {
             if (len(order) != len(b.Values)) {
                 f.Fatalf("schedule does not include all values in block %s", b);
             }
-
             {
                 var i__prev2 = i;
 
@@ -510,13 +489,11 @@ private static void schedule(ptr<Func> _addr_f) {
 
                 i = i__prev2;
             }
-
         }
         b = b__prev1;
     }
 
     f.scheduled = true;
-
 }
 
 // storeOrder orders values with respect to stores. That is,
@@ -566,11 +543,9 @@ private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparse
                 }
                 sset.add(v.MemoryArg().ID); // record that v's memory arg is used
             }
-
             if (v.Op == OpNilCheck) {
                 hasNilCheck = true;
             }
-
         }
         v = v__prev1;
     }
@@ -578,7 +553,6 @@ private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparse
     if (len(stores) == 0 || !hasNilCheck && f.pass.name == "nilcheckelim") { 
         // there is no store, the order does not matter
         return values;
-
     }
     ptr<Value> last;
     {
@@ -628,9 +602,7 @@ private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparse
             if (sset.contains(v.ID)) { 
                 // in sset means v is a store, or already pushed to stack, or already assigned a store number
                 continue;
-
             }
-
             stack = append(stack, v);
             sset.add(v.ID);
 
@@ -647,9 +619,7 @@ private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparse
                     count[2]++;
                     stack = stack[..(int)len(stack) - 1];
                     continue;
-
                 }
-
                 var max = int32(0); // latest store dependency
                 var argsdone = true;
                 foreach (var (_, a) in w.Args) {
@@ -669,19 +639,14 @@ private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparse
                 if (!argsdone) {
                     continue;
                 }
-
                 n = 3 * max + 2;
                 if (w.Op == OpNilCheck) {
                     n = 3 * max + 1;
                 }
-
                 storeNumber[w.ID] = n;
                 count[n]++;
                 stack = stack[..(int)len(stack) - 1];
-
             }
-
-
         }
         v = v__prev1;
     }
@@ -736,7 +701,6 @@ private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparse
                         start = -1;
                     }
                 }
-
             }
 
             i = i__prev1;
@@ -748,7 +712,6 @@ private static slice<ptr<Value>> storeOrder(slice<ptr<Value>> values, ptr<sparse
         }
     }
     return order;
-
 }
 
 private partial struct bySourcePos { // : slice<ptr<Value>>

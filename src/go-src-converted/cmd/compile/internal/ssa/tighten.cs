@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:47 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:05 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\tighten.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // tighten moves Values closer to the Blocks in which they are used.
-    // This can reduce the amount of register spilling required,
-    // if it doesn't also create more live values.
-    // A Value can be moved to any block that
-    // dominates all blocks in which it is used.
+// tighten moves Values closer to the Blocks in which they are used.
+// This can reduce the amount of register spilling required,
+// if it doesn't also create more live values.
+// A Value can be moved to any block that
+// dominates all blocks in which it is used.
 private static void tighten(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -33,7 +31,6 @@ private static void tighten(ptr<Func> _addr_f) {
                     if (v.Op.isLoweredGetClosurePtr()) { 
                         // Must stay in the entry block.
                         continue;
-
                     }
 
                     if (v.Op == OpPhi || v.Op == OpArg || v.Op == OpArgIntReg || v.Op == OpArgFloatReg || v.Op == OpSelect0 || v.Op == OpSelect1 || v.Op == OpSelectN) 
@@ -46,7 +43,6 @@ private static void tighten(ptr<Func> _addr_f) {
                         // We can't move values which have a memory arg - it might
                         // make two memory values live across a block boundary.
                         continue;
-
                     }
                     nint narg = 0;
                     {
@@ -67,10 +63,8 @@ private static void tighten(ptr<Func> _addr_f) {
                         // We make an exception for flags, as we want flag generators
                         // moved next to uses (because we only have 1 flag register).
                         continue;
-
                     }
                     canMove[v.ID] = true;
-
                 }
                 v = v__prev2;
             }
@@ -180,7 +174,6 @@ private static void tighten(ptr<Func> _addr_f) {
                             target[v.ID] = t;
                             targetloop = loops.b2l[t.ID];
                         }
-
                     }
                     v = v__prev3;
                 }
@@ -202,7 +195,6 @@ private static void tighten(ptr<Func> _addr_f) {
                         if (t == null || t == b) { 
                             // v is not moveable, or is already in correct place.
                             continue;
-
                         }
                         t.Values = append(t.Values, v);
                         v.Block = t;
@@ -212,17 +204,14 @@ private static void tighten(ptr<Func> _addr_f) {
                         b.Values = b.Values[..(int)last];
                         changed = true;
                         i--;
-
                     }
 
                     i = i__prev3;
                 }
-
             }
             b = b__prev2;
         }
     }
-
 }
 
 // phiTighten moves constants closer to phi users.
@@ -240,15 +229,12 @@ private static void phiTighten(ptr<Func> _addr_f) {
                 if (!a.rematerializeable()) {
                     continue; // not a constant we can move around
                 }
-
                 if (a.Block == b.Preds[i].b) {
                     continue; // already in the right place
                 } 
                 // Make a copy of a, put in predecessor block.
                 v.SetArg(i, a.copyInto(b.Preds[i].b));
-
             }
-
         }
     }
 }

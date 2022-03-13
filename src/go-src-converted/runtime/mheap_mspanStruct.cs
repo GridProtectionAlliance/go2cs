@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:56 UTC
+//     Generated on 2022 March 13 05:25:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct mspan
         {
             // Constructors
@@ -94,7 +94,7 @@ namespace go
             public static implicit operator mspan(NilType nil) => default(mspan);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static mspan mspan_cast(dynamic value)
         {
             return new mspan(ref value.next, ref value.prev, ref value.list, value.startAddr, value.npages, value.manualFreeList, value.freeindex, value.nelems, value.allocCache, ref value.allocBits, ref value.gcmarkBits, value.sweepgen, value.divMul, value.allocCount, value.spanclass, value.state, value.needzero, value.elemsize, value.limit, value.speciallock, ref value.specials);

@@ -9,17 +9,16 @@
 // correctly, and sometimes they break. This variable is a
 // backup: it depends only on old C style static linking rules.
 
-// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
+// package cgo -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Program Files\Go\src\runtime\cgo\iscgo.go
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go.runtime;
 
-public static partial class cgo_package {
- // for go:linkname
+using _@unsafe_ = @unsafe_package;
 
-    //go:linkname _iscgo runtime.iscgo
+public static partial class cgo_package { // for go:linkname
+
+//go:linkname _iscgo runtime.iscgo
 private static bool _iscgo = true;
 
 } // end cgo_package

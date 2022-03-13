@@ -4,19 +4,21 @@
 
 // This file implements a cache of method sets.
 
-// package typeutil -- go2cs converted at 2022 March 06 23:35:10 UTC
+// package typeutil -- go2cs converted at 2022 March 13 06:42:44 UTC
 // import "cmd/vendor/golang.org/x/tools/go/types/typeutil" ==> using typeutil = go.cmd.vendor.golang.org.x.tools.go.types.typeutil_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\types\typeutil\methodsetcache.go
-using types = go.go.types_package;
-using sync = go.sync_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.types;
+
+using types = go.types_package;
+using sync = sync_package;
+
+
+// A MethodSetCache records the method set of each type T for which
+// MethodSet(T) is called so that repeat queries are fast.
+// The zero value is a ready-to-use cache instance.
 
 public static partial class typeutil_package {
 
-    // A MethodSetCache records the method set of each type T for which
-    // MethodSet(T) is called so that repeat queries are fast.
-    // The zero value is a ready-to-use cache instance.
 public partial struct MethodSetCache {
     public sync.Mutex mu;
     public map<types.Type, ptr<types.MethodSet>> others; // all other types
@@ -50,7 +52,6 @@ private static ptr<types.MethodSet> MethodSet(this ptr<MethodSetCache> _addr_cac
                 }
 
             }
-
             break; 
 
         // all other types
@@ -66,10 +67,8 @@ private static ptr<types.MethodSet> MethodSet(this ptr<MethodSetCache> _addr_cac
             cache.others = make_map<types.Type, ptr<types.MethodSet>>();
         }
         cache.others[T] = mset;
-
     }
     return _addr_mset!;
-
 });
 
 private static void lookupNamed(this ptr<MethodSetCache> _addr_cache, ptr<types.Named> _addr_named) {
@@ -86,7 +85,6 @@ private static void lookupNamed(this ptr<MethodSetCache> _addr_cache, ptr<types.
         cache.named[named] = msets;
     }
     return msets;
-
 }
 
 } // end typeutil_package

@@ -17,18 +17,21 @@ for normal archives both fields will be the same. For files requiring
 the ZIP64 format the 32 bit fields will be 0xffffffff and the 64 bit
 fields must be used instead.
 */
-// package zip -- go2cs converted at 2022 March 06 22:31:42 UTC
+
+// package zip -- go2cs converted at 2022 March 13 05:42:37 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Program Files\Go\src\archive\zip\struct.go
-using fs = go.io.fs_package;
-using path = go.path_package;
-using time = go.time_package;
-
 namespace go.archive;
+
+using fs = io.fs_package;
+using path = path_package;
+using time = time_package;
+
+
+// Compression methods.
 
 public static partial class zip_package {
 
-    // Compression methods.
 public static readonly ushort Store = 0; // no compression
 public static readonly ushort Deflate = 8; // DEFLATE compressed
 
@@ -135,7 +138,6 @@ private static long Size(this headerFileInfo fi) {
         return int64(fi.fh.UncompressedSize64);
     }
     return int64(fi.fh.UncompressedSize);
-
 }
 private static bool IsDir(this headerFileInfo fi) {
     return fi.Mode().IsDir();
@@ -145,7 +147,6 @@ private static time.Time ModTime(this headerFileInfo fi) {
         return fi.fh.ModTime();
     }
     return fi.fh.Modified.UTC();
-
 }
 private static fs.FileMode Mode(this headerFileInfo fi) {
     return fi.fh.Mode();
@@ -187,7 +188,6 @@ public static (ptr<FileHeader>, error) FileInfoHeader(fs.FileInfo fi) {
         fh.UncompressedSize = uint32(fh.UncompressedSize64);
     }
     return (_addr_fh!, error.As(null!)!);
-
 }
 
 private partial struct directoryEnd {
@@ -212,7 +212,6 @@ private static ptr<time.Location> timeZone(time.Duration offset) {
         offset = 0;
     }
     return _addr_time.FixedZone("", int(offset / time.Second))!;
-
 }
 
 // msDosTimeToTime converts an MS-DOS date and time into a time.Time.
@@ -254,7 +253,6 @@ private static void SetModTime(this ptr<FileHeader> _addr_h, time.Time t) {
     t = t.UTC(); // Convert to UTC for compatibility
     h.Modified = t;
     h.ModifiedDate, h.ModifiedTime = timeToMsDosTime(t);
-
 }
 
  
@@ -275,7 +273,6 @@ private static readonly nuint s_ISVTX = 0x200;
 private static readonly nuint msdosDir = 0x10;
 private static readonly nuint msdosReadOnly = 0x01;
 
-
 // Mode returns the permission and mode bits for the FileHeader.
 private static fs.FileMode Mode(this ptr<FileHeader> _addr_h) {
     fs.FileMode mode = default;
@@ -290,7 +287,6 @@ private static fs.FileMode Mode(this ptr<FileHeader> _addr_h) {
         mode |= fs.ModeDir;
     }
     return mode;
-
 }
 
 // SetMode changes the permission and mode bits for the FileHeader.
@@ -336,7 +332,6 @@ private static fs.FileMode msdosModeToFileMode(uint m) {
         mode &= 0222;
     }
     return mode;
-
 }
 
 private static uint fileModeToUnixMode(fs.FileMode mode) {
@@ -366,7 +361,6 @@ private static uint fileModeToUnixMode(fs.FileMode mode) {
         m |= s_ISVTX;
     }
     return m | uint32(mode & 0777);
-
 }
 
 private static fs.FileMode unixModeToFileMode(uint m) {
@@ -394,7 +388,6 @@ private static fs.FileMode unixModeToFileMode(uint m) {
         mode |= fs.ModeSticky;
     }
     return mode;
-
 }
 
 // dataDescriptor holds the data descriptor that optionally follows the file

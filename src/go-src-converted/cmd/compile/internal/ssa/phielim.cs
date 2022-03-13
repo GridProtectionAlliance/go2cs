@@ -2,27 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:43 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:02:07 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\phielim.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // phielim eliminates redundant phi values from f.
-    // A phi is redundant if its arguments are all equal. For
-    // purposes of counting, ignore the phi itself. Both of
-    // these phis are redundant:
-    //   v = phi(x,x,x)
-    //   v = phi(x,v,x,v)
-    // We repeat this process to also catch situations like:
-    //   v = phi(x, phi(x, x), phi(x, v))
-    // TODO: Can we also simplify cases like:
-    //   v = phi(v, w, x)
-    //   w = phi(v, w, x)
-    // and would that be useful?
+// phielim eliminates redundant phi values from f.
+// A phi is redundant if its arguments are all equal. For
+// purposes of counting, ignore the phi itself. Both of
+// these phis are redundant:
+//   v = phi(x,x,x)
+//   v = phi(x,v,x,v)
+// We repeat this process to also catch situations like:
+//   v = phi(x, phi(x, x), phi(x, v))
+// TODO: Can we also simplify cases like:
+//   v = phi(v, w, x)
+//   w = phi(v, w, x)
+// and would that be useful?
 private static void phielim(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -37,7 +35,6 @@ private static void phielim(ptr<Func> _addr_f) {
             break;
         }
     }
-
 }
 
 // phielimValue tries to convert the phi v to a copy.
@@ -59,12 +56,10 @@ private static bool phielimValue(ptr<Value> _addr_v) {
             return false;
         }
         w = x;
-
     }    if (w == null) { 
         // v references only itself. It must be in
         // a dead code loop. Don't bother modifying it.
         return false;
-
     }
     v.Op = OpCopy;
     v.SetArgs1(w);
@@ -73,7 +68,6 @@ private static bool phielimValue(ptr<Value> _addr_v) {
         f.Warnl(v.Pos, "eliminated phi");
     }
     return true;
-
 }
 
 } // end ssa_package

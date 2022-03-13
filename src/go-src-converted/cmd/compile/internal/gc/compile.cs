@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2022 March 06 23:11:25 UTC
+// package gc -- go2cs converted at 2022 March 13 06:24:45 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\gc\compile.go
-using race = go.@internal.race_package;
-using rand = go.math.rand_package;
-using sort = go.sort_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using liveness = go.cmd.compile.@internal.liveness_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using walk = go.cmd.compile.@internal.walk_package;
-using obj = go.cmd.@internal.obj_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.compile.@internal;
 
-public static partial class gc_package {
+using race = @internal.race_package;
+using rand = math.rand_package;
+using sort = sort_package;
+using sync = sync_package;
 
-    // "Portable" code generation.
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using liveness = cmd.compile.@internal.liveness_package;
+using objw = cmd.compile.@internal.objw_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using walk = cmd.compile.@internal.walk_package;
+using obj = cmd.@internal.obj_package;
+
+
+// "Portable" code generation.
+
+
+using System;
+using System.Threading;public static partial class gc_package {
+
 private static slice<ptr<ir.Func>> compilequeue = default;
 
 private static void enqueueFunc(ptr<ir.Func> _addr_fn) {
@@ -40,7 +41,6 @@ private static void enqueueFunc(ptr<ir.Func> _addr_fn) {
         // Skip compiling blank functions.
         // Frontend already reported any spec-mandated errors (#29870).
         return ;
-
     }
     {
         var clo = fn.OClosure;
@@ -49,7 +49,6 @@ private static void enqueueFunc(ptr<ir.Func> _addr_fn) {
             return ; // we'll get this as part of its enclosing function
         }
     }
-
 
     if (len(fn.Body) == 0) { 
         // Initialize ABI wrappers if necessary.
@@ -63,7 +62,6 @@ private static void enqueueFunc(ptr<ir.Func> _addr_fn) {
             objw.Global(x, int32(len(x.P)), obj.RODATA | obj.LOCAL);
         }
         return ;
-
     }
     var errorsBefore = @base.Errors();
 
@@ -80,7 +78,6 @@ private static void enqueueFunc(ptr<ir.Func> _addr_fn) {
         return ;
     }
     compilequeue = append(compilequeue, fn);
-
 }
 
 // prepareFunc handles any remaining frontend compilation tasks that
@@ -101,7 +98,6 @@ private static void prepareFunc(ptr<ir.Func> _addr_fn) {
     walk.Walk(fn);
     ir.CurFunc = null; // enforce no further uses of CurFunc
     typecheck.DeclContext = ir.PEXTERN;
-
 }
 
 // compileFunctions compiles all functions in compilequeue.
@@ -129,15 +125,11 @@ private static void compileFunctions() {
         }
 
         copy(compilequeue, tmp);
-
     } { 
         // Compile the longest functions first,
         // since they're most likely to be the slowest.
         // This helps avoid stragglers.
-        sort.Slice(compilequeue, (i, j) => {
-            return len(compilequeue[i].Body) > len(compilequeue[j].Body);
-        });
-
+        sort.Slice(compilequeue, (i, j) => len(compilequeue[i].Body) > len(compilequeue[j].Body));
     }
     Action<Action<nint>> queue = work => {
         work(0);
@@ -170,10 +162,8 @@ private static void compileFunctions() {
                 }());
             }
 ;
-
         }
     }
-
 
     sync.WaitGroup wg = default;
     Action<slice<ptr<ir.Func>>> compile = default;
@@ -205,7 +195,6 @@ private static void compileFunctions() {
 
     @base.Ctxt.InParallel = false;
     types.CalcSizeDisabled = false;
-
 }
 
 } // end gc_package

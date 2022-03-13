@@ -5,19 +5,18 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
+// package cgo -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Program Files\Go\src\runtime\cgo\setenv.go
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go.runtime;
 
-public static partial class cgo_package {
- // for go:linkname
+using _@unsafe_ = @unsafe_package;
 
-    //go:cgo_import_static x_cgo_setenv
-    //go:linkname x_cgo_setenv x_cgo_setenv
-    //go:linkname _cgo_setenv runtime._cgo_setenv
+public static partial class cgo_package { // for go:linkname
+
+//go:cgo_import_static x_cgo_setenv
+//go:linkname x_cgo_setenv x_cgo_setenv
+//go:linkname _cgo_setenv runtime._cgo_setenv
 private static byte x_cgo_setenv = default;
 private static var _cgo_setenv = _addr_x_cgo_setenv;
 

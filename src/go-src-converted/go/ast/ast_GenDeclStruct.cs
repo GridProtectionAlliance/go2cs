@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:10 UTC
+//     Generated on 2022 March 13 05:52:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class ast_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct GenDecl
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace go
             public static implicit operator GenDecl(NilType nil) => default(GenDecl);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static GenDecl GenDecl_cast(dynamic value)
         {
             return new GenDecl(ref value.Doc, value.TokPos, value.Tok, value.Lparen, value.Specs, value.Rparen);

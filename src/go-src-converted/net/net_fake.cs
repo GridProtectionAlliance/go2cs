@@ -7,20 +7,19 @@
 //go:build js && wasm
 // +build js,wasm
 
-// package net -- go2cs converted at 2022 March 06 22:16:26 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:00 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\net_fake.go
-using context = go.context_package;
-using poll = go.@internal.poll_package;
-using io = go.io_package;
-using os = go.os_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
+
+using context = context_package;
+using poll = @internal.poll_package;
+using io = io_package;
+using os = os_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using time = time_package;
+using System;
 
 public static partial class net_package {
 
@@ -71,7 +70,6 @@ private static (ptr<netFD>, error) socket(context.Context ctx, @string net, nint
         listeners[fd.laddr._<ptr<TCPAddr>>().String()] = fd;
         listenersMu.Unlock();
         return (_addr_fd!, error.As(null!)!);
-
     }
     fd.laddr = addr(new TCPAddr(IP:IPv4(127,0,0,1),Port:nextPort(),));
     fd.raddr = raddr;
@@ -93,7 +91,6 @@ private static (ptr<netFD>, error) socket(context.Context ctx, @string net, nint
     listenersMu.Unlock();
 
     return (_addr_fd!, error.As(null!)!);
-
 }
 
 private static (nint, error) Read(this ptr<netFD> _addr_fd, slice<byte> p) {
@@ -134,7 +131,6 @@ private static error Close(this ptr<netFD> _addr_fd) {
     fd.r.Close();
     fd.w.Close();
     return error.As(null!)!;
-
 }
 
 private static error closeRead(this ptr<netFD> _addr_fd) {
@@ -161,7 +157,6 @@ private static (ptr<netFD>, error) accept(this ptr<netFD> _addr_fd) {
         return (_addr_null!, error.As(syscall.EINVAL)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 private static error SetDeadline(this ptr<netFD> _addr_fd, time.Time t) {
@@ -227,14 +222,12 @@ private static (nint, error) Read(this ptr<bufferedPipe> _addr_p, slice<byte> b)
             break;
         }
         p.rCond.Wait();
-
     }
 
     var n = copy(b, p.buf);
     p.buf = p.buf[(int)n..];
     p.wCond.Broadcast();
     return (n, error.As(null!)!);
-
 });
 
 private static (nint, error) Write(this ptr<bufferedPipe> _addr_p, slice<byte> b) => func((defer, _, _) => {
@@ -260,13 +253,11 @@ private static (nint, error) Write(this ptr<bufferedPipe> _addr_p, slice<byte> b
             break;
         }
         p.wCond.Wait();
-
     }
 
     p.buf = append(p.buf, b);
     p.rCond.Broadcast();
     return (len(b), error.As(null!)!);
-
 });
 
 private static void Close(this ptr<bufferedPipe> _addr_p) => func((defer, _, _) => {

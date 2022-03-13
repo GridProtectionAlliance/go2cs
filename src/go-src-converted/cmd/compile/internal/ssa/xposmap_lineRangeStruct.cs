@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:09:22 UTC
+//     Generated on 2022 March 13 06:22:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lineRange
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace @internal
             public static implicit operator lineRange(NilType nil) => default(lineRange);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lineRange lineRange_cast(dynamic value)
         {
             return new lineRange(value.first, value.last);

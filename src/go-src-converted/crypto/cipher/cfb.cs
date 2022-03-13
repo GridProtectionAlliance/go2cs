@@ -4,12 +4,12 @@
 
 // CFB (Cipher Feedback) Mode.
 
-// package cipher -- go2cs converted at 2022 March 06 22:18:08 UTC
+// package cipher -- go2cs converted at 2022 March 13 05:32:21 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Program Files\Go\src\crypto\cipher\cfb.go
-using subtle = go.crypto.@internal.subtle_package;
-
 namespace go.crypto;
+
+using subtle = crypto.@internal.subtle_package;
 
 public static partial class cipher_package {
 
@@ -41,7 +41,6 @@ private static void XORKeyStream(this ptr<cfb> _addr_x, slice<byte> dst, slice<b
             // larger batches for xor, and we should be
             // able to match CTR/OFB performance.
             copy(x.next[(int)x.outUsed..], src);
-
         }
         var n = xorBytes(dst, src, x.@out[(int)x.outUsed..]);
         if (!x.decrypt) {
@@ -50,9 +49,7 @@ private static void XORKeyStream(this ptr<cfb> _addr_x, slice<byte> dst, slice<b
         dst = dst[(int)n..];
         src = src[(int)n..];
         x.outUsed += n;
-
     }
-
 });
 
 // NewCFBEncrypter returns a Stream which encrypts with cipher feedback mode,
@@ -74,13 +71,11 @@ private static Stream newCFB(Block block, slice<byte> iv, bool decrypt) => func(
     if (len(iv) != blockSize) { 
         // stack trace will indicate whether it was de or encryption
         panic("cipher.newCFB: IV length must equal block size");
-
     }
     ptr<cfb> x = addr(new cfb(b:block,out:make([]byte,blockSize),next:make([]byte,blockSize),outUsed:blockSize,decrypt:decrypt,));
     copy(x.next, iv);
 
     return x;
-
 });
 
 } // end cipher_package

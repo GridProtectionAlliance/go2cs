@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:06 UTC
+//     Generated on 2022 March 13 05:36:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct finishedHash
         {
             // Constructors
@@ -73,7 +73,7 @@ namespace crypto
             public static implicit operator finishedHash(NilType nil) => default(finishedHash);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static finishedHash finishedHash_cast(dynamic value)
         {
             return new finishedHash(value.client, value.server, value.clientMD5, value.serverMD5, value.buffer, value.version, value.prf);

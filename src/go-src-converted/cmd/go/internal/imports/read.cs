@@ -4,16 +4,16 @@
 
 // Copied from Go distribution src/go/build/read.go.
 
-// package imports -- go2cs converted at 2022 March 06 23:16:54 UTC
+// package imports -- go2cs converted at 2022 March 13 06:30:12 UTC
 // import "cmd/go/internal/imports" ==> using imports = go.cmd.go.@internal.imports_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\imports\read.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.cmd.go.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using io = io_package;
+using utf8 = unicode.utf8_package;
 
 public static partial class imports_package {
 
@@ -42,9 +42,7 @@ private static ptr<importReader> newImportReader(ptr<bufio.Reader> _addr_b) {
             b.Discard(3);
         }
     }
-
     return addr(new importReader(b:b));
-
 }
 
 private static bool isIdent(byte c) {
@@ -82,10 +80,8 @@ private static byte readByte(this ptr<importReader> _addr_r) {
             r.err = err;
         }
         c = 0;
-
     }
     return c;
-
 }
 
 // peekByte returns the next byte from the input reader but does not advance beyond it.
@@ -100,7 +96,6 @@ private static byte peekByte(this ptr<importReader> _addr_r, bool skipSpace) => 
             panic("go/build: import reader looping");
         }
         return 0;
-
     }
     var c = r.peek;
     if (c == 0) {
@@ -141,25 +136,18 @@ private static byte peekByte(this ptr<importReader> _addr_r, bool skipSpace) => 
                             (c, c1) = (c1, r.readByte());
                         }
                     else
-
-
                     } {
                         r.syntaxError();
                     }
-
                     c = r.readByte();
                     continue;
-
                     break;
             }
-
         }
         break;
-
     }
     r.peek = c;
     return r.peek;
-
 });
 
 // nextByte is like peekByte but advances beyond the returned byte.
@@ -201,7 +189,6 @@ private static void readIdent(this ptr<importReader> _addr_r) {
     while (isIdent(r.peekByte(false))) {
         r.peek = 0;
     }
-
 }
 
 // readString reads a quoted string literal from the input.
@@ -247,7 +234,6 @@ private static void readString(this ptr<importReader> _addr_r, ptr<slice<@string
             r.syntaxError();
             break;
     }
-
 }
 
 // readImport reads an import clause - optional identifier followed by quoted string -
@@ -264,7 +250,6 @@ private static void readImport(this ptr<importReader> _addr_r, ptr<slice<@string
         r.readIdent();
     }
     r.readString(imports);
-
 }
 
 // ReadComments is like io.ReadAll, except that it only reads the leading
@@ -278,10 +263,8 @@ public static (slice<byte>, error) ReadComments(io.Reader f) {
     if (r.err == null && !r.eof) { 
         // Didn't reach EOF, so must have found a non-space byte. Remove it.
         r.buf = r.buf[..(int)len(r.buf) - 1];
-
     }
     return (r.buf, error.As(r.err)!);
-
 }
 
 // ReadImports is like io.ReadAll, except that it expects a Go file as input
@@ -305,7 +288,6 @@ public static (slice<byte>, error) ReadImports(io.Reader f, bool reportSyntaxErr
         else
 
             r.nextByte(false);
-
         } {
             r.readImport(imports);
         }
@@ -323,7 +305,6 @@ public static (slice<byte>, error) ReadImports(io.Reader f, bool reportSyntaxErr
         }
     }
     return (r.buf, error.As(r.err)!);
-
 }
 
 } // end imports_package

@@ -5,17 +5,19 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package time -- go2cs converted at 2022 March 06 22:30:09 UTC
+// package time -- go2cs converted at 2022 March 13 05:40:58 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\sys_unix.go
-using errors = go.errors_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using errors = errors_package;
+using syscall = syscall_package;
+
+
+// for testing: whatever interrupts a sleep
 
 public static partial class time_package {
 
-    // for testing: whatever interrupts a sleep
 private static void interrupt() {
     syscall.Kill(syscall.Getpid(), syscall.SIGCHLD);
 }
@@ -29,7 +31,6 @@ private static (System.UIntPtr, error) open(@string name) {
         return (0, error.As(err)!);
     }
     return (uintptr(fd), error.As(null!)!);
-
 }
 
 private static (nint, error) read(System.UIntPtr fd, slice<byte> buf) {
@@ -55,7 +56,6 @@ private static error preadn(System.UIntPtr fd, slice<byte> buf, nint off) {
             return error.As(err)!;
         }
     }
-
     while (len(buf) > 0) {
         var (m, err) = syscall.Read(int(fd), buf);
         if (m <= 0) {
@@ -65,10 +65,8 @@ private static error preadn(System.UIntPtr fd, slice<byte> buf, nint off) {
             return error.As(err)!;
         }
         buf = buf[(int)m..];
-
     }
     return error.As(null!)!;
-
 }
 
 } // end time_package

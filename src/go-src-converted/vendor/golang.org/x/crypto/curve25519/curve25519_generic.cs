@@ -2,22 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package curve25519 -- go2cs converted at 2022 March 06 23:36:50 UTC
+// package curve25519 -- go2cs converted at 2022 March 13 06:44:56 UTC
 // import "vendor/golang.org/x/crypto/curve25519" ==> using curve25519 = go.vendor.golang.org.x.crypto.curve25519_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\curve25519\curve25519_generic.go
-using binary = go.encoding.binary_package;
-
 namespace go.vendor.golang.org.x.crypto;
+
+using binary = encoding.binary_package;
 
 public static partial class curve25519_package {
 
-    // This code is a port of the public domain, "ref10" implementation of
-    // curve25519 from SUPERCOP 20130419 by D. J. Bernstein.
+// This code is a port of the public domain, "ref10" implementation of
+// curve25519 from SUPERCOP 20130419 by D. J. Bernstein.
 
-    // fieldElement represents an element of the field GF(2^255 - 19). An element
-    // t, entries t[0]...t[9], represents the integer t[0]+2^26 t[1]+2^51 t[2]+2^77
-    // t[3]+2^102 t[4]+...+2^230 t[9]. Bounds on each t[i] vary depending on
-    // context.
+// fieldElement represents an element of the field GF(2^255 - 19). An element
+// t, entries t[0]...t[9], represents the integer t[0]+2^26 t[1]+2^51 t[2]+2^77
+// t[3]+2^102 t[4]+...+2^230 t[9]. Bounds on each t[i] vary depending on
+// context.
 private partial struct fieldElement { // : array<int>
 }
 
@@ -267,7 +267,6 @@ private static void feToBytes(ptr<array<byte>> _addr_s, ptr<fieldElement> _addr_
     s[29] = byte(h[9] >> 2);
     s[30] = byte(h[9] >> 10);
     s[31] = byte(h[9] >> 18);
-
 }
 
 // feMul calculates h = f * g
@@ -530,7 +529,6 @@ private static void feMul(ptr<fieldElement> _addr_h, ptr<fieldElement> _addr_f, 
     h[7] = int32(h7);
     h[8] = int32(h8);
     h[9] = int32(h9);
-
 }
 
 // feSquare calculates h = f*f. Can overlap h with f.
@@ -687,7 +685,6 @@ private static void feSquare(ptr<fieldElement> _addr_h, ptr<fieldElement> _addr_
     h[7] = int32(h7);
     h[8] = int32(h8);
     h[9] = int32(h9);
-
 }
 
 // feMul121666 calculates h = f * 121666. Can overlap h with f.

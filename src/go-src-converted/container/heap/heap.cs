@@ -14,26 +14,27 @@
 // highest-priority item from the queue. The Examples include such an
 // implementation; the file example_pq_test.go has the complete source.
 //
-// package heap -- go2cs converted at 2022 March 06 22:42:02 UTC
+
+// package heap -- go2cs converted at 2022 March 13 05:53:09 UTC
 // import "container/heap" ==> using heap = go.container.heap_package
 // Original source: C:\Program Files\Go\src\container\heap\heap.go
-using sort = go.sort_package;
-
 namespace go.container;
+
+using sort = sort_package;
 
 public static partial class heap_package {
 
-    // The Interface type describes the requirements
-    // for a type using the routines in this package.
-    // Any type that implements it may be used as a
-    // min-heap with the following invariants (established after
-    // Init has been called or if the data is empty or sorted):
-    //
-    //    !h.Less(j, i) for 0 <= i < h.Len() and 2*i+1 <= j <= 2*i+2 and j < h.Len()
-    //
-    // Note that Push and Pop in this interface are for package heap's
-    // implementation to call. To add and remove things from the heap,
-    // use heap.Push and heap.Pop.
+// The Interface type describes the requirements
+// for a type using the routines in this package.
+// Any type that implements it may be used as a
+// min-heap with the following invariants (established after
+// Init has been called or if the data is empty or sorted):
+//
+//    !h.Less(j, i) for 0 <= i < h.Len() and 2*i+1 <= j <= 2*i+2 and j < h.Len()
+//
+// Note that Push and Pop in this interface are for package heap's
+// implementation to call. To add and remove things from the heap,
+// use heap.Push and heap.Pop.
 public partial interface Interface {
     void Push(object x); // add x as element Len()
     void Pop(); // remove and return element Len() - 1.
@@ -49,7 +50,6 @@ public static void Init(Interface h) {
     for (var i = n / 2 - 1; i >= 0; i--) {
         down(h, i, n);
     }
-
 }
 
 // Push pushes the element x onto the heap.
@@ -80,7 +80,6 @@ public static void Remove(Interface h, nint i) {
         }
     }
     return h.Pop();
-
 }
 
 // Fix re-establishes the heap ordering after the element at index i has changed its value.
@@ -101,9 +100,7 @@ private static void up(Interface h, nint j) {
         }
         h.Swap(i, j);
         j = i;
-
     }
-
 }
 
 private static bool down(Interface h, nint i0, nint n) {
@@ -112,7 +109,6 @@ private static bool down(Interface h, nint i0, nint n) {
         nint j1 = 2 * i + 1;
         if (j1 >= n || j1 < 0) { // j1 < 0 after int overflow
             break;
-
         }
         var j = j1; // left child
         {
@@ -123,16 +119,13 @@ private static bool down(Interface h, nint i0, nint n) {
             }
 
         }
-
         if (!h.Less(j, i)) {
             break;
         }
         h.Swap(i, j);
         i = j;
-
     }
     return i > i0;
-
 }
 
 } // end heap_package

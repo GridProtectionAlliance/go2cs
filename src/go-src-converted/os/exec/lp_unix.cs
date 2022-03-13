@@ -5,20 +5,22 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package exec -- go2cs converted at 2022 March 06 22:14:24 UTC
+// package exec -- go2cs converted at 2022 March 13 05:28:32 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Program Files\Go\src\os\exec\lp_unix.go
-using errors = go.errors_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go.os;
+
+using errors = errors_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// ErrNotFound is the error resulting if a path search failed to find an executable file.
 
 public static partial class exec_package {
 
-    // ErrNotFound is the error resulting if a path search failed to find an executable file.
 public static var ErrNotFound = errors.New("executable file not found in $PATH");
 
 private static error findExecutable(@string file) {
@@ -33,9 +35,7 @@ private static error findExecutable(@string file) {
             return error.As(null!)!;
         }
     }
-
     return error.As(fs.ErrPermission)!;
-
 }
 
 // LookPath searches for an executable named file in the
@@ -56,14 +56,12 @@ public static (@string, error) LookPath(@string file) {
             return (file, error.As(null!)!);
         }
         return ("", error.As(addr(new Error(file,err))!)!);
-
     }
     var path = os.Getenv("PATH");
     foreach (var (_, dir) in filepath.SplitList(path)) {
         if (dir == "") { 
             // Unix shell semantics: path element "" means "."
             dir = ".";
-
         }
         path = filepath.Join(dir, file);
         {
@@ -78,9 +76,7 @@ public static (@string, error) LookPath(@string file) {
             err = err__prev1;
 
         }
-
     }    return ("", error.As(addr(new Error(file,ErrNotFound))!)!);
-
 }
 
 } // end exec_package

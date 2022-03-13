@@ -5,13 +5,13 @@
 //go:build dragonfly || freebsd || linux || netbsd || openbsd
 // +build dragonfly freebsd linux netbsd openbsd
 
-// package poll -- go2cs converted at 2022 March 06 22:13:17 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:53 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\fd_writev_unix.go
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal;
+
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class poll_package {
 
@@ -30,7 +30,6 @@ private static (System.UIntPtr, error) writev(nint fd, slice<syscall.Iovec> iove
         return (r, error.As(e)!);
     }
     return (r, error.As(null!)!);
-
 }
 
 } // end poll_package

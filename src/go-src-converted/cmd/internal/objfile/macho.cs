@@ -4,18 +4,17 @@
 
 // Parsing of Mach-O executables (OS X).
 
-// package objfile -- go2cs converted at 2022 March 06 22:32:30 UTC
+// package objfile -- go2cs converted at 2022 March 13 05:43:29 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\macho.go
-using dwarf = go.debug.dwarf_package;
-using macho = go.debug.macho_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.@internal;
+
+using dwarf = debug.dwarf_package;
+using macho = debug.macho_package;
+using fmt = fmt_package;
+using io = io_package;
+using sort = sort_package;
+using System;
 
 public static partial class objfile_package {
 
@@ -36,7 +35,6 @@ private static (rawFile, error) openMacho(io.ReaderAt r) {
         return (null, error.As(err)!);
     }
     return (addr(new machoFile(f)), error.As(null!)!);
-
 }
 
 private static (slice<Sym>, error) symbols(this ptr<machoFile> _addr_f) {
@@ -57,7 +55,6 @@ private static (slice<Sym>, error) symbols(this ptr<machoFile> _addr_f) {
             if (s.Type & stabTypeMask == 0) {
                 addrs = append(addrs, s.Value);
             }
-
         }
         s = s__prev1;
     }
@@ -73,15 +70,12 @@ private static (slice<Sym>, error) symbols(this ptr<machoFile> _addr_f) {
             if (s.Type & stabTypeMask != 0) { 
                 // Skip stab debug info.
                 continue;
-
             }
-
             Sym sym = new Sym(Name:s.Name,Addr:s.Value,Code:'?');
             var i = sort.Search(len(addrs), x => addrs[x] > s.Value);
             if (i < len(addrs)) {
                 sym.Size = int64(addrs[i] - s.Value);
             }
-
             if (s.Sect == 0) {
                 sym.Code = 'U';
             }
@@ -107,17 +101,13 @@ private static (slice<Sym>, error) symbols(this ptr<machoFile> _addr_f) {
                         sym.Code = 'B';
                         break;
                 }
-
             }
-
             syms = append(syms, sym);
-
         }
         s = s__prev1;
     }
 
     return (syms, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<machoFile> _addr_f) {
@@ -138,7 +128,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<machoFile>
         sect = sect__prev1;
 
     }
-
     {
         var sect__prev1 = sect;
 
@@ -150,12 +139,10 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<machoFile>
             if (err != null) {
                 return (0, null, null, error.As(err)!);
             }
-
         }
         sect = sect__prev1;
 
     }
-
     {
         var sect__prev1 = sect;
 
@@ -167,14 +154,11 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<machoFile>
             if (err != null) {
                 return (0, null, null, error.As(err)!);
             }
-
         }
         sect = sect__prev1;
 
     }
-
     return (textStart, symtab, pclntab, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, error) text(this ptr<machoFile> _addr_f) {
@@ -190,7 +174,6 @@ private static (ulong, slice<byte>, error) text(this ptr<machoFile> _addr_f) {
     textStart = sect.Addr;
     text, err = sect.Data();
     return ;
-
 }
 
 private static @string goarch(this ptr<machoFile> _addr_f) {
@@ -208,7 +191,6 @@ private static @string goarch(this ptr<machoFile> _addr_f) {
     else if (f.macho.Cpu == macho.CpuPpc64) 
         return "ppc64";
         return "";
-
 }
 
 private partial struct uint64s { // : slice<ulong>

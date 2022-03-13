@@ -5,18 +5,19 @@
 // Package gif implements a GIF image decoder and encoder.
 //
 // The GIF specification is at https://www.w3.org/Graphics/GIF/spec-gif89a.txt.
-// package gif -- go2cs converted at 2022 March 06 23:36:03 UTC
+
+// package gif -- go2cs converted at 2022 March 13 06:44:02 UTC
 // import "image/gif" ==> using gif = go.image.gif_package
 // Original source: C:\Program Files\Go\src\image\gif\reader.go
-using bufio = go.bufio_package;
-using lzw = go.compress.lzw_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using image = go.image_package;
-using color = go.image.color_package;
-using io = go.io_package;
-
 namespace go.image;
+
+using bufio = bufio_package;
+using lzw = compress.lzw_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using image = image_package;
+using color = image.color_package;
+using io = io_package;
 
 public static partial class gif_package {
 
@@ -37,18 +38,15 @@ private static readonly nint fColorTableBitsMask = 7;
 private static readonly nint gcTransparentColorSet = 1 << 0;
 private static readonly nint gcDisposalMethodMask = 7 << 2;
 
-
 // Disposal Methods.
 public static readonly nuint DisposalNone = 0x01;
 public static readonly nuint DisposalBackground = 0x02;
 public static readonly nuint DisposalPrevious = 0x03;
 
-
 // Section indicators.
 private static readonly nuint sExtension = 0x21;
 private static readonly nuint sImageDescriptor = 0x2C;
 private static readonly nuint sTrailer = 0x3B;
-
 
 // Extensions.
 private static readonly nuint eText = 0x01; // Plain Text
@@ -62,7 +60,6 @@ private static error readFull(io.Reader r, slice<byte> b) {
         err = io.ErrUnexpectedEOF;
     }
     return error.As(err)!;
-
 }
 
 private static (byte, error) readByte(io.ByteReader r) {
@@ -74,7 +71,6 @@ private static (byte, error) readByte(io.ByteReader r) {
         err = io.ErrUnexpectedEOF;
     }
     return (b, error.As(err)!);
-
 }
 
 // decoder is the type used to decode a GIF file.
@@ -146,7 +142,6 @@ private static (byte, error) ReadByte(this ptr<blockReader> _addr_b) {
     var c = b.d.tmp[b.i];
     b.i++;
     return (c, error.As(null!)!);
-
 }
 
 // blockReader must implement io.Reader, but its Read shouldn't ever actually
@@ -168,7 +163,6 @@ private static (nint, error) Read(this ptr<blockReader> _addr_b, slice<byte> p) 
     var n = copy(p, b.d.tmp[(int)b.i..(int)b.j]);
     b.i += uint8(n);
     return (n, error.As(null!)!);
-
 }
 
 // close primarily detects whether or not a block terminator was encountered
@@ -185,12 +179,10 @@ private static error close(this ptr<blockReader> _addr_b) {
     if (b.err == io.EOF) { 
         // A clean block-sequence terminator was encountered while reading.
         return error.As(null!)!;
-
     }
     else if (b.err != null) { 
         // Some other error was encountered while reading.
         return error.As(b.err)!;
-
     }
     if (b.i == b.j) { 
         // We reached the end of a sub block reading LZW data. We'll allow at
@@ -214,7 +206,6 @@ private static error close(this ptr<blockReader> _addr_b) {
         return error.As(b.err)!;
     }
     return error.As(errTooMuch)!;
-
 }
 
 // decode reads a GIF image from r and stores the result in d.
@@ -233,7 +224,6 @@ private static error decode(this ptr<decoder> _addr_d, io.Reader r, bool configO
             d.r = bufio.NewReader(r);
         }
     }
-
 
     d.loopCount = -1;
 
@@ -256,14 +246,12 @@ private static error decode(this ptr<decoder> _addr_d, io.Reader r, bool configO
             if (err != null) {
                 return error.As(err)!;
             }
-
         else if (c == sImageDescriptor) 
             err = d.readImageDescriptor(keepAllFrames);
 
             if (err != null) {
                 return error.As(err)!;
             }
-
         else if (c == sTrailer) 
             if (len(d.image) == 0) {
                 return error.As(fmt.Errorf("gif: missing image data"))!;
@@ -271,9 +259,7 @@ private static error decode(this ptr<decoder> _addr_d, io.Reader r, bool configO
             return error.As(null!)!;
         else 
             return error.As(fmt.Errorf("gif: unknown block type: 0x%.2x", c))!;
-        
-    }
-
+            }
 }
 
 private static error readHeaderAndScreenDescriptor(this ptr<decoder> _addr_d) {
@@ -300,12 +286,10 @@ private static error readHeaderAndScreenDescriptor(this ptr<decoder> _addr_d) {
             if (err != null) {
                 return error.As(err)!;
             }
-
         }
     } 
     // d.tmp[12] is the Pixel Aspect Ratio, which is ignored.
     return error.As(null!)!;
-
 }
 
 private static (color.Palette, error) readColorTable(this ptr<decoder> _addr_d, byte fields) {
@@ -324,7 +308,6 @@ private static (color.Palette, error) readColorTable(this ptr<decoder> _addr_d, 
         p[i] = new color.RGBA(d.tmp[j+0],d.tmp[j+1],d.tmp[j+2],0xFF);
         j += 3;
     }    return (p, error.As(null!)!);
-
 }
 
 private static error readExtension(this ptr<decoder> _addr_d) {
@@ -357,7 +340,6 @@ private static error readExtension(this ptr<decoder> _addr_d) {
             }
 
         }
-
     }
     if (extension == eApplication && string(d.tmp[..(int)size]) == "NETSCAPE2.0") {
         var (n, err) = d.readBlock();
@@ -380,7 +362,6 @@ private static error readExtension(this ptr<decoder> _addr_d) {
             return error.As(null!)!;
         }
     }
-
 }
 
 private static error readGraphicControl(this ptr<decoder> _addr_d) {
@@ -393,7 +374,6 @@ private static error readGraphicControl(this ptr<decoder> _addr_d) {
             return error.As(fmt.Errorf("gif: can't read graphic control: %s", err))!;
         }
     }
-
     if (d.tmp[0] != 4) {
         return error.As(fmt.Errorf("gif: invalid graphic control extension block size: %d", d.tmp[0]))!;
     }
@@ -408,7 +388,6 @@ private static error readGraphicControl(this ptr<decoder> _addr_d) {
         return error.As(fmt.Errorf("gif: invalid graphic control extension block terminator: %d", d.tmp[5]))!;
     }
     return error.As(null!)!;
-
 }
 
 private static error readImageDescriptor(this ptr<decoder> _addr_d, bool keepAllFrames) => func((defer, _, _) => {
@@ -431,13 +410,11 @@ private static error readImageDescriptor(this ptr<decoder> _addr_d, bool keepAll
             return error.As(errors.New("gif: no color table"))!;
         }
         m.Palette = d.globalColorTable;
-
     }
     if (d.hasTransparentIndex) {
         if (!useLocalColorTable) { 
             // Clone the global color table.
             m.Palette = append(color.Palette(null), d.globalColorTable);
-
         }
         {
             var ti = int(d.transparentIndex);
@@ -458,11 +435,9 @@ private static error readImageDescriptor(this ptr<decoder> _addr_d, bool keepAll
                 }
 
                 m.Palette = p;
-
             }
 
         }
-
     }
     var (litWidth, err) = readByte(d.r);
     if (err != null) {
@@ -481,7 +456,6 @@ private static error readImageDescriptor(this ptr<decoder> _addr_d, bool keepAll
             return error.As(fmt.Errorf("gif: reading image data: %v", err))!;
         }
         return error.As(errNotEnough)!;
-
     }
     {
         var (n, err) = lzwr.Read(d.tmp[(int)256..(int)257]);
@@ -527,7 +501,6 @@ private static error readImageDescriptor(this ptr<decoder> _addr_d, bool keepAll
     d.delayTime = 0;
     d.hasTransparentIndex = false;
     return error.As(null!)!;
-
 });
 
 private static (ptr<image.Paletted>, error) newImageFromDescriptor(this ptr<decoder> _addr_d) {
@@ -542,7 +515,6 @@ private static (ptr<image.Paletted>, error) newImageFromDescriptor(this ptr<deco
             return (_addr_null!, error.As(fmt.Errorf("gif: can't read image descriptor: %s", err))!);
         }
     }
-
     var left = int(d.tmp[0]) + int(d.tmp[1]) << 8;
     var top = int(d.tmp[2]) + int(d.tmp[3]) << 8;
     var width = int(d.tmp[4]) + int(d.tmp[5]) << 8;
@@ -569,7 +541,6 @@ private static (ptr<image.Paletted>, error) newImageFromDescriptor(this ptr<deco
         return (_addr_null!, error.As(errors.New("gif: frame bounds larger than image bounds"))!);
     }
     return (_addr_image.NewPaletted(new image.Rectangle(Min:image.Point{left,top},Max:image.Point{left+width,top+height},), null)!, error.As(null!)!);
-
 }
 
 private static (nint, error) readBlock(this ptr<decoder> _addr_d) {
@@ -588,9 +559,7 @@ private static (nint, error) readBlock(this ptr<decoder> _addr_d) {
             return (0, error.As(err)!);
         }
     }
-
     return (int(n), error.As(null!)!);
-
 }
 
 // interlaceScan defines the ordering for a pass of the interlace algorithm.
@@ -624,9 +593,7 @@ private static void uninterlace(ptr<image.Paletted> _addr_m) {
             }
 
         }
-
     }    m.Pix = nPix;
-
 }
 
 // Decode reads a GIF image from r and returns the first embedded
@@ -643,9 +610,7 @@ public static (image.Image, error) Decode(io.Reader r) {
             return (null, error.As(err)!);
         }
     }
-
     return (d.image[0], error.As(null!)!);
-
 }
 
 // GIF represents the possibly multiple images stored in a GIF file.
@@ -689,10 +654,8 @@ public static (ptr<GIF>, error) DecodeAll(io.Reader r) {
             return (_addr_null!, error.As(err)!);
         }
     }
-
     ptr<GIF> gif = addr(new GIF(Image:d.image,LoopCount:d.loopCount,Delay:d.delay,Disposal:d.disposal,Config:image.Config{ColorModel:d.globalColorTable,Width:d.width,Height:d.height,},BackgroundIndex:d.backgroundIndex,));
     return (_addr_gif!, error.As(null!)!);
-
 }
 
 // DecodeConfig returns the global color model and dimensions of a GIF image
@@ -709,9 +672,7 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             return (new image.Config(), error.As(err)!);
         }
     }
-
     return (new image.Config(ColorModel:d.globalColorTable,Width:d.width,Height:d.height,), error.As(null!)!);
-
 }
 
 private static void init() {

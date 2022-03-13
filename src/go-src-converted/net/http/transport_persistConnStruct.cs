@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:24 UTC
+//     Generated on 2022 March 13 05:37:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct persistConn
         {
             // Constructors
@@ -122,7 +122,7 @@ namespace net
             public static implicit operator persistConn(NilType nil) => default(persistConn);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static persistConn persistConn_cast(dynamic value)
         {
             return new persistConn(value.alt, ref value.t, value.cacheKey, value.conn, ref value.tlsState, ref value.br, ref value.bw, value.nwrite, value.reqch, value.writech, value.closech, value.isProxy, value.sawEOF, value.readLimit, value.writeErrCh, value.writeLoopDone, value.idleAt, ref value.idleTimer, value.mu, value.numExpectedResponses, value.closed, value.canceledErr, value.broken, value.reused, value.mutateHeaderFunc);

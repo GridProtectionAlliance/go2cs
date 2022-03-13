@@ -5,19 +5,20 @@
 // Malloc profiling.
 // Patterned after tcmalloc's algorithms; shorter code.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:06 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:55 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mprof.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// NOTE(rsc): Everything here could use cas if contention became an issue.
+
+using System;
 public static partial class runtime_package {
 
-    // NOTE(rsc): Everything here could use cas if contention became an issue.
 private static mutex proflock = default;
 
 // All memory allocations are local and do not escape outside of the profiler.
@@ -31,7 +32,6 @@ private static readonly buckHashSize mutexProfile = 179999;
 
 // max depth of stack to record in bucket
 private static readonly nint maxStack = 32;
-
 
 private partial struct bucketType { // : nint
 }
@@ -121,7 +121,6 @@ private static ptr<bucket> newBucket(bucketType typ, nint nstk) {
     b.typ = typ;
     b.nstk = uintptr(nstk);
     return _addr_b!;
-
 }
 
 // stk returns the slice in b holding the stack.
@@ -141,7 +140,6 @@ private static ptr<memRecord> mp(this ptr<bucket> _addr_b) {
     }
     var data = add(@unsafe.Pointer(b), @unsafe.Sizeof(b.val) + b.nstk * @unsafe.Sizeof(uintptr(0)));
     return _addr_(memRecord.val)(data)!;
-
 }
 
 // bp returns the blockRecord associated with the blockProfile bucket b.
@@ -153,7 +151,6 @@ private static ptr<blockRecord> bp(this ptr<bucket> _addr_b) {
     }
     var data = add(@unsafe.Pointer(b), @unsafe.Sizeof(b.val) + b.nstk * @unsafe.Sizeof(uintptr(0)));
     return _addr_(blockRecord.val)(data)!;
-
 }
 
 // Return the bucket for stk[0:nstk], allocating new bucket if needed.
@@ -187,7 +184,6 @@ private static ptr<bucket> stkbucket(bucketType typ, System.UIntPtr size, slice<
                 return _addr_b!;
             b = b.next;
             }
-
         }
 
         b = b__prev1;
@@ -216,7 +212,6 @@ private static ptr<bucket> stkbucket(bucketType typ, System.UIntPtr size, slice<
         bbuckets = b;
     }
     return _addr_b!;
-
 }
 
 private static bool eqslice(slice<System.UIntPtr> x, slice<System.UIntPtr> y) {
@@ -228,7 +223,6 @@ private static bool eqslice(slice<System.UIntPtr> x, slice<System.UIntPtr> y) {
             return false;
         }
     }    return true;
-
 }
 
 // mProf_NextCycle publishes the next heap profile cycle and creates a
@@ -247,7 +241,6 @@ private static void mProf_NextCycle() {
     mProf.cycle = (mProf.cycle + 1) % mProfCycleWrap;
     mProf.flushed = false;
     unlock(_addr_proflock);
-
 }
 
 // mProf_Flush flushes the events from the current heap profiling
@@ -264,7 +257,6 @@ private static void mProf_Flush() {
         mProf.flushed = true;
     }
     unlock(_addr_proflock);
-
 }
 
 private static void mProf_FlushLocked() {
@@ -283,7 +275,6 @@ private static void mProf_FlushLocked() {
             b = b.allnext;
         }
     }
-
 }
 
 // mProf_PostSweep records that all sweep frees for this GC cycle have
@@ -310,7 +301,6 @@ private static void mProf_PostSweep() {
         }
     }
     unlock(_addr_proflock);
-
 }
 
 // Called by malloc to record a profiled block.
@@ -333,7 +323,6 @@ private static void mProf_Malloc(unsafe.Pointer p, System.UIntPtr size) {
     systemstack(() => {
         setprofilebucket(p, b);
     });
-
 }
 
 // Called when freeing a profiled block.
@@ -374,7 +363,6 @@ public static void SetBlockProfileRate(nint rate) {
         }
     }
     atomic.Store64(_addr_blockprofilerate, uint64(r));
-
 }
 
 private static void blockevent(long cycles, nint skip) {
@@ -394,7 +382,6 @@ private static bool blocksampled(long cycles, long rate) {
         return false;
     }
     return true;
-
 }
 
 private static void saveblockevent(long cycles, long rate, nint skip, bucketType which) {
@@ -415,7 +402,6 @@ private static void saveblockevent(long cycles, long rate, nint skip, bucketType
         // Remove sampling bias, see discussion on http://golang.org/cl/299991.
         b.bp().count += float64(rate) / float64(cycles);
         b.bp().cycles += rate;
-
     }
     else
  {
@@ -423,7 +409,6 @@ private static void saveblockevent(long cycles, long rate, nint skip, bucketType
         b.bp().cycles += cycles;
     }
     unlock(_addr_proflock);
-
 }
 
 private static ulong mutexprofilerate = default; // fraction sampled
@@ -442,7 +427,6 @@ public static nint SetMutexProfileFraction(nint rate) {
     var old = mutexprofilerate;
     atomic.Store64(_addr_mutexprofilerate, uint64(rate));
     return int(old);
-
 }
 
 //go:linkname mutexevent sync.event
@@ -475,7 +459,6 @@ private static slice<System.UIntPtr> Stack(this ptr<StackRecord> _addr_r) {
             return r.Stack0[(int)0..(int)i];
         }
     }    return r.Stack0[(int)0..];
-
 }
 
 // MemProfileRate controls the fraction of memory allocations
@@ -502,7 +485,6 @@ private static nint defaultMemProfileRate(nint v) {
         return 0;
     }
     return v;
-
 }
 
 // disableMemoryProfiling is set by the linker if runtime.MemProfile
@@ -544,7 +526,6 @@ private static slice<System.UIntPtr> Stack(this ptr<MemProfileRecord> _addr_r) {
             return r.Stack0[(int)0..(int)i];
         }
     }    return r.Stack0[(int)0..];
-
 }
 
 // MemProfile returns a profile of memory allocated and freed per allocation
@@ -589,11 +570,9 @@ public static (nint, bool) MemProfile(slice<MemProfileRecord> p, bool inuseZero)
                 n++;
             b = b.allnext;
             }
-
             if (mp.active.allocs != 0 || mp.active.frees != 0) {
                 clear = false;
             }
-
         }
 
         b = b__prev1;
@@ -619,13 +598,11 @@ public static (nint, bool) MemProfile(slice<MemProfileRecord> p, bool inuseZero)
                     n++;
                 b = b.allnext;
                 }
-
             }
 
 
             b = b__prev1;
         }
-
     }
     if (n <= len(p)) {
         ok = true;
@@ -642,17 +619,14 @@ public static (nint, bool) MemProfile(slice<MemProfileRecord> p, bool inuseZero)
                     idx++;
                 b = b.allnext;
                 }
-
             }
 
 
             b = b__prev1;
         }
-
     }
     unlock(_addr_proflock);
     return ;
-
 }
 
 // Write b's data to r.
@@ -675,7 +649,6 @@ private static void record(ptr<MemProfileRecord> _addr_r, ptr<bucket> _addr_b) {
     for (var i = int(b.nstk); i < len(r.Stack0); i++) {
         r.Stack0[i] = 0;
     }
-
 }
 
 private static void iterate_memprof(Action<ptr<bucket>, System.UIntPtr, ptr<System.UIntPtr>, System.UIntPtr, System.UIntPtr, System.UIntPtr> fn) {
@@ -690,7 +663,6 @@ private static void iterate_memprof(Action<ptr<bucket>, System.UIntPtr, ptr<Syst
         }
     }
     unlock(_addr_proflock);
-
 }
 
 // BlockProfileRecord describes blocking events originated
@@ -742,16 +714,13 @@ public static (nint, bool) BlockProfile(slice<BlockProfileRecord> p) {
                     r.Count = 1;
                 b = b.allnext;
                 }
-
                 r.Cycles = bp.cycles;
                 if (raceenabled) {
                     racewriterangepc(@unsafe.Pointer(_addr_r.Stack0[0]), @unsafe.Sizeof(r.Stack0), getcallerpc(), funcPC(BlockProfile));
                 }
-
                 if (msanenabled) {
                     msanwrite(@unsafe.Pointer(_addr_r.Stack0[0]), @unsafe.Sizeof(r.Stack0));
                 }
-
                 var i = copy(r.Stack0[..], b.stk());
                 while (i < len(r.Stack0)) {
                     r.Stack0[i] = 0;
@@ -759,17 +728,14 @@ public static (nint, bool) BlockProfile(slice<BlockProfileRecord> p) {
                 }
 
                 p = p[(int)1..];
-
             }
 
 
             b = b__prev1;
         }
-
     }
     unlock(_addr_proflock);
     return ;
-
 }
 
 // MutexProfile returns n, the number of records in the current mutex profile.
@@ -820,11 +786,9 @@ public static (nint, bool) MutexProfile(slice<BlockProfileRecord> p) {
 
             b = b__prev1;
         }
-
     }
     unlock(_addr_proflock);
     return ;
-
 }
 
 // ThreadCreateProfile returns n, the number of records in the thread creation profile.
@@ -867,10 +831,8 @@ public static (nint, bool) ThreadCreateProfile(slice<StackRecord> p) {
 
             mp = mp__prev1;
         }
-
     }
     return ;
-
 }
 
 //go:linkname runtime_goroutineProfileWithLabels runtime/pprof.runtime_goroutineProfileWithLabels
@@ -895,7 +857,6 @@ private static (nint, bool) goroutineProfileWithLabels(slice<StackRecord> p, sli
         // Checking isSystemGoroutine here makes GoroutineProfile
         // consistent with both NumGoroutine and Stack.
         return gp1 != gp && readgstatus(gp1) != _Gdead && !isSystemGoroutine(gp1, false);
-
     };
 
     stopTheWorld("profile"); 
@@ -934,23 +895,17 @@ private static (nint, bool) goroutineProfileWithLabels(slice<StackRecord> p, sli
                 // Should be impossible, but better to return a
                 // truncated profile than to crash the entire process.
                 return ;
-
             }
-
             saveg(~uintptr(0), ~uintptr(0), _addr_gp1, _addr_r[0]);
             if (labels != null) {
                 lbl[0] = gp1.labels;
                 lbl = lbl[(int)1..];
             }
-
             r = r[(int)1..];
-
         });
-
     }
     startTheWorld();
     return (n, ok);
-
 }
 
 // GoroutineProfile returns n, the number of records in the active goroutine stack profile.
@@ -1001,19 +956,15 @@ public static nint Stack(slice<byte> buf, bool all) {
             if (all) {
                 tracebackothers(gp);
             }
-
             g0.m.traceback = 0;
             n = len(g0.writebuf);
             g0.writebuf = null;
-
         });
-
     }
     if (all) {
         startTheWorld();
     }
     return n;
-
 }
 
 // Tracing of alloc/free/gc.
@@ -1042,7 +993,6 @@ private static void tracealloc(unsafe.Pointer p, System.UIntPtr size, ptr<_type>
         }
     else
 );
-
     } {
         goroutineheader(gp.m.curg);
         traceback(~uintptr(0), ~uintptr(0), 0, gp.m.curg);
@@ -1050,7 +1000,6 @@ private static void tracealloc(unsafe.Pointer p, System.UIntPtr size, ptr<_type>
     print("\n");
     gp.m.traceback = 0;
     unlock(_addr_tracelock);
-
 }
 
 private static void tracefree(unsafe.Pointer p, System.UIntPtr size) {
@@ -1080,7 +1029,6 @@ private static void tracegc() {
     print("\n");
     gp.m.traceback = 0;
     unlock(_addr_tracelock);
-
 }
 
 } // end runtime_package

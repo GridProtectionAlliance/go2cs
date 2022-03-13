@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:18 UTC
+//     Generated on 2022 March 13 06:36:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace @internal
 {
     public static partial class binutils_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct elfMapping
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator elfMapping(NilType nil) => default(elfMapping);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static elfMapping elfMapping_cast(dynamic value)
         {
             return new elfMapping(value.start, value.limit, value.offset, ref value.stextOffset);

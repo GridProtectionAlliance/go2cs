@@ -5,13 +5,13 @@
 //go:build linux
 // +build linux
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:15 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\netpoll_epoll.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -38,16 +38,15 @@ private static void netpollinit() {
             throw("runtime: netpollinit failed");
         }
         closeonexec(epfd);
-
     }
     var (r, w, errno) = nonblockingPipe();
     if (errno != 0) {>>MARKER:FUNCTION_epollctl_BLOCK_PREFIX<<
         println("runtime: pipe failed with", -errno);
         throw("runtime: pipe failed");
     }
-    ref epollevent ev = ref heap(new epollevent(events:_EPOLLIN,) * (uintptr.val)(@unsafe.Pointer(_addr_ev.data)), out ptr<epollevent> _addr_ev);
+    ref epollevent ev = ref heap(new epollevent(events:_EPOLLIN,) * (uintptr.val), out ptr<epollevent> _addr_ev);
 
-    _addr_netpollBreakRd;
+    (@unsafe.Pointer(_addr_ev.data)) = _addr_netpollBreakRd;
     errno = epollctl(epfd, _EPOLL_CTL_ADD, r, _addr_ev);
     if (errno != 0) {>>MARKER:FUNCTION_epollcreate1_BLOCK_PREFIX<<
         println("runtime: epollctl failed with", -errno);
@@ -55,7 +54,6 @@ private static void netpollinit() {
     }
     netpollBreakRd = uintptr(r);
     netpollBreakWr = uintptr(w);
-
 }
 
 private static bool netpollIsPollDescriptor(System.UIntPtr fd) {
@@ -66,11 +64,10 @@ private static int netpollopen(System.UIntPtr fd, ptr<pollDesc> _addr_pd) {
     ref pollDesc pd = ref _addr_pd.val;
 
     ref epollevent ev = ref heap(out ptr<epollevent> _addr_ev);
-    ev.events = _EPOLLIN | _EPOLLOUT | _EPOLLRDHUP | _EPOLLET * (pollDesc.val)(@unsafe.Pointer(_addr_ev.data));
+    ev.events = _EPOLLIN | _EPOLLOUT | _EPOLLRDHUP | _EPOLLET * (pollDesc.val);
 
-    pd;
+    (@unsafe.Pointer(_addr_ev.data)) = pd;
     return -epollctl(epfd, _EPOLL_CTL_ADD, int32(fd), _addr_ev);
-
 }
 
 private static int netpollclose(System.UIntPtr fd) {
@@ -132,7 +129,6 @@ private static gList netpoll(long delay) {
         // An arbitrary cap on how long to wait for a timer.
         // 1e9 ms == ~11.5 days.
         waitms = 1e9F;
-
     }
     array<epollevent> events = new array<epollevent>(128);
 retry:
@@ -146,7 +142,6 @@ retry:
             return new gList();
         }
         goto retry;
-
     }
     ref gList toRun = ref heap(out ptr<gList> _addr_toRun);
     for (var i = int32(0); i < n; i++) {
@@ -166,11 +161,8 @@ retry:
                 array<byte> tmp = new array<byte>(16);
                 read(int32(netpollBreakRd), noescape(@unsafe.Pointer(_addr_tmp[0])), int32(len(tmp)));
                 atomic.Store(_addr_netpollWakeSig, 0);
-
             }
-
             continue;
-
         }
         int mode = default;
         if (ev.events & (_EPOLLIN | _EPOLLRDHUP | _EPOLLHUP | _EPOLLERR) != 0) {
@@ -189,7 +181,6 @@ retry:
         }
     }
     return toRun;
-
 }
 
 } // end runtime_package

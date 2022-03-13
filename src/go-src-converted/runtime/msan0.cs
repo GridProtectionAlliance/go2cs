@@ -7,12 +7,12 @@
 
 // Dummy MSan support API, used when not built with -msan.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:08 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:56 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\msan0.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 

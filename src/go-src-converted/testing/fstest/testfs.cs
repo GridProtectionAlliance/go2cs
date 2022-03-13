@@ -3,42 +3,44 @@
 // license that can be found in the LICENSE file.
 
 // Package fstest implements support for testing implementations and users of file systems.
-// package fstest -- go2cs converted at 2022 March 06 23:19:29 UTC
+
+// package fstest -- go2cs converted at 2022 March 13 06:43:14 UTC
 // import "testing/fstest" ==> using fstest = go.testing.fstest_package
 // Original source: C:\Program Files\Go\src\testing\fstest\testfs.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using path = go.path_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using iotest = go.testing.iotest_package;
-using System;
-
-
 namespace go.testing;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using path = path_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strings = strings_package;
+using iotest = testing.iotest_package;
+
+
+// TestFS tests a file system implementation.
+// It walks the entire tree of files in fsys,
+// opening and checking that each file behaves correctly.
+// It also checks that the file system contains at least the expected files.
+// As a special case, if no expected files are listed, fsys must be empty.
+// Otherwise, fsys must contain at least the listed files; it can also contain others.
+// The contents of fsys must not change concurrently with TestFS.
+//
+// If TestFS finds any misbehaviors, it returns an error reporting all of them.
+// The error text spans multiple lines, one per detected misbehavior.
+//
+// Typical usage inside a test is:
+//
+//    if err := fstest.TestFS(myFS, "file/that/should/be/present"); err != nil {
+//        t.Fatal(err)
+//    }
+//
+
+using System;
 public static partial class fstest_package {
 
-    // TestFS tests a file system implementation.
-    // It walks the entire tree of files in fsys,
-    // opening and checking that each file behaves correctly.
-    // It also checks that the file system contains at least the expected files.
-    // As a special case, if no expected files are listed, fsys must be empty.
-    // Otherwise, fsys must contain at least the listed files; it can also contain others.
-    // The contents of fsys must not change concurrently with TestFS.
-    //
-    // If TestFS finds any misbehaviors, it returns an error reporting all of them.
-    // The error text spans multiple lines, one per detected misbehavior.
-    //
-    // Typical usage inside a test is:
-    //
-    //    if err := fstest.TestFS(myFS, "file/that/should/be/present"); err != nil {
-    //        t.Fatal(err)
-    //    }
-    //
 public static error TestFS(fs.FS fsys, params @string[] expected) {
     expected = expected.Clone();
 
@@ -53,7 +55,6 @@ public static error TestFS(fs.FS fsys, params @string[] expected) {
         err = err__prev1;
 
     }
-
     {
         var name__prev1 = name;
 
@@ -93,17 +94,14 @@ public static error TestFS(fs.FS fsys, params @string[] expected) {
                         err = err__prev2;
 
                     }
-
                     break; // one sub-test is enough
                 }
             }
-
         }
         name = name__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 private static error testFS(fs.FS fsys, params @string[] expected) {
@@ -129,7 +127,6 @@ private static error testFS(fs.FS fsys, params @string[] expected) {
             list = append(list[..(int)10], "...");
         }
         t.errorf("expected empty file system but found files:\n%s", strings.Join(list, "\n"));
-
     }
     foreach (var (_, name) in expected) {
         if (!found[name]) {
@@ -139,7 +136,6 @@ private static error testFS(fs.FS fsys, params @string[] expected) {
         return error.As(null!)!;
     }
     return error.As(errors.New("TestFS found errors:\n" + string(t.errText)))!;
-
 }
 
 // An fsTester holds state for running the test.
@@ -159,7 +155,6 @@ private static void errorf(this ptr<fsTester> _addr_t, @string format, params ob
         t.errText = append(t.errText, '\n');
     }
     t.errText = append(t.errText, fmt.Sprintf(format, args));
-
 }
 
 private static fs.ReadDirFile openDir(this ptr<fsTester> _addr_t, @string dir) {
@@ -177,7 +172,6 @@ private static fs.ReadDirFile openDir(this ptr<fsTester> _addr_t, @string dir) {
         return null;
     }
     return d;
-
 }
 
 // checkDir checks the directory dir, which is expected to exist
@@ -322,7 +316,6 @@ private static void checkDir(this ptr<fsTester> _addr_t, @string dir) => func((d
 
                 i = i__prev1;
             }
-
         }
     } 
 
@@ -347,7 +340,6 @@ private static void checkDir(this ptr<fsTester> _addr_t, @string dir) => func((d
     }
 
     t.checkGlob(dir, list);
-
 });
 
 // formatEntry formats an fs.DirEntry into a string for error messages and comparison.
@@ -405,12 +397,9 @@ private static void checkGlob(this ptr<fsTester> _addr_t, @string dir, slice<fs.
                         pattern = append(pattern, '[', '\\', r, '-', '\\', r, ']');
                         break;
                 }
-
             }
             elem[i] = string(pattern);
-
         }        glob = strings.Join(elem, "/") + "/";
-
     }
     {
         fs.GlobFS (_, err) = t.fsys._<fs.GlobFS>().Glob(glob + "nonexist/[]");
@@ -438,7 +427,6 @@ private static void checkGlob(this ptr<fsTester> _addr_t, @string dir, slice<fs.
                     haveNot = true;
         c++;
                 }
-
             }
 
             d = d__prev2;
@@ -488,10 +476,8 @@ private static void checkGlob(this ptr<fsTester> _addr_t, @string dir, slice<fs.
         else 
             problems = append(problems, "extra: " + names[0]);
             names = names[(int)1..];
-        
-    }
+            }
     t.errorf("%s: Glob(%#q): wrong output:\n%s", dir, glob, strings.Join(problems, "\n"));
-
 }
 
 // checkStat checks that a direct stat of path matches entry,
@@ -561,7 +547,6 @@ private static void checkStat(this ptr<fsTester> _addr_t, @string path, fs.DirEn
             }
         }
     }
-
 }
 
 // checkDirList checks that two directory lists contain the same files and file info.
@@ -579,7 +564,6 @@ private static void checkDirList(this ptr<fsTester> _addr_t, @string dir, @strin
  {
                 t.errorf("%s: ReadDir returned %s with IsDir() = false, Type() & ModeDir = ModeDir", dir, entry.Name());
             }
-
         }
     };
 
@@ -606,7 +590,6 @@ private static void checkDirList(this ptr<fsTester> _addr_t, @string dir, @strin
             diffs = append(diffs, "- " + formatEntry(entry1), "+ " + formatEntry(entry2));
         }
         delete(old, entry2.Name());
-
     }    {
         var entry1__prev1 = entry1;
 
@@ -625,11 +608,9 @@ private static void checkDirList(this ptr<fsTester> _addr_t, @string dir, @strin
         var fj = strings.Fields(diffs[j]); 
         // sort by name (i < j) and then +/- (j < i, because + < -)
         return fi[1] + " " + fj[0] < fj[1] + " " + fi[0];
-
     });
 
     t.errorf("%s: diff %s:\n\t%s", dir, desc, strings.Join(diffs, "\n\t"));
-
 }
 
 // checkFile checks that basic file reading works correctly.
@@ -688,7 +669,6 @@ private static void checkFile(this ptr<fsTester> _addr_t, @string file) => func(
                 t.errorf("%s: second call to fsys.ReadFile: %v", file, err);
                 return ;
             }
-
             t.checkFileRead(file, "Readall vs second fsys.ReadFile", data, data2);
 
             t.checkBadPath(file, "ReadFile", name => {
@@ -696,7 +676,6 @@ private static void checkFile(this ptr<fsTester> _addr_t, @string file) => func(
 
                 return err;
             });
-
         }
     } 
 
@@ -726,7 +705,6 @@ private static void checkFile(this ptr<fsTester> _addr_t, @string file) => func(
         err = err__prev1;
 
     }
-
 });
 
 private static void checkFileRead(this ptr<fsTester> _addr_t, @string file, @string desc, slice<byte> data1, slice<byte> data2) {
@@ -748,9 +726,7 @@ private static void checkOpen(this ptr<fsTester> _addr_t, @string file) {
             f.Close();
         }
         return err;
-
     });
-
 }
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using open.
@@ -772,7 +748,6 @@ private static error checkBadPath(this ptr<fsTester> _addr_t, @string file, @str
         i = i__prev1;
 
     }
-
     {
         var i__prev1 = i;
 
@@ -785,7 +760,6 @@ private static error checkBadPath(this ptr<fsTester> _addr_t, @string file, @str
 
     }
 
-
     foreach (var (_, b) in bad) {
         {
             var err = open(b);
@@ -795,7 +769,6 @@ private static error checkBadPath(this ptr<fsTester> _addr_t, @string file, @str
             }
 
         }
-
     }
 }
 

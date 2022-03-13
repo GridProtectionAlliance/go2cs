@@ -2,32 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:19 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:48 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\buildgo.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+/*
+ * Helpers for building cmd/go and cmd/cgo.
+ */
+
+// mkzdefaultcc writes zdefaultcc.go:
+//
+//    package main
+//    const defaultCC = <defaultcc>
+//    const defaultCXX = <defaultcxx>
+//    const defaultPkgConfig = <defaultpkgconfig>
+//
+// It is invoked to write cmd/go/internal/cfg/zdefaultcc.go
+// but we also write cmd/cgo/zdefaultcc.go
 
 public static partial class main_package {
 
-    /*
-     * Helpers for building cmd/go and cmd/cgo.
-     */
-
-    // mkzdefaultcc writes zdefaultcc.go:
-    //
-    //    package main
-    //    const defaultCC = <defaultcc>
-    //    const defaultCXX = <defaultcxx>
-    //    const defaultPkgConfig = <defaultpkgconfig>
-    //
-    // It is invoked to write cmd/go/internal/cfg/zdefaultcc.go
-    // but we also write cmd/cgo/zdefaultcc.go
 private static void mkzdefaultcc(@string dir, @string file) {
     if (strings.Contains(file, filepath.FromSlash("go/internal/cfg"))) {
         ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
@@ -50,7 +52,6 @@ private static void mkzdefaultcc(@string dir, @string file) {
     buf.WriteString(defaultCCFunc("defaultCC", defaultcc));
     buf.WriteString(defaultCCFunc("defaultCXX", defaultcxx));
     writefile(buf.String(), file, writeSkipSame);
-
 }
 
 private static @string defaultCCFunc(@string name, map<@string, @string> defaultcc) {
@@ -87,7 +88,6 @@ private static @string defaultCCFunc(@string name, map<@string, @string> default
     fmt.Fprintf(_addr_buf, "}\n");
 
     return buf.String();
-
 }
 
 // mkzcgo writes zosarch.go for cmd/go.
@@ -123,7 +123,6 @@ private static void mkzosarch(@string dir, @string file) {
     fmt.Fprintf(_addr_buf, "}\n");
 
     writefile(buf.String(), file, writeSkipSame);
-
 }
 
 // mkzcgo writes zcgo.go for the go/build package:
@@ -171,7 +170,6 @@ private static void mkzcgo(@string dir, @string file) {
     fmt.Fprintf(_addr_buf, "}\n");
 
     writefile(buf.String(), file, writeSkipSame);
-
 }
 
 } // end main_package

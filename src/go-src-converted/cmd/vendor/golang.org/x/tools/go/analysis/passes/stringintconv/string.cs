@@ -4,20 +4,20 @@
 
 // Package stringintconv defines an Analyzer that flags type conversions
 // from integers to strings.
-// package stringintconv -- go2cs converted at 2022 March 06 23:34:47 UTC
+
+// package stringintconv -- go2cs converted at 2022 March 13 06:42:04 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/stringintconv" ==> using stringintconv = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.stringintconv_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\stringintconv\string.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class stringintconv_package {
 
@@ -45,16 +45,13 @@ private static @string typeName(types.Type typ) {
             return v.Name();
         }
     }
-
     {
 
         if (v != null) {
             return v.Obj().Name();
         }
     }
-
     return "";
-
 }
 
 private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
@@ -132,13 +129,10 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             s = s__prev1;
 
         }
-
         analysis.Diagnostic diag = new analysis.Diagnostic(Pos:n.Pos(),Message:fmt.Sprintf("conversion from %s to %s yields a string of one rune, not a string of digits (did you mean fmt.Sprint(x)?)",source,target),SuggestedFixes:[]analysis.SuggestedFix{{Message:"Did you mean to convert a rune to a string?",TextEdits:[]analysis.TextEdit{{Pos:v.Pos(),End:v.Pos(),NewText:[]byte("rune("),},{Pos:v.End(),End:v.End(),NewText:[]byte(")"),},},},},);
         pass.Report(diag);
-
     });
     return (null, error.As(null!)!);
-
 }
 
 } // end stringintconv_package

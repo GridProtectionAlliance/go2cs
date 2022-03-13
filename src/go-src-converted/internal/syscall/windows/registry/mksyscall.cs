@@ -4,8 +4,9 @@
 
 // +build generate
 
-// package registry -- go2cs converted at 2022 March 06 22:13:14 UTC
+// package registry -- go2cs converted at 2022 March 13 06:44:31 UTC
 // import "internal/syscall/windows/registry" ==> using registry = go.@internal.syscall.windows.registry_package
 // Original source: C:\Program Files\Go\src\internal\syscall\windows\registry\mksyscall.go
+namespace go.@internal.syscall.windows;
 
 } // end registry_package

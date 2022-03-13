@@ -12,91 +12,92 @@
 //
 // Each level includes the earlier output as well.
 
-// package liveness -- go2cs converted at 2022 March 06 23:10:44 UTC
+// package liveness -- go2cs converted at 2022 March 13 06:24:01 UTC
 // import "cmd/compile/internal/liveness" ==> using liveness = go.cmd.compile.@internal.liveness_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\liveness\plive.go
-using md5 = go.crypto.md5_package;
-using sha1 = go.crypto.sha1_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using abi = go.cmd.compile.@internal.abi_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using bitvec = go.cmd.compile.@internal.bitvec_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using typebits = go.cmd.compile.@internal.typebits_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using md5 = crypto.md5_package;
+using sha1 = crypto.sha1_package;
+using fmt = fmt_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using abi = cmd.compile.@internal.abi_package;
+using @base = cmd.compile.@internal.@base_package;
+using bitvec = cmd.compile.@internal.bitvec_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using typebits = cmd.compile.@internal.typebits_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+
+
+// OpVarDef is an annotation for the liveness analysis, marking a place
+// where a complete initialization (definition) of a variable begins.
+// Since the liveness analysis can see initialization of single-word
+// variables quite easy, OpVarDef is only needed for multi-word
+// variables satisfying isfat(n.Type). For simplicity though, buildssa
+// emits OpVarDef regardless of variable width.
+//
+// An 'OpVarDef x' annotation in the instruction stream tells the liveness
+// analysis to behave as though the variable x is being initialized at that
+// point in the instruction stream. The OpVarDef must appear before the
+// actual (multi-instruction) initialization, and it must also appear after
+// any uses of the previous value, if any. For example, if compiling:
+//
+//    x = x[1:]
+//
+// it is important to generate code like:
+//
+//    base, len, cap = pieces of x[1:]
+//    OpVarDef x
+//    x = {base, len, cap}
+//
+// If instead the generated code looked like:
+//
+//    OpVarDef x
+//    base, len, cap = pieces of x[1:]
+//    x = {base, len, cap}
+//
+// then the liveness analysis would decide the previous value of x was
+// unnecessary even though it is about to be used by the x[1:] computation.
+// Similarly, if the generated code looked like:
+//
+//    base, len, cap = pieces of x[1:]
+//    x = {base, len, cap}
+//    OpVarDef x
+//
+// then the liveness analysis will not preserve the new value of x, because
+// the OpVarDef appears to have "overwritten" it.
+//
+// OpVarDef is a bit of a kludge to work around the fact that the instruction
+// stream is working on single-word values but the liveness analysis
+// wants to work on individual variables, which might be multi-word
+// aggregates. It might make sense at some point to look into letting
+// the liveness analysis work on single-word values as well, although
+// there are complications around interface values, slices, and strings,
+// all of which cannot be treated as individual words.
+//
+// OpVarKill is the opposite of OpVarDef: it marks a value as no longer needed,
+// even if its address has been taken. That is, an OpVarKill annotation asserts
+// that its argument is certainly dead, for use when the liveness analysis
+// would not otherwise be able to deduce that fact.
+
+// TODO: get rid of OpVarKill here. It's useful for stack frame allocation
+// so the compiler can allocate two temps to the same location. Here it's now
+// useless, since the implementation of stack objects.
+
+// blockEffects summarizes the liveness effects on an SSA block.
+
+using System;
 public static partial class liveness_package {
 
-    // OpVarDef is an annotation for the liveness analysis, marking a place
-    // where a complete initialization (definition) of a variable begins.
-    // Since the liveness analysis can see initialization of single-word
-    // variables quite easy, OpVarDef is only needed for multi-word
-    // variables satisfying isfat(n.Type). For simplicity though, buildssa
-    // emits OpVarDef regardless of variable width.
-    //
-    // An 'OpVarDef x' annotation in the instruction stream tells the liveness
-    // analysis to behave as though the variable x is being initialized at that
-    // point in the instruction stream. The OpVarDef must appear before the
-    // actual (multi-instruction) initialization, and it must also appear after
-    // any uses of the previous value, if any. For example, if compiling:
-    //
-    //    x = x[1:]
-    //
-    // it is important to generate code like:
-    //
-    //    base, len, cap = pieces of x[1:]
-    //    OpVarDef x
-    //    x = {base, len, cap}
-    //
-    // If instead the generated code looked like:
-    //
-    //    OpVarDef x
-    //    base, len, cap = pieces of x[1:]
-    //    x = {base, len, cap}
-    //
-    // then the liveness analysis would decide the previous value of x was
-    // unnecessary even though it is about to be used by the x[1:] computation.
-    // Similarly, if the generated code looked like:
-    //
-    //    base, len, cap = pieces of x[1:]
-    //    x = {base, len, cap}
-    //    OpVarDef x
-    //
-    // then the liveness analysis will not preserve the new value of x, because
-    // the OpVarDef appears to have "overwritten" it.
-    //
-    // OpVarDef is a bit of a kludge to work around the fact that the instruction
-    // stream is working on single-word values but the liveness analysis
-    // wants to work on individual variables, which might be multi-word
-    // aggregates. It might make sense at some point to look into letting
-    // the liveness analysis work on single-word values as well, although
-    // there are complications around interface values, slices, and strings,
-    // all of which cannot be treated as individual words.
-    //
-    // OpVarKill is the opposite of OpVarDef: it marks a value as no longer needed,
-    // even if its address has been taken. That is, an OpVarKill annotation asserts
-    // that its argument is certainly dead, for use when the liveness analysis
-    // would not otherwise be able to deduce that fact.
-
-    // TODO: get rid of OpVarKill here. It's useful for stack frame allocation
-    // so the compiler can allocate two temps to the same location. Here it's now
-    // useless, since the implementation of stack objects.
-
-    // blockEffects summarizes the liveness effects on an SSA block.
 private partial struct blockEffects {
     public bitvec.BitVec uevar;
     public bitvec.BitVec varkill; // Computed during Liveness.solve using control flow information:
@@ -156,7 +157,6 @@ private static void reset(this ptr<Map> _addr_m) {
         }
     }
     m.DeferReturn = objw.LivenessDontCare;
-
 }
 
 private static void set(this ptr<Map> _addr_m, ptr<ssa.Value> _addr_v, objw.LivenessIndex i) {
@@ -178,9 +178,7 @@ public static objw.LivenessIndex Get(this Map m, ptr<ssa.Value> _addr_v) {
             return idx;
         }
     }
-
     return new objw.LivenessIndex(StackMapIndex:objw.StackMapDontCare,IsUnsafePoint:false);
-
 }
 
 private partial struct progeffectscache {
@@ -234,7 +232,6 @@ private static (slice<ptr<ir.Name>>, map<ptr<ir.Name>, int>) getvariables(ptr<ir
     }
 
     return (vars, idx);
-
 }
 
 private static void initcache(this ptr<liveness> _addr_lv) {
@@ -261,8 +258,7 @@ private static void initcache(this ptr<liveness> _addr_lv) {
             // Note that this point is after escaping return values
             // are copied back to the stack using their PAUTOHEAP references.
             lv.cache.retuevar = append(lv.cache.retuevar, int32(i));
-        
-    }
+            }
 }
 
 // A liveEffect is a set of flags that describe an instruction's
@@ -278,7 +274,6 @@ private partial struct liveEffect { // : nint
 private static readonly liveEffect uevar = 1 << (int)(iota);
 private static readonly var varkill = 0;
 
-
 // valueEffects returns the index of a variable in lv.vars and the
 // liveness effects v has on that variable.
 // If v does not affect any tracked variables, it returns -1, 0.
@@ -291,7 +286,6 @@ private static (int, liveEffect) valueEffects(this ptr<liveness> _addr_lv, ptr<s
     var (n, e) = affectedVar(_addr_v);
     if (e == 0 || n == null) { // cheapest checks first
         return (-1, 0);
-
     }
 
     if (v.Op == ssa.OpVarDef || v.Op == ssa.OpVarKill || v.Op == ssa.OpVarLive || v.Op == ssa.OpKeepAlive) 
@@ -302,7 +296,6 @@ private static (int, liveEffect) valueEffects(this ptr<liveness> _addr_lv, ptr<s
         // Only aggregate-typed arguments that are not address-taken can be
         // partially live.
         lv.partLiveArgs[n] = true;
-
     }
     liveEffect effect = default; 
     // Read is a read, obviously.
@@ -327,9 +320,7 @@ private static (int, liveEffect) valueEffects(this ptr<liveness> _addr_lv, ptr<s
             return (pos, effect);
         }
     }
-
     return (-1, 0);
-
 }
 
 // affectedVar returns the *ir.Name node affected by v
@@ -387,7 +378,6 @@ private static (ptr<ir.Name>, ssa.SymEffect) affectedVar(ptr<ssa.Value> _addr_v)
             break;
         }
     }
-
 }
 
 private partial struct livenessFuncCache {
@@ -413,7 +403,6 @@ private static ptr<liveness> newliveness(ptr<ir.Func> _addr_fn, ptr<ssa.Func> _a
         if (lc == null) { 
             // Prep the cache so liveness can fill it later.
             f.Cache.Liveness = @new<livenessFuncCache>();
-
         }
         else
  {
@@ -424,7 +413,6 @@ private static ptr<liveness> newliveness(ptr<ir.Func> _addr_fn, ptr<ssa.Func> _a
             lc.livenessMap.Vals = null;
         }
     }
-
     if (lv.be == null) {
         lv.be = make_slice<blockEffects>(f.NumBlocks());
     }
@@ -447,7 +435,6 @@ private static ptr<liveness> newliveness(ptr<ir.Func> _addr_fn, ptr<ssa.Func> _a
     lv.enableClobber();
 
     return _addr_lv!;
-
 }
 
 private static ptr<blockEffects> blockEffects(this ptr<liveness> _addr_lv, ptr<ssa.Block> _addr_b) {
@@ -463,7 +450,7 @@ private static ptr<blockEffects> blockEffects(this ptr<liveness> _addr_lv, ptr<s
 private static void pointerMap(this ptr<liveness> _addr_lv, bitvec.BitVec liveout, slice<ptr<ir.Name>> vars, bitvec.BitVec args, bitvec.BitVec locals) {
     ref liveness lv = ref _addr_lv.val;
 
-    for (var i = int32(0); >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (var i = int32(0); ; i++) {
         i = liveout.Next(i);
         if (i < 0) {
             break;
@@ -488,9 +475,7 @@ private static void pointerMap(this ptr<liveness> _addr_lv, bitvec.BitVec liveou
         }
 
         __switch_break0:;
-
     }
-
 }
 
 // IsUnsafe indicates that all points in this function are
@@ -508,7 +493,6 @@ public static bool IsUnsafe(ptr<ssa.Func> _addr_f) {
     // be coupled with stack checks, go:nosplit often actually
     // means "no safe points in this function".
     return @base.Flag.CompilingRuntime || f.NoSplit;
-
 }
 
 // markUnsafePoints finds unsafe points and computes lv.unsafePoints.
@@ -519,7 +503,6 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
         // No complex analysis necessary.
         lv.allUnsafe = true;
         return ;
-
     }
     lv.unsafePoints = bitvec.New(int32(lv.f.NumValues())); 
 
@@ -551,7 +534,6 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
             // but we haven't done dead block elimination.
             // (This can happen in -N mode.)
             continue;
-
         }
         if (len(wbBlock.Succs) != 2) {
             lv.f.Fatalf("expected branch at write barrier block %v", wbBlock);
@@ -562,7 +544,6 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
             // There's no difference between write barrier on and off.
             // Thus there's no unsafe locations. See issue 26024.
             continue;
-
         }
         if (s0.Kind != ssa.BlockPlain || s1.Kind != ssa.BlockPlain) {
             lv.f.Fatalf("expected successors of write barrier block %v to be plain", wbBlock);
@@ -583,7 +564,6 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
 
             }
 
-
             if (v.Op == ssa.Op386TESTL) 
                 // 386 lowers Neq32 to (TESTL cond cond),
                 if (v.Args[0] == v.Args[1]) {
@@ -601,9 +581,7 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
             if (len(v.Args) != 1) {
                 v.Fatalf("write barrier control value has more than one argument: %s", v.LongString());
             }
-
             v = v.Args[0];
-
         } 
 
         // Mark everything after the load unsafe.
@@ -658,11 +636,8 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
                     // pointers across calls, so stop
                     // flooding.
                     return ;
-
                 }
-
                 lv.unsafePoints.Set(int32(v.ID));
-
             }
 
 
@@ -672,7 +647,6 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
             // We marked all values in this block, so no
             // need to flood this block again.
             flooded.Set(int32(b.ID));
-
         }
         foreach (var (_, pred) in b.Preds) {
             flood(pred.Block(), len(pred.Block().Values));
@@ -696,7 +670,6 @@ private static void markUnsafePoints(this ptr<liveness> _addr_lv) {
                     // Flood the unsafe-ness of this backwards
                     // until we hit a call.
                     flood(b, i + 1);
-
                 }
 
                 i = i__prev2;
@@ -726,9 +699,7 @@ private static bool hasStackMap(this ptr<liveness> _addr_lv, ptr<ssa.Value> _add
             return false;
         }
     }
-
     return true;
-
 }
 
 // Initializes the sets for solving the live variables. Visits all the
@@ -754,7 +725,6 @@ private static void prologue(this ptr<liveness> _addr_lv) {
                 be.uevar.Set(pos);
             }
         }
-
     }
 }
 
@@ -828,12 +798,9 @@ private static void solve(this ptr<liveness> _addr_lv) {
                 // in[b] = uevar[b] \cup (out[b] \setminus varkill[b])
                 newlivein.AndNot(be.liveout, be.varkill);
                 be.livein.Or(newlivein, be.uevar);
-
             }
-
         }
     }
-
 }
 
 // Visits all instructions in a basic block and computes a bit vector of live
@@ -864,29 +831,22 @@ private static void epilogue(this ptr<liveness> _addr_lv) {
                     if (n.IsOutputParamHeapAddr()) { 
                         // Just to be paranoid.  Heap addresses are PAUTOs.
                         @base.Fatalf("variable %v both output param and heap output param", n);
-
                     }
-
                     if (n.Heapaddr != null) { 
                         // If this variable moved to the heap, then
                         // its stack copy is not live.
                         continue;
-
                     } 
                     // Note: zeroing is handled by zeroResults in walk.go.
                     livedefer.Set(int32(i));
-
                 }
-
                 if (n.IsOutputParamHeapAddr()) { 
                     // This variable will be overwritten early in the function
                     // prologue (from the result of a mallocgc) but we need to
                     // zero it in case that malloc causes a stack scan.
                     n.SetNeedzero(true);
                     livedefer.Set(int32(i));
-
                 }
-
                 if (n.OpenDeferSlot()) { 
                     // Open-coded defer args slots must be live
                     // everywhere in a function, since a panic can
@@ -897,9 +857,7 @@ private static void epilogue(this ptr<liveness> _addr_lv) {
                     if (!n.Needzero()) {
                         @base.Fatalf("all pointer-containing defer arg slots should have Needzero set");
                     }
-
                 }
-
             }
 
             i = i__prev1;
@@ -913,7 +871,6 @@ private static void epilogue(this ptr<liveness> _addr_lv) {
         // Reserve an entry for function entry.
         var live = bitvec.New(nvars);
         lv.livevars = append(lv.livevars, live);
-
     }    foreach (var (_, b) in lv.f.Blocks) {
         var be = lv.blockEffects(b); 
 
@@ -953,7 +910,6 @@ private static void epilogue(this ptr<liveness> _addr_lv) {
                     live.Or(live.val, liveout);
                     live.Or(live.val, livedefer); // only for non-entry safe points
                     index--;
-
                 } 
 
                 // Update liveness information.
@@ -961,11 +917,9 @@ private static void epilogue(this ptr<liveness> _addr_lv) {
                 if (e & varkill != 0) {
                     liveout.Unset(pos);
                 }
-
                 if (e & uevar != 0) {
                     liveout.Set(pos);
                 }
-
             }
 
 
@@ -991,9 +945,7 @@ private static void epilogue(this ptr<liveness> _addr_lv) {
                     if (n.Class == ir.PPARAM) {
                         continue; // ok
                     }
-
                     @base.FatalfAt(n.Pos(), "bad live variable at entry of %v: %L", lv.fn.Nname, n);
-
                 } 
 
                 // Record live variables.
@@ -1004,13 +956,11 @@ private static void epilogue(this ptr<liveness> _addr_lv) {
 
             live = _addr_lv.livevars[index];
             live.Or(live.val, liveout);
-
         }
         if (lv.doClobber) {
             lv.clobber(b);
         }
         lv.compact(b);
-
     }    if (lv.fn.OpenCodedDeferDisallowed()) {
         lv.livenessMap.DeferReturn = objw.LivenessDontCare;
     }
@@ -1063,7 +1013,6 @@ private static void compact(this ptr<liveness> _addr_lv, ptr<ssa.Block> _addr_b)
         // Handle entry stack map.
         lv.stackMapSet.add(lv.livevars[0]);
         pos++;
-
     }
     foreach (var (_, v) in b.Values) {
         var hasStackMap = lv.hasStackMap(v);
@@ -1077,7 +1026,6 @@ private static void compact(this ptr<liveness> _addr_lv, ptr<ssa.Block> _addr_b)
             lv.livenessMap.set(v, idx);
         }
     }    lv.livevars = lv.livevars[..(int)0];
-
 }
 
 private static void enableClobber(this ptr<liveness> _addr_lv) {
@@ -1091,14 +1039,12 @@ private static void enableClobber(this ptr<liveness> _addr_lv) {
     if (lv.fn.Pragma & ir.CgoUnsafeArgs != 0) { 
         // C or assembly code uses the exact frame layout. Don't clobber.
         return ;
-
     }
     if (len(lv.vars) > 10000 || len(lv.f.Blocks) > 10000) { 
         // Be careful to avoid doing too much work.
         // Bail if >10000 variables or >10000 blocks.
         // Otherwise, giant functions make this experiment generate too much code.
         return ;
-
     }
     if (lv.f.Name == "forkAndExecInChild") { 
         // forkAndExecInChild calls vfork on some platforms.
@@ -1107,7 +1053,6 @@ private static void enableClobber(this ptr<liveness> _addr_lv) {
         // child has clobbered stack variables that the parent needs. Boom!
         // In particular, the sys argument gets clobbered.
         return ;
-
     }
     if (lv.f.Name == "wbBufFlush" || ((lv.f.Name == "callReflect" || lv.f.Name == "callMethod") && lv.fn.ABIWrapper())) { 
         // runtime.wbBufFlush must not modify its arguments. See the comments
@@ -1121,7 +1066,6 @@ private static void enableClobber(this ptr<liveness> _addr_lv) {
         // argument, and keep it alive. But the compiler-generated ABI wrappers
         // don't do that. Special case the wrappers to not clobber its arguments.
         lv.noClobberArgs = true;
-
     }
     {
         var h = os.Getenv("GOCLOBBERDEADHASH");
@@ -1136,14 +1080,10 @@ private static void enableClobber(this ptr<liveness> _addr_lv) {
             if (!strings.HasSuffix(hstr, h)) {
                 return ;
             }
-
             fmt.Printf("\t\t\tCLOBBERDEAD %s\n", lv.f.Name);
-
         }
     }
-
     lv.doClobber = true;
-
 }
 
 // Inserts code to clobber pointer slots in all the dead variables (locals and args)
@@ -1166,11 +1106,9 @@ private static void clobber(this ptr<liveness> _addr_lv, ptr<ssa.Block> _addr_b)
             // skip ops like InitMem and SP, which are ok.
             b.Values = append(b.Values, oldSched[0]);
             oldSched = oldSched[(int)1..];
-
         }
         clobber(_addr_lv, _addr_b, lv.livevars[0]);
         idx++;
-
     }
     foreach (var (_, v) in oldSched) {
         if (!lv.hasStackMap(v)) {
@@ -1180,7 +1118,6 @@ private static void clobber(this ptr<liveness> _addr_lv, ptr<ssa.Block> _addr_b)
         clobber(_addr_lv, _addr_b, lv.livevars[idx]);
         b.Values = append(b.Values, v);
         idx++;
-
     }
 }
 
@@ -1200,9 +1137,7 @@ private static void clobber(ptr<liveness> _addr_lv, ptr<ssa.Block> _addr_b, bitv
             if (lv.noClobberArgs && n.Class == ir.PPARAM) {
                 continue;
             }
-
             clobberVar(_addr_b, _addr_n);
-
         }
     }
 }
@@ -1252,8 +1187,7 @@ private static void clobberWalk(ptr<ssa.Block> _addr_b, ptr<ir.Name> _addr_v, lo
             clobberWalk(_addr_b, _addr_v, offset + t1.Offset, _addr_t1.Type);
         }    else 
         @base.Fatalf("clobberWalk: unexpected type, %v", t);
-    
-}
+    }
 
 // clobberPtr generates a clobber of the pointer at offset offset in v.
 // The clobber instruction is added at the end of b.
@@ -1275,7 +1209,6 @@ private static void showlive(this ptr<liveness> _addr_lv, ptr<ssa.Value> _addr_v
         // Historically we only printed this information at
         // calls. Keep doing so.
         return ;
-
     }
     if (live.IsEmpty()) {
         return ;
@@ -1305,9 +1238,7 @@ private static void showlive(this ptr<liveness> _addr_lv, ptr<ssa.Value> _addr_v
                 pos = pos__prev3;
 
             }
-
             s += fmt.Sprintf("call to %s:", fn);
-
         }
         else
  {
@@ -1315,13 +1246,11 @@ private static void showlive(this ptr<liveness> _addr_lv, ptr<ssa.Value> _addr_v
         }
     }
 
-
     foreach (var (j, n) in lv.vars) {
         if (live.Get(int32(j))) {
             s += fmt.Sprintf(" %v", n);
         }
     }    @base.WarnfAt(pos, s);
-
 }
 
 private static bool printbvec(this ptr<liveness> _addr_lv, bool printed, @string name, bitvec.BitVec live) {
@@ -1346,9 +1275,7 @@ private static bool printbvec(this ptr<liveness> _addr_lv, bool printed, @string
         }
         fmt.Printf("%s%s", comma, n.Sym().Name);
         comma = ",";
-
     }    return true;
-
 }
 
 // printeffect is like printbvec, but for valueEffects.
@@ -1370,7 +1297,6 @@ private static bool printeffect(this ptr<liveness> _addr_lv, bool printed, @stri
         fmt.Printf("%s", lv.vars[pos].Sym().Name);
     }
     return true;
-
 }
 
 // Prints the computed liveness information and inputs, for debugging.
@@ -1455,7 +1381,6 @@ private static void printDebug(this ptr<liveness> _addr_lv) {
             }
 
             fmt.Printf("\n");
-
         }
         foreach (var (_, v) in b.Values) {
             fmt.Printf("(%s) %v\n", @base.FmtPos(v.Pos), v.LongString());
@@ -1495,15 +1420,11 @@ private static void printDebug(this ptr<liveness> _addr_lv) {
                         n = n__prev3;
                     }
                 }
-
                 fmt.Printf("\n");
-
             }
-
             if (pcdata.IsUnsafePoint) {
                 fmt.Printf("\tunsafe-point\n");
             }
-
         }        fmt.Printf("end\n");
         printed = false;
         printed = lv.printbvec(printed, "varkill", be.varkill);
@@ -1512,7 +1433,6 @@ private static void printDebug(this ptr<liveness> _addr_lv) {
             fmt.Printf("\n");
         }
     }    fmt.Printf("\n");
-
 }
 
 // Dumps a slice of bitmaps to a symbol as a sequence of uint32 values. The
@@ -1536,8 +1456,7 @@ private static (ptr<obj.LSym>, ptr<obj.LSym>) emit(this ptr<liveness> _addr_lv) 
                     maxArgNode = n;
                 }
             }
-        
-    }    long maxArgs = default;
+            }    long maxArgs = default;
     if (maxArgNode != null) {
         maxArgs = maxArgNode.FrameOffset() + types.PtrDataSize(maxArgNode.Type());
     }
@@ -1564,14 +1483,11 @@ private static (ptr<obj.LSym>, ptr<obj.LSym>) emit(this ptr<liveness> _addr_lv) 
 
         aoff = objw.BitVec(_addr_argsSymTmp, aoff, args);
         loff = objw.BitVec(_addr_liveSymTmp, loff, locals);
-    }    Func<ptr<obj.LSym>, ptr<obj.LSym>> makeSym = tmpSym => {
-        return _addr_@base.Ctxt.LookupInit(fmt.Sprintf("gclocals·%x", md5.Sum(tmpSym.P)), lsym => {
+    }    Func<ptr<obj.LSym>, ptr<obj.LSym>> makeSym = tmpSym => _addr_@base.Ctxt.LookupInit(fmt.Sprintf("gclocals·%x", md5.Sum(tmpSym.P)), lsym => {
             lsym.P = tmpSym.P;
             lsym.Set(obj.AttrContentAddressable, true);
         })!;
-    };
     return (_addr_makeSym(_addr_argsSymTmp)!, _addr_makeSym(_addr_liveSymTmp)!);
-
 }
 
 // Entry pointer for Compute analysis. Solves for the Compute of
@@ -1606,9 +1522,7 @@ public static (Map, map<ptr<ir.Name>, bool>) Compute(ptr<ir.Func> _addr_curfn, p
                     }
 
                 }
-
             }
-
         }
     }
     if (@base.Flag.Live >= 2) {
@@ -1621,7 +1535,6 @@ public static (Map, map<ptr<ir.Name>, bool>) Compute(ptr<ir.Func> _addr_curfn, p
                 lv.be[i] = new blockEffects();
             }
             cache.be = lv.be;
-
         }
         if (len(lv.livenessMap.Vals) < 2000) {
             cache.livenessMap = lv.livenessMap;
@@ -1654,9 +1567,7 @@ public static (Map, map<ptr<ir.Name>, bool>) Compute(ptr<ir.Func> _addr_curfn, p
         }
     }
 
-
     return (lv.livenessMap, lv.partLiveArgs);
-
 }
 
 private static ptr<obj.LSym> emitStackObjects(this ptr<liveness> _addr_lv) {
@@ -1692,7 +1603,6 @@ private static ptr<obj.LSym> emitStackObjects(this ptr<liveness> _addr_lv) {
             if (frameOffset != int64(int32(frameOffset))) {
                 @base.Fatalf("frame offset too big: %v %d", v, frameOffset);
             }
-
             off = objw.Uint32(x, off, uint32(frameOffset));
 
             var t = v.Type();
@@ -1700,16 +1610,13 @@ private static ptr<obj.LSym> emitStackObjects(this ptr<liveness> _addr_lv) {
             if (sz != int64(int32(sz))) {
                 @base.Fatalf("stack object too big: %v of type %v, size %d", v, t, sz);
             }
-
             var (lsym, useGCProg, ptrdata) = reflectdata.GCSym(t);
             if (useGCProg) {
                 ptrdata = -ptrdata;
             }
-
             off = objw.Uint32(x, off, uint32(sz));
             off = objw.Uint32(x, off, uint32(ptrdata));
             off = objw.SymPtr(x, off, lsym, 0);
-
         }
         v = v__prev1;
     }
@@ -1727,7 +1634,6 @@ private static ptr<obj.LSym> emitStackObjects(this ptr<liveness> _addr_lv) {
         }
     }
     return _addr_x!;
-
 }
 
 // isfat reports whether a variable of type t needs multiple assignments to initialize.
@@ -1762,10 +1668,8 @@ private static bool isfat(ptr<types.Type> _addr_t) {
                 return isfat(_addr_t.Field(0).Type);
             }
             return true;
-        
-    }
+            }
     return false;
-
 }
 
 // WriteFuncMap writes the pointer bitmaps for bodyless function fn's
@@ -1815,10 +1719,8 @@ public static void WriteFuncMap(ptr<ir.Func> _addr_fn, ptr<abi.ABIParamResultInf
         }
 
         off = objw.BitVec(lsym, off, bv);
-
     }
     objw.Global(lsym, int32(off), obj.RODATA | obj.LOCAL);
-
 }
 
 } // end liveness_package

@@ -2,28 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:11 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:39 UTC
 // Original source: C:\Program Files\Go\src\cmd\cover\html.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using browser = go.cmd.@internal.browser_package;
-using fmt = go.fmt_package;
-using template = go.html.template_package;
-using io = go.io_package;
-using math = go.math_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
-using cover = go.golang.org.x.tools.cover_package;
-
 namespace go;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using browser = cmd.@internal.browser_package;
+using fmt = fmt_package;
+using template = html.template_package;
+using io = io_package;
+using math = math_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+using cover = golang.org.x.tools.cover_package;
+
+
+// htmlOutput reads the profile data from profile and generates an HTML
+// coverage report, writing it to outfile. If outfile is empty,
+// it writes the report to a temporary file and opens it in a web browser.
 
 public static partial class main_package {
 
-    // htmlOutput reads the profile data from profile and generates an HTML
-    // coverage report, writing it to outfile. If outfile is empty,
-    // it writes the report to a temporary file and opens it in a web browser.
 private static error htmlOutput(@string profile, @string outfile) {
     var (profiles, err) = cover.ParseProfiles(profile);
     if (err != null) {
@@ -54,7 +56,6 @@ private static error htmlOutput(@string profile, @string outfile) {
             return error.As(err)!;
         }
         d.Files = append(d.Files, addr(new templateFile(Name:fn,Body:template.HTML(buf.String()),Coverage:percentCovered(profile),)));
-
     }    ptr<os.File> @out;
     if (outfile == "") {
         @string dir = default;
@@ -63,7 +64,6 @@ private static error htmlOutput(@string profile, @string outfile) {
             return error.As(err)!;
         }
         out, err = os.Create(filepath.Join(dir, "coverage.html"));
-
     }
     else
  {
@@ -80,7 +80,6 @@ private static error htmlOutput(@string profile, @string outfile) {
             err = err2;
         }
     }
-
     if (err != null) {
         return error.As(err)!;
     }
@@ -90,7 +89,6 @@ private static error htmlOutput(@string profile, @string outfile) {
         }
     }
     return error.As(null!)!;
-
 }
 
 // percentCovered returns, as a percentage, the fraction of the statements in
@@ -110,7 +108,6 @@ private static double percentCovered(ptr<cover.Profile> _addr_p) {
         return 0;
     }
     return float64(covered) / float64(total) * 100;
-
 }
 
 // htmlGen generates an HTML coverage report with the provided filename,
@@ -131,9 +128,7 @@ private static error htmlGen(io.Writer w, slice<byte> src, slice<cover.Boundary>
  {
                 dst.WriteString("</span>");
             }
-
             boundaries = boundaries[(int)1..];
-
         }
         {
             var b__prev1 = b;
@@ -160,9 +155,7 @@ private static error htmlGen(io.Writer w, slice<byte> src, slice<cover.Boundary>
 
             b = b__prev1;
         }
-
     }    return error.As(dst.Flush())!;
-
 }
 
 // rgb returns an rgb value for the specified coverage value
@@ -175,7 +168,6 @@ private static @string rgb(nint n) {
     nint g = 128 + 12 * (n - 1);
     nint b = 128 + 3 * (n - 1);
     return fmt.Sprintf("rgb(%v, %v, %v)", r, g, b);
-
 }
 
 // colors generates the CSS rules for coverage colors.
@@ -213,7 +205,6 @@ private static @string PackageName(this templateData td) {
         }
     }
     return "";
-
 }
 
 private partial struct templateFile {

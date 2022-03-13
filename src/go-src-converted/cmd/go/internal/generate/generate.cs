@@ -3,34 +3,34 @@
 // license that can be found in the LICENSE file.
 
 // Package generate implements the ``go generate'' command.
-// package generate -- go2cs converted at 2022 March 06 23:16:03 UTC
+
+// package generate -- go2cs converted at 2022 March 13 06:29:33 UTC
 // import "cmd/go/internal/generate" ==> using generate = go.cmd.go.@internal.generate_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\generate\generate.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using context = go.context_package;
-using fmt = go.fmt_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using str = go.cmd.go.@internal.str_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using context = context_package;
+using fmt = fmt_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using str = cmd.go.@internal.str_package;
+using work = cmd.go.@internal.work_package;
+using System;
 
 public static partial class generate_package {
 
@@ -218,11 +218,9 @@ private static bool generate(@string absFile) {
     if (err != null) { 
         // Invalid package clause - ignore file.
         return true;
-
     }
     ptr<Generator> g = addr(new Generator(r:bytes.NewReader(src),path:absFile,pkg:filePkg.Name.String(),commands:make(map[string][]string),));
     return g.run();
-
 }
 
 // A Generator represents the state of a single Go source file
@@ -272,7 +270,6 @@ private static bool run(this ptr<Generator> _addr_g) => func((defer, panic, _) =
             if (isGoGenerate(buf)) {
                 g.errorf("directive too long");
             }
-
             while (err == bufio.ErrBufferFull) {
                 _, err = input.ReadSlice('\n');
             }
@@ -280,18 +277,14 @@ private static bool run(this ptr<Generator> _addr_g) => func((defer, panic, _) =
             if (err != null) {
                 break;
             }
-
             continue;
-
         }
         if (err != null) { 
             // Check for marker at EOF without final \n.
             if (err == io.EOF && isGoGenerate(buf)) {
                 err = error.As(io.ErrUnexpectedEOF)!;
             }
-
             break;
-
         }
         if (!isGoGenerate(buf)) {
             continue;
@@ -317,13 +310,11 @@ private static bool run(this ptr<Generator> _addr_g) => func((defer, panic, _) =
             continue;
         }
         g.exec(words);
-
     }
     if (err != null && err != io.EOF) {
         g.errorf("error reading %s: %s", @base.ShortPath(g.path), err);
     }
     return true;
-
 });
 
 private static bool isGoGenerate(slice<byte> buf) {
@@ -383,19 +374,16 @@ Words:
                             if (len(line) > 0 && line[0] != ' ' && line[0] != '\t') {
                                 g.errorf("expect space after quoted argument");
                             }
-
                             _continueWords = true;
                             break;
                             break;
                     }
-
                 }
 
 
                 i = i__prev2;
             }
             g.errorf("mismatched quoted string");
-
         }
         i = strings.IndexAny(line, " \t");
         if (i < 0) {
@@ -403,7 +391,6 @@ Words:
         }
         words = append(words, line[(int)0..(int)i]);
         line = line[(int)i..];
-
     } 
     // Substitute command if required.
     if (len(words) > 0 && g.commands[words[0]] != null) { 
@@ -414,7 +401,6 @@ Words:
         // to the g.commands content.
         var tmpCmdWords = append((slice<@string>)null, (g.commands[words[0]]));
         words = append(tmpCmdWords, words[(int)1..]);
-
     }
     {
         nint i__prev1 = i;
@@ -430,7 +416,6 @@ Words:
     }
 
     return words;
-
 }
 
 private static var stop = fmt.Errorf("error in generation");
@@ -457,7 +442,6 @@ private static @string expandVar(this ptr<Generator> _addr_g, @string word) {
             return e[(int)len(w)..];
         }
     }    return os.Getenv(word);
-
 }
 
 // setShorthand installs a new shorthand as defined by a -command directive.

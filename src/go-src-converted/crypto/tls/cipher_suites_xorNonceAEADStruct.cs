@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:29 UTC
+//     Generated on 2022 March 13 05:34:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct xorNonceAEAD
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace crypto
             public static implicit operator xorNonceAEAD(NilType nil) => default(xorNonceAEAD);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static xorNonceAEAD xorNonceAEAD_cast(dynamic value)
         {
             return new xorNonceAEAD(value.nonceMask, value.aead);

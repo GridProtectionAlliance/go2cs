@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:43 UTC
+//     Generated on 2022 March 13 05:31:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace math
 {
     public static partial class big_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Float
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace math
             public static implicit operator Float(NilType nil) => default(Float);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Float Float_cast(dynamic value)
         {
             return new Float(value.prec, value.mode, value.acc, value.form, value.neg, value.mant, value.exp);

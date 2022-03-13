@@ -5,17 +5,17 @@
 //go:build aix || linux || darwin || dragonfly || freebsd || openbsd || netbsd || solaris
 // +build aix linux darwin dragonfly freebsd openbsd netbsd solaris
 
-// package tar -- go2cs converted at 2022 March 06 22:31:32 UTC
+// package tar -- go2cs converted at 2022 March 13 05:42:27 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Program Files\Go\src\archive\tar\stat_unix.go
-using fs = go.io.fs_package;
-using user = go.os.user_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-
 namespace go.archive;
+
+using fs = io.fs_package;
+using user = os.user_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using sync = sync_package;
+using syscall = syscall_package;
 
 public static partial class tar_package {
 
@@ -64,11 +64,9 @@ private static error statUnix(fs.FileInfo fi, ptr<Header> _addr_h) {
 
         }
 
-
         u = u__prev1;
 
     }
-
     {
         var g__prev1 = g;
 
@@ -92,11 +90,9 @@ private static error statUnix(fs.FileInfo fi, ptr<Header> _addr_h) {
         }
 
 
-
         g = g__prev1;
 
     }
-
 
     h.AccessTime = statAtime(sys);
     h.ChangeTime = statCtime(sys); 
@@ -159,10 +155,8 @@ private static error statUnix(fs.FileInfo fi, ptr<Header> _addr_h) {
 
                 break;
         }
-
     }
     return error.As(null!)!;
-
 }
 
 } // end tar_package

@@ -7,19 +7,18 @@
 //go:build testgo
 // +build testgo
 
-// package work -- go2cs converted at 2022 March 06 23:17:45 UTC
+// package work -- go2cs converted at 2022 March 13 06:31:06 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\testgo.go
-using cfg = go.cmd.go.@internal.cfg_package;
-using search = go.cmd.go.@internal.search_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using cfg = cmd.go.@internal.cfg_package;
+using search = cmd.go.@internal.search_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using System;
 
 public static partial class work_package {
 
@@ -31,7 +30,6 @@ private static void init() {
             runtimeVersion = v;
         }
     }
-
 
     {
         var testGOROOT = os.Getenv("TESTGO_GOROOT");
@@ -59,19 +57,13 @@ private static void init() {
                                 file = shortFile;
                             }
                         }
-
                         callerPos = fmt.Sprintf("%s:%d: ", file, line);
-
                     }
                 }
-
                 return fmt.Errorf("%stestgo must not write to GOROOT (installing to %s)", callerPos, filepath.Join("GOROOT", rel));
-
             };
-
         }
     }
-
 }
 
 } // end work_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:31 UTC
+//     Generated on 2022 March 13 06:00:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class abi_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ABIConfig
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator ABIConfig(NilType nil) => default(ABIConfig);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ABIConfig ABIConfig_cast(dynamic value)
         {
             return new ABIConfig(value.offsetForLocals, value.regAmounts, value.regsForTypeCache);

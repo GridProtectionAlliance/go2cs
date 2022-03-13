@@ -5,11 +5,9 @@
 //go:build !aix && !darwin && !dragonfly && !freebsd && !linux && !netbsd && !openbsd && !solaris && !windows && !zos
 // +build !aix,!darwin,!dragonfly,!freebsd,!linux,!netbsd,!openbsd,!solaris,!windows,!zos
 
-// package nettest -- go2cs converted at 2022 March 06 23:38:10 UTC
+// package nettest -- go2cs converted at 2022 March 13 06:46:27 UTC
 // import "vendor/golang.org/x/net/nettest" ==> using nettest = go.vendor.golang.org.x.net.nettest_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\nettest\nettest_stub.go
-
-
 namespace go.vendor.golang.org.x.net;
 
 public static partial class nettest_package {

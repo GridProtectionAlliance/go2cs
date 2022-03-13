@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:52 UTC
+//     Generated on 2022 March 13 05:37:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct requestBodyReadError
         {
             // error.Error function promotion
@@ -98,7 +98,7 @@ namespace net
             public static implicit operator requestBodyReadError(NilType nil) => default(requestBodyReadError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static requestBodyReadError requestBodyReadError_cast(dynamic value)
         {
             return new requestBodyReadError(value.error);

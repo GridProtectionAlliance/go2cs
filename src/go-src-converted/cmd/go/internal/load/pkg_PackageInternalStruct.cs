@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:17:12 UTC
+//     Generated on 2022 March 13 06:30:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -56,7 +56,7 @@ namespace @internal
 {
     public static partial class load_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PackageInternal
         {
             // Constructors
@@ -131,7 +131,7 @@ namespace @internal
             public static implicit operator PackageInternal(NilType nil) => default(PackageInternal);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static PackageInternal PackageInternal_cast(dynamic value)
         {
             return new PackageInternal(ref value.Build, value.Imports, value.CompiledImports, value.RawImports, value.ForceLibrary, value.CmdlineFiles, value.CmdlinePkg, value.CmdlinePkgLiteral, value.Local, value.LocalPrefix, value.ExeName, value.CoverMode, value.CoverVars, value.OmitDebug, value.GobinSubdir, value.BuildInfo, ref value.TestmainGo, value.Embed, value.OrigImportPath, value.Asmflags, value.Gcflags, value.Ldflags, value.Gccgoflags);

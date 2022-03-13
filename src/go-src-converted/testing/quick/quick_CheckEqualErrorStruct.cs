@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:32 UTC
+//     Generated on 2022 March 13 06:43:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace testing
 {
     public static partial class quick_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(CheckError))]
         public partial struct CheckEqualError
         {
@@ -73,7 +73,7 @@ namespace testing
             public static implicit operator CheckEqualError(NilType nil) => default(CheckEqualError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CheckEqualError CheckEqualError_cast(dynamic value)
         {
             return new CheckEqualError(value.CheckError, value.Out1, value.Out2);

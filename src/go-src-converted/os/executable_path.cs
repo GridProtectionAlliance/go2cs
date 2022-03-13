@@ -5,18 +5,16 @@
 //go:build aix || openbsd
 // +build aix openbsd
 
-// package os -- go2cs converted at 2022 March 06 22:13:25 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:55 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\executable_path.go
-
-
 namespace go;
 
 public static partial class os_package {
 
-    // We query the working directory at init, to use it later to search for the
-    // executable file
-    // errWd will be checked later, if we need to use initWd
+// We query the working directory at init, to use it later to search for the
+// executable file
+// errWd will be checked later, if we need to use initWd
 
 
 private static (@string, error) executable() {
@@ -31,7 +29,6 @@ private static (@string, error) executable() {
         // Args[0] is an absolute path, so it is the executable.
         // Note that we only need to worry about Unix paths here.
         exePath = Args[0];
-
     }
     else
  {
@@ -42,14 +39,10 @@ private static (@string, error) executable() {
                 if (errWd != null) {
                     return ("", error.As(errWd)!);
                 }
-
                 exePath = initWd + string(PathSeparator) + Args[0];
                 break;
-
             }
-
         }
-
     }
     if (exePath != "") {
         {
@@ -60,9 +53,7 @@ private static (@string, error) executable() {
             }
 
         }
-
         return (exePath, error.As(null!)!);
-
     }
     foreach (var (_, dir) in splitPathList(Getenv("PATH"))) {
         if (len(dir) == 0) {
@@ -80,9 +71,7 @@ private static (@string, error) executable() {
             return (exePath, error.As(null!)!);
         else if (isExecutable(exePath) == ErrPermission) 
             return ("", error.As(ErrPermission)!);
-        
-    }    return ("", error.As(ErrNotExist)!);
-
+            }    return ("", error.As(ErrNotExist)!);
 }
 
 // isExecutable returns an error if a given file is not an executable.
@@ -99,7 +88,6 @@ private static error isExecutable(@string path) {
         return error.As(ErrPermission)!;
     }
     return error.As(null!)!;
-
 }
 
 // splitPathList splits a path list.
@@ -138,7 +126,6 @@ private static slice<@string> splitPathList(@string pathList) {
     }
     a[na] = pathList[(int)start..];
     return a[..(int)na + 1];
-
 }
 
 } // end os_package

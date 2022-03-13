@@ -3,33 +3,35 @@
 // license that can be found in the LICENSE file.
 
 // Package cache implements a build artifact cache.
-// package cache -- go2cs converted at 2022 March 06 23:16:35 UTC
+
+// package cache -- go2cs converted at 2022 March 13 06:30:04 UTC
 // import "cmd/go/internal/cache" ==> using cache = go.cmd.go.@internal.cache_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\cache\cache.go
-using bytes = go.bytes_package;
-using sha256 = go.crypto.sha256_package;
-using hex = go.encoding.hex_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using sha256 = crypto.sha256_package;
+using hex = encoding.hex_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+using lockedfile = cmd.go.@internal.lockedfile_package;
+
+
+// An ActionID is a cache action key, the hash of a complete description of a
+// repeatable computation (command line, environment variables,
+// input file contents, executable contents).
+
+using System;
 public static partial class cache_package {
 
-    // An ActionID is a cache action key, the hash of a complete description of a
-    // repeatable computation (command line, environment variables,
-    // input file contents, executable contents).
 public partial struct ActionID { // : array<byte>
 }
 
@@ -76,11 +78,9 @@ public static (ptr<Cache>, error) Open(@string dir) {
             }
 
         }
-
     }
     ptr<Cache> c = addr(new Cache(dir:dir,now:time.Now,));
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // fileName returns the name of the file corresponding to the given id.
@@ -104,7 +104,6 @@ private static @string Error(this ptr<entryNotFoundError> _addr_e) {
         return "cache entry not found";
     }
     return fmt.Sprintf("cache entry not found: %v", e.Err);
-
 }
 
 private static error Unwrap(this ptr<entryNotFoundError> _addr_e) {
@@ -117,7 +116,6 @@ private static error Unwrap(this ptr<entryNotFoundError> _addr_e) {
 // action entry file is "v1 <hex id> <hex out> <decimal size space-padded to 20 bytes> <unixnano space-padded to 20 bytes>\n"
 private static readonly var hexSize = HashSize * 2;
 private static readonly nint entrySize = 2 + 1 + hexSize + 1 + hexSize + 1 + 20 + 1 + 20 + 1;
-
 
 // verify controls whether to run the cache in verify mode.
 // In verify mode, the cache always returns errMissing from Get
@@ -169,7 +167,6 @@ private static (Entry, error) Get(this ptr<Cache> _addr_c, ActionID id) {
         return (new Entry(), error.As(addr(new entryNotFoundError(Err:errVerifyMode))!)!);
     }
     return c.get(id);
-
 }
 
 public partial struct Entry {
@@ -184,9 +181,7 @@ private static (Entry, error) get(this ptr<Cache> _addr_c, ActionID id) => func(
     error _p0 = default!;
     ref Cache c = ref _addr_c.val;
 
-    Func<error, (Entry, error)> missing = reason => {
-        return (new Entry(), error.As(addr(new entryNotFoundError(Err:reason))!)!);
-    };
+    Func<error, (Entry, error)> missing = reason => (new Entry(), error.As(addr(new entryNotFoundError(Err:reason))!)!);
     var (f, err) = os.Open(c.fileName(id, "a"));
     if (err != null) {
         return missing(err);
@@ -210,7 +205,6 @@ private static (Entry, error) get(this ptr<Cache> _addr_c, ActionID id) => func(
         }
 
     }
-
     if (entry[0] != 'v' || entry[1] != '1' || entry[2] != ' ' || entry[3 + hexSize] != ' ' || entry[3 + hexSize + 1 + hexSize] != ' ' || entry[3 + hexSize + 1 + hexSize + 1 + 20] != ' ' || entry[entrySize - 1] != '\n') {
         return missing(errors.New("invalid header"));
     }
@@ -234,7 +228,6 @@ private static (Entry, error) get(this ptr<Cache> _addr_c, ActionID id) => func(
         }
 
     }
-
     {
         (_, err) = hex.Decode(buf[..], eout);
 
@@ -242,7 +235,6 @@ private static (Entry, error) get(this ptr<Cache> _addr_c, ActionID id) => func(
             return missing(fmt.Errorf("decoding output ID: %v", err));
         }
     }
-
     nint i = 0;
     while (i < len(esize) && esize[i] == ' ') {
         i++;
@@ -268,7 +260,6 @@ private static (Entry, error) get(this ptr<Cache> _addr_c, ActionID id) => func(
     c.used(c.fileName(id, "a"));
 
     return (new Entry(buf,size,time.Unix(0,tm)), error.As(null!)!);
-
 });
 
 // GetFile looks up the action ID in the cache and returns
@@ -292,7 +283,6 @@ private static (@string, Entry, error) GetFile(this ptr<Cache> _addr_c, ActionID
         return ("", new Entry(), error.As(addr(new entryNotFoundError(Err:errors.New("file incomplete")))!)!);
     }
     return (file, entry, error.As(null!)!);
-
 }
 
 // GetBytes looks up the action ID in the cache and returns
@@ -313,7 +303,6 @@ private static (slice<byte>, Entry, error) GetBytes(this ptr<Cache> _addr_c, Act
         return (null, entry, error.As(addr(new entryNotFoundError(Err:errors.New("bad checksum")))!)!);
     }
     return (data, entry, error.As(null!)!);
-
 }
 
 // OutputFile returns the name of the cache file storing output with the given OutputID.
@@ -341,7 +330,6 @@ private static readonly nint mtimeInterval = 1 * time.Hour;
 private static readonly nint trimInterval = 24 * time.Hour;
 private static readonly nint trimLimit = 5 * 24 * time.Hour;
 
-
 // used makes a best-effort attempt to update mtime on file,
 // so that mtime reflects cache access time.
 //
@@ -359,7 +347,6 @@ private static void used(this ptr<Cache> _addr_c, @string file) {
         return ;
     }
     os.Chtimes(file, c.now(), c.now());
-
 }
 
 // Trim removes old cache entries that are likely not to be reused.
@@ -392,11 +379,9 @@ private static void Trim(this ptr<Cache> _addr_c) {
                         }
 
                     }
-
                 }
 
             }
-
         }
     } 
 
@@ -420,7 +405,6 @@ private static void Trim(this ptr<Cache> _addr_c) {
             return ;
         }
     }
-
 }
 
 // trimSubdir trims a single cache subdirectory.
@@ -475,7 +459,6 @@ private static error putIndexEntry(this ptr<Cache> _addr_c, ActionID id, OutputI
             // panic to show stack trace, so we can see what code is generating this cache entry.
             var msg = fmt.Sprintf("go: internal cache error: cache verify failed: id=%x changed:<<<\n%s\n>>>\nold: %x %d\nnew: %x %d", id, reverseHash(id), out, size, old.OutputID, old.Size);
             panic(msg);
-
         }
     }
     var file = c.fileName(id, "a"); 
@@ -496,7 +479,6 @@ private static error putIndexEntry(this ptr<Cache> _addr_c, ActionID id, OutputI
         // of the same content to the same file is idempotent, and does not — even
         // temporarily! — undo the effect of the first write.
         err = f.Truncate(int64(len(entry)));
-
     }
     {
         var closeErr = f.Close();
@@ -505,18 +487,15 @@ private static error putIndexEntry(this ptr<Cache> _addr_c, ActionID id, OutputI
             err = closeErr;
         }
     }
-
     if (err != null) { 
         // TODO(bcmills): This Remove potentially races with another go command writing to file.
         // Can we eliminate it?
         os.Remove(file);
         return error.As(err)!;
-
     }
     os.Chtimes(file, c.now(), c.now()); // mainly for tests
 
     return error.As(null!)!;
-
 });
 
 // Put stores the given output in the cache as the output for the action ID.
@@ -558,7 +537,6 @@ private static (OutputID, long, error) put(this ptr<Cache> _addr_c, ActionID id,
             return (new OutputID(), 0, error.As(err)!);
         }
     }
-
     var (size, err) = io.Copy(h, file);
     if (err != null) {
         return (new OutputID(), 0, error.As(err)!);
@@ -577,7 +555,6 @@ private static (OutputID, long, error) put(this ptr<Cache> _addr_c, ActionID id,
 
     // Add to cache index.
     return (out, size, error.As(c.putIndexEntry(id, out, size, allowVerify))!);
-
 }
 
 // PutBytes stores the given bytes in the cache as the output for the action ID.
@@ -622,7 +599,6 @@ private static error copyFile(this ptr<Cache> _addr_c, io.ReadSeeker file, Outpu
     var mode = os.O_RDWR | os.O_CREATE;
     if (err == null && info.Size() > size) { // shouldn't happen but fix in case
         mode |= os.O_TRUNC;
-
     }
     (f, err) = os.OpenFile(name, mode, 0666);
     if (err != null) {
@@ -634,7 +610,6 @@ private static error copyFile(this ptr<Cache> _addr_c, io.ReadSeeker file, Outpu
         // Only one possible zero-length file, so contents are OK too.
         // Early return here makes sure there's a "last byte" for code below.
         return error.As(null!)!;
-
     }
     {
         var (_, err) = file.Seek(0, 0);
@@ -644,7 +619,6 @@ private static error copyFile(this ptr<Cache> _addr_c, io.ReadSeeker file, Outpu
             return error.As(err)!;
         }
     }
-
     h = sha256.New();
     var w = io.MultiWriter(f, h);
     {
@@ -667,7 +641,6 @@ private static error copyFile(this ptr<Cache> _addr_c, io.ReadSeeker file, Outpu
             return error.As(err)!;
         }
     }
-
     h.Write(buf);
     var sum = h.Sum(null);
     if (!bytes.Equal(sum, out[..])) {
@@ -682,7 +655,6 @@ private static error copyFile(this ptr<Cache> _addr_c, io.ReadSeeker file, Outpu
             return error.As(err)!;
         }
     }
-
     {
         var err = f.Close();
 
@@ -692,14 +664,11 @@ private static error copyFile(this ptr<Cache> _addr_c, io.ReadSeeker file, Outpu
             // To be extra careful, remove cached file.
             os.Remove(name);
             return error.As(err)!;
-
         }
     }
-
     os.Chtimes(name, c.now(), c.now()); // mainly for tests
 
     return error.As(null!)!;
-
 });
 
 } // end cache_package

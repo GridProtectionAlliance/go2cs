@@ -5,15 +5,14 @@
 // Code to check that pointer writes follow the cgo rules.
 // These functions are invoked via the write barrier when debug.cgocheck > 1.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:22 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\cgocheck.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -60,7 +59,6 @@ private static void cgoCheckWriteBarrier(ptr<System.UIntPtr> _addr_dst, System.U
         println("write of Go pointer", hex(src), "to non-Go memory", hex(uintptr(@unsafe.Pointer(dst))));
         throw(cgoWriteBarrierFail);
     });
-
 }
 
 // cgoCheckMemmove is called when moving a block of memory.
@@ -83,7 +81,6 @@ private static void cgoCheckMemmove(ptr<_type> _addr_typ, unsafe.Pointer dst, un
         return ;
     }
     cgoCheckTypedBlock(_addr_typ, src, off, size);
-
 }
 
 // cgoCheckSliceCopy is called when copying n elements of a slice.
@@ -110,7 +107,6 @@ private static void cgoCheckSliceCopy(ptr<_type> _addr_typ, unsafe.Pointer dst, 
         cgoCheckTypedBlock(_addr_typ, p, 0, typ.size);
         p = add(p, typ.size);
     }
-
 }
 
 // cgoCheckTypedBlock checks the block of memory at src, for up to size bytes,
@@ -132,7 +128,6 @@ private static void cgoCheckTypedBlock(ptr<_type> _addr_typ, unsafe.Pointer src,
             size = ptrdataSize;
         }
     }
-
 
     if (typ.kind & kindGCProg == 0) {
         cgoCheckBits(src, _addr_typ.gcdata, off, size);
@@ -162,7 +157,6 @@ private static void cgoCheckTypedBlock(ptr<_type> _addr_typ, unsafe.Pointer src,
             cgoCheckUsingType(_addr_typ, src, off, size);
         });
         return ;
-
     }
     var hbits = heapBitsForAddr(uintptr(src));
     {
@@ -176,14 +170,10 @@ private static void cgoCheckTypedBlock(ptr<_type> _addr_typ, unsafe.Pointer src,
                     throw(cgoWriteBarrierFail);
             i += sys.PtrSize;
                 }
-
             }
-
             hbits = hbits.next();
-
         }
     }
-
 }
 
 // cgoCheckBits checks the block of memory at src, for up to size
@@ -214,7 +204,6 @@ private static void cgoCheckBits(unsafe.Pointer src, ptr<byte> _addr_gcbits, Sys
  {
                 bits>>=1;
             }
-
             if (off > 0) {
                 off -= sys.PtrSize;
             }
@@ -227,10 +216,8 @@ private static void cgoCheckBits(unsafe.Pointer src, ptr<byte> _addr_gcbits, Sys
                     }
                 }
             }
-
         }
     }
-
 }
 
 // cgoCheckUsingType is like cgoCheckTypedBlock, but is a last ditch
@@ -256,7 +243,6 @@ private static void cgoCheckUsingType(ptr<_type> _addr_typ, unsafe.Pointer src, 
             size = ptrdataSize;
         }
     }
-
 
     if (typ.kind & kindGCProg == 0) {
         cgoCheckBits(src, _addr_typ.gcdata, off, size);
@@ -300,7 +286,6 @@ private static void cgoCheckUsingType(ptr<_type> _addr_typ, unsafe.Pointer src, 
             size -= checked;
         }    else 
         throw("can't happen");
-    
-}
+    }
 
 } // end runtime_package

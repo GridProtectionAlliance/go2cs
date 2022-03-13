@@ -8,13 +8,13 @@
 //go:build amd64 || arm64 || mips64 || mips64le || ppc64 || ppc64le || riscv64 || s390x || wasm
 // +build amd64 arm64 mips64 mips64le ppc64 ppc64le riscv64 s390x wasm
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:41 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:26 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\hash64.go
-using math = go.runtime.@internal.math_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using math = runtime.@internal.math_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -23,7 +23,6 @@ private static readonly nuint m2 = 0xe7037ed1a0b428db;
 private static readonly nuint m3 = 0x8ebc6af09c88c6e3;
 private static readonly nuint m4 = 0x589965cc75374cc3;
 private static readonly nuint m5 = 0x1d8e4e27c47d124f;
-
 
 private static System.UIntPtr memhashFallback(unsafe.Pointer p, System.UIntPtr seed, System.UIntPtr s) {
     System.UIntPtr a = default;    System.UIntPtr b = default;
@@ -62,7 +61,6 @@ private static System.UIntPtr memhashFallback(unsafe.Pointer p, System.UIntPtr s
             }
 
             seed ^= seed1 ^ seed2;
-
         }
         while (l > 16) {
             seed = mix(r8(p) ^ m2, r8(add(p, 8)) ^ seed);
@@ -72,7 +70,6 @@ private static System.UIntPtr memhashFallback(unsafe.Pointer p, System.UIntPtr s
         a = r8(add(p, l - 16));
         b = r8(add(p, l - 8));
         return mix(m5 ^ s, mix(a ^ m2, b ^ seed));
-
 }
 
 private static System.UIntPtr memhash32Fallback(unsafe.Pointer p, System.UIntPtr seed) {

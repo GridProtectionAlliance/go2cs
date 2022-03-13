@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:59 UTC
+//     Generated on 2022 March 13 05:38:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace go
 {
     public static partial class flag_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Flag
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace go
             public static implicit operator Flag(NilType nil) => default(Flag);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Flag Flag_cast(dynamic value)
         {
             return new Flag(value.Name, value.Usage, value.Value, value.DefValue);

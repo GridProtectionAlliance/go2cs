@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 23:12:19 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:25:40 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\branches.go
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using System;
 
 public static partial class syntax_package {
 
-    // TODO(gri) consider making this part of the parser code
+// TODO(gri) consider making this part of the parser code
 
-    // checkBranches checks correct use of labels and branch
-    // statements (break, continue, goto) in a function body.
-    // It catches:
-    //    - misplaced breaks and continues
-    //    - bad labeled breaks and continues
-    //    - invalid, unused, duplicate, and missing labels
-    //    - gotos jumping over variable declarations and into blocks
+// checkBranches checks correct use of labels and branch
+// statements (break, continue, goto) in a function body.
+// It catches:
+//    - misplaced breaks and continues
+//    - bad labeled breaks and continues
+//    - invalid, unused, duplicate, and missing labels
+//    - gotos jumping over variable declarations and into blocks
 private static void checkBranches(ptr<BlockStmt> _addr_body, ErrorHandler errh) {
     ref BlockStmt body = ref _addr_body.val;
 
@@ -44,7 +43,6 @@ private static void checkBranches(ptr<BlockStmt> _addr_body, ErrorHandler errh) 
             if (l != null) {
                 l.used = true; // avoid "defined and not used" error
                 ls.err(fwd.Label.Pos(), "goto %s jumps into block starting at %s", name, l.parent.start);
-
             }
             else
  {
@@ -53,7 +51,6 @@ private static void checkBranches(ptr<BlockStmt> _addr_body, ErrorHandler errh) 
             l = l__prev1;
 
         }
-
     }    {
         var l__prev1 = l;
 
@@ -114,11 +111,9 @@ private static ptr<label> declare(this ptr<labelScope> _addr_ls, ptr<block> _add
             return _addr_alt!;
         }
     }
-
     ptr<label> l = addr(new label(b,s,false));
     labels[name] = l;
     return _addr_l!;
-
 }
 
 // gotoTarget returns the labeled statement matching the given name and
@@ -138,15 +133,10 @@ private static ptr<LabeledStmt> gotoTarget(this ptr<labelScope> _addr_ls, ptr<bl
                     return _addr_l.lstmt!;
                 b = b.parent;
                 }
-
             }
-
-
         }
     }
-
     return _addr_null!;
-
 }
 
 private static ptr<LabeledStmt> invalid = @new<LabeledStmt>(); // singleton to signal invalid enclosing target
@@ -168,16 +158,12 @@ private static ptr<LabeledStmt> enclosingTarget(this ptr<labelScope> _addr_ls, p
                     return _addr_l.lstmt!;
                 b = b.parent;
                 }
-
             }
 
             return _addr_invalid!;
-
         }
     }
-
     return _addr_null!;
-
 }
 
 // targets describes the target statements within which break
@@ -212,7 +198,6 @@ private static slice<ptr<BranchStmt>> blockBranches(this ptr<labelScope> _addr_l
         // of the block and be ok, but we don't know that yet.
         // Remember all forward gotos as potential bad gotos.
         badGotos = append(badGotos[..(int)0], fwdGotos);
-
     };
 
     Func<ptr<BranchStmt>, bool> jumpsOverVarDecl = fwd => {
@@ -224,14 +209,12 @@ private static slice<ptr<BranchStmt>> blockBranches(this ptr<labelScope> _addr_l
             }
         }
         return false;
-
     };
 
     Action<targets, Pos, slice<Stmt>> innerBlock = (ctxt, start, body) => { 
         // Unresolved forward gotos from the inner block
         // become forward gotos for the current block.
         fwdGotos = append(fwdGotos, ls.blockBranches(b, ctxt, lstmt, start, body));
-
     };
 
     foreach (var (_, stmt) in body) {
@@ -249,7 +232,6 @@ L:
                         }
 
                     }
-
                 }
                 break;
             case ptr<LabeledStmt> s:
@@ -275,13 +257,10 @@ L:
                                 // no match - keep forward goto
                                 fwdGotos[i] = fwd;
                                 i++;
-
                             }
-
                         }
                         fwdGotos = fwdGotos[..(int)i];
                         lstmt = s;
-
                     } 
                     // process labeled statement
 
@@ -313,7 +292,6 @@ L:
                             t = t__prev2;
 
                         }
-
                         goto __switch_break0;
                     }
                     if (s.Tok == _Continue)
@@ -334,7 +312,6 @@ L:
                             t = t__prev2;
 
                         }
-
                         goto __switch_break0;
                     }
                     if (s.Tok == _Fallthrough)
@@ -349,7 +326,6 @@ L:
 
                     __switch_break0:;
                     break;
-
                 } 
 
                 // labeled branch statement
@@ -383,7 +359,6 @@ L:
                                     break;
                                 }
                             }
-
                         }
                         else
  {
@@ -393,8 +368,6 @@ L:
                         t = t__prev1;
 
                     }
-
-
                     goto __switch_break1;
                 }
                 if (s.Tok == _Continue) 
@@ -423,7 +396,6 @@ L:
                                 t = t__prev2;
 
                             }
-
                         }
                         else
  {
@@ -433,8 +405,6 @@ L:
                         t = t__prev1;
 
                     }
-
-
                     goto __switch_break1;
                 }
                 if (s.Tok == _Goto)
@@ -451,14 +421,11 @@ L:
  { 
                             // label may be declared later - add goto to forward gotos
                             fwdGotos = append(fwdGotos, s);
-
                         }
 
                         t = t__prev1;
 
                     }
-
-
                     goto __switch_break1;
                 }
                 if (s.Tok == _Fallthrough)
@@ -513,9 +480,7 @@ L:
                 }
                 break;
         }
-
     }    return fwdGotos;
-
 });
 
 } // end syntax_package

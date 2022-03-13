@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:42:07 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:15 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\package.go
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
+using token = go.token_package;
+
+
+// A Package describes a Go package.
 
 public static partial class types_package {
 
-    // A Package describes a Go package.
 public partial struct Package {
     public @string path;
     public @string name;

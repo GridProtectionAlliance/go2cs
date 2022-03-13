@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:13:26 UTC
+//     Generated on 2022 March 13 06:26:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class syntax_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct parser
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator parser(NilType nil) => default(parser);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static parser parser_cast(dynamic value)
         {
             return new parser(ref value.file, value.errh, value.mode, value.pragh, value.scanner, ref value.@base, value.first, value.errcnt, value.pragma, value.fnest, value.xnest, value.indent);

@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:10 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:04 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\pow10.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // pow10tab stores the pre-computed values 10**i for i < 32.
+// pow10tab stores the pre-computed values 10**i for i < 32.
 private static array<double> pow10tab = new array<double>(new double[] { 1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22, 1e23, 1e24, 1e25, 1e26, 1e27, 1e28, 1e29, 1e30, 1e31 });
 
 // pow10postab32 stores the pre-computed value for 10**(i*32) at index i.
@@ -36,7 +34,6 @@ public static double Pow10(nint n) {
         return Inf(1);
     }
     return 0;
-
 }
 
 } // end math_package

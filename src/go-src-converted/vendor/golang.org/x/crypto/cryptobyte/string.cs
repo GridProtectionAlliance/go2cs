@@ -15,18 +15,16 @@
 //
 // See the documentation and examples for the Builder and String types to get
 // started.
-// package cryptobyte -- go2cs converted at 2022 March 06 23:36:38 UTC
+
+// package cryptobyte -- go2cs converted at 2022 March 13 06:44:42 UTC
 // import "vendor/golang.org/x/crypto/cryptobyte" ==> using cryptobyte = go.vendor.golang.org.x.crypto.cryptobyte_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\cryptobyte\string.go
-
-
 namespace go.vendor.golang.org.x.crypto;
 
-public static partial class cryptobyte_package {
- // import "golang.org/x/crypto/cryptobyte"
+public static partial class cryptobyte_package { // import "golang.org/x/crypto/cryptobyte"
 
-    // String represents a string of bytes. It provides methods for parsing
-    // fixed-length and length-prefixed values from it.
+// String represents a string of bytes. It provides methods for parsing
+// fixed-length and length-prefixed values from it.
 public partial struct String { // : slice<byte>
 }
 
@@ -41,7 +39,6 @@ private static slice<byte> read(this ptr<String> _addr_s, nint n) {
     var v = (s.val)[..(int)n];
     s.val = (s.val)[(int)n..];
     return v;
-
 }
 
 // Skip advances the String by n byte and reports whether it was successful.
@@ -63,7 +60,6 @@ private static bool ReadUint8(this ptr<String> _addr_s, ptr<byte> _addr_@out) {
     }
     out.val = uint8(v[0]);
     return true;
-
 }
 
 // ReadUint16 decodes a big-endian, 16-bit value into out and advances over it.
@@ -78,7 +74,6 @@ private static bool ReadUint16(this ptr<String> _addr_s, ptr<ushort> _addr_@out)
     }
     out.val = uint16(v[0]) << 8 | uint16(v[1]);
     return true;
-
 }
 
 // ReadUint24 decodes a big-endian, 24-bit value into out and advances over it.
@@ -93,7 +88,6 @@ private static bool ReadUint24(this ptr<String> _addr_s, ptr<uint> _addr_@out) {
     }
     out.val = uint32(v[0]) << 16 | uint32(v[1]) << 8 | uint32(v[2]);
     return true;
-
 }
 
 // ReadUint32 decodes a big-endian, 32-bit value into out and advances over it.
@@ -108,7 +102,6 @@ private static bool ReadUint32(this ptr<String> _addr_s, ptr<uint> _addr_@out) {
     }
     out.val = uint32(v[0]) << 24 | uint32(v[1]) << 16 | uint32(v[2]) << 8 | uint32(v[3]);
     return true;
-
 }
 
 private static bool readUnsigned(this ptr<String> _addr_s, ptr<uint> _addr_@out, nint length) {
@@ -126,7 +119,6 @@ private static bool readUnsigned(this ptr<String> _addr_s, ptr<uint> _addr_@out,
     }
     out.val = result;
     return true;
-
 }
 
 private static bool readLengthPrefixed(this ptr<String> _addr_s, nint lenLen, ptr<String> _addr_outChild) {
@@ -147,7 +139,6 @@ private static bool readLengthPrefixed(this ptr<String> _addr_s, nint lenLen, pt
     }
     outChild = v;
     return true;
-
 }
 
 // ReadUint8LengthPrefixed reads the content of an 8-bit length-prefixed value
@@ -191,7 +182,6 @@ private static bool ReadBytes(this ptr<String> _addr_s, ptr<slice<byte>> _addr_@
     }
     out.val = v;
     return true;
-
 }
 
 // CopyBytes copies len(out) bytes into out and advances over them. It reports
@@ -205,7 +195,6 @@ private static bool CopyBytes(this ptr<String> _addr_s, slice<byte> @out) {
         return false;
     }
     return copy(out, v) == n;
-
 }
 
 // Empty reports whether the string does not contain any bytes.

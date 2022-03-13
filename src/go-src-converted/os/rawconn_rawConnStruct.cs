@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:13:44 UTC
+//     Generated on 2022 March 13 05:28:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class os_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct rawConn
         {
             // Constructors
@@ -51,7 +51,7 @@ namespace go
             public static implicit operator rawConn(NilType nil) => default(rawConn);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static rawConn rawConn_cast(dynamic value)
         {
             return new rawConn(ref value.file);

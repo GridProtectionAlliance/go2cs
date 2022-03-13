@@ -19,16 +19,19 @@
 //
 // See "The Go image package" for more details:
 // https://golang.org/doc/articles/image_package.html
-// package image -- go2cs converted at 2022 March 06 23:35:56 UTC
+
+// package image -- go2cs converted at 2022 March 13 06:43:54 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Program Files\Go\src\image\image.go
-using color = go.image.color_package;
-
 namespace go;
+
+using color = image.color_package;
+
+
+// Config holds an image's color model and dimensions.
 
 public static partial class image_package {
 
-    // Config holds an image's color model and dimensions.
 public partial struct Config {
     public color.Model ColorModel;
     public nint Width;
@@ -74,7 +77,6 @@ private static nint pixelBufferLength(nint bytesPerPixel, Rectangle r, @string i
         panic("image: New" + imageTypeName + " Rectangle has huge or negative dimensions");
     }
     return totalLength;
-
 });
 
 // RGBA is an in-memory image whose At method returns color.RGBA values.
@@ -115,7 +117,6 @@ private static color.RGBA64 RGBA64At(this ptr<RGBA> _addr_p, nint x, nint y) {
     var b = uint16(s[2]);
     var a = uint16(s[3]);
     return new color.RGBA64((r<<8)|r,(g<<8)|g,(b<<8)|b,(a<<8)|a,);
-
 }
 
 private static color.RGBA RGBAAt(this ptr<RGBA> _addr_p, nint x, nint y) {
@@ -127,7 +128,6 @@ private static color.RGBA RGBAAt(this ptr<RGBA> _addr_p, nint x, nint y) {
     var i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
     return new color.RGBA(s[0],s[1],s[2],s[3]);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -151,7 +151,6 @@ private static void Set(this ptr<RGBA> _addr_p, nint x, nint y, color.Color c) {
     s[1] = c1.G;
     s[2] = c1.B;
     s[3] = c1.A;
-
 }
 
 private static void SetRGBA64(this ptr<RGBA> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -166,7 +165,6 @@ private static void SetRGBA64(this ptr<RGBA> _addr_p, nint x, nint y, color.RGBA
     s[1] = uint8(c.G >> 8);
     s[2] = uint8(c.B >> 8);
     s[3] = uint8(c.A >> 8);
-
 }
 
 private static void SetRGBA(this ptr<RGBA> _addr_p, nint x, nint y, color.RGBA c) {
@@ -181,7 +179,6 @@ private static void SetRGBA(this ptr<RGBA> _addr_p, nint x, nint y, color.RGBA c
     s[1] = c.G;
     s[2] = c.B;
     s[3] = c.A;
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -198,7 +195,6 @@ private static Image SubImage(this ptr<RGBA> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new RGBA(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -219,16 +215,13 @@ private static bool Opaque(this ptr<RGBA> _addr_p) {
                     return false;
                 i += 4;
                 }
-
             }
 
         }
         i0 += p.Stride;
         i1 += p.Stride;
-
     }
     return true;
-
 }
 
 // NewRGBA returns a new RGBA image with the given bounds.
@@ -270,7 +263,6 @@ private static color.RGBA64 RGBA64At(this ptr<RGBA64> _addr_p, nint x, nint y) {
     var i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
     return new color.RGBA64(uint16(s[0])<<8|uint16(s[1]),uint16(s[2])<<8|uint16(s[3]),uint16(s[4])<<8|uint16(s[5]),uint16(s[6])<<8|uint16(s[7]),);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -298,7 +290,6 @@ private static void Set(this ptr<RGBA64> _addr_p, nint x, nint y, color.Color c)
     s[5] = uint8(c1.B);
     s[6] = uint8(c1.A >> 8);
     s[7] = uint8(c1.A);
-
 }
 
 private static void SetRGBA64(this ptr<RGBA64> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -317,7 +308,6 @@ private static void SetRGBA64(this ptr<RGBA64> _addr_p, nint x, nint y, color.RG
     s[5] = uint8(c.B);
     s[6] = uint8(c.A >> 8);
     s[7] = uint8(c.A);
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -334,7 +324,6 @@ private static Image SubImage(this ptr<RGBA64> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new RGBA64(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -355,16 +344,13 @@ private static bool Opaque(this ptr<RGBA64> _addr_p) {
                     return false;
                 i += 8;
                 }
-
             }
 
         }
         i0 += p.Stride;
         i1 += p.Stride;
-
     }
     return true;
-
 }
 
 // NewRGBA64 returns a new RGBA64 image with the given bounds.
@@ -413,7 +399,6 @@ private static color.NRGBA NRGBAAt(this ptr<NRGBA> _addr_p, nint x, nint y) {
     var i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
     return new color.NRGBA(s[0],s[1],s[2],s[3]);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -437,7 +422,6 @@ private static void Set(this ptr<NRGBA> _addr_p, nint x, nint y, color.Color c) 
     s[1] = c1.G;
     s[2] = c1.B;
     s[3] = c1.A;
-
 }
 
 private static void SetRGBA64(this ptr<NRGBA> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -461,7 +445,6 @@ private static void SetRGBA64(this ptr<NRGBA> _addr_p, nint x, nint y, color.RGB
     s[1] = uint8(g >> 8);
     s[2] = uint8(b >> 8);
     s[3] = uint8(a >> 8);
-
 }
 
 private static void SetNRGBA(this ptr<NRGBA> _addr_p, nint x, nint y, color.NRGBA c) {
@@ -476,7 +459,6 @@ private static void SetNRGBA(this ptr<NRGBA> _addr_p, nint x, nint y, color.NRGB
     s[1] = c.G;
     s[2] = c.B;
     s[3] = c.A;
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -493,7 +475,6 @@ private static Image SubImage(this ptr<NRGBA> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new NRGBA(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -514,16 +495,13 @@ private static bool Opaque(this ptr<NRGBA> _addr_p) {
                     return false;
                 i += 4;
                 }
-
             }
 
         }
         i0 += p.Stride;
         i1 += p.Stride;
-
     }
     return true;
-
 }
 
 // NewNRGBA returns a new NRGBA image with the given bounds.
@@ -572,7 +550,6 @@ private static color.NRGBA64 NRGBA64At(this ptr<NRGBA64> _addr_p, nint x, nint y
     var i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 8, i + 8); // Small cap improves performance, see https://golang.org/issue/27857
     return new color.NRGBA64(uint16(s[0])<<8|uint16(s[1]),uint16(s[2])<<8|uint16(s[3]),uint16(s[4])<<8|uint16(s[5]),uint16(s[6])<<8|uint16(s[7]),);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -600,7 +577,6 @@ private static void Set(this ptr<NRGBA64> _addr_p, nint x, nint y, color.Color c
     s[5] = uint8(c1.B);
     s[6] = uint8(c1.A >> 8);
     s[7] = uint8(c1.A);
-
 }
 
 private static void SetRGBA64(this ptr<NRGBA64> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -628,7 +604,6 @@ private static void SetRGBA64(this ptr<NRGBA64> _addr_p, nint x, nint y, color.R
     s[5] = uint8(b);
     s[6] = uint8(a >> 8);
     s[7] = uint8(a);
-
 }
 
 private static void SetNRGBA64(this ptr<NRGBA64> _addr_p, nint x, nint y, color.NRGBA64 c) {
@@ -647,7 +622,6 @@ private static void SetNRGBA64(this ptr<NRGBA64> _addr_p, nint x, nint y, color.
     s[5] = uint8(c.B);
     s[6] = uint8(c.A >> 8);
     s[7] = uint8(c.A);
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -664,7 +638,6 @@ private static Image SubImage(this ptr<NRGBA64> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new NRGBA64(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -685,16 +658,13 @@ private static bool Opaque(this ptr<NRGBA64> _addr_p) {
                     return false;
                 i += 8;
                 }
-
             }
 
         }
         i0 += p.Stride;
         i1 += p.Stride;
-
     }
     return true;
-
 }
 
 // NewNRGBA64 returns a new NRGBA64 image with the given bounds.
@@ -743,7 +713,6 @@ private static color.Alpha AlphaAt(this ptr<Alpha> _addr_p, nint x, nint y) {
     }
     var i = p.PixOffset(x, y);
     return new color.Alpha(p.Pix[i]);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -762,7 +731,6 @@ private static void Set(this ptr<Alpha> _addr_p, nint x, nint y, color.Color c) 
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = color.AlphaModel.Convert(c)._<color.Alpha>().A;
-
 }
 
 private static void SetRGBA64(this ptr<Alpha> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -773,7 +741,6 @@ private static void SetRGBA64(this ptr<Alpha> _addr_p, nint x, nint y, color.RGB
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = uint8(c.A >> 8);
-
 }
 
 private static void SetAlpha(this ptr<Alpha> _addr_p, nint x, nint y, color.Alpha c) {
@@ -784,7 +751,6 @@ private static void SetAlpha(this ptr<Alpha> _addr_p, nint x, nint y, color.Alph
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = c.A;
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -801,7 +767,6 @@ private static Image SubImage(this ptr<Alpha> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new Alpha(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -823,7 +788,6 @@ private static bool Opaque(this ptr<Alpha> _addr_p) {
         i1 += p.Stride;
     }
     return true;
-
 }
 
 // NewAlpha returns a new Alpha image with the given bounds.
@@ -871,7 +835,6 @@ private static color.Alpha16 Alpha16At(this ptr<Alpha16> _addr_p, nint x, nint y
     }
     var i = p.PixOffset(x, y);
     return new color.Alpha16(uint16(p.Pix[i+0])<<8|uint16(p.Pix[i+1]));
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -892,7 +855,6 @@ private static void Set(this ptr<Alpha16> _addr_p, nint x, nint y, color.Color c
     color.Alpha16 c1 = color.Alpha16Model.Convert(c)._<color.Alpha16>();
     p.Pix[i + 0] = uint8(c1.A >> 8);
     p.Pix[i + 1] = uint8(c1.A);
-
 }
 
 private static void SetRGBA64(this ptr<Alpha16> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -904,7 +866,6 @@ private static void SetRGBA64(this ptr<Alpha16> _addr_p, nint x, nint y, color.R
     var i = p.PixOffset(x, y);
     p.Pix[i + 0] = uint8(c.A >> 8);
     p.Pix[i + 1] = uint8(c.A);
-
 }
 
 private static void SetAlpha16(this ptr<Alpha16> _addr_p, nint x, nint y, color.Alpha16 c) {
@@ -916,7 +877,6 @@ private static void SetAlpha16(this ptr<Alpha16> _addr_p, nint x, nint y, color.
     var i = p.PixOffset(x, y);
     p.Pix[i + 0] = uint8(c.A >> 8);
     p.Pix[i + 1] = uint8(c.A);
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -933,7 +893,6 @@ private static Image SubImage(this ptr<Alpha16> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new Alpha16(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -954,16 +913,13 @@ private static bool Opaque(this ptr<Alpha16> _addr_p) {
                     return false;
                 i += 2;
                 }
-
             }
 
         }
         i0 += p.Stride;
         i1 += p.Stride;
-
     }
     return true;
-
 }
 
 // NewAlpha16 returns a new Alpha16 image with the given bounds.
@@ -1012,7 +968,6 @@ private static color.Gray GrayAt(this ptr<Gray> _addr_p, nint x, nint y) {
     }
     var i = p.PixOffset(x, y);
     return new color.Gray(p.Pix[i]);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -1031,7 +986,6 @@ private static void Set(this ptr<Gray> _addr_p, nint x, nint y, color.Color c) {
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = color.GrayModel.Convert(c)._<color.Gray>().Y;
-
 }
 
 private static void SetRGBA64(this ptr<Gray> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -1043,7 +997,6 @@ private static void SetRGBA64(this ptr<Gray> _addr_p, nint x, nint y, color.RGBA
     nint gray = (19595 * uint32(c.R) + 38470 * uint32(c.G) + 7471 * uint32(c.B) + 1 << 15) >> 24;
     var i = p.PixOffset(x, y);
     p.Pix[i] = uint8(gray);
-
 }
 
 private static void SetGray(this ptr<Gray> _addr_p, nint x, nint y, color.Gray c) {
@@ -1054,7 +1007,6 @@ private static void SetGray(this ptr<Gray> _addr_p, nint x, nint y, color.Gray c
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = c.Y;
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -1071,7 +1023,6 @@ private static Image SubImage(this ptr<Gray> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new Gray(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -1126,7 +1077,6 @@ private static color.Gray16 Gray16At(this ptr<Gray16> _addr_p, nint x, nint y) {
     }
     var i = p.PixOffset(x, y);
     return new color.Gray16(uint16(p.Pix[i+0])<<8|uint16(p.Pix[i+1]));
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -1147,7 +1097,6 @@ private static void Set(this ptr<Gray16> _addr_p, nint x, nint y, color.Color c)
     color.Gray16 c1 = color.Gray16Model.Convert(c)._<color.Gray16>();
     p.Pix[i + 0] = uint8(c1.Y >> 8);
     p.Pix[i + 1] = uint8(c1.Y);
-
 }
 
 private static void SetRGBA64(this ptr<Gray16> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -1160,7 +1109,6 @@ private static void SetRGBA64(this ptr<Gray16> _addr_p, nint x, nint y, color.RG
     var i = p.PixOffset(x, y);
     p.Pix[i + 0] = uint8(gray >> 8);
     p.Pix[i + 1] = uint8(gray);
-
 }
 
 private static void SetGray16(this ptr<Gray16> _addr_p, nint x, nint y, color.Gray16 c) {
@@ -1172,7 +1120,6 @@ private static void SetGray16(this ptr<Gray16> _addr_p, nint x, nint y, color.Gr
     var i = p.PixOffset(x, y);
     p.Pix[i + 0] = uint8(c.Y >> 8);
     p.Pix[i + 1] = uint8(c.Y);
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -1189,7 +1136,6 @@ private static Image SubImage(this ptr<Gray16> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new Gray16(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -1245,7 +1191,6 @@ private static color.CMYK CMYKAt(this ptr<CMYK> _addr_p, nint x, nint y) {
     var i = p.PixOffset(x, y);
     var s = p.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
     return new color.CMYK(s[0],s[1],s[2],s[3]);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -1269,7 +1214,6 @@ private static void Set(this ptr<CMYK> _addr_p, nint x, nint y, color.Color c) {
     s[1] = c1.M;
     s[2] = c1.Y;
     s[3] = c1.K;
-
 }
 
 private static void SetRGBA64(this ptr<CMYK> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -1285,7 +1229,6 @@ private static void SetRGBA64(this ptr<CMYK> _addr_p, nint x, nint y, color.RGBA
     s[1] = mm;
     s[2] = yy;
     s[3] = kk;
-
 }
 
 private static void SetCMYK(this ptr<CMYK> _addr_p, nint x, nint y, color.CMYK c) {
@@ -1300,7 +1243,6 @@ private static void SetCMYK(this ptr<CMYK> _addr_p, nint x, nint y, color.CMYK c
     s[1] = c.M;
     s[2] = c.Y;
     s[3] = c.K;
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -1317,7 +1259,6 @@ private static Image SubImage(this ptr<CMYK> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new CMYK(Pix:p.Pix[i:],Stride:p.Stride,Rect:r,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -1363,7 +1304,6 @@ private static color.Color At(this ptr<Paletted> _addr_p, nint x, nint y) {
     }
     var i = p.PixOffset(x, y);
     return p.Palette[p.Pix[i]];
-
 }
 
 private static color.RGBA64 RGBA64At(this ptr<Paletted> _addr_p, nint x, nint y) {
@@ -1383,7 +1323,6 @@ private static color.RGBA64 RGBA64At(this ptr<Paletted> _addr_p, nint x, nint y)
     }
     var (r, g, b, a) = c.RGBA();
     return new color.RGBA64(uint16(r),uint16(g),uint16(b),uint16(a),);
-
 }
 
 // PixOffset returns the index of the first element of Pix that corresponds to
@@ -1402,7 +1341,6 @@ private static void Set(this ptr<Paletted> _addr_p, nint x, nint y, color.Color 
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = uint8(p.Palette.Index(c));
-
 }
 
 private static void SetRGBA64(this ptr<Paletted> _addr_p, nint x, nint y, color.RGBA64 c) {
@@ -1413,7 +1351,6 @@ private static void SetRGBA64(this ptr<Paletted> _addr_p, nint x, nint y, color.
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = uint8(p.Palette.Index(c));
-
 }
 
 private static byte ColorIndexAt(this ptr<Paletted> _addr_p, nint x, nint y) {
@@ -1424,7 +1361,6 @@ private static byte ColorIndexAt(this ptr<Paletted> _addr_p, nint x, nint y) {
     }
     var i = p.PixOffset(x, y);
     return p.Pix[i];
-
 }
 
 private static void SetColorIndex(this ptr<Paletted> _addr_p, nint x, nint y, byte index) {
@@ -1435,7 +1371,6 @@ private static void SetColorIndex(this ptr<Paletted> _addr_p, nint x, nint y, by
     }
     var i = p.PixOffset(x, y);
     p.Pix[i] = index;
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -1452,7 +1387,6 @@ private static Image SubImage(this ptr<Paletted> _addr_p, Rectangle r) {
     }
     var i = p.PixOffset(r.Min.X, r.Min.Y);
     return addr(new Paletted(Pix:p.Pix[i:],Stride:p.Stride,Rect:p.Rect.Intersect(r),Palette:p.Palette,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -1476,7 +1410,6 @@ private static bool Opaque(this ptr<Paletted> _addr_p) {
 
         i0 += p.Stride;
         i1 += p.Stride;
-
     }
     {
         var c__prev1 = c;
@@ -1496,7 +1429,6 @@ private static bool Opaque(this ptr<Paletted> _addr_p) {
     }
 
     return true;
-
 }
 
 // NewPaletted returns a new Paletted image with the given width, height and

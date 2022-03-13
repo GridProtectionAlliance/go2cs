@@ -5,23 +5,23 @@
 //go:build netbsd
 // +build netbsd
 
-// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
+// package cgo -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Program Files\Go\src\runtime\cgo\netbsd.go
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go.runtime;
 
-public static partial class cgo_package {
- // for go:linkname
+using _@unsafe_ = @unsafe_package;
 
-    // Supply environ and __progname, because we don't
-    // link against the standard NetBSD crt0.o and the
-    // libc dynamic library needs them.
+public static partial class cgo_package { // for go:linkname
 
-    //go:linkname _environ environ
-    //go:linkname _progname __progname
-    //go:linkname ___ps_strings __ps_strings
+// Supply environ and __progname, because we don't
+// link against the standard NetBSD crt0.o and the
+// libc dynamic library needs them.
+
+//go:linkname _environ environ
+//go:linkname _progname __progname
+//go:linkname ___ps_strings __ps_strings
+
 private static System.UIntPtr _environ = default;
 private static System.UIntPtr _progname = default;
 private static System.UIntPtr ___ps_strings = default;

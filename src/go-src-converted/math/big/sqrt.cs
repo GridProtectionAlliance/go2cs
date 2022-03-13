@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package big -- go2cs converted at 2022 March 06 22:18:07 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:20 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\sqrt.go
-using math = go.math_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.math;
+
+using math = math_package;
+using sync = sync_package;
+using System;
 
 public static partial class big_package {
 
@@ -45,14 +44,12 @@ private static ptr<Float> Sqrt(this ptr<Float> _addr_z, ptr<Float> _addr_x) => f
     if (x.Sign() == -1) { 
         // following IEEE754-2008 (section 7.2)
         panic(new ErrNaN("square root of negative operand"));
-
     }
     if (x.form != finite) {
         z.acc = Exact;
         z.form = x.form;
         z.neg = x.neg; // IEEE754-2008 requires √±0 = ±0
         return _addr_z!;
-
     }
     var prec = z.prec;
     var b = x.MantExp(z);
@@ -81,7 +78,6 @@ private static ptr<Float> Sqrt(this ptr<Float> _addr_z, ptr<Float> _addr_x) => f
 
     // re-attach halved exponent
     return _addr_z.SetMantExp(z, b / 2)!;
-
 });
 
 // Compute √x (to z.prec precision) by solving
@@ -109,7 +105,6 @@ private static void sqrtInverse(this ptr<Float> _addr_z, ptr<Float> _addr_x) {
         u.Mul(t, v); // u = t(3 - xt²)
         u.exp--; //   = ½t(3 - xt²)
         return t.Set(u);
-
     };
 
     var (xf, _) = x.Float64();
@@ -127,7 +122,6 @@ private static void sqrtInverse(this ptr<Float> _addr_z, ptr<Float> _addr_x) {
 
     // x/√x = √x
     z.Mul(x, sqi);
-
 }
 
 // newFloat returns a new *Float with space for twice the given
@@ -137,7 +131,6 @@ private static ptr<Float> newFloat(uint prec2) {
     // nat.make ensures the slice length is > 0
     z.mant = z.mant.make(int(prec2 / _W) * 2);
     return _addr_z!;
-
 }
 
 } // end big_package

@@ -6,10 +6,8 @@
 // live even if it matches an interface method, as long as
 // the type is never converted to an interface.
 
-// package main -- go2cs converted at 2022 March 06 23:22:34 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:37 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\deadcode\ifacemethod.go
-
-
 namespace go;
 
 public static partial class main_package {
@@ -36,7 +34,6 @@ private static void Main() {
 public static void Unused() { // convert T to interface, but this function is not reachable
     I i = I.As(T(0))!;
     i.M();
-
 }
 
 public static var Unused2 = T(1); // convert T to interface, in an unreachable global initializer

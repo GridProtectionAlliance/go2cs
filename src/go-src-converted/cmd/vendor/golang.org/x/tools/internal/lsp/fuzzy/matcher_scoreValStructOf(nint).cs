@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:15 UTC
+//     Generated on 2022 March 13 06:42:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace lsp
 {
     public static partial class fuzzy_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct scoreVal
         {
             // Value of the scoreVal struct

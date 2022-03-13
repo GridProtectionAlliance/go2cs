@@ -10,18 +10,18 @@
 // Each mcentral is two lists of mspans: those with free objects (c->nonempty)
 // and those that are completely allocated (c->empty).
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:19 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mcentral.go
-using atomic = go.runtime.@internal.atomic_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
 
 public static partial class runtime_package {
 
-    // Central list of free objects of a given size.
-    //
-    //go:notinheap
+// Central list of free objects of a given size.
+//
+//go:notinheap
 private partial struct mcentral {
     public spanClass spanclass; // partial and full contain two mspan sets: one of swept in-use
 // spans, and one of unswept in-use spans. These two trade
@@ -128,7 +128,6 @@ private static ptr<mspan> cacheSpan(this ptr<mcentral> _addr_c) {
                 s.sweep(true);
                 sl.dispose();
                 goto havespan;
-
             } 
             // We failed to get ownership of the span, which means it's being or
             // has been swept by an asynchronous sweeper that just couldn't remove it
@@ -172,7 +171,6 @@ private static ptr<mspan> cacheSpan(this ptr<mcentral> _addr_c) {
                 } 
                 // Add it to the swept list, because sweeping didn't give us any free space.
                 c.fullSwept(sg).push(s.mspan);
-
             } 
             // See comment for partial unswept spans.
 
@@ -208,7 +206,6 @@ havespan:
     s.allocCache>>=s.freeindex % 64;
 
     return _addr_s!;
-
 }
 
 // Return span from an mcache.
@@ -234,13 +231,11 @@ private static void uncacheSpan(this ptr<mcentral> _addr_c, ptr<mspan> _addr_s) 
         // sweeping and can't be allocated from. sweep will
         // set s.sweepgen to indicate s is swept.
         atomic.Store(_addr_s.sweepgen, sg - 1);
-
     }
     else
  { 
         // Indicate that s is no longer cached.
         atomic.Store(_addr_s.sweepgen, sg);
-
     }
     if (stale) { 
         // It's stale, so just sweep it. Sweeping will put it on
@@ -252,21 +247,18 @@ private static void uncacheSpan(this ptr<mcentral> _addr_c, ptr<mspan> _addr_s) 
         // have been swept.
         sweepLocked ss = new sweepLocked(s);
         ss.sweep(false);
-
     }
     else
  {
         if (int(s.nelems) - int(s.allocCount) > 0) { 
             // Put it back on the partial swept list.
             c.partialSwept(sg).push(s);
-
         }
         else
  { 
             // There's no free space and it's not stale, so put it on the
             // full swept list.
             c.fullSwept(sg).push(s);
-
         }
     }
 }
@@ -286,7 +278,6 @@ private static ptr<mspan> grow(this ptr<mcentral> _addr_c) {
     s.limit = s.@base() + size * n;
     heapBitsForAddr(s.@base()).initSpan(s);
     return _addr_s!;
-
 }
 
 } // end runtime_package

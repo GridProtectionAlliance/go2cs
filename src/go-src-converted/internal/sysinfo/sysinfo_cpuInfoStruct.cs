@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:15 UTC
+//     Generated on 2022 March 13 06:43:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace @internal
 {
     public static partial class sysinfo_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct cpuInfo
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace @internal
             public static implicit operator cpuInfo(NilType nil) => default(cpuInfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static cpuInfo cpuInfo_cast(dynamic value)
         {
             return new cpuInfo(value.once, value.name);

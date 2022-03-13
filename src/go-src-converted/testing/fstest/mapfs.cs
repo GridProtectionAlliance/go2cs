@@ -2,39 +2,40 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fstest -- go2cs converted at 2022 March 06 23:19:26 UTC
+// package fstest -- go2cs converted at 2022 March 13 06:43:11 UTC
 // import "testing/fstest" ==> using fstest = go.testing.fstest_package
 // Original source: C:\Program Files\Go\src\testing\fstest\mapfs.go
-using io = go.io_package;
-using fs = go.io.fs_package;
-using path = go.path_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.testing;
 
+using io = io_package;
+using fs = io.fs_package;
+using path = path_package;
+using sort = sort_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// A MapFS is a simple in-memory file system for use in tests,
+// represented as a map from path names (arguments to Open)
+// to information about the files or directories they represent.
+//
+// The map need not include parent directories for files contained
+// in the map; those will be synthesized if needed.
+// But a directory can still be included by setting the MapFile.Mode's ModeDir bit;
+// this may be necessary for detailed control over the directory's FileInfo
+// or to create an empty directory.
+//
+// File system operations read directly from the map,
+// so that the file system can be changed by editing the map as needed.
+// An implication is that file system operations must not run concurrently
+// with changes to the map, which would be a race.
+// Another implication is that opening or reading a directory requires
+// iterating over the entire map, so a MapFS should typically be used with not more
+// than a few hundred entries or directory reads.
+
+using System;
 public static partial class fstest_package {
 
-    // A MapFS is a simple in-memory file system for use in tests,
-    // represented as a map from path names (arguments to Open)
-    // to information about the files or directories they represent.
-    //
-    // The map need not include parent directories for files contained
-    // in the map; those will be synthesized if needed.
-    // But a directory can still be included by setting the MapFile.Mode's ModeDir bit;
-    // this may be necessary for detailed control over the directory's FileInfo
-    // or to create an empty directory.
-    //
-    // File system operations read directly from the map,
-    // so that the file system can be changed by editing the map as needed.
-    // An implication is that file system operations must not run concurrently
-    // with changes to the map, which would be a race.
-    // Another implication is that opening or reading a directory requires
-    // iterating over the entire map, so a MapFS should typically be used with not more
-    // than a few hundred entries or directory reads.
 public partial struct MapFS { // : map<@string, ptr<MapFile>>
 }
 
@@ -60,7 +61,6 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
     if (file != null && file.Mode & fs.ModeDir == 0) { 
         // Ordinary file
         return (addr(new openMapFile(name,mapFileInfo{path.Base(name),file},0)), error.As(null!)!);
-
     }
     slice<mapFileInfo> list = default;
     @string elem = default;
@@ -82,7 +82,6 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
  {
                     need[fname[..(int)i]] = true;
                 }
-
             }
     else
 
@@ -109,9 +108,7 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
  {
                         need[fname[(int)len(prefix)..(int)len(prefix) + i]] = true;
                     }
-
                 }
-
             } 
             // If the directory name is not in the map,
             // and there are no children of the name in the map,
@@ -129,15 +126,12 @@ public static (fs.File, error) Open(this MapFS fsys, @string name) {
         delete(need, fi.name);
     }    foreach (var (name) in need) {
         list = append(list, new mapFileInfo(name,&MapFile{Mode:fs.ModeDir}));
-    }    sort.Slice(list, (i, j) => {
-        return list[i].name < list[j].name;
-    });
+    }    sort.Slice(list, (i, j) => list[i].name < list[j].name);
 
     if (file == null) {
         file = addr(new MapFile(Mode:fs.ModeDir));
     }
     return (addr(new mapDir(name,mapFileInfo{elem,file},list,0)), error.As(null!)!);
-
 }
 
 // fsOnly is a wrapper that hides all but the fs.FS methods,
@@ -276,7 +270,6 @@ private static (nint, error) Read(this ptr<openMapFile> _addr_f, slice<byte> b) 
     var n = copy(b, f.f.Data[(int)f.offset..]);
     f.offset += int64(n);
     return (n, error.As(null!)!);
-
 }
 
 private static (long, error) Seek(this ptr<openMapFile> _addr_f, long offset, nint whence) {
@@ -300,7 +293,6 @@ private static (long, error) Seek(this ptr<openMapFile> _addr_f, long offset, ni
     }
     f.offset = offset;
     return (offset, error.As(null!)!);
-
 }
 
 private static (nint, error) ReadAt(this ptr<openMapFile> _addr_f, slice<byte> b, long offset) {
@@ -316,7 +308,6 @@ private static (nint, error) ReadAt(this ptr<openMapFile> _addr_f, slice<byte> b
         return (n, error.As(io.EOF)!);
     }
     return (n, error.As(null!)!);
-
 }
 
 // A mapDir is a directory fs.File (so also an fs.ReadDirFile) open for reading.
@@ -364,7 +355,6 @@ private static (slice<fs.DirEntry>, error) ReadDir(this ptr<mapDir> _addr_d, nin
         list[i] = _addr_d.entry[d.offset + i];
     }    d.offset += n;
     return (list, error.As(null!)!);
-
 }
 
 } // end fstest_package

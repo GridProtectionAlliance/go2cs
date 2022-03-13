@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:04 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:24 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\memprof.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using pprof = go.runtime.pprof_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using pprof = runtime.pprof_package;
 
 public static partial class main_package {
 
@@ -50,7 +50,6 @@ public static void MemProf() {
 
     }
 
-
     var name = f.Name();
     {
         var err__prev1 = err;
@@ -65,9 +64,7 @@ public static void MemProf() {
 
     }
 
-
     fmt.Println(name);
-
 }
 
 } // end main_package

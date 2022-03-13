@@ -4,34 +4,33 @@
 
 // HTTP Request reading and parsing.
 
-// package http -- go2cs converted at 2022 March 06 22:22:52 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:18 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\request.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using context = go.context_package;
-using tls = go.crypto.tls_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using mime = go.mime_package;
-using multipart = go.mime.multipart_package;
-using net = go.net_package;
-using httptrace = go.net.http.httptrace_package;
-using ascii = go.net.http.@internal.ascii_package;
-using textproto = go.net.textproto_package;
-using url = go.net.url_package;
-using url = go.net.url_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using idna = go.golang.org.x.net.idna_package;
-using System;
-
-
 namespace go.net;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using context = context_package;
+using tls = crypto.tls_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using mime = mime_package;
+using multipart = mime.multipart_package;
+using net = net_package;
+using httptrace = net.http.httptrace_package;
+using ascii = net.http.@internal.ascii_package;
+using textproto = net.textproto_package;
+using url = net.url_package;
+using url = net.url_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using idna = golang.org.x.net.idna_package;
+using System;
 
 public static partial class http_package {
 
@@ -273,7 +272,6 @@ private static context.Context Context(this ptr<Request> _addr_r) {
         return r.ctx;
     }
     return context.Background();
-
 }
 
 // WithContext returns a shallow copy of r with its context changed
@@ -298,7 +296,6 @@ private static ptr<Request> WithContext(this ptr<Request> _addr_r, context.Conte
     r2.ctx = ctx;
     r2.URL = cloneURL(r.URL); // legacy behavior; TODO: try to remove. Issue 23544
     return _addr_r2!;
-
 });
 
 // Clone returns a deep copy of r with its context changed to ctx.
@@ -332,12 +329,10 @@ private static ptr<Request> Clone(this ptr<Request> _addr_r, context.Context ctx
             r2.TransferEncoding = s2;
         }
     }
-
     r2.Form = cloneURLValues(r.Form);
     r2.PostForm = cloneURLValues(r.PostForm);
     r2.MultipartForm = cloneMultipartForm(r.MultipartForm);
     return _addr_r2!;
-
 });
 
 // ProtoAtLeast reports whether the HTTP protocol used
@@ -401,7 +396,6 @@ private static void AddCookie(this ptr<Request> _addr_r, ptr<Cookie> _addr_c) {
             r.Header.Set("Cookie", s);
         }
     }
-
 }
 
 // Referer returns the referring URL, if sent in the request.
@@ -440,7 +434,6 @@ private static (ptr<multipart.Reader>, error) MultipartReader(this ptr<Request> 
     }
     r.MultipartForm = multipartByReader;
     return _addr_r.multipartReader(true)!;
-
 }
 
 private static (ptr<multipart.Reader>, error) multipartReader(this ptr<Request> _addr_r, bool allowMixed) {
@@ -461,7 +454,6 @@ private static (ptr<multipart.Reader>, error) multipartReader(this ptr<Request> 
         return (_addr_null!, error.As(ErrMissingBoundary)!);
     }
     return (_addr_multipart.NewReader(r.Body, boundary)!, error.As(null!)!);
-
 }
 
 // isH2Upgrade reports whether r represents the http2 "client preface"
@@ -478,7 +470,6 @@ private static @string valueOrDefault(@string value, @string def) {
         return value;
     }
     return def;
-
 }
 
 // NOTE: This is not intended to reflect the actual Go version being used.
@@ -563,7 +554,6 @@ private static error write(this ptr<Request> _addr_r, io.Writer w, bool usingPro
             }
 
         }
-
     }()); 
 
     // Find the target host. Prefer the Host: header, but if that
@@ -576,7 +566,6 @@ private static error write(this ptr<Request> _addr_r, io.Writer w, bool usingPro
             return error.As(errMissingHost)!;
         }
         host = cleanHost(r.URL.Host);
-
     }
     host = removeZone(host);
 
@@ -603,7 +592,6 @@ private static error write(this ptr<Request> _addr_r, io.Writer w, bool usingPro
             w = bw;
         }
     }
-
 
     _, err = fmt.Fprintf(w, "%s %s HTTP/1.1\r\n", valueOrDefault(r.Method, "GET"), ruri);
     if (err != null) {
@@ -670,7 +658,6 @@ private static error write(this ptr<Request> _addr_r, io.Writer w, bool usingPro
             bw = bw__prev2;
 
         }
-
         if (trace != null && trace.Wait100Continue != null) {
             trace.Wait100Continue();
         }
@@ -694,7 +681,6 @@ private static error write(this ptr<Request> _addr_r, io.Writer w, bool usingPro
                 }
 
             }
-
         }
         bw = bw__prev1;
 
@@ -708,13 +694,11 @@ private static error write(this ptr<Request> _addr_r, io.Writer w, bool usingPro
             err = new requestBodyReadError(err);
         }
         return error.As(err)!;
-
     }
     if (bw != null) {
         return error.As(bw.Flush())!;
     }
     return error.As(null!)!;
-
 });
 
 // requestBodyReadError wraps an error from (*Request).write to indicate
@@ -741,7 +725,6 @@ private static (@string, error) idnaASCII(@string v) {
         return (v, error.As(null!)!);
     }
     return idna.Lookup.ToASCII(v);
-
 }
 
 // cleanHost cleans up the host sent in request's Host header.
@@ -765,7 +748,6 @@ private static @string cleanHost(@string @in) {
             in = in[..(int)i];
         }
     }
-
     var (host, port, err) = net.SplitHostPort(in);
     if (err != null) { // input was just a host
         var (a, err) = idnaASCII(in);
@@ -773,14 +755,12 @@ private static @string cleanHost(@string @in) {
             return in; // garbage in, garbage out
         }
         return a;
-
     }
     (a, err) = idnaASCII(host);
     if (err != null) {
         return in; // garbage in, garbage out
     }
     return net.JoinHostPort(a, port);
-
 }
 
 // removeZone removes IPv6 zone identifier from host.
@@ -798,7 +778,6 @@ private static @string removeZone(@string host) {
         return host;
     }
     return host[..(int)j] + host[(int)i..];
-
 }
 
 // ParseHTTPVersion parses an HTTP version string.
@@ -835,7 +814,6 @@ public static (nint, nint, bool) ParseHTTPVersion(@string vers) {
         return (0, 0, false);
     }
     return (major, minor, true);
-
 }
 
 private static bool validMethod(@string method) {
@@ -853,7 +831,6 @@ private static bool validMethod(@string method) {
              token          = 1*<any CHAR except CTLs or separators>
         */
     return len(method) > 0 && strings.IndexFunc(method, isNotToken) == -1;
-
 }
 
 // NewRequest wraps NewRequestWithContext using context.Background.
@@ -895,7 +872,6 @@ public static (ptr<Request>, error) NewRequestWithContext(context.Context ctx, @
         // relied on that from NewRequest, so keep that working.
         // We still enforce validMethod for non-empty methods.
         method = "GET";
-
     }
     if (!validMethod(method)) {
         return (_addr_null!, error.As(fmt.Errorf("net/http: invalid method %q", method))!);
@@ -970,7 +946,6 @@ public static (ptr<Request>, error) NewRequestWithContext(context.Context ctx, @
         }
     }
     return (_addr_req!, error.As(null!)!);
-
 }
 
 // BasicAuth returns the username and password provided in the request's
@@ -987,7 +962,6 @@ private static (@string, @string, bool) BasicAuth(this ptr<Request> _addr_r) {
         return ;
     }
     return parseBasicAuth(auth);
-
 }
 
 // parseBasicAuth parses an HTTP Basic Authentication string.
@@ -1014,7 +988,6 @@ private static (@string, @string, bool) parseBasicAuth(@string auth) {
         return ;
     }
     return (cs[..(int)s], cs[(int)s + 1..], true);
-
 }
 
 // SetBasicAuth sets the request's Authorization header to use HTTP
@@ -1046,7 +1019,6 @@ private static (@string, @string, @string, bool) parseRequestLine(@string line) 
     }
     s2 += s1 + 1;
     return (line[..(int)s1], line[(int)s1 + 1..(int)s2], line[(int)s2 + 1..], true);
-
 }
 
 private static sync.Pool textprotoReaderPool = default;
@@ -1063,9 +1035,7 @@ private static ptr<textproto.Reader> newTextprotoReader(ptr<bufio.Reader> _addr_
             return _addr_tr!;
         }
     }
-
     return _addr_textproto.NewReader(br)!;
-
 }
 
 private static void putTextprotoReader(ptr<textproto.Reader> _addr_r) {
@@ -1092,7 +1062,6 @@ public static (ptr<Request>, error) ReadRequest(ptr<bufio.Reader> _addr_b) {
     }
     delete(req.Header, "Host");
     return (_addr_req!, error.As(err)!);
-
 }
 
 private static (ptr<Request>, error) readRequest(ptr<bufio.Reader> _addr_b) => func((defer, _, _) => {
@@ -1143,7 +1112,6 @@ private static (ptr<Request>, error) readRequest(ptr<bufio.Reader> _addr_b) => f
     if (justAuthority) { 
         // Strip the bogus "http://" back off.
         req.URL.Scheme = "";
-
     }
     var (mimeHeader, err) = tp.ReadMIMEHeader();
     if (err != null) {
@@ -1174,10 +1142,8 @@ private static (ptr<Request>, error) readRequest(ptr<bufio.Reader> _addr_b) => f
         // dealing with the connection further if it's not
         // hijacked. Set Close to ensure that:
         req.Close = true;
-
     }
     return (_addr_req!, error.As(null!)!);
-
 });
 
 // MaxBytesReader is similar to io.LimitReader but is intended for
@@ -1191,10 +1157,8 @@ private static (ptr<Request>, error) readRequest(ptr<bufio.Reader> _addr_b) => f
 public static io.ReadCloser MaxBytesReader(ResponseWriter w, io.ReadCloser r, long n) {
     if (n < 0) { // Treat negative limits as equivalent to 0.
         n = 0;
-
     }
     return addr(new maxBytesReader(w:w,r:r,n:n));
-
 }
 
 private partial struct maxBytesReader {
@@ -1245,10 +1209,8 @@ private static (nint, error) Read(this ptr<maxBytesReader> _addr_l, slice<byte> 
             res.requestTooLarge();
         }
     }
-
     l.err = errors.New("http: request body too large");
     return (n, error.As(l.err)!);
-
 }
 
 private static error Close(this ptr<maxBytesReader> _addr_l) {
@@ -1289,11 +1251,9 @@ private static (url.Values, error) parsePostForm(ptr<Request> _addr_r) {
             if (!ok) {
                 maxFormSize = int64(10 << 20); // 10 MB is a lot of text.
                 reader = io.LimitReader(r.Body, maxFormSize + 1);
-
             }
 
         }
-
         var (b, e) = io.ReadAll(reader);
         if (e != null) {
             if (err == null) {
@@ -1310,7 +1270,6 @@ private static (url.Values, error) parsePostForm(ptr<Request> _addr_r) {
             err = e;
         }
     else if (ct == "multipart/form-data")         return ;
-
 }
 
 // ParseForm populates r.Form and r.PostForm.
@@ -1368,7 +1327,6 @@ private static error ParseForm(this ptr<Request> _addr_r) {
         }
     }
     return error.As(err)!;
-
 }
 
 // ParseMultipartForm parses a request body as multipart/form-data.
@@ -1390,7 +1348,6 @@ private static error ParseMultipartForm(this ptr<Request> _addr_r, long maxMemor
         // Let errors in ParseForm fall through, and just
         // return it at the end.
         parseFormErr = error.As(r.ParseForm())!;
-
     }
     if (r.MultipartForm != null) {
         return error.As(null!)!;
@@ -1410,11 +1367,9 @@ private static error ParseMultipartForm(this ptr<Request> _addr_r, long maxMemor
         r.Form[k] = append(r.Form[k], v); 
         // r.PostForm should also be populated. See Issue 9305.
         r.PostForm[k] = append(r.PostForm[k], v);
-
     }    r.MultipartForm = f;
 
     return error.As(parseFormErr)!;
-
 }
 
 // FormValue returns the first value for the named component of the query.
@@ -1437,9 +1392,7 @@ private static @string FormValue(this ptr<Request> _addr_r, @string key) {
             return vs[0];
         }
     }
-
     return "";
-
 }
 
 // PostFormValue returns the first value for the named component of the POST,
@@ -1460,9 +1413,7 @@ private static @string PostFormValue(this ptr<Request> _addr_r, @string key) {
             return vs[0];
         }
     }
-
     return "";
-
 }
 
 // FormFile returns the first file for the provided form key.
@@ -1492,10 +1443,8 @@ private static (multipart.File, ptr<multipart.FileHeader>, error) FormFile(this 
             }
 
         }
-
     }
     return (null, _addr_null!, error.As(ErrMissingFile)!);
-
 }
 
 private static bool expectsContinue(this ptr<Request> _addr_r) {
@@ -1511,7 +1460,6 @@ private static bool wantsHttp10KeepAlive(this ptr<Request> _addr_r) {
         return false;
     }
     return hasToken(r.Header.get("Connection"), "keep-alive");
-
 }
 
 private static bool wantsClose(this ptr<Request> _addr_r) {
@@ -1521,7 +1469,6 @@ private static bool wantsClose(this ptr<Request> _addr_r) {
         return true;
     }
     return hasToken(r.Header.get("Connection"), "close");
-
 }
 
 private static error closeBody(this ptr<Request> _addr_r) {
@@ -1531,7 +1478,6 @@ private static error closeBody(this ptr<Request> _addr_r) {
         return error.As(null!)!;
     }
     return error.As(r.Body.Close())!;
-
 }
 
 private static bool isReplayable(this ptr<Request> _addr_r) {
@@ -1557,7 +1503,6 @@ private static bool isReplayable(this ptr<Request> _addr_r) {
         }
     }
     return false;
-
 }
 
 // outgoingLength reports the Content-Length of this outgoing (Client) request.
@@ -1572,7 +1517,6 @@ private static long outgoingLength(this ptr<Request> _addr_r) {
         return r.ContentLength;
     }
     return -1;
-
 }
 
 // requestMethodUsuallyLacksBody reports whether the given request
@@ -1599,7 +1543,6 @@ private static bool requestMethodUsuallyLacksBody(@string method) {
             break;
     }
     return false;
-
 }
 
 // requiresHTTP1 reports whether this request requires being sent on

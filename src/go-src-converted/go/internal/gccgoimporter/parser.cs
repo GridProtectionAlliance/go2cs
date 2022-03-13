@@ -2,24 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gccgoimporter -- go2cs converted at 2022 March 06 23:32:48 UTC
+// package gccgoimporter -- go2cs converted at 2022 March 13 06:42:28 UTC
 // import "go/internal/gccgoimporter" ==> using gccgoimporter = go.go.@internal.gccgoimporter_package
 // Original source: C:\Program Files\Go\src\go\internal\gccgoimporter\parser.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using scanner = go.text.scanner_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go.@internal;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using types = go.types_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using scanner = text.scanner_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class gccgoimporter_package {
 
@@ -80,7 +79,6 @@ private static void initScanner(this ptr<parser> _addr_p, @string filename, io.R
     p.scanner.Whitespace = 1 << (int)('\t') | 1 << (int)(' ');
     p.scanner.Filename = filename; // for good error messages
     p.next();
-
 }
 
 private partial struct importError {
@@ -104,7 +102,6 @@ private static void error(this ptr<parser> _addr_p, object err) => func((_, pani
     } 
     // panic with a runtime.Error if err is not an error
     panic(new importError(p.scanner.Pos(),err.(error)));
-
 });
 
 private static void errorf(this ptr<parser> _addr_p, @string format, params object[] args) {
@@ -123,7 +120,6 @@ private static @string expect(this ptr<parser> _addr_p, int tok) {
     }
     p.next();
     return lit;
-
 }
 
 private static void expectEOL(this ptr<parser> _addr_p) {
@@ -133,7 +129,6 @@ private static void expectEOL(this ptr<parser> _addr_p) {
         p.expect(';');
     }
     p.expect('\n');
-
 }
 
 private static void expectKeyword(this ptr<parser> _addr_p, @string keyword) {
@@ -153,7 +148,6 @@ private static @string parseString(this ptr<parser> _addr_p) {
         p.error(err);
     }
     return str;
-
 }
 
 // unquotedString     = { unquotedStringChar } .
@@ -179,7 +173,6 @@ private static @string parseUnquotedString(this ptr<parser> _addr_p) {
     }
     p.next();
     return buf.String();
-
 }
 
 private static void next(this ptr<parser> _addr_p) {
@@ -191,8 +184,7 @@ private static void next(this ptr<parser> _addr_p) {
         p.lit = p.scanner.TokenText();
     else 
         p.lit = "";
-    
-}
+    }
 
 private static (@string, @string) parseQualifiedName(this ptr<parser> _addr_p) {
     @string path = default;
@@ -239,7 +231,6 @@ private static (@string, @string) parseQualifiedNameStr(this ptr<parser> _addr_p
     }
 
     return ;
-
 }
 
 // getPkg returns the package for a given path. If the package is
@@ -259,7 +250,6 @@ private static ptr<types.Package> getPkg(this ptr<parser> _addr_p, @string pkgpa
         p.imports[pkgpath] = pkg;
     }
     return _addr_pkg!;
-
 }
 
 // parseExportedName is like parseQualifiedName, but
@@ -281,7 +271,6 @@ private static (ptr<types.Package>, @string) parseExportedName(this ptr<parser> 
         p.errorf("package %s (path = %q) not found", name, path);
     }
     return ;
-
 }
 
 // Name = QualifiedName | "?" .
@@ -292,11 +281,9 @@ private static @string parseName(this ptr<parser> _addr_p) {
         // Anonymous.
         p.next();
         return "";
-
     }
     var (_, name) = p.parseUnquotedQualifiedName();
     return name;
-
 }
 
 private static types.Type deref(types.Type typ) {
@@ -307,9 +294,7 @@ private static types.Type deref(types.Type typ) {
             typ = p.Elem();
         }
     }
-
     return typ;
-
 }
 
 // Field = Name Type [string] .
@@ -347,18 +332,15 @@ private static (ptr<types.Var>, @string) parseField(this ptr<parser> _addr_p, pt
                         break;
                     }
                 }
-
             }
 
         }
-
     }
     field = types.NewField(token.NoPos, pkg, name, typ, anon);
     if (p.tok == scanner.String) {
         tag = p.parseString();
     }
     return ;
-
 }
 
 // Param = Name ["..."] Type .
@@ -380,7 +362,6 @@ private static (ptr<types.Var>, bool) parseParam(this ptr<parser> _addr_p, ptr<t
         p.expect(':');
         p.expect(scanner.Int);
         p.expect('>');
-
     }
     if (p.tok == '.') {
         p.next();
@@ -394,7 +375,6 @@ private static (ptr<types.Var>, bool) parseParam(this ptr<parser> _addr_p, ptr<t
     }
     param = types.NewParam(token.NoPos, pkg, name, typ);
     return ;
-
 }
 
 // Var = Name Type .
@@ -409,10 +389,8 @@ private static ptr<types.Var> parseVar(this ptr<parser> _addr_p, ptr<types.Packa
         // or a variable defined in a different package.
         // We only want to record exported variables.
         return _addr_null!;
-
     }
     return _addr_v!;
-
 }
 
 // Conversion = "convert" "(" Type "," ConstValue ")" .
@@ -531,7 +509,6 @@ private static (constant.Value, types.Type) parseConstValue(this ptr<parser> _ad
     else 
         p.errorf("expected const value, got %s (%q)", scanner.TokenString(p.tok), p.lit);
         return ;
-
 }
 
 // Const = Name [Type] "=" ConstValue .
@@ -550,7 +527,6 @@ private static ptr<types.Const> parseConst(this ptr<parser> _addr_p, ptr<types.P
         typ = vtyp;
     }
     return _addr_types.NewConst(token.NoPos, pkg, name, typ, val)!;
-
 }
 
 // reserved is a singleton type used to fill type map slots that have
@@ -576,7 +552,6 @@ private static void reserve(this ptr<parser> _addr_p, nint n) {
             p.errorf("invalid type number %d (out of sync)", n);
         }
         p.typeList = append(p.typeList, reserved);
-
     }
     else
  {
@@ -584,7 +559,6 @@ private static void reserve(this ptr<parser> _addr_p, nint n) {
             p.errorf("previously visited type number %d", n);
         }
         p.typeList[n] = reserved;
-
     }
 }
 
@@ -617,6 +591,15 @@ private static void update(this ptr<parser> _addr_p, types.Type t, slice<object>
                     }
                     p.typeList[n] = t;
                     break;
+                case int n: /* Matches int literals */
+                    if (p.typeList[n] == t) {
+                        continue;
+                    }
+                    if (p.typeList[n] != reserved) {
+                        p.errorf("internal error: update(%v): %d not reserved", nlist, n);
+                    }
+                    p.typeList[n] = t;
+                    break;
                 case ptr<types.Pointer> n:
                     if (n != (new types.Pointer()).val) {
                         var elem = n.Elem();
@@ -634,7 +617,6 @@ private static void update(this ptr<parser> _addr_p, types.Type t, slice<object>
                     break;
                 }
             }
-
         }
         n = n__prev1;
     }
@@ -667,13 +649,11 @@ private static types.Type parseNamedType(this ptr<parser> _addr_p, slice<object>
             p.update(t, nlist);
             p.parseType(pkg); // discard
             return t;
-
         }
         t = p.parseType(pkg, nlist);
         obj = types.NewTypeName(token.NoPos, pkg, name, t);
         scope.Insert(obj);
         return t;
-
     }
     if (obj == null) { 
         // A named type may be referred to before the underlying type
@@ -682,7 +662,6 @@ private static types.Type parseNamedType(this ptr<parser> _addr_p, slice<object>
         types.NewNamed(tname, null, null);
         scope.Insert(tname);
         obj = tname;
-
     }
     t = obj.Type();
     p.update(t, nlist);
@@ -695,7 +674,6 @@ private static types.Type parseNamedType(this ptr<parser> _addr_p, slice<object>
             p.error("unexpected underlying type for non-named TypeName");
         }
         return t;
-
     }
     var underlying = p.parseType(pkg);
     if (nt.Underlying() == null) {
@@ -720,12 +698,9 @@ private static types.Type parseNamedType(this ptr<parser> _addr_p, slice<object>
                 if (p.expect(scanner.Ident) == "asm") {
                     p.parseUnquotedString();
                 }
-
                 p.expect('*');
                 p.expect('/');
-
             }
-
             p.expect('(');
             var (receiver, _) = p.parseParam(pkg);
             p.expect(')');
@@ -737,12 +712,9 @@ private static types.Type parseNamedType(this ptr<parser> _addr_p, slice<object>
 
             var sig = types.NewSignature(receiver, params, results, isVariadic);
             nt.AddMethod(types.NewFunc(token.NoPos, pkg, name, sig));
-
         }
-
     }
     return nt;
-
 }
 
 private static long parseInt64(this ptr<parser> _addr_p) {
@@ -754,7 +726,6 @@ private static long parseInt64(this ptr<parser> _addr_p) {
         p.error(err);
     }
     return n;
-
 }
 
 private static nint parseInt(this ptr<parser> _addr_p) {
@@ -766,7 +737,6 @@ private static nint parseInt(this ptr<parser> _addr_p) {
         p.error(err);
     }
     return int(n);
-
 }
 
 // ArrayOrSliceType = "[" [ int ] "]" Type .
@@ -792,7 +762,6 @@ private static types.Type parseArrayOrSliceType(this ptr<parser> _addr_p, ptr<ty
 
     t.val = types.NewArray(p.parseType(pkg), len).val;
     return t;
-
 }
 
 // MapType = "map" "[" Type "]" Type .
@@ -843,7 +812,6 @@ private static types.Type parseChanType(this ptr<parser> _addr_p, ptr<types.Pack
 
     t.val = types.NewChan(dir, p.parseType(pkg)).val;
     return t;
-
 }
 
 // StructType = "struct" "{" { Field } "}" .
@@ -899,7 +867,6 @@ private static (ptr<types.Tuple>, bool) parseParamList(this ptr<parser> _addr_p,
     p.expect(')');
 
     return (_addr_types.NewTuple(list)!, isVariadic);
-
 }
 
 // ResultList = Type | ParamList .
@@ -915,7 +882,6 @@ private static ptr<types.Tuple> parseResultList(this ptr<parser> _addr_p, ptr<ty
             }
             var (taa, _) = p.parseTypeAfterAngle(pkg);
             return _addr_types.NewTuple(types.NewParam(token.NoPos, pkg, "", taa))!;
-
             break;
         case '(': 
             var (params, _) = p.parseParamList(pkg);
@@ -925,7 +891,6 @@ private static ptr<types.Tuple> parseResultList(this ptr<parser> _addr_p, ptr<ty
             return _addr_null!;
             break;
     }
-
 }
 
 // FunctionType = ParamList ResultList .
@@ -957,7 +922,6 @@ private static ptr<types.Func> parseFunc(this ptr<parser> _addr_p, ptr<types.Pac
         }
         p.expect('*');
         p.expect('/');
-
     }
     var name = p.parseName();
     var f = types.NewFunc(token.NoPos, pkg, name, p.parseFunctionType(pkg, null));
@@ -969,10 +933,8 @@ private static ptr<types.Func> parseFunc(this ptr<parser> _addr_p, ptr<types.Pac
         // or a type$equal or type$hash function.
         // We only want to record exported functions.
         return _addr_null!;
-
     }
     return _addr_f!;
-
 }
 
 // InterfaceType = "interface" "{" { ("?" Type | Func) ";" } "}" .
@@ -1002,13 +964,11 @@ private static types.Type parseInterfaceType(this ptr<parser> _addr_p, ptr<types
             }
         }
         p.expect(';');
-
     }
     p.expect('}');
 
     t.val = types.NewInterfaceType(methods, embeddeds).val;
     return t;
-
 }
 
 // PointerType = "*" ("any" | Type) .
@@ -1029,7 +989,6 @@ private static types.Type parsePointerType(this ptr<parser> _addr_p, ptr<types.P
     t.val = new ptr<ptr<types.NewPointer>>(p.parseType(pkg, t));
 
     return t;
-
 }
 
 // TypeSpec = NamedType | MapType | ChanType | StructType | InterfaceType | PointerType | ArrayOrSliceType | FunctionType .
@@ -1063,7 +1022,6 @@ private static types.Type parseTypeSpec(this ptr<parser> _addr_p, ptr<types.Pack
         return p.parseFunctionType(pkg, nlist);
         p.errorf("expected type name or literal, got %s", scanner.TokenString(p.tok));
     return null;
-
 }
 
  
@@ -1090,7 +1048,6 @@ private static readonly nint gccgoBuiltinCOMPLEX128 = 18;
 private static readonly nint gccgoBuiltinERROR = 19;
 private static readonly nint gccgoBuiltinBYTE = 20;
 private static readonly nint gccgoBuiltinRUNE = 21;
-
 
 private static types.Type lookupBuiltinType(nint typ) {
     return new array<types.Type>(InitKeyedValues<types.Type>((gccgoBuiltinINT8, types.Typ[types.Int8]), (gccgoBuiltinINT16, types.Typ[types.Int16]), (gccgoBuiltinINT32, types.Typ[types.Int32]), (gccgoBuiltinINT64, types.Typ[types.Int64]), (gccgoBuiltinUINT8, types.Typ[types.Uint8]), (gccgoBuiltinUINT16, types.Typ[types.Uint16]), (gccgoBuiltinUINT32, types.Typ[types.Uint32]), (gccgoBuiltinUINT64, types.Typ[types.Uint64]), (gccgoBuiltinFLOAT32, types.Typ[types.Float32]), (gccgoBuiltinFLOAT64, types.Typ[types.Float64]), (gccgoBuiltinINT, types.Typ[types.Int]), (gccgoBuiltinUINT, types.Typ[types.Uint]), (gccgoBuiltinUINTPTR, types.Typ[types.Uintptr]), (gccgoBuiltinBOOL, types.Typ[types.Bool]), (gccgoBuiltinSTRING, types.Typ[types.String]), (gccgoBuiltinCOMPLEX64, types.Typ[types.Complex64]), (gccgoBuiltinCOMPLEX128, types.Typ[types.Complex128]), (gccgoBuiltinERROR, types.Universe.Lookup("error").Type()), (gccgoBuiltinBYTE, types.Universe.Lookup("byte").Type()), (gccgoBuiltinRUNE, types.Universe.Lookup("rune").Type())))[typ];
@@ -1152,7 +1109,6 @@ private static (types.Type, nint) parseTypeAfterAngle(this ptr<parser> _addr_p, 
     }
     p.expect('>');
     return ;
-
 }
 
 // parseTypeExtended is identical to parseType, but if the type in
@@ -1204,9 +1160,7 @@ private static void skipInlineBody(this ptr<parser> _addr_p) => func((defer, _, 
             p.error("unexpected EOF");
         }
         got += utf8.RuneLen(r);
-
     }
-
 });
 
 // Types = "types" maxp1 exportedp1 (offset length)* .
@@ -1252,7 +1206,6 @@ private static void parseTypes(this ptr<parser> _addr_p, ptr<types.Package> _add
             p.error("unexpected EOF");
         }
         sb.WriteRune(r);
-
     }
     var allTypeData = sb.String();
 
@@ -1268,7 +1221,6 @@ private static void parseTypes(this ptr<parser> _addr_p, ptr<types.Package> _add
 
         i = i__prev1;
     }
-
 });
 
 // parseSavedType parses one saved type definition.
@@ -1312,7 +1264,6 @@ private static PackageInit parsePackageInit(this ptr<parser> _addr_p) {
         priority = p.parseInt();
     }
     return new PackageInit(Name:name,InitFunc:initfunc,Priority:priority);
-
 }
 
 // Create the package if we have parsed both the package path and package name.
@@ -1334,7 +1285,6 @@ private static void parseInitDataDirective(this ptr<parser> _addr_p) => func((de
     if (p.tok != scanner.Ident) { 
         // unexpected token kind; panic
         p.expect(scanner.Ident);
-
     }
     switch (p.lit) {
         case "v1": 
@@ -1367,7 +1317,6 @@ private static void parseInitDataDirective(this ptr<parser> _addr_p) => func((de
                 p.parseInt64();
             }
             p.expectEOL();
-
             break;
         case "checksum": 
             // Don't let the scanner try to parse the checksum as a number.
@@ -1383,7 +1332,6 @@ private static void parseInitDataDirective(this ptr<parser> _addr_p) => func((de
             p.errorf("unexpected identifier: %q", p.lit);
             break;
     }
-
 });
 
 // Directive = InitDataDirective |
@@ -1402,7 +1350,6 @@ private static void parseDirective(this ptr<parser> _addr_p) {
     if (p.tok != scanner.Ident) { 
         // unexpected token kind; panic
         p.expect(scanner.Ident);
-
     }
     switch (p.lit) {
         case "v1": 
@@ -1429,7 +1376,6 @@ private static void parseDirective(this ptr<parser> _addr_p) {
                 p.parseUnquotedString();
             }
             p.expectEOL();
-
             break;
         case "pkgpath": 
             p.next();
@@ -1469,7 +1415,6 @@ private static void parseDirective(this ptr<parser> _addr_p) {
                 p.pkg.Scope().Insert(fun);
             }
             p.expectEOL();
-
             break;
         case "type": 
             p.next();
@@ -1483,7 +1428,6 @@ private static void parseDirective(this ptr<parser> _addr_p) {
                 p.pkg.Scope().Insert(v);
             }
             p.expectEOL();
-
             break;
         case "const": 
             p.next();
@@ -1495,7 +1439,6 @@ private static void parseDirective(this ptr<parser> _addr_p) {
             p.errorf("unexpected identifier: %q", p.lit);
             break;
     }
-
 }
 
 // Package = { Directive } .
@@ -1510,7 +1453,6 @@ private static ptr<types.Package> parsePackage(this ptr<parser> _addr_p) {
             p.errorf("internal error: fixup can't be applied, loop required");
         }
         f.toUpdate.SetUnderlying(f.target.Underlying());
-
     }    p.fixups = null;
     foreach (var (_, typ) in p.typeList) {
         {
@@ -1521,10 +1463,8 @@ private static ptr<types.Package> parsePackage(this ptr<parser> _addr_p) {
             }
 
         }
-
     }    p.pkg.MarkComplete();
     return _addr_p.pkg!;
-
 }
 
 } // end gccgoimporter_package

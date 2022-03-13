@@ -7,16 +7,18 @@
 
 // Berkeley packet filter for BSD variants
 
-// package syscall -- go2cs converted at 2022 March 06 22:08:07 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:23:56 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\bpf_bsd.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+
+
+// Deprecated: Use golang.org/x/net/bpf instead.
 
 public static partial class syscall_package {
 
-    // Deprecated: Use golang.org/x/net/bpf instead.
 public static ptr<BpfInsn> BpfStmt(nint code, nint k) {
     return addr(new BpfInsn(Code:uint16(code),K:uint32(k)));
 }
@@ -37,7 +39,6 @@ public static (nint, error) BpfBuflen(nint fd) {
         return (0, error.As(Errno(err))!);
     }
     return (l, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -50,7 +51,6 @@ public static (nint, error) SetBpfBuflen(nint fd, nint l) {
         return (0, error.As(Errno(err))!);
     }
     return (l, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -64,7 +64,6 @@ public static (nint, error) BpfDatalink(nint fd) {
         return (0, error.As(Errno(err))!);
     }
     return (t, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -77,7 +76,6 @@ public static (nint, error) SetBpfDatalink(nint fd, nint t) {
         return (0, error.As(Errno(err))!);
     }
     return (t, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -87,7 +85,6 @@ public static error SetBpfPromisc(nint fd, nint m) {
         return error.As(Errno(err))!;
     }
     return error.As(null!)!;
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -97,7 +94,6 @@ public static error FlushBpf(nint fd) {
         return error.As(Errno(err))!;
     }
     return error.As(null!)!;
-
 }
 
 private partial struct ivalue {
@@ -116,7 +112,6 @@ public static (@string, error) BpfInterface(nint fd, @string name) {
         return ("", error.As(Errno(err))!);
     }
     return (name, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -128,7 +123,6 @@ public static error SetBpfInterface(nint fd, @string name) {
         return error.As(Errno(err))!;
     }
     return error.As(null!)!;
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -142,7 +136,6 @@ public static (ptr<Timeval>, error) BpfTimeout(nint fd) {
         return (_addr_null!, error.As(Errno(err))!);
     }
     return (_addr__addr_tv!, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -154,7 +147,6 @@ public static error SetBpfTimeout(nint fd, ptr<Timeval> _addr_tv) {
         return error.As(Errno(err))!;
     }
     return error.As(null!)!;
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -168,7 +160,6 @@ public static (ptr<BpfStat>, error) BpfStats(nint fd) {
         return (_addr_null!, error.As(Errno(err))!);
     }
     return (_addr__addr_s!, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -178,7 +169,6 @@ public static error SetBpfImmediate(nint fd, nint m) {
         return error.As(Errno(err))!;
     }
     return error.As(null!)!;
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -191,7 +181,6 @@ public static error SetBpf(nint fd, slice<BpfInsn> i) {
         return error.As(Errno(err))!;
     }
     return error.As(null!)!;
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -205,7 +194,6 @@ public static error CheckBpfVersion(nint fd) {
         return error.As(EINVAL)!;
     }
     return error.As(null!)!;
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -219,7 +207,6 @@ public static (nint, error) BpfHeadercmpl(nint fd) {
         return (0, error.As(Errno(err))!);
     }
     return (f, error.As(null!)!);
-
 }
 
 // Deprecated: Use golang.org/x/net/bpf instead.
@@ -229,7 +216,6 @@ public static error SetBpfHeadercmpl(nint fd, nint f) {
         return error.As(Errno(err))!;
     }
     return error.As(null!)!;
-
 }
 
 } // end syscall_package

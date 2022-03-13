@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mips64 -- go2cs converted at 2022 March 06 23:11:17 UTC
+// package mips64 -- go2cs converted at 2022 March 13 06:24:37 UTC
 // import "cmd/compile/internal/mips64" ==> using mips64 = go.cmd.compile.@internal.mips64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\mips64\ssa.go
-using math = go.math_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using mips = go.cmd.@internal.obj.mips_package;
-
 namespace go.cmd.compile.@internal;
+
+using math = math_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using mips = cmd.@internal.obj.mips_package;
+
+
+// isFPreg reports whether r is an FP register
 
 public static partial class mips64_package {
 
-    // isFPreg reports whether r is an FP register
 private static bool isFPreg(short r) {
     return mips.REG_F0 <= r && r <= mips.REG_F31;
 }
@@ -37,12 +39,10 @@ private static obj.As loadByType(ptr<types.Type> _addr_t, short r) => func((_, p
     if (isFPreg(r)) {
         if (t.Size() == 4) { // float32 or int32
             return mips.AMOVF;
-
         }
         else
  { // float64 or int64
             return mips.AMOVD;
-
         }
     }
     else
@@ -56,7 +56,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t, short r) => func((_, p
                 {
                                return mips.AMOVBU;
                            }
-
                 break;
             case 2: 
                            if (t.IsSigned()) {
@@ -66,7 +65,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t, short r) => func((_, p
                 {
                                return mips.AMOVHU;
                            }
-
                 break;
             case 4: 
                            if (t.IsSigned()) {
@@ -76,16 +74,13 @@ private static obj.As loadByType(ptr<types.Type> _addr_t, short r) => func((_, p
                 {
                                return mips.AMOVWU;
                            }
-
                 break;
             case 8: 
                 return mips.AMOVV;
                 break;
         }
-
     }
     panic("bad load type");
-
 });
 
 // storeByType returns the store instruction of the given type.
@@ -95,12 +90,10 @@ private static obj.As storeByType(ptr<types.Type> _addr_t, short r) => func((_, 
     if (isFPreg(r)) {
         if (t.Size() == 4) { // float32 or int32
             return mips.AMOVF;
-
         }
         else
  { // float64 or int64
             return mips.AMOVD;
-
         }
     }
     else
@@ -119,10 +112,8 @@ private static obj.As storeByType(ptr<types.Type> _addr_t, short r) => func((_, 
                 return mips.AMOVV;
                 break;
         }
-
     }
     panic("bad store type");
-
 });
 
 private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_v) {
@@ -157,7 +148,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.From.Reg = mips.REGTMP;
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = y;
-
         }
         goto __switch_break0;
     }
@@ -184,7 +174,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.From.Reg = mips.REGTMP;
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = r;
-
         }
         goto __switch_break0;
     }
@@ -203,7 +192,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = mips.REGTMP;
             r = mips.REGTMP;
-
         }
         p = s.Prog(storeByType(_addr_v.Type, r));
         p.From.Type = obj.TYPE_REG;
@@ -266,7 +254,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.From.Reg = mips.REGTMP;
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = r;
-
         }
         goto __switch_break0;
     }
@@ -325,7 +312,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             }
 
         }
-
         p.To.Type = obj.TYPE_REG;
         p.To.Reg = v.Reg();
         goto __switch_break0;
@@ -799,7 +785,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         }
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Pos.Line()==1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
         goto __switch_break0;
     }
@@ -860,7 +845,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         v.Fatalf("genValue not implemented: %s", v.LongString());
 
     __switch_break0:;
-
 }
 
 
@@ -917,14 +901,12 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
                 p = s.Br(jmp.invasm, b.Succs[1].Block());
                 s.Br(obj.AJMP, b.Succs[0].Block());
             }
-
                 if (!b.Controls[0].Type.IsFlags()) {
             p.From.Type = obj.TYPE_REG;
             p.From.Reg = b.Controls[0].Reg();
         }
     else 
         b.Fatalf("branch not implemented: %s", b.LongString());
-    
-}
+    }
 
 } // end mips64_package

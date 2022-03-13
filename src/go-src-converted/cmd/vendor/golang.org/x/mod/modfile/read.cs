@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfile -- go2cs converted at 2022 March 06 23:26:00 UTC
+// package modfile -- go2cs converted at 2022 March 13 06:40:51 UTC
 // import "cmd/vendor/golang.org/x/mod/modfile" ==> using modfile = go.cmd.vendor.golang.org.x.mod.modfile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\modfile\read.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.mod;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// A Position describes an arbitrary source position in a file, including the
+// file, line, column, and byte offset.
+
+using System;
 public static partial class modfile_package {
 
-    // A Position describes an arbitrary source position in a file, including the
-    // file, line, column, and byte offset.
 public partial struct Position {
     public nint Line; // line in input (starting at 1)
     public nint LineRune; // rune in line (starting at 1)
@@ -40,10 +41,8 @@ public static Position add(this Position p, @string s) {
             p.LineRune = 1;
         }
     }
-
     p.LineRune += utf8.RuneCountInString(s);
     return p;
-
 }
 
 // An Expr represents an input element.
@@ -99,7 +98,6 @@ private static (Position, Position) Span(this ptr<FileSyntax> _addr_x) {
     start, _ = x.Stmt[0].Span();
     _, end = x.Stmt[len(x.Stmt) - 1].Span();
     return (start, end);
-
 }
 
 // addLine adds a line containing the given tokens to the file.
@@ -134,7 +132,6 @@ Loop:
                             _breakLoop = true;
                             break;
                         }
-
                         break;
                     case ptr<LineBlock> stmt:
                         if (stmt.Token[0] == tokens[0]) {
@@ -142,16 +139,13 @@ Loop:
                             _breakLoop = true;
                             break;
                         }
-
                         break;
                 }
-
             }
 
 
             i = i__prev1;
         }
-
     }
     Func<nint, ptr<Line>> newLineAfter = i => {
         ptr<Line> @new = addr(new Line(Token:tokens));
@@ -165,7 +159,6 @@ Loop:
             x.Stmt[i + 1] = new;
         }
         return _addr_new!;
-
     };
 
     if (hint != null) {
@@ -191,9 +184,7 @@ Loop:
                             @new = addr(new Line(Token:tokens[1:],InBlock:true));
                             block.Line = append(block.Line, new);
                             return _addr_new!;
-
                         }
-
                         break;
                     case ptr<LineBlock> stmt:
                         if (stmt == hint) {
@@ -216,13 +207,10 @@ Loop:
                                 @new = addr(new Line(Token:tokens[1:],InBlock:true));
                                 stmt.Line[j + 1] = new;
                                 return _addr_new!;
-
                             }
-
                         }
                         break;
                 }
-
             }
 
             i = i__prev1;
@@ -232,7 +220,6 @@ Loop:
     @new = addr(new Line(Token:tokens));
     x.Stmt = append(x.Stmt, new);
     return _addr_new!;
-
 }
 
 private static void updateLine(this ptr<FileSyntax> _addr_x, ptr<Line> _addr_line, params @string[] tokens) {
@@ -244,7 +231,6 @@ private static void updateLine(this ptr<FileSyntax> _addr_x, ptr<Line> _addr_lin
         tokens = tokens[(int)1..];
     }
     line.Token = tokens;
-
 }
 
 // markRemoved modifies line so that it (and its end-of-line comment, if any)
@@ -295,28 +281,23 @@ private static void Cleanup(this ptr<FileSyntax> _addr_x) {
                     if (ww == 0) {
                         continue;
                     }
-
                     if (ww == 1) { 
                         // Collapse block into single line.
                         ptr<Line> line = addr(new Line(Comments:Comments{Before:commentsAdd(stmt.Before,stmt.Line[0].Before),Suffix:commentsAdd(stmt.Line[0].Suffix,stmt.Suffix),After:commentsAdd(stmt.Line[0].After,stmt.After),},Token:stringsAdd(stmt.Token,stmt.Line[0].Token),));
                         x.Stmt[w] = line;
                         w++;
                         continue;
-
                     }
-
                     stmt.Line = stmt.Line[..(int)ww];
                     break;
             }
             x.Stmt[w] = stmt;
             w++;
-
         }
         stmt = stmt__prev1;
     }
 
     x.Stmt = x.Stmt[..(int)w];
-
 }
 
 private static slice<Comment> commentsAdd(slice<Comment> x, slice<Comment> y) {
@@ -455,7 +436,6 @@ private static (ptr<FileSyntax>, error) parse(@string file, slice<byte> data) =>
             }
 
         }
-
         if (err == null && len(@in.parseErrors) > 0) {
             err = @in.parseErrors;
         }
@@ -476,7 +456,6 @@ private static (ptr<FileSyntax>, error) parse(@string file, slice<byte> data) =>
     @in.assignComments();
 
     return (_addr_@in.file!, error.As(null!)!);
-
 });
 
 // Error is called to report an error.
@@ -504,7 +483,6 @@ private static nint peekRune(this ptr<input> _addr_@in) {
     }
     var (r, _) = utf8.DecodeRune(@in.remaining);
     return int(r);
-
 }
 
 // peekPrefix reports whether the remaining input begins with the given prefix.
@@ -519,7 +497,6 @@ private static bool peekPrefix(this ptr<input> _addr_@in, @string prefix) {
         }
     }
     return true;
-
 }
 
 // readRune consumes and returns the next rune in the input.
@@ -541,7 +518,6 @@ private static nint readRune(this ptr<input> _addr_@in) {
     }
     @in.pos.Byte += size;
     return int(r);
-
 }
 
 private partial struct token {
@@ -601,7 +577,6 @@ private static void endToken(this ptr<input> _addr_@in, tokenKind kind) {
     }
     @in.token.text = text;
     @in.token.endPos = @in.pos;
-
 }
 
 // peek returns the kind of the the next token returned by lex.
@@ -643,7 +618,8 @@ private static void readToken(this ptr<input> _addr_@in) {
             @in.readRune(); 
 
             // Consume comment.
-            while (len(@in.remaining) > 0 && @in.readRune() != '\n')             } 
+            while (len(@in.remaining) > 0 && @in.readRune() != '\n') {
+            } 
 
             // If we are at top level (not in a statement), hand the comment to
             // the parser as a _COMMENT token. The grammar is written
@@ -662,13 +638,11 @@ private static void readToken(this ptr<input> _addr_@in) {
             @in.endToken(_EOLCOMMENT);
             @in.comments = append(@in.comments, new Comment(in.token.pos,in.token.text,suffix));
             return ;
-
         }
         if (@in.peekPrefix("/*")) {
             @in.Error("mod files must use // comments (not /* */ comments)");
         }
         break;
-
     } 
 
     // Found the beginning of the next token.
@@ -760,10 +734,8 @@ private static void readToken(this ptr<input> _addr_@in) {
             @in.Error("mod files must use // comments (not /* */ comments)");
         }
         @in.readRune();
-
     }
     @in.endToken(_IDENT);
-
 }
 
 // isIdent reports whether c is an identifier rune.
@@ -796,7 +768,6 @@ private static bool isIdent(nint c) {
                 break;
         }
     }
-
 }
 
 // Comment assignment.
@@ -959,7 +930,6 @@ private static void assignComments(this ptr<input> _addr_@in) {
             xcom.Suffix = append(xcom.Suffix, suffix[len(suffix) - 1]);
             suffix = suffix[..(int)len(suffix) - 1];
         }
-
     } 
 
     // We assigned suffix comments in reverse.
@@ -976,7 +946,6 @@ private static void assignComments(this ptr<input> _addr_@in) {
     }
 
     @in.file.Before = append(@in.file.Before, suffix);
-
 }
 
 // reverseComments reverses the []Comment list.
@@ -989,7 +958,6 @@ private static void reverseComments(slice<Comment> list) {
             (list[i], list[j]) = (list[j], list[i]);            (i, j) = (i + 1, j - 1);
         }
     }
-
 }
 
 private static void parseFile(this ptr<input> _addr_@in) {
@@ -1023,9 +991,7 @@ private static void parseFile(this ptr<input> _addr_@in) {
                 @in.file.Stmt[len(@in.file.Stmt) - 1].Comment().Before = cb.Before;
                 cb = null;
             }
-        
-    }
-
+            }
 }
 
 private static void parseStmt(this ptr<input> _addr_@in) {
@@ -1049,7 +1015,6 @@ private static void parseStmt(this ptr<input> _addr_@in) {
                     // Start of block: no more tokens on this line.
                     @in.file.Stmt = append(@in.file.Stmt, @in.parseLineBlock(start, tokens, tok));
                     return ;
-
                 }
                 else if (next == ')') {
                     var rparen = @in.lex();
@@ -1058,29 +1023,21 @@ private static void parseStmt(this ptr<input> _addr_@in) {
                         @in.lex();
                         @in.file.Stmt = append(@in.file.Stmt, addr(new LineBlock(Start:start,Token:tokens,LParen:LParen{Pos:tok.pos},RParen:RParen{Pos:rparen.pos},)));
                         return ;
-
                     } 
                     // '( )' in the middle of the line, not a block.
                     tokens = append(tokens, tok.text, rparen.text);
-
                 }
                 else
  { 
                     // '(' in the middle of the line, not a block.
                     tokens = append(tokens, tok.text);
-
                 }
 
-
             }
-
-
         else 
             tokens = append(tokens, tok.text);
             end = tok.endPos;
-        
-    }
-
+            }
 }
 
 private static ptr<LineBlock> parseLineBlock(this ptr<input> _addr_@in, Position start, slice<@string> token, token lparen) {
@@ -1118,9 +1075,7 @@ private static ptr<LineBlock> parseLineBlock(this ptr<input> _addr_@in, Position
             x.Line = append(x.Line, l);
             l.Comment().Before = comments;
             comments = null;
-        
-    }
-
+            }
 }
 
 private static ptr<Line> parseLine(this ptr<input> _addr_@in) {
@@ -1140,9 +1095,7 @@ private static ptr<Line> parseLine(this ptr<input> _addr_@in) {
         }
         tokens = append(tokens, tok.text);
         end = tok.endPos;
-
     }
-
 }
 
 private static slice<byte> slashSlash = (slice<byte>)"//";private static slice<byte> moduleStr = (slice<byte>)"module";
@@ -1166,7 +1119,6 @@ public static @string ModulePath(slice<byte> mod) {
             i = i__prev1;
 
         }
-
         {
             var i__prev1 = i;
 
@@ -1179,7 +1131,6 @@ public static @string ModulePath(slice<byte> mod) {
             i = i__prev1;
 
         }
-
         line = bytes.TrimSpace(line);
         if (!bytes.HasPrefix(line, moduleStr)) {
             continue;
@@ -1195,12 +1146,9 @@ public static @string ModulePath(slice<byte> mod) {
             if (err != null) {
                 return ""; // malformed quoted string or multiline module path
             }
-
             return p;
-
         }
         return string(line);
-
     }
     return ""; // missing module path
 }

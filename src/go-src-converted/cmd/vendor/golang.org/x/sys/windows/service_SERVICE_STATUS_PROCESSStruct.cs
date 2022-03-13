@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:30:36 UTC
+//     Generated on 2022 March 13 06:41:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace sys
 {
     public static partial class windows_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SERVICE_STATUS_PROCESS
         {
             // Constructors
@@ -73,7 +73,7 @@ namespace sys
             public static implicit operator SERVICE_STATUS_PROCESS(NilType nil) => default(SERVICE_STATUS_PROCESS);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SERVICE_STATUS_PROCESS SERVICE_STATUS_PROCESS_cast(dynamic value)
         {
             return new SERVICE_STATUS_PROCESS(value.ServiceType, value.CurrentState, value.ControlsAccepted, value.Win32ExitCode, value.ServiceSpecificExitCode, value.CheckPoint, value.WaitHint, value.ProcessId, value.ServiceFlags);

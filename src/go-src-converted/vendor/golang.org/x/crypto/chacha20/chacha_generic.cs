@@ -4,17 +4,18 @@
 
 // Package chacha20 implements the ChaCha20 and XChaCha20 encryption algorithms
 // as specified in RFC 8439 and draft-irtf-cfrg-xchacha-01.
-// package chacha20 -- go2cs converted at 2022 March 06 23:36:32 UTC
+
+// package chacha20 -- go2cs converted at 2022 March 13 06:44:35 UTC
 // import "vendor/golang.org/x/crypto/chacha20" ==> using chacha20 = go.vendor.golang.org.x.crypto.chacha20_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\chacha20\chacha_generic.go
-using cipher = go.crypto.cipher_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using bits = go.math.bits_package;
-
-using subtle = go.golang.org.x.crypto.@internal.subtle_package;
-
 namespace go.vendor.golang.org.x.crypto;
+
+using cipher = crypto.cipher_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using bits = math.bits_package;
+
+using subtle = golang.org.x.crypto.@internal.subtle_package;
 
 public static partial class chacha20_package {
 
@@ -32,7 +33,6 @@ public static readonly nint NonceSize = 12;
 // NonceSizeX is the size of the nonce used with the XChaCha20 variant of
 // this cipher, in bytes.
 public static readonly nint NonceSizeX = 24;
-
 
 // Cipher is a stateful instance of ChaCha20 or XChaCha20 using a particular key
 // and nonce. A *Cipher implements the cipher.Stream interface.
@@ -82,7 +82,6 @@ public static (ptr<Cipher>, error) NewUnauthenticatedCipher(slice<byte> key, sli
     // escape to the heap.
     ptr<Cipher> c = addr(new Cipher());
     return _addr_newUnauthenticatedCipher(c, key, nonce)!;
-
 }
 
 private static (ptr<Cipher>, error) newUnauthenticatedCipher(ptr<Cipher> _addr_c, slice<byte> key, slice<byte> nonce) {
@@ -101,7 +100,6 @@ private static (ptr<Cipher>, error) newUnauthenticatedCipher(ptr<Cipher> _addr_c
         var cNonce = make_slice<byte>(NonceSize);
         copy(cNonce[(int)4..(int)12], nonce[(int)16..(int)24]);
         nonce = cNonce;
-
     }
     else if (len(nonce) != NonceSize) {
         return (_addr_null!, error.As(errors.New("chacha20: wrong nonce size"))!);
@@ -109,7 +107,6 @@ private static (ptr<Cipher>, error) newUnauthenticatedCipher(ptr<Cipher> _addr_c
     (key, nonce) = (key[..(int)KeySize], nonce[..(int)NonceSize]);    c.key = new array<uint>(new uint[] { binary.LittleEndian.Uint32(key[0:4]), binary.LittleEndian.Uint32(key[4:8]), binary.LittleEndian.Uint32(key[8:12]), binary.LittleEndian.Uint32(key[12:16]), binary.LittleEndian.Uint32(key[16:20]), binary.LittleEndian.Uint32(key[20:24]), binary.LittleEndian.Uint32(key[24:28]), binary.LittleEndian.Uint32(key[28:32]) });
     c.nonce = new array<uint>(new uint[] { binary.LittleEndian.Uint32(nonce[0:4]), binary.LittleEndian.Uint32(nonce[4:8]), binary.LittleEndian.Uint32(nonce[8:12]) });
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // The constant first 4 words of the ChaCha20 state.
@@ -254,8 +251,7 @@ private static void xorKeyStreamBlocksGeneric(this ptr<Cipher> _addr_s, slice<by
     var c0 = j0;    var c1 = j1;    var c2 = j2;    var c3 = j3;
     var c4 = s.key[0];    var c5 = s.key[1];    var c6 = s.key[2];    var c7 = s.key[3];
     var c8 = s.key[4];    var c9 = s.key[5];    var c10 = s.key[6];    var c11 = s.key[7];
-    var _ = s.counter;    var c13 = s.nonce[0];    var c14 = s.nonce[1];    var c15 = s.nonce[2];
- 
+    var _ = s.counter;    var c13 = s.nonce[0];    var c14 = s.nonce[1];    var c15 = s.nonce[2]; 
 
     // Three quarters of the first round don't depend on the counter, so we can
     // calculate them here, and reuse them for multiple blocks in the loop, and
@@ -289,7 +285,6 @@ private static void xorKeyStreamBlocksGeneric(this ptr<Cipher> _addr_s, slice<by
             x1, x6, x11, x12 = quarterRound(x1, x6, x11, x12);
             x2, x7, x8, x13 = quarterRound(x2, x7, x8, x13);
             x3, x4, x9, x14 = quarterRound(x3, x4, x9, x14);
-
         } 
 
         // Add back the initial state to generate the key stream, then
@@ -315,7 +310,6 @@ private static void xorKeyStreamBlocksGeneric(this ptr<Cipher> _addr_s, slice<by
 
         (src, dst) = (src[(int)blockSize..], dst[(int)blockSize..]);
     }
-
 });
 
 // HChaCha20 uses the ChaCha20 core to generate a derived key from a 32 bytes
@@ -330,7 +324,6 @@ public static (slice<byte>, error) HChaCha20(slice<byte> key, slice<byte> nonce)
     // escape to the heap.
     var @out = make_slice<byte>(32);
     return hChaCha20(out, key, nonce);
-
 }
 
 private static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key, slice<byte> nonce) {
@@ -372,7 +365,6 @@ private static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key,
         x1, x6, x11, x12 = quarterRound(x1, x6, x11, x12);
         x2, x7, x8, x13 = quarterRound(x2, x7, x8, x13);
         x3, x4, x9, x14 = quarterRound(x3, x4, x9, x14);
-
     }
 
     _ = out[31]; // bounds check elimination hint
@@ -385,7 +377,6 @@ private static (slice<byte>, error) hChaCha20(slice<byte> @out, slice<byte> key,
     binary.LittleEndian.PutUint32(out[(int)24..(int)28], x14);
     binary.LittleEndian.PutUint32(out[(int)28..(int)32], x15);
     return (out, error.As(null!)!);
-
 }
 
 } // end chacha20_package

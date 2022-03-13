@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:03 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:55 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\dim.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Dim returns the maximum of x-y or 0.
-    //
-    // Special cases are:
-    //    Dim(+Inf, +Inf) = NaN
-    //    Dim(-Inf, -Inf) = NaN
-    //    Dim(x, NaN) = Dim(NaN, x) = NaN
+// Dim returns the maximum of x-y or 0.
+//
+// Special cases are:
+//    Dim(+Inf, +Inf) = NaN
+//    Dim(-Inf, -Inf) = NaN
+//    Dim(x, NaN) = Dim(NaN, x) = NaN
 public static double Dim(double x, double y) { 
     // The special cases result in NaN after the subtraction:
     //      +Inf - +Inf = NaN
@@ -27,10 +25,8 @@ public static double Dim(double x, double y) {
     if (v <= 0) { 
         // v is negative or 0
         return 0;
-
     }
     return v;
-
 }
 
 // Max returns the larger of x or y.
@@ -45,7 +41,6 @@ public static double Max(double x, double y) {
         return archMax(x, y);
     }
     return max(x, y);
-
 }
 
 private static double max(double x, double y) { 
@@ -64,7 +59,6 @@ private static double max(double x, double y) {
         return x;
     }
     return y;
-
 }
 
 // Min returns the smaller of x or y.
@@ -78,7 +72,6 @@ public static double Min(double x, double y) {
         return archMin(x, y);
     }
     return min(x, y);
-
 }
 
 private static double min(double x, double y) { 
@@ -97,7 +90,6 @@ private static double min(double x, double y) {
         return x;
     }
     return y;
-
 }
 
 } // end math_package

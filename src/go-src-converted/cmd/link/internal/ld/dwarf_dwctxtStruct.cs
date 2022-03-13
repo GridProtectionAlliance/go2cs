@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:10 UTC
+//     Generated on 2022 March 13 06:34:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct dwctxt
         {
             // Constructors
@@ -87,7 +87,7 @@ namespace @internal
             public static implicit operator dwctxt(NilType nil) => default(dwctxt);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static dwctxt dwctxt_cast(dynamic value)
         {
             return new dwctxt(ref value.linkctxt, ref value.ldr, ref value.arch, value.tmap, value.rtmap, value.tdmap, value.typeRuntimeEface, value.typeRuntimeIface, value.uintptrInfoSym, ref value.dwmu);

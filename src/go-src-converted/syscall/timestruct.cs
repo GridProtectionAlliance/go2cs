@@ -5,16 +5,14 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:18 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:38 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\timestruct.go
-
-
 namespace go;
 
 public static partial class syscall_package {
 
-    // TimespecToNSec returns the time stored in ts as nanoseconds.
+// TimespecToNSec returns the time stored in ts as nanoseconds.
 public static long TimespecToNsec(Timespec ts) {
     return ts.Nano();
 }
@@ -28,7 +26,6 @@ public static Timespec NsecToTimespec(long nsec) {
         sec--;
     }
     return setTimespec(sec, nsec);
-
 }
 
 // TimevalToNsec returns the time stored in tv as nanoseconds.
@@ -46,7 +43,6 @@ public static Timeval NsecToTimeval(long nsec) {
         sec--;
     }
     return setTimeval(sec, usec);
-
 }
 
 } // end syscall_package

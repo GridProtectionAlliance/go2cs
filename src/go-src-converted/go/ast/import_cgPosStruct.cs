@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:42:58 UTC
+//     Generated on 2022 March 13 05:54:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace go
 {
     public static partial class ast_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct cgPos
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace go
             public static implicit operator cgPos(NilType nil) => default(cgPos);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static cgPos cgPos_cast(dynamic value)
         {
             return new cgPos(value.left, ref value.cg);

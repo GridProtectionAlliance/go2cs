@@ -5,16 +5,14 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || zos
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris zos
 
-// package unix -- go2cs converted at 2022 March 06 23:26:34 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:18 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\fdset.go
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
 
 public static partial class unix_package {
 
-    // Set adds fd to the set fds.
+// Set adds fd to the set fds.
 private static void Set(this ptr<FdSet> _addr_fds, nint fd) {
     ref FdSet fds = ref _addr_fds.val;
 

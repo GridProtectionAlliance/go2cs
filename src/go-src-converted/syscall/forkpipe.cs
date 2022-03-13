@@ -5,16 +5,14 @@
 //go:build aix || darwin || solaris
 // +build aix darwin solaris
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:35 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:31 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\forkpipe.go
-
-
 namespace go;
 
 public static partial class syscall_package {
 
-    // Try to open a pipe with O_CLOEXEC set on both file descriptors.
+// Try to open a pipe with O_CLOEXEC set on both file descriptors.
 private static error forkExecPipe(slice<nint> p) {
     var err = Pipe(p);
     if (err != null) {
@@ -26,7 +24,6 @@ private static error forkExecPipe(slice<nint> p) {
     }
     _, err = fcntl(p[1], F_SETFD, FD_CLOEXEC);
     return error.As(err)!;
-
 }
 
 } // end syscall_package

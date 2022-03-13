@@ -2,28 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package amd64 -- go2cs converted at 2022 March 06 23:14:57 UTC
+// package amd64 -- go2cs converted at 2022 March 13 06:28:26 UTC
 // import "cmd/compile/internal/amd64" ==> using amd64 = go.cmd.compile.@internal.amd64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\amd64\ssa.go
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using math = go.math_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using x86 = go.cmd.@internal.obj.x86_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using math = math_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using objw = cmd.compile.@internal.objw_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using x86 = cmd.@internal.obj.x86_package;
+
+
+// markMoves marks any MOVXconst ops that need to avoid clobbering flags.
 
 public static partial class amd64_package {
 
-    // markMoves marks any MOVXconst ops that need to avoid clobbering flags.
 private static void ssaMarkMoves(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_b) {
     ref ssagen.State s = ref _addr_s.val;
     ref ssa.Block b = ref _addr_b.val;
@@ -36,7 +38,6 @@ private static void ssaMarkMoves(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr
         if (flive && (v.Op == ssa.OpAMD64MOVLconst || v.Op == ssa.OpAMD64MOVQconst)) { 
             // The "mark" is any non-nil Aux value.
             v.Aux = v;
-
         }
         if (v.Type.IsFlags()) {
             flive = false;
@@ -47,7 +48,6 @@ private static void ssaMarkMoves(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr
             }
         }
     }
-
 }
 
 // loadByType returns the load instruction of the given type.
@@ -64,10 +64,8 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) {
                 return x86.AMOVWLZX;
                 break;
         }
-
     }
     return storeByType(_addr_t);
-
 }
 
 // storeByType returns the store instruction of the given type.
@@ -84,7 +82,6 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return x86.AMOVSD;
                 break;
         }
-
     }
     else
  {
@@ -102,10 +99,8 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return x86.AMOVQ;
                 break;
         }
-
     }
     panic(fmt.Sprintf("bad store type %v", t));
-
 });
 
 // moveByType returns the reg->reg move instruction of the given type.
@@ -118,7 +113,6 @@ private static obj.As moveByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
         // There is no xmm->xmm move with 1 byte opcode,
         // so use movups, which has 2 byte opcode.
         return x86.AMOVUPS;
-
     }
     else
  {
@@ -143,7 +137,6 @@ private static obj.As moveByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 panic(fmt.Sprintf("bad int register width %d:%v", t.Size(), t));
                 break;
         }
-
     }
 });
 
@@ -179,7 +172,6 @@ private static void memIdx(ptr<obj.Addr> _addr_a, ptr<ssa.Value> _addr_v) {
     }
     a.Reg = r;
     a.Index = i;
-
 }
 
 // DUFFZERO consists of repeated blocks of 4 MOVUPSs + LEAQ,
@@ -213,7 +205,6 @@ private static (long, long) duff(long size) => func((_, panic, _) => {
         adj -= dzClearStep * (dzBlockLen - steps);
     }
     return (off, adj);
-
 });
 
 private static void getgFromTLS(ptr<ssagen.State> _addr_s, short r) {
@@ -228,7 +219,6 @@ private static void getgFromTLS(ptr<ssagen.State> _addr_s, short r) {
         p.From.Reg = x86.REG_TLS;
         p.To.Type = obj.TYPE_REG;
         p.To.Reg = r;
-
     }
     else
  { 
@@ -246,7 +236,6 @@ private static void getgFromTLS(ptr<ssagen.State> _addr_s, short r) {
         q.From.Scale = 1;
         q.To.Type = obj.TYPE_REG;
         q.To.Reg = r;
-
     }
 }
 
@@ -290,7 +279,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
  {
                 asm = x86.ALEAL;
             }
-
             p = s.Prog(asm);
             p.From.Type = obj.TYPE_MEM;
             p.From.Reg = r1;
@@ -366,7 +354,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             c.To.Offset = -1;
             j1 = s.Prog(x86.AJEQ);
             j1.To.Type = obj.TYPE_BRANCH;
-
         }
 
         if (v.Op == ssa.OpAMD64DIVQ) 
@@ -410,7 +397,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
 
             j1.To.SetTarget(n1);
             j2.To.SetTarget(s.Pc());
-
         }
         goto __switch_break0;
     }
@@ -541,12 +527,10 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                     {
                                        asm = x86.AINCL;
                                    }
-
                                    p = s.Prog(asm);
                                    p.To.Type = obj.TYPE_REG;
                                    p.To.Reg = r;
                                    return ;
-
                     break;
                 case -1: 
                                    asm = default;
@@ -557,12 +541,10 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                     {
                                        asm = x86.ADECL;
                                    }
-
                                    p = s.Prog(asm);
                                    p.To.Type = obj.TYPE_REG;
                                    p.To.Reg = r;
                                    return ;
-
                     break;
                 case 0x80: 
                     // 'SUBQ $-0x80, r' is shorter to encode than
@@ -585,7 +567,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = r;
             return ;
-
         }
         asm = default;
         if (v.Op == ssa.OpAMD64ADDQconst) {
@@ -728,7 +709,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.From.Reg = o;
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = o;
-
         }
         ssagen.AddAux(_addr_p.From, v);
         goto __switch_break0;
@@ -770,7 +750,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         if (op == ssa.OpAMD64BTQconst && v.AuxInt < 32) { 
             // Emit 32-bit version because it's shorter
             op = ssa.OpAMD64BTLconst;
-
         }
         p = s.Prog(op.Asm());
         p.From.Type = obj.TYPE_CONST;
@@ -839,7 +818,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         if (0 <= v.AuxInt && v.AuxInt <= (1 << 32 - 1)) { 
             // The upper 32bit are zeroed automatically when using MOVL.
             asm = x86.AMOVL;
-
         }
         p = s.Prog(asm);
         p.From.Type = obj.TYPE_CONST;
@@ -911,7 +889,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
  {
                     asm = x86.ADECQ;
                 }
-
             }
             else
  {
@@ -922,15 +899,12 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
  {
                     asm = x86.ADECL;
                 }
-
             }
-
             p = s.Prog(asm);
             p.To.Type = obj.TYPE_MEM;
             p.To.Reg = v.Args[0].Reg();
             ssagen.AddAux2(_addr_p.To, v, off);
             break;
-
         }
         fallthrough = true;
     }
@@ -963,7 +937,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         if (!buildcfg.Experiment.RegabiG || s.ABI != obj.ABIInternal) { 
             // zero X15 manually
             opregreg(_addr_s, x86.AXORPS, x86.REG_X15, x86.REG_X15);
-
         }
         p = s.Prog(v.Op.Asm());
         p.From.Type = obj.TYPE_REG;
@@ -1057,7 +1030,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         if (!buildcfg.Experiment.RegabiG || s.ABI != obj.ABIInternal) { 
             // zero X15 manually
             opregreg(_addr_s, x86.AXORPS, x86.REG_X15, x86.REG_X15);
-
         }
         off = duffStart(v.AuxInt);
         var adj = duffAdj(v.AuxInt);
@@ -1146,7 +1118,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             // Pass the spill/unspill information along to the assembler, offset by size of return PC pushed on stack.
             var addr = ssagen.SpillSlotAddr(ap, x86.REG_SP, v.Block.Func.Config.PtrSize);
             s.FuncInfo().AddSpill(new obj.RegSpill(Reg:ap.Reg,Addr:addr,Unspill:loadByType(ap.Type),Spill:storeByType(ap.Type)));
-
         }        v.Block.Func.RegArgs = null;
         ssagen.CheckArgReg(v);
         goto __switch_break0;
@@ -1173,7 +1144,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             opregreg(_addr_s, x86.AXORPS, x86.REG_X15, x86.REG_X15); 
             // set G register from TLS
             getgFromTLS(_addr_s, x86.REG_R14);
-
         }
         s.Call(v);
         if (buildcfg.Experiment.RegabiG && s.ABI == obj.ABIInternal && v.Aux._<ptr<ssa.AuxCall>>().Fn.ABI() == obj.ABI0) { 
@@ -1181,7 +1151,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             opregreg(_addr_s, x86.AXORPS, x86.REG_X15, x86.REG_X15); 
             // set G register from TLS
             getgFromTLS(_addr_s, x86.REG_R14);
-
         }
         goto __switch_break0;
     }
@@ -1285,7 +1254,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.From.Reg = v.Reg();
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = v.Reg();
-
         }
         p = s.Prog(v.Op.Asm());
         p.From.Type = obj.TYPE_REG;
@@ -1378,7 +1346,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         }
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Pos.Line()==1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
         goto __switch_break0;
     }
@@ -1472,7 +1439,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         v.Fatalf("genValue not implemented: %s", v.LongString());
 
     __switch_break0:;
-
 }
 
 
@@ -1517,7 +1483,6 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
             opregreg(_addr_s, x86.AXORPS, x86.REG_X15, x86.REG_X15); 
             // set G register from TLS
             getgFromTLS(_addr_s, x86.REG_R14);
-
         }
         p = s.Prog(obj.ARET);
         p.To.Type = obj.TYPE_MEM;
@@ -1544,11 +1509,9 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
                 s.Br(jmp.invasm, b.Succs[1].Block());
                 s.Br(obj.AJMP, b.Succs[0].Block());
             }
-
             else 
         b.Fatalf("branch not implemented: %s", b.LongString());
-    
-}
+    }
 
 private static void loadRegResults(ptr<ssagen.State> _addr_s, ptr<ssa.Func> _addr_f) {
     ref ssagen.State s = ref _addr_s.val;

@@ -5,13 +5,13 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:52 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:11 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\udpsock_posix.go
-using context = go.context_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using context = context_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -25,7 +25,6 @@ private static Addr sockaddrToUDP(syscall.Sockaddr sa) {
             break;
     }
     return null;
-
 }
 
 private static nint family(this ptr<UDPAddr> _addr_a) {
@@ -38,7 +37,6 @@ private static nint family(this ptr<UDPAddr> _addr_a) {
         return syscall.AF_INET;
     }
     return syscall.AF_INET6;
-
 }
 
 private static (syscall.Sockaddr, error) sockaddr(this ptr<UDPAddr> _addr_a, nint family) {
@@ -50,7 +48,6 @@ private static (syscall.Sockaddr, error) sockaddr(this ptr<UDPAddr> _addr_a, nin
         return (null, error.As(null!)!);
     }
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
-
 }
 
 private static sockaddr toLocal(this ptr<UDPAddr> _addr_a, @string net) {
@@ -82,7 +79,6 @@ private static (nint, ptr<UDPAddr>, error) readFrom(this ptr<UDPConn> _addr_c, s
         }
     }
     return (n, _addr_addr!, error.As(err)!);
-
 }
 
 private static (nint, nint, nint, ptr<UDPAddr>, error) readMsg(this ptr<UDPConn> _addr_c, slice<byte> b, slice<byte> oob) {
@@ -104,7 +100,6 @@ private static (nint, nint, nint, ptr<UDPAddr>, error) readMsg(this ptr<UDPConn>
             break;
     }
     return ;
-
 }
 
 private static (nint, error) writeTo(this ptr<UDPConn> _addr_c, slice<byte> b, ptr<UDPAddr> _addr_addr) {
@@ -124,7 +119,6 @@ private static (nint, error) writeTo(this ptr<UDPConn> _addr_c, slice<byte> b, p
         return (0, error.As(err)!);
     }
     return c.fd.writeTo(b, sa);
-
 }
 
 private static (nint, nint, error) writeMsg(this ptr<UDPConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<UDPAddr> _addr_addr) {
@@ -145,7 +139,6 @@ private static (nint, nint, error) writeMsg(this ptr<UDPConn> _addr_c, slice<byt
         return (0, 0, error.As(err)!);
     }
     return c.fd.writeMsg(b, oob, sa);
-
 }
 
 private static (ptr<UDPConn>, error) dialUDP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<UDPAddr> _addr_laddr, ptr<UDPAddr> _addr_raddr) {
@@ -160,7 +153,6 @@ private static (ptr<UDPConn>, error) dialUDP(this ptr<sysDialer> _addr_sd, conte
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newUDPConn(fd)!, error.As(null!)!);
-
 }
 
 private static (ptr<UDPConn>, error) listenUDP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<UDPAddr> _addr_laddr) {
@@ -174,7 +166,6 @@ private static (ptr<UDPConn>, error) listenUDP(this ptr<sysListener> _addr_sl, c
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newUDPConn(fd)!, error.As(null!)!);
-
 }
 
 private static (ptr<UDPConn>, error) listenMulticastUDP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<Interface> _addr_ifi, ptr<UDPAddr> _addr_gaddr) {
@@ -206,7 +197,6 @@ private static (ptr<UDPConn>, error) listenMulticastUDP(this ptr<sysListener> _a
                 err = err__prev2;
 
             }
-
         }
         else
  {
@@ -223,12 +213,9 @@ private static (ptr<UDPConn>, error) listenMulticastUDP(this ptr<sysListener> _a
                 err = err__prev2;
 
             }
-
         }
     }
-
     return (_addr_c!, error.As(null!)!);
-
 }
 
 private static error listenIPv4MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface> _addr_ifi, IP ip) {
@@ -248,7 +235,6 @@ private static error listenIPv4MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface>
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -261,7 +247,6 @@ private static error listenIPv4MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface>
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -273,9 +258,7 @@ private static error listenIPv4MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface>
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 private static error listenIPv6MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface> _addr_ifi, IP ip) {
@@ -295,7 +278,6 @@ private static error listenIPv6MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface>
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -308,7 +290,6 @@ private static error listenIPv6MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface>
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -320,9 +301,7 @@ private static error listenIPv6MulticastUDP(ptr<UDPConn> _addr_c, ptr<Interface>
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 } // end net_package

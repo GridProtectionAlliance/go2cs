@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package goobj -- go2cs converted at 2022 March 06 22:32:20 UTC
+// package goobj -- go2cs converted at 2022 March 13 05:43:19 UTC
 // import "cmd/internal/goobj" ==> using goobj = go.cmd.@internal.goobj_package
 // Original source: C:\Program Files\Go\src\cmd\internal\goobj\builtin.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class goobj_package {
 
-    // Builtin (compiler-generated) function references appear
-    // frequently. We assign special indices for them, so they
-    // don't need to be referenced by name.
+// Builtin (compiler-generated) function references appear
+// frequently. We assign special indices for them, so they
+// don't need to be referenced by name.
 
-    // NBuiltin returns the number of listed builtin
-    // symbols.
+// NBuiltin returns the number of listed builtin
+// symbols.
 public static nint NBuiltin() {
     return len(builtins);
 }
@@ -41,7 +39,6 @@ public static nint BuiltinIdx(@string name, nint abi) {
         return -1;
     }
     return i;
-
 }
 
 //go:generate go run mkbuiltin.go

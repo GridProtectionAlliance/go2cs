@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2022 March 06 23:35:17 UTC
+// package xerrors -- go2cs converted at 2022 March 13 06:42:51 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\xerrors\frame.go
-using runtime = go.runtime_package;
-
 namespace go.cmd.vendor.golang.org.x;
+
+using runtime = runtime_package;
+
+
+// A Frame contains part of a call stack.
 
 public static partial class xerrors_package {
 
-    // A Frame contains part of a call stack.
 public partial struct Frame {
     public array<System.UIntPtr> frames;
 }
@@ -41,13 +43,11 @@ public static (@string, @string, nint) location(this Frame f) {
             return ("", "", 0);
         }
     }
-
     var (fr, ok) = frames.Next();
     if (!ok) {
         return ("", "", 0);
     }
     return (fr.Function, fr.File, fr.Line);
-
 }
 
 // Format prints the stack as error detail.

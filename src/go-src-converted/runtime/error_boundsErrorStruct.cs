@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:39 UTC
+//     Generated on 2022 March 13 05:24:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct boundsError
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace go
             public static implicit operator boundsError(NilType nil) => default(boundsError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static boundsError boundsError_cast(dynamic value)
         {
             return new boundsError(value.x, value.y, value.signed, value.code);

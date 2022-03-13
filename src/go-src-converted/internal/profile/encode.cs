@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package profile -- go2cs converted at 2022 March 06 22:24:11 UTC
+// package profile -- go2cs converted at 2022 March 13 05:38:37 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Program Files\Go\src\internal\profile\encode.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.@internal;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using sort = sort_package;
+using System;
 
 public static partial class profile_package {
 
@@ -143,7 +142,6 @@ private static void preEncode(this ptr<Profile> _addr_p) {
  {
                         l.Line[i].functionIDX = 0;
                     }
-
                 }
 
                 i = i__prev2;
@@ -156,7 +154,6 @@ private static void preEncode(this ptr<Profile> _addr_p) {
  {
                 l.mappingIDX = 0;
             }
-
         }
         l = l__prev1;
     }
@@ -176,7 +173,6 @@ private static void preEncode(this ptr<Profile> _addr_p) {
             pt.unitX = addString(strings, pt.Unit);
         }
     }
-
 
     p.stringTable = make_slice<@string>(len(strings));
     {
@@ -259,9 +255,7 @@ private static void encode(this ptr<Profile> _addr_p, ptr<buffer> _addr_b) {
             encodeMessage(b, 11, p.PeriodType);
         }
     }
-
     encodeInt64Opt(b, 12, p.Period);
-
 }
 
 private static decoder profileDecoder = new slice<decoder>(new decoder[] { nil, func(b*buffer,mmessage)error{x:=new(ValueType)pp:=m.(*Profile)pp.SampleType=append(pp.SampleType,x)returndecodeMessage(b,x)}, func(b*buffer,mmessage)error{x:=new(Sample)pp:=m.(*Profile)pp.Sample=append(pp.Sample,x)returndecodeMessage(b,x)}, func(b*buffer,mmessage)error{x:=new(Mapping)pp:=m.(*Profile)pp.Mapping=append(pp.Mapping,x)returndecodeMessage(b,x)}, func(b*buffer,mmessage)error{x:=new(Location)pp:=m.(*Profile)pp.Location=append(pp.Location,x)returndecodeMessage(b,x)}, func(b*buffer,mmessage)error{x:=new(Function)pp:=m.(*Profile)pp.Function=append(pp.Function,x)returndecodeMessage(b,x)}, func(b*buffer,mmessage)error{err:=decodeStrings(b,&m.(*Profile).stringTable)iferr!=nil{returnerr}if*&m.(*Profile).stringTable[0]!=""{returnerrors.New("string_table[0] must be ''")}returnnil}, func(b*buffer,mmessage)error{returndecodeInt64(b,&m.(*Profile).dropFramesX)}, func(b*buffer,mmessage)error{returndecodeInt64(b,&m.(*Profile).keepFramesX)}, func(b*buffer,mmessage)error{returndecodeInt64(b,&m.(*Profile).TimeNanos)}, func(b*buffer,mmessage)error{returndecodeInt64(b,&m.(*Profile).DurationNanos)}, func(b*buffer,mmessage)error{x:=new(ValueType)pp:=m.(*Profile)pp.PeriodType=xreturndecodeMessage(b,x)}, func(b*buffer,mmessage)error{returndecodeInt64(b,&m.(*Profile).Period)}, func(b*buffer,mmessage)error{returndecodeInt64s(b,&m.(*Profile).commentX)}, func(b*buffer,mmessage)error{returndecodeInt64(b,&m.(*Profile).defaultSampleTypeX)} });
@@ -311,14 +305,12 @@ private static error postDecode(this ptr<Profile> _addr_p) {
                         }
 
                     }
-
                 }
 
                 i = i__prev2;
             }
 
             locations[l.ID] = l;
-
         }
         l = l__prev1;
     }
@@ -345,7 +337,6 @@ private static error postDecode(this ptr<Profile> _addr_p) {
  {
                     numLabels[key] = append(numLabels[key], l.numX);
                 }
-
             }
 
             l = l__prev2;
@@ -361,7 +352,6 @@ private static error postDecode(this ptr<Profile> _addr_p) {
         foreach (var (_, lid) in s.locationIDX) {
             s.Location = append(s.Location, locations[lid]);
         }        s.locationIDX = null;
-
     }    p.DropFrames, err = getString(p.stringTable, _addr_p.dropFramesX, err);
     p.KeepFrames, err = getString(p.stringTable, _addr_p.keepFramesX, err);
 
@@ -377,7 +367,6 @@ private static error postDecode(this ptr<Profile> _addr_p) {
 
     }
 
-
     {
         var pt__prev1 = pt;
 
@@ -390,7 +379,6 @@ private static error postDecode(this ptr<Profile> _addr_p) {
         pt = pt__prev1;
 
     }
-
     {
         var i__prev1 = i;
 
@@ -407,7 +395,6 @@ private static error postDecode(this ptr<Profile> _addr_p) {
     p.DefaultSampleType, err = getString(p.stringTable, _addr_p.defaultSampleTypeX, err);
     p.stringTable = null;
     return error.As(null!)!;
-
 }
 
 private static slice<decoder> decoder(this ptr<ValueType> _addr_p) {
@@ -560,7 +547,6 @@ private static long addString(map<@string, nint> strings, @string s) {
         strings[s] = i;
     }
     return int64(i);
-
 }
 
 private static (@string, error) getString(slice<@string> strings, ptr<long> _addr_strng, error err) {
@@ -577,7 +563,6 @@ private static (@string, error) getString(slice<@string> strings, ptr<long> _add
     }
     strng = 0;
     return (strings[s], error.As(null!)!);
-
 }
 
 } // end profile_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:32 UTC
+//     Generated on 2022 March 13 05:41:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class strconv_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct floatInfo
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator floatInfo(NilType nil) => default(floatInfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static floatInfo floatInfo_cast(dynamic value)
         {
             return new floatInfo(value.mantbits, value.expbits, value.bias);

@@ -4,33 +4,35 @@
 
 // Package mvs implements Minimal Version Selection.
 // See https://research.swtch.com/vgo-mvs.
-// package mvs -- go2cs converted at 2022 March 06 23:18:02 UTC
+
+// package mvs -- go2cs converted at 2022 March 13 06:31:25 UTC
 // import "cmd/go/internal/mvs" ==> using mvs = go.cmd.go.@internal.mvs_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\mvs\mvs.go
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using sync = go.sync_package;
-
-using par = go.cmd.go.@internal.par_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+using sort = sort_package;
+using sync = sync_package;
+
+using par = cmd.go.@internal.par_package;
+
+using module = golang.org.x.mod.module_package;
+
+
+// A Reqs is the requirement graph on which Minimal Version Selection (MVS) operates.
+//
+// The version strings are opaque except for the special version "none"
+// (see the documentation for module.Version). In particular, MVS does not
+// assume that the version strings are semantic versions; instead, the Max method
+// gives access to the comparison operation.
+//
+// It must be safe to call methods on a Reqs from multiple goroutines simultaneously.
+// Because a Reqs may read the underlying graph from the network on demand,
+// the MVS algorithms parallelize the traversal to overlap network delays.
+
+using System;
 public static partial class mvs_package {
 
-    // A Reqs is the requirement graph on which Minimal Version Selection (MVS) operates.
-    //
-    // The version strings are opaque except for the special version "none"
-    // (see the documentation for module.Version). In particular, MVS does not
-    // assume that the version strings are semantic versions; instead, the Max method
-    // gives access to the comparison operation.
-    //
-    // It must be safe to call methods on a Reqs from multiple goroutines simultaneously.
-    // Because a Reqs may read the underlying graph from the network on demand,
-    // the MVS algorithms parallelize the traversal to overlap network delays.
 public partial interface Reqs {
     @string Required(module.Version m); // Max returns the maximum of v1 and v2 (it returns either v1 or v2).
 //
@@ -88,7 +90,6 @@ private static (slice<module.Version>, error) buildList(module.Version target, R
             return 1;
         }
         return 0;
-
     };
 
     sync.Mutex mu = default;    var g = NewGraph(cmp, new slice<module.Version>(new module.Version[] { target }));    map upgrades = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<module.Version, module.Version>{};    map errs = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<module.Version, error>{}; 
@@ -114,7 +115,6 @@ private static (slice<module.Version>, error) buildList(module.Version target, R
             else if (err == null) {
                 err = error.As(upErr)!;
             }
-
         }
         mu.Lock();
         if (err != null) {
@@ -135,9 +135,7 @@ private static (slice<module.Version>, error) buildList(module.Version target, R
     // If there was an error, find the shortest path from the target to the
     // node where the error occurred so we can report a useful error message.
     if (len(errs) > 0) {
-        var errPath = g.FindPath(m => {
-            return errs[m] != null;
-        });
+        var errPath = g.FindPath(m => errs[m] != null);
         if (len(errPath) == 0) {
             panic("internal error: could not reconstruct path to module with error");
         }
@@ -155,12 +153,9 @@ private static (slice<module.Version>, error) buildList(module.Version target, R
                 u = u__prev2;
 
             }
-
             return false;
-
         };
         return (null, error.As(NewBuildListError(err._<error>(), errPath, isUpgrade))!);
-
     }
     var list = g.BuildList();
     {
@@ -172,12 +167,9 @@ private static (slice<module.Version>, error) buildList(module.Version target, R
             // version strings as opaque, so "" is not a special value here.
             // See golang.org/issue/31491, golang.org/issue/29773.
             panic(fmt.Sprintf("mistake: chose version %q instead of target %+v", v, target));
-
         }
     }
-
     return (list, error.As(null!)!);
-
 });
 
 // Req returns the minimal requirement list for the target module,
@@ -222,7 +214,6 @@ public static (slice<module.Version>, error) Req(module.Version target, slice<@s
                     err = err__prev1;
 
                 }
-
             }
 
             m1 = m1__prev1;
@@ -230,7 +221,6 @@ public static (slice<module.Version>, error) Req(module.Version target, slice<@s
 
         postorder = append(postorder, m);
         return null;
-
     };
     {
         var m__prev1 = m;
@@ -249,7 +239,6 @@ public static (slice<module.Version>, error) Req(module.Version target, slice<@s
                 err = err__prev1;
 
             }
-
         }
         m = m__prev1;
     }
@@ -272,7 +261,6 @@ public static (slice<module.Version>, error) Req(module.Version target, slice<@s
         }
 
         return null;
-
     };
     map max = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
     {
@@ -292,7 +280,6 @@ public static (slice<module.Version>, error) Req(module.Version target, slice<@s
                 }
 
             }
-
         }
         m = m__prev1;
     }
@@ -307,24 +294,19 @@ public static (slice<module.Version>, error) Req(module.Version target, slice<@s
         min = append(min, m);
         walk(m);
         haveBase[path] = true;
-
     }    for (var i = len(postorder) - 1; i >= 0; i--) {
         m = postorder[i];
         if (max[m.Path] != m.Version) { 
             // Older version.
             continue;
-
         }
         if (!have[m]) {
             min = append(min, m);
             walk(m);
         }
     }
-    sort.Slice(min, (i, j) => {
-        return min[i].Path < min[j].Path;
-    });
+    sort.Slice(min, (i, j) => min[i].Path < min[j].Path);
     return (min, error.As(null!)!);
-
 }
 
 // UpgradeAll returns a build list for the target module
@@ -338,9 +320,7 @@ public static (slice<module.Version>, error) UpgradeAll(module.Version target, U
             return (target, error.As(null!)!);
         }
         return reqs.Upgrade(m);
-
     });
-
 }
 
 // Upgrade returns a build list for the target module
@@ -376,7 +356,6 @@ public static (slice<module.Version>, error) Upgrade(module.Version target, Upgr
             }
 
         }
-
     }    return buildList(target, addr(new override(target,list,reqs)), m => {
         {
             var (v, ok) = upgradeTo[m.Path];
@@ -386,11 +365,8 @@ public static (slice<module.Version>, error) Upgrade(module.Version target, Upgr
             }
 
         }
-
         return (m, error.As(null!)!);
-
     });
-
 }
 
 // Downgrade returns a build list for the target module
@@ -442,7 +418,6 @@ public static (slice<module.Version>, error) Downgrade(module.Version target, Do
             v = v__prev1;
 
         }
-
     }    var added = make_map<module.Version, bool>();    var rdeps = make_map<module.Version, slice<module.Version>>();    var excluded = make_map<module.Version, bool>();
     Action<module.Version> exclude = default;
     exclude = m => {
@@ -478,13 +453,11 @@ public static (slice<module.Version>, error) Downgrade(module.Version target, Do
                 // behavior of other relevant packages.
                 exclude(m);
                 return ;
-
             }
 
             v = v__prev1;
 
         }
-
         (list, err) = reqs.Required(m);
         if (err != null) { 
             // If we can't load the requirements, we couldn't load the go.mod file.
@@ -499,7 +472,6 @@ public static (slice<module.Version>, error) Downgrade(module.Version target, Do
             // Downgrade. Currently, we can't tell what kind of error it is.
             exclude(m);
             return ;
-
         }
         {
             var r__prev1 = r;
@@ -552,7 +524,6 @@ List:
                     // TODO(golang.org/issue/31730, golang.org/issue/30134):
                     // decode what to do based on the actual error.
                     return (null, error.As(err)!);
-
                 } 
                 // If the target version is a pseudo-version, it may not be
                 // included when iterating over prior versions using reqs.Previous.
@@ -570,19 +541,15 @@ List:
                     v = v__prev1;
 
                 }
-
                 if (p.Version == "none") {
                     _continueList = true;
                     break;
                 }
-
                 add(p);
                 r = p;
-
             }
 
             downgraded = append(downgraded, r);
-
         }
         r = r__prev1;
     }
@@ -619,13 +586,11 @@ List:
                 v = v__prev1;
 
             }
-
         }
         m = m__prev1;
     }
 
     return BuildList(target, addr(new override(target:target,list:downgraded,Reqs:reqs,)));
-
 }
 
 private partial struct @override : Reqs {
@@ -643,7 +608,6 @@ private static (slice<module.Version>, error) Required(this ptr<override> _addr_
         return (r.list, error.As(null!)!);
     }
     return r.Reqs.Required(m);
-
 }
 
 } // end mvs_package

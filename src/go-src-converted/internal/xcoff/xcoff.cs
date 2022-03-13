@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xcoff -- go2cs converted at 2022 March 06 22:41:04 UTC
+// package xcoff -- go2cs converted at 2022 March 13 05:52:09 UTC
 // import "internal/xcoff" ==> using xcoff = go.@internal.xcoff_package
 // Original source: C:\Program Files\Go\src\internal\xcoff\xcoff.go
-
-
 namespace go.@internal;
 
 public static partial class xcoff_package {
 
-    // File Header.
+// File Header.
 public partial struct FileHeader32 {
     public ushort Fmagic; // Target machine
     public ushort Fnscns; // Number of sections
@@ -34,7 +32,6 @@ public partial struct FileHeader64 {
 
 public static readonly nint FILHSZ_32 = 20;
 public static readonly nint FILHSZ_64 = 24;
-
 public static readonly nint U802TOCMAGIC = 0737; // AIX 32-bit XCOFF
 public static readonly nint U64_TOCMAGIC = 0767; // AIX 64-bit XCOFF
 
@@ -49,7 +46,6 @@ public static readonly nuint F_VARPG = 0x0100;
 public static readonly nuint F_DYNLOAD = 0x1000;
 public static readonly nuint F_SHROBJ = 0x2000;
 public static readonly nuint F_LOADONLY = 0x4000;
-
 
 // Section Header.
 public partial struct SectionHeader32 {
@@ -92,7 +88,6 @@ public static readonly nuint STYP_LOADER = 0x1000;
 public static readonly nuint STYP_DEBUG = 0x2000;
 public static readonly nuint STYP_TYPCHK = 0x4000;
 public static readonly nuint STYP_OVRFLO = 0x8000;
-
 public static readonly nuint SSUBTYP_DWINFO = 0x10000; // DWARF info section
 public static readonly nuint SSUBTYP_DWLINE = 0x20000; // DWARF line-number section
 public static readonly nuint SSUBTYP_DWPBNMS = 0x30000; // DWARF public names section
@@ -230,7 +225,6 @@ private static readonly nint _AUX_FILE = 252;
 private static readonly nint _AUX_CSECT = 251;
 private static readonly nint _AUX_SECT = 250;
 
-
 // Symbol type field.
 public static readonly nint XTY_ER = 0; // External reference
 public static readonly nint XTY_SD = 1; // Section definition
@@ -291,7 +285,6 @@ public partial struct LoaderHeader64 {
 
 public static readonly nint LDHDRSZ_32 = 32;
 public static readonly nint LDHDRSZ_64 = 56;
-
 
 // Loader Symbol.
 public partial struct LoaderSymbol32 {

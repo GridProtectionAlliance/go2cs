@@ -3,24 +3,27 @@
 // license that can be found in the LICENSE file.
 
 // Package sumdb implements the HTTP protocols for serving or accessing a module checksum database.
-// package sumdb -- go2cs converted at 2022 March 06 23:26:13 UTC
+
+// package sumdb -- go2cs converted at 2022 March 13 06:41:04 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb" ==> using sumdb = go.cmd.vendor.golang.org.x.mod.sumdb_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\server.go
-using context = go.context_package;
-using http = go.net.http_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using lazyregexp = go.golang.org.x.mod.@internal.lazyregexp_package;
-using module = go.golang.org.x.mod.module_package;
-using tlog = go.golang.org.x.mod.sumdb.tlog_package;
-
 namespace go.cmd.vendor.golang.org.x.mod;
+
+using context = context_package;
+using http = net.http_package;
+using os = os_package;
+using strings = strings_package;
+
+using lazyregexp = golang.org.x.mod.@internal.lazyregexp_package;
+using module = golang.org.x.mod.module_package;
+using tlog = golang.org.x.mod.sumdb.tlog_package;
+
+
+// A ServerOps provides the external operations
+// (underlying database access and so on) needed by the Server.
 
 public static partial class sumdb_package {
 
-    // A ServerOps provides the external operations
-    // (underlying database access and so on) needed by the Server.
 public partial interface ServerOps {
     (slice<byte>, error) Signed(context.Context ctx); // ReadRecords returns the content for the n records id through id+n-1.
     (slice<byte>, error) ReadRecords(context.Context ctx, long id, long n); // Lookup looks up a record for the given module,
@@ -91,7 +94,6 @@ private static void ServeHTTP(this ptr<Server> _addr_s, http.ResponseWriter w, p
             // This should never happen - the lookup says the record exists.
             http.Error(w, err.Error(), http.StatusInternalServerError);
             return ;
-
         }
         if (len(records) != 1) {
             http.Error(w, "invalid record count returned by ReadRecords", http.StatusInternalServerError);
@@ -132,12 +134,10 @@ private static void ServeHTTP(this ptr<Server> _addr_s, http.ResponseWriter w, p
                 reportError(w, err);
                 return ;
             }
-
             if (len(records) != t.W) {
                 http.Error(w, "invalid record count returned by ReadRecords", http.StatusInternalServerError);
                 return ;
             }
-
             slice<byte> data = default;
             {
                 var i__prev1 = i;
@@ -158,7 +158,6 @@ private static void ServeHTTP(this ptr<Server> _addr_s, http.ResponseWriter w, p
             w.Header().Set("Content-Type", "text/plain; charset=UTF-8");
             w.Write(data);
             return ;
-
         }
         (data, err) = s.ops.ReadTileData(ctx, t);
         if (err != null) {
@@ -169,8 +168,7 @@ private static void ServeHTTP(this ptr<Server> _addr_s, http.ResponseWriter w, p
         w.Write(data);
     else 
         http.NotFound(w, r);
-    
-}
+    }
 
 // reportError reports err to w.
 // If it's a not-found, the reported error is 404.
@@ -183,7 +181,6 @@ private static void reportError(http.ResponseWriter w, error err) {
         return ;
     }
     http.Error(w, err.Error(), http.StatusInternalServerError);
-
 }
 
 } // end sumdb_package

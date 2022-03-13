@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:48 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:47 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\pkcs1.go
-using rsa = go.crypto.rsa_package;
-using asn1 = go.encoding.asn1_package;
-using errors = go.errors_package;
-using big = go.math.big_package;
-using System.ComponentModel;
-
-
 namespace go.crypto;
 
+using rsa = crypto.rsa_package;
+using asn1 = encoding.asn1_package;
+using errors = errors_package;
+using big = math.big_package;
+
+
+// pkcs1PrivateKey is a structure which mirrors the PKCS #1 ASN.1 for an RSA private key.
+
+using System.ComponentModel;
 public static partial class x509_package {
 
-    // pkcs1PrivateKey is a structure which mirrors the PKCS #1 ASN.1 for an RSA private key.
 private partial struct pkcs1PrivateKey {
     public nint Version;
     public ptr<big.Int> N;
@@ -67,7 +68,6 @@ public static (ptr<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der)
             }
 
         }
-
         {
             (_, err) = asn1.Unmarshal(der, addr(new pkcs8()));
 
@@ -76,9 +76,7 @@ public static (ptr<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der)
             }
 
         }
-
         return (_addr_null!, error.As(err)!);
-
     }
     if (priv.Version > 1) {
         return (_addr_null!, error.As(errors.New("x509: unsupported private key version"))!);
@@ -107,7 +105,6 @@ public static (ptr<rsa.PrivateKey>, error) ParsePKCS1PrivateKey(slice<byte> der)
     key.Precompute();
 
     return (_addr_key!, error.As(null!)!);
-
 }
 
 // MarshalPKCS1PrivateKey converts an RSA private key to PKCS #1, ASN.1 DER form.
@@ -133,7 +130,6 @@ public static slice<byte> MarshalPKCS1PrivateKey(ptr<rsa.PrivateKey> _addr_key) 
         priv.AdditionalPrimes[i].Coeff = values.Coeff;
     }    var (b, _) = asn1.Marshal(priv);
     return b;
-
 }
 
 // ParsePKCS1PublicKey parses an RSA public key in PKCS #1, ASN.1 DER form.
@@ -154,9 +150,7 @@ public static (ptr<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der) {
             }
 
         }
-
         return (_addr_null!, error.As(err)!);
-
     }
     if (len(rest) > 0) {
         return (_addr_null!, error.As(new asn1.SyntaxError(Msg:"trailing data"))!);
@@ -168,7 +162,6 @@ public static (ptr<rsa.PublicKey>, error) ParsePKCS1PublicKey(slice<byte> der) {
         return (_addr_null!, error.As(errors.New("x509: public key contains large public exponent"))!);
     }
     return (addr(new rsa.PublicKey(E:pub.E,N:pub.N,)), error.As(null!)!);
-
 }
 
 // MarshalPKCS1PublicKey converts an RSA public key to PKCS #1, ASN.1 DER form.

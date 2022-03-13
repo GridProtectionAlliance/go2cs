@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:04 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:34 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\test\testdata\gen\copyGen.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using format = go.go.format_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using format = go.format_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+
+
+// This program generates tests to verify that copying operations
+// copy the data they are supposed to and clobber no adjacent values.
+
+// run as `go run copyGen.go`.  A file called copy.go
+// will be written into the parent directory containing the tests.
 
 public static partial class main_package {
 
-    // This program generates tests to verify that copying operations
-    // copy the data they are supposed to and clobber no adjacent values.
-
-    // run as `go run copyGen.go`.  A file called copy.go
-    // will be written into the parent directory containing the tests.
 private static array<nint> sizes = new array<nint>(new nint[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 17, 23, 24, 25, 31, 32, 33, 63, 64, 65, 1023, 1024, 1025, 1024+7, 1024+8, 1024+9, 1024+15, 1024+16, 1024+17 });
 
 private static array<nint> usizes = new array<nint>(new nint[] { 2, 3, 4, 5, 6, 7 });
@@ -90,7 +92,6 @@ private static void Main() => func((_, panic, _) => {
             fmt.Fprintf(w, "    t.Errorf(\"t%dcopy got=%%v, want %%v\\n\", a, want)\n", s);
             fmt.Fprintf(w, "  }\n");
             fmt.Fprintf(w, "}\n");
-
         }
         s = s__prev1;
     }
@@ -140,7 +141,6 @@ private static void Main() => func((_, panic, _) => {
             fmt.Fprintf(w, "    t.Errorf(\"tu%dcopy got=%%v, want %%v\\n\", a, want%d)\n", s, s);
             fmt.Fprintf(w, "  }\n");
             fmt.Fprintf(w, "}\n");
-
         }
         s = s__prev1;
     }

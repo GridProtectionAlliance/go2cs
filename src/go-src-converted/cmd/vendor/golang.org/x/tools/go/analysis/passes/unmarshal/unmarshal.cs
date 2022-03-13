@@ -4,20 +4,20 @@
 
 // The unmarshal package defines an Analyzer that checks for passing
 // non-pointer or non-interface types to unmarshal and decode functions.
-// package unmarshal -- go2cs converted at 2022 March 06 23:34:50 UTC
+
+// package unmarshal -- go2cs converted at 2022 March 13 06:42:07 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unmarshal" ==> using unmarshal = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unmarshal_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unmarshal\unmarshal.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using typeutil = golang.org.x.tools.go.types.typeutil_package;
+using System;
 
 public static partial class unmarshal_package {
 
@@ -78,7 +78,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     argidx = 1; // func([]byte, interface{})
                     break;
             }
-
         }
         else if (fn.Name() == "Decode" && recv != null) { 
             // (*"encoding/json".Decoder).Decode
@@ -93,7 +92,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 }
 
             }
-
             ptr<types.Named> tname = t._<ptr<types.Named>>().Obj();
             if (tname.Name() == "Decoder") {
                 switch (tname.Pkg().Path()) {
@@ -105,9 +103,7 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                         argidx = 0; // func(interface{})
                         break;
                 }
-
             }
-
         }
         if (argidx < 0) {
             return ; // not a function we are interested in
@@ -134,10 +130,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 pass.Reportf(call.Lparen, "call of %s passes non-pointer as second argument", fn.Name());
                 break;
         }
-
     });
     return (null, error.As(null!)!);
-
 }
 
 } // end unmarshal_package

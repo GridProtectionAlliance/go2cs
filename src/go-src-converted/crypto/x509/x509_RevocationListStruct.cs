@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:20:02 UTC
+//     Generated on 2022 March 13 05:34:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct RevocationList
         {
             // Constructors
@@ -85,7 +85,7 @@ namespace crypto
             public static implicit operator RevocationList(NilType nil) => default(RevocationList);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static RevocationList RevocationList_cast(dynamic value)
         {
             return new RevocationList(value.SignatureAlgorithm, value.RevokedCertificates, ref value.Number, value.ThisUpdate, value.NextUpdate, value.ExtraExtensions);

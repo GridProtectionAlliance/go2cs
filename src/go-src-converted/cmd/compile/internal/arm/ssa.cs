@@ -2,28 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm -- go2cs converted at 2022 March 06 23:14:46 UTC
+// package arm -- go2cs converted at 2022 March 13 06:28:16 UTC
 // import "cmd/compile/internal/arm" ==> using arm = go.cmd.compile.@internal.arm_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\arm\ssa.go
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using math = go.math_package;
-using bits = go.math.bits_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using arm = go.cmd.@internal.obj.arm_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using math = math_package;
+using bits = math.bits_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using arm = cmd.@internal.obj.arm_package;
+
+
+// loadByType returns the load instruction of the given type.
 
 public static partial class arm_package {
 
-    // loadByType returns the load instruction of the given type.
 private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) => {
     ref types.Type t = ref _addr_t.val;
 
@@ -36,7 +38,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 return arm.AMOVD;
                 break;
         }
-
     }
     else
  {
@@ -63,10 +64,8 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 return arm.AMOVW;
                 break;
         }
-
     }
     panic("bad load type");
-
 });
 
 // storeByType returns the store instruction of the given type.
@@ -82,7 +81,6 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return arm.AMOVD;
                 break;
         }
-
     }
     else
  {
@@ -97,10 +95,8 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return arm.AMOVW;
                 break;
         }
-
     }
     panic("bad store type");
-
 });
 
 // shift type is used as Offset in obj.TYPE_SHIFT operands to encode shifted register operands
@@ -113,13 +109,11 @@ private static @string String(this shift v) {
     if (v & (1 << 4) != 0) { 
         // register shift
         return fmt.Sprintf("R%d%c%cR%d", v & 15, op[0], op[1], (v >> 8) & 15);
-
     }
     else
  { 
         // constant shift
         return fmt.Sprintf("R%d%c%c%d", v & 15, op[0], op[1], (v >> 7) & 31);
-
     }
 }
 
@@ -141,7 +135,6 @@ private static ptr<obj.Prog> genshift(ptr<ssagen.State> _addr_s, obj.As @as, sho
         p.To.Reg = r;
     }
     return _addr_p!;
-
 }
 
 // makeregshift encodes a register shifted by a register
@@ -162,7 +155,6 @@ private static ptr<obj.Prog> genregshift(ptr<ssagen.State> _addr_s, obj.As @as, 
         p.To.Reg = r;
     }
     return _addr_p!;
-
 }
 
 // find a (lsb, width) pair for BFC
@@ -186,10 +178,8 @@ private static (uint, uint) getBFC(uint v) {
     if ((1 << (int)(m)) - (1 << (int)(l)) == v) { 
         // it must be m > l for non-zero v
         return (l, m - l);
-
     }
     return (0xffffffff, 0);
-
 }
 
 private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_v) => func((_, panic, _) => {
@@ -220,7 +210,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                     panic("bad float size");
                     break;
             }
-
         }
         var p = s.Prog(as);
         p.From.Type = obj.TYPE_REG;
@@ -355,9 +344,7 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             else
  { // BICconst
                 val = uint32(v.AuxInt);
-
             }
-
             var (lsb, width) = getBFC(val); 
             // omit BFC for ARM's imm12
             if (8 < width && width < 24) {
@@ -369,7 +356,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                 p.To.Reg = v.Reg();
                 break;
             }
-
         }
         fallthrough = true;
     }
@@ -650,8 +636,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             }
 
         }
-
-
         goto __switch_break0;
     }
     if (v.Op == ssa.OpARMMOVBload || v.Op == ssa.OpARMMOVBUload || v.Op == ssa.OpARMMOVHload || v.Op == ssa.OpARMMOVHUload || v.Op == ssa.OpARMMOVWload || v.Op == ssa.OpARMMOVFload || v.Op == ssa.OpARMMOVDload)
@@ -758,7 +742,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             // generate more efficient "MOVB/MOVBU/MOVH/MOVHU Reg@>0, Reg" on ARMv6 & ARMv7
             genshift(_addr_s, v.Op.Asm(), 0, v.Args[0].Reg(), v.Reg(), arm.SHIFT_RR, 0);
             return ;
-
         }
         fallthrough = true;
     }
@@ -872,7 +855,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         }
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Pos.Line()==1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
         goto __switch_break0;
     }
@@ -1014,7 +996,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         v.Fatalf("genValue not implemented: %s", v.LongString());
 
     __switch_break0:;
-
 });
 
 private static map condBits = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ssa.Op, byte>{ssa.OpARMEqual:arm.C_SCOND_EQ,ssa.OpARMNotEqual:arm.C_SCOND_NE,ssa.OpARMLessThan:arm.C_SCOND_LT,ssa.OpARMLessThanU:arm.C_SCOND_LO,ssa.OpARMLessEqual:arm.C_SCOND_LE,ssa.OpARMLessEqualU:arm.C_SCOND_LS,ssa.OpARMGreaterThan:arm.C_SCOND_GT,ssa.OpARMGreaterThanU:arm.C_SCOND_HI,ssa.OpARMGreaterEqual:arm.C_SCOND_GE,ssa.OpARMGreaterEqualU:arm.C_SCOND_HS,};
@@ -1079,14 +1060,12 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
                 s.Br(jmp.invasm, b.Succs[1].Block());
                 s.Br(obj.AJMP, b.Succs[0].Block());
             }
-
             else if (b.Kind == ssa.BlockARMLEnoov) 
         s.CombJump(b, next, _addr_leJumps);
     else if (b.Kind == ssa.BlockARMGTnoov) 
         s.CombJump(b, next, _addr_gtJumps);
     else 
         b.Fatalf("branch not implemented: %s", b.LongString());
-    
-}
+    }
 
 } // end arm_package

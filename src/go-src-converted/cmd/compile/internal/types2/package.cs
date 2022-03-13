@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:46 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:10 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\package.go
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+
+
+// A Package describes a Go package.
 
 public static partial class types2_package {
 
-    // A Package describes a Go package.
 public partial struct Package {
     public @string path;
     public @string name;

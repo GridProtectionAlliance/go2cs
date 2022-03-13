@@ -2,41 +2,43 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:19:48 UTC
+// package main -- go2cs converted at 2022 March 13 06:32:36 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\main.go
-using sys = go.cmd.@internal.sys_package;
-using amd64 = go.cmd.link.@internal.amd64_package;
-using arm = go.cmd.link.@internal.arm_package;
-using arm64 = go.cmd.link.@internal.arm64_package;
-using ld = go.cmd.link.@internal.ld_package;
-using mips = go.cmd.link.@internal.mips_package;
-using mips64 = go.cmd.link.@internal.mips64_package;
-using ppc64 = go.cmd.link.@internal.ppc64_package;
-using riscv64 = go.cmd.link.@internal.riscv64_package;
-using s390x = go.cmd.link.@internal.s390x_package;
-using wasm = go.cmd.link.@internal.wasm_package;
-using x86 = go.cmd.link.@internal.x86_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using os = go.os_package;
-
 namespace go;
+
+using sys = cmd.@internal.sys_package;
+using amd64 = cmd.link.@internal.amd64_package;
+using arm = cmd.link.@internal.arm_package;
+using arm64 = cmd.link.@internal.arm64_package;
+using ld = cmd.link.@internal.ld_package;
+using mips = cmd.link.@internal.mips_package;
+using mips64 = cmd.link.@internal.mips64_package;
+using ppc64 = cmd.link.@internal.ppc64_package;
+using riscv64 = cmd.link.@internal.riscv64_package;
+using s390x = cmd.link.@internal.s390x_package;
+using wasm = cmd.link.@internal.wasm_package;
+using x86 = cmd.link.@internal.x86_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using os = os_package;
+
+
+// The bulk of the linker implementation lives in cmd/link/internal/ld.
+// Architecture-specific code lives in cmd/link/internal/GOARCH.
+//
+// Program initialization:
+//
+// Before any argument parsing is done, the Init function of relevant
+// architecture package is called. The only job done in Init is
+// configuration of the architecture-specific variables.
+//
+// Then control flow passes to ld.Main, which parses flags, makes
+// some configuration decisions, and then gives the architecture
+// packages a second chance to modify the linker's configuration
+// via the ld.Arch.Archinit function.
 
 public static partial class main_package {
 
-    // The bulk of the linker implementation lives in cmd/link/internal/ld.
-    // Architecture-specific code lives in cmd/link/internal/GOARCH.
-    //
-    // Program initialization:
-    //
-    // Before any argument parsing is done, the Init function of relevant
-    // architecture package is called. The only job done in Init is
-    // configuration of the architecture-specific variables.
-    //
-    // Then control flow passes to ld.Main, which parses flags, makes
-    // some configuration decisions, and then gives the architecture
-    // packages a second chance to modify the linker's configuration
-    // via the ld.Arch.Archinit function.
 private static void Main() {
     ptr<sys.Arch> arch;
     ld.Arch theArch = default;
@@ -85,7 +87,6 @@ private static void Main() {
             break;
     }
     ld.Main(arch, theArch);
-
 }
 
 } // end main_package

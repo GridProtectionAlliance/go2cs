@@ -13,35 +13,37 @@
 // limitations under the License.
 
 // Package binutils provides access to the GNU binutils.
-// package binutils -- go2cs converted at 2022 March 06 23:23:18 UTC
+
+// package binutils -- go2cs converted at 2022 March 13 06:36:22 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\binutils.go
-using elf = go.debug.elf_package;
-using macho = go.debug.macho_package;
-using pe = go.debug.pe_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using elfexec = go.github.com.google.pprof.@internal.elfexec_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using elf = debug.elf_package;
+using macho = debug.macho_package;
+using pe = debug.pe_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using elfexec = github.com.google.pprof.@internal.elfexec_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+
+
+// A Binutils implements plugin.ObjTool by invoking the GNU binutils.
+
+using System;
 public static partial class binutils_package {
 
-    // A Binutils implements plugin.ObjTool by invoking the GNU binutils.
 public partial struct Binutils {
     public sync.Mutex mu;
     public ptr<binrep> rep;
@@ -78,7 +80,6 @@ private static ptr<binrep> get(this ptr<Binutils> _addr_bu) {
     }
     bu.mu.Unlock();
     return _addr_r!;
-
 }
 
 // update modifies the rep for bu via the supplied function.
@@ -97,7 +98,6 @@ private static void update(this ptr<Binutils> _addr_bu, Action<ptr<binrep>> fn) 
     }
     fn(r);
     bu.rep = r;
-
 });
 
 // String returns string representation of the binutils state for debug logging.
@@ -120,7 +120,6 @@ private static @string String(this ptr<Binutils> _addr_bu) {
         objdump = r.objdump;
     }
     return fmt.Sprintf("llvm-symbolizer=%q addr2line=%q nm=%q objdump=%q fast=%t", llvmSymbolizer, addr2line, nm, objdump, r.fast);
-
 }
 
 // SetFastSymbolization sets a toggle that makes binutils use fast
@@ -132,7 +131,6 @@ private static void SetFastSymbolization(this ptr<Binutils> _addr_bu, bool fast)
     bu.update(r => {
         r.fast = fast;
     });
-
 }
 
 // SetTools processes the contents of the tools option. It
@@ -146,7 +144,6 @@ private static void SetTools(this ptr<Binutils> _addr_bu, @string config) {
     bu.update(r => {
         initTools(_addr_r, config);
     });
-
 }
 
 private static void initTools(ptr<binrep> _addr_b, @string config) {
@@ -165,9 +162,7 @@ private static void initTools(ptr<binrep> _addr_b, @string config) {
             }
 
         }
-
         paths[name] = append(paths[name], path);
-
     }    var defaultPath = paths[""];
     b.llvmSymbolizer, b.llvmSymbolizerFound = chooseExe(new slice<@string>(new @string[] { "llvm-symbolizer" }), new slice<@string>(new @string[] {  }), append(paths["llvm-symbolizer"], defaultPath));
     b.addr2line, b.addr2lineFound = chooseExe(new slice<@string>(new @string[] { "addr2line" }), new slice<@string>(new @string[] { "gaddr2line" }), append(paths["addr2line"], defaultPath)); 
@@ -176,7 +171,6 @@ private static void initTools(ptr<binrep> _addr_b, @string config) {
     // not need to differrentiate them.
     b.nm, b.nmFound = chooseExe(new slice<@string>(new @string[] { "llvm-nm", "nm" }), new slice<@string>(new @string[] { "gnm" }), append(paths["nm"], defaultPath));
     b.objdump, b.objdumpFound, b.isLLVMObjdump = findObjdump(append(paths["objdump"], defaultPath));
-
 }
 
 // findObjdump finds and returns path to preferred objdump binary.
@@ -214,9 +208,7 @@ private static (@string, bool, bool) findObjdump(slice<@string> paths) {
             }
 
         }
-
     }    return ("", false, false);
-
 }
 
 // chooseExe finds and returns path to preferred binary. names is a list of
@@ -243,9 +235,7 @@ private static (@string, bool) chooseExe(slice<@string> names, slice<@string> os
             }
 
         }
-
     }    return ("", false);
-
 }
 
 // isLLVMObjdump accepts a string with path to an objdump binary,
@@ -272,15 +262,12 @@ private static bool isLLVMObjdump(@string output) {
         // Some flags, like --demangle, and double dashes for options are
         // not supported by previous versions.
         return true;
-
     }
     if (runtime.GOOS == "darwin") { 
         // Ensure LLVM objdump is at least version 10.0.1 on MacOS.
         return verMajor > 10 || (verMajor == 10 && verPatch >= 1);
-
     }
     return false;
-
 }
 
 // isBuObjdump accepts a string with path to an objdump binary,
@@ -306,9 +293,7 @@ private static (@string, bool) findExe(@string cmd, slice<@string> paths) {
             }
 
         }
-
     }    return (cmd, false);
-
 }
 
 // Disasm returns the assembly instructions for the specified address range
@@ -340,7 +325,6 @@ private static (slice<plugin.Inst>, error) Disasm(this ptr<Binutils> _addr_bu, @
         return (null, error.As(fmt.Errorf("%v: %v", cmd.Args, err))!);
     }
     return disassemble(out);
-
 }
 
 // Open satisfies the plugin.ObjTool interface.
@@ -363,9 +347,7 @@ private static (plugin.ObjFile, error) Open(this ptr<Binutils> _addr_bu, @string
             if (strings.Contains(b.addr2line, "testdata/")) {
                 return (addr(new fileAddr2Line(file:file{b:b,name:name})), error.As(null!)!);
             }
-
             return (null, error.As(err)!);
-
         }
     } 
 
@@ -392,7 +374,6 @@ private static (plugin.ObjFile, error) Open(this ptr<Binutils> _addr_bu, @string
             return (null, error.As(fmt.Errorf("error reading ELF file %s: %v", name, err))!);
         }
         return (f, error.As(null!)!);
-
     }
     var machoMagicLittle = binary.LittleEndian.Uint32(header[..]);
     var machoMagicBig = binary.BigEndian.Uint32(header[..]);
@@ -403,7 +384,6 @@ private static (plugin.ObjFile, error) Open(this ptr<Binutils> _addr_bu, @string
             return (null, error.As(fmt.Errorf("error reading Mach-O file %s: %v", name, err))!);
         }
         return (f, error.As(null!)!);
-
     }
     if (machoMagicLittle == macho.MagicFat || machoMagicBig == macho.MagicFat) {
         (f, err) = b.openFatMachO(name, start, limit, offset);
@@ -411,7 +391,6 @@ private static (plugin.ObjFile, error) Open(this ptr<Binutils> _addr_bu, @string
             return (null, error.As(fmt.Errorf("error reading fat Mach-O file %s: %v", name, err))!);
         }
         return (f, error.As(null!)!);
-
     }
     var peMagic = string(header[..(int)2]);
     if (peMagic == "MZ") {
@@ -420,10 +399,8 @@ private static (plugin.ObjFile, error) Open(this ptr<Binutils> _addr_bu, @string
             return (null, error.As(fmt.Errorf("error reading PE file %s: %v", name, err))!);
         }
         return (f, error.As(null!)!);
-
     }
     return (null, error.As(fmt.Errorf("unrecognized binary format: %s", name))!);
-
 });
 
 private static (plugin.ObjFile, error) openMachOCommon(this ptr<binrep> _addr_b, @string name, ptr<macho.File> _addr_of, ulong start, ulong limit, ulong offset) {
@@ -449,7 +426,6 @@ private static (plugin.ObjFile, error) openMachOCommon(this ptr<binrep> _addr_b,
         return (addr(new fileNM(file:file{b:b,name:name,base:base})), error.As(null!)!);
     }
     return (addr(new fileAddr2Line(file:file{b:b,name:name,base:base})), error.As(null!)!);
-
 }
 
 private static (plugin.ObjFile, error) openFatMachO(this ptr<binrep> _addr_b, @string name, ulong start, ulong limit, ulong offset) => func((defer, _, _) => {
@@ -505,7 +481,6 @@ private static (plugin.ObjFile, error) openFatMachO(this ptr<binrep> _addr_b, @s
             return b.openMachOCommon(name, of.Arches[i].File, start, limit, offset);
         }
     }    return (null, error.As(fmt.Errorf("architecture not found in %s: %s", name, runtime.GOARCH))!);
-
 });
 
 private static (plugin.ObjFile, error) openMachO(this ptr<binrep> _addr_b, @string name, ulong start, ulong limit, ulong offset) => func((defer, _, _) => {
@@ -520,7 +495,6 @@ private static (plugin.ObjFile, error) openMachO(this ptr<binrep> _addr_b, @stri
     defer(of.Close());
 
     return b.openMachOCommon(name, of, start, limit, offset);
-
 });
 
 private static (plugin.ObjFile, error) openELF(this ptr<binrep> _addr_b, @string name, ulong start, ulong limit, ulong offset) => func((defer, _, _) => {
@@ -547,10 +521,8 @@ private static (plugin.ObjFile, error) openELF(this ptr<binrep> _addr_b, @string
                 }
 
             }
-
         }
     }
-
 
     ptr<ulong> stextOffset;    Func<ulong, bool> pageAligned = addr => addr % 4096 == 0;
     if (strings.Contains(name, "vmlinux") || !pageAligned(start) || !pageAligned(limit) || !pageAligned(offset)) { 
@@ -570,9 +542,7 @@ private static (plugin.ObjFile, error) openELF(this ptr<binrep> _addr_b, @string
                 // The kernel may use _stext as the mapping start address.
                 stextOffset = _addr_s.Value;
                 break;
-
             }
-
         }
     }
     {
@@ -583,12 +553,10 @@ private static (plugin.ObjFile, error) openELF(this ptr<binrep> _addr_b, @string
         }
     }
 
-
     if (b.fast || (!b.addr2lineFound && !b.llvmSymbolizerFound)) {
         return (addr(new fileNM(file:file{b:b,name:name,buildID:buildID,m:&elfMapping{start:start,limit:limit,offset:offset,stextOffset:stextOffset},})), error.As(null!)!);
     }
     return (addr(new fileAddr2Line(file:file{b:b,name:name,buildID:buildID,m:&elfMapping{start:start,limit:limit,offset:offset,stextOffset:stextOffset},})), error.As(null!)!);
-
 });
 
 private static (plugin.ObjFile, error) openPE(this ptr<binrep> _addr_b, @string name, ulong start, ulong limit, ulong offset) => func((defer, _, _) => {
@@ -627,7 +595,6 @@ private static (plugin.ObjFile, error) openPE(this ptr<binrep> _addr_b, @string 
         return (addr(new fileNM(file:file{b:b,name:name,base:base})), error.As(null!)!);
     }
     return (addr(new fileAddr2Line(file:file{b:b,name:name,base:base})), error.As(null!)!);
-
 });
 
 // elfMapping stores the parameters of a runtime mapping that are needed to
@@ -692,7 +659,6 @@ private static error computeBase(this ptr<file> _addr_f, ulong addr) => func((de
  { 
         // For the kernel, find the program segment that includes the .text section.
         ph = elfexec.FindTextProgHeader(ef);
-
     }
     var (base, err) = elfexec.GetBase(_addr_ef.FileHeader, ph, f.m.stextOffset, f.m.start, f.m.limit, f.m.offset);
     if (err != null) {
@@ -701,7 +667,6 @@ private static error computeBase(this ptr<file> _addr_f, ulong addr) => func((de
     f.@base = base;
     f.isData = ph != null && ph.Flags & elf.PF_X == 0;
     return error.As(null!)!;
-
 });
 
 // matchUniqueHeader attempts to identify a unique header from the given list,
@@ -718,7 +683,6 @@ private static (ptr<elf.ProgHeader>, error) matchUniqueHeader(slice<ptr<elf.Prog
     if (len(headers) == 1) { 
         // Don't use the file offset if we already have a single header.
         return (_addr_headers[0]!, error.As(null!)!);
-
     }
     ptr<elf.ProgHeader> ph;
     foreach (var (_, h) in headers) {
@@ -728,17 +692,13 @@ private static (ptr<elf.ProgHeader>, error) matchUniqueHeader(slice<ptr<elf.Prog
                 // more small program segments that fit on the same page, and a
                 // segment other than the last one includes uninitialized data.
                 return (_addr_null!, error.As(fmt.Errorf("found second program header (%#v) that matches file offset %x, first program header is %#v. Does first program segment contain uninitialized data?", h.val, fileOffset, ph.val))!);
-
             }
-
             ph = h;
-
         }
     }    if (ph == null) {
         return (_addr_null!, error.As(fmt.Errorf("no program header matches file offset %x", fileOffset))!);
     }
     return (_addr_ph!, error.As(null!)!);
-
 }
 
 private static @string Name(this ptr<file> _addr_f) {
@@ -759,7 +719,6 @@ private static (ulong, error) ObjAddr(this ptr<file> _addr_f, ulong addr) {
         return (0, error.As(f.baseErr)!);
     }
     return (addr - f.@base, error.As(null!)!);
-
 }
 
 private static @string BuildID(this ptr<file> _addr_f) {
@@ -780,7 +739,6 @@ private static (slice<plugin.Frame>, error) SourceLine(this ptr<file> _addr_f, u
         return (null, error.As(f.baseErr)!);
     }
     return (null, error.As(null!)!);
-
 }
 
 private static error Close(this ptr<file> _addr_f) {
@@ -802,7 +760,6 @@ private static (slice<ptr<plugin.Sym>>, error) Symbols(this ptr<file> _addr_f, p
         return (null, error.As(fmt.Errorf("%v: %v", cmd.Args, err))!);
     }
     return findSymbols(out, f.name, r, addr);
-
 }
 
 // fileNM implements the binutils.ObjFile interface, using 'nm' to map
@@ -830,10 +787,8 @@ private static (slice<plugin.Frame>, error) SourceLine(this ptr<fileNM> _addr_f,
             return (null, error.As(err)!);
         }
         f.addr2linernm = addr2liner;
-
     }
     return f.addr2linernm.addrInfo(addr);
-
 }
 
 // fileAddr2Line implements the binutils.ObjFile interface, using
@@ -867,7 +822,6 @@ private static (slice<plugin.Frame>, error) SourceLine(this ptr<fileAddr2Line> _
         return f.addr2liner.addrInfo(addr);
     }
     return (null, error.As(fmt.Errorf("could not find local addr2liner"))!);
-
 }
 
 private static void init(this ptr<fileAddr2Line> _addr_f) {
@@ -881,7 +835,6 @@ private static void init(this ptr<fileAddr2Line> _addr_f) {
             return ;
         }
     }
-
 
     {
         var (addr2liner, err) = newAddr2Liner(f.b.addr2line, f.name, f.@base);
@@ -900,10 +853,8 @@ private static void init(this ptr<fileAddr2Line> _addr_f) {
                 }
 
             }
-
         }
     }
-
 }
 
 private static error Close(this ptr<fileAddr2Line> _addr_f) {
@@ -918,7 +869,6 @@ private static error Close(this ptr<fileAddr2Line> _addr_f) {
         f.addr2liner = null;
     }
     return error.As(null!)!;
-
 }
 
 } // end binutils_package

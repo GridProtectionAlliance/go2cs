@@ -2,23 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package analysis -- go2cs converted at 2022 March 06 23:31:07 UTC
+// package analysis -- go2cs converted at 2022 March 13 06:41:35 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis" ==> using analysis = go.cmd.vendor.golang.org.x.tools.go.analysis_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\diagnostic.go
-using token = go.go.token_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go;
+
+using token = go.token_package;
 
 public static partial class analysis_package {
 
-    // A Diagnostic is a message associated with a source location or range.
-    //
-    // An Analyzer may return a variety of diagnostics; the optional Category,
-    // which should be a constant, may be used to classify them.
-    // It is primarily intended to make it easy to look up documentation.
-    //
-    // If End is provided, the diagnostic is specified to apply to the range between
-    // Pos and End.
+// A Diagnostic is a message associated with a source location or range.
+//
+// An Analyzer may return a variety of diagnostics; the optional Category,
+// which should be a constant, may be used to classify them.
+// It is primarily intended to make it easy to look up documentation.
+//
+// If End is provided, the diagnostic is specified to apply to the range between
+// Pos and End.
 public partial struct Diagnostic {
     public token.Pos Pos;
     public token.Pos End; // optional

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:22 UTC
+//     Generated on 2022 March 13 05:26:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct semaRoot
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace go
             public static implicit operator semaRoot(NilType nil) => default(semaRoot);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static semaRoot semaRoot_cast(dynamic value)
         {
             return new semaRoot(value.@lock, ref value.treap, value.nwait);

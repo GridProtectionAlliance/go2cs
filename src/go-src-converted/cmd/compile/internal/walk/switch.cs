@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:12:06 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:28 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\switch.go
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using sort = go.sort_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using constant = go.constant_package;
+using token = go.token_package;
+using sort = sort_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// walkSwitch walks a switch statement.
+
+using System;
 public static partial class walk_package {
 
-    // walkSwitch walks a switch statement.
 private static void walkSwitch(ptr<ir.SwitchStmt> _addr_sw) {
     ref ir.SwitchStmt sw = ref _addr_sw.val;
  
@@ -95,7 +96,6 @@ private static void walkSwitchExpr(ptr<ir.SwitchStmt> _addr_sw) {
             }
 
         }
-
     }    sw.Cases = null;
 
     if (defaultGoto == null) {
@@ -107,7 +107,6 @@ private static void walkSwitchExpr(ptr<ir.SwitchStmt> _addr_sw) {
     sw.Compiled.Append(defaultGoto);
     sw.Compiled.Append(body.Take());
     walkStmtList(sw.Compiled);
-
 }
 
 // An exprSwitch walks an expression switch.
@@ -136,7 +135,6 @@ private static void Add(this ptr<exprSwitch> _addr_s, src.XPos pos, ir.Node expr
     s.flush();
     s.clauses = append(s.clauses, c);
     s.flush();
-
 }
 
 private static void Emit(this ptr<exprSwitch> _addr_s, ptr<ir.Nodes> _addr_@out) {
@@ -185,19 +183,14 @@ private static void flush(this ptr<exprSwitch> _addr_s) {
         runs = append(runs, cc[(int)start..]); 
 
         // Perform two-level binary search.
-        binarySearch(len(runs), _addr_s.done, i => {
-            return ir.NewBinaryExpr(@base.Pos, ir.OLE, ir.NewUnaryExpr(@base.Pos, ir.OLEN, s.exprname), ir.NewInt(runLen(runs[i - 1])));
-        }, (i, nif) => {
+        binarySearch(len(runs), _addr_s.done, i => ir.NewBinaryExpr(@base.Pos, ir.OLE, ir.NewUnaryExpr(@base.Pos, ir.OLEN, s.exprname), ir.NewInt(runLen(runs[i - 1]))), (i, nif) => {
             var run = runs[i];
             nif.Cond = ir.NewBinaryExpr(@base.Pos, ir.OEQ, ir.NewUnaryExpr(@base.Pos, ir.OLEN, s.exprname), ir.NewInt(runLen(run)));
             s.search(run, _addr_nif.Body);
         });
         return ;
-
     }
-    sort.Slice(cc, (i, j) => {
-        return constant.Compare(cc[i].lo.Val(), token.LSS, cc[j].lo.Val());
-    }); 
+    sort.Slice(cc, (i, j) => constant.Compare(cc[i].lo.Val(), token.LSS, cc[j].lo.Val())); 
 
     // Merge consecutive integer cases.
     if (s.exprname.Type().IsInteger()) {
@@ -216,21 +209,16 @@ private static void flush(this ptr<exprSwitch> _addr_s) {
  {
                 merged = append(merged, c);
             }
-
         }        cc = merged;
-
     }
     s.search(cc, _addr_s.done);
-
 }
 
 private static void search(this ptr<exprSwitch> _addr_s, slice<exprClause> cc, ptr<ir.Nodes> _addr_@out) {
     ref exprSwitch s = ref _addr_s.val;
     ref ir.Nodes @out = ref _addr_@out.val;
 
-    binarySearch(len(cc), _addr_out, i => {
-        return ir.NewBinaryExpr(@base.Pos, ir.OLE, s.exprname, cc[i - 1].hi);
-    }, (i, nif) => {
+    binarySearch(len(cc), _addr_out, i => ir.NewBinaryExpr(@base.Pos, ir.OLE, s.exprname, cc[i - 1].hi), (i, nif) => {
         var c = _addr_cc[i];
         nif.Cond = c.test(s.exprname);
         nif.Body = new slice<ir.Node>(new ir.Node[] { c.jmp });
@@ -256,7 +244,6 @@ private static ir.Node test(this ptr<exprClause> _addr_c, ir.Node exprname) {
         }
     }
     return ir.NewBinaryExpr(c.pos, ir.OEQ, exprname, c.lo);
-
 }
 
 private static bool allCaseExprsAreSideEffectFree(ptr<ir.SwitchStmt> _addr_sw) {
@@ -276,7 +263,6 @@ private static bool allCaseExprsAreSideEffectFree(ptr<ir.SwitchStmt> _addr_sw) {
             }
         }
     }    return true;
-
 }
 
 // endsInFallthrough reports whether stmts ends with a "fallthrough" statement.
@@ -298,7 +284,6 @@ private static (bool, src.XPos) endsInFallthrough(slice<ir.Node> stmts) {
         return (false, src.NoXPos);
     }
     return (stmts[i].Op() == ir.OFALL, stmts[i].Pos());
-
 }
 
 // walkSwitchType generates an AST that implements sw, where sw is a
@@ -360,21 +345,16 @@ private static void walkSwitchType(ptr<ir.SwitchStmt> _addr_sw) {
             if (defaultGoto != null) {
                 @base.Fatalf("duplicate default case not detected during typechecking");
             }
-
             defaultGoto = jmp;
-
         }
         foreach (var (_, n1) in ncase.List) {
             if (ir.IsNil(n1)) { // case nil:
                 if (nilGoto != null) {
                     @base.Fatalf("duplicate nil case not detected during typechecking");
                 }
-
                 nilGoto = jmp;
                 continue;
-
             }
-
             if (singleType != null && singleType.IsInterface()) {
                 s.Add(ncase.Pos(), n1.Type(), caseVar, jmp);
                 caseVarInitialized = true;
@@ -383,7 +363,6 @@ private static void walkSwitchType(ptr<ir.SwitchStmt> _addr_sw) {
  {
                 s.Add(ncase.Pos(), n1.Type(), null, jmp);
             }
-
         }        body.Append(ir.NewLabelStmt(ncase.Pos(), label));
         if (caseVar != null && !caseVarInitialized) {
             var val = s.facename;
@@ -392,19 +371,14 @@ private static void walkSwitchType(ptr<ir.SwitchStmt> _addr_sw) {
                 if (singleType.IsInterface()) {
                     @base.Fatalf("singleType interface should have been handled in Add");
                 }
-
                 val = ifaceData(ncase.Pos(), s.facename, singleType);
-
             }
-
             ir.Node l = new slice<ir.Node>(new ir.Node[] { ir.NewDecl(ncase.Pos(),ir.ODCL,caseVar), ir.NewAssignStmt(ncase.Pos(),caseVar,val) });
             typecheck.Stmts(l);
             body.Append(l);
-
         }
         body.Append(ncase.Body);
         body.Append(br);
-
     }    sw.Cases = null;
 
     if (defaultGoto == null) {
@@ -420,7 +394,6 @@ private static void walkSwitchType(ptr<ir.SwitchStmt> _addr_sw) {
     sw.Compiled.Append(body.Take());
 
     walkStmtList(sw.Compiled);
-
 }
 
 // typeHashFieldOf returns an expression to select the type hash field
@@ -439,7 +412,6 @@ private static ptr<ir.SelectorExpr> typeHashFieldOf(src.XPos pos, ptr<ir.UnaryEx
             rtypeHashField = runtimeField("hash", int64(2 * types.PtrSize), types.Types[types.TUINT32]);
         }
         hashField = rtypeHashField;
-
     }
     else
  { 
@@ -448,10 +420,8 @@ private static ptr<ir.SelectorExpr> typeHashFieldOf(src.XPos pos, ptr<ir.UnaryEx
             itabHashField = runtimeField("hash", int64(2 * types.PtrSize), types.Types[types.TUINT32]);
         }
         hashField = itabHashField;
-
     }
     return _addr_boundedDotPtr(pos, itab, hashField)!;
-
 }
 
 private static ptr<types.Field> rtypeHashField;private static ptr<types.Field> itabHashField;
@@ -508,7 +478,6 @@ private static void Add(this ptr<typeSwitch> _addr_s, src.XPos pos, ptr<types.Ty
     }
     s.flush();
     s.done.Append(body.Take());
-
 }
 
 private static void Emit(this ptr<typeSwitch> _addr_s, ptr<ir.Nodes> _addr_@out) {
@@ -544,24 +513,19 @@ private static void flush(this ptr<typeSwitch> _addr_s) {
  {
                 merged = append(merged, c);
             }
-
         }
         c = c__prev1;
     }
 
     cc = merged;
 
-    binarySearch(len(cc), _addr_s.done, i => {
-        return ir.NewBinaryExpr(@base.Pos, ir.OLE, s.hashname, ir.NewInt(int64(cc[i - 1].hash)));
-    }, (i, nif) => { 
+    binarySearch(len(cc), _addr_s.done, i => ir.NewBinaryExpr(@base.Pos, ir.OLE, s.hashname, ir.NewInt(int64(cc[i - 1].hash))), (i, nif) => { 
         // TODO(mdempsky): Omit hash equality check if
         // there's only one type.
         var c = cc[i];
         nif.Cond = ir.NewBinaryExpr(@base.Pos, ir.OEQ, s.hashname, ir.NewInt(int64(c.hash)));
         nif.Body.Append(c.body.Take());
-
     });
-
 }
 
 // binarySearch constructs a binary search tree for handling n cases,
@@ -605,11 +569,9 @@ private static void binarySearch(nint n, ptr<ir.Nodes> _addr_@out, Func<nint, ir
         do(lo, half, _addr_nif.Body);
         do(half, hi, _addr_nif.Else);
         @out.Append(nif);
-
     };
 
     do(0, n, out);
-
 }
 
 } // end walk_package

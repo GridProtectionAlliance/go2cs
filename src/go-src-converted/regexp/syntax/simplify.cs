@@ -2,22 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 22:23:39 UTC
+// package syntax -- go2cs converted at 2022 March 13 05:38:05 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Program Files\Go\src\regexp\syntax\simplify.go
-
-
 namespace go.regexp;
 
 public static partial class syntax_package {
 
-    // Simplify returns a regexp equivalent to re but without counted repetitions
-    // and with various other simplifications, such as rewriting /(?:a+)+/ to /a+/.
-    // The resulting regexp will execute correctly but its string representation
-    // will not produce the same parse tree, because capturing parentheses
-    // may have been duplicated or removed. For example, the simplified form
-    // for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
-    // The returned regexp may share structure with or be the original.
+// Simplify returns a regexp equivalent to re but without counted repetitions
+// and with various other simplifications, such as rewriting /(?:a+)+/ to /a+/.
+// The resulting regexp will execute correctly but its string representation
+// will not produce the same parse tree, because capturing parentheses
+// may have been duplicated or removed. For example, the simplified form
+// for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
+// The returned regexp may share structure with or be the original.
 private static ptr<Regexp> Simplify(this ptr<Regexp> _addr_re) {
     ref Regexp re = ref _addr_re.val;
 
@@ -42,7 +40,6 @@ private static ptr<Regexp> Simplify(this ptr<Regexp> _addr_re) {
                     nre.val = re.val;
                     nre.Rune = null;
                     nre.Sub = append(nre.Sub0[..(int)0], re.Sub[..(int)i]);
-
                 }
                 if (nre != re) {
                     nre.Sub = append(nre.Sub, nsub);
@@ -86,7 +83,6 @@ private static ptr<Regexp> Simplify(this ptr<Regexp> _addr_re) {
             }
             nre.Sub = append(nre.Sub, simplify1(OpPlus, re.Flags, _addr_sub, _addr_null));
             return _addr_nre!;
-
         }
         if (re.Min == 1 && re.Max == 1) {
             return _addr_sub!;
@@ -104,7 +100,6 @@ private static ptr<Regexp> Simplify(this ptr<Regexp> _addr_re) {
 
                 i = i__prev1;
             }
-
         }
         if (re.Max > re.Min) {
             var suffix = simplify1(OpQuest, re.Flags, _addr_sub, _addr_null);
@@ -123,14 +118,12 @@ private static ptr<Regexp> Simplify(this ptr<Regexp> _addr_re) {
                 return _addr_suffix!;
             }
             prefix.Sub = append(prefix.Sub, suffix);
-
         }
         if (prefix != null) {
             return _addr_prefix!;
         }
         return addr(new Regexp(Op:OpNoMatch));
         return _addr_re!;
-
 }
 
 // simplify1 implements Simplify for the unary OpStar,
@@ -166,7 +159,6 @@ private static ptr<Regexp> simplify1(Op op, Flags flags, ptr<Regexp> _addr_sub, 
     re = addr(new Regexp(Op:op,Flags:flags));
     re.Sub = append(re.Sub0[..(int)0], sub);
     return _addr_re!;
-
 }
 
 } // end syntax_package

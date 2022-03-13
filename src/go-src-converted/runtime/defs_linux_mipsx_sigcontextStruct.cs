@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:34 UTC
+//     Generated on 2022 March 13 05:24:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct sigcontext
         {
             // Constructors
@@ -85,7 +85,7 @@ namespace go
             public static implicit operator sigcontext(NilType nil) => default(sigcontext);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static sigcontext sigcontext_cast(dynamic value)
         {
             return new sigcontext(value.sc_regmask, value.sc_status, value.sc_pc, value.sc_regs, value.sc_fpregs, value.sc_acx, value.sc_fpc_csr, value.sc_fpc_eir, value.sc_used_math, value.sc_dsp, value.sc_mdhi, value.sc_mdlo, value.sc_hi1, value.sc_lo1, value.sc_hi2, value.sc_lo2, value.sc_hi3, value.sc_lo3);

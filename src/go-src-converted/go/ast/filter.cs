@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2022 March 06 22:42:57 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:06 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\filter.go
-using token = go.go.token_package;
-using sort = go.sort_package;
-
 namespace go.go;
+
+using token = go.token_package;
+using sort = sort_package;
+
+
+// ----------------------------------------------------------------------------
+// Export filtering
+
+// exportFilter is a special filter function to extract exported nodes.
 
 public static partial class ast_package {
 
-    // ----------------------------------------------------------------------------
-    // Export filtering
-
-    // exportFilter is a special filter function to extract exported nodes.
 private static bool exportFilter(@string name) {
     return IsExported(name);
 }
@@ -60,7 +62,6 @@ private static slice<ptr<Ident>> filterIdentList(slice<ptr<Ident>> list, Filter 
             j++;
         }
     }    return list[(int)0..(int)j];
-
 }
 
 // fieldName assumes that x is the type of an anonymous field and
@@ -81,14 +82,12 @@ private static ptr<Ident> fieldName(Expr x) {
                 }
 
             }
-
             break;
         case ptr<StarExpr> t:
             return _addr_fieldName(t.X)!;
             break;
     }
     return _addr_null!;
-
 }
 
 private static bool filterFieldList(ptr<FieldList> _addr_fields, Filter filter, bool export) {
@@ -106,7 +105,6 @@ private static bool filterFieldList(ptr<FieldList> _addr_fields, Filter filter, 
             // anonymous field
             var name = fieldName(f.Type);
             keepField = name != null && filter(name.Name);
-
         }
         else
  {
@@ -129,7 +127,6 @@ private static bool filterFieldList(ptr<FieldList> _addr_fields, Filter filter, 
     }
     fields.List = list[(int)0..(int)j];
     return ;
-
 }
 
 private static void filterCompositeLit(ptr<CompositeLit> _addr_lit, Filter filter, bool export) {
@@ -162,7 +159,6 @@ private static slice<Expr> filterExprList(slice<Expr> list, Filter filter, bool 
                     x = x__prev1;
 
                 }
-
                 {
                     var x__prev1 = x;
 
@@ -175,14 +171,11 @@ private static slice<Expr> filterExprList(slice<Expr> list, Filter filter, bool 
                     x = x__prev1;
 
                 }
-
                 break;
         }
         list[j] = exp;
         j++;
-
     }    return list[(int)0..(int)j];
-
 }
 
 private static bool filterParamList(ptr<FieldList> _addr_fields, Filter filter, bool export) {
@@ -197,7 +190,6 @@ private static bool filterParamList(ptr<FieldList> _addr_fields, Filter filter, 
             b = true;
         }
     }    return b;
-
 }
 
 private static bool filterType(Expr typ, Filter f, bool export) {
@@ -238,7 +230,6 @@ private static bool filterType(Expr typ, Filter f, bool export) {
             break;
     }
     return false;
-
 }
 
 private static bool filterSpec(Spec spec, Filter f, bool export) {
@@ -267,13 +258,10 @@ private static bool filterSpec(Spec spec, Filter f, bool export) {
                 // If the type contains filtered elements,
                 // keep the declaration.
                 return filterType(s.Type, f, export);
-
             }
-
             break;
     }
     return false;
-
 }
 
 private static slice<Spec> filterSpecList(slice<Spec> list, Filter f, bool export) {
@@ -284,7 +272,6 @@ private static slice<Spec> filterSpecList(slice<Spec> list, Filter f, bool expor
             j++;
         }
     }    return list[(int)0..(int)j];
-
 }
 
 // FilterDecl trims the AST for a Go declaration in place by removing
@@ -309,7 +296,6 @@ private static bool filterDecl(Decl decl, Filter f, bool export) {
             break;
     }
     return false;
-
 }
 
 // FilterFile trims the AST for a Go file in place by removing all
@@ -339,7 +325,6 @@ private static bool filterFile(ptr<File> _addr_src, Filter f, bool export) {
         }
     }    src.Decls = src.Decls[(int)0..(int)j];
     return j > 0;
-
 }
 
 // FilterPackage trims the AST for a Go package in place by removing
@@ -368,7 +353,6 @@ private static bool filterPackage(ptr<Package> _addr_pkg, Filter f, bool export)
             hasDecls = true;
         }
     }    return hasDecls;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -386,7 +370,6 @@ public static readonly MergeMode FilterFuncDuplicates = 1 << (int)(iota);
 public static readonly var FilterUnassociatedComments = 0; 
 // If set, duplicate import declarations are excluded.
 public static readonly var FilterImportDuplicates = 1;
-
 
 // nameOf returns the function (foo) or method name (foo.bar) for
 // the given function declaration. If the AST is incorrect for the
@@ -432,9 +415,7 @@ private static @string nameOf(ptr<FuncDecl> _addr_f) {
             // otherwise assume a function instead
         }
     }
-
     return f.Name.Name;
-
 }
 
 // separator is an empty //-style comment that is interspersed between
@@ -468,10 +449,8 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
             if (f.Doc != null) {
                 ndocs += len(f.Doc.List) + 1; // +1 for separator
             }
-
             ncomments += len(f.Comments);
             ndecls += len(f.Decls);
-
         }
         filename = filename__prev1;
         f = f__prev1;
@@ -499,9 +478,7 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
                         // not the first group - add separator
                         list[i] = separator;
                         i++;
-
                     }
-
                     foreach (var (_, c) in f.Doc.List) {
                         list[i] = c;
                         i++;
@@ -511,18 +488,14 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
                         // position for the package clause of the merged
                         // files.
                         pos = f.Package;
-
                     }
-
                 }
-
             }
 
             filename = filename__prev1;
         }
 
         doc = addr(new CommentGroup(list));
-
     }
     slice<Decl> decls = default;
     if (ndecls > 0) {
@@ -567,15 +540,12 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
                                                 // existing declaration has no documentation;
                                                 // ignore the existing declaration
                                                 decls[j] = null;
-
                                             }
                                             else
  { 
                                                 // ignore the new declaration
                                                 d = null;
-
                                             }
-
                                             n++; // filtered an entry
                                         }
                                         else
@@ -584,18 +554,14 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
                                         }
 
                                     }
-
                                 }
 
                                 f = f__prev3;
 
                             }
-
                         }
-
                         decls[i] = d;
                         i++;
-
                     }
 
                     d = d__prev2;
@@ -628,7 +594,6 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
             }
 
             decls = decls[(int)0..(int)i];
-
         }
     }
     slice<ptr<ImportSpec>> imports = default;
@@ -654,11 +619,9 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
                             //   different) comments
                             imports = append(imports, imp);
                             seen[path] = true;
-
                         }
 
                     }
-
                 }
     else
             }
@@ -696,7 +659,6 @@ public static ptr<File> MergePackageFiles(ptr<Package> _addr_pkg, MergeMode mode
         }
     }
     return addr(new File(doc,pos,NewIdent(pkg.Name),decls,pkg.Scope,imports,nil,comments));
-
 }
 
 } // end ast_package

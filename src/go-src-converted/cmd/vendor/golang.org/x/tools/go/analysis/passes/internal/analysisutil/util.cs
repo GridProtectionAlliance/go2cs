@@ -4,23 +4,25 @@
 
 // Package analysisutil defines various helper functions
 // used by two or more packages beneath go/analysis.
-// package analysisutil -- go2cs converted at 2022 March 06 23:34:37 UTC
+
+// package analysisutil -- go2cs converted at 2022 March 13 06:41:53 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/internal/analysisutil" ==> using analysisutil = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\internal\analysisutil\util.go
-using bytes = go.bytes_package;
-using ast = go.go.ast_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using ioutil = go.io.ioutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes.@internal;
 
+using bytes = bytes_package;
+using ast = go.ast_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using types = go.types_package;
+using ioutil = io.ioutil_package;
+
+
+// Format returns a string representation of the expression.
+
+using System;
 public static partial class analysisutil_package {
 
-    // Format returns a string representation of the expression.
 public static @string Format(ptr<token.FileSet> _addr_fset, ast.Expr x) {
     ref token.FileSet fset = ref _addr_fset.val;
 
@@ -59,10 +61,8 @@ public static bool HasSideEffects(ptr<types.Info> _addr_info, ast.Expr e) {
                 break;
         }
         return true;
-
     });
     return !safe;
-
 }
 
 // Unparen returns e with any enclosing parentheses stripped.
@@ -73,9 +73,7 @@ public static ast.Expr Unparen(ast.Expr e) {
             return e;
         }
         e = p.X;
-
     }
-
 }
 
 // ReadFile reads a file and adds it to the FileSet
@@ -93,7 +91,6 @@ public static (slice<byte>, ptr<token.File>, error) ReadFile(ptr<token.FileSet> 
     var tf = fset.AddFile(filename, -1, len(content));
     tf.SetLinesForContent(content);
     return (content, _addr_tf!, error.As(null!)!);
-
 }
 
 // LineStart returns the position of the start of the specified line
@@ -127,7 +124,6 @@ public static token.Pos LineStart(ptr<token.File> _addr_f, nint line) {
             max = offset;
         }
     }
-
 }
 
 // Imports returns true if path is imported by pkg.
@@ -139,7 +135,6 @@ public static bool Imports(ptr<types.Package> _addr_pkg, @string path) {
             return true;
         }
     }    return false;
-
 }
 
 } // end analysisutil_package

@@ -10,23 +10,25 @@
 // mode that retraverses the object graph with the world stopped, to make
 // sure that everything that should be marked is marked.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:19 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mcheckmark.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// A checkmarksMap stores the GC marks in "checkmarks" mode. It is a
+// per-arena bitmap with a bit for every word in the arena. The mark
+// is stored on the bit corresponding to the first word of the marked
+// allocation.
+//
+//go:notinheap
 
 public static partial class runtime_package {
 
-    // A checkmarksMap stores the GC marks in "checkmarks" mode. It is a
-    // per-arena bitmap with a bit for every word in the arena. The mark
-    // is stored on the bit corresponding to the first word of the marked
-    // allocation.
-    //
-    //go:notinheap
 private partial struct checkmarksMap { // : array<byte>
 }
 
@@ -51,9 +53,7 @@ private static void startCheckmarks() {
             if (bitmap == null) {
                 throw("out of memory allocating checkmarks bitmap");
             }
-
             arena.checkmarks = bitmap;
-
         }
         else
  { 
@@ -61,10 +61,8 @@ private static void startCheckmarks() {
             foreach (var (i) in bitmap) {
                 bitmap[i] = 0;
             }
-
         }
     }    useCheckmark = true;
-
 }
 
 // endCheckmarks ends the checkmarks phase.
@@ -73,7 +71,6 @@ private static void endCheckmarks() {
         throw("GC work not flushed");
     }
     useCheckmark = false;
-
 }
 
 // setCheckmark throws if marking object is a checkmarks violation,
@@ -93,7 +90,6 @@ private static bool setCheckmark(System.UIntPtr obj, System.UIntPtr @base, Syste
 
         getg().m.traceback = 2;
         throw("checkmark found unmarked object");
-
     }
     var ai = arenaIndex(obj);
     var arena = mheap_.arenas[ai.l1()][ai.l2()];
@@ -104,11 +100,9 @@ private static bool setCheckmark(System.UIntPtr obj, System.UIntPtr @base, Syste
     if (atomic.Load8(bytep) & mask != 0) { 
         // Already checkmarked.
         return true;
-
     }
     atomic.Or8(bytep, mask);
     return false;
-
 }
 
 } // end runtime_package

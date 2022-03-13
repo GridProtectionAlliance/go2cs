@@ -7,12 +7,12 @@
 
 // Dummy race detection API, used when not built with -race.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:15 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:44 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\race0.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 

@@ -5,15 +5,13 @@
 //go:build go1.1
 // +build go1.1
 
-// package main -- go2cs converted at 2022 March 06 23:15:53 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:21 UTC
 // Original source: C:\Program Files\Go\src\cmd\go\go11.go
-
-
 namespace go;
 
 public static partial class main_package {
 
-    // Test that go1.1 tag above is included in builds. main.go refers to this definition.
+// Test that go1.1 tag above is included in builds. main.go refers to this definition.
 private static readonly var go11tag = true;
 
 

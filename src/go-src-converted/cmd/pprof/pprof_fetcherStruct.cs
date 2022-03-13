@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:40 UTC
+//     Generated on 2022 March 13 06:35:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct fetcher
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace go
             public static implicit operator fetcher(NilType nil) => default(fetcher);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static fetcher fetcher_cast(dynamic value)
         {
             return new fetcher();

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:58 UTC
+//     Generated on 2022 March 13 05:37:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(http2FrameHeader))]
         [PromotedStruct(typeof(http2PriorityParam))]
         private partial struct http2PriorityFrame
@@ -112,7 +112,7 @@ namespace net
             public static implicit operator http2PriorityFrame(NilType nil) => default(http2PriorityFrame);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2PriorityFrame http2PriorityFrame_cast(dynamic value)
         {
             return new http2PriorityFrame(value.http2FrameHeader, value.http2PriorityParam);

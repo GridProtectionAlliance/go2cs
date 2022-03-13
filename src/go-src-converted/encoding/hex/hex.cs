@@ -3,15 +3,16 @@
 // license that can be found in the LICENSE file.
 
 // Package hex implements hexadecimal encoding and decoding.
-// package hex -- go2cs converted at 2022 March 06 22:19:44 UTC
+
+// package hex -- go2cs converted at 2022 March 13 05:34:42 UTC
 // import "encoding/hex" ==> using hex = go.encoding.hex_package
 // Original source: C:\Program Files\Go\src\encoding\hex\hex.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strings = go.strings_package;
-
 namespace go.encoding;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using strings = strings_package;
 
 public static partial class hex_package {
 
@@ -84,7 +85,6 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
         }
         dst[i] = (a << 4) | b;
         i++;
-
     }
     if (len(src) % 2 == 1) { 
         // Check for invalid char before reporting bad length,
@@ -97,12 +97,9 @@ public static (nint, error) Decode(slice<byte> dst, slice<byte> src) {
             }
 
         }
-
         return (i, error.As(ErrLength)!);
-
     }
     return (i, error.As(null!)!);
-
 }
 
 // fromHexChar converts a hex character into its value and a success flag.
@@ -118,7 +115,6 @@ private static (byte, bool) fromHexChar(byte c) {
     else if ('A' <= c && c <= 'F') 
         return (c - 'A' + 10, true);
         return (0, false);
-
 }
 
 // EncodeToString returns the hexadecimal encoding of src.
@@ -143,7 +139,6 @@ public static (slice<byte>, error) DecodeString(@string s) {
     // because the decode loop increments by one and then the 'seen' byte is not used anymore.
     var (n, err) = Decode(src, src);
     return (src[..(int)n], error.As(err)!);
-
 }
 
 // Dump returns a string that contains a hex dump of the given data. The format
@@ -162,7 +157,6 @@ public static @string Dump(slice<byte> data) {
     dumper.Write(data);
     dumper.Close();
     return buf.String();
-
 }
 
 // bufferSize is the number of hexadecimal characters to buffer in encoder and decoder.
@@ -196,10 +190,8 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
         written, e.err = e.w.Write(e.@out[..(int)encoded]);
         n += written / 2;
         p = p[(int)chunkSize..];
-
     }
     return (n, error.As(e.err)!);
-
 }
 
 private partial struct decoder {
@@ -240,7 +232,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
                 }
 
             }
-
         }
     }
     {
@@ -250,7 +241,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
             p = p[..(int)numAvail];
         }
     }
-
     var (numDec, err) = Decode(p, d.@in[..(int)len(p) * 2]);
     d.@in = d.@in[(int)2 * numDec..];
     if (err != null) {
@@ -260,7 +250,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
         return (numDec, error.As(d.err)!); // Only expose errors when buffer fully consumed
     }
     return (numDec, error.As(null!)!);
-
 }
 
 // Dumper returns a WriteCloser that writes a hex dump of all written data to
@@ -284,7 +273,6 @@ private static byte toChar(byte b) {
         return '.';
     }
     return b;
-
 }
 
 private static (nint, error) Write(this ptr<dumper> _addr_h, slice<byte> data) {
@@ -310,7 +298,6 @@ private static (nint, error) Write(this ptr<dumper> _addr_h, slice<byte> data) {
             if (err != null) {
                 return ;
             }
-
         }
         Encode(h.buf[..], data[(int)i..(int)i + 1]);
         h.buf[2] = ' ';
@@ -319,7 +306,6 @@ private static (nint, error) Write(this ptr<dumper> _addr_h, slice<byte> data) {
             // There's an additional space after the 8th byte.
             h.buf[3] = ' ';
             l = 4;
-
         }
         else if (h.used == 15) { 
             // At the end of the line there's an extra space and
@@ -327,7 +313,6 @@ private static (nint, error) Write(this ptr<dumper> _addr_h, slice<byte> data) {
             h.buf[3] = ' ';
             h.buf[4] = '|';
             l = 5;
-
         }
         _, err = h.w.Write(h.buf[..(int)l]);
         if (err != null) {
@@ -347,7 +332,6 @@ private static (nint, error) Write(this ptr<dumper> _addr_h, slice<byte> data) {
             h.used = 0;
         }
     }    return ;
-
 }
 
 private static error Close(this ptr<dumper> _addr_h) {
@@ -381,13 +365,11 @@ private static error Close(this ptr<dumper> _addr_h) {
             return ;
         }
         h.used++;
-
     }
     h.rightChars[nBytes] = '|';
     h.rightChars[nBytes + 1] = '\n';
     _, err = h.w.Write(h.rightChars[..(int)nBytes + 2]);
     return ;
-
 }
 
 } // end hex_package

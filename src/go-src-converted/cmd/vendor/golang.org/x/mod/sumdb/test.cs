@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sumdb -- go2cs converted at 2022 March 06 23:26:13 UTC
+// package sumdb -- go2cs converted at 2022 March 13 06:41:05 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb" ==> using sumdb = go.cmd.vendor.golang.org.x.mod.sumdb_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\test.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using sync = go.sync_package;
-
-using module = go.golang.org.x.mod.module_package;
-using note = go.golang.org.x.mod.sumdb.note_package;
-using tlog = go.golang.org.x.mod.sumdb.tlog_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.mod;
 
+using context = context_package;
+using fmt = fmt_package;
+using sync = sync_package;
+
+using module = golang.org.x.mod.module_package;
+using note = golang.org.x.mod.sumdb.note_package;
+using tlog = golang.org.x.mod.sumdb.tlog_package;
+
+
+// NewTestServer constructs a new TestServer
+// that will sign its tree with the given signer key
+// (see golang.org/x/mod/sumdb/note)
+// and fetch new records as needed by calling gosum.
+
+using System;
 public static partial class sumdb_package {
 
-    // NewTestServer constructs a new TestServer
-    // that will sign its tree with the given signer key
-    // (see golang.org/x/mod/sumdb/note)
-    // and fetch new records as needed by calling gosum.
 public static ptr<TestServer> NewTestServer(@string signer, Func<@string, @string, (slice<byte>, error)> gosum) {
     return addr(new TestServer(signer:signer,gosum:gosum));
 }
@@ -70,7 +71,6 @@ private static (slice<byte>, error) Signed(this ptr<TestServer> _addr_s, context
         return (null, error.As(err)!);
     }
     return note.Sign(addr(new note.Note(Text:string(text))), signer);
-
 });
 
 private static (slice<slice<byte>>, error) ReadRecords(this ptr<TestServer> _addr_s, context.Context ctx, long id, long n) => func((defer, _, _) => {
@@ -87,10 +87,8 @@ private static (slice<slice<byte>>, error) ReadRecords(this ptr<TestServer> _add
             return (null, error.As(fmt.Errorf("missing records"))!);
         }
         list = append(list, s.records[id + i]);
-
     }
     return (list, error.As(null!)!);
-
 });
 
 private static (long, error) Lookup(this ptr<TestServer> _addr_s, context.Context ctx, module.Version m) => func((defer, panic, _) => {
@@ -131,7 +129,6 @@ private static (long, error) Lookup(this ptr<TestServer> _addr_s, context.Contex
     s.hashes = append(s.hashes, hashes);
 
     return (id, error.As(null!)!);
-
 });
 
 private static (slice<byte>, error) ReadTileData(this ptr<TestServer> _addr_s, context.Context ctx, tlog.Tile t) => func((defer, _, _) => {

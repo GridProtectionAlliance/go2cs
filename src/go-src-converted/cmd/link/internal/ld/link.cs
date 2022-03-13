@@ -28,18 +28,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:21:48 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:48 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\link.go
-using bufio = go.bufio_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.link.@internal;
+
+using bufio = bufio_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using fmt = fmt_package;
 
 public static partial class ld_package {
 
@@ -114,8 +114,7 @@ private static long FixedFrameSize(this ptr<Link> _addr_ctxt) {
         return int64(4 * ctxt.Arch.PtrSize);
     else 
         return int64(ctxt.Arch.PtrSize);
-    
-}
+    }
 
 private static void Logf(this ptr<Link> _addr_ctxt, @string format, params object[] args) {
     args = args.Clone();
@@ -136,7 +135,6 @@ private static void addImports(ptr<Link> _addr_ctxt, ptr<sym.Library> _addr_l, @
             l.Imports = append(l.Imports, lib);
         }
     }    l.Autolib = null;
-
 }
 
 // Allocate a new version (i.e. symbol namespace).

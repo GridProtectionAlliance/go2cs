@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:47:46 UTC
+//     Generated on 2022 March 13 05:59:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace @internal
 {
     public static partial class objw_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Progs
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace @internal
             public static implicit operator Progs(NilType nil) => default(Progs);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Progs Progs_cast(dynamic value)
         {
             return new Progs(ref value.Text, ref value.Next, value.PC, value.Pos, ref value.CurFunc, value.Cache, value.CacheIndex, value.NextLive, value.PrevLive);

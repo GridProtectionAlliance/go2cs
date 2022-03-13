@@ -8,16 +8,16 @@
 // This file also contains elementary operations that can be implemented
 // sufficiently efficiently in Go.
 
-// package big -- go2cs converted at 2022 March 06 22:17:37 UTC
+// package big -- go2cs converted at 2022 March 13 05:31:44 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\arith.go
-using bits = go.math.bits_package;
-
 namespace go.math;
+
+using bits = math.bits_package;
 
 public static partial class big_package {
 
-    // A Word represents a single digit of a multi-precision unsigned integer.
+// A Word represents a single digit of a multi-precision unsigned integer.
 public partial struct Word { // : nuint
 }
 
@@ -81,7 +81,6 @@ private static Word addVV_g(slice<Word> z, slice<Word> x, slice<Word> y) {
         c = Word(cc);
     }
     return ;
-
 }
 
 // The resulting carry c is either 0 or 1.
@@ -95,7 +94,6 @@ private static Word subVV_g(slice<Word> z, slice<Word> x, slice<Word> y) {
         c = Word(cc);
     }
     return ;
-
 }
 
 // The resulting carry c is either 0 or 1.
@@ -110,7 +108,6 @@ private static Word addVW_g(slice<Word> z, slice<Word> x, Word y) {
         c = Word(cc);
     }
     return ;
-
 }
 
 // addVWlarge is addVW, but intended for large z.
@@ -133,10 +130,8 @@ private static Word addVWlarge(slice<Word> z, slice<Word> x, Word y) {
         var (zi, cc) = bits.Add(uint(x[i]), uint(c), 0);
         z[i] = Word(zi);
         c = Word(cc);
-
     }
     return ;
-
 }
 
 private static Word subVW_g(slice<Word> z, slice<Word> x, Word y) {
@@ -150,7 +145,6 @@ private static Word subVW_g(slice<Word> z, slice<Word> x, Word y) {
         c = Word(cc);
     }
     return ;
-
 }
 
 // subVWlarge is to subVW as addVWlarge is to addVW.
@@ -167,10 +161,8 @@ private static Word subVWlarge(slice<Word> z, slice<Word> x, Word y) {
         var (zi, cc) = bits.Sub(uint(x[i]), uint(c), 0);
         z[i] = Word(zi);
         c = Word(cc);
-
     }
     return ;
-
 }
 
 private static Word shlVU_g(slice<Word> z, slice<Word> x, nuint s) {
@@ -192,7 +184,6 @@ private static Word shlVU_g(slice<Word> z, slice<Word> x, nuint s) {
     }
     z[0] = x[0] << (int)(s);
     return ;
-
 }
 
 private static Word shrVU_g(slice<Word> z, slice<Word> x, nuint s) => func((_, panic, _) => {
@@ -208,7 +199,6 @@ private static Word shrVU_g(slice<Word> z, slice<Word> x, nuint s) => func((_, p
     if (len(x) != len(z)) { 
         // This is an invariant guaranteed by the caller.
         panic("len(x) != len(z)");
-
     }
     s &= _W - 1; // hint to the compiler that shifts by s don't need guard code
     var ŝ = _W - s;
@@ -219,7 +209,6 @@ private static Word shrVU_g(slice<Word> z, slice<Word> x, nuint s) => func((_, p
     }
     z[len(z) - 1] = x[len(z) - 1] >> (int)(s);
     return ;
-
 });
 
 private static Word mulAddVWW_g(slice<Word> z, slice<Word> x, Word y, Word r) {
@@ -231,7 +220,6 @@ private static Word mulAddVWW_g(slice<Word> z, slice<Word> x, Word y, Word r) {
         c, z[i] = mulAddWWW_g(x[i], y, c);
     }
     return ;
-
 }
 
 private static Word addMulVVW_g(slice<Word> z, slice<Word> x, Word y) {
@@ -244,7 +232,6 @@ private static Word addMulVVW_g(slice<Word> z, slice<Word> x, Word y) {
         (c, z[i]) = (Word(cc), Word(lo));        c += z1;
     }
     return ;
-
 }
 
 // q = ( x1 << _W + x0 - r)/y. m = floor(( _B^2 - 1 ) / d - _B). Requiring x1<y.
@@ -309,7 +296,6 @@ private static (Word, Word) divWW(Word x1, Word x0, Word y, Word m) {
         r0 -= d;
     }
     return (Word(qq), Word(r0 >> (int)(s)));
-
 }
 
 // reciprocalWord return the reciprocal of the divisor. rec = floor(( _B^2 - 1 ) / u - _B). u = d1 << nlz(d1).
@@ -319,7 +305,6 @@ private static Word reciprocalWord(Word d1) {
     var x0 = uint(_M);
     var (rec, _) = bits.Div(x1, x0, u); // (_B^2-1)/U-_B = (_B*(_M-C)+_M)/U
     return Word(rec);
-
 }
 
 } // end big_package

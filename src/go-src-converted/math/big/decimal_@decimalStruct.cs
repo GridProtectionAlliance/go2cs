@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:37 UTC
+//     Generated on 2022 March 13 05:31:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace math
 {
     public static partial class big_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct @decimal
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace math
             public static implicit operator @decimal(NilType nil) => default(@decimal);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static @decimal @decimal_cast(dynamic value)
         {
             return new @decimal(value.mant, value.exp);

@@ -4,21 +4,20 @@
 
 // Type conversions for Scan.
 
-// package sql -- go2cs converted at 2022 March 06 23:35:28 UTC
+// package sql -- go2cs converted at 2022 March 13 06:43:25 UTC
 // import "database/sql" ==> using sql = go.database.sql_package
 // Original source: C:\Program Files\Go\src\database\sql\convert.go
-using driver = go.database.sql.driver_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using time = go.time_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.database;
+
+using driver = database.sql.driver_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using time = time_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class sql_package {
 
@@ -31,7 +30,6 @@ private static @string describeNamedValue(ptr<driver.NamedValue> _addr_nv) {
         return fmt.Sprintf("$%d", nv.Ordinal);
     }
     return fmt.Sprintf("with name %q", nv.Name);
-
 }
 
 private static error validateNamedValueName(@string name) {
@@ -43,7 +41,6 @@ private static error validateNamedValueName(@string name) {
         return error.As(null!)!;
     }
     return error.As(fmt.Errorf("name %q does not begin with a letter", name))!;
-
 }
 
 // ccChecker wraps the driver.ColumnConverter and allows it to be used
@@ -96,7 +93,6 @@ private static error CheckNamedValue(this ccChecker c, ptr<driver.NamedValue> _a
         return error.As(fmt.Errorf("driver ColumnConverter error converted %T to unsupported type %T", arg, nv.Value))!;
     }
     return error.As(null!)!;
-
 }
 
 // defaultCheckNamedValue wraps the default ColumnConverter to have the same
@@ -156,14 +152,11 @@ private static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Con
                 if (err != null) {
                     return (null, error.As(err)!);
                 }
-
                 arg = np.Value;
                 nv.Name = np.Name;
-
             }
 
         }
-
         nv.Ordinal = n + 1;
         nv.Value = arg; 
 
@@ -204,17 +197,13 @@ private static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Con
  {
                 checker = defaultCheckNamedValue;
             }
-
             goto nextCheck;
         else 
             return (null, error.As(fmt.Errorf("sql: converting argument %s type: %v", describeNamedValue(_addr_nv), err))!);
-        
-    }    if (want != -1 && len(nvargs) != want) {
+            }    if (want != -1 && len(nvargs) != want) {
         return (null, error.As(fmt.Errorf("sql: expected %d arguments, got %d", want, len(nvargs)))!);
     }
     return (nvargs, error.As(null!)!);
-
-
 }
 
 // convertAssign is the same as convertAssignRows, but without the optional
@@ -370,7 +359,6 @@ private static error convertAssignRows(object dest, object src, ptr<Rows> _addr_
                         if (parentCancel != null) {
                             parentCancel();
                         }
-
                     }
 ;
                     rows.closemu.Unlock();
@@ -406,7 +394,6 @@ private static error convertAssignRows(object dest, object src, ptr<Rows> _addr_
                 b = b__prev1;
 
             }
-
             break;
         case ptr<RawBytes> d:
             sv = reflect.ValueOf(src);
@@ -423,7 +410,6 @@ private static error convertAssignRows(object dest, object src, ptr<Rows> _addr_
                 b = b__prev1;
 
             }
-
             break;
         case ptr<bool> d:
             var (bv, err) = driver.Bool.ConvertValue(src);
@@ -446,7 +432,6 @@ private static error convertAssignRows(object dest, object src, ptr<Rows> _addr_
             return error.As(scanner.Scan(src))!;
         }
     }
-
 
     var dpv = reflect.ValueOf(dest);
     if (dpv.Kind() != reflect.Ptr) {
@@ -472,7 +457,6 @@ private static error convertAssignRows(object dest, object src, ptr<Rows> _addr_
             }
         }
         return error.As(null!)!;
-
     }
     if (dv.Kind() == sv.Kind() && sv.Type().ConvertibleTo(dv.Type())) {
         dv.Set(sv.Convert(dv.Type()));
@@ -537,7 +521,6 @@ private static error convertAssignRows(object dest, object src, ptr<Rows> _addr_
                 break;
         }
         return error.As(fmt.Errorf("unsupported Scan, storing driver.Value type %T into type %T", src, dest))!;
-
 }
 
 private static error strconvErr(error err) {
@@ -548,9 +531,7 @@ private static error strconvErr(error err) {
             return error.As(ne.Err)!;
         }
     }
-
     return error.As(err)!;
-
 }
 
 private static slice<byte> cloneBytes(slice<byte> b) {
@@ -560,7 +541,6 @@ private static slice<byte> cloneBytes(slice<byte> b) {
     var c = make_slice<byte>(len(b));
     copy(c, b);
     return c;
-
 }
 
 private static @string asString(object src) {
@@ -585,7 +565,6 @@ private static @string asString(object src) {
     else if (rv.Kind() == reflect.Bool) 
         return strconv.FormatBool(rv.Bool());
         return fmt.Sprintf("%v", src);
-
 }
 
 private static (slice<byte>, bool) asBytes(slice<byte> buf, reflect.Value rv) {
@@ -607,7 +586,6 @@ private static (slice<byte>, bool) asBytes(slice<byte> buf, reflect.Value rv) {
         var s = rv.String();
         return (append(buf, s), true);
         return ;
-
 }
 
 private static var valuerReflectType = reflect.TypeOf((driver.Valuer.val)(null)).Elem();
@@ -634,9 +612,7 @@ private static (driver.Value, error) callValuerValue(driver.Valuer vr) {
             return (null, error.As(null!)!);
         }
     }
-
     return vr.Value();
-
 }
 
 // decimal composes or decomposes a decimal value to and from individual parts.

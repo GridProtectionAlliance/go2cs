@@ -5,18 +5,21 @@
 // Package crc64 implements the 64-bit cyclic redundancy check, or CRC-64,
 // checksum. See https://en.wikipedia.org/wiki/Cyclic_redundancy_check for
 // information.
-// package crc64 -- go2cs converted at 2022 March 06 22:14:55 UTC
+
+// package crc64 -- go2cs converted at 2022 March 13 05:28:59 UTC
 // import "hash/crc64" ==> using crc64 = go.hash.crc64_package
 // Original source: C:\Program Files\Go\src\hash\crc64\crc64.go
-using errors = go.errors_package;
-using hash = go.hash_package;
-using sync = go.sync_package;
-
 namespace go.hash;
+
+using errors = errors_package;
+using hash = hash_package;
+using sync = sync_package;
+
+
+// The size of a CRC-64 checksum in bytes.
 
 public static partial class crc64_package {
 
-    // The size of a CRC-64 checksum in bytes.
 public static readonly nint Size = 8;
 
 // Predefined polynomials.
@@ -29,7 +32,6 @@ public static readonly nuint ISO = 0xD800000000000000;
 
 // The ECMA polynomial, defined in ECMA 182.
 public static readonly nuint ECMA = 0xC96C5795D7870F42;
-
 
 // Table is a 256-word table representing the polynomial for efficient processing.
 public partial struct Table { // : array<ulong>
@@ -57,8 +59,7 @@ public static ptr<Table> MakeTable(ulong poly) {
         return _addr__addr_slicing8TableECMA[0]!;
     else 
         return _addr_makeTable(poly)!;
-    
-}
+    }
 
 private static ptr<Table> makeTable(ulong poly) {
     ptr<Table> t = @new<Table>();
@@ -72,13 +73,10 @@ private static ptr<Table> makeTable(ulong poly) {
  {
                 crc>>=1;
             }
-
         }
         t[i] = crc;
-
     }
     return _addr_t!;
-
 }
 
 private static ptr<array<Table>> makeSlicingBy8Table(ptr<Table> _addr_t) {
@@ -134,7 +132,6 @@ private static void Reset(this ptr<digest> _addr_d) {
 private static readonly @string magic = "crc\x02";
 private static readonly var marshaledSize = len(magic) + 8 + 8;
 
-
 private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -161,7 +158,6 @@ private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
     }
     d.crc = readUint64(b[(int)12..]);
     return error.As(null!)!;
-
 }
 
 private static slice<byte> appendUint64(slice<byte> b, ulong x) {
@@ -201,13 +197,11 @@ private static ulong update(ulong crc, ptr<Table> _addr_tab, slice<byte> p) {
             crc = helperTable[7][crc & 0xff] ^ helperTable[6][(crc >> 8) & 0xff] ^ helperTable[5][(crc >> 16) & 0xff] ^ helperTable[4][(crc >> 24) & 0xff] ^ helperTable[3][(crc >> 32) & 0xff] ^ helperTable[2][(crc >> 40) & 0xff] ^ helperTable[1][(crc >> 48) & 0xff] ^ helperTable[0][crc >> 56];
             p = p[(int)8..];
         }
-
     } 
     // For reminders or small sizes
     foreach (var (_, v) in p) {
         crc = tab[byte(crc) ^ v] ^ (crc >> 8);
     }    return ~crc;
-
 }
 
 // Update returns the result of adding the bytes in p to the crc.
@@ -259,7 +253,6 @@ private static ulong tableSum(ptr<Table> _addr_t) {
         }
     }
     return Checksum(b, _addr_MakeTable(ISO));
-
 }
 
 } // end crc64_package

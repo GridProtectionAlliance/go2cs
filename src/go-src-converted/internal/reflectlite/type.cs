@@ -4,29 +4,31 @@
 
 // Package reflectlite implements lightweight version of reflect, not using
 // any package except for "runtime" and "unsafe".
-// package reflectlite -- go2cs converted at 2022 March 06 22:12:34 UTC
+
+// package reflectlite -- go2cs converted at 2022 March 13 05:27:37 UTC
 // import "internal/reflectlite" ==> using reflectlite = go.@internal.reflectlite_package
 // Original source: C:\Program Files\Go\src\internal\reflectlite\type.go
-using unsafeheader = go.@internal.unsafeheader_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.@internal;
 
+using unsafeheader = @internal.unsafeheader_package;
+using @unsafe = @unsafe_package;
+
+
+// Type is the representation of a Go type.
+//
+// Not all methods apply to all kinds of types. Restrictions,
+// if any, are noted in the documentation for each method.
+// Use the Kind method to find out the kind of type before
+// calling kind-specific methods. Calling a method
+// inappropriate to the kind of type causes a run-time panic.
+//
+// Type values are comparable, such as with the == operator,
+// so they can be used as map keys.
+// Two Type values are equal if they represent identical types.
+
+using System;
 public static partial class reflectlite_package {
 
-    // Type is the representation of a Go type.
-    //
-    // Not all methods apply to all kinds of types. Restrictions,
-    // if any, are noted in the documentation for each method.
-    // Use the Kind method to find out the kind of type before
-    // calling kind-specific methods. Calling a method
-    // inappropriate to the kind of type causes a run-time panic.
-    //
-    // Type values are comparable, such as with the == operator,
-    // so they can be used as map keys.
-    // Two Type values are equal if they represent identical types.
 public partial interface Type {
     ptr<uncommonType> Name(); // PkgPath returns a defined type's package path, that is, the import path
 // that uniquely identifies the package, such as "encoding/base64".
@@ -90,7 +92,6 @@ public static readonly var String = 23;
 public static readonly var Struct = 24;
 public static readonly var UnsafePointer = 25;
 
-
 // tflag is used by an rtype to signal what extra type information is
 // available in the memory directly following the rtype value.
 //
@@ -127,7 +128,6 @@ private static readonly tflag tflagNamed = 1 << 2;
 // tflagRegularMemory means that equal and hash functions can treat
 // this type as a single region of t.size bytes.
 private static readonly tflag tflagRegularMemory = 1 << 3;
-
 
 // rtype is the common implementation of most values.
 // It is embedded in other struct types.
@@ -319,14 +319,13 @@ private static (nint, nint) readVarint(this name n, nint off) {
     nint _p0 = default;
 
     nint v = 0;
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         var x = n.data(off + i, "read varint").val;
         v += int(x & 0x7f) << (int)((7 * i));
         if (x & 0x80 == 0) {
             return (i + 1, v);
         }
     }
-
 }
 
 private static @string name(this name n) {
@@ -340,7 +339,6 @@ private static @string name(this name n) {
     hdr.Data = @unsafe.Pointer(n.data(1 + i, "non-empty string"));
     hdr.Len = l;
     return ;
-
 }
 
 private static @string tag(this name n) {
@@ -355,7 +353,6 @@ private static @string tag(this name n) {
     hdr.Data = @unsafe.Pointer(n.data(1 + i + l + i2, "non-empty string"));
     hdr.Len = l2;
     return ;
-
 }
 
 private static @string pkgPath(this name n) {
@@ -374,7 +371,6 @@ private static @string pkgPath(this name n) {
     copy(new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_nameOff))[..], new ptr<ptr<array<byte>>>(@unsafe.Pointer(n.data(off, "name offset field")))[..]);
     name pkgPathName = new name((*byte)(resolveTypeOff(unsafe.Pointer(n.bytes),nameOff)));
     return pkgPathName.name();
-
 }
 
 /*
@@ -386,14 +382,12 @@ private static readonly nint kindDirectIface = 1 << 5;
 private static readonly nint kindGCProg = 1 << 6; // Type.gc points to GC program
 private static readonly nint kindMask = (1 << 5) - 1;
 
-
 // String returns the name of k.
 public static @string String(this Kind k) {
     if (int(k) < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
-
 }
 
 private static @string kindNames = new slice<@string>(InitKeyedValues<@string>((Invalid, "invalid"), (Bool, "bool"), (Int, "int"), (Int8, "int8"), (Int16, "int16"), (Int32, "int32"), (Int64, "int64"), (Uint, "uint"), (Uint8, "uint8"), (Uint16, "uint16"), (Uint32, "uint32"), (Uint64, "uint64"), (Uintptr, "uintptr"), (Float32, "float32"), (Float64, "float64"), (Complex64, "complex64"), (Complex128, "complex128"), (Array, "array"), (Chan, "chan"), (Func, "func"), (Interface, "interface"), (Map, "map"), (Ptr, "ptr"), (Slice, "slice"), (String, "string"), (Struct, "struct"), (UnsafePointer, "unsafe.Pointer")));
@@ -405,7 +399,6 @@ private static slice<method> methods(this ptr<uncommonType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<method>>>(add(@unsafe.Pointer(t), uintptr(t.moff), "t.mcount > 0")).slice(-1, t.mcount, t.mcount);
-
 }
 
 private static slice<method> exportedMethods(this ptr<uncommonType> _addr_t) {
@@ -415,7 +408,6 @@ private static slice<method> exportedMethods(this ptr<uncommonType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<method>>>(add(@unsafe.Pointer(t), uintptr(t.moff), "t.xcount > 0")).slice(-1, t.xcount, t.xcount);
-
 }
 
 // resolveNameOff resolves a name offset from a base pointer.
@@ -504,8 +496,7 @@ private static ptr<uncommonType> uncommon(this ptr<rtype> _addr_t) {
             public uncommonType u;
         }
         return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
-    
-}
+    }
 
 private static @string String(this ptr<rtype> _addr_t) {
     ref rtype t = ref _addr_t.val;
@@ -515,7 +506,6 @@ private static @string String(this ptr<rtype> _addr_t) {
         return s[(int)1..];
     }
     return s;
-
 }
 
 private static System.UIntPtr Size(this ptr<rtype> _addr_t) {
@@ -550,7 +540,6 @@ private static slice<method> exportedMethods(this ptr<rtype> _addr_t) {
         return null;
     }
     return ut.exportedMethods();
-
 }
 
 private static nint NumMethod(this ptr<rtype> _addr_t) {
@@ -561,7 +550,6 @@ private static nint NumMethod(this ptr<rtype> _addr_t) {
         return tt.NumMethod();
     }
     return len(t.exportedMethods());
-
 }
 
 private static @string PkgPath(this ptr<rtype> _addr_t) {
@@ -575,7 +563,6 @@ private static @string PkgPath(this ptr<rtype> _addr_t) {
         return "";
     }
     return t.nameOff(ut.pkgPath).name();
-
 }
 
 private static bool hasName(this ptr<rtype> _addr_t) {
@@ -596,7 +583,6 @@ private static @string Name(this ptr<rtype> _addr_t) {
         i--;
     }
     return s[(int)i + 1..];
-
 }
 
 private static chanDir chanDir(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -607,7 +593,6 @@ private static chanDir chanDir(this ptr<rtype> _addr_t) => func((_, panic, _) =>
     }
     var tt = (chanType.val)(@unsafe.Pointer(t));
     return chanDir(tt.dir);
-
 });
 
 private static Type Elem(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -630,7 +615,6 @@ private static Type Elem(this ptr<rtype> _addr_t) => func((_, panic, _) => {
         tt = (sliceType.val)(@unsafe.Pointer(t));
         return toType(_addr_tt.elem);
         panic("reflect: Elem of invalid type");
-
 });
 
 private static Type In(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) => {
@@ -641,7 +625,6 @@ private static Type In(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) =>
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return toType(_addr_tt.@in()[i]);
-
 });
 
 private static Type Key(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -652,7 +635,6 @@ private static Type Key(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (mapType.val)(@unsafe.Pointer(t));
     return toType(_addr_tt.key);
-
 });
 
 private static nint Len(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -663,7 +645,6 @@ private static nint Len(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (arrayType.val)(@unsafe.Pointer(t));
     return int(tt.len);
-
 });
 
 private static nint NumField(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -674,7 +655,6 @@ private static nint NumField(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (structType.val)(@unsafe.Pointer(t));
     return len(tt.fields);
-
 });
 
 private static nint NumIn(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -685,7 +665,6 @@ private static nint NumIn(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return int(tt.inCount);
-
 });
 
 private static nint NumOut(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -696,7 +675,6 @@ private static nint NumOut(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return len(tt.@out());
-
 });
 
 private static Type Out(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) => {
@@ -707,7 +685,6 @@ private static Type Out(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) =
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return toType(_addr_tt.@out()[i]);
-
 });
 
 private static slice<ptr<rtype>> @in(this ptr<funcType> _addr_t) {
@@ -721,7 +698,6 @@ private static slice<ptr<rtype>> @in(this ptr<funcType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<ptr<rtype>>>>(add(@unsafe.Pointer(t), uadd, "t.inCount > 0")).slice(-1, t.inCount, t.inCount);
-
 }
 
 private static slice<ptr<rtype>> @out(this ptr<funcType> _addr_t) {
@@ -736,7 +712,6 @@ private static slice<ptr<rtype>> @out(this ptr<funcType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<ptr<rtype>>>>(add(@unsafe.Pointer(t), uadd, "outCount > 0")).slice(t.inCount, t.inCount + outCount, t.inCount + outCount);
-
 }
 
 // add returns p+x.
@@ -774,7 +749,6 @@ private static bool Implements(this ptr<rtype> _addr_t, Type u) => func((_, pani
         panic("reflect: non-interface type passed to Type.Implements");
     }
     return implements(u._<ptr<rtype>>(), _addr_t);
-
 });
 
 private static bool AssignableTo(this ptr<rtype> _addr_t, Type u) => func((_, panic, _) => {
@@ -785,7 +759,6 @@ private static bool AssignableTo(this ptr<rtype> _addr_t, Type u) => func((_, pa
     }
     ptr<rtype> uu = u._<ptr<rtype>>();
     return directlyAssignable(uu, _addr_t) || implements(uu, _addr_t);
-
 });
 
 private static bool Comparable(this ptr<rtype> _addr_t) {
@@ -836,16 +809,13 @@ private static bool implements(ptr<rtype> _addr_T, ptr<rtype> _addr_V) {
                     if (i >= len(t.methods)) {
                         return true;
                     }
-
                 }
-
             }
 
 
             j = j__prev1;
         }
         return false;
-
     }
     v = V.uncommon();
     if (v == null) {
@@ -880,15 +850,12 @@ private static bool implements(ptr<rtype> _addr_T, ptr<rtype> _addr_V) {
                 if (i >= len(t.methods)) {
                     return true;
                 }
-
             }
-
         }
 
         j = j__prev1;
     }
     return false;
-
 }
 
 // directlyAssignable reports whether a value x of type V can be directly
@@ -908,7 +875,6 @@ private static bool directlyAssignable(ptr<rtype> _addr_T, ptr<rtype> _addr_V) {
         return false;
     }
     return haveIdenticalUnderlyingType(_addr_T, _addr_V, true);
-
 }
 
 private static bool haveIdenticalType(Type T, Type V, bool cmpTags) {
@@ -919,7 +885,6 @@ private static bool haveIdenticalType(Type T, Type V, bool cmpTags) {
         return false;
     }
     return haveIdenticalUnderlyingType(_addr_T.common(), _addr_V.common(), false);
-
 }
 
 private static bool haveIdenticalUnderlyingType(ptr<rtype> _addr_T, ptr<rtype> _addr_V, bool cmpTags) {
@@ -1024,7 +989,6 @@ private static bool haveIdenticalUnderlyingType(ptr<rtype> _addr_T, ptr<rtype> _
 
         return true;
         return false;
-
 }
 
 private partial struct structTypeUncommon {
@@ -1044,7 +1008,6 @@ private static Type toType(ptr<rtype> _addr_t) {
         return null;
     }
     return t;
-
 }
 
 // ifaceIndir reports whether t is stored indirectly in an interface value.

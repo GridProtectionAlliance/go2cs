@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:16 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:41 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\numberlines.go
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using sort = sort_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -22,7 +21,6 @@ private static bool isPoorStatementOp(Op op) {
     if (op == OpAddr || op == OpLocalAddr || op == OpOffPtr || op == OpStructSelect || op == OpPhi || op == OpITab || op == OpIData || op == OpIMake || op == OpStringMake || op == OpSliceMake || op == OpStructMake0 || op == OpStructMake1 || op == OpStructMake2 || op == OpStructMake3 || op == OpStructMake4 || op == OpConstBool || op == OpConst8 || op == OpConst16 || op == OpConst32 || op == OpConst64 || op == OpConst32F || op == OpConst64F || op == OpSB || op == OpSP || op == OpArgIntReg || op == OpArgFloatReg) 
         return true;
         return false;
-
 }
 
 // nextGoodStatementIndex returns an index at i or later that is believed
@@ -48,21 +46,16 @@ private static nint nextGoodStatementIndex(ptr<Value> _addr_v, nint i, ptr<Block
         var u = b.Values[j];
         if (u.Pos.IsStmt() == src.PosNotStmt) { // ignore non-statements
             continue;
-
         }
         if (u.Pos.SameFileAndLine(v.Pos)) {
             if (isPoorStatementOp(u.Op)) {
                 continue; // Keep looking, this is also not a good statement op
             }
-
             return j;
-
         }
         return i;
-
     }
     return i;
-
 }
 
 // notStmtBoundary reports whether a value with opcode op can never be a statement
@@ -73,7 +66,6 @@ private static bool notStmtBoundary(Op op) {
     if (op == OpCopy || op == OpPhi || op == OpVarKill || op == OpVarDef || op == OpVarLive || op == OpUnknown || op == OpFwdRef || op == OpArg || op == OpArgIntReg || op == OpArgFloatReg) 
         return true;
         return false;
-
 }
 
 private static ptr<Value> FirstPossibleStmtValue(this ptr<Block> _addr_b) {
@@ -84,9 +76,7 @@ private static ptr<Value> FirstPossibleStmtValue(this ptr<Block> _addr_b) {
             continue;
         }
         return _addr_v!;
-
     }    return _addr_null!;
-
 }
 
 private static @string flc(src.XPos p) {
@@ -94,7 +84,6 @@ private static @string flc(src.XPos p) {
         return "none";
     }
     return fmt.Sprintf("(%d):%d:%d", p.FileIndex(), p.Line(), p.Col());
-
 }
 
 private partial struct fileAndPair {
@@ -164,9 +153,7 @@ private static void numberLines(ptr<Func> _addr_f) {
                     firstPos = v.Pos;
                     v.Pos = firstPos.WithDefaultStmt(); // default to default
                     break;
-
                 }
-
             }
 
 
@@ -191,9 +178,7 @@ private static void numberLines(ptr<Func> _addr_f) {
                             line = src.NoXPos;
                             break;
                         }
-
                     }
-
                 } 
                 // If the block has no statement itself and is effectively empty, tag it w/ predecessor(s) but not as a statement
 
@@ -212,17 +197,14 @@ private static void numberLines(ptr<Func> _addr_f) {
                     fmt.Printf("Mark stmt effectively-empty-block %s %s %s\n", f.Name, b, flc(b.Pos));
                 }
             }
-
             endlines[b.ID] = b.Pos;
             continue;
-
         }
         if (len(b.Preds) == 0) { // Don't forget the entry block
             b.Values[firstPosIndex].Pos = firstPos.WithIsStmt();
             if (f.pass.debug > 0) {
                 fmt.Printf("Mark stmt entry-block %s %s %s %s\n", f.Name, b, b.Values[firstPosIndex], flc(firstPos));
             }
-
         }
         else
  { // differing pred
@@ -267,7 +249,6 @@ private static void numberLines(ptr<Func> _addr_f) {
  {
                     v.Pos = v.Pos.WithDefaultStmt();
                 }
-
             }
 
 
@@ -281,7 +262,6 @@ private static void numberLines(ptr<Func> _addr_f) {
             firstPos = b.Pos;
         }
         endlines[b.ID] = firstPos;
-
     }
     if (f.pass.stats & 1 != 0) { 
         // Report summary statistics on the shape of the sparse map about to be constructed
@@ -328,10 +308,8 @@ private static void numberLines(ptr<Func> _addr_f) {
         }
 
         f.LogStat("SUM_LINE_RANGE", total, "MAXMIN_LINE_RANGE", maxline - minline, "MAXFILE", maxfile, "NFILES", len(entries));
-
     }
     f.cachedLineStarts = newXposmap(ranges);
-
 }
 
 } // end ssa_package

@@ -14,24 +14,26 @@
 //    offsets1 := index.Lookup(s, -1) // the list of all indices where s occurs in data
 //    offsets2 := index.Lookup(s, 3)  // the list of at most 3 indices where s occurs in data
 //
-// package suffixarray -- go2cs converted at 2022 March 06 23:36:27 UTC
+
+// package suffixarray -- go2cs converted at 2022 March 13 06:44:30 UTC
 // import "index/suffixarray" ==> using suffixarray = go.index.suffixarray_package
 // Original source: C:\Program Files\Go\src\index\suffixarray\suffixarray.go
-using bytes = go.bytes_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using math = go.math_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.index;
 
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using io = io_package;
+using math = math_package;
+using regexp = regexp_package;
+using sort = sort_package;
+
+
+// Can change for testing
+
+using System;
 public static partial class suffixarray_package {
 
-    // Can change for testing
 private static nint maxData32 = realMaxData32;
 
 private static readonly var realMaxData32 = math.MaxInt32;
@@ -66,7 +68,6 @@ private static long get(this ptr<ints> _addr_a, nint i) {
         return int64(a.int32[i]);
     }
     return a.int64[i];
-
 }
 
 private static void set(this ptr<ints> _addr_a, nint i, long v) {
@@ -88,7 +89,6 @@ private static ints slice(this ptr<ints> _addr_a, nint i, nint j) {
         return new ints(a.int32[i:j],nil);
     }
     return new ints(nil,a.int64[i:j]);
-
 }
 
 // New creates a new Index for data.
@@ -105,7 +105,6 @@ public static ptr<Index> New(slice<byte> data) {
         text_64(data, ix.sa.int64);
     }
     return _addr_ix!;
-
 }
 
 // writeInt writes an int x to w using buf to buffer the write.
@@ -123,7 +122,6 @@ private static (long, error) readInt(io.Reader r, slice<byte> buf) {
     var (_, err) = io.ReadFull(r, buf[(int)0..(int)binary.MaxVarintLen64]); // ok to continue with error
     var (x, _) = binary.Varint(buf);
     return (x, error.As(err)!);
-
 }
 
 // writeSlice writes data[:n] to w and returns n.
@@ -146,7 +144,6 @@ private static (nint, error) writeSlice(io.Writer w, slice<byte> buf, ints data)
     // write buffer
     _, err = w.Write(buf[(int)0..(int)p]);
     return ;
-
 }
 
 private static var errTooBig = errors.New("suffixarray: data too large");
@@ -166,7 +163,6 @@ private static (nint, error) readSlice(io.Reader r, slice<byte> buf, ints data) 
     if (int64(int(size64)) != size64 || int(size64) < 0) { 
         // We never write chunks this big anyway.
         return (0, error.As(errTooBig)!);
-
     }
     var size = int(size64); 
 
@@ -183,7 +179,6 @@ private static (nint, error) readSlice(io.Reader r, slice<byte> buf, ints data) 
     }
 
     return ;
-
 }
 
 private static readonly nint bufSize = 16 << 10; // reasonable for BenchmarkSaveRestore
@@ -228,7 +223,6 @@ private static error Read(this ptr<Index> _addr_x, io.Reader r) {
         // re-use existing buffers
         x.data = x.data[(int)0..(int)n];
         x.sa = x.sa.slice(0, n);
-
     }
     {
         var (_, err) = io.ReadFull(r, x.data);
@@ -246,10 +240,8 @@ private static error Read(this ptr<Index> _addr_x, io.Reader r) {
             return error.As(err)!;
         }
         sa = sa.slice(n, sa.len());
-
     }
     return error.As(null!)!;
-
 }
 
 // Write writes the index x to w.
@@ -285,10 +277,8 @@ private static error Write(this ptr<Index> _addr_x, io.Writer w) {
             return error.As(err)!;
         }
         sa = sa.slice(n, sa.len());
-
     }
     return error.As(null!)!;
-
 }
 
 // Bytes returns the data over which the index was created.
@@ -317,7 +307,6 @@ private static ints lookupAll(this ptr<Index> _addr_x, slice<byte> s) {
     // starting at i, find the first index at which s is not a prefix
     var j = i + sort.Search(x.sa.len() - i, j => !bytes.HasPrefix(x.at(j + i), s));
     return x.sa.slice(i, j);
-
 }
 
 // Lookup returns an unsorted list of at most n indices where the byte string s
@@ -362,11 +351,9 @@ private static slice<nint> Lookup(this ptr<Index> _addr_x, slice<byte> s, nint n
                     i = i__prev1;
                 }
             }
-
         }
     }
     return ;
-
 }
 
 // FindAllIndex returns a sorted list of non-overlapping matches of the
@@ -402,13 +389,12 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
 
             var n1 = n;
 
-            while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+            while () {
                 var indices = x.Lookup(lit, n1);
                 if (len(indices) == 0) {
                     return ;
                 n1 += 2 * (n - len(result)); /* overflow ok */
                 }
-
                 sort.Ints(indices);
                 var pairs = make_slice<nint>(2 * len(indices));
                 result = make_slice<slice<nint>>(len(indices));
@@ -431,7 +417,6 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
                             count++;
                             prev = i + len(lit);
                         }
-
                     }
 
                     i = i__prev2;
@@ -442,9 +427,7 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
                     // found all matches or there's no chance to find more
                     // (n and n1 can be negative)
                     break;
-
                 }
-
             }
 
 
@@ -454,7 +437,6 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
             result = null;
         }
         return ;
-
     }
     r = regexp.MustCompile("^" + r.String()); // compiles because r compiled
 
@@ -464,13 +446,12 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
 
         n1 = n;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             indices = x.Lookup(lit, n1);
             if (len(indices) == 0) {
                 return ;
             n1 += 2 * (n - len(result)); /* overflow ok */
             }
-
             sort.Ints(indices);
             result = result[(int)0..(int)0];
             prev = 0;
@@ -489,9 +470,7 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
                         m[1] += i;
                         result = append(result, m);
                         prev = m[1];
-
                     }
-
                 }
 
                 i = i__prev2;
@@ -501,9 +480,7 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
                 // found all matches or there's no chance to find more
                 // (n and n1 can be negative)
                 break;
-
             }
-
         }
 
         n1 = n1__prev1;
@@ -512,7 +489,6 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Index> _addr_x, ptr<rege
         result = null;
     }
     return ;
-
 }
 
 } // end suffixarray_package

@@ -4,14 +4,14 @@
 
 // Parse nodes.
 
-// package parse -- go2cs converted at 2022 March 06 22:24:29 UTC
+// package parse -- go2cs converted at 2022 March 13 05:38:58 UTC
 // import "text/template/parse" ==> using parse = go.text.template.parse_package
 // Original source: C:\Program Files\Go\src\text\template\parse\node.go
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.text.template;
+
+using fmt = fmt_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class parse_package {
 
@@ -129,7 +129,6 @@ private static ptr<ListNode> CopyList(this ptr<ListNode> _addr_l) {
     foreach (var (_, elem) in l.Nodes) {
         n.append(elem.Copy());
     }    return _addr_n!;
-
 }
 
 private static Node Copy(this ptr<ListNode> _addr_l) {
@@ -273,7 +272,6 @@ private static void writeTo(this ptr<PipeNode> _addr_p, ptr<strings.Builder> _ad
         }
 
         sb.WriteString(" := ");
-
     }
     {
         var i__prev1 = i;
@@ -310,7 +308,6 @@ private static ptr<PipeNode> CopyPipe(this ptr<PipeNode> _addr_p) {
     foreach (var (_, c) in p.Cmds) {
         n.append(c.Copy()._<ptr<CommandNode>>());
     }    return _addr_n!;
-
 }
 
 private static Node Copy(this ptr<PipeNode> _addr_p) {
@@ -422,9 +419,7 @@ private static void writeTo(this ptr<CommandNode> _addr_c, ptr<strings.Builder> 
                 arg = arg__prev1;
 
             }
-
             arg.writeTo(sb);
-
         }
         arg = arg__prev1;
     }
@@ -446,7 +441,6 @@ private static Node Copy(this ptr<CommandNode> _addr_c) {
     foreach (var (_, c) in c.Args) {
         n.append(c.Copy());
     }    return n;
-
 }
 
 // IdentifierNode holds an identifier.
@@ -540,7 +534,6 @@ private static void writeTo(this ptr<VariableNode> _addr_v, ptr<strings.Builder>
             sb.WriteByte('.');
         }
         sb.WriteString(id);
-
     }
 }
 
@@ -576,7 +569,6 @@ private static NodeType Type(this ptr<DotNode> _addr_d) {
     // TODO: Not really a problem; could change API without effect but
     // api tool complains.
     return NodeDot;
-
 }
 
 private static @string String(this ptr<DotNode> _addr_d) {
@@ -624,7 +616,6 @@ private static NodeType Type(this ptr<NilNode> _addr_n) {
     // TODO: Not really a problem; could change API without effect but
     // api tool complains.
     return NodeNil;
-
 }
 
 private static @string String(this ptr<NilNode> _addr_n) {
@@ -727,7 +718,6 @@ private static void Add(this ptr<ChainNode> _addr_c, @string field) => func((_, 
         panic("empty field");
     }
     c.Field = append(c.Field, field);
-
 });
 
 private static @string String(this ptr<ChainNode> _addr_c) {
@@ -755,7 +745,6 @@ private static void writeTo(this ptr<ChainNode> _addr_c, ptr<strings.Builder> _a
             c.Node.writeTo(sb);
         }
     }
-
     foreach (var (_, field) in c.Field) {
         sb.WriteByte('.');
         sb.WriteString(field);
@@ -795,7 +784,6 @@ private static @string String(this ptr<BoolNode> _addr_b) {
         return "true";
     }
     return "false";
-
 }
 
 private static void writeTo(this ptr<BoolNode> _addr_b, ptr<strings.Builder> _addr_sb) {
@@ -867,7 +855,6 @@ private static (ptr<NumberNode>, error) newNumber(this ptr<Tree> _addr_t, Pos po
             }
 
         }
-
         n.IsComplex = true;
         n.simplifyComplex();
         return (_addr_n!, error.As(null!)!);
@@ -893,7 +880,6 @@ private static (ptr<NumberNode>, error) newNumber(this ptr<Tree> _addr_t, Pos po
         if (i == 0) {
             n.IsUint = true; // in case of -0.
             n.Uint64 = u;
-
         }
     }
     if (n.IsInt) {
@@ -913,7 +899,6 @@ private static (ptr<NumberNode>, error) newNumber(this ptr<Tree> _addr_t, Pos po
             if (!strings.ContainsAny(text, ".eEpP")) {
                 return (_addr_null!, error.As(fmt.Errorf("integer overflow: %q", text))!);
             }
-
             n.IsFloat = true;
             n.Float64 = f; 
             // If a floating-point extraction succeeded, extract the int if needed.
@@ -921,19 +906,16 @@ private static (ptr<NumberNode>, error) newNumber(this ptr<Tree> _addr_t, Pos po
                 n.IsInt = true;
                 n.Int64 = int64(f);
             }
-
             if (!n.IsUint && float64(uint64(f)) == f) {
                 n.IsUint = true;
                 n.Uint64 = uint64(f);
             }
-
         }
     }
     if (!n.IsInt && !n.IsUint && !n.IsFloat) {
         return (_addr_null!, error.As(fmt.Errorf("illegal number syntax: %q", text))!);
     }
     return (_addr_n!, error.As(null!)!);
-
 }
 
 // simplifyComplex pulls out any other types that are represented by the complex number.
@@ -980,7 +962,6 @@ private static Node Copy(this ptr<NumberNode> _addr_n) {
     ptr<NumberNode> nn = @new<NumberNode>();
     nn.val = n.val; // Easy, fast, correct.
     return nn;
-
 }
 
 // StringNode holds a string constant. The value has been "unquoted".
@@ -1151,7 +1132,6 @@ private static void writeTo(this ptr<BranchNode> _addr_b, ptr<strings.Builder> _
         b.ElseList.writeTo(sb);
     }
     sb.WriteString("{{end}}");
-
 });
 
 private static ptr<Tree> tree(this ptr<BranchNode> _addr_b) {
@@ -1172,8 +1152,7 @@ private static Node Copy(this ptr<BranchNode> _addr_b) => func((_, panic, _) => 
         return b.tr.newWith(b.Pos, b.Line, b.Pipe, b.List, b.ElseList);
     else 
         panic("unknown branch type");
-    
-});
+    });
 
 // IfNode represents an {{if}} action and its commands.
 public partial struct IfNode {
@@ -1271,7 +1250,6 @@ private static void writeTo(this ptr<TemplateNode> _addr_t, ptr<strings.Builder>
         t.Pipe.writeTo(sb);
     }
     sb.WriteString("}}");
-
 }
 
 private static ptr<Tree> tree(this ptr<TemplateNode> _addr_t) {

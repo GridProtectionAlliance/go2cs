@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:42 UTC
+//     Generated on 2022 March 13 06:43:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class embed_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct openDir
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace go
             public static implicit operator openDir(NilType nil) => default(openDir);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static openDir openDir_cast(dynamic value)
         {
             return new openDir(ref value.f, value.files, value.offset);

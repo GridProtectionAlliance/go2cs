@@ -5,12 +5,12 @@
 //go:build (freebsd && amd64) || (freebsd && arm64)
 // +build freebsd,amd64 freebsd,arm64
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:44 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\route_freebsd_64bit.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 

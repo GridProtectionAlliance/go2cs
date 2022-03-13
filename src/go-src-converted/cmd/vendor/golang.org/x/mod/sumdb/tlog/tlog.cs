@@ -9,20 +9,23 @@
 // and its proofs are compatible with that system.
 // See TestCertificateTransparency.
 //
-// package tlog -- go2cs converted at 2022 March 06 23:26:19 UTC
+
+// package tlog -- go2cs converted at 2022 March 13 06:41:12 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/tlog" ==> using tlog = go.cmd.vendor.golang.org.x.mod.sumdb.tlog_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\tlog\tlog.go
-using sha256 = go.crypto.sha256_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using bits = go.math.bits_package;
-
 namespace go.cmd.vendor.golang.org.x.mod.sumdb;
+
+using sha256 = crypto.sha256_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using bits = math.bits_package;
+
+
+// A Hash is a hash identifying a log record or tree root.
 
 public static partial class tlog_package {
 
-    // A Hash is a hash identifying a log record or tree root.
 public partial struct Hash { // : array<byte>
 }
 
@@ -59,7 +62,6 @@ private static error UnmarshalJSON(this ptr<Hash> _addr_h, slice<byte> data) {
     }
     h.val = tmp;
     return error.As(null!)!;
-
 }
 
 // ParseHash parses the base64-encoded string form of a hash.
@@ -74,7 +76,6 @@ public static (Hash, error) ParseHash(@string s) {
     Hash h = default;
     copy(h[..], data);
     return (h, error.As(null!)!);
-
 }
 
 // maxpow2 returns k, the maximum power of 2 smaller than n,
@@ -102,7 +103,6 @@ public static Hash RecordHash(slice<byte> data) {
     Hash h1 = default;
     h.Sum(h1[..(int)0]);
     return h1;
-
 }
 
 // NodeHash returns the hash for an interior tree node with the given left and right hashes.
@@ -116,7 +116,6 @@ public static Hash NodeHash(Hash left, Hash right) {
     copy(buf[(int)1..], left[..]);
     copy(buf[(int)1 + HashSize..], right[..]);
     return sha256.Sum256(buf[..]);
-
 }
 
 // For information about the stored hash index ordering,
@@ -145,7 +144,6 @@ public static long StoredHashIndex(nint level, long n) {
     }
 
     return i + int64(level);
-
 }
 
 // SplitStoredHashIndex is the inverse of StoredHashIndex.
@@ -170,13 +168,11 @@ public static (nint, long) SplitStoredHashIndex(long index) => func((_, panic, _
         }
         n++;
         indexN = x;
-
     } 
     // The hash we want was committed with record n,
     // meaning it is one of (0, n), (1, n/2), (2, n/4), ...
     level = int(index - indexN);
     return (level, n >> (int)(uint(level)));
-
 });
 
 // StoredHashCount returns the number of stored hashes
@@ -196,7 +192,6 @@ public static long StoredHashCount(long n) {
         }
     }
     return numHash;
-
 }
 
 // StoredHashes returns the hashes that must be stored when writing
@@ -234,7 +229,6 @@ public static (slice<Hash>, error) StoredHashesForRecordHash(long n, Hash h, Has
             // We arrange indexes in sorted order.
             // Note that n>>i is always odd.
             indexes[m - 1 - i] = StoredHashIndex(i, n >> (int)(uint(i)) - 1);
-
         }
 
         i = i__prev1;
@@ -259,7 +253,6 @@ public static (slice<Hash>, error) StoredHashesForRecordHash(long n, Hash h, Has
         i = i__prev1;
     }
     return (hashes, error.As(null!)!);
-
 }
 
 // A HashReader can read hashes for nodes in the log's tree structure.
@@ -302,7 +295,6 @@ public static (Hash, error) TreeHash(long n, HashReader r) => func((_, panic, _)
         panic("tlog: bad index math in TreeHash");
     }
     return (hash, error.As(null!)!);
-
 });
 
 // subTreeIndex returns the storage indexes needed to compute
@@ -318,10 +310,8 @@ private static slice<long> subTreeIndex(long lo, long hi, slice<long> need) => f
         }
         need = append(need, StoredHashIndex(level, lo >> (int)(uint(level))));
         lo += k;
-
     }
     return need;
-
 });
 
 // subTreeHash computes the hash for the subtree containing records [lo, hi),
@@ -344,7 +334,6 @@ private static (Hash, slice<Hash>) subTreeHash(long lo, long hi, slice<Hash> has
         }
         numTree++;
         lo += k;
-
     }
 
     if (len(hashes) < numTree) {
@@ -355,7 +344,6 @@ private static (Hash, slice<Hash>) subTreeHash(long lo, long hi, slice<Hash> has
         h = NodeHash(hashes[i], h);
     }
     return (h, hashes[(int)numTree..]);
-
 });
 
 // A RecordProof is a verifiable proof that a particular log root contains a particular record.
@@ -387,7 +375,6 @@ public static (RecordProof, error) ProveRecord(long t, long n, HashReader r) => 
         panic("tlog: bad index math in ProveRecord");
     }
     return (p, error.As(null!)!);
-
 });
 
 // leafProofIndex builds the list of indexes needed to construct the proof
@@ -415,9 +402,7 @@ private static slice<long> leafProofIndex(long lo, long hi, long n, slice<long> 
             need = leafProofIndex(lo + k, hi, n, need);
         }
     }
-
     return need;
-
 });
 
 // leafProof constructs the proof that leaf n is contained in the subtree with leaves [lo, hi).
@@ -435,7 +420,6 @@ private static (RecordProof, slice<Hash>) leafProof(long lo, long hi, long n, sl
         // Reached the leaf node.
         // The verifier knows what the leaf hash is, so we don't need to send it.
         return (new RecordProof(), hashes);
-
     }
     RecordProof p = default;
     Hash th = default;
@@ -446,19 +430,15 @@ private static (RecordProof, slice<Hash>) leafProof(long lo, long hi, long n, sl
             // n is on left side
             p, hashes = leafProof(lo, lo + k, n, hashes);
             th, hashes = subTreeHash(lo + k, hi, hashes);
-
         }
         else
  { 
             // n is on right side
             th, hashes = subTreeHash(lo, lo + k, hashes);
             p, hashes = leafProof(lo + k, hi, n, hashes);
-
         }
     }
-
     return (append(p, th), hashes);
-
 });
 
 private static var errProofFailed = errors.New("invalid transparency proof");
@@ -477,7 +457,6 @@ public static error CheckRecord(RecordProof p, long t, Hash th, long n, Hash h) 
         return error.As(null!)!;
     }
     return error.As(errProofFailed)!;
-
 }
 
 // runRecordProof runs the proof p that leaf n is contained in the subtree with leaves [lo, hi).
@@ -498,7 +477,6 @@ private static (Hash, error) runRecordProof(RecordProof p, long lo, long hi, lon
             return (new Hash(), error.As(errProofFailed)!);
         }
         return (leafHash, error.As(null!)!);
-
     }
     if (len(p) == 0) {
         return (new Hash(), error.As(errProofFailed)!);
@@ -510,7 +488,6 @@ private static (Hash, error) runRecordProof(RecordProof p, long lo, long hi, lon
             return (new Hash(), error.As(err)!);
         }
         return (NodeHash(th, p[len(p) - 1]), error.As(null!)!);
-
     }
     else
  {
@@ -519,7 +496,6 @@ private static (Hash, error) runRecordProof(RecordProof p, long lo, long hi, lon
             return (new Hash(), error.As(err)!);
         }
         return (NodeHash(p[len(p) - 1], th), error.As(null!)!);
-
     }
 });
 
@@ -554,7 +530,6 @@ public static (TreeProof, error) ProveTree(long t, long n, HashReader h) => func
         panic("tlog: bad index math in ProveTree");
     }
     return (p, error.As(null!)!);
-
 });
 
 // treeProofIndex builds the list of indexes needed to construct
@@ -570,7 +545,6 @@ private static slice<long> treeProofIndex(long lo, long hi, long n, slice<long> 
             return need;
         }
         return subTreeIndex(lo, hi, need);
-
     }
     {
         var (k, _) = maxpow2(hi - lo);
@@ -585,9 +559,7 @@ private static slice<long> treeProofIndex(long lo, long hi, long n, slice<long> 
             need = treeProofIndex(lo + k, hi, n, need);
         }
     }
-
     return need;
-
 });
 
 // treeProof constructs the sub-proof related to the subtree containing records [lo, hi).
@@ -606,11 +578,9 @@ private static (TreeProof, slice<Hash>) treeProof(long lo, long hi, long n, slic
             // This subtree corresponds exactly to the old tree.
             // The verifier knows that hash, so we don't need to send it.
             return (new TreeProof(), hashes);
-
         }
         var (th, hashes) = subTreeHash(lo, hi, hashes);
         return (new TreeProof(th), hashes);
-
     }
     TreeProof p = default;
     Hash th = default;
@@ -621,19 +591,15 @@ private static (TreeProof, slice<Hash>) treeProof(long lo, long hi, long n, slic
             // m is on left side
             p, hashes = treeProof(lo, lo + k, n, hashes);
             th, hashes = subTreeHash(lo + k, hi, hashes);
-
         }
         else
  { 
             // m is on right side
             th, hashes = subTreeHash(lo, lo + k, hashes);
             p, hashes = treeProof(lo + k, hi, n, hashes);
-
         }
     }
-
     return (append(p, th), hashes);
-
 });
 
 // CheckTree verifies that p is a valid proof that the tree of size t with hash th
@@ -650,7 +616,6 @@ public static error CheckTree(TreeProof p, long t, Hash th, long n, Hash h) {
         return error.As(null!)!;
     }
     return error.As(errProofFailed)!;
-
 }
 
 // runTreeProof runs the sub-proof p related to the subtree containing records [lo, hi),
@@ -677,7 +642,6 @@ private static (Hash, Hash, error) runTreeProof(TreeProof p, long lo, long hi, l
             return (new Hash(), new Hash(), error.As(errProofFailed)!);
         }
         return (p[0], p[0], error.As(null!)!);
-
     }
     if (len(p) == 0) {
         return (new Hash(), new Hash(), error.As(errProofFailed)!);
@@ -689,7 +653,6 @@ private static (Hash, Hash, error) runTreeProof(TreeProof p, long lo, long hi, l
             return (new Hash(), new Hash(), error.As(err)!);
         }
         return (oh, NodeHash(th, p[len(p) - 1]), error.As(null!)!);
-
     }
     else
  {
@@ -698,7 +661,6 @@ private static (Hash, Hash, error) runTreeProof(TreeProof p, long lo, long hi, l
             return (new Hash(), new Hash(), error.As(err)!);
         }
         return (NodeHash(p[len(p) - 1], oh), NodeHash(p[len(p) - 1], th), error.As(null!)!);
-
     }
 });
 

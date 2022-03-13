@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:04 UTC
+//     Generated on 2022 March 13 05:30:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace net
 {
     public static partial class url_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Userinfo
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace net
             public static implicit operator Userinfo(NilType nil) => default(Userinfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Userinfo Userinfo_cast(dynamic value)
         {
             return new Userinfo(value.username, value.password, value.passwordSet);

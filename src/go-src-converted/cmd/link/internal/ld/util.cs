@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:26 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:29 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\util.go
-using loader = go.cmd.link.@internal.loader_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using loader = cmd.link.@internal.loader_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using os = os_package;
+using System;
 
 public static partial class ld_package {
 
@@ -93,7 +92,6 @@ private static void Errorf(this ptr<Link> _addr_ctxt, loader.Sym s, @string form
     format += "\n";
     fmt.Fprintf(os.Stderr, format, args);
     afterErrorAction();
-
 }
 
 private static @string artrim(slice<byte> x) {
@@ -123,7 +121,6 @@ private static bool contains(slice<@string> s, @string v) {
             return true;
         }
     }    return false;
-
 }
 
 } // end ld_package

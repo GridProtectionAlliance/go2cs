@@ -21,15 +21,15 @@
 // The numbers n and c, when they follow a code, are encoded as varints
 // using the same encoding as encoding/binary's Uvarint.
 //
-// package gcprog -- go2cs converted at 2022 March 06 23:09:21 UTC
+
+// package gcprog -- go2cs converted at 2022 March 13 06:22:40 UTC
 // import "cmd/internal/gcprog" ==> using gcprog = go.cmd.@internal.gcprog_package
 // Original source: C:\Program Files\Go\src\cmd\internal\gcprog\gcprog.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using System;
-
-
 namespace go.cmd.@internal;
+
+using fmt = fmt_package;
+using io = io_package;
+using System;
 
 public static partial class gcprog_package {
 
@@ -88,7 +88,6 @@ private static void @byte(this ptr<Writer> _addr_w, byte x) {
         w.debugBuf = append(w.debugBuf, x);
     }
     w.writeByte(x);
-
 }
 
 // End marks the end of the program, writing any remaining bytes.
@@ -122,7 +121,6 @@ private static void Ptr(this ptr<Writer> _addr_w, long index) => func((_, panic,
         fmt.Fprintf(w.debug, "gcprog: ptr at %d\n", index);
     }
     w.lit(1);
-
 });
 
 // ShouldRepeat reports whether it would be worthwhile to
@@ -139,7 +137,6 @@ private static bool ShouldRepeat(this ptr<Writer> _addr_w, long n, long c) {
     // flushing the current bits plus at least one byte for
     // the repeat size and one for the repeat count.
     return c > 1 && c * n > 4 * 8;
-
 }
 
 // Repeat emits an instruction to repeat the description
@@ -164,7 +161,6 @@ private static void Repeat(this ptr<Writer> _addr_w, long n, long c) {
     }
     w.varint(c);
     w.index += n * c;
-
 }
 
 // ZeroUntil adds zeros to the bit stream until reaching the given index;
@@ -190,7 +186,6 @@ private static void ZeroUntil(this ptr<Writer> _addr_w, long index) => func((_, 
             w.lit(0);
         }
         return ;
-
     }
     if (w.debug != null) {
         fmt.Fprintf(w.debug, "gcprog: advance to %d by repeat\n", index);
@@ -198,7 +193,6 @@ private static void ZeroUntil(this ptr<Writer> _addr_w, long index) => func((_, 
     w.lit(0);
     w.flushlit();
     w.Repeat(1, skip - 1);
-
 });
 
 // Append emits the given GC program into the current output.
@@ -224,12 +218,10 @@ private static void Append(this ptr<Writer> _addr_w, slice<byte> prog, long n) =
             fmt.Fprintf(w.debug, "%02x", x);
         }
         w.@byte(x);
-
     }    if (w.debug != null) {
         fmt.Fprintf(w.debug, "\n");
     }
     w.index += n;
-
 });
 
 // progbits returns the length of the bit stream encoded by the program p.
@@ -254,14 +246,12 @@ private static long progbits(slice<byte> p) => func((_, panic, _) => {
         count = default;
         count, p = readvarint(p);
         n += nbit * count;
-
     }
     if (len(p) > 0) {
         println("gcprog: found end instruction after", n, "ptrs, with", len(p), "bytes remaining");
         panic("gcprog: extra data at end of program");
     }
     return n;
-
 });
 
 // readvarint reads a varint from p, returning the value and the remainder of p.
@@ -281,7 +271,6 @@ private static (long, slice<byte>) readvarint(slice<byte> p) {
         }
     }
     return (v, p);
-
 }
 
 // lit adds a single literal bit to w.
@@ -294,7 +283,6 @@ private static void lit(this ptr<Writer> _addr_w, byte x) {
     w.b[w.nb] = x;
     w.nb++;
     w.index++;
-
 }
 
 // varint emits the varint encoding of x.
@@ -309,7 +297,6 @@ private static void varint(this ptr<Writer> _addr_w, long x) => func((_, panic, 
         x>>=7;
     }
     w.@byte(byte(x));
-
 });
 
 // flushlit flushes any pending literal bits.
@@ -341,13 +328,11 @@ private static void flushlit(this ptr<Writer> _addr_w) {
             fmt.Fprintf(w.debug, " %02x", bits);
         }
         w.@byte(bits);
-
     }
     if (w.debug != null) {
         fmt.Fprintf(w.debug, "\n");
     }
     w.nb = 0;
-
 }
 
 } // end gcprog_package

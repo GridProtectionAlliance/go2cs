@@ -5,23 +5,25 @@
 //go:build darwin && !ios
 // +build darwin,!ios
 
-// package macOS -- go2cs converted at 2022 March 06 22:19:51 UTC
+// package macOS -- go2cs converted at 2022 March 13 05:35:00 UTC
 // import "crypto/x509/internal.macOS" ==> using macOS = go.crypto.x509.internal.macOS_package
 // Original source: C:\Program Files\Go\src\crypto\x509\internal\macos\security.go
-using errors = go.errors_package;
-using abi = go.@internal.abi_package;
-using strconv = go.strconv_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.crypto.x509;
+
+using errors = errors_package;
+using abi = @internal.abi_package;
+using strconv = strconv_package;
+using @unsafe = @unsafe_package;
+
+
+// Security.framework linker flags for the external linker. See Issue 42459.
+//go:cgo_ldflag "-framework"
+//go:cgo_ldflag "Security"
+
+// Based on https://opensource.apple.com/source/Security/Security-59306.41.2/base/Security.h
 
 public static partial class macOS_package {
 
-    // Security.framework linker flags for the external linker. See Issue 42459.
-    //go:cgo_ldflag "-framework"
-    //go:cgo_ldflag "Security"
-
-    // Based on https://opensource.apple.com/source/Security/Security-59306.41.2/base/Security.h
 public partial struct SecTrustSettingsResult { // : int
 }
 
@@ -31,14 +33,12 @@ public static readonly var SecTrustSettingsResultTrustAsRoot = 1;
 public static readonly var SecTrustSettingsResultDeny = 2;
 public static readonly var SecTrustSettingsResultUnspecified = 3;
 
-
 public partial struct SecTrustSettingsDomain { // : int
 }
 
 public static readonly SecTrustSettingsDomain SecTrustSettingsDomainUser = iota;
 public static readonly var SecTrustSettingsDomainAdmin = 0;
 public static readonly var SecTrustSettingsDomainSystem = 1;
-
 
 public partial struct OSStatus {
     public @string call;
@@ -85,7 +85,6 @@ public static (CFRef, error) SecTrustSettingsCopyCertificates(SecTrustSettingsDo
         return (0, error.As(new OSStatus("SecTrustSettingsCopyCertificates",int32(ret)))!);
     }
     return (certArray, error.As(null!)!);
-
 }
 private static void x509_SecTrustSettingsCopyCertificates_trampoline();
 
@@ -106,7 +105,6 @@ public static (CFRef, error) SecItemExport(CFRef cert) {
         return (0, error.As(new OSStatus("SecItemExport",int32(ret)))!);
     }
     return (data, error.As(null!)!);
-
 }
 private static void x509_SecItemExport_trampoline();
 
@@ -130,7 +128,6 @@ public static (CFRef, error) SecTrustSettingsCopyTrustSettings(CFRef cert, SecTr
         return (0, error.As(new OSStatus("SecTrustSettingsCopyTrustSettings",int32(ret)))!);
     }
     return (trustSettings, error.As(null!)!);
-
 }
 private static void x509_SecTrustSettingsCopyTrustSettings_trampoline();
 

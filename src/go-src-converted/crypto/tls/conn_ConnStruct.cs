@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:20:08 UTC
+//     Generated on 2022 March 13 05:35:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Conn
         {
             // Constructors
@@ -141,7 +141,7 @@ namespace crypto
             public static implicit operator Conn(NilType nil) => default(Conn);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Conn Conn_cast(dynamic value)
         {
             return new Conn(value.conn, value.isClient, value.handshakeFn, value.handshakeStatus, value.handshakeMutex, value.handshakeErr, value.vers, value.haveVers, ref value.config, value.handshakes, value.didResume, value.cipherSuite, value.ocspResponse, value.scts, value.peerCertificates, value.verifiedChains, value.serverName, value.secureRenegotiation, value.ekm, value.resumptionSecret, value.ticketKeys, value.clientFinishedIsFirst, value.closeNotifyErr, value.closeNotifySent, value.clientFinished, value.serverFinished, value.clientProtocol, value.@in, value.@out, value.rawInput, value.input, value.hand, value.buffering, value.sendBuf, value.bytesSent, value.packetsSent, value.retryCount, value.activeCall, value.tmp);

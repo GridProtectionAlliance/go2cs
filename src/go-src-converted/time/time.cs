@@ -73,60 +73,63 @@
 // clock reading if present. If t != u because of different monotonic clock readings,
 // that difference will be visible when printing t.String() and u.String().
 //
-// package time -- go2cs converted at 2022 March 06 22:30:14 UTC
+
+// package time -- go2cs converted at 2022 March 13 05:41:03 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\time.go
-using errors = go.errors_package;
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go;
+
+using errors = errors_package;
+using _@unsafe_ = @unsafe_package; // for go:linkname
+
+
+// A Time represents an instant in time with nanosecond precision.
+//
+// Programs using times should typically store and pass them as values,
+// not pointers. That is, time variables and struct fields should be of
+// type time.Time, not *time.Time.
+//
+// A Time value can be used by multiple goroutines simultaneously except
+// that the methods GobDecode, UnmarshalBinary, UnmarshalJSON and
+// UnmarshalText are not concurrency-safe.
+//
+// Time instants can be compared using the Before, After, and Equal methods.
+// The Sub method subtracts two instants, producing a Duration.
+// The Add method adds a Time and a Duration, producing a Time.
+//
+// The zero value of type Time is January 1, year 1, 00:00:00.000000000 UTC.
+// As this time is unlikely to come up in practice, the IsZero method gives
+// a simple way of detecting a time that has not been initialized explicitly.
+//
+// Each Time has associated with it a Location, consulted when computing the
+// presentation form of the time, such as in the Format, Hour, and Year methods.
+// The methods Local, UTC, and In return a Time with a specific location.
+// Changing the location in this way changes only the presentation; it does not
+// change the instant in time being denoted and therefore does not affect the
+// computations described in earlier paragraphs.
+//
+// Representations of a Time value saved by the GobEncode, MarshalBinary,
+// MarshalJSON, and MarshalText methods store the Time.Location's offset, but not
+// the location name. They therefore lose information about Daylight Saving Time.
+//
+// In addition to the required “wall clock” reading, a Time may contain an optional
+// reading of the current process's monotonic clock, to provide additional precision
+// for comparison or subtraction.
+// See the “Monotonic Clocks” section in the package documentation for details.
+//
+// Note that the Go == operator compares not just the time instant but also the
+// Location and the monotonic clock reading. Therefore, Time values should not
+// be used as map or database keys without first guaranteeing that the
+// identical Location has been set for all values, which can be achieved
+// through use of the UTC or Local method, and that the monotonic clock reading
+// has been stripped by setting t = t.Round(0). In general, prefer t.Equal(u)
+// to t == u, since t.Equal uses the most accurate comparison available and
+// correctly handles the case when only one of its arguments has a monotonic
+// clock reading.
+//
 
 public static partial class time_package {
 
-    // A Time represents an instant in time with nanosecond precision.
-    //
-    // Programs using times should typically store and pass them as values,
-    // not pointers. That is, time variables and struct fields should be of
-    // type time.Time, not *time.Time.
-    //
-    // A Time value can be used by multiple goroutines simultaneously except
-    // that the methods GobDecode, UnmarshalBinary, UnmarshalJSON and
-    // UnmarshalText are not concurrency-safe.
-    //
-    // Time instants can be compared using the Before, After, and Equal methods.
-    // The Sub method subtracts two instants, producing a Duration.
-    // The Add method adds a Time and a Duration, producing a Time.
-    //
-    // The zero value of type Time is January 1, year 1, 00:00:00.000000000 UTC.
-    // As this time is unlikely to come up in practice, the IsZero method gives
-    // a simple way of detecting a time that has not been initialized explicitly.
-    //
-    // Each Time has associated with it a Location, consulted when computing the
-    // presentation form of the time, such as in the Format, Hour, and Year methods.
-    // The methods Local, UTC, and In return a Time with a specific location.
-    // Changing the location in this way changes only the presentation; it does not
-    // change the instant in time being denoted and therefore does not affect the
-    // computations described in earlier paragraphs.
-    //
-    // Representations of a Time value saved by the GobEncode, MarshalBinary,
-    // MarshalJSON, and MarshalText methods store the Time.Location's offset, but not
-    // the location name. They therefore lose information about Daylight Saving Time.
-    //
-    // In addition to the required “wall clock” reading, a Time may contain an optional
-    // reading of the current process's monotonic clock, to provide additional precision
-    // for comparison or subtraction.
-    // See the “Monotonic Clocks” section in the package documentation for details.
-    //
-    // Note that the Go == operator compares not just the time instant but also the
-    // Location and the monotonic clock reading. Therefore, Time values should not
-    // be used as map or database keys without first guaranteeing that the
-    // identical Location has been set for all values, which can be achieved
-    // through use of the UTC or Local method, and that the monotonic clock reading
-    // has been stripped by setting t = t.Round(0). In general, prefer t.Equal(u)
-    // to t == u, since t.Equal uses the most accurate comparison available and
-    // correctly handles the case when only one of its arguments has a monotonic
-    // clock reading.
-    //
 public partial struct Time {
     public ulong wall;
     public long ext; // loc specifies the Location that should be used to
@@ -142,7 +145,6 @@ private static readonly var maxWall = wallToInternal + (1 << 33 - 1); // year 21
 private static readonly var minWall = wallToInternal; // year 1885
 private static readonly nint nsecMask = 1 << 30 - 1;
 private static readonly nint nsecShift = 30;
-
 
 // These helpers for manipulating the wall and monotonic clock readings
 // take pointer receivers, even when they don't modify the time,
@@ -163,7 +165,6 @@ private static long sec(this ptr<Time> _addr_t) {
         return wallToInternal + int64(t.wall << 1 >> (int)((nsecShift + 1)));
     }
     return t.ext;
-
 }
 
 // unixSec returns the time's seconds since Jan 1 1970 (Unix time).
@@ -185,7 +186,6 @@ private static void addSec(this ptr<Time> _addr_t, long d) {
             return ;
         }
         t.stripMono();
-
     }
     var sum = t.ext + d;
     if ((sum > t.ext) == (d > 0)) {
@@ -210,7 +210,6 @@ private static void setLoc(this ptr<Time> _addr_t, ptr<Location> _addr_loc) {
     }
     t.stripMono();
     t.loc = loc;
-
 }
 
 // stripMono strips the monotonic clock reading in t.
@@ -236,10 +235,8 @@ private static void setMono(this ptr<Time> _addr_t, long m) {
             return ;
         }
         t.wall |= hasMonotonic | uint64(sec - minWall) << (int)(nsecShift);
-
     }
     t.ext = m;
-
 }
 
 // mono returns t's monotonic clock reading.
@@ -254,7 +251,6 @@ private static long mono(this ptr<Time> _addr_t) {
         return 0;
     }
     return t.ext;
-
 }
 
 // After reports whether the time instant t is after u.
@@ -265,7 +261,6 @@ public static bool After(this Time t, Time u) {
     var ts = t.sec();
     var us = u.sec();
     return ts > us || ts == us && t.nsec() > u.nsec();
-
 }
 
 // Before reports whether the time instant t is before u.
@@ -276,7 +271,6 @@ public static bool Before(this Time t, Time u) {
     var ts = t.sec();
     var us = u.sec();
     return ts < us || ts == us && t.nsec() < u.nsec();
-
 }
 
 // Equal reports whether t and u represent the same time instant.
@@ -289,7 +283,6 @@ public static bool Equal(this Time t, Time u) {
         return t.ext == u.ext;
     }
     return t.sec() == u.sec() && t.nsec() == u.nsec();
-
 }
 
 // A Month specifies a month of the year (January = 1, ...).
@@ -309,7 +302,6 @@ public static readonly var October = 8;
 public static readonly var November = 9;
 public static readonly var December = 10;
 
-
 // String returns the English name of the month ("January", "February", ...).
 public static @string String(this Month m) {
     if (January <= m && m <= December) {
@@ -318,7 +310,6 @@ public static @string String(this Month m) {
     var buf = make_slice<byte>(20);
     var n = fmtInt(buf, uint64(m));
     return "%!Month(" + string(buf[(int)n..]) + ")";
-
 }
 
 // A Weekday specifies a day of the week (Sunday = 0, ...).
@@ -333,7 +324,6 @@ public static readonly var Thursday = 3;
 public static readonly var Friday = 4;
 public static readonly var Saturday = 5;
 
-
 // String returns the English name of the day ("Sunday", "Monday", ...).
 public static @string String(this Weekday d) {
     if (Sunday <= d && d <= Saturday) {
@@ -342,7 +332,6 @@ public static @string String(this Weekday d) {
     var buf = make_slice<byte>(20);
     var n = fmtInt(buf, uint64(d));
     return "%!Weekday(" + string(buf[(int)n..]) + ")";
-
 }
 
 // Computations on time.
@@ -445,7 +434,6 @@ private static readonly long internalToUnix = -unixToInternal;
 private static readonly long wallToInternal = (1884 * 365 + 1884 / 4 - 1884 / 100 + 1884 / 400) * secondsPerDay;
 private static readonly long internalToWall = -wallToInternal;
 
-
 // IsZero reports whether t represents the zero time instant,
 // January 1, year 1, 00:00:00 UTC.
 public static bool IsZero(this Time t) {
@@ -472,7 +460,6 @@ public static ulong abs(this Time t) {
         }
     }
     return uint64(sec + (unixToInternal + internalToAbsolute));
-
 }
 
 // locabs is a combination of the Zone and abs methods,
@@ -497,7 +484,6 @@ public static (@string, nint, ulong) locabs(this Time t) {
             name, offset, _, _, _ = l.lookup(sec);
         }
         sec += int64(offset);
-
     }
     else
  {
@@ -505,7 +491,6 @@ public static (@string, nint, ulong) locabs(this Time t) {
     }
     abs = uint64(sec + (unixToInternal + internalToAbsolute));
     return ;
-
 }
 
 // Date returns the year, month, and day in which t occurs.
@@ -546,7 +531,6 @@ private static Weekday absWeekday(ulong abs) {
     // January 1 of the absolute year, like January 1 of 2001, was a Monday.
     var sec = (abs + uint64(Monday) * secondsPerDay) % secondsPerWeek;
     return Weekday(int(sec) / secondsPerDay);
-
 }
 
 // ISOWeek returns the ISO 8601 year and week number in which t occurs.
@@ -576,7 +560,6 @@ public static (nint, nint) ISOWeek(this Time t) {
     abs += uint64(d) * secondsPerDay;
     var (year, _, _, yday) = absDate(abs, false);
     return (year, yday / 7 + 1);
-
 }
 
 // Clock returns the hour, minute, and second within the day specified by t.
@@ -639,7 +622,6 @@ public partial struct Duration { // : long
 private static readonly Duration minDuration = -1 << 63;
 private static readonly Duration maxDuration = 1 << 63 - 1;
 
-
 // Common durations. There is no definition for units of Day or larger
 // to avoid confusion across daylight savings time zone transitions.
 //
@@ -657,7 +639,6 @@ public static readonly nint Millisecond = 1000 * Microsecond;
 public static readonly nint Second = 1000 * Millisecond;
 public static readonly nint Minute = 60 * Second;
 public static readonly nint Hour = 60 * Minute;
-
 
 // String returns a string representing the duration in the form "72h3m0.5s".
 // Leading zero units are omitted. As a special case, durations less than one
@@ -699,7 +680,6 @@ public static @string String(this Duration d) {
             buf[w] = 'm';
                 w, u = fmtFrac(buf[..(int)w], u, prec);
         w = fmtInt(buf[..(int)w], u);
-
     }
     else
  {
@@ -726,7 +706,6 @@ public static @string String(this Duration d) {
                 buf[w] = 'h';
                 w = fmtInt(buf[..(int)w], u);
             }
-
         }
     }
     if (neg) {
@@ -734,7 +713,6 @@ public static @string String(this Duration d) {
         buf[w] = '-';
     }
     return string(buf[(int)w..]);
-
 }
 
 // fmtFrac formats the fraction of v/10**prec (e.g., ".12345") into the
@@ -756,14 +734,12 @@ private static (nint, ulong) fmtFrac(slice<byte> buf, ulong v, nint prec) {
             buf[w] = byte(digit) + '0';
         }
         v /= 10;
-
     }
     if (print) {
         w--;
         buf[w] = '.';
     }
     return (w, v);
-
 }
 
 // fmtInt formats v into the tail of buf.
@@ -783,7 +759,6 @@ private static nint fmtInt(slice<byte> buf, ulong v) {
         }
     }
     return w;
-
 }
 
 // Nanoseconds returns the duration as an integer nanosecond count.
@@ -838,7 +813,6 @@ public static Duration Truncate(this Duration d, Duration m) {
         return d;
     }
     return d - d % m;
-
 }
 
 // lessThanHalf reports whether x+x < y but avoids overflow,
@@ -875,7 +849,6 @@ public static Duration Round(this Duration d, Duration m) {
             d1 = d1__prev2;
 
         }
-
         return minDuration; // overflow
     }
     if (lessThanHalf(r, m)) {
@@ -892,7 +865,6 @@ public static Duration Round(this Duration d, Duration m) {
         d1 = d1__prev1;
 
     }
-
     return maxDuration; // overflow
 }
 
@@ -915,7 +887,6 @@ public static Time Add(this Time t, Duration d) {
         if (d < 0 && te > t.ext || d > 0 && te < t.ext) { 
             // Monotonic clock reading now out of range; degrade to wall-only.
             t.stripMono();
-
         }
         else
  {
@@ -923,7 +894,6 @@ public static Time Add(this Time t, Duration d) {
         }
     }
     return t;
-
 }
 
 // Sub returns the duration t-u. If the result exceeds the maximum (or minimum)
@@ -942,7 +912,6 @@ public static Duration Sub(this Time t, Time u) {
             return minDuration; // t - u is negative out of range
         }
         return d;
-
     }
     d = Duration(t.sec() - u.sec()) * Second + Duration(t.nsec() - u.nsec()); 
     // Check for overflow or underflow.
@@ -962,14 +931,12 @@ public static Duration Since(Time t) {
     if (t.wall & hasMonotonic != 0) { 
         // Common case optimization: if t has monotonic time, then Sub will use only it.
         now = new Time(hasMonotonic,runtimeNano()-startNano,nil);
-
     }
     else
  {
         now = Now();
     }
     return now.Sub(t);
-
 }
 
 // Until returns the duration until t.
@@ -979,14 +946,12 @@ public static Duration Until(Time t) {
     if (t.wall & hasMonotonic != 0) { 
         // Common case optimization: if t has monotonic time, then Sub will use only it.
         now = new Time(hasMonotonic,runtimeNano()-startNano,nil);
-
     }
     else
  {
         now = Now();
     }
     return t.Sub(now);
-
 }
 
 // AddDate returns the time corresponding to adding the
@@ -1010,7 +975,6 @@ private static readonly nint secondsPerWeek = 7 * secondsPerDay;
 private static readonly nint daysPer400Years = 365 * 400 + 97;
 private static readonly nint daysPer100Years = 365 * 100 + 24;
 private static readonly nint daysPer4Years = 365 * 4 + 1;
-
 
 // date computes the year, day of year, and when full=true,
 // the month and day in which t occurs.
@@ -1081,8 +1045,7 @@ private static (nint, Month, nint, nint) absDate(ulong abs, bool full) {
             month = February;
             day = 29;
             return ;
-        
-    }
+            }
     month = Month(day / 31);
     var end = int(daysBefore[month + 1]);
     nint begin = default;
@@ -1097,7 +1060,6 @@ private static (nint, Month, nint, nint) absDate(ulong abs, bool full) {
     month++; // because January is 1
     day = day - begin + 1;
     return ;
-
 }
 
 // daysBefore[m] counts the number of days in a non-leap year
@@ -1110,7 +1072,6 @@ private static nint daysIn(Month m, nint year) {
         return 29;
     }
     return int(daysBefore[m] - daysBefore[m - 1]);
-
 }
 
 // daysSinceEpoch takes a year and returns the number of days from
@@ -1139,7 +1100,6 @@ private static ulong daysSinceEpoch(nint year) {
     d += 365 * n;
 
     return d;
-
 }
 
 // Provided by package runtime.
@@ -1166,7 +1126,6 @@ public static Time Now() {
         return new Time(uint64(nsec),sec+minWall,Local);
     }
     return new Time(hasMonotonic|uint64(sec)<<nsecShift|uint64(nsec),mono,Local);
-
 }
 
 private static Time unixTime(long sec, int nsec) {
@@ -1198,7 +1157,6 @@ public static Time In(this Time t, ptr<Location> _addr_loc) => func((_, panic, _
     }
     t.setLoc(loc);
     return t;
-
 });
 
 // Location returns the time zone information associated with t.
@@ -1208,7 +1166,6 @@ public static ptr<Location> Location(this Time t) {
         l = UTC;
     }
     return _addr_l!;
-
 }
 
 // Zone computes the time zone in effect at time t, returning the abbreviated
@@ -1285,14 +1242,12 @@ public static (slice<byte>, error) MarshalBinary(this Time t) {
             return (null, error.As(errors.New("Time.MarshalBinary: unexpected zone offset"))!);
         }
         offsetMin = int16(offset);
-
     }
     var sec = t.sec();
     var nsec = t.nsec();
     byte enc = new slice<byte>(new byte[] { timeBinaryVersion, byte(sec>>56), byte(sec>>48), byte(sec>>40), byte(sec>>32), byte(sec>>24), byte(sec>>16), byte(sec>>8), byte(sec), byte(nsec>>24), byte(nsec>>16), byte(nsec>>8), byte(nsec), byte(offsetMin>>8), byte(offsetMin) });
 
     return (enc, error.As(null!)!);
-
 }
 
 // UnmarshalBinary implements the encoding.BinaryUnmarshaler interface.
@@ -1337,9 +1292,7 @@ private static error UnmarshalBinary(this ptr<Time> _addr_t, slice<byte> data) {
         }
     }
 
-
     return error.As(null!)!;
-
 }
 
 // TODO(rsc): Remove GobEncoder, GobDecoder, MarshalJSON, UnmarshalJSON in Go 2.
@@ -1374,17 +1327,14 @@ public static (slice<byte>, error) MarshalJSON(this Time t) {
             // RFC 3339 is clear that years are 4 digits exactly.
             // See golang.org/issue/4556#c15 for more discussion.
             return (null, error.As(errors.New("Time.MarshalJSON: year outside of range [0,9999]"))!);
-
         }
     }
-
 
     var b = make_slice<byte>(0, len(RFC3339Nano) + 2);
     b = append(b, '"');
     b = t.AppendFormat(b, RFC3339Nano);
     b = append(b, '"');
     return (b, error.As(null!)!);
-
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
@@ -1399,7 +1349,6 @@ private static error UnmarshalJSON(this ptr<Time> _addr_t, slice<byte> data) {
     error err = default!;
     t.val, err = Parse("\"" + RFC3339 + "\"", string(data));
     return error.As(err)!;
-
 }
 
 // MarshalText implements the encoding.TextMarshaler interface.
@@ -1416,10 +1365,8 @@ public static (slice<byte>, error) MarshalText(this Time t) {
         }
     }
 
-
     var b = make_slice<byte>(0, len(RFC3339Nano));
     return (t.AppendFormat(b, RFC3339Nano), error.As(null!)!);
-
 }
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
@@ -1431,7 +1378,6 @@ private static error UnmarshalText(this ptr<Time> _addr_t, slice<byte> data) {
     error err = default!;
     t.val, err = Parse(RFC3339, string(data));
     return error.As(err)!;
-
 }
 
 // Unix returns the local Time corresponding to the given Unix time,
@@ -1450,7 +1396,6 @@ public static Time Unix(long sec, long nsec) {
         }
     }
     return unixTime(sec, int32(nsec));
-
 }
 
 // UnixMilli returns the local Time corresponding to the given Unix time,
@@ -1493,7 +1438,6 @@ private static (nint, nint) norm(nint hi, nint lo, nint @base) {
         lo -= n * base;
     }
     return (hi, lo);
-
 }
 
 // Date returns the Time corresponding to
@@ -1561,12 +1505,10 @@ public static Time Date(nint year, Month month, nint day, nint hour, nint min, n
 
         }
         unix -= int64(offset);
-
     }
     var t = unixTime(unix, int32(nsec));
     t.setLoc(loc);
     return t;
-
 });
 
 // Truncate returns the result of rounding t down to a multiple of d (since the zero time).
@@ -1583,7 +1525,6 @@ public static Time Truncate(this Time t, Duration d) {
     }
     var (_, r) = div(t, d);
     return t.Add(-r);
-
 }
 
 // Round returns the result of rounding t to the nearest multiple of d (since the zero time).
@@ -1604,7 +1545,6 @@ public static Time Round(this Time t, Duration d) {
         return t.Add(-r);
     }
     return t.Add(d - r);
-
 }
 
 // div divides t by d and returns the quotient parity and remainder.
@@ -1671,19 +1611,14 @@ private static (nint, Duration) div(Time t, Duration d) {
                 (u0x, u0) = (u0, u0 - d0);                if (u0 > u0x) {
                     u1--;
                 }
-
                 u1 -= d1;
-
             }
-
             if (d1 == 0 && d0 == uint64(d)) {
                 break;
             }
-
             d0>>=1;
             d0 |= (d1 & 1) << 63;
             d1>>=1;
-
         }
         r = Duration(u0);
         if (neg && r != 0) { 
@@ -1695,10 +1630,8 @@ private static (nint, Duration) div(Time t, Duration d) {
         //    -(q-1)*d + (d - r) = t
         qmod2 ^= 1;
         r = d - r;
-
     }
     return ;
-
 }
 
 } // end time_package

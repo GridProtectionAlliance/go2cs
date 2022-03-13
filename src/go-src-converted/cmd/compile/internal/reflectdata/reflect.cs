@@ -2,34 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflectdata -- go2cs converted at 2022 March 06 23:09:06 UTC
+// package reflectdata -- go2cs converted at 2022 March 13 06:22:24 UTC
 // import "cmd/compile/internal/reflectdata" ==> using reflectdata = go.cmd.compile.@internal.reflectdata_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\reflectdata\reflect.go
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using bitvec = go.cmd.compile.@internal.bitvec_package;
-using escape = go.cmd.compile.@internal.escape_package;
-using inline = go.cmd.compile.@internal.inline_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using typebits = go.cmd.compile.@internal.typebits_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using gcprog = go.cmd.@internal.gcprog_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using bitvec = cmd.compile.@internal.bitvec_package;
+using escape = cmd.compile.@internal.escape_package;
+using inline = cmd.compile.@internal.inline_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using typebits = cmd.compile.@internal.typebits_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using gcprog = cmd.@internal.gcprog_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class reflectdata_package {
 
@@ -76,7 +75,6 @@ public static readonly nint BUCKETSIZE = 8;
 public static readonly nint MAXKEYSIZE = 128;
 public static readonly nint MAXELEMSIZE = 128;
 
-
 private static nint structfieldSize() {
     return 3 * types.PtrSize;
 } // Sizeof(runtime.structfield{})
@@ -94,7 +92,6 @@ private static nint uncommonSize(ptr<types.Type> _addr_t) {
         return 0;
     }
     return 4 + 2 + 2 + 4 + 4;
-
 }
 
 private static ptr<types.Field> makefield(@string name, ptr<types.Type> _addr_t) {
@@ -205,7 +202,6 @@ public static ptr<types.Type> MapBucketType(ptr<types.Type> _addr_t) {
 
     bucket.StructType().Map = t;
     return _addr_bucket!;
-
 }
 
 // MapType builds a type representing a Hmap structure for the given map type.
@@ -247,11 +243,9 @@ public static ptr<types.Type> MapType(ptr<types.Type> _addr_t) {
         }
     }
 
-
     t.MapType().Hmap = hmap;
     hmap.StructType().Map = t;
     return _addr_hmap!;
-
 }
 
 // MapIterType builds a type representing an Hiter structure for the given map type.
@@ -296,7 +290,6 @@ public static ptr<types.Type> MapIterType(ptr<types.Type> _addr_t) {
     t.MapType().Hiter = hiter;
     hiter.StructType().Map = t;
     return _addr_hiter!;
-
 }
 
 // methods returns the methods of the non-interface type t, sorted by name.
@@ -337,9 +330,7 @@ private static slice<ptr<typeSig>> methods(ptr<types.Type> _addr_t) {
         }
         ptr<typeSig> sig = addr(new typeSig(name:f.Sym,isym:methodWrapper(it,f),tsym:methodWrapper(t,f),type_:typecheck.NewMethodType(f.Type,t),mtype:typecheck.NewMethodType(f.Type,nil),));
         ms = append(ms, sig);
-
     }    return ms;
-
 }
 
 // imethods returns the methods of the interface type t, sorted by name.
@@ -366,7 +357,6 @@ private static slice<ptr<typeSig>> imethods(ptr<types.Type> _addr_t) {
 
         }
 
-
         ptr<typeSig> sig = addr(new typeSig(name:f.Sym,mtype:f.Type,type_:typecheck.NewMethodType(f.Type,nil),));
         methods = append(methods, sig); 
 
@@ -375,9 +365,7 @@ private static slice<ptr<typeSig>> imethods(ptr<types.Type> _addr_t) {
         // Generate the method body, so that compiled
         // code can refer to it.
         methodWrapper(_addr_t, _addr_f);
-
     }    return methods;
-
 }
 
 private static void dimportpath(ptr<types.Pkg> _addr_p) {
@@ -393,14 +381,12 @@ private static void dimportpath(ptr<types.Pkg> _addr_p) {
     if (p == types.LocalPkg) { 
         // Note: myimportpath != "", or else dgopkgpath won't call dimportpath.
         str = @base.Ctxt.Pkgpath;
-
     }
     var s = @base.Ctxt.Lookup("type..importpath." + p.Prefix + ".");
     var ot = dnameData(_addr_s, 0, str, "", _addr_null, false);
     objw.Global(s, int32(ot), obj.DUPOK | obj.RODATA);
     s.Set(obj.AttrContentAddressable, true);
     p.Pathsym = s;
-
 }
 
 private static nint dgopkgpath(ptr<obj.LSym> _addr_s, nint ot, ptr<types.Pkg> _addr_pkg) {
@@ -418,11 +404,9 @@ private static nint dgopkgpath(ptr<obj.LSym> _addr_s, nint ot, ptr<types.Pkg> _a
         // See also https://groups.google.com/forum/#!topic/golang-dev/myb9s53HxGQ.
         var ns = @base.Ctxt.Lookup("type..importpath.\"\".");
         return objw.SymPtr(s, ot, ns, 0);
-
     }
     dimportpath(_addr_pkg);
     return objw.SymPtr(s, ot, pkg.Pathsym, 0);
-
 }
 
 // dgopkgpathOff writes an offset relocation in s at offset ot to the pkg path symbol.
@@ -441,11 +425,9 @@ private static nint dgopkgpathOff(ptr<obj.LSym> _addr_s, nint ot, ptr<types.Pkg>
         // See also https://groups.google.com/forum/#!topic/golang-dev/myb9s53HxGQ.
         var ns = @base.Ctxt.Lookup("type..importpath.\"\".");
         return objw.SymPtrOff(s, ot, ns);
-
     }
     dimportpath(_addr_pkg);
     return objw.SymPtrOff(s, ot, pkg.Pathsym);
-
 }
 
 // dnameField dumps a reflect.name for a struct field.
@@ -459,7 +441,6 @@ private static nint dnameField(ptr<obj.LSym> _addr_lsym, nint ot, ptr<types.Pkg>
     }
     var nsym = dname(ft.Sym.Name, ft.Note, _addr_null, types.IsExported(ft.Sym.Name));
     return objw.SymPtr(lsym, ot, nsym, 0);
-
 }
 
 // dnameData writes the contents of a reflect.name into s at offset ot.
@@ -506,7 +487,6 @@ private static nint dnameData(ptr<obj.LSym> _addr_s, nint ot, @string name, @str
         ot = dgopkgpathOff(_addr_s, ot, _addr_pkg);
     }
     return ot;
-
 }
 
 private static nint dnameCount = default;
@@ -530,7 +510,6 @@ private static ptr<obj.LSym> dname(@string name, @string tag, ptr<types.Pkg> _ad
  {
                 sname += "-noname-unexported." + tag;
             }
-
         }
         else
  {
@@ -541,7 +520,6 @@ private static ptr<obj.LSym> dname(@string name, @string tag, ptr<types.Pkg> _ad
  {
                 sname += name + "-" + tag;
             }
-
         }
     }
     else
@@ -557,7 +535,6 @@ private static ptr<obj.LSym> dname(@string name, @string tag, ptr<types.Pkg> _ad
     objw.Global(s, int32(ot), obj.DUPOK | obj.RODATA);
     s.Set(obj.AttrContentAddressable, true);
     return _addr_s!;
-
 }
 
 // dextratype dumps the fields of a runtime.uncommontype.
@@ -593,7 +570,6 @@ private static nint dextratype(ptr<obj.LSym> _addr_lsym, nint ot, ptr<types.Type
     ot = objw.Uint32(lsym, ot, uint32(dataAdd));
     ot = objw.Uint32(lsym, ot, 0);
     return ot;
-
 }
 
 private static ptr<types.Pkg> typePkg(ptr<types.Type> _addr_t) {
@@ -606,13 +582,11 @@ private static ptr<types.Pkg> typePkg(ptr<types.Type> _addr_t) {
             if (t.Elem() != null) {
                 tsym = t.Elem().Sym();
             }
-        
-    }
+            }
     if (tsym != null && tsym.Pkg != types.BuiltinPkg) {
         return _addr_tsym.Pkg!;
     }
     return _addr_null!;
-
 }
 
 // dextratypeData dumps the backing array for the []method field of
@@ -634,9 +608,7 @@ private static nint dextratypeData(ptr<obj.LSym> _addr_lsym, nint ot, ptr<types.
         ot = dmethodptrOff(_addr_lsym, ot, _addr_writeType(_addr_a.mtype));
         ot = dmethodptrOff(_addr_lsym, ot, _addr_a.isym);
         ot = dmethodptrOff(_addr_lsym, ot, _addr_a.tsym);
-
     }    return ot;
-
 }
 
 private static nint dmethodptrOff(ptr<obj.LSym> _addr_s, nint ot, ptr<obj.LSym> _addr_x) {
@@ -666,7 +638,6 @@ private static readonly nint tflagExtraStar = 1 << 1;
 private static readonly nint tflagNamed = 1 << 2;
 private static readonly nint tflagRegularMemory = 1 << 3;
 
-
 private static ptr<obj.LSym> memhashvarlen;private static ptr<obj.LSym> memequalvarlen;
 
 // dcommontype dumps the contents of a reflect.rtype (runtime._type).
@@ -685,7 +656,6 @@ private static nint dcommontype(ptr<obj.LSym> _addr_lsym, ptr<types.Type> _addr_
             sptrWeak = false;
         }
         sptr = writeType(_addr_tptr);
-
     }
     var (gcsym, useGCProg, ptrdata) = dgcsym(_addr_t, true);
     delete(gcsymset, t); 
@@ -785,7 +755,6 @@ private static nint dcommontype(ptr<obj.LSym> _addr_lsym, ptr<types.Type> _addr_
         ot = objw.SymPtrOff(lsym, ot, sptr);
     }
     return ot;
-
 }
 
 // TrackSym returns the symbol for tracking use of field/method f, assumed
@@ -812,7 +781,6 @@ public static ptr<types.Sym> TypeSymPrefix(@string prefix, ptr<types.Type> _addr
     //print("algsym: %s -> %+S\n", p, s);
 
     return _addr_s!;
-
 }
 
 public static ptr<types.Sym> TypeSym(ptr<types.Type> _addr_t) {
@@ -829,7 +797,6 @@ public static ptr<types.Sym> TypeSym(ptr<types.Type> _addr_t) {
     NeedRuntimeType(_addr_t);
     signatmu.Unlock();
     return _addr_s!;
-
 }
 
 public static ptr<obj.LSym> TypeLinksymPrefix(@string prefix, ptr<types.Type> _addr_t) {
@@ -869,7 +836,6 @@ public static ptr<ir.AddrExpr> ITabAddr(ptr<types.Type> _addr_t, ptr<types.Type>
     var lsym = s.Linksym();
     var n = ir.NewLinksymExpr(@base.Pos, lsym, types.Types[types.TUINT8]);
     return typecheck.Expr(typecheck.NodAddr(n))._<ptr<ir.AddrExpr>>();
-
 }
 
 // needkeyupdate reports whether map updates with t as a key
@@ -893,8 +859,7 @@ private static bool needkeyupdate(ptr<types.Type> _addr_t) {
     else 
         @base.Fatalf("bad type for map key: %v", t);
         return true;
-    
-}
+    }
 
 // hashMightPanic reports whether the hash of a map key of type t might panic.
 private static bool hashMightPanic(ptr<types.Type> _addr_t) {
@@ -913,8 +878,7 @@ private static bool hashMightPanic(ptr<types.Type> _addr_t) {
         }        return false;
     else 
         return false;
-    
-}
+    }
 
 // formalType replaces byte and rune aliases with real types.
 // They've been separate internally to make error messages
@@ -926,7 +890,6 @@ private static ptr<types.Type> formalType(ptr<types.Type> _addr_t) {
         return _addr_types.Types[t.Kind()]!;
     }
     return _addr_t!;
-
 }
 
 private static ptr<obj.LSym> writeType(ptr<types.Type> _addr_t) {
@@ -968,9 +931,7 @@ private static ptr<obj.LSym> writeType(ptr<types.Type> _addr_t) {
                 }
 
             }
-
             return _addr_lsym!;
-
         }
         if (tbase.Kind() == types.TFORW) {
             return _addr_lsym!;
@@ -1125,12 +1086,10 @@ private static ptr<obj.LSym> writeType(ptr<types.Type> _addr_t) {
                 if (!exported && a.name.Pkg != tpkg) {
                     pkg = a.name.Pkg;
                 }
-
                 var nsym = dname(a.name.Name, "", pkg, exported);
 
                 ot = objw.SymPtrOff(lsym, ot, nsym);
                 ot = objw.SymPtrOff(lsym, ot, writeType(_addr_a.type_));
-
             } 
 
             // ../../../../runtime/type.go:/mapType
@@ -1190,12 +1149,9 @@ private static ptr<obj.LSym> writeType(ptr<types.Type> _addr_t) {
                 var r = obj.Addrel(lsym);
                 r.Sym = writeType(_addr_u);
                 r.Type = objabi.R_KEEP;
-
             }
 
         }
-
-
     else if (t.Kind() == types.TPTR) 
         if (t.Elem().Kind() == types.TANY) { 
             // ../../../../runtime/type.go:/UnsafePointerType
@@ -1203,7 +1159,6 @@ private static ptr<obj.LSym> writeType(ptr<types.Type> _addr_t) {
             ot = dextratype(_addr_lsym, ot, _addr_t, 0);
 
             break;
-
         }
         s1 = writeType(_addr_t.Elem());
 
@@ -1268,13 +1223,10 @@ private static ptr<obj.LSym> writeType(ptr<types.Type> _addr_t) {
                 if (offsetAnon >> 1 != uint64(f.Offset)) {
                     @base.Fatalf("%v: bad field offset for %s", t, f.Sym.Name);
                 }
-
                 if (f.Embedded != 0) {
                     offsetAnon |= 1;
                 }
-
                 ot = objw.Uintptr(lsym, ot, offsetAnon);
-
             }
 
             f = f__prev1;
@@ -1300,15 +1252,13 @@ private static ptr<obj.LSym> writeType(ptr<types.Type> _addr_t) {
 
         if (t.Kind() == types.TPTR || t.Kind() == types.TARRAY || t.Kind() == types.TCHAN || t.Kind() == types.TFUNC || t.Kind() == types.TMAP || t.Kind() == types.TSLICE || t.Kind() == types.TSTRUCT) 
             keep = true;
-        
-    }
+            }
     if (types.TypeHasNoAlg(t)) {
         keep = false;
     }
     lsym.Set(obj.AttrMakeTypelink, keep);
 
     return _addr_lsym!;
-
 }
 
 // InterfaceMethodOffset returns the offset of the i-th method in the interface
@@ -1325,7 +1275,6 @@ public static long InterfaceMethodOffset(ptr<types.Type> _addr_ityp, long i) {
     // }
     // The size of imethod is 8.
     return int64(commonSize() + 4 * types.PtrSize + uncommonSize(_addr_ityp)) + i * 8;
-
 }
 
 // for each itabEntry, gather the methods on
@@ -1338,7 +1287,6 @@ public static void CompileITabs() {
             continue;
         }
         tab.entries = methods;
-
     }
 }
 
@@ -1372,7 +1320,6 @@ private static slice<ptr<obj.LSym>> genfun(ptr<types.Type> _addr_t, ptr<types.Ty
         @base.Fatalf("incomplete itab");
     }
     return out;
-
 }
 
 // ITabSym uses the information gathered in
@@ -1400,7 +1347,6 @@ public static ptr<obj.LSym> ITabSym(ptr<obj.LSym> _addr_it, long offset) {
         return _addr_null!;
     }
     return _addr_syms[methodnum]!;
-
 }
 
 // NeedRuntimeType ensures that a runtime type descriptor is emitted for t.
@@ -1411,7 +1357,6 @@ public static void NeedRuntimeType(ptr<types.Type> _addr_t) {
         // Generic types don't have a runtime type descriptor (but will
         // have a dictionary)
         return ;
-
     }
     {
         var (_, ok) = signatset[t];
@@ -1421,7 +1366,6 @@ public static void NeedRuntimeType(ptr<types.Type> _addr_t) {
             signatslice = append(signatslice, t);
         }
     }
-
 }
 
 public static void WriteRuntimeTypes() { 
@@ -1504,7 +1448,6 @@ public static void WriteTabs() {
             o = objw.SymPtrWeak(i.lsym, o, fn, 0); // method pointer for each method
         }        objw.Global(i.lsym, int32(o), int16(obj.DUPOK | obj.RODATA));
         i.lsym.Set(obj.AttrContentAddressable, true);
-
     }    if (types.LocalPkg.Name == "main" && len(ptabs) > 0) {
         nint ot = 0;
         var s = @base.Ctxt.Lookup("go.plugin.tabs");
@@ -1524,14 +1467,12 @@ public static void WriteTabs() {
                 if (p.Class != ir.PFUNC) {
                     t = types.NewPtr(t);
                 }
-
                 var tsym = writeType(_addr_t);
                 ot = objw.SymPtrOff(s, ot, nsym);
                 ot = objw.SymPtrOff(s, ot, tsym); 
                 // Plugin exports symbols as interfaces. Mark their types
                 // as UsedInIface.
                 tsym.Set(obj.AttrUsedInIface, true);
-
             }
 
             p = p__prev1;
@@ -1553,7 +1494,6 @@ public static void WriteTabs() {
         }
 
         objw.Global(s, int32(ot), int16(obj.RODATA));
-
     }
 }
 
@@ -1594,7 +1534,6 @@ public static void WriteBasicTypes() {
             dimportpath(_addr_types.NewPkg("runtime/msan", ""));
         }
         dimportpath(_addr_types.NewPkg("main", ""));
-
     }
 }
 
@@ -1621,7 +1560,6 @@ private static bool Less(this typesByString a, nint i, nint j) {
         return a[i].t.AllMethods().Index(0).Pos.Before(a[j].t.AllMethods().Index(0).Pos);
     }
     return false;
-
 }
 private static void Swap(this typesByString a, nint i, nint j) {
     (a[i], a[j]) = (a[j], a[i]);
@@ -1688,11 +1626,9 @@ public static (ptr<obj.LSym>, bool, long) GCSym(ptr<types.Type> _addr_t) {
             gcsymset[t] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
         }
     }
-
     gcsymmu.Unlock();
 
     return _addr_dgcsym(_addr_t, false)!;
-
 }
 
 // dgcsym returns a data symbol containing GC information for type t, along
@@ -1713,7 +1649,6 @@ private static (ptr<obj.LSym>, bool, long) dgcsym(ptr<types.Type> _addr_t, bool 
     useGCProg = true;
     lsym, ptrdata = dgcprog(_addr_t, write);
     return ;
-
 }
 
 // dgcptrmask emits and returns the symbol containing a pointer mask for type t.
@@ -1732,7 +1667,6 @@ private static ptr<obj.LSym> dgcptrmask(ptr<types.Type> _addr_t, bool write) {
         lsym.Set(obj.AttrContentAddressable, true);
     }
     return _addr_lsym!;
-
 }
 
 // fillptrmask fills in ptrmask with 1s corresponding to the
@@ -1769,7 +1703,6 @@ private static void fillptrmask(ptr<types.Type> _addr_t, slice<byte> ptrmask) {
 
         i = i__prev1;
     }
-
 }
 
 // dgcprog emits and returns the symbol containing a GC program for type t
@@ -1799,9 +1732,7 @@ private static (ptr<obj.LSym>, long) dgcprog(ptr<types.Type> _addr_t, bool write
             @base.Fatalf("dgcprog: %v: offset=%d but ptrdata=%d size=%d", t, offset, ptrdata, t.Width);
         }
     }
-
     return (_addr_lsym!, offset);
-
 }
 
 private partial struct gcProg {
@@ -1822,7 +1753,6 @@ private static void init(this ptr<gcProg> _addr_p, ptr<obj.LSym> _addr_lsym, boo
         p.w.Init(_p0 => {
         });
         return ;
-
     }
     p.w.Init(p.writeByte);
     if (@base.Debug.GCProg > 0) {
@@ -1876,7 +1806,6 @@ private static void emit(this ptr<gcProg> _addr_p, ptr<types.Type> _addr_t, long
         if (t.NumElem() == 0) { 
             // should have been handled by haspointers check above
             @base.Fatalf("gcProg.emit: empty array");
-
         }
         var count = t.NumElem();
         var elem = t.Elem();
@@ -1892,7 +1821,6 @@ private static void emit(this ptr<gcProg> _addr_p, ptr<types.Type> _addr_t, long
             }
 
             return ;
-
         }
         p.emit(elem, offset);
         p.w.ZeroUntil((offset + elem.Width) / int64(types.PtrSize));
@@ -1902,8 +1830,7 @@ private static void emit(this ptr<gcProg> _addr_p, ptr<types.Type> _addr_t, long
             p.emit(t1.Type, offset + t1.Offset);
         }    else 
         @base.Fatalf("gcProg.emit: unexpected type %v", t);
-    
-}
+    }
 
 // ZeroAddr returns the address of a symbol with at least
 // size bytes of zeros.
@@ -1917,7 +1844,6 @@ public static ir.Node ZeroAddr(long size) {
     var lsym = @base.PkgLinksym("go.map", "zero", obj.ABI0);
     var x = ir.NewLinksymExpr(@base.Pos, lsym, types.Types[types.TUINT8]);
     return typecheck.Expr(typecheck.NodAddr(x));
-
 }
 
 public static void CollectPTabs() {
@@ -1941,7 +1867,6 @@ public static void CollectPTabs() {
             continue;
         }
         ptabs = append(ptabs, n);
-
     }
 }
 
@@ -2008,7 +1933,6 @@ private static ptr<obj.LSym> methodWrapper(ptr<types.Type> _addr_rcvr, ptr<types
         var call = ir.NewCallExpr(@base.Pos, ir.OCALL, typecheck.LookupRuntime("panicwrap"), null);
         n.Body = new slice<ir.Node>(new ir.Node[] { call });
         fn.Body.Append(n);
-
     }
     var dot = typecheck.AddImplicitDots(ir.NewSelectorExpr(@base.Pos, ir.OXDOT, nthis, method.Sym)); 
 
@@ -2032,7 +1956,6 @@ private static ptr<obj.LSym> methodWrapper(ptr<types.Type> _addr_rcvr, ptr<types
         var @as = ir.NewAssignStmt(@base.Pos, nthis, typecheck.ConvNop(left, rcvr));
         fn.Body.Append(as);
         fn.Body.Append(ir.NewTailCallStmt(@base.Pos, method.Nname._<ptr<ir.Name>>()));
-
     }
     else
  {
@@ -2070,7 +1993,6 @@ private static ptr<obj.LSym> methodWrapper(ptr<types.Type> _addr_rcvr, ptr<types
     typecheck.Target.Decls = append(typecheck.Target.Decls, fn);
 
     return _addr_lsym!;
-
 }
 
 public static long ZeroSize = default;
@@ -2087,7 +2009,6 @@ public static void MarkTypeUsedInInterface(ptr<types.Type> _addr_t, ptr<obj.LSym
     var r = obj.Addrel(from);
     r.Sym = tsym;
     r.Type = objabi.R_USEIFACE;
-
 }
 
 // MarkUsedIfaceMethod marks that an interface method is used in the current
@@ -2109,7 +2030,6 @@ public static void MarkUsedIfaceMethod(ptr<ir.CallExpr> _addr_n) {
     var midx = dot.Offset() / int64(types.PtrSize);
     r.Add = InterfaceMethodOffset(_addr_ityp, midx);
     r.Type = objabi.R_USEIFACEMETHOD;
-
 }
 
 } // end reflectdata_package

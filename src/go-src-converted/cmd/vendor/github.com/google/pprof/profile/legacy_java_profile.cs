@@ -15,20 +15,19 @@
 // This file implements parsers to convert java legacy profiles into
 // the profile.proto format.
 
-// package profile -- go2cs converted at 2022 March 06 23:23:56 UTC
+// package profile -- go2cs converted at 2022 March 13 06:37:01 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\legacy_java_profile.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class profile_package {
 
@@ -61,7 +60,6 @@ private static (ptr<Profile>, error) javaCPUProfile(slice<byte> b, long period, 
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseJavaProfile returns a new profile from heapz or contentionz
@@ -113,7 +111,6 @@ private static (ptr<Profile>, error) parseJavaProfile(slice<byte> b) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseJavaHeader parses the attribute section on a java profile and
@@ -132,9 +129,7 @@ private static (slice<byte>, error) parseJavaHeader(@string pType, slice<byte> b
             if (h == null) { 
                 // Not a valid attribute, exit.
                 return (b, error.As(null!)!);
-
             }
-
             var attribute = strings.TrimSpace(h[1]);
             var value = strings.TrimSpace(h[2]);
             error err = default!;
@@ -161,7 +156,6 @@ private static (slice<byte>, error) parseJavaHeader(@string pType, slice<byte> b
                     if (err != null) {
                         return (null, error.As(fmt.Errorf("failed to parse attribute %s: %v", line, err))!);
                     }
-
                     break;
                 case "contention/ms since reset": 
                     var (millis, err) = strconv.ParseInt(value, 0, 64);
@@ -174,14 +168,11 @@ private static (slice<byte>, error) parseJavaHeader(@string pType, slice<byte> b
                     return (null, error.As(errUnrecognized)!);
                     break;
             }
-
         }
         b = b[(int)nextNewLine + 1..];
         nextNewLine = bytes.IndexByte(b, byte('\n'));
-
     }
     return (b, error.As(null!)!);
-
 }
 
 // parseJavaSamples parses the samples from a java profile and
@@ -202,7 +193,6 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseJavaSamples(
             if (sample == null) { 
                 // Not a valid sample, exit.
                 return (b, locs, error.As(null!)!);
-
             } 
 
             // Java profiles have data/fields inverted compared to other
@@ -215,7 +205,6 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseJavaSamples(
             if (err != null) {
                 return (null, null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
             }
-
             slice<ptr<Location>> sloc = default;
             foreach (var (_, addr) in addrs) {
                 var loc = locs[addr];
@@ -233,13 +222,11 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseJavaSamples(
             if (err != null) {
                 return (null, null, error.As(fmt.Errorf("parsing sample %s: %v", line, err))!);
             }
-
             s.Value[1], err = strconv.ParseInt(value2, 0, 64);
 
             if (err != null) {
                 return (null, null, error.As(fmt.Errorf("parsing sample %s: %v", line, err))!);
             }
-
             switch (pType) {
                 case "heap": 
                                    const nint javaHeapzSamplingRate = 524288; // 512K
@@ -247,10 +234,8 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseJavaSamples(
                                    if (s.Value[0] == 0) {
                                        return (null, null, error.As(fmt.Errorf("parsing sample %s: second value must be non-zero", line))!);
                                    }
-
                                    s.NumLabel = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<long>>{"bytes":{s.Value[1]/s.Value[0]}};
                                    s.Value[0], s.Value[1] = scaleHeapSample(s.Value[0], s.Value[1], javaHeapzSamplingRate);
-
                     break;
                 case "contention": 
                     {
@@ -262,18 +247,14 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseJavaSamples(
                         }
 
                     }
-
                     break;
             }
             p.Sample = append(p.Sample, s);
-
         }
         b = b[(int)nextNewLine + 1..];
         nextNewLine = bytes.IndexByte(b, byte('\n'));
-
     }
     return (b, locs, error.As(null!)!);
-
 }
 
 // parseJavaLocations parses the location information in a java
@@ -312,7 +293,6 @@ private static error parseJavaLocations(slice<byte> b, map<ulong, ptr<Location>>
         if (loc == null) { 
             // Unused/unseen
             continue;
-
         }
         @string lineFunc = default;        @string lineFile = default;
 
@@ -331,7 +311,6 @@ private static error parseJavaLocations(slice<byte> b, map<ulong, ptr<Location>>
                     }
 
                 }
-
             }            {
                 var filePath = javaLocationPathRx.FindStringSubmatch(jloc[2]);
 
@@ -349,15 +328,11 @@ private static error parseJavaLocations(slice<byte> b, map<ulong, ptr<Location>>
                     // Treat whole line as the function name. This is used by the
                     // java agent for internal states such as "GC" or "VM".
                     lineFunc = jloc[2];
-
                 }
-
 
             }
 
-
         }
-
         var fn = fns[lineFunc];
 
         if (fn == null) {
@@ -367,7 +342,6 @@ private static error parseJavaLocations(slice<byte> b, map<ulong, ptr<Location>>
         }
         loc.Line = new slice<Line>(new Line[] { {Function:fn,Line:lineNo,} });
         loc.Address = 0;
-
     }
 
     p.remapLocationIDs();
@@ -375,7 +349,6 @@ private static error parseJavaLocations(slice<byte> b, map<ulong, ptr<Location>>
     p.remapMappingIDs();
 
     return error.As(null!)!;
-
 }
 
 } // end profile_package

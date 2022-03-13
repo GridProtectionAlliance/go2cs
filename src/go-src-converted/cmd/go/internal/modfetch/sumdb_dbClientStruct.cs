@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:00 UTC
+//     Generated on 2022 March 13 06:32:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace @internal
 {
     public static partial class modfetch_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct dbClient
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace @internal
             public static implicit operator dbClient(NilType nil) => default(dbClient);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static dbClient dbClient_cast(dynamic value)
         {
             return new dbClient(value.key, value.name, ref value.direct, value.once, ref value.@base, value.baseErr);

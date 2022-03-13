@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:00 UTC
+//     Generated on 2022 March 13 06:40:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace mod
 {
     public static partial class modfile_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct input
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace mod
             public static implicit operator input(NilType nil) => default(input);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static input input_cast(dynamic value)
         {
             return new input(value.filename, value.complete, value.remaining, value.tokenStart, value.token, value.pos, value.comments, ref value.file, value.parseErrors, value.pre, value.post);

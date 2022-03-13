@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:07 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:24 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\dcl.go
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using strconv = strconv_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
 
 public static partial class typecheck_package {
 
@@ -34,7 +34,6 @@ public static ptr<ir.Func> DeclFunc(ptr<types.Sym> _addr_sym, ir.Ntype tfn) {
     StartFuncBody(_addr_fn);
     fn.Nname.Ntype = typecheckNtype(fn.Nname.Ntype);
     return _addr_fn!;
-
 }
 
 // Declare records that Node n declares symbol n.Sym in the specified
@@ -59,7 +58,6 @@ public static void Declare(ptr<ir.Name> _addr_n, ir.Class ctxt) {
             @base.ErrorfAt(n.Pos(), "cannot declare main - must be func");
         }
         Target.Externs = append(Target.Externs, n);
-
     }
     else
  {
@@ -72,7 +70,6 @@ public static void Declare(ptr<ir.Name> _addr_n, ir.Class ctxt) {
         }
         types.Pushdcl(s);
         n.Curfn = ir.CurFunc;
-
     }
     if (ctxt == ir.PAUTO) {
         n.SetFrameOffset(0);
@@ -92,7 +89,6 @@ public static void Declare(ptr<ir.Name> _addr_n, ir.Class ctxt) {
         n.Sym().SetFunc(true);
     }
     autoexport(_addr_n, ctxt);
-
 }
 
 // Export marks n for export (or reexport).
@@ -108,7 +104,6 @@ public static void Export(ptr<ir.Name> _addr_n) {
         fmt.Printf("export symbol %v\n", n.Sym());
     }
     Target.Exports = append(Target.Exports, n);
-
 }
 
 // Redeclared emits a diagnostic about symbol s being redeclared at pos.
@@ -130,7 +125,6 @@ public static void Redeclared(src.XPos pos, ptr<types.Sym> _addr_s, @string wher
         }
     else
         @base.ErrorfAt(pos, "%v redeclared %s\n" + "\t%v: previous declaration during import %q", s, where, @base.FmtPos(pkgName.Pos()), pkgName.Pkg.Path);
-
     } {
         var prevPos = s.Lastlineno; 
 
@@ -142,7 +136,6 @@ public static void Redeclared(src.XPos pos, ptr<types.Sym> _addr_s, @string wher
             (pos, prevPos) = (prevPos, pos);
         }
         @base.ErrorfAt(pos, "%v redeclared %s\n" + "\t%v: previous declaration", s, where, @base.FmtPos(prevPos));
-
     }
 }
 
@@ -225,7 +218,6 @@ private static ptr<types.Field> addmethod(ptr<ir.Func> _addr_n, ptr<types.Sym> _
             // but just in case, fall back to generic error.
             @base.Errorf("invalid receiver type %v (%L / %L)", pa, pa, t);
                 return _addr_null!;
-
     }
     if (local && mt.Sym().Pkg != types.LocalPkg) {
         @base.Errorf("cannot define new methods on non-local type %v", mt);
@@ -263,9 +255,7 @@ private static ptr<types.Field> addmethod(ptr<ir.Func> _addr_n, ptr<types.Sym> _
             if (!types.Identical(t, f.Type) || !types.Identical(t.Recv().Type, f.Type.Recv().Type)) {
                 @base.Errorf("method redeclared: %v.%v\n\t%v\n\t%v", mt, msym, f.Type, t);
             }
-
             return _addr_f!;
-
         }
         f = f__prev1;
     }
@@ -276,7 +266,6 @@ private static ptr<types.Field> addmethod(ptr<ir.Func> _addr_n, ptr<types.Sym> _
 
     mt.Methods().Append(f);
     return _addr_f!;
-
 }
 
 private static void autoexport(ptr<ir.Name> _addr_n, ir.Class ctxt) {
@@ -366,7 +355,6 @@ private static void funcarg(ptr<ir.Field> _addr_n, ir.Class ctxt) {
     n.Decl = name;
     name.Ntype = n.Ntype;
     Declare(_addr_name, ctxt);
-
 }
 
 private static void funcarg2(ptr<types.Field> _addr_f, ir.Class ctxt) {
@@ -379,7 +367,6 @@ private static void funcarg2(ptr<types.Field> _addr_f, ir.Class ctxt) {
     f.Nname = n;
     n.SetType(f.Type);
     Declare(_addr_n, ctxt);
-
 }
 
 private static void funcargs(ptr<ir.FuncType> _addr_nt) {
@@ -411,9 +398,7 @@ private static void funcargs(ptr<ir.FuncType> _addr_nt) {
                 // Name so that escape analysis can track it. ~r stands for 'result'.
                 n.Sym = LookupNum("~r", gen);
                 gen++;
-
             }
-
             if (n.Sym.IsBlank()) { 
                 // Give it a name so we can assign to it during return. ~b stands for 'blank'.
                 // The name must be different from ~r above because if you have
@@ -423,11 +408,8 @@ private static void funcargs(ptr<ir.FuncType> _addr_nt) {
                 // So the two cases must be distinguished.
                 n.Sym = LookupNum("~b", gen);
                 gen++;
-
             }
-
             funcarg(_addr_n, ir.PPARAMOUT);
-
         }
         n = n__prev1;
     }
@@ -511,7 +493,6 @@ public static ptr<ir.Name> TempAt(src.XPos pos, ptr<ir.Func> _addr_curfn, ptr<ty
     types.CalcSize(t);
 
     return _addr_n!;
-
 }
 
 // autotmpname returns the name for an autotmp variable numbered n.
@@ -525,7 +506,6 @@ private static @string autotmpname(nint n) {
     slice<byte> b = (slice<byte>)prefix + "      "[..(int)len(prefix)];
     b = strconv.AppendInt(b, int64(n), 10);
     return types.InternString(b);
-
 }
 
 // f is method type, with receiver.
@@ -568,7 +548,6 @@ public static ptr<types.Type> NewMethodType(ptr<types.Type> _addr_sig, ptr<types
     }
 
     return _addr_types.NewSignature(types.LocalPkg, null, null, params, results)!;
-
 }
 
 } // end typecheck_package

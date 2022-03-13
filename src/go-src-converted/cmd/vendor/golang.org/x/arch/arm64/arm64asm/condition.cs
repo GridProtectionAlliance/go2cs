@@ -5,17 +5,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2022 March 06 23:24:40 UTC
+// package arm64asm -- go2cs converted at 2022 March 13 06:37:52 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\condition.go
-
-
 namespace go.cmd.vendor.golang.org.x.arch.arm64;
 
 public static partial class arm64asm_package {
 
-    // Following functions are used as the predicator: canDecode of according instruction
-    // Refer to instFormat inside decode.go for more details
+// Following functions are used as the predicator: canDecode of according instruction
+// Refer to instFormat inside decode.go for more details
+
 private static bool at_sys_cr_system_cond(uint instr) {
     return sys_op_4((instr >> 16) & 0x7, 0x7, 0x8, (instr >> 5) & 0x7) == Sys_AT;
 }

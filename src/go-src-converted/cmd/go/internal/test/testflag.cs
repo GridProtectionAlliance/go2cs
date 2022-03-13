@@ -2,35 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package test -- go2cs converted at 2022 March 06 23:17:55 UTC
+// package test -- go2cs converted at 2022 March 13 06:31:17 UTC
 // import "cmd/go/internal/test" ==> using test = go.cmd.go.@internal.test_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\test\testflag.go
-using errors = go.errors_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using cmdflag = go.cmd.go.@internal.cmdflag_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
-public static partial class test_package {
+using errors = errors_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
 
-    //go:generate go run ./genflags.go
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using cmdflag = cmd.go.@internal.cmdflag_package;
+using work = cmd.go.@internal.work_package;
 
-    // The flag handling part of go test is large and distracting.
-    // We can't use (*flag.FlagSet).Parse because some of the flags from
-    // our command line are for us, and some are for the test binary, and
-    // some are for both.
+
+//go:generate go run ./genflags.go
+
+// The flag handling part of go test is large and distracting.
+// We can't use (*flag.FlagSet).Parse because some of the flags from
+// our command line are for us, and some are for the test binary, and
+// some are for both.
+
+
+using System;public static partial class test_package {
+
 private static void init() {
     work.AddBuildFlags(CmdTest, work.OmitVFlag);
 
@@ -97,10 +98,8 @@ private static error Set(this coverFlag f, @string value) {
             return error.As(err)!;
         }
     }
-
     testCover = true;
     return error.As(null!)!;
-
 }
 
 private partial struct coverModeFlag { // : @string
@@ -129,7 +128,6 @@ private static error Set(this ptr<coverModeFlag> _addr_f, @string value) {
             return error.As(errors.New("valid modes are \"set\", \"count\", or \"atomic\""))!;
             break;
     }
-
 }
 
 // A commaListFlag is a flag.Value representing a comma-separated list.
@@ -150,7 +148,6 @@ private static error Set(this commaListFlag f, @string value) {
         f.vals.val = strings.Split(value, ",");
     }
     return error.As(null!)!;
-
 }
 
 // A stringFlag is a flag.Value representing a single string.
@@ -189,7 +186,6 @@ private static error Set(this ptr<outputdirFlag> _addr_f, @string value) {
         f.abs, err = filepath.Abs(value);
     }
     return error.As(err)!;
-
 }
 private static @string getAbs(this ptr<outputdirFlag> _addr_f) {
     ref outputdirFlag f = ref _addr_f.val;
@@ -198,7 +194,6 @@ private static @string getAbs(this ptr<outputdirFlag> _addr_f) {
         return @base.Cwd();
     }
     return f.abs;
-
 }
 
 // vetFlag implements the special parsing logic for the -vet flag:
@@ -222,9 +217,7 @@ private static @string String(this ptr<vetFlag> _addr_f) {
             buf.WriteByte(',');
         }
         buf.WriteString(f);
-
     }    return buf.String();
-
 }
 
 private static error Set(this ptr<vetFlag> _addr_f, @string value) {
@@ -250,9 +243,7 @@ private static error Set(this ptr<vetFlag> _addr_f, @string value) {
             return error.As(fmt.Errorf("-vet argument contains empty list element"))!;
         }
         f.flags = append(f.flags, "-" + arg);
-
     }    return error.As(null!)!;
-
 }
 
 private partial struct shuffleFlag {
@@ -270,7 +261,6 @@ private static @string String(this ptr<shuffleFlag> _addr_f) {
         return "on";
     }
     return fmt.Sprintf("%d", f.seed.val);
-
 }
 
 private static error Set(this ptr<shuffleFlag> _addr_f, @string value) {
@@ -290,7 +280,6 @@ private static error Set(this ptr<shuffleFlag> _addr_f, @string value) {
     }
     f.val = new shuffleFlag(on:true,seed:&seed);
     return error.As(null!)!;
-
 }
 
 // testFlags processes the command line, grabbing -x and -c, rewriting known flags
@@ -321,7 +310,6 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
             short = short__prev1;
 
         }
-
     }); 
 
     // firstUnknownFlag helps us report an error when flags not known to 'go
@@ -347,7 +335,6 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
             // including the terminator itself! — as arguments to the test.
             explicitArgs = append(explicitArgs, args);
             break;
-
         }
         {
             ref cmdflag.NonFlagError nf = ref heap((new cmdflag.NonFlagError()), out ptr<cmdflag.NonFlagError> _addr_nf);
@@ -367,7 +354,6 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
                         explicitArgs = append(explicitArgs, nf.RawArg);
                         args = remainingArgs;
                         continue;
-
                     }
                     else
  { 
@@ -375,26 +361,20 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
                         // positional argument, and so must everything after it.
                         explicitArgs = append(explicitArgs, args);
                         break;
-
                     }
-
                 }
-
                 inPkgList = true;
                 packageNames = append(packageNames, nf.RawArg);
                 args = remainingArgs; // Consume the package name.
                 continue;
-
             }
 
         }
-
 
         if (inPkgList) { 
             // This argument is syntactically a flag, so if we were in the package
             // list we're not anymore.
             inPkgList = false;
-
         }
         {
             ref cmdflag.FlagNotDefinedError nd = ref heap((new cmdflag.FlagNotDefinedError()), out ptr<cmdflag.FlagNotDefinedError> _addr_nd);
@@ -410,31 +390,24 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
                 if (packageNames == null) {
                     packageNames = new slice<@string>(new @string[] {  });
                 }
-
                 if (nd.RawArg == "-args" || nd.RawArg == "--args") { 
                     // -args or --args signals that everything that follows
                     // should be passed to the test.
                     explicitArgs = append(explicitArgs, remainingArgs);
                     break;
-
                 }
-
                 if (firstUnknownFlag == "") {
                     firstUnknownFlag = nd.RawArg;
                 }
-
                 explicitArgs = append(explicitArgs, nd.RawArg);
                 args = remainingArgs;
                 if (!nd.HasValue) {
                     afterFlagWithoutValue = true;
                 }
-
                 continue;
-
             }
 
         }
-
 
         if (err != null) {
             fmt.Fprintln(os.Stderr, err);
@@ -452,16 +425,13 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
                 // value from GOFLAGS.
                 delete(addFromGOFLAGS, short);
                 delete(addFromGOFLAGS, "test." + short);
-
             }
 
             short = short__prev1;
 
         }
 
-
         args = remainingArgs;
-
     }
     if (firstUnknownFlag != "" && (testC || cfg.BuildI)) {
         @string buildFlag = "-c";
@@ -470,7 +440,6 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
         }
         fmt.Fprintf(os.Stderr, "go test: unknown flag %s cannot be used with %s\n", firstUnknownFlag, buildFlag);
         exitWithUsage();
-
     }
     slice<@string> injectedFlags = default;
     if (testJSON) { 
@@ -479,7 +448,6 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
         injectedFlags = append(injectedFlags, "-test.v=true");
         delete(addFromGOFLAGS, "v");
         delete(addFromGOFLAGS, "test.v");
-
     }
     bool timeoutSet = default;    bool outputDirSet = default;
 
@@ -496,7 +464,6 @@ private static (slice<@string>, slice<@string>) testFlags(slice<@string> args) {
                 outputDirSet = true;
                 break;
         }
-
     }); 
 
     // 'go test' has a default timeout, but the test binary itself does not.
@@ -527,20 +494,17 @@ helpLoop:
                 break;
                 break;
         }
-
     }    if (testCoverMode == "") {
         testCoverMode = "set";
         if (cfg.BuildRace) { 
             // Default coverage mode is atomic when -race is set.
             testCoverMode = "atomic";
-
         }
     }
     if (cfg.BuildRace && testCoverMode != "atomic") {
         @base.Fatalf("-covermode must be \"atomic\", not %q, when -race is enabled", testCoverMode);
     }
     return (packageNames, append(injectedFlags, explicitArgs));
-
 }
 
 private static void exitWithUsage() {

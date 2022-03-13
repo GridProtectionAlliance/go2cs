@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package binary -- go2cs converted at 2022 March 06 22:14:40 UTC
+// package binary -- go2cs converted at 2022 March 13 05:28:39 UTC
 // import "encoding/binary" ==> using binary = go.encoding.binary_package
 // Original source: C:\Program Files\Go\src\encoding\binary\varint.go
+namespace go.encoding;
 // This file implements "varint" encoding of 64-bit integers.
 // The encoding is:
 // - unsigned integers are serialized 7 bits at a time, starting with the
@@ -25,18 +26,18 @@
 // invariant that the msb is always the "continuation bit" and thus makes the
 // format incompatible with a varint encoding for larger numbers (say 128-bit).
 
-using errors = go.errors_package;
-using io = go.io_package;
 
-namespace go.encoding;
+using errors = errors_package;
+using io = io_package;
+
+
+// MaxVarintLenN is the maximum length of a varint-encoded N-bit integer.
 
 public static partial class binary_package {
 
-    // MaxVarintLenN is the maximum length of a varint-encoded N-bit integer.
 public static readonly nint MaxVarintLen16 = 3;
 public static readonly nint MaxVarintLen32 = 5;
 public static readonly nint MaxVarintLen64 = 10;
-
 
 // PutUvarint encodes a uint64 into buf and returns the number of bytes written.
 // If the buffer is too small, PutUvarint will panic.
@@ -75,15 +76,11 @@ public static (ulong, nint) Uvarint(slice<byte> buf) {
             if (i == MaxVarintLen64 - 1 && b > 1) {
                 return (0, -(i + 1)); // overflow
             }
-
             return (x | uint64(b) << (int)(s), i + 1);
-
         }
         x |= uint64(b & 0x7f) << (int)(s);
         s += 7;
-
     }    return (0, 0);
-
 }
 
 // PutVarint encodes an int64 into buf and returns the number of bytes written.
@@ -94,7 +91,6 @@ public static nint PutVarint(slice<byte> buf, long x) {
         ux = ~ux;
     }
     return PutUvarint(buf, ux);
-
 }
 
 // Varint decodes an int64 from buf and returns that value and the
@@ -115,7 +111,6 @@ public static (long, nint) Varint(slice<byte> buf) {
         x = ~x;
     }
     return (x, n);
-
 }
 
 private static var overflow = errors.New("binary: varint overflows a 64-bit integer");
@@ -140,10 +135,8 @@ public static (ulong, error) ReadUvarint(io.ByteReader r) {
         }
         x |= uint64(b & 0x7f) << (int)(s);
         s += 7;
-
     }
     return (x, error.As(overflow)!);
-
 }
 
 // ReadVarint reads an encoded signed integer from r and returns it as an int64.
@@ -157,7 +150,6 @@ public static (long, error) ReadVarint(io.ByteReader r) {
         x = ~x;
     }
     return (x, error.As(err)!);
-
 }
 
 } // end binary_package

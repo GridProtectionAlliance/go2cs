@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:51:11 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:02:37 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewrite.go
-using logopt = go.cmd.compile.@internal.logopt_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using s390x = go.cmd.@internal.obj.s390x_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using bits = go.math.bits_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using logopt = cmd.compile.@internal.logopt_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using s390x = cmd.@internal.obj.s390x_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using bits = math.bits_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -30,7 +29,6 @@ private partial struct deadValueChoice { // : bool
 
 private static readonly deadValueChoice leaveDeadValues = false;
 private static readonly var removeDeadValues = true;
-
 
 // deadcode indicates whether rewrite should try to remove any values that become dead.
 private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewriter rv, deadValueChoice deadcode) {
@@ -56,7 +54,6 @@ private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewri
                     b0.val = b.val;
                     b0.Succs = append(new slice<Edge>(new Edge[] {  }), b.Succs); // make a new copy, not aliasing
                 }
-
                 {
                     var i__prev3 = i;
 
@@ -78,7 +75,6 @@ private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewri
                         fmt.Printf("rewriting %s  ->  %s\n", b0.LongString(), b.LongString());
                     }
                 }
-
                 {
                     var j__prev3 = j;
                     var v__prev3 = v;
@@ -92,7 +88,6 @@ private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewri
                             v0.val = v.val;
                             v0.Args = append(new slice<ptr<Value>>(new ptr<Value>[] {  }), v.Args); // make a new copy, not aliasing
                         }
-
                         if (v.Uses == 0 && v.removeable()) {
                             if (v.Op != OpInvalid && deadcode == removeDeadValues) { 
                                 // Reset any values that are now unused, so that we decrement
@@ -101,13 +96,10 @@ private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewri
                                 // But it should help Uses==1 rules to fire.
                                 v.reset(OpInvalid);
                                 change = true;
-
                             } 
                             // No point rewriting values which aren't used.
                             continue;
-
                         }
-
                         var vchange = phielimValue(v);
                         if (vchange && debug > 1) {
                             fmt.Printf("rewriting %s  ->  %s\n", v0.LongString(), v.LongString());
@@ -150,21 +142,15 @@ private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewri
                                         // line to appear in more than one block, but only one block is stored, so if both end
                                         // up here, then one will be lost.
                                         pendingLines.set(a.Pos, int32(a.Block.ID));
-
                                     }
-
                                     a.Pos = a.Pos.WithNotStmt();
-
                                 }
-
                                 vchange = true;
                                 while (a.Uses == 0) {
                                     var b = a.Args[0];
                                     a.reset(OpInvalid);
                                     a = b;
                                 }
-
-
                             }
 
                             i = i__prev4;
@@ -188,16 +174,12 @@ private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewri
                                     }
 
                                 }
-
                             }
-
                         }
-
                         change = change || vchange;
                         if (vchange && debug > 1) {
                             fmt.Printf("rewriting %s  ->  %s\n", v0.LongString(), v.LongString());
                         }
-
                     }
 
                     j = j__prev3;
@@ -252,9 +234,7 @@ private static void applyRewrite(ptr<Func> _addr_f, blockRewriter rb, valueRewri
                 b.Pos = b.Pos.WithIsStmt();
                 pendingLines.remove(b.Pos);
             }
-
             b.truncateValues(j);
-
         }
         b = b__prev1;
     }
@@ -320,7 +300,6 @@ private static Sym mergeSym(Sym x, Sym y) => func((_, panic, _) => {
         return x;
     }
     panic(fmt.Sprintf("mergeSym with two non-nil syms %v %v", x, y));
-
 });
 
 private static bool canMergeSym(Sym x, Sym y) {
@@ -351,7 +330,6 @@ private static bool canMergeLoadClobber(ptr<Value> _addr_target, ptr<Value> _add
         return false;
     }
     return canMergeLoad(_addr_target, _addr_load);
-
 }
 
 // canMergeLoad reports whether the load can be merged into target without
@@ -363,7 +341,6 @@ private static bool canMergeLoad(ptr<Value> _addr_target, ptr<Value> _addr_load)
     if (target.Block.ID != load.Block.ID) { 
         // If the load is in a different block do not merge it.
         return false;
-
     }
     if (load.Uses != 1) {
         return false;
@@ -408,33 +385,25 @@ private static bool canMergeLoad(ptr<Value> _addr_target, ptr<Value> _addr_load)
             if (i >= limit) { 
                 // Give up if we have done a lot of iterations.
                 return false;
-
             }
-
             var v = args[len(args) - 1];
             args = args[..(int)len(args) - 1];
             if (target.Block.ID != v.Block.ID) { 
                 // Since target and load are in the same block
                 // we can stop searching when we leave the block.
                 continue;
-
             }
-
             if (v.Op == OpPhi) { 
                 // A Phi implies we have reached the top of the block.
                 // The memory phi, if it exists, is always
                 // the first logical store in the block.
                 continue;
-
             }
-
             if (v.Type.IsTuple() && v.Type.FieldType(1).IsMemory()) { 
                 // We could handle this situation however it is likely
                 // to be very rare.
                 return false;
-
             }
-
             if (v.Op.SymEffect() & SymAddr != 0) { 
                 // This case prevents an operation that calculates the
                 // address of a local variable from being forced to schedule
@@ -448,9 +417,7 @@ private static bool canMergeLoad(ptr<Value> _addr_target, ptr<Value> _addr_load)
                 // that would force the CMPQ to schedule before the VARDEF, which
                 // in turn requires the LEAQ to schedule before the VARDEF.
                 return false;
-
             }
-
             if (v.Type.IsMemory()) {
                 if (memPreds == null) { 
                     // Initialise a map containing memory states
@@ -468,30 +435,23 @@ private static bool canMergeLoad(ptr<Value> _addr_target, ptr<Value> _addr_load)
                                 // The memory phi, if it exists, is always
                                 // the first logical store in the block.
                                 break;
-
                             }
-
                             if (m.Block.ID != target.Block.ID) {
                                 break;
                             }
-
                             if (!m.Type.IsMemory()) {
                                 break;
                             }
-
                             memPreds[m] = true;
                             if (len(m.Args) == 0) {
                                 break;
                             }
-
                             m = m.MemoryArg();
-
                         }
 
 
                         i = i__prev2;
                     }
-
                 } 
 
                 // We can merge if v is a predecessor of mem.
@@ -505,18 +465,13 @@ private static bool canMergeLoad(ptr<Value> _addr_target, ptr<Value> _addr_load)
                 if (memPreds[v]) {
                     continue;
                 }
-
                 return false;
-
             }
-
             if (len(v.Args) > 0 && v.Args[len(v.Args) - 1] == mem) { 
                 // If v takes mem as an input then we know mem
                 // is valid at this point.
                 continue;
-
             }
-
             {
                 var a__prev2 = a;
 
@@ -535,7 +490,6 @@ private static bool canMergeLoad(ptr<Value> _addr_target, ptr<Value> _addr_load)
     }
 
     return true;
-
 }
 
 // isSameCall reports whether sym is the same as the given named symbol
@@ -686,7 +640,6 @@ private static long b2i(bool b) {
         return 1;
     }
     return 0;
-
 }
 
 // b2i32 translates a boolean value to 0 or 1.
@@ -695,7 +648,6 @@ private static int b2i32(bool b) {
         return 1;
     }
     return 0;
-
 }
 
 // shiftIsBounded reports whether (left/right) shift Value v is known to be bounded.
@@ -719,7 +671,6 @@ private static bool canonLessThan(ptr<Value> _addr_x, ptr<Value> _addr_y) {
         return x.Pos.Before(y.Pos);
     }
     return x.ID < y.ID;
-
 }
 
 // truncate64Fto32F converts a float64 value to a float32 preserving the bit pattern
@@ -736,7 +687,6 @@ private static float truncate64Fto32F(double f) => func((_, panic, _) => {
     //          | sign                  | exponent   | mantissa       |
     var r = uint32(((b >> 32) & (1 << 31)) | 0x7f800000 | (m >> (int)((52 - 23))));
     return math.Float32frombits(r);
-
 });
 
 // extend32Fto64F converts a float32 value to a float64 value preserving the bit
@@ -749,7 +699,6 @@ private static double extend32Fto64F(float f) {
     //   | sign                  | exponent      | mantissa                    |
     var r = ((b << 32) & (1 << 63)) | (0x7ff << 52) | ((b & 0x7fffff) << (int)((52 - 23)));
     return math.Float64frombits(r);
-
 }
 
 // DivisionNeedsFixUp reports whether the division needs fix-up code.
@@ -765,7 +714,6 @@ private static long auxFrom64F(double f) => func((_, panic, _) => {
         panic("can't encode a NaN in AuxInt field");
     }
     return int64(math.Float64bits(f));
-
 });
 
 // auxFrom32F encodes a float32 value so it can be stored in an AuxInt.
@@ -774,7 +722,6 @@ private static long auxFrom32F(float f) => func((_, panic, _) => {
         panic("can't encode a NaN in AuxInt field");
     }
     return int64(math.Float64bits(extend32Fto64F(f)));
-
 });
 
 // auxTo32F decodes a float32 from the AuxInt value provided.
@@ -792,7 +739,6 @@ private static bool auxIntToBool(long i) {
         return false;
     }
     return true;
-
 }
 private static sbyte auxIntToInt8(long i) {
     return int8(i);
@@ -826,7 +772,6 @@ private static int128 auxIntToInt128(long x) => func((_, panic, _) => {
         panic("nonzero int128 not allowed");
     }
     return 0;
-
 });
 private static flagConstant auxIntToFlagConstant(long x) {
     return flagConstant(x);
@@ -841,7 +786,6 @@ private static long boolToAuxInt(bool b) {
         return 1;
     }
     return 0;
-
 }
 private static long int8ToAuxInt(sbyte i) {
     return int64(i);
@@ -875,7 +819,6 @@ private static long int128ToAuxInt(int128 x) => func((_, panic, _) => {
         panic("nonzero int128 not allowed");
     }
     return 0;
-
 });
 private static long flagConstantToAuxInt(flagConstant x) {
     return int64(x);
@@ -904,7 +847,6 @@ private static Sym auxToSym(Aux i) {
     // TODO: kind of a hack - allows nil interface through
     Sym (s, _) = i._<Sym>();
     return s;
-
 }
 private static ptr<types.Type> auxToType(Aux i) {
     return i._<ptr<types.Type>>();
@@ -972,7 +914,6 @@ private static ptr<AuxCall> devirt(ptr<Value> _addr_v, Aux aux, Sym sym, long of
     }
     ptr<AuxCall> va = aux._<ptr<AuxCall>>();
     return _addr_StaticAuxCall(lsym, va.abiInfo)!;
-
 }
 
 // de-virtualize an InterLECall
@@ -999,7 +940,6 @@ private static ptr<obj.LSym> devirtLESym(ptr<Value> _addr_v, Aux aux, Sym sym, l
         return _addr_null!;
     }
     return _addr_lsym!;
-
 }
 
 private static ptr<Value> devirtLECall(ptr<Value> _addr_v, ptr<obj.LSym> _addr_sym) {
@@ -1034,7 +974,6 @@ private static bool isSamePtr(ptr<Value> _addr_p1, ptr<Value> _addr_p2) {
     else if (p1.Op == OpAddPtr) 
         return p1.Args[1] == p2.Args[1] && isSamePtr(_addr_p1.Args[0], _addr_p2.Args[0]);
         return false;
-
 }
 
 private static bool isStackPtr(ptr<Value> _addr_v) {
@@ -1084,7 +1023,6 @@ private static bool disjoint(ptr<Value> _addr_p1, long n1, ptr<Value> _addr_p2, 
     else if (p1.Op == OpSP) 
         return p2.Op == OpAddr || p2.Op == OpLocalAddr || p2.Op == OpArg || p2.Op == OpArgIntReg || p2.Op == OpSP;
         return false;
-
 }
 
 // moveSize returns the number of bytes an aligned MOV instruction moves
@@ -1099,7 +1037,6 @@ private static long moveSize(long align, ptr<Config> _addr_c) {
     else if (align % 2 == 0) 
         return 2;
         return 1;
-
 }
 
 // mergePoint finds a block among a's blocks which dominates b and is itself
@@ -1132,11 +1069,9 @@ private static ptr<Block> mergePoint(ptr<Block> _addr_b, params ptr<ptr<Value>>[
         if (len(b.Preds) > 1) { 
             // Don't know which way to go back. Abort.
             return _addr_null!;
-
         }
         b = b.Preds[0].b;
         d--;
-
     }
     return _addr_null!; // too far away
 found: 
@@ -1163,15 +1098,12 @@ found:
         if (na == len(a)) { 
             // Found all of a in a backwards walk. We can return r.
             return _addr_r!;
-
         }
         if (len(b.Preds) > 1) {
             return _addr_null!;
         }
         b = b.Preds[0].b;
         d--;
-
-
     }
     return _addr_null!; // too far away
 }
@@ -1188,7 +1120,6 @@ private static bool clobber(params ptr<ptr<Value>>[] _addr_vv) {
         v.reset(OpInvalid); 
         // Note: leave v.Block intact.  The Block field is used after clobber.
     }    return true;
-
 }
 
 // clobberIfDead resets v when use count is 1. Returns true.
@@ -1201,7 +1132,6 @@ private static bool clobberIfDead(ptr<Value> _addr_v) {
         v.reset(OpInvalid);
     }
     return true;
-
 }
 
 // noteRule is an easy way to track if a rule is matched when writing
@@ -1227,7 +1157,6 @@ private static bool countRule(ptr<Value> _addr_v, @string key) {
     }
     f.ruleMatches[key]++;
     return true;
-
 }
 
 // warnRule generates compiler debug output with string s when
@@ -1242,9 +1171,7 @@ private static bool warnRule(bool cond, ptr<Value> _addr_v, @string s) {
             v.Block.Func.Warnl(pos, s);
         }
     }
-
     return true;
-
 }
 
 // for a pseudo-op like (LessThan x), extract x
@@ -1255,7 +1182,6 @@ private static ptr<Value> flagArg(ptr<Value> _addr_v) {
         return _addr_null!;
     }
     return _addr_v.Args[0]!;
-
 }
 
 // arm64Negate finds the complement to an ARM64 condition code,
@@ -1303,8 +1229,7 @@ private static Op arm64Negate(Op op) => func((_, panic, _) => {
         return OpARM64GreaterEqualF;
     else 
         panic("unreachable");
-    
-});
+    });
 
 // arm64Invert evaluates (InvertFlags op), which
 // is the same as altering the condition codes such
@@ -1349,8 +1274,7 @@ private static Op arm64Invert(Op op) => func((_, panic, _) => {
         return OpARM64NotLessEqualF;
     else 
         panic("unreachable");
-    
-});
+    });
 
 // evaluate an ARM64 op against a flags value
 // that is potentially constant; return 1 for true,
@@ -1371,7 +1295,6 @@ private static nint ccARM64Eval(Op op, ptr<Value> _addr_flags) {
             return 1;
         }
         return -1;
-
     };
 
     if (op == OpARM64Equal) 
@@ -1395,7 +1318,6 @@ private static nint ccARM64Eval(Op op, ptr<Value> _addr_flags) {
     else if (op == OpARM64GreaterEqualU) 
         return b2i(fc.uge());
         return 0;
-
 }
 
 // logRule logs the use of the rule s. This will only be enabled if
@@ -1413,7 +1335,6 @@ private static void logRule(@string s) => func((_, panic, _) => {
             panic(err);
         }
         ruleFile = w;
-
     }
     var (_, err) = fmt.Fprintln(ruleFile, s);
     if (err != null) {
@@ -1428,7 +1349,6 @@ private static long min(long x, long y) {
         return x;
     }
     return y;
-
 }
 
 private static bool isConstZero(ptr<Value> _addr_v) {
@@ -1440,7 +1360,6 @@ private static bool isConstZero(ptr<Value> _addr_v) {
     else if (v.Op == OpConst64 || v.Op == OpConst32 || v.Op == OpConst16 || v.Op == OpConst8 || v.Op == OpConstBool || v.Op == OpConst32F || v.Op == OpConst64F) 
         return v.AuxInt == 0;
         return false;
-
 }
 
 // reciprocalExact64 reports whether 1/c is exactly representable.
@@ -1467,7 +1386,6 @@ private static bool reciprocalExact64(double c) {
             return true;
             break;
     }
-
 }
 
 // reciprocalExact32 reports whether 1/c is exactly representable.
@@ -1494,7 +1412,6 @@ private static bool reciprocalExact32(float c) {
             return true;
             break;
     }
-
 }
 
 // check if an immediate can be directly encoded into an ARM's instruction
@@ -1504,11 +1421,9 @@ private static bool isARMImmRot(uint v) {
             return true;
         }
         v = v << 2 | v >> 30;
-
     }
 
     return false;
-
 }
 
 // overlap reports whether the ranges given by the given offset and
@@ -1521,7 +1436,6 @@ private static bool overlap(long offset1, long size1, long offset2, long size2) 
         return true;
     }
     return false;
-
 }
 
 private static bool areAdjacentOffsets(long off1, long off2, long size) {
@@ -1551,7 +1465,6 @@ private static bool zeroUpper32Bits(ptr<Value> _addr_x, nint depth) {
             }
         }        return true;
         return false;
-
 }
 
 // zeroUpper48Bits is similar to zeroUpper32Bits, but for upper 48 bits
@@ -1575,7 +1488,6 @@ private static bool zeroUpper48Bits(ptr<Value> _addr_x, nint depth) {
             }
         }        return true;
         return false;
-
 }
 
 // zeroUpper56Bits is similar to zeroUpper32Bits, but for upper 56 bits
@@ -1599,7 +1511,6 @@ private static bool zeroUpper56Bits(ptr<Value> _addr_x, nint depth) {
             }
         }        return true;
         return false;
-
 }
 
 // isInlinableMemmove reports whether the given arch performs a Move of the given size
@@ -1644,7 +1555,6 @@ private static bool isInlinableMemmove(ptr<Value> _addr_dst, ptr<Value> _addr_sr
             break;
     }
     return false;
-
 }
 
 // logLargeCopy logs the occurrence of a large copy.
@@ -1660,7 +1570,6 @@ private static bool logLargeCopy(ptr<Value> _addr_v, long s) {
         logopt.LogOpt(v.Pos, "copy", "lower", v.Block.Func.Name, fmt.Sprintf("%d bytes", s));
     }
     return true;
-
 }
 
 // hasSmallRotate reports whether the architecture has rotate instructions
@@ -1678,7 +1587,6 @@ private static bool hasSmallRotate(ptr<Config> _addr_c) {
             return false;
             break;
     }
-
 }
 
 private static int newPPC64ShiftAuxInt(long sh, long mb, long me, long sz) => func((_, panic, _) => {
@@ -1692,7 +1600,6 @@ private static int newPPC64ShiftAuxInt(long sh, long mb, long me, long sz) => fu
         panic("PPC64 shift arg me out of range");
     }
     return int32(sh << 16 | mb << 8 | me);
-
 });
 
 public static long GetPPC64Shiftsh(long auxint) {
@@ -1719,7 +1626,6 @@ private static bool isPPC64WordRotateMask(long v64) {
     var vn = ~v;
     var vpn = (vn & -vn) + vn;
     return (v & vp == 0 || vn & vpn == 0) && v != 0;
-
 }
 
 // Compress mask and shift into single value of the form
@@ -1753,7 +1659,6 @@ private static long encodePPC64RotateMask(long rotate, long mask, long nbits) =>
         (mb, me) = (men, mbn);
     }
     return int64(me) | int64(mb << 8) | int64(rotate << 16) | int64(nbits << 24);
-
 });
 
 // The inverse operation of encodePPC64RotateMask.  The values returned as
@@ -1778,7 +1683,6 @@ public static (long, long, long, ulong) DecodePPC64RotateMask(long sauxint) {
     }
     me = (me - 1) & (nbits - 1);
     return ;
-
 }
 
 // This verifies that the mask is a set of
@@ -1789,7 +1693,6 @@ private static bool isPPC64ValidShiftMask(long v) {
         return true;
     }
     return false;
-
 }
 
 private static long getPPC64ShiftMaskLength(long v) {
@@ -1810,7 +1713,6 @@ private static long mergePPC64AndSrwi(long m, long s) {
         return 0;
     }
     return encodePPC64RotateMask((32 - s) & 31, mask, 32);
-
 }
 
 // Test if a shift right feeding into a CLRLSLDI can be merged into RLWINM.
@@ -1831,7 +1733,6 @@ private static long mergePPC64ClrlsldiSrw(long sld, long srw) {
         return 0;
     }
     return encodePPC64RotateMask(int64(r_3), int64(mask_3), 32);
-
 }
 
 // Test if a RLWINM feeding into a CLRLSLDI can be merged into RLWINM.  Return
@@ -1851,7 +1752,6 @@ private static long mergePPC64ClrlsldiRlwinm(int sld, long rlw) {
         return 0;
     }
     return encodePPC64RotateMask(r_3, int64(mask_3), 32);
-
 }
 
 // Compute the encoded RLWINM constant from combining (SLDconst [sld] (SRWconst [srw] x)),
@@ -1864,7 +1764,6 @@ private static long mergePPC64SldiSrw(long sld, long srw) {
     var mask_l = uint32(0xFFFFFFFF) >> (int)(uint(sld));
     var mask = (mask_r & mask_l) << (int)(uint(sld));
     return encodePPC64RotateMask((32 - srw + sld) & 31, int64(mask), 32);
-
 }
 
 // Convenience function to rotate a 32 bit constant value by another constant.
@@ -1881,7 +1780,6 @@ private static arm64BitField armBFAuxInt(long lsb, long width) => func((_, panic
         panic("ARM(64) bit field width constant out of range");
     }
     return arm64BitField(width | lsb << 8);
-
 });
 
 // returns the lsb part of the auxInt field of arm64 bitfield ops.
@@ -1907,7 +1805,6 @@ private static long arm64BFWidth(long mask, long rshift) => func((_, panic, _) =
         panic("ARM64 BF mask is zero");
     }
     return nto(shiftedMask);
-
 });
 
 // sizeof returns the size of t in bytes.
@@ -1930,7 +1827,6 @@ private static bool registerizable(ptr<Block> _addr_b, ptr<types.Type> _addr_typ
         return typ.Size() <= b.Func.Config.RegSize;
     }
     return false;
-
 }
 
 // needRaceCleanup reports whether this call to racefuncenter/exit isn't needed.
@@ -1971,8 +1867,7 @@ private static bool needRaceCleanup(ptr<AuxCall> _addr_sym, ptr<Value> _addr_v) 
             else if (v.Op == OpPanicBounds || v.Op == OpPanicExtend)             else if (v.Op == OpClosureCall || v.Op == OpInterCall || v.Op == OpClosureLECall || v.Op == OpInterLECall) 
                 // We must keep the race functions if there are any other call types.
                 return false;
-            
-        }
+                    }
     }    if (isSameCall(sym, "runtime.racefuncenter")) { 
         // TODO REGISTER ABI this needs to be cleaned up.
         // If we're removing racefuncenter, remove its argument as well.
@@ -1980,19 +1875,14 @@ private static bool needRaceCleanup(ptr<AuxCall> _addr_sym, ptr<Value> _addr_v) 
             if (v.Op == OpStaticLECall) { 
                 // there is no store, yet.
                 return true;
-
             }
-
             return false;
-
         }
         var mem = v.Args[0].Args[2];
         v.Args[0].reset(OpCopy);
         v.Args[0].AddArg(mem);
-
     }
     return true;
-
 }
 
 // symIsRO reports whether sym is a read-only global.
@@ -2012,7 +1902,6 @@ private static bool symIsROZero(Sym sym) {
             return false;
         }
     }    return true;
-
 }
 
 // read8 reads one byte from the read-only global sym at offset off.
@@ -2024,10 +1913,8 @@ private static byte read8(object sym, long off) {
         // Just return any value, it will eventually get ignored.
         // See issue 29215.
         return 0;
-
     }
     return lsym.P[off];
-
 }
 
 // read16 reads two bytes from the read-only global sym at offset off.
@@ -2042,7 +1929,6 @@ private static ushort read16(object sym, long off, binary.ByteOrder byteorder) {
     var buf = make_slice<byte>(2);
     copy(buf, src);
     return byteorder.Uint16(buf);
-
 }
 
 // read32 reads four bytes from the read-only global sym at offset off.
@@ -2055,7 +1941,6 @@ private static uint read32(object sym, long off, binary.ByteOrder byteorder) {
     var buf = make_slice<byte>(4);
     copy(buf, src);
     return byteorder.Uint32(buf);
-
 }
 
 // read64 reads eight bytes from the read-only global sym at offset off.
@@ -2068,7 +1953,6 @@ private static ulong read64(object sym, long off, binary.ByteOrder byteorder) {
     var buf = make_slice<byte>(8);
     copy(buf, src);
     return byteorder.Uint64(buf);
-
 }
 
 // sequentialAddresses reports true if it can prove that x + n == y
@@ -2089,7 +1973,6 @@ private static bool sequentialAddresses(ptr<Value> _addr_x, ptr<Value> _addr_y, 
         return true;
     }
     return false;
-
 }
 
 // flagConstant represents the result of a compile-time comparison.
@@ -2196,7 +2079,6 @@ private static flagConstant encode(this flagConstantBuilder fcs) {
         fc |= 8;
     }
     return fc;
-
 }
 
 // Note: addFlags(x,y) != subFlags(x,-y) in some situations:
@@ -2221,7 +2103,6 @@ private static flagConstant subFlags64(long x, long y) {
     fcb.C = uint64(y) <= uint64(x); // This code follows the arm carry flag model.
     fcb.V = x >= 0 && y < 0 && x - y < 0 || x < 0 && y >= 0 && x - y >= 0;
     return fcb.encode();
-
 }
 
 // addFlags32 returns the flags that would be set from computing x+y.
@@ -2242,7 +2123,6 @@ private static flagConstant subFlags32(int x, int y) {
     fcb.C = uint32(y) <= uint32(x); // This code follows the arm carry flag model.
     fcb.V = x >= 0 && y < 0 && x - y < 0 || x < 0 && y >= 0 && x - y >= 0;
     return fcb.encode();
-
 }
 
 // logicFlags64 returns flags set to the sign/zeroness of x.

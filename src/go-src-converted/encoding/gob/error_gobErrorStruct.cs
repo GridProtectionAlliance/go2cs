@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:10 UTC
+//     Generated on 2022 March 13 05:39:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace encoding
 {
     public static partial class gob_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct gobError
         {
             // Constructors
@@ -53,7 +53,7 @@ namespace encoding
             public static implicit operator gobError(NilType nil) => default(gobError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static gobError gobError_cast(dynamic value)
         {
             return new gobError(value.err);

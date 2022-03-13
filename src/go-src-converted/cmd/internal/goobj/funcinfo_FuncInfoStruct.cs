@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:32:26 UTC
+//     Generated on 2022 March 13 05:43:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class goobj_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct FuncInfo
         {
             // Constructors
@@ -78,7 +78,7 @@ namespace @internal
             public static implicit operator FuncInfo(NilType nil) => default(FuncInfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static FuncInfo FuncInfo_cast(dynamic value)
         {
             return new FuncInfo(value.Args, value.Locals, value.FuncID, value.FuncFlag, value.Pcsp, value.Pcfile, value.Pcline, value.Pcinline, value.Pcdata, value.Funcdataoff, value.File, value.InlTree);

@@ -5,16 +5,15 @@
 //go:build nethttpomithttp2
 // +build nethttpomithttp2
 
-// package http -- go2cs converted at 2022 March 06 22:22:49 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:15 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\omithttp2.go
-using errors = go.errors_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.net;
+
+using errors = errors_package;
+using sync = sync_package;
+using time = time_package;
+using System;
 
 public static partial class http_package {
 

@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found src the LICENSE file.
 
-// package chacha20 -- go2cs converted at 2022 March 06 23:36:32 UTC
+// package chacha20 -- go2cs converted at 2022 March 13 06:44:35 UTC
 // import "vendor/golang.org/x/crypto/chacha20" ==> using chacha20 = go.vendor.golang.org.x.crypto.chacha20_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\chacha20\xor.go
-using runtime = go.runtime_package;
-
 namespace go.vendor.golang.org.x.crypto;
+
+using runtime = runtime_package;
 
 public static partial class chacha20_package {
 
-    // Platforms that have fast unaligned 32-bit little endian accesses.
+// Platforms that have fast unaligned 32-bit little endian accesses.
 private static readonly var unaligned = runtime.GOARCH == "386" || runtime.GOARCH == "amd64" || runtime.GOARCH == "arm64" || runtime.GOARCH == "ppc64le" || runtime.GOARCH == "s390x";
 
 // addXor reads a little endian uint32 from src, XORs it with (a + b) and
@@ -36,7 +36,6 @@ private static void addXor(slice<byte> dst, slice<byte> src, uint a, uint b) {
         dst[1] = byte(v >> 8);
         dst[2] = byte(v >> 16);
         dst[3] = byte(v >> 24);
-
     }
     else
  {

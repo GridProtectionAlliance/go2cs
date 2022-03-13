@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2022 March 06 22:15:00 UTC
+// package flate -- go2cs converted at 2022 March 13 05:29:06 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Program Files\Go\src\compress\flate\deflatefast.go
-using math = go.math_package;
-
 namespace go.compress;
+
+using math = math_package;
 
 public static partial class flate_package {
 
-    // This encoding algorithm, which prioritizes speed over output size, is
-    // based on Snappy's LZ77-style encoder: github.com/golang/snappy
+// This encoding algorithm, which prioritizes speed over output size, is
+// based on Snappy's LZ77-style encoder: github.com/golang/snappy
+
 private static readonly nint tableBits = 14; // Bits used in the table.
 private static readonly nint tableSize = 1 << (int)(tableBits); // Size of the table.
 private static readonly var tableMask = tableSize - 1; // Mask for table indices. Redundant, but can eliminate bounds checks.
@@ -25,17 +26,14 @@ private static readonly nint tableShift = 32 - tableBits; // Right-shift to get 
 // buffer to not risk overflowing the int32.
 private static readonly var bufferReset = math.MaxInt32 - maxStoreBlockSize * 2;
 
-
 private static uint load32(slice<byte> b, int i) {
     b = b.slice(i, i + 4, len(b)); // Help the compiler eliminate bounds checks on the next line.
     return uint32(b[0]) | uint32(b[1]) << 8 | uint32(b[2]) << 16 | uint32(b[3]) << 24;
-
 }
 
 private static ulong load64(slice<byte> b, int i) {
     b = b.slice(i, i + 8, len(b)); // Help the compiler eliminate bounds checks on the next line.
     return uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24 | uint64(b[4]) << 32 | uint64(b[5]) << 40 | uint64(b[6]) << 48 | uint64(b[7]) << 56;
-
 }
 
 private static uint hash(uint u) {
@@ -48,7 +46,6 @@ private static uint hash(uint u) {
 // optimizations, but using the same thresholds doesn't really hurt.
 private static readonly nint inputMargin = 16 - 1;
 private static readonly nint minNonLiteralBlockSize = 1 + 1 + inputMargin;
-
 
 private partial struct tableEntry {
     public uint val; // Value at destination
@@ -127,11 +124,8 @@ private static slice<token> encode(this ptr<deflateFast> _addr_e, slice<token> d
                 // Out of range or not matched.
                 cv = now;
                 continue;
-
             }
-
             break;
-
         } 
 
         // A 4-byte match has been found. We'll later see if more than 4 bytes
@@ -186,9 +180,7 @@ private static slice<token> encode(this ptr<deflateFast> _addr_e, slice<token> d
                 s++;
                 break;
             }
-
         }
-
     }
 
 emitRemainder:
@@ -199,7 +191,6 @@ emitRemainder:
     e.prev = e.prev[..(int)len(src)];
     copy(e.prev, src);
     return dst;
-
 }
 
 private static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
@@ -237,7 +228,6 @@ private static int matchLen(this ptr<deflateFast> _addr_e, int s, int t, slice<b
         }
 
         return int32(len(a));
-
     }
     var tp = int32(len(e.prev)) + t;
     if (tp < 0) {
@@ -280,7 +270,6 @@ private static int matchLen(this ptr<deflateFast> _addr_e, int s, int t, slice<b
     }
 
     return int32(len(a)) + n;
-
 }
 
 // Reset resets the encoding history.
@@ -321,7 +310,6 @@ private static void shiftOffsets(this ptr<deflateFast> _addr_e) {
 
         e.cur = maxMatchOffset + 1;
         return ;
-
     }
     {
         var i__prev1 = i;
@@ -335,17 +323,13 @@ private static void shiftOffsets(this ptr<deflateFast> _addr_e) {
                 // Because we ignore matches > maxMatchOffset, we can cap
                 // any negative offsets at 0.
                 v = 0;
-
             }
-
             e.table[i].offset = v;
-
         }
         i = i__prev1;
     }
 
     e.cur = maxMatchOffset + 1;
-
 }
 
 } // end flate_package

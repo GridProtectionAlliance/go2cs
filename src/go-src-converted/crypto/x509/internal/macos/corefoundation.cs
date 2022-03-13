@@ -8,25 +8,28 @@
 // Package macOS provides cgo-less wrappers for Core Foundation and
 // Security.framework, similarly to how package syscall provides access to
 // libSystem.dylib.
-// package macOS -- go2cs converted at 2022 March 06 22:19:50 UTC
+
+// package macOS -- go2cs converted at 2022 March 13 05:35:00 UTC
 // import "crypto/x509/internal.macOS" ==> using macOS = go.crypto.x509.internal.macOS_package
 // Original source: C:\Program Files\Go\src\crypto\x509\internal\macos\corefoundation.go
-using errors = go.errors_package;
-using abi = go.@internal.abi_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.crypto.x509;
+
+using errors = errors_package;
+using abi = @internal.abi_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
+
+
+// Core Foundation linker flags for the external linker. See Issue 42459.
+//go:cgo_ldflag "-framework"
+//go:cgo_ldflag "CoreFoundation"
+
+// CFRef is an opaque reference to a Core Foundation object. It is a pointer,
+// but to memory not owned by Go, so not an unsafe.Pointer.
 
 public static partial class macOS_package {
 
-    // Core Foundation linker flags for the external linker. See Issue 42459.
-    //go:cgo_ldflag "-framework"
-    //go:cgo_ldflag "CoreFoundation"
-
-    // CFRef is an opaque reference to a Core Foundation object. It is a pointer,
-    // but to memory not owned by Go, so not an unsafe.Pointer.
 public partial struct CFRef { // : System.UIntPtr
 }
 
@@ -74,7 +77,6 @@ public static (CFRef, bool) CFDictionaryGetValueIfPresent(CFRef dict, CFString k
         return (0, false);
     }
     return (value, true);
-
 }
 private static void x509_CFDictionaryGetValueIfPresent_trampoline();
 
@@ -96,7 +98,6 @@ public static (int, error) CFNumberGetValue(CFRef num) {
         return (0, error.As(errors.New("CFNumberGetValue call failed"))!);
     }
     return (value, error.As(null!)!);
-
 }
 private static void x509_CFNumberGetValue_trampoline();
 

@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fs -- go2cs converted at 2022 March 06 22:12:45 UTC
+// package fs -- go2cs converted at 2022 March 13 05:27:47 UTC
 // import "io/fs" ==> using fs = go.io.fs_package
 // Original source: C:\Program Files\Go\src\io\fs\stat.go
-
-
 namespace go.io;
 
 public static partial class fs_package {
 
-    // A StatFS is a file system with a Stat method.
+// A StatFS is a file system with a Stat method.
 public partial interface StatFS {
     (FileInfo, error) Stat(@string name);
 }
@@ -32,14 +30,12 @@ public static (FileInfo, error) Stat(FS fsys, @string name) => func((defer, _, _
         }
     }
 
-
     var (file, err) = fsys.Open(name);
     if (err != null) {
         return (null, error.As(err)!);
     }
     defer(file.Close());
     return file.Stat();
-
 });
 
 } // end fs_package

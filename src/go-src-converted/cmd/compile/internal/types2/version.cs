@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types2 -- go2cs converted at 2022 March 06 23:13:09 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:35 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\version.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// langCompat reports an error if the representation of a numeric
+// literal is not compatible with the current language version.
 
 public static partial class types2_package {
 
-    // langCompat reports an error if the representation of a numeric
-    // literal is not compatible with the current language version.
 private static void langCompat(this ptr<Checker> _addr_check, ptr<syntax.BasicLit> _addr_lit) {
     ref Checker check = ref _addr_check.val;
     ref syntax.BasicLit lit = ref _addr_lit.val;
@@ -60,7 +62,6 @@ private static bool allowVersion(this ptr<Checker> _addr_check, ptr<Package> _ad
     var ma = check.version.major;
     var mi = check.version.minor;
     return ma == 0 && mi == 0 || ma > major || ma == major && mi >= minor;
-
 }
 
 private partial struct version {
@@ -89,7 +90,6 @@ private static (version, error) parseGoVersion(@string s) {
     }
     v.minor, err = strconv.Atoi(matches[2]);
     return ;
-
 }
 
 // goVersionRx matches a Go version string, e.g. "go1.12".

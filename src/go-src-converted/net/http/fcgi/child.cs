@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fcgi -- go2cs converted at 2022 March 06 22:23:52 UTC
+// package fcgi -- go2cs converted at 2022 March 13 05:38:17 UTC
 // import "net/http/fcgi" ==> using fcgi = go.net.http.fcgi_package
 // Original source: C:\Program Files\Go\src\net\http\fcgi\child.go
+namespace go.net.http;
 // This file implements FastCGI from the perspective of a child process.
 
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using cgi = go.net.http.cgi_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using time = go.time_package;
+
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using net = net_package;
+using http = net.http_package;
+using cgi = net.http.cgi_package;
+using os = os_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// request holds the state for an in-progress request. As soon as it's complete,
+// it's converted to an http.Request.
+
 using System.Threading;
-
-
-namespace go.net.http;
-
 public static partial class fcgi_package {
 
-    // request holds the state for an in-progress request. As soon as it's complete,
-    // it's converted to an http.Request.
 private partial struct request {
     public ptr<io.PipeWriter> pw;
     public ushort reqId;
@@ -71,9 +72,7 @@ private static void parseParams(this ptr<request> _addr_r) {
         var val = readString(text, valLen);
         text = text[(int)valLen..];
         r.@params[key] = val;
-
     }
-
 }
 
 // response implements http.ResponseWriter.
@@ -111,7 +110,6 @@ private static (nint, error) Write(this ptr<response> _addr_r, slice<byte> p) {
         r.writeCGIHeader(p);
     }
     return r.w.Write(p);
-
 }
 
 private static void WriteHeader(this ptr<response> _addr_r, nint code) {
@@ -127,7 +125,6 @@ private static void WriteHeader(this ptr<response> _addr_r, nint code) {
         r.header.Del("Content-Type");
         r.header.Del("Content-Length");
         r.header.Del("Transfer-Encoding");
-
     }
     if (r.header.Get("Date") == "") {
         r.header.Set("Date", time.Now().UTC().Format(http.TimeFormat));
@@ -153,11 +150,9 @@ private static void writeCGIHeader(this ptr<response> _addr_r, slice<byte> p) {
             r.header.Set("Content-Type", http.DetectContentType(p));
         }
     }
-
     r.header.Write(r.w);
     r.w.WriteString("\r\n");
     r.w.Flush();
-
 }
 
 private static void Flush(this ptr<response> _addr_r) {
@@ -167,7 +162,6 @@ private static void Flush(this ptr<response> _addr_r) {
         r.WriteHeader(http.StatusOK);
     }
     r.w.Flush();
-
 }
 
 private static error Close(this ptr<response> _addr_r) {
@@ -206,7 +200,6 @@ private static void serve(this ptr<child> _addr_c) => func((defer, _, _) => {
             err = err__prev1;
 
         }
-
         {
             var err__prev1 = err;
 
@@ -219,9 +212,7 @@ private static void serve(this ptr<child> _addr_c) => func((defer, _, _) => {
             err = err__prev1;
 
         }
-
     }
-
 });
 
 private static var errCloseConn = errors.New("fcgi: connection should be closed");
@@ -244,7 +235,6 @@ private static error handleRecord(this ptr<child> _addr_c, ptr<record> _addr_rec
     if (!ok && rec.h.Type != typeBeginRequest && rec.h.Type != typeGetValues) { 
         // The spec says to ignore unknown request IDs.
         return error.As(null!)!;
-
     }
 
     if (rec.h.Type == typeBeginRequest) 
@@ -252,7 +242,6 @@ private static error handleRecord(this ptr<child> _addr_c, ptr<record> _addr_rec
             // The server is trying to begin a request with the same ID
             // as an in-progress request. This is an error.
             return error.As(errors.New("fcgi: received ID that is already in-flight"))!;
-
         }
         beginRequest br = default;
         {
@@ -263,7 +252,6 @@ private static error handleRecord(this ptr<child> _addr_c, ptr<record> _addr_rec
             }
 
         }
-
         if (br.role != roleResponder) {
             c.conn.writeEndRequest(rec.h.Id, 0, statusUnknownRole);
             return error.As(null!)!;
@@ -288,21 +276,17 @@ private static error handleRecord(this ptr<child> _addr_c, ptr<record> _addr_rec
                 // body could be an io.LimitReader, but it shouldn't matter
                 // as long as both sides are behaving.
                 body, req.pw = io.Pipe();
-
             }
             else
  {
                 body = emptyBody;
             }
-
             go_(() => c.serveRequest(req, body));
-
         }
         if (len(content) > 0) { 
             // TODO(eds): This blocks until the handler reads from the pipe.
             // If the handler takes a long time, it might be a problem.
             req.pw.Write(content);
-
         }
         else
  {
@@ -328,7 +312,6 @@ private static error handleRecord(this ptr<child> _addr_c, ptr<record> _addr_rec
         if (!req.keepConn) { 
             // connection will close upon return
             return error.As(errCloseConn)!;
-
         }
         return error.As(null!)!;
     else 
@@ -336,8 +319,7 @@ private static error handleRecord(this ptr<child> _addr_c, ptr<record> _addr_rec
         b[0] = byte(rec.h.Type);
         c.conn.writeRecord(typeUnknownType, 0, b);
         return error.As(null!)!;
-    
-}
+    }
 
 // filterOutUsedEnvVars returns a new map of env vars without the
 // variables in the given envVars map that are read for creating each http.Request
@@ -348,7 +330,6 @@ private static map<@string, @string> filterOutUsedEnvVars(map<@string, @string> 
             withoutUsedEnvVars[k] = v;
         }
     }    return withoutUsedEnvVars;
-
 }
 
 private static void serveRequest(this ptr<child> _addr_c, ptr<request> _addr_req, io.ReadCloser body) {
@@ -361,7 +342,6 @@ private static void serveRequest(this ptr<child> _addr_c, ptr<request> _addr_req
         // there was an error reading the request
         r.WriteHeader(http.StatusInternalServerError);
         c.conn.writeRecord(typeStderr, req.reqId, (slice<byte>)err.Error());
-
     }
     else
  {
@@ -398,7 +378,6 @@ private static void cleanUp(this ptr<child> _addr_c) {
             // race with call to Close in c.serveRequest doesn't matter because
             // Pipe(Reader|Writer).Close are idempotent
             req.pw.CloseWithError(ErrConnClosed);
-
         }
     }
 }
@@ -416,7 +395,6 @@ public static error Serve(net.Listener l, http.Handler handler) => func((defer, 
             return error.As(err)!;
         }
         defer(l.Close());
-
     }
     if (handler == null) {
         handler = http.DefaultServeMux;
@@ -428,9 +406,7 @@ public static error Serve(net.Listener l, http.Handler handler) => func((defer, 
         }
         var c = newChild(rw, handler);
         go_(() => c.serve());
-
     }
-
 });
 
 // ProcessEnv returns FastCGI environment variables associated with the request r
@@ -486,7 +462,6 @@ private static bool addFastCGIEnvToContext(@string s) {
     } 
     // Unknown, so include it to be safe.
     return true;
-
 }
 
 } // end fcgi_package

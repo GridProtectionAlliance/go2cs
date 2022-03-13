@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:08:47 UTC
+//     Generated on 2022 March 13 06:22:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct stackAllocState
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace @internal
             public static implicit operator stackAllocState(NilType nil) => default(stackAllocState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static stackAllocState stackAllocState_cast(dynamic value)
         {
             return new stackAllocState(ref value.f, value.live, value.values, value.interfere, value.names, value.slots, value.used, value.nArgSlot, value.nNotNeed, value.nNamedSlot, value.nReuse, value.nAuto, value.nSelfInterfere);

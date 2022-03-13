@@ -126,7 +126,9 @@ Flags:
     -w
         Omit the DWARF symbol table.
 */
-// package main -- go2cs converted at 2022 March 06 23:19:48 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:32:36 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\doc.go
+namespace go;
 
 } // end main_package

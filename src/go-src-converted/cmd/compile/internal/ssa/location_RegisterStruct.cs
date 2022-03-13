@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:50:09 UTC
+//     Generated on 2022 March 13 06:01:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Register
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace @internal
             public static implicit operator Register(NilType nil) => default(Register);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Register Register_cast(dynamic value)
         {
             return new Register(value.num, value.objNum, value.gcNum, value.name);

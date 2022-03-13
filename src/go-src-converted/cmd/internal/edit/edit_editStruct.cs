@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:47:22 UTC
+//     Generated on 2022 March 13 05:58:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class edit_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct edit
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator edit(NilType nil) => default(edit);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static edit edit_cast(dynamic value)
         {
             return new edit(value.start, value.end, value.@new);

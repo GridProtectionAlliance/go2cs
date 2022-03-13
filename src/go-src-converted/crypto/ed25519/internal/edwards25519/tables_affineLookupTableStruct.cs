@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:36 UTC
+//     Generated on 2022 March 13 05:31:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class edwards25519_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct affineLookupTable
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace @internal
             public static implicit operator affineLookupTable(NilType nil) => default(affineLookupTable);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static affineLookupTable affineLookupTable_cast(dynamic value)
         {
             return new affineLookupTable(value.points);

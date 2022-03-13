@@ -2,40 +2,39 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2022 March 06 23:12:12 UTC
+// package gc -- go2cs converted at 2022 March 13 06:25:33 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\gc\main.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using deadcode = go.cmd.compile.@internal.deadcode_package;
-using devirtualize = go.cmd.compile.@internal.devirtualize_package;
-using dwarfgen = go.cmd.compile.@internal.dwarfgen_package;
-using escape = go.cmd.compile.@internal.escape_package;
-using inline = go.cmd.compile.@internal.inline_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using noder = go.cmd.compile.@internal.noder_package;
-using pkginit = go.cmd.compile.@internal.pkginit_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using dwarf = go.cmd.@internal.dwarf_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using @base = cmd.compile.@internal.@base_package;
+using deadcode = cmd.compile.@internal.deadcode_package;
+using devirtualize = cmd.compile.@internal.devirtualize_package;
+using dwarfgen = cmd.compile.@internal.dwarfgen_package;
+using escape = cmd.compile.@internal.escape_package;
+using inline = cmd.compile.@internal.inline_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using noder = cmd.compile.@internal.noder_package;
+using pkginit = cmd.compile.@internal.pkginit_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using dwarf = cmd.@internal.dwarf_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using os = os_package;
+using runtime = runtime_package;
+using System;
 
 public static partial class gc_package {
 
@@ -53,10 +52,8 @@ private static void hidePanic() => func((_, panic, _) => {
                     panic(err);
                 }
                 @base.ErrorExit();
-
             }
         }
-
     }
 });
 
@@ -139,7 +136,6 @@ public static void Main(Action<ptr<ssagen.ArchInfo>> archInit) => func((defer, _
         // turn off inline generation if no dwarf at all
         @base.Flag.GenDwarfInl = 0;
         @base.Ctxt.Flag_locationlists = false;
-
     }
     if (@base.Ctxt.Flag_locationlists && len(@base.Ctxt.Arch.DWARFRegisters) == 0) {
         log.Fatalf("location lists requested but register mapping not available on %v", @base.Ctxt.Arch.Name);
@@ -167,11 +163,9 @@ public static void Main(Action<ptr<ssagen.ArchInfo>> archInit) => func((defer, _
             log.Fatalf("softfloat mode with GOEXPERIMENT=regabiargs not implemented ");
         }
         ssagen.Arch.SoftFloat = true;
-
     }
     if (@base.Flag.JSON != "") { // parse version,destination from json logging optimization.
         logopt.LogJsonOption(@base.Flag.JSON);
-
     }
     ir.EscFmt = escape.Fmt;
     ir.IsIntrinsicCall = ssagen.IsIntrinsicCall;
@@ -232,7 +226,6 @@ public static void Main(Action<ptr<ssagen.ArchInfo>> archInit) => func((defer, _
         // Typecheck imported function bodies if Debug.l > 1,
         // otherwise lazily when used or re-exported.
         typecheck.AllImportedBodies();
-
     }
     @base.Timer.Start("fe", "inlining");
     if (@base.Flag.LowerL != 0) {
@@ -297,7 +290,6 @@ public static void Main(Action<ptr<ssagen.ArchInfo>> archInit) => func((defer, _
             }
 
         }
-
     }
     @base.Timer.AddEvent(fcount, "funcs");
 
@@ -306,7 +298,6 @@ public static void Main(Action<ptr<ssagen.ArchInfo>> archInit) => func((defer, _
     if (@base.Flag.CompilingRuntime) { 
         // Write barriers are now known. Check the call graph.
         ssagen.NoWriteBarrierRecCheck();
-
     }
     if (@base.Ctxt.DwFixups != null) {
         @base.Ctxt.DwFixups.Finalize(@base.Ctxt.Pkgpath, @base.Debug.DwarfInl != 0);
@@ -341,7 +332,6 @@ public static void Main(Action<ptr<ssagen.ArchInfo>> archInit) => func((defer, _
             }
 
         }
-
     }
 });
 
@@ -364,7 +354,6 @@ private static error writebench(@string filename) => func((_, panic, _) => {
         panic("bad writer");
     }
     return error.As(f.Close())!;
-
 });
 
 private static src.XPos makePos(ptr<src.PosBase> _addr_b, nuint line, nuint col) {

@@ -2,26 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64 -- go2cs converted at 2022 March 06 23:11:10 UTC
+// package ppc64 -- go2cs converted at 2022 March 13 06:24:29 UTC
 // import "cmd/compile/internal/ppc64" ==> using ppc64 = go.cmd.compile.@internal.ppc64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ppc64\ssa.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using ppc64 = go.cmd.@internal.obj.ppc64_package;
-using buildcfg = go.@internal.buildcfg_package;
-using math = go.math_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using ppc64 = cmd.@internal.obj.ppc64_package;
+using buildcfg = @internal.buildcfg_package;
+using math = math_package;
+using strings = strings_package;
+
+
+// markMoves marks any MOVXconst ops that need to avoid clobbering flags.
 
 public static partial class ppc64_package {
 
-    // markMoves marks any MOVXconst ops that need to avoid clobbering flags.
 private static void ssaMarkMoves(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_b) {
     ref ssagen.State s = ref _addr_s.val;
     ref ssa.Block b = ref _addr_b.val;
@@ -60,7 +62,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 return ppc64.AFMOVD;
                 break;
         }
-
     }
     else
  {
@@ -73,7 +74,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return ppc64.AMOVBZ;
                            }
-
                 break;
             case 2: 
                            if (t.IsSigned()) {
@@ -83,7 +83,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return ppc64.AMOVHZ;
                            }
-
                 break;
             case 4: 
                            if (t.IsSigned()) {
@@ -93,16 +92,13 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return ppc64.AMOVWZ;
                            }
-
                 break;
             case 8: 
                 return ppc64.AMOVD;
                 break;
         }
-
     }
     panic("bad load type");
-
 });
 
 // storeByType returns the store instruction of the given type.
@@ -118,7 +114,6 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return ppc64.AFMOVD;
                 break;
         }
-
     }
     else
  {
@@ -136,10 +131,8 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return ppc64.AMOVD;
                 break;
         }
-
     }
     panic("bad store type");
-
 });
 
 private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_v) {
@@ -834,7 +827,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             fromAddr.Offset = 0;
             fromAddr.Name = obj.NAME_NONE;
             fromAddr.Sym = null;
-
         }
         p = s.Prog(v.Op.Asm());
         p.From = fromAddr;
@@ -903,7 +895,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             toAddr.Offset = 0;
             toAddr.Name = obj.NAME_NONE;
             toAddr.Sym = null;
-
         }
         p = s.Prog(v.Op.Asm());
         p.To = toAddr;
@@ -1028,7 +1019,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             if (top == null) {
                 top = p;
             }
-
             p = s.Prog(ppc64.ASTXV);
             p.From.Type = obj.TYPE_REG;
             p.From.Reg = ppc64.REG_VS32;
@@ -1068,7 +1058,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.Reg = ppc64.REG_R0;
             p.To.Type = obj.TYPE_BRANCH;
             p.To.SetTarget(top);
-
         }
         if (ctr == 1) {
             rem += 64;
@@ -1085,7 +1074,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = ppc64.REG_VS32;
             p.Reg = ppc64.REG_VS32;
-
         }
         while (rem >= 32) {
             p = s.Prog(ppc64.ASTXV);
@@ -1130,7 +1118,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.To.Offset = offset;
             rem -= size;
             offset += size;
-
         }
     else if (v.Op == ssa.OpPPC64LoweredZero || v.Op == ssa.OpPPC64LoweredZeroShort) 
 
@@ -1231,7 +1218,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             if (top == null) {
                 top = p;
             }
-
             p = s.Prog(ppc64.ASTXVD2X);
             p.From.Type = obj.TYPE_REG;
             p.From.Reg = ppc64.REG_VS32;
@@ -1257,7 +1243,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.Reg = ppc64.REG_R0;
             p.To.Type = obj.TYPE_BRANCH;
             p.To.SetTarget(top);
-
         }
         if (ctr == 1) {
             rem += 32;
@@ -1281,7 +1266,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.To.Offset = offset;
             rem -= size;
             offset += size;
-
         }
     else if (v.Op == ssa.OpPPC64LoweredMove || v.Op == ssa.OpPPC64LoweredMoveShort) 
 
@@ -1380,7 +1364,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             if (top == null) {
                 top = p;
             }
-
             p = s.Prog(ppc64.ALXVD2X);
             p.From.Type = obj.TYPE_MEM;
             p.From.Reg = srcReg;
@@ -1431,7 +1414,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             // srcReg and dstReg were incremented in the loop, so
             // later instructions start with offset 0.
             offset = int64(0);
-
         }
         if (ctr == 1) {
             rem += bytesPerLoop;
@@ -1481,9 +1463,7 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
 
                 offset = 32;
                 rem -= 16;
-
             }
-
         }
         while (rem > 0) {
             op = ppc64.AMOVB;
@@ -1509,7 +1489,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.To.Offset = offset;
             rem -= size;
             offset += size;
-
         }
     else if (v.Op == ssa.OpPPC64LoweredQuadMove || v.Op == ssa.OpPPC64LoweredQuadMoveShort) 
         bytesPerLoop = int64(64); 
@@ -1591,7 +1570,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             if (top == null) {
                 top = p;
             }
-
             p = s.Prog(ppc64.ALXV);
             p.From.Type = obj.TYPE_MEM;
             p.From.Reg = srcReg;
@@ -1672,7 +1650,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             // srcReg and dstReg were incremented in the loop, so
             // later instructions start with offset 0.
             offset = int64(0);
-
         }
         if (ctr == 1) {
             rem += bytesPerLoop;
@@ -1744,7 +1721,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                 offset += 16;
                 rem -= 16;
             }
-
         }
         while (rem > 0) {
             op = ppc64.AMOVB;
@@ -1770,7 +1746,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             p.To.Offset = offset;
             rem -= size;
             offset += size;
-
         }
     else if (v.Op == ssa.OpPPC64CALLstatic) 
         s.Call(v);
@@ -1801,7 +1776,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             q.From.Reg = ppc64.REGSP;
             q.To.Type = obj.TYPE_REG;
             q.To.Reg = ppc64.REG_R2;
-
         }
     else if (v.Op == ssa.OpPPC64LoweredWB) 
         p = s.Prog(obj.ACALL);
@@ -1843,8 +1817,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             // NOP (so the BNE has somewhere to land)
             var nop = s.Prog(obj.ANOP);
             p2.To.SetTarget(nop);
-
-
         }
         else
  { 
@@ -1855,14 +1827,12 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             ssagen.AddAux(_addr_p.From, v);
             p.To.Type = obj.TYPE_REG;
             p.To.Reg = ppc64.REGTMP;
-
         }
         if (logopt.Enabled()) {
             logopt.LogOpt(v.Pos, "nilcheck", "genssa", v.Block.Func.Name);
         }
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Pos.Line()==1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
     else if (v.Op == ssa.OpPPC64Equal || v.Op == ssa.OpPPC64NotEqual || v.Op == ssa.OpPPC64LessThan || v.Op == ssa.OpPPC64FLessThan || v.Op == ssa.OpPPC64LessEqual || v.Op == ssa.OpPPC64GreaterThan || v.Op == ssa.OpPPC64FGreaterThan || v.Op == ssa.OpPPC64GreaterEqual || v.Op == ssa.OpPPC64FLessEqual || v.Op == ssa.OpPPC64FGreaterEqual) 
         v.Fatalf("Pseudo-op should not make it to codegen: %s ###\n", v.LongString());
@@ -1872,8 +1842,7 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         v.Fatalf("Flag* ops should never make it to codegen %v", v.LongString());
     else if (v.Op == ssa.OpClobber || v.Op == ssa.OpClobberReg)     else 
         v.Fatalf("genValue not implemented: %s", v.LongString());
-    
-}
+    }
 
 
 
@@ -1922,9 +1891,7 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
             if (jmp.invasmun) { 
                 // TODO: The second branch is probably predict-not-taken since it is for FP unordered
                 s.Br(ppc64.ABVS, b.Succs[1].Block());
-
             }
-
         else if (next == b.Succs[1].Block()) 
             s.Br(jmp.asm, b.Succs[0].Block());
             if (jmp.asmeq) {
@@ -1944,16 +1911,11 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
                 if (jmp.invasmun) { 
                     // TODO: The second branch is probably predict-not-taken since it is for FP unordered
                     s.Br(ppc64.ABVS, b.Succs[1].Block());
-
                 }
-
                 s.Br(obj.AJMP, b.Succs[0].Block());
-
             }
-
             else 
         b.Fatalf("branch not implemented: %s", b.LongString());
-    
-}
+    }
 
 } // end ppc64_package

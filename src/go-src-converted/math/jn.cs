@@ -2,61 +2,59 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:08 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:01 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\jn.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    /*
-        Bessel function of the first and second kinds of order n.
-    */
+/*
+    Bessel function of the first and second kinds of order n.
+*/
 
-    // The original C code and the long comment below are
-    // from FreeBSD's /usr/src/lib/msun/src/e_jn.c and
-    // came with this notice. The go code is a simplified
-    // version of the original C.
-    //
-    // ====================================================
-    // Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
-    //
-    // Developed at SunPro, a Sun Microsystems, Inc. business.
-    // Permission to use, copy, modify, and distribute this
-    // software is freely granted, provided that this notice
-    // is preserved.
-    // ====================================================
-    //
-    // __ieee754_jn(n, x), __ieee754_yn(n, x)
-    // floating point Bessel's function of the 1st and 2nd kind
-    // of order n
-    //
-    // Special cases:
-    //      y0(0)=y1(0)=yn(n,0) = -inf with division by zero signal;
-    //      y0(-ve)=y1(-ve)=yn(n,-ve) are NaN with invalid signal.
-    // Note 2. About jn(n,x), yn(n,x)
-    //      For n=0, j0(x) is called,
-    //      for n=1, j1(x) is called,
-    //      for n<x, forward recursion is used starting
-    //      from values of j0(x) and j1(x).
-    //      for n>x, a continued fraction approximation to
-    //      j(n,x)/j(n-1,x) is evaluated and then backward
-    //      recursion is used starting from a supposed value
-    //      for j(n,x). The resulting value of j(0,x) is
-    //      compared with the actual value to correct the
-    //      supposed value of j(n,x).
-    //
-    //      yn(n,x) is similar in all respects, except
-    //      that forward recursion is used for all
-    //      values of n>1.
+// The original C code and the long comment below are
+// from FreeBSD's /usr/src/lib/msun/src/e_jn.c and
+// came with this notice. The go code is a simplified
+// version of the original C.
+//
+// ====================================================
+// Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+//
+// Developed at SunPro, a Sun Microsystems, Inc. business.
+// Permission to use, copy, modify, and distribute this
+// software is freely granted, provided that this notice
+// is preserved.
+// ====================================================
+//
+// __ieee754_jn(n, x), __ieee754_yn(n, x)
+// floating point Bessel's function of the 1st and 2nd kind
+// of order n
+//
+// Special cases:
+//      y0(0)=y1(0)=yn(n,0) = -inf with division by zero signal;
+//      y0(-ve)=y1(-ve)=yn(n,-ve) are NaN with invalid signal.
+// Note 2. About jn(n,x), yn(n,x)
+//      For n=0, j0(x) is called,
+//      for n=1, j1(x) is called,
+//      for n<x, forward recursion is used starting
+//      from values of j0(x) and j1(x).
+//      for n>x, a continued fraction approximation to
+//      j(n,x)/j(n-1,x) is evaluated and then backward
+//      recursion is used starting from a supposed value
+//      for j(n,x). The resulting value of j(0,x) is
+//      compared with the actual value to correct the
+//      supposed value of j(n,x).
+//
+//      yn(n,x) is similar in all respects, except
+//      that forward recursion is used for all
+//      values of n>1.
 
-    // Jn returns the order-n Bessel function of the first kind.
-    //
-    // Special cases are:
-    //    Jn(n, ±Inf) = 0
-    //    Jn(n, NaN) = NaN
+// Jn returns the order-n Bessel function of the first kind.
+//
+// Special cases are:
+//    Jn(n, ±Inf) = 0
+//    Jn(n, NaN) = NaN
 public static double Jn(nint n, double x) {
     const float TwoM29 = 1.0F / (1 << 29); // 2**-29 0x3e10000000000000
     const nint Two302 = 1 << 302; // 2**302 0x52D0000000000000 
@@ -126,7 +124,6 @@ public static double Jn(nint n, double x) {
                 }
             }
             b = (1 / SqrtPi) * temp / Sqrt(x);
-
         }
         else
  {
@@ -143,7 +140,6 @@ public static double Jn(nint n, double x) {
                 i = i__prev1;
                 a = a__prev1;
             }
-
         }
     else
     } {
@@ -153,7 +149,6 @@ public static double Jn(nint n, double x) {
 
             if (n > 33) { // underflow
                 b = 0;
-
             }
             else
  {
@@ -171,7 +166,6 @@ public static double Jn(nint n, double x) {
                     i = i__prev1;
                 }
                 b /= a;
-
             }
         else
         } { 
@@ -255,7 +249,6 @@ public static double Jn(nint n, double x) {
 
                     i = i__prev1;
                 }
-
             } {
                 {
                     nint i__prev1 = i;
@@ -271,17 +264,14 @@ public static double Jn(nint n, double x) {
 
                     i = i__prev1;
                 }
-
             }
             b = t * J0(x) / b;
-
         }
     }
     if (sign) {
         return -b;
     }
     return b;
-
 }
 
 // Yn returns the order-n Bessel function of the second kind.
@@ -310,7 +300,6 @@ public static double Yn(nint n, double x) {
             return Inf(1);
         }
         return Inf(-1);
-
     }
     var sign = false;
     if (n < 0) {
@@ -324,7 +313,6 @@ public static double Yn(nint n, double x) {
             return -Y1(x);
         }
         return Y1(x);
-
     }
     double b = default;
     if (x >= Two302) { // x > 2**302
@@ -361,7 +349,6 @@ public static double Yn(nint n, double x) {
             }
         }
         b = (1 / SqrtPi) * temp / Sqrt(x);
-
     }
     else
  {
@@ -371,13 +358,11 @@ public static double Yn(nint n, double x) {
         for (nint i = 1; i < n && !IsInf(b, -1); i++) {
             (a, b) = (b, (float64(i + i) / x) * b - a);
         }
-
     }
     if (sign) {
         return -b;
     }
     return b;
-
 }
 
 } // end math_package

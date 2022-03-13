@@ -5,17 +5,16 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:55 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:14 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\unixsock_posix.go
-using context = go.context_package;
-using errors = go.errors_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
+
+using context = context_package;
+using errors = errors_package;
+using os = os_package;
+using syscall = syscall_package;
+using System;
 
 public static partial class net_package {
 
@@ -64,7 +63,6 @@ private static (ptr<netFD>, error) unixSocket(context.Context ctx, @string net, 
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_fd!, error.As(null!)!);
-
 }
 
 private static Addr sockaddrToUnix(syscall.Sockaddr sa) {
@@ -75,9 +73,7 @@ private static Addr sockaddrToUnix(syscall.Sockaddr sa) {
             return addr(new UnixAddr(Name:s.Name,Net:"unix"));
         }
     }
-
     return null;
-
 }
 
 private static Addr sockaddrToUnixgram(syscall.Sockaddr sa) {
@@ -88,9 +84,7 @@ private static Addr sockaddrToUnixgram(syscall.Sockaddr sa) {
             return addr(new UnixAddr(Name:s.Name,Net:"unixgram"));
         }
     }
-
     return null;
-
 }
 
 private static Addr sockaddrToUnixpacket(syscall.Sockaddr sa) {
@@ -101,9 +95,7 @@ private static Addr sockaddrToUnixpacket(syscall.Sockaddr sa) {
             return addr(new UnixAddr(Name:s.Name,Net:"unixpacket"));
         }
     }
-
     return null;
-
 }
 
 private static @string sotypeToNet(nint sotype) => func((_, panic, _) => {
@@ -116,8 +108,7 @@ private static @string sotypeToNet(nint sotype) => func((_, panic, _) => {
         return "unixpacket";
     else 
         panic("sotypeToNet unknown socket type");
-    
-});
+    });
 
 private static nint family(this ptr<UnixAddr> _addr_a) {
     ref UnixAddr a = ref _addr_a.val;
@@ -134,7 +125,6 @@ private static (syscall.Sockaddr, error) sockaddr(this ptr<UnixAddr> _addr_a, ni
         return (null, error.As(null!)!);
     }
     return (addr(new syscall.SockaddrUnix(Name:a.Name)), error.As(null!)!);
-
 }
 
 private static sockaddr toLocal(this ptr<UnixAddr> _addr_a, @string net) {
@@ -159,7 +149,6 @@ private static (nint, ptr<UnixAddr>, error) readFrom(this ptr<UnixConn> _addr_c,
             break;
     }
     return (n, _addr_addr!, error.As(err)!);
-
 }
 
 private static (nint, nint, nint, ptr<UnixAddr>, error) readMsg(this ptr<UnixConn> _addr_c, slice<byte> b, slice<byte> oob) {
@@ -183,7 +172,6 @@ private static (nint, nint, nint, ptr<UnixAddr>, error) readMsg(this ptr<UnixCon
             break;
     }
     return ;
-
 }
 
 private static (nint, error) writeTo(this ptr<UnixConn> _addr_c, slice<byte> b, ptr<UnixAddr> _addr_addr) {
@@ -203,7 +191,6 @@ private static (nint, error) writeTo(this ptr<UnixConn> _addr_c, slice<byte> b, 
     }
     ptr<syscall.SockaddrUnix> sa = addr(new syscall.SockaddrUnix(Name:addr.Name));
     return c.fd.writeTo(b, sa);
-
 }
 
 private static (nint, nint, error) writeMsg(this ptr<UnixConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<UnixAddr> _addr_addr) {
@@ -222,10 +209,8 @@ private static (nint, nint, error) writeMsg(this ptr<UnixConn> _addr_c, slice<by
             return (0, 0, error.As(syscall.EAFNOSUPPORT)!);
         }
         sa = addr(new syscall.SockaddrUnix(Name:addr.Name));
-
     }
     return c.fd.writeMsg(b, oob, sa);
-
 }
 
 private static (ptr<UnixConn>, error) dialUnix(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<UnixAddr> _addr_laddr, ptr<UnixAddr> _addr_raddr) {
@@ -240,7 +225,6 @@ private static (ptr<UnixConn>, error) dialUnix(this ptr<sysDialer> _addr_sd, con
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newUnixConn(fd)!, error.As(null!)!);
-
 }
 
 private static (ptr<UnixConn>, error) accept(this ptr<UnixListener> _addr_ln) {
@@ -253,7 +237,6 @@ private static (ptr<UnixConn>, error) accept(this ptr<UnixListener> _addr_ln) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newUnixConn(fd)!, error.As(null!)!);
-
 }
 
 private static error close(this ptr<UnixListener> _addr_ln) {
@@ -276,7 +259,6 @@ private static error close(this ptr<UnixListener> _addr_ln) {
         }
     });
     return error.As(ln.fd.Close())!;
-
 }
 
 private static (ptr<os.File>, error) file(this ptr<UnixListener> _addr_ln) {
@@ -289,7 +271,6 @@ private static (ptr<os.File>, error) file(this ptr<UnixListener> _addr_ln) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_f!, error.As(null!)!);
-
 }
 
 // SetUnlinkOnClose sets whether the underlying socket file should be removed
@@ -317,7 +298,6 @@ private static (ptr<UnixListener>, error) listenUnix(this ptr<sysListener> _addr
         return (_addr_null!, error.As(err)!);
     }
     return (addr(new UnixListener(fd:fd,path:fd.laddr.String(),unlink:true)), error.As(null!)!);
-
 }
 
 private static (ptr<UnixConn>, error) listenUnixgram(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<UnixAddr> _addr_laddr) {
@@ -331,7 +311,6 @@ private static (ptr<UnixConn>, error) listenUnixgram(this ptr<sysListener> _addr
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newUnixConn(fd)!, error.As(null!)!);
-
 }
 
 } // end net_package

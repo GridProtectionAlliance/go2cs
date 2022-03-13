@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:42:12 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:20 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\resolver.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using typeparams = go.go.@internal.typeparams_package;
-using token = go.go.token_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using System;
-
-
 namespace go.go;
 
+using fmt = fmt_package;
+using ast = go.ast_package;
+using constant = go.constant_package;
+using typeparams = go.@internal.typeparams_package;
+using token = go.token_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// A declInfo describes a package-level const, type, var, or func declaration.
+
+using System;
 public static partial class types_package {
 
-    // A declInfo describes a package-level const, type, var, or func declaration.
 private partial struct declInfo {
     public ptr<Scope> file; // scope of file containing this declaration
     public slice<ptr<Var>> lhs; // lhs of n:1 variable declarations, or nil
@@ -53,7 +54,6 @@ private static void addDep(this ptr<declInfo> _addr_d, Object obj) {
         d.deps = m;
     }
     m[obj] = true;
-
 }
 
 // arityMatch checks that the lhs and rhs of a const or var decl
@@ -94,8 +94,7 @@ private static void arityMatch(this ptr<Checker> _addr_check, ptr<ast.ValueSpec>
     else if (l > r && (init != null || r != 1)) 
         n = s.Names[r];
         check.errorf(n, code, "missing init expr for %s", n);
-    
-}
+    }
 
 private static (@string, error) validatedImportPath(@string path) {
     @string _p0 = default;
@@ -115,7 +114,6 @@ private static (@string, error) validatedImportPath(@string path) {
             return (s, error.As(fmt.Errorf("invalid character %#U", r))!);
         }
     }    return (s, error.As(null!)!);
-
 }
 
 // declarePkgObj declares obj in the package scope, records its ident -> obj mapping,
@@ -140,7 +138,6 @@ private static void declarePkgObj(this ptr<Checker> _addr_check, ptr<ast.Ident> 
     check.declare(check.pkg.scope, ident, obj, token.NoPos);
     check.objMap[obj] = d;
     obj.setOrder(uint32(len(check.objMap)));
-
 }
 
 // filename returns a filename suitable for debugging output.
@@ -155,9 +152,7 @@ private static @string filename(this ptr<Checker> _addr_check, nint fileNo) {
             return check.fset.File(pos).Name();
         }
     }
-
     return fmt.Sprintf("file[%d]", fileNo);
-
 }
 
 private static ptr<Package> importPackage(this ptr<Checker> _addr_check, positioner at, @string path, @string dir) {
@@ -177,7 +172,6 @@ private static ptr<Package> importPackage(this ptr<Checker> _addr_check, positio
         imp = NewPackage("C", "C");
         imp.fake = true; // package scope is not populated
         imp.cgo = check.conf.go115UsesCgo;
-
     }
     else
  { 
@@ -237,7 +231,6 @@ private static ptr<Package> importPackage(this ptr<Checker> _addr_check, positio
                     i = i__prev4;
 
                 }
-
                 {
                     var i__prev4 = i;
 
@@ -250,9 +243,7 @@ private static ptr<Package> importPackage(this ptr<Checker> _addr_check, positio
                     i = i__prev4;
 
                 }
-
                 imp = NewPackage(path, name);
-
             } 
             // continue to use the package as best as we can
             imp.fake = true; // avoid follow-up lookup failures
@@ -266,10 +257,8 @@ private static ptr<Package> importPackage(this ptr<Checker> _addr_check, positio
             check.markImports(imp);
         }
         return _addr_imp!;
-
     }
     return _addr_null!;
-
 }
 
 // collectObjects collects all file and package objects and inserts them
@@ -322,7 +311,6 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
             }
 
         }
-
         var fileScope = NewScope(check.pkg.scope, pos, end, check.filename(fileNo));
         fileScopes = append(fileScopes, fileScope);
         check.recordScope(file, fileScope); 
@@ -353,11 +341,8 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                             // match cmd/compile (not prescribed by spec)
                             check.errorf(d.spec.Name, _ImportCRenamed, "cannot rename import \"C\"");
                             return ;
-
                         }
-
                     }
-
                     if (name == "init") {
                         check.errorf(d.spec, _InvalidInitDecl, "cannot import package as init - init must be a func");
                         return ;
@@ -370,22 +355,18 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                         pkgImports[imp] = true;
                         pkg.imports = append(pkg.imports, imp);
                     }
-
                     var pkgName = NewPkgName(d.spec.Pos(), pkg, name, imp);
                     if (d.spec.Name != null) { 
                         // in a dot-import, the dot represents the package
                         check.recordDef(d.spec.Name, pkgName);
-
                     }
                     else
  {
                         check.recordImplicit(d.spec, pkgName);
                     }
-
                     if (path == "C") { 
                         // match cmd/compile (not prescribed by spec)
                         pkgName.used = true;
-
                     } 
 
                     // add import to file scope
@@ -426,9 +407,7 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                                         alt = alt__prev3;
 
                                     }
-
                                 }
-
                             }
                     else
 
@@ -438,9 +417,7 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                         // declare imported package object in file scope
                         // (no need to provide s.Name since we called check.recordDef earlier)
                         check.declare(fileScope, null, pkgName, token.NoPos);
-
                     }
-
                     break;
                 case constDecl d:
                     {
@@ -476,7 +453,6 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                         // but that's ok because declareVar only collects the declInfo
                         // for a later phase.
                         d1 = addr(new declInfo(file:fileScope,lhs:lhs,vtyp:d.spec.Type,init:d.spec.Values[0]));
-
                     } 
 
                     // declare all variables
@@ -497,13 +473,9 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                                 if (i < len(d.spec.Values)) {
                                     init = d.spec.Values[i];
                                 }
-
                                 di = addr(new declInfo(file:fileScope,vtyp:d.spec.Type,init:init));
-
                             }
-
                             check.declarePkgObj(name, obj, di);
-
                         }
 
                         i = i__prev2;
@@ -524,7 +496,6 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                             check.error(d.decl.Recv, _BadRecv, "method is missing receiver"); 
                             // treat as function
                         }
-
                         if (name == "init" || (name == "main" && check.pkg.name == "main")) {
                             var code = _InvalidInitDecl;
                             if (name == "main") {
@@ -538,20 +509,16 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                                 }
 
                             }
-
                             {
                                 var t = d.decl.Type;
 
                                 if (t.Params.NumFields() != 0 || t.Results != null) { 
                                     // TODO(rFindley) Should this be a hard error?
                                     check.softErrorf(d.decl, code, "func %s must have no arguments and no return values", name);
-
                                 }
 
                             }
-
                         }
-
                         if (name == "init") { 
                             // don't declare init functions in the package scope - they are invisible
                             obj.parent = pkg.scope;
@@ -560,15 +527,12 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                             if (d.decl.Body == null) { 
                                 // TODO(gri) make this error message consistent with the others above
                                 check.softErrorf(obj, _MissingInitBody, "missing function body");
-
                             }
-
                         }
                         else
  {
                             check.declare(pkg.scope, d.decl.Name, obj, token.NoPos);
                         }
-
                     }
                     else
  { 
@@ -586,9 +550,7 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                         if (recv != null && name != "_") {
                             methods = append(methods, new methodInfo(obj,ptr,recv));
                         }
-
                         check.recordDef(d.decl.Name, obj);
-
                     } 
                     // Methods are not package-level objects but we still track them in the
                     // object map so that we can handle them like regular functions (if the
@@ -598,9 +560,7 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                     obj.setOrder(uint32(len(check.objMap)));
                     break;
             }
-
         });
-
     }    foreach (var (_, scope) in fileScopes) {
         {
             var obj__prev2 = obj;
@@ -627,19 +587,16 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                                 check.errorf(alt, _DuplicateDecl, "%s already declared through dot-import of %s", alt.Name(), obj.Pkg()); 
                                 // TODO(gri) dot-imported objects don't have a position; reportAltDecl won't print anything
                                 check.reportAltDecl(obj);
-
                             }
 
                             pkg = pkg__prev2;
 
                         }
-
                     }
 
                     alt = alt__prev1;
 
                 }
-
             }
 
             obj = obj__prev2;
@@ -660,7 +617,6 @@ private static void collectObjects(this ptr<Checker> _addr_check) {
                 m.obj.hasPtrRecv = ptr;
                 check.methods[base] = append(check.methods[base], m.obj);
             }
-
         }
         i = i__prev1;
     }
@@ -697,7 +653,6 @@ L:
                 break;
             }
         }
-
     } 
 
     // unpack type parameters, if any
@@ -732,15 +687,12 @@ L:
                         if (par == null) {
                             par = addr(new ast.Ident(NamePos:arg.Pos(),Name:"_"));
                         }
-
                         tparams = append(tparams, par);
-
                     }
 
                     arg = arg__prev1;
                 }
             }
-
         }
     } 
 
@@ -753,9 +705,7 @@ L:
         }
     }
 
-
     return ;
-
 }
 
 // resolveBaseTypeName returns the non-alias base type name for typ, and whether
@@ -788,7 +738,6 @@ private static (bool, ptr<TypeName>) resolveBaseTypeName(this ptr<Checker> _addr
                 if (ptr) {
                     return (false, _addr_null!);
                 }
-
                 ptr = true;
                 typ = unparen(pexpr.X); // continue with pointer base type
             } 
@@ -822,9 +771,7 @@ private static (bool, ptr<TypeName>) resolveBaseTypeName(this ptr<Checker> _addr
             seen = make_map<ptr<TypeName>, bool>();
         }
         seen[tname] = true;
-
     }
-
 }
 
 // packageObjects typechecks all package objects, but not function bodies.
@@ -865,7 +812,6 @@ private static void packageObjects(this ptr<Checker> _addr_check) {
                 obj = obj__prev1;
 
             }
-
         }
         obj = obj__prev1;
     }
@@ -888,9 +834,7 @@ private static void packageObjects(this ptr<Checker> _addr_check) {
 
             }
 
-
             check.objDecl(obj, null);
-
         }
         obj = obj__prev1;
     }
@@ -906,7 +850,6 @@ private static void packageObjects(this ptr<Checker> _addr_check) {
     }
 
     check.methods = null;
-
 }
 
 // inSourceOrder implements the sort.Sort interface.
@@ -957,7 +900,6 @@ private static void errorUnusedPkg(this ptr<Checker> _addr_check, ptr<PkgName> _
             elem = elem[(int)i + 1..];
         }
     }
-
     if (obj.name == "" || obj.name == "." || obj.name == elem) {
         check.softErrorf(obj, _UnusedImport, "%q imported but not used", path);
     }
@@ -981,7 +923,6 @@ private static @string dir(@string path) {
     } 
     // i <= 0
     return ".";
-
 }
 
 } // end types_package

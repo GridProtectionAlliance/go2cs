@@ -3,23 +3,26 @@
 // license that can be found in the LICENSE file.
 
 // Package lex implements lexical analysis for the assembler.
-// package lex -- go2cs converted at 2022 March 06 22:46:28 UTC
+
+// package lex -- go2cs converted at 2022 March 13 05:57:41 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\lex\lex.go
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using scanner = go.text.scanner_package;
-
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.asm.@internal;
+
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using strings = strings_package;
+using scanner = text.scanner_package;
+
+using src = cmd.@internal.src_package;
+
+
+// A ScanToken represents an input item. It is a simple wrapping of rune, as
+// returned by text/scanner.Scanner, plus a couple of extra values.
 
 public static partial class lex_package {
 
-    // A ScanToken represents an input item. It is a simple wrapping of rune, as
-    // returned by text/scanner.Scanner, plus a couple of extra values.
 public partial struct ScanToken { // : int
 }
 
@@ -59,8 +62,7 @@ public static @string String(this ScanToken t) {
         return "comment";
     else 
         return fmt.Sprintf("%q", rune(t));
-    
-}
+    }
 
 // NewLexer returns a lexer for the named file and the given link context.
 public static TokenReader NewLexer(@string name) {
@@ -71,7 +73,6 @@ public static TokenReader NewLexer(@string name) {
     }
     input.Push(NewTokenizer(name, fd, fd));
     return input;
-
 }
 
 // The other files in this directory each contain an implementation of TokenReader.
@@ -108,7 +109,6 @@ public static Token Make(ScanToken token, @string text) {
     text = strings.Replace(text, "\u00B7", ".", -1);
     text = strings.Replace(text, "\u2215", "/", -1);
     return new Token(ScanToken:token,text:text);
-
 }
 
 public static @string String(this Token l) {
@@ -132,10 +132,8 @@ public static slice<Token> Tokenize(@string str) {
             break;
         }
         tokens = append(tokens, Make(tok, t.Text()));
-
     }
     return tokens;
-
 }
 
 } // end lex_package

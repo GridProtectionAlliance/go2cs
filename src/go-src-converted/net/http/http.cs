@@ -4,26 +4,27 @@
 
 //go:generate bundle -o=h2_bundle.go -prefix=http2 -tags=!nethttpomithttp2 golang.org/x/net/http2
 
-// package http -- go2cs converted at 2022 March 06 22:22:48 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:15 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\http.go
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using utf8 = go.unicode.utf8_package;
-
-using httpguts = go.golang.org.x.net.http.httpguts_package;
-using System;
-
-
 namespace go.net;
 
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+using utf8 = unicode.utf8_package;
+
+using httpguts = golang.org.x.net.http.httpguts_package;
+
+
+// incomparable is a zero-width, non-comparable type. Adding it to a struct
+// makes that struct also non-comparable, and generally doesn't add
+// any size (as long as it's first).
+
+using System;
 public static partial class http_package {
 
-    // incomparable is a zero-width, non-comparable type. Adding it to a struct
-    // makes that struct also non-comparable, and generally doesn't add
-    // any size (as long as it's first).
 private partial struct incomparable { // : array<Action>
 }
 
@@ -72,7 +73,6 @@ private static @string removeEmptyPort(@string host) {
         return strings.TrimSuffix(host, ":");
     }
     return host;
-
 }
 
 private static bool isNotToken(int r) {
@@ -88,7 +88,6 @@ private static bool stringContainsCTLByte(@string s) {
         }
     }
     return false;
-
 }
 
 private static @string hexEscapeNonASCII(@string s) {
@@ -104,7 +103,6 @@ private static @string hexEscapeNonASCII(@string s) {
  {
                 newLen++;
             }
-
         }
 
         i = i__prev1;
@@ -125,13 +123,11 @@ private static @string hexEscapeNonASCII(@string s) {
  {
                 b = append(b, s[i]);
             }
-
         }
 
         i = i__prev1;
     }
     return string(b);
-
 }
 
 // NoBody is an io.ReadCloser with no bytes. Read always returns EOF

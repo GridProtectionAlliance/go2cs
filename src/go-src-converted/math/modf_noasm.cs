@@ -5,11 +5,9 @@
 //go:build !arm64 && !ppc64 && !ppc64le
 // +build !arm64,!ppc64,!ppc64le
 
-// package math -- go2cs converted at 2022 March 06 22:31:10 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:03 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\modf_noasm.go
-
-
 namespace go;
 
 public static partial class math_package {

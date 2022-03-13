@@ -4,32 +4,34 @@
 
 // Package analysisflags defines helpers for processing flags of
 // analysis driver tools.
-// package analysisflags -- go2cs converted at 2022 March 06 23:31:09 UTC
+
+// package analysisflags -- go2cs converted at 2022 March 13 06:41:37 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/internal/analysisflags" ==> using analysisflags = go.cmd.vendor.golang.org.x.tools.go.analysis.@internal.analysisflags_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\internal\analysisflags\flags.go
-using sha256 = go.crypto.sha256_package;
-using gob = go.encoding.gob_package;
-using json = go.encoding.json_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using System;
-using System.ComponentModel;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.@internal;
 
+using sha256 = crypto.sha256_package;
+using gob = encoding.gob_package;
+using json = encoding.json_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using token = go.token_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+
+
+// flags common to all {single,multi,unit}checkers.
+
+using System;
+using System.ComponentModel;
 public static partial class analysisflags_package {
 
-    // flags common to all {single,multi,unit}checkers.
 public static var JSON = false;public static nint Context = -1;
 
 // Parse creates a flag for each of the analyzer's flags,
@@ -63,7 +65,6 @@ public static slice<ptr<analysis.Analyzer>> Parse(slice<ptr<analysis.Analyzer>> 
                 flag.Var(enable, a.Name, enableUsage);
                 enabled[a] = enable;
             }
-
             a.Flags.VisitAll(f => {
                 if (!multi && flag.Lookup(f.Name) != null) {
                     log.Printf("%s flag -%s would conflict with driver; skipping", a.Name, f.Name);
@@ -72,7 +73,6 @@ public static slice<ptr<analysis.Analyzer>> Parse(slice<ptr<analysis.Analyzer>> 
                 var name = prefix + f.Name;
                 flag.Var(f.Value, name, f.Usage);
             });
-
         }
         a = a__prev1;
     }
@@ -115,8 +115,7 @@ public static slice<ptr<analysis.Analyzer>> Parse(slice<ptr<analysis.Analyzer>> 
                 hasTrue = true;
             else if (ts.val == setFalse) 
                 hasFalse = true;
-            
-        }        slice<ptr<analysis.Analyzer>> keep = default;
+                    }        slice<ptr<analysis.Analyzer>> keep = default;
         if (hasTrue) {
             {
                 var a__prev1 = a;
@@ -132,7 +131,6 @@ public static slice<ptr<analysis.Analyzer>> Parse(slice<ptr<analysis.Analyzer>> 
             }
 
             analyzers = keep;
-
         }
         else if (hasFalse) {
             {
@@ -149,7 +147,6 @@ public static slice<ptr<analysis.Analyzer>> Parse(slice<ptr<analysis.Analyzer>> 
             }
 
             analyzers = keep;
-
         }
     }
     var kept = expand(analyzers);
@@ -168,7 +165,6 @@ public static slice<ptr<analysis.Analyzer>> Parse(slice<ptr<analysis.Analyzer>> 
     }
 
     return analyzers;
-
 }
 
 private static map<ptr<analysis.Analyzer>, bool> expand(slice<ptr<analysis.Analyzer>> analyzers) {
@@ -184,7 +180,6 @@ private static map<ptr<analysis.Analyzer>, bool> expand(slice<ptr<analysis.Analy
     };
     visitAll(analyzers);
     return seen;
-
 }
 
 private static void printFlags() {
@@ -214,14 +209,12 @@ private static void printFlags() {
 
         var isBool = ok && b.IsBoolFlag();
         flags = append(flags, new jsonFlag(f.Name,isBool,f.Usage));
-
     });
     var (data, err) = json.MarshalIndent(flags, "", "\t");
     if (err != null) {
         log.Fatal(err);
     }
     os.Stdout.Write(data);
-
 }
 
 // addVersionFlag registers a -V flag that, if set,
@@ -266,12 +259,10 @@ private static error Set(this versionFlag _p0, @string s) {
             log.Fatal(err);
         }
     }
-
     f.Close();
     fmt.Printf("%s version devel comments-go-here buildID=%02x\n", progname, string(h.Sum(null)));
     os.Exit(0);
     return error.As(null!)!;
-
 }
 
 // A triState is a boolean that knows whether
@@ -286,7 +277,6 @@ private partial struct triState { // : nint
 private static readonly triState unset = iota;
 private static readonly var setTrue = 0;
 private static readonly var setFalse = 1;
-
 
 private static ptr<triState> triStateFlag(@string name, triState value, @string usage) {
     flag.Var(_addr_value, name, usage);
@@ -313,7 +303,6 @@ private static error Set(this ptr<triState> _addr_ts, @string value) {
         // This error message looks poor but package "flag" adds
         // "invalid boolean value %q for -NAME: %s"
         return error.As(fmt.Errorf("want true or false"))!;
-
     }
     if (b) {
         ts.val = setTrue;
@@ -323,7 +312,6 @@ private static error Set(this ptr<triState> _addr_ts, @string value) {
         ts.val = setFalse;
     }
     return error.As(null!)!;
-
 }
 
 private static @string String(this ptr<triState> _addr_ts) => func((_, panic, _) => {
@@ -337,7 +325,6 @@ private static @string String(this ptr<triState> _addr_ts) => func((_, panic, _)
     else if (ts.val == setFalse) 
         return "false";
         panic("not reached");
-
 });
 
 private static bool IsBoolFlag(this triState ts) {
@@ -374,7 +361,6 @@ public static void PrintPlain(ptr<token.FileSet> _addr_fset, analysis.Diagnostic
                 fmt.Fprintf(os.Stderr, "%d\t%s\n", i, lines[i - 1]);
             }
         }
-
     }
 }
 
@@ -390,7 +376,6 @@ public static void Add(this JSONTree tree, ptr<token.FileSet> _addr_fset, @strin
             public @string Err;
         }
         v = new jsonError(err.Error());
-
     }
     else if (len(diags) > 0) {
         private partial struct jsonDiagnostic {
@@ -407,7 +392,6 @@ public static void Add(this JSONTree tree, ptr<token.FileSet> _addr_fset, @strin
         foreach (var (_, f) in diags) {
             diagnostics = append(diagnostics, new jsonDiagnostic(Category:f.Category,Posn:fset.Position(f.Pos).String(),Message:f.Message,));
         }        v = diagnostics;
-
     }
     if (v != null) {
         var (m, ok) = tree[id];
@@ -416,7 +400,6 @@ public static void Add(this JSONTree tree, ptr<token.FileSet> _addr_fset, @strin
             tree[id] = m;
         }
         m[name] = v;
-
     }
 }
 
@@ -426,7 +409,6 @@ public static void Print(this JSONTree tree) {
         log.Panicf("internal error: JSON marshaling failed: %v", err);
     }
     fmt.Printf("%s\n", data);
-
 }
 
 } // end analysisflags_package

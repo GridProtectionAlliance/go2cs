@@ -15,16 +15,15 @@
 //
 // Currently plugins are only supported on Linux, FreeBSD, and macOS.
 // Please report any issues.
-// package plugin -- go2cs converted at 2022 March 06 23:36:29 UTC
+
+// package plugin -- go2cs converted at 2022 March 13 06:44:33 UTC
 // import "plugin" ==> using plugin = go.plugin_package
 // Original source: C:\Program Files\Go\src\plugin\plugin.go
-
-
 namespace go;
 
 public static partial class plugin_package {
 
-    // Plugin is a loaded Go plugin.
+// Plugin is a loaded Go plugin.
 public partial struct Plugin {
     public @string pluginpath;
     public @string err; // set if plugin failed to load

@@ -4,16 +4,14 @@
 
 // Test cases for sort order of declarations.
 
-// package d -- go2cs converted at 2022 March 06 22:41:35 UTC
+// package d -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.d" ==> using d = go.go.doc.d_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\d2.go
-
-
 namespace go.go;
 
 public static partial class d_package {
 
-    // C1 should be second.
+// C1 should be second.
 public static readonly nint C1 = 1;
 
 // C0 should be first.

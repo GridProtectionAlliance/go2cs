@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:33 UTC
+//     Generated on 2022 March 13 05:52:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace go
 {
     public static partial class doc_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct namedType
         {
             // Constructors
@@ -73,7 +73,7 @@ namespace go
             public static implicit operator namedType(NilType nil) => default(namedType);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static namedType namedType_cast(dynamic value)
         {
             return new namedType(value.doc, value.name, ref value.decl, value.isEmbedded, value.isStruct, value.embedded, value.values, value.funcs, value.methods);

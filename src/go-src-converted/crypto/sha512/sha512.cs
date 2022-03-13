@@ -8,15 +8,16 @@
 // All the hash.Hash implementations returned by this package also
 // implement encoding.BinaryMarshaler and encoding.BinaryUnmarshaler to
 // marshal and unmarshal the internal state of the hash.
-// package sha512 -- go2cs converted at 2022 March 06 22:17:16 UTC
+
+// package sha512 -- go2cs converted at 2022 March 13 05:30:37 UTC
 // import "crypto/sha512" ==> using sha512 = go.crypto.sha512_package
 // Original source: C:\Program Files\Go\src\crypto\sha512\sha512.go
-using crypto = go.crypto_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-
 namespace go.crypto;
+
+using crypto = crypto_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using hash = hash_package;
 
 public static partial class sha512_package {
 
@@ -43,7 +44,6 @@ public static readonly nint Size384 = 48;
 // BlockSize is the block size, in bytes, of the SHA-512/224,
 // SHA-512/256, SHA-384 and SHA-512 hash functions.
 public static readonly nint BlockSize = 128;
-
 
 private static readonly nint chunk = 128;
 private static readonly nuint init0 = 0x6a09e667f3bcc908;
@@ -78,7 +78,6 @@ private static readonly nuint init4_384 = 0x67332667ffc00b31;
 private static readonly nuint init5_384 = 0x8eb44a8768581511;
 private static readonly nuint init6_384 = 0xdb0c2e0d64f98fa7;
 private static readonly nuint init7_384 = 0x47b5481dbefa4fa4;
-
 
 // digest represents the partial evaluation of a checksum.
 private partial struct digest {
@@ -131,7 +130,6 @@ private static void Reset(this ptr<digest> _addr_d) {
         d.h[7] = init7;
         d.nx = 0;
     d.len = 0;
-
 }
 
 private static readonly @string magic384 = "sha\x04";
@@ -139,7 +137,6 @@ private static readonly @string magic512_224 = "sha\x05";
 private static readonly @string magic512_256 = "sha\x06";
 private static readonly @string magic512 = "sha\x07";
 private static readonly var marshaledSize = len(magic512) + 8 * 8 + chunk + 8;
-
 
 private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     slice<byte> _p0 = default;
@@ -170,7 +167,6 @@ private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     b = b[..(int)len(b) + len(d.x) - int(d.nx)]; // already zero
     b = appendUint64(b, d.len);
     return (b, error.As(null!)!);
-
 }
 
 private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
@@ -198,7 +194,6 @@ private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
     b, d.len = consumeUint64(b);
     d.nx = int(d.len % chunk);
     return error.As(null!)!;
-
 }
 
 private static slice<byte> appendUint64(slice<byte> b, ulong x) {
@@ -256,8 +251,7 @@ private static nint Size(this ptr<digest> _addr_d) {
         return Size384;
     else 
         return Size;
-    
-}
+    }
 
 private static nint BlockSize(this ptr<digest> _addr_d) {
     ref digest d = ref _addr_d.val;
@@ -280,7 +274,6 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
             d.nx = 0;
         }
         p = p[(int)n..];
-
     }
     if (len(p) >= chunk) {
         n = len(p) & ~(chunk - 1);
@@ -291,7 +284,6 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
         d.nx = copy(d.x[..], p);
     }
     return ;
-
 }
 
 private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
@@ -310,8 +302,7 @@ private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
         return append(in, hash[..(int)Size256]);
     else 
         return append(in, hash[..]);
-    
-}
+    }
 
 private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic, _) => {
     ref digest d = ref _addr_d.val;
@@ -347,7 +338,6 @@ private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic,
         binary.BigEndian.PutUint64(digest[(int)56..], d.h[7]);
     }
     return digest;
-
 });
 
 // Sum512 returns the SHA512 checksum of the data.

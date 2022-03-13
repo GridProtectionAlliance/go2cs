@@ -11,18 +11,20 @@
 //
 // aix and js,wasm are similar, in that they do not define syscall.Access.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:30 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:53 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\stat_openfile.go
-using fs = go.io.fs_package;
-using os = go.os_package;
-
 namespace go.cmd.go.@internal;
+
+using fs = io.fs_package;
+using os = os_package;
+
+
+// hasWritePerm reports whether the current user has permission to write to the
+// file with the given info.
 
 public static partial class modload_package {
 
-    // hasWritePerm reports whether the current user has permission to write to the
-    // file with the given info.
 private static bool hasWritePerm(@string path, fs.FileInfo _) {
     {
         var (f, err) = os.OpenFile(path, os.O_WRONLY, 0);
@@ -32,9 +34,7 @@ private static bool hasWritePerm(@string path, fs.FileInfo _) {
             return true;
         }
     }
-
     return false;
-
 }
 
 } // end modload_package

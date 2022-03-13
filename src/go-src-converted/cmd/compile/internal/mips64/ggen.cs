@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mips64 -- go2cs converted at 2022 March 06 23:11:11 UTC
+// package mips64 -- go2cs converted at 2022 March 13 06:24:30 UTC
 // import "cmd/compile/internal/mips64" ==> using mips64 = go.cmd.compile.@internal.mips64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\mips64\ggen.go
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using mips = go.cmd.@internal.obj.mips_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using mips = cmd.@internal.obj.mips_package;
 
 public static partial class mips64_package {
 
@@ -32,7 +32,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
                 i += int64(types.PtrSize);
             }
         }
-
     }
     else if (cnt <= int64(128 * types.PtrSize)) {
         p = pp.Append(p, mips.AADDV, obj.TYPE_CONST, 0, 8 + off - 8, obj.TYPE_REG, mips.REGRT1, 0);
@@ -60,10 +59,8 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
         p = pp.Append(p, mips.ABNE, obj.TYPE_REG, mips.REGRT1, 0, obj.TYPE_BRANCH, 0, 0);
         p.Reg = mips.REGRT2;
         p.To.SetTarget(p1);
-
     }
     return _addr_p!;
-
 }
 
 private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {

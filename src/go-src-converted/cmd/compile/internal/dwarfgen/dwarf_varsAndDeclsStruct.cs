@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:12:16 UTC
+//     Generated on 2022 March 13 06:25:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace @internal
 {
     public static partial class dwarfgen_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct varsAndDecls
         {
             // Constructors
@@ -73,7 +73,7 @@ namespace @internal
             public static implicit operator varsAndDecls(NilType nil) => default(varsAndDecls);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static varsAndDecls varsAndDecls_cast(dynamic value)
         {
             return new varsAndDecls(value.decls, value.vars, value.paramOrder);

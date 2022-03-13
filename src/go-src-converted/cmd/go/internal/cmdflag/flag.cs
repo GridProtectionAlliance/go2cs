@@ -3,27 +3,29 @@
 // license that can be found in the LICENSE file.
 
 // Package cmdflag handles flag processing common to several go tools.
-// package cmdflag -- go2cs converted at 2022 March 06 23:17:46 UTC
+
+// package cmdflag -- go2cs converted at 2022 March 13 06:31:07 UTC
 // import "cmd/go/internal/cmdflag" ==> using cmdflag = go.cmd.go.@internal.cmdflag_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\cmdflag\flag.go
-using errors = go.errors_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using errors = errors_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// The flag handling part of go commands such as test is large and distracting.
+// We can't use the standard flag package because some of the flags from
+// our command line are for us, and some are for the binary we're running,
+// and some are for both.
+
+// ErrFlagTerminator indicates the distinguished token "--", which causes the
+// flag package to treat all subsequent arguments as non-flags.
+
+using System;
 public static partial class cmdflag_package {
 
-    // The flag handling part of go commands such as test is large and distracting.
-    // We can't use the standard flag package because some of the flags from
-    // our command line are for us, and some are for the binary we're running,
-    // and some are for both.
-
-    // ErrFlagTerminator indicates the distinguished token "--", which causes the
-    // flag package to treat all subsequent arguments as non-flags.
 public static var ErrFlagTerminator = errors.New("flag terminator");
 
 // A FlagNotDefinedError indicates a flag-like argument that does not correspond
@@ -97,14 +99,11 @@ public static (ptr<flag.Flag>, slice<@string>, error) ParseOne(ptr<flag.FlagSet>
         }
     }
 
-
     f = fs.Lookup(name);
     if (f == null) {
         return (_addr_null!, args, error.As(new FlagNotDefinedError(RawArg:raw,Name:name,HasValue:hasValue,Value:value,))!);
     }
-    Func<@string, object[], (ptr<flag.Flag>, slice<@string>, error)> failf = (format, a) => {
-        return (_addr_f!, args, error.As(fmt.Errorf(format, a))!);
-    };
+    Func<@string, object[], (ptr<flag.Flag>, slice<@string>, error)> failf = (format, a) => (_addr_f!, args, error.As(fmt.Errorf(format, a))!);
 
     {
         boolFlag (fv, ok) = boolFlag.As(f.Value._<boolFlag>())!;
@@ -123,7 +122,6 @@ public static (ptr<flag.Flag>, slice<@string>, error) ParseOne(ptr<flag.FlagSet>
                     err = err__prev3;
 
                 }
-
             }
             else
  {
@@ -139,9 +137,7 @@ public static (ptr<flag.Flag>, slice<@string>, error) ParseOne(ptr<flag.FlagSet>
                     err = err__prev3;
 
                 }
-
             }
-
         }
         else
  { 
@@ -151,11 +147,9 @@ public static (ptr<flag.Flag>, slice<@string>, error) ParseOne(ptr<flag.FlagSet>
                 hasValue = true;
                 (value, args) = (args[0], args[(int)1..]);
             }
-
             if (!hasValue) {
                 return _addr_failf("flag needs an argument: -%s", name)!;
             }
-
             {
                 var err__prev2 = err;
 
@@ -168,13 +162,10 @@ public static (ptr<flag.Flag>, slice<@string>, error) ParseOne(ptr<flag.FlagSet>
                 err = err__prev2;
 
             }
-
         }
     }
 
-
     return (_addr_f!, args, error.As(null!)!);
-
 }
 
 private partial interface boolFlag {

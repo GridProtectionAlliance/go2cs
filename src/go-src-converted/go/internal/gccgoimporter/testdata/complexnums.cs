@@ -1,8 +1,6 @@
-// package complexnums -- go2cs converted at 2022 March 06 23:32:49 UTC
+// package complexnums -- go2cs converted at 2022 March 13 06:42:30 UTC
 // import "go/internal/gccgoimporter.complexnums" ==> using complexnums = go.go.@internal.gccgoimporter.complexnums_package
 // Original source: C:\Program Files\Go\src\go\internal\gccgoimporter\testdata\complexnums.go
-
-
 namespace go.go.@internal;
 
 public static partial class complexnums_package {

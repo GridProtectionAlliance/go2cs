@@ -23,19 +23,22 @@
 // Conn, a convenient packaging of Reader, Writer, and Pipeline for use
 // with a single network connection.
 //
-// package textproto -- go2cs converted at 2022 March 06 22:21:11 UTC
+
+// package textproto -- go2cs converted at 2022 March 13 05:36:19 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Program Files\Go\src\net\textproto\textproto.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using net = go.net_package;
-
 namespace go.net;
+
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+using net = net_package;
+
+
+// An Error represents a numeric error response from a server.
 
 public static partial class textproto_package {
 
-    // An Error represents a numeric error response from a server.
 public partial struct Error {
     public nint Code;
     public @string Msg;
@@ -91,7 +94,6 @@ public static (ptr<Conn>, error) Dial(@string network, @string addr) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_NewConn(c)!, error.As(null!)!);
-
 }
 
 // Cmd is a convenience method that sends a command after
@@ -133,7 +135,6 @@ private static (nuint, error) Cmd(this ptr<Conn> _addr_c, @string format, params
         return (0, error.As(err)!);
     }
     return (id, error.As(null!)!);
-
 }
 
 // TrimString returns s without leading and trailing ASCII space.
@@ -165,7 +166,6 @@ private static bool isASCIISpace(byte b) {
 private static bool isASCIILetter(byte b) {
     b |= 0x20; // make lower case
     return 'a' <= b && b <= 'z';
-
 }
 
 } // end textproto_package

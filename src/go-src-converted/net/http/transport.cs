@@ -7,45 +7,46 @@
 // This is the low-level Transport implementation of RoundTripper.
 // The high-level interface is in client.go.
 
-// package http -- go2cs converted at 2022 March 06 22:23:23 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:49 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\transport.go
-using bufio = go.bufio_package;
-using gzip = go.compress.gzip_package;
-using list = go.container.list_package;
-using context = go.context_package;
-using tls = go.crypto.tls_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using net = go.net_package;
-using httptrace = go.net.http.httptrace_package;
-using ascii = go.net.http.@internal.ascii_package;
-using textproto = go.net.textproto_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-
-using httpguts = go.golang.org.x.net.http.httpguts_package;
-using httpproxy = go.golang.org.x.net.http.httpproxy_package;
-using System;
-using System.Threading;
-
-
 namespace go.net;
 
+using bufio = bufio_package;
+using gzip = compress.gzip_package;
+using list = container.list_package;
+using context = context_package;
+using tls = crypto.tls_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using net = net_package;
+using httptrace = net.http.httptrace_package;
+using ascii = net.http.@internal.ascii_package;
+using textproto = net.textproto_package;
+using url = net.url_package;
+using os = os_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+
+using httpguts = golang.org.x.net.http.httpguts_package;
+using httpproxy = golang.org.x.net.http.httpproxy_package;
+
+
+// DefaultTransport is the default implementation of Transport and is
+// used by DefaultClient. It establishes network connections as needed
+// and caches them for reuse by subsequent calls. It uses HTTP proxies
+// as directed by the $HTTP_PROXY and $NO_PROXY (or $http_proxy and
+// $no_proxy) environment variables.
+
+using System;
+using System.Threading;
 public static partial class http_package {
 
-    // DefaultTransport is the default implementation of Transport and is
-    // used by DefaultClient. It establishes network connections as needed
-    // and caches them for reuse by subsequent calls. It uses HTTP proxies
-    // as directed by the $HTTP_PROXY and $NO_PROXY (or $http_proxy and
-    // $no_proxy) environment variables.
 public static RoundTripper DefaultTransport = addr(new Transport(Proxy:ProxyFromEnvironment,DialContext:(&net.Dialer{Timeout:30*time.Second,KeepAlive:30*time.Second,}).DialContext,ForceAttemptHTTP2:true,MaxIdleConns:100,IdleConnTimeout:90*time.Second,TLSHandshakeTimeout:10*time.Second,ExpectContinueTimeout:1*time.Second,));
 
 // DefaultMaxIdleConnsPerHost is the default value of Transport's
@@ -285,7 +286,6 @@ private static nint writeBufferSize(this ptr<Transport> _addr_t) {
         return t.WriteBufferSize;
     }
     return 4 << 10;
-
 }
 
 private static nint readBufferSize(this ptr<Transport> _addr_t) {
@@ -295,7 +295,6 @@ private static nint readBufferSize(this ptr<Transport> _addr_t) {
         return t.ReadBufferSize;
     }
     return 4 << 10;
-
 }
 
 // Clone returns a deep copy of t's exported fields.
@@ -314,7 +313,6 @@ private static ptr<Transport> Clone(this ptr<Transport> _addr_t) {
         }        t2.TLSNextProto = npm;
     }
     return _addr_t2!;
-
 }
 
 // h2Transport is the interface we expect to be able to call from
@@ -360,20 +358,16 @@ private static void onceSetNextProtoDefaults(this ptr<Transport> _addr_t) {
                         }
 
                     }
-
                 }
 
             }
-
         }
     }
-
 
     if (t.TLSNextProto != null) { 
         // This is the documented way to disable http2 on a
         // Transport.
         return ;
-
     }
     if (!t.ForceAttemptHTTP2 && (t.TLSClientConfig != null || t.Dial != null || t.DialContext != null || t.hasCustomTLSDialer())) { 
         // Be conservative and don't automatically enable
@@ -383,7 +377,6 @@ private static void onceSetNextProtoDefaults(this ptr<Transport> _addr_t) {
         // by modifying their tls.Config. Issue 14275.
         // However, if ForceAttemptHTTP2 is true, it overrides the above checks.
         return ;
-
     }
     if (omitBundledHTTP2) {
         return ;
@@ -414,10 +407,8 @@ private static void onceSetNextProtoDefaults(this ptr<Transport> _addr_t) {
  {
                 t2.MaxHeaderListSize = uint32(limit1);
             }
-
         }
     }
-
 }
 
 // ProxyFromEnvironment returns the URL of the proxy to use for a
@@ -450,9 +441,7 @@ public static (ptr<url.URL>, error) ProxyFromEnvironment(ptr<Request> _addr_req)
 public static Func<ptr<Request>, (ptr<url.URL>, error)> ProxyURL(ptr<url.URL> _addr_fixedURL) {
     ref url.URL fixedURL = ref _addr_fixedURL.val;
 
-    return _p0 => {
-        return (fixedURL, null);
-    };
+    return _p0 => (fixedURL, null);
 }
 
 // transportRequest is a wrapper around a *Request that adds
@@ -474,7 +463,6 @@ private static Header extraHeaders(this ptr<transportRequest> _addr_tr) {
         tr.extra = make(Header);
     }
     return tr.extra;
-
 }
 
 private static void setError(this ptr<transportRequest> _addr_tr, error err) {
@@ -485,7 +473,6 @@ private static void setError(this ptr<transportRequest> _addr_tr, error err) {
         tr.err = err;
     }
     tr.mu.Unlock();
-
 }
 
 // useRegisteredProtocol reports whether an alternate protocol (as registered
@@ -500,10 +487,8 @@ private static bool useRegisteredProtocol(this ptr<Transport> _addr_t, ptr<Reque
         // HTTP/2 code to take over requests if there's an
         // existing cached HTTP/2 connection.
         return false;
-
     }
     return true;
-
 }
 
 // alternateRoundTripper returns the alternate RoundTripper to use
@@ -518,7 +503,6 @@ private static RoundTripper alternateRoundTripper(this ptr<Transport> _addr_t, p
     }
     map<@string, RoundTripper> (altProto, _) = t.altProto.Load()._<map<@string, RoundTripper>>();
     return altProto[req.URL.Scheme];
-
 }
 
 // roundTrip implements a RoundTripper over HTTP.
@@ -576,16 +560,13 @@ private static (ptr<Response>, error) roundTrip(this ptr<Transport> _addr_t, ptr
                 resp = resp__prev2;
 
             }
-
             error err = default!;
             req, err = rewindBody(_addr_req);
             if (err != null) {
                 return (_addr_null!, error.As(err)!);
             }
-
         }
     }
-
     if (!isHTTP) {
         req.closeBody();
         return (_addr_null!, error.As(badStringError("unsupported protocol scheme", scheme))!);
@@ -618,7 +599,6 @@ private static (ptr<Response>, error) roundTrip(this ptr<Transport> _addr_t, ptr
             // HTTP/2 path.
             t.setReqCanceler(cancelKey, null); // not cancelable with CancelRequest
             resp, err = pconn.alt.RoundTrip(req);
-
         }
         else
  {
@@ -644,9 +624,7 @@ private static (ptr<Response>, error) roundTrip(this ptr<Transport> _addr_t, ptr
                 }
 
             }
-
             return (_addr_null!, error.As(err)!);
-
         }
         testHookRoundTripRetried(); 
 
@@ -656,7 +634,6 @@ private static (ptr<Response>, error) roundTrip(this ptr<Transport> _addr_t, ptr
             return (_addr_null!, error.As(err)!);
         }
     }
-
 }
 
 private static var errCannotRewind = errors.New("net/http: cannot rewind body after connection loss");
@@ -696,7 +673,6 @@ private static ptr<Request> setupRewindBody(ptr<Request> _addr_req) {
     ref Request newReq = ref heap(req, out ptr<Request> _addr_newReq);
     newReq.Body = addr(new readTrackingBody(ReadCloser:req.Body));
     return _addr__addr_newReq!;
-
 }
 
 // rewindBody returns a new request with the body rewound.
@@ -724,7 +700,6 @@ private static (ptr<Request>, error) rewindBody(ptr<Request> _addr_req) {
     ref Request newReq = ref heap(req, out ptr<Request> _addr_newReq);
     newReq.Body = addr(new readTrackingBody(ReadCloser:body));
     return (_addr__addr_newReq!, error.As(null!)!);
-
 }
 
 // shouldRetryRequest reports whether we should retry sending a failed
@@ -742,12 +717,10 @@ private static bool shouldRetryRequest(this ptr<persistConn> _addr_pc, ptr<Reque
         // again to get a new TCP connection, rather than failing
         // this request.
         return true;
-
     }
     if (err == errMissingHost) { 
         // User error.
         return false;
-
     }
     if (!pc.isReused()) { 
         // This was a fresh connection. There's no reason the server
@@ -758,7 +731,6 @@ private static bool shouldRetryRequest(this ptr<persistConn> _addr_pc, ptr<Reque
         // is just hanging up on us because it doesn't like
         // our request (as opposed to sending an error).
         return false;
-
     }
     {
         nothingWrittenError (_, ok) = err._<nothingWrittenError>();
@@ -767,14 +739,11 @@ private static bool shouldRetryRequest(this ptr<persistConn> _addr_pc, ptr<Reque
             // We never wrote anything, so it's safe to retry, if there's no body or we
             // can "rewind" the body with GetBody.
             return req.outgoingLength() == 0 || req.GetBody != null;
-
         }
     }
-
     if (!req.isReplayable()) { 
         // Don't retry non-idempotent requests.
         return false;
-
     }
     {
         (_, ok) = err._<transportReadFromServerError>();
@@ -783,16 +752,13 @@ private static bool shouldRetryRequest(this ptr<persistConn> _addr_pc, ptr<Reque
             // We got some non-EOF net.Conn.Read failure reading
             // the 1st response byte from the server.
             return true;
-
         }
     }
-
     if (err == errServerClosedIdle) { 
         // The server replied with io.EOF while we were trying to
         // read the response. Probably an unfortunately keep-alive
         // timeout, just as the client was writing a request.
         return true;
-
     }
     return false; // conservatively
 }
@@ -823,13 +789,11 @@ private static void RegisterProtocol(this ptr<Transport> _addr_t, @string scheme
             panic("protocol " + scheme + " already registered");
         }
     }
-
     var newMap = make_map<@string, RoundTripper>();
     foreach (var (k, v) in oldMap) {
         newMap[k] = v;
     }    newMap[scheme] = rt;
     t.altProto.Store(newMap);
-
 });
 
 // CloseIdleConnections closes any connections which were previously
@@ -857,7 +821,6 @@ private static void CloseIdleConnections(this ptr<Transport> _addr_t) {
             t2.CloseIdleConnections();
         }
     }
-
 }
 
 // CancelRequest cancels an in-flight request by closing its connection.
@@ -888,7 +851,6 @@ private static bool cancelRequest(this ptr<Transport> _addr_t, cancelKey key, er
         cancel(err);
     }
     return cancel != null;
-
 });
 
 //
@@ -928,7 +890,6 @@ private static (connectMethod, error) connectMethodForRequest(this ptr<Transport
     }
     cm.onlyH1 = treq.requiresHTTP1();
     return (cm, error.As(err)!);
-
 }
 
 // proxyAuth returns the Proxy-Authorization header to set
@@ -948,9 +909,7 @@ private static @string proxyAuth(this ptr<connectMethod> _addr_cm) {
             return "Basic " + basicAuth(username, password);
         }
     }
-
     return "";
-
 }
 
 // error values for debugging and testing, not seen by users.
@@ -987,7 +946,6 @@ private static void putOrCloseIdleConn(this ptr<Transport> _addr_t, ptr<persistC
             pconn.close(err);
         }
     }
-
 }
 
 private static nint maxIdleConnsPerHost(this ptr<Transport> _addr_t) {
@@ -1000,9 +958,7 @@ private static nint maxIdleConnsPerHost(this ptr<Transport> _addr_t) {
             return v;
         }
     }
-
     return DefaultMaxIdleConnsPerHost;
-
 }
 
 // tryPutIdleConn adds pconn to the list of idle persistent connections awaiting
@@ -1048,8 +1004,6 @@ private static error tryPutIdleConn(this ptr<Transport> _addr_t, ptr<persistConn
                     }
                 }
             else
-
-
             } { 
                 // HTTP/2.
                 // Can hand the same pconn to everyone in the waiting list,
@@ -1059,10 +1013,7 @@ private static error tryPutIdleConn(this ptr<Transport> _addr_t, ptr<persistConn
                     w = q.popFront();
                     w.tryDeliver(pconn, null);
                 }
-
-
             }
-
             if (q.len() == 0) {
                 delete(t.idleConnWait, key);
             }
@@ -1070,14 +1021,11 @@ private static error tryPutIdleConn(this ptr<Transport> _addr_t, ptr<persistConn
  {
                 t.idleConnWait[key] = q;
             }
-
             if (done) {
                 return error.As(null!)!;
             }
-
         }
     }
-
 
     if (t.closeIdle) {
         return error.As(errCloseIdle)!;
@@ -1111,7 +1059,6 @@ private static error tryPutIdleConn(this ptr<Transport> _addr_t, ptr<persistConn
     }
     pconn.idleAt = time.Now();
     return error.As(null!)!;
-
 });
 
 // queueForIdleConn queues w to receive the next idle connection for w.cm.
@@ -1135,7 +1082,6 @@ private static bool queueForIdleConn(this ptr<Transport> _addr_t, ptr<wantConn> 
     if (w == null) { 
         // Happens in test hook.
         return false;
-
     }
     time.Time oldTime = default;
     if (t.IdleConnTimeout > 0) {
@@ -1159,9 +1105,7 @@ private static bool queueForIdleConn(this ptr<Transport> _addr_t, ptr<wantConn> 
                     // time.AfterFunc called it); it acquires idleMu, which we're
                     // holding, and does a synchronous net.Conn.Close.
                     go_(() => pconn.closeConnIfStillIdle());
-
                 }
-
                 if (pconn.isBroken() || tooOld) { 
                     // If either persistConn.readLoop has marked the connection
                     // broken, but Transport.removeIdleConn has not yet removed it
@@ -1170,9 +1114,7 @@ private static bool queueForIdleConn(this ptr<Transport> _addr_t, ptr<wantConn> 
                     // cases it's already in the process of being closed.
                     list = list[..(int)len(list) - 1];
                     continue;
-
                 }
-
                 delivered = w.tryDeliver(pconn, null);
                 if (delivered) {
                     if (pconn.alt != null) { 
@@ -1185,13 +1127,9 @@ private static bool queueForIdleConn(this ptr<Transport> _addr_t, ptr<wantConn> 
                         // Remove it from the list.
                         t.idleLRU.remove(pconn);
                         list = list[..(int)len(list) - 1];
-
                     }
-
                 }
-
                 stop = true;
-
             }
 
             if (len(list) > 0) {
@@ -1201,11 +1139,9 @@ private static bool queueForIdleConn(this ptr<Transport> _addr_t, ptr<wantConn> 
  {
                 delete(t.idleConn, w.key);
             }
-
             if (stop) {
                 return delivered;
             }
-
         }
     } 
 
@@ -1218,7 +1154,6 @@ private static bool queueForIdleConn(this ptr<Transport> _addr_t, ptr<wantConn> 
     q.pushBack(w);
     t.idleConnWait[w.key] = q;
     return false;
-
 });
 
 // removeIdleConn marks pconn as dead.
@@ -1264,12 +1199,10 @@ private static bool removeIdleConnLocked(this ptr<Transport> _addr_t, ptr<persis
                 t.idleConn[key] = pconns[..(int)len(pconns) - 1];
                 removed = true;
                 break;
-
             }
             break;
     }
     return removed;
-
 }
 
 private static void setReqCanceler(this ptr<Transport> _addr_t, cancelKey key, Action<error> fn) => func((defer, _, _) => {
@@ -1310,7 +1243,6 @@ private static bool replaceReqCanceler(this ptr<Transport> _addr_t, cancelKey ke
         delete(t.reqCanceler, key);
     }
     return true;
-
 });
 
 private static net.Dialer zeroDialer = default;
@@ -1329,10 +1261,8 @@ private static (net.Conn, error) dial(this ptr<Transport> _addr_t, context.Conte
             err = errors.New("net/http: Transport.Dial hook returned (nil, nil)");
         }
         return (c, error.As(err)!);
-
     }
     return zeroDialer.DialContext(ctx, network, addr);
-
 }
 
 // A wantConn records state about a wanted connection
@@ -1383,7 +1313,6 @@ private static bool tryDeliver(this ptr<wantConn> _addr_w, ptr<persistConn> _add
     }
     close(w.ready);
     return true;
-
 });
 
 // cancel marks w as no longer wanting a result (for example, due to cancellation).
@@ -1442,7 +1371,6 @@ private static ptr<wantConn> popFront(this ptr<wantConnQueue> _addr_q) {
     q.head[q.headPos] = null;
     q.headPos++;
     return _addr_w!;
-
 }
 
 // peekFront returns the wantConn at the front of the queue without removing it.
@@ -1456,7 +1384,6 @@ private static ptr<wantConn> peekFront(this ptr<wantConnQueue> _addr_q) {
         return _addr_q.tail[0]!;
     }
     return _addr_null!;
-
 }
 
 // cleanFront pops any wantConns that are no longer waiting from the head of the
@@ -1472,9 +1399,7 @@ private static bool cleanFront(this ptr<wantConnQueue> _addr_q) {
         }
         q.popFront();
         cleaned = true;
-
     }
-
 }
 
 private static (net.Conn, error) customDialTLS(this ptr<Transport> _addr_t, context.Context ctx, @string network, @string addr) {
@@ -1493,7 +1418,6 @@ private static (net.Conn, error) customDialTLS(this ptr<Transport> _addr_t, cont
         err = errors.New("net/http: Transport.DialTLS or DialTLSContext returned (nil, nil)");
     }
     return ;
-
 }
 
 // getConn dials and creates a new persistConn to the target as
@@ -1536,10 +1460,8 @@ private static (ptr<persistConn>, error) getConn(this ptr<Transport> _addr_t, pt
             t.setReqCanceler(treq.cancelKey, _p0 => {
             });
             return (_addr_pc!, error.As(null!)!);
-
         }
     }
-
 
     var cancelc = make_channel<error>(1);
     t.setReqCanceler(treq.cancelKey, err => {
@@ -1563,7 +1485,6 @@ private static (ptr<persistConn>, error) getConn(this ptr<Transport> _addr_t, pt
             err = errRequestCanceledConn;
         }
         return (_addr_null!, error.As(err)!);
-
     }
     return (_addr_w.pc!, error.As(w.err)!);
     return (_addr_null!, error.As(errRequestCanceledConn)!);
@@ -1572,7 +1493,6 @@ private static (ptr<persistConn>, error) getConn(this ptr<Transport> _addr_t, pt
         err = errRequestCanceledConn;
     }
     return (_addr_null!, error.As(err)!);
-
 });
 
 // queueForDial queues w to wait for permission to begin dialing.
@@ -1602,7 +1522,6 @@ private static void queueForDial(this ptr<Transport> _addr_t, ptr<wantConn> _add
         }
     }
 
-
     if (t.connsPerHostWait == null) {
         t.connsPerHostWait = make_map<connectMethodKey, wantConnQueue>();
     }
@@ -1610,7 +1529,6 @@ private static void queueForDial(this ptr<Transport> _addr_t, ptr<wantConn> _add
     q.cleanFront();
     q.pushBack(w);
     t.connsPerHostWait[w.key] = q;
-
 });
 
 // dialConnFor dials on behalf of w and delivers the result to w.
@@ -1629,7 +1547,6 @@ private static void dialConnFor(this ptr<Transport> _addr_t, ptr<wantConn> _addr
         // or it is HTTP/2 and can be shared.
         // Add to the idle connection pool.
         t.putOrCloseIdleConn(pc);
-
     }
     if (err != null) {
         t.decConnsPerHost(w.key);
@@ -1651,7 +1568,6 @@ private static void decConnsPerHost(this ptr<Transport> _addr_t, connectMethodKe
         // Shouldn't happen, but if it does, the counting is buggy and could
         // easily lead to a silent deadlock, so report the problem loudly.
         panic("net/http: internal error: connCount underflow");
-
     }
     {
         var q = t.connsPerHostWait[key];
@@ -1675,13 +1591,10 @@ private static void decConnsPerHost(this ptr<Transport> _addr_t, connectMethodKe
                 // q is a value (like a slice), so we have to store
                 // the updated q back into the map.
                 t.connsPerHostWait[key] = q;
-
             }
-
             if (done) {
                 return ;
             }
-
         }
     } 
 
@@ -1725,7 +1638,6 @@ private static error addTLS(this ptr<persistConn> _addr_pconn, context.Context c
             });
         }
     }
-
     go_(() => () => {
         if (trace != null && trace.TLSHandshakeStart != null) {
             trace.TLSHandshakeStart();
@@ -1735,7 +1647,6 @@ private static error addTLS(this ptr<persistConn> _addr_pconn, context.Context c
             timer.Stop();
         }
         errc.Send(err);
-
     }());
     {
         var err__prev1 = err;
@@ -1752,7 +1663,6 @@ private static error addTLS(this ptr<persistConn> _addr_pconn, context.Context c
         err = err__prev1;
 
     }
-
     ref var cs = ref heap(tlsConn.ConnectionState(), out ptr<var> _addr_cs);
     if (trace != null && trace.TLSHandshakeDone != null) {
         trace.TLSHandshakeDone(cs, null);
@@ -1761,7 +1671,6 @@ private static error addTLS(this ptr<persistConn> _addr_pconn, context.Context c
     pconn.tlsState = ref _addr_pconn.tlsState.val;
     pconn.conn = tlsConn;
     return error.As(null!)!;
-
 }
 
 private partial interface erringRoundTripper {
@@ -1779,10 +1688,8 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
         if (cm.proxyURL != null) { 
             // Return a typed error, per Issue 16997
             return addr(new net.OpError(Op:"proxyconnect",Net:"tcp",Err:err));
-
         }
         return _addr_err!;
-
     };
     if (cm.scheme() == "https" && t.hasCustomTLSDialer()) {
         error err = default!;
@@ -1799,7 +1706,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
                 if (trace != null && trace.TLSHandshakeStart != null) {
                     trace.TLSHandshakeStart();
                 }
-
                 {
                     error err__prev3 = err;
 
@@ -1816,19 +1722,15 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
                     err = err__prev3;
 
                 }
-
                 ref var cs = ref heap(tc.ConnectionState(), out ptr<var> _addr_cs);
                 if (trace != null && trace.TLSHandshakeDone != null) {
                     trace.TLSHandshakeDone(cs, null);
                 }
-
                 _addr_pconn.tlsState = _addr_cs;
                 pconn.tlsState = ref _addr_pconn.tlsState.val;
-
             }
 
         }
-
     }
     else
  {
@@ -1844,13 +1746,11 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
             if (err != null) {
                 return (_addr_null!, error.As(wrapErr(err))!);
             }
-
             err = error.As(pconn.addTLS(ctx, firstTLSHost, trace))!;
 
             if (err != null) {
                 return (_addr_null!, error.As(wrapErr(err))!);
             }
-
         }
     }
 
@@ -1868,7 +1768,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
             }
 
         }
-
         {
             error err__prev1 = err;
 
@@ -1882,7 +1781,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
             err = err__prev1;
 
         }
-
     else if (cm.targetScheme == "http") 
         pconn.isProxy = true;
         {
@@ -1900,7 +1798,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
             pa = pa__prev1;
 
         }
-
     else if (cm.targetScheme == "https") 
         conn = pconn.conn;
         Header hdr = default;
@@ -1932,7 +1829,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
             pa = pa__prev1;
 
         }
-
         ptr<Request> connectReq = addr(new Request(Method:"CONNECT",URL:&url.URL{Opaque:cm.targetAddr},Host:cm.targetAddr,Header:hdr,)); 
 
         // If there's no done channel (no deadline or cancellation
@@ -1959,7 +1855,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
             // TLS server will not speak until spoken to.
             var br = bufio.NewReader(conn);
             resp, err = ReadResponse(br, connectReq);
-
         }());
         conn.Close().Send(didReadResponse);
         return (_addr_null!, error.As(connectCtx.Err())!);
@@ -1988,7 +1883,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
             err = err__prev2;
 
         }
-
     }
     {
         var s = pconn.tlsState;
@@ -2005,20 +1899,15 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
                         if (ok) { 
                             // pconn.conn was closed by next (http2configureTransports.upgradeFn).
                             return (_addr_null!, error.As(e.RoundTripErr())!);
-
                         }
 
                     }
-
                     return (addr(new persistConn(t:t,cacheKey:pconn.cacheKey,alt:alt)), error.As(null!)!);
-
                 }
 
             }
-
         }
     }
-
 
     pconn.br = bufio.NewReaderSize(pconn, t.readBufferSize());
     pconn.bw = bufio.NewWriterSize(new persistConnWriter(pconn), t.writeBufferSize());
@@ -2026,7 +1915,6 @@ private static (ptr<persistConn>, error) dialConn(this ptr<Transport> _addr_t, c
     go_(() => pconn.readLoop());
     go_(() => pconn.writeLoop());
     return (_addr_pconn!, error.As(null!)!);
-
 });
 
 // persistConnWriter is the io.Writer written to by pc.bw.
@@ -2102,7 +1990,6 @@ private static connectMethodKey key(this ptr<connectMethod> _addr_cm) {
         }
     }
     return new connectMethodKey(proxy:proxyStr,scheme:cm.targetScheme,addr:targetAddr,onlyH1:cm.onlyH1,);
-
 }
 
 // scheme returns the first hop scheme: http, https, or socks5
@@ -2113,7 +2000,6 @@ private static @string scheme(this ptr<connectMethod> _addr_cm) {
         return cm.proxyURL.Scheme;
     }
     return cm.targetScheme;
-
 }
 
 // addr returns the first hop "host:port" to which we need to TCP connect.
@@ -2124,7 +2010,6 @@ private static @string addr(this ptr<connectMethod> _addr_cm) {
         return canonicalAddr(_addr_cm.proxyURL);
     }
     return cm.targetAddr;
-
 }
 
 // tlsHost returns the host name to match against the peer's
@@ -2137,7 +2022,6 @@ private static @string tlsHost(this ptr<connectMethod> _addr_cm) {
         h = h[..(int)strings.LastIndex(h, ":")];
     }
     return h;
-
 }
 
 // connectMethodKey is the map key version of connectMethod, with a
@@ -2157,7 +2041,6 @@ private static @string String(this connectMethodKey k) {
         h1 = ",h1";
     }
     return fmt.Sprintf("%s|%s%s|%s", k.proxy, k.scheme, h1, k.addr);
-
 }
 
 // persistConn wraps a connection, usually a persistent one
@@ -2210,7 +2093,6 @@ private static long maxHeaderResponseSize(this ptr<persistConn> _addr_pc) {
             return v;
         }
     }
-
     return 10 << 20; // conservative default; same as http2
 }
 
@@ -2231,7 +2113,6 @@ private static (nint, error) Read(this ptr<persistConn> _addr_pc, slice<byte> p)
     }
     pc.readLimit -= int64(n);
     return ;
-
 }
 
 // isBroken reports whether this connection is in a known broken state.
@@ -2277,7 +2158,6 @@ private static httptrace.GotConnInfo gotIdleConnTrace(this ptr<persistConn> _add
         t.IdleTime = time.Since(idleAt);
     }
     return ;
-
 });
 
 private static void cancelRequest(this ptr<persistConn> _addr_pc, error err) => func((defer, _, _) => {
@@ -2304,13 +2184,10 @@ private static void closeConnIfStillIdle(this ptr<persistConn> _addr_pc) => func
         if (!ok) { 
             // Not idle.
             return ;
-
         }
     }
-
     t.removeIdleConnLocked(pc);
     pc.close(errIdleConnTimeout);
-
 });
 
 // mapRoundTripError returns the appropriate error value for
@@ -2351,7 +2228,6 @@ private static error mapRoundTripError(this ptr<persistConn> _addr_pc, ptr<trans
     if (err == errServerClosedIdle) { 
         // Don't decorate
         return error.As(err)!;
-
     }
     {
         transportReadFromServerError (_, ok) = err._<transportReadFromServerError>();
@@ -2359,19 +2235,15 @@ private static error mapRoundTripError(this ptr<persistConn> _addr_pc, ptr<trans
         if (ok) { 
             // Don't decorate
             return error.As(err)!;
-
         }
     }
-
     if (pc.isBroken()) {
         if (pc.nwrite == startBytesWritten) {
             return error.As(new nothingWrittenError(err))!;
         }
         return error.As(fmt.Errorf("net/http: HTTP/1.x transport connection broken: %v", err))!;
-
     }
     return error.As(err)!;
-
 }
 
 // errCallerOwnsConn is an internal sentinel error used when we hand
@@ -2401,12 +2273,10 @@ private static void readLoop(this ptr<persistConn> _addr_pc) => func((defer, _, 
             }
 
         }
-
         if (trace != null && trace.PutIdleConn != null) {
             trace.PutIdleConn(null);
         }
         return true;
-
     }; 
 
     // eofc is used to block caller goroutines reading from Response.Body
@@ -2466,7 +2336,6 @@ private static void readLoop(this ptr<persistConn> _addr_pc) => func((defer, _, 
             // or we get an unexpected informational (1xx) response.
             // StatusCode 100 is already handled above.
             alive = false;
-
         }
         if (!hasBody || bodyWritable) {
             var replaced = pc.t.replaceReqCanceler(rc.cancelKey, null); 
@@ -2481,11 +2350,9 @@ private static void readLoop(this ptr<persistConn> _addr_pc) => func((defer, _, 
             if (bodyWritable) {
                 closeErr = errCallerOwnsConn;
             }
-
             return ;
             testHookReadLoopBeforeNextRead();
             continue;
-
         }
         var waitForBodyRead = make_channel<bool>(2);
         ptr<bodyEOFSignal> body = addr(new bodyEOFSignal(body:resp.Body,earlyCloseFn:func()error{waitForBodyRead<-false<-eofcreturnnil},fn:func(errerror)error{isEOF:=err==io.EOFwaitForBodyRead<-isEOFifisEOF{<-eofc}elseiferr!=nil{ifcerr:=pc.canceled();cerr!=nil{returncerr}}returnerr},));
@@ -2510,9 +2377,7 @@ private static void readLoop(this ptr<persistConn> _addr_pc) => func((defer, _, 
         pc.t.cancelRequest(rc.cancelKey, rc.req.Context().Err());
         alive = false;
         testHookReadLoopBeforeNextRead();
-
     }
-
 });
 
 private static void readLoopPeekFailLocked(this ptr<persistConn> _addr_pc, error peekErr) {
@@ -2534,14 +2399,11 @@ private static void readLoopPeekFailLocked(this ptr<persistConn> _addr_pc, error
  {
                 log.Printf("Unsolicited response received on idle HTTP channel starting with %q; err=%v", buf, peekErr);
             }
-
         }
     }
-
     if (peekErr == io.EOF) { 
         // common case.
         pc.closeLocked(errServerClosedIdle);
-
     }
     else
  {
@@ -2560,7 +2422,6 @@ private static bool is408Message(slice<byte> buf) {
         return false;
     }
     return string(buf[(int)8..(int)12]) == " 408";
-
 }
 
 // readResponse reads an HTTP response (or two, in the case of "Expect:
@@ -2581,7 +2442,6 @@ private static (ptr<Response>, error) readResponse(this ptr<persistConn> _addr_p
             }
 
         }
-
     }
     nint num1xx = 0; // number of informational 1xx headers received
     const nint max1xxResponses = 5; // arbitrary bound on number of informational responses
@@ -2607,7 +2467,6 @@ private static (ptr<Response>, error) readResponse(this ptr<persistConn> _addr_p
                 close(continueCh);
                 continueCh = null;
             }
-
         }
         nint is1xx = 100 <= resCode && resCode <= 199; 
         // treat 101 as a terminal status, see issue 26161
@@ -2627,21 +2486,16 @@ private static (ptr<Response>, error) readResponse(this ptr<persistConn> _addr_p
                     }
 
                 }
-
             }
-
             continue;
-
         }
         break;
-
     }
     if (resp.isProtocolSwitch()) {
         resp.Body = newReadWriteCloserBody(_addr_pc.br, pc.conn);
     }
     resp.TLS = pc.tlsState;
     return ;
-
 }
 
 // waitForContinue returns the function to block until
@@ -2661,7 +2515,6 @@ private static Func<bool> waitForContinue(this ptr<persistConn> _addr_pc, channe
         return true;
         return false;
     };
-
 });
 
 private static io.ReadWriteCloser newReadWriteCloserBody(ptr<bufio.Reader> _addr_br, io.ReadWriteCloser rwc) {
@@ -2672,7 +2525,6 @@ private static io.ReadWriteCloser newReadWriteCloserBody(ptr<bufio.Reader> _addr
         body.br = br;
     }
     return body;
-
 }
 
 // readWriteCloserBody is the Response.Body type used when we want to
@@ -2700,16 +2552,13 @@ private static (nint, error) Read(this ptr<readWriteCloserBody> _addr_b, slice<b
             }
 
         }
-
         n, err = b.br.Read(p);
         if (b.br.Buffered() == 0) {
             b.br = null;
         }
         return (n, error.As(err)!);
-
     }
     return b.ReadWriteCloser.Read(p);
-
 }
 
 // nothingWrittenError wraps a write errors which ended up writing zero bytes.
@@ -2737,11 +2586,9 @@ private static void writeLoop(this ptr<persistConn> _addr_pc) => func((defer, _,
                 // connections and causes other
                 // errors.
                 wr.req.setError(err);
-
             }
 
         }
-
         if (err == null) {
             err = pc.bw.Flush();
         }
@@ -2757,9 +2604,7 @@ private static void writeLoop(this ptr<persistConn> _addr_pc) => func((defer, _,
             return ;
         }
         return ;
-
     }
-
 });
 
 // maxWriteWaitBeforeConnReuse is how long the a Transport RoundTrip
@@ -2889,7 +2734,6 @@ private static (ptr<Response>, error) roundTrip(this ptr<persistConn> _addr_pc, 
         // anyway. See https://golang.org/issue/8923
         requestedGzip = true;
         req.extraHeaders().Set("Accept-Encoding", "gzip");
-
     }
     channel<object> continueCh = default;
     if (req.ProtoAtLeast(1, 1) && req.Body != null && req.expectsContinue()) {
@@ -2948,11 +2792,9 @@ private static (ptr<Response>, error) roundTrip(this ptr<persistConn> _addr_pc, 
                 var timer = time.NewTimer(d);
                 defer(timer.Stop()); // prevent leaks
                 respHeaderTimer = timer.C;
-
             }
 
         }
-
         pcClosed = null;
         if (canceled || pc.t.replaceReqCanceler(req.cancelKey, null)) {
             if (debugRoundTrip) {
@@ -2980,9 +2822,7 @@ private static (ptr<Response>, error) roundTrip(this ptr<persistConn> _addr_pc, 
         canceled = pc.t.cancelRequest(req.cancelKey, req.Context().Err());
         cancelChan = null;
         ctxDoneChan = null;
-
     }
-
 });
 
 // tLogKey is a context WithValue key for test debugging contexts containing
@@ -3001,7 +2841,6 @@ private static void logf(this ptr<transportRequest> _addr_tr, @string format, pa
             logf(time.Now().Format(time.RFC3339Nano) + ": " + format, args);
         }
     }
-
 }
 
 // markReused marks this connection as having been successfully used for a
@@ -3047,7 +2886,6 @@ private static void closeLocked(this ptr<persistConn> _addr_pc, error err) => fu
         }
     }
     pc.mutateHeaderFunc = null;
-
 });
 
 private static map portMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{"http":"80","https":"443","socks5":"1080",};
@@ -3064,13 +2902,11 @@ private static @string canonicalAddr(ptr<url.URL> _addr_url) {
             addr = v;
         }
     }
-
     var port = url.Port();
     if (port == "") {
         port = portMap[url.Scheme];
     }
     return net.JoinHostPort(addr, port);
-
 }
 
 // bodyEOFSignal is used by the HTTP/1 transport when reading response
@@ -3118,10 +2954,8 @@ private static (nint, error) Read(this ptr<bodyEOFSignal> _addr_es, slice<byte> 
             es.rerr = err;
         }
         err = es.condfn(err);
-
     }
     return ;
-
 });
 
 private static error Close(this ptr<bodyEOFSignal> _addr_es) => func((defer, _, _) => {
@@ -3138,7 +2972,6 @@ private static error Close(this ptr<bodyEOFSignal> _addr_es) => func((defer, _, 
     }
     var err = es.body.Close();
     return error.As(es.condfn(err))!;
-
 });
 
 // caller must hold es.mu.
@@ -3151,7 +2984,6 @@ private static error condfn(this ptr<bodyEOFSignal> _addr_es, error err) {
     err = es.fn(err);
     es.fn = null;
     return error.As(err)!;
-
 }
 
 // gzipReader wraps a response body so it can lazily
@@ -3186,7 +3018,6 @@ private static (nint, error) Read(this ptr<gzipReader> _addr_gz, slice<byte> p) 
         return (0, error.As(err)!);
     }
     return gz.zr.Read(p);
-
 }
 
 private static error Close(this ptr<gzipReader> _addr_gz) {
@@ -3229,7 +3060,6 @@ private static ptr<tls.Config> cloneTLSConfig(ptr<tls.Config> _addr_cfg) {
         return addr(new tls.Config());
     }
     return _addr_cfg.Clone()!;
-
 }
 
 private partial struct connLRU {
@@ -3254,9 +3084,7 @@ private static void add(this ptr<connLRU> _addr_cl, ptr<persistConn> _addr_pc) =
             panic("persistConn was already in LRU");
         }
     }
-
     cl.m[pc] = ele;
-
 });
 
 private static ptr<persistConn> removeOldest(this ptr<connLRU> _addr_cl) {
@@ -3282,7 +3110,6 @@ private static void remove(this ptr<connLRU> _addr_cl, ptr<persistConn> _addr_pc
             delete(cl.m, pc);
         }
     }
-
 }
 
 // len returns the number of items in the cache.

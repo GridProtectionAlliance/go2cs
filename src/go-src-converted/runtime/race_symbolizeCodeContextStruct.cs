@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:14 UTC
+//     Generated on 2022 March 13 05:26:43 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct symbolizeCodeContext
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace go
             public static implicit operator symbolizeCodeContext(NilType nil) => default(symbolizeCodeContext);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static symbolizeCodeContext symbolizeCodeContext_cast(dynamic value)
         {
             return new symbolizeCodeContext(value.pc, ref value.fn, ref value.file, value.line, value.off, value.res);

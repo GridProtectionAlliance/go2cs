@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:01 UTC
+//     Generated on 2022 March 13 05:23:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace io
 {
     public static partial class fs_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PathError
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace io
             public static implicit operator PathError(NilType nil) => default(PathError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static PathError PathError_cast(dynamic value)
         {
             return new PathError(value.Op, value.Path, value.Err);

@@ -3,19 +3,22 @@
 // license that can be found in the LICENSE file.
 
 // Package bio implements common I/O abstractions used within the Go toolchain.
-// package bio -- go2cs converted at 2022 March 06 22:32:21 UTC
+
+// package bio -- go2cs converted at 2022 March 13 05:43:19 UTC
 // import "cmd/internal/bio" ==> using bio = go.cmd.@internal.bio_package
 // Original source: C:\Program Files\Go\src\cmd\internal\bio\buf.go
-using bufio = go.bufio_package;
-using io = go.io_package;
-using log = go.log_package;
-using os = go.os_package;
-
 namespace go.cmd.@internal;
+
+using bufio = bufio_package;
+using io = io_package;
+using log = log_package;
+using os = os_package;
+
+
+// Reader implements a seekable buffered io.Reader.
 
 public static partial class bio_package {
 
-    // Reader implements a seekable buffered io.Reader.
 public partial struct Reader {
     public ptr<os.File> f;
     public ref ptr<bufio.Reader> Reader> => ref Reader>_ptr;
@@ -38,7 +41,6 @@ public static (ptr<Writer>, error) Create(@string name) {
         return (_addr_null!, error.As(err)!);
     }
     return (addr(new Writer(f:f,Writer:bufio.NewWriter(f))), error.As(null!)!);
-
 }
 
 // Open returns a Reader for the file named name.
@@ -51,7 +53,6 @@ public static (ptr<Reader>, error) Open(@string name) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_NewReader(_addr_f)!, error.As(null!)!);
-
 }
 
 // NewReader returns a Reader from an open file.
@@ -73,7 +74,6 @@ private static long MustSeek(this ptr<Reader> _addr_r, long offset, nint whence)
     }
     r.Reset(r.f);
     return off;
-
 }
 
 private static long MustSeek(this ptr<Writer> _addr_w, long offset, nint whence) {
@@ -86,13 +86,11 @@ private static long MustSeek(this ptr<Writer> _addr_w, long offset, nint whence)
             log.Fatalf("writing output: %v", err);
         }
     }
-
     var (off, err) = w.f.Seek(offset, whence);
     if (err != null) {
         log.Fatalf("seeking in output: %v", err);
     }
     return off;
-
 }
 
 private static long Offset(this ptr<Reader> _addr_r) {
@@ -104,7 +102,6 @@ private static long Offset(this ptr<Reader> _addr_r) {
     }
     off -= int64(r.Buffered());
     return off;
-
 }
 
 private static long Offset(this ptr<Writer> _addr_w) {
@@ -117,13 +114,11 @@ private static long Offset(this ptr<Writer> _addr_w) {
             log.Fatalf("writing output: %v", err);
         }
     }
-
     var (off, err) = w.f.Seek(0, 1);
     if (err != null) {
         log.Fatalf("seeking in output [0, 1]: %v", err);
     }
     return off;
-
 }
 
 private static error Close(this ptr<Reader> _addr_r) {
@@ -141,7 +136,6 @@ private static error Close(this ptr<Writer> _addr_w) {
         err = err1;
     }
     return error.As(err)!;
-
 }
 
 private static ptr<os.File> File(this ptr<Reader> _addr_r) {
@@ -180,7 +174,6 @@ private static (slice<byte>, bool, error) Slice(this ptr<Reader> _addr_r, ulong 
         return (null, false, error.As(err)!);
     }
     return (data, false, error.As(null!)!);
-
 }
 
 // SliceRO returns a slice containing the next length bytes of r
@@ -195,7 +188,6 @@ private static slice<byte> SliceRO(this ptr<Reader> _addr_r, ulong length) {
         return data;
     }
     return null;
-
 }
 
 } // end bio_package

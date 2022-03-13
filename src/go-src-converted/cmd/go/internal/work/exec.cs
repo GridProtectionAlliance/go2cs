@@ -4,48 +4,49 @@
 
 // Action graph execution.
 
-// package work -- go2cs converted at 2022 March 06 23:17:36 UTC
+// package work -- go2cs converted at 2022 March 13 06:30:54 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\exec.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using exec = go.@internal.execabs_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using log = go.log_package;
-using rand = go.math.rand_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cache = go.cmd.go.@internal.cache_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using str = go.cmd.go.@internal.str_package;
-using trace = go.cmd.go.@internal.trace_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using context = context_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using exec = @internal.execabs_package;
+using lazyregexp = @internal.lazyregexp_package;
+using io = io_package;
+using fs = io.fs_package;
+using log = log_package;
+using rand = math.rand_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cache = cmd.go.@internal.cache_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using str = cmd.go.@internal.str_package;
+using trace = cmd.go.@internal.trace_package;
+
+
+// actionList returns the list of actions in the dag rooted at root
+// as visited in a depth-first post-order traversal.
+
+using System;
+using System.Threading;
 public static partial class work_package {
 
-    // actionList returns the list of actions in the dag rooted at root
-    // as visited in a depth-first post-order traversal.
 private static slice<ptr<Action>> actionList(ptr<Action> _addr_root) {
     ref Action root = ref _addr_root.val;
 
@@ -60,11 +61,9 @@ private static slice<ptr<Action>> actionList(ptr<Action> _addr_root) {
         foreach (var (_, a1) in a.Deps) {
             walk(a1);
         }        all = append(all, a);
-
     };
     walk(root);
     return all;
-
 }
 
 // do runs the action graph rooted at root.
@@ -79,7 +78,6 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
         // If we're doing real work, take time at the end to trim the cache.
         var c = cache.Default();
         defer(c.Trim());
-
     }
     var all = actionList(_addr_root);
     {
@@ -104,9 +102,7 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
                     // Do not overwrite Go source code in:
                     //    go build -debug-actiongraph x.go
                     @base.Fatalf("go: refusing to write action graph to %v\n", file);
-
                 }
-
                 var js = actionGraphJSON(root);
                 {
                     var err__prev2 = err;
@@ -121,11 +117,9 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
                     err = err__prev2;
 
                 }
-
             }
 
         }
-
     };
     writeActionGraph();
 
@@ -160,7 +154,6 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
             if (a.Package != null) {
                 desc += "(" + a.Mode + " " + a.Package.Desc() + ")";
             }
-
             (ctx, span) = trace.StartSpan(ctx, desc);
             a.traceSpan = span;
             foreach (var (_, d) in a.Deps) {
@@ -168,7 +161,6 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
             }
             err = a.Func(b, ctx, a);
             span.Done();
-
         }
         if (a.json != null) {
             a.json.TimeDone = time.Now();
@@ -184,9 +176,7 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
  {
                 @base.Errorf("%s", err);
             }
-
             a.Failed = true;
-
         }
         foreach (var (_, a0) in a.triggers) {
             if (a.Failed) {
@@ -198,7 +188,6 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
                 b.ready.push(a0);
                 b.readySema.Send(true);
             }
-
         }        if (a == root) {
             close(b.readySema);
         }
@@ -234,12 +223,8 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
                     handle(ctx, a);
                     @base.SetExitStatus(1);
                     return ;
-
                 }
-
-
             }());
-
         }
 
         i = i__prev1;
@@ -249,7 +234,6 @@ private static void Do(this ptr<Builder> _addr_b, context.Context ctx, ptr<Actio
 
     // Write action graph again, this time with timing information.
     writeActionGraph();
-
 });
 
 // buildActionID computes the action ID for a build action.
@@ -311,7 +295,6 @@ private static cache.ActionID buildActionID(this ptr<Builder> _addr_b, ptr<Actio
                 }
 
             }
-
         }
         if (len(p.CXXFiles) + len(p.SwigCXXFiles) > 0) {
             var cxxExe = b.cxxExe();
@@ -324,7 +307,6 @@ private static cache.ActionID buildActionID(this ptr<Builder> _addr_b, ptr<Actio
                 }
 
             }
-
         }
         if (len(p.FFiles) > 0) {
             var fcExe = b.fcExe();
@@ -337,7 +319,6 @@ private static cache.ActionID buildActionID(this ptr<Builder> _addr_b, ptr<Actio
                 }
 
             }
-
         }
     }
     if (p.Internal.CoverMode != "") {
@@ -393,14 +374,13 @@ private static cache.ActionID buildActionID(this ptr<Builder> _addr_b, ptr<Actio
                         x = x__prev1;
 
                     }
-
                 }
 
                 env = env__prev1;
             }
 
             if (os.Getenv("GOSSAHASH") != "") {
-                for (nint i = 0; inputFiles; i++) {
+                for (nint i = 0; ; i++) {
                     var env = fmt.Sprintf("GOSSAHASH%d", i);
                     x = os.Getenv(env);
                     if (x == "") {
@@ -415,7 +395,6 @@ private static cache.ActionID buildActionID(this ptr<Builder> _addr_b, ptr<Actio
                 // We will still write to the cache but it will be
                 // essentially unfindable.
                 fmt.Fprintf(h, "nocache %d\n", time.Now().UnixNano());
-
             }
             break;
         case "gccgo": 
@@ -431,7 +410,6 @@ private static cache.ActionID buildActionID(this ptr<Builder> _addr_b, ptr<Actio
                 // Ignore error; different assembler versions
                 // are unlikely to make any difference anyhow.
                 fmt.Fprintf(h, "asm %q\n", id);
-
             }
             break;
         default: 
@@ -449,7 +427,6 @@ private static cache.ActionID buildActionID(this ptr<Builder> _addr_b, ptr<Actio
             fmt.Fprintf(h, "import %s %s\n", p1.ImportPath, contentID(a1.buildID));
         }
     }    return h.Sum();
-
 }
 
 // needCgoHdr reports whether the actions triggered by this one
@@ -489,7 +466,6 @@ private static bool needCgoHdr(this ptr<Builder> _addr_b, ptr<Action> _addr_a) {
         }
     }
     return false;
-
 }
 
 // allowedVersion reports whether the version v is an allowed version of go
@@ -508,7 +484,6 @@ private static bool allowedVersion(@string v) {
             return true;
         }
     }    return false;
-
 }
 
 private static readonly uint needBuild = 1 << (int)(iota);
@@ -516,7 +491,6 @@ private static readonly var needCgoHdr = 0;
 private static readonly var needVet = 1;
 private static readonly var needCompiledGoFiles = 2;
 private static readonly var needStale = 3;
-
 
 // build is the action for building a single package.
 // Note that any new influence on this logic must be reported in b.buildActionID above as well.
@@ -532,7 +506,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
             return error.As(x)!;
         }
         return error.As(0)!;
-
     };
 
     var cachedBuild = false;
@@ -552,7 +525,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
                 p.Export = a.built;
                 p.BuildID = a.buildID;
             }
-
             if (need & needCompiledGoFiles != 0) {
                 {
                     var err__prev4 = err;
@@ -566,9 +538,7 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
                     err = err__prev4;
 
                 }
-
             }
-
         }
         if (!cachedBuild && need & needCompiledGoFiles != 0) {
             {
@@ -583,13 +553,11 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
                 err = err__prev3;
 
             }
-
         }
         if (need == 0) {
             return error.As(null!)!;
         }
         defer(b.flushOutput(a));
-
     }
     defer(() => {
         if (err != null && err != errPrintedOutput) {
@@ -606,7 +574,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
         // be merged, the banners give patch something
         // to use to find its context.
         b.Print("\n#\n# " + a.Package.ImportPath + "\n#\n\n");
-
     }
     if (cfg.BuildV) {
         b.Print(a.Package.ImportPath + "\n");
@@ -618,7 +585,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
             return error.As(null!)!;
         }
         return error.As(errors.New("binary-only packages are no longer supported"))!;
-
     }
     {
         var err__prev1 = err;
@@ -631,7 +597,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
         err = err__prev1;
 
     }
-
     var objdir = a.Objdir; 
 
     // Load cached cgo header, but only if we're skipping the main build (cachedBuild==true).
@@ -648,7 +613,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
             err = err__prev2;
 
         }
-
     }
     if (need == needVet) {
         {
@@ -663,7 +627,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
             err = err__prev2;
 
         }
-
     }
     if (need == 0) {
         return error.As(null!)!;
@@ -695,7 +658,6 @@ private static error build(this ptr<Builder> _addr_b, context.Context ctx, ptr<A
             err = err__prev2;
 
         }
-
     }
     var gofiles = str.StringList(a.Package.GoFiles);
     var cgofiles = str.StringList(a.Package.CgoFiles);
@@ -735,7 +697,6 @@ OverlayLoop:
                         }
 
                     }
-
                 }
 
                 f = f__prev2;
@@ -769,9 +730,7 @@ OverlayLoop:
                             err = err__prev2;
 
                         }
-
                         a.nonGoOverlay[from] = dst;
-
                     }
 
                     i = i__prev2;
@@ -789,7 +748,6 @@ OverlayLoop:
         cgofiles = append(cgofiles, outGo);
         cfiles = append(cfiles, outC);
         cxxfiles = append(cxxfiles, outCXX);
-
     }
     if (a.Package.Internal.CoverMode != "") {
         {
@@ -808,7 +766,6 @@ OverlayLoop:
                     sourceFile = file;
                     coverFile = objdir + base;
                     key = strings.TrimSuffix(base, ".cgo1.go") + ".go";
-
                 }
                 else
  {
@@ -816,15 +773,12 @@ OverlayLoop:
                     coverFile = objdir + file;
                     key = file;
                 }
-
                 coverFile = strings.TrimSuffix(coverFile, ".go") + ".cover.go";
                 var cover = a.Package.Internal.CoverVars[key];
                 if (cover == null || @base.IsTestFile(file)) { 
                     // Not covering this file.
                     continue;
-
                 }
-
                 {
                     var err__prev2 = err;
 
@@ -837,7 +791,6 @@ OverlayLoop:
                     err = err__prev2;
 
                 }
-
                 if (i < len(gofiles)) {
                     gofiles[i] = coverFile;
                 }
@@ -845,7 +798,6 @@ OverlayLoop:
  {
                     cgofiles[i - len(gofiles)] = coverFile;
                 }
-
             }
 
             i = i__prev1;
@@ -874,7 +826,6 @@ OverlayLoop:
  {
                             nongcc = append(nongcc, f);
                         }
-
                     }
         else
 
@@ -882,11 +833,9 @@ OverlayLoop:
                 }
 
                 return (error.As(nongcc)!, gcc);
-
             }
 ;
             sfiles, gccfiles = filter(sfiles, sfiles[..(int)0], gccfiles);
-
         } {
             foreach (var (_, sfile) in sfiles) {
                 var (data, err) = os.ReadFile(filepath.Join(a.Package.Dir, sfile));
@@ -920,7 +869,6 @@ OverlayLoop:
                 b.cacheCgoHdr(a);
                 break;
         }
-
     }
     slice<@string> srcfiles = default; // .go and non-.go
     srcfiles = append(srcfiles, gofiles);
@@ -953,14 +901,11 @@ OverlayLoop:
             err = err__prev2;
 
         }
-
         need &= needCompiledGoFiles;
-
     }
     if (need == 0) { 
         // Nothing left to do.
         return error.As(null!)!;
-
     }
     var (symabis, err) = BuildToolchain.symabis(b, a, sfiles);
     if (err != null) {
@@ -988,7 +933,6 @@ OverlayLoop:
             continue;
         }
         fmt.Fprintf(_addr_icfg, "packagefile %s=%s\n", p1.ImportPath, a1.built);
-
     }    slice<byte> embedcfg = default;
     if (len(p.Internal.Embed) > 0) {
         ref var embed = ref heap(out ptr<var> _addr_embed);
@@ -1010,7 +954,6 @@ OverlayLoop:
             return error.As(fmt.Errorf("marshal embedcfg: %v", err))!;
         }
         embedcfg = js;
-
     }
     if (p.Internal.BuildInfo != "" && cfg.ModulesEnabled) {
         {
@@ -1025,9 +968,7 @@ OverlayLoop:
             err = err__prev2;
 
         }
-
         gofiles = append(gofiles, objdir + "_gomod_.go");
-
     }
     var objpkg = objdir + "_pkg_.a";
     var (ofile, out, err) = BuildToolchain.gc(b, a, objpkg, icfg.Bytes(), embedcfg, symabis, len(sfiles) > 0, gofiles);
@@ -1046,7 +987,6 @@ OverlayLoop:
             b.showOutput(a, a.Package.Dir, a.Package.Desc(), "note: module requires Go " + p.Module.GoVersion + "\n");
         }
         return error.As(err)!;
-
     }
     if (ofile != objpkg) {
         objects = append(objects, ofile);
@@ -1075,7 +1015,6 @@ OverlayLoop:
                     err = err__prev1;
 
                 }
-
             else if (strings.HasSuffix(name, _goarch)) 
                 targ = file[..(int)len(name) - len(_goarch)] + "_GOARCH." + ext;
                 {
@@ -1090,7 +1029,6 @@ OverlayLoop:
                     err = err__prev1;
 
                 }
-
             else if (strings.HasSuffix(name, _goos)) 
                 targ = file[..(int)len(name) - len(_goos)] + "_GOOS." + ext;
                 {
@@ -1105,7 +1043,6 @@ OverlayLoop:
                     err = err__prev1;
 
                 }
-
                     }
         file = file__prev1;
     }
@@ -1128,9 +1065,7 @@ OverlayLoop:
                 err = err__prev1;
 
             }
-
             objects = append(objects, out);
-
         }
         file = file__prev1;
     }
@@ -1141,7 +1076,6 @@ OverlayLoop:
             return error.As(err)!;
         }
         objects = append(objects, ofiles);
-
     }
     if (a.buildID != "" && cfg.BuildToolchainName == "gccgo") {
         switch (cfg.Goos) {
@@ -1173,7 +1107,6 @@ OverlayLoop:
                 objects = append(objects, ofiles);
                 break;
         }
-
     }
     objects = append(objects, cgoObjects); 
 
@@ -1193,7 +1126,6 @@ OverlayLoop:
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -1207,10 +1139,8 @@ OverlayLoop:
 
     }
 
-
     a.built = objpkg;
     return error.As(null!)!;
-
 });
 
 private static error cacheObjdirFile(this ptr<Builder> _addr_b, ptr<Action> _addr_a, ptr<cache.Cache> _addr_c, @string name) => func((defer, _, _) => {
@@ -1225,7 +1155,6 @@ private static error cacheObjdirFile(this ptr<Builder> _addr_b, ptr<Action> _add
     defer(f.Close());
     _, _, err = c.Put(cache.Subkey(a.actionID, name), f);
     return error.As(err)!;
-
 });
 
 private static (@string, error) findCachedObjdirFile(this ptr<Builder> _addr_b, ptr<Action> _addr_a, ptr<cache.Cache> _addr_c, @string name) {
@@ -1240,7 +1169,6 @@ private static (@string, error) findCachedObjdirFile(this ptr<Builder> _addr_b, 
         return ("", error.As(fmt.Errorf("loading cached file %s: %w", name, err))!);
     }
     return (file, error.As(null!)!);
-
 }
 
 private static error loadCachedObjdirFile(this ptr<Builder> _addr_b, ptr<Action> _addr_a, ptr<cache.Cache> _addr_c, @string name) {
@@ -1253,7 +1181,6 @@ private static error loadCachedObjdirFile(this ptr<Builder> _addr_b, ptr<Action>
         return error.As(err)!;
     }
     return error.As(b.copyFile(a.Objdir + name, cached, 0666, true))!;
-
 }
 
 private static void cacheCgoHdr(this ptr<Builder> _addr_b, ptr<Action> _addr_a) {
@@ -1285,7 +1212,6 @@ private static void cacheSrcFiles(this ptr<Builder> _addr_b, ptr<Action> _addr_a
             buf.WriteString(file);
             buf.WriteString("\n");
             continue;
-
         }
         var name = file[(int)len(a.Objdir)..];
         buf.WriteString(name);
@@ -1298,9 +1224,7 @@ private static void cacheSrcFiles(this ptr<Builder> _addr_b, ptr<Action> _addr_a
             }
 
         }
-
     }    c.PutBytes(cache.Subkey(a.actionID, "srcfiles"), buf.Bytes());
-
 }
 
 private static error loadCachedVet(this ptr<Builder> _addr_b, ptr<Action> _addr_a) {
@@ -1316,7 +1240,6 @@ private static error loadCachedVet(this ptr<Builder> _addr_b, ptr<Action> _addr_
     foreach (var (_, name) in strings.Split(string(list), "\n")) {
         if (name == "") { // end of list
             continue;
-
         }
         if (strings.HasPrefix(name, "./")) {
             srcfiles = append(srcfiles, name[(int)2..]);
@@ -1330,12 +1253,9 @@ private static error loadCachedVet(this ptr<Builder> _addr_b, ptr<Action> _addr_
             }
 
         }
-
         srcfiles = append(srcfiles, a.Objdir + name);
-
     }    buildVetConfig(_addr_a, srcfiles);
     return error.As(null!)!;
-
 }
 
 private static error loadCachedSrcFiles(this ptr<Builder> _addr_b, ptr<Action> _addr_a) {
@@ -1351,7 +1271,6 @@ private static error loadCachedSrcFiles(this ptr<Builder> _addr_b, ptr<Action> _
     foreach (var (_, name) in strings.Split(string(list), "\n")) {
         if (name == "") { // end of list
             continue;
-
         }
         if (strings.HasPrefix(name, "./")) {
             files = append(files, name[(int)len("./")..]);
@@ -1362,10 +1281,8 @@ private static error loadCachedSrcFiles(this ptr<Builder> _addr_b, ptr<Action> _
             return error.As(fmt.Errorf("finding %s: %w", name, err))!;
         }
         files = append(files, file);
-
     }    a.Package.CompiledGoFiles = files;
     return error.As(null!)!;
-
 }
 
 // vetConfig is the configuration passed to vet describing a single package.
@@ -1459,13 +1376,11 @@ private static error vet(this ptr<Builder> _addr_b, context.Context ctx, ptr<Act
         // Vet could return export data for non-typecheck errors,
         // but we ignore it because the package cannot be compiled.
         return error.As(null!)!;
-
     }
     var vcfg = a.Deps[0].vetCfg;
     if (vcfg == null) { 
         // Vet config should only be missing if the build failed.
         return error.As(fmt.Errorf("vet config not found"))!;
-
     }
     vcfg.VetxOnly = a.VetxOnly;
     vcfg.VetxOutput = a.Objdir + "vet.out";
@@ -1535,7 +1450,6 @@ private static error vet(this ptr<Builder> _addr_b, context.Context ctx, ptr<Act
             }
 
         }
-
     }
     var (js, err) = json.MarshalIndent(vcfg, "", "\t");
     if (err != null) {
@@ -1573,9 +1487,7 @@ private static error vet(this ptr<Builder> _addr_b, context.Context ctx, ptr<Act
         }
     }
 
-
     return error.As(runErr)!;
-
 }
 
 // linkActionID computes the action ID for a link action.
@@ -1612,14 +1524,11 @@ private static cache.ActionID linkActionID(this ptr<Builder> _addr_b, ptr<Action
             if (p1.Name == "main") {
                 fmt.Fprintf(h, "packagemain %s\n", a1.buildID);
             }
-
             if (p1.Shlib != "") {
                 fmt.Fprintf(h, "packageshlib %s=%s\n", p1.ImportPath, contentID(b.buildID(p1.Shlib)));
             }
-
         }
     }    return h.Sum();
-
 }
 
 // printLinkerConfig prints the linker config into the hash h,
@@ -1675,7 +1584,6 @@ private static void printLinkerConfig(this ptr<Builder> _addr_b, io.Writer h, pt
             @base.Fatalf("linkActionID: unknown toolchain %q", cfg.BuildToolchainName);
             break;
     }
-
 }
 
 // link is the action for linking a single command.
@@ -1702,7 +1610,6 @@ private static error link(this ptr<Builder> _addr_b, context.Context ctx, ptr<Ac
 
     }
 
-
     var importcfg = a.Objdir + "importcfg.link";
     {
         var err__prev1 = err;
@@ -1715,7 +1622,6 @@ private static error link(this ptr<Builder> _addr_b, context.Context ctx, ptr<Ac
         err = err__prev1;
 
     }
-
 
     {
         var err__prev1 = err;
@@ -1744,7 +1650,6 @@ private static error link(this ptr<Builder> _addr_b, context.Context ctx, ptr<Ac
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -1786,10 +1691,8 @@ private static error link(this ptr<Builder> _addr_b, context.Context ctx, ptr<Ac
 
     }
 
-
     a.built = a.Target;
     return error.As(null!)!;
-
 });
 
 private static error writeLinkImportcfg(this ptr<Builder> _addr_b, ptr<Action> _addr_a, @string file) {
@@ -1808,7 +1711,6 @@ private static error writeLinkImportcfg(this ptr<Builder> _addr_b, ptr<Action> _
             fmt.Fprintf(_addr_icfg, "packageshlib %s=%s\n", p1.ImportPath, p1.Shlib);
         }
     }    return error.As(b.writeFile(file, icfg.Bytes()))!;
-
 }
 
 // PkgconfigCmd returns a pkg-config binary name
@@ -1851,15 +1753,12 @@ private static (slice<@string>, error) splitPkgConfigOutput(slice<byte> @out) {
                         break;
                 }
                 flag = append(flag, c);
-
             }
             else
  {
                 flag = append(flag, c);
             }
-
             escaped = false;
-
         }
         else if (quote != 0) {
             if (c == quote) {
@@ -1875,9 +1774,7 @@ private static (slice<@string>, error) splitPkgConfigOutput(slice<byte> @out) {
                         flag = append(flag, c);
                         break;
                 }
-
             }
-
         }
         else if (strings.IndexByte(" \t\n\v\f\r", c) < 0) {
             switch (c) {
@@ -1893,7 +1790,6 @@ private static (slice<@string>, error) splitPkgConfigOutput(slice<byte> @out) {
                     flag = append(flag, c);
                     break;
             }
-
         }
         else if (len(flag) != 0) {
             flags = append(flags, string(flag));
@@ -1909,7 +1805,6 @@ private static (slice<@string>, error) splitPkgConfigOutput(slice<byte> @out) {
         flags = append(flags, string(flag));
     }
     return (flags, error.As(null!)!);
-
 }
 
 // Calls pkg-config if needed and returns the cflags/ldflags needed to build the package.
@@ -1939,7 +1834,6 @@ private static (slice<@string>, slice<@string>, error) getPkgConfigFlags(this pt
  {
                     pkgs = append(pkgs, pcarg);
                 }
-
             }
             foreach (var (_, pkg) in pkgs) {
                 if (!load.SafeArg(pkg)) {
@@ -1953,7 +1847,6 @@ private static (slice<@string>, slice<@string>, error) getPkgConfigFlags(this pt
                 b.Print(err.Error() + "\n");
                 return (null, null, error.As(errPrintedOutput)!);
             }
-
             if (len(out) > 0) {
                 cflags, err = splitPkgConfigOutput(out);
                 if (err != null) {
@@ -1971,16 +1864,13 @@ private static (slice<@string>, slice<@string>, error) getPkgConfigFlags(this pt
                     err = err__prev3;
 
                 }
-
             }
-
             out, err = b.runOut(null, p.Dir, null, b.PkgconfigCmd(), "--libs", pcflags, "--", pkgs);
             if (err != null) {
                 b.showOutput(null, p.Dir, b.PkgconfigCmd() + " --libs " + strings.Join(pcflags, " ") + " -- " + strings.Join(pkgs, " "), string(out));
                 b.Print(err.Error() + "\n");
                 return (null, null, error.As(errPrintedOutput)!);
             }
-
             if (len(out) > 0) {
                 ldflags = strings.Fields(string(out));
                 {
@@ -1995,15 +1885,11 @@ private static (slice<@string>, slice<@string>, error) getPkgConfigFlags(this pt
                     err = err__prev3;
 
                 }
-
             }
-
         }
     }
 
-
     return ;
-
 }
 
 private static error installShlibname(this ptr<Builder> _addr_b, context.Context ctx, ptr<Action> _addr_a) {
@@ -2032,7 +1918,6 @@ private static error installShlibname(this ptr<Builder> _addr_b, context.Context
         b.Showcmd("", "echo '%s' > %s # internal", filepath.Base(a1.Target), a.Target);
     }
     return error.As(null!)!;
-
 }
 
 private static cache.ActionID linkSharedActionID(this ptr<Builder> _addr_b, ptr<Action> _addr_a) {
@@ -2080,7 +1965,6 @@ private static cache.ActionID linkSharedActionID(this ptr<Builder> _addr_b, ptr<
     }
 
     return h.Sum();
-
 }
 
 private static error linkShared(this ptr<Builder> _addr_b, context.Context ctx, ptr<Action> _addr_a) => func((defer, _, _) => {
@@ -2105,7 +1989,6 @@ private static error linkShared(this ptr<Builder> _addr_b, context.Context ctx, 
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -2117,7 +2000,6 @@ private static error linkShared(this ptr<Builder> _addr_b, context.Context ctx, 
         err = err__prev1;
 
     }
-
 
     var importcfg = a.Objdir + "importcfg.link";
     {
@@ -2136,7 +2018,6 @@ private static error linkShared(this ptr<Builder> _addr_b, context.Context ctx, 
     // but we have to decide where to store the build ID in these files.
     a.built = a.Target;
     return error.As(BuildToolchain.ldShared(b, a, a.Deps[0].Deps, a.Target, importcfg, a.Deps))!;
-
 });
 
 // BuildInstallFunc is the action for installing a single package or executable.
@@ -2155,9 +2036,7 @@ public static error BuildInstallFunc(ptr<Builder> _addr_b, context.Context ctx, 
             if (a.Package != null) {
                 (sep, path) = (" ", a.Package.ImportPath);
             }
-
             err = fmt.Errorf("go %s%s%s: %v", cfg.CmdName, sep, path, err);
-
         }
     }());
 
@@ -2188,10 +2067,8 @@ public static error BuildInstallFunc(ptr<Builder> _addr_b, context.Context ctx, 
                 err = err__prev4;
 
             }
-
         }
         return error.As(null!)!;
-
     }
     if (b.IsCmdList) {
         a.built = a1.built;
@@ -2209,7 +2086,6 @@ public static error BuildInstallFunc(ptr<Builder> _addr_b, context.Context ctx, 
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -2221,7 +2097,6 @@ public static error BuildInstallFunc(ptr<Builder> _addr_b, context.Context ctx, 
         err = err__prev1;
 
     }
-
 
     var perm = fs.FileMode(0666);
     if (a1.Mode == "link") {
@@ -2237,7 +2112,6 @@ public static error BuildInstallFunc(ptr<Builder> _addr_b, context.Context ctx, 
                 perm = 0777;
                 break;
         }
-
     }
     var (dir, _) = filepath.Split(a.Target);
     if (dir != "") {
@@ -2253,13 +2127,11 @@ public static error BuildInstallFunc(ptr<Builder> _addr_b, context.Context ctx, 
             err = err__prev2;
 
         }
-
     }
     if (!a.buggyInstall) {
         defer(b.cleanup(a1));
     }
     return error.As(b.moveOrCopyFile(a.Target, a1.built, perm, false))!;
-
 });
 
 // allowInstall returns a non-nil error if this invocation of the go command is
@@ -2289,10 +2161,8 @@ private static void cleanup(this ptr<Builder> _addr_b, ptr<Action> _addr_a) {
                 }
 
             }
-
         }
         os.RemoveAll(a.Objdir);
-
     }
 }
 
@@ -2341,7 +2211,6 @@ private static error moveOrCopyFile(this ptr<Builder> _addr_b, @string dst, @str
         var name = f.Name();
         f.Close();
         os.Remove(name);
-
     }
     {
         var err__prev1 = err;
@@ -2364,15 +2233,12 @@ private static error moveOrCopyFile(this ptr<Builder> _addr_b, @string dst, @str
                 err = err__prev2;
 
             }
-
         }
         err = err__prev1;
 
     }
 
-
     return error.As(b.copyFile(dst, src, perm, force))!;
-
 }
 
 // copyFile is like 'cp src dst'.
@@ -2417,7 +2283,6 @@ private static error copyFile(this ptr<Builder> _addr_b, @string dst, @string sr
             }
 
         }
-
     }
     mayberemovefile(dst);
     var (df, err) = os.OpenFile(dst, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, perm);
@@ -2434,9 +2299,7 @@ private static error copyFile(this ptr<Builder> _addr_b, @string dst, @string sr
             }
 
         }
-
         df, err = os.OpenFile(dst, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, perm);
-
     }
     if (err != null) {
         return error.As(fmt.Errorf("copying %s: %w", src, err))!; // err should already refer to dst
@@ -2448,7 +2311,6 @@ private static error copyFile(this ptr<Builder> _addr_b, @string dst, @string sr
         return error.As(fmt.Errorf("copying %s to %s: %v", src, dst, err))!;
     }
     return error.As(null!)!;
-
 });
 
 // writeFile writes the text to file.
@@ -2462,7 +2324,6 @@ private static error writeFile(this ptr<Builder> _addr_b, @string file, slice<by
         return error.As(null!)!;
     }
     return error.As(os.WriteFile(file, text, 0666))!;
-
 }
 
 // Install the cgo export header file, if there is one.
@@ -2485,14 +2346,11 @@ private static error installHeader(this ptr<Builder> _addr_b, context.Context ct
             if (cfg.BuildX) {
                 b.Showcmd("", "# %s not created", src);
             }
-
             return error.As(null!)!;
-
         }
         err = err__prev1;
 
     }
-
 
     {
         var err__prev1 = err;
@@ -2505,7 +2363,6 @@ private static error installHeader(this ptr<Builder> _addr_b, context.Context ct
         err = err__prev1;
 
     }
-
 
     var (dir, _) = filepath.Split(a.Target);
     if (dir != "") {
@@ -2521,10 +2378,8 @@ private static error installHeader(this ptr<Builder> _addr_b, context.Context ct
             err = err__prev2;
 
         }
-
     }
     return error.As(b.moveOrCopyFile(a.Target, src, 0666, true))!;
-
 }
 
 // cover runs, in effect,
@@ -2551,7 +2406,6 @@ private static bool isObject(@string s) => func((defer, _, _) => {
             return true;
         }
     }    return false;
-
 });
 
 // mayberemovefile removes a file only if it is a regular file
@@ -2565,9 +2419,7 @@ private static void mayberemovefile(@string s) {
             return ;
         }
     }
-
     os.Remove(s);
-
 }
 
 // fmtcmd formats a command in the manner of fmt.Sprintf but also:
@@ -2607,7 +2459,6 @@ private static @string fmtcmd(this ptr<Builder> _addr_b, @string dir, @string fo
         }
     }
     return cmd;
-
 }
 
 // showcmd prints the given command to standard output
@@ -2660,7 +2511,6 @@ private static void showOutput(this ptr<Builder> _addr_b, ptr<Action> _addr_a, @
             suffix = strings.ReplaceAll(suffix, "\n" + dir, "\n" + reldir);
         }
     }
-
     suffix = strings.ReplaceAll(suffix, " " + b.WorkDir, " $WORK");
 
     if (a != null && a.output != null) {
@@ -2671,7 +2521,6 @@ private static void showOutput(this ptr<Builder> _addr_b, ptr<Action> _addr_a, @
     b.output.Lock();
     defer(b.output.Unlock());
     b.Print(prefix, suffix);
-
 });
 
 // errPrintedOutput is a special error indicating that a command failed
@@ -2703,7 +2552,6 @@ private static error run(this ptr<Builder> _addr_b, ptr<Action> _addr_a, @string
         }
     }
     return error.As(err)!;
-
 }
 
 // processOutput prepares the output of runOut to be output to the console.
@@ -2723,7 +2571,6 @@ private static @string processOutput(this ptr<Builder> _addr_b, slice<byte> @out
         messages = cgoTypeSigRe.ReplaceAllString(messages, "C.");
     }
     return messages;
-
 }
 
 // runOut runs the command given by cmdline in the directory dir.
@@ -2760,13 +2607,10 @@ private static (slice<byte>, error) runOut(this ptr<Builder> _addr_b, ptr<Action
  {
                         envcmdline += fmt.Sprintf("%s='%s'", e[..(int)j], e[(int)j + 1..]);
                     }
-
                     envcmdline += " ";
-
                 }
 
             }
-
         }        envcmdline += joinUnambiguously(cmdline);
         b.Showcmd(dir, "%s", envcmdline);
         if (cfg.BuildN) {
@@ -2811,13 +2655,11 @@ private static (slice<byte>, error) runOut(this ptr<Builder> _addr_b, ptr<Action
             }
 
         }
-
     }
     if (err != null) {
         err = errors.New(cmdline[0] + ": " + err.Error());
     }
     return (buf.Bytes(), error.As(err)!);
-
 });
 
 // joinUnambiguously prints the slice, quoting where necessary to make the
@@ -2841,7 +2683,6 @@ private static @string joinUnambiguously(slice<@string> a) {
             buf.WriteString(s);
         }
     }    return buf.String();
-
 }
 
 // cCompilerEnv returns environment variables to set when running the
@@ -2883,9 +2724,7 @@ private static error Mkdir(this ptr<Builder> _addr_b, @string dir) => func((defe
             return error.As(err)!;
         }
     }
-
     return error.As(null!)!;
-
 });
 
 // symlink creates a symlink newname -> oldname.
@@ -2901,7 +2740,6 @@ private static error Symlink(this ptr<Builder> _addr_b, @string oldname, @string
         }
     }
 
-
     if (cfg.BuildN || cfg.BuildX) {
         b.Showcmd("", "ln -s %s %s", oldname, newname);
         if (cfg.BuildN) {
@@ -2909,7 +2747,6 @@ private static error Symlink(this ptr<Builder> _addr_b, @string oldname, @string
         }
     }
     return error.As(os.Symlink(oldname, newname))!;
-
 }
 
 // mkAbs returns an absolute path corresponding to
@@ -2926,7 +2763,6 @@ private static @string mkAbs(@string dir, @string f) {
         return f;
     }
     return filepath.Join(dir, f);
-
 }
 
 private partial interface toolchain {
@@ -3097,9 +2933,7 @@ private static error ccompile(this ptr<Builder> _addr_b, ptr<Action> _addr_a, pt
  {
                 to = filepath.Join("/_", toPath);
             }
-
             flags = append(flags.slice(-1, len(flags), len(flags)), "-fdebug-prefix-map=" + from + "=" + to);
-
         }
         else if (p.Goroot && cfg.GOROOT_FINAL != cfg.GOROOT) {
             flags = append(flags.slice(-1, len(flags), len(flags)), "-fdebug-prefix-map=" + cfg.GOROOT + "=" + cfg.GOROOT_FINAL);
@@ -3113,7 +2947,6 @@ private static error ccompile(this ptr<Builder> _addr_b, ptr<Action> _addr_a, pt
             overlayPath = p;
         }
     }
-
     var (output, err) = b.runOut(a, filepath.Dir(overlayPath), b.cCompilerEnv(), compiler, flags, "-o", outfile, "-c", filepath.Base(overlayPath));
     if (len(output) > 0) { 
         // On FreeBSD 11, when we pass -g to clang 3.8 it
@@ -3144,7 +2977,6 @@ private static error ccompile(this ptr<Builder> _addr_b, ptr<Action> _addr_a, pt
         }
     }
     return error.As(err)!;
-
 }
 
 // gccld runs the gcc linker to create an executable from a set of object files.
@@ -3174,7 +3006,6 @@ private static error gccld(this ptr<Builder> _addr_b, ptr<Action> _addr_a, ptr<l
             if (bytes.Contains(line, (slice<byte>)"ld: warning: text-based stub file")) {
                 continue;
             }
-
             if (skipLines > 0) {
                 skipLines--;
                 continue;
@@ -3193,9 +3024,7 @@ private static error gccld(this ptr<Builder> _addr_b, ptr<Action> _addr_a, ptr<l
                 skipLines = 1;
                 continue;
             }
-
             save = append(save, line);
-
         }        out = bytes.Join(save, null);
         if (len(out) > 0) {
             b.showOutput(null, dir, p.ImportPath, b.processOutput(out));
@@ -3205,7 +3034,6 @@ private static error gccld(this ptr<Builder> _addr_b, ptr<Action> _addr_a, ptr<l
         }
     }
     return error.As(err)!;
-
 }
 
 // Grab these before main helpfully overwrites them.
@@ -3269,7 +3097,6 @@ private static slice<@string> compilerExe(this ptr<Builder> _addr_b, @string env
         compiler = strings.Fields(def);
     }
     return compiler;
-
 }
 
 // compilerCmd returns a command line prefix for the given environment
@@ -3299,12 +3126,10 @@ private static slice<@string> compilerCmd(this ptr<Builder> _addr_b, slice<@stri
                 a = append(a, "-pthread");
                 break;
         }
-
     }
     if (cfg.Goos == "aix") { 
         // mcmodel=large must always be enabled to allow large TOC.
         a = append(a, "-mcmodel=large");
-
     }
     if (b.gccSupportsFlag(compiler, "-fno-caret-diagnostics")) {
         a = append(a, "-fno-caret-diagnostics");
@@ -3321,7 +3146,6 @@ private static slice<@string> compilerCmd(this ptr<Builder> _addr_b, slice<@stri
         }
         workdir = strings.TrimSuffix(workdir, string(filepath.Separator));
         a = append(a, "-fdebug-prefix-map=" + workdir + "=/tmp/go-build");
-
     }
     if (b.gccSupportsFlag(compiler, "-gno-record-gcc-switches")) {
         a = append(a, "-gno-record-gcc-switches");
@@ -3330,7 +3154,6 @@ private static slice<@string> compilerCmd(this ptr<Builder> _addr_b, slice<@stri
         a = append(a, "-fno-common");
     }
     return a;
-
 }
 
 // gccNoPie returns the flag to use to request non-PIE. On systems
@@ -3347,7 +3170,6 @@ private static @string gccNoPie(this ptr<Builder> _addr_b, slice<@string> linker
         return "-nopie";
     }
     return "";
-
 }
 
 // gccSupportsFlag checks to see if the compiler supports a flag.
@@ -3365,7 +3187,6 @@ private static bool gccSupportsFlag(this ptr<Builder> _addr_b, slice<@string> co
             return b;
         }
     }
-
     if (b.flagCache == null) {
         b.flagCache = make_map<array<@string>, bool>();
     }
@@ -3378,7 +3199,6 @@ private static bool gccSupportsFlag(this ptr<Builder> _addr_b, slice<@string> co
         f.Close();
         tmp = f.Name();
         defer(os.Remove(tmp));
-
     }
     var cmdArgs = str.StringList(compiler, flag, "-c", "-x", "c", "-", "-o", tmp);
     if (cfg.BuildN || cfg.BuildX) {
@@ -3399,7 +3219,6 @@ private static bool gccSupportsFlag(this ptr<Builder> _addr_b, slice<@string> co
     var supported = !bytes.Contains(out, (slice<byte>)"unrecognized") && !bytes.Contains(out, (slice<byte>)"unknown") && !bytes.Contains(out, (slice<byte>)"unrecognised") && !bytes.Contains(out, (slice<byte>)"is not supported");
     b.flagCache[key] = supported;
     return supported;
-
 });
 
 // gccArchArgs returns arguments to pass to gcc based on the architecture.
@@ -3415,7 +3234,6 @@ private static slice<@string> gccArchArgs(this ptr<Builder> _addr_b) {
                 return new slice<@string>(new @string[] { "-arch", "x86_64", "-m64" });
             }
             return new slice<@string>(new @string[] { "-m64" });
-
             break;
         case "arm64": 
             if (cfg.Goos == "darwin") {
@@ -3457,7 +3275,6 @@ private static slice<@string> gccArchArgs(this ptr<Builder> _addr_b) {
             break;
     }
     return null;
-
 }
 
 // envList returns the value of the given environment variable broken
@@ -3468,7 +3285,6 @@ private static slice<@string> envList(@string key, @string def) {
         v = def;
     }
     return strings.Fields(v);
-
 }
 
 // CFlags returns the flags to use when invoking the C, C++ or Fortran compilers, or cgo.
@@ -3510,7 +3326,6 @@ private static (slice<@string>, slice<@string>, slice<@string>, slice<@string>, 
         return ;
     }
     return ;
-
 }
 
 private static (slice<@string>, error) buildFlags(@string name, @string defaults, slice<@string> fromPackage, Func<@string, @string, slice<@string>, error> check) {
@@ -3524,9 +3339,7 @@ private static (slice<@string>, error) buildFlags(@string name, @string defaults
             return (null, error.As(err)!);
         }
     }
-
     return (str.StringList(envList("CGO_" + name, defaults), fromPackage), error.As(null!)!);
-
 }
 
 private static var cgoRe = lazyregexp.New("[/\\\\:]");
@@ -3597,7 +3410,6 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
         }
 
         cgoenv = append(cgoenv, "CGO_LDFLAGS=" + strings.Join(flags, " "));
-
     }
     if (cfg.BuildToolchainName == "gccgo") {
         if (b.gccSupportsFlag(new slice<@string>(new @string[] { BuildToolchain.compiler() }), "-fsplit-stack")) {
@@ -3612,7 +3424,6 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
             }
 
         }
-
     }
     switch (cfg.BuildBuildmode) {
         case "c-archive": 
@@ -3648,7 +3459,6 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                 }
 
             }
-
         }
         i = i__prev1;
     }
@@ -3667,7 +3477,6 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
         err = err__prev1;
 
     }
-
     outGo = append(outGo, gofiles); 
 
     // Use sequential object file names to keep them distinct
@@ -3698,9 +3507,7 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
             err = err__prev1;
 
         }
-
         outObj = append(outObj, ofile);
-
     }    {
         var file__prev1 = file;
 
@@ -3719,9 +3526,7 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                 err = err__prev1;
 
             }
-
             outObj = append(outObj, ofile);
-
         }
         file = file__prev1;
     }
@@ -3745,9 +3550,7 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                 err = err__prev1;
 
             }
-
             outObj = append(outObj, ofile);
-
         }
         file = file__prev1;
     }
@@ -3770,9 +3573,7 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                 err = err__prev1;
 
             }
-
             outObj = append(outObj, ofile);
-
         }
         file = file__prev1;
     }
@@ -3796,9 +3597,7 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                 err = err__prev1;
 
             }
-
             outObj = append(outObj, ofile);
-
         }
         file = file__prev1;
     }
@@ -3818,9 +3617,7 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                 err = err__prev1;
 
             }
-
             outGo = append(outGo, importGo);
-
             break;
         case "gccgo": 
             var defunC = objdir + "_cgo_defun.c";
@@ -3837,9 +3634,7 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                 err = err__prev1;
 
             }
-
             outObj = append(outObj, defunObj);
-
             break;
         default: 
             noCompiler();
@@ -3901,15 +3696,10 @@ private static (slice<@string>, slice<@string>, error) cgo(this ptr<Builder> _ad
                         flag = strings.TrimSpace(flag);
                         flag = strings.Trim(flag, "\"");
                         flags = append(flags, flag);
-
                     }
-
                     src = src[(int)end..];
                     idx = bytes.Index(src, (slice<byte>)cgoLdflag);
-
                 }
-
-
             } 
 
             // We expect to find the contents of cgoLDFLAGS in flags.
@@ -3934,7 +3724,6 @@ outer:
                                 _continueouter = true;
                                 break;
                             }
-
                         }
 
                         f = f__prev2;
@@ -3942,7 +3731,6 @@ outer:
 
                     flags = append(flags[..(int)i], flags[(int)i + len(cgoLDFLAGS)..]);
                     break;
-
                 }
 
                 i = i__prev1;
@@ -3960,10 +3748,8 @@ outer:
             err = err__prev2;
 
         }
-
     }
     return (outGo, outObj, error.As(null!)!);
-
 }
 
 // dynimport creates a Go source file named importGo containing
@@ -3988,7 +3774,6 @@ private static error dynimport(this ptr<Builder> _addr_b, ptr<Action> _addr_a, p
 
     }
 
-
     var linkobj = str.StringList(ofile, outObj, mkAbsFiles(p.Dir, p.SysoFiles));
     var dynobj = objdir + "_cgo_.o"; 
 
@@ -4003,7 +3788,6 @@ private static error dynimport(this ptr<Builder> _addr_b, ptr<Action> _addr_a, p
                 n = append(n, flag);
             }
         }        ldflags = append(n, "-pie");
-
     }
     {
         var err__prev1 = err;
@@ -4023,7 +3807,6 @@ private static error dynimport(this ptr<Builder> _addr_b, ptr<Action> _addr_a, p
         cgoflags = new slice<@string>(new @string[] { "-dynlinker" }); // record path to dynamic linker
     }
     return error.As(b.run(a, @base.Cwd(), p.ImportPath, b.cCompilerEnv(), cfg.BuildToolexec, cgoExe, "-dynpackage", p.Name, "-dynimport", dynobj, "-dynout", importGo, cgoflags))!;
-
 }
 
 // Run SWIG on all SWIG input files.
@@ -4045,7 +3828,6 @@ private static (slice<@string>, slice<@string>, slice<@string>, error) swig(this
             return (null, null, null, error.As(err)!);
         }
     }
-
 
     var (intgosize, err) = b.swigIntSize(objdir);
     if (err != null) {
@@ -4090,7 +3872,6 @@ private static (slice<@string>, slice<@string>, slice<@string>, error) swig(this
     }
 
     return (outGo, outC, outCXX, error.As(null!)!);
-
 }
 
 // Make sure SWIG is new enough.
@@ -4108,13 +3889,11 @@ private static error swigDoVersionCheck(this ptr<Builder> _addr_b) {
     if (matches == null) { 
         // Can't find version number; hope for the best.
         return error.As(null!)!;
-
     }
     var (major, err) = strconv.Atoi(string(matches[1]));
     if (err != null) { 
         // Can't find version number; hope for the best.
         return error.As(null!)!;
-
     }
     const @string errmsg = "must have SWIG version >= 3.0.6";
 
@@ -4124,7 +3903,6 @@ private static error swigDoVersionCheck(this ptr<Builder> _addr_b) {
     if (major > 3) { 
         // 4.0 or later
         return error.As(null!)!;
-
     }
     if (len(matches[2]) > 0) {
         var (minor, err) = strconv.Atoi(string(matches[2][(int)1..]));
@@ -4134,7 +3912,6 @@ private static error swigDoVersionCheck(this ptr<Builder> _addr_b) {
         if (minor > 0) { 
             // 3.1 or later
             return error.As(null!)!;
-
         }
     }
     if (len(matches[3]) > 0) {
@@ -4145,11 +3922,9 @@ private static error swigDoVersionCheck(this ptr<Builder> _addr_b) {
         if (patch < 6) { 
             // Before 3.0.6.
             return error.As(errors.New(errmsg))!;
-
         }
     }
     return error.As(null!)!;
-
 }
 
 private static error swigVersionCheck(this ptr<Builder> _addr_b) {
@@ -4198,9 +3973,7 @@ private static (@string, error) swigDoIntSize(this ptr<Builder> _addr_b, @string
             return ("32", error.As(null!)!);
         }
     }
-
     return ("64", error.As(null!)!);
-
 }
 
 // Determine the size of int on the target system for the -intgosize option
@@ -4267,7 +4040,6 @@ private static (@string, @string, error) swigOne(this ptr<Builder> _addr_b, ptr<
             }
 
         }
-
     }
     if (cxx) {
         args = append(args, "-c++");
@@ -4280,10 +4052,8 @@ private static (@string, @string, error) swigOne(this ptr<Builder> _addr_b, ptr<
             }
             b.showOutput(a, p.Dir, p.Desc(), b.processOutput(out)); // swig error
             return ("", "", error.As(errPrintedOutput)!);
-
         }
         return ("", "", error.As(err)!);
-
     }
     if (len(out) > 0) {
         b.showOutput(a, p.Dir, p.Desc(), b.processOutput(out)); // swig warning
@@ -4297,9 +4067,7 @@ private static (@string, @string, error) swigOne(this ptr<Builder> _addr_b, ptr<
             return ("", "", error.As(err)!);
         }
     }
-
     return (newGoFile, objdir + gccBase + gccExt, error.As(null!)!);
-
 }
 
 // disableBuildID adjusts a linker command line to avoid creating a
@@ -4327,7 +4095,6 @@ private static slice<@string> disableBuildID(this ptr<Builder> _addr_b, slice<@s
             break;
     }
     return ldflags;
-
 }
 
 // mkAbsFiles converts files into a list of absolute files,
@@ -4340,9 +4107,7 @@ private static slice<@string> mkAbsFiles(@string dir, slice<@string> files) {
             f = filepath.Join(dir, f);
         }
         abs[i] = f;
-
     }    return abs;
-
 }
 
 // passLongArgsInResponseFiles modifies cmd such that, for
@@ -4400,7 +4165,6 @@ private static Action passLongArgsInResponseFiles(ptr<exec.Cmd> _addr_cmd) {
             log.Fatalf("error writing long arguments to response file: %v", err);
         }
     }
-
     {
         var err = tf.Close();
 
@@ -4409,10 +4173,8 @@ private static Action passLongArgsInResponseFiles(ptr<exec.Cmd> _addr_cmd) {
             log.Fatalf("error writing long arguments to response file: %v", err);
         }
     }
-
     cmd.Args = new slice<@string>(new @string[] { cmd.Args[0], "@"+tf.Name() });
     return cleanup;
-
 }
 
 // Windows has a limit of 32 KB arguments. To be conservative and not worry
@@ -4447,7 +4209,6 @@ private static bool useResponseFile(@string path, nint argLen) {
         return true;
     }
     return false;
-
 }
 
 // encodeArg encodes an argument for response file writing.
@@ -4471,9 +4232,7 @@ private static @string encodeArg(@string arg) {
                 b.WriteRune(r);
                 break;
         }
-
     }    return b.String();
-
 }
 
 } // end work_package

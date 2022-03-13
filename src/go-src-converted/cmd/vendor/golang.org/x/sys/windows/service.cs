@@ -4,11 +4,9 @@
 
 // +build windows
 
-// package windows -- go2cs converted at 2022 March 06 23:30:36 UTC
+// package windows -- go2cs converted at 2022 March 13 06:41:28 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\windows\service.go
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
 
 public static partial class windows_package {
@@ -20,7 +18,6 @@ public static readonly nint SC_MANAGER_LOCK = 8;
 public static readonly nint SC_MANAGER_QUERY_LOCK_STATUS = 16;
 public static readonly nint SC_MANAGER_MODIFY_BOOT_CONFIG = 32;
 public static readonly nuint SC_MANAGER_ALL_ACCESS = 0xf003f;
-
 
 //sys    OpenSCManager(machineName *uint16, databaseName *uint16, access uint32) (handle Handle, err error) [failretval==0] = advapi32.OpenSCManagerW
 
@@ -137,7 +134,6 @@ public static readonly nuint SERVICE_NOTIFY_DELETE_PENDING = 0x00000200;
 public static readonly nint SC_EVENT_DATABASE_CHANGE = 0;
 public static readonly nint SC_EVENT_PROPERTY_CHANGE = 1;
 public static readonly nint SC_EVENT_STATUS_CHANGE = 2;
-
 
 public partial struct SERVICE_STATUS {
     public uint ServiceType;

@@ -28,44 +28,45 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package arm -- go2cs converted at 2022 March 06 23:19:57 UTC
+// package arm -- go2cs converted at 2022 March 13 06:32:45 UTC
 // import "cmd/link/internal/arm" ==> using arm = go.cmd.link.@internal.arm_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\arm\asm.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
-public static partial class arm_package {
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using fmt = fmt_package;
+using log = log_package;
 
-    // This assembler:
-    //
-    //         .align 2
-    // local.dso_init:
-    //         ldr r0, .Lmoduledata
-    // .Lloadfrom:
-    //         ldr r0, [r0]
-    //         b runtime.addmoduledata@plt
-    // .align 2
-    // .Lmoduledata:
-    //         .word local.moduledata(GOT_PREL) + (. - (.Lloadfrom + 4))
-    // assembles to:
-    //
-    // 00000000 <local.dso_init>:
-    //    0:        e59f0004        ldr     r0, [pc, #4]    ; c <local.dso_init+0xc>
-    //    4:        e5900000        ldr     r0, [r0]
-    //    8:        eafffffe        b       0 <runtime.addmoduledata>
-    //                      8: R_ARM_JUMP24 runtime.addmoduledata
-    //    c:        00000004        .word   0x00000004
-    //                      c: R_ARM_GOT_PREL       local.moduledata
+
+// This assembler:
+//
+//         .align 2
+// local.dso_init:
+//         ldr r0, .Lmoduledata
+// .Lloadfrom:
+//         ldr r0, [r0]
+//         b runtime.addmoduledata@plt
+// .align 2
+// .Lmoduledata:
+//         .word local.moduledata(GOT_PREL) + (. - (.Lloadfrom + 4))
+// assembles to:
+//
+// 00000000 <local.dso_init>:
+//    0:        e59f0004        ldr     r0, [pc, #4]    ; c <local.dso_init+0xc>
+//    4:        e5900000        ldr     r0, [r0]
+//    8:        eafffffe        b       0 <runtime.addmoduledata>
+//                      8: R_ARM_JUMP24 runtime.addmoduledata
+//    c:        00000004        .word   0x00000004
+//                      c: R_ARM_GOT_PREL       local.moduledata
+
+
+using System;public static partial class arm_package {
+
 private static void gentext(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr) {
     ref ld.Link ctxt = ref _addr_ctxt.val;
     ref loader.Loader ldr = ref _addr_ldr.val;
@@ -94,7 +95,6 @@ private static void gentext(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ld
     rel2.SetSiz(4);
     rel2.SetSym(ctxt.Moduledata);
     rel2.SetAdd(4);
-
 }
 
 // Preserve highest 8 bits of a, and do addition to lower 24-bit
@@ -210,7 +210,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         if (target.IsExternal()) { 
             // External linker will do this relocation.
             return true;
-
         }
         addpltsym(_addr_target, _addr_ldr, _addr_syms, targ);
         su = ldr.MakeSymbolUpdater(s);
@@ -230,13 +229,11 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             su.SetRelocType(rIdx, objabi.R_CONST); // write r->add during relocsym
             su.SetRelocSym(rIdx, 0);
             return true;
-
         }
     else if (r.Type() == objabi.R_GOTPCREL) 
         if (target.IsExternal()) { 
             // External linker will do this relocation.
             return true;
-
         }
         if (targType != sym.SDYNIMPORT) {
             ldr.Errorf(s, "R_GOTPCREL target is not SDYNIMPORT symbol: %v", ldr.SymName(targ));
@@ -248,7 +245,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         su.SetRelocAdd(rIdx, r.Add() + int64(ldr.SymGot(targ)));
         return true;
         return false;
-
 }
 
 private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, nint ri, long sectoff) {
@@ -283,13 +279,11 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
             var r = relocs.At(ri);
             if (r.Add() & 0xff000000 == 0xeb000000) { // BL // TODO: using r.Add here is bad (issue 19811)
                 @out.Write32(uint32(elf.R_ARM_CALL) | uint32(elfsym) << 8);
-
             }
             else
  {
                 @out.Write32(uint32(elf.R_ARM_JUMP24) | uint32(elfsym) << 8);
             }
-
         }
         else
  {
@@ -310,7 +304,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
     else 
         return false;
         return true;
-
 }
 
 private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_got, loader.Sym dynamic) {
@@ -339,7 +332,6 @@ private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilde
 
         got.AddUint32(ctxt.Arch, 0);
         got.AddUint32(ctxt.Arch, 0);
-
     }
 }
 
@@ -378,7 +370,6 @@ private static bool pereloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out
         @out.Write16(uint16(v));
 
     return true;
-
 }
 
 // sign extend a 24-bit integer
@@ -393,10 +384,8 @@ private static uint immrot(uint v) {
             return uint32(i << 8) | v | 1 << 25;
         }
         v = v << 2 | v >> 30;
-
     }
     return 0;
-
 }
 
 // Convert the direct jump relocation r to refer to a trampoline if the target is too far
@@ -423,7 +412,6 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
             // r.Add is the instruction
             // low 24-bit encodes the target address
             t = (ldr.SymValue(rs) + int64(signext24(r.Add() & 0xffffff) * 4) - (ldr.SymValue(s) + int64(r.Off()))) / 4;
-
         }
         if (t > 0x7fffff || t < -0x800000 || ldr.SymValue(rs) == 0 || (ld.FlagDebugTramp > 1 && ldr.SymPkg(s) != ldr.SymPkg(rs).val)) { 
             // direct call too far, need to insert trampoline.
@@ -431,7 +419,7 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
             // of direct call, we can reuse it. otherwise create a new one.
             var offset = (signext24(r.Add() & 0xffffff) + 2) * 4;
             loader.Sym tramp = default;
-            for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+            for (nint i = 0; ; i++) {
                 var oName = ldr.SymName(rs);
                 var name = oName + fmt.Sprintf("%+d-tramp%d", offset, i);
                 tramp = ldr.LookupOrCreateSym(name, int(ldr.SymVersion(rs)));
@@ -439,29 +427,22 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
                 if (ldr.SymType(tramp) == sym.SDYNIMPORT) { 
                     // don't reuse trampoline defined in other module
                     continue;
-
                 }
-
                 if (oName == "runtime.deferreturn") {
                     ldr.SetIsDeferReturnTramp(tramp, true);
                 }
-
                 if (ldr.SymValue(tramp) == 0) { 
                     // either the trampoline does not exist -- we need to create one,
                     // or found one the address which is not assigned -- this will be
                     // laid down immediately after the current function. use this one.
                     break;
-
                 }
-
                 t = (ldr.SymValue(tramp) - 8 - (ldr.SymValue(s) + int64(r.Off()))) / 4;
                 if (t >= -0x800000 && t < 0x7fffff) { 
                     // found an existing trampoline that is not too far
                     // we can just use it
                     break;
-
                 }
-
             }
 
             if (ldr.SymType(tramp) == 0) { 
@@ -481,7 +462,6 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
  {
                     gentramp(_addr_ctxt.Arch, ctxt.LinkMode, _addr_ldr, _addr_trampb, rs, int64(offset));
                 }
-
             } 
             // modify reloc to point to tramp, which will be resolved later
             var sb = ldr.MakeSymbolUpdater(s);
@@ -496,7 +476,6 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
         ctxt.Errorf(s, "trampoline called with non-jump reloc: %d (%s)", r.Type(), sym.RelocName(ctxt.Arch, r.Type()));
 
     __switch_break0:;
-
 }
 
 // generate a trampoline to target+offset
@@ -547,7 +526,6 @@ private static void gentramppic(ptr<sys.Arch> _addr_arch, ptr<loader.SymbolBuild
     r.SetSiz(4);
     r.SetSym(target);
     r.SetAdd(offset + 4);
-
 }
 
 // generate a trampoline to target+offset in dynlink mode (using GOT)
@@ -590,7 +568,6 @@ private static void gentrampdyn(ptr<sys.Arch> _addr_arch, ptr<loader.SymbolBuild
         // increase reloc offset by 4 as we inserted an ADD instruction
         r.SetOff(20);
         r.SetAdd(12);
-
     }
 }
 
@@ -615,7 +592,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             }
             return (int64(braddoff(int32(0xff000000 & uint32(r.Add())), int32(0xffffff & uint32(xadd / 4)))), 1, true);
                 return (-1, 0, false);
-
     }
     const var isOk = true;
 
@@ -642,7 +618,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
         }
         return (int64(braddoff(int32(0xff000000 & uint32(r.Add())), int32(0xffffff & t))), noExtReloc, isOk);
         return (val, 0, false);
-
 }
 
 private static long archrelocvariant(ptr<ld.Target> _addr__p0, ptr<loader.Loader> _addr__p0, loader.Reloc _p0, sym.RelocVariant _p0, loader.Sym _p0, long _p0, slice<byte> _p0) {
@@ -675,7 +650,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<ld.Target> _addr_target, ptr
         rr.Size = r.Siz();
         return (rr, true);
         return (rr, false);
-
 }
 
 private static void addpltreloc(ptr<loader.Loader> _addr_ldr, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_got, loader.Sym s, objabi.RelocType typ) {
@@ -729,7 +703,6 @@ private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         rel.AddAddrPlus(target.Arch, got.Sym(), int64(ldr.SymGot(s)));
 
         rel.AddUint32(target.Arch, elf.R_INFO32(uint32(ldr.SymDynid(s)), uint32(elf.R_ARM_JUMP_SLOT)));
-
     }
     else
  {
@@ -749,7 +722,8 @@ private static void addgotsyminternal(ptr<ld.Target> _addr_target, ptr<loader.Lo
     ldr.SetGot(s, int32(got.Size()));
     got.AddAddrPlus(target.Arch, s, 0);
 
-    if (target.IsElf())     }
+    if (target.IsElf()) {
+    }
     else
  {
         ldr.Errorf(s, "addgotsyminternal: unsupported binary format");

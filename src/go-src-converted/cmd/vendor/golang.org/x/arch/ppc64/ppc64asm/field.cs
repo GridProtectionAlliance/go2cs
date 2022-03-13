@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2022 March 06 23:25:04 UTC
+// package ppc64asm -- go2cs converted at 2022 March 13 06:38:18 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\field.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.ppc64;
+
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// A BitField is a bit-field in a 32-bit word.
+// Bits are counted from 0 from the MSB to 31 as the LSB.
 
 public static partial class ppc64asm_package {
 
-    // A BitField is a bit-field in a 32-bit word.
-    // Bits are counted from 0 from the MSB to 31 as the LSB.
 public partial struct BitField {
     public byte Offs; // the offset of the left-most bit.
     public byte Bits; // length in bits.
@@ -45,7 +47,6 @@ public static uint Parse(this BitField b, array<uint> i) => func((_, panic, _) =
         panic(fmt.Sprintf("invalid bitfiled %v", b));
     }
     return (i[b.Word] >> (int)((32 - b.Offs - b.Bits))) & ((1 << (int)(b.Bits)) - 1);
-
 });
 
 // ParseSigned extracts the bitfield b from i, and return it as a signed integer.

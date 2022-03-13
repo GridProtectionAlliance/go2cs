@@ -6,20 +6,21 @@
 // +build go1.16
 
 // Package buildtag defines an Analyzer that checks build tags.
-// package buildtag -- go2cs converted at 2022 March 06 23:34:30 UTC
+
+// package buildtag -- go2cs converted at 2022 March 13 06:41:47 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/buildtag" ==> using buildtag = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.buildtag_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\buildtag\buildtag.go
-using ast = go.go.ast_package;
-using constraint = go.go.build.constraint_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using constraint = go.build.constraint_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
 
 public static partial class buildtag_package {
 
@@ -61,7 +62,6 @@ private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass) {
                 err = err__prev1;
 
             }
-
         }
         name = name__prev1;
     }
@@ -76,11 +76,8 @@ private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass) {
                 if (err != null) { 
                     // Not valid Go source code - not our job to diagnose, so ignore.
                     return (null, error.As(null!)!);
-
                 }
-
                 checkGoFile(_addr_pass, _addr_f);
-
             }
             else
  {
@@ -96,15 +93,12 @@ private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass) {
                     err = err__prev2;
 
                 }
-
             }
-
         }
         name = name__prev1;
     }
 
     return (null, error.As(null!)!);
-
 }
 
 private static void checkGoFile(ptr<analysis.Pass> _addr_pass, ptr<ast.File> _addr_f) => func((defer, _, _) => {
@@ -128,9 +122,7 @@ private static void checkGoFile(ptr<analysis.Pass> _addr_pass, ptr<ast.File> _ad
             if (!strings.HasPrefix(c.Text, "//")) {
                 check.plusBuildOK = false;
             }
-
             check.comment(c.Slash, c.Text);
-
         }
     }
 });
@@ -150,7 +142,6 @@ private static error checkOtherFile(ptr<analysis.Pass> _addr_pass, @string filen
     }
     check.file(token.Pos(tf.Base()), string(content));
     return error.As(null!)!;
-
 });
 
 private partial struct checker {
@@ -257,10 +248,8 @@ private static void file(this ptr<checker> _addr_check, token.Pos pos, @string t
             // string constants or anything else (this might
             // not even be a Go program). So stop.
             break;
-
         }
     }
-
 }
 
 private static void comment(this ptr<checker> _addr_check, token.Pos pos, @string text) {
@@ -295,25 +284,20 @@ private static void comment(this ptr<checker> _addr_check, token.Pos pos, @strin
  {
                         i++;
                     }
-
                     var line = text[..(int)i];
                     if (strings.HasPrefix(line, "//")) {
                         check.comment(pos, line);
                     }
-
                     pos += token.Pos(i);
                     text = text[(int)i..];
-
                 }
 
                 check.inStar = false;
-
             }
 
             i = i__prev2;
 
         }
-
     }
 }
 
@@ -325,7 +309,6 @@ private static void goBuildLine(this ptr<checker> _addr_check, token.Pos pos, @s
             check.pass.Reportf(pos, "malformed //go:build line (space between // and go:build)");
         }
         return ;
-
     }
     if (!check.goBuildOK || check.inStar) {
         check.pass.Reportf(pos, "misplaced //go:build comment");
@@ -347,7 +330,6 @@ private static void goBuildLine(this ptr<checker> _addr_check, token.Pos pos, @s
             line = line[..(int)i];
         }
     }
-
 
     var (x, err) = constraint.Parse(line);
     if (err != null) {
@@ -371,12 +353,10 @@ private static void plusBuildLine(this ptr<checker> _addr_check, token.Pos pos, 
             check.pass.Reportf(pos, "possible malformed +build comment");
         }
         return ;
-
     }
     if (!check.plusBuildOK) { // inStar implies !plusBuildOK
         check.pass.Reportf(pos, "misplaced +build comment");
         check.crossCheck = false;
-
     }
     if (check.plusBuildPos == token.NoPos) {
         check.plusBuildPos = pos;
@@ -388,7 +368,6 @@ private static void plusBuildLine(this ptr<checker> _addr_check, token.Pos pos, 
             line = line[..(int)i];
         }
     }
-
 
     var fields = strings.Fields(line[(int)len("//")..]); 
     // IsPlusBuildConstraint check above implies fields[0] == "+build"
@@ -417,7 +396,6 @@ private static void plusBuildLine(this ptr<checker> _addr_check, token.Pos pos, 
             check.pass.Reportf(pos, "%v", err);
             check.crossCheck = false;
             return ;
-
         }
         if (check.plusBuild == null) {
             check.plusBuild = y;
@@ -447,7 +425,6 @@ private static void finish(this ptr<checker> _addr_check) {
             // Definitely should not happen, but not the user's fault.
             // Do not report.
             return ;
-
         }
         if (want == null) {
             want = y;

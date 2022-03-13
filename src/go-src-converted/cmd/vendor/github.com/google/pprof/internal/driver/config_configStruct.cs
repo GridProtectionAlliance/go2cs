@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:22 UTC
+//     Generated on 2022 March 13 06:36:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace @internal
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct config
         {
             // Constructors
@@ -121,7 +121,7 @@ namespace @internal
             public static implicit operator config(NilType nil) => default(config);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static config config_cast(dynamic value)
         {
             return new config(value.Output, value.CallTree, value.RelativePercentages, value.Unit, value.CompactLabels, value.SourcePath, value.TrimPath, value.IntelSyntax, value.Mean, value.SampleIndex, value.DivideBy, value.Normalize, value.Sort, value.DropNegative, value.NodeCount, value.NodeFraction, value.EdgeFraction, value.Trim, value.Focus, value.Ignore, value.PruneFrom, value.Hide, value.Show, value.ShowFrom, value.TagFocus, value.TagIgnore, value.TagShow, value.TagHide, value.NoInlines, value.Granularity);

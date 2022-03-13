@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:33 UTC
+//     Generated on 2022 March 13 06:44:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace crypto
 {
     public static partial class chacha20poly1305_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct xchacha20poly1305
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace crypto
             public static implicit operator xchacha20poly1305(NilType nil) => default(xchacha20poly1305);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static xchacha20poly1305 xchacha20poly1305_cast(dynamic value)
         {
             return new xchacha20poly1305(value.key);

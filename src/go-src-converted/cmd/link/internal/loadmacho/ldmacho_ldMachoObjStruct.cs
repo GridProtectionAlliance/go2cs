@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:45 UTC
+//     Generated on 2022 March 13 06:34:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class loadmacho_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct ldMachoObj
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace @internal
             public static implicit operator ldMachoObj(NilType nil) => default(ldMachoObj);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ldMachoObj ldMachoObj_cast(dynamic value)
         {
             return new ldMachoObj(ref value.f, value.@base, value.length, value.is64, value.name, value.e, value.cputype, value.subcputype, value.filetype, value.flags, value.cmd, value.ncmd);

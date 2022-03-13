@@ -3,25 +3,28 @@
 // license that can be found in the LICENSE file.
 
 // Package field implements fast arithmetic modulo 2^255-19.
-// package field -- go2cs converted at 2022 March 06 22:17:26 UTC
+
+// package field -- go2cs converted at 2022 March 13 05:30:46 UTC
 // import "crypto/ed25519/internal/edwards25519/field" ==> using field = go.crypto.ed25519.@internal.edwards25519.field_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\field\fe.go
-using subtle = go.crypto.subtle_package;
-using binary = go.encoding.binary_package;
-using bits = go.math.bits_package;
-
 namespace go.crypto.ed25519.@internal.edwards25519;
+
+using subtle = crypto.subtle_package;
+using binary = encoding.binary_package;
+using bits = math.bits_package;
+
+
+// Element represents an element of the field GF(2^255-19). Note that this
+// is not a cryptographically secure group, and should only be used to interact
+// with edwards25519.Point coordinates.
+//
+// This type works similarly to math/big.Int, and all arguments and receivers
+// are allowed to alias.
+//
+// The zero value is a valid zero element.
 
 public static partial class field_package {
 
-    // Element represents an element of the field GF(2^255-19). Note that this
-    // is not a cryptographically secure group, and should only be used to interact
-    // with edwards25519.Point coordinates.
-    //
-    // This type works similarly to math/big.Int, and all arguments and receivers
-    // are allowed to alias.
-    //
-    // The zero value is a valid zero element.
 public partial struct Element {
     public ulong l0;
     public ulong l1;
@@ -87,7 +90,6 @@ private static ptr<Element> reduce(this ptr<Element> _addr_v) {
     v.l4 = v.l4 & maskLow51Bits;
 
     return _addr_v!;
-
 }
 
 // Add sets v = a + b, and returns v.
@@ -106,7 +108,6 @@ private static ptr<Element> Add(this ptr<Element> _addr_v, ptr<Element> _addr_a,
     // the compiler can figure out better optimizations by inlining the carry
     // propagation.
     return _addr_v.carryPropagateGeneric()!;
-
 }
 
 // Subtract sets v = a - b, and returns v.
@@ -123,7 +124,6 @@ private static ptr<Element> Subtract(this ptr<Element> _addr_v, ptr<Element> _ad
     v.l3 = (a.l3 + 0xFFFFFFFFFFFFE) - b.l3;
     v.l4 = (a.l4 + 0xFFFFFFFFFFFFE) - b.l4;
     return _addr_v.carryPropagate()!;
-
 }
 
 // Negate sets v = -a, and returns v.
@@ -285,7 +285,6 @@ private static ptr<Element> SetBytes(this ptr<Element> _addr_v, slice<byte> x) =
     v.l4 &= maskLow51Bits;
 
     return _addr_v!;
-
 });
 
 // Bytes returns the canonical 32-byte little-endian encoding of v.
@@ -296,7 +295,6 @@ private static slice<byte> Bytes(this ptr<Element> _addr_v) {
     // rather than happen on the heap.
     ref array<byte> @out = ref heap(new array<byte>(32), out ptr<array<byte>> _addr_@out);
     return v.bytes(_addr_out);
-
 }
 
 private static slice<byte> bytes(this ptr<Element> _addr_v, ptr<array<byte>> _addr_@out) {
@@ -335,7 +333,6 @@ private static slice<byte> bytes(this ptr<Element> _addr_v, ptr<array<byte>> _ad
     }
 
     return out[..];
-
 }
 
 // Equal returns 1 if v and u are equal, and 0 otherwise.
@@ -346,7 +343,6 @@ private static nint Equal(this ptr<Element> _addr_v, ptr<Element> _addr_u) {
     var sa = u.Bytes();
     var sv = v.Bytes();
     return subtle.ConstantTimeCompare(sa, sv);
-
 }
 
 // mask64Bits returns 0xffffffff if cond is 1, and 0 otherwise.
@@ -444,7 +440,6 @@ private static ptr<Element> Mult32(this ptr<Element> _addr_v, ptr<Element> _addr
     // The hi portions are going to be only 32 bits, plus any previous excess,
     // so we can skip the carry propagation.
     return _addr_v!;
-
 }
 
 // mul51 returns lo + hi * 2⁵¹ = a * b.
@@ -480,7 +475,6 @@ private static ptr<Element> Pow22523(this ptr<Element> _addr_v, ptr<Element> _ad
 
         for (nint i = 1; i < 5; i++) { // x^992
             t1.Square(_addr_t1);
-
         }
 
         i = i__prev1;
@@ -492,7 +486,6 @@ private static ptr<Element> Pow22523(this ptr<Element> _addr_v, ptr<Element> _ad
 
         for (i = 1; i < 10; i++) { // 2^20 - 2^10
             t1.Square(_addr_t1);
-
         }
 
         i = i__prev1;
@@ -504,7 +497,6 @@ private static ptr<Element> Pow22523(this ptr<Element> _addr_v, ptr<Element> _ad
 
         for (i = 1; i < 20; i++) { // 2^40 - 2^20
             t2.Square(_addr_t2);
-
         }
 
         i = i__prev1;
@@ -516,7 +508,6 @@ private static ptr<Element> Pow22523(this ptr<Element> _addr_v, ptr<Element> _ad
 
         for (i = 1; i < 10; i++) { // 2^50 - 2^10
             t1.Square(_addr_t1);
-
         }
 
         i = i__prev1;
@@ -528,7 +519,6 @@ private static ptr<Element> Pow22523(this ptr<Element> _addr_v, ptr<Element> _ad
 
         for (i = 1; i < 50; i++) { // 2^100 - 2^50
             t1.Square(_addr_t1);
-
         }
 
         i = i__prev1;
@@ -540,7 +530,6 @@ private static ptr<Element> Pow22523(this ptr<Element> _addr_v, ptr<Element> _ad
 
         for (i = 1; i < 100; i++) { // 2^200 - 2^100
             t2.Square(_addr_t2);
-
         }
 
         i = i__prev1;
@@ -552,7 +541,6 @@ private static ptr<Element> Pow22523(this ptr<Element> _addr_v, ptr<Element> _ad
 
         for (i = 1; i < 50; i++) { // 2^250 - 2^50
             t1.Square(_addr_t1);
-
         }
 
         i = i__prev1;
@@ -602,7 +590,6 @@ private static (ptr<Element>, nint) SqrtRatio(this ptr<Element> _addr_r, ptr<Ele
 
     r.Absolute(r); // Choose the nonnegative square root.
     return (_addr_r!, correctSignSqrt | flippedSignSqrt);
-
 }
 
 } // end field_package

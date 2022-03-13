@@ -4,20 +4,20 @@
 
 // The errorsas package defines an Analyzer that checks that the second argument to
 // errors.As is a pointer to a type implementing error.
-// package errorsas -- go2cs converted at 2022 March 06 23:34:35 UTC
+
+// package errorsas -- go2cs converted at 2022 March 13 06:41:51 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/errorsas" ==> using errorsas = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.errorsas_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\errorsas\errorsas.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using typeutil = golang.org.x.tools.go.types.typeutil_package;
+using System;
 
 public static partial class errorsas_package {
 
@@ -63,7 +63,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         }
     });
     return (null, error.As(null!)!);
-
 }
 
 private static ptr<types.Interface> errorType = types.Universe.Lookup("error").Type().Underlying()._<ptr<types.Interface>>();
@@ -81,14 +80,12 @@ private static bool pointerToInterfaceOrError(ptr<analysis.Pass> _addr_pass, ast
             return true;
         }
     }
-
     ptr<types.Pointer> (pt, ok) = t.Underlying()._<ptr<types.Pointer>>();
     if (!ok) {
         return false;
     }
     _, ok = pt.Elem().Underlying()._<ptr<types.Interface>>();
     return ok || types.Implements(pt.Elem(), errorType);
-
 }
 
 } // end errorsas_package

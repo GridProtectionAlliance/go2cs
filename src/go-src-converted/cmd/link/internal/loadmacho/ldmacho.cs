@@ -3,56 +3,57 @@
 // license that can be found in the LICENSE file.
 
 // Package loadmacho implements a Mach-O file reader.
-// package loadmacho -- go2cs converted at 2022 March 06 23:21:45 UTC
+
+// package loadmacho -- go2cs converted at 2022 March 13 06:34:45 UTC
 // import "cmd/link/internal/loadmacho" ==> using loadmacho = go.cmd.link.@internal.loadmacho_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\loadmacho\ldmacho.go
-using bytes = go.bytes_package;
-using bio = go.cmd.@internal.bio_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
+using bytes = bytes_package;
+using bio = cmd.@internal.bio_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+
+
+/*
+Derived from Plan 9 from User Space's src/libmach/elf.h, elf.c
+http://code.swtch.com/plan9port/src/tip/src/libmach/
+
+    Copyright © 2004 Russ Cox.
+    Portions Copyright © 2008-2010 Google Inc.
+    Portions Copyright © 2010 The Go Authors.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+// TODO(crawshaw): de-duplicate these symbols with cmd/link/internal/ld
+
+using System;
 public static partial class loadmacho_package {
 
-    /*
-    Derived from Plan 9 from User Space's src/libmach/elf.h, elf.c
-    http://code.swtch.com/plan9port/src/tip/src/libmach/
-
-        Copyright © 2004 Russ Cox.
-        Portions Copyright © 2008-2010 Google Inc.
-        Portions Copyright © 2010 The Go Authors.
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-    */
-
-    // TODO(crawshaw): de-duplicate these symbols with cmd/link/internal/ld
 public static readonly nint MACHO_X86_64_RELOC_UNSIGNED = 0;
 public static readonly nint MACHO_X86_64_RELOC_SIGNED = 1;
 public static readonly nint MACHO_ARM64_RELOC_ADDEND = 10;
-
 
 private partial struct ldMachoObj {
     public ptr<bio.Reader> f;
@@ -164,11 +165,9 @@ public static readonly nuint N_EXT = 0x01;
 public static readonly nuint N_TYPE = 0x1e;
 public static readonly nuint N_STAB = 0xe0;
 
-
 // ldMachoSym.desc
 public static readonly nuint N_WEAK_REF = 0x40;
 public static readonly nuint N_WEAK_DEF = 0x80;
-
 
 public static readonly nint LdMachoCpuVax = 1;
 public static readonly nint LdMachoCpu68000 = 6;
@@ -195,7 +194,6 @@ public static readonly nint LdMachoFileExecutable = 2;
 public static readonly nint LdMachoFileFvmlib = 3;
 public static readonly nint LdMachoFileCore = 4;
 public static readonly nint LdMachoFilePreload = 5;
-
 
 private static nint unpackcmd(slice<byte> p, ptr<ldMachoObj> _addr_m, ptr<ldMachoCmd> _addr_c, nuint type_, nuint sz) {
     ref ldMachoObj m = ref _addr_m.val;
@@ -286,7 +284,6 @@ private static nint unpackcmd(slice<byte> p, ptr<ldMachoObj> _addr_m, ptr<ldMach
 
                 // p+76 is reserved
                 p = p[(int)80..];
-
             }
 
 
@@ -325,7 +322,6 @@ private static nint unpackcmd(slice<byte> p, ptr<ldMachoObj> _addr_m, ptr<ldMach
     else 
         return -1;
         return 0;
-
 }
 
 private static nint macholoadrel(ptr<ldMachoObj> _addr_m, ptr<ldMachoSect> _addr_sect) {
@@ -359,7 +355,6 @@ private static nint macholoadrel(ptr<ldMachoObj> _addr_m, ptr<ldMachoSect> _addr
             v>>=2;
             r.pcrel = uint8(v & 1);
             r.value = m.e.Uint32(p[(int)4..]);
-
         }
         else
  {
@@ -378,7 +373,6 @@ private static nint macholoadrel(ptr<ldMachoObj> _addr_m, ptr<ldMachoSect> _addr
 
     sect.rel = rel;
     return 0;
-
 }
 
 private static nint macholoaddsym(ptr<ldMachoObj> _addr_m, ptr<ldMachoDysymtab> _addr_d) {
@@ -396,7 +390,6 @@ private static nint macholoaddsym(ptr<ldMachoObj> _addr_m, ptr<ldMachoDysymtab> 
         d.indir[i] = m.e.Uint32(p[(int)4 * i..]);
     }
     return 0;
-
 }
 
 private static nint macholoadsym(ptr<ldMachoObj> _addr_m, ptr<ldMachoSymtab> _addr_symtab) {
@@ -441,13 +434,11 @@ private static nint macholoadsym(ptr<ldMachoObj> _addr_m, ptr<ldMachoSymtab> _ad
             s.value = uint64(m.e.Uint32(p[(int)8..]));
         }
         p = p[(int)symsize..];
-
     }
 
     symtab.str = strbuf;
     symtab.sym = sym;
     return 0;
-
 }
 
 // Load the Mach-O file pn from f.
@@ -459,9 +450,7 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
     ref sys.Arch arch = ref _addr_arch.val;
     ref bio.Reader f = ref _addr_f.val;
 
-    Func<@string, object[], (slice<loader.Sym>, error)> errorf = (str, args) => {
-        return (null, error.As(fmt.Errorf("loadmacho: %v: %v", pn, fmt.Sprintf(str, args)))!);
-    };
+    Func<@string, object[], (slice<loader.Sym>, error)> errorf = (str, args) => (null, error.As(fmt.Errorf("loadmacho: %v: %v", pn, fmt.Sprintf(str, args)))!);
 
     var @base = f.Offset();
 
@@ -555,7 +544,6 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
     if (symtab == null) { 
         // our work is done here - no symbols means nothing can refer to this file
         return ;
-
     }
     if (int64(c.seg.fileoff + c.seg.filesz) >= length) {
         return errorf("load segment out of range");
@@ -584,14 +572,12 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
             }
             if (sect.flags & 0xff == 1) { // S_ZEROFILL
                 bld.SetData(make_slice<byte>(sect.size));
-
             }
             else
  {
                 bld.SetReadOnly(readOnly);
                 bld.SetData(dat[(int)sect.addr - c.seg.vmaddr..][..(int)sect.size]);
             }
-
             bld.SetSize(int64(len(bld.Data())));
 
             if (sect.segname == "__TEXT") {
@@ -602,7 +588,6 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
  {
                     bld.SetType(sym.SRODATA);
                 }
-
             }
             else
  {
@@ -614,11 +599,8 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
  {
                     bld.SetType(sym.SNOPTRDATA);
                 }
-
             }
-
             sect.sym = s;
-
         }
 
         i = i__prev1;
@@ -641,38 +623,30 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
             if (name[0] == '_' && name[1] != '\x00') {
                 name = name[(int)1..];
             }
-
             nint v = 0;
             if (machsym.type_ & N_EXT == 0) {
                 v = localSymVersion;
             }
-
             s = l.LookupOrCreateCgoExport(name, v);
             if (machsym.type_ & N_EXT == 0) {
                 l.SetAttrDuplicateOK(s, true);
             }
-
             if (machsym.desc & (N_WEAK_REF | N_WEAK_DEF) != 0) {
                 l.SetAttrDuplicateOK(s, true);
             }
-
             machsym.sym = s;
             if (machsym.sectnum == 0) { // undefined
                 continue;
-
             }
-
             if (uint32(machsym.sectnum) > c.seg.nsect) {
                 return errorf("reference to invalid section %d", machsym.sectnum);
             }
-
             sect = _addr_c.seg.sect[machsym.sectnum - 1];
             bld = l.MakeSymbolUpdater(s);
             var outer = sect.sym;
             if (outer == 0) {
                 continue; // ignore reference to invalid section
             }
-
             {
                 var osym = l.OuterSym(s);
 
@@ -685,25 +659,20 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
 
             }
 
-
             bld.SetType(l.SymType(outer));
             if (l.SymSize(outer) != 0) { // skip empty section (0-sized symbol)
                 l.AddInteriorSym(outer, s);
-
             }
-
             bld.SetValue(int64(machsym.value - sect.addr));
             if (!l.AttrCgoExportDynamic(s)) {
                 bld.SetDynimplib(""); // satisfy dynimport
             }
-
             if (l.SymType(outer) == sym.STEXT) {
                 if (bld.External() && !bld.DuplicateOK()) {
                     return errorf("%v: duplicate symbol definition", s);
                 }
                 bld.SetExternal(true);
             }
-
         }
 
         i = i__prev1;
@@ -746,15 +715,12 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                             }
 
                         }
-
                     }
 
 
                     s1 = s1__prev2;
                 }
-
             }
-
             if (bld.Type() == sym.STEXT) {
                 if (bld.OnList()) {
                     return errorf("symbol %s listed multiple times", bld.Name());
@@ -771,18 +737,14 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                             return errorf("symbol %s listed multiple times", l.RawSymName(s1));
                         s1 = l.SubSym(s1);
                         }
-
                         l.SetAttrOnList(s1, true);
                         textp = append(textp, s1);
-
                     }
 
 
                     s1 = s1__prev2;
                 }
-
             }
-
         }
 
         i = i__prev1;
@@ -811,16 +773,12 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                     // mach-o only uses scattered relocation on 32-bit platforms,
                     // which are no longer supported.
                     return errorf("%v: unexpected scattered relocation", s);
-
                 }
-
                 if (arch.Family == sys.ARM64 && rel.type_ == MACHO_ARM64_RELOC_ADDEND) { 
                     // Two relocations. This addend will be applied to the next one.
                     rAdd = int64(rel.symnum) << 40 >> 40; // convert unsigned 24-bit to signed 24-bit
                     continue;
-
                 }
-
                 rSize = rel.length;
                 rType = objabi.MachoRelocOffset + (objabi.RelocType(rel.type_) << 1) + objabi.RelocType(rel.pcrel);
                 rOff = int32(rel.addr); 
@@ -846,13 +804,11 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                         // [For future reference, see Darwin's /usr/include/mach-o/x86_64/reloc.h]
                         var secaddr = c.seg.sect[rel.symnum - 1].addr;
                         rAdd = int64(uint64(int64(int32(e.Uint32(p[(int)rOff..]))) + int64(rOff) + 4) - secaddr);
-
                     }
                     else
  {
                         rAdd = int64(int32(e.Uint32(p[(int)rOff..])));
                     }
-
                 } 
 
                 // An unsigned internal relocation has a value offset
@@ -861,7 +817,6 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                     secaddr = c.seg.sect[rel.symnum - 1].addr;
                     rAdd -= int64(secaddr);
                 }
-
                 if (rel.extrn == 0) {
                     if (rel.symnum < 1 || rel.symnum > c.seg.nsect) {
                         return errorf("invalid relocation: section reference out of range %d vs %d", rel.symnum, c.seg.nsect);
@@ -878,7 +833,6 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                     }
                     rSym = symtab.sym[rel.symnum].sym;
                 }
-
                 var (r, _) = sb.AddRel(rType);
                 r.SetOff(rOff);
                 r.SetSiz(rSize);
@@ -890,14 +844,12 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
 
 
             sb.SortRelocs();
-
         }
 
         i = i__prev1;
     }
 
     return (textp, error.As(null!)!);
-
 }
 
 private static @string cstring(slice<byte> x) {
@@ -906,7 +858,6 @@ private static @string cstring(slice<byte> x) {
         x = x[..(int)i];
     }
     return string(x);
-
 }
 
 } // end loadmacho_package

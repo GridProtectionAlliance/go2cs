@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:45 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:15 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\html.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.html;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+
+// htmlNospaceEscaper escapes for inclusion in unquoted attribute values.
 
 public static partial class template_package {
 
-    // htmlNospaceEscaper escapes for inclusion in unquoted attribute values.
 private static @string htmlNospaceEscaper(params object[] args) {
     args = args.Clone();
 
@@ -23,7 +25,6 @@ private static @string htmlNospaceEscaper(params object[] args) {
         return htmlReplacer(stripTags(s), htmlNospaceNormReplacementTable, false);
     }
     return htmlReplacer(s, htmlNospaceReplacementTable, false);
-
 }
 
 // attrEscaper escapes for inclusion in quoted attribute values.
@@ -35,7 +36,6 @@ private static @string attrEscaper(params object[] args) {
         return htmlReplacer(stripTags(s), htmlNormReplacementTable, true);
     }
     return htmlReplacer(s, htmlReplacementTable, true);
-
 }
 
 // rcdataEscaper escapes for inclusion in an RCDATA element body.
@@ -47,7 +47,6 @@ private static @string rcdataEscaper(params object[] args) {
         return htmlReplacer(s, htmlNormReplacementTable, true);
     }
     return htmlReplacer(s, htmlReplacementTable, true);
-
 }
 
 // htmlEscaper escapes for inclusion in HTML text.
@@ -59,7 +58,6 @@ private static @string htmlEscaper(params object[] args) {
         return s;
     }
     return htmlReplacer(s, htmlReplacementTable, true);
-
 }
 
 // htmlReplacementTable contains the runes that need to be escaped
@@ -115,15 +113,12 @@ private static @string htmlReplacer(@string s, slice<@string> replacementTable, 
                             b.Grow(len(s));
             i += w;
                         }
-
                         b.WriteString(s[(int)written..(int)i]);
                         b.WriteString(repl);
                         written = i + w;
-
                     }
 
                 }
-
             }
             else if (badRunes) { 
                 // No-op.
@@ -136,7 +131,6 @@ private static @string htmlReplacer(@string s, slice<@string> replacementTable, 
                 fmt.Fprintf(b, "%s&#x%x;", s[(int)written..(int)i], r);
                 written = i + w;
             }
-
         }
     }
     if (written == 0) {
@@ -144,7 +138,6 @@ private static @string htmlReplacer(@string s, slice<@string> replacementTable, 
     }
     b.WriteString(s[(int)written..]);
     return b.String();
-
 }
 
 // stripTags takes a snippet of HTML and returns only the text content.
@@ -164,7 +157,6 @@ private static @string stripTags(@string html) {
             if (c.element != elementNone && !isInTag(st)) {
                 st = stateRCDATA;
             }
-
             var (d, nread) = transitionFunc[st](c, s[(int)i..]);
             var i1 = i + nread;
             if (c.state == stateText || c.state == stateRCDATA) { 
@@ -180,13 +172,10 @@ private static @string stripTags(@string html) {
                 }
             else
                 b.Write(s[(int)i..(int)j]);
-
             } {
                 allText = false;
             }
-
             (c, i) = (d, i1);            continue;
-
         }
         i1 = i + bytes.IndexAny(s[(int)i..], delimEnds[c.delim]);
         if (i1 < i) {
@@ -195,7 +184,6 @@ private static @string stripTags(@string html) {
         if (c.delim != delimSpaceOrTagEnd) { 
             // Consume any quote.
             i1++;
-
         }
         (c, i) = (new context(state:stateTag,element:c.element), i1);
     }
@@ -206,7 +194,6 @@ private static @string stripTags(@string html) {
         b.Write(s[(int)i..]);
     }
     return b.String();
-
 }
 
 // htmlNameFilter accepts valid parts of an HTML attribute or tag name or
@@ -225,7 +212,6 @@ private static @string htmlNameFilter(params object[] args) {
         // checked, but otherwise .V is the value of the attribute
         // named .K.
         return filterFailsafe;
-
     }
     s = strings.ToLower(s);
     {
@@ -234,17 +220,13 @@ private static @string htmlNameFilter(params object[] args) {
         if (t != contentTypePlain) { 
             // TODO: Split attr and element name part filters so we can recognize known attributes.
             return filterFailsafe;
-
         }
     }
-
     foreach (var (_, r) in s) {
 
         if ('0' <= r && r <= '9')         else if ('a' <= r && r <= 'z')         else 
             return filterFailsafe;
-        
-    }    return s;
-
+            }    return s;
 }
 
 // commentEscaper returns the empty string regardless of input.

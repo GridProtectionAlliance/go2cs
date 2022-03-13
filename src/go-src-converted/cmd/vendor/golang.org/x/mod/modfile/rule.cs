@@ -17,28 +17,30 @@
 //
 // The Format function formats a File back to a byte slice which can be
 // written to a file.
-// package modfile -- go2cs converted at 2022 March 06 23:26:05 UTC
+
+// package modfile -- go2cs converted at 2022 March 13 06:40:56 UTC
 // import "cmd/vendor/golang.org/x/mod/modfile" ==> using modfile = go.cmd.vendor.golang.org.x.mod.modfile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\modfile\rule.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
-using lazyregexp = go.golang.org.x.mod.@internal.lazyregexp_package;
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.mod;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+using lazyregexp = golang.org.x.mod.@internal.lazyregexp_package;
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+
+
+// A File is the parsed, interpreted form of a go.mod file.
+
+using System;
 public static partial class modfile_package {
 
-    // A File is the parsed, interpreted form of a go.mod file.
 public partial struct File {
     public ptr<Module> Module;
     public ptr<Go> Go;
@@ -120,25 +122,18 @@ private static void setVersion(this ptr<Require> _addr_r, @string v) {
                 if (len(line.Comments.Before) == 1 && len(line.Comments.Before[0].Token) == 0) {
                     line.Comments.Before = line.Comments.Before[..(int)0];
                 }
-
                 if (len(line.Token) >= 2) { // example.com v1.2.3
                     line.Token[1] = v;
-
                 }
-
             }
             else
  {
                 if (len(line.Token) >= 3) { // require example.com v1.2.3
                     line.Token[2] = v;
-
                 }
-
             }
-
         }
     }
-
 }
 
 // setIndirect sets line to have (or not have) a "// indirect" comment.
@@ -156,7 +151,6 @@ private static void setIndirect(this ptr<Require> _addr_r, bool indirect) {
             // New comment.
             line.Suffix = new slice<Comment>(new Comment[] { {Token:"// indirect",Suffix:true} });
             return ;
-
         }
         var com = _addr_line.Suffix[0];
         var text = strings.TrimSpace(strings.TrimPrefix(com.Token, string(slashSlash)));
@@ -164,23 +158,19 @@ private static void setIndirect(this ptr<Require> _addr_r, bool indirect) {
             // Empty comment.
             com.Token = "// indirect";
             return ;
-
         }
         com.Token = "// indirect; " + text;
         return ;
-
     }
     var f = strings.TrimSpace(strings.TrimPrefix(line.Suffix[0].Token, string(slashSlash)));
     if (f == "indirect") { 
         // Remove whole comment.
         line.Suffix = null;
         return ;
-
     }
     com = _addr_line.Suffix[0];
     var i = strings.Index(com.Token, "indirect;");
     com.Token = "//" + com.Token[(int)i + len("indirect;")..];
-
 }
 
 // isIndirect reports whether line has a "// indirect" comment,
@@ -195,7 +185,6 @@ private static bool isIndirect(ptr<Line> _addr_line) {
     }
     var f = strings.Fields(strings.TrimPrefix(line.Suffix[0].Token, string(slashSlash)));
     return (len(f) == 1 && f[0] == "indirect" || len(f) > 1 && f[0] == "indirect;");
-
 }
 
 private static error AddModuleStmt(this ptr<File> _addr_f, @string path) {
@@ -213,7 +202,6 @@ private static error AddModuleStmt(this ptr<File> _addr_f, @string path) {
         f.Syntax.updateLine(f.Module.Syntax, "module", AutoQuote(path));
     }
     return error.As(null!)!;
-
 }
 
 private static void AddComment(this ptr<File> _addr_f, @string text) {
@@ -223,16 +211,13 @@ private static void AddComment(this ptr<File> _addr_f, @string text) {
         f.Syntax = @new<FileSyntax>();
     }
     f.Syntax.Stmt = append(f.Syntax.Stmt, addr(new CommentBlock(Comments:Comments{Before:[]Comment{{Token:text,},},},)));
-
 }
 
 public delegate  error) VersionFixer(@string,  @string,  (@string);
 
 // errDontFix is returned by a VersionFixer to indicate the version should be
 // left alone, even if it's not canonical.
-private static VersionFixer dontFixRetract = (_, vers) => {
-    return (vers, null);
-};
+private static VersionFixer dontFixRetract = (_, vers) => (vers, null);
 
 // Parse parses and returns a go.mod file.
 //
@@ -324,7 +309,6 @@ private static (ptr<File>, error) parseToFile(@string file, slice<byte> data, Ve
                     }
                     break;
             }
-
         }
         x = x__prev1;
     }
@@ -333,7 +317,6 @@ private static (ptr<File>, error) parseToFile(@string file, slice<byte> data, Ve
         return (_addr_null!, error.As(errs)!);
     }
     return (_addr_f!, error.As(null!)!);
-
 });
 
 public static var GoVersionRE = lazyregexp.New("^([1-9][0-9]*)\\.(0|[1-9][0-9]*)$");
@@ -366,7 +349,6 @@ private static void add(this ptr<File> _addr_f, ptr<ErrorList> _addr_errs, ptr<L
                 return ;
                 break;
         }
-
     }
     Action<@string, error> wrapModPathError = (modPath, err) => {
         errs = append(errs, new Error(Filename:f.Syntax.Name,Pos:line.Start,ModPath:modPath,Verb:verb,Err:err,));
@@ -400,18 +382,14 @@ private static void add(this ptr<File> _addr_f, ptr<ErrorList> _addr_errs, ptr<L
                         }
 
                     }
-
                 }
-
                 if (!fixed) {
                     errorf("invalid go version '%s': must match format 1.23", args[0]);
                     return ;
                 }
-
             }
             f.Go = addr(new Go(Syntax:line));
             f.Go.Version = args[0];
-
             break;
         case "module": 
             if (f.Module != null) {
@@ -430,7 +408,6 @@ private static void add(this ptr<File> _addr_f, ptr<ErrorList> _addr_errs, ptr<L
                 return ;
             }
             f.Module.Mod = new module.Version(Path:s);
-
             break;
         case "require": 
 
@@ -467,7 +444,6 @@ private static void add(this ptr<File> _addr_f, ptr<ErrorList> _addr_errs, ptr<L
                        err = err__prev1;
 
                    }
-
                    if (verb == "require") {
                        f.Require = append(f.Require, addr(new Require(Mod:module.Version{Path:s,Version:v},Syntax:line,Indirect:isIndirect(line),)));
                    }
@@ -515,7 +491,6 @@ private static void add(this ptr<File> _addr_f, ptr<ErrorList> _addr_errs, ptr<L
                     err = err__prev2;
 
                 }
-
             }
             var (ns, err) = parseString(_addr_args[arrow + 1]);
             if (err != null) {
@@ -545,7 +520,6 @@ private static void add(this ptr<File> _addr_f, ptr<ErrorList> _addr_errs, ptr<L
                 }
             }
             f.Replace = append(f.Replace, addr(new Replace(Old:module.Version{Path:s,Version:v},New:module.Version{Path:ns,Version:nv},Syntax:line,)));
-
             break;
         case "retract": 
                    var rationale = parseDirectiveComment(_addr_block, _addr_line);
@@ -562,25 +536,20 @@ private static void add(this ptr<File> _addr_f, ptr<ErrorList> _addr_errs, ptr<L
                            // intervals. Those can't be supported now, because they break the
                            // go.mod parser, even in lax mode.
                            return ;
-
                        }
-
                    }
                    if (len(args) > 0 && strict) { 
                        // In the future, there may be additional information after the version.
                        errorf("unexpected token after version: %q", args[0]);
                        return ;
-
                    }
                    ptr<Retract> retract = addr(new Retract(VersionInterval:vi,Rationale:rationale,Syntax:line,));
                    f.Retract = append(f.Retract, retract);
-
             break;
         default: 
             errorf("unknown directive: %s", verb);
             break;
     }
-
 }
 
 // fixRetract applies fix to each retract directive in f, appending any errors
@@ -620,7 +589,6 @@ private static void fixRetract(this ptr<File> _addr_f, VersionFixer fix, ptr<Err
             wrapError(err);
         }
         r.VersionInterval = vi;
-
     }
 }
 
@@ -631,7 +599,6 @@ public static bool IsDirectoryPath(@string ns) {
     // Because go.mod files can move from one system to another,
     // we check all known path syntaxes, both Unix and Windows.
     return strings.HasPrefix(ns, "./") || strings.HasPrefix(ns, "../") || strings.HasPrefix(ns, "/") || strings.HasPrefix(ns, ".\\") || strings.HasPrefix(ns, "..\\") || strings.HasPrefix(ns, "\\") || len(ns) >= 2 && ('A' <= ns[0] && ns[0] <= 'Z' || 'a' <= ns[0] && ns[0] <= 'z') && ns[1] == ':';
-
 }
 
 // MustQuote reports whether s must be quoted in order to appear as
@@ -671,9 +638,7 @@ public static bool MustQuote(@string s) {
                 }
                 break;
         }
-
     }    return s == "" || strings.Contains(s, "//") || strings.Contains(s, "/*");
-
 }
 
 // AutoQuote returns s or, if quoting is required for s to appear in a go.mod,
@@ -683,7 +648,6 @@ public static @string AutoQuote(@string s) {
         return strconv.Quote(s);
     }
     return s;
-
 }
 
 private static (VersionInterval, error) parseVersionInterval(@string verb, @string path, ptr<slice<@string>> _addr_args, VersionFixer fix) {
@@ -702,7 +666,6 @@ private static (VersionInterval, error) parseVersionInterval(@string verb, @stri
         }
         args = toks[(int)1..];
         return (new VersionInterval(Low:v,High:v), error.As(null!)!);
-
     }
     toks = toks[(int)1..];
 
@@ -736,7 +699,6 @@ private static (VersionInterval, error) parseVersionInterval(@string verb, @stri
 
     args = toks;
     return (new VersionInterval(Low:low,High:high), error.As(null!)!);
-
 }
 
 private static (@string, error) parseString(ptr<@string> _addr_s) {
@@ -758,11 +720,9 @@ private static (@string, error) parseString(ptr<@string> _addr_s) {
         // and to avoid confusion. For example if someone types 'x'
         // we want that to be a syntax error and not a literal x in literal quotation marks.
         return ("", error.As(fmt.Errorf("unquoted string cannot contain quote"))!);
-
     }
     s = AutoQuote(t);
     return (t, error.As(null!)!);
-
 }
 
 private static var deprecatedRE = lazyregexp.New("(?s)(?:^|\\n\\n)Deprecated: *(.*?)(?:$|\\n\\n)");
@@ -785,7 +745,6 @@ private static @string parseDeprecation(ptr<LineBlock> _addr_block, ptr<Line> _a
         return "";
     }
     return m[1];
-
 }
 
 // parseDirectiveComment extracts the text of comments on a directive.
@@ -806,12 +765,9 @@ private static @string parseDirectiveComment(ptr<LineBlock> _addr_block, ptr<Lin
             if (!strings.HasPrefix(c.Token, "//")) {
                 continue; // blank line
             }
-
             lines = append(lines, strings.TrimSpace(strings.TrimPrefix(c.Token, "//")));
-
         }
     }    return strings.Join(lines, "\n");
-
 }
 
 public partial struct ErrorList { // : slice<Error>
@@ -840,7 +796,6 @@ private static @string Error(this ptr<Error> _addr_e) {
         // Don't print LineRune if it's 1 (beginning of line).
         // It's always 1 except in scanner errors, which are rare.
         pos = fmt.Sprintf("%s:%d:%d: ", e.Filename, e.Pos.Line, e.Pos.LineRune);
-
     }
     else if (e.Pos.Line > 0) {
         pos = fmt.Sprintf("%s:%d: ", e.Filename, e.Pos.Line);
@@ -856,7 +811,6 @@ private static @string Error(this ptr<Error> _addr_e) {
         directive = fmt.Sprintf("%s: ", e.Verb);
     }
     return pos + directive + e.Err.Error();
-
 }
 
 private static error Unwrap(this ptr<Error> _addr_e) {
@@ -885,12 +839,9 @@ private static (@string, error) parseVersion(@string verb, @string path, ptr<@st
                 }
 
             }
-
             return ("", error.As(err)!);
-
         }
         t = fixed;
-
     }
     else
  {
@@ -899,11 +850,9 @@ private static (@string, error) parseVersion(@string verb, @string path, ptr<@st
             return ("", error.As(addr(new Error(Verb:verb,ModPath:path,Err:&module.InvalidVersionError{Version:t,Err:errors.New("must be of the form v1.2.3"),},))!)!);
         }
         t = cv;
-
     }
     s = t;
     return (s, error.As(null!)!);
-
 }
 
 private static (@string, error) modulePathMajor(@string path) {
@@ -915,7 +864,6 @@ private static (@string, error) modulePathMajor(@string path) {
         return ("", error.As(fmt.Errorf("invalid module path"))!);
     }
     return (major, error.As(null!)!);
-
 }
 
 private static (slice<byte>, error) Format(this ptr<File> _addr_f) {
@@ -990,7 +938,6 @@ private static void Cleanup(this ptr<File> _addr_f) {
     f.Retract = f.Retract[..(int)w];
 
     f.Syntax.Cleanup();
-
 }
 
 private static error AddGoStmt(this ptr<File> _addr_f, @string version) {
@@ -1005,7 +952,6 @@ private static error AddGoStmt(this ptr<File> _addr_f, @string version) {
             hint = f.Module.Syntax;
         }
         f.Go = addr(new Go(Version:version,Syntax:f.Syntax.addLine(hint,"go",version),));
-
     }
     else
  {
@@ -1013,7 +959,6 @@ private static error AddGoStmt(this ptr<File> _addr_f, @string version) {
         f.Syntax.updateLine(f.Go.Syntax, "go", version);
     }
     return error.As(null!)!;
-
 }
 
 // AddRequire sets the first require line for path to version vers,
@@ -1038,13 +983,11 @@ private static error AddRequire(this ptr<File> _addr_f, @string path, @string ve
                 r.Syntax.markRemoved();
                 r.val = new Require();
             }
-
         }
     }    if (need) {
         f.AddNewRequire(path, vers, false);
     }
     return error.As(null!)!;
-
 }
 
 // AddNewRequire adds a new require line for path at version vers at the end of
@@ -1093,9 +1036,7 @@ private static void SetRequire(this ptr<File> _addr_f, slice<ptr<Require>> req) 
                 }
 
             }
-
             need[r.Mod.Path] = new elem(r.Mod.Version,r.Indirect);
-
         }
         r = r__prev1;
     }
@@ -1114,9 +1055,7 @@ private static void SetRequire(this ptr<File> _addr_f, slice<ptr<Require>> req) 
  {
                 r.markRemoved();
             }
-
             delete(need, r.Mod.Path);
-
         }
         r = r__prev1;
     }
@@ -1133,7 +1072,6 @@ private static void SetRequire(this ptr<File> _addr_f, slice<ptr<Require>> req) 
     }
 
     f.SortBlocks();
-
 });
 
 // SetRequireSeparateIndirect updates the requirements of f to contain the given
@@ -1159,9 +1097,7 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
  
     // hasComments returns whether a line or block has comments
     // other than "indirect".
-    Func<Comments, bool> hasComments = c => {
-        return len(c.Before) > 0 || len(c.After) > 0 || len(c.Suffix) > 1 || (len(c.Suffix) == 1 && strings.TrimSpace(strings.TrimPrefix(c.Suffix[0].Token, string(slashSlash))) != "indirect");
-    }; 
+    Func<Comments, bool> hasComments = c => len(c.Before) > 0 || len(c.After) > 0 || len(c.Suffix) > 1 || (len(c.Suffix) == 1 && strings.TrimSpace(strings.TrimPrefix(c.Suffix[0].Token, string(slashSlash))) != "indirect"); 
 
     // moveReq adds r to block. If r was in another block, moveReq deletes
     // it from that block and transfers its comments.
@@ -1183,11 +1119,9 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
             }
             r.Syntax.Token = null; // Cleanup will delete the old line.
             r.Syntax = line;
-
         }
         line.InBlock = true;
         block.Line = append(block.Line, line);
-
     }; 
 
     // Examine existing require lines and blocks.
@@ -1217,9 +1151,7 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
  {
                             lastDirectIndex = i;
                         }
-
                     }
-
                     break;
                 case ptr<LineBlock> stmt:
                     if (len(stmt.Token) == 0 || stmt.Token[0] != "require") {
@@ -1246,7 +1178,6 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
  {
                                 allIndirect = false;
                             }
-
                         }
 
                         line = line__prev2;
@@ -1255,14 +1186,11 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
                     if (allDirect) {
                         lastDirectIndex = i;
                     }
-
                     if (allIndirect) {
                         lastIndirectIndex = i;
                     }
-
                     break;
             }
-
         }
         stmt = stmt__prev1;
     }
@@ -1299,7 +1227,6 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
                 break;
             }
         }
-
     };
 
     ptr<LineBlock> lastDirectBlock;
@@ -1316,7 +1243,6 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
             lastDirectIndex = len(f.Syntax.Stmt);
         }
         lastDirectBlock = insertBlock(lastDirectIndex);
-
     }
     else
  {
@@ -1353,9 +1279,7 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
                 // Requirement not needed, or duplicate requirement. Delete.
                 r.markRemoved();
                 continue;
-
             }
-
             have[r.Mod.Path] = r;
             r.setVersion(need[path].Mod.Version);
             r.setIndirect(need[path].Indirect);
@@ -1365,7 +1289,6 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
             else if (!need[path].Indirect && (oneFlatUncommentedBlock || lineToBlock[r.Syntax] == lastIndirectBlock)) {
                 moveReq(r, lastDirectBlock);
             }
-
         }
         r = r__prev1;
     }
@@ -1385,18 +1308,14 @@ private static void SetRequireSeparateIndirect(this ptr<File> _addr_f, slice<ptr
  {
                     moveReq(r, lastDirectBlock);
                 }
-
                 f.Require = append(f.Require, r);
-
             }
-
         }
         path = path__prev1;
         r = r__prev1;
     }
 
     f.SortBlocks();
-
 });
 
 private static error DropRequire(this ptr<File> _addr_f, @string path) {
@@ -1408,7 +1327,6 @@ private static error DropRequire(this ptr<File> _addr_f, @string path) {
             r.val = new Require();
         }
     }    return error.As(null!)!;
-
 }
 
 // AddExclude adds a exclude statement to the mod file. Errors if the provided
@@ -1424,7 +1342,6 @@ private static error AddExclude(this ptr<File> _addr_f, @string path, @string ve
         }
     }
 
-
     ptr<Line> hint;
     foreach (var (_, x) in f.Exclude) {
         if (x.Mod.Path == path && x.Mod.Version == vers) {
@@ -1435,7 +1352,6 @@ private static error AddExclude(this ptr<File> _addr_f, @string path, @string ve
         }
     }    f.Exclude = append(f.Exclude, addr(new Exclude(Mod:module.Version{Path:path,Version:vers},Syntax:f.Syntax.addLine(hint,"exclude",AutoQuote(path),vers))));
     return error.As(null!)!;
-
 }
 
 private static error DropExclude(this ptr<File> _addr_f, @string path, @string vers) {
@@ -1447,7 +1363,6 @@ private static error DropExclude(this ptr<File> _addr_f, @string path, @string v
             x.val = new Exclude();
         }
     }    return error.As(null!)!;
-
 }
 
 private static error AddReplace(this ptr<File> _addr_f, @string oldPath, @string oldVers, @string newPath, @string newVers) {
@@ -1473,12 +1388,10 @@ private static error AddReplace(this ptr<File> _addr_f, @string oldPath, @string
                 f.Syntax.updateLine(r.Syntax, tokens);
                 need = false;
                 continue;
-
             } 
             // Already added; delete other replacements for same.
             r.Syntax.markRemoved();
             r.val = new Replace();
-
         }
         if (r.Old.Path == oldPath) {
             hint = r.Syntax;
@@ -1487,7 +1400,6 @@ private static error AddReplace(this ptr<File> _addr_f, @string oldPath, @string
         f.Replace = append(f.Replace, addr(new Replace(Old:old,New:new,Syntax:f.Syntax.addLine(hint,tokens...))));
     }
     return error.As(null!)!;
-
 }
 
 private static error DropReplace(this ptr<File> _addr_f, @string oldPath, @string oldVers) {
@@ -1499,7 +1411,6 @@ private static error DropReplace(this ptr<File> _addr_f, @string oldPath, @strin
             r.val = new Replace();
         }
     }    return error.As(null!)!;
-
 }
 
 // AddRetract adds a retract statement to the mod file. Errors if the provided
@@ -1522,7 +1433,6 @@ private static error AddRetract(this ptr<File> _addr_f, VersionInterval vi, @str
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -1534,7 +1444,6 @@ private static error AddRetract(this ptr<File> _addr_f, VersionInterval vi, @str
         err = err__prev1;
 
     }
-
 
     ptr<Retract> r = addr(new Retract(VersionInterval:vi,));
     if (vi.Low == vi.High) {
@@ -1551,7 +1460,6 @@ private static error AddRetract(this ptr<File> _addr_f, VersionInterval vi, @str
         }
     }
     return error.As(null!)!;
-
 }
 
 private static error DropRetract(this ptr<File> _addr_f, VersionInterval vi) {
@@ -1563,7 +1471,6 @@ private static error DropRetract(this ptr<File> _addr_f, VersionInterval vi) {
             r.val = new Retract();
         }
     }    return error.As(null!)!;
-
 }
 
 private static void SortBlocks(this ptr<File> _addr_f) {
@@ -1580,10 +1487,7 @@ private static void SortBlocks(this ptr<File> _addr_f) {
         if (block.Token[0] == "retract") {
             less = lineRetractLess;
         }
-        sort.SliceStable(block.Line, (i, j) => {
-            return less(block.Line[i], block.Line[j]);
-        });
-
+        sort.SliceStable(block.Line, (i, j) => less(block.Line[i], block.Line[j]));
     }
 }
 
@@ -1644,7 +1548,6 @@ private static void removeDups(this ptr<File> _addr_f) {
             continue;
         }
         haveReplace[x.Old] = true;
-
     }
     slice<ptr<Replace>> repl = default;
     {
@@ -1690,13 +1593,11 @@ private static void removeDups(this ptr<File> _addr_f) {
                     break;
             }
             stmts = append(stmts, stmt);
-
         }
         stmt = stmt__prev1;
     }
 
     f.Syntax.Stmt = stmts;
-
 }
 
 // lineLess returns whether li should be sorted before lj. It sorts
@@ -1711,7 +1612,6 @@ private static bool lineLess(ptr<Line> _addr_li, ptr<Line> _addr_lj) {
         }
     }
     return len(li.Token) < len(lj.Token);
-
 }
 
 // lineRetractLess returns whether li should be sorted before lj for lines in
@@ -1734,7 +1634,6 @@ private static bool lineRetractLess(ptr<Line> _addr_li, ptr<Line> _addr_lj) {
  { 
             // Line in unknown format. Treat as an invalid version.
             return new VersionInterval();
-
         }
     };
     var vii = interval(li);
@@ -1746,9 +1645,7 @@ private static bool lineRetractLess(ptr<Line> _addr_li, ptr<Line> _addr_lj) {
             return cmp > 0;
         }
     }
-
     return semver.Compare(vii.High, vij.High) > 0;
-
 }
 
 // checkCanonicalVersion returns a non-nil error if vers is not a canonical
@@ -1764,7 +1661,6 @@ private static error checkCanonicalVersion(@string path, @string vers) {
             return error.As(addr(new module.InvalidVersionError(Version:vers,Err:fmt.Errorf("must be of the form v1.2.3"),))!)!;
         }
         return error.As(addr(new module.InvalidVersionError(Version:vers,Err:fmt.Errorf("must be of the form %s.2.3",module.PathMajorPrefix(pathMajor)),))!)!;
-
     }
     if (pathMajorOk) {
         {
@@ -1775,18 +1671,13 @@ private static error checkCanonicalVersion(@string path, @string vers) {
                     // In this context, the user probably wrote "v2.3.4" when they meant
                     // "v2.3.4+incompatible". Suggest that instead of "v0 or v1".
                     return error.As(addr(new module.InvalidVersionError(Version:vers,Err:fmt.Errorf("should be %s+incompatible (or module %s/%v)",vers,path,semver.Major(vers)),))!)!;
-
                 }
-
                 return error.As(err)!;
-
             }
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 } // end modfile_package

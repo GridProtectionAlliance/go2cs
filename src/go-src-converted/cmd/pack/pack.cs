@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:22:38 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:42 UTC
 // Original source: C:\Program Files\Go\src\cmd\pack\pack.go
-using archive = go.cmd.@internal.archive_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using System;
-
-
 namespace go;
+
+using archive = cmd.@internal.archive_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using System;
 
 public static partial class main_package {
 
@@ -103,32 +102,24 @@ private static void setOp(@string arg) {
                 if (op != 0) { 
                     // At most one can be set.
                     usage();
-
                 }
-
                 op = r;
-
                 break;
             case 'v': 
                 if (verbose) { 
                     // Can be set only once.
                     usage();
-
                 }
-
                 verbose = true;
-
                 break;
             default: 
                 usage();
                 break;
         }
-
     }
 }
 
 private static readonly @string arHeader = "!<arch>\n";
-
 
 // An Archive represents an open archive file. It is always scanned sequentially
 // from start to end, without backing up.
@@ -148,21 +139,18 @@ private static ptr<Archive> openArchive(@string name, nint mode, slice<@string> 
     ptr<archive.Archive> a;
     if (mode & os.O_TRUNC != 0) { // the c command
         a, err = archive.New(f);
-
     }
     else
  {
         a, err = archive.Parse(f, verbose);
         if (err != null && mode & os.O_CREATE != 0) { // the r command
             a, err = archive.New(f);
-
         }
     }
     if (err != null) {
         log.Fatal(err);
     }
     return addr(new Archive(a:a,files:files,matchAll:len(files)==0,));
-
 }
 
 // scan scans the archive and executes the specified action on each entry.
@@ -219,7 +207,6 @@ private static bool match(this ptr<Archive> _addr_ar, ptr<archive.Entry> _addr_e
             return true;
         }
     }    return false;
-
 }
 
 // addFiles adds files to the archive. The archive is known to be
@@ -252,9 +239,7 @@ private static void addFiles(this ptr<Archive> _addr_ar) {
             ar.a.AddEntry(archive.EntryGoObj, filepath.Base(file), 0, 0, 0, 0644, e.Size, io.NewSectionReader(f, e.Offset, e.Size));
         }close:
         f.Close();
-
     }    ar.files = null;
-
 }
 
 // FileLike abstracts the few methods we need, so we can test without needing real files.
@@ -279,7 +264,6 @@ private static void addFile(this ptr<Archive> _addr_ar, FileLike fd) {
     nint uid = 0;
     nint gid = 0;
     ar.a.AddEntry(archive.EntryNativeObj, info.Name(), mtime, uid, gid, info.Mode(), info.Size(), fd);
-
 }
 
 // addPkgdef adds the __.PKGDEF file to the archive, copied
@@ -363,7 +347,6 @@ private static void extractContents1(this ptr<Archive> _addr_ar, ptr<archive.Ent
             out = f;
         }
         ar.output(e, out);
-
     }
 });
 
@@ -393,7 +376,6 @@ private static bool isGoCompilerObjFile(ptr<archive.Archive> _addr_a) {
             return false;
             break;
     }
-
 }
 
 } // end main_package

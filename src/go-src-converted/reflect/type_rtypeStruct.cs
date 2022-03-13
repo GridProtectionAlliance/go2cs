@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:47 UTC
+//     Generated on 2022 March 13 05:41:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace go
 {
     public static partial class reflect_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct rtype
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace go
             public static implicit operator rtype(NilType nil) => default(rtype);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static rtype rtype_cast(dynamic value)
         {
             return new rtype(value.size, value.ptrdata, value.hash, value.tflag, value.align, value.fieldAlign, value.kind, value.equal, ref value.gcdata, value.str, value.ptrToThis);

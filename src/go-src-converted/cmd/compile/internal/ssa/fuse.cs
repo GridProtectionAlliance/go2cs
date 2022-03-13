@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:02 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:26 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\fuse.go
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
+
+
+// fuseEarly runs fuse(f, fuseTypePlain|fuseTypeIntInRange).
 
 public static partial class ssa_package {
 
-    // fuseEarly runs fuse(f, fuseTypePlain|fuseTypeIntInRange).
 private static void fuseEarly(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -33,7 +35,6 @@ private static readonly var fuseTypeIf = 0;
 private static readonly var fuseTypeIntInRange = 1;
 private static readonly var fuseTypeBranchRedirect = 2;
 private static readonly var fuseTypeShortCircuit = 3;
-
 
 // fuse simplifies control flow by joining basic blocks.
 private static void fuse(ptr<Func> _addr_f, fuseType typ) {
@@ -64,14 +65,11 @@ private static void fuse(ptr<Func> _addr_f, fuseType typ) {
             if (typ & fuseTypeBranchRedirect != 0) {
                 changed = fuseBranchRedirect(f) || changed;
             }
-
             if (changed) {
                 f.invalidateCFG();
             }
-
         }
     }
-
 }
 
 // fuseBlockIf handles the following cases where s0 and s1 are empty blocks.
@@ -131,7 +129,6 @@ private static bool fuseBlockIf(ptr<Block> _addr_b) {
  {
                 return false;
             }
-
         }
         else
  {
@@ -177,7 +174,6 @@ private static bool fuseBlockIf(ptr<Block> _addr_b) {
         s0.Values = null;
         s0.Succs = null;
         s0.Preds = null;
-
     }
     b.Kind = BlockPlain;
     b.Likely = BranchUnknown;
@@ -209,7 +205,6 @@ private static bool fuseBlockIf(ptr<Block> _addr_b) {
         }
     }
     return true;
-
 }
 
 // isEmpty reports whether b contains any live values.
@@ -222,7 +217,6 @@ private static bool isEmpty(ptr<Block> _addr_b) {
             return false;
         }
     }    return true;
-
 }
 
 private static bool fuseBlockPlain(ptr<Block> _addr_b) {
@@ -276,18 +270,15 @@ private static bool fuseBlockPlain(ptr<Block> _addr_b) {
         if (cap(c.Values) < bl + cl) { 
             // reallocate
             t = make_slice<ptr<Value>>(bl + cl);
-
         }
         else
  { 
             // in place.
             t = c.Values[(int)0..(int)bl + cl];
-
         }
         copy(t[(int)bl..], c.Values); // possibly in-place
         c.Values = t;
         copy(c.Values, b.Values);
-
     }
     else
  {
@@ -313,7 +304,6 @@ private static bool fuseBlockPlain(ptr<Block> _addr_b) {
     b.Preds = null;
     b.Succs = null;
     return true;
-
 }
 
 } // end ssa_package

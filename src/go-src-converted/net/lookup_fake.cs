@@ -5,13 +5,13 @@
 //go:build js && wasm
 // +build js,wasm
 
-// package net -- go2cs converted at 2022 March 06 22:16:17 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:56 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\lookup_fake.go
-using context = go.context_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using context = context_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 

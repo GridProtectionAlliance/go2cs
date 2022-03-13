@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:24 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:29 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\driver_focus.go
-using fmt = go.fmt_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using measurement = go.github.com.google.pprof.@internal.measurement_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using fmt = fmt_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using measurement = github.com.google.pprof.@internal.measurement_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using profile = github.com.google.pprof.profile_package;
+using System;
 
 public static partial class driver_package {
 
@@ -70,7 +69,6 @@ private static error applyFocus(ptr<profile.Profile> _addr_prof, map<@string, @s
         prof.PruneFrom(prunefrom);
     }
     return error.As(err)!;
-
 }
 
 private static (ptr<regexp.Regexp>, error) compileRegexOption(@string name, @string value, error err) {
@@ -85,7 +83,6 @@ private static (ptr<regexp.Regexp>, error) compileRegexOption(@string name, @str
         return (_addr_null!, error.As(fmt.Errorf("parsing %s regexp: %v", name, err))!);
     }
     return (_addr_rx!, error.As(null!)!);
-
 }
 
 private static (Func<ptr<profile.Sample>, bool>, error) compileTagFilter(@string name, @string value, map<@string, @string> numLabelUnits, plugin.UI ui, error err) {
@@ -121,13 +118,9 @@ private static (Func<ptr<profile.Sample>, bool>, error) compileTagFilter(@string
                 }
 
                 return false;
-
             }
 ;
-            Func<@string, @string> numLabelUnit = key => {
-                return numLabelUnits[key];
-            }
-;
+            Func<@string, @string> numLabelUnit = key => numLabelUnits[key];
             if (wantKey == "") {
                 return (s => {
                     {
@@ -147,11 +140,8 @@ private static (Func<ptr<profile.Sample>, bool>, error) compileTagFilter(@string
                     }
 
                     return false;
-
                 }, error.As(null!)!);
-
             }
-
             return (s => {
                 {
                     var vals__prev2 = vals;
@@ -165,14 +155,10 @@ private static (Func<ptr<profile.Sample>, bool>, error) compileTagFilter(@string
                     vals = vals__prev2;
 
                 }
-
                 return false;
-
             }, error.As(null!)!);
-
         }
     }
-
 
     slice<ptr<regexp.Regexp>> rfx = default;
     foreach (var (_, tagf) in strings.Split(value, ",")) {
@@ -181,7 +167,6 @@ private static (Func<ptr<profile.Sample>, bool>, error) compileTagFilter(@string
             return (null, error.As(fmt.Errorf("parsing %s regexp: %v", name, err))!);
         }
         rfx = append(rfx, fx);
-
     }    if (wantKey == "") {
         return (s => {
 matchedrx:
@@ -207,7 +192,6 @@ matchedrx:
                                         _continuematchedrx = true;
                                         break;
                                     }
-
                                 }
 
                                 val = val__prev3;
@@ -219,15 +203,12 @@ matchedrx:
                     }
 
                     return false;
-
                 }
 
                 rx = rx__prev1;
             }
             return true;
-
         }, error.As(null!)!);
-
     }
     return (s => {
         {
@@ -262,11 +243,8 @@ matchedrx:
             vals = vals__prev1;
 
         }
-
         return false;
-
     }, error.As(null!)!);
-
 }
 
 // parseTagFilterRange returns a function to checks if a value is
@@ -309,7 +287,6 @@ private static Func<long, @string, bool> parseTagFilterRange(@string filter) => 
 
         }
         return null;
-
     }
     if (filter != ranges[0][0] + ":" + ranges[1][0]) {
         return null;
@@ -327,7 +304,6 @@ private static Func<long, @string, bool> parseTagFilterRange(@string filter) => 
         (sv, su) = measurement.Scale(v, u, unit);
         return su == unit && sv >= scaledValue && sv <= scaledValue2;
     };
-
 });
 
 private static void warnNoMatches(bool match, @string option, plugin.UI ui) {

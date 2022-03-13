@@ -4,32 +4,34 @@
 
 // Package codehost defines the interface implemented by a code hosting source,
 // along with support code for use by implementations.
-// package codehost -- go2cs converted at 2022 March 06 23:18:38 UTC
+
+// package codehost -- go2cs converted at 2022 March 13 06:32:01 UTC
 // import "cmd/go/internal/modfetch/codehost" ==> using codehost = go.cmd.go.@internal.modfetch.codehost_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\codehost\codehost.go
-using bytes = go.bytes_package;
-using sha256 = go.crypto.sha256_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using str = go.cmd.go.@internal.str_package;
-using System;
-
-
 namespace go.cmd.go.@internal.modfetch;
 
+using bytes = bytes_package;
+using sha256 = crypto.sha256_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using cfg = cmd.go.@internal.cfg_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using str = cmd.go.@internal.str_package;
+
+
+// Downloaded size limits.
+
+using System;
 public static partial class codehost_package {
 
-    // Downloaded size limits.
 public static readonly nint MaxGoMod = 16 << 20; // maximum size of go.mod file
 public static readonly nint MaxLICENSE = 16 << 20; // maximum size of LICENSE file
 public static readonly nint MaxZipFile = 500 << 20; // maximum size of downloaded zip file
@@ -130,10 +132,8 @@ public static bool AllHex(@string rev) {
             continue;
         }
         return false;
-
     }
     return true;
-
 }
 
 // ShortenSHA1 shortens a SHA1 hash (40 hex digits) to the canonical length
@@ -143,7 +143,6 @@ public static @string ShortenSHA1(@string rev) {
         return rev[..(int)12];
     }
     return rev;
-
 }
 
 // WorkDir returns the name of the cached work directory to use for the
@@ -177,7 +176,6 @@ public static (@string, @string, error) WorkDir(@string typ, @string name) => fu
 
     }
 
-
     lockfile = dir + ".lock";
     if (cfg.BuildX) {
         fmt.Fprintf(os.Stderr, "# lock %s", lockfile);
@@ -200,7 +198,6 @@ public static (@string, @string, error) WorkDir(@string typ, @string name) => fu
             fmt.Fprintf(os.Stderr, "# %s for %s %s\n", dir, typ, name);
         }
         return (dir, lockfile, error.As(null!)!);
-
     }
     if (cfg.BuildX) {
         fmt.Fprintf(os.Stderr, "mkdir -p %s # %s %s\n", dir, typ, name);
@@ -217,7 +214,6 @@ public static (@string, @string, error) WorkDir(@string typ, @string name) => fu
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -230,9 +226,7 @@ public static (@string, @string, error) WorkDir(@string typ, @string name) => fu
         err = err__prev1;
 
     }
-
     return (dir, lockfile, error.As(null!)!);
-
 });
 
 public partial struct RunError {
@@ -254,7 +248,6 @@ private static @string Error(this ptr<RunError> _addr_e) {
         text += "\n" + e.HelpText;
     }
     return text;
-
 }
 
 private static sync.Map dirLock = default;
@@ -289,7 +282,6 @@ public static (slice<byte>, error) RunWithStdin(@string dir, io.Reader stdin, pa
         ptr<sync.Mutex> mu = muIface._<ptr<sync.Mutex>>();
         mu.Lock();
         defer(mu.Unlock());
-
     }
     var cmd = str.StringList(cmdline);
     if (os.Getenv("TESTGOVCS") == "panic") {
@@ -319,13 +311,11 @@ public static (slice<byte>, error) RunWithStdin(@string dir, io.Reader stdin, pa
                 text.WriteByte('\'');
             else 
                 text.WriteString(arg);
-            
-        }        fmt.Fprintf(os.Stderr, "%s\n", text);
+                    }        fmt.Fprintf(os.Stderr, "%s\n", text);
         var start = time.Now();
         defer(() => {
             fmt.Fprintf(os.Stderr, "%.3fs # %s\n", time.Since(start).Seconds(), text);
         }());
-
     }
     ref bytes.Buffer stderr = ref heap(out ptr<bytes.Buffer> _addr_stderr);
     ref bytes.Buffer stdout = ref heap(out ptr<bytes.Buffer> _addr_stdout);
@@ -341,7 +331,6 @@ public static (slice<byte>, error) RunWithStdin(@string dir, io.Reader stdin, pa
         err = addr(new RunError(Cmd:strings.Join(cmd," ")+" in "+dir,Stderr:stderr.Bytes(),Err:err));
     }
     return (stdout.Bytes(), error.As(err)!);
-
 });
 
 } // end codehost_package

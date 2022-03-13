@@ -2,50 +2,51 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2022 March 06 22:26:23 UTC
+// package sync -- go2cs converted at 2022 March 13 05:24:06 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\pool.go
-using race = go.@internal.race_package;
-using runtime = go.runtime_package;
-using atomic = go.sync.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using race = @internal.race_package;
+using runtime = runtime_package;
+using atomic = sync.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// A Pool is a set of temporary objects that may be individually saved and
+// retrieved.
+//
+// Any item stored in the Pool may be removed automatically at any time without
+// notification. If the Pool holds the only reference when this happens, the
+// item might be deallocated.
+//
+// A Pool is safe for use by multiple goroutines simultaneously.
+//
+// Pool's purpose is to cache allocated but unused items for later reuse,
+// relieving pressure on the garbage collector. That is, it makes it easy to
+// build efficient, thread-safe free lists. However, it is not suitable for all
+// free lists.
+//
+// An appropriate use of a Pool is to manage a group of temporary items
+// silently shared among and potentially reused by concurrent independent
+// clients of a package. Pool provides a way to amortize allocation overhead
+// across many clients.
+//
+// An example of good use of a Pool is in the fmt package, which maintains a
+// dynamically-sized store of temporary output buffers. The store scales under
+// load (when many goroutines are actively printing) and shrinks when
+// quiescent.
+//
+// On the other hand, a free list maintained as part of a short-lived object is
+// not a suitable use for a Pool, since the overhead does not amortize well in
+// that scenario. It is more efficient to have such objects implement their own
+// free list.
+//
+// A Pool must not be copied after first use.
+
+using System;
 public static partial class sync_package {
 
-    // A Pool is a set of temporary objects that may be individually saved and
-    // retrieved.
-    //
-    // Any item stored in the Pool may be removed automatically at any time without
-    // notification. If the Pool holds the only reference when this happens, the
-    // item might be deallocated.
-    //
-    // A Pool is safe for use by multiple goroutines simultaneously.
-    //
-    // Pool's purpose is to cache allocated but unused items for later reuse,
-    // relieving pressure on the garbage collector. That is, it makes it easy to
-    // build efficient, thread-safe free lists. However, it is not suitable for all
-    // free lists.
-    //
-    // An appropriate use of a Pool is to manage a group of temporary items
-    // silently shared among and potentially reused by concurrent independent
-    // clients of a package. Pool provides a way to amortize allocation overhead
-    // across many clients.
-    //
-    // An example of good use of a Pool is in the fmt package, which maintains a
-    // dynamically-sized store of temporary output buffers. The store scales under
-    // load (when many goroutines are actively printing) and shrinks when
-    // quiescent.
-    //
-    // On the other hand, a free list maintained as part of a short-lived object is
-    // not a suitable use for a Pool, since the overhead does not amortize well in
-    // that scenario. It is more efficient to have such objects implement their own
-    // free list.
-    //
-    // A Pool must not be copied after first use.
 public partial struct Pool {
     public noCopy noCopy;
     public unsafe.Pointer local; // local fixed-size per-P pool, actual type is [P]poolLocal
@@ -98,11 +99,9 @@ private static void Put(this ptr<Pool> _addr_p, object x) {
         if (fastrand() % 4 == 0) { 
             // Randomly drop x on floor.
             return ;
-
         }
         race.ReleaseMerge(poolRaceAddr(x));
         race.Disable();
-
     }
     var (l, _) = p.pin();
     if (l.@private == null) {
@@ -155,7 +154,6 @@ private static void Get(this ptr<Pool> _addr_p) {
         x = p.New();
     }
     return x;
-
 }
 
 private static void getSlow(this ptr<Pool> _addr_p, nint pid) {
@@ -182,7 +180,6 @@ private static void getSlow(this ptr<Pool> _addr_p, nint pid) {
                 x = x__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -209,7 +206,6 @@ private static void getSlow(this ptr<Pool> _addr_p, nint pid) {
         x = x__prev1;
 
     }
-
     {
         nint i__prev1 = i;
 
@@ -227,7 +223,6 @@ private static void getSlow(this ptr<Pool> _addr_p, nint pid) {
                 x = x__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -238,7 +233,6 @@ private static void getSlow(this ptr<Pool> _addr_p, nint pid) {
     atomic.StoreUintptr(_addr_p.victimSize, 0);
 
     return null;
-
 }
 
 // pin pins the current goroutine to P, disables preemption and
@@ -260,7 +254,6 @@ private static (ptr<poolLocal>, nint) pin(this ptr<Pool> _addr_p) {
         return (_addr_indexLocal(l, pid)!, pid);
     }
     return _addr_p.pinSlow()!;
-
 }
 
 private static (ptr<poolLocal>, nint) pinSlow(this ptr<Pool> _addr_p) => func((defer, _, _) => {
@@ -288,7 +281,6 @@ private static (ptr<poolLocal>, nint) pinSlow(this ptr<Pool> _addr_p) => func((d
     atomic.StorePointer(_addr_p.local, @unsafe.Pointer(_addr_local[0])); // store-release
     runtime_StoreReluintptr(_addr_p.localSize, uintptr(size)); // store-release
     return (_addr__addr_local[pid]!, pid);
-
 });
 
 private static void poolCleanup() { 

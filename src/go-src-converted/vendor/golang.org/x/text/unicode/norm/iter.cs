@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2022 March 06 23:38:52 UTC
+// package norm -- go2cs converted at 2022 March 13 06:47:07 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\iter.go
-using fmt = go.fmt_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using fmt = fmt_package;
+using utf8 = unicode.utf8_package;
+
+
+// MaxSegmentSize is the maximum size of a byte buffer needed to consider any
+// sequence of starter and non-starter runes for the purpose of normalization.
 
 public static partial class norm_package {
 
-    // MaxSegmentSize is the maximum size of a byte buffer needed to consider any
-    // sequence of starter and non-starter runes for the purpose of normalization.
 public static readonly var MaxSegmentSize = maxByteBufferSize;
 
 // An Iter iterates over a string or byte slice, while normalizing it
@@ -50,7 +52,6 @@ private static void Init(this ptr<Iter> _addr_i, Form f, slice<byte> src) {
     i.asciiF = nextASCIIBytes;
     i.info = i.rb.f.info(i.rb.src, i.p);
     i.rb.ss.first(i.info);
-
 }
 
 // InitString initializes i to iterate over src after normalizing it to Form f.
@@ -69,7 +70,6 @@ private static void InitString(this ptr<Iter> _addr_i, Form f, @string src) {
     i.asciiF = nextASCIIString;
     i.info = i.rb.f.info(i.rb.src, i.p);
     i.rb.ss.first(i.info);
-
 }
 
 // Seek sets the segment to be returned by the next call to Next to start
@@ -108,7 +108,6 @@ private static (long, error) Seek(this ptr<Iter> _addr_i, long offset, nint when
     i.info = i.rb.f.info(i.rb.src, i.p);
     i.rb.ss.first(i.info);
     return (abs, error.As(null!)!);
-
 }
 
 // returnSlice returns a slice of the underlying input type as a byte slice.
@@ -122,7 +121,6 @@ private static slice<byte> returnSlice(this ptr<Iter> _addr_i, nint a, nint b) {
         return i.buf[..(int)copy(i.buf[..], i.rb.src.str[(int)a..(int)b])];
     }
     return i.rb.src.bytes[(int)a..(int)b];
-
 }
 
 // Pos returns the byte position at which the next call to Next will commence processing.
@@ -174,7 +172,6 @@ private static slice<byte> nextASCIIBytes(ptr<Iter> _addr_i) {
     i.info = i.rb.f.info(i.rb.src, i.p);
     i.next = i.rb.f.nextMain;
     return i.next(i);
-
 }
 
 private static slice<byte> nextASCIIString(ptr<Iter> _addr_i) {
@@ -194,7 +191,6 @@ private static slice<byte> nextASCIIString(ptr<Iter> _addr_i) {
     i.info = i.rb.f.info(i.rb.src, i.p);
     i.next = i.rb.f.nextMain;
     return i.next(i);
-
 }
 
 private static slice<byte> nextHangul(ptr<Iter> _addr_i) {
@@ -213,7 +209,6 @@ private static slice<byte> nextHangul(ptr<Iter> _addr_i) {
     }
     i.p = next;
     return i.buf[..(int)decomposeHangul(i.buf[..], i.rb.src.hangul(p))];
-
 }
 
 private static slice<byte> nextDone(ptr<Iter> _addr_i) {
@@ -230,7 +225,8 @@ private static slice<byte> nextMulti(ptr<Iter> _addr_i) {
     nint j = 0;
     var d = i.multiSeg; 
     // skip first rune
-    for (j = 1; j < len(d) && !utf8.RuneStart(d[j]); j++)     }
+    for (j = 1; j < len(d) && !utf8.RuneStart(d[j]); j++) {
+    }
     while (j < len(d)) {
         var info = i.rb.f.info(new input(bytes:d), j);
         if (info.BoundaryBefore()) {
@@ -238,12 +234,10 @@ private static slice<byte> nextMulti(ptr<Iter> _addr_i) {
             return d[..(int)j];
         }
         j += int(info.size);
-
     } 
     // treat last segment as normal decomposition
     i.next = i.rb.f.nextMain;
     return i.next(i);
-
 }
 
 // nextMultiNorm is used for iterating over multi-segment decompositions
@@ -264,12 +258,10 @@ private static slice<byte> nextMultiNorm(ptr<Iter> _addr_i) {
         }
         i.rb.insertUnsafe(new input(bytes:d), j, info);
         j += int(info.size);
-
     }
     i.multiSeg = null;
     i.next = nextComposed;
     return doNormComposed(_addr_i);
-
 }
 
 // nextDecomposed is the implementation of Next for forms NFD and NFKD.
@@ -296,9 +288,7 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
                     i.next = i.asciiF;
                     return i.returnSlice(p, i.p);
                 }
-
                 outp++;
-
             }            {
                 var d = i.info.Decomposition();
 
@@ -316,7 +306,6 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
                         if (p > len(i.buf)) {
                             return i.buf[..(int)outp];
                         }
-
                     }
                     else if (i.info.multiSegment()) { 
                         // outp must be 0 as multi-segment decompositions always
@@ -330,9 +319,7 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
                         d = i.multiSeg;
                         i.multiSeg = null;
                         p = len(d);
-
                     }
-
                     var prevCC = i.info.tccc;
                     i.p += sz;
 
@@ -344,7 +331,6 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
  {
                         i.info = i.rb.f.info(i.rb.src, i.p);
                     }
-
 
                     if (i.rb.ss.next(i.info) == ssOverflow)
                     {
@@ -367,9 +353,7 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
                     (inCopyStart, outCopyStart) = (i.p, outp);                    if (i.info.ccc < prevCC) {
                         goto doNorm;
                     }
-
                     continue;
-
                 }                {
                     var r = i.rb.src.hangul(i.p);
 
@@ -385,7 +369,6 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
                             i.next = nextHangul;
                             return i.buf[..(int)outp];
                         }
-
                     }
                     else
  {
@@ -399,12 +382,9 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
 
                 }
 
-
             }
 
-
         }
-
         if (i.p >= i.rb.nsrc) {
             i.setDone();
             break;
@@ -422,9 +402,7 @@ private static slice<byte> nextDecomposed(ptr<Iter> _addr_i) {
                 break;
             }
 
-
         }
-
         if (i.info.ccc < prevCC) {
             goto doNorm;
         }
@@ -440,7 +418,6 @@ doNorm:
     i.rb.src.copySlice(i.buf[(int)outCopyStart..], inCopyStart, i.p);
     i.rb.insertDecomposed(i.buf[(int)0..(int)outp]);
     return doNormDecomposed(_addr_i);
-
 }
 
 private static slice<byte> doNormDecomposed(ptr<Iter> _addr_i) {
@@ -467,11 +444,9 @@ private static slice<byte> doNormDecomposed(ptr<Iter> _addr_i) {
             }
 
         }
-
     } 
     // new segment or too many combining characters: exit normalization
     return i.buf[..(int)i.rb.flushCopy(i.buf[..])];
-
 }
 
 private static slice<byte> nextCGJDecompose(ptr<Iter> _addr_i) {
@@ -528,9 +503,7 @@ private static slice<byte> nextComposed(ptr<Iter> _addr_i) {
                 break;
             }
 
-
         }
-
         if (i.info.ccc < prevCC) {
             goto doNorm;
         }
@@ -551,7 +524,6 @@ doNorm:
     i.rb.ss.first(i.info);
     i.rb.insertUnsafe(i.rb.src, i.p, i.info);
     return doNormComposed(_addr_i);
-
 }
 
 private static slice<byte> doNormComposed(ptr<Iter> _addr_i) {
@@ -577,16 +549,12 @@ private static slice<byte> doNormComposed(ptr<Iter> _addr_i) {
                 break;
             }
 
-
         }
-
         i.rb.insertUnsafe(i.rb.src, i.p, i.info);
-
     }
     i.rb.compose();
     var seg = i.buf[..(int)i.rb.flushCopy(i.buf[..])];
     return seg;
-
 }
 
 private static slice<byte> nextCGJCompose(ptr<Iter> _addr_i) {
@@ -601,7 +569,6 @@ private static slice<byte> nextCGJCompose(ptr<Iter> _addr_i) {
     i.rb.ss.first(i.info);
     i.rb.insertUnsafe(i.rb.src, i.p, i.info);
     return doNormComposed(_addr_i);
-
 }
 
 } // end norm_package

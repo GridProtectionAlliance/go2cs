@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package s390x -- go2cs converted at 2022 March 06 23:10:45 UTC
+// package s390x -- go2cs converted at 2022 March 13 06:24:02 UTC
 // import "cmd/compile/internal/s390x" ==> using s390x = go.cmd.compile.@internal.s390x_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\s390x\ggen.go
-using @base = go.cmd.compile.@internal.@base_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using obj = go.cmd.@internal.obj_package;
-using s390x = go.cmd.@internal.obj.s390x_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using objw = cmd.compile.@internal.objw_package;
+using obj = cmd.@internal.obj_package;
+using s390x = cmd.@internal.obj.s390x_package;
+
+
+// clearLoopCutOff is the (somewhat arbitrary) value above which it is better
+// to have a loop of clear instructions (e.g. XCs) rather than just generating
+// multiple instructions (i.e. loop unrolling).
+// Must be between 256 and 4096.
 
 public static partial class s390x_package {
 
-    // clearLoopCutOff is the (somewhat arbitrary) value above which it is better
-    // to have a loop of clear instructions (e.g. XCs) rather than just generating
-    // multiple instructions (i.e. loop unrolling).
-    // Must be between 256 and 4096.
 private static readonly nint clearLoopCutoff = 1024;
 
 // zerorange clears the stack in the given range.
@@ -53,7 +55,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
         p = pp.Append(p, s390x.ABRCTG, obj.TYPE_REG, ireg, 0, obj.TYPE_BRANCH, 0, 0);
         p.To.SetTarget(pl);
         cnt = cnt % 256;
-
     }
     while (cnt > 0) {
         var n = cnt; 
@@ -94,11 +95,9 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
 
         cnt -= n;
         off += n;
-
     }
 
     return _addr_p!;
-
 }
 
 private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {

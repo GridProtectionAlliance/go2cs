@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:34:56 UTC
+//     Generated on 2022 March 13 06:42:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace analysis
 {
     public static partial class unitchecker_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Config
         {
             // Constructors
@@ -107,7 +107,7 @@ namespace analysis
             public static implicit operator Config(NilType nil) => default(Config);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Config Config_cast(dynamic value)
         {
             return new Config(value.ID, value.Compiler, value.Dir, value.ImportPath, value.GoFiles, value.NonGoFiles, value.IgnoredFiles, value.ImportMap, value.PackageFile, value.Standard, value.PackageVetx, value.VetxOnly, value.VetxOutput, value.SucceedOnTypecheckFailure);

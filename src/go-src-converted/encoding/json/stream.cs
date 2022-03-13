@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2022 March 06 22:25:23 UTC
+// package json -- go2cs converted at 2022 March 13 05:39:56 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\stream.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using io = go.io_package;
-
 namespace go.encoding;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using io = io_package;
+
+
+// A Decoder reads and decodes JSON values from an input stream.
 
 public static partial class json_package {
 
-    // A Decoder reads and decodes JSON values from an input stream.
 public partial struct Decoder {
     public io.Reader r;
     public slice<byte> buf;
@@ -70,7 +72,6 @@ private static error Decode(this ptr<Decoder> _addr_dec, object v) {
         }
     }
 
-
     if (!dec.tokenValueAllowed()) {
         return error.As(addr(new SyntaxError(msg:"not at beginning of value",Offset:dec.InputOffset()))!)!;
     }
@@ -90,7 +91,6 @@ private static error Decode(this ptr<Decoder> _addr_dec, object v) {
     dec.tokenValueEnd();
 
     return error.As(err)!;
-
 }
 
 // Buffered returns a reader of the data remaining in the Decoder's
@@ -136,12 +136,10 @@ Input:
                     break;
             scanp++;
                 }
-
             else if (dec.scan.step(_addr_dec.scan, c) == scanError) 
                 dec.err = dec.scan.err;
                 return (0, error.As(dec.scan.err)!);
-            
-        } 
+                    } 
 
         // Did the last read have an error?
         // Delayed until now to allow buffer scan.
@@ -151,24 +149,18 @@ Input:
                     _breakInput = true;
                     break;
                 }
-
                 if (nonSpace(dec.buf)) {
                     err = error.As(io.ErrUnexpectedEOF)!;
                 }
-
             }
-
             dec.err = err;
             return (0, error.As(err)!);
-
         }
         var n = scanp - dec.scanp;
         err = error.As(dec.refill())!;
         scanp = dec.scanp + n;
-
     }
     return (scanp - dec.scanp, error.As(null!)!);
-
 }
 
 private static error refill(this ptr<Decoder> _addr_dec) {
@@ -193,7 +185,6 @@ private static error refill(this ptr<Decoder> _addr_dec) {
     dec.buf = dec.buf[(int)0..(int)len(dec.buf) + n];
 
     return error.As(err)!;
-
 }
 
 private static bool nonSpace(slice<byte> b) {
@@ -202,7 +193,6 @@ private static bool nonSpace(slice<byte> b) {
             return true;
         }
     }    return false;
-
 }
 
 // An Encoder writes JSON values to an output stream.
@@ -249,7 +239,6 @@ private static error Encode(this ptr<Encoder> _addr_enc, object v) {
             return error.As(err)!;
         }
         b = enc.indentBuf.Bytes();
-
     }
     _, err = enc.w.Write(b);
 
@@ -258,7 +247,6 @@ private static error Encode(this ptr<Encoder> _addr_enc, object v) {
     }
     encodeStatePool.Put(e);
     return error.As(err)!;
-
 }
 
 // SetIndent instructs the encoder to format each subsequent encoded
@@ -299,7 +287,6 @@ public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
         return ((slice<byte>)"null", error.As(null!)!);
     }
     return (m, error.As(null!)!);
-
 }
 
 // UnmarshalJSON sets *m to a copy of data.
@@ -311,7 +298,6 @@ private static error UnmarshalJSON(this ptr<RawMessage> _addr_m, slice<byte> dat
     }
     m.val = append((m.val)[(int)0..(int)0], data);
     return error.As(null!)!;
-
 }
 
 private static Marshaler _ = (RawMessage.val)(null);
@@ -338,7 +324,6 @@ private static readonly var tokenObjectKey = 4;
 private static readonly var tokenObjectColon = 5;
 private static readonly var tokenObjectValue = 6;
 private static readonly var tokenObjectComma = 7;
-
 
 // advance tokenstate from a separator state to a value state
 private static error tokenPrepareForDecode(this ptr<Decoder> _addr_dec) {
@@ -369,7 +354,6 @@ private static error tokenPrepareForDecode(this ptr<Decoder> _addr_dec) {
         dec.scanp++;
         dec.tokenState = tokenObjectValue;
         return error.As(null!)!;
-
 }
 
 private static bool tokenValueAllowed(this ptr<Decoder> _addr_dec) {
@@ -379,7 +363,6 @@ private static bool tokenValueAllowed(this ptr<Decoder> _addr_dec) {
     if (dec.tokenState == tokenTopValue || dec.tokenState == tokenArrayStart || dec.tokenState == tokenArrayValue || dec.tokenState == tokenObjectValue) 
         return true;
         return false;
-
 }
 
 private static void tokenValueEnd(this ptr<Decoder> _addr_dec) {
@@ -390,8 +373,7 @@ private static void tokenValueEnd(this ptr<Decoder> _addr_dec) {
         dec.tokenState = tokenArrayComma;
     else if (dec.tokenState == tokenObjectValue) 
         dec.tokenState = tokenObjectComma;
-    
-}
+    }
 
 // A Delim is a JSON array or object delimiter, one of [ ] { or }.
 public partial struct Delim { // : int
@@ -526,13 +508,10 @@ private static (Token, error) Token(this ptr<Decoder> _addr_dec) {
                 err = err__prev1;
 
             }
-
             return (x, error.As(null!)!);
 
         __switch_break0:;
-
     }
-
 }
 
 private static (Token, error) tokenError(this ptr<Decoder> _addr_dec, byte c) {
@@ -555,7 +534,6 @@ private static (Token, error) tokenError(this ptr<Decoder> _addr_dec, byte c) {
     else if (dec.tokenState == tokenObjectComma) 
         context = " after object key:value pair";
         return (null, error.As(addr(new SyntaxError("invalid character "+quoteChar(c)+context,dec.InputOffset()))!)!);
-
 }
 
 // More reports whether there is another element in the
@@ -587,9 +565,7 @@ private static (byte, error) peek(this ptr<Decoder> _addr_dec) {
             return (0, error.As(err)!);
         }
         err = error.As(dec.refill())!;
-
     }
-
 }
 
 // InputOffset returns the input stream byte offset of the current decoder position.

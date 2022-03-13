@@ -9,19 +9,21 @@
 //go:build aix && ppc64 && gc
 // +build aix,ppc64,gc
 
-// package cpu -- go2cs converted at 2022 March 06 23:38:22 UTC
+// package cpu -- go2cs converted at 2022 March 13 06:46:35 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\syscall_aix_ppc64_gc.go
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.vendor.golang.org.x.sys;
+
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
+
+
+//go:cgo_import_dynamic libc_getsystemcfg getsystemcfg "libc.a/shr_64.o"
+
+//go:linkname libc_getsystemcfg libc_getsystemcfg
 
 public static partial class cpu_package {
 
-    //go:cgo_import_dynamic libc_getsystemcfg getsystemcfg "libc.a/shr_64.o"
-
-    //go:linkname libc_getsystemcfg libc_getsystemcfg
 private partial struct syscallFunc { // : System.UIntPtr
 }
 

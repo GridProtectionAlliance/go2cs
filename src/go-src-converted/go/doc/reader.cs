@@ -2,29 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package doc -- go2cs converted at 2022 March 06 22:41:33 UTC
+// package doc -- go2cs converted at 2022 March 13 05:52:38 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Program Files\Go\src\go\doc\reader.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using System;
-
-
 namespace go.go;
 
+using ast = go.ast_package;
+using token = go.token_package;
+using lazyregexp = @internal.lazyregexp_package;
+using sort = sort_package;
+using strconv = strconv_package;
+
+
+// ----------------------------------------------------------------------------
+// function/method sets
+//
+// Internally, we treat functions like methods and collect them in method sets.
+
+// A methodSet describes a set of methods. Entries where Decl == nil are conflict
+// entries (more than one method with the same name at the same embedding level).
+//
+
+using System;
 public static partial class doc_package {
 
-    // ----------------------------------------------------------------------------
-    // function/method sets
-    //
-    // Internally, we treat functions like methods and collect them in method sets.
-
-    // A methodSet describes a set of methods. Entries where Decl == nil are conflict
-    // entries (more than one method with the same name at the same embedding level).
-    //
 private partial struct methodSet { // : map<@string, ptr<Func>>
 }
 
@@ -41,7 +42,6 @@ private static @string recvString(ast.Expr recv) {
             break;
     }
     return "BADRECV";
-
 }
 
 // set creates the corresponding Func for f and adds it to mset.
@@ -63,7 +63,6 @@ private static void set(this methodSet mset, ptr<ast.FuncDecl> _addr_f, bool pre
             // caller is using go/build.ScanDir to determine the list of
             // files implementing a package.
             return ;
-
         }
     } 
     // function doesn't exist or has no documentation; use f
@@ -79,9 +78,7 @@ private static void set(this methodSet mset, ptr<ast.FuncDecl> _addr_f, bool pre
             }
 
         }
-
         recv = recvString(typ);
-
     }
     mset[name] = addr(new Func(Doc:f.Doc.Text(),Name:name,Decl:f,Recv:recv,Orig:recv,));
     if (!preserveAST) {
@@ -104,7 +101,6 @@ private static void add(this methodSet mset, ptr<Func> _addr_m) {
     if (m.Level == old.Level) { 
         // conflict - mark it using a method with nil Decl
         mset[m.Name] = addr(new Func(Name:m.Name,Level:m.Level,));
-
     }
 }
 
@@ -130,11 +126,9 @@ private static (@string, bool) baseTypeName(ast.Expr x) {
                     // only possible for qualified type names;
                     // assume type is imported
                     return (t.Sel.Name, true);
-
                 }
 
             }
-
             break;
         case ptr<ast.ParenExpr> t:
             return baseTypeName(t.X);
@@ -144,7 +138,6 @@ private static (@string, bool) baseTypeName(ast.Expr x) {
             break;
     }
     return ;
-
 }
 
 // An embeddedSet describes a set of embedded types.
@@ -227,7 +220,6 @@ private static ptr<namedType> lookupType(this ptr<reader> _addr_r, @string name)
     ptr<namedType> typ = addr(new namedType(name:name,embedded:make(embeddedSet),funcs:make(methodSet),methods:make(methodSet),));
     r.types[name] = typ;
     return _addr_typ!;
-
 }
 
 // recordAnonymousField registers fieldType as the type of an
@@ -253,9 +245,7 @@ private static @string recordAnonymousField(this ptr<reader> _addr_r, ptr<namedT
             parent.embedded[ftype] = ptr;
         }
     }
-
     return ;
-
 }
 
 private static void readDoc(this ptr<reader> _addr_r, ptr<ast.CommentGroup> _addr_comment) {
@@ -270,7 +260,6 @@ private static void readDoc(this ptr<reader> _addr_r, ptr<ast.CommentGroup> _add
         return ;
     }
     r.doc += "\n" + text;
-
 }
 
 private static void remember(this ptr<reader> _addr_r, ptr<ast.InterfaceType> _addr_typ) {
@@ -288,7 +277,6 @@ private static slice<@string> specNames(slice<ast.Spec> specs) {
             names = append(names, ident.Name);
         }
     }    return names;
-
 }
 
 // readValue processes a const or var declaration.
@@ -326,7 +314,6 @@ private static void readValue(this ptr<reader> _addr_r, ptr<ast.GenDecl> _addr_d
                 n = n__prev1;
 
             }
-
         else if (decl.Tok == token.CONST && len(s.Values) == 0) 
             // no type or value is present but we have a constant declaration;
             // use the previous type name (possibly the empty string)
@@ -338,16 +325,12 @@ private static void readValue(this ptr<reader> _addr_r, ptr<ast.GenDecl> _addr_d
                 // with any type
                 domName = "";
                 break;
-
             }
-
             domName = name;
             domFreq++;
-
         }
         prev = name;
         n++;
-
     }    if (n == 0) {
         return ;
     }
@@ -364,14 +347,12 @@ private static void readValue(this ptr<reader> _addr_r, ptr<ast.GenDecl> _addr_d
             }
 
         }
-
     }
     values.val = append(values.val, addr(new Value(Doc:decl.Doc.Text(),Names:specNames(decl.Specs),Decl:decl,order:r.order,)));
     if (r.mode & PreserveAST == 0) {
         decl.Doc = null; // doc consumed - remove from AST
     }
     r.order++;
-
 }
 
 // fields returns a struct's fields or an interface's methods.
@@ -394,7 +375,6 @@ private static (slice<ptr<ast.Field>>, bool) fields(ast.Expr typ) {
         list = fields.List;
     }
     return ;
-
 }
 
 // readType processes a type declaration.
@@ -415,7 +395,6 @@ private static void readType(this ptr<reader> _addr_r, ptr<ast.GenDecl> _addr_de
     if (doc == null) { 
         // no doc associated with the spec, use the declaration doc, if any
         doc = decl.Doc;
-
     }
     if (r.mode & PreserveAST == 0) {
         spec.Doc = null; // doc consumed - remove from AST
@@ -459,14 +438,12 @@ private static void readFunc(this ptr<reader> _addr_r, ptr<ast.FuncDecl> _addr_f
             // should not happen (incorrect AST); (See issue 17788)
             // don't show this method
             return ;
-
         }
         var (recvTypeName, imp) = baseTypeName(fun.Recv.List[0].Type);
         if (imp) { 
             // should not happen (incorrect AST);
             // don't show this method
             return ;
-
         }
         {
             var typ__prev2 = typ;
@@ -491,7 +468,6 @@ private static void readFunc(this ptr<reader> _addr_r, ptr<ast.FuncDecl> _addr_f
         // function results) of that type. Could determine if that is the
         // case and then show those methods in an appropriate section.
         return ;
-
     }
     if (fun.Type.Results.NumFields() >= 1) {
         typ = ; // type to associate the function with
@@ -507,13 +483,11 @@ private static void readFunc(this ptr<reader> _addr_r, ptr<ast.FuncDecl> _addr_f
                     // We consider functions that return slices or arrays of type
                     // T (or pointers to T) as factory functions of T.
                     factoryType = t.Elt;
-
                 }
 
                 t = t__prev2;
 
             }
-
             {
                 var (n, imp) = baseTypeName(factoryType);
 
@@ -534,18 +508,15 @@ private static void readFunc(this ptr<reader> _addr_r, ptr<ast.FuncDecl> _addr_f
                         t = t__prev3;
 
                     }
-
                 }
 
             }
-
         }        if (numResultTypes == 1) {
             typ.funcs.set(fun, r.mode & PreserveAST != 0);
             return ;
         }
     }
     r.funcs.set(fun, r.mode & PreserveAST != 0);
-
 }
 
 private static @string noteMarker = "([A-Z][A-Z]+)\\(([^)]+)\\):?";private static var noteMarkerRx = lazyregexp.New("^[ \\t]*" + noteMarker);private static var noteCommentRx = lazyregexp.New("^/[/*][ \\t]*" + noteMarker);
@@ -569,10 +540,8 @@ private static void readNote(this ptr<reader> _addr_r, slice<ptr<ast.Comment>> l
                 var marker = text[(int)m[2]..(int)m[3]];
                 r.notes[marker] = append(r.notes[marker], addr(new Note(Pos:list[0].Pos(),End:list[len(list)-1].End(),UID:text[m[4]:m[5]],Body:body,)));
             }
-
         }
     }
-
 }
 
 // readNotes extracts notes from comments.
@@ -641,13 +610,11 @@ private static void readFile(this ptr<reader> _addr_r, ptr<ast.File> _addr_src) 
                                         }
 
                                     }
-
                                 }
 
                                 s = s__prev1;
 
                             }
-
                         }
 
                         spec = spec__prev2;
@@ -675,11 +642,8 @@ private static void readFile(this ptr<reader> _addr_r, ptr<ast.File> _addr_src) 
                             s = s__prev2;
 
                         }
-
                         break;
-
                     }
-
                     {
                         var spec__prev2 = spec;
 
@@ -697,20 +661,17 @@ private static void readFile(this ptr<reader> _addr_r, ptr<ast.File> _addr_src) 
                                     // if there's none associated with the spec itself
                                     ptr<ast.GenDecl> fake = addr(new ast.GenDecl(Doc:d.Doc,TokPos:s.Pos(),Tok:token.TYPE,Specs:[]ast.Spec{s},));
                                     r.readType(fake, s);
-
                                 }
 
                                 s = s__prev1;
 
                             }
-
                         }
 
                         spec = spec__prev2;
                     }
                                 break;
         }
-
     }    r.readNotes(src.Comments);
     if (r.mode & PreserveAST == 0) {
         src.Comments = null; // consumed unassociated comments - remove from AST
@@ -774,9 +735,7 @@ private static void readPackage(this ptr<reader> _addr_r, ptr<ast.Package> _addr
                     }
 
                 }
-
             }
-
         }
         f = f__prev1;
     }
@@ -799,7 +758,6 @@ private static ptr<Func> customizeRecv(ptr<Func> _addr_f, @string recvTypeName, 
     if (!embeddedIsPtr && origRecvIsPtr) {
         newIdent.NamePos++; // '*' is one character
         typ = addr(new ast.StarExpr(Star:origPos,X:newIdent));
-
     }
     newField.Type = typ; 
 
@@ -821,7 +779,6 @@ private static ptr<Func> customizeRecv(ptr<Func> _addr_f, @string recvTypeName, 
     newF.Level = level;
 
     return _addr__addr_newF!;
-
 }
 
 // collectEmbeddedMethods collects the embedded methods of typ in mset.
@@ -843,12 +800,10 @@ private static void collectEmbeddedMethods(this ptr<reader> _addr_r, methodSet m
             if (m.Level == 0) {
                 mset.add(customizeRecv(_addr_m, recvTypeName, thisEmbeddedIsPtr, level));
             }
-
         }        if (!visited[embedded]) {
             r.collectEmbeddedMethods(mset, embedded, recvTypeName, thisEmbeddedIsPtr, level + 1, visited);
         }
     }    delete(visited, typ);
-
 }
 
 // computeMethodSets determines the actual method sets for each type encountered.
@@ -861,7 +816,6 @@ private static void computeMethodSets(this ptr<reader> _addr_r) {
         if (t.isStruct) { 
             // struct
             r.collectEmbeddedMethods(t.methods, t, t.name, false, 1, make(embeddedSet));
-
         }
         else
  { 
@@ -905,7 +859,6 @@ private static void cleanupTypes(this ptr<reader> _addr_r) {
                     // in a correct AST, package-level function names
                     // are all different - no need to check for conflicts
                     r.funcs[name] = f;
-
                 } 
                 // 3) move methods
 
@@ -928,13 +881,11 @@ private static void cleanupTypes(this ptr<reader> _addr_r) {
                             }
 
                         }
-
                     }
 
                     name = name__prev2;
                 }
             }
-
         }
         if (t.decl == null || !visible) {
             delete(r.types, t.name);
@@ -996,10 +947,8 @@ private static @string sortingName(ptr<ast.GenDecl> _addr_d) {
             }
 
         }
-
     }
     return "";
-
 }
 
 private static slice<ptr<Value>> sortedValues(slice<ptr<Value>> m, token.Token tok) {
@@ -1022,15 +971,12 @@ private static slice<ptr<Value>> sortedValues(slice<ptr<Value>> m, token.Token t
             }
 
         }
-
         return list[i].order < list[j].order;
-
     }, (i, j) => {
         (list[i], list[j]) = (list[j], list[i]);
     }, len(list));
 
     return list;
-
 }
 
 private static slice<ptr<Type>> sortedTypes(map<@string, ptr<namedType>> m, bool allMethods) {
@@ -1044,7 +990,6 @@ private static slice<ptr<Type>> sortedTypes(map<@string, ptr<namedType>> m, bool
     }, len(list));
 
     return list;
-
 }
 
 private static @string removeStar(@string s) {
@@ -1052,7 +997,6 @@ private static @string removeStar(@string s) {
         return s[(int)1..];
     }
     return s;
-
 }
 
 private static slice<ptr<Func>> sortedFuncs(methodSet m, bool allMethods) {
@@ -1066,13 +1010,11 @@ private static slice<ptr<Func>> sortedFuncs(methodSet m, bool allMethods) {
             // embedded but original receiver type not exported
             list[i] = m;
             i++;
-        
-    }    list = list[(int)0..(int)i];
+            }    list = list[(int)0..(int)i];
     sortBy((i, j) => list[i].Name < list[j].Name, (i, j) => {
         (list[i], list[j]) = (list[j], list[i]);
     }, len(list));
     return list;
-
 }
 
 // noteBodies returns a list of note body strings given a list of notes.

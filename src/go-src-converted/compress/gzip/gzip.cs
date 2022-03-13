@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gzip -- go2cs converted at 2022 March 06 22:15:09 UTC
+// package gzip -- go2cs converted at 2022 March 13 05:29:16 UTC
 // import "compress/gzip" ==> using gzip = go.compress.gzip_package
 // Original source: C:\Program Files\Go\src\compress\gzip\gzip.go
-using flate = go.compress.flate_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using crc32 = go.hash.crc32_package;
-using io = go.io_package;
-using time = go.time_package;
-
 namespace go.compress;
+
+using flate = compress.flate_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using crc32 = hash.crc32_package;
+using io = io_package;
+using time = time_package;
+
+
+// These constants are copied from the flate package, so that code that imports
+// "compress/gzip" does not also have to import "compress/flate".
 
 public static partial class gzip_package {
 
-    // These constants are copied from the flate package, so that code that imports
-    // "compress/gzip" does not also have to import "compress/flate".
 public static readonly var NoCompression = flate.NoCompression;
 public static readonly var BestSpeed = flate.BestSpeed;
 public static readonly var BestCompression = flate.BestCompression;
 public static readonly var DefaultCompression = flate.DefaultCompression;
 public static readonly var HuffmanOnly = flate.HuffmanOnly;
-
 
 // A Writer is an io.WriteCloser.
 // Writes to a Writer are compressed and written to w.
@@ -69,7 +70,6 @@ public static (ptr<Writer>, error) NewWriterLevel(io.Writer w, nint level) {
     ptr<Writer> z = @new<Writer>();
     z.init(w, level);
     return (_addr_z!, error.As(null!)!);
-
 }
 
 private static void init(this ptr<Writer> _addr_z, io.Writer w, nint level) {
@@ -80,7 +80,6 @@ private static void init(this ptr<Writer> _addr_z, io.Writer w, nint level) {
         compressor.Reset(w);
     }
     z.val = new Writer(Header:Header{OS:255,},w:w,level:level,compressor:compressor,);
-
 }
 
 // Reset discards the Writer z's state and makes it equivalent to the
@@ -107,7 +106,6 @@ private static error writeBytes(this ptr<Writer> _addr_z, slice<byte> b) {
     }
     _, err = z.w.Write(b);
     return error.As(err)!;
-
 }
 
 // writeString writes a UTF-8 string s in GZIP's format to z.w.
@@ -148,7 +146,6 @@ private static error writeString(this ptr<Writer> _addr_z, @string s) {
         }
 
         _, err = z.w.Write(b);
-
     } {
         _, err = io.WriteString(z.w, s);
     }
@@ -158,7 +155,6 @@ private static error writeString(this ptr<Writer> _addr_z, @string s) {
     z.buf[0] = 0;
     _, err = z.w.Write(z.buf[..(int)1]);
     return error.As(err)!;
-
 }
 
 // Write writes a compressed form of p to the underlying io.Writer. The
@@ -189,7 +185,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_z, slice<byte> p) {
             // Section 2.3.1, the zero value for MTIME means that the
             // modified time is not set.
             le.PutUint32(z.buf[(int)4..(int)8], uint32(z.ModTime.Unix()));
-
         }
         if (z.level == BestCompression) {
             z.buf[8] = 2;
@@ -228,7 +223,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_z, slice<byte> p) {
     z.digest = crc32.Update(z.digest, crc32.IEEETable, p);
     n, z.err = z.compressor.Write(p);
     return (n, error.As(z.err)!);
-
 }
 
 // Flush flushes any pending compressed data to the underlying writer.
@@ -256,7 +250,6 @@ private static error Flush(this ptr<Writer> _addr_z) {
     }
     z.err = z.compressor.Flush();
     return error.As(z.err)!;
-
 }
 
 // Close closes the Writer by flushing any unwritten data to the underlying
@@ -286,7 +279,6 @@ private static error Close(this ptr<Writer> _addr_z) {
     le.PutUint32(z.buf[(int)4..(int)8], z.size);
     _, z.err = z.w.Write(z.buf[..(int)8]);
     return error.As(z.err)!;
-
 }
 
 } // end gzip_package

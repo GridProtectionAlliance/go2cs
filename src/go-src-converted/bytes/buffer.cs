@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bytes -- go2cs converted at 2022 March 06 22:14:01 UTC
+// package bytes -- go2cs converted at 2022 March 13 05:28:11 UTC
 // import "bytes" ==> using bytes = go.bytes_package
 // Original source: C:\Program Files\Go\src\bytes\buffer.go
+namespace go;
 // Simple byte buffer for marshaling data.
 
-using errors = go.errors_package;
-using io = go.io_package;
-using utf8 = go.unicode.utf8_package;
+
+using errors = errors_package;
+using io = io_package;
+using utf8 = unicode.utf8_package;
+
+
+// smallBufferSize is an initial allocation minimal capacity.
+
 using System;
-
-
-namespace go;
-
 public static partial class bytes_package {
 
-    // smallBufferSize is an initial allocation minimal capacity.
 private static readonly nint smallBufferSize = 64;
 
 // A Buffer is a variable-sized buffer of bytes with Read and Write methods.
@@ -82,10 +83,8 @@ private static @string String(this ptr<Buffer> _addr_b) {
     if (b == null) { 
         // Special case, useful in debugging.
         return "<nil>";
-
     }
     return string(b.buf[(int)b.off..]);
-
 }
 
 // empty reports whether the unread portion of the buffer is empty.
@@ -126,7 +125,6 @@ private static void Truncate(this ptr<Buffer> _addr_b, nint n) => func((_, panic
         panic("bytes.Buffer: truncation out of range");
     }
     b.buf = b.buf[..(int)b.off + n];
-
 });
 
 // Reset resets the buffer to be empty,
@@ -156,9 +154,7 @@ private static (nint, bool) tryGrowByReslice(this ptr<Buffer> _addr_b, nint n) {
             return (l, true);
         }
     }
-
     return (0, false);
-
 }
 
 // grow grows the buffer to guarantee space for n more bytes.
@@ -179,7 +175,6 @@ private static nint grow(this ptr<Buffer> _addr_b, nint n) => func((_, panic, _)
             return i;
         }
     }
-
     if (b.buf == null && n <= smallBufferSize) {
         b.buf = make_slice<byte>(n, smallBufferSize);
         return 0;
@@ -191,7 +186,6 @@ private static nint grow(this ptr<Buffer> _addr_b, nint n) => func((_, panic, _)
         // we instead let capacity get twice as large so we
         // don't spend all our time copying.
         copy(b.buf, b.buf[(int)b.off..]);
-
     }
     else if (c > maxInt - c - n) {
         panic(ErrTooLarge);
@@ -202,12 +196,10 @@ private static nint grow(this ptr<Buffer> _addr_b, nint n) => func((_, panic, _)
         var buf = makeSlice(2 * c + n);
         copy(buf, b.buf[(int)b.off..]);
         b.buf = buf;
-
     }
     b.off = 0;
     b.buf = b.buf[..(int)m + n];
     return m;
-
 });
 
 // Grow grows the buffer's capacity, if necessary, to guarantee space for
@@ -223,7 +215,6 @@ private static void Grow(this ptr<Buffer> _addr_b, nint n) => func((_, panic, _)
     }
     var m = b.grow(n);
     b.buf = b.buf[..(int)m];
-
 });
 
 // Write appends the contents of p to the buffer, growing the buffer as
@@ -240,7 +231,6 @@ private static (nint, error) Write(this ptr<Buffer> _addr_b, slice<byte> p) {
         m = b.grow(len(p));
     }
     return (copy(b.buf[(int)m..], p), error.As(null!)!);
-
 }
 
 // WriteString appends the contents of s to the buffer, growing the buffer as
@@ -257,7 +247,6 @@ private static (nint, error) WriteString(this ptr<Buffer> _addr_b, @string s) {
         m = b.grow(len(s));
     }
     return (copy(b.buf[(int)m..], s), error.As(null!)!);
-
 }
 
 // MinRead is the minimum slice size passed to a Read call by
@@ -298,7 +287,6 @@ private static (long, error) ReadFrom(this ptr<Buffer> _addr_b, io.Reader r) => 
             return (n, error.As(e)!);
         }
     }
-
 });
 
 // makeSlice allocates a slice of size n. If the allocation fails, it panics
@@ -311,7 +299,6 @@ private static slice<byte> makeSlice(nint n) => func((defer, panic, _) => {
         }
     }());
     return make_slice<byte>(n);
-
 });
 
 // WriteTo writes data to w until the buffer is drained or an error occurs.
@@ -342,13 +329,11 @@ private static (long, error) WriteTo(this ptr<Buffer> _addr_b, io.Writer w) => f
             if (m != nBytes) {
                 return (n, error.As(io.ErrShortWrite)!);
             }
-
         }
     } 
     // Buffer is now empty; reset.
     b.Reset();
     return (n, error.As(null!)!);
-
 });
 
 // WriteByte appends the byte c to the buffer, growing the buffer as needed.
@@ -365,7 +350,6 @@ private static error WriteByte(this ptr<Buffer> _addr_b, byte c) {
     }
     b.buf[m] = c;
     return error.As(null!)!;
-
 }
 
 // WriteRune appends the UTF-8 encoding of Unicode code point r to the
@@ -390,7 +374,6 @@ private static (nint, error) WriteRune(this ptr<Buffer> _addr_b, int r) {
     n = utf8.EncodeRune(b.buf[(int)m..(int)m + utf8.UTFMax], r);
     b.buf = b.buf[..(int)m + n];
     return (n, error.As(null!)!);
-
 }
 
 // Read reads the next len(p) bytes from the buffer or until the buffer
@@ -410,7 +393,6 @@ private static (nint, error) Read(this ptr<Buffer> _addr_b, slice<byte> p) {
             return (0, error.As(null!)!);
         }
         return (0, error.As(io.EOF)!);
-
     }
     n = copy(p, b.buf[(int)b.off..]);
     b.off += n;
@@ -418,7 +400,6 @@ private static (nint, error) Read(this ptr<Buffer> _addr_b, slice<byte> p) {
         b.lastRead = opRead;
     }
     return (n, error.As(null!)!);
-
 }
 
 // Next returns a slice containing the next n bytes from the buffer,
@@ -439,7 +420,6 @@ private static slice<byte> Next(this ptr<Buffer> _addr_b, nint n) {
         b.lastRead = opRead;
     }
     return data;
-
 }
 
 // ReadByte reads and returns the next byte from the buffer.
@@ -453,13 +433,11 @@ private static (byte, error) ReadByte(this ptr<Buffer> _addr_b) {
         // Buffer is empty, reset to recover space.
         b.Reset();
         return (0, error.As(io.EOF)!);
-
     }
     var c = b.buf[b.off];
     b.off++;
     b.lastRead = opRead;
     return (c, error.As(null!)!);
-
 }
 
 // ReadRune reads and returns the next UTF-8-encoded
@@ -477,7 +455,6 @@ private static (int, nint, error) ReadRune(this ptr<Buffer> _addr_b) {
         // Buffer is empty, reset to recover space.
         b.Reset();
         return (0, 0, error.As(io.EOF)!);
-
     }
     var c = b.buf[b.off];
     if (c < utf8.RuneSelf) {
@@ -489,7 +466,6 @@ private static (int, nint, error) ReadRune(this ptr<Buffer> _addr_b) {
     b.off += n;
     b.lastRead = readOp(n);
     return (r, n, error.As(null!)!);
-
 }
 
 // UnreadRune unreads the last rune returned by ReadRune.
@@ -508,7 +484,6 @@ private static error UnreadRune(this ptr<Buffer> _addr_b) {
     }
     b.lastRead = opInvalid;
     return error.As(null!)!;
-
 }
 
 private static var errUnreadByte = errors.New("bytes.Buffer: UnreadByte: previous operation was not a successful read");
@@ -528,7 +503,6 @@ private static error UnreadByte(this ptr<Buffer> _addr_b) {
         b.off--;
     }
     return error.As(null!)!;
-
 }
 
 // ReadBytes reads until the first occurrence of delim in the input,
@@ -547,7 +521,6 @@ private static (slice<byte>, error) ReadBytes(this ptr<Buffer> _addr_b, byte del
     // be overwritten by later calls.
     line = append(line, slice);
     return (line, error.As(err)!);
-
 }
 
 // readSlice is like ReadBytes but returns a reference to internal buffer data.
@@ -566,7 +539,6 @@ private static (slice<byte>, error) readSlice(this ptr<Buffer> _addr_b, byte del
     b.off = end;
     b.lastRead = opRead;
     return (line, error.As(err)!);
-
 }
 
 // ReadString reads until the first occurrence of delim in the input,

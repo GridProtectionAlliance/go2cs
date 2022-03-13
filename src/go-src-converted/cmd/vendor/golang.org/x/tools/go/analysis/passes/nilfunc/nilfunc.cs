@@ -4,20 +4,20 @@
 
 // Package nilfunc defines an Analyzer that checks for useless
 // comparisons against nil.
-// package nilfunc -- go2cs converted at 2022 March 06 23:34:40 UTC
+
+// package nilfunc -- go2cs converted at 2022 March 13 06:41:57 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/nilfunc" ==> using nilfunc = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.nilfunc_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\nilfunc\nilfunc.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class nilfunc_package {
 
@@ -80,12 +80,9 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
 
         }
 
-
         pass.ReportRangef(e, "comparison of function %v %v nil is always %v", obj.Name(), e.Op, e.Op == token.NEQ);
-
     });
     return (null, error.As(null!)!);
-
 }
 
 } // end nilfunc_package

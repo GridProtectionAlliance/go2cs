@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:56 UTC
+//     Generated on 2022 March 13 05:34:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct VerifyOptions
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace crypto
             public static implicit operator VerifyOptions(NilType nil) => default(VerifyOptions);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static VerifyOptions VerifyOptions_cast(dynamic value)
         {
             return new VerifyOptions(value.DNSName, ref value.Intermediates, ref value.Roots, value.CurrentTime, value.KeyUsages, value.MaxConstraintComparisions);

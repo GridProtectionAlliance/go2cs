@@ -10,12 +10,12 @@
 
 // See NIST SP 800-38A, pp 13-15
 
-// package cipher -- go2cs converted at 2022 March 06 22:18:08 UTC
+// package cipher -- go2cs converted at 2022 March 13 05:32:21 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Program Files\Go\src\crypto\cipher\ctr.go
-using subtle = go.crypto.@internal.subtle_package;
-
 namespace go.crypto;
+
+using subtle = crypto.@internal.subtle_package;
 
 public static partial class cipher_package {
 
@@ -50,7 +50,6 @@ public static Stream NewCTR(Block block, slice<byte> iv) => func((_, panic, _) =
             return ctr.NewCTR(iv);
         }
     }
-
     if (len(iv) != block.BlockSize()) {
         panic("cipher.NewCTR: IV length must equal block size");
     }
@@ -59,7 +58,6 @@ public static Stream NewCTR(Block block, slice<byte> iv) => func((_, panic, _) =
         bufSize = block.BlockSize();
     }
     return addr(new ctr(b:block,ctr:dup(iv),out:make([]byte,0,bufSize),outUsed:0,));
-
 });
 
 private static void refill(this ptr<ctr> _addr_x) {
@@ -80,11 +78,9 @@ private static void refill(this ptr<ctr> _addr_x) {
                 break;
             }
         }
-
     }
     x.@out = x.@out[..(int)remain];
     x.outUsed = 0;
-
 }
 
 private static void XORKeyStream(this ptr<ctr> _addr_x, slice<byte> dst, slice<byte> src) => func((_, panic, _) => {
@@ -104,9 +100,7 @@ private static void XORKeyStream(this ptr<ctr> _addr_x, slice<byte> dst, slice<b
         dst = dst[(int)n..];
         src = src[(int)n..];
         x.outUsed += n;
-
     }
-
 });
 
 } // end cipher_package

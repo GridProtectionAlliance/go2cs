@@ -2,30 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:21 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:43 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\branchelim.go
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class ssa_package {
 
-    // branchelim tries to eliminate branches by
-    // generating CondSelect instructions.
-    //
-    // Search for basic blocks that look like
-    //
-    // bb0            bb0
-    //  | \          /   \
-    //  | bb1  or  bb1   bb2    <- trivial if/else blocks
-    //  | /          \   /
-    // bb2            bb3
-    //
-    // where the intermediate blocks are mostly empty (with no side-effects);
-    // rewrite Phis in the postdominator as CondSelects.
+// branchelim tries to eliminate branches by
+// generating CondSelect instructions.
+//
+// Search for basic blocks that look like
+//
+// bb0            bb0
+//  | \          /   \
+//  | bb1  or  bb1   bb2    <- trivial if/else blocks
+//  | /          \   /
+// bb2            bb3
+//
+// where the intermediate blocks are mostly empty (with no side-effects);
+// rewrite Phis in the postdominator as CondSelects.
 private static void branchelim(ptr<Func> _addr_f) => func((defer, _, _) => {
     ref Func f = ref _addr_f.val;
  
@@ -62,8 +61,7 @@ private static void branchelim(ptr<Func> _addr_f) => func((defer, _, _) => {
                         loadAddr.add(v.Args[0].ID);
                     else if (v.Op == OpMove) 
                         loadAddr.add(v.Args[1].ID);
-                    
-                }
+                                    }
                 v = v__prev2;
             }
         }
@@ -89,7 +87,6 @@ private static void branchelim(ptr<Func> _addr_f) => func((defer, _, _) => {
                         }
                     }
                 }
-
             }
             b = b__prev2;
         }
@@ -112,7 +109,6 @@ private static void branchelim(ptr<Func> _addr_f) => func((defer, _, _) => {
             b = b__prev2;
         }
     }
-
 });
 
 private static bool canCondSelect(ptr<Value> _addr_v, @string arch, ptr<sparseSet> _addr_loadAddr) {
@@ -128,7 +124,6 @@ private static bool canCondSelect(ptr<Value> _addr_v, @string arch, ptr<sparseSe
         // be an expensive cache miss).
         // See issue #26306.
         return false;
-
     }
 
     if (v.Type.Size() > v.Block.Func.Config.RegSize) 
@@ -139,13 +134,11 @@ private static bool canCondSelect(ptr<Value> _addr_v, @string arch, ptr<sparseSe
         if (arch == "amd64" && v.Type.Size() < 2) { 
             // amd64 doesn't support CMOV with byte registers
             return false;
-
         }
         return true;
     else 
         return false;
-    
-}
+    }
 
 // elimIf converts the one-way branch starting at dom in f to a conditional move if possible.
 // loadAddr is a set of values which are used to compute the address of a load.
@@ -175,7 +168,6 @@ private static bool elimIf(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr, ptr
                 post = other;
                 break;
             }
-
         }
         i = i__prev1;
     }
@@ -222,9 +214,7 @@ private static bool elimIf(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr, ptr
             if (swap) {
                 (v.Args[0], v.Args[1]) = (v.Args[1], v.Args[0]);
             }
-
             v.AddArg(dom.Controls[0]);
-
         }
         v = v__prev1;
     }
@@ -280,14 +270,12 @@ private static bool elimIf(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr, ptr
                 if (pos.SameFileAndLine(v.Pos) && v.Pos.IsStmt() == src.PosIsStmt) {
                     return true;
                 }
-
             }
 
             v = v__prev1;
         }
 
         return false;
-
     };
     if (simpleStmt) {
         simpleStmt = !findBlockPos(simple);
@@ -315,7 +303,6 @@ private static bool elimIf(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr, ptr
         }
 
         return false;
-
     }; 
     // If necessary and possible, add a mark to a value in simple
     if (simpleStmt) {
@@ -357,9 +344,7 @@ private static bool elimIf(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr, ptr
                 if (postStmt && succ.Pos.IsStmt() != src.PosIsStmt) {
                     succ.Pos = postPos;
                 }
-
             }
-
         }
     }
     dom.Values = append(dom.Values, simple.Values);
@@ -371,7 +356,6 @@ private static bool elimIf(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr, ptr
 
     f.invalidateCFG();
     return true;
-
 }
 
 // is this a BlockPlain with one predecessor?
@@ -457,9 +441,7 @@ private static bool elimIfElse(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr,
             if (swap) {
                 (v.Args[0], v.Args[1]) = (v.Args[1], v.Args[0]);
             }
-
             v.AddArg(b.Controls[0]);
-
         }
         v = v__prev1;
     }
@@ -520,7 +502,6 @@ private static bool elimIfElse(ptr<Func> _addr_f, ptr<sparseSet> _addr_loadAddr,
 
     f.invalidateCFG();
     return true;
-
 }
 
 // shouldElimIfElse reports whether estimated cost of eliminating branch
@@ -541,31 +522,25 @@ private static bool shouldElimIfElse(ptr<Block> _addr_no, ptr<Block> _addr_yes, 
                     // Each phi results in CondSelect, which lowers into CMOV,
                     // CMOV has latency >1 on most CPUs.
                     phi++;
-
                 }
-
                 foreach (var (_, x) in v.Args) {
                     if (x.Block == no || x.Block == yes) {
                         other++;
                     }
                 }
-
             }        var cost = phi * 1;
             if (phi > 1) { 
                 // If we have more than 1 phi and some values in post have args
                 // in yes or no blocks, we may have to recalculate condition, because
                 // those args may clobber flags. For now assume that all operations clobber flags.
                 cost += other * 1;
-
             }
             return cost < maxcost;
-
             break;
         default: 
             return true;
             break;
     }
-
 }
 
 // canSpeculativelyExecute reports whether every value in the block can
@@ -586,7 +561,6 @@ private static bool canSpeculativelyExecute(ptr<Block> _addr_b) {
             return false;
         }
     }    return true;
-
 }
 
 private static bool isDivMod(Op op) {
@@ -595,7 +569,6 @@ private static bool isDivMod(Op op) {
         return true;
     else 
         return false;
-    
-}
+    }
 
 } // end ssa_package

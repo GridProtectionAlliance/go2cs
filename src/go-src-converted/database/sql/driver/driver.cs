@@ -35,32 +35,35 @@
 // ResetSession is called if implemented. If a connection is never returned to the
 // connection pool but immediately reused, then ResetSession is called prior to
 // reuse but IsValid is not called.
-// package driver -- go2cs converted at 2022 March 06 23:35:29 UTC
+
+// package driver -- go2cs converted at 2022 March 13 06:43:26 UTC
 // import "database/sql/driver" ==> using driver = go.database.sql.driver_package
 // Original source: C:\Program Files\Go\src\database\sql\driver\driver.go
-using context = go.context_package;
-using errors = go.errors_package;
-using reflect = go.reflect_package;
-
 namespace go.database.sql;
+
+using context = context_package;
+using errors = errors_package;
+using reflect = reflect_package;
+
+
+// Value is a value that drivers must be able to handle.
+// It is either nil, a type handled by a database driver's NamedValueChecker
+// interface, or an instance of one of these types:
+//
+//   int64
+//   float64
+//   bool
+//   []byte
+//   string
+//   time.Time
+//
+// If the driver supports cursors, a returned Value may also implement the Rows interface
+// in this package. This is used, for example, when a user selects a cursor
+// such as "select cursor(select * from my_table) from dual". If the Rows
+// from the select is closed, the cursor Rows will also be closed.
 
 public static partial class driver_package {
 
-    // Value is a value that drivers must be able to handle.
-    // It is either nil, a type handled by a database driver's NamedValueChecker
-    // interface, or an instance of one of these types:
-    //
-    //   int64
-    //   float64
-    //   bool
-    //   []byte
-    //   string
-    //   time.Time
-    //
-    // If the driver supports cursors, a returned Value may also implement the Rows interface
-    // in this package. This is used, for example, when a user selects a cursor
-    // such as "select cursor(select * from my_table) from dual". If the Rows
-    // from the select is closed, the cursor Rows will also be closed.
 public partial interface Value {
 }
 

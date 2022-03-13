@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:54 UTC
+//     Generated on 2022 March 13 05:40:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace rpc
 {
     public static partial class jsonrpc_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct clientCodec
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace rpc
             public static implicit operator clientCodec(NilType nil) => default(clientCodec);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static clientCodec clientCodec_cast(dynamic value)
         {
             return new clientCodec(ref value.dec, ref value.enc, value.c, value.req, value.resp, value.mutex, value.pending);

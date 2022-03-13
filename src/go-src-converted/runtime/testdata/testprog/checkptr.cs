@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:25:57 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:18 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\checkptr.go
-using runtime = go.runtime_package;
-using time = go.time_package;
-using @unsafe = go.@unsafe_package;
+namespace go;
+
+using runtime = runtime_package;
+using time = time_package;
+using @unsafe = @unsafe_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -50,7 +49,6 @@ public static void CheckPtrAlignmentNilPtr() {
         }
         unsafe.Pointer p = default;
         _ = (int.val)(p);
-
     };
 
     go_(() => () => {
@@ -60,13 +58,12 @@ public static void CheckPtrAlignmentNilPtr() {
     }());
 
     go_(() => () => {
-        for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+        for (nint i = 0; ; i++) {
             do(i % 1024);
         }
     }());
 
     time.Sleep(time.Second);
-
 }
 
 public static void CheckPtrArithmetic() {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:14:28 UTC
+//     Generated on 2022 March 13 06:27:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class @base_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct debugField
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace @internal
             public static implicit operator debugField(NilType nil) => default(debugField);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static debugField debugField_cast(dynamic value)
         {
             return new debugField(value.name, value.help);

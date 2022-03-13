@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue13742 -- go2cs converted at 2022 March 06 22:41:35 UTC
+// package issue13742 -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.issue13742" ==> using issue13742 = go.go.doc.issue13742_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\issue13742.go
-using ast = go.go.ast_package;
-using ast = go.go.ast_package;
-
 namespace go.go;
+
+using ast = go.ast_package;
+using ast = go.ast_package;
+
+
+// Both F0 and G0 should appear as functions.
 
 public static partial class issue13742_package {
 
-    // Both F0 and G0 should appear as functions.
 public static void F0(Node _p0) {
 }
 public static Node G0() {

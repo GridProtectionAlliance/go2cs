@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:48 UTC
+//     Generated on 2022 March 13 05:38:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace go
 {
     public static partial class regexp_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct inputString
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace go
             public static implicit operator inputString(NilType nil) => default(inputString);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static inputString inputString_cast(dynamic value)
         {
             return new inputString(value.str);

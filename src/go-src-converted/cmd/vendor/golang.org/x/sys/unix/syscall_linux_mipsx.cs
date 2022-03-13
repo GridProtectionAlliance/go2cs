@@ -6,13 +6,13 @@
 // +build linux
 // +build mips mipsle
 
-// package unix -- go2cs converted at 2022 March 06 23:27:09 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:24 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux_mipsx.go
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 
@@ -89,7 +89,6 @@ public static error Fstatfs(nint fd, ptr<Statfs_t> _addr_buf) {
         err = errnoErr(e);
     }
     return ;
-
 }
 
 public static error Statfs(@string path, ptr<Statfs_t> _addr_buf) {
@@ -105,7 +104,6 @@ public static error Statfs(@string path, ptr<Statfs_t> _addr_buf) {
         err = errnoErr(e);
     }
     return ;
-
 }
 
 public static (long, error) Seek(nint fd, long offset, nint whence) {
@@ -117,7 +115,6 @@ public static (long, error) Seek(nint fd, long offset, nint whence) {
         err = errnoErr(e);
     }
     return ;
-
 }
 
 private static Timespec setTimespec(long sec, long nsec) {
@@ -141,7 +138,6 @@ public static error Pipe2(slice<nint> p, nint flags) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 //sysnb    pipe() (p1 int, p2 int, err error)
@@ -154,7 +150,6 @@ public static error Pipe(slice<nint> p) {
     }
     p[0], p[1], err = pipe();
     return ;
-
 }
 
 //sys    mmap2(addr uintptr, length uintptr, prot int, flags int, fd int, pageOffset uintptr) (xaddr uintptr, err error)
@@ -168,7 +163,6 @@ private static (System.UIntPtr, error) mmap(System.UIntPtr addr, System.UIntPtr 
         return (0, error.As(EINVAL)!);
     }
     return mmap2(addr, length, prot, flags, fd, page);
-
 }
 
 private static readonly var rlimInf32 = ~uint32(0);
@@ -212,7 +206,6 @@ public static error Getrlimit(nint resource, ptr<Rlimit> _addr_rlim) {
         rlim.Max = uint64(rl.Max);
     }
     return ;
-
 }
 
 //sysnb    setrlimit(resource int, rlim *rlimit32) (err error) = SYS_SETRLIMIT
@@ -247,7 +240,6 @@ public static error Setrlimit(nint resource, ptr<Rlimit> _addr_rlim) {
         return error.As(EINVAL)!;
     }
     return error.As(setrlimit(resource, _addr_rl))!;
-
 }
 
 private static ulong PC(this ptr<PtraceRegs> _addr_r) {
@@ -296,7 +288,6 @@ public static (nint, error) Poll(slice<PollFd> fds, nint timeout) {
         return poll(null, 0, timeout);
     }
     return poll(_addr_fds[0], len(fds), timeout);
-
 }
 
 } // end unix_package

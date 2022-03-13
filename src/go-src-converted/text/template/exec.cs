@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:40 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:10 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Program Files\Go\src\text\template\exec.go
-using fmt = go.fmt_package;
-using fmtsort = go.@internal.fmtsort_package;
-using io = go.io_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using parse = go.text.template.parse_package;
-using System;
-
-
 namespace go.text;
 
+using fmt = fmt_package;
+using fmtsort = @internal.fmtsort_package;
+using io = io_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using parse = text.template.parse_package;
+
+
+// maxExecDepth specifies the maximum stack depth of templates within
+// templates. This limit is only practically reached by accidentally
+// recursive template invocations. This limit allows us to return
+// an error instead of triggering a stack overflow.
+
+using System;
 public static partial class template_package {
 
-    // maxExecDepth specifies the maximum stack depth of templates within
-    // templates. This limit is only practically reached by accidentally
-    // recursive template invocations. This limit allows us to return
-    // an error instead of triggering a stack overflow.
 private static var maxExecDepth = initMaxExecDepth();
 
 private static nint initMaxExecDepth() {
@@ -30,7 +31,6 @@ private static nint initMaxExecDepth() {
         return 1000;
     }
     return 100000;
-
 }
 
 // state represents the state of an execution. It's not part of the
@@ -83,7 +83,6 @@ private static void setVar(this ptr<state> _addr_s, @string name, reflect.Value 
         }
     }
     s.errorf("undefined variable: %s", name);
-
 }
 
 // setTopVar overwrites the top-nth variable on the stack. Used by range iterations.
@@ -104,7 +103,6 @@ private static reflect.Value varValue(this ptr<state> _addr_s, @string name) {
     }
     s.errorf("undefined variable: %s", name);
     return zero;
-
 }
 
 private static reflect.Value zero = default;
@@ -162,7 +160,6 @@ private static void errorf(this ptr<state> _addr_s, @string format, params objec
         format = fmt.Sprintf("template: %s: executing %q at <%s>: %s", location, name, doublePercent(context), format);
     }
     panic(new ExecError(Name:s.tmpl.Name(),Err:fmt.Errorf(format,args...),));
-
 });
 
 // writeError is the wrapper type used internally when Execute has an
@@ -203,7 +200,6 @@ private static void errRecover(ptr<error> _addr_errp) => func((_, panic, _) => {
                 break;
             }
         }
-
     }
 });
 
@@ -222,7 +218,6 @@ private static error ExecuteTemplate(this ptr<Template> _addr_t, io.Writer wr, @
         return error.As(fmt.Errorf("template: no template %q associated with template %q", name, t.name))!;
     }
     return error.As(tmpl.Execute(wr, data))!;
-
 }
 
 // Execute applies a parsed template to the specified data object,
@@ -256,7 +251,6 @@ private static error execute(this ptr<Template> _addr_t, io.Writer wr, object da
     }
     state.walk(value, t.Root);
     return ;
-
 });
 
 // DefinedTemplates returns a string listing the defined templates,
@@ -284,9 +278,7 @@ private static @string DefinedTemplates(this ptr<Template> _addr_t) => func((def
             b.WriteString(", ");
         }
         fmt.Fprintf(_addr_b, "%q", name);
-
     }    return b.String();
-
 });
 
 // Walk functions step through the major pieces of the template structure,
@@ -334,7 +326,6 @@ private static void walk(this ptr<state> _addr_s, reflect.Value dot, parse.Node 
                 }
 
             }
-
             break;
         case ptr<parse.WithNode> node:
             s.walkIfOrWith(parse.NodeWith, dot, node.Pipe, node.List, node.ElseList);
@@ -346,7 +337,6 @@ private static void walk(this ptr<state> _addr_s, reflect.Value dot, parse.Node 
             break;
         }
     }
-
 }
 
 // walkIfOrWith walks an 'if' or 'with' node. The two control structures
@@ -394,7 +384,6 @@ private static (bool, bool) isTrue(reflect.Value val) {
     if (!val.IsValid()) { 
         // Something like var x interface{}, never set. It's a form of nil.
         return (false, true);
-
     }
 
     if (val.Kind() == reflect.Array || val.Kind() == reflect.Map || val.Kind() == reflect.Slice || val.Kind() == reflect.String) 
@@ -416,7 +405,6 @@ private static (bool, bool) isTrue(reflect.Value val) {
     else 
         return ;
         return (truth, true);
-
 }
 
 private static void walkRange(this ptr<state> _addr_s, reflect.Value dot, ptr<parse.RangeNode> _addr_r) => func((defer, _, _) => {
@@ -438,7 +426,6 @@ private static void walkRange(this ptr<state> _addr_s, reflect.Value dot, ptr<pa
         }
         s.walk(elem, r.List);
         s.pop(mark);
-
     };
 
     if (val.Kind() == reflect.Array || val.Kind() == reflect.Slice) 
@@ -483,15 +470,13 @@ private static void walkRange(this ptr<state> _addr_s, reflect.Value dot, ptr<pa
             break;
         }
         i = 0;
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             var (elem, ok) = val.Recv();
             if (!ok) {
                 break;
             i++;
             }
-
             oneIteration(reflect.ValueOf(i), elem);
-
         }
         if (i == 0) {
             break;
@@ -525,7 +510,6 @@ private static void walkTemplate(this ptr<state> _addr_s, reflect.Value dot, ptr
     // No dynamic scoping: template invocations inherit no variables.
     newState.vars = new slice<variable>(new variable[] { {"$",dot} });
     newState.walk(dot, tmpl.Root);
-
 }
 
 // Eval functions evaluate pipelines, commands, and their elements and extract
@@ -561,7 +545,6 @@ private static reflect.Value evalPipeline(this ptr<state> _addr_s, reflect.Value
             s.push(variable.Ident[0], value);
         }
     }    return value;
-
 }
 
 private static void notAFunction(this ptr<state> _addr_s, slice<parse.Node> args, reflect.Value final) {
@@ -616,7 +599,6 @@ private static reflect.Value evalCommand(this ptr<state> _addr_s, reflect.Value 
     }
     s.errorf("can't evaluate command %q", firstWord);
     panic("not reached");
-
 });
 
 // idealConstant is called to return the value of a number in a context where
@@ -645,7 +627,6 @@ private static reflect.Value idealConstant(this ptr<state> _addr_s, ptr<parse.Nu
     else if (constant.IsUint) 
         s.errorf("%s overflows int", constant.Text);
         return zero;
-
 }
 
 private static bool isRuneInt(@string s) {
@@ -677,7 +658,6 @@ private static reflect.Value evalChainNode(this ptr<state> _addr_s, reflect.Valu
     }
     var pipe = s.evalArg(dot, null, chain.Node);
     return s.evalFieldChain(dot, pipe, chain, chain.Field, args, final);
-
 }
 
 private static reflect.Value evalVariableNode(this ptr<state> _addr_s, reflect.Value dot, ptr<parse.VariableNode> _addr_variable, slice<parse.Node> args, reflect.Value final) {
@@ -692,7 +672,6 @@ private static reflect.Value evalVariableNode(this ptr<state> _addr_s, reflect.V
         return value;
     }
     return s.evalFieldChain(dot, value, variable, variable.Ident[(int)1..], args, final);
-
 }
 
 // evalFieldChain evaluates .X.Y.Z possibly followed by arguments.
@@ -707,7 +686,6 @@ private static reflect.Value evalFieldChain(this ptr<state> _addr_s, reflect.Val
     } 
     // Now if it's a method, it gets the arguments.
     return s.evalField(dot, ident[n - 1], node, args, final, receiver);
-
 }
 
 private static reflect.Value evalFunction(this ptr<state> _addr_s, reflect.Value dot, ptr<parse.IdentifierNode> _addr_node, parse.Node cmd, slice<parse.Node> args, reflect.Value final) {
@@ -721,7 +699,6 @@ private static reflect.Value evalFunction(this ptr<state> _addr_s, reflect.Value
         s.errorf("%q is not a defined function", name);
     }
     return s.evalCall(dot, function, cmd, name, args, final);
-
 }
 
 // evalField evaluates an expression like (.Field) or (.Field arg1 arg2).
@@ -733,10 +710,8 @@ private static reflect.Value evalField(this ptr<state> _addr_s, reflect.Value do
     if (!receiver.IsValid()) {
         if (s.tmpl.option.missingKey == mapError) { // Treat invalid value as missing map key.
             s.errorf("nil data; no entry for key %q", fieldName);
-
         }
         return zero;
-
     }
     var typ = receiver.Type();
     var (receiver, isNil) = indirect(receiver);
@@ -745,7 +720,6 @@ private static reflect.Value evalField(this ptr<state> _addr_s, reflect.Value do
         // MethodByName method call below would panic.
         s.errorf("nil pointer evaluating %s.%s", typ, fieldName);
         return zero;
-
     }
     var ptr = receiver;
     if (ptr.Kind() != reflect.Interface && ptr.Kind() != reflect.Ptr && ptr.CanAddr()) {
@@ -758,7 +732,6 @@ private static reflect.Value evalField(this ptr<state> _addr_s, reflect.Value do
             return s.evalCall(dot, method, node, fieldName, args, final);
         }
     }
-
     var hasArgs = len(args) > 1 || final != missingVal; 
     // It's not a method; must be a field of a struct or an element of a map.
 
@@ -773,9 +746,7 @@ private static reflect.Value evalField(this ptr<state> _addr_s, reflect.Value do
             if (hasArgs) {
                 s.errorf("%s has arguments but cannot be invoked as function", fieldName);
             }
-
             return field;
-
         }
     else if (receiver.Kind() == reflect.Map) 
         // If it's a map, attempt to use the field name as a key.
@@ -791,11 +762,8 @@ private static reflect.Value evalField(this ptr<state> _addr_s, reflect.Value do
                     result = reflect.Zero(receiver.Type().Elem());
                 else if (s.tmpl.option.missingKey == mapError) 
                     s.errorf("map has no entry for key %q", fieldName);
-                
-            }
-
+                            }
             return result;
-
         }
     else if (receiver.Kind() == reflect.Ptr) 
         var etyp = receiver.Type().Elem();
@@ -807,18 +775,15 @@ private static reflect.Value evalField(this ptr<state> _addr_s, reflect.Value do
                     // If there's no such field, say "can't evaluate"
                     // instead of "nil pointer evaluating".
                     break;
-
                 }
 
             }
-
         }
         if (isNil) {
             s.errorf("nil pointer evaluating %s.%s", typ, fieldName);
         }
         s.errorf("can't evaluate field %s in type %s", fieldName, typ);
     panic("not reached");
-
 });
 
 private static var errorType = reflect.TypeOf((error.val)(null)).Elem();private static var fmtStringerType = reflect.TypeOf((fmt.Stringer.val)(null)).Elem();private static var reflectValueType = reflect.TypeOf((reflect.Value.val)(null)).Elem();
@@ -850,7 +815,6 @@ private static reflect.Value evalCall(this ptr<state> _addr_s, reflect.Value dot
     if (!goodFunc(typ)) { 
         // TODO: This could still be a confusing error; maybe goodFunc should provide info.
         s.errorf("can't call method/function %q with %d results", name, typ.NumOut());
-
     }
     var argv = make_slice<reflect.Value>(numIn); 
     // Args must be evaluated. Fixed args first.
@@ -866,7 +830,6 @@ private static reflect.Value evalCall(this ptr<state> _addr_s, reflect.Value dot
             argv[i] = s.evalArg(dot, argType, args[i]);
             i++;
         }
-
     }
     if (final != missingVal) {
         var t = typ.In(typ.NumIn() - 1);
@@ -875,19 +838,15 @@ private static reflect.Value evalCall(this ptr<state> _addr_s, reflect.Value dot
                 // The added final argument corresponds to a fixed parameter of the function.
                 // Validate against the type of the actual parameter.
                 t = typ.In(numIn - 1);
-
             }
             else
  { 
                 // The added final argument corresponds to the variadic part.
                 // Validate against the type of the elements of the variadic slice.
                 t = t.Elem();
-
             }
-
         }
         argv[i] = s.validateType(final, t);
-
     }
     var (v, err) = safeCall(fun, argv); 
     // If we have an error that is not nil, stop execution and return that
@@ -900,7 +859,6 @@ private static reflect.Value evalCall(this ptr<state> _addr_s, reflect.Value dot
         v = v.Interface()._<reflect.Value>();
     }
     return v;
-
 }
 
 // canBeNil reports whether an untyped nil can be assigned to the type. See reflect.Zero.
@@ -911,7 +869,6 @@ private static bool canBeNil(reflect.Type typ) {
     else if (typ.Kind() == reflect.Struct) 
         return typ == reflectValueType;
         return false;
-
 }
 
 // validateType guarantees that the value is valid and assignable to the type.
@@ -922,15 +879,12 @@ private static reflect.Value validateType(this ptr<state> _addr_s, reflect.Value
         if (typ == null) { 
             // An untyped nil interface{}. Accept as a proper nil value.
             return reflect.ValueOf(null);
-
         }
         if (canBeNil(typ)) { 
             // Like above, but use the zero value of the non-nil type.
             return reflect.Zero(typ);
-
         }
         s.errorf("invalid value; expected %s", typ);
-
     }
     if (typ == reflectValueType && value.Type() != typ) {
         return reflect.ValueOf(value);
@@ -953,10 +907,8 @@ private static reflect.Value validateType(this ptr<state> _addr_s, reflect.Value
             value = value.Addr();
         else 
             s.errorf("wrong type for value; expected %s; got %s", typ, value.Type());
-        
-    }
+            }
     return value;
-
 }
 
 private static reflect.Value evalArg(this ptr<state> _addr_s, reflect.Value dot, reflect.Type typ, parse.Node n) => func((_, panic, _) => {
@@ -1012,7 +964,6 @@ private static reflect.Value evalArg(this ptr<state> _addr_s, reflect.Value dot,
         return s.evalUnsignedInteger(typ, n);
         s.errorf("can't handle %s for arg of type %s", n, typ);
     panic("not reached");
-
 });
 
 private static reflect.Value evalBool(this ptr<state> _addr_s, reflect.Type typ, parse.Node n) => func((_, panic, _) => {
@@ -1028,10 +979,8 @@ private static reflect.Value evalBool(this ptr<state> _addr_s, reflect.Type typ,
             return value;
         }
     }
-
     s.errorf("expected bool; found %s", n);
     panic("not reached");
-
 });
 
 private static reflect.Value evalString(this ptr<state> _addr_s, reflect.Type typ, parse.Node n) => func((_, panic, _) => {
@@ -1047,10 +996,8 @@ private static reflect.Value evalString(this ptr<state> _addr_s, reflect.Type ty
             return value;
         }
     }
-
     s.errorf("expected string; found %s", n);
     panic("not reached");
-
 });
 
 private static reflect.Value evalInteger(this ptr<state> _addr_s, reflect.Type typ, parse.Node n) => func((_, panic, _) => {
@@ -1066,10 +1013,8 @@ private static reflect.Value evalInteger(this ptr<state> _addr_s, reflect.Type t
             return value;
         }
     }
-
     s.errorf("expected integer; found %s", n);
     panic("not reached");
-
 });
 
 private static reflect.Value evalUnsignedInteger(this ptr<state> _addr_s, reflect.Type typ, parse.Node n) => func((_, panic, _) => {
@@ -1085,10 +1030,8 @@ private static reflect.Value evalUnsignedInteger(this ptr<state> _addr_s, reflec
             return value;
         }
     }
-
     s.errorf("expected unsigned integer; found %s", n);
     panic("not reached");
-
 });
 
 private static reflect.Value evalFloat(this ptr<state> _addr_s, reflect.Type typ, parse.Node n) => func((_, panic, _) => {
@@ -1104,10 +1047,8 @@ private static reflect.Value evalFloat(this ptr<state> _addr_s, reflect.Type typ
             return value;
         }
     }
-
     s.errorf("expected float; found %s", n);
     panic("not reached");
-
 });
 
 private static reflect.Value evalComplex(this ptr<state> _addr_s, reflect.Type typ, parse.Node n) => func((_, panic, _) => {
@@ -1122,10 +1063,8 @@ private static reflect.Value evalComplex(this ptr<state> _addr_s, reflect.Type t
             return value;
         }
     }
-
     s.errorf("expected complex; found %s", n);
     panic("not reached");
-
 });
 
 private static reflect.Value evalEmptyInterface(this ptr<state> _addr_s, reflect.Value dot, parse.Node n) => func((_, panic, _) => {
@@ -1163,7 +1102,6 @@ private static reflect.Value evalEmptyInterface(this ptr<state> _addr_s, reflect
     }
     s.errorf("can't handle assignment of %s to empty interface argument", n);
     panic("not reached");
-
 });
 
 // indirect returns the item at the end of indirection, and a bool to indicate
@@ -1180,7 +1118,6 @@ private static (reflect.Value, bool) indirect(reflect.Value v) {
         }
     }
     return (v, false);
-
 }
 
 // indirectInterface returns the concrete value in an interface value,
@@ -1195,7 +1132,6 @@ private static reflect.Value indirectInterface(reflect.Value v) {
         return new reflect.Value();
     }
     return v.Elem();
-
 }
 
 // printValue writes the textual representation of the value to the output of
@@ -1235,11 +1171,9 @@ private static (object, bool) printableValue(reflect.Value v) {
 
             if (v.Kind() == reflect.Chan || v.Kind() == reflect.Func) 
                 return (null, false);
-            
-        }
+                    }
     }
     return (v.Interface(), true);
-
 }
 
 } // end template_package

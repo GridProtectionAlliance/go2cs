@@ -2,27 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:51 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:10 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\udpsock.go
-using context = go.context_package;
-using itoa = go.@internal.itoa_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using context = context_package;
+using itoa = @internal.itoa_package;
+using syscall = syscall_package;
+
+
+// BUG(mikio): On Plan 9, the ReadMsgUDP and
+// WriteMsgUDP methods of UDPConn are not implemented.
+
+// BUG(mikio): On Windows, the File method of UDPConn is not
+// implemented.
+
+// BUG(mikio): On JS, methods and functions related to UDPConn are not
+// implemented.
+
+// UDPAddr represents the address of a UDP end point.
 
 public static partial class net_package {
 
-    // BUG(mikio): On Plan 9, the ReadMsgUDP and
-    // WriteMsgUDP methods of UDPConn are not implemented.
-
-    // BUG(mikio): On Windows, the File method of UDPConn is not
-    // implemented.
-
-    // BUG(mikio): On JS, methods and functions related to UDPConn are not
-    // implemented.
-
-    // UDPAddr represents the address of a UDP end point.
 public partial struct UDPAddr {
     public IP IP;
     public nint Port;
@@ -47,7 +49,6 @@ private static @string String(this ptr<UDPAddr> _addr_a) {
         return JoinHostPort(ip + "%" + a.Zone, itoa.Itoa(a.Port));
     }
     return JoinHostPort(ip, itoa.Itoa(a.Port));
-
 }
 
 private static bool isWildcard(this ptr<UDPAddr> _addr_a) {
@@ -57,7 +58,6 @@ private static bool isWildcard(this ptr<UDPAddr> _addr_a) {
         return true;
     }
     return a.IP.IsUnspecified();
-
 }
 
 private static Addr opAddr(this ptr<UDPAddr> _addr_a) {
@@ -67,7 +67,6 @@ private static Addr opAddr(this ptr<UDPAddr> _addr_a) {
         return null;
     }
     return a;
-
 }
 
 // ResolveUDPAddr returns an address of UDP end point.
@@ -109,7 +108,6 @@ public static (ptr<UDPAddr>, error) ResolveUDPAddr(@string network, @string addr
         return (_addr_null!, error.As(err)!);
     }
     return (addrs.forResolve(network, address)._<ptr<UDPAddr>>(), error.As(null!)!);
-
 }
 
 // UDPConn is the implementation of the Conn and PacketConn interfaces
@@ -129,7 +127,6 @@ private static (syscall.RawConn, error) SyscallConn(this ptr<UDPConn> _addr_c) {
         return (null, error.As(syscall.EINVAL)!);
     }
     return newRawConn(c.fd);
-
 }
 
 // ReadFromUDP acts like ReadFrom but returns a UDPAddr.
@@ -144,7 +141,6 @@ private static (nint, ptr<UDPAddr>, error) ReadFromUDP(this ptr<UDPConn> _addr_c
     // See https://blog.filippo.io/efficient-go-apis-with-the-inliner/.
     // The real work is done by readFromUDP, below.
     return c.readFromUDP(b, addr(new UDPAddr()));
-
 }
 
 // readFromUDP implements ReadFromUDP.
@@ -163,7 +159,6 @@ private static (nint, ptr<UDPAddr>, error) readFromUDP(this ptr<UDPConn> _addr_c
         err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return (n, _addr_addr!, error.As(err)!);
-
 }
 
 // ReadFrom implements the PacketConn ReadFrom method.
@@ -177,10 +172,8 @@ private static (nint, Addr, error) ReadFrom(this ptr<UDPConn> _addr_c, slice<byt
     if (addr == null) { 
         // Return Addr(nil), not Addr(*UDPConn(nil)).
         return (n, null, error.As(err)!);
-
     }
     return (n, addr, error.As(err)!);
-
 }
 
 // ReadMsgUDP reads a message from c, copying the payload into b and
@@ -206,7 +199,6 @@ private static (nint, nint, nint, ptr<UDPAddr>, error) ReadMsgUDP(this ptr<UDPCo
         err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return ;
-
 }
 
 // WriteToUDP acts like WriteTo but takes a UDPAddr.
@@ -224,7 +216,6 @@ private static (nint, error) WriteToUDP(this ptr<UDPConn> _addr_c, slice<byte> b
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // WriteTo implements the PacketConn WriteTo method.
@@ -245,7 +236,6 @@ private static (nint, error) WriteTo(this ptr<UDPConn> _addr_c, slice<byte> b, A
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:a.opAddr(),Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // WriteMsgUDP writes a message to addr via c if c isn't connected, or
@@ -271,7 +261,6 @@ private static (nint, nint, error) WriteMsgUDP(this ptr<UDPConn> _addr_c, slice<
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
     }
     return ;
-
 }
 
 private static ptr<UDPConn> newUDPConn(ptr<netFD> _addr_fd) {
@@ -314,7 +303,6 @@ public static (ptr<UDPConn>, error) DialUDP(@string network, ptr<UDPAddr> _addr_
         return (_addr_null!, error.As(addr(new OpError(Op:"dial",Net:network,Source:laddr.opAddr(),Addr:raddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // ListenUDP acts like ListenPacket for UDP networks.
@@ -352,7 +340,6 @@ public static (ptr<UDPConn>, error) ListenUDP(@string network, ptr<UDPAddr> _add
         return (_addr_null!, error.As(addr(new OpError(Op:"listen",Net:network,Source:nil,Addr:laddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // ListenMulticastUDP acts like ListenPacket for UDP networks but
@@ -402,7 +389,6 @@ public static (ptr<UDPConn>, error) ListenMulticastUDP(@string network, ptr<Inte
         return (_addr_null!, error.As(addr(new OpError(Op:"listen",Net:network,Source:nil,Addr:gaddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 } // end net_package

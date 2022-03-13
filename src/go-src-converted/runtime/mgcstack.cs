@@ -92,13 +92,13 @@
 // dead (meaning that foo() never accesses B again after it calls
 // bar()), then B's pointers into the heap are not considered live.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:46 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:34 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mgcstack.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -174,10 +174,9 @@ private static void setRecord(this ptr<stackObject> _addr_obj, ptr<stackObjectRe
  
     // Types of stack objects are always in read-only memory, not the heap.
     // So not using a write barrier is ok.
-    (uintptr.val)(@unsafe.Pointer(_addr_obj.r)).val;
+    (uintptr.val).val;
 
-    uintptr(@unsafe.Pointer(r));
-
+    (@unsafe.Pointer(_addr_obj.r)) = uintptr(@unsafe.Pointer(r));
 }
 
 // A stackScanState keeps track of the state used during the GC walk
@@ -225,7 +224,6 @@ private static void putPtr(this ptr<stackScanState> _addr_s, System.UIntPtr p, b
         buf.nobj = 0;
         buf.next = null;
         head.val = buf;
-
     }
     else if (buf.nobj == len(buf.obj)) {
         if (s.freeBuf != null) {
@@ -239,11 +237,9 @@ private static void putPtr(this ptr<stackScanState> _addr_s, System.UIntPtr p, b
         buf.nobj = 0;
         buf.next = head.val;
         head.val = buf;
-
     }
     buf.obj[buf.nobj] = p;
     buf.nobj++;
-
 }
 
 // Remove and return a potential pointer to a stack object.
@@ -261,13 +257,11 @@ private static (System.UIntPtr, bool) getPtr(this ptr<stackScanState> _addr_s) {
         if (buf == null) { 
             // Never had any data.
             continue;
-
         }
         if (buf.nobj == 0) {
             if (s.freeBuf != null) { 
                 // Free old freeBuf.
                 putempty((workbuf.val)(@unsafe.Pointer(s.freeBuf)));
-
             } 
             // Move buf to the freeBuf.
             s.freeBuf = buf;
@@ -276,19 +270,15 @@ private static (System.UIntPtr, bool) getPtr(this ptr<stackScanState> _addr_s) {
             if (buf == null) { 
                 // No more data in this list.
                 continue;
-
             }
-
         }
         buf.nobj--;
         return (buf.obj[buf.nobj], head == _addr_s.cbuf);
-
     }    if (s.freeBuf != null) {
         putempty((workbuf.val)(@unsafe.Pointer(s.freeBuf)));
         s.freeBuf = null;
     }
     return (0, false);
-
 }
 
 // addObject adds a stack object at addr of type typ to the set of stack objects.
@@ -303,7 +293,6 @@ private static void addObject(this ptr<stackScanState> _addr_s, System.UIntPtr a
         x.next = null;
         s.head = x;
         s.tail = x;
-
     }
     if (x.nobj > 0 && uint32(addr - s.stack.lo) < x.obj[x.nobj - 1].off + x.obj[x.nobj - 1].size) {
         throw("objects added out of order or overlapping");
@@ -315,7 +304,6 @@ private static void addObject(this ptr<stackScanState> _addr_s, System.UIntPtr a
         x.next = y;
         s.tail = y;
         x = y;
-
     }
     var obj = _addr_x.obj[x.nobj];
     x.nobj++;
@@ -324,7 +312,6 @@ private static void addObject(this ptr<stackScanState> _addr_s, System.UIntPtr a
     obj.setRecord(r); 
     // obj.left and obj.right will be initialized by buildIndex before use.
     s.nobjs++;
-
 }
 
 // buildIndex initializes s.root to a binary search tree.
@@ -363,7 +350,6 @@ private static (ptr<stackObject>, ptr<stackObjectBuf>, nint) binarySearchTree(pt
     root.left = left;
     root.right = right;
     return (_addr_root!, _addr_x!, idx);
-
 }
 
 // findObject returns the stack object containing address a, if any.
@@ -386,9 +372,7 @@ private static ptr<stackObject> findObject(this ptr<stackScanState> _addr_s, Sys
             continue;
         }
         return _addr_obj!;
-
     }
-
 }
 
 } // end runtime_package

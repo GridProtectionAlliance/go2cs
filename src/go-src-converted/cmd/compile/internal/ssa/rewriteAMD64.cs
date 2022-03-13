@@ -1,15 +1,15 @@
 // Code generated from gen/AMD64.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 22:55:26 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:07:21 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewriteAMD64.go
-using buildcfg = go.@internal.buildcfg_package;
-using math = go.math_package;
-using obj = go.cmd.@internal.obj_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using buildcfg = @internal.buildcfg_package;
+using math = math_package;
+using obj = cmd.@internal.obj_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -1159,7 +1159,6 @@ private static bool rewriteValueAMD64(ptr<Value> _addr_v) {
         v.Op = OpAMD64MOVBQZX;
         return true;
         return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADCQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1180,23 +1179,19 @@ private static bool rewriteValueAMD64_OpAMD64ADCQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 var carry = v_2;
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADCQconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg2(x, carry);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (ADCQ x y (FlagEQ))
     // result: (ADDQcarry x y)
@@ -1209,10 +1204,8 @@ private static bool rewriteValueAMD64_OpAMD64ADCQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64ADDQcarry);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADCQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1231,10 +1224,8 @@ private static bool rewriteValueAMD64_OpAMD64ADCQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1255,20 +1246,17 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpAMD64ADDLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL (SHLLconst x [c]) (SHRLconst x [d]))
     // cond: d==32-c
@@ -1284,30 +1272,25 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRLconst) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLLconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL <t> (SHLLconst x [c]) (SHRWconst x [d]))
     // cond: d==16-c && c < 16 && t.Size() == 2
@@ -1324,30 +1307,25 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 16 - c && c < 16 && t.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLWconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL <t> (SHLLconst x [c]) (SHRBconst x [d]))
     // cond: d==8-c && c < 8 && t.Size() == 1
@@ -1364,30 +1342,25 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRBconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 8 - c && c < 8 && t.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLBconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (SHLLconst [3] y))
     // result: (LEAL8 x y)
@@ -1403,19 +1376,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpAMD64LEAL8);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (SHLLconst [2] y))
     // result: (LEAL4 x y)
@@ -1431,19 +1401,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAL4);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (SHLLconst [1] y))
     // result: (LEAL2 x y)
@@ -1459,19 +1426,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAL2);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (ADDL y y))
     // result: (LEAL2 x y)
@@ -1487,23 +1451,19 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[1];
                 if (y != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAL2);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (ADDL x y))
     // result: (LEAL2 y x)
@@ -1519,7 +1479,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -1531,23 +1490,19 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         y = v_1_1;
                         v.reset(OpAMD64LEAL2);
                         v.AddArg2(y, x);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL (ADDLconst [c] x) y)
     // result: (LEAL1 [c] x y)
@@ -1562,7 +1517,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 y = v_1;
@@ -1570,14 +1524,12 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (LEAL [c] {s} y))
     // cond: x.Op != OpSB && y.Op != OpSB
@@ -1594,27 +1546,23 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var s = auxToSym(v_1.Aux);
                 y = v_1.Args[0];
                 if (!(x.Op != OpSB && y.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAL1);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (NEGL y))
     // result: (SUBL x y)
@@ -1630,19 +1578,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64SUBL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -1660,7 +1605,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -1668,23 +1612,19 @@ private static bool rewriteValueAMD64_OpAMD64ADDL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1703,7 +1643,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (SHLLconst [1] x))
     // result: (LEAL1 [c] x x)
@@ -1717,7 +1656,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL [d] {s} x))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1738,7 +1676,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL1 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1760,7 +1697,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL2 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1782,7 +1718,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL4 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1804,7 +1739,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL8 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1826,7 +1760,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] x)
     // cond: c==0
@@ -1839,7 +1772,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c+d])
@@ -1852,7 +1784,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(c + d);
         return true;
-
     } 
     // match: (ADDLconst [c] (ADDLconst [d] x))
     // result: (ADDLconst [c+d] x)
@@ -1867,7 +1798,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDLconst [off] x:(SP))
     // result: (LEAL [off] x)
@@ -1881,10 +1811,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(off);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1911,7 +1839,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ADDLconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -1934,10 +1861,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDLconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1968,7 +1893,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDLload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -1992,7 +1916,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDLload x [off] {sym} ptr (MOVSSstore [off] {sym} ptr y _))
     // result: (ADDL x (MOVLf2i y))
@@ -2013,10 +1936,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDLload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2045,7 +1966,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ADDLmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -2069,10 +1989,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2094,24 +2012,20 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDQconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (MOVLconst [c]))
     // result: (ADDQconst [c] x)
@@ -2127,20 +2041,17 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpAMD64ADDQconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ (SHLQconst x [c]) (SHRQconst x [d]))
     // cond: d==64-c
@@ -2156,30 +2067,25 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRQconst) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 64 - c)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLQconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (SHLQconst [3] y))
     // result: (LEAQ8 x y)
@@ -2195,19 +2101,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpAMD64LEAQ8);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (SHLQconst [2] y))
     // result: (LEAQ4 x y)
@@ -2223,19 +2126,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAQ4);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (SHLQconst [1] y))
     // result: (LEAQ2 x y)
@@ -2251,19 +2151,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAQ2);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (ADDQ y y))
     // result: (LEAQ2 x y)
@@ -2279,23 +2176,19 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[1];
                 if (y != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAQ2);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (ADDQ x y))
     // result: (LEAQ2 y x)
@@ -2311,7 +2204,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -2323,23 +2215,19 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         y = v_1_1;
                         v.reset(OpAMD64LEAQ2);
                         v.AddArg2(y, x);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ (ADDQconst [c] x) y)
     // result: (LEAQ1 [c] x y)
@@ -2354,7 +2242,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 y = v_1;
@@ -2362,14 +2249,12 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (LEAQ [c] {s} y))
     // cond: x.Op != OpSB && y.Op != OpSB
@@ -2386,27 +2271,23 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var s = auxToSym(v_1.Aux);
                 y = v_1.Args[0];
                 if (!(x.Op != OpSB && y.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAQ1);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x (NEGQ y))
     // result: (SUBQ x y)
@@ -2422,19 +2303,16 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64SUBQ);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDQ x l:(MOVQload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -2452,7 +2330,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -2460,23 +2337,19 @@ private static bool rewriteValueAMD64_OpAMD64ADDQ(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDQload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDQcarry(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2496,25 +2369,20 @@ private static bool rewriteValueAMD64_OpAMD64ADDQcarry(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDQconstcarry);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2533,7 +2401,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDQconst [c] (SHLQconst [1] x))
     // result: (LEAQ1 [c] x x)
@@ -2547,7 +2414,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (ADDQconst [c] (LEAQ [d] {s} x))
     // cond: is32Bit(int64(c)+int64(d))
@@ -2568,7 +2434,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDQconst [c] (LEAQ1 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -2590,7 +2455,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDQconst [c] (LEAQ2 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -2612,7 +2476,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDQconst [c] (LEAQ4 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -2634,7 +2497,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDQconst [c] (LEAQ8 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -2656,7 +2518,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDQconst [0] x)
     // result: x
@@ -2667,7 +2528,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(c)+d])
@@ -2680,7 +2540,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(c) + d);
         return true;
-
     } 
     // match: (ADDQconst [c] (ADDQconst [d] x))
     // cond: is32Bit(int64(c)+int64(d))
@@ -2699,7 +2558,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDQconst [off] x:(SP))
     // result: (LEAQ [off] x)
@@ -2713,10 +2571,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(off);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDQconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2743,7 +2599,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ADDQconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -2766,10 +2621,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDQconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2800,7 +2653,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDQload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -2824,7 +2676,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDQload x [off] {sym} ptr (MOVSDstore [off] {sym} ptr y _))
     // result: (ADDQ x (MOVQf2i y))
@@ -2845,10 +2696,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDQload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDQmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2877,7 +2726,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ADDQmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -2901,10 +2749,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2925,7 +2771,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDSD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -2933,21 +2778,17 @@ private static bool rewriteValueAMD64_OpAMD64ADDSD(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDSDload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2978,7 +2819,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDSDload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3002,7 +2842,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDSDload x [off] {sym} ptr (MOVQstore [off] {sym} ptr y _))
     // result: (ADDSD x (MOVQi2f y))
@@ -3023,10 +2862,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDSDload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3047,7 +2884,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDSS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -3055,21 +2891,17 @@ private static bool rewriteValueAMD64_OpAMD64ADDSS(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDSSload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ADDSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3100,7 +2932,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDSSload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3124,7 +2955,6 @@ private static bool rewriteValueAMD64_OpAMD64ADDSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDSSload x [off] {sym} ptr (MOVLstore [off] {sym} ptr y _))
     // result: (ADDSS x (MOVLi2f y))
@@ -3145,10 +2975,8 @@ private static bool rewriteValueAMD64_OpAMD64ADDSSload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3168,30 +2996,25 @@ private static bool rewriteValueAMD64_OpAMD64ANDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAMD64SHLL) {
                     continue;
                 }
-
                 var y = v_0_0.Args[1];
                 var v_0_0_0 = v_0_0.Args[0];
                 if (v_0_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_0_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var x = v_1;
                 v.reset(OpAMD64BTRL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDL (MOVLconst [c]) x)
     // cond: isUint32PowerOfTwo(int64(^c)) && uint64(^c) >= 128
@@ -3207,25 +3030,21 @@ private static bool rewriteValueAMD64_OpAMD64ANDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 x = v_1;
                 if (!(isUint32PowerOfTwo(int64(~c)) && uint64(~c) >= 128)) {
                     continue;
                 }
-
                 v.reset(OpAMD64BTRLconst);
                 v.AuxInt = int8ToAuxInt(int8(log32(~c)));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDL x (MOVLconst [c]))
     // result: (ANDLconst [c] x)
@@ -3241,20 +3060,17 @@ private static bool rewriteValueAMD64_OpAMD64ANDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpAMD64ANDLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDL x x)
     // result: x
@@ -3265,7 +3081,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -3283,7 +3098,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -3291,23 +3105,19 @@ private static bool rewriteValueAMD64_OpAMD64ANDL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ANDLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3326,7 +3136,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(log32(~c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDLconst [c] (ANDLconst [d] x))
     // result: (ANDLconst [c & d] x)
@@ -3341,7 +3150,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDLconst [c] (BTRLconst [d] x))
     // result: (ANDLconst [c &^ (1<<uint32(d))] x)
@@ -3356,7 +3164,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & ~(1 << (int)(uint32(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDLconst [ 0xFF] x)
     // result: (MOVBQZX x)
@@ -3368,7 +3175,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDLconst [0xFFFF] x)
     // result: (MOVWQZX x)
@@ -3380,7 +3186,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDLconst [c] _)
     // cond: c==0
@@ -3393,7 +3198,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDLconst [c] x)
     // cond: c==-1
@@ -3406,7 +3210,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c&d])
@@ -3419,10 +3222,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(c & d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3449,7 +3250,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ANDLconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -3472,10 +3272,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDLconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3506,7 +3304,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ANDLload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3530,7 +3327,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ANDLload x [off] {sym} ptr (MOVSSstore [off] {sym} ptr y _))
     // result: (ANDL x (MOVLf2i y))
@@ -3551,10 +3347,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDLload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3583,7 +3377,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ANDLmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3607,10 +3400,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3630,30 +3421,25 @@ private static bool rewriteValueAMD64_OpAMD64ANDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAMD64SHLQ) {
                     continue;
                 }
-
                 var y = v_0_0.Args[1];
                 var v_0_0_0 = v_0_0.Args[0];
                 if (v_0_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_0_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var x = v_1;
                 v.reset(OpAMD64BTRQ);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDQ (MOVQconst [c]) x)
     // cond: isUint64PowerOfTwo(^c) && uint64(^c) >= 128
@@ -3669,25 +3455,21 @@ private static bool rewriteValueAMD64_OpAMD64ANDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 x = v_1;
                 if (!(isUint64PowerOfTwo(~c) && uint64(~c) >= 128)) {
                     continue;
                 }
-
                 v.reset(OpAMD64BTRQconst);
                 v.AuxInt = int8ToAuxInt(int8(log64(~c)));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDQ x (MOVQconst [c]))
     // cond: is32Bit(c)
@@ -3704,24 +3486,20 @@ private static bool rewriteValueAMD64_OpAMD64ANDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ANDQconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDQ x x)
     // result: x
@@ -3732,7 +3510,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQ(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDQ x l:(MOVQload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -3750,7 +3527,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -3758,23 +3534,19 @@ private static bool rewriteValueAMD64_OpAMD64ANDQ(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ANDQload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3793,7 +3565,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(log32(~c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDQconst [c] (ANDQconst [d] x))
     // result: (ANDQconst [c & d] x)
@@ -3808,7 +3579,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDQconst [c] (BTRQconst [d] x))
     // cond: is32Bit(int64(c) &^ (1<<uint32(d)))
@@ -3827,7 +3597,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & ~(1 << (int)(uint32(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDQconst [ 0xFF] x)
     // result: (MOVBQZX x)
@@ -3839,7 +3608,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDQconst [0xFFFF] x)
     // result: (MOVWQZX x)
@@ -3851,7 +3619,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDQconst [0] _)
     // result: (MOVQconst [0])
@@ -3862,7 +3629,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDQconst [-1] x)
     // result: x
@@ -3873,7 +3639,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(c)&d])
@@ -3886,10 +3651,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(c) & d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDQconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3916,7 +3679,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ANDQconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -3939,10 +3701,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDQconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3973,7 +3733,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ANDQload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3997,7 +3756,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ANDQload x [off] {sym} ptr (MOVSDstore [off] {sym} ptr y _))
     // result: (ANDQ x (MOVQf2i y))
@@ -4018,10 +3776,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDQload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ANDQmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4050,7 +3806,6 @@ private static bool rewriteValueAMD64_OpAMD64ANDQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ANDQmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -4074,10 +3829,8 @@ private static bool rewriteValueAMD64_OpAMD64ANDQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BSFQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4105,7 +3858,6 @@ private static bool rewriteValueAMD64_OpAMD64BSFQ(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (BSFQ (ORQconst <t> [1<<16] (MOVWQZX x)))
     // result: (BSFQ (ORQconst <t> [1<<16] x))
@@ -4128,10 +3880,8 @@ private static bool rewriteValueAMD64_OpAMD64BSFQ(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTCLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4150,7 +3900,6 @@ private static bool rewriteValueAMD64_OpAMD64BTCLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(d ^ 1 << (int)(uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTCLconst [c] (BTCLconst [d] x))
     // result: (XORLconst [1<<uint32(c) | 1<<uint32(d)] x)
@@ -4165,7 +3914,6 @@ private static bool rewriteValueAMD64_OpAMD64BTCLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1 << (int)(uint32(c)) | 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTCLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [d^(1<<uint32(c))])
@@ -4178,10 +3926,8 @@ private static bool rewriteValueAMD64_OpAMD64BTCLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(d ^ (1 << (int)(uint32(c))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTCQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4204,7 +3950,6 @@ private static bool rewriteValueAMD64_OpAMD64BTCQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(d ^ 1 << (int)(uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTCQconst [c] (BTCQconst [d] x))
     // cond: is32Bit(1<<uint32(c) ^ 1<<uint32(d))
@@ -4223,7 +3968,6 @@ private static bool rewriteValueAMD64_OpAMD64BTCQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1 << (int)(uint32(c)) ^ 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTCQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [d^(1<<uint32(c))])
@@ -4236,10 +3980,8 @@ private static bool rewriteValueAMD64_OpAMD64BTCQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(d ^ (1 << (int)(uint32(c))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4262,7 +4004,6 @@ private static bool rewriteValueAMD64_OpAMD64BTLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTLconst [c] (SHLQconst [d] x))
     // cond: c>d
@@ -4281,7 +4022,6 @@ private static bool rewriteValueAMD64_OpAMD64BTLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTLconst [0] s:(SHRQ x y))
     // result: (BTQ y x)
@@ -4298,7 +4038,6 @@ private static bool rewriteValueAMD64_OpAMD64BTLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64BTQ);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (BTLconst [c] (SHRLconst [d] x))
     // cond: (c+d)<32
@@ -4317,7 +4056,6 @@ private static bool rewriteValueAMD64_OpAMD64BTLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTLconst [c] (SHLLconst [d] x))
     // cond: c>d
@@ -4336,7 +4074,6 @@ private static bool rewriteValueAMD64_OpAMD64BTLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTLconst [0] s:(SHRL x y))
     // result: (BTL y x)
@@ -4353,10 +4090,8 @@ private static bool rewriteValueAMD64_OpAMD64BTLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64BTL);
         v.AddArg2(y, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4379,7 +4114,6 @@ private static bool rewriteValueAMD64_OpAMD64BTQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTQconst [c] (SHLQconst [d] x))
     // cond: c>d
@@ -4398,7 +4132,6 @@ private static bool rewriteValueAMD64_OpAMD64BTQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTQconst [0] s:(SHRQ x y))
     // result: (BTQ y x)
@@ -4415,10 +4148,8 @@ private static bool rewriteValueAMD64_OpAMD64BTQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64BTQ);
         v.AddArg2(y, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTRLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4436,7 +4167,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRLconst [c] (BTCLconst [c] x))
     // result: (BTRLconst [c] x)
@@ -4450,7 +4180,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRLconst [c] (ANDLconst [d] x))
     // result: (ANDLconst [d &^ (1<<uint32(c))] x)
@@ -4465,7 +4194,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(d & ~(1 << (int)(uint32(c))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRLconst [c] (BTRLconst [d] x))
     // result: (ANDLconst [^(1<<uint32(c) | 1<<uint32(d))] x)
@@ -4480,7 +4208,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(~(1 << (int)(uint32(c)) | 1 << (int)(uint32(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [d&^(1<<uint32(c))])
@@ -4493,10 +4220,8 @@ private static bool rewriteValueAMD64_OpAMD64BTRLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(d & ~(1 << (int)(uint32(c))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTRQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4514,7 +4239,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRQconst [c] (BTCQconst [c] x))
     // result: (BTRQconst [c] x)
@@ -4528,7 +4252,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRQconst [c] (ANDQconst [d] x))
     // cond: is32Bit(int64(d) &^ (1<<uint32(c)))
@@ -4547,7 +4270,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(d & ~(1 << (int)(uint32(c))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRQconst [c] (BTRQconst [d] x))
     // cond: is32Bit(^(1<<uint32(c) | 1<<uint32(d)))
@@ -4566,7 +4288,6 @@ private static bool rewriteValueAMD64_OpAMD64BTRQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(~(1 << (int)(uint32(c)) | 1 << (int)(uint32(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTRQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [d&^(1<<uint32(c))])
@@ -4579,10 +4300,8 @@ private static bool rewriteValueAMD64_OpAMD64BTRQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(d & ~(1 << (int)(uint32(c))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTSLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4600,7 +4319,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSLconst [c] (BTCLconst [c] x))
     // result: (BTSLconst [c] x)
@@ -4614,7 +4332,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSLconst [c] (ORLconst [d] x))
     // result: (ORLconst [d | 1<<uint32(c)] x)
@@ -4629,7 +4346,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(d | 1 << (int)(uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSLconst [c] (BTSLconst [d] x))
     // result: (ORLconst [1<<uint32(c) | 1<<uint32(d)] x)
@@ -4644,7 +4360,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1 << (int)(uint32(c)) | 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [d|(1<<uint32(c))])
@@ -4657,10 +4372,8 @@ private static bool rewriteValueAMD64_OpAMD64BTSLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(d | (1 << (int)(uint32(c))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64BTSQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4678,7 +4391,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSQconst [c] (BTCQconst [c] x))
     // result: (BTSQconst [c] x)
@@ -4692,7 +4404,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSQconst [c] (ORQconst [d] x))
     // cond: is32Bit(int64(d) | 1<<uint32(c))
@@ -4711,7 +4422,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(d | 1 << (int)(uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSQconst [c] (BTSQconst [d] x))
     // cond: is32Bit(1<<uint32(c) | 1<<uint32(d))
@@ -4730,7 +4440,6 @@ private static bool rewriteValueAMD64_OpAMD64BTSQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1 << (int)(uint32(c)) | 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BTSQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [d|(1<<uint32(c))])
@@ -4743,10 +4452,8 @@ private static bool rewriteValueAMD64_OpAMD64BTSQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(d | (1 << (int)(uint32(c))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLCC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4766,7 +4473,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCC(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLLS);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLCC _ x (FlagEQ))
     // result: x
@@ -4777,7 +4483,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLCC _ x (FlagGT_UGT))
     // result: x
@@ -4788,7 +4493,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLCC y _ (FlagGT_ULT))
     // result: y
@@ -4799,7 +4503,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCC(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLCC y _ (FlagLT_ULT))
     // result: y
@@ -4810,7 +4513,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCC(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLCC _ x (FlagLT_UGT))
     // result: x
@@ -4821,10 +4523,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLCS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4844,7 +4544,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCS(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLHI);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLCS y _ (FlagEQ))
     // result: y
@@ -4855,7 +4554,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLCS y _ (FlagGT_UGT))
     // result: y
@@ -4866,7 +4564,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLCS _ x (FlagGT_ULT))
     // result: x
@@ -4877,7 +4574,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLCS _ x (FlagLT_ULT))
     // result: x
@@ -4888,7 +4584,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLCS y _ (FlagLT_UGT))
     // result: y
@@ -4899,10 +4594,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLEQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4922,7 +4615,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLEQ);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLEQ _ x (FlagEQ))
     // result: x
@@ -4933,7 +4625,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLEQ y _ (FlagGT_UGT))
     // result: y
@@ -4944,7 +4635,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLEQ y _ (FlagGT_ULT))
     // result: y
@@ -4955,7 +4645,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLEQ y _ (FlagLT_ULT))
     // result: y
@@ -4966,7 +4655,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLEQ y _ (FlagLT_UGT))
     // result: y
@@ -4977,10 +4665,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLGE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5000,7 +4686,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLLE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLGE _ x (FlagEQ))
     // result: x
@@ -5011,7 +4696,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLGE _ x (FlagGT_UGT))
     // result: x
@@ -5022,7 +4706,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLGE _ x (FlagGT_ULT))
     // result: x
@@ -5033,7 +4716,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLGE y _ (FlagLT_ULT))
     // result: y
@@ -5044,7 +4726,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLGE y _ (FlagLT_UGT))
     // result: y
@@ -5055,10 +4736,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLGT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5078,7 +4757,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGT(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLLT);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLGT y _ (FlagEQ))
     // result: y
@@ -5089,7 +4767,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLGT _ x (FlagGT_UGT))
     // result: x
@@ -5100,7 +4777,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLGT _ x (FlagGT_ULT))
     // result: x
@@ -5111,7 +4787,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLGT y _ (FlagLT_ULT))
     // result: y
@@ -5122,7 +4797,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLGT y _ (FlagLT_UGT))
     // result: y
@@ -5133,10 +4807,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLHI(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5156,7 +4828,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLHI(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLCS);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLHI y _ (FlagEQ))
     // result: y
@@ -5167,7 +4838,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLHI _ x (FlagGT_UGT))
     // result: x
@@ -5178,7 +4848,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLHI(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLHI y _ (FlagGT_ULT))
     // result: y
@@ -5189,7 +4858,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLHI y _ (FlagLT_ULT))
     // result: y
@@ -5200,7 +4868,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLHI _ x (FlagLT_UGT))
     // result: x
@@ -5211,10 +4878,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLHI(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLLE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5234,7 +4899,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLGE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLLE _ x (FlagEQ))
     // result: x
@@ -5245,7 +4909,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLLE y _ (FlagGT_UGT))
     // result: y
@@ -5256,7 +4919,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLLE y _ (FlagGT_ULT))
     // result: y
@@ -5267,7 +4929,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLLE _ x (FlagLT_ULT))
     // result: x
@@ -5278,7 +4939,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLLE _ x (FlagLT_UGT))
     // result: x
@@ -5289,10 +4949,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLLS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5312,7 +4970,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLS(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLCC);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLLS _ x (FlagEQ))
     // result: x
@@ -5323,7 +4980,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLLS y _ (FlagGT_UGT))
     // result: y
@@ -5334,7 +4990,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLLS _ x (FlagGT_ULT))
     // result: x
@@ -5345,7 +5000,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLLS _ x (FlagLT_ULT))
     // result: x
@@ -5356,7 +5010,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLLS y _ (FlagLT_UGT))
     // result: y
@@ -5367,10 +5020,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLLT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5390,7 +5041,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLT(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLGT);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLLT y _ (FlagEQ))
     // result: y
@@ -5401,7 +5051,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLLT y _ (FlagGT_UGT))
     // result: y
@@ -5412,7 +5061,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLLT y _ (FlagGT_ULT))
     // result: y
@@ -5423,7 +5071,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLLT _ x (FlagLT_ULT))
     // result: x
@@ -5434,7 +5081,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLLT _ x (FlagLT_UGT))
     // result: x
@@ -5445,10 +5091,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLLT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVLNE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5468,7 +5112,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLNE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVLNE y _ (FlagEQ))
     // result: y
@@ -5479,7 +5122,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLNE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVLNE _ x (FlagGT_UGT))
     // result: x
@@ -5490,7 +5132,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLNE _ x (FlagGT_ULT))
     // result: x
@@ -5501,7 +5142,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLNE _ x (FlagLT_ULT))
     // result: x
@@ -5512,7 +5152,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVLNE _ x (FlagLT_UGT))
     // result: x
@@ -5523,10 +5162,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVLNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQCC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5546,7 +5183,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCC(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQLS);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQCC _ x (FlagEQ))
     // result: x
@@ -5557,7 +5193,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQCC _ x (FlagGT_UGT))
     // result: x
@@ -5568,7 +5203,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQCC y _ (FlagGT_ULT))
     // result: y
@@ -5579,7 +5213,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCC(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQCC y _ (FlagLT_ULT))
     // result: y
@@ -5590,7 +5223,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCC(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQCC _ x (FlagLT_UGT))
     // result: x
@@ -5601,10 +5233,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQCS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5624,7 +5254,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCS(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQHI);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQCS y _ (FlagEQ))
     // result: y
@@ -5635,7 +5264,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQCS y _ (FlagGT_UGT))
     // result: y
@@ -5646,7 +5274,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQCS _ x (FlagGT_ULT))
     // result: x
@@ -5657,7 +5284,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQCS _ x (FlagLT_ULT))
     // result: x
@@ -5668,7 +5294,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQCS y _ (FlagLT_UGT))
     // result: y
@@ -5679,10 +5304,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5702,7 +5325,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQEQ);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQEQ _ x (FlagEQ))
     // result: x
@@ -5713,7 +5335,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQEQ y _ (FlagGT_UGT))
     // result: y
@@ -5724,7 +5345,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQEQ y _ (FlagGT_ULT))
     // result: y
@@ -5735,7 +5355,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQEQ y _ (FlagLT_ULT))
     // result: y
@@ -5746,7 +5365,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQEQ y _ (FlagLT_UGT))
     // result: y
@@ -5757,7 +5375,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQEQ x _ (Select1 (BSFQ (ORQconst [c] _))))
     // cond: c != 0
@@ -5781,10 +5398,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQGE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5804,7 +5419,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQLE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQGE _ x (FlagEQ))
     // result: x
@@ -5815,7 +5429,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQGE _ x (FlagGT_UGT))
     // result: x
@@ -5826,7 +5439,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQGE _ x (FlagGT_ULT))
     // result: x
@@ -5837,7 +5449,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQGE y _ (FlagLT_ULT))
     // result: y
@@ -5848,7 +5459,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQGE y _ (FlagLT_UGT))
     // result: y
@@ -5859,10 +5469,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQGT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5882,7 +5490,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGT(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQLT);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQGT y _ (FlagEQ))
     // result: y
@@ -5893,7 +5500,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQGT _ x (FlagGT_UGT))
     // result: x
@@ -5904,7 +5510,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQGT _ x (FlagGT_ULT))
     // result: x
@@ -5915,7 +5520,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQGT y _ (FlagLT_ULT))
     // result: y
@@ -5926,7 +5530,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQGT y _ (FlagLT_UGT))
     // result: y
@@ -5937,10 +5540,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQHI(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5960,7 +5561,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQHI(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQCS);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQHI y _ (FlagEQ))
     // result: y
@@ -5971,7 +5571,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQHI _ x (FlagGT_UGT))
     // result: x
@@ -5982,7 +5581,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQHI(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQHI y _ (FlagGT_ULT))
     // result: y
@@ -5993,7 +5591,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQHI y _ (FlagLT_ULT))
     // result: y
@@ -6004,7 +5601,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQHI _ x (FlagLT_UGT))
     // result: x
@@ -6015,10 +5611,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQHI(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQLE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6038,7 +5632,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQGE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQLE _ x (FlagEQ))
     // result: x
@@ -6049,7 +5642,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQLE y _ (FlagGT_UGT))
     // result: y
@@ -6060,7 +5652,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQLE y _ (FlagGT_ULT))
     // result: y
@@ -6071,7 +5662,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQLE _ x (FlagLT_ULT))
     // result: x
@@ -6082,7 +5672,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQLE _ x (FlagLT_UGT))
     // result: x
@@ -6093,10 +5682,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQLS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6116,7 +5703,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLS(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQCC);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQLS _ x (FlagEQ))
     // result: x
@@ -6127,7 +5713,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQLS y _ (FlagGT_UGT))
     // result: y
@@ -6138,7 +5723,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQLS _ x (FlagGT_ULT))
     // result: x
@@ -6149,7 +5733,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQLS _ x (FlagLT_ULT))
     // result: x
@@ -6160,7 +5743,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQLS y _ (FlagLT_UGT))
     // result: y
@@ -6171,10 +5753,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQLT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6194,7 +5774,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLT(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQGT);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQLT y _ (FlagEQ))
     // result: y
@@ -6205,7 +5784,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQLT y _ (FlagGT_UGT))
     // result: y
@@ -6216,7 +5794,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQLT y _ (FlagGT_ULT))
     // result: y
@@ -6227,7 +5804,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQLT _ x (FlagLT_ULT))
     // result: x
@@ -6238,7 +5814,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQLT _ x (FlagLT_UGT))
     // result: x
@@ -6249,10 +5824,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQLT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVQNE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6272,7 +5845,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQNE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVQNE y _ (FlagEQ))
     // result: y
@@ -6283,7 +5855,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQNE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVQNE _ x (FlagGT_UGT))
     // result: x
@@ -6294,7 +5865,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQNE _ x (FlagGT_ULT))
     // result: x
@@ -6305,7 +5875,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQNE _ x (FlagLT_ULT))
     // result: x
@@ -6316,7 +5885,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVQNE _ x (FlagLT_UGT))
     // result: x
@@ -6327,10 +5895,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVQNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWCC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6350,7 +5916,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCC(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWLS);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWCC _ x (FlagEQ))
     // result: x
@@ -6361,7 +5926,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWCC _ x (FlagGT_UGT))
     // result: x
@@ -6372,7 +5936,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWCC y _ (FlagGT_ULT))
     // result: y
@@ -6383,7 +5946,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCC(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWCC y _ (FlagLT_ULT))
     // result: y
@@ -6394,7 +5956,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCC(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWCC _ x (FlagLT_UGT))
     // result: x
@@ -6405,10 +5966,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCC(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWCS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6428,7 +5987,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCS(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWHI);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWCS y _ (FlagEQ))
     // result: y
@@ -6439,7 +5997,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWCS y _ (FlagGT_UGT))
     // result: y
@@ -6450,7 +6007,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWCS _ x (FlagGT_ULT))
     // result: x
@@ -6461,7 +6017,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWCS _ x (FlagLT_ULT))
     // result: x
@@ -6472,7 +6027,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWCS y _ (FlagLT_UGT))
     // result: y
@@ -6483,10 +6037,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWCS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWEQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6506,7 +6058,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWEQ);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWEQ _ x (FlagEQ))
     // result: x
@@ -6517,7 +6068,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWEQ y _ (FlagGT_UGT))
     // result: y
@@ -6528,7 +6078,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWEQ y _ (FlagGT_ULT))
     // result: y
@@ -6539,7 +6088,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWEQ y _ (FlagLT_ULT))
     // result: y
@@ -6550,7 +6098,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWEQ y _ (FlagLT_UGT))
     // result: y
@@ -6561,10 +6108,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWEQ(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWGE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6584,7 +6129,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWLE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWGE _ x (FlagEQ))
     // result: x
@@ -6595,7 +6139,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWGE _ x (FlagGT_UGT))
     // result: x
@@ -6606,7 +6149,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWGE _ x (FlagGT_ULT))
     // result: x
@@ -6617,7 +6159,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWGE y _ (FlagLT_ULT))
     // result: y
@@ -6628,7 +6169,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWGE y _ (FlagLT_UGT))
     // result: y
@@ -6639,10 +6179,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWGT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6662,7 +6200,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGT(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWLT);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWGT y _ (FlagEQ))
     // result: y
@@ -6673,7 +6210,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWGT _ x (FlagGT_UGT))
     // result: x
@@ -6684,7 +6220,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWGT _ x (FlagGT_ULT))
     // result: x
@@ -6695,7 +6230,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWGT y _ (FlagLT_ULT))
     // result: y
@@ -6706,7 +6240,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWGT y _ (FlagLT_UGT))
     // result: y
@@ -6717,10 +6250,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWGT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWHI(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6740,7 +6271,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWHI(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWCS);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWHI y _ (FlagEQ))
     // result: y
@@ -6751,7 +6281,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWHI _ x (FlagGT_UGT))
     // result: x
@@ -6762,7 +6291,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWHI(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWHI y _ (FlagGT_ULT))
     // result: y
@@ -6773,7 +6301,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWHI y _ (FlagLT_ULT))
     // result: y
@@ -6784,7 +6311,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWHI(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWHI _ x (FlagLT_UGT))
     // result: x
@@ -6795,10 +6321,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWHI(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWLE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6818,7 +6342,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWGE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWLE _ x (FlagEQ))
     // result: x
@@ -6829,7 +6352,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWLE y _ (FlagGT_UGT))
     // result: y
@@ -6840,7 +6362,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWLE y _ (FlagGT_ULT))
     // result: y
@@ -6851,7 +6372,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWLE _ x (FlagLT_ULT))
     // result: x
@@ -6862,7 +6382,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWLE _ x (FlagLT_UGT))
     // result: x
@@ -6873,10 +6392,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWLS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6896,7 +6413,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLS(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWCC);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWLS _ x (FlagEQ))
     // result: x
@@ -6907,7 +6423,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWLS y _ (FlagGT_UGT))
     // result: y
@@ -6918,7 +6433,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWLS _ x (FlagGT_ULT))
     // result: x
@@ -6929,7 +6443,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWLS _ x (FlagLT_ULT))
     // result: x
@@ -6940,7 +6453,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLS(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWLS y _ (FlagLT_UGT))
     // result: y
@@ -6951,10 +6463,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLS(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWLT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6974,7 +6484,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLT(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWGT);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWLT y _ (FlagEQ))
     // result: y
@@ -6985,7 +6494,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWLT y _ (FlagGT_UGT))
     // result: y
@@ -6996,7 +6504,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWLT y _ (FlagGT_ULT))
     // result: y
@@ -7007,7 +6514,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLT(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWLT _ x (FlagLT_ULT))
     // result: x
@@ -7018,7 +6524,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWLT _ x (FlagLT_UGT))
     // result: x
@@ -7029,10 +6534,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWLT(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMOVWNE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7052,7 +6555,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWNE);
         v.AddArg3(x, y, cond);
         return true;
-
     } 
     // match: (CMOVWNE y _ (FlagEQ))
     // result: y
@@ -7063,7 +6565,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWNE(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (CMOVWNE _ x (FlagGT_UGT))
     // result: x
@@ -7074,7 +6575,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWNE _ x (FlagGT_ULT))
     // result: x
@@ -7085,7 +6585,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWNE _ x (FlagLT_ULT))
     // result: x
@@ -7096,7 +6595,6 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWNE _ x (FlagLT_UGT))
     // result: x
@@ -7107,10 +6605,8 @@ private static bool rewriteValueAMD64_OpAMD64CMOVWNE(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7130,7 +6626,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPB (MOVLconst [c]) x)
     // result: (InvertFlags (CMPBconst x [int8(c)]))
@@ -7146,7 +6641,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPB(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPB x y)
     // cond: canonLessThan(x,y)
@@ -7162,7 +6656,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPB(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPB l:(MOVBload {sym} [off] ptr mem) x)
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -7185,7 +6678,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPB(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (CMPB x l:(MOVBload {sym} [off] ptr mem))
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -7210,10 +6702,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPB(ptr<Value> _addr_v) {
         v0.AddArg3(ptr, x, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7234,7 +6724,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)<y && uint8(x)<uint8(y)
@@ -7250,7 +6739,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)<y && uint8(x)>uint8(y)
@@ -7266,7 +6754,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)>y && uint8(x)<uint8(y)
@@ -7282,7 +6769,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)>y && uint8(x)>uint8(y)
@@ -7298,7 +6784,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPBconst (ANDLconst _ [m]) [n])
     // cond: 0 <= int8(m) && int8(m) < n
@@ -7314,7 +6799,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPBconst a:(ANDL x y) [0])
     // cond: a.Uses == 1
@@ -7335,7 +6819,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPBconst a:(ANDLconst [c] x) [0])
     // cond: a.Uses == 1
@@ -7357,7 +6840,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPBconst x [0])
     // result: (TESTB x x)
@@ -7369,7 +6851,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTB);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPBconst l:(MOVBload {sym} [off] ptr mem) [c])
     // cond: l.Uses == 1 && clobber(l)
@@ -7394,10 +6875,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconst(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPBconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7424,7 +6903,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (CMPBconstload [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -7447,10 +6925,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPBconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7479,7 +6955,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPBload [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -7503,7 +6978,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPBload {sym} [off] ptr (MOVLconst [c]) mem)
     // result: (CMPBconstload {sym} [makeValAndOff(int32(int8(c)),off)] ptr mem)
@@ -7521,10 +6995,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7544,7 +7016,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPL (MOVLconst [c]) x)
     // result: (InvertFlags (CMPLconst x [c]))
@@ -7560,7 +7031,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPL x y)
     // cond: canonLessThan(x,y)
@@ -7576,7 +7046,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPL(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPL l:(MOVLload {sym} [off] ptr mem) x)
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -7599,7 +7068,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPL(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (CMPL x l:(MOVLload {sym} [off] ptr mem))
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -7624,10 +7092,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPL(ptr<Value> _addr_v) {
         v0.AddArg3(ptr, x, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7648,7 +7114,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x<y && uint32(x)<uint32(y)
@@ -7664,7 +7129,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x<y && uint32(x)>uint32(y)
@@ -7680,7 +7144,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x>y && uint32(x)<uint32(y)
@@ -7696,7 +7159,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x>y && uint32(x)>uint32(y)
@@ -7712,7 +7174,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPLconst (SHRLconst _ [c]) [n])
     // cond: 0 <= n && 0 < c && c <= 32 && (1<<uint64(32-c)) <= uint64(n)
@@ -7728,7 +7189,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPLconst (ANDLconst _ [m]) [n])
     // cond: 0 <= m && m < n
@@ -7744,7 +7204,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPLconst a:(ANDL x y) [0])
     // cond: a.Uses == 1
@@ -7765,7 +7224,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPLconst a:(ANDLconst [c] x) [0])
     // cond: a.Uses == 1
@@ -7787,7 +7245,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPLconst x [0])
     // result: (TESTL x x)
@@ -7799,7 +7256,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTL);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPLconst l:(MOVLload {sym} [off] ptr mem) [c])
     // cond: l.Uses == 1 && clobber(l)
@@ -7824,10 +7280,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconst(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPLconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7854,7 +7308,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (CMPLconstload [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -7877,10 +7330,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPLconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7909,7 +7360,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPLload [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -7933,7 +7383,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPLload {sym} [off] ptr (MOVLconst [c]) mem)
     // result: (CMPLconstload {sym} [makeValAndOff(c,off)] ptr mem)
@@ -7951,10 +7400,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7978,7 +7425,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPQ (MOVQconst [c]) x)
     // cond: is32Bit(c)
@@ -7998,7 +7444,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPQ x y)
     // cond: canonLessThan(x,y)
@@ -8014,7 +7459,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPQ (MOVQconst [x]) (MOVQconst [y]))
     // cond: x==y
@@ -8033,7 +7477,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (CMPQ (MOVQconst [x]) (MOVQconst [y]))
     // cond: x<y && uint64(x)<uint64(y)
@@ -8052,7 +7495,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQ (MOVQconst [x]) (MOVQconst [y]))
     // cond: x<y && uint64(x)>uint64(y)
@@ -8071,7 +7513,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPQ (MOVQconst [x]) (MOVQconst [y]))
     // cond: x>y && uint64(x)<uint64(y)
@@ -8090,7 +7531,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPQ (MOVQconst [x]) (MOVQconst [y]))
     // cond: x>y && uint64(x)>uint64(y)
@@ -8109,7 +7549,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPQ l:(MOVQload {sym} [off] ptr mem) x)
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -8132,7 +7571,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (CMPQ x l:(MOVQload {sym} [off] ptr mem))
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -8157,10 +7595,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPQ(ptr<Value> _addr_v) {
         v0.AddArg3(ptr, x, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8183,7 +7619,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (NEGQ (ADDQconst [ -8] (ANDQconst [7] _))) [32])
     // result: (FlagLT_ULT)
@@ -8201,7 +7636,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (MOVQconst [x]) [y])
     // cond: x==int64(y)
@@ -8217,7 +7651,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (CMPQconst (MOVQconst [x]) [y])
     // cond: x<int64(y) && uint64(x)<uint64(int64(y))
@@ -8233,7 +7666,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (MOVQconst [x]) [y])
     // cond: x<int64(y) && uint64(x)>uint64(int64(y))
@@ -8249,7 +7681,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPQconst (MOVQconst [x]) [y])
     // cond: x>int64(y) && uint64(x)<uint64(int64(y))
@@ -8265,7 +7696,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (MOVQconst [x]) [y])
     // cond: x>int64(y) && uint64(x)>uint64(int64(y))
@@ -8281,7 +7711,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPQconst (MOVBQZX _) [c])
     // cond: 0xFF < c
@@ -8293,7 +7722,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (MOVWQZX _) [c])
     // cond: 0xFFFF < c
@@ -8305,7 +7733,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (SHRQconst _ [c]) [n])
     // cond: 0 <= n && 0 < c && c <= 64 && (1<<uint64(64-c)) <= uint64(n)
@@ -8321,7 +7748,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (ANDQconst _ [m]) [n])
     // cond: 0 <= m && m < n
@@ -8337,7 +7763,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst (ANDLconst _ [m]) [n])
     // cond: 0 <= m && m < n
@@ -8353,7 +7778,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPQconst a:(ANDQ x y) [0])
     // cond: a.Uses == 1
@@ -8374,7 +7798,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPQconst a:(ANDQconst [c] x) [0])
     // cond: a.Uses == 1
@@ -8396,7 +7819,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPQconst x [0])
     // result: (TESTQ x x)
@@ -8408,7 +7830,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTQ);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPQconst l:(MOVQload {sym} [off] ptr mem) [c])
     // cond: l.Uses == 1 && clobber(l)
@@ -8433,10 +7854,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconst(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPQconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8463,7 +7882,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (CMPQconstload [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -8486,10 +7904,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPQconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8518,7 +7934,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPQload [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -8542,7 +7957,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPQload {sym} [off] ptr (MOVQconst [c]) mem)
     // cond: validVal(c)
@@ -8564,10 +7978,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8587,7 +7999,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPW(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPW (MOVLconst [c]) x)
     // result: (InvertFlags (CMPWconst x [int16(c)]))
@@ -8603,7 +8014,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPW(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPW x y)
     // cond: canonLessThan(x,y)
@@ -8619,7 +8029,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPW(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPW l:(MOVWload {sym} [off] ptr mem) x)
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -8642,7 +8051,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPW(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (CMPW x l:(MOVWload {sym} [off] ptr mem))
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -8667,10 +8075,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPW(ptr<Value> _addr_v) {
         v0.AddArg3(ptr, x, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8691,7 +8097,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)<y && uint16(x)<uint16(y)
@@ -8707,7 +8112,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)<y && uint16(x)>uint16(y)
@@ -8723,7 +8127,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)>y && uint16(x)<uint16(y)
@@ -8739,7 +8142,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)>y && uint16(x)>uint16(y)
@@ -8755,7 +8157,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPWconst (ANDLconst _ [m]) [n])
     // cond: 0 <= int16(m) && int16(m) < n
@@ -8771,7 +8172,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPWconst a:(ANDL x y) [0])
     // cond: a.Uses == 1
@@ -8792,7 +8192,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPWconst a:(ANDLconst [c] x) [0])
     // cond: a.Uses == 1
@@ -8814,7 +8213,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPWconst x [0])
     // result: (TESTW x x)
@@ -8826,7 +8224,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTW);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPWconst l:(MOVWload {sym} [off] ptr mem) [c])
     // cond: l.Uses == 1 && clobber(l)
@@ -8851,10 +8248,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconst(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPWconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8881,7 +8276,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (CMPWconstload [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -8904,10 +8298,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPWconstload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8936,7 +8328,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPWload [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -8960,7 +8351,6 @@ private static bool rewriteValueAMD64_OpAMD64CMPWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (CMPWload {sym} [off] ptr (MOVLconst [c]) mem)
     // result: (CMPWconstload {sym} [makeValAndOff(int32(int16(c)),off)] ptr mem)
@@ -8978,10 +8368,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPXCHGLlock(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9012,10 +8400,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPXCHGLlock(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg4(ptr, old, new_, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64CMPXCHGQlock(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9046,10 +8432,8 @@ private static bool rewriteValueAMD64_OpAMD64CMPXCHGQlock(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg4(ptr, old, new_, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64DIVSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9077,10 +8461,8 @@ private static bool rewriteValueAMD64_OpAMD64DIVSD(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64DIVSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9109,7 +8491,6 @@ private static bool rewriteValueAMD64_OpAMD64DIVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (DIVSDload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9133,10 +8514,8 @@ private static bool rewriteValueAMD64_OpAMD64DIVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64DIVSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9164,10 +8543,8 @@ private static bool rewriteValueAMD64_OpAMD64DIVSS(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64DIVSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9196,7 +8573,6 @@ private static bool rewriteValueAMD64_OpAMD64DIVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (DIVSSload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9220,10 +8596,8 @@ private static bool rewriteValueAMD64_OpAMD64DIVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64HMULL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9242,10 +8616,8 @@ private static bool rewriteValueAMD64_OpAMD64HMULL(ptr<Value> _addr_v) {
         v.reset(OpAMD64HMULL);
         v.AddArg2(y, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64HMULLU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9264,10 +8636,8 @@ private static bool rewriteValueAMD64_OpAMD64HMULLU(ptr<Value> _addr_v) {
         v.reset(OpAMD64HMULLU);
         v.AddArg2(y, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64HMULQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9286,10 +8656,8 @@ private static bool rewriteValueAMD64_OpAMD64HMULQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64HMULQ);
         v.AddArg2(y, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64HMULQU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9308,10 +8676,8 @@ private static bool rewriteValueAMD64_OpAMD64HMULQU(ptr<Value> _addr_v) {
         v.reset(OpAMD64HMULQU);
         v.AddArg2(y, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9336,7 +8702,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAL(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAL [c] {s} (ADDL x y))
     // cond: x.Op != OpSB && y.Op != OpSB
@@ -9360,21 +8725,17 @@ private static bool rewriteValueAMD64_OpAMD64LEAL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.reset(OpAMD64LEAL1);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAL1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9397,27 +8758,23 @@ private static bool rewriteValueAMD64_OpAMD64LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var d = auxIntToInt32(v_0.AuxInt);
                 var x = v_0.Args[0];
                 var y = v_1;
                 if (!(is32Bit(int64(c) + int64(d)) && x.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAL1);
                 v.AuxInt = int32ToAuxInt(c + d);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [c] {s} x (SHLLconst [1] y))
     // result: (LEAL2 [c] {s} x y)
@@ -9435,21 +8792,18 @@ private static bool rewriteValueAMD64_OpAMD64LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAL2);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [c] {s} x (SHLLconst [2] y))
     // result: (LEAL4 [c] {s} x y)
@@ -9467,21 +8821,18 @@ private static bool rewriteValueAMD64_OpAMD64LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAL4);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [c] {s} x (SHLLconst [3] y))
     // result: (LEAL8 [c] {s} x y)
@@ -9499,24 +8850,20 @@ private static bool rewriteValueAMD64_OpAMD64LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAL8);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAL2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9543,7 +8890,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [c] {s} x (ADDLconst [d] y))
     // cond: is32Bit(int64(c)+2*int64(d)) && y.Op != OpSB
@@ -9565,7 +8911,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [c] {s} x (SHLLconst [1] y))
     // result: (LEAL4 [c] {s} x y)
@@ -9582,7 +8927,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [c] {s} x (SHLLconst [2] y))
     // result: (LEAL8 [c] {s} x y)
@@ -9599,10 +8943,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAL4(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9629,7 +8971,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL4 [c] {s} x (ADDLconst [d] y))
     // cond: is32Bit(int64(c)+4*int64(d)) && y.Op != OpSB
@@ -9651,7 +8992,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL4 [c] {s} x (SHLLconst [1] y))
     // result: (LEAL8 [c] {s} x y)
@@ -9668,10 +9008,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAL8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9698,7 +9036,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAL8(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL8 [c] {s} x (ADDLconst [d] y))
     // cond: is32Bit(int64(c)+8*int64(d)) && y.Op != OpSB
@@ -9720,10 +9057,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAL8(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9748,7 +9083,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAQ [c] {s} (ADDQ x y))
     // cond: x.Op != OpSB && y.Op != OpSB
@@ -9772,18 +9106,15 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.reset(OpAMD64LEAQ1);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (LEAQ [off1] {sym1} (LEAQ [off2] {sym2} x))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9805,7 +9136,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAQ [off1] {sym1} (LEAQ1 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9828,7 +9158,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ [off1] {sym1} (LEAQ2 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9851,7 +9180,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ [off1] {sym1} (LEAQ4 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9874,7 +9202,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ [off1] {sym1} (LEAQ8 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9897,10 +9224,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9923,27 +9248,23 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var d = auxIntToInt32(v_0.AuxInt);
                 var x = v_0.Args[0];
                 var y = v_1;
                 if (!(is32Bit(int64(c) + int64(d)) && x.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAQ1);
                 v.AuxInt = int32ToAuxInt(c + d);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAQ1 [c] {s} x (SHLQconst [1] y))
     // result: (LEAQ2 [c] {s} x y)
@@ -9961,21 +9282,18 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAQ2);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAQ1 [c] {s} x (SHLQconst [2] y))
     // result: (LEAQ4 [c] {s} x y)
@@ -9993,21 +9311,18 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAQ4);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAQ1 [c] {s} x (SHLQconst [3] y))
     // result: (LEAQ8 [c] {s} x y)
@@ -10025,21 +9340,18 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpAMD64LEAQ8);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAQ1 [off1] {sym1} (LEAQ [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -10057,7 +9369,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off2 = auxIntToInt32(v_0.AuxInt);
                 var sym2 = auxToSym(v_0.Aux);
                 x = v_0.Args[0];
@@ -10065,20 +9376,17 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                 if (!(is32Bit(int64(off1) + int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAQ1);
                 v.AuxInt = int32ToAuxInt(off1 + off2);
                 v.Aux = symToAux(mergeSym(sym1, sym2));
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAQ1 [off1] {sym1} x (LEAQ1 [off2] {sym2} y y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -10097,27 +9405,23 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off2 = auxIntToInt32(v_1.AuxInt);
                 sym2 = auxToSym(v_1.Aux);
                 y = v_1.Args[1];
                 if (y != v_1.Args[0] || !(is32Bit(int64(off1) + int64(off2)) && canMergeSym(sym1, sym2))) {
                     continue;
                 }
-
                 v.reset(OpAMD64LEAQ2);
                 v.AuxInt = int32ToAuxInt(off1 + off2);
                 v.Aux = symToAux(mergeSym(sym1, sym2));
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAQ1 [off1] {sym1} x (LEAQ1 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -10136,7 +9440,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off2 = auxIntToInt32(v_1.AuxInt);
                 sym2 = auxToSym(v_1.Aux);
                 _ = v_1.Args[1];
@@ -10150,29 +9453,24 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         y = v_1_1;
                         if (!(is32Bit(int64(off1) + int64(off2)) && canMergeSym(sym1, sym2))) {
                             continue;
                         }
-
                         v.reset(OpAMD64LEAQ2);
                         v.AuxInt = int32ToAuxInt(off1 + off2);
                         v.Aux = symToAux(mergeSym(sym1, sym2));
                         v.AddArg2(y, x);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAQ1 [0] x y)
     // cond: v.Aux == nil
@@ -10189,10 +9487,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ1(ptr<Value> _addr_v) {
         v.reset(OpAMD64ADDQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10219,7 +9515,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ2 [c] {s} x (ADDQconst [d] y))
     // cond: is32Bit(int64(c)+2*int64(d)) && y.Op != OpSB
@@ -10241,7 +9536,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ2 [c] {s} x (SHLQconst [1] y))
     // result: (LEAQ4 [c] {s} x y)
@@ -10258,7 +9552,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ2 [c] {s} x (SHLQconst [2] y))
     // result: (LEAQ8 [c] {s} x y)
@@ -10275,7 +9568,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ2 [off1] {sym1} (LEAQ [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -10298,7 +9590,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ2 [off1] {sym1} x (LEAQ1 [off2] {sym2} y y))
     // cond: is32Bit(int64(off1)+2*int64(off2)) && sym2 == nil
@@ -10321,7 +9612,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym1);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ2 [off] {sym} x (MOVQconst [scale]))
     // cond: is32Bit(int64(off)+int64(scale)*2)
@@ -10342,7 +9632,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAQ2 [off] {sym} x (MOVLconst [scale]))
     // cond: is32Bit(int64(off)+int64(scale)*2)
@@ -10363,10 +9652,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ2(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10393,7 +9680,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ4 [c] {s} x (ADDQconst [d] y))
     // cond: is32Bit(int64(c)+4*int64(d)) && y.Op != OpSB
@@ -10415,7 +9701,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ4 [c] {s} x (SHLQconst [1] y))
     // result: (LEAQ8 [c] {s} x y)
@@ -10432,7 +9717,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ4 [off1] {sym1} (LEAQ [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -10455,7 +9739,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ4 [off1] {sym1} x (LEAQ1 [off2] {sym2} y y))
     // cond: is32Bit(int64(off1)+4*int64(off2)) && sym2 == nil
@@ -10478,7 +9761,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym1);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ4 [off] {sym} x (MOVQconst [scale]))
     // cond: is32Bit(int64(off)+int64(scale)*4)
@@ -10499,7 +9781,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAQ4 [off] {sym} x (MOVLconst [scale]))
     // cond: is32Bit(int64(off)+int64(scale)*4)
@@ -10520,10 +9801,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ4(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64LEAQ8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10550,7 +9829,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ8(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ8 [c] {s} x (ADDQconst [d] y))
     // cond: is32Bit(int64(c)+8*int64(d)) && y.Op != OpSB
@@ -10572,7 +9850,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ8(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ8 [off1] {sym1} (LEAQ [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -10595,7 +9872,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ8(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAQ8 [off] {sym} x (MOVQconst [scale]))
     // cond: is32Bit(int64(off)+int64(scale)*8)
@@ -10616,7 +9892,6 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ8(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAQ8 [off] {sym} x (MOVLconst [scale]))
     // cond: is32Bit(int64(off)+int64(scale)*8)
@@ -10637,10 +9912,8 @@ private static bool rewriteValueAMD64_OpAMD64LEAQ8(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVBQSX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10669,7 +9942,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQSX x:(MOVWload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10693,7 +9965,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQSX x:(MOVLload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10717,7 +9988,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQSX x:(MOVQload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10741,7 +10011,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQSX (ANDLconst [c] x))
     // cond: c & 0x80 == 0
@@ -10759,7 +10028,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7f);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBQSX (MOVBQSX x))
     // result: (MOVBQSX x)
@@ -10771,10 +10039,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQSX);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVBQSXload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10801,7 +10067,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSXload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBQSXload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -10824,10 +10089,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQSXload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10856,7 +10119,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQZX x:(MOVWload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10880,7 +10142,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQZX x:(MOVLload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10904,7 +10165,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQZX x:(MOVQload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10928,7 +10188,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBQZX x)
     // cond: zeroUpper56Bits(x,3)
@@ -10940,7 +10199,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBQZX (ANDLconst [c] x))
     // result: (ANDLconst [c & 0xff] x)
@@ -10954,7 +10212,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBQZX (MOVBQZX x))
     // result: (MOVBQZX x)
@@ -10966,10 +10223,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVBQZX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQZX);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVBatomicload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10996,7 +10251,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBatomicload(ptr<Value> _addr_v) 
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBatomicload [off1] {sym1} (LEAQ [off2] {sym2} ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -11019,10 +10273,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVBatomicload(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11049,7 +10301,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym} (ADDQconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -11071,7 +10322,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -11094,7 +10344,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -11117,7 +10366,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym} (ADDLconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -11139,7 +10387,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -11153,10 +10400,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVBload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(int32(read8(sym, int64(off))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11187,7 +10432,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETLE x) mem)
     // cond: y.Uses == 1
@@ -11210,7 +10454,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETG x) mem)
     // cond: y.Uses == 1
@@ -11233,7 +10476,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETGE x) mem)
     // cond: y.Uses == 1
@@ -11256,7 +10498,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETEQ x) mem)
     // cond: y.Uses == 1
@@ -11279,7 +10520,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETNE x) mem)
     // cond: y.Uses == 1
@@ -11302,7 +10542,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETB x) mem)
     // cond: y.Uses == 1
@@ -11325,7 +10564,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETBE x) mem)
     // cond: y.Uses == 1
@@ -11348,7 +10586,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETA x) mem)
     // cond: y.Uses == 1
@@ -11371,7 +10608,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr y:(SETAE x) mem)
     // cond: y.Uses == 1
@@ -11394,7 +10630,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBQSX x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -11412,7 +10647,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBQZX x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -11430,7 +10664,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym} (ADDQconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -11453,7 +10686,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVLconst [c]) mem)
     // result: (MOVBstoreconst [makeValAndOff(int32(int8(c)),off)] {sym} ptr mem)
@@ -11471,7 +10703,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVQconst [c]) mem)
     // result: (MOVBstoreconst [makeValAndOff(int32(int8(c)),off)] {sym} ptr mem)
@@ -11489,7 +10720,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -11513,7 +10743,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x0:(MOVBstore [i-1] {s} p (SHRWconst [8] w) mem))
     // cond: x0.Uses == 1 && clobber(x0)
@@ -11543,7 +10772,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 w x0:(MOVBstore [i] {s} p0 (SHRWconst [8] w) mem))
     // cond: x0.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x0)
@@ -11571,7 +10799,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p0, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x2:(MOVBstore [i-1] {s} p (SHRLconst [8] w) x1:(MOVBstore [i-2] {s} p (SHRLconst [16] w) x0:(MOVBstore [i-3] {s} p (SHRLconst [24] w) mem))))
     // cond: x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && clobber(x0, x1, x2)
@@ -11624,7 +10851,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p3 w x2:(MOVBstore [i] {s} p2 (SHRLconst [8] w) x1:(MOVBstore [i] {s} p1 (SHRLconst [16] w) x0:(MOVBstore [i] {s} p0 (SHRLconst [24] w) mem))))
     // cond: x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && sequentialAddresses(p0, p1, 1) && sequentialAddresses(p1, p2, 1) && sequentialAddresses(p2, p3, 1) && clobber(x0, x1, x2)
@@ -11671,7 +10897,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p0, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x6:(MOVBstore [i-1] {s} p (SHRQconst [8] w) x5:(MOVBstore [i-2] {s} p (SHRQconst [16] w) x4:(MOVBstore [i-3] {s} p (SHRQconst [24] w) x3:(MOVBstore [i-4] {s} p (SHRQconst [32] w) x2:(MOVBstore [i-5] {s} p (SHRQconst [40] w) x1:(MOVBstore [i-6] {s} p (SHRQconst [48] w) x0:(MOVBstore [i-7] {s} p (SHRQconst [56] w) mem))))))))
     // cond: x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && clobber(x0, x1, x2, x3, x4, x5, x6)
@@ -11772,7 +10997,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p7 w x6:(MOVBstore [i] {s} p6 (SHRQconst [8] w) x5:(MOVBstore [i] {s} p5 (SHRQconst [16] w) x4:(MOVBstore [i] {s} p4 (SHRQconst [24] w) x3:(MOVBstore [i] {s} p3 (SHRQconst [32] w) x2:(MOVBstore [i] {s} p2 (SHRQconst [40] w) x1:(MOVBstore [i] {s} p1 (SHRQconst [48] w) x0:(MOVBstore [i] {s} p0 (SHRQconst [56] w) mem))))))))
     // cond: x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && sequentialAddresses(p0, p1, 1) && sequentialAddresses(p1, p2, 1) && sequentialAddresses(p2, p3, 1) && sequentialAddresses(p3, p4, 1) && sequentialAddresses(p4, p5, 1) && sequentialAddresses(p5, p6, 1) && sequentialAddresses(p6, p7, 1) && clobber(x0, x1, x2, x3, x4, x5, x6)
@@ -11859,7 +11083,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p0, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRWconst [8] w) x:(MOVBstore [i-1] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11885,7 +11108,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRLconst [8] w) x:(MOVBstore [i-1] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11911,7 +11133,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRQconst [8] w) x:(MOVBstore [i-1] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11937,7 +11158,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x:(MOVBstore [i+1] {s} p (SHRWconst [8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11964,7 +11184,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x:(MOVBstore [i+1] {s} p (SHRLconst [8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11991,7 +11210,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x:(MOVBstore [i+1] {s} p (SHRQconst [8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -12018,7 +11236,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRLconst [j] w) x:(MOVBstore [i-1] {s} p w0:(SHRLconst [j-8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -12049,7 +11266,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRQconst [j] w) x:(MOVBstore [i-1] {s} p w0:(SHRQconst [j-8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -12080,7 +11296,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRWconst [8] w) x:(MOVBstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12107,7 +11322,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRLconst [8] w) x:(MOVBstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12134,7 +11348,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRQconst [8] w) x:(MOVBstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12161,7 +11374,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p0 w x:(MOVBstore [i] {s} p1 (SHRWconst [8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12186,7 +11398,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p0 w x:(MOVBstore [i] {s} p1 (SHRLconst [8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12211,7 +11422,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p0 w x:(MOVBstore [i] {s} p1 (SHRQconst [8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12236,7 +11446,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRLconst [j] w) x:(MOVBstore [i] {s} p0 w0:(SHRLconst [j-8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12265,7 +11474,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRQconst [j] w) x:(MOVBstore [i] {s} p0 w0:(SHRQconst [j-8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -12294,7 +11502,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [7] {s} p1 (SHRQconst [56] w) x1:(MOVWstore [5] {s} p1 (SHRQconst [40] w) x2:(MOVLstore [1] {s} p1 (SHRQconst [8] w) x3:(MOVBstore [0] {s} p1 w mem))))
     // cond: x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && clobber(x1, x2, x3)
@@ -12345,7 +11552,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p1, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p x1:(MOVBload [j] {s2} p2 mem) mem2:(MOVBstore [i-1] {s} p x2:(MOVBload [j-1] {s2} p2 mem) mem))
     // cond: x1.Uses == 1 && x2.Uses == 1 && mem2.Uses == 1 && clobber(x1, x2, mem2)
@@ -12387,7 +11593,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg2(p2, mem);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -12411,7 +11616,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym} (ADDLconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -12434,10 +11638,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVBstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12464,7 +11666,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [sc] {sym1} (LEAQ [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && ValAndOff(sc).canAdd32(off)
@@ -12487,7 +11688,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [c] {s} p x:(MOVBstoreconst [a] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 1 == c.Off() && clobber(x)
@@ -12513,7 +11713,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [a] {s} p x:(MOVBstoreconst [c] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 1 == c.Off() && clobber(x)
@@ -12539,7 +11738,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [sc] {sym1} (LEAL [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -12562,7 +11760,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [sc] {s} (ADDLconst [off] ptr) mem)
     // cond: sc.canAdd32(off)
@@ -12584,10 +11781,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLQSX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12616,7 +11811,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLQSX x:(MOVQload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -12640,7 +11834,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLQSX (ANDLconst [c] x))
     // cond: uint32(c) & 0x80000000 == 0
@@ -12658,7 +11851,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7fffffff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLQSX (MOVLQSX x))
     // result: (MOVLQSX x)
@@ -12670,7 +11862,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLQSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLQSX (MOVWQSX x))
     // result: (MOVWQSX x)
@@ -12682,7 +11873,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLQSX (MOVBQSX x))
     // result: (MOVBQSX x)
@@ -12694,10 +11884,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQSX);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLQSXload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12724,7 +11912,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSXload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLQSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLQSXload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -12747,10 +11934,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQSXload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12779,7 +11964,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLQZX x:(MOVQload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -12803,7 +11987,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLQZX x)
     // cond: zeroUpper32Bits(x,3)
@@ -12815,7 +11998,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVLQZX (ANDLconst [c] x))
     // result: (ANDLconst [c] x)
@@ -12829,7 +12011,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLQZX (MOVLQZX x))
     // result: (MOVLQZX x)
@@ -12841,7 +12022,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLQZX (MOVWQZX x))
     // result: (MOVWQZX x)
@@ -12853,7 +12033,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLQZX (MOVBQZX x))
     // result: (MOVBQZX x)
@@ -12865,10 +12044,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLQZX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQZX);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLatomicload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12895,7 +12072,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLatomicload(ptr<Value> _addr_v) 
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLatomicload [off1] {sym1} (LEAQ [off2] {sym2} ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -12918,10 +12094,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLatomicload(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLf2i(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12948,10 +12122,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLf2i(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(off);
         v0.Aux = symToAux(sym);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLi2f(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12978,10 +12150,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLi2f(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(off);
         v0.Aux = symToAux(sym);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13010,7 +12180,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVLload [off1] {sym} (ADDQconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -13032,7 +12201,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -13055,7 +12223,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVLload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -13078,7 +12245,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVLload [off1] {sym} (ADDLconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -13100,7 +12266,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLload [off] {sym} ptr (MOVSSstore [off] {sym} ptr val _))
     // result: (MOVLf2i val)
@@ -13118,7 +12283,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLf2i);
         v.AddArg(val);
         return true;
-
     } 
     // match: (MOVLload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -13132,10 +12296,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(read32(sym, int64(off), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13161,7 +12323,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr (MOVLQZX x) mem)
     // result: (MOVLstore [off] {sym} ptr x mem)
@@ -13179,7 +12340,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore [off1] {sym} (ADDQconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -13202,7 +12362,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr (MOVLconst [c]) mem)
     // result: (MOVLstoreconst [makeValAndOff(int32(c),off)] {sym} ptr mem)
@@ -13220,7 +12379,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr (MOVQconst [c]) mem)
     // result: (MOVLstoreconst [makeValAndOff(int32(c),off)] {sym} ptr mem)
@@ -13238,7 +12396,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -13262,7 +12419,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVLstore [i] {s} p (SHRQconst [32] w) x:(MOVLstore [i-4] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -13288,7 +12444,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVLstore [i] {s} p (SHRQconst [j] w) x:(MOVLstore [i-4] {s} p w0:(SHRQconst [j-32] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -13319,7 +12474,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVLstore [i] {s} p1 (SHRQconst [32] w) x:(MOVLstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 4) && clobber(x)
@@ -13346,7 +12500,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVLstore [i] {s} p1 (SHRQconst [j] w) x:(MOVLstore [i] {s} p0 w0:(SHRQconst [j-32] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 4) && clobber(x)
@@ -13375,7 +12528,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w0, mem);
         return true;
-
     } 
     // match: (MOVLstore [i] {s} p x1:(MOVLload [j] {s2} p2 mem) mem2:(MOVLstore [i-4] {s} p x2:(MOVLload [j-4] {s2} p2 mem) mem))
     // cond: x1.Uses == 1 && x2.Uses == 1 && mem2.Uses == 1 && clobber(x1, x2, mem2)
@@ -13417,7 +12569,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v0.AddArg2(p2, mem);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVLstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -13441,7 +12592,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVLstore [off1] {sym} (ADDLconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -13464,7 +12614,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ADDLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -13487,7 +12636,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ANDLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -13510,7 +12658,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ORLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -13533,7 +12680,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(XORLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -13556,7 +12702,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ADDL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -13583,30 +12728,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(SUBL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -13633,7 +12773,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ANDL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -13660,30 +12799,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ANDLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ORL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -13710,30 +12844,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ORLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(XORL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -13760,30 +12889,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64XORLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore [off] {sym} ptr a:(ADDLconst [c] l:(MOVLload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -13811,7 +12935,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr a:(ANDLconst [c] l:(MOVLload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -13839,7 +12962,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr a:(ORLconst [c] l:(MOVLload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -13867,7 +12989,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr a:(XORLconst [c] l:(MOVLload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -13895,7 +13016,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr (MOVLf2i val) mem)
     // result: (MOVSSstore [off] {sym} ptr val mem)
@@ -13913,10 +13033,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVLstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13945,7 +13063,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstoreconst [sc] {sym1} (LEAQ [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && ValAndOff(sc).canAdd32(off)
@@ -13968,7 +13085,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstoreconst [c] {s} p x:(MOVLstoreconst [a] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 4 == c.Off() && clobber(x)
@@ -13996,7 +13112,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstoreconst(ptr<Value> _addr_v) 
         v0.AuxInt = int64ToAuxInt(a.Val64() & 0xffffffff | c.Val64() << 32);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVLstoreconst [a] {s} p x:(MOVLstoreconst [c] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 4 == c.Off() && clobber(x)
@@ -14024,7 +13139,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstoreconst(ptr<Value> _addr_v) 
         v0.AuxInt = int64ToAuxInt(a.Val64() & 0xffffffff | c.Val64() << 32);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVLstoreconst [sc] {sym1} (LEAL [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -14047,7 +13161,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstoreconst [sc] {s} (ADDLconst [off] ptr) mem)
     // cond: sc.canAdd32(off)
@@ -14069,10 +13182,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVLstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVOload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14099,7 +13210,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVOload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVOload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -14122,10 +13232,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVOload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVOstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14157,7 +13265,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVOstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVOstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -14181,7 +13288,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVOstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVOstore [dstOff] {dstSym} ptr (MOVOload [srcOff] {srcSym} (SB) _) mem)
     // cond: symIsRO(srcSym)
@@ -14216,10 +13322,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVOstore(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v2, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVQatomicload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14246,7 +13350,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQatomicload(ptr<Value> _addr_v) 
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQatomicload [off1] {sym1} (LEAQ [off2] {sym2} ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -14269,10 +13372,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVQatomicload(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVQf2i(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14299,10 +13400,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVQf2i(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(off);
         v0.Aux = symToAux(sym);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVQi2f(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14329,10 +13428,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVQi2f(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(off);
         v0.Aux = symToAux(sym);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14360,7 +13457,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVQload [off1] {sym} (ADDQconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -14382,7 +13478,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -14405,7 +13500,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVQload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -14428,7 +13522,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVQload [off1] {sym} (ADDLconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -14450,7 +13543,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQload [off] {sym} ptr (MOVSDstore [off] {sym} ptr val _))
     // result: (MOVQf2i val)
@@ -14468,7 +13560,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQf2i);
         v.AddArg(val);
         return true;
-
     } 
     // match: (MOVQload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -14482,10 +13573,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVQload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(read64(sym, int64(off), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14514,7 +13603,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVQstore [off] {sym} ptr (MOVQconst [c]) mem)
     // cond: validVal(c)
@@ -14536,7 +13624,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -14560,7 +13647,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVQstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -14584,7 +13670,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVQstore [off1] {sym} (ADDLconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -14607,7 +13692,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(ADDQload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -14630,7 +13714,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(ANDQload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -14653,7 +13736,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(ORQload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -14676,7 +13758,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(XORQload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -14699,7 +13780,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(ADDQ l:(MOVQload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -14726,30 +13806,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ADDQmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(SUBQ l:(MOVQload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -14776,7 +13851,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(ANDQ l:(MOVQload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -14803,30 +13877,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ANDQmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(ORQ l:(MOVQload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -14853,30 +13922,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ORQmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVQstore {sym} [off] ptr y:(XORQ l:(MOVQload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -14903,30 +13967,25 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64XORQmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVQstore [off] {sym} ptr a:(ADDQconst [c] l:(MOVQload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -14954,7 +14013,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstore [off] {sym} ptr a:(ANDQconst [c] l:(MOVQload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -14982,7 +14040,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstore [off] {sym} ptr a:(ORQconst [c] l:(MOVQload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -15010,7 +14067,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstore [off] {sym} ptr a:(XORQconst [c] l:(MOVQload [off] {sym} ptr2 mem)) mem)
     // cond: isSamePtr(ptr, ptr2) && a.Uses == 1 && l.Uses == 1 && clobber(l, a)
@@ -15038,7 +14094,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstore [off] {sym} ptr (MOVQf2i val) mem)
     // result: (MOVSDstore [off] {sym} ptr val mem)
@@ -15056,10 +14111,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVQstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15088,7 +14141,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstoreconst [sc] {sym1} (LEAQ [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && ValAndOff(sc).canAdd32(off)
@@ -15111,7 +14163,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstoreconst [c] {s} p x:(MOVQstoreconst [c2] {s} p mem))
     // cond: config.useSSE && x.Uses == 1 && c2.Off() + 8 == c.Off() && c.Val() == 0 && c2.Val() == 0 && clobber(x)
@@ -15137,7 +14188,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVQstoreconst [sc] {sym1} (LEAL [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -15160,7 +14210,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVQstoreconst [sc] {s} (ADDLconst [off] ptr) mem)
     // cond: sc.canAdd32(off)
@@ -15182,10 +14231,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVQstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15212,7 +14259,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVSDload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -15235,7 +14281,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVSDload [off] {sym} ptr (MOVQstore [off] {sym} ptr val _))
     // result: (MOVQi2f val)
@@ -15253,10 +14298,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVSDload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQi2f);
         v.AddArg(val);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVSDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15285,7 +14328,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVSDstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -15309,7 +14351,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVSDstore [off] {sym} ptr (MOVQi2f val) mem)
     // result: (MOVQstore [off] {sym} ptr val mem)
@@ -15327,10 +14368,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVSDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15357,7 +14396,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVSSload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -15380,7 +14418,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVSSload [off] {sym} ptr (MOVLstore [off] {sym} ptr val _))
     // result: (MOVLi2f val)
@@ -15398,10 +14435,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVSSload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLi2f);
         v.AddArg(val);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVSSstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15430,7 +14465,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVSSstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -15454,7 +14488,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVSSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVSSstore [off] {sym} ptr (MOVLi2f val) mem)
     // result: (MOVLstore [off] {sym} ptr val mem)
@@ -15472,10 +14505,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVSSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVWQSX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15504,7 +14535,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWQSX x:(MOVLload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -15528,7 +14558,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWQSX x:(MOVQload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -15552,7 +14581,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWQSX (ANDLconst [c] x))
     // cond: c & 0x8000 == 0
@@ -15570,7 +14598,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7fff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWQSX (MOVWQSX x))
     // result: (MOVWQSX x)
@@ -15582,7 +14609,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWQSX (MOVBQSX x))
     // result: (MOVBQSX x)
@@ -15594,10 +14620,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQSX);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVWQSXload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15624,7 +14648,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSXload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWQSXload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -15647,10 +14670,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQSXload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15679,7 +14700,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWQZX x:(MOVLload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -15703,7 +14723,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWQZX x:(MOVQload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -15727,7 +14746,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWQZX x)
     // cond: zeroUpper48Bits(x,3)
@@ -15739,7 +14757,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWQZX (ANDLconst [c] x))
     // result: (ANDLconst [c & 0xffff] x)
@@ -15753,7 +14770,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xffff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWQZX (MOVWQZX x))
     // result: (MOVWQZX x)
@@ -15765,7 +14781,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWQZX (MOVBQZX x))
     // result: (MOVBQZX x)
@@ -15777,10 +14792,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVWQZX(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBQZX);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15809,7 +14822,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWQZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym} (ADDQconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -15831,7 +14843,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -15854,7 +14865,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -15877,7 +14887,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym} (ADDLconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -15899,7 +14908,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -15913,10 +14921,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVWload(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(int32(read16(sym, int64(off), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15942,7 +14948,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWQZX x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -15960,7 +14965,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym} (ADDQconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -15983,7 +14987,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVLconst [c]) mem)
     // result: (MOVWstoreconst [makeValAndOff(int32(int16(c)),off)] {sym} ptr mem)
@@ -16001,7 +15004,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVQconst [c]) mem)
     // result: (MOVWstoreconst [makeValAndOff(int32(int16(c)),off)] {sym} ptr mem)
@@ -16019,7 +15021,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -16043,7 +15044,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p (SHRLconst [16] w) x:(MOVWstore [i-2] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -16069,7 +15069,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p (SHRQconst [16] w) x:(MOVWstore [i-2] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -16095,7 +15094,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p (SHRLconst [j] w) x:(MOVWstore [i-2] {s} p w0:(SHRLconst [j-16] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -16126,7 +15124,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p (SHRQconst [j] w) x:(MOVWstore [i-2] {s} p w0:(SHRQconst [j-16] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -16157,7 +15154,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p1 (SHRLconst [16] w) x:(MOVWstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -16184,7 +15180,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p1 (SHRQconst [16] w) x:(MOVWstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -16211,7 +15206,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p1 (SHRLconst [j] w) x:(MOVWstore [i] {s} p0 w0:(SHRLconst [j-16] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -16240,7 +15234,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w0, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p1 (SHRQconst [j] w) x:(MOVWstore [i] {s} p0 w0:(SHRQconst [j-16] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -16269,7 +15262,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w0, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p x1:(MOVWload [j] {s2} p2 mem) mem2:(MOVWstore [i-2] {s} p x2:(MOVWload [j-2] {s2} p2 mem) mem))
     // cond: x1.Uses == 1 && x2.Uses == 1 && mem2.Uses == 1 && clobber(x1, x2, mem2)
@@ -16311,7 +15303,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v0.AddArg2(p2, mem);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: canMergeSym(sym1, sym2) && is32Bit(int64(off1)+int64(off2))
@@ -16335,7 +15326,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym} (ADDLconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -16358,10 +15348,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MOVWstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16388,7 +15376,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [sc] {sym1} (LEAQ [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && ValAndOff(sc).canAdd32(off)
@@ -16411,7 +15398,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [c] {s} p x:(MOVWstoreconst [a] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 2 == c.Off() && clobber(x)
@@ -16437,7 +15423,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [a] {s} p x:(MOVWstoreconst [c] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 2 == c.Off() && clobber(x)
@@ -16463,7 +15448,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [sc] {sym1} (LEAL [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -16486,7 +15470,6 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [sc] {s} (ADDLconst [off] ptr) mem)
     // cond: sc.canAdd32(off)
@@ -16508,10 +15491,8 @@ private static bool rewriteValueAMD64_OpAMD64MOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16530,21 +15511,17 @@ private static bool rewriteValueAMD64_OpAMD64MULL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpAMD64MULLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16564,7 +15541,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c * d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MULLconst [-9] x)
     // result: (NEGL (LEAL8 <v.Type> x x))
@@ -16578,7 +15554,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [-5] x)
     // result: (NEGL (LEAL4 <v.Type> x x))
@@ -16592,7 +15567,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [-3] x)
     // result: (NEGL (LEAL2 <v.Type> x x))
@@ -16606,7 +15580,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [-1] x)
     // result: (NEGL x)
@@ -16618,7 +15591,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64NEGL);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MULLconst [ 0] _)
     // result: (MOVLconst [0])
@@ -16629,7 +15601,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (MULLconst [ 1] x)
     // result: x
@@ -16640,7 +15611,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (MULLconst [ 3] x)
     // result: (LEAL2 x x)
@@ -16652,7 +15622,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64LEAL2);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULLconst [ 5] x)
     // result: (LEAL4 x x)
@@ -16664,7 +15633,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64LEAL4);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULLconst [ 7] x)
     // result: (LEAL2 x (LEAL2 <v.Type> x x))
@@ -16678,7 +15646,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [ 9] x)
     // result: (LEAL8 x x)
@@ -16690,7 +15657,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64LEAL8);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULLconst [11] x)
     // result: (LEAL2 x (LEAL4 <v.Type> x x))
@@ -16704,7 +15670,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [13] x)
     // result: (LEAL4 x (LEAL2 <v.Type> x x))
@@ -16718,7 +15683,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [19] x)
     // result: (LEAL2 x (LEAL8 <v.Type> x x))
@@ -16732,7 +15696,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [21] x)
     // result: (LEAL4 x (LEAL4 <v.Type> x x))
@@ -16746,7 +15709,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [25] x)
     // result: (LEAL8 x (LEAL2 <v.Type> x x))
@@ -16760,7 +15722,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [27] x)
     // result: (LEAL8 (LEAL2 <v.Type> x x) (LEAL2 <v.Type> x x))
@@ -16774,7 +15735,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULLconst [37] x)
     // result: (LEAL4 x (LEAL8 <v.Type> x x))
@@ -16788,7 +15748,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [41] x)
     // result: (LEAL8 x (LEAL4 <v.Type> x x))
@@ -16802,7 +15761,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [45] x)
     // result: (LEAL8 (LEAL4 <v.Type> x x) (LEAL4 <v.Type> x x))
@@ -16816,7 +15774,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULLconst [73] x)
     // result: (LEAL8 x (LEAL8 <v.Type> x x))
@@ -16830,7 +15787,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [81] x)
     // result: (LEAL8 (LEAL8 <v.Type> x x) (LEAL8 <v.Type> x x))
@@ -16844,7 +15800,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo64(int64(c)+1) && c >= 15
@@ -16861,7 +15816,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-1) && c >= 17
@@ -16878,7 +15832,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-2) && c >= 34
@@ -16895,7 +15848,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-4) && c >= 68
@@ -16912,7 +15864,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-8) && c >= 136
@@ -16929,7 +15880,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -16946,7 +15896,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -16963,7 +15912,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -16980,7 +15928,6 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c*d])
@@ -16993,10 +15940,8 @@ private static bool rewriteValueAMD64_OpAMD64MULLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(c * d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17016,25 +15961,20 @@ private static bool rewriteValueAMD64_OpAMD64MULQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64MULQconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17058,7 +15998,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c * d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MULQconst [-9] x)
     // result: (NEGQ (LEAQ8 <v.Type> x x))
@@ -17072,7 +16011,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULQconst [-5] x)
     // result: (NEGQ (LEAQ4 <v.Type> x x))
@@ -17086,7 +16024,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULQconst [-3] x)
     // result: (NEGQ (LEAQ2 <v.Type> x x))
@@ -17100,7 +16037,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULQconst [-1] x)
     // result: (NEGQ x)
@@ -17112,7 +16048,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64NEGQ);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MULQconst [ 0] _)
     // result: (MOVQconst [0])
@@ -17123,7 +16058,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (MULQconst [ 1] x)
     // result: x
@@ -17134,7 +16068,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (MULQconst [ 3] x)
     // result: (LEAQ2 x x)
@@ -17146,7 +16079,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64LEAQ2);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULQconst [ 5] x)
     // result: (LEAQ4 x x)
@@ -17158,7 +16090,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64LEAQ4);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULQconst [ 7] x)
     // result: (LEAQ2 x (LEAQ2 <v.Type> x x))
@@ -17172,7 +16103,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [ 9] x)
     // result: (LEAQ8 x x)
@@ -17184,7 +16114,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64LEAQ8);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULQconst [11] x)
     // result: (LEAQ2 x (LEAQ4 <v.Type> x x))
@@ -17198,7 +16127,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [13] x)
     // result: (LEAQ4 x (LEAQ2 <v.Type> x x))
@@ -17212,7 +16140,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [19] x)
     // result: (LEAQ2 x (LEAQ8 <v.Type> x x))
@@ -17226,7 +16153,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [21] x)
     // result: (LEAQ4 x (LEAQ4 <v.Type> x x))
@@ -17240,7 +16166,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [25] x)
     // result: (LEAQ8 x (LEAQ2 <v.Type> x x))
@@ -17254,7 +16179,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [27] x)
     // result: (LEAQ8 (LEAQ2 <v.Type> x x) (LEAQ2 <v.Type> x x))
@@ -17268,7 +16192,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULQconst [37] x)
     // result: (LEAQ4 x (LEAQ8 <v.Type> x x))
@@ -17282,7 +16205,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [41] x)
     // result: (LEAQ8 x (LEAQ4 <v.Type> x x))
@@ -17296,7 +16218,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [45] x)
     // result: (LEAQ8 (LEAQ4 <v.Type> x x) (LEAQ4 <v.Type> x x))
@@ -17310,7 +16231,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULQconst [73] x)
     // result: (LEAQ8 x (LEAQ8 <v.Type> x x))
@@ -17324,7 +16244,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULQconst [81] x)
     // result: (LEAQ8 (LEAQ8 <v.Type> x x) (LEAQ8 <v.Type> x x))
@@ -17338,7 +16257,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: isPowerOfTwo64(int64(c)+1) && c >= 15
@@ -17355,7 +16273,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: isPowerOfTwo32(c-1) && c >= 17
@@ -17372,7 +16289,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: isPowerOfTwo32(c-2) && c >= 34
@@ -17389,7 +16305,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: isPowerOfTwo32(c-4) && c >= 68
@@ -17406,7 +16321,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: isPowerOfTwo32(c-8) && c >= 136
@@ -17423,7 +16337,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -17440,7 +16353,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -17457,7 +16369,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULQconst [c] x)
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -17474,7 +16385,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(c)*d])
@@ -17487,7 +16397,6 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(c) * d);
         return true;
-
     } 
     // match: (MULQconst [c] (NEGQ x))
     // cond: c != -(1<<31)
@@ -17505,10 +16414,8 @@ private static bool rewriteValueAMD64_OpAMD64MULQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17529,7 +16436,6 @@ private static bool rewriteValueAMD64_OpAMD64MULSD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -17537,21 +16443,17 @@ private static bool rewriteValueAMD64_OpAMD64MULSD(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64MULSDload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17582,7 +16484,6 @@ private static bool rewriteValueAMD64_OpAMD64MULSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (MULSDload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -17606,7 +16507,6 @@ private static bool rewriteValueAMD64_OpAMD64MULSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (MULSDload x [off] {sym} ptr (MOVQstore [off] {sym} ptr y _))
     // result: (MULSD x (MOVQi2f y))
@@ -17627,10 +16527,8 @@ private static bool rewriteValueAMD64_OpAMD64MULSDload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17651,7 +16549,6 @@ private static bool rewriteValueAMD64_OpAMD64MULSS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -17659,21 +16556,17 @@ private static bool rewriteValueAMD64_OpAMD64MULSS(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64MULSSload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64MULSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17704,7 +16597,6 @@ private static bool rewriteValueAMD64_OpAMD64MULSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (MULSSload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -17728,7 +16620,6 @@ private static bool rewriteValueAMD64_OpAMD64MULSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (MULSSload x [off] {sym} ptr (MOVLstore [off] {sym} ptr y _))
     // result: (MULSS x (MOVLi2f y))
@@ -17749,10 +16640,8 @@ private static bool rewriteValueAMD64_OpAMD64MULSSload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64NEGL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17767,7 +16656,6 @@ private static bool rewriteValueAMD64_OpAMD64NEGL(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (NEGL s:(SUBL x y))
     // cond: s.Uses == 1
@@ -17785,7 +16673,6 @@ private static bool rewriteValueAMD64_OpAMD64NEGL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SUBL);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (NEGL (MOVLconst [c]))
     // result: (MOVLconst [-c])
@@ -17797,10 +16684,8 @@ private static bool rewriteValueAMD64_OpAMD64NEGL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(-c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64NEGQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17815,7 +16700,6 @@ private static bool rewriteValueAMD64_OpAMD64NEGQ(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (NEGQ s:(SUBQ x y))
     // cond: s.Uses == 1
@@ -17833,7 +16717,6 @@ private static bool rewriteValueAMD64_OpAMD64NEGQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SUBQ);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (NEGQ (MOVQconst [c]))
     // result: (MOVQconst [-c])
@@ -17845,7 +16728,6 @@ private static bool rewriteValueAMD64_OpAMD64NEGQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(-c);
         return true;
-
     } 
     // match: (NEGQ (ADDQconst [c] (NEGQ x)))
     // cond: c != -(1<<31)
@@ -17867,10 +16749,8 @@ private static bool rewriteValueAMD64_OpAMD64NEGQ(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64NOTL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17886,10 +16766,8 @@ private static bool rewriteValueAMD64_OpAMD64NOTL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(~c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64NOTQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17905,10 +16783,8 @@ private static bool rewriteValueAMD64_OpAMD64NOTQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(~c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17930,25 +16806,21 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var x = v_1;
                 v.reset(OpAMD64BTSL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (MOVLconst [c]) x)
     // cond: isUint32PowerOfTwo(int64(c)) && uint64(c) >= 128
@@ -17964,25 +16836,21 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 x = v_1;
                 if (!(isUint32PowerOfTwo(int64(c)) && uint64(c) >= 128)) {
                     continue;
                 }
-
                 v.reset(OpAMD64BTSLconst);
                 v.AuxInt = int8ToAuxInt(int8(log32(c)));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x (MOVLconst [c]))
     // result: (ORLconst [c] x)
@@ -17998,20 +16866,17 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpAMD64ORLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHLLconst x [c]) (SHRLconst x [d]))
     // cond: d==32-c
@@ -18027,30 +16892,25 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRLconst) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLLconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL <t> (SHLLconst x [c]) (SHRWconst x [d]))
     // cond: d==16-c && c < 16 && t.Size() == 2
@@ -18067,30 +16927,25 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 16 - c && c < 16 && t.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLWconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL <t> (SHLLconst x [c]) (SHRBconst x [d]))
     // cond: d==8-c && c < 8 && t.Size() == 1
@@ -18107,30 +16962,25 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRBconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 8 - c && c < 8 && t.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLBconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHLL x y) (ANDL (SHRL x (NEGQ y)) (SBBLcarrymask (CMPQconst (NEGQ (ADDQconst (ANDQconst y [31]) [-32])) [32]))))
     // result: (ROLL x y)
@@ -18145,13 +16995,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -18165,54 +17013,44 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGQ || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         var v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPQconst || auxIntToInt32(v_1_1_0.AuxInt) != 32) {
                             continue;
                         }
-
                         var v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         var v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -32) {
                             continue;
                         }
-
                         var v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 31 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLL);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHLL x y) (ANDL (SHRL x (NEGL y)) (SBBLcarrymask (CMPLconst (NEGL (ADDLconst (ANDLconst y [31]) [-32])) [32]))))
     // result: (ROLL x y)
@@ -18227,13 +17065,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18247,54 +17083,44 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGL || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPLconst || auxIntToInt32(v_1_1_0.AuxInt) != 32) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -32) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 31 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLL);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHRL x y) (ANDL (SHLL x (NEGQ y)) (SBBLcarrymask (CMPQconst (NEGQ (ADDQconst (ANDQconst y [31]) [-32])) [32]))))
     // result: (RORL x y)
@@ -18309,13 +17135,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18329,54 +17153,44 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGQ || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPQconst || auxIntToInt32(v_1_1_0.AuxInt) != 32) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -32) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 31 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64RORL);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHRL x y) (ANDL (SHLL x (NEGL y)) (SBBLcarrymask (CMPLconst (NEGL (ADDLconst (ANDLconst y [31]) [-32])) [32]))))
     // result: (RORL x y)
@@ -18391,13 +17205,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18411,54 +17223,44 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGL || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPLconst || auxIntToInt32(v_1_1_0.AuxInt) != 32) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -32) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 31 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64RORL);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHLL x (ANDQconst y [15])) (ANDL (SHRW x (NEGQ (ADDQconst (ANDQconst y [15]) [-16]))) (SBBLcarrymask (CMPQconst (NEGQ (ADDQconst (ANDQconst y [15]) [-16])) [16]))))
     // cond: v.Type.Size() == 2
@@ -18474,19 +17276,16 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDQconst || auxIntToInt32(v_0_1.AuxInt) != 15) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18500,64 +17299,52 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         var v_1_0_1_0 = v_1_0_1.Args[0];
                         if (v_1_0_1_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_0_1_0.AuxInt) != -16) {
                             continue;
                         }
-
                         var v_1_0_1_0_0 = v_1_0_1_0.Args[0];
                         if (v_1_0_1_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_0_1_0_0.AuxInt) != 15 || y != v_1_0_1_0_0.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPQconst || auxIntToInt32(v_1_1_0.AuxInt) != 16) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -16) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 15 || y != v_1_1_0_0_0_0.Args[0] || !(v.Type.Size() == 2)) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLW);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHLL x (ANDLconst y [15])) (ANDL (SHRW x (NEGL (ADDLconst (ANDLconst y [15]) [-16]))) (SBBLcarrymask (CMPLconst (NEGL (ADDLconst (ANDLconst y [15]) [-16])) [16]))))
     // cond: v.Type.Size() == 2
@@ -18573,19 +17360,16 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDLconst || auxIntToInt32(v_0_1.AuxInt) != 15) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18599,64 +17383,52 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_0_1_0 = v_1_0_1.Args[0];
                         if (v_1_0_1_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_0_1_0.AuxInt) != -16) {
                             continue;
                         }
-
                         v_1_0_1_0_0 = v_1_0_1_0.Args[0];
                         if (v_1_0_1_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_0_1_0_0.AuxInt) != 15 || y != v_1_0_1_0_0.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPLconst || auxIntToInt32(v_1_1_0.AuxInt) != 16) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -16) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 15 || y != v_1_1_0_0_0_0.Args[0] || !(v.Type.Size() == 2)) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLW);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHRW x (ANDQconst y [15])) (SHLL x (NEGQ (ADDQconst (ANDQconst y [15]) [-16]))))
     // cond: v.Type.Size() == 2
@@ -18672,50 +17444,41 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDQconst || auxIntToInt32(v_0_1.AuxInt) != 15) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64SHLL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpAMD64NEGQ) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0.AuxInt) != -16) {
                     continue;
                 }
-
                 v_1_1_0_0 = v_1_1_0.Args[0];
                 if (v_1_1_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0.AuxInt) != 15 || y != v_1_1_0_0.Args[0] || !(v.Type.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64RORW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHRW x (ANDLconst y [15])) (SHLL x (NEGL (ADDLconst (ANDLconst y [15]) [-16]))))
     // cond: v.Type.Size() == 2
@@ -18731,50 +17494,41 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDLconst || auxIntToInt32(v_0_1.AuxInt) != 15) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64SHLL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpAMD64NEGL) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0.AuxInt) != -16) {
                     continue;
                 }
-
                 v_1_1_0_0 = v_1_1_0.Args[0];
                 if (v_1_1_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0.AuxInt) != 15 || y != v_1_1_0_0.Args[0] || !(v.Type.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64RORW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHLL x (ANDQconst y [ 7])) (ANDL (SHRB x (NEGQ (ADDQconst (ANDQconst y [ 7]) [ -8]))) (SBBLcarrymask (CMPQconst (NEGQ (ADDQconst (ANDQconst y [ 7]) [ -8])) [ 8]))))
     // cond: v.Type.Size() == 1
@@ -18790,19 +17544,16 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDQconst || auxIntToInt32(v_0_1.AuxInt) != 7) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18816,64 +17567,52 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         v_1_0_1_0 = v_1_0_1.Args[0];
                         if (v_1_0_1_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_0_1_0.AuxInt) != -8) {
                             continue;
                         }
-
                         v_1_0_1_0_0 = v_1_0_1_0.Args[0];
                         if (v_1_0_1_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_0_1_0_0.AuxInt) != 7 || y != v_1_0_1_0_0.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPQconst || auxIntToInt32(v_1_1_0.AuxInt) != 8) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -8) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 7 || y != v_1_1_0_0_0_0.Args[0] || !(v.Type.Size() == 1)) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLB);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHLL x (ANDLconst y [ 7])) (ANDL (SHRB x (NEGL (ADDLconst (ANDLconst y [ 7]) [ -8]))) (SBBLcarrymask (CMPLconst (NEGL (ADDLconst (ANDLconst y [ 7]) [ -8])) [ 8]))))
     // cond: v.Type.Size() == 1
@@ -18889,19 +17628,16 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDLconst || auxIntToInt32(v_0_1.AuxInt) != 7) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64ANDL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18915,64 +17651,52 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_0_1_0 = v_1_0_1.Args[0];
                         if (v_1_0_1_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_0_1_0.AuxInt) != -8) {
                             continue;
                         }
-
                         v_1_0_1_0_0 = v_1_0_1_0.Args[0];
                         if (v_1_0_1_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_0_1_0_0.AuxInt) != 7 || y != v_1_0_1_0_0.Args[0] || v_1_1.Op != OpAMD64SBBLcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPLconst || auxIntToInt32(v_1_1_0.AuxInt) != 8) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -8) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 7 || y != v_1_1_0_0_0_0.Args[0] || !(v.Type.Size() == 1)) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLB);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHRB x (ANDQconst y [ 7])) (SHLL x (NEGQ (ADDQconst (ANDQconst y [ 7]) [ -8]))))
     // cond: v.Type.Size() == 1
@@ -18988,50 +17712,41 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDQconst || auxIntToInt32(v_0_1.AuxInt) != 7) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64SHLL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpAMD64NEGQ) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0.AuxInt) != -8) {
                     continue;
                 }
-
                 v_1_1_0_0 = v_1_1_0.Args[0];
                 if (v_1_1_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0.AuxInt) != 7 || y != v_1_1_0_0.Args[0] || !(v.Type.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(OpAMD64RORB);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL (SHRB x (ANDLconst y [ 7])) (SHLL x (NEGL (ADDLconst (ANDLconst y [ 7]) [ -8]))))
     // cond: v.Type.Size() == 1
@@ -19047,50 +17762,41 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpAMD64ANDLconst || auxIntToInt32(v_0_1.AuxInt) != 7) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpAMD64SHLL) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpAMD64NEGL) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0.AuxInt) != -8) {
                     continue;
                 }
-
                 v_1_1_0_0 = v_1_1_0.Args[0];
                 if (v_1_1_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0.AuxInt) != 7 || y != v_1_1_0_0.Args[0] || !(v.Type.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(OpAMD64RORB);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x x)
     // result: x
@@ -19101,7 +17807,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORL x0:(MOVBload [i0] {s} p mem) sh:(SHLLconst [8] x1:(MOVBload [i1] {s} p mem)))
     // cond: i1 == i0+1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -19118,7 +17823,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i0 = auxIntToInt32(x0.AuxInt);
                 var s = auxToSym(x0.Aux);
                 var mem = x0.Args[1];
@@ -19127,22 +17831,18 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 var x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 var i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 var v0 = b.NewValue0(x1.Pos, OpAMD64MOVWload, typ.UInt16);
                 v.copyOf(v0);
@@ -19150,14 +17850,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x0:(MOVBload [i] {s} p0 mem) sh:(SHLLconst [8] x1:(MOVBload [i] {s} p1 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -19174,7 +17872,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -19183,18 +17880,15 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVBload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 var p1 = x1.Args[0];
                 if (mem != x1.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVWload, typ.UInt16);
                 v.copyOf(v0);
@@ -19202,14 +17896,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x0:(MOVWload [i0] {s} p mem) sh:(SHLLconst [16] x1:(MOVWload [i1] {s} p mem)))
     // cond: i1 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -19226,7 +17918,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -19235,22 +17926,18 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVLload, typ.UInt32);
                 v.copyOf(v0);
@@ -19258,14 +17945,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x0:(MOVWload [i] {s} p0 mem) sh:(SHLLconst [16] x1:(MOVWload [i] {s} p1 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -19282,7 +17967,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -19291,18 +17975,15 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVWload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 p1 = x1.Args[0];
                 if (mem != x1.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVLload, typ.UInt32);
                 v.copyOf(v0);
@@ -19310,14 +17991,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL s1:(SHLLconst [j1] x1:(MOVBload [i1] {s} p mem)) or:(ORL s0:(SHLLconst [j0] x0:(MOVBload [i0] {s} p mem)) y))
     // cond: i1 == i0+1 && j1 == j0+8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -19334,13 +18013,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var j1 = auxIntToInt8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -19349,7 +18026,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORL) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 var or_0 = or.Args[0];
                 var or_1 = or.Args[1];
@@ -19364,28 +18040,23 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         var j0 = auxIntToInt8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpAMD64MOVBload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 1 && j1 == j0 + 8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpAMD64ORL, v.Type);
                         v.copyOf(v0);
@@ -19398,20 +18069,17 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL s1:(SHLLconst [j1] x1:(MOVBload [i] {s} p1 mem)) or:(ORL s0:(SHLLconst [j0] x0:(MOVBload [i] {s} p0 mem)) y))
     // cond: j1 == j0+8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -19428,13 +18096,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j1 = auxIntToInt8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -19443,7 +18109,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORL) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -19458,24 +18123,20 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j0 = auxIntToInt8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpAMD64MOVBload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         p0 = x0.Args[0];
                         if (mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(j1 == j0 + 8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpAMD64ORL, v.Type);
                         v.copyOf(v0);
@@ -19488,20 +18149,17 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x1:(MOVBload [i1] {s} p mem) sh:(SHLLconst [8] x0:(MOVBload [i0] {s} p mem)))
     // cond: i1 == i0+1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -19518,7 +18176,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -19527,22 +18184,18 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = sh.Args[0];
                 if (x0.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64ROLWconst, v.Type);
                 v.copyOf(v0);
@@ -19553,14 +18206,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x1:(MOVBload [i] {s} p1 mem) sh:(SHLLconst [8] x0:(MOVBload [i] {s} p0 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -19577,7 +18228,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -19586,18 +18236,15 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = sh.Args[0];
                 if (x0.Op != OpAMD64MOVBload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 p0 = x0.Args[0];
                 if (mem != x0.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64ROLWconst, v.Type);
                 v.copyOf(v0);
@@ -19608,14 +18255,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v1.AddArg2(p0, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL r1:(ROLWconst [8] x1:(MOVWload [i1] {s} p mem)) sh:(SHLLconst [16] r0:(ROLWconst [8] x0:(MOVWload [i0] {s} p mem))))
     // cond: i1 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -19632,12 +18277,10 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -19646,27 +18289,22 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 var r0 = sh.Args[0];
                 if (r0.Op != OpAMD64ROLWconst || auxIntToInt8(r0.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64BSWAPL, v.Type);
                 v.copyOf(v0);
@@ -19676,14 +18314,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL r1:(ROLWconst [8] x1:(MOVWload [i] {s} p1 mem)) sh:(SHLLconst [16] r0:(ROLWconst [8] x0:(MOVWload [i] {s} p0 mem))))
     // cond: x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -19700,12 +18336,10 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -19714,23 +18348,19 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLLconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 r0 = sh.Args[0];
                 if (r0.Op != OpAMD64ROLWconst || auxIntToInt8(r0.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVWload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 p0 = x0.Args[0];
                 if (mem != x0.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64BSWAPL, v.Type);
                 v.copyOf(v0);
@@ -19740,14 +18370,12 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 v1.AddArg2(p0, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL s0:(SHLLconst [j0] x0:(MOVBload [i0] {s} p mem)) or:(ORL s1:(SHLLconst [j1] x1:(MOVBload [i1] {s} p mem)) y))
     // cond: i1 == i0+1 && j1 == j0-8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -19764,13 +18392,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j0 = auxIntToInt8(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -19779,7 +18405,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORL) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -19794,28 +18419,23 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j1 = auxIntToInt8(s1.AuxInt);
                         x1 = s1.Args[0];
                         if (x1.Op != OpAMD64MOVBload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 1 && j1 == j0 - 8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpAMD64ORL, v.Type);
                         v.copyOf(v0);
@@ -19831,20 +18451,17 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL s0:(SHLLconst [j0] x0:(MOVBload [i] {s} p0 mem)) or:(ORL s1:(SHLLconst [j1] x1:(MOVBload [i] {s} p1 mem)) y))
     // cond: j1 == j0-8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -19861,13 +18478,11 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j0 = auxIntToInt8(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -19876,7 +18491,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORL) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -19891,24 +18505,20 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j1 = auxIntToInt8(s1.AuxInt);
                         x1 = s1.Args[0];
                         if (x1.Op != OpAMD64MOVBload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         p1 = x1.Args[0];
                         if (mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(j1 == j0 - 8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpAMD64ORL, v.Type);
                         v.copyOf(v0);
@@ -19924,20 +18534,17 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -19955,7 +18562,6 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 mem = l.Args[1];
@@ -19963,23 +18569,19 @@ private static bool rewriteValueAMD64_OpAMD64ORL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ORLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19998,7 +18600,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(log32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORLconst [c] (ORLconst [d] x))
     // result: (ORLconst [c | d] x)
@@ -20013,7 +18614,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c | d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORLconst [c] (BTSLconst [d] x))
     // result: (ORLconst [c | 1<<uint32(d)] x)
@@ -20028,7 +18628,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c | 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORLconst [c] x)
     // cond: c==0
@@ -20041,7 +18640,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORLconst [c] _)
     // cond: c==-1
@@ -20054,7 +18652,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c|d])
@@ -20067,10 +18664,8 @@ private static bool rewriteValueAMD64_OpAMD64ORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(c | d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20097,7 +18692,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLconstmodify(ptr<Value> _addr_v) 
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ORLconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -20120,10 +18714,8 @@ private static bool rewriteValueAMD64_OpAMD64ORLconstmodify(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20154,7 +18746,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ORLload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -20178,7 +18769,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: ( ORLload x [off] {sym} ptr (MOVSSstore [off] {sym} ptr y _))
     // result: ( ORL x (MOVLf2i y))
@@ -20199,10 +18789,8 @@ private static bool rewriteValueAMD64_OpAMD64ORLload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20231,7 +18819,6 @@ private static bool rewriteValueAMD64_OpAMD64ORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ORLmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -20255,10 +18842,8 @@ private static bool rewriteValueAMD64_OpAMD64ORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20280,25 +18865,21 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var x = v_1;
                 v.reset(OpAMD64BTSQ);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (MOVQconst [c]) x)
     // cond: isUint64PowerOfTwo(c) && uint64(c) >= 128
@@ -20314,25 +18895,21 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 x = v_1;
                 if (!(isUint64PowerOfTwo(c) && uint64(c) >= 128)) {
                     continue;
                 }
-
                 v.reset(OpAMD64BTSQconst);
                 v.AuxInt = int8ToAuxInt(int8(log64(c)));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x (MOVQconst [c]))
     // cond: is32Bit(c)
@@ -20349,24 +18926,20 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ORQconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x (MOVLconst [c]))
     // result: (ORQconst [c] x)
@@ -20382,20 +18955,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpAMD64ORQconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (SHLQconst x [c]) (SHRQconst x [d]))
     // cond: d==64-c
@@ -20411,30 +18981,25 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRQconst) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 64 - c)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLQconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (SHLQ x y) (ANDQ (SHRQ x (NEGQ y)) (SBBQcarrymask (CMPQconst (NEGQ (ADDQconst (ANDQconst y [63]) [-64])) [64]))))
     // result: (ROLQ x y)
@@ -20449,13 +19014,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDQ) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -20469,54 +19032,44 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGQ || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBQcarrymask) {
                             continue;
                         }
-
                         var v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPQconst || auxIntToInt32(v_1_1_0.AuxInt) != 64) {
                             continue;
                         }
-
                         var v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         var v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -64) {
                             continue;
                         }
-
                         var v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 63 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLQ);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (SHLQ x y) (ANDQ (SHRQ x (NEGL y)) (SBBQcarrymask (CMPLconst (NEGL (ADDLconst (ANDLconst y [63]) [-64])) [64]))))
     // result: (ROLQ x y)
@@ -20531,13 +19084,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDQ) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -20551,54 +19102,44 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGL || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBQcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPLconst || auxIntToInt32(v_1_1_0.AuxInt) != 64) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -64) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 63 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64ROLQ);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (SHRQ x y) (ANDQ (SHLQ x (NEGQ y)) (SBBQcarrymask (CMPQconst (NEGQ (ADDQconst (ANDQconst y [63]) [-64])) [64]))))
     // result: (RORQ x y)
@@ -20613,13 +19154,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDQ) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -20633,54 +19172,44 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGQ || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBQcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPQconst || auxIntToInt32(v_1_1_0.AuxInt) != 64) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGQ) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDQconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -64) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDQconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 63 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64RORQ);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (SHRQ x y) (ANDQ (SHLQ x (NEGL y)) (SBBQcarrymask (CMPLconst (NEGL (ADDLconst (ANDLconst y [63]) [-64])) [64]))))
     // result: (RORQ x y)
@@ -20695,13 +19224,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64ANDQ) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -20715,54 +19242,44 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         _ = v_1_0.Args[1];
                         if (x != v_1_0.Args[0]) {
                             continue;
                         }
-
                         v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpAMD64NEGL || y != v_1_0_1.Args[0] || v_1_1.Op != OpAMD64SBBQcarrymask) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAMD64CMPLconst || auxIntToInt32(v_1_1_0.AuxInt) != 64) {
                             continue;
                         }
-
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAMD64NEGL) {
                             continue;
                         }
-
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpAMD64ADDLconst || auxIntToInt32(v_1_1_0_0_0.AuxInt) != -64) {
                             continue;
                         }
-
                         v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpAMD64ANDLconst || auxIntToInt32(v_1_1_0_0_0_0.AuxInt) != 63 || y != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         v.reset(OpAMD64RORQ);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (SHRQ lo bits) (SHLQ hi (NEGQ bits)))
     // result: (SHRDQ lo hi bits)
@@ -20777,31 +19294,26 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var bits = v_0.Args[1];
                 var lo = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHLQ) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var hi = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpAMD64NEGQ || bits != v_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpAMD64SHRDQ);
                 v.AddArg3(lo, hi, bits);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (SHLQ lo bits) (SHRQ hi (NEGQ bits)))
     // result: (SHLDQ lo hi bits)
@@ -20816,31 +19328,26 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 bits = v_0.Args[1];
                 lo = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRQ) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 hi = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpAMD64NEGQ || bits != v_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpAMD64SHLDQ);
                 v.AddArg3(lo, hi, bits);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ (MOVQconst [c]) (MOVQconst [d]))
     // result: (MOVQconst [c|d])
@@ -20855,24 +19362,20 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpAMD64MOVQconst) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpAMD64MOVQconst);
                 v.AuxInt = int64ToAuxInt(c | d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x x)
     // result: x
@@ -20883,7 +19386,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORQ x0:(MOVBload [i0] {s} p mem) sh:(SHLQconst [8] x1:(MOVBload [i1] {s} p mem)))
     // cond: i1 == i0+1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -20900,7 +19402,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i0 = auxIntToInt32(x0.AuxInt);
                 var s = auxToSym(x0.Aux);
                 var mem = x0.Args[1];
@@ -20909,22 +19410,18 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 var x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 var i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 var v0 = b.NewValue0(x1.Pos, OpAMD64MOVWload, typ.UInt16);
                 v.copyOf(v0);
@@ -20932,14 +19429,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x0:(MOVBload [i] {s} p0 mem) sh:(SHLQconst [8] x1:(MOVBload [i] {s} p1 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -20956,7 +19451,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -20965,18 +19459,15 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVBload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 var p1 = x1.Args[0];
                 if (mem != x1.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVWload, typ.UInt16);
                 v.copyOf(v0);
@@ -20984,14 +19475,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x0:(MOVWload [i0] {s} p mem) sh:(SHLQconst [16] x1:(MOVWload [i1] {s} p mem)))
     // cond: i1 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -21008,7 +19497,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -21017,22 +19505,18 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVLload, typ.UInt32);
                 v.copyOf(v0);
@@ -21040,14 +19524,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x0:(MOVWload [i] {s} p0 mem) sh:(SHLQconst [16] x1:(MOVWload [i] {s} p1 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -21064,7 +19546,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -21073,18 +19554,15 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVWload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 p1 = x1.Args[0];
                 if (mem != x1.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVLload, typ.UInt32);
                 v.copyOf(v0);
@@ -21092,14 +19570,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x0:(MOVLload [i0] {s} p mem) sh:(SHLQconst [32] x1:(MOVLload [i1] {s} p mem)))
     // cond: i1 == i0+4 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -21116,7 +19592,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -21125,22 +19600,18 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 32) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVLload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 4 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVQload, typ.UInt64);
                 v.copyOf(v0);
@@ -21148,14 +19619,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x0:(MOVLload [i] {s} p0 mem) sh:(SHLQconst [32] x1:(MOVLload [i] {s} p1 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 4) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -21172,7 +19641,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -21181,18 +19649,15 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 32) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpAMD64MOVLload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 p1 = x1.Args[0];
                 if (mem != x1.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 4) && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpAMD64MOVQload, typ.UInt64);
                 v.copyOf(v0);
@@ -21200,14 +19665,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s1:(SHLQconst [j1] x1:(MOVBload [i1] {s} p mem)) or:(ORQ s0:(SHLQconst [j0] x0:(MOVBload [i0] {s} p mem)) y))
     // cond: i1 == i0+1 && j1 == j0+8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -21224,13 +19687,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var j1 = auxIntToInt8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21239,7 +19700,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 var or_0 = or.Args[0];
                 var or_1 = or.Args[1];
@@ -21254,28 +19714,23 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         var j0 = auxIntToInt8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpAMD64MOVBload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 1 && j1 == j0 + 8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -21288,20 +19743,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s1:(SHLQconst [j1] x1:(MOVBload [i] {s} p1 mem)) or:(ORQ s0:(SHLQconst [j0] x0:(MOVBload [i] {s} p0 mem)) y))
     // cond: j1 == j0+8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -21318,13 +19770,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j1 = auxIntToInt8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21333,7 +19783,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -21348,24 +19797,20 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j0 = auxIntToInt8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpAMD64MOVBload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         p0 = x0.Args[0];
                         if (mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(j1 == j0 + 8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -21378,20 +19823,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s1:(SHLQconst [j1] x1:(MOVWload [i1] {s} p mem)) or:(ORQ s0:(SHLQconst [j0] x0:(MOVWload [i0] {s} p mem)) y))
     // cond: i1 == i0+2 && j1 == j0+16 && j0 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -21408,13 +19850,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j1 = auxIntToInt8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21423,7 +19863,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -21438,28 +19877,23 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j0 = auxIntToInt8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpAMD64MOVWload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 2 && j1 == j0 + 16 && j0 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -21472,20 +19906,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s1:(SHLQconst [j1] x1:(MOVWload [i] {s} p1 mem)) or:(ORQ s0:(SHLQconst [j0] x0:(MOVWload [i] {s} p0 mem)) y))
     // cond: j1 == j0+16 && j0 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -21502,13 +19933,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j1 = auxIntToInt8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21517,7 +19946,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -21532,24 +19960,20 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j0 = auxIntToInt8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpAMD64MOVWload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         p0 = x0.Args[0];
                         if (mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(j1 == j0 + 16 && j0 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -21562,20 +19986,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x1:(MOVBload [i1] {s} p mem) sh:(SHLQconst [8] x0:(MOVBload [i0] {s} p mem)))
     // cond: i1 == i0+1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -21592,7 +20013,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21601,22 +20021,18 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = sh.Args[0];
                 if (x0.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64ROLWconst, v.Type);
                 v.copyOf(v0);
@@ -21627,14 +20043,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x1:(MOVBload [i] {s} p1 mem) sh:(SHLQconst [8] x0:(MOVBload [i] {s} p0 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -21651,7 +20065,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21660,18 +20073,15 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = sh.Args[0];
                 if (x0.Op != OpAMD64MOVBload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 p0 = x0.Args[0];
                 if (mem != x0.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64ROLWconst, v.Type);
                 v.copyOf(v0);
@@ -21682,14 +20092,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v1.AddArg2(p0, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ r1:(ROLWconst [8] x1:(MOVWload [i1] {s} p mem)) sh:(SHLQconst [16] r0:(ROLWconst [8] x0:(MOVWload [i0] {s} p mem))))
     // cond: i1 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -21706,12 +20114,10 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21720,27 +20126,22 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 var r0 = sh.Args[0];
                 if (r0.Op != OpAMD64ROLWconst || auxIntToInt8(r0.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64BSWAPL, v.Type);
                 v.copyOf(v0);
@@ -21750,14 +20151,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ r1:(ROLWconst [8] x1:(MOVWload [i] {s} p1 mem)) sh:(SHLQconst [16] r0:(ROLWconst [8] x0:(MOVWload [i] {s} p0 mem))))
     // cond: x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -21774,12 +20173,10 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21788,23 +20185,19 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 r0 = sh.Args[0];
                 if (r0.Op != OpAMD64ROLWconst || auxIntToInt8(r0.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVWload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 p0 = x0.Args[0];
                 if (mem != x0.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64BSWAPL, v.Type);
                 v.copyOf(v0);
@@ -21814,14 +20207,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v1.AddArg2(p0, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ r1:(BSWAPL x1:(MOVLload [i1] {s} p mem)) sh:(SHLQconst [32] r0:(BSWAPL x0:(MOVLload [i0] {s} p mem))))
     // cond: i1 == i0+4 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -21838,12 +20229,10 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpAMD64MOVLload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21852,27 +20241,22 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 32) {
                     continue;
                 }
-
                 r0 = sh.Args[0];
                 if (r0.Op != OpAMD64BSWAPL) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVLload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 4 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64BSWAPQ, v.Type);
                 v.copyOf(v0);
@@ -21882,14 +20266,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ r1:(BSWAPL x1:(MOVLload [i] {s} p1 mem)) sh:(SHLQconst [32] r0:(BSWAPL x0:(MOVLload [i] {s} p0 mem))))
     // cond: x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 4) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -21906,12 +20288,10 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpAMD64MOVLload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -21920,23 +20300,19 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (sh.Op != OpAMD64SHLQconst || auxIntToInt8(sh.AuxInt) != 32) {
                     continue;
                 }
-
                 r0 = sh.Args[0];
                 if (r0.Op != OpAMD64BSWAPL) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVLload || auxIntToInt32(x0.AuxInt) != i || auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 p0 = x0.Args[0];
                 if (mem != x0.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && sequentialAddresses(p0, p1, 4) && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpAMD64BSWAPQ, v.Type);
                 v.copyOf(v0);
@@ -21946,14 +20322,12 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 v1.AddArg2(p0, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s0:(SHLQconst [j0] x0:(MOVBload [i0] {s} p mem)) or:(ORQ s1:(SHLQconst [j1] x1:(MOVBload [i1] {s} p mem)) y))
     // cond: i1 == i0+1 && j1 == j0-8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -21970,13 +20344,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j0 = auxIntToInt8(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -21985,7 +20357,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -22000,28 +20371,23 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j1 = auxIntToInt8(s1.AuxInt);
                         x1 = s1.Args[0];
                         if (x1.Op != OpAMD64MOVBload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 1 && j1 == j0 - 8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -22037,20 +20403,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s0:(SHLQconst [j0] x0:(MOVBload [i] {s} p0 mem)) or:(ORQ s1:(SHLQconst [j1] x1:(MOVBload [i] {s} p1 mem)) y))
     // cond: j1 == j0-8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -22067,13 +20430,11 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j0 = auxIntToInt8(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpAMD64MOVBload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -22082,7 +20443,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -22097,24 +20457,20 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j1 = auxIntToInt8(s1.AuxInt);
                         x1 = s1.Args[0];
                         if (x1.Op != OpAMD64MOVBload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         p1 = x1.Args[0];
                         if (mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(j1 == j0 - 8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -22130,20 +20486,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s0:(SHLQconst [j0] r0:(ROLWconst [8] x0:(MOVWload [i0] {s} p mem))) or:(ORQ s1:(SHLQconst [j1] r1:(ROLWconst [8] x1:(MOVWload [i1] {s} p mem))) y))
     // cond: i1 == i0+2 && j1 == j0-16 && j1 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, r0, r1, s0, s1, or)
@@ -22160,18 +20513,15 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j0 = auxIntToInt8(s0.AuxInt);
                 r0 = s0.Args[0];
                 if (r0.Op != OpAMD64ROLWconst || auxIntToInt8(r0.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -22180,7 +20530,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -22195,33 +20544,27 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j1 = auxIntToInt8(s1.AuxInt);
                         r1 = s1.Args[0];
                         if (r1.Op != OpAMD64ROLWconst || auxIntToInt8(r1.AuxInt) != 8) {
                             continue;
                         }
-
                         x1 = r1.Args[0];
                         if (x1.Op != OpAMD64MOVWload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 2 && j1 == j0 - 16 && j1 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, r0, r1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -22236,20 +20579,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ s0:(SHLQconst [j0] r0:(ROLWconst [8] x0:(MOVWload [i] {s} p0 mem))) or:(ORQ s1:(SHLQconst [j1] r1:(ROLWconst [8] x1:(MOVWload [i] {s} p1 mem))) y))
     // cond: j1 == j0-16 && j1 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, r0, r1, s0, s1, or)
@@ -22266,18 +20606,15 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j0 = auxIntToInt8(s0.AuxInt);
                 r0 = s0.Args[0];
                 if (r0.Op != OpAMD64ROLWconst || auxIntToInt8(r0.AuxInt) != 8) {
                     continue;
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpAMD64MOVWload) {
                     continue;
                 }
-
                 i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -22286,7 +20623,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (or.Op != OpAMD64ORQ) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -22301,29 +20637,24 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j1 = auxIntToInt8(s1.AuxInt);
                         r1 = s1.Args[0];
                         if (r1.Op != OpAMD64ROLWconst || auxIntToInt8(r1.AuxInt) != 8) {
                             continue;
                         }
-
                         x1 = r1.Args[0];
                         if (x1.Op != OpAMD64MOVWload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         p1 = x1.Args[0];
                         if (mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(j1 == j0 - 16 && j1 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && sequentialAddresses(p0, p1, 2) && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, r0, r1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpAMD64ORQ, v.Type);
                         v.copyOf(v0);
@@ -22338,20 +20669,17 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORQ x l:(MOVQload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -22369,7 +20697,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 mem = l.Args[1];
@@ -22377,23 +20704,19 @@ private static bool rewriteValueAMD64_OpAMD64ORQ(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64ORQload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22412,7 +20735,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(log32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORQconst [c] (ORQconst [d] x))
     // result: (ORQconst [c | d] x)
@@ -22427,7 +20749,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c | d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORQconst [c] (BTSQconst [d] x))
     // cond: is32Bit(int64(c) | 1<<uint32(d))
@@ -22446,7 +20767,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c | 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORQconst [0] x)
     // result: x
@@ -22457,7 +20777,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORQconst [-1] _)
     // result: (MOVQconst [-1])
@@ -22468,7 +20787,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(c)|d])
@@ -22481,10 +20799,8 @@ private static bool rewriteValueAMD64_OpAMD64ORQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(c) | d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORQconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22511,7 +20827,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQconstmodify(ptr<Value> _addr_v) 
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ORQconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -22534,10 +20849,8 @@ private static bool rewriteValueAMD64_OpAMD64ORQconstmodify(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22568,7 +20881,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ORQload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -22592,7 +20904,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: ( ORQload x [off] {sym} ptr (MOVSDstore [off] {sym} ptr y _))
     // result: ( ORQ x (MOVQf2i y))
@@ -22613,10 +20924,8 @@ private static bool rewriteValueAMD64_OpAMD64ORQload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ORQmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22645,7 +20954,6 @@ private static bool rewriteValueAMD64_OpAMD64ORQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ORQmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -22669,10 +20977,8 @@ private static bool rewriteValueAMD64_OpAMD64ORQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22690,7 +20996,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLB(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLB x (NEGL y))
     // result: (RORB x y)
@@ -22703,7 +21008,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLB(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLB x (MOVQconst [c]))
     // result: (ROLBconst [int8(c&7) ] x)
@@ -22717,7 +21021,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 7));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLB x (MOVLconst [c]))
     // result: (ROLBconst [int8(c&7) ] x)
@@ -22731,10 +21034,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 7));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22753,7 +21054,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLBconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt((c + d) & 7);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLBconst x [0])
     // result: x
@@ -22764,10 +21064,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLBconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22785,7 +21083,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLL(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLL x (NEGL y))
     // result: (RORL x y)
@@ -22798,7 +21095,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLL(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLL x (MOVQconst [c]))
     // result: (ROLLconst [int8(c&31)] x)
@@ -22812,7 +21108,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLL x (MOVLconst [c]))
     // result: (ROLLconst [int8(c&31)] x)
@@ -22826,10 +21121,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22848,7 +21141,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt((c + d) & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLLconst x [0])
     // result: x
@@ -22859,10 +21151,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLLconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22880,7 +21170,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLQ x (NEGL y))
     // result: (RORQ x y)
@@ -22893,7 +21182,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLQ x (MOVQconst [c]))
     // result: (ROLQconst [int8(c&63)] x)
@@ -22907,7 +21195,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLQ x (MOVLconst [c]))
     // result: (ROLQconst [int8(c&63)] x)
@@ -22921,10 +21208,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22943,7 +21228,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt((c + d) & 63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLQconst x [0])
     // result: x
@@ -22954,10 +21238,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22975,7 +21257,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLW(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLW x (NEGL y))
     // result: (RORW x y)
@@ -22988,7 +21269,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLW(ptr<Value> _addr_v) {
         v.reset(OpAMD64RORW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ROLW x (MOVQconst [c]))
     // result: (ROLWconst [int8(c&15)] x)
@@ -23002,7 +21282,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 15));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLW x (MOVLconst [c]))
     // result: (ROLWconst [int8(c&15)] x)
@@ -23016,10 +21295,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 15));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64ROLWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23038,7 +21315,6 @@ private static bool rewriteValueAMD64_OpAMD64ROLWconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt((c + d) & 15);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLWconst x [0])
     // result: x
@@ -23049,10 +21325,8 @@ private static bool rewriteValueAMD64_OpAMD64ROLWconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64RORB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23070,7 +21344,6 @@ private static bool rewriteValueAMD64_OpAMD64RORB(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORB x (NEGL y))
     // result: (ROLB x y)
@@ -23083,7 +21356,6 @@ private static bool rewriteValueAMD64_OpAMD64RORB(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORB x (MOVQconst [c]))
     // result: (ROLBconst [int8((-c)&7) ] x)
@@ -23097,7 +21369,6 @@ private static bool rewriteValueAMD64_OpAMD64RORB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 7));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RORB x (MOVLconst [c]))
     // result: (ROLBconst [int8((-c)&7) ] x)
@@ -23111,10 +21382,8 @@ private static bool rewriteValueAMD64_OpAMD64RORB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 7));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64RORL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23132,7 +21401,6 @@ private static bool rewriteValueAMD64_OpAMD64RORL(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORL x (NEGL y))
     // result: (ROLL x y)
@@ -23145,7 +21413,6 @@ private static bool rewriteValueAMD64_OpAMD64RORL(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORL x (MOVQconst [c]))
     // result: (ROLLconst [int8((-c)&31)] x)
@@ -23159,7 +21426,6 @@ private static bool rewriteValueAMD64_OpAMD64RORL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RORL x (MOVLconst [c]))
     // result: (ROLLconst [int8((-c)&31)] x)
@@ -23173,10 +21439,8 @@ private static bool rewriteValueAMD64_OpAMD64RORL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 31));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64RORQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23194,7 +21458,6 @@ private static bool rewriteValueAMD64_OpAMD64RORQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORQ x (NEGL y))
     // result: (ROLQ x y)
@@ -23207,7 +21470,6 @@ private static bool rewriteValueAMD64_OpAMD64RORQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORQ x (MOVQconst [c]))
     // result: (ROLQconst [int8((-c)&63)] x)
@@ -23221,7 +21483,6 @@ private static bool rewriteValueAMD64_OpAMD64RORQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RORQ x (MOVLconst [c]))
     // result: (ROLQconst [int8((-c)&63)] x)
@@ -23235,10 +21496,8 @@ private static bool rewriteValueAMD64_OpAMD64RORQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64RORW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23256,7 +21515,6 @@ private static bool rewriteValueAMD64_OpAMD64RORW(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORW x (NEGL y))
     // result: (ROLW x y)
@@ -23269,7 +21527,6 @@ private static bool rewriteValueAMD64_OpAMD64RORW(ptr<Value> _addr_v) {
         v.reset(OpAMD64ROLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RORW x (MOVQconst [c]))
     // result: (ROLWconst [int8((-c)&15)] x)
@@ -23283,7 +21540,6 @@ private static bool rewriteValueAMD64_OpAMD64RORW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 15));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RORW x (MOVLconst [c]))
     // result: (ROLWconst [int8((-c)&15)] x)
@@ -23297,10 +21553,8 @@ private static bool rewriteValueAMD64_OpAMD64RORW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8((-c) & 15));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23319,7 +21573,6 @@ private static bool rewriteValueAMD64_OpAMD64SARB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(min(int64(c) & 31, 7)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SARB x (MOVLconst [c]))
     // result: (SARBconst [int8(min(int64(c)&31,7))] x)
@@ -23333,10 +21586,8 @@ private static bool rewriteValueAMD64_OpAMD64SARB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(min(int64(c) & 31, 7)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23351,7 +21602,6 @@ private static bool rewriteValueAMD64_OpAMD64SARBconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SARBconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(int8(d))>>uint64(c)])
@@ -23364,10 +21614,8 @@ private static bool rewriteValueAMD64_OpAMD64SARBconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(int8(d)) >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23387,7 +21635,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SARL x (MOVLconst [c]))
     // result: (SARLconst [int8(c&31)] x)
@@ -23401,7 +21648,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SARL x (ADDQconst [c] y))
     // cond: c & 31 == 0
@@ -23419,7 +21665,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARL x (NEGQ <t> (ADDQconst [c] y)))
     // cond: c & 31 == 0
@@ -23444,7 +21689,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SARL x (ANDQconst [c] y))
     // cond: c & 31 == 31
@@ -23462,7 +21706,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARL x (NEGQ <t> (ANDQconst [c] y)))
     // cond: c & 31 == 31
@@ -23487,7 +21730,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SARL x (ADDLconst [c] y))
     // cond: c & 31 == 0
@@ -23505,7 +21747,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARL x (NEGL <t> (ADDLconst [c] y)))
     // cond: c & 31 == 0
@@ -23530,7 +21771,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SARL x (ANDLconst [c] y))
     // cond: c & 31 == 31
@@ -23548,7 +21788,6 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARL x (NEGL <t> (ANDLconst [c] y)))
     // cond: c & 31 == 31
@@ -23573,10 +21812,8 @@ private static bool rewriteValueAMD64_OpAMD64SARL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23591,7 +21828,6 @@ private static bool rewriteValueAMD64_OpAMD64SARLconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SARLconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(int32(d))>>uint64(c)])
@@ -23604,10 +21840,8 @@ private static bool rewriteValueAMD64_OpAMD64SARLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(int32(d)) >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23627,7 +21861,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SARQ x (MOVLconst [c]))
     // result: (SARQconst [int8(c&63)] x)
@@ -23641,7 +21874,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SARQ x (ADDQconst [c] y))
     // cond: c & 63 == 0
@@ -23659,7 +21891,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARQ x (NEGQ <t> (ADDQconst [c] y)))
     // cond: c & 63 == 0
@@ -23684,7 +21915,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SARQ x (ANDQconst [c] y))
     // cond: c & 63 == 63
@@ -23702,7 +21932,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARQ x (NEGQ <t> (ANDQconst [c] y)))
     // cond: c & 63 == 63
@@ -23727,7 +21956,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SARQ x (ADDLconst [c] y))
     // cond: c & 63 == 0
@@ -23745,7 +21973,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARQ x (NEGL <t> (ADDLconst [c] y)))
     // cond: c & 63 == 0
@@ -23770,7 +21997,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SARQ x (ANDLconst [c] y))
     // cond: c & 63 == 63
@@ -23788,7 +22014,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SARQ x (NEGL <t> (ANDLconst [c] y)))
     // cond: c & 63 == 63
@@ -23813,10 +22038,8 @@ private static bool rewriteValueAMD64_OpAMD64SARQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23831,7 +22054,6 @@ private static bool rewriteValueAMD64_OpAMD64SARQconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SARQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [d>>uint64(c)])
@@ -23844,10 +22066,8 @@ private static bool rewriteValueAMD64_OpAMD64SARQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(d >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23866,7 +22086,6 @@ private static bool rewriteValueAMD64_OpAMD64SARW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(min(int64(c) & 31, 15)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SARW x (MOVLconst [c]))
     // result: (SARWconst [int8(min(int64(c)&31,15))] x)
@@ -23880,10 +22099,8 @@ private static bool rewriteValueAMD64_OpAMD64SARW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(min(int64(c) & 31, 15)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SARWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23898,7 +22115,6 @@ private static bool rewriteValueAMD64_OpAMD64SARWconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SARWconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(int16(d))>>uint64(c)])
@@ -23911,10 +22127,8 @@ private static bool rewriteValueAMD64_OpAMD64SARWconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(int16(d)) >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SBBLcarrymask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23929,7 +22143,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagLT_ULT))
     // result: (MOVLconst [-1])
@@ -23940,7 +22153,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -23951,7 +22163,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagGT_ULT))
     // result: (MOVLconst [-1])
@@ -23962,7 +22173,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -23973,10 +22183,8 @@ private static bool rewriteValueAMD64_OpAMD64SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SBBQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24001,7 +22209,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBQ(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(x, borrow);
         return true;
-
     } 
     // match: (SBBQ x y (FlagEQ))
     // result: (SUBQborrow x y)
@@ -24014,10 +22221,8 @@ private static bool rewriteValueAMD64_OpAMD64SBBQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SUBQborrow);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SBBQcarrymask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24032,7 +22237,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBQcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SBBQcarrymask (FlagLT_ULT))
     // result: (MOVQconst [-1])
@@ -24043,7 +22247,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBQcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(-1);
         return true;
-
     } 
     // match: (SBBQcarrymask (FlagLT_UGT))
     // result: (MOVQconst [0])
@@ -24054,7 +22257,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBQcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SBBQcarrymask (FlagGT_ULT))
     // result: (MOVQconst [-1])
@@ -24065,7 +22267,6 @@ private static bool rewriteValueAMD64_OpAMD64SBBQcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(-1);
         return true;
-
     } 
     // match: (SBBQcarrymask (FlagGT_UGT))
     // result: (MOVQconst [0])
@@ -24076,10 +22277,8 @@ private static bool rewriteValueAMD64_OpAMD64SBBQcarrymask(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SBBQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24098,10 +22297,8 @@ private static bool rewriteValueAMD64_OpAMD64SBBQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24117,7 +22314,6 @@ private static bool rewriteValueAMD64_OpAMD64SETA(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETB);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETA (FlagEQ))
     // result: (MOVLconst [0])
@@ -24128,7 +22324,6 @@ private static bool rewriteValueAMD64_OpAMD64SETA(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETA (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -24139,7 +22334,6 @@ private static bool rewriteValueAMD64_OpAMD64SETA(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETA (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -24150,7 +22344,6 @@ private static bool rewriteValueAMD64_OpAMD64SETA(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETA (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -24161,7 +22354,6 @@ private static bool rewriteValueAMD64_OpAMD64SETA(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETA (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -24172,10 +22364,8 @@ private static bool rewriteValueAMD64_OpAMD64SETA(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24194,7 +22384,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (SETAE (TESTL x x))
     // result: (ConstBool [true])
@@ -24209,7 +22398,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (SETAE (TESTW x x))
     // result: (ConstBool [true])
@@ -24224,7 +22412,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (SETAE (TESTB x x))
     // result: (ConstBool [true])
@@ -24239,7 +22426,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (SETAE (InvertFlags x))
     // result: (SETBE x)
@@ -24251,7 +22437,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETBE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETAE (FlagEQ))
     // result: (MOVLconst [1])
@@ -24262,7 +22447,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETAE (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -24273,7 +22457,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETAE (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -24284,7 +22467,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETAE (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -24295,7 +22477,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETAE (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -24306,10 +22487,8 @@ private static bool rewriteValueAMD64_OpAMD64SETAE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24335,7 +22514,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETAEstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -24358,7 +22536,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETAEstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -24382,7 +22559,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETAEstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -24401,7 +22577,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAEstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -24420,7 +22595,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAEstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -24439,7 +22613,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAEstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -24458,7 +22631,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAEstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -24477,10 +22649,8 @@ private static bool rewriteValueAMD64_OpAMD64SETAEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24506,7 +22676,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETAstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -24529,7 +22698,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETAstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -24553,7 +22721,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETAstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -24572,7 +22739,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -24591,7 +22757,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -24610,7 +22775,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -24629,7 +22793,6 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETAstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -24648,10 +22811,8 @@ private static bool rewriteValueAMD64_OpAMD64SETAstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24670,7 +22831,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (SETB (TESTL x x))
     // result: (ConstBool [false])
@@ -24685,7 +22845,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (SETB (TESTW x x))
     // result: (ConstBool [false])
@@ -24700,7 +22859,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (SETB (TESTB x x))
     // result: (ConstBool [false])
@@ -24715,7 +22873,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (SETB (BTLconst [0] x))
     // result: (ANDLconst [1] x)
@@ -24728,7 +22885,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETB (BTQconst [0] x))
     // result: (ANDQconst [1] x)
@@ -24741,7 +22897,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETB (InvertFlags x))
     // result: (SETA x)
@@ -24753,7 +22908,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETA);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETB (FlagEQ))
     // result: (MOVLconst [0])
@@ -24764,7 +22918,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETB (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -24775,7 +22928,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETB (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -24786,7 +22938,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETB (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -24797,7 +22948,6 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETB (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -24808,10 +22958,8 @@ private static bool rewriteValueAMD64_OpAMD64SETB(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETBE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24827,7 +22975,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBE(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETAE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETBE (FlagEQ))
     // result: (MOVLconst [1])
@@ -24838,7 +22985,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETBE (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -24849,7 +22995,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETBE (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -24860,7 +23005,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETBE (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -24871,7 +23015,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETBE (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -24882,10 +23025,8 @@ private static bool rewriteValueAMD64_OpAMD64SETBE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -24911,7 +23052,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETBEstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -24934,7 +23074,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETBEstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -24958,7 +23097,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETBEstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -24977,7 +23115,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBEstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -24996,7 +23133,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBEstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -25015,7 +23151,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBEstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -25034,7 +23169,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBEstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -25053,10 +23187,8 @@ private static bool rewriteValueAMD64_OpAMD64SETBEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -25082,7 +23214,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETBstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -25105,7 +23236,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETBstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -25129,7 +23259,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETBstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -25148,7 +23277,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -25167,7 +23295,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -25186,7 +23313,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -25205,7 +23331,6 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETBstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -25224,10 +23349,8 @@ private static bool rewriteValueAMD64_OpAMD64SETBstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -25253,27 +23376,23 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var x = v_0_0.Args[1];
                 var v_0_0_0 = v_0_0.Args[0];
                 if (v_0_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_0_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var y = v_0_1;
                 v.reset(OpAMD64SETAE);
                 var v0 = b.NewValue0(v.Pos, OpAMD64BTL, types.TypeFlags);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (TESTQ (SHLQ (MOVQconst [1]) x) y))
     // result: (SETAE (BTQ x y))
@@ -25294,27 +23413,23 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_0.Args[1];
                 v_0_0_0 = v_0_0.Args[0];
                 if (v_0_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_0_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 y = v_0_1;
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQ, types.TypeFlags);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (TESTLconst [c] x))
     // cond: isUint32PowerOfTwo(int64(c))
@@ -25334,7 +23449,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETEQ (TESTQconst [c] x))
     // cond: isUint64PowerOfTwo(int64(c))
@@ -25354,7 +23468,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETEQ (TESTQ (MOVQconst [c]) x))
     // cond: isUint64PowerOfTwo(c)
@@ -25376,27 +23489,23 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(isUint64PowerOfTwo(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(int8(log64(c)));
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (CMPLconst [1] s:(ANDLconst [1] _)))
     // result: (SETNE (CMPLconst [0] s))
@@ -25414,7 +23523,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETEQ (CMPQconst [1] s:(ANDQconst [1] _)))
     // result: (SETNE (CMPQconst [0] s))
@@ -25432,7 +23540,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETEQ (TESTQ z1:(SHLQconst [63] (SHRQconst [63] x)) z2))
     // cond: z1==z2
@@ -25455,32 +23562,27 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 var z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(63);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (TESTL z1:(SHLLconst [31] (SHRQconst [31] x)) z2))
     // cond: z1==z2
@@ -25503,32 +23605,27 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(31);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (TESTQ z1:(SHRQconst [63] (SHLQconst [63] x)) z2))
     // cond: z1==z2
@@ -25551,32 +23648,27 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(0);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (TESTL z1:(SHRLconst [31] (SHLLconst [31] x)) z2))
     // cond: z1==z2
@@ -25599,32 +23691,27 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTLconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(0);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (TESTQ z1:(SHRQconst [63] x) z2))
     // cond: z1==z2
@@ -25647,27 +23734,23 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(63);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (TESTL z1:(SHRLconst [31] x) z2))
     // cond: z1==z2
@@ -25690,27 +23773,23 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAE);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTLconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(31);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQ (InvertFlags x))
     // result: (SETEQ x)
@@ -25722,7 +23801,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETEQ);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETEQ (FlagEQ))
     // result: (MOVLconst [1])
@@ -25733,7 +23811,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETEQ (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -25744,7 +23821,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETEQ (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -25755,7 +23831,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETEQ (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -25766,7 +23841,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETEQ (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -25777,10 +23851,8 @@ private static bool rewriteValueAMD64_OpAMD64SETEQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -25812,13 +23884,11 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 var x = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_1_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var y = v_1_1;
                 var mem = v_2;
                 v.reset(OpAMD64SETAEstore);
@@ -25828,14 +23898,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg2(x, y);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTQ (SHLQ (MOVQconst [1]) x) y) mem)
     // result: (SETAEstore [off] {sym} ptr (BTQ x y) mem)
@@ -25859,13 +23927,11 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 x = v_1_0.Args[1];
                 v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_1_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 y = v_1_1;
                 mem = v_2;
                 v.reset(OpAMD64SETAEstore);
@@ -25875,14 +23941,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg2(x, y);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTLconst [c] x) mem)
     // cond: isUint32PowerOfTwo(int64(c))
@@ -25908,7 +23972,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTQconst [c] x) mem)
     // cond: isUint64PowerOfTwo(int64(c))
@@ -25934,7 +23997,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTQ (MOVQconst [c]) x) mem)
     // cond: isUint64PowerOfTwo(c)
@@ -25959,14 +24021,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 x = v_1_1;
                 mem = v_2;
                 if (!(isUint64PowerOfTwo(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAEstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -25975,14 +24035,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (CMPLconst [1] s:(ANDLconst [1] _)) mem)
     // result: (SETNEstore [off] {sym} ptr (CMPLconst [0] s) mem)
@@ -26006,7 +24064,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (CMPQconst [1] s:(ANDQconst [1] _)) mem)
     // result: (SETNEstore [off] {sym} ptr (CMPQconst [0] s) mem)
@@ -26030,7 +24087,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTQ z1:(SHLQconst [63] (SHRQconst [63] x)) z2) mem)
     // cond: z1==z2
@@ -26056,19 +24112,16 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 var z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 var z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAEstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -26077,14 +24130,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTL z1:(SHLLconst [31] (SHRLconst [31] x)) z2) mem)
     // cond: z1==z2
@@ -26110,19 +24161,16 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAEstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -26131,14 +24179,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTQ z1:(SHRQconst [63] (SHLQconst [63] x)) z2) mem)
     // cond: z1==z2
@@ -26164,19 +24210,16 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAEstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -26185,14 +24228,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTL z1:(SHRLconst [31] (SHLLconst [31] x)) z2) mem)
     // cond: z1==z2
@@ -26218,19 +24259,16 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAEstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -26239,14 +24277,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTQ z1:(SHRQconst [63] x) z2) mem)
     // cond: z1==z2
@@ -26272,14 +24308,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAEstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -26288,14 +24322,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (TESTL z1:(SHRLconst [31] x) z2) mem)
     // cond: z1==z2
@@ -26321,14 +24353,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETAEstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -26337,14 +24367,12 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (InvertFlags x) mem)
     // result: (SETEQstore [off] {sym} ptr x mem)
@@ -26362,7 +24390,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETEQstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -26385,7 +24412,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETEQstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -26409,7 +24435,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -26428,7 +24453,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26447,7 +24471,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26466,7 +24489,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26485,7 +24507,6 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETEQstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26504,10 +24525,8 @@ private static bool rewriteValueAMD64_OpAMD64SETEQstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26523,7 +24542,6 @@ private static bool rewriteValueAMD64_OpAMD64SETG(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETL);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETG (FlagEQ))
     // result: (MOVLconst [0])
@@ -26534,7 +24552,6 @@ private static bool rewriteValueAMD64_OpAMD64SETG(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETG (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -26545,7 +24562,6 @@ private static bool rewriteValueAMD64_OpAMD64SETG(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETG (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -26556,7 +24572,6 @@ private static bool rewriteValueAMD64_OpAMD64SETG(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETG (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -26567,7 +24582,6 @@ private static bool rewriteValueAMD64_OpAMD64SETG(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETG (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -26578,10 +24592,8 @@ private static bool rewriteValueAMD64_OpAMD64SETG(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETGE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26597,7 +24609,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETLE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETGE (FlagEQ))
     // result: (MOVLconst [1])
@@ -26608,7 +24619,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETGE (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -26619,7 +24629,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETGE (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -26630,7 +24639,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETGE (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -26641,7 +24649,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETGE (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -26652,10 +24659,8 @@ private static bool rewriteValueAMD64_OpAMD64SETGE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26681,7 +24686,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETGEstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -26704,7 +24708,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETGEstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -26728,7 +24731,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETGEstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -26747,7 +24749,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGEstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26766,7 +24767,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGEstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26785,7 +24785,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGEstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -26804,7 +24803,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGEstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -26823,10 +24821,8 @@ private static bool rewriteValueAMD64_OpAMD64SETGEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26852,7 +24848,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETGstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -26875,7 +24870,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETGstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -26899,7 +24893,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETGstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26918,7 +24911,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26937,7 +24929,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -26956,7 +24947,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -26975,7 +24965,6 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETGstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -26994,10 +24983,8 @@ private static bool rewriteValueAMD64_OpAMD64SETGstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27013,7 +25000,6 @@ private static bool rewriteValueAMD64_OpAMD64SETL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETG);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETL (FlagEQ))
     // result: (MOVLconst [0])
@@ -27024,7 +25010,6 @@ private static bool rewriteValueAMD64_OpAMD64SETL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETL (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -27035,7 +25020,6 @@ private static bool rewriteValueAMD64_OpAMD64SETL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETL (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -27046,7 +25030,6 @@ private static bool rewriteValueAMD64_OpAMD64SETL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETL (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -27057,7 +25040,6 @@ private static bool rewriteValueAMD64_OpAMD64SETL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETL (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -27068,10 +25050,8 @@ private static bool rewriteValueAMD64_OpAMD64SETL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETLE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27087,7 +25067,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETGE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETLE (FlagEQ))
     // result: (MOVLconst [1])
@@ -27098,7 +25077,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETLE (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -27109,7 +25087,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETLE (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -27120,7 +25097,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETLE (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -27131,7 +25107,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETLE (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -27142,10 +25117,8 @@ private static bool rewriteValueAMD64_OpAMD64SETLE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27171,7 +25144,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETLEstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -27194,7 +25166,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETLEstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -27218,7 +25189,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETLEstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -27237,7 +25207,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLEstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -27256,7 +25225,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLEstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -27275,7 +25243,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLEstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -27294,7 +25261,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLEstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -27313,10 +25279,8 @@ private static bool rewriteValueAMD64_OpAMD64SETLEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27342,7 +25306,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETLstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -27365,7 +25328,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETLstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -27389,7 +25351,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETLstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -27408,7 +25369,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -27427,7 +25387,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -27446,7 +25405,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -27465,7 +25423,6 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETLstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -27484,10 +25441,8 @@ private static bool rewriteValueAMD64_OpAMD64SETLstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27505,7 +25460,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETNE (TESTWconst [1] x))
     // result: (ANDLconst [1] x)
@@ -27518,7 +25472,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(1);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETNE (TESTL (SHLL (MOVLconst [1]) x) y))
     // result: (SETB (BTL x y))
@@ -27539,27 +25492,23 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_0.Args[1];
                 var v_0_0_0 = v_0_0.Args[0];
                 if (v_0_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_0_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var y = v_0_1;
                 v.reset(OpAMD64SETB);
                 var v0 = b.NewValue0(v.Pos, OpAMD64BTL, types.TypeFlags);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (TESTQ (SHLQ (MOVQconst [1]) x) y))
     // result: (SETB (BTQ x y))
@@ -27580,27 +25529,23 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_0.Args[1];
                 v_0_0_0 = v_0_0.Args[0];
                 if (v_0_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_0_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 y = v_0_1;
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQ, types.TypeFlags);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (TESTLconst [c] x))
     // cond: isUint32PowerOfTwo(int64(c))
@@ -27620,7 +25565,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETNE (TESTQconst [c] x))
     // cond: isUint64PowerOfTwo(int64(c))
@@ -27640,7 +25584,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETNE (TESTQ (MOVQconst [c]) x))
     // cond: isUint64PowerOfTwo(c)
@@ -27662,27 +25605,23 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(isUint64PowerOfTwo(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(int8(log64(c)));
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (CMPLconst [1] s:(ANDLconst [1] _)))
     // result: (SETEQ (CMPLconst [0] s))
@@ -27700,7 +25639,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETNE (CMPQconst [1] s:(ANDQconst [1] _)))
     // result: (SETEQ (CMPQconst [0] s))
@@ -27718,7 +25656,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SETNE (TESTQ z1:(SHLQconst [63] (SHRQconst [63] x)) z2))
     // cond: z1==z2
@@ -27741,32 +25678,27 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 var z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(63);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (TESTL z1:(SHLLconst [31] (SHRQconst [31] x)) z2))
     // cond: z1==z2
@@ -27789,32 +25721,27 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(31);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (TESTQ z1:(SHRQconst [63] (SHLQconst [63] x)) z2))
     // cond: z1==z2
@@ -27837,32 +25764,27 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(0);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (TESTL z1:(SHRLconst [31] (SHLLconst [31] x)) z2))
     // cond: z1==z2
@@ -27885,32 +25807,27 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTLconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(0);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (TESTQ z1:(SHRQconst [63] x) z2))
     // cond: z1==z2
@@ -27933,27 +25850,23 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTQconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(63);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (TESTL z1:(SHRLconst [31] x) z2))
     // cond: z1==z2
@@ -27976,27 +25889,23 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_0_1;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETB);
                 v0 = b.NewValue0(v.Pos, OpAMD64BTLconst, types.TypeFlags);
                 v0.AuxInt = int8ToAuxInt(31);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNE (InvertFlags x))
     // result: (SETNE x)
@@ -28008,7 +25917,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETNE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETNE (FlagEQ))
     // result: (MOVLconst [0])
@@ -28019,7 +25927,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETNE (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -28030,7 +25937,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETNE (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -28041,7 +25947,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETNE (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -28052,7 +25957,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETNE (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -28063,10 +25967,8 @@ private static bool rewriteValueAMD64_OpAMD64SETNE(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28098,13 +26000,11 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 var x = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_1_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var y = v_1_1;
                 var mem = v_2;
                 v.reset(OpAMD64SETBstore);
@@ -28114,14 +26014,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg2(x, y);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTQ (SHLQ (MOVQconst [1]) x) y) mem)
     // result: (SETBstore [off] {sym} ptr (BTQ x y) mem)
@@ -28145,13 +26043,11 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 x = v_1_0.Args[1];
                 v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_1_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 y = v_1_1;
                 mem = v_2;
                 v.reset(OpAMD64SETBstore);
@@ -28161,14 +26057,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg2(x, y);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTLconst [c] x) mem)
     // cond: isUint32PowerOfTwo(int64(c))
@@ -28194,7 +26088,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTQconst [c] x) mem)
     // cond: isUint64PowerOfTwo(int64(c))
@@ -28220,7 +26113,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTQ (MOVQconst [c]) x) mem)
     // cond: isUint64PowerOfTwo(c)
@@ -28245,14 +26137,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 x = v_1_1;
                 mem = v_2;
                 if (!(isUint64PowerOfTwo(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETBstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -28261,14 +26151,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (CMPLconst [1] s:(ANDLconst [1] _)) mem)
     // result: (SETEQstore [off] {sym} ptr (CMPLconst [0] s) mem)
@@ -28292,7 +26180,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (CMPQconst [1] s:(ANDQconst [1] _)) mem)
     // result: (SETEQstore [off] {sym} ptr (CMPQconst [0] s) mem)
@@ -28316,7 +26203,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AddArg(s);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTQ z1:(SHLQconst [63] (SHRQconst [63] x)) z2) mem)
     // cond: z1==z2
@@ -28342,19 +26228,16 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 var z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 var z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETBstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -28363,14 +26246,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTL z1:(SHLLconst [31] (SHRLconst [31] x)) z2) mem)
     // cond: z1==z2
@@ -28396,19 +26277,16 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHRLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETBstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -28417,14 +26295,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTQ z1:(SHRQconst [63] (SHLQconst [63] x)) z2) mem)
     // cond: z1==z2
@@ -28450,19 +26326,16 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETBstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -28471,14 +26344,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTL z1:(SHRLconst [31] (SHLLconst [31] x)) z2) mem)
     // cond: z1==z2
@@ -28504,19 +26375,16 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 z1_0 = z1.Args[0];
                 if (z1_0.Op != OpAMD64SHLLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                     continue;
                 }
-
                 x = z1_0.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETBstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -28525,14 +26393,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTQ z1:(SHRQconst [63] x) z2) mem)
     // cond: z1==z2
@@ -28558,14 +26424,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETBstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -28574,14 +26438,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (TESTL z1:(SHRLconst [31] x) z2) mem)
     // cond: z1==z2
@@ -28607,14 +26469,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 x = z1.Args[0];
                 z2 = v_1_1;
                 mem = v_2;
                 if (!(z1 == z2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64SETBstore);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
@@ -28623,14 +26483,12 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg3(ptr, v0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (InvertFlags x) mem)
     // result: (SETNEstore [off] {sym} ptr x mem)
@@ -28648,7 +26506,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (SETNEstore [off1] {sym} (ADDQconst [off2] base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -28671,7 +26528,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETNEstore [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -28695,7 +26551,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (FlagEQ) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [0]) mem)
@@ -28714,7 +26569,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (FlagLT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -28733,7 +26587,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (FlagLT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -28752,7 +26605,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (FlagGT_ULT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -28771,7 +26623,6 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (SETNEstore [off] {sym} ptr (FlagGT_UGT) mem)
     // result: (MOVBstore [off] {sym} ptr (MOVLconst <typ.UInt8> [1]) mem)
@@ -28790,10 +26641,8 @@ private static bool rewriteValueAMD64_OpAMD64SETNEstore(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28813,7 +26662,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHLL x (MOVLconst [c]))
     // result: (SHLLconst [int8(c&31)] x)
@@ -28827,7 +26675,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHLL x (ADDQconst [c] y))
     // cond: c & 31 == 0
@@ -28845,7 +26692,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLL x (NEGQ <t> (ADDQconst [c] y)))
     // cond: c & 31 == 0
@@ -28870,7 +26716,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHLL x (ANDQconst [c] y))
     // cond: c & 31 == 31
@@ -28888,7 +26733,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLL x (NEGQ <t> (ANDQconst [c] y)))
     // cond: c & 31 == 31
@@ -28913,7 +26757,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHLL x (ADDLconst [c] y))
     // cond: c & 31 == 0
@@ -28931,7 +26774,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLL x (NEGL <t> (ADDLconst [c] y)))
     // cond: c & 31 == 0
@@ -28956,7 +26798,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHLL x (ANDLconst [c] y))
     // cond: c & 31 == 31
@@ -28974,7 +26815,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLL x (NEGL <t> (ANDLconst [c] y)))
     // cond: c & 31 == 31
@@ -28999,10 +26839,8 @@ private static bool rewriteValueAMD64_OpAMD64SHLL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHLLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29019,7 +26857,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(0);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHLLconst x [0])
     // result: x
@@ -29030,7 +26867,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLLconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SHLLconst [d] (MOVLconst [c]))
     // result: (MOVLconst [c << uint64(d)])
@@ -29043,10 +26879,8 @@ private static bool rewriteValueAMD64_OpAMD64SHLLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29066,7 +26900,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHLQ x (MOVLconst [c]))
     // result: (SHLQconst [int8(c&63)] x)
@@ -29080,7 +26913,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHLQ x (ADDQconst [c] y))
     // cond: c & 63 == 0
@@ -29098,7 +26930,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLQ x (NEGQ <t> (ADDQconst [c] y)))
     // cond: c & 63 == 0
@@ -29123,7 +26954,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHLQ x (ANDQconst [c] y))
     // cond: c & 63 == 63
@@ -29141,7 +26971,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLQ x (NEGQ <t> (ANDQconst [c] y)))
     // cond: c & 63 == 63
@@ -29166,7 +26995,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHLQ x (ADDLconst [c] y))
     // cond: c & 63 == 0
@@ -29184,7 +27012,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLQ x (NEGL <t> (ADDLconst [c] y)))
     // cond: c & 63 == 0
@@ -29209,7 +27036,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHLQ x (ANDLconst [c] y))
     // cond: c & 63 == 63
@@ -29227,7 +27053,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHLQ x (NEGL <t> (ANDLconst [c] y)))
     // cond: c & 63 == 63
@@ -29252,10 +27077,8 @@ private static bool rewriteValueAMD64_OpAMD64SHLQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHLQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29272,7 +27095,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(0);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHLQconst x [0])
     // result: x
@@ -29283,7 +27105,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SHLQconst [d] (MOVQconst [c]))
     // result: (MOVQconst [c << uint64(d)])
@@ -29296,7 +27117,6 @@ private static bool rewriteValueAMD64_OpAMD64SHLQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(c << (int)(uint64(d)));
         return true;
-
     } 
     // match: (SHLQconst [d] (MOVLconst [c]))
     // result: (MOVQconst [int64(c) << uint64(d)])
@@ -29309,10 +27129,8 @@ private static bool rewriteValueAMD64_OpAMD64SHLQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(c) << (int)(uint64(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29335,7 +27153,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRB x (MOVLconst [c]))
     // cond: c&31 < 8
@@ -29353,7 +27170,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRB _ (MOVQconst [c]))
     // cond: c&31 >= 8
@@ -29369,7 +27185,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRB(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SHRB _ (MOVLconst [c]))
     // cond: c&31 >= 8
@@ -29385,10 +27200,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRB(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29403,10 +27216,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRBconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29426,7 +27237,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRL x (MOVLconst [c]))
     // result: (SHRLconst [int8(c&31)] x)
@@ -29440,7 +27250,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRL x (ADDQconst [c] y))
     // cond: c & 31 == 0
@@ -29458,7 +27267,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRL x (NEGQ <t> (ADDQconst [c] y)))
     // cond: c & 31 == 0
@@ -29483,7 +27291,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHRL x (ANDQconst [c] y))
     // cond: c & 31 == 31
@@ -29501,7 +27308,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRL x (NEGQ <t> (ANDQconst [c] y)))
     // cond: c & 31 == 31
@@ -29526,7 +27332,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHRL x (ADDLconst [c] y))
     // cond: c & 31 == 0
@@ -29544,7 +27349,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRL x (NEGL <t> (ADDLconst [c] y)))
     // cond: c & 31 == 0
@@ -29569,7 +27373,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHRL x (ANDLconst [c] y))
     // cond: c & 31 == 31
@@ -29587,7 +27390,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRL x (NEGL <t> (ANDLconst [c] y)))
     // cond: c & 31 == 31
@@ -29612,10 +27414,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRL(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29632,7 +27432,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRLconst x [0])
     // result: x
@@ -29643,10 +27442,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRLconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29666,7 +27463,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRQ x (MOVLconst [c]))
     // result: (SHRQconst [int8(c&63)] x)
@@ -29680,7 +27476,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRQ x (ADDQconst [c] y))
     // cond: c & 63 == 0
@@ -29698,7 +27493,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRQ x (NEGQ <t> (ADDQconst [c] y)))
     // cond: c & 63 == 0
@@ -29723,7 +27517,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHRQ x (ANDQconst [c] y))
     // cond: c & 63 == 63
@@ -29741,7 +27534,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRQ x (NEGQ <t> (ANDQconst [c] y)))
     // cond: c & 63 == 63
@@ -29766,7 +27558,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHRQ x (ADDLconst [c] y))
     // cond: c & 63 == 0
@@ -29784,7 +27575,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRQ x (NEGL <t> (ADDLconst [c] y)))
     // cond: c & 63 == 0
@@ -29809,7 +27599,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SHRQ x (ANDLconst [c] y))
     // cond: c & 63 == 63
@@ -29827,7 +27616,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SHRQ x (NEGL <t> (ANDLconst [c] y)))
     // cond: c & 63 == 63
@@ -29852,10 +27640,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRQ(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29872,7 +27658,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRQconst x [0])
     // result: x
@@ -29883,10 +27668,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29909,7 +27692,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRW x (MOVLconst [c]))
     // cond: c&31 < 16
@@ -29927,7 +27709,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRW(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRW _ (MOVQconst [c]))
     // cond: c&31 >= 16
@@ -29943,7 +27724,6 @@ private static bool rewriteValueAMD64_OpAMD64SHRW(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SHRW _ (MOVLconst [c]))
     // cond: c&31 >= 16
@@ -29959,10 +27739,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRW(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SHRWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29977,10 +27755,8 @@ private static bool rewriteValueAMD64_OpAMD64SHRWconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30000,7 +27776,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBL (MOVLconst [c]) x)
     // result: (NEGL (SUBLconst <v.Type> x [c]))
@@ -30016,7 +27791,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBL x x)
     // result: (MOVLconst [0])
@@ -30028,7 +27802,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SUBL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -30051,10 +27824,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBL(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30071,7 +27842,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUBLconst [c] x)
     // result: (ADDLconst [-c] x)
@@ -30083,7 +27853,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBLconst(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30114,7 +27883,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBLload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -30138,7 +27906,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBLload x [off] {sym} ptr (MOVSSstore [off] {sym} ptr y _))
     // result: (SUBL x (MOVLf2i y))
@@ -30159,10 +27926,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBLload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30191,7 +27956,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SUBLmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -30215,10 +27979,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30242,7 +28004,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQ(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBQ (MOVQconst [c]) x)
     // cond: is32Bit(c)
@@ -30262,7 +28023,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQ(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBQ x x)
     // result: (MOVQconst [0])
@@ -30274,7 +28034,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SUBQ x l:(MOVQload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -30297,10 +28056,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBQborrow(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30323,10 +28080,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBQborrow(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30341,7 +28096,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUBQconst [c] x)
     // cond: c != -(1<<31)
@@ -30356,7 +28110,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBQconst (MOVQconst [d]) [c])
     // result: (MOVQconst [d-int64(c)])
@@ -30369,7 +28122,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(d - int64(c));
         return true;
-
     } 
     // match: (SUBQconst (SUBQconst x [d]) [c])
     // cond: is32Bit(int64(-c)-int64(d))
@@ -30388,10 +28140,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c - d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30422,7 +28172,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBQload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -30446,7 +28195,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBQload x [off] {sym} ptr (MOVSDstore [off] {sym} ptr y _))
     // result: (SUBQ x (MOVQf2i y))
@@ -30467,10 +28215,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBQload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBQmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30499,7 +28245,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SUBQmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -30523,10 +28268,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30554,10 +28297,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBSD(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30588,7 +28329,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBSDload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -30612,7 +28352,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBSDload x [off] {sym} ptr (MOVQstore [off] {sym} ptr y _))
     // result: (SUBSD x (MOVQi2f y))
@@ -30633,10 +28372,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBSDload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30664,10 +28401,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBSS(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64SUBSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30698,7 +28433,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBSSload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -30722,7 +28456,6 @@ private static bool rewriteValueAMD64_OpAMD64SUBSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBSSload x [off] {sym} ptr (MOVLstore [off] {sym} ptr y _))
     // result: (SUBSS x (MOVLi2f y))
@@ -30743,10 +28476,8 @@ private static bool rewriteValueAMD64_OpAMD64SUBSSload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30767,21 +28498,18 @@ private static bool rewriteValueAMD64_OpAMD64TESTB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 var x = v_1;
                 v.reset(OpAMD64TESTBconst);
                 v.AuxInt = int8ToAuxInt(int8(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TESTB l:(MOVBload {sym} [off] ptr mem) l2)
     // cond: l == l2 && l.Uses == 2 && clobber(l)
@@ -30798,7 +28526,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -30807,7 +28534,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTB(ptr<Value> _addr_v) {
                 if (!(l == l2 && l.Uses == 2 && clobber(l))) {
                     continue;
                 }
-
                 b = l.Block;
                 var v0 = b.NewValue0(l.Pos, OpAMD64CMPBconstload, types.TypeFlags);
                 v.copyOf(v0);
@@ -30815,17 +28541,14 @@ private static bool rewriteValueAMD64_OpAMD64TESTB(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(sym);
                 v0.AddArg2(ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30845,10 +28568,8 @@ private static bool rewriteValueAMD64_OpAMD64TESTBconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTB);
         v.AddArg2(x, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30869,21 +28590,18 @@ private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 var x = v_1;
                 v.reset(OpAMD64TESTLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TESTL l:(MOVLload {sym} [off] ptr mem) l2)
     // cond: l == l2 && l.Uses == 2 && clobber(l)
@@ -30900,7 +28618,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -30909,7 +28626,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
                 if (!(l == l2 && l.Uses == 2 && clobber(l))) {
                     continue;
                 }
-
                 b = l.Block;
                 var v0 = b.NewValue0(l.Pos, OpAMD64CMPLconstload, types.TypeFlags);
                 v.copyOf(v0);
@@ -30917,14 +28633,12 @@ private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(sym);
                 v0.AddArg2(ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TESTL a:(ANDLload [off] {sym} x ptr mem) a)
     // cond: a.Uses == 2 && a.Block == v.Block && clobber(a)
@@ -30941,7 +28655,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off = auxIntToInt32(a.AuxInt);
                 sym = auxToSym(a.Aux);
                 mem = a.Args[2];
@@ -30950,7 +28663,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
                 if (a != v_1 || !(a.Uses == 2 && a.Block == v.Block && clobber(a))) {
                     continue;
                 }
-
                 v.reset(OpAMD64TESTL);
                 v0 = b.NewValue0(a.Pos, OpAMD64MOVLload, a.Type);
                 v0.AuxInt = int32ToAuxInt(off);
@@ -30958,17 +28670,14 @@ private static bool rewriteValueAMD64_OpAMD64TESTL(ptr<Value> _addr_v) {
                 v0.AddArg2(ptr, mem);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30984,7 +28693,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (TESTLconst [c] (MOVLconst [c]))
     // cond: c < 0
@@ -30996,7 +28704,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_UGT);
         return true;
-
     } 
     // match: (TESTLconst [c] (MOVLconst [c]))
     // cond: c > 0
@@ -31008,7 +28715,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTLconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_UGT);
         return true;
-
     } 
     // match: (TESTLconst [-1] x)
     // cond: x.Op != OpAMD64MOVLconst
@@ -31024,10 +28730,8 @@ private static bool rewriteValueAMD64_OpAMD64TESTLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTL);
         v.AddArg2(x, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31049,25 +28753,21 @@ private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 var x = v_1;
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64TESTQconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TESTQ l:(MOVQload {sym} [off] ptr mem) l2)
     // cond: l == l2 && l.Uses == 2 && clobber(l)
@@ -31084,7 +28784,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -31093,7 +28792,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
                 if (!(l == l2 && l.Uses == 2 && clobber(l))) {
                     continue;
                 }
-
                 b = l.Block;
                 var v0 = b.NewValue0(l.Pos, OpAMD64CMPQconstload, types.TypeFlags);
                 v.copyOf(v0);
@@ -31101,14 +28799,12 @@ private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(sym);
                 v0.AddArg2(ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TESTQ a:(ANDQload [off] {sym} x ptr mem) a)
     // cond: a.Uses == 2 && a.Block == v.Block && clobber(a)
@@ -31125,7 +28821,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off = auxIntToInt32(a.AuxInt);
                 sym = auxToSym(a.Aux);
                 mem = a.Args[2];
@@ -31134,7 +28829,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
                 if (a != v_1 || !(a.Uses == 2 && a.Block == v.Block && clobber(a))) {
                     continue;
                 }
-
                 v.reset(OpAMD64TESTQ);
                 v0 = b.NewValue0(a.Pos, OpAMD64MOVQload, a.Type);
                 v0.AuxInt = int32ToAuxInt(off);
@@ -31142,17 +28836,14 @@ private static bool rewriteValueAMD64_OpAMD64TESTQ(ptr<Value> _addr_v) {
                 v0.AddArg2(ptr, mem);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31172,7 +28863,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (TESTQconst [c] (MOVQconst [d]))
     // cond: int64(c) == d && c < 0
@@ -31188,7 +28878,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagLT_UGT);
         return true;
-
     } 
     // match: (TESTQconst [c] (MOVQconst [d]))
     // cond: int64(c) == d && c > 0
@@ -31204,7 +28893,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTQconst(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagGT_UGT);
         return true;
-
     } 
     // match: (TESTQconst [-1] x)
     // cond: x.Op != OpAMD64MOVQconst
@@ -31220,10 +28908,8 @@ private static bool rewriteValueAMD64_OpAMD64TESTQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTQ);
         v.AddArg2(x, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31244,21 +28930,18 @@ private static bool rewriteValueAMD64_OpAMD64TESTW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 var x = v_1;
                 v.reset(OpAMD64TESTWconst);
                 v.AuxInt = int16ToAuxInt(int16(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TESTW l:(MOVWload {sym} [off] ptr mem) l2)
     // cond: l == l2 && l.Uses == 2 && clobber(l)
@@ -31275,7 +28958,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -31284,7 +28966,6 @@ private static bool rewriteValueAMD64_OpAMD64TESTW(ptr<Value> _addr_v) {
                 if (!(l == l2 && l.Uses == 2 && clobber(l))) {
                     continue;
                 }
-
                 b = l.Block;
                 var v0 = b.NewValue0(l.Pos, OpAMD64CMPWconstload, types.TypeFlags);
                 v.copyOf(v0);
@@ -31292,17 +28973,14 @@ private static bool rewriteValueAMD64_OpAMD64TESTW(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(sym);
                 v0.AddArg2(ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64TESTWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31322,10 +29000,8 @@ private static bool rewriteValueAMD64_OpAMD64TESTWconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64TESTW);
         v.AddArg2(x, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XADDLlock(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31354,10 +29030,8 @@ private static bool rewriteValueAMD64_OpAMD64XADDLlock(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XADDQlock(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31386,10 +29060,8 @@ private static bool rewriteValueAMD64_OpAMD64XADDQlock(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XCHGL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31418,7 +29090,6 @@ private static bool rewriteValueAMD64_OpAMD64XCHGL(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, ptr, mem);
         return true;
-
     } 
     // match: (XCHGL [off1] {sym1} val (LEAQ [off2] {sym2} ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && ptr.Op != OpSB
@@ -31442,10 +29113,8 @@ private static bool rewriteValueAMD64_OpAMD64XCHGL(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XCHGQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31474,7 +29143,6 @@ private static bool rewriteValueAMD64_OpAMD64XCHGQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, ptr, mem);
         return true;
-
     } 
     // match: (XCHGQ [off1] {sym1} val (LEAQ [off2] {sym2} ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && ptr.Op != OpSB
@@ -31498,10 +29166,8 @@ private static bool rewriteValueAMD64_OpAMD64XCHGQ(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31521,25 +29187,21 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var x = v_1;
                 v.reset(OpAMD64BTCL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL (MOVLconst [c]) x)
     // cond: isUint32PowerOfTwo(int64(c)) && uint64(c) >= 128
@@ -31555,25 +29217,21 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 x = v_1;
                 if (!(isUint32PowerOfTwo(int64(c)) && uint64(c) >= 128)) {
                     continue;
                 }
-
                 v.reset(OpAMD64BTCLconst);
                 v.AuxInt = int8ToAuxInt(int8(log32(c)));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL x (MOVLconst [c]))
     // result: (XORLconst [c] x)
@@ -31589,20 +29247,17 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpAMD64XORLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL (SHLLconst x [c]) (SHRLconst x [d]))
     // cond: d==32-c
@@ -31618,30 +29273,25 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRLconst) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLLconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL <t> (SHLLconst x [c]) (SHRWconst x [d]))
     // cond: d==16-c && c < 16 && t.Size() == 2
@@ -31658,30 +29308,25 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 16 - c && c < 16 && t.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLWconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL <t> (SHLLconst x [c]) (SHRBconst x [d]))
     // cond: d==8-c && c < 8 && t.Size() == 1
@@ -31698,30 +29343,25 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRBconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 8 - c && c < 8 && t.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLBconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL x x)
     // result: (MOVLconst [0])
@@ -31733,7 +29373,6 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (XORL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -31751,7 +29390,6 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -31759,23 +29397,19 @@ private static bool rewriteValueAMD64_OpAMD64XORL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64XORLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31794,7 +29428,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(log32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETNE x))
     // result: (SETEQ x)
@@ -31806,7 +29439,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETEQ);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETEQ x))
     // result: (SETNE x)
@@ -31818,7 +29450,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETNE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETL x))
     // result: (SETGE x)
@@ -31830,7 +29461,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETGE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETGE x))
     // result: (SETL x)
@@ -31842,7 +29472,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETL);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETLE x))
     // result: (SETG x)
@@ -31854,7 +29483,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETG);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETG x))
     // result: (SETLE x)
@@ -31866,7 +29494,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETLE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETB x))
     // result: (SETAE x)
@@ -31878,7 +29505,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETAE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETAE x))
     // result: (SETB x)
@@ -31890,7 +29516,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETB);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETBE x))
     // result: (SETA x)
@@ -31902,7 +29527,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETA);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [1] (SETA x))
     // result: (SETBE x)
@@ -31914,7 +29538,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64SETBE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [c] (XORLconst [d] x))
     // result: (XORLconst [c ^ d] x)
@@ -31929,7 +29552,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c ^ d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [c] (BTCLconst [d] x))
     // result: (XORLconst [c ^ 1<<uint32(d)] x)
@@ -31944,7 +29566,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c ^ 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [c] x)
     // cond: c==0
@@ -31957,7 +29578,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (XORLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c^d])
@@ -31970,10 +29590,8 @@ private static bool rewriteValueAMD64_OpAMD64XORLconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLconst);
         v.AuxInt = int32ToAuxInt(c ^ d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32000,7 +29618,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (XORLconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -32023,10 +29640,8 @@ private static bool rewriteValueAMD64_OpAMD64XORLconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32057,7 +29672,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (XORLload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -32081,7 +29695,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (XORLload x [off] {sym} ptr (MOVSSstore [off] {sym} ptr y _))
     // result: (XORL x (MOVLf2i y))
@@ -32102,10 +29715,8 @@ private static bool rewriteValueAMD64_OpAMD64XORLload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32134,7 +29745,6 @@ private static bool rewriteValueAMD64_OpAMD64XORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (XORLmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -32158,10 +29768,8 @@ private static bool rewriteValueAMD64_OpAMD64XORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32181,25 +29789,21 @@ private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_0_0.AuxInt) != 1) {
                     continue;
                 }
-
                 var x = v_1;
                 v.reset(OpAMD64BTCQ);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORQ (MOVQconst [c]) x)
     // cond: isUint64PowerOfTwo(c) && uint64(c) >= 128
@@ -32215,25 +29819,21 @@ private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 x = v_1;
                 if (!(isUint64PowerOfTwo(c) && uint64(c) >= 128)) {
                     continue;
                 }
-
                 v.reset(OpAMD64BTCQconst);
                 v.AuxInt = int8ToAuxInt(int8(log64(c)));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORQ x (MOVQconst [c]))
     // cond: is32Bit(c)
@@ -32250,24 +29850,20 @@ private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpAMD64XORQconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORQ (SHLQconst x [c]) (SHRQconst x [d]))
     // cond: d==64-c
@@ -32283,30 +29879,25 @@ private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpAMD64SHRQconst) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 64 - c)) {
                     continue;
                 }
-
                 v.reset(OpAMD64ROLQconst);
                 v.AuxInt = int8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORQ x x)
     // result: (MOVQconst [0])
@@ -32318,7 +29909,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (XORQ x l:(MOVQload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -32336,7 +29926,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -32344,23 +29933,19 @@ private static bool rewriteValueAMD64_OpAMD64XORQ(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpAMD64XORQload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32379,7 +29964,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(log32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORQconst [c] (XORQconst [d] x))
     // result: (XORQconst [c ^ d] x)
@@ -32394,7 +29978,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c ^ d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORQconst [c] (BTCQconst [d] x))
     // cond: is32Bit(int64(c) ^ 1<<uint32(d))
@@ -32413,7 +29996,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c ^ 1 << (int)(uint32(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORQconst [0] x)
     // result: x
@@ -32424,7 +30006,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (XORQconst [c] (MOVQconst [d]))
     // result: (MOVQconst [int64(c)^d])
@@ -32437,10 +30018,8 @@ private static bool rewriteValueAMD64_OpAMD64XORQconst(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQconst);
         v.AuxInt = int64ToAuxInt(int64(c) ^ d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORQconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32467,7 +30046,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (XORQconstmodify [valoff1] {sym1} (LEAQ [off2] {sym2} base) mem)
     // cond: ValAndOff(valoff1).canAdd32(off2) && canMergeSym(sym1, sym2)
@@ -32490,10 +30068,8 @@ private static bool rewriteValueAMD64_OpAMD64XORQconstmodify(ptr<Value> _addr_v)
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32524,7 +30100,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (XORQload [off1] {sym1} val (LEAQ [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -32548,7 +30123,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (XORQload x [off] {sym} ptr (MOVSDstore [off] {sym} ptr y _))
     // result: (XORQ x (MOVQf2i y))
@@ -32569,10 +30143,8 @@ private static bool rewriteValueAMD64_OpAMD64XORQload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAMD64XORQmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32601,7 +30173,6 @@ private static bool rewriteValueAMD64_OpAMD64XORQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (XORQmodify [off1] {sym1} (LEAQ [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -32625,10 +30196,8 @@ private static bool rewriteValueAMD64_OpAMD64XORQmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32644,7 +30213,6 @@ private static bool rewriteValueAMD64_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicAdd32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32666,7 +30234,6 @@ private static bool rewriteValueAMD64_OpAtomicAdd32(ptr<Value> _addr_v) {
         v.AddArg2(val, v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicAdd64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32688,7 +30255,6 @@ private static bool rewriteValueAMD64_OpAtomicAdd64(ptr<Value> _addr_v) {
         v.AddArg2(val, v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicAnd32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32706,7 +30272,6 @@ private static bool rewriteValueAMD64_OpAtomicAnd32(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicAnd8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32724,7 +30289,6 @@ private static bool rewriteValueAMD64_OpAtomicAnd8(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicCompareAndSwap32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32744,7 +30308,6 @@ private static bool rewriteValueAMD64_OpAtomicCompareAndSwap32(ptr<Value> _addr_
         v.AddArg4(ptr, old, new_, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicCompareAndSwap64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32764,7 +30327,6 @@ private static bool rewriteValueAMD64_OpAtomicCompareAndSwap64(ptr<Value> _addr_
         v.AddArg4(ptr, old, new_, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicExchange32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32782,7 +30344,6 @@ private static bool rewriteValueAMD64_OpAtomicExchange32(ptr<Value> _addr_v) {
         v.AddArg3(val, ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicExchange64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32800,7 +30361,6 @@ private static bool rewriteValueAMD64_OpAtomicExchange64(ptr<Value> _addr_v) {
         v.AddArg3(val, ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicLoad32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32816,7 +30376,6 @@ private static bool rewriteValueAMD64_OpAtomicLoad32(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicLoad64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32832,7 +30391,6 @@ private static bool rewriteValueAMD64_OpAtomicLoad64(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicLoad8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32848,7 +30406,6 @@ private static bool rewriteValueAMD64_OpAtomicLoad8(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicLoadPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32864,7 +30421,6 @@ private static bool rewriteValueAMD64_OpAtomicLoadPtr(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicOr32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32882,7 +30438,6 @@ private static bool rewriteValueAMD64_OpAtomicOr32(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicOr8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32900,7 +30455,6 @@ private static bool rewriteValueAMD64_OpAtomicOr8(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicStore32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32922,7 +30476,6 @@ private static bool rewriteValueAMD64_OpAtomicStore32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicStore64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32944,7 +30497,6 @@ private static bool rewriteValueAMD64_OpAtomicStore64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicStore8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32966,7 +30518,6 @@ private static bool rewriteValueAMD64_OpAtomicStore8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpAtomicStorePtrNoWB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32988,7 +30539,6 @@ private static bool rewriteValueAMD64_OpAtomicStorePtrNoWB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpBitLen16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33009,7 +30559,6 @@ private static bool rewriteValueAMD64_OpBitLen16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpBitLen32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33032,7 +30581,6 @@ private static bool rewriteValueAMD64_OpBitLen32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpBitLen64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33060,7 +30608,6 @@ private static bool rewriteValueAMD64_OpBitLen64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpBitLen8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33081,7 +30628,6 @@ private static bool rewriteValueAMD64_OpBitLen8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpCeil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33096,7 +30642,6 @@ private static bool rewriteValueAMD64_OpCeil(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33123,7 +30668,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQEQ);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETNE cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33142,7 +30686,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQNE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETL cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33161,7 +30704,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQLT);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETG cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33180,7 +30722,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQGT);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETLE cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33199,7 +30740,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQLE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGE cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33218,7 +30758,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQGE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETA cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33237,7 +30776,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQHI);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETB cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33256,7 +30794,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQCS);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETAE cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33275,7 +30812,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQCC);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETBE cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33294,7 +30830,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQLS);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETEQF cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33313,7 +30848,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQEQF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETNEF cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33332,7 +30866,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQNEF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGF cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33351,7 +30884,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQGTF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGEF cond))
     // cond: (is64BitInt(t) || isPtr(t))
@@ -33370,7 +30902,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVQGEF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETEQ cond))
     // cond: is32BitInt(t)
@@ -33389,7 +30920,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLEQ);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETNE cond))
     // cond: is32BitInt(t)
@@ -33408,7 +30938,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLNE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETL cond))
     // cond: is32BitInt(t)
@@ -33427,7 +30956,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLLT);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETG cond))
     // cond: is32BitInt(t)
@@ -33446,7 +30974,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLGT);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETLE cond))
     // cond: is32BitInt(t)
@@ -33465,7 +30992,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLLE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGE cond))
     // cond: is32BitInt(t)
@@ -33484,7 +31010,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLGE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETA cond))
     // cond: is32BitInt(t)
@@ -33503,7 +31028,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLHI);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETB cond))
     // cond: is32BitInt(t)
@@ -33522,7 +31046,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLCS);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETAE cond))
     // cond: is32BitInt(t)
@@ -33541,7 +31064,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLCC);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETBE cond))
     // cond: is32BitInt(t)
@@ -33560,7 +31082,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLLS);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETEQF cond))
     // cond: is32BitInt(t)
@@ -33579,7 +31100,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLEQF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETNEF cond))
     // cond: is32BitInt(t)
@@ -33598,7 +31118,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLNEF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGF cond))
     // cond: is32BitInt(t)
@@ -33617,7 +31136,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLGTF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGEF cond))
     // cond: is32BitInt(t)
@@ -33636,7 +31154,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVLGEF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETEQ cond))
     // cond: is16BitInt(t)
@@ -33655,7 +31172,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWEQ);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETNE cond))
     // cond: is16BitInt(t)
@@ -33674,7 +31190,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWNE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETL cond))
     // cond: is16BitInt(t)
@@ -33693,7 +31208,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWLT);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETG cond))
     // cond: is16BitInt(t)
@@ -33712,7 +31226,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWGT);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETLE cond))
     // cond: is16BitInt(t)
@@ -33731,7 +31244,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWLE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGE cond))
     // cond: is16BitInt(t)
@@ -33750,7 +31262,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWGE);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETA cond))
     // cond: is16BitInt(t)
@@ -33769,7 +31280,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWHI);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETB cond))
     // cond: is16BitInt(t)
@@ -33788,7 +31298,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWCS);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETAE cond))
     // cond: is16BitInt(t)
@@ -33807,7 +31316,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWCC);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETBE cond))
     // cond: is16BitInt(t)
@@ -33826,7 +31334,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWLS);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETEQF cond))
     // cond: is16BitInt(t)
@@ -33845,7 +31352,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWEQF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETNEF cond))
     // cond: is16BitInt(t)
@@ -33864,7 +31370,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWNEF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGF cond))
     // cond: is16BitInt(t)
@@ -33883,7 +31388,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWGTF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y (SETGEF cond))
     // cond: is16BitInt(t)
@@ -33902,7 +31406,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v.reset(OpAMD64CMOVWGEF);
         v.AddArg3(y, x, cond);
         return true;
-
     } 
     // match: (CondSelect <t> x y check)
     // cond: !check.Type.IsFlags() && check.Type.Size() == 1
@@ -33921,7 +31424,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v0.AddArg(check);
         v.AddArg3(x, y, v0);
         return true;
-
     } 
     // match: (CondSelect <t> x y check)
     // cond: !check.Type.IsFlags() && check.Type.Size() == 2
@@ -33940,7 +31442,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v0.AddArg(check);
         v.AddArg3(x, y, v0);
         return true;
-
     } 
     // match: (CondSelect <t> x y check)
     // cond: !check.Type.IsFlags() && check.Type.Size() == 4
@@ -33959,7 +31460,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v0.AddArg(check);
         v.AddArg3(x, y, v0);
         return true;
-
     } 
     // match: (CondSelect <t> x y check)
     // cond: !check.Type.IsFlags() && check.Type.Size() == 8 && (is64BitInt(t) || isPtr(t))
@@ -33978,7 +31478,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v0.AddArg(check);
         v.AddArg3(y, x, v0);
         return true;
-
     } 
     // match: (CondSelect <t> x y check)
     // cond: !check.Type.IsFlags() && check.Type.Size() == 8 && is32BitInt(t)
@@ -33997,7 +31496,6 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v0.AddArg(check);
         v.AddArg3(y, x, v0);
         return true;
-
     } 
     // match: (CondSelect <t> x y check)
     // cond: !check.Type.IsFlags() && check.Type.Size() == 8 && is16BitInt(t)
@@ -34016,10 +31514,8 @@ private static bool rewriteValueAMD64_OpCondSelect(ptr<Value> _addr_v) {
         v0.AddArg(check);
         v.AddArg3(y, x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34032,7 +31528,6 @@ private static bool rewriteValueAMD64_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34045,7 +31540,6 @@ private static bool rewriteValueAMD64_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34058,7 +31552,6 @@ private static bool rewriteValueAMD64_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(b2i32(c));
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34070,7 +31563,6 @@ private static bool rewriteValueAMD64_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpCtz16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34089,7 +31581,6 @@ private static bool rewriteValueAMD64_OpCtz16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpCtz32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34110,7 +31601,6 @@ private static bool rewriteValueAMD64_OpCtz32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpCtz64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34135,7 +31625,6 @@ private static bool rewriteValueAMD64_OpCtz64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpCtz64NonZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34153,7 +31642,6 @@ private static bool rewriteValueAMD64_OpCtz64NonZero(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpCtz8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34172,7 +31660,6 @@ private static bool rewriteValueAMD64_OpCtz8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34194,7 +31681,6 @@ private static bool rewriteValueAMD64_OpDiv16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34214,7 +31700,6 @@ private static bool rewriteValueAMD64_OpDiv16u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34236,7 +31721,6 @@ private static bool rewriteValueAMD64_OpDiv32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34256,7 +31740,6 @@ private static bool rewriteValueAMD64_OpDiv32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34278,7 +31761,6 @@ private static bool rewriteValueAMD64_OpDiv64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34298,7 +31780,6 @@ private static bool rewriteValueAMD64_OpDiv64u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34322,7 +31803,6 @@ private static bool rewriteValueAMD64_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34346,7 +31826,6 @@ private static bool rewriteValueAMD64_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34365,7 +31844,6 @@ private static bool rewriteValueAMD64_OpEq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34384,7 +31862,6 @@ private static bool rewriteValueAMD64_OpEq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34403,7 +31880,6 @@ private static bool rewriteValueAMD64_OpEq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34422,7 +31898,6 @@ private static bool rewriteValueAMD64_OpEq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34441,7 +31916,6 @@ private static bool rewriteValueAMD64_OpEq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34460,7 +31934,6 @@ private static bool rewriteValueAMD64_OpEq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34479,7 +31952,6 @@ private static bool rewriteValueAMD64_OpEqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34498,7 +31970,6 @@ private static bool rewriteValueAMD64_OpEqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpFMA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34516,7 +31987,6 @@ private static bool rewriteValueAMD64_OpFMA(ptr<Value> _addr_v) {
         v.AddArg3(z, x, y);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpFloor(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34531,7 +32001,6 @@ private static bool rewriteValueAMD64_OpFloor(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpGetG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34548,10 +32017,8 @@ private static bool rewriteValueAMD64_OpGetG(ptr<Value> _addr_v) {
         v.reset(OpAMD64LoweredGetG);
         v.AddArg(mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpHasCPUFeature(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34571,7 +32038,6 @@ private static bool rewriteValueAMD64_OpHasCPUFeature(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpIsInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34590,7 +32056,6 @@ private static bool rewriteValueAMD64_OpIsInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34607,7 +32072,6 @@ private static bool rewriteValueAMD64_OpIsNonNil(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpIsSliceInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34626,7 +32090,6 @@ private static bool rewriteValueAMD64_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34645,7 +32108,6 @@ private static bool rewriteValueAMD64_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34664,7 +32126,6 @@ private static bool rewriteValueAMD64_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34683,7 +32144,6 @@ private static bool rewriteValueAMD64_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34702,7 +32162,6 @@ private static bool rewriteValueAMD64_OpLeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34721,7 +32180,6 @@ private static bool rewriteValueAMD64_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34740,7 +32198,6 @@ private static bool rewriteValueAMD64_OpLeq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34759,7 +32216,6 @@ private static bool rewriteValueAMD64_OpLeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34778,7 +32234,6 @@ private static bool rewriteValueAMD64_OpLeq64U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34797,7 +32252,6 @@ private static bool rewriteValueAMD64_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34816,7 +32270,6 @@ private static bool rewriteValueAMD64_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34835,7 +32288,6 @@ private static bool rewriteValueAMD64_OpLess16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34854,7 +32306,6 @@ private static bool rewriteValueAMD64_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34873,7 +32324,6 @@ private static bool rewriteValueAMD64_OpLess32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34892,7 +32342,6 @@ private static bool rewriteValueAMD64_OpLess32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34911,7 +32360,6 @@ private static bool rewriteValueAMD64_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34930,7 +32378,6 @@ private static bool rewriteValueAMD64_OpLess64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34949,7 +32396,6 @@ private static bool rewriteValueAMD64_OpLess64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34968,7 +32414,6 @@ private static bool rewriteValueAMD64_OpLess64U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -34987,7 +32432,6 @@ private static bool rewriteValueAMD64_OpLess8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35006,7 +32450,6 @@ private static bool rewriteValueAMD64_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35026,7 +32469,6 @@ private static bool rewriteValueAMD64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitInt(t)
@@ -35041,7 +32483,6 @@ private static bool rewriteValueAMD64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is16BitInt(t)
@@ -35056,7 +32497,6 @@ private static bool rewriteValueAMD64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (t.IsBoolean() || is8BitInt(t))
@@ -35071,7 +32511,6 @@ private static bool rewriteValueAMD64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitFloat(t)
@@ -35086,7 +32525,6 @@ private static bool rewriteValueAMD64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVSSload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -35101,10 +32539,8 @@ private static bool rewriteValueAMD64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVSDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35120,7 +32556,6 @@ private static bool rewriteValueAMD64_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35148,7 +32583,6 @@ private static bool rewriteValueAMD64_OpLsh16x16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh16x16 x y)
     // cond: shiftIsBounded(v)
@@ -35162,10 +32596,8 @@ private static bool rewriteValueAMD64_OpLsh16x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35193,7 +32625,6 @@ private static bool rewriteValueAMD64_OpLsh16x32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh16x32 x y)
     // cond: shiftIsBounded(v)
@@ -35207,10 +32638,8 @@ private static bool rewriteValueAMD64_OpLsh16x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35238,7 +32667,6 @@ private static bool rewriteValueAMD64_OpLsh16x64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh16x64 x y)
     // cond: shiftIsBounded(v)
@@ -35252,10 +32680,8 @@ private static bool rewriteValueAMD64_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35283,7 +32709,6 @@ private static bool rewriteValueAMD64_OpLsh16x8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh16x8 x y)
     // cond: shiftIsBounded(v)
@@ -35297,10 +32722,8 @@ private static bool rewriteValueAMD64_OpLsh16x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35328,7 +32751,6 @@ private static bool rewriteValueAMD64_OpLsh32x16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh32x16 x y)
     // cond: shiftIsBounded(v)
@@ -35342,10 +32764,8 @@ private static bool rewriteValueAMD64_OpLsh32x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35373,7 +32793,6 @@ private static bool rewriteValueAMD64_OpLsh32x32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh32x32 x y)
     // cond: shiftIsBounded(v)
@@ -35387,10 +32806,8 @@ private static bool rewriteValueAMD64_OpLsh32x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35418,7 +32835,6 @@ private static bool rewriteValueAMD64_OpLsh32x64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh32x64 x y)
     // cond: shiftIsBounded(v)
@@ -35432,10 +32848,8 @@ private static bool rewriteValueAMD64_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35463,7 +32877,6 @@ private static bool rewriteValueAMD64_OpLsh32x8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh32x8 x y)
     // cond: shiftIsBounded(v)
@@ -35477,10 +32890,8 @@ private static bool rewriteValueAMD64_OpLsh32x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35508,7 +32919,6 @@ private static bool rewriteValueAMD64_OpLsh64x16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh64x16 x y)
     // cond: shiftIsBounded(v)
@@ -35522,10 +32932,8 @@ private static bool rewriteValueAMD64_OpLsh64x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35553,7 +32961,6 @@ private static bool rewriteValueAMD64_OpLsh64x32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh64x32 x y)
     // cond: shiftIsBounded(v)
@@ -35567,10 +32974,8 @@ private static bool rewriteValueAMD64_OpLsh64x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35598,7 +33003,6 @@ private static bool rewriteValueAMD64_OpLsh64x64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh64x64 x y)
     // cond: shiftIsBounded(v)
@@ -35612,10 +33016,8 @@ private static bool rewriteValueAMD64_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35643,7 +33045,6 @@ private static bool rewriteValueAMD64_OpLsh64x8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh64x8 x y)
     // cond: shiftIsBounded(v)
@@ -35657,10 +33058,8 @@ private static bool rewriteValueAMD64_OpLsh64x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35688,7 +33087,6 @@ private static bool rewriteValueAMD64_OpLsh8x16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh8x16 x y)
     // cond: shiftIsBounded(v)
@@ -35702,10 +33100,8 @@ private static bool rewriteValueAMD64_OpLsh8x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35733,7 +33129,6 @@ private static bool rewriteValueAMD64_OpLsh8x32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh8x32 x y)
     // cond: shiftIsBounded(v)
@@ -35747,10 +33142,8 @@ private static bool rewriteValueAMD64_OpLsh8x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35778,7 +33171,6 @@ private static bool rewriteValueAMD64_OpLsh8x64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh8x64 x y)
     // cond: shiftIsBounded(v)
@@ -35792,10 +33184,8 @@ private static bool rewriteValueAMD64_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35823,7 +33213,6 @@ private static bool rewriteValueAMD64_OpLsh8x8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh8x8 x y)
     // cond: shiftIsBounded(v)
@@ -35837,10 +33226,8 @@ private static bool rewriteValueAMD64_OpLsh8x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35862,7 +33249,6 @@ private static bool rewriteValueAMD64_OpMod16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35882,7 +33268,6 @@ private static bool rewriteValueAMD64_OpMod16u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35904,7 +33289,6 @@ private static bool rewriteValueAMD64_OpMod32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMod32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35924,7 +33308,6 @@ private static bool rewriteValueAMD64_OpMod32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMod64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35946,7 +33329,6 @@ private static bool rewriteValueAMD64_OpMod64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMod64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35966,7 +33348,6 @@ private static bool rewriteValueAMD64_OpMod64u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -35990,7 +33371,6 @@ private static bool rewriteValueAMD64_OpMod8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36014,7 +33394,6 @@ private static bool rewriteValueAMD64_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36034,7 +33413,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (MOVBstore dst (MOVBload src mem) mem)
@@ -36050,7 +33428,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (MOVWstore dst (MOVWload src mem) mem)
@@ -36066,7 +33443,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (MOVLstore dst (MOVLload src mem) mem)
@@ -36082,7 +33458,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [8] dst src mem)
     // result: (MOVQstore dst (MOVQload src mem) mem)
@@ -36098,7 +33473,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [16] dst src mem)
     // cond: config.useSSE
@@ -36118,7 +33492,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [16] dst src mem)
     // cond: !config.useSSE
@@ -36144,7 +33517,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [32] dst src mem)
     // result: (Move [16] (OffPtr <dst.Type> dst [16]) (OffPtr <src.Type> src [16]) (Move [16] dst src mem))
@@ -36168,7 +33540,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, src, mem);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [48] dst src mem)
     // cond: config.useSSE
@@ -36196,7 +33567,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, src, mem);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [64] dst src mem)
     // cond: config.useSSE
@@ -36224,7 +33594,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, src, mem);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (MOVBstore [2] dst (MOVBload [2] src mem) (MOVWstore dst (MOVWload src mem) mem))
@@ -36246,7 +33615,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [5] dst src mem)
     // result: (MOVBstore [4] dst (MOVBload [4] src mem) (MOVLstore dst (MOVLload src mem) mem))
@@ -36268,7 +33636,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [6] dst src mem)
     // result: (MOVWstore [4] dst (MOVWload [4] src mem) (MOVLstore dst (MOVLload src mem) mem))
@@ -36290,7 +33657,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [7] dst src mem)
     // result: (MOVLstore [3] dst (MOVLload [3] src mem) (MOVLstore dst (MOVLload src mem) mem))
@@ -36312,7 +33678,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [9] dst src mem)
     // result: (MOVBstore [8] dst (MOVBload [8] src mem) (MOVQstore dst (MOVQload src mem) mem))
@@ -36334,7 +33699,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [10] dst src mem)
     // result: (MOVWstore [8] dst (MOVWload [8] src mem) (MOVQstore dst (MOVQload src mem) mem))
@@ -36356,7 +33720,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [12] dst src mem)
     // result: (MOVLstore [8] dst (MOVLload [8] src mem) (MOVQstore dst (MOVQload src mem) mem))
@@ -36378,7 +33741,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s == 11 || s >= 13 && s <= 15
@@ -36402,7 +33764,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 16 && s%16 != 0 && s%16 <= 8
@@ -36429,7 +33790,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, v3, mem);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 16 && s%16 != 0 && s%16 > 8 && config.useSSE
@@ -36456,7 +33816,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, v3, mem);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 16 && s%16 != 0 && s%16 > 8 && !config.useSSE
@@ -36489,7 +33848,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, v3, v4);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 64 && s <= 16*64 && s%16 == 0 && !config.noDuffDevice && logLargeCopy(v, s)
@@ -36506,7 +33864,6 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: (s > 16*64 || config.noDuffDevice) && s%8 == 0 && logLargeCopy(v, s)
@@ -36524,10 +33881,8 @@ private static bool rewriteValueAMD64_OpMove(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(s / 8);
         v.AddArg4(dst, src, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpNeg32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36545,7 +33900,6 @@ private static bool rewriteValueAMD64_OpNeg32F(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeg64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36563,7 +33917,6 @@ private static bool rewriteValueAMD64_OpNeg64F(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36582,7 +33935,6 @@ private static bool rewriteValueAMD64_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36601,7 +33953,6 @@ private static bool rewriteValueAMD64_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36620,7 +33971,6 @@ private static bool rewriteValueAMD64_OpNeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36639,7 +33989,6 @@ private static bool rewriteValueAMD64_OpNeq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36658,7 +34007,6 @@ private static bool rewriteValueAMD64_OpNeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36677,7 +34025,6 @@ private static bool rewriteValueAMD64_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36696,7 +34043,6 @@ private static bool rewriteValueAMD64_OpNeqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36715,7 +34061,6 @@ private static bool rewriteValueAMD64_OpNeqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpNot(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36730,7 +34075,6 @@ private static bool rewriteValueAMD64_OpNot(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36751,7 +34095,6 @@ private static bool rewriteValueAMD64_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(off));
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (OffPtr [off] ptr)
     // result: (ADDQ (MOVQconst [off]) ptr)
@@ -36764,7 +34107,6 @@ private static bool rewriteValueAMD64_OpOffPtr(ptr<Value> _addr_v) {
         v.AddArg2(v0, ptr);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpPanicBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36787,7 +34129,6 @@ private static bool rewriteValueAMD64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 1
@@ -36804,7 +34145,6 @@ private static bool rewriteValueAMD64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 2
@@ -36821,10 +34161,8 @@ private static bool rewriteValueAMD64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpPopCount16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36842,7 +34180,6 @@ private static bool rewriteValueAMD64_OpPopCount16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpPopCount8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36860,7 +34197,6 @@ private static bool rewriteValueAMD64_OpPopCount8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpRoundToEven(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36875,7 +34211,6 @@ private static bool rewriteValueAMD64_OpRoundToEven(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36903,7 +34238,6 @@ private static bool rewriteValueAMD64_OpRsh16Ux16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh16Ux16 x y)
     // cond: shiftIsBounded(v)
@@ -36917,10 +34251,8 @@ private static bool rewriteValueAMD64_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36948,7 +34280,6 @@ private static bool rewriteValueAMD64_OpRsh16Ux32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh16Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -36962,10 +34293,8 @@ private static bool rewriteValueAMD64_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -36993,7 +34322,6 @@ private static bool rewriteValueAMD64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh16Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -37007,10 +34335,8 @@ private static bool rewriteValueAMD64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37038,7 +34364,6 @@ private static bool rewriteValueAMD64_OpRsh16Ux8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh16Ux8 x y)
     // cond: shiftIsBounded(v)
@@ -37052,10 +34377,8 @@ private static bool rewriteValueAMD64_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37086,7 +34409,6 @@ private static bool rewriteValueAMD64_OpRsh16x16(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x16 x y)
     // cond: shiftIsBounded(v)
@@ -37100,10 +34422,8 @@ private static bool rewriteValueAMD64_OpRsh16x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37134,7 +34454,6 @@ private static bool rewriteValueAMD64_OpRsh16x32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x32 x y)
     // cond: shiftIsBounded(v)
@@ -37148,10 +34467,8 @@ private static bool rewriteValueAMD64_OpRsh16x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37182,7 +34499,6 @@ private static bool rewriteValueAMD64_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x64 x y)
     // cond: shiftIsBounded(v)
@@ -37196,10 +34512,8 @@ private static bool rewriteValueAMD64_OpRsh16x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37230,7 +34544,6 @@ private static bool rewriteValueAMD64_OpRsh16x8(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x8 x y)
     // cond: shiftIsBounded(v)
@@ -37244,10 +34557,8 @@ private static bool rewriteValueAMD64_OpRsh16x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37275,7 +34586,6 @@ private static bool rewriteValueAMD64_OpRsh32Ux16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh32Ux16 x y)
     // cond: shiftIsBounded(v)
@@ -37289,10 +34599,8 @@ private static bool rewriteValueAMD64_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37320,7 +34628,6 @@ private static bool rewriteValueAMD64_OpRsh32Ux32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh32Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -37334,10 +34641,8 @@ private static bool rewriteValueAMD64_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37365,7 +34670,6 @@ private static bool rewriteValueAMD64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh32Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -37379,10 +34683,8 @@ private static bool rewriteValueAMD64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37410,7 +34712,6 @@ private static bool rewriteValueAMD64_OpRsh32Ux8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh32Ux8 x y)
     // cond: shiftIsBounded(v)
@@ -37424,10 +34725,8 @@ private static bool rewriteValueAMD64_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37458,7 +34757,6 @@ private static bool rewriteValueAMD64_OpRsh32x16(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x16 x y)
     // cond: shiftIsBounded(v)
@@ -37472,10 +34770,8 @@ private static bool rewriteValueAMD64_OpRsh32x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37506,7 +34802,6 @@ private static bool rewriteValueAMD64_OpRsh32x32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x32 x y)
     // cond: shiftIsBounded(v)
@@ -37520,10 +34815,8 @@ private static bool rewriteValueAMD64_OpRsh32x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37554,7 +34847,6 @@ private static bool rewriteValueAMD64_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x64 x y)
     // cond: shiftIsBounded(v)
@@ -37568,10 +34860,8 @@ private static bool rewriteValueAMD64_OpRsh32x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37602,7 +34892,6 @@ private static bool rewriteValueAMD64_OpRsh32x8(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x8 x y)
     // cond: shiftIsBounded(v)
@@ -37616,10 +34905,8 @@ private static bool rewriteValueAMD64_OpRsh32x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37647,7 +34934,6 @@ private static bool rewriteValueAMD64_OpRsh64Ux16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh64Ux16 x y)
     // cond: shiftIsBounded(v)
@@ -37661,10 +34947,8 @@ private static bool rewriteValueAMD64_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37692,7 +34976,6 @@ private static bool rewriteValueAMD64_OpRsh64Ux32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh64Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -37706,10 +34989,8 @@ private static bool rewriteValueAMD64_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37737,7 +35018,6 @@ private static bool rewriteValueAMD64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh64Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -37751,10 +35031,8 @@ private static bool rewriteValueAMD64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37782,7 +35060,6 @@ private static bool rewriteValueAMD64_OpRsh64Ux8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh64Ux8 x y)
     // cond: shiftIsBounded(v)
@@ -37796,10 +35073,8 @@ private static bool rewriteValueAMD64_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37830,7 +35105,6 @@ private static bool rewriteValueAMD64_OpRsh64x16(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x16 x y)
     // cond: shiftIsBounded(v)
@@ -37844,10 +35118,8 @@ private static bool rewriteValueAMD64_OpRsh64x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37878,7 +35150,6 @@ private static bool rewriteValueAMD64_OpRsh64x32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x32 x y)
     // cond: shiftIsBounded(v)
@@ -37892,10 +35163,8 @@ private static bool rewriteValueAMD64_OpRsh64x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37926,7 +35195,6 @@ private static bool rewriteValueAMD64_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 x y)
     // cond: shiftIsBounded(v)
@@ -37940,10 +35208,8 @@ private static bool rewriteValueAMD64_OpRsh64x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -37974,7 +35240,6 @@ private static bool rewriteValueAMD64_OpRsh64x8(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x8 x y)
     // cond: shiftIsBounded(v)
@@ -37988,10 +35253,8 @@ private static bool rewriteValueAMD64_OpRsh64x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARQ);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38019,7 +35282,6 @@ private static bool rewriteValueAMD64_OpRsh8Ux16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh8Ux16 x y)
     // cond: shiftIsBounded(v)
@@ -38033,10 +35295,8 @@ private static bool rewriteValueAMD64_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38064,7 +35324,6 @@ private static bool rewriteValueAMD64_OpRsh8Ux32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh8Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -38078,10 +35337,8 @@ private static bool rewriteValueAMD64_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38109,7 +35366,6 @@ private static bool rewriteValueAMD64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh8Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -38123,10 +35379,8 @@ private static bool rewriteValueAMD64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38154,7 +35408,6 @@ private static bool rewriteValueAMD64_OpRsh8Ux8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh8Ux8 x y)
     // cond: shiftIsBounded(v)
@@ -38168,10 +35421,8 @@ private static bool rewriteValueAMD64_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SHRB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38202,7 +35453,6 @@ private static bool rewriteValueAMD64_OpRsh8x16(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x16 x y)
     // cond: shiftIsBounded(v)
@@ -38216,10 +35466,8 @@ private static bool rewriteValueAMD64_OpRsh8x16(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38250,7 +35498,6 @@ private static bool rewriteValueAMD64_OpRsh8x32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x32 x y)
     // cond: shiftIsBounded(v)
@@ -38264,10 +35511,8 @@ private static bool rewriteValueAMD64_OpRsh8x32(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38298,7 +35543,6 @@ private static bool rewriteValueAMD64_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x64 x y)
     // cond: shiftIsBounded(v)
@@ -38312,10 +35556,8 @@ private static bool rewriteValueAMD64_OpRsh8x64(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38346,7 +35588,6 @@ private static bool rewriteValueAMD64_OpRsh8x8(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x8 x y)
     // cond: shiftIsBounded(v)
@@ -38360,10 +35601,8 @@ private static bool rewriteValueAMD64_OpRsh8x8(ptr<Value> _addr_v) {
         v.reset(OpAMD64SARB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpSelect0(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38385,7 +35624,6 @@ private static bool rewriteValueAMD64_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select0 (Mul32uover x y))
     // result: (Select0 <typ.UInt32> (MULLU x y))
@@ -38401,7 +35639,6 @@ private static bool rewriteValueAMD64_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select0 (Add64carry x y c))
     // result: (Select0 <typ.UInt64> (ADCQ x y (Select1 <types.TypeFlags> (NEGLflags c))))
@@ -38422,7 +35659,6 @@ private static bool rewriteValueAMD64_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg3(x, y, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select0 (Sub64borrow x y c))
     // result: (Select0 <typ.UInt64> (SBBQ x y (Select1 <types.TypeFlags> (NEGLflags c))))
@@ -38443,7 +35679,6 @@ private static bool rewriteValueAMD64_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg3(x, y, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select0 <t> (AddTupleFirst32 val tuple))
     // result: (ADDL val (Select0 <t> tuple))
@@ -38459,7 +35694,6 @@ private static bool rewriteValueAMD64_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg(tuple);
         v.AddArg2(val, v0);
         return true;
-
     } 
     // match: (Select0 <t> (AddTupleFirst64 val tuple))
     // result: (ADDQ val (Select0 <t> tuple))
@@ -38475,10 +35709,8 @@ private static bool rewriteValueAMD64_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg(tuple);
         v.AddArg2(val, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38501,7 +35733,6 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select1 (Mul32uover x y))
     // result: (SETO (Select1 <types.TypeFlags> (MULLU x y)))
@@ -38518,7 +35749,6 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select1 (Add64carry x y c))
     // result: (NEGQ <typ.UInt64> (SBBQcarrymask <typ.UInt64> (Select1 <types.TypeFlags> (ADCQ x y (Select1 <types.TypeFlags> (NEGLflags c))))))
@@ -38543,7 +35773,6 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select1 (Sub64borrow x y c))
     // result: (NEGQ <typ.UInt64> (SBBQcarrymask <typ.UInt64> (Select1 <types.TypeFlags> (SBBQ x y (Select1 <types.TypeFlags> (NEGLflags c))))))
@@ -38568,7 +35797,6 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select1 (NEGLflags (MOVQconst [0])))
     // result: (FlagEQ)
@@ -38582,7 +35810,6 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         }
         v.reset(OpAMD64FlagEQ);
         return true;
-
     } 
     // match: (Select1 (NEGLflags (NEGQ (SBBQcarrymask x))))
     // result: x
@@ -38601,7 +35828,6 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         x = v_0_0_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Select1 (AddTupleFirst32 _ tuple))
     // result: (Select1 tuple)
@@ -38613,7 +35839,6 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(tuple);
         return true;
-
     } 
     // match: (Select1 (AddTupleFirst64 _ tuple))
     // result: (Select1 tuple)
@@ -38625,10 +35850,8 @@ private static bool rewriteValueAMD64_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(tuple);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpSelectN(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38673,7 +35896,6 @@ private static bool rewriteValueAMD64_OpSelectN(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(sc.Val64());
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (SelectN [0] call:(CALLstatic {sym} dst src (MOVQconst [sz]) mem))
     // cond: sz >= 0 && isSameCall(sym, "runtime.memmove") && call.Uses == 1 && isInlinableMemmove(dst, src, sz, config) && clobber(call)
@@ -38702,10 +35924,8 @@ private static bool rewriteValueAMD64_OpSelectN(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(sz);
         v.AddArg3(dst, src, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38724,7 +35944,6 @@ private static bool rewriteValueAMD64_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpSpectreIndex(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38746,7 +35965,6 @@ private static bool rewriteValueAMD64_OpSpectreIndex(ptr<Value> _addr_v) {
         v.AddArg3(x, v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpSpectreSliceIndex(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38768,7 +35986,6 @@ private static bool rewriteValueAMD64_OpSpectreSliceIndex(ptr<Value> _addr_v) {
         v.AddArg3(x, v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38790,7 +36007,6 @@ private static bool rewriteValueAMD64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVSDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitFloat(val.Type)
@@ -38806,7 +36022,6 @@ private static bool rewriteValueAMD64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVSSstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8
@@ -38822,7 +36037,6 @@ private static bool rewriteValueAMD64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVQstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4
@@ -38838,7 +36052,6 @@ private static bool rewriteValueAMD64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVLstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -38854,7 +36067,6 @@ private static bool rewriteValueAMD64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 1
@@ -38870,10 +36082,8 @@ private static bool rewriteValueAMD64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVBstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64_OpTrunc(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38888,7 +36098,6 @@ private static bool rewriteValueAMD64_OpTrunc(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -38907,7 +36116,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] destptr mem)
     // result: (MOVBstoreconst [makeValAndOff(0,0)] destptr mem)
@@ -38921,7 +36129,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(makeValAndOff(0, 0));
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [2] destptr mem)
     // result: (MOVWstoreconst [makeValAndOff(0,0)] destptr mem)
@@ -38935,7 +36142,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(makeValAndOff(0, 0));
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [4] destptr mem)
     // result: (MOVLstoreconst [makeValAndOff(0,0)] destptr mem)
@@ -38949,7 +36155,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(makeValAndOff(0, 0));
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [8] destptr mem)
     // result: (MOVQstoreconst [makeValAndOff(0,0)] destptr mem)
@@ -38963,7 +36168,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(makeValAndOff(0, 0));
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [3] destptr mem)
     // result: (MOVBstoreconst [makeValAndOff(0,2)] destptr (MOVWstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -38980,7 +36184,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [5] destptr mem)
     // result: (MOVBstoreconst [makeValAndOff(0,4)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -38997,7 +36200,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [6] destptr mem)
     // result: (MOVWstoreconst [makeValAndOff(0,4)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -39014,7 +36216,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [7] destptr mem)
     // result: (MOVLstoreconst [makeValAndOff(0,3)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -39031,7 +36232,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s%8 != 0 && s > 8 && !config.useSSE
@@ -39053,7 +36253,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg2(destptr, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [16] destptr mem)
     // cond: !config.useSSE
@@ -39074,7 +36273,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [24] destptr mem)
     // cond: !config.useSSE
@@ -39098,7 +36296,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, v1);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [32] destptr mem)
     // cond: !config.useSSE
@@ -39125,7 +36322,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, v1);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s > 8 && s < 16 && config.useSSE
@@ -39144,7 +36340,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s%16 != 0 && s > 16 && s%16 > 8 && config.useSSE
@@ -39165,7 +36360,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg2(destptr, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s%16 != 0 && s > 16 && s%16 <= 8 && config.useSSE
@@ -39187,7 +36381,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg2(destptr, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [16] destptr mem)
     // cond: config.useSSE
@@ -39204,7 +36397,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v.reset(OpAMD64MOVOstorezero);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [32] destptr mem)
     // cond: config.useSSE
@@ -39226,7 +36418,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg2(destptr, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [48] destptr mem)
     // cond: config.useSSE
@@ -39253,7 +36444,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg2(v2, v3);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [64] destptr mem)
     // cond: config.useSSE
@@ -39285,7 +36475,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg2(v2, v3);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s > 64 && s <= 1024 && s%16 == 0 && !config.noDuffDevice
@@ -39301,7 +36490,6 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: (s > 1024 || (config.noDuffDevice && s > 64 || !config.useSSE && s > 32)) && s%8 == 0
@@ -39320,10 +36508,8 @@ private static bool rewriteValueAMD64_OpZero(ptr<Value> _addr_v) {
         v1.AuxInt = int64ToAuxInt(0);
         v.AddArg4(destptr, v0, v1, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -39347,26 +36533,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     var x = v_0_0.Args[1];
                     var v_0_0_0 = v_0_0.Args[0];
                     if (v_0_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_0_0_0.AuxInt) != 1) {
                         continue;
                     }
-
                     var y = v_0_1;
                     var v0 = b.NewValue0(v_0.Pos, OpAMD64BTL, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTQ (SHLQ (MOVQconst [1]) x) y))
         // result: (UGE (BTQ x y))
@@ -39385,26 +36567,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     x = v_0_0.Args[1];
                     v_0_0_0 = v_0_0.Args[0];
                     if (v_0_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_0_0_0.AuxInt) != 1) {
                         continue;
                     }
-
                     y = v_0_1;
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTLconst [c] x))
         // cond: isUint32PowerOfTwo(int64(c))
@@ -39456,26 +36634,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     c = auxIntToInt64(v_0_0.AuxInt);
                     x = v_0_1;
                     if (!(isUint64PowerOfTwo(c))) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(int8(log64(c)));
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTQ z1:(SHLQconst [63] (SHRQconst [63] x)) z2))
         // cond: z1==z2
@@ -39496,31 +36670,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     var z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     var z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(63);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTL z1:(SHLLconst [31] (SHRQconst [31] x)) z2))
         // cond: z1==z2
@@ -39541,31 +36710,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(31);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTQ z1:(SHRQconst [63] (SHLQconst [63] x)) z2))
         // cond: z1==z2
@@ -39586,31 +36750,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHLQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(0);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTL z1:(SHRLconst [31] (SHLLconst [31] x)) z2))
         // cond: z1==z2
@@ -39631,31 +36790,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHLLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTLconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(0);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTQ z1:(SHRQconst [63] x) z2))
         // cond: z1==z2
@@ -39676,26 +36830,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     x = z1.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(63);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (TESTL z1:(SHRLconst [31] x) z2))
         // cond: z1==z2
@@ -39716,26 +36866,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     x = z1.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTLconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(31);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64UGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (InvertFlags cmp) yes no)
         // result: (EQ cmp yes no)
@@ -40280,26 +37426,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     x = v_0_0.Args[1];
                     v_0_0_0 = v_0_0.Args[0];
                     if (v_0_0_0.Op != OpAMD64MOVLconst || auxIntToInt32(v_0_0_0.AuxInt) != 1) {
                         continue;
                     }
-
                     y = v_0_1;
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTL, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTQ (SHLQ (MOVQconst [1]) x) y))
         // result: (ULT (BTQ x y))
@@ -40318,26 +37460,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     x = v_0_0.Args[1];
                     v_0_0_0 = v_0_0.Args[0];
                     if (v_0_0_0.Op != OpAMD64MOVQconst || auxIntToInt64(v_0_0_0.AuxInt) != 1) {
                         continue;
                     }
-
                     y = v_0_1;
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTLconst [c] x))
         // cond: isUint32PowerOfTwo(int64(c))
@@ -40389,26 +37527,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     c = auxIntToInt64(v_0_0.AuxInt);
                     x = v_0_1;
                     if (!(isUint64PowerOfTwo(c))) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(int8(log64(c)));
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTQ z1:(SHLQconst [63] (SHRQconst [63] x)) z2))
         // cond: z1==z2
@@ -40429,31 +37563,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(63);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTL z1:(SHLLconst [31] (SHRQconst [31] x)) z2))
         // cond: z1==z2
@@ -40474,31 +37603,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHRQconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(31);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTQ z1:(SHRQconst [63] (SHLQconst [63] x)) z2))
         // cond: z1==z2
@@ -40519,31 +37643,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHLQconst || auxIntToInt8(z1_0.AuxInt) != 63) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(0);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTL z1:(SHRLconst [31] (SHLLconst [31] x)) z2))
         // cond: z1==z2
@@ -40564,31 +37683,26 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     z1_0 = z1.Args[0];
                     if (z1_0.Op != OpAMD64SHLLconst || auxIntToInt8(z1_0.AuxInt) != 31) {
                         continue;
                     }
-
                     x = z1_0.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTLconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(0);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTQ z1:(SHRQconst [63] x) z2))
         // cond: z1==z2
@@ -40609,26 +37723,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     x = z1.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTQconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(63);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTL z1:(SHRLconst [31] x) z2))
         // cond: z1==z2
@@ -40649,26 +37759,22 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     x = z1.Args[0];
                     z2 = v_0_1;
                     if (!(z1 == z2)) {
                         continue;
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpAMD64BTLconst, types.TypeFlags);
                     v0.AuxInt = int8ToAuxInt(31);
                     v0.AddArg(x);
                     b.resetWithControl(BlockAMD64ULT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (TESTB (SETGF cmp) (SETGF cmp)) yes no)
         // result: (UGT cmp yes no)
@@ -41036,7 +38142,6 @@ private static bool rewriteBlockAMD64(ptr<Block> _addr_b) {
             return true;
         }
         return false;
-
 }
 
 } // end ssa_package

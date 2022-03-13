@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package des -- go2cs converted at 2022 March 06 22:19:19 UTC
+// package des -- go2cs converted at 2022 March 13 05:34:15 UTC
 // import "crypto/des" ==> using des = go.crypto.des_package
 // Original source: C:\Program Files\Go\src\crypto\des\cipher.go
-using cipher = go.crypto.cipher_package;
-using subtle = go.crypto.@internal.subtle_package;
-using binary = go.encoding.binary_package;
-using strconv = go.strconv_package;
-
 namespace go.crypto;
+
+using cipher = crypto.cipher_package;
+using subtle = crypto.@internal.subtle_package;
+using binary = encoding.binary_package;
+using strconv = strconv_package;
+
+
+// The DES block size in bytes.
 
 public static partial class des_package {
 
-    // The DES block size in bytes.
 public static readonly nint BlockSize = 8;
 
 
@@ -42,7 +44,6 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
     ptr<desCipher> c = @new<desCipher>();
     c.generateSubkeys(key);
     return (c, error.As(null!)!);
-
 }
 
 private static nint BlockSize(this ptr<desCipher> _addr_c) {
@@ -64,7 +65,6 @@ private static void Encrypt(this ptr<desCipher> _addr_c, slice<byte> dst, slice<
         panic("crypto/des: invalid buffer overlap");
     }
     encryptBlock(c.subkeys[..], dst, src);
-
 });
 
 private static void Decrypt(this ptr<desCipher> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, _) => {
@@ -80,7 +80,6 @@ private static void Decrypt(this ptr<desCipher> _addr_c, slice<byte> dst, slice<
         panic("crypto/des: invalid buffer overlap");
     }
     decryptBlock(c.subkeys[..], dst, src);
-
 });
 
 // A tripleDESCipher is an instance of TripleDES encryption.
@@ -103,7 +102,6 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
     c.cipher2.generateSubkeys(key[(int)8..(int)16]);
     c.cipher3.generateSubkeys(key[(int)16..]);
     return (c, error.As(null!)!);
-
 }
 
 private static nint BlockSize(this ptr<tripleDESCipher> _addr_c) {
@@ -165,7 +163,6 @@ private static void Encrypt(this ptr<tripleDESCipher> _addr_c, slice<byte> dst, 
 
     var preOutput = (uint64(right) << 32) | uint64(left);
     binary.BigEndian.PutUint64(dst, permuteFinalBlock(preOutput));
-
 });
 
 private static void Decrypt(this ptr<tripleDESCipher> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, _) => {
@@ -221,7 +218,6 @@ private static void Decrypt(this ptr<tripleDESCipher> _addr_c, slice<byte> dst, 
 
     var preOutput = (uint64(right) << 32) | uint64(left);
     binary.BigEndian.PutUint64(dst, permuteFinalBlock(preOutput));
-
 });
 
 } // end des_package

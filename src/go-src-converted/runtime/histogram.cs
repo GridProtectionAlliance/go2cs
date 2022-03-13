@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:45 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:31 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\histogram.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -59,7 +59,6 @@ private static readonly nint timeHistNumSubBuckets = 1 << (int)(timeHistSubBucke
 private static readonly nint timeHistNumSuperBuckets = 45;
 private static readonly var timeHistTotalBuckets = timeHistNumSuperBuckets * timeHistNumSubBuckets + 1;
 
-
 // timeHistogram represents a distribution of durations in
 // nanoseconds.
 //
@@ -105,7 +104,6 @@ private static void record(this ptr<timeHistogram> _addr_h, long duration) {
             // infinity.
             superBucket = timeHistNumSuperBuckets - 1;
             subBucket = timeHistNumSubBuckets - 1;
-
         }
         else
  { 
@@ -114,7 +112,6 @@ private static void record(this ptr<timeHistogram> _addr_h, long duration) {
             // the duration such that we leave the top bit and the next bits
             // intact, then extract the index.
             subBucket = uint((duration >> (int)((superBucket - 1))) % timeHistNumSubBuckets);
-
         }
     }
     else
@@ -122,12 +119,10 @@ private static void record(this ptr<timeHistogram> _addr_h, long duration) {
         subBucket = uint(duration);
     }
     atomic.Xadd64(_addr_h.counts[superBucket * timeHistNumSubBuckets + subBucket], 1);
-
 }
 
 private static readonly nuint fInf = 0x7FF0000000000000;
 private static readonly nuint fNegInf = 0xFFF0000000000000;
-
 
 private static double float64Inf() {
     ref var inf = ref heap(uint64(fInf), out ptr<var> _addr_inf);
@@ -156,7 +151,6 @@ private static slice<double> timeHistogramMetricsBuckets() {
             // Thereafter, we shift up by 1 each time, so we can represent
             // this pattern as (i-1)+timeHistSubBucketBits.
             superBucketMin = uint64(1) << (int)(uint(i - 1 + timeHistSubBucketBits));
-
         }
         var subBucketShift = uint(0);
         if (i > 1) { 
@@ -164,7 +158,6 @@ private static slice<double> timeHistogramMetricsBuckets() {
             // so we'll never have to shift the sub-bucket index. Thereafter,
             // we shift up by 1 with each subsequent bucket.
             subBucketShift = uint(i - 2);
-
         }
         for (nint j = 0; j < timeHistNumSubBuckets; j++) { 
             // j is the sub-bucket index. By shifting the index into position to
@@ -175,13 +168,10 @@ private static slice<double> timeHistogramMetricsBuckets() {
             // Convert the subBucketMin which is in nanoseconds to a float64 seconds value.
             // These values will all be exactly representable by a float64.
             b[i * timeHistNumSubBuckets + j + 1] = float64(subBucketMin) / 1e9F;
-
         }
-
     }
     b[len(b) - 1] = float64Inf();
     return b;
-
 }
 
 } // end runtime_package

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64 -- go2cs converted at 2022 March 06 22:47:35 UTC
+// package ppc64 -- go2cs converted at 2022 March 13 05:58:50 UTC
 // import "cmd/compile/internal/ppc64" ==> using ppc64 = go.cmd.compile.@internal.ppc64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ppc64\galign.go
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using ppc64 = go.cmd.@internal.obj.ppc64_package;
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.compile.@internal;
+
+using ssagen = cmd.compile.@internal.ssagen_package;
+using ppc64 = cmd.@internal.obj.ppc64_package;
+using buildcfg = @internal.buildcfg_package;
 
 public static partial class ppc64_package {
 
@@ -30,7 +30,6 @@ public static void Init(ptr<ssagen.ArchInfo> _addr_arch) {
     arch.SSAMarkMoves = ssaMarkMoves;
     arch.SSAGenValue = ssaGenValue;
     arch.SSAGenBlock = ssaGenBlock;
-
 }
 
 } // end ppc64_package

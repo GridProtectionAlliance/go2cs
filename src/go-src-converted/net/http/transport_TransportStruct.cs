@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:24 UTC
+//     Generated on 2022 March 13 05:37:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Transport
         {
             // Constructors
@@ -146,7 +146,7 @@ namespace net
             public static implicit operator Transport(NilType nil) => default(Transport);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Transport Transport_cast(dynamic value)
         {
             return new Transport(value.idleMu, value.closeIdle, value.idleConn, value.idleConnWait, value.idleLRU, value.reqMu, value.reqCanceler, value.altMu, value.altProto, value.connsPerHostMu, value.connsPerHost, value.connsPerHostWait, value.Proxy, value.DialContext, value.Dial, value.DialTLSContext, value.DialTLS, ref value.TLSClientConfig, value.TLSHandshakeTimeout, value.DisableKeepAlives, value.DisableCompression, value.MaxIdleConns, value.MaxIdleConnsPerHost, value.MaxConnsPerHost, value.IdleConnTimeout, value.ResponseHeaderTimeout, value.ExpectContinueTimeout, value.TLSNextProto, value.ProxyConnectHeader, value.GetProxyConnectHeader, value.MaxResponseHeaderBytes, value.WriteBufferSize, value.ReadBufferSize, value.nextProtoOnce, value.h2transport, value.tlsNextProtoWasNil, value.ForceAttemptHTTP2);

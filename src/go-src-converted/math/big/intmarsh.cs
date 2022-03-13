@@ -4,17 +4,19 @@
 
 // This file implements encoding/decoding of Ints.
 
-// package big -- go2cs converted at 2022 March 06 22:17:55 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:06 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\intmarsh.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
 namespace go.math;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+
+
+// Gob codec version. Permits backward-compatible changes to the encoding.
 
 public static partial class big_package {
 
-    // Gob codec version. Permits backward-compatible changes to the encoding.
 private static readonly byte intGobVersion = 1;
 
 // GobEncode implements the gob.GobEncoder interface.
@@ -37,7 +39,6 @@ private static (slice<byte>, error) GobEncode(this ptr<Int> _addr_x) {
     }
     buf[i] = b;
     return (buf[(int)i..], error.As(null!)!);
-
 }
 
 // GobDecode implements the gob.GobDecoder interface.
@@ -48,7 +49,6 @@ private static error GobDecode(this ptr<Int> _addr_z, slice<byte> buf) {
         // Other side sent a nil or default value.
         z.val = new Int();
         return error.As(null!)!;
-
     }
     var b = buf[0];
     if (b >> 1 != intGobVersion) {
@@ -57,7 +57,6 @@ private static error GobDecode(this ptr<Int> _addr_z, slice<byte> buf) {
     z.neg = b & 1 != 0;
     z.abs = z.abs.setBytes(buf[(int)1..]);
     return error.As(null!)!;
-
 }
 
 // MarshalText implements the encoding.TextMarshaler interface.
@@ -70,7 +69,6 @@ private static (slice<byte>, error) MarshalText(this ptr<Int> _addr_x) {
         return ((slice<byte>)"<nil>", error.As(null!)!);
     }
     return (x.abs.itoa(x.neg, 10), error.As(null!)!);
-
 }
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
@@ -84,9 +82,7 @@ private static error UnmarshalText(this ptr<Int> _addr_z, slice<byte> text) {
             return error.As(fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int", text))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // The JSON marshalers are only here for API backward compatibility
@@ -111,7 +107,6 @@ private static error UnmarshalJSON(this ptr<Int> _addr_z, slice<byte> text) {
         return error.As(null!)!;
     }
     return error.As(z.UnmarshalText(text))!;
-
 }
 
 } // end big_package

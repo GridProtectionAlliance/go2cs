@@ -12,13 +12,14 @@
 // with the arguments shown above followed by the command to run.
 // This program will check whether it is expected to run the cover
 // program, and if so replace it with /path/to/testcover.
-// package main -- go2cs converted at 2022 March 06 23:15:13 UTC
-// Original source: C:\Program Files\Go\src\cmd\cover\testdata\toolexec.go
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using strings = go.strings_package;
 
+// package main -- go2cs converted at 2022 March 13 06:28:41 UTC
+// Original source: C:\Program Files\Go\src\cmd\cover\testdata\toolexec.go
 namespace go;
+
+using exec = @internal.execabs_package;
+using os = os_package;
+using strings = strings_package;
 
 public static partial class main_package {
 
@@ -36,7 +37,6 @@ private static void Main() {
             os.Exit(1);
         }
     }
-
 }
 
 } // end main_package

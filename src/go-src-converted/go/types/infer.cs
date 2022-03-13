@@ -5,33 +5,34 @@
 // This file implements type parameter inference given
 // a list of concrete arguments and a parameter list.
 
-// package types -- go2cs converted at 2022 March 06 22:42:01 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:08 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\infer.go
-using token = go.go.token_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.go;
 
+using token = go.token_package;
+using strings = strings_package;
+
+
+// infer attempts to infer the complete set of type arguments for generic function instantiation/call
+// based on the given type parameters tparams, type arguments targs, function parameters params, and
+// function arguments args, if any. There must be at least one type parameter, no more type arguments
+// than type parameters, and params and args must match in number (incl. zero).
+// If successful, infer returns the complete list of type arguments, one for each type parameter.
+// Otherwise the result is nil and appropriate errors will be reported unless report is set to false.
+//
+// Inference proceeds in 3 steps:
+//
+//   1) Start with given type arguments.
+//   2) Infer type arguments from typed function arguments.
+//   3) Infer type arguments from untyped function arguments.
+//
+// Constraint type inference is used after each step to expand the set of type arguments.
+//
+
+using System;
 public static partial class types_package {
 
-    // infer attempts to infer the complete set of type arguments for generic function instantiation/call
-    // based on the given type parameters tparams, type arguments targs, function parameters params, and
-    // function arguments args, if any. There must be at least one type parameter, no more type arguments
-    // than type parameters, and params and args must match in number (incl. zero).
-    // If successful, infer returns the complete list of type arguments, one for each type parameter.
-    // Otherwise the result is nil and appropriate errors will be reported unless report is set to false.
-    //
-    // Inference proceeds in 3 steps:
-    //
-    //   1) Start with given type arguments.
-    //   2) Infer type arguments from typed function arguments.
-    //   3) Infer type arguments from untyped function arguments.
-    //
-    // Constraint type inference is used after each step to expand the set of type arguments.
-    //
 private static slice<Type> infer(this ptr<Checker> _addr_check, positioner posn, slice<ptr<TypeName>> tparams, slice<Type> targs, ptr<Tuple> _addr_@params, slice<ptr<operand>> args, bool report) => func((defer, _, _) => {
     slice<Type> result = default;
     ref Checker check = ref _addr_check.val;
@@ -50,7 +51,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, positioner posn,
                 targ = targ__prev1;
             }
         }());
-
     }
     var n = len(tparams);
     assert(n > 0 && len(targs) <= n); 
@@ -157,7 +157,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, positioner posn,
                     // and continue, we may still be able to infer all
                     // targs resulting in fewer follon-on errors.
                     continue;
-
                 }
                 {
                     var targ__prev2 = targ;
@@ -180,7 +179,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, positioner posn,
                     targ = targ__prev2;
 
                 }
-
             }
         }
         i = i__prev1;
@@ -226,7 +224,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, positioner posn,
                 tpar = tpar__prev1;
 
             }
-
         }
         i = i__prev1;
     }
@@ -245,7 +242,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, positioner posn,
         check.errorf(posn, _Todo, "cannot infer %s (%v) (%v)", tpar.name, tpar.pos, targs);
     }
     return null;
-
 });
 
 // typeNamesString produces a string containing all the
@@ -272,11 +268,9 @@ private static @string typeNamesString(slice<ptr<TypeName>> list) {
             b.WriteString(", ");
         }
         b.WriteString(tname.name);
-
     }    b.WriteString(", and ");
     b.WriteString(list[n - 1].name);
     return b.String();
-
 }
 
 // IsParameterized reports whether typ contains any of the type parameters of tparams.
@@ -302,7 +296,6 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
             return x;
         }
     }
-
     w.seen[typ] = false;
     defer(() => {
         w.seen[typ] = res;
@@ -360,9 +353,7 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
                 }
 
                 return w.isParameterizedList(unpackType(t.allTypes));
-
             }
-
             return t.iterate(t => {
                 {
                     var m__prev1 = m;
@@ -378,7 +369,6 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
                 }
 
                 return w.isParameterizedList(unpackType(t.types));
-
             }, null);
             break;
         case ptr<Map> t:
@@ -406,7 +396,6 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
     }
 
     return false;
-
 });
 
 private static bool isParameterizedList(this ptr<tpWalker> _addr_w, slice<Type> list) {
@@ -417,7 +406,6 @@ private static bool isParameterizedList(this ptr<tpWalker> _addr_w, slice<Type> 
             return true;
         }
     }    return false;
-
 }
 
 // inferB returns the list of actual type arguments inferred from the type parameters'
@@ -518,9 +506,7 @@ private static (slice<Type>, nint) inferB(this ptr<Checker> _addr_check, slice<p
                 }
 
             }
-
         }        dirty = dirty[..(int)n];
-
     } 
 
     // Once nothing changes anymore, we may still have type parameters left;
@@ -560,7 +546,6 @@ private static (slice<Type>, nint) inferB(this ptr<Checker> _addr_check, slice<p
     }
 
     return ;
-
 }
 
 // structuralType returns the structural type of a constraint, if any.
@@ -579,9 +564,7 @@ private static Type structuralType(this ptr<Checker> _addr_check, Type constrain
             return null;
         }
     }
-
     return constraint;
-
 }
 
 } // end types_package

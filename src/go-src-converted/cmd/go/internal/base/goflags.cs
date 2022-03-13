@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 23:19:43 UTC
+// package @base -- go2cs converted at 2022 March 13 06:32:31 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\base\goflags.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-
 namespace go.cmd.go.@internal;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using cfg = cmd.go.@internal.cfg_package;
 
 public static partial class @base_package {
 
@@ -31,14 +31,12 @@ public static slice<@string> GOFLAGS() {
 public static void InitGOFLAGS() {
     if (goflags != null) { // already initialized
         return ;
-
     }
     goflags = strings.Fields(cfg.Getenv("GOFLAGS"));
     if (len(goflags) == 0) { 
         // nothing to do; avoid work on later InitGOFLAGS call
         goflags = new slice<@string>(new @string[] {  });
         return ;
-
     }
     var hideErrors = cfg.CmdName == "env" || cfg.CmdName == "bug"; 
 
@@ -65,7 +63,6 @@ public static void InitGOFLAGS() {
             }
 
         }
-
         if (!hasFlag(Go, name)) {
             if (hideErrors) {
                 continue;
@@ -111,9 +108,7 @@ public static void SetFromGOFLAGS(ptr<flag.FlagSet> _addr_flags) {
                 (name, value, hasValue) = (goflag[..(int)i], goflag[(int)i + 1..], true);
             }
 
-
         }
-
         if (strings.HasPrefix(name, "--")) {
             name = name[(int)1..];
         }
@@ -139,7 +134,6 @@ public static void SetFromGOFLAGS(ptr<flag.FlagSet> _addr_flags) {
                         err = err__prev3;
 
                     }
-
                 }
                 else
  {
@@ -156,9 +150,7 @@ public static void SetFromGOFLAGS(ptr<flag.FlagSet> _addr_flags) {
                         err = err__prev3;
 
                     }
-
                 }
-
             }
             else
  {
@@ -179,11 +171,9 @@ public static void SetFromGOFLAGS(ptr<flag.FlagSet> _addr_flags) {
                     err = err__prev2;
 
                 }
-
             }
 
         }
-
     }
 }
 
@@ -202,12 +192,10 @@ public static bool InGOFLAGS(@string flag) {
             }
 
         }
-
         if (name == flag) {
             return true;
         }
     }    return false;
-
 }
 
 } // end @base_package

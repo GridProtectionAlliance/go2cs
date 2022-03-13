@@ -8,20 +8,19 @@
 // RFC 1929.
 //
 
-// package http -- go2cs converted at 2022 March 06 22:23:11 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:35 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\socks_bundle.go
-using context = go.context_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using net = go.net_package;
-using strconv = go.strconv_package;
-using time = go.time_package;
+namespace go.net;
+
+using context = context_package;
+using errors = errors_package;
+using io = io_package;
+using net = net_package;
+using strconv = strconv_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go.net;
 
 public static partial class http_package {
 
@@ -44,7 +43,6 @@ private static (net.Addr, error) connect(this ptr<socksDialer> _addr_d, context.
             defer(c.SetDeadline(socksnoDeadline));
         }
     }
-
     if (ctx != context.Background()) {
         var errCh = make_channel<error>(1);
         var done = make_channel<object>();
@@ -134,9 +132,7 @@ private static (net.Addr, error) connect(this ptr<socksDialer> _addr_d, context.
 
                 }
 
-
             }
-
         }
         else
  {
@@ -148,7 +144,6 @@ private static (net.Addr, error) connect(this ptr<socksDialer> _addr_d, context.
             b = append(b, host);
         }
     }
-
     b = append(b, byte(port >> 8), byte(port));
     _, ctxErr = c.Write(b);
 
@@ -170,7 +165,6 @@ private static (net.Addr, error) connect(this ptr<socksDialer> _addr_d, context.
             return (null, error.As(errors.New("unknown error " + cmdErr.String()))!);
         }
     }
-
     if (b[2] != 0) {
         return (null, error.As(errors.New("non-zero reserved field"))!);
     }
@@ -192,7 +186,6 @@ private static (net.Addr, error) connect(this ptr<socksDialer> _addr_d, context.
             }
 
         }
-
         l += int(b[0]);
     else 
         return (null, error.As(errors.New("unknown address type " + strconv.Itoa(int(b[3]))))!);
@@ -217,7 +210,6 @@ private static (net.Addr, error) connect(this ptr<socksDialer> _addr_d, context.
     }
     a.Port = int(b[len(b) - 2]) << 8 | int(b[len(b) - 1]);
     return (_addr_a, error.As(null!)!);
-
 });
 
 private static (@string, nint, error) sockssplitHostPort(@string address) {
@@ -237,7 +229,6 @@ private static (@string, nint, error) sockssplitHostPort(@string address) {
         return ("", 0, error.As(errors.New("port number out of range " + port))!);
     }
     return (host, portnum, error.As(null!)!);
-
 }
 
 // A Command represents a SOCKS command.
@@ -252,8 +243,7 @@ private static @string String(this socksCommand cmd) {
         return "socks bind";
     else 
         return "socks " + strconv.Itoa(int(cmd));
-    
-}
+    }
 
 // An AuthMethod represents a SOCKS authentication method.
 private partial struct socksAuthMethod { // : nint
@@ -285,8 +275,7 @@ private static @string String(this socksReply code) {
         return "address type not supported";
     else 
         return "unknown code: " + strconv.Itoa(int(code));
-    
-}
+    }
 
 // Wire protocol constants.
 private static readonly nuint socksVersion5 = 0x05;
@@ -303,7 +292,6 @@ private static readonly socksAuthMethod socksAuthMethodUsernamePassword = 0x02; 
 private static readonly socksAuthMethod socksAuthMethodNoAcceptableMethods = 0xff; // no acceptable authentication methods
 
 private static readonly socksReply socksStatusSucceeded = 0x00;
-
 
 // An Addr represents a SOCKS-specific address.
 // Either Name or IP is used exclusively.
@@ -330,7 +318,6 @@ private static @string String(this ptr<socksAddr> _addr_a) {
         return net.JoinHostPort(a.Name, port);
     }
     return net.JoinHostPort(a.IP.String(), port);
-
 }
 
 // A Conn represents a forward proxy connection.
@@ -348,7 +335,6 @@ private static net.Addr BoundAddr(this ptr<socksConn> _addr_c) {
         return null;
     }
     return c.boundAddr;
-
 }
 
 // A Dialer holds SOCKS-specific options.
@@ -395,7 +381,6 @@ private static (net.Conn, error) DialContext(this ptr<socksDialer> _addr_d, cont
         err = err__prev1;
 
     }
-
     if (ctx == null) {
         (proxy, dst, _) = d.pathAddrs(address);
         return (null, error.As(addr(new net.OpError(Op:d.cmd.String(),Net:network,Source:proxy,Addr:dst,Err:errors.New("nil context")))!)!);
@@ -421,7 +406,6 @@ private static (net.Conn, error) DialContext(this ptr<socksDialer> _addr_d, cont
         return (null, error.As(addr(new net.OpError(Op:d.cmd.String(),Net:network,Source:proxy,Addr:dst,Err:err))!)!);
     }
     return (addr(new socksConn(Conn:c,boundAddr:a)), error.As(null!)!);
-
 }
 
 // DialWithConn initiates a connection from SOCKS server to the target
@@ -443,7 +427,6 @@ private static (net.Addr, error) DialWithConn(this ptr<socksDialer> _addr_d, con
             return (null, error.As(addr(new net.OpError(Op:d.cmd.String(),Net:network,Source:proxy,Addr:dst,Err:err))!)!);
         }
     }
-
     if (ctx == null) {
         (proxy, dst, _) = d.pathAddrs(address);
         return (null, error.As(addr(new net.OpError(Op:d.cmd.String(),Net:network,Source:proxy,Addr:dst,Err:errors.New("nil context")))!)!);
@@ -454,7 +437,6 @@ private static (net.Addr, error) DialWithConn(this ptr<socksDialer> _addr_d, con
         return (null, error.As(addr(new net.OpError(Op:d.cmd.String(),Net:network,Source:proxy,Addr:dst,Err:err))!)!);
     }
     return (a, error.As(null!)!);
-
 }
 
 // Dial connects to the provided address on the provided network.
@@ -480,7 +462,6 @@ private static (net.Conn, error) Dial(this ptr<socksDialer> _addr_d, @string net
         err = err__prev1;
 
     }
-
     err = default!;
     net.Conn c = default;
     if (d.ProxyDial != null) {
@@ -506,9 +487,7 @@ private static (net.Conn, error) Dial(this ptr<socksDialer> _addr_d, @string net
         err = err__prev1;
 
     }
-
     return (c, error.As(null!)!);
-
 }
 
 private static error validateTarget(this ptr<socksDialer> _addr_d, @string network, @string address) {
@@ -530,7 +509,6 @@ private static error validateTarget(this ptr<socksDialer> _addr_d, @string netwo
     if (d.cmd == socksCmdConnect || d.cmd == sockscmdBind)     else 
         return error.As(errors.New("command not implemented"))!;
         return error.As(null!)!;
-
 }
 
 private static (net.Addr, net.Addr, error) pathAddrs(this ptr<socksDialer> _addr_d, @string address) {
@@ -557,7 +535,6 @@ private static (net.Addr, net.Addr, error) pathAddrs(this ptr<socksDialer> _addr
             dst = a;
         }
     }    return ;
-
 }
 
 // NewDialer returns a new Dialer that dials through the provided
@@ -568,7 +545,6 @@ private static ptr<socksDialer> socksNewDialer(@string network, @string address)
 
 private static readonly nuint socksauthUsernamePasswordVersion = 0x01;
 private static readonly nuint socksauthStatusSucceeded = 0x00;
-
 
 // UsernamePassword are the credentials for the username/password
 // authentication method.
@@ -604,7 +580,6 @@ private static error Authenticate(this ptr<socksUsernamePassword> _addr_up, cont
             }
 
         }
-
         {
             (_, err) = io.ReadFull(rw, b[..(int)2]);
 
@@ -613,7 +588,6 @@ private static error Authenticate(this ptr<socksUsernamePassword> _addr_up, cont
             }
 
         }
-
         if (b[0] != socksauthUsernamePasswordVersion) {
             return error.As(errors.New("invalid username/password version"))!;
         }
@@ -622,7 +596,6 @@ private static error Authenticate(this ptr<socksUsernamePassword> _addr_up, cont
         }
         return error.As(null!)!;
         return error.As(errors.New("unsupported authentication method " + strconv.Itoa(int(auth))))!;
-
 }
 
 } // end http_package

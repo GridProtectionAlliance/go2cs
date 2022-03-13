@@ -4,12 +4,12 @@
 
 // This file contains tests for the atomic checker.
 
-// package atomic -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package atomic -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata/atomic" ==> using atomic = go.cmd.vet.testdata.atomic_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\atomic\atomic.go
-using atomic = go.sync.atomic_package;
-
 namespace go.cmd.vet.testdata;
+
+using atomic = sync.atomic_package;
 
 public static partial class atomic_package {
 

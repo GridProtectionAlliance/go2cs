@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:09:38 UTC
+// package main -- go2cs converted at 2022 March 13 06:22:53 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\testdata\scopes.go
-using fmt = go.fmt_package;
-using time = go.time_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using time = time_package;
 
 public static partial class main_package {
 
 private static void Main() {
     growstack(); // Use stack early to prevent growth during test, which confuses gdb
     test();
-
 }
 
 //go:noinline
@@ -57,12 +56,9 @@ private static void test() {
                     c = 1.1F;
                     f4(int(c));
                 }
-
                 f5(b);
-
             }
             f6(a);
-
         }
 
         x = x__prev1;
@@ -86,7 +82,6 @@ private static void test() {
             i = i__prev1;
         }
         helloworld();
-
     }
 }
 

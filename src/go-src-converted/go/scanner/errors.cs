@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package scanner -- go2cs converted at 2022 March 06 22:42:46 UTC
+// package scanner -- go2cs converted at 2022 March 13 05:53:55 UTC
 // import "go/scanner" ==> using scanner = go.go.scanner_package
 // Original source: C:\Program Files\Go\src\go\scanner\errors.go
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using sort = go.sort_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
+using token = go.token_package;
+using io = io_package;
+using sort = sort_package;
+
+
+// In an ErrorList, an error is represented by an *Error.
+// The position Pos, if valid, points to the beginning of
+// the offending token, and the error condition is described
+// by Msg.
+//
 
 public static partial class scanner_package {
 
-    // In an ErrorList, an error is represented by an *Error.
-    // The position Pos, if valid, points to the beginning of
-    // the offending token, and the error condition is described
-    // by Msg.
-    //
 public partial struct Error {
     public token.Position Pos;
     public @string Msg;
@@ -30,10 +32,8 @@ public static @string Error(this Error e) {
         // don't print "<unknown position>"
         // TODO(gri) reconsider the semantics of Position.IsValid
         return e.Pos.String() + ": " + e.Msg;
-
     }
     return e.Msg;
-
 }
 
 // ErrorList is a list of *Errors.
@@ -80,7 +80,6 @@ public static bool Less(this ErrorList p, nint i, nint j) {
         return e.Column < f.Column;
     }
     return p[i].Msg < p[j].Msg;
-
 }
 
 // Sort sorts an ErrorList. *Error entries are sorted by position,
@@ -105,7 +104,6 @@ private static void RemoveMultiples(this ptr<ErrorList> _addr_p) {
             i++;
         }
     }    p.val = (p.val)[(int)0..(int)i];
-
 }
 
 // An ErrorList implements the error interface.
@@ -119,7 +117,6 @@ public static @string Error(this ErrorList p) {
             break;
     }
     return fmt.Sprintf("%s (and %d more errors)", p[0], len(p) - 1);
-
 }
 
 // Err returns an error equivalent to this error list.
@@ -129,7 +126,6 @@ public static error Err(this ErrorList p) {
         return error.As(null!)!;
     }
     return error.As(p)!;
-
 }
 
 // PrintError is a utility function that prints a list of errors to w,
@@ -150,7 +146,6 @@ public static void PrintError(io.Writer w, error err) {
         }
 
     }
-
 }
 
 } // end scanner_package

@@ -9,25 +9,27 @@
 // depending on the operating system. To process paths such as URLs
 // that always use forward slashes regardless of the operating
 // system, see the path package.
-// package filepath -- go2cs converted at 2022 March 06 22:14:06 UTC
+
+// package filepath -- go2cs converted at 2022 March 13 05:28:16 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Program Files\Go\src\path\filepath\path.go
-using errors = go.errors_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.path;
 
+using errors = errors_package;
+using fs = io.fs_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// A lazybuf is a lazily constructed path buffer.
+// It supports append, reading previously appended bytes,
+// and retrieving the final string. It does not allocate a buffer
+// to hold the output until that output diverges from s.
+
+using System;
 public static partial class filepath_package {
 
-    // A lazybuf is a lazily constructed path buffer.
-    // It supports append, reading previously appended bytes,
-    // and retrieving the final string. It does not allocate a buffer
-    // to hold the output until that output diverges from s.
 private partial struct lazybuf {
     public @string path;
     public slice<byte> buf;
@@ -43,7 +45,6 @@ private static byte index(this ptr<lazybuf> _addr_b, nint i) {
         return b.buf[i];
     }
     return b.path[i];
-
 }
 
 private static void append(this ptr<lazybuf> _addr_b, byte c) {
@@ -56,11 +57,9 @@ private static void append(this ptr<lazybuf> _addr_b, byte c) {
         }
         b.buf = make_slice<byte>(len(b.path));
         copy(b.buf, b.path[..(int)b.w]);
-
     }
     b.buf[b.w] = c;
     b.w++;
-
 }
 
 private static @string @string(this ptr<lazybuf> _addr_b) {
@@ -70,12 +69,10 @@ private static @string @string(this ptr<lazybuf> _addr_b) {
         return b.volAndPath[..(int)b.volLen + b.w];
     }
     return b.volAndPath[..(int)b.volLen] + string(b.buf[..(int)b.w]);
-
 }
 
 public static readonly var Separator = os.PathSeparator;
 public static readonly var ListSeparator = os.PathListSeparator;
-
 
 // Clean returns the shortest path name equivalent to path
 // by purely lexical processing. It applies the following rules
@@ -108,10 +105,8 @@ public static @string Clean(@string path) {
         if (volLen > 1 && originalPath[1] != ':') { 
             // should be UNC
             return FromSlash(originalPath);
-
         }
         return originalPath + ".";
-
     }
     var rooted = os.IsPathSeparator(path[0]); 
 
@@ -165,15 +160,13 @@ public static @string Clean(@string path) {
                 @out.append(path[r]);
                 r++;
             }
-        
-    } 
+            } 
 
     // Turn empty string into "."
     if (@out.w == 0) {
         @out.append('.');
     }
     return FromSlash(@out.@string());
-
 }
 
 // ToSlash returns the result of replacing each separator character
@@ -184,7 +177,6 @@ public static @string ToSlash(@string path) {
         return path;
     }
     return strings.ReplaceAll(path, string(Separator), "/");
-
 }
 
 // FromSlash returns the result of replacing each slash ('/') character
@@ -195,7 +187,6 @@ public static @string FromSlash(@string path) {
         return path;
     }
     return strings.ReplaceAll(path, "/", string(Separator));
-
 }
 
 // SplitList splits a list of paths joined by the OS-specific ListSeparator,
@@ -247,7 +238,6 @@ public static @string Ext(@string path) {
         }
     }
     return "";
-
 }
 
 // EvalSymlinks returns the path name after the evaluation of any symbolic
@@ -286,7 +276,6 @@ private static (@string, error) unixAbs(@string path) {
         return ("", error.As(err)!);
     }
     return (Join(wd, path), error.As(null!)!);
-
 }
 
 // Rel returns a relative path that is lexically equivalent to targpath when
@@ -316,7 +305,6 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
     else if (base == "" && volumeNameLen(baseVol) > 2) { 
         // Treat any targetpath matching `\\host\share` basepath as absolute path.
         base = string(Separator);
-
     }
     var baseSlashed = len(base) > 0 && base[0] == Separator;
     var targSlashed = len(targ) > 0 && targ[0] == Separator;
@@ -345,7 +333,6 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
         }
         b0 = bi;
         t0 = ti;
-
     }
     if (base[(int)b0..(int)bi] == "..") {
         return ("", error.As(errors.New("Rel: can't make " + targpath + " relative to " + basepath))!);
@@ -369,10 +356,8 @@ public static (@string, error) Rel(@string basepath, @string targpath) {
             copy(buf[(int)n + 1..], targ[(int)t0..]);
         }
         return (string(buf), error.As(null!)!);
-
     }
     return (targ[(int)t0..], error.As(null!)!);
-
 }
 
 // SkipDir is used as a return value from WalkFuncs to indicate that
@@ -432,16 +417,12 @@ private static error walkDir(@string path, fs.DirEntry d, fs.WalkDirFunc walkDir
             if (err == SkipDir && d.IsDir()) { 
                 // Successfully skipped directory.
                 err = null;
-
             }
-
             return error.As(err)!;
-
         }
         err = err__prev1;
 
     }
-
 
     var (dirs, err) = readDir(path);
     if (err != null) { 
@@ -468,9 +449,7 @@ private static error walkDir(@string path, fs.DirEntry d, fs.WalkDirFunc walkDir
             err = err__prev1;
 
         }
-
     }    return error.As(null!)!;
-
 }
 
 // walk recursively descends path, calling walkFn.
@@ -489,7 +468,6 @@ private static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
         // If walkFn returns SkipDir, it will be handled by the caller.
         // So walk should return whatever walkFn returns.
         return error.As(err1)!;
-
     }
     foreach (var (_, name) in names) {
         var filename = Join(path, name);
@@ -503,7 +481,6 @@ private static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
                 }
 
             }
-
         }
         else
  {
@@ -515,7 +492,6 @@ private static error walk(@string path, fs.FileInfo info, WalkFunc walkFn) {
             }
         }
     }    return error.As(null!)!;
-
 }
 
 // WalkDir walks the file tree rooted at root, calling fn for each file or
@@ -542,7 +518,6 @@ public static error WalkDir(@string root, fs.WalkDirFunc fn) {
         return error.As(null!)!;
     }
     return error.As(err)!;
-
 }
 
 private partial struct statDirEntry {
@@ -599,7 +574,6 @@ public static error Walk(@string root, WalkFunc fn) {
         return error.As(null!)!;
     }
     return error.As(err)!;
-
 }
 
 // readDir reads the directory named by dirname and returns
@@ -619,7 +593,6 @@ private static (slice<fs.DirEntry>, error) readDir(@string dirname) {
     }
     sort.Slice(dirs, (i, j) => dirs[i].Name() < dirs[j].Name());
     return (dirs, error.As(null!)!);
-
 }
 
 // readDirNames reads the directory named by dirname and returns
@@ -639,7 +612,6 @@ private static (slice<@string>, error) readDirNames(@string dirname) {
     }
     sort.Strings(names);
     return (names, error.As(null!)!);
-
 }
 
 // Base returns the last element of path.
@@ -667,7 +639,6 @@ public static @string Base(@string path) {
         return string(Separator);
     }
     return path;
-
 }
 
 // Dir returns all but the last element of path, typically the path's directory.
@@ -686,10 +657,8 @@ public static @string Dir(@string path) {
     if (dir == "." && len(vol) > 2) { 
         // must be UNC
         return vol;
-
     }
     return vol + dir;
-
 }
 
 // VolumeName returns leading volume name.

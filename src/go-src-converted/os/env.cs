@@ -4,20 +4,21 @@
 
 // General environment variables.
 
-// package os -- go2cs converted at 2022 March 06 22:12:49 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:48 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\env.go
-using testlog = go.@internal.testlog_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using testlog = @internal.testlog_package;
+using syscall = syscall_package;
+
+
+// Expand replaces ${var} or $var in the string based on the mapping function.
+// For example, os.ExpandEnv(s) is equivalent to os.Expand(s, os.Getenv).
+
+using System;
 public static partial class os_package {
 
-    // Expand replaces ${var} or $var in the string based on the mapping function.
-    // For example, os.ExpandEnv(s) is equivalent to os.Expand(s, os.Getenv).
 public static @string Expand(@string s, Func<@string, @string> mapping) {
     slice<byte> buf = default; 
     // ${} is all ASCII, so bytes are fine for this operation.
@@ -37,7 +38,6 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
                 // Valid syntax, but $ was not followed by a
                 // name. Leave the dollar character untouched.
                 buf = append(buf, s[j]);
-
             }
             else
  {
@@ -45,14 +45,12 @@ public static @string Expand(@string s, Func<@string, @string> mapping) {
             }
             j += w;
             i = j + 1;
-
         }
     }
     if (buf == null) {
         return s;
     }
     return string(buf) + s[(int)i..];
-
 }
 
 // ExpandEnv replaces ${var} or $var in the string according to the values
@@ -103,7 +101,6 @@ private static bool isShellSpecialVar(byte c) {
             break;
     }
     return false;
-
 }
 
 // isAlphaNum reports whether the byte is an ASCII letter, number, or underscore
@@ -131,11 +128,8 @@ private static (@string, nint) getShellName(@string s) {
                     if (i == 1) {
                         return ("", 2); // Bad syntax; eat "${}"
                     }
-
                     return (s[(int)1..(int)i], i + 1);
-
                 }
-
             }
 
 
@@ -146,9 +140,9 @@ private static (@string, nint) getShellName(@string s) {
         return (s[(int)0..(int)1], 1);
     // Scan alphanumerics.
     i = default;
-    for (i = 0; i < len(s) && isAlphaNum(s[i]); i++)     }
+    for (i = 0; i < len(s) && isAlphaNum(s[i]); i++) {
+    }
     return (s[..(int)i], i);
-
 }
 
 // Getenv retrieves the value of the environment variable named by the key.
@@ -181,7 +175,6 @@ public static error Setenv(@string key, @string value) {
         return error.As(NewSyscallError("setenv", err))!;
     }
     return error.As(null!)!;
-
 }
 
 // Unsetenv unsets a single environment variable.

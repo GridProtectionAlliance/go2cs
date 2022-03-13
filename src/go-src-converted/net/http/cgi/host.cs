@@ -12,29 +12,29 @@
 // request, which is typically less efficient than using a
 // long-running server. This package is intended primarily for
 // compatibility with existing systems.
-// package cgi -- go2cs converted at 2022 March 06 22:23:27 UTC
+
+// package cgi -- go2cs converted at 2022 March 13 05:37:52 UTC
 // import "net/http/cgi" ==> using cgi = go.net.http.cgi_package
 // Original source: C:\Program Files\Go\src\net\http\cgi\host.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using textproto = go.net.textproto_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using httpguts = go.golang.org.x.net.http.httpguts_package;
-using System;
-
-
 namespace go.net.http;
+
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using net = net_package;
+using http = net.http_package;
+using textproto = net.textproto_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using httpguts = golang.org.x.net.http.httpguts_package;
+using System;
 
 public static partial class cgi_package {
 
@@ -72,7 +72,6 @@ private static Func<slice<@string>> osDefaultInheritEnv = () => {
             break;
     }
     return null;
-
 }();
 
 // Handler runs an executable in a subprocess with a CGI environment.
@@ -109,7 +108,6 @@ private static io.Writer stderr(this ptr<Handler> _addr_h) {
         return h.Stderr;
     }
     return os.Stderr;
-
 }
 
 // removeLeadingDuplicates remove leading duplicate in environments.
@@ -134,16 +132,13 @@ private static slice<@string> removeLeadingDuplicates(slice<@string> env) {
                         break;
                     }
                 }
-
             }
 
         }
-
         if (!found) {
             ret = append(ret, e);
         }
     }    return ;
-
 }
 
 private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw, ptr<http.Request> _addr_req) => func((defer, _, _) => {
@@ -172,7 +167,6 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
         }
     }
 
-
     @string env = new slice<@string>(new @string[] { "SERVER_SOFTWARE=go", "SERVER_NAME="+req.Host, "SERVER_PROTOCOL=HTTP/1.1", "HTTP_HOST="+req.Host, "GATEWAY_INTERFACE=CGI/1.1", "REQUEST_METHOD="+req.Method, "QUERY_STRING="+req.URL.RawQuery, "REQUEST_URI="+req.URL.RequestURI(), "PATH_INFO="+pathInfo, "SCRIPT_NAME="+root, "SCRIPT_FILENAME="+h.Path, "SERVER_PORT="+port });
 
     {
@@ -185,10 +179,8 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
  { 
             // could not parse ip:port, let's use whole RemoteAddr and leave REMOTE_PORT undefined
             env = append(env, "REMOTE_ADDR=" + req.RemoteAddr, "REMOTE_HOST=" + req.RemoteAddr);
-
         }
     }
-
 
     if (req.TLS != null) {
         env = append(env, "HTTPS=on");
@@ -204,16 +196,12 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
             if (k == "PROXY") { 
                 // See Issue 16405
                 continue;
-
             }
-
             @string joinStr = ", ";
             if (k == "COOKIE") {
                 joinStr = "; ";
             }
-
             env = append(env, "HTTP_" + k + "=" + strings.Join(v, joinStr));
-
         }
         k = k__prev1;
         v = v__prev1;
@@ -229,7 +217,6 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
             env = append(env, "CONTENT_TYPE=" + ctype);
         }
     }
-
 
     var envPath = os.Getenv("PATH");
     if (envPath == "") {
@@ -254,7 +241,6 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
                 v = v__prev1;
 
             }
-
         }
         e = e__prev1;
     }
@@ -276,7 +262,6 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
                 v = v__prev1;
 
             }
-
         }
         e = e__prev1;
     }
@@ -325,7 +310,6 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
             hook(cmd.Process);
         }
     }
-
     defer(cmd.Wait());
     defer(stdoutRead.Close());
 
@@ -381,8 +365,7 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
             statusCode = code;
         else 
             headers.Add(header, val);
-        
-    }
+            }
     if (headerLines == 0 || !sawBlankLine) {
         rw.WriteHeader(http.StatusInternalServerError);
         h.printf("cgi: no headers");
@@ -401,7 +384,6 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
             }
         }
     }
-
 
     if (statusCode == 0 && headers.Get("Content-Type") == "") {
         rw.WriteHeader(http.StatusInternalServerError);
@@ -443,7 +425,6 @@ private static void ServeHTTP(this ptr<Handler> _addr_h, http.ResponseWriter rw,
         // kill of an already-dead process is harmless (the PID
         // won't be reused until the Wait above).
         cmd.Process.Kill();
-
     }
 });
 
@@ -472,7 +453,6 @@ private static void handleInternalRedirect(this ptr<Handler> _addr_h, http.Respo
     }
     ptr<http.Request> newReq = addr(new http.Request(Method:"GET",URL:url,Proto:"HTTP/1.1",ProtoMajor:1,ProtoMinor:1,Header:make(http.Header),Host:url.Host,RemoteAddr:req.RemoteAddr,TLS:req.TLS,));
     h.PathLocationHandler.ServeHTTP(rw, newReq);
-
 }
 
 private static int upperCaseAndUnderscore(int r) {
@@ -488,7 +468,6 @@ private static int upperCaseAndUnderscore(int r) {
         return '_';
     // TODO: other transformations in spec or practice?
     return r;
-
 }
 
 private static Action<ptr<os.Process>> testHookStartProcess = default; // nil except for some tests

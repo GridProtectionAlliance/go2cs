@@ -6,12 +6,12 @@
 // s390x instruction set, to minimize its interaction
 // with the core of the assembler.
 
-// package arch -- go2cs converted at 2022 March 06 22:46:39 UTC
+// package arch -- go2cs converted at 2022 March 13 05:57:52 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\arch\s390x.go
-using s390x = go.cmd.@internal.obj.s390x_package;
-
 namespace go.cmd.asm.@internal;
+
+using s390x = cmd.@internal.obj.s390x_package;
 
 public static partial class arch_package {
 
@@ -98,7 +98,6 @@ private static bool jumpS390x(@string word) {
             break;
     }
     return false;
-
 }
 
 private static (short, bool) s390xRegisterNumber(@string name, short n) {
@@ -128,7 +127,6 @@ private static (short, bool) s390xRegisterNumber(@string name, short n) {
             break;
     }
     return (0, false);
-
 }
 
 } // end arch_package

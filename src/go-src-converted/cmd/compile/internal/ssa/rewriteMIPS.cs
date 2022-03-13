@@ -1,12 +1,12 @@
 // Code generated from gen/MIPS.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:03:23 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:16:04 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewriteMIPS.go
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -586,7 +586,6 @@ private static bool rewriteValueMIPS(ptr<Value> _addr_v) {
     else if (v.Op == OpZeromask) 
         return rewriteValueMIPS_OpZeromask(_addr_v);
         return false;
-
 }
 private static bool rewriteValueMIPS_OpAdd32withcarry(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -608,7 +607,6 @@ private static bool rewriteValueMIPS_OpAdd32withcarry(ptr<Value> _addr_v) {
         v.AddArg2(c, v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -624,7 +622,6 @@ private static bool rewriteValueMIPS_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpAtomicAnd8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -671,7 +668,6 @@ private static bool rewriteValueMIPS_OpAtomicAnd8(ptr<Value> _addr_v) {
         v2.AddArg2(v3, v7);
         v.AddArg3(v0, v2, mem);
         return true;
-
     } 
     // match: (AtomicAnd8 ptr val mem)
     // cond: config.BigEndian
@@ -712,10 +708,8 @@ private static bool rewriteValueMIPS_OpAtomicAnd8(ptr<Value> _addr_v) {
         v2.AddArg2(v3, v8);
         v.AddArg3(v0, v2, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpAtomicOr8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -753,7 +747,6 @@ private static bool rewriteValueMIPS_OpAtomicOr8(ptr<Value> _addr_v) {
         v2.AddArg2(v3, v4);
         v.AddArg3(v0, v2, mem);
         return true;
-
     } 
     // match: (AtomicOr8 ptr val mem)
     // cond: config.BigEndian
@@ -785,10 +778,8 @@ private static bool rewriteValueMIPS_OpAtomicOr8(ptr<Value> _addr_v) {
         v2.AddArg2(v3, v4);
         v.AddArg3(v0, v2, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpAvg32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -811,7 +802,6 @@ private static bool rewriteValueMIPS_OpAvg32u(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpBitLen32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -832,7 +822,6 @@ private static bool rewriteValueMIPS_OpBitLen32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpCom16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -847,7 +836,6 @@ private static bool rewriteValueMIPS_OpCom16(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpCom32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -862,7 +850,6 @@ private static bool rewriteValueMIPS_OpCom32(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpCom8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -877,7 +864,6 @@ private static bool rewriteValueMIPS_OpCom8(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -890,7 +876,6 @@ private static bool rewriteValueMIPS_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(val));
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpConst32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -903,7 +888,6 @@ private static bool rewriteValueMIPS_OpConst32(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(val));
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -916,7 +900,6 @@ private static bool rewriteValueMIPS_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(val));
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -929,7 +912,6 @@ private static bool rewriteValueMIPS_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(b2i32(t));
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -941,7 +923,6 @@ private static bool rewriteValueMIPS_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpCtz32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -969,7 +950,6 @@ private static bool rewriteValueMIPS_OpCtz32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -993,7 +973,6 @@ private static bool rewriteValueMIPS_OpDiv16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1017,7 +996,6 @@ private static bool rewriteValueMIPS_OpDiv16u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1037,7 +1015,6 @@ private static bool rewriteValueMIPS_OpDiv32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpDiv32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1057,7 +1034,6 @@ private static bool rewriteValueMIPS_OpDiv32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1081,7 +1057,6 @@ private static bool rewriteValueMIPS_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1105,7 +1080,6 @@ private static bool rewriteValueMIPS_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1130,7 +1104,6 @@ private static bool rewriteValueMIPS_OpEq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1151,7 +1124,6 @@ private static bool rewriteValueMIPS_OpEq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpEq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1170,7 +1142,6 @@ private static bool rewriteValueMIPS_OpEq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpEq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1189,7 +1160,6 @@ private static bool rewriteValueMIPS_OpEq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1214,7 +1184,6 @@ private static bool rewriteValueMIPS_OpEq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1235,7 +1204,6 @@ private static bool rewriteValueMIPS_OpEqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1256,7 +1224,6 @@ private static bool rewriteValueMIPS_OpEqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpHmul32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1276,7 +1243,6 @@ private static bool rewriteValueMIPS_OpHmul32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpHmul32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1296,7 +1262,6 @@ private static bool rewriteValueMIPS_OpHmul32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpIsInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1312,7 +1277,6 @@ private static bool rewriteValueMIPS_OpIsInBounds(ptr<Value> _addr_v) {
         v.AddArg2(len, idx);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1330,7 +1294,6 @@ private static bool rewriteValueMIPS_OpIsNonNil(ptr<Value> _addr_v) {
         v.AddArg2(ptr, v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpIsSliceInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1351,7 +1314,6 @@ private static bool rewriteValueMIPS_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1376,7 +1338,6 @@ private static bool rewriteValueMIPS_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1401,7 +1362,6 @@ private static bool rewriteValueMIPS_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1422,7 +1382,6 @@ private static bool rewriteValueMIPS_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1441,7 +1400,6 @@ private static bool rewriteValueMIPS_OpLeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1462,7 +1420,6 @@ private static bool rewriteValueMIPS_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1481,7 +1438,6 @@ private static bool rewriteValueMIPS_OpLeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1506,7 +1462,6 @@ private static bool rewriteValueMIPS_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1531,7 +1486,6 @@ private static bool rewriteValueMIPS_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1553,7 +1507,6 @@ private static bool rewriteValueMIPS_OpLess16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1575,7 +1528,6 @@ private static bool rewriteValueMIPS_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1591,7 +1543,6 @@ private static bool rewriteValueMIPS_OpLess32(ptr<Value> _addr_v) {
         v.AddArg2(y, x);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1610,7 +1561,6 @@ private static bool rewriteValueMIPS_OpLess32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1626,7 +1576,6 @@ private static bool rewriteValueMIPS_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg2(y, x);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1645,7 +1594,6 @@ private static bool rewriteValueMIPS_OpLess64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1667,7 +1615,6 @@ private static bool rewriteValueMIPS_OpLess8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1689,7 +1636,6 @@ private static bool rewriteValueMIPS_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1709,7 +1655,6 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVBUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is8BitInt(t) && isSigned(t))
@@ -1724,7 +1669,6 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVBload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is8BitInt(t) && !isSigned(t))
@@ -1739,7 +1683,6 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVBUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is16BitInt(t) && isSigned(t))
@@ -1754,7 +1697,6 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVHload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is16BitInt(t) && !isSigned(t))
@@ -1769,7 +1711,6 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVHUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is32BitInt(t) || isPtr(t))
@@ -1784,7 +1725,6 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitFloat(t)
@@ -1799,7 +1739,6 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVFload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -1814,10 +1753,8 @@ private static bool rewriteValueMIPS_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1833,7 +1770,6 @@ private static bool rewriteValueMIPS_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1861,7 +1797,6 @@ private static bool rewriteValueMIPS_OpLsh16x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1887,7 +1822,6 @@ private static bool rewriteValueMIPS_OpLsh16x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1910,7 +1844,6 @@ private static bool rewriteValueMIPS_OpLsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh16x64 _ (Const64 [c]))
     // cond: uint32(c) >= 16
@@ -1926,10 +1859,8 @@ private static bool rewriteValueMIPS_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1957,7 +1888,6 @@ private static bool rewriteValueMIPS_OpLsh16x8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1985,7 +1915,6 @@ private static bool rewriteValueMIPS_OpLsh32x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2011,7 +1940,6 @@ private static bool rewriteValueMIPS_OpLsh32x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2034,7 +1962,6 @@ private static bool rewriteValueMIPS_OpLsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh32x64 _ (Const64 [c]))
     // cond: uint32(c) >= 32
@@ -2050,10 +1977,8 @@ private static bool rewriteValueMIPS_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2081,7 +2006,6 @@ private static bool rewriteValueMIPS_OpLsh32x8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2109,7 +2033,6 @@ private static bool rewriteValueMIPS_OpLsh8x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2135,7 +2058,6 @@ private static bool rewriteValueMIPS_OpLsh8x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2158,7 +2080,6 @@ private static bool rewriteValueMIPS_OpLsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh8x64 _ (Const64 [c]))
     // cond: uint32(c) >= 8
@@ -2174,10 +2095,8 @@ private static bool rewriteValueMIPS_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2205,7 +2124,6 @@ private static bool rewriteValueMIPS_OpLsh8x8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpMIPSADD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2226,20 +2144,17 @@ private static bool rewriteValueMIPS_OpMIPSADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpMIPSADDconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (NEG y))
     // result: (SUB x y)
@@ -2255,22 +2170,18 @@ private static bool rewriteValueMIPS_OpMIPSADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpMIPSSUB);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSADDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2291,7 +2202,6 @@ private static bool rewriteValueMIPS_OpMIPSADDconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (ADDconst [0] x)
     // result: x
@@ -2302,7 +2212,6 @@ private static bool rewriteValueMIPS_OpMIPSADDconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDconst [c] (MOVWconst [d]))
     // result: (MOVWconst [int32(c+d)])
@@ -2315,7 +2224,6 @@ private static bool rewriteValueMIPS_OpMIPSADDconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(c + d));
         return true;
-
     } 
     // match: (ADDconst [c] (ADDconst [d] x))
     // result: (ADDconst [c+d] x)
@@ -2330,7 +2238,6 @@ private static bool rewriteValueMIPS_OpMIPSADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] (SUBconst [d] x))
     // result: (ADDconst [c-d] x)
@@ -2345,10 +2252,8 @@ private static bool rewriteValueMIPS_OpMIPSADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSAND(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2370,20 +2275,17 @@ private static bool rewriteValueMIPS_OpMIPSAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpMIPSANDconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x x)
     // result: x
@@ -2394,7 +2296,6 @@ private static bool rewriteValueMIPS_OpMIPSAND(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (AND (SGTUconst [1] x) (SGTUconst [1] y))
     // result: (SGTUconst [1] (OR <x.Type> x y))
@@ -2409,12 +2310,10 @@ private static bool rewriteValueMIPS_OpMIPSAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[0];
                 if (v_1.Op != OpMIPSSGTUconst || auxIntToInt32(v_1.AuxInt) != 1) {
                     continue;
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpMIPSSGTUconst);
                 v.AuxInt = int32ToAuxInt(1);
@@ -2422,17 +2321,14 @@ private static bool rewriteValueMIPS_OpMIPSAND(ptr<Value> _addr_v) {
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSANDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2447,7 +2343,6 @@ private static bool rewriteValueMIPS_OpMIPSANDconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDconst [-1] x)
     // result: x
@@ -2458,7 +2353,6 @@ private static bool rewriteValueMIPS_OpMIPSANDconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVWconst [d]))
     // result: (MOVWconst [c&d])
@@ -2471,7 +2365,6 @@ private static bool rewriteValueMIPS_OpMIPSANDconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(c & d);
         return true;
-
     } 
     // match: (ANDconst [c] (ANDconst [d] x))
     // result: (ANDconst [c&d] x)
@@ -2486,10 +2379,8 @@ private static bool rewriteValueMIPS_OpMIPSANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSCMOVZ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2506,7 +2397,6 @@ private static bool rewriteValueMIPS_OpMIPSCMOVZ(ptr<Value> _addr_v) {
         }
         v.copyOf(f);
         return true;
-
     } 
     // match: (CMOVZ a _ (MOVWconst [c]))
     // cond: c!=0
@@ -2522,7 +2412,6 @@ private static bool rewriteValueMIPS_OpMIPSCMOVZ(ptr<Value> _addr_v) {
         }
         v.copyOf(a);
         return true;
-
     } 
     // match: (CMOVZ a (MOVWconst [0]) c)
     // result: (CMOVZzero a c)
@@ -2535,10 +2424,8 @@ private static bool rewriteValueMIPS_OpMIPSCMOVZ(ptr<Value> _addr_v) {
         v.reset(OpMIPSCMOVZzero);
         v.AddArg2(a, c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSCMOVZzero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2554,7 +2441,6 @@ private static bool rewriteValueMIPS_OpMIPSCMOVZzero(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (CMOVZzero a (MOVWconst [c]))
     // cond: c!=0
@@ -2570,10 +2456,8 @@ private static bool rewriteValueMIPS_OpMIPSCMOVZzero(ptr<Value> _addr_v) {
         }
         v.copyOf(a);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSLoweredAtomicAdd(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2598,10 +2482,8 @@ private static bool rewriteValueMIPS_OpMIPSLoweredAtomicAdd(ptr<Value> _addr_v) 
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSLoweredAtomicStore32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2620,10 +2502,8 @@ private static bool rewriteValueMIPS_OpMIPSLoweredAtomicStore32(ptr<Value> _addr
         v.reset(OpMIPSLoweredAtomicStorezero);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVBUload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2651,7 +2531,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBUload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -2674,7 +2553,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBUload [off] {sym} ptr (MOVBstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -2696,10 +2574,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUload(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVBUreg);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVBUreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2716,7 +2592,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg x:(MOVBUreg _))
     // result: (MOVWreg x)
@@ -2728,7 +2603,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg <t> x:(MOVBload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -2753,7 +2627,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBUreg (ANDconst [c] x))
     // result: (ANDconst [c&0xff] x)
@@ -2767,7 +2640,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg (MOVWconst [c]))
     // result: (MOVWconst [int32(uint8(c))])
@@ -2779,10 +2651,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint8(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2810,7 +2680,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -2833,7 +2702,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off] {sym} ptr (MOVBstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -2855,10 +2723,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVBload(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVBreg);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVBreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2875,7 +2741,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg x:(MOVBreg _))
     // result: (MOVWreg x)
@@ -2887,7 +2752,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg <t> x:(MOVBUload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -2912,7 +2776,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBreg (ANDconst [c] x))
     // cond: c & 0x80 == 0
@@ -2930,7 +2793,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7f);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (MOVWconst [c]))
     // result: (MOVWconst [int32(int8(c))])
@@ -2942,10 +2804,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(int8(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2975,7 +2835,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -2999,7 +2858,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVWconst [0]) mem)
     // result: (MOVBstorezero [off] {sym} ptr mem)
@@ -3016,7 +2874,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3034,7 +2891,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBUreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3052,7 +2908,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3070,7 +2925,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHUreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3088,7 +2942,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3106,10 +2959,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVBstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3137,7 +2988,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstorezero [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3160,10 +3010,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVBstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3191,7 +3039,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3214,7 +3061,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDload [off] {sym} ptr (MOVDstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -3235,10 +3081,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVDload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3268,7 +3112,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3292,10 +3135,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVFload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3323,7 +3164,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVFload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVFload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3346,7 +3186,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVFload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVFload [off] {sym} ptr (MOVFstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -3367,10 +3206,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVFload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVFstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3400,7 +3237,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVFstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVFstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3424,10 +3260,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVFstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVHUload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3455,7 +3289,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHUload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3478,7 +3311,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHUload [off] {sym} ptr (MOVHstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -3500,10 +3332,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUload(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVHUreg);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3520,7 +3350,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVHUload _ _))
     // result: (MOVWreg x)
@@ -3532,7 +3361,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVBUreg _))
     // result: (MOVWreg x)
@@ -3544,7 +3372,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVHUreg _))
     // result: (MOVWreg x)
@@ -3556,7 +3383,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg <t> x:(MOVHload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -3581,7 +3407,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHUreg (ANDconst [c] x))
     // result: (ANDconst [c&0xffff] x)
@@ -3595,7 +3420,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xffff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg (MOVWconst [c]))
     // result: (MOVWconst [int32(uint16(c))])
@@ -3607,10 +3431,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint16(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVHload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3638,7 +3460,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3661,7 +3482,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHload [off] {sym} ptr (MOVHstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -3683,10 +3503,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVHload(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVHreg);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3703,7 +3521,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBUload _ _))
     // result: (MOVWreg x)
@@ -3715,7 +3532,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHload _ _))
     // result: (MOVWreg x)
@@ -3727,7 +3543,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBreg _))
     // result: (MOVWreg x)
@@ -3739,7 +3554,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBUreg _))
     // result: (MOVWreg x)
@@ -3751,7 +3565,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHreg _))
     // result: (MOVWreg x)
@@ -3763,7 +3576,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg <t> x:(MOVHUload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -3788,7 +3600,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHreg (ANDconst [c] x))
     // cond: c & 0x8000 == 0
@@ -3806,7 +3617,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7fff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (MOVWconst [c]))
     // result: (MOVWconst [int32(int16(c))])
@@ -3818,10 +3628,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(int16(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVHstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3851,7 +3659,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -3875,7 +3682,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVWconst [0]) mem)
     // result: (MOVHstorezero [off] {sym} ptr mem)
@@ -3892,7 +3698,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -3910,7 +3715,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHUreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -3928,7 +3732,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -3946,10 +3749,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVHstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3977,7 +3778,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstorezero [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -4000,10 +3800,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVHstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4031,7 +3829,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -4054,7 +3851,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off] {sym} ptr (MOVWstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -4075,10 +3871,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVWload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVWnop(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4094,10 +3888,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVWnop(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVWreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4114,7 +3906,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWnop);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg (MOVWconst [c]))
     // result: (MOVWconst [c])
@@ -4126,10 +3917,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVWstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4159,7 +3948,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -4183,7 +3971,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWconst [0]) mem)
     // result: (MOVWstorezero [off] {sym} ptr mem)
@@ -4200,7 +3987,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -4218,10 +4004,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMOVWstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4249,7 +4033,6 @@ private static bool rewriteValueMIPS_OpMIPSMOVWstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstorezero [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -4272,10 +4055,8 @@ private static bool rewriteValueMIPS_OpMIPSMOVWstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSMUL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4295,18 +4076,15 @@ private static bool rewriteValueMIPS_OpMIPSMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpMIPSMOVWconst);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL (MOVWconst [1]) x )
     // result: x
@@ -4321,18 +4099,15 @@ private static bool rewriteValueMIPS_OpMIPSMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL (MOVWconst [-1]) x )
     // result: (NEG x)
@@ -4347,19 +4122,16 @@ private static bool rewriteValueMIPS_OpMIPSMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.reset(OpMIPSNEG);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL (MOVWconst [c]) x )
     // cond: isPowerOfTwo64(int64(uint32(c)))
@@ -4375,25 +4147,21 @@ private static bool rewriteValueMIPS_OpMIPSMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 x = v_1;
                 if (!(isPowerOfTwo64(int64(uint32(c))))) {
                     continue;
                 }
-
                 v.reset(OpMIPSSLLconst);
                 v.AuxInt = int32ToAuxInt(int32(log2uint32(int64(c))));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL (MOVWconst [c]) (MOVWconst [d]))
     // result: (MOVWconst [c*d])
@@ -4408,27 +4176,22 @@ private static bool rewriteValueMIPS_OpMIPSMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpMIPSMOVWconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpMIPSMOVWconst);
                 v.AuxInt = int32ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSNEG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4444,10 +4207,8 @@ private static bool rewriteValueMIPS_OpMIPSNEG(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(-c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSNOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4466,21 +4227,17 @@ private static bool rewriteValueMIPS_OpMIPSNOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpMIPSNORconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSNORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4497,10 +4254,8 @@ private static bool rewriteValueMIPS_OpMIPSNORconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(~(c | d));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4522,20 +4277,17 @@ private static bool rewriteValueMIPS_OpMIPSOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpMIPSORconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x x)
     // result: x
@@ -4546,7 +4298,6 @@ private static bool rewriteValueMIPS_OpMIPSOR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (OR (SGTUzero x) (SGTUzero y))
     // result: (SGTUzero (OR <x.Type> x y))
@@ -4561,29 +4312,24 @@ private static bool rewriteValueMIPS_OpMIPSOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[0];
                 if (v_1.Op != OpMIPSSGTUzero) {
                     continue;
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpMIPSSGTUzero);
                 var v0 = b.NewValue0(v.Pos, OpMIPSOR, x.Type);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4598,7 +4344,6 @@ private static bool rewriteValueMIPS_OpMIPSORconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORconst [-1] _)
     // result: (MOVWconst [-1])
@@ -4609,7 +4354,6 @@ private static bool rewriteValueMIPS_OpMIPSORconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORconst [c] (MOVWconst [d]))
     // result: (MOVWconst [c|d])
@@ -4622,7 +4366,6 @@ private static bool rewriteValueMIPS_OpMIPSORconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(c | d);
         return true;
-
     } 
     // match: (ORconst [c] (ORconst [d] x))
     // result: (ORconst [c|d] x)
@@ -4637,10 +4380,8 @@ private static bool rewriteValueMIPS_OpMIPSORconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c | d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSGT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4659,7 +4400,6 @@ private static bool rewriteValueMIPS_OpMIPSSGT(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SGT x (MOVWconst [0]))
     // result: (SGTzero x)
@@ -4671,10 +4411,8 @@ private static bool rewriteValueMIPS_OpMIPSSGT(ptr<Value> _addr_v) {
         v.reset(OpMIPSSGTzero);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSGTU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4693,7 +4431,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTU(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SGTU x (MOVWconst [0]))
     // result: (SGTUzero x)
@@ -4705,10 +4442,8 @@ private static bool rewriteValueMIPS_OpMIPSSGTU(ptr<Value> _addr_v) {
         v.reset(OpMIPSSGTUzero);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSGTUconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4729,7 +4464,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTUconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTUconst [c] (MOVWconst [d]))
     // cond: uint32(c) <= uint32(d)
@@ -4746,7 +4480,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTUconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SGTUconst [c] (MOVBUreg _))
     // cond: 0xff < uint32(c)
@@ -4759,7 +4492,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTUconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTUconst [c] (MOVHUreg _))
     // cond: 0xffff < uint32(c)
@@ -4772,7 +4504,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTUconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTUconst [c] (ANDconst [m] _))
     // cond: uint32(m) < uint32(c)
@@ -4789,7 +4520,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTUconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTUconst [c] (SRLconst _ [d]))
     // cond: uint32(d) <= 31 && 0xffffffff>>uint32(d) < uint32(c)
@@ -4806,10 +4536,8 @@ private static bool rewriteValueMIPS_OpMIPSSGTUconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSGTUzero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4829,7 +4557,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTUzero(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTUzero (MOVWconst [d]))
     // cond: d == 0
@@ -4845,10 +4572,8 @@ private static bool rewriteValueMIPS_OpMIPSSGTUzero(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4869,7 +4594,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVWconst [d]))
     // cond: c <= d
@@ -4886,7 +4610,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVBreg _))
     // cond: 0x7f < c
@@ -4899,7 +4622,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVBreg _))
     // cond: c <= -0x80
@@ -4912,7 +4634,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVBUreg _))
     // cond: 0xff < c
@@ -4925,7 +4646,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVBUreg _))
     // cond: c < 0
@@ -4938,7 +4658,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVHreg _))
     // cond: 0x7fff < c
@@ -4951,7 +4670,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVHreg _))
     // cond: c <= -0x8000
@@ -4964,7 +4682,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVHUreg _))
     // cond: 0xffff < c
@@ -4977,7 +4694,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTconst [c] (MOVHUreg _))
     // cond: c < 0
@@ -4990,7 +4706,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SGTconst [c] (ANDconst [m] _))
     // cond: 0 <= m && m < c
@@ -5007,7 +4722,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTconst [c] (SRLconst _ [d]))
     // cond: 0 <= c && uint32(d) <= 31 && 0xffffffff>>uint32(d) < uint32(c)
@@ -5024,10 +4738,8 @@ private static bool rewriteValueMIPS_OpMIPSSGTconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSGTzero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5047,7 +4759,6 @@ private static bool rewriteValueMIPS_OpMIPSSGTzero(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SGTzero (MOVWconst [d]))
     // cond: d <= 0
@@ -5063,10 +4774,8 @@ private static bool rewriteValueMIPS_OpMIPSSGTzero(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5085,10 +4794,8 @@ private static bool rewriteValueMIPS_OpMIPSSLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSLLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5105,10 +4812,8 @@ private static bool rewriteValueMIPS_OpMIPSSLLconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(d << (int)(uint32(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5127,10 +4832,8 @@ private static bool rewriteValueMIPS_OpMIPSSRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSRAconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5147,10 +4850,8 @@ private static bool rewriteValueMIPS_OpMIPSSRAconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(d >> (int)(uint32(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5169,10 +4870,8 @@ private static bool rewriteValueMIPS_OpMIPSSRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSRLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5189,10 +4888,8 @@ private static bool rewriteValueMIPS_OpMIPSSRLconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint32(d) >> (int)(uint32(c))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSUB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5211,7 +4908,6 @@ private static bool rewriteValueMIPS_OpMIPSSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUB x x)
     // result: (MOVWconst [0])
@@ -5223,7 +4919,6 @@ private static bool rewriteValueMIPS_OpMIPSSUB(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SUB (MOVWconst [0]) x)
     // result: (NEG x)
@@ -5235,10 +4930,8 @@ private static bool rewriteValueMIPS_OpMIPSSUB(ptr<Value> _addr_v) {
         v.reset(OpMIPSNEG);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSSUBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5253,7 +4946,6 @@ private static bool rewriteValueMIPS_OpMIPSSUBconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUBconst [c] (MOVWconst [d]))
     // result: (MOVWconst [d-c])
@@ -5266,7 +4958,6 @@ private static bool rewriteValueMIPS_OpMIPSSUBconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(d - c);
         return true;
-
     } 
     // match: (SUBconst [c] (SUBconst [d] x))
     // result: (ADDconst [-c-d] x)
@@ -5281,7 +4972,6 @@ private static bool rewriteValueMIPS_OpMIPSSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBconst [c] (ADDconst [d] x))
     // result: (ADDconst [-c+d] x)
@@ -5296,10 +4986,8 @@ private static bool rewriteValueMIPS_OpMIPSSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c + d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSXOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5318,18 +5006,15 @@ private static bool rewriteValueMIPS_OpMIPSXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpMIPSXORconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (XOR x x)
     // result: (MOVWconst [0])
@@ -5341,10 +5026,8 @@ private static bool rewriteValueMIPS_OpMIPSXOR(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMIPSXORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5359,7 +5042,6 @@ private static bool rewriteValueMIPS_OpMIPSXORconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (XORconst [-1] x)
     // result: (NORconst [0] x)
@@ -5372,7 +5054,6 @@ private static bool rewriteValueMIPS_OpMIPSXORconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(0);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORconst [c] (MOVWconst [d]))
     // result: (MOVWconst [c^d])
@@ -5385,7 +5066,6 @@ private static bool rewriteValueMIPS_OpMIPSXORconst(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(c ^ d);
         return true;
-
     } 
     // match: (XORconst [c] (XORconst [d] x))
     // result: (XORconst [c^d] x)
@@ -5400,10 +5080,8 @@ private static bool rewriteValueMIPS_OpMIPSXORconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c ^ d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5427,7 +5105,6 @@ private static bool rewriteValueMIPS_OpMod16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5451,7 +5128,6 @@ private static bool rewriteValueMIPS_OpMod16u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5471,7 +5147,6 @@ private static bool rewriteValueMIPS_OpMod32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpMod32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5491,7 +5166,6 @@ private static bool rewriteValueMIPS_OpMod32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5515,7 +5189,6 @@ private static bool rewriteValueMIPS_OpMod8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5539,7 +5212,6 @@ private static bool rewriteValueMIPS_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5559,7 +5231,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (MOVBstore dst (MOVBUload src mem) mem)
@@ -5575,7 +5246,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -5596,7 +5266,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (MOVBstore [1] dst (MOVBUload [1] src mem) (MOVBstore dst (MOVBUload src mem) mem))
@@ -5618,7 +5287,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [4] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -5639,7 +5307,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -5666,7 +5333,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (MOVBstore [3] dst (MOVBUload [3] src mem) (MOVBstore [2] dst (MOVBUload [2] src mem) (MOVBstore [1] dst (MOVBUload [1] src mem) (MOVBstore dst (MOVBUload src mem) mem))))
@@ -5700,7 +5366,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (MOVBstore [2] dst (MOVBUload [2] src mem) (MOVBstore [1] dst (MOVBUload [1] src mem) (MOVBstore dst (MOVBUload src mem) mem)))
@@ -5728,7 +5393,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [8] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -5755,7 +5419,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [8] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -5794,7 +5457,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [6] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -5827,7 +5489,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [12] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -5860,7 +5521,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [16] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -5899,7 +5559,6 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] {t} dst src mem)
     // cond: (s > 16 && logLargeCopy(v, s) || t.Alignment()%4 != 0)
@@ -5920,10 +5579,8 @@ private static bool rewriteValueMIPS_OpMove(ptr<Value> _addr_v) {
         v0.AddArg(src);
         v.AddArg4(dst, src, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5949,7 +5606,6 @@ private static bool rewriteValueMIPS_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5971,7 +5627,6 @@ private static bool rewriteValueMIPS_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpNeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5990,7 +5645,6 @@ private static bool rewriteValueMIPS_OpNeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpNeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6009,7 +5663,6 @@ private static bool rewriteValueMIPS_OpNeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6035,7 +5688,6 @@ private static bool rewriteValueMIPS_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6057,7 +5709,6 @@ private static bool rewriteValueMIPS_OpNeqPtr(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpNot(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6072,7 +5723,6 @@ private static bool rewriteValueMIPS_OpNot(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6090,7 +5740,6 @@ private static bool rewriteValueMIPS_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(off));
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (OffPtr [off] ptr)
     // result: (ADDconst [int32(off)] ptr)
@@ -6102,7 +5751,6 @@ private static bool rewriteValueMIPS_OpOffPtr(ptr<Value> _addr_v) {
         v.AddArg(ptr);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpPanicBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6125,7 +5773,6 @@ private static bool rewriteValueMIPS_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 1
@@ -6142,7 +5789,6 @@ private static bool rewriteValueMIPS_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 2
@@ -6159,10 +5805,8 @@ private static bool rewriteValueMIPS_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpPanicExtend(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6187,7 +5831,6 @@ private static bool rewriteValueMIPS_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     } 
     // match: (PanicExtend [kind] hi lo y mem)
     // cond: boundsABI(kind) == 1
@@ -6205,7 +5848,6 @@ private static bool rewriteValueMIPS_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     } 
     // match: (PanicExtend [kind] hi lo y mem)
     // cond: boundsABI(kind) == 2
@@ -6223,10 +5865,8 @@ private static bool rewriteValueMIPS_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6255,10 +5895,8 @@ private static bool rewriteValueMIPS_OpRotateLeft16(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRotateLeft32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6287,10 +5925,8 @@ private static bool rewriteValueMIPS_OpRotateLeft32(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRotateLeft64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6319,10 +5955,8 @@ private static bool rewriteValueMIPS_OpRotateLeft64(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6351,10 +5985,8 @@ private static bool rewriteValueMIPS_OpRotateLeft8(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6384,7 +6016,6 @@ private static bool rewriteValueMIPS_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v3, v4);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6412,7 +6043,6 @@ private static bool rewriteValueMIPS_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6440,7 +6070,6 @@ private static bool rewriteValueMIPS_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16Ux64 _ (Const64 [c]))
     // cond: uint32(c) >= 16
@@ -6456,10 +6085,8 @@ private static bool rewriteValueMIPS_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6489,7 +6116,6 @@ private static bool rewriteValueMIPS_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v3, v4);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6518,7 +6144,6 @@ private static bool rewriteValueMIPS_OpRsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6545,7 +6170,6 @@ private static bool rewriteValueMIPS_OpRsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6573,7 +6197,6 @@ private static bool rewriteValueMIPS_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16x64 x (Const64 [c]))
     // cond: uint32(c) >= 16
@@ -6594,10 +6217,8 @@ private static bool rewriteValueMIPS_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6626,7 +6247,6 @@ private static bool rewriteValueMIPS_OpRsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6654,7 +6274,6 @@ private static bool rewriteValueMIPS_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6680,7 +6299,6 @@ private static bool rewriteValueMIPS_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6703,7 +6321,6 @@ private static bool rewriteValueMIPS_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32Ux64 _ (Const64 [c]))
     // cond: uint32(c) >= 32
@@ -6719,10 +6336,8 @@ private static bool rewriteValueMIPS_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6750,7 +6365,6 @@ private static bool rewriteValueMIPS_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6777,7 +6391,6 @@ private static bool rewriteValueMIPS_OpRsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6802,7 +6415,6 @@ private static bool rewriteValueMIPS_OpRsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6825,7 +6437,6 @@ private static bool rewriteValueMIPS_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32x64 x (Const64 [c]))
     // cond: uint32(c) >= 32
@@ -6843,10 +6454,8 @@ private static bool rewriteValueMIPS_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6873,7 +6482,6 @@ private static bool rewriteValueMIPS_OpRsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6903,7 +6511,6 @@ private static bool rewriteValueMIPS_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v3, v4);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6931,7 +6538,6 @@ private static bool rewriteValueMIPS_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6959,7 +6565,6 @@ private static bool rewriteValueMIPS_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8Ux64 _ (Const64 [c]))
     // cond: uint32(c) >= 8
@@ -6975,10 +6580,8 @@ private static bool rewriteValueMIPS_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7008,7 +6611,6 @@ private static bool rewriteValueMIPS_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v3, v4);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7037,7 +6639,6 @@ private static bool rewriteValueMIPS_OpRsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7064,7 +6665,6 @@ private static bool rewriteValueMIPS_OpRsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7092,7 +6692,6 @@ private static bool rewriteValueMIPS_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8x64 x (Const64 [c]))
     // cond: uint32(c) >= 8
@@ -7113,10 +6712,8 @@ private static bool rewriteValueMIPS_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7145,7 +6742,6 @@ private static bool rewriteValueMIPS_OpRsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7166,7 +6762,6 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
         v.Type = t.FieldType(0);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Select0 (Sub32carry <t> x y))
     // result: (SUB <t.FieldType(0)> x y)
@@ -7181,7 +6776,6 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
         v.Type = t.FieldType(0);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Select0 (MULTU (MOVWconst [0]) _ ))
     // result: (MOVWconst [0])
@@ -7201,18 +6795,15 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.reset(OpMIPSMOVWconst);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select0 (MULTU (MOVWconst [1]) _ ))
     // result: (MOVWconst [0])
@@ -7232,18 +6823,15 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.reset(OpMIPSMOVWconst);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select0 (MULTU (MOVWconst [-1]) x ))
     // result: (CMOVZ (ADDconst <x.Type> [-1] x) (MOVWconst [0]) x)
@@ -7264,7 +6852,6 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.reset(OpMIPSCMOVZ);
                 var v0 = b.NewValue0(v.Pos, OpMIPSADDconst, x.Type);
@@ -7274,14 +6861,12 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
                 v1.AuxInt = int32ToAuxInt(0);
                 v.AddArg3(v0, v1, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select0 (MULTU (MOVWconst [c]) x ))
     // cond: isPowerOfTwo64(int64(uint32(c)))
@@ -7303,25 +6888,21 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var c = auxIntToInt32(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(isPowerOfTwo64(int64(uint32(c))))) {
                     continue;
                 }
-
                 v.reset(OpMIPSSRLconst);
                 v.AuxInt = int32ToAuxInt(int32(32 - log2uint32(int64(c))));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select0 (MULTU (MOVWconst [c]) (MOVWconst [d])))
     // result: (MOVWconst [int32((int64(uint32(c))*int64(uint32(d)))>>32)])
@@ -7342,24 +6923,20 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_0_1.Op != OpMIPSMOVWconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_0_1.AuxInt);
                 v.reset(OpMIPSMOVWconst);
                 v.AuxInt = int32ToAuxInt(int32((int64(uint32(c)) * int64(uint32(d))) >> 32));
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select0 (DIV (MOVWconst [c]) (MOVWconst [d])))
     // cond: d != 0
@@ -7385,7 +6962,6 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(c % d);
         return true;
-
     } 
     // match: (Select0 (DIVU (MOVWconst [c]) (MOVWconst [d])))
     // cond: d != 0
@@ -7411,10 +6987,8 @@ private static bool rewriteValueMIPS_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint32(c) % uint32(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7437,7 +7011,6 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Select1 (Sub32carry <t> x y))
     // result: (SGTU <typ.Bool> (SUB <t.FieldType(0)> x y) x)
@@ -7454,7 +7027,6 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Select1 (MULTU (MOVWconst [0]) _ ))
     // result: (MOVWconst [0])
@@ -7474,18 +7046,15 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.reset(OpMIPSMOVWconst);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select1 (MULTU (MOVWconst [1]) x ))
     // result: x
@@ -7506,18 +7075,15 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select1 (MULTU (MOVWconst [-1]) x ))
     // result: (NEG <x.Type> x)
@@ -7538,20 +7104,17 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.reset(OpMIPSNEG);
                 v.Type = x.Type;
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select1 (MULTU (MOVWconst [c]) x ))
     // cond: isPowerOfTwo64(int64(uint32(c)))
@@ -7573,25 +7136,21 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var c = auxIntToInt32(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(isPowerOfTwo64(int64(uint32(c))))) {
                     continue;
                 }
-
                 v.reset(OpMIPSSLLconst);
                 v.AuxInt = int32ToAuxInt(int32(log2uint32(int64(c))));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select1 (MULTU (MOVWconst [c]) (MOVWconst [d])))
     // result: (MOVWconst [int32(uint32(c)*uint32(d))])
@@ -7612,24 +7171,20 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_0_1.Op != OpMIPSMOVWconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_0_1.AuxInt);
                 v.reset(OpMIPSMOVWconst);
                 v.AuxInt = int32ToAuxInt(int32(uint32(c) * uint32(d)));
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select1 (DIV (MOVWconst [c]) (MOVWconst [d])))
     // cond: d != 0
@@ -7655,7 +7210,6 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(c / d);
         return true;
-
     } 
     // match: (Select1 (DIVU (MOVWconst [c]) (MOVWconst [d])))
     // cond: d != 0
@@ -7681,10 +7235,8 @@ private static bool rewriteValueMIPS_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint32(c) / uint32(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpSignmask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7699,7 +7251,6 @@ private static bool rewriteValueMIPS_OpSignmask(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7718,7 +7269,6 @@ private static bool rewriteValueMIPS_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7740,7 +7290,6 @@ private static bool rewriteValueMIPS_OpStore(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVBstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -7756,7 +7305,6 @@ private static bool rewriteValueMIPS_OpStore(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVHstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && !is32BitFloat(val.Type)
@@ -7772,7 +7320,6 @@ private static bool rewriteValueMIPS_OpStore(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitFloat(val.Type)
@@ -7788,7 +7335,6 @@ private static bool rewriteValueMIPS_OpStore(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVFstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8 && is64BitFloat(val.Type)
@@ -7804,10 +7350,8 @@ private static bool rewriteValueMIPS_OpStore(ptr<Value> _addr_v) {
         v.reset(OpMIPSMOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpSub32withcarry(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7829,7 +7373,6 @@ private static bool rewriteValueMIPS_OpSub32withcarry(ptr<Value> _addr_v) {
         v.AddArg2(v0, c);
         return true;
     }
-
 }
 private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7848,7 +7391,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] ptr mem)
     // result: (MOVBstore ptr (MOVWconst [0]) mem)
@@ -7863,7 +7405,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [2] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -7883,7 +7424,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [2] ptr mem)
     // result: (MOVBstore [1] ptr (MOVWconst [0]) (MOVBstore [0] ptr (MOVWconst [0]) mem))
@@ -7902,7 +7442,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [4] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -7922,7 +7461,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [4] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -7946,7 +7484,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [4] ptr mem)
     // result: (MOVBstore [3] ptr (MOVWconst [0]) (MOVBstore [2] ptr (MOVWconst [0]) (MOVBstore [1] ptr (MOVWconst [0]) (MOVBstore [0] ptr (MOVWconst [0]) mem))))
@@ -7971,7 +7508,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [3] ptr mem)
     // result: (MOVBstore [2] ptr (MOVWconst [0]) (MOVBstore [1] ptr (MOVWconst [0]) (MOVBstore [0] ptr (MOVWconst [0]) mem)))
@@ -7993,7 +7529,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [6] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -8020,7 +7555,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [8] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -8044,7 +7578,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [12] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -8071,7 +7604,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [16] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -8101,7 +7633,6 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [s] {t} ptr mem)
     // cond: (s > 16 || t.Alignment()%4 != 0)
@@ -8121,10 +7652,8 @@ private static bool rewriteValueMIPS_OpZero(ptr<Value> _addr_v) {
         v0.AddArg(ptr);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueMIPS_OpZeromask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8144,7 +7673,6 @@ private static bool rewriteValueMIPS_OpZeromask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteBlockMIPS(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -8587,7 +8115,6 @@ private static bool rewriteBlockMIPS(ptr<Block> _addr_b) {
             return true;
         }
         return false;
-
 }
 
 } // end ssa_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:50:09 UTC
+//     Generated on 2022 March 13 06:01:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct loop
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace @internal
             public static implicit operator loop(NilType nil) => default(loop);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static loop loop_cast(dynamic value)
         {
             return new loop(ref value.header, ref value.outer, value.children, value.exits, value.nBlocks, value.depth, value.isInner, value.containsUnavoidableCall);

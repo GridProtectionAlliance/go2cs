@@ -4,29 +4,32 @@
 
 // Package ascii85 implements the ascii85 data encoding
 // as used in the btoa tool and Adobe's PostScript and PDF document formats.
-// package ascii85 -- go2cs converted at 2022 March 06 22:24:52 UTC
+
+// package ascii85 -- go2cs converted at 2022 March 13 05:39:23 UTC
 // import "encoding/ascii85" ==> using ascii85 = go.encoding.ascii85_package
 // Original source: C:\Program Files\Go\src\encoding\ascii85\ascii85.go
-using io = go.io_package;
-using strconv = go.strconv_package;
-
 namespace go.encoding;
+
+using io = io_package;
+using strconv = strconv_package;
+
+
+/*
+ * Encoder
+ */
+
+// Encode encodes src into at most MaxEncodedLen(len(src))
+// bytes of dst, returning the actual number of bytes written.
+//
+// The encoding handles 4-byte chunks, using a special encoding
+// for the last fragment, so Encode is not appropriate for use on
+// individual blocks of a large data stream. Use NewEncoder() instead.
+//
+// Often, ascii85-encoded data is wrapped in <~ and ~> symbols.
+// Encode does not add these.
 
 public static partial class ascii85_package {
 
-    /*
-     * Encoder
-     */
-
-    // Encode encodes src into at most MaxEncodedLen(len(src))
-    // bytes of dst, returning the actual number of bytes written.
-    //
-    // The encoding handles 4-byte chunks, using a special encoding
-    // for the last fragment, so Encode is not appropriate for use on
-    // individual blocks of a large data stream. Use NewEncoder() instead.
-    //
-    // Often, ascii85-encoded data is wrapped in <~ and ~> symbols.
-    // Encode does not add these.
 public static nint Encode(slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return 0;
@@ -87,10 +90,8 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
         }
         dst = dst[(int)m..];
         n += m;
-
     }
     return n;
-
 }
 
 // MaxEncodedLen returns the maximum length of an encoding of n source bytes.
@@ -141,7 +142,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
             return (n, error.As(e.err)!);
         }
         e.nbuf = 0;
-
     }
     while (len(p) >= 4) {
         var nn = len(e.@out) / 5 * 4;
@@ -156,11 +156,9 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
             if (e.err != null) {
                 return (n, error.As(e.err)!);
             }
-
         }
         n += nn;
         p = p[(int)nn..];
-
     } 
 
     // Trailing fringe.
@@ -176,7 +174,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
     e.nbuf = len(p);
     n += len(p);
     return ;
-
 }
 
 // Close flushes any pending output from the encoder.
@@ -191,7 +188,6 @@ private static error Close(this ptr<encoder> _addr_e) {
         _, e.err = e.w.Write(e.@out[(int)0..(int)nout]);
     }
     return error.As(e.err)!;
-
 }
 
 /*
@@ -256,7 +252,6 @@ public static (nint, nint, error) Decode(slice<byte> dst, slice<byte> src, bool 
                 nb = 0;
                 v = 0;
             }
-
         }
         i = i__prev1;
     }
@@ -271,7 +266,6 @@ public static (nint, nint, error) Decode(slice<byte> dst, slice<byte> src, bool 
             if (nb == 1) {
                 return (0, 0, error.As(CorruptInputError(len(src)))!);
             }
-
             {
                 var i__prev1 = i;
 
@@ -280,7 +274,6 @@ public static (nint, nint, error) Decode(slice<byte> dst, slice<byte> src, bool 
                     // We have to assume the worst case values (digit 84)
                     // in order to ensure that the top bits are correct.
                     v = v * 85 + 84;
-
                 }
 
 
@@ -298,11 +291,9 @@ public static (nint, nint, error) Decode(slice<byte> dst, slice<byte> src, bool 
 
                 i = i__prev1;
             }
-
         }
     }
     return ;
-
 }
 
 // NewDecoder constructs a new ascii85 stream decoder.
@@ -347,7 +338,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
                 d.nbuf = copy(d.buf[(int)0..], d.buf[(int)nsrc..(int)d.nbuf]);
                 continue; // copy out and return
             }
-
             if (ndst == 0 && d.err == null) { 
                 // Special case: input buffer is mostly filled with non-data bytes.
                 // Filter out such bytes to make room for more input.
@@ -360,9 +350,7 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
                 }
 
                 d.nbuf = off;
-
             }
-
         }
         if (d.err != null) {
             return (0, error.As(d.err)!);
@@ -373,9 +361,7 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
         }
         nn, d.readErr = d.r.Read(d.buf[(int)d.nbuf..]);
         d.nbuf += nn;
-
     }
-
 }
 
 } // end ascii85_package

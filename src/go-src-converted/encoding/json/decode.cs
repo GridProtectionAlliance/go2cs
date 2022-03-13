@@ -5,97 +5,99 @@
 // Represents JSON data structure using native Go types: booleans, floats,
 // strings, arrays, and maps.
 
-// package json -- go2cs converted at 2022 March 06 22:24:51 UTC
+// package json -- go2cs converted at 2022 March 13 05:39:22 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\decode.go
-using encoding = go.encoding_package;
-using base64 = go.encoding.base64_package;
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf16 = go.unicode.utf16_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.encoding;
+
+using encoding = encoding_package;
+using base64 = encoding.base64_package;
+using fmt = fmt_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf16 = unicode.utf16_package;
+using utf8 = unicode.utf8_package;
+
+
+// Unmarshal parses the JSON-encoded data and stores the result
+// in the value pointed to by v. If v is nil or not a pointer,
+// Unmarshal returns an InvalidUnmarshalError.
+//
+// Unmarshal uses the inverse of the encodings that
+// Marshal uses, allocating maps, slices, and pointers as necessary,
+// with the following additional rules:
+//
+// To unmarshal JSON into a pointer, Unmarshal first handles the case of
+// the JSON being the JSON literal null. In that case, Unmarshal sets
+// the pointer to nil. Otherwise, Unmarshal unmarshals the JSON into
+// the value pointed at by the pointer. If the pointer is nil, Unmarshal
+// allocates a new value for it to point to.
+//
+// To unmarshal JSON into a value implementing the Unmarshaler interface,
+// Unmarshal calls that value's UnmarshalJSON method, including
+// when the input is a JSON null.
+// Otherwise, if the value implements encoding.TextUnmarshaler
+// and the input is a JSON quoted string, Unmarshal calls that value's
+// UnmarshalText method with the unquoted form of the string.
+//
+// To unmarshal JSON into a struct, Unmarshal matches incoming object
+// keys to the keys used by Marshal (either the struct field name or its tag),
+// preferring an exact match but also accepting a case-insensitive match. By
+// default, object keys which don't have a corresponding struct field are
+// ignored (see Decoder.DisallowUnknownFields for an alternative).
+//
+// To unmarshal JSON into an interface value,
+// Unmarshal stores one of these in the interface value:
+//
+//    bool, for JSON booleans
+//    float64, for JSON numbers
+//    string, for JSON strings
+//    []interface{}, for JSON arrays
+//    map[string]interface{}, for JSON objects
+//    nil for JSON null
+//
+// To unmarshal a JSON array into a slice, Unmarshal resets the slice length
+// to zero and then appends each element to the slice.
+// As a special case, to unmarshal an empty JSON array into a slice,
+// Unmarshal replaces the slice with a new empty slice.
+//
+// To unmarshal a JSON array into a Go array, Unmarshal decodes
+// JSON array elements into corresponding Go array elements.
+// If the Go array is smaller than the JSON array,
+// the additional JSON array elements are discarded.
+// If the JSON array is smaller than the Go array,
+// the additional Go array elements are set to zero values.
+//
+// To unmarshal a JSON object into a map, Unmarshal first establishes a map to
+// use. If the map is nil, Unmarshal allocates a new map. Otherwise Unmarshal
+// reuses the existing map, keeping existing entries. Unmarshal then stores
+// key-value pairs from the JSON object into the map. The map's key type must
+// either be any string type, an integer, implement json.Unmarshaler, or
+// implement encoding.TextUnmarshaler.
+//
+// If a JSON value is not appropriate for a given target type,
+// or if a JSON number overflows the target type, Unmarshal
+// skips that field and completes the unmarshaling as best it can.
+// If no more serious errors are encountered, Unmarshal returns
+// an UnmarshalTypeError describing the earliest such error. In any
+// case, it's not guaranteed that all the remaining fields following
+// the problematic one will be unmarshaled into the target object.
+//
+// The JSON null value unmarshals into an interface, map, pointer, or slice
+// by setting that Go value to nil. Because null is often used in JSON to mean
+// ``not present,'' unmarshaling a JSON null into any other Go type has no effect
+// on the value and produces no error.
+//
+// When unmarshaling quoted strings, invalid UTF-8 or
+// invalid UTF-16 surrogate pairs are not treated as an error.
+// Instead, they are replaced by the Unicode replacement
+// character U+FFFD.
+//
 
 public static partial class json_package {
 
-    // Unmarshal parses the JSON-encoded data and stores the result
-    // in the value pointed to by v. If v is nil or not a pointer,
-    // Unmarshal returns an InvalidUnmarshalError.
-    //
-    // Unmarshal uses the inverse of the encodings that
-    // Marshal uses, allocating maps, slices, and pointers as necessary,
-    // with the following additional rules:
-    //
-    // To unmarshal JSON into a pointer, Unmarshal first handles the case of
-    // the JSON being the JSON literal null. In that case, Unmarshal sets
-    // the pointer to nil. Otherwise, Unmarshal unmarshals the JSON into
-    // the value pointed at by the pointer. If the pointer is nil, Unmarshal
-    // allocates a new value for it to point to.
-    //
-    // To unmarshal JSON into a value implementing the Unmarshaler interface,
-    // Unmarshal calls that value's UnmarshalJSON method, including
-    // when the input is a JSON null.
-    // Otherwise, if the value implements encoding.TextUnmarshaler
-    // and the input is a JSON quoted string, Unmarshal calls that value's
-    // UnmarshalText method with the unquoted form of the string.
-    //
-    // To unmarshal JSON into a struct, Unmarshal matches incoming object
-    // keys to the keys used by Marshal (either the struct field name or its tag),
-    // preferring an exact match but also accepting a case-insensitive match. By
-    // default, object keys which don't have a corresponding struct field are
-    // ignored (see Decoder.DisallowUnknownFields for an alternative).
-    //
-    // To unmarshal JSON into an interface value,
-    // Unmarshal stores one of these in the interface value:
-    //
-    //    bool, for JSON booleans
-    //    float64, for JSON numbers
-    //    string, for JSON strings
-    //    []interface{}, for JSON arrays
-    //    map[string]interface{}, for JSON objects
-    //    nil for JSON null
-    //
-    // To unmarshal a JSON array into a slice, Unmarshal resets the slice length
-    // to zero and then appends each element to the slice.
-    // As a special case, to unmarshal an empty JSON array into a slice,
-    // Unmarshal replaces the slice with a new empty slice.
-    //
-    // To unmarshal a JSON array into a Go array, Unmarshal decodes
-    // JSON array elements into corresponding Go array elements.
-    // If the Go array is smaller than the JSON array,
-    // the additional JSON array elements are discarded.
-    // If the JSON array is smaller than the Go array,
-    // the additional Go array elements are set to zero values.
-    //
-    // To unmarshal a JSON object into a map, Unmarshal first establishes a map to
-    // use. If the map is nil, Unmarshal allocates a new map. Otherwise Unmarshal
-    // reuses the existing map, keeping existing entries. Unmarshal then stores
-    // key-value pairs from the JSON object into the map. The map's key type must
-    // either be any string type, an integer, implement json.Unmarshaler, or
-    // implement encoding.TextUnmarshaler.
-    //
-    // If a JSON value is not appropriate for a given target type,
-    // or if a JSON number overflows the target type, Unmarshal
-    // skips that field and completes the unmarshaling as best it can.
-    // If no more serious errors are encountered, Unmarshal returns
-    // an UnmarshalTypeError describing the earliest such error. In any
-    // case, it's not guaranteed that all the remaining fields following
-    // the problematic one will be unmarshaled into the target object.
-    //
-    // The JSON null value unmarshals into an interface, map, pointer, or slice
-    // by setting that Go value to nil. Because null is often used in JSON to mean
-    // ``not present,'' unmarshaling a JSON null into any other Go type has no effect
-    // on the value and produces no error.
-    //
-    // When unmarshaling quoted strings, invalid UTF-8 or
-    // invalid UTF-16 surrogate pairs are not treated as an error.
-    // Instead, they are replaced by the Unicode replacement
-    // character U+FFFD.
-    //
 public static error Unmarshal(slice<byte> data, object v) { 
     // Check for well-formedness.
     // Avoids filling out half a data structure
@@ -107,7 +109,6 @@ public static error Unmarshal(slice<byte> data, object v) {
     }
     d.init(data);
     return error.As(d.unmarshal(v))!;
-
 }
 
 // Unmarshaler is the interface implemented by types
@@ -139,7 +140,6 @@ private static @string Error(this ptr<UnmarshalTypeError> _addr_e) {
         return "json: cannot unmarshal " + e.Value + " into Go struct field " + e.Struct + "." + e.Field + " of type " + e.Type.String();
     }
     return "json: cannot unmarshal " + e.Value + " into Go value of type " + e.Type.String();
-
 }
 
 // An UnmarshalFieldError describes a JSON object key that
@@ -174,7 +174,6 @@ private static @string Error(this ptr<InvalidUnmarshalError> _addr_e) {
         return "json: Unmarshal(non-pointer " + e.Type.String() + ")";
     }
     return "json: Unmarshal(nil " + e.Type.String() + ")";
-
 }
 
 private static error unmarshal(this ptr<decodeState> _addr_d, object v) {
@@ -193,7 +192,6 @@ private static error unmarshal(this ptr<decodeState> _addr_d, object v) {
         return error.As(d.addErrorContext(err))!;
     }
     return error.As(d.savedError)!;
-
 }
 
 // A Number represents a JSON number literal.
@@ -263,10 +261,8 @@ private static ptr<decodeState> init(this ptr<decodeState> _addr_d, slice<byte> 
         d.errorContext.Struct = null; 
         // Reuse the allocated space for the FieldStack slice.
         d.errorContext.FieldStack = d.errorContext.FieldStack[..(int)0];
-
     }
     return _addr_d!;
-
 }
 
 // saveError saves the first err it is called with,
@@ -290,10 +286,8 @@ private static error addErrorContext(this ptr<decodeState> _addr_d, error err) {
                 err.Field = strings.Join(d.errorContext.FieldStack, ".");
                 break;
         }
-
     }
     return error.As(err)!;
-
 }
 
 // skip scans to the end of what was started.
@@ -313,7 +307,6 @@ private static void skip(this ptr<decodeState> _addr_d) {
             return ;
         }
     }
-
 }
 
 // scanNext processes the byte at d.data[d.off].
@@ -351,7 +344,6 @@ private static void scanWhile(this ptr<decodeState> _addr_d, nint op) {
 
     d.off = len(data) + 1; // mark processed EOF with len+1
     d.opcode = d.scan.eof();
-
 }
 
 // rescanLiteral is similar to scanWhile(scanContinue), but it specialises the
@@ -383,7 +375,6 @@ Switch:
                 }
                 i++;
             }
-
             break;
         case '0': // number
 
@@ -446,7 +437,6 @@ Switch:
                 }
                 i++;
             }
-
             break;
         case 't': // true
             i += len("rue");
@@ -466,7 +456,6 @@ Switch:
         d.opcode = scanEnd;
     }
     d.off = i + 1;
-
 }
 
 // value consumes a JSON value from d.data[d.off-1:], decoding into v, and
@@ -490,7 +479,6 @@ private static error value(this ptr<decodeState> _addr_d, reflect.Value v) => fu
                 err = err__prev2;
 
             }
-
         }
         else
  {
@@ -511,7 +499,6 @@ private static error value(this ptr<decodeState> _addr_d, reflect.Value v) => fu
                 err = err__prev2;
 
             }
-
         }
         else
  {
@@ -536,12 +523,10 @@ private static error value(this ptr<decodeState> _addr_d, reflect.Value v) => fu
                 err = err__prev2;
 
             }
-
         }
     else 
         panic(phasePanicMsg);
         return error.As(null!)!;
-
 });
 
 private partial struct unquotedValue {
@@ -568,7 +553,6 @@ private static void valueQuoted(this ptr<decodeState> _addr_d) => func((_, panic
     else 
         panic(phasePanicMsg);
         return new unquotedValue();
-
 });
 
 // indirect walks down v allocating pointers as needed,
@@ -639,7 +623,6 @@ private static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(r
                 u = u__prev2;
 
             }
-
             if (!decodingNull) {
                 {
                     Unmarshaler u__prev3 = u;
@@ -653,14 +636,11 @@ private static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(r
                     u = u__prev3;
 
                 }
-
             }
-
         }
         if (haveAddr) {
             v = v0; // restore original value after round-trip Value.Addr().Elem()
             haveAddr = false;
-
         }
         else
  {
@@ -668,7 +648,6 @@ private static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(r
         }
     }
     return (null, null, v);
-
 }
 
 // array consumes an array from d.data[d.off-1:], decoding into v.
@@ -699,7 +678,6 @@ private static error array(this ptr<decodeState> _addr_d, reflect.Value v) => fu
             var ai = d.arrayInterface();
             v.Set(reflect.ValueOf(ai));
             return error.As(null!)!;
-
         }
         fallthrough = true;
     }
@@ -733,11 +711,9 @@ private static error array(this ptr<decodeState> _addr_d, reflect.Value v) => fu
                 reflect.Copy(newv, v);
                 v.Set(newv);
             }
-
             if (i >= v.Len()) {
                 v.SetLen(i + 1);
             }
-
         }
         if (i < v.Len()) { 
             // Decode into element.
@@ -753,7 +729,6 @@ private static error array(this ptr<decodeState> _addr_d, reflect.Value v) => fu
                 err = err__prev2;
 
             }
-
         }
         else
  { 
@@ -770,7 +745,6 @@ private static error array(this ptr<decodeState> _addr_d, reflect.Value v) => fu
                 err = err__prev2;
 
             }
-
         }
         i++; 
 
@@ -795,8 +769,6 @@ private static error array(this ptr<decodeState> _addr_d, reflect.Value v) => fu
                 i++;
             }
         else
-
-
         } {
             v.SetLen(i);
         }
@@ -805,7 +777,6 @@ private static error array(this ptr<decodeState> _addr_d, reflect.Value v) => fu
         v.Set(reflect.MakeSlice(v.Type(), 0, 0));
     }
     return error.As(null!)!;
-
 });
 
 private static slice<byte> nullLiteral = (slice<byte>)"null";
@@ -875,7 +846,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
         if (d.opcode == scanEndObject) { 
             // closing } - can only happen on first iteration.
             break;
-
         }
         if (d.opcode != scanBeginLiteral) {
             panic(phasePanicMsg);
@@ -899,9 +869,7 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
  {
                 mapElem.Set(reflect.Zero(elemType));
             }
-
             subv = mapElem;
-
         }
         else
  {
@@ -914,7 +882,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                 if (ok) { 
                     // Found an exact name match.
                     f = _addr_fields.list[i];
-
                 }
                 else
  { 
@@ -939,7 +906,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                 i = i__prev2;
 
             }
-
             if (f != null) {
                 subv = v;
                 destring = f.quoted;
@@ -962,19 +928,12 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                                     subv = new reflect.Value();
                                     destring = false;
                                     break;
-
                                 }
-
                                 subv.Set(reflect.New(subv.Type().Elem()));
-
                             }
-
                             subv = subv.Elem();
-
                         }
-
                         subv = subv.Field(i);
-
                     }
 
                     i = i__prev2;
@@ -983,15 +942,12 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                 if (d.errorContext == null) {
                     d.errorContext = @new<errorContext>();
                 }
-
                 d.errorContext.FieldStack = append(d.errorContext.FieldStack, f.name);
                 d.errorContext.Struct = t;
-
             }
             else if (d.disallowUnknownFields) {
                 d.saveError(fmt.Errorf("json: unknown field %q", key));
             }
-
         }
         if (d.opcode == scanSkipSpace) {
             d.scanWhile(scanSkipSpace);
@@ -1016,7 +972,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                         err = err__prev2;
 
                     }
-
                     break;
                 case @string qv:
                     {
@@ -1031,7 +986,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                         err = err__prev2;
 
                     }
-
                     break;
                 default:
                 {
@@ -1040,7 +994,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                     break;
                 }
             }
-
         }
         else
  {
@@ -1056,7 +1009,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                 err = err__prev2;
 
             }
-
         }
         if (v.Kind() == reflect.Map) {
             var kt = t.Key();
@@ -1076,7 +1028,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                     err = err__prev2;
 
                 }
-
                 kv = kv.Elem();
             else if (kt.Kind() == reflect.String) 
                 kv = reflect.ValueOf(key).Convert(kt);
@@ -1103,7 +1054,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
                                         if (kv.IsValid()) {
                 v.SetMapIndex(kv, subv);
             }
-
         }
         if (d.opcode == scanSkipSpace) {
             d.scanWhile(scanSkipSpace);
@@ -1114,7 +1064,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
             // space and avoid unnecessary allocs.
             d.errorContext.FieldStack = d.errorContext.FieldStack[..(int)len(origErrorContext.FieldStack)];
             d.errorContext.Struct = origErrorContext.Struct;
-
         }
         if (d.opcode == scanEndObject) {
             break;
@@ -1124,7 +1073,6 @@ private static error @object(this ptr<decodeState> _addr_d, reflect.Value v) => 
         }
     }
     return error.As(null!)!;
-
 });
 
 // convertNumber converts the number literal s to a float64 or a Number
@@ -1142,7 +1090,6 @@ private static (object, error) convertNumber(this ptr<decodeState> _addr_d, @str
         return (null, error.As(addr(new UnmarshalTypeError(Value:"number "+s,Type:reflect.TypeOf(0.0),Offset:int64(d.off)))!)!);
     }
     return (f, error.As(null!)!);
-
 }
 
 private static var numberType = reflect.TypeOf(Number(""));
@@ -1160,7 +1107,6 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
         //Empty string given
         d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
         return error.As(null!)!;
-
     }
     var isNull = item[0] == 'n'; // null
     var (u, ut, pv) = indirect(v, isNull);
@@ -1186,7 +1132,6 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
             }
             d.saveError(addr(new UnmarshalTypeError(Value:val,Type:v.Type(),Offset:int64(d.readIndex()))));
             return error.As(null!)!;
-
         }
         var (s, ok) = unquoteBytes(item);
         if (!ok) {
@@ -1196,7 +1141,6 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
             panic(phasePanicMsg);
         }
         return error.As(ut.UnmarshalText(s))!;
-
     }
     v = pv;
 
@@ -1227,7 +1171,6 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
                                break;
                            }
 
-
                            if (v.Kind() == reflect.Bool) 
                                v.SetBool(value);
                            else if (v.Kind() == reflect.Interface) 
@@ -1238,7 +1181,6 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
                 {
                                    d.saveError(addr(new UnmarshalTypeError(Value:"bool",Type:v.Type(),Offset:int64(d.readIndex()))));
                                }
-
                            else 
                                if (fromQuoted) {
                                    d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()));
@@ -1247,7 +1189,6 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
                 {
                                    d.saveError(addr(new UnmarshalTypeError(Value:"bool",Type:v.Type(),Offset:int64(d.readIndex()))));
                                }
-
                 break;
             case '"': // string
                            (s, ok) = unquoteBytes(item);
@@ -1283,10 +1224,8 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
                 {
                                    d.saveError(addr(new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.readIndex()))));
                                }
-
                            else 
                                d.saveError(addr(new UnmarshalTypeError(Value:"string",Type:v.Type(),Offset:int64(d.readIndex()))));
-
                 break;
             default: // number
                 if (c != '-' && (c < '0' || c > '9')) {
@@ -1335,20 +1274,15 @@ private static error literalStore(this ptr<decodeState> _addr_d, slice<byte> ite
                         // already been tokenized.
                         v.SetString(s);
                         break;
-
                     }
-
                     if (fromQuoted) {
                         return error.As(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v", item, v.Type()))!;
                     }
-
                     d.saveError(addr(new UnmarshalTypeError(Value:"number",Type:v.Type(),Offset:int64(d.readIndex()))));
-
                 break;
         }
     }
     return error.As(null!)!;
-
 });
 
 // The xxxInterface routines build up a value to be stored
@@ -1372,7 +1306,6 @@ private static object valueInterface(this ptr<decodeState> _addr_d) => func((_, 
     else 
         panic(phasePanicMsg);
         return ;
-
 });
 
 // arrayInterface is like array but returns []interface{}.
@@ -1400,7 +1333,6 @@ private static slice<object> arrayInterface(this ptr<decodeState> _addr_d) => fu
         }
     }
     return v;
-
 });
 
 // objectInterface is like object but returns map[string]interface{}.
@@ -1414,7 +1346,6 @@ private static void objectInterface(this ptr<decodeState> _addr_d) => func((_, p
         if (d.opcode == scanEndObject) { 
             // closing } - can only happen on first iteration.
             break;
-
         }
         if (d.opcode != scanBeginLiteral) {
             panic(phasePanicMsg);
@@ -1449,7 +1380,6 @@ private static void objectInterface(this ptr<decodeState> _addr_d) => func((_, p
         }
     }
     return m;
-
 });
 
 // literalInterface consumes and returns a literal from d.data[d.off-1:] and
@@ -1495,7 +1425,6 @@ private static void literalInterface(this ptr<decodeState> _addr_d) => func((_, 
                 break;
         }
     }
-
 });
 
 // getu4 decodes \uXXXX from the beginning of s, returning the hex value,
@@ -1516,9 +1445,7 @@ private static int getu4(slice<byte> s) {
         else 
             return -1;
                 r = r * 16 + rune(c);
-
     }    return r;
-
 }
 
 // unquote converts a quoted JSON string literal s into an actual string t.
@@ -1559,7 +1486,6 @@ private static (slice<byte>, bool) unquoteBytes(slice<byte> s) {
             break;
         }
         r += size;
-
     }
     if (r == len(s)) {
         return (s, true);
@@ -1640,18 +1566,14 @@ private static (slice<byte>, bool) unquoteBytes(slice<byte> s) {
                                     r += 6;
                                     w += utf8.EncodeRune(b[(int)w..], dec);
                                     break;
-
                                 } 
                                 // Invalid surrogate; fall back to replacement rune.
 
                             } 
                             // Invalid surrogate; fall back to replacement rune.
                             rr = unicode.ReplacementChar;
-
                         }
-
                         w += utf8.EncodeRune(b[(int)w..], rr);
-
                         break;
                     default: 
                         return ;
@@ -1677,10 +1599,8 @@ private static (slice<byte>, bool) unquoteBytes(slice<byte> s) {
 
             c = c__prev1;
         }
-
     }
     return (b[(int)0..(int)w], true);
-
 }
 
 } // end json_package

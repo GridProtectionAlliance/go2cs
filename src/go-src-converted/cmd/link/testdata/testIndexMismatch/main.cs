@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:22:35 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:39 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\testdata\testIndexMismatch\main.go
-using a = go.a_package;
-
 namespace go;
+
+using a = a_package;
 
 public static partial class main_package {
 

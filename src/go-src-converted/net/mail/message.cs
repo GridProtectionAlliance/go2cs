@@ -15,24 +15,24 @@ Notable divergences:
     * No unicode normalization is performed.
     * The special characters ()[]:;@\, are allowed to appear unquoted in names.
 */
-// package mail -- go2cs converted at 2022 March 06 22:25:48 UTC
+
+// package mail -- go2cs converted at 2022 March 13 05:40:18 UTC
 // import "net/mail" ==> using mail = go.net.mail_package
 // Original source: C:\Program Files\Go\src\net\mail\message.go
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using mime = go.mime_package;
-using textproto = go.net.textproto_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.net;
+
+using bufio = bufio_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using mime = mime_package;
+using textproto = net.textproto_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class mail_package {
 
@@ -69,7 +69,6 @@ public static (ptr<Message>, error) ReadMessage(io.Reader r) {
         return (_addr_null!, error.As(err)!);
     }
     return (addr(new Message(Header:Header(hdr),Body:tp.R,)), error.As(null!)!);
-
 }
 
 // Layouts suitable for passing to time.Parse.
@@ -137,22 +136,17 @@ public static (time.Time, error) ParseDate(@string date) {
                 if (ind != -1) {
                     ind++;
                 }
-
             }
-
             if (ind != -1 && len(p.s) >= ind + 5) { 
                 // The last letter T of the obsolete time zone is checked when no standard time zone is found.
                 // If T is misplaced, the date to parse is garbage.
                 date = p.s[..(int)ind + 1];
                 p.s = p.s[(int)ind + 1..];
-
             }
-
         }
         ind = ind__prev1;
 
     }
-
     if (!p.skipCFWS()) {
         return (new time.Time(), error.As(errors.New("mail: misformatted parenthetical comment"))!);
     }
@@ -162,7 +156,6 @@ public static (time.Time, error) ParseDate(@string date) {
             return (t, error.As(null!)!);
         }
     }    return (new time.Time(), error.As(errors.New("mail: header could not be parsed"))!);
-
 }
 
 // A Header represents the key-value pairs in a mail message header.
@@ -191,7 +184,6 @@ public static (time.Time, error) Date(this Header h) {
         return (new time.Time(), error.As(ErrHeaderNotPresent)!);
     }
     return ParseDate(hdr);
-
 }
 
 // AddressList parses the named header field as a list of addresses.
@@ -204,7 +196,6 @@ public static (slice<ptr<Address>>, error) AddressList(this Header h, @string ke
         return (null, error.As(ErrHeaderNotPresent)!);
     }
     return ParseAddressList(hdr);
-
 }
 
 // Address represents a single mail address.
@@ -270,7 +261,6 @@ private static @string String(this ptr<Address> _addr_a) {
         // This is a malformed address ("@" is required in addr-spec);
         // treat the whole address as local-part.
         local = a.Address;
-
     }
     else
  {
@@ -293,12 +283,9 @@ private static @string String(this ptr<Address> _addr_a) {
                 if (i > 0 && local[i - 1] != '.' && i < len(local) - 1) {
                     continue;
                 }
-
             }
-
             quoteLocal = true;
             break;
-
         }
         r = r__prev1;
     }
@@ -323,7 +310,6 @@ private static @string String(this ptr<Address> _addr_a) {
                 allPrintable = false;
                 break;
             }
-
         }
         r = r__prev1;
     }
@@ -335,7 +321,6 @@ private static @string String(this ptr<Address> _addr_a) {
         return mime.BEncoding.Encode("utf-8", a.Name) + " " + s;
     }
     return mime.QEncoding.Encode("utf-8", a.Name) + " " + s;
-
 }
 
 private partial struct addrParser {
@@ -379,7 +364,6 @@ private static (slice<ptr<Address>>, error) parseAddressList(this ptr<addrParser
         }
     }
     return (list, error.As(null!)!);
-
 }
 
 private static (ptr<Address>, error) parseSingleAddress(this ptr<addrParser> _addr_p) {
@@ -404,7 +388,6 @@ private static (ptr<Address>, error) parseSingleAddress(this ptr<addrParser> _ad
         return (_addr_null!, error.As(errors.New("mail: group with multiple addresses"))!);
     }
     return (_addr_addrs[0]!, error.As(null!)!);
-
 }
 
 // parseAddress parses a single RFC 5322 address at the start of p.
@@ -429,7 +412,6 @@ private static (slice<ptr<Address>>, error) parseAddress(this ptr<addrParser> _a
             }
         }
         return (new slice<ptr<Address>>(new ptr<Address>[] { {Name:displayName,Address:spec,} }), error.As(err)!);
-
     }
     debug.Printf("parseAddress: not an addr-spec: %v", err);
     debug.Printf("parseAddress: state is now %q", p.s); 
@@ -461,10 +443,8 @@ private static (slice<ptr<Address>>, error) parseAddress(this ptr<addrParser> _a
             // The input is like "foo.bar"; it's possible the input
             // meant to be "foo.bar@domain", or "foo.bar <...>".
             return (null, error.As(errors.New("mail: missing '@' or angle-addr"))!);
-
         }
         return (null, error.As(errors.New("mail: no angle-addr"))!);
-
     }
     spec, err = p.consumeAddrSpec();
     if (err != null) {
@@ -476,7 +456,6 @@ private static (slice<ptr<Address>>, error) parseAddress(this ptr<addrParser> _a
     debug.Printf("parseAddress: spec=%q", spec);
 
     return (new slice<ptr<Address>>(new ptr<Address>[] { {Name:displayName,Address:spec,} }), error.As(null!)!);
-
 }
 
 private static (slice<ptr<Address>>, error) consumeGroupList(this ptr<addrParser> _addr_p) {
@@ -512,7 +491,6 @@ private static (slice<ptr<Address>>, error) consumeGroupList(this ptr<addrParser
         }
     }
     return (group, error.As(null!)!);
-
 }
 
 // consumeAddrSpec parses a single RFC 5322 addr-spec at the start of p.
@@ -549,7 +527,6 @@ private static (@string, error) consumeAddrSpec(this ptr<addrParser> _addr_p) =>
         // dot-atom
         debug.Printf("consumeAddrSpec: parsing dot-atom");
         localPart, err = p.consumeAtom(true, false);
-
     }
     if (err != null) {
         debug.Printf("consumeAddrSpec: failed: %v", err);
@@ -568,7 +545,6 @@ private static (@string, error) consumeAddrSpec(this ptr<addrParser> _addr_p) =>
         return ("", error.As(err)!);
     }
     return (localPart + "@" + domain, error.As(null!)!);
-
 });
 
 // consumePhrase parses the RFC 5322 phrase at the start of p.
@@ -592,7 +568,6 @@ private static (@string, error) consumePhrase(this ptr<addrParser> _addr_p) {
         if (p.peek() == '"') { 
             // quoted-string
             word, err = p.consumeQuotedString();
-
         }
         else
  { 
@@ -603,7 +578,6 @@ private static (@string, error) consumePhrase(this ptr<addrParser> _addr_p) {
             if (err == null) {
                 word, isEncoded, err = p.decodeRFC2047Word(word);
             }
-
         }
         if (err != null) {
             break;
@@ -617,7 +591,6 @@ private static (@string, error) consumePhrase(this ptr<addrParser> _addr_p) {
             words = append(words, word);
         }
         isPrevEncoded = isEncoded;
-
     } 
     // Ignore any error if we got at least one word.
     if (err != null && len(words) == 0) {
@@ -626,7 +599,6 @@ private static (@string, error) consumePhrase(this ptr<addrParser> _addr_p) {
     }
     phrase = strings.Join(words, " ");
     return (phrase, error.As(null!)!);
-
 }
 
 // consumeQuotedString parses the quoted string at the start of p.
@@ -671,11 +643,9 @@ Loop:
         else 
             return ("", error.As(fmt.Errorf("mail: bad character in quoted-string: %q", r))!);
                 i += size;
-
     }
     p.s = p.s[(int)i + 1..];
     return (string(qsb), error.As(null!)!);
-
 }
 
 // consumeAtom parses an RFC 5322 atom at the start of p.
@@ -703,8 +673,7 @@ Loop:
             break;
         else 
             i += size;
-        
-    }
+            }
     if (i == 0) {
         return ("", error.As(errors.New("mail: invalid string"))!);
     }
@@ -720,7 +689,6 @@ Loop:
         }
     }
     return (atom, error.As(null!)!);
-
 }
 
 private static (@string, error) consumeDisplayNameComment(this ptr<addrParser> _addr_p) {
@@ -745,7 +713,6 @@ private static (@string, error) consumeDisplayNameComment(this ptr<addrParser> _
             words[idx] = decoded;
         }
     }    return (strings.Join(words, " "), error.As(null!)!);
-
 }
 
 private static bool consume(this ptr<addrParser> _addr_p, byte c) {
@@ -756,7 +723,6 @@ private static bool consume(this ptr<addrParser> _addr_p, byte c) {
     }
     p.s = p.s[(int)1..];
     return true;
-
 }
 
 // skipSpace skips the leading space and tab characters.
@@ -803,13 +769,10 @@ private static bool skipCFWS(this ptr<addrParser> _addr_p) {
 
         }
 
-
         p.skipSpace();
-
     }
 
     return true;
-
 }
 
 private static (@string, bool) consumeComment(this ptr<addrParser> _addr_p) {
@@ -838,11 +801,9 @@ private static (@string, bool) consumeComment(this ptr<addrParser> _addr_p) {
             comment += p.s[..(int)1];
         }
         p.s = p.s[(int)1..];
-
     }
 
     return (comment, depth == 0);
-
 }
 
 private static (@string, bool, error) decodeRFC2047Word(this ptr<addrParser> _addr_p, @string s) {
@@ -871,7 +832,6 @@ private static (@string, bool, error) decodeRFC2047Word(this ptr<addrParser> _ad
 
     // Ignore invalid RFC 2047 encoded-word errors.
     return (s, false, error.As(null!)!);
-
 }
 
 private static mime.WordDecoder rfc2047Decoder = new mime.WordDecoder(CharsetReader:func(charsetstring,inputio.Reader)(io.Reader,error){returnnil,charsetError(charset)},);
@@ -922,7 +882,6 @@ private static bool isAtext(int r, bool dot, bool permissive) {
             break;
     }
     return isVchar(r);
-
 }
 
 // isQtext reports whether r is an RFC 5322 qtext character.
@@ -932,7 +891,6 @@ private static bool isQtext(int r) {
         return false;
     }
     return isVchar(r);
-
 }
 
 // quoteString renders a string as an RFC 5322 quoted-string.
@@ -949,14 +907,12 @@ private static @string quoteString(@string s) {
         }
     }    buf.WriteByte('"');
     return buf.String();
-
 }
 
 // isVchar reports whether r is an RFC 5322 VCHAR character.
 private static bool isVchar(int r) { 
     // Visible (printing) characters.
     return '!' <= r && r <= '~' || isMultibyte(r);
-
 }
 
 // isMultibyte reports whether r is a multi-byte UTF-8 character

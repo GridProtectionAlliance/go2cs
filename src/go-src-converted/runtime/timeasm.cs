@@ -8,16 +8,16 @@
 // +build !faketime
 // +build windows linux,amd64
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:13 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:18 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\timeasm.go
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go;
+
+using _@unsafe_ = @unsafe_package;
 
 public static partial class runtime_package {
 
-    //go:linkname time_now time.now
+//go:linkname time_now time.now
 private static (long, int, long) time_now();
 
 } // end runtime_package

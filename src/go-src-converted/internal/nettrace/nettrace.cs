@@ -6,19 +6,17 @@
 // the net package. This package is purely internal for use by the
 // net/http/httptrace package and has no stable API exposed to end
 // users.
-// package nettrace -- go2cs converted at 2022 March 06 22:15:20 UTC
+
+// package nettrace -- go2cs converted at 2022 March 13 05:29:38 UTC
 // import "internal/nettrace" ==> using nettrace = go.@internal.nettrace_package
 // Original source: C:\Program Files\Go\src\internal\nettrace\nettrace.go
-
-using System;
-
-
 namespace go.@internal;
 
+using System;
 public static partial class nettrace_package {
 
-    // TraceKey is a context.Context Value key. Its associated value should
-    // be a *Trace struct.
+// TraceKey is a context.Context Value key. Its associated value should
+// be a *Trace struct.
 public partial struct TraceKey {
 }
 

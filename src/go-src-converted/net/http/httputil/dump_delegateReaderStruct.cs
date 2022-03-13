@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:01 UTC
+//     Generated on 2022 March 13 05:38:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace http
 {
     public static partial class httputil_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct delegateReader
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace http
             public static implicit operator delegateReader(NilType nil) => default(delegateReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static delegateReader delegateReader_cast(dynamic value)
         {
             return new delegateReader(value.c, value.err, value.r);

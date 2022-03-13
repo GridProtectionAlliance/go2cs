@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:30 UTC
+//     Generated on 2022 March 13 05:25:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct fixalloc
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace go
             public static implicit operator fixalloc(NilType nil) => default(fixalloc);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static fixalloc fixalloc_cast(dynamic value)
         {
             return new fixalloc(value.size, value.first, value.arg, ref value.list, value.chunk, value.nchunk, value.inuse, ref value.stat, value.zero);

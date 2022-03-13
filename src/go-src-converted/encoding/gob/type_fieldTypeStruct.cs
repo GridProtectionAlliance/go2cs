@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:13 UTC
+//     Generated on 2022 March 13 05:39:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace encoding
 {
     public static partial class gob_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct fieldType
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace encoding
             public static implicit operator fieldType(NilType nil) => default(fieldType);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static fieldType fieldType_cast(dynamic value)
         {
             return new fieldType(value.Name, value.Id);

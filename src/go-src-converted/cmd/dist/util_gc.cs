@@ -5,16 +5,14 @@
 //go:build gc
 // +build gc
 
-// package main -- go2cs converted at 2022 March 06 23:15:35 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:04 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\util_gc.go
-
-
 namespace go;
 
 public static partial class main_package {
 
-    // useVFPv1 tries to execute one VFPv1 instruction on ARM.
-    // It will crash the current process if VFPv1 is missing.
+// useVFPv1 tries to execute one VFPv1 instruction on ARM.
+// It will crash the current process if VFPv1 is missing.
 private static void useVFPv1();
 
 // useVFPv3 tries to execute one VFPv3 instruction on ARM.

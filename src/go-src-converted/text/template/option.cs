@@ -4,16 +4,16 @@
 
 // This file contains the code to handle template options.
 
-// package template -- go2cs converted at 2022 March 06 22:24:44 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:14 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Program Files\Go\src\text\template\option.go
-using strings = go.strings_package;
-
 namespace go.text;
+
+using strings = strings_package;
 
 public static partial class template_package {
 
-    // missingKeyAction defines how to respond to indexing a map with a key that is not present.
+// missingKeyAction defines how to respond to indexing a map with a key that is not present.
 private partial struct missingKeyAction { // : nint
 }
 
@@ -81,14 +81,11 @@ private static void setOption(this ptr<Template> _addr_t, @string opt) => func((
                             return ;
                             break;
                     }
-
                     break;
             }
-
             break;
     }
     panic("unrecognized option: " + opt);
-
 });
 
 } // end template_package

@@ -11,97 +11,93 @@
 // Although these are both useful directly, two simpler patterns
 // are fairly common and also provided: Visit and Any.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:18 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:40 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\visit.go
-
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using System;
 public static partial class ir_package {
 
-    // DoChildren calls do(x) on each of n's non-nil child nodes x.
-    // If any call returns true, DoChildren stops and returns true.
-    // Otherwise, DoChildren returns false.
-    //
-    // Note that DoChildren(n, do) only calls do(x) for n's immediate children.
-    // If x's children should be processed, then do(x) must call DoChildren(x, do).
-    //
-    // DoChildren allows constructing general traversals of the IR graph
-    // that can stop early if needed. The most general usage is:
-    //
-    //    var do func(ir.Node) bool
-    //    do = func(x ir.Node) bool {
-    //        ... processing BEFORE visiting children ...
-    //        if ... should visit children ... {
-    //            ir.DoChildren(x, do)
-    //            ... processing AFTER visiting children ...
-    //        }
-    //        if ... should stop parent DoChildren call from visiting siblings ... {
-    //            return true
-    //        }
-    //        return false
-    //    }
-    //    do(root)
-    //
-    // Since DoChildren does not return true itself, if the do function
-    // never wants to stop the traversal, it can assume that DoChildren
-    // itself will always return false, simplifying to:
-    //
-    //    var do func(ir.Node) bool
-    //    do = func(x ir.Node) bool {
-    //        ... processing BEFORE visiting children ...
-    //        if ... should visit children ... {
-    //            ir.DoChildren(x, do)
-    //        }
-    //        ... processing AFTER visiting children ...
-    //        return false
-    //    }
-    //    do(root)
-    //
-    // The Visit function illustrates a further simplification of the pattern,
-    // only processing before visiting children and never stopping:
-    //
-    //    func Visit(n ir.Node, visit func(ir.Node)) {
-    //        if n == nil {
-    //            return
-    //        }
-    //        var do func(ir.Node) bool
-    //        do = func(x ir.Node) bool {
-    //            visit(x)
-    //            return ir.DoChildren(x, do)
-    //        }
-    //        do(n)
-    //    }
-    //
-    // The Any function illustrates a different simplification of the pattern,
-    // visiting each node and then its children, recursively, until finding
-    // a node x for which cond(x) returns true, at which point the entire
-    // traversal stops and returns true.
-    //
-    //    func Any(n ir.Node, cond(ir.Node) bool) bool {
-    //        if n == nil {
-    //            return false
-    //        }
-    //        var do func(ir.Node) bool
-    //        do = func(x ir.Node) bool {
-    //            return cond(x) || ir.DoChildren(x, do)
-    //        }
-    //        return do(n)
-    //    }
-    //
-    // Visit and Any are presented above as examples of how to use
-    // DoChildren effectively, but of course, usage that fits within the
-    // simplifications captured by Visit or Any will be best served
-    // by directly calling the ones provided by this package.
+// DoChildren calls do(x) on each of n's non-nil child nodes x.
+// If any call returns true, DoChildren stops and returns true.
+// Otherwise, DoChildren returns false.
+//
+// Note that DoChildren(n, do) only calls do(x) for n's immediate children.
+// If x's children should be processed, then do(x) must call DoChildren(x, do).
+//
+// DoChildren allows constructing general traversals of the IR graph
+// that can stop early if needed. The most general usage is:
+//
+//    var do func(ir.Node) bool
+//    do = func(x ir.Node) bool {
+//        ... processing BEFORE visiting children ...
+//        if ... should visit children ... {
+//            ir.DoChildren(x, do)
+//            ... processing AFTER visiting children ...
+//        }
+//        if ... should stop parent DoChildren call from visiting siblings ... {
+//            return true
+//        }
+//        return false
+//    }
+//    do(root)
+//
+// Since DoChildren does not return true itself, if the do function
+// never wants to stop the traversal, it can assume that DoChildren
+// itself will always return false, simplifying to:
+//
+//    var do func(ir.Node) bool
+//    do = func(x ir.Node) bool {
+//        ... processing BEFORE visiting children ...
+//        if ... should visit children ... {
+//            ir.DoChildren(x, do)
+//        }
+//        ... processing AFTER visiting children ...
+//        return false
+//    }
+//    do(root)
+//
+// The Visit function illustrates a further simplification of the pattern,
+// only processing before visiting children and never stopping:
+//
+//    func Visit(n ir.Node, visit func(ir.Node)) {
+//        if n == nil {
+//            return
+//        }
+//        var do func(ir.Node) bool
+//        do = func(x ir.Node) bool {
+//            visit(x)
+//            return ir.DoChildren(x, do)
+//        }
+//        do(n)
+//    }
+//
+// The Any function illustrates a different simplification of the pattern,
+// visiting each node and then its children, recursively, until finding
+// a node x for which cond(x) returns true, at which point the entire
+// traversal stops and returns true.
+//
+//    func Any(n ir.Node, cond(ir.Node) bool) bool {
+//        if n == nil {
+//            return false
+//        }
+//        var do func(ir.Node) bool
+//        do = func(x ir.Node) bool {
+//            return cond(x) || ir.DoChildren(x, do)
+//        }
+//        return do(n)
+//    }
+//
+// Visit and Any are presented above as examples of how to use
+// DoChildren effectively, but of course, usage that fits within the
+// simplifications captured by Visit or Any will be best served
+// by directly calling the ones provided by this package.
 public static bool DoChildren(Node n, Func<Node, bool> @do) {
     if (n == null) {
         return false;
     }
     return n.doChildren(do);
-
 }
 
 // Visit visits each non-nil node x in the IR tree rooted at n
@@ -116,7 +112,6 @@ public static void Visit(Node n, Action<Node> visit) {
         return DoChildren(x, do);
     };
     do(n);
-
 }
 
 // VisitList calls Visit(x, visit) for each node x in the list.
@@ -137,11 +132,8 @@ public static bool Any(Node n, Func<Node, bool> cond) {
         return false;
     }
     Func<Node, bool> @do = default;
-    do = x => {
-        return cond(x) || DoChildren(x, do);
-    };
+    do = x => cond(x) || DoChildren(x, do);
     return do(n);
-
 }
 
 // AnyList calls Any(x, cond) for each node x in the list, in order.
@@ -154,7 +146,6 @@ public static bool AnyList(Nodes list, Func<Node, bool> cond) {
             return true;
         }
     }    return false;
-
 }
 
 // EditChildren edits the child nodes of n, replacing each child x with edit(x).
@@ -195,7 +186,6 @@ public static Node EditChildren(Node n, Func<Node, Node> edit) {
         return ;
     }
     n.editChildren(edit);
-
 }
 
 } // end ir_package

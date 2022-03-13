@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:46:36 UTC
+//     Generated on 2022 March 13 05:57:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
 {
     public static partial class asm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Parser
         {
             // Constructors
@@ -106,7 +106,7 @@ namespace @internal
             public static implicit operator Parser(NilType nil) => default(Parser);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Parser Parser_cast(dynamic value)
         {
             return new Parser(value.lex, value.lineNum, value.errorLine, value.errorCount, value.sawCode, value.pc, value.input, value.inputPos, value.pendingLabels, value.labels, value.toPatch, value.addr, ref value.arch, ref value.ctxt, ref value.firstProg, ref value.lastProg, value.dataAddr, value.isJump, value.compilingRuntime, value.errorWriter);

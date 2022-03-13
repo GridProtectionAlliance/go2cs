@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:03 UTC
+//     Generated on 2022 March 13 06:46:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace net
 {
     public static partial class lif_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Inet6Addr
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace net
             public static implicit operator Inet6Addr(NilType nil) => default(Inet6Addr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Inet6Addr Inet6Addr_cast(dynamic value)
         {
             return new Inet6Addr(value.IP, value.PrefixLen, value.ZoneID);

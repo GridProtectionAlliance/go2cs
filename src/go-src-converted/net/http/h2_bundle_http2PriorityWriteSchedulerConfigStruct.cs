@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:02 UTC
+//     Generated on 2022 March 13 05:37:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2PriorityWriteSchedulerConfig
         {
             // Constructors
@@ -86,7 +86,7 @@ namespace net
             public static implicit operator http2PriorityWriteSchedulerConfig(NilType nil) => default(http2PriorityWriteSchedulerConfig);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2PriorityWriteSchedulerConfig http2PriorityWriteSchedulerConfig_cast(dynamic value)
         {
             return new http2PriorityWriteSchedulerConfig(value.MaxClosedNodesInTree, value.MaxIdleNodesInTree, value.ThrottleOutOfOrderWrites);

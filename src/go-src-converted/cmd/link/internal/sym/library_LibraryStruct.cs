@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:34 UTC
+//     Generated on 2022 March 13 06:33:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class sym_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Library
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace @internal
             public static implicit operator Library(NilType nil) => default(Library);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Library Library_cast(dynamic value)
         {
             return new Library(value.Objref, value.Srcref, value.File, value.Pkg, value.Shlib, value.Fingerprint, value.Autolib, value.Imports, value.Main, value.Units, value.Textp, value.DupTextSyms);

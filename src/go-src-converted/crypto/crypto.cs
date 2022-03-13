@@ -3,21 +3,23 @@
 // license that can be found in the LICENSE file.
 
 // Package crypto collects common cryptographic constants.
-// package crypto -- go2cs converted at 2022 March 06 22:17:06 UTC
+
+// package crypto -- go2cs converted at 2022 March 13 05:30:27 UTC
 // import "crypto" ==> using crypto = go.crypto_package
 // Original source: C:\Program Files\Go\src\crypto\crypto.go
-using hash = go.hash_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using System;
-
-
 namespace go;
 
+using hash = hash_package;
+using io = io_package;
+using strconv = strconv_package;
+
+
+// Hash identifies a cryptographic hash function that is implemented in another
+// package.
+
+using System;
 public static partial class crypto_package {
 
-    // Hash identifies a cryptographic hash function that is implemented in another
-    // package.
 public partial struct Hash { // : nuint
 }
 
@@ -68,8 +70,7 @@ public static @string String(this Hash h) {
         return "BLAKE2b-512";
     else 
         return "unknown hash value " + strconv.Itoa(int(h));
-    
-}
+    }
 
 public static readonly Hash MD4 = 1 + iota; // import golang.org/x/crypto/md4
 public static readonly var MD5 = 0; // import crypto/md5
@@ -92,7 +93,6 @@ public static readonly var BLAKE2b_384 = 16; // import golang.org/x/crypto/blake
 public static readonly var BLAKE2b_512 = 17; // import golang.org/x/crypto/blake2b
 private static readonly var maxHash = 18;
 
-
 private static byte digestSizes = new slice<byte>(InitKeyedValues<byte>((MD4, 16), (MD5, 16), (SHA1, 20), (SHA224, 28), (SHA256, 32), (SHA384, 48), (SHA512, 64), (SHA512_224, 28), (SHA512_256, 32), (SHA3_224, 28), (SHA3_256, 32), (SHA3_384, 48), (SHA3_512, 64), (MD5SHA1, 36), (RIPEMD160, 20), (BLAKE2s_256, 32), (BLAKE2b_256, 32), (BLAKE2b_384, 48), (BLAKE2b_512, 64)));
 
 // Size returns the length, in bytes, of a digest resulting from the given hash
@@ -103,7 +103,6 @@ public static nint Size(this Hash h) => func((_, panic, _) => {
         return int(digestSizes[h]);
     }
     panic("crypto: Size of unknown hash function");
-
 });
 
 private static var hashes = make_slice<Func<hash.Hash>>(maxHash);
@@ -118,7 +117,6 @@ public static hash.Hash New(this Hash h) => func((_, panic, _) => {
         }
     }
     panic("crypto: requested hash function #" + strconv.Itoa(int(h)) + " is unavailable");
-
 });
 
 // Available reports whether the given hash function is linked into the binary.
@@ -134,7 +132,6 @@ public static hash.Hash RegisterHash(Hash h, Func<hash.Hash> f) => func((_, pani
         panic("crypto: RegisterHash of unknown hash function");
     }
     hashes[h] = f;
-
 });
 
 // PublicKey represents a public key using an unspecified algorithm.

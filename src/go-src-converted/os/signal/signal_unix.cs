@@ -5,17 +5,19 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package signal -- go2cs converted at 2022 March 06 22:14:26 UTC
+// package signal -- go2cs converted at 2022 March 13 05:28:33 UTC
 // import "os/signal" ==> using signal = go.os.signal_package
 // Original source: C:\Program Files\Go\src\os\signal\signal_unix.go
-using os = go.os_package;
-using syscall = go.syscall_package;
-
 namespace go.os;
+
+using os = os_package;
+using syscall = syscall_package;
+
+
+// Defined by the runtime package.
 
 public static partial class signal_package {
 
-    // Defined by the runtime package.
 private static void signal_disable(uint _p0);
 private static void signal_enable(uint _p0);
 private static void signal_ignore(uint _p0);
@@ -50,7 +52,6 @@ private static nint signum(os.Signal sig) {
             break;
         }
     }
-
 }
 
 private static void enableSignal(nint sig) {

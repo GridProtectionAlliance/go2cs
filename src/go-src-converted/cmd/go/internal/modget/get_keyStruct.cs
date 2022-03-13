@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:17 UTC
+//     Generated on 2022 March 13 06:29:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace @internal
 {
     public static partial class modget_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct key
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace @internal
             public static implicit operator key(NilType nil) => default(key);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static key key_cast(dynamic value)
         {
             return new key(value.pattern, value.m);

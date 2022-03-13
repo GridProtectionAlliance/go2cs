@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:54 UTC
+//     Generated on 2022 March 13 05:40:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace go
 {
     public static partial class token_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct FileSet
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace go
             public static implicit operator FileSet(NilType nil) => default(FileSet);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static FileSet FileSet_cast(dynamic value)
         {
             return new FileSet(value.mutex, value.@base, value.files, ref value.last);

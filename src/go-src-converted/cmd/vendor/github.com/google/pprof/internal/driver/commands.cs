@@ -12,29 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:21 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:25 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\commands.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using report = go.github.com.google.pprof.@internal.report_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using exec = os.exec_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using time = time_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using report = github.com.google.pprof.@internal.report_package;
+
+
+// commands describes the commands accepted by pprof.
+
+using System;
 public static partial class driver_package {
 
-    // commands describes the commands accepted by pprof.
 private partial struct commands { // : map<@string, ptr<command>>
 }
 
@@ -64,7 +65,6 @@ private static @string help(this ptr<command> _addr_c, @string name) {
         }
     }
     return message + "\n";
-
 }
 
 // AddCommand adds an additional command to the set of commands
@@ -107,9 +107,7 @@ private static @string usage(bool commandLine) {
     if (commandLine) {
         prefix = "-";
     }
-    Func<@string, @string, @string> fmtHelp = (c, d) => {
-        return fmt.Sprintf("    %-16s %s", c, strings.SplitN(d, "\n", 2)[0]);
-    };
+    Func<@string, @string, @string> fmtHelp = (c, d) => fmt.Sprintf("    %-16s %s", c, strings.SplitN(d, "\n", 2)[0]);
 
     slice<@string> commands = default;
     foreach (var (name, cmd) in pprofCommands) {
@@ -141,11 +139,9 @@ private static @string usage(bool commandLine) {
         foreach (var (_, choice) in f.choices) {
             s = append(s, "  " + fmtHelp(prefix + choice, configHelp[choice]));
         }        radioStrings = append(radioStrings, strings.Join(s, "\n"));
-
     }    sort.Strings(variables);
     sort.Strings(radioStrings);
     return help + strings.Join(variables, "\n") + "\n\n" + "  Option groups (only set one per group):\n" + strings.Join(radioStrings, "\n");
-
 }
 
 private static @string reportHelp(@string c, bool cum, bool redirect) {
@@ -159,7 +155,6 @@ private static @string reportHelp(@string c, bool cum, bool redirect) {
         h = append(h, "Optionally save the report on the file f");
     }
     return strings.Join(h, "\n");
-
 }
 
 private static @string listHelp(@string c, bool redirect) {
@@ -169,7 +164,6 @@ private static @string listHelp(@string c, bool redirect) {
         h = append(h, "Optionally save the report on the file f");
     }
     return strings.Join(h, "\n");
-
 }
 
 // browsers returns a list of commands to attempt for web visualization.
@@ -182,7 +176,6 @@ private static slice<@string> browsers() {
             cmds = append(cmds, userBrowser);
         }
     }
-
     switch (runtime.GOOS) {
         case "darwin": 
             cmds = append(cmds, "/usr/bin/open");
@@ -199,12 +192,10 @@ private static slice<@string> browsers() {
             if (os.Getenv("DISPLAY") != "") { 
                 // xdg-open is only for use in a desktop environment.
                 cmds = append(cmds, "xdg-open");
-
             }
             break;
     }
     return cmds;
-
 }
 
 private static @string kcachegrind = new slice<@string>(new @string[] { "kcachegrind" });
@@ -224,9 +215,7 @@ private static PostProcessor awayFromTTY(@string format) {
         }
         var (_, err) = io.Copy(output, input);
         return err;
-
     };
-
 }
 
 private static PostProcessor invokeDot(@string format) {
@@ -240,11 +229,8 @@ private static PostProcessor invokeDot(@string format) {
             }
 
         }
-
         return null;
-
     };
-
 }
 
 // massageDotSVG invokes the dot tool to generate an SVG image and alters
@@ -261,12 +247,9 @@ private static PostProcessor massageDotSVG() {
             }
 
         }
-
         var (_, err) = output.Write((slice<byte>)massageSVG(baseSVG.String()));
         return err;
-
     };
-
 }
 
 private static PostProcessor invokeVisualizer(@string suffix, slice<@string> visualizers) => func((defer, _, _) => {
@@ -284,7 +267,6 @@ private static PostProcessor invokeVisualizer(@string suffix, slice<@string> vis
             }
 
         }
-
         tempFile.Close(); 
         // Try visualizers until one is successful
         foreach (var (_, v) in visualizers) { 
@@ -293,7 +275,6 @@ private static PostProcessor invokeVisualizer(@string suffix, slice<@string> vis
             if (len(args) == 0) {
                 continue;
             }
-
             var viewer = exec.Command(args[0], append(args[(int)1..], tempFile.Name()));
             viewer.Stderr = os.Stderr;
             err = viewer.Start();
@@ -311,15 +292,10 @@ private static PostProcessor invokeVisualizer(@string suffix, slice<@string> vis
                 if (!interactiveMode) {
                     return viewer.Wait();
                 }
-
                 return null;
-
             }
-
         }        return err;
-
     };
-
 });
 
 // stringToBool is a custom parser for bools. We avoid using strconv.ParseBool
@@ -357,7 +333,6 @@ private static (bool, error) stringToBool(@string s) {
             return (false, error.As(fmt.Errorf("illegal value \"%s\" for bool variable", s))!);
             break;
     }
-
 }
 
 } // end driver_package

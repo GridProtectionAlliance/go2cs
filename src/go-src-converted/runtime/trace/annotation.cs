@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2022 March 06 22:24:12 UTC
+// package trace -- go2cs converted at 2022 March 13 05:38:37 UTC
 // import "runtime/trace" ==> using trace = go.runtime.trace_package
 // Original source: C:\Program Files\Go\src\runtime\trace\annotation.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using atomic = go.sync.atomic_package;
-using _@unsafe_ = go.@unsafe_package;
-using System;
-
-
 namespace go.runtime;
+
+using context = context_package;
+using fmt = fmt_package;
+using atomic = sync.atomic_package;
+using _@unsafe_ = @unsafe_package;
+using System;
 
 public static partial class trace_package {
 
@@ -79,9 +78,7 @@ private static ptr<Task> fromContext(context.Context ctx) {
             return _addr_s!;
         }
     }
-
     return _addr__addr_bgTask!;
-
 }
 
 // Task is a data type for tracing a user-defined, logical operation.
@@ -101,7 +98,6 @@ private static ulong lastTaskID = 0; // task id issued last time
 private static ulong newID() { 
     // TODO(hyangah): use per-P cache
     return atomic.AddUint64(_addr_lastTaskID, 1);
-
 }
 
 private static Task bgTask = new Task(id:uint64(0));
@@ -123,13 +119,11 @@ public static void Logf(context.Context ctx, @string category, @string format, p
         // add one more frame in the stack trace.
         var id = fromContext(ctx).id;
         userLog(id, category, fmt.Sprintf(format, args));
-
     }
 }
 
 private static readonly var regionStartCode = uint64(0);
 private static readonly var regionEndCode = uint64(1);
-
 
 // WithRegion starts a region associated with its calling goroutine, runs fn,
 // and then ends the region. If the context carries a task, the region is
@@ -158,7 +152,6 @@ public static void WithRegion(context.Context ctx, @string regionType, Action fn
     userRegion(id, regionStartCode, regionType);
     defer(userRegion(id, regionEndCode, regionType));
     fn();
-
 });
 
 // StartRegion starts a region and returns a function for marking the
@@ -177,7 +170,6 @@ public static ptr<Region> StartRegion(context.Context ctx, @string regionType) {
     var id = fromContext(ctx).id;
     userRegion(id, regionStartCode, regionType);
     return addr(new Region(id,regionType));
-
 }
 
 // Region is a region of code whose execution time interval is traced.
@@ -196,7 +188,6 @@ private static void End(this ptr<Region> _addr_r) {
         return ;
     }
     userRegion(r.id, regionEndCode, r.regionType);
-
 }
 
 // IsEnabled reports whether tracing is enabled.

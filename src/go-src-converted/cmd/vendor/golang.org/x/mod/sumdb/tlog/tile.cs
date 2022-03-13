@@ -2,43 +2,45 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tlog -- go2cs converted at 2022 March 06 23:26:17 UTC
+// package tlog -- go2cs converted at 2022 March 13 06:41:10 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/tlog" ==> using tlog = go.cmd.vendor.golang.org.x.mod.sumdb.tlog_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\tlog\tile.go
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.golang.org.x.mod.sumdb;
+
+using fmt = fmt_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// A Tile is a description of a transparency log tile.
+// A tile of height H at level L offset N lists W consecutive hashes
+// at level H*L of the tree starting at offset N*(2**H).
+// A complete tile lists 2**H hashes; a partial tile lists fewer.
+// Note that a tile represents the entire subtree of height H
+// with those hashes as the leaves. The levels above H*L
+// can be reconstructed by hashing the leaves.
+//
+// Each Tile can be encoded as a “tile coordinate path”
+// of the form tile/H/L/NNN[.p/W].
+// The .p/W suffix is present only for partial tiles, meaning W < 2**H.
+// The NNN element is an encoding of N into 3-digit path elements.
+// All but the last path element begins with an "x".
+// For example,
+// Tile{H: 3, L: 4, N: 1234067, W: 1}'s path
+// is tile/3/4/x001/x234/067.p/1, and
+// Tile{H: 3, L: 4, N: 1234067, W: 8}'s path
+// is tile/3/4/x001/x234/067.
+// See Tile's Path method and the ParseTilePath function.
+//
+// The special level L=-1 holds raw record data instead of hashes.
+// In this case, the level encodes into a tile path as the path element
+// "data" instead of "-1".
+//
+// See also https://golang.org/design/25530-sumdb#checksum-database
+// and https://research.swtch.com/tlog#tiling_a_log.
 
 public static partial class tlog_package {
 
-    // A Tile is a description of a transparency log tile.
-    // A tile of height H at level L offset N lists W consecutive hashes
-    // at level H*L of the tree starting at offset N*(2**H).
-    // A complete tile lists 2**H hashes; a partial tile lists fewer.
-    // Note that a tile represents the entire subtree of height H
-    // with those hashes as the leaves. The levels above H*L
-    // can be reconstructed by hashing the leaves.
-    //
-    // Each Tile can be encoded as a “tile coordinate path”
-    // of the form tile/H/L/NNN[.p/W].
-    // The .p/W suffix is present only for partial tiles, meaning W < 2**H.
-    // The NNN element is an encoding of N into 3-digit path elements.
-    // All but the last path element begins with an "x".
-    // For example,
-    // Tile{H: 3, L: 4, N: 1234067, W: 1}'s path
-    // is tile/3/4/x001/x234/067.p/1, and
-    // Tile{H: 3, L: 4, N: 1234067, W: 8}'s path
-    // is tile/3/4/x001/x234/067.
-    // See Tile's Path method and the ParseTilePath function.
-    //
-    // The special level L=-1 holds raw record data instead of hashes.
-    // In this case, the level encodes into a tile path as the path element
-    // "data" instead of "-1".
-    //
-    // See also https://golang.org/design/25530-sumdb#checksum-database
-    // and https://research.swtch.com/tlog#tiling_a_log.
 public partial struct Tile {
     public nint H; // height of tile (1 ≤ H ≤ 30)
     public nint L; // level in tiling (-1 ≤ L ≤ 63)
@@ -56,7 +58,6 @@ public static Tile TileForIndex(nint h, long index) => func((_, panic, _) => {
     }
     var (t, _, _) = tileForIndex(h, index);
     return t;
-
 });
 
 // tileForIndex returns the tile of height h ≥ 1
@@ -75,7 +76,6 @@ private static (Tile, nint, nint) tileForIndex(nint h, long index) {
     n -= t.N << (int)(uint(t.H)) >> (int)(uint(level)); // now n within tile at level
     t.W = int((n + 1) << (int)(uint(level)));
     return (t, int(n << (int)(uint(level))) * HashSize, int((n + 1) << (int)(uint(level))) * HashSize);
-
 }
 
 // HashFromTile returns the hash at the given storage index,
@@ -96,7 +96,6 @@ public static (Hash, error) HashFromTile(Tile t, slice<byte> data, long index) {
         return (new Hash(), error.As(fmt.Errorf("index %v is in %v not %v", index, t1.Path(), t.Path()))!);
     }
     return (tileHash(data[(int)start..(int)end]), error.As(null!)!);
-
 }
 
 // tileHash computes the subtree hash corresponding to the (2^K)-1 hashes in data.
@@ -111,7 +110,6 @@ private static Hash tileHash(slice<byte> data) => func((_, panic, _) => {
     }
     var n = len(data) / 2;
     return NodeHash(tileHash(data[..(int)n]), tileHash(data[(int)n..]));
-
 });
 
 // NewTiles returns the coordinates of the tiles of height h ≥ 1
@@ -148,10 +146,8 @@ public static slice<Tile> NewTiles(nint h, long oldTreeSize, long newTreeSize) =
         for (var w = minW; w <= maxW; w++) {
             tiles = append(tiles, new Tile(H:h,L:int(level),N:n,W:w));
         }
-
     }
     return tiles;
-
 });
 
 // ReadTileData reads the hashes for tile t from r
@@ -194,7 +190,6 @@ public static (slice<byte>, error) ReadTileData(Tile t, HashReader r) {
         i = i__prev1;
     }
     return (tile, error.As(null!)!);
-
 }
 
 // To limit the size of any particular directory listing,
@@ -229,7 +224,6 @@ public static @string Path(this Tile t) {
         L = fmt.Sprintf("%d", t.L);
     }
     return fmt.Sprintf("tile/%d/%s/%s%s", t.H, L, nStr, pStr);
-
 }
 
 // ParseTilePath parses a tile coordinate path.
@@ -265,7 +259,6 @@ public static (Tile, error) ParseTilePath(@string path) {
             f = f[..(int)len(f) - 1];
         }
     }
-
     f = f[(int)3..];
     var n = int64(0);
     foreach (var (_, s) in f) {
@@ -274,7 +267,6 @@ public static (Tile, error) ParseTilePath(@string path) {
             return (new Tile(), error.As(addr(new badPathError(path))!)!);
         }
         n = n * pathBase + int64(nn);
-
     }    if (isData) {
         l = -1;
     }
@@ -283,7 +275,6 @@ public static (Tile, error) ParseTilePath(@string path) {
         return (new Tile(), error.As(addr(new badPathError(path))!)!);
     }
     return (t, error.As(null!)!);
-
 }
 
 private partial struct badPathError {
@@ -350,9 +341,7 @@ private static Tile tileParent(Tile t, nint k, long n) {
             t.W = int(max - t.N << (int)(uint(t.H)));
         }
     }
-
     return t;
-
 }
 
 private static (slice<Hash>, error) ReadHashes(this ptr<tileHashReader> _addr_r, slice<long> indexes) {
@@ -391,11 +380,9 @@ private static (slice<Hash>, error) ReadHashes(this ptr<tileHashReader> _addr_r,
                 j = j__prev1;
 
             }
-
             stxTileOrder[i] = len(tiles);
             tileOrder[tile] = len(tiles);
             tiles = append(tiles, tile);
-
         }
         i = i__prev1;
         x = x__prev1;
@@ -417,7 +404,7 @@ private static (slice<Hash>, error) ReadHashes(this ptr<tileHashReader> _addr_r,
             // Walk up parent tiles until we find one we've requested.
             // That one will be authenticated.
             nint k = 0;
-            while (k >= 0) {
+            while () {
                 var p = tileParent(tile, k, r.tree.N);
                 {
                     var j__prev1 = j;
@@ -429,15 +416,12 @@ private static (slice<Hash>, error) ReadHashes(this ptr<tileHashReader> _addr_r,
                             indexTileOrder[i] = j;
                 k++;
                         }
-
                         break;
-
                     }
 
                     j = j__prev1;
 
                 }
-
             } 
 
             // Walk back down recording child tiles after parents.
@@ -460,17 +444,12 @@ private static (slice<Hash>, error) ReadHashes(this ptr<tileHashReader> _addr_r,
                     return (null, error.As(fmt.Errorf("bad math in tileHashReader: %d %d %v", r.tree.N, x, p))!);
                 k--;
                 }
-
                 tileOrder[p] = len(tiles);
                 if (k == 0) {
                     indexTileOrder[i] = len(tiles);
                 }
-
                 tiles = append(tiles, p);
-
             }
-
-
         }
         i = i__prev1;
         x = x__prev1;
@@ -519,7 +498,6 @@ private static (slice<Hash>, error) ReadHashes(this ptr<tileHashReader> _addr_r,
         // The tiles do not support the tree hash.
         // We know at least one is wrong, but not which one.
         return (null, error.As(fmt.Errorf("downloaded inconsistent tile"))!);
-
     }
     {
         var i__prev1 = i;
@@ -568,7 +546,6 @@ private static (slice<Hash>, error) ReadHashes(this ptr<tileHashReader> _addr_r,
     }
 
     return (hashes, error.As(null!)!);
-
 }
 
 } // end tlog_package

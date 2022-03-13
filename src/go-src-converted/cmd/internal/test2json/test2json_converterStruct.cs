@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:17:54 UTC
+//     Generated on 2022 March 13 06:31:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class test2json_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Converter
         {
             // Constructors
@@ -78,7 +78,7 @@ namespace @internal
             public static implicit operator Converter(NilType nil) => default(Converter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Converter Converter_cast(dynamic value)
         {
             return new Converter(value.w, value.pkg, value.mode, value.start, value.testName, value.report, value.result, value.input, value.output);

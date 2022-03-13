@@ -31,34 +31,35 @@
 //go:build !plan9
 // +build !plan9
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:48 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:00 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sigqueue.go
-using atomic = go.runtime.@internal.atomic_package;
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using _@unsafe_ = @unsafe_package; // for go:linkname
+
+
+// sig handles communication between the signal handler and os/signal.
+// Other than the inuse and recv fields, the fields are accessed atomically.
+//
+// The wanted and ignored fields are only written by one goroutine at
+// a time; access is controlled by the handlers Mutex in os/signal.
+// The fields are only read by that one goroutine and by the signal handler.
+// We access them atomically to minimize the race between setting them
+// in the goroutine calling os/signal and the signal handler,
+// which may be running in a different thread. That race is unavoidable,
+// as there is no connection between handling a signal and receiving one,
+// but atomic instructions should minimize it.
 
 public static partial class runtime_package {
 
-    // sig handles communication between the signal handler and os/signal.
-    // Other than the inuse and recv fields, the fields are accessed atomically.
-    //
-    // The wanted and ignored fields are only written by one goroutine at
-    // a time; access is controlled by the handlers Mutex in os/signal.
-    // The fields are only read by that one goroutine and by the signal handler.
-    // We access them atomically to minimize the race between setting them
-    // in the goroutine calling os/signal and the signal handler,
-    // which may be running in a different thread. That race is unavoidable,
-    // as there is no connection between handling a signal and receiving one,
-    // but atomic instructions should minimize it.
 private static var sig = default;
 
 private static readonly var sigIdle = iota;
 private static readonly var sigReceiving = 0;
 private static readonly var sigSending = 1;
 private static readonly var sigFixup = 2;
-
 
 // sigsend delivers a signal from sighandler to the internal signal delivery queue.
 // It reports whether the signal was sent. If not, the caller typically crashes the program.
@@ -102,7 +103,6 @@ Send:
                 _breakSend = true;
                 break;
             }
-
         else if (atomic.Load(_addr_sig.state) == sigSending) 
             // notification already pending
             _breakSend = true;
@@ -114,22 +114,18 @@ Send:
                     _breakSend = true;
                     break;
                 }
-
                 notewakeup(_addr_sig.note);
                 _breakSend = true;
                 break;
             }
-
         else if (atomic.Load(_addr_sig.state) == sigFixup) 
             // nothing to do - we need to wait for sigIdle.
             mDoFixupAndOSYield();
         else 
             throw("sigsend: inconsistent state");
-        
-    }
+            }
     atomic.Xadd(_addr_sig.delivering, -1);
     return true;
-
 }
 
 // sigRecvPrepareForFixup is used to temporarily wake up the
@@ -180,7 +176,6 @@ Receive:
                         _breakReceive = true;
                         break;
                     }
-
                     notetsleepg(_addr_sig.note, -1);
                     noteclear(_addr_sig.note);
                     if (!atomic.Cas(_addr_sig.state, sigFixup, sigIdle)) {
@@ -195,17 +190,14 @@ Receive:
                     // has been called by another
                     // thread.
                 }
-
             else if (atomic.Load(_addr_sig.state) == sigSending) 
                 if (atomic.Cas(_addr_sig.state, sigSending, sigIdle)) {
                     _breakReceive = true;
                     break;
                 }
-
             else 
                 throw("signal_recv: inconsistent state");
-            
-        } 
+                    } 
 
         // Incorporate updates from sender into local copy.
         {
@@ -219,7 +211,6 @@ Receive:
             i = i__prev2;
         }
     }
-
 }
 
 // signalWaitUntilIdle waits until the signal delivery mechanism is idle.
@@ -246,7 +237,6 @@ private static void signalWaitUntilIdle() {
     while (atomic.Load(_addr_sig.state) != sigReceiving) {
         Gosched();
     }
-
 }
 
 // Must only be called from a single goroutine at a time.
@@ -275,7 +265,6 @@ private static void signal_enable(uint s) {
     atomic.Store(_addr_sig.ignored[s / 32], i);
 
     sigenable(s);
-
 }
 
 // Must only be called from a single goroutine at a time.
@@ -289,7 +278,6 @@ private static void signal_disable(uint s) {
     var w = sig.wanted[s / 32];
     w &= 1 << (int)((s & 31));
     atomic.Store(_addr_sig.wanted[s / 32], w);
-
 }
 
 // Must only be called from a single goroutine at a time.
@@ -307,7 +295,6 @@ private static void signal_ignore(uint s) {
     var i = sig.ignored[s / 32];
     i |= 1 << (int)((s & 31));
     atomic.Store(_addr_sig.ignored[s / 32], i);
-
 }
 
 // sigInitIgnored marks the signal as already ignored. This is called at

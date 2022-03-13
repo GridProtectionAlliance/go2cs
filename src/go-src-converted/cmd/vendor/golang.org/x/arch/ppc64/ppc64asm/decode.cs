@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2022 March 06 23:25:04 UTC
+// package ppc64asm -- go2cs converted at 2022 March 13 06:38:17 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\decode.go
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.ppc64;
+
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using log = log_package;
 
 public static partial class ppc64asm_package {
 
@@ -97,8 +97,7 @@ private static Arg Parse(this argField a, array<uint> i) {
         return Offset(a.BitFields.ParseSigned(i) << (int)(a.Shift));
     else 
         return null;
-    
-}
+    }
 
 public partial struct ArgType { // : sbyte
 }
@@ -154,8 +153,7 @@ public static @string String(this ArgType t) {
         return "Offset";
     else 
         return fmt.Sprintf("ArgType(%d)", int(t));
-    
-}
+    }
 
 public static @string GoString(this ArgType t) {
     var s = t.String();
@@ -163,7 +161,6 @@ public static @string GoString(this ArgType t) {
         return "Type" + s;
     }
     return s;
-
 }
 
  
@@ -198,7 +195,6 @@ public static (Inst, error) Decode(slice<byte> src, binary.ByteOrder ord) {
         ui_extn[1] = ord.Uint32(src[(int)4..(int)inst.Len]);
         ui |= uint64(ui_extn[1]);
         inst.SuffixEnc = ui_extn[1];
-
     }
     {
         var i__prev1 = i;
@@ -215,7 +211,6 @@ public static (Inst, error) Decode(slice<byte> src, binary.ByteOrder ord) {
                 } 
                 // to match GNU objdump (libopcodes), we ignore don't care bits
             }
-
             {
                 var i__prev2 = i;
 
@@ -236,9 +231,7 @@ public static (Inst, error) Decode(slice<byte> src, binary.ByteOrder ord) {
                 log.Printf("%#x: search entry %d", ui, i);
                 continue;
             }
-
             break;
-
         }
         i = i__prev1;
     }
@@ -247,7 +240,6 @@ public static (Inst, error) Decode(slice<byte> src, binary.ByteOrder ord) {
         return (inst, error.As(errUnknown)!);
     }
     return (inst, error.As(null!)!);
-
 }
 
 } // end ppc64asm_package

@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:07 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:31 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\layout.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // layout orders basic blocks in f with the goal of minimizing control flow instructions.
-    // After this phase returns, the order of f.Blocks matters and is the order
-    // in which those blocks will appear in the assembly output.
+// layout orders basic blocks in f with the goal of minimizing control flow instructions.
+// After this phase returns, the order of f.Blocks matters and is the order
+// in which those blocks will appear in the assembly output.
 private static void layout(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -27,7 +25,6 @@ private static slice<ptr<Block>> layoutRegallocOrder(ptr<Func> _addr_f) {
  
     // remnant of an experiment; perhaps there will be another.
     return layoutOrder(_addr_f);
-
 }
 
 private static slice<ptr<Block>> layoutOrder(ptr<Func> _addr_f) => func((defer, _, _) => {
@@ -78,14 +75,11 @@ NextPred:
                         _continueNextPred = true;
                         break;
                     }
-
                 } 
                 // All Succs are in exit; add p.
                 exit.add(p.ID);
                 changed = true;
-
             }
-
         }        if (!changed) {
             break;
         }
@@ -100,20 +94,16 @@ NextPred:
             if (exit.contains(b.ID)) { 
                 // exit blocks are always scheduled last
                 continue;
-
             }
-
             indegree[b.ID] = len(b.Preds);
             if (len(b.Preds) == 0) { 
                 // Push an element to the tail of the queue.
                 zerodegree = append(zerodegree, b.ID);
-
             }
             else
  {
                 posdegree.add(b.ID);
             }
-
         }
         b = b__prev1;
     }
@@ -139,7 +129,6 @@ blockloop:
  {
                 succs = append(succs, c.ID);
             }
-
         } 
 
         // Pick the next block to schedule
@@ -169,7 +158,6 @@ blockloop:
                 _continueblockloop = true;
                 break;
             }
-
         } 
 
         // Still nothing, pick the unscheduled successor block encountered most recently.
@@ -182,7 +170,6 @@ blockloop:
                 _continueblockloop = true;
                 break;
             }
-
         } 
 
         // Still nothing, pick any non-exit block.
@@ -193,7 +180,6 @@ blockloop:
                 _continueblockloop = true;
                 break;
             }
-
         } 
         // Pick any exit block.
         // TODO: Order these to minimize jump distances?
@@ -204,9 +190,7 @@ blockloop:
                 _continueblockloop = true;
                 break;
             }
-
         }
-
     }
     f.laidout = true;
     return order; 

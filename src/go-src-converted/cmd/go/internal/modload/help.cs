@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:04 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:26 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\help.go
-using @base = go.cmd.go.@internal.@base_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
 
 public static partial class modload_package {
 

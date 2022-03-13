@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:47:48 UTC
+//     Generated on 2022 March 13 05:59:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace @internal
 {
     public static partial class logopt_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct LoggedOpt
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace @internal
             public static implicit operator LoggedOpt(NilType nil) => default(LoggedOpt);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static LoggedOpt LoggedOpt_cast(dynamic value)
         {
             return new LoggedOpt(value.pos, value.compilerPass, value.functionName, value.what, value.target);

@@ -5,17 +5,19 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:32 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:05 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sockaddr_posix.go
-using syscall = go.syscall_package;
-
 namespace go;
+
+using syscall = syscall_package;
+
+
+// A sockaddr represents a TCP, UDP, IP or Unix network endpoint
+// address that can be converted into a syscall.Sockaddr.
 
 public static partial class net_package {
 
-    // A sockaddr represents a TCP, UDP, IP or Unix network endpoint
-    // address that can be converted into a syscall.Sockaddr.
 private partial interface sockaddr {
     sockaddr family(); // isWildcard reports whether the address is a wildcard
 // address.

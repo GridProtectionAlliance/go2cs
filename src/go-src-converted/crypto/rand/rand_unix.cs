@@ -8,23 +8,22 @@
 // Unix cryptographically secure pseudorandom number
 // generator.
 
-// package rand -- go2cs converted at 2022 March 06 22:17:21 UTC
+// package rand -- go2cs converted at 2022 March 13 05:30:41 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Program Files\Go\src\crypto\rand\rand_unix.go
-using bufio = go.bufio_package;
-using aes = go.crypto.aes_package;
-using cipher = go.crypto.cipher_package;
-using binary = go.encoding.binary_package;
-using io = go.io_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.crypto;
+
+using bufio = bufio_package;
+using aes = crypto.aes_package;
+using cipher = crypto.cipher_package;
+using binary = encoding.binary_package;
+using io = io_package;
+using os = os_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+using System;
 
 public static partial class rand_package {
 
@@ -74,7 +73,6 @@ private static (nint, error) Read(this ptr<devReader> _addr_r, slice<byte> b) =>
         // being blocked on entropy not being available.
         var t = time.AfterFunc(60 * time.Second, warnBlocked);
         defer(t.Stop());
-
     }
     if (altGetRandom != null && r.name == urandomDevice && altGetRandom(b)) {
         return (len(b), error.As(null!)!);
@@ -95,7 +93,6 @@ private static (nint, error) Read(this ptr<devReader> _addr_r, slice<byte> b) =>
         }
     }
     return r.f.Read(b);
-
 });
 
 private static Func<error, bool> isEAGAIN = default; // set by eagain.go on unix systems
@@ -115,7 +112,6 @@ private static (nint, error) Read(this hideAgainReader hr, slice<byte> p) {
         err = null;
     }
     return ;
-
 }
 
 // Alternate pseudo-random implementation for use on
@@ -135,7 +131,6 @@ private static io.Reader newReader(io.Reader entropy) {
         entropy = addr(new devReader(name:"/dev/random"));
     }
     return addr(new reader(entropy:entropy));
-
 }
 
 private partial struct reader {
@@ -210,11 +205,9 @@ private static (nint, error) Read(this ptr<reader> _addr_r, slice<byte> b) => fu
 
         var m = copy(b, r.dst[(int)0..]);
         b = b[(int)m..];
-
     }
 
     return (n, error.As(null!)!);
-
 });
 
 } // end rand_package

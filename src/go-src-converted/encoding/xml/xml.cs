@@ -4,9 +4,11 @@
 
 // Package xml implements a simple XML 1.0 parser that
 // understands XML name spaces.
-// package xml -- go2cs converted at 2022 March 06 22:25:36 UTC
+
+// package xml -- go2cs converted at 2022 March 13 05:40:09 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Program Files\Go\src\encoding\xml\xml.go
+namespace go.encoding;
 // References:
 //    Annotated XML spec: https://www.xml.com/axml/testaxml.htm
 //    XML name spaces: https://www.w3.org/TR/REC-xml-names/
@@ -14,23 +16,23 @@
 // TODO(rsc):
 //    Test error handling.
 
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// A SyntaxError represents a syntax error in the XML input stream.
+
 using System;
-
-
-namespace go.encoding;
-
 public static partial class xml_package {
 
-    // A SyntaxError represents a syntax error in the XML input stream.
 public partial struct SyntaxError {
     public @string Msg;
     public nint Line;
@@ -156,7 +158,6 @@ public static Token CopyToken(Token t) {
             break;
     }
     return t;
-
 }
 
 // A TokenReader is anything that can decode a stream of XML tokens, including a
@@ -240,10 +241,8 @@ public static ptr<Decoder> NewTokenDecoder(TokenReader t) {
         d = d__prev1;
 
     }
-
     ptr<Decoder> d = addr(new Decoder(ns:make(map[string]string),t:t,nextByte:-1,line:1,Strict:true,));
     return _addr_d!;
-
 }
 
 // Token returns the next XML token in the input stream.
@@ -294,7 +293,6 @@ private static (Token, error) Token(this ptr<Decoder> _addr_d) {
             return (null, error.As(err)!);
         }
         err = error.As(null)!;
-
     }
     if (!d.Strict) {
         {
@@ -310,7 +308,6 @@ private static (Token, error) Token(this ptr<Decoder> _addr_d) {
             t1 = t1__prev2;
 
         }
-
     }
     switch (t.type()) {
         case StartElement t1:
@@ -325,9 +322,7 @@ private static (Token, error) Token(this ptr<Decoder> _addr_d) {
                     (v, ok) = d.ns[""];
                     d.pushNs("", v, ok);
                     d.ns[""] = a.Value;
-
                 }
-
             }
             d.translate(_addr_t1.Name, true);
             foreach (var (i) in t1.Attr) {
@@ -345,13 +340,11 @@ private static (Token, error) Token(this ptr<Decoder> _addr_d) {
             break;
     }
     return (t, error.As(err)!);
-
 }
 
 private static readonly @string xmlURL = "http://www.w3.org/XML/1998/namespace";
 private static readonly @string xmlnsPrefix = "xmlns";
 private static readonly @string xmlPrefix = "xml";
-
 
 // Apply name space translation to name n.
 // The default name space (for Space=="")
@@ -380,7 +373,6 @@ private static void translate(this ptr<Decoder> _addr_d, ptr<Name> _addr_n, bool
         }
 
     }
-
 }
 
 private static void switchToReader(this ptr<Decoder> _addr_d, io.Reader r) {
@@ -401,7 +393,6 @@ private static void switchToReader(this ptr<Decoder> _addr_d, io.Reader r) {
             d.r = bufio.NewReader(r);
         }
     }
-
 }
 
 // Parsing state - stack holds old name space translations
@@ -419,7 +410,6 @@ private static readonly var stkStart = iota;
 private static readonly var stkNs = 0;
 private static readonly var stkEOF = 1;
 
-
 private static ptr<stack> push(this ptr<Decoder> _addr_d, nint kind) {
     ref Decoder d = ref _addr_d.val;
 
@@ -435,7 +425,6 @@ private static ptr<stack> push(this ptr<Decoder> _addr_d, nint kind) {
     s.kind = kind;
     d.stk = s;
     return _addr_s!;
-
 }
 
 private static ptr<stack> pop(this ptr<Decoder> _addr_d) {
@@ -448,7 +437,6 @@ private static ptr<stack> pop(this ptr<Decoder> _addr_d) {
         d.free = s;
     }
     return _addr_s!;
-
 }
 
 // Record that after the current element is finished
@@ -480,7 +468,6 @@ private static void pushEOF(this ptr<Decoder> _addr_d) {
     s.kind = stkEOF;
     s.next = start.next;
     start.next = s;
-
 }
 
 // Undo a pushEOF.
@@ -493,7 +480,6 @@ private static bool popEOF(this ptr<Decoder> _addr_d) {
     }
     d.pop();
     return true;
-
 }
 
 // Record that we are starting an element with the given name.
@@ -564,7 +550,6 @@ private static bool popElement(this ptr<Decoder> _addr_d, ptr<EndElement> _addr_
     }
 
     return true;
-
 }
 
 // If the top element on the stack is autoclosing and
@@ -585,12 +570,9 @@ private static (Token, bool) autoClose(this ptr<Decoder> _addr_d, Token t) {
             if (!ok || et.Name.Local != name) {
                 return (new EndElement(d.stk.name), true);
             }
-
             break;
-
         }
     }    return (null, false);
-
 }
 
 private static var errRawToken = errors.New("xml: cannot use RawToken from UnmarshalXML method");
@@ -607,7 +589,6 @@ private static (Token, error) RawToken(this ptr<Decoder> _addr_d) {
         return (null, error.As(errRawToken)!);
     }
     return d.rawToken();
-
 }
 
 private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, panic, _) => {
@@ -627,7 +608,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
         // Return the EndElement half now.
         d.needClose = false;
         return (new EndElement(d.toClose), error.As(null!)!);
-
     }
     var (b, ok) = d.getc();
     if (!ok) {
@@ -641,7 +621,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
             return (null, error.As(d.err)!);
         }
         return (CharData(data), error.As(null!)!);
-
     }
     b, ok = d.mustgetc();
 
@@ -671,7 +650,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                 return (null, error.As(d.err)!);
             }
             return (new EndElement(name), error.As(null!)!);
-
             break;
         case '?': 
             // <?: Processing instruction.
@@ -693,14 +671,11 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                 if (!ok) {
                     return (null, error.As(d.err)!);
                 }
-
                 d.buf.WriteByte(b);
                 if (b0 == '?' && b == '>') {
                     break;
                 }
-
                 b0 = b;
-
             }
             data = d.buf.Bytes();
             data = data[(int)0..(int)len(data) - 2]; // chop ?>
@@ -730,7 +705,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                 }
             }
             return (new ProcInst(target,data), error.As(null!)!);
-
             break;
         case '!': 
             // <!: Maybe comment, maybe CDATA.
@@ -747,7 +721,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                             if (!ok) {
                                 return (null, error.As(d.err)!);
                             }
-
                             if (b != '-') {
                                 d.err = d.syntaxError("invalid sequence <!- not part of <!--");
                                 return (null, error.As(d.err)!);
@@ -762,7 +735,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                                 if (!ok) {
                                     return (null, error.As(d.err)!);
                                 }
-
                                 d.buf.WriteByte(b);
                                 if (b0 == '-' && b1 == '-') {
                                     if (b != '>') {
@@ -771,14 +743,12 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                                     }
                                     break;
                                 }
-
                                 (b0, b1) = (b1, b);
                             }
 
                             data = d.buf.Bytes();
                             data = data[(int)0..(int)len(data) - 3]; // chop -->
                             return (Comment(data), error.As(null!)!);
-
                             break;
                         case '[': // <![
                             // Probably <![CDATA[.
@@ -791,12 +761,10 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                                     if (!ok) {
                                         return (null, error.As(d.err)!);
                                     }
-
                                     if (b != "CDATA["[i]) {
                                         d.err = d.syntaxError("invalid <![ sequence");
                                         return (null, error.As(d.err)!);
                                     }
-
                                 } 
                                 // Have <![CDATA[.  Read text until ]]>.
 
@@ -808,9 +776,7 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                             if (data == null) {
                                 return (null, error.As(d.err)!);
                             }
-
                             return (CharData(data), error.As(null!)!);
-
                             break;
                     } 
 
@@ -827,11 +793,9 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                         if (!ok) {
                             return (null, error.As(d.err)!);
                         }
-
                         if (inquote == 0 && b == '>' && depth == 0) {
                             break;
                         }
-
             HandleB:
                         d.buf.WriteByte(b);
 
@@ -853,7 +817,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                                     if (!ok) {
                                         return (null, error.As(d.err)!);
                                     }
-
                                     if (b != s[i]) {
                                         for (nint j = 0; j < i; j++) {
                                             d.buf.WriteByte(s[j]);
@@ -862,7 +825,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                                         depth++;
                                         goto HandleB;
                                     }
-
                                 } 
 
                                 // Remove < that was written above.
@@ -883,11 +845,9 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                                 if (!ok) {
                                     return (null, error.As(d.err)!);
                                 }
-
                                 if (b0 == '-' && b1 == '-' && b == '>') {
                                     break;
                                 }
-
                                 (b0, b1) = (b1, b);
                             } 
 
@@ -902,10 +862,8 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
                             // (like a "<" and a "!") don't get joined when re-encoding the
                             // Directive, taking new semantic meaning.
                             d.buf.WriteByte(' ');
-
-                    }
+                                }
                     return (Directive(d.buf.Bytes()), error.As(null!)!);
-
             break;
     } 
 
@@ -920,7 +878,6 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
             d.err = d.syntaxError("expected element name after <");
         }
         return (null, error.As(d.err)!);
-
     }
     attr = new slice<Attr>(new Attr[] {  });
     while (true) {
@@ -937,14 +894,11 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
             if (!ok) {
                 return (null, error.As(d.err)!);
             }
-
             if (b != '>') {
                 d.err = d.syntaxError("expected /> in element");
                 return (null, error.As(d.err)!);
             }
-
             break;
-
         }
         if (b == '>') {
             break;
@@ -984,14 +938,12 @@ private static (Token, error) rawToken(this ptr<Decoder> _addr_d) => func((_, pa
             a.Value = string(data);
         }
         attr = append(attr, a);
-
     }
     if (empty) {
         d.needClose = true;
         d.toClose = name;
     }
     return (new StartElement(name,attr), error.As(null!)!);
-
 });
 
 private static slice<byte> attrval(this ptr<Decoder> _addr_d) {
@@ -1025,7 +977,6 @@ private static slice<byte> attrval(this ptr<Decoder> _addr_d) {
         }
     }
     return d.buf.Bytes();
-
 }
 
 // Skip spaces if any
@@ -1052,9 +1003,7 @@ private static void space(this ptr<Decoder> _addr_d) {
                 return ;
                 break;
         }
-
     }
-
 }
 
 // Read a single byte.
@@ -1088,7 +1037,6 @@ private static (byte, bool) getc(this ptr<Decoder> _addr_d) {
     }
     d.offset++;
     return (b, true);
-
 }
 
 // InputOffset returns the input stream byte offset of the current decoder position.
@@ -1110,7 +1058,6 @@ private static nint savedOffset(this ptr<Decoder> _addr_d) {
         n--;
     }
     return n;
-
 }
 
 // Must read a single byte.
@@ -1130,7 +1077,6 @@ private static (byte, bool) mustgetc(this ptr<Decoder> _addr_d) {
         }
     }
     return ;
-
 }
 
 // Unread a single byte.
@@ -1142,7 +1088,6 @@ private static void ungetc(this ptr<Decoder> _addr_d, byte b) {
     }
     d.nextByte = int(b);
     d.offset--;
-
 }
 
 private static map entity = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, int>{"lt":'<',"gt":'>',"amp":'&',"apos":'\'',"quot":'"',};
@@ -1177,10 +1122,8 @@ Input:
                 _breakInput = true;
                 break;
             }
-
             d.err = d.syntaxError("unescaped ]]> not in CDATA section");
             return null;
-
         }
         if (b == '<' && !cdata) {
             if (quote >= 0) {
@@ -1211,7 +1154,6 @@ Input:
             if (!ok) {
                 return null;
             }
-
             if (b == '#') {
                 d.buf.WriteByte(b);
                 b, ok = d.mustgetc();
@@ -1219,7 +1161,6 @@ Input:
                 if (!ok) {
                     return null;
                 }
-
                 nint @base = 10;
                 if (b == 'x') {
                     base = 16;
@@ -1229,9 +1170,7 @@ Input:
                     if (!ok) {
                         return null;
                     }
-
                 }
-
                 var start = d.buf.Len();
                 while ('0' <= b && b <= '9' || base == 16 && 'a' <= b && b <= 'f' || base == 16 && 'A' <= b && b <= 'F') {
                     d.buf.WriteByte(b);
@@ -1240,7 +1179,6 @@ Input:
                     if (!ok) {
                         return null;
                     }
-
                 }
             else
 
@@ -1257,7 +1195,6 @@ Input:
                         haveText = true;
                     }
                 }
-
             } {
                 d.ungetc(b);
                 if (!d.readName()) {
@@ -1270,7 +1207,6 @@ Input:
                 if (!ok) {
                     return null;
                 }
-
                 if (b != ';') {
                     d.ungetc(b);
                 }
@@ -1293,37 +1229,28 @@ Input:
                                 text, haveText = d.Entity[s];
                             }
 
-
                             r = r__prev5;
 
                         }
-
                     }
-
                 }
-
             }
-
             if (haveText) {
                 d.buf.Truncate(before);
                 d.buf.Write((slice<byte>)text);
                 (b0, b1) = (0, 0);                _continueInput = true;
                 break;
             }
-
             if (!d.Strict) {
                 (b0, b1) = (0, 0);                _continueInput = true;
                 break;
             }
-
             var ent = string(d.buf.Bytes()[(int)before..]);
             if (ent[len(ent) - 1] != ';') {
                 ent += " (no semicolon)";
             }
-
             d.err = d.syntaxError("invalid character entity " + ent);
             return null;
-
         }
         if (b == '\r') {
             d.buf.WriteByte('\n');
@@ -1356,7 +1283,6 @@ Input:
     }
 
     return data;
-
 }
 
 // Decide whether the given rune is in the XML Character Range, per
@@ -1394,9 +1320,7 @@ private static (Name, bool) nsname(this ptr<Decoder> _addr_d) {
             name.Local = s[(int)i + 1..];
         }
     }
-
     return (name, true);
-
 }
 
 // Get name: /first(first|second)*/
@@ -1417,7 +1341,6 @@ private static (@string, bool) name(this ptr<Decoder> _addr_d) {
         return ("", false);
     }
     return (string(b), true);
-
 }
 
 // Read a name and append its bytes to d.buf.
@@ -1450,10 +1373,8 @@ private static bool readName(this ptr<Decoder> _addr_d) {
             break;
         }
         d.buf.WriteByte(b);
-
     }
     return true;
-
 }
 
 private static bool isNameByte(byte c) {
@@ -1482,7 +1403,6 @@ private static bool isName(slice<byte> s) {
         }
     }
     return true;
-
 }
 
 private static bool isNameString(@string s) {
@@ -1507,7 +1427,6 @@ private static bool isNameString(@string s) {
         }
     }
     return true;
-
 }
 
 // These tables were generated by cut and paste from Appendix B of
@@ -1599,7 +1518,6 @@ private static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline) 
                 }
 
             }
-
             {
                 (_, err) = w.Write(esc);
 
@@ -1608,14 +1526,11 @@ private static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline) 
                 }
 
             }
-
             last = i;
-
         }
     }
     (_, err) = w.Write(s[(int)last..]);
     return error.As(err)!;
-
 }
 
 // EscapeString writes to p the properly escaped XML equivalent
@@ -1667,11 +1582,9 @@ private static void EscapeString(this ptr<printer> _addr_p, @string s) {
             p.WriteString(s[(int)last..(int)i - width]);
             p.Write(esc);
             last = i;
-
         }
     }
     p.WriteString(s[(int)last..]);
-
 }
 
 // Escape is like EscapeText but omits the error return value.
@@ -1696,7 +1609,6 @@ private static error emitCDATA(io.Writer w, slice<byte> s) {
             return error.As(err)!;
         }
     }
-
     while (true) {
         var i = bytes.Index(s, cdataEnd);
         if (i >= 0 && i + len(cdataEnd) <= len(s)) { 
@@ -1709,7 +1621,6 @@ private static error emitCDATA(io.Writer w, slice<byte> s) {
                 }
 
             }
-
             {
                 (_, err) = w.Write(cdataEscape);
 
@@ -1718,9 +1629,7 @@ private static error emitCDATA(io.Writer w, slice<byte> s) {
                 }
 
             }
-
             i += len(cdataEnd);
-
         }
         else
  {
@@ -1732,16 +1641,12 @@ private static error emitCDATA(io.Writer w, slice<byte> s) {
                 }
 
             }
-
             break;
-
         }
         s = s[(int)i..];
-
     }
     (_, err) = w.Write(cdataEnd);
     return error.As(err)!;
-
 }
 
 // procInst parses the `param="..."` or `param='...'`
@@ -1766,7 +1671,6 @@ private static @string procInst(@string param, @string s) {
         return "";
     }
     return v[(int)1..(int)idx + 1];
-
 }
 
 } // end xml_package

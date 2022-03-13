@@ -5,21 +5,23 @@
 //go:build gc
 // +build gc
 
-// package goroot -- go2cs converted at 2022 March 06 22:41:22 UTC
+// package goroot -- go2cs converted at 2022 March 13 05:52:27 UTC
 // import "internal/goroot" ==> using goroot = go.@internal.goroot_package
 // Original source: C:\Program Files\Go\src\internal\goroot\gc.go
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
 namespace go.@internal;
+
+using exec = @internal.execabs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// IsStandardPackage reports whether path is a standard package,
+// given goroot and compiler.
 
 public static partial class goroot_package {
 
-    // IsStandardPackage reports whether path is a standard package,
-    // given goroot and compiler.
 public static bool IsStandardPackage(@string goroot, @string compiler, @string path) => func((_, panic, _) => {
     switch (compiler) {
         case "gc": 
@@ -34,7 +36,6 @@ public static bool IsStandardPackage(@string goroot, @string compiler, @string p
             panic("unknown compiler " + compiler);
             break;
     }
-
 });
 
 // gccgoSearch holds the gccgo search directories.
@@ -102,13 +103,11 @@ private static void init(this ptr<gccgoDirs> _addr_gd) {
                 if (err == null && fi.IsDir()) {
                     gd.dirs = append(gd.dirs, goDir);
                 }
-
             }
 
             fi = fi__prev1;
 
         }
-
         {
             var fi__prev1 = fi;
 
@@ -121,9 +120,7 @@ private static void init(this ptr<gccgoDirs> _addr_gd) {
             fi = fi__prev1;
 
         }
-
     }    gd.dirs = append(gd.dirs, lastDirs);
-
 }
 
 // isStandard reports whether path is a standard library for gccgo.
@@ -142,7 +139,6 @@ private static bool isStandard(this ptr<gccgoDirs> _addr_gd, @string path) {
     if (path == "unsafe") { 
         // Special case.
         return true;
-
     }
     gd.once.Do(gd.init);
     if (gd.dirs == null) { 
@@ -150,7 +146,6 @@ private static bool isStandard(this ptr<gccgoDirs> _addr_gd, @string path) {
         // Best guess, since the first component did not contain
         // '.', is that this is a standard library package.
         return true;
-
     }
     foreach (var (_, dir) in gd.dirs) {
         var full = filepath.Join(dir, path) + ".gox";
@@ -162,9 +157,7 @@ private static bool isStandard(this ptr<gccgoDirs> _addr_gd, @string path) {
             }
 
         }
-
     }    return false;
-
 }
 
 } // end goroot_package

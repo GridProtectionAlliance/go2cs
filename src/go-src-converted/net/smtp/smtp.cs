@@ -13,25 +13,27 @@
 // Some external packages provide more functionality. See:
 //
 //   https://godoc.org/?q=smtp
-// package smtp -- go2cs converted at 2022 March 06 22:25:56 UTC
+
+// package smtp -- go2cs converted at 2022 March 13 05:40:27 UTC
 // import "net/smtp" ==> using smtp = go.net.smtp_package
 // Original source: C:\Program Files\Go\src\net\smtp\smtp.go
-using tls = go.crypto.tls_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using net = go.net_package;
-using textproto = go.net.textproto_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.net;
 
+using tls = crypto.tls_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using net = net_package;
+using textproto = net.textproto_package;
+using strings = strings_package;
+
+
+// A Client represents a client connection to an SMTP server.
+
+using System;
 public static partial class smtp_package {
 
-    // A Client represents a client connection to an SMTP server.
 public partial struct Client {
     public ptr<textproto.Conn> Text; // keep a reference to the connection so it can be used to create a TLS
 // connection later
@@ -57,7 +59,6 @@ public static (ptr<Client>, error) Dial(@string addr) {
     }
     var (host, _, _) = net.SplitHostPort(addr);
     return _addr_NewClient(conn, host)!;
-
 }
 
 // NewClient returns a new Client using an existing connection and host as a
@@ -75,7 +76,6 @@ public static (ptr<Client>, error) NewClient(net.Conn conn, @string host) {
     ptr<Client> c = addr(new Client(Text:text,conn:conn,serverName:host,localName:"localhost"));
     _, c.tls = conn._<ptr<tls.Conn>>();
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // Close closes the connection.
@@ -97,7 +97,6 @@ private static error hello(this ptr<Client> _addr_c) {
         }
     }
     return error.As(c.helloError)!;
-
 }
 
 // Hello sends a HELO or EHLO to the server as the given host name.
@@ -115,13 +114,11 @@ private static error Hello(this ptr<Client> _addr_c, @string localName) {
             return error.As(err)!;
         }
     }
-
     if (c.didHello) {
         return error.As(errors.New("smtp: Hello called after other methods"))!;
     }
     c.localName = localName;
     return error.As(c.hello())!;
-
 }
 
 // cmd is a convenience function that sends a command and returns the response
@@ -140,7 +137,6 @@ private static (nint, @string, error) cmd(this ptr<Client> _addr_c, nint expectC
     defer(c.Text.EndResponse(id));
     var (code, msg, err) = c.Text.ReadResponse(expectCode);
     return (code, msg, error.As(err)!);
-
 });
 
 // helo sends the HELO greeting to the server. It should be used only when the
@@ -175,7 +171,6 @@ private static error ehlo(this ptr<Client> _addr_c) {
  {
                 ext[args[0]] = "";
             }
-
         }
     }
     {
@@ -185,10 +180,8 @@ private static error ehlo(this ptr<Client> _addr_c) {
             c.auth = strings.Split(mechs, " ");
         }
     }
-
     c.ext = ext;
     return error.As(err)!;
-
 }
 
 // StartTLS sends the STARTTLS command and encrypts all further communication.
@@ -204,7 +197,6 @@ private static error StartTLS(this ptr<Client> _addr_c, ptr<tls.Config> _addr_co
             return error.As(err)!;
         }
     }
-
     var (_, _, err) = c.cmd(220, "STARTTLS");
     if (err != null) {
         return error.As(err)!;
@@ -213,7 +205,6 @@ private static error StartTLS(this ptr<Client> _addr_c, ptr<tls.Config> _addr_co
     c.Text = textproto.NewConn(c.conn);
     c.tls = true;
     return error.As(c.ehlo())!;
-
 }
 
 // TLSConnectionState returns the client's TLS connection state.
@@ -229,7 +220,6 @@ private static (tls.ConnectionState, bool) TLSConnectionState(this ptr<Client> _
         return ;
     }
     return (tc.ConnectionState(), true);
-
 }
 
 // Verify checks the validity of an email address on the server.
@@ -250,7 +240,6 @@ private static error Verify(this ptr<Client> _addr_c, @string addr) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -262,10 +251,8 @@ private static error Verify(this ptr<Client> _addr_c, @string addr) {
         err = err__prev1;
 
     }
-
     var (_, _, err) = c.cmd(250, "VRFY %s", addr);
     return error.As(err)!;
-
 }
 
 // Auth authenticates a client using the provided authentication mechanism.
@@ -281,7 +268,6 @@ private static error Auth(this ptr<Client> _addr_c, Auth a) {
             return error.As(err)!;
         }
     }
-
     var encoding = base64.StdEncoding;
     var (mech, resp, err) = a.Start(addr(new ServerInfo(c.serverName,c.tls,c.auth)));
     if (err != null) {
@@ -313,7 +299,6 @@ private static error Auth(this ptr<Client> _addr_c, Auth a) {
             c.cmd(501, "*");
             c.Quit();
             break;
-
         }
         if (resp == null) {
             break;
@@ -321,10 +306,8 @@ private static error Auth(this ptr<Client> _addr_c, Auth a) {
         resp64 = make_slice<byte>(encoding.EncodedLen(len(resp)));
         encoding.Encode(resp64, resp);
         code, msg64, err = c.cmd(0, string(resp64));
-
     }
     return error.As(err)!;
-
 }
 
 // Mail issues a MAIL command to the server using the provided email address.
@@ -346,7 +329,6 @@ private static error Mail(this ptr<Client> _addr_c, @string from) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -358,7 +340,6 @@ private static error Mail(this ptr<Client> _addr_c, @string from) {
         err = err__prev1;
 
     }
-
     @string cmdStr = "MAIL FROM:<%s>";
     if (c.ext != null) {
         {
@@ -369,7 +350,6 @@ private static error Mail(this ptr<Client> _addr_c, @string from) {
             }
 
         }
-
         {
             (_, ok) = c.ext["SMTPUTF8"];
 
@@ -378,11 +358,9 @@ private static error Mail(this ptr<Client> _addr_c, @string from) {
             }
 
         }
-
     }
     var (_, _, err) = c.cmd(250, cmdStr, from);
     return error.As(err)!;
-
 }
 
 // Rcpt issues a RCPT command to the server using the provided email address.
@@ -398,10 +376,8 @@ private static error Rcpt(this ptr<Client> _addr_c, @string to) {
             return error.As(err)!;
         }
     }
-
     var (_, _, err) = c.cmd(25, "RCPT TO:<%s>", to);
     return error.As(err)!;
-
 }
 
 private partial struct dataCloser : io.WriteCloser {
@@ -431,7 +407,6 @@ private static (io.WriteCloser, error) Data(this ptr<Client> _addr_c) {
         return (null, error.As(err)!);
     }
     return (addr(new dataCloser(c,c.Text.DotWriter())), error.As(null!)!);
-
 }
 
 private static Action<ptr<tls.Config>> testHookStartTLS = default; // nil, except for tests
@@ -468,7 +443,6 @@ public static error SendMail(@string addr, Auth a, @string from, slice<@string> 
         err = err__prev1;
 
     }
-
     foreach (var (_, recp) in to) {
         {
             var err__prev1 = err;
@@ -482,7 +456,6 @@ public static error SendMail(@string addr, Auth a, @string from, slice<@string> 
             err = err__prev1;
 
         }
-
     }    var (c, err) = Dial(addr);
     if (err != null) {
         return error.As(err)!;
@@ -506,10 +479,8 @@ public static error SendMail(@string addr, Auth a, @string from, slice<@string> 
             if (err != null) {
                 return error.As(err)!;
             }
-
         }
     }
-
     if (a != null && c.ext != null) {
         {
             var (_, ok) = c.ext["AUTH"];
@@ -519,7 +490,6 @@ public static error SendMail(@string addr, Auth a, @string from, slice<@string> 
             }
 
         }
-
         err = c.Auth(a);
 
         if (err != null) {
@@ -550,7 +520,6 @@ public static error SendMail(@string addr, Auth a, @string from, slice<@string> 
         return error.As(err)!;
     }
     return error.As(c.Quit())!;
-
 });
 
 // Extension reports whether an extension is support by the server.
@@ -569,14 +538,12 @@ private static (bool, @string) Extension(this ptr<Client> _addr_c, @string ext) 
             return (false, "");
         }
     }
-
     if (c.ext == null) {
         return (false, "");
     }
     ext = strings.ToUpper(ext);
     var (param, ok) = c.ext[ext];
     return (ok, param);
-
 }
 
 // Reset sends the RSET command to the server, aborting the current mail
@@ -591,10 +558,8 @@ private static error Reset(this ptr<Client> _addr_c) {
             return error.As(err)!;
         }
     }
-
     var (_, _, err) = c.cmd(250, "RSET");
     return error.As(err)!;
-
 }
 
 // Noop sends the NOOP command to the server. It does nothing but check
@@ -609,10 +574,8 @@ private static error Noop(this ptr<Client> _addr_c) {
             return error.As(err)!;
         }
     }
-
     var (_, _, err) = c.cmd(250, "NOOP");
     return error.As(err)!;
-
 }
 
 // Quit sends the QUIT command and closes the connection to the server.
@@ -626,13 +589,11 @@ private static error Quit(this ptr<Client> _addr_c) {
             return error.As(err)!;
         }
     }
-
     var (_, _, err) = c.cmd(221, "QUIT");
     if (err != null) {
         return error.As(err)!;
     }
     return error.As(c.Text.Close())!;
-
 }
 
 // validateLine checks to see if a line has CR or LF as per RFC 5321
@@ -641,7 +602,6 @@ private static error validateLine(@string line) {
         return error.As(errors.New("smtp: A line must not contain CR or LF"))!;
     }
     return error.As(null!)!;
-
 }
 
 } // end smtp_package

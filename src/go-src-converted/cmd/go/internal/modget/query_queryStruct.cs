@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:34 UTC
+//     Generated on 2022 March 13 06:31:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class modget_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct query
         {
             // Constructors
@@ -88,7 +88,7 @@ namespace @internal
             public static implicit operator query(NilType nil) => default(query);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static query query_cast(dynamic value)
         {
             return new query(value.raw, value.rawVersion, value.pattern, value.patternIsLocal, value.version, value.matchWildcard, value.canMatchWildcardInModule, ref value.conflict, value.candidates, value.candidatesMu, value.pathSeen, value.resolved, value.matchesPackages);

@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:01 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:22 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\expr.go
-using bytes = go.bytes_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using System.ComponentModel;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+
+// An Expr is a Node that can appear as an expression.
+
+using System.ComponentModel;
+using System;
 public static partial class ir_package {
 
-    // An Expr is a Node that can appear as an expression.
 public partial interface Expr {
     void isExpr();
 }
@@ -42,7 +43,6 @@ private static readonly var miniExprTransient = 0;
 private static readonly var miniExprBounded = 1;
 private static readonly var miniExprImplicit = 2; // for use by implementations; not supported by every Expr
 private static readonly var miniExprCheckPtr = 3;
-
 
 private static void isExpr(this ptr<miniExpr> _addr__p0) {
     ref miniExpr _p0 = ref _addr__p0.val;
@@ -155,8 +155,7 @@ private static void SetOp(this ptr<AddrExpr> _addr_n, Op op) => func((_, panic, 
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // A BasicLit is a literal of basic type.
 public partial struct BasicLit {
@@ -175,9 +174,7 @@ public static Node NewBasicLit(src.XPos pos, constant.Value val) {
             n.SetType(idealType(k));
         }
     }
-
     return n;
-
 }
 
 private static constant.Value Val(this ptr<BasicLit> _addr_n) {
@@ -214,8 +211,7 @@ private static void SetOp(this ptr<BinaryExpr> _addr_n, Op op) => func((_, panic
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // A CallUse records how the result of the call is used:
 public partial struct CallUse { // : byte
@@ -262,8 +258,7 @@ private static void SetOp(this ptr<CallExpr> _addr_n, Op op) => func((_, panic, 
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // A ClosureExpr is a function literal expression.
 public partial struct ClosureExpr {
@@ -321,8 +316,7 @@ private static void SetOp(this ptr<CompLitExpr> _addr_n, Op op) => func((_, pani
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 public partial struct ConstExpr {
     public ref miniExpr miniExpr => ref miniExpr_val;
@@ -398,8 +392,7 @@ private static void SetOp(this ptr<ConvExpr> _addr_n, Op op) => func((_, panic, 
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // An IndexExpr is an index expression X[Y].
 public partial struct IndexExpr {
@@ -424,8 +417,7 @@ private static void SetOp(this ptr<IndexExpr> _addr_n, Op op) => func((_, panic,
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // A KeyExpr is a Key: Value composite literal key.
 public partial struct KeyExpr {
@@ -505,8 +497,7 @@ private static void SetOp(this ptr<LogicalExpr> _addr_n, Op op) => func((_, pani
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // A MakeExpr is a make expression: make(Type[, Len[, Cap]]).
 // Op is OMAKECHAN, OMAKEMAP, OMAKESLICE, or OMAKESLICECOPY,
@@ -532,8 +523,7 @@ private static void SetOp(this ptr<MakeExpr> _addr_n, Op op) => func((_, panic, 
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // A NilExpr represents the predefined untyped constant nil.
 // (It may be copied and assigned a type, though.)
@@ -654,7 +644,6 @@ public static ptr<LinksymOffsetExpr> NewNameOffsetExpr(src.XPos pos, ptr<Name> _
         @base.FatalfAt(pos, "cannot take offset of nil, blank name or non-global variable: %v", name);
     }
     return _addr_NewLinksymOffsetExpr(pos, _addr_name.Linksym(), offset, _addr_typ)!;
-
 }
 
 // A SelectorExpr is a selector expression X.Sel.
@@ -683,8 +672,7 @@ private static void SetOp(this ptr<SelectorExpr> _addr_n, Op op) => func((_, pan
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 private static ptr<types.Sym> Sym(this ptr<SelectorExpr> _addr_n) {
     ref SelectorExpr n = ref _addr_n.val;
@@ -722,10 +710,8 @@ private static ptr<Name> FuncName(this ptr<SelectorExpr> _addr_n) => func((_, pa
         // those here. reflectdata.methodWrapper generates the
         // Func.
         fn.Func = n.Selection.Nname._<ptr<Name>>().Func;
-
     }
     return _addr_fn!;
-
 });
 
 // Before type-checking, bytes.Buffer is a SelectorExpr.
@@ -759,8 +745,7 @@ private static void SetOp(this ptr<SliceExpr> _addr_n, Op op) => func((_, panic,
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // IsSlice3 reports whether o is a slice3 op (OSLICE3, OSLICE3ARR).
 // o must be a slicing op.
@@ -772,7 +757,6 @@ public static bool IsSlice3(this Op o) {
         return true;
         @base.Fatalf("IsSlice3 op %v", o);
     return false;
-
 }
 
 // A SliceHeader expression constructs a slice header from its parts.
@@ -861,8 +845,7 @@ private static void SetOp(this ptr<TypeAssertExpr> _addr_n, Op op) => func((_, p
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // A UnaryExpr is a unary expression Op X,
 // or Op(X) for a builtin function that does not end up being a call.
@@ -886,8 +869,7 @@ private static void SetOp(this ptr<UnaryExpr> _addr_n, Op op) => func((_, panic,
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // An InstExpr is a generic function or type instantiation.
 public partial struct InstExpr {
@@ -957,7 +939,6 @@ public static bool IsZero(Node n) {
 
         return true;
         return false;
-
 }
 
 // lvalue etc
@@ -1003,7 +984,6 @@ public static bool IsAddressable(Node n) {
     __switch_break0:;
 
     return false;
-
 }
 
 public static Node StaticValue(Node n) {
@@ -1017,9 +997,7 @@ public static Node StaticValue(Node n) {
             return n;
         }
         n = n1;
-
     }
-
 }
 
 // staticValue1 implements a simple SSA-like optimization. If n is a local variable
@@ -1051,7 +1029,6 @@ FindRHS:
                 _breakFindRHS = true;
                 break;
             }
-
         }        @base.Fatalf("%v missing from LHS of %v", n, defn);
     else 
         return null;
@@ -1062,7 +1039,6 @@ FindRHS:
         return null;
     }
     return rhs;
-
 }
 
 // reassigned takes an ONAME node, walks the function in which it is defined, and returns a boolean
@@ -1111,10 +1087,8 @@ private static bool reassigned(ptr<Name> _addr_name) {
                 return true;
             }
                 return false;
-
     };
     return Any(name.Curfn, do);
-
 }
 
 // IsIntrinsicCall reports whether the compiler back end will treat the call as an intrinsic operation.
@@ -1177,7 +1151,6 @@ public static bool SameSafeExpr(Node l, Node r) {
     else if (l.Op() == ONIL) 
         return true;
         return false;
-
 }
 
 // ShouldCheckPtr reports whether pointer checking should be enabled for
@@ -1209,7 +1182,6 @@ public static bool IsReflectHeaderDataField(Node l) {
         return false;
     }
     return tsym.Name == "SliceHeader" || tsym.Name == "StringHeader";
-
 }
 
 public static slice<Node> ParamNames(ptr<types.Type> _addr_ft) {
@@ -1254,7 +1226,6 @@ public static ptr<types.Sym> MethodSymSuffix(ptr<types.Type> _addr_recv, ptr<typ
             @base.Fatalf("declared pointer receiver type: %v", recv);
         }
         rsym = recv.Elem().Sym();
-
     }
     var rpkg = Pkgs.Go;
     if (rsym != null) {
@@ -1265,7 +1236,6 @@ public static ptr<types.Sym> MethodSymSuffix(ptr<types.Type> _addr_recv, ptr<typ
         // The parentheses aren't really necessary, but
         // they're pretty traditional at this point.
         fmt.Fprintf(_addr_b, "(%-S)", recv);
-
     }
     else
  {
@@ -1280,7 +1250,6 @@ public static ptr<types.Sym> MethodSymSuffix(ptr<types.Type> _addr_recv, ptr<typ
     b.WriteString(suffix);
 
     return _addr_rpkg.LookupBytes(b.Bytes())!;
-
 }
 
 // MethodExprName returns the ONAME representing the method
@@ -1298,7 +1267,6 @@ public static ptr<types.Field> MethodExprFunc(Node n) => func((_, panic, _) => {
         return n._<ptr<SelectorExpr>>().Selection;
         @base.Fatalf("unexpected node: %v (%v)", n, n.Op());
     panic("unreachable");
-
 });
 
 } // end ir_package

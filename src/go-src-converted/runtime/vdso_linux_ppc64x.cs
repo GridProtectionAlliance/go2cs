@@ -6,11 +6,9 @@
 // +build linux
 // +build ppc64 ppc64le
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:29 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:32 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\vdso_linux_ppc64x.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -19,7 +17,6 @@ public static partial class runtime_package {
 // vdsoArrayMax is the byte-size of a maximally sized array on this architecture.
 // See cmd/compile/internal/ppc64/galign.go arch.MAXWIDTH initialization.
 private static readonly nint vdsoArrayMax = 1 << 50 - 1;
-
 
 private static vdsoVersionKey vdsoLinuxVersion = new vdsoVersionKey("LINUX_2.6.15",0x75fcba5);
 

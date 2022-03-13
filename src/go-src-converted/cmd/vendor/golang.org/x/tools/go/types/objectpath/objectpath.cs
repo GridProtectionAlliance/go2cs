@@ -19,24 +19,27 @@
 // the field X has two paths due to its membership of both A and B.
 // The For(obj) function always returns one of these paths, arbitrarily
 // but consistently.
-// package objectpath -- go2cs converted at 2022 March 06 23:35:07 UTC
+
+// package objectpath -- go2cs converted at 2022 March 13 06:42:41 UTC
 // import "cmd/vendor/golang.org/x/tools/go/types/objectpath" ==> using objectpath = go.cmd.vendor.golang.org.x.tools.go.types.objectpath_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\types\objectpath\objectpath.go
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using types = go.go.types_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.types;
+
+using fmt = fmt_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using types = go.types_package;
+
+
+// A Path is an opaque name that identifies a types.Object
+// relative to its package. Conceptually, the name consists of a
+// sequence of destructuring operations applied to the package scope
+// to obtain the original object.
+// The name does not include the package itself.
 
 public static partial class objectpath_package {
 
-    // A Path is an opaque name that identifies a types.Object
-    // relative to its package. Conceptually, the name consists of a
-    // sequence of destructuring operations applied to the package scope
-    // to obtain the original object.
-    // The name does not include the package itself.
 public partial struct Path { // : @string
 }
 
@@ -195,9 +198,7 @@ public static (Path, error) For(types.Object obj) => func((_, panic, _) => {
             }
 
         }
-
         return (Path(obj.Name()), error.As(null!)!);
-
     }
     switch (obj.type()) {
         case ptr<types.Const> obj:
@@ -265,7 +266,6 @@ public static (Path, error) For(types.Object obj) => func((_, panic, _) => {
             if (!ok) {
                 continue; // handle non-types in second pass
             }
-
             var path = append(empty, name);
             path = append(path, opType);
 
@@ -285,7 +285,6 @@ public static (Path, error) For(types.Object obj) => func((_, panic, _) => {
                     r = r__prev2;
 
                 }
-
             }
             else
  { 
@@ -302,9 +301,7 @@ public static (Path, error) For(types.Object obj) => func((_, panic, _) => {
                     r = r__prev2;
 
                 }
-
             }
-
         }
         name = name__prev1;
     }
@@ -334,11 +331,8 @@ public static (Path, error) For(types.Object obj) => func((_, panic, _) => {
                             r = r__prev3;
 
                         }
-
                     }
-
                     continue;
-
                 } 
 
                 // Inspect declared methods of defined types.
@@ -359,7 +353,6 @@ public static (Path, error) For(types.Object obj) => func((_, panic, _) => {
                         if (m == obj) {
                             return (Path(path2), error.As(null!)!); // found declared method
                         }
-
                         {
                             var r__prev2 = r;
 
@@ -372,22 +365,17 @@ public static (Path, error) For(types.Object obj) => func((_, panic, _) => {
                             r = r__prev2;
 
                         }
-
                     }
-
-
                 }
 
                 T = T__prev1;
 
             }
-
         }
         name = name__prev1;
     }
 
     return ("", error.As(fmt.Errorf("can't find path for %v in %s", obj, pkg.Path()))!);
-
 });
 
 private static slice<byte> appendOpArg(slice<byte> path, byte op, nint arg) {
@@ -430,7 +418,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                 r = r__prev1;
 
             }
-
             return find(obj, T.Elem(), append(path, opElem));
             break;
         case ptr<types.Signature> T:
@@ -446,7 +433,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                 r = r__prev1;
 
             }
-
             return find(obj, T.Results(), append(path, opResults));
             break;
         case ptr<types.Struct> T:
@@ -459,7 +445,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                     if (f == obj) {
                         return path2; // found field var
                     }
-
                     {
                         var r__prev1 = r;
 
@@ -472,7 +457,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                         r = r__prev1;
 
                     }
-
                 }
 
 
@@ -490,7 +474,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                     if (v == obj) {
                         return path2; // found param/result var
                     }
-
                     {
                         var r__prev1 = r;
 
@@ -503,7 +486,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                         r = r__prev1;
 
                     }
-
                 }
 
 
@@ -521,7 +503,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                     if (m == obj) {
                         return path2; // found interface method
                     }
-
                     {
                         var r__prev1 = r;
 
@@ -534,7 +515,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
                         r = r__prev1;
 
                     }
-
                 }
 
 
@@ -544,7 +524,6 @@ private static slice<byte> find(types.Object obj, types.Type T, slice<byte> path
             break;
     }
     panic(T);
-
 });
 
 // Object returns the object denoted by path p within the package pkg.
@@ -571,7 +550,6 @@ public static (types.Object, error) Object(ptr<types.Package> _addr_pkg, Path p)
             suffix = pathstr[(int)dot..]; // suffix starts with "."
         }
     }
-
 
     var obj = pkg.Scope().Lookup(pkgobj);
     if (obj == null) {
@@ -631,7 +609,6 @@ public static (types.Object, error) Object(ptr<types.Package> _addr_pkg, Path p)
             if (!ok) {
                 return (null, error.As(fmt.Errorf("cannot apply %q to %s (got %T, want pointer, slice, array, chan or map)", code, t, t))!);
             }
-
             t = hasElem.Elem();
         else if (code == opKey) 
             ptr<types.Map> (mapType, ok) = t._<ptr<types.Map>>();
@@ -674,7 +651,6 @@ public static (types.Object, error) Object(ptr<types.Package> _addr_pkg, Path p)
                 n = n__prev1;
 
             }
-
             obj = tuple.At(index);
             t = null;
         else if (code == opField) 
@@ -694,7 +670,6 @@ public static (types.Object, error) Object(ptr<types.Package> _addr_pkg, Path p)
                 n = n__prev1;
 
             }
-
             obj = structType.Field(index);
             t = null;
         else if (code == opMethod) 
@@ -702,7 +677,6 @@ public static (types.Object, error) Object(ptr<types.Package> _addr_pkg, Path p)
             if (!ok) {
                 return (null, error.As(fmt.Errorf("cannot apply %q to %s (got %s, want interface or named)", code, t, t))!);
             }
-
             {
                 var n__prev1 = n;
 
@@ -715,7 +689,6 @@ public static (types.Object, error) Object(ptr<types.Package> _addr_pkg, Path p)
                 n = n__prev1;
 
             }
-
             obj = hasMethods.Method(index);
             t = null;
         else if (code == opObj) 
@@ -727,8 +700,7 @@ public static (types.Object, error) Object(ptr<types.Package> _addr_pkg, Path p)
             t = null;
         else 
             return (null, error.As(fmt.Errorf("invalid path: unknown code %q", code))!);
-        
-    }
+            }
 
     if (obj.Pkg() != pkg) {
         return (null, error.As(fmt.Errorf("path denotes %s, which belongs to a different package", obj))!);

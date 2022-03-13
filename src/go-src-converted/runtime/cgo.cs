@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:20 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\cgo.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    //go:cgo_export_static main
+//go:cgo_export_static main
 
-    // Filled in by runtime/cgo when linked into binary.
+// Filled in by runtime/cgo when linked into binary.
 
-    //go:linkname _cgo_init _cgo_init
-    //go:linkname _cgo_thread_start _cgo_thread_start
-    //go:linkname _cgo_sys_thread_create _cgo_sys_thread_create
-    //go:linkname _cgo_notify_runtime_init_done _cgo_notify_runtime_init_done
-    //go:linkname _cgo_callers _cgo_callers
-    //go:linkname _cgo_set_context_function _cgo_set_context_function
-    //go:linkname _cgo_yield _cgo_yield
+//go:linkname _cgo_init _cgo_init
+//go:linkname _cgo_thread_start _cgo_thread_start
+//go:linkname _cgo_sys_thread_create _cgo_sys_thread_create
+//go:linkname _cgo_notify_runtime_init_done _cgo_notify_runtime_init_done
+//go:linkname _cgo_callers _cgo_callers
+//go:linkname _cgo_set_context_function _cgo_set_context_function
+//go:linkname _cgo_yield _cgo_yield
+
 private static unsafe.Pointer _cgo_init = default;private static unsafe.Pointer _cgo_thread_start = default;private static unsafe.Pointer _cgo_sys_thread_create = default;private static unsafe.Pointer _cgo_notify_runtime_init_done = default;private static unsafe.Pointer _cgo_callers = default;private static unsafe.Pointer _cgo_set_context_function = default;private static unsafe.Pointer _cgo_yield = default;
 
 // iscgo is set to true by the runtime/cgo package

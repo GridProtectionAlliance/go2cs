@@ -2,11 +2,9 @@
 // Run go generate from src/runtime to update.
 // See mkfastlog2table.go for comments.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:40 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:25 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\fastlog2table.go
-
-
 namespace go;
 
 public static partial class runtime_package {

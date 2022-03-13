@@ -4,16 +4,16 @@
 
 // This file implements various error reporters.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:31 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:25:53 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\errors.go
-using bytes = go.bytes_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class types2_package {
 
@@ -58,7 +58,6 @@ private static syntax.Pos pos(this ptr<error_> _addr_err) {
         return nopos;
     }
     return err.desc[0].pos;
-
 }
 
 private static @string msg(this ptr<error_> _addr_err, Qualifier qf) {
@@ -74,9 +73,7 @@ private static @string msg(this ptr<error_> _addr_err, Qualifier qf) {
             fmt.Fprintf(_addr_buf, "\n\t%s: ", p.pos);
         }
         buf.WriteString(sprintf(qf, p.format, p.args));
-
     }    return buf.String();
-
 }
 
 // String is for testing.
@@ -87,7 +84,6 @@ private static @string String(this ptr<error_> _addr_err) {
         return "no error";
     }
     return fmt.Sprintf("%s: %s", err.pos(), err.msg(null));
-
 }
 
 // errorf adds formatted error information to err.
@@ -127,9 +123,7 @@ private static @string sprintf(Qualifier qf, @string format, params object[] arg
                 break;
         }
         args[i] = arg;
-
     }    return fmt.Sprintf(format, args);
-
 });
 
 private static @string qualifier(this ptr<Checker> _addr_check, ptr<Package> _addr_pkg) {
@@ -147,10 +141,8 @@ private static @string qualifier(this ptr<Checker> _addr_check, ptr<Package> _ad
             return strconv.Quote(pkg.path);
         }
         return pkg.name;
-
     }
     return "";
-
 }
 
 // markImports recursively walks pkg and its imports, to record unique import
@@ -191,7 +183,6 @@ private static void report(this ptr<Checker> _addr_check, ptr<error_> _addr_err)
         panic("internal error: reporting no error");
     }
     check.err(err.pos(), err.msg(check.qualifier), err.soft);
-
 });
 
 private static void trace(this ptr<Checker> _addr_check, syntax.Pos pos, @string format, params object[] args) {
@@ -244,13 +235,11 @@ private static void err(this ptr<Checker> _addr_check, poser at, @string msg, bo
         panic(new bailout()); // report only first error
     }
     f(err);
-
 });
 
 private static readonly @string invalidAST = "invalid AST: ";
 private static readonly @string invalidArg = "invalid argument: ";
 private static readonly @string invalidOp = "invalid operation: ";
-
 
 private partial interface poser {
     syntax.Pos Pos();
@@ -289,7 +278,6 @@ private static syntax.Pos posFor(poser at) {
             break;
     }
     return at.Pos();
-
 }
 
 // stripAnnotations removes internal (type) annotations from s.
@@ -300,13 +288,11 @@ private static @string stripAnnotations(@string s) {
         // strip #'s and subscript digits
         if (r != instanceMarker && !('₀' <= r && r < '₀' + 10)) { // '₀' == U+2080
             b.WriteRune(r);
-
         }
     }    if (b.Len() < len(s)) {
         return b.String();
     }
     return s;
-
 }
 
 } // end types2_package

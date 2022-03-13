@@ -13,23 +13,25 @@
 // limitations under the License.
 
 // Package plugin defines the plugin implementations that the main pprof driver requires.
-// package plugin -- go2cs converted at 2022 March 06 23:23:40 UTC
+
+// package plugin -- go2cs converted at 2022 March 13 06:36:45 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/plugin" ==> using plugin = go.cmd.vendor.github.com.google.pprof.@internal.plugin_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\plugin\plugin.go
-using io = go.io_package;
-using http = go.net.http_package;
-using regexp = go.regexp_package;
-using time = go.time_package;
-
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using io = io_package;
+using http = net.http_package;
+using regexp = regexp_package;
+using time = time_package;
+
+using profile = github.com.google.pprof.profile_package;
+
+
+// Options groups all the optional plugins into pprof.
+
+using System;
 public static partial class plugin_package {
 
-    // Options groups all the optional plugins into pprof.
 public partial struct Options {
     public Writer Writer;
     public FlagSet Flagset;

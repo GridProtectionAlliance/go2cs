@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rsa -- go2cs converted at 2022 March 06 22:17:13 UTC
+// package rsa -- go2cs converted at 2022 March 13 05:30:34 UTC
 // import "crypto/rsa" ==> using rsa = go.crypto.rsa_package
 // Original source: C:\Program Files\Go\src\crypto\rsa\pkcs1v15.go
-using crypto = go.crypto_package;
-using subtle = go.crypto.subtle_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using big = go.math.big_package;
-
-using randutil = go.crypto.@internal.randutil_package;
-
 namespace go.crypto;
+
+using crypto = crypto_package;
+using subtle = crypto.subtle_package;
+using errors = errors_package;
+using io = io_package;
+using big = math.big_package;
+
+using randutil = crypto.@internal.randutil_package;
+
+
+// This file implements encryption and decryption using PKCS #1 v1.5 padding.
+
+// PKCS1v15DecrypterOpts is for passing options to PKCS #1 v1.5 decryption using
+// the crypto.Decrypter interface.
 
 public static partial class rsa_package {
 
-    // This file implements encryption and decryption using PKCS #1 v1.5 padding.
-
-    // PKCS1v15DecrypterOpts is for passing options to PKCS #1 v1.5 decryption using
-    // the crypto.Decrypter interface.
 public partial struct PKCS1v15DecryptOptions {
     public nint SessionKeyLen;
 }
@@ -53,7 +55,6 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader rand, ptr<PublicKey
         err = err__prev1;
 
     }
-
     var k = pub.Size();
     if (len(msg) > k - 11) {
         return (null, error.As(ErrMessageTooLong)!);
@@ -73,7 +74,6 @@ public static (slice<byte>, error) EncryptPKCS1v15(io.Reader rand, ptr<PublicKey
     var c = encrypt(@new<big.Int>(), pub, m);
 
     return (c.FillBytes(em), error.As(null!)!);
-
 }
 
 // DecryptPKCS1v15 decrypts a plaintext using RSA and the padding scheme from PKCS #1 v1.5.
@@ -96,7 +96,6 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader rand, ptr<PrivateKe
             return (null, error.As(err)!);
         }
     }
-
     var (valid, out, index, err) = decryptPKCS1v15(rand, _addr_priv, ciphertext);
     if (err != null) {
         return (null, error.As(err)!);
@@ -105,7 +104,6 @@ public static (slice<byte>, error) DecryptPKCS1v15(io.Reader rand, ptr<PrivateKe
         return (null, error.As(ErrDecryption)!);
     }
     return (out[(int)index..], error.As(null!)!);
-
 }
 
 // DecryptPKCS1v15SessionKey decrypts a session key using RSA and the padding scheme from PKCS #1 v1.5.
@@ -137,7 +135,6 @@ public static error DecryptPKCS1v15SessionKey(io.Reader rand, ptr<PrivateKey> _a
             return error.As(err)!;
         }
     }
-
     var k = priv.Size();
     if (k - (len(key) + 3 + 8) < 0) {
         return error.As(ErrDecryption)!;
@@ -150,12 +147,10 @@ public static error DecryptPKCS1v15SessionKey(io.Reader rand, ptr<PrivateKey> _a
         // This should be impossible because decryptPKCS1v15 always
         // returns the full slice.
         return error.As(ErrDecryption)!;
-
     }
     valid &= subtle.ConstantTimeEq(int32(len(em) - index), int32(len(key)));
     subtle.ConstantTimeCopy(valid, key, em[(int)len(em) - len(key)..]);
     return error.As(null!)!;
-
 }
 
 // decryptPKCS1v15 decrypts ciphertext using priv and blinds the operation if
@@ -204,7 +199,6 @@ private static (nint, slice<byte>, nint, error) decryptPKCS1v15(io.Reader rand, 
     valid = firstByteIsZero & secondByteIsTwo & (~lookingForIndex & 1) & validPS;
     index = subtle.ConstantTimeSelect(valid, index + 1, 0);
     return (valid, em, index, error.As(null!)!);
-
 }
 
 // nonZeroRandomBytes fills the given slice with non-zero random octets.
@@ -224,13 +218,10 @@ private static error nonZeroRandomBytes(slice<byte> s, io.Reader rand) {
             // In tests, the PRNG may return all zeros so we do
             // this to break the loop.
             s[i] ^= 0x42;
-
         }
-
     }
 
     return ;
-
 }
 
 // These are ASN1 DER structures:
@@ -284,7 +275,6 @@ public static (slice<byte>, error) SignPKCS1v15(io.Reader rand, ptr<PrivateKey> 
         return (null, error.As(err)!);
     }
     return (c.FillBytes(em), error.As(null!)!);
-
 }
 
 // VerifyPKCS1v15 verifies an RSA PKCS #1 v1.5 signature.
@@ -326,7 +316,6 @@ public static error VerifyPKCS1v15(ptr<PublicKey> _addr_pub, crypto.Hash hash, s
         return error.As(ErrVerification)!;
     }
     return error.As(null!)!;
-
 }
 
 private static (nint, slice<byte>, error) pkcs1v15HashInfo(crypto.Hash hash, nint inLen) {
@@ -348,7 +337,6 @@ private static (nint, slice<byte>, error) pkcs1v15HashInfo(crypto.Hash hash, nin
         return (0, null, error.As(errors.New("crypto/rsa: unsupported hash function"))!);
     }
     return ;
-
 }
 
 } // end rsa_package

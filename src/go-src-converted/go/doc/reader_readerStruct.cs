@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:33 UTC
+//     Generated on 2022 March 13 05:52:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace go
 {
     public static partial class doc_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct reader
         {
             // Constructors
@@ -79,7 +79,7 @@ namespace go
             public static implicit operator reader(NilType nil) => default(reader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static reader reader_cast(dynamic value)
         {
             return new reader(value.mode, value.doc, value.filenames, value.notes, value.imports, value.hasDotImp, value.values, value.order, value.types, value.funcs, value.errorDecl, value.fixlist);

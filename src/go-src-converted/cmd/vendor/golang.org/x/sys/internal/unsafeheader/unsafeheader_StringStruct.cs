@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:22 UTC
+//     Generated on 2022 March 13 06:41:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class unsafeheader_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct String
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace @internal
             public static implicit operator String(NilType nil) => default(String);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static String String_cast(dynamic value)
         {
             return new String(value.Data, value.Len);

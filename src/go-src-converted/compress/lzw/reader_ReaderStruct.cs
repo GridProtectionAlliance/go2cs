@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:25 UTC
+//     Generated on 2022 March 13 06:43:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace compress
 {
     public static partial class lzw_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Reader
         {
             // Constructors
@@ -88,7 +88,7 @@ namespace compress
             public static implicit operator Reader(NilType nil) => default(Reader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Reader Reader_cast(dynamic value)
         {
             return new Reader(value.r, value.bits, value.nBits, value.width, value.read, value.litWidth, value.err, value.clear, value.eof, value.hi, value.overflow, value.last, value.suffix, value.prefix, value.output, value.o, value.toRead);

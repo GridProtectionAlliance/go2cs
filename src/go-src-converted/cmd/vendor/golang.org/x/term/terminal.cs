@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package term -- go2cs converted at 2022 March 06 23:31:03 UTC
+// package term -- go2cs converted at 2022 March 13 06:41:32 UTC
 // import "cmd/vendor/golang.org/x/term" ==> using term = go.cmd.vendor.golang.org.x.term_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\term\terminal.go
-using bytes = go.bytes_package;
-using io = go.io_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x;
 
+using bytes = bytes_package;
+using io = io_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using sync = sync_package;
+using utf8 = unicode.utf8_package;
+
+
+// EscapeCodes contains escape sequences that can be written to the terminal in
+// order to achieve different styles of text.
+
+using System;
 public static partial class term_package {
 
-    // EscapeCodes contains escape sequences that can be written to the terminal in
-    // order to achieve different styles of text.
 public partial struct EscapeCodes {
     public slice<byte> Black; // Reset all attributes
     public slice<byte> Red; // Reset all attributes
@@ -99,7 +100,6 @@ private static readonly var keyClearScreen = 10;
 private static readonly var keyPasteStart = 11;
 private static readonly var keyPasteEnd = 12;
 
-
 private static byte crlf = new slice<byte>(new byte[] { '\r', '\n' });private static byte pasteStart = new slice<byte>(new byte[] { keyEscape, '[', '2', '0', '0', '~' });private static byte pasteEnd = new slice<byte>(new byte[] { keyEscape, '[', '2', '0', '1', '~' });
 
 // bytesToKey tries to parse a key sequence from b. If successful, it returns
@@ -144,7 +144,6 @@ private static (int, slice<byte>) bytesToKey(slice<byte> b, bool pasteActive) {
                 return (keyUp, b[(int)1..]);
                 break;
         }
-
     }
     if (b[0] != keyEscape) {
         if (!utf8.FullRune(b)) {
@@ -152,7 +151,6 @@ private static (int, slice<byte>) bytesToKey(slice<byte> b, bool pasteActive) {
         }
         var (r, l) = utf8.DecodeRune(b);
         return (r, b[(int)l..]);
-
     }
     if (!pasteActive && len(b) >= 3 && b[0] == keyEscape && b[1] == '[') {
         switch (b[2]) {
@@ -175,7 +173,6 @@ private static (int, slice<byte>) bytesToKey(slice<byte> b, bool pasteActive) {
                 return (keyEnd, b[(int)3..]);
                 break;
         }
-
     }
     if (!pasteActive && len(b) >= 6 && b[0] == keyEscape && b[1] == '[' && b[2] == '1' && b[3] == ';' && b[4] == '3') {
         switch (b[5]) {
@@ -186,7 +183,6 @@ private static (int, slice<byte>) bytesToKey(slice<byte> b, bool pasteActive) {
                 return (keyAltLeft, b[(int)6..]);
                 break;
         }
-
     }
     if (!pasteActive && len(b) >= 6 && bytes.Equal(b[..(int)6], pasteStart)) {
         return (keyPasteStart, b[(int)6..]);
@@ -199,7 +195,6 @@ private static (int, slice<byte>) bytesToKey(slice<byte> b, bool pasteActive) {
             return (keyUnknown, b[(int)i + 1..]);
         }
     }    return (utf8.RuneError, b);
-
 }
 
 // queue appends data to the end of t.outBuf
@@ -248,7 +243,6 @@ private static void moveCursorToPos(this ptr<Terminal> _addr_t, nint pos) {
     t.cursorX = x;
     t.cursorY = y;
     t.move(up, down, left, right);
-
 }
 
 private static void move(this ptr<Terminal> _addr_t, nint up, nint down, nint left, nint right) {
@@ -292,7 +286,6 @@ private static void move(this ptr<Terminal> _addr_t, nint up, nint down, nint le
         m = append(m, 'D');
     }
     t.queue(m);
-
 }
 
 private static void clearLineToRight(this ptr<Terminal> _addr_t) {
@@ -319,7 +312,6 @@ private static void setLine(this ptr<Terminal> _addr_t, slice<int> newLine, nint
     }
     t.line = newLine;
     t.pos = newPos;
-
 }
 
 private static void advanceCursor(this ptr<Terminal> _addr_t, nint places) {
@@ -344,7 +336,6 @@ private static void advanceCursor(this ptr<Terminal> _addr_t, nint places) {
         // need to write a newline so that our cursor can be
         // advanced to the next line.
         t.outBuf = append(t.outBuf, '\r', '\n');
-
     }
 }
 
@@ -386,7 +377,6 @@ private static nint countToLeftWord(this ptr<Terminal> _addr_t) {
             break;
         }
         pos--;
-
     }
     while (pos > 0) {
         if (t.line[pos] == ' ') {
@@ -394,11 +384,9 @@ private static nint countToLeftWord(this ptr<Terminal> _addr_t) {
             break;
         }
         pos--;
-
     }
 
     return t.pos - pos;
-
 }
 
 // countToRightWord returns then number of characters from the cursor to the
@@ -412,17 +400,14 @@ private static nint countToRightWord(this ptr<Terminal> _addr_t) {
             break;
         }
         pos++;
-
     }
     while (pos < len(t.line)) {
         if (t.line[pos] != ' ') {
             break;
         }
         pos++;
-
     }
     return pos - t.pos;
-
 }
 
 // visualLength returns the number of visible glyphs in s.
@@ -440,9 +425,7 @@ private static nint visualLength(slice<int> runes) {
             inEscapeSeq = true;
         else 
             length++;
-        
-    }    return length;
-
+            }    return length;
 }
 
 // handleKey processes the given key and, optionally, returns a line of text
@@ -584,7 +567,6 @@ private static (@string, bool) handleKey(this ptr<Terminal> _addr_t, int key) {
         }
         t.addKeyToLine(key);
         return ;
-
 }
 
 // addKeyToLine inserts the given key at the current position in the current
@@ -605,7 +587,6 @@ private static void addKeyToLine(this ptr<Terminal> _addr_t, int key) {
     }
     t.pos++;
     t.moveCursorToPos(t.pos);
-
 }
 
 private static void writeLine(this ptr<Terminal> _addr_t, slice<int> line) {
@@ -620,9 +601,7 @@ private static void writeLine(this ptr<Terminal> _addr_t, slice<int> line) {
         t.queue(line[..(int)todo]);
         t.advanceCursor(visualLength(line[..(int)todo]));
         line = line[(int)todo..];
-
     }
-
 }
 
 // writeWithCRLF writes buf to w but replaces all occurrences of \n with \r\n.
@@ -650,15 +629,12 @@ private static (nint, error) writeWithCRLF(io.Writer w, slice<byte> buf) {
             if (err != null) {
                 return (n, error.As(err)!);
             }
-
             n++;
             buf = buf[(int)1..];
-
         }
     }
 
     return (n, error.As(null!)!);
-
 }
 
 private static (nint, error) Write(this ptr<Terminal> _addr_t, slice<byte> buf) => func((defer, _, _) => {
@@ -673,7 +649,6 @@ private static (nint, error) Write(this ptr<Terminal> _addr_t, slice<byte> buf) 
         // This is the easy case: there's nothing on the screen that we
         // have to move out of the way.
         return writeWithCRLF(t.c, buf);
-
     }
     t.move(0, 0, t.cursorX, 0);
     t.cursorX = 0;
@@ -710,7 +685,6 @@ private static (nint, error) Write(this ptr<Terminal> _addr_t, slice<byte> buf) 
     }
     t.outBuf = t.outBuf[..(int)0];
     return ;
-
 });
 
 // ReadPassword temporarily changes the prompt and reads a password, without
@@ -791,13 +765,10 @@ private static (@string, error) readLine(this ptr<Terminal> _addr_t) {
                 t.pasteActive = false;
                 continue;
             }
-
             if (!t.pasteActive) {
                 lineIsPasted = false;
             }
-
             line, lineOk = t.handleKey(key);
-
         }
         if (len(rest) > 0) {
             var n = copy(t.inBuf[..], rest);
@@ -830,9 +801,7 @@ private static (@string, error) readLine(this ptr<Terminal> _addr_t) {
             return ;
         }
         t.remainder = t.inBuf[..(int)n + len(t.remainder)];
-
     }
-
 }
 
 // SetPrompt sets the prompt to be used when reading subsequent lines.
@@ -856,7 +825,6 @@ private static void clearAndRepaintLinePlusNPrevious(this ptr<Terminal> _addr_t,
         t.move(0, 1, 0, 0);
         t.cursorY++;
         t.clearLineToRight();
-
     } 
     // Move back to beginning.
     t.move(t.cursorY, 0, 0, 0);
@@ -864,7 +832,6 @@ private static void clearAndRepaintLinePlusNPrevious(this ptr<Terminal> _addr_t,
     t.advanceCursor(visualLength(t.prompt));
     t.writeLine(t.line);
     t.moveCursorToPos(t.pos);
-
 }
 
 private static error SetSize(this ptr<Terminal> _addr_t, nint width, nint height) => func((defer, _, _) => {
@@ -915,7 +882,6 @@ private static error SetSize(this ptr<Terminal> _addr_t, nint width, nint height
         var (_, err) = t.c.Write(t.outBuf);
     t.outBuf = t.outBuf[..(int)0];
     return error.As(err)!;
-
 });
 
 private partial struct pasteIndicatorError {
@@ -989,7 +955,6 @@ private static (@string, bool) NthPreviousEntry(this ptr<stRingBuffer> _addr_s, 
         index += s.max;
     }
     return (s.entries[index], true);
-
 }
 
 // readPasswordLine reads from reader until it finds \n or io.EOF.
@@ -1030,7 +995,6 @@ private static (slice<byte>, error) readPasswordLine(io.Reader reader) {
                     break;
             }
             continue;
-
         }
         if (err != null) {
             if (err == io.EOF && len(ret) > 0) {
@@ -1039,7 +1003,6 @@ private static (slice<byte>, error) readPasswordLine(io.Reader reader) {
             return (ret, error.As(err)!);
         }
     }
-
 }
 
 } // end term_package

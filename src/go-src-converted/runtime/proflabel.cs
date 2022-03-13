@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:13 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:42 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\proflabel.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -37,7 +37,6 @@ private static void runtime_setProfLabel(unsafe.Pointer labels) {
         racereleasemerge(@unsafe.Pointer(_addr_labelSync));
     }
     getg().labels = labels;
-
 }
 
 //go:linkname runtime_getProfLabel runtime/pprof.runtime_getProfLabel

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:42:55 UTC
+//     Generated on 2022 March 13 05:54:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class ast_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct TypeSpec
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace go
             public static implicit operator TypeSpec(NilType nil) => default(TypeSpec);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static TypeSpec TypeSpec_cast(dynamic value)
         {
             return new TypeSpec(ref value.Doc, ref value.Name, ref value.TParams, value.Assign, value.Type, ref value.Comment);

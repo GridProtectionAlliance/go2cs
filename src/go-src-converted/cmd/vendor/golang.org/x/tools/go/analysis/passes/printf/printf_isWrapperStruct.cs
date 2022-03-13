@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:34:44 UTC
+//     Generated on 2022 March 13 06:42:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -45,7 +45,7 @@ namespace passes
 {
     public static partial class printf_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct isWrapper
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace passes
             public static implicit operator isWrapper(NilType nil) => default(isWrapper);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static isWrapper isWrapper_cast(dynamic value)
         {
             return new isWrapper(value.Kind);

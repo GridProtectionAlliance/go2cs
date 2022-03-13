@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package regexp -- go2cs converted at 2022 March 06 22:23:41 UTC
+// package regexp -- go2cs converted at 2022 March 13 05:38:07 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Program Files\Go\src\regexp\exec.go
-using io = go.io_package;
-using syntax = go.regexp.syntax_package;
-using sync = go.sync_package;
-
 namespace go;
+
+using io = io_package;
+using syntax = regexp.syntax_package;
+using sync = sync_package;
+
+
+// A queue is a 'sparse array' holding pending threads of execution.
+// See https://research.swtch.com/2008/03/using-uninitialized-memory-for-fun-and.html
 
 public static partial class regexp_package {
 
-    // A queue is a 'sparse array' holding pending threads of execution.
-    // See https://research.swtch.com/2008/03/using-uninitialized-memory-for-fun-and.html
 private partial struct queue {
     public slice<uint> sparse;
     public slice<entry> dense;
@@ -108,7 +110,6 @@ private static (input, nint) init(this ptr<inputs> _addr_i, io.RuneReader r, sli
         return (i.newBytes(b), len(b));
     }
     return (i.newString(s), len(s));
-
 }
 
 private static void init(this ptr<machine> _addr_m, nint ncap) {
@@ -139,10 +140,8 @@ private static ptr<thread> alloc(this ptr<machine> _addr_m, ptr<syntax.Inst> _ad
             t.cap = make_slice<nint>(len(m.matchcap), cap(m.matchcap));
         }
     }
-
     t.inst = i;
     return _addr_t!;
-
 }
 
 // A lazyFlag is a lazily-evaluated syntax.EmptyOp,
@@ -167,14 +166,12 @@ private static bool match(this lazyFlag f, syntax.EmptyOp op) {
             return false;
         }
         op &= syntax.EmptyBeginLine;
-
     }
     if (op & syntax.EmptyBeginText != 0) {
         if (r1 >= 0) {
             return false;
         }
         op &= syntax.EmptyBeginText;
-
     }
     if (op == 0) {
         return true;
@@ -185,14 +182,12 @@ private static bool match(this lazyFlag f, syntax.EmptyOp op) {
             return false;
         }
         op &= syntax.EmptyEndLine;
-
     }
     if (op & syntax.EmptyEndText != 0) {
         if (r2 >= 0) {
             return false;
         }
         op &= syntax.EmptyEndText;
-
     }
     if (op == 0) {
         return true;
@@ -205,7 +200,6 @@ private static bool match(this lazyFlag f, syntax.EmptyOp op) {
         op &= syntax.EmptyNoWordBoundary;
     }
     return op == 0;
-
 }
 
 // match runs the machine over the input starting at pos.
@@ -217,7 +211,6 @@ private static bool match(this ptr<machine> _addr_m, input i, nint pos) {
     var startCond = m.re.cond;
     if (startCond == ~syntax.EmptyOp(0)) { // impossible
         return false;
-
     }
     m.matched = false;
     foreach (var (i) in m.matchcap) {
@@ -245,28 +238,21 @@ private static bool match(this ptr<machine> _addr_m, input i, nint pos) {
             if (startCond & syntax.EmptyBeginText != 0 && pos != 0) { 
                 // Anchored match, past beginning of text.
                 break;
-
             }
-
             if (m.matched) { 
                 // Have match; finished exploring alternatives.
                 break;
-
             }
-
             if (len(m.re.prefix) > 0 && r1 != m.re.prefixRune && i.canCheckPrefix()) { 
                 // Match requires literal prefix; fast search for it.
                 var advance = i.index(m.re, pos);
                 if (advance < 0) {
                     break;
                 }
-
                 pos += advance;
                 r, width = i.step(pos);
                 r1, width1 = i.step(pos + width);
-
             }
-
         }
         if (!m.matched) {
             if (len(m.matchcap) > 0) {
@@ -283,7 +269,6 @@ private static bool match(this ptr<machine> _addr_m, input i, nint pos) {
             // Found a match and not paying attention
             // to where it is, so any match will do.
             break;
-
         }
         pos += width;
         (r, width) = (r1, width1);        if (r != endOfText) {
@@ -293,7 +278,6 @@ private static bool match(this ptr<machine> _addr_m, input i, nint pos) {
     }
     m.clear(nextq);
     return m.matched;
-
 }
 
 // clear frees all threads on the thread queue.
@@ -306,7 +290,6 @@ private static void clear(this ptr<machine> _addr_m, ptr<queue> _addr_q) {
             m.pool = append(m.pool, d.t);
         }
     }    q.dense = q.dense[..(int)0];
-
 }
 
 // step executes one step of the machine, running each of the threads
@@ -355,9 +338,7 @@ private static void step(this ptr<machine> _addr_m, ptr<queue> _addr_runq, ptr<q
                 }
 
                 runq.dense = runq.dense[..(int)0];
-
             }
-
             m.matched = true;
         else if (i.Op == syntax.InstRune) 
             add = i.MatchRune(c);
@@ -377,7 +358,6 @@ private static void step(this ptr<machine> _addr_m, ptr<queue> _addr_runq, ptr<q
         }
     }
     runq.dense = runq.dense[..(int)0];
-
 });
 
 // add adds an entry to q for pc, unless the q already has such an entry.
@@ -405,7 +385,6 @@ Again:
         j = j__prev1;
 
     }
-
 
     j = len(q.dense);
     q.dense = q.dense[..(int)j + 1];
@@ -456,7 +435,6 @@ Again:
     else 
         panic("unhandled");
         return _addr_t!;
-
 });
 
 private partial struct onePassMachine {
@@ -472,7 +450,6 @@ private static ptr<onePassMachine> newOnePassMachine() {
         m = @new<onePassMachine>();
     }
     return _addr_m!;
-
 }
 
 private static void freeOnePassMachine(ptr<onePassMachine> _addr_m) {
@@ -489,7 +466,6 @@ private static slice<nint> doOnePass(this ptr<Regexp> _addr_re, io.RuneReader ir
     var startCond = re.cond;
     if (startCond == ~syntax.EmptyOp(0)) { // impossible
         return null;
-
     }
     var m = newOnePassMachine();
     if (cap(m.matchcap) < ncap) {
@@ -541,7 +517,6 @@ private static slice<nint> doOnePass(this ptr<Regexp> _addr_re, io.RuneReader ir
         r1, width1 = i.step(pos + width);
         flag = i.context(pos);
         pc = int(re.prefixEnd);
-
     }
     while (true) {
         inst = re.onepass.Inst[pc];
@@ -605,7 +580,6 @@ Return:
     dstCap = append(dstCap, m.matchcap);
     freeOnePassMachine(_addr_m);
     return dstCap;
-
 });
 
 // doMatch reports whether either r, b or s match the regexp.
@@ -625,7 +599,6 @@ private static slice<nint> doExecute(this ptr<Regexp> _addr_re, io.RuneReader r,
     if (dstCap == null) { 
         // Make sure 'return dstCap' is non-nil.
         dstCap = arrayNoInts.slice(-1, 0, 0);
-
     }
     if (r == null && len(b) + len(s) < re.minInputLen) {
         return null;
@@ -647,7 +620,6 @@ private static slice<nint> doExecute(this ptr<Regexp> _addr_re, io.RuneReader r,
     dstCap = append(dstCap, m.matchcap);
     re.put(m);
     return dstCap;
-
 }
 
 // arrayNoInts is returned by doExecute match if nil dstCap is passed

@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package riscv64 -- go2cs converted at 2022 March 06 23:10:52 UTC
+// package riscv64 -- go2cs converted at 2022 March 13 06:24:10 UTC
 // import "cmd/compile/internal/riscv64" ==> using riscv64 = go.cmd.compile.@internal.riscv64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\riscv64\gsubr.go
-using objw = go.cmd.compile.@internal.objw_package;
-using obj = go.cmd.@internal.obj_package;
-using riscv = go.cmd.@internal.obj.riscv_package;
-
 namespace go.cmd.compile.@internal;
+
+using objw = cmd.compile.@internal.objw_package;
+using obj = cmd.@internal.obj_package;
+using riscv = cmd.@internal.obj.riscv_package;
 
 public static partial class riscv64_package {
 
@@ -22,7 +22,6 @@ private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {
     p.Reg = riscv.REG_ZERO;
     p.To = new obj.Addr(Type:obj.TYPE_REG,Reg:riscv.REG_ZERO);
     return _addr_p!;
-
 }
 
 } // end riscv64_package

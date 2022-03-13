@@ -8,12 +8,13 @@
 // logical network interfaces and interface addresses on Solaris.
 //
 // The package supports Solaris 11 or above.
-// package lif -- go2cs converted at 2022 March 06 23:38:04 UTC
+
+// package lif -- go2cs converted at 2022 March 13 06:46:22 UTC
 // import "vendor/golang.org/x/net/lif" ==> using lif = go.vendor.golang.org.x.net.lif_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\lif\lif.go
-using syscall = go.syscall_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using syscall = syscall_package;
 
 public static partial class lif_package {
 
@@ -45,12 +46,10 @@ private static (slice<endpoint>, error) newEndpoints(nint af) {
             continue;
         }
         eps = append(eps, new endpoint(af:af,s:uintptr(s)));
-
     }    if (len(eps) == 0) {
         return (null, error.As(lastErr)!);
     }
     return (eps, error.As(null!)!);
-
 }
 
 } // end lif_package

@@ -5,24 +5,23 @@
 // PE (Portable Executable) file writing
 // https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
 
-// package ld -- go2cs converted at 2022 March 06 23:22:18 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:21 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\pe.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using pe = go.debug.pe_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using pe = debug.pe_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class ld_package {
 
@@ -88,7 +87,6 @@ public static readonly nuint IMAGE_SCN_MEM_EXECUTE = 0x20000000;
 public static readonly nuint IMAGE_SCN_MEM_READ = 0x40000000;
 public static readonly nuint IMAGE_SCN_MEM_WRITE = 0x80000000;
 
-
 // See https://docs.microsoft.com/en-us/windows/win32/debug/pe-format.
 // TODO(crawshaw): add these constants to debug/pe.
  
@@ -138,10 +136,8 @@ public static readonly nuint IMAGE_REL_ARM64_REL32 = 0x0011;
 public static readonly nint IMAGE_REL_BASED_HIGHLOW = 3;
 public static readonly nint IMAGE_REL_BASED_DIR64 = 10;
 
-
 public static readonly nint PeMinimumTargetMajorVersion = 6;
 public static readonly nint PeMinimumTargetMinorVersion = 1;
-
 
 // DOS stub that prints out
 // "This program cannot be run in DOS mode."
@@ -176,7 +172,6 @@ private static nint size(this ptr<peStringTable> _addr_t) {
  
     // string table starts with 4-byte length at the beginning
     return t.stringsLen + 4;
-
 }
 
 // add adds string str to string table t.
@@ -187,7 +182,6 @@ private static nint add(this ptr<peStringTable> _addr_t, @string str) {
     t.strings = append(t.strings, str);
     t.stringsLen += len(str) + 1; // each string will have 0 appended to it
     return off;
-
 }
 
 // write writes string table t into the output file.
@@ -263,7 +257,6 @@ private static error write(this ptr<peSection> _addr_sect, ptr<OutBuf> _addr_@ou
     }
     copy(h.Name[..], sect.shortName);
     return error.As(binary.Write(out, binary.LittleEndian, h))!;
-
 }
 
 // emitRelocations emits the relocation entries for the sect.
@@ -295,7 +288,6 @@ private static nint emitRelocations(this ptr<peSection> _addr_sect, ptr<OutBuf> 
         sect.pointerToRelocations += 10; // skip the extend reloc entry
     }
     sect.numberOfRelocations = uint16(n - 1);
-
 }
 
 // peFile is used to build COFF file.
@@ -331,7 +323,6 @@ private static ptr<peSection> addSection(this ptr<peFile> _addr_f, @string name,
     }
     f.sections = append(f.sections, sect);
     return _addr_sect!;
-
 }
 
 // addDWARFSection adds DWARF section to the COFF file f.
@@ -348,7 +339,6 @@ private static ptr<peSection> addDWARFSection(this ptr<peFile> _addr_f, @string 
     h.shortName = fmt.Sprintf("/%d", off);
     h.characteristics = IMAGE_SCN_ALIGN_1BYTES | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_DISCARDABLE | IMAGE_SCN_CNT_INITIALIZED_DATA;
     return _addr_h!;
-
 }
 
 // addDWARF adds DWARF information to the COFF file f.
@@ -357,11 +347,9 @@ private static void addDWARF(this ptr<peFile> _addr_f) {
 
     if (FlagS.val) { // disable symbol table
         return ;
-
     }
     if (FlagW.val) { // disable dwarf
         return ;
-
     }
     foreach (var (_, sect) in Segdwarf.Sections) {
         var h = f.addDWARFSection(sect.Name, int(sect.Length));
@@ -422,7 +410,6 @@ private static ptr<peSection> addInitArray(this ptr<peFile> _addr_f, ptr<Link> _
             break;
     }
     return _addr_sect!;
-
 }
 
 // emitRelocations emits relocation entries for go.o in external linking.
@@ -496,8 +483,6 @@ private static void emitRelocations(this ptr<peFile> _addr_f, ptr<Link> _addr_ct
                         ctxt.Errorf(s, "unsupported obj reloc %v/%d to %s", r.Type(), r.Siz(), ldr.SymName(r.Sym()));
                     }
                 }
-
-
             }
 
             s = s__prev1;
@@ -507,7 +492,6 @@ private static void emitRelocations(this ptr<peFile> _addr_f, ptr<Link> _addr_ct
         const nint relocLen = 4 + 4 + 2;
 
         return int(sect.Rellen / relocLen);
-
     };
 
     {
@@ -529,9 +513,7 @@ private static void emitRelocations(this ptr<peFile> _addr_f, ptr<Link> _addr_ct
                 }
 
                 return n;
-
             });
-
         }
         s = s__prev1;
     }
@@ -549,16 +531,12 @@ dwarfLoop:
             }
             foreach (var (_, pesect) in f.sections) {
                 if (sect.Name == pesect.name) {
-                    pesect.emitRelocations(ctxt.Out, () => {
-                        return relocsect(sect, si.syms, sect.Vaddr);
-                    });
+                    pesect.emitRelocations(ctxt.Out, () => relocsect(sect, si.syms, sect.Vaddr));
                     _continuedwarfLoop = true;
                     break;
                 }
-
             }
             Errorf(null, "emitRelocations: could not find %q section", sect.Name);
-
         }
 
         i = i__prev1;
@@ -588,9 +566,7 @@ dwarfLoop:
                 break;
         }
         return 1;
-
     });
-
 });
 
 // writeSymbol appends symbol s to file f symbol table.
@@ -617,7 +593,6 @@ private static void writeSymbol(this ptr<peFile> _addr_f, ptr<OutBuf> _addr_@out
     ldr.SetSymDynid(s, int32(f.symbolCount));
 
     f.symbolCount++;
-
 }
 
 // mapToPESection searches peFile f for s symbol's location.
@@ -653,7 +628,6 @@ private static (nint, long, error) mapToPESection(this ptr<peFile> _addr_f, ptr<
         return (f.dataSect.index, int64(v), error.As(null!)!);
     }
     return (f.bssSect.index, int64(v - Segdata.Filelen), error.As(null!)!);
-
 }
 
 private static var isLabel = make_map<loader.Sym, bool>();
@@ -702,14 +676,12 @@ private static void writeSymbols(this ptr<peFile> _addr_f, ptr<Link> _addr_ctxt)
  {
                 ctxt.Errorf(s, "addpesym: %v", err);
             }
-
         }
         var @class = IMAGE_SYM_CLASS_EXTERNAL;
         if (ldr.IsFileLocal(s) || ldr.AttrVisibilityHidden(s) || ldr.AttrLocal(s)) {
             class = IMAGE_SYM_CLASS_STATIC;
         }
         f.writeSymbol(ctxt.Out, ldr, s, name, value, sect, peSymType, uint8(class));
-
     };
 
     if (ctxt.LinkMode == LinkExternal) { 
@@ -747,7 +719,6 @@ private static void writeSymbols(this ptr<peFile> _addr_f, ptr<Link> _addr_ctxt)
             return false;
         }
         return true;
-
     }; 
 
     // Add data symbols and external references.
@@ -763,15 +734,11 @@ private static void writeSymbols(this ptr<peFile> _addr_f, ptr<Link> _addr_ctxt)
                 if (t == sym.STLSBSS) {
                     continue;
                 }
-
                 if (!shouldBeInSymbolTable(s)) {
                     continue;
                 }
-
                 addsym(s);
-
             }
-
 
             if (t == sym.SDYNIMPORT || t == sym.SHOSTOBJ || t == sym.SUNDEFEXT) 
                 addsym(s);
@@ -779,12 +746,10 @@ private static void writeSymbols(this ptr<peFile> _addr_f, ptr<Link> _addr_ctxt)
                 if (len(isLabel) > 0 && isLabel[s]) {
                     addsym(s);
                 }
-            
-        }
+                    }
 
         s = s__prev1;
     }
-
 }
 
 // writeSymbolTableAndStringTable writes out symbol and string tables for peFile f.
@@ -806,7 +771,6 @@ private static void writeSymbolTableAndStringTable(this ptr<peFile> _addr_f, ptr
         h = f.addSection(".symtab", size, size);
         h.characteristics = IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_DISCARDABLE;
         h.checkOffset(f.symtabOffset);
-
     }
     f.stringTable.write(ctxt.Out);
     if (ctxt.LinkMode != LinkExternal) {
@@ -849,8 +813,7 @@ private static void writeFileHeader(this ptr<peFile> _addr_f, ptr<Link> _addr_ct
             if (ctxt.BuildMode != BuildModePIE) {
                 fh.Characteristics |= pe.IMAGE_FILE_RELOCS_STRIPPED;
             }
-        
-    }
+            }
     if (pe64 != 0) {
         ref pe.OptionalHeader64 oh64 = ref heap(out ptr<pe.OptionalHeader64> _addr_oh64);
         fh.SizeOfOptionalHeader = uint16(binary.Size(_addr_oh64));
@@ -866,7 +829,6 @@ private static void writeFileHeader(this ptr<peFile> _addr_f, ptr<Link> _addr_ct
     fh.NumberOfSymbols = uint32(f.symbolCount);
 
     binary.Write(ctxt.Out, binary.LittleEndian, _addr_fh);
-
 }
 
 // writeOptionalHeader writes COFF optional header for peFile f.
@@ -884,7 +846,6 @@ private static void writeOptionalHeader(this ptr<peFile> _addr_f, ptr<Link> _add
  {
         oh.Magic = 0x10b; // PE32
         oh.BaseOfData = f.dataSect.virtualAddress;
-
     }
     oh64.MajorLinkerVersion = 3;
     oh.MajorLinkerVersion = 3;
@@ -1006,11 +967,9 @@ public static void Peinit(ptr<Link> _addr_ctxt) {
             // that fail when PEBASE is too large.
             // We need to fix this, but for now, use a smaller PEBASE.
             PEBASE = 1 << 22;
-
         }
         ref pe.OptionalHeader64 oh64 = ref heap(out ptr<pe.OptionalHeader64> _addr_oh64);
         l = binary.Size(_addr_oh64);
-
     }
     else
  { 
@@ -1018,7 +977,6 @@ public static void Peinit(ptr<Link> _addr_ctxt) {
         PEBASE = 1 << 22;
         ref pe.OptionalHeader32 oh = ref heap(out ptr<pe.OptionalHeader32> _addr_oh);
         l = binary.Size(_addr_oh);
-
     }
     if (ctxt.LinkMode == LinkExternal) { 
         // .rdata section will contain "masks" and "shifts" symbols, and they
@@ -1027,7 +985,6 @@ public static void Peinit(ptr<Link> _addr_ctxt) {
         // linker will honour that requirement.
         PESECTALIGN = 32;
         PEFILEALIGN = 0;
-
     }
     ref array<pe.SectionHeader32> sh = ref heap(new array<pe.SectionHeader32>(16), out ptr<array<pe.SectionHeader32>> _addr_sh);
     ref pe.FileHeader fh = ref heap(out ptr<pe.FileHeader> _addr_fh);
@@ -1110,7 +1067,6 @@ private static ptr<Dll> initdynimport(ptr<Link> _addr_ctxt) {
                 break;
             d = d.next;
             }
-
         }
 
         if (d == null) {
@@ -1137,11 +1093,9 @@ private static ptr<Dll> initdynimport(ptr<Link> _addr_ctxt) {
 
         }
 
-
         m.s = s;
         m.next = d.ms;
         d.ms = m;
-
     }
 
     if (ctxt.IsExternal()) { 
@@ -1164,7 +1118,6 @@ private static ptr<Dll> initdynimport(ptr<Link> _addr_ctxt) {
                         dynName += fmt.Sprintf("@%d", m.argsize);
                     m = m.next;
                     }
-
                     var dynSym = ldr.CreateSymForUpdate(dynName, 0);
                     dynSym.SetType(sym.SHOSTOBJ);
                     var (r, _) = sb.AddRel(objabi.R_ADDR);
@@ -1173,14 +1126,11 @@ private static ptr<Dll> initdynimport(ptr<Link> _addr_ctxt) {
                 d = d.next;
                 }
     else
-
-
             }
 
 
             d = d__prev1;
         }
-
     } {
         var dynamic = ldr.CreateSymForUpdate(".windynamic", 0);
         dynamic.SetType(sym.SWINDOWS);
@@ -1209,10 +1159,8 @@ private static ptr<Dll> initdynimport(ptr<Link> _addr_ctxt) {
 
             d = d__prev1;
         }
-
     }
     return _addr_dr!;
-
 }
 
 // peimporteddlls returns the gcc command line argument to link all imported
@@ -1230,7 +1178,6 @@ private static slice<@string> peimporteddlls() {
     }
 
     return dlls;
-
 }
 
 private static void addimports(ptr<Link> _addr_ctxt, ptr<peSection> _addr_datsect) {
@@ -1327,7 +1274,6 @@ private static void addimports(ptr<Link> _addr_ctxt, ptr<peSection> _addr_datsec
                         ctxt.Out.Write32(uint32(m.off));
             d = d.next;
                     }
-
                 }
 
 
@@ -1341,7 +1287,6 @@ private static void addimports(ptr<Link> _addr_ctxt, ptr<peSection> _addr_datsec
  {
                 ctxt.Out.Write32(0);
             }
-
         }
 
         d = d__prev1;
@@ -1381,7 +1326,6 @@ private static void addimports(ptr<Link> _addr_ctxt, ptr<peSection> _addr_datsec
                         ctxt.Out.Write32(uint32(m.off));
             d = d.next;
                     }
-
                 }
 
 
@@ -1395,7 +1339,6 @@ private static void addimports(ptr<Link> _addr_ctxt, ptr<peSection> _addr_datsec
  {
                 ctxt.Out.Write32(0);
             }
-
         }
 
         d = d__prev1;
@@ -1435,7 +1378,6 @@ private static void addimports(ptr<Link> _addr_ctxt, ptr<peSection> _addr_datsec
     pefile.dataDirectory[pe.IMAGE_DIRECTORY_ENTRY_IAT].Size = uint32(ldr.SymSize(dynamic));
 
     @out.SeekSet(endoff);
-
 }
 
 private static void initdynexport(ptr<Link> _addr_ctxt) {
@@ -1451,11 +1393,9 @@ private static void initdynexport(ptr<Link> _addr_ctxt) {
             errorexit();
         }
         dexport = append(dexport, s);
-
     }
 
     sort.Slice(dexport, (i, j) => ldr.SymExtname(dexport[i]) < ldr.SymExtname(dexport[j]));
-
 }
 
 private static void addexports(ptr<Link> _addr_ctxt) {
@@ -1549,7 +1489,6 @@ private static void addexports(ptr<Link> _addr_ctxt) {
     }
 
     sect.pad(out, uint32(size));
-
 }
 
 // peBaseRelocEntry represents a single relocation entry.
@@ -1637,7 +1576,6 @@ private static void addentry(this ptr<peBaseRelocTable> _addr_rt, ptr<loader.Loa
 
     b.entries = append(b.entries, e);
     rt.blocks[page] = b;
-
 }
 
 private static void write(this ptr<peBaseRelocTable> _addr_rt, ptr<Link> _addr_ctxt) {
@@ -1675,7 +1613,6 @@ private static void addPEBaseRelocSym(ptr<loader.Loader> _addr_ldr, loader.Sym s
         }
         if (r.Siz() == 0) { // informational relocation
             continue;
-
         }
         if (r.Type() == objabi.R_DWARFFILEREF) {
             continue;
@@ -1693,7 +1630,6 @@ private static void addPEBaseRelocSym(ptr<loader.Loader> _addr_ldr, loader.Sym s
             rt.addentry(ldr, s, _addr_r);
         else         
     }
-
 }
 
 private static bool needPEBaseReloc(ptr<Link> _addr_ctxt) {
@@ -1705,7 +1641,6 @@ private static bool needPEBaseReloc(ptr<Link> _addr_ctxt) {
         return false;
     }
     return true;
-
 }
 
 private static void addPEBaseReloc(ptr<Link> _addr_ctxt) {
@@ -1751,7 +1686,6 @@ private static void addPEBaseReloc(ptr<Link> _addr_ctxt) {
 
     pefile.dataDirectory[pe.IMAGE_DIRECTORY_ENTRY_BASERELOC].VirtualAddress = rsect.virtualAddress;
     pefile.dataDirectory[pe.IMAGE_DIRECTORY_ENTRY_BASERELOC].Size = rsect.virtualSize;
-
 }
 
 private static void dope(this ptr<Link> _addr_ctxt) {
@@ -1768,7 +1702,6 @@ private static void setpersrc(ptr<Link> _addr_ctxt, slice<loader.Sym> syms) {
         Errorf(null, "too many .rsrc sections");
     }
     rsrcsyms = syms;
-
 }
 
 private static void addpersrc(ptr<Link> _addr_ctxt) {
@@ -1817,15 +1750,11 @@ private static void addpersrc(ptr<Link> _addr_ctxt) {
                     // This works because .rsrc sections are divided into two (but not more)
                     // of these sections.
                     val += uint32(len(data));
-
                 }
-
                 binary.LittleEndian.PutUint32(p, val);
-
             }
 
             ctxt.Out.Write(data);
-
         }
         rsrcsym = rsrcsym__prev1;
     }
@@ -1835,7 +1764,6 @@ private static void addpersrc(ptr<Link> _addr_ctxt) {
     // update data directory
     pefile.dataDirectory[pe.IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress = h.virtualAddress;
     pefile.dataDirectory[pe.IMAGE_DIRECTORY_ENTRY_RESOURCE].Size = h.virtualSize;
-
 }
 
 private static void asmbPe(ptr<Link> _addr_ctxt) {
@@ -1847,7 +1775,6 @@ private static void asmbPe(ptr<Link> _addr_ctxt) {
         // some data symbols (e.g. masks) end up in the .text section, and they normally
         // expect larger alignment requirement than the default text section alignment.
         t.characteristics |= IMAGE_SCN_ALIGN_32BYTES;
-
     }
     t.checkSegment(_addr_Segtext);
     pefile.textSect = t;
@@ -1858,7 +1785,6 @@ private static void asmbPe(ptr<Link> _addr_ctxt) {
         // some data symbols (e.g. masks) end up in the .rdata section, and they normally
         // expect larger alignment requirement than the default text section alignment.
         ro.characteristics |= IMAGE_SCN_ALIGN_32BYTES;
-
     }
     ro.checkSegment(_addr_Segrodata);
     pefile.rdataSect = ro;
@@ -1899,7 +1825,6 @@ private static void asmbPe(ptr<Link> _addr_ctxt) {
         pefile.emitRelocations(ctxt);
     }
     pewrite(_addr_ctxt);
-
 }
 
 } // end ld_package

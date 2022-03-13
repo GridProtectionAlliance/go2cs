@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:08 UTC
+//     Generated on 2022 March 13 06:29:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace @internal
 {
     public static partial class modcmd_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct moduleJSON
         {
             // Constructors
@@ -79,7 +79,7 @@ namespace @internal
             public static implicit operator moduleJSON(NilType nil) => default(moduleJSON);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static moduleJSON moduleJSON_cast(dynamic value)
         {
             return new moduleJSON(value.Path, value.Version, value.Error, value.Info, value.GoMod, value.Zip, value.Dir, value.Sum, value.GoModSum);

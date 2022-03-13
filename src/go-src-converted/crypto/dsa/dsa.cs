@@ -11,21 +11,24 @@
 // with 1024-bit moduli (L1024N160 parameters) are cryptographically weak, while
 // bigger keys are not widely supported. Note that FIPS 186-5 no longer approves
 // DSA for signature generation.
-// package dsa -- go2cs converted at 2022 March 06 22:19:21 UTC
+
+// package dsa -- go2cs converted at 2022 March 13 05:34:17 UTC
 // import "crypto/dsa" ==> using dsa = go.crypto.dsa_package
 // Original source: C:\Program Files\Go\src\crypto\dsa\dsa.go
-using errors = go.errors_package;
-using io = go.io_package;
-using big = go.math.big_package;
-
-using randutil = go.crypto.@internal.randutil_package;
-
 namespace go.crypto;
+
+using errors = errors_package;
+using io = io_package;
+using big = math.big_package;
+
+using randutil = crypto.@internal.randutil_package;
+
+
+// Parameters represents the domain parameters for a key. These parameters can
+// be shared across many keys. The bit length of Q must be a multiple of 8.
 
 public static partial class dsa_package {
 
-    // Parameters represents the domain parameters for a key. These parameters can
-    // be shared across many keys. The bit length of Q must be a multiple of 8.
 public partial struct Parameters {
     public ptr<big.Int> P;
     public ptr<big.Int> Q;
@@ -59,7 +62,6 @@ public static readonly ParameterSizes L1024N160 = iota;
 public static readonly var L2048N224 = 0;
 public static readonly var L2048N256 = 1;
 public static readonly var L3072N256 = 2;
-
 
 // numMRTests is the number of Miller-Rabin primality tests that we perform. We
 // pick the largest recommended number from table C.1 of FIPS 186-3.
@@ -117,7 +119,6 @@ GeneratePrimes:
 
         }
 
-
         qBytes[len(qBytes) - 1] |= 1;
         qBytes[0] |= 0x80;
         q.SetBytes(qBytes);
@@ -135,7 +136,6 @@ GeneratePrimes:
 
             }
 
-
             pBytes[len(pBytes) - 1] |= 1;
             pBytes[0] |= 0x80;
 
@@ -146,17 +146,14 @@ GeneratePrimes:
             if (p.BitLen() < L) {
                 continue;
             }
-
             if (!p.ProbablyPrime(numMRTests)) {
                 continue;
             }
-
             @params.P = p;
             @params.Q = q;
             _breakGeneratePrimes = true;
             break;
         }
-
     }
     ptr<big.Int> h = @new<big.Int>();
     h.SetInt64(2);
@@ -173,9 +170,7 @@ GeneratePrimes:
         }
         @params.G = g;
         return error.As(null!)!;
-
     }
-
 }
 
 // GenerateKey generates a public&private key pair. The Parameters of the
@@ -204,7 +199,6 @@ public static error GenerateKey(ptr<PrivateKey> _addr_priv, io.Reader rand) {
     priv.Y = @new<big.Int>();
     priv.Y.Exp(priv.G, x, priv.P);
     return error.As(null!)!;
-
 }
 
 // fermatInverse calculates the inverse of k in GF(P) using Fermat's method.
@@ -265,7 +259,6 @@ public static (ptr<big.Int>, ptr<big.Int>, error) Sign(io.Reader rand, ptr<Priva
             if (k.Sign() > 0 && k.Cmp(priv.Q) < 0) {
                 break;
             }
-
         }
 
         var kInv = fermatInverse(k, _addr_priv.Q);
@@ -295,7 +288,6 @@ public static (ptr<big.Int>, ptr<big.Int>, error) Sign(io.Reader rand, ptr<Priva
         return (_addr_null!, _addr_null!, error.As(ErrInvalidPublicKey)!);
     }
     return ;
-
 }
 
 // Verify verifies the signature in r, s of hash using the public key, pub. It
@@ -341,7 +333,6 @@ public static bool Verify(ptr<PublicKey> _addr_pub, slice<byte> hash, ptr<big.In
     v.Mod(v, pub.Q);
 
     return v.Cmp(r) == 0;
-
 }
 
 } // end dsa_package

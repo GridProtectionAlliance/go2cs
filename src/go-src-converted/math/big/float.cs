@@ -9,14 +9,14 @@
 // rounding mode of the result operand determines the rounding
 // mode of an operation. This is a from-scratch implementation.
 
-// package big -- go2cs converted at 2022 March 06 22:17:43 UTC
+// package big -- go2cs converted at 2022 March 13 05:31:53 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\float.go
-using fmt = go.fmt_package;
-using math = go.math_package;
-using bits = go.math.bits_package;
-
 namespace go.math;
+
+using fmt = fmt_package;
+using math = math_package;
+using bits = math.bits_package;
 
 public static partial class big_package {
 
@@ -138,7 +138,6 @@ public static ptr<Float> NewFloat(double x) => func((_, panic, _) => {
         panic(new ErrNaN("NewFloat(NaN)"));
     }
     return @new<Float>().SetFloat64(x);
-
 });
 
 // Exponent and precision limits.
@@ -172,7 +171,6 @@ private static readonly form zero = iota;
 private static readonly var finite = 0;
 private static readonly var inf = 1;
 
-
 // RoundingMode determines how a Float value is rounded to the
 // desired precision. Rounding may change the Float value; the
 // rounding error is described by the Float's Accuracy.
@@ -199,7 +197,6 @@ public static readonly Accuracy Below = -1;
 public static readonly Accuracy Exact = 0;
 public static readonly Accuracy Above = +1;
 
-
 //go:generate stringer -type=Accuracy
 
 // SetPrec sets z's precision to prec and returns the (possibly) rounded
@@ -219,10 +216,8 @@ private static ptr<Float> SetPrec(this ptr<Float> _addr_z, nuint prec) {
             // truncate z to 0
             z.acc = makeAcc(z.neg);
             z.form = zero;
-
         }
         return _addr_z!;
-
     }
     if (prec > MaxPrec) {
         prec = MaxPrec;
@@ -233,7 +228,6 @@ private static ptr<Float> SetPrec(this ptr<Float> _addr_z, nuint prec) {
         z.round(0);
     }
     return _addr_z!;
-
 }
 
 private static Accuracy makeAcc(bool above) {
@@ -241,7 +235,6 @@ private static Accuracy makeAcc(bool above) {
         return Above;
     }
     return Below;
-
 }
 
 // SetMode sets z's rounding mode to mode and returns an exact z.
@@ -273,7 +266,6 @@ private static nuint MinPrec(this ptr<Float> _addr_x) {
         return 0;
     }
     return uint(len(x.mant)) * _W - x.mant.trailingZeroBits();
-
 }
 
 // Mode returns the rounding mode of x.
@@ -311,7 +303,6 @@ private static nint Sign(this ptr<Float> _addr_x) {
         return -1;
     }
     return 1;
-
 }
 
 // MantExp breaks x into its mantissa and exponent components
@@ -347,7 +338,6 @@ private static nint MantExp(this ptr<Float> _addr_x, ptr<Float> _addr_mant) {
         }
     }
     return ;
-
 }
 
 private static void setExpAndRound(this ptr<Float> _addr_z, long exp, nuint sbit) {
@@ -358,19 +348,16 @@ private static void setExpAndRound(this ptr<Float> _addr_z, long exp, nuint sbit
         z.acc = makeAcc(z.neg);
         z.form = zero;
         return ;
-
     }
     if (exp > MaxExp) { 
         // overflow
         z.acc = makeAcc(!z.neg);
         z.form = inf;
         return ;
-
     }
     z.form = finite;
     z.exp = int32(exp);
     z.round(sbit);
-
 }
 
 // SetMantExp sets z to mant × 2**exp and returns z.
@@ -401,10 +388,8 @@ private static ptr<Float> SetMantExp(this ptr<Float> _addr_z, ptr<Float> _addr_m
     if (z.form == finite) { 
         // 0 < |mant| < +Inf
         z.setExpAndRound(int64(z.exp) + int64(exp), 0);
-
     }
     return _addr_z!;
-
 }
 
 // Signbit reports whether x is negative or negative zero.
@@ -445,7 +430,6 @@ private static void validate(this ptr<Float> _addr_x) => func((_, panic, _) => {
     if (!debugFloat) { 
         // avoid performance bugs
         panic("validate called but debugFloat is not set");
-
     }
     if (x.form != finite) {
         return ;
@@ -482,14 +466,12 @@ private static void round(this ptr<Float> _addr_z, nuint sbit) => func((_, panic
     if (z.form != finite) { 
         // ±0 or ±Inf => nothing left to do
         return ;
-
     }
     var m = uint32(len(z.mant)); // present mantissa length in words
     var bits = m * _W; // present mantissa bits; bits > 0
     if (bits <= z.prec) { 
         // mantissa fits => nothing to do
         return ;
-
     }
     var r = uint(bits - z.prec - 1); // rounding bit position; r >= 0
     var rbit = z.mant.bit(r) & 1; // rounding bit; be safe and ensure it's a single bit
@@ -505,7 +487,6 @@ private static void round(this ptr<Float> _addr_z, nuint sbit) => func((_, panic
     if (m > n) {
         copy(z.mant, z.mant[(int)m - n..]); // move n last words to front
         z.mant = z.mant[..(int)n];
-
     }
     var ntz = n * _W - z.prec; // 0 <= ntz < _W
     var lsb = Word(1) << (int)(ntz); 
@@ -542,9 +523,7 @@ private static void round(this ptr<Float> _addr_z, nuint sbit) => func((_, panic
                     // exponent overflow
                     z.form = inf;
                     return ;
-
                 }
-
                 z.exp++; 
                 // adjust mantissa: divide by 2 to compensate for exponent adjustment
                 shrVU(z.mant, z.mant, 1); 
@@ -552,9 +531,7 @@ private static void round(this ptr<Float> _addr_z, nuint sbit) => func((_, panic
                 const nint msb = 1 << (int)((_W - 1));
 
                 z.mant[n - 1] |= msb;
-
             }
-
         }
     }
     z.mant[0] &= lsb - 1;
@@ -584,7 +561,6 @@ private static ptr<Float> setBits64(this ptr<Float> _addr_z, bool neg, ulong x) 
         z.round(0);
     }
     return _addr_z!;
-
 }
 
 // SetUint64 sets z to the (possibly rounded) value of x and returns z.
@@ -607,7 +583,6 @@ private static ptr<Float> SetInt64(this ptr<Float> _addr_z, long x) {
         u = -u;
     }
     return _addr_z.setBits64(x < 0, uint64(u))!;
-
 }
 
 // SetFloat64 sets z to the (possibly rounded) value of x and returns z.
@@ -640,7 +615,6 @@ private static ptr<Float> SetFloat64(this ptr<Float> _addr_z, double x) => func(
         z.round(0);
     }
     return _addr_z!;
-
 });
 
 // fnorm normalizes mantissa m by shifting it to the left
@@ -658,7 +632,6 @@ private static long fnorm(nat m) => func((_, panic, _) => {
         }
     }
     return int64(s);
-
 });
 
 // SetInt sets z to the (possibly rounded) value of x and returns z.
@@ -685,7 +658,6 @@ private static ptr<Float> SetInt(this ptr<Float> _addr_z, ptr<Int> _addr_x) {
     fnorm(z.mant);
     z.setExpAndRound(int64(bits), 0);
     return _addr_z!;
-
 }
 
 // SetRat sets z to the (possibly rounded) value of x and returns z.
@@ -706,7 +678,6 @@ private static ptr<Float> SetRat(this ptr<Float> _addr_z, ptr<Rat> _addr_x) {
         z.prec = umax32(a.prec, b.prec);
     }
     return _addr_z.Quo(_addr_a, _addr_b)!;
-
 }
 
 // SetInf sets z to the infinite Float -Inf if signbit is
@@ -751,7 +722,6 @@ private static ptr<Float> Set(this ptr<Float> _addr_z, ptr<Float> _addr_x) {
         }
     }
     return _addr_z!;
-
 }
 
 // Copy sets z to x, with the same precision, rounding mode, and
@@ -776,7 +746,6 @@ private static ptr<Float> Copy(this ptr<Float> _addr_z, ptr<Float> _addr_x) {
         }
     }
     return _addr_z!;
-
 }
 
 // msb32 returns the 32 most significant bits of x.
@@ -797,7 +766,6 @@ private static uint msb32(nat x) => func((_, panic, _) => {
             break;
     }
     panic("unreachable");
-
 });
 
 // msb64 returns the 64 most significant bits of x.
@@ -816,14 +784,12 @@ private static ulong msb64(nat x) => func((_, panic, _) => {
                 v |= uint64(x[i - 1]);
             }
             return v;
-
             break;
         case 64: 
             return uint64(x[i]);
             break;
     }
     panic("unreachable");
-
 });
 
 // Uint64 returns the unsigned integer resulting from truncating x
@@ -847,7 +813,6 @@ private static (ulong, Accuracy) Uint64(this ptr<Float> _addr_x) => func((_, pan
         if (x.exp <= 0) { 
             // 0 < x < 1
             return (0, Below);
-
         }
         if (x.exp <= 64) { 
             // u = trunc(x) fits into a uint64
@@ -855,7 +820,6 @@ private static (ulong, Accuracy) Uint64(this ptr<Float> _addr_x) => func((_, pan
             if (x.MinPrec() <= 64) {
                 return (u, Exact);
             }
-
             return (u, Below); // x truncated
         }
         return (math.MaxUint64, Below);
@@ -867,7 +831,6 @@ private static (ulong, Accuracy) Uint64(this ptr<Float> _addr_x) => func((_, pan
         }
         return (math.MaxUint64, Below);
         panic("unreachable");
-
 });
 
 // Int64 returns the integer resulting from truncating x towards zero.
@@ -890,7 +853,6 @@ private static (long, Accuracy) Int64(this ptr<Float> _addr_x) => func((_, panic
         if (x.exp <= 0) { 
             // 0 < |x| < 1
             return (0, acc);
-
         }
         if (x.exp <= 63) { 
             // i = trunc(x) fits into an int64 (excluding math.MinInt64)
@@ -898,11 +860,9 @@ private static (long, Accuracy) Int64(this ptr<Float> _addr_x) => func((_, panic
             if (x.neg) {
                 i = -i;
             }
-
             if (x.MinPrec() <= uint(x.exp)) {
                 return (i, Exact);
             }
-
             return (i, acc); // x truncated
         }
         if (x.neg) { 
@@ -910,9 +870,7 @@ private static (long, Accuracy) Int64(this ptr<Float> _addr_x) => func((_, panic
             if (x.exp == 64 && x.MinPrec() == 1) {
                 acc = Exact;
             }
-
             return (math.MinInt64, acc);
-
         }
         return (math.MaxInt64, Below);
     else if (x.form == zero) 
@@ -923,7 +881,6 @@ private static (long, Accuracy) Int64(this ptr<Float> _addr_x) => func((_, panic
         }
         return (math.MaxInt64, Below);
         panic("unreachable");
-
 });
 
 // Float32 returns the float32 value nearest to x. If x is too small to be
@@ -975,9 +932,7 @@ private static (float, Accuracy) Float32(this ptr<Float> _addr_x) => func((_, pa
                     float z = default;
                     return (-z, Above);
                 }
-
                 return (0.0F, Below);
-
             } 
             // otherwise, round up
             // We handle p == 0 explicitly because it's easy and because
@@ -988,7 +943,6 @@ private static (float, Accuracy) Float32(this ptr<Float> _addr_x) => func((_, pa
                 }
                 return (math.SmallestNonzeroFloat32, Above);
             }
-
         }
         Float r = default;
         r.prec = uint32(p);
@@ -1003,9 +957,7 @@ private static (float, Accuracy) Float32(this ptr<Float> _addr_x) => func((_, pa
             if (x.neg) {
                 return (float32(math.Inf(-1)), Below);
             }
-
             return (float32(math.Inf(+1)), Above);
-
         }
         uint sign = default;        uint bexp = default;        uint mant = default;
 
@@ -1019,7 +971,6 @@ private static (float, Accuracy) Float32(this ptr<Float> _addr_x) => func((_, pa
             // bexp == 0 for denormals
             p = mbits + 1 - emin + int(e);
             mant = msb32(r.mant) >> (int)(uint(fbits - p));
-
         }
         else
  { 
@@ -1040,7 +991,6 @@ private static (float, Accuracy) Float32(this ptr<Float> _addr_x) => func((_, pa
         }
         return (float32(math.Inf(+1)), Exact);
         panic("unreachable");
-
 });
 
 // Float64 returns the float64 value nearest to x. If x is too small to be
@@ -1092,9 +1042,7 @@ private static (double, Accuracy) Float64(this ptr<Float> _addr_x) => func((_, p
                     double z = default;
                     return (-z, Above);
                 }
-
                 return (0.0F, Below);
-
             } 
             // otherwise, round up
             // We handle p == 0 explicitly because it's easy and because
@@ -1105,7 +1053,6 @@ private static (double, Accuracy) Float64(this ptr<Float> _addr_x) => func((_, p
                 }
                 return (math.SmallestNonzeroFloat64, Above);
             }
-
         }
         Float r = default;
         r.prec = uint32(p);
@@ -1120,9 +1067,7 @@ private static (double, Accuracy) Float64(this ptr<Float> _addr_x) => func((_, p
             if (x.neg) {
                 return (math.Inf(-1), Below);
             }
-
             return (math.Inf(+1), Above);
-
         }
         ulong sign = default;        ulong bexp = default;        ulong mant = default;
 
@@ -1136,7 +1081,6 @@ private static (double, Accuracy) Float64(this ptr<Float> _addr_x) => func((_, p
             // bexp == 0 for denormals
             p = mbits + 1 - emin + int(e);
             mant = msb64(r.mant) >> (int)(uint(fbits - p));
-
         }
         else
  { 
@@ -1157,7 +1101,6 @@ private static (double, Accuracy) Float64(this ptr<Float> _addr_x) => func((_, p
         }
         return (math.Inf(+1), Exact);
         panic("unreachable");
-
 });
 
 // Int returns the result of truncating x towards zero;
@@ -1185,7 +1128,6 @@ private static (ptr<Int>, Accuracy) Int(this ptr<Float> _addr_x, ptr<Int> _addr_
         if (x.exp <= 0) { 
             // 0 < |x| < 1
             return (_addr_z.SetInt64(0)!, acc);
-
         }
         var allBits = uint(len(x.mant)) * _W;
         var exp = uint(x.exp);
@@ -1209,7 +1151,6 @@ private static (ptr<Int>, Accuracy) Int(this ptr<Float> _addr_x, ptr<Int> _addr_
     else if (x.form == inf) 
         return (_addr_null!, makeAcc(x.neg));
         panic("unreachable");
-
 });
 
 // Rat returns the rational number corresponding to x;
@@ -1255,7 +1196,6 @@ private static (ptr<Rat>, Accuracy) Rat(this ptr<Float> _addr_x, ptr<Rat> _addr_
     else if (x.form == inf) 
         return (_addr_null!, makeAcc(x.neg));
         panic("unreachable");
-
 });
 
 // Abs sets z to the (possibly rounded) value |x| (the absolute value of x)
@@ -1287,7 +1227,6 @@ private static void validateBinaryOperands(ptr<Float> _addr_x, ptr<Float> _addr_
     if (!debugFloat) { 
         // avoid performance bugs
         panic("validateBinaryOperands called but debugFloat is not set");
-
     }
     if (len(x.mant) == 0) {
         panic("empty mantissa for x");
@@ -1353,7 +1292,6 @@ private static void uadd(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float>
     // len(z.mant) > 0
 
     z.setExpAndRound(ex + int64(len(z.mant)) * _W - fnorm(z.mant), 0);
-
 }
 
 // z = x - y for |x| > |y|, ignoring signs of x and y for the subtraction
@@ -1410,7 +1348,6 @@ private static void usub(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float>
         return ;
     }
     z.setExpAndRound(ex + int64(len(z.mant)) * _W - fnorm(z.mant), 0);
-
 }
 
 // z = x * y, ignoring signs of x and y for the multiplication
@@ -1433,7 +1370,6 @@ private static void umul(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float>
         z.mant = z.mant.mul(x.mant, y.mant);
     }
     z.setExpAndRound(e - fnorm(z.mant), 0);
-
 }
 
 // z = x / y, ignoring signs of x and y for the division
@@ -1460,7 +1396,6 @@ private static void uquo(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float>
             // d extra words needed => add d "0 digits" to x
             xadj = make(nat, len(x.mant) + d);
             copy(xadj[(int)d..], x.mant);
-
         }
         d = d__prev1;
 
@@ -1487,7 +1422,6 @@ private static void uquo(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<Float>
         sbit = 1;
     }
     z.setExpAndRound(e - fnorm(z.mant), sbit);
-
 }
 
 // ucmp returns -1, 0, or +1, depending on whether
@@ -1526,11 +1460,9 @@ private static nint ucmp(this ptr<Float> _addr_x, ptr<Float> _addr_y) {
             return -1;
         else if (xm > ym) 
             return +1;
-        
-    }
+            }
 
     return 0;
-
 }
 
 // Handling of sign bit as defined by IEEE 754-2008, section 6.3:
@@ -1585,7 +1517,6 @@ private static ptr<Float> Add(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
             // x + y == x + y
             // (-x) + (-y) == -(x + y)
             z.uadd(x, y);
-
         }
         else
  { 
@@ -1599,13 +1530,11 @@ private static ptr<Float> Add(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
                 z.neg = !z.neg;
                 z.usub(y, x);
             }
-
         }
         if (z.form == zero && z.mode == ToNegativeInf && z.acc == Exact) {
             z.neg = true;
         }
         return _addr_z!;
-
     }
     if (x.form == inf && y.form == inf && x.neg != y.neg) { 
         // +Inf + -Inf
@@ -1615,7 +1544,6 @@ private static ptr<Float> Add(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         z.form = zero;
         z.neg = false;
         panic(new ErrNaN("addition of infinities with opposite signs"));
-
     }
     if (x.form == zero && y.form == zero) { 
         // ±0 + ±0
@@ -1623,16 +1551,13 @@ private static ptr<Float> Add(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         z.form = zero;
         z.neg = x.neg && y.neg; // -0 + -0 == -0
         return _addr_z!;
-
     }
     if (x.form == inf || y.form == zero) { 
         // ±Inf + y
         // x + ±0
         return _addr_z.Set(x)!;
-
     }
     return _addr_z.Set(y)!;
-
 });
 
 // Sub sets z to the rounded difference x-y and returns z.
@@ -1659,7 +1584,6 @@ private static ptr<Float> Sub(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
             // x - (-y) == x + y
             // (-x) - y == -(x + y)
             z.uadd(x, y);
-
         }
         else
  { 
@@ -1673,13 +1597,11 @@ private static ptr<Float> Sub(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
                 z.neg = !z.neg;
                 z.usub(y, x);
             }
-
         }
         if (z.form == zero && z.mode == ToNegativeInf && z.acc == Exact) {
             z.neg = true;
         }
         return _addr_z!;
-
     }
     if (x.form == inf && y.form == inf && x.neg == y.neg) { 
         // +Inf - +Inf
@@ -1689,7 +1611,6 @@ private static ptr<Float> Sub(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         z.form = zero;
         z.neg = false;
         panic(new ErrNaN("subtraction of infinities with equal signs"));
-
     }
     if (x.form == zero && y.form == zero) { 
         // ±0 - ±0
@@ -1697,16 +1618,13 @@ private static ptr<Float> Sub(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         z.form = zero;
         z.neg = x.neg && !y.neg; // -0 - +0 == -0
         return _addr_z!;
-
     }
     if (x.form == inf || y.form == zero) { 
         // ±Inf - y
         // x - ±0
         return _addr_z.Set(x)!;
-
     }
     return _addr_z.Neg(y)!;
-
 });
 
 // Mul sets z to the rounded product x*y and returns z.
@@ -1731,7 +1649,6 @@ private static ptr<Float> Mul(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         // x * y (common case)
         z.umul(x, y);
         return _addr_z!;
-
     }
     z.acc = Exact;
     if (x.form == zero && y.form == inf || x.form == inf && y.form == zero) { 
@@ -1741,18 +1658,15 @@ private static ptr<Float> Mul(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         z.form = zero;
         z.neg = false;
         panic(new ErrNaN("multiplication of zero with infinity"));
-
     }
     if (x.form == inf || y.form == inf) { 
         // ±Inf * y
         // x * ±Inf
         z.form = inf;
         return _addr_z!;
-
     }
     z.form = zero;
     return _addr_z!;
-
 });
 
 // Quo sets z to the rounded quotient x/y and returns z.
@@ -1777,7 +1691,6 @@ private static ptr<Float> Quo(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         // x / y (common case)
         z.uquo(x, y);
         return _addr_z!;
-
     }
     z.acc = Exact;
     if (x.form == zero && y.form == zero || x.form == inf && y.form == inf) { 
@@ -1787,18 +1700,15 @@ private static ptr<Float> Quo(this ptr<Float> _addr_z, ptr<Float> _addr_x, ptr<F
         z.form = zero;
         z.neg = false;
         panic(new ErrNaN("division of zero by zero or infinity by infinity"));
-
     }
     if (x.form == zero || y.form == inf) { 
         // ±0 / y
         // x / ±Inf
         z.form = zero;
         return _addr_z!;
-
     }
     z.form = inf;
     return _addr_z!;
-
 });
 
 // Cmp compares x and y and returns:
@@ -1835,7 +1745,6 @@ private static nint Cmp(this ptr<Float> _addr_x, ptr<Float> _addr_y) {
     }
 
     return 0;
-
 }
 
 // ord classifies x and returns:
@@ -1861,7 +1770,6 @@ private static nint ord(this ptr<Float> _addr_x) {
         m = -m;
     }
     return m;
-
 }
 
 private static uint umax32(uint x, uint y) {
@@ -1869,7 +1777,6 @@ private static uint umax32(uint x, uint y) {
         return x;
     }
     return y;
-
 }
 
 } // end big_package

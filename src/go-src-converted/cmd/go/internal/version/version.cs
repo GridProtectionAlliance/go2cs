@@ -3,24 +3,24 @@
 // license that can be found in the LICENSE file.
 
 // Package version implements the ``go version'' command.
-// package version -- go2cs converted at 2022 March 06 23:17:47 UTC
+
+// package version -- go2cs converted at 2022 March 13 06:31:08 UTC
 // import "cmd/go/internal/version" ==> using version = go.cmd.go.@internal.version_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\version\version.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using context = context_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using System;
 
 public static partial class version_package {
 
@@ -69,7 +69,6 @@ private static void runVersion(context.Context ctx, ptr<base.Command> _addr_cmd,
         }
         fmt.Printf("go version %s %s/%s\n", runtime.Version(), runtime.GOOS, runtime.GOARCH);
         return ;
-
     }
     foreach (var (_, arg) in args) {
         var (info, err) = os.Stat(arg);
@@ -102,9 +101,7 @@ private static void scanDir(@string dir) {
             scanFile(path, info, versionV.val);
         }
         return null;
-
     });
-
 }
 
 // isExe reports whether the file should be considered executable.
@@ -113,7 +110,6 @@ private static bool isExe(@string file, fs.FileInfo info) {
         return strings.HasSuffix(strings.ToLower(file), ".exe");
     }
     return info.Mode().IsRegular() && info.Mode() & 0111 != 0;
-
 }
 
 // scanFile scans file to try to report the Go and module versions.
@@ -131,14 +127,12 @@ private static void scanFile(@string file, fs.FileInfo info, bool mustPrint) => 
             return ;
         }
         info = i;
-
     }
     if (!isExe(file, info)) {
         if (mustPrint) {
             fmt.Fprintf(os.Stderr, "%s: not executable file\n", file);
         }
         return ;
-
     }
     var (x, err) = openExe(file);
     if (err != null) {
@@ -146,7 +140,6 @@ private static void scanFile(@string file, fs.FileInfo info, bool mustPrint) => 
             fmt.Fprintf(os.Stderr, "%s: %v\n", file, err);
         }
         return ;
-
     }
     defer(x.Close());
 
@@ -156,7 +149,6 @@ private static void scanFile(@string file, fs.FileInfo info, bool mustPrint) => 
             fmt.Fprintf(os.Stderr, "%s: go version not found\n", file);
         }
         return ;
-
     }
     fmt.Printf("%s: %s\n", file, vers);
     if (versionM && mod != "".val) {
@@ -205,7 +197,6 @@ private static (@string, @string) findVers(exe x) {
         readPtr = b => uint64(bo.Uint32(b));
         }
     else;
-
     } {
         readPtr = bo.Uint64;
     }
@@ -217,14 +208,12 @@ private static (@string, @string) findVers(exe x) {
     if (len(mod) >= 33 && mod[len(mod) - 17] == '\n') { 
         // Strip module framing.
         mod = mod[(int)16..(int)len(mod) - 16];
-
     }
     else
  {
         mod = "";
     }
     return ;
-
 }
 
 // readString returns the string at address addr in the executable x.
@@ -240,7 +229,6 @@ private static @string readString(exe x, nint ptrSize, Func<slice<byte>, ulong> 
         return "";
     }
     return string(data);
-
 }
 
 } // end version_package

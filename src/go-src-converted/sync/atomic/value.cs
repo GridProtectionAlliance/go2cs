@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package atomic -- go2cs converted at 2022 March 06 22:08:13 UTC
+// package atomic -- go2cs converted at 2022 March 13 05:24:02 UTC
 // import "sync/atomic" ==> using atomic = go.sync.atomic_package
 // Original source: C:\Program Files\Go\src\sync\atomic\value.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.sync;
+
+using @unsafe = @unsafe_package;
+
+
+// A Value provides an atomic load and store of a consistently typed value.
+// The zero value for a Value returns nil from Load.
+// Once Store has been called, a Value must not be copied.
+//
+// A Value must not be copied after first use.
 
 public static partial class atomic_package {
 
-    // A Value provides an atomic load and store of a consistently typed value.
-    // The zero value for a Value returns nil from Load.
-    // Once Store has been called, a Value must not be copied.
-    //
-    // A Value must not be copied after first use.
 public partial struct Value {
 }
 
@@ -36,14 +38,12 @@ private static object Load(this ptr<Value> _addr_v) {
     if (typ == null || uintptr(typ) == ~uintptr(0)) { 
         // First store not yet completed.
         return null;
-
     }
     var data = LoadPointer(_addr_vp.data);
     var vlp = (ifaceWords.val)(@unsafe.Pointer(_addr_val));
     vlp.typ = typ;
     vlp.data = data;
     return ;
-
 }
 
 // Store sets the value of the Value to x.
@@ -74,23 +74,19 @@ private static void Store(this ptr<Value> _addr_v, object val) => func((_, panic
             StorePointer(_addr_vp.typ, vlp.typ);
             runtime_procUnpin();
             return ;
-
         }
         if (uintptr(typ) == ~uintptr(0)) { 
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
-
         }
         if (typ != vlp.typ) {
             panic("sync/atomic: store of inconsistently typed value into Value");
         }
         StorePointer(_addr_vp.data, vlp.data);
         return ;
-
     }
-
 });
 
 // Swap stores new into Value and returns the previous value. It returns nil if
@@ -124,23 +120,19 @@ private static object Swap(this ptr<Value> _addr_v, object @new) => func((_, pan
             StorePointer(_addr_vp.typ, np.typ);
             runtime_procUnpin();
             return null;
-
         }
         if (uintptr(typ) == ~uintptr(0)) { 
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
-
         }
         if (typ != np.typ) {
             panic("sync/atomic: swap of inconsistently typed value into Value");
         }
         var op = (ifaceWords.val)(@unsafe.Pointer(_addr_old));
         (op.typ, op.data) = (np.typ, SwapPointer(_addr_vp.data, np.data));        return old;
-
     }
-
 });
 
 // CompareAndSwap executes the compare-and-swap operation for the Value.
@@ -181,32 +173,28 @@ private static bool CompareAndSwap(this ptr<Value> _addr_v, object old, object @
             StorePointer(_addr_vp.typ, np.typ);
             runtime_procUnpin();
             return true;
-
         }
         if (uintptr(typ) == ~uintptr(0)) { 
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
-
         }
         if (typ != np.typ) {
             panic("sync/atomic: compare and swap of inconsistently typed value into Value");
         }
         var data = LoadPointer(_addr_vp.data);
         ref var i = ref heap(out ptr<var> _addr_i);
-        (ifaceWords.val)(@unsafe.Pointer(_addr_i)).typ;
+        (ifaceWords.val);
 
-        typ(ifaceWords.val)(@unsafe.Pointer(_addr_i)).data;
+        (@unsafe.Pointer(_addr_i)).typ = typ(ifaceWords.val);
 
-        data;
+        (@unsafe.Pointer(_addr_i)).data = data;
         if (i != old) {
             return false;
         }
         return CompareAndSwapPointer(_addr_vp.data, data, np.data);
-
     }
-
 });
 
 // Disable/enable preemption, implemented in runtime.

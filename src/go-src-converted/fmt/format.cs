@@ -2,23 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2022 March 06 22:31:17 UTC
+// package fmt -- go2cs converted at 2022 March 13 05:42:11 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Program Files\Go\src\fmt\format.go
-using strconv = go.strconv_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go;
+
+using strconv = strconv_package;
+using utf8 = unicode.utf8_package;
 
 public static partial class fmt_package {
 
 private static readonly @string ldigits = "0123456789abcdefx";
 private static readonly @string udigits = "0123456789ABCDEFX";
 
-
 private static readonly var signed = true;
 private static readonly var unsigned = false;
-
 
 // flags placed in a separate struct for easy clearing.
 private partial struct fmtFlags {
@@ -68,7 +66,6 @@ private static void writePadding(this ptr<fmt> _addr_f, nint n) {
 
     if (n <= 0) { // No padding bytes needed.
         return ;
-
     }
     var buf = f.buf.val;
     var oldLen = len(buf);
@@ -86,7 +83,6 @@ private static void writePadding(this ptr<fmt> _addr_f, nint n) {
     foreach (var (i) in padding) {
         padding[i] = padByte;
     }    f.buf.val = buf[..(int)newLen];
-
 }
 
 // pad appends b to f.buf, padded on left (!f.minus) or right (f.minus).
@@ -102,14 +98,12 @@ private static void pad(this ptr<fmt> _addr_f, slice<byte> b) {
         // left padding
         f.writePadding(width);
         f.buf.write(b);
-
     }
     else
  { 
         // right padding
         f.buf.write(b);
         f.writePadding(width);
-
     }
 }
 
@@ -126,14 +120,12 @@ private static void padString(this ptr<fmt> _addr_f, @string s) {
         // left padding
         f.writePadding(width);
         f.buf.writeString(s);
-
     }
     else
  { 
         // right padding
         f.buf.writeString(s);
         f.writePadding(width);
-
     }
 }
 
@@ -206,7 +198,6 @@ private static void fmtUnicode(this ptr<fmt> _addr_f, ulong u) {
     f.zero = false;
     f.pad(buf[(int)i..]);
     f.zero = oldZero;
-
 }
 
 // fmtInteger formats signed and unsigned integers.
@@ -226,7 +217,6 @@ private static void fmtInteger(this ptr<fmt> _addr_f, ulong u, nint @base, bool 
         if (width > len(buf)) { 
             // We're going to need a bigger boat.
             buf = make_slice<byte>(width);
-
         }
     }
     nint prec = 0;
@@ -315,7 +305,6 @@ private static void fmtInteger(this ptr<fmt> _addr_f, ulong u, nint @base, bool 
                 buf[i] = '0';
                 break;
         }
-
     }
     if (verb == 'O') {
         i--;
@@ -339,7 +328,6 @@ private static void fmtInteger(this ptr<fmt> _addr_f, ulong u, nint @base, bool 
     f.zero = false;
     f.pad(buf[(int)i..]);
     f.zero = oldZero;
-
 });
 
 // truncateString truncates the string s to the specified precision, if present.
@@ -356,7 +344,6 @@ private static @string truncateString(this ptr<fmt> _addr_f, @string s) {
         }
     }
     return s;
-
 }
 
 // truncate truncates the byte slice b as a string of the specified precision, if present.
@@ -381,10 +368,8 @@ private static slice<byte> truncate(this ptr<fmt> _addr_f, slice<byte> b) {
             }
 
         }
-
     }
     return b;
-
 }
 
 // fmtS formats a string.
@@ -411,7 +396,6 @@ private static void fmtSbx(this ptr<fmt> _addr_f, @string s, slice<byte> b, @str
     if (b == null) { 
         // No byte slice present. Assume string s should be encoded.
         length = len(s);
-
     }
     if (f.precPresent && f.prec < length) {
         length = f.prec;
@@ -425,12 +409,10 @@ private static void fmtSbx(this ptr<fmt> _addr_f, @string s, slice<byte> b, @str
             } 
             // Elements will be separated by a space.
             width += length - 1;
-
         }
         else if (f.sharp) { 
             // Only a leading 0x or 0X will be added for the whole string.
             width += 2;
-
         }
     }
     else
@@ -439,7 +421,6 @@ private static void fmtSbx(this ptr<fmt> _addr_f, @string s, slice<byte> b, @str
             f.writePadding(f.wid);
         }
         return ;
-
     }
     if (f.widPresent && f.wid > width && !f.minus) {
         f.writePadding(f.wid - width);
@@ -448,7 +429,6 @@ private static void fmtSbx(this ptr<fmt> _addr_f, @string s, slice<byte> b, @str
     if (f.sharp) { 
         // Add leading 0x or 0X.
         buf = append(buf, '0', digits[16]);
-
     }
     byte c = default;
     for (nint i = 0; i < length; i++) {
@@ -458,9 +438,7 @@ private static void fmtSbx(this ptr<fmt> _addr_f, @string s, slice<byte> b, @str
             if (f.sharp) { 
                 // Add leading 0x or 0X for each element.
                 buf = append(buf, '0', digits[16]);
-
             }
-
         }
         if (b != null) {
             c = b[i]; // Take a byte from the input byte slice.
@@ -470,7 +448,6 @@ private static void fmtSbx(this ptr<fmt> _addr_f, @string s, slice<byte> b, @str
             c = s[i]; // Take a byte from the input string.
         }
         buf = append(buf, digits[c >> 4], digits[c & 0xF]);
-
     }
     f.buf.val = buf; 
     // Handle padding to the right.
@@ -526,7 +503,6 @@ private static void fmtC(this ptr<fmt> _addr_f, ulong c) {
     var buf = f.intbuf[..(int)0];
     var w = utf8.EncodeRune(buf[..(int)utf8.UTFMax], r);
     f.pad(buf[..(int)w]);
-
 }
 
 // fmtQc formats an integer as a single-quoted, escaped Go character constant.
@@ -578,7 +554,6 @@ private static void fmtFloat(this ptr<fmt> _addr_f, double v, nint size, int ver
         f.pad(num);
         f.zero = oldZero;
         return ;
-
     }
     if (f.sharp && verb != 'b') {
         nint digits = 0;
@@ -595,7 +570,6 @@ private static void fmtFloat(this ptr<fmt> _addr_f, double v, nint size, int ver
                 if (digits == -1) {
                     digits = 6;
                 }
-
                 break;
         } 
 
@@ -637,25 +611,20 @@ private static void fmtFloat(this ptr<fmt> _addr_f, double v, nint size, int ver
                     digits--;
                 }
 
-
             __switch_break0:;
-
         }
         if (!hasDecimalPoint) { 
             // Leading digit 0 should contribute once to digits.
             if (len(num) == 2 && num[1] == '0') {
                 digits--;
             }
-
             num = append(num, '.');
-
         }
         while (digits > 0) {
             num = append(num, '0');
             digits--;
         }
         num = append(num, tail);
-
     }
     if (f.plus || num[0] != '+') { 
         // If we're zero padding to the left we want the sign before the leading zeros.
@@ -668,10 +637,8 @@ private static void fmtFloat(this ptr<fmt> _addr_f, double v, nint size, int ver
         }
         f.pad(num);
         return ;
-
     }
     f.pad(num[(int)1..]);
-
 }
 
 } // end fmt_package

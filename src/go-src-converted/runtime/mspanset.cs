@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:09 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:58 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mspanset.go
-using cpu = go.@internal.cpu_package;
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using cpu = @internal.cpu_package;
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// A spanSet is a set of *mspans.
+//
+// spanSet is safe for concurrent push and pop operations.
 
 public static partial class runtime_package {
 
-    // A spanSet is a set of *mspans.
-    //
-    // spanSet is safe for concurrent push and pop operations.
 private partial struct spanSet {
     public mutex spineLock;
     public unsafe.Pointer spine; // *[N]*spanSetBlock, accessed atomically
@@ -89,13 +91,11 @@ retry:
             if (newCap == 0) {
                 newCap = spanSetInitSpineCap;
             }
-
             var newSpine = persistentalloc(newCap * sys.PtrSize, cpu.CacheLineSize, _addr_memstats.gcMiscSys);
             if (b.spineCap != 0) { 
                 // Blocks are allocated off-heap, so
                 // no write barriers.
                 memmove(newSpine, b.spine, b.spineCap * sys.PtrSize);
-
             } 
             // Spine is allocated off-heap, so no write barrier.
             atomic.StorepNoWB(@unsafe.Pointer(_addr_b.spine), newSpine);
@@ -116,10 +116,8 @@ retry:
         atomic.StorepNoWB(blockp, @unsafe.Pointer(block));
         atomic.Storeuintptr(_addr_b.spineLen, spineLen + 1);
         unlock(_addr_b.spineLock);
-
     }
     atomic.StorepNoWB(@unsafe.Pointer(_addr_block.spans[bottom]), @unsafe.Pointer(s));
-
 }
 
 // pop removes and returns a span from buffer b, or nil if b is empty.
@@ -136,7 +134,6 @@ claimLoop:
         if (head >= tail) { 
             // The buf is empty, as far as we can tell.
             return _addr_null!;
-
         }
         var spineLen = atomic.Loaduintptr(_addr_b.spineLen);
         if (spineLen <= uintptr(head) / spanSetBlockEntries) { 
@@ -147,7 +144,6 @@ claimLoop:
             // there's nothing currently here. Spinning on this is
             // almost definitely not worth it.
             return _addr_null!;
-
         }
         var want = head;
         while (want == head) {
@@ -155,10 +151,8 @@ claimLoop:
                 _breakclaimLoop = true;
                 break;
             }
-
             headtail = b.index.load();
             head, tail = headtail.split();
-
         } 
         // We failed to claim the spot we were after and the head changed,
         // meaning a popper got ahead of us. Try again from the top because
@@ -183,7 +177,6 @@ claimLoop:
         // know a block for this span exists, the race window here is
         // extremely small. Try again.
         s = (mspan.val)(atomic.Loadp(@unsafe.Pointer(_addr_block.spans[bottom])));
-
     } 
     // Clear the pointer. This isn't strictly necessary, but defensively
     // avoids accidentally re-using blocks which could lead to memory
@@ -208,10 +201,8 @@ claimLoop:
 
         // Return the block to the block pool.
         spanSetBlockPool.free(block);
-
     }
     return _addr_s!;
-
 }
 
 // reset resets a spanSet which is empty. It will also clean up
@@ -245,15 +236,12 @@ private static void reset(this ptr<spanSet> _addr_b) {
                 // pushed at least one value but not yet popped if this
                 // block pointer is not nil.
                 throw("span set block with unpopped elements found in reset");
-
             }
-
             if (block.popped == spanSetBlockEntries) { 
                 // popped should also never be equal to spanSetBlockEntries
                 // because the last popper should have made the block pointer
                 // in this slot nil.
                 throw("fully empty unfreed span set block found in reset");
-
             } 
 
             // Clear the pointer to the block.
@@ -261,12 +249,10 @@ private static void reset(this ptr<spanSet> _addr_b) {
 
             // Return the block to the block pool.
             spanSetBlockPool.free(block);
-
         }
     }
     b.index.reset();
     atomic.Storeuintptr(_addr_b.spineLen, 0);
-
 }
 
 // spanSetBlockPool is a global pool of spanSetBlocks.
@@ -289,9 +275,7 @@ private static ptr<spanSetBlock> alloc(this ptr<spanSetBlockAlloc> _addr_p) {
             return _addr_s!;
         }
     }
-
     return _addr_(spanSetBlock.val)(persistentalloc(@unsafe.Sizeof(new spanSetBlock()), cpu.CacheLineSize, _addr_memstats.gcMiscSys))!;
-
 }
 
 // free returns a spanSetBlock back to the pool.
@@ -371,7 +355,6 @@ private static headTailIndex incTail(this ptr<headTailIndex> _addr_h) {
         throw("headTailIndex overflow");
     }
     return ht;
-
 }
 
 // reset clears the headTailIndex to (0, 0).

@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fs -- go2cs converted at 2022 March 06 22:12:45 UTC
+// package fs -- go2cs converted at 2022 March 13 05:27:47 UTC
 // import "io/fs" ==> using fs = go.io.fs_package
 // Original source: C:\Program Files\Go\src\io\fs\sub.go
-using errors = go.errors_package;
-using path = go.path_package;
-
 namespace go.io;
+
+using errors = errors_package;
+using path = path_package;
+
+
+// A SubFS is a file system with a Sub method.
 
 public static partial class fs_package {
 
-    // A SubFS is a file system with a Sub method.
 public partial interface SubFS {
     (FS, error) Sub(@string dir);
 }
@@ -48,9 +50,7 @@ public static (FS, error) Sub(FS fsys, @string dir) {
             return fsys.Sub(dir);
         }
     }
-
     return (addr(new subFS(fsys,dir)), error.As(null!)!);
-
 }
 
 private partial struct subFS {
@@ -68,7 +68,6 @@ private static (@string, error) fullName(this ptr<subFS> _addr_f, @string op, @s
         return ("", error.As(addr(new PathError(Op:op,Path:name,Err:errors.New("invalid name")))!)!);
     }
     return (path.Join(f.dir, name), error.As(null!)!);
-
 }
 
 // shorten maps name, which should start with f.dir, back to the suffix after f.dir.
@@ -84,7 +83,6 @@ private static (@string, bool) shorten(this ptr<subFS> _addr_f, @string name) {
         return (name[(int)len(f.dir) + 1..], true);
     }
     return ("", false);
-
 }
 
 // fixErr shortens any reported names in PathErrors by stripping f.dir.
@@ -103,12 +101,9 @@ private static error fixErr(this ptr<subFS> _addr_f, error err) {
                 }
 
             }
-
         }
     }
-
     return error.As(err)!;
-
 }
 
 private static (File, error) Open(this ptr<subFS> _addr_f, @string name) {
@@ -122,7 +117,6 @@ private static (File, error) Open(this ptr<subFS> _addr_f, @string name) {
     }
     var (file, err) = f.fsys.Open(full);
     return (file, error.As(f.fixErr(err))!);
-
 }
 
 private static (slice<DirEntry>, error) ReadDir(this ptr<subFS> _addr_f, @string name) {
@@ -136,7 +130,6 @@ private static (slice<DirEntry>, error) ReadDir(this ptr<subFS> _addr_f, @string
     }
     var (dir, err) = ReadDir(f.fsys, full);
     return (dir, error.As(f.fixErr(err))!);
-
 }
 
 private static (slice<byte>, error) ReadFile(this ptr<subFS> _addr_f, @string name) {
@@ -150,7 +143,6 @@ private static (slice<byte>, error) ReadFile(this ptr<subFS> _addr_f, @string na
     }
     var (data, err) = ReadFile(f.fsys, full);
     return (data, error.As(f.fixErr(err))!);
-
 }
 
 private static (slice<@string>, error) Glob(this ptr<subFS> _addr_f, @string pattern) {
@@ -166,7 +158,6 @@ private static (slice<@string>, error) Glob(this ptr<subFS> _addr_f, @string pat
             return (null, error.As(err)!);
         }
     }
-
     if (pattern == ".") {
         return (new slice<@string>(new @string[] { "." }), error.As(null!)!);
     }
@@ -182,15 +173,12 @@ private static (slice<@string>, error) Glob(this ptr<subFS> _addr_f, @string pat
             if (!ok) {
                 return (null, error.As(errors.New("invalid result from inner fsys Glob: " + name + " not in " + f.dir))!); // can't use fmt in this package
             }
-
             list[i] = name;
-
         }
         name = name__prev1;
     }
 
     return (list, error.As(f.fixErr(err))!);
-
 }
 
 private static (FS, error) Sub(this ptr<subFS> _addr_f, @string dir) {
@@ -206,7 +194,6 @@ private static (FS, error) Sub(this ptr<subFS> _addr_f, @string dir) {
         return (null, error.As(err)!);
     }
     return (addr(new subFS(f.fsys,full)), error.As(null!)!);
-
 }
 
 } // end fs_package

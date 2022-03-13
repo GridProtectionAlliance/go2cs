@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:12:00 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:21 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\range.go
-using utf8 = go.unicode.utf8_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using sys = go.cmd.@internal.sys_package;
-
 namespace go.cmd.compile.@internal;
+
+using utf8 = unicode.utf8_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using sys = cmd.@internal.sys_package;
 
 public static partial class walk_package {
 
@@ -39,7 +39,6 @@ private static bool cheapComputableIndex(long width) {
                 break;
         }
         return false;
-
 }
 
 // walkRange transforms various forms of ORANGE into
@@ -130,7 +129,6 @@ private static ir.Node walkRange(ptr<ir.RangeStmt> _addr_nrange) {
             a = ir.NewAssignListStmt(@base.Pos, ir.OAS2, new slice<ir.Node>(new ir.Node[] { v1, v2 }), new slice<ir.Node>(new ir.Node[] { hv1, tmp }));
             body = new slice<ir.Node>(new ir.Node[] { a });
             break;
-
         }
         ifGuard = ir.NewIfStmt(@base.Pos, null, null, null);
         ifGuard.Cond = ir.NewBinaryExpr(@base.Pos, ir.OLT, hv1, hn);
@@ -245,7 +243,6 @@ private static ir.Node walkRange(ptr<ir.RangeStmt> _addr_nrange) {
         if (v1 != null) { 
             // hv1t = hv1
             body = append(body, ir.NewAssignStmt(@base.Pos, hv1t, hv1));
-
         }
         var nind = ir.NewIndexExpr(@base.Pos, ha, hv1);
         nind.SetBounded(true);
@@ -272,15 +269,12 @@ private static ir.Node walkRange(ptr<ir.RangeStmt> _addr_nrange) {
                 // v1, v2 = hv1t, hv2
                 a = ir.NewAssignListStmt(@base.Pos, ir.OAS2, new slice<ir.Node>(new ir.Node[] { v1, v2 }), new slice<ir.Node>(new ir.Node[] { hv1t, hv2 }));
                 body = append(body, a);
-
             }
             else
  { 
                 // v1 = hv1t
                 body = append(body, ir.NewAssignStmt(@base.Pos, v1, hv1t));
-
             }
-
         }
     else 
         @base.Fatalf("walkRange");
@@ -312,7 +306,6 @@ private static ir.Node walkRange(ptr<ir.RangeStmt> _addr_nrange) {
 
     @base.Pos = lno;
     return n;
-
 }
 
 // isMapClear checks if n is of the form:
@@ -358,7 +351,6 @@ private static bool isMapClear(ptr<ir.RangeStmt> _addr_n) {
         return false;
     }
     return true;
-
 }
 
 // mapClear constructs a call to runtime.mapclear for the map m.
@@ -370,7 +362,6 @@ private static ir.Node mapClear(ir.Node m) {
     fn = typecheck.SubstArgTypes(fn, t.Key(), t.Elem());
     var n = mkcallstmt1(fn, reflectdata.TypePtr(t), m);
     return walkStmt(typecheck.Stmt(n));
-
 }
 
 // Lower n into runtime·memclr if possible, for
@@ -434,13 +425,11 @@ private static ir.Node arrayClear(ptr<ir.RangeStmt> _addr_loop, ir.Node v1, ir.N
         // memclrHasPointers(hp, hn)
         ir.CurFunc.SetWBPos(stmt.Pos());
         fn = mkcallstmt("memclrHasPointers", hp, hn);
-
     }
     else
  { 
         // memclrNoHeapPointers(hp, hn)
         fn = mkcallstmt("memclrNoHeapPointers", hp, hn);
-
     }
     n.Body.Append(fn); 
 
@@ -453,7 +442,6 @@ private static ir.Node arrayClear(ptr<ir.RangeStmt> _addr_loop, ir.Node v1, ir.N
     n.Cond = typecheck.DefaultLit(n.Cond, null);
     typecheck.Stmts(n.Body);
     return walkStmt(n);
-
 }
 
 // addptr returns (*T)(uintptr(p) + n).

@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:17:29 UTC
+// package main -- go2cs converted at 2022 March 13 05:30:49 UTC
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\field\_asm\fe_amd64_asm.go
-using fmt = go.fmt_package;
-
-using static go.github.com.mmcloughlin.avo.build_package;
-using static go.github.com.mmcloughlin.avo.gotypes_package;
-using static go.github.com.mmcloughlin.avo.operand_package;
-using static go.github.com.mmcloughlin.avo.reg_package;
-
 namespace go;
+
+using fmt = fmt_package;
+
+using static github.com.mmcloughlin.avo.build_package;
+using static github.com.mmcloughlin.avo.gotypes_package;
+using static github.com.mmcloughlin.avo.operand_package;
+using static github.com.mmcloughlin.avo.reg_package;
+
+
+//go:generate go run . -out ../fe_amd64.s -stubs ../fe_amd64.go -pkg field
 
 public static partial class main_package {
 
-    //go:generate go run . -out ../fe_amd64.s -stubs ../fe_amd64.go -pkg field
 private static void Main() {
     Package("crypto/ed25519/internal/edwards25519/field");
     ConstraintExpr("amd64,gc,!purego");
@@ -130,7 +132,6 @@ private static void feSquare() {
     Store(r4lo, @out.Field("l4"));
 
     RET();
-
 }
 
 private static void feMul() {
@@ -237,7 +238,6 @@ private static void feMul() {
     Store(r4lo, @out.Field("l4"));
 
     RET();
-
 }
 
 // mul64 sets r to i * aX * bX.
@@ -259,7 +259,6 @@ private static void mul64(uint128 r, nint i, namedComponent aX, namedComponent b
     MULQ(mustAddr(bX)); // RDX, RAX = RAX * bX
     MOVQ(RAX, r.lo);
     MOVQ(RDX, r.hi);
-
 });
 
 // addMul64 sets r to r + i * aX * bX.
@@ -277,7 +276,6 @@ private static void addMul64(uint128 r, ulong i, namedComponent aX, namedCompone
     MULQ(mustAddr(bX)); // RDX, RAX = RAX * bX
     ADDQ(RAX, r.lo);
     ADCQ(RDX, r.hi);
-
 }
 
 // shiftRightBy51 returns r >> 51 and r.lo.
@@ -301,7 +299,6 @@ private static void maskAndAdd(GPVirtual r, GPVirtual mask, GPVirtual c, ulong i
         IMUL3Q(Imm(i), c, c);
     }
     ADDQ(c, r);
-
 }
 
 private static Op mustAddr(Component c) => func((_, panic, _) => {
@@ -310,7 +307,6 @@ private static Op mustAddr(Component c) => func((_, panic, _) => {
         panic(err);
     }
     return b.Addr;
-
 });
 
 } // end main_package

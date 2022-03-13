@@ -53,16 +53,15 @@
 // not sufficiently large to satisfy a page-level memory allocation, so we
 // scavenge those fragments eagerly to offset the growth in RSS that results.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:45 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mgcscavenge.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -101,7 +100,6 @@ private static readonly float scavengeCostRatio = 0.7F * (sys.GoosDarwin + sys.G
 // should reserve for scavenging at a time. Specifically, the amount of
 // memory reserved is (heap size in bytes) / scavengeReservationShards.
 private static readonly nint scavengeReservationShards = 64;
-
 
 // heapRetained returns an estimate of the current heap RSS.
 private static ulong heapRetained() {
@@ -159,7 +157,6 @@ private static void gcPaceScavenger() {
         return ;
     }
     mheap_.scavengeGoal = retainedGoal;
-
 }
 
 // Sleep/wait state of the background scavenger.
@@ -212,10 +209,8 @@ private static void wakeScavenger() {
         ref gList list = ref heap(out ptr<gList> _addr_list);
         list.push(scavenge.g);
         injectglist(_addr_list);
-
     }
     unlock(_addr_scavenge.@lock);
-
 }
 
 // scavengeSleep attempts to put the scavenger to sleep for ns.
@@ -243,7 +238,6 @@ private static long scavengeSleep(long ns) {
 
     // Return how long we actually slept for.
     return nanotime() - start;
-
 }
 
 // Background scavenger.
@@ -310,7 +304,6 @@ private static void bgscavenge() {
             crit = float64(nanotime() - start);
 
             unlock(_addr_mheap_.@lock);
-
         });
 
         if (released == 0) {
@@ -325,7 +318,6 @@ private static void bgscavenge() {
             // the whole physical page, some of which may have still been in-use.
             // This could lead to memory corruption. Throw.
             throw("released less than one physical page of memory");
-
         }
         const float approxCritNSPerPhysicalPage = 10e3F;
 
@@ -363,9 +355,7 @@ private static void bgscavenge() {
         const float alpha = 0.5F;
 
         scavengeEWMA = alpha * fraction + (1 - alpha) * scavengeEWMA;
-
     }
-
 }
 
 // scavenge scavenges nbytes worth of free pages, starting with the
@@ -395,18 +385,15 @@ private static System.UIntPtr scavenge(this ptr<pageAlloc> _addr_p, System.UIntP
             if (addrs.size() == 0) {
                 break;
             }
-
         }
         var (r, a) = p.scavengeOne(addrs, nbytes - released, mayUnlock);
         released += r;
         addrs = a;
-
     } 
     // Only unreserve the space which hasn't been scavenged or searched
     // to ensure we always make progress.
     p.scavengeUnreserve(addrs, gen);
     return released;
-
 }
 
 // printScavTrace prints a scavenge trace line to standard error.
@@ -422,7 +409,6 @@ private static void printScavTrace(uint gen, System.UIntPtr released, bool force
     }
     println();
     printunlock();
-
 }
 
 // scavengeStartGen starts a new scavenge generation, resetting
@@ -452,7 +438,6 @@ private static void scavengeStartGen(this ptr<pageAlloc> _addr_p) {
         // highest one. Pick that as our new starting point to ensure we
         // see those pages.
         startAddr = p.scav.freeHWM;
-
     }
     else
  { 
@@ -461,7 +446,6 @@ private static void scavengeStartGen(this ptr<pageAlloc> _addr_p) {
         // the range we scavenged last cycle, so we might as well continue
         // scavenging from where we were.
         startAddr = p.scav.scavLWM;
-
     }
     p.scav.inUse.removeGreaterEqual(startAddr.addr()); 
 
@@ -476,7 +460,6 @@ private static void scavengeStartGen(this ptr<pageAlloc> _addr_p) {
     p.scav.released = 0;
     p.scav.freeHWM = minOffAddr;
     p.scav.scavLWM = maxOffAddr;
-
 }
 
 // scavengeReserve reserves a contiguous range of the address space
@@ -512,7 +495,6 @@ private static (addrRange, uint) scavengeReserve(this ptr<pageAlloc> _addr_p) {
     p.scav.inUse.removeGreaterEqual(newBase);
     r.@base = new offAddr(newBase);
     return (r, p.scav.gen);
-
 }
 
 // scavengeUnreserve returns an unscavenged portion of a range that was
@@ -535,7 +517,6 @@ private static void scavengeUnreserve(this ptr<pageAlloc> _addr_p, addrRange r, 
         throw("unreserving unaligned region");
     }
     p.scav.inUse.add(r);
-
 }
 
 // scavengeOne walks over address range work until it finds
@@ -567,7 +548,6 @@ private static (System.UIntPtr, addrRange) scavengeOne(this ptr<pageAlloc> _addr
     if (work.size() == 0) { 
         // Nothing to do.
         return (0, work);
-
     }
     if (work.@base.addr() % pallocChunkBytes != 0) {
         throw("scavengeOne called with unaligned work region");
@@ -609,7 +589,6 @@ private static (System.UIntPtr, addrRange) scavengeOne(this ptr<pageAlloc> _addr
 
             assertLockHeld(p.mheapLock); // Must be locked on return.
             return (uintptr(npages) * pageSize, work);
-
         }
     }
     work.limit = new offAddr(chunkBase(maxChunk)); 
@@ -643,10 +622,8 @@ private static (System.UIntPtr, addrRange) scavengeOne(this ptr<pageAlloc> _addr
             if (l2 != null && l2[i.l2()].hasScavengeCandidate(minPages)) {
                 return (i, true);
             }
-
         }
         return (0, false);
-
     }; 
 
     // Slow path: iterate optimistically over the in-use address space
@@ -667,7 +644,6 @@ private static (System.UIntPtr, addrRange) scavengeOne(this ptr<pageAlloc> _addr
             // We didn't find a candidate, so we're done.
             work.limit = work.@base;
             break;
-
         }
         var chunk = p.chunkOf(candidateChunkIdx);
         (base, npages) = chunk.findScavengeCandidate(pallocChunkPages - 1, minPages, maxPages);
@@ -676,15 +652,12 @@ private static (System.UIntPtr, addrRange) scavengeOne(this ptr<pageAlloc> _addr
 
             assertLockHeld(p.mheapLock); // Must be locked on return.
             return (uintptr(npages) * pageSize, work);
-
         }
         work.limit = new offAddr(chunkBase(candidateChunkIdx));
-
     }
 
     assertLockHeld(p.mheapLock); // Must be locked on return.
     return (0, work);
-
 }
 
 // scavengeRangeLocked scavenges the given region of memory.
@@ -733,7 +706,6 @@ private static System.UIntPtr scavengeRangeLocked(this ptr<pageAlloc> _addr_p, c
     memstats.heapStats.release();
 
     return addr;
-
 }
 
 // fillAligned returns x but with all zeroes in m-aligned
@@ -762,7 +734,6 @@ private static ulong fillAligned(ulong x, nuint m) {
         // bits are zero by ORing with ones everywhere except the
         // high bits and inverting the result."
         return ~((((x & c) + c) | x) | c);
-
     }; 
     // Transform x to contain a 1 bit at the top of each m-aligned
     // group of m zero bits.
@@ -802,7 +773,6 @@ private static ulong fillAligned(ulong x, nuint m) {
     // the top bit, so just OR with the original
     // result to set all the bits.
     return ~((x - (x >> (int)((m - 1)))) | x);
-
 }
 
 // hasScavengeCandidate returns true if there's any min-page-aligned groups of
@@ -836,7 +806,6 @@ private static bool hasScavengeCandidate(this ptr<pallocData> _addr_m, System.UI
         }
     }
     return false;
-
 }
 
 // findScavengeCandidate returns a start index and a size for this pallocData
@@ -892,7 +861,6 @@ private static (nuint, nuint) findScavengeCandidate(this ptr<pallocData> _addr_m
     if (i < 0) { 
         // Failed to find any free/unscavenged pages.
         return (0, 0);
-
     }
     x = fillAligned(m.scavenged[i] | m.pallocBits[i], uint(min));
     var z1 = uint(sys.LeadingZeros64(~x));
@@ -902,7 +870,6 @@ private static (nuint, nuint) findScavengeCandidate(this ptr<pallocData> _addr_m
         // After shifting out z1 bits, we still have 1s,
         // so the run ends inside this word.
         run = uint(sys.LeadingZeros64(x << (int)(z1)));
-
     }
     else
  { 
@@ -916,11 +883,8 @@ private static (nuint, nuint) findScavengeCandidate(this ptr<pallocData> _addr_m
             if (x != 0) { 
                 // The run stopped in this word.
                 break;
-
             }
-
         }
-
     }
     var size = run;
     if (size > uint(max)) {
@@ -956,13 +920,10 @@ private static (nuint, nuint) findScavengeCandidate(this ptr<pallocData> _addr_m
                 // huge page in the bound by rounding down to the huge page size.
                 size = size + (start - hugePageBelow);
                 start = hugePageBelow;
-
             }
-
         }
     }
     return (start, size);
-
 }
 
 } // end runtime_package

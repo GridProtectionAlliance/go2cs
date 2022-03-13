@@ -5,11 +5,9 @@
 //go:build !ppc64 && !ppc64le
 // +build !ppc64,!ppc64le
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:09 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sys_nonppc64x.go
-
-
 namespace go;
 
 public static partial class runtime_package {

@@ -5,11 +5,9 @@
 //go:build !amd64 && !s390x && !ppc64le && !arm64
 // +build !amd64,!s390x,!ppc64le,!arm64
 
-// package crc32 -- go2cs converted at 2022 March 06 22:14:54 UTC
+// package crc32 -- go2cs converted at 2022 March 13 05:28:57 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Program Files\Go\src\hash\crc32\crc32_otherarch.go
-
-
 namespace go.hash;
 
 public static partial class crc32_package {

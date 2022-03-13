@@ -5,22 +5,24 @@
 // Package strings implements simple functions to manipulate UTF-8 encoded strings.
 //
 // For information about UTF-8 strings in Go, see https://blog.golang.org/strings.
-// package strings -- go2cs converted at 2022 March 06 22:30:26 UTC
+
+// package strings -- go2cs converted at 2022 March 13 05:41:15 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Program Files\Go\src\strings\strings.go
-using bytealg = go.@internal.bytealg_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
 
+using bytealg = @internal.bytealg_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// explode splits s into a slice of UTF-8 strings,
+// one string per Unicode character up to a maximum of n (n < 0 means no limit).
+// Invalid UTF-8 sequences become correct encodings of U+FFFD.
+
+using System;
 public static partial class strings_package {
 
-    // explode splits s into a slice of UTF-8 strings,
-    // one string per Unicode character up to a maximum of n (n < 0 means no limit).
-    // Invalid UTF-8 sequences become correct encodings of U+FFFD.
 private static slice<@string> explode(@string s, nint n) {
     var l = utf8.RuneCountInString(s);
     if (n < 0 || n > l) {
@@ -39,7 +41,6 @@ private static slice<@string> explode(@string s, nint n) {
         a[n - 1] = s;
     }
     return a;
-
 }
 
 // Count counts the number of non-overlapping instances of substr in s.
@@ -60,9 +61,7 @@ public static nint Count(@string s, @string substr) {
         }
         n++;
         s = s[(int)i + len(substr)..];
-
     }
-
 }
 
 // Contains reports whether substr is within s.
@@ -126,7 +125,6 @@ public static nint LastIndex(@string s, @string substr) {
         i = i__prev1;
     }
     return -1;
-
 }
 
 // IndexByte returns the index of the first instance of c in s, or -1 if c is not present in s.
@@ -152,8 +150,7 @@ public static nint IndexRune(@string s, int r) {
         return -1;
     else 
         return Index(s, string(r));
-    
-}
+    }
 
 // IndexAny returns the index of the first instance of any Unicode code point
 // from chars in s, or -1 if no Unicode code point from chars is present in s.
@@ -161,7 +158,6 @@ public static nint IndexAny(@string s, @string chars) {
     if (chars == "") { 
         // Avoid scanning all of s.
         return -1;
-
     }
     if (len(chars) == 1) { 
         // Avoid scanning all of s.
@@ -170,7 +166,6 @@ public static nint IndexAny(@string s, @string chars) {
             r = utf8.RuneError;
         }
         return IndexRune(s, r);
-
     }
     if (len(s) > 8) {
         {
@@ -190,11 +185,9 @@ public static nint IndexAny(@string s, @string chars) {
                     i = i__prev1;
                 }
                 return -1;
-
             }
 
         }
-
     }
     {
         nint i__prev1 = i;
@@ -210,7 +203,6 @@ public static nint IndexAny(@string s, @string chars) {
     }
 
     return -1;
-
 }
 
 // LastIndexAny returns the index of the last instance of any Unicode code
@@ -220,7 +212,6 @@ public static nint LastIndexAny(@string s, @string chars) {
     if (chars == "") { 
         // Avoid scanning all of s.
         return -1;
-
     }
     if (len(s) == 1) {
         var rc = rune(s[0]);
@@ -231,7 +222,6 @@ public static nint LastIndexAny(@string s, @string chars) {
             return 0;
         }
         return -1;
-
     }
     if (len(s) > 8) {
         {
@@ -251,11 +241,9 @@ public static nint LastIndexAny(@string s, @string chars) {
                     i = i__prev1;
                 }
                 return -1;
-
             }
 
         }
-
     }
     if (len(chars) == 1) {
         rc = rune(chars[0]);
@@ -279,7 +267,6 @@ public static nint LastIndexAny(@string s, @string chars) {
             i = i__prev1;
         }
         return -1;
-
     }
     {
         var i__prev1 = i;
@@ -297,7 +284,6 @@ public static nint LastIndexAny(@string s, @string chars) {
         i = i__prev1;
     }
     return -1;
-
 }
 
 // LastIndexByte returns the index of the last instance of c in s, or -1 if c is not present in s.
@@ -308,7 +294,6 @@ public static nint LastIndexByte(@string s, byte c) {
         }
     }
     return -1;
-
 }
 
 // Generic split: splits after each instance of sep,
@@ -334,11 +319,9 @@ private static slice<@string> genSplit(@string s, @string sep, nint sepSave, nin
         a[i] = s[..(int)m + sepSave];
         s = s[(int)m + len(sep)..];
         i++;
-
     }
     a[i] = s;
     return a[..(int)i + 1];
-
 }
 
 // SplitN slices s into substrings separated by sep and returns a slice of
@@ -426,7 +409,6 @@ public static slice<@string> Fields(@string s) {
     if (setBits >= utf8.RuneSelf) { 
         // Some runes in the input string are not ASCII.
         return FieldsFunc(s, unicode.IsSpace);
-
     }
     var a = make_slice<@string>(n);
     nint na = 0;
@@ -450,14 +432,11 @@ public static slice<@string> Fields(@string s) {
             i++;
         }
         fieldStart = i;
-
     }
     if (fieldStart < len(s)) { // Last field might end at EOF.
         a[na] = s[(int)fieldStart..];
-
     }
     return a;
-
 }
 
 // FieldsFunc splits the string s at each run of Unicode code points c satisfying f(c)
@@ -488,9 +467,7 @@ public static slice<@string> FieldsFunc(@string s, Func<int, bool> f) {
                 // Note: using -1 here consistently and reproducibly
                 // slows down this code by a several percent on amd64.
                 start = ~start;
-
             }
-
         }
         else
  {
@@ -505,7 +482,6 @@ public static slice<@string> FieldsFunc(@string s, Func<int, bool> f) {
     foreach (var (i, span) in spans) {
         a[i] = s[(int)span.start..(int)span.end];
     }    return a;
-
 }
 
 // Join concatenates the elements of its first argument to create a single string. The separator
@@ -531,7 +507,6 @@ public static @string Join(slice<@string> elems, @string sep) {
         b.WriteString(sep);
         b.WriteString(s);
     }    return b.String();
-
 }
 
 // HasPrefix tests whether the string s begins with prefix.
@@ -577,23 +552,19 @@ public static @string Map(Func<int, int> mapping, @string s) {
  {
                 width = utf8.RuneLen(c);
             }
-
             b.Grow(len(s) + utf8.UTFMax);
             b.WriteString(s[..(int)i]);
             if (r >= 0) {
                 b.WriteRune(r);
             }
-
             s = s[(int)i + width..];
             break;
-
         }
         c = c__prev1;
     }
 
     if (b.Cap() == 0) { // didn't call b.Grow above
         return s;
-
     }
     {
         var c__prev1 = c;
@@ -613,17 +584,13 @@ public static @string Map(Func<int, int> mapping, @string s) {
  { 
                     // r is not a ASCII rune.
                     b.WriteRune(r);
-
                 }
-
             }
-
         }
         c = c__prev1;
     }
 
     return b.String();
-
 }
 
 // Repeat returns a new string consisting of count copies of the string s.
@@ -655,7 +622,6 @@ public static @string Repeat(@string s, nint count) => func((_, panic, _) => {
         }
     }
     return b.String();
-
 });
 
 // ToUpper returns s with all Unicode letters mapped to their upper case.
@@ -698,10 +664,8 @@ public static @string ToUpper(@string s) {
             i = i__prev1;
         }
         return b.String();
-
     }
     return Map(unicode.ToUpper, s);
-
 }
 
 // ToLower returns s with all Unicode letters mapped to their lower case.
@@ -744,10 +708,8 @@ public static @string ToLower(@string s) {
             i = i__prev1;
         }
         return b.String();
-
     }
     return Map(unicode.ToLower, s);
-
 }
 
 // ToTitle returns a copy of the string s with all Unicode letters mapped to
@@ -803,7 +765,6 @@ public static @string ToValidUTF8(@string s, @string replacement) {
 
     if (b.Cap() == 0) { // didn't call b.Grow above
         return s;
-
     }
     var invalid = false; // previous byte was from an invalid UTF-8 sequence
     {
@@ -837,7 +798,6 @@ public static @string ToValidUTF8(@string s, @string replacement) {
     }
 
     return b.String();
-
 }
 
 // isSeparator reports whether the rune could mark a word boundary.
@@ -855,13 +815,11 @@ private static bool isSeparator(int r) {
         else if (r == '_') 
             return false;
                 return true;
-
     }
     if (unicode.IsLetter(r) || unicode.IsDigit(r)) {
         return false;
     }
     return unicode.IsSpace(r);
-
 }
 
 // Title returns a copy of the string s with all Unicode letters that begin words
@@ -880,9 +838,7 @@ public static @string Title(@string s) {
         }
         prev = r;
         return r;
-
     }, s);
-
 }
 
 // TrimLeftFunc returns a slice of the string s with all leading
@@ -893,7 +849,6 @@ public static @string TrimLeftFunc(@string s, Func<int, bool> f) {
         return "";
     }
     return s[(int)i..];
-
 }
 
 // TrimRightFunc returns a slice of the string s with all trailing
@@ -909,7 +864,6 @@ public static @string TrimRightFunc(@string s, Func<int, bool> f) {
         i++;
     }
     return s[(int)0..(int)i];
-
 }
 
 // TrimFunc returns a slice of the string s with all leading
@@ -939,7 +893,6 @@ private static nint indexFunc(@string s, Func<int, bool> f, bool truth) {
             return i;
         }
     }    return -1;
-
 }
 
 // lastIndexFunc is the same as LastIndexFunc except that if
@@ -958,7 +911,6 @@ private static nint lastIndexFunc(@string s, Func<int, bool> f, bool truth) {
         }
     }
     return -1;
-
 }
 
 // asciiSet is a 32-byte value, where each bit represents the presence of a
@@ -982,10 +934,8 @@ private static (asciiSet, bool) makeASCIISet(@string chars) {
             return (as, false);
         }
         as[c >> 5] |= 1 << (int)(uint(c & 31));
-
     }
     return (as, true);
-
 }
 
 // contains reports whether c is inside the set.
@@ -997,22 +947,16 @@ private static bool contains(this ptr<asciiSet> _addr_@as, byte c) {
 
 private static Func<int, bool> makeCutsetFunc(@string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
-        return r => {
-            return r == rune(cutset[0]);
-        };
+        return r => r == rune(cutset[0]);
     }
     {
         var (as, isASCII) = makeASCIISet(cutset);
 
         if (isASCII) {
-            return r => {
-                return r < utf8.RuneSelf && @as.contains(byte(r));
-            };
+            return r => r < utf8.RuneSelf && @as.contains(byte(r));
         }
     }
-
     return r => IndexRune(cutset, r) >= 0;
-
 }
 
 // Trim returns a slice of the string s with all leading and
@@ -1022,7 +966,6 @@ public static @string Trim(@string s, @string cutset) {
         return s;
     }
     return TrimFunc(s, makeCutsetFunc(cutset));
-
 }
 
 // TrimLeft returns a slice of the string s with all leading
@@ -1034,7 +977,6 @@ public static @string TrimLeft(@string s, @string cutset) {
         return s;
     }
     return TrimLeftFunc(s, makeCutsetFunc(cutset));
-
 }
 
 // TrimRight returns a slice of the string s, with all trailing
@@ -1046,7 +988,6 @@ public static @string TrimRight(@string s, @string cutset) {
         return s;
     }
     return TrimRightFunc(s, makeCutsetFunc(cutset));
-
 }
 
 // TrimSpace returns a slice of the string s, with all leading
@@ -1084,7 +1025,6 @@ public static @string TrimSpace(@string s) {
     // non-space bytes, so we're done. Non-ASCII cases have already
     // been handled above.
     return s[(int)start..(int)stop];
-
 }
 
 // TrimPrefix returns s without the provided leading prefix string.
@@ -1094,7 +1034,6 @@ public static @string TrimPrefix(@string s, @string prefix) {
         return s[(int)len(prefix)..];
     }
     return s;
-
 }
 
 // TrimSuffix returns s without the provided trailing suffix string.
@@ -1104,7 +1043,6 @@ public static @string TrimSuffix(@string s, @string suffix) {
         return s[..(int)len(s) - len(suffix)];
     }
     return s;
-
 }
 
 // Replace returns a copy of the string s with the first n
@@ -1148,11 +1086,9 @@ public static @string Replace(@string s, @string old, @string @new, nint n) {
         b.WriteString(s[(int)start..(int)j]);
         b.WriteString(new);
         start = j + len(old);
-
     }
     b.WriteString(s[(int)start..]);
     return b.String();
-
 }
 
 // ReplaceAll returns a copy of the string s with all
@@ -1199,9 +1135,7 @@ public static bool EqualFold(@string s, @string t) {
             if ('A' <= sr && sr <= 'Z' && tr == sr + 'a' - 'A') {
                 continue;
             }
-
             return false;
-
         }
         var r = unicode.SimpleFold(sr);
         while (r != sr && r < tr) {
@@ -1211,12 +1145,10 @@ public static bool EqualFold(@string s, @string t) {
             continue;
         }
         return false;
-
     } 
 
     // One string is empty. Are both?
     return s == t;
-
 }
 
 // Index returns the index of the first instance of substr in s, or -1 if substr is not present in s.
@@ -1252,15 +1184,11 @@ public static nint Index(@string s, @string substr) {
                 if (o < 0) {
                     return -1;
                 }
-
                 i += o + 1;
-
             }
-
             if (s[i + 1] == c1 && s[(int)i..(int)i + n] == substr) {
                 return i;
             }
-
             fails++;
             i++; 
             // Switch to bytealg.IndexString when IndexByte produces too many false positives.
@@ -1271,7 +1199,6 @@ public static nint Index(@string s, @string substr) {
                 }
                 return -1;
             }
-
         }
         return -1;
         c0 = substr[0];
@@ -1298,13 +1225,10 @@ public static nint Index(@string s, @string substr) {
             if (j < 0) {
                 return -1;
             }
-
             return i + j;
-
         }
     }
     return -1;
-
 }
 
 } // end strings_package

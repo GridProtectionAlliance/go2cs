@@ -7,20 +7,19 @@
 //go:build (linux && amd64) || (freebsd && amd64) || (linux && arm64) || (linux && ppc64le)
 // +build linux,amd64 freebsd,amd64 linux,arm64 linux,ppc64le
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:23 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:12 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\cgo_sigaction.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
-    // _cgo_sigaction is filled in by runtime/cgo when it is linked into the
-    // program, so it is only non-nil when using cgo.
-    //go:linkname _cgo_sigaction _cgo_sigaction
+// _cgo_sigaction is filled in by runtime/cgo when it is linked into the
+// program, so it is only non-nil when using cgo.
+//go:linkname _cgo_sigaction _cgo_sigaction
 private static unsafe.Pointer _cgo_sigaction = default;
 
 //go:nosplit
@@ -84,7 +83,6 @@ private static void sigaction(uint sig, ptr<sigactiont> _addr_@new, ptr<sigactio
             // returns EINVAL for sigaction calls on those signals.  If we get EINVAL,
             // fall back to making the syscall directly.
             sysSigaction(sig, new, old);
-
         }
     }
     if (msanenabled && old != null) {

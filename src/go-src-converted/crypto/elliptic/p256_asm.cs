@@ -13,12 +13,12 @@
 //go:build amd64 || arm64
 // +build amd64 arm64
 
-// package elliptic -- go2cs converted at 2022 March 06 22:19:00 UTC
+// package elliptic -- go2cs converted at 2022 March 13 05:34:00 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Program Files\Go\src\crypto\elliptic\p256_asm.go
-using big = go.math.big_package;
-
 namespace go.crypto;
+
+using big = math.big_package;
 
 public static partial class elliptic_package {
 
@@ -28,8 +28,7 @@ private partial struct p256Curve {
 
 private partial struct p256Point {
     public array<ulong> xyz;
-}
-private static p256Curve p256 = default;
+}private static p256Curve p256 = default;
 
 private static void initP256() { 
     // See FIPS 186-3, section D.2.3
@@ -40,7 +39,6 @@ private static void initP256() {
     p256.Gx, _ = @new<big.Int>().SetString("6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296", 16);
     p256.Gy, _ = @new<big.Int>().SetString("4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5", 16);
     p256.BitSize = 256;
-
 }
 
 private static ptr<CurveParams> Params(this p256Curve curve) {
@@ -113,12 +111,10 @@ private static ptr<big.Int> Inverse(this p256Curve curve, ptr<big.Int> _addr_k) 
     if (k.Sign() < 0) {>>MARKER:FUNCTION_p256PointDoubleAsm_BLOCK_PREFIX<< 
         // This should never happen.
         k = @new<big.Int>().Neg(k);
-
     }
     if (k.Cmp(p256.N) >= 0) {>>MARKER:FUNCTION_p256PointAddAsm_BLOCK_PREFIX<< 
         // This should never happen.
         k = @new<big.Int>().Mod(k, p256.N);
-
     }
     array<ulong> table = new array<ulong>(4 * 9);
     var _1 = table[(int)4 * 0..(int)4 * 1];    var _11 = table[(int)4 * 1..(int)4 * 2];    var _101 = table[(int)4 * 2..(int)4 * 3];    var _111 = table[(int)4 * 3..(int)4 * 4];    var _1111 = table[(int)4 * 4..(int)4 * 5];    var _10101 = table[(int)4 * 5..(int)4 * 6];    var _101111 = table[(int)4 * 6..(int)4 * 7];    var x = table[(int)4 * 7..(int)4 * 8];    var t = table[(int)4 * 8..(int)4 * 9];
@@ -169,7 +165,6 @@ private static ptr<big.Int> Inverse(this p256Curve curve, ptr<big.Int> _addr_k) 
     var xOut = make_slice<byte>(32);
     p256LittleToBig(xOut, x);
     return @new<big.Int>().SetBytes(xOut);
-
 }
 
 // fromBig converts a *big.Int into a format used by this code.
@@ -208,7 +203,6 @@ private static void p256GetScalar(slice<ulong> @out, slice<byte> @in) {
         n.Mod(n, p256.N);
     }
     fromBig(out, n);
-
 }
 
 // p256Mul operates in a Montgomery domain with R = 2^256 mod p, where p is the
@@ -223,7 +217,6 @@ private static ptr<big.Int> maybeReduceModP(ptr<big.Int> _addr_@in) {
         return _addr_in!;
     }
     return @new<big.Int>().Mod(in, p256.P);
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) CombinedMult(this p256Curve curve, ptr<big.Int> _addr_bigX, ptr<big.Int> _addr_bigY, slice<byte> baseScalar, slice<byte> scalar) {
@@ -263,7 +256,6 @@ private static (ptr<big.Int>, ptr<big.Int>) CombinedMult(this p256Curve curve, p
     sum.CopyConditional(_addr_r2, r1IsInfinity);
 
     return _addr_sum.p256PointToAffine()!;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this p256Curve curve, slice<byte> scalar) {
@@ -300,7 +292,6 @@ private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this p256Curve curve, ptr
 
     r.p256ScalarMult(scalarReversed);
     return _addr_r.p256PointToAffine()!;
-
 }
 
 // uint64IsZero returns 1 if x is zero and zero otherwise.
@@ -407,7 +398,6 @@ private static void p256Inverse(slice<ulong> @out, slice<ulong> @in) {
 
     p256Sqr(out, out, 2);
     p256Mul(out, out, in);
-
 }
 
 private static void p256StorePoint(this ptr<p256Point> _addr_p, ptr<array<ulong>> _addr_r, nint index) {
@@ -476,9 +466,7 @@ private static void p256BaseMult(this ptr<p256Point> _addr_p, slice<ulong> scala
         p256SelectBase(t0.xyz[(int)0..(int)8], p256Precomputed[i][(int)0..], sel);
         p256PointAddAffineAsm(p.xyz[(int)0..(int)12], p.xyz[(int)0..(int)12], t0.xyz[(int)0..(int)8], sign, sel, zero);
         zero |= sel;
-
     }
-
 }
 
 private static void p256ScalarMult(this ptr<p256Point> _addr_p, slice<ulong> scalar) {
@@ -566,7 +554,6 @@ private static void p256ScalarMult(this ptr<p256Point> _addr_p, slice<ulong> sca
         p256MovCond(t1.xyz[(int)0..(int)12], t1.xyz[(int)0..(int)12], p.xyz[(int)0..(int)12], sel);
         p256MovCond(p.xyz[(int)0..(int)12], t1.xyz[(int)0..(int)12], t0.xyz[(int)0..(int)12], zero);
         zero |= sel;
-
     }
 
     p256PointDoubleAsm(p.xyz[..], p.xyz[..]);
@@ -583,7 +570,6 @@ private static void p256ScalarMult(this ptr<p256Point> _addr_p, slice<ulong> sca
     p256PointAddAsm(t1.xyz[..], p.xyz[..], t0.xyz[..]);
     p256MovCond(t1.xyz[(int)0..(int)12], t1.xyz[(int)0..(int)12], p.xyz[(int)0..(int)12], sel);
     p256MovCond(p.xyz[(int)0..(int)12], t1.xyz[(int)0..(int)12], t0.xyz[(int)0..(int)12], zero);
-
 }
 
 } // end elliptic_package

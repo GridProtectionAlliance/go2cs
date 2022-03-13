@@ -3,33 +3,34 @@
 // license that can be found in the LICENSE file.
 
 // Package arch defines architecture-specific information and support functions.
-// package arch -- go2cs converted at 2022 March 06 22:43:06 UTC
+
+// package arch -- go2cs converted at 2022 March 13 05:54:16 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\arch\arch.go
-using obj = go.cmd.@internal.obj_package;
-using arm = go.cmd.@internal.obj.arm_package;
-using arm64 = go.cmd.@internal.obj.arm64_package;
-using mips = go.cmd.@internal.obj.mips_package;
-using ppc64 = go.cmd.@internal.obj.ppc64_package;
-using riscv = go.cmd.@internal.obj.riscv_package;
-using s390x = go.cmd.@internal.obj.s390x_package;
-using wasm = go.cmd.@internal.obj.wasm_package;
-using x86 = go.cmd.@internal.obj.x86_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.asm.@internal;
 
+using obj = cmd.@internal.obj_package;
+using arm = cmd.@internal.obj.arm_package;
+using arm64 = cmd.@internal.obj.arm64_package;
+using mips = cmd.@internal.obj.mips_package;
+using ppc64 = cmd.@internal.obj.ppc64_package;
+using riscv = cmd.@internal.obj.riscv_package;
+using s390x = cmd.@internal.obj.s390x_package;
+using wasm = cmd.@internal.obj.wasm_package;
+using x86 = cmd.@internal.obj.x86_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// Pseudo-registers whose names are the constant name without the leading R.
+
+using System;
 public static partial class arch_package {
 
-    // Pseudo-registers whose names are the constant name without the leading R.
 public static readonly var RFP = -(iota + 1);
 public static readonly var RSB = 0;
 public static readonly var RSP = 1;
 public static readonly var RPC = 2;
-
 
 // Arch wraps the link architecture object with more architecture-specific information.
 public partial struct Arch {
@@ -95,7 +96,6 @@ public static ptr<Arch> Set(@string GOARCH) {
             break;
     }
     return _addr_null!;
-
 }
 
 private static bool jumpX86(@string word) {
@@ -147,7 +147,6 @@ private static bool jumpRISCV(@string word) {
             break;
     }
     return false;
-
 }
 
 private static bool jumpWasm(@string word) {
@@ -178,7 +177,6 @@ private static ptr<Arch> archX86(ptr<obj.LinkArch> _addr_linkArch) {
     if (linkArch == _addr_x86.Linkamd64) { 
         // Alias g to R14
         register["g"] = x86.REGG;
-
     }
     var instructions = make_map<@string, obj.As>();
     {
@@ -264,7 +262,6 @@ private static ptr<Arch> archX86(ptr<obj.LinkArch> _addr_linkArch) {
     instructions["PADDD"] = x86.APADDL;
 
     return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:nil,RegisterNumber:nilRegisterNumber,IsJump:jumpX86,));
-
 }
 
 private static ptr<Arch> archArm() {
@@ -347,7 +344,6 @@ private static ptr<Arch> archArm() {
     instructions["MCR"] = aMCR;
 
     return addr(new Arch(LinkArch:&arm.Linkarm,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:armRegisterNumber,IsJump:jumpArm,));
-
 }
 
 private static ptr<Arch> archArm64() {
@@ -481,8 +477,6 @@ private static ptr<Arch> archArm64() {
     instructions["BL"] = arm64.ABL;
 
     return addr(new Arch(LinkArch:&arm64.Linkarm64,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:arm64RegisterNumber,IsJump:jumpArm64,));
-
-
 }
 
 private static ptr<Arch> archPPC64(ptr<obj.LinkArch> _addr_linkArch) {
@@ -593,7 +587,6 @@ private static ptr<Arch> archPPC64(ptr<obj.LinkArch> _addr_linkArch) {
     instructions["BL"] = ppc64.ABL;
 
     return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:ppc64RegisterNumber,IsJump:jumpPPC64,));
-
 }
 
 private static ptr<Arch> archMips(ptr<obj.LinkArch> _addr_linkArch) {
@@ -683,7 +676,6 @@ private static ptr<Arch> archMips(ptr<obj.LinkArch> _addr_linkArch) {
     instructions["JAL"] = mips.AJAL;
 
     return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:mipsRegisterNumber,IsJump:jumpMIPS,));
-
 }
 
 private static ptr<Arch> archMips64(ptr<obj.LinkArch> _addr_linkArch) {
@@ -783,7 +775,6 @@ private static ptr<Arch> archMips64(ptr<obj.LinkArch> _addr_linkArch) {
     instructions["JAL"] = mips.AJAL;
 
     return addr(new Arch(LinkArch:linkArch,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:mipsRegisterNumber,IsJump:jumpMIPS,));
-
 }
 
 private static ptr<Arch> archRISCV64() {
@@ -922,7 +913,6 @@ private static ptr<Arch> archRISCV64() {
     }
 
     return addr(new Arch(LinkArch:&riscv.LinkRISCV64,Instructions:instructions,Register:register,RegisterPrefix:nil,RegisterNumber:nilRegisterNumber,IsJump:jumpRISCV,));
-
 }
 
 private static ptr<Arch> archS390x() {
@@ -1008,7 +998,6 @@ private static ptr<Arch> archS390x() {
     instructions["BL"] = s390x.ABL;
 
     return addr(new Arch(LinkArch:&s390x.Links390x,Instructions:instructions,Register:register,RegisterPrefix:registerPrefix,RegisterNumber:s390xRegisterNumber,IsJump:jumpS390x,));
-
 }
 
 private static ptr<Arch> archWasm() {
@@ -1042,7 +1031,6 @@ private static ptr<Arch> archWasm() {
     }
 
     return addr(new Arch(LinkArch:&wasm.Linkwasm,Instructions:instructions,Register:wasm.Register,RegisterPrefix:nil,RegisterNumber:nilRegisterNumber,IsJump:jumpWasm,));
-
 }
 
 } // end arch_package

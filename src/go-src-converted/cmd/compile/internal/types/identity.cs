@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:51 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:07 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\identity.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class types_package {
 
-    // Identical reports whether t1 and t2 are identical types, following
-    // the spec rules. Receiver parameter types are ignored.
+// Identical reports whether t1 and t2 are identical types, following
+// the spec rules. Receiver parameter types are ignored.
 public static bool Identical(ptr<Type> _addr_t1, ptr<Type> _addr_t2) {
     ref Type t1 = ref _addr_t1.val;
     ref Type t2 = ref _addr_t2.val;
@@ -54,8 +52,7 @@ private static bool identical(ptr<Type> _addr_t1, ptr<Type> _addr_t2, bool cmpTa
             return (t1 == Types[TINT32] || t1 == RuneType) && (t2 == Types[TINT32] || t2 == RuneType);
         else 
             return false;
-        
-    }
+            }
     if (assumedEqual == null) {
         assumedEqual = make();
     }    {
@@ -66,7 +63,6 @@ private static bool identical(ptr<Type> _addr_t1, ptr<Type> _addr_t2, bool cmpTa
             return true;
         }
     }
-
     assumedEqual[new typePair(t1,t2)] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
 
 
@@ -134,7 +130,6 @@ private static bool identical(ptr<Type> _addr_t1, ptr<Type> _addr_t2, bool cmpTa
             if (len(fs1) != len(fs2)) {
                 return false;
             }
-
             {
                 var i__prev2 = i;
                 var f1__prev2 = f1;
@@ -165,7 +160,6 @@ private static bool identical(ptr<Type> _addr_t1, ptr<Type> _addr_t2, bool cmpTa
             return false;
         }
         return identical(_addr_t1.Elem(), _addr_t2.Elem(), cmpTags, assumedEqual);
-
 }
 
 } // end types_package

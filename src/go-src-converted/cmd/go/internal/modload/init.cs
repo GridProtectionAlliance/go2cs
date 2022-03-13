@@ -2,43 +2,44 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:09 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:32 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\init.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using modconv = go.cmd.go.@internal.modconv_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using search = go.cmd.go.@internal.search_package;
-
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using context = context_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using lazyregexp = @internal.lazyregexp_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using modconv = cmd.go.@internal.modconv_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using search = cmd.go.@internal.search_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+
+
+// Variables set by other packages.
+//
+// TODO(#40775): See if these can be plumbed as explicit parameters.
+
+using System;
 public static partial class modload_package {
 
-    // Variables set by other packages.
-    //
-    // TODO(#40775): See if these can be plumbed as explicit parameters.
  
 // RootMode determines whether a module root is needed.
 public static Root RootMode = default;public static bool ForceUseModules = default;private static bool allowMissingModuleImports = default;
@@ -67,7 +68,6 @@ public static readonly var NoRoot = 0;
 // make sense without a main module.
 public static readonly var NeedRoot = 1;
 
-
 // ModFile returns the parsed go.mod file.
 //
 // Note that after calling LoadPackages or LoadModGraph,
@@ -82,7 +82,6 @@ public static ptr<modfile.File> ModFile() {
         die();
     }
     return _addr_modFile!;
-
 }
 
 public static @string BinDir() {
@@ -120,7 +119,6 @@ public static void Init() {
             }
             mustUseModules = false;
             return ;
-
             break;
         default: 
             @base.Fatalf("go: unknown environment setting GO111MODULE=%s", env);
@@ -159,7 +157,6 @@ public static void Init() {
             @base.Fatalf("go: -modfile cannot be used with commands that ignore the current module");
         }
         modRoot = "";
-
     }
     else
  {
@@ -175,9 +172,7 @@ public static void Init() {
                 // GO111MODULE is 'auto', and we can't find a module root.
                 // Stay in GOPATH mode.
                 return ;
-
             }
-
         }
         else if (search.InDir(modRoot, os.TempDir()) == ".") { 
             // If you create /tmp/go.mod for experimenting,
@@ -190,7 +185,6 @@ public static void Init() {
             if (!mustUseModules) {
                 return ;
             }
-
         }
     }
     if (cfg.ModFile != "" && !strings.HasSuffix(cfg.ModFile, ".mod")) {
@@ -210,7 +204,6 @@ public static void Init() {
             @base.Fatalf("$GOPATH/go.mod exists but should not");
         }
     }
-
 
     if (modRoot == "") { 
         // We're in module mode, but not inside a module.
@@ -251,12 +244,10 @@ public static bool WillBeEnabled() {
     if (modRoot != "" || cfg.ModulesEnabled) { 
         // Already enabled.
         return true;
-
     }
     if (initialized) { 
         // Initialized, not enabled.
         return false;
-
     }
     var env = cfg.Getenv("GO111MODULE");
     switch (env) {
@@ -280,7 +271,6 @@ public static bool WillBeEnabled() {
             // GO111MODULE is 'auto', and we can't find a module root.
             // Stay in GOPATH mode.
             return false;
-
         }
         else if (search.InDir(modRoot, os.TempDir()) == ".") { 
             // If you create /tmp/go.mod for experimenting,
@@ -289,13 +279,10 @@ public static bool WillBeEnabled() {
             // It's a bit of a peculiar thing to disallow but quite mysterious
             // when it happens. See golang.org/issue/26708.
             return false;
-
         }
 
     }
-
     return true;
-
 }
 
 // Enabled reports whether modules are (or must be) enabled.
@@ -314,7 +301,6 @@ public static @string ModRoot() {
         die();
     }
     return modRoot;
-
 }
 
 // HasModRoot reports whether a main module is present.
@@ -337,7 +323,6 @@ public static @string ModFilePath() {
         return cfg.ModFile;
     }
     return filepath.Join(modRoot, "go.mod");
-
 }
 
 private static void die() {
@@ -359,9 +344,7 @@ private static void die() {
             @base.Fatalf("go: cannot find main module, but found %s in %s\n\tto create a module there, run:\n\t%sgo mod init", name, dir, cdCmd);
         }
     }
-
     @base.Fatalf("go: %v", ErrNoModRoot);
-
 }
 
 public static var ErrNoModRoot = errors.New("go.mod file not found in current directory or any parent directory; see 'go help modules'");
@@ -377,7 +360,6 @@ private static @string Error(this goModDirtyError _p0) {
         return fmt.Sprintf("updates to go.mod needed, disabled by -mod=%s\n\t(%s)\n\tto update it:\n\tgo mod tidy", cfg.BuildMod, cfg.BuildModReason);
     }
     return "updates to go.mod needed; to update it:\n\tgo mod tidy";
-
 }
 
 private static error errGoModDirty = error.As(new goModDirtyError())!;
@@ -405,7 +387,6 @@ public static ptr<Requirements> LoadModFile(context.Context ctx) {
         commitRequirements(ctx, modFileGoVersion(), _addr_rs);
     }
     return _addr_rs!;
-
 }
 
 // loadModFile is like LoadModFile, but does not implicitly commit the
@@ -441,14 +422,12 @@ private static (ptr<Requirements>, bool) loadModFile(context.Context ctx) {
             // On Plan 9, locking requires chmod, and we don't want to modify any file
             // in the overlay. See #44700.
             data, err = os.ReadFile(gomodActual);
-
         }
         else
  {
             data, err = lockedfile.Read(gomodActual);
         }
     }
-
     if (err != null) {
         @base.Fatalf("go: %v", err);
     }
@@ -457,12 +436,10 @@ private static (ptr<Requirements>, bool) loadModFile(context.Context ctx) {
     if (err != null) { 
         // Errors returned by modfile.Parse begin with file:line.
         @base.Fatalf("go: errors parsing go.mod:\n%s\n", err);
-
     }
     if (f.Module == null) { 
         // No module declaration. Must add module path.
         @base.Fatalf("go: no module declaration in go.mod. To specify the module path:\n\tgo mod edit -module=example.com/mod");
-
     }
     modFile = f;
     initTarget(f.Module.Mod);
@@ -482,14 +459,11 @@ private static (ptr<Requirements>, bool) loadModFile(context.Context ctx) {
                 }
 
             }
-
             @base.Fatalf("go: %v", err);
-
         }
         err = err__prev1;
 
     }
-
 
     setDefaultBuildMod(); // possibly enable automatic vendoring
     rs = requirementsFromModFile();
@@ -522,9 +496,7 @@ private static (ptr<Requirements>, bool) loadModFile(context.Context ctx) {
                 if (err != null) {
                     @base.Fatalf("go: %v", err);
                 }
-
             }
-
         }
         else
  {
@@ -533,7 +505,6 @@ private static (ptr<Requirements>, bool) loadModFile(context.Context ctx) {
     }
     requirements = rs;
     return (_addr_requirements!, true);
-
 }
 
 // CreateModFile initializes a new module by creating a go.mod file.
@@ -561,7 +532,6 @@ public static void CreateModFile(context.Context ctx, @string modPath) {
 
     }
 
-
     if (modPath == "") {
         error err = default!;
         modPath, err = findModulePath(modRoot);
@@ -584,18 +554,14 @@ public static void CreateModFile(context.Context ctx, @string modPath) {
                     if (pathErr.Path == "." || pathErr.Path == ".." || strings.HasPrefix(pathErr.Path, "./") || strings.HasPrefix(pathErr.Path, "../")) {
                         pathErr.Err = errors.New("is a local import path");
                     }
-
                 }
 
             }
-
             @base.Fatalf("go: %v", err);
-
         }
         err = err__prev2;
 
     }
-
 
     fmt.Fprintf(os.Stderr, "go: creating new go.mod: module %s\n", modPath);
     modFile = @new<modfile.File>();
@@ -674,18 +640,14 @@ private static modfile.VersionFixer fixVersion(context.Context ctx, ptr<bool> _a
                 }
 
             }
-
             return (vers, null);
-
         }
         var (info, err) = Query(ctx, path, vers, "", null);
         if (err != null) {
             return ("", err);
         }
         return (info.Version, null);
-
     };
-
 });
 
 // AllowMissingModuleImports allows import paths to be resolved to modules
@@ -700,7 +662,6 @@ public static void AllowMissingModuleImports() => func((_, panic, _) => {
         panic("AllowMissingModuleImports after Init");
     }
     allowMissingModuleImports = true;
-
 });
 
 // initTarget sets Target and associated variables according to modFile,
@@ -723,12 +684,9 @@ private static void initTarget(module.Version m) {
                 // and the ordinary standard library.
                 // (See https://golang.org/issue/30756.)
                 targetPrefix = "";
-
             }
-
         }
     }
-
 }
 
 // requirementsFromModFile returns the set of non-excluded requirements from
@@ -745,9 +703,7 @@ private static ptr<Requirements> requirementsFromModFile() {
  {
                 fmt.Fprintf(os.Stderr, "go: ignoring requirement on excluded version %s %s\n", r.Mod.Path, r.Mod.Version);
             }
-
             continue;
-
         }
         roots = append(roots, r.Mod);
         if (!r.Indirect) {
@@ -756,7 +712,6 @@ private static ptr<Requirements> requirementsFromModFile() {
     }    module.Sort(roots);
     var rs = newRequirements(modDepthFromGoVersion(modFileGoVersion()), roots, direct);
     return _addr_rs!;
-
 }
 
 // setDefaultBuildMod sets a default value for cfg.BuildMod if the -mod flag
@@ -765,7 +720,6 @@ private static void setDefaultBuildMod() {
     if (cfg.BuildModExplicit) { 
         // Don't override an explicit '-mod=' argument.
         return ;
-
     }
     if (cfg.CmdName == "get" || strings.HasPrefix(cfg.CmdName, "mod ")) { 
         // 'get' and 'go mod' commands may update go.mod automatically.
@@ -773,7 +727,6 @@ private static void setDefaultBuildMod() {
         // 'go mod graph' update go.mod by default?
         cfg.BuildMod = "mod";
         return ;
-
     }
     if (modRoot == "") {
         if (allowMissingModuleImports) {
@@ -784,7 +737,6 @@ private static void setDefaultBuildMod() {
             cfg.BuildMod = "readonly";
         }
         return ;
-
     }
     {
         var (fi, err) = fsys.Stat(filepath.Join(modRoot, "vendor"));
@@ -798,25 +750,20 @@ private static void setDefaultBuildMod() {
                     cfg.BuildMod = "vendor";
                     cfg.BuildModReason = "Go version in go.mod is at least 1.14 and vendor directory exists.";
                     return ;
-
                 }
                 else
  {
                     modGo = index.goVersionV[(int)1..];
                 }
-
             } 
 
             // Since a vendor directory exists, we should record why we didn't use it.
             // This message won't normally be shown, but it may appear with import errors.
             cfg.BuildModReason = fmt.Sprintf("Go version in go.mod is %s, so vendor directory was not used.", modGo);
-
         }
     }
 
-
     cfg.BuildMod = "readonly";
-
 }
 
 // convertLegacyConfig imports module requirements from a legacy vendoring
@@ -835,7 +782,6 @@ private static (@string, error) convertLegacyConfig(@string modPath) {
             return (pkgMods[0].Mod, error.As(null!)!);
         }
         return (modOnly.Mod, error.As(null!)!);
-
     };
     foreach (var (_, name) in altConfigs) {
         var cfg = filepath.Join(modRoot, name);
@@ -850,7 +796,6 @@ private static (@string, error) convertLegacyConfig(@string modPath) {
             return (name, error.As(err)!);
         }
     }    return ("", error.As(null!)!);
-
 }
 
 // addGoStmt adds a go directive to the go.mod file if it does not already
@@ -867,9 +812,7 @@ private static void addGoStmt(@string v) {
             @base.Fatalf("go: internal error: %v", err);
         }
     }
-
     rawGoVersion.Store(Target, v);
-
 }
 
 // LatestGoVersion returns the latest version of the Go language supported by
@@ -881,7 +824,6 @@ public static @string LatestGoVersion() {
         @base.Fatalf("go: internal error: unrecognized default version %q", version);
     }
     return version[(int)2..];
-
 }
 
 // priorGoVersion returns the Go major release immediately preceding v,
@@ -902,7 +844,6 @@ private static @string priorGoVersion(@string v) {
             return version[(int)2..];
         }
     }    return v;
-
 }
 
 private static @string altConfigs = new slice<@string>(new @string[] { "Gopkg.lock", "GLOCKFILE", "Godeps/Godeps.json", "dependencies.tsv", "glide.lock", "vendor.conf", "vendor.yml", "vendor/manifest", "vendor/vendor.json", ".git/config" });
@@ -925,16 +866,13 @@ private static @string findModuleRoot(@string dir) => func((_, panic, _) => {
             }
 
         }
-
         var d = filepath.Dir(dir);
         if (d == dir) {
             break;
         }
         dir = d;
-
     }
     return "";
-
 });
 
 private static (@string, @string) findAltConfig(@string dir) => func((_, panic, _) => {
@@ -952,10 +890,8 @@ private static (@string, @string) findAltConfig(@string dir) => func((_, panic, 
             // Don't suggest creating a module from $GOROOT/.git/config
             // or a config file found in any parent of $GOROOT (see #34191).
             return ("", "");
-
         }
     }
-
     while (true) {
         foreach (var (_, name) in altConfigs) {
             {
@@ -966,16 +902,13 @@ private static (@string, @string) findAltConfig(@string dir) => func((_, panic, 
                 }
 
             }
-
         }        var d = filepath.Dir(dir);
         if (d == dir) {
             break;
         }
         dir = d;
-
     }
     return ("", "");
-
 });
 
 private static (@string, error) findModulePath(@string dir) {
@@ -1005,7 +938,6 @@ private static (@string, error) findModulePath(@string dir) {
                 com = com__prev2;
 
             }
-
         }
     }    foreach (var (_, info1) in list) {
         if (info1.IsDir()) {
@@ -1024,11 +956,8 @@ private static (@string, error) findModulePath(@string dir) {
                         com = com__prev3;
 
                     }
-
                 }
-
             }
-
         }
     }    var (data, _) = os.ReadFile(filepath.Join(dir, "Godeps/Godeps.json"));
     ref var cfg1 = ref heap(out ptr<var> _addr_cfg1);
@@ -1062,25 +991,20 @@ private static (@string, error) findModulePath(@string dir) {
                     }
 
                 }
-
                 return (path, error.As(null!)!);
-
             }
 
         }
-
     }    @string reason = "outside GOPATH, module path must be specified";
     if (badPathErr != null) { 
         // return a different error message if the module was in GOPATH, but
         // the module path determined above would be an invalid path.
         reason = fmt.Sprintf("bad module path inferred from directory in GOPATH: %v", badPathErr);
-
     }
     @string msg = "cannot determine module path for source directory %s (%s)\n\nExample usage:\n\t\'go mo" +
     "d init example.com/m\' to initialize a v0 or v1 module\n\t\'go mod init example.com/" +
     "m/v2\' to initialize a v2 module\n\nRun \'go help mod init\' for more information.\n";
     return ("", error.As(fmt.Errorf(msg, dir, reason))!);
-
 }
 
 private static var importCommentRE = lazyregexp.New("(?m)^package[ \\t]+[^ \\t\\r\\n/]+[ \\t]+//[ \\t]+import[ \\t]+(\\\"[^\"]+\\\")[ \\t]*\\r?\\n");
@@ -1099,7 +1023,6 @@ private static @string findImportComment(@string file) {
         return "";
     }
     return path;
-
 }
 
 private static var allowWriteGoMod = true;
@@ -1123,7 +1046,6 @@ public static void WriteGoMod(context.Context ctx) => func((_, panic, _) => {
         panic("WriteGoMod called while disallowed");
     }
     commitRequirements(ctx, modFileGoVersion(), _addr_LoadModFile(ctx));
-
 });
 
 // commitRequirements writes sets the global requirements variable to rs and
@@ -1136,12 +1058,10 @@ private static void commitRequirements(context.Context ctx, @string goVersion, p
     if (!allowWriteGoMod) { 
         // Some package outside of modload promised to update the go.mod file later.
         return ;
-
     }
     if (modRoot == "") { 
         // We aren't in a module, so we don't have anywhere to write a go.mod file.
         return ;
-
     }
     slice<ptr<modfile.Require>> list = default;
     foreach (var (_, m) in rs.rootModules) {
@@ -1163,7 +1083,6 @@ private static void commitRequirements(context.Context ctx, @string goVersion, p
         // If we're about to fail due to -mod=readonly,
         // prefer to report a dirty go.mod over a dirty go.sum
         @base.Fatalf("go: %v", errGoModDirty);
-
     }
     if (!dirty && cfg.CmdName != "mod tidy") { 
         // The go.mod file has the same semantic content that it had before
@@ -1174,7 +1093,6 @@ private static void commitRequirements(context.Context ctx, @string goVersion, p
             modfetch.WriteGoSum(keepSums(ctx, _addr_loaded, _addr_rs, addBuildListZipSums));
         }
         return ;
-
     }
     var gomod = ModFilePath();
     {
@@ -1187,7 +1105,6 @@ private static void commitRequirements(context.Context ctx, @string goVersion, p
             return ;
         }
     }
-
 
     var (new, err) = modFile.Format();
     if (err != null) {
@@ -1214,7 +1131,6 @@ private static void commitRequirements(context.Context ctx, @string goVersion, p
         }
     }
 
-
     var errNoChange = errors.New("no update needed");
 
     err = lockedfile.Transform(ModFilePath(), old => {
@@ -1222,7 +1138,6 @@ private static void commitRequirements(context.Context ctx, @string goVersion, p
             // The go.mod file is already equal to new, possibly as the result of some
             // other process.
             return (null, errNoChange);
-
         }
         if (index != null && !bytes.Equal(old, index.data)) { 
             // The contents of the go.mod file have changed. In theory we could add all
@@ -1232,10 +1147,8 @@ private static void commitRequirements(context.Context ctx, @string goVersion, p
             // want to run concurrent commands, they need to start with a complete,
             // consistent module definition.
             return (null, fmt.Errorf("existing contents have changed since last read"));
-
         }
         return (new, null);
-
     });
 
     if (err != null && err != errNoChange) {
@@ -1270,7 +1183,6 @@ private static map<module.Version, bool> keepSums(context.Context ctx, ptr<loade
             if (pkg.testOf != null || (pkg.mod.Path == "" && pkg.err == null) || module.CheckImportPath(pkg.path) != null) {
                 continue;
             }
-
             if (rs.depth == lazy && pkg.mod.Path != "") {
                 {
                     var v__prev3 = v;
@@ -1302,22 +1214,18 @@ private static map<module.Version, bool> keepSums(context.Context ctx, ptr<loade
                                     v = v__prev4;
 
                                 }
-
                             }
 
 
                             prefix = prefix__prev2;
                         }
                         continue;
-
                     }
 
                     v = v__prev3;
 
                 }
-
             }
-
             var (mg, _) = rs.Graph(ctx);
             {
                 var prefix__prev2 = prefix;
@@ -1339,13 +1247,11 @@ private static map<module.Version, bool> keepSums(context.Context ctx, ptr<loade
                         v = v__prev2;
 
                     }
-
                 }
 
 
                 prefix = prefix__prev2;
             }
-
         }
     }
     if (rs.graph.Load() == null) { 
@@ -1379,11 +1285,9 @@ private static map<module.Version, bool> keepSums(context.Context ctx, ptr<loade
                     // so they are relevant to the MVS result regardless of whether m was
                     // actually selected.
                     keep[modkey(resolveReplacement(m))] = true;
-
                 }
 
             }
-
         });
 
         if (which == addBuildListZipSums) {
@@ -1400,7 +1304,6 @@ private static map<module.Version, bool> keepSums(context.Context ctx, ptr<loade
         }
     }
     return keep;
-
 }
 
 private partial struct whichSums { // : sbyte
@@ -1408,7 +1311,6 @@ private partial struct whichSums { // : sbyte
 
 private static readonly var loadedZipSumsOnly = whichSums(iota);
 private static readonly var addBuildListZipSums = 0;
-
 
 // modKey returns the module.Version under which the checksum for m's go.mod
 // file is stored in the go.sum file.

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:20 UTC
+//     Generated on 2022 March 13 05:29:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ListenConfig
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace go
             public static implicit operator ListenConfig(NilType nil) => default(ListenConfig);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ListenConfig ListenConfig_cast(dynamic value)
         {
             return new ListenConfig(value.Control, value.KeepAlive);

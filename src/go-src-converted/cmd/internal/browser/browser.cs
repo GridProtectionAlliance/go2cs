@@ -3,22 +3,24 @@
 // license that can be found in the LICENSE file.
 
 // Package browser provides utilities for interacting with users' browsers.
-// package browser -- go2cs converted at 2022 March 06 23:15:11 UTC
+
+// package browser -- go2cs converted at 2022 March 13 06:28:40 UTC
 // import "cmd/internal/browser" ==> using browser = go.cmd.@internal.browser_package
 // Original source: C:\Program Files\Go\src\cmd\internal\browser\browser.go
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.@internal;
 
+using exec = @internal.execabs_package;
+using os = os_package;
+using runtime = runtime_package;
+using time = time_package;
+
+
+// Commands returns a list of possible commands to use to open a url.
+
+using System;
+using System.Threading;
 public static partial class browser_package {
 
-    // Commands returns a list of possible commands to use to open a url.
 public static slice<slice<@string>> Commands() {
     slice<slice<@string>> cmds = default;
     {
@@ -28,7 +30,6 @@ public static slice<slice<@string>> Commands() {
             cmds = append(cmds, new slice<@string>(new @string[] { exe }));
         }
     }
-
     switch (runtime.GOOS) {
         case "darwin": 
             cmds = append(cmds, new slice<@string>(new @string[] { "/usr/bin/open" }));
@@ -40,13 +41,11 @@ public static slice<slice<@string>> Commands() {
             if (os.Getenv("DISPLAY") != "") { 
                 // xdg-open is only for use in a desktop environment.
                 cmds = append(cmds, new slice<@string>(new @string[] { "xdg-open" }));
-
             }
             break;
     }
     cmds = append(cmds, new slice<@string>(new @string[] { "chrome" }), new slice<@string>(new @string[] { "google-chrome" }), new slice<@string>(new @string[] { "chromium" }), new slice<@string>(new @string[] { "firefox" }));
     return cmds;
-
 }
 
 // Open tries to open url in a browser and reports whether it succeeded.
@@ -57,7 +56,6 @@ public static bool Open(@string url) {
             return true;
         }
     }    return false;
-
 }
 
 // appearsSuccessful reports whether the command appears to have run successfully.

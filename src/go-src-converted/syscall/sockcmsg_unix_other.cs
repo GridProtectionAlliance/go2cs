@@ -5,16 +5,18 @@
 //go:build aix || darwin || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin freebsd linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:47 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:33 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\sockcmsg_unix_other.go
-using runtime = go.runtime_package;
-
 namespace go;
+
+using runtime = runtime_package;
+
+
+// Round the length of a raw sockaddr up to align it properly.
 
 public static partial class syscall_package {
 
-    // Round the length of a raw sockaddr up to align it properly.
 private static nint cmsgAlignOf(nint salen) {
     var salign = sizeofPtr; 
 
@@ -63,7 +65,6 @@ private static nint cmsgAlignOf(nint salen) {
     }
 
     return (salen + salign - 1) & ~(salign - 1);
-
 }
 
 } // end syscall_package

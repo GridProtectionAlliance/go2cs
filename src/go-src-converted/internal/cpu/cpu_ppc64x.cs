@@ -5,11 +5,9 @@
 //go:build ppc64 || ppc64le
 // +build ppc64 ppc64le
 
-// package cpu -- go2cs converted at 2022 March 06 22:29:51 UTC
+// package cpu -- go2cs converted at 2022 March 13 05:40:41 UTC
 // import "internal/cpu" ==> using cpu = go.@internal.cpu_package
 // Original source: C:\Program Files\Go\src\internal\cpu\cpu_ppc64x.go
-
-
 namespace go.@internal;
 
 public static partial class cpu_package {

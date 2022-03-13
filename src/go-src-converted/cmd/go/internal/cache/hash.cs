@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cache -- go2cs converted at 2022 March 06 23:17:17 UTC
+// package cache -- go2cs converted at 2022 March 13 06:30:35 UTC
 // import "cmd/go/internal/cache" ==> using cache = go.cmd.go.@internal.cache_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\cache\hash.go
-using bytes = go.bytes_package;
-using sha256 = go.crypto.sha256_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using sha256 = crypto.sha256_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using io = io_package;
+using os = os_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using sync = sync_package;
 
 public static partial class cache_package {
 
@@ -62,9 +62,7 @@ private static @string stripExperiment(@string version) {
             return version[..(int)i];
         }
     }
-
     return version;
-
 }
 
 // Subkey returns an action ID corresponding to mixing a parent
@@ -85,7 +83,6 @@ public static ActionID Subkey(ActionID parent, @string desc) {
         hashDebug.Unlock();
     }
     return out;
-
 }
 
 // NewHash returns a new Hash.
@@ -100,7 +97,6 @@ public static ptr<Hash> NewHash(@string name) {
         h.buf = @new<bytes.Buffer>();
     }
     return _addr_h!;
-
 }
 
 // Write writes data to the running hash.
@@ -116,7 +112,6 @@ private static (nint, error) Write(this ptr<Hash> _addr_h, slice<byte> b) {
         h.buf.Write(b);
     }
     return h.h.Write(b);
-
 }
 
 // Sum returns the hash of the data written previously.
@@ -135,10 +130,8 @@ private static array<byte> Sum(this ptr<Hash> _addr_h) {
         }
         hashDebug.m[out] = h.buf.String();
         hashDebug.Unlock();
-
     }
     return out;
-
 }
 
 // In GODEBUG=gocacheverify=1 mode,
@@ -183,7 +176,6 @@ public static (array<byte>, error) FileHash(@string file) {
             fmt.Fprintf(os.Stderr, "HASH %s: %v\n", file, err);
         }
         return (new array<byte>(new byte[] {  }), error.As(err)!);
-
     }
     _, err = io.Copy(h, f);
     f.Close();
@@ -192,7 +184,6 @@ public static (array<byte>, error) FileHash(@string file) {
             fmt.Fprintf(os.Stderr, "HASH %s: %v\n", file, err);
         }
         return (new array<byte>(new byte[] {  }), error.As(err)!);
-
     }
     h.Sum(out[..(int)0]);
     if (debugHash) {
@@ -200,7 +191,6 @@ public static (array<byte>, error) FileHash(@string file) {
     }
     SetFileHash(file, out);
     return (out, error.As(null!)!);
-
 }
 
 // SetFileHash sets the hash returned by FileHash for file.
@@ -213,7 +203,6 @@ public static void SetFileHash(@string file, array<byte> sum) {
     }
     hashFileCache.m[file] = sum;
     hashFileCache.Unlock();
-
 }
 
 } // end cache_package

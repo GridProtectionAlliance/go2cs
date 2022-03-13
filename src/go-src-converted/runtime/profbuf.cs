@@ -2,92 +2,94 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:13 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:42 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\profbuf.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// A profBuf is a lock-free buffer for profiling events,
+// safe for concurrent use by one reader and one writer.
+// The writer may be a signal handler running without a user g.
+// The reader is assumed to be a user g.
+//
+// Each logged event corresponds to a fixed size header, a list of
+// uintptrs (typically a stack), and exactly one unsafe.Pointer tag.
+// The header and uintptrs are stored in the circular buffer data and the
+// tag is stored in a circular buffer tags, running in parallel.
+// In the circular buffer data, each event takes 2+hdrsize+len(stk)
+// words: the value 2+hdrsize+len(stk), then the time of the event, then
+// hdrsize words giving the fixed-size header, and then len(stk) words
+// for the stack.
+//
+// The current effective offsets into the tags and data circular buffers
+// for reading and writing are stored in the high 30 and low 32 bits of r and w.
+// The bottom bits of the high 32 are additional flag bits in w, unused in r.
+// "Effective" offsets means the total number of reads or writes, mod 2^length.
+// The offset in the buffer is the effective offset mod the length of the buffer.
+// To make wraparound mod 2^length match wraparound mod length of the buffer,
+// the length of the buffer must be a power of two.
+//
+// If the reader catches up to the writer, a flag passed to read controls
+// whether the read blocks until more data is available. A read returns a
+// pointer to the buffer data itself; the caller is assumed to be done with
+// that data at the next read. The read offset rNext tracks the next offset to
+// be returned by read. By definition, r ≤ rNext ≤ w (before wraparound),
+// and rNext is only used by the reader, so it can be accessed without atomics.
+//
+// If the writer gets ahead of the reader, so that the buffer fills,
+// future writes are discarded and replaced in the output stream by an
+// overflow entry, which has size 2+hdrsize+1, time set to the time of
+// the first discarded write, a header of all zeroed words, and a "stack"
+// containing one word, the number of discarded writes.
+//
+// Between the time the buffer fills and the buffer becomes empty enough
+// to hold more data, the overflow entry is stored as a pending overflow
+// entry in the fields overflow and overflowTime. The pending overflow
+// entry can be turned into a real record by either the writer or the
+// reader. If the writer is called to write a new record and finds that
+// the output buffer has room for both the pending overflow entry and the
+// new record, the writer emits the pending overflow entry and the new
+// record into the buffer. If the reader is called to read data and finds
+// that the output buffer is empty but that there is a pending overflow
+// entry, the reader will return a synthesized record for the pending
+// overflow entry.
+//
+// Only the writer can create or add to a pending overflow entry, but
+// either the reader or the writer can clear the pending overflow entry.
+// A pending overflow entry is indicated by the low 32 bits of 'overflow'
+// holding the number of discarded writes, and overflowTime holding the
+// time of the first discarded write. The high 32 bits of 'overflow'
+// increment each time the low 32 bits transition from zero to non-zero
+// or vice versa. This sequence number avoids ABA problems in the use of
+// compare-and-swap to coordinate between reader and writer.
+// The overflowTime is only written when the low 32 bits of overflow are
+// zero, that is, only when there is no pending overflow entry, in
+// preparation for creating a new one. The reader can therefore fetch and
+// clear the entry atomically using
+//
+//    for {
+//        overflow = load(&b.overflow)
+//        if uint32(overflow) == 0 {
+//            // no pending entry
+//            break
+//        }
+//        time = load(&b.overflowTime)
+//        if cas(&b.overflow, overflow, ((overflow>>32)+1)<<32) {
+//            // pending entry cleared
+//            break
+//        }
+//    }
+//    if uint32(overflow) > 0 {
+//        emit entry for uint32(overflow), time
+//    }
+//
 
 public static partial class runtime_package {
 
-    // A profBuf is a lock-free buffer for profiling events,
-    // safe for concurrent use by one reader and one writer.
-    // The writer may be a signal handler running without a user g.
-    // The reader is assumed to be a user g.
-    //
-    // Each logged event corresponds to a fixed size header, a list of
-    // uintptrs (typically a stack), and exactly one unsafe.Pointer tag.
-    // The header and uintptrs are stored in the circular buffer data and the
-    // tag is stored in a circular buffer tags, running in parallel.
-    // In the circular buffer data, each event takes 2+hdrsize+len(stk)
-    // words: the value 2+hdrsize+len(stk), then the time of the event, then
-    // hdrsize words giving the fixed-size header, and then len(stk) words
-    // for the stack.
-    //
-    // The current effective offsets into the tags and data circular buffers
-    // for reading and writing are stored in the high 30 and low 32 bits of r and w.
-    // The bottom bits of the high 32 are additional flag bits in w, unused in r.
-    // "Effective" offsets means the total number of reads or writes, mod 2^length.
-    // The offset in the buffer is the effective offset mod the length of the buffer.
-    // To make wraparound mod 2^length match wraparound mod length of the buffer,
-    // the length of the buffer must be a power of two.
-    //
-    // If the reader catches up to the writer, a flag passed to read controls
-    // whether the read blocks until more data is available. A read returns a
-    // pointer to the buffer data itself; the caller is assumed to be done with
-    // that data at the next read. The read offset rNext tracks the next offset to
-    // be returned by read. By definition, r ≤ rNext ≤ w (before wraparound),
-    // and rNext is only used by the reader, so it can be accessed without atomics.
-    //
-    // If the writer gets ahead of the reader, so that the buffer fills,
-    // future writes are discarded and replaced in the output stream by an
-    // overflow entry, which has size 2+hdrsize+1, time set to the time of
-    // the first discarded write, a header of all zeroed words, and a "stack"
-    // containing one word, the number of discarded writes.
-    //
-    // Between the time the buffer fills and the buffer becomes empty enough
-    // to hold more data, the overflow entry is stored as a pending overflow
-    // entry in the fields overflow and overflowTime. The pending overflow
-    // entry can be turned into a real record by either the writer or the
-    // reader. If the writer is called to write a new record and finds that
-    // the output buffer has room for both the pending overflow entry and the
-    // new record, the writer emits the pending overflow entry and the new
-    // record into the buffer. If the reader is called to read data and finds
-    // that the output buffer is empty but that there is a pending overflow
-    // entry, the reader will return a synthesized record for the pending
-    // overflow entry.
-    //
-    // Only the writer can create or add to a pending overflow entry, but
-    // either the reader or the writer can clear the pending overflow entry.
-    // A pending overflow entry is indicated by the low 32 bits of 'overflow'
-    // holding the number of discarded writes, and overflowTime holding the
-    // time of the first discarded write. The high 32 bits of 'overflow'
-    // increment each time the low 32 bits transition from zero to non-zero
-    // or vice versa. This sequence number avoids ABA problems in the use of
-    // compare-and-swap to coordinate between reader and writer.
-    // The overflowTime is only written when the low 32 bits of overflow are
-    // zero, that is, only when there is no pending overflow entry, in
-    // preparation for creating a new one. The reader can therefore fetch and
-    // clear the entry atomically using
-    //
-    //    for {
-    //        overflow = load(&b.overflow)
-    //        if uint32(overflow) == 0 {
-    //            // no pending entry
-    //            break
-    //        }
-    //        time = load(&b.overflowTime)
-    //        if cas(&b.overflow, overflow, ((overflow>>32)+1)<<32) {
-    //            // pending entry cleared
-    //            break
-    //        }
-    //    }
-    //    if uint32(overflow) > 0 {
-    //        emit entry for uint32(overflow), time
-    //    }
-    //
 private partial struct profBuf {
     public profAtomic r;
     public profAtomic w;
@@ -147,7 +149,6 @@ private static uint tagCount(this profIndex x) {
 private static nint countSub(uint x, uint y) { 
     // x-y is 32-bit signed or 30-bit signed; sign-extend to 32 bits and convert to int.
     return int(int32(x - y) << 2 >> 2);
-
 }
 
 // addCountsAndClearFlags returns the packed form of "x + (data, tag) - all flags".
@@ -183,10 +184,8 @@ private static (uint, ulong) takeOverflow(this ptr<profBuf> _addr_b) {
         }
         overflow = atomic.Load64(_addr_b.overflow);
         time = atomic.Load64(_addr_b.overflowTime);
-
     }
     return (uint32(overflow), time);
-
 }
 
 // incrementOverflow records a single overflow at time now.
@@ -204,7 +203,6 @@ private static void incrementOverflow(this ptr<profBuf> _addr_b, long now) {
             atomic.Store64(_addr_b.overflowTime, uint64(now));
             atomic.Store64(_addr_b.overflow, (((overflow >> 32) + 1) << 32) + 1);
             break;
-
         }
         if (int32(overflow) == -1) {
             break;
@@ -213,7 +211,6 @@ private static void incrementOverflow(this ptr<profBuf> _addr_b, long now) {
             break;
         }
     }
-
 }
 
 // newProfBuf returns a new profiling buffer with room for
@@ -254,7 +251,6 @@ private static ptr<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
     b.tags = make_slice<unsafe.Pointer>(tags);
     b.overflowBuf = make_slice<ulong>(2 + b.hdrsize + 1);
     return _addr_b!;
-
 }
 
 // canWriteRecord reports whether the buffer has room
@@ -276,10 +272,8 @@ private static bool canWriteRecord(this ptr<profBuf> _addr_b, nint nstk) {
         // Can't fit in trailing fragment of slice.
         // Skip over that and start over at beginning of slice.
         nd -= len(b.data) - i;
-
     }
     return nd >= want;
-
 }
 
 // canWriteTwoRecords reports whether the buffer has room
@@ -307,7 +301,6 @@ private static bool canWriteTwoRecords(this ptr<profBuf> _addr_b, nint nstk1, ni
         // Skip over that and start over at beginning of slice.
         nd -= len(b.data) - i;
         i = 0;
-
     }
     i += want;
     nd -= want; 
@@ -319,10 +312,8 @@ private static bool canWriteTwoRecords(this ptr<profBuf> _addr_b, nint nstk1, ni
         // Skip over that and start over at beginning of slice.
         nd -= len(b.data) - i;
         i = 0;
-
     }
     return nd >= want;
-
 }
 
 // write writes an entry to the profiling buffer b.
@@ -353,7 +344,6 @@ private static void write(this ptr<profBuf> _addr_b, ptr<unsafe.Pointer> _addr_t
                 stk[0] = uintptr(count);
                 b.write(null, int64(time), null, stk[..]);
             }
-
         }
         else if (hasOverflow || !b.canWriteRecord(len(stk))) { 
             // Pending overflow without room to write overflow and new records
@@ -361,7 +351,6 @@ private static void write(this ptr<profBuf> _addr_b, ptr<unsafe.Pointer> _addr_t
             b.incrementOverflow(now);
             b.wakeupExtra();
             return ;
-
         }
 
     } 
@@ -388,10 +377,9 @@ private static void write(this ptr<profBuf> _addr_b, ptr<unsafe.Pointer> _addr_t
     // so there is no need for a deletion barrier on b.tags[wt].
     var wt = int(bw.tagCount() % uint32(len(b.tags)));
     if (tagPtr != null) {
-        (uintptr.val)(@unsafe.Pointer(_addr_b.tags[wt])).val;
+        (uintptr.val).val;
 
-        uintptr(@unsafe.Pointer(tagPtr));
-
+        (@unsafe.Pointer(_addr_b.tags[wt])) = uintptr(@unsafe.Pointer(tagPtr));
     }
     var wd = int(bw.dataCount() % uint32(len(b.data)));
     var nd = countSub(br.dataCount(), bw.dataCount()) + len(b.data);
@@ -434,9 +422,7 @@ private static void write(this ptr<profBuf> _addr_b, ptr<unsafe.Pointer> _addr_t
             notewakeup(_addr_b.wait);
         }
         break;
-
     }
-
 }
 
 // close signals that there will be no more writes on the buffer.
@@ -449,7 +435,6 @@ private static void close(this ptr<profBuf> _addr_b) {
     }
     atomic.Store(_addr_b.eof, 1);
     b.wakeupExtra();
-
 }
 
 // wakeupExtra must be called after setting one of the "extra"
@@ -468,9 +453,7 @@ private static void wakeupExtra(this ptr<profBuf> _addr_b) {
             notewakeup(_addr_b.wait);
         }
         break;
-
     }
-
 }
 
 // profBufReadMode specifies whether to block when no data is available to read.
@@ -479,7 +462,6 @@ private partial struct profBufReadMode { // : nint
 
 private static readonly profBufReadMode profBufBlocking = iota;
 private static readonly var profBufNonBlocking = 0;
-
 
 private static array<unsafe.Pointer> overflowTag = new array<unsafe.Pointer>(1); // always nil
 
@@ -513,14 +495,12 @@ private static (slice<ulong>, slice<unsafe.Pointer>, bool) read(this ptr<profBuf
                 if (ti == len(b.tags)) {
                     ti = 0;
                 }
-
             }
 
 
             i = i__prev1;
         }
         b.r.store(br);
-
     }
 Read:
     var bw = b.w.load();
@@ -533,7 +513,6 @@ Read:
             if (count == 0) { 
                 // Lost the race, go around again.
                 goto Read;
-
             } 
             // Won the race, report overflow.
             var dst = b.overflowBuf;
@@ -551,12 +530,10 @@ Read:
             }
             dst[2 + b.hdrsize] = uint64(count);
             return (dst[..(int)2 + b.hdrsize + 1], overflowTag[..(int)1], false);
-
         }
         if (atomic.Load(_addr_b.eof) > 0) { 
             // No data, no overflow, EOF set: done.
             return (null, null, true);
-
         }
         if (bw & profWriteExtra != 0) { 
             // Writer claims to have published extra information (overflow or eof).
@@ -565,7 +542,6 @@ Read:
             // so we still need to check again.
             b.w.cas(bw, bw & ~profWriteExtra);
             goto Read;
-
         }
         if (mode == profBufNonBlocking) {
             return (null, null, false);
@@ -576,7 +552,6 @@ Read:
         notetsleepg(_addr_b.wait, -1);
         noteclear(_addr_b.wait);
         goto Read;
-
     }
     data = b.data[(int)br.dataCount() % uint32(len(b.data))..];
     if (len(data) > numData) {
@@ -611,7 +586,6 @@ Read:
         }
         di += int(data[di]);
         ti++;
-
     } 
 
     // Remember how much we returned, to commit read on next call.
@@ -628,10 +602,8 @@ Read:
         // and then the read-out from the signal handler buffer uses
         // atomics to read those queue indices.
         raceacquire(@unsafe.Pointer(_addr_labelSync));
-
     }
     return (data[..(int)di], tags[..(int)ti], false);
-
 }
 
 } // end runtime_package

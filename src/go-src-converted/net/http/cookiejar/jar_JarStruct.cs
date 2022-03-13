@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:50 UTC
+//     Generated on 2022 March 13 05:38:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace http
 {
     public static partial class cookiejar_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Jar
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace http
             public static implicit operator Jar(NilType nil) => default(Jar);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Jar Jar_cast(dynamic value)
         {
             return new Jar(value.psList, value.mu, value.entries, value.nextSeqNum);

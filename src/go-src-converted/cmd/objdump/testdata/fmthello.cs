@@ -1,8 +1,8 @@
-// package main -- go2cs converted at 2022 March 06 23:22:37 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:41 UTC
 // Original source: C:\Program Files\Go\src\cmd\objdump\testdata\fmthello.go
-using fmt = go.fmt_package;
-
 namespace go;
+
+using fmt = fmt_package;
 
 public static partial class main_package {
 
@@ -11,8 +11,8 @@ private static void Main() {
     if (flag) {
         //line fmthello.go:999999
         Println("bad line");
-        while (true)         }
-
+        while (true) {
+        }
     }
 }
 

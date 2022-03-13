@@ -4,12 +4,12 @@
 
 // +build windows,!race
 
-// package windows -- go2cs converted at 2022 March 06 23:30:34 UTC
+// package windows -- go2cs converted at 2022 March 13 06:41:28 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\windows\race0.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using @unsafe = @unsafe_package;
 
 public static partial class windows_package {
 

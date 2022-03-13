@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:03 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:49 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\map_fast32.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -30,7 +30,6 @@ private static unsafe.Pointer mapaccess1_fast32(ptr<maptype> _addr_t, ptr<hmap> 
     if (h.B == 0) { 
         // One-bucket table. No need to hash.
         b = (bmap.val)(h.buckets);
-
     }
     else
  {
@@ -44,7 +43,6 @@ private static unsafe.Pointer mapaccess1_fast32(ptr<maptype> _addr_t, ptr<hmap> 
                 if (!h.sameSizeGrow()) { 
                     // There used to be half as many buckets; mask down one more power of two.
                     m>>=1;
-
                 }
                 var oldb = (bmap.val)(add(c, (hash & m) * uintptr(t.bucketsize)));
                 if (!evacuated(oldb)) {
@@ -52,7 +50,6 @@ private static unsafe.Pointer mapaccess1_fast32(ptr<maptype> _addr_t, ptr<hmap> 
                 }
             }
         }
-
     }
     while (b != null) {
         {
@@ -67,10 +64,8 @@ private static unsafe.Pointer mapaccess1_fast32(ptr<maptype> _addr_t, ptr<hmap> 
         b = b.overflow(t);
             }
         }
-
     }
     return @unsafe.Pointer(_addr_zeroVal[0]);
-
 }
 
 private static (unsafe.Pointer, bool) mapaccess2_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, uint key) {
@@ -93,7 +88,6 @@ private static (unsafe.Pointer, bool) mapaccess2_fast32(ptr<maptype> _addr_t, pt
     if (h.B == 0) { 
         // One-bucket table. No need to hash.
         b = (bmap.val)(h.buckets);
-
     }
     else
  {
@@ -107,18 +101,14 @@ private static (unsafe.Pointer, bool) mapaccess2_fast32(ptr<maptype> _addr_t, pt
                 if (!h.sameSizeGrow()) { 
                     // There used to be half as many buckets; mask down one more power of two.
                     m>>=1;
-
                 }
-
                 var oldb = (bmap.val)(add(c, (hash & m) * uintptr(t.bucketsize)));
                 if (!evacuated(oldb)) {
                     b = oldb;
                 }
-
             }
 
         }
-
     }
     while (b != null) {
         {
@@ -130,15 +120,12 @@ private static (unsafe.Pointer, bool) mapaccess2_fast32(ptr<maptype> _addr_t, pt
                     return (add(@unsafe.Pointer(b), dataOffset + bucketCnt * 4 + i * uintptr(t.elemsize)), true);
                 (i, k) = (i + 1, add(k, 4));
                 }
-
         b = b.overflow(t);
             }
 
         }
-
     }
     return (@unsafe.Pointer(_addr_zeroVal[0]), false);
-
 }
 
 private static unsafe.Pointer mapassign_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, uint key) => func((_, panic, _) => {
@@ -191,27 +178,21 @@ bucketloop:
                     _breakbucketloop = true;
                     break;
                 }
-
                 continue;
-
             }
-
             var k = ((uint32.val)(add(@unsafe.Pointer(b), dataOffset + i * 4))).val;
             if (k != key) {
                 continue;
             }
-
             inserti = i;
             insertb = b;
             goto done;
-
         }
         var ovf = b.overflow(t);
         if (ovf == null) {
             break;
         }
         b = ovf;
-
     } 
 
     // Did not find mapping for key. Allocate new cell & add entry.
@@ -229,9 +210,9 @@ bucketloop:
     }
     insertb.tophash[inserti & (bucketCnt - 1)] = tophash(hash); // mask inserti to avoid bounds checks
 
-    insertk = add(@unsafe.Pointer(insertb), dataOffset + inserti * 4) * (uint32.val)(insertk);
+    insertk = add(@unsafe.Pointer(insertb), dataOffset + inserti * 4) * (uint32.val);
 
-    key;
+    (insertk) = key;
 
     h.count++;
 
@@ -242,7 +223,6 @@ done:
     }
     h.flags &= hashWriting;
     return elem;
-
 });
 
 private static unsafe.Pointer mapassign_fast32ptr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, unsafe.Pointer key) => func((_, panic, _) => {
@@ -295,27 +275,21 @@ bucketloop:
                     _breakbucketloop = true;
                     break;
                 }
-
                 continue;
-
             }
-
             var k = ((@unsafe.Pointer.val)(add(@unsafe.Pointer(b), dataOffset + i * 4))).val;
             if (k != key) {
                 continue;
             }
-
             inserti = i;
             insertb = b;
             goto done;
-
         }
         var ovf = b.overflow(t);
         if (ovf == null) {
             break;
         }
         b = ovf;
-
     } 
 
     // Did not find mapping for key. Allocate new cell & add entry.
@@ -333,9 +307,9 @@ bucketloop:
     }
     insertb.tophash[inserti & (bucketCnt - 1)] = tophash(hash); // mask inserti to avoid bounds checks
 
-    insertk = add(@unsafe.Pointer(insertb), dataOffset + inserti * 4) * (@unsafe.Pointer.val)(insertk);
+    insertk = add(@unsafe.Pointer(insertb), dataOffset + inserti * 4) * (@unsafe.Pointer.val);
 
-    key;
+    (insertk) = key;
 
     h.count++;
 
@@ -346,7 +320,6 @@ done:
     }
     h.flags &= hashWriting;
     return elem;
-
 });
 
 private static void mapdelete_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, uint key) {
@@ -392,12 +365,11 @@ search:
                 if (sys.PtrSize == 4 && t.key.ptrdata != 0) { 
                     // The key must be a pointer as we checked pointers are
                     // 32 bits wide and the key is 32 bits wide also.
-                    (@unsafe.Pointer.val)(k).val;
+                    (@unsafe.Pointer.val).val;
 
-                    null;
+                    (k) = null;
         b = b.overflow(t);
                 }
-
                 var e = add(@unsafe.Pointer(b), dataOffset + bucketCnt * 4 + i * uintptr(t.elemsize));
                 if (t.elem.ptrdata != 0) {
                     memclrHasPointers(e, t.elem.size);
@@ -406,7 +378,6 @@ search:
  {
                     memclrNoHeapPointers(e, t.elem.size);
                 }
-
                 b.tophash[i] = emptyOne; 
                 // If the bucket now ends in a bunch of emptyOne states,
                 // change those to emptyRest states.
@@ -421,7 +392,6 @@ search:
                         goto notLast;
                     }
                 }
-
                 while (true) {
                     b.tophash[i] = emptyRest;
                     if (i == 0) {
@@ -438,15 +408,12 @@ search:
                     else
 
                         i = bucketCnt - 1;
-
                     } {
                         i--;
                     }
-
                     if (b.tophash[i] != emptyOne) {
                         break;
                     }
-
                 }
 
 notLast: 
@@ -458,19 +425,16 @@ notLast:
                 if (h.count == 0) {
                     h.hash0 = fastrand();
                 }
-
                 _breaksearch = true;
                 break;
             }
 
         }
-
     }
     if (h.flags & hashWriting == 0) {
         throw("concurrent map writes");
     }
     h.flags &= hashWriting;
-
 }
 
 private static void growWork_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIntPtr bucket) {
@@ -511,7 +475,6 @@ private static void evacuate_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sys
             y.b = (bmap.val)(add(h.buckets, (oldbucket + newbit) * uintptr(t.bucketsize)));
             y.k = add(@unsafe.Pointer(y.b), dataOffset);
             y.e = add(y.k, bucketCnt * 4);
-
         }
         while (b != null) {
             var k = add(@unsafe.Pointer(b), dataOffset);
@@ -526,12 +489,10 @@ private static void evacuate_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sys
                         continue;
                     (i, k, e) = (i + 1, add(k, 4), add(e, uintptr(t.elemsize)));
                     }
-
                     if (top < minTopHash) {
                         throw("bad map state");
             b = b.overflow(t);
                     }
-
                     byte useY = default;
                     if (!h.sameSizeGrow()) { 
                         // Compute hash to make our evacuation decision (whether we need
@@ -540,9 +501,7 @@ private static void evacuate_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sys
                         if (hash & newbit != 0) {
                             useY = 1;
                         }
-
                     }
-
                     b.tophash[i] = evacuatedX + useY; // evacuatedX + 1 == evacuatedY, enforced in makemap
                     var dst = _addr_xy[useY]; // evacuation destination
 
@@ -552,25 +511,21 @@ private static void evacuate_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sys
                         dst.k = add(@unsafe.Pointer(dst.b), dataOffset);
                         dst.e = add(dst.k, bucketCnt * 4);
                     }
-
                     dst.b.tophash[dst.i & (bucketCnt - 1)] = top; // mask dst.i as an optimization, to avoid a bounds check
 
                     // Copy key.
                     if (sys.PtrSize == 4 && t.key.ptrdata != 0 && writeBarrier.enabled) { 
                         // Write with a write barrier.
-                        (@unsafe.Pointer.val)(dst.k).val;
+                        (@unsafe.Pointer.val).val;
 
-                        new ptr<ptr<ptr<unsafe.Pointer>>>(k);
-
+                        (dst.k) = new ptr<ptr<ptr<unsafe.Pointer>>>(k);
                     }
                     else
  {
-                        (uint32.val)(dst.k).val;
+                        (uint32.val).val;
 
-                        new ptr<ptr<ptr<uint>>>(k);
-
+                        (dst.k) = new ptr<ptr<ptr<uint>>>(k);
                     }
-
                     typedmemmove(t.elem, dst.e, e);
                     dst.i++; 
                     // These updates might push these pointers past the end of the
@@ -579,11 +534,9 @@ private static void evacuate_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sys
                     // end of the bucket.
                     dst.k = add(dst.k, 4);
                     dst.e = add(dst.e, uintptr(t.elemsize));
-
                 }
 
             }
-
         } 
         // Unlink the overflow buckets & clear key/elem to help GC.
         if (h.flags & oldIterator == 0 && t.bucket.ptrdata != 0) {
@@ -593,7 +546,6 @@ private static void evacuate_fast32(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sys
             var ptr = add(b, dataOffset);
             var n = uintptr(t.bucketsize) - dataOffset;
             memclrHasPointers(ptr, n);
-
         }
     }
     if (oldbucket == h.nevacuate) {

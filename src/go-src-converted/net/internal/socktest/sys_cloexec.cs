@@ -5,16 +5,16 @@
 //go:build dragonfly || freebsd || illumos || linux || netbsd || openbsd
 // +build dragonfly freebsd illumos linux netbsd openbsd
 
-// package socktest -- go2cs converted at 2022 March 06 22:25:42 UTC
+// package socktest -- go2cs converted at 2022 March 13 05:40:14 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Program Files\Go\src\net\internal\socktest\sys_cloexec.go
-using syscall = go.syscall_package;
-
 namespace go.net.@internal;
+
+using syscall = syscall_package;
 
 public static partial class socktest_package {
 
-    // Accept4 wraps syscall.Accept4.
+// Accept4 wraps syscall.Accept4.
 private static (nint, syscall.Sockaddr, error) Accept4(this ptr<Switch> _addr_sw, nint s, nint flags) => func((defer, _, _) => {
     nint ns = default;
     syscall.Sockaddr sa = default;
@@ -41,21 +41,20 @@ private static (nint, syscall.Sockaddr, error) Accept4(this ptr<Switch> _addr_sw
             syscall.Close(ns);
         }
         return (-1, null, error.As(err)!);
-
     }
     sw.smu.Lock();
     defer(sw.smu.Unlock());
     if (so.Err != null) {
-        sw.stats.getLocked(so.Cookie).AcceptFailed;
+        sw.stats.getLocked;
 
+        (so.Cookie).AcceptFailed++;
         return (-1, null, error.As(so.Err)!);
-
     }
     var nso = sw.addLocked(ns, so.Cookie.Family(), so.Cookie.Type(), so.Cookie.Protocol());
-    sw.stats.getLocked(nso.Cookie).Accepted;
+    sw.stats.getLocked;
 
+    (nso.Cookie).Accepted++;
     return (ns, sa, error.As(null!)!);
-
 });
 
 } // end socktest_package

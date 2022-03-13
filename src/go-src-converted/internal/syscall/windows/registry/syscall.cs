@@ -4,12 +4,12 @@
 
 // +build windows
 
-// package registry -- go2cs converted at 2022 March 06 22:13:14 UTC
+// package registry -- go2cs converted at 2022 March 13 06:44:31 UTC
 // import "internal/syscall/windows/registry" ==> using registry = go.@internal.syscall.windows.registry_package
 // Original source: C:\Program Files\Go\src\internal\syscall\windows\registry\syscall.go
-using syscall = go.syscall_package;
-
 namespace go.@internal.syscall.windows;
+
+using syscall = syscall_package;
 
 public static partial class registry_package {
 
@@ -19,7 +19,6 @@ private static readonly nint _REG_CREATED_NEW_KEY = 1;
 private static readonly nint _REG_OPENED_EXISTING_KEY = 2;
 
 private static readonly syscall.Errno _ERROR_NO_MORE_ITEMS = 259;
-
 
 public static error LoadRegLoadMUIString() {
     return error.As(procRegLoadMUIStringW.Find())!;

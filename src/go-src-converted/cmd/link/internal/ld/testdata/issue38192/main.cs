@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:22:34 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:38 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\issue38192\main.go
-
-
 namespace go;
 
 public static partial class main_package {

@@ -12,19 +12,18 @@
 // If so, the error will likely wrap one of:
 // The functions in this package do not completely eliminate spurious errors,
 // but substantially reduce their rate of occurrence in practice.
-// package robustio -- go2cs converted at 2022 March 06 23:18:38 UTC
+
+// package robustio -- go2cs converted at 2022 March 13 06:32:01 UTC
 // import "cmd/go/internal/robustio" ==> using robustio = go.cmd.go.@internal.robustio_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\robustio\robustio.go
-
-
 namespace go.cmd.go.@internal;
 
 public static partial class robustio_package {
 
-    // Rename is like os.Rename, but on Windows retries errors that may occur if the
-    // file is concurrently read or overwritten.
-    //
-    // (See golang.org/issue/31247 and golang.org/issue/32188.)
+// Rename is like os.Rename, but on Windows retries errors that may occur if the
+// file is concurrently read or overwritten.
+//
+// (See golang.org/issue/31247 and golang.org/issue/32188.)
 public static error Rename(@string oldpath, @string newpath) {
     return error.As(rename(oldpath, newpath))!;
 }

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:19 UTC
+//     Generated on 2022 March 13 06:35:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct peFile
         {
             // Constructors
@@ -87,7 +87,7 @@ namespace @internal
             public static implicit operator peFile(NilType nil) => default(peFile);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static peFile peFile_cast(dynamic value)
         {
             return new peFile(value.sections, value.stringTable, ref value.textSect, ref value.rdataSect, ref value.dataSect, ref value.bssSect, ref value.ctorsSect, value.nextSectOffset, value.nextFileOffset, value.symtabOffset, value.symbolCount, value.dataDirectory);

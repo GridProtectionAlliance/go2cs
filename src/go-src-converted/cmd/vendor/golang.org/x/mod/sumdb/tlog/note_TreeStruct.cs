@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:16 UTC
+//     Generated on 2022 March 13 06:41:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace sumdb
 {
     public static partial class tlog_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Tree
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace sumdb
             public static implicit operator Tree(NilType nil) => default(Tree);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Tree Tree_cast(dynamic value)
         {
             return new Tree(value.N, value.Hash);

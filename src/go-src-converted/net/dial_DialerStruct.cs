@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:20 UTC
+//     Generated on 2022 March 13 05:29:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Dialer
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace go
             public static implicit operator Dialer(NilType nil) => default(Dialer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Dialer Dialer_cast(dynamic value)
         {
             return new Dialer(value.Timeout, value.Deadline, value.LocalAddr, value.DualStack, value.FallbackDelay, value.KeepAlive, ref value.Resolver, value.Cancel, value.Control);

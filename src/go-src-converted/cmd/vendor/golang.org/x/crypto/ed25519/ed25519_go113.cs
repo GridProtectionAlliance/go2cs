@@ -17,13 +17,14 @@
 // Beginning with Go 1.13, the functionality of this package was moved to the
 // standard library as crypto/ed25519. This package only acts as a compatibility
 // wrapper.
-// package ed25519 -- go2cs converted at 2022 March 06 23:25:42 UTC
+
+// package ed25519 -- go2cs converted at 2022 March 13 06:38:57 UTC
 // import "cmd/vendor/golang.org/x/crypto/ed25519" ==> using ed25519 = go.cmd.vendor.golang.org.x.crypto.ed25519_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\crypto\ed25519\ed25519_go113.go
-using ed25519 = go.crypto.ed25519_package;
-using io = go.io_package;
-
 namespace go.cmd.vendor.golang.org.x.crypto;
+
+using ed25519 = crypto.ed25519_package;
+using io = io_package;
 
 public static partial class ed25519_package {
 
@@ -36,7 +37,6 @@ public static readonly nint PrivateKeySize = 64;
 public static readonly nint SignatureSize = 64; 
 // SeedSize is the size, in bytes, of private key seeds. These are the private key representations used by RFC 8032.
 public static readonly nint SeedSize = 32;
-
 
 // PublicKey is the type of Ed25519 public keys.
 //

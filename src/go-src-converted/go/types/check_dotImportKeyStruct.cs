@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:45 UTC
+//     Generated on 2022 March 13 05:52:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace go
 {
     public static partial class types_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct dotImportKey
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace go
             public static implicit operator dotImportKey(NilType nil) => default(dotImportKey);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static dotImportKey dotImportKey_cast(dynamic value)
         {
             return new dotImportKey(ref value.scope, value.obj);

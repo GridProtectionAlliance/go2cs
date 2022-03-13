@@ -10,14 +10,14 @@
 // with the log, those writes will be recorded as a count of lost records.
 // The actual profile buffer is in profbuf.go.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:27 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:16 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\cpuprof.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -76,7 +76,6 @@ public static void SetCPUProfileRate(nint hz) {
         array<ulong> hdr = new array<ulong>(new ulong[] { uint64(hz) });
         cpuprof.log.write(null, nanotime(), hdr[..], null);
         setcpuprofilerate(int32(hz));
-
     }
     else if (cpuprof.on) {
         setcpuprofilerate(0);
@@ -85,7 +84,6 @@ public static void SetCPUProfileRate(nint hz) {
         cpuprof.log.close();
     }
     unlock(_addr_cpuprof.@lock);
-
 }
 
 // add adds the stack trace to the profile.
@@ -122,10 +120,8 @@ private static void add(this ptr<cpuProfile> _addr_p, ptr<g> _addr_gp, slice<Sys
             tagPtr = _addr_gp.labels;
         }
         cpuprof.log.write(tagPtr, nanotime(), hdr[..], stk);
-
     }
     atomic.Store(_addr_prof.signalLock, 0);
-
 }
 
 // addNonGo adds the non-Go stack trace to the profile.
@@ -159,7 +155,6 @@ private static void addNonGo(this ptr<cpuProfile> _addr_p, slice<System.UIntPtr>
         cpuprof.lostExtra++;
     }
     atomic.Store(_addr_prof.signalLock, 0);
-
 }
 
 // addExtra adds the "extra" profiling events,
@@ -237,7 +232,6 @@ private static (slice<ulong>, slice<unsafe.Pointer>, bool) runtime_pprof_readPro
         unlock(_addr_cpuprof.@lock);
     }
     return (data, tags, eof);
-
 }
 
 } // end runtime_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:08 UTC
+//     Generated on 2022 March 13 05:36:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Dialer
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace crypto
             public static implicit operator Dialer(NilType nil) => default(Dialer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Dialer Dialer_cast(dynamic value)
         {
             return new Dialer(ref value.NetDialer, ref value.Config);

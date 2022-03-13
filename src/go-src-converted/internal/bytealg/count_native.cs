@@ -5,16 +5,14 @@
 //go:build amd64 || arm || arm64 || ppc64le || ppc64 || riscv64 || s390x
 // +build amd64 arm arm64 ppc64le ppc64 riscv64 s390x
 
-// package bytealg -- go2cs converted at 2022 March 06 22:30:04 UTC
+// package bytealg -- go2cs converted at 2022 March 13 05:40:51 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
 // Original source: C:\Program Files\Go\src\internal\bytealg\count_native.go
-
-
 namespace go.@internal;
 
 public static partial class bytealg_package {
 
-    //go:noescape
+//go:noescape
 public static nint Count(slice<byte> b, byte c);
 
 //go:noescape
@@ -28,7 +26,6 @@ private static nint countGeneric(slice<byte> b, byte c) {
             n++;
         }
     }    return n;
-
 }
 private static nint countGenericString(@string s, byte c) {
     nint n = 0;
@@ -38,7 +35,6 @@ private static nint countGenericString(@string s, byte c) {
         }
     }
     return n;
-
 }
 
 } // end bytealg_package

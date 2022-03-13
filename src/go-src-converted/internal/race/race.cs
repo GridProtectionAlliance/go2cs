@@ -5,13 +5,13 @@
 //go:build race
 // +build race
 
-// package race -- go2cs converted at 2022 March 06 22:08:15 UTC
+// package race -- go2cs converted at 2022 March 13 05:24:05 UTC
 // import "internal/race" ==> using race = go.@internal.race_package
 // Original source: C:\Program Files\Go\src\internal\race\race.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal;
+
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
 
 public static partial class race_package {
 

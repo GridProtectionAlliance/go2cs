@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:08 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:54 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\map_faststr.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -47,7 +47,6 @@ private static unsafe.Pointer mapaccess1_faststr(ptr<maptype> _addr_t, ptr<hmap>
                     (i, kptr) = (i + 1, add(kptr, 2 * sys.PtrSize));
                         }
                         continue;
-
                     }
                     if (k.str == key.str || memequal(k.str, key.str, uintptr(key.len))) {
                         return add(@unsafe.Pointer(b), dataOffset + bucketCnt * 2 * sys.PtrSize + i * uintptr(t.elemsize));
@@ -58,7 +57,6 @@ private static unsafe.Pointer mapaccess1_faststr(ptr<maptype> _addr_t, ptr<hmap>
                 kptr = kptr__prev1;
             }
             return @unsafe.Pointer(_addr_zeroVal[0]);
-
         }
         var keymaybe = uintptr(bucketCnt);
         {
@@ -76,7 +74,6 @@ private static unsafe.Pointer mapaccess1_faststr(ptr<maptype> _addr_t, ptr<hmap>
                 (i, kptr) = (i + 1, add(kptr, 2 * sys.PtrSize));
                     }
                     continue;
-
                 }
                 if (k.str == key.str) {
                     return add(@unsafe.Pointer(b), dataOffset + bucketCnt * 2 * sys.PtrSize + i * uintptr(t.elemsize));
@@ -90,10 +87,8 @@ private static unsafe.Pointer mapaccess1_faststr(ptr<maptype> _addr_t, ptr<hmap>
                 if (keymaybe != bucketCnt) { 
                     // Two keys are potential matches. Use hash to distinguish them.
                     goto dohash;
-
                 }
                 keymaybe = i;
-
             }
 
             i = i__prev1;
@@ -106,7 +101,6 @@ private static unsafe.Pointer mapaccess1_faststr(ptr<maptype> _addr_t, ptr<hmap>
             }
         }
         return @unsafe.Pointer(_addr_zeroVal[0]);
-
     }
 dohash:
     var hash = t.hasher(noescape(@unsafe.Pointer(_addr_ky)), uintptr(h.hash0));
@@ -119,7 +113,6 @@ dohash:
             if (!h.sameSizeGrow()) { 
                 // There used to be half as many buckets; mask down one more power of two.
                 m>>=1;
-
             }
             var oldb = (bmap.val)(add(c, (hash & m) * uintptr(t.bucketsize)));
             if (!evacuated(oldb)) {
@@ -127,7 +120,6 @@ dohash:
             }
         }
     }
-
     var top = tophash(hash);
     while (b != null) {
         {
@@ -152,10 +144,8 @@ dohash:
             i = i__prev2;
             kptr = kptr__prev2;
         }
-
     }
     return @unsafe.Pointer(_addr_zeroVal[0]);
-
 }
 
 private static (unsafe.Pointer, bool) mapaccess2_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, @string ky) {
@@ -194,15 +184,11 @@ private static (unsafe.Pointer, bool) mapaccess2_faststr(ptr<maptype> _addr_t, p
                             break;
                     (i, kptr) = (i + 1, add(kptr, 2 * sys.PtrSize));
                         }
-
                         continue;
-
                     }
-
                     if (k.str == key.str || memequal(k.str, key.str, uintptr(key.len))) {
                         return (add(@unsafe.Pointer(b), dataOffset + bucketCnt * 2 * sys.PtrSize + i * uintptr(t.elemsize)), true);
                     }
-
                 }
 
 
@@ -210,7 +196,6 @@ private static (unsafe.Pointer, bool) mapaccess2_faststr(ptr<maptype> _addr_t, p
                 kptr = kptr__prev1;
             }
             return (@unsafe.Pointer(_addr_zeroVal[0]), false);
-
         }
         var keymaybe = uintptr(bucketCnt);
         {
@@ -227,11 +212,8 @@ private static (unsafe.Pointer, bool) mapaccess2_faststr(ptr<maptype> _addr_t, p
                         break;
                 (i, kptr) = (i + 1, add(kptr, 2 * sys.PtrSize));
                     }
-
                     continue;
-
                 }
-
                 if (k.str == key.str) {
                     return (add(@unsafe.Pointer(b), dataOffset + bucketCnt * 2 * sys.PtrSize + i * uintptr(t.elemsize)), true);
                 } 
@@ -243,15 +225,11 @@ private static (unsafe.Pointer, bool) mapaccess2_faststr(ptr<maptype> _addr_t, p
                 if ((new ptr<ptr<array<byte>>>(add(key.str, uintptr(key.len) - 4))) != (new ptr<ptr<array<byte>>>(add(k.str, uintptr(key.len) - 4))).val) {
                     continue;
                 }
-
                 if (keymaybe != bucketCnt) { 
                     // Two keys are potential matches. Use hash to distinguish them.
                     goto dohash;
-
                 }
-
                 keymaybe = i;
-
             }
 
 
@@ -265,7 +243,6 @@ private static (unsafe.Pointer, bool) mapaccess2_faststr(ptr<maptype> _addr_t, p
             }
         }
         return (@unsafe.Pointer(_addr_zeroVal[0]), false);
-
     }
 dohash:
     var hash = t.hasher(noescape(@unsafe.Pointer(_addr_ky)), uintptr(h.hash0));
@@ -278,17 +255,13 @@ dohash:
             if (!h.sameSizeGrow()) { 
                 // There used to be half as many buckets; mask down one more power of two.
                 m>>=1;
-
             }
-
             var oldb = (bmap.val)(add(c, (hash & m) * uintptr(t.bucketsize)));
             if (!evacuated(oldb)) {
                 b = oldb;
             }
-
         }
     }
-
     var top = tophash(hash);
     while (b != null) {
         {
@@ -304,22 +277,18 @@ dohash:
                     continue;
                 (i, kptr) = (i + 1, add(kptr, 2 * sys.PtrSize));
                 }
-
                 if (k.str == key.str || memequal(k.str, key.str, uintptr(key.len))) {
                     return (add(@unsafe.Pointer(b), dataOffset + bucketCnt * 2 * sys.PtrSize + i * uintptr(t.elemsize)), true);
         b = b.overflow(t);
                 }
-
             }
 
 
             i = i__prev2;
             kptr = kptr__prev2;
         }
-
     }
     return (@unsafe.Pointer(_addr_zeroVal[0]), false);
-
 }
 
 private static unsafe.Pointer mapassign_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, @string s) => func((_, panic, _) => {
@@ -374,16 +343,12 @@ bucketloop:
                     _breakbucketloop = true;
                     break;
                 }
-
                 continue;
-
             }
-
             var k = (stringStruct.val)(add(@unsafe.Pointer(b), dataOffset + i * 2 * sys.PtrSize));
             if (k.len != key.len) {
                 continue;
             }
-
             if (k.str != key.str && !memequal(k.str, key.str, uintptr(key.len))) {
                 continue;
             } 
@@ -394,14 +359,12 @@ bucketloop:
             // The size is already guaranteed to be set correctly.
             k.str = key.str;
             goto done;
-
         }
         var ovf = b.overflow(t);
         if (ovf == null) {
             break;
         }
         b = ovf;
-
     } 
 
     // Did not find mapping for key. Allocate new cell & add entry.
@@ -431,7 +394,6 @@ done:
     }
     h.flags &= hashWriting;
     return elem;
-
 });
 
 private static void mapdelete_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, @string ky) {
@@ -474,7 +436,6 @@ search:
                     continue;
                 (i, kptr) = (i + 1, add(kptr, 2 * sys.PtrSize));
                 }
-
                 if (k.str != key.str && !memequal(k.str, key.str, uintptr(key.len))) {
                     continue;
         b = b.overflow(t);
@@ -489,7 +450,6 @@ search:
  {
                     memclrNoHeapPointers(e, t.elem.size);
                 }
-
                 b.tophash[i] = emptyOne; 
                 // If the bucket now ends in a bunch of emptyOne states,
                 // change those to emptyRest states.
@@ -504,7 +464,6 @@ search:
                         goto notLast;
                     }
                 }
-
                 while (true) {
                     b.tophash[i] = emptyRest;
                     if (i == 0) {
@@ -521,15 +480,12 @@ search:
                     else
 
                         i = bucketCnt - 1;
-
                     } {
                         i--;
                     }
-
                     if (b.tophash[i] != emptyOne) {
                         break;
                     }
-
                 }
 
 notLast: 
@@ -541,19 +497,16 @@ notLast:
                 if (h.count == 0) {
                     h.hash0 = fastrand();
                 }
-
                 _breaksearch = true;
                 break;
             }
 
         }
-
     }
     if (h.flags & hashWriting == 0) {
         throw("concurrent map writes");
     }
     h.flags &= hashWriting;
-
 }
 
 private static void growWork_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIntPtr bucket) {
@@ -594,7 +547,6 @@ private static void evacuate_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sy
             y.b = (bmap.val)(add(h.buckets, (oldbucket + newbit) * uintptr(t.bucketsize)));
             y.k = add(@unsafe.Pointer(y.b), dataOffset);
             y.e = add(y.k, bucketCnt * 2 * sys.PtrSize);
-
         }
         while (b != null) {
             var k = add(@unsafe.Pointer(b), dataOffset);
@@ -609,12 +561,10 @@ private static void evacuate_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sy
                         continue;
                     (i, k, e) = (i + 1, add(k, 2 * sys.PtrSize), add(e, uintptr(t.elemsize)));
                     }
-
                     if (top < minTopHash) {
                         throw("bad map state");
             b = b.overflow(t);
                     }
-
                     byte useY = default;
                     if (!h.sameSizeGrow()) { 
                         // Compute hash to make our evacuation decision (whether we need
@@ -623,9 +573,7 @@ private static void evacuate_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sy
                         if (hash & newbit != 0) {
                             useY = 1;
                         }
-
                     }
-
                     b.tophash[i] = evacuatedX + useY; // evacuatedX + 1 == evacuatedY, enforced in makemap
                     var dst = _addr_xy[useY]; // evacuation destination
 
@@ -635,10 +583,9 @@ private static void evacuate_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sy
                         dst.k = add(@unsafe.Pointer(dst.b), dataOffset);
                         dst.e = add(dst.k, bucketCnt * 2 * sys.PtrSize);
                     }
+                    dst.b.tophash[dst.i & (bucketCnt - 1)] = top * (string.val);
 
-                    dst.b.tophash[dst.i & (bucketCnt - 1)] = top * (string.val)(dst.k);
-
-                    new ptr<ptr<ptr<@string>>>(k);
+                    (dst.k) = new ptr<ptr<ptr<@string>>>(k);
 
                     typedmemmove(t.elem, dst.e, e);
                     dst.i++; 
@@ -648,11 +595,9 @@ private static void evacuate_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sy
                     // end of the bucket.
                     dst.k = add(dst.k, 2 * sys.PtrSize);
                     dst.e = add(dst.e, uintptr(t.elemsize));
-
                 }
 
             }
-
         } 
         // Unlink the overflow buckets & clear key/elem to help GC.
         if (h.flags & oldIterator == 0 && t.bucket.ptrdata != 0) {
@@ -662,7 +607,6 @@ private static void evacuate_faststr(ptr<maptype> _addr_t, ptr<hmap> _addr_h, Sy
             var ptr = add(b, dataOffset);
             var n = uintptr(t.bucketsize) - dataOffset;
             memclrHasPointers(ptr, n);
-
         }
     }
     if (oldbucket == h.nevacuate) {

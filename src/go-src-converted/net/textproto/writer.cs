@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2022 March 06 22:21:12 UTC
+// package textproto -- go2cs converted at 2022 March 13 05:36:19 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Program Files\Go\src\net\textproto\writer.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.net;
+
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// A Writer implements convenience methods for writing
+// requests or responses to a text protocol network connection.
 
 public static partial class textproto_package {
 
-    // A Writer implements convenience methods for writing
-    // requests or responses to a text protocol network connection.
 public partial struct Writer {
     public ptr<bufio.Writer> W;
     public ptr<dotWriter> dot;
@@ -89,9 +91,7 @@ private static (nint, error) Write(this ptr<dotWriter> _addr_d, slice<byte> b) {
             if (c == '.') { 
                 // escape leading dot
                 bw.WriteByte('.');
-
             }
-
             fallthrough = true;
 
         }
@@ -122,10 +122,8 @@ private static (nint, error) Write(this ptr<dotWriter> _addr_d, slice<byte> b) {
             break;
         }
         n++;
-
     }
     return ;
-
 }
 
 private static error Close(this ptr<dotWriter> _addr_d) {
@@ -151,7 +149,6 @@ private static error Close(this ptr<dotWriter> _addr_d) {
 
     __switch_break1:;
     return error.As(bw.Flush())!;
-
 }
 
 } // end textproto_package

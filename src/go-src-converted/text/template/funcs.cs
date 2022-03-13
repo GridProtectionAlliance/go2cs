@@ -2,40 +2,41 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:43 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:13 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Program Files\Go\src\text\template\funcs.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using url = go.net.url_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.text;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using url = net.url_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using sync = sync_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// FuncMap is the type of the map defining the mapping from names to functions.
+// Each function must have either a single return value, or two return values of
+// which the second has type error. In that case, if the second (error)
+// return value evaluates to non-nil during execution, execution terminates and
+// Execute returns that error.
+//
+// Errors returned by Execute wrap the underlying error; call errors.As to
+// uncover them.
+//
+// When template execution invokes a function with an argument list, that list
+// must be assignable to the function's parameter types. Functions meant to
+// apply to arguments of arbitrary type can use parameters of type interface{} or
+// of type reflect.Value. Similarly, functions meant to return a result of arbitrary
+// type can return interface{} or reflect.Value.
+
+using System;
 public static partial class template_package {
 
-    // FuncMap is the type of the map defining the mapping from names to functions.
-    // Each function must have either a single return value, or two return values of
-    // which the second has type error. In that case, if the second (error)
-    // return value evaluates to non-nil during execution, execution terminates and
-    // Execute returns that error.
-    //
-    // Errors returned by Execute wrap the underlying error; call errors.As to
-    // uncover them.
-    //
-    // When template execution invokes a function with an argument list, that list
-    // must be assignable to the function's parameter types. Functions meant to
-    // apply to arguments of arbitrary type can use parameters of type interface{} or
-    // of type reflect.Value. Similarly, functions meant to return a result of arbitrary
-    // type can return interface{} or reflect.Value.
 private static FuncMap builtins() {
     return new FuncMap("and":and,"call":call,"html":HTMLEscaper,"index":index,"slice":slice,"js":JSEscaper,"len":length,"not":not,"or":or,"print":fmt.Sprint,"printf":fmt.Sprintf,"println":fmt.Sprintln,"urlquery":URLQueryEscaper,"eq":eq,"ge":ge,"gt":gt,"le":le,"lt":lt,"ne":ne,);
 }
@@ -72,7 +73,6 @@ private static void addValueFuncs(map<@string, reflect.Value> @out, FuncMap @in)
             panic(fmt.Errorf("can't install method/function %q with %d results", name, v.Type().NumOut()));
         }
         out[name] = v;
-
     }
 });
 
@@ -93,7 +93,6 @@ private static bool goodFunc(reflect.Type typ) {
     else if (typ.NumOut() == 2 && typ.Out(1) == errorType) 
         return true;
         return false;
-
 }
 
 // goodName reports whether the function name is a valid identifier.
@@ -107,9 +106,7 @@ private static bool goodName(@string name) {
             return false;
         else if (!unicode.IsLetter(r) && !unicode.IsDigit(r)) 
             return false;
-        
-    }    return true;
-
+            }    return true;
 }
 
 // findFunction looks for a function in the template, and global map.
@@ -133,7 +130,6 @@ private static (reflect.Value, bool) findFunction(@string name, ptr<Template> _a
             fn = fn__prev2;
 
         }
-
     }
     {
         var fn__prev1 = fn;
@@ -146,9 +142,7 @@ private static (reflect.Value, bool) findFunction(@string name, ptr<Template> _a
         fn = fn__prev1;
 
     }
-
     return (new reflect.Value(), false);
-
 });
 
 // prepareArg checks if value can be used as an argument of type argType, and
@@ -162,7 +156,6 @@ private static (reflect.Value, error) prepareArg(reflect.Value value, reflect.Ty
             return (new reflect.Value(), error.As(fmt.Errorf("value is nil; should be of type %s", argType))!);
         }
         value = reflect.Zero(argType);
-
     }
     if (value.Type().AssignableTo(argType)) {
         return (value, error.As(null!)!);
@@ -172,7 +165,6 @@ private static (reflect.Value, error) prepareArg(reflect.Value value, reflect.Ty
         return (value, error.As(null!)!);
     }
     return (new reflect.Value(), error.As(fmt.Errorf("value has type %s; should be %s", value.Type(), argType))!);
-
 }
 
 private static bool intLike(reflect.Kind typ) {
@@ -182,7 +174,6 @@ private static bool intLike(reflect.Kind typ) {
     else if (typ == reflect.Uint || typ == reflect.Uint8 || typ == reflect.Uint16 || typ == reflect.Uint32 || typ == reflect.Uint64 || typ == reflect.Uintptr) 
         return true;
         return false;
-
 }
 
 // indexArg checks if a reflect.Value can be used as an index, and converts it to int if possible.
@@ -204,7 +195,6 @@ private static (nint, error) indexArg(reflect.Value index, nint cap) {
         return (0, error.As(fmt.Errorf("index out of range: %d", x))!);
     }
     return (int(x), error.As(null!)!);
-
 }
 
 // Indexing.
@@ -234,7 +224,6 @@ private static (reflect.Value, error) index(reflect.Value item, params reflect.V
                 return (new reflect.Value(), error.As(fmt.Errorf("index of nil pointer"))!);
             }
 
-
             if (item.Kind() == reflect.Array || item.Kind() == reflect.Slice || item.Kind() == reflect.String) 
                 var (x, err) = indexArg(index, item.Len());
                 if (err != null) {
@@ -262,19 +251,16 @@ private static (reflect.Value, error) index(reflect.Value item, params reflect.V
                     x = x__prev1;
 
                 }
-
             else if (item.Kind() == reflect.Invalid) 
                 // the loop holds invariant: item.IsValid()
                 panic("unreachable");
             else 
                 return (new reflect.Value(), error.As(fmt.Errorf("can't index item of type %s", item.Type()))!);
-            
-        }
+                    }
         index = index__prev1;
     }
 
     return (item, error.As(null!)!);
-
 });
 
 // Slicing.
@@ -314,7 +300,6 @@ private static (reflect.Value, error) slice(reflect.Value item, params reflect.V
             return (new reflect.Value(), error.As(err)!);
         }
         idx[i] = x;
-
     }    if (idx[0] > idx[1]) {
         return (new reflect.Value(), error.As(fmt.Errorf("invalid slice index: %d > %d", idx[0], idx[1]))!);
     }
@@ -325,7 +310,6 @@ private static (reflect.Value, error) slice(reflect.Value item, params reflect.V
         return (new reflect.Value(), error.As(fmt.Errorf("invalid slice index: %d > %d", idx[1], idx[2]))!);
     }
     return (item.Slice3(idx[0], idx[1], idx[2]), error.As(null!)!);
-
 }
 
 // Length
@@ -343,7 +327,6 @@ private static (nint, error) length(reflect.Value item) {
     if (item.Kind() == reflect.Array || item.Kind() == reflect.Chan || item.Kind() == reflect.Map || item.Kind() == reflect.Slice || item.Kind() == reflect.String) 
         return (item.Len(), error.As(null!)!);
         return (0, error.As(fmt.Errorf("len of type %s", item.Type()))!);
-
 }
 
 // Function invocation
@@ -373,7 +356,6 @@ private static (reflect.Value, error) call(reflect.Value fn, params reflect.Valu
             return (new reflect.Value(), error.As(fmt.Errorf("wrong number of args: got %d want at least %d", len(args), numIn - 1))!);
         }
         dddType = typ.In(numIn - 1).Elem();
-
     }
     else
  {
@@ -396,7 +378,6 @@ private static (reflect.Value, error) call(reflect.Value fn, params reflect.Valu
             return (new reflect.Value(), error.As(fmt.Errorf("arg %d: %w", i, err))!);
         }
     }    return safeCall(fn, argv);
-
 }
 
 // safeCall runs fun.Call(args), and returns the resulting value and error, if
@@ -422,18 +403,15 @@ private static (reflect.Value, error) safeCall(reflect.Value fun, slice<reflect.
                     }
 
                 }
-
             }
 
         }
-
     }());
     var ret = fun.Call(args);
     if (len(ret) == 2 && !ret[1].IsNil()) {
         return (ret[0], error.As(ret[1].Interface()._<error>()!)!);
     }
     return (ret[0], error.As(null!)!);
-
 });
 
 // Boolean logic.
@@ -457,7 +435,6 @@ private static reflect.Value and(reflect.Value arg0, params reflect.Value[] args
             break;
         }
     }    return arg0;
-
 }
 
 // or computes the Boolean OR of its arguments, returning
@@ -474,7 +451,6 @@ private static reflect.Value or(reflect.Value arg0, params reflect.Value[] args)
             break;
         }
     }    return arg0;
-
 }
 
 // not returns the Boolean negation of its argument.
@@ -499,7 +475,6 @@ private static readonly var floatKind = 3;
 private static readonly var stringKind = 4;
 private static readonly var uintKind = 5;
 
-
 private static (kind, error) basicKind(reflect.Value v) {
     kind _p0 = default;
     error _p0 = default!;
@@ -518,7 +493,6 @@ private static (kind, error) basicKind(reflect.Value v) {
     else if (v.Kind() == reflect.String) 
         return (stringKind, error.As(null!)!);
         return (invalidKind, error.As(errBadComparisonType)!);
-
 }
 
 // eq evaluates the comparison a == b || a == c || ...
@@ -537,7 +511,6 @@ private static (bool, error) eq(reflect.Value arg1, params reflect.Value[] arg2)
             }
 
         }
-
     }
     if (len(arg2) == 0) {
         return (false, error.As(errNoComparison)!);
@@ -558,8 +531,7 @@ private static (bool, error) eq(reflect.Value arg1, params reflect.Value[] arg2)
                 if (arg1 != zero && arg != zero) {
                     return (false, error.As(errBadComparison)!);
                 }
-            
-        }
+                    }
         else
  {
 
@@ -589,17 +561,13 @@ private static (bool, error) eq(reflect.Value arg1, params reflect.Value[] arg2)
                         }
 
                     }
-
                     truth = arg1.Interface() == arg.Interface();
-
                 }
-
                     }
         if (truth) {
             return (true, error.As(null!)!);
         }
     }    return (false, error.As(null!)!);
-
 }
 
 // ne evaluates the comparison a != b.
@@ -610,7 +578,6 @@ private static (bool, error) ne(reflect.Value arg1, reflect.Value arg2) {
     // != is the inverse of ==.
     var (equal, err) = eq(arg1, arg2);
     return (!equal, error.As(err)!);
-
 }
 
 // lt evaluates the comparison a < b.
@@ -638,8 +605,7 @@ private static (bool, error) lt(reflect.Value arg1, reflect.Value arg2) => func(
             truth = arg2.Int() >= 0 && arg1.Uint() < uint64(arg2.Int());
         else 
             return (false, error.As(errBadComparison)!);
-        
-    }
+            }
     else
  {
 
@@ -655,10 +621,8 @@ private static (bool, error) lt(reflect.Value arg1, reflect.Value arg2) => func(
             truth = arg1.Uint() < arg2.Uint();
         else 
             panic("invalid kind");
-        
-    }
+            }
     return (truth, error.As(null!)!);
-
 });
 
 // le evaluates the comparison <= b.
@@ -672,7 +636,6 @@ private static (bool, error) le(reflect.Value arg1, reflect.Value arg2) {
         return (lessThan, error.As(err)!);
     }
     return eq(arg1, arg2);
-
 }
 
 // gt evaluates the comparison a > b.
@@ -686,7 +649,6 @@ private static (bool, error) gt(reflect.Value arg1, reflect.Value arg2) {
         return (false, error.As(err)!);
     }
     return (!lessOrEqual, error.As(null!)!);
-
 }
 
 // ge evaluates the comparison a >= b.
@@ -700,7 +662,6 @@ private static (bool, error) ge(reflect.Value arg1, reflect.Value arg2) {
         return (false, error.As(err)!);
     }
     return (!lessThan, error.As(null!)!);
-
 }
 
 // HTML escaping.
@@ -738,9 +699,7 @@ public static void HTMLEscape(io.Writer w, slice<byte> b) {
         w.Write(b[(int)last..(int)i]);
         w.Write(html);
         last = i + 1;
-
     }    w.Write(b[(int)last..]);
-
 }
 
 // HTMLEscapeString returns the escaped HTML equivalent of the plain text data s.
@@ -752,7 +711,6 @@ public static @string HTMLEscapeString(@string s) {
     ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
     HTMLEscape(_addr_b, (slice<byte>)s);
     return b.String();
-
 }
 
 // HTMLEscaper returns the escaped HTML equivalent of the textual
@@ -776,7 +734,6 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
         if (!jsIsSpecial(rune(c))) { 
             // fast path: nothing to do
             continue;
-
         }
         w.Write(b[(int)last..(int)i]);
 
@@ -811,10 +768,8 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
                     var b = c & 0x0f;
                     w.Write(hex[(int)t..(int)t + 1]);
                     w.Write(hex[(int)b..(int)b + 1]);
-
                     break;
             }
-
         }
         else
  { 
@@ -827,15 +782,11 @@ public static void JSEscape(io.Writer w, slice<byte> b) {
  {
                 fmt.Fprintf(w, "\\u%04X", r);
             }
-
             i += size - 1;
-
         }
         last = i + 1;
-
     }
     w.Write(b[(int)last..]);
-
 }
 
 // JSEscapeString returns the escaped JavaScript equivalent of the plain text data s.
@@ -847,7 +798,6 @@ public static @string JSEscapeString(@string s) {
     ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
     JSEscape(_addr_b, (slice<byte>)s);
     return b.String();
-
 }
 
 private static bool jsIsSpecial(int r) {
@@ -869,7 +819,6 @@ private static bool jsIsSpecial(int r) {
             break;
     }
     return r < ' ' || utf8.RuneSelf <= r;
-
 }
 
 // JSEscaper returns the escaped JavaScript equivalent of the textual
@@ -907,10 +856,8 @@ private static @string evalArgs(slice<object> args) {
                 args[i] = a;
             } // else let fmt do its thing
         }        s = fmt.Sprint(args);
-
     }
     return s;
-
 }
 
 } // end template_package

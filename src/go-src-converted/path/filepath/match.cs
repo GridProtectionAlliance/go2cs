@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package filepath -- go2cs converted at 2022 March 06 22:14:04 UTC
+// package filepath -- go2cs converted at 2022 March 13 05:28:14 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Program Files\Go\src\path\filepath\match.go
-using errors = go.errors_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.path;
+
+using errors = errors_package;
+using os = os_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+
+// ErrBadPattern indicates a pattern was malformed.
 
 public static partial class filepath_package {
 
-    // ErrBadPattern indicates a pattern was malformed.
 public static var ErrBadPattern = errors.New("syntax error in pattern");
 
 // Match reports whether name matches the shell file name pattern.
@@ -56,7 +58,6 @@ Pattern:
         if (star && chunk == "") { 
             // Trailing * matches rest of string unless it has a /.
             return (!strings.Contains(name, string(Separator)), error.As(null!)!);
-
         }
         var (t, ok, err) = matchChunk(chunk, name); 
         // if we're the last chunk, make sure we've exhausted the name
@@ -79,25 +80,18 @@ Pattern:
                     if (len(pattern) == 0 && len(t) > 0) {
                         continue;
                     }
-
                     name = t;
                     _continuePattern = true;
                     break;
                 }
-
                 if (err != null) {
                     return (false, error.As(err)!);
                 }
-
             }
-
-
         }
         return (false, error.As(null!)!);
-
     }
     return (len(name) == 0, error.As(null!)!);
-
 }
 
 // scanChunk gets the next segment of pattern, which is a non-star string
@@ -122,9 +116,7 @@ Scan:
                     if (i + 1 < len(pattern)) {
                         i++;
                     }
-
                 }
-
                 break;
             case '[': 
                 inrange = true;
@@ -137,13 +129,10 @@ Scan:
                     _breakScan = true;
                     break;
                 }
-
                 break;
         }
-
     }
     return (star, pattern[(int)0..(int)i], pattern[(int)i..]);
-
 }
 
 // matchChunk checks whether chunk matches the beginning of s.
@@ -194,7 +183,6 @@ private static (@string, bool, error) matchChunk(@string chunk, @string s) {
                 if (err != null) {
                     return ("", false, error.As(err)!);
                 }
-
                 hi = lo;
                 if (chunk[0] == '-') {
                     hi, chunk, err = getEsc(chunk[(int)1..]);
@@ -202,21 +190,16 @@ private static (@string, bool, error) matchChunk(@string chunk, @string s) {
                     if (err != null) {
                         return ("", false, error.As(err)!);
                     }
-
                 }
-
                 if (lo <= r && r <= hi) {
                     match = true;
                 }
-
                 nrange++;
-
             }
 
             if (match == negated) {
                 failed = true;
             }
-
             goto __switch_break0;
         }
         if (chunk[0] == '?')
@@ -250,13 +233,11 @@ private static (@string, bool, error) matchChunk(@string chunk, @string s) {
             chunk = chunk[(int)1..];
 
         __switch_break0:;
-
     }
     if (failed) {
         return ("", false, error.As(null!)!);
     }
     return (s, true, error.As(null!)!);
-
 }
 
 // getEsc gets a possibly-escaped character from chunk, for a character class.
@@ -285,7 +266,6 @@ private static (int, @string, error) getEsc(@string chunk) {
         err = ErrBadPattern;
     }
     return ;
-
 }
 
 // Glob returns the names of all files matching pattern or nil
@@ -308,7 +288,6 @@ public static (slice<@string>, error) Glob(@string pattern) {
             return (null, error.As(err)!);
         }
     }
-
     if (!hasMeta(pattern)) {
         _, err = os.Lstat(pattern);
 
@@ -316,7 +295,6 @@ public static (slice<@string>, error) Glob(@string pattern) {
             return (null, error.As(null!)!);
         }
         return (new slice<@string>(new @string[] { pattern }), error.As(null!)!);
-
     }
     var (dir, file) = Split(pattern);
     nint volumeLen = 0;
@@ -344,7 +322,6 @@ public static (slice<@string>, error) Glob(@string pattern) {
             return ;
         }
     }    return ;
-
 }
 
 // cleanGlobPath prepares path for glob matching.
@@ -414,7 +391,6 @@ private static (slice<@string>, error) glob(@string dir, @string pattern, slice<
             m = append(m, Join(dir, n));
         }
     }    return ;
-
 });
 
 // hasMeta reports whether path contains any of the magic characters
@@ -425,7 +401,6 @@ private static bool hasMeta(@string path) {
         magicChars = "*?[\\";
     }
     return strings.ContainsAny(path, magicChars);
-
 }
 
 } // end filepath_package

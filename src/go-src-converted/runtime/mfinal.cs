@@ -4,29 +4,30 @@
 
 // Garbage collector: finalizers and block profiling.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:30 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mfinal.go
-using abi = go.@internal.abi_package;
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using abi = @internal.abi_package;
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// finblock is an array of finalizers to be executed. finblocks are
+// arranged in a linked list for the finalizer queue.
+//
+// finblock is allocated from non-GC'd memory, so any heap pointers
+// must be specially handled. GC currently assumes that the finalizer
+// queue does not grow during marking (but it can shrink).
+//
+//go:notinheap
+
+using System;
+using System.Threading;
 public static partial class runtime_package {
 
-    // finblock is an array of finalizers to be executed. finblocks are
-    // arranged in a linked list for the finalizer queue.
-    //
-    // finblock is allocated from non-GC'd memory, so any heap pointers
-    // must be specially handled. GC currently assumes that the finalizer
-    // queue does not grow during marking (but it can shrink).
-    //
-    //go:notinheap
 private partial struct finblock {
     public ptr<finblock> alllink;
     public ptr<finblock> next;
@@ -68,7 +69,6 @@ private static void queuefinalizer(unsafe.Pointer p, ptr<funcval> _addr_fn, Syst
         // necessary barriers to queuefinalizer (which it may
         // have automatically).
         throw("queuefinalizer during GC");
-
     }
     lock(_addr_finlock);
     if (finq == null || finq.cnt == uint32(len(finq.fin))) {
@@ -82,19 +82,15 @@ private static void queuefinalizer(unsafe.Pointer p, ptr<funcval> _addr_fn, Syst
                 if ((@unsafe.Sizeof(new finalizer()) != 5 * sys.PtrSize || @unsafe.Offsetof(new finalizer().fn) != 0 || @unsafe.Offsetof(new finalizer().arg) != sys.PtrSize || @unsafe.Offsetof(new finalizer().nret) != 2 * sys.PtrSize || @unsafe.Offsetof(new finalizer().fint) != 3 * sys.PtrSize || @unsafe.Offsetof(new finalizer().ot) != 4 * sys.PtrSize)) {
                     throw("finalizer out of sync");
                 }
-
                 foreach (var (i) in finptrmask) {
                     finptrmask[i] = finalizer1[i % len(finalizer1)];
                 }
-
             }
-
         }
         var block = finc;
         finc = block.next;
         block.next = finq;
         finq = block;
-
     }
     var f = _addr_finq.fin[finq.cnt];
     atomic.Xadd(_addr_finq.cnt, +1); // Sync with markroots
@@ -105,7 +101,6 @@ private static void queuefinalizer(unsafe.Pointer p, ptr<funcval> _addr_fn, Syst
     f.arg = p;
     fingwake = true;
     unlock(_addr_finlock);
-
 }
 
 //go:nowritebarrier
@@ -122,7 +117,6 @@ private static void iterate_finq(Action<ptr<funcval>, unsafe.Pointer, System.UIn
             fb = fb.alllink;
         }
     }
-
 }
 
 private static ptr<g> wakefing() {
@@ -135,7 +129,6 @@ private static ptr<g> wakefing() {
     }
     unlock(_addr_finlock);
     return _addr_res!;
-
 }
 
 private static uint fingCreate = default;private static bool fingRunning = default;
@@ -183,15 +176,12 @@ private static void runfinq() {
                     // figure out how many of those can get passed in registers,
                     // just conservatively assume none of them do.
                     framesz = f.nret;
-
                 }
                 else
  { 
                     // Need to pass arguments on the stack too.
                     framesz = @unsafe.Sizeof() + f.nret;
-
                 }
-
                 if (framecap < framesz) { 
                     // The frame does not contain pointers interesting for GC,
                     // all not yet finalized objects are stored in finq.
@@ -199,13 +189,10 @@ private static void runfinq() {
                     // the last finalized object is not collected.
                     frame = mallocgc(framesz, null, true);
                     framecap = framesz;
-
                 }
-
                 if (f.fint == null) {
                     throw("missing type in runfinq");
                 }
-
                 var r = frame;
                 if (argRegs > 0) {
                     r = @unsafe.Pointer(_addr_regs.Ints);
@@ -217,30 +204,26 @@ private static void runfinq() {
                     // it before writing to it to avoid
                     // confusing the write barrier.
                     new ptr<ptr<ptr<array<System.UIntPtr>>>>(frame) = new array<System.UIntPtr>(new System.UIntPtr[] {  });
-
                 }
-
 
                 if (f.fint.kind & kindMask == kindPtr) 
                     // direct use of pointer
-                    (@unsafe.Pointer.val)(r).val;
+                    (@unsafe.Pointer.val).val;
 
-                    f.arg;
+                    (r) = f.arg;
                 else if (f.fint.kind & kindMask == kindInterface) 
-                    var ityp = (interfacetype.val)(@unsafe.Pointer(f.fint))(eface.val)(r)._type;
+                    var ityp = (interfacetype.val)(@unsafe.Pointer(f.fint))(eface.val);
 
-                    _addr_f.ot.typ(eface.val)(r).data;
+                    (r)._type = _addr_f.ot.typ(eface.val);
 
-                    f.arg;
+                    (r).data = f.arg;
                     if (len(ityp.mhdr) != 0) { 
                         // convert to interface with methods
                         // this conversion is guaranteed to succeed - we checked in SetFinalizer
-                        (iface.val)(r).tab;
+                        (iface.val);
 
-                        assertE2I(ityp, (eface.val)(r)._type);
-
+                        (r).tab = assertE2I(ityp, (eface.val)(r)._type);
                     }
-
                 else 
                     throw("bad kind in runfinq");
                                 fingRunning = true;
@@ -255,7 +238,6 @@ private static void runfinq() {
                 f.arg = null;
                 f.ot = null;
                 atomic.Store(_addr_fb.cnt, i - 1);
-
             }
 
             var next = fb.next;
@@ -264,11 +246,8 @@ private static void runfinq() {
             finc = fb;
             unlock(_addr_finlock);
             fb = next;
-
         }
-
     }
-
 }
 
 // SetFinalizer sets the finalizer associated with obj to the provided
@@ -341,7 +320,6 @@ public static void SetFinalizer(object obj, object finalizer) {
         // debug.sbrk never frees memory, so no finalizers run
         // (and we don't have the data structures to record them).
         return ;
-
     }
     var e = efaceOf(_addr_obj);
     var etyp = e._type;
@@ -370,12 +348,10 @@ public static void SetFinalizer(object obj, object finalizer) {
                     return ;
                 datap = datap.next;
                 }
-
             }
 
         }
         throw("runtime.SetFinalizer: pointer not in allocated block");
-
     }
     if (uintptr(e.data) != base) { 
         // As an implementation detail we allow to set finalizers for an inner byte
@@ -392,7 +368,6 @@ public static void SetFinalizer(object obj, object finalizer) {
             removefinalizer(e.data);
         });
         return ;
-
     }
     if (ftyp.kind & kindMask != kindFunc) {
         throw("runtime.SetFinalizer: second argument is " + ftyp.@string() + ", not a function");
@@ -414,14 +389,12 @@ public static void SetFinalizer(object obj, object finalizer) {
             // ok - not same type, but both pointers,
             // one or the other is unnamed, and same element type, so assignable.
             goto okarg;
-
         }
     else if (fint.kind & kindMask == kindInterface) 
         var ityp = (interfacetype.val)(@unsafe.Pointer(fint));
         if (len(ityp.mhdr) == 0) { 
             // ok - satisfies empty interface
             goto okarg;
-
         }
         {
             var iface = assertE2I2(ityp, new ptr<ptr<efaceOf>>(_addr_obj));
@@ -431,7 +404,6 @@ public static void SetFinalizer(object obj, object finalizer) {
             }
 
         }
-
         throw("runtime.SetFinalizer: cannot pass " + etyp.@string() + " to finalizer " + ftyp.@string());
 okarg:
     var nret = uintptr(0);
@@ -447,7 +419,6 @@ okarg:
             throw("runtime.SetFinalizer: finalizer already set");
         }
     });
-
 }
 
 // Mark KeepAlive as noinline so that it is easily detectable as an intrinsic.

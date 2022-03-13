@@ -4,16 +4,15 @@
 
 // This file implements typechecking of statements.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:55 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:20 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\stmt.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-using constant = go.go.constant_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using syntax = cmd.compile.@internal.syntax_package;
+using constant = go.constant_package;
+using sort = sort_package;
+using System;
 
 public static partial class types2_package {
 
@@ -53,7 +52,6 @@ private static void funcBody(this ptr<Checker> _addr_check, ptr<declInfo> _addr_
         check.error(body.Rbrace, "missing return");
     }
     check.usage(sig.scope);
-
 });
 
 private static void usage(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope) {
@@ -74,10 +72,7 @@ private static void usage(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope)
             v = v__prev1;
 
         }
-
-    }    sort.Slice(unused, (i, j) => {
-        return unused[i].pos.Cmp(unused[j].pos) < 0;
-    });
+    }    sort.Slice(unused, (i, j) => unused[i].pos.Cmp(unused[j].pos) < 0);
     {
         ptr<Var> v__prev1 = v;
 
@@ -113,7 +108,6 @@ private static readonly var fallthroughOk = 1;
 // additional context information
 private static readonly var finalSwitchCase = 2;
 
-
 private static void simpleStmt(this ptr<Checker> _addr_check, syntax.Stmt s) {
     ref Checker check = ref _addr_check.val;
 
@@ -132,10 +126,8 @@ private static slice<syntax.Stmt> trimTrailingEmptyStmts(slice<syntax.Stmt> list
             }
 
         }
-
     }
     return null;
-
 }
 
 private static void stmtList(this ptr<Checker> _addr_check, stmtContext ctxt, slice<syntax.Stmt> list) {
@@ -150,7 +142,6 @@ private static void stmtList(this ptr<Checker> _addr_check, stmtContext ctxt, sl
             inner |= fallthroughOk;
         }
         check.stmt(inner, s);
-
     }
 }
 
@@ -168,7 +159,6 @@ private static void multipleSwitchDefaults(this ptr<Checker> _addr_check, slice<
  {
                 first = c;
             }
-
         }
     }
 }
@@ -187,7 +177,6 @@ private static void multipleSelectDefaults(this ptr<Checker> _addr_check, slice<
  {
                 first = c;
             }
-
         }
     }
 }
@@ -228,7 +217,6 @@ private static void suspendedCall(this ptr<Checker> _addr_check, @string keyword
     else 
         unreachable();
         check.errorf(_addr_x, "%s %s %s", keyword, msg, _addr_x);
-
 }
 
 // goVal returns the Go value for val, or nil.
@@ -251,7 +239,6 @@ private static void goVal(constant.Value val) {
             x = x__prev1;
 
         }
-
         {
             var x__prev1 = x;
 
@@ -264,7 +251,6 @@ private static void goVal(constant.Value val) {
             x = x__prev1;
 
         }
-
     else if (val.Kind() == constant.Float) 
         {
             var x__prev1 = x;
@@ -278,11 +264,9 @@ private static void goVal(constant.Value val) {
             x = x__prev1;
 
         }
-
     else if (val.Kind() == constant.String) 
         return constant.StringVal(val);
         return null;
-
 }
 
 // A valueMap maps a case value (of a basic Go type) to a list of positions
@@ -294,8 +278,7 @@ private static void goVal(constant.Value val) {
 private partial struct valueType {
     public syntax.Pos pos;
     public Type typ;
-}
-private static void caseValues(this ptr<Checker> _addr_check, ptr<operand> _addr_x, slice<syntax.Expr> values, valueMap seen) {
+}private static void caseValues(this ptr<Checker> _addr_check, ptr<operand> _addr_x, slice<syntax.Expr> values, valueMap seen) {
     ref Checker check = ref _addr_check.val;
     ref operand x = ref _addr_x.val;
 
@@ -337,14 +320,11 @@ L:
                         _continueL = true;
                         break;
                     }
-
                 }
                 seen[val] = append(seen[val], new valueType(v.Pos(),v.typ));
-
             }
 
         }
-
     }
 }
 
@@ -371,7 +351,6 @@ L:
                 if (T != null) {
                     Ts = T.String();
                 }
-
                 ref error_ err = ref heap(out ptr<error_> _addr_err);
                 err.errorf(e, "duplicate case %s in type switch", Ts);
                 err.errorf(other, "previous case");
@@ -379,13 +358,11 @@ L:
                 _continueL = true;
                 break;
             }
-
         }        seen[T] = e;
         if (T != null) {
             check.typeAssertion(e.Pos(), x, xtyp, T);
         }
     }    return ;
-
 }
 
 // stmt typechecks statement s.
@@ -404,11 +381,8 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                 }
 
             }
-
             assert(scope == check.scope);
-
         }(check.scope));
-
     }
     defer(check.processDelayed(len(check.delayed)));
 
@@ -466,23 +440,18 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                     check.errorf(s, invalidAST + "%s%s requires one operand", s.Op, s.Op);
                     return ;
                 }
-
                 x = default;
                 check.expr(_addr_x, lhs[0]);
                 if (x.mode == invalid) {
                     return ;
                 }
-
                 if (!isNumeric(x.typ)) {
                     check.errorf(lhs[0], invalidOp + "%s%s%s (non-numeric type %s)", lhs[0], s.Op, s.Op, x.typ);
                     return ;
                 }
-
                 check.assignVar(lhs[0], _addr_x);
                 return ;
-
             }
-
             var rhs = unpackExpr(s.Rhs);
 
             if (s.Op == 0) 
@@ -496,7 +465,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                 check.errorf(s, "assignment operation %s requires single-valued expressions", s.Op);
                 return ;
             }
-
             x = default;
             check.binary(_addr_x, null, lhs[0], rhs[0], s.Op);
             check.assignVar(lhs[0], _addr_x);
@@ -531,28 +499,23 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                             }
 
                         }
-
                     }
                 else
                 } { 
                     // return has results or result parameters are unnamed
                     check.initVars(res.vars, results, s.Pos());
-
                 }
-
             }
             else if (len(results) > 0) {
                 check.error(results[0], "no result values expected");
                 check.use(results);
             }
-
             break;
         case ptr<syntax.BranchStmt> s:
             if (s.Label != null) {
                 check.hasLabel = true;
                 break; // checked in 2nd pass (check.labels)
             }
-
 
             if (s.Tok == syntax.Break)
             {
@@ -564,9 +527,7 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
  {
                         check.error(s, "break not in for, switch, or select statement");
                     }
-
                 }
-
                 goto __switch_break0;
             }
             if (s.Tok == syntax.Continue)
@@ -579,9 +540,7 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
  {
                         check.error(s, "continue not in for statement");
                     }
-
                 }
-
                 goto __switch_break0;
             }
             if (s.Tok == syntax.Fallthrough)
@@ -659,8 +618,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                 }
 
             }
-
-
             break;
         case ptr<syntax.SelectStmt> s:
             inner |= breakOk;
@@ -688,7 +645,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                             }
 
                         }
-
                         break;
                     case ptr<syntax.ExprStmt> s:
                         rhs = s.X;
@@ -711,27 +667,21 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                         x = x__prev2;
 
                     }
-
                 }
-
                 if (!valid) {
                     check.error(clause.Comm, "select case must be send or receive (possibly with assignment)");
                     continue;
                 }
-
                 var end = s.Rbrace;
                 if (i + 1 < len(s.Body)) {
                     end = s.Body[i + 1].Pos();
                 }
-
                 check.openScopeUntil(clause, end, "case");
                 if (clause.Comm != null) {
                     check.stmt(inner, clause.Comm);
                 }
-
                 check.stmtList(inner, clause.Body);
                 check.closeScope();
-
             }
             break;
         case ptr<syntax.ForStmt> s:
@@ -749,7 +699,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
 
             }
 
-
             check.simpleStmt(s.Init);
             if (s.Cond != null) {
                 x = default;
@@ -758,7 +707,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                     check.error(s.Cond, "non-boolean condition in for statement");
                 }
             }
-
             check.simpleStmt(s.Post); 
             // spec: "The init statement may be a short variable
             // declaration, but the post statement must not."
@@ -778,7 +726,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
                 s = s__prev1;
 
             }
-
             check.stmt(inner, s.Body);
             break;
         default:
@@ -788,7 +735,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, syntax
             break;
         }
     }
-
 });
 
 private static void switchStmt(this ptr<Checker> _addr_check, stmtContext inner, ptr<syntax.SwitchStmt> _addr_s) {
@@ -821,7 +767,6 @@ private static void switchStmt(this ptr<Checker> _addr_check, stmtContext inner,
             pos = s.Body[0].Pos();
         }
         x.expr = syntax.NewName(pos, "true");
-
     }
     check.multipleSwitchDefaults(s.Body);
 
@@ -845,7 +790,6 @@ private static void switchStmt(this ptr<Checker> _addr_check, stmtContext inner,
         check.openScopeUntil(clause, end, "case");
         check.stmtList(inner, clause.Body);
         check.closeScope();
-
     }
 }
 
@@ -912,7 +856,6 @@ private static void typeSwitchStmt(this ptr<Checker> _addr_check, stmtContext in
             if (len(cases) != 1 || T == null) {
                 T = x.typ;
             }
-
             var obj = NewVar(lhs.Pos(), check.pkg, lhs.Value, T); 
             // TODO(mdempsky): Just use clause.Colon? Why did I even suggest
             // "at the end of the TypeSwitchCase" in #16794 instead?
@@ -925,18 +868,15 @@ private static void typeSwitchStmt(this ptr<Checker> _addr_check, stmtContext in
                 }
 
             }
-
             check.declare(check.scope, null, obj, scopePos);
             check.recordImplicit(clause, obj); 
             // For the "declared but not used" error, all lhs variables act as
             // one; i.e., if any one of them is 'used', all of them are 'used'.
             // Collect them for later analysis.
             lhsVars = append(lhsVars, obj);
-
         }
         check.stmtList(inner, clause.Body);
         check.closeScope();
-
     }    if (lhs != null) {
         bool used = default;
         foreach (var (_, v) in lhsVars) {
@@ -992,7 +932,6 @@ private static void rangeStmt(this ptr<Checker> _addr_check, stmtContext inner, 
             }
 
         }
-
         @string msg = default;
         key, val, msg = rangeKeyVal(typ, isVarName(sKey), isVarName(sValue));
         if (key == null || msg != "") {
@@ -1036,7 +975,6 @@ private static void rangeStmt(this ptr<Checker> _addr_check, stmtContext inner, 
                         if (name != "_") {
                             vars = append(vars, obj);
                         }
-
                     }
                     else
  {
@@ -1059,7 +997,6 @@ private static void rangeStmt(this ptr<Checker> _addr_check, stmtContext inner, 
                         x.expr = lhs; // we don't have a better rhs expression to use here
                         x.typ = typ;
                         check.initVar(obj, _addr_x, "range clause");
-
                     }
                     else
  {
@@ -1070,7 +1007,6 @@ private static void rangeStmt(this ptr<Checker> _addr_check, stmtContext inner, 
                     typ = typ__prev2;
 
                 }
-
             }
     else
  
@@ -1093,7 +1029,6 @@ private static void rangeStmt(this ptr<Checker> _addr_check, stmtContext inner, 
                     // for short variable declarations) and ends at the end of the innermost
                     // containing block."
                     check.declare(check.scope, null, obj, scopePos);
-
                 }
         else
 
@@ -1124,13 +1059,11 @@ private static void rangeStmt(this ptr<Checker> _addr_check, stmtContext inner, 
                         x.expr = lhs; // we don't have a better rhs expression to use here
                         x.typ = typ;
                         check.assignVar(lhs, _addr_x);
-
                     }
 
                     typ = typ__prev2;
 
                 }
-
             }
 
             i = i__prev1;
@@ -1138,7 +1071,6 @@ private static void rangeStmt(this ptr<Checker> _addr_check, stmtContext inner, 
         }
     }
     check.stmt(inner, s.Body);
-
 }
 
 // isVarName reports whether x is a non-nil, non-blank (_) expression.
@@ -1148,7 +1080,6 @@ private static bool isVarName(syntax.Expr x) {
     }
     ptr<syntax.Name> (ident, _) = unparen(x)._<ptr<syntax.Name>>();
     return ident == null || ident.Value != "_";
-
 }
 
 // rangeKeyVal returns the key and value type produced by a range clause
@@ -1169,7 +1100,6 @@ private static (Type, Type, @string) rangeKeyVal(Type typ, bool wantKey, bool wa
             if (isString(typ)) {
                 return (Typ[Int], universeRune, ""); // use 'rune' name
             }
-
             break;
         case ptr<Array> typ:
             return (Typ[Int], typ.elem, "");
@@ -1190,7 +1120,6 @@ private static (Type, Type, @string) rangeKeyVal(Type typ, bool wantKey, bool wa
                 typ = typ__prev1;
 
             }
-
             break;
         case ptr<Map> typ:
             return (typ.key, typ.elem, "");
@@ -1228,7 +1157,6 @@ private static (Type, Type, @string) rangeKeyVal(Type typ, bool wantKey, bool wa
             break;
     }
     return (null, null, "");
-
 }
 
 } // end types2_package

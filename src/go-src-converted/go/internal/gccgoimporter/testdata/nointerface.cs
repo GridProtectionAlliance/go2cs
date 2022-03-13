@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package nointerface -- go2cs converted at 2022 March 06 23:32:49 UTC
+// package nointerface -- go2cs converted at 2022 March 13 06:42:30 UTC
 // import "go/internal/gccgoimporter.nointerface" ==> using nointerface = go.go.@internal.gccgoimporter.nointerface_package
 // Original source: C:\Program Files\Go\src\go\internal\gccgoimporter\testdata\nointerface.go
-
-
 namespace go.go.@internal;
 
 public static partial class nointerface_package {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:34:24 UTC
+//     Generated on 2022 March 13 06:41:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace @internal
 {
     public static partial class facts_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct gobFact
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace @internal
             public static implicit operator gobFact(NilType nil) => default(gobFact);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static gobFact gobFact_cast(dynamic value)
         {
             return new gobFact(value.PkgPath, value.Object, value.Fact);

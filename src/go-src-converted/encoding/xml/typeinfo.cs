@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xml -- go2cs converted at 2022 March 06 22:25:31 UTC
+// package xml -- go2cs converted at 2022 March 13 05:40:03 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Program Files\Go\src\encoding\xml\typeinfo.go
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
 namespace go.encoding;
+
+using fmt = fmt_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// typeInfo holds details for the xml representation of a type.
 
 public static partial class xml_package {
 
-    // typeInfo holds details for the xml representation of a type.
 private partial struct typeInfo {
     public ptr<fieldInfo> xmlname;
     public slice<fieldInfo> fields;
@@ -44,7 +46,6 @@ private static readonly fMode fOmitEmpty = fElement | fAttr | fCDATA | fCharData
 
 private static readonly @string xmlName = "XMLName";
 
-
 private static sync.Map tinfoMap = default; // map[reflect.Type]*typeInfo
 
 private static var nameType = reflect.TypeOf(new Name());
@@ -66,7 +67,6 @@ private static (ptr<typeInfo>, error) getTypeInfo(reflect.Type typ) {
         ti = ti__prev1;
 
     }
-
 
     ptr<typeInfo> tinfo = addr(new typeInfo());
     if (typ.Kind() == reflect.Struct && typ != nameType) {
@@ -109,23 +109,18 @@ private static (ptr<typeInfo>, error) getTypeInfo(reflect.Type typ) {
                                 err = err__prev4;
 
                             }
-
                         }
 
                         finfo = finfo__prev2;
                     }
 
                     continue;
-
                 }
-
             }
-
             var (finfo, err) = structFieldInfo(typ, _addr_f);
             if (err != null) {
                 return (_addr_null!, error.As(err)!);
             }
-
             if (f.Name == xmlName) {
                 tinfo.xmlname = finfo;
                 continue;
@@ -144,13 +139,10 @@ private static (ptr<typeInfo>, error) getTypeInfo(reflect.Type typ) {
                 err = err__prev2;
 
             }
-
         }
-
     }
     var (ti, _) = tinfoMap.LoadOrStore(typ, tinfo);
     return (ti._<ptr<typeInfo>>(), error.As(null!)!);
-
 }
 
 // structFieldInfo builds and returns a fieldInfo for f.
@@ -203,7 +195,6 @@ private static (ptr<fieldInfo>, error) structFieldInfo(reflect.Type typ, ptr<ref
                     finfo.flags |= fOmitEmpty;
                     break;
             }
-
         }        var valid = true;
         {
             var mode = finfo.flags & fMode;
@@ -239,7 +230,6 @@ private static (ptr<fieldInfo>, error) structFieldInfo(reflect.Type typ, ptr<ref
         // empty rather than to the field name.
         finfo.name = tag;
         return (_addr_finfo!, error.As(null!)!);
-
     }
     if (tag == "") { 
         // If the name part of the tag is completely empty, get
@@ -261,9 +251,7 @@ private static (ptr<fieldInfo>, error) structFieldInfo(reflect.Type typ, ptr<ref
             xmlname = xmlname__prev2;
 
         }
-
         return (_addr_finfo!, error.As(null!)!);
-
     }
     var parents = strings.Split(tag, ">");
     if (parents[0] == "") {
@@ -278,7 +266,6 @@ private static (ptr<fieldInfo>, error) structFieldInfo(reflect.Type typ, ptr<ref
             return (_addr_null!, error.As(fmt.Errorf("xml: %s chain not valid with %s flag", tag, strings.Join(tokens[(int)1..], ",")))!);
         }
         finfo.parents = parents[..(int)len(parents) - 1];
-
     }
     if (finfo.flags & fElement != 0) {
         var ftyp = f.Type;
@@ -288,7 +275,6 @@ private static (ptr<fieldInfo>, error) structFieldInfo(reflect.Type typ, ptr<ref
         }
     }
     return (_addr_finfo!, error.As(null!)!);
-
 }
 
 // lookupXMLName returns the fieldInfo for typ's XMLName field
@@ -314,10 +300,8 @@ private static ptr<fieldInfo> lookupXMLName(reflect.Type typ) {
             return _addr_finfo!;
         }
         break;
-
     }
     return _addr_null!;
-
 }
 
 private static nint min(nint a, nint b) {
@@ -325,7 +309,6 @@ private static nint min(nint a, nint b) {
         return a;
     }
     return b;
-
 }
 
 // addFieldInfo adds finfo to tinfo.fields if there are no
@@ -360,7 +343,6 @@ Loop:
                     _continueLoop = true;
                     break;
                 }
-
             }
 
             if (len(oldf.parents) > len(newf.parents)) {
@@ -379,7 +361,6 @@ Loop:
                     conflicts = append(conflicts, i);
                 }
             }
-
         }
         i = i__prev1;
     }
@@ -421,7 +402,6 @@ Loop:
     }
     tinfo.fields = append(tinfo.fields, newf);
     return error.As(null!)!;
-
 }
 
 // A TagPathError represents an error in the unmarshaling process
@@ -442,7 +422,6 @@ private static @string Error(this ptr<TagPathError> _addr_e) {
 
 private static readonly var initNilPointers = true;
 private static readonly var dontInitNilPointers = false;
-
 
 // value returns v's field value corresponding to finfo.
 // It's equivalent to v.FieldByIndex(finfo.idx), but when passed
@@ -466,9 +445,7 @@ private static reflect.Value value(this ptr<fieldInfo> _addr_finfo, reflect.Valu
             }
         }
         v = v.Field(x);
-
     }    return v;
-
 }
 
 } // end xml_package

@@ -10,32 +10,33 @@
 // to avoid needing to build net (and thus use cgo) during the
 // bootstrap process.
 
-// package web -- go2cs converted at 2022 March 06 23:17:18 UTC
+// package web -- go2cs converted at 2022 March 13 06:30:37 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\web\http.go
-using tls = go.crypto.tls_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using mime = go.mime_package;
-using http = go.net.http_package;
-using urlpkg = go.net.url_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
-using auth = go.cmd.go.@internal.auth_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using browser = go.cmd.@internal.browser_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using tls = crypto.tls_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using mime = mime_package;
+using http = net.http_package;
+using urlpkg = net.url_package;
+using os = os_package;
+using strings = strings_package;
+using time = time_package;
+
+using auth = cmd.go.@internal.auth_package;
+using cfg = cmd.go.@internal.cfg_package;
+using browser = cmd.@internal.browser_package;
+
+
+// impatientInsecureHTTPClient is used with GOINSECURE,
+// when we're connecting to https servers that might not be there
+// or might be using self-signed certificates.
+
+using System;
 public static partial class web_package {
 
-    // impatientInsecureHTTPClient is used with GOINSECURE,
-    // when we're connecting to https servers that might not be there
-    // or might be using self-signed certificates.
 private static ptr<http.Client> impatientInsecureHTTPClient = addr(new http.Client(Timeout:5*time.Second,Transport:&http.Transport{Proxy:http.ProxyFromEnvironment,TLSClientConfig:&tls.Config{InsecureSkipVerify:true,},},));
 
 // securityPreservingHTTPClient is like the default HTTP client, but rejects
@@ -58,7 +59,6 @@ private static (ptr<Response>, error) get(SecurityMode security, ptr<urlpkg.URL>
             fmt.Fprintf(os.Stderr, "# get %s: %v (%.3fs)\n", url.Redacted(), res.Status, time.Since(start).Seconds());
         }
         return (_addr_res!, error.As(null!)!);
-
     }
     if (url.Host == "localhost.localdev") {
         return (_addr_null!, error.As(fmt.Errorf("no such host localhost.localdev"))!);
@@ -84,14 +84,12 @@ private static (ptr<Response>, error) get(SecurityMode security, ptr<urlpkg.URL>
         res = ;
         if (security == Insecure && url.Scheme == "https") { // fail earlier
             res, err = impatientInsecureHTTPClient.Do(req);
-
         }
         else
  {
             res, err = securityPreservingHTTPClient.Do(req);
         }
         return (_addr_url!, error.As(res)!, err);
-
     };
 
     ptr<urlpkg.URL> fetched;    res = ;    error err = default!;
@@ -109,9 +107,7 @@ private static (ptr<Response>, error) get(SecurityMode security, ptr<urlpkg.URL>
                 // HTTPS failed, and we can't fall back to plain HTTP.
                 // Report the error from the HTTPS attempt.
                 return (_addr_null!, error.As(err)!);
-
             }
-
         }
     }
     if (res == null) {
@@ -154,7 +150,6 @@ private static (ptr<Response>, error) get(SecurityMode security, ptr<urlpkg.URL>
             // HTTP failed, and we already tried HTTPS if applicable.
             // Report the error from the HTTP attempt.
             return (_addr_null!, error.As(err)!);
-
         }
     }
     if (cfg.BuildX) {
@@ -188,14 +183,11 @@ private static (ptr<Response>, error) get(SecurityMode security, ptr<urlpkg.URL>
                             break;
                     }
                 }
-
             }
 
         }
-
     }
     return (_addr_r!, error.As(null!)!);
-
 });
 
 private static (ptr<Response>, error) getFile(ptr<urlpkg.URL> _addr_u) {
@@ -219,7 +211,6 @@ private static (ptr<Response>, error) getFile(ptr<urlpkg.URL> _addr_u) {
         return (_addr_null!, error.As(err)!);
     }
     return (addr(new Response(URL:u.Redacted(),Status:http.StatusText(http.StatusOK),StatusCode:http.StatusOK,Body:f,)), error.As(null!)!);
-
 }
 
 private static bool openBrowser(@string url) {

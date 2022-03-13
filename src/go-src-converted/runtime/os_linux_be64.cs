@@ -8,11 +8,9 @@
 // +build linux
 // +build ppc64 s390x
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:30 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\os_linux_be64.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -23,7 +21,6 @@ private static readonly nint _SI_USER = 0;
 private static readonly nint _SIG_BLOCK = 0;
 private static readonly nint _SIG_UNBLOCK = 1;
 private static readonly nint _SIG_SETMASK = 2;
-
 
 private partial struct sigset { // : ulong
 }
@@ -39,7 +36,6 @@ private static void sigaddset(ptr<sigset> _addr_mask, nint i) {
         throw("unexpected signal greater than 64");
     }
     mask |= 1 << (int)((uint(i) - 1));
-
 }
 
 private static void sigdelset(ptr<sigset> _addr_mask, nint i) {
@@ -49,7 +45,6 @@ private static void sigdelset(ptr<sigset> _addr_mask, nint i) {
         throw("unexpected signal greater than 64");
     }
     mask &= 1 << (int)((uint(i) - 1));
-
 }
 
 //go:nosplit

@@ -5,16 +5,16 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package filepath -- go2cs converted at 2022 March 06 22:14:06 UTC
+// package filepath -- go2cs converted at 2022 March 13 05:28:16 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Program Files\Go\src\path\filepath\path_unix.go
-using strings = go.strings_package;
-
 namespace go.path;
+
+using strings = strings_package;
 
 public static partial class filepath_package {
 
-    // IsAbs reports whether the path is absolute.
+// IsAbs reports whether the path is absolute.
 public static bool IsAbs(@string path) {
     return strings.HasPrefix(path, "/");
 }
@@ -38,7 +38,6 @@ private static slice<@string> splitList(@string path) {
         return new slice<@string>(new @string[] {  });
     }
     return strings.Split(path, string(ListSeparator));
-
 }
 
 private static (@string, error) abs(@string path) {
@@ -55,7 +54,6 @@ private static @string join(slice<@string> elem) {
             return Clean(strings.Join(elem[(int)i..], string(Separator)));
         }
     }    return "";
-
 }
 
 private static bool sameWord(@string a, @string b) {

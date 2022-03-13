@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:17 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\runtime2.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// defined constants
+
+using System;
 public static partial class runtime_package {
 
-    // defined constants
  
 // G status
 //
@@ -142,7 +143,6 @@ private static readonly var _Pgcstop = 2;
 // stripped of its resources, though a few things remain
 // (e.g., trace buffers).
 private static readonly var _Pdead = 3;
-
 
 // Mutual exclusion locks.  In the uncontended case,
 // as fast as spin locks (just a few user-level instructions),
@@ -494,7 +494,6 @@ private static readonly nint gTrackingPeriod = 8;
 private static readonly nint tlsSlots = 6;
 private static readonly var tlsSize = tlsSlots * sys.PtrSize;
 
-
 private partial struct m {
     public ptr<g> g0; // goroutine with scheduling stack
     public gobuf morebuf; // gobuf arg to morestack
@@ -816,9 +815,7 @@ private static void extendRandom(slice<byte> r, nint n) {
             n++;
             h>>=8;
         }
-
     }
-
 }
 
 // A _defer holds an entry on the list of deferred calls.
@@ -943,7 +940,6 @@ private static @string String(this waitReason w) {
         return "unknown wait reason";
     }
     return waitReasonStrings[w];
-
 }
 
 private static ptr<m> allm;private static int gomaxprocs = default;private static int ncpu = default;private static forcegcstate forcegc = default;private static schedt sched = default;private static int newprocs = default;private static mutex allpLock = default;private static slice<ptr<p>> allp = default;private static pMask idlepMask = default;private static pMask timerpMask = default;private static lfstack gcBgMarkWorkerPool = default;private static int gcBgMarkWorkerCount = default;private static uint processorVersionInfo = default;private static bool isIntel = default;private static bool lfenceBeforeRdtsc = default;private static byte goarm = default;

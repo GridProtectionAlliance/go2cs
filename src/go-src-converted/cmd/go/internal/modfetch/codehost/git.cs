@@ -2,38 +2,39 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package codehost -- go2cs converted at 2022 March 06 23:18:42 UTC
+// package codehost -- go2cs converted at 2022 March 13 06:32:05 UTC
 // import "cmd/go/internal/modfetch/codehost" ==> using codehost = go.cmd.go.@internal.modfetch.codehost_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\codehost\git.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using par = go.cmd.go.@internal.par_package;
-using web = go.cmd.go.@internal.web_package;
-
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal.modfetch;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using fs = io.fs_package;
+using url = net.url_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using par = cmd.go.@internal.par_package;
+using web = cmd.go.@internal.web_package;
+
+using semver = golang.org.x.mod.semver_package;
+
+
+// LocalGitRepo is like Repo but accepts both Git remote references
+// and paths to repositories on the local file system.
+
+using System;
 public static partial class codehost_package {
 
-    // LocalGitRepo is like Repo but accepts both Git remote references
-    // and paths to repositories on the local file system.
 public static (Repo, error) LocalGitRepo(@string remote) {
     Repo _p0 = default;
     error _p0 = default!;
@@ -79,7 +80,6 @@ private static (Repo, error) newGitRepoCached(@string remote, bool localOK) {
     })._<cached>();
 
     return (c.repo, error.As(c.err)!);
-
 }
 
 private static (Repo, error) newGitRepo(@string remote, bool localOK) => func((defer, _, _) => {
@@ -130,14 +130,11 @@ private static (Repo, error) newGitRepo(@string remote, bool localOK) => func((d
                     }
 
                 }
-
             }
 
         }
-
         r.remoteURL = r.remote;
         r.remote = "origin";
-
     }
     else
  { 
@@ -161,10 +158,8 @@ private static (Repo, error) newGitRepo(@string remote, bool localOK) => func((d
         }
         r.dir = remote;
         r.mu.Path = r.dir + ".lock";
-
     }
     return (r, error.As(null!)!);
-
 });
 
 private partial struct gitRepo {
@@ -253,15 +248,12 @@ private static void loadRefs(this ptr<gitRepo> _addr_r) {
                     }
 
                 }
-
             }
 
         }
 
-
         r.refsErr = gitErr;
         return ;
-
     }
     r.refs = make_map<@string, @string>();
     foreach (var (_, line) in strings.Split(string(out), "\n")) {
@@ -276,7 +268,6 @@ private static void loadRefs(this ptr<gitRepo> _addr_r) {
         if (strings.HasSuffix(ref, "^{}")) { // record unwrapped annotated tag as value of tag
             r.refs[strings.TrimSuffix(ref, "^{}")] = hash;
             delete(r.refs, ref);
-
         }
     }
 }
@@ -300,10 +291,8 @@ private static (slice<@string>, error) Tags(this ptr<gitRepo> _addr_r, @string p
             continue;
         }
         tags = append(tags, tag);
-
     }    sort.Strings(tags);
     return (tags, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) Latest(this ptr<gitRepo> _addr_r) {
@@ -319,7 +308,6 @@ private static (ptr<RevInfo>, error) Latest(this ptr<gitRepo> _addr_r) {
         return (_addr_null!, error.As(ErrNoCommits)!);
     }
     return _addr_r.Stat(r.refs["HEAD"])!;
-
 }
 
 // findRef finds some ref name for the given hash,
@@ -337,7 +325,6 @@ private static (@string, bool) findRef(this ptr<gitRepo> _addr_r, @string hash) 
             return (ref, true);
         }
     }    return ("", false);
-
 }
 
 // minHashDigits is the minimum number of digits to require
@@ -376,9 +363,7 @@ private static (ptr<RevInfo>, error) stat(this ptr<gitRepo> _addr_r, @string rev
             info = info__prev2;
 
         }
-
         didStatLocal = true;
-
     }
     r.localTagsOnce.Do(r.loadLocalTags);
     if (r.localTags[rev]) {
@@ -416,31 +401,23 @@ private static (ptr<RevInfo>, error) stat(this ptr<gitRepo> _addr_r, @string rev
                     // Hash is an ambiguous hash prefix.
                     // More information will not change that.
                     return (_addr_null!, error.As(fmt.Errorf("ambiguous revision %s", rev))!);
-
                 }
-
                 if (ref == "" || ref > k) { // Break ties deterministically when multiple refs point at same hash.
                     ref = k;
-
                 }
-
                 rev = h;
                 hash = h;
-
             }
-
         }
     else
         if (hash == "" && len(rev) == 40) { // Didn't find a ref, but rev is a full hash.
             hash = rev;
-
         }
     } {
         if (r.refsErr != null) {
             return (_addr_null!, error.As(r.refsErr)!);
         }
         return (_addr_null!, error.As(addr(new UnknownRevisionError(Rev:rev))!)!);
-
     }
     var (unlock, err) = r.mu.Lock();
     if (err != null) {
@@ -462,17 +439,13 @@ private static (ptr<RevInfo>, error) stat(this ptr<gitRepo> _addr_r, @string rev
                 if (strings.HasPrefix(ref, "refs/tags/")) { 
                     // Make sure tag exists, so it will be in localTags next time the go command is run.
                     Run(r.dir, "git", "tag", strings.TrimPrefix(ref, "refs/tags/"), hash);
-
                 }
-
                 return (_addr_info!, error.As(null!)!);
-
             }
 
             info = info__prev2;
 
         }
-
     }
     if (r.fetchLevel <= fetchSome && ref != "" && hash != "" && !r.local) {
         r.fetchLevel = fetchSome;
@@ -483,7 +456,6 @@ private static (ptr<RevInfo>, error) stat(this ptr<gitRepo> _addr_r, @string rev
             // on a future call. Also, some servers refuse to allow
             // full hashes in ref specs, so prefer a ref name if known.
             refspec = ref + ":" + ref;
-
         }
         else
  { 
@@ -494,7 +466,6 @@ private static (ptr<RevInfo>, error) stat(this ptr<gitRepo> _addr_r, @string rev
             // overwritten in the next command, and that's fine.
             ref = hash;
             refspec = hash + ":refs/dummy";
-
         }
         var (_, err) = Run(r.dir, "git", "fetch", "-f", "--depth=1", r.remote, refspec);
         if (err == null) {
@@ -509,9 +480,7 @@ private static (ptr<RevInfo>, error) stat(this ptr<gitRepo> _addr_r, @string rev
         }
     }
 
-
     return _addr_r.statLocal(rev, rev)!;
-
 });
 
 // fetchRefsLocked fetches all heads and tags from the origin, along with the
@@ -542,7 +511,6 @@ private static error fetchRefsLocked(this ptr<gitRepo> _addr_r) {
 
         }
 
-
         {
             (_, err) = os.Stat(filepath.Join(r.dir, "shallow"));
 
@@ -555,17 +523,13 @@ private static error fetchRefsLocked(this ptr<gitRepo> _addr_r) {
                     }
 
                 }
-
             }
 
         }
 
-
         r.fetchLevel = fetchAll;
-
     }
     return error.As(null!)!;
-
 }
 
 // statLocal returns a RevInfo describing rev in the local git repository.
@@ -613,7 +577,6 @@ private static (ptr<RevInfo>, error) statLocal(this ptr<gitRepo> _addr_r, @strin
             info.Version = version;
         }
     }    return (_addr_info!, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) Stat(this ptr<gitRepo> _addr_r, @string rev) {
@@ -633,7 +596,6 @@ private static (ptr<RevInfo>, error) Stat(this ptr<gitRepo> _addr_r, @string rev
         return _addr_new cached(info,err)!;
     })._<cached>();
     return (_addr_c.info!, error.As(c.err)!);
-
 }
 
 private static (slice<byte>, error) ReadFile(this ptr<gitRepo> _addr_r, @string rev, @string file, long maxSize) {
@@ -651,7 +613,6 @@ private static (slice<byte>, error) ReadFile(this ptr<gitRepo> _addr_r, @string 
         return (null, error.As(fs.ErrNotExist)!);
     }
     return (out, error.As(null!)!);
-
 }
 
 private static (map<@string, ptr<FileRev>>, error) ReadFileRevs(this ptr<gitRepo> _addr_r, slice<@string> revs, @string file, long maxSize) => func((defer, _, _) => {
@@ -697,7 +658,6 @@ private static (map<@string, ptr<FileRev>>, error) ReadFileRevs(this ptr<gitRepo
         }
     }
 
-
     {
         var (_, err) = r.readFileRevs(redo, file, files);
 
@@ -706,9 +666,7 @@ private static (map<@string, ptr<FileRev>>, error) ReadFileRevs(this ptr<gitRepo
         }
     }
 
-
     return (files, error.As(null!)!);
-
 });
 
 private static (slice<@string>, error) readFileRevs(this ptr<gitRepo> _addr_r, slice<@string> tags, @string file, map<@string, ptr<FileRev>> fileMap) {
@@ -756,12 +714,9 @@ private static (slice<@string>, error) readFileRevs(this ptr<gitRepo> _addr_r, s
             data = data[(int)1..];
         }
         return (f[1], error.As(body)!, true);
-
     };
 
-    Func<(slice<@string>, error)> badGit = () => {
-        return (null, error.As(fmt.Errorf("malformed output from git cat-file --batch"))!);
-    };
+    Func<(slice<@string>, error)> badGit = () => (null, error.As(fmt.Errorf("malformed output from git cat-file --batch"))!);
 
     {
         var tag__prev1 = tag;
@@ -799,13 +754,11 @@ private static (slice<@string>, error) readFileRevs(this ptr<gitRepo> _addr_r, s
                             f.Err = addr(new fs.PathError(Path:tag+":"+file,Op:"read",Err:fmt.Errorf("unexpected non-blob type %q",fileType)));
                             break;
                     }
-
                     break;
                 default: 
                     f.Err = fmt.Errorf("unexpected non-commit type %q for rev %s", commitType, tag);
                     break;
             }
-
         }
         tag = tag__prev1;
     }
@@ -814,7 +767,6 @@ private static (slice<@string>, error) readFileRevs(this ptr<gitRepo> _addr_r, s
         return badGit();
     }
     return (missing, error.As(null!)!);
-
 }
 
 private static (@string, error) RecentTag(this ptr<gitRepo> _addr_r, @string rev, @string prefix, Func<@string, bool> allowed) => func((defer, _, _) => {
@@ -844,13 +796,11 @@ private static (@string, error) RecentTag(this ptr<gitRepo> _addr_r, @string rev
             if (!strings.HasPrefix(line, "refs/tags/")) {
                 continue;
             }
-
             line = line[(int)len("refs/tags/")..];
 
             if (!strings.HasPrefix(line, prefix)) {
                 continue;
             }
-
             var semtag = line[(int)len(prefix)..]; 
             // Consider only tags that are valid and complete (not just major.minor prefixes).
             // NOTE: Do not replace the call to semver.Compare with semver.Max.
@@ -864,16 +814,13 @@ private static (@string, error) RecentTag(this ptr<gitRepo> _addr_r, @string rev
                 }
 
             }
-
             if (semver.Compare(semtag, highest) > 0) {
                 highest = semtag;
             }
-
         }        if (highest != "") {
             tag = prefix + highest;
         }
         return tag != "" && !AllHex(tag);
-
     };
 
     if (describe()) {
@@ -912,7 +859,6 @@ private static (@string, error) RecentTag(this ptr<gitRepo> _addr_r, @string rev
     // waiting on the lock.
     describe();
     return (tag, error.As(err)!);
-
 });
 
 private static (bool, error) DescendsFrom(this ptr<gitRepo> _addr_r, @string rev, @string tag) => func((defer, _, _) => {
@@ -967,7 +913,6 @@ private static (bool, error) DescendsFrom(this ptr<gitRepo> _addr_r, @string rev
             }
 
         }
-
     }
     _, err = Run(r.dir, "git", "merge-base", "--is-ancestor", "--", tag, rev);
     if (err == null) {
@@ -980,9 +925,7 @@ private static (bool, error) DescendsFrom(this ptr<gitRepo> _addr_r, @string rev
             return (false, error.As(null!)!);
         }
     }
-
     return (false, error.As(err)!);
-
 });
 
 private static (io.ReadCloser, error) ReadZip(this ptr<gitRepo> _addr_r, @string rev, @string subdir, long maxSize) => func((defer, _, _) => {
@@ -1024,10 +967,8 @@ private static (io.ReadCloser, error) ReadZip(this ptr<gitRepo> _addr_r, @string
             return (null, error.As(fs.ErrNotExist)!);
         }
         return (null, error.As(err)!);
-
     }
     return (io.NopCloser(bytes.NewReader(archive)), error.As(null!)!);
-
 });
 
 // ensureGitAttributes makes sure export-subst and export-ignore features are
@@ -1055,7 +996,6 @@ private static error ensureGitAttributes(@string repoDir) => func((defer, _, _) 
         }
     }
 
-
     var (f, err) = os.OpenFile(p, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0666);
     if (err != null) {
         return error.As(err)!;
@@ -1076,7 +1016,6 @@ private static error ensureGitAttributes(@string repoDir) => func((defer, _, _) 
         return error.As(err)!;
     }
     return error.As(null!)!;
-
 });
 
 } // end codehost_package

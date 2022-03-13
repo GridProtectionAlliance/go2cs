@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:07 UTC
+//     Generated on 2022 March 13 05:29:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace compress
 {
     public static partial class flate_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct decompressor
         {
             // Constructors
@@ -93,7 +93,7 @@ namespace compress
             public static implicit operator decompressor(NilType nil) => default(decompressor);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static decompressor decompressor_cast(dynamic value)
         {
             return new decompressor(value.r, value.roffset, value.b, value.nb, value.h1, value.h2, ref value.bits, ref value.codebits, value.dict, value.buf, value.step, value.stepState, value.final, value.err, value.toRead, ref value.hl, ref value.hd, value.copyLen, value.copyDist);

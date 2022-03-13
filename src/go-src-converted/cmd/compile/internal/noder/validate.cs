@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:22 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:51 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\validate.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+
+
+// match reports whether types t1 and t2 are consistent
+// representations for a given expression's type.
 
 public static partial class noder_package {
 
-    // match reports whether types t1 and t2 are consistent
-    // representations for a given expression's type.
 private static bool match(this ptr<irgen> _addr_g, ptr<types.Type> _addr_t1, types2.Type t2, bool hasOK) {
     ref irgen g = ref _addr_g.val;
     ref types.Type t1 = ref _addr_t1.val;
@@ -26,7 +28,6 @@ private static bool match(this ptr<irgen> _addr_g, ptr<types.Type> _addr_t1, typ
     if (!ok) { 
         // Not a tuple; can use simple type identity comparison.
         return types.Identical(t1, g.typ(t2));
-
     }
     if (hasOK) { 
         // For has-ok values, types2 represents the expression's type as a
@@ -37,7 +38,6 @@ private static bool match(this ptr<irgen> _addr_g, ptr<types.Type> _addr_t1, typ
             return true;
         }
         return types.Identical(t1, g.typ(t2));
-
     }
     if (t1 == null || tuple == null) {
         return t1 == null && tuple == null;
@@ -53,7 +53,6 @@ private static bool match(this ptr<irgen> _addr_g, ptr<types.Type> _addr_t1, typ
             return false;
         }
     }    return true;
-
 }
 
 private static void validate(this ptr<irgen> _addr_g, syntax.Node n) {
@@ -77,12 +76,9 @@ private static void validate(this ptr<irgen> _addr_g, syntax.Node n) {
                         break;
                     }
                 }
-
             }
-
             break;
     }
-
 }
 
 private static void validateBuiltin(this ptr<irgen> _addr_g, @string name, ptr<syntax.CallExpr> _addr_call) {
@@ -114,7 +110,6 @@ private static void validateBuiltin(this ptr<irgen> _addr_g, @string name, ptr<s
             }
             break;
     }
-
 }
 
 // unsafeExpr evaluates the given unsafe builtin function on arg.
@@ -146,9 +141,7 @@ private static long unsafeExpr(this ptr<irgen> _addr_g, @string name, syntax.Exp
         var f = typ.Field(i);
         offset += f.Offset;
         typ = f.Type;
-
     }    return offset;
-
 }
 
 } // end noder_package

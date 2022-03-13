@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:56 UTC
+//     Generated on 2022 March 13 05:34:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct rfc2821Mailbox
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace crypto
             public static implicit operator rfc2821Mailbox(NilType nil) => default(rfc2821Mailbox);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static rfc2821Mailbox rfc2821Mailbox_cast(dynamic value)
         {
             return new rfc2821Mailbox(value.local, value.domain);

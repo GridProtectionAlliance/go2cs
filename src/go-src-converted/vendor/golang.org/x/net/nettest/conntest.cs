@@ -2,31 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package nettest -- go2cs converted at 2022 March 06 23:38:08 UTC
+// package nettest -- go2cs converted at 2022 March 13 06:46:26 UTC
 // import "vendor/golang.org/x/net/nettest" ==> using nettest = go.vendor.golang.org.x.net.nettest_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\nettest\conntest.go
-using bytes = go.bytes_package;
-using binary = go.encoding.binary_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using rand = go.math.rand_package;
-using net = go.net_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using testing = go.testing_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go.vendor.golang.org.x.net;
 
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using rand = math.rand_package;
+using net = net_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using testing = testing_package;
+using time = time_package;
+
+
+// MakePipe creates a connection between two endpoints and returns the pair
+// as c1 and c2, such that anything written to c1 is read by c2 and vice-versa.
+// The stop function closes all resources, including c1, c2, and the underlying
+// net.Listener (if there is one), and should not be nil.
+
+using System;
+using System.Threading;
 public static partial class nettest_package {
 
-    // MakePipe creates a connection between two endpoints and returns the pair
-    // as c1 and c2, such that anything written to c1 is read by c2 and vice-versa.
-    // The stop function closes all resources, including c1, c2, and the underlying
-    // net.Listener (if there is one), and should not be nil.
 public delegate  error) MakePipe((net.Conn,  net.Conn,  Action);
 
 // TestConn tests that a net.Conn implementation properly satisfies the interface.
@@ -70,7 +71,6 @@ public static void TestConn(ptr<testing.T> _addr_t, MakePipe mp) {
     t.Run("ConcurrentMethods", t => {
         timeoutWrapper(_addr_t, mp, testConcurrentMethods);
     });
-
 }
 
 public delegate void connTester(ptr<testing.T>, net.Conn, net.Conn);
@@ -95,7 +95,6 @@ private static void timeoutWrapper(ptr<testing.T> _addr_t, MakePipe mp, connTest
     });
     defer(timer.Stop());
     f(t, c1, c2);
-
 });
 
 // testBasicIO tests that the data sent on c1 is properly received on c2.
@@ -120,7 +119,6 @@ private static void testBasicIO(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c2
             err = err__prev1;
 
         }
-
         {
             var err__prev1 = err;
 
@@ -133,7 +131,6 @@ private static void testBasicIO(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c2
             err = err__prev1;
 
         }
-
     }());
 
     go_(() => () => {
@@ -150,7 +147,6 @@ private static void testBasicIO(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c2
             err = err__prev1;
 
         }
-
         {
             var err__prev1 = err;
 
@@ -163,9 +159,7 @@ private static void testBasicIO(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c2
             err = err__prev1;
 
         }
-
         dataCh.Send(wr.Bytes());
-
     }());
 
     {
@@ -175,7 +169,6 @@ private static void testBasicIO(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c2
             t.Error("transmitted data differs");
         }
     }
-
 }
 
 // testPingPong tests that the two endpoints can synchronously send data to
@@ -203,18 +196,15 @@ private static void testPingPong(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c
 
             }
 
-
             var v = binary.LittleEndian.Uint64(buf);
             binary.LittleEndian.PutUint64(buf, v + 1);
             if (prev != 0 && prev + 2 != v) {
                 t.Errorf("mismatching value: got %d, want %d", v, prev + 2);
             }
-
             prev = v;
             if (v == 1000) {
                 break;
             }
-
             {
                 (_, err) = c.Write(buf);
 
@@ -224,7 +214,6 @@ private static void testPingPong(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c
                 }
 
             }
-
         }
         {
             var err = c.Close();
@@ -234,7 +223,6 @@ private static void testPingPong(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c
             }
 
         }
-
     };
 
     wg.Add(2);
@@ -249,7 +237,6 @@ private static void testPingPong(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c
             t.Errorf("unexpected c1.Write error: %v", err);
         }
     }
-
 });
 
 // testRacyRead tests that it is safe to mutate the input Read buffer
@@ -277,14 +264,9 @@ private static void testRacyRead(ptr<testing.T> _addr_t, net.Conn c1, net.Conn c
                     checkForTimeoutError(_addr_t, err);
                     c1.SetReadDeadline(time.Now().Add(time.Millisecond));
                 }
-
             }
-
-
         }());
-
     }
-
 });
 
 // testRacyWrite tests that it is safe to mutate the input Write buffer
@@ -312,14 +294,9 @@ private static void testRacyWrite(ptr<testing.T> _addr_t, net.Conn c1, net.Conn 
                     checkForTimeoutError(_addr_t, err);
                     c1.SetWriteDeadline(time.Now().Add(time.Millisecond));
                 }
-
             }
-
-
         }());
-
     }
-
 });
 
 // testReadTimeout tests that Read timeouts do not affect Write.
@@ -338,7 +315,6 @@ private static void testReadTimeout(ptr<testing.T> _addr_t, net.Conn c1, net.Con
             t.Errorf("unexpected Write error: %v", err);
         }
     }
-
 }
 
 // testWriteTimeout tests that Write timeouts do not affect Read.
@@ -357,7 +333,6 @@ private static void testWriteTimeout(ptr<testing.T> _addr_t, net.Conn c1, net.Co
             t.Errorf("unexpected Read error: %v", err);
         }
     }
-
 }
 
 // testPastTimeout tests that a deadline set in the past immediately times out
@@ -382,7 +357,6 @@ private static void testPastTimeout(ptr<testing.T> _addr_t, net.Conn c1, net.Con
     checkForTimeoutError(_addr_t, err);
 
     testRoundtrip(_addr_t, c1);
-
 }
 
 // testPresentTimeout tests that a past deadline set while there are pending
@@ -424,7 +398,6 @@ private static void testPresentTimeout(ptr<testing.T> _addr_t, net.Conn c1, net.
             t.Error("Write timed out before deadline is set");
         }
     }());
-
 });
 
 // testFutureTimeout tests that a future deadline will eventually time out
@@ -490,7 +463,6 @@ private static void testCloseTimeout(ptr<testing.T> _addr_t, net.Conn c1, net.Co
             _, err = c1.Write(buf);
         }
     }());
-
 });
 
 // testConcurrentMethods tests that the methods of net.Conn can safely
@@ -541,7 +513,6 @@ private static void testConcurrentMethods(ptr<testing.T> _addr_t, net.Conn c1, n
 
     resyncConn(_addr_t, c1);
     testRoundtrip(_addr_t, c1);
-
 });
 
 // checkForTimeoutError checks that the error satisfies the Error interface
@@ -563,7 +534,6 @@ private static void checkForTimeoutError(ptr<testing.T> _addr_t, error err) {
             t.Errorf("got %T, want net.Error", err);
         }
     }
-
 }
 
 // testRoundtrip writes something into c and reads it back.
@@ -580,7 +550,6 @@ private static void testRoundtrip(ptr<testing.T> _addr_t, net.Conn c) {
         }
     }
 
-
     const @string s = "Hello, world!";
 
     slice<byte> buf = (slice<byte>)s;
@@ -591,7 +560,6 @@ private static void testRoundtrip(ptr<testing.T> _addr_t, net.Conn c) {
             t.Errorf("roundtrip Write error: %v", err);
         }
     }
-
     {
         (_, err) = io.ReadFull(c, buf);
 
@@ -599,7 +567,6 @@ private static void testRoundtrip(ptr<testing.T> _addr_t, net.Conn c) {
             t.Errorf("roundtrip Read error: %v", err);
         }
     }
-
     if (string(buf) != s) {
         t.Errorf("roundtrip data mismatch: got %q, want %q", buf, s);
     }
@@ -636,7 +603,6 @@ private static void resyncConn(ptr<testing.T> _addr_t, net.Conn c) {
             t.Errorf("unexpected Write error: %v", err);
         }
     }
-
 }
 
 // chunkedCopy copies from r to w in fixed-width chunks to avoid

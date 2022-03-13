@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:13 UTC
+//     Generated on 2022 March 13 05:30:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace crypto
 {
     public static partial class aes_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct gcmAsm
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace crypto
             public static implicit operator gcmAsm(NilType nil) => default(gcmAsm);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static gcmAsm gcmAsm_cast(dynamic value)
         {
             return new gcmAsm(value.ks, value.productTable, value.nonceSize, value.tagSize);

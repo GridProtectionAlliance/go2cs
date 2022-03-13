@@ -2,36 +2,37 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2022 March 06 22:23:14 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:38 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\transfer.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using httptrace = go.net.http.httptrace_package;
-using @internal = go.net.http.@internal_package;
-using ascii = go.net.http.@internal.ascii_package;
-using textproto = go.net.textproto_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using httpguts = go.golang.org.x.net.http.httpguts_package;
-using System;
-using System.Threading;
-
-
 namespace go.net;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using httptrace = net.http.httptrace_package;
+using @internal = net.http.@internal_package;
+using ascii = net.http.@internal.ascii_package;
+using textproto = net.textproto_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using httpguts = golang.org.x.net.http.httpguts_package;
+
+
+// ErrLineTooLong is returned when reading request or response bodies
+// with malformed chunked encoding.
+
+using System;
+using System.Threading;
 public static partial class http_package {
 
-    // ErrLineTooLong is returned when reading request or response bodies
-    // with malformed chunked encoding.
 public static var ErrLineTooLong = @internal.ErrLineTooLong;
 
 private partial struct errorReader {
@@ -64,7 +65,6 @@ private static (nint, error) Read(this ptr<byteReader> _addr_br, slice<byte> p) 
     br.done = true;
     p[0] = br.b;
     return (1, error.As(io.EOF)!);
-
 }
 
 // transferWriter inspects the fields of a user-supplied Request or Response,
@@ -121,7 +121,6 @@ private static (ptr<transferWriter>, error) newTransferWriter(object r) {
             if (t.ContentLength != 0 && !isKnownInMemoryReader(t.Body)) {
                 t.FlushHeaders = true;
             }
-
             atLeastHTTP11 = true; // Transport requests are always 1.1 or 2.0
             break;
         case ptr<Response> rr:
@@ -160,14 +159,12 @@ private static (ptr<transferWriter>, error) newTransferWriter(object r) {
         }
         else if (t.Body == null) { // no chunking, no body
             t.ContentLength = 0;
-
         }
     }
     if (!chunked(t.TransferEncoding)) {
         t.Trailer = null;
     }
     return (_addr_t!, error.As(null!)!);
-
 }
 
 // shouldSendChunkedRequestBody reports whether we should try to send a
@@ -195,7 +192,6 @@ private static bool shouldSendChunkedRequestBody(this ptr<transferWriter> _addr_
     // from rr.outgoingLength, so 0 actually means zero, not unknown.
     if (t.ContentLength >= 0 || t.Body == null) { // redundant checks; caller did them
         return false;
-
     }
     if (t.Method == "CONNECT") {
         return false;
@@ -206,10 +202,8 @@ private static bool shouldSendChunkedRequestBody(this ptr<transferWriter> _addr_
         // that confuse servers.
         t.probeRequestBody(); // adjusts t.Body, t.ContentLength
         return t.Body != null;
-
     }
     return true;
-
 }
 
 // probeRequestBody reads a byte from t.Body to see whether it's empty
@@ -238,7 +232,6 @@ private static void probeRequestBody(this ptr<transferWriter> _addr_t) {
             rres.b = buf[0];
         }
         t.ByteReadCh.Send(rres);
-
     }(t.Body));
     var timer = time.NewTimer(200 * time.Millisecond);
     timer.Stop();
@@ -246,7 +239,6 @@ private static void probeRequestBody(this ptr<transferWriter> _addr_t) {
         // It was empty.
         t.Body = null;
         t.ContentLength = 0;
-
     }
     else if (rres.n == 1) {
         if (rres.err != null) {
@@ -265,7 +257,6 @@ private static void probeRequestBody(this ptr<transferWriter> _addr_t) {
     // network before writing the body, since our body may not
     // become readable until it's seen the response headers.
     t.FlushHeaders = true;
-
 }
 
 private static bool noResponseBodyExpected(@string requestMethod) {
@@ -292,10 +283,8 @@ private static bool shouldSendContentLength(this ptr<transferWriter> _addr_t) {
             return false;
         }
         return true;
-
     }
     return false;
-
 }
 
 private static error writeHeader(this ptr<transferWriter> _addr_t, io.Writer w, ptr<httptrace.ClientTrace> _addr_trace) {
@@ -311,7 +300,6 @@ private static error writeHeader(this ptr<transferWriter> _addr_t, io.Writer w, 
             }
 
         }
-
         if (trace != null && trace.WroteHeaderField != null) {
             trace.WroteHeaderField("Connection", new slice<@string>(new @string[] { "close" }));
         }
@@ -325,7 +313,6 @@ private static error writeHeader(this ptr<transferWriter> _addr_t, io.Writer w, 
             }
 
         }
-
         {
             (_, err) = io.WriteString(w, strconv.FormatInt(t.ContentLength, 10) + "\r\n");
 
@@ -334,7 +321,6 @@ private static error writeHeader(this ptr<transferWriter> _addr_t, io.Writer w, 
             }
 
         }
-
         if (trace != null && trace.WroteHeaderField != null) {
             trace.WroteHeaderField("Content-Length", new slice<@string>(new @string[] { strconv.FormatInt(t.ContentLength,10) }));
         }
@@ -348,7 +334,6 @@ private static error writeHeader(this ptr<transferWriter> _addr_t, io.Writer w, 
             }
 
         }
-
         if (trace != null && trace.WroteHeaderField != null) {
             trace.WroteHeaderField("Transfer-Encoding", new slice<@string>(new @string[] { "chunked" }));
         }
@@ -367,7 +352,6 @@ private static error writeHeader(this ptr<transferWriter> _addr_t, io.Writer w, 
                     break;
             }
             keys = append(keys, k);
-
         }        if (len(keys) > 0) {
             sort.Strings(keys); 
             // TODO: could do better allocation-wise here, but trailers are rare,
@@ -380,15 +364,12 @@ private static error writeHeader(this ptr<transferWriter> _addr_t, io.Writer w, 
                 }
 
             }
-
             if (trace != null && trace.WroteHeaderField != null) {
                 trace.WroteHeaderField("Trailer", keys);
             }
-
         }
     }
     return error.As(null!)!;
-
 }
 
 // always closes t.BodyCloser
@@ -410,7 +391,6 @@ private static error writeBody(this ptr<transferWriter> _addr_t, io.Writer w) =>
             }
 
         }
-
     }()); 
 
     // Write body. We "unwrap" the body first if it was wrapped in a
@@ -428,13 +408,11 @@ private static error writeBody(this ptr<transferWriter> _addr_t, io.Writer w) =>
                 }
 
             }
-
             var cw = @internal.NewChunkedWriter(w);
             _, err = t.doBodyCopy(cw, body);
             if (err == null) {
                 err = cw.Close();
             }
-
         }
         else if (t.ContentLength == -1) {
             var dst = w;
@@ -471,7 +449,6 @@ private static error writeBody(this ptr<transferWriter> _addr_t, io.Writer w) =>
             err = err__prev2;
 
         }
-
     }
     if (!t.ResponseToHEAD && t.ContentLength != -1 && t.ContentLength != ncopy) {
         return error.As(fmt.Errorf("http: ContentLength=%d with Body length %d", t.ContentLength, ncopy))!;
@@ -491,13 +468,10 @@ private static error writeBody(this ptr<transferWriter> _addr_t, io.Writer w) =>
                 err = err__prev3;
 
             }
-
         }
         _, err = io.WriteString(w, "\r\n");
-
     }
     return error.As(err)!;
-
 });
 
 // doBodyCopy wraps a copy operation, with any resulting error also
@@ -514,7 +488,6 @@ private static (long, error) doBodyCopy(this ptr<transferWriter> _addr_t, io.Wri
         t.bodyReadError = err;
     }
     return ;
-
 }
 
 // unwrapBodyReader unwraps the body's inner reader if it's a
@@ -536,9 +509,7 @@ private static io.Reader unwrapBody(this ptr<transferWriter> _addr_t) {
             return r.ReadCloser;
         }
     }
-
     return t.Body;
-
 }
 
 private partial struct transferReader {
@@ -571,7 +542,6 @@ private static bool bodyAllowedForStatus(nint status) {
     else if (status == 304) 
         return false;
         return true;
-
 }
 
 private static @string suppressedHeaders304 = new slice<@string>(new @string[] { "Content-Type", "Content-Length", "Transfer-Encoding" });private static @string suppressedHeadersNoBody = new slice<@string>(new @string[] { "Content-Length", "Transfer-Encoding" });
@@ -584,7 +554,6 @@ private static slice<@string> suppressedHeaders(nint status) {
     else if (!bodyAllowedForStatus(status)) 
         return suppressedHeadersNoBody;
         return null;
-
 }
 
 // msg is *Request or *Response.
@@ -640,7 +609,6 @@ private static error readTransfer(object msg, ptr<bufio.Reader> _addr_r) => func
         }
     }
 
-
     var (realLength, err) = fixLength(isResponse, t.StatusCode, t.RequestMethod, t.Header, t.Chunked);
     if (err != null) {
         return error.As(err)!;
@@ -658,7 +626,6 @@ private static error readTransfer(object msg, ptr<bufio.Reader> _addr_r) => func
             }
 
         }
-
     }
     else
  {
@@ -673,9 +640,7 @@ private static error readTransfer(object msg, ptr<bufio.Reader> _addr_r) => func
             if (realLength == -1 && !t.Chunked && bodyAllowedForStatus(t.StatusCode)) { 
                 // Unbounded body.
                 t.Close = true;
-
             }
-
             break; 
 
         // Prepare body reader. ContentLength < 0 means chunked encoding
@@ -702,13 +667,11 @@ private static error readTransfer(object msg, ptr<bufio.Reader> _addr_r) => func
         if (t.Close) { 
             // Close semantics (i.e. HTTP/1.0)
             t.Body = addr(new body(src:r,closing:t.Close));
-
         }
         else
  { 
             // Persistent connection (i.e. HTTP/1.1)
             t.Body = NoBody;
-
         }
     // Unify output
     switch (msg.type()) {
@@ -734,7 +697,6 @@ private static error readTransfer(object msg, ptr<bufio.Reader> _addr_r) => func
     }
 
     return error.As(null!)!;
-
 });
 
 // Checks whether chunked is part of the encodings stack
@@ -789,7 +751,6 @@ private static error parseTransferEncoding(this ptr<transferReader> _addr_t) {
 
     t.Chunked = true;
     return error.As(null!)!;
-
 }
 
 // Determine the expected body length, using RFC 7230 Section 3.3. This
@@ -817,7 +778,6 @@ private static (long, error) fixLength(bool isResponse, nint status, @string req
         header.Add("Content-Length", first);
 
         contentLens = header["Content-Length"];
-
     }
     if (noResponseBodyExpected(requestMethod)) { 
         // For HTTP requests, as part of hardening against request
@@ -828,7 +788,6 @@ private static (long, error) fixLength(bool isResponse, nint status, @string req
             return (0, error.As(fmt.Errorf("http: method cannot contain a Content-Length; got %q", contentLens))!);
         }
         return (0, error.As(null!)!);
-
     }
     if (status / 100 == 1) {
         return (0, error.As(null!)!);
@@ -855,7 +814,6 @@ private static (long, error) fixLength(bool isResponse, nint status, @string req
             return (-1, error.As(err)!);
         }
         return (n, error.As(null!)!);
-
     }
     header.Del("Content-Length");
 
@@ -868,10 +826,8 @@ private static (long, error) fixLength(bool isResponse, nint status, @string req
         // no body if neither Transfer-Encoding chunked nor a
         // Content-Length are set.
         return (0, error.As(null!)!);
-
     }
     return (-1, error.As(null!)!);
-
 }
 
 // Determine whether to hang up after sending a request and body, or
@@ -890,7 +846,6 @@ private static bool shouldClose(nint major, nint minor, Header header, bool remo
         header.Del("Connection");
     }
     return hasClose;
-
 }
 
 // Parse the trailer header
@@ -911,7 +866,6 @@ private static (Header, error) fixTrailer(Header header, bool chunked) {
         // but not populate Response.Trailer.
         // See issue #27197.
         return (null, error.As(null!)!);
-
     }
     header.Del("Trailer");
 
@@ -933,9 +887,7 @@ private static (Header, error) fixTrailer(Header header, bool chunked) {
                     break;
             }
             trailer[key] = null;
-
         });
-
     }    if (err != null) {
         return (null, error.As(err)!);
     }
@@ -943,7 +895,6 @@ private static (Header, error) fixTrailer(Header header, bool chunked) {
         return (null, error.As(null!)!);
     }
     return (trailer, error.As(null!)!);
-
 }
 
 // body turns a Reader into a ReadCloser.
@@ -979,7 +930,6 @@ private static (nint, error) Read(this ptr<body> _addr_b, slice<byte> p) => func
         return (0, error.As(ErrBodyReadAfterClose)!);
     }
     return b.readLocked(p);
-
 });
 
 // Must hold b.mu.
@@ -1008,13 +958,10 @@ private static (nint, error) readLocked(this ptr<body> _addr_b, slice<byte> p) {
                     // golang.org/issue/12027
                     b.sawEOF = false;
                     b.closed = true;
-
                 }
 
             }
-
             b.hdr = null;
-
         }
         else
  { 
@@ -1032,7 +979,6 @@ private static (nint, error) readLocked(this ptr<body> _addr_b, slice<byte> p) {
                 lr = lr__prev3;
 
             }
-
         }
     }
     if (err == null && n > 0) {
@@ -1049,13 +995,11 @@ private static (nint, error) readLocked(this ptr<body> _addr_b, slice<byte> p) {
             lr = lr__prev2;
 
         }
-
     }
     if (b.sawEOF && b.onHitEOF != null) {
         b.onHitEOF();
     }
     return (n, error.As(err)!);
-
 }
 
 private static slice<byte> singleCRLF = (slice<byte>)"\r\n";private static slice<byte> doubleCRLF = (slice<byte>)"\r\n\r\n";
@@ -1063,7 +1007,7 @@ private static slice<byte> singleCRLF = (slice<byte>)"\r\n";private static slice
 private static bool seeUpcomingDoubleCRLF(ptr<bufio.Reader> _addr_r) {
     ref bufio.Reader r = ref _addr_r.val;
 
-    for (nint peekSize = 4; >>MARKER:FOREXPRESSION_LEVEL_1<<; peekSize++) { 
+    for (nint peekSize = 4; ; peekSize++) { 
         // This loop stops when Peek returns an error,
         // which it does when r's buffer has been filled.
         var (buf, err) = r.Peek(peekSize);
@@ -1075,7 +1019,6 @@ private static bool seeUpcomingDoubleCRLF(ptr<bufio.Reader> _addr_r) {
         }
     }
     return false;
-
 }
 
 private static var errTrailerEOF = errors.New("http: unexpected EOF reading trailer");
@@ -1104,7 +1047,6 @@ private static error readTrailer(this ptr<body> _addr_b) {
             return error.As(errTrailerEOF)!;
         }
         return error.As(err)!;
-
     }
     switch (b.hdr.type()) {
         case ptr<Request> rr:
@@ -1115,7 +1057,6 @@ private static error readTrailer(this ptr<body> _addr_b) {
             break;
     }
     return error.As(null!)!;
-
 }
 
 private static void mergeSetHeader(ptr<Header> _addr_dst, Header src) {
@@ -1143,9 +1084,7 @@ private static long unreadDataSizeLocked(this ptr<body> _addr_b) {
             return lr.N;
         }
     }
-
     return -1;
-
 }
 
 private static error Close(this ptr<body> _addr_b) => func((defer, _, _) => {
@@ -1168,7 +1107,6 @@ private static error Close(this ptr<body> _addr_b) => func((defer, _, _) => {
                 // There was a declared Content-Length, and we have more bytes remaining
                 // than our maxPostHandlerReadBytes tolerance. So, give up.
                 b.earlyClose = true;
-
             }
             else
  {
@@ -1179,22 +1117,18 @@ private static error Close(this ptr<body> _addr_b) => func((defer, _, _) => {
                 if (err == io.EOF) {
                     err = error.As(null)!;
                 }
-
                 if (n == maxPostHandlerReadBytes) {
                     b.earlyClose = true;
                 }
-
             }
 
         }
-
     else 
         // Fully consume the body, which will also lead to us reading
         // the trailer headers after the body, if present.
         _, err = io.Copy(io.Discard, new bodyLocked(b));
         b.closed = true;
     return error.As(err)!;
-
 });
 
 private static bool didEarlyClose(this ptr<body> _addr_b) => func((defer, _, _) => {
@@ -1237,7 +1171,6 @@ private static (nint, error) Read(this bodyLocked bl, slice<byte> p) {
         return (0, error.As(ErrBodyReadAfterClose)!);
     }
     return bl.b.readLocked(p);
-
 }
 
 // parseContentLength trims whitespace from s and returns -1 if no value
@@ -1255,8 +1188,6 @@ private static (long, error) parseContentLength(@string cl) {
         return (0, error.As(badStringError("bad Content-Length", cl))!);
     }
     return (int64(n), error.As(null!)!);
-
-
 }
 
 // finishAsyncByteRead finishes reading the 1-byte sniff
@@ -1277,7 +1208,6 @@ private static (nint, error) Read(this finishAsyncByteRead fr, slice<byte> p) {
         p[0] = rres.b;
     }
     return ;
-
 }
 
 private static var nopCloserType = reflect.TypeOf(io.NopCloser(null));
@@ -1307,9 +1237,7 @@ private static bool isKnownInMemoryReader(io.Reader r) {
             return isKnownInMemoryReader(r.ReadCloser);
         }
     }
-
     return false;
-
 }
 
 // bufioFlushWriter is an io.Writer wrapper that flushes all writes
@@ -1333,9 +1261,7 @@ private static (nint, error) Write(this bufioFlushWriter fw, slice<byte> p) {
             }
         }
     }
-
     return ;
-
 }
 
 } // end http_package

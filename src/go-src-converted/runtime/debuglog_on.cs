@@ -5,11 +5,9 @@
 //go:build debuglog
 // +build debuglog
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:32 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:24 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\debuglog_on.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -41,7 +39,6 @@ private static ptr<dlogger> getCachedDlogger() {
     }
     releasem(mp);
     return _addr_l!;
-
 }
 
 // putCachedDlogger attempts to return l to the local cache. It
@@ -57,7 +54,6 @@ private static bool putCachedDlogger(ptr<dlogger> _addr_l) {
     }
     releasem(mp);
     return false;
-
 }
 
 } // end runtime_package

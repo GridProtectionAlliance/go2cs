@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:28 UTC
+//     Generated on 2022 March 13 05:37:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class regexp_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct bitState
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace go
             public static implicit operator bitState(NilType nil) => default(bitState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static bitState bitState_cast(dynamic value)
         {
             return new bitState(value.end, value.cap, value.matchcap, value.jobs, value.visited, value.inputs);

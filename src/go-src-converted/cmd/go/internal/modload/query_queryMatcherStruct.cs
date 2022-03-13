@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:28 UTC
+//     Generated on 2022 March 13 06:31:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace @internal
 {
     public static partial class modload_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct queryMatcher
         {
             // Constructors
@@ -87,7 +87,7 @@ namespace @internal
             public static implicit operator queryMatcher(NilType nil) => default(queryMatcher);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static queryMatcher queryMatcher_cast(dynamic value)
         {
             return new queryMatcher(value.path, value.prefix, value.filter, value.allowed, value.canStat, value.preferLower, value.mayUseLatest, value.preferIncompatible);

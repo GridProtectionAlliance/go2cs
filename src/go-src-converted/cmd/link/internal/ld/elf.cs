@@ -2,79 +2,81 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:21:22 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:21 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\elf.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using sha1 = go.crypto.sha1_package;
-using elf = go.debug.elf_package;
-using binary = go.encoding.binary_package;
-using hex = go.encoding.hex_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using sha1 = crypto.sha1_package;
+using elf = debug.elf_package;
+using binary = encoding.binary_package;
+using hex = encoding.hex_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+/*
+ * Derived from:
+ * $FreeBSD: src/sys/sys/elf32.h,v 1.8.14.1 2005/12/30 22:13:58 marcel Exp $
+ * $FreeBSD: src/sys/sys/elf64.h,v 1.10.14.1 2005/12/30 22:13:58 marcel Exp $
+ * $FreeBSD: src/sys/sys/elf_common.h,v 1.15.8.1 2005/12/30 22:13:58 marcel Exp $
+ * $FreeBSD: src/sys/alpha/include/elf.h,v 1.14 2003/09/25 01:10:22 peter Exp $
+ * $FreeBSD: src/sys/amd64/include/elf.h,v 1.18 2004/08/03 08:21:48 dfr Exp $
+ * $FreeBSD: src/sys/arm/include/elf.h,v 1.5.2.1 2006/06/30 21:42:52 cognet Exp $
+ * $FreeBSD: src/sys/i386/include/elf.h,v 1.16 2004/08/02 19:12:17 dfr Exp $
+ * $FreeBSD: src/sys/powerpc/include/elf.h,v 1.7 2004/11/02 09:47:01 ssouhlal Exp $
+ * $FreeBSD: src/sys/sparc64/include/elf.h,v 1.12 2003/09/25 01:10:26 peter Exp $
+ *
+ * Copyright (c) 1996-1998 John D. Polstra.  All rights reserved.
+ * Copyright (c) 2001 David E. O'Brien
+ * Portions Copyright 2009 The Go Authors. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ */
+
+/*
+ * ELF definitions that are independent of architecture or word size.
+ */
+
+/*
+ * Note header.  The ".note" section contains an array of notes.  Each
+ * begins with this header, aligned to a word boundary.  Immediately
+ * following the note header is n_namesz bytes of name, padded to the
+ * next word boundary.  Then comes n_descsz bytes of descriptor, again
+ * padded to a word boundary.  The values of n_namesz and n_descsz do
+ * not include the padding.
+ */
 
 public static partial class ld_package {
 
-    /*
-     * Derived from:
-     * $FreeBSD: src/sys/sys/elf32.h,v 1.8.14.1 2005/12/30 22:13:58 marcel Exp $
-     * $FreeBSD: src/sys/sys/elf64.h,v 1.10.14.1 2005/12/30 22:13:58 marcel Exp $
-     * $FreeBSD: src/sys/sys/elf_common.h,v 1.15.8.1 2005/12/30 22:13:58 marcel Exp $
-     * $FreeBSD: src/sys/alpha/include/elf.h,v 1.14 2003/09/25 01:10:22 peter Exp $
-     * $FreeBSD: src/sys/amd64/include/elf.h,v 1.18 2004/08/03 08:21:48 dfr Exp $
-     * $FreeBSD: src/sys/arm/include/elf.h,v 1.5.2.1 2006/06/30 21:42:52 cognet Exp $
-     * $FreeBSD: src/sys/i386/include/elf.h,v 1.16 2004/08/02 19:12:17 dfr Exp $
-     * $FreeBSD: src/sys/powerpc/include/elf.h,v 1.7 2004/11/02 09:47:01 ssouhlal Exp $
-     * $FreeBSD: src/sys/sparc64/include/elf.h,v 1.12 2003/09/25 01:10:26 peter Exp $
-     *
-     * Copyright (c) 1996-1998 John D. Polstra.  All rights reserved.
-     * Copyright (c) 2001 David E. O'Brien
-     * Portions Copyright 2009 The Go Authors. All rights reserved.
-     *
-     * Redistribution and use in source and binary forms, with or without
-     * modification, are permitted provided that the following conditions
-     * are met:
-     * 1. Redistributions of source code must retain the above copyright
-     *    notice, this list of conditions and the following disclaimer.
-     * 2. Redistributions in binary form must reproduce the above copyright
-     *    notice, this list of conditions and the following disclaimer in the
-     *    documentation and/or other materials provided with the distribution.
-     *
-     * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
-     * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-     * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-     * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-     * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-     * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-     * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-     * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-     * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-     * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-     * SUCH DAMAGE.
-     *
-     */
-
-    /*
-     * ELF definitions that are independent of architecture or word size.
-     */
-
-    /*
-     * Note header.  The ".note" section contains an array of notes.  Each
-     * begins with this header, aligned to a word boundary.  Immediately
-     * following the note header is n_namesz bytes of name, padded to the
-     * next word boundary.  Then comes n_descsz bytes of descriptor, again
-     * padded to a word boundary.  The values of n_namesz and n_descsz do
-     * not include the padding.
-     */
 private partial struct elfNote {
     public uint nNamesz;
     public uint nDescsz;
@@ -89,7 +91,6 @@ private partial struct elfNote {
  * Relocation types.
  */
 public static readonly nuint ARM_MAGIC_TRAMP_NUMBER = 0x5c000003;
-
 
 /*
  * Symbol table entries.
@@ -150,7 +151,6 @@ public static readonly nint ELF32SHDRSIZE = 40;
 public static readonly nint ELF32SYMSIZE = 16;
 public static readonly nint ELF32RELSIZE = 8;
 
-
 /*
  * The interface uses the 64-bit structures always,
  * to avoid code duplication.  The writers know how to
@@ -167,14 +167,12 @@ public static slice<byte> Elfstrdat = default;
  */
 public static readonly nint ELFRESERVE = 4096;
 
-
 /*
  * We use the 64-bit data structures on both 32- and 64-bit machines
  * in order to write the code just once.  The 64-bit data structure is
  * written in the 32-bit format on the 32-bit machines.
  */
 public static readonly nint NSECT = 400;
-
 
 public static nint Nelfsym = 1;private static bool elf64 = default;private static @string elfRelType = default;private static ElfEhdr ehdr = default;private static array<ptr<ElfPhdr>> phdr = new array<ptr<ElfPhdr>>(NSECT);private static array<ptr<ElfShdr>> shdr = new array<ptr<ElfShdr>>(NSECT);private static @string interp = default;
 
@@ -252,7 +250,6 @@ public static void Elfinit(ptr<Link> _addr_ctxt) {
                 // appropriate.
                 ehdr.Flags = 0x5000002; // has entry point, Version5 EABI
             }
-
         }
         else if (ctxt.Arch.Family == sys.MIPS) {
             ehdr.Flags = 0x50001004; /* MIPS 32 CPIC O32*/
@@ -267,7 +264,6 @@ public static void Elfinit(ptr<Link> _addr_ctxt) {
         ehdr.Shentsize = ELF32SHDRSIZE; /* Must be ELF32SHDRSIZE */
 
     __switch_break0:;
-
 }
 
 // Make sure PT_LOAD is aligned properly and
@@ -302,7 +298,6 @@ private static void elf64phdr(ptr<OutBuf> _addr_@out, ptr<ElfPhdr> _addr_e) {
     @out.Write64(e.Filesz);
     @out.Write64(e.Memsz);
     @out.Write64(e.Align);
-
 }
 
 private static void elf32phdr(ptr<OutBuf> _addr_@out, ptr<ElfPhdr> _addr_e) {
@@ -320,7 +315,6 @@ private static void elf32phdr(ptr<OutBuf> _addr_@out, ptr<ElfPhdr> _addr_e) {
     @out.Write32(uint32(e.Memsz));
     @out.Write32(uint32(e.Flags));
     @out.Write32(uint32(e.Align));
-
 }
 
 private static void elf64shdr(ptr<OutBuf> _addr_@out, ptr<ElfShdr> _addr_e) {
@@ -370,7 +364,6 @@ private static uint elfwriteshdrs(ptr<OutBuf> _addr_@out) {
             i = i__prev1;
         }
         return uint32(ehdr.Shnum) * ELF64SHDRSIZE;
-
     }
     {
         nint i__prev1 = i;
@@ -382,7 +375,6 @@ private static uint elfwriteshdrs(ptr<OutBuf> _addr_@out) {
         i = i__prev1;
     }
     return uint32(ehdr.Shnum) * ELF32SHDRSIZE;
-
 }
 
 private static void elfsetstring(ptr<Link> _addr_ctxt, loader.Sym s, @string str, nint off) {
@@ -395,7 +387,6 @@ private static void elfsetstring(ptr<Link> _addr_ctxt, loader.Sym s, @string str
     elfstr[nelfstr].s = str;
     elfstr[nelfstr].off = off;
     nelfstr++;
-
 }
 
 private static uint elfwritephdrs(ptr<OutBuf> _addr_@out) {
@@ -413,7 +404,6 @@ private static uint elfwritephdrs(ptr<OutBuf> _addr_@out) {
             i = i__prev1;
         }
         return uint32(ehdr.Phnum) * ELF64PHDRSIZE;
-
     }
     {
         nint i__prev1 = i;
@@ -425,7 +415,6 @@ private static uint elfwritephdrs(ptr<OutBuf> _addr_@out) {
         i = i__prev1;
     }
     return uint32(ehdr.Phnum) * ELF32PHDRSIZE;
-
 }
 
 private static ptr<ElfPhdr> newElfPhdr() {
@@ -446,7 +435,6 @@ private static ptr<ElfPhdr> newElfPhdr() {
         ehdr.Shoff += ELF32PHDRSIZE;
     }
     return _addr_e!;
-
 }
 
 private static ptr<ElfShdr> newElfShdr(long name) {
@@ -462,7 +450,6 @@ private static ptr<ElfShdr> newElfShdr(long name) {
         ehdr.Shnum++;
     }
     return _addr_e!;
-
 }
 
 private static ptr<ElfEhdr> getElfEhdr() {
@@ -516,7 +503,6 @@ private static uint elfwritehdr(ptr<OutBuf> _addr_@out) {
         return elf64writehdr(_addr_out);
     }
     return elf32writehdr(_addr_out);
-
 }
 
 /* Taken directly from the definition document for ELF64 */
@@ -532,12 +518,9 @@ private static uint elfhash(@string name) {
             }
 
         }
-
         h &= 0x0fffffff;
-
     }
     return h;
-
 }
 
 private static void elfWriteDynEntSym(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_s, elf.DynTag tag, loader.Sym t) {
@@ -581,7 +564,6 @@ public static void Elfwritedynentsymplus(ptr<Link> _addr_ctxt, ptr<loader.Symbol
         s.AddUint32(ctxt.Arch, uint32(tag));
     }
     s.AddAddrPlus(ctxt.Arch, t, add);
-
 }
 
 private static void elfwritedynentsymsize(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_s, elf.DynTag tag, loader.Sym t) {
@@ -596,7 +578,6 @@ private static void elfwritedynentsymsize(ptr<Link> _addr_ctxt, ptr<loader.Symbo
         s.AddUint32(ctxt.Arch, uint32(tag));
     }
     s.AddSize(ctxt.Arch, t);
-
 }
 
 private static nint elfinterp(ptr<ElfShdr> _addr_sh, ulong startva, ulong resoff, @string p) {
@@ -640,7 +621,6 @@ public static readonly nint MIPS_FPABI_FPXX = 5;
 public static readonly nint MIPS_FPABI_FP64 = 6; 
 // FP code in the module uses the FP64A ABI
 public static readonly nint MIPS_FPABI_FP64A = 7;
-
 
 private static nint elfMipsAbiFlags(ptr<ElfShdr> _addr_sh, ulong startva, ulong resoff) {
     ref ElfShdr sh = ref _addr_sh.val;
@@ -709,7 +689,6 @@ private static nint elfWriteMipsAbiFlags(ptr<Link> _addr_ctxt) {
     ctxt.Out.Write32(0); // flags1
     ctxt.Out.Write32(0); // flags2
     return int(sh.Size);
-
 }
 
 private static nint elfnote(ptr<ElfShdr> _addr_sh, ulong startva, ulong resoff, nint sz) {
@@ -740,7 +719,6 @@ private static ptr<ElfShdr> elfwritenotehdr(ptr<OutBuf> _addr_@out, @string str,
     @out.Write32(tag);
 
     return _addr_sh!;
-
 }
 
 // NetBSD Signature (as per sys/exec_elf.h)
@@ -772,7 +750,6 @@ private static nint elfwritenetbsdsig(ptr<OutBuf> _addr_@out) {
     @out.Write32(ELF_NOTE_NETBSD_VERSION);
 
     return int(sh.Size);
-
 }
 
 // The race detector can't handle ASLR (address space layout randomization).
@@ -796,7 +773,6 @@ private static nint elfwritenetbsdpax(ptr<OutBuf> _addr_@out) {
     @out.Write((slice<byte>)"PaX\x00");
     @out.Write32(0x20); // 0x20 = Force disable ASLR
     return int(sh.Size);
-
 }
 
 // OpenBSD Signature
@@ -804,7 +780,6 @@ public static readonly nint ELF_NOTE_OPENBSD_NAMESZ = 8;
 public static readonly nint ELF_NOTE_OPENBSD_DESCSZ = 4;
 public static readonly nint ELF_NOTE_OPENBSD_TAG = 1;
 public static readonly nint ELF_NOTE_OPENBSD_VERSION = 0;
-
 
 public static slice<byte> ELF_NOTE_OPENBSD_NAME = (slice<byte>)"OpenBSD\x00";
 
@@ -829,7 +804,6 @@ private static nint elfwriteopenbsdsig(ptr<OutBuf> _addr_@out) {
     @out.Write32(ELF_NOTE_OPENBSD_VERSION);
 
     return int(sh.Size);
-
 }
 
 private static void addbuildinfo(@string val) {
@@ -857,18 +831,14 @@ private static void addbuildinfo(@string val) {
             }
 
         }
-
         Exitf("-B argument contains invalid hex: %s", ov);
-
     }
     buildinfo = b;
-
 }
 
 // Build info note
 public static readonly nint ELF_NOTE_BUILDINFO_NAMESZ = 4;
 public static readonly nint ELF_NOTE_BUILDINFO_TAG = 3;
-
 
 public static slice<byte> ELF_NOTE_BUILDINFO_NAME = (slice<byte>)"GNU\x00";
 
@@ -899,7 +869,6 @@ private static nint elfwritebuildinfo(ptr<OutBuf> _addr_@out) {
     @out.Write(zero[..(int)int(Rnd(int64(len(buildinfo)), 4) - int64(len(buildinfo)))]);
 
     return int(sh.Size);
-
 }
 
 private static nint elfwritegobuildid(ptr<OutBuf> _addr_@out) {
@@ -915,7 +884,6 @@ private static nint elfwritegobuildid(ptr<OutBuf> _addr_@out) {
     @out.Write(zero[..(int)int(Rnd(int64(len(flagBuildid.val)), 4) - int64(len(flagBuildid.val)))]);
 
     return int(sh.Size);
-
 }
 
 // Go specific notes
@@ -923,7 +891,6 @@ public static readonly nint ELF_NOTE_GOPKGLIST_TAG = 1;
 public static readonly nint ELF_NOTE_GOABIHASH_TAG = 2;
 public static readonly nint ELF_NOTE_GODEPS_TAG = 3;
 public static readonly nint ELF_NOTE_GOBUILDID_TAG = 4;
-
 
 public static slice<byte> ELF_NOTE_GO_NAME = (slice<byte>)"Go\x00\x00";
 
@@ -970,7 +937,6 @@ havelib:
                 return _addr_aux!;
             aux = aux.next;
             }
-
         }
 
         aux = aux__prev1;
@@ -981,7 +947,6 @@ havelib:
     lib.aux = aux;
 
     return _addr_aux!;
-
 }
 
 private static void elfdynhash(ptr<Link> _addr_ctxt) {
@@ -1050,7 +1015,6 @@ private static void elfdynhash(ptr<Link> _addr_ctxt) {
 
             i = i__prev1;
         }
-
     } {
         s.AddUint32(ctxt.Arch, uint32(nbucket));
         s.AddUint32(ctxt.Arch, uint32(nsym));
@@ -1074,7 +1038,6 @@ private static void elfdynhash(ptr<Link> _addr_ctxt) {
 
             i = i__prev1;
         }
-
     }
     var dynstr = ldr.CreateSymForUpdate(".dynstr", 0); 
 
@@ -1116,7 +1079,6 @@ private static void elfdynhash(ptr<Link> _addr_ctxt) {
  {
                 s.AddUint32(ctxt.Arch, 0);
             }
-
             {
                 var x__prev2 = x;
 
@@ -1139,13 +1101,11 @@ private static void elfdynhash(ptr<Link> _addr_ctxt) {
  {
                         s.AddUint32(ctxt.Arch, 0);
                     }
-
                 }
 
 
                 x = x__prev2;
             }
-
         }
     } 
 
@@ -1167,7 +1127,6 @@ private static void elfdynhash(ptr<Link> _addr_ctxt) {
  {
                 s.AddUint16(ctxt.Arch, uint16(need[i].num));
             }
-
         }
 
         i = i__prev1;
@@ -1179,7 +1138,6 @@ private static void elfdynhash(ptr<Link> _addr_ctxt) {
         const nuint DTFLAGS_1_PIE = 0x08000000;
 
         Elfwritedynent(_addr_ctxt.Arch, _addr_s, elf.DT_FLAGS_1, uint64(DTFLAGS_1_PIE));
-
     }
     elfverneed = nfile;
     if (elfverneed != 0) {
@@ -1198,10 +1156,8 @@ private static void elfdynhash(ptr<Link> _addr_ctxt) {
         }
         elfwritedynentsymsize(_addr_ctxt, _addr_s, elf.DT_PLTRELSZ, sy.Sym());
         elfWriteDynEntSym(_addr_ctxt, _addr_s, elf.DT_JMPREL, sy.Sym());
-
     }
     Elfwritedynent(_addr_ctxt.Arch, _addr_s, elf.DT_NULL, 0);
-
 }
 
 private static ptr<ElfPhdr> elfphload(ptr<sym.Segment> _addr_seg) {
@@ -1226,7 +1182,6 @@ private static ptr<ElfPhdr> elfphload(ptr<sym.Segment> _addr_seg) {
     ph.Align = uint64(FlagRound.val);
 
     return _addr_ph!;
-
 }
 
 private static void elfphrelro(ptr<sym.Segment> _addr_seg) {
@@ -1255,11 +1210,9 @@ private static ptr<ElfShdr> elfshname(@string name) {
             }
         }
         return _addr_newElfShdr(int64(off))!;
-
     }
     Exitf("cannot find elf name %s", name);
     return _addr_null!;
-
 }
 
 // Create an ElfShdr for the section with name.
@@ -1275,7 +1228,6 @@ private static ptr<ElfShdr> elfshnamedup(@string name) {
     Errorf(null, "cannot find elf name %s", name);
     errorexit();
     return _addr_null!;
-
 }
 
 private static ptr<ElfShdr> elfshalloc(ptr<sym.Section> _addr_sect) {
@@ -1296,7 +1248,6 @@ private static ptr<ElfShdr> elfshbits(LinkMode linkmode, ptr<sym.Section> _addr_
             sect.Elfsect = elfshnamedup(sect.Name);
         }
         sh = sect.Elfsect._<ptr<ElfShdr>>();
-
     }
     else
  {
@@ -1312,13 +1263,11 @@ private static ptr<ElfShdr> elfshbits(LinkMode linkmode, ptr<sym.Section> _addr_
             // for Symbol.Type corresponding to mapped and unmapped notes
             // and handle them in dodata().
             Errorf(null, "sh.Type == SHT_NOTE in elfshbits when linking internally");
-
         }
         sh.Addralign = uint64(sect.Align);
         sh.Size = sect.Length;
         sh.Off = sect.Seg.Fileoff + sect.Vaddr - sect.Seg.Vaddr;
         return _addr_sh!;
-
     }
     if (sh.Type > 0) {
         return _addr_sh!;
@@ -1353,7 +1302,6 @@ private static ptr<ElfShdr> elfshbits(LinkMode linkmode, ptr<sym.Section> _addr_
         sh.Off = sect.Seg.Fileoff + sect.Vaddr - sect.Seg.Vaddr;
     }
     return _addr_sh!;
-
 }
 
 private static ptr<ElfShdr> elfshreloc(ptr<sys.Arch> _addr_arch, ptr<sym.Section> _addr_sect) {
@@ -1395,7 +1343,6 @@ private static ptr<ElfShdr> elfshreloc(ptr<sys.Arch> _addr_arch, ptr<sym.Section
     sh.Size = sect.Rellen;
     sh.Addralign = uint64(arch.RegSize);
     return _addr_sh!;
-
 }
 
 private static void elfrelocsect(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ptr<sym.Section> _addr_sect, slice<loader.Sym> syms) => func((_, panic, _) => {
@@ -1466,8 +1413,6 @@ private static void elfrelocsect(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, p
                     ldr.Errorf(s, "unsupported obj reloc %d (%s)/%d to %s", r.Type(), sym.RelocName(ctxt.Arch, r.Type()), r.Siz(), ldr.SymName(r.Sym()));
                 }
             }
-
-
         }
         s = s__prev1;
     }
@@ -1499,7 +1444,6 @@ private static void elfEmitReloc(ptr<Link> _addr_ctxt) => func((_, panic, _) => 
  {
                 relocSect(ctxt, sect, ctxt.datap);
             }
-
         }
         sect = sect__prev1;
     }
@@ -1541,10 +1485,8 @@ private static void elfEmitReloc(ptr<Link> _addr_ctxt) => func((_, panic, _) => 
             panic("inconsistency between dwarfp and Segdwarf");
         }
         relocSect(ctxt, sect, si.syms);
-
     }
     wg.Wait();
-
 });
 
 private static void addgonote(ptr<Link> _addr_ctxt, @string sectionName, uint tag, slice<byte> desc) {
@@ -1571,7 +1513,6 @@ private static void addgonote(ptr<Link> _addr_ctxt, @string sectionName, uint ta
     }
     s.SetSize(int64(len(s.Data())));
     s.SetAlign(4);
-
 }
 
 private static void doelf(this ptr<Link> _addr_ctxt) {
@@ -1729,7 +1670,6 @@ private static void doelf(this ptr<Link> _addr_ctxt) {
             // In the ppc64 ABI, .plt is a data section
             // written by the dynamic linker.
             plt.SetType(sym.SELFSECT);
-
         }
         else
  {
@@ -1751,7 +1691,6 @@ private static void doelf(this ptr<Link> _addr_ctxt) {
         if (ctxt.IsS390X()) { 
             // S390X uses .got instead of .got.plt
             gotplt = got;
-
         }
         thearch.Elfsetupplt(ctxt, plt, gotplt, dynamic.Sym());
 
@@ -1797,7 +1736,6 @@ private static void doelf(this ptr<Link> _addr_ctxt) {
             Elfwritedynent(_addr_ctxt.Arch, _addr_dynamic, elf.DT_PPC64_OPT, 0);
         }
         Elfwritedynent(_addr_ctxt.Arch, _addr_dynamic, elf.DT_DEBUG, 0);
-
     }
     if (ctxt.IsShared()) { 
         // The go.link.abihashbytes symbol will be pointed at the appropriate
@@ -1820,7 +1758,6 @@ private static void doelf(this ptr<Link> _addr_ctxt) {
         foreach (var (_, shlib) in ctxt.Shlibs) {
             deplist = append(deplist, filepath.Base(shlib.Path));
         }        addgonote(_addr_ctxt, ".note.go.deps", ELF_NOTE_GODEPS_TAG, (slice<byte>)strings.Join(deplist, "\n"));
-
     }
     if (ctxt.LinkMode == LinkExternal && flagBuildid != "".val) {
         addgonote(_addr_ctxt, ".note.go.buildid", ELF_NOTE_GOBUILDID_TAG, (slice<byte>)flagBuildid.val);
@@ -1844,7 +1781,6 @@ private static void doelf(this ptr<Link> _addr_ctxt) {
             //       It is not for 'ANY'.
             // TODO: switch to FPXX after be sure that no odd-number-fpr is used.
             gnuattributes.AddUint8(MIPS_FPABI_ANY);
-
         }
     }
 }
@@ -1863,7 +1799,6 @@ private static void shsym(ptr<ElfShdr> _addr_sh, ptr<loader.Loader> _addr_ldr, l
     }
     sh.Off = uint64(datoff(ldr, s, addr));
     sh.Size = uint64(ldr.SymSize(s));
-
 });
 
 private static void phsh(ptr<ElfPhdr> _addr_ph, ptr<ElfShdr> _addr_sh) {
@@ -1898,7 +1833,6 @@ public static void Asmbelfsetup() {
  {
                 elfshalloc(_addr_sect);
             }
-
         }
         sect = sect__prev1;
     }
@@ -2033,7 +1967,6 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
             sh.Flags = uint64(elf.SHF_ALLOC);
         }
         goto elfobj;
-
     }
     pph = newElfPhdr();
 
@@ -2079,7 +2012,6 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
  {
                     interpreter = thearch.Linuxdynld;
                 }
-
             else if (ctxt.HeadType == objabi.Hfreebsd) 
                 interpreter = thearch.Freebsddynld;
             else if (ctxt.HeadType == objabi.Hnetbsd) 
@@ -2090,15 +2022,13 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
                 interpreter = thearch.Dragonflydynld;
             else if (ctxt.HeadType == objabi.Hsolaris) 
                 interpreter = thearch.Solarisdynld;
-            
-        }
+                    }
         resoff -= int64(elfinterp(_addr_sh, uint64(startva), uint64(resoff), interpreter));
 
         var ph = newElfPhdr();
         ph.Type = elf.PT_INTERP;
         ph.Flags = elf.PF_R;
         phsh(_addr_ph, _addr_sh);
-
     }
     pnote = null;
     if (ctxt.HeadType == objabi.Hnetbsd || ctxt.HeadType == objabi.Hopenbsd) {
@@ -2114,7 +2044,6 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
         pnote.Type = elf.PT_NOTE;
         pnote.Flags = elf.PF_R;
         phsh(pnote, _addr_sh);
-
     }
     if (len(buildinfo) > 0) {
         sh = elfshname(".note.gnu.build-id");
@@ -2126,7 +2055,6 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
             pnote.Flags = elf.PF_R;
         }
         phsh(pnote, _addr_sh);
-
     }
     if (flagBuildid != "".val) {
         sh = elfshname(".note.go.buildid");
@@ -2174,7 +2102,6 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
                     break;
                 sub = ldr.SubSym(sub);
                 }
-
             }
 
         }
@@ -2263,7 +2190,6 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
 
             sh.Flags = uint64(elf.SHF_ALLOC + elf.SHF_WRITE);
             sh.Entsize = 8;
-
         }
         else
  {
@@ -2346,7 +2272,6 @@ private static void asmbElf(ptr<Link> _addr_ctxt) {
         ph.Type = elf.PT_PAX_FLAGS;
         ph.Flags = 0x2a00; // mprotect, randexec, emutramp disabled
         ph.Align = uint64(ctxt.Arch.RegSize);
-
     }
     else if (ctxt.HeadType == objabi.Hsolaris) {
         ph = newElfPhdr();
@@ -2485,7 +2410,6 @@ elfobj:
         sh.Type = uint32(elf.SHT_PROGBITS);
         sh.Addralign = 1;
         sh.Flags = 0;
-
     }
     if (!FlagS.val) {
         sh = elfshname(".symtab");

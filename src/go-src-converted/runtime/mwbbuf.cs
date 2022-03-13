@@ -20,21 +20,22 @@
 // stack frame (since we don't know the types of the spilled
 // registers).
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:12 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:01 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mwbbuf.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// testSmallBuf forces a small write barrier buffer to stress write
+// barrier flushing.
+
+using System;
 public static partial class runtime_package {
 
-    // testSmallBuf forces a small write barrier buffer to stress write
-    // barrier flushing.
 private static readonly var testSmallBuf = false;
 
 // wbBuf is a per-P buffer of pointers queued by the write barrier.
@@ -79,7 +80,6 @@ private static readonly nint wbBufEntries = 256;
 // buffer by each write barrier.
 private static readonly nint wbBufEntryPointers = 2;
 
-
 // reset empties b by resetting its next and end pointers.
 private static void reset(this ptr<wbBuf> _addr_b) {
     ref wbBuf b = ref _addr_b.val;
@@ -90,7 +90,6 @@ private static void reset(this ptr<wbBuf> _addr_b) {
         // Effectively disable the buffer by forcing a flush
         // on every barrier.
         b.end = uintptr(@unsafe.Pointer(_addr_b.buf[wbBufEntryPointers]));
-
     }
     else if (testSmallBuf) { 
         // For testing, allow two barriers in the buffer. If
@@ -98,7 +97,6 @@ private static void reset(this ptr<wbBuf> _addr_b) {
         // would be no-ops. This lets us combine a buffered
         // barrier with a flush at a later time.
         b.end = uintptr(@unsafe.Pointer(_addr_b.buf[2 * wbBufEntryPointers]));
-
     }
     else
  {
@@ -200,7 +198,6 @@ private static void wbBufFlush(ptr<System.UIntPtr> _addr_dst, System.UIntPtr src
         // panic path.
         getg().m.p.ptr().wbBuf.discard();
         return ;
-
     }
     if (writeBarrier.cgo && dst != null) { 
         // This must be called from the stack that did the
@@ -210,13 +207,11 @@ private static void wbBufFlush(ptr<System.UIntPtr> _addr_dst, System.UIntPtr src
             // We were only called for cgocheck.
             getg().m.p.ptr().wbBuf.discard();
             return ;
-
         }
     }
     systemstack(() => {
         wbBufFlush1(_addr_getg().m.p.ptr());
     });
-
 }
 
 // wbBufFlush1 flushes p's write barrier buffer to the GC work queue.
@@ -256,7 +251,6 @@ private static void wbBufFlush1(ptr<p> _addr__p_) {
 
         _p_.wbBuf.reset();
         return ;
-
     }
     var gcw = _addr__p_.gcw;
     nint pos = 0;
@@ -273,9 +267,7 @@ private static void wbBufFlush1(ptr<p> _addr__p_) {
                 // TODO: Should we filter out nils in the fast
                 // path to reduce the rate of flushes?
                 continue;
-
             }
-
             var (obj, span, objIndex) = findObject(ptr, 0, 0);
             if (obj == 0) {
                 continue;
@@ -286,7 +278,6 @@ private static void wbBufFlush1(ptr<p> _addr__p_) {
             if (mbits.isMarked()) {
                 continue;
             }
-
             mbits.setMarked(); 
 
             // Mark span.
@@ -294,15 +285,12 @@ private static void wbBufFlush1(ptr<p> _addr__p_) {
             if (arena.pageMarks[pageIdx] & pageMask == 0) {
                 atomic.Or8(_addr_arena.pageMarks[pageIdx], pageMask);
             }
-
             if (span.spanclass.noscan()) {
                 gcw.bytesMarked += uint64(span.elemsize);
                 continue;
             }
-
             ptrs[pos] = obj;
             pos++;
-
         }
         ptr = ptr__prev1;
     }
@@ -310,7 +298,6 @@ private static void wbBufFlush1(ptr<p> _addr__p_) {
     gcw.putBatch(ptrs[..(int)pos]);
 
     _p_.wbBuf.reset();
-
 }
 
 } // end runtime_package

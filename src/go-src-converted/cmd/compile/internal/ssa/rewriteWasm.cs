@@ -1,14 +1,14 @@
 // Code generated from gen/Wasm.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:38 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:21:55 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewriteWasm.go
-using buildcfg = go.@internal.buildcfg_package;
-using math = go.math_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using buildcfg = @internal.buildcfg_package;
+using math = math_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -668,7 +668,6 @@ private static bool rewriteValueWasm(ptr<Value> _addr_v) {
     else if (v.Op == OpZeroExt8to64) 
         return rewriteValueWasm_OpZeroExt8to64(_addr_v);
         return false;
-
 }
 private static bool rewriteValueWasm_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -685,7 +684,6 @@ private static bool rewriteValueWasm_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpBitLen64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -705,7 +703,6 @@ private static bool rewriteValueWasm_OpBitLen64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCom16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -723,7 +720,6 @@ private static bool rewriteValueWasm_OpCom16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCom32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -741,7 +737,6 @@ private static bool rewriteValueWasm_OpCom32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCom64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -759,7 +754,6 @@ private static bool rewriteValueWasm_OpCom64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCom8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -777,7 +771,6 @@ private static bool rewriteValueWasm_OpCom8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -790,7 +783,6 @@ private static bool rewriteValueWasm_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpConst32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -803,7 +795,6 @@ private static bool rewriteValueWasm_OpConst32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -816,7 +807,6 @@ private static bool rewriteValueWasm_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -829,7 +819,6 @@ private static bool rewriteValueWasm_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(b2i(c));
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -841,7 +830,6 @@ private static bool rewriteValueWasm_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCtz16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -861,7 +849,6 @@ private static bool rewriteValueWasm_OpCtz16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCtz32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -881,7 +868,6 @@ private static bool rewriteValueWasm_OpCtz32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCtz8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -901,7 +887,6 @@ private static bool rewriteValueWasm_OpCtz8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCvt32Uto32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -919,7 +904,6 @@ private static bool rewriteValueWasm_OpCvt32Uto32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCvt32Uto64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -937,7 +921,6 @@ private static bool rewriteValueWasm_OpCvt32Uto64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCvt32to32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -955,7 +938,6 @@ private static bool rewriteValueWasm_OpCvt32to32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpCvt32to64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -973,7 +955,6 @@ private static bool rewriteValueWasm_OpCvt32to64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -997,10 +978,8 @@ private static bool rewriteValueWasm_OpDiv16(ptr<Value> _addr_v) {
         v1.AddArg(y);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1022,7 +1001,6 @@ private static bool rewriteValueWasm_OpDiv16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1046,10 +1024,8 @@ private static bool rewriteValueWasm_OpDiv32(ptr<Value> _addr_v) {
         v1.AddArg(y);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpDiv32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1071,7 +1047,6 @@ private static bool rewriteValueWasm_OpDiv32u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpDiv64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1089,10 +1064,8 @@ private static bool rewriteValueWasm_OpDiv64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64DivS);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1114,7 +1087,6 @@ private static bool rewriteValueWasm_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1136,7 +1108,6 @@ private static bool rewriteValueWasm_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1158,7 +1129,6 @@ private static bool rewriteValueWasm_OpEq16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1180,7 +1150,6 @@ private static bool rewriteValueWasm_OpEq32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1202,7 +1171,6 @@ private static bool rewriteValueWasm_OpEq8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1220,7 +1188,6 @@ private static bool rewriteValueWasm_OpIsNonNil(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1242,7 +1209,6 @@ private static bool rewriteValueWasm_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1264,7 +1230,6 @@ private static bool rewriteValueWasm_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1286,7 +1251,6 @@ private static bool rewriteValueWasm_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1308,7 +1272,6 @@ private static bool rewriteValueWasm_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1330,7 +1293,6 @@ private static bool rewriteValueWasm_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1352,7 +1314,6 @@ private static bool rewriteValueWasm_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1374,7 +1335,6 @@ private static bool rewriteValueWasm_OpLess16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1396,7 +1356,6 @@ private static bool rewriteValueWasm_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1418,7 +1377,6 @@ private static bool rewriteValueWasm_OpLess32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1440,7 +1398,6 @@ private static bool rewriteValueWasm_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1462,7 +1419,6 @@ private static bool rewriteValueWasm_OpLess8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1484,7 +1440,6 @@ private static bool rewriteValueWasm_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1504,7 +1459,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmF32Load);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -1519,7 +1473,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmF64Load);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.Size() == 8
@@ -1534,7 +1487,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Load);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.Size() == 4 && !t.IsSigned()
@@ -1549,7 +1501,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Load32U);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.Size() == 4 && t.IsSigned()
@@ -1564,7 +1515,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Load32S);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.Size() == 2 && !t.IsSigned()
@@ -1579,7 +1529,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Load16U);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.Size() == 2 && t.IsSigned()
@@ -1594,7 +1543,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Load16S);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.Size() == 1 && !t.IsSigned()
@@ -1609,7 +1557,6 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Load8U);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.Size() == 1 && t.IsSigned()
@@ -1624,10 +1571,8 @@ private static bool rewriteValueWasm_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Load8S);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1643,7 +1588,6 @@ private static bool rewriteValueWasm_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1665,7 +1609,6 @@ private static bool rewriteValueWasm_OpLsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1687,7 +1630,6 @@ private static bool rewriteValueWasm_OpLsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1709,7 +1651,6 @@ private static bool rewriteValueWasm_OpLsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1731,7 +1672,6 @@ private static bool rewriteValueWasm_OpLsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1753,7 +1693,6 @@ private static bool rewriteValueWasm_OpLsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1775,7 +1714,6 @@ private static bool rewriteValueWasm_OpLsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1797,7 +1735,6 @@ private static bool rewriteValueWasm_OpLsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1819,7 +1756,6 @@ private static bool rewriteValueWasm_OpLsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1840,7 +1776,6 @@ private static bool rewriteValueWasm_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Shl);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x64 x (I64Const [c]))
     // cond: uint64(c) < 64
@@ -1859,7 +1794,6 @@ private static bool rewriteValueWasm_OpLsh64x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh64x64 x (I64Const [c]))
     // cond: uint64(c) >= 64
@@ -1875,7 +1809,6 @@ private static bool rewriteValueWasm_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh64x64 x y)
     // result: (Select (I64Shl x y) (I64Const [0]) (I64LtU y (I64Const [64])))
@@ -1894,7 +1827,6 @@ private static bool rewriteValueWasm_OpLsh64x64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1916,7 +1848,6 @@ private static bool rewriteValueWasm_OpLsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1938,7 +1869,6 @@ private static bool rewriteValueWasm_OpLsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1960,7 +1890,6 @@ private static bool rewriteValueWasm_OpLsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1982,7 +1911,6 @@ private static bool rewriteValueWasm_OpLsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2006,10 +1934,8 @@ private static bool rewriteValueWasm_OpMod16(ptr<Value> _addr_v) {
         v1.AddArg(y);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2031,7 +1957,6 @@ private static bool rewriteValueWasm_OpMod16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2055,10 +1980,8 @@ private static bool rewriteValueWasm_OpMod32(ptr<Value> _addr_v) {
         v1.AddArg(y);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpMod32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2080,7 +2003,6 @@ private static bool rewriteValueWasm_OpMod32u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpMod64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2098,10 +2020,8 @@ private static bool rewriteValueWasm_OpMod64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64RemS);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2123,7 +2043,6 @@ private static bool rewriteValueWasm_OpMod8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2145,7 +2064,6 @@ private static bool rewriteValueWasm_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2164,7 +2082,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (I64Store8 dst (I64Load8U src mem) mem)
@@ -2180,7 +2097,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (I64Store16 dst (I64Load16U src mem) mem)
@@ -2196,7 +2112,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (I64Store32 dst (I64Load32U src mem) mem)
@@ -2212,7 +2127,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [8] dst src mem)
     // result: (I64Store dst (I64Load src mem) mem)
@@ -2228,7 +2142,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [16] dst src mem)
     // result: (I64Store [8] dst (I64Load [8] src mem) (I64Store dst (I64Load src mem) mem))
@@ -2250,7 +2163,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (I64Store8 [2] dst (I64Load8U [2] src mem) (I64Store16 dst (I64Load16U src mem) mem))
@@ -2272,7 +2184,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [5] dst src mem)
     // result: (I64Store8 [4] dst (I64Load8U [4] src mem) (I64Store32 dst (I64Load32U src mem) mem))
@@ -2294,7 +2205,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [6] dst src mem)
     // result: (I64Store16 [4] dst (I64Load16U [4] src mem) (I64Store32 dst (I64Load32U src mem) mem))
@@ -2316,7 +2226,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [7] dst src mem)
     // result: (I64Store32 [3] dst (I64Load32U [3] src mem) (I64Store32 dst (I64Load32U src mem) mem))
@@ -2338,7 +2247,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 8 && s < 16
@@ -2362,7 +2270,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 16 && s%16 != 0 && s%16 <= 8
@@ -2389,7 +2296,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, v3, mem);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 16 && s%16 != 0 && s%16 > 8
@@ -2422,7 +2328,6 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, v3, v4);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s%8 == 0 && logLargeCopy(v, s)
@@ -2439,10 +2344,8 @@ private static bool rewriteValueWasm_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s / 8);
         v.AddArg3(dst, src, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpNeg16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2460,7 +2363,6 @@ private static bool rewriteValueWasm_OpNeg16(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpNeg32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2478,7 +2380,6 @@ private static bool rewriteValueWasm_OpNeg32(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpNeg64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2496,7 +2397,6 @@ private static bool rewriteValueWasm_OpNeg64(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpNeg8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2514,7 +2414,6 @@ private static bool rewriteValueWasm_OpNeg8(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2536,7 +2435,6 @@ private static bool rewriteValueWasm_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2558,7 +2456,6 @@ private static bool rewriteValueWasm_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2580,7 +2477,6 @@ private static bool rewriteValueWasm_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpPopCount16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2598,7 +2494,6 @@ private static bool rewriteValueWasm_OpPopCount16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpPopCount32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2616,7 +2511,6 @@ private static bool rewriteValueWasm_OpPopCount32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpPopCount8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2634,7 +2528,6 @@ private static bool rewriteValueWasm_OpPopCount8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2663,10 +2556,8 @@ private static bool rewriteValueWasm_OpRotateLeft16(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2695,10 +2586,8 @@ private static bool rewriteValueWasm_OpRotateLeft8(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2722,7 +2611,6 @@ private static bool rewriteValueWasm_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2746,7 +2634,6 @@ private static bool rewriteValueWasm_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2768,7 +2655,6 @@ private static bool rewriteValueWasm_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2792,7 +2678,6 @@ private static bool rewriteValueWasm_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2816,7 +2701,6 @@ private static bool rewriteValueWasm_OpRsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2840,7 +2724,6 @@ private static bool rewriteValueWasm_OpRsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2862,7 +2745,6 @@ private static bool rewriteValueWasm_OpRsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2886,7 +2768,6 @@ private static bool rewriteValueWasm_OpRsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2910,7 +2791,6 @@ private static bool rewriteValueWasm_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2934,7 +2814,6 @@ private static bool rewriteValueWasm_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2956,7 +2835,6 @@ private static bool rewriteValueWasm_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2980,7 +2858,6 @@ private static bool rewriteValueWasm_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3004,7 +2881,6 @@ private static bool rewriteValueWasm_OpRsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3028,7 +2904,6 @@ private static bool rewriteValueWasm_OpRsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3050,7 +2925,6 @@ private static bool rewriteValueWasm_OpRsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3074,7 +2948,6 @@ private static bool rewriteValueWasm_OpRsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3096,7 +2969,6 @@ private static bool rewriteValueWasm_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3118,7 +2990,6 @@ private static bool rewriteValueWasm_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3139,7 +3010,6 @@ private static bool rewriteValueWasm_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64ShrU);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (I64Const [c]))
     // cond: uint64(c) < 64
@@ -3158,7 +3028,6 @@ private static bool rewriteValueWasm_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (I64Const [c]))
     // cond: uint64(c) >= 64
@@ -3174,7 +3043,6 @@ private static bool rewriteValueWasm_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh64Ux64 x y)
     // result: (Select (I64ShrU x y) (I64Const [0]) (I64LtU y (I64Const [64])))
@@ -3193,7 +3061,6 @@ private static bool rewriteValueWasm_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3215,7 +3082,6 @@ private static bool rewriteValueWasm_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3237,7 +3103,6 @@ private static bool rewriteValueWasm_OpRsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3259,7 +3124,6 @@ private static bool rewriteValueWasm_OpRsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3280,7 +3144,6 @@ private static bool rewriteValueWasm_OpRsh64x64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64ShrS);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x64 x (I64Const [c]))
     // cond: uint64(c) < 64
@@ -3299,7 +3162,6 @@ private static bool rewriteValueWasm_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 x (I64Const [c]))
     // cond: uint64(c) >= 64
@@ -3318,7 +3180,6 @@ private static bool rewriteValueWasm_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(63);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 x y)
     // result: (I64ShrS x (Select <typ.Int64> y (I64Const [63]) (I64LtU y (I64Const [64]))))
@@ -3337,7 +3198,6 @@ private static bool rewriteValueWasm_OpRsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3359,7 +3219,6 @@ private static bool rewriteValueWasm_OpRsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3383,7 +3242,6 @@ private static bool rewriteValueWasm_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3407,7 +3265,6 @@ private static bool rewriteValueWasm_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3429,7 +3286,6 @@ private static bool rewriteValueWasm_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3453,7 +3309,6 @@ private static bool rewriteValueWasm_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3477,7 +3332,6 @@ private static bool rewriteValueWasm_OpRsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3501,7 +3355,6 @@ private static bool rewriteValueWasm_OpRsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3523,7 +3376,6 @@ private static bool rewriteValueWasm_OpRsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3547,7 +3399,6 @@ private static bool rewriteValueWasm_OpRsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpSignExt16to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3564,7 +3415,6 @@ private static bool rewriteValueWasm_OpSignExt16to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SignExt16to32 x)
     // cond: buildcfg.GOWASM.SignExt
@@ -3577,7 +3427,6 @@ private static bool rewriteValueWasm_OpSignExt16to32(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Extend16S);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SignExt16to32 x)
     // result: (I64ShrS (I64Shl x (I64Const [48])) (I64Const [48]))
@@ -3591,7 +3440,6 @@ private static bool rewriteValueWasm_OpSignExt16to32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpSignExt16to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3608,7 +3456,6 @@ private static bool rewriteValueWasm_OpSignExt16to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SignExt16to64 x)
     // cond: buildcfg.GOWASM.SignExt
@@ -3621,7 +3468,6 @@ private static bool rewriteValueWasm_OpSignExt16to64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Extend16S);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SignExt16to64 x)
     // result: (I64ShrS (I64Shl x (I64Const [48])) (I64Const [48]))
@@ -3635,7 +3481,6 @@ private static bool rewriteValueWasm_OpSignExt16to64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpSignExt32to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3652,7 +3497,6 @@ private static bool rewriteValueWasm_OpSignExt32to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SignExt32to64 x)
     // cond: buildcfg.GOWASM.SignExt
@@ -3665,7 +3509,6 @@ private static bool rewriteValueWasm_OpSignExt32to64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Extend32S);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SignExt32to64 x)
     // result: (I64ShrS (I64Shl x (I64Const [32])) (I64Const [32]))
@@ -3679,7 +3522,6 @@ private static bool rewriteValueWasm_OpSignExt32to64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpSignExt8to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3696,7 +3538,6 @@ private static bool rewriteValueWasm_OpSignExt8to16(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SignExt8to16 x)
     // cond: buildcfg.GOWASM.SignExt
@@ -3709,7 +3550,6 @@ private static bool rewriteValueWasm_OpSignExt8to16(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Extend8S);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SignExt8to16 x)
     // result: (I64ShrS (I64Shl x (I64Const [56])) (I64Const [56]))
@@ -3723,7 +3563,6 @@ private static bool rewriteValueWasm_OpSignExt8to16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpSignExt8to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3740,7 +3579,6 @@ private static bool rewriteValueWasm_OpSignExt8to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SignExt8to32 x)
     // cond: buildcfg.GOWASM.SignExt
@@ -3753,7 +3591,6 @@ private static bool rewriteValueWasm_OpSignExt8to32(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Extend8S);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SignExt8to32 x)
     // result: (I64ShrS (I64Shl x (I64Const [56])) (I64Const [56]))
@@ -3767,7 +3604,6 @@ private static bool rewriteValueWasm_OpSignExt8to32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpSignExt8to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3784,7 +3620,6 @@ private static bool rewriteValueWasm_OpSignExt8to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SignExt8to64 x)
     // cond: buildcfg.GOWASM.SignExt
@@ -3797,7 +3632,6 @@ private static bool rewriteValueWasm_OpSignExt8to64(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Extend8S);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SignExt8to64 x)
     // result: (I64ShrS (I64Shl x (I64Const [56])) (I64Const [56]))
@@ -3811,7 +3645,6 @@ private static bool rewriteValueWasm_OpSignExt8to64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3833,7 +3666,6 @@ private static bool rewriteValueWasm_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3855,7 +3687,6 @@ private static bool rewriteValueWasm_OpStore(ptr<Value> _addr_v) {
         v.reset(OpWasmF64Store);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: is32BitFloat(t)
@@ -3871,7 +3702,6 @@ private static bool rewriteValueWasm_OpStore(ptr<Value> _addr_v) {
         v.reset(OpWasmF32Store);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8
@@ -3887,7 +3717,6 @@ private static bool rewriteValueWasm_OpStore(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Store);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4
@@ -3903,7 +3732,6 @@ private static bool rewriteValueWasm_OpStore(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Store32);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -3919,7 +3747,6 @@ private static bool rewriteValueWasm_OpStore(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Store16);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 1
@@ -3935,10 +3762,8 @@ private static bool rewriteValueWasm_OpStore(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Store8);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmF64Add(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3961,7 +3786,6 @@ private static bool rewriteValueWasm_OpWasmF64Add(ptr<Value> _addr_v) {
         v.reset(OpWasmF64Const);
         v.AuxInt = float64ToAuxInt(x + y);
         return true;
-
     } 
     // match: (F64Add (F64Const [x]) y)
     // cond: y.Op != OpWasmF64Const
@@ -3980,10 +3804,8 @@ private static bool rewriteValueWasm_OpWasmF64Add(ptr<Value> _addr_v) {
         v0.AuxInt = float64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmF64Mul(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4010,7 +3832,6 @@ private static bool rewriteValueWasm_OpWasmF64Mul(ptr<Value> _addr_v) {
         v.reset(OpWasmF64Const);
         v.AuxInt = float64ToAuxInt(x * y);
         return true;
-
     } 
     // match: (F64Mul (F64Const [x]) y)
     // cond: y.Op != OpWasmF64Const
@@ -4029,10 +3850,8 @@ private static bool rewriteValueWasm_OpWasmF64Mul(ptr<Value> _addr_v) {
         v0.AuxInt = float64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Add(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4055,7 +3874,6 @@ private static bool rewriteValueWasm_OpWasmI64Add(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(x + y);
         return true;
-
     } 
     // match: (I64Add (I64Const [x]) y)
     // cond: y.Op != OpWasmI64Const
@@ -4074,7 +3892,6 @@ private static bool rewriteValueWasm_OpWasmI64Add(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     } 
     // match: (I64Add x (I64Const [y]))
     // result: (I64AddConst [y] x)
@@ -4088,10 +3905,8 @@ private static bool rewriteValueWasm_OpWasmI64Add(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(y);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64AddConst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4106,7 +3921,6 @@ private static bool rewriteValueWasm_OpWasmI64AddConst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (I64AddConst [off] (LoweredAddr {sym} [off2] base))
     // cond: isU32Bit(off+int64(off2))
@@ -4127,7 +3941,6 @@ private static bool rewriteValueWasm_OpWasmI64AddConst(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(base);
         return true;
-
     } 
     // match: (I64AddConst [off] x:(SP))
     // cond: isU32Bit(off)
@@ -4142,10 +3955,8 @@ private static bool rewriteValueWasm_OpWasmI64AddConst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(off));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64And(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4168,7 +3979,6 @@ private static bool rewriteValueWasm_OpWasmI64And(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(x & y);
         return true;
-
     } 
     // match: (I64And (I64Const [x]) y)
     // cond: y.Op != OpWasmI64Const
@@ -4187,10 +3997,8 @@ private static bool rewriteValueWasm_OpWasmI64And(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Eq(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4217,7 +4025,6 @@ private static bool rewriteValueWasm_OpWasmI64Eq(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (I64Eq (I64Const [x]) (I64Const [y]))
     // cond: x != y
@@ -4237,7 +4044,6 @@ private static bool rewriteValueWasm_OpWasmI64Eq(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (I64Eq (I64Const [x]) y)
     // cond: y.Op != OpWasmI64Const
@@ -4256,7 +4062,6 @@ private static bool rewriteValueWasm_OpWasmI64Eq(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     } 
     // match: (I64Eq x (I64Const [0]))
     // result: (I64Eqz x)
@@ -4268,10 +4073,8 @@ private static bool rewriteValueWasm_OpWasmI64Eq(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Eqz);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Eqz(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4291,10 +4094,8 @@ private static bool rewriteValueWasm_OpWasmI64Eqz(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Eqz);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64LeU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4313,7 +4114,6 @@ private static bool rewriteValueWasm_OpWasmI64LeU(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Eqz);
         v.AddArg(x);
         return true;
-
     } 
     // match: (I64LeU (I64Const [1]) x)
     // result: (I64Eqz (I64Eqz x))
@@ -4327,10 +4127,8 @@ private static bool rewriteValueWasm_OpWasmI64LeU(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Load(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4357,7 +4155,6 @@ private static bool rewriteValueWasm_OpWasmI64Load(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (I64Load [off] (LoweredAddr {sym} [off2] (SB)) _)
     // cond: symIsRO(sym) && isU32Bit(off+int64(off2))
@@ -4376,10 +4173,8 @@ private static bool rewriteValueWasm_OpWasmI64Load(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(int64(read64(sym, off + int64(off2), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Load16S(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4404,10 +4199,8 @@ private static bool rewriteValueWasm_OpWasmI64Load16S(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Load16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4434,7 +4227,6 @@ private static bool rewriteValueWasm_OpWasmI64Load16U(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (I64Load16U [off] (LoweredAddr {sym} [off2] (SB)) _)
     // cond: symIsRO(sym) && isU32Bit(off+int64(off2))
@@ -4453,10 +4245,8 @@ private static bool rewriteValueWasm_OpWasmI64Load16U(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(int64(read16(sym, off + int64(off2), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Load32S(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4481,10 +4271,8 @@ private static bool rewriteValueWasm_OpWasmI64Load32S(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Load32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4511,7 +4299,6 @@ private static bool rewriteValueWasm_OpWasmI64Load32U(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (I64Load32U [off] (LoweredAddr {sym} [off2] (SB)) _)
     // cond: symIsRO(sym) && isU32Bit(off+int64(off2))
@@ -4530,10 +4317,8 @@ private static bool rewriteValueWasm_OpWasmI64Load32U(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(int64(read32(sym, off + int64(off2), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Load8S(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4558,10 +4343,8 @@ private static bool rewriteValueWasm_OpWasmI64Load8S(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Load8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4586,7 +4369,6 @@ private static bool rewriteValueWasm_OpWasmI64Load8U(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (I64Load8U [off] (LoweredAddr {sym} [off2] (SB)) _)
     // cond: symIsRO(sym) && isU32Bit(off+int64(off2))
@@ -4605,10 +4387,8 @@ private static bool rewriteValueWasm_OpWasmI64Load8U(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(int64(read8(sym, off + int64(off2))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64LtU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4629,7 +4409,6 @@ private static bool rewriteValueWasm_OpWasmI64LtU(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (I64LtU x (I64Const [1]))
     // result: (I64Eqz x)
@@ -4641,10 +4420,8 @@ private static bool rewriteValueWasm_OpWasmI64LtU(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Eqz);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Mul(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4667,7 +4444,6 @@ private static bool rewriteValueWasm_OpWasmI64Mul(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(x * y);
         return true;
-
     } 
     // match: (I64Mul (I64Const [x]) y)
     // cond: y.Op != OpWasmI64Const
@@ -4686,10 +4462,8 @@ private static bool rewriteValueWasm_OpWasmI64Mul(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Ne(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4716,7 +4490,6 @@ private static bool rewriteValueWasm_OpWasmI64Ne(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (I64Ne (I64Const [x]) (I64Const [y]))
     // cond: x != y
@@ -4736,7 +4509,6 @@ private static bool rewriteValueWasm_OpWasmI64Ne(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (I64Ne (I64Const [x]) y)
     // cond: y.Op != OpWasmI64Const
@@ -4755,7 +4527,6 @@ private static bool rewriteValueWasm_OpWasmI64Ne(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     } 
     // match: (I64Ne x (I64Const [0]))
     // result: (I64Eqz (I64Eqz x))
@@ -4769,10 +4540,8 @@ private static bool rewriteValueWasm_OpWasmI64Ne(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Or(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4795,7 +4564,6 @@ private static bool rewriteValueWasm_OpWasmI64Or(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(x | y);
         return true;
-
     } 
     // match: (I64Or (I64Const [x]) y)
     // cond: y.Op != OpWasmI64Const
@@ -4814,10 +4582,8 @@ private static bool rewriteValueWasm_OpWasmI64Or(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Shl(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4838,10 +4604,8 @@ private static bool rewriteValueWasm_OpWasmI64Shl(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(x << (int)(uint64(y)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64ShrS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4862,10 +4626,8 @@ private static bool rewriteValueWasm_OpWasmI64ShrS(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(x >> (int)(uint64(y)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64ShrU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4886,10 +4648,8 @@ private static bool rewriteValueWasm_OpWasmI64ShrU(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(int64(uint64(x) >> (int)(uint64(y))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Store(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4916,10 +4676,8 @@ private static bool rewriteValueWasm_OpWasmI64Store(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Store16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4946,10 +4704,8 @@ private static bool rewriteValueWasm_OpWasmI64Store16(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Store32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4976,10 +4732,8 @@ private static bool rewriteValueWasm_OpWasmI64Store32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Store8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5006,10 +4760,8 @@ private static bool rewriteValueWasm_OpWasmI64Store8(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off + off2);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpWasmI64Xor(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5032,7 +4784,6 @@ private static bool rewriteValueWasm_OpWasmI64Xor(ptr<Value> _addr_v) {
         v.reset(OpWasmI64Const);
         v.AuxInt = int64ToAuxInt(x ^ y);
         return true;
-
     } 
     // match: (I64Xor (I64Const [x]) y)
     // cond: y.Op != OpWasmI64Const
@@ -5051,10 +4802,8 @@ private static bool rewriteValueWasm_OpWasmI64Xor(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(x);
         v.AddArg2(y, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5072,7 +4821,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] destptr mem)
     // result: (I64Store8 destptr (I64Const [0]) mem)
@@ -5087,7 +4835,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(destptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [2] destptr mem)
     // result: (I64Store16 destptr (I64Const [0]) mem)
@@ -5102,7 +4849,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(destptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [4] destptr mem)
     // result: (I64Store32 destptr (I64Const [0]) mem)
@@ -5117,7 +4863,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(destptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [8] destptr mem)
     // result: (I64Store destptr (I64Const [0]) mem)
@@ -5132,7 +4877,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(destptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [3] destptr mem)
     // result: (I64Store8 [2] destptr (I64Const [0]) (I64Store16 destptr (I64Const [0]) mem))
@@ -5150,7 +4894,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v0, mem);
         v.AddArg3(destptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [5] destptr mem)
     // result: (I64Store8 [4] destptr (I64Const [0]) (I64Store32 destptr (I64Const [0]) mem))
@@ -5168,7 +4911,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v0, mem);
         v.AddArg3(destptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [6] destptr mem)
     // result: (I64Store16 [4] destptr (I64Const [0]) (I64Store32 destptr (I64Const [0]) mem))
@@ -5186,7 +4928,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v0, mem);
         v.AddArg3(destptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [7] destptr mem)
     // result: (I64Store32 [3] destptr (I64Const [0]) (I64Store32 destptr (I64Const [0]) mem))
@@ -5204,7 +4945,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v0, mem);
         v.AddArg3(destptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s%8 != 0 && s > 8
@@ -5227,7 +4967,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v2, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [16] destptr mem)
     // result: (I64Store [8] destptr (I64Const [0]) (I64Store destptr (I64Const [0]) mem))
@@ -5245,7 +4984,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v0, mem);
         v.AddArg3(destptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [24] destptr mem)
     // result: (I64Store [16] destptr (I64Const [0]) (I64Store [8] destptr (I64Const [0]) (I64Store destptr (I64Const [0]) mem)))
@@ -5266,7 +5004,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v0, v2);
         v.AddArg3(destptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [32] destptr mem)
     // result: (I64Store [24] destptr (I64Const [0]) (I64Store [16] destptr (I64Const [0]) (I64Store [8] destptr (I64Const [0]) (I64Store destptr (I64Const [0]) mem))))
@@ -5290,7 +5027,6 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(destptr, v0, v2);
         v.AddArg3(destptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s%8 == 0 && s > 32
@@ -5306,10 +5042,8 @@ private static bool rewriteValueWasm_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s / 8);
         v.AddArg2(destptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueWasm_OpZeroExt16to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5326,7 +5060,6 @@ private static bool rewriteValueWasm_OpZeroExt16to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ZeroExt16to32 x)
     // result: (I64And x (I64Const [0xffff]))
@@ -5338,7 +5071,6 @@ private static bool rewriteValueWasm_OpZeroExt16to32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpZeroExt16to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5355,7 +5087,6 @@ private static bool rewriteValueWasm_OpZeroExt16to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ZeroExt16to64 x)
     // result: (I64And x (I64Const [0xffff]))
@@ -5367,7 +5098,6 @@ private static bool rewriteValueWasm_OpZeroExt16to64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpZeroExt32to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5384,7 +5114,6 @@ private static bool rewriteValueWasm_OpZeroExt32to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ZeroExt32to64 x)
     // result: (I64And x (I64Const [0xffffffff]))
@@ -5396,7 +5125,6 @@ private static bool rewriteValueWasm_OpZeroExt32to64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpZeroExt8to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5413,7 +5141,6 @@ private static bool rewriteValueWasm_OpZeroExt8to16(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ZeroExt8to16 x)
     // result: (I64And x (I64Const [0xff]))
@@ -5425,7 +5152,6 @@ private static bool rewriteValueWasm_OpZeroExt8to16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpZeroExt8to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5442,7 +5168,6 @@ private static bool rewriteValueWasm_OpZeroExt8to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ZeroExt8to32 x)
     // result: (I64And x (I64Const [0xff]))
@@ -5454,7 +5179,6 @@ private static bool rewriteValueWasm_OpZeroExt8to32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueWasm_OpZeroExt8to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5471,7 +5195,6 @@ private static bool rewriteValueWasm_OpZeroExt8to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ZeroExt8to64 x)
     // result: (I64And x (I64Const [0xff]))
@@ -5483,7 +5206,6 @@ private static bool rewriteValueWasm_OpZeroExt8to64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteBlockWasm(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;

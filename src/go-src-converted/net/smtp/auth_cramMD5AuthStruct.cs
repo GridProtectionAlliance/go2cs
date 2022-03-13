@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:55 UTC
+//     Generated on 2022 March 13 05:40:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace net
 {
     public static partial class smtp_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct cramMD5Auth
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace net
             public static implicit operator cramMD5Auth(NilType nil) => default(cramMD5Auth);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static cramMD5Auth cramMD5Auth_cast(dynamic value)
         {
             return new cramMD5Auth(value.username, value.secret);

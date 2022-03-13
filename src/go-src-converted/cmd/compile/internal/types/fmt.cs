@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:50 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:06 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\fmt.go
-using bytes = go.bytes_package;
-using md5 = go.crypto.md5_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using md5 = crypto.md5_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using @base = cmd.compile.@internal.@base_package;
+
+
+// BuiltinPkg is a fake package that declares the universe block.
+
+using System;
 public static partial class types_package {
 
-    // BuiltinPkg is a fake package that declares the universe block.
 public static ptr<Pkg> BuiltinPkg;
 
 // LocalPkg is the package being compiled.
@@ -49,15 +50,12 @@ public static ptr<Sym> OrigSym(ptr<Sym> _addr_s) {
                 break;
         }
         return _addr_s!;
-
     }
     if (strings.HasPrefix(s.Name, ".anon")) { 
         // originally an unnamed or _ name (see subr.go: NewFuncParams)
         return _addr_null!;
-
     }
     return _addr_s!;
-
 }
 
 // numImport tracks how often a package with a given name is imported.
@@ -78,7 +76,6 @@ private static readonly fmtMode fmtGo = iota;
 private static readonly var fmtDebug = 0;
 private static readonly var fmtTypeID = 1;
 private static readonly var fmtTypeIDName = 2;
-
 
 // Sym
 
@@ -101,13 +98,11 @@ private static void Format(this ptr<Sym> _addr_s, fmt.State f, int verb) {
                 mode = fmtDebug;
             }
             fmt.Fprint(f, sconv(_addr_s, verb, mode));
-
             break;
         default: 
             fmt.Fprintf(f, "%%!%c(*types.Sym=%p)", verb, s);
             break;
     }
-
 }
 
 private static @string String(this ptr<Sym> _addr_s) {
@@ -139,7 +134,6 @@ private static @string sconv(ptr<Sym> _addr_s, int verb, fmtMode mode) => func((
     buf.WriteByte('.');
     buf.WriteString(s.Name);
     return InternString(buf.Bytes());
-
 });
 
 private static void sconv2(ptr<bytes.Buffer> _addr_b, ptr<Sym> _addr_s, int verb, fmtMode mode) => func((_, panic, _) => {
@@ -154,7 +148,6 @@ private static void sconv2(ptr<bytes.Buffer> _addr_b, ptr<Sym> _addr_s, int verb
         return ;
     }
     symfmt(_addr_b, _addr_s, verb, mode);
-
 });
 
 private static void symfmt(ptr<bytes.Buffer> _addr_b, ptr<Sym> _addr_s, int verb, fmtMode mode) {
@@ -169,9 +162,7 @@ private static void symfmt(ptr<bytes.Buffer> _addr_b, ptr<Sym> _addr_s, int verb
             b.WriteByte('.');
         }
     }
-
     b.WriteString(s.Name);
-
 }
 
 // pkgqual returns the qualifier that should be used for printing
@@ -191,7 +182,6 @@ private static @string pkgqual(ptr<Pkg> _addr_pkg, int verb, fmtMode mode) {
             if (pkg.Name != "" && NumImport[pkg.Name] > 1) {
                 return strconv.Quote(pkg.Path);
             }
-
             return pkg.Name;
         else if (mode == fmtDebug) 
             return pkg.Name;
@@ -201,10 +191,8 @@ private static @string pkgqual(ptr<Pkg> _addr_pkg, int verb, fmtMode mode) {
         else if (mode == fmtTypeID) 
             // (methodsym), typesym, weaksym
             return pkg.Prefix;
-        
-    }
+            }
     return "";
-
 }
 
 // Type
@@ -234,20 +222,16 @@ private static void Format(this ptr<Type> _addr_t, fmt.State s, int verb) {
         case 'L': 
             if (verb == 'v' && s.Flag('+')) { // %+v is debug format
                 mode = fmtDebug;
-
             }
             if (verb == 'S' && s.Flag('-')) { // %-S is special case for receiver - short typeid format
                 mode = fmtTypeID;
-
             }
             fmt.Fprint(s, tconv(_addr_t, verb, mode));
-
             break;
         default: 
             fmt.Fprintf(s, "%%!%c(*Type=%p)", verb, t);
             break;
     }
-
 }
 
 // String returns the Go syntax for the type t.
@@ -302,10 +286,8 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
             // Print a reference to it instead.
             fmt.Fprintf(b, "@%d", off);
             return ;
-
         }
     }
-
     if (t == null) {
         b.WriteString("<T>");
         return ;
@@ -338,7 +320,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
         }
 
         return ;
-
     }
     if (t == ByteType || t == RuneType) { 
         // in %-T mode collapse rune and byte with their originals.
@@ -348,8 +329,7 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
         else 
             sconv2(_addr_b, _addr_t.Sym(), 'S', mode);
             return ;
-        
-    }
+            }
     if (t == ErrorType) {
         b.WriteString("error");
         return ;
@@ -377,7 +357,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
             }
                 sconv2(_addr_b, _addr_t.Sym(), 'v', mode);
         return ;
-
     }
     if (int(t.Kind()) < len(BasicTypeNames) && BasicTypeNames[t.Kind()] != "") {
         @string name = default;
@@ -398,7 +377,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
             name = BasicTypeNames[t.Kind()];
                 b.WriteString(name);
         return ;
-
     }
     if (mode == fmtDebug) {
         b.WriteString(t.Kind().String());
@@ -449,7 +427,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
  {
                 tconv2(_addr_b, _addr_t.Elem(), 0, mode, visited);
             }
-
             else if (t.Kind() == TMAP) 
         b.WriteString("map[");
         tconv2(_addr_b, _addr_t.Key(), 0, mode, visited);
@@ -485,7 +462,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
                     }
                     sconv2(_addr_b, _addr_f.Sym, 'v', mode);
                                 tconv2(_addr_b, _addr_f.Type, 'S', mode, visited);
-
             }
 
             i = i__prev1;
@@ -548,11 +524,9 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
                 b.WriteByte(']');
                 tconv2(_addr_b, _addr_m.Elem(), 0, mode, visited);
                 break;
-
             }
 
         }
-
 
         {
             var funarg = t.StructType().Funarg;
@@ -563,7 +537,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
                 if (funarg == FunargTparams) {
                     (open, close) = ('[', ']');
                 }
-
                 b.WriteByte(byte(open));
                 char fieldVerb = 'v';
 
@@ -589,7 +562,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
                 }
 
                 b.WriteByte(byte(close));
-
             } {
                 b.WriteString("struct {");
                 {
@@ -613,14 +585,10 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
                 if (t.NumFields() != 0) {
                     b.WriteByte(' ');
                 }
-
                 b.WriteByte('}');
-
             }
 
         }
-
-
     else if (t.Kind() == TFORW) 
         b.WriteString("undefined");
         if (t.Sym() != null) {
@@ -638,7 +606,6 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
             b.WriteString("tp"); 
             // Print out the pointer value for now to disambiguate type params
             b.WriteString(fmt.Sprintf("%p", t));
-
         }
     else if (t.Kind() == Txxx) 
         b.WriteString("Txxx");
@@ -648,8 +615,7 @@ private static void tconv2(ptr<bytes.Buffer> _addr_b, ptr<Type> _addr_t, int ver
         b.WriteString(" <");
         sconv2(_addr_b, _addr_t.Sym(), 'v', mode);
         b.WriteString(">");
-    
-});
+    });
 
 private static void fldconv(ptr<bytes.Buffer> _addr_b, ptr<Field> _addr_f, int verb, fmtMode mode, map<ptr<Type>, nint> visited, Funarg funarg) {
     ref bytes.Buffer b = ref _addr_b.val;
@@ -676,17 +642,14 @@ private static void fldconv(ptr<bytes.Buffer> _addr_b, ptr<Field> _addr_f, int v
                 if (name == ".F") {
                     name = "F"; // Hack for toolstash -cmp.
                 }
-
                 if (!IsExported(name) && mode != fmtTypeIDName) {
                     name = sconv(_addr_s, 0, mode); // qualify non-exported names (used on structs, not on funarg)
                 }
-
             }
             else
  {
                 name = sconv(_addr_s, 0, mode);
             }
-
         }
     }
     if (name != "") {
@@ -700,7 +663,6 @@ private static void fldconv(ptr<bytes.Buffer> _addr_b, ptr<Field> _addr_f, int v
         }
         b.WriteString("...");
         tconv2(_addr_b, et, 0, mode, visited);
-
     }
     else
  {
@@ -740,10 +702,8 @@ public static @string FmtConst(constant.Value v, bool sharp) {
             return fmt.Sprintf("(%s%si)", re, im);
         else 
             return fmt.Sprintf("(%s+%si)", re, im);
-        
-    }
+            }
     return v.String();
-
 }
 
 // TypeHash computes a hash value for type t to use in type switch statements.
@@ -755,7 +715,6 @@ public static uint TypeHash(ptr<Type> _addr_t) {
     // Using MD5 is overkill, but reduces accidental collisions.
     var h = md5.Sum((slice<byte>)p);
     return binary.LittleEndian.Uint32(h[..(int)4]);
-
 }
 
 } // end types_package

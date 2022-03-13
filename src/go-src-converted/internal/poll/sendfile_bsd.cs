@@ -5,17 +5,17 @@
 //go:build dragonfly || freebsd
 // +build dragonfly freebsd
 
-// package poll -- go2cs converted at 2022 March 06 22:13:18 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:53 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\sendfile_bsd.go
-using syscall = go.syscall_package;
-
 namespace go.@internal;
+
+using syscall = syscall_package;
 
 public static partial class poll_package {
 
-    // maxSendfileSize is the largest chunk size we ask the kernel to copy
-    // at a time.
+// maxSendfileSize is the largest chunk size we ask the kernel to copy
+// at a time.
 private static readonly nint maxSendfileSize = 4 << 20;
 
 // SendFile wraps the sendfile system call.
@@ -38,7 +38,6 @@ public static (long, error) SendFile(ptr<FD> _addr_dstFD, nint src, long pos, lo
         err = err__prev1;
 
     }
-
     defer(dstFD.writeUnlock());
     {
         var err__prev1 = err;
@@ -51,7 +50,6 @@ public static (long, error) SendFile(ptr<FD> _addr_dstFD, nint src, long pos, lo
         err = err__prev1;
 
     }
-
 
     var dst = dstFD.Sysfd;
     long written = default;
@@ -80,7 +78,6 @@ public static (long, error) SendFile(ptr<FD> _addr_dstFD, nint src, long pos, lo
             if (err1 == null) {
                 continue;
             }
-
         }
         if (err1 != null) { 
             // This includes syscall.ENOSYS (no kernel
@@ -88,11 +85,9 @@ public static (long, error) SendFile(ptr<FD> _addr_dstFD, nint src, long pos, lo
             // don't implement sendfile)
             err = err1;
             break;
-
         }
     }
     return (written, error.As(err)!);
-
 });
 
 } // end poll_package

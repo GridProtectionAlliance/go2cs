@@ -5,13 +5,13 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:41 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\route_bsd.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
@@ -24,13 +24,11 @@ private static nint rsaAlignOf(nint salen) {
         // Darwin kernels require 32-bit aligned access to
         // routing facilities.
         salign = 4;
-
     }
     else if (netbsd32Bit) { 
         // NetBSD 6 and beyond kernels require 64-bit aligned
         // access to routing facilities.
         salign = 8;
-
     }
     else if (runtime.GOOS == "freebsd") { 
         // In the case of kern.supported_archs="amd64 i386",
@@ -45,7 +43,6 @@ private static nint rsaAlignOf(nint salen) {
         return salign;
     }
     return (salen + salign - 1) & ~(salign - 1);
-
 }
 
 // parseSockaddrLink parses b as a datalink socket address.
@@ -65,7 +62,6 @@ private static (ptr<SockaddrDatalink>, error) parseSockaddrLink(slice<byte> b) {
     sa.Family = rsa.Family;
     sa.Index = rsa.Index;
     return (_addr_sa!, error.As(null!)!);
-
 }
 
 // parseLinkLayerAddr parses b as a datalink socket address in
@@ -104,7 +100,6 @@ private static (ptr<SockaddrDatalink>, nint, error) parseLinkLayerAddr(slice<byt
         sa.Data[i] = int8(b[i]);
     }
     return (_addr_sa!, rsaAlignOf(l), error.As(null!)!);
-
 }
 
 // parseSockaddrInet parses b as an internet socket address.
@@ -127,12 +122,10 @@ private static (Sockaddr, error) parseSockaddrInet(slice<byte> b, byte family) {
         return anyToSockaddr(rsa);
     else 
         return (null, error.As(EINVAL)!);
-    
-}
+    }
 
 private static readonly var offsetofInet4 = int(@unsafe.Offsetof(new RawSockaddrInet4().Addr));
 private static readonly var offsetofInet6 = int(@unsafe.Offsetof(new RawSockaddrInet6().Addr));
-
 
 // parseNetworkLayerAddr parses b as an internet socket address in
 // conventional BSD kernel form.
@@ -192,8 +185,7 @@ private static (Sockaddr, error) parseNetworkLayerAddr(slice<byte> b, byte famil
             copy(sa.Addr[..], b[(int)l - offsetofInet4..(int)l]);
         }
         return (sa, error.As(null!)!);
-    
-}
+    }
 
 // RouteRIB returns routing information base, as known as RIB,
 // which consists of network facility information, states and
@@ -218,7 +210,6 @@ public static (slice<byte>, error) RouteRIB(nint facility, nint param) {
         err = err__prev1;
 
     }
-
     if (n == 0) {
         return (null, error.As(null!)!);
     }
@@ -234,9 +225,7 @@ public static (slice<byte>, error) RouteRIB(nint facility, nint param) {
         err = err__prev1;
 
     }
-
     return (tab[..(int)n], error.As(null!)!);
-
 }
 
 // RoutingMessage represents a routing message.
@@ -301,10 +290,8 @@ private static (slice<Sockaddr>, error) sockaddr(this ptr<RouteMessage> _addr_m)
             }
             sas[i] = sa;
             b = b[(int)rsaAlignOf(int(b[0]))..];
-        
-    }
+            }
     return (sas[..], error.As(null!)!);
-
 }
 
 // InterfaceMessage represents a routing message containing
@@ -331,7 +318,6 @@ private static (slice<Sockaddr>, error) sockaddr(this ptr<InterfaceMessage> _add
     }
     sas[RTAX_IFP] = sa;
     return (sas[..], error.As(null!)!);
-
 }
 
 // InterfaceAddrMessage represents a routing message containing
@@ -379,10 +365,8 @@ private static (slice<Sockaddr>, error) sockaddr(this ptr<InterfaceAddrMessage> 
             }
             sas[i] = sa;
             b = b[(int)rsaAlignOf(int(b[0]))..];
-        
-    }
+            }
     return (sas[..], error.As(null!)!);
-
 }
 
 // ParseRoutingMessage parses b as routing messages and returns the
@@ -414,16 +398,13 @@ public static (slice<RoutingMessage>, error) ParseRoutingMessage(slice<byte> b) 
             }
 
         }
-
         b = b[(int)any.Msglen..];
-
     } 
     // We failed to parse any of the messages - version mismatch?
     if (nmsgs != len(msgs) + nskips) {
         return (null, error.As(EINVAL)!);
     }
     return (msgs, error.As(null!)!);
-
 }
 
 // ParseRoutingSockaddr parses msg's payload as raw sockaddrs and
@@ -439,7 +420,6 @@ public static (slice<Sockaddr>, error) ParseRoutingSockaddr(RoutingMessage msg) 
         return (null, error.As(err)!);
     }
     return (sas, error.As(null!)!);
-
 }
 
 } // end syscall_package

@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testlog -- go2cs converted at 2022 March 06 22:12:49 UTC
+// package testlog -- go2cs converted at 2022 March 13 05:27:48 UTC
 // import "internal/testlog" ==> using testlog = go.@internal.testlog_package
 // Original source: C:\Program Files\Go\src\internal\testlog\exit.go
-using sync = go.sync_package;
-
 namespace go.@internal;
+
+using sync = sync_package;
 
 public static partial class testlog_package {
 
-    // PanicOnExit0 reports whether to panic on a call to os.Exit(0).
-    // This is in the testlog package because, like other definitions in
-    // package testlog, it is a hook between the testing package and the
-    // os package. This is used to ensure that an early call to os.Exit(0)
-    // does not cause a test to pass.
+// PanicOnExit0 reports whether to panic on a call to os.Exit(0).
+// This is in the testlog package because, like other definitions in
+// package testlog, it is a hook between the testing package and the
+// os package. This is used to ensure that an early call to os.Exit(0)
+// does not cause a test to pass.
 public static bool PanicOnExit0() => func((defer, _, _) => {
     panicOnExit0.mu.Lock();
     defer(panicOnExit0.mu.Unlock());

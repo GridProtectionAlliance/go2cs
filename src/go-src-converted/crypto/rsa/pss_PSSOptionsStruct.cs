@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:18:18 UTC
+//     Generated on 2022 March 13 05:32:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace crypto
 {
     public static partial class rsa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PSSOptions
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace crypto
             public static implicit operator PSSOptions(NilType nil) => default(PSSOptions);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static PSSOptions PSSOptions_cast(dynamic value)
         {
             return new PSSOptions(value.SaltLength, value.Hash);

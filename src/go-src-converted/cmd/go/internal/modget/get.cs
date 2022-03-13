@@ -3,9 +3,11 @@
 // license that can be found in the LICENSE file.
 
 // Package modget implements the module-aware ``go get'' command.
-// package modget -- go2cs converted at 2022 March 06 23:16:17 UTC
+
+// package modget -- go2cs converted at 2022 March 13 06:29:47 UTC
 // import "cmd/go/internal/modget" ==> using modget = go.cmd.go.@internal.modget_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modget\get.go
+namespace go.cmd.go.@internal;
 // The arguments to 'go get' are patterns with optional version queries, with
 // the version queries defaulting to "upgrade".
 //
@@ -25,32 +27,30 @@
 // If the argument is ambiguous, the user can often disambiguate by specifying
 // explicit versions for *all* of the potential module paths involved.
 
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
 
-using @base = go.cmd.go.@internal.@base_package;
-using imports = go.cmd.go.@internal.imports_package;
-using load = go.cmd.go.@internal.load_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modload = go.cmd.go.@internal.modload_package;
-using par = go.cmd.go.@internal.par_package;
-using search = go.cmd.go.@internal.search_package;
-using work = go.cmd.go.@internal.work_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
 
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
+using @base = cmd.go.@internal.@base_package;
+using imports = cmd.go.@internal.imports_package;
+using load = cmd.go.@internal.load_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modload = cmd.go.@internal.modload_package;
+using par = cmd.go.@internal.par_package;
+using search = cmd.go.@internal.search_package;
+using work = cmd.go.@internal.work_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
 using System;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class modget_package {
 
@@ -239,7 +239,6 @@ private static error Set(this ptr<upgradeFlag> _addr_v, @string s) {
         v.rawVersion = s;
     }
     return error.As(null!)!;
-
 }
 
 private static @string String(this ptr<upgradeFlag> _addr_v) {
@@ -252,7 +251,6 @@ private static void init() {
     work.AddBuildFlags(CmdGet, work.OmitModFlag);
     CmdGet.Run = runGet; // break init loop
     CmdGet.Flag.Var(_addr_getU, "u", "");
-
 }
 
 private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
@@ -326,7 +324,6 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
                 // is if some matching package moves from one module in the build list
                 // to another, which should not happen very often.
                 continue;
-
             } 
 
             // When we load imports, we detect the following conditions:
@@ -370,7 +367,6 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
 
         }
 
-
         r.findMissingWildcards(ctx);
         {
             var changed__prev1 = changed;
@@ -385,9 +381,7 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
 
         }
 
-
         break;
-
     }
 
     r.checkWildcardVersions(ctx);
@@ -430,17 +424,12 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
                                 // that module — not also build the package — so suppress the error.
                                 // (See https://golang.org/issue/33526.)
                                 continue;
-
                             }
 
                         }
-
                     }
-
                 }
-
                 pkgs = append(pkgs, pkg);
-
             }
 
             pkg = pkg__prev1;
@@ -478,13 +467,10 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
  {
                 altMsg = "\n\tUse 'go install pkg@version' instead.\n";
             }
-
             fmt.Fprint(os.Stderr, altMsg);
             fmt.Fprintf(os.Stderr, "\tFor more information, see https://golang.org/doc/go-get-install-deprecation\n\tor run 'go help get' or 'go help install'.\n");
-
         }
         work.InstallPackages(ctx, pkgPatterns, pkgs);
-
     }
     if (!modload.HasModRoot()) {
         return ;
@@ -497,7 +483,6 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
 
     var newReqs = reqsFromGoMod(_addr_modload.ModFile());
     r.reportChanges(oldReqs, newReqs);
-
 }
 
 // parseArgs parses command-line arguments and reports errors.
@@ -531,12 +516,9 @@ private static slice<ptr<query>> parseArgs(context.Context ctx, slice<@string> r
                 }
 
             }
-
         }
         queries = append(queries, q);
-
     }    return queries;
-
 });
 
 private partial struct resolver {
@@ -607,12 +589,9 @@ private static ptr<resolver> newResolver(context.Context ctx, slice<ptr<query>> 
                 // All "<path>@none" queries for the same path are identical; we only
                 // need to index one copy.
                 r.nonesByPath[q.pattern] = q;
-
             }
-
         }
     }    return _addr_r!;
-
 }
 
 // initialSelected returns the version of the module with the given path that
@@ -626,7 +605,6 @@ private static @string initialSelected(this ptr<resolver> _addr_r, @string mPath
         return "none";
     }
     return v;
-
 }
 
 // selected returns the version of the module with the given path that is
@@ -640,7 +618,6 @@ private static @string selected(this ptr<resolver> _addr_r, @string mPath) {
         return "none";
     }
     return v;
-
 }
 
 // noneForPath returns a "none" query matching the given module path,
@@ -660,7 +637,6 @@ private static (ptr<query>, bool) noneForPath(this ptr<resolver> _addr_r, @strin
             return (_addr_nq!, true);
         }
     }    return (_addr_null!, false);
-
 }
 
 // queryModule wraps modload.Query, substituting r.checkAllowedOr to decide
@@ -676,7 +652,6 @@ private static (module.Version, error) queryModule(this ptr<resolver> _addr_r, c
         return (new module.Version(), error.As(err)!);
     }
     return (new module.Version(Path:mPath,Version:rev.Version), error.As(null!)!);
-
 }
 
 // queryPackage wraps modload.QueryPackage, substituting r.checkAllowedOr to
@@ -694,7 +669,6 @@ private static (slice<module.Version>, error) queryPackages(this ptr<resolver> _
         }
     }
     return (pkgMods, error.As(err)!);
-
 }
 
 // queryPattern wraps modload.QueryPattern, substituting r.checkAllowedOr to
@@ -716,7 +690,6 @@ private static (slice<module.Version>, module.Version, error) queryPattern(this 
         mod = modOnly.Mod;
     }
     return (pkgMods, mod, error.As(err)!);
-
 }
 
 // checkAllowedOr is like modload.CheckAllowed, but it always allows the requested
@@ -732,9 +705,7 @@ private static modload.AllowedFunc checkAllowedOr(this ptr<resolver> _addr_r, @s
             return null;
         }
         return modload.CheckAllowed(ctx, m);
-
     };
-
 }
 
 // matchInModule is a caching wrapper around modload.MatchInModule.
@@ -758,11 +729,9 @@ private static (slice<@string>, error) matchInModule(this ptr<resolver> _addr_r,
             return new entry(match.Pkgs,match.Errs[0]);
         }
         return new entry(match.Pkgs,nil);
-
     })._<entry>();
 
     return (e.packages, error.As(e.err)!);
-
 }
 
 // queryNone adds a candidate set to q for each module matching q.pattern.
@@ -794,13 +763,9 @@ private static void queryNone(this ptr<resolver> _addr_r, context.Context ctx, p
                 // plain meaning of the query. To try to reduce confusion, reject the
                 // query explicitly.
                 return errSet(addr(new modload.QueryMatchesMainModuleError(Pattern:q.pattern,Query:q.version)));
-
             }
-
             return new pathSet(mod:module.Version{Path:q.pattern,Version:"none"});
-
         });
-
     }
     foreach (var (_, curM) in r.buildList) {
         if (!q.matchesPath(curM.Path)) {
@@ -812,7 +777,6 @@ private static void queryNone(this ptr<resolver> _addr_r, context.Context ctx, p
             }
             return new pathSet(mod:module.Version{Path:curM.Path,Version:"none"});
         });
-
     }
 });
 
@@ -831,7 +795,6 @@ private static void performLocalQueries(this ptr<resolver> _addr_r, context.Cont
                     }
 
                 }
-
             } 
 
             // Absolute paths like C:\foo and relative paths like ../foo... are
@@ -840,12 +803,10 @@ private static void performLocalQueries(this ptr<resolver> _addr_r, context.Cont
             if (pkgPattern == ".") {
                 return errSet(fmt.Errorf("%s%s is not within module rooted at %s", q.pattern, absDetail, modload.ModRoot()));
             }
-
             var match = modload.MatchInModule(ctx, pkgPattern, modload.Target, imports.AnyTags());
             if (len(match.Errs) > 0) {
                 return new pathSet(err:match.Errs[0]);
             }
-
             if (len(match.Pkgs) == 0) {
                 if (q.raw == "" || q.raw == ".") {
                     return errSet(fmt.Errorf("no package in current directory"));
@@ -856,11 +817,8 @@ private static void performLocalQueries(this ptr<resolver> _addr_r, context.Cont
                 search.WarnUnmatched(new slice<ptr<search.Match>>(new ptr<search.Match>[] { match }));
                 return new pathSet();
             }
-
             return new pathSet(pkgMods:[]module.Version{modload.Target});
-
         });
-
     }
 }
 
@@ -889,15 +847,12 @@ private static void performWildcardQueries(this ptr<resolver> _addr_r, context.C
  {
                     r.queryWildcard(ctx, q);
                 }
-
             });
-
         }
         q = q__prev1;
     }
 
     r.work.Idle().Receive();
-
 }
 
 // queryWildcard adds a candidate set to q for each module for which:
@@ -927,11 +882,9 @@ private static void queryWildcard(this ptr<resolver> _addr_r, context.Context ct
                     // This module is being removed, so it will no longer be in the build list
                     // (and thus will no longer match the pattern).
                     return new pathSet();
-
                 }
 
             }
-
 
             if (curM.Path == modload.Target.Path && !versionOkForMainModule(q.version)) {
                 if (q.matchesPath(curM.Path)) {
@@ -946,13 +899,11 @@ private static void queryWildcard(this ptr<resolver> _addr_r, context.Context ct
                 }
                 return r.tryWildcard(ctx, q, curM);
             }
-
             var (m, err) = r.queryModule(ctx, curM.Path, q.version, r.initialSelected);
             if (err != null) {
                 if (!isNoSuchModuleVersion(err)) { 
                     // We can't tell whether a matching version exists.
                     return errSet(err);
-
                 } 
                 // There is no version of curM.Path matching the query.
 
@@ -968,13 +919,9 @@ private static void queryWildcard(this ptr<resolver> _addr_r, context.Context ct
                 //
                 // Either way, punt on the query rather than erroring out just yet.
                 return new pathSet();
-
             }
-
             return r.tryWildcard(ctx, q, m);
-
         });
-
     }
 }
 
@@ -996,7 +943,6 @@ private static pathSet tryWildcard(this ptr<resolver> _addr_r, context.Context c
         return new pathSet(mod:m);
     }
     return new pathSet();
-
 }
 
 // findMissingWildcards adds a candidate set for each query in r.wildcardQueries
@@ -1017,21 +963,13 @@ private static void findMissingWildcards(this ptr<resolver> _addr_r, context.Con
                         // That's ok: this pattern is just a module pattern, and we don't
                         // need to add any more modules to satisfy it.
                         return new pathSet();
-
                     }
-
                     return errSet(err);
-
                 }
-
                 return new pathSet(pkgMods:pkgMods,mod:mod);
-
             });
-
         });
-
     }    r.work.Idle().Receive();
-
 }
 
 // checkWildcardVersions reports an error if any module in the build list has a
@@ -1055,19 +993,15 @@ private static void checkWildcardVersions(this ptr<resolver> _addr_r, context.Co
                     }
                     continue; // curM is not relevant to q.
                 }
-
             }
-
             var (rev, err) = r.queryModule(ctx, curM.Path, q.version, r.initialSelected);
             if (err != null) {
                 reportError(q, err);
                 continue;
             }
-
             if (rev.Version == curM.Version) {
                 continue; // curM already matches q.
             }
-
             if (!q.matchesPath(curM.Path)) {
                 module.Version m = new module.Version(Path:curM.Path,Version:rev.Version);
                 (packages, err) = r.matchInModule(ctx, q.pattern, m);
@@ -1083,12 +1017,9 @@ private static void checkWildcardVersions(this ptr<resolver> _addr_r, context.Co
                     if (rev.Version != q.version) {
                         version = fmt.Sprintf("%s@%s (%s)", m.Path, q.version, m.Version);
                     }
-
                     reportError(q, fmt.Errorf("%v matches packages in %v but not %v: specify a different version for module %s", q, curM, version, m.Path));
                     continue;
-
                 }
-
             } 
 
             // Since queryModule succeeded and either curM or one of the packages it
@@ -1097,7 +1028,6 @@ private static void checkWildcardVersions(this ptr<resolver> _addr_r, context.Co
             // If we're still here and the version doesn't match,
             // something has gone very wrong.
             reportError(q, fmt.Errorf("internal error: selected %v instead of %v", curM, rev.Version));
-
         }
     }
 });
@@ -1125,15 +1055,12 @@ private static void performPathQueries(this ptr<resolver> _addr_r, context.Conte
  {
                     r.queryPath(ctx, q);
                 }
-
             });
-
         }
         q = q__prev1;
     }
 
     r.work.Idle().Receive();
-
 }
 
 // queryPath adds a candidate set to q for the package with path q.pattern.
@@ -1161,16 +1088,13 @@ private static void queryPath(this ptr<resolver> _addr_r, context.Context ctx, p
                 q.matchesPackages = true;
                 return new pathSet(); // No module needed for standard library.
             }
-
         }
         var (pkgMods, mod, err) = r.queryPattern(ctx, q.pattern, q.version, r.initialSelected);
         if (err != null) {
             return errSet(err);
         }
         return new pathSet(pkgMods:pkgMods,mod:mod);
-
     });
-
 });
 
 // performPatternAllQueries populates the candidates for each query whose
@@ -1203,20 +1127,15 @@ private static void performPatternAllQueries(this ptr<resolver> _addr_r, context
                         // might no longer be dependencies after we resolve the correct
                         // version.
                         versionOk = false;
-
                     }
-
                     return new pathSet(pkgMods:pkgMods,err:err);
-
                 });
-
             }
 
             q = q__prev1;
         }
 
         return versionOk;
-
     };
 
     r.loadPackages(ctx, new slice<@string>(new @string[] { "all" }), findPackage); 
@@ -1230,9 +1149,7 @@ private static void performPatternAllQueries(this ptr<resolver> _addr_r, context
 
         foreach (var (_, __q) in r.patternAllQueries) {
             q = __q;
-            sort.Slice(q.candidates, (i, j) => {
-                return q.candidates[i].path < q.candidates[j].path;
-            });
+            sort.Slice(q.candidates, (i, j) => q.candidates[i].path < q.candidates[j].path);
         }
         q = q__prev1;
     }
@@ -1265,9 +1182,7 @@ private static slice<pathSet> findAndUpgradeImports(this ptr<resolver> _addr_r, 
             if (getU.version == "") { 
                 // The user did not request that we upgrade transitive dependencies.
                 return true;
-
             }
-
             {
                 var (_, ok) = r.resolvedVersion[m.Path];
 
@@ -1275,13 +1190,10 @@ private static slice<pathSet> findAndUpgradeImports(this ptr<resolver> _addr_r, 
                     // We cannot upgrade m implicitly because its version is determined by
                     // an explicit pattern argument.
                     return true;
-
                 }
 
             }
-
             version = getU.version;
-
         }
         var (pkgMods, err) = r.queryPackages(ctx, path, version, r.selected);
         foreach (var (_, u) in pkgMods) {
@@ -1289,9 +1201,7 @@ private static slice<pathSet> findAndUpgradeImports(this ptr<resolver> _addr_r, 
                 // The selected package version is already upgraded appropriately; there
                 // is no need to change it.
                 return true;
-
             }
-
         }        if (err != null) {
             if (isNoSuchPackageVersion(err) || (m.Path == "" && module.CheckPath(path) != null)) { 
                 // We can't find the package because it doesn't — or can't — even exist
@@ -1305,15 +1215,12 @@ private static slice<pathSet> findAndUpgradeImports(this ptr<resolver> _addr_r, 
                 // the gaps, or we will report an error (with a better import stack) in
                 // the final LoadPackages call.
                 return true;
-
             }
-
         }
         mu.Lock();
         upgrades = append(upgrades, new pathSet(path:path,pkgMods:pkgMods,err:err));
         mu.Unlock();
         return false;
-
     };
 
     r.loadPackages(ctx, patterns, findPackage); 
@@ -1322,11 +1229,8 @@ private static slice<pathSet> findAndUpgradeImports(this ptr<resolver> _addr_r, 
     // nondeterministic order. We want 'go get' to be fully deterministic,
     // including in which errors it chooses to report, so sort the candidates
     // into a deterministic-but-arbitrary order.
-    sort.Slice(upgrades, (i, j) => {
-        return upgrades[i].path < upgrades[j].path;
-    });
+    sort.Slice(upgrades, (i, j) => upgrades[i].path < upgrades[j].path);
     return upgrades;
-
 }
 
 // loadPackages loads the packages matching the given patterns, invoking the
@@ -1352,7 +1256,6 @@ private static bool loadPackages(this ptr<resolver> _addr_r, context.Context ctx
             // Packages in the standard library and main module are already at their
             // latest (and only) available versions.
             return null;
-
         }
         {
             var ok = findPackage(ctx, path, m);
@@ -1362,9 +1265,7 @@ private static bool loadPackages(this ptr<resolver> _addr_r, context.Context ctx
             }
 
         }
-
         return null;
-
     };
 
     var (_, pkgs) = modload.LoadPackages(ctx, opts, patterns);
@@ -1382,29 +1283,23 @@ private static bool loadPackages(this ptr<resolver> _addr_r, context.Context ctx
             if (errors.Is(err, errVersionChange)) { 
                 // We already added candidates during loading.
                 continue;
-
             }
-
             ptr<modload.ImportMissingError> importMissing;            ptr<modload.AmbiguousImportError> ambiguous;
             if (!errors.As(err, _addr_importMissing) && !errors.As(err, _addr_ambiguous)) { 
                 // The package, which is a dependency of something we care about, has some
                 // problem that we can't resolve with a version change.
                 // Leave the error for the final LoadPackages call.
                 continue;
-
             }
-
             var path = path;
             r.work.Add(() => {
                 findPackage(ctx, path, new module.Version());
             });
-
         }
         path = path__prev1;
     }
 
     r.work.Idle().Receive();
-
 }
 
 // errVersionChange is a sentinel error indicating that a module's version needs
@@ -1469,23 +1364,18 @@ private static bool resolveQueries(this ptr<resolver> _addr_r, context.Context c
                             // The query is not viable. Choose an arbitrary candidate from
                             // before filtering and “resolve” it to report a conflict.
                             isPackage, m = r.chooseArbitrarily(cs);
-
                         }
-
                         if (isPackage) {
                             q.matchesPackages = true;
                         }
-
                         r.resolve(q, m);
                         resolved++;
-
                     }
 
                     cs = cs__prev3;
                 }
 
                 q.candidates = unresolved;
-
             }
 
             q = q__prev2;
@@ -1505,7 +1395,6 @@ private static bool resolveQueries(this ptr<resolver> _addr_r, context.Context c
             // they might now be determined by requirements in the build list, which we
             // would prefer to use instead of arbitrary versions.
             return true;
-
         }
     }
     nint resolvedArbitrarily = 0;
@@ -1537,7 +1426,6 @@ private static bool resolveQueries(this ptr<resolver> _addr_r, context.Context c
         changed = r.updateBuildList(ctx, null);
     }
     return changed;
-
 });
 
 // applyUpgrades disambiguates candidate sets that are needed to upgrade (or
@@ -1574,15 +1462,12 @@ private static bool applyUpgrades(this ptr<resolver> _addr_r, context.Context ct
             // There is no viable candidate for the missing package.
             // Leave it unresolved.
             continue;
-
         }
         tentative = append(tentative, m);
-
     }    @base.ExitIfErrors();
 
     changed = r.updateBuildList(ctx, tentative);
     return changed;
-
 });
 
 // disambiguate eliminates candidates from cs that conflict with other module
@@ -1613,11 +1498,9 @@ private static (pathSet, bool, module.Version, bool) disambiguate(this ptr<resol
                 // A query with version "none" forces the candidate module to version
                 // "none", so we cannot use any other version for that module.
                 continue;
-
             }
 
         }
-
 
         if (m.Path == modload.Target.Path) {
             if (m.Version == modload.Target.Version) {
@@ -1625,7 +1508,6 @@ private static (pathSet, bool, module.Version, bool) disambiguate(this ptr<resol
             } 
             // The main module can only be set to its own version.
             continue;
-
         }
         var (vr, ok) = r.resolvedVersion[m.Path];
         if (!ok) { 
@@ -1633,7 +1515,6 @@ private static (pathSet, bool, module.Version, bool) disambiguate(this ptr<resol
             // still be viable.
             filtered.pkgMods = append(filtered.pkgMods, m);
             continue;
-
         }
         if (vr.version != m.Version) { 
             // Some query forces the candidate module to a version other than this
@@ -1647,10 +1528,8 @@ private static (pathSet, bool, module.Version, bool) disambiguate(this ptr<resol
             // example.com/foo/bar (because it is constrained to version
             // "none") and must fall through to module example.com/foo@latest.
             continue;
-
         }
         return (new pathSet(), true, m, true);
-
     }    if (cs.mod.Path != "") {
         (vr, ok) = r.resolvedVersion[cs.mod.Path];
         if (!ok || vr.version == cs.mod.Version) {
@@ -1661,7 +1540,6 @@ private static (pathSet, bool, module.Version, bool) disambiguate(this ptr<resol
         // Exactly one viable module contains the package with the given path
         // (by far the common case), so we can resolve it unambiguously.
         return (new pathSet(), true, filtered.pkgMods[0], true);
-
     }
     if (len(filtered.pkgMods) == 0) { 
         // All modules that could provide the path as a package conflict with other
@@ -1669,10 +1547,8 @@ private static (pathSet, bool, module.Version, bool) disambiguate(this ptr<resol
         // otherwise, this pathSet cannot be resolved (and we will return the
         // zero module.Version).
         return (new pathSet(), false, filtered.mod, true);
-
     }
     return (filtered, false, new module.Version(), false);
-
 });
 
 // chooseArbitrarily returns an arbitrary (but deterministic) module version
@@ -1696,7 +1572,6 @@ private static (bool, module.Version) chooseArbitrarily(this ptr<resolver> _addr
         return (true, cs.pkgMods[0]);
     }
     return (false, cs.mod);
-
 }
 
 // checkPackageProblems reloads packages for the given patterns and reports
@@ -1766,9 +1641,7 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
                             // user is going to build or test this package in some other
                             // configuration and suppress the error.
                             continue;
-
                         }
-
                         @base.SetExitStatus(1);
                         {
                             ref var ambiguousErr = ref heap((modload.AmbiguousImportError.val)(null), out ptr<var> _addr_ambiguousErr);
@@ -1787,13 +1660,11 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
                             }
 
                         }
-
                     }
 
                     err = err__prev2;
 
                 }
-
                 {
                     module.Version m__prev2 = m;
 
@@ -1806,7 +1677,6 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
                     m = m__prev2;
 
                 }
-
             }
 
             pkg = pkg__prev1;
@@ -1876,9 +1746,7 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
                     }
 
                 }
-
             });
-
         }
         i = i__prev1;
     }
@@ -1934,12 +1802,10 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
                 }
 
             }
-
             module.Version old = new module.Version(Path:m.Path,Version:r.initialVersion[m.Path]);
             if (old.Version == "") {
                 continue;
             }
-
             var oldActual = old;
             {
                 var oldRepl = modload.Replacement(old);
@@ -1949,11 +1815,9 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
                 }
 
             }
-
             if (mActual == oldActual || mActual.Version == "" || !modfetch.HaveSum(oldActual)) {
                 continue;
             }
-
             r.work.Add(() => {
                 {
                     var err__prev1 = err;
@@ -1976,9 +1840,7 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
                     err = err__prev1;
 
                 }
-
             });
-
         }
         i = i__prev1;
     }
@@ -2014,9 +1876,7 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
  {
                     retractPath = "<module>";
                 }
-
             }
-
         }
         mm = mm__prev1;
     }
@@ -2037,7 +1897,6 @@ private static void checkPackageProblems(this ptr<resolver> _addr_r, context.Con
     }
 
     @base.ExitIfErrors();
-
 });
 
 // reportChanges logs version changes to os.Stderr.
@@ -2114,9 +1973,7 @@ private static void reportChanges(this ptr<resolver> _addr_r, slice<module.Versi
         c = c__prev1;
     }
 
-    sort.Slice(sortedChanges, (i, j) => {
-        return sortedChanges[i].path < sortedChanges[j].path;
-    });
+    sort.Slice(sortedChanges, (i, j) => sortedChanges[i].path < sortedChanges[j].path);
     {
         var c__prev1 = c;
 
@@ -2135,7 +1992,6 @@ private static void reportChanges(this ptr<resolver> _addr_r, slice<module.Versi
  {
                 fmt.Fprintf(os.Stderr, "go get: downgraded %s %s => %s\n", c.path, c.old, c.@new);
             }
-
         }
         c = c__prev1;
     }
@@ -2162,7 +2018,6 @@ private static void resolve(this ptr<resolver> _addr_r, ptr<query> _addr_q, modu
     }
     r.resolvedVersion[m.Path] = new versionReason(m.Version,q);
     q.resolved = append(q.resolved, m);
-
 });
 
 // updateBuildList updates the module loader's global build list to be
@@ -2211,7 +2066,6 @@ private static bool updateBuildList(this ptr<resolver> _addr_r, context.Context 
         foreach (var (_, c) in constraint.Conflicts) {
             @base.Errorf("go get: %v requires %v, not %v", reason(c.Source), c.Dep, reason(c.Constraint));
         }        return false;
-
     }
     if (!changed) {
         return false;
@@ -2223,7 +2077,6 @@ private static bool updateBuildList(this ptr<resolver> _addr_r, context.Context 
     foreach (var (_, m) in r.buildList) {
         r.buildListVersion[m.Path] = m.Version;
     }    return true;
-
 });
 
 private static slice<module.Version> reqsFromGoMod(ptr<modfile.File> _addr_f) {

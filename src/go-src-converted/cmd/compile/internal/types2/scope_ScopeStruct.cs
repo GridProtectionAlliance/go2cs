@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:12:51 UTC
+//     Generated on 2022 March 13 06:26:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class types2_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Scope
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace @internal
             public static implicit operator Scope(NilType nil) => default(Scope);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Scope Scope_cast(dynamic value)
         {
             return new Scope(ref value.parent, value.children, value.elems, value.pos, value.end, value.comment, value.isFunc);

@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2022 March 06 22:21:20 UTC
+// package http -- go2cs converted at 2022 March 13 05:36:28 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\filetransport.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using System;
-using System.Threading;
-
-
 namespace go.net;
 
+using fmt = fmt_package;
+using io = io_package;
+
+
+// fileTransport implements RoundTripper for the 'file' protocol.
+
+using System;
+using System.Threading;
 public static partial class http_package {
 
-    // fileTransport implements RoundTripper for the 'file' protocol.
 private partial struct fileTransport {
     public fileHandler fh;
 }
@@ -54,7 +55,6 @@ private static (ptr<Response>, error) RoundTrip(this fileTransport t, ptr<Reques
         rw.finish();
     }());
     return (_addr_resc.Receive()!, error.As(null!)!);
-
 }
 
 private static (ptr<populateResponse>, channel<ptr<Response>>) newPopulateResponseWriter() {
@@ -89,7 +89,6 @@ private static void finish(this ptr<populateResponse> _addr_pr) {
         pr.sendResponse();
     }
     pr.pw.Close();
-
 }
 
 private static void sendResponse(this ptr<populateResponse> _addr_pr) {
@@ -104,7 +103,6 @@ private static void sendResponse(this ptr<populateResponse> _addr_pr) {
         pr.res.ContentLength = -1;
     }
     pr.ch.Send(pr.res);
-
 }
 
 private static Header Header(this ptr<populateResponse> _addr_pr) {
@@ -123,7 +121,6 @@ private static void WriteHeader(this ptr<populateResponse> _addr_pr, nint code) 
 
     pr.res.StatusCode = code;
     pr.res.Status = fmt.Sprintf("%d %s", code, StatusText(code));
-
 }
 
 private static (nint, error) Write(this ptr<populateResponse> _addr_pr, slice<byte> p) {
@@ -139,7 +136,6 @@ private static (nint, error) Write(this ptr<populateResponse> _addr_pr, slice<by
         pr.sendResponse();
     }
     return pr.pw.Write(p);
-
 }
 
 } // end http_package

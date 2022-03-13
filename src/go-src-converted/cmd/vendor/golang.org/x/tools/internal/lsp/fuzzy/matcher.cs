@@ -3,13 +3,14 @@
 // license that can be found in the LICENSE file.
 
 // Package fuzzy implements a fuzzy matching algorithm.
-// package fuzzy -- go2cs converted at 2022 March 06 23:35:15 UTC
+
+// package fuzzy -- go2cs converted at 2022 March 13 06:42:49 UTC
 // import "cmd/vendor/golang.org/x/tools/internal/lsp/fuzzy" ==> using fuzzy = go.cmd.vendor.golang.org.x.tools.@internal.lsp.fuzzy_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\internal\lsp\fuzzy\matcher.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.@internal.lsp;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
 
 public static partial class fuzzy_package {
 
@@ -20,7 +21,6 @@ public static readonly nint MaxInputSize = 127;
 // MaxPatternSize is the maximum size of the pattern used to construct the fuzzy matcher. Longer
 // inputs are truncated to this size.
 public static readonly nint MaxPatternSize = 63;
-
 
 private partial struct scoreVal { // : nint
 }
@@ -64,7 +64,6 @@ private static nint bestK(this ptr<Matcher> _addr_m, nint i, nint j) {
         return 1;
     }
     return 0;
-
 }
 
 // NewMatcher returns a new fuzzy matcher for scoring candidates against the provided pattern.
@@ -93,7 +92,6 @@ public static ptr<Matcher> NewMatcher(@string pattern) {
         m.scoreScale = 1 / float32(maxCharScore * len(pattern));
     }
     return _addr_m!;
-
 }
 
 // Score returns the score returned by matching the candidate to the pattern.
@@ -111,7 +109,6 @@ private static float Score(this ptr<Matcher> _addr_m, @string candidate) {
     if (len(m.pattern) == 0) { 
         // Empty patterns perfectly match candidates.
         return 1;
-
     }
     if (m.match(candidate, lower)) {
         var sc = m.computeScore(candidate, lower);
@@ -120,25 +117,19 @@ private static float Score(this ptr<Matcher> _addr_m, @string candidate) {
             if (len(m.pattern) == len(candidate)) { 
                 // Perfect match.
                 return 1;
-
             }
-
             if (sc < 0) {
                 sc = 0;
             }
-
             var normalizedScore = float32(sc) * m.scoreScale;
             if (normalizedScore > 1) {
                 normalizedScore = 1;
             }
-
             return normalizedScore;
-
         }
     }
     m.lastCandidateMatched = false;
     return 0;
-
 }
 
 private static readonly nint minScore = -10000;
@@ -174,12 +165,9 @@ private static slice<nint> MatchedRanges(this ptr<Matcher> _addr_m) {
  {
                 ret[len(ret) - 1] = i - 1;
             }
-
             j--;
-
         }
         i--;
-
     } 
     // Reverse slice.
     {
@@ -192,7 +180,6 @@ private static slice<nint> MatchedRanges(this ptr<Matcher> _addr_m) {
         i = i__prev1;
     }
     return ret;
-
 }
 
 private static bool match(this ptr<Matcher> _addr_m, @string candidate, slice<byte> candidateLower) {
@@ -212,7 +199,6 @@ private static bool match(this ptr<Matcher> _addr_m, @string candidate, slice<by
     m.roles = RuneRoles(candidate, m.rolesBuf[..]);
 
     return true;
-
 }
 
 private static nint computeScore(this ptr<Matcher> _addr_m, @string candidate, slice<byte> candidateLower) {
@@ -265,14 +251,11 @@ private static nint computeScore(this ptr<Matcher> _addr_m, @string candidate, s
                 wordIdx = 0;
                 segmentsLeft--;
             }
-
             nint skipPenalty = default;
             if (i == 1 || (i - 1) == lastSegStart) { 
                 // Skipping the start of first or last segment.
                 skipPenalty++;
-
             }
-
             {
                 nint j__prev2 = j;
 
@@ -285,28 +268,23 @@ private static nint computeScore(this ptr<Matcher> _addr_m, @string candidate, s
                     if (m.scores[i - 1][j][0].val() < m.scores[i - 1][j][1].val()) {
                         k = 1;
                     }
-
                     var skipScore = m.scores[i - 1][j][k].val(); 
                     // Do not penalize missing characters after the last matched segment.
                     if (j != pattLen) {
                         skipScore -= skipPenalty;
                     }
-
                     m.scores[i][j][0] = score(skipScore, k);
 
                     if (j == 0 || candidateLower[i - 1] != m.patternLower[j - 1]) { 
                         // Not a match.
                         continue;
-
                     }
-
                     var pRole = m.patternRoles[j - 1];
 
                     if (role == RTail && pRole == RHead) {
                         if (j > 1) { 
                             // Not a match: a head in the pattern matches a tail character in the candidate.
                             continue;
-
                         } 
                         // Special treatment for the first character of the pattern. We allow
                         // matches in the middle of a word if they are long enough, at least
@@ -314,7 +292,6 @@ private static nint computeScore(this ptr<Matcher> _addr_m, @string candidate, s
                         if (!bytes.HasPrefix(candidateLower[(int)i - 1..], m.patternShort)) {
                             continue;
                         }
-
                     } 
 
                     // Compute the char score.
@@ -354,34 +331,27 @@ private static nint computeScore(this ptr<Matcher> _addr_m, @string candidate, s
                                 // Logically, this is a part of charScore, but we have to compute it here because it
                                 // only applies for consecutive matches (k == 1).
                                 sc += consecutiveBonus;
-
                             }
-
                             if (k == 0) { 
                                 // Penalty 3: Matching inside a segment (and previous char wasn't matched). Penalize for the lack
                                 // of alignment.
                                 if (role == RTail || role == RUCTail) {
                                     sc -= 3;
                                 }
-
                             }
-
                             if (sc > m.scores[i][j][1].val()) {
                                 m.scores[i][j][1] = score(sc, k);
                             }
-
                         }
 
 
                         k = k__prev3;
                     }
-
                 }
 
 
                 j = j__prev2;
             }
-
         }
 
         i = i__prev1;
@@ -390,7 +360,6 @@ private static nint computeScore(this ptr<Matcher> _addr_m, @string candidate, s
     var result = m.scores[len(candidate)][len(m.pattern)][m.bestK(len(candidate), len(m.pattern))].val();
 
     return result;
-
 }
 
 // ScoreTable returns the score table computed for the provided candidate. Used only for debugging.
@@ -443,11 +412,9 @@ private static @string ScoreTable(this ptr<Matcher> _addr_m, @string candidate) 
         buf.WriteString("\n");
         buf.WriteString(separator.String());
         buf.WriteString("\n");
-
     }
 
     return buf.String();
-
 }
 
 private static int dir(nint prevK) {
@@ -455,7 +422,6 @@ private static int dir(nint prevK) {
         return 'M';
     }
     return 'H';
-
 }
 
 private static bool poorMatch(this ptr<Matcher> _addr_m) {
@@ -481,21 +447,16 @@ private static bool poorMatch(this ptr<Matcher> _addr_m) {
                 if (counter > 1) {
                     return true;
                 }
-
             }
-
             j--;
-
         }
         else
  {
             len = 0;
         }
         i--;
-
     }
     return false;
-
 }
 
 } // end fuzzy_package

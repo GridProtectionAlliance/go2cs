@@ -6,16 +6,17 @@
 
 // Package internal contains HTTP internals shared by net/http and
 // net/http/httputil.
-// package @internal -- go2cs converted at 2022 March 06 22:23:15 UTC
+
+// package @internal -- go2cs converted at 2022 March 13 05:37:39 UTC
 // import "net/http/internal" ==> using @internal = go.net.http.@internal_package
 // Original source: C:\Program Files\Go\src\net\http\internal\chunked.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.net.http;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
 
 public static partial class @internal_package {
 
@@ -37,7 +38,6 @@ public static io.Reader NewChunkedReader(io.Reader r) {
         br = bufio.NewReader(r);
     }
     return addr(new chunkedReader(r:br));
-
 }
 
 private partial struct chunkedReader {
@@ -75,7 +75,6 @@ private static bool chunkHeaderAvailable(this ptr<chunkedReader> _addr_cr) {
         return bytes.IndexByte(peek, '\n') >= 0;
     }
     return false;
-
 }
 
 private static (nint, error) Read(this ptr<chunkedReader> _addr_cr, slice<byte> b) {
@@ -90,9 +89,7 @@ private static (nint, error) Read(this ptr<chunkedReader> _addr_cr, slice<byte> 
                 // contract) instead of potentially blocking while
                 // reading more.
                 break;
-
             }
-
             _, cr.err = io.ReadFull(cr.r, cr.buf[..(int)2]);
 
             if (cr.err == null) {
@@ -101,21 +98,16 @@ private static (nint, error) Read(this ptr<chunkedReader> _addr_cr, slice<byte> 
                     break;
                 }
             }
-
             cr.checkEnd = false;
-
         }
         if (cr.n == 0) {
             if (n > 0 && !cr.chunkHeaderAvailable()) { 
                 // We've read enough. Don't potentially block
                 // reading a new chunk header.
                 break;
-
             }
-
             cr.beginChunk();
             continue;
-
         }
         if (len(b) == 0) {
             break;
@@ -136,7 +128,6 @@ private static (nint, error) Read(this ptr<chunkedReader> _addr_cr, slice<byte> 
         }
     }
     return (n, error.As(cr.err)!);
-
 }
 
 // Read a line of bytes (up to \n) from b.
@@ -159,7 +150,6 @@ private static (slice<byte>, error) readChunkLine(ptr<bufio.Reader> _addr_b) {
             err = ErrLineTooLong;
         }
         return (null, error.As(err)!);
-
     }
     if (len(p) >= maxLineLength) {
         return (null, error.As(ErrLineTooLong)!);
@@ -170,7 +160,6 @@ private static (slice<byte>, error) readChunkLine(ptr<bufio.Reader> _addr_b) {
         return (null, error.As(err)!);
     }
     return (p, error.As(null!)!);
-
 }
 
 private static slice<byte> trimTrailingWhitespace(slice<byte> b) {
@@ -199,7 +188,6 @@ private static (slice<byte>, error) removeChunkExtension(slice<byte> p) {
         return (p, error.As(null!)!);
     }
     return (p[..(int)semi], error.As(null!)!);
-
 }
 
 // NewChunkedWriter returns a new chunkedWriter that translates writes into HTTP
@@ -261,9 +249,7 @@ private static (nint, error) Write(this ptr<chunkedWriter> _addr_cw, slice<byte>
             err = bw.Flush();
         }
     }
-
     return ;
-
 }
 
 private static error Close(this ptr<chunkedWriter> _addr_cw) {
@@ -301,9 +287,7 @@ private static (ulong, error) parseHexUint(slice<byte> v) {
         }
         n<<=4;
         n |= uint64(b);
-
     }    return ;
-
 }
 
 } // end @internal_package

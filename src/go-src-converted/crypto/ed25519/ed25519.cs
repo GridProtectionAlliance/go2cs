@@ -10,19 +10,20 @@
 // representation includes a public key suffix to make multiple signing
 // operations with the same key more efficient. This package refers to the RFC
 // 8032 private key as the “seed”.
-// package ed25519 -- go2cs converted at 2022 March 06 22:17:09 UTC
+
+// package ed25519 -- go2cs converted at 2022 March 13 05:30:29 UTC
 // import "crypto/ed25519" ==> using ed25519 = go.crypto.ed25519_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\ed25519.go
-using bytes = go.bytes_package;
-using crypto = go.crypto_package;
-using edwards25519 = go.crypto.ed25519.@internal.edwards25519_package;
-using cryptorand = go.crypto.rand_package;
-using sha512 = go.crypto.sha512_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-
 namespace go.crypto;
+
+using bytes = bytes_package;
+using crypto = crypto_package;
+using edwards25519 = crypto.ed25519.@internal.edwards25519_package;
+using cryptorand = crypto.rand_package;
+using sha512 = crypto.sha512_package;
+using errors = errors_package;
+using io = io_package;
+using strconv = strconv_package;
 
 public static partial class ed25519_package {
 
@@ -35,7 +36,6 @@ public static readonly nint PrivateKeySize = 64;
 public static readonly nint SignatureSize = 64; 
 // SeedSize is the size, in bytes, of private key seeds. These are the private key representations used by RFC 8032.
 public static readonly nint SeedSize = 32;
-
 
 // PublicKey is the type of Ed25519 public keys.
 public partial struct PublicKey { // : slice<byte>
@@ -51,7 +51,6 @@ public static bool Equal(this PublicKey pub, crypto.PublicKey x) {
         return false;
     }
     return bytes.Equal(pub, xx);
-
 }
 
 // PrivateKey is the type of Ed25519 private keys. It implements crypto.Signer.
@@ -72,7 +71,6 @@ public static bool Equal(this PrivateKey priv, crypto.PrivateKey x) {
         return false;
     }
     return bytes.Equal(priv, xx);
-
 }
 
 // Seed returns the private key seed corresponding to priv. It is provided for
@@ -97,7 +95,6 @@ public static (slice<byte>, error) Sign(this PrivateKey priv, io.Reader rand, sl
         return (null, error.As(errors.New("ed25519: cannot sign hashed message"))!);
     }
     return (Sign(priv, message), error.As(null!)!);
-
 }
 
 // GenerateKey generates a public/private key pair using entropy from rand.
@@ -119,13 +116,11 @@ public static (PublicKey, PrivateKey, error) GenerateKey(io.Reader rand) {
         }
     }
 
-
     var privateKey = NewKeyFromSeed(seed);
     var publicKey = make_slice<byte>(PublicKeySize);
     copy(publicKey, privateKey[(int)32..]);
 
     return (publicKey, privateKey, error.As(null!)!);
-
 }
 
 // NewKeyFromSeed calculates a private key from a seed. It will panic if
@@ -137,7 +132,6 @@ public static PrivateKey NewKeyFromSeed(slice<byte> seed) {
     var privateKey = make_slice<byte>(PrivateKeySize);
     newKeyFromSeed(privateKey, seed);
     return privateKey;
-
 }
 
 private static void newKeyFromSeed(slice<byte> privateKey, slice<byte> seed) => func((_, panic, _) => {
@@ -149,7 +143,6 @@ private static void newKeyFromSeed(slice<byte> privateKey, slice<byte> seed) => 
         }
     }
 
-
     var h = sha512.Sum512(seed);
     var s = edwards25519.NewScalar().SetBytesWithClamping(h[..(int)32]);
     ptr<edwards25519.Point> A = (addr(new edwards25519.Point())).ScalarBaseMult(s);
@@ -158,7 +151,6 @@ private static void newKeyFromSeed(slice<byte> privateKey, slice<byte> seed) => 
 
     copy(privateKey, seed);
     copy(privateKey[(int)32..], publicKey);
-
 });
 
 // Sign signs the message with privateKey and returns a signature. It will
@@ -169,7 +161,6 @@ public static slice<byte> Sign(PrivateKey privateKey, slice<byte> message) {
     var signature = make_slice<byte>(SignatureSize);
     sign(signature, privateKey, message);
     return signature;
-
 }
 
 private static void sign(slice<byte> signature, slice<byte> privateKey, slice<byte> message) => func((_, panic, _) => {
@@ -180,7 +171,6 @@ private static void sign(slice<byte> signature, slice<byte> privateKey, slice<by
             panic("ed25519: bad private key length: " + strconv.Itoa(l));
         }
     }
-
     var seed = privateKey[..(int)SeedSize];
     var publicKey = privateKey[(int)SeedSize..];
 
@@ -209,7 +199,6 @@ private static void sign(slice<byte> signature, slice<byte> privateKey, slice<by
 
     copy(signature[..(int)32], R.Bytes());
     copy(signature[(int)32..], S.Bytes());
-
 });
 
 // Verify reports whether sig is a valid signature of message by publicKey. It
@@ -222,7 +211,6 @@ public static bool Verify(PublicKey publicKey, slice<byte> message, slice<byte> 
             panic("ed25519: bad public key length: " + strconv.Itoa(l));
         }
     }
-
 
     if (len(sig) != SignatureSize || sig[63] & 224 != 0) {
         return false;
@@ -247,7 +235,6 @@ public static bool Verify(PublicKey publicKey, slice<byte> message, slice<byte> 
     ptr<edwards25519.Point> R = (addr(new edwards25519.Point())).VarTimeDoubleScalarBaseMult(k, minusA, S);
 
     return bytes.Equal(sig[..(int)32], R.Bytes());
-
 });
 
 } // end ed25519_package

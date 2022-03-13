@@ -10,24 +10,27 @@
 // values produce unknown values unless specified
 // otherwise.
 //
-// package constant -- go2cs converted at 2022 March 06 22:41:26 UTC
+
+// package constant -- go2cs converted at 2022 March 13 05:52:31 UTC
 // import "go/constant" ==> using constant = go.go.constant_package
 // Original source: C:\Program Files\Go\src\go\constant\value.go
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using math = go.math_package;
-using big = go.math.big_package;
-using bits = go.math.bits_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
+using token = go.token_package;
+using math = math_package;
+using big = math.big_package;
+using bits = math.bits_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using utf8 = unicode.utf8_package;
+
+
+// Kind specifies the kind of value represented by a Value.
 
 public static partial class constant_package {
 
-    // Kind specifies the kind of value represented by a Value.
 public partial struct Kind { // : nint
 }
 
@@ -43,7 +46,6 @@ public static readonly var String = 1;
 public static readonly var Int = 2;
 public static readonly var Float = 3;
 public static readonly var Complex = 4;
-
 
 // A Value represents the value of a Go constant.
 public partial interface Value {
@@ -122,8 +124,7 @@ private partial struct floatVal {
 private partial struct complexVal {
     public Value re;
     public Value im;
-}
-private static Kind Kind(this unknownVal _p0) {
+}private static Kind Kind(this unknownVal _p0) {
     return Unknown;
 }
 private static Kind Kind(this boolVal _p0) {
@@ -174,10 +175,8 @@ private static @string String(this ptr<stringVal> _addr_x) {
             i += size;
         }
         s = s[..(int)i] + "...";
-
     }
     return s;
-
 }
 
 // string constructs and returns the actual string literal value.
@@ -198,7 +197,6 @@ private static @string @string(this ptr<stringVal> _addr_x) {
     x.mu.Unlock();
 
     return s;
-
 }
 
 // reverse reverses x in place and returns it.
@@ -208,7 +206,6 @@ private static slice<@string> reverse(slice<@string> x) {
         (x[i], x[n - 1 - i]) = (x[n - 1 - i], x[i]);
     }
     return x;
-
 }
 
 // appendReverse appends to list all of x's subpieces, but in reverse,
@@ -232,14 +229,12 @@ private static slice<@string> appendReverse(this ptr<stringVal> _addr_x, slice<@
         }
         l.mu.Lock();
         y = l;
-
     }
     var s = y.s;
     if (y != x) {
         y.mu.Unlock();
     }
     return append(list, s);
-
 }
 
 private static @string String(this int64Val x) {
@@ -302,7 +297,6 @@ private static @string String(this floatVal x) {
     }
 
     return fmt.Sprintf("%.6ge%+d", m, e);
-
 }
 
 private static @string String(this complexVal x) {
@@ -333,7 +327,6 @@ private static @string ExactString(this ratVal x) {
         return r.Num().String();
     }
     return r.String();
-
 }
 
 private static @string ExactString(this floatVal x) {
@@ -402,7 +395,6 @@ private static Value makeInt(ptr<big.Int> _addr_x) {
         return int64Val(x.Int64());
     }
     return new intVal(x);
-
 }
 
 private static Value makeRat(ptr<big.Rat> _addr_x) {
@@ -413,10 +405,8 @@ private static Value makeRat(ptr<big.Rat> _addr_x) {
     if (smallInt(_addr_a) && smallInt(_addr_b)) { 
         // ok to remain fraction
         return new ratVal(x);
-
     }
     return new floatVal(newFloat().SetRat(x));
-
 }
 
 private static floatVal floatVal0 = new floatVal(newFloat());
@@ -432,7 +422,6 @@ private static Value makeFloat(ptr<big.Float> _addr_x) {
         return new unknownVal();
     }
     return new floatVal(x);
-
 }
 
 private static Value makeComplex(Value re, Value im) {
@@ -440,7 +429,6 @@ private static Value makeComplex(Value re, Value im) {
         return new unknownVal();
     }
     return new complexVal(re,im);
-
 }
 
 private static Value makeFloatFromLiteral(@string lit) {
@@ -456,9 +444,7 @@ private static Value makeFloatFromLiteral(@string lit) {
                     // such as -6e-1886451601. As a float, that will underflow to 0,
                     // but it'll take forever to parse as a Rat.
                     lit = "0";
-
                 }
-
                 {
                     var (r, ok) = newRat().SetString(lit);
 
@@ -467,16 +453,12 @@ private static Value makeFloatFromLiteral(@string lit) {
                     }
 
                 }
-
             } 
             // otherwise use floats
             return makeFloat(_addr_f);
-
         }
     }
-
     return null;
-
 }
 
 // Permit fractions with component sizes up to maxExp
@@ -503,7 +485,6 @@ private static bool smallFloat64(double x) {
     }
     var (_, e) = math.Frexp(x);
     return -maxExp < e && e < maxExp;
-
 }
 
 // smallFloat reports whether x would lead to "reasonably"-sized fraction
@@ -516,7 +497,6 @@ private static bool smallFloat(ptr<big.Float> _addr_x) {
     }
     var e = x.MantExp(null);
     return -maxExp < e && e < maxExp;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -548,7 +528,6 @@ public static Value MakeUint64(ulong x) {
         return int64Val(int64(x));
     }
     return new intVal(newInt().SetUint64(x));
-
 }
 
 // MakeFloat64 returns the Float value for x.
@@ -562,7 +541,6 @@ public static Value MakeFloat64(double x) {
         return new ratVal(newRat().SetFloat64(x+0)); // convert -0 to 0
     }
     return new floatVal(newFloat().SetFloat64(x+0));
-
 }
 
 // MakeFromLiteral returns the corresponding integer, floating-point,
@@ -588,7 +566,6 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) =>
             x = x__prev1;
 
         }
-
         {
             var x__prev1 = x;
 
@@ -601,8 +578,6 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) =>
             x = x__prev1;
 
         }
-
-
     else if (tok == token.FLOAT) 
         {
             var x__prev1 = x;
@@ -616,8 +591,6 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) =>
             x = x__prev1;
 
         }
-
-
     else if (tok == token.IMAG) 
         {
             var n__prev1 = n;
@@ -633,14 +606,11 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) =>
                     }
 
                 }
-
             }
 
             n = n__prev1;
 
         }
-
-
     else if (tok == token.CHAR) 
         {
             var n__prev1 = n;
@@ -656,14 +626,11 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) =>
                     }
 
                 }
-
             }
 
             n = n__prev1;
 
         }
-
-
     else if (tok == token.STRING) 
         {
             var (s, err) = strconv.Unquote(lit);
@@ -673,12 +640,9 @@ public static Value MakeFromLiteral(@string lit, token.Token tok, nuint zero) =>
             }
 
         }
-
-
     else 
         panic(fmt.Sprintf("%v is not a valid token", tok));
         return new unknownVal();
-
 });
 
 // ----------------------------------------------------------------------------
@@ -704,7 +668,6 @@ public static bool BoolVal(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // StringVal returns the Go string value of x, which must be a String or an Unknown.
@@ -724,7 +687,6 @@ public static @string StringVal(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Int64Val returns the Go int64 value of x and whether the result is exact;
@@ -751,7 +713,6 @@ public static (long, bool) Int64Val(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Uint64Val returns the Go uint64 value of x and whether the result is exact;
@@ -778,7 +739,6 @@ public static (ulong, bool) Uint64Val(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Float32Val is like Float64Val but for float32 instead of float64.
@@ -812,7 +772,6 @@ public static (float, bool) Float32Val(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Float64Val returns the nearest Go float64 value of x and whether the result is exact;
@@ -850,7 +809,6 @@ public static (double, bool) Float64Val(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Val returns the underlying value for a given constant. Since it returns an
@@ -892,7 +850,6 @@ public static void Val(Value x) {
             break;
         }
     }
-
 }
 
 // Make returns the Value for x.
@@ -934,7 +891,6 @@ public static Value Make(object x) {
             break;
         }
     }
-
 }
 
 // BitLen returns the number of bits required to represent
@@ -962,7 +918,6 @@ public static nint BitLen(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Sign returns -1, 0, or 1 depending on whether x < 0, x == 0, or x > 0;
@@ -1000,7 +955,6 @@ public static nint Sign(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // ----------------------------------------------------------------------------
@@ -1011,7 +965,6 @@ public static nint Sign(Value x) => func((_, panic, _) => {
 private static readonly var _m = ~big.Word(0);
 private static readonly var _log = _m >> 8 & 1 + _m >> 16 & 1 + _m >> 32 & 1;
 private static readonly nint wordSize = 1 << (int)(_log);
-
 
 // Bytes returns the bytes for the absolute value of x in little-
 // endian binary representation; x must be an Int.
@@ -1048,7 +1001,6 @@ public static slice<byte> Bytes(Value x) => func((_, panic, _) => {
     }
 
     return bytes[..(int)i];
-
 });
 
 // MakeFromBytes returns the Int value given the bytes of its little-endian
@@ -1078,7 +1030,6 @@ public static Value MakeFromBytes(slice<byte> bytes) {
     }
 
     return makeInt(_addr_newInt().SetBits(words[..(int)i]));
-
 }
 
 // Num returns the numerator of x; x must be Int, Float, or Unknown.
@@ -1113,7 +1064,6 @@ public static Value Num(Value x) => func((_, panic, _) => {
         }
     }
     return new unknownVal();
-
 });
 
 // Denom returns the denominator of x; x must be Int, Float, or Unknown.
@@ -1147,7 +1097,6 @@ public static Value Denom(Value x) => func((_, panic, _) => {
         }
     }
     return new unknownVal();
-
 });
 
 // MakeImag returns the Complex value x*i;
@@ -1176,7 +1125,6 @@ public static Value MakeImag(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Real returns the real part of x, which must be a numeric or unknown value.
@@ -1208,7 +1156,6 @@ public static Value Real(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // Imag returns the imaginary part of x, which must be a numeric or unknown value.
@@ -1240,7 +1187,6 @@ public static Value Imag(Value x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // ----------------------------------------------------------------------------
@@ -1311,9 +1257,7 @@ public static Value ToInt(Value x) {
                     }
 
                 }
-
             }
-
             break;
         case complexVal x:
             {
@@ -1324,13 +1268,11 @@ public static Value ToInt(Value x) {
                 }
 
             }
-
             break;
 
     }
 
     return new unknownVal();
-
 }
 
 // ToFloat converts x to a Float value if x is representable as a Float.
@@ -1359,7 +1301,6 @@ public static Value ToFloat(Value x) {
             break;
     }
     return new unknownVal();
-
 }
 
 // ToComplex converts x to a Complex value if x is representable as a Complex.
@@ -1383,7 +1324,6 @@ public static Value ToComplex(Value x) {
             break;
     }
     return new unknownVal();
-
 }
 
 // ----------------------------------------------------------------------------
@@ -1450,7 +1390,6 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) => func((_, pan
                     z = z__prev1;
 
                 }
-
                 return makeInt(_addr_newInt().Neg(big.NewInt(int64(y))));
                 break;
             case intVal y:
@@ -1509,7 +1448,6 @@ public static Value UnaryOp(token.Token op, Value y, nuint prec) => func((_, pan
         }
     Error:
     panic(fmt.Sprintf("invalid unary operation %s%v", op, y));
-
 });
 
 private static nint ord(Value x) {
@@ -1544,7 +1482,6 @@ private static nint ord(Value x) {
             break;
         }
     }
-
 }
 
 // match returns the matching representation (same type) with the
@@ -1568,7 +1505,6 @@ private static (Value, Value) match(Value x, Value y) {
 
     }
     return (x, y);
-
 }
 
 // match0 must only be called by match.
@@ -1622,7 +1558,6 @@ private static (Value, Value) match0(Value x, Value y) {
     // force unknown and invalid values into "x position" in callers of match
     // (don't panic here so that callers can provide a better error message)
     return (x, x);
-
 }
 
 // BinaryOp returns the result of the binary expression x op y.
@@ -1803,7 +1738,6 @@ public static Value BinaryOp(Value x_, token.Token op, Value y_) => func((_, pan
 
 Error:
     panic(fmt.Sprintf("invalid binary operation %v %s %v", x_, op, y_));
-
 });
 
 private static Value add(Value x, Value y) {
@@ -1854,7 +1788,6 @@ public static Value Shift(Value x, token.Token op, nuint s) => func((_, panic, _
     }
 
     panic(fmt.Sprintf("invalid shift %v %s %d", x, op, s));
-
 });
 
 private static bool cmpZero(nint x, token.Token op) => func((_, panic, _) => {
@@ -1872,7 +1805,6 @@ private static bool cmpZero(nint x, token.Token op) => func((_, panic, _) => {
     else if (op == token.GEQ) 
         return x >= 0;
         panic(fmt.Sprintf("invalid comparison %v %s 0", x, op));
-
 });
 
 // Compare returns the result of the comparison x op y.
@@ -1951,7 +1883,6 @@ public static bool Compare(Value x_, token.Token op, Value y_) => func((_, panic
     }
 
     panic(fmt.Sprintf("invalid comparison %v %s %v", x_, op, y_));
-
 });
 
 } // end constant_package

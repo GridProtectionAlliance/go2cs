@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:27 UTC
+//     Generated on 2022 March 13 06:36:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace @internal
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct profileSource
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace @internal
             public static implicit operator profileSource(NilType nil) => default(profileSource);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static profileSource profileSource_cast(dynamic value)
         {
             return new profileSource(value.addr, ref value.source, ref value.p, value.msrc, value.remote, value.err);

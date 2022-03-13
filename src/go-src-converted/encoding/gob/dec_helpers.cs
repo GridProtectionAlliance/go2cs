@@ -4,13 +4,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2022 March 06 22:25:04 UTC
+// package gob -- go2cs converted at 2022 March 13 05:39:36 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Program Files\Go\src\encoding\gob\dec_helpers.go
-using math = go.math_package;
-using reflect = go.reflect_package;
-
 namespace go.encoding;
+
+using math = math_package;
+using reflect = reflect_package;
 
 public static partial class gob_package {
 
@@ -26,7 +26,6 @@ private static bool decBoolArray(ptr<decoderState> _addr_state, reflect.Value v,
         return false;
     }
     return decBoolSlice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decBoolSlice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -36,17 +35,14 @@ private static bool decBoolSlice(ptr<decoderState> _addr_state, reflect.Value v,
     if (!ok) { 
         // It is kind bool but not type bool. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
             errorf("decoding bool array or slice: length exceeds input size (%d elements)", length);
         }
         slice[i] = state.decodeUint() != 0;
-
     }
     return true;
-
 }
 
 private static bool decComplex64Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -57,7 +53,6 @@ private static bool decComplex64Array(ptr<decoderState> _addr_state, reflect.Val
         return false;
     }
     return decComplex64Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decComplex64Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -67,7 +62,6 @@ private static bool decComplex64Slice(ptr<decoderState> _addr_state, reflect.Val
     if (!ok) { 
         // It is kind complex64 but not type complex64. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -76,10 +70,8 @@ private static bool decComplex64Slice(ptr<decoderState> _addr_state, reflect.Val
         var real = float32FromBits(state.decodeUint(), ovfl);
         var imag = float32FromBits(state.decodeUint(), ovfl);
         slice[i] = complex(float32(real), float32(imag));
-
     }
     return true;
-
 }
 
 private static bool decComplex128Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -90,7 +82,6 @@ private static bool decComplex128Array(ptr<decoderState> _addr_state, reflect.Va
         return false;
     }
     return decComplex128Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decComplex128Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -100,7 +91,6 @@ private static bool decComplex128Slice(ptr<decoderState> _addr_state, reflect.Va
     if (!ok) { 
         // It is kind complex128 but not type complex128. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -109,10 +99,8 @@ private static bool decComplex128Slice(ptr<decoderState> _addr_state, reflect.Va
         var real = float64FromBits(state.decodeUint());
         var imag = float64FromBits(state.decodeUint());
         slice[i] = complex(real, imag);
-
     }
     return true;
-
 }
 
 private static bool decFloat32Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -123,7 +111,6 @@ private static bool decFloat32Array(ptr<decoderState> _addr_state, reflect.Value
         return false;
     }
     return decFloat32Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decFloat32Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -133,17 +120,14 @@ private static bool decFloat32Slice(ptr<decoderState> _addr_state, reflect.Value
     if (!ok) { 
         // It is kind float32 but not type float32. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
             errorf("decoding float32 array or slice: length exceeds input size (%d elements)", length);
         }
         slice[i] = float32(float32FromBits(state.decodeUint(), ovfl));
-
     }
     return true;
-
 }
 
 private static bool decFloat64Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -154,7 +138,6 @@ private static bool decFloat64Array(ptr<decoderState> _addr_state, reflect.Value
         return false;
     }
     return decFloat64Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decFloat64Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -164,17 +147,14 @@ private static bool decFloat64Slice(ptr<decoderState> _addr_state, reflect.Value
     if (!ok) { 
         // It is kind float64 but not type float64. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
             errorf("decoding float64 array or slice: length exceeds input size (%d elements)", length);
         }
         slice[i] = float64FromBits(state.decodeUint());
-
     }
     return true;
-
 }
 
 private static bool decIntArray(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -185,7 +165,6 @@ private static bool decIntArray(ptr<decoderState> _addr_state, reflect.Value v, 
         return false;
     }
     return decIntSlice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decIntSlice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -195,7 +174,6 @@ private static bool decIntSlice(ptr<decoderState> _addr_state, reflect.Value v, 
     if (!ok) { 
         // It is kind int but not type int. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -207,10 +185,8 @@ private static bool decIntSlice(ptr<decoderState> _addr_state, reflect.Value v, 
             error_(ovfl);
         }
         slice[i] = int(x);
-
     }
     return true;
-
 }
 
 private static bool decInt16Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -221,7 +197,6 @@ private static bool decInt16Array(ptr<decoderState> _addr_state, reflect.Value v
         return false;
     }
     return decInt16Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decInt16Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -231,7 +206,6 @@ private static bool decInt16Slice(ptr<decoderState> _addr_state, reflect.Value v
     if (!ok) { 
         // It is kind int16 but not type int16. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -242,10 +216,8 @@ private static bool decInt16Slice(ptr<decoderState> _addr_state, reflect.Value v
             error_(ovfl);
         }
         slice[i] = int16(x);
-
     }
     return true;
-
 }
 
 private static bool decInt32Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -256,7 +228,6 @@ private static bool decInt32Array(ptr<decoderState> _addr_state, reflect.Value v
         return false;
     }
     return decInt32Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decInt32Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -266,7 +237,6 @@ private static bool decInt32Slice(ptr<decoderState> _addr_state, reflect.Value v
     if (!ok) { 
         // It is kind int32 but not type int32. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -277,10 +247,8 @@ private static bool decInt32Slice(ptr<decoderState> _addr_state, reflect.Value v
             error_(ovfl);
         }
         slice[i] = int32(x);
-
     }
     return true;
-
 }
 
 private static bool decInt64Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -291,7 +259,6 @@ private static bool decInt64Array(ptr<decoderState> _addr_state, reflect.Value v
         return false;
     }
     return decInt64Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decInt64Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -301,17 +268,14 @@ private static bool decInt64Slice(ptr<decoderState> _addr_state, reflect.Value v
     if (!ok) { 
         // It is kind int64 but not type int64. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
             errorf("decoding int64 array or slice: length exceeds input size (%d elements)", length);
         }
         slice[i] = state.decodeInt();
-
     }
     return true;
-
 }
 
 private static bool decInt8Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -322,7 +286,6 @@ private static bool decInt8Array(ptr<decoderState> _addr_state, reflect.Value v,
         return false;
     }
     return decInt8Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decInt8Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -332,7 +295,6 @@ private static bool decInt8Slice(ptr<decoderState> _addr_state, reflect.Value v,
     if (!ok) { 
         // It is kind int8 but not type int8. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -343,10 +305,8 @@ private static bool decInt8Slice(ptr<decoderState> _addr_state, reflect.Value v,
             error_(ovfl);
         }
         slice[i] = int8(x);
-
     }
     return true;
-
 }
 
 private static bool decStringArray(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -357,7 +317,6 @@ private static bool decStringArray(ptr<decoderState> _addr_state, reflect.Value 
         return false;
     }
     return decStringSlice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decStringSlice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -367,7 +326,6 @@ private static bool decStringSlice(ptr<decoderState> _addr_state, reflect.Value 
     if (!ok) { 
         // It is kind string but not type string. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -387,10 +345,8 @@ private static bool decStringSlice(ptr<decoderState> _addr_state, reflect.Value 
         }
         slice[i] = string(data[..(int)n]);
         state.b.Drop(n);
-
     }
     return true;
-
 }
 
 private static bool decUintArray(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -401,7 +357,6 @@ private static bool decUintArray(ptr<decoderState> _addr_state, reflect.Value v,
         return false;
     }
     return decUintSlice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decUintSlice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -411,7 +366,6 @@ private static bool decUintSlice(ptr<decoderState> _addr_state, reflect.Value v,
     if (!ok) { 
         // It is kind uint but not type uint. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -422,10 +376,8 @@ private static bool decUintSlice(ptr<decoderState> _addr_state, reflect.Value v,
                     error_(ovfl)
                 }*/
         slice[i] = uint(x);
-
     }
     return true;
-
 }
 
 private static bool decUint16Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -436,7 +388,6 @@ private static bool decUint16Array(ptr<decoderState> _addr_state, reflect.Value 
         return false;
     }
     return decUint16Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decUint16Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -446,7 +397,6 @@ private static bool decUint16Slice(ptr<decoderState> _addr_state, reflect.Value 
     if (!ok) { 
         // It is kind uint16 but not type uint16. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -457,10 +407,8 @@ private static bool decUint16Slice(ptr<decoderState> _addr_state, reflect.Value 
             error_(ovfl);
         }
         slice[i] = uint16(x);
-
     }
     return true;
-
 }
 
 private static bool decUint32Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -471,7 +419,6 @@ private static bool decUint32Array(ptr<decoderState> _addr_state, reflect.Value 
         return false;
     }
     return decUint32Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decUint32Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -481,7 +428,6 @@ private static bool decUint32Slice(ptr<decoderState> _addr_state, reflect.Value 
     if (!ok) { 
         // It is kind uint32 but not type uint32. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -492,10 +438,8 @@ private static bool decUint32Slice(ptr<decoderState> _addr_state, reflect.Value 
             error_(ovfl);
         }
         slice[i] = uint32(x);
-
     }
     return true;
-
 }
 
 private static bool decUint64Array(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -506,7 +450,6 @@ private static bool decUint64Array(ptr<decoderState> _addr_state, reflect.Value 
         return false;
     }
     return decUint64Slice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decUint64Slice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -516,17 +459,14 @@ private static bool decUint64Slice(ptr<decoderState> _addr_state, reflect.Value 
     if (!ok) { 
         // It is kind uint64 but not type uint64. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
             errorf("decoding uint64 array or slice: length exceeds input size (%d elements)", length);
         }
         slice[i] = state.decodeUint();
-
     }
     return true;
-
 }
 
 private static bool decUintptrArray(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -537,7 +477,6 @@ private static bool decUintptrArray(ptr<decoderState> _addr_state, reflect.Value
         return false;
     }
     return decUintptrSlice(_addr_state, v.Slice(0, v.Len()), length, ovfl);
-
 }
 
 private static bool decUintptrSlice(ptr<decoderState> _addr_state, reflect.Value v, nint length, error ovfl) {
@@ -547,7 +486,6 @@ private static bool decUintptrSlice(ptr<decoderState> _addr_state, reflect.Value
     if (!ok) { 
         // It is kind uintptr but not type uintptr. TODO: We can handle this unsafely.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         if (state.b.Len() == 0) {
@@ -558,10 +496,8 @@ private static bool decUintptrSlice(ptr<decoderState> _addr_state, reflect.Value
             error_(ovfl);
         }
         slice[i] = uintptr(x);
-
     }
     return true;
-
 }
 
 } // end gob_package

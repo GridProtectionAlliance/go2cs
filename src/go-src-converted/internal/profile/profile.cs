@@ -5,24 +5,26 @@
 // Package profile provides a representation of
 // github.com/google/pprof/proto/profile.proto and
 // methods to encode/decode/merge profiles in this format.
-// package profile -- go2cs converted at 2022 March 06 22:24:19 UTC
+
+// package profile -- go2cs converted at 2022 March 13 05:38:46 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Program Files\Go\src\internal\profile\profile.go
-using bytes = go.bytes_package;
-using gzip = go.compress.gzip_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.@internal;
 
+using bytes = bytes_package;
+using gzip = compress.gzip_package;
+using fmt = fmt_package;
+using io = io_package;
+using regexp = regexp_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// Profile is an in-memory representation of profile.proto.
+
+using System;
 public static partial class profile_package {
 
-    // Profile is an in-memory representation of profile.proto.
 public partial struct Profile {
     public slice<ptr<ValueType>> SampleType;
     public @string DefaultSampleType;
@@ -138,7 +140,6 @@ public static (ptr<Profile>, error) Parse(io.Reader r) {
             return (_addr_null!, error.As(fmt.Errorf("decompressing profile: %v", err))!);
         }
         orig = data;
-
     }
     p, err = parseUncompressed(orig);
 
@@ -156,9 +157,7 @@ public static (ptr<Profile>, error) Parse(io.Reader r) {
             return (_addr_null!, error.As(fmt.Errorf("malformed profile: %v", err))!);
         }
     }
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static var errUnrecognized = fmt.Errorf("unrecognized profile format");
@@ -181,7 +180,6 @@ private static (ptr<Profile>, error) parseLegacy(slice<byte> data) {
             return (_addr_null!, error.As(err)!);
         }
     }    return (_addr_null!, error.As(errUnrecognized)!);
-
 }
 
 private static (ptr<Profile>, error) parseUncompressed(slice<byte> data) {
@@ -201,7 +199,6 @@ private static (ptr<Profile>, error) parseUncompressed(slice<byte> data) {
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -214,9 +211,7 @@ private static (ptr<Profile>, error) parseUncompressed(slice<byte> data) {
 
     }
 
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static var libRx = regexp.MustCompile("([.]so$|[.]so[._][0-9]+)");
@@ -239,9 +234,7 @@ private static void setMain(this ptr<Profile> _addr_p) {
             continue;
         }
         (p.Mapping[i], p.Mapping[0]) = (p.Mapping[0], p.Mapping[i]);        break;
-
     }
-
 }
 
 // Write writes the profile as a gzip-compressed marshaled protobuf.
@@ -329,7 +322,6 @@ private static error CheckValid(this ptr<Profile> _addr_p) {
             m = m__prev1;
 
         }
-
         foreach (var (_, ln) in l.Line) {
             {
                 var f__prev1 = f;
@@ -345,10 +337,8 @@ private static error CheckValid(this ptr<Profile> _addr_p) {
                 f = f__prev1;
 
             }
-
         }
     }    return error.As(null!)!;
-
 }
 
 // Aggregate merges the locations in the profile into equivalence
@@ -389,7 +379,6 @@ private static error Aggregate(this ptr<Profile> _addr_p, bool inlineFrame, bool
         }
     }
     return error.As(p.CheckValid())!;
-
 }
 
 // Print dumps a text representation of a profile. Intended mainly
@@ -405,7 +394,6 @@ private static @string String(this ptr<Profile> _addr_p) {
             ss = append(ss, fmt.Sprintf("PeriodType: %s %s", pt.Type, pt.Unit));
         }
     }
-
     ss = append(ss, fmt.Sprintf("Period: %d", p.Period));
     if (p.TimeNanos != 0) {
         ss = append(ss, fmt.Sprintf("Time: %v", time.Unix(0, p.TimeNanos)));
@@ -475,9 +463,7 @@ private static @string String(this ptr<Profile> _addr_p) {
                 }
 
                 ss = append(ss, ls);
-
             }
-
             if (len(s.NumLabel) > 0) {
                 ls = labelHeader;
                 {
@@ -495,9 +481,7 @@ private static @string String(this ptr<Profile> _addr_p) {
                 }
 
                 ss = append(ss, ls);
-
             }
-
         }
         s = s__prev1;
     }
@@ -521,11 +505,9 @@ private static @string String(this ptr<Profile> _addr_p) {
                 m = m__prev1;
 
             }
-
             if (len(l.Line) == 0) {
                 ss = append(ss, locStr);
             }
-
             foreach (var (li) in l.Line) {
                 @string lnStr = "??";
                 {
@@ -539,13 +521,10 @@ private static @string String(this ptr<Profile> _addr_p) {
                     }
 
                 }
-
                 ss = append(ss, locStr + lnStr); 
                 // Do not print location details past the first line
                 locStr = "             ";
-
             }
-
         }
         l = l__prev1;
     }
@@ -575,7 +554,6 @@ private static @string String(this ptr<Profile> _addr_p) {
     }
 
     return strings.Join(ss, "\n") + "\n";
-
 }
 
 // Merge adds profile p adjusted by ratio r into profile p. Profiles
@@ -593,7 +571,6 @@ private static error Merge(this ptr<Profile> _addr_p, ptr<Profile> _addr_pb, dou
             return error.As(err)!;
         }
     }
-
 
     pb = pb.Copy(); 
 
@@ -656,7 +633,6 @@ private static error Merge(this ptr<Profile> _addr_p, ptr<Profile> _addr_pb, dou
     }
     p.Sample = append(p.Sample, pb.Sample);
     return error.As(p.CheckValid())!;
-
 }
 
 // Compatible determines if two profiles can be compared/merged.
@@ -677,7 +653,6 @@ private static error Compatible(this ptr<Profile> _addr_p, ptr<Profile> _addr_pb
             return error.As(fmt.Errorf("incompatible sample types %v and %v", p.SampleType, pb.SampleType))!;
         }
     }    return error.As(null!)!;
-
 }
 
 // HasFunctions determines if all locations in this profile have
@@ -690,7 +665,6 @@ private static bool HasFunctions(this ptr<Profile> _addr_p) {
             return false;
         }
     }    return true;
-
 }
 
 // HasFileLines determines if all locations in this profile have
@@ -703,7 +677,6 @@ private static bool HasFileLines(this ptr<Profile> _addr_p) {
             return false;
         }
     }    return true;
-
 }
 
 private static bool compatibleValueTypes(ptr<ValueType> _addr_v1, ptr<ValueType> _addr_v2) {
@@ -714,7 +687,6 @@ private static bool compatibleValueTypes(ptr<ValueType> _addr_v1, ptr<ValueType>
         return true; // No grounds to disqualify.
     }
     return v1.Type == v2.Type && v1.Unit == v2.Unit;
-
 }
 
 // Copy makes a fully independent copy of a profile.
@@ -736,7 +708,6 @@ private static ptr<Profile> Copy(this ptr<Profile> _addr_p) => func((_, panic, _
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -749,9 +720,7 @@ private static ptr<Profile> Copy(this ptr<Profile> _addr_p) => func((_, panic, _
 
     }
 
-
     return _addr_pp!;
-
 });
 
 // Demangler maps symbol names to a human-readable form. This may
@@ -794,13 +763,11 @@ private static error Demangle(this ptr<Profile> _addr_p, Demangler d) {
                 }
 
             }
-
         }
         fn = fn__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 // Empty reports whether the profile contains no samples.
@@ -821,7 +788,6 @@ private static void Scale(this ptr<Profile> _addr_p, double ratio) {
     foreach (var (i) in p.SampleType) {
         ratios[i] = ratio;
     }    p.ScaleN(ratios);
-
 }
 
 // ScaleN multiplies each sample values in a sample by a different amount.
@@ -847,7 +813,6 @@ private static error ScaleN(this ptr<Profile> _addr_p, slice<double> ratios) {
             }
         }
     }    return error.As(null!)!;
-
 }
 
 } // end profile_package

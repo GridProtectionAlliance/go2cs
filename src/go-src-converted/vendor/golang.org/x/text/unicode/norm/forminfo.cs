@@ -2,38 +2,39 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2022 March 06 23:38:50 UTC
+// package norm -- go2cs converted at 2022 March 13 06:47:04 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\forminfo.go
-using binary = go.encoding.binary_package;
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using binary = encoding.binary_package;
 
 public static partial class norm_package {
 
-    // This file contains Form-specific logic and wrappers for data in tables.go.
+// This file contains Form-specific logic and wrappers for data in tables.go.
 
-    // Rune info is stored in a separate trie per composing form. A composing form
-    // and its corresponding decomposing form share the same trie.  Each trie maps
-    // a rune to a uint16. The values take two forms.  For v >= 0x8000:
-    //   bits
-    //   15:    1 (inverse of NFD_QC bit of qcInfo)
-    //   13..7: qcInfo (see below). isYesD is always true (no decompostion).
-    //    6..0: ccc (compressed CCC value).
-    // For v < 0x8000, the respective rune has a decomposition and v is an index
-    // into a byte array of UTF-8 decomposition sequences and additional info and
-    // has the form:
-    //    <header> <decomp_byte>* [<tccc> [<lccc>]]
-    // The header contains the number of bytes in the decomposition (excluding this
-    // length byte). The two most significant bits of this length byte correspond
-    // to bit 5 and 4 of qcInfo (see below).  The byte sequence itself starts at v+1.
-    // The byte sequence is followed by a trailing and leading CCC if the values
-    // for these are not zero.  The value of v determines which ccc are appended
-    // to the sequences.  For v < firstCCC, there are none, for v >= firstCCC,
-    // the sequence is followed by a trailing ccc, and for v >= firstLeadingCC
-    // there is an additional leading ccc. The value of tccc itself is the
-    // trailing CCC shifted left 2 bits. The two least-significant bits of tccc
-    // are the number of trailing non-starters.
+// Rune info is stored in a separate trie per composing form. A composing form
+// and its corresponding decomposing form share the same trie.  Each trie maps
+// a rune to a uint16. The values take two forms.  For v >= 0x8000:
+//   bits
+//   15:    1 (inverse of NFD_QC bit of qcInfo)
+//   13..7: qcInfo (see below). isYesD is always true (no decompostion).
+//    6..0: ccc (compressed CCC value).
+// For v < 0x8000, the respective rune has a decomposition and v is an index
+// into a byte array of UTF-8 decomposition sequences and additional info and
+// has the form:
+//    <header> <decomp_byte>* [<tccc> [<lccc>]]
+// The header contains the number of bytes in the decomposition (excluding this
+// length byte). The two most significant bits of this length byte correspond
+// to bit 5 and 4 of qcInfo (see below).  The byte sequence itself starts at v+1.
+// The byte sequence is followed by a trailing and leading CCC if the values
+// for these are not zero.  The value of v determines which ccc are appended
+// to the sequences.  For v < firstCCC, there are none, for v >= firstCCC,
+// the sequence is followed by a trailing ccc, and for v >= firstLeadingCC
+// there is an additional leading ccc. The value of tccc itself is the
+// trailing CCC shifted left 2 bits. The two least-significant bits of tccc
+// are the number of trailing non-starters.
+
 private static readonly nuint qcInfoMask = 0x3F; // to clear all but the relevant bits in a qcInfo
 private static readonly nuint headerLenMask = 0x3F; // extract the length value from the header byte
 private static readonly nuint headerFlagsMask = 0xC0; // extract the qcInfo bits from the header byte
@@ -76,7 +77,6 @@ public static bool BoundaryBefore(this Properties p) {
         return true;
     }
     return false;
-
 }
 
 // BoundaryAfter returns true if runes cannot combine with or otherwise
@@ -84,7 +84,6 @@ public static bool BoundaryBefore(this Properties p) {
 public static bool BoundaryAfter(this Properties p) { 
     // TODO: loosen these conditions.
     return p.isInert();
-
 }
 
 // We pack quick check data in 4 bits:
@@ -142,7 +141,6 @@ public static slice<byte> Decomposition(this Properties p) {
     var n = decomps[i] & headerLenMask;
     i++;
     return decomps[(int)i..(int)i + uint16(n)];
-
 }
 
 // Size returns the length of UTF-8 encoding of the rune.
@@ -156,7 +154,6 @@ public static byte CCC(this Properties p) {
         return 0;
     }
     return ccc[p.ccc];
-
 }
 
 // LeadCCC returns the CCC of the first rune in the decomposition.
@@ -185,7 +182,6 @@ private static void buildRecompMap() {
             i += 8;
         }
     }
-
 }
 
 // Recomposition
@@ -205,7 +201,6 @@ private static int combine(int a, int b) => func((_, panic, _) => {
         panic("caller error"); // see func comment
     }
     return recompMap[key];
-
 });
 
 private static Properties lookupInfoNFC(input b, nint i) {
@@ -224,7 +219,6 @@ public static Properties Properties(this Form f, slice<byte> s) {
         return compInfo(nfcData.lookup(s));
     }
     return compInfo(nfkcData.lookup(s));
-
 }
 
 // PropertiesString returns properties for the first rune in s.
@@ -233,7 +227,6 @@ public static Properties PropertiesString(this Form f, @string s) {
         return compInfo(nfcData.lookupString(s));
     }
     return compInfo(nfkcData.lookupString(s));
-
 }
 
 // compInfo converts the information contained in v and sz
@@ -249,7 +242,6 @@ private static Properties compInfo(ushort v, nint sz) {
             p.nLead = uint8(p.flags & 0x3);
         }
         return p;
-
     }
     var h = decomps[v];
     var f = (qcInfo(h & headerFlagsMask) >> 2) | 0x4;
@@ -266,15 +258,11 @@ private static Properties compInfo(ushort v, nint sz) {
                 p.flags &= 0x03;
                 p.index = 0;
                 return p;
-
             }
-
             p.ccc = decomps[v + 1];
-
         }
     }
     return p;
-
 }
 
 } // end norm_package

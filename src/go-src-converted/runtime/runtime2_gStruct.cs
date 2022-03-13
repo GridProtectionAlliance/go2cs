@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:17 UTC
+//     Generated on 2022 March 13 05:26:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct g
         {
             // Constructors
@@ -153,7 +153,7 @@ namespace go
             public static implicit operator g(NilType nil) => default(g);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static g g_cast(dynamic value)
         {
             return new g(value.stack, value.stackguard0, value.stackguard1, ref value._panic, ref value._defer, ref value.m, value.sched, value.syscallsp, value.syscallpc, value.stktopsp, value.param, value.atomicstatus, value.stackLock, value.goid, value.schedlink, value.waitsince, value.waitreason, value.preempt, value.preemptStop, value.preemptShrink, value.asyncSafePoint, value.paniconfault, value.gcscandone, value.throwsplit, value.activeStackChans, value.parkingOnChan, value.raceignore, value.sysblocktraced, value.tracking, value.trackingSeq, value.runnableStamp, value.runnableTime, value.sysexitticks, value.traceseq, value.tracelastp, value.lockedm, value.sig, value.writebuf, value.sigcode0, value.sigcode1, value.sigpc, value.gopc, ref value.ancestors, value.startpc, value.racectx, ref value.waiting, value.cgoCtxt, value.labels, ref value.timer, value.selectDone, value.gcAssistBytes);

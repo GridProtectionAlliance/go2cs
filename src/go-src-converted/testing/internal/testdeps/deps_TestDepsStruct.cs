@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:30 UTC
+//     Generated on 2022 March 13 06:43:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class testdeps_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct TestDeps
         {
             // Constructors
@@ -53,7 +53,7 @@ namespace @internal
             public static implicit operator TestDeps(NilType nil) => default(TestDeps);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static TestDeps TestDeps_cast(dynamic value)
         {
             return new TestDeps();

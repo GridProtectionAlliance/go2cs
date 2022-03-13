@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:54 UTC
+//     Generated on 2022 March 13 05:32:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace math
 {
     public static partial class rand_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Zipf
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace math
             public static implicit operator Zipf(NilType nil) => default(Zipf);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Zipf Zipf_cast(dynamic value)
         {
             return new Zipf(ref value.r, value.imax, value.v, value.q, value.s, value.oneminusQ, value.oneminusQinv, value.hxm, value.hx0minusHxm);

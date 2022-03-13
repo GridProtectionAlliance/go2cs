@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:03 UTC
+//     Generated on 2022 March 13 05:28:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace go
 {
     public static partial class context_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(cancelCtx))]
         private partial struct timerCtx
         {
@@ -71,7 +71,7 @@ namespace go
             public static implicit operator timerCtx(NilType nil) => default(timerCtx);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static timerCtx timerCtx_cast(dynamic value)
         {
             return new timerCtx(value.cancelCtx, ref value.timer, value.deadline);

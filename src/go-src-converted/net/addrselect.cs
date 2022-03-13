@@ -7,12 +7,12 @@
 
 // Minimal RFC 6724 address selection.
 
-// package net -- go2cs converted at 2022 March 06 22:15:13 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:35 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\addrselect.go
-using sort = go.sort_package;
-
 namespace go;
+
+using sort = sort_package;
 
 public static partial class net_package {
 
@@ -21,7 +21,6 @@ private static void sortByRFC6724(slice<IPAddr> addrs) {
         return ;
     }
     sortByRFC6724withSrcs(addrs, srcAddrs(addrs));
-
 }
 
 private static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<IP> srcs) => func((_, panic, _) => {
@@ -34,7 +33,6 @@ private static void sortByRFC6724withSrcs(slice<IPAddr> addrs, slice<IP> srcs) =
         addrAttr[i] = ipAttrOf(v.IP);
         srcAttr[i] = ipAttrOf(srcs[i]);
     }    sort.Stable(addr(new byRFC6724(addrs:addrs,addrAttr:addrAttr,srcs:srcs,srcAttr:srcAttr,)));
-
 });
 
 // srcsAddrs tries to UDP-connect to each address to see if it has a
@@ -56,12 +54,9 @@ private static slice<IP> srcAddrs(slice<IPAddr> addrs) {
                 }
 
             }
-
             c.Close();
-
         }
     }    return srcs;
-
 }
 
 private partial struct ipAttr {
@@ -76,7 +71,6 @@ private static ipAttr ipAttrOf(IP ip) {
     }
     var match = rfc6724policyTable.Classify(ip);
     return new ipAttr(Scope:classifyScope(ip),Precedence:match.Precedence,Label:match.Label,);
-
 }
 
 private partial struct byRFC6724 {
@@ -219,7 +213,6 @@ private static ptr<IPNet> mustCIDR(@string s) => func((_, panic, _) => {
         panic("unexpected IP length");
     }
     return _addr_ipNet!;
-
 });
 
 // Classify returns the policyTableEntry of the entry with the longest
@@ -231,7 +224,6 @@ private static policyTableEntry Classify(this policyTable t, IP ip) {
             return ent;
         }
     }    return new policyTableEntry();
-
 }
 
 // RFC 6724 section 3.1.
@@ -245,7 +237,6 @@ private static readonly scope scopeSiteLocal = 0x5;
 private static readonly scope scopeOrgLocal = 0x8;
 private static readonly scope scopeGlobal = 0xe;
 
-
 private static scope classifyScope(IP ip) {
     if (ip.IsLoopback() || ip.IsLinkLocalUnicast()) {
         return scopeLinkLocal;
@@ -258,7 +249,6 @@ private static scope classifyScope(IP ip) {
         return scopeSiteLocal;
     }
     return scopeGlobal;
-
 }
 
 // commonPrefixLen reports the length of the longest prefix (looking
@@ -281,7 +271,6 @@ private static nint commonPrefixLen(IP a, IP b) {
             a = a4;
         }
     }
-
     {
         var b4 = b.To4();
 
@@ -289,7 +278,6 @@ private static nint commonPrefixLen(IP a, IP b) {
             b = b4;
         }
     }
-
     if (len(a) != len(b)) {
         return 0;
     }
@@ -316,10 +304,8 @@ private static nint commonPrefixLen(IP a, IP b) {
                 return ;
             }
         }
-
     }
     return ;
-
 }
 
 } // end net_package

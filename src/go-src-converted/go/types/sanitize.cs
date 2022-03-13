@@ -2,22 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:42:13 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:21 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\sanitize.go
-
-
 namespace go.go;
 
 public static partial class types_package {
 
-    // sanitizeInfo walks the types contained in info to ensure that all instances
-    // are expanded.
-    //
-    // This includes some objects that may be shared across concurrent
-    // type-checking passes (such as those in the universe scope), so we are
-    // careful here not to write types that are already sanitized. This avoids a
-    // data race as any shared types should already be sanitized.
+// sanitizeInfo walks the types contained in info to ensure that all instances
+// are expanded.
+//
+// This includes some objects that may be shared across concurrent
+// type-checking passes (such as those in the universe scope), so we are
+// careful here not to write types that are already sanitized. This avoids a
+// data race as any shared types should already be sanitized.
 private static void sanitizeInfo(ptr<Info> _addr_info) {
     ref Info info = ref _addr_info.val;
 
@@ -44,7 +42,6 @@ private static void sanitizeInfo(ptr<Info> _addr_info) {
                 typ = typ__prev1;
 
             }
-
         }
         e = e__prev1;
     }
@@ -70,7 +67,6 @@ private static void sanitizeInfo(ptr<Info> _addr_info) {
                     typ = typ__prev1;
 
                 }
-
             }            {
                 var typ__prev1 = typ;
 
@@ -83,7 +79,6 @@ private static void sanitizeInfo(ptr<Info> _addr_info) {
                 typ = typ__prev1;
 
             }
-
             if (changed) {
                 inferred[e] = inf;
             }
@@ -108,7 +103,6 @@ private static void sanitizeInfo(ptr<Info> _addr_info) {
                     typ = typ__prev2;
 
                 }
-
             }
         }
         obj = obj__prev1;
@@ -131,7 +125,6 @@ private static void sanitizeInfo(ptr<Info> _addr_info) {
                     typ = typ__prev2;
 
                 }
-
             }
         }
         obj = obj__prev1;
@@ -156,7 +149,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
         t = t__prev1;
 
     }
-
     s[typ] = typ;
 
     switch (typ.type()) {
@@ -179,8 +171,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 elem = elem__prev1;
 
             }
-
-
             break;
         case ptr<Slice> t:
             {
@@ -195,8 +185,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 elem = elem__prev1;
 
             }
-
-
             break;
         case ptr<Struct> t:
             s.varList(t.fields);
@@ -210,8 +198,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 }
 
             }
-
-
             break;
         case ptr<Tuple> t:
             s.tuple(t);
@@ -234,7 +220,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 }
 
             }
-
             s.typeList(t.embeddeds);
             s.funcList(t.allMethods);
             {
@@ -245,8 +230,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 }
 
             }
-
-
             break;
         case ptr<Map> t:
             {
@@ -257,7 +240,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 }
 
             }
-
             {
                 var elem__prev1 = elem;
 
@@ -270,8 +252,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 elem = elem__prev1;
 
             }
-
-
             break;
         case ptr<Chan> t:
             {
@@ -286,8 +266,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 elem = elem__prev1;
 
             }
-
-
             break;
         case ptr<Named> t:
             if (debug && t.check != null) {
@@ -301,7 +279,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 }
 
             }
-
             {
                 var under = s.typ(t.underlying);
 
@@ -310,7 +287,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 }
 
             }
-
             s.typeList(t.targs);
             s.funcList(t.methods);
             break;
@@ -323,8 +299,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
                 }
 
             }
-
-
             break;
         case ptr<instance> t:
             typ = t.expand();
@@ -340,7 +314,6 @@ private static Type typ(this sanitizer s, Type typ) => func((_, panic, _) => {
     }
 
     return typ;
-
 });
 
 private static void var_(this sanitizer s, ptr<Var> _addr_v) {
@@ -355,7 +328,6 @@ private static void var_(this sanitizer s, ptr<Var> _addr_v) {
             }
 
         }
-
     }
 }
 
@@ -385,7 +357,6 @@ private static void func_(this sanitizer s, ptr<Func> _addr_f) {
             }
 
         }
-
     }
 }
 
@@ -405,7 +376,6 @@ private static void typeList(this sanitizer s, slice<Type> list) {
             }
 
         }
-
     }
 }
 

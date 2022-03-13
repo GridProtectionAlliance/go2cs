@@ -4,23 +4,25 @@
 
 // Package pkix contains shared, low level structures used for ASN.1 parsing
 // and serialization of X.509 certificates, CRL and OCSP.
-// package pkix -- go2cs converted at 2022 March 06 22:19:40 UTC
+
+// package pkix -- go2cs converted at 2022 March 13 05:34:38 UTC
 // import "crypto/x509/pkix" ==> using pkix = go.crypto.x509.pkix_package
 // Original source: C:\Program Files\Go\src\crypto\x509\pkix\pkix.go
-using asn1 = go.encoding.asn1_package;
-using hex = go.encoding.hex_package;
-using fmt = go.fmt_package;
-using big = go.math.big_package;
-using time = go.time_package;
-using System.ComponentModel;
-
-
 namespace go.crypto.x509;
 
+using asn1 = encoding.asn1_package;
+using hex = encoding.hex_package;
+using fmt = fmt_package;
+using big = math.big_package;
+using time = time_package;
+
+
+// AlgorithmIdentifier represents the ASN.1 structure of the same name. See RFC
+// 5280, section 4.1.1.2.
+
+using System.ComponentModel;
 public static partial class pkix_package {
 
-    // AlgorithmIdentifier represents the ASN.1 structure of the same name. See RFC
-    // 5280, section 4.1.1.2.
 public partial struct AlgorithmIdentifier {
     public asn1.ObjectIdentifier Algorithm;
     [Description("asn1:\"optional\"")]
@@ -53,11 +55,8 @@ public static @string String(this RDNSequence r) {
                     s += oidString + "=#" + hex.EncodeToString(derBytes);
                     continue; // No value escaping necessary.
                 }
-
                 typeName = oidString;
-
             }
-
             var valueString = fmt.Sprint(tv.Value);
             var escaped = make_slice<int>(0, len(valueString));
 
@@ -95,15 +94,12 @@ public static @string String(this RDNSequence r) {
  {
                     escaped = append(escaped, c);
                 }
-
             }
             s += typeName + "=" + string(escaped);
-
         }
     }
 
     return s;
-
 }
 
 public partial struct RelativeDistinguishedNameSET { // : slice<AttributeTypeAndValue>
@@ -206,9 +202,7 @@ private static void FillFromRDNSequence(this ptr<Name> _addr_n, ptr<RDNSequence>
                         n.PostalCode = append(n.PostalCode, value);
                         break;
                 }
-
             }
-
         }
     }
 }
@@ -228,7 +222,6 @@ public static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@string
         s[i].Type = oid;
         s[i].Value = value;
     }    return append(in, s);
-
 }
 
 // ToRDNSequence converts n into a single RDNSequence. The following
@@ -262,7 +255,6 @@ public static RDNSequence ToRDNSequence(this Name n) {
     foreach (var (_, atv) in n.ExtraNames) {
         ret = append(ret, new slice<AttributeTypeAndValue>(new AttributeTypeAndValue[] { atv }));
     }    return ret;
-
 }
 
 // String returns the string form of n, roughly following
@@ -305,17 +297,14 @@ public static @string String(this Name n) {
                         continue;
                         break;
                 }
-
             } 
             // Place non-standard parsed values at the beginning of the sequence
             // so they will be at the end of the string. See Issue 39924.
             rdns = append(rdns, new slice<AttributeTypeAndValue>(new AttributeTypeAndValue[] { atv }));
-
         }
     }
     rdns = append(rdns, n.ToRDNSequence());
     return rdns.String();
-
 }
 
 // oidInAttributeTypeAndValue reports whether a type with the given OID exists
@@ -326,7 +315,6 @@ private static bool oidInAttributeTypeAndValue(asn1.ObjectIdentifier oid, slice<
             return true;
         }
     }    return false;
-
 }
 
 // CertificateList represents the ASN.1 structure of the same name. See RFC

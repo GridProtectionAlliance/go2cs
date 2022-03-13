@@ -35,23 +35,23 @@
 // all its visible symbols. The argument must identify a package.
 //
 // For complete documentation, run "go help doc".
-// package main -- go2cs converted at 2022 March 06 23:15:38 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:29:06 UTC
 // Original source: C:\Program Files\Go\src\cmd\doc\main.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using log = go.log_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using token = go.token_package;
+using io = io_package;
+using log = log_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using System;
 
 public static partial class main_package {
 
@@ -104,11 +104,10 @@ private static error @do(io.Writer writer, ptr<flag.FlagSet> _addr_flagSet, slic
  
     // Loop until something is printed.
     dirs.Reset();
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         var (buildPackage, userPath, sym, more) = parseArgs(flagSet.Args());
         if (i > 0 && !more) { // Ignore the "more" bit on the first iteration.
             return error.As(failMessage(paths, symbol, method))!;
-
         }
         if (buildPackage == null) {
             return error.As(fmt.Errorf("no such package: %s", userPath))!;
@@ -155,9 +154,7 @@ private static error @do(io.Writer writer, ptr<flag.FlagSet> _addr_flagSet, slic
             if (pkg.fieldDoc(symbol, method)) {
                 return ;
             }
-        
-    }
-
+            }
 });
 
 // failMessage creates a nicely formatted error message when there is no result to show.
@@ -172,12 +169,10 @@ private static error failMessage(slice<@string> paths, @string symbol, @string m
             b.WriteString(", ");
         }
         b.WriteString(path);
-
     }    if (method == "") {
         return error.As(fmt.Errorf("no symbol %s in package%s", symbol, _addr_b))!;
     }
     return error.As(fmt.Errorf("no method or field %s.%s in package%s", symbol, method, _addr_b))!;
-
 }
 
 // parseArgs analyzes the arguments (if any) and returns the package
@@ -204,7 +199,6 @@ private static (ptr<build.Package>, @string, @string, bool) parseArgs(slice<@str
     if (len(args) == 0) { 
         // Easy: current directory.
         return (_addr_importDir(wd)!, "", "", false);
-
     }
     var arg = args[0]; 
     // We have an argument. If it is a directory name beginning with . or ..,
@@ -240,10 +234,8 @@ private static (ptr<build.Package>, @string, @string, bool) parseArgs(slice<@str
                     pkg = pkg__prev1;
 
                 }
-
             }
             return (_addr_null!, args[0], args[1], false);
-
             break;
         default: 
             usage();
@@ -317,7 +309,6 @@ private static (ptr<build.Package>, @string, @string, bool) parseArgs(slice<@str
                 if (err == null) {
                     return (_addr_pkg!, arg[(int)0..(int)period], symbol, true);
                 }
-
             }
 
             dirs.Reset(); // Next iteration of for loop must scan all the directories again.
@@ -341,7 +332,6 @@ private static (ptr<build.Package>, @string, @string, bool) parseArgs(slice<@str
         }
     }
     return (_addr_importDir(wd)!, "", arg, false);
-
 }
 
 // dotPaths lists all the dotted paths legal on Unix-like and
@@ -361,7 +351,6 @@ private static bool isDotSlash(@string arg) {
             return true;
         }
     }    return false;
-
 }
 
 // importDir is just an error-catching wrapper for build.ImportDir.
@@ -371,7 +360,6 @@ private static ptr<build.Package> importDir(@string dir) {
         log.Fatal(err);
     }
     return _addr_pkg!;
-
 }
 
 // parseSymbol breaks str apart into a symbol and method.
@@ -399,7 +387,6 @@ private static (@string, @string) parseSymbol(@string str) {
     }
     symbol = elem[0];
     return ;
-
 }
 
 // isExported reports whether the name is an exported identifier.
@@ -421,11 +408,9 @@ private static (@string, bool) findNextPackage(@string pkg) {
             return (pkg, true);
         }
         return ("", false);
-
     }
     if (pkg == "" || token.IsExported(pkg)) { // Upper case symbol cannot be a package name.
         return ("", false);
-
     }
     pkg = path.Clean(pkg);
     @string pkgSuffix = "/" + pkg;
@@ -438,7 +423,6 @@ private static (@string, bool) findNextPackage(@string pkg) {
             return (d.dir, true);
         }
     }
-
 }
 
 private static var buildCtx = build.Default;

@@ -2,31 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2022 March 06 23:24:35 UTC
+// package armasm -- go2cs converted at 2022 March 13 06:37:45 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\plan9x.go
-using bytes = go.bytes_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.arch.arm;
 
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using strings = strings_package;
+
+
+// GoSyntax returns the Go assembler syntax for the instruction.
+// The syntax was originally defined by Plan 9.
+// The pc is the program counter of the instruction, used for expanding
+// PC-relative addresses into absolute ones.
+// The symname function queries the symbol table for the program
+// being disassembled. Given a target address it returns the name and base
+// address of the symbol containing the target, if any; otherwise it returns "", 0.
+// The reader r should read from the text segment using text addresses
+// as offsets; it is used to display pc-relative loads as constant loads.
+
+using System;
 public static partial class armasm_package {
 
-    // GoSyntax returns the Go assembler syntax for the instruction.
-    // The syntax was originally defined by Plan 9.
-    // The pc is the program counter of the instruction, used for expanding
-    // PC-relative addresses into absolute ones.
-    // The symname function queries the symbol table for the program
-    // being disassembled. Given a target address it returns the name and base
-    // address of the symbol containing the target, if any; otherwise it returns "", 0.
-    // The reader r should read from the text segment using text addresses
-    // as offsets; it is used to display pc-relative loads as constant loads.
 public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)> symname, io.ReaderAt text) => func((_, panic, _) => {
     if (symname == null) {
         symname = _p0 => ("", 0);
@@ -37,7 +38,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             break;
         }
         args = append(args, plan9Arg(_addr_inst, pc, symname, a));
-
     }    var op = inst.Op.String();
 
 
@@ -60,7 +60,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                         break;
                     }
                 }
-
                 args[1] = fmt.Sprintf("$%#x", buf[0]);
             else if (inst.Op & ~15 == LDRH_EQ || inst.Op & ~15 == LDRSH_EQ) 
                 {
@@ -70,7 +69,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                         break;
                     }
                 }
-
                 args[1] = fmt.Sprintf("$%#x", binary.LittleEndian.Uint16(buf));
             else if (inst.Op & ~15 == LDR_EQ) 
                 {
@@ -80,7 +78,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                         break;
                     }
                 }
-
                 var x = binary.LittleEndian.Uint32(buf);
                 {
                     var (s, base) = symname(uint64(x));
@@ -93,8 +90,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                         args[1] = fmt.Sprintf("$%#x", x);
                     }
                 }
-
-
             else if (inst.Op & ~15 == VLDR_EQ) 
 
                 if (strings.HasPrefix(args[0], "D")) // VLDR.F64
@@ -105,7 +100,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                             break;
                         }
                     }
-
                     args[1] = fmt.Sprintf("$%f", math.Float64frombits(binary.LittleEndian.Uint64(buf)));
                 else if (strings.HasPrefix(args[0], "S")) // VLDR.F32
                     {
@@ -115,12 +109,10 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                             break;
                         }
                     }
-
                     args[1] = fmt.Sprintf("$%f", math.Float32frombits(binary.LittleEndian.Uint32(buf)));
                 else 
                     panic(fmt.Sprintf("wrong FP register: %v", inst));
-                            
-        }
+                                    }
     // Move addressing mode into opcode suffix.
     @string suffix = "";
 
@@ -140,7 +132,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             mem = mem__prev1;
 
         }
-
     else if (inst.Op & ~15 == LDR_EQ || inst.Op & ~15 == LDRB_EQ || inst.Op & ~15 == LDRSB_EQ || inst.Op & ~15 == LDRH_EQ || inst.Op & ~15 == LDRSH_EQ || inst.Op & ~15 == STR_EQ || inst.Op & ~15 == STRB_EQ || inst.Op & ~15 == STRH_EQ || inst.Op & ~15 == VLDR_EQ || inst.Op & ~15 == VSTR_EQ || inst.Op & ~15 == LDREX_EQ || inst.Op & ~15 == LDREXH_EQ || inst.Op & ~15 == LDREXB_EQ) 
         {
             Mem mem__prev1 = mem;
@@ -157,7 +148,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             mem = mem__prev1;
 
         }
-
     else if (inst.Op & ~15 == SWP_EQ || inst.Op & ~15 == SWP_B_EQ || inst.Op & ~15 == STREX_EQ || inst.Op & ~15 == STREXB_EQ || inst.Op & ~15 == STREXH_EQ) 
         {
             Mem mem__prev1 = mem;
@@ -174,7 +164,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             mem = mem__prev1;
 
         }
-
     // Reverse args, placing dest last.
     {
         nint i = 0;
@@ -228,7 +217,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
         op += " " + strings.Join(args, ", ");
     }
     return op;
-
 });
 
 // assembler syntax for the various shifts.
@@ -258,7 +246,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                 }
 
             }
-
             return fmt.Sprintf("%#x", addr);
             break;
         case Reg a:
@@ -283,12 +270,9 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                         fmt.Fprintf(_addr_buf, "R%d-R%d", start, end);
                     }
-
                     start = -2;
                     end = -2;
-
                 }
-
             }
 ;
             for (nint i = 0; i < 16; i++) {
@@ -304,7 +288,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                     flush();
                 }
-
             }
 
             flush();
@@ -319,7 +302,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
             break;
     }
     return strings.ToUpper(arg.String());
-
 }
 
 // convert memory operand from GNU syntax to Plan 9 syntax, for example,
@@ -358,10 +340,8 @@ private static (@string, @string) memOpTrans(Mem mem) {
             shift = fmt.Sprintf("%s%d", plan9Shift[mem.Shift], mem.Count);
         }
         index = fmt.Sprintf("(%sR%d%s)", sign, int(mem.Index), shift);
-
     }
     return (off + base + index, suffix);
-
 }
 
 private partial struct goFPInfo {
@@ -401,8 +381,7 @@ private static (@string, slice<@string>) fpTrans(ptr<Inst> _addr_inst, @string o
                     op = "MOVF" + op[(int)len(fp.gnuName)..];
                 else 
                     panic(fmt.Sprintf("wrong FP register: %v", inst));
-                
-            }
+                            }
             else
  {
                 op = fp.goName + op[(int)len(fp.gnuName)..];
@@ -429,9 +408,7 @@ private static (@string, slice<@string>) fpTrans(ptr<Inst> _addr_inst, @string o
                 {
                     if (inst.Args[ix]._<Reg>() & 1 == 0) { // Sx -> Fy, y = x/2, if x is even
                         args[ri] = fmt.Sprintf("F%d", (inst.Args[ix]._<Reg>() - S0) / 2);
-
                     }
-
                     goto __switch_break0;
                 }
                 if (strings.HasPrefix(args[ri], "$")) // CMPF/CMPD $0, Fx
@@ -448,13 +425,10 @@ private static (@string, slice<@string>) fpTrans(ptr<Inst> _addr_inst, @string o
                     panic(fmt.Sprintf("wrong FP register: %v", inst));
 
                 __switch_break0:;
-
             }
             break;
-
         }
     }    return (op, args);
-
 });
 
 } // end armasm_package

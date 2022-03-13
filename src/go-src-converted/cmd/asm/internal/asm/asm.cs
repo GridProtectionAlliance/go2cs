@@ -2,27 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package asm -- go2cs converted at 2022 March 06 22:43:10 UTC
+// package asm -- go2cs converted at 2022 March 13 05:54:20 UTC
 // import "cmd/asm/internal/asm" ==> using asm = go.cmd.asm.@internal.asm_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\asm\asm.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using scanner = go.text.scanner_package;
-
-using arch = go.cmd.asm.@internal.arch_package;
-using flags = go.cmd.asm.@internal.flags_package;
-using lex = go.cmd.asm.@internal.lex_package;
-using obj = go.cmd.@internal.obj_package;
-using x86 = go.cmd.@internal.obj.x86_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-
 namespace go.cmd.asm.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strconv = strconv_package;
+using scanner = text.scanner_package;
+
+using arch = cmd.asm.@internal.arch_package;
+using flags = cmd.asm.@internal.flags_package;
+using lex = cmd.asm.@internal.lex_package;
+using obj = cmd.@internal.obj_package;
+using x86 = cmd.@internal.obj.x86_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+
+
+// TODO: configure the architecture
 
 public static partial class asm_package {
 
-    // TODO: configure the architecture
 private static ptr<bytes.Buffer> testOut; // Gathers output when testing.
 
 // append adds the Prog to the end of the program-thus-far.
@@ -53,13 +55,10 @@ private static void append(this ptr<Parser> _addr_p, ptr<obj.Prog> _addr_prog, @
                 }
 
             }
-
-
         else 
             p.errorf("unrecognized suffix .%q", cond);
             return ;
-        
-    }
+            }
     if (p.firstProg == null) {
         p.firstProg = prog;
     }
@@ -101,7 +100,6 @@ private static bool validSymbol(this ptr<Parser> _addr_p, @string pseudo, ptr<ob
         return false;
     }
     return true;
-
 }
 
 // evalInteger evaluates an integer constant for a pseudo-op.
@@ -122,7 +120,6 @@ private static bool validImmediate(this ptr<Parser> _addr_p, @string pseudo, ptr
         return false;
     }
     return true;
-
 }
 
 // asmText assembles a TEXT pseudo-op.
@@ -183,14 +180,12 @@ private static void asmText(this ptr<Parser> _addr_p, slice<slice<lex.Token>> op
             return ;
         }
         argSize = p.positiveAtoi(op[1].String());
-
     }
     p.ctxt.InitTextSym(nameAddr.Sym, int(flag));
     ptr<obj.Prog> prog = addr(new obj.Prog(Ctxt:p.ctxt,As:obj.ATEXT,Pos:p.pos(),From:nameAddr,To:obj.Addr{Type:obj.TYPE_TEXTSIZE,Offset:frameSize,},));
     nameAddr.Sym.Func().Text = prog;
     prog.To.Val = int32(argSize);
     p.append(prog, "", true);
-
 }
 
 // asmData assembles a DATA pseudo-op.
@@ -235,7 +230,6 @@ private static void asmData(this ptr<Parser> _addr_p, slice<slice<lex.Token>> op
             return ;
         }
     }
-
     p.dataAddr[name] = nameAddr.Offset + int64(sz);
 
 
@@ -305,7 +299,6 @@ private static void asmGlobl(this ptr<Parser> _addr_p, slice<slice<lex.Token>> o
         return ;
     }
     p.ctxt.Globl(nameAddr.Sym, addr.Offset, int(flag));
-
 }
 
 // asmPCData assembles a PCDATA pseudo-op.
@@ -327,7 +320,6 @@ private static void asmPCData(this ptr<Parser> _addr_p, slice<slice<lex.Token>> 
     }
     ptr<obj.Prog> prog = addr(new obj.Prog(Ctxt:p.ctxt,As:obj.APCDATA,Pos:p.pos(),From:key,To:value,));
     p.append(prog, "", true);
-
 }
 
 // asmPCAlign assembles a PCALIGN pseudo-op.
@@ -345,7 +337,6 @@ private static void asmPCAlign(this ptr<Parser> _addr_p, slice<slice<lex.Token>>
     }
     ptr<obj.Prog> prog = addr(new obj.Prog(Ctxt:p.ctxt,As:obj.APCALIGN,From:key,));
     p.append(prog, "", true);
-
 }
 
 // asmFuncData assembles a FUNCDATA pseudo-op.
@@ -367,7 +358,6 @@ private static void asmFuncData(this ptr<Parser> _addr_p, slice<slice<lex.Token>
     }
     ptr<obj.Prog> prog = addr(new obj.Prog(Ctxt:p.ctxt,As:obj.AFUNCDATA,Pos:p.pos(),From:valueAddr,To:nameAddr,));
     p.append(prog, "", true);
-
 }
 
 // asmJump assembles a jump instruction.
@@ -387,7 +377,6 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
             }
             p.errorf("wrong number of arguments to %s instruction", op);
             return ;
-
             break;
         case 1: 
             target = _addr_a[0];
@@ -409,10 +398,8 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
                            p.errorf("bad register number %d", reg);
                            return ;
                        }
-
                        prog.Reg = reg;
                        break;
-
                    }
                    if (p.arch.Family == sys.MIPS || p.arch.Family == sys.MIPS64 || p.arch.Family == sys.RISCV64) { 
                        // 3-operand jumps.
@@ -421,7 +408,6 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
                        prog.From = a[0];
                        prog.Reg = p.getRegister(prog, op, _addr_a[1]);
                        break;
-
                    }
                    if (p.arch.Family == sys.S390X) { 
                        // 3-operand jumps.
@@ -430,17 +416,13 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
                        if (a[1].Reg != 0) { 
                            // Compare two registers and jump.
                            prog.Reg = p.getRegister(prog, op, _addr_a[1]);
-
                        }
                        else
             { 
                            // Compare register with immediate and jump.
                            prog.SetFrom3(a[1]);
-
                        }
-
                        break;
-
                    }
                    if (p.arch.Family == sys.ARM64) { 
                        // Special 3-operand jumps.
@@ -449,16 +431,13 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
                            p.errorf("%s: expected immediate constant; found %s", op, obj.Dconv(prog, _addr_a[0]));
                            return ;
                        }
-
                        prog.From = a[0];
                        prog.Reg = p.getRegister(prog, op, _addr_a[1]);
                        target = _addr_a[2];
                        break;
-
                    }
                    p.errorf("wrong number of arguments to %s instruction", op);
                    return ;
-
             break;
         case 4: 
             if (p.arch.Family == sys.S390X) { 
@@ -468,11 +447,9 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
                 prog.SetFrom3(a[2]);
                 target = _addr_a[3];
                 break;
-
             }
             p.errorf("wrong number of arguments to %s instruction", op);
             return ;
-
             break;
         default: 
             p.errorf("wrong number of arguments to %s instruction", op);
@@ -498,7 +475,6 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
         if (target.Sym == null) { 
             // Parse error left name unset.
             return ;
-
         }
         var targetProg = p.labels[target.Sym.Name];
         if (targetProg == null) {
@@ -522,7 +498,6 @@ private static void asmJump(this ptr<Parser> _addr_p, obj.As op, @string cond, s
         p.errorf("cannot assemble jump %+v", target);
         return ;
         p.append(prog, cond, true);
-
 }
 
 private static void patch(this ptr<Parser> _addr_p) {
@@ -535,9 +510,7 @@ private static void patch(this ptr<Parser> _addr_p) {
             return ;
         }
         p.branch(patch.prog, targetProg);
-
     }    p.toPatch = p.toPatch[..(int)0];
-
 }
 
 private static void branch(this ptr<Parser> _addr_p, ptr<obj.Prog> _addr_jmp, ptr<obj.Prog> _addr_target) {
@@ -566,7 +539,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
         if (p.arch.UnaryDst[op] || op == obj.ARET || op == obj.AGETCALLERPC) { 
             // prog.From is no address.
             prog.To = a[0];
-
         }
         else
  {
@@ -578,7 +550,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
             prog.To = a[0];
             prog.From = a[0];
             break;
-
         }
         goto __switch_break0;
     }
@@ -596,7 +567,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
                 prog.Reg = p.getRegister(prog, op, _addr_a[1]);
                 break;
             }
-
         }
         else if (p.arch.Family == sys.ARM64 && arch.IsARM64CMP(op)) {
             prog.From = a[0];
@@ -632,16 +602,13 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
                 prog.Reg = p.getRegister(prog, op, _addr_a[0]);
                 prog.To = a[2];
                 break;
-
             }
-
             if (arch.IsARMBFX(op)) { 
                 // a[0] and a[1] must be constants, a[2] must be a register
                 prog.From = a[0];
                 prog.SetFrom3(a[1]);
                 prog.To = a[2];
                 break;
-
             } 
             // Otherwise the 2nd operand (a[1]) must be a register.
             prog.From = a[0];
@@ -694,7 +661,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
                 prog.Reg = p.getRegister(prog, op, _addr_a[2]);
                 prog.To = a[1];
                 break;
-
             } 
             // Arithmetic. Choices are:
             // reg reg reg
@@ -737,7 +703,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
  {
                 prog.SetFrom3(a[1]);
             }
-
             prog.To = a[2];
         else 
             p.errorf("TODO: implement three-operand instructions for this architecture");
@@ -754,9 +719,7 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
                 prog.Reg = p.getRegister(prog, op, _addr_a[2]);
                 prog.To = a[3];
                 break;
-
             }
-
             if (arch.IsARMMULA(op)) { 
                 // All must be registers.
                 p.getRegister(prog, op, _addr_a[0]);
@@ -769,9 +732,7 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
                 prog.To.Offset = int64(r2);
                 prog.Reg = r1;
                 break;
-
             }
-
         }
         if (p.arch.Family == sys.AMD64) {
             prog.From = a[0];
@@ -801,7 +762,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
                 prog.Reg = p.getRegister(prog, op, _addr_a[1]); // rb
                 prog.To = a[3]; // rt
                 break;
-
             } 
             // Else, it is a VA-form instruction
             // reg reg reg reg
@@ -827,7 +787,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
                 p.errorf("invalid addressing modes for %s instruction", op);
                 return ;
             }
-
         }
         if (p.arch.Family == sys.S390X) {
             if (a[1].Type != obj.TYPE_REG) {
@@ -853,7 +812,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
             prog.SetRestArgs(new slice<obj.Addr>(new obj.Addr[] { a[2], a[3] }));
             prog.To = a[4];
             break;
-
         }
         if (p.arch.Family == sys.AMD64) {
             prog.From = a[0];
@@ -887,12 +845,10 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
             if (!ok) {
                 p.errorf("unrecognized condition code .%q", cond);
             }
-
             prog.To.Offset = offset;
             cond = "";
             prog.As = MRC; // Both instructions are coded as MRC.
             break;
-
         }
     }
     // default: 
@@ -902,7 +858,6 @@ private static void asmInstruction(this ptr<Parser> _addr_p, obj.As op, @string 
     __switch_break0:;
 
     p.append(prog, cond, true);
-
 }
 
 // newAddr returns a new(Addr) initialized to x.
@@ -920,7 +875,6 @@ private static @string symbolName(ptr<obj.Addr> _addr_addr) {
         return addr.Sym.Name;
     }
     return "<erroneous symbol>";
-
 }
 
 private static obj.Prog emptyProg = default;
@@ -934,7 +888,6 @@ private static long getConstantPseudo(this ptr<Parser> _addr_p, @string pseudo, 
         p.errorf("%s: expected integer constant; found %s", pseudo, obj.Dconv(_addr_emptyProg, addr));
     }
     return addr.Offset;
-
 }
 
 // getConstant checks that addr represents a plain constant and returns its value.
@@ -947,7 +900,6 @@ private static long getConstant(this ptr<Parser> _addr_p, ptr<obj.Prog> _addr_pr
         p.errorf("%s: expected integer constant; found %s", op, obj.Dconv(prog, addr));
     }
     return addr.Offset;
-
 }
 
 // getImmediate checks that addr represents an immediate constant and returns its value.
@@ -960,7 +912,6 @@ private static long getImmediate(this ptr<Parser> _addr_p, ptr<obj.Prog> _addr_p
         p.errorf("%s: expected immediate constant; found %s", op, obj.Dconv(prog, addr));
     }
     return addr.Offset;
-
 }
 
 // getRegister checks that addr represents a register and returns its value.
@@ -973,7 +924,6 @@ private static short getRegister(this ptr<Parser> _addr_p, ptr<obj.Prog> _addr_p
         p.errorf("%s: expected register; found %s", op, obj.Dconv(prog, addr));
     }
     return addr.Reg;
-
 }
 
 } // end asm_package

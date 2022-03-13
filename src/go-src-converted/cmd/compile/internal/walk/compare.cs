@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:37 UTC
+// package walk -- go2cs converted at 2022 March 13 06:24:56 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\compare.go
-using binary = go.encoding.binary_package;
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using sys = go.cmd.@internal.sys_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using binary = encoding.binary_package;
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using sys = cmd.@internal.sys_package;
+
+
+// The result of walkCompare MUST be assigned back to n, e.g.
+//     n.Left = walkCompare(n.Left, init)
+
+using System;
 public static partial class walk_package {
 
-    // The result of walkCompare MUST be assigned back to n, e.g.
-    //     n.Left = walkCompare(n.Left, init)
 private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
     ref ir.BinaryExpr n = ref _addr_n.val;
     ref ir.Nodes init = ref _addr_init.val;
@@ -71,7 +72,6 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
         // Put it all together.
         var expr = ir.NewLogicalExpr(@base.Pos, andor, eqtype, eqdata);
         return finishCompare(_addr_n, expr, _addr_init);
-
     }
     var t = n.X.Type();
     bool inline = default;
@@ -81,7 +81,6 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
     if (unalignedLoad) { 
         // Keep this low enough to generate less code than a function call.
         maxcmpsize = 2 * int64(ssagen.Arch.LinkArch.RegSize);
-
     }
 
     if (t.Kind() == types.TARRAY) 
@@ -114,7 +113,6 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
                         fn = "libfuzzerTraceConstCmp1";
                     }
                     paramType = types.Types[types.TUINT8];
-
                     break;
                 case 2: 
                     fn = "libfuzzerTraceCmp2";
@@ -122,7 +120,6 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
                         fn = "libfuzzerTraceConstCmp2";
                     }
                     paramType = types.Types[types.TUINT16];
-
                     break;
                 case 4: 
                     fn = "libfuzzerTraceCmp4";
@@ -130,7 +127,6 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
                         fn = "libfuzzerTraceConstCmp4";
                     }
                     paramType = types.Types[types.TUINT32];
-
                     break;
                 case 8: 
                     fn = "libfuzzerTraceCmp8";
@@ -138,14 +134,12 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
                         fn = "libfuzzerTraceConstCmp8";
                     }
                     paramType = types.Types[types.TUINT64];
-
                     break;
                 default: 
                     @base.Fatalf("unexpected integer size %d for %v", t.Size(), t);
                     break;
             }
             init.Append(mkcall(fn, null, init, tracecmpArg(l, paramType, _addr_init), tracecmpArg(r, paramType, _addr_init)));
-
         }
         return n;
         var cmpl = n.X;
@@ -175,7 +169,6 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
             res = ir.NewUnaryExpr(@base.Pos, ir.ONOT, res);
         }
         return finishCompare(_addr_n, res, _addr_init);
-
     }
     andor = ir.OANDAND;
     if (n.Op() == ir.ONE) {
@@ -201,7 +194,6 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
                 continue;
             }
             compare(ir.NewSelectorExpr(@base.Pos, ir.OXDOT, cmpl, sym), ir.NewSelectorExpr(@base.Pos, ir.OXDOT, cmpr, sym));
-
         }
     else
     } {
@@ -258,11 +250,9 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
                     compare(cmplw, cmprw);
                     i += step;
                     remains -= step * t.Elem().Width;
-
                 }
             }
         }
-
     }
     if (expr == null) {
         expr = ir.NewBool(n.Op() == ir.OEQ); 
@@ -272,10 +262,8 @@ private static ir.Node walkCompare(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _ad
         var a1 = typecheck.Stmt(ir.NewAssignStmt(@base.Pos, t, cmpl));
         var a2 = typecheck.Stmt(ir.NewAssignStmt(@base.Pos, t, cmpr));
         init.Append(a1, a2);
-
     }
     return finishCompare(_addr_n, expr, _addr_init);
-
 }
 
 private static ir.Node walkCompareInterface(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
@@ -295,7 +283,6 @@ private static ir.Node walkCompareInterface(ptr<ir.BinaryExpr> _addr_n, ptr<ir.N
         cmp = ir.NewLogicalExpr(@base.Pos, ir.OOROR, eqtab, ir.NewUnaryExpr(@base.Pos, ir.ONOT, eqdata));
     }
     return finishCompare(_addr_n, cmp, _addr_init);
-
 }
 
 private static ir.Node walkCompareString(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
@@ -329,7 +316,6 @@ private static ir.Node walkCompareString(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Node
             // Keep this low enough to generate less code than a function call.
             maxRewriteLen = 2 * ssagen.Arch.LinkArch.RegSize;
             combine64bit = ssagen.Arch.LinkArch.RegSize >= 8;
-
         }
         ir.Op and = default;
 
@@ -392,16 +378,13 @@ private static ir.Node walkCompareString(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Node
                         r = ir.NewLogicalExpr(@base.Pos, and, r, ir.NewBinaryExpr(@base.Pos, cmp, csubstrPart, ncsubstr));
                         remains -= step;
                         i += step;
-
                     }
 
                 }
                 return finishCompare(_addr_n, r, _addr_init);
-
             }
 
         }
-
     }
     r = default;
     if (n.Op() == ir.OEQ || n.Op() == ir.ONE) { 
@@ -414,14 +397,12 @@ private static ir.Node walkCompareString(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Node
         if (n.Op() == ir.OEQ) { 
             // len(left) == len(right) && memequal(left, right, len)
             r = ir.NewLogicalExpr(@base.Pos, ir.OANDAND, eqlen, eqmem);
-
         }
         else
  { 
             // len(left) != len(right) || !memequal(left, right, len)
             eqlen.SetOp(ir.ONE);
             r = ir.NewLogicalExpr(@base.Pos, ir.OOROR, eqlen, ir.NewUnaryExpr(@base.Pos, ir.ONOT, eqmem));
-
         }
     }
     else
@@ -429,10 +410,8 @@ private static ir.Node walkCompareString(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Node
         // sys_cmpstring(s1, s2) :: 0
         r = mkcall("cmpstring", types.Types[types.TINT], init, typecheck.Conv(n.X, types.Types[types.TSTRING]), typecheck.Conv(n.Y, types.Types[types.TSTRING]));
         r = ir.NewBinaryExpr(@base.Pos, n.Op(), r, ir.NewInt(0));
-
     }
     return finishCompare(_addr_n, r, _addr_init);
-
 }
 
 // The result of finishCompare MUST be assigned back to n, e.g.
@@ -475,7 +454,6 @@ private static (ir.Node, bool) eqFor(ptr<types.Type> _addr_t) {
     }
     @base.Fatalf("eqFor %v", t);
     return (null, false);
-
 }
 
 // brcom returns !(op).
@@ -496,7 +474,6 @@ private static ir.Op brcom(ir.Op op) {
         return ir.OLT;
         @base.Fatalf("brcom: no com for %v\n", op);
     return op;
-
 }
 
 // brrev returns reverse(op).
@@ -517,7 +494,6 @@ private static ir.Op brrev(ir.Op op) {
         return ir.OLE;
         @base.Fatalf("brrev: no rev for %v\n", op);
     return op;
-
 }
 
 private static ir.Node tracecmpArg(ir.Node n, ptr<types.Type> _addr_t, ptr<ir.Nodes> _addr_init) {
@@ -529,7 +505,6 @@ private static ir.Node tracecmpArg(ir.Node n, ptr<types.Type> _addr_t, ptr<ir.No
         n = copyExpr(n, n.Type(), init);
     }
     return typecheck.Conv(n, t);
-
 }
 
 // canMergeLoads reports whether the backend optimization passes for
@@ -544,7 +519,6 @@ private static bool canMergeLoads() {
         // Load combining only supported on ppc64le.
         return ssagen.Arch.LinkArch.ByteOrder == binary.LittleEndian;
         return false;
-
 }
 
 } // end walk_package

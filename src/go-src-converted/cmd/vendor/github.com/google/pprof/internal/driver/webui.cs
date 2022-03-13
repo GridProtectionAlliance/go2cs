@@ -12,34 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:33 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:37 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\webui.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using template = go.html.template_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using gourl = go.net.url_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
-using graph = go.github.com.google.pprof.@internal.graph_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using report = go.github.com.google.pprof.@internal.report_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System.Threading;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using template = html.template_package;
+using net = net_package;
+using http = net.http_package;
+using gourl = net.url_package;
+using os = os_package;
+using exec = os.exec_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+using graph = github.com.google.pprof.@internal.graph_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using report = github.com.google.pprof.@internal.report_package;
+using profile = github.com.google.pprof.profile_package;
+
+
+// webInterface holds the state needed for serving a browser based interface.
+
+using System.Threading;
+using System;
 public static partial class driver_package {
 
-    // webInterface holds the state needed for serving a browser based interface.
 private partial struct webInterface {
     public ptr<profile.Profile> prof;
     public ptr<plugin.Options> options;
@@ -62,7 +63,6 @@ private static (ptr<webInterface>, error) makeWebInterface(ptr<profile.Profile> 
     addTemplates(templates);
     report.AddSourceTemplates(templates);
     return (addr(new webInterface(prof:p,options:opt,help:make(map[string]string),templates:templates,settingsFile:settingsFile,)), error.As(null!)!);
-
 }
 
 // maxEntries is the maximum number of entries to print for text interfaces.
@@ -155,7 +155,6 @@ private static error serveWebInterface(@string hostport, ptr<profile.Profile> _a
         go_(() => openBrowser(url, _addr_o));
     }
     return error.As(server(args))!;
-
 }
 
 private static (@string, nint, error) getHostAndPort(@string hostport) {
@@ -190,7 +189,6 @@ private static (@string, nint, error) getHostAndPort(@string hostport) {
         }
     }
     return (host, port, error.As(null!)!);
-
 }
 private static error defaultWebServer(ptr<plugin.HTTPServerArgs> _addr_args) {
     ref plugin.HTTPServerArgs args = ref _addr_args.val;
@@ -208,16 +206,13 @@ private static error defaultWebServer(ptr<plugin.HTTPServerArgs> _addr_args) {
                 http.Error(w, "permission denied", http.StatusForbidden);
                 return ;
             }
-
         }
         var h = args.Handlers[req.URL.Path];
         if (h == null) { 
             // Fall back to default behavior
             h = http.DefaultServeMux;
-
         }
         h.ServeHTTP(w, req);
-
     }); 
 
     // We serve the ui at /ui/ and redirect there from the root. This is done
@@ -229,7 +224,6 @@ private static error defaultWebServer(ptr<plugin.HTTPServerArgs> _addr_args) {
     mux.Handle("/", redirectWithQuery("/ui"));
     ptr<http.Server> s = addr(new http.Server(Handler:mux));
     return error.As(s.Serve(ln))!;
-
 }
 
 private static http.HandlerFunc redirectWithQuery(@string path) {
@@ -245,7 +239,6 @@ private static bool isLocalhost(@string host) {
             return true;
         }
     }    return false;
-
 }
 
 private static void openBrowser(@string url, ptr<plugin.Options> _addr_o) {
@@ -274,9 +267,7 @@ private static void openBrowser(@string url, ptr<plugin.Options> _addr_o) {
             }
 
         }
-
     }    o.UI.PrintErr(u.String());
-
 }
 
 // makeReport generates a report for the specified command.
@@ -297,7 +288,6 @@ private static (ptr<report.Report>, slice<@string>) makeReport(this ptr<webInter
             return (_addr_null!, null);
         }
     }
-
     if (configEditor != null) {
         configEditor(_addr_cfg);
     }
@@ -311,7 +301,6 @@ private static (ptr<report.Report>, slice<@string>) makeReport(this ptr<webInter
         return (_addr_null!, null);
     }
     return (_addr_rpt!, catcher.errors);
-
 }
 
 // render generates html using the named template based on the contents of data.
@@ -340,10 +329,8 @@ private static void render(this ptr<webInterface> _addr_ui, http.ResponseWriter 
             return ;
         }
     }
-
     w.Header().Set("Content-Type", "text/html");
     w.Write(html.Bytes());
-
 }
 
 // dot generates a web page containing an svg diagram.
@@ -372,7 +359,6 @@ private static void dot(this ptr<webInterface> _addr_ui, http.ResponseWriter w, 
     foreach (var (_, n) in g.Nodes) {
         nodes = append(nodes, n.Info.Name);
     }    ui.render(w, req, "graph", rpt, errList, legend, new webArgs(HTMLBody:template.HTML(string(svg)),Nodes:nodes,));
-
 }
 
 private static (slice<byte>, error) dotToSvg(slice<byte> dot) {
@@ -400,9 +386,7 @@ private static (slice<byte>, error) dotToSvg(slice<byte> dot) {
             svg = svg[(int)pos..];
         }
     }
-
     return (svg, error.As(null!)!);
-
 }
 
 private static void top(this ptr<webInterface> _addr_ui, http.ResponseWriter w, ptr<http.Request> _addr_req) {
@@ -420,7 +404,6 @@ private static void top(this ptr<webInterface> _addr_ui, http.ResponseWriter w, 
     foreach (var (_, item) in top) {
         nodes = append(nodes, item.Name);
     }    ui.render(w, req, "top", rpt, errList, legend, new webArgs(Top:top,Nodes:nodes,));
-
 }
 
 // disasm generates a web page containing disassembly.
@@ -444,11 +427,8 @@ private static void disasm(this ptr<webInterface> _addr_ui, http.ResponseWriter 
         }
     }
 
-
     var legend = report.ProfileLabels(rpt);
     ui.render(w, req, "plaintext", rpt, errList, legend, new webArgs(TextBody:out.String(),));
-
-
 }
 
 // source generates a web page containing source code annotated with profile
@@ -473,10 +453,8 @@ private static void source(this ptr<webInterface> _addr_ui, http.ResponseWriter 
         }
     }
 
-
     var legend = report.ProfileLabels(rpt);
     ui.render(w, req, "sourcelisting", rpt, errList, legend, new webArgs(HTMLBody:template.HTML(body.String()),));
-
 }
 
 // peek generates a web page listing callers/callers.
@@ -502,10 +480,8 @@ private static void peek(this ptr<webInterface> _addr_ui, http.ResponseWriter w,
         }
     }
 
-
     var legend = report.ProfileLabels(rpt);
     ui.render(w, req, "plaintext", rpt, errList, legend, new webArgs(TextBody:out.String(),));
-
 }
 
 // saveConfig saves URL configuration.
@@ -522,7 +498,6 @@ private static void saveConfig(this ptr<webInterface> _addr_ui, http.ResponseWri
             return ;
         }
     }
-
 }
 
 // deleteConfig deletes a configuration.
@@ -540,7 +515,6 @@ private static void deleteConfig(this ptr<webInterface> _addr_ui, http.ResponseW
             return ;
         }
     }
-
 }
 
 // getFromLegend returns the suffix of an entry in legend that starts
@@ -551,7 +525,6 @@ private static @string getFromLegend(slice<@string> legend, @string param, @stri
             return s[(int)len(param)..];
         }
     }    return def;
-
 }
 
 } // end driver_package

@@ -4,11 +4,10 @@
 
 // Package unicode provides data and functions to test some properties of
 // Unicode code points.
-// package unicode -- go2cs converted at 2022 March 06 22:14:12 UTC
+
+// package unicode -- go2cs converted at 2022 March 13 05:28:21 UTC
 // import "unicode" ==> using unicode = go.unicode_package
 // Original source: C:\Program Files\Go\src\unicode\letter.go
-
-
 namespace go;
 
 public static partial class unicode_package {
@@ -76,7 +75,6 @@ public static readonly var LowerCase = 0;
 public static readonly var TitleCase = 1;
 public static readonly var MaxCase = 2;
 
-
 private partial struct d { // : array<int>
 } // to make the CaseRanges text shorter
 
@@ -122,7 +120,6 @@ private static bool is16(slice<Range16> ranges, ushort r) {
         }
     }
     return false;
-
 }
 
 // is32 reports whether r is in the sorted slice of 32-bit ranges.
@@ -155,7 +152,6 @@ private static bool is32(slice<Range32> ranges, uint r) {
         }
     }
     return false;
-
 }
 
 // Is reports whether the rune is in the specified table of ranges.
@@ -172,7 +168,6 @@ public static bool Is(ptr<RangeTable> _addr_rangeTab, int r) {
         return is32(r32, uint32(r));
     }
     return false;
-
 }
 
 private static bool isExcludingLatin(ptr<RangeTable> _addr_rangeTab, int r) {
@@ -187,13 +182,11 @@ private static bool isExcludingLatin(ptr<RangeTable> _addr_rangeTab, int r) {
             return is16(r16[(int)off..], uint16(r));
         }
     }
-
     var r32 = rangeTab.R32;
     if (len(r32) > 0 && r >= rune(r32[0].Lo)) {
         return is32(r32, uint32(r));
     }
     return false;
-
 }
 
 // IsUpper reports whether the rune is an upper case letter.
@@ -203,7 +196,6 @@ public static bool IsUpper(int r) {
         return properties[uint8(r)] & pLmask == pLu;
     }
     return isExcludingLatin(_addr_Upper, r);
-
 }
 
 // IsLower reports whether the rune is a lower case letter.
@@ -213,7 +205,6 @@ public static bool IsLower(int r) {
         return properties[uint8(r)] & pLmask == pLl;
     }
     return isExcludingLatin(_addr_Lower, r);
-
 }
 
 // IsTitle reports whether the rune is a title case letter.
@@ -222,7 +213,6 @@ public static bool IsTitle(int r) {
         return false;
     }
     return isExcludingLatin(_addr_Title, r);
-
 }
 
 // to maps the rune using the specified case mapping.
@@ -253,11 +243,8 @@ private static (int, bool) to(nint _case, int r, slice<CaseRange> caseRange) {
                 // The constants UpperCase and TitleCase are even while LowerCase
                 // is odd so we take the low bit from _case.
                 return (rune(cr.Lo) + ((r - rune(cr.Lo)) & ~1 | rune(_case & 1)), true);
-
             }
-
             return (r + delta, true);
-
         }
         if (r < rune(cr.Lo)) {
             hi = m;
@@ -268,7 +255,6 @@ private static (int, bool) to(nint _case, int r, slice<CaseRange> caseRange) {
         }
     }
     return (r, false);
-
 }
 
 // To maps the rune to the specified case: UpperCase, LowerCase, or TitleCase.
@@ -284,10 +270,8 @@ public static int ToUpper(int r) {
             r -= 'a' - 'A';
         }
         return r;
-
     }
     return To(UpperCase, r);
-
 }
 
 // ToLower maps the rune to lower case.
@@ -297,10 +281,8 @@ public static int ToLower(int r) {
             r += 'a' - 'A';
         }
         return r;
-
     }
     return To(LowerCase, r);
-
 }
 
 // ToTitle maps the rune to title case.
@@ -308,13 +290,10 @@ public static int ToTitle(int r) {
     if (r <= MaxASCII) {
         if ('a' <= r && r <= 'z') { // title case is upper case for ASCII
             r -= 'a' - 'A';
-
         }
         return r;
-
     }
     return To(TitleCase, r);
-
 }
 
 // ToUpper maps the rune to upper case giving priority to the special mapping.
@@ -324,7 +303,6 @@ public static int ToUpper(this SpecialCase special, int r) {
         r1 = ToUpper(r);
     }
     return r1;
-
 }
 
 // ToTitle maps the rune to title case giving priority to the special mapping.
@@ -334,7 +312,6 @@ public static int ToTitle(this SpecialCase special, int r) {
         r1 = ToTitle(r);
     }
     return r1;
-
 }
 
 // ToLower maps the rune to lower case giving priority to the special mapping.
@@ -344,7 +321,6 @@ public static int ToLower(this SpecialCase special, int r) {
         r1 = ToLower(r);
     }
     return r1;
-
 }
 
 // caseOrbit is defined in tables.go as []foldPair. Right now all the
@@ -403,9 +379,7 @@ public static int SimpleFold(int r) {
             return l;
         }
     }
-
     return ToUpper(r);
-
 }
 
 } // end unicode_package

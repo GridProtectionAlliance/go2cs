@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:11 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:40 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\proc.go
-using abi = go.@internal.abi_package;
-using cpu = go.@internal.cpu_package;
-using goexperiment = go.@internal.goexperiment_package;
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using abi = @internal.abi_package;
+using cpu = @internal.cpu_package;
+using goexperiment = @internal.goexperiment_package;
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// set using cmd/go/internal/modload.ModInfoProg
+
+using System;
+using System.Threading;
 public static partial class runtime_package {
 
-    // set using cmd/go/internal/modload.ModInfoProg
 private static @string modinfo = default;
 
 // Goroutine scheduler
@@ -173,7 +174,6 @@ private static void Main() => func((defer, _, _) => {
         systemstack(() => {
             newm(sysmon, _addr_null, -1);
         });
-
     }
     lockOSThread();
 
@@ -222,7 +222,6 @@ private static void Main() => func((defer, _, _) => {
         }
         startTemplateThread();
         cgocall(_cgo_notify_runtime_init_done, null);
-
     }
     doInit(_addr_main_inittask); 
 
@@ -239,7 +238,6 @@ private static void Main() => func((defer, _, _) => {
         // A program compiled with -buildmode=c-archive or c-shared
         // has a main, but it is not executed.
         return ;
-
     }
     var fn = main_main; // make an indirect call, as the linker doesn't know the address of the main package when laying down the runtime
     fn();
@@ -254,7 +252,6 @@ private static void Main() => func((defer, _, _) => {
             }
             Gosched();
         }
-
     }
     if (atomic.Load(_addr_panicking) != 0) {
         gopark(null, null, waitReasonPanicWait, traceEvGoStop, 1);
@@ -264,7 +261,6 @@ private static void Main() => func((defer, _, _) => {
         ptr<int> x;
         x.val = 0;
     }
-
 });
 
 // os_beforeExit is called from os.Exit(0).
@@ -295,9 +291,7 @@ private static void forcegchelper() {
             println("GC forced");
         }
         gcStart(new gcTrigger(kind:gcTriggerTime,now:nanotime()));
-
     }
-
 }
 
 //go:nosplit
@@ -351,7 +345,6 @@ private static bool gopark(Func<ptr<g>, unsafe.Pointer, bool> unlockf, unsafe.Po
     releasem(mp); 
     // can't do anything that might move the G between Ms here.
     mcall(park_m);
-
 }
 
 // Puts the current goroutine into a waiting state and unlocks the lock.
@@ -406,7 +399,6 @@ private static ptr<sudog> acquireSudog() {
     }
     releasem(mp);
     return _addr_s!;
-
 }
 
 //go:nosplit
@@ -453,19 +445,15 @@ private static void releaseSudog(ptr<sudog> _addr_s) {
  {
                 last.next = p;
             }
-
             last = p;
-
         }
         lock(_addr_sched.sudoglock);
         last.next = sched.sudogcache;
         sched.sudogcache = first;
         unlock(_addr_sched.sudoglock);
-
     }
     pp.sudogcache = append(pp.sudogcache, s);
     releasem(mp);
-
 }
 
 // funcPC returns the entry PC of the function f.
@@ -543,7 +531,6 @@ private static void allgadd(ptr<g> _addr_gp) {
     }
     atomic.Storeuintptr(_addr_allglen, uintptr(len(allgs)));
     unlock(_addr_allglock);
-
 }
 
 // atomicAllG returns &allgs[0] and len(allgs) for use with atomicAllGIndex.
@@ -591,7 +578,6 @@ private static void forEachGRace(Action<ptr<g>> fn) {
 // 16 seems to provide enough amortization, but other than that it's mostly arbitrary number.
 private static readonly nint _GoidCacheBatch = 16;
 
-
 // cpuinit extracts the environment variable GODEBUG from the environment on
 // Unix-like operating systems and calls internal/cpu.Initialize.
 private static void cpuinit() {
@@ -638,7 +624,6 @@ private static void cpuinit() {
                     break;
                 }
             }
-
             break;
     }
 
@@ -653,7 +638,6 @@ private static void cpuinit() {
     armHasVFPv4 = cpu.ARM.HasVFPv4;
 
     arm64HasATOMICS = cpu.ARM64.HasATOMICS;
-
 }
 
 // The bootstrap sequence is:
@@ -719,7 +703,6 @@ private static void schedinit() {
         }
     }
 
-
     goargs();
     goenvs();
     parsedebugvars();
@@ -735,7 +718,6 @@ private static void schedinit() {
             procs = n;
         }
     }
-
     if (procresize(procs) != null) {
         throw("unknown runnable goroutine during bootstrap");
     }
@@ -758,13 +740,11 @@ private static void schedinit() {
         // Condition should never trigger. This code just serves
         // to ensure runtime·buildVersion is kept in the resulting binary.
         buildVersion = "unknown";
-
     }
     if (len(modinfo) == 1) { 
         // Condition should never trigger. This code just serves
         // to ensure runtime·modinfo is kept in the resulting binary.
         modinfo = "";
-
     }
 }
 
@@ -800,7 +780,6 @@ private static long mReserveID() {
     sched.mnext++;
     checkmcount();
     return id;
-
 }
 
 // Pre-allocated ID may be passed as 'id', or omitted by passing -1.
@@ -871,7 +850,6 @@ private static void ready(ptr<g> _addr_gp, nint traceskip, bool next) {
     runqput(_addr__g_.m.p.ptr(), _addr_gp, next);
     wakep();
     releasem(mp);
-
 }
 
 // freezeStopWait is a large value that freezetheworld sets
@@ -903,13 +881,11 @@ private static void freezetheworld() {
             break; // no running goroutines
         }
         usleep(1000);
-
     } 
     // to be sure
     usleep(1000);
     preemptall();
     usleep(1000);
-
 }
 
 // All reads and writes of g's status go through readgstatus, casgstatus
@@ -946,7 +922,6 @@ private static void casfrom_Gscanstatus(ptr<g> _addr_gp, uint oldval, uint newva
         throw("casfrom_Gscanstatus: gp->status is not in scan state");
     }
     releaseLockRank(lockRankGscan);
-
 }
 
 // This will return false if the gp is not in the expected status and the cas fails.
@@ -966,7 +941,6 @@ private static bool castogscanstatus(ptr<g> _addr_gp, uint oldval, uint newval) 
         print("runtime: castogscanstatus oldval=", hex(oldval), " newval=", hex(newval), "\n");
     throw("castogscanstatus");
     panic("not reached");
-
 });
 
 // If asked to move to or from a Gscanstatus this will throw. Use the castogscanstatus
@@ -1005,8 +979,6 @@ private static void casgstatus(ptr<g> _addr_gp, uint oldval, uint newval) {
                 procyield(1);
             }
         else
-
-
         } {
             osyield();
             nextYield = nanotime() + yieldDelay / 2;
@@ -1020,7 +992,6 @@ private static void casgstatus(ptr<g> _addr_gp, uint oldval, uint newval) {
             gp.tracking = true;
         }
         gp.trackingSeq++;
-
     }
     if (gp.tracking) {
         var now = nanotime();
@@ -1030,13 +1001,11 @@ private static void casgstatus(ptr<g> _addr_gp, uint oldval, uint newval) {
             // runnableTime.
             gp.runnableTime += now - gp.runnableStamp;
             gp.runnableStamp = 0;
-
         }
         if (newval == _Grunnable) { 
             // We just transitioned into runnable, so record what
             // time that happened.
             gp.runnableStamp = now;
-
         }
         else if (newval == _Grunning) { 
             // We're transitioning into running, so turn off
@@ -1045,7 +1014,6 @@ private static void casgstatus(ptr<g> _addr_gp, uint oldval, uint newval) {
             gp.tracking = false;
             sched.timeToRun.record(gp.runnableTime);
             gp.runnableTime = 0;
-
         }
     }
 }
@@ -1068,7 +1036,6 @@ private static uint casgcopystack(ptr<g> _addr_gp) {
             return oldstatus;
         }
     }
-
 }
 
 // casGToPreemptScan transitions gp from _Grunning to _Gscan|_Gpreempted.
@@ -1082,8 +1049,8 @@ private static void casGToPreemptScan(ptr<g> _addr_gp, uint old, uint @new) {
         throw("bad g transition");
     }
     acquireLockRank(lockRankGscan);
-    while (!atomic.Cas(_addr_gp.atomicstatus, _Grunning, _Gscan | _Gpreempted))     }
-
+    while (!atomic.Cas(_addr_gp.atomicstatus, _Grunning, _Gscan | _Gpreempted)) {
+    }
 }
 
 // casGFromPreempted attempts to transition gp from _Gpreempted to
@@ -1096,7 +1063,6 @@ private static bool casGFromPreempted(ptr<g> _addr_gp, uint old, uint @new) {
         throw("bad g transition");
     }
     return atomic.Cas(_addr_gp.atomicstatus, _Gpreempted, _Gwaiting);
-
 }
 
 // stopTheWorld stops all P's from executing goroutines, interrupting
@@ -1131,9 +1097,7 @@ private static void stopTheWorld(@string reason) {
         casgstatus(_addr_gp, _Grunning, _Gwaiting);
         stopTheWorldWithSema();
         casgstatus(_addr_gp, _Gwaiting, _Grunning);
-
     });
-
 }
 
 // startTheWorld undoes the effects of stopTheWorld.
@@ -1161,7 +1125,6 @@ private static void startTheWorld() {
     mp.preemptoff = "";
     semrelease1(_addr_worldsema, true, 0);
     releasem(mp);
-
 }
 
 // stopTheWorldGC has the same effect as stopTheWorld, but blocks
@@ -1252,7 +1215,6 @@ private static void stopTheWorldWithSema() {
         }
         p.status = _Pgcstop;
         sched.stopwait--;
-
     }
     var wait = sched.stopwait > 0;
     unlock(_addr_sched.@lock); 
@@ -1265,11 +1227,8 @@ private static void stopTheWorldWithSema() {
                 noteclear(_addr_sched.stopnote);
                 break;
             }
-
             preemptall();
-
         }
-
     }
     @string bad = "";
     if (sched.stopwait != 0) {
@@ -1297,13 +1256,11 @@ private static void stopTheWorldWithSema() {
         // we should halt this thread.
         lock(_addr_deadlock);
         lock(_addr_deadlock);
-
     }
     if (bad != "") {
         throw(bad);
     }
     worldStopped();
-
 }
 
 private static long startTheWorldWithSema(bool emitTraceEvent) {
@@ -1313,7 +1270,6 @@ private static long startTheWorldWithSema(bool emitTraceEvent) {
     if (netpollinited()) {
         ref var list = ref heap(netpoll(0), out ptr<var> _addr_list); // non-blocking
         injectglist(_addr_list);
-
     }
     lock(_addr_sched.@lock);
 
@@ -1348,7 +1304,6 @@ private static long startTheWorldWithSema(bool emitTraceEvent) {
  { 
             // Start M to run P.  Do not start another M below.
             newm(null, _addr_p, -1);
-
         }
     } 
 
@@ -1362,7 +1317,6 @@ private static long startTheWorldWithSema(bool emitTraceEvent) {
     releasem(mp);
 
     return startTime;
-
 }
 
 // usesLibcall indicates whether this runtime performs system calls
@@ -1387,7 +1341,6 @@ private static bool usesLibcall() {
             break;
     }
     return false;
-
 }
 
 // mStackIsSystemAllocated indicates whether this runtime starts on a
@@ -1421,11 +1374,9 @@ private static bool mStackIsSystemAllocated() {
                     return true;
                     break;
             }
-
             break;
     }
     return false;
-
 }
 
 // mstart is the entry-point for new Ms.
@@ -1460,7 +1411,6 @@ private static void mstart0() {
         }
         _g_.stack.hi = uintptr(noescape(@unsafe.Pointer(_addr_size)));
         _g_.stack.lo = _g_.stack.hi - size + 1024;
-
     }
     _g_.stackguard0 = _g_.stack.lo + _StackGuard; 
     // This is the g0, so we can also call go:systemstack
@@ -1474,10 +1424,8 @@ private static void mstart0() {
         // the stack, but put it in _g_.stack before mstart,
         // so the logic above hasn't set osStack yet.
         osStack = true;
-
     }
     mexit(osStack);
-
 }
 
 // The go:noinline is to guarantee the getcallerpc/getcallersp below are safe,
@@ -1509,13 +1457,11 @@ private static void mstart1() {
         }
     }
 
-
     if (_g_.m != _addr_m0) {
         acquirep(_addr__g_.m.nextp.ptr());
         _g_.m.nextp = 0;
     }
     schedule();
-
 }
 
 // mstartm0 implements part of mstart1 that only runs on the m0.
@@ -1533,7 +1479,6 @@ private static void mstartm0() {
         newextram();
     }
     initsig(false);
-
 }
 
 // mPark causes a thread to park itself - temporarily waking for
@@ -1552,7 +1497,6 @@ private static void mPark() {
             return ;
         }
     }
-
 }
 
 // mexit tears down and exits the current thread.
@@ -1588,7 +1532,6 @@ private static void mexit(bool osStack) {
         unlock(_addr_sched.@lock);
         mPark();
         throw("locked m0 woke up");
-
     }
     sigblock(true);
     unminit(); 
@@ -1601,7 +1544,6 @@ private static void mexit(bool osStack) {
         // Now the stack is freed, unlink it from the m, so we
         // won't write to it when calling VDSO code.
         m.gsignal = null;
-
     }
     lock(_addr_sched.@lock);
     {
@@ -1613,7 +1555,6 @@ private static void mexit(bool osStack) {
                 goto found;
             pprev = _addr_(pprev.val).alllink;
             }
-
         }
     }
     throw("m not found in allm");
@@ -1630,7 +1571,6 @@ found:
         // locking, so may be using alllink.
         m.freelink = sched.freem;
         sched.freem = m;
-
     }
     unlock(_addr_sched.@lock);
 
@@ -1661,10 +1601,8 @@ found:
         // Return from mstart and let the system thread
         // library free the g0 stack and terminate the thread.
         return ;
-
     }
     exitThread(_addr_m.freeWait);
-
 }
 
 // forEachP calls fn(p) for every P p when p reaches a GC safe point.
@@ -1721,7 +1659,6 @@ private static void forEachP(Action<ptr<p>> fn) {
                 sched.safePointWait--;
             p = p.link.ptr();
             }
-
         }
 
         p = p__prev1;
@@ -1763,11 +1700,8 @@ private static void forEachP(Action<ptr<p>> fn) {
                 noteclear(_addr_sched.safePointNote);
                 break;
             }
-
             preemptall();
-
         }
-
     }
     if (sched.safePointWait != 0) {
         throw("forEachP: not done");
@@ -1788,7 +1722,6 @@ private static void forEachP(Action<ptr<p>> fn) {
     sched.safePointFn = null;
     unlock(_addr_sched.@lock);
     releasem(mp);
-
 }
 
 // syscall_runtime_doAllThreadsSyscall serializes Go execution and
@@ -1842,7 +1775,6 @@ private static bool syscall_runtime_doAllThreadsSyscall(Func<bool, bool> fn) => 
             lock(_addr_newmHandoff.@lock);
         }
         unlock(_addr_newmHandoff.@lock);
-
     }
     if (netpollinited()) {
         netpollBreak();
@@ -1855,7 +1787,6 @@ private static bool syscall_runtime_doAllThreadsSyscall(Func<bool, bool> fn) => 
         lock(_addr_mFixupRace.@lock);
         mFixupRace.ctx = _g_.racectx;
         unlock(_addr_mFixupRace.@lock);
-
     }
     {
         var ok = fn(true);
@@ -1887,7 +1818,6 @@ private static bool syscall_runtime_doAllThreadsSyscall(Func<bool, bool> fn) => 
                         // code. Neither of which are
                         // currently supported by this API.
                         throw("unsupported runtime environment");
-
                     } 
                     // stopTheWorldGC() doesn't guarantee stopping
                     // all the threads, so we lock here to avoid
@@ -1902,11 +1832,8 @@ private static bool syscall_runtime_doAllThreadsSyscall(Func<bool, bool> fn) => 
                         // next real wakeup will occur after
                         // startTheWorldGC() is called.
                         notewakeup(_addr_mp.park);
-
                     }
-
                     unlock(_addr_mp.mFixup.@lock);
-
                 }
 
 
@@ -1924,9 +1851,7 @@ private static bool syscall_runtime_doAllThreadsSyscall(Func<bool, bool> fn) => 
                             continue;
                         mp = mp.alllink;
                         }
-
                         done = atomic.Load(_addr_mp.mFixup.used) == 0;
-
                     }
 
 
@@ -1941,23 +1866,17 @@ private static bool syscall_runtime_doAllThreadsSyscall(Func<bool, bool> fn) => 
                     atomic.Store(_addr_sched.sysmonwait, 0);
                     notewakeup(_addr_sched.sysmonnote);
                 }
-
                 unlock(_addr_sched.@lock);
                 lock(_addr_newmHandoff.@lock);
                 if (newmHandoff.waiting) {
                     newmHandoff.waiting = false;
                     notewakeup(_addr_newmHandoff.wake);
                 }
-
                 unlock(_addr_newmHandoff.@lock);
                 osyield();
-
             }
-
-
         }
     }
-
     if (raceenabled) {
         lock(_addr_mFixupRace.@lock);
         mFixupRace.ctx = 0;
@@ -1966,7 +1885,6 @@ private static bool syscall_runtime_doAllThreadsSyscall(Func<bool, bool> fn) => 
     startTheWorldGC();
     msigrestore(sigmask);
     unlockOSThread();
-
 });
 
 // runSafePointFn runs the safe point function, if any, for this P.
@@ -1995,7 +1913,6 @@ private static void runSafePointFn() {
         notewakeup(_addr_sched.safePointNote);
     }
     unlock(_addr_sched.@lock);
-
 }
 
 // When running with cgo, we call _cgo_thread_start
@@ -2047,13 +1964,11 @@ private static ptr<m> allocm(ptr<p> _addr__p_, Action fn, long id) {
                     stackfree(freem.g0.stack);
                 });
                 freem = freem.freelink;
-
             }
 
         }
         sched.freem = newList;
         unlock(_addr_sched.@lock);
-
     }
     ptr<m> mp = @new<m>();
     mp.mstartfn = fn;
@@ -2076,7 +1991,6 @@ private static ptr<m> allocm(ptr<p> _addr__p_, Action fn, long id) {
     releasem(_g_.m);
 
     return _addr_mp!;
-
 }
 
 // needm is called when a cgo callback happens on a
@@ -2123,7 +2037,6 @@ private static void needm() {
         // Can not throw, because scheduler is not initialized yet.
         write(2, @unsafe.Pointer(_addr_earlycgocallback[0]), int32(len(earlycgocallback)));
         exit(1);
-
     }
     ref sigset sigmask = ref heap(out ptr<sigset> _addr_sigmask);
     sigsave(_addr_sigmask);
@@ -2171,7 +2084,6 @@ private static void needm() {
     // mp.curg is now a real goroutine.
     casgstatus(_addr_mp.curg, _Gdead, _Gsyscall);
     atomic.Xadd(_addr_sched.ngsys, -1);
-
 }
 
 private static slice<byte> earlycgocallback = (slice<byte>)"fatal error: cgo callback before cgo call\n";
@@ -2186,8 +2098,6 @@ private static void newextram() {
             oneNewExtraM();
         }
     else
-
-
     } { 
         // Make sure there is at least one extra M.
         var mp = lockextra(true);
@@ -2242,7 +2152,6 @@ private static void oneNewExtraM() {
     mp.schedlink.set(mnext);
     extraMCount++;
     unlockextra(_addr_mp);
-
 }
 
 // dropm is called when a cgo callback has called needm but is now
@@ -2297,7 +2206,6 @@ private static void dropm() {
     unlockextra(_addr_mp);
 
     msigrestore(sigmask);
-
 }
 
 // A helper function for EnsureDropM.
@@ -2334,21 +2242,16 @@ private static ptr<m> lockextra(bool nilokay) {
                 // This is cleared by newextram.
                 atomic.Xadd(_addr_extraMWaiters, 1);
                 incr = true;
-
             }
-
             usleep_no_g(1);
             continue;
-
         }
         if (atomic.Casuintptr(_addr_extram, old, locked)) {
             return _addr_(m.val)(@unsafe.Pointer(old))!;
         }
         osyield_no_g();
         continue;
-
     }
-
 }
 
 //go:nosplit
@@ -2399,22 +2302,17 @@ private static void newm(Action fn, ptr<p> _addr__p_, long id) {
             if (newmHandoff.haveTemplateThread == 0) {
                 throw("on a locked thread with no template thread");
             }
-
             mp.schedlink = newmHandoff.newm;
             newmHandoff.newm.set(mp);
             if (newmHandoff.waiting) {
                 newmHandoff.waiting = false;
                 notewakeup(_addr_newmHandoff.wake);
             }
-
             unlock(_addr_newmHandoff.@lock);
             return ;
-
         }
     }
-
     newm1(_addr_mp);
-
 }
 
 private static void newm1(ptr<m> _addr_mp) {
@@ -2435,12 +2333,10 @@ private static void newm1(ptr<m> _addr_mp) {
         asmcgocall(_cgo_thread_start, @unsafe.Pointer(_addr_ts));
         execLock.runlock();
         return ;
-
     }
     execLock.rlock(); // Prevent process clone.
     newosproc(mp);
     execLock.runlock();
-
 }
 
 // startTemplateThread starts the template thread if it is not already
@@ -2450,7 +2346,6 @@ private static void newm1(ptr<m> _addr_mp) {
 private static void startTemplateThread() {
     if (GOARCH == "wasm") { // no threads on wasm yet
         return ;
-
     }
     var mp = acquirem();
     if (!atomic.Cas(_addr_newmHandoff.haveTemplateThread, 0, 1)) {
@@ -2459,7 +2354,6 @@ private static void startTemplateThread() {
     }
     newm(templateThread, _addr_null, -1);
     releasem(mp);
-
 }
 
 // mFixupRace is used to temporarily borrow the race context from the
@@ -2505,7 +2399,6 @@ private static bool mDoFixup() {
             // the GC is off so this lack of write barrier
             // is more obviously safe.
             throw("GC must be disabled to protect validity of fn value");
-
         }
         if (_g_.racectx != 0 || !raceenabled) {
             fn(false);
@@ -2522,18 +2415,15 @@ private static bool mDoFixup() {
             fn(false);
             _g_.racectx = 0;
             unlock(_addr_mFixupRace.@lock);
-
         }
-        (uintptr.val)(@unsafe.Pointer(_addr__g_.m.mFixup.fn)).val;
+        (uintptr.val).val;
 
-        0;
+        (@unsafe.Pointer(_addr__g_.m.mFixup.fn)) = 0;
         atomic.Store(_addr__g_.m.mFixup.used, 0);
-
     }
     unlock(_addr__g_.m.mFixup.@lock);
     msigrestore(sigmask);
     return fn != null;
-
 }
 
 // mDoFixupAndOSYield is called when an m is unable to send a signal
@@ -2607,13 +2497,11 @@ private static void stopm() {
     mPark();
     acquirep(_addr__g_.m.nextp.ptr());
     _g_.m.nextp = 0;
-
 }
 
 private static void mspinning() { 
     // startm's caller incremented nmspinning. Set the new M's spinning.
     getg().m.spinning = true;
-
 }
 
 // Schedules some M to run the p (creates an M if necessary).
@@ -2658,12 +2546,9 @@ private static void startm(ptr<p> _addr__p_, bool spinning) {
                 if (int32(atomic.Xadd(_addr_sched.nmspinning, -1)) < 0) {
                     throw("startm: negative nmspinning");
                 }
-
             }
-
             releasem(mp);
             return ;
-
         }
     }
     var nmp = mget();
@@ -2687,14 +2572,12 @@ private static void startm(ptr<p> _addr__p_, bool spinning) {
         if (spinning) { 
             // The caller incremented nmspinning, so set m.spinning in the new M.
             fn = mspinning;
-
         }
         newm(fn, _addr__p_, id); 
         // Ownership transfer of _p_ committed by start in newm.
         // Preemption is now safe.
         releasem(mp);
         return ;
-
     }
     unlock(_addr_sched.@lock);
     if (nmp.spinning) {
@@ -2712,7 +2595,6 @@ private static void startm(ptr<p> _addr__p_, bool spinning) {
     // Ownership transfer of _p_ committed by wakeup. Preemption is now
     // safe.
     releasem(mp);
-
 }
 
 // Hands off P from syscall or locked M.
@@ -2736,7 +2618,6 @@ private static void handoffp(ptr<p> _addr__p_) {
     if (atomic.Load(_addr_sched.nmspinning) + atomic.Load(_addr_sched.npidle) == 0 && atomic.Cas(_addr_sched.nmspinning, 0, 1)) { // TODO: fast atomic
         startm(_addr__p_, true);
         return ;
-
     }
     lock(_addr_sched.@lock);
     if (sched.gcwaiting != 0) {
@@ -2747,7 +2628,6 @@ private static void handoffp(ptr<p> _addr__p_) {
         }
         unlock(_addr_sched.@lock);
         return ;
-
     }
     if (_p_.runSafePointFn != 0 && atomic.Cas(_addr__p_.runSafePointFn, 1, 0)) {
         sched.safePointFn(_p_);
@@ -2785,7 +2665,6 @@ private static void wakep() {
         return ;
     }
     startm(_addr_null, true);
-
 }
 
 // Stops execution of the current m that is locked to a g until the g is runnable again.
@@ -2800,7 +2679,6 @@ private static void stoplockedm() {
         // Schedule another M to run this p.
         var _p_ = releasep();
         handoffp(_addr__p_);
-
     }
     incidlelocked(1); 
     // Wait until another thread schedules lockedg again.
@@ -2813,7 +2691,6 @@ private static void stoplockedm() {
     }
     acquirep(_addr__g_.m.nextp.ptr());
     _g_.m.nextp = 0;
-
 }
 
 // Schedules the locked m to run the locked gp.
@@ -2836,7 +2713,6 @@ private static void startlockedm(ptr<g> _addr_gp) {
     mp.nextp.set(_p_);
     notewakeup(_addr_mp.park);
     stopm();
-
 }
 
 // Stops the current m for stopTheWorld.
@@ -2864,7 +2740,6 @@ private static void gcstopm() {
     }
     unlock(_addr_sched.@lock);
     stopm();
-
 }
 
 // Schedules gp to run on the current M.
@@ -2903,10 +2778,8 @@ private static void execute(ptr<g> _addr_gp, bool inheritTime) {
             traceGoSysExit(gp.sysexitticks);
         }
         traceGoStart();
-
     }
     gogo(_addr_gp.sched);
-
 }
 
 // Finds a runnable goroutine to execute.
@@ -2945,7 +2818,6 @@ top:
             gp = gp__prev2;
 
         }
-
     }
     if (cgo_yield != null.val) {
         asmcgocall(cgo_yield.val, null);
@@ -2984,15 +2856,12 @@ top:
                 if (trace.enabled) {
                     traceGoUnpark(gp, 0);
                 }
-
                 return (_addr_gp!, false);
-
             }
 
             list = list__prev2;
 
         }
-
     }
     var procs = uint32(gomaxprocs);
     if (_g_.m.spinning || 2 * atomic.Load(_addr_sched.nmspinning) < procs - atomic.Load(_addr_sched.npidle)) {
@@ -3005,18 +2874,15 @@ top:
         if (gp != null) { 
             // Successfully stole.
             return (_addr_gp!, inheritTime);
-
         }
         if (newWork) { 
             // There may be new timer or GC work; restart to
             // discover.
             goto top;
-
         }
         if (w != 0 && (pollUntil == 0 || w < pollUntil)) { 
             // Earlier timer to wait for.
             pollUntil = w;
-
         }
     }
     if (gcBlackenEnabled != 0 && gcMarkWorkAvailable(_p_)) {
@@ -3038,7 +2904,6 @@ top:
             traceGoUnpark(gp, 0);
         }
         return (_addr_gp!, false);
-
     }
     if (otherReady) {
         goto top;
@@ -3111,12 +2976,9 @@ top:
             if (trace.enabled) {
                 traceGoUnpark(gp, 0);
             }
-
             return (_addr_gp!, false);
-
         }
         pollUntil = checkTimersNoP(allpSnapshot, timerpMaskSnapshot, pollUntil);
-
     }
     if (netpollinited() && (atomic.Load(_addr_netpollWaiters) > 0 || pollUntil != 0) && atomic.Xchg64(_addr_sched.lastpoll, 0) != 0) {
         atomic.Store64(_addr_sched.pollUntil, uint64(pollUntil));
@@ -3139,7 +3001,6 @@ top:
         if (faketime != 0) { 
             // When using fake time, just poll.
             delay = 0;
-
         }
         list = netpoll(delay); // block until new work is available
         atomic.Store64(_addr_sched.pollUntil, 0);
@@ -3149,7 +3010,6 @@ top:
             // When all M's stop, checkdead will call timejump.
             stopm();
             goto top;
-
         }
         lock(_addr_sched.@lock);
         _p_ = pidleget();
@@ -3184,7 +3044,6 @@ top:
     }
     stopm();
     goto top;
-
 }
 
 // pollWork reports whether there is non-background work this P could
@@ -3209,10 +3068,8 @@ private static bool pollWork() {
             }
 
         }
-
     }
     return false;
-
 }
 
 // stealWork attempts to steal a runnable goroutine or timer from any P.
@@ -3241,9 +3098,7 @@ private static (ptr<g>, bool, long, long, bool) stealWork(long now) {
             if (sched.gcwaiting != 0) { 
                 // GC work may be available.
                 return (_addr_null!, false, now, pollUntil, true);
-
             }
-
             var p2 = allp[@enum.position()];
             if (pp == p2) {
                 continue;
@@ -3289,11 +3144,8 @@ private static (ptr<g>, bool, long, long, bool) stealWork(long now) {
                         gp = gp__prev3;
 
                     }
-
                     ranTimer = true;
-
                 }
-
             } 
 
             // Don't bother to attempt to steal if p2 is idle.
@@ -3310,18 +3162,14 @@ private static (ptr<g>, bool, long, long, bool) stealWork(long now) {
                     gp = gp__prev2;
 
                 }
-
             }
-
         }
-
     } 
 
     // No goroutines found to steal. Regardless, running a timer may have
     // made some goroutine ready that we missed. Indicate the next timer to
     // wait for.
     return (_addr_null!, false, now, pollUntil, ranTimer);
-
 }
 
 // Check all Ps for a runnable G to steal.
@@ -3341,10 +3189,8 @@ private static ptr<p> checkRunqsNoP(slice<ptr<p>> allpSnapshot, pMask idlepMaskS
 
             // Can't get a P, don't bother checking remaining Ps.
             break;
-
         }
     }    return _addr_null!;
-
 }
 
 // Check all Ps for a timer expiring sooner than pollUntil.
@@ -3359,7 +3205,6 @@ private static long checkTimersNoP(slice<ptr<p>> allpSnapshot, pMask timerpMaskS
             }
         }
     }    return pollUntil;
-
 }
 
 // Check for idle-priority GC, without a P on entry.
@@ -3398,7 +3243,6 @@ private static (ptr<p>, ptr<g>) checkIdleGCNoP() {
     unlock(_addr_sched.@lock);
 
     return (_addr_pp!, _addr_node.gp.ptr()!);
-
 }
 
 // wakeNetPoller wakes up the thread sleeping in the network poller if it isn't
@@ -3421,7 +3265,6 @@ private static void wakeNetPoller(long when) {
         // one there so it can handle new timers.
         if (GOOS != "plan9") { // Temporary workaround - see issue #42303.
             wakep();
-
         }
     }
 }
@@ -3437,7 +3280,6 @@ private static void resetspinning() {
         throw("findrunnable: negative nmspinning");
     }
     wakep();
-
 }
 
 // injectglist adds each runnable G on the list to some run queue,
@@ -3468,7 +3310,6 @@ private static void injectglist(ptr<gList> _addr_glist) {
 
             gp = gp__prev1;
         }
-
     }
     var head = glist.head.ptr();
     ptr<g> tail;
@@ -3499,7 +3340,6 @@ private static void injectglist(ptr<gList> _addr_glist) {
             startm(_addr_null, false);
             n--;
         }
-
     };
 
     var pp = getg().m.p.ptr();
@@ -3611,7 +3451,6 @@ top:
             // Something re-enabled scheduling while we
             // were acquiring the lock.
             unlock(_addr_sched.@lock);
-
         }
         else
  {
@@ -3629,10 +3468,8 @@ top:
         // then blocks waiting for a new p.
         startlockedm(gp);
         goto top;
-
     }
     execute(gp, inheritTime);
-
 }
 
 // dropg removes the association between m and the current goroutine m->curg (gp for short).
@@ -3674,7 +3511,6 @@ private static (long, long, bool) checkTimers(ptr<p> _addr_pp, long now) {
     if (next == 0) { 
         // No timers to run or adjust.
         return (now, 0, false);
-
     }
     if (now == 0) {
         now = nanotime();
@@ -3706,11 +3542,8 @@ private static (long, long, bool) checkTimers(ptr<p> _addr_pp, long now) {
                 }
 
             }
-
             ran = true;
-
         }
-
     }
     if (pp == getg().m.p.ptr() && int(atomic.Load(_addr_pp.deletedTimers)) > len(pp.timers) / 4) {
         clearDeletedTimers(pp);
@@ -3718,7 +3551,6 @@ private static (long, long, bool) checkTimers(ptr<p> _addr_pp, long now) {
     unlock(_addr_pp.timersLock);
 
     return (now, pollUntil, ran);
-
 }
 
 private static bool parkunlock_c(ptr<g> _addr_gp, unsafe.Pointer @lock) {
@@ -3754,12 +3586,9 @@ private static void park_m(ptr<g> _addr_gp) {
                 casgstatus(_addr_gp, _Gwaiting, _Grunnable);
                 execute(_addr_gp, true); // Schedule it back, never returns.
             }
-
         }
     }
-
     schedule();
-
 }
 
 private static void goschedImpl(ptr<g> _addr_gp) {
@@ -3777,7 +3606,6 @@ private static void goschedImpl(ptr<g> _addr_gp) {
     unlock(_addr_sched.@lock);
 
     schedule();
-
 }
 
 // Gosched continuation on g0.
@@ -3788,7 +3616,6 @@ private static void gosched_m(ptr<g> _addr_gp) {
         traceGoSched();
     }
     goschedImpl(_addr_gp);
-
 }
 
 // goschedguarded is a forbidden-states-avoided version of gosched_m
@@ -3802,7 +3629,6 @@ private static void goschedguarded_m(ptr<g> _addr_gp) {
         traceGoSched();
     }
     goschedImpl(_addr_gp);
-
 }
 
 private static void gopreempt_m(ptr<g> _addr_gp) {
@@ -3812,7 +3638,6 @@ private static void gopreempt_m(ptr<g> _addr_gp) {
         traceGoPreempt();
     }
     goschedImpl(_addr_gp);
-
 }
 
 // preemptPark parks gp and puts it in _Gpreempted.
@@ -3848,7 +3673,6 @@ private static void preemptPark(ptr<g> _addr_gp) {
     dropg();
     casfrom_Gscanstatus(_addr_gp, _Gscan | _Gpreempted, _Gpreempted);
     schedule();
-
 }
 
 // goyield is like Gosched, but it:
@@ -3870,7 +3694,6 @@ private static void goyield_m(ptr<g> _addr_gp) {
     dropg();
     runqput(_addr_pp, _addr_gp, false);
     schedule();
-
 }
 
 // Finishes execution of the current goroutine.
@@ -3882,7 +3705,6 @@ private static void goexit1() {
         traceGoEnd();
     }
     mcall(goexit0);
-
 }
 
 // goexit continuation on g0.
@@ -3917,7 +3739,6 @@ private static void goexit0(ptr<g> _addr_gp) {
         var scanCredit = int64(assistWorkPerByte * float64(gp.gcAssistBytes));
         atomic.Xaddint64(_addr_gcController.bgScanCredit, scanCredit);
         gp.gcAssistBytes = 0;
-
     }
     dropg();
 
@@ -3939,18 +3760,15 @@ private static void goexit0(ptr<g> _addr_gp) {
         // the thread.
         if (GOOS != "plan9") { // See golang.org/issue/22227.
             gogo(_addr__g_.m.g0.sched);
-
         }
         else
  { 
             // Clear lockedExt on plan9 since we may end up re-using
             // this thread.
             _g_.m.lockedExt = 0;
-
         }
     }
     schedule();
-
 }
 
 // save updates getg().sched to refer to pc and sp so that a following
@@ -3971,7 +3789,6 @@ private static void save(System.UIntPtr pc, System.UIntPtr sp) {
         // This check makes sure save calls do not accidentally
         // run in contexts where they'd write to system g's.
         throw("save on system g not allowed");
-
     }
     _g_.sched.pc = pc;
     _g_.sched.sp = sp;
@@ -4053,7 +3870,6 @@ private static void reentersyscall(System.UIntPtr pc, System.UIntPtr sp) {
         // need them later when the G is genuinely blocked in a
         // syscall
         save(pc, sp);
-
     }
     if (atomic.Load(_addr_sched.sysmonwait) != 0) {
         systemstack(entersyscall_sysmon);
@@ -4063,7 +3879,6 @@ private static void reentersyscall(System.UIntPtr pc, System.UIntPtr sp) {
         // runSafePointFn may stack split if run on this stack
         systemstack(runSafePointFn);
         save(pc, sp);
-
     }
     _g_.m.syscalltick = _g_.m.p.ptr().syscalltick;
     _g_.sysblocktraced = true;
@@ -4077,7 +3892,6 @@ private static void reentersyscall(System.UIntPtr pc, System.UIntPtr sp) {
         save(pc, sp);
     }
     _g_.m.locks--;
-
 }
 
 // Standard syscall entry used by the go syscall library and normal cgo calls.
@@ -4097,7 +3911,6 @@ private static void entersyscall_sysmon() {
         notewakeup(_addr_sched.sysmonnote);
     }
     unlock(_addr_sched.@lock);
-
 }
 
 private static void entersyscall_gcwait() {
@@ -4118,7 +3931,6 @@ private static void entersyscall_gcwait() {
         }
     }
     unlock(_addr_sched.@lock);
-
 }
 
 // The same as entersyscall(), but with a hint that the syscall is blocking.
@@ -4161,7 +3973,6 @@ private static void entersyscallblock() {
     save(getcallerpc(), getcallersp());
 
     _g_.m.locks--;
-
 }
 
 private static void entersyscallblock_handoff() {
@@ -4170,7 +3981,6 @@ private static void entersyscallblock_handoff() {
         traceGoSysBlock(getg().m.p.ptr());
     }
     handoffp(_addr_releasep());
-
 }
 
 // The goroutine g exited its system call.
@@ -4212,23 +4022,19 @@ private static void exitsyscall() {
         if (_g_.preempt) { 
             // restore the preemption request in case we've cleared it in newstack
             _g_.stackguard0 = stackPreempt;
-
         }
         else
  { 
             // otherwise restore the real _StackGuard, we've spoiled it in entersyscall/entersyscallblock
             _g_.stackguard0 = _g_.stack.lo + _StackGuard;
-
         }
         _g_.throwsplit = false;
 
         if (sched.disable.user && !schedEnabled(_addr__g_)) { 
             // Scheduling of this goroutine is disabled.
             Gosched();
-
         }
         return ;
-
     }
     _g_.sysexitticks = 0;
     if (trace.enabled) { 
@@ -4242,7 +4048,6 @@ private static void exitsyscall() {
         // So instead we remember the syscall exit time and emit the event
         // in execute when we have a P.
         _g_.sysexitticks = cputicks();
-
     }
     _g_.m.locks--; 
 
@@ -4258,7 +4063,6 @@ private static void exitsyscall() {
     _g_.syscallsp = 0;
     _g_.m.p.ptr().syscalltick++;
     _g_.throwsplit = false;
-
 }
 
 //go:nosplit
@@ -4276,7 +4080,6 @@ private static bool exitsyscallfast(ptr<p> _addr_oldp) {
         wirep(_addr_oldp);
         exitsyscallfast_reacquired();
         return true;
-
     }
     if (sched.pidle != 0) {
         bool ok = default;
@@ -4289,21 +4092,15 @@ private static bool exitsyscallfast(ptr<p> _addr_oldp) {
                     while (oldp.syscalltick == _g_.m.syscalltick) {
                         osyield();
                     }
-
-
                 }
-
                 traceGoSysExit(0);
-
             }
-
         });
         if (ok) {
             return true;
         }
     }
     return false;
-
 }
 
 // exitsyscallfast_reacquired is the exitsyscall path on which this G
@@ -4323,12 +4120,9 @@ private static void exitsyscallfast_reacquired() {
                 traceGoSysBlock(_g_.m.p.ptr()); 
                 // Denote completion of the current syscall.
                 traceGoSysExit(0);
-
             });
-
         }
         _g_.m.p.ptr().syscalltick++;
-
     }
 }
 
@@ -4345,7 +4139,6 @@ private static bool exitsyscallfast_pidle() {
         return true;
     }
     return false;
-
 }
 
 // exitsyscall slow path on g0.
@@ -4374,7 +4167,6 @@ private static void exitsyscall0(ptr<g> _addr_gp) {
         // could race with another M transitioning gp from unlocked to
         // locked.
         locked = gp.lockedm != 0;
-
     }
     else if (atomic.Load(_addr_sched.sysmonwait) != 0) {
         atomic.Store(_addr_sched.sysmonwait, 0);
@@ -4412,7 +4204,6 @@ private static void beforefork() {
     // Here we spoil g->_StackGuard to reliably detect any attempts to grow stack.
     // runtime_AfterFork will undo this in parent process, but not in child.
     gp.stackguard0 = stackFork;
-
 }
 
 // Called from syscall package before fork.
@@ -4431,7 +4222,6 @@ private static void afterfork() {
     msigrestore(gp.m.sigmask);
 
     gp.m.locks--;
-
 }
 
 // Called from syscall package after fork in parent.
@@ -4470,7 +4260,6 @@ private static void syscall_runtime_AfterForkInChild() {
     msigrestore(getg().m.sigmask);
 
     inForkedChild = false;
-
 }
 
 // pendingPreemptSignals is the number of preemption signals
@@ -4508,13 +4297,11 @@ private static ptr<g> malg(int stacksize) {
             newg.stack = stackalloc(uint32(stacksize));
         });
         newg.stackguard0 = newg.stack.lo + _StackGuard;
-        newg.stackguard1 = ~uintptr(0) * (uintptr.val)(@unsafe.Pointer(newg.stack.lo));
+        newg.stackguard1 = ~uintptr(0) * (uintptr.val);
 
-        0;
-
+        (@unsafe.Pointer(newg.stack.lo)) = 0;
     }
     return _addr_newg!;
-
 }
 
 // Create a new g running fn with siz bytes of arguments.
@@ -4548,7 +4335,6 @@ private static void newproc(int siz, ptr<funcval> _addr_fn) {
             wakep();
         }
     });
-
 }
 
 // Create a new g in state _Grunnable, starting at fn, with narg bytes
@@ -4570,14 +4356,12 @@ private static ptr<g> newproc1(ptr<funcval> _addr_fn, unsafe.Pointer argp, int n
         // newproc will no longer have a funny stack layout or
         // need to be nosplit.
         throw("go with non-empty frame");
-
     }
     var _g_ = getg();
 
     if (fn == null) {
         _g_.m.throwing = -1; // do not dump full stacks
         throw("go of nil func value");
-
     }
     acquirem(); // disable preemption because it can be holding p in a local var
     var siz = narg;
@@ -4609,12 +4393,11 @@ private static ptr<g> newproc1(ptr<funcval> _addr_fn, unsafe.Pointer argp, int n
     var spArg = sp;
     if (usesLR) { 
         // caller's LR
-        (uintptr.val)(@unsafe.Pointer(sp)).val;
+        (uintptr.val).val;
 
-        0;
+        (@unsafe.Pointer(sp)) = 0;
         prepGoExitFrame(sp);
         spArg += sys.MinFrameSize;
-
     }
     if (narg > 0) {
         memmove(@unsafe.Pointer(spArg), argp, uintptr(narg)); 
@@ -4631,9 +4414,7 @@ private static ptr<g> newproc1(ptr<funcval> _addr_fn, unsafe.Pointer argp, int n
                 // We're in the prologue, so it's always stack map index 0.
                 var bv = stackmapdata(stkmap, 0);
                 bulkBarrierBitmap(spArg, spArg, uintptr(bv.n) * sys.PtrSize, 0, bv.bytedata);
-
             }
-
         }
     }
     memclrNoHeapPointers(@unsafe.Pointer(_addr_newg.sched), @unsafe.Sizeof(newg.sched));
@@ -4664,7 +4445,6 @@ private static ptr<g> newproc1(ptr<funcval> _addr_fn, unsafe.Pointer argp, int n
         _p_.goidcache = atomic.Xadd64(_addr_sched.goidgen, _GoidCacheBatch);
         _p_.goidcache -= _GoidCacheBatch - 1;
         _p_.goidcacheend = _p_.goidcache + _GoidCacheBatch;
-
     }
     newg.goid = int64(_p_.goidcache);
     _p_.goidcache++;
@@ -4677,7 +4457,6 @@ private static ptr<g> newproc1(ptr<funcval> _addr_fn, unsafe.Pointer argp, int n
     releasem(_g_.m);
 
     return _addr_newg!;
-
 }
 
 // saveAncestors copies previous ancestors of the given caller g and
@@ -4710,7 +4489,6 @@ private static ptr<slice<ancestorInfo>> saveAncestors(ptr<g> _addr_callergp) {
     ptr<var> ancestorsp = @new<ancestorInfo>();
     ancestorsp.val = ancestors;
     return _addr_ancestorsp!;
-
 }
 
 // Put on gfree list.
@@ -4730,7 +4508,6 @@ private static void gfput(ptr<p> _addr__p_, ptr<g> _addr_gp) {
         gp.stack.lo = 0;
         gp.stack.hi = 0;
         gp.stackguard0 = 0;
-
     }
     _p_.gFree.push(gp);
     _p_.gFree.n++;
@@ -4746,16 +4523,13 @@ private static void gfput(ptr<p> _addr__p_, ptr<g> _addr_gp) {
  {
                 stackQ.push(gp);
             }
-
             inc++;
-
         }
         lock(_addr_sched.gFree.@lock);
         sched.gFree.noStack.pushAll(noStackQ);
         sched.gFree.stack.pushAll(stackQ);
         sched.gFree.n += inc;
         unlock(_addr_sched.gFree.@lock);
-
     }
 }
 
@@ -4777,15 +4551,12 @@ retry:
                     break;
                 }
             }
-
             sched.gFree.n--;
             _p_.gFree.push(gp);
             _p_.gFree.n++;
-
         }
         unlock(_addr_sched.gFree.@lock);
         goto retry;
-
     }
     gp = _p_.gFree.pop();
     if (gp == null) {
@@ -4800,7 +4571,6 @@ retry:
     else
 );
         gp.stackguard0 = gp.stack.lo + _StackGuard;
-
     } {
         if (raceenabled) {
             racemalloc(@unsafe.Pointer(gp.stack.lo), gp.stack.hi - gp.stack.lo);
@@ -4810,7 +4580,6 @@ retry:
         }
     }
     return _addr_gp!;
-
 }
 
 // Purge all cached G's from gfree list to the global list.
@@ -4829,14 +4598,12 @@ private static void gfpurge(ptr<p> _addr__p_) {
             stackQ.push(gp);
         }
         inc++;
-
     }
     lock(_addr_sched.gFree.@lock);
     sched.gFree.noStack.pushAll(noStackQ);
     sched.gFree.stack.pushAll(stackQ);
     sched.gFree.n += inc;
     unlock(_addr_sched.gFree.@lock);
-
 }
 
 // Breakpoint executes a breakpoint trap.
@@ -4855,7 +4622,6 @@ private static void dolockOSThread() {
     var _g_ = getg();
     _g_.m.lockedg.set(_g_);
     _g_.lockedm.set(_g_.m);
-
 }
 
 //go:nosplit
@@ -4880,7 +4646,6 @@ public static void LockOSThread() => func((_, panic, _) => {
         // thread, we need the template thread. Start it now
         // while we're in a known-good state.
         startTemplateThread();
-
     }
     var _g_ = getg();
     _g_.m.lockedExt++;
@@ -4889,7 +4654,6 @@ public static void LockOSThread() => func((_, panic, _) => {
         panic("LockOSThread nesting overflow");
     }
     dolockOSThread();
-
 });
 
 //go:nosplit
@@ -4912,7 +4676,6 @@ private static void dounlockOSThread() {
     }
     _g_.m.lockedg = 0;
     _g_.lockedm = 0;
-
 }
 
 //go:nosplit
@@ -4936,7 +4699,6 @@ public static void UnlockOSThread() {
     }
     _g_.m.lockedExt--;
     dounlockOSThread();
-
 }
 
 //go:nosplit
@@ -4947,7 +4709,6 @@ private static void unlockOSThread() {
     }
     _g_.m.lockedInt--;
     dounlockOSThread();
-
 }
 
 private static void badunlockosthread() {
@@ -4962,7 +4723,6 @@ private static int gcount() {
         n = 1;
     }
     return n;
-
 }
 
 private static int mcount() {
@@ -5015,14 +4775,12 @@ private static void sigprof(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr
             }
 
         }
-
         if (GOARCH == "arm" && goarm < 7 && GOOS == "linux" && pc & 0xffff0000 == 0xffff0000) { 
             // runtime/internal/atomic functions call into kernel
             // helpers on arm < 7. See
             // runtime/internal/atomic/sys_linux_arm.s.
             cpuprof.lostAtomic++;
             return ;
-
         }
     }
     getg().m.mallocing++;
@@ -5060,7 +4818,6 @@ private static void sigprof(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr
             // Libcall, i.e. runtime syscall on windows.
             // Collect Go stack that leads to the call.
             n = gentraceback(mp.libcallpc, mp.libcallsp, 0, mp.libcallg.ptr(), 0, _addr_stk[0], len(stk), null, null, 0);
-
         }
         if (n == 0 && mp != null && mp.vdsoSP != 0) {
             n = gentraceback(mp.vdsoPC, mp.vdsoSP, 0, gp, 0, _addr_stk[0], len(stk), null, null, _TraceTrap | _TraceJumpStack);
@@ -5074,9 +4831,7 @@ private static void sigprof(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr
             else if (pc > firstmoduledata.etext) { 
                 // "ExternalCode" is better than "etext".
                 pc = funcPC(_ExternalCode) + sys.PCQuantum;
-
             }
-
             stk[0] = pc;
             if (mp.preemptoff != "") {
                 stk[1] = funcPC(_GC) + sys.PCQuantum;
@@ -5085,14 +4840,12 @@ private static void sigprof(System.UIntPtr pc, System.UIntPtr sp, System.UIntPtr
  {
                 stk[1] = funcPC(_System) + sys.PCQuantum;
             }
-
         }
     }
     if (prof.hz != 0) {
         cpuprof.add(gp, stk[..(int)n]);
     }
     getg().m.mallocing--;
-
 }
 
 // If the signal handler receives a SIGPROF signal on a non-Go thread,
@@ -5116,7 +4869,6 @@ private static void sigprofNonGo() {
         cpuprof.addNonGo(sigprofCallers[..(int)n]);
     }
     atomic.Store(_addr_sigprofCallersUse, 0);
-
 }
 
 // sigprofNonGoPC is called when a profiling signal arrived on a
@@ -5163,7 +4915,6 @@ private static void setcpuprofilerate(int hz) {
         setThreadCPUProfiler(hz);
     }
     _g_.m.locks--;
-
 }
 
 // init initializes pp, which may be a freshly allocated p or a
@@ -5185,7 +4936,6 @@ private static void init(this ptr<p> _addr_pp, int id) {
             // Use the bootstrap mcache0. Only one P will get
             // mcache0: the one with ID 0.
             pp.mcache = mcache0;
-
         }
         else
  {
@@ -5210,7 +4960,6 @@ private static void init(this ptr<p> _addr_pp, int id) {
     // Similarly, we may not go through pidleget before this P starts
     // running if it is P 0 on startup.
     idlepMask.clear(id);
-
 }
 
 // destroy releases all of the resources associated with pp and
@@ -5230,7 +4979,6 @@ private static void destroy(this ptr<p> _addr_pp) {
         var gp = pp.runq[pp.runqtail % uint32(len(pp.runq))].ptr(); 
         // Push onto head of global queue
         globrunqputhead(_addr_gp);
-
     }
     if (pp.runnext != 0) {
         globrunqputhead(_addr_pp.runnext.ptr());
@@ -5251,7 +4999,6 @@ private static void destroy(this ptr<p> _addr_pp) {
         atomic.Store64(_addr_pp.timer0When, 0);
         unlock(_addr_pp.timersLock);
         unlock(_addr_plocal.timersLock);
-
     }
     if (gcphase != _GCoff) {
         wbBufFlush1(pp);
@@ -5288,7 +5035,6 @@ private static void destroy(this ptr<p> _addr_pp) {
             for (nint i = 0; i < pp.mspancache.len; i++) { 
                 // Safe to call since the world is stopped.
                 mheap_.spanalloc.free(@unsafe.Pointer(pp.mspancache.buf[i]));
-
             }
 
 
@@ -5298,7 +5044,6 @@ private static void destroy(this ptr<p> _addr_pp) {
         lock(_addr_mheap_.@lock);
         pp.pcache.flush(_addr_mheap_.pages);
         unlock(_addr_mheap_.@lock);
-
     });
     freemcache(pp.mcache);
     pp.mcache = null;
@@ -5319,15 +5064,12 @@ private static void destroy(this ptr<p> _addr_pp) {
             pp.timerRaceCtx = 0;
 
             mp.p.set(phold);
-
         }
         raceprocdestroy(pp.raceprocctx);
         pp.raceprocctx = 0;
-
     }
     pp.gcAssistTime = 0;
     pp.status = _Pdead;
-
 }
 
 // Change number of processors.
@@ -5372,7 +5114,6 @@ private static ptr<p> procresize(int nprocs) {
             // never lose old allocated Ps.
             copy(nallp, allp[..(int)cap(allp)]);
             allp = nallp;
-
         }
         if (maskWords <= int32(cap(idlepMask))) {
             idlepMask = idlepMask[..(int)maskWords];
@@ -5388,10 +5129,8 @@ private static ptr<p> procresize(int nprocs) {
             var ntimerpMask = make_slice<uint>(maskWords);
             copy(ntimerpMask, timerpMask);
             timerpMask = ntimerpMask;
-
         }
         unlock(_addr_allpLock);
-
     }
     {
         var i__prev1 = i;
@@ -5413,7 +5152,6 @@ private static ptr<p> procresize(int nprocs) {
         // continue to use the current P
         _g_.m.p.ptr().status = _Prunning;
         _g_.m.p.ptr().mcache.prepareForSweep();
-
     }
     else
  { 
@@ -5429,11 +5167,8 @@ private static ptr<p> procresize(int nprocs) {
                 // the trace sane.
                 traceGoSched();
                 traceProcStop(_g_.m.p.ptr());
-
             }
-
             _g_.m.p.ptr().m = 0;
-
         }
         _g_.m.p = 0;
         var p = allp[0];
@@ -5486,7 +5221,6 @@ private static ptr<p> procresize(int nprocs) {
                 p.link.set(runnablePs);
                 runnablePs = p;
             }
-
         }
 
         i = i__prev1;
@@ -5495,7 +5229,6 @@ private static ptr<p> procresize(int nprocs) {
     ptr<int> int32p_addr_gomaxprocs; // make compiler check that gomaxprocs is an int32
     atomic.Store((uint32.val)(@unsafe.Pointer(int32p)), uint32(nprocs));
     return _addr_runnablePs!;
-
 }
 
 // Associate p and the current m.
@@ -5542,12 +5275,10 @@ private static void wirep(ptr<p> _addr__p_) {
         }
         print("wirep: p->m=", _p_.m, "(", id, ") p->status=", _p_.status, "\n");
         throw("wirep: invalid p state");
-
     }
     _g_.m.p.set(_p_);
     _p_.m.set(_g_.m);
     _p_.status = _Prunning;
-
 }
 
 // Disassociate p and the current m.
@@ -5569,7 +5300,6 @@ private static ptr<p> releasep() {
     _p_.m = 0;
     _p_.status = _Pidle;
     return _addr__p_!;
-
 }
 
 private static void incidlelocked(int v) {
@@ -5579,7 +5309,6 @@ private static void incidlelocked(int v) {
         checkdead();
     }
     unlock(_addr_sched.@lock);
-
 }
 
 // Check for deadlock situation.
@@ -5626,12 +5355,10 @@ private static void checkdead() {
         else if (s & ~_Gscan == _Grunnable || s & ~_Gscan == _Grunning || s & ~_Gscan == _Gsyscall) 
             print("runtime: checkdead: find g ", gp.goid, " in status ", s, "\n");
             throw("checkdead: runnable g");
-        
-    });
+            });
     if (grunning == 0) { // possible if main goroutine calls runtime·Goexit()
         unlock(_addr_sched.@lock); // unlock so that GODEBUG=scheddetail=1 doesn't hang
         throw("no goroutines (main called runtime.Goexit) - deadlock!");
-
     }
     if (faketime != 0) {
         var (when, _p_) = timeSleepUntil();
@@ -5646,7 +5373,6 @@ private static void checkdead() {
                         break;
                     pp = _addr_(pp.val).ptr().link;
                     }
-
                 }
 
             }
@@ -5655,13 +5381,10 @@ private static void checkdead() {
                 // There should always be a free M since
                 // nothing is running.
                 throw("checkdead: no m for timer");
-
             }
-
             mp.nextp.set(_p_);
             notewakeup(_addr_mp.park);
             return ;
-
         }
     }
     foreach (var (_, _p_) in allp) {
@@ -5671,7 +5394,6 @@ private static void checkdead() {
     }    getg().m.throwing = -1; // do not dump full stacks
     unlock(_addr_sched.@lock); // unlock so that GODEBUG=scheddetail=1 doesn't hang
     throw("all goroutines are asleep - deadlock!");
-
 }
 
 // forcegcperiod is the maximum time in nanoseconds between garbage
@@ -5701,15 +5423,12 @@ private static void sysmon() {
     while (true) {
         if (idle == 0) { // start with 20us sleep...
             delay = 20;
-
         }
         else if (idle > 50) { // start doubling the sleep after 1ms...
             delay *= 2;
-
         }
         if (delay > 10 * 1000) { // up to 10ms
             delay = 10 * 1000;
-
         }
         usleep(delay);
         mDoFixup(); 
@@ -5744,33 +5463,25 @@ private static void sysmon() {
                     if (next - now < sleep) {
                         sleep = next - now;
                     }
-
                     var shouldRelax = sleep >= osRelaxMinNS;
                     if (shouldRelax) {
                         osRelax(true);
                     }
-
                     syscallWake = notetsleep(_addr_sched.sysmonnote, sleep);
                     mDoFixup();
                     if (shouldRelax) {
                         osRelax(false);
                     }
-
                     lock(_addr_sched.@lock);
                     atomic.Store(_addr_sched.sysmonwait, 0);
                     noteclear(_addr_sched.sysmonnote);
-
                 }
-
                 if (syscallWake) {
                     idle = 0;
                     delay = 20;
                 }
-
             }
-
             unlock(_addr_sched.@lock);
-
         }
         lock(_addr_sched.sysmonlock); 
         // Update now in case we blocked on sysmonnote or spent a long time
@@ -5796,9 +5507,7 @@ private static void sysmon() {
                 incidlelocked(-1);
                 injectglist(_addr_list);
                 incidlelocked(1);
-
             }
-
         }
         mDoFixup();
         if (GOOS == "netbsd") { 
@@ -5829,12 +5538,10 @@ private static void sysmon() {
                 next = next__prev2;
 
             }
-
         }
         if (atomic.Load(_addr_scavenge.sysmonWake) != 0) { 
             // Kick the scavenger awake if someone requested it.
             wakeScavenger();
-
         }
         if (retake(now) != 0) {
             idle = 0;
@@ -5856,15 +5563,12 @@ private static void sysmon() {
             }
 
         }
-
         if (debug.schedtrace > 0 && lasttrace + int64(debug.schedtrace) * 1000000 <= now) {
             lasttrace = now;
             schedtrace(debug.scheddetail > 0);
         }
         unlock(_addr_sched.sysmonlock);
-
     }
-
 }
 
 private partial struct sysmontick {
@@ -5894,7 +5598,6 @@ private static uint retake(long now) {
             // This can happen if procresize has grown
             // allp but not yet created new Ps.
             continue;
-
         }
         var pd = _addr__p_.sysmontick;
         var s = _p_.status;
@@ -5911,9 +5614,7 @@ private static uint retake(long now) {
                 // In case of syscall, preemptone() doesn't
                 // work, because there is no M wired to P.
                 sysretake = true;
-
             }
-
         }
         if (s == _Psyscall) { 
             // Retake P from syscall if it's there for more than 1 sysmon tick (at least 20us).
@@ -5945,15 +5646,12 @@ private static uint retake(long now) {
                 _p_.syscalltick++;
                 handoffp(_addr__p_);
             }
-
             incidlelocked(1);
             lock(_addr_allpLock);
-
         }
     }
     unlock(_addr_allpLock);
     return uint32(n);
-
 }
 
 // Tell all goroutines that they have been preempted and they should stop.
@@ -5971,7 +5669,6 @@ private static bool preemptall() {
             res = true;
         }
     }    return res;
-
 }
 
 // Tell the goroutine running on processor P to stop.
@@ -6009,7 +5706,6 @@ private static bool preemptone(ptr<p> _addr__p_) {
         preemptM(mp);
     }
     return true;
-
 }
 
 private static long starttime = default;
@@ -6048,14 +5744,11 @@ private static void schedtrace(bool detailed) {
                 if (i == 0) {
                     print("[");
                 }
-
                 print(t - h);
                 if (i == len(allp) - 1) {
                     print("]\n");
                 }
-
             }
-
         }
         _p_ = _p___prev1;
     }
@@ -6078,19 +5771,15 @@ private static void schedtrace(bool detailed) {
                 id1 = _p_.id;
             mp = mp.alllink;
             }
-
             var id2 = int64(-1);
             if (gp != null) {
                 id2 = gp.goid;
             }
-
             var id3 = int64(-1);
             if (lockedg != null) {
                 id3 = lockedg.goid;
             }
-
             print("  M", mp.id, ": p=", id1, " curg=", id2, " mallocing=", mp.mallocing, " throwing=", mp.throwing, " preemptoff=", mp.preemptoff, "" + " locks=", mp.locks, " dying=", mp.dying, " spinning=", mp.spinning, " blocked=", mp.blocked, " lockedg=", id3, "\n");
-
         }
 
         mp = mp__prev1;
@@ -6108,10 +5797,8 @@ private static void schedtrace(bool detailed) {
             id2 = lockedm.id;
         }
         print("  G", gp.goid, ": status=", readgstatus(_addr_gp), "(", gp.waitreason.String(), ") m=", id1, " lockedm=", id2, "\n");
-
     });
     unlock(_addr_sched.@lock);
-
 }
 
 // schedEnableUser enables or disables the scheduling of user
@@ -6136,8 +5823,6 @@ private static void schedEnableUser(bool enable) {
             n--;
         }
     else
-
-
     } {
         unlock(_addr_sched.@lock);
     }
@@ -6156,7 +5841,6 @@ private static bool schedEnabled(ptr<g> _addr_gp) {
         return isSystemGoroutine(gp, true);
     }
     return true;
-
 }
 
 // Put mp on midle list.
@@ -6187,7 +5871,6 @@ private static ptr<m> mget() {
         sched.nmidle--;
     }
     return _addr_mp!;
-
 }
 
 // Put gp on the global runnable queue.
@@ -6261,7 +5944,6 @@ private static ptr<g> globrunqget(ptr<p> _addr__p_, int max) {
         n--;
     }
     return _addr_gp!;
-
 }
 
 // pMask is an atomic bitstring with one bit per P.
@@ -6325,7 +6007,6 @@ private static void updateTimerPMask(ptr<p> _addr_pp) {
         timerpMask.clear(pp.id);
     }
     unlock(_addr_pp.timersLock);
-
 }
 
 // pidleput puts p to on the _Pidle list.
@@ -6370,7 +6051,6 @@ private static ptr<p> pidleget() {
         atomic.Xadd(_addr_sched.npidle, -1); // TODO: fast atomic
     }
     return _addr__p_!;
-
 }
 
 // runqempty reports whether _p_ has no Gs on its local run queue.
@@ -6390,7 +6070,6 @@ private static bool runqempty(ptr<p> _addr__p_) {
             return head == tail && runnext == 0;
         }
     }
-
 }
 
 // To shake out latent assumptions about scheduling order,
@@ -6433,7 +6112,6 @@ retryNext:
             return ;
         }
         gp = oldnext.ptr();
-
     }
 retry: // load-acquire, synchronize with consumers
     var h = atomic.LoadAcq(_addr__p_.runqhead); // load-acquire, synchronize with consumers
@@ -6442,13 +6120,11 @@ retry: // load-acquire, synchronize with consumers
         _p_.runq[t % uint32(len(_p_.runq))].set(gp);
         atomic.StoreRel(_addr__p_.runqtail, t + 1); // store-release, makes the item available for consumption
         return ;
-
     }
     if (runqputslow(_addr__p_, _addr_gp, h, t)) {
         return ;
     }
     goto retry;
-
 }
 
 // Put g and a batch of work from local runnable queue on global queue.
@@ -6476,7 +6152,6 @@ private static bool runqputslow(ptr<p> _addr__p_, ptr<g> _addr_gp, uint h, uint 
     }
     if (!atomic.CasRel(_addr__p_.runqhead, h, h + n)) { // cas-release, commits consume
         return false;
-
     }
     batch[n] = gp;
 
@@ -6492,7 +6167,6 @@ private static bool runqputslow(ptr<p> _addr__p_, ptr<g> _addr_gp, uint h, uint 
 
             i = i__prev1;
         }
-
     }
     {
         var i__prev1 = i;
@@ -6512,7 +6186,6 @@ private static bool runqputslow(ptr<p> _addr__p_, ptr<g> _addr_gp, uint h, uint 
     globrunqputbatch(_addr_q, int32(n + 1));
     unlock(_addr_sched.@lock);
     return true;
-
 }
 
 // runqputbatch tries to put all the G's on q on the local runnable queue.
@@ -6535,14 +6208,11 @@ private static void runqputbatch(ptr<p> _addr_pp, ptr<gQueue> _addr_q, nint qsiz
     qsize -= int(n);
 
     if (randomizeScheduler) {
-        Func<uint, uint> off = o => {
-            return (pp.runqtail + o) % uint32(len(pp.runq));
-        };
+        Func<uint, uint> off = o => (pp.runqtail + o) % uint32(len(pp.runq));
         for (var i = uint32(1); i < n; i++) {
             var j = fastrandn(i + 1);
             (pp.runq[off(i)], pp.runq[off(j)]) = (pp.runq[off(j)], pp.runq[off(i)]);
         }
-
     }
     atomic.StoreRel(_addr_pp.runqtail, t);
     if (!q.empty()) {
@@ -6581,10 +6251,8 @@ private static (ptr<g>, bool) runqget(ptr<p> _addr__p_) {
         var gp = _p_.runq[h % uint32(len(_p_.runq))].ptr();
         if (atomic.CasRel(_addr__p_.runqhead, h, h + 1)) { // cas-release, commits consume
             return (_addr_gp!, false);
-
         }
     }
-
 }
 
 // runqdrain drains the local runnable queue of _p_ and returns all goroutines in it.
@@ -6608,11 +6276,9 @@ retry: // load-acquire, synchronize with other consumers
     }
     if (qn > uint32(len(_p_.runq))) { // read inconsistent h and t
         goto retry;
-
     }
     if (!atomic.CasRel(_addr__p_.runqhead, h, h + qn)) { // cas-release, commits consume
         goto retry;
-
     }
     for (var i = uint32(0); i < qn; i++) {
         var gp = _p_.runq[(h + i) % uint32(len(_p_.runq))].ptr();
@@ -6620,7 +6286,6 @@ retry: // load-acquire, synchronize with other consumers
         n++;
     }
     return ;
-
 }
 
 // Grabs a batch of goroutines from _p_'s runnable queue into batch.
@@ -6663,30 +6328,21 @@ private static uint runqgrab(ptr<p> _addr__p_, ptr<array<guintptr>> _addr_batch,
                                 // 1-15ms, which is way too much for this
                                 // optimization. So just yield.
                                 osyield();
-
                             }
-
                         }
-
                         if (!_p_.runnext.cas(next, 0)) {
                             continue;
                         }
-
                         batch[batchHead % uint32(len(batch))] = next;
                         return 1;
-
                     }
 
                 }
-
             }
-
             return 0;
-
         }
         if (n > uint32(len(_p_.runq) / 2)) { // read inconsistent h and t
             continue;
-
         }
         for (var i = uint32(0); i < n; i++) {
             var g = _p_.runq[(h + i) % uint32(len(_p_.runq))];
@@ -6694,10 +6350,8 @@ private static uint runqgrab(ptr<p> _addr__p_, ptr<array<guintptr>> _addr_batch,
         }
         if (atomic.CasRel(_addr__p_.runqhead, h, h + n)) { // cas-release, commits consume
             return n;
-
         }
     }
-
 }
 
 // Steal half of elements from local runnable queue of p2
@@ -6723,7 +6377,6 @@ private static ptr<g> runqsteal(ptr<p> _addr__p_, ptr<p> _addr_p2, bool stealRun
     }
     atomic.StoreRel(_addr__p_.runqtail, t + n); // store-release, makes the item available for consumption
     return _addr_gp!;
-
 }
 
 // A gQueue is a dequeue of Gs linked through g.schedlink. A G can only
@@ -6766,7 +6419,6 @@ private static void pushBack(this ptr<gQueue> _addr_q, ptr<g> _addr_gp) {
         q.head.set(gp);
     }
     q.tail.set(gp);
-
 }
 
 // pushBackAll adds all Gs in l2 to the tail of q. After this q2 must
@@ -6786,7 +6438,6 @@ private static void pushBackAll(this ptr<gQueue> _addr_q, gQueue q2) {
         q.head = q2.head;
     }
     q.tail = q2.tail;
-
 }
 
 // pop removes and returns the head of queue q. It returns nil if
@@ -6802,7 +6453,6 @@ private static ptr<g> pop(this ptr<gQueue> _addr_q) {
         }
     }
     return _addr_gp!;
-
 }
 
 // popList takes all Gs in q and returns them as a gList.
@@ -6855,7 +6505,6 @@ private static ptr<g> pop(this ptr<gList> _addr_l) {
         l.head = gp.schedlink;
     }
     return _addr_gp!;
-
 }
 
 //go:linkname setMaxThreads runtime/debug.setMaxThreads
@@ -6866,7 +6515,6 @@ private static nint setMaxThreads(nint @in) {
     out = int(sched.maxmcount);
     if (in > 0x7fffffff) { // MaxInt32
         sched.maxmcount = 0x7fffffff;
-
     }
     else
  {
@@ -6875,7 +6523,6 @@ private static nint setMaxThreads(nint @in) {
     checkmcount();
     unlock(_addr_sched.@lock);
     return ;
-
 }
 
 //go:nosplit
@@ -6936,9 +6583,7 @@ private static bool sync_runtime_canSpin(nint i) {
             return false;
         }
     }
-
     return true;
-
 }
 
 //go:linkname sync_runtime_doSpin sync.runtime_doSpin
@@ -6975,7 +6620,6 @@ private static void reset(this ptr<randomOrder> _addr_ord, uint count) {
             ord.coprimes = append(ord.coprimes, i);
         }
     }
-
 }
 
 private static randomEnum start(this ptr<randomOrder> _addr_ord, uint i) {
@@ -7008,7 +6652,6 @@ private static uint gcd(uint a, uint b) {
         (a, b) = (b, a % b);
     }
     return a;
-
 }
 
 // An initTask represents the set of initializations that need to be done for a package.
@@ -7060,7 +6703,6 @@ private static void doInit(ptr<initTask> _addr_t) {
             if (t.nfns == 0) {
                 t.state = 2; // initialization done
                 return ;
-
             }
             long start = default;        tracestat before = default;
 
@@ -7068,7 +6710,6 @@ private static void doInit(ptr<initTask> _addr_t) {
                 start = nanotime(); 
                 // Load stats non-atomically since tracinit is updated only by this init goroutine.
                 before = inittrace;
-
             }
             var firstFunc = add(@unsafe.Pointer(t), (3 + t.ndeps) * sys.PtrSize);
             {
@@ -7098,12 +6739,10 @@ private static void doInit(ptr<initTask> _addr_t) {
                 print(string(itoa(sbuf[..], after.bytes - before.bytes)), " bytes, ");
                 print(string(itoa(sbuf[..], after.allocs - before.allocs)), " allocs");
                 print("\n");
-
             }
             t.state = 2; // initialization done
             break;
     }
-
 }
 
 } // end runtime_package

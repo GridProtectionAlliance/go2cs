@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:20 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:51 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\select.go
+namespace go;
 // This file contains the implementation of Go select statements.
 
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
 using System;
-
-
-namespace go;
 
 public static partial class runtime_package {
 
@@ -65,9 +64,7 @@ private static void selunlock(slice<scase> scases, slice<ushort> lockorder) {
             continue; // will unlock it on the next iteration
         }
         unlock(_addr_c.@lock);
-
     }
-
 }
 
 private static bool selparkcommit(ptr<g> _addr_gp, unsafe.Pointer _) {
@@ -108,16 +105,13 @@ private static bool selparkcommit(ptr<g> _addr_gp, unsafe.Pointer _) {
                 unlock(_addr_lastc.@lock);
             sg = sg.waitlink;
             }
-
             lastc = sg.c;
-
         }
     }
     if (lastc != null) {
         unlock(_addr_lastc.@lock);
     }
     return true;
-
 }
 
 private static void block() {
@@ -171,7 +165,6 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
             return 0;
         }
         return pcs[casi];
-
     };
 
     long t0 = default;
@@ -190,14 +183,11 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
             if (cas.c == null) {
                 cas.elem = null; // allow GC
                 continue;
-
             }
-
             var j = fastrandn(uint32(norder + 1));
             pollorder[norder] = pollorder[j];
             pollorder[j] = uint16(i);
             norder++;
-
         }
         i = i__prev1;
     }
@@ -222,7 +212,6 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
             }
 
             lockorder[j] = pollorder[i];
-
         }
         i = i__prev1;
     }
@@ -271,7 +260,6 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
 
             i = i__prev1;
         }
-
     }
     sellock(scases, lockorder);
 
@@ -320,7 +308,6 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
                     goto bufsend;
                 }
             }
-
         }
         casei = casei__prev1;
     }
@@ -353,7 +340,6 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
             if (t0 != 0) {
                 sg.releasetime = -1;
             }
-
             sg.c = c; 
             // Construct waiting list in lock order.
             nextp.val = sg;
@@ -366,7 +352,6 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
  {
                 c.recvq.enqueue(sg);
             }
-
         }
         casei = casei__prev1;
     }
@@ -421,7 +406,6 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
                 if (sglist.releasetime > 0) {
                     caseReleaseTime = sglist.releasetime;
                 }
-
             }
             else
  {
@@ -433,14 +417,11 @@ private static (nint, bool) selectgo(ptr<scase> _addr_cas0, ptr<ushort> _addr_or
  {
                     c.recvq.dequeueSudoG(sglist);
                 }
-
             }
-
             sgnext = sglist.waitlink;
             sglist.waitlink = null;
             releaseSudog(sglist);
             sglist = addr(sgnext);
-
         }
         casei = casei__prev1;
     }
@@ -487,7 +468,6 @@ bufrecv:
             raceWriteObjectPC(c.elemtype, cas.elem, casePC(casi), chanrecvpc);
         }
         racenotify(c, c.recvx, null);
-
     }
     if (msanenabled && cas.elem != null) {
         msanwrite(cas.elem, c.elemtype.size);
@@ -568,7 +548,6 @@ retc:
 sclose:
     selunlock(scases, lockorder);
     panic(plainError("send on closed channel"));
-
 });
 
 private static System.UIntPtr sortkey(this ptr<hchan> _addr_c) {
@@ -627,7 +606,6 @@ private static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
                 j = len(cases) - nrecvs;
                         sel[j] = new scase(c:rc.ch,elem:rc.val);
             orig[j] = i;
-
         }
         i = i__prev1;
     }
@@ -655,7 +633,6 @@ private static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
         }
 
         pc0 = _addr_pcs[0];
-
     }
     var (chosen, recvOK) = selectgo(_addr_sel[0], _addr_order[0], pc0, nsends, nrecvs, dflt == -1); 
 
@@ -668,7 +645,6 @@ private static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
         chosen = orig[chosen];
     }
     return (chosen, recvOK);
-
 }
 
 private static void dequeueSudoG(this ptr<waitq> _addr_q, ptr<sudog> _addr_sgp) {
@@ -685,13 +661,11 @@ private static void dequeueSudoG(this ptr<waitq> _addr_q, ptr<sudog> _addr_sgp) 
             sgp.next = null;
             sgp.prev = null;
             return ;
-
         }
         x.next = null;
         q.last = x;
         sgp.prev = null;
         return ;
-
     }
     if (y != null) { 
         // start of queue
@@ -699,7 +673,6 @@ private static void dequeueSudoG(this ptr<waitq> _addr_q, ptr<sudog> _addr_sgp) 
         q.first = y;
         sgp.next = null;
         return ;
-
     }
     if (q.first == sgp) {
         q.first = null;

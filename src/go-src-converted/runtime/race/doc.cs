@@ -6,8 +6,10 @@
 // No public interface is provided.
 // For details about the race detector see
 // https://golang.org/doc/articles/race_detector.html
-// package race -- go2cs converted at 2022 March 06 22:25:57 UTC
+
+// package race -- go2cs converted at 2022 March 13 05:29:17 UTC
 // import "runtime/race" ==> using race = go.runtime.race_package
 // Original source: C:\Program Files\Go\src\runtime\race\doc.go
+namespace go.runtime;
 
 } // end race_package

@@ -2,35 +2,37 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflect -- go2cs converted at 2022 March 06 22:08:02 UTC
+// package reflect -- go2cs converted at 2022 March 13 05:23:51 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Program Files\Go\src\reflect\abi.go
-using abi = go.@internal.abi_package;
-using goexperiment = go.@internal.goexperiment_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using abi = @internal.abi_package;
+using goexperiment = @internal.goexperiment_package;
+using @unsafe = @unsafe_package;
+
+
+// These variables are used by the register assignment
+// algorithm in this file.
+//
+// They should be modified with care (no other reflect code
+// may be executing) and are generally only modified
+// when testing this package.
+//
+// They should never be set higher than their internal/abi
+// constant counterparts, because the system relies on a
+// structure that is at least large enough to hold the
+// registers the system supports.
+//
+// Currently they're set to zero because using the actual
+// constants will break every part of the toolchain that
+// uses reflect to call functions (e.g. go test, or anything
+// that uses text/template). The values that are currently
+// commented out there should be the actual values once
+// we're ready to use the register ABI everywhere.
 
 public static partial class reflect_package {
 
-    // These variables are used by the register assignment
-    // algorithm in this file.
-    //
-    // They should be modified with care (no other reflect code
-    // may be executing) and are generally only modified
-    // when testing this package.
-    //
-    // They should never be set higher than their internal/abi
-    // constant counterparts, because the system relies on a
-    // structure that is at least large enough to hold the
-    // registers the system supports.
-    //
-    // Currently they're set to zero because using the actual
-    // constants will break every part of the toolchain that
-    // uses reflect to call functions (e.g. go test, or anything
-    // that uses text/template). The values that are currently
-    // commented out there should be the actual values once
-    // we're ready to use the register ABI everywhere.
 private static var intArgRegs = abi.IntArgRegs * goexperiment.RegabiArgsInt;private static var floatArgRegs = abi.FloatArgRegs * goexperiment.RegabiArgsInt;private static var floatRegSize = uintptr(abi.EffectiveFloatRegSize * goexperiment.RegabiArgsInt);
 
 // abiStep represents an ABI "instruction." Each instruction
@@ -100,7 +102,6 @@ private static void dump(this ptr<abiSeq> _addr_a) {
     println("stack", a.stackBytes);
     println("iregs", a.iregs);
     println("fregs", a.fregs);
-
 }
 
 // stepsForValue returns the ABI instructions for translating
@@ -119,7 +120,6 @@ private static slice<abiStep> stepsForValue(this ptr<abiSeq> _addr_a, nint i) {
         e = a.valueStart[i + 1];
     }
     return a.steps[(int)s..(int)e];
-
 }
 
 // addArg extends the abiSeq with a new Go value of type t.
@@ -150,7 +150,6 @@ private static ptr<abiStep> addArg(this ptr<abiSeq> _addr_a, ptr<rtype> _addr_t)
         // at the top.
         a.stackBytes = align(a.stackBytes, uintptr(t.align));
         return _addr_null!;
-
     }
     var aOld = a.val;
     if (!a.regAssign(t, 0)) { 
@@ -159,10 +158,8 @@ private static ptr<abiStep> addArg(this ptr<abiSeq> _addr_a, ptr<rtype> _addr_t)
         a.val = aOld;
         a.stackAssign(t.size, uintptr(t.align));
         return _addr__addr_a.steps[len(a.steps) - 1]!;
-
     }
     return _addr_null!;
-
 }
 
 // addRcvr extends the abiSeq with a new method call
@@ -195,14 +192,12 @@ private static (ptr<abiStep>, bool) addRcvr(this ptr<abiSeq> _addr_a, ptr<rtype>
         // GC bitmap.
         ok = a.assignIntN(0, ptrSize, 1, 0b0);
         ptr = false;
-
     }
     if (!ok) {
         a.stackAssign(ptrSize, ptrSize);
         return (_addr__addr_a.steps[len(a.steps) - 1]!, ptr);
     }
     return (_addr_null!, ptr);
-
 }
 
 // regAssign attempts to reserve argument registers for a value of
@@ -272,7 +267,6 @@ private static bool regAssign(this ptr<abiSeq> _addr_a, ptr<rtype> _addr_t, Syst
         print("t.Kind == ", t.Kind(), "\n");
         panic("unknown type kind");
         panic("unhandled register assignment path");
-
 });
 
 // assignIntN assigns n values to registers, each "size" bytes large,
@@ -303,10 +297,8 @@ private static bool assignIntN(this ptr<abiSeq> _addr_a, System.UIntPtr offset, 
         }
         a.steps = append(a.steps, new abiStep(kind:kind,offset:offset+uintptr(i)*size,size:size,ireg:a.iregs,));
         a.iregs++;
-
     }
     return true;
-
 });
 
 // assignFloatN assigns n values to registers, each "size" bytes large,
@@ -329,7 +321,6 @@ private static bool assignFloatN(this ptr<abiSeq> _addr_a, System.UIntPtr offset
         a.fregs++;
     }
     return true;
-
 });
 
 // stackAssign reserves space for one value that is "size" bytes
@@ -413,9 +404,7 @@ private static void dumpPtrBitMap(abi.IntArgRegBitmap b) {
             x = 1;
         }
         print(" ", x);
-
     }
-
 }
 
 private static abiDesc newAbiDesc(ptr<funcType> _addr_t, ptr<rtype> _addr_rcvr) {
@@ -451,7 +440,6 @@ private static abiDesc newAbiDesc(ptr<funcType> _addr_t, ptr<rtype> _addr_rcvr) 
  {
                 stackPtrs.append(0);
             }
-
         }
         else
  {
@@ -485,7 +473,6 @@ private static abiDesc newAbiDesc(ptr<funcType> _addr_t, ptr<rtype> _addr_rcvr) 
                     st = st__prev2;
                 }
             }
-
         }
         i = i__prev1;
     }
@@ -534,14 +521,12 @@ private static abiDesc newAbiDesc(ptr<funcType> _addr_t, ptr<rtype> _addr_rcvr) 
                     st = st__prev2;
                 }
             }
-
         }
         i = i__prev1;
     }
 
     @out.stackBytes -= retOffset;
     return new abiDesc(in,out,stackCallArgsSize,retOffset,spill,stackPtrs,inRegPtrs,outRegPtrs);
-
 }
 
 } // end reflect_package

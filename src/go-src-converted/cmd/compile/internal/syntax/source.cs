@@ -10,43 +10,44 @@
 // This file is self-contained (go tool compile source.go
 // compiles) and thus could be made into its own package.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:41 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:27:07 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\source.go
-using io = go.io_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
-public static partial class syntax_package {
+using io = io_package;
+using utf8 = unicode.utf8_package;
 
-    // The source buffer is accessed using three indices b (begin),
-    // r (read), and e (end):
-    //
-    // - If b >= 0, it points to the beginning of a segment of most
-    //   recently read characters (typically a Go literal).
-    //
-    // - r points to the byte immediately following the most recently
-    //   read character ch, which starts at r-chw.
-    //
-    // - e points to the byte immediately following the last byte that
-    //   was read into the buffer.
-    //
-    // The buffer content is terminated at buf[e] with the sentinel
-    // character utf8.RuneSelf. This makes it possible to test for
-    // the common case of ASCII characters with a single 'if' (see
-    // nextch method).
-    //
-    //                +------ content in use -------+
-    //                v                             v
-    // buf [...read...|...segment...|ch|...unread...|s|...free...]
-    //                ^             ^  ^            ^
-    //                |             |  |            |
-    //                b         r-chw  r            e
-    //
-    // Invariant: -1 <= b < r <= e < len(buf) && buf[e] == sentinel
+
+// The source buffer is accessed using three indices b (begin),
+// r (read), and e (end):
+//
+// - If b >= 0, it points to the beginning of a segment of most
+//   recently read characters (typically a Go literal).
+//
+// - r points to the byte immediately following the most recently
+//   read character ch, which starts at r-chw.
+//
+// - e points to the byte immediately following the last byte that
+//   was read into the buffer.
+//
+// The buffer content is terminated at buf[e] with the sentinel
+// character utf8.RuneSelf. This makes it possible to test for
+// the common case of ASCII characters with a single 'if' (see
+// nextch method).
+//
+//                +------ content in use -------+
+//                v                             v
+// buf [...read...|...segment...|ch|...unread...|s|...free...]
+//                ^             ^  ^            ^
+//                |             |  |            |
+//                b         r-chw  r            e
+//
+// Invariant: -1 <= b < r <= e < len(buf) && buf[e] == sentinel
+
+
+using System;public static partial class syntax_package {
+
 private partial struct source {
     public io.Reader @in;
     public Action<nuint, nuint, @string> errh;
@@ -78,7 +79,6 @@ private static void init(this ptr<source> _addr_s, io.Reader @in, Action<nuint, 
     s.ioerr = null;
     (s.b, s.r, s.e) = (-1, 0, 0);    (s.line, s.col) = (0, 0);    s.ch = ' ';
     s.chw = 0;
-
 }
 
 // starting points for line and column numbers
@@ -141,7 +141,6 @@ private static void rewind(this ptr<source> _addr_s) => func((_, panic, _) => {
     s.col -= uint(s.r - s.b);
     s.r = s.b;
     s.nextch();
-
 });
 
 private static void nextch(this ptr<source> _addr_s) {
@@ -163,7 +162,6 @@ redo:
             goto redo;
         }
         return ;
-
     }
     while (s.e - s.r < utf8.UTFMax && !utf8.FullRune(s.buf[(int)s.r..(int)s.e]) && s.ioerr == null) {
         s.fill();
@@ -175,12 +173,10 @@ redo:
             // ensure we never start with a '/' (e.g., rooted path) in the error message
             s.error("I/O error: " + s.ioerr.Error());
             s.ioerr = null;
-
         }
         s.ch = -1;
         s.chw = 0;
         return ;
-
     }
     s.ch, s.chw = utf8.DecodeRune(s.buf[(int)s.r..(int)s.e]);
     s.r += s.chw;
@@ -196,7 +192,6 @@ redo:
             s.error("invalid BOM in the middle of the file");
         }
         goto redo;
-
     }
 }
 
@@ -240,7 +235,6 @@ private static void fill(this ptr<source> _addr_s) => func((_, panic, _) => {
 
     s.buf[s.e] = sentinel;
     s.ioerr = io.ErrNoProgress;
-
 });
 
 // nextSize returns the next bigger size for a buffer of a given size.
@@ -256,7 +250,6 @@ private static nint nextSize(nint size) {
         return size << 1;
     }
     return size + max;
-
 }
 
 } // end syntax_package

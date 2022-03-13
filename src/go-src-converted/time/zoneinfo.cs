@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2022 March 06 22:30:15 UTC
+// package time -- go2cs converted at 2022 March 13 05:41:05 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\zoneinfo.go
-using errors = go.errors_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using sync = sync_package;
+using syscall = syscall_package;
+
+
+//go:generate env ZONEINFO=$GOROOT/lib/time/zoneinfo.zip go run genzabbrs.go -output zoneinfo_abbrs_windows.go
+
+// A Location maps time instants to the zone in use at that time.
+// Typically, the Location represents the collection of time offsets
+// in use in a geographical area. For many Locations the time offset varies
+// depending on whether daylight savings time is in use at the time instant.
+
+using System;
 public static partial class time_package {
 
-    //go:generate env ZONEINFO=$GOROOT/lib/time/zoneinfo.zip go run genzabbrs.go -output zoneinfo_abbrs_windows.go
-
-    // A Location maps time instants to the zone in use at that time.
-    // Typically, the Location represents the collection of time offsets
-    // in use in a geographical area. For many Locations the time offset varies
-    // depending on whether daylight savings time is in use at the time instant.
 public partial struct Location {
     public @string name;
     public slice<zone> zone;
@@ -94,7 +95,6 @@ private static ptr<Location> get(this ptr<Location> _addr_l) {
         localOnce.Do(initLocal);
     }
     return _addr_l!;
-
 }
 
 // String returns a descriptive name for the time zone information,
@@ -155,7 +155,6 @@ private static (@string, nint, long, long, bool) lookup(this ptr<Location> _addr
 
     }
 
-
     if (len(l.tx) == 0 || sec < l.tx[0].when) {
         zone = _addr_l.zone[l.lookupFirstZone()];
         name = zone.name;
@@ -170,7 +169,6 @@ private static (@string, nint, long, long, bool) lookup(this ptr<Location> _addr
         }
         isDST = zone.isDST;
         return ;
-
     }
     var tx = l.tx;
     end = omega;
@@ -206,10 +204,8 @@ private static (@string, nint, long, long, bool) lookup(this ptr<Location> _addr
             }
 
         }
-
     }
     return ;
-
 }
 
 // lookupFirstZone returns the index of the time zone to use for times
@@ -247,7 +243,6 @@ private static nint lookupFirstZone(this ptr<Location> _addr_l) {
 
             zi = zi__prev1;
         }
-
     }
     {
         var zi__prev1 = zi;
@@ -262,7 +257,6 @@ private static nint lookupFirstZone(this ptr<Location> _addr_l) {
     }
 
     return 0;
-
 }
 
 // firstZoneUsed reports whether the first zone is used by some
@@ -275,7 +269,6 @@ private static bool firstZoneUsed(this ptr<Location> _addr_l) {
             return true;
         }
     }    return false;
-
 }
 
 // tzset takes a timezone string like the one found in the TZ environment
@@ -307,7 +300,6 @@ private static (@string, nint, long, long, bool, bool) tzset(@string s, long ini
     if (len(s) == 0 || s[0] == ',') { 
         // No daylight savings time.
         return (stdName, stdOffset, initEnd, omega, false, true);
-
     }
     dstName, s, ok = tzsetName(s);
     if (ok) {
@@ -326,7 +318,6 @@ private static (@string, nint, long, long, bool, bool) tzset(@string s, long ini
     if (len(s) == 0) { 
         // Default DST rules per tzcode.
         s = ",M3.2.0,M11.1.0";
-
     }
     if (s[0] != ',' && s[0] != ';') {
         return ("", 0, 0, 0, false, false);
@@ -425,7 +416,6 @@ private static (@string, @string, bool) tzsetName(@string s) {
                         return (s[..(int)i], s[(int)i..], true);
                         break;
                 }
-
             }
     else
 
@@ -437,7 +427,6 @@ private static (@string, @string, bool) tzsetName(@string s) {
             return ("", "", false);
         }
         return (s, "", true);
-
     } {
         {
             var i__prev1 = i;
@@ -456,7 +445,6 @@ private static (@string, @string, bool) tzsetName(@string s) {
         }
 
         return ("", "", false);
-
     }
 }
 
@@ -490,7 +478,6 @@ private static (nint, @string, bool) tzsetOffset(@string s) {
             off = -off;
         }
         return (off, s, true);
-
     }
     nint mins = default;
     mins, s, ok = tzsetNum(s[(int)1..], 0, 59);
@@ -503,7 +490,6 @@ private static (nint, @string, bool) tzsetOffset(@string s) {
             off = -off;
         }
         return (off, s, true);
-
     }
     nint secs = default;
     secs, s, ok = tzsetNum(s[(int)1..], 0, 59);
@@ -516,7 +502,6 @@ private static (nint, @string, bool) tzsetOffset(@string s) {
         off = -off;
     }
     return (off, s, true);
-
 }
 
 // ruleKind is the kinds of rules that can be seen in a tzset string.
@@ -526,7 +511,6 @@ private partial struct ruleKind { // : nint
 private static readonly ruleKind ruleJulian = iota;
 private static readonly var ruleDOY = 0;
 private static readonly var ruleMonthWeekDay = 1;
-
 
 // rule is a rule read from a tzset string.
 private partial struct rule {
@@ -557,7 +541,6 @@ private static (rule, @string, bool) tzsetRule(@string s) {
         }
         r.kind = ruleJulian;
         r.day = jday;
-
     }
     else if (s[0] == 'M') {
         nint mon = default;
@@ -579,7 +562,6 @@ private static (rule, @string, bool) tzsetRule(@string s) {
         r.day = day;
         r.week = week;
         r.mon = mon;
-
     }
     else
  {
@@ -590,12 +572,10 @@ private static (rule, @string, bool) tzsetRule(@string s) {
         }
         r.kind = ruleDOY;
         r.day = day;
-
     }
     if (len(s) == 0 || s[0] != '/') {
         r.time = 2 * secondsPerHour; // 2am is the default
         return (r, s, true);
-
     }
     var (offset, s, ok) = tzsetOffset(s[(int)1..]);
     if (!ok) {
@@ -604,7 +584,6 @@ private static (rule, @string, bool) tzsetRule(@string s) {
     r.time = offset;
 
     return (r, s, true);
-
 }
 
 // tzsetNum parses a number from a tzset string.
@@ -635,7 +614,6 @@ private static (nint, @string, bool) tzsetNum(@string s, nint min, nint max) {
         return (0, "", false);
     }
     return (num, "", true);
-
 }
 
 // tzruleTime takes a year, a rule, and a timezone offset,
@@ -680,7 +658,6 @@ private static nint tzruleTime(nint year, rule r, nint off) {
         }
         s = d * secondsPerDay;
         return s + r.time - off;
-
 }
 
 // lookupName returns information about the time zone with
@@ -729,7 +706,6 @@ private static (nint, bool) lookupName(this ptr<Location> _addr_l, @string name,
     }
 
     return ;
-
 }
 
 // NOTE(rsc): Eventually we will need to accept the POSIX TZ environment
@@ -768,7 +744,6 @@ public static (ptr<Location>, error) LoadLocation(@string name) {
         // No valid IANA Time Zone name contains a single dot,
         // much less dot dot. Likewise, none begin with a slash.
         return (_addr_null!, error.As(errLocation)!);
-
     }
     zoneinfoOnce.Do(() => {
         var (env, _) = syscall.Getenv("ZONEINFO");
@@ -792,17 +767,13 @@ public static (ptr<Location>, error) LoadLocation(@string name) {
                     z = z__prev3;
 
                 }
-
                 firstErr = error.As(err)!;
-
             }
             else if (err != syscall.ENOENT) {
                 firstErr = error.As(err)!;
             }
 
-
         }
-
     }
     {
         var z__prev1 = z;
@@ -819,9 +790,7 @@ public static (ptr<Location>, error) LoadLocation(@string name) {
         z = z__prev1;
 
     }
-
     return (_addr_null!, error.As(firstErr)!);
-
 }
 
 // containsDotDot reports whether s contains "..".
@@ -835,7 +804,6 @@ private static bool containsDotDot(@string s) {
         }
     }
     return false;
-
 }
 
 } // end time_package

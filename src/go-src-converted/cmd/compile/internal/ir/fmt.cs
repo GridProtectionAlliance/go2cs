@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:06 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:27 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\fmt.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using io = go.io_package;
-using math = go.math_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-
-using utf8 = go.unicode.utf8_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
-public static partial class ir_package {
+using bytes = bytes_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using io = io_package;
+using math = math_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using strings = strings_package;
 
-    // Op
+using utf8 = unicode.utf8_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// Op
+
+
+using System;public static partial class ir_package {
+
 public static @string OpNames = new slice<@string>(InitKeyedValues<@string>((OADDR, "&"), (OADD, "+"), (OADDSTR, "+"), (OALIGNOF, "unsafe.Alignof"), (OANDAND, "&&"), (OANDNOT, "&^"), (OAND, "&"), (OAPPEND, "append"), (OAS, "="), (OAS2, "="), (OBREAK, "break"), (OCALL, "function call"), (OCAP, "cap"), (OCASE, "case"), (OCLOSE, "close"), (OCOMPLEX, "complex"), (OBITNOT, "^"), (OCONTINUE, "continue"), (OCOPY, "copy"), (ODELETE, "delete"), (ODEFER, "defer"), (ODIV, "/"), (OEQ, "=="), (OFALL, "fallthrough"), (OFOR, "for"), (OFORUNTIL, "foruntil"), (OGE, ">="), (OGOTO, "goto"), (OGT, ">"), (OIF, "if"), (OIMAG, "imag"), (OINLMARK, "inlmark"), (ODEREF, "*"), (OLEN, "len"), (OLE, "<="), (OLSH, "<<"), (OLT, "<"), (OMAKE, "make"), (ONEG, "-"), (OMOD, "%"), (OMUL, "*"), (ONEW, "new"), (ONE, "!="), (ONOT, "!"), (OOFFSETOF, "unsafe.Offsetof"), (OOROR, "||"), (OOR, "|"), (OPANIC, "panic"), (OPLUS, "+"), (OPRINTN, "println"), (OPRINT, "print"), (ORANGE, "range"), (OREAL, "real"), (ORECV, "<-"), (ORECOVER, "recover"), (ORETURN, "return"), (ORSH, ">>"), (OSELECT, "select"), (OSEND, "<-"), (OSIZEOF, "unsafe.Sizeof"), (OSUB, "-"), (OSWITCH, "switch"), (OUNSAFEADD, "unsafe.Add"), (OUNSAFESLICE, "unsafe.Slice"), (OXOR, "^")));
 
 // GoString returns the Go syntax for the Op, or else its name.
@@ -36,7 +37,6 @@ public static @string GoString(this Op o) {
         return OpNames[o];
     }
     return o.String();
-
 }
 
 // Format implements formatting for an Op.
@@ -52,16 +52,13 @@ public static void Format(this Op o, fmt.State s, int verb) {
                 // %+v is OMUL instead of "*"
                 io.WriteString(s, o.String());
                 return ;
-
             }
             io.WriteString(s, o.GoString());
-
             break;
         default: 
             fmt.Fprintf(s, "%%!%c(Op=%d)", verb, int(o));
             break;
     }
-
 }
 
 // Node
@@ -102,14 +99,12 @@ private static void fmtNode(Node n, fmt.State s, int verb) {
             fmt.Fprintf(s, "%v (type %v)", n, t);
         }
         return ;
-
     }
     if (OpPrec[n.Op()] < 0) {
         stmtFmt(n, s);
         return ;
     }
     exprFmt(n, s, 0);
-
 }
 
 public static nint OpPrec = new slice<nint>(InitKeyedValues<nint>((OALIGNOF, 8), (OAPPEND, 8), (OBYTES2STR, 8), (OARRAYLIT, 8), (OSLICELIT, 8), (ORUNES2STR, 8), (OCALLFUNC, 8), (OCALLINTER, 8), (OCALLMETH, 8), (OCALL, 8), (OCAP, 8), (OCLOSE, 8), (OCOMPLIT, 8), (OCONVIFACE, 8), (OCONVNOP, 8), (OCONV, 8), (OCOPY, 8), (ODELETE, 8), (OGETG, 8), (OLEN, 8), (OLITERAL, 8), (OMAKESLICE, 8), (OMAKESLICECOPY, 8), (OMAKE, 8), (OMAPLIT, 8), (ONAME, 8), (ONEW, 8), (ONIL, 8), (ONONAME, 8), (OOFFSETOF, 8), (OPACK, 8), (OPANIC, 8), (OPAREN, 8), (OPRINTN, 8), (OPRINT, 8), (ORUNESTR, 8), (OSIZEOF, 8), (OSLICE2ARRPTR, 8), (OSTR2BYTES, 8), (OSTR2RUNES, 8), (OSTRUCTLIT, 8), (OTARRAY, 8), (OTSLICE, 8), (OTCHAN, 8), (OTFUNC, 8), (OTINTER, 8), (OTMAP, 8), (OTSTRUCT, 8), (OTYPE, 8), (OUNSAFEADD, 8), (OUNSAFESLICE, 8), (OINDEXMAP, 8), (OINDEX, 8), (OSLICE, 8), (OSLICESTR, 8), (OSLICEARR, 8), (OSLICE3, 8), (OSLICE3ARR, 8), (OSLICEHEADER, 8), (ODOTINTER, 8), (ODOTMETH, 8), (ODOTPTR, 8), (ODOTTYPE2, 8), (ODOTTYPE, 8), (ODOT, 8), (OXDOT, 8), (OCALLPART, 8), (OMETHEXPR, 8), (OPLUS, 7), (ONOT, 7), (OBITNOT, 7), (ONEG, 7), (OADDR, 7), (ODEREF, 7), (ORECV, 7), (OMUL, 6), (ODIV, 6), (OMOD, 6), (OLSH, 6), (ORSH, 6), (OAND, 6), (OANDNOT, 6), (OADD, 5), (OSUB, 5), (OOR, 5), (OXOR, 5), (OEQ, 4), (OLT, 4), (OLE, 4), (OGE, 4), (OGT, 4), (ONE, 4), (OSEND, 3), (OANDAND, 2), (OOROR, 1), (OAS, -1), (OAS2, -1), (OAS2DOTTYPE, -1), (OAS2FUNC, -1), (OAS2MAPR, -1), (OAS2RECV, -1), (OASOP, -1), (OBLOCK, -1), (OBREAK, -1), (OCASE, -1), (OCONTINUE, -1), (ODCL, -1), (ODEFER, -1), (OFALL, -1), (OFOR, -1), (OFORUNTIL, -1), (OGOTO, -1), (OIF, -1), (OLABEL, -1), (OGO, -1), (ORANGE, -1), (ORETURN, -1), (OSELECT, -1), (OSWITCH, -1), (OEND, 0)));
@@ -120,7 +115,6 @@ public static bool StmtWithInit(Op op) {
     if (op == OIF || op == OFOR || op == OFORUNTIL || op == OSWITCH) 
         return true;
         return false;
-
 }
 
 private static void stmtFmt(Node n, fmt.State s) { 
@@ -187,9 +181,7 @@ private static void stmtFmt(Node n, fmt.State s) {
  {
                 fmt.Fprintf(s, "%v--", n.X);
             }
-
             break;
-
         }
         fmt.Fprintf(s, "%v %v= %v", n.X, n.AsOp, n.Y);
     else if (n.Op() == OAS2 || n.Op() == OAS2DOTTYPE || n.Op() == OAS2FUNC || n.Op() == OAS2MAPR || n.Op() == OAS2RECV) 
@@ -242,7 +234,6 @@ private static void stmtFmt(Node n, fmt.State s) {
         if (!exportFormat) { // TODO maybe only if FmtShort, same below
             fmt.Fprintf(s, "%s loop", opname);
             break;
-
         }
         fmt.Fprint(s, opname);
         if (simpleinit) {
@@ -386,7 +377,6 @@ private static void exprFmt(Node n, fmt.State s, nint prec) {
         }
 
         break;
-
     }
 
     var nprec = OpPrec[n.Op()];
@@ -426,9 +416,7 @@ private static void exprFmt(Node n, fmt.State s, nint prec) {
  {
                 fmt.Fprintf(s, "%v(", n.Type());
             }
-
             needUnparen = true;
-
         }
         if (n.Type() == types.UntypedRune) {
             {
@@ -459,7 +447,6 @@ private static void exprFmt(Node n, fmt.State s, nint prec) {
 
                 __switch_break0:;
             }
-
         }
         else
  {
@@ -482,7 +469,6 @@ private static void exprFmt(Node n, fmt.State s, nint prec) {
             }
 
         }
-
         fmt.Fprintf(s, "<unnamed Func>");
         goto __switch_break1;
     }
@@ -563,7 +549,6 @@ private static void exprFmt(Node n, fmt.State s, nint prec) {
  {
                 fmt.Fprintf(s, "chan %v", n.Elem);
             }
-
                 goto __switch_break1;
     }
     if (n.Op() == OTSTRUCT)
@@ -839,7 +824,6 @@ private static void exprFmt(Node n, fmt.State s, nint prec) {
         fmt.Fprintf(s, "<node %v>", n.Op());
 
     __switch_break1:;
-
 }
 
 private static @string ellipsisIf(bool b) {
@@ -847,7 +831,6 @@ private static @string ellipsisIf(bool b) {
         return "...";
     }
     return "";
-
 }
 
 // Nodes
@@ -864,7 +847,6 @@ public static void Format(this Nodes l, fmt.State s, int verb) {
         // %+v is DumpList output
         dumpNodes(s, l, 1);
         return ;
-
     }
     if (verb != 'v') {
         fmt.Fprintf(s, "%%!%c(Nodes)", verb);
@@ -876,10 +858,8 @@ public static void Format(this Nodes l, fmt.State s, int verb) {
 
         if (ok) { // %.v is expr list
             sep = ", ";
-
         }
     }
-
 
     foreach (var (i, n) in l) {
         fmt.Fprint(s, n);
@@ -930,17 +910,14 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
     if (@base.Debug.DumpPtrs != 0 && n.Name() != null && n.Name().Defn != null) { 
         // Useful to see where Defn is set and what node it points to
         fmt.Fprintf(w, " defn(%p)", n.Name().Defn);
-
     }
     if (@base.Debug.DumpPtrs != 0 && n.Name() != null && n.Name().Curfn != null) { 
         // Useful to see where Defn is set and what node it points to
         fmt.Fprintf(w, " curfn(%p)", n.Name().Curfn);
-
     }
     if (@base.Debug.DumpPtrs != 0 && n.Name() != null && n.Name().Outer != null) { 
         // Useful to see where Defn is set and what node it points to
         fmt.Fprintf(w, " outer(%p)", n.Name().Outer);
-
     }
     if (EscFmt != null) {
         {
@@ -951,7 +928,6 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
             }
 
         }
-
     }
     if (n.Typecheck() != 0) {
         fmt.Fprintf(w, " tc(%d)", n.Typecheck());
@@ -967,9 +943,7 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
             if (tf.PkgPath != "") { 
                 // skip unexported field - Interface will fail
                 continue;
-
             }
-
             var k = tf.Type.Kind();
             if (reflect.Bool <= k && k <= reflect.Complex128) {
                 var name = strings.TrimSuffix(tf.Name, "_");
@@ -985,9 +959,7 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
  {
                     fmt.Fprintf(w, " %s:%+v", name, vf.Interface());
                 }
-
             }
-
         }
 
         i = i__prev1;
@@ -1006,9 +978,7 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
             if (tm.PkgPath != "") { 
                 // skip unexported method - call will fail
                 continue;
-
             }
-
             var m = v.Method(i);
             var mt = m.Type();
             if (mt.NumIn() == 0 && mt.NumOut() == 1 && mt.Out(0).Kind() == reflect.Bool) { 
@@ -1024,11 +994,8 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
                         name = strings.TrimSuffix(tm.Name, "_");
                         fmt.Fprintf(w, " %s", name);
                     }
-
                 }();
-
             }
-
         }
 
         i = i__prev1;
@@ -1044,14 +1011,12 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
             }
 
         }
-
     }
     if (n.Type() != null) {
         if (n.Op() == OTYPE) {
             fmt.Fprintf(w, " type");
         }
         fmt.Fprintf(w, " %+v", n.Type());
-
     }
     if (n.Pos().IsKnown()) {
         @string pfx = "";
@@ -1063,7 +1028,6 @@ private static void dumpNodeHeader(io.Writer w, Node n) => func((defer, _, recov
                 var pos = @base.Ctxt.PosTable.Pos(n.Pos());
         var file = filepath.Base(pos.Filename());
         fmt.Fprintf(w, " # %s%s:%d", pfx, file, pos.Line());
-
     }
 });
 
@@ -1171,9 +1135,7 @@ private static void dumpNode(io.Writer w, Node n, nint depth) {
             if (tf.PkgPath != "") { 
                 // skip unexported field - Interface will fail
                 continue;
-
             }
-
 
             if (tf.Type.Kind() == reflect.Interface || tf.Type.Kind() == reflect.Ptr || tf.Type.Kind() == reflect.Slice) 
                 if (vf.IsNil()) {
@@ -1240,18 +1202,14 @@ private static void dumpNode(io.Writer w, Node n, nint depth) {
                             i = i__prev2;
                             n = n__prev2;
                         }
-
                     }
-
                     break;
                 }
             }
-
         }
 
         i = i__prev1;
     }
-
 }
 
 private static var nodeType = reflect.TypeOf((Node.val)(null)).Elem();
@@ -1314,7 +1272,6 @@ private static bool isZero(reflect.Value v) {
         return true;
     else 
         return false;
-    
-}
+    }
 
 } // end ir_package

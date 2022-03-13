@@ -5,16 +5,16 @@
 //go:build !compiler_bootstrap
 // +build !compiler_bootstrap
 
-// package bits -- go2cs converted at 2022 March 06 22:14:59 UTC
+// package bits -- go2cs converted at 2022 March 13 05:29:04 UTC
 // import "math/bits" ==> using bits = go.math.bits_package
 // Original source: C:\Program Files\Go\src\math\bits\bits_errors.go
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go.math;
+
+using _@unsafe_ = @unsafe_package;
 
 public static partial class bits_package {
 
-    //go:linkname overflowError runtime.overflowError
+//go:linkname overflowError runtime.overflowError
 private static error overflowError = default!;
 
 //go:linkname divideError runtime.divideError

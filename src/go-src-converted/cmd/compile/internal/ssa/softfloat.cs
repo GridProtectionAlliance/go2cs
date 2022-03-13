@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:42 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:21:59 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\softfloat.go
-using types = go.cmd.compile.@internal.types_package;
-using math = go.math_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
+using math = math_package;
 
 public static partial class ssa_package {
 
@@ -63,7 +63,6 @@ private static void softfloat(ptr<Func> _addr_f) {
                     v.Op = OpCopy;
                     v.Type = f.Config.Types.UInt64;
                                 newInt64 = newInt64 || v.Type.Size() == 8;
-
             }
             else if ((v.Op == OpStore || v.Op == OpZero || v.Op == OpMove) && v.Aux._<ptr<types.Type>>().IsFloat()) {
                 {
@@ -81,14 +80,12 @@ private static void softfloat(ptr<Func> _addr_f) {
                             break;
                     }
                 }
-
             }
         }
     }    if (newInt64 && f.Config.RegSize == 4) { 
         // On 32bit arch, decompose Uint64 introduced in the switch above.
         decomposeBuiltIn(f);
         applyRewrite(f, rewriteBlockdec64, rewriteValuedec64, removeDeadValues);
-
     }
 }
 

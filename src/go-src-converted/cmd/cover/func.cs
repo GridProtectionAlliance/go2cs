@@ -4,42 +4,44 @@
 
 // This file implements the visitor that computes the (line, column)-(line-column) range for each function.
 
-// package main -- go2cs converted at 2022 March 06 23:15:09 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:38 UTC
 // Original source: C:\Program Files\Go\src\cmd\cover\func.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using tabwriter = go.text.tabwriter_package;
-
-using cover = go.golang.org.x.tools.cover_package;
-
 namespace go;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using tabwriter = text.tabwriter_package;
+
+using cover = golang.org.x.tools.cover_package;
+
+
+// funcOutput takes two file names as arguments, a coverage profile to read as input and an output
+// file to write ("" means to write to standard output). The function reads the profile and produces
+// as output the coverage data broken down by function, like this:
+//
+//    fmt/format.go:30:    init            100.0%
+//    fmt/format.go:57:    clearflags        100.0%
+//    ...
+//    fmt/scan.go:1046:    doScan            100.0%
+//    fmt/scan.go:1075:    advance            96.2%
+//    fmt/scan.go:1119:    doScanf            96.8%
+//    total:        (statements)            91.9%
 
 public static partial class main_package {
 
-    // funcOutput takes two file names as arguments, a coverage profile to read as input and an output
-    // file to write ("" means to write to standard output). The function reads the profile and produces
-    // as output the coverage data broken down by function, like this:
-    //
-    //    fmt/format.go:30:    init            100.0%
-    //    fmt/format.go:57:    clearflags        100.0%
-    //    ...
-    //    fmt/scan.go:1046:    doScan            100.0%
-    //    fmt/scan.go:1075:    advance            96.2%
-    //    fmt/scan.go:1119:    doScanf            96.8%
-    //    total:        (statements)            91.9%
 private static error funcOutput(@string profile, @string outputFile) => func((defer, _, _) => {
     var (profiles, err) = cover.ParseProfiles(profile);
     if (err != null) {
@@ -61,7 +63,6 @@ private static error funcOutput(@string profile, @string outputFile) => func((de
         }
         defer(fd.Close());
         out = bufio.NewWriter(fd);
-
     }
     defer(@out.Flush());
 
@@ -89,7 +90,6 @@ private static error funcOutput(@string profile, @string outputFile) => func((de
     }    fmt.Fprintf(tabber, "total:\t(statements)\t%.1f%%\n", percent(covered, total));
 
     return error.As(null!)!;
-
 });
 
 // findFuncs parses the file and returns a slice of FuncExtent descriptors.
@@ -105,7 +105,6 @@ private static (slice<ptr<FuncExtent>>, error) findFuncs(@string name) {
     ptr<FuncVisitor> visitor = addr(new FuncVisitor(fset:fset,name:name,astFile:parsedFile,));
     ast.Walk(visitor, visitor.astFile);
     return (visitor.funcs, error.As(null!)!);
-
 }
 
 // FuncExtent describes a function's extent in the source by file and position.
@@ -134,9 +133,7 @@ private static ast.Visitor Visit(this ptr<FuncVisitor> _addr_v, ast.Node node) {
             if (n.Body == null) { 
                 // Do not count declarations of assembly functions.
                 break;
-
             }
-
             var start = v.fset.Position(n.Pos());
             var end = v.fset.Position(n.End());
             ptr<FuncExtent> fe = addr(new FuncExtent(name:n.Name.Name,startLine:start.Line,startCol:start.Column,endLine:end.Line,endCol:end.Column,));
@@ -144,7 +141,6 @@ private static ast.Visitor Visit(this ptr<FuncVisitor> _addr_v, ast.Node node) {
             break;
     }
     return v;
-
 }
 
 // coverage returns the fraction of the statements in the function that were covered, as a numerator and denominator.
@@ -164,19 +160,16 @@ private static (long, long) coverage(this ptr<FuncExtent> _addr_f, ptr<cover.Pro
         if (b.StartLine > f.endLine || (b.StartLine == f.endLine && b.StartCol >= f.endCol)) { 
             // Past the end of the function.
             break;
-
         }
         if (b.EndLine < f.startLine || (b.EndLine == f.startLine && b.EndCol <= f.startCol)) { 
             // Before the beginning of the function
             continue;
-
         }
         total += int64(b.NumStmt);
         if (b.Count > 0) {
             covered += int64(b.NumStmt);
         }
     }    return (covered, total);
-
 }
 
 // Pkg describes a single package, compatible with the JSON output from 'go list'; see 'go help list'.
@@ -196,7 +189,6 @@ private static (map<@string, ptr<Pkg>>, error) findPkgs(slice<ptr<cover.Profile>
         if (strings.HasPrefix(profile.FileName, ".") || filepath.IsAbs(profile.FileName)) { 
             // Relative or absolute path.
             continue;
-
         }
         ref var pkg = ref heap(path.Dir(profile.FileName), out ptr<var> _addr_pkg);
         {
@@ -208,7 +200,6 @@ private static (map<@string, ptr<Pkg>>, error) findPkgs(slice<ptr<cover.Profile>
             }
 
         }
-
     }    if (len(list) == 0) {
         return (pkgs, error.As(null!)!);
     }
@@ -233,10 +224,8 @@ private static (map<@string, ptr<Pkg>>, error) findPkgs(slice<ptr<cover.Profile>
         }
         _addr_pkgs[pkg.ImportPath] = _addr_pkg;
         pkgs[pkg.ImportPath] = ref _addr_pkgs[pkg.ImportPath].val;
-
     }
     return (pkgs, error.As(null!)!);
-
 }
 
 // findFile finds the location of the named file in GOROOT, GOPATH etc.
@@ -247,7 +236,6 @@ private static (@string, error) findFile(map<@string, ptr<Pkg>> pkgs, @string fi
     if (strings.HasPrefix(file, ".") || filepath.IsAbs(file)) { 
         // Relative or absolute path.
         return (file, error.As(null!)!);
-
     }
     var pkg = pkgs[path.Dir(file)];
     if (pkg != null) {
@@ -259,7 +247,6 @@ private static (@string, error) findFile(map<@string, ptr<Pkg>> pkgs, @string fi
         }
     }
     return ("", error.As(fmt.Errorf("did not find package for %s in go list output", file))!);
-
 }
 
 private static double percent(long covered, long total) {
@@ -267,7 +254,6 @@ private static double percent(long covered, long total) {
         total = 1; // Avoid zero denominator.
     }
     return 100.0F * float64(covered) / float64(total);
-
 }
 
 } // end main_package

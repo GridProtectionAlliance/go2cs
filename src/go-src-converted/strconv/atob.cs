@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2022 March 06 22:08:02 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:23:51 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\atob.go
-
-
 namespace go;
 
 public static partial class strconv_package {
 
-    // ParseBool returns the boolean value represented by the string.
-    // It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
-    // Any other value returns an error.
+// ParseBool returns the boolean value represented by the string.
+// It accepts 1, t, T, TRUE, true, True, 0, f, F, FALSE, false, False.
+// Any other value returns an error.
 public static (bool, error) ParseBool(@string str) {
     bool _p0 = default;
     error _p0 = default!;
@@ -47,7 +45,6 @@ public static (bool, error) ParseBool(@string str) {
             break;
     }
     return (false, error.As(syntaxError("ParseBool", str))!);
-
 }
 
 // FormatBool returns "true" or "false" according to the value of b.
@@ -56,7 +53,6 @@ public static @string FormatBool(bool b) {
         return "true";
     }
     return "false";
-
 }
 
 // AppendBool appends "true" or "false", according to the value of b,
@@ -66,7 +62,6 @@ public static slice<byte> AppendBool(slice<byte> dst, bool b) {
         return append(dst, "true");
     }
     return append(dst, "false");
-
 }
 
 } // end strconv_package

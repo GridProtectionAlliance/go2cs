@@ -28,14 +28,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package s390x -- go2cs converted at 2022 March 06 23:20:38 UTC
+// package s390x -- go2cs converted at 2022 March 13 06:33:32 UTC
 // import "cmd/link/internal/s390x" ==> using s390x = go.cmd.link.@internal.s390x_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\s390x\obj.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
 
 public static partial class s390x_package {
 
@@ -65,7 +65,6 @@ private static void archinit(ptr<ld.Link> _addr_ctxt) {
         }
     else 
         ld.Exitf("unknown -H option: %v", ctxt.HeadType);
-    
-}
+    }
 
 } // end s390x_package

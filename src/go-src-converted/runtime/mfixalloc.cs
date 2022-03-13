@@ -6,31 +6,30 @@
 //
 // See malloc.go for overview.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:30 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mfixalloc.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
-    // FixAlloc is a simple free-list allocator for fixed size objects.
-    // Malloc uses a FixAlloc wrapped around sysAlloc to manage its
-    // mcache and mspan objects.
-    //
-    // Memory returned by fixalloc.alloc is zeroed by default, but the
-    // caller may take responsibility for zeroing allocations by setting
-    // the zero flag to false. This is only safe if the memory never
-    // contains heap pointers.
-    //
-    // The caller is responsible for locking around FixAlloc calls.
-    // Callers can keep state in the object but the first word is
-    // smashed by freeing and reallocating.
-    //
-    // Consider marking fixalloc'd types go:notinheap.
+// FixAlloc is a simple free-list allocator for fixed size objects.
+// Malloc uses a FixAlloc wrapped around sysAlloc to manage its
+// mcache and mspan objects.
+//
+// Memory returned by fixalloc.alloc is zeroed by default, but the
+// caller may take responsibility for zeroing allocations by setting
+// the zero flag to false. This is only safe if the memory never
+// contains heap pointers.
+//
+// The caller is responsible for locking around FixAlloc calls.
+// Callers can keep state in the object but the first word is
+// smashed by freeing and reallocating.
+//
+// Consider marking fixalloc'd types go:notinheap.
 private partial struct fixalloc {
     public System.UIntPtr size;
     public Action<unsafe.Pointer, unsafe.Pointer> first; // called first time p is returned
@@ -86,7 +85,6 @@ private static unsafe.Pointer alloc(this ptr<fixalloc> _addr_f) {
             memclrNoHeapPointers(v, f.size);
         }
         return v;
-
     }
     if (uintptr(f.nchunk) < f.size) {
         f.chunk = uintptr(persistentalloc(_FixAllocChunk, 0, f.stat));
@@ -100,7 +98,6 @@ private static unsafe.Pointer alloc(this ptr<fixalloc> _addr_f) {
     f.nchunk -= uint32(f.size);
     f.inuse += f.size;
     return v;
-
 }
 
 private static void free(this ptr<fixalloc> _addr_f, unsafe.Pointer p) {

@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package errors -- go2cs converted at 2022 March 06 22:31:27 UTC
+// package errors -- go2cs converted at 2022 March 13 05:42:23 UTC
 // import "errors" ==> using errors = go.errors_package
 // Original source: C:\Program Files\Go\src\errors\wrap.go
-using reflectlite = go.@internal.reflectlite_package;
-
 namespace go;
+
+using reflectlite = @internal.reflectlite_package;
+
+
+// Unwrap returns the result of calling the Unwrap method on err, if err's
+// type contains an Unwrap method returning error.
+// Otherwise, Unwrap returns nil.
 
 public static partial class errors_package {
 
-    // Unwrap returns the result of calling the Unwrap method on err, if err's
-    // type contains an Unwrap method returning error.
-    // Otherwise, Unwrap returns nil.
 public static error Unwrap(error err) {
     if (!ok) {
         return error.As(null!)!;
     }
     return error.As(u.Unwrap())!;
-
 }
 
 // Is reports whether any error in err's chain matches target.
@@ -65,7 +66,6 @@ public static bool Is(error err, error target) {
             return false;
         }
     }
-
 }
 
 // As finds the first error in err's chain that matches target, and if so, sets
@@ -109,12 +109,9 @@ public static bool As(error err, object target) => func((_, panic, _) => {
             }
 
         }
-
         err = Unwrap(err);
-
     }
     return false;
-
 });
 
 private static var errorType = reflectlite.TypeOf((error.val)(null)).Elem();

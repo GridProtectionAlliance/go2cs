@@ -4,17 +4,16 @@
 
 // This file implements typechecking of statements.
 
-// package types -- go2cs converted at 2022 March 06 22:42:18 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:27 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\stmt.go
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.go;
+
+using ast = go.ast_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using sort = sort_package;
+using System;
 
 public static partial class types_package {
 
@@ -54,7 +53,6 @@ private static void funcBody(this ptr<Checker> _addr_check, ptr<declInfo> _addr_
         check.error(atPos(body.Rbrace), _MissingReturn, "missing return");
     }
     check.usage(sig.scope);
-
 });
 
 private static void usage(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope) {
@@ -75,10 +73,7 @@ private static void usage(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope)
             v = v__prev1;
 
         }
-
-    }    sort.Slice(unused, (i, j) => {
-        return unused[i].pos < unused[j].pos;
-    });
+    }    sort.Slice(unused, (i, j) => unused[i].pos < unused[j].pos);
     {
         ptr<Var> v__prev1 = v;
 
@@ -114,7 +109,6 @@ private static readonly var fallthroughOk = 1;
 // additional context information
 private static readonly var finalSwitchCase = 2;
 
-
 private static void simpleStmt(this ptr<Checker> _addr_check, ast.Stmt s) {
     ref Checker check = ref _addr_check.val;
 
@@ -133,10 +127,8 @@ private static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
             }
 
         }
-
     }
     return null;
-
 }
 
 private static void stmtList(this ptr<Checker> _addr_check, stmtContext ctxt, slice<ast.Stmt> list) {
@@ -151,7 +143,6 @@ private static void stmtList(this ptr<Checker> _addr_check, stmtContext ctxt, sl
             inner |= fallthroughOk;
         }
         check.stmt(inner, s);
-
     }
 }
 
@@ -187,7 +178,6 @@ private static void multipleDefaults(this ptr<Checker> _addr_check, slice<ast.St
  {
                 first = d;
             }
-
         }
     }
 }
@@ -212,7 +202,6 @@ private static token.Token assignOp(token.Token op) {
         return op + (token.ADD - token.ADD_ASSIGN);
     }
     return token.ILLEGAL;
-
 }
 
 private static void suspendedCall(this ptr<Checker> _addr_check, @string keyword, ptr<ast.CallExpr> _addr_call) {
@@ -237,7 +226,6 @@ private static void suspendedCall(this ptr<Checker> _addr_check, @string keyword
     else 
         unreachable();
         check.errorf(_addr_x, code, "%s %s %s", keyword, msg, _addr_x);
-
 }
 
 // goVal returns the Go value for val, or nil.
@@ -260,7 +248,6 @@ private static void goVal(constant.Value val) {
             x = x__prev1;
 
         }
-
         {
             var x__prev1 = x;
 
@@ -273,7 +260,6 @@ private static void goVal(constant.Value val) {
             x = x__prev1;
 
         }
-
     else if (val.Kind() == constant.Float) 
         {
             var x__prev1 = x;
@@ -287,11 +273,9 @@ private static void goVal(constant.Value val) {
             x = x__prev1;
 
         }
-
     else if (val.Kind() == constant.String) 
         return constant.StringVal(val);
         return null;
-
 }
 
 // A valueMap maps a case value (of a basic Go type) to a list of positions
@@ -303,8 +287,7 @@ private static void goVal(constant.Value val) {
 private partial struct valueType {
     public token.Pos pos;
     public Type typ;
-}
-private static void caseValues(this ptr<Checker> _addr_check, ptr<operand> _addr_x, slice<ast.Expr> values, valueMap seen) {
+}private static void caseValues(this ptr<Checker> _addr_check, ptr<operand> _addr_x, slice<ast.Expr> values, valueMap seen) {
     ref Checker check = ref _addr_check.val;
     ref operand x = ref _addr_x.val;
 
@@ -344,14 +327,11 @@ L:
                         _continueL = true;
                         break;
                     }
-
                 }
                 seen[val] = append(seen[val], new valueType(v.Pos(),v.typ));
-
             }
 
         }
-
     }
 }
 
@@ -378,19 +358,16 @@ L:
                 if (T != null) {
                     Ts = T.String();
                 }
-
                 check.errorf(e, _DuplicateCase, "duplicate case %s in type switch", Ts);
                 check.error(other, _DuplicateCase, "\tprevious case"); // secondary error, \t indented
                 _continueL = true;
                 break;
             }
-
         }        seen[T] = e;
         if (T != null) {
             check.typeAssertion(e, x, xtyp, T);
         }
     }    return ;
-
 }
 
 // stmt typechecks statement s.
@@ -409,11 +386,8 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                 }
 
             }
-
             assert(scope == check.scope);
-
         }(check.scope));
-
     }
     defer(check.processDelayed(len(check.delayed)));
 
@@ -484,18 +458,15 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
             if (x.mode == invalid) {
                 return ;
             }
-
             if (!isNumeric(x.typ)) {
                 check.invalidOp(s.X, _NonNumericIncDec, "%s%s (non-numeric type %s)", s.X, s.Tok, x.typ);
                 return ;
             }
-
             ptr<ast.BasicLit> Y = addr(new ast.BasicLit(ValuePos:s.X.Pos(),Kind:token.INT,Value:"1")); // use x's position
             check.binary(_addr_x, null, s.X, Y, op, s.TokPos);
             if (x.mode == invalid) {
                 return ;
             }
-
             check.assignVar(s.X, _addr_x);
             break;
         case ptr<ast.AssignStmt> s:
@@ -512,9 +483,7 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
  { 
                     // regular assignment
                     check.assignVars(s.Lhs, s.Rhs);
-
                 }
-
             else 
                 // assignment operations
                 if (len(s.Lhs) != 1 || len(s.Rhs) != 1) {
@@ -563,7 +532,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                                 }
 
                             }
-
                         }
                 else
 
@@ -572,22 +540,18 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                 } { 
                     // return has results or result parameters are unnamed
                     check.initVars(res.vars, s.Results, s.Return);
-
                 }
-
             }
             else if (len(s.Results) > 0) {
                 check.error(s.Results[0], _WrongResultCount, "no result values expected");
                 check.use(s.Results);
             }
-
             break;
         case ptr<ast.BranchStmt> s:
             if (s.Label != null) {
                 check.hasLabel = true;
                 return ; // checked in 2nd pass (check.labels)
             }
-
 
             if (s.Tok == token.BREAK) 
                 if (ctxt & breakOk == 0) {
@@ -661,7 +625,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                     check.errorf(_addr_x, _InvalidExprSwitch, "cannot switch on %s (%s is not comparable)", _addr_x, x.typ);
                     x.mode = invalid;
                 }
-
             }
             else
  { 
@@ -671,9 +634,7 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                 x.typ = Typ[Bool];
                 x.val = constant.MakeBool(true);
                 x.expr = addr(new ast.Ident(NamePos:s.Body.Lbrace,Name:"true"));
-
             }
-
             check.multipleDefaults(s.Body.List);
 
             var seen = make(valueMap); // map of seen case values to positions and types
@@ -698,10 +659,8 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
  {
                         inner |= finalSwitchCase;
                     }
-
                     check.stmtList(inner, clause.Body);
                     check.closeScope();
-
                 }
 
                 i = i__prev1;
@@ -747,7 +706,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
  {
                         check.recordDef(lhs, null); // lhs variable is implicitly declared in each cause clause
                     }
-
                     rhs = guard.Rhs[0];
                     break;
                 default:
@@ -767,19 +725,16 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                 check.invalidAST(s, "incorrect form of type switch guard");
                 return ;
             }
-
             x = default;
             check.expr(_addr_x, expr.X);
             if (x.mode == invalid) {
                 return ;
             }
-
             ptr<Interface> (xtyp, _) = under(x.typ)._<ptr<Interface>>();
             if (xtyp == null) {
                 check.errorf(_addr_x, _InvalidTypeSwitch, "%s is not an interface", _addr_x);
                 return ;
             }
-
             check.ordinaryType(_addr_x, xtyp);
 
             check.multipleDefaults(s.Body.List);
@@ -809,7 +764,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                         if (len(clause.List) != 1 || T == null) {
                             T = x.typ;
                         }
-
                         var obj = NewVar(lhs.Pos(), check.pkg, lhs.Name, T);
                         var scopePos = clause.Pos() + token.Pos(len("default")); // for default clause (len(List) == 0)
                         {
@@ -820,19 +774,15 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                             }
 
                         }
-
                         check.declare(check.scope, null, obj, scopePos);
                         check.recordImplicit(clause, obj); 
                         // For the "declared but not used" error, all lhs variables act as
                         // one; i.e., if any one of them is 'used', all of them are 'used'.
                         // Collect them for later analysis.
                         lhsVars = append(lhsVars, obj);
-
                     }
-
                     check.stmtList(inner, clause.Body);
                     check.closeScope();
-
                 } 
 
                 // If lhs exists, we must have at least one lhs variable that was used.
@@ -851,9 +801,7 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                 if (!used) {
                     check.softErrorf(lhs, _UnusedVar, "%s declared but not used", lhs.Name);
                 }
-
             }
-
             break;
         case ptr<ast.SelectStmt> s:
             inner |= breakOk;
@@ -903,22 +851,17 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                             x = x__prev2;
 
                         }
-
                     }
-
                     if (!valid) {
                         check.error(clause.Comm, _InvalidSelectCase, "select case must be send or receive (possibly with assignment)");
                         continue;
                     }
-
                     check.openScope(s, "case");
                     if (clause.Comm != null) {
                         check.stmt(inner, clause.Comm);
                     }
-
                     check.stmtList(inner, clause.Body);
                     check.closeScope();
-
                 }
 
                 s = s__prev1;
@@ -956,7 +899,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                 s = s__prev1;
 
             }
-
             check.stmt(inner, s.Body);
             break;
         case ptr<ast.RangeStmt> s:
@@ -983,20 +925,16 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                     }
 
                 }
-
                 msg = default;
                 key, val, msg = rangeKeyVal(typ, isVarName(s.Key), isVarName(s.Value));
                 if (key == null || msg != "") {
                     if (msg != "") { 
                         // TODO(rFindley) should this be parenthesized, to be consistent with other qualifiers?
                         msg = ": " + msg;
-
                     }
-
                     check.softErrorf(_addr_x, _InvalidRangeExpr, "cannot range over %s%s", _addr_x, msg); 
                     // ok to continue
                 }
-
             } 
 
             // check assignment to/declaration of iteration variables
@@ -1036,7 +974,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                                 if (name != "_") {
                                     vars = append(vars, obj);
                                 }
-
                             }
                             else
  {
@@ -1059,7 +996,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                                 x.expr = lhs; // we don't have a better rhs expression to use here
                                 x.typ = typ;
                                 check.initVar(obj, _addr_x, "range clause");
-
                             }
                             else
  {
@@ -1070,7 +1006,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                             typ = typ__prev2;
 
                         }
-
                     }
             else
  
@@ -1093,7 +1028,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                             // for short variable declarations) and ends at the end of the innermost
                             // containing block."
                             check.declare(check.scope, null, obj, scopePos);
-
                         }
                 else
 
@@ -1102,7 +1036,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                 } {
                     check.error(inNode(s, s.TokPos), _NoNewVar, "no new variables on left side of :=");
                 }
-
             } { 
                 // ordinary assignment
                 {
@@ -1125,20 +1058,17 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
                                 x.expr = lhs; // we don't have a better rhs expression to use here
                                 x.typ = typ;
                                 check.assignVar(lhs, _addr_x);
-
                             }
 
                             typ = typ__prev2;
 
                         }
-
                     }
 
                     i = i__prev1;
                     lhs = lhs__prev1;
                 }
             }
-
             check.stmt(inner, s.Body);
             break;
         default:
@@ -1148,7 +1078,6 @@ private static void stmt(this ptr<Checker> _addr_check, stmtContext ctxt, ast.St
             break;
         }
     }
-
 });
 
 // isVarName reports whether x is a non-nil, non-blank (_) expression.
@@ -1158,7 +1087,6 @@ private static bool isVarName(ast.Expr x) {
     }
     ptr<ast.Ident> (ident, _) = unparen(x)._<ptr<ast.Ident>>();
     return ident == null || ident.Name != "_";
-
 }
 
 // rangeKeyVal returns the key and value type produced by a range clause
@@ -1179,7 +1107,6 @@ private static (Type, Type, @string) rangeKeyVal(Type typ, bool wantKey, bool wa
             if (isString(typ)) {
                 return (Typ[Int], universeRune, ""); // use 'rune' name
             }
-
             break;
         case ptr<Array> typ:
             return (Typ[Int], typ.elem, "");
@@ -1200,7 +1127,6 @@ private static (Type, Type, @string) rangeKeyVal(Type typ, bool wantKey, bool wa
                 typ = typ__prev1;
 
             }
-
             break;
         case ptr<Map> typ:
             return (typ.key, typ.elem, "");
@@ -1238,7 +1164,6 @@ private static (Type, Type, @string) rangeKeyVal(Type typ, bool wantKey, bool wa
             break;
     }
     return (null, null, "");
-
 }
 
 } // end types_package

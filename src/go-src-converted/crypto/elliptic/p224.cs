@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package elliptic -- go2cs converted at 2022 March 06 22:18:23 UTC
+// package elliptic -- go2cs converted at 2022 March 13 05:32:34 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Program Files\Go\src\crypto\elliptic\p224.go
+namespace go.crypto;
 // This is a constant-time, 32-bit implementation of P224. See FIPS 186-3,
 // section D.2.2.
 //
 // See https://www.imperialviolet.org/2010/12/04/ecc.html ([1]) for background.
 
-using big = go.math.big_package;
 
-namespace go.crypto;
+using big = math.big_package;
 
 public static partial class elliptic_package {
 
@@ -38,7 +38,6 @@ private static void initP224() {
     p224FromBig(_addr_p224.gx, _addr_p224.Gx);
     p224FromBig(_addr_p224.gy, _addr_p224.Gy);
     p224FromBig(_addr_p224.b, _addr_p224.B);
-
 }
 
 // P224 returns a Curve which implements P-224 (see FIPS 186-3, section D.2.2).
@@ -97,7 +96,6 @@ private static bool IsOnCurve(this p224Curve curve, ptr<big.Int> _addr_bigX, ptr
         i = i__prev1;
     }
     return true;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) Add(this p224Curve _p0, ptr<big.Int> _addr_bigX1, ptr<big.Int> _addr_bigY1, ptr<big.Int> _addr_bigX2, ptr<big.Int> _addr_bigY2) {
@@ -124,7 +122,6 @@ private static (ptr<big.Int>, ptr<big.Int>) Add(this p224Curve _p0, ptr<big.Int>
     }
     p224AddJacobian(_addr_x3, _addr_y3, _addr_z3, _addr_x1, _addr_y1, _addr_z1, _addr_x2, _addr_y2, _addr_z2);
     return _addr_p224ToAffine(_addr_x3, _addr_y3, _addr_z3)!;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) Double(this p224Curve _p0, ptr<big.Int> _addr_bigX1, ptr<big.Int> _addr_bigY1) {
@@ -226,7 +223,6 @@ private static uint p224IsZero(ptr<p224FieldElement> _addr_a) {
     result = (~result) & 1;
 
     return result;
-
 }
 
 // p224Add computes *out = a+b
@@ -335,7 +331,6 @@ private static void p224Mul(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEleme
     }
 
     p224ReduceLarge(_addr_out, _addr_tmp);
-
 }
 
 // Square computes *out = a*a
@@ -370,17 +365,13 @@ private static void p224Square(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
  {
                     tmp[i + j] += r << 1;
                 }
-
             }
-
-
         }
 
         i = i__prev1;
     }
 
     p224ReduceLarge(_addr_out, _addr_tmp);
-
 }
 
 // ReduceLarge converts a p224LargeFieldElement to a p224FieldElement.
@@ -475,7 +466,6 @@ private static void p224Reduce(ptr<p224FieldElement> _addr_a) {
     a[2] += mask & (1 << 28 - 1);
     a[1] += mask & (1 << 28 - 1);
     a[0] += mask & (1 << 28);
-
 }
 
 // p224Invert calculates *out = in**-1 by computing in**(2**224 - 2**96 - 1),
@@ -502,7 +492,6 @@ private static void p224Invert(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
 
         for (nint i = 0; i < 5; i++) { // 2**12 - 2**6
             p224Square(_addr_f2, _addr_f2, _addr_c);
-
         }
 
         i = i__prev1;
@@ -514,7 +503,6 @@ private static void p224Invert(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
 
         for (i = 0; i < 11; i++) { // 2**24 - 2**12
             p224Square(_addr_f3, _addr_f3, _addr_c);
-
         }
 
         i = i__prev1;
@@ -526,7 +514,6 @@ private static void p224Invert(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
 
         for (i = 0; i < 23; i++) { // 2**48 - 2**24
             p224Square(_addr_f3, _addr_f3, _addr_c);
-
         }
 
         i = i__prev1;
@@ -538,7 +525,6 @@ private static void p224Invert(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
 
         for (i = 0; i < 47; i++) { // 2**96 - 2**48
             p224Square(_addr_f4, _addr_f4, _addr_c);
-
         }
 
         i = i__prev1;
@@ -550,7 +536,6 @@ private static void p224Invert(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
 
         for (i = 0; i < 23; i++) { // 2**120 - 2**24
             p224Square(_addr_f4, _addr_f4, _addr_c);
-
         }
 
         i = i__prev1;
@@ -561,7 +546,6 @@ private static void p224Invert(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
 
         for (i = 0; i < 6; i++) { // 2**126 - 2**6
             p224Square(_addr_f2, _addr_f2, _addr_c);
-
         }
 
         i = i__prev1;
@@ -574,7 +558,6 @@ private static void p224Invert(ptr<p224FieldElement> _addr_@out, ptr<p224FieldEl
 
         for (i = 0; i < 97; i++) { // 2**224 - 2**97
             p224Square(_addr_f1, _addr_f1, _addr_c);
-
         }
 
         i = i__prev1;
@@ -743,7 +726,6 @@ private static void p224Contract(ptr<p224FieldElement> _addr_@out, ptr<p224Field
 
         i = i__prev1;
     }
-
 }
 
 // Group element functions.
@@ -869,7 +851,6 @@ private static void p224AddJacobian(ptr<p224FieldElement> _addr_x3, ptr<p224Fiel
     p224CopyConditional(_addr_y3, _addr_y1, z2IsZero);
     p224CopyConditional(_addr_z3, _addr_z2, z1IsZero);
     p224CopyConditional(_addr_z3, _addr_z1, z2IsZero);
-
 }
 
 // p224DoubleJacobian computes *out = a+a.
@@ -955,7 +936,6 @@ private static void p224DoubleJacobian(ptr<p224FieldElement> _addr_x3, ptr<p224F
     p224Mul(_addr_y3, _addr_alpha, _addr_beta, _addr_c);
     p224Sub(_addr_y3, _addr_y3, _addr_gamma);
     p224Reduce(_addr_y3);
-
 }
 
 // p224CopyConditional sets *out = *in iff the least-significant-bit of control
@@ -1020,7 +1000,6 @@ private static (ptr<big.Int>, ptr<big.Int>) p224ToAffine(ptr<p224FieldElement> _
         }
     }
 
-
     p224Invert(_addr_zinv, _addr_z);
     p224Square(_addr_zinvsq, _addr_zinv, _addr_tmp);
     p224Mul(_addr_x, _addr_x, _addr_zinvsq, _addr_tmp);
@@ -1030,7 +1009,6 @@ private static (ptr<big.Int>, ptr<big.Int>) p224ToAffine(ptr<p224FieldElement> _
     p224Contract(_addr_outx, _addr_x);
     p224Contract(_addr_outy, _addr_y);
     return (_addr_p224ToBig(_addr_outx)!, _addr_p224ToBig(_addr_outy)!);
-
 }
 
 // get28BitsFromEnd returns the least-significant 28 bits from buf>>shift,
@@ -1053,17 +1031,13 @@ private static (uint, slice<byte>) get28BitsFromEnd(slice<byte> buf, nuint shift
                 if (i != 3 || shift == 4) {
                     buf = buf[..(int)l - 1];
                 }
-
             }
 
         }
-
         ret |= uint32(b) << (int)((8 * i)) >> (int)(shift);
-
     }
     ret &= bottom28Bits;
     return (ret, buf);
-
 }
 
 // p224FromBig sets *out = *in.

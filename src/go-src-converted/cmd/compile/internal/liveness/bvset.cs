@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package liveness -- go2cs converted at 2022 March 06 23:10:39 UTC
+// package liveness -- go2cs converted at 2022 March 13 06:23:56 UTC
 // import "cmd/compile/internal/liveness" ==> using liveness = go.cmd.compile.@internal.liveness_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\liveness\bvset.go
-using bitvec = go.cmd.compile.@internal.bitvec_package;
-
 namespace go.cmd.compile.@internal;
+
+using bitvec = cmd.compile.@internal.bitvec_package;
 
 public static partial class liveness_package {
 
-    // FNV-1 hash function constants.
+// FNV-1 hash function constants.
 private static readonly nint h0 = (nint)2166136261L;
 private static readonly nint hp = 16777619;
-
 
 // bvecSet is a set of bvecs, in initial insertion order.
 private partial struct bvecSet {
@@ -64,7 +63,6 @@ private static void grow(this ptr<bvecSet> _addr_m) {
     }
 
     m.index = newIndex;
-
 }
 
 // add adds bv to the set and returns its index in m.extractUnique.
@@ -84,20 +82,17 @@ private static nint add(this ptr<bvecSet> _addr_m, bitvec.BitVec bv) {
             index[h] = len(m.uniq);
             m.uniq = append(m.uniq, bv);
             return len(m.uniq) - 1;
-
         }
         var jlive = m.uniq[j];
         if (bv.Eq(jlive)) { 
             // Existing bvec.
             return j;
-
         }
         h++;
         if (h == uint32(len(index))) {
             h = 0;
         }
     }
-
 }
 
 // extractUnique returns this slice of unique bit vectors in m, as

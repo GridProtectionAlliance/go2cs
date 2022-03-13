@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:33 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:37 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\xcoff.go
-using bytes = go.bytes_package;
-using objabi = go.cmd.@internal.objabi_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
-using bits = go.math.bits_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
-public static partial class ld_package {
+using bytes = bytes_package;
+using objabi = cmd.@internal.objabi_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using ioutil = io.ioutil_package;
+using bits = math.bits_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
 
-    // This file handles all algorithms related to XCOFF files generation.
-    // Most of them are adaptations of the ones in  cmd/link/internal/pe.go
-    // as PE and XCOFF are based on COFF files.
-    // XCOFF files generated are 64 bits.
+
+// This file handles all algorithms related to XCOFF files generation.
+// Most of them are adaptations of the ones in  cmd/link/internal/pe.go
+// as PE and XCOFF are based on COFF files.
+// XCOFF files generated are 64 bits.
+
+
+using System;public static partial class ld_package {
+
  
 // Total amount of space to reserve at the start of the file
 // for File Header, Auxiliary Header, and Section Headers.
@@ -70,7 +71,6 @@ public static readonly nuint F_VARPG = 0x0100;
 public static readonly nuint F_DYNLOAD = 0x1000;
 public static readonly nuint F_SHROBJ = 0x2000;
 public static readonly nuint F_LOADONLY = 0x4000;
-
 
 // Auxiliary Header
 public partial struct XcoffAoutHdr64 {
@@ -135,7 +135,6 @@ public static readonly nuint STYP_LOADER = 0x1000;
 public static readonly nuint STYP_DEBUG = 0x2000;
 public static readonly nuint STYP_TYPCHK = 0x4000;
 public static readonly nuint STYP_OVRFLO = 0x8000;
-
 public static readonly nuint SSUBTYP_DWINFO = 0x10000; // DWARF info section
 public static readonly nuint SSUBTYP_DWLINE = 0x20000; // DWARF line-number section
 public static readonly nuint SSUBTYP_DWPBNMS = 0x30000; // DWARF public names section
@@ -159,7 +158,6 @@ public static readonly nint LDHDRSZ_32 = 32;
 public static readonly nint LDHDRSZ_64 = 56;
 public static readonly nint LDSYMSZ_64 = 24;
 public static readonly nint RELSZ_64 = 14;
-
 
 // Type representing all XCOFF symbols.
 private partial interface xcoffSym {
@@ -266,7 +264,6 @@ private static readonly nint _AUX_SYM = 253;
 private static readonly nint _AUX_FILE = 252;
 private static readonly nint _AUX_CSECT = 251;
 private static readonly nint _AUX_SECT = 250;
-
 
 // Xftype field
 public static readonly nint XFT_FN = 0; // Source File Name
@@ -425,7 +422,6 @@ private static nint size(this ptr<xcoffStringTable> _addr_t) {
  
     // string table starts with 4-byte length at the beginning
     return t.stringsLen + 4;
-
 }
 
 // add adds string str to string table t.
@@ -436,7 +432,6 @@ private static nint add(this ptr<xcoffStringTable> _addr_t, @string str) {
     t.strings = append(t.strings, str);
     t.stringsLen += len(str) + 1; // each string will have 0 appended to it
     return off;
-
 }
 
 // write writes string table t into the output file.
@@ -469,7 +464,6 @@ private static ptr<XcoffScnHdr64> addSection(this ptr<xcoffFile> _addr_f, @strin
     f.sections = append(f.sections, sect);
     f.sectNameToScnum[name] = int16(len(f.sections));
     return _addr_sect!;
-
 }
 
 // addDwarfSection adds a dwarf section to the XCOFF file f.
@@ -520,7 +514,6 @@ private static (@string, uint) xcoffGetDwarfSubtype(@string str) {
     } 
     // never used
     return ("", 0);
-
 }
 
 // getXCOFFscnum returns the XCOFF section number of a Go section.
@@ -546,7 +539,6 @@ private static short getXCOFFscnum(this ptr<xcoffFile> _addr_f, ptr<sym.Section>
         return f.sectNameToScnum[".data"];
         Errorf(null, "getXCOFFscnum not implemented for section %s", sect.Name);
     return -1;
-
 }
 
 // Xcoffinit initialised some internal value and setups
@@ -565,8 +557,6 @@ public static void Xcoffinit(ptr<Link> _addr_ctxt) {
         Errorf(null, "-R not available on AIX");
     }
     FlagRound.val = int(XCOFFSECTALIGN);
-
-
 }
 
 // SYMBOL TABLE
@@ -604,7 +594,6 @@ private static void xcoffUpdateOuterSize(ptr<Link> _addr_ctxt, long size, sym.Sy
             var tsize = ldr.SymSize(ldr.Lookup("runtime.types", 0));
             outerSymSize["typerel.*"] = size - tsize;
             return ;
-
         }
         fallthrough = true;
     }
@@ -614,7 +603,6 @@ private static void xcoffUpdateOuterSize(ptr<Link> _addr_ctxt, long size, sym.Sy
             // runtime.types size must be removed, as it's a real symbol.
             tsize = ldr.SymSize(ldr.Lookup("runtime.types", 0));
             outerSymSize["type.*"] = size - tsize;
-
         }
         goto __switch_break0;
     }
@@ -649,7 +637,6 @@ private static void xcoffUpdateOuterSize(ptr<Link> _addr_ctxt, long size, sym.Sy
         Errorf(null, "unknown XCOFF outer symbol for type %s", stype.String());
 
     __switch_break0:;
-
 }
 
 // addSymbol writes a symbol or an auxiliary symbol entry on ctxt.out.
@@ -675,7 +662,6 @@ private static byte xcoffAlign(ptr<loader.Loader> _addr_ldr, loader.Sym x, Symbo
         }
     }
     return logBase2(int(align));
-
 }
 
 // logBase2 returns the log in base 2 of a.
@@ -716,13 +702,11 @@ private static void writeSymbolNewFile(this ptr<xcoffFile> _addr_f, ptr<Link> _a
             if (sect.Name == ".debug_abbrev") {
                 dwsize = uint64(ldr.SymSize(loader.Sym(sect.Sym)));
             }
-
         }
         else
  { 
             // There is only one .FILE with external linking.
             dwsize = sect.Length;
-
         }
         var (name, _) = xcoffGetDwarfSubtype(sect.Name);
         s = addr(new XcoffSymEnt64(Nvalue:currDwscnoff[sect.Name],Noffset:uint32(f.stringTable.add(name)),Nsclass:C_DWARF,Nscnum:f.getXCOFFscnum(sect),Nnumaux:1,));
@@ -736,9 +720,7 @@ private static void writeSymbolNewFile(this ptr<xcoffFile> _addr_f, ptr<Link> _a
             if (sect.Name == ".debug_frame" && ctxt.LinkMode != LinkExternal) { 
                 // CIE size must be added to the first package.
                 dwsize += 48;
-
             }
-
         }
         f.addSymbol(s); 
 
@@ -749,7 +731,6 @@ private static void writeSymbolNewFile(this ptr<xcoffFile> _addr_f, ptr<Link> _a
         ptr<XcoffAuxDWARF64> auxd = addr(new XcoffAuxDWARF64(Xscnlen:dwsize,Xauxtype:_AUX_SECT,));
 
         f.addSymbol(auxd);
-
     }    if (extnum != 1) {
         Exitf("XCOFF symtab: A new file was detected with its first symbol not in .text");
     }
@@ -765,7 +746,6 @@ private static void writeSymbolNewFile(this ptr<xcoffFile> _addr_f, ptr<Link> _a
     currSymSrcFile.csectAux = aux;
     currSymSrcFile.csectVAStart = int64(firstEntry);
     currSymSrcFile.csectVAEnd = int64(firstEntry);
-
 }
 
 // Update values for the previous package.
@@ -791,7 +771,6 @@ private static void updatePreviousFile(this ptr<xcoffFile> _addr_f, ptr<Link> _a
     var csectSize = currSymSrcFile.csectVAEnd - currSymSrcFile.csectVAStart;
     aux.Xscnlenlo = uint32(csectSize & 0xFFFFFFFF);
     aux.Xscnlenhi = uint32(csectSize >> 32);
-
 }
 
 // Write symbol representing a .text function.
@@ -827,7 +806,6 @@ private static slice<xcoffSym> writeSymbolFunc(this ptr<xcoffFile> _addr_f, ptr<
                 xfile.updatePreviousFile(ctxt, false);
                 currSymSrcFile.name = ldr.SymPkg(x);
                 f.writeSymbolNewFile(ctxt, ldr.SymPkg(x), uint64(ldr.SymValue(x)), xfile.getXCOFFscnum(ldr.SymSect(x)));
-
             }
             else
  { 
@@ -842,9 +820,7 @@ private static slice<xcoffSym> writeSymbolFunc(this ptr<xcoffFile> _addr_f, ptr<
                     currSymSrcFile.name = ldr.SymPkg(x);
                     f.writeSymbolNewFile(ctxt, "go_functions", uint64(ldr.SymValue(x)), xfile.getXCOFFscnum(ldr.SymSect(x)));
                 }
-
             }
-
         }
     }
     ptr<XcoffSymEnt64> s = addr(new XcoffSymEnt64(Nsclass:C_EXT,Noffset:uint32(xfile.stringTable.add(ldr.SymExtname(x))),Nvalue:uint64(ldr.SymValue(x)),Nscnum:f.getXCOFFscnum(ldr.SymSect(x)),Ntype:SYM_TYPE_FUNC,Nnumaux:2,));
@@ -870,7 +846,6 @@ private static slice<xcoffSym> writeSymbolFunc(this ptr<xcoffFile> _addr_f, ptr<
 
     syms = append(syms, a4);
     return syms;
-
 }
 
 // put function used by genasmsym to write symbol table
@@ -891,7 +866,6 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
         if (ldr.SymPkg(x) != "" || strings.Contains(name, "-tramp") || strings.HasPrefix(name, "runtime.text.")) { 
             // Function within a file
             syms = xfile.writeSymbolFunc(ctxt, x);
-
         }
         else
  { 
@@ -899,7 +873,6 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
             if (name != "runtime.text" && name != "runtime.etext" && name != "go.buildid") {
                 Exitf("putaixsym: unknown text symbol %s", name);
             }
-
             ptr<XcoffSymEnt64> s = addr(new XcoffSymEnt64(Nsclass:C_HIDEXT,Noffset:uint32(xfile.stringTable.add(name)),Nvalue:uint64(ldr.SymValue(x)),Nscnum:xfile.getXCOFFscnum(ldr.SymSect(x)),Ntype:SYM_TYPE_FUNC,Nnumaux:1,));
             ldr.SetSymDynid(x, int32(xfile.symbolCount));
             syms = append(syms, s);
@@ -908,7 +881,6 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
             ptr<XcoffAuxCSect64> a4 = addr(new XcoffAuxCSect64(Xauxtype:_AUX_CSECT,Xscnlenlo:uint32(size&0xFFFFFFFF),Xscnlenhi:uint32(size>>32),Xsmclas:XMC_PR,Xsmtyp:XTY_SD,));
             a4.Xsmtyp |= uint8(xcoffAlign(_addr_ldr, x, TextSym) << 3);
             syms = append(syms, a4);
-
         }
     else if (t == DataSym || t == BSSSym) 
         s = addr(new XcoffSymEnt64(Nsclass:C_EXT,Noffset:uint32(xfile.stringTable.add(name)),Nvalue:uint64(ldr.SymValue(x)),Nscnum:xfile.getXCOFFscnum(ldr.SymSect(x)),Nnumaux:1,));
@@ -921,7 +893,6 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
             // global or local (the capital letter), we don't need to
             // implement them yet.
             s.Nsclass = C_HIDEXT;
-
         }
         ldr.SetSymDynid(x, int32(xfile.symbolCount));
         syms = append(syms, s); 
@@ -945,15 +916,12 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
                     // During external linking, read-only datas with relocation
                     // must be in .data.
                     a4.Xsmclas = XMC_RW;
-
                 }
                 else
  { 
                     // Read only data
                     a4.Xsmclas = XMC_RO;
-
                 }
-
             }
             else if (strings.HasPrefix(ldr.SymName(x), "TOC.") && ctxt.IsExternal()) {
                 a4.Xsmclas = XMC_TC;
@@ -966,11 +934,9 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
                 a4.Xsmclas = XMC_RW;
             }
 
-
             ty = ty__prev1;
 
         }
-
         if (t == DataSym) {
             a4.Xsmtyp |= XTY_SD;
         }
@@ -994,7 +960,6 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
             ty = ty__prev1;
 
         }
-
         s = addr(new XcoffSymEnt64(Nsclass:C_EXT,Noffset:uint32(xfile.stringTable.add(name)),Nnumaux:1,));
         ldr.SetSymDynid(x, int32(xfile.symbolCount));
         syms = append(syms, s);
@@ -1006,7 +971,6 @@ private static void putaixsym(ptr<Link> _addr_ctxt, loader.Sym x, SymbolType t) 
             // syscall functions, except __n_pthreads which is a variable.
             // TODO(aix): Find a way to detect variables imported by cgo.
             a4.Xsmclas = XMC_RW;
-
         }
         syms = append(syms, a4);
     else if (t == TLSSym) 
@@ -1066,7 +1030,6 @@ private static void asmaixsym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
         if (sect.Name != ".text" || ctxt.IsExternal()) { 
             // On AIX, runtime.text.X are symbols already in the symtab.
             break;
-
         }
         s = ldr.Lookup(fmt.Sprintf("runtime.text.%d", n), 0);
         if (s == 0) {
@@ -1076,7 +1039,6 @@ private static void asmaixsym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
             putaixsym(_addr_ctxt, s, TextSym);
         }
         n++;
-
     }    s = ldr.Lookup("runtime.etext", 0);
     if (ldr.SymType(s) == sym.STEXT) { 
         // We've already included this symbol in ctxt.Textp
@@ -1091,7 +1053,6 @@ private static void asmaixsym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
             // On AIX, .go.buildinfo must be in the symbol table as
             // it has relocations.
             return true;
-
         }
         if (ldr.AttrNotInSymbolTable(s)) {
             return false;
@@ -1100,7 +1061,6 @@ private static void asmaixsym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
             return false;
         }
         return true;
-
     };
 
     {
@@ -1135,8 +1095,7 @@ private static void asmaixsym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
                 if (ldr.AttrReachable(s)) {
                     putaixsym(_addr_ctxt, s, UndefinedSym);
                 }
-            
-        }
+                    }
 
         s = s__prev1;
     }
@@ -1155,7 +1114,6 @@ private static void asmaixsym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
         ctxt.Logf("symsize = %d\n", uint32(symSize));
     }
     xfile.updatePreviousFile(ctxt, true);
-
 }
 
 private static void genDynSym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt) {
@@ -1179,9 +1137,7 @@ private static void genDynSym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
                 }
 
             }
-
             dynsyms = append(dynsyms, s);
-
         }
 
         s = s__prev1;
@@ -1202,7 +1158,6 @@ private static void genDynSym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctxt)
                 }
 
             }
-
         }
         s = s__prev1;
     }
@@ -1243,7 +1198,6 @@ private static void adddynimpsym(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ct
         // syscall functions, except __n_pthreads which is a variable.
         // TODO(aix): Find a way to detect variables imported by cgo.
         lds.smclas = XMC_RW;
-
     }
     f.loaderSymbols = append(f.loaderSymbols, lds); 
 
@@ -1288,11 +1242,8 @@ public static bool Xcoffadddynrel(ptr<Target> _addr_target, ptr<loader.Loader> _
                 if (ldr.SymName(dynsym.sym) == ldr.SymName(targ)) {
                     xldr.symndx = int32(i + 3); // +3 because of 3 section symbols
                     break;
-
                 }
-
             }
-
         }        {
             var t = ldr.SymType(s);
 
@@ -1309,11 +1260,9 @@ public static bool Xcoffadddynrel(ptr<Target> _addr_target, ptr<loader.Loader> _
  {
                         xldr.symndx = 1; // .data
                     }
-
                 else 
                     ldr.Errorf(s, "unknown segment for .loader relocation with symbol %s", ldr.SymName(targ));
-                
-            }
+                            }
             else
  {
                 ldr.Errorf(s, "unexpected type for .loader relocation R_ADDR for symbol %s: %s to %s", ldr.SymName(targ), ldr.SymType(s), ldr.SymType(targ));
@@ -1321,7 +1270,6 @@ public static bool Xcoffadddynrel(ptr<Target> _addr_target, ptr<loader.Loader> _
             }
 
         }
-
 
         xldr.rtype = 0x3F << 8 + XCOFF_R_POS;
     else 
@@ -1331,7 +1279,6 @@ public static bool Xcoffadddynrel(ptr<Target> _addr_target, ptr<loader.Loader> _
     xfile.loaderReloc = append(xfile.loaderReloc, xldr);
     xfile.Unlock();
     return true;
-
 }
 
 private static void doxcoff(this ptr<Link> _addr_ctxt) => func((_, panic, _) => {
@@ -1340,7 +1287,6 @@ private static void doxcoff(this ptr<Link> _addr_ctxt) => func((_, panic, _) => 
     if (FlagD.val) { 
         // All XCOFF files have dynamic symbols because of the syscalls.
         Exitf("-d is not available on AIX");
-
     }
     var ldr = ctxt.loader; 
 
@@ -1400,15 +1346,12 @@ private static void doxcoff(this ptr<Link> _addr_ctxt) => func((_, panic, _) => 
                     desc.AddAddr(ctxt.Arch, s);
                     desc.AddAddr(ctxt.Arch, toc.Sym());
                     desc.AddUint64(ctxt.Arch, 0);
-
                 }
-
             }
 
 
             s = s__prev1;
         }
-
     }
 });
 
@@ -1461,8 +1404,6 @@ private static void writeLdrScn(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctx
             stlen += uint32(2 + ldstr.size); // 2 = sizeof ldstr.size
             symtab = append(symtab, lds);
             strtab = append(strtab, ldstr);
-
-
         }
         s = s__prev1;
     }
@@ -1486,7 +1427,6 @@ private static void writeLdrScn(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctx
             return r1.rtype < r2.rtype;
         }
         return r1.symndx < r2.symndx;
-
     });
 
     var ep = ldr.Lookup(flagEntrySymbol.val, 0);
@@ -1535,7 +1475,6 @@ private static void writeLdrScn(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctx
             continue;
         }
         libsOrdered[val] = key;
-
     }    foreach (var (_, lib) in libsOrdered) { 
         // lib string is defined as base.a/mem.o or path/base.a/mem.o
         var n = strings.Split(lib, "/");
@@ -1548,7 +1487,6 @@ private static void writeLdrScn(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctx
         ldimpf = addr(new XcoffLdImportFile64(Limpidpath:path,Limpidbase:base,Limpidmem:mem,));
         off += uint64(len(ldimpf.Limpidpath) + len(ldimpf.Limpidbase) + len(ldimpf.Limpidmem) + 3); // + null delimiter
         importtab = append(importtab, ldimpf);
-
     }    hdr.Lnimpid = int32(len(importtab));
     hdr.Listlen = uint32(off - hdr.Limpoff);
     hdr.Lstoff = off;
@@ -1598,7 +1536,6 @@ private static void writeLdrScn(this ptr<xcoffFile> _addr_f, ptr<Link> _addr_ctx
     }
 
     f.loaderSize = off + uint64(stlen);
-
 });
 
 // XCOFF assembling and writing file
@@ -1637,7 +1574,6 @@ private static void writeFileHeader(this ptr<xcoffFile> _addr_f, ptr<Link> _addr
 
         binary.Write(ctxt.Out, binary.BigEndian, _addr_f.xfhdr);
         binary.Write(ctxt.Out, binary.BigEndian, _addr_f.xahdr);
-
     }
     else
  {
@@ -1685,7 +1621,6 @@ private static void asmbXcoff(ptr<Link> _addr_ctxt) {
         segdataVaddr = Segrelrodata.Vaddr;
         segdataFileoff = Segrelrodata.Fileoff;
         segdataFilelen = Segdata.Vaddr + Segdata.Filelen - Segrelrodata.Vaddr;
-
     }
     s = xfile.addSection(".data", segdataVaddr, segdataFilelen, segdataFileoff, STYP_DATA);
     xfile.xahdr.Odatastart = s.Svaddr;
@@ -1715,7 +1650,6 @@ private static void asmbXcoff(ptr<Link> _addr_ctxt) {
         }
 
         s = xfile.addSection(".tbss", tbss.Vaddr, tbss.Length, 0, STYP_TBSS);
-
     }
     foreach (var (_, sect) in Segdwarf.Sections) {
         xfile.addDwarfSection(sect);
@@ -1728,7 +1662,6 @@ private static void asmbXcoff(ptr<Link> _addr_ctxt) {
 
             // Update fileoff for symbol table
             fileoff += int64(xfile.loaderSize);
-
         }
     }
     xfile.asmaixsym(ctxt);
@@ -1751,7 +1684,6 @@ private static void asmbXcoff(ptr<Link> _addr_ctxt) {
 
     // write headers
     xcoffwrite(_addr_ctxt);
-
 }
 
 // emitRelocations emits relocation entries for go.o in external linking.
@@ -1821,9 +1753,7 @@ private static void emitRelocations(this ptr<xcoffFile> _addr_f, ptr<Link> _addr
 
                     i = i__prev2;
                 }
-                sort.Slice(sorted, (i, j) => {
-                    return relocs.At(sorted[i]).Off() < relocs.At(sorted[j]).Off();
-                });
+                sort.Slice(sorted, (i, j) => relocs.At(sorted[i]).Off() < relocs.At(sorted[j]).Off());
 
                 foreach (var (_, ri) in sorted) {
                     var r = relocs.At(ri);
@@ -1842,7 +1772,6 @@ private static void emitRelocations(this ptr<xcoffFile> _addr_f, ptr<Link> _addr
                         ldr.Errorf(s, "unsupported obj reloc %d(%s)/%d to %s", r.Type(), r.Type(), r.Siz(), ldr.SymName(r.Sym()));
                     }
                 }
-
             }
 
             s = s__prev1;
@@ -1850,7 +1779,6 @@ private static void emitRelocations(this ptr<xcoffFile> _addr_f, ptr<Link> _addr
 
         sect.Rellen = uint64(ctxt.Out.Offset()) - sect.Reloff;
         return uint32(sect.Rellen) / RELSZ_64;
-
     };
     {
         var s__prev1 = s;
@@ -1872,14 +1800,12 @@ private static void emitRelocations(this ptr<xcoffFile> _addr_f, ptr<Link> _addr
  {
                             n += relocsect(sect, ctxt.datap, 0);
                         }
-
                     }
 
                     sect = sect__prev3;
                 }
             }
             s.xcoffSect.Snreloc += n;
-
         }
         s = s__prev1;
     }
@@ -1902,15 +1828,12 @@ dwarfLoop:
                     _continuedwarfLoop = true;
                     break;
                 }
-
             }
             Errorf(null, "emitRelocations: could not find %q section", sect.Name);
-
         }
 
         i = i__prev1;
     }
-
 });
 
 // xcoffCreateExportFile creates a file with exported symbols for
@@ -1939,7 +1862,6 @@ private static @string xcoffCreateExportFile(ptr<Link> _addr_ctxt) {
         var name = strings.SplitN(extname, "_", 4)[3];
 
         buf.Write((slice<byte>)name + "\n");
-
     }
 
     var err = ioutil.WriteFile(fname, buf.Bytes(), 0666);
@@ -1947,7 +1869,6 @@ private static @string xcoffCreateExportFile(ptr<Link> _addr_ctxt) {
         Errorf(null, "WriteFile %s failed: %v", fname, err);
     }
     return fname;
-
 }
 
 } // end ld_package

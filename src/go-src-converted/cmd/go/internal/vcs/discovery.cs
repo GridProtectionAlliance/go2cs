@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package vcs -- go2cs converted at 2022 March 06 23:16:39 UTC
+// package vcs -- go2cs converted at 2022 March 13 06:30:08 UTC
 // import "cmd/go/internal/vcs" ==> using vcs = go.cmd.go.@internal.vcs_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\vcs\discovery.go
-using xml = go.encoding.xml_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strings = go.strings_package;
-
 namespace go.cmd.go.@internal;
+
+using xml = encoding.xml_package;
+using fmt = fmt_package;
+using io = io_package;
+using strings = strings_package;
+
+
+// charsetReader returns a reader that converts from the given charset to UTF-8.
+// Currently it only supports UTF-8 and ASCII. Otherwise, it returns a meaningful
+// error which is printed by go get, so the user can find why the package
+// wasn't downloaded if the encoding is not supported. Note that, in
+// order to reduce potential errors, ASCII is treated as UTF-8 (i.e. characters
+// greater than 0x7f are not rejected).
 
 public static partial class vcs_package {
 
-    // charsetReader returns a reader that converts from the given charset to UTF-8.
-    // Currently it only supports UTF-8 and ASCII. Otherwise, it returns a meaningful
-    // error which is printed by go get, so the user can find why the package
-    // wasn't downloaded if the encoding is not supported. Note that, in
-    // order to reduce potential errors, ASCII is treated as UTF-8 (i.e. characters
-    // greater than 0x7f are not rejected).
 private static (io.Reader, error) charsetReader(@string charset, io.Reader input) {
     io.Reader _p0 = default;
     error _p0 = default!;
@@ -34,7 +36,6 @@ private static (io.Reader, error) charsetReader(@string charset, io.Reader input
             return (null, error.As(fmt.Errorf("can't decode XML document using charset %q", charset))!);
             break;
     }
-
 }
 
 // parseMetaGoImports returns meta imports from the HTML in r.
@@ -67,7 +68,6 @@ private static (slice<metaImport>, error) parseMetaGoImports(io.Reader r, Module
             e = e__prev1;
 
         }
-
         {
             xml.StartElement e__prev1 = e;
 
@@ -80,7 +80,6 @@ private static (slice<metaImport>, error) parseMetaGoImports(io.Reader r, Module
             e = e__prev1;
 
         }
-
         (e, ok) = t._<xml.StartElement>();
         if (!ok || !strings.EqualFold(e.Name.Local, "meta")) {
             continue;
@@ -96,7 +95,6 @@ private static (slice<metaImport>, error) parseMetaGoImports(io.Reader r, Module
             }
 
         }
-
     } 
 
     // Extract mod entries if we are paying attention to them.
@@ -131,7 +129,6 @@ private static (slice<metaImport>, error) parseMetaGoImports(io.Reader r, Module
     }
 
     return (list, error.As(null!)!);
-
 }
 
 // attrValue returns the attribute value for the case-insensitive key
@@ -142,7 +139,6 @@ private static @string attrValue(slice<xml.Attr> attrs, @string name) {
             return a.Value;
         }
     }    return "";
-
 }
 
 } // end vcs_package

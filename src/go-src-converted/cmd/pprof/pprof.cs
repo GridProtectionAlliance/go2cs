@@ -7,29 +7,28 @@
 // modifications specific to the Go distribution. Please consider
 // upstreaming any modifications to these packages.
 
-// package main -- go2cs converted at 2022 March 06 23:22:40 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:44 UTC
 // Original source: C:\Program Files\Go\src\cmd\pprof\pprof.go
-using tls = go.crypto.tls_package;
-using dwarf = go.debug.dwarf_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using http = go.net.http_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using objfile = go.cmd.@internal.objfile_package;
-
-using driver = go.github.com.google.pprof.driver_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go;
+
+using tls = crypto.tls_package;
+using dwarf = debug.dwarf_package;
+using fmt = fmt_package;
+using io = io_package;
+using http = net.http_package;
+using url = net.url_package;
+using os = os_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using objfile = cmd.@internal.objfile_package;
+
+using driver = github.com.google.pprof.driver_package;
+using profile = github.com.google.pprof.profile_package;
+using System;
 
 public static partial class main_package {
 
@@ -43,7 +42,6 @@ private static void Main() {
             os.Exit(2);
         }
     }
-
 }
 
 private partial struct fetcher {
@@ -59,7 +57,6 @@ private static (ptr<profile.Profile>, @string, error) Fetch(this ptr<fetcher> _a
     if (sourceURL == "") { 
         // Could not recognize URL, let regular pprof attempt to fetch the profile (eg. from a file)
         return (_addr_null!, "", error.As(null!)!);
-
     }
     fmt.Fprintln(os.Stderr, "Fetching profile over HTTP from", sourceURL);
     if (duration > 0) {
@@ -67,7 +64,6 @@ private static (ptr<profile.Profile>, @string, error) Fetch(this ptr<fetcher> _a
     }
     var (p, err) = getProfile(sourceURL, timeout);
     return (_addr_p!, sourceURL, error.As(err)!);
-
 }
 
 private static (ptr<profile.Profile>, error) getProfile(@string source, time.Duration timeout) => func((defer, _, _) => {
@@ -94,7 +90,6 @@ private static (ptr<profile.Profile>, error) getProfile(@string source, time.Dur
         return (_addr_null!, error.As(statusCodeError(_addr_resp))!);
     }
     return _addr_profile.Parse(resp.Body)!;
-
 });
 
 private static error statusCodeError(ptr<http.Response> _addr_resp) {
@@ -110,10 +105,8 @@ private static error statusCodeError(ptr<http.Response> _addr_resp) {
             }
 
         }
-
     }
     return error.As(fmt.Errorf("server response: %s", resp.Status))!;
-
 }
 
 // cpuProfileHandler is the Go pprof CPU profile handler URL.
@@ -132,7 +125,6 @@ private static (@string, time.Duration) adjustURL(@string source, time.Duration 
         // Try adding http:// to catch sources of the form hostname:port/path.
         // url.Parse treats "hostname" as the scheme.
         u, err = url.Parse("http://" + source);
-
     }
     if (err != null || u.Host == "") {
         return ("", 0);
@@ -158,11 +150,9 @@ private static (@string, time.Duration) adjustURL(@string source, time.Duration 
                     }
 
                 }
-
             }
 
         }
-
     }
     if (timeout <= 0) {
         if (duration > 0) {
@@ -175,7 +165,6 @@ private static (@string, time.Duration) adjustURL(@string source, time.Duration 
     }
     u.RawQuery = values.Encode();
     return (u.String(), timeout);
-
 }
 
 // objTool implements driver.ObjTool using Go libraries
@@ -204,10 +193,8 @@ private static (driver.ObjFile, error) Open(this ptr<objTool> _addr__p0, @string
             }
 
         }
-
     }
     return (f, error.As(null!)!);
-
 }
 
 private static (map<@string, @string>, error) Demangle(this ptr<objTool> _addr__p0, slice<@string> names) {
@@ -217,7 +204,6 @@ private static (map<@string, @string>, error) Demangle(this ptr<objTool> _addr__
  
     // No C++, nothing to demangle.
     return (make_map<@string, @string>(), error.As(null!)!);
-
 }
 
 private static (slice<driver.Inst>, error) Disasm(this ptr<objTool> _addr_t, @string file, ulong start, ulong end, bool intelSyntax) {
@@ -237,7 +223,6 @@ private static (slice<driver.Inst>, error) Disasm(this ptr<objTool> _addr_t, @st
         asm = append(asm, new driver.Inst(Addr:pc,File:file,Line:line,Text:text));
     });
     return (asm, error.As(null!)!);
-
 }
 
 private static (ptr<objfile.Disasm>, error) cachedDisasm(this ptr<objTool> _addr_t, @string file) => func((defer, _, _) => {
@@ -265,7 +250,6 @@ private static (ptr<objfile.Disasm>, error) cachedDisasm(this ptr<objTool> _addr
     }
     t.disasmCache[file] = d;
     return (_addr_d!, error.As(null!)!);
-
 });
 
 private static void SetConfig(this ptr<objTool> _addr__p0, @string config) {
@@ -301,7 +285,6 @@ private static (ulong, error) ObjAddr(this ptr<file> _addr_f, ulong addr) {
  
     // No support for shared libraries, so translation is a no-op.
     return (addr, error.As(null!)!);
-
 }
 
 private static @string BuildID(this ptr<file> _addr_f) {
@@ -309,7 +292,6 @@ private static @string BuildID(this ptr<file> _addr_f) {
  
     // No support for build ID.
     return "";
-
 }
 
 private static (slice<driver.Frame>, error) SourceLine(this ptr<file> _addr_f, ulong addr) {
@@ -323,7 +305,6 @@ private static (slice<driver.Frame>, error) SourceLine(this ptr<file> _addr_f, u
             return (null, error.As(err)!);
         }
         f.pcln = pcln;
-
     }
     addr -= f.offset;
     var (file, line, fn) = f.pcln.PCToLine(addr);
@@ -336,7 +317,6 @@ private static (slice<driver.Frame>, error) SourceLine(this ptr<file> _addr_f, u
         return (frames, error.As(null!)!);
     }
     return (null, error.As(fmt.Errorf("no line information for PC=%#x", addr))!);
-
 }
 
 // dwarfSourceLine tries to get file/line information using DWARF.
@@ -350,7 +330,6 @@ private static slice<driver.Frame> dwarfSourceLine(this ptr<file> _addr_f, ulong
         // is no DWARF info.
         f.dwarf, _ = f.file.DWARF();
         f.triedDwarf = true;
-
     }
     if (f.dwarf != null) {
         var r = f.dwarf.Reader();
@@ -364,11 +343,9 @@ private static slice<driver.Frame> dwarfSourceLine(this ptr<file> _addr_f, ulong
                 }
 
             }
-
         }
     }
     return null;
-
 }
 
 // dwarfSourceLineEntry tries to get file/line information from a
@@ -407,7 +384,6 @@ FindName:
                     return null;
             entry, err = r.Next();
                 }
-
                 foreach (var (_, pcs) in ranges) {
                     if (pcs[0] <= addr && addr < pcs[1]) {
                         bool ok = default; 
@@ -417,13 +393,9 @@ FindName:
                             _breakFindName = true;
                             break;
                         }
-
                     }
-
                 }
-
             }
-
         }
     } 
 
@@ -431,7 +403,6 @@ FindName:
     driver.Frame frames = new slice<driver.Frame>(new driver.Frame[] { {Func:name,File:lentry.File.Name,Line:lentry.Line,} });
 
     return frames;
-
 }
 
 private static (slice<ptr<driver.Sym>>, error) Symbols(this ptr<file> _addr_f, ptr<regexp.Regexp> _addr_r, ulong addr) {
@@ -446,7 +417,6 @@ private static (slice<ptr<driver.Sym>>, error) Symbols(this ptr<file> _addr_f, p
             return (null, error.As(err)!);
         }
         f.sym = sym;
-
     }
     slice<ptr<driver.Sym>> @out = default;
     foreach (var (_, s) in f.sym) { 
@@ -459,7 +429,6 @@ private static (slice<ptr<driver.Sym>>, error) Symbols(this ptr<file> _addr_f, p
             out = append(out, addr(new driver.Sym(Name:[]string{s.Name},File:f.name,Start:s.Addr,End:s.Addr+uint64(s.Size)-1,)));
         }
     }    return (out, error.As(null!)!);
-
 }
 
 private static error Close(this ptr<file> _addr_f) {

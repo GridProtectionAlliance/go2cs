@@ -2,28 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:23:13 UTC
+// package main -- go2cs converted at 2022 March 13 06:36:17 UTC
 // Original source: C:\Program Files\Go\src\cmd\trace\trace.go
-using traceviewer = go.cmd.@internal.traceviewer_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using trace = go.@internal.trace_package;
-using io = go.io_package;
-using log = go.log_package;
-using math = go.math_package;
-using http = go.net.http_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using debug = go.runtime.debug_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
+namespace go;
+
+using traceviewer = cmd.@internal.traceviewer_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+using trace = @internal.trace_package;
+using io = io_package;
+using log = log_package;
+using math = math_package;
+using http = net.http_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using debug = runtime.debug_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
 using System;
 using System.ComponentModel;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -51,11 +50,8 @@ private static void httpTrace(http.ResponseWriter w, ptr<http.Request> _addr_r) 
             return ;
         }
     }
-
     var html = strings.ReplaceAll(templTrace, "{{PARAMS}}", r.Form.Encode());
     w.Write((slice<byte>)html);
-
-
 }
 
 // https://chromium.googlesource.com/catapult/+/9508452e18f130c98499cb4c4f1e1efaedee8962/tracing/docs/embedding-trace-viewer.md
@@ -138,14 +134,12 @@ private static void httpJsonTrace(http.ResponseWriter w, ptr<http.Request> _addr
                 log.Printf("failed to parse goid parameter %q: %v", goids, err);
                 return ;
             }
-
             analyzeGoroutines(res.Events);
             var (g, ok) = gs[goid];
             if (!ok) {
                 log.Printf("failed to find goroutine %d", goid);
                 return ;
             }
-
             @params.mode = modeGoroutineOriented;
             @params.startTime = g.StartTime;
             if (g.EndTime != 0) {
@@ -154,12 +148,9 @@ private static void httpJsonTrace(http.ResponseWriter w, ptr<http.Request> _addr
             else
  { // The goroutine didn't end.
                 @params.endTime = lastTimestamp();
-
             }
-
             @params.maing = goid;
             @params.gs = trace.RelatedGoroutines(res.Events, goid);
-
         }        {
             var taskids__prev2 = taskids;
 
@@ -190,10 +181,8 @@ private static void httpJsonTrace(http.ResponseWriter w, ptr<http.Request> _addr
                     foreach (var (k, v) in t.RelatedGoroutines(res.Events, 0)) {
                         gs[k] = v;
                     }
-
                 }
                 @params.gs = gs;
-
             }            {
                 var taskids__prev3 = taskids;
 
@@ -223,15 +212,12 @@ private static void httpJsonTrace(http.ResponseWriter w, ptr<http.Request> _addr
             }
 
 
-
             taskids = taskids__prev2;
 
         }
 
 
-
     }
-
 
     var start = int64(0);
     var end = int64(math.MaxInt64);
@@ -246,16 +232,13 @@ private static void httpJsonTrace(http.ResponseWriter w, ptr<http.Request> _addr
                 log.Printf("failed to parse start parameter %q: %v", startStr, err);
                 return ;
             }
-
             end, err = strconv.ParseInt(endStr, 10, 64);
             if (err != null) {
                 log.Printf("failed to parse end parameter %q: %v", endStr, err);
                 return ;
             }
-
         }
     }
-
 
     var c = viewerDataTraceConsumer(w, start, end);
     {
@@ -266,7 +249,6 @@ private static void httpJsonTrace(http.ResponseWriter w, ptr<http.Request> _addr
             return ;
         }
     }
-
 });
 
 public partial struct Range {
@@ -294,9 +276,7 @@ private static slice<Range> splitTrace(trace.ParseResult res) {
             dief("%v\n", err);
         }
     }
-
     return s.Ranges;
-
 }
 
 private partial struct splitter {
@@ -317,7 +297,6 @@ private static (ptr<splitter>, traceConsumer) splittingTraceConsumer(nint max) {
     ptr<splitter> s = @new<splitter>();
 
     return (_addr_s!, new traceConsumer(consumeTimeUnit:func(unitstring){data.TimeUnit=unit},consumeViewerEvent:func(v*traceviewer.Event,requiredbool){ifrequired{data.Events=append(data.Events,v)return}enc:=json.NewEncoder(&cw)enc.Encode(v)sizes=append(sizes,eventSz{v.Time,cw.size+1})cw.size=0},consumeViewerFrame:func(kstring,vtraceviewer.Frame){data.Frames[k]=v},flush:func(){cw.size=0enc:=json.NewEncoder(&cw)enc.Encode(data)minSize:=cw.sizesum:=minSizestart:=0fori,ev:=rangesizes{ifsum+ev.Sz>max{startTime:=time.Duration(sizes[start].Time*1000)endTime:=time.Duration(ev.Time*1000)ranges=append(ranges,Range{Name:fmt.Sprintf("%v-%v",startTime,endTime),Start:start,End:i+1,StartTime:int64(startTime),EndTime:int64(endTime),})start=i+1sum=minSize}else{sum+=ev.Sz+1}}iflen(ranges)<=1{s.Ranges=nilreturn}ifend:=len(sizes)-1;start<end{ranges=append(ranges,Range{Name:fmt.Sprintf("%v-%v",time.Duration(sizes[start].Time*1000),time.Duration(sizes[end].Time*1000)),Start:start,End:end,StartTime:int64(sizes[start].Time*1000),EndTime:int64(sizes[end].Time*1000),})}s.Ranges=ranges},));
-
 }
 
 private partial struct countingWriter {
@@ -348,7 +327,6 @@ private partial struct traceviewMode { // : nuint
 
 private static readonly traceviewMode modeGoroutineOriented = 1 << (int)(iota);
 private static readonly var modeTaskOriented = 0;
-
 
 private partial struct traceContext {
     public ref ptr<traceParams> ptr<traceParams> => ref ptr<traceParams>_ptr;
@@ -392,7 +370,6 @@ private static readonly var gWaiting = 2;
 private static readonly var gWaitingGC = 3;
 
 private static readonly var gStateCount = 4;
-
 
 private partial struct gInfo {
     public gState state; // current state
@@ -465,7 +442,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
             ginfos[g] = info;
         }
         return error.As(info)!;
-
     }; 
 
     // Since we make many calls to setGState, we record a sticky
@@ -476,7 +452,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
         if (oldState == gWaiting && info.state == gWaitingGC) { 
             // For checking, gWaiting counts as any gWaiting*.
             oldState = info.state;
-
         }
         if (info.state != oldState && setGStateErr == null) {
             setGStateErr = error.As(fmt.Errorf("expected G %d to be in state %d, but got state %d", g, oldState, newState))!;
@@ -484,7 +459,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
         ctx.gstates[info.state]--;
         ctx.gstates[newState]++;
         info.state = newState;
-
     };
 
     foreach (var (_, ev) in ctx.parsed.Events) { 
@@ -528,7 +502,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
  {
                 ctx.threadStats.insyscall--;
             }
-
         else if (ev.Type == trace.EvGoSysBlock) 
             setGState(ev, ev.G, gRunning, gWaiting);
             if (getGInfo(ev.G).isSystemG) {
@@ -538,7 +511,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
  {
                 ctx.threadStats.insyscall++;
             }
-
         else if (ev.Type == trace.EvGoSched || ev.Type == trace.EvGoPreempt) 
             setGState(ev, ev.G, gRunning, gRunnable);
         else if (ev.Type == trace.EvGoStop || ev.Type == trace.EvGoSleep || ev.Type == trace.EvGoBlock || ev.Type == trace.EvGoBlockSend || ev.Type == trace.EvGoBlockRecv || ev.Type == trace.EvGoBlockSelect || ev.Type == trace.EvGoBlockSync || ev.Type == trace.EvGoBlockCond || ev.Type == trace.EvGoBlockNet) 
@@ -546,13 +518,13 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
         else if (ev.Type == trace.EvGoBlockGC) 
             setGState(ev, ev.G, gRunning, gWaitingGC);
         else if (ev.Type == trace.EvGCMarkAssistStart) 
-            getGInfo(ev.G).markAssist;
+            getGInfo;
 
-            ev;
+            (ev.G).markAssist = ev;
         else if (ev.Type == trace.EvGCMarkAssistDone) 
-            getGInfo(ev.G).markAssist;
+            getGInfo;
 
-            null;
+            (ev.G).markAssist = null;
         else if (ev.Type == trace.EvGoWaiting) 
             setGState(ev, ev.G, gRunnable, gWaiting);
         else if (ev.Type == trace.EvGoInSyscall) 
@@ -565,7 +537,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
  {
                 ctx.threadStats.insyscall++;
             }
-
         else if (ev.Type == trace.EvHeapAlloc) 
             ctx.heapStats.heapAlloc = ev.Args[0];
         else if (ev.Type == trace.EvHeapGoal) 
@@ -626,7 +597,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
                 }
 
             }
-
             ctx.emit(slice);
         else if (ev.Type == trace.EvGoStart || ev.Type == trace.EvGoStartLabel) 
             info = getGInfo(ev.G);
@@ -637,7 +607,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
  {
                 ctx.emitSlice(ev, info.name);
             }
-
             if (info.markAssist != null) { 
                 // If we're in a mark assist, synthesize a new slice, ending
                 // either when the mark assist ends or when we're descheduled.
@@ -649,11 +618,8 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
                     fakeMarkStart.Link = markFinish;
                     text = "MARK ASSIST (resumed)";
                 }
-
                 ctx.emitSlice(_addr_fakeMarkStart, text);
-
             }
-
         else if (ev.Type == trace.EvGoCreate) 
             ctx.emitArrow(ev, "go");
         else if (ev.Type == trace.EvGoUnblock) 
@@ -672,7 +638,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
         ctx.emitThreadCounters(ev);
         ctx.emitHeapCounters(ev);
         ctx.emitGoroutineCounters(ev);
-
     }    ctx.emitSectionFooter(statsSection, "STATS", 0);
 
     if (ctx.mode & modeTaskOriented != 0) {
@@ -710,7 +675,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
 
             i = i__prev1;
         }
-
     }
     if (ctx.mode & modeTaskOriented != 0) { 
         // sort tasks based on the task start time.
@@ -732,9 +696,7 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
             if (ti.firstTimestamp() == tj.firstTimestamp()) {
                 return error.As(ti.lastTimestamp() < tj.lastTimestamp())!;
             }
-
             return error.As(ti.firstTimestamp() < tj.firstTimestamp())!;
-
         });
 
         {
@@ -753,7 +715,6 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
                         ctx.emitRegion(s);
                     }
                 }
-
             }
 
             i = i__prev1;
@@ -769,10 +730,8 @@ private static error generateTrace(ptr<traceParams> _addr_@params, traceConsumer
         }        ctx.emitFooter(addr(new traceviewer.Event(Name:"thread_sort_index",Phase:"M",PID:procsSection,TID:ctx.maing,Arg:&SortIndexArg{-2}))); 
         // Row for GC or global state (specified with G=0)
         ctx.emitFooter(addr(new traceviewer.Event(Name:"thread_sort_index",Phase:"M",PID:procsSection,TID:0,Arg:&SortIndexArg{-1})));
-
     }
     return error.As(null!)!;
-
 });
 
 private static void emit(this ptr<traceContext> _addr_ctx, ptr<traceviewer.Event> _addr_e) {
@@ -801,7 +760,6 @@ private static double time(this ptr<traceContext> _addr_ctx, ptr<trace.Event> _a
  
     // Trace viewer wants timestamps in microseconds.
     return float64(ev.Ts) / 1000;
-
 }
 
 private static bool withinTimeRange(ptr<trace.Event> _addr_ev, long s, long e) {
@@ -814,9 +772,7 @@ private static bool withinTimeRange(ptr<trace.Event> _addr_ev, long s, long e) {
             return ev.Ts <= e && evEnd.Ts >= s;
         }
     }
-
     return ev.Ts >= s && ev.Ts <= e;
-
 }
 
 private static bool tsWithinRange(long ts, long s, long e) {
@@ -867,7 +823,6 @@ private static ptr<traceviewer.Event> makeSlice(this ptr<traceContext> _addr_ctx
                     public nint P;
                 }
                 sl.Arg = addr(new Arg(P:ev.P));
-
             } 
             // grey out non-overlapping events.
 
@@ -884,13 +839,11 @@ private static ptr<traceviewer.Event> makeSlice(this ptr<traceContext> _addr_ctx
                 }
 
             }
-
         }        if (!overlapping) {
             sl.Cname = colorLightGrey;
         }
     }
     return _addr_sl!;
-
 }
 
 private static void emitTask(this ptr<traceContext> _addr_ctx, ptr<taskDesc> _addr_task, nint sortIndex) {
@@ -951,7 +904,6 @@ private static void emitRegion(this ptr<traceContext> _addr_ctx, regionDesc s) {
         sl1.Stack = ctx.stack(s.End.Stk);
     }
     ctx.emit(sl1);
-
 }
 
 private partial struct heapCountersArg {
@@ -974,7 +926,6 @@ private static void emitHeapCounters(this ptr<traceContext> _addr_ctx, ptr<trace
         ctx.emit(addr(new traceviewer.Event(Name:"Heap",Phase:"C",Time:ctx.time(ev),PID:1,Arg:&heapCountersArg{ctx.heapStats.heapAlloc,diff})));
     }
     ctx.prevHeapStats = ctx.heapStats;
-
 }
 
 private partial struct goroutineCountersArg {
@@ -994,7 +945,6 @@ private static void emitGoroutineCounters(this ptr<traceContext> _addr_ctx, ptr<
         ctx.emit(addr(new traceviewer.Event(Name:"Goroutines",Phase:"C",Time:ctx.time(ev),PID:1,Arg:&goroutineCountersArg{uint64(ctx.gstates[gRunning]),uint64(ctx.gstates[gRunnable]),uint64(ctx.gstates[gWaitingGC])})));
     }
     ctx.prevGstates = ctx.gstates;
-
 }
 
 private partial struct threadCountersArg {
@@ -1013,7 +963,6 @@ private static void emitThreadCounters(this ptr<traceContext> _addr_ctx, ptr<tra
         ctx.emit(addr(new traceviewer.Event(Name:"Threads",Phase:"C",Time:ctx.time(ev),PID:1,Arg:&threadCountersArg{Running:ctx.threadStats.prunning,InSyscall:ctx.threadStats.insyscall})));
     }
     ctx.prevThreadStats = ctx.threadStats;
-
 }
 
 private static void emitInstant(this ptr<traceContext> _addr_ctx, ptr<trace.Event> _addr_ev, @string name, @string category) {
@@ -1037,9 +986,7 @@ private static void emitInstant(this ptr<traceContext> _addr_ctx, ptr<trace.Even
             if (isUserAnnotation) {
                 return ; // don't display unrelated user annotation events.
             }
-
             cname = colorLightGrey;
-
         }
     }
     var arg = default;
@@ -1048,10 +995,8 @@ private static void emitInstant(this ptr<traceContext> _addr_ctx, ptr<trace.Even
             public nint P;
         }
         arg = addr(new Arg(ev.Args[0]));
-
     }
     ctx.emit(addr(new traceviewer.Event(Name:name,Category:category,Phase:"I",Scope:"t",Time:ctx.time(ev),TID:ctx.proc(ev),Stack:ctx.stack(ev.Stk),Cname:cname,Arg:arg)));
-
 }
 
 private static void emitArrow(this ptr<traceContext> _addr_ctx, ptr<trace.Event> _addr_ev, @string name) {
@@ -1062,7 +1007,6 @@ private static void emitArrow(this ptr<traceContext> _addr_ctx, ptr<trace.Event>
         // The other end of the arrow is not captured in the trace.
         // For example, a goroutine was unblocked but was not scheduled before trace stop.
         return ;
-
     }
     if (ctx.mode & modeGoroutineOriented != 0 && (!ctx.gs[ev.Link.G] || ev.Link.Ts < ctx.startTime || ev.Link.Ts > ctx.endTime)) {
         return ;
@@ -1071,7 +1015,6 @@ private static void emitArrow(this ptr<traceContext> _addr_ctx, ptr<trace.Event>
         // Trace-viewer discards arrows if they don't start/end inside of a slice or instant.
         // So emit a fake instant at the start of the arrow.
         ctx.emitInstant(addr(new trace.Event(P:ev.P,Ts:ev.Ts)), "unblock", "");
-
     }
     @string color = "";
     if (ctx.mode & modeTaskOriented != 0) {
@@ -1087,7 +1030,6 @@ private static void emitArrow(this ptr<traceContext> _addr_ctx, ptr<trace.Event>
                 }
 
             }
-
         }        if (!overlapping) {
             return ;
         }
@@ -1095,7 +1037,6 @@ private static void emitArrow(this ptr<traceContext> _addr_ctx, ptr<trace.Event>
     ctx.arrowSeq++;
     ctx.emit(addr(new traceviewer.Event(Name:name,Phase:"s",TID:ctx.proc(ev),ID:ctx.arrowSeq,Time:ctx.time(ev),Stack:ctx.stack(ev.Stk),Cname:color)));
     ctx.emit(addr(new traceviewer.Event(Name:name,Phase:"t",TID:ctx.proc(ev.Link),ID:ctx.arrowSeq,Time:ctx.time(ev.Link),Cname:color)));
-
 }
 
 private static nint stack(this ptr<traceContext> _addr_ctx, slice<ptr<trace.Frame>> stk) {
@@ -1124,14 +1065,12 @@ private static nint buildBranch(this ptr<traceContext> _addr_ctx, frameNode pare
         ctx.consumer.consumeViewerFrame(strconv.Itoa(node.id), new traceviewer.Frame(Name:fmt.Sprintf("%v:%v",frame.Fn,frame.Line),Parent:parent.id));
     }
     return ctx.buildBranch(node, stk);
-
 }
 
 private static bool isSystemGoroutine(@string entryFn) { 
     // This mimics runtime.isSystemGoroutine as closely as
     // possible.
     return entryFn != "runtime.main" && strings.HasPrefix(entryFn, "runtime.");
-
 }
 
 // firstTimestamp returns the timestamp of the first event record.
@@ -1141,7 +1080,6 @@ private static long firstTimestamp() {
         return res.Events[0].Ts;
     }
     return 0;
-
 }
 
 // lastTimestamp returns the timestamp of the last event record.
@@ -1154,9 +1092,7 @@ private static long lastTimestamp() {
             return res.Events[n - 1].Ts;
         }
     }
-
     return 0;
-
 }
 
 private partial struct jsonWriter {

@@ -4,26 +4,26 @@
 
 // Package asmdecl defines an Analyzer that reports mismatches between
 // assembly files and Go declarations.
-// package asmdecl -- go2cs converted at 2022 March 06 23:34:27 UTC
+
+// package asmdecl -- go2cs converted at 2022 March 13 06:41:43 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/asmdecl" ==> using asmdecl = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.asmdecl_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\asmdecl\asmdecl.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using build = go.go.build_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using log = go.log_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using build = go.build_package;
+using token = go.token_package;
+using types = go.types_package;
+using log = log_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using System;
 
 public static partial class asmdecl_package {
 
@@ -46,7 +46,6 @@ private static readonly var asmInterface = 2;
 private static readonly var asmEmptyInterface = 3;
 private static readonly var asmStruct = 4;
 private static readonly var asmComplex = 5;
-
 
 // An asmArch describes assembly parameters for an architecture
 private partial struct asmArch {
@@ -92,12 +91,10 @@ private static void init() {
             // to defer size computation until we have Pass.TypesSizes.
             arch.sizes = types.SizesFor("gc", "amd64");
             log.Printf("unknown architecture %s", arch.name);
-
         }
         arch.intSize = int(arch.sizes.Sizeof(types.Typ[types.Int]));
         arch.ptrSize = int(arch.sizes.Sizeof(types.Typ[types.UnsafePointer]));
         arch.maxAlign = int(arch.sizes.Alignof(types.Typ[types.Int64]));
-
     }
 }
 
@@ -146,7 +143,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     decl = decl__prev1;
 
                 }
-
             }
 
             decl = decl__prev2;
@@ -198,9 +194,7 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                         line = line__prev2;
                     }
                 }
-
                 retLine = null;
-
             }
 ;
             Func<@string, @string> trimABI = fnName => {
@@ -268,13 +262,11 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                                     arch = archCandidates[0].name;
                                     archDef = archCandidates[0];
                                 }
-
                             }
 
                             m = m__prev2;
 
                         }
-
                     } 
 
                     // Ignore comments and commented-out code.
@@ -286,7 +278,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                         }
 
                     }
-
 
                     {
                         var m__prev1 = m;
@@ -318,9 +309,7 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                                     _continueFiles = true;
                                     break;
                                 }
-
                             }
-
                             fnName = m[2];
                             {
                                 var pkgPath = strings.TrimSpace(m[1]);
@@ -334,9 +323,7 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                                         fn = null;
                                         fnName = "";
                                         continue;
-
                                     }
-
                                 } 
                                 // Trim off optional ABI selector.
 
@@ -351,25 +338,20 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                                     badf("wrong argument size %d; expected $...-%d", size, fn.size);
                                 }
                             }
-
                             localSize, _ = strconv.Atoi(m[4]);
                             localSize += archDef.intSize;
                             if (archDef.lr && !strings.Contains(flag, "NOFRAME")) { 
                                 // Account for caller's saved LR
                                 localSize += archDef.intSize;
-
                             }
-
                             argSize, _ = strconv.Atoi(m[5]);
                             noframe = strings.Contains(flag, "NOFRAME");
                             if (fn == null && !strings.Contains(fnName, "<>") && !noframe) {
                                 badf("function %s missing Go declaration", fnName);
                             }
-
                             wroteSP = false;
                             haveRetArg = false;
                             continue;
-
                         }
                         else if (strings.Contains(line, "TEXT") && strings.Contains(line, "SB")) { 
                             // function, but not visible from Go (didn't match asmTEXT), so stop checking
@@ -377,44 +359,33 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                             fn = null;
                             fnName = "";
                             continue;
-
                         }
-
 
                         m = m__prev1;
 
                     }
 
-
                     if (strings.Contains(line, "RET") && !strings.Contains(line, "(SB)")) { 
                         // RET f(SB) is a tail call. It is okay to not write the results.
                         retLine = append(retLine, lineno);
-
                     }
-
                     if (fnName == "") {
                         continue;
                     }
-
                     if (asmDATA.FindStringSubmatch(line) != null) {
                         fn = null;
                     }
-
                     if (archDef == null) {
                         continue;
                     }
-
                     if (strings.Contains(line, ", " + archDef.stack) || strings.Contains(line, ",\t" + archDef.stack) || strings.Contains(line, "NOP " + archDef.stack) || strings.Contains(line, "NOP\t" + archDef.stack)) {
                         wroteSP = true;
                         continue;
                     }
-
                     if (arch == "wasm" && strings.Contains(line, "CallImport")) { 
                         // CallImport is a call out to magic that can write the result.
                         haveRetArg = true;
-
                     }
-
                     {
                         var m__prev3 = m;
 
@@ -449,7 +420,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     if (fn == null) {
                         continue;
                     }
-
                     {
                         var m__prev3 = m;
 
@@ -464,7 +434,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
  {
                                 badf("use of unnamed argument %s", m[1]);
                             }
-
                         }
 
                         m = m__prev3;
@@ -489,7 +458,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                                 if (name == "argframe" && off == 0) {
                                     continue;
                                 }
-
                                 v = fn.varByOffset[off];
                                 if (v != null) {
                                     badf("unknown variable %s; offset %d is %s+%d(FP)", name, off, v.name, v.off);
@@ -498,13 +466,9 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
  {
                                     badf("unknown variable %s", name);
                                 }
-
                                 continue;
-
                             }
-
                             asmCheckVar(badf, fn, line, m[0], off, _addr_v, archDef);
-
                         }
 
                         m = m__prev3;
@@ -515,12 +479,10 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             }
 
             flushRet();
-
         }
         fname = fname__prev1;
     }
     return (null, error.As(null!)!);
-
 }
 
 private static asmKind asmKindForType(types.Type t, nint size) => func((_, panic, _) => {
@@ -562,7 +524,6 @@ private static asmKind asmKindForType(types.Type t, nint size) => func((_, panic
             break;
     }
     panic("unreachable");
-
 });
 
 // A component is an assembly-addressable component of a composite type,
@@ -607,10 +568,8 @@ private static slice<component> appendComponentsRecursive(ptr<asmArch> _addr_arc
             if (arch.bigEndian) {
                 (w1, w2) = (w2, w1);
             }
-
             cc = append(cc, newComponent(suffix + "_" + w1, 4, "half " + s, off, 4, suffix));
             cc = append(cc, newComponent(suffix + "_" + w2, 4, "half " + s, off + 4, 4, suffix));
-
         }
     else if (kind == asmEmptyInterface) 
         cc = append(cc, newComponent(suffix + "_type", asmKind(arch.ptrSize), "interface type", off, arch.ptrSize, suffix));
@@ -672,7 +631,6 @@ private static slice<component> appendComponentsRecursive(ptr<asmArch> _addr_arc
             i = i__prev1;
         }
         return cc;
-
 }
 
 // asmParseDecl parses a function decl for expected assembly variables.
@@ -701,9 +659,7 @@ private static map<@string, ptr<asmFunc>> asmParseDecl(ptr<analysis.Pass> _addr_
                     }
 
                 }
-
             }
-
             var align = int(arch.sizes.Alignof(t));
             var size = int(arch.sizes.Sizeof(t));
             offset += -offset & (align - 1);
@@ -718,15 +674,11 @@ private static map<@string, ptr<asmFunc>> asmParseDecl(ptr<analysis.Pass> _addr_
                 if (isret) {
                     name = "ret";
                 }
-
                 if (argnum > 0) {
                     name += strconv.Itoa(argnum);
                 }
-
                 names = new slice<ptr<ast.Ident>>(new ptr<ast.Ident>[] { ast.NewIdent(name) });
-
             }
-
             argnum += len(names); 
 
             // Create variable for each name.
@@ -743,21 +695,15 @@ private static map<@string, ptr<asmFunc>> asmParseDecl(ptr<analysis.Pass> _addr_
                         }
 
                     }
-
                     _addr_fn.vars[v.name] = _addr_v;
                     fn.vars[v.name] = ref _addr_fn.vars[v.name].val;
                     for (nint i = 0; i < v.size; i++) {
                         _addr_fn.varByOffset[v.off + i] = _addr_v;
                         fn.varByOffset[v.off + i] = ref _addr_fn.varByOffset[v.off + i].val;
-
                     }
-
-
                 }
                 offset += size;
-
             }
-
         }
     };
 
@@ -773,10 +719,8 @@ private static map<@string, ptr<asmFunc>> asmParseDecl(ptr<analysis.Pass> _addr_
         }
         fn.size = offset;
         m[arch.name] = fn;
-
     }
     return m;
-
 }
 
 // asmCheckVar checks a single variable reference.
@@ -792,7 +736,6 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
             badf("cannot find assembly opcode");
         }
         return ;
-
     }
     var addr = strings.HasPrefix(expr, "$"); 
 
@@ -840,49 +783,36 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
                         // FMOVDP, FXCHD, etc
                         src = 8;
                         break;
-
                     }
-
                     if (strings.HasPrefix(op, "P") && strings.HasSuffix(op, "RD")) { 
                         // PINSRD, PEXTRD, etc
                         src = 4;
                         break;
-
                     }
-
                     if (strings.HasPrefix(op, "F") && (strings.HasSuffix(op, "F") || strings.HasSuffix(op, "FP"))) { 
                         // FMOVFP, FXCHF, etc
                         src = 4;
                         break;
-
                     }
-
                     if (strings.HasSuffix(op, "SD")) { 
                         // MOVSD, SQRTSD, etc
                         src = 8;
                         break;
-
                     }
-
                     if (strings.HasSuffix(op, "SS")) { 
                         // MOVSS, SQRTSS, etc
                         src = 4;
                         break;
-
                     }
-
                     if (op == "MOVO" || op == "MOVOU") {
                         src = 16;
                         break;
                     }
-
                     if (strings.HasPrefix(op, "SET")) { 
                         // SETEQ, etc
                         src = 1;
                         break;
-
                     }
-
                     switch (op[len(op) - 1]) {
                         case 'B': 
                             src = 1;
@@ -899,7 +829,6 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
                             src = 8;
                             break;
                     }
-
                     break;
                 case "ppc64": 
                     // Strip standard suffixes to reveal size letter.
@@ -922,9 +851,7 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
                                 src = 8;
                                 break;
                         }
-
                     }
-
                     break;
                 case "mips": 
 
@@ -957,7 +884,6 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
                             src = 8;
                             break;
                     }
-
                     break;
                 case "s390x": 
                     switch (op) {
@@ -984,10 +910,8 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
                             src = 8;
                             break;
                     }
-
                     break;
             }
-
             break;
     }
     if (dst == 0) {
@@ -1044,7 +968,6 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
 
         badf("invalid offset %s; expected %s+%d(FP)%s", expr, v.name, v.off, inner.String());
         return ;
-
     }
     if (kind != 0 && kind != vk) {
         inner = default;
@@ -1072,7 +995,6 @@ private static void asmCheckVar(params Action<@string, object>[] badf, ptr<asmFu
             }
         }
         badf("invalid %s of %s; %s is %d-byte value%s", op, expr, vt, vs, inner.String());
-
     }
 }
 

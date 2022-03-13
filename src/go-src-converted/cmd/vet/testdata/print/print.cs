@@ -4,21 +4,23 @@
 
 // This file contains tests for the printf checker.
 
-// package print -- go2cs converted at 2022 March 06 23:35:21 UTC
+// package print -- go2cs converted at 2022 March 13 06:42:55 UTC
 // import "cmd/vet/testdata/print" ==> using print = go.cmd.vet.testdata.print_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\print\print.go
-using fmt = go.fmt_package;
-using logpkg = go.log_package; // renamed to make it harder to see
-using math = go.math_package;
-using os = go.os_package;
-using testing = go.testing_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.cmd.vet.testdata;
 
-public static partial class print_package {
+using fmt = fmt_package;
+using logpkg = log_package; // renamed to make it harder to see
+using math = math_package;
+using os = os_package;
+using testing = testing_package;
+using @unsafe = @unsafe_package; // just for test case printing unsafe.Pointer
+// For testing printf-like functions from external package.
+// "github.com/foobar/externalprintf"
+
+
+
+using System;public static partial class print_package {
 
 public static void UnsafePointerPrintfTest() {
     unsafe.Pointer up = default;
@@ -49,7 +51,6 @@ private partial struct errorTest4 { // : nint
 
 private static nint Error(this errorTest4 _p0) { // Different return type.
     return 3;
-
 }
 
 private partial struct errorTest5 { // : nint
@@ -721,7 +722,6 @@ private static void dbg(@string format, params object[] args) {
         format = "%v";
     }
     fmt.Printf(format, args);
-
 }
 
 public static void PointersToCompoundTypes() {

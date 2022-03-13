@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:17 UTC
+//     Generated on 2022 March 13 05:52:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace go
 {
     public static partial class build_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Package
         {
             // Constructors
@@ -171,7 +171,7 @@ namespace go
             public static implicit operator Package(NilType nil) => default(Package);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Package Package_cast(dynamic value)
         {
             return new Package(value.Dir, value.Name, value.ImportComment, value.Doc, value.ImportPath, value.Root, value.SrcRoot, value.PkgRoot, value.PkgTargetRoot, value.BinDir, value.Goroot, value.PkgObj, value.AllTags, value.ConflictDir, value.BinaryOnly, value.GoFiles, value.CgoFiles, value.IgnoredGoFiles, value.InvalidGoFiles, value.IgnoredOtherFiles, value.CFiles, value.CXXFiles, value.MFiles, value.HFiles, value.FFiles, value.SFiles, value.SwigFiles, value.SwigCXXFiles, value.SysoFiles, value.CgoCFLAGS, value.CgoCPPFLAGS, value.CgoCXXFLAGS, value.CgoFFLAGS, value.CgoLDFLAGS, value.CgoPkgConfig, value.TestGoFiles, value.XTestGoFiles, value.Imports, value.ImportPos, value.TestImports, value.TestImportPos, value.XTestImports, value.XTestImportPos, value.EmbedPatterns, value.EmbedPatternPos, value.TestEmbedPatterns, value.TestEmbedPatternPos, value.XTestEmbedPatterns, value.XTestEmbedPatternPos);

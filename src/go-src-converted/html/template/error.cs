@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:23 UTC
+// package template -- go2cs converted at 2022 March 13 05:38:51 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\error.go
-using fmt = go.fmt_package;
-using parse = go.text.template.parse_package;
-
 namespace go.html;
+
+using fmt = fmt_package;
+using parse = text.template.parse_package;
+
+
+// Error describes a problem encountered during template Escaping.
 
 public static partial class template_package {
 
-    // Error describes a problem encountered during template Escaping.
 public partial struct Error {
     public ErrorCode ErrorCode; // Node is the node that caused the problem, if known.
 // If not nil, it overrides Name and Line.
@@ -211,7 +213,6 @@ public static readonly var ErrSlashAmbig = 9;
 //   disallowed. Avoid using "html" and "urlquery" entirely in new templates.
 public static readonly var ErrPredefinedEscaper = 10;
 
-
 private static @string Error(this ptr<Error> _addr_e) {
     ref Error e = ref _addr_e.val;
 
@@ -224,7 +225,6 @@ private static @string Error(this ptr<Error> _addr_e) {
     else if (e.Name != "") 
         return fmt.Sprintf("html/template:%s: %s", e.Name, e.Description);
         return "html/template: " + e.Description;
-
 }
 
 // errorf creates an error given a format string f and args.

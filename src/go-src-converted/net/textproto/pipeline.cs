@@ -2,32 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2022 March 06 22:21:09 UTC
+// package textproto -- go2cs converted at 2022 March 13 05:36:17 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Program Files\Go\src\net\textproto\pipeline.go
-using sync = go.sync_package;
-
 namespace go.net;
+
+using sync = sync_package;
+
+
+// A Pipeline manages a pipelined in-order request/response sequence.
+//
+// To use a Pipeline p to manage multiple clients on a connection,
+// each client should run:
+//
+//    id := p.Next()    // take a number
+//
+//    p.StartRequest(id)    // wait for turn to send request
+//    «send request»
+//    p.EndRequest(id)    // notify Pipeline that request is sent
+//
+//    p.StartResponse(id)    // wait for turn to read response
+//    «read response»
+//    p.EndResponse(id)    // notify Pipeline that response is read
+//
+// A pipelined server can use the same calls to ensure that
+// responses computed in parallel are written in the correct order.
 
 public static partial class textproto_package {
 
-    // A Pipeline manages a pipelined in-order request/response sequence.
-    //
-    // To use a Pipeline p to manage multiple clients on a connection,
-    // each client should run:
-    //
-    //    id := p.Next()    // take a number
-    //
-    //    p.StartRequest(id)    // wait for turn to send request
-    //    «send request»
-    //    p.EndRequest(id)    // notify Pipeline that request is sent
-    //
-    //    p.StartResponse(id)    // wait for turn to read response
-    //    «read response»
-    //    p.EndResponse(id)    // notify Pipeline that response is read
-    //
-    // A pipelined server can use the same calls to ensure that
-    // responses computed in parallel are written in the correct order.
 public partial struct Pipeline {
     public sync.Mutex mu;
     public nuint id;
@@ -105,7 +107,6 @@ private static void Start(this ptr<sequencer> _addr_s, nuint id) {
     }
     s.wait[id] = c;
     s.mu.Unlock().Send(c);
-
 }
 
 // End notifies the sequencer that the event numbered id has completed,

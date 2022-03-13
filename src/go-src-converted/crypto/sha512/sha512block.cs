@@ -6,12 +6,12 @@
 // In its own file so that a faster assembly or C version
 // can be substituted easily.
 
-// package sha512 -- go2cs converted at 2022 March 06 22:18:08 UTC
+// package sha512 -- go2cs converted at 2022 March 13 05:32:21 UTC
 // import "crypto/sha512" ==> using sha512 = go.crypto.sha512_package
 // Original source: C:\Program Files\Go\src\crypto\sha512\sha512block.go
-using bits = go.math.bits_package;
-
 namespace go.crypto;
+
+using bits = math.bits_package;
 
 public static partial class sha512_package {
 
@@ -98,7 +98,6 @@ private static void blockGeneric(ptr<digest> _addr_dig, slice<byte> p) {
         h7 += h;
 
         p = p[(int)chunk..];
-
     }
 
     (dig.h[0], dig.h[1], dig.h[2], dig.h[3], dig.h[4], dig.h[5], dig.h[6], dig.h[7]) = (h0, h1, h2, h3, h4, h5, h6, h7);

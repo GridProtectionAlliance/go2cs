@@ -2,75 +2,76 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:28 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:51 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\query.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using pathpkg = go.path_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-using imports = go.cmd.go.@internal.imports_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using search = go.cmd.go.@internal.search_package;
-using str = go.cmd.go.@internal.str_package;
-using trace = go.cmd.go.@internal.trace_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using fs = io.fs_package;
+using os = os_package;
+using pathpkg = path_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using cfg = cmd.go.@internal.cfg_package;
+using imports = cmd.go.@internal.imports_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using search = cmd.go.@internal.search_package;
+using str = cmd.go.@internal.str_package;
+using trace = cmd.go.@internal.trace_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+
+
+// Query looks up a revision of a given module given a version query string.
+// The module must be a complete module path.
+// The version must take one of the following forms:
+//
+// - the literal string "latest", denoting the latest available, allowed
+//   tagged version, with non-prereleases preferred over prereleases.
+//   If there are no tagged versions in the repo, latest returns the most
+//   recent commit.
+// - the literal string "upgrade", equivalent to "latest" except that if
+//   current is a newer version, current will be returned (see below).
+// - the literal string "patch", denoting the latest available tagged version
+//   with the same major and minor number as current (see below).
+// - v1, denoting the latest available tagged version v1.x.x.
+// - v1.2, denoting the latest available tagged version v1.2.x.
+// - v1.2.3, a semantic version string denoting that tagged version.
+// - <v1.2.3, <=v1.2.3, >v1.2.3, >=v1.2.3,
+//   denoting the version closest to the target and satisfying the given operator,
+//   with non-prereleases preferred over prereleases.
+// - a repository commit identifier or tag, denoting that commit.
+//
+// current denotes the currently-selected version of the module; it may be
+// "none" if no version is currently selected, or "" if the currently-selected
+// version is unknown or should not be considered. If query is
+// "upgrade" or "patch", current will be returned if it is a newer
+// semantic version or a chronologically later pseudo-version than the
+// version that would otherwise be chosen. This prevents accidental downgrades
+// from newer pre-release or development versions.
+//
+// The allowed function (which may be nil) is used to filter out unsuitable
+// versions (see AllowedFunc documentation for details). If the query refers to
+// a specific revision (for example, "master"; see IsRevisionQuery), and the
+// revision is disallowed by allowed, Query returns the error. If the query
+// does not refer to a specific revision (for example, "latest"), Query
+// acts as if versions disallowed by allowed do not exist.
+//
+// If path is the path of the main module and the query is "latest",
+// Query returns Target.Version as the version.
+
+using System;
+using System.Threading;
 public static partial class modload_package {
 
-    // Query looks up a revision of a given module given a version query string.
-    // The module must be a complete module path.
-    // The version must take one of the following forms:
-    //
-    // - the literal string "latest", denoting the latest available, allowed
-    //   tagged version, with non-prereleases preferred over prereleases.
-    //   If there are no tagged versions in the repo, latest returns the most
-    //   recent commit.
-    // - the literal string "upgrade", equivalent to "latest" except that if
-    //   current is a newer version, current will be returned (see below).
-    // - the literal string "patch", denoting the latest available tagged version
-    //   with the same major and minor number as current (see below).
-    // - v1, denoting the latest available tagged version v1.x.x.
-    // - v1.2, denoting the latest available tagged version v1.2.x.
-    // - v1.2.3, a semantic version string denoting that tagged version.
-    // - <v1.2.3, <=v1.2.3, >v1.2.3, >=v1.2.3,
-    //   denoting the version closest to the target and satisfying the given operator,
-    //   with non-prereleases preferred over prereleases.
-    // - a repository commit identifier or tag, denoting that commit.
-    //
-    // current denotes the currently-selected version of the module; it may be
-    // "none" if no version is currently selected, or "" if the currently-selected
-    // version is unknown or should not be considered. If query is
-    // "upgrade" or "patch", current will be returned if it is a newer
-    // semantic version or a chronologically later pseudo-version than the
-    // version that would otherwise be chosen. This prevents accidental downgrades
-    // from newer pre-release or development versions.
-    //
-    // The allowed function (which may be nil) is used to filter out unsuitable
-    // versions (see AllowedFunc documentation for details). If the query refers to
-    // a specific revision (for example, "master"; see IsRevisionQuery), and the
-    // revision is disallowed by allowed, Query returns the error. If the query
-    // does not refer to a specific revision (for example, "latest"), Query
-    // acts as if versions disallowed by allowed do not exist.
-    //
-    // If path is the path of the main module and the query is "latest",
-    // Query returns Target.Version as the version.
 public static (ptr<modfetch.RevInfo>, error) Query(context.Context ctx, @string path, @string query, @string current, AllowedFunc allowed) {
     ptr<modfetch.RevInfo> _p0 = default!;
     error _p0 = default!;
@@ -104,7 +105,6 @@ private static @string Error(this queryDisabledError _p0) {
         return fmt.Sprintf("cannot query module due to -mod=%s", cfg.BuildMod);
     }
     return fmt.Sprintf("cannot query module due to -mod=%s\n\t(%s)", cfg.BuildMod, cfg.BuildModReason);
-
 }
 
 private static (ptr<modfetch.RevInfo>, error) queryProxy(context.Context ctx, @string proxy, @string path, @string query, @string current, AllowedFunc allowed) => func((defer, _, _) => {
@@ -136,9 +136,7 @@ private static (ptr<modfetch.RevInfo>, error) queryProxy(context.Context ctx, @s
             err = err__prev2;
 
         }
-
         return (addr(new modfetch.RevInfo(Version:Target.Version)), error.As(null!)!);
-
     }
     if (path == "std" || path == "cmd") {
         return (_addr_null!, error.As(fmt.Errorf("can't query specific version (%q) of standard-library module %q", query, path))!);
@@ -168,11 +166,9 @@ private static (ptr<modfetch.RevInfo>, error) queryProxy(context.Context ctx, @s
                     return (_addr_info!, error.As(err)!);
                 }
             }
-
             if (err != null) {
                 return (_addr_null!, error.As(queryErr)!);
             }
-
         }
         {
             var err__prev2 = err;
@@ -186,9 +182,7 @@ private static (ptr<modfetch.RevInfo>, error) queryProxy(context.Context ctx, @s
             err = err__prev2;
 
         }
-
         return (_addr_info!, error.As(null!)!);
-
     }
     else if (err != null) {
         return (_addr_null!, error.As(err)!);
@@ -239,14 +233,10 @@ private static (ptr<modfetch.RevInfo>, error) queryProxy(context.Context ctx, @s
                     err = err__prev3;
 
                 }
-
                 return _addr_repo.Stat(current)!;
-
             }
-
         }
         return (_addr_rev!, error.As(null!)!);
-
     };
 
     if (qm.preferLower) {
@@ -291,12 +281,9 @@ private static (ptr<modfetch.RevInfo>, error) queryProxy(context.Context ctx, @s
             err = err__prev2;
 
         }
-
         return _addr_lookup(current)!;
-
     }
     return (_addr_null!, error.As(addr(new NoMatchingVersionError(query:query,current:current))!)!);
-
 });
 
 // IsRevisionQuery returns true if vers is a version query that may refer to
@@ -308,7 +295,6 @@ public static bool IsRevisionQuery(@string vers) {
         return false;
     }
     return true;
-
 }
 
 // isSemverPrefix reports whether v is a semantic version prefix: v1 or v1.2 (not v1.2.3).
@@ -329,10 +315,8 @@ private static bool isSemverPrefix(@string v) {
                 }
                 break;
         }
-
     }
     return true;
-
 }
 
 private partial struct queryMatcher {
@@ -357,9 +341,7 @@ private static (ptr<queryMatcher>, error) newQueryMatcher(@string path, @string 
     ptr<queryMatcher> _p0 = default!;
     error _p0 = default!;
 
-    Func<@string, (ptr<queryMatcher>, error)> badVersion = v => {
-        return (_addr_null!, error.As(fmt.Errorf("invalid semantic version %q in range %q", v, query))!);
-    };
+    Func<@string, (ptr<queryMatcher>, error)> badVersion = v => (_addr_null!, error.As(fmt.Errorf("invalid semantic version %q in range %q", v, query))!);
 
     Func<@string, bool> matchesMajor = v => {
         var (_, pathMajor, ok) = module.SplitPathVersion(path);
@@ -367,7 +349,6 @@ private static (ptr<queryMatcher>, error) newQueryMatcher(@string path, @string 
             return _addr_false!;
         }
         return _addr_module.CheckPathMajor(v, pathMajor) == null!;
-
     };
 
     ptr<queryMatcher> qm = addr(new queryMatcher(path:path,allowed:allowed,preferIncompatible:strings.HasSuffix(current,"+incompatible"),));
@@ -405,7 +386,6 @@ private static (ptr<queryMatcher>, error) newQueryMatcher(@string path, @string 
         if (isSemverPrefix(v)) { 
             // Refuse to say whether <=v1.2 allows v1.2.3 (remember, @v1.2 might mean v1.2.3).
             return (_addr_null!, error.As(fmt.Errorf("ambiguous semantic version %q in range %q", v, query))!);
-
         }
         qm.filter = mv => _addr_semver.Compare(mv, v) <= 0!;
         if (!matchesMajor(v)) {
@@ -438,7 +418,6 @@ private static (ptr<queryMatcher>, error) newQueryMatcher(@string path, @string 
         if (isSemverPrefix(v)) { 
             // Refuse to say whether >v1.2 allows v1.2.3 (remember, @v1.2 might mean v1.2.3).
             return (_addr_null!, error.As(fmt.Errorf("ambiguous semantic version %q in range %q", v, query))!);
-
         }
         qm.filter = mv => _addr_semver.Compare(mv, v) > 0!;
         qm.preferLower = true;
@@ -453,7 +432,6 @@ private static (ptr<queryMatcher>, error) newQueryMatcher(@string path, @string 
             qm.filter = mv => _addr_semver.Compare(mv, query) >= 0!;
             }
         else;
-
         } {
             qm.canStat = true;
             qm.filter = mv => _addr_semver.Compare(mv, query) == 0!;
@@ -465,7 +443,6 @@ private static (ptr<queryMatcher>, error) newQueryMatcher(@string path, @string 
     else 
         return (_addr_null!, error.As(errRevQuery)!);
         return (_addr_qm!, error.As(null!)!);
-
 }
 
 // allowsVersion reports whether version v is allowed by the prefix, filter, and
@@ -488,10 +465,8 @@ private static bool allowsVersion(this ptr<queryMatcher> _addr_qm, context.Conte
             }
 
         }
-
     }
     return true;
-
 }
 
 // filterVersions classifies versions into releases and pre-releases, filtering
@@ -544,23 +519,19 @@ private static (slice<@string>, slice<@string>, error) filterVersions(this ptr<q
                 if (err != null) {
                     return (null, null, error.As(err)!);
                 }
-
                 if (ok) { 
                     // The last compatible version has a go.mod file, so that's the
                     // highest version we're willing to consider. Don't bother even
                     // looking at higher versions, because they're all +incompatible from
                     // here onward.
                     break;
-
                 } 
 
                 // No acceptable compatible release has a go.mod file, so the versioning
                 // for the module might not be module-aware, and we should respect
                 // legacy major-version tags.
                 needIncompatible = true;
-
             }
-
         }
         if (semver.Prerelease(v) != "") {
             prereleases = append(prereleases, v);
@@ -570,7 +541,6 @@ private static (slice<@string>, slice<@string>, error) filterVersions(this ptr<q
             releases = append(releases, v);
         }
     }    return (releases, prereleases, error.As(null!)!);
-
 }
 
 public partial struct QueryResult {
@@ -591,7 +561,6 @@ public static (slice<QueryResult>, error) QueryPackages(context.Context ctx, @st
         return (null, error.As(addr(new PackageNotInModuleError(Mod:modOnly.Mod,Replacement:Replacement(modOnly.Mod),Query:query,Pattern:pattern,))!)!);
     }
     return (pkgMods, error.As(err)!);
-
 }
 
 // QueryPattern looks up the module(s) containing at least one package matching
@@ -624,7 +593,6 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
             return null;
         }
         return m.Errs[0];
-
     };
 
     Func<module.Version, @string, bool, ptr<search.Match>> match = default;
@@ -645,7 +613,6 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
             }
         else
 ;
-
         } {
             match = (mod, root, isLocal) => {
                 m = search.NewMatch(pattern);
@@ -665,19 +632,14 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
                         m.Pkgs = new slice<@string>(new @string[] { pattern });
                     }
 
-
                     err = err__prev2;
 
                 }
-
                 return m;
-
             }
 ;
-
         }
     }
-
 
     bool queryMatchesMainModule = default;
     if (HasModRoot()) {
@@ -698,9 +660,7 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
                 err = err__prev3;
 
             }
-
             return (new slice<QueryResult>(new QueryResult[] { {Mod:Target,Rev:&modfetch.RevInfo{Version:Target.Version},Packages:m.Pkgs,} }), _addr_null!, error.As(null!)!);
-
         }
         {
             var err__prev2 = err;
@@ -714,7 +674,6 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
             err = err__prev2;
 
         }
-
 
         if (matchPattern(Target.Path)) {
             queryMatchesMainModule = true;
@@ -732,7 +691,6 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
                 err = err__prev3;
 
             }
-
         }
     }
     slice<QueryResult> results = default;    var candidateModules = modulePrefixesExcludingTarget(base);
@@ -780,13 +738,9 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
                     err = err__prev2;
 
                 }
-
                 return (r, addr(new PackageNotInModuleError(Mod:r.Mod,Replacement:Replacement(r.Mod),Query:query,Pattern:pattern,)));
-
             }
-
             return (r, _addr_null!);
-
         };
 
         var (allResults, err) = queryPrefixModules(ctx, candidateModules, queryModule);
@@ -799,16 +753,13 @@ public static (slice<QueryResult>, ptr<QueryResult>, error) QueryPattern(context
  {
                 results = append(results, r);
             }
-
         }        return err;
-
     });
 
     if (queryMatchesMainModule && len(results) == 0 && modOnly == null && errors.Is(err, fs.ErrNotExist)) {
         return (null, _addr_null!, error.As(addr(new QueryMatchesMainModuleError(Pattern:pattern,Query:query,))!)!);
     }
     return (results.slice(-1, len(results), len(results)), _addr_modOnly!, error.As(err)!);
-
 });
 
 // modulePrefixesExcludingTarget returns all prefixes of path that may plausibly
@@ -829,18 +780,15 @@ private static slice<@string> modulePrefixesExcludingTarget(@string path) {
                 }
 
             }
-
         }
         var j = strings.LastIndexByte(path, '/');
         if (j < 0) {
             break;
         }
         path = path[..(int)j];
-
     }
 
     return prefixes;
-
 }
 
 private static (slice<QueryResult>, error) queryPrefixModules(context.Context ctx, slice<@string> candidateModules, Func<context.Context, @string, (QueryResult, error)> queryModule) => func((defer, panic, _) => {
@@ -920,13 +868,10 @@ private static (slice<QueryResult>, error) queryPrefixModules(context.Context ct
  {
                         err = r.err;
                     }
-
                 }
-
                 break;
             }
         }
-
     }    if (len(found) == 0 && err == null) {
 
         if (noPackage != null) 
@@ -941,10 +886,8 @@ private static (slice<QueryResult>, error) queryPrefixModules(context.Context ct
             err = notExistErr;
         else 
             panic("queryPrefixModules: no modules found, but no error detected");
-        
-    }
+            }
     return (found, error.As(err)!);
-
 });
 
 // A NoMatchingVersionError indicates that Query found a module at the requested
@@ -968,7 +911,6 @@ private static @string Error(this ptr<NoMatchingVersionError> _addr_e) {
         currentSuffix = fmt.Sprintf(" (current version is %s)", e.current);
     }
     return fmt.Sprintf("no matching versions for query %q", e.query) + currentSuffix;
-
 }
 
 // A NoPatchBaseError indicates that Query was called with the query "patch"
@@ -1021,7 +963,6 @@ private static @string Error(this ptr<PackageNotInModuleError> _addr_e) {
             return fmt.Sprintf("main module (%s) does not contain packages matching %s", Target.Path, e.Pattern);
         }
         return fmt.Sprintf("main module (%s) does not contain package %s", Target.Path, e.Pattern);
-
     }
     @string found = "";
     {
@@ -1039,7 +980,6 @@ private static @string Error(this ptr<PackageNotInModuleError> _addr_e) {
  {
                 found = fmt.Sprintf(" (%s, replaced by %s)", e.Mod.Version, replacement);
             }
-
         }
         else if (e.Query != e.Mod.Version) {
             found = fmt.Sprintf(" (%s)", e.Mod.Version);
@@ -1047,12 +987,10 @@ private static @string Error(this ptr<PackageNotInModuleError> _addr_e) {
 
     }
 
-
     if (strings.Contains(e.Pattern, "...")) {
         return fmt.Sprintf("module %s@%s found%s, but does not contain packages matching %s", e.Mod.Path, e.Query, found, e.Pattern);
     }
     return fmt.Sprintf("module %s@%s found%s, but does not contain package %s", e.Mod.Path, e.Query, found, e.Pattern);
-
 }
 
 private static @string ImportPath(this ptr<PackageNotInModuleError> _addr_e) {
@@ -1062,7 +1000,6 @@ private static @string ImportPath(this ptr<PackageNotInModuleError> _addr_e) {
         return e.Pattern;
     }
     return "";
-
 }
 
 // moduleHasRootPackage returns whether module m contains a package m.Path.
@@ -1077,7 +1014,6 @@ private static (bool, error) moduleHasRootPackage(context.Context ctx, module.Ve
     }
     var (_, ok, err) = dirInModule(m.Path, m.Path, root, isLocal);
     return (ok, error.As(err)!);
-
 }
 
 // versionHasGoMod returns whether a version has a go.mod file.
@@ -1109,7 +1045,6 @@ private static (bool, error) versionHasGoMod(context.Context _, module.Version m
     }
     var isFake = bytes.Equal(data, modfetch.LegacyGoMod(m.Path));
     return (!isFake, error.As(null!)!);
-
 }
 
 // A versionRepo is a subset of modfetch.Repo that can report information about
@@ -1146,9 +1081,7 @@ private static (versionRepo, error) lookupRepo(@string proxy, @string path) {
         }
     }
 
-
     return (addr(new replacementRepo(repo:repo)), error.As(null!)!);
-
 }
 
 // An emptyRepo is a versionRepo that contains no versions.
@@ -1221,14 +1154,10 @@ private static (slice<@string>, error) Versions(this ptr<replacementRepo> _addr_
     }
     if (len(versions) == len(repoVersions)) { // No replacement versions added.
         return (versions, error.As(null!)!);
-
     }
-    sort.Slice(versions, (i, j) => {
-        return semver.Compare(versions[i], versions[j]) < 0;
-    });
+    sort.Slice(versions, (i, j) => semver.Compare(versions[i], versions[j]) < 0);
     str.Uniq(_addr_versions);
     return (versions, error.As(null!)!);
-
 }
 
 private static (ptr<modfetch.RevInfo>, error) Stat(this ptr<replacementRepo> _addr_rr, @string rev) {
@@ -1245,7 +1174,6 @@ private static (ptr<modfetch.RevInfo>, error) Stat(this ptr<replacementRepo> _ad
         // The replacements in the go.mod file list only canonical semantic versions,
         // so a non-canonical version can't possibly have a replacement.
         return (_addr_info!, error.As(err)!);
-
     }
     var path = rr.ModulePath();
     var (_, pathMajor, ok) = module.SplitPathVersion(path);
@@ -1258,7 +1186,6 @@ private static (ptr<modfetch.RevInfo>, error) Stat(this ptr<replacementRepo> _ad
             }
 
         }
-
     }
     {
         var r = Replacement(new module.Version(Path:path,Version:v));
@@ -1267,9 +1194,7 @@ private static (ptr<modfetch.RevInfo>, error) Stat(this ptr<replacementRepo> _ad
             return (_addr_info!, error.As(err)!);
         }
     }
-
     return _addr_rr.replacementStat(v)!;
-
 }
 
 private static (ptr<modfetch.RevInfo>, error) Latest(this ptr<replacementRepo> _addr_rr) {
@@ -1303,20 +1228,15 @@ private static (ptr<modfetch.RevInfo>, error) Latest(this ptr<replacementRepo> _
                         }
 
                     }
-
                 }
-
                 if (err != null || semver.Compare(v, info.Version) > 0) {
                     return _addr_rr.replacementStat(v)!;
                 }
-
             }
 
         }
-
     }
     return (_addr_info!, error.As(err)!);
-
 }
 
 private static (ptr<modfetch.RevInfo>, error) replacementStat(this ptr<replacementRepo> _addr_rr, @string v) {
@@ -1330,7 +1250,6 @@ private static (ptr<modfetch.RevInfo>, error) replacementStat(this ptr<replaceme
         rev.Short, _ = module.PseudoVersionRev(v);
     }
     return (_addr_rev!, error.As(null!)!);
-
 }
 
 // A QueryMatchesMainModuleError indicates that a query requests
@@ -1348,7 +1267,6 @@ private static @string Error(this ptr<QueryMatchesMainModuleError> _addr_e) {
         return fmt.Sprintf("can't request version %q of the main module (%s)", e.Query, e.Pattern);
     }
     return fmt.Sprintf("can't request version %q of pattern %q that includes the main module (%s)", e.Query, e.Pattern, Target.Path);
-
 }
 
 // A QueryMatchesPackagesInMainModuleError indicates that a query cannot be
@@ -1369,7 +1287,6 @@ private static @string Error(this ptr<QueryMatchesPackagesInMainModuleError> _ad
         return fmt.Sprintf("pattern %s matches package %s in the main module, so can't request version %s", e.Pattern, e.Packages[0], e.Query);
     }
     return fmt.Sprintf("package %s is in the main module, so can't request version %s", e.Packages[0], e.Query);
-
 }
 
 } // end modload_package

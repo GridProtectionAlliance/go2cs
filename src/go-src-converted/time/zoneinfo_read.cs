@@ -7,21 +7,22 @@
 // See tzfile(5), https://en.wikipedia.org/wiki/Zoneinfo,
 // and ftp://munnari.oz.au/pub/oldtz/
 
-// package time -- go2cs converted at 2022 March 06 22:30:19 UTC
+// package time -- go2cs converted at 2022 March 13 05:41:07 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\zoneinfo_read.go
-using errors = go.errors_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// registerLoadFromEmbeddedTZData is called by the time/tzdata package,
+// if it is imported.
+
+using System;
 public static partial class time_package {
 
-    // registerLoadFromEmbeddedTZData is called by the time/tzdata package,
-    // if it is imported.
 private static (@string, error) registerLoadFromEmbeddedTZData(Func<@string, (@string, error)> f) {
     @string _p0 = default;
     error _p0 = default!;
@@ -54,7 +55,6 @@ private static readonly nint seekStart = 0;
 private static readonly nint seekCurrent = 1;
 private static readonly nint seekEnd = 2;
 
-
 // Simple I/O interface to binary blob of data.
 private partial struct dataIO {
     public slice<byte> p;
@@ -72,7 +72,6 @@ private static slice<byte> read(this ptr<dataIO> _addr_d, nint n) {
     var p = d.p[(int)0..(int)n];
     d.p = d.p[(int)n..];
     return p;
-
 }
 
 private static (uint, bool) big4(this ptr<dataIO> _addr_d) {
@@ -86,7 +85,6 @@ private static (uint, bool) big4(this ptr<dataIO> _addr_d) {
         return (0, false);
     }
     return (uint32(p[3]) | uint32(p[2]) << 8 | uint32(p[1]) << 16 | uint32(p[0]) << 24, true);
-
 }
 
 private static (ulong, bool) big8(this ptr<dataIO> _addr_d) {
@@ -101,7 +99,6 @@ private static (ulong, bool) big8(this ptr<dataIO> _addr_d) {
         return (0, false);
     }
     return ((uint64(n1) << 32) | uint64(n2), true);
-
 }
 
 private static (byte, bool) @byte(this ptr<dataIO> _addr_d) {
@@ -115,7 +112,6 @@ private static (byte, bool) @byte(this ptr<dataIO> _addr_d) {
         return (0, false);
     }
     return (p[0], true);
-
 }
 
 // read returns the read of the data in the buffer.
@@ -135,7 +131,6 @@ private static @string byteString(slice<byte> p) {
         }
     }
     return string(p);
-
 }
 
 private static var badData = errors.New("malformed time zone information");
@@ -183,7 +178,6 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
                 return (_addr_null!, error.As(badData)!);
                 break;
         }
-
     }
     const var NUTCLocal = iota;
     const var NStdWall = 0;
@@ -191,7 +185,6 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
     const var NTime = 2;
     const var NZone = 3;
     const var NChar = 4;
-
     array<nint> n = new array<nint>(6);
     {
         nint i__prev1 = i;
@@ -243,7 +236,6 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
 
             i = i__prev1;
         }
-
     }
     nint size = 4;
     if (is64) {
@@ -273,7 +265,6 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
 
     if (d.error) { // ran out of data
         return (_addr_null!, error.As(badData)!);
-
     }
     @string extend = default;
     var rest = d.rest();
@@ -285,7 +276,6 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
         // Reject tzdata files with no zones. There's nothing useful in them.
         // This also avoids a panic later when we add and then use a fake transition (golang.org/issue/29437).
         return (_addr_null!, error.As(badData)!);
-
     }
     var zones = make_slice<zone>(nzone);
     {
@@ -300,11 +290,9 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
             if (!ok) {
                 return (_addr_null!, error.As(badData)!);
             }
-
             if (uint32(int(n)) != n) {
                 return (_addr_null!, error.As(badData)!);
             }
-
             zones[i].offset = int(int32(n));
             byte b = default;
             b, ok = zonedata.@byte();
@@ -312,14 +300,12 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
             if (!ok) {
                 return (_addr_null!, error.As(badData)!);
             }
-
             zones[i].isDST = b != 0;
             b, ok = zonedata.@byte();
 
             if (!ok || int(b) >= len(abbrev)) {
                 return (_addr_null!, error.As(badData)!);
             }
-
             zones[i].name = byteString(abbrev[(int)b..]);
             if (runtime.GOOS == "aix" && len(name) > 8 && (name[..(int)8] == "Etc/GMT+" || name[..(int)8] == "Etc/GMT-")) { 
                 // There is a bug with AIX 7.2 TL 0 with files in Etc,
@@ -327,11 +313,8 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
                 if (name != "Etc/GMT+0") { 
                     // GMT+0 is OK
                     zones[i].name = name[(int)4..];
-
                 }
-
             }
-
         }
         i = i__prev1;
     }
@@ -356,7 +339,6 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
                     }
 
                 }
-
             }
             else
  {
@@ -372,23 +354,18 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
                     }
 
                 }
-
             }
-
             tx[i].when = n;
             if (int(txzones[i]) >= len(zones)) {
                 return (_addr_null!, error.As(badData)!);
             }
-
             tx[i].index = txzones[i];
             if (i < len(isstd)) {
                 tx[i].isstd = isstd[i] != 0;
             }
-
             if (i < len(isutc)) {
                 tx[i].isutc = isutc[i] != 0;
             }
-
         }
         i = i__prev1;
     }
@@ -397,7 +374,6 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
         // Build fake transition to cover all time.
         // This happens in fixed locations like "Etc/GMT0".
         tx = append(tx, new zoneTrans(when:alpha,index:0));
-
     }
     ptr<Location> l = addr(new Location(zone:zones,tx:tx,name:name,extend:extend)); 
 
@@ -438,23 +414,17 @@ public static (ptr<Location>, error) LoadLocationFromTZData(@string name, slice<
                                 }
 
                             }
-
                         }
 
                     }
-
                 }
-
                 break;
-
             }
-
         }
         i = i__prev1;
     }
 
     return (_addr_l!, error.As(null!)!);
-
 }
 
 private static nint findZone(slice<zone> zones, @string name, nint offset, bool isDST) {
@@ -463,7 +433,6 @@ private static nint findZone(slice<zone> zones, @string name, nint offset, bool 
             return i;
         }
     }    return -1;
-
 }
 
 // loadTzinfoFromDirOrZip returns the contents of the file with the given name
@@ -479,7 +448,6 @@ private static (slice<byte>, error) loadTzinfoFromDirOrZip(@string dir, @string 
         name = dir + "/" + name;
     }
     return readFile(name);
-
 }
 
 // There are 500+ zoneinfo files. Rather than distribute them all
@@ -496,7 +464,6 @@ private static nint get4(slice<byte> b) {
         return 0;
     }
     return int(b[0]) | int(b[1]) << 8 | int(b[2]) << 16 | int(b[3]) << 24;
-
 }
 
 // get2 returns the little-endian 16-bit value in b.
@@ -505,7 +472,6 @@ private static nint get2(slice<byte> b) {
         return 0;
     }
     return int(b[0]) | int(b[1]) << 8;
-
 }
 
 // loadTzinfoFromZip returns the contents of the file with the given name
@@ -527,7 +493,6 @@ private static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string n
     const nint zheadersize = 30;
     const nuint zheader = 0x04034b50;
 
-
     var buf = make_slice<byte>(ztailsize);
     {
         var err__prev1 = err;
@@ -540,7 +505,6 @@ private static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string n
         err = err__prev1;
 
     }
-
     var n = get2(buf[(int)10..]);
     var size = get4(buf[(int)12..]);
     var off = get4(buf[(int)16..]);
@@ -557,7 +521,6 @@ private static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string n
         err = err__prev1;
 
     }
-
 
     for (nint i = 0; i < n; i++) { 
         // zip entry layout:
@@ -613,7 +576,6 @@ private static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string n
             err = err__prev1;
 
         }
-
         xlen = get2(buf[(int)28..]);
 
         buf = make_slice<byte>(size);
@@ -630,13 +592,10 @@ private static (slice<byte>, error) loadTzinfoFromZip(@string zipfile, @string n
 
         }
 
-
         return (buf, error.As(null!)!);
-
     }
 
     return (null, error.As(syscall.ENOENT)!);
-
 });
 
 // loadTzinfoFromTzdata returns the time zone information of the time zone
@@ -656,7 +615,6 @@ private static (slice<byte>, error) loadTzinfo(@string name, @string source) {
         return loadTzinfoFromTzdata(source, name);
     }
     return loadTzinfoFromDirOrZip(source, name);
-
 }
 
 // loadLocation returns the Location with the given name from one of
@@ -675,7 +633,6 @@ private static (ptr<Location>, error) loadLocation(@string name, slice<@string> 
             if (err == null) {
                 return (_addr_z!, error.As(null!)!);
             }
-
         }
         if (firstErr == null && err != syscall.ENOENT) {
             firstErr = err;
@@ -688,7 +645,6 @@ private static (ptr<Location>, error) loadLocation(@string name, slice<@string> 
             if (err == null) {
                 return (_addr_z!, error.As(null!)!);
             }
-
         }
         if (firstErr == null && err != syscall.ENOENT) {
             firstErr = err;
@@ -698,7 +654,6 @@ private static (ptr<Location>, error) loadLocation(@string name, slice<@string> 
         return (_addr_null!, error.As(firstErr)!);
     }
     return (_addr_null!, error.As(errors.New("unknown time zone " + name))!);
-
 }
 
 // readFile reads and returns the content of the named file.
@@ -728,7 +683,6 @@ private static (slice<byte>, error) readFile(@string name) => func((defer, _, _)
         }
     }
     return (ret, error.As(err)!);
-
 });
 
 } // end time_package

@@ -2,27 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:21:02 UTC
+// package tls -- go2cs converted at 2022 March 13 05:36:08 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\handshake_server_tls13.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using crypto = go.crypto_package;
-using hmac = go.crypto.hmac_package;
-using rsa = go.crypto.rsa_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-
 namespace go.crypto;
+
+using bytes = bytes_package;
+using context = context_package;
+using crypto = crypto_package;
+using hmac = crypto.hmac_package;
+using rsa = crypto.rsa_package;
+using errors = errors_package;
+using hash = hash_package;
+using io = io_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+
+
+// maxClientPSKIdentities is the number of client PSK identities the server will
+// attempt to validate. It will ignore the rest not to let cheap ClientHello
+// messages cause too much work in session ticket decryption attempts.
 
 public static partial class tls_package {
 
-    // maxClientPSKIdentities is the number of client PSK identities the server will
-    // attempt to validate. It will ignore the rest not to let cheap ClientHello
-    // messages cause too much work in session ticket decryption attempts.
 private static readonly nint maxClientPSKIdentities = 5;
 
 
@@ -63,7 +65,6 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -75,7 +76,6 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -87,7 +87,6 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
         err = err__prev1;
 
     }
-
     c.buffering = true;
     {
         var err__prev1 = err;
@@ -100,7 +99,6 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -112,7 +110,6 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -138,7 +135,6 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -150,7 +146,6 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -163,11 +158,9 @@ private static error handshake(this ptr<serverHandshakeStateTLS13> _addr_hs) {
 
     }
 
-
     atomic.StoreUint32(_addr_c.handshakeStatus, 1);
 
     return error.As(null!)!;
-
 }
 
 private static error processClientHello(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -194,9 +187,7 @@ private static error processClientHello(this ptr<serverHandshakeStateTLS13> _add
                 c.sendAlert(alertInappropriateFallback);
                 return error.As(errors.New("tls: client using inappropriate protocol fallback"))!;
             }
-
             break;
-
         }
     }    if (len(hs.clientHello.compressionMethods) != 1 || hs.clientHello.compressionMethods[0] != compressionNone) {
         c.sendAlert(alertIllegalParameter);
@@ -212,7 +203,6 @@ private static error processClientHello(this ptr<serverHandshakeStateTLS13> _add
         }
     }
 
-
     if (len(hs.clientHello.secureRenegotiation) != 0) {
         c.sendAlert(alertHandshakeFailure);
         return error.As(errors.New("tls: initial handshake had non-empty renegotiation extension"))!;
@@ -226,7 +216,6 @@ private static error processClientHello(this ptr<serverHandshakeStateTLS13> _add
         // applies to mixing or replacing with any TLS 1.2 server.
         c.sendAlert(alertUnsupportedExtension);
         return error.As(errors.New("tls: client sent unexpected early data"))!;
-
     }
     hs.hello.sessionId = hs.clientHello.sessionId;
     hs.hello.compressionMethod = compressionNone;
@@ -261,7 +250,6 @@ GroupSelection:
                 _breakGroupSelection = true;
                 break;
             }
-
         }        if (selectedGroup != 0) {
             continue;
         }
@@ -284,9 +272,7 @@ GroupSelection:
             }
 
         }
-
         clientKeyShare = _addr_hs.clientHello.keyShares[0];
-
     }
     {
         var (_, ok) = curveForCurveID(selectedGroup);
@@ -296,7 +282,6 @@ GroupSelection:
             return error.As(errors.New("tls: CurvePreferences includes unsupported curve"))!;
         }
     }
-
     var (params, err) = generateECDHEParameters(c.config.rand(), selectedGroup);
     if (err != null) {
         c.sendAlert(alertInternalError);
@@ -310,7 +295,6 @@ GroupSelection:
     }
     c.serverName = hs.clientHello.serverName;
     return error.As(null!)!;
-
 }
 
 private static error checkForResumption(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -355,7 +339,6 @@ private static error checkForResumption(this ptr<serverHandshakeStateTLS13> _add
 
         }
 
-
         var createdAt = time.Unix(int64(sessionState.createdAt), 0);
         if (c.config.time().Sub(createdAt) > maxSessionTicketLifetime) {
             continue;
@@ -397,14 +380,11 @@ private static error checkForResumption(this ptr<serverHandshakeStateTLS13> _add
 
         }
 
-
         hs.hello.selectedIdentityPresent = true;
         hs.hello.selectedIdentity = uint16(i);
         hs.usingPSK = true;
         return error.As(null!)!;
-
     }    return error.As(null!)!;
-
 }
 
 // cloneHash uses the encoding.BinaryMarshaler and encoding.BinaryUnmarshaler
@@ -436,9 +416,7 @@ private static hash.Hash cloneHash(hash.Hash @in, crypto.Hash h) {
             return null;
         }
     }
-
     return out;
-
 }
 
 private static error pickCertificate(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -463,7 +441,6 @@ private static error pickCertificate(this ptr<serverHandshakeStateTLS13> _addr_h
             c.sendAlert(alertInternalError);
         }
         return error.As(err)!;
-
     }
     hs.sigAlg, err = selectSignatureScheme(c.vers, certificate, hs.clientHello.supportedSignatureAlgorithms);
     if (err != null) { 
@@ -471,12 +448,10 @@ private static error pickCertificate(this ptr<serverHandshakeStateTLS13> _addr_h
         // incompatible with the client's signature algorithms.
         c.sendAlert(alertHandshakeFailure);
         return error.As(err)!;
-
     }
     hs.cert = certificate;
 
     return error.As(null!)!;
-
 }
 
 // sendDummyChangeCipherSpec sends a ChangeCipherSpec record for compatibility
@@ -491,7 +466,6 @@ private static error sendDummyChangeCipherSpec(this ptr<serverHandshakeStateTLS1
 
     var (_, err) = hs.c.writeRecord(recordTypeChangeCipherSpec, new slice<byte>(new byte[] { 1 }));
     return error.As(err)!;
-
 }
 
 private static error doHelloRetryRequest(this ptr<serverHandshakeStateTLS13> _addr_hs, CurveID selectedGroup) {
@@ -518,7 +492,6 @@ private static error doHelloRetryRequest(this ptr<serverHandshakeStateTLS13> _ad
         }
     }
 
-
     {
         var err = hs.sendDummyChangeCipherSpec();
 
@@ -526,7 +499,6 @@ private static error doHelloRetryRequest(this ptr<serverHandshakeStateTLS13> _ad
             return error.As(err)!;
         }
     }
-
 
     var (msg, err) = c.readHandshake();
     if (err != null) {
@@ -551,7 +523,6 @@ private static error doHelloRetryRequest(this ptr<serverHandshakeStateTLS13> _ad
     }
     hs.clientHello = clientHello;
     return error.As(null!)!;
-
 }
 
 // illegalClientHelloChange reports whether the two ClientHello messages are
@@ -637,7 +608,6 @@ private static bool illegalClientHelloChange(ptr<clientHelloMsg> _addr_ch, ptr<c
     }
 
     return ch.vers != ch1.vers || !bytes.Equal(ch.random, ch1.random) || !bytes.Equal(ch.sessionId, ch1.sessionId) || !bytes.Equal(ch.compressionMethods, ch1.compressionMethods) || ch.serverName != ch1.serverName || ch.ocspStapling != ch1.ocspStapling || !bytes.Equal(ch.supportedPoints, ch1.supportedPoints) || ch.ticketSupported != ch1.ticketSupported || !bytes.Equal(ch.sessionTicket, ch1.sessionTicket) || ch.secureRenegotiationSupported != ch1.secureRenegotiationSupported || !bytes.Equal(ch.secureRenegotiation, ch1.secureRenegotiation) || ch.scts != ch1.scts || !bytes.Equal(ch.cookie, ch1.cookie) || !bytes.Equal(ch.pskModes, ch1.pskModes);
-
 }
 
 private static error sendServerParameters(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -659,7 +629,6 @@ private static error sendServerParameters(this ptr<serverHandshakeStateTLS13> _a
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -671,7 +640,6 @@ private static error sendServerParameters(this ptr<serverHandshakeStateTLS13> _a
         err = err__prev1;
 
     }
-
 
     var earlySecret = hs.earlySecret;
     if (earlySecret == null) {
@@ -717,9 +685,7 @@ private static error sendServerParameters(this ptr<serverHandshakeStateTLS13> _a
 
     }
 
-
     return error.As(null!)!;
-
 }
 
 private static bool requestClientCert(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -755,7 +721,6 @@ private static error sendServerCertificate(this ptr<serverHandshakeStateTLS13> _
             }
 
         }
-
     }
     ptr<object> certMsg = @new<certificateMsgTLS13>();
 
@@ -771,7 +736,6 @@ private static error sendServerCertificate(this ptr<serverHandshakeStateTLS13> _
             return error.As(err)!;
         }
     }
-
 
     ptr<object> certVerifyMsg = @new<certificateVerifyMsg>();
     certVerifyMsg.hasSignatureAlgorithm = true;
@@ -794,7 +758,6 @@ private static error sendServerCertificate(this ptr<serverHandshakeStateTLS13> _
 
             if (ok && sigType == signatureRSAPSS && rsaKey.N.BitLen() / 8 < sigHash.Size() * 2 + 2) { // key too small for RSA-PSS
                 c.sendAlert(alertHandshakeFailure);
-
             }
             else
  {
@@ -802,9 +765,7 @@ private static error sendServerCertificate(this ptr<serverHandshakeStateTLS13> _
             }
 
         }
-
         return error.As(errors.New("tls: failed to sign handshake: " + err.Error()))!;
-
     }
     certVerifyMsg.signature = sig;
 
@@ -817,9 +778,7 @@ private static error sendServerCertificate(this ptr<serverHandshakeStateTLS13> _
         }
     }
 
-
     return error.As(null!)!;
-
 }
 
 private static error sendServerFinished(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -878,10 +837,8 @@ private static error sendServerFinished(this ptr<serverHandshakeStateTLS13> _add
             err = err__prev2;
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 private static bool shouldSendSessionTickets(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -895,7 +852,6 @@ private static bool shouldSendSessionTickets(this ptr<serverHandshakeStateTLS13>
             return true;
         }
     }    return false;
-
 }
 
 private static error sendSessionTickets(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -933,9 +889,7 @@ private static error sendSessionTickets(this ptr<serverHandshakeStateTLS13> _add
         }
     }
 
-
     return error.As(null!)!;
-
 }
 
 private static error readClientCertificate(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -960,10 +914,8 @@ private static error readClientCertificate(this ptr<serverHandshakeStateTLS13> _
                 err = err__prev3;
 
             }
-
         }
         return error.As(null!)!;
-
     }
     var (msg, err) = c.readHandshake();
     if (err != null) {
@@ -988,7 +940,6 @@ private static error readClientCertificate(this ptr<serverHandshakeStateTLS13> _
 
     }
 
-
     if (c.config.VerifyConnection != null) {
         {
             var err__prev2 = err;
@@ -1003,7 +954,6 @@ private static error readClientCertificate(this ptr<serverHandshakeStateTLS13> _
             err = err__prev2;
 
         }
-
     }
     if (len(certMsg.certificate.Certificate) != 0) {
         msg, err = c.readHandshake();
@@ -1042,9 +992,7 @@ private static error readClientCertificate(this ptr<serverHandshakeStateTLS13> _
 
         }
 
-
         hs.transcript.Write(certVerify.marshal());
-
     }
     {
         var err__prev1 = err;
@@ -1058,9 +1006,7 @@ private static error readClientCertificate(this ptr<serverHandshakeStateTLS13> _
 
     }
 
-
     return error.As(null!)!;
-
 }
 
 private static error readClientFinished(this ptr<serverHandshakeStateTLS13> _addr_hs) {
@@ -1084,7 +1030,6 @@ private static error readClientFinished(this ptr<serverHandshakeStateTLS13> _add
     c.@in.setTrafficSecret(hs.suite, hs.trafficSecret);
 
     return error.As(null!)!;
-
 }
 
 } // end tls_package

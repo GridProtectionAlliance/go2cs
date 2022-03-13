@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:22 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:44 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\cache.go
-using obj = go.cmd.@internal.obj_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using obj = cmd.@internal.obj_package;
+using sort = sort_package;
+
+
+// A Cache holds reusable compiler state.
+// It is intended to be re-used for multiple Func compilations.
+
+using System;
 public static partial class ssa_package {
 
-    // A Cache holds reusable compiler state.
-    // It is intended to be re-used for multiple Func compilations.
 public partial struct Cache {
     public array<Value> values;
     public array<Block> blocks;

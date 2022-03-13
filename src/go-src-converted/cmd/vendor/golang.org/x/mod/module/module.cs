@@ -82,9 +82,11 @@
 // as the same path. If we do allow Unicode marks in paths, there
 // must be some kind of normalization to allow only one canonical
 // encoding of any character used in an import path.
-// package module -- go2cs converted at 2022 March 06 23:26:07 UTC
+
+// package module -- go2cs converted at 2022 March 13 06:40:58 UTC
 // import "cmd/vendor/golang.org/x/mod/module" ==> using module = go.cmd.vendor.golang.org.x.mod.module_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\module\module.go
+namespace go.cmd.vendor.golang.org.x.mod;
 // IMPORTANT NOTE
 //
 // This file essentially defines the set of valid import paths for the go command.
@@ -96,25 +98,25 @@
 //
 // Changes to the semantics in this file require approval from rsc.
 
-using fmt = go.fmt_package;
-using path = go.path_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
 
-using semver = go.golang.org.x.mod.semver_package;
-using errors = go.golang.org.x.xerrors_package;
+using fmt = fmt_package;
+using path = path_package;
+using sort = sort_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using semver = golang.org.x.mod.semver_package;
+using errors = golang.org.x.xerrors_package;
+
+
+// A Version (for clients, a module.Version) is defined by a module path and version pair.
+// These are stored in their plain (unescaped) form.
+
 using System.ComponentModel;
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.mod;
-
 public static partial class module_package {
 
-    // A Version (for clients, a module.Version) is defined by a module path and version pair.
-    // These are stored in their plain (unescaped) form.
 public partial struct Version {
     public @string Path; // Version is usually a semantic version in canonical form.
 // There are three exceptions to this general rule.
@@ -135,7 +137,6 @@ public static @string String(this Version m) {
         return m.Path;
     }
     return m.Path + "@" + m.Version;
-
 }
 
 // A ModuleError indicates an error specific to a module.
@@ -153,7 +154,6 @@ public static error VersionError(Version v, error err) {
         return error.As(err)!;
     }
     return error.As(addr(new ModuleError(Path:v.Path,Version:v.Version,Err:err,))!)!;
-
 }
 
 private static @string Error(this ptr<ModuleError> _addr_e) {
@@ -166,12 +166,10 @@ private static @string Error(this ptr<ModuleError> _addr_e) {
             return fmt.Sprintf("%s@%s: invalid %s: %v", e.Path, v.Version, v.noun(), v.Err);
         }
     }
-
     if (e.Version != "") {
         return fmt.Sprintf("%s@%s: %v", e.Path, e.Version, e.Err);
     }
     return fmt.Sprintf("module %s: %v", e.Path, e.Err);
-
 }
 
 private static error Unwrap(this ptr<ModuleError> _addr_e) {
@@ -200,7 +198,6 @@ private static @string noun(this ptr<InvalidVersionError> _addr_e) {
         return "pseudo-version";
     }
     return "version";
-
 }
 
 private static @string Error(this ptr<InvalidVersionError> _addr_e) {
@@ -254,7 +251,6 @@ public static error Check(@string path, @string version) {
         err = err__prev1;
 
     }
-
     if (!semver.IsValid(version)) {
         return error.As(addr(new ModuleError(Path:path,Err:&InvalidVersionError{Version:version,Err:errors.New("not a semantic version")},))!)!;
     }
@@ -270,9 +266,7 @@ public static error Check(@string path, @string version) {
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 // firstPathOK reports whether r can appear in the first element of a module path.
@@ -296,7 +290,6 @@ private static bool modPathOK(int r) {
         return r == '-' || r == '.' || r == '_' || r == '~' || '0' <= r && r <= '9' || 'A' <= r && r <= 'Z' || 'a' <= r && r <= 'z';
     }
     return false;
-
 }
 
 // modPathOK reports whether r can appear in a package import path element.
@@ -334,10 +327,8 @@ private static bool fileNameOK(int r) {
             }
         }
         return false;
-
     }
     return unicode.IsLetter(r);
-
 }
 
 // CheckPath checks that a module path is valid.
@@ -369,7 +360,6 @@ public static error CheckPath(@string path) => func((defer, _, _) => {
             return error.As(err)!;
         }
     }
-
     var i = strings.Index(path, "/");
     if (i < 0) {
         i = len(path);
@@ -394,9 +384,7 @@ public static error CheckPath(@string path) => func((defer, _, _) => {
             return error.As(fmt.Errorf("invalid version"))!;
         }
     }
-
     return error.As(null!)!;
-
 });
 
 // CheckImportPath checks that an import path is valid.
@@ -424,9 +412,7 @@ public static error CheckImportPath(@string path) {
             return error.As(addr(new InvalidPathError(Kind:"import",Path:path,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // pathKind indicates what kind of path we're checking. Module paths,
@@ -437,7 +423,6 @@ private partial struct pathKind { // : nint
 private static readonly pathKind modulePath = iota;
 private static readonly var importPath = 0;
 private static readonly var filePath = 1;
-
 
 // checkPath checks that a general path is valid. kind indicates what
 // specific constraints should be applied.
@@ -477,9 +462,7 @@ private static error checkPath(@string path, pathKind kind) {
                 err = err__prev2;
 
             }
-
             elemStart = i + 1;
-
         }
     }    {
         var err__prev1 = err;
@@ -492,9 +475,7 @@ private static error checkPath(@string path, pathKind kind) {
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 // checkElem checks whether an individual path element is valid.
@@ -529,7 +510,6 @@ private static error checkElem(@string elem, pathKind kind) => func((_, panic, _
                         if (!ok) {
                 return error.As(fmt.Errorf("invalid char %q", r))!;
             }
-
         }
         r = r__prev1;
     }
@@ -542,7 +522,6 @@ private static error checkElem(@string elem, pathKind kind) => func((_, panic, _
             short = short[..(int)i];
         }
     }
-
     foreach (var (_, bad) in badWindowsNames) {
         if (strings.EqualFold(bad, short)) {
             return error.As(fmt.Errorf("%q disallowed as path element component on Windows", short))!;
@@ -551,7 +530,6 @@ private static error checkElem(@string elem, pathKind kind) => func((_, panic, _
         // don't check for Windows short-names in file names. They're
         // only an issue for import paths.
         return error.As(null!)!;
-
     }
     {
         var tilde = strings.LastIndexByte(short, '~');
@@ -576,13 +554,10 @@ private static error checkElem(@string elem, pathKind kind) => func((_, panic, _
             if (suffixIsDigits) {
                 return error.As(fmt.Errorf("trailing tilde and digits in path element"))!;
             }
-
         }
     }
 
-
     return error.As(null!)!;
-
 });
 
 // CheckFilePath checks that a slash-separated file path is valid.
@@ -605,9 +580,7 @@ public static error CheckFilePath(@string path) {
             return error.As(addr(new InvalidPathError(Kind:"file",Path:path,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // badWindowsNames are the reserved file path elements on Windows.
@@ -636,7 +609,6 @@ public static (@string, @string, bool) SplitPathVersion(@string path) {
             dot = true;
         }
         i--;
-
     }
     if (i <= 1 || i == len(path) || path[i - 1] != 'v' || path[i - 2] != '/') {
         return (path, "", true);
@@ -645,7 +617,6 @@ public static (@string, @string, bool) SplitPathVersion(@string path) {
         return (path, "", false);
     }
     return (prefix, pathMajor, true);
-
 }
 
 // splitGopkgIn is like SplitPathVersion but only for gopkg.in paths.
@@ -667,13 +638,11 @@ private static (@string, @string, bool) splitGopkgIn(@string path) {
     if (i <= 1 || path[i - 1] != 'v' || path[i - 2] != '.') { 
         // All gopkg.in paths must end in vN for some N.
         return (path, "", false);
-
     }
     (prefix, pathMajor) = (path[..(int)i - 2], path[(int)i - 2..]);    if (len(pathMajor) <= 2 || pathMajor[2] == '0' && pathMajor != ".v0") {
         return (path, "", false);
     }
     return (prefix, pathMajor, true);
-
 }
 
 // MatchPathMajor reports whether the semantic version v
@@ -697,7 +666,6 @@ public static error CheckPathMajor(@string v, @string pathMajor) {
         // Allow old bug in pseudo-versions that generated v0.0.0- pseudoversion for gopkg .v1.
         // For example, gopkg.in/yaml.v2@v2.2.1's go.mod requires gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405.
         return error.As(null!)!;
-
     }
     var m = semver.Major(v);
     if (pathMajor == "") {
@@ -705,17 +673,14 @@ public static error CheckPathMajor(@string v, @string pathMajor) {
             return error.As(null!)!;
         }
         pathMajor = "v0 or v1";
-
     }
     else if (pathMajor[0] == '/' || pathMajor[0] == '.') {
         if (m == pathMajor[(int)1..]) {
             return error.As(null!)!;
         }
         pathMajor = pathMajor[(int)1..];
-
     }
     return error.As(addr(new InvalidVersionError(Version:v,Err:fmt.Errorf("should be %s, not %s",pathMajor,semver.Major(v)),))!)!;
-
 }
 
 // PathMajorPrefix returns the major-version tag prefix implied by pathMajor.
@@ -739,7 +704,6 @@ public static @string PathMajorPrefix(@string pathMajor) => func((_, panic, _) =
         panic("pathMajor suffix " + pathMajor + "passed to PathMajorPrefix is not a valid major version");
     }
     return m;
-
 });
 
 // CanonicalVersion returns the canonical form of the version string v.
@@ -750,7 +714,6 @@ public static @string CanonicalVersion(@string v) {
         cv += "+incompatible";
     }
     return cv;
-
 }
 
 // Sort sorts the list by Path, breaking ties by comparing Version fields.
@@ -780,7 +743,6 @@ public static void Sort(slice<Version> list) {
             k = k__prev1;
 
         }
-
         {
             var k__prev1 = k;
 
@@ -793,14 +755,11 @@ public static void Sort(slice<Version> list) {
             k = k__prev1;
 
         }
-
         if (vi != vj) {
             return semver.Compare(vi, vj) < 0;
         }
         return fi < fj;
-
     });
-
 }
 
 // EscapePath returns the escaped form of the given module path.
@@ -817,9 +776,7 @@ public static (@string, error) EscapePath(@string path) {
         }
     }
 
-
     return escapeString(path);
-
 }
 
 // EscapeVersion returns the escaped form of the given module version.
@@ -836,9 +793,7 @@ public static (@string, error) EscapeVersion(@string v) {
             return ("", error.As(addr(new InvalidVersionError(Version:v,Err:fmt.Errorf("disallowed version string"),))!)!);
         }
     }
-
     return escapeString(v);
-
 }
 
 private static (@string, error) escapeString(@string s) {
@@ -855,13 +810,10 @@ private static (@string, error) escapeString(@string s) {
                 // This should be disallowed by CheckPath, but diagnose anyway.
                 // The correctness of the escaping loop below depends on it.
                 return ("", error.As(fmt.Errorf("internal error: inconsistency in EscapePath"))!);
-
             }
-
             if ('A' <= r && r <= 'Z') {
                 haveUpper = true;
             }
-
         }
         r = r__prev1;
     }
@@ -882,13 +834,11 @@ private static (@string, error) escapeString(@string s) {
  {
                 buf = append(buf, byte(r));
             }
-
         }
         r = r__prev1;
     }
 
     return (string(buf), error.As(null!)!);
-
 }
 
 // UnescapePath returns the module path for the given escaped path.
@@ -908,9 +858,7 @@ public static (@string, error) UnescapePath(@string escaped) {
             return ("", error.As(fmt.Errorf("invalid escaped module path %q: %v", escaped, err))!);
         }
     }
-
     return (path, error.As(null!)!);
-
 }
 
 // UnescapeVersion returns the version string for the given escaped version.
@@ -932,9 +880,7 @@ public static (@string, error) UnescapeVersion(@string escaped) {
             return ("", error.As(fmt.Errorf("invalid escaped version %q: %v", v, err))!);
         }
     }
-
     return (v, error.As(null!)!);
-
 }
 
 private static (@string, bool) unescapeString(@string escaped) {
@@ -964,12 +910,10 @@ private static (@string, bool) unescapeString(@string escaped) {
             return ("", false);
         }
         buf = append(buf, byte(r));
-
     }    if (bang) {
         return ("", false);
     }
     return (string(buf), true);
-
 }
 
 // MatchPrefixPatterns reports whether any path prefix of target matches one of
@@ -998,7 +942,6 @@ public static bool MatchPrefixPatterns(@string globs, @string target) {
             i = i__prev1;
 
         }
-
         if (glob == "") {
             continue;
         }
@@ -1024,7 +967,6 @@ public static bool MatchPrefixPatterns(@string globs, @string target) {
         if (n > 0) { 
             // Not enough prefix elements.
             continue;
-
         }
         var (matched, _) = path.Match(glob, prefix);
         if (matched) {
@@ -1032,7 +974,6 @@ public static bool MatchPrefixPatterns(@string globs, @string target) {
         }
     }
     return false;
-
 }
 
 } // end module_package

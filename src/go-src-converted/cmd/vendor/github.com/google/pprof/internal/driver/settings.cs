@@ -1,21 +1,22 @@
-// package driver -- go2cs converted at 2022 March 06 23:23:30 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:35 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\settings.go
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using System.ComponentModel;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using json = encoding.json_package;
+using fmt = fmt_package;
+using ioutil = io.ioutil_package;
+using url = net.url_package;
+using os = os_package;
+using filepath = path.filepath_package;
+
+
+// settings holds pprof settings.
+
+using System.ComponentModel;
+using System;
 public static partial class driver_package {
 
-    // settings holds pprof settings.
 private partial struct settings {
     [Description("json:\"configs\"")]
     public slice<namedConfig> Configs;
@@ -39,7 +40,6 @@ private static (@string, error) settingsFileName() {
         return ("", error.As(err)!);
     }
     return (filepath.Join(dir, "pprof", "settings.json"), error.As(null!)!);
-
 }
 
 // readSettings reads settings from fname.
@@ -53,7 +53,6 @@ private static (ptr<settings>, error) readSettings(@string fname) {
             return (addr(new settings()), error.As(null!)!);
         }
         return (_addr_null!, error.As(fmt.Errorf("could not read settings: %w", err))!);
-
     }
     ptr<settings> settings = addr(new settings());
     {
@@ -63,11 +62,9 @@ private static (ptr<settings>, error) readSettings(@string fname) {
             return (_addr_null!, error.As(fmt.Errorf("could not parse settings: %w", err))!);
         }
     }
-
     foreach (var (i) in settings.Configs) {
         settings.Configs[i].resetTransient();
     }    return (_addr_settings!, error.As(null!)!);
-
 }
 
 // writeSettings saves settings to fname.
@@ -90,7 +87,6 @@ private static error writeSettings(@string fname, ptr<settings> _addr_settings) 
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -102,9 +98,7 @@ private static error writeSettings(@string fname, ptr<settings> _addr_settings) 
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 // configMenuEntry holds information for a single config menu entry.
@@ -125,7 +119,6 @@ private static slice<configMenuEntry> configMenu(@string fname, url.URL url) {
         if (err == null) { 
             // Add user configs.
             configs = append(configs, settings.Configs);
-
         }
     } 
 
@@ -138,12 +131,10 @@ private static slice<configMenuEntry> configMenu(@string fname, url.URL url) {
             lastMatch = i;
         }
         result[i] = new configMenuEntry(Name:cfg.Name,URL:dst.String(),UserConfig:(i!=0),);
-
     }    if (lastMatch >= 0) {
         result[lastMatch].Current = true;
     }
     return result;
-
 }
 
 // editSettings edits settings by applying fn to them.
@@ -159,9 +150,7 @@ private static error editSettings(@string fname, Func<ptr<settings>, error> fn) 
             return error.As(err)!;
         }
     }
-
     return error.As(writeSettings(fname, _addr_settings))!;
-
 }
 
 // setConfig saves the config specified in request to fname.
@@ -179,7 +168,6 @@ private static error setConfig(@string fname, url.URL request) {
             return error.As(err)!;
         }
     }
-
     return error.As(editSettings(fname, s => {
         foreach (var (i, c) in s.Configs) {
             if (c.Name == name) {
@@ -189,7 +177,6 @@ private static error setConfig(@string fname, url.URL request) {
         }        s.Configs = append(s.Configs, new namedConfig(Name:name,config:cfg));
         return error.As(null!)!;
     }))!;
-
 }
 
 // removeConfig removes config from fname.

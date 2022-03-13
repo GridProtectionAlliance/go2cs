@@ -7,19 +7,21 @@
 // This file contains an implementation of a data structure which
 // manages ordered address ranges.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:08 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:56 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mranges.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// addrRange represents a region of address space.
+//
+// An addrRange must never span a gap in the address space.
 
 public static partial class runtime_package {
 
-    // addrRange represents a region of address space.
-    //
-    // An addrRange must never span a gap in the address space.
 private partial struct addrRange {
     public offAddr @base;
     public offAddr limit;
@@ -34,7 +36,6 @@ private static addrRange makeAddrRange(System.UIntPtr @base, System.UIntPtr limi
         throw("addr range base and limit are not in the same memory segment");
     }
     return r;
-
 }
 
 // size returns the size of the range represented in bytes.
@@ -43,7 +44,6 @@ private static System.UIntPtr size(this addrRange a) {
         return 0;
     }
     return a.limit.diff(a.@base);
-
 }
 
 // contains returns whether or not the range contains a given address.
@@ -69,7 +69,6 @@ private static addrRange subtract(this addrRange a, addrRange b) {
         a.limit = b.@base;
     }
     return a;
-
 }
 
 // removeGreaterEqual removes all addresses in a greater than or equal
@@ -82,7 +81,6 @@ private static addrRange removeGreaterEqual(this addrRange a, System.UIntPtr add
         return a;
     }
     return makeAddrRange(a.@base.addr(), addr);
-
 }
 
  
@@ -130,7 +128,6 @@ private static bool equal(this offAddr l1, offAddr l2) {
     // No need to compare in the offset space, it
     // means the same thing.
     return l1 == l2;
-
 }
 
 // addr returns the virtual address for this offset address.
@@ -187,14 +184,12 @@ private static nint findSucc(this ptr<addrRanges> _addr_a, System.UIntPtr addr) 
             // a.ranges[i] contains base, so
             // its successor is the next index.
             return i + 1;
-
         }
         if (@base.lessThan(a.ranges[i].@base)) { 
             // In this case i might actually be
             // the successor, but we can't be sure
             // until we check the ones before it.
             top = i;
-
         }
         else
  { 
@@ -204,7 +199,6 @@ private static nint findSucc(this ptr<addrRanges> _addr_a, System.UIntPtr addr) 
             // We already checked i, so pick the next
             // one.
             bot = i + 1;
-
         }
     } 
     // There are top-bot candidates left, so
@@ -222,7 +216,6 @@ private static nint findSucc(this ptr<addrRanges> _addr_a, System.UIntPtr addr) 
         i = i__prev1;
     }
     return top;
-
 }
 
 // findAddrGreaterEqual returns the smallest address represented by a
@@ -246,7 +239,6 @@ private static (System.UIntPtr, bool) findAddrGreaterEqual(this ptr<addrRanges> 
         return (a.ranges[i].@base.addr(), true);
     }
     return (0, false);
-
 }
 
 // contains returns true if a covers the address addr.
@@ -258,7 +250,6 @@ private static bool contains(this ptr<addrRanges> _addr_a, System.UIntPtr addr) 
         return false;
     }
     return a.ranges[i - 1].contains(addr);
-
 }
 
 // add inserts a new address range to a.
@@ -293,19 +284,16 @@ private static void add(this ptr<addrRanges> _addr_a, addrRange r) {
         // Delete a.ranges[i].
         copy(a.ranges[(int)i..], a.ranges[(int)i + 1..]);
         a.ranges = a.ranges[..(int)len(a.ranges) - 1];
-
     }
     else if (coalescesDown) { 
         // We have a neighbor at a lower address only and it borders us.
         // Merge the new space into a.ranges[i-1].
         a.ranges[i - 1].limit = r.limit;
-
     }
     else if (coalescesUp) { 
         // We have a neighbor at a higher address only and it borders us.
         // Merge the new space into a.ranges[i].
         a.ranges[i].@base = r.@base;
-
     }
     else
  { 
@@ -325,7 +313,6 @@ private static void add(this ptr<addrRanges> _addr_a, addrRange r) {
             // Copy in the old array, but make space for the new range.
             copy(a.ranges[..(int)i], oldRanges[..(int)i]);
             copy(a.ranges[(int)i + 1..], oldRanges[(int)i..]);
-
         }
         else
  {
@@ -333,10 +320,8 @@ private static void add(this ptr<addrRanges> _addr_a, addrRange r) {
             copy(a.ranges[(int)i + 1..], a.ranges[(int)i..]);
         }
         a.ranges[i] = r;
-
     }
     a.totalBytes += r.size();
-
 }
 
 // removeLast removes and returns the highest-addressed contiguous range
@@ -359,7 +344,6 @@ private static addrRange removeLast(this ptr<addrRanges> _addr_a, System.UIntPtr
     a.ranges = a.ranges[..(int)len(a.ranges) - 1];
     a.totalBytes -= size;
     return r;
-
 }
 
 // removeGreaterEqual removes the ranges of a which are above addr, and additionally
@@ -373,7 +357,6 @@ private static void removeGreaterEqual(this ptr<addrRanges> _addr_a, System.UInt
         a.totalBytes = 0;
         a.ranges = a.ranges[..(int)0];
         return ;
-
     }
     var removed = uintptr(0);
     {
@@ -402,15 +385,12 @@ private static void removeGreaterEqual(this ptr<addrRanges> _addr_a, System.UInt
                 removed -= r.size();
                 a.ranges[pivot - 1] = r;
             }
-
         }
         r = r__prev1;
 
     }
-
     a.ranges = a.ranges[..(int)pivot];
     a.totalBytes -= removed;
-
 }
 
 // cloneInto makes a deep clone of a's state into b, re-using
@@ -425,12 +405,10 @@ private static void cloneInto(this ptr<addrRanges> _addr_a, ptr<addrRanges> _add
         ranges.len = 0;
         ranges.cap = cap(a.ranges);
         ranges.array = (notInHeap.val)(persistentalloc(@unsafe.Sizeof(new addrRange()) * uintptr(ranges.cap), sys.PtrSize, b.sysStat));
-
     }
     b.ranges = b.ranges[..(int)len(a.ranges)];
     b.totalBytes = a.totalBytes;
     copy(b.ranges, a.ranges);
-
 }
 
 } // end runtime_package

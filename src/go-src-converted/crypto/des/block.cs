@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package des -- go2cs converted at 2022 March 06 22:19:18 UTC
+// package des -- go2cs converted at 2022 March 13 05:34:14 UTC
 // import "crypto/des" ==> using des = go.crypto.des_package
 // Original source: C:\Program Files\Go\src\crypto\des\block.go
-using binary = go.encoding.binary_package;
-using sync = go.sync_package;
-
 namespace go.crypto;
+
+using binary = encoding.binary_package;
+using sync = sync_package;
 
 public static partial class des_package {
 
@@ -33,7 +33,6 @@ private static void cryptBlock(slice<ulong> subkeys, slice<byte> dst, slice<byte
 
             i = i__prev1;
         }
-
     } {
         {
             nint i__prev1 = i;
@@ -44,7 +43,6 @@ private static void cryptBlock(slice<ulong> subkeys, slice<byte> dst, slice<byte
 
             i = i__prev1;
         }
-
     }
     left = (left << 31) | (left >> 1);
     right = (right << 31) | (right >> 1); 
@@ -52,7 +50,6 @@ private static void cryptBlock(slice<ulong> subkeys, slice<byte> dst, slice<byte
     // switch left & right and perform final permutation
     var preOutput = (uint64(right) << 32) | uint64(left);
     binary.BigEndian.PutUint64(dst, permuteFinalBlock(preOutput));
-
 }
 
 // Encrypt one block from src into dst, using the subkeys.
@@ -121,12 +118,8 @@ private static void initFeistelBox() {
                 f = (f << 1) | (f >> 31);
 
                 feistelBox[s][t] = uint32(f);
-
             }
-
-
         }
-
     }
 }
 
@@ -196,7 +189,6 @@ private static ulong permuteInitialBlock(ulong block) {
     // 3 11 19 27 35 43 51 59
     // 1  9 17 25 33 41 49 57
     return block;
-
 }
 
 // permuteInitialBlock is equivalent to the permutation defined
@@ -223,7 +215,6 @@ private static ulong permuteFinalBlock(ulong block) {
     b2 = block << 48;
     block ^= b1 ^ b2 ^ b1 << 48 ^ b2 >> 48;
     return block;
-
 }
 
 // creates 16 28-bit blocks rotated according
@@ -239,10 +230,8 @@ private static slice<uint> ksRotate(uint @in) {
         var right = (last << 4) >> (int)((32 - ksRotations[i]));
         out[i] = left | right;
         last = out[i];
-
     }
     return ;
-
 }
 
 // creates 16 56-bit subkeys from the original key
@@ -265,9 +254,7 @@ private static void generateSubkeys(this ptr<desCipher> _addr_c, slice<byte> key
         var pc2Input = uint64(leftRotations[i]) << 28 | uint64(rightRotations[i]); 
         // apply PC2 permutation to 7 byte input
         c.subkeys[i] = unpack(permuteBlock(pc2Input, permutedChoice2[..]));
-
     }
-
 }
 
 // Expand 48-bit input to 64-bit, with each 6-bit block padded by extra two bits at the top.

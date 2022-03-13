@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:15:50 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:47 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\hosts.go
-using bytealg = go.@internal.bytealg_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using sync = sync_package;
+using time = time_package;
 
 public static partial class net_package {
 
@@ -31,7 +31,6 @@ private static @string parseLiteralIP(@string addr) {
         return ip.String();
     }
     return ip.String() + "%" + zone;
-
 }
 
 // hosts contains known host entries.
@@ -75,17 +74,14 @@ private static void readHosts() {
                 i = i__prev1;
 
             }
-
             var f = getFields(line);
             if (len(f) < 2) {
                 continue;
             }
-
             var addr = parseLiteralIP(f[0]);
             if (addr == "") {
                 continue;
             }
-
             {
                 var i__prev2 = i;
 
@@ -101,7 +97,6 @@ private static void readHosts() {
 
                 i = i__prev2;
             }
-
         }
     } 
     // Update the data cache.
@@ -112,7 +107,6 @@ private static void readHosts() {
     hosts.mtime = mtime;
     hosts.size = size;
     file.close();
-
 }
 
 // lookupStaticHost looks up the addresses for the given host from /etc/hosts.
@@ -135,10 +129,8 @@ private static slice<@string> lookupStaticHost(@string host) => func((defer, _, 
             }
 
         }
-
     }
     return null;
-
 });
 
 // lookupStaticAddr looks up the hosts for the given address from /etc/hosts.
@@ -161,10 +153,8 @@ private static slice<@string> lookupStaticAddr(@string addr) => func((defer, _, 
             }
 
         }
-
     }
     return null;
-
 });
 
 } // end net_package

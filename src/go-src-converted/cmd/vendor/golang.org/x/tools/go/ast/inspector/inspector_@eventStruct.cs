@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:02 UTC
+//     Generated on 2022 March 13 06:42:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace ast
 {
     public static partial class inspector_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct @event
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace ast
             public static implicit operator @event(NilType nil) => default(@event);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static @event @event_cast(dynamic value)
         {
             return new @event(value.node, value.typ, value.index);

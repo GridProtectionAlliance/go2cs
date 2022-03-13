@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2022 March 06 22:21:20 UTC
+// package http -- go2cs converted at 2022 March 13 05:36:28 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\cookie.go
-using log = go.log_package;
-using net = go.net_package;
-using ascii = go.net.http.@internal.ascii_package;
-using textproto = go.net.textproto_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.net;
 
+using log = log_package;
+using net = net_package;
+using ascii = net.http.@internal.ascii_package;
+using textproto = net.textproto_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// A Cookie represents an HTTP cookie as sent in the Set-Cookie header of an
+// HTTP response or the Cookie header of an HTTP request.
+//
+// See https://tools.ietf.org/html/rfc6265 for details.
+
+using System;
 public static partial class http_package {
 
-    // A Cookie represents an HTTP cookie as sent in the Set-Cookie header of an
-    // HTTP response or the Cookie header of an HTTP request.
-    //
-    // See https://tools.ietf.org/html/rfc6265 for details.
 public partial struct Cookie {
     public @string Name;
     public @string Value;
@@ -55,7 +56,6 @@ public static readonly SameSite SameSiteDefaultMode = iota + 1;
 public static readonly var SameSiteLaxMode = 0;
 public static readonly var SameSiteStrictMode = 1;
 public static readonly var SameSiteNoneMode = 2;
-
 
 // readSetCookies parses all "Set-Cookie" values from
 // the header h and returns the successfully parsed Cookies.
@@ -104,18 +104,15 @@ private static slice<ptr<Cookie>> readSetCookies(Header h) {
                 j = j__prev1;
 
             }
-
             var (lowerAttr, isASCII) = ascii.ToLower(attr);
             if (!isASCII) {
                 continue;
             }
-
             val, ok = parseCookieValue(val, false);
             if (!ok) {
                 c.Unparsed = append(c.Unparsed, parts[i]);
                 continue;
             }
-
             switch (lowerAttr) {
                 case "samesite": 
                     var (lowerVal, ascii) = ascii.ToLower(val);
@@ -138,7 +135,6 @@ private static slice<ptr<Cookie>> readSetCookies(Header h) {
                             break;
                     }
                     continue;
-
                     break;
                 case "secure": 
                     c.Secure = true;
@@ -182,12 +178,9 @@ private static slice<ptr<Cookie>> readSetCookies(Header h) {
                     break;
             }
             c.Unparsed = append(c.Unparsed, parts[i]);
-
         }
         cookies = append(cookies, c);
-
     }    return cookies;
-
 }
 
 // SetCookie adds a Set-Cookie header to the provided ResponseWriter's headers.
@@ -203,7 +196,6 @@ public static void SetCookie(ResponseWriter w, ptr<Cookie> _addr_cookie) {
             w.Header().Add("Set-Cookie", v);
         }
     }
-
 }
 
 // String returns the serialization of the cookie for use in a Cookie
@@ -238,10 +230,8 @@ private static @string String(this ptr<Cookie> _addr_c) {
             if (d[0] == '.') {
                 d = d[(int)1..];
             }
-
             b.WriteString("; Domain=");
             b.WriteString(d);
-
         }
         else
  {
@@ -274,7 +264,6 @@ private static @string String(this ptr<Cookie> _addr_c) {
     else if (c.SameSite == SameSiteStrictMode) 
         b.WriteString("; SameSite=Strict");
         return b.String();
-
 }
 
 // readCookies parses all "Cookie" values from the header h and
@@ -304,12 +293,10 @@ private static slice<ptr<Cookie>> readCookies(Header h, @string filter) {
                 }
 
             }
-
             part = textproto.TrimString(part);
             if (len(part) == 0) {
                 continue;
             }
-
             var name = part;
             @string val = "";
             {
@@ -320,26 +307,19 @@ private static slice<ptr<Cookie>> readCookies(Header h, @string filter) {
                 }
 
             }
-
             if (!isCookieNameValid(name)) {
                 continue;
             }
-
             if (filter != "" && filter != name) {
                 continue;
             }
-
             var (val, ok) = parseCookieValue(val, true);
             if (!ok) {
                 continue;
             }
-
             cookies = append(cookies, addr(new Cookie(Name:name,Value:val)));
-
         }
-
     }    return cookies;
-
 }
 
 // validCookieDomain reports whether v is a valid cookie domain-value.
@@ -351,14 +331,12 @@ private static bool validCookieDomain(@string v) {
         return true;
     }
     return false;
-
 }
 
 // validCookieExpires reports whether v is a valid cookie expires-value.
 private static bool validCookieExpires(time.Time t) { 
     // IETF RFC 6265 Section 5.1.1.5, the year must not be less than 1601
     return t.Year() >= 1601;
-
 }
 
 // isCookieDomainName reports whether s is a valid domain name or a valid
@@ -374,7 +352,6 @@ private static bool isCookieDomainName(@string s) {
     if (s[0] == '.') { 
         // A cookie a domain attribute may start with a leading dot.
         s = s[(int)1..];
-
     }
     var last = byte('.');
     var ok = false; // Ok once we've seen a letter.
@@ -407,13 +384,11 @@ private static bool isCookieDomainName(@string s) {
         else 
             return false;
                 last = c;
-
     }
     if (last == '-' || partlen > 63) {
         return false;
     }
     return ok;
-
 }
 
 private static var cookieNameSanitizer = strings.NewReplacer("\n", "-", "\r", "-");
@@ -442,7 +417,6 @@ private static @string sanitizeCookieValue(@string v) {
         return "\"" + v + "\"";
     }
     return v;
-
 }
 
 private static bool validCookieValueByte(byte b) {
@@ -491,13 +465,11 @@ private static @string sanitizeOrWarn(@string fieldName, Func<byte, bool> valid,
                 }
 
             }
-
         }
 
         i = i__prev1;
     }
     return string(buf);
-
 }
 
 private static (@string, bool) parseCookieValue(@string raw, bool allowDoubleQuote) {
@@ -514,7 +486,6 @@ private static (@string, bool) parseCookieValue(@string raw, bool allowDoubleQuo
         }
     }
     return (raw, true);
-
 }
 
 private static bool isCookieNameValid(@string raw) {
@@ -522,7 +493,6 @@ private static bool isCookieNameValid(@string raw) {
         return false;
     }
     return strings.IndexFunc(raw, isNotToken) < 0;
-
 }
 
 } // end http_package

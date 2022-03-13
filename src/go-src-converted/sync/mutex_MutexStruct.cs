@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:15 UTC
+//     Generated on 2022 March 13 05:24:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class sync_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Mutex
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator Mutex(NilType nil) => default(Mutex);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Mutex Mutex_cast(dynamic value)
         {
             return new Mutex(value.state, value.sema);

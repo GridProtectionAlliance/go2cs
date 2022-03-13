@@ -5,14 +5,14 @@
 //go:build dragonfly || freebsd || linux
 // +build dragonfly freebsd linux
 
-// package unix -- go2cs converted at 2022 March 06 22:12:54 UTC
+// package unix -- go2cs converted at 2022 March 13 05:27:49 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
 // Original source: C:\Program Files\Go\src\internal\syscall\unix\getrandom.go
-using atomic = go.sync.atomic_package;
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal.syscall;
+
+using atomic = sync.atomic_package;
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 
@@ -39,10 +39,8 @@ public static (nint, error) GetRandom(slice<byte> p, GetRandomFlag flags) {
             atomic.StoreInt32(_addr_getrandomUnsupported, 1);
         }
         return (0, error.As(errno)!);
-
     }
     return (int(r1), error.As(null!)!);
-
 }
 
 } // end unix_package

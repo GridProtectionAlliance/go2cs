@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 23:19:43 UTC
+// package @base -- go2cs converted at 2022 March 13 06:32:32 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\base\path.go
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+using System;
 
 public static partial class @base_package {
 
@@ -29,7 +28,6 @@ public static @string Cwd() {
         }
     });
     return cwd;
-
 }
 
 // ShortPath returns an absolute or relative name for path, whatever is shorter.
@@ -41,9 +39,7 @@ public static @string ShortPath(@string path) {
             return rel;
         }
     }
-
     return path;
-
 }
 
 // RelPaths returns a copy of paths with absolute paths
@@ -56,9 +52,7 @@ public static slice<@string> RelPaths(slice<@string> paths) {
             p = rel;
         }
         out = append(out, p);
-
     }    return out;
-
 }
 
 // IsTestFile reports whether the source file is a set of tests and should therefore
@@ -66,7 +60,6 @@ public static slice<@string> RelPaths(slice<@string> paths) {
 public static bool IsTestFile(@string file) { 
     // We don't cover tests, only the code they test.
     return strings.HasSuffix(file, "_test.go");
-
 }
 
 } // end @base_package

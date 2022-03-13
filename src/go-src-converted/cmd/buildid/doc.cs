@@ -15,7 +15,9 @@ the file to accurately record a content hash of the file.
 This tool is only intended for use by the go command or
 other build systems.
 */
-// package main -- go2cs converted at 2022 March 06 22:46:42 UTC
+
+// package main -- go2cs converted at 2022 March 13 05:57:56 UTC
 // Original source: C:\Program Files\Go\src\cmd\buildid\doc.go
+namespace go;
 
 } // end main_package

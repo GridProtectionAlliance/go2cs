@@ -63,27 +63,29 @@
 //
 // (There are a few other methods that do not match this pattern.)
 //
-// package regexp -- go2cs converted at 2022 March 06 22:23:48 UTC
+
+// package regexp -- go2cs converted at 2022 March 13 05:38:13 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Program Files\Go\src\regexp\regexp.go
-using bytes = go.bytes_package;
-using io = go.io_package;
-using syntax = go.regexp.syntax_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
 
+using bytes = bytes_package;
+using io = io_package;
+using syntax = regexp.syntax_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Regexp is the representation of a compiled regular expression.
+// A Regexp is safe for concurrent use by multiple goroutines,
+// except for configuration methods, such as Longest.
+
+using System;
 public static partial class regexp_package {
 
-    // Regexp is the representation of a compiled regular expression.
-    // A Regexp is safe for concurrent use by multiple goroutines,
-    // except for configuration methods, such as Longest.
 public partial struct Regexp {
     public @string expr; // as passed to Compile
     public ptr<syntax.Prog> prog; // compiled program
@@ -217,7 +219,6 @@ private static (ptr<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
         // IndexString to package bytes.
         regexp.prefixBytes = (slice<byte>)regexp.prefix;
         regexp.prefixRune, _ = utf8.DecodeRuneInString(regexp.prefix);
-
     }
     var n = len(prog.Inst);
     nint i = 0;
@@ -227,7 +228,6 @@ private static (ptr<Regexp>, error) compile(@string expr, syntax.Flags mode, boo
     regexp.mpool = i;
 
     return (_addr_regexp!, error.As(null!)!);
-
 }
 
 // Pools of *machine for use during (*Regexp).doExecute,
@@ -259,14 +259,12 @@ private static ptr<machine> get(this ptr<Regexp> _addr_re) {
     var n = matchSize[re.mpool];
     if (n == 0) { // large pool
         n = len(re.prog.Inst);
-
     }
     if (len(m.q0.sparse) < n) {
         m.q0 = new queue(make([]uint32,n),make([]entry,0,n));
         m.q1 = new queue(make([]uint32,n),make([]entry,0,n));
     }
     return _addr_m!;
-
 }
 
 // put returns a machine to the correct machine pool.
@@ -330,8 +328,7 @@ private static nint minInputLen(ptr<syntax.Regexp> _addr_re) {
         return l;
     else 
         return 0;
-    
-}
+    }
 
 // MustCompile is like Compile but panics if the expression cannot be parsed.
 // It simplifies safe initialization of global variables holding compiled regular
@@ -342,7 +339,6 @@ public static ptr<Regexp> MustCompile(@string str) => func((_, panic, _) => {
         panic("regexp: Compile(" + quote(str) + "): " + err.Error());
     }
     return _addr_regexp!;
-
 });
 
 // MustCompilePOSIX is like CompilePOSIX but panics if the expression cannot be parsed.
@@ -354,7 +350,6 @@ public static ptr<Regexp> MustCompilePOSIX(@string str) => func((_, panic, _) =>
         panic("regexp: CompilePOSIX(" + quote(str) + "): " + err.Error());
     }
     return _addr_regexp!;
-
 });
 
 private static @string quote(@string s) {
@@ -362,7 +357,6 @@ private static @string quote(@string s) {
         return "`" + s + "`";
     }
     return strconv.Quote(s);
-
 }
 
 // NumSubexp returns the number of parenthesized subexpressions in this Regexp.
@@ -401,7 +395,6 @@ private static nint SubexpIndex(this ptr<Regexp> _addr_re, @string name) {
         }
     }
     return -1;
-
 }
 
 private static readonly int endOfText = -1;
@@ -436,10 +429,8 @@ private static (int, nint) step(this ptr<inputString> _addr_i, nint pos) {
             return (rune(c), 1);
         }
         return utf8.DecodeRuneInString(i.str[(int)pos..]);
-
     }
     return (endOfText, 0);
-
 }
 
 private static bool canCheckPrefix(this ptr<inputString> _addr_i) {
@@ -481,7 +472,6 @@ private static lazyFlag context(this ptr<inputString> _addr_i, nint pos) {
         }
     }
     return newLazyFlag(r1, r2);
-
 }
 
 // inputBytes scans a byte slice.
@@ -500,10 +490,8 @@ private static (int, nint) step(this ptr<inputBytes> _addr_i, nint pos) {
             return (rune(c), 1);
         }
         return utf8.DecodeRune(i.str[(int)pos..]);
-
     }
     return (endOfText, 0);
-
 }
 
 private static bool canCheckPrefix(this ptr<inputBytes> _addr_i) {
@@ -545,7 +533,6 @@ private static lazyFlag context(this ptr<inputBytes> _addr_i, nint pos) {
         }
     }
     return newLazyFlag(r1, r2);
-
 }
 
 // inputReader scans a RuneReader.
@@ -570,7 +557,6 @@ private static (int, nint) step(this ptr<inputReader> _addr_i, nint pos) {
     }
     i.pos += w;
     return (r, w);
-
 }
 
 private static bool canCheckPrefix(this ptr<inputReader> _addr_i) {
@@ -646,7 +632,6 @@ public static (bool, error) MatchReader(@string pattern, io.RuneReader r) {
         return (false, error.As(err)!);
     }
     return (re.MatchReader(r), error.As(null!)!);
-
 }
 
 // MatchString reports whether the string s
@@ -661,7 +646,6 @@ public static (bool, error) MatchString(@string pattern, @string s) {
         return (false, error.As(err)!);
     }
     return (re.MatchString(s), error.As(null!)!);
-
 }
 
 // Match reports whether the byte slice b
@@ -676,7 +660,6 @@ public static (bool, error) Match(@string pattern, slice<byte> b) {
         return (false, error.As(err)!);
     }
     return (re.Match(b), error.As(null!)!);
-
 }
 
 // ReplaceAllString returns a copy of src, replacing matches of the Regexp
@@ -689,11 +672,8 @@ private static @string ReplaceAllString(this ptr<Regexp> _addr_re, @string src, 
     if (strings.Contains(repl, "$")) {
         n = 2 * (re.numSubexp + 1);
     }
-    var b = re.replaceAll(null, src, n, (dst, match) => {
-        return re.expand(dst, repl, null, src, match);
-    });
+    var b = re.replaceAll(null, src, n, (dst, match) => re.expand(dst, repl, null, src, match));
     return string(b);
-
 }
 
 // ReplaceAllLiteralString returns a copy of src, replacing matches of the Regexp
@@ -702,9 +682,7 @@ private static @string ReplaceAllString(this ptr<Regexp> _addr_re, @string src, 
 private static @string ReplaceAllLiteralString(this ptr<Regexp> _addr_re, @string src, @string repl) {
     ref Regexp re = ref _addr_re.val;
 
-    return string(re.replaceAll(null, src, 2, (dst, match) => {
-        return append(dst, repl);
-    }));
+    return string(re.replaceAll(null, src, 2, (dst, match) => append(dst, repl)));
 }
 
 // ReplaceAllStringFunc returns a copy of src in which all matches of the
@@ -714,9 +692,7 @@ private static @string ReplaceAllLiteralString(this ptr<Regexp> _addr_re, @strin
 private static @string ReplaceAllStringFunc(this ptr<Regexp> _addr_re, @string src, Func<@string, @string> repl) {
     ref Regexp re = ref _addr_re.val;
 
-    var b = re.replaceAll(null, src, 2, (dst, match) => {
-        return append(dst, repl(src[(int)match[0]..(int)match[1]]));
-    });
+    var b = re.replaceAll(null, src, 2, (dst, match) => append(dst, repl(src[(int)match[0]..(int)match[1]])));
     return string(b);
 }
 
@@ -771,7 +747,6 @@ private static slice<byte> replaceAll(this ptr<Regexp> _addr_re, slice<byte> bsr
             // This clause is only needed at the end of the input
             // string. In that case, DecodeRuneInString returns width=0.
             searchPos++;
-
         }
         else
  {
@@ -788,7 +763,6 @@ private static slice<byte> replaceAll(this ptr<Regexp> _addr_re, slice<byte> bsr
         buf = append(buf, src[(int)lastMatchEnd..]);
     }
     return buf;
-
 }
 
 // ReplaceAll returns a copy of src, replacing matches of the Regexp
@@ -807,10 +781,8 @@ private static slice<byte> ReplaceAll(this ptr<Regexp> _addr_re, slice<byte> src
             srepl = string(repl);
         }
         return re.expand(dst, srepl, src, "", match);
-
     });
     return b;
-
 }
 
 // ReplaceAllLiteral returns a copy of src, replacing matches of the Regexp
@@ -819,9 +791,7 @@ private static slice<byte> ReplaceAll(this ptr<Regexp> _addr_re, slice<byte> src
 private static slice<byte> ReplaceAllLiteral(this ptr<Regexp> _addr_re, slice<byte> src, slice<byte> repl) {
     ref Regexp re = ref _addr_re.val;
 
-    return re.replaceAll(src, "", 2, (dst, match) => {
-        return append(dst, repl);
-    });
+    return re.replaceAll(src, "", 2, (dst, match) => append(dst, repl));
 }
 
 // ReplaceAllFunc returns a copy of src in which all matches of the
@@ -831,9 +801,7 @@ private static slice<byte> ReplaceAllLiteral(this ptr<Regexp> _addr_re, slice<by
 private static slice<byte> ReplaceAllFunc(this ptr<Regexp> _addr_re, slice<byte> src, Func<slice<byte>, slice<byte>> repl) {
     ref Regexp re = ref _addr_re.val;
 
-    return re.replaceAll(src, "", 2, (dst, match) => {
-        return append(dst, repl(src[(int)match[0]..(int)match[1]]));
-    });
+    return re.replaceAll(src, "", 2, (dst, match) => append(dst, repl(src[(int)match[0]..(int)match[1]])));
 }
 
 // Bitmap used by func special to check whether a character needs to be escaped.
@@ -876,10 +844,8 @@ public static @string QuoteMeta(@string s) {
         }
         b[j] = s[i];
         j++;
-
     }
     return string(b[..(int)j]);
-
 }
 
 // The number of capture values in the program may correspond
@@ -893,14 +859,12 @@ private static slice<nint> pad(this ptr<Regexp> _addr_re, slice<nint> a) {
     if (a == null) { 
         // No match.
         return null;
-
     }
     nint n = (1 + re.numSubexp) * 2;
     while (len(a) < n) {
         a = append(a, -1);
     }
     return a;
-
 }
 
 // allMatches calls deliver at most n times
@@ -934,9 +898,7 @@ private static void allMatches(this ptr<Regexp> _addr_re, @string s, slice<byte>
                     // We don't allow an empty match right
                     // after a previous match, so ignore it.
                     accept = false;
-
                 }
-
                 nint width = default; 
                 // TODO: use step()
                 if (b == null) {
@@ -946,7 +908,6 @@ private static void allMatches(this ptr<Regexp> _addr_re, @string s, slice<byte>
  {
                     _, width = utf8.DecodeRune(b[(int)pos..(int)end]);
                 }
-
                 if (width > 0) {
                     pos += width;
                 }
@@ -954,23 +915,19 @@ private static void allMatches(this ptr<Regexp> _addr_re, @string s, slice<byte>
  {
                     pos = end + 1;
                 }
-
             }
             else
  {
                 pos = matches[1];
             }
-
             prevMatchEnd = matches[1];
 
             if (accept) {
                 deliver(re.pad(matches));
                 i++;
             }
-
         }
     }
-
 }
 
 // Find returns a slice holding the text of the leftmost match in b of the regular expression.
@@ -984,7 +941,6 @@ private static slice<byte> Find(this ptr<Regexp> _addr_re, slice<byte> b) {
         return null;
     }
     return b.slice(a[0], a[1], a[1]);
-
 }
 
 // FindIndex returns a two-element slice of integers defining the location of
@@ -1000,7 +956,6 @@ private static slice<nint> FindIndex(this ptr<Regexp> _addr_re, slice<byte> b) {
         return null;
     }
     return a[(int)0..(int)2];
-
 }
 
 // FindString returns a string holding the text of the leftmost match in s of the regular
@@ -1017,7 +972,6 @@ private static @string FindString(this ptr<Regexp> _addr_re, @string s) {
         return "";
     }
     return s[(int)a[0]..(int)a[1]];
-
 }
 
 // FindStringIndex returns a two-element slice of integers defining the
@@ -1033,7 +987,6 @@ private static slice<nint> FindStringIndex(this ptr<Regexp> _addr_re, @string s)
         return null;
     }
     return a[(int)0..(int)2];
-
 }
 
 // FindReaderIndex returns a two-element slice of integers defining the
@@ -1050,7 +1003,6 @@ private static slice<nint> FindReaderIndex(this ptr<Regexp> _addr_re, io.RuneRea
         return null;
     }
     return a[(int)0..(int)2];
-
 }
 
 // FindSubmatch returns a slice of slices holding the text of the leftmost
@@ -1072,7 +1024,6 @@ private static slice<slice<byte>> FindSubmatch(this ptr<Regexp> _addr_re, slice<
             ret[i] = b.slice(a[2 * i], a[2 * i + 1], a[2 * i + 1]);
         }
     }    return ret;
-
 }
 
 // Expand appends template to dst and returns the result; during the
@@ -1122,7 +1073,6 @@ private static slice<byte> expand(this ptr<Regexp> _addr_re, slice<byte> dst, @s
             dst = append(dst, '$');
             template = template[(int)2..];
             continue;
-
         }
         var (name, num, rest, ok) = extract(template);
         if (!ok) { 
@@ -1130,7 +1080,6 @@ private static slice<byte> expand(this ptr<Regexp> _addr_re, slice<byte> dst, @s
             dst = append(dst, '$');
             template = template[(int)1..];
             continue;
-
         }
         template = rest;
         if (num >= 0) {
@@ -1142,9 +1091,7 @@ private static slice<byte> expand(this ptr<Regexp> _addr_re, slice<byte> dst, @s
  {
                     dst = append(dst, src[(int)match[2 * num]..(int)match[2 * num + 1]]);
                 }
-
             }
-
         }
         else
  {
@@ -1162,11 +1109,8 @@ private static slice<byte> expand(this ptr<Regexp> _addr_re, slice<byte> dst, @s
  {
                             dst = append(dst, src[(int)match[2 * i]..(int)match[2 * i + 1]]);
                         }
-
                         break;
-
                     }
-
                 }
 
                 i = i__prev2;
@@ -1175,7 +1119,6 @@ private static slice<byte> expand(this ptr<Regexp> _addr_re, slice<byte> dst, @s
     }
     dst = append(dst, template);
     return dst;
-
 }
 
 // extract returns the name from a leading "$name" or "${name}" in str.
@@ -1205,22 +1148,18 @@ private static (@string, nint, @string, bool) extract(@string str) {
             break;
         }
         i += size;
-
     }
     if (i == 0) { 
         // empty name is not okay
         return ;
-
     }
     name = str[..(int)i];
     if (brace) {
         if (i >= len(str) || str[i] != '}') { 
             // missing closing brace
             return ;
-
         }
         i++;
-
     }
     num = 0;
     {
@@ -1243,7 +1182,6 @@ private static (@string, nint, @string, bool) extract(@string str) {
     rest = str[(int)i..];
     ok = true;
     return ;
-
 }
 
 // FindSubmatchIndex returns a slice holding the index pairs identifying the
@@ -1276,7 +1214,6 @@ private static slice<@string> FindStringSubmatch(this ptr<Regexp> _addr_re, @str
             ret[i] = s[(int)a[2 * i]..(int)a[2 * i + 1]];
         }
     }    return ret;
-
 }
 
 // FindStringSubmatchIndex returns a slice holding the index pairs
@@ -1325,10 +1262,8 @@ private static slice<slice<byte>> FindAll(this ptr<Regexp> _addr_re, slice<byte>
             result = make_slice<slice<byte>>(0, startSize);
         }
         result = append(result, b.slice(match[0], match[1], match[1]));
-
     });
     return result;
-
 }
 
 // FindAllIndex is the 'All' version of FindIndex; it returns a slice of all
@@ -1347,10 +1282,8 @@ private static slice<slice<nint>> FindAllIndex(this ptr<Regexp> _addr_re, slice<
             result = make_slice<slice<nint>>(0, startSize);
         }
         result = append(result, match[(int)0..(int)2]);
-
     });
     return result;
-
 }
 
 // FindAllString is the 'All' version of FindString; it returns a slice of all
@@ -1369,10 +1302,8 @@ private static slice<@string> FindAllString(this ptr<Regexp> _addr_re, @string s
             result = make_slice<@string>(0, startSize);
         }
         result = append(result, s[(int)match[0]..(int)match[1]]);
-
     });
     return result;
-
 }
 
 // FindAllStringIndex is the 'All' version of FindStringIndex; it returns a
@@ -1391,10 +1322,8 @@ private static slice<slice<nint>> FindAllStringIndex(this ptr<Regexp> _addr_re, 
             result = make_slice<slice<nint>>(0, startSize);
         }
         result = append(result, match[(int)0..(int)2]);
-
     });
     return result;
-
 }
 
 // FindAllSubmatch is the 'All' version of FindSubmatch; it returns a slice
@@ -1418,10 +1347,8 @@ private static slice<slice<slice<byte>>> FindAllSubmatch(this ptr<Regexp> _addr_
                 slice[j] = b.slice(match[2 * j], match[2 * j + 1], match[2 * j + 1]);
             }
         }        result = append(result, slice);
-
     });
     return result;
-
 }
 
 // FindAllSubmatchIndex is the 'All' version of FindSubmatchIndex; it returns
@@ -1440,10 +1367,8 @@ private static slice<slice<nint>> FindAllSubmatchIndex(this ptr<Regexp> _addr_re
             result = make_slice<slice<nint>>(0, startSize);
         }
         result = append(result, match);
-
     });
     return result;
-
 }
 
 // FindAllStringSubmatch is the 'All' version of FindStringSubmatch; it
@@ -1467,10 +1392,8 @@ private static slice<slice<@string>> FindAllStringSubmatch(this ptr<Regexp> _add
                 slice[j] = s[(int)match[2 * j]..(int)match[2 * j + 1]];
             }
         }        result = append(result, slice);
-
     });
     return result;
-
 }
 
 // FindAllStringSubmatchIndex is the 'All' version of
@@ -1490,10 +1413,8 @@ private static slice<slice<nint>> FindAllStringSubmatchIndex(this ptr<Regexp> _a
             result = make_slice<slice<nint>>(0, startSize);
         }
         result = append(result, match);
-
     });
     return result;
-
 }
 
 // Split slices s into substrings separated by the expression and returns a slice of
@@ -1534,12 +1455,10 @@ private static slice<@string> Split(this ptr<Regexp> _addr_re, @string s, nint n
             strings = append(strings, s[(int)beg..(int)end]);
         }
         beg = match[1];
-
     }    if (end != len(s)) {
         strings = append(strings, s[(int)beg..]);
     }
     return strings;
-
 }
 
 } // end regexp_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:34 UTC
+//     Generated on 2022 March 13 06:33:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
 {
     public static partial class loader_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct extSymPayload
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace @internal
             public static implicit operator extSymPayload(NilType nil) => default(extSymPayload);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static extSymPayload extSymPayload_cast(dynamic value)
         {
             return new extSymPayload(value.name, value.size, value.ver, value.kind, value.objidx, value.relocs, value.data, value.auxs);

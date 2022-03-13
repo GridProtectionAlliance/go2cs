@@ -4,15 +4,12 @@
 
 // This file contains the test for canonical struct tags.
 
-// package structtag -- go2cs converted at 2022 March 06 23:35:21 UTC
+// package structtag -- go2cs converted at 2022 March 13 06:43:18 UTC
 // import "cmd/vet/testdata/structtag" ==> using structtag = go.cmd.vet.testdata.structtag_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\structtag\structtag.go
-
-using System.ComponentModel;
-
-
 namespace go.cmd.vet.testdata;
 
+using System.ComponentModel;
 public static partial class structtag_package {
 
 public partial struct StructTagTest {

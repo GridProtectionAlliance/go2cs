@@ -8,37 +8,39 @@
 // This is not a general tool for code-signing. It is made
 // specifically for the Go toolchain. It uses the same
 // ad-hoc signing algorithm as the Darwin linker.
-// package codesign -- go2cs converted at 2022 March 06 22:46:42 UTC
+
+// package codesign -- go2cs converted at 2022 March 13 05:57:56 UTC
 // import "cmd/internal/codesign" ==> using codesign = go.cmd.@internal.codesign_package
 // Original source: C:\Program Files\Go\src\cmd\internal\codesign\codesign.go
-using sha256 = go.crypto.sha256_package;
-using macho = go.debug.macho_package;
-using binary = go.encoding.binary_package;
-using io = go.io_package;
-
 namespace go.cmd.@internal;
+
+using sha256 = crypto.sha256_package;
+using macho = debug.macho_package;
+using binary = encoding.binary_package;
+using io = io_package;
+
+
+// Code signature layout.
+//
+// The code signature is a block of bytes that contains
+// a SuperBlob, which contains one or more Blobs. For ad-hoc
+// signing, a single CodeDirectory Blob suffices.
+//
+// A SuperBlob starts with its header (the binary representation
+// of the SuperBlob struct), followed by a list of (in our case,
+// one) Blobs (offset and size). A CodeDirectory Blob starts
+// with its head (the binary representation of CodeDirectory struct),
+// followed by the identifier (as a C string) and the hashes, at
+// the corresponding offsets.
+//
+// The signature data must be included in the __LINKEDIT segment.
+// In the Mach-O file header, an LC_CODE_SIGNATURE load command
+// points to the data.
 
 public static partial class codesign_package {
 
-    // Code signature layout.
-    //
-    // The code signature is a block of bytes that contains
-    // a SuperBlob, which contains one or more Blobs. For ad-hoc
-    // signing, a single CodeDirectory Blob suffices.
-    //
-    // A SuperBlob starts with its header (the binary representation
-    // of the SuperBlob struct), followed by a list of (in our case,
-    // one) Blobs (offset and size). A CodeDirectory Blob starts
-    // with its head (the binary representation of CodeDirectory struct),
-    // followed by the identifier (as a C string) and the hashes, at
-    // the corresponding offsets.
-    //
-    // The signature data must be included in the __LINKEDIT segment.
-    // In the Mach-O file header, an LC_CODE_SIGNATURE load command
-    // points to the data.
 private static readonly nint pageSizeBits = 12;
 private static readonly nint pageSize = 1 << (int)(pageSizeBits);
-
 
 public static readonly nuint LC_CODE_SIGNATURE = 0x1d;
 
@@ -62,7 +64,6 @@ public static readonly nint CS_HASHTYPE_SHA1 = 1;
 public static readonly nint CS_HASHTYPE_SHA256 = 2;
 public static readonly nint CS_HASHTYPE_SHA256_TRUNCATED = 3;
 public static readonly nint CS_HASHTYPE_SHA384 = 4;
-
 
 public static readonly nuint CS_EXECSEG_MAIN_BINARY = 0x1; // executable segment denotes main binary
 public static readonly nuint CS_EXECSEG_ALLOW_UNSIGNED = 0x10; // allow unsigned pages (for debugging)
@@ -187,7 +188,6 @@ public static (CodeSigCmd, bool) FindCodeSigCmd(ptr<macho.File> _addr_f) {
             return (new CodeSigCmd(cmd,get32(data[4:]),get32(data[8:]),get32(data[12:]),), true);
         }
     }    return (new CodeSigCmd(), false);
-
 }
 
 private static slice<byte> put32be(slice<byte> b, uint x) {
@@ -270,9 +270,7 @@ public static void Sign(slice<byte> @out, io.Reader data, @string id, long codeS
         h.Write(buf[..(int)n]);
         var b = h.Sum(null);
         outp = puts(outp, b[..]);
-
     }
-
 });
 
 } // end codesign_package

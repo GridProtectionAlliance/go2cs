@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:59 UTC
+//     Generated on 2022 March 13 05:29:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace hash
 {
     public static partial class maphash_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Seed
         {
             // Constructors
@@ -54,7 +54,7 @@ namespace hash
             public static implicit operator Seed(NilType nil) => default(Seed);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Seed Seed_cast(dynamic value)
         {
             return new Seed(value.s);

@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:21 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:50 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\types.go
-using bytes = go.bytes_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-using src = go.cmd.@internal.src_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+using src = cmd.@internal.src_package;
+using strings = strings_package;
+using System;
 
 public static partial class noder_package {
 
@@ -32,7 +31,6 @@ private static ptr<types.Pkg> pkg(this ptr<irgen> _addr_g, ptr<types2.Package> _
     else if (pkg == types2.Unsafe) 
         return _addr_ir.Pkgs.Unsafe!;
         return _addr_types.NewPkg(pkg.Path(), pkg.Name())!;
-
 }
 
 // typ converts a types2.Type to a types.Type, including caching of previously
@@ -51,7 +49,6 @@ private static ptr<types.Type> typ(this ptr<irgen> _addr_g, types2.Type typ) {
         types.CheckSize(res);
     }
     return _addr_res!;
-
 }
 
 // typ1 is like typ, but doesn't call CheckSize, since it may have only
@@ -70,7 +67,6 @@ private static ptr<types.Type> typ1(this ptr<irgen> _addr_g, types2.Type typ) {
         g.typs[typ] = res;
     }
     return _addr_res!;
-
 }
 
 // instTypeName2 creates a name for an instantiated type, base on the type args
@@ -88,13 +84,10 @@ private static @string instTypeName2(@string name, slice<types2.Type> targs) {
             // list, but we don't want spaces in our actual type names
             // and method/function names derived from them.
             tname = strings.Replace(tname, ", ", ",", -1);
-
         }
         b.WriteString(tname);
-
     }    b.WriteByte(']');
     return b.String();
-
 }
 
 // typ0 converts a types2.Type to a types.Type, but doesn't do the caching check
@@ -130,7 +123,6 @@ private static ptr<types.Type> typ0(this ptr<irgen> _addr_g, types2.Type typ) =>
                     // so use the type we previously created, since there
                     // must be exactly one instance of a defined type.
                     return _addr_s.Def.Type()!;
-
                 } 
 
                 // Create a forwarding type first and put it in the g.typs
@@ -172,14 +164,11 @@ private static ptr<types.Type> typ0(this ptr<irgen> _addr_g, types2.Type typ) =>
                 ntyp.SetUnderlying(g.typ1(typ.Underlying()));
                 g.fillinMethods(typ, ntyp);
                 return _addr_ntyp!;
-
             }
-
             var obj = g.obj(typ.Obj());
             if (obj.Op() != ir.OTYPE) {
                 @base.FatalfAt(obj.Pos(), "expected type: %L", obj);
             }
-
             return _addr_obj.Type()!;
             break;
         case ptr<types2.Array> typ:
@@ -241,16 +230,13 @@ private static ptr<types.Type> typ0(this ptr<irgen> _addr_g, types2.Type typ) =>
                             // doesn't resolve and it doesn't have any
                             // relevant methods.
                             continue;
-
                         }
 
                         t = t__prev1;
 
                     }
-
                     embeddeds[j] = types.NewField(src.NoXPos, null, g.typ1(e));
                     j++;
-
                 }
 
                 i = i__prev1;
@@ -317,7 +303,6 @@ private static ptr<types.Type> typ0(this ptr<irgen> _addr_g, types2.Type typ) =>
             break;
         }
     }
-
 });
 
 // fillinMethods fills in the method name nodes and types for a defined type. This
@@ -394,16 +379,11 @@ private static void fillinMethods(this ptr<irgen> _addr_g, ptr<types2.Named> _ad
                         // Do the substitution of the type
                         meth2.SetType(subst.typ(meth.Type()));
                         newsym.Def = meth2;
-
                     }
-
                     meth = meth2;
-
                 }
-
                 methods[i] = types.NewField(meth.Pos(), g.selector(m), meth.Type());
                 methods[i].Nname = meth;
-
             }
 
             i = i__prev1;
@@ -413,7 +393,6 @@ private static void fillinMethods(this ptr<irgen> _addr_g, ptr<types2.Named> _ad
         if (!ntyp.HasTParam()) { 
             // Generate all the methods for a new fully-instantiated type.
             g.instTypeList = append(g.instTypeList, ntyp);
-
         }
     }
 }
@@ -450,7 +429,6 @@ private static ptr<types.Type> signature(this ptr<irgen> _addr_g, ptr<types.Fiel
         }
 
         return _addr_fields!;
-
     };
     var @params = do(sig.Params());
     var results = do(sig.Results());
@@ -458,7 +436,6 @@ private static ptr<types.Type> signature(this ptr<irgen> _addr_g, ptr<types.Fiel
         params[len(params) - 1].SetIsDDD(true);
     }
     return _addr_types.NewSignature(g.tpkg(sig), recv, tparams, params, results)!;
-
 }
 
 private static ptr<types.Field> param(this ptr<irgen> _addr_g, ptr<types2.Var> _addr_v) {
@@ -478,9 +455,7 @@ private static ptr<types.Sym> sym(this ptr<irgen> _addr_g, types2.Object obj) {
             return _addr_g.pkg(obj.Pkg()).Lookup(obj.Name())!;
         }
     }
-
     return _addr_null!;
-
 }
 
 private static ptr<types.Sym> selector(this ptr<irgen> _addr_g, types2.Object obj) {
@@ -492,7 +467,6 @@ private static ptr<types.Sym> selector(this ptr<irgen> _addr_g, types2.Object ob
         pkg = types.LocalPkg;
     }
     return _addr_pkg.Lookup(name)!;
-
 }
 
 // tpkg returns the package that a function, interface, or struct type
@@ -518,7 +492,6 @@ private static ptr<types.Pkg> tpkg(this ptr<irgen> _addr_g, types2.Type typ) {
                     }
 
                 }
-
                 {
                     var @params = typ.Params();
 
@@ -527,7 +500,6 @@ private static ptr<types.Pkg> tpkg(this ptr<irgen> _addr_g, types2.Type typ) {
                     }
 
                 }
-
                 {
                     var results = typ.Results();
 
@@ -536,7 +508,6 @@ private static ptr<types.Pkg> tpkg(this ptr<irgen> _addr_g, types2.Type typ) {
                     }
 
                 }
-
                 break;
             case ptr<types2.Struct> typ:
                 if (typ.NumFields() > 0) {
@@ -550,7 +521,6 @@ private static ptr<types.Pkg> tpkg(this ptr<irgen> _addr_g, types2.Type typ) {
                 break;
         }
         return _addr_null!;
-
     };
 
     {
@@ -560,9 +530,7 @@ private static ptr<types.Pkg> tpkg(this ptr<irgen> _addr_g, types2.Type typ) {
             return _addr_g.pkg(obj.Pkg())!;
         }
     }
-
     return _addr_types.LocalPkg!;
-
 }
 
 private static ptr<types.Type> basic(this ptr<irgen> _addr_g, ptr<types2.Basic> _addr_typ) {
@@ -578,7 +546,6 @@ private static ptr<types.Type> basic(this ptr<irgen> _addr_g, ptr<types2.Basic> 
             break;
     }
     return _addr_basics[typ.Kind()].val!;
-
 }
 
 private static array<ptr<ptr<types.Type>>> basics = new array<ptr<ptr<types.Type>>>(InitKeyedValues<ptr<ptr<types.Type>>>((types2.Invalid, new(*types.Type)), (types2.Bool, &types.Types[types.TBOOL]), (types2.Int, &types.Types[types.TINT]), (types2.Int8, &types.Types[types.TINT8]), (types2.Int16, &types.Types[types.TINT16]), (types2.Int32, &types.Types[types.TINT32]), (types2.Int64, &types.Types[types.TINT64]), (types2.Uint, &types.Types[types.TUINT]), (types2.Uint8, &types.Types[types.TUINT8]), (types2.Uint16, &types.Types[types.TUINT16]), (types2.Uint32, &types.Types[types.TUINT32]), (types2.Uint64, &types.Types[types.TUINT64]), (types2.Uintptr, &types.Types[types.TUINTPTR]), (types2.Float32, &types.Types[types.TFLOAT32]), (types2.Float64, &types.Types[types.TFLOAT64]), (types2.Complex64, &types.Types[types.TCOMPLEX64]), (types2.Complex128, &types.Types[types.TCOMPLEX128]), (types2.String, &types.Types[types.TSTRING]), (types2.UnsafePointer, &types.Types[types.TUNSAFEPTR]), (types2.UntypedBool, &types.UntypedBool), (types2.UntypedInt, &types.UntypedInt), (types2.UntypedRune, &types.UntypedRune), (types2.UntypedFloat, &types.UntypedFloat), (types2.UntypedComplex, &types.UntypedComplex), (types2.UntypedString, &types.UntypedString), (types2.UntypedNil, &types.Types[types.TNIL])));

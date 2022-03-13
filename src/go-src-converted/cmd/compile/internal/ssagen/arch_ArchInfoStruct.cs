@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:09:45 UTC
+//     Generated on 2022 March 13 06:23:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace @internal
 {
     public static partial class ssagen_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ArchInfo
         {
             // Constructors
@@ -83,7 +83,7 @@ namespace @internal
             public static implicit operator ArchInfo(NilType nil) => default(ArchInfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ArchInfo ArchInfo_cast(dynamic value)
         {
             return new ArchInfo(ref value.LinkArch, value.REGSP, value.MAXWIDTH, value.SoftFloat, value.PadFrame, value.ZeroRange, value.Ginsnop, value.Ginsnopdefer, value.SSAMarkMoves, value.SSAGenValue, value.SSAGenBlock, value.LoadRegResults, value.SpillArgReg);

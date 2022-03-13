@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:54 UTC
+//     Generated on 2022 March 13 06:35:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace @internal
 {
     public static partial class trace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct mud
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator mud(NilType nil) => default(mud);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static mud mud_cast(dynamic value)
         {
             return new mud(value.sorted, value.unsorted, value.trackMass, value.trackBucket, value.trackSum, value.hist);

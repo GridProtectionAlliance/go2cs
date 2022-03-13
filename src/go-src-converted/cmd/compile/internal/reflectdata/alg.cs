@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflectdata -- go2cs converted at 2022 March 06 23:08:59 UTC
+// package reflectdata -- go2cs converted at 2022 March 13 06:22:16 UTC
 // import "cmd/compile/internal/reflectdata" ==> using reflectdata = go.cmd.compile.@internal.reflectdata_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\reflectdata\alg.go
-using fmt = go.fmt_package;
-using bits = go.math.bits_package;
-using sort = go.sort_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using bits = math.bits_package;
+using sort = sort_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+
+
+// isRegularMemory reports whether t can be compared/hashed as regular memory.
+
+using System;
 public static partial class reflectdata_package {
 
-    // isRegularMemory reports whether t can be compared/hashed as regular memory.
 private static bool isRegularMemory(ptr<types.Type> _addr_t) {
     ref types.Type t = ref _addr_t.val;
 
@@ -48,8 +49,7 @@ private static bool eqCanPanic(ptr<types.Type> _addr_t) {
         }        return false;
     else 
         return false;
-    
-}
+    }
 
 // AlgType returns the fixed-width AMEMxx variants instead of the general
 // AMEM kind when possible.
@@ -62,7 +62,6 @@ public static types.AlgKind AlgType(ptr<types.Type> _addr_t) {
             // For example, we can't treat [2]int16 as an int32 if int32s require
             // 4-byte alignment. See issue 46283.
             return a;
-
         }
         switch (t.Width) {
             case 0: 
@@ -84,10 +83,8 @@ public static types.AlgKind AlgType(ptr<types.Type> _addr_t) {
                 return types.AMEM128;
                 break;
         }
-
     }
     return a;
-
 }
 
 // genhash returns a symbol which is the closure used to compute
@@ -130,7 +127,6 @@ private static ptr<obj.LSym> genhash(ptr<types.Type> _addr_t) {
         var closure = TypeLinksymLookup(fmt.Sprintf(".hashfunc%d", t.Width));
         if (len(closure.P) > 0) { // already generated
             return _addr_closure!;
-
         }
         if (memhashvarlen == null) {
             memhashvarlen = typecheck.LookupRuntimeFunc("memhash_varlen");
@@ -148,7 +144,6 @@ private static ptr<obj.LSym> genhash(ptr<types.Type> _addr_t) {
         closure = TypeLinksymPrefix(".hashfunc", t);
     if (len(closure.P) > 0) { // already generated
         return _addr_closure!;
-
     }
 
     if (t.Kind() == types.TARRAY) 
@@ -233,7 +228,6 @@ private static ptr<obj.LSym> genhash(ptr<types.Type> _addr_t) {
                     fn.Body.Append(ir.NewAssignStmt(@base.Pos, nh, call));
                     i++;
                     continue;
-
                 } 
 
                 // Otherwise, hash a maximal length run of raw memory.
@@ -250,7 +244,6 @@ private static ptr<obj.LSym> genhash(ptr<types.Type> _addr_t) {
                 fn.Body.Append(ir.NewAssignStmt(@base.Pos, nh, call));
 
                 i = next;
-
             }
 
         }
@@ -282,7 +275,6 @@ private static ptr<obj.LSym> genhash(ptr<types.Type> _addr_t) {
     objw.Global(closure, int32(types.PtrSize), obj.DUPOK | obj.RODATA);
 
     return _addr_closure!;
-
 }
 
 private static ir.Node hashfor(ptr<types.Type> _addr_t) {
@@ -322,7 +314,6 @@ private static ir.Node hashfor(ptr<types.Type> _addr_t) {
     ir.MarkFunc(n);
     n.SetType(types.NewSignature(types.NoPkg, null, null, new slice<ptr<types.Field>>(new ptr<types.Field>[] { types.NewField(base.Pos,nil,types.NewPtr(t)), types.NewField(base.Pos,nil,types.Types[types.TUINTPTR]) }), new slice<ptr<types.Field>>(new ptr<types.Field>[] { types.NewField(base.Pos,nil,types.Types[types.TUINTPTR]) })));
     return n;
-
 }
 
 // sysClosure returns a closure which will call the
@@ -335,7 +326,6 @@ private static ptr<obj.LSym> sysClosure(@string name) {
         objw.Global(s, int32(types.PtrSize), obj.DUPOK | obj.RODATA);
     }
     return _addr_s!;
-
 }
 
 // geneq returns a symbol which is the closure used to compute
@@ -394,7 +384,6 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
         closure = TypeLinksymPrefix(".eqfunc", t);
     if (len(closure.P) > 0) { // already generated
         return _addr_closure!;
-
     }
     var sym = TypeSymPrefix(".eq", t);
     if (@base.Flag.LowerR != 0) {
@@ -454,7 +443,6 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                 qi.SetBounded(true);
                 qi.SetType(t.Elem());
                 return _addr_eq(pi, qi)!;
-
             }
 ;
 
@@ -462,7 +450,6 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                 if (last) { 
                     // Do last comparison in a different manner.
                     nelem--;
-
                 } 
                 // Generate a series of checks.
                 {
@@ -473,7 +460,6 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                         var nif = ir.NewIfStmt(@base.Pos, checkIdx(ir.NewInt(i)), null, null);
                         nif.Else.Append(ir.NewBranchStmt(@base.Pos, ir.OGOTO, neq));
                         fn.Body.Append(nif);
-
                     }
             else
 
@@ -483,7 +469,6 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                 if (last) {
                     fn.Body.Append(ir.NewAssignStmt(@base.Pos, nr, checkIdx(ir.NewInt(nelem))));
                 }
-
             } { 
                 // Generate a for loop.
                 // for i := 0; i < nelem; i++
@@ -501,9 +486,7 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                 if (last) {
                     fn.Body.Append(ir.NewAssignStmt(@base.Pos, nr, ir.NewBool(true)));
                 }
-
             }
-
         };
 
 
@@ -515,26 +498,22 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                 // Compare lengths.
                 var (eqlen, _) = EqString(pi, qi);
                 return _addr_eqlen!;
-
             });
             checkAll(1, true, (pi, qi) => { 
                 // Compare contents.
                 var (_, eqmem) = EqString(pi, qi);
                 return _addr_eqmem!;
-
             });
         else if (t.Elem().Kind() == types.TFLOAT32 || t.Elem().Kind() == types.TFLOAT64) 
             checkAll(2, true, (pi, qi) => { 
                 // p[i] == q[i]
                 return _addr_ir.NewBinaryExpr(@base.Pos, ir.OEQ, pi, qi)!;
-
             }); 
             // TODO: pick apart structs, do them piecemeal too
         else 
             checkAll(1, true, (pi, qi) => { 
                 // p[i] == q[i]
                 return _addr_ir.NewBinaryExpr(@base.Pos, ir.OEQ, pi, qi)!;
-
             });
             else if (t.Kind() == types.TSTRUCT) 
         // Build a list of conditions to satisfy.
@@ -569,9 +548,7 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                     if (eqCanPanic(_addr_f.Type)) { 
                         // Enforce ordering by starting a new set of reorderable conditions.
                         conds = append(conds, new slice<ir.Node>(new ir.Node[] {  }));
-
                     }
-
                     var p = ir.NewSelectorExpr(@base.Pos, ir.OXDOT, np, f.Sym);
                     var q = ir.NewSelectorExpr(@base.Pos, ir.OXDOT, nq, f.Sym);
 
@@ -584,12 +561,9 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                                         if (eqCanPanic(_addr_f.Type)) { 
                         // Also enforce ordering after something that can panic.
                         conds = append(conds, new slice<ir.Node>(new ir.Node[] {  }));
-
                     }
-
                     i++;
                     continue;
-
                 } 
 
                 // Find maximal length run of memory-only fields.
@@ -616,13 +590,10 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                     } { 
                         // More than two fields: use memequal.
                         and(eqmem(np, nq, _addr_f.Sym, size));
-
                     }
 
                 }
-
                 i = next;
-
             } 
 
             // Sort conditions to put runtime calls last.
@@ -640,13 +611,8 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
 
             foreach (var (_, __c) in conds) {
                 c = __c;
-                Func<ir.Node, bool> isCall = n => {
-                    return _addr_n.Op() == ir.OCALL || n.Op() == ir.OCALLFUNC!;
-                }
-;
-                sort.SliceStable(c, (i, j) => {
-                    return _addr_!isCall(c[i]) && isCall(c[j])!;
-                });
+                Func<ir.Node, bool> isCall = n => _addr_n.Op() == ir.OCALL || n.Op() == ir.OCALLFUNC!;
+                sort.SliceStable(c, (i, j) => _addr_!isCall(c[i]) && isCall(c[j])!);
                 flatConds = append(flatConds, c);
             }
 
@@ -667,14 +633,12 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
                     var n = ir.NewIfStmt(@base.Pos, c, null, null);
                     n.Else.Append(ir.NewBranchStmt(@base.Pos, ir.OGOTO, neq));
                     fn.Body.Append(n);
-
                 }
 
                 c = c__prev1;
             }
 
             fn.Body.Append(ir.NewAssignStmt(@base.Pos, nr, flatConds[len(flatConds) - 1]));
-
         }
     else 
         @base.Fatalf("geneq %v", t);
@@ -692,13 +656,11 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
     if (eqCanPanic(_addr_t) || anyCall(_addr_fn)) { 
         // Epilogue is large, so share it with the equal case.
         fn.Body.Append(ir.NewBranchStmt(@base.Pos, ir.OGOTO, ret));
-
     }
     else
  { 
         // Epilogue is small, so don't bother sharing.
         fn.Body.Append(ir.NewReturnStmt(@base.Pos, null));
-
     }
     if (@base.Flag.LowerR != 0) {
         ir.DumpList("geneq body", fn.Body);
@@ -722,7 +684,6 @@ private static ptr<obj.LSym> geneq(ptr<types.Type> _addr_t) {
     objw.SymPtr(closure, 0, fn.Linksym(), 0);
     objw.Global(closure, int32(types.PtrSize), obj.DUPOK | obj.RODATA);
     return _addr_closure!;
-
 }
 
 private static bool anyCall(ptr<ir.Func> _addr_fn) {
@@ -732,9 +693,7 @@ private static bool anyCall(ptr<ir.Func> _addr_fn) {
         // TODO(rsc): No methods?
         var op = n.Op();
         return op == ir.OCALL || op == ir.OCALLFUNC;
-
     });
-
 }
 
 // eqfield returns the node
@@ -813,7 +772,6 @@ public static (ptr<ir.BinaryExpr>, ptr<ir.CallExpr>) EqInterface(ir.Node s, ir.N
     cmp = typecheck.Expr(cmp)._<ptr<ir.BinaryExpr>>();
     cmp.SetType(types.Types[types.TBOOL]);
     return (_addr_cmp!, _addr_call!);
-
 }
 
 // eqmem returns the node
@@ -832,7 +790,6 @@ private static ir.Node eqmem(ir.Node p, ir.Node q, ptr<types.Sym> _addr_field, l
         call.Args.Append(ir.NewInt(size));
     }
     return call;
-
 }
 
 private static (ptr<ir.Name>, bool) eqmemfunc(long size, ptr<types.Type> _addr_t) {
@@ -861,7 +818,6 @@ private static (ptr<ir.Name>, bool) eqmemfunc(long size, ptr<types.Type> _addr_t
 
     fn = typecheck.SubstArgTypes(fn, t, t);
     return (_addr_fn!, needsize);
-
 }
 
 // memrun finds runs of struct fields for which memory-only algs are appropriate.
@@ -903,20 +859,16 @@ private static (long, nint) memrun(ptr<types.Type> _addr_t, nint start) {
                     // Offset is less aligned than the containing type.
                     // Use offset to determine alignment.
                     align = 1 << (int)(uint(bits.TrailingZeros64(uint64(off))));
-
                 }
 
             }
-
             var size = t.Field(next).End() - t.Field(start).Offset;
             if (size > align) {
                 break;
             }
-
         }
     }
     return (t.Field(next - 1).End() - t.Field(start).Offset, next);
-
 }
 
 private static ir.Node hashmem(ptr<types.Type> _addr_t) {
@@ -929,7 +881,6 @@ private static ir.Node hashmem(ptr<types.Type> _addr_t) {
     ir.MarkFunc(n);
     n.SetType(types.NewSignature(types.NoPkg, null, null, new slice<ptr<types.Field>>(new ptr<types.Field>[] { types.NewField(base.Pos,nil,types.NewPtr(t)), types.NewField(base.Pos,nil,types.Types[types.TUINTPTR]), types.NewField(base.Pos,nil,types.Types[types.TUINTPTR]) }), new slice<ptr<types.Field>>(new ptr<types.Field>[] { types.NewField(base.Pos,nil,types.Types[types.TUINTPTR]) })));
     return n;
-
 }
 
 } // end reflectdata_package

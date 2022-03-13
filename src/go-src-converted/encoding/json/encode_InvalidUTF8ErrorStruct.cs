@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:19 UTC
+//     Generated on 2022 March 13 05:39:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace encoding
 {
     public static partial class json_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct InvalidUTF8Error
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace encoding
             public static implicit operator InvalidUTF8Error(NilType nil) => default(InvalidUTF8Error);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static InvalidUTF8Error InvalidUTF8Error_cast(dynamic value)
         {
             return new InvalidUTF8Error(value.S);

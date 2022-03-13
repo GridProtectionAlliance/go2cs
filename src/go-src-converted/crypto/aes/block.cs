@@ -34,16 +34,18 @@
 //    https://csrc.nist.gov/csrc/media/publications/fips/197/final/documents/fips-197.pdf
 //    https://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf
 
-// package aes -- go2cs converted at 2022 March 06 22:18:12 UTC
+// package aes -- go2cs converted at 2022 March 13 05:32:26 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Program Files\Go\src\crypto\aes\block.go
-using binary = go.encoding.binary_package;
-
 namespace go.crypto;
+
+using binary = encoding.binary_package;
+
+
+// Encrypt one block from src into dst, using the expanded key xk.
 
 public static partial class aes_package {
 
-    // Encrypt one block from src into dst, using the expanded key xk.
 private static void encryptBlockGo(slice<uint> xk, slice<byte> dst, slice<byte> src) {
     _ = src[15]; // early bounds check
     var s0 = binary.BigEndian.Uint32(src[(int)0..(int)4]);
@@ -88,7 +90,6 @@ private static void encryptBlockGo(slice<uint> xk, slice<byte> dst, slice<byte> 
     binary.BigEndian.PutUint32(dst[(int)4..(int)8], s1);
     binary.BigEndian.PutUint32(dst[(int)8..(int)12], s2);
     binary.BigEndian.PutUint32(dst[(int)12..(int)16], s3);
-
 }
 
 // Decrypt one block from src into dst, using the expanded key xk.
@@ -136,7 +137,6 @@ private static void decryptBlockGo(slice<uint> xk, slice<byte> dst, slice<byte> 
     binary.BigEndian.PutUint32(dst[(int)4..(int)8], s1);
     binary.BigEndian.PutUint32(dst[(int)8..(int)12], s2);
     binary.BigEndian.PutUint32(dst[(int)12..(int)16], s3);
-
 }
 
 // Apply sbox0 to each byte in w.
@@ -168,7 +168,6 @@ private static void expandKeyGo(slice<byte> key, slice<uint> enc, slice<uint> de
             t = subw(t);
         }
         enc[i] = enc[i - nk] ^ t;
-
     } 
 
     // Derive decryption key from encryption key.
@@ -193,13 +192,10 @@ private static void expandKeyGo(slice<byte> key, slice<uint> enc, slice<uint> de
                 dec[i + j] = x;
             i += 4;
             }
-
-
         }
 
         i = i__prev1;
     }
-
 }
 
 } // end aes_package

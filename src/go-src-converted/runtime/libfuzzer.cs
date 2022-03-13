@@ -5,15 +5,15 @@
 //go:build libfuzzer
 // +build libfuzzer
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:48 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:34 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\libfuzzer.go
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go;
 
-public static partial class runtime_package {
- // for go:linkname
+using _@unsafe_ = @unsafe_package;
+
+public static partial class runtime_package { // for go:linkname
+
 private static void libfuzzerCall(ptr<byte> fn, System.UIntPtr arg0, System.UIntPtr arg1);
 
 private static void libfuzzerTraceCmp1(byte arg0, byte arg1) {

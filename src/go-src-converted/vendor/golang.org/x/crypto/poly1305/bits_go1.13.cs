@@ -5,12 +5,12 @@
 //go:build go1.13
 // +build go1.13
 
-// package poly1305 -- go2cs converted at 2022 March 06 23:36:52 UTC
+// package poly1305 -- go2cs converted at 2022 March 13 06:44:59 UTC
 // import "vendor/golang.org/x/crypto/poly1305" ==> using poly1305 = go.vendor.golang.org.x.crypto.poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\poly1305\bits_go1.13.go
-using bits = go.math.bits_package;
-
 namespace go.vendor.golang.org.x.crypto;
+
+using bits = math.bits_package;
 
 public static partial class poly1305_package {
 

@@ -2,22 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package edwards25519 -- go2cs converted at 2022 March 06 23:25:56 UTC
+// package edwards25519 -- go2cs converted at 2022 March 13 06:40:47 UTC
 // import "cmd/vendor/golang.org/x/crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.cmd.vendor.golang.org.x.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\crypto\ed25519\internal\edwards25519\edwards25519.go
-using binary = go.encoding.binary_package;
-
 namespace go.cmd.vendor.golang.org.x.crypto.ed25519.@internal;
+
+using binary = encoding.binary_package;
 
 public static partial class edwards25519_package {
 
-    // This code is a port of the public domain, “ref10” implementation of ed25519
-    // from SUPERCOP.
+// This code is a port of the public domain, “ref10” implementation of ed25519
+// from SUPERCOP.
 
-    // FieldElement represents an element of the field GF(2^255 - 19).  An element
-    // t, entries t[0]...t[9], represents the integer t[0]+2^26 t[1]+2^51 t[2]+2^77
-    // t[3]+2^102 t[4]+...+2^230 t[9].  Bounds on each t[i] vary depending on
-    // context.
+// FieldElement represents an element of the field GF(2^255 - 19).  An element
+// t, entries t[0]...t[9], represents the integer t[0]+2^26 t[1]+2^51 t[2]+2^77
+// t[3]+2^102 t[4]+...+2^230 t[9].  Bounds on each t[i] vary depending on
+// context.
 public partial struct FieldElement { // : array<int>
 }
 
@@ -246,7 +246,6 @@ public static void FeToBytes(ptr<array<byte>> _addr_s, ptr<FieldElement> _addr_h
     s[29] = byte(h[9] >> 2);
     s[30] = byte(h[9] >> 10);
     s[31] = byte(h[9] >> 18);
-
 }
 
 public static byte FeIsNegative(ptr<FieldElement> _addr_f) {
@@ -392,7 +391,6 @@ public static void FeCombine(ptr<FieldElement> _addr_h, long h0, long h1, long h
     h[7] = int32(h7);
     h[8] = int32(h8);
     h[9] = int32(h9);
-
 }
 
 // FeMul calculates h = f * g
@@ -477,7 +475,6 @@ public static void FeMul(ptr<FieldElement> _addr_h, ptr<FieldElement> _addr_f, p
     var h9 = f0 * g9 + f1 * g8 + f2 * g7 + f3 * g6 + f4 * g5 + f5 * g4 + f6 * g3 + f7 * g2 + f8 * g1 + f9 * g0;
 
     FeCombine(_addr_h, h0, h1, h2, h3, h4, h5, h6, h7, h8, h9);
-
 }
 
 private static (long, long, long, long, long, long, long, long, long, long) feSquare(ptr<FieldElement> _addr_f) {
@@ -529,7 +526,6 @@ private static (long, long, long, long, long, long, long, long, long, long) feSq
     h9 = f0_2 * f9 + f1_2 * f8 + f2_2 * f7 + f3_2 * f6 + f4_2 * f5;
 
     return ;
-
 }
 
 // FeSquare calculates h = f*f. Can overlap h with f.
@@ -589,7 +585,6 @@ public static void FeInvert(ptr<FieldElement> _addr_@out, ptr<FieldElement> _add
     FeSquare(_addr_t1, _addr_t0); // 2^2
     for (i = 1; i < 2; i++) { // 2^3
         FeSquare(_addr_t1, _addr_t1);
-
     }
     FeMul(_addr_t1, _addr_z, _addr_t1); // 2^3 + 2^0
     FeMul(_addr_t0, _addr_t0, _addr_t1); // 2^3 + 2^1 + 2^0
@@ -598,49 +593,41 @@ public static void FeInvert(ptr<FieldElement> _addr_@out, ptr<FieldElement> _add
     FeSquare(_addr_t2, _addr_t1); // 5,4,3,2,1
     for (i = 1; i < 5; i++) { // 9,8,7,6,5
         FeSquare(_addr_t2, _addr_t2);
-
     }
     FeMul(_addr_t1, _addr_t2, _addr_t1); // 9,8,7,6,5,4,3,2,1,0
     FeSquare(_addr_t2, _addr_t1); // 10..1
     for (i = 1; i < 10; i++) { // 19..10
         FeSquare(_addr_t2, _addr_t2);
-
     }
     FeMul(_addr_t2, _addr_t2, _addr_t1); // 19..0
     FeSquare(_addr_t3, _addr_t2); // 20..1
     for (i = 1; i < 20; i++) { // 39..20
         FeSquare(_addr_t3, _addr_t3);
-
     }
     FeMul(_addr_t2, _addr_t3, _addr_t2); // 39..0
     FeSquare(_addr_t2, _addr_t2); // 40..1
     for (i = 1; i < 10; i++) { // 49..10
         FeSquare(_addr_t2, _addr_t2);
-
     }
     FeMul(_addr_t1, _addr_t2, _addr_t1); // 49..0
     FeSquare(_addr_t2, _addr_t1); // 50..1
     for (i = 1; i < 50; i++) { // 99..50
         FeSquare(_addr_t2, _addr_t2);
-
     }
     FeMul(_addr_t2, _addr_t2, _addr_t1); // 99..0
     FeSquare(_addr_t3, _addr_t2); // 100..1
     for (i = 1; i < 100; i++) { // 199..100
         FeSquare(_addr_t3, _addr_t3);
-
     }
     FeMul(_addr_t2, _addr_t3, _addr_t2); // 199..0
     FeSquare(_addr_t2, _addr_t2); // 200..1
     for (i = 1; i < 50; i++) { // 249..50
         FeSquare(_addr_t2, _addr_t2);
-
     }
     FeMul(_addr_t1, _addr_t2, _addr_t1); // 249..0
     FeSquare(_addr_t1, _addr_t1); // 250..1
     for (i = 1; i < 5; i++) { // 254..5
         FeSquare(_addr_t1, _addr_t1);
-
     }
     FeMul(_addr_out, _addr_t1, _addr_t0); // 254..5,3,1,0
 }
@@ -901,7 +888,6 @@ private static bool FromBytes(this ptr<ExtendedGroupElement> _addr_p, ptr<array<
     }
     FeMul(_addr_p.T, _addr_p.X, _addr_p.Y);
     return true;
-
 }
 
 private static void ToProjective(this ptr<CompletedGroupElement> _addr_p, ptr<ProjectiveGroupElement> _addr_r) {
@@ -1045,19 +1031,12 @@ private static void slide(ptr<array<sbyte>> _addr_r, ptr<array<byte>> _addr_a) {
                                 r[k] = 0;
                             }
                         else
-
-
                         } {
                             break;
                         }
-
                     }
-
                 }
-
-
             }
-
         }
         i = i__prev1;
     }
@@ -1129,9 +1108,7 @@ public static void GeDoubleScalarMultVartime(ptr<ProjectiveGroupElement> _addr_r
             geMixedSub(_addr_t, _addr_u, _addr_bi[(-bSlide[i]) / 2]);
         }
         t.ToProjective(r);
-
     }
-
 }
 
 // equal returns 1 if b == c and 0 otherwise, assuming that b and c are
@@ -1255,7 +1232,6 @@ public static void GeScalarMultBase(ptr<ExtendedGroupElement> _addr_h, ptr<array
 
         i = i__prev1;
     }
-
 }
 
 // The scalars are GF(2^252 + 27742317777372353535851937790883648493).
@@ -2033,7 +2009,7 @@ private static array<ulong> order = new array<ulong>(new ulong[] { 0x5812631a5cf
 public static bool ScMinimal(ptr<array<byte>> _addr_scalar) {
     ref array<byte> scalar = ref _addr_scalar.val;
 
-    for (nint i = 3; >>MARKER:FOREXPRESSION_LEVEL_1<<; i--) {
+    for (nint i = 3; ; i--) {
         var v = binary.LittleEndian.Uint64(scalar[(int)i * 8..]);
         if (v > order[i]) {
             return false;
@@ -2047,7 +2023,6 @@ public static bool ScMinimal(ptr<array<byte>> _addr_scalar) {
     }
 
     return true;
-
 }
 
 } // end edwards25519_package

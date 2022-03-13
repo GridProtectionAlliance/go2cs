@@ -11,30 +11,32 @@
 //          changed (no 3-operand slice expressions). If that
 //          changes, alias needs to be updated for correctness.
 
-// package big -- go2cs converted at 2022 March 06 22:17:59 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:11 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\nat.go
-using binary = go.encoding.binary_package;
-using bits = go.math.bits_package;
-using rand = go.math.rand_package;
-using sync = go.sync_package;
-
 namespace go.math;
+
+using binary = encoding.binary_package;
+using bits = math.bits_package;
+using rand = math.rand_package;
+using sync = sync_package;
+
+
+// An unsigned integer x of the form
+//
+//   x = x[n-1]*_B^(n-1) + x[n-2]*_B^(n-2) + ... + x[1]*_B + x[0]
+//
+// with 0 <= x[i] < _B and 0 <= i < n is stored in a slice of length n,
+// with the digits x[i] as the slice elements.
+//
+// A number is normalized if the slice contains no leading 0 digits.
+// During arithmetic operations, denormalized values may occur but are
+// always normalized before returning the final result. The normalized
+// representation of 0 is the empty or nil slice (length = 0).
+//
 
 public static partial class big_package {
 
-    // An unsigned integer x of the form
-    //
-    //   x = x[n-1]*_B^(n-1) + x[n-2]*_B^(n-2) + ... + x[1]*_B + x[0]
-    //
-    // with 0 <= x[i] < _B and 0 <= i < n is stored in a slice of length n,
-    // with the digits x[i] as the slice elements.
-    //
-    // A number is normalized if the slice contains no leading 0 digits.
-    // During arithmetic operations, denormalized values may occur but are
-    // always normalized before returning the final result. The normalized
-    // representation of 0 is the empty or nil slice (length = 0).
-    //
 private partial struct nat { // : slice<Word>
 }
 
@@ -61,12 +63,10 @@ private static nat make(this nat z, nint n) {
     if (n == 1) { 
         // Most nats start small and stay that way; don't over-allocate.
         return make(nat, 1);
-
     }
     const nint e = 4; // extra capacity
  // extra capacity
     return make(nat, n, n + e);
-
 }
 
 private static nat setWord(this nat z, Word x) {
@@ -76,7 +76,6 @@ private static nat setWord(this nat z, Word x) {
     z = z.make(1);
     z[0] = x;
     return z;
-
 }
 
 private static nat setUint64(this nat z, ulong x) { 
@@ -93,7 +92,6 @@ private static nat setUint64(this nat z, ulong x) {
     z[1] = Word(x >> 32);
     z[0] = Word(x);
     return z;
-
 }
 
 private static nat set(this nat z, nat x) {
@@ -125,7 +123,6 @@ private static nat add(this nat z, nat x, nat y) {
     z[m] = c;
 
     return z.norm();
-
 }
 
 private static nat sub(this nat z, nat x, nat y) => func((_, panic, _) => {
@@ -152,7 +149,6 @@ private static nat sub(this nat z, nat x, nat y) => func((_, panic, _) => {
         panic("underflow");
     }
     return z.norm();
-
 });
 
 private static nint cmp(this nat x, nat y) {
@@ -167,7 +163,6 @@ private static nint cmp(this nat x, nat y) {
         else if (m > n) 
             r = 1;
                 return ;
-
     }
     var i = m - 1;
     while (i > 0 && x[i] == y[i]) {
@@ -180,7 +175,6 @@ private static nint cmp(this nat x, nat y) {
     else if (x[i] > y[i]) 
         r = 1;
         return ;
-
 }
 
 private static nat mulAddWW(this nat z, nat x, Word y, Word r) {
@@ -192,7 +186,6 @@ private static nat mulAddWW(this nat z, nat x, Word y, Word r) {
     z[m] = mulAddVWW(z[(int)0..(int)m], x, y, r);
 
     return z.norm();
-
 }
 
 // basicMul multiplies x and y and leaves the result in z.
@@ -250,7 +243,6 @@ private static nat montgomery(this nat z, nat x, nat y, nat m, Word k, nint n) =
         copy(z[..(int)n], z[(int)n..]);
     }
     return z[..(int)n];
-
 });
 
 // Fast version of z[0:n+n>>1].add(z[0:n+n>>1], x[0:n]) w/o bounds checks.
@@ -263,7 +255,6 @@ private static void karatsubaAdd(nat z, nat x, nint n) {
             addVW(z[(int)n..(int)n + n >> 1], z[(int)n..], c);
         }
     }
-
 }
 
 // Like karatsubaAdd, but does subtract.
@@ -275,7 +266,6 @@ private static void karatsubaSub(nat z, nat x, nint n) {
             subVW(z[(int)n..(int)n + n >> 1], z[(int)n..], c);
         }
     }
-
 }
 
 // Operands that are shorter than karatsubaThreshold are multiplied using
@@ -383,10 +373,8 @@ private static void addAt(nat z, nat x, nint i) {
                 }
 
             }
-
         }
     }
-
 }
 
 private static nint max(nint x, nint y) {
@@ -394,7 +382,6 @@ private static nint max(nint x, nint y) {
         return x;
     }
     return y;
-
 }
 
 // karatsubaLen computes an approximation to the maximum k <= n such that
@@ -477,22 +464,18 @@ private static nat mul(this nat z, nat x, nat y) {
                     xi = xi[..(int)k];
                 i += k;
                 }
-
                 xi = xi.norm();
                 t = t.mul(xi, y0);
                 addAt(z, t, i);
                 t = t.mul(xi, y1);
                 addAt(z, t, i + k);
-
             }
 
         }
 
         putNat(_addr_tp);
-
     }
     return z.norm();
-
 }
 
 // basicSqr sets z = x*x and is asymptotically faster than basicMul
@@ -511,12 +494,10 @@ private static void basicSqr(nat z, nat x) {
         z[2 * i + 1], z[2 * i] = mulWW(d, d); 
         // t collects the products x[i] * x[j] where j < i
         t[2 * i] = addMulVVW(t[(int)i..(int)2 * i], x[(int)0..(int)i], d);
-
     }
     t[2 * n - 1] = shlVU(t[(int)1..(int)2 * n - 1], t[(int)1..(int)2 * n - 1], 1); // double the j < i products
     addVV(z, z, t); // combine the result
     putNat(_addr_tp);
-
 }
 
 // karatsubaSqr squares x and leaves the result in z.
@@ -603,10 +584,8 @@ private static nat sqr(this nat z, nat x) {
         t = t.sqr(x1);
         addAt(z, t, 2 * k); // z = x1^2*b^2 + 2*x1*x0*b + x0^2
         putNat(_addr_tp);
-
     }
     return z.norm();
-
 }
 
 // mulRange computes the product of all the unsigned integers in the
@@ -624,7 +603,6 @@ private static nat mulRange(this nat z, ulong a, ulong b) {
         return z.mul(nat(null).setUint64(a), nat(null).setUint64(b));
         var m = (a + b) / 2;
     return z.mul(nat(null).mulRange(a, m), nat(null).mulRange(m + 1, b));
-
 }
 
 // getNat returns a *nat of len n. The contents may not be zero.
@@ -638,13 +616,11 @@ private static ptr<nat> getNat(nint n) {
             z = v._<ptr<nat>>();
         }
     }
-
     if (z == null) {
         z = @new<nat>();
     }
     z.val = z.make(n);
     return _addr_z!;
-
 }
 
 private static void putNat(ptr<nat> _addr_x) {
@@ -664,9 +640,7 @@ private static nint bitLen(this nat x) {
             return i * _W + bits.Len(uint(x[i]));
         }
     }
-
     return 0;
-
 }
 
 // trailingZeroBits returns the number of consecutive least significant zero
@@ -681,7 +655,6 @@ private static nuint trailingZeroBits(this nat x) {
     } 
     // x[i] != 0
     return i * _W + uint(bits.TrailingZeros(uint(x[i])));
-
 }
 
 private static bool same(nat x, nat y) {
@@ -708,7 +681,6 @@ private static nat shl(this nat z, nat x, nuint s) {
     z[(int)0..(int)n - m].clear();
 
     return z.norm();
-
 }
 
 // z = x >> s
@@ -730,7 +702,6 @@ private static nat shr(this nat z, nat x, nuint s) {
     shrVU(z, x[(int)m - n..], s % _W);
 
     return z.norm();
-
 }
 
 private static nat setBit(this nat z, nat x, nuint i, nuint b) => func((_, panic, _) => {
@@ -744,11 +715,9 @@ private static nat setBit(this nat z, nat x, nuint i, nuint b) => func((_, panic
             if (j >= n) { 
                 // no need to grow
                 return z;
-
             }
             z[j] &= m;
             return z.norm();
-
             break;
         case 1: 
                    if (j >= n) {
@@ -763,11 +732,9 @@ private static nat setBit(this nat z, nat x, nuint i, nuint b) => func((_, panic
                    z[j] |= m; 
                    // no need to normalize
                    return z;
-
             break;
     }
     panic("set bit is not 0 or 1");
-
 });
 
 // bit returns the value of the i'th bit, with lsb == bit 0.
@@ -777,7 +744,6 @@ private static nuint bit(this nat x, nuint i) {
         return 0;
     }
     return uint(x[j] >> (int)((i % _W)) & 1);
-
 }
 
 // sticky returns 1 if there's a 1 bit within the
@@ -789,7 +755,6 @@ private static nuint sticky(this nat x, nuint i) {
             return 0;
         }
         return 1;
-
     }
     foreach (var (_, x) in x[..(int)j]) {
         if (x != 0) {
@@ -799,7 +764,6 @@ private static nuint sticky(this nat x, nuint i) {
         return 1;
     }
     return 0;
-
 }
 
 private static nat and(this nat z, nat x, nat y) {
@@ -814,7 +778,6 @@ private static nat and(this nat z, nat x, nat y) {
     }
 
     return z.norm();
-
 }
 
 private static nat andNot(this nat z, nat x, nat y) {
@@ -830,7 +793,6 @@ private static nat andNot(this nat z, nat x, nat y) {
     copy(z[(int)n..(int)m], x[(int)n..(int)m]);
 
     return z.norm();
-
 }
 
 private static nat or(this nat z, nat x, nat y) {
@@ -847,7 +809,6 @@ private static nat or(this nat z, nat x, nat y) {
     copy(z[(int)n..(int)m], s[(int)n..(int)m]);
 
     return z.norm();
-
 }
 
 private static nat xor(this nat z, nat x, nat y) {
@@ -864,7 +825,6 @@ private static nat xor(this nat z, nat x, nat y) {
     copy(z[(int)n..(int)m], s[(int)n..(int)m]);
 
     return z.norm();
-
 }
 
 // random creates a random integer in [0..limit), using the space in z if
@@ -920,7 +880,6 @@ private static nat random(this nat z, ptr<rand.Rand> _addr_rand, nat limit, nint
     }
 
     return z.norm();
-
 });
 
 // If m != 0 (i.e., len(m) != 0), expNN sets z to x**y mod m;
@@ -929,7 +888,6 @@ private static nat expNN(this nat z, nat x, nat y, nat m) {
     if (alias(z, x) || alias(z, y)) { 
         // We cannot allow in-place modification of x or y.
         z = null;
-
     }
     if (len(m) == 1 && m[0] == 1) {
         return z.setWord(0);
@@ -944,7 +902,6 @@ private static nat expNN(this nat z, nat x, nat y, nat m) {
     if (len(m) != 0) { 
         // We likely end up being as long as the modulus.
         z = z.make(len(m));
-
     }
     z = z.set(x); 
 
@@ -958,7 +915,6 @@ private static nat expNN(this nat z, nat x, nat y, nat m) {
             return z.expNNMontgomery(x, y, m);
         }
         return z.expNNWindowed(x, y, m);
-
     }
     var v = y[len(y) - 1]; // v > 0 because y is normalized and y > 0
     var shift = nlz(v) + 1;
@@ -991,14 +947,11 @@ private static nat expNN(this nat z, nat x, nat y, nat m) {
                 zz = zz.mul(z, x);
                 (zz, z) = (z, zz);
             }
-
             if (len(m) != 0) {
                 zz, r = zz.div(r, z, m);
                 (zz, r, q, z) = (q, z, zz, r);
             }
-
             v<<=1;
-
         }
 
         j = j__prev1;
@@ -1016,24 +969,19 @@ private static nat expNN(this nat z, nat x, nat y, nat m) {
                     zz = zz.mul(z, x);
                     (zz, z) = (z, zz);
                 }
-
                 if (len(m) != 0) {
                     zz, r = zz.div(r, z, m);
                     (zz, r, q, z) = (q, z, zz, r);
                 }
-
                 v<<=1;
-
             }
 
 
             j = j__prev2;
         }
-
     }
 
     return z.norm();
-
 }
 
 // expNNWindowed calculates x**y mod m using a fixed, 4-bit window.
@@ -1095,22 +1043,18 @@ private static nat expNNWindowed(this nat z, nat x, nat y, nat m) {
                         (zz, z) = (z, zz);                        zz, r = zz.div(r, z, m);
                         (z, r) = (r, z);                    j += n;
                     }
-
                     zz = zz.mul(z, powers[yi >> (int)((_W - n))]);
                     (zz, z) = (z, zz);                    zz, r = zz.div(r, z, m);
                     (z, r) = (r, z);                    yi<<=n;
-
                 }
 
             }
-
         }
 
         i = i__prev1;
     }
 
     return z.norm();
-
 }
 
 // expNNMontgomery calculates x**y mod m using a fixed, 4-bit window.
@@ -1198,14 +1142,11 @@ private static nat expNNMontgomery(this nat z, nat x, nat y, nat m) {
                         z = z.montgomery(zz, zz, m, k0, numWords);
                     j += n;
                     }
-
                     zz = zz.montgomery(z, powers[yi >> (int)((_W - n))], m, k0, numWords);
                     (z, zz) = (zz, z);                    yi<<=n;
-
                 }
 
             }
-
         }
 
         i = i__prev1;
@@ -1229,7 +1170,6 @@ private static nat expNNMontgomery(this nat z, nat x, nat y, nat m) {
         }
     }
     return zz.norm();
-
 }
 
 // bytes writes the value of z into buf using big-endian encoding.
@@ -1249,11 +1189,8 @@ private static nint bytes(this nat z, slice<byte> buf) => func((_, panic, _) => 
             else if (byte(d) != 0) {
                 panic("math/big: buffer too small to fit value");
             }
-
             d>>=8;
-
         }
-
     }    if (i < 0) {
         i = 0;
     }
@@ -1262,7 +1199,6 @@ private static nint bytes(this nat z, slice<byte> buf) => func((_, panic, _) => 
     }
 
     return ;
-
 });
 
 // bigEndianWord returns the contents of buf interpreted as a big-endian encoded Word value.
@@ -1271,7 +1207,6 @@ private static Word bigEndianWord(slice<byte> buf) {
         return Word(binary.BigEndian.Uint64(buf));
     }
     return Word(binary.BigEndian.Uint32(buf));
-
 }
 
 // setBytes interprets buf as the bytes of a big-endian unsigned
@@ -1297,10 +1232,8 @@ private static nat setBytes(this nat z, slice<byte> buf) {
 
         }
         z[len(z) - 1] = d;
-
     }
     return z.norm();
-
 }
 
 // sqrt sets z = ⌊√x⌋
@@ -1316,7 +1249,7 @@ private static nat sqrt(this nat z, nat x) {
     z1 = z;
     z1 = z1.setUint64(1);
     z1 = z1.shl(z1, uint(x.bitLen() + 1) / 2); // must be ≥ √x
-    for (nint n = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; n++) {
+    for (nint n = 0; ; n++) {
         z2, _ = z2.div(null, x, z1);
         z2 = z2.add(z2, z1);
         z2 = z2.shr(z2, 1);
@@ -1326,13 +1259,10 @@ private static nat sqrt(this nat z, nat x) {
             if (n & 1 == 0) {
                 return z1;
             }
-
             return z.set(z1);
-
         }
         (z1, z2) = (z2, z1);
     }
-
 }
 
 } // end big_package

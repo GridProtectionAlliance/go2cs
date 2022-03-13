@@ -8,35 +8,36 @@
 //    Emit correct line number annotations.
 //    Make gc understand the annotations.
 
-// package main -- go2cs converted at 2022 March 06 22:47:21 UTC
+// package main -- go2cs converted at 2022 March 13 05:58:37 UTC
 // Original source: C:\Program Files\Go\src\cmd\cgo\main.go
-using md5 = go.crypto.md5_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using edit = go.cmd.@internal.edit_package;
-using objabi = go.cmd.@internal.objabi_package;
-using System;
-
-
 namespace go;
 
+using md5 = crypto.md5_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using edit = cmd.@internal.edit_package;
+using objabi = cmd.@internal.objabi_package;
+
+
+// A Package collects information about the package we're going to write.
+
+using System;
 public static partial class main_package {
 
-    // A Package collects information about the package we're going to write.
 public partial struct Package {
     public @string PackageName; // name of package
     public @string PackagePath;
@@ -232,14 +233,12 @@ private static void Main() {
         // symbols and which ones to use.
         dynimport(dynobj.val);
         return ;
-
     }
     if (godefs.val) { 
         // Generating definitions pulled from header files,
         // to be checked into Go repositories.
         // Line numbers are just noise.
         conf.Mode &= printer.SourcePos;
-
     }
     var args = flag.Args();
     if (len(args) < 1) {
@@ -315,12 +314,10 @@ private static void Main() {
 
             }
 
-
             var (b, err) = ioutil.ReadFile(input);
             if (err != null) {
                 fatalf("%s", err);
             }
-
             _, err = h.Write(b);
 
             if (err != null) {
@@ -336,7 +333,6 @@ private static void Main() {
             f.ParseGo(input, b);
             f.DiscardCgoDirectives();
             fs[i] = f;
-
         }
         i = i__prev1;
         input = input__prev1;
@@ -349,7 +345,6 @@ private static void Main() {
         // all the output files there.
         os.Mkdir("_obj", 0777);
         objDir.val = "_obj";
-
     }
     objDir.val += string(filepath.Separator);
 
@@ -371,12 +366,10 @@ private static void Main() {
                     var old = cref.Expr.val;
                     cref.Expr.val = cref.Name.Type.Go;
                     f.Edit.Replace(f.offset(old.Pos()), f.offset(old.End()), gofmt(cref.Name.Type.Go));
-                
-            }
+                            }
             if (nerrors > 0) {
                 os.Exit(2);
             }
-
             p.PackagePath = f.Package;
             p.Record(f);
             if (godefs.val) {
@@ -386,7 +379,6 @@ private static void Main() {
  {
                 p.writeOutput(f, input);
             }
-
         }
         i = i__prev1;
         input = input__prev1;
@@ -415,7 +407,6 @@ private static ptr<Package> newPackage(slice<@string> args) {
         s = s__prev1;
 
     }
-
     goos = runtime.GOOS;
     {
         var s__prev1 = s;
@@ -428,7 +419,6 @@ private static ptr<Package> newPackage(slice<@string> args) {
         s = s__prev1;
 
     }
-
     buildcfg.Check();
     gomips = buildcfg.GOMIPS;
     gomips64 = buildcfg.GOMIPS64;
@@ -446,7 +436,6 @@ private static ptr<Package> newPackage(slice<@string> args) {
     ptr<Package> p = addr(new Package(PtrSize:ptrSize,IntSize:intSize,CgoFlags:make(map[string][]string),Written:make(map[string]bool),));
     p.addToFlag("CFLAGS", args);
     return _addr_p!;
-
 }
 
 // Record what needs to be recorded about f.
@@ -487,9 +476,7 @@ private static void Record(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                     error_(token.NoPos, "inconsistent definitions for C.%s", fixGo(k));
                 }
 
-
             }
-
         }
     }
     if (f.ExpFunc != null) {
@@ -497,7 +484,6 @@ private static void Record(this ptr<Package> _addr_p, ptr<File> _addr_f) {
         p.Preamble += "\n" + f.Preamble;
     }
     p.Decl = append(p.Decl, f.AST.Decls);
-
 }
 
 // incompleteTypedef reports whether t appears to be an incomplete

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:22 UTC
+//     Generated on 2022 March 13 05:52:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class goroot_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct gccgoDirs
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator gccgoDirs(NilType nil) => default(gccgoDirs);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static gccgoDirs gccgoDirs_cast(dynamic value)
         {
             return new gccgoDirs(value.once, value.dirs);

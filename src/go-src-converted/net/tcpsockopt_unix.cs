@@ -5,14 +5,14 @@
 //go:build aix || freebsd || linux || netbsd
 // +build aix freebsd linux netbsd
 
-// package net -- go2cs converted at 2022 March 06 22:16:47 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:09 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\tcpsockopt_unix.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
+using time = time_package;
 
 public static partial class net_package {
 
@@ -32,11 +32,9 @@ private static error setKeepAlivePeriod(ptr<netFD> _addr_fd, time.Duration d) {
         err = err__prev1;
 
     }
-
     err = fd.pfd.SetsockoptInt(syscall.IPPROTO_TCP, syscall.TCP_KEEPIDLE, secs);
     runtime.KeepAlive(fd);
     return error.As(wrapSyscallError("setsockopt", err))!;
-
 }
 
 } // end net_package

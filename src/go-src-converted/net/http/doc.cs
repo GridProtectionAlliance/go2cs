@@ -104,8 +104,10 @@ package takes precedence over the net/http package's built-in HTTP/2
 support.
 
 */
-// package http -- go2cs converted at 2022 March 06 22:21:20 UTC
+
+// package http -- go2cs converted at 2022 March 13 05:36:28 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\doc.go
+namespace go.net;
 
 } // end http_package

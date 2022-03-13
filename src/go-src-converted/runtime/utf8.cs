@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:27 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:32 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\utf8.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // Numbers fundamental to the encoding.
+// Numbers fundamental to the encoding.
 private static readonly char runeError = '\uFFFD'; // the "error" Rune or "Unicode replacement character"
 private static readonly nuint runeSelf = 0x80; // characters below runeSelf are represented as themselves in a single byte.
 private static readonly char maxRune = '\U0010FFFF'; // Maximum valid Unicode code point.
@@ -19,7 +17,6 @@ private static readonly char maxRune = '\U0010FFFF'; // Maximum valid Unicode co
 // Code points in the surrogate range are not valid for UTF-8.
 private static readonly nuint surrogateMin = 0xD800;
 private static readonly nuint surrogateMax = 0xDFFF;
-
 
 private static readonly nuint t1 = 0x00; // 0000 0000
 private static readonly nuint tx = 0x80; // 1000 0000
@@ -98,7 +95,6 @@ private static (int, nint) decoderune(@string s, nint k) {
             }
         }
         return (runeError, k + 1);
-
 }
 
 // encoderune writes into p (which must be large enough) the UTF-8 encoding of the rune.
@@ -147,7 +143,6 @@ private static nint encoderune(slice<byte> p, int r) {
 
         __switch_break0:;
     }
-
 }
 
 } // end runtime_package

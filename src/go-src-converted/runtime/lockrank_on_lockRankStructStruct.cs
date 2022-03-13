@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:50 UTC
+//     Generated on 2022 March 13 05:24:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lockRankStruct
         {
             // Constructors
@@ -54,7 +54,7 @@ namespace go
             public static implicit operator lockRankStruct(NilType nil) => default(lockRankStruct);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lockRankStruct lockRankStruct_cast(dynamic value)
         {
             return new lockRankStruct(value.rank, value.pad);

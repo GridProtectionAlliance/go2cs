@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:31 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:35 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\tempfile.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sync = go.sync_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sync = sync_package;
+
+
+// newTempFile returns a new output file in dir with the provided prefix and suffix.
 
 public static partial class driver_package {
 
-    // newTempFile returns a new output file in dir with the provided prefix and suffix.
 private static (ptr<os.File>, error) newTempFile(@string dir, @string prefix, @string suffix) {
     ptr<os.File> _p0 = default!;
     error _p0 = default!;
@@ -40,11 +42,9 @@ private static (ptr<os.File>, error) newTempFile(@string dir, @string prefix, @s
                 return (_addr_null!, error.As(err)!);
 
         }
-
     } 
     // Give up
     return (_addr_null!, error.As(fmt.Errorf("could not create file of the form %s%03d%s", prefix, 1, suffix))!);
-
 }
 
 private static slice<@string> tempFiles = default;
@@ -71,10 +71,8 @@ private static error cleanupTempFiles() => func((defer, _, _) => {
             }
 
         }
-
     }    tempFiles = null;
     return error.As(lastErr)!;
-
 });
 
 } // end driver_package

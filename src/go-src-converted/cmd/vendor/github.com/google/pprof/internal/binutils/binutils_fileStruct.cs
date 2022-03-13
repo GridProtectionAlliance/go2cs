@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:19 UTC
+//     Generated on 2022 March 13 06:36:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace @internal
 {
     public static partial class binutils_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct file
         {
             // Constructors
@@ -88,7 +88,7 @@ namespace @internal
             public static implicit operator file(NilType nil) => default(file);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static file file_cast(dynamic value)
         {
             return new file(ref value.b, value.name, value.buildID, value.baseOnce, value.@base, value.baseErr, value.isData, ref value.m);

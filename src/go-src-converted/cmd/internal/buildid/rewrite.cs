@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package buildid -- go2cs converted at 2022 March 06 22:46:42 UTC
+// package buildid -- go2cs converted at 2022 March 13 05:57:55 UTC
 // import "cmd/internal/buildid" ==> using buildid = go.cmd.@internal.buildid_package
 // Original source: C:\Program Files\Go\src\cmd\internal\buildid\rewrite.go
-using bytes = go.bytes_package;
-using codesign = go.cmd.@internal.codesign_package;
-using sha256 = go.crypto.sha256_package;
-using macho = go.debug.macho_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.cmd.@internal;
+
+using bytes = bytes_package;
+using codesign = cmd.@internal.codesign_package;
+using sha256 = crypto.sha256_package;
+using macho = debug.macho_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// FindAndHash reads all of r and returns the offsets of occurrences of id.
+// While reading, findAndHash also computes and returns
+// a hash of the content of r, but with occurrences of id replaced by zeros.
+// FindAndHash reads bufSize bytes from r at a time.
+// If bufSize == 0, FindAndHash uses a reasonable default.
 
 public static partial class buildid_package {
 
-    // FindAndHash reads all of r and returns the offsets of occurrences of id.
-    // While reading, findAndHash also computes and returns
-    // a hash of the content of r, but with occurrences of id replaced by zeros.
-    // FindAndHash reads bufSize bytes from r at a time.
-    // If bufSize == 0, FindAndHash uses a reasonable default.
 public static (slice<long>, array<byte>, error) FindAndHash(io.Reader r, @string id, nint bufSize) {
     slice<long> matches = default;
     array<byte> hash = default;
@@ -54,7 +56,7 @@ public static (slice<long>, array<byte>, error) FindAndHash(io.Reader r, @string
     {
         var offset = int64(0);
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) { 
+        while () { 
             // The file offset maintained by the loop corresponds to &buf[tiny].
             // buf[start:tiny] is left over from previous iteration.
             // After reading n bytes into buf[tiny:], we process buf[start:tiny+n].
@@ -71,13 +73,11 @@ public static (slice<long>, array<byte>, error) FindAndHash(io.Reader r, @string
                 h.Write(buf[(int)start..(int)start + i]);
                 h.Write(zeros);
                 start += i + len(id);
-
             }
             if (n < bufSize) { 
                 // Did not fill buffer, must be at end of file.
                 h.Write(buf[(int)start..(int)tiny + n]);
                 break;
-
             }
             if (start < len(buf) - tiny) {
                 h.Write(buf[(int)start..(int)len(buf) - tiny]);
@@ -86,12 +86,10 @@ public static (slice<long>, array<byte>, error) FindAndHash(io.Reader r, @string
             copy(buf[(int)0..], buf[(int)bufSize..]);
             start -= bufSize;
             offset += int64(bufSize);
-
         }
     }
     h.Sum(hash[..(int)0]);
     return (matches, hash, error.As(null!)!);
-
 }
 
 public static error Rewrite(io.WriterAt w, slice<long> pos, @string id) {
@@ -105,7 +103,6 @@ public static error Rewrite(io.WriterAt w, slice<long> pos, @string id) {
             }
 
         }
-
     }    {
         var (f, cmd, ok) = findMachoCodeSignature(w);
 
@@ -125,15 +122,11 @@ public static error Rewrite(io.WriterAt w, slice<long> pos, @string id) {
                     }
 
                 }
-
             }
-
         }
     }
 
-
     return error.As(null!)!;
-
 }
 
 private static io.Reader excludeMachoCodeSignature(io.Reader r) {
@@ -142,7 +135,6 @@ private static io.Reader excludeMachoCodeSignature(io.Reader r) {
         return r;
     }
     return addr(new excludedReader(r,0,int64(cmd.Dataoff),int64(cmd.Dataoff+cmd.Datasize)));
-
 }
 
 // excludedReader wraps an io.Reader. Reading from it returns the bytes from
@@ -172,11 +164,9 @@ private static (nint, error) Read(this ptr<excludedReader> _addr_r, slice<byte> 
         }
         var zeros = make_slice<byte>(cend - cstart);
         copy(p[(int)cstart..(int)cend], zeros);
-
     }
     r.off += int64(n);
     return (n, error.As(err)!);
-
 }
 
 private static (ptr<macho.File>, codesign.CodeSigCmd, bool) findMachoCodeSignature(object r) {
@@ -194,7 +184,6 @@ private static (ptr<macho.File>, codesign.CodeSigCmd, bool) findMachoCodeSignatu
     }
     var (cmd, ok) = codesign.FindCodeSigCmd(f);
     return (_addr_f!, cmd, ok);
-
 }
 
 } // end buildid_package

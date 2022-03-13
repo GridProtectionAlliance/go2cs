@@ -1,11 +1,10 @@
-// package p1 -- go2cs converted at 2022 March 06 22:43:01 UTC
+// package p1 -- go2cs converted at 2022 March 13 05:54:11 UTC
 // import "cmd/api/testdata/src/pkg/p1" ==> using p1 = go.cmd.api.testdata.src.pkg.p1_package
 // Original source: C:\Program Files\Go\src\cmd\api\testdata\src\pkg\p1\p1.go
-using ptwo = go.p2_package;
-using System;
-
-
 namespace go.cmd.api.testdata.src.pkg;
+
+using ptwo = p2_package;
+using System;
 
 public static partial class p1_package {
 
@@ -19,7 +18,6 @@ public static readonly long A64 = 1;
 public static readonly var AIsLowerA = a; // previously declared
 
 public static readonly var ConversionConst = MyInt(5);
-
 
 // Variables from function calls.
 public static var V = ptwo.F();public static var VError = BarE();public static var V1 = Bar1(1, 2, 3);public static var V2 = ptwo.G();
@@ -200,7 +198,6 @@ public partial struct EmbedSelector {
 private static readonly @string foo = "foo";
 private static readonly @string foo2 = "foo2";
 private static readonly var truth = foo == "foo" || foo2 == "foo2";
-
 
 private static void ellipsis(params @string _p0) {
 }

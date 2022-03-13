@@ -33,7 +33,9 @@ Fix does not make backup copies of the files that it edits.
 Instead, use a version control system's ``diff'' functionality to inspect
 the changes that fix makes before committing them.
 */
-// package main -- go2cs converted at 2022 March 06 23:15:44 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:29:13 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\doc.go
+namespace go;
 
 } // end main_package

@@ -10,20 +10,21 @@
 // This library accepts either size of byte slice but always
 // returns 16-byte addresses.
 
-// package net -- go2cs converted at 2022 March 06 22:16:10 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:51 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\ip.go
-using bytealg = go.@internal.bytealg_package;
-using itoa = go.@internal.itoa_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using itoa = @internal.itoa_package;
+
+
+// IP address lengths (bytes).
 
 public static partial class net_package {
 
-    // IP address lengths (bytes).
 public static readonly nint IPv4len = 4;
 public static readonly nint IPv6len = 16;
-
 
 // An IP is a single IP address, a slice of bytes.
 // Functions in this package accept either 4-byte (IPv4)
@@ -96,10 +97,8 @@ public static IPMask CIDRMask(nint ones, nint bits) {
         }
         m[i] = ~byte(0xff >> (int)(n));
         n = 0;
-
     }
     return m;
-
 }
 
 // Well-known IPv4 addresses
@@ -123,9 +122,7 @@ public static bool IsLoopback(this IP ip) {
             return ip4[0] == 127;
         }
     }
-
     return ip.Equal(IPv6loopback);
-
 }
 
 // IsPrivate reports whether ip is a private address, according to
@@ -142,13 +139,11 @@ public static bool IsPrivate(this IP ip) {
             //     172.16.0.0      -   172.31.255.255  (172.16/12 prefix)
             //     192.168.0.0     -   192.168.255.255 (192.168/16 prefix)
             return ip4[0] == 10 || (ip4[0] == 172 && ip4[1] & 0xf0 == 16) || (ip4[0] == 192 && ip4[1] == 168);
-
         }
     } 
     // Following RFC 4193, Section 8. IANA Considerations which says:
     //   The IANA has assigned the FC00::/7 prefix to "Unique Local Unicast".
     return len(ip) == IPv6len && ip[0] & 0xfe == 0xfc;
-
 }
 
 // IsMulticast reports whether ip is a multicast address.
@@ -160,9 +155,7 @@ public static bool IsMulticast(this IP ip) {
             return ip4[0] & 0xf0 == 0xe0;
         }
     }
-
     return len(ip) == IPv6len && ip[0] == 0xff;
-
 }
 
 // IsInterfaceLocalMulticast reports whether ip is
@@ -181,9 +174,7 @@ public static bool IsLinkLocalMulticast(this IP ip) {
             return ip4[0] == 224 && ip4[1] == 0 && ip4[2] == 0;
         }
     }
-
     return len(ip) == IPv6len && ip[0] == 0xff && ip[1] & 0x0f == 0x02;
-
 }
 
 // IsLinkLocalUnicast reports whether ip is a link-local
@@ -196,9 +187,7 @@ public static bool IsLinkLocalUnicast(this IP ip) {
             return ip4[0] == 169 && ip4[1] == 254;
         }
     }
-
     return len(ip) == IPv6len && ip[0] == 0xfe && ip[1] & 0xc0 == 0x80;
-
 }
 
 // IsGlobalUnicast reports whether ip is a global unicast
@@ -221,7 +210,6 @@ private static bool isZeros(IP p) {
         }
     }
     return true;
-
 }
 
 // To4 converts the IPv4 address ip to a 4-byte representation.
@@ -234,7 +222,6 @@ public static IP To4(this IP ip) {
         return ip[(int)12..(int)16];
     }
     return null;
-
 }
 
 // To16 converts the IP address ip to a 16-byte representation.
@@ -247,7 +234,6 @@ public static IP To16(this IP ip) {
         return ip;
     }
     return null;
-
 }
 
 // Default route masks for IPv4.
@@ -269,8 +255,7 @@ public static IPMask DefaultMask(this IP ip) {
         return classBMask;
     else 
         return classCMask;
-    
-}
+    }
 
 private static bool allFF(slice<byte> b) {
     foreach (var (_, c) in b) {
@@ -278,7 +263,6 @@ private static bool allFF(slice<byte> b) {
             return false;
         }
     }    return true;
-
 }
 
 // Mask returns the result of masking the IP address ip with mask.
@@ -298,7 +282,6 @@ public static IP Mask(this IP ip, IPMask mask) {
         out[i] = ip[i] & mask[i];
     }
     return out;
-
 }
 
 // ubtoa encodes the string form of the integer v to dst[start:] and
@@ -318,7 +301,6 @@ private static nint ubtoa(slice<byte> dst, nint start, byte v) {
     dst[start + 1] = (v / 10) % 10 + '0';
     dst[start] = v / 100 + '0';
     return 3;
-
 }
 
 // String returns the string form of the IP address ip.
@@ -357,7 +339,6 @@ public static @string String(this IP ip) {
             return string(b[..(int)n]);
         }
     }
-
     if (len(p) != IPv6len) {
         return "?" + hexString(ip);
     }
@@ -380,7 +361,6 @@ public static @string String(this IP ip) {
                 e1 = j;
                 i = j;
             }
-
         }
 
         i = i__prev1;
@@ -408,20 +388,16 @@ public static @string String(this IP ip) {
                     break;
             i += 2;
                 }
-
             }
             else if (i > 0) {
                 b = append(b, ':');
             }
-
             b = appendHex(b, (uint32(p[i]) << 8) | uint32(p[i + 1]));
-
         }
 
         i = i__prev1;
     }
     return string(b);
-
 }
 
 private static @string hexString(slice<byte> b) {
@@ -429,7 +405,6 @@ private static @string hexString(slice<byte> b) {
     foreach (var (i, tn) in b) {
         (s[i * 2], s[i * 2 + 1]) = (hexDigit[tn >> 4], hexDigit[tn & 0xf]);
     }    return string(s);
-
 }
 
 // ipEmptyString is like ip.String except that it returns
@@ -439,7 +414,6 @@ private static @string ipEmptyString(IP ip) {
         return "";
     }
     return ip.String();
-
 }
 
 // MarshalText implements the encoding.TextMarshaler interface.
@@ -456,7 +430,6 @@ public static (slice<byte>, error) MarshalText(this IP ip) {
         return (null, error.As(addr(new AddrError(Err:"invalid IP address",Addr:hexString(ip)))!)!);
     }
     return ((slice<byte>)ip.String(), error.As(null!)!);
-
 }
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
@@ -475,7 +448,6 @@ private static error UnmarshalText(this ptr<IP> _addr_ip, slice<byte> text) {
     }
     ip.val = x;
     return error.As(null!)!;
-
 }
 
 // Equal reports whether ip and x are the same IP address.
@@ -492,7 +464,6 @@ public static bool Equal(this IP ip, IP x) {
         return bytealg.Equal(ip[(int)0..(int)12], v4InV6Prefix) && bytealg.Equal(ip[(int)12..], x);
     }
     return false;
-
 }
 
 public static bool matchAddrFamily(this IP ip, IP x) {
@@ -523,12 +494,9 @@ private static nint simpleMaskLength(IPMask mask) {
                 return -1;
             i++;
             }
-
         }
         break;
-
     }    return n;
-
 }
 
 // Size returns the number of leading ones and total bits in the mask.
@@ -542,7 +510,6 @@ public static (nint, nint) Size(this IPMask m) {
         return (0, 0);
     }
     return ;
-
 }
 
 // String returns the hexadecimal form of m, with no punctuation.
@@ -551,7 +518,6 @@ public static @string String(this IPMask m) {
         return "<nil>";
     }
     return hexString(m);
-
 }
 
 private static (IP, IPMask) networkNumberAndMask(ptr<IPNet> _addr_n) {
@@ -580,7 +546,6 @@ private static (IP, IPMask) networkNumberAndMask(ptr<IPNet> _addr_n) {
     else 
         return (null, null);
         return ;
-
 }
 
 // Contains reports whether the network includes ip.
@@ -595,7 +560,6 @@ private static bool Contains(this ptr<IPNet> _addr_n, IP ip) {
             ip = x;
         }
     }
-
     var l = len(ip);
     if (l != len(nn)) {
         return false;
@@ -606,7 +570,6 @@ private static bool Contains(this ptr<IPNet> _addr_n, IP ip) {
         }
     }
     return true;
-
 }
 
 // Network returns the address's network name, "ip+net".
@@ -634,7 +597,6 @@ private static @string String(this ptr<IPNet> _addr_n) {
         return nn.String() + "/" + m.String();
     }
     return nn.String() + "/" + itoa.Uitoa(uint(l));
-
 }
 
 // Parse IPv4 address (d.d.d.d).
@@ -644,7 +606,6 @@ private static IP parseIPv4(@string s) {
         if (len(s) == 0) { 
             // Missing octets.
             return null;
-
         }
         if (i > 0) {
             if (s[0] != '.') {
@@ -659,17 +620,14 @@ private static IP parseIPv4(@string s) {
         if (c > 1 && s[0] == '0') { 
             // Reject non-zero components with leading zeroes.
             return null;
-
         }
         s = s[(int)c..];
         p[i] = byte(n);
-
     }
     if (len(s) != 0) {
         return null;
     }
     return IPv4(p[0], p[1], p[2], p[3]);
-
 }
 
 // parseIPv6Zone parses s as a literal IPv6 address and its associated zone
@@ -710,20 +668,15 @@ private static IP parseIPv6(@string s) {
             if (ellipsis < 0 && i != IPv6len - IPv4len) { 
                 // Not the right place.
                 return null;
-
             }
-
             if (i + IPv4len > IPv6len) { 
                 // Not enough room.
                 return null;
-
             }
-
             var ip4 = parseIPv4(s);
             if (ip4 == null) {
                 return null;
             }
-
             ip[i] = ip4[12];
             ip[i + 1] = ip4[13];
             ip[i + 2] = ip4[14];
@@ -731,7 +684,6 @@ private static IP parseIPv6(@string s) {
             s = "";
             i += IPv4len;
             break;
-
         }
         ip[i] = byte(n >> 8);
         ip[i + 1] = byte(n);
@@ -751,16 +703,12 @@ private static IP parseIPv6(@string s) {
         if (s[0] == ':') {
             if (ellipsis >= 0) { // already have one
                 return null;
-
             }
-
             ellipsis = i;
             s = s[(int)1..];
             if (len(s) == 0) { // can be at end
                 break;
-
             }
-
         }
     } 
 
@@ -793,15 +741,12 @@ private static IP parseIPv6(@string s) {
 
             j = j__prev1;
         }
-
     }
     else if (ellipsis >= 0) { 
         // Ellipsis must represent at least one 0 group.
         return null;
-
     }
     return ip;
-
 }
 
 // ParseIP parses s as an IP address, returning the result.
@@ -819,10 +764,8 @@ public static IP ParseIP(@string s) {
                 return parseIPv6(s);
                 break;
         }
-
     }
     return null;
-
 }
 
 // parseIPZone parses s as an IP address, return it and its associated zone
@@ -840,10 +783,8 @@ private static (IP, @string) parseIPZone(@string s) {
                 return parseIPv6Zone(s);
                 break;
         }
-
     }
     return (null, "");
-
 }
 
 // ParseCIDR parses s as a CIDR notation IP address and prefix length,
@@ -877,7 +818,6 @@ public static (IP, ptr<IPNet>, error) ParseCIDR(@string s) {
     }
     var m = CIDRMask(n, 8 * iplen);
     return (ip, addr(new IPNet(IP:ip.Mask(m),Mask:m)), error.As(null!)!);
-
 }
 
 } // end net_package

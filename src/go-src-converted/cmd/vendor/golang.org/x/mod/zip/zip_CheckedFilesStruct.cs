@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:22 UTC
+//     Generated on 2022 March 13 06:41:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace mod
 {
     public static partial class zip_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CheckedFiles
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace mod
             public static implicit operator CheckedFiles(NilType nil) => default(CheckedFiles);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CheckedFiles CheckedFiles_cast(dynamic value)
         {
             return new CheckedFiles(value.Valid, value.Omitted, value.Invalid, value.SizeError);

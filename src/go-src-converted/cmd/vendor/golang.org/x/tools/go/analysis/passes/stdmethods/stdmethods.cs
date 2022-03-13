@@ -4,20 +4,20 @@
 
 // Package stdmethods defines an Analyzer that checks for misspellings
 // in the signatures of methods similar to well-known interfaces.
-// package stdmethods -- go2cs converted at 2022 March 06 23:34:46 UTC
+
+// package stdmethods -- go2cs converted at 2022 March 13 06:42:03 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/stdmethods" ==> using stdmethods = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.stdmethods_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\stdmethods\stdmethods.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+using strings = strings_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class stdmethods_package {
 
@@ -87,10 +87,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 }
                 break;
         }
-
     });
     return (null, error.As(null!)!);
-
 }
 
 private static void canonicalMethod(ptr<analysis.Pass> _addr_pass, ptr<ast.Ident> _addr_id) {
@@ -121,7 +119,6 @@ private static void canonicalMethod(ptr<analysis.Pass> _addr_pass, ptr<ast.Ident
             }
 
         }
-
     }
     if (!matchParams(_addr_pass, expect.args, _addr_args, "=") || !matchParams(_addr_pass, expect.results, _addr_results, "=")) {
         return ;
@@ -139,7 +136,6 @@ private static void canonicalMethod(ptr<analysis.Pass> _addr_pass, ptr<ast.Ident
         actual = id.Name + actual;
 
         pass.ReportRangef(id, "method %s should have signature %s", actual, expectFmt);
-
     }
 }
 
@@ -154,9 +150,7 @@ private static @string argjoin(slice<@string> x) {
             s = s[(int)1..];
         }
         y[i] = s;
-
     }    return strings.Join(y, ", ");
-
 }
 
 // Does each type in expect with the given prefix match the corresponding type in actual?
@@ -178,7 +172,6 @@ private static bool matchParams(ptr<analysis.Pass> _addr_pass, slice<@string> ex
         return false;
     }
     return true;
-
 }
 
 // Does this one type match?
@@ -186,7 +179,6 @@ private static bool matchParamType(@string expect, types.Type actual) {
     expect = strings.TrimPrefix(expect, "="); 
     // Overkill but easy.
     return typeString(actual) == expect;
-
 }
 
 private static ptr<types.Interface> errorType = types.Universe.Lookup("error").Type().Underlying()._<ptr<types.Interface>>();

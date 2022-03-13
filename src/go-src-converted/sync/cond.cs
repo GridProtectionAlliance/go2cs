@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2022 March 06 22:08:12 UTC
+// package sync -- go2cs converted at 2022 March 13 05:24:01 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\cond.go
-using atomic = go.sync.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = sync.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// Cond implements a condition variable, a rendezvous point
+// for goroutines waiting for or announcing the occurrence
+// of an event.
+//
+// Each Cond has an associated Locker L (often a *Mutex or *RWMutex),
+// which must be held when changing the condition and
+// when calling the Wait method.
+//
+// A Cond must not be copied after first use.
 
 public static partial class sync_package {
 
-    // Cond implements a condition variable, a rendezvous point
-    // for goroutines waiting for or announcing the occurrence
-    // of an event.
-    //
-    // Each Cond has an associated Locker L (often a *Mutex or *RWMutex),
-    // which must be held when changing the condition and
-    // when calling the Wait method.
-    //
-    // A Cond must not be copied after first use.
 public partial struct Cond {
     public noCopy noCopy; // L is held while observing or changing the condition
     public Locker L;

@@ -4,26 +4,27 @@
 
 // Memory statistics
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:11 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:00 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mstats.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// Statistics.
+//
+// For detailed descriptions see the documentation for MemStats.
+// Fields that differ from MemStats are further documented here.
+//
+// Many of these fields are updated on the fly, while others are only
+// updated when updatememstats is called.
+
+using System;
 public static partial class runtime_package {
 
-    // Statistics.
-    //
-    // For detailed descriptions see the documentation for MemStats.
-    // Fields that differ from MemStats are further documented here.
-    //
-    // Many of these fields are updated on the fly, while others are only
-    // updated when updatememstats is called.
 private partial struct mstats {
     public ulong alloc; // bytes allocated and not yet freed
     public ulong total_alloc; // bytes allocated (even if freed)
@@ -298,7 +299,6 @@ private static void init() {
         offset = offset__prev1;
 
     }
-
     {
         var offset__prev1 = offset;
 
@@ -321,7 +321,6 @@ private static void init() {
             throw("heapStatsDelta not a multiple of 8 bytes in size");
         }
     }
-
 }
 
 // ReadMemStats populates m with memory allocator statistics.
@@ -414,13 +413,11 @@ private static void readmemstats_m(ptr<MemStats> _addr_stats) {
             bySizeLen = l;
         }
     }
-
     for (nint i = 0; i < bySizeLen; i++) {
         stats.BySize[i].Size = memstats.by_size[i].size;
         stats.BySize[i].Mallocs = memstats.by_size[i].nmalloc;
         stats.BySize[i].Frees = memstats.by_size[i].nfree;
     }
-
 }
 
 //go:linkname readGCStats runtime/debug.readGCStats
@@ -461,7 +458,6 @@ private static void readGCStats_m(ptr<slice<ulong>> _addr_pauses) {
     p[n + n + 2] = memstats.pause_total_ns;
     unlock(_addr_mheap_.@lock);
     pauses = p[..(int)n + n + 3];
-
 }
 
 // Updates the memstats structure.
@@ -529,7 +525,6 @@ private static void updatememstats() {
             totalFree += f * uint64(class_to_size[i]);
             memstats.nfree += f;
             memstats.by_size[i].nfree = f;
-
         }
 
         i = i__prev1;
@@ -597,7 +592,6 @@ private static void flushmcache(nint i) {
     }
     c.releaseAll();
     stackcache_clear(c);
-
 }
 
 // flushallmcaches flushes the mcaches of all Ps.
@@ -749,19 +743,15 @@ private static ptr<heapStatsDelta> acquire(this ptr<consistentHeapStats> _addr_m
                 // Should have been incremented to odd.
                 print("runtime: seq=", seq, "\n");
                 throw("bad sequence number");
-
             }
-
         }
         else
  {
             lock(_addr_m.noPLock);
         }
     }
-
     var gen = atomic.Load(_addr_m.gen) % 3;
     return _addr__addr_m.stats[gen]!;
-
 }
 
 // release indicates that the writer is done modifying
@@ -784,16 +774,13 @@ private static void release(this ptr<consistentHeapStats> _addr_m) {
                 // Should have been incremented to even.
                 print("runtime: seq=", seq, "\n");
                 throw("bad sequence number");
-
             }
-
         }
         else
  {
             unlock(_addr_m.noPLock);
         }
     }
-
 }
 
 // unsafeRead aggregates the delta for this shard into out.
@@ -865,8 +852,8 @@ private static void read(this ptr<consistentHeapStats> _addr_m, ptr<heapStatsDel
 
     foreach (var (_, p) in allp) { 
         // Spin until there are no more writers.
-        while (atomic.Load(_addr_p.statsSeq) % 2 != 0)         }
-
+        while (atomic.Load(_addr_p.statsSeq) % 2 != 0) {
+        }
     }    m.stats[currGen].merge(_addr_m.stats[prevGen]);
     m.stats[prevGen] = new heapStatsDelta(); 
 
@@ -874,7 +861,6 @@ private static void read(this ptr<consistentHeapStats> _addr_m, ptr<heapStatsDel
     out.val = m.stats[currGen];
 
     releasem(mp);
-
 }
 
 } // end runtime_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:33 UTC
+//     Generated on 2022 March 13 05:34:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lazyCert
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace crypto
             public static implicit operator lazyCert(NilType nil) => default(lazyCert);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lazyCert lazyCert_cast(dynamic value)
         {
             return new lazyCert(value.rawSubject, value.getCert);

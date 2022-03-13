@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:34:31 UTC
+//     Generated on 2022 March 13 06:41:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace passes
 {
     public static partial class buildtag_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct checker
         {
             // Constructors
@@ -83,7 +83,7 @@ namespace passes
             public static implicit operator checker(NilType nil) => default(checker);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static checker checker_cast(dynamic value)
         {
             return new checker(ref value.pass, value.plusBuildOK, value.goBuildOK, value.crossCheck, value.inStar, value.goBuildPos, value.plusBuildPos, value.goBuild, value.plusBuild);

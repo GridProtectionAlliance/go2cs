@@ -5,20 +5,18 @@
 //go:build aix || darwin || (js && wasm) || openbsd || solaris
 // +build aix darwin js,wasm openbsd solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:56 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:06 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\wait_unimp.go
-
-
 namespace go;
 
 public static partial class os_package {
 
-    // blockUntilWaitable attempts to block until a call to p.Wait will
-    // succeed immediately, and reports whether it has done so.
-    // It does not actually call p.Wait.
-    // This version is used on systems that do not implement waitid,
-    // or where we have not implemented it yet.
+// blockUntilWaitable attempts to block until a call to p.Wait will
+// succeed immediately, and reports whether it has done so.
+// It does not actually call p.Wait.
+// This version is used on systems that do not implement waitid,
+// or where we have not implemented it yet.
 private static (bool, error) blockUntilWaitable(this ptr<Process> _addr_p) {
     bool _p0 = default;
     error _p0 = default!;

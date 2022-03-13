@@ -5,12 +5,12 @@
 //go:build go1.8
 // +build go1.8
 
-// package logopt -- go2cs converted at 2022 March 06 22:47:44 UTC
+// package logopt -- go2cs converted at 2022 March 13 05:59:00 UTC
 // import "cmd/compile/internal/logopt" ==> using logopt = go.cmd.compile.@internal.logopt_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\logopt\escape.go
-using url = go.net.url_package;
-
 namespace go.cmd.compile.@internal;
+
+using url = net.url_package;
 
 public static partial class logopt_package {
 

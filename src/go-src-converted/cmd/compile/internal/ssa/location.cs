@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:09 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:33 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\location.go
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using fmt = fmt_package;
+
+
+// A place that an ssa variable can reside.
 
 public static partial class ssa_package {
 
-    // A place that an ssa variable can reside.
 public partial interface Location {
     @string String(); // name to use in assembly templates: AX, 16(SP), ...
 }
@@ -82,7 +84,6 @@ public static @string String(this LocalSlot s) {
         return fmt.Sprintf("%v[%v]", s.N, s.Type);
     }
     return fmt.Sprintf("%v+%d[%v]", s.N, s.Off, s.Type);
-
 }
 
 public partial struct LocPair { // : array<Location>
@@ -98,7 +99,6 @@ public static @string String(this LocPair t) {
         n1 = t[1].String();
     }
     return fmt.Sprintf("<%s,%s>", n0, n1);
-
 }
 
 public partial struct LocResults { // : slice<Location>

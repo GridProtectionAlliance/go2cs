@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2022 March 06 22:26:22 UTC
+// package sync -- go2cs converted at 2022 March 13 05:24:05 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\once.go
-using atomic = go.sync.atomic_package;
-using System;
-
-
 namespace go;
 
+using atomic = sync.atomic_package;
+
+
+// Once is an object that will perform exactly one action.
+//
+// A Once must not be copied after first use.
+
+using System;
 public static partial class sync_package {
 
-    // Once is an object that will perform exactly one action.
-    //
-    // A Once must not be copied after first use.
 public partial struct Once {
     public uint done;
     public Mutex m;
@@ -59,7 +60,6 @@ private static void Do(this ptr<Once> _addr_o, Action f) {
     if (atomic.LoadUint32(_addr_o.done) == 0) { 
         // Outlined slow-path to allow inlining of the fast-path.
         o.doSlow(f);
-
     }
 }
 

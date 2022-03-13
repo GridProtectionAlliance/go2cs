@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2022 March 06 22:30:21 UTC
+// package strings -- go2cs converted at 2022 March 13 05:41:08 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Program Files\Go\src\strings\reader.go
-using errors = go.errors_package;
-using io = go.io_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go;
+
+using errors = errors_package;
+using io = io_package;
+using utf8 = unicode.utf8_package;
+
+
+// A Reader implements the io.Reader, io.ReaderAt, io.ByteReader, io.ByteScanner,
+// io.RuneReader, io.RuneScanner, io.Seeker, and io.WriterTo interfaces by reading
+// from a string.
+// The zero value for Reader operates like a Reader of an empty string.
 
 public static partial class strings_package {
 
-    // A Reader implements the io.Reader, io.ReaderAt, io.ByteReader, io.ByteScanner,
-    // io.RuneReader, io.RuneScanner, io.Seeker, and io.WriterTo interfaces by reading
-    // from a string.
-    // The zero value for Reader operates like a Reader of an empty string.
 public partial struct Reader {
     public @string s;
     public long i; // current reading index
@@ -32,7 +34,6 @@ private static nint Len(this ptr<Reader> _addr_r) {
         return 0;
     }
     return int(int64(len(r.s)) - r.i);
-
 }
 
 // Size returns the original length of the underlying string.
@@ -58,7 +59,6 @@ private static (nint, error) Read(this ptr<Reader> _addr_r, slice<byte> b) {
     n = copy(b, r.s[(int)r.i..]);
     r.i += int64(n);
     return ;
-
 }
 
 // ReadAt implements the io.ReaderAt interface.
@@ -79,7 +79,6 @@ private static (nint, error) ReadAt(this ptr<Reader> _addr_r, slice<byte> b, lon
         err = io.EOF;
     }
     return ;
-
 }
 
 // ReadByte implements the io.ByteReader interface.
@@ -95,7 +94,6 @@ private static (byte, error) ReadByte(this ptr<Reader> _addr_r) {
     var b = r.s[r.i];
     r.i++;
     return (b, error.As(null!)!);
-
 }
 
 // UnreadByte implements the io.ByteScanner interface.
@@ -108,7 +106,6 @@ private static error UnreadByte(this ptr<Reader> _addr_r) {
     r.prevRune = -1;
     r.i--;
     return error.As(null!)!;
-
 }
 
 // ReadRune implements the io.RuneReader interface.
@@ -131,11 +128,9 @@ private static (int, nint, error) ReadRune(this ptr<Reader> _addr_r) {
             return (rune(c), 1, error.As(null!)!);
         }
     }
-
     ch, size = utf8.DecodeRuneInString(r.s[(int)r.i..]);
     r.i += int64(size);
     return ;
-
 }
 
 // UnreadRune implements the io.RuneScanner interface.
@@ -151,7 +146,6 @@ private static error UnreadRune(this ptr<Reader> _addr_r) {
     r.i = int64(r.prevRune);
     r.prevRune = -1;
     return error.As(null!)!;
-
 }
 
 // Seek implements the io.Seeker interface.
@@ -176,7 +170,6 @@ private static (long, error) Seek(this ptr<Reader> _addr_r, long offset, nint wh
     }
     r.i = abs;
     return (abs, error.As(null!)!);
-
 }
 
 // WriteTo implements the io.WriterTo interface.
@@ -200,7 +193,6 @@ private static (long, error) WriteTo(this ptr<Reader> _addr_r, io.Writer w) => f
         err = io.ErrShortWrite;
     }
     return ;
-
 });
 
 // Reset resets the Reader to be reading from s.

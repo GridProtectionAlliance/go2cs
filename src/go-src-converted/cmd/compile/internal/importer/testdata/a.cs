@@ -5,12 +5,12 @@
 
 // Input for TestIssue13566
 
-// package a -- go2cs converted at 2022 March 06 23:13:55 UTC
+// package a -- go2cs converted at 2022 March 13 06:27:22 UTC
 // import "cmd/compile/internal/importer.a" ==> using a = go.cmd.compile.@internal.importer.a_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\importer\testdata\a.go
-using json = go.encoding.json_package;
-
 namespace go.cmd.compile.@internal;
+
+using json = encoding.json_package;
 
 public static partial class a_package {
 

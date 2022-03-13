@@ -4,23 +4,24 @@
 
 // MakeFunc implementation.
 
-// package reflect -- go2cs converted at 2022 March 06 22:30:37 UTC
+// package reflect -- go2cs converted at 2022 March 13 05:41:27 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Program Files\Go\src\reflect\makefunc.go
-using abi = go.@internal.abi_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using abi = @internal.abi_package;
+using @unsafe = @unsafe_package;
+
+
+// makeFuncImpl is the closure value implementing the function
+// returned by MakeFunc.
+// The first three words of this type must be kept in sync with
+// methodValue and runtime.reflectMethodValue.
+// Any changes should be reflected in all three.
+
+using System;
 public static partial class reflect_package {
 
-    // makeFuncImpl is the closure value implementing the function
-    // returned by MakeFunc.
-    // The first three words of this type must be kept in sync with
-    // methodValue and runtime.reflectMethodValue.
-    // Any changes should be reflected in all three.
 private partial struct makeFuncImpl {
     public ref makeFuncCtxt makeFuncCtxt => ref makeFuncCtxt_val;
     public ptr<funcType> ftyp;
@@ -68,7 +69,6 @@ public static Value MakeFunc(Type typ, Func<slice<Value>, slice<Value>> fn) => f
     ptr<makeFuncImpl> impl = addr(new makeFuncImpl(makeFuncCtxt:makeFuncCtxt{fn:code,stack:abi.stackPtrs,argLen:abi.stackCallArgsSize,regPtrs:abi.inRegPtrs,},ftyp:ftyp,fn:fn,));
 
     return new Value(t,unsafe.Pointer(impl),flag(Func));
-
 });
 
 // makeFuncStub is an assembly function that is the code half of
@@ -121,7 +121,6 @@ private static Value makeMethodValue(@string op, Value v) => func((_, panic, _) 
     methodReceiver(op, fv.rcvr, fv.method);
 
     return new Value(&ftyp.rtype,unsafe.Pointer(fv),v.flag&flagRO|flag(Func));
-
 });
 
 // methodValueCall is an assembly function that is the code half of
@@ -158,20 +157,18 @@ private static void moveMakeFuncArgPtrs(ptr<makeFuncCtxt> _addr_ctxt, ptr<abi.Re
         // Avoid write barriers! Because our write barrier enqueues what
         // was there before, we might enqueue garbage.
         if (ctxt.regPtrs.Get(i)) {>>MARKER:FUNCTION_methodValueCall_BLOCK_PREFIX<<
-            (uintptr.val)(@unsafe.Pointer(_addr_args.Ptrs[i])).val;
+            (uintptr.val).val;
 
-            arg;
-
+            (@unsafe.Pointer(_addr_args.Ptrs[i])) = arg;
         }
         else
  { 
             // We *must* zero this space ourselves because it's defined in
             // assembly code and the GC will scan these pointers. Otherwise,
             // there will be garbage here.
-            (uintptr.val)(@unsafe.Pointer(_addr_args.Ptrs[i])).val;
+            (uintptr.val).val;
 
-            0;
-
+            (@unsafe.Pointer(_addr_args.Ptrs[i])) = 0;
         }
     }
 }

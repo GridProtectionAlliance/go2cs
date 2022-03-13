@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cryptobyte -- go2cs converted at 2022 March 06 23:36:37 UTC
+// package cryptobyte -- go2cs converted at 2022 March 13 06:44:40 UTC
 // import "vendor/golang.org/x/crypto/cryptobyte" ==> using cryptobyte = go.vendor.golang.org.x.crypto.cryptobyte_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\cryptobyte\asn1.go
-using encoding_asn1 = go.encoding.asn1_package;
-using fmt = go.fmt_package;
-using big = go.math.big_package;
-using reflect = go.reflect_package;
-using time = go.time_package;
-
-using asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.crypto;
 
+using encoding_asn1 = encoding.asn1_package;
+using fmt = fmt_package;
+using big = math.big_package;
+using reflect = reflect_package;
+using time = time_package;
+
+using asn1 = golang.org.x.crypto.cryptobyte.asn1_package;
+
+
+// This file contains ASN.1-related methods for String and Builder.
+
+// Builder
+
+// AddASN1Int64 appends a DER-encoded ASN.1 INTEGER.
+
+using System;
 public static partial class cryptobyte_package {
 
-    // This file contains ASN.1-related methods for String and Builder.
-
-    // Builder
-
-    // AddASN1Int64 appends a DER-encoded ASN.1 INTEGER.
 private static void AddASN1Int64(this ptr<Builder> _addr_b, long v) {
     ref Builder b = ref _addr_b.val;
 
@@ -69,9 +70,7 @@ private static void addASN1Signed(this ptr<Builder> _addr_b, asn1.Tag tag, long 
             c.AddUint8(uint8(i));
             length--;
         }
-
     });
-
 }
 
 // AddASN1Uint64 appends a DER-encoded ASN.1 INTEGER.
@@ -99,9 +98,7 @@ private static void AddASN1Uint64(this ptr<Builder> _addr_b, ulong v) {
             c.AddUint8(uint8(i));
             length--;
         }
-
     });
-
 }
 
 // AddASN1BigInt appends a DER-encoded ASN.1 INTEGER.
@@ -127,9 +124,7 @@ private static void AddASN1BigInt(this ptr<Builder> _addr_b, ptr<big.Int> _addr_
             if (len(bytes) == 0 || bytes[0] & 0x80 == 0) {
                 c.add(0xff);
             }
-
             c.add(bytes);
-
         }
         else if (n.Sign() == 0) {
             c.add(0);
@@ -143,7 +138,6 @@ private static void AddASN1BigInt(this ptr<Builder> _addr_b, ptr<big.Int> _addr_
             c.add(bytes);
         }
     });
-
 }
 
 // AddASN1OctetString appends a DER-encoded ASN.1 OCTET STRING.
@@ -171,7 +165,6 @@ private static void AddASN1GeneralizedTime(this ptr<Builder> _addr_b, time.Time 
     b.AddASN1(asn1.GeneralizedTime, c => {
         c.AddBytes((slice<byte>)t.Format(generalizedTimeFormatStr));
     });
-
 }
 
 // AddASN1UTCTime appends a DER-encoded ASN.1 UTCTime.
@@ -186,9 +179,7 @@ private static void AddASN1UTCTime(this ptr<Builder> _addr_b, time.Time t) {
             return ;
         }
         c.AddBytes((slice<byte>)t.Format(defaultUTCTimeFormatStr));
-
     });
-
 }
 
 // AddASN1BitString appends a DER-encoded ASN.1 BIT STRING. This does not
@@ -224,7 +215,6 @@ private static void addBase128Int(this ptr<Builder> _addr_b, long n) {
 
             i = i__prev1;
         }
-
     }
     {
         var i__prev1 = i;
@@ -240,7 +230,6 @@ private static void addBase128Int(this ptr<Builder> _addr_b, long n) {
 
         i = i__prev1;
     }
-
 }
 
 private static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
@@ -255,7 +244,6 @@ private static bool isValidOID(encoding_asn1.ObjectIdentifier oid) {
             return false;
         }
     }    return true;
-
 }
 
 private static void AddASN1ObjectIdentifier(this ptr<Builder> _addr_b, encoding_asn1.ObjectIdentifier oid) {
@@ -271,7 +259,6 @@ private static void AddASN1ObjectIdentifier(this ptr<Builder> _addr_b, encoding_
             b.addBase128Int(int64(v));
         }
     });
-
 }
 
 private static void AddASN1Boolean(this ptr<Builder> _addr_b, bool v) {
@@ -286,7 +273,6 @@ private static void AddASN1Boolean(this ptr<Builder> _addr_b, bool v) {
             b.AddUint8(0);
         }
     });
-
 }
 
 private static void AddASN1NULL(this ptr<Builder> _addr_b) {
@@ -312,7 +298,6 @@ private static void MarshalASN1(this ptr<Builder> _addr_b, object v) {
         return ;
     }
     b.AddBytes(bytes);
-
 }
 
 // AddASN1 appends an ASN.1 object. The object is prefixed with the given tag.
@@ -331,7 +316,6 @@ private static void AddASN1(this ptr<Builder> _addr_b, asn1.Tag tag, BuilderCont
     }
     b.AddUint8(uint8(tag));
     b.addLengthPrefixed(1, true, f);
-
 }
 
 // String
@@ -360,7 +344,6 @@ private static bool ReadASN1Boolean(this ptr<String> _addr_s, ptr<bool> _addr_@o
     }
 
     return true;
-
 }
 
 private static var bigIntType = reflect.TypeOf((big.Int.val)(null)).Elem();
@@ -394,14 +377,12 @@ private static bool ReadASN1Integer(this ptr<String> _addr_s, object @out) => fu
             return s.readASN1BigInt(out._<ptr<big.Int>>());
         }
         panic("out does not point to an integer type");
-
 });
 
 private static bool checkASN1Integer(slice<byte> bytes) {
     if (len(bytes) == 0) { 
         // An INTEGER is encoded with at least one octet.
         return false;
-
     }
     if (len(bytes) == 1) {
         return true;
@@ -409,10 +390,8 @@ private static bool checkASN1Integer(slice<byte> bytes) {
     if (bytes[0] == 0 && bytes[1] & 0x80 == 0 || bytes[0] == 0xff && bytes[1] & 0x80 == 0x80) { 
         // Value is not minimally encoded.
         return false;
-
     }
     return true;
-
 }
 
 private static var bigOne = big.NewInt(1);
@@ -435,12 +414,10 @@ private static bool readASN1BigInt(this ptr<String> _addr_s, ptr<big.Int> _addr_
         @out.SetBytes(neg);
         @out.Add(out, bigOne);
         @out.Neg(out);
-
     } {
         @out.SetBytes(bytes);
     }
     return true;
-
 }
 
 private static bool readASN1Int64(this ptr<String> _addr_s, ptr<long> _addr_@out) {
@@ -452,7 +429,6 @@ private static bool readASN1Int64(this ptr<String> _addr_s, ptr<long> _addr_@out
         return false;
     }
     return true;
-
 }
 
 private static bool asn1Signed(ptr<long> _addr_@out, slice<byte> n) {
@@ -470,7 +446,6 @@ private static bool asn1Signed(ptr<long> _addr_@out, slice<byte> n) {
     out.val<<=64 - uint8(length) * 8;
     out.val>>=64 - uint8(length) * 8;
     return true;
-
 }
 
 private static bool readASN1Uint64(this ptr<String> _addr_s, ptr<ulong> _addr_@out) {
@@ -482,7 +457,6 @@ private static bool readASN1Uint64(this ptr<String> _addr_s, ptr<ulong> _addr_@o
         return false;
     }
     return true;
-
 }
 
 private static bool asn1Unsigned(ptr<ulong> _addr_@out, slice<byte> n) {
@@ -492,19 +466,16 @@ private static bool asn1Unsigned(ptr<ulong> _addr_@out, slice<byte> n) {
     if (length > 9 || length == 9 && n[0] != 0) { 
         // Too large for uint64.
         return false;
-
     }
     if (n[0] & 0x80 != 0) { 
         // Negative number.
         return false;
-
     }
     for (nint i = 0; i < length; i++) {
         out.val<<=8;
         out.val |= uint64(n[i]);
     }
     return true;
-
 }
 
 // ReadASN1Int64WithTag decodes an ASN.1 INTEGER with the given tag into out
@@ -534,7 +505,6 @@ private static bool ReadASN1Enum(this ptr<String> _addr_s, ptr<nint> _addr_@out)
     }
     out.val = int(i);
     return true;
-
 }
 
 private static bool readBase128Int(this ptr<String> _addr_s, ptr<nint> _addr_@out) {
@@ -593,11 +563,9 @@ private static bool ReadASN1ObjectIdentifier(this ptr<String> _addr_s, ptr<encod
         i++;
         }
         components[i] = v;
-
     }
     out.val = components[..(int)i];
     return true;
-
 }
 
 // ReadASN1GeneralizedTime decodes an ASN.1 GENERALIZEDTIME into out and
@@ -622,10 +590,8 @@ private static bool ReadASN1GeneralizedTime(this ptr<String> _addr_s, ptr<time.T
             return false;
         }
     }
-
     out.val = res;
     return true;
-
 }
 
 private static readonly @string defaultUTCTimeFormatStr = "060102150405Z0700";
@@ -655,7 +621,6 @@ private static bool ReadASN1UTCTime(this ptr<String> _addr_s, ptr<time.Time> _ad
         // support this, but we do.
         formatStr = "0601021504Z0700";
         res, err = time.Parse(formatStr, t);
-
     }
     if (err != null) {
         return false;
@@ -668,17 +633,14 @@ private static bool ReadASN1UTCTime(this ptr<String> _addr_s, ptr<time.Time> _ad
         }
     }
 
-
     if (res.Year() >= 2050) { 
         // UTCTime interprets the low order digits 50-99 as 1950-99.
         // This only applies to its use in the X.509 profile.
         // See https://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
         res = res.AddDate(-100, 0, 0);
-
     }
     out.val = res;
     return true;
-
 }
 
 // ReadASN1BitString decodes an ASN.1 BIT STRING into out and advances.
@@ -699,7 +661,6 @@ private static bool ReadASN1BitString(this ptr<String> _addr_s, ptr<encoding_asn
     @out.BitLength = len(bytes) * 8 - int(paddingBits);
     @out.Bytes = bytes;
     return true;
-
 }
 
 // ReadASN1BitString decodes an ASN.1 BIT STRING into out and advances. It is
@@ -719,7 +680,6 @@ private static bool ReadASN1BitStringAsBytes(this ptr<String> _addr_s, ptr<slice
     }
     out.val = bytes[(int)1..];
     return true;
-
 }
 
 // ReadASN1Bytes reads the contents of a DER-encoded ASN.1 element (not including
@@ -746,7 +706,6 @@ private static bool ReadASN1(this ptr<String> _addr_s, ptr<String> _addr_@out, a
         return false;
     }
     return true;
-
 }
 
 // ReadASN1Element reads the contents of a DER-encoded ASN.1 element (including
@@ -763,7 +722,6 @@ private static bool ReadASN1Element(this ptr<String> _addr_s, ptr<String> _addr_
         return false;
     }
     return true;
-
 }
 
 // ReadAnyASN1 reads the contents of a DER-encoded ASN.1 element (not including
@@ -799,7 +757,6 @@ public static bool PeekASN1Tag(this String s, asn1.Tag tag) {
         return false;
     }
     return asn1.Tag(s[0]) == tag;
-
 }
 
 // SkipASN1 reads and discards an ASN.1 element with the given tag. It
@@ -828,7 +785,6 @@ private static bool ReadOptionalASN1(this ptr<String> _addr_s, ptr<String> _addr
         return false;
     }
     return true;
-
 }
 
 // SkipOptionalASN1 advances s over an ASN.1 element with the given tag, or
@@ -841,7 +797,6 @@ private static bool SkipOptionalASN1(this ptr<String> _addr_s, asn1.Tag tag) {
     }
     ref String unused = ref heap(out ptr<String> _addr_unused);
     return s.ReadASN1(_addr_unused, tag);
-
 }
 
 // ReadOptionalASN1Integer attempts to read an optional ASN.1 INTEGER
@@ -875,13 +830,11 @@ private static bool ReadOptionalASN1Integer(this ptr<String> _addr_s, object @ou
         else 
             panic("invalid integer type");
                 return true;
-
     }
     if (!i.ReadASN1Integer(out) || !i.Empty()) {
         return false;
     }
     return true;
-
 });
 
 // ReadOptionalASN1OctetString attempts to read an optional ASN.1 OCTET STRING
@@ -907,14 +860,12 @@ private static bool ReadOptionalASN1OctetString(this ptr<String> _addr_s, ptr<sl
             return false;
         }
         out.val = oct;
-
     }
     else
  {
         out.val = null;
     }
     return true;
-
 }
 
 // ReadOptionalASN1Boolean sets *out to the value of the next ASN.1 BOOLEAN or,
@@ -934,7 +885,6 @@ private static bool ReadOptionalASN1Boolean(this ptr<String> _addr_s, ptr<bool> 
         return true;
     }
     return s.ReadASN1Boolean(out);
-
 }
 
 private static bool readASN1(this ptr<String> _addr_s, ptr<String> _addr_@out, ptr<asn1.Tag> _addr_outTag, bool skipHeader) => func((_, panic, _) => {
@@ -955,7 +905,6 @@ private static bool readASN1(this ptr<String> _addr_s, ptr<String> _addr_@out, p
         // form identifier with two or more octets. We only support tags less than
         // 31 (i.e. low-tag-number form, single octet identifier).
         return false;
-
     }
     if (outTag != null) {
         outTag = asn1.Tag(tag);
@@ -966,7 +915,6 @@ private static bool readASN1(this ptr<String> _addr_s, ptr<String> _addr_@out, p
         // Short-form length (section 8.1.3.4), encoded in bits 1-7.
         length = uint32(lenByte) + 2;
         headerLen = 2;
-
     }
     else
  { 
@@ -985,21 +933,17 @@ private static bool readASN1(this ptr<String> _addr_s, ptr<String> _addr_@out, p
         if (len32 < 128) { 
             // Length should have used short-form encoding.
             return false;
-
         }
         if (len32 >> (int)(((lenLen - 1) * 8)) == 0) { 
             // Leading octet is 0. Length should have been at least one byte shorter.
             return false;
-
         }
         headerLen = 2 + uint32(lenLen);
         if (headerLen + len32 < len32) { 
             // Overflow.
             return false;
-
         }
         length = headerLen + len32;
-
     }
     if (int(length) < 0 || !s.ReadBytes(new ptr<ptr<slice<byte>>>(out), int(length))) {
         return false;
@@ -1008,7 +952,6 @@ private static bool readASN1(this ptr<String> _addr_s, ptr<String> _addr_@out, p
         panic("cryptobyte: internal error");
     }
     return true;
-
 });
 
 } // end cryptobyte_package

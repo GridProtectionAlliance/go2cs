@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:12:45 UTC
+//     Generated on 2022 March 13 06:26:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class types2_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(@object))]
         public partial struct TypeName
         {
@@ -82,7 +82,7 @@ namespace @internal
             public static implicit operator TypeName(NilType nil) => default(TypeName);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static TypeName TypeName_cast(dynamic value)
         {
             return new TypeName(value.@object);

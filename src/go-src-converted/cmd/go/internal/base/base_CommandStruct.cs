@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:15:55 UTC
+//     Generated on 2022 March 13 06:29:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class @base_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Command
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace @internal
             public static implicit operator Command(NilType nil) => default(Command);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Command Command_cast(dynamic value)
         {
             return new Command(value.Run, value.UsageLine, value.Short, value.Long, value.Flag, value.CustomFlags, value.Commands);

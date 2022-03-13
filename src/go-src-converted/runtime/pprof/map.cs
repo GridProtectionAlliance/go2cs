@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2022 March 06 22:14:40 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:28:40 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\map.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.runtime;
+
+using @unsafe = @unsafe_package;
 
 public static partial class pprof_package {
 
-    // A profMap is a map from (stack, tag) to mapEntry.
-    // It grows without bound, but that's assumed to be OK.
+// A profMap is a map from (stack, tag) to mapEntry.
+// It grows without bound, but that's assumed to be OK.
 private partial struct profMap {
     public map<System.UIntPtr, ptr<profMapEntry>> hash;
     public ptr<profMapEntry> all;
@@ -56,7 +56,6 @@ Search:
                 continue;
             (last, e) = (e, e.nextHash);
             }
-
             {
                 var j__prev2 = j;
 
@@ -66,7 +65,6 @@ Search:
                         _continueSearch = true;
                         break;
                     }
-
                 } 
                 // Move to front.
 
@@ -78,9 +76,7 @@ Search:
                 e.nextHash = m.hash[h];
                 m.hash[h] = e;
             }
-
             return _addr_e!;
-
         }
 
         e = e__prev1;
@@ -125,7 +121,6 @@ Search:
         m.last = e;
     }
     return _addr_e!;
-
 }
 
 } // end pprof_package

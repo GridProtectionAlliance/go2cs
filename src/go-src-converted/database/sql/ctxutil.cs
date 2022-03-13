@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sql -- go2cs converted at 2022 March 06 23:35:30 UTC
+// package sql -- go2cs converted at 2022 March 13 06:43:27 UTC
 // import "database/sql" ==> using sql = go.database.sql_package
 // Original source: C:\Program Files\Go\src\database\sql\ctxutil.go
-using context = go.context_package;
-using driver = go.database.sql.driver_package;
-using errors = go.errors_package;
-
 namespace go.database;
+
+using context = context_package;
+using driver = database.sql.driver_package;
+using errors = errors_package;
 
 public static partial class sql_package {
 
@@ -24,14 +24,12 @@ private static (driver.Stmt, error) ctxDriverPrepare(context.Context ctx, driver
             return ciCtx.PrepareContext(ctx, query);
         }
     }
-
     var (si, err) = ci.Prepare(query);
     if (err == null) {
         si.Close();
         return (null, error.As(ctx.Err())!);
     }
     return (si, error.As(err)!);
-
 }
 
 private static (driver.Result, error) ctxDriverExec(context.Context ctx, driver.ExecerContext execerCtx, driver.Execer execer, @string query, slice<driver.NamedValue> nvdargs) {
@@ -47,7 +45,6 @@ private static (driver.Result, error) ctxDriverExec(context.Context ctx, driver.
     }
     return (null, error.As(ctx.Err())!);
     return execer.Exec(query, dargs);
-
 }
 
 private static (driver.Rows, error) ctxDriverQuery(context.Context ctx, driver.QueryerContext queryerCtx, driver.Queryer queryer, @string query, slice<driver.NamedValue> nvdargs) {
@@ -63,7 +60,6 @@ private static (driver.Rows, error) ctxDriverQuery(context.Context ctx, driver.Q
     }
     return (null, error.As(ctx.Err())!);
     return queryer.Query(query, dargs);
-
 }
 
 private static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, driver.Stmt si, slice<driver.NamedValue> nvdargs) {
@@ -77,14 +73,12 @@ private static (driver.Result, error) ctxDriverStmtExec(context.Context ctx, dri
             return siCtx.ExecContext(ctx, nvdargs);
         }
     }
-
     var (dargs, err) = namedValueToValue(nvdargs);
     if (err != null) {
         return (null, error.As(err)!);
     }
     return (null, error.As(ctx.Err())!);
     return si.Exec(dargs);
-
 }
 
 private static (driver.Rows, error) ctxDriverStmtQuery(context.Context ctx, driver.Stmt si, slice<driver.NamedValue> nvdargs) {
@@ -98,14 +92,12 @@ private static (driver.Rows, error) ctxDriverStmtQuery(context.Context ctx, driv
             return siCtx.QueryContext(ctx, nvdargs);
         }
     }
-
     var (dargs, err) = namedValueToValue(nvdargs);
     if (err != null) {
         return (null, error.As(err)!);
     }
     return (null, error.As(ctx.Err())!);
     return si.Query(dargs);
-
 }
 
 private static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ptr<TxOptions> _addr_opts, driver.Conn ci) {
@@ -126,7 +118,6 @@ private static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ptr<TxOpti
         }
     }
 
-
     if (opts != null) { 
         // Check the transaction level. If the transaction level is non-default
         // then return an error here as the BeginTx driver value is not supported.
@@ -146,7 +137,6 @@ private static (driver.Tx, error) ctxDriverBegin(context.Context ctx, ptr<TxOpti
         return (null, error.As(ctx.Err())!);
     }
     return (txi, error.As(err)!);
-
 }
 
 private static (slice<driver.Value>, error) namedValueToValue(slice<driver.NamedValue> named) {
@@ -159,9 +149,7 @@ private static (slice<driver.Value>, error) namedValueToValue(slice<driver.Named
             return (null, error.As(errors.New("sql: driver does not support the use of Named Parameters"))!);
         }
         dargs[n] = param.Value;
-
     }    return (dargs, error.As(null!)!);
-
 }
 
 } // end sql_package

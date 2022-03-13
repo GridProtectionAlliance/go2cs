@@ -4,14 +4,13 @@
 
 // +build js,wasm
 
-// package js -- go2cs converted at 2022 March 06 22:17:18 UTC
+// package js -- go2cs converted at 2022 March 13 05:40:38 UTC
 // import "syscall/js" ==> using js = go.syscall.js_package
 // Original source: C:\Program Files\Go\src\syscall\js\func.go
-using sync = go.sync_package;
-using System;
-
-
 namespace go.syscall;
+
+using sync = sync_package;
+using System;
 
 public static partial class js_package {
 
@@ -92,7 +91,6 @@ private static void handleEvent() {
         args[i] = argsObj.Index(i);
     }    var result = f(this, args);
     cb.Set("result", result);
-
 }
 
 } // end js_package

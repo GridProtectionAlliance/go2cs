@@ -5,14 +5,14 @@
 //go:build !amd64 && !arm64
 // +build !amd64,!arm64
 
-// package elliptic -- go2cs converted at 2022 March 06 22:18:58 UTC
+// package elliptic -- go2cs converted at 2022 March 13 05:33:58 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Program Files\Go\src\crypto\elliptic\p256.go
+namespace go.crypto;
 // This file contains a constant-time, 32-bit implementation of P256.
 
-using big = go.math.big_package;
 
-namespace go.crypto;
+using big = math.big_package;
 
 public static partial class elliptic_package {
 
@@ -36,7 +36,6 @@ private static void initP256() {
 
     // Arch-specific initialization, i.e. let a platform dynamically pick a P256 implementation
     initP256Arch();
-
 }
 
 private static ptr<CurveParams> Params(this p256Curve curve) {
@@ -115,7 +114,6 @@ private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this p256Curve _p0, ptr<b
 private static readonly nint p256Limbs = 9;
 private static readonly nuint bottom29Bits = 0x1fffffff;
 
-
  
 // p256One is the number 1 as a field element.
 private static array<uint> p256One = new array<uint>(new uint[] { 2, 0, 0, 0xffff800, 0x1fffffff, 0xfffffff, 0x1fbfffff, 0x1ffffff, 0 });private static array<uint> p256Zero = new array<uint>(new uint[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });private static array<uint> p256P = new array<uint>(new uint[] { 0x1fffffff, 0xfffffff, 0x1fffffff, 0x3ff, 0, 0, 0x200000, 0xf000000, 0xfffffff });private static array<uint> p2562P = new array<uint>(new uint[] { 0x1ffffffe, 0xfffffff, 0x1fffffff, 0x7ff, 0, 0, 0x400000, 0xe000000, 0x1fffffff });
@@ -183,7 +181,6 @@ private static void p256ReduceCarry(ptr<array<uint>> _addr_inout, uint carry) {
     // next line.
     inout[7] -= 1 & carry_mask;
     inout[7] += carry << 25;
-
 }
 
 // p256Sum sets out = in+in2.
@@ -196,7 +193,7 @@ private static void p256Sum(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_
     ref array<uint> in2 = ref _addr_in2.val;
 
     var carry = uint32(0);
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         out[i] = in[i] + in2[i];
         out[i] += carry;
         carry = out[i] >> 29;
@@ -210,11 +207,9 @@ private static void p256Sum(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_
         out[i] += carry;
         carry = out[i] >> 28;
         out[i] &= bottom28Bits;
-
     }
 
     p256ReduceCarry(_addr_out, carry);
-
 }
 
 private static readonly nint two30m2 = 1 << 30 - 1 << 2;
@@ -222,7 +217,6 @@ private static readonly nint two30p13m2 = 1 << 30 + 1 << 13 - 1 << 2;
 private static readonly nint two31m2 = 1 << 31 - 1 << 2;
 private static readonly nint two31p24m2 = 1 << 31 + 1 << 24 - 1 << 2;
 private static readonly nint two30m27m2 = 1 << 30 - 1 << 27 - 1 << 2;
-
 
 // p256Zero31 is 0 mod p.
 private static array<uint> p256Zero31 = new array<uint>(new uint[] { two31m3, two30m2, two31m2, two30p13m2, two31m2, two30m2, two31p24m2, two30m27m2, two31m2 });
@@ -239,7 +233,7 @@ private static void p256Diff(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr
 
     uint carry = default;
 
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         out[i] = in[i] - in2[i];
         out[i] += p256Zero31[i];
         out[i] += carry;
@@ -255,11 +249,9 @@ private static void p256Diff(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr
         out[i] += carry;
         carry = out[i] >> 28;
         out[i] &= bottom28Bits;
-
     }
 
     p256ReduceCarry(_addr_out, carry);
-
 }
 
 // p256ReduceDegree sets out = tmp/R mod p where tmp contains 64-bit words with
@@ -351,7 +343,7 @@ private static void p256ReduceDegree(ptr<array<uint>> _addr_@out, array<ulong> t
 
         i = 0;
 
-        while (i < 8) {
+        while () {
             tmp2[i + 1] += tmp2[i] >> 29;
             x = tmp2[i] & bottom29Bits;
             xMask = nonZeroToAllOnes(x);
@@ -422,7 +414,6 @@ private static void p256ReduceDegree(ptr<array<uint>> _addr_@out, array<ulong> t
                 break;
             i += 2;
             }
-
             tmp2[i + 2] += tmp2[i + 1] >> 28;
             x = tmp2[i + 1] & bottom28Bits;
             xMask = nonZeroToAllOnes(x);
@@ -446,7 +437,6 @@ private static void p256ReduceDegree(ptr<array<uint>> _addr_@out, array<ulong> t
             tmp2[i + 9] += 0x10000000 & xMask;
             tmp2[i + 9] -= x;
             tmp2[i + 10] += (x - 1) & xMask;
-
         }
 
         i = i__prev1;
@@ -473,7 +463,6 @@ private static void p256ReduceDegree(ptr<array<uint>> _addr_@out, array<ulong> t
             out[i] += carry;
             carry = out[i] >> 28;
             out[i] &= bottom28Bits;
-
         }
 
         i = i__prev1;
@@ -485,7 +474,6 @@ private static void p256ReduceDegree(ptr<array<uint>> _addr_@out, array<ulong> t
     out[8] &= bottom29Bits;
 
     p256ReduceCarry(_addr_out, carry);
-
 }
 
 // p256Square sets out=in*in.
@@ -519,7 +507,6 @@ private static void p256Square(ptr<array<uint>> _addr_@out, ptr<array<uint>> _ad
     tmp[16] = uint64(in[8]) * uint64(in[8]);
 
     p256ReduceDegree(_addr_out, tmp);
-
 }
 
 // p256Mul sets out=in*in2.
@@ -555,7 +542,6 @@ private static void p256Mul(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_
     tmp[16] = uint64(in[8]) * (uint64(in2[8]) << 0);
 
     p256ReduceDegree(_addr_out, tmp);
-
 }
 
 private static void p256Assign(ptr<array<uint>> _addr_@out, ptr<array<uint>> _addr_@in) {
@@ -691,7 +677,7 @@ private static void p256Scalar3(ptr<array<uint>> _addr_@out) {
 
     uint carry = default;
 
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         out[i] *= 3;
         out[i] += carry;
         carry = out[i] >> 29;
@@ -705,11 +691,9 @@ private static void p256Scalar3(ptr<array<uint>> _addr_@out) {
         out[i] += carry;
         carry = out[i] >> 28;
         out[i] &= bottom28Bits;
-
     }
 
     p256ReduceCarry(_addr_out, carry);
-
 }
 
 // p256Scalar4 sets out=4*out.
@@ -723,7 +707,7 @@ private static void p256Scalar4(ptr<array<uint>> _addr_@out) {
 
 
 
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         nextCarry = out[i] >> 27;
         out[i]<<=2;
         out[i] &= bottom29Bits;
@@ -741,11 +725,9 @@ private static void p256Scalar4(ptr<array<uint>> _addr_@out) {
         out[i] += carry;
         carry = nextCarry + (out[i] >> 28);
         out[i] &= bottom28Bits;
-
     }
 
     p256ReduceCarry(_addr_out, carry);
-
 }
 
 // p256Scalar8 sets out=8*out.
@@ -759,7 +741,7 @@ private static void p256Scalar8(ptr<array<uint>> _addr_@out) {
 
 
 
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         nextCarry = out[i] >> 26;
         out[i]<<=3;
         out[i] &= bottom29Bits;
@@ -777,11 +759,9 @@ private static void p256Scalar8(ptr<array<uint>> _addr_@out) {
         out[i] += carry;
         carry = nextCarry + (out[i] >> 28);
         out[i] &= bottom28Bits;
-
     }
 
     p256ReduceCarry(_addr_out, carry);
-
 }
 
 // Group operations:
@@ -1011,7 +991,6 @@ private static void p256SelectAffinePoint(ptr<array<uint>> _addr_xOut, ptr<array
 
         i = i__prev1;
     }
-
 }
 
 // p256SelectJacobianPoint sets {out_x,out_y,out_z} to the index'th entry of
@@ -1098,7 +1077,6 @@ private static void p256SelectJacobianPoint(ptr<array<uint>> _addr_xOut, ptr<arr
 
         i = i__prev1;
     }
-
 }
 
 // p256GetBit returns the bit'th bit of scalar.
@@ -1200,12 +1178,10 @@ private static void p256ScalarBaseMult(ptr<array<uint>> _addr_xOut, ptr<array<ui
                 }
 
             }
-
         }
 
         i = i__prev1;
     }
-
 }
 
 // p256PointToAffine converts a Jacobian point to an affine point. If the input
@@ -1344,12 +1320,10 @@ private static void p256ScalarMult(ptr<array<uint>> _addr_xOut, ptr<array<uint>>
             p256CopyConditional(_addr_yOut, _addr_ty, mask);
             p256CopyConditional(_addr_zOut, _addr_tz, mask);
             nIsInfinityMask &= pIsNoninfiniteMask;
-
         }
 
         i = i__prev1;
     }
-
 }
 
 // p256FromBig sets out = R*in.
@@ -1377,7 +1351,6 @@ private static void p256FromBig(ptr<array<uint>> _addr_@out, ptr<big.Int> _addr_
             bits = bits__prev1;
 
         }
-
         tmp.Rsh(tmp, 29);
 
         i++;
@@ -1400,11 +1373,8 @@ private static void p256FromBig(ptr<array<uint>> _addr_@out, ptr<big.Int> _addr_
             bits = bits__prev1;
 
         }
-
         tmp.Rsh(tmp, 28);
-
     }
-
 }
 
 // p256ToBig returns a *big.Int containing the value of in.
@@ -1425,13 +1395,11 @@ private static ptr<big.Int> p256ToBig(ptr<array<uint>> _addr_@in) {
         }
         tmp.SetInt64(int64(in[i]));
         result.Add(result, tmp);
-
     }
 
     result.Mul(result, p256RInverse);
     result.Mod(result, p256Params.P);
     return _addr_result!;
-
 }
 
 } // end elliptic_package

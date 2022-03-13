@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:55 UTC
+//     Generated on 2022 March 13 06:33:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct GCProg
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace @internal
             public static implicit operator GCProg(NilType nil) => default(GCProg);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static GCProg GCProg_cast(dynamic value)
         {
             return new GCProg(ref value.ctxt, ref value.sym, value.w);

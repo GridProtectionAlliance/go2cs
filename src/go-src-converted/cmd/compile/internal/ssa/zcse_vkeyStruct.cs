@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:09:23 UTC
+//     Generated on 2022 March 13 06:22:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct vkey
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace @internal
             public static implicit operator vkey(NilType nil) => default(vkey);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static vkey vkey_cast(dynamic value)
         {
             return new vkey(value.op, value.ai, value.ax, ref value.t);

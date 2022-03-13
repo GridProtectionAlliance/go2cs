@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:03 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:24 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\main.go
-using os = go.os_package;
-using System;
-
-
 namespace go;
+
+using os = os_package;
+using System;
 
 public static partial class main_package {
 
@@ -19,7 +18,6 @@ private static void register(@string name, Action f) => func((_, panic, _) => {
         panic("duplicate registration: " + name);
     }
     cmds[name] = f;
-
 });
 
 private static void registerInit(@string name, Action f) {
@@ -39,7 +37,6 @@ private static void Main() {
         return ;
     }
     f();
-
 }
 
 } // end main_package

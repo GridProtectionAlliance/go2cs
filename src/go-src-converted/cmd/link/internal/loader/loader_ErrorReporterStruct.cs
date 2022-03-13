@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:34 UTC
+//     Generated on 2022 March 13 06:33:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
 {
     public static partial class loader_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ErrorReporter
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace @internal
             public static implicit operator ErrorReporter(NilType nil) => default(ErrorReporter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ErrorReporter ErrorReporter_cast(dynamic value)
         {
             return new ErrorReporter(ref value.ldr, value.AfterErrorAction);

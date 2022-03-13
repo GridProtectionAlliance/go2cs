@@ -5,17 +5,17 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package poll -- go2cs converted at 2022 March 06 22:12:56 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:49 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\errno_unix.go
-using syscall = go.syscall_package;
-
 namespace go.@internal;
+
+using syscall = syscall_package;
 
 public static partial class poll_package {
 
-    // Do the interface allocations only once for common
-    // Errno values.
+// Do the interface allocations only once for common
+// Errno values.
 private static error errEAGAIN = error.As(syscall.EAGAIN)!;private static error errEINVAL = error.As(syscall.EINVAL)!;private static error errENOENT = error.As(syscall.ENOENT)!;
 
 // errnoErr returns common boxed Errno values, to prevent
@@ -31,7 +31,6 @@ private static error errnoErr(syscall.Errno e) {
     else if (e == syscall.ENOENT) 
         return error.As(errENOENT)!;
         return error.As(e)!;
-
 }
 
 } // end poll_package

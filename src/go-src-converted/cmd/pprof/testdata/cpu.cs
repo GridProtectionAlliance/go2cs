@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:22:40 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:44 UTC
 // Original source: C:\Program Files\Go\src\cmd\pprof\testdata\cpu.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using pprof = go.runtime.pprof_package;
-using time = go.time_package;
-
 namespace go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using os = os_package;
+using pprof = runtime.pprof_package;
+using time = time_package;
 
 public static partial class main_package {
 
@@ -37,13 +37,12 @@ private static void Main() => func((defer, _, _) => {
             os.Exit(2);
         }
     }
-
     defer(pprof.StopCPUProfile()); 
 
     // Spin for long enough to collect some samples.
     var start = time.Now();
-    while (time.Since(start) < time.Second)     }
-
+    while (time.Since(start) < time.Second) {
+    }
 });
 
 } // end main_package

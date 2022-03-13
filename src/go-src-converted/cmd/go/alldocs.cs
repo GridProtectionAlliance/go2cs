@@ -2963,7 +2963,9 @@
 // variable for future go command invocations.
 //
 //
-// package main -- go2cs converted at 2022 March 06 23:15:53 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:29:21 UTC
 // Original source: C:\Program Files\Go\src\cmd\go\alldocs.go
+namespace go;
 
 } // end main_package

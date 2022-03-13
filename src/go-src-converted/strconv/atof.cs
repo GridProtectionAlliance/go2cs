@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:28 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:17 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\atof.go
+namespace go;
 // decimal to binary floating point conversion.
 // Algorithm:
 //   1) Store input in multiprecision decimal.
 //   2) Multiply/divide decimal by powers of two until in range [0.5, 1)
 //   3) Multiply by 2^precision and round to get mantissa.
 
-using math = go.math_package;
-
-namespace go;
+using math = math_package;
 
 public static partial class strconv_package {
 
@@ -37,7 +36,6 @@ private static nint commonPrefixLenIgnoreCase(@string s, @string prefix) {
         }
     }
     return n;
-
 }
 
 // special returns the floating-point value for the special,
@@ -88,7 +86,6 @@ private static (double, nint, bool) special(@string s) {
 
     __switch_break0:;
     return (0, 0, false);
-
 }
 
 private static bool set(this ptr<decimal> _addr_b, @string s) {
@@ -122,7 +119,6 @@ private static bool set(this ptr<decimal> _addr_b, @string s) {
                 return ;
         i++;
             }
-
             sawdot = true;
             b.dp = b.nd;
             continue;
@@ -131,9 +127,7 @@ private static bool set(this ptr<decimal> _addr_b, @string s) {
             if (s[i] == '0' && b.nd == 0) { // ignore leading zeros
                 b.dp--;
                 continue;
-
             }
-
             if (b.nd < len(b.d)) {
                 b.d[b.nd] = s[i];
                 b.nd++;
@@ -141,10 +135,8 @@ private static bool set(this ptr<decimal> _addr_b, @string s) {
             else if (s[i] != '0') {
                 b.trunc = true;
             }
-
             continue;
                 break;
-
     }
     if (!sawdigits) {
         return ;
@@ -175,21 +167,17 @@ private static bool set(this ptr<decimal> _addr_b, @string s) {
                 continue;
             i++;
             }
-
             if (e < 10000) {
                 e = e * 10 + int(s[i]) - '0';
             }
-
         }
         b.dp += e * esign;
-
     }
     if (i != len(s)) {
         return ;
     }
     ok = true;
     return ;
-
 }
 
 // readFloat reads a decimal or hexadecimal mantissa and exponent from a float
@@ -227,7 +215,6 @@ private static (ulong, nint, bool, bool, bool, nint, bool) readFloat(@string s) 
         i += 2;
         expChar = 'p';
         hex = true;
-
     }
     var sawdot = false;
     var sawdigits = false;
@@ -249,7 +236,6 @@ loop:
                     break;
         i++;
                 }
-
                 sawdot = true;
                 dp = nd;
                 continue;
@@ -258,9 +244,7 @@ loop:
                 if (c == '0' && nd == 0) { // ignore leading zeros
                     dp--;
                     continue;
-
                 }
-
                 nd++;
                 if (ndMant < maxMantDigits) {
                     mantissa *= base;
@@ -270,7 +254,6 @@ loop:
                 else if (c != '0') {
                     trunc = true;
                 }
-
                 continue;
             else if (true == base == 16 && 'a' <= lower(c) && lower(c) <= 'f') 
                 sawdigits = true;
@@ -284,12 +267,10 @@ loop:
  {
                     trunc = true;
                 }
-
                 continue;
 
         }
         break;
-
     }
     if (!sawdigits) {
         return ;
@@ -324,19 +305,15 @@ loop:
                 continue;
             i++;
             }
-
             if (e < 10000) {
                 e = e * 10 + int(s[i]) - '0';
             }
-
         }
         dp += e * esign;
-
     }
     else if (base == 16) { 
         // Must have exponent.
         return ;
-
     }
     if (mantissa != 0) {
         exp = dp - ndMant;
@@ -346,7 +323,6 @@ loop:
     }
     ok = true;
     return ;
-
 }
 
 // decimal power of ten to binary power of two.
@@ -375,7 +351,6 @@ private static (ulong, bool) floatBits(this ptr<decimal> _addr_d, ptr<floatInfo>
         mant = 0;
         exp = flt.bias;
         goto @out;
-
     }
     exp = 0;
     while (d.dp > 0) {
@@ -389,7 +364,6 @@ private static (ulong, bool) floatBits(this ptr<decimal> _addr_d, ptr<floatInfo>
         }
         d.Shift(-n);
         exp += n;
-
     }
     while (d.dp < 0 || d.dp == 0 && d.d[0] < '5') {
         n = default;
@@ -402,7 +376,6 @@ private static (ulong, bool) floatBits(this ptr<decimal> _addr_d, ptr<floatInfo>
         }
         d.Shift(n);
         exp -= n;
-
     } 
 
     // Our range is [0.5,1) but floating point range is [1,2).
@@ -447,7 +420,6 @@ overflow:
         bits |= 1 << (int)(flt.mantbits) << (int)(flt.expbits);
     }
     return (bits, overflow);
-
 }
 
 // Exact powers of 10.
@@ -488,13 +460,11 @@ private static (double, bool) atof64exact(ulong mantissa, nint exp, bool neg) {
         if (f > 1e15F || f < -1e15F) { 
             // the exponent was really too large.
             return ;
-
         }
         return (f * float64pow10[exp], true);
     else if (exp < 0 && exp >= -22) // int / 10^k
         return (f / float64pow10[-exp], true);
         return ;
-
 }
 
 // If possible to compute mantissa*10^exp to 32-bit float f exactly,
@@ -525,13 +495,11 @@ private static (float, bool) atof32exact(ulong mantissa, nint exp, bool neg) {
         if (f > 1e7F || f < -1e7F) { 
             // the exponent was really too large.
             return ;
-
         }
         return (f * float32pow10[exp], true);
     else if (exp < 0 && exp >= -10) // int / 10^k
         return (f / float32pow10[-exp], true);
         return ;
-
 }
 
 // atofHex converts the hex floating-point string s
@@ -588,14 +556,12 @@ private static (double, error) atofHex(@string s, ptr<floatInfo> _addr_flt, ulon
     }
     if (mantissa >> (int)(flt.mantbits) == 0) { // Denormal or zero.
         exp = flt.bias;
-
     }
     error err = default!;
     if (exp > maxExp) { // infinity and range error
         mantissa = 1 << (int)(flt.mantbits);
         exp = maxExp + 1;
         err = error.As(rangeError(fnParseFloat, s))!;
-
     }
     var bits = mantissa & (1 << (int)(flt.mantbits) - 1);
     bits |= uint64((exp - flt.bias) & (1 << (int)(flt.expbits) - 1)) << (int)(flt.mantbits);
@@ -606,7 +572,6 @@ private static (double, error) atofHex(@string s, ptr<floatInfo> _addr_flt, ulon
         return (float64(math.Float32frombits(uint32(bits))), error.As(err)!);
     }
     return (math.Float64frombits(bits), error.As(err)!);
-
 }
 
 private static readonly @string fnParseFloat = "ParseFloat";
@@ -625,7 +590,6 @@ private static (float, nint, error) atof32(@string s) {
             return (float32(val), n, error.As(null!)!);
         }
     }
-
 
     var (mantissa, exp, neg, trunc, hex, n, ok) = readFloat(s);
     if (!ok) {
@@ -651,7 +615,6 @@ private static (float, nint, error) atof32(@string s) {
                 f = f__prev3;
 
             }
-
         }
         (f, ok) = eiselLemire32(mantissa, exp, neg);
         if (ok) {
@@ -665,7 +628,6 @@ private static (float, nint, error) atof32(@string s) {
             if (ok && f == fUp) {
                 return (f, n, error.As(null!)!);
             }
-
         }
     }
     decimal d = default;
@@ -678,7 +640,6 @@ private static (float, nint, error) atof32(@string s) {
         err = rangeError(fnParseFloat, s);
     }
     return (f, n, error.As(err)!);
-
 }
 
 private static (double, nint, error) atof64(@string s) {
@@ -693,7 +654,6 @@ private static (double, nint, error) atof64(@string s) {
             return (val, n, error.As(null!)!);
         }
     }
-
 
     var (mantissa, exp, neg, trunc, hex, n, ok) = readFloat(s);
     if (!ok) {
@@ -719,7 +679,6 @@ private static (double, nint, error) atof64(@string s) {
                 f = f__prev3;
 
             }
-
         }
         (f, ok) = eiselLemire64(mantissa, exp, neg);
         if (ok) {
@@ -733,7 +692,6 @@ private static (double, nint, error) atof64(@string s) {
             if (ok && f == fUp) {
                 return (f, n, error.As(null!)!);
             }
-
         }
     }
     decimal d = default;
@@ -746,7 +704,6 @@ private static (double, nint, error) atof64(@string s) {
         err = rangeError(fnParseFloat, s);
     }
     return (f, n, error.As(err)!);
-
 }
 
 // ParseFloat converts the string s to a floating-point number
@@ -782,7 +739,6 @@ public static (double, error) ParseFloat(@string s, nint bitSize) {
         return (0, error.As(syntaxError(fnParseFloat, s))!);
     }
     return (f, error.As(err)!);
-
 }
 
 private static (double, nint, error) parseFloatPrefix(@string s, nint bitSize) {
@@ -795,7 +751,6 @@ private static (double, nint, error) parseFloatPrefix(@string s, nint bitSize) {
         return (float64(f), n, error.As(err)!);
     }
     return atof64(s);
-
 }
 
 } // end strconv_package

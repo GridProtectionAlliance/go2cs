@@ -4,17 +4,17 @@
 
 // This file implements various error reporters.
 
-// package types -- go2cs converted at 2022 March 06 22:41:50 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:57 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\errors.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.go;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class types_package {
 
@@ -43,10 +43,8 @@ private static @string qualifier(this ptr<Checker> _addr_check, ptr<Package> _ad
             return strconv.Quote(pkg.path);
         }
         return pkg.name;
-
     }
     return "";
-
 }
 
 // markImports recursively walks pkg and its imports, to record unique import
@@ -101,9 +99,7 @@ private static @string sprintf(this ptr<Checker> _addr_check, @string format, pa
                 break;
         }
         args[i] = arg;
-
     }    return fmt.Sprintf(format, args);
-
 });
 
 private static void trace(this ptr<Checker> _addr_check, token.Pos pos, @string format, params object[] args) {
@@ -149,10 +145,8 @@ private static void err(this ptr<Checker> _addr_check, error err) => func((_, pa
             e.Pos = span.pos;
             e.go116start = span.start;
             e.go116end = span.end;
-
         }
         err = e;
-
     }
     if (check.firstErr == null) {
         check.firstErr = err;
@@ -165,14 +159,12 @@ private static void err(this ptr<Checker> _addr_check, error err) => func((_, pa
             pos = token.NoPos;
         }
         check.trace(pos, "ERROR: %s", msg);
-
     }
     var f = check.conf.Error;
     if (f == null) {
         panic(new bailout()); // report only first error
     }
     f(err);
-
 });
 
 private static error newError(this ptr<Checker> _addr_check, positioner at, errorCode code, bool soft, @string msg) {
@@ -263,7 +255,6 @@ private static posSpan inNode(ast.Node node, token.Pos pos) {
         assert(start <= pos && pos < end);
     }
     return new posSpan(start,pos,end);
-
 }
 
 // atPos wraps a token.Pos to implement the positioner interface.
@@ -304,7 +295,6 @@ private static posSpan spanOf(positioner at) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 // stripAnnotations removes internal (type) annotations from s.
@@ -314,13 +304,11 @@ private static @string stripAnnotations(@string s) {
         // strip #'s and subscript digits
         if (r != instanceMarker && !('₀' <= r && r < '₀' + 10)) { // '₀' == U+2080
             b.WriteRune(r);
-
         }
     }    if (b.Len() < len(s)) {
         return b.String();
     }
     return s;
-
 }
 
 } // end types_package

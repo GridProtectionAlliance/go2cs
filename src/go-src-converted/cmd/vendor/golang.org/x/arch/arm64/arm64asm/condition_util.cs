@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2022 March 06 23:24:40 UTC
+// package arm64asm -- go2cs converted at 2022 March 13 06:37:52 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\condition_util.go
-
-
 namespace go.cmd.vendor.golang.org.x.arch.arm64;
 
 public static partial class arm64asm_package {
@@ -31,7 +29,6 @@ private static bool bfxpreferred_4(uint sf, uint opc1, uint imms, uint immr) {
         }
     }
     return true;
-
 }
 
 private static bool move_wide_preferred_4(uint sf, uint N, uint imms, uint immr) {
@@ -52,7 +49,6 @@ private static bool move_wide_preferred_4(uint sf, uint N, uint imms, uint immr)
         return (immr % 16) <= (imms - (width - 15));
     }
     return false;
-
 }
 
 public partial struct Sys { // : byte
@@ -64,11 +60,9 @@ public static readonly var Sys_IC = 1;
 public static readonly var Sys_TLBI = 2;
 public static readonly var Sys_SYS = 3;
 
-
 private static Sys sys_op_4(uint op1, uint crn, uint crm, uint op2) { 
     // TODO: system instruction
     return Sys_SYS;
-
 }
 
 private static bool is_zero(uint x) {
@@ -90,7 +84,6 @@ private static byte bit_count(uint x) {
         }
     }
     return count;
-
 }
 
 } // end arm64asm_package

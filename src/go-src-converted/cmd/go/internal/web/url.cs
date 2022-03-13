@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package web -- go2cs converted at 2022 March 06 23:17:19 UTC
+// package web -- go2cs converted at 2022 March 13 06:30:38 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\web\url.go
-using errors = go.errors_package;
-using url = go.net.url_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
-public static partial class web_package {
+using errors = errors_package;
+using url = net.url_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
 
-    // TODO(golang.org/issue/32456): If accepted, move these functions into the
-    // net/url package.
+
+// TODO(golang.org/issue/32456): If accepted, move these functions into the
+// net/url package.
+
+
+using System;public static partial class web_package {
+
 private static var errNotAbsolute = errors.New("path is not absolute");
 
 private static (@string, error) urlToFilePath(ptr<url.URL> _addr_u) {
@@ -33,7 +34,6 @@ private static (@string, error) urlToFilePath(ptr<url.URL> _addr_u) {
             return ("", error.As(errNotAbsolute)!);
         }
         return (path, error.As(null!)!);
-
     };
 
     if (u.Path == "") {
@@ -41,14 +41,12 @@ private static (@string, error) urlToFilePath(ptr<url.URL> _addr_u) {
             return ("", error.As(errors.New("file URL missing path"))!);
         }
         return checkAbs(filepath.FromSlash(u.Opaque));
-
     }
     var (path, err) = convertFileURLPath(u.Host, u.Path);
     if (err != null) {
         return (path, error.As(err)!);
     }
     return checkAbs(path);
-
 }
 
 private static (ptr<url.URL>, error) urlFromFilePath(@string path) {
@@ -72,21 +70,18 @@ private static (ptr<url.URL>, error) urlFromFilePath(@string path) {
                     // becomes
                     // file://host.example.com/
                     return (addr(new url.URL(Scheme:"file",Host:path,Path:"/",)), error.As(null!)!);
-
                 } 
 
                 // \\host.example.com\Share\path\to\file
                 // becomes
                 // file://host.example.com/Share/path/to/file
                 return (addr(new url.URL(Scheme:"file",Host:path[:i],Path:filepath.ToSlash(path[i:]),)), error.As(null!)!);
-
             } 
 
             // C:\path\to\file
             // becomes
             // file:///C:/path/to/file
             return (addr(new url.URL(Scheme:"file",Path:"/"+filepath.ToSlash(path),)), error.As(null!)!);
-
         }
     } 
 
@@ -94,7 +89,6 @@ private static (ptr<url.URL>, error) urlFromFilePath(@string path) {
     // becomes
     // file:///path/to/file
     return (addr(new url.URL(Scheme:"file",Path:filepath.ToSlash(path),)), error.As(null!)!);
-
 }
 
 } // end web_package

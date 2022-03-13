@@ -16,160 +16,162 @@
 //
 // If the object file format changes, they may (or may not) need to change.
 
-// package goobj -- go2cs converted at 2022 March 06 22:32:29 UTC
+// package goobj -- go2cs converted at 2022 March 13 05:43:28 UTC
 // import "cmd/internal/goobj" ==> using goobj = go.cmd.@internal.goobj_package
 // Original source: C:\Program Files\Go\src\cmd\internal\goobj\objfile.go
-using bytes = go.bytes_package;
-using bio = go.cmd.@internal.bio_package;
-using sha1 = go.crypto.sha1_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using unsafeheader = go.@internal.unsafeheader_package;
-using io = go.io_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.@internal;
+
+using bytes = bytes_package;
+using bio = cmd.@internal.bio_package;
+using sha1 = crypto.sha1_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using unsafeheader = @internal.unsafeheader_package;
+using io = io_package;
+using @unsafe = @unsafe_package;
+
+
+// New object file format.
+//
+//    Header struct {
+//       Magic       [...]byte   // "\x00go117ld"
+//       Fingerprint [8]byte
+//       Flags       uint32
+//       Offsets     [...]uint32 // byte offset of each block below
+//    }
+//
+//    Strings [...]struct {
+//       Data [...]byte
+//    }
+//
+//    Autolib  [...]struct { // imported packages (for file loading)
+//       Pkg         string
+//       Fingerprint [8]byte
+//    }
+//
+//    PkgIndex [...]string // referenced packages by index
+//
+//    Files [...]string
+//
+//    SymbolDefs [...]struct {
+//       Name  string
+//       ABI   uint16
+//       Type  uint8
+//       Flag  uint8
+//       Flag2 uint8
+//       Size  uint32
+//    }
+//    Hashed64Defs [...]struct { // short hashed (content-addressable) symbol definitions
+//       ... // same as SymbolDefs
+//    }
+//    HashedDefs [...]struct { // hashed (content-addressable) symbol definitions
+//       ... // same as SymbolDefs
+//    }
+//    NonPkgDefs [...]struct { // non-pkg symbol definitions
+//       ... // same as SymbolDefs
+//    }
+//    NonPkgRefs [...]struct { // non-pkg symbol references
+//       ... // same as SymbolDefs
+//    }
+//
+//    RefFlags [...]struct { // referenced symbol flags
+//       Sym   symRef
+//       Flag  uint8
+//       Flag2 uint8
+//    }
+//
+//    Hash64 [...][8]byte
+//    Hash   [...][N]byte
+//
+//    RelocIndex [...]uint32 // index to Relocs
+//    AuxIndex   [...]uint32 // index to Aux
+//    DataIndex  [...]uint32 // offset to Data
+//
+//    Relocs [...]struct {
+//       Off  int32
+//       Size uint8
+//       Type uint16
+//       Add  int64
+//       Sym  symRef
+//    }
+//
+//    Aux [...]struct {
+//       Type uint8
+//       Sym  symRef
+//    }
+//
+//    Data   [...]byte
+//    Pcdata [...]byte
+//
+//    // blocks only used by tools (objdump, nm)
+//
+//    RefNames [...]struct { // referenced symbol names
+//       Sym  symRef
+//       Name string
+//       // TODO: include ABI version as well?
+//    }
+//
+// string is encoded as is a uint32 length followed by a uint32 offset
+// that points to the corresponding string bytes.
+//
+// symRef is struct { PkgIdx, SymIdx uint32 }.
+//
+// Slice type (e.g. []symRef) is encoded as a length prefix (uint32)
+// followed by that number of elements.
+//
+// The types below correspond to the encoded data structure in the
+// object file.
+
+// Symbol indexing.
+//
+// Each symbol is referenced with a pair of indices, { PkgIdx, SymIdx },
+// as the symRef struct above.
+//
+// PkgIdx is either a predeclared index (see PkgIdxNone below) or
+// an index of an imported package. For the latter case, PkgIdx is the
+// index of the package in the PkgIndex array. 0 is an invalid index.
+//
+// SymIdx is the index of the symbol in the given package.
+// - If PkgIdx is PkgIdxSelf, SymIdx is the index of the symbol in the
+//   SymbolDefs array.
+// - If PkgIdx is PkgIdxHashed64, SymIdx is the index of the symbol in the
+//   Hashed64Defs array.
+// - If PkgIdx is PkgIdxHashed, SymIdx is the index of the symbol in the
+//   HashedDefs array.
+// - If PkgIdx is PkgIdxNone, SymIdx is the index of the symbol in the
+//   NonPkgDefs array (could natually overflow to NonPkgRefs array).
+// - Otherwise, SymIdx is the index of the symbol in some other package's
+//   SymbolDefs array.
+//
+// {0, 0} represents a nil symbol. Otherwise PkgIdx should not be 0.
+//
+// Hash contains the content hashes of content-addressable symbols, of
+// which PkgIdx is PkgIdxHashed, in the same order of HashedDefs array.
+// Hash64 is similar, for PkgIdxHashed64 symbols.
+//
+// RelocIndex, AuxIndex, and DataIndex contains indices/offsets to
+// Relocs/Aux/Data blocks, one element per symbol, first for all the
+// defined symbols, then all the defined hashed and non-package symbols,
+// in the same order of SymbolDefs/Hashed64Defs/HashedDefs/NonPkgDefs
+// arrays. For N total defined symbols, the array is of length N+1. The
+// last element is the total number of relocations (aux symbols, data
+// blocks, etc.).
+//
+// They can be accessed by index. For the i-th symbol, its relocations
+// are the RelocIndex[i]-th (inclusive) to RelocIndex[i+1]-th (exclusive)
+// elements in the Relocs array. Aux/Data are likewise. (The index is
+// 0-based.)
+
+// Auxiliary symbols.
+//
+// Each symbol may (or may not) be associated with a number of auxiliary
+// symbols. They are described in the Aux block. See Aux struct below.
+// Currently a symbol's Gotype, FuncInfo, and associated DWARF symbols
+// are auxiliary symbols.
 
 public static partial class goobj_package {
 
-    // New object file format.
-    //
-    //    Header struct {
-    //       Magic       [...]byte   // "\x00go117ld"
-    //       Fingerprint [8]byte
-    //       Flags       uint32
-    //       Offsets     [...]uint32 // byte offset of each block below
-    //    }
-    //
-    //    Strings [...]struct {
-    //       Data [...]byte
-    //    }
-    //
-    //    Autolib  [...]struct { // imported packages (for file loading)
-    //       Pkg         string
-    //       Fingerprint [8]byte
-    //    }
-    //
-    //    PkgIndex [...]string // referenced packages by index
-    //
-    //    Files [...]string
-    //
-    //    SymbolDefs [...]struct {
-    //       Name  string
-    //       ABI   uint16
-    //       Type  uint8
-    //       Flag  uint8
-    //       Flag2 uint8
-    //       Size  uint32
-    //    }
-    //    Hashed64Defs [...]struct { // short hashed (content-addressable) symbol definitions
-    //       ... // same as SymbolDefs
-    //    }
-    //    HashedDefs [...]struct { // hashed (content-addressable) symbol definitions
-    //       ... // same as SymbolDefs
-    //    }
-    //    NonPkgDefs [...]struct { // non-pkg symbol definitions
-    //       ... // same as SymbolDefs
-    //    }
-    //    NonPkgRefs [...]struct { // non-pkg symbol references
-    //       ... // same as SymbolDefs
-    //    }
-    //
-    //    RefFlags [...]struct { // referenced symbol flags
-    //       Sym   symRef
-    //       Flag  uint8
-    //       Flag2 uint8
-    //    }
-    //
-    //    Hash64 [...][8]byte
-    //    Hash   [...][N]byte
-    //
-    //    RelocIndex [...]uint32 // index to Relocs
-    //    AuxIndex   [...]uint32 // index to Aux
-    //    DataIndex  [...]uint32 // offset to Data
-    //
-    //    Relocs [...]struct {
-    //       Off  int32
-    //       Size uint8
-    //       Type uint16
-    //       Add  int64
-    //       Sym  symRef
-    //    }
-    //
-    //    Aux [...]struct {
-    //       Type uint8
-    //       Sym  symRef
-    //    }
-    //
-    //    Data   [...]byte
-    //    Pcdata [...]byte
-    //
-    //    // blocks only used by tools (objdump, nm)
-    //
-    //    RefNames [...]struct { // referenced symbol names
-    //       Sym  symRef
-    //       Name string
-    //       // TODO: include ABI version as well?
-    //    }
-    //
-    // string is encoded as is a uint32 length followed by a uint32 offset
-    // that points to the corresponding string bytes.
-    //
-    // symRef is struct { PkgIdx, SymIdx uint32 }.
-    //
-    // Slice type (e.g. []symRef) is encoded as a length prefix (uint32)
-    // followed by that number of elements.
-    //
-    // The types below correspond to the encoded data structure in the
-    // object file.
-
-    // Symbol indexing.
-    //
-    // Each symbol is referenced with a pair of indices, { PkgIdx, SymIdx },
-    // as the symRef struct above.
-    //
-    // PkgIdx is either a predeclared index (see PkgIdxNone below) or
-    // an index of an imported package. For the latter case, PkgIdx is the
-    // index of the package in the PkgIndex array. 0 is an invalid index.
-    //
-    // SymIdx is the index of the symbol in the given package.
-    // - If PkgIdx is PkgIdxSelf, SymIdx is the index of the symbol in the
-    //   SymbolDefs array.
-    // - If PkgIdx is PkgIdxHashed64, SymIdx is the index of the symbol in the
-    //   Hashed64Defs array.
-    // - If PkgIdx is PkgIdxHashed, SymIdx is the index of the symbol in the
-    //   HashedDefs array.
-    // - If PkgIdx is PkgIdxNone, SymIdx is the index of the symbol in the
-    //   NonPkgDefs array (could natually overflow to NonPkgRefs array).
-    // - Otherwise, SymIdx is the index of the symbol in some other package's
-    //   SymbolDefs array.
-    //
-    // {0, 0} represents a nil symbol. Otherwise PkgIdx should not be 0.
-    //
-    // Hash contains the content hashes of content-addressable symbols, of
-    // which PkgIdx is PkgIdxHashed, in the same order of HashedDefs array.
-    // Hash64 is similar, for PkgIdxHashed64 symbols.
-    //
-    // RelocIndex, AuxIndex, and DataIndex contains indices/offsets to
-    // Relocs/Aux/Data blocks, one element per symbol, first for all the
-    // defined symbols, then all the defined hashed and non-package symbols,
-    // in the same order of SymbolDefs/Hashed64Defs/HashedDefs/NonPkgDefs
-    // arrays. For N total defined symbols, the array is of length N+1. The
-    // last element is the total number of relocations (aux symbols, data
-    // blocks, etc.).
-    //
-    // They can be accessed by index. For the i-th symbol, its relocations
-    // are the RelocIndex[i]-th (inclusive) to RelocIndex[i+1]-th (exclusive)
-    // elements in the Relocs array. Aux/Data are likewise. (The index is
-    // 0-based.)
-
-    // Auxiliary symbols.
-    //
-    // Each symbol may (or may not) be associated with a number of auxiliary
-    // symbols. They are described in the Aux block. See Aux struct below.
-    // Currently a symbol's Gotype, FuncInfo, and associated DWARF symbols
-    // are auxiliary symbols.
 private static readonly nint stringRefSize = 8; // two uint32s
 
  // two uint32s
@@ -211,7 +213,6 @@ public static readonly var BlkPcdata = 16;
 public static readonly var BlkRefName = 17;
 public static readonly var BlkEnd = 18;
 public static readonly var NBlk = 19;
-
 
 // File header.
 // TODO: probably no need to export this.
@@ -256,7 +257,6 @@ private static error Read(this ptr<Header> _addr_h, ptr<Reader> _addr_r) {
         h.Offsets[i] = r.uint32At(off);
         off += 4;
     }    return error.As(null!)!;
-
 }
 
 private static nint Size(this ptr<Header> _addr_h) {
@@ -319,11 +319,9 @@ public static readonly var SymFlagNoSplit = 3;
 public static readonly var SymFlagReflectMethod = 4;
 public static readonly var SymFlagGoType = 5;
 
-
 // Sym.Flag2
 public static readonly nint SymFlagUsedInIface = 1 << (int)(iota);
 public static readonly var SymFlagItab = 0;
-
 
 // Returns the length of the name of the symbol.
 private static nint NameLen(this ptr<Sym> _addr_s, ptr<Reader> _addr_r) {
@@ -628,7 +626,6 @@ public static readonly var AuxPcline = 8;
 public static readonly var AuxPcinline = 9;
 public static readonly var AuxPcdata = 10;
 
-
 private static byte Type(this ptr<Aux> _addr_a) {
     ref Aux a = ref _addr_a.val;
 
@@ -806,10 +803,8 @@ private static void AddString(this ptr<Writer> _addr_w, @string s) {
             return ;
         }
     }
-
     w.stringMap[s] = w.off;
     w.RawString(s);
-
 }
 
 private static uint stringOff(this ptr<Writer> _addr_w, @string s) => func((_, panic, _) => {
@@ -820,7 +815,6 @@ private static uint stringOff(this ptr<Writer> _addr_w, @string s) => func((_, p
         panic(fmt.Sprintf("writeStringRef: string not added: %q", s));
     }
     return off;
-
 });
 
 private static void StringRef(this ptr<Writer> _addr_w, @string s) {
@@ -900,7 +894,6 @@ public static ptr<Reader> NewReaderFromBytes(slice<byte> b, bool @readonly) {
         return _addr_null!;
     }
     return _addr_r!;
-
 }
 
 private static slice<byte> BytesAt(this ptr<Reader> _addr_r, uint off, nint len) {
@@ -911,7 +904,6 @@ private static slice<byte> BytesAt(this ptr<Reader> _addr_r, uint off, nint len)
     }
     var end = int(off) + len;
     return r.b.slice(int(off), end, end);
-
 }
 
 private static ulong uint64At(this ptr<Reader> _addr_r, uint off) {
@@ -962,7 +954,6 @@ private static @string StringAt(this ptr<Reader> _addr_r, uint off, uint len) {
         return toString(b); // backed by RO memory, ok to make unsafe string
     }
     return string(b);
-
 }
 
 private static @string toString(slice<byte> b) {
@@ -975,7 +966,6 @@ private static @string toString(slice<byte> b) {
     hdr.Len = len(b);
 
     return s;
-
 }
 
 private static @string StringRef(this ptr<Reader> _addr_r, uint off) {

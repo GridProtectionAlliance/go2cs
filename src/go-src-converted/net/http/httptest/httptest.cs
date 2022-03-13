@@ -3,43 +3,46 @@
 // license that can be found in the LICENSE file.
 
 // Package httptest provides utilities for HTTP testing.
-// package httptest -- go2cs converted at 2022 March 06 22:23:53 UTC
+
+// package httptest -- go2cs converted at 2022 March 13 05:38:18 UTC
 // import "net/http/httptest" ==> using httptest = go.net.http.httptest_package
 // Original source: C:\Program Files\Go\src\net\http\httptest\httptest.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using tls = go.crypto.tls_package;
-using io = go.io_package;
-using http = go.net.http_package;
-using strings = go.strings_package;
-
 namespace go.net.http;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using tls = crypto.tls_package;
+using io = io_package;
+using http = net.http_package;
+using strings = strings_package;
+
+
+// NewRequest returns a new incoming server Request, suitable
+// for passing to an http.Handler for testing.
+//
+// The target is the RFC 7230 "request-target": it may be either a
+// path or an absolute URL. If target is an absolute URL, the host name
+// from the URL is used. Otherwise, "example.com" is used.
+//
+// The TLS field is set to a non-nil dummy value if target has scheme
+// "https".
+//
+// The Request.Proto is always HTTP/1.1.
+//
+// An empty method means "GET".
+//
+// The provided body may be nil. If the body is of type *bytes.Reader,
+// *strings.Reader, or *bytes.Buffer, the Request.ContentLength is
+// set.
+//
+// NewRequest panics on error for ease of use in testing, where a
+// panic is acceptable.
+//
+// To generate a client HTTP request instead of a server request, see
+// the NewRequest function in the net/http package.
 
 public static partial class httptest_package {
 
-    // NewRequest returns a new incoming server Request, suitable
-    // for passing to an http.Handler for testing.
-    //
-    // The target is the RFC 7230 "request-target": it may be either a
-    // path or an absolute URL. If target is an absolute URL, the host name
-    // from the URL is used. Otherwise, "example.com" is used.
-    //
-    // The TLS field is set to a non-nil dummy value if target has scheme
-    // "https".
-    //
-    // The Request.Proto is always HTTP/1.1.
-    //
-    // An empty method means "GET".
-    //
-    // The provided body may be nil. If the body is of type *bytes.Reader,
-    // *strings.Reader, or *bytes.Buffer, the Request.ContentLength is
-    // set.
-    //
-    // NewRequest panics on error for ease of use in testing, where a
-    // panic is acceptable.
-    //
-    // To generate a client HTTP request instead of a server request, see
-    // the NewRequest function in the net/http package.
 public static ptr<http.Request> NewRequest(@string method, @string target, io.Reader body) => func((_, panic, _) => {
     if (method == "") {
         method = "GET";
@@ -81,7 +84,6 @@ public static ptr<http.Request> NewRequest(@string method, @string target, io.Re
                 req.Body = io.NopCloser(body);
             }
         }
-
     }
     req.RemoteAddr = "192.0.2.1:1234";
 
@@ -92,7 +94,6 @@ public static ptr<http.Request> NewRequest(@string method, @string target, io.Re
         req.TLS = addr(new tls.ConnectionState(Version:tls.VersionTLS12,HandshakeComplete:true,ServerName:req.Host,));
     }
     return _addr_req!;
-
 });
 
 } // end httptest_package

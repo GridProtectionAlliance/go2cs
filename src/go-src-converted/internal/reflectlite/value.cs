@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflectlite -- go2cs converted at 2022 March 06 22:12:35 UTC
+// package reflectlite -- go2cs converted at 2022 March 13 05:27:39 UTC
 // import "internal/reflectlite" ==> using reflectlite = go.@internal.reflectlite_package
 // Original source: C:\Program Files\Go\src\internal\reflectlite\value.go
-using unsafeheader = go.@internal.unsafeheader_package;
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal;
+
+using unsafeheader = @internal.unsafeheader_package;
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
 
 public static partial class reflectlite_package {
 
@@ -94,7 +94,6 @@ private static readonly flag flagMethod = 1 << 9;
 private static readonly nint flagMethodShift = 10;
 private static readonly flag flagRO = flagStickyRO | flagEmbedRO;
 
-
 private static Kind kind(this flag f) {
     return Kind(f & flagKindMask);
 }
@@ -104,7 +103,6 @@ private static flag ro(this flag f) {
         return flagStickyRO;
     }
     return 0;
-
 }
 
 // pointer returns the underlying pointer represented by v.
@@ -117,7 +115,6 @@ public static unsafe.Pointer pointer(this Value v) => func((_, panic, _) => {
         return new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
     }
     return v.ptr;
-
 });
 
 // packEface converts v to the empty interface.
@@ -138,7 +135,6 @@ private static void packEface(Value v) => func((_, panic, _) => {
             var c = unsafe_New(_addr_t);
             typedmemmove(_addr_t, c, ptr);
             ptr = c;
-
         }
         e.word = ptr;
     else if (v.flag & flagIndir != 0) 
@@ -154,7 +150,6 @@ private static void packEface(Value v) => func((_, panic, _) => {
     // interface value.
     e.typ = t;
     return i;
-
 });
 
 // unpackEface converts the empty interface i to a Value.
@@ -170,7 +165,6 @@ private static Value unpackEface(object i) {
         f |= flagIndir;
     }
     return new Value(t,e.word,f);
-
 }
 
 // A ValueError occurs when a Value method is invoked on
@@ -188,7 +182,6 @@ private static @string Error(this ptr<ValueError> _addr_e) {
         return "reflect: call of " + e.Method + " on zero Value";
     }
     return "reflect: call of " + e.Method + " on " + e.Kind.String() + " Value";
-
 }
 
 // methodName returns the name of the calling method,
@@ -200,7 +193,6 @@ private static @string methodName() {
         return "unknown method";
     }
     return f.Name();
-
 }
 
 // emptyInterface is the header for an interface{} value.
@@ -253,9 +245,11 @@ public static Value Elem(this Value v) => func((_, panic, _) => {
 
     if (k == Interface) 
         var eface = default;
-        if (v.typ.NumMethod() == 0)         }
+        if (v.typ.NumMethod() == 0) {
+        }
         else
-         }
+ {
+        }
         var x = unpackEface(eface);
         if (x.flag != 0) {
             x.flag |= v.flag.ro();
@@ -275,7 +269,6 @@ public static Value Elem(this Value v) => func((_, panic, _) => {
         fl |= flag(typ.Kind());
         return new Value(typ,ptr,fl);
         panic(addr(new ValueError("reflectlite.Value.Elem",v.kind())));
-
 });
 
 private static void valueInterface(Value v) => func((_, panic, _) => {
@@ -290,10 +283,8 @@ private static void valueInterface(Value v) => func((_, panic, _) => {
             return ;
         }
         return ;
-
     }
     return packEface(v);
-
 });
 
 // IsNil reports whether its argument v is nil. The argument must be
@@ -320,7 +311,6 @@ public static bool IsNil(this Value v) => func((_, panic, _) => {
         // Both are always bigger than a word; assume flagIndir.
         return new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr) == null;
         panic(addr(new ValueError("reflectlite.Value.IsNil",v.kind())));
-
 });
 
 // IsValid reports whether v represents a value.
@@ -361,7 +351,6 @@ public static nint Len(this Value v) => func((_, panic, _) => {
         // String is bigger than a word; assume flagIndir.
         return (unsafeheader.String.val)(v.ptr).Len;
         panic(addr(new ValueError("reflect.Value.Len",v.kind())));
-
 });
 
 // NumMethod returns the number of exported methods in the value's method set.
@@ -370,7 +359,6 @@ public static nint numMethod(this Value v) => func((_, panic, _) => {
         panic(addr(new ValueError("reflectlite.Value.NumMethod",Invalid)));
     }
     return v.typ.NumMethod();
-
 });
 
 // Set assigns x to the value v.
@@ -389,10 +377,9 @@ public static void Set(this Value v, Value x) {
     }
     else
  {
-        (@unsafe.Pointer.val)(v.ptr).val;
+        (@unsafe.Pointer.val).val;
 
-        x.ptr;
-
+        (v.ptr) = x.ptr;
     }
 }
 
@@ -403,7 +390,6 @@ public static Type Type(this Value v) => func((_, panic, _) => {
         panic(addr(new ValueError("reflectlite.Value.Type",Invalid)));
     }
     return v.typ;
-
 });
 
 /*
@@ -422,7 +408,6 @@ public static Value ValueOf(object i) {
     escapes(i);
 
     return unpackEface(i);
-
 }
 
 // assignTo returns a value v that can be assigned directly to typ.
@@ -451,10 +436,10 @@ public static Value assignTo(this Value v, @string context, ptr<rtype> _addr_dst
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
             return new Value(dst,nil,flag(Interface));
-
         }
         var x = valueInterface(v);
-        if (dst.NumMethod() == 0)         }
+        if (dst.NumMethod() == 0) {
+        }
         else
  {
             ifaceE2I(_addr_dst, x, target);
@@ -462,7 +447,6 @@ public static Value assignTo(this Value v, @string context, ptr<rtype> _addr_dst
         return new Value(dst,target,flagIndir|flag(Interface));
     // Failed.
     panic(context + ": value of type " + v.typ.String() + " is not assignable to type " + dst.String());
-
 });
 
 // arrayAt returns the i-th element of p,

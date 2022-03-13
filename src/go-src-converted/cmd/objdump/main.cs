@@ -29,19 +29,20 @@
 // Each stanza gives the disassembly for a contiguous range of addresses
 // all mapped to the same original source file and line number.
 // This mode is intended for use by pprof.
-// package main -- go2cs converted at 2022 March 06 23:22:37 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:35:40 UTC
 // Original source: C:\Program Files\Go\src\cmd\objdump\main.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using objfile = go.cmd.@internal.objfile_package;
-
 namespace go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using objfile = cmd.@internal.objfile_package;
 
 public static partial class main_package {
 
@@ -71,7 +72,6 @@ private static void Main() => func((defer, _, _) => {
             log.Fatalf("invalid -s regexp: %v", err);
         }
         symRE = re;
-
     }
     var (f, err) = objfile.Open(flag.Arg(0));
     if (err != null) {
@@ -99,13 +99,11 @@ private static void Main() => func((defer, _, _) => {
                 log.Fatalf("invalid end PC: %v", err);
             }
             dis.Print(os.Stdout, symRE, start, end, printCode.val, gnuAsm.val);
-
             break;
         default: 
             usage();
             break;
     }
-
 });
 
 } // end main_package

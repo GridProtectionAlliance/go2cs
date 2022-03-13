@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:49 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\plugin.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    //go:linkname plugin_lastmoduleinit plugin.lastmoduleinit
+//go:linkname plugin_lastmoduleinit plugin.lastmoduleinit
 private static (@string, object, @string) plugin_lastmoduleinit() {
     @string path = default;
     object syms = default;
@@ -30,7 +30,6 @@ private static (@string, object, @string) plugin_lastmoduleinit() {
             pmd = pmd.next;
             }
             md = pmd;
-
         }
 
         pmd = pmd__prev1;
@@ -106,9 +105,7 @@ private static (@string, object, @string) plugin_lastmoduleinit() {
             name = "." + name;
         }
         syms[name] = val;
-
     }    return (md.pluginpath, syms, "");
-
 }
 
 private static void pluginftabverify(ptr<moduledata> _addr_md) {
@@ -135,7 +132,6 @@ private static void pluginftabverify(ptr<moduledata> _addr_md) {
         }
         badtable = true;
         println("ftab entry", hex(entry), "/", hex(entry2), ": ", name, "/", name2, "outside pc range:[", hex(md.minpc), ",", hex(md.maxpc), "], modulename=", md.modulename, ", pluginpath=", md.pluginpath);
-
     }
     if (badtable) {
         throw("runtime: plugin has bad symbol table");

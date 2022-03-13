@@ -2,18 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:42 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:06 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\labels.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using syntax = cmd.compile.@internal.syntax_package;
+
+
+// labels checks correct label use in body.
+
+using System;
 public static partial class types2_package {
 
-    // labels checks correct label use in body.
 private static void labels(this ptr<Checker> _addr_check, ptr<syntax.BlockStmt> _addr_body) {
     ref Checker check = ref _addr_check.val;
     ref syntax.BlockStmt body = ref _addr_body.val;
@@ -42,9 +43,7 @@ private static void labels(this ptr<Checker> _addr_check, ptr<syntax.BlockStmt> 
                 msg = "label %s not declared";
             }
         }
-
         check.errorf(jmp.Label, msg, name);
-
     }    foreach (var (_, obj) in all.elems) {
         {
             ptr<Label> lbl = obj._<ptr<Label>>();
@@ -53,7 +52,6 @@ private static void labels(this ptr<Checker> _addr_check, ptr<syntax.BlockStmt> 
                 check.softErrorf(lbl.pos, "label %s declared but not used", lbl.name);
             }
         }
-
     }
 }
 
@@ -80,7 +78,6 @@ private static void insert(this ptr<block> _addr_b, ptr<syntax.LabeledStmt> _add
         b.labels = labels;
     }
     labels[name] = s;
-
 }
 
 // gotoTarget returns the labeled statement in the current
@@ -101,11 +98,9 @@ private static ptr<syntax.LabeledStmt> gotoTarget(this ptr<block> _addr_b, @stri
                 }
 
             }
-
         }
     }
     return _addr_null!;
-
 }
 
 // enclosingTarget returns the innermost enclosing labeled
@@ -126,11 +121,9 @@ private static ptr<syntax.LabeledStmt> enclosingTarget(this ptr<block> _addr_b, 
                 }
 
             }
-
         }
     }
     return _addr_null!;
-
 }
 
 // blockBranches processes a block's statement list and returns the set of outgoing forward jumps.
@@ -163,7 +156,6 @@ private static slice<ptr<syntax.BranchStmt>> blockBranches(this ptr<Checker> _ad
             }
         }
         return false;
-
     };
 
     Action<syntax.Stmt> stmtBranches = default;
@@ -187,7 +179,6 @@ private static slice<ptr<syntax.BranchStmt>> blockBranches(this ptr<Checker> _ad
                             d = d__prev1;
 
                         }
-
                     }
 
                     d = d__prev1;
@@ -231,26 +222,21 @@ private static slice<ptr<syntax.BranchStmt>> blockBranches(this ptr<Checker> _ad
                                     check.softErrorf(jmp.Label, "goto %s jumps over variable declaration at line %d", name, varDeclPos.Line()); 
                                     // ok to continue
                                 }
-
                             }
                             else
  { 
                                 // no match - record new forward jump
                                 fwdJumps[i] = jmp;
                                 i++;
-
                             }
-
                         }
                         fwdJumps = fwdJumps[..(int)i];
                         lstmt = s;
-
                     }
 
                     name = name__prev1;
 
                 }
-
                 stmtBranches(s.Stmt);
                 break;
             case ptr<syntax.BranchStmt> s:
@@ -283,18 +269,15 @@ private static slice<ptr<syntax.BranchStmt>> blockBranches(this ptr<Checker> _ad
                                     valid = true;
                                     break;
                             }
-
                         }
 
                         t = t__prev1;
 
                     }
-
                     if (!valid) {
                         check.errorf(s.Label, "invalid break label %s", name);
                         return ;
                     }
-
                 else if (s.Tok == syntax.Continue) 
                     // spec: "If there is a label, it must be that of an enclosing
                     // "for" statement, and that is the one whose execution advances."
@@ -310,26 +293,21 @@ private static slice<ptr<syntax.BranchStmt>> blockBranches(this ptr<Checker> _ad
                                     valid = true;
                                     break;
                             }
-
                         }
 
                         t = t__prev1;
 
                     }
-
                     if (!valid) {
                         check.errorf(s.Label, "invalid continue label %s", name);
                         return ;
                     }
-
                 else if (s.Tok == syntax.Goto) 
                     if (b.gotoTarget(name) == null) { 
                         // label may be declared later - add branch to forward jumps
                         fwdJumps = append(fwdJumps, s);
                         return ;
-
                     }
-
                 else 
                     check.errorf(s, invalidAST + "branch statement: %s %s", s.Tok, name);
                     return ;
@@ -382,7 +360,6 @@ private static slice<ptr<syntax.BranchStmt>> blockBranches(this ptr<Checker> _ad
                 stmtBranches(s.Body);
                 break;
         }
-
     };
 
     {
@@ -396,7 +373,6 @@ private static slice<ptr<syntax.BranchStmt>> blockBranches(this ptr<Checker> _ad
     }
 
     return fwdJumps;
-
 }
 
 } // end types2_package

@@ -7,12 +7,12 @@
 
 // This file handles forkAndExecInChild function for OS using libc syscall like AIX or Solaris.
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:27 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:29 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\exec_libc.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
@@ -124,7 +124,6 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
         // parent; return PID
         runtime_AfterFork();
         return (int(r1), 0);
-
     }
     if (sys.Setsid) {>>MARKER:FUNCTION_setsid_BLOCK_PREFIX<<
         _, err1 = setsid();
@@ -203,28 +202,22 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
         fcntl1(uintptr(nextfd), F_SETFD, FD_CLOEXEC);
         pipe = nextfd;
         nextfd++;
-
     }
     for (i = 0; i < len(fd); i++) {
         if (fd[i] >= 0 && fd[i] < int(i)) {
             if (nextfd == pipe) { // don't stomp on pipe
                 nextfd++;
-
             }
-
             _, err1 = dup2child(uintptr(fd[i]), uintptr(nextfd));
             if (err1 != 0) {
                 goto childerror;
             }
-
             _, err1 = fcntl1(uintptr(nextfd), F_SETFD, FD_CLOEXEC);
             if (err1 != 0) {
                 goto childerror;
             }
-
             fd[i] = nextfd;
             nextfd++;
-
         }
     } 
 
@@ -241,9 +234,7 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
             if (err1 != 0) {
                 goto childerror;
             }
-
             continue;
-
         }
         _, err1 = dup2child(uintptr(fd[i]), uintptr(i));
         if (err1 != 0) {
@@ -284,7 +275,6 @@ childerror:
     while (true) {
         exit(253);
     }
-
 }
 
 } // end syscall_package

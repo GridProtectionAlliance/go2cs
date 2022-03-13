@@ -16,41 +16,43 @@
 // UTS #46 is defined in https://www.unicode.org/reports/tr46.
 // See https://unicode.org/cldr/utility/idna.jsp for a visualization of the
 // differences between these two standards.
-// package idna -- go2cs converted at 2022 March 06 23:37:16 UTC
+
+// package idna -- go2cs converted at 2022 March 13 06:45:32 UTC
 // import "vendor/golang.org/x/net/idna" ==> using idna = go.vendor.golang.org.x.net.idna_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\idna\idna10.0.0.go
+namespace go.vendor.golang.org.x.net;
 // import "golang.org/x/net/idna"
 
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
 
-using bidirule = go.golang.org.x.text.secure.bidirule_package;
-using bidi = go.golang.org.x.text.unicode.bidi_package;
-using norm = go.golang.org.x.text.unicode.norm_package;
+using fmt = fmt_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+using bidirule = golang.org.x.text.secure.bidirule_package;
+using bidi = golang.org.x.text.unicode.bidi_package;
+using norm = golang.org.x.text.unicode.norm_package;
+
+
+// NOTE: Unlike common practice in Go APIs, the functions will return a
+// sanitized domain name in case of errors. Browsers sometimes use a partially
+// evaluated string as lookup.
+// TODO: the current error handling is, in my opinion, the least opinionated.
+// Other strategies are also viable, though:
+// Option 1) Return an empty string in case of error, but allow the user to
+//    specify explicitly which errors to ignore.
+// Option 2) Return the partially evaluated string if it is itself a valid
+//    string, otherwise return the empty string in case of error.
+// Option 3) Option 1 and 2.
+// Option 4) Always return an empty string for now and implement Option 1 as
+//    needed, and document that the return string may not be empty in case of
+//    error in the future.
+// I think Option 1 is best, but it is quite opinionated.
+
+// ToASCII is a wrapper for Punycode.ToASCII.
+
 using System;
-
-
-namespace go.vendor.golang.org.x.net;
-
 public static partial class idna_package {
 
-    // NOTE: Unlike common practice in Go APIs, the functions will return a
-    // sanitized domain name in case of errors. Browsers sometimes use a partially
-    // evaluated string as lookup.
-    // TODO: the current error handling is, in my opinion, the least opinionated.
-    // Other strategies are also viable, though:
-    // Option 1) Return an empty string in case of error, but allow the user to
-    //    specify explicitly which errors to ignore.
-    // Option 2) Return the partially evaluated string if it is itself a valid
-    //    string, otherwise return the empty string in case of error.
-    // Option 3) Option 1 and 2.
-    // Option 4) Always return an empty string for now and implement Option 1 as
-    //    needed, and document that the return string may not be empty in case of
-    //    error in the future.
-    // I think Option 1 is best, but it is quite opinionated.
-
-    // ToASCII is a wrapper for Punycode.ToASCII.
 public static (@string, error) ToASCII(@string s) {
     @string _p0 = default;
     error _p0 = default!;
@@ -78,7 +80,6 @@ public static Option Transitional(bool transitional) {
     return o => {
         o.transitional = true;
     };
-
 }
 
 // VerifyDNSLength sets whether a Profile should fail if any of the IDN parts
@@ -89,7 +90,6 @@ public static Option VerifyDNSLength(bool verify) {
     return o => {
         o.verifyDNSLength = verify;
     };
-
 }
 
 // RemoveLeadingDots removes leading label separators. Leading runes that map to
@@ -98,7 +98,6 @@ public static Option RemoveLeadingDots(bool remove) {
     return o => {
         o.removeLeadingDots = remove;
     };
-
 }
 
 // ValidateLabels sets whether to check the mandatory label validation criteria
@@ -124,7 +123,6 @@ public static Option ValidateLabels(bool enable) {
             o.fromPuny = null;
         }
     };
-
 }
 
 // CheckHyphens sets whether to check for correct use of hyphens ('-') in
@@ -136,7 +134,6 @@ public static Option CheckHyphens(bool enable) {
     return o => {
         o.checkHyphens = enable;
     };
-
 }
 
 // CheckJoiners sets whether to check the ContextJ rules as defined in Appendix
@@ -164,7 +161,6 @@ public static Option StrictDomainName(bool use) {
     return o => {
         o.useSTD3Rules = use;
     };
-
 }
 
 // NOTE: the following options pull in tables. The tables should not be linked
@@ -178,7 +174,6 @@ public static Option BidiRule() {
     return o => {
         o.bidirule = bidirule.ValidString;
     };
-
 }
 
 // ValidateForRegistration sets validation options to verify that a given IDN is
@@ -305,7 +300,6 @@ private static @string String(this ptr<Profile> _addr_p) {
         s += ":VerifyDNSLength";
     }
     return s;
-
 }
 
  
@@ -351,7 +345,6 @@ private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bo
         while (len(s) > 0 && s[0] == '.') {
             s = s[(int)1..];
         }
-
     }
     if (err == null && p.verifyDNSLength && s == "") {
         err = error.As(addr(new labelError(s,"A4")))!;
@@ -366,9 +359,7 @@ private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bo
                 err = error.As(addr(new labelError(s,"A4")))!;
         labels.next();
             }
-
             continue;
-
         }
         if (strings.HasPrefix(label, acePrefix)) {
             var (u, err2) = decode(label[(int)len(acePrefix)..]);
@@ -378,23 +369,18 @@ private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bo
                 } 
                 // Spec says keep the old label.
                 continue;
-
             }
-
             isBidi = isBidi || bidirule.DirectionString(u) != bidi.LeftToRight;
             labels.set(u);
             if (err == null && p.fromPuny != null) {
                 err = error.As(p.fromPuny(p, u))!;
             }
-
             if (err == null) { 
                 // This should be called on NonTransitional, according to the
                 // spec, but that currently does not have any effect. Use the
                 // original profile to preserve options.
                 err = error.As(p.validateLabel(u))!;
-
             }
-
         }
         else if (err == null) {
             err = error.As(p.validateLabel(label))!;
@@ -409,9 +395,7 @@ private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bo
                 break;
             labels.next();
             }
-
         }
-
     }
     if (toASCII) {
         labels.reset();
@@ -424,19 +408,14 @@ private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bo
                     err = error.As(err2)!;
             labels.next();
                 }
-
                 label = a;
                 labels.set(a);
-
             }
-
             var n = len(label);
             if (p.verifyDNSLength && err == null && (n == 0 || n > 63)) {
                 err = error.As(addr(new labelError(label,"A4")))!;
             }
-
         }
-
     }
     s = labels.result();
     if (toASCII && p.verifyDNSLength && err == null) { 
@@ -450,7 +429,6 @@ private static (@string, error) process(this ptr<Profile> _addr_p, @string s, bo
         }
     }
     return (s, error.As(err)!);
-
 }
 
 private static (@string, bool, error) normalize(ptr<Profile> _addr_p, @string s) {
@@ -465,7 +443,6 @@ private static (@string, bool, error) normalize(ptr<Profile> _addr_p, @string s)
     mapped = norm.NFC.String(s);
     isBidi = bidirule.DirectionString(mapped) == bidi.RightToLeft;
     return (mapped, isBidi, error.As(null!)!);
-
 }
 
 private static (@string, bool, error) validateRegistration(ptr<Profile> _addr_p, @string s) {
@@ -495,11 +472,9 @@ private static (@string, bool, error) validateRegistration(ptr<Profile> _addr_p,
                 var (r, _) = utf8.DecodeRuneInString(s[(int)i..]);
                 return (s, bidi, error.As(runeError(r))!);
                         i += sz;
-
         }
     }
     return (s, bidi, error.As(null!)!);
-
 }
 
 private static bool isBidi(this info c, @string s) {
@@ -511,7 +486,6 @@ private static bool isBidi(this info c, @string s) {
     if (p.Class() == bidi.R || p.Class() == bidi.AL || p.Class() == bidi.AN) 
         return true;
         return false;
-
 }
 
 private static (@string, bool, error) validateAndMap(ptr<Profile> _addr_p, @string s) {
@@ -564,7 +538,6 @@ private static (@string, bool, error) validateAndMap(ptr<Profile> _addr_p, @stri
                 b = append(b, s[(int)k..(int)start]);
                 b = append(b, "\ufffd");
                         k = i;
-
         }
     }
     if (k == 0) { 
@@ -580,10 +553,8 @@ private static (@string, bool, error) validateAndMap(ptr<Profile> _addr_p, @stri
             b = norm.NFC.Bytes(b);
         }
         s = string(b);
-
     }
     return (s, bidi, error.As(err)!);
-
 }
 
 // A labelIter allows iterating over domain name labels.
@@ -616,7 +587,6 @@ private static @string result(this ptr<labelIter> _addr_l) {
         return strings.Join(l.slice, ".");
     }
     return l.orig;
-
 }
 
 private static @string label(this ptr<labelIter> _addr_l) {
@@ -631,7 +601,6 @@ private static @string label(this ptr<labelIter> _addr_l) {
         l.curEnd = len(l.orig);
     }
     return l.orig[(int)l.curStart..(int)l.curEnd];
-
 }
 
 // next sets the value to the next label. It skips the last label if it is empty.
@@ -660,7 +629,6 @@ private static void set(this ptr<labelIter> _addr_l, @string s) {
         l.slice = strings.Split(l.orig, ".");
     }
     l.slice[l.i] = s;
-
 }
 
 // acePrefix is the ASCII Compatible Encoding prefix.
@@ -696,7 +664,6 @@ private static category simplify(this ptr<Profile> _addr_p, category cat) {
         // TODO: handle V2008
         cat = valid;
         return cat;
-
 }
 
 private static error validateFromPunycode(ptr<Profile> _addr_p, @string s) {
@@ -721,18 +688,14 @@ private static error validateFromPunycode(ptr<Profile> _addr_p, @string s) {
                 }
 
             }
-
             i += sz;
-
         }
     }
     return error.As(null!)!;
-
 }
 
 private static readonly @string zwnj = "\u200c";
 private static readonly @string zwj = "\u200d";
-
 
 private partial struct joinState { // : sbyte
 }
@@ -743,7 +706,6 @@ private static readonly var stateBefore = 1;
 private static readonly var stateBeforeVirama = 2;
 private static readonly var stateAfter = 3;
 private static readonly var stateFAIL = 4;
-
 
 private static array<joinState> joinStates = new slice<array<joinState>>(InitKeyedValues<array<joinState>>((stateStart, {joiningL:stateBefore,joiningD:stateBefore,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateVirama,}), (stateVirama, {joiningL:stateBefore,joiningD:stateBefore,}), (stateBefore, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,joinZWNJ:stateAfter,joinZWJ:stateFAIL,joinVirama:stateBeforeVirama,}), (stateBeforeVirama, {joiningL:stateBefore,joiningD:stateBefore,joiningT:stateBefore,}), (stateAfter, {joiningL:stateFAIL,joiningD:stateBefore,joiningT:stateAfter,joiningR:stateStart,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateAfter,}), (stateFAIL, {0:stateFAIL,joiningL:stateFAIL,joiningD:stateFAIL,joiningT:stateFAIL,joiningR:stateFAIL,joinZWNJ:stateFAIL,joinZWJ:stateFAIL,joinVirama:stateFAIL,})));
 
@@ -758,7 +720,6 @@ private static error validateLabel(this ptr<Profile> _addr_p, @string s) {
             return error.As(addr(new labelError(s,"A4"))!)!;
         }
         return error.As(null!)!;
-
     }
     if (p.checkHyphens) {
         if (len(s) > 4 && s[2] == '-' && s[3] == '-') {
@@ -785,7 +746,7 @@ private static error validateLabel(this ptr<Profile> _addr_p, @string s) {
     {
         nint i = 0;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             var jt = x.joinType();
             if (s[(int)i..(int)i + sz] == zwj) {
                 jt = joinZWJ;
@@ -793,28 +754,23 @@ private static error validateLabel(this ptr<Profile> _addr_p, @string s) {
             else if (s[(int)i..(int)i + sz] == zwnj) {
                 jt = joinZWNJ;
             }
-
             st = joinStates[st][jt];
             if (x.isViramaModifier()) {
                 st = joinStates[st][joinVirama];
             }
-
             i += sz;
 
             if (i == len(s)) {
                 break;
             }
-
             v, sz = trie.lookupString(s[(int)i..]);
             x = info(v);
-
         }
     }
     if (st == stateFAIL || st == stateAfter) {
         return error.As(addr(new labelError(s,"C"))!)!;
     }
     return error.As(null!)!;
-
 }
 
 private static bool ascii(@string s) {
@@ -824,7 +780,6 @@ private static bool ascii(@string s) {
         }
     }
     return true;
-
 }
 
 } // end idna_package

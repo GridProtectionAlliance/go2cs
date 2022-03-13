@@ -2,52 +2,52 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2022 March 06 22:31:28 UTC
+// package tar -- go2cs converted at 2022 March 13 05:42:23 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Program Files\Go\src\archive\tar\format.go
-using strings = go.strings_package;
-
 namespace go.archive;
+
+using strings = strings_package;
 
 public static partial class tar_package {
 
-    // Format represents the tar archive format.
-    //
-    // The original tar format was introduced in Unix V7.
-    // Since then, there have been multiple competing formats attempting to
-    // standardize or extend the V7 format to overcome its limitations.
-    // The most common formats are the USTAR, PAX, and GNU formats,
-    // each with their own advantages and limitations.
-    //
-    // The following table captures the capabilities of each format:
-    //
-    //                      |  USTAR |       PAX |       GNU
-    //    ------------------+--------+-----------+----------
-    //    Name              |   256B | unlimited | unlimited
-    //    Linkname          |   100B | unlimited | unlimited
-    //    Size              | uint33 | unlimited |    uint89
-    //    Mode              | uint21 |    uint21 |    uint57
-    //    Uid/Gid           | uint21 | unlimited |    uint57
-    //    Uname/Gname       |    32B | unlimited |       32B
-    //    ModTime           | uint33 | unlimited |     int89
-    //    AccessTime        |    n/a | unlimited |     int89
-    //    ChangeTime        |    n/a | unlimited |     int89
-    //    Devmajor/Devminor | uint21 |    uint21 |    uint57
-    //    ------------------+--------+-----------+----------
-    //    string encoding   |  ASCII |     UTF-8 |    binary
-    //    sub-second times  |     no |       yes |        no
-    //    sparse files      |     no |       yes |       yes
-    //
-    // The table's upper portion shows the Header fields, where each format reports
-    // the maximum number of bytes allowed for each string field and
-    // the integer type used to store each numeric field
-    // (where timestamps are stored as the number of seconds since the Unix epoch).
-    //
-    // The table's lower portion shows specialized features of each format,
-    // such as supported string encodings, support for sub-second timestamps,
-    // or support for sparse files.
-    //
-    // The Writer currently provides no support for sparse files.
+// Format represents the tar archive format.
+//
+// The original tar format was introduced in Unix V7.
+// Since then, there have been multiple competing formats attempting to
+// standardize or extend the V7 format to overcome its limitations.
+// The most common formats are the USTAR, PAX, and GNU formats,
+// each with their own advantages and limitations.
+//
+// The following table captures the capabilities of each format:
+//
+//                      |  USTAR |       PAX |       GNU
+//    ------------------+--------+-----------+----------
+//    Name              |   256B | unlimited | unlimited
+//    Linkname          |   100B | unlimited | unlimited
+//    Size              | uint33 | unlimited |    uint89
+//    Mode              | uint21 |    uint21 |    uint57
+//    Uid/Gid           | uint21 | unlimited |    uint57
+//    Uname/Gname       |    32B | unlimited |       32B
+//    ModTime           | uint33 | unlimited |     int89
+//    AccessTime        |    n/a | unlimited |     int89
+//    ChangeTime        |    n/a | unlimited |     int89
+//    Devmajor/Devminor | uint21 |    uint21 |    uint57
+//    ------------------+--------+-----------+----------
+//    string encoding   |  ASCII |     UTF-8 |    binary
+//    sub-second times  |     no |       yes |        no
+//    sparse files      |     no |       yes |       yes
+//
+// The table's upper portion shows the Header fields, where each format reports
+// the maximum number of bytes allowed for each string field and
+// the integer type used to store each numeric field
+// (where timestamps are stored as the number of seconds since the Unix epoch).
+//
+// The table's lower portion shows specialized features of each format,
+// such as supported string encodings, support for sub-second timestamps,
+// or support for sparse files.
+//
+// The Writer currently provides no support for sparse files.
 public partial struct Format { // : nint
 }
 
@@ -110,7 +110,6 @@ private static readonly var formatSTAR = 5;
 
 private static readonly var formatMax = 6;
 
-
 public static bool has(this Format f, Format f2) {
     return f & f2 != 0;
 }
@@ -142,7 +141,6 @@ public static @string String(this Format f) {
                 ss = append(ss, formatNames[f2]);
             f2<<=1;
             }
-
         }
     }
     switch (len(ss)) {
@@ -156,7 +154,6 @@ public static @string String(this Format f) {
             return "(" + strings.Join(ss, " | ") + ")";
             break;
     }
-
 }
 
 // Magics used to identify various formats.
@@ -165,7 +162,6 @@ private static readonly @string versionGNU = " \x00";
 private static readonly @string magicUSTAR = "ustar\x00";
 private static readonly @string versionUSTAR = "00";
 private static readonly @string trailerSTAR = "tar\x00";
-
 
 // Size constants from various tar specifications.
 private static readonly nint blockSize = 512; // Size of each block in a tar stream
@@ -237,8 +233,7 @@ private static Format GetFormat(this ptr<block> _addr_b) {
         return FormatGNU;
     else 
         return formatV7;
-    
-}
+    }
 
 // SetFormat writes the magic values necessary for specified format
 // and then updates the checksum accordingly.
@@ -266,7 +261,6 @@ private static void SetFormat(this ptr<block> _addr_b, Format format) => func((_
     var (chksum, _) = b.ComputeChecksum(); // Possible values are 256..128776
     f.formatOctal(field[..(int)7], chksum); // Never fails since 128776 < 262143
     field[7] = ' ';
-
 });
 
 // ComputeChecksum computes the checksum for the header block.
@@ -284,9 +278,7 @@ private static (long, long) ComputeChecksum(this ptr<block> _addr_b) {
         }
         unsigned += int64(c);
         signed += int64(int8(c));
-
     }    return (unsigned, signed);
-
 }
 
 // Reset clears the block with all zeros.

@@ -4,16 +4,16 @@
 
 // This file implements FindExportData.
 
-// package gcimporter -- go2cs converted at 2022 March 06 23:32:35 UTC
+// package gcimporter -- go2cs converted at 2022 March 13 06:42:15 UTC
 // import "go/internal/gcimporter" ==> using gcimporter = go.go.@internal.gcimporter_package
 // Original source: C:\Program Files\Go\src\go\internal\gcimporter\exportdata.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.go.@internal;
+
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class gcimporter_package {
 
@@ -40,7 +40,6 @@ private static (@string, nint, error) readGopackHeader(ptr<bufio.Reader> _addr_r
     }
     name = strings.TrimSpace(string(hdr[..(int)16]));
     return ;
-
 }
 
 // FindExportData positions the reader r at the beginning of the
@@ -94,7 +93,6 @@ public static (@string, error) FindExportData(ptr<bufio.Reader> _addr_r) {
     hdr = string(line);
 
     return ;
-
 }
 
 } // end gcimporter_package

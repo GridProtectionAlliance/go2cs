@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:10:11 UTC
+//     Generated on 2022 March 13 05:26:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct MemStats
         {
             // Constructors
@@ -113,7 +113,7 @@ namespace go
             public static implicit operator MemStats(NilType nil) => default(MemStats);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static MemStats MemStats_cast(dynamic value)
         {
             return new MemStats(value.Alloc, value.TotalAlloc, value.Sys, value.Lookups, value.Mallocs, value.Frees, value.HeapAlloc, value.HeapSys, value.HeapIdle, value.HeapInuse, value.HeapReleased, value.HeapObjects, value.StackInuse, value.StackSys, value.MSpanInuse, value.MSpanSys, value.MCacheInuse, value.MCacheSys, value.BuckHashSys, value.GCSys, value.OtherSys, value.NextGC, value.LastGC, value.PauseTotalNs, value.PauseNs, value.PauseEnd, value.NumGC, value.NumForcedGC, value.GCCPUFraction, value.EnableGC, value.DebugGC);

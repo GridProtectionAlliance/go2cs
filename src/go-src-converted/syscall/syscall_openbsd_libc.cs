@@ -5,12 +5,12 @@
 //go:build openbsd && !mips64
 // +build openbsd,!mips64
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:10 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:37 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\syscall_openbsd_libc.go
-using abi = go.@internal.abi_package;
-
 namespace go;
+
+using abi = @internal.abi_package;
 
 public static partial class syscall_package {
 

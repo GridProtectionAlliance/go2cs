@@ -4,29 +4,28 @@
 
 // go mod edit
 
-// package modcmd -- go2cs converted at 2022 March 06 23:19:35 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:32:23 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\edit.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using strings = go.strings_package;
+namespace go.cmd.go.@internal;
 
-using @base = go.cmd.go.@internal.@base_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modload = go.cmd.go.@internal.modload_package;
+using bytes = bytes_package;
+using context = context_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
+using strings = strings_package;
 
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
+using @base = cmd.go.@internal.@base_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modload = cmd.go.@internal.modload_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
 using System;
 using System.ComponentModel;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class modcmd_package {
 
@@ -160,7 +159,6 @@ private static void init() {
 
     @base.AddModCommonFlags(_addr_cmdEdit.Flag);
     @base.AddBuildFlagsNX(_addr_cmdEdit.Flag);
-
 }
 
 private static void runEdit(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) => func((defer, _, _) => {
@@ -198,7 +196,6 @@ private static void runEdit(context.Context ctx, ptr<base.Command> _addr_cmd, sl
             err = err__prev2;
 
         }
-
     }
     if (editGo != "".val) {
         if (!modfile.GoVersionRE.MatchString(editGo.val)) {
@@ -229,7 +226,6 @@ private static void runEdit(context.Context ctx, ptr<base.Command> _addr_cmd, sl
             err = err__prev2;
 
         }
-
     }
     if (len(edits) > 0) {
         foreach (var (_, edit) in edits) {
@@ -263,13 +259,11 @@ private static void runEdit(context.Context ctx, ptr<base.Command> _addr_cmd, sl
 
     }
 
-
     err = lockedfile.Transform(gomod, lockedData => {
         if (!bytes.Equal(lockedData, data)) {
             return (null, errors.New("go.mod changed during editing; not overwriting"));
         }
         return (out, null);
-
     });
     if (err != null) {
         @base.Fatalf("go: %v", err);
@@ -293,12 +287,10 @@ private static (@string, @string) parsePathVersion(@string flag, @string arg) {
         }
     }
 
-
     if (!allowedVersionArg(version)) {
         @base.Fatalf("go mod: -%s=%s: invalid version %q", flag, arg, version);
     }
     return (path, version);
-
 }
 
 // parsePath parses -flag=arg expecting arg to be path (not path@version).
@@ -316,9 +308,7 @@ private static @string parsePath(@string flag, @string arg) {
             @base.Fatalf("go mod: -%s=%s: invalid path: %v", flag, arg, err);
         }
     }
-
     return path;
-
 }
 
 // parsePathVersionOptional parses path[@version], using adj to
@@ -339,7 +329,6 @@ private static (@string, @string, error) parsePathVersionOptional(@string adj, @
             (path, version) = (strings.TrimSpace(arg[..(int)i]), strings.TrimSpace(arg[(int)i + 1..]));
         }
     }
-
     {
         var err = module.CheckImportPath(path);
 
@@ -349,12 +338,10 @@ private static (@string, @string, error) parsePathVersionOptional(@string adj, @
             }
         }
     }
-
     if (path != arg && !allowedVersionArg(version)) {
         return (path, version, error.As(fmt.Errorf("invalid %s version: %q", adj, version))!);
     }
     return (path, version, error.As(null!)!);
-
 }
 
 // parseVersionInterval parses a single version like "v1.2.3" or a closed
@@ -370,7 +357,6 @@ private static (modfile.VersionInterval, error) parseVersionInterval(@string arg
             return (new modfile.VersionInterval(), error.As(fmt.Errorf("invalid version: %q", arg))!);
         }
         return (new modfile.VersionInterval(Low:arg,High:arg), error.As(null!)!);
-
     }
     if (!strings.HasSuffix(arg, "]")) {
         return (new modfile.VersionInterval(), error.As(fmt.Errorf("invalid version interval: %q", arg))!);
@@ -386,7 +372,6 @@ private static (modfile.VersionInterval, error) parseVersionInterval(@string arg
         return (new modfile.VersionInterval(), error.As(fmt.Errorf("invalid version interval: %q", arg))!);
     }
     return (new modfile.VersionInterval(Low:low,High:high), error.As(null!)!);
-
 }
 
 // allowedVersionArg returns whether a token may be used as a version in go.mod.
@@ -410,9 +395,7 @@ private static void flagRequire(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // flagDropRequire implements the -droprequire flag.
@@ -427,9 +410,7 @@ private static void flagDropRequire(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // flagExclude implements the -exclude flag.
@@ -444,9 +425,7 @@ private static void flagExclude(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // flagDropExclude implements the -dropexclude flag.
@@ -461,9 +440,7 @@ private static void flagDropExclude(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // flagReplace implements the -replace flag.
@@ -499,9 +476,7 @@ private static void flagReplace(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // flagDropReplace implements the -dropreplace flag.
@@ -519,9 +494,7 @@ private static void flagDropReplace(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // flagRetract implements the -retract flag.
@@ -539,9 +512,7 @@ private static void flagRetract(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // flagDropRetract implements the -dropretract flag.
@@ -559,9 +530,7 @@ private static void flagDropRetract(@string arg) {
             }
 
         }
-
     });
-
 }
 
 // fileJSON is the -json output data structure.
@@ -652,7 +621,6 @@ private static void editPrintJSON(ptr<modfile.File> _addr_modFile) {
     }
     data = append(data, '\n');
     os.Stdout.Write(data);
-
 }
 
 } // end modcmd_package

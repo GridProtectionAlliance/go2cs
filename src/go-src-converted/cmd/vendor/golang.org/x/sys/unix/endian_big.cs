@@ -5,11 +5,9 @@
 //go:build armbe || arm64be || m68k || mips || mips64 || mips64p32 || ppc || ppc64 || s390 || s390x || shbe || sparc || sparc64
 // +build armbe arm64be m68k mips mips64 mips64p32 ppc ppc64 s390 s390x shbe sparc sparc64
 
-// package unix -- go2cs converted at 2022 March 06 23:26:31 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:18 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\endian_big.go
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
 
 public static partial class unix_package {

@@ -2,25 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:15:20 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:38 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\dial.go
-using context = go.context_package;
-using nettrace = go.@internal.nettrace_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using context = context_package;
+using nettrace = @internal.nettrace_package;
+using syscall = syscall_package;
+using time = time_package;
+
+
+// defaultTCPKeepAlive is a default constant value for TCPKeepAlive times
+// See golang.org/issue/31510
+
+using System;
+using System.Threading;
 public static partial class net_package {
 
-    // defaultTCPKeepAlive is a default constant value for TCPKeepAlive times
-    // See golang.org/issue/31510
 private static readonly nint defaultTCPKeepAlive = 15 * time.Second;
-
 
 // A Dialer contains options for connecting to an address.
 //
@@ -89,7 +89,6 @@ private static time.Time minNonzeroTime(time.Time a, time.Time b) {
         return a;
     }
     return b;
-
 }
 
 // deadline returns the earliest of:
@@ -103,7 +102,6 @@ private static time.Time deadline(this ptr<Dialer> _addr_d, context.Context ctx,
 
     if (d.Timeout != 0) { // including negative, for historical reasons
         earliest = now.Add(d.Timeout);
-
     }
     {
         var (d, ok) = ctx.Deadline();
@@ -112,9 +110,7 @@ private static time.Time deadline(this ptr<Dialer> _addr_d, context.Context ctx,
             earliest = minNonzeroTime(earliest, d);
         }
     }
-
     return minNonzeroTime(earliest, d.Deadline);
-
 }
 
 private static ptr<Resolver> resolver(this ptr<Dialer> _addr_d) {
@@ -124,7 +120,6 @@ private static ptr<Resolver> resolver(this ptr<Dialer> _addr_d) {
         return _addr_d.Resolver!;
     }
     return _addr_DefaultResolver!;
-
 }
 
 // partialDeadline returns the deadline to use for a single address,
@@ -154,7 +149,6 @@ private static (time.Time, error) partialDeadline(time.Time now, time.Time deadl
         }
     }
     return (now.Add(timeout), error.As(null!)!);
-
 }
 
 private static time.Duration fallbackDelay(this ptr<Dialer> _addr_d) {
@@ -212,7 +206,6 @@ private static (@string, nint, error) parseNetwork(context.Context ctx, @string 
                 break;
         }
         return (network, 0, error.As(null!)!);
-
     }
     afnet = network[..(int)i];
     switch (afnet) {
@@ -230,11 +223,9 @@ private static (@string, nint, error) parseNetwork(context.Context ctx, @string 
                 }
             }
             return (afnet, proto, error.As(null!)!);
-
             break;
     }
     return ("", 0, error.As(UnknownNetworkError(network))!);
-
 }
 
 // resolveAddrList resolves addr using hint and returns a list of
@@ -266,7 +257,6 @@ private static (addrList, error) resolveAddrList(this ptr<Resolver> _addr_r, con
                 return (null, error.As(addr(new AddrError(Err:"mismatched local address type",Addr:hint.String()))!)!);
             }
             return (new addrList(addr), error.As(null!)!);
-
             break;
     }
     var (addrs, err) = r.internetAddrList(ctx, afnet, addr);
@@ -317,7 +307,6 @@ private static (addrList, error) resolveAddrList(this ptr<Resolver> _addr_r, con
                     naddrs = append(naddrs, addr);
                     break;
             }
-
         }
         addr = addr__prev1;
     }
@@ -326,7 +315,6 @@ private static (addrList, error) resolveAddrList(this ptr<Resolver> _addr_r, con
         return (null, error.As(addr(new AddrError(Err:errNoSuitableAddress.Error(),Addr:hint.String()))!)!);
     }
     return (naddrs, error.As(null!)!);
-
 }
 
 // Dial connects to the address on the named network.
@@ -461,7 +449,6 @@ private static (Conn, error) DialContext(this ptr<Dialer> _addr_d, context.Conte
             }
 
         }
-
     }
     {
         var oldCancel = d.Cancel;
@@ -488,7 +475,6 @@ private static (Conn, error) DialContext(this ptr<Dialer> _addr_d, context.Conte
             resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(), _addr_shadow);
         }
     }
-
 
     var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, "dial", network, address, d.LocalAddr);
     if (err != null) {
@@ -529,9 +515,7 @@ private static (Conn, error) DialContext(this ptr<Dialer> _addr_d, context.Conte
             testHookSetKeepAlive(ka);
         }
     }
-
     return (c, error.As(null!)!);
-
 });
 
 // dialParallel races two copies of dialSerial, giving the first a
@@ -606,10 +590,8 @@ private static (Conn, error) dialParallel(this ptr<sysDialer> _addr_sd, context.
             // we just got an error on the primary path, so start
             // the fallback immediately (in 0 nanoseconds).
             fallbackTimer.Reset(0);
-
         }
     }
-
 });
 
 // dialSerial connects to a list of addresses in sequence, returning
@@ -634,21 +616,16 @@ private static (Conn, error) dialSerial(this ptr<sysDialer> _addr_sd, context.Co
                     if (firstErr == null) {
                         firstErr = error.As(addr(new OpError(Op:"dial",Net:sd.network,Source:sd.LocalAddr,Addr:ra,Err:err)))!;
                     }
-
                     break;
-
                 }
-
                 if (partialDeadline.Before(deadline)) {
                     context.CancelFunc cancel = default;
                     dialCtx, cancel = context.WithDeadline(ctx, partialDeadline);
                     defer(cancel());
                 }
-
             }
 
         }
-
 
         var (c, err) = sd.dialSingle(dialCtx, ra);
         if (err == null) {
@@ -661,7 +638,6 @@ private static (Conn, error) dialSerial(this ptr<sysDialer> _addr_sd, context.Co
         firstErr = error.As(addr(new OpError(Op:"dial",Net:sd.network,Source:nil,Addr:nil,Err:errMissingAddress)))!;
     }
     return (null, error.As(firstErr)!);
-
 });
 
 // dialSingle attempts to establish and returns a single connection to
@@ -681,7 +657,6 @@ private static (Conn, error) dialSingle(this ptr<sysDialer> _addr_sd, context.Co
             defer(() => {
                 trace.ConnectDone(sd.network, raStr, err);
             }());
-
         }
     }
     var la = sd.LocalAddr;
@@ -713,7 +688,6 @@ private static (Conn, error) dialSingle(this ptr<sysDialer> _addr_sd, context.Co
         return (null, error.As(addr(new OpError(Op:"dial",Net:sd.network,Source:la,Addr:ra,Err:err))!)!); // c is non-nil interface containing nil pointer
     }
     return (c, error.As(null!)!);
-
 });
 
 // ListenConfig contains options for listening to an address.
@@ -761,7 +735,6 @@ private static (Listener, error) Listen(this ptr<ListenConfig> _addr_lc, context
         return (null, error.As(addr(new OpError(Op:"listen",Net:sl.network,Source:nil,Addr:la,Err:err))!)!); // l is non-nil interface containing nil pointer
     }
     return (l, error.As(null!)!);
-
 }
 
 // ListenPacket announces on the local network address.
@@ -801,7 +774,6 @@ private static (PacketConn, error) ListenPacket(this ptr<ListenConfig> _addr_lc,
         return (null, error.As(addr(new OpError(Op:"listen",Net:sl.network,Source:nil,Addr:la,Err:err))!)!); // c is non-nil interface containing nil pointer
     }
     return (c, error.As(null!)!);
-
 }
 
 // sysListener contains a Listen's parameters and configuration.

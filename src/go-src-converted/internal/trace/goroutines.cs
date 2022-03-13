@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2022 March 06 23:22:53 UTC
+// package trace -- go2cs converted at 2022 March 13 06:35:57 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Program Files\Go\src\internal\trace\goroutines.go
-using sort = go.sort_package;
-using System;
-
-
 namespace go.@internal;
+
+using sort = sort_package;
+using System;
 
 public static partial class trace_package {
 
-    // GDesc contains statistics and execution details of a single goroutine.
+// GDesc contains statistics and execution details of a single goroutine.
 public partial struct GDesc {
     public ulong ID;
     public @string Name;
@@ -91,7 +90,6 @@ private static GExecutionStat snapshotStat(this ptr<GDesc> _addr_g, long lastTs,
             // The goroutine's lifetime completely overlaps
             // with a GC.
             ret.GCTime += lastTs - g.CreationTime;
-
         }
     }
     if (g.TotalTime == 0) {
@@ -116,7 +114,6 @@ private static GExecutionStat snapshotStat(this ptr<GDesc> _addr_g, long lastTs,
         ret.SweepTime += lastTs - g.blockSweepTime;
     }
     return ret;
-
 }
 
 // finalize is called when processing a goroutine end event or at
@@ -137,7 +134,6 @@ private static void finalize(this ptr<GDesc> _addr_g, long lastTs, long activeGC
         s.GExecutionStat = finalStat.sub(s.GExecutionStat);
         g.Regions = append(g.Regions, s);
     }    (g.gdesc).val = new gdesc();
-
 }
 
 // gdesc is a private part of GDesc that is required only during analysis.
@@ -179,7 +175,6 @@ public static map<ulong, ptr<GDesc>> GoroutineStats(slice<ptr<Event>> events) {
                 }
 
             }
-
             gs[g.ID] = g;
         else if (ev.Type == EvGoStart || ev.Type == EvGoStartLabel) 
             g = gs[ev.G];
@@ -250,9 +245,7 @@ public static map<ulong, ptr<GDesc>> GoroutineStats(slice<ptr<Event>> events) {
             if (g != null) { 
                 // Sweep can happen during GC on system goroutine.
                 g.blockSweepTime = ev.Ts;
-
             }
-
         else if (ev.Type == EvGCSweepDone) 
             g = gs[ev.G];
             if (g != null && g.blockSweepTime != 0) {
@@ -277,7 +270,6 @@ public static map<ulong, ptr<GDesc>> GoroutineStats(slice<ptr<Event>> events) {
  {
                         g.GCTime += ev.Ts - gcStartTime;
                     }
-
                 }
 
                 g = g__prev2;
@@ -303,7 +295,6 @@ public static map<ulong, ptr<GDesc>> GoroutineStats(slice<ptr<Event>> events) {
                                                    sd = regionStk[n - 1];
                                                    regionStk = regionStk[..(int)n - 1]; // pop
                                                    g.activeRegions = regionStk;
-
                                                }
                                                else
                         {
@@ -311,16 +302,13 @@ public static map<ulong, ptr<GDesc>> GoroutineStats(slice<ptr<Event>> events) {
                                                }
 
                                            }
-
                                            sd.GExecutionStat = g.snapshotStat(lastTs, gcStartTime).sub(sd.GExecutionStat);
                                            sd.End = ev;
                                            g.Regions = append(g.Regions, sd);
-
                         break;
                 }
             }
-        
-    }    {
+            }    {
         ptr<GDesc> g__prev1 = g;
 
         foreach (var (_, __g) in gs) {
@@ -341,13 +329,11 @@ public static map<ulong, ptr<GDesc>> GoroutineStats(slice<ptr<Event>> events) {
             });
 
             g.gdesc = null;
-
         }
         g = g__prev1;
     }
 
     return gs;
-
 }
 
 // RelatedGoroutines finds a set of goroutines related to goroutine goid.
@@ -368,7 +354,6 @@ public static map<ulong, bool> RelatedGoroutines(slice<ptr<Event>> events, ulong
     }
     gmap[0] = true; // for GC events
     return gmap;
-
 }
 
 } // end trace_package

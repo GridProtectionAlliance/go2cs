@@ -4,22 +4,20 @@
 
 // This file implements helper functions for scope position computations.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:33 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:26:58 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\positions.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class syntax_package {
 
-    // StartPos returns the start position of n.
+// StartPos returns the start position of n.
 public static Pos StartPos(Node n) => func((_, panic, _) => { 
     // Cases for nodes which don't need a correction are commented out.
     {
         var m = n;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             switch (m.type()) {
                 case 
                     panic("internal error: nil"); 
@@ -133,10 +131,8 @@ public static Pos StartPos(Node n) => func((_, panic, _) => {
                     break;
                 }
             }
-
         }
     }
-
 });
 
 // EndPos returns the approximate end position of n in the source.
@@ -152,7 +148,7 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
     {
         var m = n;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             switch (m.type()) {
                 case 
                     panic("internal error: nil"); 
@@ -189,7 +185,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Pos();
                     break;
                 case ptr<TypeDecl> n:
@@ -217,7 +212,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Pos();
                     break;
                 case ptr<FuncDecl> n:
@@ -269,7 +263,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                             }
 
                         }
-
                     }
 
                     m = n.X;
@@ -301,7 +294,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     m = n.Fun;
                     break;
                 case ptr<ListExpr> n:
@@ -318,7 +310,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Pos(); 
 
                     // types
@@ -346,7 +337,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Pos(); 
                     // TODO(gri) need to take TagList into account
                     break;
@@ -371,7 +361,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Pos();
                     break;
                 case ptr<FuncType> n:
@@ -388,7 +377,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     {
                         var l__prev1 = l;
 
@@ -402,7 +390,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Pos();
                     break;
                 case ptr<MapType> n:
@@ -442,7 +429,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Pos();
                     break;
                 case ptr<AssignStmt> n:
@@ -504,7 +490,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Colon;
                     break;
                 case ptr<CommClause> n:
@@ -521,7 +506,6 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                         l = l__prev1;
 
                     }
-
                     return n.Colon;
                     break;
                 default:
@@ -531,10 +515,8 @@ public static Pos EndPos(Node n) => func((_, panic, _) => {
                     break;
                 }
             }
-
         }
     }
-
 });
 
 private static Decl lastDecl(slice<Decl> list) {
@@ -545,9 +527,7 @@ private static Decl lastDecl(slice<Decl> list) {
             return list[l - 1];
         }
     }
-
     return null;
-
 }
 
 private static Expr lastExpr(slice<Expr> list) {
@@ -558,9 +538,7 @@ private static Expr lastExpr(slice<Expr> list) {
             return list[l - 1];
         }
     }
-
     return null;
-
 }
 
 private static Stmt lastStmt(slice<Stmt> list) {
@@ -571,9 +549,7 @@ private static Stmt lastStmt(slice<Stmt> list) {
             return list[l - 1];
         }
     }
-
     return null;
-
 }
 
 private static ptr<Field> lastField(slice<ptr<Field>> list) {
@@ -584,9 +560,7 @@ private static ptr<Field> lastField(slice<ptr<Field>> list) {
             return _addr_list[l - 1]!;
         }
     }
-
     return _addr_null!;
-
 }
 
 } // end syntax_package

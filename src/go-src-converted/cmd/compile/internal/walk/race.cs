@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:58 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:19 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\race.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
 
 public static partial class walk_package {
 
@@ -33,7 +33,6 @@ private static void instrument(ptr<ir.Func> _addr_fn) {
         }
         fn.Exit.Append(mkcallstmt("racefuncexit"));
         @base.Pos = lno;
-
     }
 }
 

@@ -7,9 +7,11 @@
 //
 // See also ``A Layman's Guide to a Subset of ASN.1, BER, and DER,''
 // http://luca.ntop.org/Teaching/Appunti/asn1.html.
-// package asn1 -- go2cs converted at 2022 March 06 22:19:43 UTC
+
+// package asn1 -- go2cs converted at 2022 March 13 05:34:41 UTC
 // import "encoding/asn1" ==> using asn1 = go.encoding.asn1_package
 // Original source: C:\Program Files\Go\src\encoding\asn1\asn1.go
+namespace go.encoding;
 // ASN.1 is a syntax for specifying abstract objects and BER, DER, PER, XER etc
 // are different encoding formats for those objects. Here, we'll be dealing
 // with DER, the Distinguished Encoding Rules. DER is used in X.509 because
@@ -20,22 +22,23 @@
 // ASN.1 is very complex and this package doesn't attempt to implement
 // everything by any means.
 
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using math = go.math_package;
-using big = go.math.big_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using time = go.time_package;
-using utf16 = go.unicode.utf16_package;
-using utf8 = go.unicode.utf8_package;
 
-namespace go.encoding;
+using errors = errors_package;
+using fmt = fmt_package;
+using math = math_package;
+using big = math.big_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using time = time_package;
+using utf16 = unicode.utf16_package;
+using utf8 = unicode.utf8_package;
+
+
+// A StructuralError suggests that the ASN.1 data is valid, but the Go type
+// which is receiving it doesn't match.
 
 public static partial class asn1_package {
 
-    // A StructuralError suggests that the ASN.1 data is valid, but the Go type
-    // which is receiving it doesn't match.
 public partial struct StructuralError {
     public @string Msg;
 }
@@ -78,7 +81,6 @@ private static (bool, error) parseBool(slice<byte> bytes) {
     }
 
     return ;
-
 }
 
 // INTEGER
@@ -96,7 +98,6 @@ private static error checkInteger(slice<byte> bytes) {
         return error.As(new StructuralError("integer not minimally-encoded"))!;
     }
     return error.As(null!)!;
-
 }
 
 // parseInt64 treats the given bytes as a big-endian, signed integer and
@@ -113,7 +114,6 @@ private static (long, error) parseInt64(slice<byte> bytes) {
         // We'll overflow an int64 in this case.
         err = new StructuralError("integer too large");
         return ;
-
     }
     for (nint bytesRead = 0; bytesRead < len(bytes); bytesRead++) {
         ret<<=8;
@@ -124,7 +124,6 @@ private static (long, error) parseInt64(slice<byte> bytes) {
     ret<<=64 - uint8(len(bytes)) * 8;
     ret>>=64 - uint8(len(bytes)) * 8;
     return ;
-
 }
 
 // parseInt treats the given bytes as a big-endian, signed integer and returns
@@ -140,7 +139,6 @@ private static (int, error) parseInt32(slice<byte> bytes) {
             return (0, error.As(err)!);
         }
     }
-
     var (ret64, err) = parseInt64(bytes);
     if (err != null) {
         return (0, error.As(err)!);
@@ -149,7 +147,6 @@ private static (int, error) parseInt32(slice<byte> bytes) {
         return (0, error.As(new StructuralError("integer too large"))!);
     }
     return (int32(ret64), error.As(null!)!);
-
 }
 
 private static var bigOne = big.NewInt(1);
@@ -167,7 +164,6 @@ private static (ptr<big.Int>, error) parseBigInt(slice<byte> bytes) {
             return (_addr_null!, error.As(err)!);
         }
     }
-
     ptr<big.Int> ret = @new<big.Int>();
     if (len(bytes) > 0 && bytes[0] & 0x80 == 0x80) { 
         // This is a negative number.
@@ -178,11 +174,9 @@ private static (ptr<big.Int>, error) parseBigInt(slice<byte> bytes) {
         ret.Add(ret, bigOne);
         ret.Neg(ret);
         return (_addr_ret!, error.As(null!)!);
-
     }
     ret.SetBytes(bytes);
     return (_addr_ret!, error.As(null!)!);
-
 }
 
 // BIT STRING
@@ -204,7 +198,6 @@ public static nint At(this BitString b, nint i) {
     var x = i / 8;
     nint y = 7 - uint(i % 8);
     return int(b.Bytes[x] >> (int)(y)) & 1;
-
 }
 
 // RightAlign returns a slice where the padding bits are at the beginning. The
@@ -222,7 +215,6 @@ public static slice<byte> RightAlign(this BitString b) {
     }
 
     return a;
-
 }
 
 // parseBitString parses an ASN.1 bit string from the given byte slice and returns it.
@@ -242,7 +234,6 @@ private static (BitString, error) parseBitString(slice<byte> bytes) {
     ret.BitLength = (len(bytes) - 1) * 8 - paddingBits;
     ret.Bytes = bytes[(int)1..];
     return ;
-
 }
 
 // NULL
@@ -271,7 +262,6 @@ public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) {
     }
 
     return true;
-
 }
 
 public static @string String(this ObjectIdentifier oi) {
@@ -282,9 +272,7 @@ public static @string String(this ObjectIdentifier oi) {
             s += ".";
         }
         s += strconv.Itoa(v);
-
     }    return s;
-
 }
 
 // parseObjectIdentifier parses an OBJECT IDENTIFIER from the given bytes and
@@ -325,11 +313,9 @@ private static (ObjectIdentifier, error) parseObjectIdentifier(slice<byte> bytes
         i++;
         }
         s[i] = v;
-
     }
     s = s[(int)0..(int)i];
     return ;
-
 }
 
 // ENUMERATED
@@ -376,14 +362,11 @@ private static (nint, nint, error) parseBase128Int(slice<byte> bytes, nint initO
             if (ret64 > math.MaxInt32) {
                 err = new StructuralError("base 128 integer too large");
             }
-
             return ;
-
         }
     }
     err = new SyntaxError("truncated base 128 integer");
     return ;
-
 }
 
 // UTCTime
@@ -412,14 +395,11 @@ private static (time.Time, error) parseUTCTime(slice<byte> bytes) {
         }
     }
 
-
     if (ret.Year() >= 2050) { 
         // UTCTime only encodes times prior to 2050. See https://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
         ret = ret.AddDate(-100, 0, 0);
-
     }
     return ;
-
 }
 
 // parseGeneralizedTime parses the GeneralizedTime from the given byte slice
@@ -445,9 +425,7 @@ private static (time.Time, error) parseGeneralizedTime(slice<byte> bytes) {
         }
     }
 
-
     return ;
-
 }
 
 // NumericString
@@ -463,7 +441,6 @@ private static (@string, error) parseNumericString(slice<byte> bytes) {
             return ("", error.As(new SyntaxError("NumericString contains invalid character"))!);
         }
     }    return (string(bytes), error.As(null!)!);
-
 }
 
 // isNumeric reports whether the given b is in the ASN.1 NumericString set.
@@ -486,7 +463,6 @@ private static (@string, error) parsePrintableString(slice<byte> bytes) {
         }
     }    ret = string(bytes);
     return ;
-
 }
 
 private partial struct asteriskFlag { // : bool
@@ -499,7 +475,6 @@ private static readonly asteriskFlag rejectAsterisk = false;
 
 private static readonly ampersandFlag allowAmpersand = true;
 private static readonly ampersandFlag rejectAmpersand = false;
-
 
 // isPrintable reports whether the given b is in the ASN.1 PrintableString set.
 // If asterisk is allowAsterisk then '*' is also allowed, reflecting existing
@@ -523,7 +498,6 @@ private static (@string, error) parseIA5String(slice<byte> bytes) {
         }
     }    ret = string(bytes);
     return ;
-
 }
 
 // T61String
@@ -549,7 +523,6 @@ private static (@string, error) parseUTF8String(slice<byte> bytes) {
         return ("", error.As(errors.New("asn1: invalid UTF-8 string"))!);
     }
     return (string(bytes), error.As(null!)!);
-
 }
 
 // BMPString
@@ -571,7 +544,6 @@ private static (@string, error) parseBMPString(slice<byte> bmpString) {
         }
     }
 
-
     var s = make_slice<ushort>(0, len(bmpString) / 2);
     while (len(bmpString) > 0) {
         s = append(s, uint16(bmpString[0]) << 8 + uint16(bmpString[1]));
@@ -579,7 +551,6 @@ private static (@string, error) parseBMPString(slice<byte> bmpString) {
     }
 
     return (string(utf16.Decode(s)), error.As(null!)!);
-
 }
 
 // A RawValue represents an undecoded ASN.1 object.
@@ -642,7 +613,6 @@ private static (tagAndLength, nint, error) parseTagAndLength(slice<byte> bytes, 
     if (b & 0x80 == 0) { 
         // The length is encoded in the bottom 7 bits.
         ret.length = int(b & 0x7f);
-
     }
     else
  { 
@@ -665,18 +635,14 @@ private static (tagAndLength, nint, error) parseTagAndLength(slice<byte> bytes, 
                 // overflowing.
                 err = new StructuralError("length too large");
                 return ;
-
             }
-
             ret.length<<=8;
             ret.length |= int(b);
             if (ret.length == 0) { 
                 // DER requires that lengths be minimal.
                 err = new StructuralError("superfluous leading zeros in length");
                 return ;
-
             }
-
         } 
         // Short lengths must be encoded in short form.
         if (ret.length < 0x80) {
@@ -685,7 +651,6 @@ private static (tagAndLength, nint, error) parseTagAndLength(slice<byte> bytes, 
         }
     }
     return ;
-
 }
 
 // parseSequenceOf is used for SEQUENCE OF and SET OF values. It tries to parse
@@ -725,15 +690,12 @@ private static (reflect.Value, error) parseSequenceOf(slice<byte> bytes, reflect
                 err = new StructuralError("sequence tag mismatch");
                 return ;
             }
-
             if (invalidLength(offset, t.length, len(bytes))) {
                 err = new SyntaxError("truncated sequence");
                 return ;
             }
-
             offset += t.length;
             numElements++;
-
         }
 
         offset = offset__prev1;
@@ -748,7 +710,6 @@ private static (reflect.Value, error) parseSequenceOf(slice<byte> bytes, reflect
         }
     }
     return ;
-
 }
 
 private static var bitStringType = reflect.TypeOf(new BitString());private static var objectIdentifierType = reflect.TypeOf(new ObjectIdentifier());private static var enumeratedType = reflect.TypeOf(Enumerated(0));private static var flagType = reflect.TypeOf(Flag(false));private static var timeType = reflect.TypeOf(new time.Time());private static var rawValueType = reflect.TypeOf(new RawValue());private static var rawContentsType = reflect.TypeOf(RawContent(null));private static var bigIntType = reflect.TypeOf(@new<big.Int>());
@@ -775,7 +736,6 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
             err = new SyntaxError("sequence truncated");
         }
         return ;
-
     }
     {
         var ifaceType = fieldType;
@@ -820,21 +780,16 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
                     result, err = parseBMPString(innerBytes);
                 else                 
             }
-
             offset += t.length;
             if (err != null) {
                 return ;
             }
-
             if (result != null) {
                 v.Set(reflect.ValueOf(result));
             }
-
             return ;
-
         }
     }
-
 
     var (t, offset, err) = parseTagAndLength(bytes, offset);
     if (err != null) {
@@ -868,7 +823,6 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
                 v.SetBool(true);
                 return ;
             }
-
         }
         else
  { 
@@ -881,9 +835,7 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
  {
                 err = new StructuralError("explicitly tagged member didn't match");
             }
-
             return ;
-
         }
     }
     var (matchAny, universalTag, compoundType, ok1) = getUniversalType(fieldType);
@@ -896,8 +848,7 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
 
             if (t.tag == TagIA5String || t.tag == TagGeneralString || t.tag == TagT61String || t.tag == TagUTF8String || t.tag == TagNumericString || t.tag == TagBMPString) 
                 universalTag = t.tag;
-            
-        }
+                    }
         else if (@params.stringType != 0) {
             universalTag = @params.stringType;
         }
@@ -938,7 +889,6 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
             err = new StructuralError(fmt.Sprintf("tags don't match (%d vs %+v) %+v %s @%d",expectedTag,t,params,fieldType.Name(),offset));
         }
         return ;
-
     }
     if (invalidLength(offset, t.length, len(bytes))) {
         err = new SyntaxError("data truncated");
@@ -1017,7 +967,6 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
                 }
                 err = err1;
             }
-
             return ; 
             // TODO(dfc) Add support for the remaining integer types
         else if (val.Kind() == reflect.Struct) 
@@ -1041,7 +990,6 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
                 var bytes = bytes[(int)initOffset..(int)offset];
                 val.Field(0).Set(reflect.ValueOf(RawContent(bytes)));
             }
-
             nint innerOffset = 0;
             {
                 nint i__prev1 = i;
@@ -1106,13 +1054,11 @@ private static (nint, error) parseField(reflect.Value v, slice<byte> bytes, nint
                         if (err == null) {
                 val.SetString(v);
             }
-
             return ;
 
     }
     err = new StructuralError("unsupported: "+v.Type().String());
     return ;
-
 }
 
 // canHaveDefaultValue reports whether k is a Kind that we will set a default
@@ -1122,7 +1068,6 @@ private static bool canHaveDefaultValue(reflect.Kind k) {
     if (k == reflect.Int || k == reflect.Int8 || k == reflect.Int16 || k == reflect.Int32 || k == reflect.Int64) 
         return true;
         return false;
-
 }
 
 // setDefaultValue is used to install a default value, from a tag string, into
@@ -1142,7 +1087,6 @@ private static bool setDefaultValue(reflect.Value v, fieldParameters @params) {
         v.SetInt(@params.defaultValue.val);
     }
     return ;
-
 }
 
 // Unmarshal parses the DER-encoded ASN.1 data structure b
@@ -1238,7 +1182,6 @@ private static @string Error(this ptr<invalidUnmarshalError> _addr_e) {
         return "asn1: Unmarshal recipient value is non-pointer " + e.Type.String();
     }
     return "asn1: Unmarshal recipient value is nil " + e.Type.String();
-
 }
 
 // UnmarshalWithParams allows field parameters to be specified for the
@@ -1256,7 +1199,6 @@ public static (slice<byte>, error) UnmarshalWithParams(slice<byte> b, object val
         return (null, error.As(err)!);
     }
     return (b[(int)offset..], error.As(null!)!);
-
 }
 
 } // end asn1_package

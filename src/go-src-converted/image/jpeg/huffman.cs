@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2022 March 06 23:36:07 UTC
+// package jpeg -- go2cs converted at 2022 March 13 06:44:07 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Program Files\Go\src\image\jpeg\huffman.go
-using io = go.io_package;
-
 namespace go.image;
+
+using io = io_package;
+
+
+// maxCodeLength is the maximum (inclusive) number of bits in a Huffman code.
 
 public static partial class jpeg_package {
 
-    // maxCodeLength is the maximum (inclusive) number of bits in a Huffman code.
 private static readonly nint maxCodeLength = 16;
 
 // maxNCodes is the maximum (inclusive) number of codes in a Huffman tree.
@@ -76,7 +78,6 @@ private static error ensureNBits(this ptr<decoder> _addr_d, int n) {
         }
     }
     return error.As(null!)!;
-
 }
 
 // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
@@ -95,7 +96,6 @@ private static (int, error) receiveExtend(this ptr<decoder> _addr_d, byte t) {
             }
 
         }
-
     }
     d.bits.n -= int32(t);
     d.bits.m>>=t;
@@ -105,7 +105,6 @@ private static (int, error) receiveExtend(this ptr<decoder> _addr_d, byte t) {
         x += ((-1) << (int)(t)) + 1;
     }
     return (x, error.As(null!)!);
-
 }
 
 // processDHT processes a Define Huffman Table marker, and initializes a huffman
@@ -129,7 +128,6 @@ private static error processDHT(this ptr<decoder> _addr_d, nint n) {
             err = err__prev1;
 
         }
-
         var tc = d.tmp[0] >> 4;
         if (tc > maxTc) {
             return error.As(FormatError("bad Tc value"))!;
@@ -216,10 +214,7 @@ private static error processDHT(this ptr<decoder> _addr_d, nint n) {
 
                     code++;
                     x++;
-
                 }
-
-
             } 
 
             // Derive minCodes, maxCodes, and valsIndices.
@@ -250,16 +245,13 @@ private static error processDHT(this ptr<decoder> _addr_d, nint n) {
                     c += n;
                     index += n;
                 }
-
                 c<<=1;
-
             }
 
             i = i__prev2;
         }
     }
     return error.As(null!)!;
-
 }
 
 // decodeHuffman returns the next Huffman-coded value from the bit-stream,
@@ -289,15 +281,12 @@ private static (byte, error) decodeHuffman(this ptr<decoder> _addr_d, ptr<huffma
                 if (d.bytes.nUnreadable != 0) {
                     d.unreadByteStuffedByte();
                 }
-
                 goto slowPath;
-
             }
 
             err = err__prev2;
 
         }
-
     }
     {
         var v = h.lut[(d.bits.a >> (int)(uint32(d.bits.n - lutSize))) & 0xff];
@@ -309,7 +298,6 @@ private static (byte, error) decodeHuffman(this ptr<decoder> _addr_d, ptr<huffma
             return (uint8(v >> 8), error.As(null!)!);
         }
     }
-
 
 slowPath:
     for (nint i = 0;
@@ -327,7 +315,6 @@ slowPath:
                 err = err__prev2;
 
             }
-
         }
         if (d.bits.a & d.bits.m != 0) {
             code |= 1;
@@ -338,10 +325,8 @@ slowPath:
             return (h.vals[h.valsIndices[i] + code - h.minCodes[i]], error.As(null!)!);
         }
         code<<=1;
-
     }
     return (0, error.As(FormatError("bad Huffman code"))!);
-
 }
 
 private static (bool, error) decodeBit(this ptr<decoder> _addr_d) {
@@ -358,13 +343,11 @@ private static (bool, error) decodeBit(this ptr<decoder> _addr_d) {
             }
 
         }
-
     }
     var ret = d.bits.a & d.bits.m != 0;
     d.bits.n--;
     d.bits.m>>=1;
     return (ret, error.As(null!)!);
-
 }
 
 private static (uint, error) decodeBits(this ptr<decoder> _addr_d, int n) {
@@ -381,14 +364,12 @@ private static (uint, error) decodeBits(this ptr<decoder> _addr_d, int n) {
             }
 
         }
-
     }
     var ret = d.bits.a >> (int)(uint32(d.bits.n - n));
     ret &= (1 << (int)(uint32(n))) - 1;
     d.bits.n -= n;
     d.bits.m>>=uint32(n);
     return (ret, error.As(null!)!);
-
 }
 
 } // end jpeg_package

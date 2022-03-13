@@ -4,22 +4,22 @@
 
 // Package lostcancel defines an Analyzer that checks for failure to
 // call a context cancellation function.
-// package lostcancel -- go2cs converted at 2022 March 06 23:34:40 UTC
+
+// package lostcancel -- go2cs converted at 2022 March 13 06:41:56 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/lostcancel" ==> using lostcancel = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.lostcancel_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\lostcancel\lostcancel.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using ctrlflow = go.golang.org.x.tools.go.analysis.passes.ctrlflow_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using cfg = go.golang.org.x.tools.go.cfg_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using ctrlflow = golang.org.x.tools.go.analysis.passes.ctrlflow_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using cfg = golang.org.x.tools.go.cfg_package;
+using System;
 
 public static partial class lostcancel_package {
 
@@ -65,7 +65,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         runFunc(_addr_pass, n);
     });
     return (null, error.As(null!)!);
-
 }
 
 private static void runFunc(ptr<analysis.Pass> _addr_pass, ast.Node node) {
@@ -99,7 +98,6 @@ private static void runFunc(ptr<analysis.Pass> _addr_pass, ast.Node node) {
                 if (len(stack) > 0) {
                     return false; // don't stray into nested functions
                 }
-
                 break;
             case 
                 stack = stack[..(int)len(stack) - 1]; // pop
@@ -146,7 +144,6 @@ private static void runFunc(ptr<analysis.Pass> _addr_pass, ast.Node node) {
                     if (funcScope.Contains(v.Pos())) {
                         cancelvars[v] = stmt;
                     }
-
                 }                {
                     var v__prev4 = v;
 
@@ -161,14 +158,11 @@ private static void runFunc(ptr<analysis.Pass> _addr_pass, ast.Node node) {
 
                 }
 
-
                 v = v__prev3;
 
             }
-
         }
         return true;
-
     });
 
     if (len(cancelvars) == 0) {
@@ -184,9 +178,7 @@ private static void runFunc(ptr<analysis.Pass> _addr_pass, ast.Node node) {
                 // Returning from main.main terminates the process,
                 // so there's no need to cancel contexts.
                 return ;
-
             }
-
             g = cfgs.FuncDecl(node);
             break;
         case ptr<ast.FuncLit> node:
@@ -217,7 +209,6 @@ private static void runFunc(ptr<analysis.Pass> _addr_pass, ast.Node node) {
                 }
 
             }
-
         }
         v = v__prev1;
         stmt = stmt__prev1;
@@ -238,7 +229,6 @@ private static bool hasImport(ptr<types.Package> _addr_pkg, @string path) {
             return true;
         }
     }    return false;
-
 }
 
 // isContextWithCancel reports whether n is one of the qualified identifiers
@@ -279,12 +269,9 @@ private static bool isContextWithCancel(ptr<types.Info> _addr_info, ast.Node n) 
             // Import failed, so we can't check package path.
             // Just check the local package name (heuristic).
             return x.Name == "context";
-
         }
     }
-
     return false;
-
 }
 
 // lostCancelPath finds a path through the CFG, from stmt (which defines
@@ -317,11 +304,8 @@ private static ptr<ast.ReturnStmt> lostCancelPath(ptr<analysis.Pass> _addr_pass,
                         break;
                 }
                 return _addr_!found!;
-
             });
-
         }        return _addr_found!;
-
     }; 
 
     // blockUses computes "uses" for each block, caching the result.
@@ -333,7 +317,6 @@ private static ptr<ast.ReturnStmt> lostCancelPath(ptr<analysis.Pass> _addr_pass,
             memo[b] = res;
         }
         return _addr_res!;
-
     }; 
 
     // Find the var's defining block in the CFG,
@@ -358,7 +341,6 @@ outer:
                         _breakouter = true;
                         break;
                     }
-
                 }
 
                 n = n__prev2;
@@ -439,17 +421,14 @@ outer:
                     ret = ret__prev1;
 
                 }
-
             }
 
             b = b__prev1;
         }
 
         return _addr_null!;
-
     };
     return _addr_search(defblock.Succs)!;
-
 });
 
 private static bool tupleContains(ptr<types.Tuple> _addr_tuple, ptr<types.Var> _addr_v) {
@@ -462,7 +441,6 @@ private static bool tupleContains(ptr<types.Tuple> _addr_tuple, ptr<types.Var> _
         }
     }
     return false;
-
 }
 
 } // end lostcancel_package

@@ -7,21 +7,23 @@
 // defined at http://codesourcery.com/cxx-abi/.
 //
 // Most programs will want to call Filter or ToString.
-// package demangle -- go2cs converted at 2022 March 06 23:24:31 UTC
+
+// package demangle -- go2cs converted at 2022 March 13 06:37:40 UTC
 // import "cmd/vendor/github.com/ianlancetaylor/demangle" ==> using demangle = go.cmd.vendor.github.com.ianlancetaylor.demangle_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\ianlancetaylor\demangle\demangle.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.ianlancetaylor;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// ErrNotMangledName is returned by CheckedDemangle if the string does
+// not appear to be a C++ symbol name.
+
+using System;
 public static partial class demangle_package {
 
-    // ErrNotMangledName is returned by CheckedDemangle if the string does
-    // not appear to be a C++ symbol name.
 public static var ErrNotMangledName = errors.New("not a C++ mangled name");
 
 // Option is the type of demangler options.
@@ -42,7 +44,6 @@ public static readonly var NoClones = 1;
 // The Verbose option turns on more verbose demangling.
 public static readonly var Verbose = 2;
 
-
 // Filter demangles a C++ symbol name, returning the human-readable C++ name.
 // If any error occurs during demangling, the input string is returned.
 public static @string Filter(@string name, params Option[] options) {
@@ -53,7 +54,6 @@ public static @string Filter(@string name, params Option[] options) {
         return name;
     }
     return ret;
-
 }
 
 // ToString demangles a C++ symbol name, returning a human-readable C++
@@ -70,7 +70,6 @@ public static (@string, error) ToString(@string name, params Option[] options) {
         return ("", error.As(err)!);
     }
     return (ASTToString(a, options), error.As(null!)!);
-
 }
 
 // ToAST demangles a C++ symbol name into an abstract syntax tree
@@ -102,14 +101,11 @@ public static (AST, error) ToAST(@string name, params Option[] options) {
  {
                 i++;
             }
-
         }
         (a, err) = globalCDtorName(name[(int)len(prefix)..], options);
         return (a, error.As(adjustErr(err, len(prefix)))!);
-
     }
     return (null, error.As(ErrNotMangledName)!);
-
 }
 
 // globalCDtorName demangles a global constructor/destructor symbol name.
@@ -161,7 +157,6 @@ private static (AST, error) globalCDtorName(@string name, params Option[] option
             return (null, error.As(adjustErr(err, 5))!);
         }
         return (addr(new GlobalCDtor(Ctor:ctor,Key:a)), error.As(null!)!);
-
     }
 }
 
@@ -188,13 +183,10 @@ private static (AST, error) doDemangle(@string name, params Option[] options) =>
                     }
 
                 }
-
                 panic(r);
-
             }
 
         }
-
     }());
 
     var @params = true;
@@ -211,8 +203,7 @@ private static (AST, error) doDemangle(@string name, params Option[] options) =>
             verbose = true;
         else 
             return (null, error.As(fmt.Errorf("unrecognized demangler option %v", o))!);
-        
-    }    ptr<state> st = addr(new state(str:name,verbose:verbose));
+            }    ptr<state> st = addr(new state(str:name,verbose:verbose));
     var a = st.encoding(params, notForLocalName); 
 
     // Accept a clone suffix.
@@ -225,7 +216,6 @@ private static (AST, error) doDemangle(@string name, params Option[] options) =>
         st.fail("unparsed characters at end of mangled name");
     }
     return (a, error.As(null!)!);
-
 });
 
 // A state holds the current state of demangling a string.
@@ -263,7 +253,6 @@ private static void failEarlier(this ptr<state> _addr_st, @string err, nint dec)
         panic("internal error");
     }
     panic(new demangleErr(err:err,off:st.off-dec));
-
 });
 
 // advance advances the current string offset.
@@ -275,7 +264,6 @@ private static void advance(this ptr<state> _addr_st, nint add) => func((_, pani
     }
     st.str = st.str[(int)add..];
     st.off += add;
-
 });
 
 // checkChar requires that the next character in the string be c, and
@@ -287,7 +275,6 @@ private static void checkChar(this ptr<state> _addr_st, byte c) => func((_, pani
         panic("internal error");
     }
     st.advance(1);
-
 });
 
 // A demangleErr is an error at a specific offset in the mangled
@@ -316,9 +303,7 @@ private static error adjustErr(error err, nint adj) {
             return error.As(de)!;
         }
     }
-
     return error.As(err)!;
-
 }
 
 private partial struct forLocalNameType { // : nint
@@ -326,7 +311,6 @@ private partial struct forLocalNameType { // : nint
 
 private static readonly forLocalNameType forLocalName = iota;
 private static readonly var notForLocalName = 0;
-
 
 // encoding ::= <(function) name> <bare-function-type>
 //              <(data) name>
@@ -392,7 +376,6 @@ private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalName
                     da = da__prev3;
 
                 }
-
                 {
                     ptr<MethodWithQualifiers> mwq__prev3 = mwq;
 
@@ -405,22 +388,18 @@ private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalName
                     mwq = mwq__prev3;
 
                 }
-
             }
 
             q = q__prev2;
 
         }
 
-
         return a;
-
     }
     if (len(st.str) == 0 || st.str[0] == 'E') { 
         // There are no parameters--this is a data symbol, not
         // a function symbol.
         return a;
-
     }
     var check = a;
     ptr<MethodWithQualifiers> (mwq, _) = check._<ptr<MethodWithQualifiers>>();
@@ -443,11 +422,8 @@ private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalName
                     }
 
                 }
-
                 template, _ = n._<ptr<Template>>();
-
             }
-
             break;
     }
     nint oldInLambda = default;
@@ -482,7 +458,6 @@ private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalName
             }
 
         }
-
     }
     if (mwq != null) {
         a = mwq.Method;
@@ -508,7 +483,6 @@ private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalName
                 da = da__prev2;
 
             }
-
             {
                 ptr<MethodWithQualifiers> mwq__prev2 = mwq;
 
@@ -523,12 +497,10 @@ private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalName
                 mwq = mwq__prev2;
 
             }
-
         }
         q = q__prev1;
 
     }
-
 
     var r = AST(addr(new Typed(Name:a,Type:ft)));
 
@@ -536,7 +508,6 @@ private static AST encoding(this ptr<state> _addr_st, bool @params, forLocalName
         r = addr(new EnableIf(Type:r,Args:enableIfArgs));
     }
     return r;
-
 }
 
 // hasReturnType returns whether the mangled form of a will have a
@@ -565,7 +536,6 @@ private static bool hasReturnType(AST a) {
             break;
         }
     }
-
 }
 
 // isCDtorConversion returns when an AST is a constructor, a
@@ -591,7 +561,6 @@ private static bool isCDtorConversion(AST a) {
             break;
         }
     }
-
 }
 
 // <tagged-name> ::= <name> B <source-name>
@@ -635,7 +604,6 @@ private static AST name(this ptr<state> _addr_st) {
                 st.setTemplate(a, null);
             }
             return a;
-
             break;
         case 'S': 
                    if (len(st.str) < 2) {
@@ -664,7 +632,6 @@ private static AST name(this ptr<state> _addr_st) {
                        if (!subst) {
                            st.subs.add(a);
                        }
-
                        var args = st.templateArgs();
                        ptr<Template> tmpl = addr(new Template(Name:a,Args:args));
                        if (isCast) {
@@ -672,15 +639,12 @@ private static AST name(this ptr<state> _addr_st) {
                            st.clearTemplateArgs(args);
                            isCast = false;
                        }
-
                        a = tmpl;
-
                    }
                    if (isCast) {
                        st.setTemplate(a, null);
                    }
                    return a;
-
             break;
         default: 
             (a, isCast) = st.unqualifiedName();
@@ -699,10 +663,8 @@ private static AST name(this ptr<state> _addr_st) {
                 st.setTemplate(a, null);
             }
             return a;
-
             break;
     }
-
 }
 
 // <nested-name> ::= N [<CV-qualifiers>] [<ref-qualifier>] <prefix> <unqualified-name> E
@@ -722,7 +684,6 @@ private static AST nestedName(this ptr<state> _addr_st) {
     }
     st.advance(1);
     return a;
-
 }
 
 // <prefix> ::= <prefix> <unqualified-name>
@@ -779,16 +740,12 @@ private static AST prefix(this ptr<state> _addr_st) {
 
                     }
 
-
                 }
-
 
                 t = t__prev1;
 
             }
-
         }
-
     };
 
     var isCast = false;
@@ -843,7 +800,6 @@ private static AST prefix(this ptr<state> _addr_st) {
                                        st.advance(2);
                                        next = addr(new Destructor(Name:getLast(last)));
                                    }
-
                     break;
                 case 'S': 
                     next = st.substitution(true);
@@ -886,7 +842,6 @@ private static AST prefix(this ptr<state> _addr_st) {
                     // gives appropriate output.
                     st.advance(1);
                     continue;
-
                     break;
                 case 'J': 
                     // It appears that in some cases clang
@@ -917,7 +872,6 @@ private static AST prefix(this ptr<state> _addr_st) {
                     st.fail("unrecognized letter in prefix");
                     break;
             }
-
         }
         last = next;
         if (a == null) {
@@ -931,7 +885,6 @@ private static AST prefix(this ptr<state> _addr_st) {
             st.subs.add(a);
         }
     }
-
 }
 
 // <unqualified-name> ::= <operator-name>
@@ -964,7 +917,6 @@ private static (AST, bool) unqualifiedName(this ptr<state> _addr_st) {
             }
 
         }
-
         {
             ptr<Operator> (op, ok) = a._<ptr<Operator>>();
 
@@ -974,7 +926,6 @@ private static (AST, bool) unqualifiedName(this ptr<state> _addr_st) {
             }
 
         }
-
     }
     else
  {
@@ -1007,19 +958,16 @@ private static (AST, bool) unqualifiedName(this ptr<state> _addr_st) {
                         st.fail("expected closure or unnamed type");
                         break;
                 }
-
                 break;
             default: 
                 st.fail("expected unqualified name");
                 break;
         }
-
     }
     if (len(st.str) > 0 && st.str[0] == 'B') {
         a = st.taggedName(a);
     }
     return (a, isCast);
-
 }
 
 // <source-name> ::= <(positive length) number> <identifier>
@@ -1050,7 +998,6 @@ private static AST sourceName(this ptr<state> _addr_st) {
     }
     ptr<Name> n = addr(new Name(Name:id));
     return n;
-
 }
 
 // number ::= [n] <(non-negative decimal integer)>
@@ -1074,13 +1021,11 @@ private static nint number(this ptr<state> _addr_st) {
         }
         val = val * 10 + int(st.str[0] - '0');
         st.advance(1);
-
     }
     if (neg) {
         val = -val;
     }
     return val;
-
 }
 
 // An operator is the demangled name, and the number of arguments it
@@ -1127,7 +1072,6 @@ private static (AST, nint) operatorName(this ptr<state> _addr_st, bool inExpress
             st.templates = st.templates[..(int)len(st.templates) - 1];
         }
         return (addr(new Cast(To:t)), 1);
-
     }    {
         var (op, ok) = operators[code];
 
@@ -1141,7 +1085,6 @@ private static (AST, nint) operatorName(this ptr<state> _addr_st, bool inExpress
             panic("not reached");
         }
     }
-
 });
 
 // <local-name> ::= Z <(function) encoding> E <(entity) name> [<discriminator>]
@@ -1169,7 +1112,6 @@ private static AST localName(this ptr<state> _addr_st) {
             // Default argument scope.
             st.advance(1);
             num = st.compactNumber();
-
         }
         n = st.name();
         n = st.discriminator(n);
@@ -1177,7 +1119,6 @@ private static AST localName(this ptr<state> _addr_st) {
             n = addr(new DefaultArg(Num:num,Arg:n));
         }
         return addr(new Qualified(Scope:fn,Name:n,LocalName:true));
-
     }
 }
 
@@ -1219,7 +1160,6 @@ private static AST javaResource(this ptr<state> _addr_st) {
         }
     }
     return addr(new Special(Prefix:"java resource ",Val:&Name{Name:final}));
-
 }
 
 // <special-name> ::= TV <type>
@@ -1321,7 +1261,6 @@ private static AST specialName(this ptr<state> _addr_st) => func((_, panic, _) =
                 panic("not reached");
                 break;
         }
-
     }
     else
  {
@@ -1367,7 +1306,6 @@ private static AST specialName(this ptr<state> _addr_st) => func((_, panic, _) =
 
                         break;
                 }
-
                 break;
             case 'r': 
                 return st.javaResource();
@@ -1377,7 +1315,6 @@ private static AST specialName(this ptr<state> _addr_st) => func((_, panic, _) =
                 panic("not reached");
                 break;
         }
-
     }
 });
 
@@ -1401,7 +1338,6 @@ private static void callOffset(this ptr<state> _addr_st, byte c) {
         }
         c = st.str[0];
         st.advance(1);
-
     }
     switch (c) {
         case 'h': 
@@ -1414,7 +1350,6 @@ private static void callOffset(this ptr<state> _addr_st, byte c) {
             }
             st.advance(1);
             st.number();
-
             break;
         default: 
             st.failEarlier("unrecognized call offset code", 1);
@@ -1424,7 +1359,6 @@ private static void callOffset(this ptr<state> _addr_st, byte c) {
         st.fail("expected _ after call offset");
     }
     st.advance(1);
-
 }
 
 // builtinTypes maps the type letter to the type name.
@@ -1483,7 +1417,6 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
             return ret;
         }
     }
-
     var c = st.str[0];
     switch (c) {
         case 'u': 
@@ -1537,7 +1470,6 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
             {
                            ret = st.demangleCastTemplateArgs(ret, true);
                        }
-
                    }
             break;
         case 'S': 
@@ -1572,9 +1504,7 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                                }
 
                            }
-
                        }
-
                    }
                    else
             {
@@ -1585,7 +1515,6 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                        if (ret == subAST[c2] || ret == verboseAST[c2]) {
                            addSubst = false;
                        }
-
                    }
             break;
         case 'O': 
@@ -1616,7 +1545,6 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                     ret = addr(new ImaginaryType(Base:t));
                     break;
             }
-
             break;
         case 'U': 
             if (len(st.str) < 2) {
@@ -1642,7 +1570,6 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                     ret = addr(new VendorQualifier(Qualifier:n,Type:t));
                     break;
             }
-
             break;
         case 'D': 
             st.advance(1);
@@ -1708,16 +1635,12 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                         accum = true; 
                         // We don't care about the bits.
                         _ = st.number();
-
                     }
-
                     var @base = st.demangleType(isCast);
                     if (len(st.str) > 0 && isDigit(st.str[0])) { 
                         // We don't care about the bits.
                         st.number();
-
                     }
-
                     var sat = false;
                     if (len(st.str) > 0) {
                         if (st.str[0] == 's') {
@@ -1725,9 +1648,7 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                         }
                         st.advance(1);
                     }
-
                     ret = addr(new FixedType(Base:base,Accum:accum,Sat:sat));
-
                     break;
                 case 'v': 
                     ret = st.vectorType(isCast);
@@ -1737,7 +1658,6 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                     st.fail("unrecognized D code in type");
                     break;
             }
-
             break;
         default: 
             st.fail("unrecognized type code");
@@ -1768,7 +1688,6 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                     // happens with a function with a trailing
                     // ref-qualifier.
                     mwq.Qualifiers = mergeQualifiers(q, mwq.Qualifiers);
-
                 }
                 else
  { 
@@ -1783,21 +1702,15 @@ private static AST demangleType(this ptr<state> _addr_st, bool isCast) {
                         }
 
                     }
-
                     ret = addr(new TypeWithQualifiers(Base:ret,Qualifiers:q));
-
                 }
 
             }
 
-
         }
-
         st.subs.add(ret);
-
     }
     return ret;
-
 }
 
 // demangleCastTemplateArgs is for a rather hideous parse.  When we
@@ -1860,15 +1773,12 @@ private static AST demangleCastTemplateArgs(this ptr<state> _addr_st, AST tp, bo
                         }
 
                     }
-
                 }
 
             }
-
         }());
 
         args = st.templateArgs();
-
     }();
 
     if (!failed && len(st.str) > 0 && st.str[0] == 'I') {
@@ -1876,11 +1786,9 @@ private static AST demangleCastTemplateArgs(this ptr<state> _addr_st, AST tp, bo
             st.subs.add(tp);
         }
         return addr(new Template(Name:tp,Args:args));
-
     }
     st.val = save.val;
     return tp;
-
 });
 
 // mergeQualifiers merges two qualifer lists into one.
@@ -1920,14 +1828,12 @@ private static AST mergeQualifiers(AST q1AST, AST q2AST) {
                 rq = append(rq, qualAST);
                 m[qual.Name] = true;
             }
-
         }
         qualAST = qualAST__prev1;
     }
 
     q1.Qualifiers = rq;
     return q1;
-
 }
 
 // qualifiers maps from the character used in the mangled name to the
@@ -1984,22 +1890,18 @@ qualLoop:
                         break;
                 }
                 q = append(new slice<AST>(new AST[] { qual }), q);
-
             }
             else
  {
                 break;
             }
 
-
         }
-
     }
     if (len(q) == 0) {
         return null;
     }
     return addr(new Qualifiers(Qualifiers:q));
-
 }
 
 // <ref-qualifier> ::= R
@@ -2018,10 +1920,8 @@ private static @string refQualifier(this ptr<state> _addr_st) {
                 return "&&";
                 break;
         }
-
     }
     return "";
-
 }
 
 // <type>+
@@ -2039,11 +1939,9 @@ private static slice<AST> parmlist(this ptr<state> _addr_st) {
         if ((st.str[0] == 'R' || st.str[0] == 'O') && len(st.str) > 1 && st.str[1] == 'E') { 
             // This is a function ref-qualifier.
             break;
-
         }
         var ptype = st.demangleType(false);
         ret = append(ret, ptype);
-
     } 
 
     // There should always be at least one type.  A function that
@@ -2061,10 +1959,8 @@ private static slice<AST> parmlist(this ptr<state> _addr_st) {
             }
 
         }
-
     }
     return ret;
-
 }
 
 // <function-type> ::= F [Y] <bare-function-type> [<ref-qualifier>] E
@@ -2075,7 +1971,6 @@ private static AST functionType(this ptr<state> _addr_st) {
     if (len(st.str) > 0 && st.str[0] == 'Y') { 
         // Function has C linkage.  We don't print this.
         st.advance(1);
-
     }
     var ret = st.bareFunctionType(true);
     var r = st.refQualifier();
@@ -2087,7 +1982,6 @@ private static AST functionType(this ptr<state> _addr_st) {
     }
     st.advance(1);
     return ret;
-
 }
 
 // <bare-function-type> ::= [J]<type>+
@@ -2104,7 +1998,6 @@ private static AST bareFunctionType(this ptr<state> _addr_st, bool hasReturnType
     }
     var types = st.parmlist();
     return addr(new FunctionType(Return:returnType,Args:types));
-
 }
 
 // <array-type> ::= A <(positive dimension) number> _ <(element) type>
@@ -2130,7 +2023,6 @@ private static AST arrayType(this ptr<state> _addr_st, bool isCast) {
 
         dim = addr(new Name(Name:st.str[:i]));
         st.advance(i);
-
     } {
         dim = st.expression();
     }
@@ -2153,9 +2045,7 @@ private static AST arrayType(this ptr<state> _addr_st, bool isCast) {
         }
     }
 
-
     return arr;
-
 }
 
 // <vector-type> ::= Dv <number> _ <type>
@@ -2184,7 +2074,6 @@ private static AST vectorType(this ptr<state> _addr_st, bool isCast) {
     var t = st.demangleType(isCast);
 
     return addr(new VectorType(Dimension:dim,Base:t));
-
 }
 
 // <pointer-to-member-type> ::= M <(class) type> <(member) type>
@@ -2213,7 +2102,6 @@ private static AST pointerToMemberType(this ptr<state> _addr_st, bool isCast) {
     // substitution table is harmless.
     var mem = st.demangleType(isCast);
     return addr(new PtrMem(Class:cl,Member:mem));
-
 }
 
 // <non-negative number> _ */
@@ -2236,7 +2124,6 @@ private static nint compactNumber(this ptr<state> _addr_st) {
     }
     st.advance(1);
     return n + 1;
-
 }
 
 // <template-param> ::= T_
@@ -2263,7 +2150,6 @@ private static AST templateParam(this ptr<state> _addr_st) {
         // Apparently we can't encounter a template within a lambda.
         // See https://gcc.gnu.org/PR78252.
         return addr(new LambdaAuto(Index:n));
-
     }
     var template = st.templates[len(st.templates) - 1];
 
@@ -2272,13 +2158,11 @@ private static AST templateParam(this ptr<state> _addr_st) {
         // itself a template, then this is a forward
         // reference.  Fill it in later.
         return addr(new TemplateParam(Index:n,Template:nil));
-
     }
     if (n >= len(template.Args)) {
         st.failEarlier(fmt.Sprintf("template index out of range (%d >= %d)", n, len(template.Args)), st.off - off);
     }
     return addr(new TemplateParam(Index:n,Template:template));
-
 }
 
 // setTemplate sets the Template field of any TemplateParam's in a.
@@ -2323,9 +2207,7 @@ private static void setTemplate(this ptr<state> _addr_st, AST a, ptr<Template> _
                 break;
             }
         }
-
     });
-
 }
 
 // clearTemplateArgs gives an error for any unset Template field in
@@ -2356,7 +2238,6 @@ private static slice<AST> templateArgs(this ptr<state> _addr_st) => func((_, pan
     }
     st.advance(1);
     return ret;
-
 });
 
 // <template-arg> ::= <type>
@@ -2377,7 +2258,6 @@ private static AST templateArg(this ptr<state> _addr_st) {
             }
             st.advance(1);
             return expr;
-
             break;
         case 'L': 
             return st.exprPrimary();
@@ -2392,7 +2272,6 @@ private static AST templateArg(this ptr<state> _addr_st) {
             return st.demangleType(false);
             break;
     }
-
 }
 
 // exprList parses a sequence of expressions up to a terminating character.
@@ -2413,7 +2292,6 @@ private static AST exprList(this ptr<state> _addr_st, byte stop) {
         }
     }
     return addr(new ExprList(Exprs:exprs));
-
 }
 
 // <expression> ::= <(unary) operator-name> <expression>
@@ -2503,7 +2381,6 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
             st.failEarlier("missing argument pack", st.off - off);
         }
         return addr(new SizeofPack(Pack:ap));
-
     }
     else if (st.str[0] == 's' && len(st.str) > 1 && st.str[1] == 'P') {
         st.advance(2);
@@ -2528,7 +2405,6 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
             st.cvQualifiers();
             var index = st.compactNumber();
             return addr(new FunctionParam(Index:index+1));
-
         }
     }
     else if (st.str[0] == 'f' && len(st.str) > 2 && st.str[1] == 'L' && isDigit(st.str[2])) {
@@ -2544,13 +2420,11 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
         st.cvQualifiers();
         index = st.compactNumber();
         return addr(new FunctionParam(Index:index+1));
-
     }
     else if (isDigit(st.str[0]) || (st.str[0] == 'o' && len(st.str) > 1 && st.str[1] == 'n')) {
         if (st.str[0] == 'o') { 
             // Skip operator function ID.
             st.advance(2);
-
         }
         var (n, _) = st.unqualifiedName();
         if (len(st.str) > 0 && st.str[0] == 'I') {
@@ -2558,7 +2432,6 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
             n = addr(new Template(Name:n,Args:args));
         }
         return n;
-
     }
     else if ((st.str[0] == 'i' || st.str[0] == 't') && len(st.str) > 1 && st.str[1] == 'l') { 
         // Brace-enclosed initializer list.
@@ -2570,7 +2443,6 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
         }
         var exprs = st.exprList('E');
         return addr(new InitializerList(Type:t,Exprs:exprs));
-
     }
     else if (st.str[0] == 's' && len(st.str) > 1 && st.str[1] == 't') {
         var (o, _) = st.operatorName(true);
@@ -2598,9 +2470,7 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
                 {
                                    suffix = true;
                                }
-
                            }
-
                            AST operand = default;
                            {
                                ptr<Cast> (_, ok) = o._<ptr<Cast>>();
@@ -2615,9 +2485,7 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
                                }
 
                            }
-
                            return addr(new Unary(Op:o,Expr:operand,Suffix:suffix,SizeofType:false));
-
                 break;
             case 2: 
                            AST left = default;            AST right = default;
@@ -2637,7 +2505,6 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
                 {
                                left = st.expression();
                            }
-
                            if (code == "cl" || code == "cp") {
                                right = st.exprList('E');
                            }
@@ -2652,9 +2519,7 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
                 {
                                right = st.expression();
                            }
-
                            return addr(new Binary(Op:o,Left:left,Right:right));
-
                 break;
             case 3: 
                            if (code[0] == 'n') {
@@ -2674,20 +2539,16 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
                                    // Parenthesized initializer.
                                    st.advance(2);
                                    ini = st.exprList('E');
-
                                }
                                else if (len(st.str) > 1 && st.str[0] == 'i' && st.str[1] == 'l') { 
                                    // Initializer list.
                                    ini = st.expression();
-
                                }
                                else
                 {
                                    st.fail("unrecognized new initializer");
                                }
-
                                return addr(new New(Op:o,Place:place,Type:t,Init:ini));
-
                            }
                            else if (code[0] == 'f') {
                                var (first, _) = st.operatorName(true);
@@ -2702,14 +2563,12 @@ private static AST expression(this ptr<state> _addr_st) => func((_, panic, _) =>
                                third = st.expression();
                                return addr(new Trinary(Op:o,First:first,Second:second,Third:third));
                            }
-
                 break;
             default: 
                 st.fail(fmt.Sprintf("unsupported number of operator arguments: %d", args));
                 panic("not reached");
                 break;
         }
-
     }
 });
 
@@ -2778,22 +2637,17 @@ private static AST unresolvedName(this ptr<state> _addr_st) {
                                                t = t__prev5;
 
                                            }
-
                                            return s;
-
                                        }
 
                                    }
-
                                }
-
                                n = st.sourceName();
                                if (len(st.str) > 0 && st.str[0] == 'I') {
                                    st.subs.add(n);
                                    args = st.templateArgs();
                                    n = addr(new Template(Name:n,Args:args));
                                }
-
                                if (s == null) {
                                    s = n;
                                }
@@ -2801,23 +2655,18 @@ private static AST unresolvedName(this ptr<state> _addr_st) {
                 {
                                    s = addr(new Qualified(Scope:s,Name:n,LocalName:false));
                                }
-
                                st.subs.add(s);
-
                            }
                    else
 
                            if (s == null) {
                                st.fail("missing scope in unresolved name");
                            }
-
                            st.advance(1);
                            n = st.baseUnresolvedName();
                            return addr(new Qualified(Scope:s,Name:n,LocalName:false));
-
                 break;
         }
-
     } {
         return st.baseUnresolvedName();
     }
@@ -2847,7 +2696,6 @@ private static AST baseUnresolvedName(this ptr<state> _addr_st) {
             n = st.demangleType(false);
         }
         n = addr(new Destructor(Name:n));
-
     }
     else if (len(st.str) > 0 && isDigit(st.str[0])) {
         n = st.sourceName();
@@ -2858,14 +2706,12 @@ private static AST baseUnresolvedName(this ptr<state> _addr_st) {
         // an operator name without on.
         // See https://gcc.gnu.org/PR70182.
         n, _ = st.operatorName(true);
-
     }
     if (len(st.str) > 0 && st.str[0] == 'I') {
         var args = st.templateArgs();
         n = addr(new Template(Name:n,Args:args));
     }
     return n;
-
 }
 
 // <expr-primary> ::= L <type> <(value) number> E
@@ -2888,7 +2734,6 @@ private static AST exprPrimary(this ptr<state> _addr_st) {
         }
         st.advance(1);
         ret = st.encoding(true, notForLocalName);
-
     }
     else
  {
@@ -2915,7 +2760,6 @@ private static AST exprPrimary(this ptr<state> _addr_st) {
                 }
 
             }
-
         }
         nint i = 0;
         while (len(st.str) > i && st.str[i] != 'E') {
@@ -2924,14 +2768,12 @@ private static AST exprPrimary(this ptr<state> _addr_st) {
         var val = st.str[..(int)i];
         st.advance(i);
         ret = addr(new Literal(Type:t,Val:val,Neg:neg));
-
     }
     if (len(st.str) == 0 || st.str[0] != 'E') {
         st.fail("expected E after literal");
     }
     st.advance(1);
     return ret;
-
 }
 
 // <discriminator> ::= _ <(non-negative) number> (when number < 10)
@@ -2958,10 +2800,8 @@ private static AST discriminator(this ptr<state> _addr_st, AST a) {
             st.fail("expected _ after discriminator >= 10");
         }
         st.advance(1);
-
     }
     return a;
-
 }
 
 // <closure-type-name> ::= Ul <lambda-sig> E [ <nonnegative number> ] _
@@ -2979,7 +2819,6 @@ private static AST closureTypeName(this ptr<state> _addr_st) {
     st.advance(1);
     var num = st.compactNumber();
     return addr(new Closure(Types:types,Num:num));
-
 }
 
 // <unnamed-type-name> ::= Ut [ <nonnegative number> ] _
@@ -3015,7 +2854,6 @@ private static AST cloneSuffix(this ptr<state> _addr_st, AST a) {
     var suffix = st.str[..(int)i];
     st.advance(i);
     return addr(new Clone(Base:a,Suffix:suffix));
-
 }
 
 // substitutions is the list of substitution candidates that may
@@ -3065,7 +2903,6 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
                 if (id >= 0x80000000 / 36 - 36) {
                     st.fail("substitution index overflow");
                 }
-
                 if (isDigit(c)) {
                     id = id * 36 + int(c - '0');
                 }
@@ -3076,19 +2913,15 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
  {
                     st.fail("invalid character in substitution index");
                 }
-
                 if (len(st.str) == 0) {
                     st.fail("missing end to substitution index");
                 }
-
                 c = st.str[0];
                 st.advance(1);
                 dec++;
-
             }
 
             id++;
-
         }
     else
         if (id >= len(st.subs)) {
@@ -3129,7 +2962,6 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
                         }
 
                     }
-
                     return null;
                     break;
                 case ptr<Closure> a:
@@ -3158,11 +2990,8 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
                     }
 
                 }
-
                 return addr(new LambdaAuto(Index:index));
-
             }
-
             ptr<Template> template;
             if (len(copyTemplates) > 0) {
                 template = copyTemplates[len(copyTemplates) - 1];
@@ -3176,7 +3005,6 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
                     // to it. There is probably something wrong
                     // here.
                     template = rt;
-
                 }
                 else
  {
@@ -3184,20 +3012,15 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
                 }
 
             }
-
             if (template == null) { 
                 // This template parameter is within
                 // the scope of a cast operator.
                 return addr(new TemplateParam(Index:index,Template:nil));
-
             }
-
             if (index >= len(template.Args)) {
                 st.failEarlier(fmt.Sprintf("substituted template index out of range (%d >= %d)", index, len(template.Args)), dec);
             }
-
             return addr(new TemplateParam(Index:index,Template:template));
-
         };
         slice<AST> seen = default;
         Func<AST, bool> skip = a => {
@@ -3211,13 +3034,11 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
                         if (ok) { 
                             // This template is removed in copy.
                             pushTemplate(template);
-
                         }
 
                         template = template__prev2;
 
                     }
-
                     return false;
                     break;
                 case ptr<Closure> a:
@@ -3238,7 +3059,6 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
             }
             seen = append(seen, a);
             return false;
-
         };
 
         {
@@ -3254,9 +3074,7 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
 
         }
 
-
         return ret;
-
     } {
         var m = subAST;
         if (st.verbose) {
@@ -3274,7 +3092,6 @@ private static AST substitution(this ptr<state> _addr_st, bool forPrefix) {
             st.subs.add(a);
         }
         return a;
-
     }
 }
 
@@ -3312,9 +3129,7 @@ private static AST simplify(AST a) {
             return r;
         }
     }
-
     return a;
-
 }
 
 // simplifyOne simplifies a single AST.  It returns nil if there is
@@ -3342,15 +3157,12 @@ private static AST simplifyOne(AST a) {
                             ref = "&";
                         }
                     }
-
                     return addr(new MethodWithQualifiers(Method:m.Method,Qualifiers:mergeQualifiers(a.Qualifiers,m.Qualifiers),RefQualifier:ref));
-
                 }
 
                 m = m__prev1;
 
             }
-
             {
                 ptr<TypeWithQualifiers> t__prev1 = t;
 
@@ -3363,7 +3175,6 @@ private static AST simplifyOne(AST a) {
                 t = t__prev1;
 
             }
-
             break;
         case ptr<TypeWithQualifiers> a:
             {
@@ -3374,7 +3185,6 @@ private static AST simplifyOne(AST a) {
                 }
 
             }
-
             {
                 ptr<TypeWithQualifiers> t__prev1 = t;
 
@@ -3387,7 +3197,6 @@ private static AST simplifyOne(AST a) {
                 t = t__prev1;
 
             }
-
             {
                 ptr<MethodWithQualifiers> m__prev1 = m;
 
@@ -3400,7 +3209,6 @@ private static AST simplifyOne(AST a) {
                 m = m__prev1;
 
             }
-
             break;
         case ptr<ReferenceType> a:
             {
@@ -3415,7 +3223,6 @@ private static AST simplifyOne(AST a) {
                 rt = rt__prev1;
 
             }
-
             {
                 ptr<RvalueReferenceType> rrt__prev1 = rrt;
 
@@ -3428,7 +3235,6 @@ private static AST simplifyOne(AST a) {
                 rrt = rrt__prev1;
 
             }
-
             break;
         case ptr<RvalueReferenceType> a:
             {
@@ -3443,7 +3249,6 @@ private static AST simplifyOne(AST a) {
                 rrt = rrt__prev1;
 
             }
-
             {
                 ptr<ReferenceType> rt__prev1 = rt;
 
@@ -3456,7 +3261,6 @@ private static AST simplifyOne(AST a) {
                 rt = rt__prev1;
 
             }
-
             break;
         case ptr<ArrayType> a:
             {
@@ -3467,7 +3271,6 @@ private static AST simplifyOne(AST a) {
                 }
 
             }
-
             break;
         case ptr<PackExpansion> a:
             if (a.Pack != null) {
@@ -3481,7 +3284,6 @@ private static AST simplifyOne(AST a) {
                         } 
                         // Copy everything else.
                         return null;
-
                     }
 ;
 
@@ -3497,7 +3299,6 @@ private static AST simplifyOne(AST a) {
                             }
 
                         }
-
                         foreach (var (_, v) in seen) {
                             if (v == sub) {
                                 return true;
@@ -3505,7 +3306,6 @@ private static AST simplifyOne(AST a) {
                         }
                         seen = append(seen, sub);
                         return false;
-
                     }
 ;
 
@@ -3513,18 +3313,13 @@ private static AST simplifyOne(AST a) {
                     if (b == null) {
                         b = a.Base;
                     }
-
                     exprs[i] = simplify(b);
-
                 }
                 return addr(new ExprList(Exprs:exprs));
-
             }
-
             break;
     }
     return null;
-
 }
 
 // findArgumentPack walks the AST looking for the argument pack for a
@@ -3552,7 +3347,6 @@ private static ptr<ArgumentPack> findArgumentPack(this ptr<state> _addr_st, AST 
                     }
 
                 }
-
                 break;
             case ptr<PackExpansion> a:
                 return _addr_false!;
@@ -3591,10 +3385,8 @@ private static ptr<ArgumentPack> findArgumentPack(this ptr<state> _addr_st, AST 
             }
         }        seen = append(seen, a);
         return _addr_true!;
-
     });
     return _addr_ret!;
-
 }
 
 } // end demangle_package

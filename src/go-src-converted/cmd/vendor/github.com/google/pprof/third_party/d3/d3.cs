@@ -3,16 +3,14 @@
 // See LICENSE file for license details
 // Custom build for pprof (https://github.com/spiermar/d3-pprof)
 
-// package d3 -- go2cs converted at 2022 March 06 23:24:05 UTC
+// package d3 -- go2cs converted at 2022 March 13 06:37:12 UTC
 // import "cmd/vendor/github.com/google/pprof/third_party/d3" ==> using d3 = go.cmd.vendor.github.com.google.pprof.third_party.d3_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\third_party\d3\d3.go
-
-
 namespace go.cmd.vendor.github.com.google.pprof.third_party;
 
 public static partial class d3_package {
 
-    // JSSource returns the d3.js file
+// JSSource returns the d3.js file
 public static readonly @string JSSource = "\n(function (global, factory) {\n\ttypeof exports === \'object\' && typeof module !== " +
     "\'undefined\' ? factory(exports) :\n\ttypeof define === \'function\' && define.amd ? d" +
     "efine([\'exports\'], factory) :\n\t(factory((global.d3 = {})));\n}(this, (function (e" +

@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:58 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\string.go
-using bytealg = go.@internal.bytealg_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// The constant is known to the compiler.
+// There is no fundamental theory behind this number.
 
 public static partial class runtime_package {
 
-    // The constant is known to the compiler.
-    // There is no fundamental theory behind this number.
 private static readonly nint tmpStringBufSize = 32;
 
 
@@ -72,7 +74,6 @@ private static @string concatstrings(ptr<tmpBuf> _addr_buf, slice<@string> a) {
     }
 
     return s;
-
 }
 
 private static @string concatstring2(ptr<tmpBuf> _addr_buf, @string a0, @string a1) {
@@ -115,7 +116,6 @@ private static @string slicebytetostring(ptr<tmpBuf> _addr_buf, ptr<byte> _addr_
         // Consider that you want to parse out data between parens in "foo()bar",
         // you find the indices and convert the subslice to string.
         return "";
-
     }
     if (raceenabled) {
         racereadrangepc(@unsafe.Pointer(ptr), uintptr(n), getcallerpc(), funcPC(slicebytetostring));
@@ -128,14 +128,13 @@ private static @string slicebytetostring(ptr<tmpBuf> _addr_buf, ptr<byte> _addr_
         if (sys.BigEndian) {
             p = add(p, 7);
         }
-        stringStructOf(_addr_str).str;
+        stringStructOf;
 
-        p;
-        stringStructOf(_addr_str).len;
+        (_addr_str).str = p;
+        stringStructOf;
 
-        1;
+        (_addr_str).len = 1;
         return ;
-
     }
     p = default;
     if (buf != null && n <= len(buf)) {
@@ -145,15 +144,14 @@ private static @string slicebytetostring(ptr<tmpBuf> _addr_buf, ptr<byte> _addr_
  {
         p = mallocgc(uintptr(n), null, false);
     }
-    stringStructOf(_addr_str).str;
+    stringStructOf;
 
-    p;
-    stringStructOf(_addr_str).len;
+    (_addr_str).str = p;
+    stringStructOf;
 
-    n;
+    (_addr_str).len = n;
     memmove(p, @unsafe.Pointer(ptr), uintptr(n));
     return ;
-
 }
 
 // stringDataOnStack reports whether the string's data is
@@ -178,7 +176,6 @@ private static (@string, slice<byte>) rawstringtmp(ptr<tmpBuf> _addr_buf, nint l
         s, b = rawstring(l);
     }
     return ;
-
 }
 
 // slicebytetostringtmp returns a "string" referring to the actual []byte bytes.
@@ -205,14 +202,13 @@ private static @string slicebytetostringtmp(ptr<byte> _addr_ptr, nint n) {
     if (msanenabled && n > 0) {
         msanread(@unsafe.Pointer(ptr), uintptr(n));
     }
-    stringStructOf(_addr_str).str;
+    stringStructOf;
 
-    @unsafe.Pointer(ptr);
-    stringStructOf(_addr_str).len;
+    (_addr_str).str = @unsafe.Pointer(ptr);
+    stringStructOf;
 
-    n;
+    (_addr_str).len = n;
     return ;
-
 }
 
 private static slice<byte> stringtoslicebyte(ptr<tmpBuf> _addr_buf, @string s) {
@@ -229,7 +225,6 @@ private static slice<byte> stringtoslicebyte(ptr<tmpBuf> _addr_buf, @string s) {
     }
     copy(b, s);
     return b;
-
 }
 
 private static slice<int> stringtoslicerune(ptr<array<int>> _addr_buf, @string s) {
@@ -254,7 +249,6 @@ private static slice<int> stringtoslicerune(ptr<array<int>> _addr_buf, @string s
         a[n] = r;
         n++;
     }    return a;
-
 }
 
 private static @string slicerunetostring(ptr<tmpBuf> _addr_buf, slice<int> a) {
@@ -289,15 +283,12 @@ private static @string slicerunetostring(ptr<tmpBuf> _addr_buf, slice<int> a) {
             if (size2 >= size1) {
                 break;
             }
-
             size2 += encoderune(b[(int)size2..], r);
-
         }
         r = r__prev1;
     }
 
     return s[..(int)size2];
-
 }
 
 private partial struct stringStruct {
@@ -335,7 +326,6 @@ private static @string intstring(ptr<array<byte>> _addr_buf, long v) {
     }
     var n = encoderune(b, rune(v));
     return s[..(int)n];
-
 }
 
 // rawstring allocates storage for a new string. The returned
@@ -348,17 +338,16 @@ private static (@string, slice<byte>) rawstring(nint size) {
 
     var p = mallocgc(uintptr(size), null, false);
 
-    stringStructOf(_addr_s).str;
+    stringStructOf;
 
-    p;
-    stringStructOf(_addr_s).len;
+    (_addr_s).str = p;
+    stringStructOf;
 
-    size * (slice.val)(@unsafe.Pointer(_addr_b));
+    (_addr_s).len = size * (slice.val);
 
-    new slice(p,size,size);
+    (@unsafe.Pointer(_addr_b)) = new slice(p,size,size);
 
     return ;
-
 }
 
 // rawbyteslice allocates a new byte slice. The byte slice is not zeroed.
@@ -370,11 +359,10 @@ private static slice<byte> rawbyteslice(nint size) {
     if (cap != uintptr(size)) {
         memclrNoHeapPointers(add(p, uintptr(size)), cap - uintptr(size));
     }
-    (slice.val)(@unsafe.Pointer(_addr_b)).val;
+    (slice.val).val;
 
-    new slice(p,size,int(cap));
+    (@unsafe.Pointer(_addr_b)) = new slice(p,size,int(cap));
     return ;
-
 }
 
 // rawruneslice allocates a new rune slice. The rune slice is not zeroed.
@@ -389,11 +377,10 @@ private static slice<int> rawruneslice(nint size) {
     if (mem != uintptr(size) * 4) {
         memclrNoHeapPointers(add(p, uintptr(size) * 4), mem - uintptr(size) * 4);
     }
-    (slice.val)(@unsafe.Pointer(_addr_b)).val;
+    (slice.val).val;
 
-    new slice(p,size,int(mem/4));
+    (@unsafe.Pointer(_addr_b)) = new slice(p,size,int(mem/4));
     return ;
-
 }
 
 // used by cmd/cgo
@@ -408,11 +395,10 @@ private static slice<byte> gobytes(ptr<byte> _addr_p, nint n) => func((_, panic,
         panic(errorString("gobytes: length out of range"));
     }
     var bp = mallocgc(uintptr(n), null, false);
-    memmove(bp, @unsafe.Pointer(p), uintptr(n)) * (slice.val)(@unsafe.Pointer(_addr_b));
+    memmove(bp, @unsafe.Pointer(p), uintptr(n)) * (slice.val);
 
-    new slice(bp,n,n);
+    (@unsafe.Pointer(_addr_b)) = new slice(bp,n,n);
     return ;
-
 });
 
 // This is exported via linkname to assembly in syscall (for Plan9).
@@ -427,7 +413,6 @@ private static @string gostring(ptr<byte> _addr_p) {
     var (s, b) = rawstring(l);
     memmove(@unsafe.Pointer(_addr_b[0]), @unsafe.Pointer(p), uintptr(l));
     return s;
-
 }
 
 private static @string gostringn(ptr<byte> _addr_p, nint l) {
@@ -439,7 +424,6 @@ private static @string gostringn(ptr<byte> _addr_p, nint l) {
     var (s, b) = rawstring(l);
     memmove(@unsafe.Pointer(_addr_b[0]), @unsafe.Pointer(p), uintptr(l));
     return s;
-
 }
 
 private static bool hasPrefix(@string s, @string prefix) {
@@ -448,7 +432,6 @@ private static bool hasPrefix(@string s, @string prefix) {
 
 private static readonly var maxUint = ~uint(0);
 private static readonly var maxInt = int(maxUint >> 1);
-
 
 // atoi parses an int from a string s.
 // The bool result reports whether s is a number
@@ -474,17 +457,14 @@ private static (nint, bool) atoi(@string s) {
         if (un > maxUint / 10) { 
             // overflow
             return (0, false);
-
         }
         un *= 10;
         var un1 = un + uint(c) - '0';
         if (un1 < un) { 
             // overflow
             return (0, false);
-
         }
         un = un1;
-
     }
 
     if (!neg && un > uint(maxInt)) {
@@ -498,7 +478,6 @@ private static (nint, bool) atoi(@string s) {
         n = -n;
     }
     return (n, true);
-
 }
 
 // atoi32 is like atoi but for integers
@@ -514,9 +493,7 @@ private static (int, bool) atoi32(@string s) {
             return (int32(n), ok);
         }
     }
-
     return (0, false);
-
 }
 
 //go:nosplit
@@ -561,9 +538,7 @@ private static nint findnull(ptr<byte> _addr_s) {
         ptr = @unsafe.Pointer(uintptr(ptr) + uintptr(safeLen));
         offset += safeLen;
         safeLen = pageSize;
-
     }
-
 }
 
 private static nint findnullw(ptr<ushort> _addr_s) {
@@ -578,7 +553,6 @@ private static nint findnullw(ptr<ushort> _addr_s) {
         l++;
     }
     return l;
-
 }
 
 //go:nosplit
@@ -615,16 +589,13 @@ private static @string gostringw(ptr<ushort> _addr_strw) {
             if (n2 >= n1) {
                 break;
             }
-
             n2 += encoderune(b[(int)n2..], rune(str[i]));
-
         }
 
         i = i__prev1;
     }
     b[n2] = 0; // for luck
     return s[..(int)n2];
-
 }
 
 } // end runtime_package

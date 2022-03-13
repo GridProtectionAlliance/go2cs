@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:12:37 UTC
+//     Generated on 2022 March 13 05:27:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class sort_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lessSwap
         {
             // Constructors
@@ -53,7 +53,7 @@ namespace go
             public static implicit operator lessSwap(NilType nil) => default(lessSwap);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lessSwap lessSwap_cast(dynamic value)
         {
             return new lessSwap(value.Less, value.Swap);

@@ -496,17 +496,17 @@ the algorithm is at its core just long division on wide digits, so that the
 usual long division proofs apply essentially unaltered.
 */
 
-// package big -- go2cs converted at 2022 March 06 22:18:02 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:14 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\natdiv.go
-using bits = go.math.bits_package;
-
 namespace go.math;
+
+using bits = math.bits_package;
 
 public static partial class big_package {
 
-    // div returns q, r such that q = ⌊u/v⌋ and r = u%v = u - q·v.
-    // It uses z and z2 as the storage for q and r.
+// div returns q, r such that q = ⌊u/v⌋ and r = u%v = u - q·v.
+// It uses z and z2 as the storage for q and r.
 private static (nat, nat) div(this nat z, nat z2, nat u, nat v) => func((_, panic, _) => {
     nat q = default;
     nat r = default;
@@ -526,11 +526,9 @@ private static (nat, nat) div(this nat z, nat z2, nat u, nat v) => func((_, pani
         q, r2 = z.divW(u, v[0]);
         r = z2.setWord(r2);
         return ;
-
     }
     q, r = z.divLarge(z2, u, v);
     return ;
-
 });
 
 // divW returns q, r such that q = ⌊x/y⌋ and r = x%y = x - q·y.
@@ -555,7 +553,6 @@ private static (nat, Word) divW(this nat z, nat x, Word y) => func((_, panic, _)
     r = divWVW(z, 0, x, y);
     q = z.norm();
     return ;
-
 });
 
 // modW returns x % d.
@@ -566,7 +563,6 @@ private static Word modW(this nat x, Word d) {
     nat q = default;
     q = q.make(len(x));
     return divWVW(q, 0, x, d);
-
 }
 
 // divWVW overwrites z with ⌊x/y⌋, returning the remainder r.
@@ -585,7 +581,6 @@ private static Word divWVW(slice<Word> z, Word xn, slice<Word> x, Word y) {
         z[i], r = divWW(r, x[i], y, rec);
     }
     return r;
-
 }
 
 // div returns q, r such that q = ⌊uIn/vIn⌋ and r = uIn%vIn = uIn - q·vIn.
@@ -634,7 +629,6 @@ private static (nat, nat) divLarge(this nat z, nat u, nat uIn, nat vIn) {
     r = u.norm();
 
     return (q, r);
-
 }
 
 // divBasic implements long division as described above.
@@ -680,10 +674,7 @@ private static void divBasic(this nat q, nat u, nat v) {
                 // TODO(rsc): No need for a full mulWW.
                 // x2 += vn2; if x2 overflows, x1++
                 x1, x2 = mulWW(qhat, vn2);
-
             }
-
-
         }
         qhatv[n] = mulAddVWW(qhatv[(int)0..(int)n], v, qhat, 0);
         var qhl = len(qhatv);
@@ -698,19 +689,15 @@ private static void divBasic(this nat q, nat u, nat v) {
             if (n < qhl) {
                 u[j + n] += c;
             }
-
             qhat--;
-
         }
         if (j == m && m == len(q) && qhat == 0) {
             continue;
         }
         q[j] = qhat;
-
     }
 
     putNat(qhatvp);
-
 }
 
 // greaterThan reports whether the two digit numbers x1 x2 > y1 y2.
@@ -753,7 +740,6 @@ private static void divRecursive(this nat z, nat u, nat v) {
             putNat(n);
         }
     }    putNat(tmp);
-
 }
 
 // divRecursiveStep is the actual implementation of recursive division.
@@ -859,7 +845,6 @@ private static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ptr<n
         }
         addAt(z, qhat, j - B);
         j -= B;
-
     } 
 
     // TODO(rsc): Rewrite loop as described above and delete all this code.
@@ -896,7 +881,6 @@ private static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ptr<n
                 e = e__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -912,7 +896,6 @@ private static void divRecursiveStep(this nat z, nat u, nat v, nint depth, ptr<n
         panic("impossible");
     }
     addAt(z, qhat.norm(), 0);
-
 });
 
 } // end big_package

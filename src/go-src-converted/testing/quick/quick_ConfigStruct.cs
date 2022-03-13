@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:32 UTC
+//     Generated on 2022 March 13 06:43:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace testing
 {
     public static partial class quick_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Config
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace testing
             public static implicit operator Config(NilType nil) => default(Config);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Config Config_cast(dynamic value)
         {
             return new Config(value.MaxCount, value.MaxCountScale, ref value.Rand, value.Values);

@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package riscv64 -- go2cs converted at 2022 March 06 23:20:16 UTC
+// package riscv64 -- go2cs converted at 2022 March 13 06:33:07 UTC
 // import "cmd/link/internal/riscv64" ==> using riscv64 = go.cmd.link.@internal.riscv64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\riscv64\asm.go
-using riscv = go.cmd.@internal.obj.riscv_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
+using riscv = cmd.@internal.obj.riscv_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using fmt = fmt_package;
+using log = log_package;
+using sort = sort_package;
+
+
+// fakeLabelName matches the RISCV_FAKE_LABEL_NAME from binutils.
+
+using System;
 public static partial class riscv64_package {
 
-    // fakeLabelName matches the RISCV_FAKE_LABEL_NAME from binutils.
 private static readonly @string fakeLabelName = ".L0 ";
 
 
@@ -55,7 +56,6 @@ private static void genSymsLate(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _add
                 // Use the symbol for the function instead of creating
                 // an overlapping symbol.
                 continue;
-
             } 
 
             // TODO(jsing): Consider generating ELF symbols without needing
@@ -77,14 +77,10 @@ private static void genSymsLate(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _add
                 }
 
             }
-
             hi20Syms = append(hi20Syms, sb.Sym());
-
         }
-
     }    ctxt.Textp = append(ctxt.Textp, hi20Syms);
     ldr.SortSyms(ctxt.Textp);
-
 }
 
 private static loader.Sym findHI20Symbol(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr, long val) {
@@ -102,9 +98,7 @@ private static loader.Sym findHI20Symbol(ptr<ld.Link> _addr_ctxt, ptr<loader.Loa
             return s;
         }
     }
-
     return 0;
-
 }
 
 private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, nint ri, long sectoff) {
@@ -165,7 +159,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
     else 
         return false;
         return true;
-
 }
 
 private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_gotplt, loader.Sym dynamic) {
@@ -200,7 +193,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
         else if (r.Type() == objabi.R_RISCV_PCREL_ITYPE || r.Type() == objabi.R_RISCV_PCREL_STYPE || r.Type() == objabi.R_RISCV_TLS_IE_ITYPE || r.Type() == objabi.R_RISCV_TLS_IE_STYPE) 
             return (val, 2, true);
                 return (val, 0, false);
-
     }
     var rs = ldr.ResolveABIAlias(r.Sym());
 
@@ -256,7 +248,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
 
         return (second << 32 | auipc, 0, true);
         return (val, 0, false);
-
 });
 
 private static long archrelocvariant(ptr<ld.Target> _addr__p0, ptr<loader.Loader> _addr__p0, loader.Reloc _p0, sym.RelocVariant _p0, loader.Sym _p0, long _p0, slice<byte> _p0) {
@@ -277,7 +268,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<ld.Target> _addr_target, ptr
     if (r.Type() == objabi.R_RISCV_PCREL_ITYPE || r.Type() == objabi.R_RISCV_PCREL_STYPE || r.Type() == objabi.R_RISCV_TLS_IE_ITYPE || r.Type() == objabi.R_RISCV_TLS_IE_STYPE) 
         return (ld.ExtrelocViaOuterSym(ldr, r, s), true);
         return (new loader.ExtReloc(), false);
-
 }
 
 } // end riscv64_package

@@ -5,21 +5,20 @@
 // This file implements parsers to convert legacy profiles into the
 // profile.proto format.
 
-// package profile -- go2cs converted at 2022 March 06 22:24:16 UTC
+// package profile -- go2cs converted at 2022 March 13 05:38:43 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Program Files\Go\src\internal\profile\legacy_profile.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class profile_package {
 
@@ -96,11 +95,8 @@ private static (ptr<Profile>, error) parseGoCount(slice<byte> b) {
                 locations[addr] = loc;
                 p.Location = append(p.Location, loc);
             }
-
             locs = append(locs, loc);
-
         }        p.Sample = append(p.Sample, addr(new Sample(Location:locs,Value:[]int64{n},)));
-
     }
 
     err = error.As(parseAdditionalSections(strings.TrimSpace(line), _addr_r, p))!;
@@ -109,7 +105,6 @@ private static (ptr<Profile>, error) parseGoCount(slice<byte> b) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // remapLocationIDs ensures there is a location for each address
@@ -131,7 +126,6 @@ private static void remapLocationIDs(this ptr<Profile> _addr_p) {
             seen[l] = true;
         }
     }    p.Location = locs;
-
 }
 
 private static void remapFunctionIDs(this ptr<Profile> _addr_p) {
@@ -151,7 +145,6 @@ private static void remapFunctionIDs(this ptr<Profile> _addr_p) {
             seen[fn] = true;
         }
     }    p.Function = fns;
-
 }
 
 // remapMappingIDs matches location addresses with existing mappings
@@ -195,7 +188,6 @@ private static void remapMappingIDs(this ptr<Profile> _addr_p) {
 
     }
 
-
     foreach (var (_, l) in p.Location) {
         {
             var a = l.Address;
@@ -217,7 +209,6 @@ private static void remapMappingIDs(this ptr<Profile> _addr_p) {
             }
 
         }
-
     }    {
         var m__prev1 = m;
 
@@ -240,7 +231,6 @@ private static (ulong, slice<byte>) get32l(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24, b[(int)4..]);
-
 }
 
 private static (ulong, slice<byte>) get32b(slice<byte> b) {
@@ -251,7 +241,6 @@ private static (ulong, slice<byte>) get32b(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[3]) | uint64(b[2]) << 8 | uint64(b[1]) << 16 | uint64(b[0]) << 24, b[(int)4..]);
-
 }
 
 private static (ulong, slice<byte>) get64l(slice<byte> b) {
@@ -262,7 +251,6 @@ private static (ulong, slice<byte>) get64l(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24 | uint64(b[4]) << 32 | uint64(b[5]) << 40 | uint64(b[6]) << 48 | uint64(b[7]) << 56, b[(int)8..]);
-
 }
 
 private static (ulong, slice<byte>) get64b(slice<byte> b) {
@@ -273,7 +261,6 @@ private static (ulong, slice<byte>) get64b(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[7]) | uint64(b[6]) << 8 | uint64(b[5]) << 16 | uint64(b[4]) << 24 | uint64(b[3]) << 32 | uint64(b[2]) << 40 | uint64(b[1]) << 48 | uint64(b[0]) << 56, b[(int)8..]);
-
 }
 
 // ParseTracebacks parses a set of tracebacks and returns a newly
@@ -320,24 +307,19 @@ public static (ptr<Profile>, error) ParseTracebacks(slice<byte> b) {
                         p.Location = append(p.Location, loc);
                         locs[addr] = loc;
                     }
-
                     sloc = append(sloc, loc);
-
                 }
             else
 
                 sources = append(sources, s);
-
             } {
                 if (len(sources) > 0 || len(sloc) > 0) {
                     addTracebackSample(sloc, sources, p);
                     (sloc, sources) = (null, null);
                 }
-
             }
 
         }
-
     } 
 
     // Add final sample to save any leftover data.
@@ -351,9 +333,7 @@ public static (ptr<Profile>, error) ParseTracebacks(slice<byte> b) {
             return (_addr_null!, error.As(err)!);
         }
     }
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static void addTracebackSample(slice<ptr<Location>> l, slice<@string> s, ptr<Profile> _addr_p) {
@@ -394,7 +374,6 @@ private static (ptr<Profile>, error) parseCPU(slice<byte> b) {
         }
     }
     return (_addr_null!, error.As(errUnrecognized)!);
-
 }
 
 // cpuProfile returns a new Profile from C++ profilez data.
@@ -453,9 +432,7 @@ private static (ptr<Profile>, error) cpuProfile(slice<byte> b, long period, Func
         err = err__prev1;
 
     }
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseCPUSamples parses a collection of profilez samples from a
@@ -507,7 +484,6 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseCPUSamples(s
         if (count == 0 && nstk == 1 && addrs[0] == 0) { 
             // End of data marker
             break;
-
         }
         {
             nint i__prev2 = i;
@@ -531,11 +507,9 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseCPUSamples(s
         }
 
         p.Sample = append(p.Sample, addr(new Sample(Value:[]int64{int64(count),int64(count)*p.Period},Location:sloc,)));
-
     } 
     // Reached the end without finding the EOD marker.
     return (b, locs, error.As(null!)!);
-
 }
 
 // parseHeap parses a heapz legacy or a growthz profile and
@@ -564,9 +538,7 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
                 if (err != null) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                 }
-
             }
-
             switch (header[5]) {
                 case "heapz_v2": 
 
@@ -583,7 +555,6 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                     break;
             }
-
         }        header = growthHeaderRE.FindStringSubmatch(l);
 
 
@@ -601,7 +572,6 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
         }
 
     }
-
 
     if (LegacyHeapAllocated) {
         {
@@ -661,11 +631,8 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
                 p.Location = append(p.Location, loc);
                 locs[addr] = loc;
             }
-
             sloc = append(sloc, loc);
-
         }        p.Sample = append(p.Sample, addr(new Sample(Value:value,Location:sloc,NumLabel:map[string][]int64{"bytes":{blocksize}},)));
-
     }
 
     err = parseAdditionalSections(l, _addr_r, _addr_p);
@@ -674,7 +641,6 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseHeapSample parses a single row from a heap profile into a new Sample.
@@ -720,7 +686,6 @@ private static (slice<long>, long, slice<ulong>, error) parseHeapSample(@string 
     addrs = parseHexAddresses(sampleData[5]);
 
     return (value, blocksize, addrs, error.As(null!)!);
-
 }
 
 // extractHexAddresses extracts hex numbers from a string and returns
@@ -742,13 +707,10 @@ private static (slice<@string>, slice<ulong>) extractHexAddresses(@string s) => 
  { 
                 // Do not expect any parsing failures due to the regexp matching.
                 panic("failed to parse hex value:" + s);
-
             }
 
         }
-
     }    return (hexStrings, ids);
-
 });
 
 // parseHexAddresses parses hex numbers from a string and returns them
@@ -778,13 +740,11 @@ private static (long, long) scaleHeapSample(long count, long size, long rate) {
         // if rate==1 all samples were collected so no adjustment is needed.
         // if rate<1 treat as unknown and skip scaling.
         return (count, size);
-
     }
     var avgSize = float64(size) / float64(count);
     nint scale = 1 / (1 - math.Exp(-avgSize / float64(rate)));
 
     return (int64(float64(count) * scale), int64(float64(size) * scale));
-
 }
 
 // parseContention parses a mutex or contention profile. There are 2 cases:
@@ -820,7 +780,6 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
         return _addr_parseCppContention(_addr_r)!;
     }
     return (_addr_null!, error.As(errUnrecognized)!);
-
 }
 
 // parseCppContention parses the output from synchronization_profiling.cc
@@ -874,7 +833,6 @@ private static (ptr<Profile>, error) parseCppContention(ptr<bytes.Buffer> _addr_
                 if (err != null) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                 }
-
                 break;
             case "sampling period": 
                 p.Period, err = strconv.ParseInt(val, 0, 64);
@@ -882,7 +840,6 @@ private static (ptr<Profile>, error) parseCppContention(ptr<bytes.Buffer> _addr_
                 if (err != null) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                 }
-
                 break;
             case "ms since reset": 
                 var (ms, err) = strconv.ParseInt(val, 0, 64);
@@ -906,7 +863,6 @@ private static (ptr<Profile>, error) parseCppContention(ptr<bytes.Buffer> _addr_
                 return (_addr_null!, error.As(errUnrecognized)!);
                 break;
         }
-
     }
 
     var locs = make_map<ulong, ptr<Location>>();
@@ -917,12 +873,10 @@ private static (ptr<Profile>, error) parseCppContention(ptr<bytes.Buffer> _addr_
             if (strings.HasPrefix(l, "---")) {
                 break;
             }
-
             var (value, addrs, err) = parseContentionSample(l, p.Period, cpuHz);
             if (err != null) {
                 return (_addr_null!, error.As(err)!);
             }
-
             slice<ptr<Location>> sloc = default;
             foreach (var (_, addr) in addrs) { 
                 // Addresses from stack traces point to the next instruction after
@@ -934,12 +888,9 @@ private static (ptr<Profile>, error) parseCppContention(ptr<bytes.Buffer> _addr_
                     p.Location = append(p.Location, loc);
                     locs[addr] = loc;
                 }
-
                 sloc = append(sloc, loc);
-
             }
             p.Sample = append(p.Sample, addr(new Sample(Value:value,Location:sloc,)));
-
         }
         l, err = r.ReadString('\n');
 
@@ -959,7 +910,6 @@ private static (ptr<Profile>, error) parseCppContention(ptr<bytes.Buffer> _addr_
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseContentionSample parses a single row from a contention profile
@@ -987,13 +937,11 @@ private static (slice<long>, slice<ulong>, error) parseContentionSample(@string 
             v1 = int64(float64(v1) * float64(period) / cpuGHz);
         }
         v2 = v2 * period;
-
     }
     value = new slice<long>(new long[] { v2, v1 });
     addrs = parseHexAddresses(sampleData[3]);
 
     return (value, addrs, error.As(null!)!);
-
 }
 
 // parseThread parses a Threadz profile and returns a new Profile.
@@ -1035,8 +983,6 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
                     break;
                 }
             }
-
-
         }        {
             var t__prev2 = t;
 
@@ -1052,9 +998,7 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
         }
 
 
-
     }
-
 
     ptr<Profile> p = addr(new Profile(SampleType:[]*ValueType{{Type:"thread",Unit:"count"}},PeriodType:&ValueType{Type:"thread",Unit:"count"},Period:1,));
 
@@ -1078,7 +1022,6 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
 
         }
 
-
         slice<ulong> addrs = default;
         line, addrs, err = parseThreadSample(_addr_r);
         if (err != null) {
@@ -1090,9 +1033,7 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
                 var s = p.Sample[len(p.Sample) - 1];
                 s.Value[0]++;
             }
-
             continue;
-
         }
         slice<ptr<Location>> sloc = default;
         foreach (var (_, addr) in addrs) { 
@@ -1105,11 +1046,8 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
                 p.Location = append(p.Location, loc);
                 locs[addr] = loc;
             }
-
             sloc = append(sloc, loc);
-
         }        p.Sample = append(p.Sample, addr(new Sample(Value:[]int64{1},Location:sloc,)));
-
     }
 
     err = error.As(parseAdditionalSections(line, _addr_r, p))!;
@@ -1118,7 +1056,6 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseThreadSample parses a symbolized or unsymbolized stack trace.
@@ -1156,14 +1093,12 @@ private static (@string, slice<ulong>, error) parseThreadSample(ptr<bytes.Buffer
             continue;
         }
         addrs = append(addrs, parseHexAddresses(l));
-
     }
 
     if (sameAsPrevious) {
         return (l, null, error.As(null!)!);
     }
     return (l, addrs, error.As(null!)!);
-
 }
 
 // parseAdditionalSections parses any additional sections in the
@@ -1190,10 +1125,8 @@ private static error parseAdditionalSections(@string l, ptr<bytes.Buffer> _addr_
             }
 
         }
-
     }
     return error.As(p.ParseMemoryMap(b))!;
-
 }
 
 // ParseMemoryMap parses a memory map in the format of
@@ -1243,33 +1176,26 @@ private static error ParseMemoryMap(this ptr<Profile> _addr_p, io.Reader rd) {
                 } 
                 // Ignore any unrecognized entries
                 continue;
-
             }
-
             return error.As(err)!;
-
         }
         if (m == null || (m.File == "" && len(p.Mapping) != 0)) { 
             // In some cases the first entry may include the address range
             // but not the name of the file. It should be followed by
             // another entry with the name.
             continue;
-
         }
         if (len(p.Mapping) == 1 && p.Mapping[0].File == "") { 
             // Update the name if this is the entry following that empty one.
             p.Mapping[0].File = m.File;
             continue;
-
         }
         p.Mapping = append(p.Mapping, m);
-
     }
     p.remapLocationIDs();
     p.remapFunctionIDs();
     p.remapMappingIDs();
     return error.As(null!)!;
-
 }
 
 private static (ptr<Mapping>, error) parseMappingEntry(@string l) {
@@ -1287,38 +1213,30 @@ private static (ptr<Mapping>, error) parseMappingEntry(@string l) {
             if (!strings.Contains(me[3], "x")) { 
                 // Skip non-executable entries.
                 return (_addr_null!, error.As(null!)!);
-
             }
-
             mapping.Start, err = strconv.ParseUint(me[1], 16, 64);
 
             if (err != null) {
                 return (_addr_null!, error.As(errUnrecognized)!);
             }
-
             mapping.Limit, err = strconv.ParseUint(me[2], 16, 64);
 
             if (err != null) {
                 return (_addr_null!, error.As(errUnrecognized)!);
             }
-
             if (me[4] != "") {
                 mapping.Offset, err = strconv.ParseUint(me[4], 16, 64);
 
                 if (err != null) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                 }
-
             }
-
             mapping.File = me[8];
             return (_addr_mapping!, error.As(null!)!);
-
         }
         me = me__prev1;
 
     }
-
 
     {
         var me__prev1 = me;
@@ -1331,13 +1249,11 @@ private static (ptr<Mapping>, error) parseMappingEntry(@string l) {
             if (err != null) {
                 return (_addr_null!, error.As(errUnrecognized)!);
             }
-
             mapping.Limit, err = strconv.ParseUint(me[2], 16, 64);
 
             if (err != null) {
                 return (_addr_null!, error.As(errUnrecognized)!);
             }
-
             mapping.File = me[3];
             if (me[5] != "") {
                 mapping.Offset, err = strconv.ParseUint(me[5], 16, 64);
@@ -1345,19 +1261,14 @@ private static (ptr<Mapping>, error) parseMappingEntry(@string l) {
                 if (err != null) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                 }
-
             }
-
             return (_addr_mapping!, error.As(null!)!);
-
         }
         me = me__prev1;
 
     }
 
-
     return (_addr_null!, error.As(errUnrecognized)!);
-
 }
 
 private partial struct sectionType { // : nint
@@ -1365,7 +1276,6 @@ private partial struct sectionType { // : nint
 
 private static readonly sectionType unrecognizedSection = iota;
 private static readonly var memoryMapSection = 0;
-
 
 private static @string memoryMapTriggers = new slice<@string>(new @string[] { "--- Memory map: ---", "MAPPED_LIBRARIES:" });
 
@@ -1375,7 +1285,6 @@ private static sectionType sectionTrigger(@string line) {
             return memoryMapSection;
         }
     }    return unrecognizedSection;
-
 }
 
 private static void addLegacyFrameInfo(this ptr<Profile> _addr_p) {
@@ -1405,7 +1314,6 @@ private static bool isProfileType(ptr<Profile> _addr_p, slice<@string> t) {
             return false;
         }
     }    return true;
-
 }
 
 private static var allocRxStr = strings.Join(new slice<@string>(new @string[] { `calloc`, `cfree`, `malloc`, `free`, `memalign`, `do_memalign`, `(__)?posix_memalign`, `pvalloc`, `valloc`, `realloc`, `tcmalloc::.*`, `tc_calloc`, `tc_cfree`, `tc_malloc`, `tc_free`, `tc_memalign`, `tc_posix_memalign`, `tc_pvalloc`, `tc_valloc`, `tc_realloc`, `tc_new`, `tc_delete`, `tc_newarray`, `tc_deletearray`, `tc_new_nothrow`, `tc_newarray_nothrow`, `malloc_zone_malloc`, `malloc_zone_calloc`, `malloc_zone_valloc`, `malloc_zone_realloc`, `malloc_zone_memalign`, `malloc_zone_free`, `runtime\..*`, `BaseArena::.*`, `(::)?do_malloc_no_errno`, `(::)?do_malloc_pages`, `(::)?do_malloc`, `DoSampledAllocation`, `MallocedMemBlock::MallocedMemBlock`, `_M_allocate`, `__builtin_(vec_)?delete`, `__builtin_(vec_)?new`, `__gnu_cxx::new_allocator::allocate`, `__libc_malloc`, `__malloc_alloc_template::allocate`, `allocate`, `cpp_alloc`, `operator new(\[\])?`, `simple_alloc::allocate` }), "|");

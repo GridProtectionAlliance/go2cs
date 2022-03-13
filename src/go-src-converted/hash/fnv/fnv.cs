@@ -10,14 +10,15 @@
 // All the hash.Hash implementations returned by this package also
 // implement encoding.BinaryMarshaler and encoding.BinaryUnmarshaler to
 // marshal and unmarshal the internal state of the hash.
-// package fnv -- go2cs converted at 2022 March 06 22:14:57 UTC
+
+// package fnv -- go2cs converted at 2022 March 13 05:29:01 UTC
 // import "hash/fnv" ==> using fnv = go.hash.fnv_package
 // Original source: C:\Program Files\Go\src\hash\fnv\fnv.go
-using errors = go.errors_package;
-using hash = go.hash_package;
-using bits = go.math.bits_package;
-
 namespace go.hash;
+
+using errors = errors_package;
+using hash = hash_package;
+using bits = math.bits_package;
 
 public static partial class fnv_package {
 
@@ -32,8 +33,7 @@ private partial struct sum64a { // : ulong
 private partial struct sum128 { // : array<ulong>
 }
 private partial struct sum128a { // : array<ulong>
-}
-private static readonly nint offset32 = (nint)2166136261L;
+}private static readonly nint offset32 = (nint)2166136261L;
 private static readonly nuint offset64 = (nuint)14695981039346656037UL;
 private static readonly nuint offset128Lower = 0x62b821756295c58d;
 private static readonly nuint offset128Higher = 0x6c62272e07bb0142;
@@ -41,7 +41,6 @@ private static readonly nint prime32 = 16777619;
 private static readonly nint prime64 = (nint)1099511628211L;
 private static readonly nuint prime128Lower = 0x13b;
 private static readonly nint prime128Shift = 24;
-
 
 // New32 returns a new 32-bit FNV-1 hash.Hash.
 // Its Sum method will lay the value out in big-endian byte order.
@@ -210,9 +209,7 @@ private static (nint, error) Write(this ptr<sum128> _addr_s, slice<byte> data) {
         s[1] = s1;
         s[0] = s0;
         s[1] ^= uint64(c);
-
     }    return (len(data), error.As(null!)!);
-
 }
 
 private static (nint, error) Write(this ptr<sum128a> _addr_s, slice<byte> data) {
@@ -228,9 +225,7 @@ private static (nint, error) Write(this ptr<sum128a> _addr_s, slice<byte> data) 
         // Update the values
         s[1] = s1;
         s[0] = s0;
-
     }    return (len(data), error.As(null!)!);
-
 }
 
 private static nint Size(this ptr<sum32> _addr_s) {
@@ -345,7 +340,6 @@ private static readonly var marshaledSize32 = len(magic32) + 4;
 private static readonly var marshaledSize64 = len(magic64) + 8;
 private static readonly var marshaledSize128 = len(magic128) + 8 * 2;
 
-
 private static (slice<byte>, error) MarshalBinary(this ptr<sum32> _addr_s) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -425,7 +419,6 @@ private static error UnmarshalBinary(this ptr<sum32> _addr_s, slice<byte> b) {
     }
     s.val = sum32(readUint32(b[(int)4..]));
     return error.As(null!)!;
-
 }
 
 private static error UnmarshalBinary(this ptr<sum32a> _addr_s, slice<byte> b) {
@@ -439,7 +432,6 @@ private static error UnmarshalBinary(this ptr<sum32a> _addr_s, slice<byte> b) {
     }
     s.val = sum32a(readUint32(b[(int)4..]));
     return error.As(null!)!;
-
 }
 
 private static error UnmarshalBinary(this ptr<sum64> _addr_s, slice<byte> b) {
@@ -453,7 +445,6 @@ private static error UnmarshalBinary(this ptr<sum64> _addr_s, slice<byte> b) {
     }
     s.val = sum64(readUint64(b[(int)4..]));
     return error.As(null!)!;
-
 }
 
 private static error UnmarshalBinary(this ptr<sum64a> _addr_s, slice<byte> b) {
@@ -467,7 +458,6 @@ private static error UnmarshalBinary(this ptr<sum64a> _addr_s, slice<byte> b) {
     }
     s.val = sum64a(readUint64(b[(int)4..]));
     return error.As(null!)!;
-
 }
 
 private static error UnmarshalBinary(this ptr<sum128> _addr_s, slice<byte> b) {
@@ -482,7 +472,6 @@ private static error UnmarshalBinary(this ptr<sum128> _addr_s, slice<byte> b) {
     s[0] = readUint64(b[(int)4..]);
     s[1] = readUint64(b[(int)12..]);
     return error.As(null!)!;
-
 }
 
 private static error UnmarshalBinary(this ptr<sum128a> _addr_s, slice<byte> b) {
@@ -497,7 +486,6 @@ private static error UnmarshalBinary(this ptr<sum128a> _addr_s, slice<byte> b) {
     s[0] = readUint64(b[(int)4..]);
     s[1] = readUint64(b[(int)12..]);
     return error.As(null!)!;
-
 }
 
 private static uint readUint32(slice<byte> b) {

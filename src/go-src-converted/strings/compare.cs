@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2022 March 06 22:30:21 UTC
+// package strings -- go2cs converted at 2022 March 13 05:41:08 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Program Files\Go\src\strings\compare.go
-
-
 namespace go;
 
 public static partial class strings_package {
 
-    // Compare returns an integer comparing two strings lexicographically.
-    // The result will be 0 if a==b, -1 if a < b, and +1 if a > b.
-    //
-    // Compare is included only for symmetry with package bytes.
-    // It is usually clearer and always faster to use the built-in
-    // string comparison operators ==, <, >, and so on.
+// Compare returns an integer comparing two strings lexicographically.
+// The result will be 0 if a==b, -1 if a < b, and +1 if a > b.
+//
+// Compare is included only for symmetry with package bytes.
+// It is usually clearer and always faster to use the built-in
+// string comparison operators ==, <, >, and so on.
 public static nint Compare(@string a, @string b) { 
     // NOTE(rsc): This function does NOT call the runtime cmpstring function,
     // because we do not want to provide any performance justification for
@@ -32,7 +30,6 @@ public static nint Compare(@string a, @string b) {
         return -1;
     }
     return +1;
-
 }
 
 } // end strings_package

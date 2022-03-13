@@ -5,13 +5,13 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:12 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:52 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\iprawsock_posix.go
-using context = go.context_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using context = context_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -25,7 +25,6 @@ private static Addr sockaddrToIP(syscall.Sockaddr sa) {
             break;
     }
     return null;
-
 }
 
 private static nint family(this ptr<IPAddr> _addr_a) {
@@ -38,7 +37,6 @@ private static nint family(this ptr<IPAddr> _addr_a) {
         return syscall.AF_INET;
     }
     return syscall.AF_INET6;
-
 }
 
 private static (syscall.Sockaddr, error) sockaddr(this ptr<IPAddr> _addr_a, nint family) {
@@ -50,7 +48,6 @@ private static (syscall.Sockaddr, error) sockaddr(this ptr<IPAddr> _addr_a, nint
         return (null, error.As(null!)!);
     }
     return ipToSockaddr(family, a.IP, 0, a.Zone);
-
 }
 
 private static sockaddr toLocal(this ptr<IPAddr> _addr_a, @string net) {
@@ -79,7 +76,6 @@ private static (nint, ptr<IPAddr>, error) readFrom(this ptr<IPConn> _addr_c, sli
             break;
     }
     return (n, _addr_addr!, error.As(err)!);
-
 }
 
 private static nint stripIPv4Header(nint n, slice<byte> b) {
@@ -95,7 +91,6 @@ private static nint stripIPv4Header(nint n, slice<byte> b) {
     }
     copy(b, b[(int)l..]);
     return n - l;
-
 }
 
 private static (nint, nint, nint, ptr<IPAddr>, error) readMsg(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob) {
@@ -117,7 +112,6 @@ private static (nint, nint, nint, ptr<IPAddr>, error) readMsg(this ptr<IPConn> _
             break;
     }
     return ;
-
 }
 
 private static (nint, error) writeTo(this ptr<IPConn> _addr_c, slice<byte> b, ptr<IPAddr> _addr_addr) {
@@ -137,7 +131,6 @@ private static (nint, error) writeTo(this ptr<IPConn> _addr_c, slice<byte> b, pt
         return (0, error.As(err)!);
     }
     return c.fd.writeTo(b, sa);
-
 }
 
 private static (nint, nint, error) writeMsg(this ptr<IPConn> _addr_c, slice<byte> b, slice<byte> oob, ptr<IPAddr> _addr_addr) {
@@ -158,7 +151,6 @@ private static (nint, nint, error) writeMsg(this ptr<IPConn> _addr_c, slice<byte
         return (0, 0, error.As(err)!);
     }
     return c.fd.writeMsg(b, oob, sa);
-
 }
 
 private static (ptr<IPConn>, error) dialIP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<IPAddr> _addr_laddr, ptr<IPAddr> _addr_raddr) {
@@ -189,7 +181,6 @@ private static (ptr<IPConn>, error) dialIP(this ptr<sysDialer> _addr_sd, context
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newIPConn(fd)!, error.As(null!)!);
-
 }
 
 private static (ptr<IPConn>, error) listenIP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<IPAddr> _addr_laddr) {
@@ -219,7 +210,6 @@ private static (ptr<IPConn>, error) listenIP(this ptr<sysListener> _addr_sl, con
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newIPConn(fd)!, error.As(null!)!);
-
 }
 
 } // end net_package

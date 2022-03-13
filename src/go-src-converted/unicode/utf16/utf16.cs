@@ -3,18 +3,18 @@
 // license that can be found in the LICENSE file.
 
 // Package utf16 implements encoding and decoding of UTF-16 sequences.
-// package utf16 -- go2cs converted at 2022 March 06 22:13:10 UTC
+
+// package utf16 -- go2cs converted at 2022 March 13 05:28:31 UTC
 // import "unicode/utf16" ==> using utf16 = go.unicode.utf16_package
 // Original source: C:\Program Files\Go\src\unicode\utf16\utf16.go
-
-
 namespace go.unicode;
 
 public static partial class utf16_package {
 
-    // The conditions replacementChar==unicode.ReplacementChar and
-    // maxRune==unicode.MaxRune are verified in the tests.
-    // Defining them locally avoids this package depending on package unicode.
+// The conditions replacementChar==unicode.ReplacementChar and
+// maxRune==unicode.MaxRune are verified in the tests.
+// Defining them locally avoids this package depending on package unicode.
+
 private static readonly char replacementChar = '\uFFFD'; // Unicode replacement character
 private static readonly char maxRune = '\U0010FFFF'; // Maximum valid Unicode code point.
 
@@ -27,7 +27,6 @@ private static readonly nuint surr2 = 0xdc00;
 private static readonly nuint surr3 = 0xe000;
 
 private static readonly nuint surrSelf = 0x10000;
-
 
 // IsSurrogate reports whether the specified Unicode code point
 // can appear in a surrogate pair.
@@ -43,7 +42,6 @@ public static int DecodeRune(int r1, int r2) {
         return (r1 - surr1) << 10 | (r2 - surr2) + surrSelf;
     }
     return replacementChar;
-
 }
 
 // EncodeRune returns the UTF-16 surrogate pair r1, r2 for the given rune.
@@ -58,7 +56,6 @@ public static (int, int) EncodeRune(int r) {
     }
     r -= surrSelf;
     return (surr1 + (r >> 10) & 0x3ff, surr2 + r & 0x3ff);
-
 }
 
 // Encode returns the UTF-16 encoding of the Unicode code point sequence s.
@@ -97,13 +94,11 @@ public static slice<ushort> Encode(slice<int> s) {
             else 
                 a[n] = uint16(replacementChar);
                 n++;
-            
-        }
+                    }
         v = v__prev1;
     }
 
     return a[..(int)n];
-
 }
 
 // Decode returns the Unicode code point sequence represented
@@ -129,10 +124,8 @@ public static slice<int> Decode(slice<ushort> s) {
 
         }
         n++;
-
     }
     return a[..(int)n];
-
 }
 
 } // end utf16_package

@@ -4,33 +4,35 @@
 
 //go:generate go run -mod=mod mknode.go
 
-// package ir -- go2cs converted at 2022 March 06 22:49:07 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:29 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\mini.go
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+
+
+// A miniNode is a minimal node implementation,
+// meant to be embedded as the first field in a larger node implementation,
+// at a cost of 8 bytes.
+//
+// A miniNode is NOT a valid Node by itself: the embedding struct
+// must at the least provide:
+//
+//    func (n *MyNode) String() string { return fmt.Sprint(n) }
+//    func (n *MyNode) rawCopy() Node { c := *n; return &c }
+//    func (n *MyNode) Format(s fmt.State, verb rune) { FmtNode(n, s, verb) }
+//
+// The embedding struct should also fill in n.op in its constructor,
+// for more useful panic messages when invalid methods are called,
+// instead of implementing Op itself.
+//
 
 public static partial class ir_package {
 
-    // A miniNode is a minimal node implementation,
-    // meant to be embedded as the first field in a larger node implementation,
-    // at a cost of 8 bytes.
-    //
-    // A miniNode is NOT a valid Node by itself: the embedding struct
-    // must at the least provide:
-    //
-    //    func (n *MyNode) String() string { return fmt.Sprint(n) }
-    //    func (n *MyNode) rawCopy() Node { c := *n; return &c }
-    //    func (n *MyNode) Format(s fmt.State, verb rune) { FmtNode(n, s, verb) }
-    //
-    // The embedding struct should also fill in n.op in its constructor,
-    // for more useful panic messages when invalid methods are called,
-    // instead of implementing Op itself.
-    //
 private partial struct miniNode {
     public src.XPos pos; // uint32
     public Op op; // uint8
@@ -47,7 +49,6 @@ private static src.XPos posOr(this ptr<miniNode> _addr_n, src.XPos pos) {
         return pos;
     }
     return n.pos;
-
 }
 
 // op can be read, but not written.
@@ -96,7 +97,6 @@ private static void SetTypecheck(this ptr<miniNode> _addr_n, byte x) => func((_,
         panic(fmt.Sprintf("cannot SetTypecheck %d", x));
     }
     n.bits.set2(miniTypecheckShift, x);
-
 });
 
 private static bool Diag(this ptr<miniNode> _addr_n) {

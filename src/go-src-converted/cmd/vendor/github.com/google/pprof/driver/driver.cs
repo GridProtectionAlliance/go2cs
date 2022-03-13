@@ -13,27 +13,29 @@
 // limitations under the License.
 
 // Package driver provides an external entry point to the pprof driver.
-// package driver -- go2cs converted at 2022 March 06 23:23:14 UTC
+
+// package driver -- go2cs converted at 2022 March 13 06:36:18 UTC
 // import "cmd/vendor/github.com/google/pprof/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\driver\driver.go
-using io = go.io_package;
-using http = go.net.http_package;
-using regexp = go.regexp_package;
-using time = go.time_package;
-
-using internaldriver = go.github.com.google.pprof.@internal.driver_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof;
 
+using io = io_package;
+using http = net.http_package;
+using regexp = regexp_package;
+using time = time_package;
+
+using internaldriver = github.com.google.pprof.@internal.driver_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using profile = github.com.google.pprof.profile_package;
+
+
+// PProf acquires a profile, and symbolizes it using a profile
+// manager. Then it generates a report formatted according to the
+// options selected through the flags package.
+
+using System;
 public static partial class driver_package {
 
-    // PProf acquires a profile, and symbolizes it using a profile
-    // manager. Then it generates a report formatted according to the
-    // options selected through the flags package.
 public static error PProf(ptr<Options> _addr_o) {
     ref Options o = ref _addr_o.val;
 
@@ -53,12 +55,9 @@ private static ptr<plugin.Options> internalOptions(this ptr<Options> _addr_o) {
     }
     Func<ptr<plugin.HTTPServerArgs>, error> httpServer = default;
     if (o.HTTPServer != null) {
-        httpServer = args => {
-            return _addr_o.HTTPServer(((HTTPServerArgs.val)(args)))!;
-        };
+        httpServer = args => _addr_o.HTTPServer(((HTTPServerArgs.val)(args)))!;
     }
     return addr(new plugin.Options(Writer:o.Writer,Flagset:o.Flagset,Fetch:o.Fetch,Sym:sym,Obj:obj,UI:o.UI,HTTPServer:httpServer,HTTPTransport:o.HTTPTransport,));
-
 }
 
 // HTTPServerArgs contains arguments needed by an HTTP server that
@@ -204,7 +203,6 @@ private static (plugin.ObjFile, error) Open(this ptr<internalObjTool> _addr_o, @
         return (null, error.As(err)!);
     }
     return (addr(new internalObjFile(f)), error.As(err)!);
-
 }
 
 private partial struct internalObjFile : ObjFile {
@@ -224,7 +222,6 @@ private static (slice<plugin.Frame>, error) SourceLine(this ptr<internalObjFile>
     foreach (var (_, f) in frames) {
         pluginFrames = append(pluginFrames, plugin.Frame(f));
     }    return (pluginFrames, error.As(null!)!);
-
 }
 
 private static (slice<ptr<plugin.Sym>>, error) Symbols(this ptr<internalObjFile> _addr_f, ptr<regexp.Regexp> _addr_r, ulong addr) {
@@ -242,7 +239,6 @@ private static (slice<ptr<plugin.Sym>>, error) Symbols(this ptr<internalObjFile>
         ref var ps = ref heap(plugin.Sym(s.val), out ptr<var> _addr_ps);
         pluginSyms = append(pluginSyms, _addr_ps);
     }    return (pluginSyms, error.As(null!)!);
-
 }
 
 private static (slice<plugin.Inst>, error) Disasm(this ptr<internalObjTool> _addr_o, @string file, ulong start, ulong end, bool intelSyntax) {
@@ -258,7 +254,6 @@ private static (slice<plugin.Inst>, error) Disasm(this ptr<internalObjTool> _add
     foreach (var (_, inst) in insts) {
         pluginInst = append(pluginInst, plugin.Inst(inst));
     }    return (pluginInst, error.As(null!)!);
-
 }
 
 // internalSymbolizer is a wrapper to map from the pprof external

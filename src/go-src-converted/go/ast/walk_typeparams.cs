@@ -5,12 +5,12 @@
 //go:build typeparams
 // +build typeparams
 
-// package ast -- go2cs converted at 2022 March 06 22:43:01 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:10 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\walk_typeparams.go
-using fmt = go.fmt_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
 
 public static partial class ast_package {
 
@@ -45,7 +45,6 @@ private static void walkOtherNodes(Visitor v, Node n) => func((_, panic, _) => {
             panic(fmt.Sprintf("ast.Walk: unexpected node type %T", n));
         }
     }
-
 });
 
 } // end ast_package

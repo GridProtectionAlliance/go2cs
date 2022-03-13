@@ -5,13 +5,13 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package rand -- go2cs converted at 2022 March 06 22:17:16 UTC
+// package rand -- go2cs converted at 2022 March 13 05:30:38 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Program Files\Go\src\crypto\rand\eagain.go
-using fs = go.io.fs_package;
-using syscall = go.syscall_package;
-
 namespace go.crypto;
+
+using fs = io.fs_package;
+using syscall = syscall_package;
 
 public static partial class rand_package {
 
@@ -34,12 +34,9 @@ private static bool unixIsEAGAIN(error err) {
                 }
 
             }
-
         }
     }
-
     return false;
-
 }
 
 } // end rand_package

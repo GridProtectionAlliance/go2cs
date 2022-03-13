@@ -2,66 +2,68 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
+// package cgo -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Program Files\Go\src\runtime\cgo\handle.go
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-
 namespace go.runtime;
+
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+
+// Handle provides a way to pass values that contain Go pointers
+// (pointers to memory allocated by Go) between Go and C without
+// breaking the cgo pointer passing rules. A Handle is an integer
+// value that can represent any Go value. A Handle can be passed
+// through C and back to Go, and Go code can use the Handle to
+// retrieve the original Go value.
+//
+// The underlying type of Handle is guaranteed to fit in an integer type
+// that is large enough to hold the bit pattern of any pointer. The zero
+// value of a Handle is not valid, and thus is safe to use as a sentinel
+// in C APIs.
+//
+// For instance, on the Go side:
+//
+//    package main
+//
+//    /*
+//    #include <stdint.h> // for uintptr_t
+//
+//    extern void MyGoPrint(uintptr_t handle);
+//    void myprint(uintptr_t handle);
+//    */
+//    import "C"
+//    import "runtime/cgo"
+//
+//    //export MyGoPrint
+//    func MyGoPrint(handle C.uintptr_t) {
+//        h := cgo.Handle(handle)
+//        val := h.Value().(string)
+//        println(val)
+//        h.Delete()
+//    }
+//
+//    func main() {
+//        val := "hello Go"
+//        C.myprint(C.uintptr_t(cgo.NewHandle(val)))
+//        // Output: hello Go
+//    }
+//
+// and on the C side:
+//
+//    #include <stdint.h> // for uintptr_t
+//
+//    // A Go function
+//    extern void MyGoPrint(uintptr_t handle);
+//
+//    // A C function
+//    void myprint(uintptr_t handle) {
+//        MyGoPrint(handle);
+//    }
 
 public static partial class cgo_package {
 
-    // Handle provides a way to pass values that contain Go pointers
-    // (pointers to memory allocated by Go) between Go and C without
-    // breaking the cgo pointer passing rules. A Handle is an integer
-    // value that can represent any Go value. A Handle can be passed
-    // through C and back to Go, and Go code can use the Handle to
-    // retrieve the original Go value.
-    //
-    // The underlying type of Handle is guaranteed to fit in an integer type
-    // that is large enough to hold the bit pattern of any pointer. The zero
-    // value of a Handle is not valid, and thus is safe to use as a sentinel
-    // in C APIs.
-    //
-    // For instance, on the Go side:
-    //
-    //    package main
-    //
-    //    /*
-    //    #include <stdint.h> // for uintptr_t
-    //
-    //    extern void MyGoPrint(uintptr_t handle);
-    //    void myprint(uintptr_t handle);
-    //    */
-    //    import "C"
-    //    import "runtime/cgo"
-    //
-    //    //export MyGoPrint
-    //    func MyGoPrint(handle C.uintptr_t) {
-    //        h := cgo.Handle(handle)
-    //        val := h.Value().(string)
-    //        println(val)
-    //        h.Delete()
-    //    }
-    //
-    //    func main() {
-    //        val := "hello Go"
-    //        C.myprint(C.uintptr_t(cgo.NewHandle(val)))
-    //        // Output: hello Go
-    //    }
-    //
-    // and on the C side:
-    //
-    //    #include <stdint.h> // for uintptr_t
-    //
-    //    // A Go function
-    //    extern void MyGoPrint(uintptr_t handle);
-    //
-    //    // A C function
-    //    void myprint(uintptr_t handle) {
-    //        MyGoPrint(handle);
-    //    }
 public partial struct Handle { // : System.UIntPtr
 }
 
@@ -81,7 +83,6 @@ public static Handle NewHandle(object v) => func((_, panic, _) => {
     }
     handles.Store(h, v);
     return Handle(h);
-
 });
 
 // Value returns the associated Go value for a valid handle.
@@ -93,7 +94,6 @@ public static void Value(this Handle h) => func((_, panic, _) => {
         panic("runtime/cgo: misuse of an invalid Handle");
     }
     return v;
-
 });
 
 // Delete invalidates a handle. This method should only be called once

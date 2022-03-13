@@ -2,33 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:06 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:58 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\hypot.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    /*
-        Hypot -- sqrt(p*p + q*q), but overflows only if the result does.
-    */
+/*
+    Hypot -- sqrt(p*p + q*q), but overflows only if the result does.
+*/
 
-    // Hypot returns Sqrt(p*p + q*q), taking care to avoid
-    // unnecessary overflow and underflow.
-    //
-    // Special cases are:
-    //    Hypot(±Inf, q) = +Inf
-    //    Hypot(p, ±Inf) = +Inf
-    //    Hypot(NaN, q) = NaN
-    //    Hypot(p, NaN) = NaN
+// Hypot returns Sqrt(p*p + q*q), taking care to avoid
+// unnecessary overflow and underflow.
+//
+// Special cases are:
+//    Hypot(±Inf, q) = +Inf
+//    Hypot(p, ±Inf) = +Inf
+//    Hypot(NaN, q) = NaN
+//    Hypot(p, NaN) = NaN
 public static double Hypot(double p, double q) {
     if (haveArchHypot) {
         return archHypot(p, q);
     }
     return hypot(p, q);
-
 }
 
 private static double hypot(double p, double q) { 
@@ -46,7 +43,6 @@ private static double hypot(double p, double q) {
     }
     q = q / p;
     return p * Sqrt(1 + q * q);
-
 }
 
 } // end math_package

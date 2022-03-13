@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2022 March 06 22:15:10 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:29:17 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\runtime.go
-using context = go.context_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.runtime;
 
+using context = context_package;
+using @unsafe = @unsafe_package;
+
+
+// runtime_expandFinalInlineFrame is defined in runtime/symtab.go.
+
+using System;
 public static partial class pprof_package {
 
-    // runtime_expandFinalInlineFrame is defined in runtime/symtab.go.
 private static slice<System.UIntPtr> runtime_expandFinalInlineFrame(slice<System.UIntPtr> stk);
 
 // runtime_setProfLabel is defined in runtime/proflabel.go.

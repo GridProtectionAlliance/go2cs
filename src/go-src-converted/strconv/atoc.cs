@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:26 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:15 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\atoc.go
-
-
 namespace go;
 
 public static partial class strconv_package {
@@ -34,9 +32,7 @@ private static (error, error) convErr(error err, @string s) {
             }
         }
     }
-
     return (error.As(err)!, error.As(null!)!);
-
 }
 
 // ParseComplex converts the string s to a complex number
@@ -128,7 +124,6 @@ public static (System.Numerics.Complex128, error) ParseComplex(@string s, nint b
         return (0, error.As(syntaxError(fnParseComplex, orig))!);
     }
     return (complex(re, im), error.As(pending)!);
-
 }
 
 } // end strconv_package

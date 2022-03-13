@@ -4,21 +4,23 @@
 
 // This file implements printing of expressions.
 
-// package types -- go2cs converted at 2022 March 06 22:41:57 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:04 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\exprstring.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using typeparams = go.go.@internal.typeparams_package;
-
 namespace go.go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using typeparams = go.@internal.typeparams_package;
+
+
+// ExprString returns the (possibly shortened) string representation for x.
+// Shortened representations are suitable for user interfaces but may not
+// necessarily follow Go syntax.
 
 public static partial class types_package {
 
-    // ExprString returns the (possibly shortened) string representation for x.
-    // Shortened representations are suitable for user interfaces but may not
-    // necessarily follow Go syntax.
 public static @string ExprString(ast.Expr x) {
     ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
     WriteExpr(_addr_buf, x);
@@ -153,15 +155,12 @@ public static void WriteExpr(ptr<bytes.Buffer> _addr_buf, ast.Expr x) {
                 if (len(f.Names) > 1 && f.Names[0].Name == "type") { 
                     // type list type
                     types = append(types, f.Type);
-
                 }
                 else
  { 
                     // method or embedded interface
                     methods = append(methods, f);
-
                 }
-
             }
             buf.WriteString("interface{");
             writeFieldList(_addr_buf, methods, "; ", true);
@@ -172,7 +171,6 @@ public static void WriteExpr(ptr<bytes.Buffer> _addr_buf, ast.Expr x) {
                 buf.WriteString("type ");
                 writeExprList(_addr_buf, types);
             }
-
             buf.WriteByte('}');
             break;
         case ptr<ast.MapType> x:
@@ -200,7 +198,6 @@ public static void WriteExpr(ptr<bytes.Buffer> _addr_buf, ast.Expr x) {
             break;
         }
     }
-
 }
 
 private static void writeSigExpr(ptr<bytes.Buffer> _addr_buf, ptr<ast.FuncType> _addr_sig) {
@@ -216,19 +213,16 @@ private static void writeSigExpr(ptr<bytes.Buffer> _addr_buf, ptr<ast.FuncType> 
     if (n == 0) { 
         // no result
         return ;
-
     }
     buf.WriteByte(' ');
     if (n == 1 && len(res.List[0].Names) == 0) { 
         // single unnamed result
         WriteExpr(_addr_buf, res.List[0].Type);
         return ;
-
     }
     buf.WriteByte('(');
     writeFieldList(_addr_buf, res.List, ", ", false);
     buf.WriteByte(')');
-
 }
 
 private static void writeFieldList(ptr<bytes.Buffer> _addr_buf, slice<ptr<ast.Field>> list, @string sep, bool iface) {
@@ -271,7 +265,6 @@ private static void writeIdentList(ptr<bytes.Buffer> _addr_buf, slice<ptr<ast.Id
             buf.WriteString(", ");
         }
         buf.WriteString(x.Name);
-
     }
 }
 
@@ -283,7 +276,6 @@ private static void writeExprList(ptr<bytes.Buffer> _addr_buf, slice<ast.Expr> l
             buf.WriteString(", ");
         }
         WriteExpr(_addr_buf, x);
-
     }
 }
 

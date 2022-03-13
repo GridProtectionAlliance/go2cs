@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package riscv64 -- go2cs converted at 2022 March 06 23:10:52 UTC
+// package riscv64 -- go2cs converted at 2022 March 13 06:24:09 UTC
 // import "cmd/compile/internal/riscv64" ==> using riscv64 = go.cmd.compile.@internal.riscv64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\riscv64\ggen.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using riscv = go.cmd.@internal.obj.riscv_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using riscv = cmd.@internal.obj.riscv_package;
 
 public static partial class riscv64_package {
 
@@ -36,7 +36,6 @@ private static ptr<obj.Prog> zeroRange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
             }
         }
         return _addr_p!;
-
     }
     if (cnt <= int64(128 * types.PtrSize)) {
         p = pp.Append(p, riscv.AADDI, obj.TYPE_CONST, 0, off, obj.TYPE_REG, riscv.REG_A0, 0);
@@ -58,7 +57,6 @@ private static ptr<obj.Prog> zeroRange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
     p.Reg = riscv.REG_T1;
     p.To.SetTarget(loop);
     return _addr_p!;
-
 }
 
 } // end riscv64_package

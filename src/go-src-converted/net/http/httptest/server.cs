@@ -4,31 +4,32 @@
 
 // Implementation of Server
 
-// package httptest -- go2cs converted at 2022 March 06 22:23:56 UTC
+// package httptest -- go2cs converted at 2022 March 13 05:38:21 UTC
 // import "net/http/httptest" ==> using httptest = go.net.http.httptest_package
 // Original source: C:\Program Files\Go\src\net\http\httptest\server.go
-using tls = go.crypto.tls_package;
-using x509 = go.crypto.x509_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using testcert = go.net.http.@internal.testcert_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System.Threading;
-using System;
-
-
 namespace go.net.http;
 
+using tls = crypto.tls_package;
+using x509 = crypto.x509_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using log = log_package;
+using net = net_package;
+using http = net.http_package;
+using testcert = net.http.@internal.testcert_package;
+using os = os_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// A Server is an HTTP server listening on a system-chosen port on the
+// local loopback interface, for use in end-to-end HTTP tests.
+
+using System.Threading;
+using System;
 public static partial class httptest_package {
 
-    // A Server is an HTTP server listening on a system-chosen port on the
-    // local loopback interface, for use in end-to-end HTTP tests.
 public partial struct Server {
     public @string URL; // base URL of form http://ipaddr:port with no trailing slash
     public net.Listener Listener; // EnableHTTP2 controls whether HTTP/2 is enabled
@@ -59,7 +60,6 @@ private static net.Listener newLocalListener() => func((_, panic, _) => {
             panic(fmt.Sprintf("httptest: failed to listen on %v: %v", serveFlag, err));
         }
         return l;
-
     }
     (l, err) = net.Listen("tcp", "127.0.0.1:0");
     if (err != null) {
@@ -70,7 +70,6 @@ private static net.Listener newLocalListener() => func((_, panic, _) => {
         }
     }
     return l;
-
 });
 
 // When debugging a particular http server-based test,
@@ -94,7 +93,6 @@ private static bool strSliceContainsPrefix(slice<@string> v, @string pre) {
             return true;
         }
     }    return false;
-
 }
 
 // NewServer starts and returns a new Server.
@@ -161,7 +159,6 @@ private static void StartTLS(this ptr<Server> _addr_s) => func((_, panic, _) => 
             nextProtos = new slice<@string>(new @string[] { "h2" });
         }
         s.TLS.NextProtos = nextProtos;
-
     }
     if (len(s.TLS.Certificates) == 0) {
         s.TLS.Certificates = new slice<tls.Certificate>(new tls.Certificate[] { cert });
@@ -177,7 +174,6 @@ private static void StartTLS(this ptr<Server> _addr_s) => func((_, panic, _) => 
     s.URL = "https://" + s.Listener.Addr().String();
     s.wrap();
     s.goServe();
-
 });
 
 // NewTLSServer starts and returns a new Server using TLS.
@@ -224,10 +220,8 @@ private static void Close(this ptr<Server> _addr_s) => func((defer, _, _) => {
             if (st == http.StateIdle || st == http.StateNew) {
                 s.closeConn(c);
             }
-
         }        var t = time.AfterFunc(5 * time.Second, s.logCloseHangDebugInfo);
         defer(t.Stop());
-
     }
     s.mu.Unlock(); 
 
@@ -260,10 +254,8 @@ private static void Close(this ptr<Server> _addr_s) => func((defer, _, _) => {
             t = t__prev2;
 
         }
-
     }
     s.wg.Wait();
-
 });
 
 private static void logCloseHangDebugInfo(this ptr<Server> _addr_s) => func((defer, _, _) => {
@@ -300,7 +292,6 @@ private static void CloseClientConnections(this ptr<Server> _addr_s) => func((de
     for (nint i = 0; i < nconn; i++) {
         return ;
     }
-
 });
 
 // Certificate returns the certificate used by the server, or nil if
@@ -357,11 +348,9 @@ private static void wrap(this ptr<Server> _addr_s) => func((defer, panic, _) => 
                 }
 
             }
-
             if (s.conns == null) {
                 s.conns = make_map<net.Conn, http.ConnState>();
             }
-
             s.conns[c] = cs;
             if (s.closed) { 
                 // Probably just a socket-late-binding dial from
@@ -369,9 +358,7 @@ private static void wrap(this ptr<Server> _addr_s) => func((defer, panic, _) => 
                 // thus this connection is now idle and will
                 // never be used).
                 s.closeConn(c);
-
             }
-
         else if (cs == http.StateActive) 
             {
                 var oldState__prev1 = oldState;
@@ -388,7 +375,6 @@ private static void wrap(this ptr<Server> _addr_s) => func((defer, panic, _) => 
                 oldState = oldState__prev1;
 
             }
-
         else if (cs == http.StateIdle) 
             {
                 var oldState__prev1 = oldState;
@@ -405,18 +391,15 @@ private static void wrap(this ptr<Server> _addr_s) => func((defer, panic, _) => 
                 oldState = oldState__prev1;
 
             }
-
             if (s.closed) {
                 s.closeConn(c);
             }
-
         else if (cs == http.StateHijacked || cs == http.StateClosed) 
             s.forgetConn(c);
                 if (oldHook != null) {
             oldHook(c, cs);
         }
     };
-
 });
 
 // closeConn closes c.
@@ -452,7 +435,6 @@ private static void forgetConn(this ptr<Server> _addr_s, net.Conn c) {
             s.wg.Done();
         }
     }
-
 }
 
 } // end httptest_package

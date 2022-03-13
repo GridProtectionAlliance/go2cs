@@ -4,11 +4,9 @@
 
 // +build windows
 
-// package windows -- go2cs converted at 2022 March 06 23:30:36 UTC
+// package windows -- go2cs converted at 2022 March 13 06:41:28 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\windows\str.go
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
 
 public static partial class windows_package {
@@ -26,7 +24,6 @@ private static @string itoa(nint val) { // do it here rather than with fmt to av
     }
     buf[i] = byte(val + '0');
     return string(buf[(int)i..]);
-
 }
 
 } // end windows_package

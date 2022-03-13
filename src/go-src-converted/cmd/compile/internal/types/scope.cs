@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:52 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:08 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\scope.go
-using @base = go.cmd.compile.@internal.@base_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using src = cmd.@internal.src_package;
+
+
+// Declaration stack & operations
 
 public static partial class types_package {
 
-    // Declaration stack & operations
 private static int blockgen = 1; // max block number
 public static int Block = 1; // current block number
 
@@ -48,7 +50,6 @@ public static void Popdcl() {
             Block = d.block;
             dclstack = dclstack[..(int)i - 1];
             return ;
-
         }
         s.Def = d.def;
         s.Block = d.block;
@@ -57,10 +58,8 @@ public static void Popdcl() {
         // Clear dead pointer fields.
         d.sym = null;
         d.def = null;
-
     }
     @base.Fatalf("popdcl: no stack mark");
-
 }
 
 // Markdcl records the start of a new block scope for declarations.
@@ -76,7 +75,6 @@ private static bool isDclstackValid() {
             return false;
         }
     }    return true;
-
 }
 
 // PkgDef returns the definition associated with s at package scope.
@@ -104,7 +102,6 @@ private static ptr<Object> pkgDefPtr(this ptr<Sym> _addr_s) {
             return _addr__addr_d.def!;
         }
     }    return _addr__addr_s.Def!;
-
 }
 
 public static void CheckDclstack() {

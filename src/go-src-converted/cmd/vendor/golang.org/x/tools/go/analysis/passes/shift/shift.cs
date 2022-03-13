@@ -4,25 +4,25 @@
 
 // Package shift defines an Analyzer that checks for shifts that exceed
 // the width of an integer.
-// package shift -- go2cs converted at 2022 March 06 23:34:45 UTC
+
+// package shift -- go2cs converted at 2022 March 13 06:42:01 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/shift" ==> using shift = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.shift_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\shift\shift.go
+namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 // TODO(adonovan): integrate with ctrflow (CFG-based) dead code analysis. May
 // have impedance mismatch due to its (non-)treatment of constant
 // expressions (such as runtime.GOARCH=="386").
 
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
 
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
+using ast = go.ast_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 
 public static partial class shift_package {
 
@@ -45,7 +45,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
     inspect.Preorder(nodeFilter, n => { 
         // TODO(adonovan): move updateDead into this file.
         updateDead(pass.TypesInfo, dead, n);
-
     });
 
     nodeFilter = new slice<ast.Node>(new ast.Node[] { (*ast.AssignStmt)(nil), (*ast.BinaryExpr)(nil) });
@@ -53,7 +52,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         if (dead[node]) { 
             // Skip shift checks on unreachable nodes.
             return ;
-
         }
         switch (node.type()) {
             case ptr<ast.BinaryExpr> node:
@@ -70,10 +68,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 }
                 break;
         }
-
     });
     return (null, error.As(null!)!);
-
 }
 
 // checkLongShift checks if shift or shift-assign operations shift by more than
@@ -86,7 +82,6 @@ private static void checkLongShift(ptr<analysis.Pass> _addr_pass, ast.Node node,
         // These are frequently used for bit-twiddling tricks
         // like ^uint(0) >> 63 for 32/64 bit detection and compatibility.
         return ;
-
     }
     var v = pass.TypesInfo.Types[y].Value;
     if (v == null) {

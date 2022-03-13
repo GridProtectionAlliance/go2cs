@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package token -- go2cs converted at 2022 March 06 22:25:54 UTC
+// package token -- go2cs converted at 2022 March 13 05:40:25 UTC
 // import "go/token" ==> using token = go.go.token_package
 // Original source: C:\Program Files\Go\src\go\token\serialize.go
-
-using System;
-
-
 namespace go.go;
 
+using System;
 public static partial class token_package {
 
 private partial struct serializedFile {
@@ -39,7 +36,6 @@ private static error Read(this ptr<FileSet> _addr_s, Func<object, error> decode)
         }
     }
 
-
     s.mutex.Lock();
     s.@base = ss.Base;
     var files = make_slice<ptr<File>>(len(ss.Files));
@@ -52,7 +48,6 @@ private static error Read(this ptr<FileSet> _addr_s, Func<object, error> decode)
     s.mutex.Unlock();
 
     return error.As(null!)!;
-
 }
 
 // Write calls encode to serialize the file set s.

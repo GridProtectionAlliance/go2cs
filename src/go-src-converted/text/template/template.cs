@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:44 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:15 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Program Files\Go\src\text\template\template.go
-using reflect = go.reflect_package;
-using sync = go.sync_package;
-using parse = go.text.template.parse_package;
-
 namespace go.text;
+
+using reflect = reflect_package;
+using sync = sync_package;
+using parse = text.template.parse_package;
+
+
+// common holds the information shared by related templates.
 
 public static partial class template_package {
 
-    // common holds the information shared by related templates.
 private partial struct common {
     public map<@string, ptr<Template>> tmpl; // Map from name to defined templates.
     public sync.RWMutex muTmpl; // protects tmpl
@@ -110,7 +112,6 @@ private static (ptr<Template>, error) Clone(this ptr<Template> _addr_t) => func(
             // The associated templates share nt's common structure.
             var tmpl = v.copy(nt.common);
             nt.tmpl[k] = tmpl;
-
         }
         k = k__prev1;
         v = v__prev1;
@@ -145,7 +146,6 @@ private static (ptr<Template>, error) Clone(this ptr<Template> _addr_t) => func(
     }
 
     return (_addr_nt!, error.As(null!)!);
-
 });
 
 // copy returns a shallow copy of t, with common set to the argument.
@@ -177,7 +177,6 @@ private static (ptr<Template>, error) AddParseTree(this ptr<Template> _addr_t, @
         nt.Tree = tree;
     }
     return (_addr_nt!, error.As(null!)!);
-
 });
 
 // Templates returns a slice of defined templates associated with t.
@@ -193,7 +192,6 @@ private static slice<ptr<Template>> Templates(this ptr<Template> _addr_t) => fun
     foreach (var (_, v) in t.tmpl) {
         m = append(m, v);
     }    return m;
-
 });
 
 // Delims sets the action delimiters to the specified strings, to be used in
@@ -238,7 +236,6 @@ private static ptr<Template> Lookup(this ptr<Template> _addr_t, @string name) =>
     t.muTmpl.RLock();
     defer(t.muTmpl.RUnlock());
     return _addr_t.tmpl[name]!;
-
 });
 
 // Parse parses text as a template body for t.
@@ -272,9 +269,7 @@ private static (ptr<Template>, error) Parse(this ptr<Template> _addr_t, @string 
             }
 
         }
-
     }    return (_addr_t!, error.As(null!)!);
-
 }
 
 // associate installs the new template into the group of templates associated
@@ -295,13 +290,10 @@ private static bool associate(this ptr<Template> _addr_t, ptr<Template> _addr_@n
             // If a template by that name exists,
             // don't replace it with an empty template.
             return false;
-
         }
     }
-
     t.tmpl[@new.name] = new;
     return true;
-
 });
 
 } // end template_package

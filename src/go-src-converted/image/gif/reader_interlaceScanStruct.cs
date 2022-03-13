@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:03 UTC
+//     Generated on 2022 March 13 06:44:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace image
 {
     public static partial class gif_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct interlaceScan
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace image
             public static implicit operator interlaceScan(NilType nil) => default(interlaceScan);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static interlaceScan interlaceScan_cast(dynamic value)
         {
             return new interlaceScan(value.skip, value.start);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:17 UTC
+//     Generated on 2022 March 13 05:25:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct heapBits
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace go
             public static implicit operator heapBits(NilType nil) => default(heapBits);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static heapBits heapBits_cast(dynamic value)
         {
             return new heapBits(ref value.bitp, value.shift, value.arena, ref value.last);

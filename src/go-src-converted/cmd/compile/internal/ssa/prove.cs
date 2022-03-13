@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:54 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:02:18 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\prove.go
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using math = go.math_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using math = math_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -21,7 +20,6 @@ private partial struct branch { // : nint
 private static readonly branch unknown = iota;
 private static readonly var positive = 0;
 private static readonly var negative = 1;
-
 
 // relation represents the set of possible relations between
 // pairs of variables (v, w). Without a priori knowledge the
@@ -50,7 +48,6 @@ private static readonly relation lt = 1 << (int)(iota);
 private static readonly var eq = 0;
 private static readonly var gt = 1;
 
-
 private static array<@string> relationStrings = new array<@string>(InitKeyedValues<@string>((0, "none"), (lt, "<"), (eq, "=="), (lt|eq, "<="), (gt, ">"), (gt|lt, "!="), (gt|eq, ">="), (gt|eq|lt, "any")));
 
 private static @string String(this relation r) {
@@ -58,7 +55,6 @@ private static @string String(this relation r) {
         return relationStrings[r];
     }
     return fmt.Sprintf("relation(%d)", uint(r));
-
 }
 
 // domain represents the domain of a variable pair in which a set
@@ -72,7 +68,6 @@ private static readonly domain signed = 1 << (int)(iota);
 private static readonly var unsigned = 0;
 private static readonly var pointer = 1;
 private static readonly var boolean = 2;
-
 
 private static array<@string> domainStrings = new array<@string>(new @string[] { "signed", "unsigned", "pointer", "boolean" });
 
@@ -91,10 +86,8 @@ private static @string String(this domain d) {
             s += "|";
         }
         s += fmt.Sprintf("0x%x", uint(d));
-
     }
     return s;
-
 }
 
 private partial struct pair {
@@ -139,7 +132,6 @@ private static limit intersect(this limit l, limit l2) {
         l.umax = l2.umax;
     }
     return l;
-
 }
 
 private static limit noLimit = new limit(math.MinInt64,math.MaxInt64,0,math.MaxUint64);
@@ -220,7 +212,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
             ft.unsat = true;
         }
         return ;
-
     }
     if (d == signed || d == unsigned) {
         bool ok = default;
@@ -266,7 +257,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
  {
                 oldR = lt | eq | gt;
             }
-
         }
         if (oldR == r) {
             return ;
@@ -300,16 +290,13 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                     (old.min, old.max) = (v.AuxInt, v.AuxInt);                    if (v.AuxInt >= 0) {
                         (old.umin, old.umax) = (uint64(v.AuxInt), uint64(v.AuxInt));
                     }
-
                 else if (d == unsigned) 
                     old.umin = v.AuxUnsigned();
                     old.umax = old.umin;
                     if (int64(old.umin) >= 0) {
                         (old.min, old.max) = (int64(old.umin), int64(old.umin));
                     }
-
                             }
-
         }
         var lim = noLimit;
 
@@ -338,17 +325,13 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                         if (lim.min >= 0) { 
                 // int(x) >= 0 && int(x) >= N  ⇒  uint(x) >= N
                 lim.umin = uint64(lim.min);
-
             }
-
             if (lim.max != noLimit.max && old.min >= 0 && lim.max >= 0) { 
                 // 0 <= int(x) <= N  ⇒  0 <= uint(x) <= N
                 // This is for a max update, so the lower bound
                 // comes from what we already know (old).
                 lim.umax = uint64(lim.max);
-
             }
-
         else if (d == unsigned) 
             var uc = w.AuxUnsigned();
 
@@ -393,24 +376,20 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
         // len(s) >= w implies cap(s) >= w
         // len(s) == w implies cap(s) >= w
         ft.update(parent, ft.caps[v.Args[0].ID], w, d, r | gt);
-
     }
     if (w.Op == OpSliceLen && r & gt == 0 && ft.caps[w.Args[0].ID] != null) { 
         // same, length on the RHS.
         ft.update(parent, v, ft.caps[w.Args[0].ID], d, r | lt);
-
     }
     if (v.Op == OpSliceCap && r & gt == 0 && ft.lens[v.Args[0].ID] != null) { 
         // cap(s) < w implies len(s) < w
         // cap(s) <= w implies len(s) <= w
         // cap(s) == w implies len(s) <= w
         ft.update(parent, ft.lens[v.Args[0].ID], w, d, r | lt);
-
     }
     if (w.Op == OpSliceCap && r & lt == 0 && ft.lens[w.Args[0].ID] != null) { 
         // same, capacity on the RHS.
         ft.update(parent, v, ft.lens[w.Args[0].ID], d, r | gt);
-
     }
     if (r == lt || r == lt | eq) {
         (v, w) = (w, v);        r = reverseBits[r];
@@ -428,7 +407,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                 // This is useful for eliminating the
                 // growslice branch of append.
                 ft.update(parent, x, w, d, gt | eq);
-
             }            {
                 var x__prev2 = x;
 
@@ -438,18 +416,15 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                 else if (x != null && delta == -1) { 
                     // v > x-1  ⇒  v >= x
                     ft.update(parent, v, x, d, gt | eq);
-
                 }
 
                 x = x__prev2;
 
             }
 
-
             x = x__prev1;
 
         }
-
     else if (r == gt | eq) 
         {
             var x__prev1 = x;
@@ -464,7 +439,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                 if (ok && ((d == signed && lim.min > opMin[v.Op]) || (d == unsigned && lim.umin > 0))) {
                     ft.update(parent, x, w, d, gt);
                 }
-
             }            {
                 var x__prev2 = x;
 
@@ -477,18 +451,15 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                     if (ok && ((d == signed && lim.max < opMax[w.Op]) || (d == unsigned && lim.umax < opUMax[w.Op]))) {
                         ft.update(parent, v, x, d, gt);
                     }
-
                 }
 
                 x = x__prev2;
 
             }
 
-
             x = x__prev1;
 
         }
-
     // Process: x+delta > w (with delta constant)
     // Only signed domain for now (useful for accesses to slices in loops).
     if (r == gt || r == gt | eq) {
@@ -519,7 +490,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                         l = l__prev4;
 
                     }
-
                 }
                 else
  { 
@@ -568,7 +538,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                         // Record that x > min and max >= x
                         ft.update(parent, x, vmin, d, r);
                         ft.update(parent, vmax, x, d, r | eq);
-
                     }
                     else
  { 
@@ -585,32 +554,24 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
                                     if (r & eq == 0 || l.max < min) { 
                                         // x>min (x>=min) is impossible, so it must be x<=max
                                         ft.update(parent, vmax, x, d, r | eq);
-
                                     }
-
                                 }
                                 else if (l.min > max) { 
                                     // x<=max is impossible, so it must be x>min
                                     ft.update(parent, x, vmin, d, r);
-
                                 }
-
                             }
 
                             l = l__prev5;
 
                         }
-
                     }
-
                 }
-
             }
 
             x = x__prev2;
 
         }
-
     }
     if (isCleanExt(_addr_v)) {
 
@@ -625,7 +586,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
         }
 
         __switch_break0:;
-
     }
     if (isCleanExt(_addr_w)) {
 
@@ -640,7 +600,6 @@ private static void update(this ptr<factsTable> _addr_ft, ptr<Block> _addr_paren
         }
 
         __switch_break1:;
-
     }
 });
 
@@ -713,7 +672,6 @@ private static bool isNonNegative(this ptr<factsTable> _addr_ft, ptr<Value> _add
                 l = l__prev2;
 
             }
-
         }
     } 
 
@@ -722,7 +680,6 @@ private static bool isNonNegative(this ptr<factsTable> _addr_ft, ptr<Value> _add
         return true;
     }
     return ft.orderS.OrderedOrEqual(ft.zero, v);
-
 });
 
 // checkpoint saves the current state of known relations.
@@ -737,7 +694,6 @@ private static void checkpoint(this ptr<factsTable> _addr_ft) {
     ft.limitStack = append(ft.limitStack, checkpointBound);
     ft.orderS.Checkpoint();
     ft.orderU.Checkpoint();
-
 }
 
 // restore restores known relation to the state just
@@ -772,7 +728,6 @@ private static void restore(this ptr<factsTable> _addr_ft) {
         ft.limitStack = ft.limitStack[..(int)len(ft.limitStack) - 1];
         if (old.vid == 0) { // checkpointBound
             break;
-
         }
         if (old.limit == noLimit) {
             delete(ft.limits, old.vid);
@@ -784,7 +739,6 @@ private static void restore(this ptr<factsTable> _addr_ft) {
     }
     ft.orderS.Undo();
     ft.orderU.Undo();
-
 }
 
 private static bool lessByID(ptr<Value> _addr_v, ptr<Value> _addr_w) {
@@ -794,13 +748,11 @@ private static bool lessByID(ptr<Value> _addr_v, ptr<Value> _addr_w) {
     if (v == null && w == null) { 
         // Should not happen, but just in case.
         return false;
-
     }
     if (v == null) {
         return true;
     }
     return w != null && v.ID < w.ID;
-
 }
 
 private static array<relation> reverseBits = new array<relation>(new relation[] { 0, 4, 2, 6, 1, 5, 3, 7 });
@@ -822,10 +774,8 @@ private static void cleanup(this ptr<factsTable> _addr_ft, ptr<Func> _addr_f) {
                 }
 
             }
-
         }
         f.retPoset(po);
-
     }
 }
 
@@ -879,9 +829,7 @@ private static void prove(ptr<Func> _addr_f) {
                     // We don't care about dead values.
                     // (There can be some that are CSEd but not removed yet.)
                     continue;
-
                 }
-
 
                 if (v.Op == OpStringLen) 
                     ft.update(b, v, ft.zero, signed, gt | eq);
@@ -904,7 +852,6 @@ private static void prove(ptr<Func> _addr_f) {
                         }
 
                     }
-
                     ft.update(b, v, ft.zero, signed, gt | eq);
                     if (v.Args[0].Op == OpSliceMake) {
                         if (lensVars == null) {
@@ -912,7 +859,6 @@ private static void prove(ptr<Func> _addr_f) {
                         }
                         lensVars[b] = append(lensVars[b], v);
                     }
-
                 else if (v.Op == OpSliceCap) 
                     if (ft.caps == null) {
                         ft.caps = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ID, ptr<Value>>{};
@@ -930,7 +876,6 @@ private static void prove(ptr<Func> _addr_f) {
                         }
 
                     }
-
                     ft.update(b, v, ft.zero, signed, gt | eq);
                     if (v.Args[0].Op == OpSliceMake) {
                         if (lensVars == null) {
@@ -938,7 +883,6 @@ private static void prove(ptr<Func> _addr_f) {
                         }
                         lensVars[b] = append(lensVars[b], v);
                     }
-
                             }
 
             v = v__prev2;
@@ -960,8 +904,7 @@ private static void prove(ptr<Func> _addr_f) {
     private partial struct walkState { // : nint
     }
     const walkState descend = iota;
-    const var simplify = 0;
- 
+    const var simplify = 0; 
     // work maintains the DFS stack.
     private partial struct bp {
         public ptr<Block> block; // current handled block
@@ -1003,7 +946,6 @@ private static void prove(ptr<Func> _addr_f) {
                 }
 
             }
-
             {
                 var (lens, ok) = lensVars[node.block];
 
@@ -1018,15 +960,13 @@ private static void prove(ptr<Func> _addr_f) {
                                 ft.update(node.block, v, v.Args[0].Args[1], signed, eq);
                             else if (v.Op == OpSliceCap) 
                                 ft.update(node.block, v, v.Args[0].Args[2], signed, eq);
-                            
-                        }
+                                                    }
 
                         v = v__prev2;
                     }
                 }
 
             }
-
 
             if (branch != unknown) {
                 addBranchRestrictions(_addr_ft, _addr_parent, branch);
@@ -1037,7 +977,6 @@ private static void prove(ptr<Func> _addr_f) {
                     removeBranch(_addr_parent, branch);
                     ft.restore();
                     break;
-
                 } 
                 // Otherwise, we can now commit to
                 // taking this branch. We'll restore
@@ -1060,13 +999,11 @@ private static void prove(ptr<Func> _addr_f) {
         else if (node.state == simplify) 
             simplifyBlock(sdom, _addr_ft, _addr_node.block);
             ft.restore();
-        
-    }
+            }
 
     ft.restore();
 
     ft.cleanup(f);
-
 }
 
 // getBranch returns the range restrictions added by p
@@ -1085,7 +1022,6 @@ private static branch getBranch(SparseTree sdom, ptr<Block> _addr_p, ptr<Block> 
         return negative;
     }
     return unknown;
-
 }
 
 // addIndVarRestrictions updates the factsTables ft with the facts
@@ -1140,7 +1076,6 @@ private static void addBranchRestrictions(ptr<factsTable> _addr_ft, ptr<Block> _
                 d |= unsigned;
             }
 
-
             if (c.Op == OpIsInBounds || c.Op == OpIsSliceInBounds) 
                 // 0 <= a0 < a1 (or 0 <= a0 <= a1)
                 //
@@ -1171,10 +1106,8 @@ private static void addBranchRestrictions(ptr<factsTable> _addr_ft, ptr<Block> _
                     addRestrictions(_addr_b, _addr_ft, d, _addr_c.Args[0], _addr_c.Args[1], tr.r ^ (lt | gt | eq));
                 else if (br == positive) 
                     addRestrictions(_addr_b, _addr_ft, d, _addr_c.Args[0], _addr_c.Args[1], tr.r);
-                            
-        }
+                                    }
     }
-
 });
 
 // addRestrictions updates restrictions from the immediate
@@ -1189,7 +1122,6 @@ private static void addRestrictions(ptr<Block> _addr_parent, ptr<factsTable> _ad
         // Trivial case: nothing to do.
         // Shoult not happen, but just in case.
         return ;
-
     }
     {
         var i = domain(1);
@@ -1199,12 +1131,9 @@ private static void addRestrictions(ptr<Block> _addr_parent, ptr<factsTable> _ad
                 continue;
             i<<=1;
             }
-
             ft.update(parent, v, w, i, r);
-
         }
     }
-
 }
 
 // addLocalInductiveFacts adds inductive facts when visiting b, where
@@ -1274,36 +1203,30 @@ private static void addLocalInductiveFacts(ptr<factsTable> _addr_ft, ptr<Block> 
                 continue;
             (pred, child) = (uniquePred(pred), pred);
             }
-
             var control = pred.Controls[0];
 
             var br = unknown;
             if (pred.Succs[0].b == child) {
                 br = positive;
             }
-
             if (pred.Succs[1].b == child) {
                 if (br != unknown) {
                     continue;
                 }
                 br = negative;
             }
-
             if (br == unknown) {
                 continue;
             }
-
             var (tr, has) = domainRelationTable[control.Op];
             if (!has) {
                 continue;
             }
-
             var r = tr.r;
             if (br == negative) { 
                 // Negative branch taken to reach b.
                 // Complement the relations.
                 r = (lt | eq | gt) ^ r;
-
             } 
 
             // Check for i2 < max or max > i2.
@@ -1334,14 +1257,10 @@ private static void addLocalInductiveFacts(ptr<factsTable> _addr_ft, ptr<Block> 
                 if (b.Func.pass.debug > 0) {
                     printIndVar(b, i1, min, max, 1, 0);
                 }
-
                 ft.update(b, min, i1, tr.d, lt | eq);
                 ft.update(b, i1, max, tr.d, lt);
-
             }
-
         }
-
     }
 }
 
@@ -1369,7 +1288,6 @@ private static void simplifyBlock(SparseTree sdom, ptr<factsTable> _addr_ft, ptr
             if (!ok) {
                 continue;
             }
-
             if (lim.umin > uint64(-delta)) {
                 if (v.Args[0].Op == OpAdd64) {
                     v.reset(OpConst64);
@@ -1378,15 +1296,11 @@ private static void simplifyBlock(SparseTree sdom, ptr<factsTable> _addr_ft, ptr
  {
                     v.reset(OpConst32);
                 }
-
                 if (b.Func.pass.debug > 0) {
                     b.Func.Warnl(v.Pos, "Proved slicemask not needed");
                 }
-
                 v.AuxInt = -1;
-
             }
-
             goto __switch_break2;
         }
         if (v.Op == OpCtz8 || v.Op == OpCtz16 || v.Op == OpCtz32 || v.Op == OpCtz64) 
@@ -1454,9 +1368,7 @@ private static void simplifyBlock(SparseTree sdom, ptr<factsTable> _addr_ft, ptr
                 if (b.Func.pass.debug > 0) {
                     b.Func.Warnl(v.Pos, "Proved %v bounded", v.Op);
                 }
-
             }
-
             goto __switch_break2;
         }
         if (v.Op == OpDiv16 || v.Op == OpDiv32 || v.Op == OpDiv64 || v.Op == OpMod16 || v.Op == OpMod32 || v.Op == OpMod64) 
@@ -1482,14 +1394,11 @@ private static void simplifyBlock(SparseTree sdom, ptr<factsTable> _addr_ft, ptr
                 if (b.Func.pass.debug > 0) {
                     b.Func.Warnl(v.Pos, "Proved %v does not need fix-up", v.Op);
                 }
-
             }
-
             goto __switch_break2;
         }
 
         __switch_break2:;
-
     }    if (b.Kind != BlockIf) {
         return ;
     }
@@ -1500,7 +1409,6 @@ private static void simplifyBlock(SparseTree sdom, ptr<factsTable> _addr_ft, ptr
             // For edges to uniquely dominated blocks, we
             // already did this when we visited the child.
             continue;
-
         }
         ft.checkpoint();
         addBranchRestrictions(_addr_ft, _addr_parent, branch);
@@ -1516,7 +1424,6 @@ private static void simplifyBlock(SparseTree sdom, ptr<factsTable> _addr_ft, ptr
             // incomplete. We could turn this into a
             // BlockExit, but it doesn't seem worth it.)
             break;
-
         }
     }
 });
@@ -1541,7 +1448,6 @@ private static void removeBranch(ptr<Block> _addr_b, branch branch) {
     if (c != null && c.Pos.IsStmt() == src.PosIsStmt && c.Pos.SameFileAndLine(b.Pos)) { 
         // attempt to preserve statement marker.
         b.Pos = b.Pos.WithIsStmt();
-
     }
     b.Kind = BlockFirst;
     b.ResetControls();
@@ -1581,7 +1487,6 @@ private static bool isNonNegative(ptr<Value> _addr_v) {
         // We could handle OpPhi here, but the improvements from doing
         // so are very minor, and it is neither simple nor cheap.
         return false;
-
 }
 
 // isConstDelta returns non-nil if v is equivalent to w+delta (signed).
@@ -1607,12 +1512,9 @@ private static (ptr<Value>, long) isConstDelta(ptr<Value> _addr_v) {
             var aux = v.Args[1].AuxInt;
             if (aux != -aux) { // Overflow; too bad
                 return (_addr_v.Args[0]!, -aux);
-
             }
-
         }
         return (_addr_null!, 0);
-
 }
 
 // isCleanExt reports whether v is the result of a value-preserving
@@ -1628,7 +1530,6 @@ private static bool isCleanExt(ptr<Value> _addr_v) {
         // unsigned -> signed/unsigned are value-preserving zero extensions
         return !v.Args[0].Type.IsSigned();
         return false;
-
 }
 
 } // end ssa_package

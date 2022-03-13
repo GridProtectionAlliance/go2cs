@@ -28,20 +28,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package amd64 -- go2cs converted at 2022 March 06 23:19:51 UTC
+// package amd64 -- go2cs converted at 2022 March 13 06:32:40 UTC
 // import "cmd/link/internal/amd64" ==> using amd64 = go.cmd.link.@internal.amd64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\amd64\asm.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using log = go.log_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using log = log_package;
+using System;
 
 public static partial class amd64_package {
 
@@ -74,7 +73,6 @@ private static void gentext(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ld
     initfunc.AddSymRef(ctxt.Arch, addmoduledata, 0, objabi.R_CALL, 4); 
     //    c:    c3                       retq
     o(0xc3);
-
 }
 
 private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, loader.Sym s, loader.Reloc r, nint rIdx) {
@@ -101,7 +99,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             if ((targType == 0 || targType == sym.SXREF) && !ldr.AttrVisibilityHidden(targ)) {
                 ldr.Errorf(s, "unknown symbol %s in pcrel", ldr.SymName(targ));
             }
-
             var su = ldr.MakeSymbolUpdater(s);
             su.SetRelocType(rIdx, objabi.R_PCREL);
             su.SetRelocAdd(rIdx, r.Add() + 4);
@@ -149,9 +146,7 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                     su.SetRelocType(rIdx, objabi.R_PCREL);
                     su.SetRelocAdd(rIdx, r.Add() + 4);
                     return true;
-
                 }
-
             } 
 
             // fall back to using GOT and hope for the best (CMOV*)
@@ -176,9 +171,7 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                 // be resolved statically. We need to generate a dynamic
                 // relocation. Let the code below handle it.
                 break;
-
             }
-
             return true; 
 
             // Handle relocations found in Mach-O object files.
@@ -204,11 +197,8 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                     // MACHO_X86_64_RELOC_SIGNED or MACHO_X86_64_RELOC_BRANCH
                     // Can this happen? The object is expected to be PIC.
                     ldr.Errorf(s, "unsupported relocation for PIE: %v", rt);
-
                 }
-
             }
-
             return true;
             goto __switch_break0;
         }
@@ -246,16 +236,13 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                     ldr.Errorf(s, "unexpected GOT_LOAD reloc for non-dynamic symbol %s", ldr.SymName(targ));
                     return false;
                 }
-
                 su = ldr.MakeSymbolUpdater(s);
                 su.MakeWritable();
                 sdata = su.Data();
                 sdata[r.Off() - 2] = 0x8d;
                 su.SetRelocType(rIdx, objabi.R_PCREL);
                 return true;
-
             }
-
             fallthrough = true;
 
         }
@@ -292,12 +279,10 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         if (targType != sym.SDYNIMPORT) { 
             // nothing to do, the relocation will be laid out in reloc
             return true;
-
         }
         if (target.IsExternal()) { 
             // External linker will do this relocation.
             return true;
-
         }
         addpltsym(_addr_target, _addr_ldr, _addr_syms, targ);
         su = ldr.MakeSymbolUpdater(s);
@@ -321,7 +306,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             su.SetRelocSym(rIdx, syms.GOT);
             su.SetRelocAdd(rIdx, r.Add() + int64(ldr.SymGot(targ)));
             return true;
-
         }
         if (target.IsPIE() && target.IsInternal()) { 
             // When internally linking, generate dynamic relocations
@@ -368,7 +352,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                     return false;
                     break;
             }
-
         }
         else
  { 
@@ -381,7 +364,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             if (ldr.SymType(s) != sym.SDATA && ldr.SymType(s) != sym.SRODATA) {
                 break;
             }
-
         }
         if (target.IsElf()) { 
             // Generate R_X86_64_RELATIVE relocations for best
@@ -410,14 +392,12 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
  {
                 ldr.Errorf(s, "unexpected relocation for dynamic symbol %s", ldr.SymName(targ));
             }
-
             rela.AddAddrPlus(target.Arch, targ, int64(r.Add())); 
             // Not mark r done here. So we still apply it statically,
             // so in the file content we'll also have the right offset
             // to the relocation target. So it can be examined statically
             // (e.g. go version).
             return true;
-
         }
         if (target.IsDarwin()) { 
             // Mach-O relocations are a royal pain to lay out.
@@ -429,10 +409,8 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             // to the relocation target. So it can be examined statically
             // (e.g. go version).
             return true;
-
         }
         return false;
-
 }
 
 private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, nint ri, long sectoff) {
@@ -481,7 +459,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
  {
                 @out.Write64(uint64(elf.R_X86_64_PC32) | uint64(elfsym) << 32);
             }
-
         }
         else
  {
@@ -496,7 +473,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
  {
                 @out.Write64(uint64(elf.R_X86_64_PC32) | uint64(elfsym) << 32);
             }
-
         }
         else
  {
@@ -514,7 +490,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
         return false;
         @out.Write64(uint64(r.Xadd));
     return true;
-
 }
 
 private static bool machoreloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, long sectoff) {
@@ -580,7 +555,6 @@ private static bool machoreloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@
     @out.Write32(uint32(sectoff));
     @out.Write32(v);
     return true;
-
 }
 
 private static bool pereloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, long sectoff) {
@@ -618,7 +592,6 @@ private static bool pereloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out
         @out.Write16(uint16(v));
 
     return true;
-
 }
 
 private static (long, nint, bool) archreloc(ptr<ld.Target> _addr__p0, ptr<loader.Loader> _addr__p0, ptr<ld.ArchSyms> _addr__p0, loader.Reloc _p0, loader.Sym _p0, long _p0) {
@@ -666,7 +639,6 @@ private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilde
 
         got.AddUint64(ctxt.Arch, 0);
         got.AddUint64(ctxt.Arch, 0);
-
     }
 }
 
@@ -713,7 +685,6 @@ private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         rela.AddUint64(target.Arch, 0);
 
         ldr.SetPlt(s, int32(plt.Size() - 16));
-
     }
     else if (target.IsDarwin()) {
         ld.AddGotSym(target, ldr, syms, s, 0);
@@ -729,7 +700,6 @@ private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         plt.AddUint8(0xff);
         plt.AddUint8(0x25);
         plt.AddPCRelPlus(target.Arch, syms.GOT, int64(ldr.SymGot(s)));
-
     }
     else
  {
@@ -767,7 +737,6 @@ private static void tlsIEtoLE(slice<byte> P, nint off, nint size) {
             op[1] = 0x81; // special case for SP
         }
         op[2] = 0xc0 | reg;
-
     }
     else
  { 
@@ -776,7 +745,6 @@ private static void tlsIEtoLE(slice<byte> P, nint off, nint size) {
         //    ADDQ X(IP), REG  ->  ADDQ $Y, REG
         // Consider adding support for it here.
         log.Fatalf("expected TLS IE op to be MOVQ, got %v", op);
-
     }
 }
 

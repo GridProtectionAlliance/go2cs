@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package b -- go2cs converted at 2022 March 06 22:41:33 UTC
+// package b -- go2cs converted at 2022 March 13 05:52:38 UTC
 // import "go/doc.b" ==> using b = go.go.doc.b_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\b.go
-using a = go.a_package;
-
 namespace go.go;
+
+using a = a_package;
 
 public static partial class b_package {
 
-    // ----------------------------------------------------------------------------
-    // Basic declarations
+// ----------------------------------------------------------------------------
+// Basic declarations
+
 public static readonly float Pi = 3.14F; // Pi
  // Pi
 public static nint MaxInt = default; // MaxInt
@@ -59,7 +60,6 @@ public static readonly var C2 = 0;
 private static readonly var c3 = 1;
 public static readonly var C4 = 2;
 public static readonly var C5 = 3;
-
 
 public static notExported V = default;
 public static notExported V1 = default;public static notExported V2 = default;private static notExported v3 = default;public static notExported V4 = default;public static notExported V5 = default;

@@ -29,35 +29,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:20:54 UTC
+// package ld -- go2cs converted at 2022 March 13 06:33:50 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\data.go
-using bytes = go.bytes_package;
-using gcprog = go.cmd.@internal.gcprog_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using zlib = go.compress.zlib_package;
-using elf = go.debug.elf_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.link.@internal;
 
+using bytes = bytes_package;
+using gcprog = cmd.@internal.gcprog_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using zlib = compress.zlib_package;
+using elf = debug.elf_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+
+// isRuntimeDepPkg reports whether pkg is the runtime package or its dependency
+
+using System;
+using System.Threading;
 public static partial class ld_package {
 
-    // isRuntimeDepPkg reports whether pkg is the runtime package or its dependency
 private static bool isRuntimeDepPkg(@string pkg) {
     switch (pkg) {
         case "runtime": // for cpu features
@@ -73,7 +74,6 @@ private static bool isRuntimeDepPkg(@string pkg) {
             break;
     }
     return strings.HasPrefix(pkg, "runtime/internal/") && !strings.HasSuffix(pkg, "_test");
-
 }
 
 // Estimate the max size needed to hold any new trampolines created for this function. This
@@ -104,7 +104,6 @@ private static ulong maxSizeTrampolines(ptr<Link> _addr_ctxt, ptr<loader.Loader>
         return n * 12; // Trampolines in ARM64 are 3 instructions.
     }
     panic("unreachable");
-
 });
 
 // detect too-far jumps in function s, and add trampolines if necessary
@@ -136,18 +135,13 @@ private static void trampoline(ptr<Link> _addr_ctxt, loader.Sym s) {
                 // Except that if SymPkg(s) == "", it is a host object symbol
                 // which may call an external symbol via PLT.
                 continue;
-
             }
-
             if (isRuntimeDepPkg(ldr.SymPkg(s)) && isRuntimeDepPkg(ldr.SymPkg(rs))) {
                 continue; // runtime packages are laid out together
             }
-
         }
         thearch.Trampoline(ctxt, ldr, ri, rs, s);
-
     }
-
 }
 
 // whether rt is a (host object) relocation that will be turned into
@@ -165,7 +159,6 @@ private static bool isPLTCall(objabi.RelocType rt) {
         return true;
     // TODO: other architectures.
     return false;
-
 }
 
 // FoldSubSymbolOffset computes the offset of symbol s to its top-level outer
@@ -183,7 +176,6 @@ public static (loader.Sym, long) FoldSubSymbolOffset(ptr<loader.Loader> _addr_ld
         s = outer;
     }
     return (s, off);
-
 }
 
 // relocsym resolve relocations in "s", updating the symbol's content
@@ -231,7 +223,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
         }
         if (siz == 0) { // informational relocation - no work to do
             continue;
-
         }
         sym.SymKind rst = default;
         if (rs != 0) {
@@ -249,16 +240,13 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                     // Skip go.info symbols. They are only needed to communicate
                     // DWARF info between the compiler and linker.
                     continue;
-
                 }
-
             }
             else
  {
                 st.err.errorUnresolved(ldr, s, rs);
                 continue;
             }
-
         }
         if (rt >= objabi.ElfRelocOffset) {
             continue;
@@ -282,8 +270,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 rv = sym.RV_390_DBL;
             else if (rt == objabi.R_CALL) 
                 rv = sym.RV_390_DBL;
-            
-        }
+                    }
         long o = default;
 
         if (rt == objabi.R_TLS_LE)
@@ -305,7 +292,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 // related to the fact that our own TLS storage happens
                 // to take up 8 bytes.
                 o = 8 + ldr.SymValue(rs);
-
             }
             else if (target.IsElf() || target.IsPlan9() || target.IsDarwin()) {
                 o = int64(syms.Tlsoffset) + r.Add();
@@ -317,7 +303,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
  {
                 log.Fatalf("unexpected R_TLS_LE relocation for %v", target.HeadType);
             }
-
             goto __switch_break0;
         }
         if (rt == objabi.R_TLS_IE)
@@ -331,27 +316,21 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 if (target.Is386()) {
                     nExtReloc++; // need two ELF relocations on 386, see ../x86/asm.go:elfreloc1
                 }
-
                 break;
-
             }
-
             if (target.IsPIE() && target.IsElf()) { 
                 // We are linking the final executable, so we
                 // can optimize any TLS IE relocation to LE.
                 if (thearch.TLSIEtoLE == null) {
                     log.Fatalf("internal linking of TLS IE not supported on %v", target.Arch.Family);
                 }
-
                 thearch.TLSIEtoLE(P, int(off), int(siz));
                 o = int64(syms.Tlsoffset);
-
             }
             else
  {
                 log.Fatalf("cannot handle R_TLS_IE (sym %s) when linking internally", ldr.SymName(s));
             }
-
             goto __switch_break0;
         }
         if (rt == objabi.R_ADDR)
@@ -360,9 +339,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 // Redirect it to runtime.unreachableMethod, which will throw if called.
                 rs = syms.unreachableMethod;
                 rs = ldr.ResolveABIAlias(rs);
-
             }
-
             if (target.IsExternal()) {
                 nExtReloc++; 
 
@@ -374,7 +351,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 if (rst != sym.SHOSTOBJ && rst != sym.SDYNIMPORT && rst != sym.SUNDEFEXT && ldr.SymSect(rs) == null) {
                     st.err.Errorf(s, "missing section for relocation target %s", ldr.SymName(rs));
                 }
-
                 o = xadd;
                 if (target.IsElf()) {
                     if (target.IsAMD64()) {
@@ -396,9 +372,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
  {
                     st.err.Errorf(s, "unhandled pcrel relocation to %s on %v", ldr.SymName(rs), target.HeadType);
                 }
-
                 break;
-
             } 
 
             // On AIX, a second relocation must be done by the loader,
@@ -414,9 +388,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 if (ldr.SymSect(s).Seg == _addr_Segdata) {
                     Xcoffadddynrel(target, ldr, syms, s, r, ri);
                 }
-
             }
-
             o = ldr.SymValue(rs) + r.Add(); 
 
             // On amd64, 4-byte offsets will be sign-extended, so it is impossible to
@@ -428,7 +400,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 st.err.Errorf(s, "non-pc-relative relocation address for %s is too big: %#x (%#x + %#x)", ldr.SymName(rs), uint64(o), ldr.SymValue(rs), r.Add());
                 errorexit();
             }
-
             goto __switch_break0;
         }
         if (rt == objabi.R_DWARFSECREF)
@@ -445,18 +416,14 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 if (!target.IsDarwin()) {
                     nExtReloc++;
                 }
-
                 xadd = r.Add() + ldr.SymValue(rs) - int64(ldr.SymSect(rs).Vaddr);
 
                 o = xadd;
                 if (target.IsElf() && target.IsAMD64()) {
                     o = 0;
                 }
-
                 break;
-
             }
-
             o = ldr.SymValue(rs) + r.Add() - int64(ldr.SymSect(rs).Vaddr);
             goto __switch_break0;
         }
@@ -467,9 +434,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 // anything valid.
                 o = -1;
                 break;
-
             }
-
             fallthrough = true;
         }
         if (fallthrough || rt == objabi.R_ADDROFF)
@@ -486,7 +451,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
  {
                 o = ldr.SymValue(rs) - int64(ldr.SymSect(rs).Vaddr) + r.Add();
             }
-
             goto __switch_break0;
         }
         if (rt == objabi.R_ADDRCUOFF) 
@@ -508,7 +472,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
             if (target.Is386() && target.IsExternal() && target.IsELF) {
                 nExtReloc++; // need two ELF relocations on 386, see ../x86/asm.go:elfreloc1
             }
-
             fallthrough = true;
         }
         if (fallthrough || rt == objabi.R_CALL || rt == objabi.R_PCREL)
@@ -518,9 +481,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 nExtReloc++;
                 o = 0;
                 break;
-
             }
-
             if (target.IsExternal() && rs != 0 && (ldr.SymSect(rs) != ldr.SymSect(s) || rt == objabi.R_GOTPCREL)) {
                 nExtReloc++; 
 
@@ -532,7 +493,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 if (rst != sym.SHOSTOBJ && rst != sym.SDYNIMPORT && ldr.SymSect(rs) == null) {
                     st.err.Errorf(s, "missing section for relocation target %s", ldr.SymName(rs));
                 }
-
                 o = xadd;
                 if (target.IsElf()) {
                     if (target.IsAMD64()) {
@@ -545,9 +505,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                             if (target.IsAMD64()) { 
                                 // AMD64 dynamic relocations are relative to the end of the relocation.
                                 o += int64(siz);
-
                             }
-
                         }
                         else
  {
@@ -556,34 +514,27 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                             }
                             o -= int64(off); // relative to section offset, not symbol
                         }
-
                     }
                     else
  {
                         o += int64(siz);
                     }
-
                 }
                 else if (target.IsWindows() && target.IsAMD64()) { // only amd64 needs PCREL
                     // PE/COFF's PC32 relocation uses the address after the relocated
                     // bytes as the base. Compensate by skewing the addend.
                     o += int64(siz);
-
                 }
                 else
  {
                     st.err.Errorf(s, "unhandled pcrel relocation to %s on %v", ldr.SymName(rs), target.HeadType);
                 }
-
                 break;
-
             }
-
             o = 0;
             if (rs != 0) {
                 o = ldr.SymValue(rs);
             }
-
             o += r.Add() - (ldr.SymValue(s) + int64(off) + int64(siz));
             goto __switch_break0;
         }
@@ -642,7 +593,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
             if (target.IsExternal()) {
                 nExtReloc += n;
             }
-
             if (ok) {
                 o = out;
             }
@@ -650,7 +600,6 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
  {
                 st.err.Errorf(s, "unknown reloc to %v: %d (%s)", ldr.SymName(rs), rt, sym.RelocName(target.Arch, rt));
             }
-
 
         __switch_break0:;
 
@@ -681,9 +630,7 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                                    st.err.Errorf(s, "non-pc-relative relocation address for %s is too big: %#x", ldr.SymName(rs), uint64(o));
                                }
                            }
-
                            target.Arch.ByteOrder.PutUint32(P[(int)off..], uint32(o));
-
                 break;
             case 8: 
                 target.Arch.ByteOrder.PutUint64(P[(int)off..], uint64(o));
@@ -692,13 +639,11 @@ private static void relocsym(this ptr<relocSymState> _addr_st, loader.Sym s, sli
                 st.err.Errorf(s, "bad reloc size %#x for %s", uint32(siz), ldr.SymName(rs));
                 break;
         }
-
     }
     if (target.IsExternal()) { 
         // We'll stream out the external relocations in asmb2 (e.g. elfrelocsect)
         // and we only need the count here.
         atomic.AddUint32(_addr_ldr.SymSect(s).Relcount, uint32(nExtReloc));
-
     }
 }
 
@@ -714,7 +659,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<Link> _addr_ctxt, ptr<loader
     var siz = int32(r.Siz());
     if (siz == 0) { // informational relocation - no work to do
         return (rr, false);
-
     }
     var rt = r.Type();
     if (rt >= objabi.ElfRelocOffset) {
@@ -728,8 +672,7 @@ private static (loader.ExtReloc, bool) extreloc(ptr<Link> _addr_ctxt, ptr<loader
 
         if (rt == objabi.R_PCRELDBL) 
             rt = objabi.R_PCREL;
-        
-    }
+            }
 
     if (rt == objabi.R_TLS_LE || rt == objabi.R_TLS_IE) 
         if (target.IsElf()) {
@@ -773,7 +716,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<Link> _addr_ctxt, ptr<loader
             rr.Xadd -= int64(siz); // relative to address after the relocated chunk
             rr.Xsym = rs;
             break;
-
         }
         if (rs != 0 && ldr.SymType(rs) == sym.SUNDEFEXT) { 
             // pass through to the external linker.
@@ -781,10 +723,8 @@ private static (loader.ExtReloc, bool) extreloc(ptr<Link> _addr_ctxt, ptr<loader
             if (target.IsElf()) {
                 rr.Xadd -= int64(siz);
             }
-
             rr.Xsym = rs;
             break;
-
         }
         if (rs != 0 && (ldr.SymSect(rs) != ldr.SymSect(s) || rt == objabi.R_GOTPCREL)) { 
             // set up addend for eventual relocation via outer symbol.
@@ -794,7 +734,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<Link> _addr_ctxt, ptr<loader
             rr.Xadd -= int64(siz); // relative to address after the relocated chunk
             rr.Xsym = rs;
             break;
-
         }
         return (rr, false);
     else if (rt == objabi.R_XCOFFREF) 
@@ -806,7 +745,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<Link> _addr_ctxt, ptr<loader
     else 
         return thearch.Extreloc(target, ldr, r, s);
         return (rr, true);
-
 }
 
 // ExtrelocSimple creates a simple external relocation from r, with the same
@@ -841,7 +779,6 @@ public static loader.ExtReloc ExtrelocViaOuterSym(ptr<loader.Loader> _addr_ldr, 
     rr.Type = r.Type();
     rr.Size = r.Siz();
     return rr;
-
 }
 
 // relocSymState hold state information needed when making a series of
@@ -897,7 +834,6 @@ private static void windynrelocsym(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilde
             if (su == null) {
                 su = ctxt.loader.MakeSymbolUpdater(s);
             }
-
             r.SetSym(rel.Sym());
             r.SetAdd(int64(tplt)); 
 
@@ -918,8 +854,7 @@ private static void windynrelocsym(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilde
             else 
                 ctxt.Errorf(s, "unsupported arch %v", ctxt.Arch.Family);
                 return ;
-            
-        }
+                    }
         else if (tplt >= 0) {
             if (su == null) {
                 su = ctxt.loader.MakeSymbolUpdater(s);
@@ -928,7 +863,6 @@ private static void windynrelocsym(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilde
             r.SetAdd(int64(tplt));
         }
     }
-
 }
 
 // windynrelocsyms generates jump table to C library functions that will be
@@ -945,7 +879,6 @@ private static void windynrelocsyms(this ptr<Link> _addr_ctxt) {
     foreach (var (_, s) in ctxt.Textp) {
         windynrelocsym(_addr_ctxt, _addr_rel, s);
     }    ctxt.Textp = append(ctxt.Textp, rel.Sym());
-
 }
 
 private static void dynrelocsym(ptr<Link> _addr_ctxt, loader.Sym s) {
@@ -970,7 +903,6 @@ private static void dynrelocsym(ptr<Link> _addr_ctxt, loader.Sym s) {
             // don't worry if Adddynrel returns false.
             thearch.Adddynrel(target, ldr, syms, s, r, ri);
             continue;
-
         }
         if (rSym != 0 && ldr.SymType(rSym) == sym.SDYNIMPORT || r.Type() >= objabi.ElfRelocOffset) {
             if (rSym != 0 && !ldr.AttrReachable(rSym)) {
@@ -981,7 +913,6 @@ private static void dynrelocsym(ptr<Link> _addr_ctxt, loader.Sym s) {
             }
         }
     }
-
 }
 
 private static void dynreloc(this ptr<dodataState> _addr_state, ptr<Link> _addr_ctxt) {
@@ -1094,7 +1025,6 @@ private static void writeBlocks(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ch
                 if (end > addr + max) {
                     break;
                 }
-
             } 
 
             // If we didn't find any symbols to write, we're done here.
@@ -1118,7 +1048,6 @@ private static void writeBlocks(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ch
             }
 
             length = ldr.SymValue(next) - addr;
-
         }
         if (length == 0 || length > lastAddr - addr) {
             length = lastAddr - addr;
@@ -1135,10 +1064,8 @@ private static void writeBlocks(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ch
                 }
             else
 (o, ldr, syms, addr, length, pad));
-
             } { // output not mmaped, don't parallelize.
                 writeBlock(_addr_ctxt, _addr_out, _addr_ldr, syms, addr, length, pad);
-
             } 
 
             // Prepare for the next loop.
@@ -1151,10 +1078,8 @@ private static void writeBlocks(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ch
         }
         written += length;
         addr += length;
-
     }
     wg.Wait();
-
 }
 
 private static void writeBlock(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, slice<loader.Sym> syms, long addr, long size, slice<byte> pad) {
@@ -1195,7 +1120,6 @@ private static void writeBlock(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ptr
             }
 
         }
-
         addr += int64(len(P));
         var siz = ldr.SymSize(s);
         if (addr < val + siz) {
@@ -1237,7 +1161,6 @@ private static void writeParallel(ptr<sync.WaitGroup> _addr_wg, writeFn fn, ptr<
             }());
         }
     }
-
 });
 
 private static void datblk(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, long addr, long size) {
@@ -1297,7 +1220,6 @@ private static void dwarfblk(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, long 
     }
 
     writeBlocks(_addr_ctxt, _addr_out, ctxt.outSem, _addr_ctxt.loader, syms, addr, size, zeros[..]);
-
 }
 
 private static array<byte> zeros = new array<byte>(512);
@@ -1326,9 +1248,7 @@ private static void addstrdata1(ptr<Link> _addr_ctxt, @string arg) {
             strnames = append(strnames, name);
         }
     }
-
     strdata[name] = value;
-
 }
 
 // addstrdata sets the initial value of the string variable name to value.
@@ -1356,9 +1276,7 @@ private static void addstrdata(ptr<sys.Arch> _addr_arch, ptr<loader.Loader> _add
 
         }
 
-
     }
-
     if (!l.AttrReachable(s)) {
         return ; // don't bother setting unreachable variable
     }
@@ -1377,7 +1295,6 @@ private static void addstrdata(ptr<sys.Arch> _addr_arch, ptr<loader.Loader> _add
     bld.ResetRelocs();
     bld.AddAddrPlus(arch, sbld.Sym(), 0);
     bld.AddUint(arch, uint64(len(value)));
-
 }
 
 private static void dostrdata(this ptr<Link> _addr_ctxt) {
@@ -1405,7 +1322,6 @@ private static void addgostring(ptr<Link> _addr_ctxt, ptr<loader.Loader> _addr_l
     sdata.SetData((slice<byte>)str);
     s.AddAddr(ctxt.Arch, sdata.Sym());
     s.AddUint(ctxt.Arch, uint64(len(str)));
-
 }
 
 private static void addinitarrdata(ptr<Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr, loader.Sym s) {
@@ -1437,7 +1353,6 @@ private static int symalign(ptr<loader.Loader> _addr_ldr, loader.Sym s) {
         // String data is just bytes.
         // If we align it, we waste a lot of space to padding.
         return min;
-
     }
     align = int32(thearch.Maxalign);
     var ssz = ldr.SymSize(s);
@@ -1446,7 +1361,6 @@ private static int symalign(ptr<loader.Loader> _addr_ldr, loader.Sym s) {
     }
     ldr.SetSymAlign(s, align);
     return align;
-
 }
 
 private static long aligndatsize(ptr<dodataState> _addr_state, long datsize, loader.Sym s) {
@@ -1530,7 +1444,6 @@ private static void AddSym(this ptr<GCProg> _addr_p, loader.Sym s) {
         }
         p.ctxt.Errorf(p.sym.Sym(), "missing Go type information for global symbol %s: size %d", ldr.SymName(s), ldr.SymSize(s));
         return ;
-
     }
     var ptrsize = int64(p.ctxt.Arch.PtrSize);
     var typData = ldr.Data(typ);
@@ -1549,12 +1462,10 @@ private static void AddSym(this ptr<GCProg> _addr_p, loader.Sym s) {
             }
         }
         return ;
-
     }
     var prog = decodetypeGcprog(p.ctxt, typ);
     p.w.ZeroUntil(sval / ptrsize);
     p.w.Append(prog[(int)4..], nptr);
-
 }
 
 // cutoff is the maximum data section size permitted by the linker
@@ -1619,7 +1530,6 @@ private static void fixZeroSizedSymbols(ptr<Link> _addr_ctxt) {
     if (ctxt.HeadType == objabi.Haix) { 
         // XCOFFTOC symbols are part of .data section.
         edata.SetType(sym.SXCOFFTOC);
-
     }
     var types = ldr.CreateSymForUpdate("runtime.types", 0);
     types.SetType(sym.STYPE);
@@ -1674,9 +1584,7 @@ private static void makeRelroForSharedLib(this ptr<dodataState> _addr_state, ptr
                         // runtime.etypes must be at the end of
                         // the relro data.
                         isRelro = true;
-
                     }
-
                                 if (isRelro) {
                     state.setSymType(s, symnrelro);
                     {
@@ -1691,15 +1599,12 @@ private static void makeRelroForSharedLib(this ptr<dodataState> _addr_state, ptr
                         outer = outer__prev2;
 
                     }
-
                     relro = append(relro, s);
-
                 }
                 else
  {
                     ro = append(ro, s);
                 }
-
             } 
 
             // Check that we haven't made two symbols with the same .Outer into
@@ -1731,7 +1636,6 @@ private static void makeRelroForSharedLib(this ptr<dodataState> _addr_state, ptr
                     outer = outer__prev1;
 
                 }
-
             }
 
             s = s__prev2;
@@ -1739,7 +1643,6 @@ private static void makeRelroForSharedLib(this ptr<dodataState> _addr_state, ptr
 
         state.data[symnro] = ro;
         state.data[symnrelro] = relro;
-
     }
 }
 
@@ -1778,10 +1681,8 @@ private static sym.SymKind symType(this ptr<dodataState> _addr_state, loader.Sym
             }
 
         }
-
     }
     return state.ctxt.loader.SymType(s);
-
 }
 
 // setSymType sets a new override type for 's'.
@@ -1828,9 +1729,7 @@ private static void dodata(this ptr<Link> _addr_ctxt, slice<sym.SymKind> symGrou
             if (ldr.AttrOnList(s)) {
                 log.Fatalf("symbol %s listed multiple times", ldr.SymName(s));
             }
-
             ldr.SetAttrOnList(s, true);
-
         }
 
         s = s__prev1;
@@ -1900,7 +1799,6 @@ private static void dodata(this ptr<Link> _addr_ctxt, slice<sym.SymKind> symGrou
                         reli = i;
                         break;
                 }
-
             }
 
             s = s__prev1;
@@ -1916,7 +1814,6 @@ private static void dodata(this ptr<Link> _addr_ctxt, slice<sym.SymKind> symGrou
  {
                 (first, second) = (plti, reli);
             }
-
             var rel = syms[reli];
             var plt = syms[plti];
             copy(syms[(int)first + 2..], syms[(int)first + 1..(int)second]);
@@ -1929,17 +1826,14 @@ private static void dodata(this ptr<Link> _addr_ctxt, slice<sym.SymKind> symGrou
             // getting it wrong.
             ldr.SetSymAlign(rel, int32(ctxt.Arch.RegSize));
             ldr.SetSymAlign(plt, int32(ctxt.Arch.RegSize));
-
         }
         state.data[sym.SELFROSECT] = syms;
-
     }
     if (ctxt.HeadType == objabi.Haix && ctxt.LinkMode == LinkExternal) { 
         // These symbols must have the same alignment as their section.
         // Otherwise, ld might change the layout of Go sections.
         ldr.SetSymAlign(ldr.Lookup("runtime.data", 0), state.dataMaxAlign[sym.SDATA]);
         ldr.SetSymAlign(ldr.Lookup("runtime.bss", 0), state.dataMaxAlign[sym.SBSS]);
-
     }
     state.allocateDataSections(ctxt); 
 
@@ -2051,7 +1945,6 @@ private static ptr<sym.Section> allocateNamedDataSection(this ptr<dodataState> _
     state.datsize = Rnd(state.datsize, int64(sect.Align));
     sect.Vaddr = uint64(state.datsize);
     return _addr_sect!;
-
 }
 
 // assignDsymsToSection assigns a collection of data symbols to a
@@ -2073,9 +1966,7 @@ private static long assignDsymsToSection(this ptr<dodataState> _addr_state, ptr<
         }
         ldr.SetSymValue(s, int64(uint64(state.datsize) - sect.Vaddr));
         state.datsize += ldr.SymSize(s);
-
     }    sect.Length = uint64(state.datsize) - sect.Vaddr;
-
 }
 
 private static void assignToSection(this ptr<dodataState> _addr_state, ptr<sym.Section> _addr_sect, sym.SymKind symn, sym.SymKind forceType) {
@@ -2165,7 +2056,6 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
                         ldr.AddInteriorSym(s, toc);
                         ldr.SetSymValue(toc, 0x8000);
                     }
-
                 }
 
                 s = s__prev1;
@@ -2223,7 +2113,6 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
         }
 
         gc.End(g.gcEnd);
-
     }    sect = state.allocateNamedSectionAndAssignSyms(_addr_Segdata, ".noptrbss", sym.SNOPTRBSS, sym.Sxxx, 06);
     ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.noptrbss", 0), sect);
     ldr.SetSymSect(ldr.LookupOrCreateSym("runtime.enoptrbss", 0), sect);
@@ -2241,7 +2130,6 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
             sect.Align = int32(ctxt.Arch.PtrSize); 
             // FIXME: why does this need to be set to zero?
             sect.Vaddr = 0;
-
         }
         state.datsize = 0;
 
@@ -2310,9 +2198,7 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
                 // XCOFF symbol table needs to know the size of
                 // these outer symbols.
                 xcoffUpdateOuterSize(ctxt, state.datsize - symnStartValue, symn);
-
             }
-
         }
         symn = symn__prev1;
     }
@@ -2339,7 +2225,6 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
             return ".rodata";
         }
         return suffix;
-
     };
     var seg = segro;
 
@@ -2353,20 +2238,14 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
             // rodata segment and let the external linker
             // sort out a rel.ro segment.
             segrelro = segro;
-
         }
         else
  { 
             // Reset datsize for new segment.
             state.datsize = 0;
-
         }
         if (!ctxt.IsDarwin()) { // We don't need the special names on darwin.
-            genrelrosecname = suffix => {
-                return ".data.rel.ro" + suffix;
-            }
-;
-
+            genrelrosecname = suffix => ".data.rel.ro" + suffix;
         }
         sym.SymKind relroReadOnly = new slice<sym.SymKind>(new sym.SymKind[] {  });
         {
@@ -2402,9 +2281,7 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
                     // This is unlikely but possible in small
                     // programs with no other read-only data.
                     state.datsize++;
-
                 }
-
                 symn = sym.RelROMap[symnro];
                 symnStartValue = state.datsize;
 
@@ -2430,16 +2307,13 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
                     // XCOFF symbol table needs to know the size of
                     // these outer symbols.
                     xcoffUpdateOuterSize(ctxt, state.datsize - symnStartValue, symn);
-
                 }
-
             }
 
             symnro = symnro__prev1;
         }
 
         sect.Length = uint64(state.datsize) - sect.Vaddr;
-
     }
     sect = state.allocateNamedDataSection(seg, genrelrosecname(".typelink"), new slice<sym.SymKind>(new sym.SymKind[] { sym.STYPELINK }), relroSecPerm);
 
@@ -2502,7 +2376,6 @@ private static void allocateDataSections(this ptr<dodataState> _addr_state, ptr<
 
         symn = symn__prev1;
     }
-
 }
 
 // allocateDwarfSections allocates sym.Section objects for DWARF
@@ -2535,15 +2408,11 @@ private static void allocateDwarfSections(this ptr<dodataState> _addr_state, ptr
                 // Update the size of .debug_loc for this symbol's
                 // package.
                 addDwsectCUSize(".debug_loc", ldr.SymPkg(s), uint64(ldr.SymSize(s)));
-
             }
-
         }
         sect.Length = uint64(state.datsize) - sect.Vaddr;
         state.checkdatsize(curType);
-
     }
-
 }
 
 private partial struct symNameSize {
@@ -2610,9 +2479,7 @@ private static (slice<loader.Sym>, int) dodataSect(this ptr<dodataState> _addr_s
                         continue;
                         break;
                 }
-
             }
-
         }
         k = k__prev1;
         s = s__prev1;
@@ -2637,19 +2504,15 @@ private static (slice<loader.Sym>, int) dodataSect(this ptr<dodataState> _addr_s
                     return isz < jsz;
                 }
             }
-
             var iname = sl[i].name;
             var jname = sl[j].name;
             if (iname != jname) {
                 return iname < jname;
             }
-
             return si < sj;
-
         }
     else
 );
-
     } { 
         // PCLNTAB was built internally, and has the proper order based on value.
         // Sort the symbols as such.
@@ -2668,7 +2531,6 @@ private static (slice<loader.Sym>, int) dodataSect(this ptr<dodataState> _addr_s
         }
 
         sort.Slice(sl, (i, j) => sl[i].val < sl[j].val);
-
     }
     syms = syms[..(int)0];
     {
@@ -2689,7 +2551,6 @@ private static (slice<loader.Sym>, int) dodataSect(this ptr<dodataState> _addr_s
     }
 
     return (syms, maxAlign);
-
 }
 
 // Add buildid to beginning of text segment, on non-ELF systems.
@@ -2715,7 +2576,6 @@ private static void textbuildid(this ptr<Link> _addr_ctxt) {
     ctxt.Textp = append(ctxt.Textp, 0);
     copy(ctxt.Textp[(int)1..], ctxt.Textp);
     ctxt.Textp[0] = s.Sym();
-
 }
 
 private static void buildinfo(this ptr<Link> _addr_ctxt) {
@@ -2727,7 +2587,6 @@ private static void buildinfo(this ptr<Link> _addr_ctxt) {
         // pointing at the other data sections.
         // The version information is only available in executables.
         return ;
-
     }
     var ldr = ctxt.loader;
     var s = ldr.CreateSymForUpdate(".go.buildinfo", 0); 
@@ -2757,7 +2616,6 @@ private static void buildinfo(this ptr<Link> _addr_ctxt) {
     r.SetOff(16 + int32(ctxt.Arch.PtrSize));
     r.SetSiz(uint8(ctxt.Arch.PtrSize));
     r.SetSym(ldr.LookupOrCreateSym("runtime.modinfo", 0));
-
 }
 
 // assign addresses to text
@@ -2785,7 +2643,6 @@ private static void textaddress(this ptr<Link> _addr_ctxt) {
         var u = ldr.MakeSymbolUpdater(text);
         u.SetAlign(sect.Align);
         u.SetSize(8);
-
     }
     if ((ctxt.DynlinkingGo() && ctxt.IsDarwin()) || (ctxt.IsAIX() && ctxt.IsExternal())) {
         ldr.SetSymSect(etext, sect);
@@ -2815,7 +2672,6 @@ private static void textaddress(this ptr<Link> _addr_ctxt) {
         // Just generate trampoline for now (which will turn a direct call to
         // an indirect call, which at least builds).
         limit = 1;
-
     }
     var big = false;
     {
@@ -2852,7 +2708,6 @@ private static void textaddress(this ptr<Link> _addr_ctxt) {
                     }
 
                 }
-
             }
 
             s = s__prev1;
@@ -2878,12 +2733,8 @@ private static void textaddress(this ptr<Link> _addr_ctxt) {
                         continue;
                     ntramps++;
                     }
-
                     sect, n, va = assignAddress(_addr_ctxt, _addr_sect, n, tramp, va, true, big);
-
                 }
-
-
             } 
 
             // merge tramps into Textp, keeping Textp in address order
@@ -2905,7 +2756,6 @@ private static void textaddress(this ptr<Link> _addr_ctxt) {
                     }
 
                     newtextp = append(newtextp, s);
-
                 }
 
                 s = s__prev1;
@@ -2914,7 +2764,6 @@ private static void textaddress(this ptr<Link> _addr_ctxt) {
             newtextp = append(newtextp, ctxt.tramps[(int)i..(int)ntramps]);
 
             ctxt.Textp = newtextp;
-
         }
     }
     sect.Length = va - sect.Vaddr;
@@ -2924,7 +2773,6 @@ private static void textaddress(this ptr<Link> _addr_ctxt) {
         // (i.e. not darwin+dynlink or AIX+external, see above).
         ldr.SetSymValue(etext, int64(va));
         ldr.SetSymValue(text, int64(Segtext.Sections[0].Vaddr));
-
     }
 }
 
@@ -2979,7 +2827,6 @@ private static (ptr<sym.Section>, nint, ulong) assignAddress(ptr<Link> _addr_ctx
 
                 sectAlign = ppc64maxFuncalign;
                 va = uint64(Rnd(int64(va), ppc64maxFuncalign));
-
             } 
 
             // Set the length for the previous text section
@@ -3024,11 +2871,8 @@ private static (ptr<sym.Section>, nint, ulong) assignAddress(ptr<Link> _addr_ctx
                     align = align__prev4;
 
                 }
-
             }
-
             n++;
-
         }
     }
     ldr.SetSymValue(s, 0);
@@ -3041,14 +2885,12 @@ private static (ptr<sym.Section>, nint, ulong) assignAddress(ptr<Link> _addr_ctx
                 fmt.Println("assign text address:", ldr.SymName(sub), ldr.SymValue(sub));
             sub = ldr.SubSym(sub);
             }
-
         }
     }
 
     va += funcsize;
 
     return (_addr_sect!, n, va);
-
 });
 
 // Return whether we may need to split text sections.
@@ -3141,7 +2983,6 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
         }
 
         Segrodata.Length = va - Segrodata.Vaddr;
-
     }
     if (len(Segrelrodata.Sections) > 0) { 
         // align to page boundary so as not to mix
@@ -3150,7 +2991,6 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
         if (ctxt.HeadType == objabi.Haix) { 
             // Relro data are inside data segment on AIX.
             va += uint64(XCOFFDATABASE) - uint64(XCOFFTEXTBASE);
-
         }
         order = append(order, _addr_Segrelrodata);
         Segrelrodata.Rwx = 06;
@@ -3169,7 +3009,6 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
         }
 
         Segrelrodata.Length = va - Segrelrodata.Vaddr;
-
     }
     va = uint64(Rnd(int64(va), int64(FlagRound.val)));
     if (ctxt.HeadType == objabi.Haix && len(Segrelrodata.Sections) == 0) { 
@@ -3177,7 +3016,6 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
         // to ensure that they are position-independent.
         // Already done if relro sections exist.
         va += uint64(XCOFFDATABASE) - uint64(XCOFFTEXTBASE);
-
     }
     order = append(order, _addr_Segdata);
     Segdata.Rwx = 06;
@@ -3268,7 +3106,6 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
                 sect = sect__prev1;
 
             }
-
             var v = ldr.SymValue(s);
             {
                 var sub__prev2 = sub;
@@ -3283,7 +3120,6 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
 
                 sub = sub__prev2;
             }
-
         }
         s = s__prev1;
     }
@@ -3306,19 +3142,15 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
                     sect = sect__prev1;
 
                 }
-
                 sub = ldr.SubSym(s);
                 if (sub != 0) {
                     panic(fmt.Sprintf("unexpected sub-sym for %s %s", ldr.SymName(s), ldr.SymType(s).String()));
                 }
-
                 v = ldr.SymValue(s);
                 while (sub != 0) {
                     ldr.AddToSymValue(s, v);
                     sub = ldr.SubSym(sub);
                 }
-
-
             }
 
             s = s__prev2;
@@ -3343,11 +3175,8 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
                 // Addresses are already set on AIX with external linker
                 // because these symbols are part of their sections.
                 ctxt.xdefine(symname, sym.STEXT, int64(sect.Vaddr));
-
             }
-
             n++;
-
         }
         sect = sect__prev1;
     }
@@ -3403,10 +3232,8 @@ private static slice<ptr<sym.Segment>> address(this ptr<Link> _addr_ctxt) => fun
         ldr.SetSymSect(ldr.Lookup("_etext", 0), ldr.SymSect(etext));
         ldr.SetSymSect(ldr.Lookup("_edata", 0), ldr.SymSect(edata));
         ldr.SetSymSect(ldr.Lookup("_end", 0), ldr.SymSect(end));
-
     }
     return order;
-
 });
 
 // layout assigns file offsets and lengths to the segments in order.
@@ -3435,18 +3262,14 @@ private static ulong layout(this ptr<Link> _addr_ctxt, slice<ptr<sym.Segment>> o
                 if (seg.Vaddr % uint64(FlagRound.val) != seg.Fileoff % uint64(FlagRound.val)) {
                     Exitf("bad segment rounding (Vaddr=%#x Fileoff=%#x FlagRound=%#x)", seg.Vaddr, seg.Fileoff, FlagRound.val);
                 }
-            
-        }
+                    }
         if (seg != _addr_Segdata) { 
             // Link.address already set Segdata.Filelen to
             // account for BSS.
             seg.Filelen = seg.Length;
-
         }
         prev = seg;
-
     }    return prev.Fileoff + prev.Filelen;
-
 }
 
 // add a trampoline with symbol s (to be laid down after the current function)
@@ -3507,7 +3330,6 @@ private static slice<byte> compressSyms(ptr<Link> _addr_ctxt, slice<loader.Sym> 
             }
 
         }
-
         {
             var i = ldr.SymSize(s) - int64(len(P));
 
@@ -3524,7 +3346,6 @@ private static slice<byte> compressSyms(ptr<Link> _addr_ctxt, slice<loader.Sym> 
             }
 
         }
-
     }    {
         var err = z.Close();
 
@@ -3532,14 +3353,11 @@ private static slice<byte> compressSyms(ptr<Link> _addr_ctxt, slice<loader.Sym> 
             log.Fatalf("compression failed: %s", err);
         }
     }
-
     if (int64(buf.Len()) >= total) { 
         // Compression didn't save any space.
         return null;
-
     }
     return buf.Bytes();
-
 }
 
 } // end ld_package

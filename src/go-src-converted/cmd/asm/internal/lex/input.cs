@@ -2,28 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lex -- go2cs converted at 2022 March 06 22:43:14 UTC
+// package lex -- go2cs converted at 2022 March 13 05:54:23 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\lex\input.go
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using scanner = go.text.scanner_package;
-
-using flags = go.cmd.asm.@internal.flags_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.asm.@internal;
+
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using scanner = text.scanner_package;
+
+using flags = cmd.asm.@internal.flags_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+
+
+// Input is the main input: a stack of readers and some macro definitions.
+// It also handles #include processing (by pushing onto the input stack)
+// and parses and instantiates macro definitions.
 
 public static partial class lex_package {
 
-    // Input is the main input: a stack of readers and some macro definitions.
-    // It also handles #include processing (by pushing onto the input stack)
-    // and parses and instantiates macro definitions.
 public partial struct Input {
     public ref Stack Stack => ref Stack_val;
     public slice<@string> includes;
@@ -52,7 +54,6 @@ private static map<@string, ptr<Macro>> predefine(flags.MultiFlag defines) {
             // Define macro.
             @string name = "GOEXPERIMENT_" + exp;
             macros[name] = addr(new Macro(name:name,args:nil,tokens:Tokenize("1"),));
-
         }
     }
     {
@@ -65,21 +66,17 @@ private static map<@string, ptr<Macro>> predefine(flags.MultiFlag defines) {
             if (i > 0) {
                 (name, value) = (name[..(int)i], name[(int)i + 1..]);
             }
-
             var tokens = Tokenize(name);
             if (len(tokens) != 1 || tokens[0].ScanToken != scanner.Ident) {
                 fmt.Fprintf(os.Stderr, "asm: parsing -D: %q is not a valid identifier name\n", tokens[0]);
                 flags.Usage();
             }
-
             macros[name] = addr(new Macro(name:name,args:nil,tokens:Tokenize(value),));
-
         }
         name = name__prev1;
     }
 
     return macros;
-
 }
 
 private static bool panicOnError = default; // For testing.
@@ -93,7 +90,6 @@ private static void Error(this ptr<Input> _addr_@in, params object[] args) => fu
     }
     fmt.Fprintf(os.Stderr, "%s:%d: %s", @in.File(), @in.Line(), fmt.Sprintln(args));
     os.Exit(1);
-
 });
 
 // expectText is like Error but adds "got XXX" where XXX is a quoted representation of the most recent token.
@@ -160,23 +156,18 @@ private static ScanToken Next(this ptr<Input> _addr_@in) {
                 if (tok == scanner.EOF && len(@in.ifdefStack) > 0) { 
                     // We're skipping text but have run out of input with no #endif.
                     @in.Error("unclosed #ifdef or #ifndef");
-
                 }
-
                 @in.beginningOfLine = tok == '\n';
                 if (@in.enabled()) {
                     @in.text = @in.Stack.Text();
                     return tok;
                 }
 
-
             __switch_break0:;
-
         }
     }
     @in.Error("recursive macro invocation");
     return 0;
-
 }
 
 private static @string Text(this ptr<Input> _addr_@in) {
@@ -214,7 +205,6 @@ private static bool hash(this ptr<Input> _addr_@in) {
                 return false;
                 break;
         }
-
     }
     switch (@in.Stack.Text()) {
         case "define": 
@@ -246,7 +236,6 @@ private static bool hash(this ptr<Input> _addr_@in) {
             break;
     }
     return true;
-
 }
 
 // macroName returns the name for the macro being referenced.
@@ -259,7 +248,6 @@ private static @string macroName(this ptr<Input> _addr_@in) {
         @in.expectText("expected identifier after # directive");
     }
     return @in.Stack.Text();
-
 }
 
 // #define processing.
@@ -279,7 +267,6 @@ private static void defineMacro(this ptr<Input> _addr_@in, @string name, slice<@
         @in.Error("redefinition of macro:", name);
     }
     @in.macros[name] = addr(new Macro(name:name,args:args,tokens:tokens,));
-
 }
 
 // macroDefinition returns the list of formals and the tokens of the definition.
@@ -334,14 +321,11 @@ Loop:
                     }
 
                 }
-
                 args = append(args, arg);
                 acceptArg = false;
             else 
                 @in.Error("bad definition for macro:", name);
-            
-        }
-
+                    }
     }
     slice<Token> tokens = default; 
     // Scan to newline. Backslashes escape newlines.
@@ -357,10 +341,8 @@ Loop:
         }
         tokens = append(tokens, Make(tok, @in.Stack.Text()));
         tok = @in.Stack.Next();
-
     }
     return (args, tokens);
-
 }
 
 private static nint lookup(slice<@string> args, @string arg) {
@@ -369,7 +351,6 @@ private static nint lookup(slice<@string> args, @string arg) {
             return i;
         }
     }    return -1;
-
 }
 
 // invokeMacro pushes onto the input Stack a Slice that holds the macro definition with the actual
@@ -393,7 +374,6 @@ private static void invokeMacro(this ptr<Input> _addr_@in, ptr<Macro> _addr_macr
         @in.peek = true;
         @in.Push(NewSlice(@in.Base(), @in.Line(), new slice<Token>(new Token[] { Make(macroName,macro.name) })));
         return ;
-
     }
     var actuals = @in.argsFor(macro);
     slice<Token> tokens = default;
@@ -417,7 +397,6 @@ private static void invokeMacro(this ptr<Input> _addr_@in, ptr<Macro> _addr_macr
     }
 
     @in.Push(NewSlice(@in.Base(), @in.Line(), tokens));
-
 }
 
 // argsFor returns a map from formal name to actual value for this argumented macro invocation.
@@ -428,7 +407,7 @@ private static map<@string, slice<Token>> argsFor(this ptr<Input> _addr_@in, ptr
 
     slice<slice<Token>> args = default; 
     // One macro argument per iteration. Collect them all and check counts afterwards.
-    for (nint argNum = 0; args; argNum++) {
+    for (nint argNum = 0; ; argNum++) {
         var (tokens, tok) = @in.collectArgument(macro);
         args = append(args, tokens);
         if (tok == ')') {
@@ -446,7 +425,6 @@ private static map<@string, slice<Token>> argsFor(this ptr<Input> _addr_@in, ptr
     foreach (var (i, arg) in args) {
         argMap[macro.args[i]] = arg;
     }    return argMap;
-
 }
 
 // collectArgument returns the actual tokens for a single argument of a macro.
@@ -475,9 +453,7 @@ private static (slice<Token>, ScanToken) collectArgument(this ptr<Input> _addr_@
             nesting--;
         }
         tokens = append(tokens, Make(tok, @in.Stack.Text()));
-
     }
-
 }
 
 // #ifdef and #ifndef processing.
@@ -496,9 +472,7 @@ private static void ifdef(this ptr<Input> _addr_@in, bool truth) {
             truth = !truth;
         }
     }
-
     @in.ifdefStack = append(@in.ifdefStack, truth);
-
 }
 
 // #else processing
@@ -523,7 +497,6 @@ private static void endif(this ptr<Input> _addr_@in) {
         @in.Error("unmatched #endif");
     }
     @in.ifdefStack = @in.ifdefStack[..(int)len(@in.ifdefStack) - 1];
-
 }
 
 // #include processing.
@@ -553,7 +526,6 @@ private static void include(this ptr<Input> _addr_@in) {
         }
     }
     @in.Push(NewTokenizer(name, fd, fd));
-
 }
 
 // #line processing.
@@ -583,7 +555,6 @@ private static void line(this ptr<Input> _addr_@in) {
     }
     var pos = src.MakePos(@in.Base(), uint(@in.Line()) + 1, 1); // +1 because #line nnn means line nnn starts on next line
     @in.Stack.SetBase(src.NewLinePragmaBase(pos, file, objabi.AbsFile(objabi.WorkingDir(), file, flags.TrimPath.val), uint(line), 1));
-
 }
 
 // #undef processing
@@ -599,7 +570,6 @@ private static void undef(this ptr<Input> _addr_@in) {
         @in.Error("syntax error in #undef for macro:", name);
     }
     delete(@in.macros, name);
-
 }
 
 private static void Push(this ptr<Input> _addr_@in, TokenReader r) {
@@ -609,7 +579,6 @@ private static void Push(this ptr<Input> _addr_@in, TokenReader r) {
         @in.Error("input recursion");
     }
     @in.Stack.Push(r);
-
 }
 
 private static void Close(this ptr<Input> _addr_@in) {

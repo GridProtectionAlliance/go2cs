@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:51 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:08 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\value.go
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using math = go.math_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using math = math_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// A Value represents a value in the SSA representation of the program.
+// The ID and Type fields must not be modified. The remainder may be modified
+// if they preserve the value of the Value (e.g. changing a (mul 2 x) to an (add x x)).
 
 public static partial class ssa_package {
 
-    // A Value represents a value in the SSA representation of the program.
-    // The ID and Type fields must not be modified. The remainder may be modified
-    // if they preserve the value of the Value (e.g. changing a (mul 2 x) to an (add x x)).
 public partial struct Value {
     public ID ID; // The operation that computes this value. See op.go.
     public Op Op; // The type of this value. Normally this will be a Go type, but there
@@ -58,7 +60,6 @@ private static @string String(this ptr<Value> _addr_v) {
         return "nil"; // should never happen, but not panicking helps with debugging
     }
     return fmt.Sprintf("v%d", v.ID);
-
 }
 
 private static sbyte AuxInt8(this ptr<Value> _addr_v) {
@@ -68,7 +69,6 @@ private static sbyte AuxInt8(this ptr<Value> _addr_v) {
         v.Fatalf("op %s doesn't have an int8 aux field", v.Op);
     }
     return int8(v.AuxInt);
-
 }
 
 private static short AuxInt16(this ptr<Value> _addr_v) {
@@ -78,7 +78,6 @@ private static short AuxInt16(this ptr<Value> _addr_v) {
         v.Fatalf("op %s doesn't have an int16 aux field", v.Op);
     }
     return int16(v.AuxInt);
-
 }
 
 private static int AuxInt32(this ptr<Value> _addr_v) {
@@ -88,7 +87,6 @@ private static int AuxInt32(this ptr<Value> _addr_v) {
         v.Fatalf("op %s doesn't have an int32 aux field", v.Op);
     }
     return int32(v.AuxInt);
-
 }
 
 // AuxUnsigned returns v.AuxInt as an unsigned value for OpConst*.
@@ -109,7 +107,6 @@ private static ulong AuxUnsigned(this ptr<Value> _addr_v) {
         return uint64(uint8(c));
         v.Fatalf("op %s isn't OpConst*", v.Op);
     return 0;
-
 }
 
 private static double AuxFloat(this ptr<Value> _addr_v) {
@@ -119,7 +116,6 @@ private static double AuxFloat(this ptr<Value> _addr_v) {
         v.Fatalf("op %s doesn't have a float aux field", v.Op);
     }
     return math.Float64frombits(uint64(v.AuxInt));
-
 }
 private static ValAndOff AuxValAndOff(this ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -128,7 +124,6 @@ private static ValAndOff AuxValAndOff(this ptr<Value> _addr_v) {
         v.Fatalf("op %s doesn't have a ValAndOff aux field", v.Op);
     }
     return ValAndOff(v.AuxInt);
-
 }
 
 private static arm64BitField AuxArm64BitField(this ptr<Value> _addr_v) {
@@ -138,7 +133,6 @@ private static arm64BitField AuxArm64BitField(this ptr<Value> _addr_v) {
         v.Fatalf("op %s doesn't have a ValAndOff aux field", v.Op);
     }
     return arm64BitField(v.AuxInt);
-
 }
 
 // long form print.  v# = opcode <type> [aux] args [: reg] (names)
@@ -168,18 +162,14 @@ private static @string LongString(this ptr<Value> _addr_v) {
                     names = append(names, name.String());
                     break; // drop duplicates.
                 }
-
             }
-
         }
     }
     if (len(names) != 0) {
         sort.Strings(names); // Otherwise a source of variation in debugging output.
         s += " (" + strings.Join(names, ", ") + ")";
-
     }
     return s;
-
 }
 
 private static @string auxString(this ptr<Value> _addr_v) {
@@ -236,7 +226,6 @@ private static @string auxString(this ptr<Value> _addr_v) {
     else if (opcodeTable[v.Op].auxType == auxFlagConstant) 
         return fmt.Sprintf("[%s]", flagConstant(v.AuxInt));
         return "";
-
 }
 
 // If/when midstack inlining is enabled (-l=4), the compiler gets both larger and slower.
@@ -251,7 +240,6 @@ private static void AddArg(this ptr<Value> _addr_v, ptr<Value> _addr_w) {
     }
     v.Args = append(v.Args, w);
     w.Uses++;
-
 }
 
 //go:noinline
@@ -266,7 +254,6 @@ private static void AddArg2(this ptr<Value> _addr_v, ptr<Value> _addr_w1, ptr<Va
     v.Args = append(v.Args, w1, w2);
     w1.Uses++;
     w2.Uses++;
-
 }
 
 //go:noinline
@@ -283,7 +270,6 @@ private static void AddArg3(this ptr<Value> _addr_v, ptr<Value> _addr_w1, ptr<Va
     w1.Uses++;
     w2.Uses++;
     w3.Uses++;
-
 }
 
 //go:noinline
@@ -365,7 +351,6 @@ private static void RemoveArg(this ptr<Value> _addr_v, nint i) {
     copy(v.Args[(int)i..], v.Args[(int)i + 1..]);
     v.Args[len(v.Args) - 1] = null; // aid GC
     v.Args = v.Args[..(int)len(v.Args) - 1];
-
 }
 private static void SetArgs1(this ptr<Value> _addr_v, ptr<Value> _addr_a) {
     ref Value v = ref _addr_v.val;
@@ -420,7 +405,6 @@ private static void reset(this ptr<Value> _addr_v, Op op) {
     v.resetArgs();
     v.AuxInt = 0;
     v.Aux = null;
-
 }
 
 // invalidateRecursively marks a value as invalid (unused)
@@ -450,7 +434,6 @@ private static void invalidateRecursively(this ptr<Value> _addr_v) {
 
     v.AuxInt = 0;
     v.Aux = null;
-
 }
 
 // copyOf is called from rewrite rules.
@@ -472,7 +455,6 @@ private static void copyOf(this ptr<Value> _addr_v, ptr<Value> _addr_a) {
     v.AuxInt = 0;
     v.Aux = null;
     v.Type = a.Type;
-
 }
 
 // copyInto makes a new value identical to v and adds it to the end of b.
@@ -490,7 +472,6 @@ private static ptr<Value> copyInto(this ptr<Value> _addr_v, ptr<Block> _addr_b) 
             v.Fatalf("can't move a value with a memory arg %s", v.LongString());
         }
     }    return _addr_c!;
-
 }
 
 // copyIntoWithXPos makes a new value identical to v and adds it to the end of b.
@@ -515,7 +496,6 @@ private static ptr<Value> copyIntoWithXPos(this ptr<Value> _addr_v, ptr<Block> _
             v.Fatalf("can't move a value with a memory arg %s", v.LongString());
         }
     }    return _addr_c!;
-
 }
 
 private static void Logf(this ptr<Value> _addr_v, @string msg, params object[] args) {
@@ -560,12 +540,10 @@ private static short ResultReg(this ptr<Value> _addr_v) {
             reg = pair[0];
         }
     }
-
     if (reg == null) {
         v.Fatalf("nil reg0 for value: %s\n%s\n", v.LongString(), v.Block.Func);
     }
     return reg._<ptr<Register>>().objNum;
-
 }
 
 // Reg returns the register assigned to v, in cmd/internal/obj/$ARCH numbering.
@@ -577,7 +555,6 @@ private static short Reg(this ptr<Value> _addr_v) {
         v.Fatalf("nil register for value: %s\n%s\n", v.LongString(), v.Block.Func);
     }
     return reg._<ptr<Register>>().objNum;
-
 }
 
 // Reg0 returns the register assigned to the first output of v, in cmd/internal/obj/$ARCH numbering.
@@ -589,7 +566,6 @@ private static short Reg0(this ptr<Value> _addr_v) {
         v.Fatalf("nil first register for value: %s\n%s\n", v.LongString(), v.Block.Func);
     }
     return reg._<ptr<Register>>().objNum;
-
 }
 
 // Reg1 returns the register assigned to the second output of v, in cmd/internal/obj/$ARCH numbering.
@@ -601,7 +577,6 @@ private static short Reg1(this ptr<Value> _addr_v) {
         v.Fatalf("nil second register for value: %s\n%s\n", v.LongString(), v.Block.Func);
     }
     return reg._<ptr<Register>>().objNum;
-
 }
 
 private static @string RegName(this ptr<Value> _addr_v) {
@@ -612,7 +587,6 @@ private static @string RegName(this ptr<Value> _addr_v) {
         v.Fatalf("nil register for value: %s\n%s\n", v.LongString(), v.Block.Func);
     }
     return reg._<ptr<Register>>().name;
-
 }
 
 // MemoryArg returns the memory argument for the Value.
@@ -635,9 +609,7 @@ private static ptr<Value> MemoryArg(this ptr<Value> _addr_v) {
             return _addr_m!;
         }
     }
-
     return _addr_null!;
-
 }
 
 // LackingPos indicates whether v is a value that is unlikely to have a correct
@@ -650,7 +622,6 @@ private static bool LackingPos(this ptr<Value> _addr_v) {
     // in the future, for example if some of these operations are generated more carefully
     // with respect to their source position.
     return v.Op == OpVarDef || v.Op == OpVarKill || v.Op == OpVarLive || v.Op == OpPhi || (v.Op == OpFwdRef || v.Op == OpCopy) && v.Type == types.TypeMem;
-
 }
 
 // removeable reports whether the value v can be removed from the SSA graph entirely
@@ -661,22 +632,18 @@ private static bool removeable(this ptr<Value> _addr_v) {
     if (v.Type.IsVoid()) { 
         // Void ops, like nil pointer checks, must stay.
         return false;
-
     }
     if (v.Type.IsMemory()) { 
         // We don't need to preserve all memory ops, but we do need
         // to keep calls at least (because they might have
         // synchronization operations we can't see).
         return false;
-
     }
     if (v.Op.HasSideEffects()) { 
         // These are mostly synchronization operations.
         return false;
-
     }
     return true;
-
 }
 
 // TODO(mdempsky): Shouldn't be necessary; see discussion at golang.org/cl/275756
@@ -705,7 +672,6 @@ public static (ptr<ir.Name>, long) AutoVar(ptr<Value> _addr_v) {
     // Assume it is a register, return its spill slot, which needs to be live
     ptr<AuxNameOffset> nameOff = v.Aux._<ptr<AuxNameOffset>>();
     return (_addr_nameOff.Name!, nameOff.Offset);
-
 }
 
 } // end ssa_package

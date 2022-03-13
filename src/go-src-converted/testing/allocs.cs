@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2022 March 06 23:19:11 UTC
+// package testing -- go2cs converted at 2022 March 13 06:42:56 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Program Files\Go\src\testing\allocs.go
-using runtime = go.runtime_package;
-using System;
-
-
 namespace go;
 
+using runtime = runtime_package;
+
+
+// AllocsPerRun returns the average number of allocations during calls to f.
+// Although the return value has type float64, it will always be an integral value.
+//
+// To compute the number of allocations, the function will first be run once as
+// a warm-up. The average number of allocations over the specified number of
+// runs will then be measured and returned.
+//
+// AllocsPerRun sets GOMAXPROCS to 1 during its measurement and will restore
+// it before returning.
+
+using System;
 public static partial class testing_package {
 
-    // AllocsPerRun returns the average number of allocations during calls to f.
-    // Although the return value has type float64, it will always be an integral value.
-    //
-    // To compute the number of allocations, the function will first be run once as
-    // a warm-up. The average number of allocations over the specified number of
-    // runs will then be measured and returned.
-    //
-    // AllocsPerRun sets GOMAXPROCS to 1 during its measurement and will restore
-    // it before returning.
 public static double AllocsPerRun(nint runs, Action f) => func((defer, _, _) => {
     double avg = default;
 
@@ -49,7 +50,6 @@ public static double AllocsPerRun(nint runs, Action f) => func((defer, _, _) => 
     // the division as integers so we can ask if AllocsPerRun()==1
     // instead of AllocsPerRun()<2.
     return float64(mallocs / uint64(runs));
-
 });
 
 } // end testing_package

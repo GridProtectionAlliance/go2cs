@@ -3,28 +3,30 @@
 // license that can be found in the LICENSE file.
 
 // Package gccgoimporter implements Import for gccgo-generated object files.
-// package gccgoimporter -- go2cs converted at 2022 March 06 23:32:41 UTC
+
+// package gccgoimporter -- go2cs converted at 2022 March 13 06:42:21 UTC
 // import "go/internal/gccgoimporter" ==> using gccgoimporter = go.go.@internal.gccgoimporter_package
 // Original source: C:\Program Files\Go\src\go\internal\gccgoimporter\importer.go
+namespace go.go.@internal;
 // import "go/internal/gccgoimporter"
 
-using bytes = go.bytes_package;
-using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-using types = go.go.types_package;
-using xcoff = go.@internal.xcoff_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
+
+using bytes = bytes_package;
+using elf = debug.elf_package;
+using fmt = fmt_package;
+using types = go.types_package;
+using xcoff = @internal.xcoff_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// A PackageInit describes an imported package that needs initialization.
+
 using System;
-
-
-namespace go.go.@internal;
-
 public static partial class gccgoimporter_package {
 
-    // A PackageInit describes an imported package that needs initialization.
 public partial struct PackageInit {
     public @string Name; // short package name
     public @string InitFunc; // name of init function
@@ -56,7 +58,6 @@ private static (@string, error) findExportFile(slice<@string> searchpaths, @stri
             }
         }
     }    return ("", error.As(fmt.Errorf("%s: could not find export data (tried %s)", pkgpath, strings.Join(searchpaths, ":")))!);
-
 }
 
 private static readonly @string gccgov1Magic = "v1;\n";
@@ -65,7 +66,6 @@ private static readonly @string gccgov3Magic = "v3;\n";
 private static readonly @string goimporterMagic = "\n$$ ";
 private static readonly @string archiveMagic = "!<ar";
 private static readonly @string aixbigafMagic = "<big";
-
 
 // Opens the export data file at the given path. If this is an ELF file,
 // searches for and opens the .go_export section. If this is an archive,
@@ -112,7 +112,6 @@ private static (io.ReadSeeker, io.Closer, error) openExportFile(@string fpath) =
         }
         reader = sec.Open();
         return ;
-
     }
     var (xf, err) = xcoff.NewFile(objreader);
     if (err == null) {
@@ -123,11 +122,9 @@ private static (io.ReadSeeker, io.Closer, error) openExportFile(@string fpath) =
         }
         reader = bytes.NewReader(sdat);
         return ;
-
     }
     err = fmt.Errorf("%s: unrecognized file format", fpath);
     return ;
-
 });
 
 // An Importer resolves import paths to Packages. The imports map records
@@ -164,12 +161,10 @@ public static Importer GetImporter(slice<@string> searchpaths, map<ptr<types.Pac
                 p = p__prev2;
 
             }
-
             rc, err = lookup(pkgpath);
             if (err != null) {
                 return (null, err);
             }
-
         }
         if (rc != null) {
             defer(rc.Close());
@@ -187,7 +182,6 @@ public static Importer GetImporter(slice<@string> searchpaths, map<ptr<types.Pac
                 }
 
             }
-
         }
         else
  {
@@ -251,9 +245,7 @@ public static Importer GetImporter(slice<@string> searchpaths, map<ptr<types.Pac
         else 
             err = fmt.Errorf("unrecognized magic string: %q", magics);
                 return ;
-
     };
-
 });
 
 // readMagic reads the four bytes at the start of a ReadSeeker and
@@ -270,7 +262,6 @@ private static (@string, error) readMagic(io.ReadSeeker reader) {
             return ("", error.As(err)!);
         }
     }
-
     {
         (_, err) = reader.Seek(0, io.SeekStart);
 
@@ -278,9 +269,7 @@ private static (@string, error) readMagic(io.ReadSeeker reader) {
             return ("", error.As(err)!);
         }
     }
-
     return (string(magic[..]), error.As(null!)!);
-
 }
 
 } // end gccgoimporter_package

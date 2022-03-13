@@ -2,43 +2,44 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2022 March 06 23:14:26 UTC
+// package gc -- go2cs converted at 2022 March 13 06:27:55 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\gc\obj.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using staticdata = go.cmd.compile.@internal.staticdata_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using archive = go.cmd.@internal.archive_package;
-using bio = go.cmd.@internal.bio_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using staticdata = cmd.compile.@internal.staticdata_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using archive = cmd.@internal.archive_package;
+using bio = cmd.@internal.bio_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+
+
+// These modes say which kind of object file to generate.
+// The default use of the toolchain is to set both bits,
+// generating a combined compiler+linker object, one that
+// serves to describe the package to both the compiler and the linker.
+// In fact the compiler and linker read nearly disjoint sections of
+// that file, though, so in a distributed build setting it can be more
+// efficient to split the output into two files, supplying the compiler
+// object only to future compilations and the linker object only to
+// future links.
+//
+// By default a combined object is written, but if -linkobj is specified
+// on the command line then the default -o output is a compiler object
+// and the -linkobj output is a linker object.
 
 public static partial class gc_package {
 
-    // These modes say which kind of object file to generate.
-    // The default use of the toolchain is to set both bits,
-    // generating a combined compiler+linker object, one that
-    // serves to describe the package to both the compiler and the linker.
-    // In fact the compiler and linker read nearly disjoint sections of
-    // that file, though, so in a distributed build setting it can be more
-    // efficient to split the output into two files, supplying the compiler
-    // object only to future compilations and the linker object only to
-    // future links.
-    //
-    // By default a combined object is written, but if -linkobj is specified
-    // on the command line then the default -o output is a compiler object
-    // and the -linkobj output is a linker object.
 private static readonly nint modeCompilerObj = 1 << (int)(iota);
 private static readonly var modeLinkerObj = 0;
-
 
 private static void dumpobj() {
     if (@base.Flag.LinkObj == "") {
@@ -47,7 +48,6 @@ private static void dumpobj() {
     }
     dumpobj1(@base.Flag.LowerO, modeCompilerObj);
     dumpobj1(@base.Flag.LinkObj, modeLinkerObj);
-
 }
 
 private static void dumpobj1(@string outfile, nint mode) => func((defer, _, _) => {
@@ -108,7 +108,6 @@ private static void finishArchiveEntry(ptr<bio.Writer> _addr_bout, long start, @
     bout.Write(arhdr[..]);
     bout.Flush();
     bout.MustSeek(start + size + (size & 1), 0);
-
 }
 
 private static void dumpCompilerObj(ptr<bio.Writer> _addr_bout) {
@@ -150,7 +149,6 @@ private static void dumpdata() {
                 }
 
             }
-
         }
         numDecls = len(typecheck.Target.Decls);
         compileFunctions();
@@ -200,14 +198,11 @@ private static void dumpLinkerObj(ptr<bio.Writer> _addr_bout) {
             }
 
         }
-
         fmt.Fprintf(bout, "\n$$\n\n");
-
     }
     fmt.Fprintf(bout, "\n!\n");
 
     obj.WriteObjFile(@base.Ctxt, bout);
-
 }
 
 private static void dumpGlobal(ptr<ir.Name> _addr_n) {
@@ -225,7 +220,6 @@ private static void dumpGlobal(ptr<ir.Name> _addr_n) {
     types.CalcSize(n.Type());
     ggloblnod(_addr_n);
     @base.Ctxt.DwarfGlobal(@base.Ctxt.Pkgpath, types.TypeSymName(n.Type()), n.Linksym());
-
 }
 
 private static void dumpGlobalConst(ir.Node n) { 
@@ -249,7 +243,6 @@ private static void dumpGlobalConst(ir.Node n) {
         }
     }
     @base.Ctxt.DwarfIntConst(@base.Ctxt.Pkgpath, n.Sym().Name, types.TypeSymName(t), ir.IntVal(t, v));
-
 }
 
 private static void dumpglobls(slice<ir.Node> externs) { 
@@ -260,8 +253,7 @@ private static void dumpglobls(slice<ir.Node> externs) {
             dumpGlobal(n._<ptr<ir.Name>>());
         else if (n.Op() == ir.OLITERAL) 
             dumpGlobalConst(n);
-        
-    }
+            }
 }
 
 // addGCLocals adds gcargs, gclocals, gcregs, and stack object symbols to Ctxt.Data.
@@ -292,7 +284,6 @@ private static void addGCLocals() {
             x = x__prev1;
 
         }
-
         {
             var x__prev1 = x;
 
@@ -305,7 +296,6 @@ private static void addGCLocals() {
             x = x__prev1;
 
         }
-
         {
             var x__prev1 = x;
 
@@ -320,7 +310,6 @@ private static void addGCLocals() {
             x = x__prev1;
 
         }
-
     }
 }
 
@@ -345,7 +334,6 @@ private static void ggloblnod(ptr<ir.Name> _addr_nam) {
         // both imported and linkname'd, s.Pkg may not set to "_" in
         // types.Sym.Linksym because LSym already exists. Set it here.
         s.Pkg = "_";
-
     }
 }
 

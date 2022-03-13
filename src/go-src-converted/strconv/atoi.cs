@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:29 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:18 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\atoi.go
-using errors = go.errors_package;
-
 namespace go;
+
+using errors = errors_package;
 
 public static partial class strconv_package {
 
-    // lower(c) is a lower-case letter if and only if
-    // c is either that lower-case letter or the equivalent upper-case letter.
-    // Instead of writing c == 'x' || c == 'X' one can write lower(c) == 'x'.
-    // Note that lower of non-letters can produce other non-letters.
+// lower(c) is a lower-case letter if and only if
+// c is either that lower-case letter or the equivalent upper-case letter.
+// Instead of writing c == 'x' || c == 'X' one can write lower(c) == 'x'.
+// Note that lower of non-letters can produce other non-letters.
 private static byte lower(byte c) {
     return c | ('x' - 'X');
 }
@@ -112,8 +112,7 @@ public static (ulong, error) ParseUint(@string s, nint @base, nint bitSize) {
             else 
                 base = 8;
                 s = s[(int)1..];
-            
-        }
+                    }
     else 
         return (0, error.As(baseError(fnParseUint, s0, base))!);
         if (bitSize == 0) {
@@ -157,7 +156,6 @@ public static (ulong, error) ParseUint(@string s, nint @base, nint bitSize) {
         if (n >= cutoff) { 
             // n*base overflows
             return (maxVal, error.As(rangeError(fnParseUint, s0))!);
-
         }
         n *= uint64(base);
 
@@ -165,15 +163,12 @@ public static (ulong, error) ParseUint(@string s, nint @base, nint bitSize) {
         if (n1 < n || n1 > maxVal) { 
             // n+d overflows
             return (maxVal, error.As(rangeError(fnParseUint, s0))!);
-
         }
         n = n1;
-
     }    if (underscores && !underscoreOK(s0)) {
         return (0, error.As(syntaxError(fnParseUint, s0))!);
     }
     return (n, error.As(null!)!);
-
 }
 
 // ParseInt interprets a string s in the given base (0, 2 to 36) and
@@ -241,7 +236,6 @@ public static (long, error) ParseInt(@string s, nint @base, nint bitSize) {
         n = -n;
     }
     return (n, error.As(null!)!);
-
 }
 
 // Atoi is equivalent to ParseInt(s, 10, 0), converted to type int.
@@ -274,7 +268,6 @@ public static (nint, error) Atoi(@string s) {
             n = -n;
         }
         return (n, error.As(null!)!);
-
     }
     var (i64, err) = ParseInt(s, 10, 0);
     {
@@ -284,9 +277,7 @@ public static (nint, error) Atoi(@string s) {
             nerr.Func = fnAtoi;
         }
     }
-
     return (int(i64), error.As(err)!);
-
 }
 
 // underscoreOK reports whether the underscores in s are allowed.
@@ -310,7 +301,6 @@ private static bool underscoreOK(@string s) {
         i = 2;
         saw = '0'; // base prefix counts as a digit for "underscore as digit separator"
         hex = lower(s[1]) == 'x';
-
     }
     while (i < len(s)) { 
         // Digits are always okay.
@@ -330,10 +320,8 @@ private static bool underscoreOK(@string s) {
             return false;
         }
         saw = '!';
-
     }
     return saw != '_';
-
 }
 
 } // end strconv_package

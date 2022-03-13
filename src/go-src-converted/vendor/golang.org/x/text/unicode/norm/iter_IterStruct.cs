@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:52 UTC
+//     Generated on 2022 March 13 06:47:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace unicode
 {
     public static partial class norm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Iter
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace unicode
             public static implicit operator Iter(NilType nil) => default(Iter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Iter Iter_cast(dynamic value)
         {
             return new Iter(value.rb, value.buf, value.info, value.next, value.asciiF, value.p, value.multiSeg);

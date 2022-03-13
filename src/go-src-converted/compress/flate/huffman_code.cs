@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2022 March 06 22:15:04 UTC
+// package flate -- go2cs converted at 2022 March 13 05:29:11 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Program Files\Go\src\compress\flate\huffman_code.go
-using math = go.math_package;
-using bits = go.math.bits_package;
-using sort = go.sort_package;
-
 namespace go.compress;
+
+using math = math_package;
+using bits = math.bits_package;
+using sort = sort_package;
+
+
+// hcode is a huffman code with a bit code and bit length.
 
 public static partial class flate_package {
 
-    // hcode is a huffman code with a bit code and bit length.
 private partial struct hcode {
     public ushort code;
     public ushort len;
@@ -88,10 +90,8 @@ private static ptr<huffmanEncoder> generateFixedLiteralEncoding() {
             bits = ch + 192 - 280;
             size = 8;
                 codes[ch] = new hcode(code:reverseBits(bits,byte(size)),len:size);
-
     }
     return _addr_h!;
-
 }
 
 private static ptr<huffmanEncoder> generateFixedOffsetEncoding() {
@@ -114,7 +114,6 @@ private static nint bitLength(this ptr<huffmanEncoder> _addr_h, slice<int> freq)
             total += int(f) * int(h.codes[i].len);
         }
     }    return total;
-
 }
 
 private static readonly nint maxBitsLimit = 16;
@@ -180,7 +179,6 @@ private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<lite
             if (level == 1) {
                 levels[level].nextPairFreq = math.MaxInt32;
             }
-
         }
 
         level = level__prev1;
@@ -201,7 +199,6 @@ private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<lite
             levels[level + 1].nextPairFreq = math.MaxInt32;
             level++;
             continue;
-
         }
         var prevFreq = l.lastFreq;
         if (l.nextCharFreq < l.nextPairFreq) { 
@@ -211,7 +208,6 @@ private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<lite
             // Lower leafCounts are the same of the previous node.
             leafCounts[level][level] = n;
             l.nextCharFreq = list[n].freq;
-
         }
         else
  { 
@@ -222,7 +218,6 @@ private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<lite
             // Take leaf counts from the lower level, except counts[level] remains the same.
             copy(leafCounts[level][..(int)level], leafCounts[level - 1][..(int)level]);
             levels[l.level - 1].needed = 2;
-
         }
         l.needed--;
 
@@ -234,12 +229,9 @@ private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<lite
             if (l.level == maxBits) { 
                 // All done!
                 break;
-
             }
-
             levels[l.level + 1].nextPairFreq = prevFreq + l.lastFreq;
             level++;
-
         }
         else
  { 
@@ -247,8 +239,6 @@ private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<lite
             while (levels[level - 1].needed > 0) {
                 level--;
             }
-
-
         }
     } 
 
@@ -268,13 +258,11 @@ private static slice<int> bitCounts(this ptr<huffmanEncoder> _addr_h, slice<lite
             // bits to encode.
             bitCount[bits] = counts[level] - counts[level - 1];
             bits++;
-
         }
 
         level = level__prev1;
     }
     return bitCount;
-
 });
 
 // Look at the leaves and assign them a bit count and an encoding as specified
@@ -295,7 +283,6 @@ private static void assignEncodingAndSize(this ptr<huffmanEncoder> _addr_h, slic
             h.codes[node.literal] = new hcode(code:reverseBits(code,uint8(n)),len:uint16(n));
             code++;
         }        list = list[(int)0..(int)len(list) - int(bits)];
-
     }
 }
 
@@ -311,7 +298,6 @@ private static void generate(this ptr<huffmanEncoder> _addr_h, slice<int> freq, 
         // Possible lengths are codegenCodeCount, offsetCodeCount and maxNumLit.
         // The largest of these is maxNumLit, so we allocate for that case.
         h.freqcache = make_slice<literalNode>(maxNumLit + 1);
-
     }
     var list = h.freqcache[..(int)len(freq) + 1]; 
     // Number of non-zero literals
@@ -332,7 +318,6 @@ private static void generate(this ptr<huffmanEncoder> _addr_h, slice<int> freq, 
                 list[count] = new literalNode();
                 h.codes[i].len = 0;
             }
-
         }
         i = i__prev1;
     }
@@ -351,14 +336,12 @@ private static void generate(this ptr<huffmanEncoder> _addr_h, slice<int> freq, 
                 node = __node; 
                 // "list" is in order of increasing literal value.
                 h.codes[node.literal].set(uint16(i), 1);
-
             }
 
             i = i__prev1;
         }
 
         return ;
-
     }
     h.lfs.sort(list); 
 
@@ -366,7 +349,6 @@ private static void generate(this ptr<huffmanEncoder> _addr_h, slice<int> freq, 
     var bitCount = h.bitCounts(list, maxBits); 
     // And do the assignment
     h.assignEncodingAndSize(bitCount, list);
-
 }
 
 private partial struct byLiteral { // : slice<literalNode>
@@ -410,7 +392,6 @@ private static bool Less(this byFreq s, nint i, nint j) {
         return s[i].literal < s[j].literal;
     }
     return s[i].freq < s[j].freq;
-
 }
 
 private static void Swap(this byFreq s, nint i, nint j) {

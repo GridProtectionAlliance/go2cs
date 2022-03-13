@@ -2,28 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:49 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:09 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\expr.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using buildcfg = go.@internal.buildcfg_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using staticdata = go.cmd.compile.@internal.staticdata_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using constant = go.constant_package;
+using buildcfg = @internal.buildcfg_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using staticdata = cmd.compile.@internal.staticdata_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+
+
+// The result of walkExpr MUST be assigned back to n, e.g.
+//     n.Left = walkExpr(n.Left, init)
 
 public static partial class walk_package {
 
-    // The result of walkExpr MUST be assigned back to n, e.g.
-    //     n.Left = walkExpr(n.Left, init)
 private static ir.Node walkExpr(ir.Node n, ptr<ir.Nodes> _addr_init) {
     ref ir.Nodes init = ref _addr_init.val;
 
@@ -40,12 +42,10 @@ private static ir.Node walkExpr(ir.Node n, ptr<ir.Nodes> _addr_init) {
             // because we might replace n with some other node
             // and would lose the init list.
             @base.Fatalf("walkExpr init == &n->ninit");
-
         }
         n = n__prev1;
 
     }
-
 
     if (len(n.Init()) != 0) {
         walkStmtList(n.Init());
@@ -72,7 +72,6 @@ private static ir.Node walkExpr(ir.Node n, ptr<ir.Nodes> _addr_init) {
             types.CheckSize(typ);
         }
     }
-
     {
         ir.InitNode n__prev1 = n;
 
@@ -84,19 +83,16 @@ private static ir.Node walkExpr(ir.Node n, ptr<ir.Nodes> _addr_init) {
         n = n__prev1;
 
     }
-
     if (ir.IsConst(n, constant.String)) { 
         // Emit string symbol now to avoid emitting
         // any concurrently during the backend.
         _ = staticdata.StringSym(n.Pos(), constant.StringVal(n.Val()));
-
     }
     if (@base.Flag.LowerW != 0 && n != null) {
         ir.Dump("after walk expr", n);
     }
     @base.Pos = lno;
     return n;
-
 }
 
 private static ir.Node walkExpr1(ir.Node n, ptr<ir.Nodes> _addr_init) => func((_, panic, _) => {
@@ -328,7 +324,6 @@ private static ir.Node cheapExpr(ir.Node n, ptr<ir.Nodes> _addr_init) {
     if (n.Op() == ir.ONAME || n.Op() == ir.OLITERAL || n.Op() == ir.ONIL) 
         return n;
         return copyExpr(n, _addr_n.Type(), _addr_init);
-
 }
 
 // return side effect-free n, appending side effects to init.
@@ -394,7 +389,6 @@ private static ir.Node safeExpr(ir.Node n, ptr<ir.Nodes> _addr_init) {
         @base.Fatalf("missing lvalue case in safeExpr: %v", n);
     }
     return cheapExpr(n, _addr_init);
-
 }
 
 private static ir.Node copyExpr(ir.Node n, ptr<types.Type> _addr_t, ptr<ir.Nodes> _addr_init) {
@@ -425,7 +419,6 @@ private static ir.Node walkAddString(ptr<ir.AddStringExpr> _addr_n, ptr<ir.Nodes
         }        if (sz < tmpstringbufsize) { 
             // Create temporary buffer for result string on stack.
             buf = stackBufAddr(tmpstringbufsize, types.Types[types.TUINT8]);
-
         }
     }
     ir.Node args = new slice<ir.Node>(new ir.Node[] { buf });
@@ -436,7 +429,6 @@ private static ir.Node walkAddString(ptr<ir.AddStringExpr> _addr_n, ptr<ir.Nodes
         // small numbers of strings use direct runtime helpers.
         // note: order.expr knows this cutoff too.
         fn = fmt.Sprintf("concatstring%d", c);
-
     }
     else
  { 
@@ -449,7 +441,6 @@ private static ir.Node walkAddString(ptr<ir.AddStringExpr> _addr_n, ptr<ir.Nodes
         slice.Prealloc = n.Prealloc;
         args = new slice<ir.Node>(new ir.Node[] { buf, slice });
         slice.SetEsc(ir.EscNone);
-
     }
     var cat = typecheck.LookupRuntime(fn);
     var r = ir.NewCallExpr(@base.Pos, ir.OCALL, cat, null);
@@ -459,7 +450,6 @@ private static ir.Node walkAddString(ptr<ir.AddStringExpr> _addr_n, ptr<ir.Nodes
     r1.SetType(n.Type());
 
     return r1;
-
 }
 
 // walkCall walks an OCALLFUNC, OCALLINTER, or OCALLMETH node.
@@ -471,7 +461,6 @@ private static ir.Node walkCall(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_in
         // We expect both interface call reflect.Type.Method and concrete
         // call reflect.(*rtype).Method.
         usemethod(_addr_n);
-
     }
     if (n.Op() == ir.OCALLINTER) {
         reflectdata.MarkUsedIfaceMethod(n);
@@ -514,11 +503,9 @@ private static ir.Node walkCall(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_in
         e = ir.NewStarExpr(n.Pos(), e);
         e.SetType(n.Type());
         return e;
-
     }
     walkCall1(_addr_n, _addr_init);
     return n;
-
 }
 
 private static void walkCall1(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
@@ -563,10 +550,8 @@ private static void walkCall1(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_init
             init.Append(convas(typecheck.Stmt(ir.NewAssignStmt(@base.Pos, tmp, arg))._<ptr<ir.AssignStmt>>(), init)); 
             // replace arg with temp
             args[i] = tmp;
-
         }
     }    n.Args = args;
-
 }
 
 // walkDivMod walks an ODIV or OMOD node.
@@ -609,8 +594,7 @@ private static ir.Node walkDivMod(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _add
                 if (c != 0 && c & (c - 1) == 0) {
                     return n;
                 }
-            
-        }
+                    }
         @string fn = default;
         if (et == types.TINT64) {
             fn = "int64";
@@ -627,10 +611,8 @@ private static ir.Node walkDivMod(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _add
             fn += "mod";
         }
         return mkcall(fn, n.Type(), init, typecheck.Conv(n.X, types.Types[et]), typecheck.Conv(n.Y, types.Types[et]));
-
     }
     return n;
-
 }
 
 // walkDot walks an ODOT or ODOTPTR node.
@@ -654,7 +636,6 @@ private static ir.Node walkDotType(ptr<ir.TypeAssertExpr> _addr_n, ptr<ir.Nodes>
         n.Itab = reflectdata.ITabAddr(n.Type(), n.X.Type());
     }
     return n;
-
 }
 
 // walkIndex walks an OINDEX node.
@@ -706,10 +687,8 @@ private static ir.Node walkIndex(ptr<ir.IndexExpr> _addr_n, ptr<ir.Nodes> _addr_
             }
 
         }
-
     }
     return n;
-
 }
 
 // mapKeyArg returns an expression for key that is suitable to be passed
@@ -732,8 +711,7 @@ private static ir.Node mapKeyArg(nint fast, ir.Node n, ir.Node key) {
     else 
         // fast version takes key by value.
         return key;
-    
-}
+    }
 
 // walkIndexMap walks an OINDEXMAP node.
 private static ir.Node walkIndexMap(ptr<ir.IndexExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
@@ -754,10 +732,8 @@ private static ir.Node walkIndexMap(ptr<ir.IndexExpr> _addr_n, ptr<ir.Nodes> _ad
             // standard version takes key by reference.
             // order.expr made sure key is addressable.
             key = typecheck.NodAddr(key);
-
         }
         call = mkcall1(mapfn(mapassign[fast], t, false), null, init, reflectdata.TypePtr(t), map_, key);
-
     }
     else
  { 
@@ -777,7 +753,6 @@ private static ir.Node walkIndexMap(ptr<ir.IndexExpr> _addr_n, ptr<ir.Nodes> _ad
             }
 
         }
-
     }
     call.SetType(types.NewPtr(t.Elem()));
     call.MarkNonNil(); // mapaccess1* and mapassign always return non-nil pointers.
@@ -785,7 +760,6 @@ private static ir.Node walkIndexMap(ptr<ir.IndexExpr> _addr_n, ptr<ir.Nodes> _ad
     star.SetType(t.Elem());
     star.SetTypecheck(1);
     return star;
-
 }
 
 // walkLogical walks an OANDAND or OOROR node.
@@ -803,7 +777,6 @@ private static ir.Node walkLogical(ptr<ir.LogicalExpr> _addr_n, ptr<ir.Nodes> _a
     n.Y = walkExpr(n.Y, _addr_ll);
     n.Y = ir.InitExpr(ll, n.Y);
     return n;
-
 }
 
 // walkSend walks an OSEND node.
@@ -836,7 +809,6 @@ private static ir.Node walkSlice(ptr<ir.SliceExpr> _addr_n, ptr<ir.Nodes> _addr_
     if (n.Low != null && ir.IsZero(n.Low)) { 
         // Reduce x[0:j] to x[:j] and x[0:j:k] to x[:j:k].
         n.Low = null;
-
     }
     n.High = walkExpr(n.High, _addr_init);
     n.Max = walkExpr(n.Max, _addr_init);
@@ -853,15 +825,11 @@ private static ir.Node walkSlice(ptr<ir.SliceExpr> _addr_n, ptr<ir.Nodes> _addr_
  {
                 n.SetOp(ir.OSLICEARR);
             }
-
             return reduceSlice(_addr_n);
-
         }
         return n;
-
     }
     return reduceSlice(_addr_n);
-
 }
 
 // walkSliceHeader walks an OSLICEHEADER node.
@@ -882,7 +850,6 @@ private static ir.Node reduceSlice(ptr<ir.SliceExpr> _addr_n) {
     if (n.High != null && n.High.Op() == ir.OLEN && ir.SameSafeExpr(n.X, n.High._<ptr<ir.UnaryExpr>>().X)) { 
         // Reduce x[i:len(x)] to x[i:].
         n.High = null;
-
     }
     if ((n.Op() == ir.OSLICE || n.Op() == ir.OSLICESTR) && n.Low == null && n.High == null) { 
         // Reduce x[:] to x.
@@ -890,10 +857,8 @@ private static ir.Node reduceSlice(ptr<ir.SliceExpr> _addr_n) {
             @base.Warn("slice: omit slice operation");
         }
         return n.X;
-
     }
     return n;
-
 }
 
 // return 1 if integer n must be in range [0, max), 0 otherwise
@@ -956,7 +921,6 @@ private static bool bounded(ir.Node n, long max) {
         return true;
     }
     return false;
-
 }
 
 // usemethod checks interface method calls for uses of reflect.Type.Method.
@@ -982,7 +946,6 @@ private static void usemethod(ptr<ir.CallExpr> _addr_n) {
         n = n__prev1;
 
     }
-
     {
         var n__prev1 = n;
 
@@ -994,7 +957,6 @@ private static void usemethod(ptr<ir.CallExpr> _addr_n) {
         n = n__prev1;
 
     }
-
     var p0 = t.Params().Field(0);
     var res0 = t.Results().Field(0);
     ptr<types.Field> res1;
@@ -1027,7 +989,6 @@ private static void usemethod(ptr<ir.CallExpr> _addr_n) {
                 return ;
                 break;
         }
-
     }
     {
         var s = res0.Type.Sym();
@@ -1036,10 +997,8 @@ private static void usemethod(ptr<ir.CallExpr> _addr_n) {
             ir.CurFunc.SetReflectMethod(true); 
             // The LSym is initialized at this point. We need to set the attribute on the LSym.
             ir.CurFunc.LSym.Set(obj.AttrReflectMethod, true);
-
         }
     }
-
 }
 
 private static void usefield(ptr<ir.SelectorExpr> _addr_n) {
@@ -1078,7 +1037,6 @@ private static void usefield(ptr<ir.SelectorExpr> _addr_n) {
         ir.CurFunc.FieldTrack = make();
     }
     ir.CurFunc.FieldTrack[sym] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
-
 }
 
 } // end walk_package

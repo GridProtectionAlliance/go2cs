@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:12:59 UTC
+//     Generated on 2022 March 13 06:26:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class types2_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Signature
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace @internal
             public static implicit operator Signature(NilType nil) => default(Signature);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Signature Signature_cast(dynamic value)
         {
             return new Signature(value.rparams, value.tparams, ref value.scope, ref value.recv, ref value.@params, ref value.results, value.variadic);

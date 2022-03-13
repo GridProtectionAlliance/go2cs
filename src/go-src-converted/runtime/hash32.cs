@@ -8,12 +8,12 @@
 //go:build 386 || arm || mips || mipsle
 // +build 386 arm mips mipsle
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:40 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:26 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\hash32.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -62,7 +62,6 @@ private static System.UIntPtr memhashFallback(unsafe.Pointer p, System.UIntPtr s
     a, b = mix32(a, b);
     a, b = mix32(a, b);
     return uintptr(a ^ b);
-
 }
 
 private static (uint, uint) mix32(uint a, uint b) {

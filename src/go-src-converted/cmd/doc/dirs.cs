@@ -2,29 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:36 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:05 UTC
 // Original source: C:\Program Files\Go\src\cmd\doc\dirs.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using semver = go.golang.org.x.mod.semver_package;
-using System.Threading;
-using System;
-
-
 namespace go;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using semver = golang.org.x.mod.semver_package;
+
+
+// A Dir describes a directory holding code by specifying
+// the expected import path and the file system directory.
+
+using System.Threading;
+using System;
 public static partial class main_package {
 
-    // A Dir describes a directory holding code by specifying
-    // the expected import path and the file system directory.
 public partial struct Dir {
     public @string importPath; // import path for that dir
     public @string dir; // file system directory
@@ -80,7 +81,6 @@ private static (Dir, bool) Next(this ptr<Dirs> _addr_d) {
     d.hist = append(d.hist, dir);
     d.offset++;
     return (dir, ok);
-
 }
 
 // walk walks the trees in GOROOT and GOPATH.
@@ -147,11 +147,9 @@ private static void bfsWalkRoot(this ptr<Dirs> _addr_d, Dir root) {
                         }
 
                     }
-
                 } 
                 // Remember this (fully qualified) directory for the next pass.
                 next = append(next, filepath.Join(dir, name));
-
             }
             if (hasGoFiles) { 
                 // It's a candidate.
@@ -162,14 +160,10 @@ private static void bfsWalkRoot(this ptr<Dirs> _addr_d, Dir root) {
                     }
                     importPath += filepath.ToSlash(dir[(int)len(root.dir) + 1..]);
                 }
-
                 d.scan.Send(new Dir(importPath,dir,root.inModule));
-
             }
-
         }
     }
-
 }
 
 private static var testGOPATH = false; // force GOPATH use for testing
@@ -206,7 +200,6 @@ private static slice<Dir> findCodeRoots() {
             // on the command line, but there are no module roots.
             // Avoid 'go list -m all' below, since it will not work.
             return list;
-
         }
     }
     if (!usingModules) {
@@ -228,7 +221,6 @@ private static slice<Dir> findCodeRoots() {
             list = append(list, new Dir(importPath:mainMod.Path,dir:mainMod.Dir,inModule:true));
         }
         return list;
-
     }
     var cmd = exec.Command("go", "list", "-m", "-f={{.Path}}\t{{.Dir}}", "all");
     cmd.Stderr = os.Stderr;
@@ -244,7 +236,6 @@ private static slice<Dir> findCodeRoots() {
             list = append(list, new Dir(importPath:path,dir:dir,inModule:true));
         }
     }    return list;
-
 }
 
 // The functions below are derived from x/tools/internal/imports at CL 203017.
@@ -278,7 +269,6 @@ private static (ptr<moduleJSON>, bool, error) vendorEnabled() {
     if (modFlag != "") { 
         // Don't override an explicit '-mod=' argument.
         return (_addr_mainMod!, modFlag == "vendor", error.As(null!)!);
-
     }
     if (mainMod == null || !go114) {
         return (_addr_mainMod!, false, error.As(null!)!);
@@ -291,14 +281,10 @@ private static (ptr<moduleJSON>, bool, error) vendorEnabled() {
                 // The Go version is at least 1.14, and a vendor directory exists.
                 // Set -mod=vendor by default.
                 return (_addr_mainMod!, true, error.As(null!)!);
-
             }
-
         }
     }
-
     return (_addr_mainMod!, false, error.As(null!)!);
-
 }
 
 // getMainModuleAnd114 gets the main module's information and whether the
@@ -324,7 +310,6 @@ private static (ptr<moduleJSON>, bool, error) getMainModuleAnd114() {
     }
     ptr<moduleJSON> mod = addr(new moduleJSON(Path:lines[0],Dir:lines[1],GoVersion:lines[2],));
     return (_addr_mod!, lines[3] == "go1.14", error.As(null!)!);
-
 }
 
 } // end main_package

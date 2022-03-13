@@ -5,18 +5,19 @@
 //go:build linux || freebsd || dragonfly || solaris
 // +build linux freebsd dragonfly solaris
 
-// package rand -- go2cs converted at 2022 March 06 22:17:18 UTC
+// package rand -- go2cs converted at 2022 March 13 05:30:40 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Program Files\Go\src\crypto\rand\rand_batched.go
-using unix = go.@internal.syscall.unix_package;
-using System;
-
-
 namespace go.crypto;
 
+using unix = @internal.syscall.unix_package;
+
+
+// maxGetRandomRead is platform dependent.
+
+using System;
 public static partial class rand_package {
 
-    // maxGetRandomRead is platform dependent.
 private static void init() {
     altGetRandom = batched(getRandomBatch, maxGetRandomRead);
 }

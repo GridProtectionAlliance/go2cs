@@ -4,20 +4,19 @@
 
 // Godoc comment extraction and comment -> HTML formatting.
 
-// package doc -- go2cs converted at 2022 March 06 22:41:21 UTC
+// package doc -- go2cs converted at 2022 March 13 05:52:27 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Program Files\Go\src\go\doc\comment.go
-using bytes = go.bytes_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using template = go.text.template_package; // for HTMLEscape
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go;
+
+using bytes = bytes_package;
+using lazyregexp = @internal.lazyregexp_package;
+using io = io_package;
+using strings = strings_package;
+using template = text.template_package; // for HTMLEscape
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class doc_package {
 
@@ -25,7 +24,6 @@ private static readonly @string ldquo = "&ldquo;";
 private static readonly @string rdquo = "&rdquo;";
 private static readonly @string ulquo = "“";
 private static readonly @string urquo = "”";
-
 
 private static var htmlQuoteReplacer = strings.NewReplacer(ulquo, ldquo, urquo, rdquo);private static var unicodeQuoteReplacer = strings.NewReplacer("``", ulquo, "''", urquo);
 
@@ -43,10 +41,8 @@ private static void commentEscape(io.Writer w, @string text, bool nice) {
         // otherwise HTMLEscape will escape & to &amp;
         htmlQuoteReplacer.WriteString(w, buf.String());
         return ;
-
     }
     template.HTMLEscape(w, (slice<byte>)text);
-
 }
 
 private static @string convertQuotes(@string text) {
@@ -71,7 +67,6 @@ private static readonly @string hostPart = "([a-zA-Z0-9_@\\-.\\[\\]:]+)";
 private static readonly @string pathPart = "([.,:;?!]*[a-zA-Z0-9$\'()*+&#=@~_/\\-\\[\\]%])*";
 
 private static readonly var urlRx = protoPart + "://" + hostPart + pathPart;
-
 
 private static var matchRx = lazyregexp.New("(" + urlRx + ")|(" + identRx + ")");
 
@@ -128,14 +123,11 @@ private static void emphasize(io.Writer w, @string line, map<@string, @string> w
 
                     i = i__prev3;
                 }
-
             }
             if (m1 != m[1]) { 
                 // redo matching with shortened line for correct indices
                 m = matchRx.FindStringSubmatchIndex(line[..(int)m[0] + len(match)]);
-
             }
-
         }
         @string url = "";
         var italics = false;
@@ -147,9 +139,7 @@ private static void emphasize(io.Writer w, @string line, map<@string, @string> w
             if (!italics) { 
                 // no alternative URL in words list, use match instead
                 url = match;
-
             }
-
             italics = false; // don't italicize URLs
         }
         if (len(url) > 0) {
@@ -168,10 +158,8 @@ private static void emphasize(io.Writer w, @string line, map<@string, @string> w
             w.Write(html_enda);
         }
         line = line[(int)m[1]..];
-
     }
     commentEscape(w, line, nice);
-
 }
 
 private static nint indentLen(@string s) {
@@ -251,7 +239,7 @@ private static @string heading(@string line) {
 
         var b = line;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             var i = strings.IndexRune(b, '\'');
             if (i < 0) {
                 break;
@@ -259,9 +247,7 @@ private static @string heading(@string line) {
             if (i + 1 >= len(b) || b[i + 1] != 's' || (i + 2 < len(b) && b[i + 2] != ' ')) {
                 return ""; // not followed by "s "
             }
-
             b = b[(int)i + 2..];
-
         }
 
         b = b__prev1;
@@ -273,7 +259,7 @@ private static @string heading(@string line) {
 
         b = line;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             i = strings.IndexRune(b, '.');
             if (i < 0) {
                 break;
@@ -281,16 +267,13 @@ private static @string heading(@string line) {
             if (i + 1 >= len(b) || b[i + 1] == ' ') {
                 return ""; // not followed by non-space
             }
-
             b = b[(int)i + 1..];
-
         }
 
         b = b__prev1;
     }
 
     return line;
-
 }
 
 private partial struct op { // : nint
@@ -299,7 +282,6 @@ private partial struct op { // : nint
 private static readonly op opPara = iota;
 private static readonly var opHead = 0;
 private static readonly var opPre = 1;
-
 
 private partial struct block {
     public op op;
@@ -311,7 +293,6 @@ private static var nonAlphaNumRx = lazyregexp.New("[^a-zA-Z0-9]");
 private static @string anchorID(@string line) { 
     // Add a "hdr-" prefix to avoid conflicting with IDs used for package symbols.
     return "hdr-" + nonAlphaNumRx.ReplaceAllString(line, "_");
-
 }
 
 // ToHTML converts comment text to formatted HTML.
@@ -378,7 +359,6 @@ public static void ToHTML(io.Writer w, @string text, map<@string, @string> words
             if (id == "") {
                 w.Write(html_hq);
             }
-
             w.Write(html_endh);
         else if (b.op == opPre) 
             w.Write(html_pre);
@@ -394,8 +374,7 @@ public static void ToHTML(io.Writer w, @string text, map<@string, @string> words
             }
 
             w.Write(html_endpre);
-        
-    }
+            }
 }
 
 private static slice<block> blocks(@string text) {
@@ -421,9 +400,7 @@ private static slice<block> blocks(@string text) {
                 i++;
                 lastWasBlank = true;
                 continue;
-
             }
-
             if (indentLen(line) > 0) { 
                 // close paragraph
                 close(); 
@@ -449,9 +426,7 @@ private static slice<block> blocks(@string text) {
                 out = append(out, new block(opPre,pre));
                 lastWasHeading = false;
                 continue;
-
             }
-
             if (lastWasBlank && !lastWasHeading && i + 2 < len(lines) && isBlank(lines[i + 1]) && !isBlank(lines[i + 2]) && indentLen(lines[i + 2]) == 0) { 
                 // current line is non-blank, surrounded by blank lines
                 // and the next non-blank line is not indented: this
@@ -468,7 +443,6 @@ private static slice<block> blocks(@string text) {
                     }
 
                 }
-
             } 
 
             // open paragraph
@@ -476,13 +450,11 @@ private static slice<block> blocks(@string text) {
             lastWasHeading = false;
             para = append(para, lines[i]);
             i++;
-
         }
     }
     close();
 
     return out;
-
 }
 
 // ToText prepares comment text for presentation in textual output.
@@ -541,7 +513,6 @@ public static void ToText(io.Writer w, @string text, @string indent, @string pre
                         w.Write((slice<byte>)preIndent);
                         w.Write((slice<byte>)line);
                     }
-
                 }
 
                 line = line__prev2;
@@ -592,7 +563,6 @@ private static void write(this ptr<lineWrapper> _addr_l, @string text) {
         l.@out.Write((slice<byte>)f);
         l.n += l.pendSpace + w;
         l.pendSpace = 1;
-
     }
 }
 
@@ -605,7 +575,6 @@ private static void flush(this ptr<lineWrapper> _addr_l) {
     l.@out.Write(nl);
     l.pendSpace = 0;
     l.n = 0;
-
 }
 
 } // end doc_package

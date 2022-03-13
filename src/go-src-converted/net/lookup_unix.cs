@@ -5,17 +5,17 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:16:20 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:57 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\lookup_unix.go
-using context = go.context_package;
-using bytealg = go.@internal.bytealg_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-
-using dnsmessage = go.golang.org.x.net.dns.dnsmessage_package;
-
 namespace go;
+
+using context = context_package;
+using bytealg = @internal.bytealg_package;
+using sync = sync_package;
+using syscall = syscall_package;
+
+using dnsmessage = golang.org.x.net.dns.dnsmessage_package;
 
 public static partial class net_package {
 
@@ -44,12 +44,10 @@ private static void readProtocols() => func((defer, _, _) => {
                 }
 
             }
-
             var f = getFields(line);
             if (len(f) < 2) {
                 continue;
             }
-
             {
                 var (proto, _, ok) = dtoi(f[1]);
 
@@ -62,7 +60,6 @@ private static void readProtocols() => func((defer, _, _) => {
                         }
 
                     }
-
                     foreach (var (_, alias) in f[(int)2..]) {
                         {
                             (_, ok) = protocols[alias];
@@ -72,16 +69,12 @@ private static void readProtocols() => func((defer, _, _) => {
                             }
 
                         }
-
                     }
-
                 }
 
             }
-
         }
     }
-
 });
 
 // lookupProtocol looks up IP protocol name in /etc/protocols and
@@ -118,7 +111,6 @@ private static (Conn, error) dial(this ptr<Resolver> _addr_r, context.Context ct
         return (null, error.As(mapErr(err))!);
     }
     return (c, error.As(null!)!);
-
 }
 
 private static (slice<@string>, error) lookupHost(this ptr<Resolver> _addr_r, context.Context ctx, @string host) {
@@ -139,10 +131,8 @@ private static (slice<@string>, error) lookupHost(this ptr<Resolver> _addr_r, co
         } 
         // cgo not available (or netgo); fall back to Go's DNS resolver
         order = hostLookupFilesDNS;
-
     }
     return r.goLookupHostOrder(ctx, host, order);
-
 }
 
 private static (slice<IPAddr>, error) lookupIP(this ptr<Resolver> _addr_r, context.Context ctx, @string network, @string host) {
@@ -166,11 +156,9 @@ private static (slice<IPAddr>, error) lookupIP(this ptr<Resolver> _addr_r, conte
         } 
         // cgo not available (or netgo); fall back to Go's DNS resolver
         order = hostLookupFilesDNS;
-
     }
     var (ips, _, err) = r.goLookupIPCNAMEOrder(ctx, network, host, order);
     return (ips, error.As(err)!);
-
 }
 
 private static (nint, error) lookupPort(this ptr<Resolver> _addr_r, context.Context ctx, @string network, @string service) {
@@ -200,20 +188,15 @@ private static (nint, error) lookupPort(this ptr<Resolver> _addr_r, context.Cont
                         port = port__prev4;
 
                     }
-
                 }
-
                 return (port, error.As(err)!);
-
             }
 
             port = port__prev2;
 
         }
-
     }
     return goLookupPort(network, service);
-
 }
 
 private static (@string, error) lookupCNAME(this ptr<Resolver> _addr_r, context.Context ctx, @string name) {
@@ -230,10 +213,8 @@ private static (@string, error) lookupCNAME(this ptr<Resolver> _addr_r, context.
             }
 
         }
-
     }
     return r.goLookupCNAME(ctx, name);
-
 }
 
 private static (@string, slice<ptr<SRV>>, error) lookupSRV(this ptr<Resolver> _addr_r, context.Context ctx, @string service, @string proto, @string name) {
@@ -273,9 +254,7 @@ private static (@string, slice<ptr<SRV>>, error) lookupSRV(this ptr<Resolver> _a
                 }
 
             }
-
             continue;
-
         }
         if (cname.Length == 0 && h.Name.Length != 0) {
             cname = h.Name;
@@ -285,11 +264,9 @@ private static (@string, slice<ptr<SRV>>, error) lookupSRV(this ptr<Resolver> _a
             return ("", null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
         }
         srvs = append(srvs, addr(new SRV(Target:srv.Target.String(),Port:srv.Port,Priority:srv.Priority,Weight:srv.Weight)));
-
     }
     byPriorityWeight(srvs).sort();
     return (cname.String(), srvs, error.As(null!)!);
-
 }
 
 private static (slice<ptr<MX>>, error) lookupMX(this ptr<Resolver> _addr_r, context.Context ctx, @string name) {
@@ -319,21 +296,16 @@ private static (slice<ptr<MX>>, error) lookupMX(this ptr<Resolver> _addr_r, cont
                 }
 
             }
-
             continue;
-
         }
         var (mx, err) = p.MXResource();
         if (err != null) {
             return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
         }
         mxs = append(mxs, addr(new MX(Host:mx.MX.String(),Pref:mx.Pref)));
-
-
     }
     byPref(mxs).sort();
     return (mxs, error.As(null!)!);
-
 }
 
 private static (slice<ptr<NS>>, error) lookupNS(this ptr<Resolver> _addr_r, context.Context ctx, @string name) {
@@ -363,19 +335,15 @@ private static (slice<ptr<NS>>, error) lookupNS(this ptr<Resolver> _addr_r, cont
                 }
 
             }
-
             continue;
-
         }
         var (ns, err) = p.NSResource();
         if (err != null) {
             return (null, error.As(addr(new DNSError(Err:"cannot unmarshal DNS message",Name:name,Server:server,))!)!);
         }
         nss = append(nss, addr(new NS(Host:ns.NS.String())));
-
     }
     return (nss, error.As(null!)!);
-
 }
 
 private static (slice<@string>, error) lookupTXT(this ptr<Resolver> _addr_r, context.Context ctx, @string name) {
@@ -405,9 +373,7 @@ private static (slice<@string>, error) lookupTXT(this ptr<Resolver> _addr_r, con
                 }
 
             }
-
             continue;
-
         }
         var (txt, err) = p.TXTResource();
         if (err != null) {
@@ -441,10 +407,8 @@ private static (slice<@string>, error) lookupTXT(this ptr<Resolver> _addr_r, con
             txts = make_slice<@string>(0, 1);
         }
         txts = append(txts, string(txtJoin));
-
     }
     return (txts, error.As(null!)!);
-
 }
 
 private static (slice<@string>, error) lookupAddr(this ptr<Resolver> _addr_r, context.Context ctx, @string addr) {
@@ -461,10 +425,8 @@ private static (slice<@string>, error) lookupAddr(this ptr<Resolver> _addr_r, co
             }
 
         }
-
     }
     return r.goLookupPTR(ctx, addr);
-
 }
 
 // concurrentThreadsLimit returns the number of threads we permit to
@@ -486,7 +448,6 @@ private static nint concurrentThreadsLimit() {
             return 500;
         }
     }
-
     var r = int(rlim.Cur);
     if (r > 500) {
         r = 500;
@@ -495,7 +456,6 @@ private static nint concurrentThreadsLimit() {
         r -= 30;
     }
     return r;
-
 }
 
 } // end net_package

@@ -2,99 +2,101 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:14:58 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:27 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\test\testdata\flowgraph_generator1.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// make fake flow graph.
+
+// The blocks of the flow graph are designated with letters A
+// through Z, always including A (start block) and Z (exit
+// block) The specification of a flow graph is a comma-
+// separated list of block successor words, for blocks ordered
+// A, B, C etc, where each block except Z has one or two
+// successors, and any block except A can be a target. Within
+// the generated code, each block with two successors includes
+// a conditional testing x & 1 != 0 (x is the input parameter
+// to the generated function) and also unconditionally shifts x
+// right by one, so that different inputs generate different
+// execution paths, including loops. Every block inverts a
+// global binary to ensure it is not empty. For a flow graph
+// with J words (J+1 blocks), a J-1 bit serial number specifies
+// which blocks (not including A and Z) include an increment of
+// the return variable y by increasing powers of 10, and a
+// different version of the test function is created for each
+// of the 2-to-the-(J-1) serial numbers.
+
+// For each generated function a compact summary is also
+// created so that the generated function can be simulated
+// with a simple interpreter to sanity check the behavior of
+// the compiled code.
+
+// For example:
+
+// func BC_CD_BE_BZ_CZ101(x int64) int64 {
+//     y := int64(0)
+//     var b int64
+//     _ = b
+//     b = x & 1
+//     x = x >> 1
+//     if b != 0 {
+//         goto C
+//     }
+//     goto B
+// B:
+//     glob_ = !glob_
+//     y += 1
+//     b = x & 1
+//     x = x >> 1
+//     if b != 0 {
+//         goto D
+//     }
+//     goto C
+// C:
+//     glob_ = !glob_
+//     // no y increment
+//     b = x & 1
+//     x = x >> 1
+//     if b != 0 {
+//         goto E
+//     }
+//     goto B
+// D:
+//     glob_ = !glob_
+//     y += 10
+//     b = x & 1
+//     x = x >> 1
+//     if b != 0 {
+//         goto Z
+//     }
+//     goto B
+// E:
+//     glob_ = !glob_
+//     // no y increment
+//     b = x & 1
+//     x = x >> 1
+//     if b != 0 {
+//         goto Z
+//     }
+//     goto C
+// Z:
+//     return y
+// }
+
+// {f:BC_CD_BE_BZ_CZ101,
+//  maxin:32, blocks:[]blo{
+//      blo{inc:0, cond:true, succs:[2]int64{1, 2}},
+//      blo{inc:1, cond:true, succs:[2]int64{2, 3}},
+//      blo{inc:0, cond:true, succs:[2]int64{1, 4}},
+//      blo{inc:10, cond:true, succs:[2]int64{1, 25}},
+//      blo{inc:0, cond:true, succs:[2]int64{2, 25}},}},
 
 public static partial class main_package {
 
-    // make fake flow graph.
-
-    // The blocks of the flow graph are designated with letters A
-    // through Z, always including A (start block) and Z (exit
-    // block) The specification of a flow graph is a comma-
-    // separated list of block successor words, for blocks ordered
-    // A, B, C etc, where each block except Z has one or two
-    // successors, and any block except A can be a target. Within
-    // the generated code, each block with two successors includes
-    // a conditional testing x & 1 != 0 (x is the input parameter
-    // to the generated function) and also unconditionally shifts x
-    // right by one, so that different inputs generate different
-    // execution paths, including loops. Every block inverts a
-    // global binary to ensure it is not empty. For a flow graph
-    // with J words (J+1 blocks), a J-1 bit serial number specifies
-    // which blocks (not including A and Z) include an increment of
-    // the return variable y by increasing powers of 10, and a
-    // different version of the test function is created for each
-    // of the 2-to-the-(J-1) serial numbers.
-
-    // For each generated function a compact summary is also
-    // created so that the generated function can be simulated
-    // with a simple interpreter to sanity check the behavior of
-    // the compiled code.
-
-    // For example:
-
-    // func BC_CD_BE_BZ_CZ101(x int64) int64 {
-    //     y := int64(0)
-    //     var b int64
-    //     _ = b
-    //     b = x & 1
-    //     x = x >> 1
-    //     if b != 0 {
-    //         goto C
-    //     }
-    //     goto B
-    // B:
-    //     glob_ = !glob_
-    //     y += 1
-    //     b = x & 1
-    //     x = x >> 1
-    //     if b != 0 {
-    //         goto D
-    //     }
-    //     goto C
-    // C:
-    //     glob_ = !glob_
-    //     // no y increment
-    //     b = x & 1
-    //     x = x >> 1
-    //     if b != 0 {
-    //         goto E
-    //     }
-    //     goto B
-    // D:
-    //     glob_ = !glob_
-    //     y += 10
-    //     b = x & 1
-    //     x = x >> 1
-    //     if b != 0 {
-    //         goto Z
-    //     }
-    //     goto B
-    // E:
-    //     glob_ = !glob_
-    //     // no y increment
-    //     b = x & 1
-    //     x = x >> 1
-    //     if b != 0 {
-    //         goto Z
-    //     }
-    //     goto C
-    // Z:
-    //     return y
-    // }
-
-    // {f:BC_CD_BE_BZ_CZ101,
-    //  maxin:32, blocks:[]blo{
-    //      blo{inc:0, cond:true, succs:[2]int64{1, 2}},
-    //      blo{inc:1, cond:true, succs:[2]int64{2, 3}},
-    //      blo{inc:0, cond:true, succs:[2]int64{1, 4}},
-    //      blo{inc:10, cond:true, succs:[2]int64{1, 25}},
-    //      blo{inc:0, cond:true, succs:[2]int64{2, 25}},}},
 private static @string labels = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 private static (slice<@string>, @string) blocks(@string spec) {
@@ -115,7 +117,6 @@ private static @string makeFunctionFromFlowGraph(slice<blo> blocks, @string fnam
         if (j == 0) { 
             // block A, implicit label
             s += "\nfunc " + fname + "(x int64) int64 {\n\ty := int64(0)\n\tvar b int64\n\t_ = b";
-
         }
         else
  { 
@@ -125,20 +126,14 @@ private static @string makeFunctionFromFlowGraph(slice<blo> blocks, @string fnam
             if (blocks[j].inc != 0) {
                 yeq = "\n\ty += " + fmt.Sprintf("%d", blocks[j].inc);
             }
-
             s += "\n" + l + ":\n\tglob = !glob" + yeq;
-
         }
         if (blocks[j].cond) { // conditionally branch to second successor
             s += "\n\tb = x & 1\n\tx = x >> 1\n\tif b != 0 {" + "\n\t\tgoto " + string(labels[blocks[j].succs[1]]) + "\n\t}";
-
-
         }
         s += "\n\tgoto " + string(labels[blocks[j].succs[0]]);
-
     }    s += "\nZ:\n\treturn y\n}\n";
     return s;
-
 }
 
 private static slice<@string> graphs = new slice<@string>(new @string[] { "Z", "BZ,Z", "B,BZ", "BZ,BZ", "ZB,Z", "B,ZB", "ZB,BZ", "ZB,ZB", "BC,C,Z", "BC,BC,Z", "BC,BC,BZ", "BC,Z,Z", "BC,ZC,Z", "BC,ZC,BZ", "BZ,C,Z", "BZ,BC,Z", "BZ,CZ,Z", "BZ,C,BZ", "BZ,BC,BZ", "BZ,CZ,BZ", "BZ,C,CZ", "BZ,BC,CZ", "BZ,CZ,CZ", "BC,CD,BE,BZ,CZ", "BC,BD,CE,CZ,BZ", "BC,BD,CE,FZ,GZ,F,G", "BC,BD,CE,FZ,GZ,G,F", "BC,DE,BE,FZ,FZ,Z", "BC,DE,BE,FZ,ZF,Z", "BC,DE,BE,ZF,FZ,Z", "BC,DE,EB,FZ,FZ,Z", "BC,ED,BE,FZ,FZ,Z", "CB,DE,BE,FZ,FZ,Z", "CB,ED,BE,FZ,FZ,Z", "BC,ED,EB,FZ,ZF,Z", "CB,DE,EB,ZF,FZ,Z", "CB,ED,EB,FZ,FZ,Z", "BZ,CD,CD,CE,BZ", "EC,DF,FG,ZC,GB,BE,FD", "BH,CF,DG,HE,BF,CG,DH,BZ" });
@@ -162,7 +157,8 @@ private static (slice<blo>, nuint) strings2blocks(slice<@string> blocks, @string
     cond = 0;
     var k = uint(0);
     foreach (var (j, s) in blocks) {
-        if (j == 0)         }
+        if (j == 0) {
+        }
         else
  {
             if ((i >> (int)(k)) & 1 != 0) {
@@ -177,9 +173,7 @@ private static (slice<blo>, nuint) strings2blocks(slice<@string> blocks, @string
             cond++;
         }
         bs[j].succs[0] = int64(blocks[j][0] - 'A');
-
     }    return (bs, cond);
-
 }
 
 // fmtBlocks writes out the blocks for consumption in the generated test
@@ -255,7 +249,6 @@ func main() {
 //	fmt.Printf(""Sum of all returns over all terminating inputs is %d\n"", sum)
 }
 ");
-
 }
 
 } // end main_package

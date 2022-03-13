@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sym -- go2cs converted at 2022 March 06 23:20:35 UTC
+// package sym -- go2cs converted at 2022 March 13 06:33:29 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\sym\reloc.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using elf = go.debug.elf_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using elf = debug.elf_package;
+
+
+// RelocVariant is a linker-internal variation on a relocation.
 
 public static partial class sym_package {
 
-    // RelocVariant is a linker-internal variation on a relocation.
 public partial struct RelocVariant { // : byte
 }
 
@@ -30,7 +32,6 @@ public static readonly var RV_390_DBL = 4;
 
 public static readonly RelocVariant RV_CHECK_OVERFLOW = 1 << 7;
 public static readonly RelocVariant RV_TYPE_MASK = RV_CHECK_OVERFLOW - 1;
-
 
 public static @string RelocName(ptr<sys.Arch> _addr_arch, objabi.RelocType r) => func((_, panic, _) => {
     ref sys.Arch arch = ref _addr_arch.val;
@@ -59,7 +60,6 @@ public static @string RelocName(ptr<sys.Arch> _addr_arch, objabi.RelocType r) =>
         else 
             panic("unreachable");
                 return r.String();
-
 });
 
 } // end sym_package

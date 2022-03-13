@@ -11,14 +11,14 @@
 // used as input to mksyscall which parses the //sys
 // lines and generates system call stubs.
 
-// package unix -- go2cs converted at 2022 March 06 23:26:45 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:22 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_bsd.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 
@@ -40,7 +40,6 @@ public static (@string, error) Getwd() {
         return ("", error.As(EINVAL)!);
     }
     return (string(buf[..(int)n]), error.As(null!)!);
-
 }
 
 /*
@@ -73,7 +72,6 @@ public static (slice<nint>, error) Getgroups() {
     foreach (var (i, v) in a[(int)0..(int)n]) {
         gids[i] = int(v);
     }    return ;
-
 }
 
 public static error Setgroups(slice<nint> gids) {
@@ -86,7 +84,6 @@ public static error Setgroups(slice<nint> gids) {
     foreach (var (i, v) in gids) {
         a[i] = _Gid_t(v);
     }    return error.As(setgroups(len(a), _addr_a[0]))!;
-
 }
 
 // Wait status is 7 bits at bottom, either 0 (exited),
@@ -106,7 +103,6 @@ private static readonly nint exited = 0;
 private static readonly nint killed = 9;
 private static readonly nuint stopped = 0x7F;
 
-
 public static bool Exited(this WaitStatus w) {
     return w & mask == exited;
 }
@@ -116,7 +112,6 @@ public static nint ExitStatus(this WaitStatus w) {
         return -1;
     }
     return int(w >> (int)(shift));
-
 }
 
 public static bool Signaled(this WaitStatus w) {
@@ -129,7 +124,6 @@ public static syscall.Signal Signal(this WaitStatus w) {
         return -1;
     }
     return sig;
-
 }
 
 public static bool CoreDump(this WaitStatus w) {
@@ -153,7 +147,6 @@ public static syscall.Signal StopSignal(this WaitStatus w) {
         return -1;
     }
     return syscall.Signal(w >> (int)(shift)) & 0xFF;
-
 }
 
 public static nint TrapCause(this WaitStatus w) {
@@ -174,7 +167,6 @@ public static (nint, error) Wait4(nint pid, ptr<WaitStatus> _addr_wstatus, nint 
         wstatus = WaitStatus(status);
     }
     return ;
-
 }
 
 //sys    accept(s int, rsa *RawSockaddrAny, addrlen *_Socklen) (fd int, err error)
@@ -205,7 +197,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrInet4
         sa.raw.Addr[i] = sa.Addr[i];
     }
     return (@unsafe.Pointer(_addr_sa.raw), _Socklen(sa.raw.Len), error.As(null!)!);
-
 }
 
 private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrInet6> _addr_sa) {
@@ -227,7 +218,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrInet6
         sa.raw.Addr[i] = sa.Addr[i];
     }
     return (@unsafe.Pointer(_addr_sa.raw), _Socklen(sa.raw.Len), error.As(null!)!);
-
 }
 
 private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrUnix> _addr_sa) {
@@ -247,7 +237,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrUnix>
         sa.raw.Path[i] = int8(name[i]);
     }
     return (@unsafe.Pointer(_addr_sa.raw), _Socklen(sa.raw.Len), error.As(null!)!);
-
 }
 
 private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrDatalink> _addr_sa) {
@@ -270,7 +259,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrDatal
         sa.raw.Data[i] = sa.Data[i];
     }
     return (@unsafe.Pointer(_addr_sa.raw), SizeofSockaddrDatalink, error.As(null!)!);
-
 }
 
 private static (Sockaddr, error) anyToSockaddr(nint fd, ptr<RawSockaddrAny> _addr_rsa) {
@@ -321,9 +309,7 @@ private static (Sockaddr, error) anyToSockaddr(nint fd, ptr<RawSockaddrAny> _add
                     // or was overestimating.
                     n = i;
                     break;
-
                 }
-
             }
 
 
@@ -366,7 +352,6 @@ private static (Sockaddr, error) anyToSockaddr(nint fd, ptr<RawSockaddrAny> _add
         }
         return (sa, error.As(null!)!);
         return anyToSockaddrGOOS(fd, rsa);
-
 }
 
 public static (nint, Sockaddr, error) Accept(nint fd) {
@@ -387,7 +372,6 @@ public static (nint, Sockaddr, error) Accept(nint fd) {
         // is accepted, but has no address.
         Close(nfd);
         return (0, null, error.As(ECONNABORTED)!);
-
     }
     sa, err = anyToSockaddr(fd, _addr_rsa);
     if (err != null) {
@@ -395,7 +379,6 @@ public static (nint, Sockaddr, error) Accept(nint fd) {
         nfd = 0;
     }
     return ;
-
 }
 
 public static (Sockaddr, error) Getsockname(nint fd) {
@@ -414,7 +397,6 @@ public static (Sockaddr, error) Getsockname(nint fd) {
         rsa.Addr.Len = SizeofSockaddrUnix;
     }
     return anyToSockaddr(fd, _addr_rsa);
-
 }
 
 //sysnb    socketpair(domain int, typ int, proto int, fd *[2]int32) (err error)
@@ -432,7 +414,6 @@ public static (@string, error) GetsockoptString(nint fd, nint level, nint opt) {
         return ("", error.As(err)!);
     }
     return (string(buf[..(int)vallen - 1]), error.As(null!)!);
-
 }
 
 //sys    recvfrom(fd int, p []byte, flags int, from *RawSockaddrAny, fromlen *_Socklen) (n int, err error)
@@ -462,11 +443,9 @@ public static (nint, nint, nint, Sockaddr, error) Recvmsg(nint fd, slice<byte> p
             _addr_iov.Base = _addr_dummy;
             iov.Base = ref _addr_iov.Base.val;
             iov.SetLen(1);
-
         }
         msg.Control = (byte.val)(@unsafe.Pointer(_addr_oob[0]));
         msg.SetControllen(len(oob));
-
     }
     _addr_msg.Iov = _addr_iov;
     msg.Iov = ref _addr_msg.Iov.val;
@@ -483,7 +462,6 @@ public static (nint, nint, nint, Sockaddr, error) Recvmsg(nint fd, slice<byte> p
         from, err = anyToSockaddr(fd, _addr_rsa);
     }
     return ;
-
 }
 
 //sys    sendmsg(s int, msg *Msghdr, flags int) (n int, err error)
@@ -522,11 +500,9 @@ public static (nint, error) SendmsgN(nint fd, slice<byte> p, slice<byte> oob, So
             _addr_iov.Base = _addr_dummy;
             iov.Base = ref _addr_iov.Base.val;
             iov.SetLen(1);
-
         }
         msg.Control = (byte.val)(@unsafe.Pointer(_addr_oob[0]));
         msg.SetControllen(len(oob));
-
     }
     _addr_msg.Iov = _addr_iov;
     msg.Iov = ref _addr_msg.Iov.val;
@@ -540,7 +516,6 @@ public static (nint, error) SendmsgN(nint fd, slice<byte> p, slice<byte> oob, So
         n = 0;
     }
     return (n, error.As(null!)!);
-
 }
 
 //sys    kevent(kq int, change unsafe.Pointer, nchange int, event unsafe.Pointer, nevent int, timeout *Timespec) (n int, err error)
@@ -559,7 +534,6 @@ public static (nint, error) Kevent(nint kq, slice<Kevent_t> changes, slice<Keven
         event = @unsafe.Pointer(_addr_events[0]);
     }
     return kevent(kq, change, len(changes), event, len(events), timeout);
-
 }
 
 // sysctlmib translates name to mib number and appends any additional args.
@@ -576,7 +550,6 @@ private static (slice<_C_int>, error) sysctlmib(@string name, params nint[] args
     foreach (var (_, a) in args) {
         mib = append(mib, _C_int(a));
     }    return (mib, error.As(null!)!);
-
 }
 
 public static (@string, error) Sysctl(@string name) {
@@ -602,7 +575,6 @@ public static (@string, error) SysctlArgs(@string name, params nint[] args) {
         n--;
     }
     return (string(buf[(int)0..(int)n]), error.As(null!)!);
-
 }
 
 public static (uint, error) SysctlUint32(@string name) {
@@ -630,12 +602,10 @@ public static (uint, error) SysctlUint32Args(@string name, params nint[] args) {
             return (0, error.As(err)!);
         }
     }
-
     if (n != 4) {
         return (0, error.As(EIO)!);
     }
     return (new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(_addr_buf[0])), error.As(null!)!);
-
 }
 
 public static (ulong, error) SysctlUint64(@string name, params nint[] args) {
@@ -656,12 +626,10 @@ public static (ulong, error) SysctlUint64(@string name, params nint[] args) {
             return (0, error.As(err)!);
         }
     }
-
     if (n != 8) {
         return (0, error.As(EIO)!);
     }
     return (new ptr<ptr<ptr<ulong>>>(@unsafe.Pointer(_addr_buf[0])), error.As(null!)!);
-
 }
 
 public static (slice<byte>, error) SysctlRaw(@string name, params nint[] args) {
@@ -685,7 +653,6 @@ public static (slice<byte>, error) SysctlRaw(@string name, params nint[] args) {
         err = err__prev1;
 
     }
-
     if (n == 0) {
         return (null, error.As(null!)!);
     }
@@ -705,7 +672,6 @@ public static (slice<byte>, error) SysctlRaw(@string name, params nint[] args) {
     // The actual call may return less than the original reported required
     // size so ensure we deal with that.
     return (buf[..(int)n], error.As(null!)!);
-
 }
 
 public static (ptr<Clockinfo>, error) SysctlClockinfo(@string name) {
@@ -725,12 +691,10 @@ public static (ptr<Clockinfo>, error) SysctlClockinfo(@string name) {
             return (_addr_null!, error.As(err)!);
         }
     }
-
     if (n != SizeofClockinfo) {
         return (_addr_null!, error.As(EIO)!);
     }
     return (_addr__addr_ci!, error.As(null!)!);
-
 }
 
 public static (ptr<Timeval>, error) SysctlTimeval(@string name) {
@@ -750,12 +714,10 @@ public static (ptr<Timeval>, error) SysctlTimeval(@string name) {
             return (_addr_null!, error.As(err)!);
         }
     }
-
     if (n != @unsafe.Sizeof(tv)) {
         return (_addr_null!, error.As(EIO)!);
     }
     return (_addr__addr_tv!, error.As(null!)!);
-
 }
 
 //sys    utimes(path string, timeval *[2]Timeval) (err error)
@@ -768,7 +730,6 @@ public static error Utimes(@string path, slice<Timeval> tv) {
         return error.As(EINVAL)!;
     }
     return error.As(utimes(path, new ptr<ptr<array<Timeval>>>(@unsafe.Pointer(_addr_tv[0]))))!;
-
 }
 
 public static error UtimesNano(@string path, slice<Timespec> ts) {
@@ -778,7 +739,6 @@ public static error UtimesNano(@string path, slice<Timespec> ts) {
             return error.As(err)!;
         }
         return error.As(utimes(path, null))!;
-
     }
     if (len(ts) != 2) {
         return error.As(EINVAL)!;
@@ -793,7 +753,6 @@ public static error UtimesNano(@string path, slice<Timespec> ts) {
     }
     array<Timeval> tv = new array<Timeval>(new Timeval[] { NsecToTimeval(TimespecToNsec(ts[0])), NsecToTimeval(TimespecToNsec(ts[1])) });
     return error.As(utimes(path, new ptr<ptr<array<Timeval>>>(@unsafe.Pointer(_addr_tv[0]))))!;
-
 }
 
 public static error UtimesNanoAt(nint dirfd, @string path, slice<Timespec> ts, nint flags) {
@@ -808,7 +767,6 @@ public static error UtimesNanoAt(nint dirfd, @string path, slice<Timespec> ts, n
         return error.As(err)!;
     }
     return error.As(utimensat(dirfd, path, new ptr<ptr<array<Timespec>>>(@unsafe.Pointer(_addr_ts[0])), flags))!;
-
 }
 
 //sys    futimes(fd int, timeval *[2]Timeval) (err error)
@@ -821,7 +779,6 @@ public static error Futimes(nint fd, slice<Timeval> tv) {
         return error.As(EINVAL)!;
     }
     return error.As(futimes(fd, new ptr<ptr<array<Timeval>>>(@unsafe.Pointer(_addr_tv[0]))))!;
-
 }
 
 //sys    poll(fds *PollFd, nfds int, timeout int) (n int, err error)
@@ -834,7 +791,6 @@ public static (nint, error) Poll(slice<PollFd> fds, nint timeout) {
         return poll(null, 0, timeout);
     }
     return poll(_addr_fds[0], len(fds), timeout);
-
 }
 
 // TODO: wrap

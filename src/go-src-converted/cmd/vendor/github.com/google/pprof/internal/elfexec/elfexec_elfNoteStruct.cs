@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:34 UTC
+//     Generated on 2022 March 13 06:36:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class elfexec_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct elfNote
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace @internal
             public static implicit operator elfNote(NilType nil) => default(elfNote);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static elfNote elfNote_cast(dynamic value)
         {
             return new elfNote(value.Name, value.Desc, value.Type);

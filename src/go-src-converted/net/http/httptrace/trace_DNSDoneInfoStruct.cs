@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:03 UTC
+//     Generated on 2022 March 13 05:37:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace http
 {
     public static partial class httptrace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct DNSDoneInfo
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace http
             public static implicit operator DNSDoneInfo(NilType nil) => default(DNSDoneInfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static DNSDoneInfo DNSDoneInfo_cast(dynamic value)
         {
             return new DNSDoneInfo(value.Addrs, value.Err, value.Coalesced);

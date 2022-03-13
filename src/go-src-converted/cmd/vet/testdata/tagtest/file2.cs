@@ -5,11 +5,11 @@
 //go:build !testtag
 // +build !testtag
 
-// package main -- go2cs converted at 2022 March 06 23:35:21 UTC
+// package main -- go2cs converted at 2022 March 13 06:43:18 UTC
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\tagtest\file2.go
-using fmt = go.fmt_package;
-
 namespace go;
+
+using fmt = fmt_package;
 
 public static partial class main_package {
 

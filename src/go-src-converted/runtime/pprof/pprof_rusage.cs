@@ -5,19 +5,21 @@
 //go:build darwin || linux
 // +build darwin linux
 
-// package pprof -- go2cs converted at 2022 March 06 22:14:45 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:28:49 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\pprof_rusage.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go.runtime;
+
+using fmt = fmt_package;
+using io = io_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// Adds MaxRSS to platforms that are supported.
 
 public static partial class pprof_package {
 
-    // Adds MaxRSS to platforms that are supported.
 private static void addMaxRSS(io.Writer w) => func((_, panic, _) => {
     System.UIntPtr rssToBytes = default;
     switch (runtime.GOOS) {
@@ -39,7 +41,6 @@ private static void addMaxRSS(io.Writer w) => func((_, panic, _) => {
     ref syscall.Rusage rusage = ref heap(out ptr<syscall.Rusage> _addr_rusage);
     syscall.Getrusage(0, _addr_rusage);
     fmt.Fprintf(w, "# MaxRSS = %d\n", uintptr(rusage.Maxrss) * rssToBytes);
-
 });
 
 } // end pprof_package

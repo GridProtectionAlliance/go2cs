@@ -4,24 +4,25 @@
 
 // Debug arguments, set by -d flag.
 
-// package @base -- go2cs converted at 2022 March 06 23:14:28 UTC
+// package @base -- go2cs converted at 2022 March 13 06:27:57 UTC
 // import "cmd/compile/internal/base" ==> using @base = go.cmd.compile.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\base\debug.go
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System.ComponentModel;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// Debug holds the parsed debugging configuration values.
+
+using System.ComponentModel;
+using System;
 public static partial class @base_package {
 
-    // Debug holds the parsed debugging configuration values.
 public static DebugFlags Debug = default;
 
 // DebugFlags defines the debugging configuration values (see var Debug).
@@ -120,9 +121,7 @@ private static void init() => func((_, panic, _) => {
             }
         }
         debugTab = append(debugTab, new debugField(name,help,ptr));
-
     }
-
 });
 
 // DebugSSA is called to set a -d ssa/... option.
@@ -173,7 +172,6 @@ Split:
             fmt.Printf("\t%-*s\t%s\n", maxLen, "ssa/help", "print help about SSA debugging");
             fmt.Print(debugHelpFooter);
             os.Exit(0);
-
         }
         nint val = 1;
         @string valstring = "";
@@ -189,13 +187,11 @@ Split:
                 if (err != null) {
                     (val, haveInt) = (1, false);
                 }
-
             }
 
             i = i__prev1;
 
         }
-
         {
             var t__prev2 = t;
 
@@ -250,17 +246,14 @@ Split:
                 i = i__prev2;
 
             }
-
             err = DebugSSA(phase, flag, val, valstring);
             if (err != "") {
                 log.Fatalf(err);
             }
-
             _continueSplit = true;
             break;
         }
         log.Fatalf("unknown debug key -d %s\n", name);
-
     }
 });
 

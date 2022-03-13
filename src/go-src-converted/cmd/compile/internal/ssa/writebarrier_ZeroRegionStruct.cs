@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:08:53 UTC
+//     Generated on 2022 March 13 06:22:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ZeroRegion
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace @internal
             public static implicit operator ZeroRegion(NilType nil) => default(ZeroRegion);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ZeroRegion ZeroRegion_cast(dynamic value)
         {
             return new ZeroRegion(ref value.@base, value.mask);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:21 UTC
+//     Generated on 2022 March 13 06:43:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace testdata
 {
     public static partial class structtag_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct StructTagTest
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace testdata
             public static implicit operator StructTagTest(NilType nil) => default(StructTagTest);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static StructTagTest StructTagTest_cast(dynamic value)
         {
             return new StructTagTest(value.A);

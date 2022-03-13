@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package image -- go2cs converted at 2022 March 06 23:35:47 UTC
+// package image -- go2cs converted at 2022 March 13 06:43:44 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Program Files\Go\src\image\geom.go
-using color = go.image.color_package;
-using bits = go.math.bits_package;
-using strconv = go.strconv_package;
-
 namespace go;
+
+using color = image.color_package;
+using bits = math.bits_package;
+using strconv = strconv_package;
+
+
+// A Point is an X, Y coordinate pair. The axes increase right and down.
 
 public static partial class image_package {
 
-    // A Point is an X, Y coordinate pair. The axes increase right and down.
 public partial struct Point {
     public nint X;
     public nint Y;
@@ -64,7 +66,6 @@ public static Point Mod(this Point p, Rectangle r) {
         p.Y += h;
     }
     return p.Add(r.Min);
-
 }
 
 // Eq reports whether p and q are equal.
@@ -148,7 +149,6 @@ public static Rectangle Inset(this Rectangle r, nint n) {
         r.Max.Y -= n;
     }
     return r;
-
 }
 
 // Intersect returns the largest rectangle contained by both r and s. If the
@@ -170,7 +170,6 @@ public static Rectangle Intersect(this Rectangle r, Rectangle s) {
         return ZR;
     }
     return r;
-
 }
 
 // Union returns the smallest rectangle that contains both r and s.
@@ -194,7 +193,6 @@ public static Rectangle Union(this Rectangle r, Rectangle s) {
         r.Max.Y = s.Max.Y;
     }
     return r;
-
 }
 
 // Empty reports whether the rectangle contains no points.
@@ -219,7 +217,6 @@ public static bool In(this Rectangle r, Rectangle s) {
         return true;
     }
     return s.Min.X <= r.Min.X && r.Max.X <= s.Max.X && s.Min.Y <= r.Min.Y && r.Max.Y <= s.Max.Y;
-
 }
 
 // Canon returns the canonical version of r. The returned rectangle has minimum
@@ -232,7 +229,6 @@ public static Rectangle Canon(this Rectangle r) {
         (r.Min.Y, r.Max.Y) = (r.Max.Y, r.Min.Y);
     }
     return r;
-
 }
 
 // At implements the Image interface.
@@ -241,7 +237,6 @@ public static color.Color At(this Rectangle r, nint x, nint y) {
         return color.Opaque;
     }
     return color.Transparent;
-
 }
 
 // RGBA64At implements the RGBA64Image interface.
@@ -250,7 +245,6 @@ public static color.RGBA64 RGBA64At(this Rectangle r, nint x, nint y) {
         return new color.RGBA64(0xffff,0xffff,0xffff,0xffff);
     }
     return new color.RGBA64();
-
 }
 
 // Bounds implements the Image interface.
@@ -279,7 +273,6 @@ public static Rectangle Rect(nint x0, nint y0, nint x1, nint y1) {
         (y0, y1) = (y1, y0);
     }
     return new Rectangle(Point{x0,y0},Point{x1,y1});
-
 }
 
 // mul3NonNeg returns (x * y * z), unless at least one argument is negative or
@@ -301,7 +294,6 @@ private static nint mul3NonNeg(nint x, nint y, nint z) {
         return -1;
     }
     return a;
-
 }
 
 // add2NonNeg returns (x + y), unless at least one argument is negative or if
@@ -315,7 +307,6 @@ private static nint add2NonNeg(nint x, nint y) {
         return -1;
     }
     return a;
-
 }
 
 } // end image_package

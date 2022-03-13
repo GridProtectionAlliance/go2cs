@@ -4,17 +4,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package idna -- go2cs converted at 2022 March 06 23:38:02 UTC
+// package idna -- go2cs converted at 2022 March 13 06:46:19 UTC
 // import "vendor/golang.org/x/net/idna" ==> using idna = go.vendor.golang.org.x.net.idna_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\idna\trie.go
-
-
 namespace go.vendor.golang.org.x.net;
 
 public static partial class idna_package {
 
-    // appendMapping appends the mapping for the respective rune. isMapped must be
-    // true. A mapping is a categorization of a rune as defined in UTS #46.
+// appendMapping appends the mapping for the respective rune. isMapped must be
+// true. A mapping is a categorization of a rune as defined in UTS #46.
 private static slice<byte> appendMapping(this info c, slice<byte> b, @string s) {
     var index = int(c >> (int)(indexShift));
     if (c & xorBit == 0) {
@@ -25,7 +23,6 @@ private static slice<byte> appendMapping(this info c, slice<byte> b, @string s) 
     if (c & inlineXOR == inlineXOR) { 
         // TODO: support and handle two-byte inline masks
         b[len(b) - 1] ^= byte(index);
-
     }
     else
  {
@@ -35,7 +32,6 @@ private static slice<byte> appendMapping(this info c, slice<byte> b, @string s) 
         }
     }
     return b;
-
 }
 
 // Sparse block handling code.
@@ -82,7 +78,6 @@ private static ushort lookup(this ptr<sparseBlocks> _addr_t, uint n, byte b) {
         }
     }
     return 0;
-
 }
 
 } // end idna_package

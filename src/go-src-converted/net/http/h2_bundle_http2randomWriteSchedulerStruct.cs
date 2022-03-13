@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:03 UTC
+//     Generated on 2022 March 13 05:37:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2randomWriteScheduler
         {
             // Constructors
@@ -86,7 +86,7 @@ namespace net
             public static implicit operator http2randomWriteScheduler(NilType nil) => default(http2randomWriteScheduler);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2randomWriteScheduler http2randomWriteScheduler_cast(dynamic value)
         {
             return new http2randomWriteScheduler(value.zero, value.sq, value.queuePool);

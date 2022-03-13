@@ -2,26 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:53 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:11 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\writebarrier.go
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+
+
+// A ZeroRegion records parts of an object which are known to be zero.
+// A ZeroRegion only applies to a single memory state.
+// Each bit in mask is set if the corresponding pointer-sized word of
+// the base object is known to be zero.
+// In other words, if mask & (1<<i) != 0, then [base+i*ptrSize, base+(i+1)*ptrSize)
+// is known to be zero.
 
 public static partial class ssa_package {
 
-    // A ZeroRegion records parts of an object which are known to be zero.
-    // A ZeroRegion only applies to a single memory state.
-    // Each bit in mask is set if the corresponding pointer-sized word of
-    // the base object is known to be zero.
-    // In other words, if mask & (1<<i) != 0, then [base+i*ptrSize, base+(i+1)*ptrSize)
-    // is known to be zero.
 public partial struct ZeroRegion {
     public ptr<Value> @base;
     public ulong mask;
@@ -50,11 +52,9 @@ private static bool needwb(ptr<Value> _addr_v, map<ID, ZeroRegion> zeroes) {
             if (ok && mem == v.MemoryArg()) { 
                 // Copying data from readonly memory into a fresh object doesn't need a write barrier.
                 return false;
-
             }
 
         }
-
     }
     if (v.Op == OpStore && IsGlobalAddr(_addr_v.Args[1])) { 
         // Storing pointers to non-heap locations into zeroed memory doesn't need a write barrier.
@@ -72,7 +72,6 @@ private static bool needwb(ptr<Value> _addr_v, map<ID, ZeroRegion> zeroes) {
         if (off < 0 || off + size > 64 * ptrSize) { 
             // write goes off end of tracked offsets
             return true;
-
         }
         var z = zeroes[v.MemoryArg().ID];
         if (ptr != z.@base) {
@@ -86,17 +85,14 @@ private static bool needwb(ptr<Value> _addr_v, map<ID, ZeroRegion> zeroes) {
                     return true; // not known to be zero
                 i += ptrSize;
                 }
-
             } 
             // All written locations are known to be zero - write barrier not needed.
 
         } 
         // All written locations are known to be zero - write barrier not needed.
         return false;
-
     }
     return true;
-
 }
 
 // writebarrier pass inserts write barriers for store ops (Store, Move, Zero)
@@ -143,9 +139,7 @@ private static void writebarrier(ptr<Func> _addr_f) => func((defer, _, _) => {
                     else if (v.Op == OpZero) 
                         v.Op = OpZeroWB;
                                         nWBops++;
-
                 }
-
                     }        if (nWBops == 0) {
             continue;
         }
@@ -165,7 +159,6 @@ private static void writebarrier(ptr<Func> _addr_f) => func((defer, _, _) => {
             sset = f.newSparseSet(f.NumValues());
             defer(f.retSparseSet(sset));
             storeNumber = make_slice<int>(f.NumValues());
-
         }
         b.Values = storeOrder(b.Values, sset, storeNumber);
 
@@ -273,7 +266,6 @@ copyLoop:
                                     _continuecopyLoop = true; // already copied
                                     break;
                                 }
-
                             }
 
                             c = c__prev3;
@@ -287,11 +279,8 @@ copyLoop:
                         memThen = bThen.NewValue3I(w.Pos, OpMove, types.TypeMem, siz, tmpaddr, val, memThen);
                         memThen.Aux = t;
                         volatiles = append(volatiles, new volatileCopy(val,tmpaddr));
-
                     }
-
                 }
-
             }
 
             w = w__prev2;
@@ -344,9 +333,7 @@ copyLoop:
                                 c = c__prev3;
                             }
                         }
-
                         memThen = wbcall(pos, _addr_bThen, fn, typ, _addr_ptr, _addr_srcval, _addr_memThen, sp, sb);
-
                     } 
                     // Note that we set up a writebarrier function call.
                     f.fe.SetWBPos(pos);
@@ -364,8 +351,7 @@ copyLoop:
                     memElse.Aux = w.Aux;
                 else if (w.Op == OpVarDef || w.Op == OpVarLive || w.Op == OpVarKill) 
                     memElse = bElse.NewValue1A(pos, w.Op, types.TypeMem, w.Aux, memElse);
-                
-            } 
+                            } 
 
             // mark volatile temps dead
 
@@ -449,14 +435,12 @@ copyLoop:
             // Add b itself.
             b.Func.WBLoads = append(b.Func.WBLoads, b);
             firstSplit = false;
-
         }
         else
  { 
             // We've already split b, so we just pushed a
             // write barrier test into bEnd.
             b.Func.WBLoads = append(b.Func.WBLoads, bEnd);
-
         }
         if (nWBops > 0) {
             goto again;
@@ -502,7 +486,6 @@ private static map<ID, ZeroRegion> computeZeroMap(this ptr<Func> _addr_f) {
                         mem = mem__prev1;
 
                     }
-
                 }
 
                 v = v__prev2;
@@ -546,7 +529,6 @@ private static map<ID, ZeroRegion> computeZeroMap(this ptr<Func> _addr_f) {
                             // about, but through an aliased but offset pointer.
                             // So we have to throw all the zero information we have away.
                             continue;
-
                         } 
                         // Round to cover any partially written pointer slots.
                         // Pointer writes should never be unaligned like this, but non-pointer
@@ -564,7 +546,6 @@ private static map<ID, ZeroRegion> computeZeroMap(this ptr<Func> _addr_f) {
                             d = d__prev1;
 
                         }
-
                         {
                             var d__prev1 = d;
 
@@ -584,7 +565,6 @@ private static map<ID, ZeroRegion> computeZeroMap(this ptr<Func> _addr_f) {
                         if (min < 0) {
                             min = 0;
                         }
-
                         if (max > 64 * ptrSize) {
                             max = 64 * ptrSize;
                         } 
@@ -603,14 +583,12 @@ private static map<ID, ZeroRegion> computeZeroMap(this ptr<Func> _addr_f) {
                         if (z.mask == 0) { 
                             // No more known zeros - don't bother keeping.
                             continue;
-
                         } 
                         // Save updated known zero contents for new store.
                         if (zeroes[v.ID] != z) {
                             zeroes[v.ID] = z;
                             changed = true;
                         }
-
                     }
 
                     v = v__prev3;
@@ -641,7 +619,6 @@ private static map<ID, ZeroRegion> computeZeroMap(this ptr<Func> _addr_f) {
         }
     }
     return zeroes;
-
 }
 
 // wbcall emits write barrier runtime call in b, returns memory.
@@ -678,7 +655,6 @@ private static ptr<Value> wbcall(src.XPos pos, ptr<Block> _addr_b, ptr<obj.LSym>
             mem = b.NewValue3A(pos, OpStore, types.TypeMem, ptr.Type, arg, taddr, mem);
         }
         off += taddr.Type.Size();
-
     }
     argTypes = append(argTypes, ptr.Type);
     off = round(off, ptr.Type.Alignment());
@@ -704,7 +680,6 @@ private static ptr<Value> wbcall(src.XPos pos, ptr<Block> _addr_b, ptr<obj.LSym>
             mem = b.NewValue3A(pos, OpStore, types.TypeMem, val.Type, arg, val, mem);
         }
         off += val.Type.Size();
-
     }
     off = round(off, config.PtrSize);
     wbargs = append(wbargs, mem); 
@@ -714,7 +689,6 @@ private static ptr<Value> wbcall(src.XPos pos, ptr<Block> _addr_b, ptr<obj.LSym>
     call.AddArgs(wbargs);
     call.AuxInt = off - config.ctxt.FixedFrameSize();
     return _addr_b.NewValue1I(pos, OpSelectN, types.TypeMem, 0, call)!;
-
 }
 
 // round to a multiple of r, r is a power of 2
@@ -733,7 +707,6 @@ public static bool IsStackAddr(ptr<Value> _addr_v) {
     if (v.Op == OpSP || v.Op == OpLocalAddr || v.Op == OpSelectNAddr) 
         return true;
         return false;
-
 }
 
 // IsGlobalAddr reports whether v is known to be an address of a global (or nil).
@@ -750,7 +723,6 @@ public static bool IsGlobalAddr(ptr<Value> _addr_v) {
         return true; // loading from a read-only global - the resulting address can't be a heap address.
     }
     return false;
-
 }
 
 // IsReadOnlyGlobalAddr reports whether v is known to be an address of a read-only global.
@@ -760,13 +732,11 @@ public static bool IsReadOnlyGlobalAddr(ptr<Value> _addr_v) {
     if (v.Op == OpConstNil) { 
         // Nil pointers are read only. See issue 33438.
         return true;
-
     }
     if (v.Op == OpAddr && v.Aux._<ptr<obj.LSym>>().Type == objabi.SRODATA) {
         return true;
     }
     return false;
-
 }
 
 // IsNewObject reports whether v is a pointer to a freshly allocated & zeroed object,
@@ -816,7 +786,6 @@ public static (ptr<Value>, bool) IsNewObject(ptr<Value> _addr_v) {
             return (_addr_mem!, true);
         }
         return (_addr_null!, false);
-
     }
     if (v.Args[0].Op != OpOffPtr) {
         return (_addr_null!, false);
@@ -826,10 +795,8 @@ public static (ptr<Value>, bool) IsNewObject(ptr<Value> _addr_v) {
     }
     if (v.Args[0].AuxInt != c.ctxt.FixedFrameSize() + c.RegSize) { // offset of return value
         return (_addr_null!, false);
-
     }
     return (_addr_mem!, true);
-
 }
 
 // IsSanitizerSafeAddr reports whether v is known to be an address
@@ -851,7 +818,6 @@ public static bool IsSanitizerSafeAddr(ptr<Value> _addr_v) {
     else if (v.Op == OpAddr) 
         return v.Aux._<ptr<obj.LSym>>().Type == objabi.SRODATA;
         return false;
-
 }
 
 // isVolatile reports whether v is a pointer to argument region on stack which

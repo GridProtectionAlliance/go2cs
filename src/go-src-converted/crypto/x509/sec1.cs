@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:53 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:48 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\sec1.go
-using ecdsa = go.crypto.ecdsa_package;
-using elliptic = go.crypto.elliptic_package;
-using asn1 = go.encoding.asn1_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using big = go.math.big_package;
-using System.ComponentModel;
-
-
 namespace go.crypto;
+
+using ecdsa = crypto.ecdsa_package;
+using elliptic = crypto.elliptic_package;
+using asn1 = encoding.asn1_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using big = math.big_package;
+using System.ComponentModel;
 
 public static partial class x509_package {
 
@@ -68,7 +67,6 @@ public static (slice<byte>, error) MarshalECPrivateKey(ptr<ecdsa.PrivateKey> _ad
         return (null, error.As(errors.New("x509: unknown elliptic curve"))!);
     }
     return marshalECPrivateKeyWithOID(_addr_key, oid);
-
 }
 
 // marshalECPrivateKey marshals an EC private key into ASN.1, DER format and
@@ -104,7 +102,6 @@ private static (ptr<ecdsa.PrivateKey>, error) parseECPrivateKey(ptr<asn1.ObjectI
                 }
 
             }
-
             {
                 (_, err) = asn1.Unmarshal(der, addr(new pkcs1PrivateKey()));
 
@@ -113,12 +110,9 @@ private static (ptr<ecdsa.PrivateKey>, error) parseECPrivateKey(ptr<asn1.ObjectI
                 }
 
             }
-
             return (_addr_null!, error.As(errors.New("x509: failed to parse EC private key: " + err.Error()))!);
-
         }
     }
-
     if (privKey.Version != ecPrivKeyVersion) {
         return (_addr_null!, error.As(fmt.Errorf("x509: unknown EC private key version %d", privKey.Version))!);
     }
@@ -151,7 +145,6 @@ private static (ptr<ecdsa.PrivateKey>, error) parseECPrivateKey(ptr<asn1.ObjectI
             return (_addr_null!, error.As(errors.New("x509: invalid private key length"))!);
         }
         privKey.PrivateKey = privKey.PrivateKey[(int)1..];
-
     } 
 
     // Some private keys remove all leading zeros, this is also invalid
@@ -161,7 +154,6 @@ private static (ptr<ecdsa.PrivateKey>, error) parseECPrivateKey(ptr<asn1.ObjectI
     priv.X, priv.Y = curve.ScalarBaseMult(privateKey);
 
     return (_addr_priv!, error.As(null!)!);
-
 }
 
 } // end x509_package

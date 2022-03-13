@@ -1,13 +1,15 @@
-// package report -- go2cs converted at 2022 March 06 23:23:49 UTC
+// package report -- go2cs converted at 2022 March 13 06:36:54 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\report\synth.go
-using profile = go.github.com.google.pprof.profile_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using profile = github.com.google.pprof.profile_package;
+
+
+// synthCode assigns addresses to locations without an address.
 
 public static partial class report_package {
 
-    // synthCode assigns addresses to locations without an address.
 private partial struct synthCode {
     public ulong next;
     public map<ptr<profile.Location>, ulong> addr; // Synthesized address assigned to a location
@@ -21,7 +23,6 @@ private static ptr<synthCode> newSynthCode(slice<ptr<profile.Mapping>> mappings)
             s.next = m.Limit;
         }
     }    return _addr_s!;
-
 }
 
 // address returns the synthetic address for loc, creating one if needed.
@@ -43,7 +44,6 @@ private static ulong address(this ptr<synthCode> _addr_s, ptr<profile.Location> 
         addr = addr__prev1;
 
     }
-
     if (s.addr == null) {
         s.addr = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<profile.Location>, ulong>{};
     }
@@ -51,7 +51,6 @@ private static ulong address(this ptr<synthCode> _addr_s, ptr<profile.Location> 
     s.next++;
     s.addr[loc] = addr;
     return addr;
-
 });
 
 } // end report_package

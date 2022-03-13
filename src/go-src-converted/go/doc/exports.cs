@@ -4,19 +4,21 @@
 
 // This file implements export filtering of an AST.
 
-// package doc -- go2cs converted at 2022 March 06 22:41:30 UTC
+// package doc -- go2cs converted at 2022 March 13 05:52:35 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Program Files\Go\src\go\doc\exports.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-
 namespace go.go;
+
+using ast = go.ast_package;
+using token = go.token_package;
+
+
+// filterIdentList removes unexported names from list in place
+// and returns the resulting list.
+//
 
 public static partial class doc_package {
 
-    // filterIdentList removes unexported names from list in place
-    // and returns the resulting list.
-    //
 private static slice<ptr<ast.Ident>> filterIdentList(slice<ptr<ast.Ident>> list) {
     nint j = 0;
     foreach (var (_, x) in list) {
@@ -25,7 +27,6 @@ private static slice<ptr<ast.Ident>> filterIdentList(slice<ptr<ast.Ident>> list)
             j++;
         }
     }    return list[(int)0..(int)j];
-
 }
 
 private static var underscore = ast.NewIdent("_");
@@ -60,7 +61,6 @@ private static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Filter filte
                     x = x__prev1;
 
                 }
-
                 {
                     var x__prev1 = x;
 
@@ -73,14 +73,11 @@ private static slice<ast.Expr> filterExprList(slice<ast.Expr> list, Filter filte
                     x = x__prev1;
 
                 }
-
                 break;
         }
         list[j] = exp;
         j++;
-
     }    return list[(int)0..(int)j];
-
 }
 
 // updateIdentList replaces all unexported identifiers with underscore
@@ -97,7 +94,6 @@ private static bool updateIdentList(slice<ptr<ast.Ident>> list) {
             list[i] = underscore;
         }
     }    return hasExported;
-
 }
 
 // hasExportedName reports whether list contains any exported names.
@@ -108,7 +104,6 @@ private static bool hasExportedName(slice<ptr<ast.Ident>> list) {
             return true;
         }
     }    return false;
-
 }
 
 // removeErrorField removes anonymous fields named "error" from an interface.
@@ -135,11 +130,9 @@ private static void removeErrorField(ptr<ast.InterfaceType> _addr_ityp) {
                     }
 
                 }
-
             }
 
         }
-
         if (keepField) {
             list[j] = field;
             j++;
@@ -148,7 +141,6 @@ private static void removeErrorField(ptr<ast.InterfaceType> _addr_ityp) {
         ityp.Incomplete = true;
     }
     ityp.Methods.List = list[(int)0..(int)j];
-
 }
 
 // filterFieldList removes unexported fields (field names) from the field list
@@ -185,9 +177,7 @@ private static bool filterFieldList(this ptr<reader> _addr_r, ptr<namedType> _ad
                     // it can be fixed if error is also defined locally
                     keepField = true;
                     r.remember(ityp);
-
                 }
-
             }
             else
  {
@@ -201,7 +191,6 @@ private static bool filterFieldList(this ptr<reader> _addr_r, ptr<namedType> _ad
             }
 
         }
-
         if (keepField) {
             r.filterType(null, field.Type);
             list[j] = field;
@@ -212,7 +201,6 @@ private static bool filterFieldList(this ptr<reader> _addr_r, ptr<namedType> _ad
     }
     fields.List = list[(int)0..(int)j];
     return ;
-
 }
 
 // filterParamList applies filterType to each parameter type in fields.
@@ -267,7 +255,6 @@ private static void filterType(this ptr<reader> _addr_r, ptr<namedType> _addr_pa
             r.filterType(null, t.Value);
             break;
     }
-
 }
 
 private static bool filterSpec(this ptr<reader> _addr_r, ast.Spec spec) {
@@ -290,7 +277,6 @@ private static bool filterSpec(this ptr<reader> _addr_r, ast.Spec spec) {
                     r.filterType(null, s.Type);
                     return true;
                 }
-
             }
             else
  {
@@ -300,7 +286,6 @@ private static bool filterSpec(this ptr<reader> _addr_r, ast.Spec spec) {
                     return true;
                 }
             }
-
             break;
         case ptr<ast.TypeSpec> s:
             {
@@ -313,16 +298,12 @@ private static bool filterSpec(this ptr<reader> _addr_r, ast.Spec spec) {
                 else if (name == "error") { 
                     // special case: remember that error is declared locally
                     r.errorDecl = true;
-
                 }
 
-
             }
-
             break;
     }
     return false;
-
 }
 
 // copyConstType returns a copy of typ with position pos.
@@ -341,11 +322,9 @@ private static ast.Expr copyConstType(ast.Expr typ, token.Pos pos) {
                 if (ok) { 
                     // presumably a qualified identifier
                     return addr(new ast.SelectorExpr(Sel:ast.NewIdent(typ.Sel.Name),X:&ast.Ident{Name:id.Name,NamePos:pos},));
-
                 }
 
             }
-
             break;
     }
     return null; // shouldn't happen, but be conservative and don't panic
@@ -367,19 +346,15 @@ private static slice<ast.Spec> filterSpecList(this ptr<reader> _addr_r, slice<as
                 if (spec.Type == null && len(spec.Values) == 0 && prevType != null) { 
                     // provide current spec with an explicit type
                     spec.Type = copyConstType(prevType, spec.Pos());
-
                 }
-
                 if (hasExportedName(spec.Names)) { 
                     // exported names are preserved so there's no need to propagate the type
                     prevType = null;
-
                 }
                 else
  {
                     prevType = spec.Type;
                 }
-
             }
 
             spec = spec__prev1;
@@ -392,7 +367,6 @@ private static slice<ast.Spec> filterSpecList(this ptr<reader> _addr_r, slice<as
             j++;
         }
     }    return list[(int)0..(int)j];
-
 }
 
 private static bool filterDecl(this ptr<reader> _addr_r, ast.Decl decl) {
@@ -408,7 +382,6 @@ private static bool filterDecl(this ptr<reader> _addr_r, ast.Decl decl) {
             break;
     }
     return false;
-
 }
 
 // fileExports removes unexported declarations from src in place.
@@ -424,7 +397,6 @@ private static void fileExports(this ptr<reader> _addr_r, ptr<ast.File> _addr_sr
             j++;
         }
     }    src.Decls = src.Decls[(int)0..(int)j];
-
 }
 
 } // end doc_package

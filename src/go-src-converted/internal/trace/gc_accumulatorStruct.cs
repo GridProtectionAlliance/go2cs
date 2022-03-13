@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:52 UTC
+//     Generated on 2022 March 13 06:35:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class trace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct accumulator
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace @internal
             public static implicit operator accumulator(NilType nil) => default(accumulator);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static accumulator accumulator_cast(dynamic value)
         {
             return new accumulator(value.mmu, value.bound, value.nWorst, value.wHeap, ref value.mud, value.preciseMass, value.lastTime, value.lastMU);

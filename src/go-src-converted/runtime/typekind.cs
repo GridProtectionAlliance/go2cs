@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:26 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:31 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\typekind.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -39,7 +37,6 @@ private static readonly var kindStruct = 23;
 private static readonly kindDirectIface kindUnsafePointer = 1 << 5;
 private static readonly nint kindGCProg = 1 << 6;
 private static readonly nint kindMask = (1 << 5) - 1;
-
 
 // isDirectIface reports whether t is stored directly in an interface value.
 private static bool isDirectIface(ptr<_type> _addr_t) {

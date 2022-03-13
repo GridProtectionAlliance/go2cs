@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:34 UTC
+//     Generated on 2022 March 13 06:33:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
 {
     public static partial class loader_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Loader
         {
             // Constructors
@@ -166,7 +166,7 @@ namespace @internal
             public static implicit operator Loader(NilType nil) => default(Loader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Loader Loader_cast(dynamic value)
         {
             return new Loader(value.start, value.objs, value.extStart, value.builtinSyms, value.objSyms, value.symsByName, value.extStaticSyms, ref value.extReader, value.payloadBatch, value.payloads, value.values, value.sects, value.symSects, value.align, value.deferReturnTramp, value.objByPkg, value.anonVersion, value.attrReachable, value.attrOnList, value.attrLocal, value.attrNotInSymbolTable, value.attrUsedInIface, value.attrVisibilityHidden, value.attrDuplicateOK, value.attrShared, value.attrExternal, value.attrReadOnly, value.outer, value.sub, value.dynimplib, value.dynimpvers, value.localentry, value.extname, value.elfType, value.elfSym, value.localElfSym, value.symPkg, value.plt, value.got, value.dynid, value.relocVariant, value.Reachparent, value.CgoExports, value.flags, value.hasUnknownPkgPath, value.strictDupMsgs, value.elfsetstring, ref value.errorReporter, value.npkgsyms, value.nhashedsyms);

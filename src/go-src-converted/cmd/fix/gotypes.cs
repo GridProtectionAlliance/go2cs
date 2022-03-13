@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:46 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:15 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\gotypes.go
-using ast = go.go.ast_package;
-using strconv = go.strconv_package;
-using System;
-
-
 namespace go;
+
+using ast = go.ast_package;
+using strconv = strconv_package;
+using System;
 
 public static partial class main_package {
 
@@ -27,7 +26,6 @@ private static bool gotypes(ptr<ast.File> _addr_f) {
         fixed = true;
     }
     return fixed;
-
 }
 
 private static bool fixGoTypes(ptr<ast.File> _addr_f) {
@@ -72,7 +70,6 @@ private static bool fixGoExact(ptr<ast.File> _addr_f) {
     // we know it should be missing.
     importSpec.Name = null;
     return true;
-
 }
 
 } // end main_package

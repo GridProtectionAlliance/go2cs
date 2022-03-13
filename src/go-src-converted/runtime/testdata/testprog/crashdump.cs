@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:25:58 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:19 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\crashdump.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using System.Threading;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using System.Threading;
 
 public static partial class main_package {
 
@@ -37,14 +36,13 @@ public static void CrashDumpsAllThreads() {
             os.Exit(2);
         }
     }
-
-
 }
 
 private static void crashDumpsAllThreadsLoop(nint i, channel<bool> c) {
     close(c);
     while (true) {
-        for (nint j = 0; j < 0x7fffffff; j++)         }
+        for (nint j = 0; j < 0x7fffffff; j++) {
+        }
     }
 }
 

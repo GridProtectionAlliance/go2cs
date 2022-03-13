@@ -2,66 +2,68 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2022 March 06 22:31:15 UTC
+// package cmplx -- go2cs converted at 2022 March 13 05:42:09 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Program Files\Go\src\math\cmplx\tan.go
-using math = go.math_package;
-using bits = go.math.bits_package;
-
 namespace go.math;
+
+using math = math_package;
+using bits = math.bits_package;
+
+
+// The original C code, the long comment, and the constants
+// below are from http://netlib.sandia.gov/cephes/c9x-complex/clog.c.
+// The go code is a simplified version of the original C.
+//
+// Cephes Math Library Release 2.8:  June, 2000
+// Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
+//
+// The readme file at http://netlib.sandia.gov/cephes/ says:
+//    Some software in this archive may be from the book _Methods and
+// Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
+// International, 1989) or from the Cephes Mathematical Library, a
+// commercial product. In either event, it is copyrighted by the author.
+// What you see here may be used freely but it comes with no support or
+// guarantee.
+//
+//   The two known misprints in the book are repaired here in the
+// source listings for the gamma function and the incomplete beta
+// integral.
+//
+//   Stephen L. Moshier
+//   moshier@na-net.ornl.gov
+
+// Complex circular tangent
+//
+// DESCRIPTION:
+//
+// If
+//     z = x + iy,
+//
+// then
+//
+//           sin 2x  +  i sinh 2y
+//     w  =  --------------------.
+//            cos 2x  +  cosh 2y
+//
+// On the real axis the denominator is zero at odd multiples
+// of PI/2. The denominator is evaluated by its Taylor
+// series near these points.
+//
+// ctan(z) = -i ctanh(iz).
+//
+// ACCURACY:
+//
+//                      Relative error:
+// arithmetic   domain     # trials      peak         rms
+//    DEC       -10,+10      5200       7.1e-17     1.6e-17
+//    IEEE      -10,+10     30000       7.2e-16     1.2e-16
+// Also tested by ctan * ccot = 1 and catan(ctan(z))  =  z.
+
+// Tan returns the tangent of x.
 
 public static partial class cmplx_package {
 
-    // The original C code, the long comment, and the constants
-    // below are from http://netlib.sandia.gov/cephes/c9x-complex/clog.c.
-    // The go code is a simplified version of the original C.
-    //
-    // Cephes Math Library Release 2.8:  June, 2000
-    // Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
-    //
-    // The readme file at http://netlib.sandia.gov/cephes/ says:
-    //    Some software in this archive may be from the book _Methods and
-    // Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
-    // International, 1989) or from the Cephes Mathematical Library, a
-    // commercial product. In either event, it is copyrighted by the author.
-    // What you see here may be used freely but it comes with no support or
-    // guarantee.
-    //
-    //   The two known misprints in the book are repaired here in the
-    // source listings for the gamma function and the incomplete beta
-    // integral.
-    //
-    //   Stephen L. Moshier
-    //   moshier@na-net.ornl.gov
-
-    // Complex circular tangent
-    //
-    // DESCRIPTION:
-    //
-    // If
-    //     z = x + iy,
-    //
-    // then
-    //
-    //           sin 2x  +  i sinh 2y
-    //     w  =  --------------------.
-    //            cos 2x  +  cosh 2y
-    //
-    // On the real axis the denominator is zero at odd multiples
-    // of PI/2. The denominator is evaluated by its Taylor
-    // series near these points.
-    //
-    // ctan(z) = -i ctanh(iz).
-    //
-    // ACCURACY:
-    //
-    //                      Relative error:
-    // arithmetic   domain     # trials      peak         rms
-    //    DEC       -10,+10      5200       7.1e-17     1.6e-17
-    //    IEEE      -10,+10     30000       7.2e-16     1.2e-16
-    // Also tested by ctan * ccot = 1 and catan(ctan(z))  =  z.
-
-    // Tan returns the tangent of x.
 public static System.Numerics.Complex128 Tan(System.Numerics.Complex128 x) {
     {
         var re = real(x);
@@ -85,7 +87,6 @@ public static System.Numerics.Complex128 Tan(System.Numerics.Complex128 x) {
         return Inf();
     }
     return complex(math.Sin(2 * real(x)) / d, math.Sinh(2 * imag(x)) / d);
-
 }
 
 // Complex hyperbolic tangent
@@ -121,7 +122,6 @@ public static System.Numerics.Complex128 Tanh(System.Numerics.Complex128 x) {
         return Inf();
     }
     return complex(math.Sinh(2 * real(x)) / d, math.Sin(2 * imag(x)) / d);
-
 }
 
 // reducePi reduces the input argument x to the range (-Pi/2, Pi/2].
@@ -160,13 +160,11 @@ private static double reducePi(double x) {
         t += 0.5F;
         t = float64(int64(t)); // int64(t) = the multiple
         return ((x - t * PI1) - t * PI2) - t * PI3;
-
     }
     const nuint mask = 0x7FF;
     const nint shift = 64 - 11 - 1;
     const nint bias = 1023;
-    const nint fracMask = 1 << (int)(shift) - 1;
- 
+    const nint fracMask = 1 << (int)(shift) - 1; 
     // Extract out the integer and exponent such that,
     // x = ix * 2 ** exp.
     var ix = math.Float64bits(x);
@@ -207,7 +205,6 @@ private static double reducePi(double x) {
         x--;
     }
     return math.Pi * x;
-
 }
 
 // Taylor series expansion for cosh(2y) - cos(2x)
@@ -248,11 +245,9 @@ private static double tanSeries(System.Numerics.Complex128 z) {
             // Caution: Use ! and > instead of <= for correct behavior if t/d is NaN.
             // See issue 17577.
             break;
-
         }
     }
     return d;
-
 }
 
 // Complex circular cotangent
@@ -290,7 +285,6 @@ public static System.Numerics.Complex128 Cot(System.Numerics.Complex128 x) {
         return Inf();
     }
     return complex(math.Sin(2 * real(x)) / d, -math.Sinh(2 * imag(x)) / d);
-
 }
 
 } // end cmplx_package

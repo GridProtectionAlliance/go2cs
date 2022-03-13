@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2022 March 06 23:24:34 UTC
+// package armasm -- go2cs converted at 2022 March 13 06:37:44 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\inst.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.arm;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+
+
+// A Mode is an instruction execution mode.
 
 public static partial class armasm_package {
 
-    // A Mode is an instruction execution mode.
 public partial struct Mode { // : nint
 }
 
 private static readonly Mode _ = iota;
 public static readonly var ModeARM = 0;
 public static readonly var ModeThumb = 1;
-
 
 public static @string String(this Mode m) {
 
@@ -28,7 +29,6 @@ public static @string String(this Mode m) {
     else if (m == ModeThumb) 
         return "Thumb";
         return fmt.Sprintf("Mode(%d)", int(m));
-
 }
 
 // An Op is an ARM opcode.
@@ -45,7 +45,6 @@ public static @string String(this Op op) {
         return fmt.Sprintf("Op(%d)", int(op));
     }
     return opstr[op];
-
 }
 
 // An Inst is a single instruction.
@@ -71,9 +70,7 @@ public static @string String(this Inst i) {
             buf.WriteString(", ");
         }
         buf.WriteString(arg.String());
-
     }    return buf.String();
-
 }
 
 // An Args holds the instruction arguments.
@@ -244,7 +241,6 @@ public static readonly SP FPSCR = R13;
 public static readonly var LR = R14;
 public static readonly var PC = R15;
 
-
 public static void IsArg(this Reg _p0) {
 }
 
@@ -272,7 +268,6 @@ public static @string String(this Reg r) {
         return fmt.Sprintf("D%d", int(r - D0));
     }
     return fmt.Sprintf("Reg(%d)", int(r));
-
 }
 
 // A RegX represents a fraction of a multi-value register.
@@ -313,7 +308,6 @@ public static @string String(this RegList r) {
     }
     fmt.Fprintf(_addr_buf, "}");
     return buf.String();
-
 }
 
 // An Endian is the argument to the SETEND instruction.
@@ -323,7 +317,6 @@ public partial struct Endian { // : byte
 public static readonly Endian LittleEndian = 0;
 public static readonly Endian BigEndian = 1;
 
-
 public static void IsArg(this Endian _p0) {
 }
 
@@ -332,7 +325,6 @@ public static @string String(this Endian e) {
         return "BE";
     }
     return "LE";
-
 }
 
 // A Shift describes an ARM shift operation.
@@ -352,7 +344,6 @@ public static @string String(this Shift s) {
         return shiftName[s];
     }
     return fmt.Sprintf("Shift(%d)", int(s));
-
 }
 
 // A RegShift is a register shifted by a constant.
@@ -460,7 +451,6 @@ public static @string String(this Mem m) {
             return R + "!";
         }
         return fmt.Sprintf("[%s Mode(%d) %s]", R, int(m.Mode), X);
-
 }
 
 } // end armasm_package

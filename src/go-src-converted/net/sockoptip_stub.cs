@@ -5,12 +5,12 @@
 //go:build js && wasm
 // +build js,wasm
 
-// package net -- go2cs converted at 2022 March 06 22:16:34 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:05 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sockoptip_stub.go
-using syscall = go.syscall_package;
-
 namespace go;
+
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -20,7 +20,6 @@ private static error setIPv4MulticastInterface(ptr<netFD> _addr_fd, ptr<Interfac
  
     // See golang.org/issue/7399.
     return error.As(syscall.ENOPROTOOPT)!;
-
 }
 
 private static error setIPv4MulticastLoopback(ptr<netFD> _addr_fd, bool v) {
@@ -28,7 +27,6 @@ private static error setIPv4MulticastLoopback(ptr<netFD> _addr_fd, bool v) {
  
     // See golang.org/issue/7399.
     return error.As(syscall.ENOPROTOOPT)!;
-
 }
 
 private static error joinIPv4Group(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi, IP ip) {
@@ -37,7 +35,6 @@ private static error joinIPv4Group(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi
  
     // See golang.org/issue/7399.
     return error.As(syscall.ENOPROTOOPT)!;
-
 }
 
 private static error setIPv6MulticastInterface(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi) {
@@ -46,7 +43,6 @@ private static error setIPv6MulticastInterface(ptr<netFD> _addr_fd, ptr<Interfac
  
     // See golang.org/issue/7399.
     return error.As(syscall.ENOPROTOOPT)!;
-
 }
 
 private static error setIPv6MulticastLoopback(ptr<netFD> _addr_fd, bool v) {
@@ -54,7 +50,6 @@ private static error setIPv6MulticastLoopback(ptr<netFD> _addr_fd, bool v) {
  
     // See golang.org/issue/7399.
     return error.As(syscall.ENOPROTOOPT)!;
-
 }
 
 private static error joinIPv6Group(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi, IP ip) {
@@ -63,7 +58,6 @@ private static error joinIPv6Group(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi
  
     // See golang.org/issue/7399.
     return error.As(syscall.ENOPROTOOPT)!;
-
 }
 
 } // end net_package

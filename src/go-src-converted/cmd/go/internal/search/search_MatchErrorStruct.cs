@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:39 UTC
+//     Generated on 2022 March 13 06:30:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
 {
     public static partial class search_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct MatchError
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace @internal
             public static implicit operator MatchError(NilType nil) => default(MatchError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static MatchError MatchError_cast(dynamic value)
         {
             return new MatchError(ref value.Match, value.Err);

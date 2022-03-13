@@ -2,31 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:19:31 UTC
+// package tls -- go2cs converted at 2022 March 13 05:34:29 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\common.go
-using bytes = go.bytes_package;
-using list = go.container.list_package;
-using context = go.context_package;
-using crypto = go.crypto_package;
-using ecdsa = go.crypto.ecdsa_package;
-using ed25519 = go.crypto.ed25519_package;
-using elliptic = go.crypto.elliptic_package;
-using rand = go.crypto.rand_package;
-using rsa = go.crypto.rsa_package;
-using sha512 = go.crypto.sha512_package;
-using x509 = go.crypto.x509_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using net = go.net_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.crypto;
+
+using bytes = bytes_package;
+using list = container.list_package;
+using context = context_package;
+using crypto = crypto_package;
+using ecdsa = crypto.ecdsa_package;
+using ed25519 = crypto.ed25519_package;
+using elliptic = crypto.elliptic_package;
+using rand = crypto.rand_package;
+using rsa = crypto.rsa_package;
+using sha512 = crypto.sha512_package;
+using x509 = crypto.x509_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using net = net_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+using System;
 
 public static partial class tls_package {
 
@@ -38,7 +37,6 @@ public static readonly nuint VersionTLS13 = 0x0304;
 // Deprecated: SSLv3 is cryptographically broken, and is no longer
 // supported by this package. See golang.org/issue/32716.
 public static readonly nuint VersionSSL30 = 0x0300;
-
 
 private static readonly nint maxPlaintext = 16384; // maximum plaintext payload length
 private static readonly nint maxCiphertext = 16384 + 2048; // maximum ciphertext payload length
@@ -55,7 +53,6 @@ private static readonly recordType recordTypeChangeCipherSpec = 20;
 private static readonly recordType recordTypeAlert = 21;
 private static readonly recordType recordTypeHandshake = 22;
 private static readonly recordType recordTypeApplicationData = 23;
-
 
 // TLS handshake message types.
 private static readonly byte typeHelloRequest = 0;
@@ -79,7 +76,6 @@ private static readonly byte typeMessageHash = 254; // synthetic message
 // TLS compression types.
 private static readonly byte compressionNone = 0;
 
-
 // TLS extension numbers
 private static readonly ushort extensionServerName = 0;
 private static readonly ushort extensionStatusRequest = 5;
@@ -99,10 +95,8 @@ private static readonly ushort extensionSignatureAlgorithmsCert = 50;
 private static readonly ushort extensionKeyShare = 51;
 private static readonly ushort extensionRenegotiationInfo = 0xff01;
 
-
 // TLS signaling cipher suite values
 private static readonly ushort scsvRenegotiation = 0x00ff;
-
 
 // CurveID is the type of a TLS identifier for an elliptic curve. See
 // https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-8.
@@ -117,7 +111,6 @@ public static readonly CurveID CurveP384 = 24;
 public static readonly CurveID CurveP521 = 25;
 public static readonly CurveID X25519 = 29;
 
-
 // TLS 1.3 Key Share. See RFC 8446, Section 4.2.8.
 private partial struct keyShare {
     public CurveID group;
@@ -127,7 +120,6 @@ private partial struct keyShare {
 // TLS 1.3 PSK Key Exchange Modes. See RFC 8446, Section 4.2.9.
 private static readonly byte pskModePlain = 0;
 private static readonly byte pskModeDHE = 1;
-
 
 // TLS 1.3 PSK Identity. Can be a Session Ticket, or a reference to a saved
 // session. See RFC 8446, Section 4.2.11.
@@ -140,10 +132,8 @@ private partial struct pskIdentity {
 // https://www.iana.org/assignments/tls-parameters/tls-parameters.xml#tls-parameters-9
 private static readonly byte pointFormatUncompressed = 0;
 
-
 // TLS CertificateStatusType (RFC 3546)
 private static readonly byte statusTypeOCSP = 1;
-
 
 // Certificate types (for certificateRequestMsg)
 private static readonly nint certTypeRSASign = 1;
@@ -155,7 +145,6 @@ private static readonly byte signaturePKCS1v15 = iota + 225;
 private static readonly var signatureRSAPSS = 0;
 private static readonly var signatureECDSA = 1;
 private static readonly var signatureEd25519 = 2;
-
 
 // directSigning is a standard Hash value that signals that no pre-hashing
 // should be performed, and that the input should be signed directly. It is the
@@ -178,7 +167,6 @@ private static byte helloRetryRequestRandom = new slice<byte>(new byte[] { 0xCF,
 // negotiating a higher version. See RFC 8446, Section 4.1.3.
 private static readonly @string downgradeCanaryTLS12 = "DOWNGRD\x01";
 private static readonly @string downgradeCanaryTLS11 = "DOWNGRD\x00";
-
 
 // testingOnlyForceDowngradeCanary is set in tests to force the server side to
 // include downgrade canaries even if it's using its highers supported version.
@@ -266,7 +254,6 @@ public static readonly var VerifyClientCertIfGiven = 2;
 // to be sent by the client.
 public static readonly var RequireAndVerifyClientCert = 3;
 
-
 // requiresClientCert reports whether the ClientAuthType requires a client
 // certificate to be provided.
 private static bool requiresClientCert(ClientAuthType c) {
@@ -275,8 +262,7 @@ private static bool requiresClientCert(ClientAuthType c) {
         return true;
     else 
         return false;
-    
-}
+    }
 
 // ClientSessionState contains the state needed by clients to resume TLS
 // sessions.
@@ -340,7 +326,6 @@ public static readonly SignatureScheme Ed25519 = 0x0807;
 // Legacy signature and hash algorithms for TLS 1.2.
 public static readonly SignatureScheme PKCS1WithSHA1 = 0x0201;
 public static readonly SignatureScheme ECDSAWithSHA1 = 0x0203;
-
 
 // ClientHelloInfo contains information from a ClientHello message in order to
 // guide application logic in the GetCertificate and GetConfigForClient callbacks.
@@ -433,7 +418,6 @@ public static readonly var RenegotiateOnceAsClient = 0;
 // RenegotiateFreelyAsClient allows a remote server to repeatedly
 // request renegotiation.
 public static readonly var RenegotiateFreelyAsClient = 1;
-
 
 // A Config structure is used to configure a TLS client or server.
 // After one has been passed to a TLS function it must not be
@@ -607,7 +591,6 @@ private static readonly nint ticketKeyLifetime = 7 * 24 * time.Hour; // 7 days
 // that is used for new tickets.
 private static readonly nint ticketKeyRotation = 24 * time.Hour;
 
-
 // ticketKey is the internal representation of a session ticket key.
 private partial struct ticketKey {
     public array<byte> keyName;
@@ -651,7 +634,6 @@ private static ptr<Config> Clone(this ptr<Config> _addr_c) => func((defer, _, _)
     c.mutex.RLock();
     defer(c.mutex.RUnlock());
     return addr(new Config(Rand:c.Rand,Time:c.Time,Certificates:c.Certificates,NameToCertificate:c.NameToCertificate,GetCertificate:c.GetCertificate,GetClientCertificate:c.GetClientCertificate,GetConfigForClient:c.GetConfigForClient,VerifyPeerCertificate:c.VerifyPeerCertificate,VerifyConnection:c.VerifyConnection,RootCAs:c.RootCAs,NextProtos:c.NextProtos,ServerName:c.ServerName,ClientAuth:c.ClientAuth,ClientCAs:c.ClientCAs,InsecureSkipVerify:c.InsecureSkipVerify,CipherSuites:c.CipherSuites,PreferServerCipherSuites:c.PreferServerCipherSuites,SessionTicketsDisabled:c.SessionTicketsDisabled,SessionTicketKey:c.SessionTicketKey,ClientSessionCache:c.ClientSessionCache,MinVersion:c.MinVersion,MaxVersion:c.MaxVersion,CurvePreferences:c.CurvePreferences,DynamicRecordSizingDisabled:c.DynamicRecordSizingDisabled,Renegotiation:c.Renegotiation,KeyLogWriter:c.KeyLogWriter,sessionTicketKeys:c.sessionTicketKeys,autoSessionTicketKeys:c.autoSessionTicketKeys,));
-
 });
 
 // deprecatedSessionTicketKey is set as the prefix of SessionTicketKey if it was
@@ -690,7 +672,6 @@ private static void initLegacySessionTicketKeyRLocked(this ptr<Config> _addr_c) 
         // session ticket key, and is only randomized in case the application
         // reuses it for some reason.
         copy(c.SessionTicketKey[..], deprecatedSessionTicketKey);
-
     }
     else if (!bytes.HasPrefix(c.SessionTicketKey[..], deprecatedSessionTicketKey) && len(c.sessionTicketKeys) == 0) {
         c.sessionTicketKeys = new slice<ticketKey>(new ticketKey[] { c.ticketKeyFromBytes(c.SessionTicketKey) });
@@ -724,7 +705,6 @@ private static slice<ticketKey> ticketKeys(this ptr<Config> _addr_c, ptr<Config>
             return ret;
         }
         configForClient.mutex.RUnlock();
-
     }
     c.mutex.RLock();
     defer(c.mutex.RUnlock());
@@ -753,7 +733,6 @@ private static slice<ticketKey> ticketKeys(this ptr<Config> _addr_c, ptr<Config>
             }
 
         }
-
         var valid = make_slice<ticketKey>(0, len(c.autoSessionTicketKeys) + 1);
         valid = append(valid, c.ticketKeyFromBytes(newKey));
         foreach (var (_, k) in c.autoSessionTicketKeys) { 
@@ -761,12 +740,9 @@ private static slice<ticketKey> ticketKeys(this ptr<Config> _addr_c, ptr<Config>
             if (c.time().Sub(k.created) < ticketKeyLifetime) {
                 valid = append(valid, k);
             }
-
         }        c.autoSessionTicketKeys = valid;
-
     }
     return c.autoSessionTicketKeys;
-
 });
 
 // SetSessionTicketKeys updates the session ticket keys for a server.
@@ -794,7 +770,6 @@ private static void SetSessionTicketKeys(this ptr<Config> _addr_c, slice<array<b
     }    c.mutex.Lock();
     c.sessionTicketKeys = newKeys;
     c.mutex.Unlock();
-
 });
 
 private static io.Reader rand(this ptr<Config> _addr_c) {
@@ -805,7 +780,6 @@ private static io.Reader rand(this ptr<Config> _addr_c) {
         return rand.Reader;
     }
     return r;
-
 }
 
 private static time.Time time(this ptr<Config> _addr_c) {
@@ -816,7 +790,6 @@ private static time.Time time(this ptr<Config> _addr_c) {
         t = time.Now;
     }
     return t();
-
 }
 
 private static slice<ushort> cipherSuites(this ptr<Config> _addr_c) {
@@ -826,7 +799,6 @@ private static slice<ushort> cipherSuites(this ptr<Config> _addr_c) {
         return c.CipherSuites;
     }
     return defaultCipherSuites;
-
 }
 
 private static ushort supportedVersions = new slice<ushort>(new ushort[] { VersionTLS13, VersionTLS12, VersionTLS11, VersionTLS10 });
@@ -843,9 +815,7 @@ private static slice<ushort> supportedVersions(this ptr<Config> _addr_c) {
             continue;
         }
         versions = append(versions, v);
-
     }    return versions;
-
 }
 
 private static ushort maxSupportedVersion(this ptr<Config> _addr_c) {
@@ -856,7 +826,6 @@ private static ushort maxSupportedVersion(this ptr<Config> _addr_c) {
         return 0;
     }
     return supportedVersions[0];
-
 }
 
 // supportedVersionsFromMax returns a list of supported versions derived from a
@@ -869,9 +838,7 @@ private static slice<ushort> supportedVersionsFromMax(ushort maxVersion) {
             continue;
         }
         versions = append(versions, v);
-
     }    return versions;
-
 }
 
 private static CurveID defaultCurvePreferences = new slice<CurveID>(new CurveID[] { X25519, CurveP256, CurveP384, CurveP521 });
@@ -883,7 +850,6 @@ private static slice<CurveID> curvePreferences(this ptr<Config> _addr_c) {
         return defaultCurvePreferences;
     }
     return c.CurvePreferences;
-
 }
 
 private static bool supportsCurve(this ptr<Config> _addr_c, CurveID curve) {
@@ -894,7 +860,6 @@ private static bool supportsCurve(this ptr<Config> _addr_c, CurveID curve) {
             return true;
         }
     }    return false;
-
 }
 
 // mutualVersion returns the protocol version to use given the advertised
@@ -912,7 +877,6 @@ private static (ushort, bool) mutualVersion(this ptr<Config> _addr_c, slice<usho
             }
         }
     }    return (0, false);
-
 }
 
 private static var errNoCertificates = errors.New("tls: no certificates configured");
@@ -937,7 +901,6 @@ private static (ptr<Certificate>, error) getCertificate(this ptr<Config> _addr_c
     if (len(c.Certificates) == 1) { 
         // There's only one choice, so no point doing any work.
         return (_addr__addr_c.Certificates[0]!, error.As(null!)!);
-
     }
     if (c.NameToCertificate != null) {
         var name = strings.ToLower(clientHello.ServerName);
@@ -953,7 +916,6 @@ private static (ptr<Certificate>, error) getCertificate(this ptr<Config> _addr_c
             cert = cert__prev2;
 
         }
-
         if (len(name) > 0) {
             var labels = strings.Split(name, ".");
             labels[0] = "*";
@@ -970,7 +932,6 @@ private static (ptr<Certificate>, error) getCertificate(this ptr<Config> _addr_c
                 cert = cert__prev3;
 
             }
-
         }
     }
     {
@@ -986,13 +947,11 @@ private static (ptr<Certificate>, error) getCertificate(this ptr<Config> _addr_c
                 }
 
             }
-
         }
         cert = cert__prev1;
     }
 
     return (_addr__addr_c.Certificates[0]!, error.As(null!)!);
-
 }
 
 // SupportsCertificate returns nil if the provided certificate is supported by
@@ -1036,7 +995,6 @@ private static error SupportsCertificate(this ptr<ClientHelloInfo> _addr_chi, pt
             }
 
         }
-
     }
     Func<error, error> supportsRSAFallback = unsupported => { 
         // TLS 1.3 dropped support for the static RSA key exchange.
@@ -1057,7 +1015,6 @@ private static error SupportsCertificate(this ptr<ClientHelloInfo> _addr_chi, pt
                     }
 
                 }
-
             }
             else
  {
@@ -1084,7 +1041,6 @@ private static error SupportsCertificate(this ptr<ClientHelloInfo> _addr_chi, pt
             return error.As(unsupported)!;
         }
         return error.As(null!)!;
-
     }; 
 
     // If the client sent the signature_algorithms extension, ensure it supports
@@ -1098,7 +1054,6 @@ private static error SupportsCertificate(this ptr<ClientHelloInfo> _addr_chi, pt
             }
 
         }
-
     }
     if (vers == VersionTLS13) {
         return error.As(null!)!;
@@ -1136,7 +1091,6 @@ private static error SupportsCertificate(this ptr<ClientHelloInfo> _addr_chi, pt
                     if (!curveOk) {
                         return error.As(errors.New("client doesn't support certificate curve"))!;
                     }
-
                     ecdsaCipherSuite = true;
                     break;
                 case ed25519.PublicKey pub:
@@ -1154,7 +1108,6 @@ private static error SupportsCertificate(this ptr<ClientHelloInfo> _addr_chi, pt
                     break;
                 }
             }
-
         } {
             return error.As(supportsRSAFallback(unsupportedCertificateError(c)))!;
         }
@@ -1184,13 +1137,11 @@ private static error SupportsCertificate(this ptr<ClientHelloInfo> _addr_chi, pt
             return error.As(false)!;
         }
         return error.As(true)!;
-
     });
     if (cipherSuite == null) {
         return error.As(supportsRSAFallback(errors.New("client doesn't support any cipher suites compatible with the certificate")))!;
     }
     return error.As(null!)!;
-
 }
 
 // SupportsCertificate returns nil if the provided certificate is supported by
@@ -1208,7 +1159,6 @@ private static error SupportsCertificate(this ptr<CertificateRequestInfo> _addr_
         }
     }
 
-
     if (len(cri.AcceptableCAs) == 0) {
         return error.As(null!)!;
     }
@@ -1223,7 +1173,6 @@ private static error SupportsCertificate(this ptr<CertificateRequestInfo> _addr_
             if (err != null) {
                 return error.As(fmt.Errorf("failed to parse certificate #%d in the chain: %w", j, err))!;
             }
-
         }
         foreach (var (_, ca) in cri.AcceptableCAs) {
             if (bytes.Equal(x509Cert.RawIssuer, ca)) {
@@ -1231,7 +1180,6 @@ private static error SupportsCertificate(this ptr<CertificateRequestInfo> _addr_
             }
         }
     }    return error.As(errors.New("chain is not signed by an acceptable CA"))!;
-
 }
 
 // BuildNameToCertificate parses c.Certificates and builds c.NameToCertificate
@@ -1266,7 +1214,6 @@ private static readonly @string keyLogLabelServerHandshake = "SERVER_HANDSHAKE_T
 private static readonly @string keyLogLabelClientTraffic = "CLIENT_TRAFFIC_SECRET_0";
 private static readonly @string keyLogLabelServerTraffic = "SERVER_TRAFFIC_SECRET_0";
 
-
 private static error writeKeyLog(this ptr<Config> _addr_c, @string label, slice<byte> clientRandom, slice<byte> secret) {
     ref Config c = ref _addr_c.val;
 
@@ -1280,7 +1227,6 @@ private static error writeKeyLog(this ptr<Config> _addr_c, @string label, slice<
     writerMutex.Unlock();
 
     return error.As(err)!;
-
 }
 
 // writerMutex protects all KeyLogWriters globally. It is rarely enabled,
@@ -1316,7 +1262,6 @@ private static (ptr<x509.Certificate>, error) leaf(this ptr<Certificate> _addr_c
         return (_addr_c.Leaf!, error.As(null!)!);
     }
     return _addr_x509.ParseCertificate(c.Certificate[0])!;
-
 }
 
 private partial interface handshakeMessage {
@@ -1350,7 +1295,6 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
         capacity = defaultSessionCacheCapacity;
     }
     return addr(new lruSessionCache(m:make(map[string]*list.Element),q:list.New(),capacity:capacity,));
-
 }
 
 // Put adds the provided (sessionKey, cs) pair to the cache. If cs is nil, the entry
@@ -1378,14 +1322,11 @@ private static void Put(this ptr<lruSessionCache> _addr_c, @string sessionKey, p
                 entry.state = cs;
                 c.q.MoveToFront(elem);
             }
-
             return ;
-
         }
         elem = elem__prev1;
 
     }
-
 
     if (c.q.Len() < c.capacity) {
         entry = addr(new lruSessionCacheEntry(sessionKey,cs));
@@ -1399,7 +1340,6 @@ private static void Put(this ptr<lruSessionCache> _addr_c, @string sessionKey, p
     entry.state = cs;
     c.q.MoveToFront(elem);
     c.m[sessionKey] = elem;
-
 });
 
 // Get returns the ClientSessionState value associated with a given key. It
@@ -1420,9 +1360,7 @@ private static (ptr<ClientSessionState>, bool) Get(this ptr<lruSessionCache> _ad
             return (elem.Value._<ptr<lruSessionCacheEntry>>().state, true);
         }
     }
-
     return (_addr_null!, false);
-
 });
 
 private static Config emptyConfig = default;
@@ -1441,7 +1379,6 @@ private static bool isSupportedSignatureAlgorithm(SignatureScheme sigAlg, slice<
             return true;
         }
     }    return false;
-
 }
 
 } // end tls_package

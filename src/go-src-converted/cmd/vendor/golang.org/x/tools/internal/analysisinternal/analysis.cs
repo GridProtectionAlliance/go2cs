@@ -3,22 +3,22 @@
 // license that can be found in the LICENSE file.
 
 // Package analysisinternal exposes internal-only fields from go/analysis.
-// package analysisinternal -- go2cs converted at 2022 March 06 23:35:12 UTC
+
+// package analysisinternal -- go2cs converted at 2022 March 13 06:42:47 UTC
 // import "cmd/vendor/golang.org/x/tools/internal/analysisinternal" ==> using analysisinternal = go.cmd.vendor.golang.org.x.tools.@internal.analysisinternal_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\internal\analysisinternal\analysis.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using strings = go.strings_package;
-
-using astutil = go.golang.org.x.tools.go.ast.astutil_package;
-using fuzzy = go.golang.org.x.tools.@internal.lsp.fuzzy_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+using strings = strings_package;
+
+using astutil = golang.org.x.tools.go.ast.astutil_package;
+using fuzzy = golang.org.x.tools.@internal.lsp.fuzzy_package;
+using System;
 
 public static partial class analysisinternal_package {
 
@@ -40,9 +40,7 @@ public static token.Pos TypeErrorEndPos(ptr<token.FileSet> _addr_fset, slice<byt
             end = start + token.Pos(width);
         }
     }
-
     return end;
-
 }
 
 public static ast.Expr ZeroValue(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_f, ptr<types.Package> _addr_pkg, types.Type typ) => func((_, panic, _) => {
@@ -58,7 +56,6 @@ public static ast.Expr ZeroValue(ptr<token.FileSet> _addr_fset, ptr<ast.File> _a
             under = n.Underlying();
         }
     }
-
     switch (under.type()) {
         case ptr<types.Basic> u:
 
@@ -97,12 +94,10 @@ public static ast.Expr ZeroValue(ptr<token.FileSet> _addr_fset, ptr<ast.File> _a
             if (texpr == null) {
                 return null;
             }
-
             return addr(new ast.CompositeLit(Type:texpr,));
             break;
     }
     return null;
-
 });
 
 // IsZeroValue checks whether the given expression is a 'zero value' (as determined by output of
@@ -122,7 +117,6 @@ public static bool IsZeroValue(ast.Expr expr) {
             break;
         }
     }
-
 }
 
 public static ast.Expr TypeExpr(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_f, ptr<types.Package> _addr_pkg, types.Type typ) {
@@ -232,7 +226,6 @@ public static ast.Expr TypeExpr(ptr<token.FileSet> _addr_fset, ptr<ast.File> _ad
             if (pkgName == ".") {
                 return ast.NewIdent(t.Obj().Name());
             }
-
             return addr(new ast.SelectorExpr(X:ast.NewIdent(pkgName),Sel:ast.NewIdent(t.Obj().Name()),));
             break;
         case ptr<types.Struct> t:
@@ -248,7 +241,6 @@ public static ast.Expr TypeExpr(ptr<token.FileSet> _addr_fset, ptr<ast.File> _ad
             break;
         }
     }
-
 }
 
 public partial struct TypeErrorPass { // : @string
@@ -257,7 +249,6 @@ public partial struct TypeErrorPass { // : @string
 public static readonly TypeErrorPass NoNewVars = "nonewvars";
 public static readonly TypeErrorPass NoResultValues = "noresultvalues";
 public static readonly TypeErrorPass UndeclaredName = "undeclaredname";
-
 
 // StmtToInsertVarBefore returns the ast.Stmt before which we can safely insert a new variable.
 // Some examples:
@@ -291,7 +282,6 @@ public static ast.Stmt StmtToInsertVarBefore(slice<ast.Node> path) {
                 }
 
             }
-
         }
         i = i__prev1;
     }
@@ -330,11 +320,9 @@ public static ast.Stmt StmtToInsertVarBefore(slice<ast.Node> path) {
 
                         }
 
-
                         node = node__prev1;
 
                     }
-
                 }
 
 
@@ -356,7 +344,6 @@ public static ast.Stmt StmtToInsertVarBefore(slice<ast.Node> path) {
             break;
     }
     return enclosingStmt._<ast.Stmt>();
-
 }
 
 // baseIfStmt walks up the if/else-if chain until we get to
@@ -373,12 +360,9 @@ private static ast.Stmt baseIfStmt(slice<ast.Node> path, nint index) {
             }
 
         }
-
         break;
-
     }
     return stmt._<ast.Stmt>();
-
 }
 
 // WalkASTWithParent walks the AST rooted at n. The semantics are
@@ -396,9 +380,7 @@ public static bool WalkASTWithParent(ast.Node n, Func<ast.Node, ast.Node, bool> 
         }
         ancestors = append(ancestors, n);
         return f(n, parent);
-
     });
-
 }
 
 // FindMatchingIdents finds all identifiers in 'node' that match any of the given types.
@@ -498,10 +480,8 @@ public static map<types.Type, slice<ptr<ast.Ident>>> FindMatchingIdents(slice<ty
         }
 
         return true;
-
     });
     return matches;
-
 }
 
 private static bool equivalentTypes(types.Type want, types.Type got) {
@@ -520,12 +500,9 @@ private static bool equivalentTypes(types.Type want, types.Type got) {
                 }
 
             }
-
         }
     }
-
     return types.AssignableTo(want, got);
-
 }
 
 // FindBestMatch employs fuzzy matching to evaluate the similarity of each given identifier to the
@@ -551,10 +528,8 @@ public static ast.Expr FindBestMatch(@string pattern, slice<ptr<ast.Ident>> iden
                 highScore = revScore;
                 bestFuzz = ident;
             }
-
         }
     }    return bestFuzz;
-
 }
 
 } // end analysisinternal_package

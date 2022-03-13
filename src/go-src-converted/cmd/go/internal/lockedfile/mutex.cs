@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lockedfile -- go2cs converted at 2022 March 06 23:17:01 UTC
+// package lockedfile -- go2cs converted at 2022 March 13 06:30:19 UTC
 // import "cmd/go/internal/lockedfile" ==> using lockedfile = go.cmd.go.@internal.lockedfile_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\lockedfile\mutex.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+using os = os_package;
+using sync = sync_package;
+
+
+// A Mutex provides mutual exclusion within and across processes by locking a
+// well-known file. Such a file generally guards some other part of the
+// filesystem: for example, a Mutex file in a directory might guard access to
+// the entire tree rooted in that directory.
+//
+// Mutex does not implement sync.Locker: unlike a sync.Mutex, a lockedfile.Mutex
+// can fail to lock (e.g. if there is a permission error in the filesystem).
+//
+// Like a sync.Mutex, a Mutex may be included as a field of a larger struct but
+// must not be copied after first use. The Path field must be set before first
+// use and must not be change thereafter.
+
+using System;
 public static partial class lockedfile_package {
 
-    // A Mutex provides mutual exclusion within and across processes by locking a
-    // well-known file. Such a file generally guards some other part of the
-    // filesystem: for example, a Mutex file in a directory might guard access to
-    // the entire tree rooted in that directory.
-    //
-    // Mutex does not implement sync.Locker: unlike a sync.Mutex, a lockedfile.Mutex
-    // can fail to lock (e.g. if there is a permission error in the filesystem).
-    //
-    // Like a sync.Mutex, a Mutex may be included as a field of a larger struct but
-    // must not be copied after first use. The Path field must be set before first
-    // use and must not be change thereafter.
 public partial struct Mutex {
     public @string Path; // The path to the well-known lock file. Must be non-empty.
     public sync.Mutex mu; // A redundant mutex. The race detector doesn't know about file locking, so in tests we may need to lock something that it understands.
@@ -37,7 +38,6 @@ public static ptr<Mutex> MutexAt(@string path) => func((_, panic, _) => {
         panic("lockedfile.MutexAt: path must be non-empty");
     }
     return addr(new Mutex(Path:path));
-
 });
 
 private static @string String(this ptr<Mutex> _addr_mu) {
@@ -69,7 +69,6 @@ private static (Action, error) Lock(this ptr<Mutex> _addr_mu) => func((_, panic,
         mu.mu.Unlock();
         f.Close();
     }, error.As(null!)!);
-
 });
 
 } // end lockedfile_package

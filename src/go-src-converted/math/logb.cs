@@ -2,21 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:09 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:03 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\logb.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Logb returns the binary exponent of x.
-    //
-    // Special cases are:
-    //    Logb(±Inf) = +Inf
-    //    Logb(0) = -Inf
-    //    Logb(NaN) = NaN
+// Logb returns the binary exponent of x.
+//
+// Special cases are:
+//    Logb(±Inf) = +Inf
+//    Logb(0) = -Inf
+//    Logb(NaN) = NaN
 public static double Logb(double x) { 
     // special cases
 
@@ -27,7 +25,6 @@ public static double Logb(double x) {
     else if (IsNaN(x)) 
         return x;
         return float64(ilogb(x));
-
 }
 
 // Ilogb returns the binary exponent of x as an integer.
@@ -46,7 +43,6 @@ public static nint Ilogb(double x) {
     else if (IsInf(x, 0)) 
         return MaxInt32;
         return ilogb(x);
-
 }
 
 // logb returns the binary exponent of x. It assumes x is finite and

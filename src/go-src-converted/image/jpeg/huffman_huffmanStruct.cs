@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:07 UTC
+//     Generated on 2022 March 13 06:44:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace image
 {
     public static partial class jpeg_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct huffman
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace image
             public static implicit operator huffman(NilType nil) => default(huffman);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static huffman huffman_cast(dynamic value)
         {
             return new huffman(value.nCodes, value.lut, value.vals, value.minCodes, value.maxCodes, value.valsIndices);

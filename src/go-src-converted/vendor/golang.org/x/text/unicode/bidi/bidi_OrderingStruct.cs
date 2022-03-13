@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:25 UTC
+//     Generated on 2022 March 13 06:46:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace unicode
 {
     public static partial class bidi_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Ordering
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace unicode
             public static implicit operator Ordering(NilType nil) => default(Ordering);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Ordering Ordering_cast(dynamic value)
         {
             return new Ordering(value.runes, value.directions, value.startpos);

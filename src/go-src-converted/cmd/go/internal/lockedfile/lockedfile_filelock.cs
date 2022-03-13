@@ -5,15 +5,15 @@
 //go:build !plan9
 // +build !plan9
 
-// package lockedfile -- go2cs converted at 2022 March 06 23:16:59 UTC
+// package lockedfile -- go2cs converted at 2022 March 13 06:30:17 UTC
 // import "cmd/go/internal/lockedfile" ==> using lockedfile = go.cmd.go.@internal.lockedfile_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\lockedfile\lockedfile_filelock.go
-using fs = go.io.fs_package;
-using os = go.os_package;
-
-using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package;
-
 namespace go.cmd.go.@internal;
+
+using fs = io.fs_package;
+using os = os_package;
+
+using filelock = cmd.go.@internal.lockedfile.@internal.filelock_package;
 
 public static partial class lockedfile_package {
 
@@ -57,13 +57,10 @@ private static (ptr<os.File>, error) openFile(@string name, nint flag, fs.FileMo
                         return (_addr_null!, error.As(err)!);
                     }
                 }
-
             }
         }
-
     }
     return (_addr_f!, error.As(null!)!);
-
 }
 
 private static error closeFile(ptr<os.File> _addr_f) {
@@ -81,9 +78,7 @@ private static error closeFile(ptr<os.File> _addr_f) {
             err = closeErr;
         }
     }
-
     return error.As(err)!;
-
 }
 
 } // end lockedfile_package

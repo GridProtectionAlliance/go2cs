@@ -3,17 +3,20 @@
 // license that can be found in the LICENSE file.
 
 // Package edit implements buffered position-based editing of byte slices.
-// package edit -- go2cs converted at 2022 March 06 22:47:22 UTC
+
+// package edit -- go2cs converted at 2022 March 13 05:58:37 UTC
 // import "cmd/internal/edit" ==> using edit = go.cmd.@internal.edit_package
 // Original source: C:\Program Files\Go\src\cmd\internal\edit\edit.go
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-
 namespace go.cmd.@internal;
+
+using fmt = fmt_package;
+using sort = sort_package;
+
+
+// A Buffer is a queue of edits to apply to a given byte slice.
 
 public static partial class edit_package {
 
-    // A Buffer is a queue of edits to apply to a given byte slice.
 public partial struct Buffer {
     public slice<byte> old;
     public edits q;
@@ -41,7 +44,6 @@ private static bool Less(this edits x, nint i, nint j) {
         return x[i].start < x[j].start;
     }
     return x[i].end < x[j].end;
-
 }
 
 // NewBuffer returns a new buffer to accumulate changes to an initial data slice.
@@ -58,7 +60,6 @@ private static void Insert(this ptr<Buffer> _addr_b, nint pos, @string @new) => 
         panic("invalid edit position");
     }
     b.q = append(b.q, new edit(pos,pos,new));
-
 });
 
 private static void Delete(this ptr<Buffer> _addr_b, nint start, nint end) => func((_, panic, _) => {
@@ -68,7 +69,6 @@ private static void Delete(this ptr<Buffer> _addr_b, nint start, nint end) => fu
         panic("invalid edit position");
     }
     b.q = append(b.q, new edit(start,end,""));
-
 });
 
 private static void Replace(this ptr<Buffer> _addr_b, nint start, nint end, @string @new) => func((_, panic, _) => {
@@ -78,7 +78,6 @@ private static void Replace(this ptr<Buffer> _addr_b, nint start, nint end, @str
         panic("invalid edit position");
     }
     b.q = append(b.q, new edit(start,end,new));
-
 });
 
 // Bytes returns a new byte slice containing the original data
@@ -101,10 +100,8 @@ private static slice<byte> Bytes(this ptr<Buffer> _addr_b) => func((_, panic, _)
         new = append(new, b.old[(int)offset..(int)e.start]);
         offset = e.end;
         new = append(new, e.@new);
-
     }    new = append(new, b.old[(int)offset..]);
     return new;
-
 });
 
 // String returns a string containing the original data

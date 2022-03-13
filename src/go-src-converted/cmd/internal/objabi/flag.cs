@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:22 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:20 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\flag.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.@internal;
+
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class objabi_package {
 
@@ -88,12 +87,10 @@ private static slice<@string> expandArgs(slice<@string> @in) {
                 }
 
                 out = append(out, expandArgs(args));
-
             }
             else if (out != null) {
                 out = append(out, s);
             }
-
         }
         i = i__prev1;
     }
@@ -102,7 +99,6 @@ private static slice<@string> expandArgs(slice<@string> @in) {
         return in;
     }
     return ;
-
 }
 
 public static void AddVersionFlag() {
@@ -135,7 +131,6 @@ private static error Set(this versionFlag _p0, @string s) {
         // test/run.go uses this to discover the full set of
         // experiment tags. Report everything.
         p = " X:" + strings.Join(buildcfg.AllExperiments(), ",");
-
     }
     else
  { 
@@ -149,7 +144,6 @@ private static error Set(this versionFlag _p0, @string s) {
             }
 
         }
-
     }
     if (s == "full") {
         if (strings.HasPrefix(buildcfg.Version, "devel")) {
@@ -159,7 +153,6 @@ private static error Set(this versionFlag _p0, @string s) {
     fmt.Printf("%s version %s%s\n", name, buildcfg.Version, p);
     os.Exit(0);
     return error.As(null!)!;
-
 }
 
 // count is a flag.Value that is like a flag.Bool and a flag.Int.
@@ -190,11 +183,9 @@ private static error Set(this ptr<count> _addr_c, @string s) {
                 return error.As(fmt.Errorf("invalid count %q", s))!;
             }
             c.val = count(n);
-
             break;
     }
     return error.As(null!)!;
-
 }
 
 private static void Get(this ptr<count> _addr_c) {
@@ -251,7 +242,6 @@ public static @string DecodeArg(@string arg) => func((_, panic, _) => {
                     panic("badly formatted input");
                     break;
             }
-
         }
         else if (r == '\\') {
             wasBS = true;
@@ -262,9 +252,7 @@ public static @string DecodeArg(@string arg) => func((_, panic, _) => {
             b.WriteRune(r);
         }
         wasBS = false;
-
     }    return b.String();
-
 });
 
 } // end objabi_package

@@ -2,35 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:26 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:49 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\compile.go
-using bytes = go.bytes_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using crc32 = go.hash.crc32_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using rand = go.math.rand_package;
-using os = go.os_package;
-using regexp = go.regexp_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using crc32 = hash.crc32_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using rand = math.rand_package;
+using os = os_package;
+using regexp = regexp_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// Compile is the main entry point for this package.
+// Compile modifies f so that on return:
+//   · all Values in f map to 0 or 1 assembly instructions of the target architecture
+//   · the order of f.Blocks is the order to emit the Blocks
+//   · the order of b.Values is the order to emit the Values in each Block
+//   · f has a non-nil regAlloc field
+
+using System;
 public static partial class ssa_package {
 
-    // Compile is the main entry point for this package.
-    // Compile modifies f so that on return:
-    //   · all Values in f map to 0 or 1 assembly instructions of the target architecture
-    //   · the order of f.Blocks is the order to emit the Blocks
-    //   · the order of b.Values is the order to emit the Values in each Block
-    //   · f has a non-nil regAlloc field
 public static void Compile(ptr<Func> _addr_f) => func((defer, _, _) => {
     ref Func f = ref _addr_f.val;
  
@@ -55,7 +56,6 @@ public static void Compile(ptr<Func> _addr_f) => func((defer, _, _) => {
                 f.HTMLWriter.flushPhases();
             }
             f.Fatalf("panic during %s while compiling %s:\n\n%v\n\n%s\n", phaseName, f.Name, err, stack);
-
         }
     }()); 
 
@@ -93,7 +93,6 @@ public static void Compile(ptr<Func> _addr_f) => func((defer, _, _) => {
                     var j = i + rnd.Intn(len(b.Values) - i);
                     (b.Values[i], b.Values[j]) = (b.Values[j], b.Values[i]);
                 }
-
             }
         }
         var tStart = time.Now();
@@ -120,7 +119,6 @@ public static void Compile(ptr<Func> _addr_f) => func((defer, _, _) => {
                 printFunc(f);
             }
             f.HTMLWriter.WritePhase(phaseName, fmt.Sprintf("%s <span class=\"stats\">%s</span>", phaseName, stats));
-
         }
         if (p.time || p.mem) { 
             // Surround timing information w/ enough context to allow comparisons.
@@ -139,7 +137,6 @@ public static void Compile(ptr<Func> _addr_f) => func((defer, _, _) => {
         if (p.dump != null && p.dump[f.Name]) { 
             // Dump function to appropriately named file
             f.dumpFile(phaseName);
-
         }
         if (checkEnabled) {
             checkFunc(f);
@@ -147,7 +144,6 @@ public static void Compile(ptr<Func> _addr_f) => func((defer, _, _) => {
     }    if (f.HTMLWriter != null) { 
         // Ensure we write any pending phases to the html
         f.HTMLWriter.flushPhases();
-
     }
     if (f.ruleMatches != null) {
         slice<@string> keys = default;
@@ -176,10 +172,8 @@ public static void Compile(ptr<Func> _addr_f) => func((defer, _, _) => {
 
         fmt.Fprint(buf, "\n");
         fmt.Print(buf.String());
-
     }
     phaseName = "";
-
 });
 
 // dumpFile creates a file from the phase name and function name
@@ -202,7 +196,6 @@ private static void dumpFile(this ptr<Func> _addr_f, @string phaseName) {
     stringFuncPrinter p = new stringFuncPrinter(w:fi);
     fprintFunc(p, f);
     fi.Close();
-
 }
 
 private partial struct pass {
@@ -225,7 +218,6 @@ private static void addDump(this ptr<pass> _addr_p, @string s) {
         p.dump = make_map<@string, bool>();
     }
     p.dump[s] = true;
-
 }
 
 private static @string String(this ptr<pass> _addr_p) {
@@ -235,7 +227,6 @@ private static @string String(this ptr<pass> _addr_p) {
         return "nil pass";
     }
     return p.name;
-
 }
 
 // Run consistency checker between each phase
@@ -290,7 +281,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
              {
                                 phasenames += ", " + pn;
                             }
-
                         }
 
                         p = p__prev1;
@@ -338,7 +328,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
 
                 -d=ssa/check/on,ssa/all/time
             ";
-
             break;
     }
 
@@ -348,7 +337,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
                 checkEnabled = val != 0;
                 debugPoset = checkEnabled; // also turn on advanced self-checking in prove's datastructure
                 return "";
-
                 break;
             case "off": 
                 checkEnabled = val == 0;
@@ -362,7 +350,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
                 return "";
                 break;
         }
-
     }
     var alltime = false;
     var allmem = false;
@@ -385,7 +372,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
                 return fmt.Sprintf("Did not find a flag matching %s in -d=ssa/%s debug option", flag, phase);
                 break;
         }
-
     }
     if (phase == "intrinsics") {
         switch (flag) {
@@ -403,7 +389,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
                 break;
         }
         return "";
-
     }
     if (phase == "build") {
         switch (flag) {
@@ -424,7 +409,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
                 break;
         }
         return "";
-
     }
     var underphase = strings.Replace(phase, "_", " ", -1);
     ptr<regexp.Regexp> re;
@@ -434,7 +418,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
             return fmt.Sprintf("Error %s in regexp for phase %s, flag %s", ok.Error(), phase, flag);
         }
         re = r;
-
     }
     var matchedOne = false;
     {
@@ -485,12 +468,9 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
                 if (p.disabled && p.required) {
                     return fmt.Sprintf("Cannot disable required SSA phase %s using -d=ssa/%s debug option", phase, phase);
                 }
-
                 passes[i] = p;
                 matchedOne = true;
-
             }
-
         }
         p = p__prev1;
     }
@@ -499,7 +479,6 @@ public static @string PhaseOption(@string phase, @string flag, nint val, @string
         return "";
     }
     return fmt.Sprintf("Did not find a phase matching %s in -d=ssa/... debug option", phase);
-
 }
 
 // list of passes for the compiler

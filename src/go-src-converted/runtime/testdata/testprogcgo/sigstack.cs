@@ -8,8 +8,9 @@
 // C-created threads with and without signal stacks. (See issue
 // #22930.)
 
-// package main -- go2cs converted at 2022 March 06 22:26:17 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:33 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\sigstack.go
+namespace go;
 /*
 #include <pthread.h>
 #include <signal.h>
@@ -74,36 +75,7 @@ static void DoThread(int sigstack) {
     pthread_join(tid, NULL);
 }
 */
-using C = go.C_package;
-using System;
 
 
-namespace go;
-
-public static partial class main_package {
-
-private static void init() {
-    register("SigStack", SigStack);
-}
-
-public static void SigStack() {
-    C.DoThread(0);
-    C.DoThread(1);
-    C.DoThread(0);
-    C.DoThread(1);
-    println("OK");
-}
-
-public static ptr<nint> BadPtr;
-
-//export SigStackCallback
-public static void SigStackCallback() => func((defer, _, recover) => { 
-    // Cause the Go signal handler to run.
-    defer(() => {
-        recover();
-    }());
-    BadPtr.val = 42;
-
-});
 
 } // end main_package

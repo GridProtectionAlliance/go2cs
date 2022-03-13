@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:42:06 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:14 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\object.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-
 namespace go.go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+
+// An Object describes a named language entity such as a package,
+// constant, type, variable, function (incl. methods), or label.
+// All objects implement the Object interface.
+//
 
 public static partial class types_package {
 
-    // An Object describes a named language entity such as a package,
-    // constant, type, variable, function (incl. methods), or label.
-    // All objects implement the Object interface.
-    //
 public partial interface Object {
     token.Pos Parent(); // scope in which this object is declared; nil for methods and struct fields
     token.Pos Pos(); // position of object identifier in declaration
@@ -58,7 +60,6 @@ public static @string Id(ptr<Package> _addr_pkg, @string name) {
         path = pkg.path;
     }
     return path + "." + name;
-
 }
 
 // An object implements the common parts of an Object.
@@ -91,8 +92,7 @@ private static @string String(this color c) {
         return "black";
     else 
         return "grey";
-    
-}
+    }
 
 // colorFor returns the (initial) color for an object depending on
 // whether its type t is known or not.
@@ -101,7 +101,6 @@ private static color colorFor(Type t) {
         return black;
     }
     return white;
-
 }
 
 // Parent returns the scope in which the object is declared.
@@ -227,7 +226,6 @@ private static bool sameId(this ptr<object> _addr_obj, ptr<Package> _addr_pkg, @
         return pkg == obj.pkg;
     }
     return pkg.path == obj.pkg.path;
-
 }
 
 // A PkgName represents an imported Go package.
@@ -329,7 +327,6 @@ private static bool IsAlias(this ptr<TypeName> _addr_obj) {
             break;
         }
     }
-
 }
 
 // A Variable represents a declared variable (including function parameters and results, and struct fields).
@@ -411,7 +408,6 @@ public static ptr<Func> NewFunc(token.Pos pos, ptr<Package> _addr_pkg, @string n
         typ = sig;
     }
     return addr(new Func(object{nil,pos,pkg,name,typ,0,colorFor(typ),token.NoPos},false));
-
 }
 
 // FullName returns the package- or receiver-type-qualified name of
@@ -483,7 +479,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
                 }
 
             }
-
             return ;
             break;
         case ptr<Const> obj:
@@ -501,7 +496,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
  {
                 buf.WriteString("var");
             }
-
             break;
         case ptr<Func> obj:
             buf.WriteString("func ");
@@ -555,7 +549,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
             }
 
         }
-
         if (tname.IsAlias()) {
             buf.WriteString(" =");
         }
@@ -566,7 +559,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
     }
     buf.WriteByte(' ');
     WriteType(buf, typ, qf);
-
 });
 
 private static void writePackage(ptr<bytes.Buffer> _addr_buf, ptr<Package> _addr_pkg, Qualifier qf) {
@@ -660,7 +652,6 @@ private static void writeFuncName(ptr<bytes.Buffer> _addr_buf, ptr<Func> _addr_f
                         // (not the named type) as the receiver.
                         // Don't print it in full.
                         buf.WriteString("interface");
-
                     }
                     else
  {
@@ -668,21 +659,16 @@ private static void writeFuncName(ptr<bytes.Buffer> _addr_buf, ptr<Func> _addr_f
                     }
 
                 }
-
                 buf.WriteByte(')');
                 buf.WriteByte('.');
-
             }
             else if (f.pkg != null) {
                 writePackage(_addr_buf, _addr_f.pkg, qf);
             }
 
-
         }
-
     }
     buf.WriteString(f.name);
-
 }
 
 } // end types_package

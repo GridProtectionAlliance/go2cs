@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:26 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:29 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\typelink.go
-using objabi = go.cmd.@internal.objabi_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using sort = go.sort_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using sort = sort_package;
 
 public static partial class ld_package {
 
@@ -54,7 +54,6 @@ private static void typelink(this ptr<Link> _addr_ctxt) {
             else if (ldr.IsItab(s)) {
                 itabs = append(itabs, s);
             }
-
         }
 
         s = s__prev1;

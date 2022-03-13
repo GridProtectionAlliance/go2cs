@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:25 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\chan.go
+namespace go;
 // This file contains the implementation of Go channels.
 
 // Invariants:
@@ -18,20 +19,17 @@
 //  c.qcount > 0 implies that c.recvq is empty.
 //  c.qcount < c.dataqsiz implies that c.sendq is empty.
 
-using atomic = go.runtime.@internal.atomic_package;
-using math = go.runtime.@internal.math_package;
-using @unsafe = go.@unsafe_package;
+
+using atomic = runtime.@internal.atomic_package;
+using math = runtime.@internal.math_package;
+using @unsafe = @unsafe_package;
 using System;
-
-
-namespace go;
 
 public static partial class runtime_package {
 
 private static readonly nint maxAlign = 8;
 private static readonly var hchanSize = @unsafe.Sizeof(new hchan()) + uintptr(-int(@unsafe.Sizeof(new hchan())) & (maxAlign - 1));
 private static readonly var debugChan = false;
-
 
 private partial struct hchan {
     public nuint qcount; // total data in the queue
@@ -73,7 +71,6 @@ private static ptr<hchan> makechan64(ptr<chantype> _addr_t, long size) => func((
         panic(plainError("makechan: size out of range"));
     }
     return _addr_makechan(_addr_t, int(size))!;
-
 });
 
 private static ptr<hchan> makechan(ptr<chantype> _addr_t, nint size) => func((_, panic, _) => {
@@ -117,7 +114,6 @@ private static ptr<hchan> makechan(ptr<chantype> _addr_t, nint size) => func((_,
         print("makechan: chan=", c, "; elemsize=", elem.size, "; dataqsiz=", size, "\n");
     }
     return _addr_c!;
-
 });
 
 // chanbuf(c, i) is pointer to the i'th slot in the buffer.
@@ -139,10 +135,8 @@ private static bool full(ptr<hchan> _addr_c) {
     if (c.dataqsiz == 0) { 
         // Assumes that a pointer read is relaxed-atomic.
         return c.recvq.first == null;
-
     }
     return c.qcount == c.dataqsiz;
-
 }
 
 // entry point for c <- x from compiled code
@@ -174,7 +168,6 @@ private static bool chansend(ptr<hchan> _addr_c, unsafe.Pointer ep, bool block, 
         }
         gopark(null, null, waitReasonChanSendNilChan, traceEvGoStop, 2);
         throw("unreachable");
-
     }
     if (debugChan) {
         print("chansend: chan=", c, "\n");
@@ -205,10 +198,8 @@ private static bool chansend(ptr<hchan> _addr_c, unsafe.Pointer ep, bool block, 
                 unlock(_addr_c.@lock);
             }, 3);
             return true;
-
         }
     }
-
 
     if (c.qcount < c.dataqsiz) { 
         // Space is available in the channel buffer. Enqueue the element to send.
@@ -224,7 +215,6 @@ private static bool chansend(ptr<hchan> _addr_c, unsafe.Pointer ep, bool block, 
         c.qcount++;
         unlock(_addr_c.@lock);
         return true;
-
     }
     if (!block) {
         unlock(_addr_c.@lock);
@@ -274,10 +264,8 @@ private static bool chansend(ptr<hchan> _addr_c, unsafe.Pointer ep, bool block, 
             throw("chansend: spurious wakeup");
         }
         panic(plainError("send on closed channel"));
-
     }
     return true;
-
 });
 
 // send processes a send operation on an empty channel c.
@@ -305,7 +293,6 @@ private static void send(ptr<hchan> _addr_c, ptr<sudog> _addr_sg, unsafe.Pointer
             if (c.recvx == c.dataqsiz) {
                 c.recvx = 0;
             }
-
             c.sendx = c.recvx; // c.sendx = (c.sendx+1) % c.dataqsiz
         }
     }
@@ -321,7 +308,6 @@ private static void send(ptr<hchan> _addr_c, ptr<sudog> _addr_sg, unsafe.Pointer
         sg.releasetime = cputicks();
     }
     goready(gp, skip + 1);
-
 }
 
 // Sends and receives on unbuffered or empty-buffered channels are the
@@ -348,7 +334,6 @@ private static void sendDirect(ptr<_type> _addr_t, ptr<sudog> _addr_sg, unsafe.P
     // No need for cgo write barrier checks because dst is always
     // Go memory.
     memmove(dst, src, t.size);
-
 }
 
 private static void recvDirect(ptr<_type> _addr_t, ptr<sudog> _addr_sg, unsafe.Pointer dst) {
@@ -361,7 +346,6 @@ private static void recvDirect(ptr<_type> _addr_t, ptr<sudog> _addr_sg, unsafe.P
     var src = sg.elem;
     typeBitsBulkBarrier(t, uintptr(dst), uintptr(src), t.size);
     memmove(dst, src, t.size);
-
 }
 
 private static void closechan(ptr<hchan> _addr_c) => func((_, panic, _) => {
@@ -404,7 +388,6 @@ private static void closechan(ptr<hchan> _addr_c) => func((_, panic, _) => {
             raceacquireg(gp, c.raceaddr());
         }
         glist.push(gp);
-
     } 
 
     // release all writers (they will panic)
@@ -424,7 +407,6 @@ private static void closechan(ptr<hchan> _addr_c) => func((_, panic, _) => {
             raceacquireg(gp, c.raceaddr());
         }
         glist.push(gp);
-
     }
     unlock(_addr_c.@lock); 
 
@@ -434,7 +416,6 @@ private static void closechan(ptr<hchan> _addr_c) => func((_, panic, _) => {
         gp.schedlink = 0;
         goready(gp, 3);
     }
-
 });
 
 // empty reports whether a read from c would block (that is, the channel is
@@ -447,7 +428,6 @@ private static bool empty(ptr<hchan> _addr_c) {
         return atomic.Loadp(@unsafe.Pointer(_addr_c.sendq.first)) == null;
     }
     return atomic.Loaduint(_addr_c.qcount) == 0;
-
 }
 
 // entry points for <- c from compiled code
@@ -490,7 +470,6 @@ private static (bool, bool) chanrecv(ptr<hchan> _addr_c, unsafe.Pointer ep, bool
         }
         gopark(null, null, waitReasonChanReceiveNilChan, traceEvGoStop, 2);
         throw("unreachable");
-
     }
     if (!block && empty(_addr_c)) { 
         // After observing that the channel is not ready for receiving, we observe whether the
@@ -508,20 +487,16 @@ private static (bool, bool) chanrecv(ptr<hchan> _addr_c, unsafe.Pointer ep, bool
             // first observation. We behave as if we observed the channel at that moment
             // and report that the receive cannot proceed.
             return ;
-
         }
         if (empty(_addr_c)) { 
             // The channel is irreversibly closed and empty.
             if (raceenabled) {
                 raceacquire(c.raceaddr());
             }
-
             if (ep != null) {
                 typedmemclr(c.elemtype, ep);
             }
-
             return (true, false);
-
         }
     }
     long t0 = default;
@@ -539,7 +514,6 @@ private static (bool, bool) chanrecv(ptr<hchan> _addr_c, unsafe.Pointer ep, bool
             typedmemclr(c.elemtype, ep);
         }
         return (true, false);
-
     }
     {
         var sg = c.sendq.dequeue();
@@ -553,10 +527,8 @@ private static (bool, bool) chanrecv(ptr<hchan> _addr_c, unsafe.Pointer ep, bool
                 unlock(_addr_c.@lock);
             }, 3);
             return (true, true);
-
         }
     }
-
 
     if (c.qcount > 0) { 
         // Receive directly from queue
@@ -575,7 +547,6 @@ private static (bool, bool) chanrecv(ptr<hchan> _addr_c, unsafe.Pointer ep, bool
         c.qcount--;
         unlock(_addr_c.@lock);
         return (true, true);
-
     }
     if (!block) {
         unlock(_addr_c.@lock);
@@ -616,7 +587,6 @@ private static (bool, bool) chanrecv(ptr<hchan> _addr_c, unsafe.Pointer ep, bool
     mysg.c = null;
     releaseSudog(mysg);
     return (true, success);
-
 }
 
 // recv processes a receive operation on a full channel c.
@@ -643,7 +613,6 @@ private static void recv(ptr<hchan> _addr_c, ptr<sudog> _addr_sg, unsafe.Pointer
         if (ep != null) { 
             // copy data from sender
             recvDirect(_addr_c.elemtype, _addr_sg, ep);
-
         }
     }
     else
@@ -676,7 +645,6 @@ private static void recv(ptr<hchan> _addr_c, ptr<sudog> _addr_sg, unsafe.Pointer
         sg.releasetime = cputicks();
     }
     goready(gp, skip + 1);
-
 }
 
 private static bool chanparkcommit(ptr<g> _addr_gp, unsafe.Pointer chanLock) {
@@ -699,7 +667,6 @@ private static bool chanparkcommit(ptr<g> _addr_gp, unsafe.Pointer chanLock) {
     // the unlock is visible (even to gp itself).
     unlock((mutex.val)(chanLock));
     return true;
-
 }
 
 // compiler implements
@@ -776,7 +743,6 @@ private static nint reflect_chanlen(ptr<hchan> _addr_c) {
         return 0;
     }
     return int(c.qcount);
-
 }
 
 //go:linkname reflectlite_chanlen internal/reflectlite.chanlen
@@ -787,7 +753,6 @@ private static nint reflectlite_chanlen(ptr<hchan> _addr_c) {
         return 0;
     }
     return int(c.qcount);
-
 }
 
 //go:linkname reflect_chancap reflect.chancap
@@ -798,7 +763,6 @@ private static nint reflect_chancap(ptr<hchan> _addr_c) {
         return 0;
     }
     return int(c.dataqsiz);
-
 }
 
 //go:linkname reflect_chanclose reflect.chanclose
@@ -823,7 +787,6 @@ private static void enqueue(this ptr<waitq> _addr_q, ptr<sudog> _addr_sgp) {
     sgp.prev = x;
     x.next = sgp;
     q.last = sgp;
-
 }
 
 private static ptr<sudog> dequeue(this ptr<waitq> _addr_q) {
@@ -849,9 +812,7 @@ private static ptr<sudog> dequeue(this ptr<waitq> _addr_q) {
             continue;
         }
         return _addr_sgp!;
-
     }
-
 }
 
 private static unsafe.Pointer raceaddr(this ptr<hchan> _addr_c) {
@@ -863,7 +824,6 @@ private static unsafe.Pointer raceaddr(this ptr<hchan> _addr_c) {
     // those addresses, and we don't want them racing with
     // operations like close().
     return @unsafe.Pointer(_addr_c.buf);
-
 }
 
 private static void racesync(ptr<hchan> _addr_c, ptr<sudog> _addr_sg) {

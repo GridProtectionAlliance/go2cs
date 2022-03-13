@@ -8,20 +8,22 @@
 // launch with `go run arithBoundaryGen.go` a file called arithBoundary.go
 // will be written into the parent directory containing the tests
 
-// package main -- go2cs converted at 2022 March 06 23:14:59 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:28 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\test\testdata\gen\arithBoundaryGen.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using format = go.go.format_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using template = go.text.template_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using format = go.format_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using template = text.template_package;
+
+
+// used for interpolation in a text template
 
 public static partial class main_package {
 
-    // used for interpolation in a text template
 private partial struct tmplData {
     public @string Name;
     public @string Stype;
@@ -48,7 +50,6 @@ private static ulong ucast(ulong i, sizedTestData s) {
             break;
     }
     return i;
-
 }
 
 // icast casts a signed int to the size in s
@@ -65,7 +66,6 @@ private static long icast(long i, sizedTestData s) {
             break;
     }
     return i;
-
 }
 
 private partial struct sizedTestData {
@@ -165,7 +165,6 @@ private static void Main() => func((_, panic, _) => {
                 }
 
                 fmt.Fprintf(w, "}\n");
-
             } { 
                 // TODO: clean up this duplication
                 fmt.Fprintf(w, "var %s_data []itd%s = []itd%s{", s.name, s.sn, s.sn);
@@ -194,9 +193,7 @@ private static void Main() => func((_, panic, _) => {
                 }
 
                 fmt.Fprintf(w, "}\n");
-
             }
-
         }
         s = s__prev1;
     }
@@ -224,24 +221,20 @@ private static void Main() => func((_, panic, _) => {
                     if (o.name == "div" || o.name == "mod") {
                         fmt.Fprint(w, "if v.b != 0 {");
                     }
-
                     err = verify.Execute(w, new tmplData(o.name,s.name,o.symbol));
 
                     if (o.name == "div" || o.name == "mod") {
                         fmt.Fprint(w, "\n}\n");
                     }
-
                     if (err != null) {
                         panic(err);
                     }
-
                 }
 
                 o = o__prev2;
             }
 
             fmt.Fprint(w, "    }\n");
-
         }
         s = s__prev1;
     }

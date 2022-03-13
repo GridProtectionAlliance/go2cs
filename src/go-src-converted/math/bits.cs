@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:02 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:54 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\bits.go
-
-
 namespace go;
 
 public static partial class math_package {
@@ -21,7 +19,6 @@ private static readonly nint bias = 1023;
 private static readonly nint signMask = 1 << 63;
 private static readonly nint fracMask = 1 << (int)(shift) - 1;
 
-
 // Inf returns positive infinity if sign >= 0, negative infinity if sign < 0.
 public static double Inf(nint sign) {
     ulong v = default;
@@ -33,7 +30,6 @@ public static double Inf(nint sign) {
         v = uvneginf;
     }
     return Float64frombits(v);
-
 }
 
 // NaN returns an IEEE 754 ``not-a-number'' value.
@@ -50,7 +46,6 @@ public static bool IsNaN(double f) {
     //    x := Float64bits(f);
     //    return uint32(x>>shift)&mask == mask && x != uvinf && x != uvneginf
     return f != f;
-
 }
 
 // IsInf reports whether f is an infinity, according to sign.
@@ -63,7 +58,6 @@ public static bool IsInf(double f, nint sign) {
     //    x := Float64bits(f);
     //    return sign >= 0 && x == uvinf || sign <= 0 && x == uvneginf;
     return sign >= 0 && f > MaxFloat64 || sign <= 0 && f < -MaxFloat64;
-
 }
 
 // normalize returns a normal number y and exponent exp
@@ -78,7 +72,6 @@ private static (double, nint) normalize(double x) {
         return (x * (1 << 52), -52);
     }
     return (x, 0);
-
 }
 
 } // end math_package

@@ -4,24 +4,23 @@
 
 // Runtime type representation.
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:26 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:31 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\type.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
-    // tflag is documented in reflect/type.go.
-    //
-    // tflag values must be kept in sync with copies in:
-    //    cmd/compile/internal/reflectdata/reflect.go
-    //    cmd/link/internal/ld/decodesym.go
-    //    reflect/type.go
-    //      internal/reflectlite/type.go
+// tflag is documented in reflect/type.go.
+//
+// tflag values must be kept in sync with copies in:
+//    cmd/compile/internal/reflectdata/reflect.go
+//    cmd/link/internal/ld/decodesym.go
+//    reflect/type.go
+//      internal/reflectlite/type.go
 private partial struct tflag { // : byte
 }
 
@@ -59,7 +58,6 @@ private static @string @string(this ptr<_type> _addr_t) {
         return s[(int)1..];
     }
     return s;
-
 }
 
 private static ptr<uncommontype> uncommon(this ptr<_type> _addr_t) {
@@ -123,8 +121,7 @@ private static ptr<uncommontype> uncommon(this ptr<_type> _addr_t) {
             public uncommontype u;
         }
         return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
-    
-}
+    }
 
 private static @string name(this ptr<_type> _addr_t) {
     ref _type t = ref _addr_t.val;
@@ -138,7 +135,6 @@ private static @string name(this ptr<_type> _addr_t) {
         i--;
     }
     return s[(int)i + 1..];
-
 }
 
 // pkgpath returns the path of the package where t was defined, if
@@ -156,7 +152,6 @@ private static @string pkgpath(this ptr<_type> _addr_t) {
         }
     }
 
-
     if (t.kind & kindMask == kindStruct) 
         var st = (structtype.val)(@unsafe.Pointer(t));
         return st.pkgPath.name();
@@ -164,7 +159,6 @@ private static @string pkgpath(this ptr<_type> _addr_t) {
         var it = (interfacetype.val)(@unsafe.Pointer(t));
         return it.pkgpath.name();
         return "";
-
 }
 
 // reflectOffs holds type offsets defined at run time by the reflect package.
@@ -194,7 +188,6 @@ private static void reflectOffsUnlock() {
         racerelease(@unsafe.Pointer(_addr_reflectOffs.@lock));
     }
     unlock(_addr_reflectOffs.@lock);
-
 }
 
 private static name resolveNameOff(unsafe.Pointer ptrInModule, nameOff off) {
@@ -213,11 +206,8 @@ private static name resolveNameOff(unsafe.Pointer ptrInModule, nameOff off) {
                     throw("runtime: name offset out of range");
             md = md.next;
                 }
-
                 return new name((*byte)(unsafe.Pointer(res)));
-
             }
-
         }
     } 
 
@@ -237,10 +227,8 @@ private static name resolveNameOff(unsafe.Pointer ptrInModule, nameOff off) {
 
         }
         throw("runtime: name offset base pointer out of range");
-
     }
     return new name((*byte)(res));
-
 }
 
 private static name nameOff(this ptr<_type> _addr_t, nameOff off) {
@@ -254,7 +242,6 @@ private static ptr<_type> resolveTypeOff(unsafe.Pointer ptrInModule, typeOff off
         // -1 is the sentinel value for unreachable code.
         // See cmd/link/internal/ld/data.go:relocsym.
         return _addr_null!;
-
     }
     var @base = uintptr(ptrInModule);
     ptr<moduledata> md;
@@ -269,7 +256,6 @@ private static ptr<_type> resolveTypeOff(unsafe.Pointer ptrInModule, typeOff off
                 break;
             next = next.next;
             }
-
         }
 
         next = next__prev1;
@@ -294,10 +280,8 @@ private static ptr<_type> resolveTypeOff(unsafe.Pointer ptrInModule, typeOff off
                 next = next__prev1;
             }
             throw("runtime: type offset base pointer out of range");
-
         }
         return _addr_(_type.val)(res)!;
-
     }
     {
         var t = md.typemap[off];
@@ -306,14 +290,12 @@ private static ptr<_type> resolveTypeOff(unsafe.Pointer ptrInModule, typeOff off
             return _addr_t!;
         }
     }
-
     res = md.types + uintptr(off);
     if (res > md.etypes) {
         println("runtime: typeOff", hex(off), "out of range", hex(md.types), "-", hex(md.etypes));
         throw("runtime: type offset out of range");
     }
     return _addr_(_type.val)(@unsafe.Pointer(res))!;
-
 }
 
 private static ptr<_type> typeOff(this ptr<_type> _addr_t, typeOff off) {
@@ -329,7 +311,6 @@ private static unsafe.Pointer textOff(this ptr<_type> _addr_t, textOff off) {
         // -1 is the sentinel value for unreachable code.
         // See cmd/link/internal/ld/data.go:relocsym.
         return @unsafe.Pointer(funcPC(unreachableMethod));
-
     }
     var @base = uintptr(@unsafe.Pointer(t));
     ptr<moduledata> md;
@@ -344,7 +325,6 @@ private static unsafe.Pointer textOff(this ptr<_type> _addr_t, textOff off) {
                 break;
             next = next.next;
             }
-
         }
 
         next = next__prev1;
@@ -369,10 +349,8 @@ private static unsafe.Pointer textOff(this ptr<_type> _addr_t, textOff off) {
                 next = next__prev1;
             }
             throw("runtime: text offset base pointer out of range");
-
         }
         return res;
-
     }
     res = uintptr(0); 
 
@@ -397,15 +375,12 @@ private static unsafe.Pointer textOff(this ptr<_type> _addr_t, textOff off) {
     } { 
         // single text section
         res = md.text + uintptr(off);
-
     }
     if (res > md.etext && GOARCH != "wasm") { // on wasm, functions do not live in the same address space as the linear memory
         println("runtime: textOff", hex(off), "out of range", hex(md.text), "-", hex(md.etext));
         throw("runtime: text offset out of range");
-
     }
     return @unsafe.Pointer(res);
-
 }
 
 private static slice<ptr<_type>> @in(this ptr<functype> _addr_t) {
@@ -417,7 +392,6 @@ private static slice<ptr<_type>> @in(this ptr<functype> _addr_t) {
         uadd += @unsafe.Sizeof(new uncommontype());
     }
     return new ptr<ptr<array<ptr<_type>>>>(add(@unsafe.Pointer(t), uadd))[..(int)t.inCount];
-
 }
 
 private static slice<ptr<_type>> @out(this ptr<functype> _addr_t) {
@@ -430,7 +404,6 @@ private static slice<ptr<_type>> @out(this ptr<functype> _addr_t) {
     }
     var outCount = t.outCount & (1 << 15 - 1);
     return new ptr<ptr<array<ptr<_type>>>>(add(@unsafe.Pointer(t), uadd))[(int)t.inCount..(int)t.inCount + outCount];
-
 }
 
 private static bool dotdotdot(this ptr<functype> _addr_t) {
@@ -491,31 +464,26 @@ private static bool indirectkey(this ptr<maptype> _addr_mt) {
     ref maptype mt = ref _addr_mt.val;
  // store ptr to key instead of key itself
     return mt.flags & 1 != 0;
-
 }
 private static bool indirectelem(this ptr<maptype> _addr_mt) {
     ref maptype mt = ref _addr_mt.val;
  // store ptr to elem instead of elem itself
     return mt.flags & 2 != 0;
-
 }
 private static bool reflexivekey(this ptr<maptype> _addr_mt) {
     ref maptype mt = ref _addr_mt.val;
  // true if k==k for all keys
     return mt.flags & 4 != 0;
-
 }
 private static bool needkeyupdate(this ptr<maptype> _addr_mt) {
     ref maptype mt = ref _addr_mt.val;
  // true if we need to update key on an overwrite
     return mt.flags & 8 != 0;
-
 }
 private static bool hashMightPanic(this ptr<maptype> _addr_mt) {
     ref maptype mt = ref _addr_mt.val;
  // true if hash function might panic
     return mt.flags & 16 != 0;
-
 }
 
 private partial struct arraytype {
@@ -584,14 +552,13 @@ private static (nint, nint) readvarint(this name n, nint off) {
     nint _p0 = default;
 
     nint v = 0;
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         ptr<n.data> x = new ptr<ptr<n.data>>(off + i);
         v += int(x & 0x7f) << (int)((7 * i));
         if (x & 0x80 == 0) {
             return (i + 1, v);
         }
     }
-
 }
 
 private static @string name(this name n) {
@@ -608,7 +575,6 @@ private static @string name(this name n) {
     hdr.str = @unsafe.Pointer(n.data(1 + i));
     hdr.len = l;
     return ;
-
 }
 
 private static @string tag(this name n) {
@@ -623,7 +589,6 @@ private static @string tag(this name n) {
     hdr.str = @unsafe.Pointer(n.data(1 + i + l + i2));
     hdr.len = l2;
     return ;
-
 }
 
 private static @string pkgPath(this name n) {
@@ -640,7 +605,6 @@ private static @string pkgPath(this name n) {
     copy(new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_nameOff))[..], new ptr<ptr<array<byte>>>(@unsafe.Pointer(n.data(off)))[..]);
     var pkgPathName = resolveNameOff(@unsafe.Pointer(n.bytes), nameOff);
     return pkgPathName.name();
-
 }
 
 private static bool isBlank(this name n) {
@@ -649,7 +613,6 @@ private static bool isBlank(this name n) {
     }
     var (_, l) = n.readvarint(1);
     return l == 1 && new ptr<ptr<n.data>>(2) == '_';
-
 }
 
 // typelinksinit scans the types from extra modules and builds the
@@ -686,10 +649,8 @@ collect:
                         _continuecollect = true;
                         break;
                     }
-
                 }
                 typehash[t.hash] = append(tlist, t);
-
             }
 
             tl = tl__prev2;
@@ -720,7 +681,6 @@ collect:
             }
         }
         prev = md;
-
     }
 }
 
@@ -853,17 +813,14 @@ private static bool typesEqual(ptr<_type> _addr_t, ptr<_type> _addr_v, object se
                 if (tname.name() != vname.name()) {
                     return false;
                 }
-
                 if (tname.pkgPath() != vname.pkgPath()) {
                     return false;
                 }
-
                 var tityp = resolveTypeOff(@unsafe.Pointer(tm), tm.ityp);
                 var vityp = resolveTypeOff(@unsafe.Pointer(vm), vm.ityp);
                 if (!typesEqual(_addr_tityp, _addr_vityp, seen)) {
                     return false;
                 }
-
             }
 
             i = i__prev1;
@@ -920,7 +877,6 @@ private static bool typesEqual(ptr<_type> _addr_t, ptr<_type> _addr_v, object se
         println("runtime: impossible type kind", kind);
         throw("runtime: impossible type kind");
         return false;
-    
-}
+    }
 
 } // end runtime_package

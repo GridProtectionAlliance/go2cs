@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:52 UTC
+//     Generated on 2022 March 13 06:35:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class trace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct mmuBand
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace @internal
             public static implicit operator mmuBand(NilType nil) => default(mmuBand);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static mmuBand mmuBand_cast(dynamic value)
         {
             return new mmuBand(value.minUtil, value.cumUtil, value.integrator);

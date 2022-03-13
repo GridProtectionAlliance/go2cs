@@ -3,24 +3,27 @@
 // license that can be found in the LICENSE file.
 
 // Package base32 implements base32 encoding as specified by RFC 4648.
-// package base32 -- go2cs converted at 2022 March 06 22:24:54 UTC
+
+// package base32 -- go2cs converted at 2022 March 13 05:39:25 UTC
 // import "encoding/base32" ==> using base32 = go.encoding.base32_package
 // Original source: C:\Program Files\Go\src\encoding\base32\base32.go
-using io = go.io_package;
-using strconv = go.strconv_package;
-
 namespace go.encoding;
+
+using io = io_package;
+using strconv = strconv_package;
+
+
+/*
+ * Encodings
+ */
+
+// An Encoding is a radix 32 encoding/decoding scheme, defined by a
+// 32-character alphabet. The most common is the "base32" encoding
+// introduced for SASL GSSAPI and standardized in RFC 4648.
+// The alternate "base32hex" encoding is used in DNSSEC.
 
 public static partial class base32_package {
 
-    /*
-     * Encodings
-     */
-
-    // An Encoding is a radix 32 encoding/decoding scheme, defined by a
-    // 32-character alphabet. The most common is the "base32" encoding
-    // introduced for SASL GSSAPI and standardized in RFC 4648.
-    // The alternate "base32hex" encoding is used in DNSSEC.
 public partial struct Encoding {
     public array<byte> encode;
     public array<byte> decodeMap;
@@ -67,7 +70,6 @@ public static ptr<Encoding> NewEncoding(@string encoder) => func((_, panic, _) =
         i = i__prev1;
     }
     return _addr_e!;
-
 });
 
 // StdEncoding is the standard base32 encoding, as defined in
@@ -95,7 +97,6 @@ public static ptr<Encoding> WithPadding(this Encoding enc, int padding) => func(
 
     enc.padChar = padding;
     return _addr__addr_enc!;
-
 });
 
 /*
@@ -161,7 +162,6 @@ private static void Encode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<
             dst[5] = enc.encode[b[5] & 31];
             dst[6] = enc.encode[b[6] & 31];
             dst[7] = enc.encode[b[7] & 31];
-
         }
         else
  {
@@ -189,9 +189,7 @@ private static void Encode(this ptr<Encoding> _addr_enc, slice<byte> dst, slice<
         }
         src = src[(int)5..];
         dst = dst[(int)8..];
-
     }
-
 }
 
 // EncodeToString returns the base32 encoding of src.
@@ -238,7 +236,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
             return (n, error.As(e.err)!);
         }
         e.nbuf = 0;
-
     }
     while (len(p) >= 5) {
         var nn = len(e.@out) / 8 * 5;
@@ -254,7 +251,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
         }
         n += nn;
         p = p[(int)nn..];
-
     } 
 
     // Trailing fringe.
@@ -270,7 +266,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> p) {
     e.nbuf = len(p);
     n += len(p);
     return ;
-
 }
 
 // Close flushes any pending output from the encoder.
@@ -286,7 +281,6 @@ private static error Close(this ptr<encoder> _addr_e) {
         _, e.err = e.w.Write(e.@out[(int)0..(int)encodedLen]);
     }
     return error.As(e.err)!;
-
 }
 
 // NewEncoder returns a new base32 stream encoder. Data written to
@@ -309,7 +303,6 @@ private static nint EncodedLen(this ptr<Encoding> _addr_enc, nint n) {
         return (n * 8 + 4) / 5;
     }
     return (n + 4) / 5 * 8;
-
 }
 
 /*
@@ -352,13 +345,10 @@ private static (nint, bool, error) decode(this ptr<Encoding> _addr_enc, slice<by
                     if (enc.padChar != NoPadding) { 
                         // We have reached the end and are missing padding
                         return (n, false, error.As(CorruptInputError(olen - len(src) - j))!);
-
                     } 
                     // We have reached the end and are not expecting any padding
                     (dlen, end) = (j, true);                    break;
-
                 }
-
                 var @in = src[0];
                 src = src[(int)1..];
                 if (in == byte(enc.padChar) && j >= 2 && len(src) < 8) { 
@@ -366,33 +356,24 @@ private static (nint, bool, error) decode(this ptr<Encoding> _addr_enc, slice<by
                     if (len(src) + j < 8 - 1) { 
                         // not enough padding
                         return (n, false, error.As(CorruptInputError(olen))!);
-
                     }
-
                     for (nint k = 0; k < 8 - 1 - j; k++) {
                         if (len(src) > k && src[k] != byte(enc.padChar)) { 
                             // incorrect padding
                             return (n, false, error.As(CorruptInputError(olen - len(src) + k - 1))!);
-
                         }
-
                     }
 
                     (dlen, end) = (j, true);                    if (dlen == 1 || dlen == 3 || dlen == 6) {
                         return (n, false, error.As(CorruptInputError(olen - len(src) - 1))!);
                     }
-
                     break;
-
                 }
-
                 dbuf[j] = enc.decodeMap[in];
                 if (dbuf[j] == 0xFF) {
                     return (n, false, error.As(CorruptInputError(olen - len(src) - 1))!);
                 }
-
                 j++;
-
             } 
 
             // Pack 8x 5-bit source blocks into 5 byte destination
@@ -436,10 +417,8 @@ private static (nint, bool, error) decode(this ptr<Encoding> _addr_enc, slice<by
 
         __switch_break1:;
         dsti += 5;
-
     }
     return (n, end, error.As(null!)!);
-
 }
 
 // Decode decodes src using the encoding enc. It writes at most
@@ -498,7 +477,6 @@ private static (nint, error) readEncodedData(io.Reader r, slice<byte> buf, nint 
         err = io.ErrUnexpectedEOF;
     }
     return ;
-
 }
 
 private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
@@ -514,7 +492,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
             return (n, error.As(d.err)!);
         }
         return (n, error.As(null!)!);
-
     }
     if (d.err != null) {
         return (0, error.As(d.err)!);
@@ -576,10 +553,8 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
         // will be called again.  The error stored in d.err, if any, will be
         // returned with the last set of decoded bytes.
         return (n, error.As(null!)!);
-
     }
     return (n, error.As(d.err)!);
-
 }
 
 private partial struct newlineFilteringReader {
@@ -596,9 +571,7 @@ private static nint stripNewlines(slice<byte> dst, slice<byte> src) {
         }
         dst[offset] = b;
         offset++;
-
     }    return offset;
-
 }
 
 private static (nint, error) Read(this ptr<newlineFilteringReader> _addr_r, slice<byte> p) {
@@ -614,10 +587,8 @@ private static (nint, error) Read(this ptr<newlineFilteringReader> _addr_r, slic
             return (offset, error.As(err)!);
         }
         n, err = r.wrapped.Read(p);
-
     }
     return (n, error.As(err)!);
-
 }
 
 // NewDecoder constructs a new base32 stream decoder.
@@ -636,7 +607,6 @@ private static nint DecodedLen(this ptr<Encoding> _addr_enc, nint n) {
         return n * 5 / 8;
     }
     return n / 8 * 5;
-
 }
 
 } // end base32_package

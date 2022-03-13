@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:13:47 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:13 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\expr.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+using src = cmd.@internal.src_package;
 
 public static partial class noder_package {
 
@@ -34,7 +34,6 @@ private static ir.Node expr(this ptr<irgen> _addr_g, syntax.Expr expr) {
         expr = expr__prev1;
 
     }
-
 
     var (tv, ok) = g.info.Types[expr];
     if (!ok) {
@@ -60,15 +59,12 @@ private static ir.Node expr(this ptr<irgen> _addr_g, syntax.Expr expr) {
                                 return g.use(expr.Sel);
                             }
                         }
-
                     }
                 }
-
             }
             expr = expr__prev1;
 
         }
-
         return g.use(expr._<ptr<syntax.Name>>());
     else if (tv.IsType()) 
         return ir.TypeNode(g.typ(tv.Type));
@@ -90,8 +86,7 @@ private static ir.Node expr(this ptr<irgen> _addr_g, syntax.Expr expr) {
                 typ = types2.Typ[types2.String]; // argument to "append" or "copy" calls
             else 
                 @base.FatalfAt(g.pos(expr), "unexpected untyped type: %v", basic);
-            
-        }
+                    }
     } 
 
     // Constant expression.
@@ -106,7 +101,6 @@ private static ir.Node expr(this ptr<irgen> _addr_g, syntax.Expr expr) {
         @base.FatalfAt(g.pos(expr), "expected %L to have type %v", n, typ);
     }
     return n;
-
 }
 
 private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Expr expr) => func((_, panic, _) => {
@@ -124,7 +118,6 @@ private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Ex
                 }
 
             }
-
             return g.use(expr);
             break;
         case ptr<syntax.CompositeLit> expr:
@@ -169,7 +162,6 @@ private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Ex
                         // Replace explicit type args with the full list that
                         // includes the additional inferred type args
                         fun._<ptr<ir.InstExpr>>().Targs = targs;
-
                     }
                     else
  { 
@@ -179,15 +171,12 @@ private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Ex
                         var inst = ir.NewInstExpr(pos, ir.OFUNCINST, fun, targs);
                         typed(fun.Type(), inst);
                         fun = inst;
-
                     }
-
                 }
 
                 inferred = inferred__prev1;
 
             }
-
             return Call(pos, g.typ(typ), fun, g.exprs(expr.ArgList), expr.HasDots);
             break;
         case ptr<syntax.IndexExpr> expr:
@@ -229,11 +218,9 @@ private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Ex
                         if (index.Op() != ir.OTYPE) { 
                             // This is just a normal index expression
                             return Index(pos, g.typ(typ), g.expr(expr.X), index);
-
                         } 
                         // This is generic function instantiation with a single type
                         targs = new slice<ir.Node>(new ir.Node[] { index });
-
                     } 
                     // This is a generic function instantiation (e.g. min[int]).
                     // Generic type instantiation is handled in the type
@@ -254,7 +241,6 @@ private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Ex
             if (x.Op() != ir.ONAME || x.Type().Kind() != types.TFUNC) {
                 panic("Incorrect argument for generic func instantiation");
             }
-
             var n = ir.NewInstExpr(pos, ir.OFUNCINST, x, targs);
             typed(g.typ(typ), n);
             return n;
@@ -275,11 +261,9 @@ private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Ex
                         }
 
                     }
-
                 }
 
             }
-
             return g.selectorExpr(pos, typ, expr);
             break;
         case ptr<syntax.SliceExpr> expr:
@@ -308,7 +292,6 @@ private static ir.Node expr0(this ptr<irgen> _addr_g, types2.Type typ, syntax.Ex
             break;
         }
     }
-
 });
 
 // selectorExpr resolves the choice of ODOT, ODOTPTR, OCALLPART (eventually
@@ -325,7 +308,6 @@ private static ir.Node selectorExpr(this ptr<irgen> _addr_g, src.XPos pos, types
         var n = ir.NewSelectorExpr(pos, ir.OXDOT, x, typecheck.Lookup(expr.Sel.Value));
         typed(g.typ(typ), n);
         return n;
-
     }
     var selinfo = g.info.Selections[expr]; 
     // Everything up to the last selection is an implicit embedded field access,
@@ -352,7 +334,6 @@ private static ir.Node selectorExpr(this ptr<irgen> _addr_g, src.XPos pos, types
         // actually drop any ODOT nodes we created due to the embedded
         // fields.
         n = MethodExpr(pos, origx, x.Type(), last);
-
     }
     else
  { 
@@ -374,14 +355,11 @@ private static ir.Node selectorExpr(this ptr<irgen> _addr_g, src.XPos pos, types
  {
                     x = Implicit(Addr(pos, x));
                 }
-
             }
-
             var recvType2Base = recvType2;
             if (wantPtr) {
                 recvType2Base = types2.AsPointer(recvType2).Elem();
             }
-
             if (len(types2.AsNamed(recvType2Base).TParams()) > 0) { 
                 // recvType2 is the original generic type that is
                 // instantiated for this method call.
@@ -407,9 +385,7 @@ private static ir.Node selectorExpr(this ptr<irgen> _addr_g, src.XPos pos, types
                 n = ir.NewInstExpr(pos, ir.OFUNCINST, n, targs);
                 typed(g.typ(typ), n);
                 return n;
-
             }
-
             if (!g.match(x.Type(), recvType2, false)) {
                 @base.FatalfAt(pos, "expected %L to have type %v", x, recvType2);
             }
@@ -417,7 +393,6 @@ private static ir.Node selectorExpr(this ptr<irgen> _addr_g, src.XPos pos, types
  {
                 n = DotMethod(pos, x, last);
             }
-
         }
     }
     {
@@ -428,9 +403,7 @@ private static ir.Node selectorExpr(this ptr<irgen> _addr_g, src.XPos pos, types
             @base.FatalfAt(pos, "bad Sym: have %v, want %v", have, want);
         }
     }
-
     return n;
-
 }
 
 // getTargs gets the targs associated with the receiver of a selected method
@@ -445,13 +418,11 @@ private static slice<types2.Type> getTargs(ptr<types2.Selection> _addr_selinfo) 
             r = p.Elem();
         }
     }
-
     var n = types2.AsNamed(r);
     if (n == null) {
         @base.Fatalf("Incorrect type for selinfo %v", selinfo);
     }
     return n.TArgs();
-
 }
 
 private static slice<ir.Node> exprList(this ptr<irgen> _addr_g, syntax.Expr expr) {
@@ -471,7 +442,6 @@ private static slice<ir.Node> exprList(this ptr<irgen> _addr_g, syntax.Expr expr
             break;
         }
     }
-
 }
 
 private static slice<ir.Node> exprs(this ptr<irgen> _addr_g, slice<syntax.Expr> exprs) {
@@ -497,7 +467,6 @@ private static ir.Node compLit(this ptr<irgen> _addr_g, types2.Type typ, ptr<syn
         }
     }
 
-
     ptr<types2.Struct> (_, isStruct) = typ.Underlying()._<ptr<types2.Struct>>();
 
     var exprs = make_slice<ir.Node>(len(lit.ElemList));
@@ -516,7 +485,6 @@ private static ir.Node compLit(this ptr<irgen> _addr_g, types2.Type typ, ptr<syn
  {
                         exprs[i] = ir.NewKeyExpr(g.pos(elem), g.expr(elem.Key), g.expr(elem.Value));
                     }
-
                     break;
                 default:
                 {
@@ -525,7 +493,6 @@ private static ir.Node compLit(this ptr<irgen> _addr_g, types2.Type typ, ptr<syn
                     break;
                 }
             }
-
         }
         elem = elem__prev1;
     }
@@ -533,7 +500,6 @@ private static ir.Node compLit(this ptr<irgen> _addr_g, types2.Type typ, ptr<syn
     n = ir.NewCompLitExpr(g.pos(lit), ir.OCOMPLIT, null, exprs);
     typed(g.typ(typ), n);
     return transformCompLit(n);
-
 }
 
 private static ir.Node funcLit(this ptr<irgen> _addr_g, types2.Type typ2, ptr<syntax.FuncLit> _addr_expr) {
@@ -567,7 +533,6 @@ private static ir.Node funcLit(this ptr<irgen> _addr_g, types2.Type typ2, ptr<sy
     }    g.target.Decls = append(g.target.Decls, fn);
 
     return fn.OClosure;
-
 }
 
 private static ptr<types.Type> typeExpr(this ptr<irgen> _addr_g, syntax.Expr typ) {
@@ -578,7 +543,6 @@ private static ptr<types.Type> typeExpr(this ptr<irgen> _addr_g, syntax.Expr typ
         @base.FatalfAt(g.pos(typ), "expected type: %L", n);
     }
     return _addr_n.Type()!;
-
 }
 
 } // end noder_package

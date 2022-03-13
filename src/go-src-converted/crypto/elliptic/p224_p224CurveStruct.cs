@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:18:23 UTC
+//     Generated on 2022 March 13 05:32:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace crypto
 {
     public static partial class elliptic_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct p224Curve
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace crypto
             public static implicit operator p224Curve(NilType nil) => default(p224Curve);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static p224Curve p224Curve_cast(dynamic value)
         {
             return new p224Curve(ref value.ptr<CurveParams>, value.gx, value.gy, value.b);

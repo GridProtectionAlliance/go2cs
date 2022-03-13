@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:35 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:57 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\deadcode.go
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using src = cmd.@internal.src_package;
+
+
+// findlive returns the reachable blocks and live values in f.
+// The caller should call f.retDeadcodeLive(live) when it is done with it.
+
+using System;
 public static partial class ssa_package {
 
-    // findlive returns the reachable blocks and live values in f.
-    // The caller should call f.retDeadcodeLive(live) when it is done with it.
 private static (slice<bool>, slice<bool>) findlive(ptr<Func> _addr_f) {
     slice<bool> reachable = default;
     slice<bool> live = default;
@@ -53,11 +54,9 @@ public static slice<bool> ReachableBlocks(ptr<Func> _addr_f) {
                 reachable[c.ID] = true;
                 p = append(p, c); // push
             }
-
         }
     }
     return reachable;
-
 }
 
 // liveValues returns the live values in f and a list of values that are eligible
@@ -107,7 +106,6 @@ private static (slice<bool>, slice<ptr<Value>>) liveValues(ptr<Func> _addr_f, sl
         }
 
         return ;
-
     }
     map<nint, bool> liveInlIdx = default;
     var pt = f.Config.ctxt.PosTable;
@@ -138,13 +136,10 @@ private static (slice<bool>, slice<ptr<Value>>) liveValues(ptr<Func> _addr_f, sl
             if (i < 0) {
                 continue;
             }
-
             if (liveInlIdx == null) {
                 liveInlIdx = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<nint, bool>{};
             }
-
             liveInlIdx[i] = true;
-
         }
         b = b__prev1;
     }
@@ -201,17 +196,13 @@ private static (slice<bool>, slice<ptr<Value>>) liveValues(ptr<Func> _addr_f, sl
                             // TODO: save marks only for bodies which
                             // have a faulting instruction or a call?
                             continue;
-
                         }
-
                         live[v.ID] = true;
                         q = append(q, v);
                         if (v.Pos.IsStmt() != src.PosNotStmt) {
                             liveOrderStmts = append(liveOrderStmts, v);
                         }
-
                     }
-
                 }
 
                 v = v__prev2;
@@ -239,9 +230,7 @@ private static (slice<bool>, slice<ptr<Value>>) liveValues(ptr<Func> _addr_f, sl
                     if (x.Pos.IsStmt() != src.PosNotStmt) {
                         liveOrderStmts = append(liveOrderStmts, x);
                     }
-
                 }
-
             }
 
             i = i__prev2;
@@ -249,7 +238,6 @@ private static (slice<bool>, slice<ptr<Value>>) liveValues(ptr<Func> _addr_f, sl
     }
 
     return ;
-
 });
 
 // deadcode removes dead code from f.
@@ -288,13 +276,11 @@ private static void deadcode(ptr<Func> _addr_f) => func((defer, _, _) => {
  {
                         i++;
                     }
-
                 }
 
 
                 i = i__prev2;
             }
-
         }
         b = b__prev1;
     }
@@ -387,9 +373,7 @@ private static void deadcode(ptr<Func> _addr_f) => func((defer, _, _) => {
             if (!reachable[b.ID]) { 
                 // TODO what if control is statement boundary? Too late here.
                 b.ResetControls();
-
             }
-
             {
                 var v__prev2 = v;
 
@@ -400,9 +384,7 @@ private static void deadcode(ptr<Func> _addr_f) => func((defer, _, _) => {
                         if (v.Pos.IsStmt() == src.PosIsStmt && reachable[b.ID]) {
                             pendingLines.set(v.Pos, int32(i)); // TODO could be more than one pos for a line
                         }
-
                     }
-
                 }
 
                 v = v__prev2;
@@ -430,7 +412,6 @@ private static void deadcode(ptr<Func> _addr_f) => func((defer, _, _) => {
                 j = j__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -465,14 +446,12 @@ private static void deadcode(ptr<Func> _addr_f) => func((defer, _, _) => {
  {
                         f.freeValue(v);
                     }
-
                 }
 
                 v = v__prev2;
             }
 
             b.truncateValues(i);
-
         }
         b = b__prev1;
     }
@@ -522,7 +501,6 @@ private static void deadcode(ptr<Func> _addr_f) => func((defer, _, _) => {
                 }
                 f.freeBlock(b);
             }
-
         }
         b = b__prev1;
     }
@@ -539,7 +517,6 @@ private static void deadcode(ptr<Func> _addr_f) => func((defer, _, _) => {
     }
 
     f.Blocks = f.Blocks[..(int)i];
-
 });
 
 // removeEdge removes the i'th outgoing edge from b (and

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:09:20 UTC
+//     Generated on 2022 March 13 06:22:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class inline_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct inlsubst
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace @internal
             public static implicit operator inlsubst(NilType nil) => default(inlsubst);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static inlsubst inlsubst_cast(dynamic value)
         {
             return new inlsubst(ref value.retlabel, value.retvars, value.delayretvars, value.inlvars, value.defnMarker, value.bases, value.newInlIndex, value.edit, ref value.newclofn, ref value.fn, value.noPosUpdate);

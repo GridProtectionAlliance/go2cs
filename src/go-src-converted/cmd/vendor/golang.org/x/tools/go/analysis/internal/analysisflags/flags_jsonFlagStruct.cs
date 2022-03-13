@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:31:09 UTC
+//     Generated on 2022 March 13 06:41:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace @internal
 {
     public static partial class analysisflags_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct jsonFlag
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace @internal
             public static implicit operator jsonFlag(NilType nil) => default(jsonFlag);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static jsonFlag jsonFlag_cast(dynamic value)
         {
             return new jsonFlag(value.Name, value.Bool, value.Usage);

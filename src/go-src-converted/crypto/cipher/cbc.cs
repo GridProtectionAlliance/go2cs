@@ -9,12 +9,12 @@
 
 // See NIST SP 800-38A, pp 10-11
 
-// package cipher -- go2cs converted at 2022 March 06 22:17:14 UTC
+// package cipher -- go2cs converted at 2022 March 13 05:30:35 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Program Files\Go\src\crypto\cipher\cbc.go
-using subtle = go.crypto.@internal.subtle_package;
-
 namespace go.crypto;
+
+using subtle = crypto.@internal.subtle_package;
 
 public static partial class cipher_package {
 
@@ -54,9 +54,7 @@ public static BlockMode NewCBCEncrypter(Block b, slice<byte> iv) => func((_, pan
             return cbc.NewCBCEncrypter(iv);
         }
     }
-
     return (cbcEncrypter.val)(newCBC(b, iv));
-
 });
 
 private static nint BlockSize(this ptr<cbcEncrypter> _addr_x) {
@@ -88,12 +86,10 @@ private static void CryptBlocks(this ptr<cbcEncrypter> _addr_x, slice<byte> dst,
         iv = dst[..(int)x.blockSize];
         src = src[(int)x.blockSize..];
         dst = dst[(int)x.blockSize..];
-
     } 
 
     // Save the iv for the next CryptBlocks call.
     copy(x.iv, iv);
-
 });
 
 private static void SetIV(this ptr<cbcEncrypter> _addr_x, slice<byte> iv) => func((_, panic, _) => {
@@ -103,7 +99,6 @@ private static void SetIV(this ptr<cbcEncrypter> _addr_x, slice<byte> iv) => fun
         panic("cipher: incorrect length IV");
     }
     copy(x.iv, iv);
-
 });
 
 private partial struct cbcDecrypter { // : cbc
@@ -131,9 +126,7 @@ public static BlockMode NewCBCDecrypter(Block b, slice<byte> iv) => func((_, pan
             return cbc.NewCBCDecrypter(iv);
         }
     }
-
     return (cbcDecrypter.val)(newCBC(b, iv));
-
 });
 
 private static nint BlockSize(this ptr<cbcDecrypter> _addr_x) {
@@ -189,7 +182,6 @@ private static void SetIV(this ptr<cbcDecrypter> _addr_x, slice<byte> iv) => fun
         panic("cipher: incorrect length IV");
     }
     copy(x.iv, iv);
-
 });
 
 } // end cipher_package

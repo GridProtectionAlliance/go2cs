@@ -3,19 +3,17 @@
 // license that can be found in the LICENSE file.
 
 // Package color implements a basic color library.
-// package color -- go2cs converted at 2022 March 06 23:35:48 UTC
+
+// package color -- go2cs converted at 2022 March 13 06:43:45 UTC
 // import "image/color" ==> using color = go.image.color_package
 // Original source: C:\Program Files\Go\src\image\color\color.go
-
-using System;
-
-
 namespace go.image;
 
+using System;
 public static partial class color_package {
 
-    // Color can convert itself to alpha-premultiplied 16-bits per channel RGBA.
-    // The conversion may be lossy.
+// Color can convert itself to alpha-premultiplied 16-bits per channel RGBA.
+// The conversion may be lossy.
 public partial interface Color {
     (uint, uint, uint, uint) RGBA();
 }
@@ -205,7 +203,6 @@ public static Model ModelFunc(Func<Color, Color> f) {
     // we use the func value directly, because funcs
     // are no longer comparable.
     return addr(new modelFunc(f));
-
 }
 
 private partial struct modelFunc {
@@ -229,10 +226,8 @@ private static Color rgbaModel(Color c) {
             return c;
         }
     }
-
     var (r, g, b, a) = c.RGBA();
     return new RGBA(uint8(r>>8),uint8(g>>8),uint8(b>>8),uint8(a>>8));
-
 }
 
 private static Color rgba64Model(Color c) {
@@ -243,10 +238,8 @@ private static Color rgba64Model(Color c) {
             return c;
         }
     }
-
     var (r, g, b, a) = c.RGBA();
     return new RGBA64(uint16(r),uint16(g),uint16(b),uint16(a));
-
 }
 
 private static Color nrgbaModel(Color c) {
@@ -257,7 +250,6 @@ private static Color nrgbaModel(Color c) {
             return c;
         }
     }
-
     var (r, g, b, a) = c.RGBA();
     if (a == 0xffff) {
         return new NRGBA(uint8(r>>8),uint8(g>>8),uint8(b>>8),0xff);
@@ -269,7 +261,6 @@ private static Color nrgbaModel(Color c) {
     g = (g * 0xffff) / a;
     b = (b * 0xffff) / a;
     return new NRGBA(uint8(r>>8),uint8(g>>8),uint8(b>>8),uint8(a>>8));
-
 }
 
 private static Color nrgba64Model(Color c) {
@@ -280,7 +271,6 @@ private static Color nrgba64Model(Color c) {
             return c;
         }
     }
-
     var (r, g, b, a) = c.RGBA();
     if (a == 0xffff) {
         return new NRGBA64(uint16(r),uint16(g),uint16(b),0xffff);
@@ -292,7 +282,6 @@ private static Color nrgba64Model(Color c) {
     g = (g * 0xffff) / a;
     b = (b * 0xffff) / a;
     return new NRGBA64(uint16(r),uint16(g),uint16(b),uint16(a));
-
 }
 
 private static Color alphaModel(Color c) {
@@ -303,10 +292,8 @@ private static Color alphaModel(Color c) {
             return c;
         }
     }
-
     var (_, _, _, a) = c.RGBA();
     return new Alpha(uint8(a>>8));
-
 }
 
 private static Color alpha16Model(Color c) {
@@ -317,10 +304,8 @@ private static Color alpha16Model(Color c) {
             return c;
         }
     }
-
     var (_, _, _, a) = c.RGBA();
     return new Alpha16(uint16(a));
-
 }
 
 private static Color grayModel(Color c) {
@@ -331,7 +316,6 @@ private static Color grayModel(Color c) {
             return c;
         }
     }
-
     var (r, g, b, _) = c.RGBA(); 
 
     // These coefficients (the fractions 0.299, 0.587 and 0.114) are the same
@@ -345,7 +329,6 @@ private static Color grayModel(Color c) {
     nint y = (19595 * r + 38470 * g + 7471 * b + 1 << 15) >> 24;
 
     return new Gray(uint8(y));
-
 }
 
 private static Color gray16Model(Color c) {
@@ -356,7 +339,6 @@ private static Color gray16Model(Color c) {
             return c;
         }
     }
-
     var (r, g, b, _) = c.RGBA(); 
 
     // These coefficients (the fractions 0.299, 0.587 and 0.114) are the same
@@ -367,7 +349,6 @@ private static Color gray16Model(Color c) {
     nint y = (19595 * r + 38470 * g + 7471 * b + 1 << 15) >> 16;
 
     return new Gray16(uint16(y));
-
 }
 
 // Palette is a palette of colors.
@@ -380,7 +361,6 @@ public static Color Convert(this Palette p, Color c) {
         return null;
     }
     return p[p.Index(c)];
-
 }
 
 // Index returns the index of the palette color closest to c in Euclidean
@@ -401,7 +381,6 @@ public static nint Index(this Palette p, Color c) {
             (ret, bestSum) = (i, sum);
         }
     }    return ret;
-
 }
 
 // sqDiff returns the squared-difference of x and y, shifted by 2 so that
@@ -433,7 +412,6 @@ private static uint sqDiff(uint x, uint y) {
     // which is slightly faster. See TestSqDiff for correctness check.
     var d = x - y;
     return (d * d) >> 2;
-
 }
 
 // Standard colors.

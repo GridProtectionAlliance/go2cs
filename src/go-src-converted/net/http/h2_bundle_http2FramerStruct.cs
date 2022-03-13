@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:57 UTC
+//     Generated on 2022 March 13 05:37:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2Framer
         {
             // Constructors
@@ -124,7 +124,7 @@ namespace net
             public static implicit operator http2Framer(NilType nil) => default(http2Framer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2Framer http2Framer_cast(dynamic value)
         {
             return new http2Framer(value.r, value.lastFrame, value.errDetail, value.lastHeaderStream, value.maxReadSize, value.headerBuf, value.getReadBuf, value.readBuf, value.maxWriteSize, value.w, value.wbuf, value.AllowIllegalWrites, value.AllowIllegalReads, ref value.ReadMetaHeaders, value.MaxHeaderListSize, value.logReads, value.logWrites, ref value.debugFramer, ref value.debugFramerBuf, value.debugReadLoggerf, value.debugWriteLoggerf, ref value.frameCache);

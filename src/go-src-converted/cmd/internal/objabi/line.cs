@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:22 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\line.go
-using buildcfg = go.@internal.buildcfg_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go.cmd.@internal;
+
+using buildcfg = @internal.buildcfg_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// WorkingDir returns the current working directory
+// (or "/???" if the directory cannot be identified),
+// with "/" as separator.
 
 public static partial class objabi_package {
 
-    // WorkingDir returns the current working directory
-    // (or "/???" if the directory cannot be identified),
-    // with "/" as separator.
 public static @string WorkingDir() {
     @string path = default;
     path, _ = os.Getwd();
@@ -24,7 +26,6 @@ public static @string WorkingDir() {
         path = "/???";
     }
     return filepath.ToSlash(path);
-
 }
 
 // AbsFile returns the absolute filename for file in the given directory,
@@ -49,7 +50,6 @@ public static @string AbsFile(@string dir, @string file, @string rewrites) {
         abs = "??";
     }
     return abs;
-
 }
 
 // ApplyRewrites returns the filename for file in the given directory,
@@ -74,14 +74,11 @@ public static (@string, bool) ApplyRewrites(@string file, @string rewrites) {
                 }
 
             }
-
             start = i + 1;
-
         }
     }
 
     return (file, false);
-
 }
 
 // applyRewrite applies the rewrite to the path,
@@ -101,7 +98,6 @@ private static (@string, bool) applyRewrite(@string path, @string rewrite) {
         }
     }
 
-
     if (prefix == "" || !hasPathPrefix(path, prefix)) {
         return (path, false);
     }
@@ -112,7 +108,6 @@ private static (@string, bool) applyRewrite(@string path, @string rewrite) {
         return (path[(int)len(prefix) + 1..], true);
     }
     return (replace + path[(int)len(prefix)..], true);
-
 }
 
 // Does s have t as a path prefix?
@@ -147,7 +142,6 @@ private static bool hasPathPrefix(@string s, @string t) {
         }
     }
     return i >= len(s) || s[i] == '/' || s[i] == '\\';
-
 }
 
 } // end objabi_package

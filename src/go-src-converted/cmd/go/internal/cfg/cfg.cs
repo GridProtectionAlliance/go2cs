@@ -4,30 +4,32 @@
 
 // Package cfg holds configuration shared by multiple parts
 // of the go command.
-// package cfg -- go2cs converted at 2022 March 06 23:15:57 UTC
+
+// package cfg -- go2cs converted at 2022 March 13 06:29:26 UTC
 // import "cmd/go/internal/cfg" ==> using cfg = go.cmd.go.@internal.cfg_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\cfg\cfg.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using buildcfg = go.@internal.buildcfg_package;
-using cfg = go.@internal.cfg_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using fsys = go.cmd.go.@internal.fsys_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using buildcfg = @internal.buildcfg_package;
+using cfg = @internal.cfg_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using fsys = cmd.go.@internal.fsys_package;
+
+
+// These are general "build flags" used by build and other commands.
+
+using System;
 public static partial class cfg_package {
 
-    // These are general "build flags" used by build and other commands.
 public static bool BuildA = default;public static @string BuildBuildmode = default;public static var BuildContext = defaultContext();public static @string BuildMod = default;public static bool BuildModExplicit = default;public static @string BuildModReason = default;public static bool BuildI = default;public static bool BuildLinkshared = default;public static bool BuildMSan = default;public static bool BuildN = default;public static @string BuildO = default;public static var BuildP = runtime.GOMAXPROCS(0);public static @string BuildPkgdir = default;public static bool BuildRace = default;public static slice<@string> BuildToolexec = default;public static @string BuildToolchainName = default;public static Func<@string> BuildToolchainCompiler = default;public static Func<@string> BuildToolchainLinker = default;public static bool BuildTrimpath = default;public static bool BuildV = default;public static bool BuildWork = default;public static bool BuildX = default;public static bool ModCacheRW = default;public static @string ModFile = default;public static @string CmdName = default;public static @string DebugActiongraph = default;public static @string DebugTrace = default;
 
 private static build.Context defaultContext() {
@@ -42,7 +44,6 @@ private static build.Context defaultContext() {
         // go/build, except for using ctxt.GOROOT rather than
         // runtime.GOROOT.
         build.ToolDir = filepath.Join(ctxt.GOROOT, "pkg/tool/" + runtime.GOOS + "_" + runtime.GOARCH);
-
     }
     ctxt.GOPATH = envOr("GOPATH", ctxt.GOPATH); 
 
@@ -86,10 +87,7 @@ private static build.Context defaultContext() {
 
     }
 
-
-    ctxt.OpenFile = path => {
-        return fsys.Open(path);
-    };
+    ctxt.OpenFile = path => fsys.Open(path);
     ctxt.ReadDir = fsys.ReadDir;
     ctxt.IsDir = path => {
         var (isDir, err) = fsys.IsDir(path);
@@ -97,7 +95,6 @@ private static build.Context defaultContext() {
     };
 
     return ctxt;
-
 }
 
 private static void init() {
@@ -127,7 +124,6 @@ private static @string exeSuffix() {
         return ".exe";
     }
     return "";
-
 }
 
 private static var envCache = default;
@@ -147,7 +143,6 @@ public static (@string, error) EnvFile() {
             return (file, error.As(null!)!);
         }
     }
-
     var (dir, err) = os.UserConfigDir();
     if (err != null) {
         return ("", error.As(err)!);
@@ -156,7 +151,6 @@ public static (@string, error) EnvFile() {
         return ("", error.As(fmt.Errorf("missing user-config dir"))!);
     }
     return (filepath.Join(dir, "go/env"), error.As(null!)!);
-
 }
 
 private static void initEnvCache() {
@@ -188,14 +182,11 @@ private static void initEnvCache() {
             // the go command unusable just because somehow the env file has
             // gotten corrupted.)
             continue;
-
         }
         var key = line[..(int)i];
         var val = line[(int)i + 1..];
         envCache.m[string(key)] = string(val);
-
     }
-
 }
 
 // Getenv gets the value for the configuration key.
@@ -221,7 +212,6 @@ public static @string Getenv(@string key) => func((_, panic, _) => {
                 panic("internal error: invalid Getenv " + key);
                 break;
         }
-
     }
     var val = os.Getenv(key);
     if (val != "") {
@@ -229,7 +219,6 @@ public static @string Getenv(@string key) => func((_, panic, _) => {
     }
     envCache.once.Do(initEnvCache);
     return envCache.m[key];
-
 });
 
 // CanGetenv reports whether key is a valid go/env configuration key.
@@ -276,7 +265,6 @@ public static (@string, @string) GetArchEnv() {
             break;
     }
     return ("", "");
-
 }
 
 // envOr returns Getenv(key) if set, or else def.
@@ -286,7 +274,6 @@ private static @string envOr(@string key, @string def) {
         val = def;
     }
     return val;
-
 }
 
 // There is a copy of findGOROOT, isSameDir, and isGOROOT in
@@ -307,13 +294,11 @@ private static @string findGOROOT() {
             return filepath.Clean(env);
         }
     }
-
     var def = filepath.Clean(runtime.GOROOT());
     if (runtime.Compiler == "gccgo") { 
         // gccgo has no real GOROOT, and it certainly doesn't
         // depend on the executable's location.
         return def;
-
     }
     var (exe, err) = os.Executable();
     if (err == null) {
@@ -330,15 +315,12 @@ private static @string findGOROOT() {
                     if (isSameDir(def, dir)) {
                         return def;
                     }
-
                     return dir;
-
                 }
 
                 dir = dir__prev3;
 
             }
-
             exe, err = filepath.EvalSymlinks(exe);
             if (err == null) {
                 {
@@ -356,13 +338,10 @@ private static @string findGOROOT() {
                     dir = dir__prev4;
 
                 }
-
             }
-
         }
     }
     return def;
-
 }
 
 private static @string findGOROOT_FINAL() { 
@@ -376,9 +355,7 @@ private static @string findGOROOT_FINAL() {
             def = filepath.Clean(env);
         }
     }
-
     return def;
-
 }
 
 // isSameDir reports whether dir1 and dir2 are the same directory.
@@ -389,7 +366,6 @@ private static bool isSameDir(@string dir1, @string dir2) {
     var (info1, err1) = os.Stat(dir1);
     var (info2, err2) = os.Stat(dir2);
     return err1 == null && err2 == null && os.SameFile(info1, info2);
-
 }
 
 // isGOROOT reports whether path looks like a GOROOT.
@@ -405,7 +381,6 @@ private static bool isGOROOT(@string path) {
         return false;
     }
     return stat.IsDir();
-
 }
 
 private static @string gopathDir(@string rel) {
@@ -414,7 +389,6 @@ private static @string gopathDir(@string rel) {
         return "";
     }
     return filepath.Join(list[0], rel);
-
 }
 
 } // end cfg_package

@@ -15,29 +15,31 @@
 // Package symbolizer provides a routine to populate a profile with
 // symbol, file and line number information. It relies on the
 // addr2liner and demangle packages to do the actual work.
-// package symbolizer -- go2cs converted at 2022 March 06 23:23:50 UTC
+
+// package symbolizer -- go2cs converted at 2022 March 13 06:36:55 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/symbolizer" ==> using symbolizer = go.cmd.vendor.github.com.google.pprof.@internal.symbolizer_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\symbolizer\symbolizer.go
-using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
-using http = go.net.http_package;
-using url = go.net.url_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
-using binutils = go.github.com.google.pprof.@internal.binutils_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using symbolz = go.github.com.google.pprof.@internal.symbolz_package;
-using profile = go.github.com.google.pprof.profile_package;
-using demangle = go.github.com.ianlancetaylor.demangle_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using fmt = fmt_package;
+using ioutil = io.ioutil_package;
+using http = net.http_package;
+using url = net.url_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+using binutils = github.com.google.pprof.@internal.binutils_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using symbolz = github.com.google.pprof.@internal.symbolz_package;
+using profile = github.com.google.pprof.profile_package;
+using demangle = github.com.ianlancetaylor.demangle_package;
+
+
+// Symbolizer implements the plugin.Symbolize interface.
+
+using System;
 public static partial class symbolizer_package {
 
-    // Symbolizer implements the plugin.Symbolize interface.
 public partial struct Symbolizer {
     public plugin.ObjTool Obj;
     public plugin.UI UI;
@@ -104,10 +106,8 @@ private static error Symbolize(this ptr<Symbolizer> _addr_s, @string mode, plugi
                 }
                 s.UI.PrintErr("ignoring unrecognized symbolization option: " + mode);
                 s.UI.PrintErr("expecting -symbolize=[local|fastlocal|remote|none][:force][:demangle=[none|full|templates|default]");
-
                 break;
         }
-
     }    error err = default!;
     if (local) { 
         // Symbolize locally using binutils.
@@ -118,9 +118,7 @@ private static error Symbolize(this ptr<Symbolizer> _addr_s, @string mode, plugi
         }
     }
     if (remote) {
-        Func<@string, @string, (slice<byte>, error)> post = (source, post) => {
-            return error.As(postURL(source, post, s.Transport))!;
-        };
+        Func<@string, @string, (slice<byte>, error)> post = (source, post) => error.As(postURL(source, post, s.Transport))!;
         err = error.As(symbolzSymbolize(p, force, sources, post, s.UI))!;
 
         if (err != null) {
@@ -129,7 +127,6 @@ private static error Symbolize(this ptr<Symbolizer> _addr_s, @string mode, plugi
     }
     demangleFunction(p, force, demanglerMode);
     return error.As(null!)!;
-
 }
 
 // postURL issues a POST to a URL over HTTP.
@@ -147,7 +144,6 @@ private static (slice<byte>, error) postURL(@string source, @string post, http.R
         return (null, error.As(fmt.Errorf("http post %s: %v", source, statusCodeError(_addr_resp)))!);
     }
     return ioutil.ReadAll(resp.Body);
-
 });
 
 private static error statusCodeError(ptr<http.Response> _addr_resp) {
@@ -163,10 +159,8 @@ private static error statusCodeError(ptr<http.Response> _addr_resp) {
             }
 
         }
-
     }
     return error.As(fmt.Errorf("server response: %s", resp.Status))!;
-
 }
 
 // doLocalSymbolize adds symbol and line number information to all locations
@@ -184,7 +178,6 @@ private static error doLocalSymbolize(ptr<profile.Profile> _addr_prof, bool fast
             }
 
         }
-
     }
     var (mt, err) = newMapping(_addr_prof, obj, ui, force);
     if (err != null) {
@@ -199,13 +192,11 @@ private static error doLocalSymbolize(ptr<profile.Profile> _addr_prof, bool fast
         if (segment == null) { 
             // Nothing to do.
             continue;
-
         }
         var (stack, err) = segment.SourceLine(l.Address);
         if (err != null || len(stack) == 0) { 
             // No answers from addr2line.
             continue;
-
         }
         l.Line = make_slice<profile.Line>(len(stack));
         l.IsFolded = false;
@@ -234,14 +225,11 @@ private static error doLocalSymbolize(ptr<profile.Profile> _addr_prof, bool fast
                 }
 
             }
-
             l.Line[i] = new profile.Line(Function:f,Line:int64(frame.Line),);
-
         }        if (len(stack) > 0) {
             m.HasInlineFrames = true;
         }
     }    return error.As(null!)!;
-
 });
 
 // Demangle updates the function names in a profile with demangled C++
@@ -304,7 +292,6 @@ public static void Demangle(ptr<profile.Profile> _addr_prof, bool force, @string
             }
         }
         fn.Name = name;
-
     }
 }
 
@@ -314,10 +301,8 @@ public static void Demangle(ptr<profile.Profile> _addr_prof, bool force, @string
 private static bool looksLikeDemangledCPlusPlus(@string demangled) {
     if (strings.Contains(demangled, ".<")) { // Skip java names of the form "class.<init>"
         return false;
-
     }
     return strings.ContainsAny(demangled, "<>[]") || strings.Contains(demangled, "::");
-
 }
 
 // removeMatching removes nested instances of start..end from name.
@@ -338,7 +323,6 @@ private static @string removeMatching(@string name, byte start, byte end) {
                     first = current;
             index = strings.IndexAny(name[(int)current..], s);
                 }
-
             else if (name[current] == end) 
                 nesting--;
 
@@ -349,11 +333,9 @@ private static @string removeMatching(@string name, byte start, byte end) {
                     current = first - 1;
                 
             current++;
-
         }
     }
     return name;
-
 }
 
 // newMapping creates a mappingTable for a profile.
@@ -396,7 +378,6 @@ private static (ptr<mappingTable>, error) newMapping(ptr<profile.Profile> _addr_
                 }
 
             }
-
         }
         var name = filepath.Base(m.File);
         var (f, err) = obj.Open(m.File, m.Start, m.Limit, m.Offset);
@@ -416,14 +397,11 @@ private static (ptr<mappingTable>, error) newMapping(ptr<profile.Profile> _addr_
 
         }
 
-
         mt.segments[m] = f;
-
     }    if (missingBinaries) {
         ui.PrintErr("Some binary filenames not available. Symbolization may be incomplete.\n" + "Try setting PPROF_BINARY_PATH to the search path for local binaries.");
     }
     return (_addr_mt!, error.As(null!)!);
-
 }
 
 // mappingTable contains the mechanisms for symbolization of a

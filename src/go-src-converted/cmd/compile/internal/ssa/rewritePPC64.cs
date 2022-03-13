@@ -1,14 +1,14 @@
 // Code generated from gen/PPC64.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:05:48 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:18:45 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewritePPC64.go
-using buildcfg = go.@internal.buildcfg_package;
-using math = go.math_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using buildcfg = @internal.buildcfg_package;
+using math = math_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -830,7 +830,6 @@ private static bool rewriteValuePPC64(ptr<Value> _addr_v) {
         v.Op = OpPPC64MOVBZreg;
         return true;
         return false;
-
 }
 private static bool rewriteValuePPC64_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -847,7 +846,6 @@ private static bool rewriteValuePPC64_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicCompareAndSwap32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -868,7 +866,6 @@ private static bool rewriteValuePPC64_OpAtomicCompareAndSwap32(ptr<Value> _addr_
         v.AddArg4(ptr, old, new_, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicCompareAndSwap64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -889,7 +886,6 @@ private static bool rewriteValuePPC64_OpAtomicCompareAndSwap64(ptr<Value> _addr_
         v.AddArg4(ptr, old, new_, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicCompareAndSwapRel32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -910,7 +906,6 @@ private static bool rewriteValuePPC64_OpAtomicCompareAndSwapRel32(ptr<Value> _ad
         v.AddArg4(ptr, old, new_, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicLoad32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -927,7 +922,6 @@ private static bool rewriteValuePPC64_OpAtomicLoad32(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicLoad64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -944,7 +938,6 @@ private static bool rewriteValuePPC64_OpAtomicLoad64(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicLoad8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -961,7 +954,6 @@ private static bool rewriteValuePPC64_OpAtomicLoad8(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicLoadAcq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -978,7 +970,6 @@ private static bool rewriteValuePPC64_OpAtomicLoadAcq32(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicLoadAcq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -995,7 +986,6 @@ private static bool rewriteValuePPC64_OpAtomicLoadAcq64(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicLoadPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1012,7 +1002,6 @@ private static bool rewriteValuePPC64_OpAtomicLoadPtr(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicStore32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1031,7 +1020,6 @@ private static bool rewriteValuePPC64_OpAtomicStore32(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicStore64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1050,7 +1038,6 @@ private static bool rewriteValuePPC64_OpAtomicStore64(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicStore8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1069,7 +1056,6 @@ private static bool rewriteValuePPC64_OpAtomicStore8(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicStoreRel32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1088,7 +1074,6 @@ private static bool rewriteValuePPC64_OpAtomicStoreRel32(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAtomicStoreRel64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1107,7 +1092,6 @@ private static bool rewriteValuePPC64_OpAtomicStoreRel64(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpAvg64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1130,7 +1114,6 @@ private static bool rewriteValuePPC64_OpAvg64u(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpBitLen32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1149,7 +1132,6 @@ private static bool rewriteValuePPC64_OpBitLen32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpBitLen64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1168,7 +1150,6 @@ private static bool rewriteValuePPC64_OpBitLen64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCom16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1182,7 +1163,6 @@ private static bool rewriteValuePPC64_OpCom16(ptr<Value> _addr_v) {
         v.AddArg2(x, x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCom32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1196,7 +1176,6 @@ private static bool rewriteValuePPC64_OpCom32(ptr<Value> _addr_v) {
         v.AddArg2(x, x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCom64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1210,7 +1189,6 @@ private static bool rewriteValuePPC64_OpCom64(ptr<Value> _addr_v) {
         v.AddArg2(x, x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCom8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1224,7 +1202,6 @@ private static bool rewriteValuePPC64_OpCom8(ptr<Value> _addr_v) {
         v.AddArg2(x, x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCondSelect(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1247,7 +1224,6 @@ private static bool rewriteValuePPC64_OpCondSelect(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(2);
         v.AddArg3(x, y, bool);
         return true;
-
     } 
     // match: (CondSelect x y bool)
     // cond: flagArg(bool) == nil
@@ -1266,10 +1242,8 @@ private static bool rewriteValuePPC64_OpCondSelect(ptr<Value> _addr_v) {
         v0.AddArg(bool);
         v.AddArg3(x, y, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1282,7 +1256,6 @@ private static bool rewriteValuePPC64_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpConst32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1295,7 +1268,6 @@ private static bool rewriteValuePPC64_OpConst32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpConst64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1308,7 +1280,6 @@ private static bool rewriteValuePPC64_OpConst64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1321,7 +1292,6 @@ private static bool rewriteValuePPC64_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1334,7 +1304,6 @@ private static bool rewriteValuePPC64_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(b2i(t));
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1346,7 +1315,6 @@ private static bool rewriteValuePPC64_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCopysign(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1362,7 +1330,6 @@ private static bool rewriteValuePPC64_OpCopysign(ptr<Value> _addr_v) {
         v.AddArg2(y, x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCtz16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1385,7 +1352,6 @@ private static bool rewriteValuePPC64_OpCtz16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCtz32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1411,7 +1377,6 @@ private static bool rewriteValuePPC64_OpCtz32(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Ctz32 x)
     // result: (CNTTZW (MOVWZreg x))
@@ -1423,7 +1388,6 @@ private static bool rewriteValuePPC64_OpCtz32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCtz64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1447,7 +1411,6 @@ private static bool rewriteValuePPC64_OpCtz64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Ctz64 x)
     // result: (CNTTZD x)
@@ -1457,7 +1420,6 @@ private static bool rewriteValuePPC64_OpCtz64(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCtz8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1480,7 +1442,6 @@ private static bool rewriteValuePPC64_OpCtz8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt32Fto32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1498,7 +1459,6 @@ private static bool rewriteValuePPC64_OpCvt32Fto32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt32Fto64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1516,7 +1476,6 @@ private static bool rewriteValuePPC64_OpCvt32Fto64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt32to32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1536,7 +1495,6 @@ private static bool rewriteValuePPC64_OpCvt32to32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt32to64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1556,7 +1514,6 @@ private static bool rewriteValuePPC64_OpCvt32to64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt64Fto32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1574,7 +1531,6 @@ private static bool rewriteValuePPC64_OpCvt64Fto32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt64Fto64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1592,7 +1548,6 @@ private static bool rewriteValuePPC64_OpCvt64Fto64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt64to32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1610,7 +1565,6 @@ private static bool rewriteValuePPC64_OpCvt64to32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpCvt64to64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1628,7 +1582,6 @@ private static bool rewriteValuePPC64_OpCvt64to64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1652,10 +1605,8 @@ private static bool rewriteValuePPC64_OpDiv16(ptr<Value> _addr_v) {
         v1.AddArg(y);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1677,7 +1628,6 @@ private static bool rewriteValuePPC64_OpDiv16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1695,10 +1645,8 @@ private static bool rewriteValuePPC64_OpDiv32(ptr<Value> _addr_v) {
         v.reset(OpPPC64DIVW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpDiv64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1716,10 +1664,8 @@ private static bool rewriteValuePPC64_OpDiv64(ptr<Value> _addr_v) {
         v.reset(OpPPC64DIVD);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1741,7 +1687,6 @@ private static bool rewriteValuePPC64_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1763,7 +1708,6 @@ private static bool rewriteValuePPC64_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1786,7 +1730,6 @@ private static bool rewriteValuePPC64_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpPPC64Equal);
                 var v0 = b.NewValue0(v.Pos, OpPPC64CMPW, types.TypeFlags);
                 var v1 = b.NewValue0(v.Pos, OpSignExt16to32, typ.Int32);
@@ -1796,12 +1739,10 @@ private static bool rewriteValuePPC64_OpEq16(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg(v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Eq16 x y)
     // result: (Equal (CMPW (ZeroExt16to32 x) (ZeroExt16to32 y)))
@@ -1818,7 +1759,6 @@ private static bool rewriteValuePPC64_OpEq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1837,7 +1777,6 @@ private static bool rewriteValuePPC64_OpEq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1856,7 +1795,6 @@ private static bool rewriteValuePPC64_OpEq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1875,7 +1813,6 @@ private static bool rewriteValuePPC64_OpEq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1894,7 +1831,6 @@ private static bool rewriteValuePPC64_OpEq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1917,7 +1853,6 @@ private static bool rewriteValuePPC64_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpPPC64Equal);
                 var v0 = b.NewValue0(v.Pos, OpPPC64CMPW, types.TypeFlags);
                 var v1 = b.NewValue0(v.Pos, OpSignExt8to32, typ.Int32);
@@ -1927,12 +1862,10 @@ private static bool rewriteValuePPC64_OpEq8(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg(v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Eq8 x y)
     // result: (Equal (CMPW (ZeroExt8to32 x) (ZeroExt8to32 y)))
@@ -1949,7 +1882,6 @@ private static bool rewriteValuePPC64_OpEq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1970,7 +1902,6 @@ private static bool rewriteValuePPC64_OpEqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1989,7 +1920,6 @@ private static bool rewriteValuePPC64_OpEqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpIsInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2008,7 +1938,6 @@ private static bool rewriteValuePPC64_OpIsInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2026,7 +1955,6 @@ private static bool rewriteValuePPC64_OpIsNonNil(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpIsSliceInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2045,7 +1973,6 @@ private static bool rewriteValuePPC64_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2069,7 +1996,6 @@ private static bool rewriteValuePPC64_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2093,7 +2019,6 @@ private static bool rewriteValuePPC64_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2112,7 +2037,6 @@ private static bool rewriteValuePPC64_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2131,7 +2055,6 @@ private static bool rewriteValuePPC64_OpLeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2150,7 +2073,6 @@ private static bool rewriteValuePPC64_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2169,7 +2091,6 @@ private static bool rewriteValuePPC64_OpLeq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2188,7 +2109,6 @@ private static bool rewriteValuePPC64_OpLeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2207,7 +2127,6 @@ private static bool rewriteValuePPC64_OpLeq64U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2231,7 +2150,6 @@ private static bool rewriteValuePPC64_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2255,7 +2173,6 @@ private static bool rewriteValuePPC64_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2279,7 +2196,6 @@ private static bool rewriteValuePPC64_OpLess16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2303,7 +2219,6 @@ private static bool rewriteValuePPC64_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2322,7 +2237,6 @@ private static bool rewriteValuePPC64_OpLess32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2341,7 +2255,6 @@ private static bool rewriteValuePPC64_OpLess32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2360,7 +2273,6 @@ private static bool rewriteValuePPC64_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2379,7 +2291,6 @@ private static bool rewriteValuePPC64_OpLess64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2398,7 +2309,6 @@ private static bool rewriteValuePPC64_OpLess64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2417,7 +2327,6 @@ private static bool rewriteValuePPC64_OpLess64U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2441,7 +2350,6 @@ private static bool rewriteValuePPC64_OpLess8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2465,7 +2373,6 @@ private static bool rewriteValuePPC64_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2487,7 +2394,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitInt(t) && isSigned(t)
@@ -2502,7 +2408,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitInt(t) && !isSigned(t)
@@ -2517,7 +2422,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWZload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is16BitInt(t) && isSigned(t)
@@ -2532,7 +2436,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is16BitInt(t) && !isSigned(t)
@@ -2547,7 +2450,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHZload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsBoolean()
@@ -2562,7 +2464,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBZload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is8BitInt(t) && isSigned(t)
@@ -2579,7 +2480,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v0.AddArg2(ptr, mem);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is8BitInt(t) && !isSigned(t)
@@ -2594,7 +2494,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBZload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitFloat(t)
@@ -2609,7 +2508,6 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVSload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -2624,10 +2522,8 @@ private static bool rewriteValuePPC64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2643,7 +2539,6 @@ private static bool rewriteValuePPC64_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2664,7 +2559,6 @@ private static bool rewriteValuePPC64_OpLsh16x16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x16 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [16]))))
@@ -2686,7 +2580,6 @@ private static bool rewriteValuePPC64_OpLsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2711,7 +2604,6 @@ private static bool rewriteValuePPC64_OpLsh16x32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh16x32 x y)
     // cond: shiftIsBounded(v)
@@ -2725,7 +2617,6 @@ private static bool rewriteValuePPC64_OpLsh16x32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x32 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [16]))))
@@ -2745,7 +2636,6 @@ private static bool rewriteValuePPC64_OpLsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2768,7 +2658,6 @@ private static bool rewriteValuePPC64_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh16x64 x (MOVDconst [c]))
     // cond: uint64(c) < 16
@@ -2786,7 +2675,6 @@ private static bool rewriteValuePPC64_OpLsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh16x64 x y)
     // cond: shiftIsBounded(v)
@@ -2800,7 +2688,6 @@ private static bool rewriteValuePPC64_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x64 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [16]))))
@@ -2820,7 +2707,6 @@ private static bool rewriteValuePPC64_OpLsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2841,7 +2727,6 @@ private static bool rewriteValuePPC64_OpLsh16x8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x8 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [16]))))
@@ -2863,7 +2748,6 @@ private static bool rewriteValuePPC64_OpLsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2884,7 +2768,6 @@ private static bool rewriteValuePPC64_OpLsh32x16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x16 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [32]))))
@@ -2906,7 +2789,6 @@ private static bool rewriteValuePPC64_OpLsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2931,7 +2813,6 @@ private static bool rewriteValuePPC64_OpLsh32x32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh32x32 x y)
     // cond: shiftIsBounded(v)
@@ -2945,7 +2826,6 @@ private static bool rewriteValuePPC64_OpLsh32x32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x32 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [32]))))
@@ -2965,7 +2845,6 @@ private static bool rewriteValuePPC64_OpLsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2988,7 +2867,6 @@ private static bool rewriteValuePPC64_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh32x64 x (MOVDconst [c]))
     // cond: uint64(c) < 32
@@ -3006,7 +2884,6 @@ private static bool rewriteValuePPC64_OpLsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh32x64 x y)
     // cond: shiftIsBounded(v)
@@ -3020,7 +2897,6 @@ private static bool rewriteValuePPC64_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x64 x (AND y (MOVDconst [31])))
     // result: (SLW x (ANDconst <typ.Int32> [31] y))
@@ -3041,19 +2917,16 @@ private static bool rewriteValuePPC64_OpLsh32x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 v.reset(OpPPC64SLW);
                 var v0 = b.NewValue0(v.Pos, OpPPC64ANDconst, typ.Int32);
                 v0.AuxInt = int64ToAuxInt(31);
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Lsh32x64 x (ANDconst <typ.Int32> [31] y))
     // result: (SLW x (ANDconst <typ.Int32> [31] y))
@@ -3069,7 +2942,6 @@ private static bool rewriteValuePPC64_OpLsh32x64(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh32x64 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [32]))))
@@ -3089,7 +2961,6 @@ private static bool rewriteValuePPC64_OpLsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3110,7 +2981,6 @@ private static bool rewriteValuePPC64_OpLsh32x8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x8 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [32]))))
@@ -3132,7 +3002,6 @@ private static bool rewriteValuePPC64_OpLsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3153,7 +3022,6 @@ private static bool rewriteValuePPC64_OpLsh64x16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x16 x y)
     // result: (SLD x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [64]))))
@@ -3175,7 +3043,6 @@ private static bool rewriteValuePPC64_OpLsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3200,7 +3067,6 @@ private static bool rewriteValuePPC64_OpLsh64x32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh64x32 x y)
     // cond: shiftIsBounded(v)
@@ -3214,7 +3080,6 @@ private static bool rewriteValuePPC64_OpLsh64x32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x32 x y)
     // result: (SLD x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [64]))))
@@ -3234,7 +3099,6 @@ private static bool rewriteValuePPC64_OpLsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3257,7 +3121,6 @@ private static bool rewriteValuePPC64_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh64x64 x (MOVDconst [c]))
     // cond: uint64(c) < 64
@@ -3275,7 +3138,6 @@ private static bool rewriteValuePPC64_OpLsh64x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh64x64 x y)
     // cond: shiftIsBounded(v)
@@ -3289,7 +3151,6 @@ private static bool rewriteValuePPC64_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x64 x (AND y (MOVDconst [63])))
     // result: (SLD x (ANDconst <typ.Int64> [63] y))
@@ -3310,19 +3171,16 @@ private static bool rewriteValuePPC64_OpLsh64x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 v.reset(OpPPC64SLD);
                 var v0 = b.NewValue0(v.Pos, OpPPC64ANDconst, typ.Int64);
                 v0.AuxInt = int64ToAuxInt(63);
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Lsh64x64 x (ANDconst <typ.Int64> [63] y))
     // result: (SLD x (ANDconst <typ.Int64> [63] y))
@@ -3338,7 +3196,6 @@ private static bool rewriteValuePPC64_OpLsh64x64(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh64x64 x y)
     // result: (SLD x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [64]))))
@@ -3358,7 +3215,6 @@ private static bool rewriteValuePPC64_OpLsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3379,7 +3235,6 @@ private static bool rewriteValuePPC64_OpLsh64x8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x8 x y)
     // result: (SLD x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [64]))))
@@ -3401,7 +3256,6 @@ private static bool rewriteValuePPC64_OpLsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3422,7 +3276,6 @@ private static bool rewriteValuePPC64_OpLsh8x16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x16 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [8]))))
@@ -3444,7 +3297,6 @@ private static bool rewriteValuePPC64_OpLsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3469,7 +3321,6 @@ private static bool rewriteValuePPC64_OpLsh8x32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 7);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh8x32 x y)
     // cond: shiftIsBounded(v)
@@ -3483,7 +3334,6 @@ private static bool rewriteValuePPC64_OpLsh8x32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x32 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [8]))))
@@ -3503,7 +3353,6 @@ private static bool rewriteValuePPC64_OpLsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3526,7 +3375,6 @@ private static bool rewriteValuePPC64_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh8x64 x (MOVDconst [c]))
     // cond: uint64(c) < 8
@@ -3544,7 +3392,6 @@ private static bool rewriteValuePPC64_OpLsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh8x64 x y)
     // cond: shiftIsBounded(v)
@@ -3558,7 +3405,6 @@ private static bool rewriteValuePPC64_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x64 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [8]))))
@@ -3578,7 +3424,6 @@ private static bool rewriteValuePPC64_OpLsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3599,7 +3444,6 @@ private static bool rewriteValuePPC64_OpLsh8x8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x8 x y)
     // result: (SLW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [8]))))
@@ -3621,7 +3465,6 @@ private static bool rewriteValuePPC64_OpLsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3643,7 +3486,6 @@ private static bool rewriteValuePPC64_OpMod16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3665,7 +3507,6 @@ private static bool rewriteValuePPC64_OpMod16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3686,7 +3527,6 @@ private static bool rewriteValuePPC64_OpMod32(ptr<Value> _addr_v) {
         v.reset(OpPPC64MODSW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Mod32 x y)
     // cond: buildcfg.GOPPC64 <= 8
@@ -3704,10 +3544,8 @@ private static bool rewriteValuePPC64_OpMod32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpMod32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3728,7 +3566,6 @@ private static bool rewriteValuePPC64_OpMod32u(ptr<Value> _addr_v) {
         v.reset(OpPPC64MODUW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Mod32u x y)
     // cond: buildcfg.GOPPC64 <= 8
@@ -3746,10 +3583,8 @@ private static bool rewriteValuePPC64_OpMod32u(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpMod64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3770,7 +3605,6 @@ private static bool rewriteValuePPC64_OpMod64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MODSD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Mod64 x y)
     // cond: buildcfg.GOPPC64 <=8
@@ -3788,10 +3622,8 @@ private static bool rewriteValuePPC64_OpMod64(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpMod64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3812,7 +3644,6 @@ private static bool rewriteValuePPC64_OpMod64u(ptr<Value> _addr_v) {
         v.reset(OpPPC64MODUD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Mod64u x y)
     // cond: buildcfg.GOPPC64 <= 8
@@ -3830,10 +3661,8 @@ private static bool rewriteValuePPC64_OpMod64u(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3855,7 +3684,6 @@ private static bool rewriteValuePPC64_OpMod8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3877,7 +3705,6 @@ private static bool rewriteValuePPC64_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3896,7 +3723,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (MOVBstore dst (MOVBZload src mem) mem)
@@ -3912,7 +3738,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (MOVHstore dst (MOVHZload src mem) mem)
@@ -3928,7 +3753,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (MOVWstore dst (MOVWZload src mem) mem)
@@ -3944,7 +3768,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [8] {t} dst src mem)
     // result: (MOVDstore dst (MOVDload src mem) mem)
@@ -3960,7 +3783,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (MOVBstore [2] dst (MOVBZload [2] src mem) (MOVHstore dst (MOVHload src mem) mem))
@@ -3982,7 +3804,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [5] dst src mem)
     // result: (MOVBstore [4] dst (MOVBZload [4] src mem) (MOVWstore dst (MOVWZload src mem) mem))
@@ -4004,7 +3825,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [6] dst src mem)
     // result: (MOVHstore [4] dst (MOVHZload [4] src mem) (MOVWstore dst (MOVWZload src mem) mem))
@@ -4026,7 +3846,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [7] dst src mem)
     // result: (MOVBstore [6] dst (MOVBZload [6] src mem) (MOVHstore [4] dst (MOVHZload [4] src mem) (MOVWstore dst (MOVWZload src mem) mem)))
@@ -4054,7 +3873,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 8 && buildcfg.GOPPC64 <= 8 && logLargeCopy(v, s)
@@ -4071,7 +3889,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 8 && s <= 64 && buildcfg.GOPPC64 >= 9
@@ -4088,7 +3905,6 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 8 && buildcfg.GOPPC64 >= 9 && logLargeCopy(v, s)
@@ -4105,10 +3921,8 @@ private static bool rewriteValuePPC64_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg3(dst, src, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4131,7 +3945,6 @@ private static bool rewriteValuePPC64_OpNeq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpPPC64NotEqual);
                 var v0 = b.NewValue0(v.Pos, OpPPC64CMPW, types.TypeFlags);
                 var v1 = b.NewValue0(v.Pos, OpSignExt16to32, typ.Int32);
@@ -4141,12 +3954,10 @@ private static bool rewriteValuePPC64_OpNeq16(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg(v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Neq16 x y)
     // result: (NotEqual (CMPW (ZeroExt16to32 x) (ZeroExt16to32 y)))
@@ -4163,7 +3974,6 @@ private static bool rewriteValuePPC64_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4182,7 +3992,6 @@ private static bool rewriteValuePPC64_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpNeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4201,7 +4010,6 @@ private static bool rewriteValuePPC64_OpNeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpNeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4220,7 +4028,6 @@ private static bool rewriteValuePPC64_OpNeq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpNeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4239,7 +4046,6 @@ private static bool rewriteValuePPC64_OpNeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4262,7 +4068,6 @@ private static bool rewriteValuePPC64_OpNeq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpPPC64NotEqual);
                 var v0 = b.NewValue0(v.Pos, OpPPC64CMPW, types.TypeFlags);
                 var v1 = b.NewValue0(v.Pos, OpSignExt8to32, typ.Int32);
@@ -4272,12 +4077,10 @@ private static bool rewriteValuePPC64_OpNeq8(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg(v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Neq8 x y)
     // result: (NotEqual (CMPW (ZeroExt8to32 x) (ZeroExt8to32 y)))
@@ -4294,7 +4097,6 @@ private static bool rewriteValuePPC64_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4313,7 +4115,6 @@ private static bool rewriteValuePPC64_OpNeqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpNot(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4328,7 +4129,6 @@ private static bool rewriteValuePPC64_OpNot(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4347,7 +4147,6 @@ private static bool rewriteValuePPC64_OpOffPtr(ptr<Value> _addr_v) {
         v.AddArg2(v0, ptr);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4371,25 +4170,21 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = l.Args[1];
                 var x = l.Args[0];
                 var z = v_1;
                 if (!(buildcfg.GOPPC64 >= 9 && l.Uses == 1 && clobber(l))) {
                     continue;
                 }
-
                 v.reset(OpPPC64MADDLD);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (SLDconst x [c]) (SRDconst x [d]))
     // cond: d == 64-c
@@ -4405,30 +4200,25 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpPPC64SRDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 64 - c)) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (SLWconst x [c]) (SRWconst x [d]))
     // cond: d == 32-c
@@ -4444,30 +4234,25 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpPPC64SRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLWconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (SLD x (ANDconst <typ.Int64> [63] y)) (SRD x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y))))
     // result: (ROTL x y)
@@ -4482,51 +4267,42 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int64 || auxIntToInt64(v_0_1.AuxInt) != 63) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRD) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUB || v_1_1.Type != typ.UInt) {
                     continue;
                 }
-
                 _ = v_1_1.Args[1];
                 var v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64MOVDconst || auxIntToInt64(v_1_1_0.AuxInt) != 64) {
                     continue;
                 }
-
                 var v_1_1_1 = v_1_1.Args[1];
                 if (v_1_1_1.Op != OpPPC64ANDconst || v_1_1_1.Type != typ.UInt || auxIntToInt64(v_1_1_1.AuxInt) != 63 || y != v_1_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (SLD x (ANDconst <typ.Int64> [63] y)) (SRD x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y))))
     // result: (ROTL x y)
@@ -4541,45 +4317,37 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int64 || auxIntToInt64(v_0_1.AuxInt) != 63) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRD) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUBFCconst || v_1_1.Type != typ.UInt || auxIntToInt64(v_1_1.AuxInt) != 64) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64ANDconst || v_1_1_0.Type != typ.UInt || auxIntToInt64(v_1_1_0.AuxInt) != 63 || y != v_1_1_0.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (SLW x (ANDconst <typ.Int32> [31] y)) (SRW x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y))))
     // result: (ROTLW x y)
@@ -4594,45 +4362,37 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int32 || auxIntToInt64(v_0_1.AuxInt) != 31) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRW) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUBFCconst || v_1_1.Type != typ.UInt || auxIntToInt64(v_1_1.AuxInt) != 32) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64ANDconst || v_1_1_0.Type != typ.UInt || auxIntToInt64(v_1_1_0.AuxInt) != 31 || y != v_1_1_0.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (SLW x (ANDconst <typ.Int32> [31] y)) (SRW x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y))))
     // result: (ROTLW x y)
@@ -4647,51 +4407,42 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int32 || auxIntToInt64(v_0_1.AuxInt) != 31) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRW) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUB || v_1_1.Type != typ.UInt) {
                     continue;
                 }
-
                 _ = v_1_1.Args[1];
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64MOVDconst || auxIntToInt64(v_1_1_0.AuxInt) != 32) {
                     continue;
                 }
-
                 v_1_1_1 = v_1_1.Args[1];
                 if (v_1_1_1.Op != OpPPC64ANDconst || v_1_1_1.Type != typ.UInt || auxIntToInt64(v_1_1_1.AuxInt) != 31 || y != v_1_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (MOVDconst [c]))
     // cond: is32Bit(c)
@@ -4708,27 +4459,22 @@ private static bool rewriteValuePPC64_OpPPC64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpPPC64ADDconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ADDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4751,7 +4497,6 @@ private static bool rewriteValuePPC64_OpPPC64ADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [0] x)
     // result: x
@@ -4762,7 +4507,6 @@ private static bool rewriteValuePPC64_OpPPC64ADDconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDconst [c] (MOVDaddr [d] {sym} x))
     // cond: is32Bit(c+int64(d))
@@ -4783,7 +4527,6 @@ private static bool rewriteValuePPC64_OpPPC64ADDconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] x:(SP))
     // cond: is32Bit(c)
@@ -4798,7 +4541,6 @@ private static bool rewriteValuePPC64_OpPPC64ADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] (SUBFCconst [d] x))
     // cond: is32Bit(c+d)
@@ -4817,10 +4559,8 @@ private static bool rewriteValuePPC64_OpPPC64ADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4841,30 +4581,25 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var m = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64ROTLWconst) {
                     continue;
                 }
-
                 var r = auxIntToInt64(v_1.AuxInt);
                 var x = v_1.Args[0];
                 if (!(isPPC64WordRotateMask(m))) {
                     continue;
                 }
-
                 v.reset(OpPPC64RLWINM);
                 v.AuxInt = int64ToAuxInt(encodePPC64RotateMask(r, m, 32));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [m]) (ROTLW x r))
     // cond: isPPC64WordRotateMask(m)
@@ -4880,30 +4615,25 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 m = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64ROTLW) {
                     continue;
                 }
-
                 r = v_1.Args[1];
                 x = v_1.Args[0];
                 if (!(isPPC64WordRotateMask(m))) {
                     continue;
                 }
-
                 v.reset(OpPPC64RLWNM);
                 v.AuxInt = int64ToAuxInt(encodePPC64RotateMask(0, m, 32));
                 v.AddArg2(x, r);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [m]) (SRWconst x [s]))
     // cond: mergePPC64RShiftMask(m,s,32) == 0
@@ -4919,28 +4649,23 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 m = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64SRWconst) {
                     continue;
                 }
-
                 var s = auxIntToInt64(v_1.AuxInt);
                 if (!(mergePPC64RShiftMask(m, s, 32) == 0)) {
                     continue;
                 }
-
                 v.reset(OpPPC64MOVDconst);
                 v.AuxInt = int64ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [m]) (SRWconst x [s]))
     // cond: mergePPC64AndSrwi(m,s) != 0
@@ -4956,30 +4681,25 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 m = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64SRWconst) {
                     continue;
                 }
-
                 s = auxIntToInt64(v_1.AuxInt);
                 x = v_1.Args[0];
                 if (!(mergePPC64AndSrwi(m, s) != 0)) {
                     continue;
                 }
-
                 v.reset(OpPPC64RLWINM);
                 v.AuxInt = int64ToAuxInt(mergePPC64AndSrwi(m, s));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (NOR y y))
     // result: (ANDN x y)
@@ -4995,23 +4715,19 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[1];
                 if (y != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ANDN);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [c]) (MOVDconst [d]))
     // result: (MOVDconst [c&d])
@@ -5026,24 +4742,20 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64MOVDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpPPC64MOVDconst);
                 v.AuxInt = int64ToAuxInt(c & d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (MOVDconst [c]))
     // cond: isU16Bit(c)
@@ -5060,24 +4772,20 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(isU16Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpPPC64ANDconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [c]) y:(MOVWZreg _))
     // cond: c&0xFFFFFFFF == 0xFFFFFFFF
@@ -5093,23 +4801,19 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 y = v_1;
                 if (y.Op != OpPPC64MOVWZreg || !(c & 0xFFFFFFFF == 0xFFFFFFFF)) {
                     continue;
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [0xFFFFFFFF]) y:(MOVWreg x))
     // result: (MOVWZreg x)
@@ -5124,24 +4828,20 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1;
                 if (y.Op != OpPPC64MOVWreg) {
                     continue;
                 }
-
                 x = y.Args[0];
                 v.reset(OpPPC64MOVWZreg);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [c]) x:(MOVBZload _ _))
     // result: (ANDconst [c&0xFF] x)
@@ -5156,28 +4856,23 @@ private static bool rewriteValuePPC64_OpPPC64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 x = v_1;
                 if (x.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 v.reset(OpPPC64ANDconst);
                 v.AuxInt = int64ToAuxInt(c & 0xFF);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ANDN(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5198,10 +4893,8 @@ private static bool rewriteValuePPC64_OpPPC64ANDN(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(c & ~d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5224,7 +4917,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(encodePPC64RotateMask(r, m, 32));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [m] (ROTLW x r))
     // cond: isPPC64WordRotateMask(m)
@@ -5243,7 +4935,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(encodePPC64RotateMask(0, m, 32));
         v.AddArg2(x, r);
         return true;
-
     } 
     // match: (ANDconst [m] (SRWconst x [s]))
     // cond: mergePPC64RShiftMask(m,s,32) == 0
@@ -5260,7 +4951,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDconst [m] (SRWconst x [s]))
     // cond: mergePPC64AndSrwi(m,s) != 0
@@ -5279,7 +4969,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(mergePPC64AndSrwi(m, s));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] (ANDconst [d] x))
     // result: (ANDconst [c&d] x)
@@ -5294,7 +4983,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [-1] x)
     // result: x
@@ -5305,7 +4993,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDconst [0] _)
     // result: (MOVDconst [0])
@@ -5316,7 +5003,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDconst [c] y:(MOVBZreg _))
     // cond: c&0xFF == 0xFF
@@ -5329,7 +5015,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ANDconst [0xFF] y:(MOVBreg _))
     // result: y
@@ -5343,7 +5028,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ANDconst [c] y:(MOVHZreg _))
     // cond: c&0xFFFF == 0xFFFF
@@ -5356,7 +5040,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ANDconst [0xFFFF] y:(MOVHreg _))
     // result: y
@@ -5370,7 +5053,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVBreg x))
     // result: (ANDconst [c&0xFF] x)
@@ -5384,7 +5066,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 0xFF);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVBZreg x))
     // result: (ANDconst [c&0xFF] x)
@@ -5398,7 +5079,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 0xFF);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVHreg x))
     // result: (ANDconst [c&0xFFFF] x)
@@ -5412,7 +5092,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 0xFFFF);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVHZreg x))
     // result: (ANDconst [c&0xFFFF] x)
@@ -5426,7 +5105,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 0xFFFF);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVWreg x))
     // result: (ANDconst [c&0xFFFFFFFF] x)
@@ -5440,7 +5118,6 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 0xFFFFFFFF);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVWZreg x))
     // result: (ANDconst [c&0xFFFFFFFF] x)
@@ -5454,10 +5131,8 @@ private static bool rewriteValuePPC64_OpPPC64ANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 0xFFFFFFFF);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CLRLSLDI(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5480,7 +5155,6 @@ private static bool rewriteValuePPC64_OpPPC64CLRLSLDI(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(mergePPC64ClrlsldiSrw(int64(c), s));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CLRLSLDI [c] i:(RLWINM [s] x))
     // cond: mergePPC64ClrlsldiRlwinm(c,s) != 0
@@ -5500,10 +5174,8 @@ private static bool rewriteValuePPC64_OpPPC64CLRLSLDI(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(mergePPC64ClrlsldiRlwinm(c, s));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMP(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5527,7 +5199,6 @@ private static bool rewriteValuePPC64_OpPPC64CMP(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMP (MOVDconst [c]) y)
     // cond: is16Bit(c)
@@ -5547,7 +5218,6 @@ private static bool rewriteValuePPC64_OpPPC64CMP(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x y)
     // cond: canonLessThan(x,y)
@@ -5563,10 +5233,8 @@ private static bool rewriteValuePPC64_OpPPC64CMP(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMPU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5590,7 +5258,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPU(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPU (MOVDconst [c]) y)
     // cond: isU16Bit(c)
@@ -5610,7 +5277,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPU(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPU x y)
     // cond: canonLessThan(x,y)
@@ -5626,10 +5292,8 @@ private static bool rewriteValuePPC64_OpPPC64CMPU(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMPUconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5649,7 +5313,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagEQ);
         return true;
-
     } 
     // match: (CMPUconst (MOVDconst [x]) [y])
     // cond: uint64(x)<uint64(y)
@@ -5665,7 +5328,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagLT);
         return true;
-
     } 
     // match: (CMPUconst (MOVDconst [x]) [y])
     // cond: uint64(x)>uint64(y)
@@ -5681,10 +5343,8 @@ private static bool rewriteValuePPC64_OpPPC64CMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagGT);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMPW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5703,7 +5363,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPW(ptr<Value> _addr_v) {
         v.reset(OpPPC64CMPW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPW (MOVWreg x) y)
     // result: (CMPW x y)
@@ -5716,7 +5375,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPW(ptr<Value> _addr_v) {
         v.reset(OpPPC64CMPW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPW x (MOVDconst [c]))
     // cond: is16Bit(c)
@@ -5734,7 +5392,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPW(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPW (MOVDconst [c]) y)
     // cond: is16Bit(c)
@@ -5754,7 +5411,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPW(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPW x y)
     // cond: canonLessThan(x,y)
@@ -5770,10 +5426,8 @@ private static bool rewriteValuePPC64_OpPPC64CMPW(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMPWU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5792,7 +5446,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWU(ptr<Value> _addr_v) {
         v.reset(OpPPC64CMPWU);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPWU (MOVWZreg x) y)
     // result: (CMPWU x y)
@@ -5805,7 +5458,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWU(ptr<Value> _addr_v) {
         v.reset(OpPPC64CMPWU);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPWU x (MOVDconst [c]))
     // cond: isU16Bit(c)
@@ -5823,7 +5475,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWU(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPWU (MOVDconst [c]) y)
     // cond: isU16Bit(c)
@@ -5843,7 +5494,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWU(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPWU x y)
     // cond: canonLessThan(x,y)
@@ -5859,10 +5509,8 @@ private static bool rewriteValuePPC64_OpPPC64CMPWU(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMPWUconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5882,7 +5530,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagEQ);
         return true;
-
     } 
     // match: (CMPWUconst (MOVDconst [x]) [y])
     // cond: uint32(x)<uint32(y)
@@ -5898,7 +5545,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagLT);
         return true;
-
     } 
     // match: (CMPWUconst (MOVDconst [x]) [y])
     // cond: uint32(x)>uint32(y)
@@ -5914,10 +5560,8 @@ private static bool rewriteValuePPC64_OpPPC64CMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagGT);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMPWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5937,7 +5581,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagEQ);
         return true;
-
     } 
     // match: (CMPWconst (MOVDconst [x]) [y])
     // cond: int32(x)<int32(y)
@@ -5953,7 +5596,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagLT);
         return true;
-
     } 
     // match: (CMPWconst (MOVDconst [x]) [y])
     // cond: int32(x)>int32(y)
@@ -5969,10 +5611,8 @@ private static bool rewriteValuePPC64_OpPPC64CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagGT);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64CMPconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5992,7 +5632,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagEQ);
         return true;
-
     } 
     // match: (CMPconst (MOVDconst [x]) [y])
     // cond: x<y
@@ -6008,7 +5647,6 @@ private static bool rewriteValuePPC64_OpPPC64CMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagLT);
         return true;
-
     } 
     // match: (CMPconst (MOVDconst [x]) [y])
     // cond: x>y
@@ -6024,10 +5662,8 @@ private static bool rewriteValuePPC64_OpPPC64CMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpPPC64FlagGT);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64Equal(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6044,7 +5680,6 @@ private static bool rewriteValuePPC64_OpPPC64Equal(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (Equal (FlagLT))
     // result: (MOVDconst [0])
@@ -6055,7 +5690,6 @@ private static bool rewriteValuePPC64_OpPPC64Equal(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Equal (FlagGT))
     // result: (MOVDconst [0])
@@ -6066,7 +5700,6 @@ private static bool rewriteValuePPC64_OpPPC64Equal(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Equal (InvertFlags x))
     // result: (Equal x)
@@ -6078,7 +5711,6 @@ private static bool rewriteValuePPC64_OpPPC64Equal(ptr<Value> _addr_v) {
         v.reset(OpPPC64Equal);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Equal cmp)
     // result: (ISELB [2] (MOVDconst [1]) cmp)
@@ -6091,7 +5723,6 @@ private static bool rewriteValuePPC64_OpPPC64Equal(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64FABS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6107,10 +5738,8 @@ private static bool rewriteValuePPC64_OpPPC64FABS(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDconst);
         v.AuxInt = float64ToAuxInt(math.Abs(x));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FADD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6128,22 +5757,18 @@ private static bool rewriteValuePPC64_OpPPC64FADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_0.Args[1];
                 var x = v_0.Args[0];
                 var z = v_1;
                 v.reset(OpPPC64FMADD);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FADDS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6161,22 +5786,18 @@ private static bool rewriteValuePPC64_OpPPC64FADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_0.Args[1];
                 var x = v_0.Args[0];
                 var z = v_1;
                 v.reset(OpPPC64FMADDS);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FCEIL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6192,10 +5813,8 @@ private static bool rewriteValuePPC64_OpPPC64FCEIL(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDconst);
         v.AuxInt = float64ToAuxInt(math.Ceil(x));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FFLOOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6211,10 +5830,8 @@ private static bool rewriteValuePPC64_OpPPC64FFLOOR(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDconst);
         v.AuxInt = float64ToAuxInt(math.Floor(x));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FGreaterEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6236,7 +5853,6 @@ private static bool rewriteValuePPC64_OpPPC64FGreaterEqual(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64FGreaterThan(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6255,7 +5871,6 @@ private static bool rewriteValuePPC64_OpPPC64FGreaterThan(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64FLessEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6277,7 +5892,6 @@ private static bool rewriteValuePPC64_OpPPC64FLessEqual(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64FLessThan(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6296,7 +5910,6 @@ private static bool rewriteValuePPC64_OpPPC64FLessThan(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64FMOVDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6319,7 +5932,6 @@ private static bool rewriteValuePPC64_OpPPC64FMOVDload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MTVSRD);
         v.AddArg(x);
         return true;
-
     } 
     // match: (FMOVDload [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -6343,7 +5955,6 @@ private static bool rewriteValuePPC64_OpPPC64FMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (FMOVDload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -6365,10 +5976,8 @@ private static bool rewriteValuePPC64_OpPPC64FMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FMOVDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6392,7 +6001,6 @@ private static bool rewriteValuePPC64_OpPPC64FMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (FMOVDstore [off1] {sym} (ADDconst [off2] ptr) val mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -6415,7 +6023,6 @@ private static bool rewriteValuePPC64_OpPPC64FMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (FMOVDstore [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -6440,10 +6047,8 @@ private static bool rewriteValuePPC64_OpPPC64FMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FMOVSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6472,7 +6077,6 @@ private static bool rewriteValuePPC64_OpPPC64FMOVSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (FMOVSload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -6494,10 +6098,8 @@ private static bool rewriteValuePPC64_OpPPC64FMOVSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FMOVSstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6526,7 +6128,6 @@ private static bool rewriteValuePPC64_OpPPC64FMOVSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (FMOVSstore [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -6551,10 +6152,8 @@ private static bool rewriteValuePPC64_OpPPC64FMOVSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FNEG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6570,7 +6169,6 @@ private static bool rewriteValuePPC64_OpPPC64FNEG(ptr<Value> _addr_v) {
         v.reset(OpPPC64FNABS);
         v.AddArg(x);
         return true;
-
     } 
     // match: (FNEG (FNABS x))
     // result: (FABS x)
@@ -6582,10 +6180,8 @@ private static bool rewriteValuePPC64_OpPPC64FNEG(ptr<Value> _addr_v) {
         v.reset(OpPPC64FABS);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FSQRT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6605,10 +6201,8 @@ private static bool rewriteValuePPC64_OpPPC64FSQRT(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDconst);
         v.AuxInt = float64ToAuxInt(math.Sqrt(x));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FSUB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6627,10 +6221,8 @@ private static bool rewriteValuePPC64_OpPPC64FSUB(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMSUB);
         v.AddArg3(x, y, z);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FSUBS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6649,10 +6241,8 @@ private static bool rewriteValuePPC64_OpPPC64FSUBS(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMSUBS);
         v.AddArg3(x, y, z);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64FTRUNC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6668,10 +6258,8 @@ private static bool rewriteValuePPC64_OpPPC64FTRUNC(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDconst);
         v.AuxInt = float64ToAuxInt(math.Trunc(x));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64GreaterEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6688,7 +6276,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (GreaterEqual (FlagLT))
     // result: (MOVDconst [0])
@@ -6699,7 +6286,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (GreaterEqual (FlagGT))
     // result: (MOVDconst [1])
@@ -6710,7 +6296,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (GreaterEqual (InvertFlags x))
     // result: (LessEqual x)
@@ -6722,7 +6307,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64LessEqual);
         v.AddArg(x);
         return true;
-
     } 
     // match: (GreaterEqual cmp)
     // result: (ISELB [4] (MOVDconst [1]) cmp)
@@ -6735,7 +6319,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterEqual(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64GreaterThan(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6752,7 +6335,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (GreaterThan (FlagLT))
     // result: (MOVDconst [0])
@@ -6763,7 +6345,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (GreaterThan (FlagGT))
     // result: (MOVDconst [1])
@@ -6774,7 +6355,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (GreaterThan (InvertFlags x))
     // result: (LessThan x)
@@ -6786,7 +6366,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64LessThan);
         v.AddArg(x);
         return true;
-
     } 
     // match: (GreaterThan cmp)
     // result: (ISELB [1] (MOVDconst [1]) cmp)
@@ -6799,7 +6378,6 @@ private static bool rewriteValuePPC64_OpPPC64GreaterThan(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6836,7 +6414,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(d);
         v.AddArg(y);
         return true;
-
     } 
     // match: (ISEL [0] (ANDconst [d] y) (MOVDconst [-1]) (CMPUconst [c] (ANDconst [d] y)))
     // cond: c >= d
@@ -6859,7 +6436,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(d);
         v.AddArg(y);
         return true;
-
     } 
     // match: (ISEL [2] x _ (FlagEQ))
     // result: x
@@ -6873,7 +6449,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [2] _ y (FlagLT))
     // result: y
@@ -6887,7 +6462,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [2] _ y (FlagGT))
     // result: y
@@ -6901,7 +6475,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [6] _ y (FlagEQ))
     // result: y
@@ -6915,7 +6488,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [6] x _ (FlagLT))
     // result: x
@@ -6929,7 +6501,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [6] x _ (FlagGT))
     // result: x
@@ -6943,7 +6514,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [0] _ y (FlagEQ))
     // result: y
@@ -6957,7 +6527,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [0] _ y (FlagGT))
     // result: y
@@ -6971,7 +6540,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [0] x _ (FlagLT))
     // result: x
@@ -6985,7 +6553,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [5] _ x (FlagEQ))
     // result: x
@@ -6999,7 +6566,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [5] _ x (FlagLT))
     // result: x
@@ -7013,7 +6579,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [5] y _ (FlagGT))
     // result: y
@@ -7027,7 +6592,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [1] _ y (FlagEQ))
     // result: y
@@ -7041,7 +6605,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [1] _ y (FlagLT))
     // result: y
@@ -7055,7 +6618,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [1] x _ (FlagGT))
     // result: x
@@ -7069,7 +6631,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [4] x _ (FlagEQ))
     // result: x
@@ -7083,7 +6644,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [4] x _ (FlagGT))
     // result: x
@@ -7097,7 +6657,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ISEL [4] _ y (FlagLT))
     // result: y
@@ -7111,7 +6670,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (ISEL [n] x y (InvertFlags bool))
     // cond: n%4 == 0
@@ -7131,7 +6689,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(n + 1);
         v.AddArg3(x, y, bool);
         return true;
-
     } 
     // match: (ISEL [n] x y (InvertFlags bool))
     // cond: n%4 == 1
@@ -7151,7 +6708,6 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(n - 1);
         v.AddArg3(x, y, bool);
         return true;
-
     } 
     // match: (ISEL [n] x y (InvertFlags bool))
     // cond: n%4 == 2
@@ -7171,10 +6727,8 @@ private static bool rewriteValuePPC64_OpPPC64ISEL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(n);
         v.AddArg3(x, y, bool);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7192,7 +6746,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [0] _ (FlagGT))
     // result: (MOVDconst [0])
@@ -7203,7 +6756,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [0] _ (FlagEQ))
     // result: (MOVDconst [0])
@@ -7214,7 +6766,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [1] _ (FlagGT))
     // result: (MOVDconst [1])
@@ -7225,7 +6776,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [1] _ (FlagLT))
     // result: (MOVDconst [0])
@@ -7236,7 +6786,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [1] _ (FlagEQ))
     // result: (MOVDconst [0])
@@ -7247,7 +6796,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [2] _ (FlagEQ))
     // result: (MOVDconst [1])
@@ -7258,7 +6806,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [2] _ (FlagLT))
     // result: (MOVDconst [0])
@@ -7269,7 +6816,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [2] _ (FlagGT))
     // result: (MOVDconst [0])
@@ -7280,7 +6826,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [4] _ (FlagLT))
     // result: (MOVDconst [0])
@@ -7291,7 +6836,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [4] _ (FlagGT))
     // result: (MOVDconst [1])
@@ -7302,7 +6846,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [4] _ (FlagEQ))
     // result: (MOVDconst [1])
@@ -7313,7 +6856,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [5] _ (FlagGT))
     // result: (MOVDconst [0])
@@ -7324,7 +6866,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [5] _ (FlagLT))
     // result: (MOVDconst [1])
@@ -7335,7 +6876,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [5] _ (FlagEQ))
     // result: (MOVDconst [1])
@@ -7346,7 +6886,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [6] _ (FlagEQ))
     // result: (MOVDconst [0])
@@ -7357,7 +6896,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ISELB [6] _ (FlagLT))
     // result: (MOVDconst [1])
@@ -7368,7 +6906,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [6] _ (FlagGT))
     // result: (MOVDconst [1])
@@ -7379,7 +6916,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (ISELB [n] (MOVDconst [1]) (InvertFlags bool))
     // cond: n%4 == 0
@@ -7399,7 +6935,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(1);
         v.AddArg2(v0, bool);
         return true;
-
     } 
     // match: (ISELB [n] (MOVDconst [1]) (InvertFlags bool))
     // cond: n%4 == 1
@@ -7419,7 +6954,6 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(1);
         v.AddArg2(v0, bool);
         return true;
-
     } 
     // match: (ISELB [n] (MOVDconst [1]) (InvertFlags bool))
     // cond: n%4 == 2
@@ -7439,10 +6973,8 @@ private static bool rewriteValuePPC64_OpPPC64ISELB(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(1);
         v.AddArg2(v0, bool);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64LessEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7459,7 +6991,6 @@ private static bool rewriteValuePPC64_OpPPC64LessEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (LessEqual (FlagLT))
     // result: (MOVDconst [1])
@@ -7470,7 +7001,6 @@ private static bool rewriteValuePPC64_OpPPC64LessEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (LessEqual (FlagGT))
     // result: (MOVDconst [0])
@@ -7481,7 +7011,6 @@ private static bool rewriteValuePPC64_OpPPC64LessEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (LessEqual (InvertFlags x))
     // result: (GreaterEqual x)
@@ -7493,7 +7022,6 @@ private static bool rewriteValuePPC64_OpPPC64LessEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64GreaterEqual);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LessEqual cmp)
     // result: (ISELB [5] (MOVDconst [1]) cmp)
@@ -7506,7 +7034,6 @@ private static bool rewriteValuePPC64_OpPPC64LessEqual(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64LessThan(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7523,7 +7050,6 @@ private static bool rewriteValuePPC64_OpPPC64LessThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (LessThan (FlagLT))
     // result: (MOVDconst [1])
@@ -7534,7 +7060,6 @@ private static bool rewriteValuePPC64_OpPPC64LessThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (LessThan (FlagGT))
     // result: (MOVDconst [0])
@@ -7545,7 +7070,6 @@ private static bool rewriteValuePPC64_OpPPC64LessThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (LessThan (InvertFlags x))
     // result: (GreaterThan x)
@@ -7557,7 +7081,6 @@ private static bool rewriteValuePPC64_OpPPC64LessThan(ptr<Value> _addr_v) {
         v.reset(OpPPC64GreaterThan);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LessThan cmp)
     // result: (ISELB [0] (MOVDconst [1]) cmp)
@@ -7570,7 +7093,6 @@ private static bool rewriteValuePPC64_OpPPC64LessThan(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64MFVSRD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7588,7 +7110,6 @@ private static bool rewriteValuePPC64_OpPPC64MFVSRD(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(math.Float64bits(c)));
         return true;
-
     } 
     // match: (MFVSRD x:(FMOVDload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -7612,10 +7133,8 @@ private static bool rewriteValuePPC64_OpPPC64MFVSRD(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVBZload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7644,7 +7163,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBZload [off1] {sym} (ADDconst [off2] x) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -7666,7 +7184,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVBZload [0] {sym} p:(ADD ptr idx) mem)
     // cond: sym == nil && p.Uses == 1
@@ -7689,10 +7206,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBZloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVBZloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7717,7 +7232,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBZloadidx (MOVDconst [c]) ptr mem)
     // cond: is16Bit(c)
@@ -7736,10 +7250,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7761,7 +7273,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVBZreg (SRWconst [c] (MOVBZreg x)))
     // result: (SRWconst [c] (MOVBZreg x))
@@ -7781,7 +7292,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVBZreg (SRWconst [c] x))
     // cond: sizeof(x.Type) == 8
@@ -7799,7 +7309,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg (SRDconst [c] x))
     // cond: c>=56
@@ -7817,7 +7326,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg (SRWconst [c] x))
     // cond: c>=24
@@ -7835,7 +7343,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg y:(MOVBZreg _))
     // result: y
@@ -7846,7 +7353,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVBZreg (MOVBreg x))
     // result: (MOVBZreg x)
@@ -7858,7 +7364,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg (OR <t> x (MOVWZreg y)))
     // result: (MOVBZreg (OR <t> x y))
@@ -7881,21 +7386,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64OR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (XOR <t> x (MOVWZreg y)))
     // result: (MOVBZreg (XOR <t> x y))
@@ -7918,21 +7420,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64XOR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (AND <t> x (MOVWZreg y)))
     // result: (MOVBZreg (AND <t> x y))
@@ -7955,21 +7454,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64AND, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (OR <t> x (MOVHZreg y)))
     // result: (MOVBZreg (OR <t> x y))
@@ -7992,21 +7488,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64OR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (XOR <t> x (MOVHZreg y)))
     // result: (MOVBZreg (XOR <t> x y))
@@ -8029,21 +7522,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64XOR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (AND <t> x (MOVHZreg y)))
     // result: (MOVBZreg (AND <t> x y))
@@ -8066,21 +7556,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64AND, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (OR <t> x (MOVBZreg y)))
     // result: (MOVBZreg (OR <t> x y))
@@ -8103,21 +7590,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64OR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (XOR <t> x (MOVBZreg y)))
     // result: (MOVBZreg (XOR <t> x y))
@@ -8140,21 +7624,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64XOR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg (AND <t> x (MOVBZreg y)))
     // result: (MOVBZreg (AND <t> x y))
@@ -8177,21 +7658,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVBZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64AND, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg z:(ANDconst [c] (MOVBZload ptr x)))
     // result: z
@@ -8206,7 +7684,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(z);
         return true;
-
     } 
     // match: (MOVBZreg z:(AND y (MOVBZload ptr x)))
     // result: z
@@ -8228,17 +7705,14 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                 }
-
                 v.copyOf(z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVBZreg x:(MOVBZload _ _))
     // result: x
@@ -8249,7 +7723,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBZreg x:(MOVBZloadidx _ _ _))
     // result: x
@@ -8260,7 +7733,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBZreg x:(Arg <t>))
     // cond: is8BitInt(t) && !isSigned(t)
@@ -8276,7 +7748,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBZreg (MOVDconst [c]))
     // result: (MOVDconst [int64(uint8(c))])
@@ -8288,10 +7759,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint8(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8313,7 +7782,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVBreg (SRAWconst [c] (MOVBreg x)))
     // result: (SRAWconst [c] (MOVBreg x))
@@ -8333,7 +7801,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVBreg (SRAWconst [c] x))
     // cond: sizeof(x.Type) == 8
@@ -8351,7 +7818,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (SRDconst [c] x))
     // cond: c>56
@@ -8369,7 +7835,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (SRDconst [c] x))
     // cond: c==56
@@ -8387,7 +7852,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (SRADconst [c] x))
     // cond: c>=56
@@ -8405,7 +7869,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (SRWconst [c] x))
     // cond: c>24
@@ -8423,7 +7886,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (SRWconst [c] x))
     // cond: c==24
@@ -8441,7 +7903,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (SRAWconst [c] x))
     // cond: c>=24
@@ -8459,7 +7920,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg y:(MOVBreg _))
     // result: y
@@ -8470,7 +7930,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVBreg (MOVBZreg x))
     // result: (MOVBreg x)
@@ -8482,7 +7941,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg x:(Arg <t>))
     // cond: is8BitInt(t) && isSigned(t)
@@ -8498,7 +7956,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBreg (MOVDconst [c]))
     // result: (MOVDconst [int64(int8(c))])
@@ -8510,10 +7967,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVBreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int8(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8545,7 +8000,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -8570,7 +8024,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVBstorezero [off] {sym} ptr mem)
@@ -8587,7 +8040,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstore [0] {sym} p:(ADD ptr idx) val mem)
     // cond: sym == nil && p.Uses == 1
@@ -8611,7 +8063,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstoreidx);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -8629,7 +8080,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBZreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -8647,7 +8097,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -8665,7 +8114,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHZreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -8683,7 +8131,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -8701,7 +8148,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVWZreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -8719,7 +8165,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (SRWconst (MOVHreg x) [c]) mem)
     // cond: c <= 8
@@ -8749,7 +8194,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (SRWconst (MOVHZreg x) [c]) mem)
     // cond: c <= 8
@@ -8779,7 +8223,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (SRWconst (MOVWreg x) [c]) mem)
     // cond: c <= 24
@@ -8809,7 +8252,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (SRWconst (MOVWZreg x) [c]) mem)
     // cond: c <= 24
@@ -8839,7 +8281,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i1] {s} p (SRWconst w [24]) x0:(MOVBstore [i0] {s} p (SRWconst w [16]) mem))
     // cond: !config.BigEndian && x0.Uses == 1 && i1 == i0+1 && clobber(x0)
@@ -8876,7 +8317,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i1] {s} p (SRDconst w [24]) x0:(MOVBstore [i0] {s} p (SRDconst w [16]) mem))
     // cond: !config.BigEndian && x0.Uses == 1 && i1 == i0+1 && clobber(x0)
@@ -8913,7 +8353,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(w);
         v.AddArg3(p, v0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i1] {s} p (SRWconst w [8]) x0:(MOVBstore [i0] {s} p w mem))
     // cond: !config.BigEndian && x0.Uses == 1 && i1 == i0+1 && clobber(x0)
@@ -8943,7 +8382,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i1] {s} p (SRDconst w [8]) x0:(MOVBstore [i0] {s} p w mem))
     // cond: !config.BigEndian && x0.Uses == 1 && i1 == i0+1 && clobber(x0)
@@ -8973,7 +8411,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i3] {s} p w x0:(MOVBstore [i2] {s} p (SRWconst w [8]) x1:(MOVBstore [i1] {s} p (SRWconst w [16]) x2:(MOVBstore [i0] {s} p (SRWconst w [24]) mem))))
     // cond: !config.BigEndian && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && i1 == i0+1 && i2 == i0+2 && i3 == i0+3 && clobber(x0, x1, x2)
@@ -9038,7 +8475,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(p);
         v.AddArg3(v0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i1] {s} p w x0:(MOVBstore [i0] {s} p (SRWconst w [8]) mem))
     // cond: !config.BigEndian && x0.Uses == 1 && i1 == i0+1 && clobber(x0)
@@ -9071,7 +8507,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(p);
         v.AddArg3(v0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i7] {s} p (SRDconst w [56]) x0:(MOVBstore [i6] {s} p (SRDconst w [48]) x1:(MOVBstore [i5] {s} p (SRDconst w [40]) x2:(MOVBstore [i4] {s} p (SRDconst w [32]) x3:(MOVWstore [i0] {s} p w mem)))))
     // cond: !config.BigEndian && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && i4 == i0+4 && i5 == i0+5 && i6 == i0+6 && i7 == i0+7 && clobber(x0, x1, x2, x3)
@@ -9149,7 +8584,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i7] {s} p w x0:(MOVBstore [i6] {s} p (SRDconst w [8]) x1:(MOVBstore [i5] {s} p (SRDconst w [16]) x2:(MOVBstore [i4] {s} p (SRDconst w [24]) x3:(MOVBstore [i3] {s} p (SRDconst w [32]) x4:(MOVBstore [i2] {s} p (SRDconst w [40]) x5:(MOVBstore [i1] {s} p (SRDconst w [48]) x6:(MOVBstore [i0] {s} p (SRDconst w [56]) mem))))))))
     // cond: !config.BigEndian && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && i1 == i0+1 && i2 == i0+2 && i3 == i0+3 && i4 == i0+4 && i5 == i0+5 && i6 == i0+6 && i7 == i0+7 && clobber(x0, x1, x2, x3, x4, x5, x6)
@@ -9278,10 +8712,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstore(ptr<Value> _addr_v) {
         v0.AddArg(p);
         v.AddArg3(v0, w, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9310,7 +8742,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx (MOVDconst [c]) ptr val mem)
     // cond: is16Bit(c)
@@ -9330,7 +8761,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (MOVBreg x) mem)
     // result: (MOVBstoreidx ptr idx x mem)
@@ -9345,7 +8775,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (MOVBZreg x) mem)
     // result: (MOVBstoreidx ptr idx x mem)
@@ -9360,7 +8789,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (MOVHreg x) mem)
     // result: (MOVBstoreidx ptr idx x mem)
@@ -9375,7 +8803,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (MOVHZreg x) mem)
     // result: (MOVBstoreidx ptr idx x mem)
@@ -9390,7 +8817,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (MOVWreg x) mem)
     // result: (MOVBstoreidx ptr idx x mem)
@@ -9405,7 +8831,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (MOVWZreg x) mem)
     // result: (MOVBstoreidx ptr idx x mem)
@@ -9420,7 +8845,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (SRWconst (MOVHreg x) [c]) mem)
     // cond: c <= 8
@@ -9447,7 +8871,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg4(ptr, idx, v0, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (SRWconst (MOVHZreg x) [c]) mem)
     // cond: c <= 8
@@ -9474,7 +8897,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg4(ptr, idx, v0, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (SRWconst (MOVWreg x) [c]) mem)
     // cond: c <= 24
@@ -9501,7 +8923,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg4(ptr, idx, v0, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx ptr idx (SRWconst (MOVWZreg x) [c]) mem)
     // cond: c <= 24
@@ -9528,10 +8949,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstoreidx(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg4(ptr, idx, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVBstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9558,7 +8977,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVBstorezero [off1] {sym1} p:(MOVDaddr [off2] {sym2} x) mem)
     // cond: canMergeSym(sym1,sym2) && (x.Op != OpSB || p.Uses == 1)
@@ -9582,10 +9000,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVBstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9608,7 +9024,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MFVSRD);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -9632,7 +9047,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym} (ADDconst [off2] x) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -9654,7 +9068,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVDload [0] {sym} p:(ADD ptr idx) mem)
     // cond: sym == nil && p.Uses == 1
@@ -9677,10 +9090,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVDload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVDloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9705,7 +9116,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDloadidx (MOVDconst [c]) ptr mem)
     // cond: is16Bit(c) && c%4 == 0
@@ -9724,10 +9134,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVDloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9751,7 +9159,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVDstore [off1] {sym} (ADDconst [off2] x) val mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -9774,7 +9181,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -9799,7 +9205,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVDstorezero [off] {sym} ptr mem)
@@ -9816,7 +9221,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDstore [0] {sym} p:(ADD ptr idx) val mem)
     // cond: sym == nil && p.Uses == 1
@@ -9840,10 +9244,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDstoreidx);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVDstoreidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9870,7 +9272,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVDstoreidx (MOVDconst [c]) ptr val mem)
     // cond: is16Bit(c) && c%4 == 0
@@ -9890,10 +9291,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVDstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9920,7 +9319,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVDstorezero [off1] {sym1} p:(MOVDaddr [off2] {sym2} x) mem)
     // cond: canMergeSym(sym1,sym2) && (x.Op != OpSB || p.Uses == 1)
@@ -9944,10 +9342,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVDstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHBRstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9969,7 +9365,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHBRstore {sym} ptr (MOVHZreg x) mem)
     // result: (MOVHBRstore {sym} ptr x mem)
@@ -9985,7 +9380,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHBRstore {sym} ptr (MOVWreg x) mem)
     // result: (MOVHBRstore {sym} ptr x mem)
@@ -10001,7 +9395,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHBRstore {sym} ptr (MOVWZreg x) mem)
     // result: (MOVHBRstore {sym} ptr x mem)
@@ -10017,10 +9410,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHZload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10049,7 +9440,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHZload [off1] {sym} (ADDconst [off2] x) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -10071,7 +9461,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVHZload [0] {sym} p:(ADD ptr idx) mem)
     // cond: sym == nil && p.Uses == 1
@@ -10094,10 +9483,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHZloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHZloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10122,7 +9509,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHZloadidx (MOVDconst [c]) ptr mem)
     // cond: is16Bit(c)
@@ -10141,10 +9527,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10166,7 +9550,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVHZreg (SRWconst [c] (MOVBZreg x)))
     // result: (SRWconst [c] (MOVBZreg x))
@@ -10186,7 +9569,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVHZreg (SRWconst [c] (MOVHZreg x)))
     // result: (SRWconst [c] (MOVHZreg x))
@@ -10206,7 +9588,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVHZreg (SRWconst [c] x))
     // cond: sizeof(x.Type) <= 16
@@ -10224,7 +9605,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg (SRDconst [c] x))
     // cond: c>=48
@@ -10242,7 +9622,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg (SRWconst [c] x))
     // cond: c>=16
@@ -10260,7 +9639,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg y:(MOVHZreg _))
     // result: y
@@ -10271,7 +9649,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVHZreg y:(MOVBZreg _))
     // result: y
@@ -10282,7 +9659,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVHZreg y:(MOVHBRload _ _))
     // result: y
@@ -10293,7 +9669,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVHZreg y:(MOVHreg x))
     // result: (MOVHZreg x)
@@ -10306,7 +9681,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg (OR <t> x (MOVWZreg y)))
     // result: (MOVHZreg (OR <t> x y))
@@ -10329,21 +9703,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVHZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64OR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVHZreg (XOR <t> x (MOVWZreg y)))
     // result: (MOVHZreg (XOR <t> x y))
@@ -10366,21 +9737,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVHZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64XOR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVHZreg (AND <t> x (MOVWZreg y)))
     // result: (MOVHZreg (AND <t> x y))
@@ -10403,21 +9771,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVHZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64AND, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVHZreg (OR <t> x (MOVHZreg y)))
     // result: (MOVHZreg (OR <t> x y))
@@ -10440,21 +9805,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVHZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64OR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVHZreg (XOR <t> x (MOVHZreg y)))
     // result: (MOVHZreg (XOR <t> x y))
@@ -10477,21 +9839,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVHZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64XOR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVHZreg (AND <t> x (MOVHZreg y)))
     // result: (MOVHZreg (AND <t> x y))
@@ -10514,21 +9873,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVHZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64AND, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVHZreg z:(ANDconst [c] (MOVBZload ptr x)))
     // result: z
@@ -10543,7 +9899,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(z);
         return true;
-
     } 
     // match: (MOVHZreg z:(ANDconst [c] (MOVHZload ptr x)))
     // result: z
@@ -10558,7 +9913,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(z);
         return true;
-
     } 
     // match: (MOVHZreg z:(AND y (MOVHZload ptr x)))
     // result: z
@@ -10580,17 +9934,14 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                 }
-
                 v.copyOf(z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVHZreg x:(MOVBZload _ _))
     // result: x
@@ -10601,7 +9952,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg x:(MOVBZloadidx _ _ _))
     // result: x
@@ -10612,7 +9962,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg x:(MOVHZload _ _))
     // result: x
@@ -10623,7 +9972,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg x:(MOVHZloadidx _ _ _))
     // result: x
@@ -10634,7 +9982,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg x:(Arg <t>))
     // cond: (is8BitInt(t) || is16BitInt(t)) && !isSigned(t)
@@ -10650,7 +9997,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg (MOVDconst [c]))
     // result: (MOVDconst [int64(uint16(c))])
@@ -10662,10 +10008,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint16(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10694,7 +10038,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHload [off1] {sym} (ADDconst [off2] x) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -10716,7 +10059,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVHload [0] {sym} p:(ADD ptr idx) mem)
     // cond: sym == nil && p.Uses == 1
@@ -10739,10 +10081,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10767,7 +10107,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHloadidx (MOVDconst [c]) ptr mem)
     // cond: is16Bit(c)
@@ -10786,10 +10125,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10811,7 +10148,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVHreg (SRAWconst [c] (MOVBreg x)))
     // result: (SRAWconst [c] (MOVBreg x))
@@ -10831,7 +10167,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVHreg (SRAWconst [c] (MOVHreg x)))
     // result: (SRAWconst [c] (MOVHreg x))
@@ -10851,7 +10186,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVHreg (SRAWconst [c] x))
     // cond: sizeof(x.Type) <= 16
@@ -10869,7 +10203,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (SRDconst [c] x))
     // cond: c>48
@@ -10887,7 +10220,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (SRDconst [c] x))
     // cond: c==48
@@ -10905,7 +10237,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (SRADconst [c] x))
     // cond: c>=48
@@ -10923,7 +10254,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (SRWconst [c] x))
     // cond: c>16
@@ -10941,7 +10271,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (SRAWconst [c] x))
     // cond: c>=16
@@ -10959,7 +10288,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (SRWconst [c] x))
     // cond: c==16
@@ -10977,7 +10305,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg y:(MOVHreg _))
     // result: y
@@ -10988,7 +10315,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVHreg y:(MOVBreg _))
     // result: y
@@ -10999,7 +10325,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVHreg y:(MOVHZreg x))
     // result: (MOVHreg x)
@@ -11012,7 +10337,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHload _ _))
     // result: x
@@ -11023,7 +10347,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHloadidx _ _ _))
     // result: x
@@ -11034,7 +10357,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHreg x:(Arg <t>))
     // cond: (is8BitInt(t) || is16BitInt(t)) && isSigned(t)
@@ -11050,7 +10372,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHreg (MOVDconst [c]))
     // result: (MOVDconst [int64(int16(c))])
@@ -11062,10 +10383,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int16(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11096,7 +10415,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -11121,7 +10439,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVHstorezero [off] {sym} ptr mem)
@@ -11138,7 +10455,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstore [0] {sym} p:(ADD ptr idx) val mem)
     // cond: sym == nil && p.Uses == 1
@@ -11162,7 +10478,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHstoreidx);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -11180,7 +10495,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHZreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -11198,7 +10512,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -11216,7 +10529,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVWZreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -11234,7 +10546,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [i1] {s} p (SRWconst w [16]) x0:(MOVHstore [i0] {s} p w mem))
     // cond: !config.BigEndian && x0.Uses == 1 && i1 == i0+2 && clobber(x0)
@@ -11264,7 +10575,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVHstore [i1] {s} p (SRDconst w [16]) x0:(MOVHstore [i0] {s} p w mem))
     // cond: !config.BigEndian && x0.Uses == 1 && i1 == i0+2 && clobber(x0)
@@ -11294,10 +10604,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHstoreidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11324,7 +10632,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstoreidx (MOVDconst [c]) ptr val mem)
     // cond: is16Bit(c)
@@ -11344,7 +10651,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstoreidx ptr idx (MOVHreg x) mem)
     // result: (MOVHstoreidx ptr idx x mem)
@@ -11359,7 +10665,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVHstoreidx ptr idx (MOVHZreg x) mem)
     // result: (MOVHstoreidx ptr idx x mem)
@@ -11374,7 +10679,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVHstoreidx ptr idx (MOVWreg x) mem)
     // result: (MOVHstoreidx ptr idx x mem)
@@ -11389,7 +10693,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVHstoreidx ptr idx (MOVWZreg x) mem)
     // result: (MOVHstoreidx ptr idx x mem)
@@ -11404,10 +10707,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVHstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11434,7 +10735,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVHstorezero [off1] {sym1} p:(MOVDaddr [off2] {sym2} x) mem)
     // cond: canMergeSym(sym1,sym2) && (x.Op != OpSB || p.Uses == 1)
@@ -11458,10 +10758,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVHstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWBRstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11483,7 +10781,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWBRstore {sym} ptr (MOVWZreg x) mem)
     // result: (MOVWBRstore {sym} ptr x mem)
@@ -11499,10 +10796,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWZload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11531,7 +10826,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWZload [off1] {sym} (ADDconst [off2] x) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -11553,7 +10847,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVWZload [0] {sym} p:(ADD ptr idx) mem)
     // cond: sym == nil && p.Uses == 1
@@ -11576,10 +10869,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWZloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWZloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11604,7 +10895,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWZloadidx (MOVDconst [c]) ptr mem)
     // cond: is16Bit(c)
@@ -11623,10 +10913,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11648,7 +10936,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWZreg y:(AND (MOVDconst [c]) _))
     // cond: uint64(c) <= 0xFFFFFFFF
@@ -11670,22 +10957,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 c = auxIntToInt64(y_0.AuxInt);
                 if (!(uint64(c) <= 0xFFFFFFFF)) {
                     continue;
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVWZreg (SRWconst [c] (MOVBZreg x)))
     // result: (SRWconst [c] (MOVBZreg x))
@@ -11705,7 +10988,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVWZreg (SRWconst [c] (MOVHZreg x)))
     // result: (SRWconst [c] (MOVHZreg x))
@@ -11725,7 +11007,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVWZreg (SRWconst [c] (MOVWZreg x)))
     // result: (SRWconst [c] (MOVWZreg x))
@@ -11745,7 +11026,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVWZreg (SRWconst [c] x))
     // cond: sizeof(x.Type) <= 32
@@ -11763,7 +11043,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZreg (SRDconst [c] x))
     // cond: c>=32
@@ -11781,7 +11060,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZreg y:(MOVWZreg _))
     // result: y
@@ -11792,7 +11070,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWZreg y:(MOVHZreg _))
     // result: y
@@ -11803,7 +11080,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWZreg y:(MOVBZreg _))
     // result: y
@@ -11814,7 +11090,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWZreg y:(MOVHBRload _ _))
     // result: y
@@ -11825,7 +11100,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWZreg y:(MOVWBRload _ _))
     // result: y
@@ -11836,7 +11110,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWZreg y:(MOVWreg x))
     // result: (MOVWZreg x)
@@ -11849,7 +11122,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZreg (OR <t> x (MOVWZreg y)))
     // result: (MOVWZreg (OR <t> x y))
@@ -11872,21 +11144,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVWZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64OR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVWZreg (XOR <t> x (MOVWZreg y)))
     // result: (MOVWZreg (XOR <t> x y))
@@ -11909,21 +11178,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVWZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64XOR, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVWZreg (AND <t> x (MOVWZreg y)))
     // result: (MOVWZreg (AND <t> x y))
@@ -11946,21 +11212,18 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 y = v_0_1.Args[0];
                 v.reset(OpPPC64MOVWZreg);
                 v0 = b.NewValue0(v.Pos, OpPPC64AND, t);
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVWZreg z:(ANDconst [c] (MOVBZload ptr x)))
     // result: z
@@ -11975,7 +11238,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(z);
         return true;
-
     } 
     // match: (MOVWZreg z:(ANDconst [c] (MOVHZload ptr x)))
     // result: z
@@ -11990,7 +11252,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(z);
         return true;
-
     } 
     // match: (MOVWZreg z:(ANDconst [c] (MOVWZload ptr x)))
     // result: z
@@ -12005,7 +11266,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(z);
         return true;
-
     } 
     // match: (MOVWZreg z:(AND y (MOVWZload ptr x)))
     // result: z
@@ -12027,17 +11287,14 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                 }
-
                 v.copyOf(z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVWZreg x:(MOVBZload _ _))
     // result: x
@@ -12048,7 +11305,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVBZloadidx _ _ _))
     // result: x
@@ -12059,7 +11315,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVHZload _ _))
     // result: x
@@ -12070,7 +11325,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVHZloadidx _ _ _))
     // result: x
@@ -12081,7 +11335,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVWZload _ _))
     // result: x
@@ -12092,7 +11345,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVWZloadidx _ _ _))
     // result: x
@@ -12103,7 +11355,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(Arg <t>))
     // cond: (is8BitInt(t) || is16BitInt(t) || is32BitInt(t)) && !isSigned(t)
@@ -12119,7 +11370,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg (MOVDconst [c]))
     // result: (MOVDconst [int64(uint32(c))])
@@ -12131,10 +11381,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWZreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint32(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12163,7 +11411,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym} (ADDconst [off2] x) mem)
     // cond: is16Bit(int64(off1)+off2)
@@ -12185,7 +11432,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVWload [0] {sym} p:(ADD ptr idx) mem)
     // cond: sym == nil && p.Uses == 1
@@ -12208,10 +11454,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWload(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12236,7 +11480,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWloadidx (MOVDconst [c]) ptr mem)
     // cond: is16Bit(c) && c%4 == 0
@@ -12255,10 +11498,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12280,7 +11521,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWreg y:(AND (MOVDconst [c]) _))
     // cond: uint64(c) <= 0x7FFFFFFF
@@ -12300,20 +11540,16 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 c = auxIntToInt64(y_0.AuxInt);
                 if (!(uint64(c) <= 0x7FFFFFFF)) {
                     continue;
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (MOVWreg (SRAWconst [c] (MOVBreg x)))
     // result: (SRAWconst [c] (MOVBreg x))
@@ -12333,7 +11569,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVWreg (SRAWconst [c] (MOVHreg x)))
     // result: (SRAWconst [c] (MOVHreg x))
@@ -12353,7 +11588,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVWreg (SRAWconst [c] (MOVWreg x)))
     // result: (SRAWconst [c] (MOVWreg x))
@@ -12373,7 +11607,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MOVWreg (SRAWconst [c] x))
     // cond: sizeof(x.Type) <= 32
@@ -12391,7 +11624,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg (SRDconst [c] x))
     // cond: c>32
@@ -12409,7 +11641,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg (SRADconst [c] x))
     // cond: c>=32
@@ -12427,7 +11658,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg (SRDconst [c] x))
     // cond: c==32
@@ -12445,7 +11675,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg y:(MOVWreg _))
     // result: y
@@ -12456,7 +11685,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWreg y:(MOVHreg _))
     // result: y
@@ -12467,7 +11695,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWreg y:(MOVBreg _))
     // result: y
@@ -12478,7 +11705,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     } 
     // match: (MOVWreg y:(MOVWZreg x))
     // result: (MOVWreg x)
@@ -12491,7 +11717,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVHload _ _))
     // result: x
@@ -12502,7 +11727,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVHloadidx _ _ _))
     // result: x
@@ -12513,7 +11737,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVWload _ _))
     // result: x
@@ -12524,7 +11747,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVWloadidx _ _ _))
     // result: x
@@ -12535,7 +11757,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(Arg <t>))
     // cond: (is8BitInt(t) || is16BitInt(t) || is32BitInt(t)) && isSigned(t)
@@ -12551,7 +11772,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg (MOVDconst [c]))
     // result: (MOVDconst [int64(int32(c))])
@@ -12563,10 +11783,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int32(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12595,7 +11813,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym1} p:(MOVDaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2) && is16Bit(int64(off1+off2)) && (ptr.Op != OpSB || p.Uses == 1)
@@ -12620,7 +11837,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVWstorezero [off] {sym} ptr mem)
@@ -12637,7 +11853,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstore [0] {sym} p:(ADD ptr idx) val mem)
     // cond: sym == nil && p.Uses == 1
@@ -12661,7 +11876,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWstoreidx);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -12679,7 +11893,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWZreg x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -12697,10 +11910,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWstoreidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12727,7 +11938,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx (MOVDconst [c]) ptr val mem)
     // cond: is16Bit(c)
@@ -12747,7 +11957,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx ptr idx (MOVWreg x) mem)
     // result: (MOVWstoreidx ptr idx x mem)
@@ -12762,7 +11971,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx ptr idx (MOVWZreg x) mem)
     // result: (MOVWstoreidx ptr idx x mem)
@@ -12777,10 +11985,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstoreidx(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWstoreidx);
         v.AddArg4(ptr, idx, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MOVWstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12807,7 +12013,6 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, mem);
         return true;
-
     } 
     // match: (MOVWstorezero [off1] {sym1} p:(MOVDaddr [off2] {sym2} x) mem)
     // cond: canMergeSym(sym1,sym2) && (x.Op != OpSB || p.Uses == 1)
@@ -12831,10 +12036,8 @@ private static bool rewriteValuePPC64_OpPPC64MOVWstorezero(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MTVSRD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12856,7 +12059,6 @@ private static bool rewriteValuePPC64_OpPPC64MTVSRD(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDconst);
         v.AuxInt = float64ToAuxInt(math.Float64frombits(uint64(c)));
         return true;
-
     } 
     // match: (MTVSRD x:(MOVDload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -12880,10 +12082,8 @@ private static bool rewriteValuePPC64_OpPPC64MTVSRD(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MULLD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12903,25 +12103,20 @@ private static bool rewriteValuePPC64_OpPPC64MULLD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is16Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpPPC64MULLDconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64MULLW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12941,25 +12136,20 @@ private static bool rewriteValuePPC64_OpPPC64MULLW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is16Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpPPC64MULLWconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64NEG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12981,7 +12171,6 @@ private static bool rewriteValuePPC64_OpPPC64NEG(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (NEG (SUBFCconst [c] x))
     // cond: is32Bit(-c)
@@ -12999,10 +12188,8 @@ private static bool rewriteValuePPC64_OpPPC64NEG(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64NOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13020,25 +12207,20 @@ private static bool rewriteValuePPC64_OpPPC64NOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64MOVDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpPPC64MOVDconst);
                 v.AuxInt = int64ToAuxInt(~(c | d));
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64NotEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13055,7 +12237,6 @@ private static bool rewriteValuePPC64_OpPPC64NotEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (NotEqual (FlagLT))
     // result: (MOVDconst [1])
@@ -13066,7 +12247,6 @@ private static bool rewriteValuePPC64_OpPPC64NotEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (NotEqual (FlagGT))
     // result: (MOVDconst [1])
@@ -13077,7 +12257,6 @@ private static bool rewriteValuePPC64_OpPPC64NotEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(1);
         return true;
-
     } 
     // match: (NotEqual (InvertFlags x))
     // result: (NotEqual x)
@@ -13089,7 +12268,6 @@ private static bool rewriteValuePPC64_OpPPC64NotEqual(ptr<Value> _addr_v) {
         v.reset(OpPPC64NotEqual);
         v.AddArg(x);
         return true;
-
     } 
     // match: (NotEqual cmp)
     // result: (ISELB [6] (MOVDconst [1]) cmp)
@@ -13102,7 +12280,6 @@ private static bool rewriteValuePPC64_OpPPC64NotEqual(ptr<Value> _addr_v) {
         v.AddArg2(v0, cmp);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13126,30 +12303,25 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 var x = v_0.Args[0];
                 if (v_1.Op != OpPPC64SRDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 64 - c)) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( OR (SLWconst x [c]) (SRWconst x [d]))
     // cond: d == 32-c
@@ -13165,30 +12337,25 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpPPC64SRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLWconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( OR (SLD x (ANDconst <typ.Int64> [63] y)) (SRD x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y))))
     // result: (ROTL x y)
@@ -13203,51 +12370,42 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int64 || auxIntToInt64(v_0_1.AuxInt) != 63) {
                     continue;
                 }
-
                 var y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRD) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUB || v_1_1.Type != typ.UInt) {
                     continue;
                 }
-
                 _ = v_1_1.Args[1];
                 var v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64MOVDconst || auxIntToInt64(v_1_1_0.AuxInt) != 64) {
                     continue;
                 }
-
                 var v_1_1_1 = v_1_1.Args[1];
                 if (v_1_1_1.Op != OpPPC64ANDconst || v_1_1_1.Type != typ.UInt || auxIntToInt64(v_1_1_1.AuxInt) != 63 || y != v_1_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( OR (SLD x (ANDconst <typ.Int64> [63] y)) (SRD x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y))))
     // result: (ROTL x y)
@@ -13262,45 +12420,37 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int64 || auxIntToInt64(v_0_1.AuxInt) != 63) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRD) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUBFCconst || v_1_1.Type != typ.UInt || auxIntToInt64(v_1_1.AuxInt) != 64) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64ANDconst || v_1_1_0.Type != typ.UInt || auxIntToInt64(v_1_1_0.AuxInt) != 63 || y != v_1_1_0.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( OR (SLW x (ANDconst <typ.Int32> [31] y)) (SRW x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y))))
     // result: (ROTLW x y)
@@ -13315,45 +12465,37 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int32 || auxIntToInt64(v_0_1.AuxInt) != 31) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRW) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUBFCconst || v_1_1.Type != typ.UInt || auxIntToInt64(v_1_1.AuxInt) != 32) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64ANDconst || v_1_1_0.Type != typ.UInt || auxIntToInt64(v_1_1_0.AuxInt) != 31 || y != v_1_1_0.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( OR (SLW x (ANDconst <typ.Int32> [31] y)) (SRW x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y))))
     // result: (ROTLW x y)
@@ -13368,51 +12510,42 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int32 || auxIntToInt64(v_0_1.AuxInt) != 31) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRW) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUB || v_1_1.Type != typ.UInt) {
                     continue;
                 }
-
                 _ = v_1_1.Args[1];
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64MOVDconst || auxIntToInt64(v_1_1_0.AuxInt) != 32) {
                     continue;
                 }
-
                 v_1_1_1 = v_1_1.Args[1];
                 if (v_1_1_1.Op != OpPPC64ANDconst || v_1_1_1.Type != typ.UInt || auxIntToInt64(v_1_1_1.AuxInt) != 31 || y != v_1_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR (MOVDconst [c]) (MOVDconst [d]))
     // result: (MOVDconst [c|d])
@@ -13427,24 +12560,20 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64MOVDconst) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpPPC64MOVDconst);
                 v.AuxInt = int64ToAuxInt(c | d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x (MOVDconst [c]))
     // cond: isU32Bit(c)
@@ -13461,24 +12590,20 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(isU32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpPPC64ORconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x0:(MOVBZload [i0] {s} p mem) o1:(SLWconst x1:(MOVBZload [i1] {s} p mem) [8]))
     // cond: !config.BigEndian && i1 == i0+1 && x0.Uses ==1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != nil && clobber(x0, x1, o1)
@@ -13496,7 +12621,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i0 = auxIntToInt32(x0.AuxInt);
                 var s = auxToSym(x0.Aux);
                 var mem = x0.Args[1];
@@ -13505,22 +12629,18 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o1.Op != OpPPC64SLWconst || auxIntToInt64(o1.AuxInt) != 8) {
                     continue;
                 }
-
                 var x1 = o1.Args[0];
                 if (x1.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 var i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, o1))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 var v0 = b.NewValue0(x1.Pos, OpPPC64MOVHZload, t);
                 v.copyOf(v0);
@@ -13528,14 +12648,12 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x0:(MOVBZload [i0] {s} p mem) o1:(SLDconst x1:(MOVBZload [i1] {s} p mem) [8]))
     // cond: !config.BigEndian && i1 == i0+1 && x0.Uses ==1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != nil && clobber(x0, x1, o1)
@@ -13553,7 +12671,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13562,22 +12679,18 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o1.Op != OpPPC64SLDconst || auxIntToInt64(o1.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = o1.Args[0];
                 if (x1.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, o1))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpPPC64MOVHZload, t);
                 v.copyOf(v0);
@@ -13585,14 +12698,12 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x0:(MOVBZload [i1] {s} p mem) o1:(SLWconst x1:(MOVBZload [i0] {s} p mem) [8]))
     // cond: !config.BigEndian && i1 == i0+1 && x0.Uses ==1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != nil && clobber(x0, x1, o1)
@@ -13610,7 +12721,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i1 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13619,22 +12729,18 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o1.Op != OpPPC64SLWconst || auxIntToInt64(o1.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = o1.Args[0];
                 if (x1.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, o1))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpPPC64MOVHBRload, t);
                 v.copyOf(v0);
@@ -13644,14 +12750,12 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 v1.AddArg(p);
                 v0.AddArg2(v1, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x0:(MOVBZload [i1] {s} p mem) o1:(SLDconst x1:(MOVBZload [i0] {s} p mem) [8]))
     // cond: !config.BigEndian && i1 == i0+1 && x0.Uses ==1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != nil && clobber(x0, x1, o1)
@@ -13669,7 +12773,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i1 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13678,22 +12781,18 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o1.Op != OpPPC64SLDconst || auxIntToInt64(o1.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = o1.Args[0];
                 if (x1.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && o1.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, o1))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpPPC64MOVHBRload, t);
                 v.copyOf(v0);
@@ -13703,14 +12802,12 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 v1.AddArg(p);
                 v0.AddArg2(v1, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s0:(SLWconst x0:(MOVBZload [i1] {s} p mem) [n1]) s1:(SLWconst x1:(MOVBZload [i0] {s} p mem) [n2]))
     // cond: !config.BigEndian && i1 == i0+1 && n1%8 == 0 && n2 == n1+8 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1) != nil && clobber(x0, x1, s0, s1)
@@ -13728,13 +12825,11 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var n1 = auxIntToInt64(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13743,23 +12838,19 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (s1.Op != OpPPC64SLWconst) {
                     continue;
                 }
-
                 var n2 = auxIntToInt64(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && n1 % 8 == 0 && n2 == n1 + 8 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, s0, s1))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpPPC64SLDconst, t);
                 v.copyOf(v0);
@@ -13772,14 +12863,12 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 v1.AddArg2(v2, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s0:(SLDconst x0:(MOVBZload [i1] {s} p mem) [n1]) s1:(SLDconst x1:(MOVBZload [i0] {s} p mem) [n2]))
     // cond: !config.BigEndian && i1 == i0+1 && n1%8 == 0 && n2 == n1+8 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1) != nil && clobber(x0, x1, s0, s1)
@@ -13797,13 +12886,11 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 n1 = auxIntToInt64(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13812,23 +12899,19 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (s1.Op != OpPPC64SLDconst) {
                     continue;
                 }
-
                 n2 = auxIntToInt64(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && n1 % 8 == 0 && n2 == n1 + 8 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, s0, s1))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpPPC64SLDconst, t);
                 v.copyOf(v0);
@@ -13841,14 +12924,12 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 v1.AddArg2(v2, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s1:(SLWconst x2:(MOVBZload [i3] {s} p mem) [24]) o0:(OR <t> s0:(SLWconst x1:(MOVBZload [i2] {s} p mem) [16]) x0:(MOVHZload [i0] {s} p mem)))
     // cond: !config.BigEndian && i2 == i0+2 && i3 == i0+3 && x0.Uses ==1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -13866,12 +12947,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x2 = s1.Args[0];
                 if (x2.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 var i3 = auxIntToInt32(x2.AuxInt);
                 s = auxToSym(x2.Aux);
                 mem = x2.Args[1];
@@ -13880,7 +12959,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 var o0_0 = o0.Args[0];
                 var o0_1 = o0.Args[1];
@@ -13895,37 +12973,30 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         var i2 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         x0 = o0_1;
                         if (x0.Op != OpPPC64MOVHZload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1] || !(!config.BigEndian && i2 == i0 + 2 && i3 == i0 + 3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x0.Pos, OpPPC64MOVWZload, t);
                         v.copyOf(v0);
@@ -13933,20 +13004,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v0.Aux = symToAux(s);
                         v0.AddArg2(p, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s1:(SLDconst x2:(MOVBZload [i3] {s} p mem) [24]) o0:(OR <t> s0:(SLDconst x1:(MOVBZload [i2] {s} p mem) [16]) x0:(MOVHZload [i0] {s} p mem)))
     // cond: !config.BigEndian && i2 == i0+2 && i3 == i0+3 && x0.Uses ==1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -13964,12 +13032,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x2 = s1.Args[0];
                 if (x2.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i3 = auxIntToInt32(x2.AuxInt);
                 s = auxToSym(x2.Aux);
                 mem = x2.Args[1];
@@ -13978,7 +13044,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -13993,37 +13058,30 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i2 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         x0 = o0_1;
                         if (x0.Op != OpPPC64MOVHZload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1] || !(!config.BigEndian && i2 == i0 + 2 && i3 == i0 + 3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x0.Pos, OpPPC64MOVWZload, t);
                         v.copyOf(v0);
@@ -14031,20 +13089,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v0.Aux = symToAux(s);
                         v0.AddArg2(p, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s1:(SLWconst x2:(MOVBZload [i0] {s} p mem) [24]) o0:(OR <t> s0:(SLWconst x1:(MOVBZload [i1] {s} p mem) [16]) x0:(MOVHBRload <t> (MOVDaddr <typ.Uintptr> [i2] {s} p) mem)))
     // cond: !config.BigEndian && i1 == i0+1 && i2 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -14062,12 +13117,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x2 = s1.Args[0];
                 if (x2.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x2.AuxInt);
                 s = auxToSym(x2.Aux);
                 mem = x2.Args[1];
@@ -14076,7 +13129,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -14091,38 +13143,31 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         x0 = o0_1;
                         if (x0.Op != OpPPC64MOVHBRload || x0.Type != t) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         var x0_0 = x0.Args[0];
                         if (x0_0.Op != OpPPC64MOVDaddr || x0_0.Type != typ.Uintptr) {
                             continue;
                         }
-
                         i2 = auxIntToInt32(x0_0.AuxInt);
                         if (auxToSym(x0_0.Aux) != s || p != x0_0.Args[0] || mem != x0.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && i2 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x0.Pos, OpPPC64MOVWBRload, t);
                         v.copyOf(v0);
@@ -14132,20 +13177,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v1.AddArg(p);
                         v0.AddArg2(v1, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s1:(SLDconst x2:(MOVBZload [i0] {s} p mem) [24]) o0:(OR <t> s0:(SLDconst x1:(MOVBZload [i1] {s} p mem) [16]) x0:(MOVHBRload <t> (MOVDaddr <typ.Uintptr> [i2] {s} p) mem)))
     // cond: !config.BigEndian && i1 == i0+1 && i2 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -14163,12 +13205,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x2 = s1.Args[0];
                 if (x2.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x2.AuxInt);
                 s = auxToSym(x2.Aux);
                 mem = x2.Args[1];
@@ -14177,7 +13217,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -14192,38 +13231,31 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         x0 = o0_1;
                         if (x0.Op != OpPPC64MOVHBRload || x0.Type != t) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         x0_0 = x0.Args[0];
                         if (x0_0.Op != OpPPC64MOVDaddr || x0_0.Type != typ.Uintptr) {
                             continue;
                         }
-
                         i2 = auxIntToInt32(x0_0.AuxInt);
                         if (auxToSym(x0_0.Aux) != s || p != x0_0.Args[0] || mem != x0.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && i2 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x0.Pos, OpPPC64MOVWBRload, t);
                         v.copyOf(v0);
@@ -14233,20 +13265,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v1.AddArg(p);
                         v0.AddArg2(v1, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x0:(MOVBZload [i3] {s} p mem) o0:(OR <t> s0:(SLWconst x1:(MOVBZload [i2] {s} p mem) [8]) s1:(SLWconst x2:(MOVHBRload <t> (MOVDaddr <typ.Uintptr> [i0] {s} p) mem) [16])))
     // cond: !config.BigEndian && i2 == i0+2 && i3 == i0+3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -14264,7 +13293,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i3 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -14273,7 +13301,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -14288,43 +13315,35 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i2 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         s1 = o0_1;
                         if (s1.Op != OpPPC64SLWconst || auxIntToInt64(s1.AuxInt) != 16) {
                             continue;
                         }
-
                         x2 = s1.Args[0];
                         if (x2.Op != OpPPC64MOVHBRload || x2.Type != t) {
                             continue;
                         }
-
                         _ = x2.Args[1];
                         var x2_0 = x2.Args[0];
                         if (x2_0.Op != OpPPC64MOVDaddr || x2_0.Type != typ.Uintptr) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x2_0.AuxInt);
                         if (auxToSym(x2_0.Aux) != s || p != x2_0.Args[0] || mem != x2.Args[1] || !(!config.BigEndian && i2 == i0 + 2 && i3 == i0 + 3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x2.Pos, OpPPC64MOVWBRload, t);
                         v.copyOf(v0);
@@ -14334,20 +13353,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v1.AddArg(p);
                         v0.AddArg2(v1, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x0:(MOVBZload [i3] {s} p mem) o0:(OR <t> s0:(SLDconst x1:(MOVBZload [i2] {s} p mem) [8]) s1:(SLDconst x2:(MOVHBRload <t> (MOVDaddr <typ.Uintptr> [i0] {s} p) mem) [16])))
     // cond: !config.BigEndian && i2 == i0+2 && i3 == i0+3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -14365,7 +13381,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i3 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -14374,7 +13389,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -14389,43 +13403,35 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i2 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         s1 = o0_1;
                         if (s1.Op != OpPPC64SLDconst || auxIntToInt64(s1.AuxInt) != 16) {
                             continue;
                         }
-
                         x2 = s1.Args[0];
                         if (x2.Op != OpPPC64MOVHBRload || x2.Type != t) {
                             continue;
                         }
-
                         _ = x2.Args[1];
                         x2_0 = x2.Args[0];
                         if (x2_0.Op != OpPPC64MOVDaddr || x2_0.Type != typ.Uintptr) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x2_0.AuxInt);
                         if (auxToSym(x2_0.Aux) != s || p != x2_0.Args[0] || mem != x2.Args[1] || !(!config.BigEndian && i2 == i0 + 2 && i3 == i0 + 3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x2.Pos, OpPPC64MOVWBRload, t);
                         v.copyOf(v0);
@@ -14435,20 +13441,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v1.AddArg(p);
                         v0.AddArg2(v1, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s2:(SLDconst x2:(MOVBZload [i3] {s} p mem) [32]) o0:(OR <t> s1:(SLDconst x1:(MOVBZload [i2] {s} p mem) [40]) s0:(SLDconst x0:(MOVHBRload <t> (MOVDaddr <typ.Uintptr> [i0] {s} p) mem) [48])))
     // cond: !config.BigEndian && i2 == i0+2 && i3 == i0+3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && s2.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, s2, o0)
@@ -14466,12 +13469,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x2 = s2.Args[0];
                 if (x2.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i3 = auxIntToInt32(x2.AuxInt);
                 s = auxToSym(x2.Aux);
                 mem = x2.Args[1];
@@ -14480,7 +13481,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -14495,43 +13495,35 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s1.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i2 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         s0 = o0_1;
                         if (s0.Op != OpPPC64SLDconst || auxIntToInt64(s0.AuxInt) != 48) {
                             continue;
                         }
-
                         x0 = s0.Args[0];
                         if (x0.Op != OpPPC64MOVHBRload || x0.Type != t) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         x0_0 = x0.Args[0];
                         if (x0_0.Op != OpPPC64MOVDaddr || x0_0.Type != typ.Uintptr) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0_0.AuxInt);
                         if (auxToSym(x0_0.Aux) != s || p != x0_0.Args[0] || mem != x0.Args[1] || !(!config.BigEndian && i2 == i0 + 2 && i3 == i0 + 3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && s2.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, s2, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x0.Pos, OpPPC64SLDconst, t);
                         v.copyOf(v0);
@@ -14544,20 +13536,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v1.AddArg2(v2, mem);
                         v0.AddArg(v1);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s2:(SLDconst x2:(MOVBZload [i0] {s} p mem) [56]) o0:(OR <t> s1:(SLDconst x1:(MOVBZload [i1] {s} p mem) [48]) s0:(SLDconst x0:(MOVHBRload <t> (MOVDaddr <typ.Uintptr> [i2] {s} p) mem) [32])))
     // cond: !config.BigEndian && i1 == i0+1 && i2 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && s2.Uses == 1 && mergePoint(b, x0, x1, x2) != nil && clobber(x0, x1, x2, s0, s1, s2, o0)
@@ -14575,12 +13564,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x2 = s2.Args[0];
                 if (x2.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x2.AuxInt);
                 s = auxToSym(x2.Aux);
                 mem = x2.Args[1];
@@ -14589,7 +13576,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -14604,43 +13590,35 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s1.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         s0 = o0_1;
                         if (s0.Op != OpPPC64SLDconst || auxIntToInt64(s0.AuxInt) != 32) {
                             continue;
                         }
-
                         x0 = s0.Args[0];
                         if (x0.Op != OpPPC64MOVHBRload || x0.Type != t) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         x0_0 = x0.Args[0];
                         if (x0_0.Op != OpPPC64MOVDaddr || x0_0.Type != typ.Uintptr) {
                             continue;
                         }
-
                         i2 = auxIntToInt32(x0_0.AuxInt);
                         if (auxToSym(x0_0.Aux) != s || p != x0_0.Args[0] || mem != x0.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && i2 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && o0.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && s2.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, s2, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x0.Pos, OpPPC64SLDconst, t);
                         v.copyOf(v0);
@@ -14653,20 +13631,17 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                         v1.AddArg2(v2, mem);
                         v0.AddArg(v1);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s6:(SLDconst x7:(MOVBZload [i7] {s} p mem) [56]) o5:(OR <t> s5:(SLDconst x6:(MOVBZload [i6] {s} p mem) [48]) o4:(OR <t> s4:(SLDconst x5:(MOVBZload [i5] {s} p mem) [40]) o3:(OR <t> s3:(SLDconst x4:(MOVBZload [i4] {s} p mem) [32]) x0:(MOVWZload {s} [i0] p mem)))))
     // cond: !config.BigEndian && i4 == i0+4 && i5 == i0+5 && i6 == i0+6 && i7 == i0+7 && x0.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses ==1 && x7.Uses == 1 && o3.Uses == 1 && o4.Uses == 1 && o5.Uses == 1 && s3.Uses == 1 && s4.Uses == 1 && s5.Uses == 1 && s6.Uses == 1 && mergePoint(b, x0, x4, x5, x6, x7) != nil && clobber(x0, x4, x5, x6, x7, s3, s4, s5, s6, o3, o4, o5)
@@ -14684,12 +13659,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x7 = s6.Args[0];
                 if (x7.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 var i7 = auxIntToInt32(x7.AuxInt);
                 s = auxToSym(x7.Aux);
                 mem = x7.Args[1];
@@ -14698,7 +13671,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o5.Op != OpPPC64OR || o5.Type != t) {
                     continue;
                 }
-
                 _ = o5.Args[1];
                 var o5_0 = o5.Args[0];
                 var o5_1 = o5.Args[1];
@@ -14713,27 +13685,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o5_0, o5_1) = (_i1 + 1, o5_1, o5_0);
                         }
-
                         var x6 = s5.Args[0];
                         if (x6.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         var i6 = auxIntToInt32(x6.AuxInt);
                         if (auxToSym(x6.Aux) != s) {
                             continue;
                         }
-
                         _ = x6.Args[1];
                         if (p != x6.Args[0] || mem != x6.Args[1]) {
                             continue;
                         }
-
                         var o4 = o5_1;
                         if (o4.Op != OpPPC64OR || o4.Type != t) {
                             continue;
                         }
-
                         _ = o4.Args[1];
                         var o4_0 = o4.Args[0];
                         var o4_1 = o4.Args[1];
@@ -14748,27 +13715,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, o4_0, o4_1) = (_i2 + 1, o4_1, o4_0);
                                 }
-
                                 var x5 = s4.Args[0];
                                 if (x5.Op != OpPPC64MOVBZload) {
                                     continue;
                                 }
-
                                 var i5 = auxIntToInt32(x5.AuxInt);
                                 if (auxToSym(x5.Aux) != s) {
                                     continue;
                                 }
-
                                 _ = x5.Args[1];
                                 if (p != x5.Args[0] || mem != x5.Args[1]) {
                                     continue;
                                 }
-
                                 var o3 = o4_1;
                                 if (o3.Op != OpPPC64OR || o3.Type != t) {
                                     continue;
                                 }
-
                                 _ = o3.Args[1];
                                 var o3_0 = o3.Args[0];
                                 var o3_1 = o3.Args[1];
@@ -14783,37 +13745,30 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                             continue;
                                         (_i3, o3_0, o3_1) = (_i3 + 1, o3_1, o3_0);
                                         }
-
                                         var x4 = s3.Args[0];
                                         if (x4.Op != OpPPC64MOVBZload) {
                                             continue;
                                         }
-
                                         var i4 = auxIntToInt32(x4.AuxInt);
                                         if (auxToSym(x4.Aux) != s) {
                                             continue;
                                         }
-
                                         _ = x4.Args[1];
                                         if (p != x4.Args[0] || mem != x4.Args[1]) {
                                             continue;
                                         }
-
                                         x0 = o3_1;
                                         if (x0.Op != OpPPC64MOVWZload) {
                                             continue;
                                         }
-
                                         i0 = auxIntToInt32(x0.AuxInt);
                                         if (auxToSym(x0.Aux) != s) {
                                             continue;
                                         }
-
                                         _ = x0.Args[1];
                                         if (p != x0.Args[0] || mem != x0.Args[1] || !(!config.BigEndian && i4 == i0 + 4 && i5 == i0 + 5 && i6 == i0 + 6 && i7 == i0 + 7 && x0.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && x7.Uses == 1 && o3.Uses == 1 && o4.Uses == 1 && o5.Uses == 1 && s3.Uses == 1 && s4.Uses == 1 && s5.Uses == 1 && s6.Uses == 1 && mergePoint(b, x0, x4, x5, x6, x7) != null && clobber(x0, x4, x5, x6, x7, s3, s4, s5, s6, o3, o4, o5))) {
                                             continue;
                                         }
-
                                         b = mergePoint(b, x0, x4, x5, x6, x7);
                                         v0 = b.NewValue0(x0.Pos, OpPPC64MOVDload, t);
                                         v.copyOf(v0);
@@ -14821,32 +13776,27 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                         v0.Aux = symToAux(s);
                                         v0.AddArg2(p, mem);
                                         return true;
-
                                     }
 
 
                                     _i3 = _i3__prev5;
                                 }
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> s0:(SLDconst x0:(MOVBZload [i0] {s} p mem) [56]) o0:(OR <t> s1:(SLDconst x1:(MOVBZload [i1] {s} p mem) [48]) o1:(OR <t> s2:(SLDconst x2:(MOVBZload [i2] {s} p mem) [40]) o2:(OR <t> s3:(SLDconst x3:(MOVBZload [i3] {s} p mem) [32]) x4:(MOVWBRload <t> (MOVDaddr <typ.Uintptr> [i4] p) mem)))))
     // cond: !config.BigEndian && i1 == i0+1 && i2 == i0+2 && i3 == i0+3 && i4 == i0+4 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && x4.Uses == 1 && o0.Uses == 1 && o1.Uses == 1 && o2.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && s2.Uses == 1 && s3.Uses == 1 && mergePoint(b, x0, x1, x2, x3, x4) != nil && clobber(x0, x1, x2, x3, x4, o0, o1, o2, s0, s1, s2, s3)
@@ -14864,12 +13814,10 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x0 = s0.Args[0];
                 if (x0.Op != OpPPC64MOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -14878,7 +13826,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o0.Op != OpPPC64OR || o0.Type != t) {
                     continue;
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -14893,27 +13840,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         x1 = s1.Args[0];
                         if (x1.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         o1 = o0_1;
                         if (o1.Op != OpPPC64OR || o1.Type != t) {
                             continue;
                         }
-
                         _ = o1.Args[1];
                         var o1_0 = o1.Args[0];
                         var o1_1 = o1.Args[1];
@@ -14928,27 +13870,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, o1_0, o1_1) = (_i2 + 1, o1_1, o1_0);
                                 }
-
                                 x2 = s2.Args[0];
                                 if (x2.Op != OpPPC64MOVBZload) {
                                     continue;
                                 }
-
                                 i2 = auxIntToInt32(x2.AuxInt);
                                 if (auxToSym(x2.Aux) != s) {
                                     continue;
                                 }
-
                                 _ = x2.Args[1];
                                 if (p != x2.Args[0] || mem != x2.Args[1]) {
                                     continue;
                                 }
-
                                 var o2 = o1_1;
                                 if (o2.Op != OpPPC64OR || o2.Type != t) {
                                     continue;
                                 }
-
                                 _ = o2.Args[1];
                                 var o2_0 = o2.Args[0];
                                 var o2_1 = o2.Args[1];
@@ -14963,38 +13900,31 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                             continue;
                                         (_i3, o2_0, o2_1) = (_i3 + 1, o2_1, o2_0);
                                         }
-
                                         var x3 = s3.Args[0];
                                         if (x3.Op != OpPPC64MOVBZload) {
                                             continue;
                                         }
-
                                         i3 = auxIntToInt32(x3.AuxInt);
                                         if (auxToSym(x3.Aux) != s) {
                                             continue;
                                         }
-
                                         _ = x3.Args[1];
                                         if (p != x3.Args[0] || mem != x3.Args[1]) {
                                             continue;
                                         }
-
                                         x4 = o2_1;
                                         if (x4.Op != OpPPC64MOVWBRload || x4.Type != t) {
                                             continue;
                                         }
-
                                         _ = x4.Args[1];
                                         var x4_0 = x4.Args[0];
                                         if (x4_0.Op != OpPPC64MOVDaddr || x4_0.Type != typ.Uintptr) {
                                             continue;
                                         }
-
                                         i4 = auxIntToInt32(x4_0.AuxInt);
                                         if (p != x4_0.Args[0] || mem != x4.Args[1] || !(!config.BigEndian && i1 == i0 + 1 && i2 == i0 + 2 && i3 == i0 + 3 && i4 == i0 + 4 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && x4.Uses == 1 && o0.Uses == 1 && o1.Uses == 1 && o2.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && s2.Uses == 1 && s3.Uses == 1 && mergePoint(b, x0, x1, x2, x3, x4) != null && clobber(x0, x1, x2, x3, x4, o0, o1, o2, s0, s1, s2, s3))) {
                                             continue;
                                         }
-
                                         b = mergePoint(b, x0, x1, x2, x3, x4);
                                         v0 = b.NewValue0(x4.Pos, OpPPC64MOVDBRload, t);
                                         v.copyOf(v0);
@@ -15004,32 +13934,27 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                         v1.AddArg(p);
                                         v0.AddArg2(v1, mem);
                                         return true;
-
                                     }
 
 
                                     _i3 = _i3__prev5;
                                 }
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x7:(MOVBZload [i7] {s} p mem) o5:(OR <t> s6:(SLDconst x6:(MOVBZload [i6] {s} p mem) [8]) o4:(OR <t> s5:(SLDconst x5:(MOVBZload [i5] {s} p mem) [16]) o3:(OR <t> s4:(SLDconst x4:(MOVBZload [i4] {s} p mem) [24]) s0:(SLWconst x3:(MOVWBRload <t> (MOVDaddr <typ.Uintptr> [i0] {s} p) mem) [32])))))
     // cond: !config.BigEndian && i4 == i0+4 && i5 == i0+5 && i6 == i0+6 && i7 == i0+7 && x3.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && x7.Uses == 1 && o3.Uses == 1 && o4.Uses == 1 && o5.Uses == 1 && s0.Uses == 1 && s4.Uses == 1 && s5.Uses == 1 && s6.Uses == 1 && mergePoint(b, x3, x4, x5, x6, x7) != nil && clobber(x3, x4, x5, x6, x7, o3, o4, o5, s0, s4, s5, s6)
@@ -15047,7 +13972,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i7 = auxIntToInt32(x7.AuxInt);
                 s = auxToSym(x7.Aux);
                 mem = x7.Args[1];
@@ -15056,7 +13980,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o5.Op != OpPPC64OR || o5.Type != t) {
                     continue;
                 }
-
                 _ = o5.Args[1];
                 o5_0 = o5.Args[0];
                 o5_1 = o5.Args[1];
@@ -15071,27 +13994,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o5_0, o5_1) = (_i1 + 1, o5_1, o5_0);
                         }
-
                         x6 = s6.Args[0];
                         if (x6.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i6 = auxIntToInt32(x6.AuxInt);
                         if (auxToSym(x6.Aux) != s) {
                             continue;
                         }
-
                         _ = x6.Args[1];
                         if (p != x6.Args[0] || mem != x6.Args[1]) {
                             continue;
                         }
-
                         o4 = o5_1;
                         if (o4.Op != OpPPC64OR || o4.Type != t) {
                             continue;
                         }
-
                         _ = o4.Args[1];
                         o4_0 = o4.Args[0];
                         o4_1 = o4.Args[1];
@@ -15106,27 +14024,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, o4_0, o4_1) = (_i2 + 1, o4_1, o4_0);
                                 }
-
                                 x5 = s5.Args[0];
                                 if (x5.Op != OpPPC64MOVBZload) {
                                     continue;
                                 }
-
                                 i5 = auxIntToInt32(x5.AuxInt);
                                 if (auxToSym(x5.Aux) != s) {
                                     continue;
                                 }
-
                                 _ = x5.Args[1];
                                 if (p != x5.Args[0] || mem != x5.Args[1]) {
                                     continue;
                                 }
-
                                 o3 = o4_1;
                                 if (o3.Op != OpPPC64OR || o3.Type != t) {
                                     continue;
                                 }
-
                                 _ = o3.Args[1];
                                 o3_0 = o3.Args[0];
                                 o3_1 = o3.Args[1];
@@ -15141,43 +14054,35 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                             continue;
                                         (_i3, o3_0, o3_1) = (_i3 + 1, o3_1, o3_0);
                                         }
-
                                         x4 = s4.Args[0];
                                         if (x4.Op != OpPPC64MOVBZload) {
                                             continue;
                                         }
-
                                         i4 = auxIntToInt32(x4.AuxInt);
                                         if (auxToSym(x4.Aux) != s) {
                                             continue;
                                         }
-
                                         _ = x4.Args[1];
                                         if (p != x4.Args[0] || mem != x4.Args[1]) {
                                             continue;
                                         }
-
                                         s0 = o3_1;
                                         if (s0.Op != OpPPC64SLWconst || auxIntToInt64(s0.AuxInt) != 32) {
                                             continue;
                                         }
-
                                         x3 = s0.Args[0];
                                         if (x3.Op != OpPPC64MOVWBRload || x3.Type != t) {
                                             continue;
                                         }
-
                                         _ = x3.Args[1];
                                         var x3_0 = x3.Args[0];
                                         if (x3_0.Op != OpPPC64MOVDaddr || x3_0.Type != typ.Uintptr) {
                                             continue;
                                         }
-
                                         i0 = auxIntToInt32(x3_0.AuxInt);
                                         if (auxToSym(x3_0.Aux) != s || p != x3_0.Args[0] || mem != x3.Args[1] || !(!config.BigEndian && i4 == i0 + 4 && i5 == i0 + 5 && i6 == i0 + 6 && i7 == i0 + 7 && x3.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && x7.Uses == 1 && o3.Uses == 1 && o4.Uses == 1 && o5.Uses == 1 && s0.Uses == 1 && s4.Uses == 1 && s5.Uses == 1 && s6.Uses == 1 && mergePoint(b, x3, x4, x5, x6, x7) != null && clobber(x3, x4, x5, x6, x7, o3, o4, o5, s0, s4, s5, s6))) {
                                             continue;
                                         }
-
                                         b = mergePoint(b, x3, x4, x5, x6, x7);
                                         v0 = b.NewValue0(x3.Pos, OpPPC64MOVDBRload, t);
                                         v.copyOf(v0);
@@ -15187,32 +14092,27 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                         v1.AddArg(p);
                                         v0.AddArg2(v1, mem);
                                         return true;
-
                                     }
 
 
                                     _i3 = _i3__prev5;
                                 }
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR <t> x7:(MOVBZload [i7] {s} p mem) o5:(OR <t> s6:(SLDconst x6:(MOVBZload [i6] {s} p mem) [8]) o4:(OR <t> s5:(SLDconst x5:(MOVBZload [i5] {s} p mem) [16]) o3:(OR <t> s4:(SLDconst x4:(MOVBZload [i4] {s} p mem) [24]) s0:(SLDconst x3:(MOVWBRload <t> (MOVDaddr <typ.Uintptr> [i0] {s} p) mem) [32])))))
     // cond: !config.BigEndian && i4 == i0+4 && i5 == i0+5 && i6 == i0+6 && i7 == i0+7 && x3.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && x7.Uses == 1 && o3.Uses == 1 && o4.Uses == 1 && o5.Uses == 1 && s0.Uses == 1 && s4.Uses == 1 && s5.Uses == 1 && s6.Uses == 1 && mergePoint(b, x3, x4, x5, x6, x7) != nil && clobber(x3, x4, x5, x6, x7, o3, o4, o5, s0, s4, s5, s6)
@@ -15230,7 +14130,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i7 = auxIntToInt32(x7.AuxInt);
                 s = auxToSym(x7.Aux);
                 mem = x7.Args[1];
@@ -15239,7 +14138,6 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                 if (o5.Op != OpPPC64OR || o5.Type != t) {
                     continue;
                 }
-
                 _ = o5.Args[1];
                 o5_0 = o5.Args[0];
                 o5_1 = o5.Args[1];
@@ -15254,27 +14152,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o5_0, o5_1) = (_i1 + 1, o5_1, o5_0);
                         }
-
                         x6 = s6.Args[0];
                         if (x6.Op != OpPPC64MOVBZload) {
                             continue;
                         }
-
                         i6 = auxIntToInt32(x6.AuxInt);
                         if (auxToSym(x6.Aux) != s) {
                             continue;
                         }
-
                         _ = x6.Args[1];
                         if (p != x6.Args[0] || mem != x6.Args[1]) {
                             continue;
                         }
-
                         o4 = o5_1;
                         if (o4.Op != OpPPC64OR || o4.Type != t) {
                             continue;
                         }
-
                         _ = o4.Args[1];
                         o4_0 = o4.Args[0];
                         o4_1 = o4.Args[1];
@@ -15289,27 +14182,22 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, o4_0, o4_1) = (_i2 + 1, o4_1, o4_0);
                                 }
-
                                 x5 = s5.Args[0];
                                 if (x5.Op != OpPPC64MOVBZload) {
                                     continue;
                                 }
-
                                 i5 = auxIntToInt32(x5.AuxInt);
                                 if (auxToSym(x5.Aux) != s) {
                                     continue;
                                 }
-
                                 _ = x5.Args[1];
                                 if (p != x5.Args[0] || mem != x5.Args[1]) {
                                     continue;
                                 }
-
                                 o3 = o4_1;
                                 if (o3.Op != OpPPC64OR || o3.Type != t) {
                                     continue;
                                 }
-
                                 _ = o3.Args[1];
                                 o3_0 = o3.Args[0];
                                 o3_1 = o3.Args[1];
@@ -15324,43 +14212,35 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                             continue;
                                         (_i3, o3_0, o3_1) = (_i3 + 1, o3_1, o3_0);
                                         }
-
                                         x4 = s4.Args[0];
                                         if (x4.Op != OpPPC64MOVBZload) {
                                             continue;
                                         }
-
                                         i4 = auxIntToInt32(x4.AuxInt);
                                         if (auxToSym(x4.Aux) != s) {
                                             continue;
                                         }
-
                                         _ = x4.Args[1];
                                         if (p != x4.Args[0] || mem != x4.Args[1]) {
                                             continue;
                                         }
-
                                         s0 = o3_1;
                                         if (s0.Op != OpPPC64SLDconst || auxIntToInt64(s0.AuxInt) != 32) {
                                             continue;
                                         }
-
                                         x3 = s0.Args[0];
                                         if (x3.Op != OpPPC64MOVWBRload || x3.Type != t) {
                                             continue;
                                         }
-
                                         _ = x3.Args[1];
                                         x3_0 = x3.Args[0];
                                         if (x3_0.Op != OpPPC64MOVDaddr || x3_0.Type != typ.Uintptr) {
                                             continue;
                                         }
-
                                         i0 = auxIntToInt32(x3_0.AuxInt);
                                         if (auxToSym(x3_0.Aux) != s || p != x3_0.Args[0] || mem != x3.Args[1] || !(!config.BigEndian && i4 == i0 + 4 && i5 == i0 + 5 && i6 == i0 + 6 && i7 == i0 + 7 && x3.Uses == 1 && x4.Uses == 1 && x5.Uses == 1 && x6.Uses == 1 && x7.Uses == 1 && o3.Uses == 1 && o4.Uses == 1 && o5.Uses == 1 && s0.Uses == 1 && s4.Uses == 1 && s5.Uses == 1 && s6.Uses == 1 && mergePoint(b, x3, x4, x5, x6, x7) != null && clobber(x3, x4, x5, x6, x7, o3, o4, o5, s0, s4, s5, s6))) {
                                             continue;
                                         }
-
                                         b = mergePoint(b, x3, x4, x5, x6, x7);
                                         v0 = b.NewValue0(x3.Pos, OpPPC64MOVDBRload, t);
                                         v.copyOf(v0);
@@ -15370,35 +14250,29 @@ private static bool rewriteValuePPC64_OpPPC64OR(ptr<Value> _addr_v) {
                                         v1.AddArg(p);
                                         v0.AddArg2(v1, mem);
                                         return true;
-
                                     }
 
 
                                     _i3 = _i3__prev5;
                                 }
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ORN(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15414,7 +14288,6 @@ private static bool rewriteValuePPC64_OpPPC64ORN(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORN (MOVDconst [c]) (MOVDconst [d]))
     // result: (MOVDconst [c|^d])
@@ -15430,10 +14303,8 @@ private static bool rewriteValuePPC64_OpPPC64ORN(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(c | ~d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15452,7 +14323,6 @@ private static bool rewriteValuePPC64_OpPPC64ORconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c | d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORconst [-1] _)
     // result: (MOVDconst [-1])
@@ -15463,7 +14333,6 @@ private static bool rewriteValuePPC64_OpPPC64ORconst(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORconst [0] x)
     // result: x
@@ -15474,10 +14343,8 @@ private static bool rewriteValuePPC64_OpPPC64ORconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ROTL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15496,10 +14363,8 @@ private static bool rewriteValuePPC64_OpPPC64ROTL(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ROTLW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15518,10 +14383,8 @@ private static bool rewriteValuePPC64_OpPPC64ROTLW(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64ROTLWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15546,23 +14409,19 @@ private static bool rewriteValuePPC64_OpPPC64ROTLWconst(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var m = auxIntToInt64(v_0_0.AuxInt);
                 var x = v_0_1;
                 if (!(isPPC64WordRotateMask(m))) {
                     continue;
                 }
-
                 v.reset(OpPPC64RLWINM);
                 v.AuxInt = int64ToAuxInt(encodePPC64RotateMask(r, rotateLeft32(m, r), 32));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (ROTLWconst [r] (ANDconst [m] x))
     // cond: isPPC64WordRotateMask(m)
@@ -15581,10 +14440,8 @@ private static bool rewriteValuePPC64_OpPPC64ROTLWconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(encodePPC64RotateMask(r, rotateLeft32(m, r), 32));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SLD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15603,10 +14460,8 @@ private static bool rewriteValuePPC64_OpPPC64SLD(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63 | (c >> 6 & 1 * 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15629,7 +14484,6 @@ private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(mergePPC64SldiSrw(l, r));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLDconst [c] z:(MOVBZreg x))
     // cond: c < 8 && z.Uses == 1
@@ -15648,7 +14502,6 @@ private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 56, 63, 64));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLDconst [c] z:(MOVHZreg x))
     // cond: c < 16 && z.Uses == 1
@@ -15667,7 +14520,6 @@ private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 48, 63, 64));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLDconst [c] z:(MOVWZreg x))
     // cond: c < 32 && z.Uses == 1
@@ -15686,7 +14538,6 @@ private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 32, 63, 64));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLDconst [c] z:(ANDconst [d] x))
     // cond: z.Uses == 1 && isPPC64ValidShiftMask(d) && c <= (64-getPPC64ShiftMaskLength(d))
@@ -15706,7 +14557,6 @@ private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 64 - getPPC64ShiftMaskLength(d), 63, 64));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLDconst [c] z:(AND (MOVDconst [d]) x))
     // cond: z.Uses == 1 && isPPC64ValidShiftMask(d) && c<=(64-getPPC64ShiftMaskLength(d))
@@ -15728,23 +14578,19 @@ private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
                     continue;
                 (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                 }
-
                 d = auxIntToInt64(z_0.AuxInt);
                 x = z_1;
                 if (!(z.Uses == 1 && isPPC64ValidShiftMask(d) && c <= (64 - getPPC64ShiftMaskLength(d)))) {
                     continue;
                 }
-
                 v.reset(OpPPC64CLRLSLDI);
                 v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 64 - getPPC64ShiftMaskLength(d), 63, 64));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SLDconst [c] z:(MOVWreg x))
     // cond: c < 32 && buildcfg.GOPPC64 >= 9
@@ -15763,10 +14609,8 @@ private static bool rewriteValuePPC64_OpPPC64SLDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SLW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15785,10 +14629,8 @@ private static bool rewriteValuePPC64_OpPPC64SLW(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31 | (c >> 5 & 1 * 31));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SLWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15811,7 +14653,6 @@ private static bool rewriteValuePPC64_OpPPC64SLWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 24, 31, 32));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLWconst [c] z:(MOVHZreg x))
     // cond: z.Uses == 1 && c < 16
@@ -15830,7 +14671,6 @@ private static bool rewriteValuePPC64_OpPPC64SLWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 16, 31, 32));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLWconst [c] z:(ANDconst [d] x))
     // cond: z.Uses == 1 && isPPC64ValidShiftMask(d) && c<=(32-getPPC64ShiftMaskLength(d))
@@ -15850,7 +14690,6 @@ private static bool rewriteValuePPC64_OpPPC64SLWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 32 - getPPC64ShiftMaskLength(d), 31, 32));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLWconst [c] z:(AND (MOVDconst [d]) x))
     // cond: z.Uses == 1 && isPPC64ValidShiftMask(d) && c<=(32-getPPC64ShiftMaskLength(d))
@@ -15872,23 +14711,19 @@ private static bool rewriteValuePPC64_OpPPC64SLWconst(ptr<Value> _addr_v) {
                     continue;
                 (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                 }
-
                 d = auxIntToInt64(z_0.AuxInt);
                 x = z_1;
                 if (!(z.Uses == 1 && isPPC64ValidShiftMask(d) && c <= (32 - getPPC64ShiftMaskLength(d)))) {
                     continue;
                 }
-
                 v.reset(OpPPC64CLRLSLWI);
                 v.AuxInt = int32ToAuxInt(newPPC64ShiftAuxInt(c, 32 - getPPC64ShiftMaskLength(d), 31, 32));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SLWconst [c] z:(MOVWreg x))
     // cond: c < 32 && buildcfg.GOPPC64 >= 9
@@ -15907,10 +14742,8 @@ private static bool rewriteValuePPC64_OpPPC64SLWconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SRAD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15929,10 +14762,8 @@ private static bool rewriteValuePPC64_OpPPC64SRAD(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63 | (c >> 6 & 1 * 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SRAW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15951,10 +14782,8 @@ private static bool rewriteValuePPC64_OpPPC64SRAW(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31 | (c >> 5 & 1 * 31));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SRD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15973,10 +14802,8 @@ private static bool rewriteValuePPC64_OpPPC64SRD(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63 | (c >> 6 & 1 * 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SRW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15995,10 +14822,8 @@ private static bool rewriteValuePPC64_OpPPC64SRW(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31 | (c >> 5 & 1 * 31));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SRWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16019,7 +14844,6 @@ private static bool rewriteValuePPC64_OpPPC64SRWconst(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SRWconst (ANDconst [m] x) [s])
     // cond: mergePPC64AndSrwi(m>>uint(s),s) != 0
@@ -16038,7 +14862,6 @@ private static bool rewriteValuePPC64_OpPPC64SRWconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(mergePPC64AndSrwi(m >> (int)(uint(s)), s));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRWconst (AND (MOVDconst [m]) x) [s])
     // cond: mergePPC64RShiftMask(m>>uint(s),s,32) == 0
@@ -16061,23 +14884,19 @@ private static bool rewriteValuePPC64_OpPPC64SRWconst(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 m = auxIntToInt64(v_0_0.AuxInt);
                 if (!(mergePPC64RShiftMask(m >> (int)(uint(s)), s, 32) == 0)) {
                     continue;
                 }
-
                 v.reset(OpPPC64MOVDconst);
                 v.AuxInt = int64ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (SRWconst (AND (MOVDconst [m]) x) [s])
     // cond: mergePPC64AndSrwi(m>>uint(s),s) != 0
@@ -16100,28 +14919,23 @@ private static bool rewriteValuePPC64_OpPPC64SRWconst(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 m = auxIntToInt64(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(mergePPC64AndSrwi(m >> (int)(uint(s)), s) != 0)) {
                     continue;
                 }
-
                 v.reset(OpPPC64RLWINM);
                 v.AuxInt = int64ToAuxInt(mergePPC64AndSrwi(m >> (int)(uint(s)), s));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SUB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16144,7 +14958,6 @@ private static bool rewriteValuePPC64_OpPPC64SUB(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUB (MOVDconst [c]) x)
     // cond: is32Bit(c)
@@ -16162,10 +14975,8 @@ private static bool rewriteValuePPC64_OpPPC64SUB(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64SUBFCconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16183,7 +14994,6 @@ private static bool rewriteValuePPC64_OpPPC64SUBFCconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBFCconst [c] (SUBFCconst [d] x))
     // cond: is32Bit(c-d)
@@ -16202,7 +15012,6 @@ private static bool rewriteValuePPC64_OpPPC64SUBFCconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBFCconst [0] x)
     // result: (NEG x)
@@ -16214,10 +15023,8 @@ private static bool rewriteValuePPC64_OpPPC64SUBFCconst(ptr<Value> _addr_v) {
         v.reset(OpPPC64NEG);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16240,30 +15047,25 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 var x = v_0.Args[0];
                 if (v_1.Op != OpPPC64SRDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 64 - c)) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (SLWconst x [c]) (SRWconst x [d]))
     // cond: d == 32-c
@@ -16279,30 +15081,25 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpPPC64SRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLWconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (SLD x (ANDconst <typ.Int64> [63] y)) (SRD x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y))))
     // result: (ROTL x y)
@@ -16317,51 +15114,42 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int64 || auxIntToInt64(v_0_1.AuxInt) != 63) {
                     continue;
                 }
-
                 var y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRD) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUB || v_1_1.Type != typ.UInt) {
                     continue;
                 }
-
                 _ = v_1_1.Args[1];
                 var v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64MOVDconst || auxIntToInt64(v_1_1_0.AuxInt) != 64) {
                     continue;
                 }
-
                 var v_1_1_1 = v_1_1.Args[1];
                 if (v_1_1_1.Op != OpPPC64ANDconst || v_1_1_1.Type != typ.UInt || auxIntToInt64(v_1_1_1.AuxInt) != 63 || y != v_1_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (SLD x (ANDconst <typ.Int64> [63] y)) (SRD x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y))))
     // result: (ROTL x y)
@@ -16376,45 +15164,37 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int64 || auxIntToInt64(v_0_1.AuxInt) != 63) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRD) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUBFCconst || v_1_1.Type != typ.UInt || auxIntToInt64(v_1_1.AuxInt) != 64) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64ANDconst || v_1_1_0.Type != typ.UInt || auxIntToInt64(v_1_1_0.AuxInt) != 63 || y != v_1_1_0.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (SLW x (ANDconst <typ.Int32> [31] y)) (SRW x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y))))
     // result: (ROTLW x y)
@@ -16429,45 +15209,37 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int32 || auxIntToInt64(v_0_1.AuxInt) != 31) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRW) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUBFCconst || v_1_1.Type != typ.UInt || auxIntToInt64(v_1_1.AuxInt) != 32) {
                     continue;
                 }
-
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64ANDconst || v_1_1_0.Type != typ.UInt || auxIntToInt64(v_1_1_0.AuxInt) != 31 || y != v_1_1_0.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (SLW x (ANDconst <typ.Int32> [31] y)) (SRW x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y))))
     // result: (ROTLW x y)
@@ -16482,51 +15254,42 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpPPC64ANDconst || v_0_1.Type != typ.Int32 || auxIntToInt64(v_0_1.AuxInt) != 31) {
                     continue;
                 }
-
                 y = v_0_1.Args[0];
                 if (v_1.Op != OpPPC64SRW) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpPPC64SUB || v_1_1.Type != typ.UInt) {
                     continue;
                 }
-
                 _ = v_1_1.Args[1];
                 v_1_1_0 = v_1_1.Args[0];
                 if (v_1_1_0.Op != OpPPC64MOVDconst || auxIntToInt64(v_1_1_0.AuxInt) != 32) {
                     continue;
                 }
-
                 v_1_1_1 = v_1_1.Args[1];
                 if (v_1_1_1.Op != OpPPC64ANDconst || v_1_1_1.Type != typ.UInt || auxIntToInt64(v_1_1_1.AuxInt) != 31 || y != v_1_1_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpPPC64ROTLW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (MOVDconst [c]) (MOVDconst [d]))
     // result: (MOVDconst [c^d])
@@ -16541,24 +15304,20 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpPPC64MOVDconst) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpPPC64MOVDconst);
                 v.AuxInt = int64ToAuxInt(c ^ d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (MOVDconst [c]))
     // cond: isU32Bit(c)
@@ -16575,27 +15334,22 @@ private static bool rewriteValuePPC64_OpPPC64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(isU32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpPPC64XORconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPPC64XORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16614,7 +15368,6 @@ private static bool rewriteValuePPC64_OpPPC64XORconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c ^ d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORconst [0] x)
     // result: x
@@ -16625,10 +15378,8 @@ private static bool rewriteValuePPC64_OpPPC64XORconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPanicBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16651,7 +15402,6 @@ private static bool rewriteValuePPC64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 1
@@ -16668,7 +15418,6 @@ private static bool rewriteValuePPC64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 2
@@ -16685,10 +15434,8 @@ private static bool rewriteValuePPC64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpPopCount16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16706,7 +15453,6 @@ private static bool rewriteValuePPC64_OpPopCount16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPopCount32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16724,7 +15470,6 @@ private static bool rewriteValuePPC64_OpPopCount32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpPopCount8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16742,7 +15487,6 @@ private static bool rewriteValuePPC64_OpPopCount8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16771,10 +15515,8 @@ private static bool rewriteValuePPC64_OpRotateLeft16(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpRotateLeft32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16793,7 +15535,6 @@ private static bool rewriteValuePPC64_OpRotateLeft32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RotateLeft32 x y)
     // result: (ROTLW x y)
@@ -16804,7 +15545,6 @@ private static bool rewriteValuePPC64_OpRotateLeft32(ptr<Value> _addr_v) {
         v.AddArg2(x, y);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRotateLeft64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16823,7 +15563,6 @@ private static bool rewriteValuePPC64_OpRotateLeft64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RotateLeft64 x y)
     // result: (ROTL x y)
@@ -16834,7 +15573,6 @@ private static bool rewriteValuePPC64_OpRotateLeft64(ptr<Value> _addr_v) {
         v.AddArg2(x, y);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16863,10 +15601,8 @@ private static bool rewriteValuePPC64_OpRotateLeft8(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16889,7 +15625,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux16 x y)
     // result: (SRW (ZeroExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [16]))))
@@ -16913,7 +15648,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16940,7 +15674,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -16956,7 +15689,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux32 x y)
     // result: (SRW (ZeroExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [16]))))
@@ -16978,7 +15710,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17001,7 +15732,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh16Ux64 x (MOVDconst [c]))
     // cond: uint64(c) < 16
@@ -17021,7 +15751,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -17037,7 +15766,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux64 x y)
     // result: (SRW (ZeroExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [16]))))
@@ -17059,7 +15787,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17082,7 +15809,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux8 x y)
     // result: (SRW (ZeroExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [16]))))
@@ -17106,7 +15832,6 @@ private static bool rewriteValuePPC64_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17129,7 +15854,6 @@ private static bool rewriteValuePPC64_OpRsh16x16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x16 x y)
     // result: (SRAW (SignExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [16]))))
@@ -17153,7 +15877,6 @@ private static bool rewriteValuePPC64_OpRsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17180,7 +15903,6 @@ private static bool rewriteValuePPC64_OpRsh16x32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16x32 x y)
     // cond: shiftIsBounded(v)
@@ -17196,7 +15918,6 @@ private static bool rewriteValuePPC64_OpRsh16x32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x32 x y)
     // result: (SRAW (SignExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [16]))))
@@ -17218,7 +15939,6 @@ private static bool rewriteValuePPC64_OpRsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17245,7 +15965,6 @@ private static bool rewriteValuePPC64_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16x64 x (MOVDconst [c]))
     // cond: uint64(c) < 16
@@ -17265,7 +15984,6 @@ private static bool rewriteValuePPC64_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16x64 x y)
     // cond: shiftIsBounded(v)
@@ -17281,7 +15999,6 @@ private static bool rewriteValuePPC64_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x64 x y)
     // result: (SRAW (SignExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [16]))))
@@ -17303,7 +16020,6 @@ private static bool rewriteValuePPC64_OpRsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17326,7 +16042,6 @@ private static bool rewriteValuePPC64_OpRsh16x8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x8 x y)
     // result: (SRAW (SignExt16to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [16]))))
@@ -17350,7 +16065,6 @@ private static bool rewriteValuePPC64_OpRsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17371,7 +16085,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux16 x y)
     // result: (SRW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [32]))))
@@ -17393,7 +16106,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17418,7 +16130,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -17432,7 +16143,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux32 x y)
     // result: (SRW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [32]))))
@@ -17452,7 +16162,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17475,7 +16184,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh32Ux64 x (MOVDconst [c]))
     // cond: uint64(c) < 32
@@ -17493,7 +16201,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -17507,7 +16214,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux64 x (AND y (MOVDconst [31])))
     // result: (SRW x (ANDconst <typ.Int32> [31] y))
@@ -17530,21 +16236,18 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 v.reset(OpPPC64SRW);
                 var v0 = b.NewValue0(v.Pos, OpPPC64ANDconst, typ.Int32);
                 v0.AuxInt = int64ToAuxInt(31);
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh32Ux64 x (ANDconst <typ.UInt> [31] y))
     // result: (SRW x (ANDconst <typ.UInt> [31] y))
@@ -17560,7 +16263,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y)))
     // result: (SRW x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y)))
@@ -17589,7 +16291,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y)))
     // result: (SRW x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y)))
@@ -17612,7 +16313,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 x (SUB <typ.UInt> (MOVDconst [32]) (AND <typ.UInt> y (MOVDconst [31]))))
     // result: (SRW x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y)))
@@ -17644,7 +16344,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_1_0, v_1_1_1) = (_i0 + 1, v_1_1_1, v_1_1_0);
                 }
-
                 v.reset(OpPPC64SRW);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUB, typ.UInt);
                 v1 = b.NewValue0(v.Pos, OpPPC64MOVDconst, typ.Int64);
@@ -17655,14 +16354,12 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh32Ux64 x (SUBFCconst <typ.UInt> [32] (AND <typ.UInt> y (MOVDconst [31]))))
     // result: (SRW x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y)))
@@ -17689,7 +16386,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0_0, v_1_0_1) = (_i0 + 1, v_1_0_1, v_1_0_0);
                 }
-
                 v.reset(OpPPC64SRW);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUBFCconst, typ.UInt);
                 v0.AuxInt = int64ToAuxInt(32);
@@ -17699,14 +16395,12 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
                 v0.AddArg(v1);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh32Ux64 x y)
     // result: (SRW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [32]))))
@@ -17726,7 +16420,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17747,7 +16440,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux8 x y)
     // result: (SRW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [32]))))
@@ -17769,7 +16461,6 @@ private static bool rewriteValuePPC64_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17790,7 +16481,6 @@ private static bool rewriteValuePPC64_OpRsh32x16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x16 x y)
     // result: (SRAW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [32]))))
@@ -17812,7 +16502,6 @@ private static bool rewriteValuePPC64_OpRsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17837,7 +16526,6 @@ private static bool rewriteValuePPC64_OpRsh32x32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32x32 x y)
     // cond: shiftIsBounded(v)
@@ -17851,7 +16539,6 @@ private static bool rewriteValuePPC64_OpRsh32x32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x32 x y)
     // result: (SRAW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [32]))))
@@ -17871,7 +16558,6 @@ private static bool rewriteValuePPC64_OpRsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17896,7 +16582,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32x64 x (MOVDconst [c]))
     // cond: uint64(c) < 32
@@ -17914,7 +16599,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32x64 x y)
     // cond: shiftIsBounded(v)
@@ -17928,7 +16612,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x64 x (AND y (MOVDconst [31])))
     // result: (SRAW x (ANDconst <typ.Int32> [31] y))
@@ -17951,21 +16634,18 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 v.reset(OpPPC64SRAW);
                 var v0 = b.NewValue0(v.Pos, OpPPC64ANDconst, typ.Int32);
                 v0.AuxInt = int64ToAuxInt(31);
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh32x64 x (ANDconst <typ.UInt> [31] y))
     // result: (SRAW x (ANDconst <typ.UInt> [31] y))
@@ -17981,7 +16661,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x64 x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y)))
     // result: (SRAW x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y)))
@@ -18010,7 +16689,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x64 x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y)))
     // result: (SRAW x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y)))
@@ -18033,7 +16711,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x64 x (SUB <typ.UInt> (MOVDconst [32]) (AND <typ.UInt> y (MOVDconst [31]))))
     // result: (SRAW x (SUB <typ.UInt> (MOVDconst [32]) (ANDconst <typ.UInt> [31] y)))
@@ -18065,7 +16742,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_1_0, v_1_1_1) = (_i0 + 1, v_1_1_1, v_1_1_0);
                 }
-
                 v.reset(OpPPC64SRAW);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUB, typ.UInt);
                 v1 = b.NewValue0(v.Pos, OpPPC64MOVDconst, typ.Int64);
@@ -18076,14 +16752,12 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh32x64 x (SUBFCconst <typ.UInt> [32] (AND <typ.UInt> y (MOVDconst [31]))))
     // result: (SRAW x (SUBFCconst <typ.UInt> [32] (ANDconst <typ.UInt> [31] y)))
@@ -18110,7 +16784,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0_0, v_1_0_1) = (_i0 + 1, v_1_0_1, v_1_0_0);
                 }
-
                 v.reset(OpPPC64SRAW);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUBFCconst, typ.UInt);
                 v0.AuxInt = int64ToAuxInt(32);
@@ -18120,14 +16793,12 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
                 v0.AddArg(v1);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh32x64 x y)
     // result: (SRAW x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [32]))))
@@ -18147,7 +16818,6 @@ private static bool rewriteValuePPC64_OpRsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18168,7 +16838,6 @@ private static bool rewriteValuePPC64_OpRsh32x8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x8 x y)
     // result: (SRAW x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [32]))))
@@ -18190,7 +16859,6 @@ private static bool rewriteValuePPC64_OpRsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18211,7 +16879,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux16 x y)
     // result: (SRD x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [64]))))
@@ -18233,7 +16900,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18258,7 +16924,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh64Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -18272,7 +16937,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux32 x y)
     // result: (SRD x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [64]))))
@@ -18292,7 +16956,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18315,7 +16978,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (MOVDconst [c]))
     // cond: uint64(c) < 64
@@ -18333,7 +16995,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh64Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -18347,7 +17008,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (AND y (MOVDconst [63])))
     // result: (SRD x (ANDconst <typ.Int64> [63] y))
@@ -18370,21 +17030,18 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 v.reset(OpPPC64SRD);
                 var v0 = b.NewValue0(v.Pos, OpPPC64ANDconst, typ.Int64);
                 v0.AuxInt = int64ToAuxInt(63);
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh64Ux64 x (ANDconst <typ.UInt> [63] y))
     // result: (SRD x (ANDconst <typ.UInt> [63] y))
@@ -18400,7 +17057,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y)))
     // result: (SRD x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y)))
@@ -18429,7 +17085,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y)))
     // result: (SRD x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y)))
@@ -18452,7 +17107,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (SUB <typ.UInt> (MOVDconst [64]) (AND <typ.UInt> y (MOVDconst [63]))))
     // result: (SRD x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y)))
@@ -18484,7 +17138,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_1_0, v_1_1_1) = (_i0 + 1, v_1_1_1, v_1_1_0);
                 }
-
                 v.reset(OpPPC64SRD);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUB, typ.UInt);
                 v1 = b.NewValue0(v.Pos, OpPPC64MOVDconst, typ.Int64);
@@ -18495,14 +17148,12 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh64Ux64 x (SUBFCconst <typ.UInt> [64] (AND <typ.UInt> y (MOVDconst [63]))))
     // result: (SRD x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y)))
@@ -18529,7 +17180,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0_0, v_1_0_1) = (_i0 + 1, v_1_0_1, v_1_0_0);
                 }
-
                 v.reset(OpPPC64SRD);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUBFCconst, typ.UInt);
                 v0.AuxInt = int64ToAuxInt(64);
@@ -18539,14 +17189,12 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
                 v0.AddArg(v1);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh64Ux64 x y)
     // result: (SRD x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [64]))))
@@ -18566,7 +17214,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18587,7 +17234,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux8 x y)
     // result: (SRD x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [64]))))
@@ -18609,7 +17255,6 @@ private static bool rewriteValuePPC64_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18630,7 +17275,6 @@ private static bool rewriteValuePPC64_OpRsh64x16(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x16 x y)
     // result: (SRAD x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [64]))))
@@ -18652,7 +17296,6 @@ private static bool rewriteValuePPC64_OpRsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18677,7 +17320,6 @@ private static bool rewriteValuePPC64_OpRsh64x32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & 63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh64x32 x y)
     // cond: shiftIsBounded(v)
@@ -18691,7 +17333,6 @@ private static bool rewriteValuePPC64_OpRsh64x32(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x32 x y)
     // result: (SRAD x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [64]))))
@@ -18711,7 +17352,6 @@ private static bool rewriteValuePPC64_OpRsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18736,7 +17376,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh64x64 x (MOVDconst [c]))
     // cond: uint64(c) < 64
@@ -18754,7 +17393,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh64x64 x y)
     // cond: shiftIsBounded(v)
@@ -18768,7 +17406,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x64 x (AND y (MOVDconst [63])))
     // result: (SRAD x (ANDconst <typ.Int64> [63] y))
@@ -18791,21 +17428,18 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 v.reset(OpPPC64SRAD);
                 var v0 = b.NewValue0(v.Pos, OpPPC64ANDconst, typ.Int64);
                 v0.AuxInt = int64ToAuxInt(63);
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh64x64 x (ANDconst <typ.UInt> [63] y))
     // result: (SRAD x (ANDconst <typ.UInt> [63] y))
@@ -18821,7 +17455,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y)))
     // result: (SRAD x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y)))
@@ -18850,7 +17483,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y)))
     // result: (SRAD x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y)))
@@ -18873,7 +17505,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 x (SUB <typ.UInt> (MOVDconst [64]) (AND <typ.UInt> y (MOVDconst [63]))))
     // result: (SRAD x (SUB <typ.UInt> (MOVDconst [64]) (ANDconst <typ.UInt> [63] y)))
@@ -18905,7 +17536,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_1_0, v_1_1_1) = (_i0 + 1, v_1_1_1, v_1_1_0);
                 }
-
                 v.reset(OpPPC64SRAD);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUB, typ.UInt);
                 v1 = b.NewValue0(v.Pos, OpPPC64MOVDconst, typ.Int64);
@@ -18916,14 +17546,12 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, v2);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh64x64 x (SUBFCconst <typ.UInt> [64] (AND <typ.UInt> y (MOVDconst [63]))))
     // result: (SRAD x (SUBFCconst <typ.UInt> [64] (ANDconst <typ.UInt> [63] y)))
@@ -18950,7 +17578,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0_0, v_1_0_1) = (_i0 + 1, v_1_0_1, v_1_0_0);
                 }
-
                 v.reset(OpPPC64SRAD);
                 v0 = b.NewValue0(v.Pos, OpPPC64SUBFCconst, typ.UInt);
                 v0.AuxInt = int64ToAuxInt(64);
@@ -18960,14 +17587,12 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
                 v0.AddArg(v1);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Rsh64x64 x y)
     // result: (SRAD x (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [64]))))
@@ -18987,7 +17612,6 @@ private static bool rewriteValuePPC64_OpRsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19008,7 +17632,6 @@ private static bool rewriteValuePPC64_OpRsh64x8(ptr<Value> _addr_v) {
         v.reset(OpPPC64SRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x8 x y)
     // result: (SRAD x (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [64]))))
@@ -19030,7 +17653,6 @@ private static bool rewriteValuePPC64_OpRsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19053,7 +17675,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux16 x y)
     // result: (SRW (ZeroExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [8]))))
@@ -19077,7 +17698,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19104,7 +17724,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8Ux32 x y)
     // cond: shiftIsBounded(v)
@@ -19120,7 +17739,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux32 x y)
     // result: (SRW (ZeroExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [8]))))
@@ -19142,7 +17760,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19165,7 +17782,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh8Ux64 x (MOVDconst [c]))
     // cond: uint64(c) < 8
@@ -19185,7 +17801,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8Ux64 x y)
     // cond: shiftIsBounded(v)
@@ -19201,7 +17816,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux64 x y)
     // result: (SRW (ZeroExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [8]))))
@@ -19223,7 +17837,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19246,7 +17859,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux8 x y)
     // result: (SRW (ZeroExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [8]))))
@@ -19270,7 +17882,6 @@ private static bool rewriteValuePPC64_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19293,7 +17904,6 @@ private static bool rewriteValuePPC64_OpRsh8x16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x16 x y)
     // result: (SRAW (SignExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt16to64 y) (MOVDconst [8]))))
@@ -19317,7 +17927,6 @@ private static bool rewriteValuePPC64_OpRsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19344,7 +17953,6 @@ private static bool rewriteValuePPC64_OpRsh8x32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8x32 x y)
     // cond: shiftIsBounded(v)
@@ -19360,7 +17968,6 @@ private static bool rewriteValuePPC64_OpRsh8x32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x32 x y)
     // result: (SRAW (SignExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [8]))))
@@ -19382,7 +17989,6 @@ private static bool rewriteValuePPC64_OpRsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19409,7 +18015,6 @@ private static bool rewriteValuePPC64_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8x64 x (MOVDconst [c]))
     // cond: uint64(c) < 8
@@ -19429,7 +18034,6 @@ private static bool rewriteValuePPC64_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8x64 x y)
     // cond: shiftIsBounded(v)
@@ -19445,7 +18049,6 @@ private static bool rewriteValuePPC64_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x64 x y)
     // result: (SRAW (SignExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU y (MOVDconst [8]))))
@@ -19467,7 +18070,6 @@ private static bool rewriteValuePPC64_OpRsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19490,7 +18092,6 @@ private static bool rewriteValuePPC64_OpRsh8x8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x8 x y)
     // result: (SRAW (SignExt8to32 x) (ISEL [0] y (MOVDconst [-1]) (CMPU (ZeroExt8to64 y) (MOVDconst [8]))))
@@ -19514,7 +18115,6 @@ private static bool rewriteValuePPC64_OpRsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19533,7 +18133,6 @@ private static bool rewriteValuePPC64_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19555,7 +18154,6 @@ private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8 && is32BitFloat(val.Type)
@@ -19571,7 +18169,6 @@ private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitFloat(val.Type)
@@ -19587,7 +18184,6 @@ private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpPPC64FMOVSstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8 && (is64BitInt(val.Type) || isPtr(val.Type))
@@ -19603,7 +18199,6 @@ private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitInt(val.Type)
@@ -19619,7 +18214,6 @@ private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -19635,7 +18229,6 @@ private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 1
@@ -19651,10 +18244,8 @@ private static bool rewriteValuePPC64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuePPC64_OpTrunc16to8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19672,7 +18263,6 @@ private static bool rewriteValuePPC64_OpTrunc16to8(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc16to8 x)
     // result: (MOVBZreg x)
@@ -19682,7 +18272,6 @@ private static bool rewriteValuePPC64_OpTrunc16to8(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpTrunc32to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19700,7 +18289,6 @@ private static bool rewriteValuePPC64_OpTrunc32to16(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc32to16 x)
     // result: (MOVHZreg x)
@@ -19710,7 +18298,6 @@ private static bool rewriteValuePPC64_OpTrunc32to16(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpTrunc32to8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19728,7 +18315,6 @@ private static bool rewriteValuePPC64_OpTrunc32to8(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc32to8 x)
     // result: (MOVBZreg x)
@@ -19738,7 +18324,6 @@ private static bool rewriteValuePPC64_OpTrunc32to8(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpTrunc64to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19756,7 +18341,6 @@ private static bool rewriteValuePPC64_OpTrunc64to16(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to16 x)
     // result: (MOVHZreg x)
@@ -19766,7 +18350,6 @@ private static bool rewriteValuePPC64_OpTrunc64to16(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpTrunc64to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19784,7 +18367,6 @@ private static bool rewriteValuePPC64_OpTrunc64to32(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to32 x)
     // result: (MOVWZreg x)
@@ -19794,7 +18376,6 @@ private static bool rewriteValuePPC64_OpTrunc64to32(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpTrunc64to8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19812,7 +18393,6 @@ private static bool rewriteValuePPC64_OpTrunc64to8(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to8 x)
     // result: (MOVBZreg x)
@@ -19822,7 +18402,6 @@ private static bool rewriteValuePPC64_OpTrunc64to8(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19839,7 +18418,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] destptr mem)
     // result: (MOVBstorezero destptr mem)
@@ -19852,7 +18430,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVBstorezero);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [2] destptr mem)
     // result: (MOVHstorezero destptr mem)
@@ -19865,7 +18442,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVHstorezero);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [3] destptr mem)
     // result: (MOVBstorezero [2] destptr (MOVHstorezero destptr mem))
@@ -19881,7 +18457,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [4] destptr mem)
     // result: (MOVWstorezero destptr mem)
@@ -19894,7 +18469,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVWstorezero);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [5] destptr mem)
     // result: (MOVBstorezero [4] destptr (MOVWstorezero destptr mem))
@@ -19910,7 +18484,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [6] destptr mem)
     // result: (MOVHstorezero [4] destptr (MOVWstorezero destptr mem))
@@ -19926,7 +18499,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [7] destptr mem)
     // result: (MOVBstorezero [6] destptr (MOVHstorezero [4] destptr (MOVWstorezero destptr mem)))
@@ -19945,7 +18517,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, v1);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [8] {t} destptr mem)
     // result: (MOVDstorezero destptr mem)
@@ -19958,7 +18529,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.reset(OpPPC64MOVDstorezero);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [12] {t} destptr mem)
     // result: (MOVWstorezero [8] destptr (MOVDstorezero [0] destptr mem))
@@ -19975,7 +18545,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [16] {t} destptr mem)
     // result: (MOVDstorezero [8] destptr (MOVDstorezero [0] destptr mem))
@@ -19992,7 +18561,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [24] {t} destptr mem)
     // result: (MOVDstorezero [16] destptr (MOVDstorezero [8] destptr (MOVDstorezero [0] destptr mem)))
@@ -20012,7 +18580,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, v1);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [32] {t} destptr mem)
     // result: (MOVDstorezero [24] destptr (MOVDstorezero [16] destptr (MOVDstorezero [8] destptr (MOVDstorezero [0] destptr mem))))
@@ -20035,7 +18602,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, v1);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [s] ptr mem)
     // cond: buildcfg.GOPPC64 <= 8 && s < 64
@@ -20051,7 +18617,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Zero [s] ptr mem)
     // cond: buildcfg.GOPPC64 <= 8
@@ -20067,7 +18632,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Zero [s] ptr mem)
     // cond: s < 128 && buildcfg.GOPPC64 >= 9
@@ -20083,7 +18647,6 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Zero [s] ptr mem)
     // cond: buildcfg.GOPPC64 >= 9
@@ -20099,10 +18662,8 @@ private static bool rewriteValuePPC64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(s);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -20240,19 +18801,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ANDCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64EQ, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (CMPconst [0] z:(OR x y)) yes no)
         // cond: z.Uses == 1
@@ -20281,19 +18839,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64EQ, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (CMPconst [0] z:(XOR x y)) yes no)
         // cond: z.Uses == 1
@@ -20322,19 +18877,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64XORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64EQ, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         }
     else if (b.Kind == BlockPPC64GE) 
         // match: (GE (FlagEQ) yes no)
@@ -20429,19 +18981,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ANDCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64GE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GE (CMPconst [0] z:(OR x y)) yes no)
         // cond: z.Uses == 1
@@ -20470,19 +19019,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64GE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GE (CMPconst [0] z:(XOR x y)) yes no)
         // cond: z.Uses == 1
@@ -20511,19 +19057,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64XORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64GE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         }
     else if (b.Kind == BlockPPC64GT) 
         // match: (GT (FlagEQ) yes no)
@@ -20619,19 +19162,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ANDCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64GT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GT (CMPconst [0] z:(OR x y)) yes no)
         // cond: z.Uses == 1
@@ -20660,19 +19200,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64GT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GT (CMPconst [0] z:(XOR x y)) yes no)
         // cond: z.Uses == 1
@@ -20701,19 +19238,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64XORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64GT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         }
     else if (b.Kind == BlockIf) 
         // match: (If (Equal cc) yes no)
@@ -20899,19 +19433,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ANDCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64LE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LE (CMPconst [0] z:(OR x y)) yes no)
         // cond: z.Uses == 1
@@ -20940,19 +19471,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64LE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LE (CMPconst [0] z:(XOR x y)) yes no)
         // cond: z.Uses == 1
@@ -20981,19 +19509,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64XORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64LE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         }
     else if (b.Kind == BlockPPC64LT) 
         // match: (LT (FlagEQ) yes no)
@@ -21089,19 +19614,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ANDCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64LT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LT (CMPconst [0] z:(OR x y)) yes no)
         // cond: z.Uses == 1
@@ -21130,19 +19652,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64LT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LT (CMPconst [0] z:(XOR x y)) yes no)
         // cond: z.Uses == 1
@@ -21171,19 +19690,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64XORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64LT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         }
     else if (b.Kind == BlockPPC64NE) 
         // match: (NE (CMPWconst [0] (Equal cc)) yes no)
@@ -21466,19 +19982,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ANDCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64NE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (CMPconst [0] z:(OR x y)) yes no)
         // cond: z.Uses == 1
@@ -21507,19 +20020,16 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64ORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64NE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (CMPconst [0] z:(XOR x y)) yes no)
         // cond: z.Uses == 1
@@ -21548,22 +20058,18 @@ private static bool rewriteBlockPPC64(ptr<Block> _addr_b) {
                         continue;
                     (_i0, z_0, z_1) = (_i0 + 1, z_1, z_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpPPC64XORCC, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockPPC64NE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         }
         return false;
-
 }
 
 } // end ssa_package

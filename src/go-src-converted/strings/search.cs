@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2022 March 06 22:30:23 UTC
+// package strings -- go2cs converted at 2022 March 13 05:41:12 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Program Files\Go\src\strings\search.go
-
-
 namespace go;
 
 public static partial class strings_package {
 
-    // stringFinder efficiently finds strings in a source text. It's implemented
-    // using the Boyer-Moore string search algorithm:
-    // https://en.wikipedia.org/wiki/Boyer-Moore_string_search_algorithm
-    // https://www.cs.utexas.edu/~moore/publications/fstrpos.pdf (note: this aged
-    // document uses 1-based indexing)
+// stringFinder efficiently finds strings in a source text. It's implemented
+// using the Boyer-Moore string search algorithm:
+// https://en.wikipedia.org/wiki/Boyer-Moore_string_search_algorithm
+// https://www.cs.utexas.edu/~moore/publications/fstrpos.pdf (note: this aged
+// document uses 1-based indexing)
 private partial struct stringFinder {
     public @string pattern; // badCharSkip[b] contains the distance between the last byte of pattern
 // and the rightmost occurrence of b in pattern. If b is not in pattern,
@@ -87,7 +85,6 @@ private static ptr<stringFinder> makeStringFinder(@string pattern) {
             } 
             // lastPrefix is the shift, and (last-i) is len(suffix).
             f.goodSuffixSkip[i] = lastPrefix + last - i;
-
         }
 
         i = i__prev1;
@@ -101,16 +98,13 @@ private static ptr<stringFinder> makeStringFinder(@string pattern) {
             if (pattern[i - lenSuffix] != pattern[last - lenSuffix]) { 
                 // (last-i) is the shift, and lenSuffix is len(suffix).
                 f.goodSuffixSkip[last - lenSuffix] = lenSuffix + last - i;
-
             }
-
         }
 
         i = i__prev1;
     }
 
     return _addr_f!;
-
 }
 
 private static nint longestCommonSuffix(@string a, @string b) {
@@ -123,7 +117,6 @@ private static nint longestCommonSuffix(@string a, @string b) {
         }
     }
     return ;
-
 }
 
 // next returns the index in text of the first occurrence of the pattern. If
@@ -143,10 +136,8 @@ private static nint next(this ptr<stringFinder> _addr_f, @string text) {
             return i + 1; // match
         }
         i += max(f.badCharSkip[text[i]], f.goodSuffixSkip[j]);
-
     }
     return -1;
-
 }
 
 private static nint max(nint a, nint b) {
@@ -154,7 +145,6 @@ private static nint max(nint a, nint b) {
         return a;
     }
     return b;
-
 }
 
 } // end strings_package

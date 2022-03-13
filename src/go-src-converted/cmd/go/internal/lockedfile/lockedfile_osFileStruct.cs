@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:36 UTC
+//     Generated on 2022 March 13 06:30:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace @internal
 {
     public static partial class lockedfile_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct osFile
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator osFile(NilType nil) => default(osFile);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static osFile osFile_cast(dynamic value)
         {
             return new osFile(ref value.File>);

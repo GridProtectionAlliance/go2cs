@@ -6,27 +6,24 @@
 // +build freebsd
 // +build 386 amd64
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:28 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:32 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\vdso_freebsd_x86.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
 private static readonly nint _VDSO_TH_ALGO_X86_TSC = 1;
 private static readonly nint _VDSO_TH_ALGO_X86_HPET = 2;
 
-
 private static readonly nint _HPET_DEV_MAP_MAX = 10;
 private static readonly nuint _HPET_MAIN_COUNTER = 0xf0;/* Main counter register */
 
 private static readonly @string hpetDevPath = "/dev/hpetX\x00";
-
 
 private static array<System.UIntPtr> hpetDevMap = new array<System.UIntPtr>(_HPET_DEV_MAP_MAX);
 
@@ -39,7 +36,6 @@ private static uint getTSCTimecounter(this ptr<vdsoTimehands> _addr_th) {
         tsc>>=th.x86_shift;
     }
     return uint32(tsc);
-
 }
 
 //go:systemstack
@@ -77,13 +73,11 @@ private static (uint, bool) getHPETTimecounter(this ptr<vdsoTimehands> _addr_th)
             munmap(addr, physPageSize);
         }
         p = atomic.Loaduintptr(_addr_hpetDevMap[idx]);
-
     }
     if (p == ~uintptr(0)) {
         return (0, false);
     }
     return (new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(p + _HPET_MAIN_COUNTER)), true);
-
 }
 
 //go:nosplit
@@ -103,7 +97,6 @@ private static (uint, bool) getTimecounter(this ptr<vdsoTimehands> _addr_th) {
         return (tc, ok);
     else 
         return (0, false);
-    
-}
+    }
 
 } // end runtime_package

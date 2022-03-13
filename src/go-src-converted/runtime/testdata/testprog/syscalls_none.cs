@@ -4,10 +4,8 @@
 
 // +build !linux
 
-// package main -- go2cs converted at 2022 March 06 22:26:08 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:27 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\syscalls_none.go
-
-
 namespace go;
 
 public static partial class main_package {

@@ -8,17 +8,18 @@
 // as exec.Command("cmd"), but if the result is a path
 // which is relative, the Run and Start methods will report
 // an error instead of running the executable.
-// package execabs -- go2cs converted at 2022 March 06 22:41:18 UTC
+
+// package execabs -- go2cs converted at 2022 March 13 05:52:23 UTC
 // import "internal/execabs" ==> using execabs = go.@internal.execabs_package
 // Original source: C:\Program Files\Go\src\internal\execabs\execabs.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal;
+
+using context = context_package;
+using fmt = fmt_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using @unsafe = @unsafe_package;
 
 public static partial class execabs_package {
 
@@ -29,8 +30,7 @@ public partial struct Cmd { // : exec.Cmd
 public partial struct Error { // : exec.Error
 }
 public partial struct ExitError { // : exec.ExitError
-}
-private static error relError(@string file, @string path) {
+}private static error relError(@string file, @string path) {
     return error.As(fmt.Errorf("%s resolves to executable relative to current directory (.%c%s)", file, filepath.Separator, path))!;
 }
 
@@ -46,7 +46,6 @@ public static (@string, error) LookPath(@string file) {
         return ("", error.As(relError(file, path))!);
     }
     return (path, error.As(null!)!);
-
 }
 
 private static void fixCmd(@string name, ptr<exec.Cmd> _addr_cmd) {
@@ -62,7 +61,6 @@ private static void fixCmd(@string name, ptr<exec.Cmd> _addr_cmd) {
             lookPathErr.val = relError(name, cmd.Path);
         }
         cmd.Path = "";
-
     }
 }
 

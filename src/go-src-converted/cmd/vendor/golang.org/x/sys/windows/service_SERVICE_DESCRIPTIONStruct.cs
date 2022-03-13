@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:30:36 UTC
+//     Generated on 2022 March 13 06:41:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace sys
 {
     public static partial class windows_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SERVICE_DESCRIPTION
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace sys
             public static implicit operator SERVICE_DESCRIPTION(NilType nil) => default(SERVICE_DESCRIPTION);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SERVICE_DESCRIPTION SERVICE_DESCRIPTION_cast(dynamic value)
         {
             return new SERVICE_DESCRIPTION(ref value.Description);

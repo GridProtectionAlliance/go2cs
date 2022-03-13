@@ -11,38 +11,39 @@
 //   - file:line info for variables
 //   - make strings a typedef so prettyprinters can see the underlying string type
 
-// package ld -- go2cs converted at 2022 March 06 23:21:09 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:06 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\dwarf.go
-using dwarf = go.cmd.@internal.dwarf_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using path = go.path_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.link.@internal;
 
+using dwarf = cmd.@internal.dwarf_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using path = path_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// dwctxt is a wrapper intended to satisfy the method set of
+// dwarf.Context, so that functions like dwarf.PutAttrs will work with
+// DIEs that use loader.Sym as opposed to *sym.Symbol. It is also
+// being used as a place to store tables/maps that are useful as part
+// of type conversion (this is just a convenience; it would be easy to
+// split these things out into another type if need be).
+
+using System;
+using System.Threading;
 public static partial class ld_package {
 
-    // dwctxt is a wrapper intended to satisfy the method set of
-    // dwarf.Context, so that functions like dwarf.PutAttrs will work with
-    // DIEs that use loader.Sym as opposed to *sym.Symbol. It is also
-    // being used as a place to store tables/maps that are useful as part
-    // of type conversion (this is just a convenience; it would be easy to
-    // split these things out into another type if need be).
 private partial struct dwctxt {
     public ptr<Link> linkctxt;
     public ptr<loader.Loader> ldr;
@@ -113,7 +114,6 @@ private static void AddAddress(this dwctxt c, dwarf.Sym s, object data, long val
     }
     var tgtds = loader.Sym(data._<dwSym>());
     dsu.AddAddrPlus(c.arch, tgtds, value);
-
 }
 
 private static void AddCURelativeAddress(this dwctxt c, dwarf.Sym s, object data, long value) {
@@ -124,7 +124,6 @@ private static void AddCURelativeAddress(this dwctxt c, dwarf.Sym s, object data
     }
     var tgtds = loader.Sym(data._<dwSym>());
     dsu.AddCURelativeAddrPlus(c.arch, tgtds, value);
-
 }
 
 private static void AddSectionOffset(this dwctxt c, dwarf.Sym s, nint size, object t, long ofs) {
@@ -135,7 +134,6 @@ private static void AddSectionOffset(this dwctxt c, dwarf.Sym s, nint size, obje
     if (size == c.arch.PtrSize || size == 4)     else 
         c.linkctxt.Errorf(ds, "invalid size %d in adddwarfref\n", size);
         dsu.AddSymRef(c.arch, tds, ofs, objabi.R_ADDROFF, size);
-
 }
 
 private static void AddDWARFAddrSectionOffset(this dwctxt c, dwarf.Sym s, object t, long ofs) {
@@ -150,7 +148,6 @@ private static void AddDWARFAddrSectionOffset(this dwctxt c, dwarf.Sym s, object
     if (size == c.arch.PtrSize || size == 4)     else 
         c.linkctxt.Errorf(ds, "invalid size %d in adddwarfref\n", size);
         dsu.AddSymRef(c.arch, tds, ofs, objabi.R_DWARFSECREF, size);
-
 }
 
 private static void Logf(this dwctxt c, @string format, params object[] args) {
@@ -207,7 +204,6 @@ private static loader.Sym secSym(this ptr<dwarfSecInfo> _addr_dsi) {
         return 0;
     }
     return dsi.syms[0];
-
 }
 
 // subSyms returns a list of sub-symbols for the section.
@@ -218,7 +214,6 @@ private static slice<loader.Sym> subSyms(this ptr<dwarfSecInfo> _addr_dsi) {
         return new slice<loader.Sym>(new loader.Sym[] {  });
     }
     return dsi.syms[(int)1..];
-
 }
 
 // dwarfp stores the collected DWARF symbols created during
@@ -276,11 +271,9 @@ private static ptr<dwarf.DWAttr> getattr(ptr<dwarf.DWDie> _addr_die, ushort attr
         }
         a = b;
         b = b.Link;
-
     }
 
     return _addr_null!;
-
 }
 
 // Every DIE manufactured by the linker has at least an AT_name
@@ -330,7 +323,6 @@ private static ptr<dwarf.DWDie> newdie(this ptr<dwctxt> _addr_d, ptr<dwarf.DWDie
         d.tmap[name] = ds;
     }
     return _addr_die!;
-
 });
 
 private static ptr<dwarf.DWDie> walktypedef(ptr<dwarf.DWDie> _addr_die) {
@@ -348,14 +340,11 @@ private static ptr<dwarf.DWDie> walktypedef(ptr<dwarf.DWDie> _addr_die) {
                     return attr.Data._<ptr<dwarf.DWDie>>();
                 attr = attr.Link;
                 }
-
             }
 
         }
-
     }
     return _addr_die!;
-
 }
 
 private static loader.Sym walksymtypedef(this ptr<dwctxt> _addr_d, loader.Sym symIdx) {
@@ -378,16 +367,12 @@ private static loader.Sym walksymtypedef(this ptr<dwctxt> _addr_d, loader.Sym sy
                 }
 
             }
-
             d.linkctxt.Errorf(ts, "internal error: no entry for sym %d in tdmap\n", ts);
             return 0;
-
         }
     }
-
     d.linkctxt.Errorf(symIdx, "internal error: no entry for sym %d in rtmap\n", symIdx);
     return 0;
-
 }
 
 // Find child by AT_name using hashtable if available or linear scan
@@ -405,16 +390,13 @@ private static ptr<dwarf.DWDie> findchild(ptr<dwarf.DWDie> _addr_die, @string na
                     return _addr_a!;
                 a = a.Link;
                 }
-
         (prev, die) = (die, walktypedef(_addr_die));
             }
 
         }
         continue;
-
     }
     return _addr_null!;
-
 }
 
 // find looks up the loader symbol for the DWARF DIE generated for the
@@ -433,7 +415,6 @@ private static loader.Sym mustFind(this ptr<dwctxt> _addr_d, @string name) {
         Exitf("dwarf find: cannot find %s", name);
     }
     return r;
-
 }
 
 private static long adddwarfref(this ptr<dwctxt> _addr_d, ptr<loader.SymbolBuilder> _addr_sb, loader.Sym t, nint size) {
@@ -446,7 +427,6 @@ private static long adddwarfref(this ptr<dwctxt> _addr_d, ptr<loader.SymbolBuild
         d.linkctxt.Errorf(sb.Sym(), "invalid size %d in adddwarfref\n", size);
         result = sb.AddSymRef(d.arch, t, 0, objabi.R_DWARFSECREF, size);
     return result;
-
 }
 
 private static ptr<dwarf.DWAttr> newrefattr(this ptr<dwctxt> _addr_d, ptr<dwarf.DWDie> _addr_die, ushort attr, loader.Sym @ref) {
@@ -457,7 +437,6 @@ private static ptr<dwarf.DWAttr> newrefattr(this ptr<dwctxt> _addr_d, ptr<dwarf.
         return _addr_null!;
     }
     return _addr_newattr(_addr_die, attr, dwarf.DW_CLS_REFERENCE, 0, dwSym(ref))!;
-
 }
 
 private static loader.Sym dtolsym(this ptr<dwctxt> _addr_d, dwarf.Sym s) {
@@ -468,7 +447,6 @@ private static loader.Sym dtolsym(this ptr<dwctxt> _addr_d, dwarf.Sym s) {
     }
     var dws = loader.Sym(s._<dwSym>());
     return dws;
-
 }
 
 private static slice<loader.Sym> putdie(this ptr<dwctxt> _addr_d, slice<loader.Sym> syms, ptr<dwarf.DWDie> _addr_die) {
@@ -498,10 +476,8 @@ private static slice<loader.Sym> putdie(this ptr<dwctxt> _addr_d, slice<loader.S
         }
         var dsu = d.ldr.MakeSymbolUpdater(syms[len(syms) - 1]);
         dsu.AddUint8(0);
-
     }
     return syms;
-
 }
 
 private static void reverselist(ptr<ptr<dwarf.DWDie>> _addr_list) {
@@ -531,10 +507,8 @@ private static void reversetree(ptr<ptr<dwarf.DWDie>> _addr_list) {
                 reversetree(_addr_die.Child);
             die = die.Link;
             }
-
         }
     }
-
 }
 
 private static void newmemberoffsetattr(ptr<dwarf.DWDie> _addr_die, int offs) {
@@ -554,7 +528,6 @@ private static loader.Sym lookupOrDiag(this ptr<dwctxt> _addr_d, @string n) {
         Exitf("dwarf: missing type (no data): %s", n);
     }
     return symIdx;
-
 }
 
 private static ptr<dwarf.DWDie> dotypedef(this ptr<dwctxt> _addr_d, ptr<dwarf.DWDie> _addr_parent, loader.Sym gotype, @string name, ptr<dwarf.DWDie> _addr_def) {
@@ -594,7 +567,6 @@ private static ptr<dwarf.DWDie> dotypedef(this ptr<dwctxt> _addr_d, ptr<dwarf.DW
     d.newrefattr(die, dwarf.DW_AT_type, tds);
 
     return _addr_die!;
-
 }
 
 // Define gotype, for composite ones recurse into constituents.
@@ -612,7 +584,6 @@ private static loader.Sym defgotype(this ptr<dwctxt> _addr_d, loader.Sym gotype)
         }
     }
 
-
     var sn = d.ldr.SymName(gotype);
     if (!strings.HasPrefix(sn, "type.")) {
         d.linkctxt.Errorf(gotype, "dwarf: type name doesn't start with \"type.\"");
@@ -627,7 +598,6 @@ private static loader.Sym defgotype(this ptr<dwctxt> _addr_d, loader.Sym gotype)
     var gtdwSym = d.newtype(gotype);
     d.tdmap[gotype] = loader.Sym(gtdwSym.Sym._<dwSym>());
     return loader.Sym(gtdwSym.Sym._<dwSym>());
-
 }
 
 private static ptr<dwarf.DWDie> newtype(this ptr<dwctxt> _addr_d, loader.Sym gotype) {
@@ -773,16 +743,13 @@ private static ptr<dwarf.DWDie> newtype(this ptr<dwctxt> _addr_d, loader.Sym got
                     sn = d.ldr.SymName(s);
                     f = sn[(int)5..]; // skip "type."
                 }
-
                 fld = d.newdie(die, dwarf.DW_ABRV_STRUCTFIELD, f, 0);
                 d.newrefattr(fld, dwarf.DW_AT_type, d.defgotype(s));
                 var offsetAnon = decodetypeStructFieldOffsAnon(d.ldr, d.arch, gotype, i);
                 newmemberoffsetattr(_addr_fld, int32(offsetAnon >> 1));
                 if (offsetAnon & 1 != 0) { // is embedded field
                     newattr(_addr_fld, dwarf.DW_AT_go_embedded_field, dwarf.DW_CLS_FLAG, 1, 0);
-
                 }
-
             }
 
 
@@ -807,7 +774,6 @@ private static ptr<dwarf.DWDie> newtype(this ptr<dwctxt> _addr_d, loader.Sym got
         }
     }
 
-
     var ds = loader.Sym(die.Sym._<dwSym>());
     if (typedefdie != null) {
         ds = loader.Sym(typedefdie.Sym._<dwSym>());
@@ -822,12 +788,10 @@ private static ptr<dwarf.DWDie> newtype(this ptr<dwctxt> _addr_d, loader.Sym got
         }
     }
 
-
     if (typedefdie != null) {
         return _addr_typedefdie!;
     }
     return _addr_die!;
-
 }
 
 private static @string nameFromDIESym(this ptr<dwctxt> _addr_d, loader.Sym dwtypeDIESym) {
@@ -853,7 +817,6 @@ private static loader.Sym defptrto(this ptr<dwctxt> _addr_d, loader.Sym dwtype) 
         }
     }
 
-
     var pdie = d.newdie(_addr_dwtypes, dwarf.DW_ABRV_PTRTYPE, ptrname, 0);
     d.newrefattr(pdie, dwarf.DW_AT_type, dwtype); 
 
@@ -870,7 +833,6 @@ private static loader.Sym defptrto(this ptr<dwctxt> _addr_d, loader.Sym dwtype) 
         d.tdmap[gts] = ds;
     }
     return d.dtolsym(pdie.Sym);
-
 }
 
 // Copies src's children into dst. Copies attributes by value.
@@ -901,11 +863,9 @@ private static void copychildrenexcept(this ptr<dwctxt> _addr_d, ptr<Link> _addr
 
         }
         d.copychildrenexcept(ctxt, c, src, null);
-
     }
 
     reverselist(_addr_dst.Child);
-
 }
 
 private static void copychildren(this ptr<dwctxt> _addr_d, ptr<Link> _addr_ctxt, ptr<dwarf.DWDie> _addr_dst, ptr<dwarf.DWDie> _addr_src) {
@@ -951,7 +911,6 @@ private static ptr<dwarf.DWDie> findprotodie(this ptr<dwctxt> _addr_d, ptr<Link>
         log.Fatalf("internal error: DIE generation failed for %s\n", name);
     }
     return _addr_die!;
-
 }
 
 private static void synthesizestringtypes(this ptr<dwctxt> _addr_d, ptr<Link> _addr_ctxt, ptr<dwarf.DWDie> _addr_die) {
@@ -969,9 +928,7 @@ private static void synthesizestringtypes(this ptr<dwctxt> _addr_d, ptr<Link> _a
         die = die.Link;
         }
         d.copychildren(ctxt, die, prototype);
-
     }
-
 }
 
 private static void synthesizeslicetypes(this ptr<dwctxt> _addr_d, ptr<Link> _addr_ctxt, ptr<dwarf.DWDie> _addr_die) {
@@ -991,9 +948,7 @@ private static void synthesizeslicetypes(this ptr<dwctxt> _addr_d, ptr<Link> _ad
         d.copychildren(ctxt, die, prototype);
         var elem = loader.Sym(getattr(_addr_die, dwarf.DW_AT_go_elem).Data._<dwSym>());
         d.substitutetype(die, "array", d.defptrto(elem));
-
     }
-
 }
 
 private static @string mkinternaltypename(@string @base, @string arg1, @string arg2) {
@@ -1001,14 +956,12 @@ private static @string mkinternaltypename(@string @base, @string arg1, @string a
         return fmt.Sprintf("%s<%s>", base, arg1);
     }
     return fmt.Sprintf("%s<%s,%s>", base, arg1, arg2);
-
 }
 
 // synthesizemaptypes is way too closely married to runtime/hashmap.c
 public static readonly nint MaxKeySize = 128;
 public static readonly nint MaxValSize = 128;
 public static readonly nint BucketSize = 8;
-
 
 private static loader.Sym mkinternaltype(this ptr<dwctxt> _addr_d, ptr<Link> _addr_ctxt, nint abbrev, @string typename, @string keyname, @string valname, Action<ptr<dwarf.DWDie>> f) {
     ref dwctxt d = ref _addr_d.val;
@@ -1023,7 +976,6 @@ private static loader.Sym mkinternaltype(this ptr<dwctxt> _addr_d, ptr<Link> _ad
     var die = d.newdie(_addr_dwtypes, abbrev, name, 0);
     f(die);
     return d.dtolsym(die.Sym);
-
 }
 
 private static void synthesizemaptypes(this ptr<dwctxt> _addr_d, ptr<Link> _addr_ctxt, ptr<dwarf.DWDie> _addr_die) {
@@ -1106,9 +1058,7 @@ private static void synthesizemaptypes(this ptr<dwctxt> _addr_d, ptr<Link> _addr
                 d.newrefattr(fld, dwarf.DW_AT_type, d.uintptrInfoSym);
                 newmemberoffsetattr(_addr_fld, BucketSize + BucketSize * (int32(keysize) + int32(valsize)) + int32(d.arch.PtrSize));
             }
-
             newattr(_addr_dwhb, dwarf.DW_AT_byte_size, dwarf.DW_CLS_CONSTANT, BucketSize + BucketSize * keysize + BucketSize * valsize + int64(d.arch.RegSize), 0);
-
         }); 
 
         // Construct hash<K,V>
@@ -1121,9 +1071,7 @@ private static void synthesizemaptypes(this ptr<dwctxt> _addr_d, ptr<Link> _addr
 
         // make map type a pointer to hash<K,V>
         d.newrefattr(die, dwarf.DW_AT_type, d.defptrto(dwhs));
-
     }
-
 }
 
 private static void synthesizechantypes(this ptr<dwctxt> _addr_d, ptr<Link> _addr_ctxt, ptr<dwarf.DWDie> _addr_die) {
@@ -1173,9 +1121,7 @@ private static void synthesizechantypes(this ptr<dwctxt> _addr_d, ptr<Link> _add
         });
 
         d.newrefattr(die, dwarf.DW_AT_type, d.defptrto(dwhs));
-
     }
-
 }
 
 // createUnitLength creates the initial length field with value v and update
@@ -1188,7 +1134,6 @@ private static void createUnitLength(this ptr<dwctxt> _addr_d, ptr<loader.Symbol
         su.AddUint32(d.arch, 0xFFFFFFFF);
     }
     d.addDwarfAddrField(su, v);
-
 }
 
 // addDwarfAddrField adds a DWARF field in DWARF 64bits or 32bits.
@@ -1242,7 +1187,6 @@ private static void calcCompUnitRanges(this ptr<dwctxt> _addr_d) {
             prevUnit = unit;
         }
         unit.PCs[len(unit.PCs) - 1].End = sval - u0val + int64(len(d.ldr.Data(sym)));
-
     }
 }
 
@@ -1259,7 +1203,6 @@ private static void movetomodule(ptr<Link> _addr_ctxt, ptr<dwarf.DWDie> _addr_pa
         die = die.Link;
     }
     die.Link = parent.Child;
-
 }
 
 /*
@@ -1270,7 +1213,6 @@ public static readonly nint LINE_BASE = -4;
 public static readonly nint LINE_RANGE = 10;
 public static readonly nint PC_RANGE = (255 - OPCODE_BASE) / LINE_RANGE;
 public static readonly nint OPCODE_BASE = 11;
-
 
 /*
  * Walk prog table, emit line program and build DIE tree.
@@ -1284,7 +1226,6 @@ private static @string getCompilationDir() {
     // produces relative paths, but we don't know where they start, so
     // all we can do here is try not to make things worse.
     return ".";
-
 }
 
 private static void importInfoSymbol(this ptr<dwctxt> _addr_d, loader.Sym dsym) {
@@ -1311,7 +1252,6 @@ private static void importInfoSymbol(this ptr<dwctxt> _addr_d, loader.Sym dsym) 
             if (ok) { 
                 // type already generated
                 continue;
-
             } 
             // FIXME: is there a way we could avoid materializing the
             // symbol name here?
@@ -1323,9 +1263,7 @@ private static void importInfoSymbol(this ptr<dwctxt> _addr_d, loader.Sym dsym) 
         var tn = sn[(int)len(dwarf.InfoPrefix)..];
         var ts = d.ldr.Lookup("type." + tn, 0);
         d.defgotype(ts);
-
     }
-
 }
 
 private static @string expandFile(@string fname) {
@@ -1333,7 +1271,6 @@ private static @string expandFile(@string fname) {
         fname = fname[(int)len(src.FileSymPrefix)..];
     }
     return expandGoroot(fname);
-
 }
 
 // writeDirFileTables emits the portion of the DWARF line table
@@ -1369,7 +1306,6 @@ private static void writeDirFileTables(this ptr<dwctxt> _addr_d, ptr<sym.Compila
                 // Can't have empty filenames, and having a unique
                 // filename is quite useful for debugging.
                 name = fmt.Sprintf("<missing>_%d", i);
-
             } 
             // Note the use of "path" here and not "filepath". The compiler
             // hard-codes to use "/" in DWARF paths (even for Windows), so we
@@ -1382,7 +1318,6 @@ private static void writeDirFileTables(this ptr<dwctxt> _addr_d, ptr<sym.Compila
                 dirNums[dir] = dirIdx;
                 dirs = append(dirs, dir);
             }
-
             files = append(files, new fileDir(base:file,dir:dirIdx)); 
 
             // We can't use something that may be dead-code
@@ -1405,7 +1340,6 @@ private static void writeDirFileTables(this ptr<dwctxt> _addr_d, ptr<sym.Compila
                 i = i__prev1;
 
             }
-
         }
         i = i__prev1;
         name = name__prev1;
@@ -1513,7 +1447,6 @@ private static slice<loader.Sym> writelines(this ptr<dwctxt> _addr_d, ptr<sym.Co
     if (isDwarf64(_addr_d.linkctxt)) {
         lsu.SetUint(d.arch, unitLengthOffset + 4, uint64(unitlen)); // +4 because of 0xFFFFFFFF
         lsu.SetUint(d.arch, headerLengthOffset, uint64(headerend - headerstart));
-
     }
     else
  {
@@ -1521,7 +1454,6 @@ private static slice<loader.Sym> writelines(this ptr<dwctxt> _addr_d, ptr<sym.Co
         lsu.SetUint32(d.arch, headerLengthOffset, uint32(headerend - headerstart));
     }
     return syms;
-
 }
 
 // writepcranges generates the DW_AT_ranges table for compilation unit
@@ -1551,14 +1483,12 @@ private static slice<loader.Sym> writepcranges(this ptr<dwctxt> _addr_d, ptr<sym
         addDwsectCUSize(".debug_ranges", unit.Lib.Pkg, rsize);
     }
     return syms;
-
 }
 
 /*
  *  Emit .debug_frame
  */
 private static readonly nint dataAlignmentFactor = -4;
-
 
 // appendPCDeltaCFA appends per-PC CFA deltas to b and returns the final slice.
 private static slice<byte> appendPCDeltaCFA(ptr<sys.Arch> _addr_arch, slice<byte> b, long deltapc, long cfa) {
@@ -1580,7 +1510,6 @@ private static slice<byte> appendPCDeltaCFA(ptr<sys.Arch> _addr_arch, slice<byte
         b = append(b, dwarf.DW_CFA_advance_loc4, 0, 0, 0, 0);
         arch.ByteOrder.PutUint32(b[(int)len(b) - 4..], uint32(deltapc));
         return b;
-
 }
 
 private static dwarfSecInfo writeframes(this ptr<dwctxt> _addr_d, loader.Sym fs) {
@@ -1661,7 +1590,6 @@ private static dwarfSecInfo writeframes(this ptr<dwctxt> _addr_d, loader.Sym fs)
             // TODO: similar mark on non-LR architectures.
             deltaBuf = append(deltaBuf, dwarf.DW_CFA_undefined);
             deltaBuf = dwarf.AppendUleb128(deltaBuf, uint64(thearch.Dwarfreglr));
-
         }
         pcsp.Init(d.linkctxt.loader.Data(fpcsp));
 
@@ -1676,16 +1604,12 @@ private static dwarfSecInfo writeframes(this ptr<dwctxt> _addr_d, loader.Sym fs)
                     continue;
             pcsp.Next();
                 }
-
             }
-
             var spdelta = int64(pcsp.Value);
             if (!haslr) { 
                 // Return address has been pushed onto stack.
                 spdelta += int64(d.arch.PtrSize);
-
             }
-
             if (haslr && !fi.TopFrame()) { 
                 // TODO(bryanpkc): This is imprecise. In general, the instruction
                 // that stores the return address to the stack frame is not the
@@ -1696,7 +1620,6 @@ private static dwarfSecInfo writeframes(this ptr<dwctxt> _addr_d, loader.Sym fs)
                     deltaBuf = append(deltaBuf, dwarf.DW_CFA_offset_extended_sf);
                     deltaBuf = dwarf.AppendUleb128(deltaBuf, uint64(thearch.Dwarfreglr));
                     deltaBuf = dwarf.AppendSleb128(deltaBuf, -spdelta / dataAlignmentFactor);
-
                 }
                 else
  { 
@@ -1704,13 +1627,9 @@ private static dwarfSecInfo writeframes(this ptr<dwctxt> _addr_d, loader.Sym fs)
                     // when a stack frame has been de-allocated.
                     deltaBuf = append(deltaBuf, dwarf.DW_CFA_same_value);
                     deltaBuf = dwarf.AppendUleb128(deltaBuf, uint64(thearch.Dwarfreglr));
-
                 }
-
             }
-
             deltaBuf = appendPCDeltaCFA(_addr_d.arch, deltaBuf, int64(nextpc) - int64(pcsp.PC), spdelta);
-
         }
         pad = int(Rnd(int64(len(deltaBuf)), int64(d.arch.PtrSize))) - len(deltaBuf);
         deltaBuf = append(deltaBuf, zeros[..(int)pad]); 
@@ -1742,7 +1661,6 @@ private static dwarfSecInfo writeframes(this ptr<dwctxt> _addr_d, loader.Sym fs)
             addDwsectCUSize(".debug_frame", d.ldr.SymPkg(fn), fdeLength + uint64(lengthFieldSize));
         }
     }    return new dwarfSecInfo(syms:[]loader.Sym{fs});
-
 }
 
 /*
@@ -1750,7 +1668,6 @@ private static dwarfSecInfo writeframes(this ptr<dwctxt> _addr_d, loader.Sym fs)
  */
 
 public static readonly nint COMPUNITHEADERSIZE = 4 + 2 + 4 + 1;
-
 
 // appendSyms appends the syms from 'src' into 'syms' and returns the
 // result. This can go away once we do away with sym.LoaderSym
@@ -1820,7 +1737,6 @@ private static slice<loader.Sym> writeUnitInfo(this ptr<dwctxt> _addr_d, ptr<sym
                 cusize = cusize - lastSymSz + int64(len(d.ldr.Data(cu[l - 1])));
             die = die.Link;
             }
-
             {
                 var child__prev2 = child;
 
@@ -1851,10 +1767,8 @@ private static slice<loader.Sym> writeUnitInfo(this ptr<dwctxt> _addr_d, ptr<sym
  {
         cusize -= 4; // exclude the length field.
         su.SetUint32(d.arch, 0, uint32(cusize));
-
     }
     return append(syms, cu);
-
 }
 
 private static dwarfSecInfo writegdbscript(this ptr<dwctxt> _addr_d) {
@@ -1872,7 +1786,6 @@ private static dwarfSecInfo writegdbscript(this ptr<dwctxt> _addr_d) {
         // c-archive users would need to specify the linker script manually.
         // For UX it's better not to deal with this.
         return new dwarfSecInfo();
-
     }
     if (gdbscript == "") {
         return new dwarfSecInfo();
@@ -1883,7 +1796,6 @@ private static dwarfSecInfo writegdbscript(this ptr<dwctxt> _addr_d) {
     gs.AddUint8(1); // magic 1 byte?
     gs.Addstring(gdbscript);
     return new dwarfSecInfo(syms:[]loader.Sym{gs.Sym()});
-
 }
 
 // FIXME: might be worth looking replacing this map with a function
@@ -1896,7 +1808,6 @@ private static bool dwarfEnabled(ptr<Link> _addr_ctxt) {
 
     if (FlagW.val) { // disable dwarf
         return false;
-
     }
     if (FlagS && ctxt.HeadType != objabi.Hdarwin.val) {
         return false;
@@ -1914,10 +1825,8 @@ private static bool dwarfEnabled(ptr<Link> _addr_ctxt) {
             return res;
         else 
             return false;
-        
-    }
+            }
     return true;
-
 }
 
 // mkBuiltinType populates the dwctxt2 sym lookup maps for the
@@ -1940,7 +1849,6 @@ private static ptr<dwarf.DWDie> mkBuiltinType(this ptr<dwctxt> _addr_d, ptr<Link
     d.tdmap[gotype] = ds;
 
     return _addr_die!;
-
 }
 
 // dwarfVisitFunction takes a function (text) symbol and processes the
@@ -1986,11 +1894,8 @@ private static void dwarfVisitFunction(this ptr<dwctxt> _addr_d, loader.Sym fnSy
                 d.ldr.SetAttrOnList(rsym, true);
                 unit.AbsFnDIEs = append(unit.AbsFnDIEs, sym.LoaderSym(rsym));
                 d.importInfoSymbol(rsym);
-
             }
-
             continue;
-
         }
         if (rst != sym.SDWARFTYPE && rst != sym.Sxxx) {
             continue;
@@ -2001,19 +1906,15 @@ private static void dwarfVisitFunction(this ptr<dwctxt> _addr_d, loader.Sym fnSy
             if (ok) { 
                 // type already generated
                 continue;
-
             }
 
         }
-
 
         var rsn = d.ldr.SymName(rsym);
         var tn = rsn[(int)len(dwarf.InfoPrefix)..];
         var ts = d.ldr.Lookup("type." + tn, 0);
         d.defgotype(ts);
-
     }
-
 }
 
 // dwarfGenerateDebugInfo generated debug info entries for all types,
@@ -2034,7 +1935,6 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
     if (ctxt.HeadType == objabi.Haix) { 
         // Initial map used to store package size for each DWARF section.
         dwsectCUSize = make_map<@string, ulong>();
-
     }
     newattr(_addr_dwtypes, dwarf.DW_AT_name, dwarf.DW_CLS_STRING, int64(len("dwtypes")), "dwtypes"); 
 
@@ -2074,19 +1974,16 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
                     d.importInfoSymbol(consts);
                     consts = 0;
                 }
-
                 ctxt.compUnits = append(ctxt.compUnits, unit); 
 
                 // We need at least one runtime unit.
                 if (unit.Lib.Pkg == "runtime") {
                     ctxt.runtimeCU = unit;
                 }
-
                 var cuabrv = dwarf.DW_ABRV_COMPUNIT;
                 if (len(unit.Textp) == 0) {
                     cuabrv = dwarf.DW_ABRV_COMPUNIT_TEXTLESS;
                 }
-
                 unit.DWInfo = d.newdie(_addr_dwroot, cuabrv, unit.Lib.Pkg, 0);
                 newattr(_addr_unit.DWInfo, dwarf.DW_AT_language, dwarf.DW_CLS_CONSTANT, int64(dwarf.DW_LANG_Go), 0); 
                 // OS X linker requires compilation dir or absolute path in comp unit name to output debug info.
@@ -2105,7 +2002,6 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
                     }
 
                 }
-
                 @string producer = "Go cmd/compile " + buildcfg.Version;
                 if (len(peData) > 0) { 
                     // We put a semicolon before the flags to clearly
@@ -2116,13 +2012,11 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
                     // forward to the semicolon.
                     producer += "; " + string(peData);
                     flagVariants[string(peData)] = true;
-
                 }
                 else
  {
                     flagVariants[""] = true;
                 }
-
                 newattr(_addr_unit.DWInfo, dwarf.DW_AT_producer, dwarf.DW_CLS_STRING, int64(len(producer)), producer);
 
                 @string pkgname = default;
@@ -2135,7 +2029,6 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
                     }
 
                 }
-
                 newattr(_addr_unit.DWInfo, dwarf.DW_AT_go_package_name, dwarf.DW_CLS_STRING, int64(len(pkgname)), pkgname); 
 
                 // Scan all functions in this compilation unit, create
@@ -2145,7 +2038,6 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
                 foreach (var (_, s) in unit.Textp) {
                     d.dwarfVisitFunction(loader.Sym(s), unit);
                 }
-
             }
 
             unit = unit__prev2;
@@ -2173,7 +2065,6 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
         if (sn == "") { 
             // skip aux symbols
             continue;
-
         }
         var varDIE = d.ldr.Lookup(dwarf.InfoPrefix + sn, 0);
         if (varDIE != 0) {
@@ -2187,7 +2078,6 @@ private static void dwarfGenerateDebugInfo(ptr<Link> _addr_ctxt) {
     d.synthesizeslicetypes(ctxt, dwtypes.Child);
     d.synthesizemaptypes(ctxt, dwtypes.Child);
     d.synthesizechantypes(ctxt, dwtypes.Child);
-
 }
 
 // dwarfGenerateDebugSyms constructs debug_line, debug_frame, and
@@ -2201,7 +2091,6 @@ private static void dwarfGenerateDebugSyms(ptr<Link> _addr_ctxt) {
     }
     ptr<dwctxt> d = addr(new dwctxt(linkctxt:ctxt,ldr:ctxt.loader,arch:ctxt.Arch,dwmu:new(sync.Mutex),));
     d.dwarfGenerateDebugSyms();
-
 }
 
 // dwUnitSyms stores input and output symbols for DWARF generation
@@ -2233,7 +2122,6 @@ private static void dwUnitPortion(this ptr<dwctxt> _addr_d, ptr<sym.CompilationU
         us.locsyms = d.collectUnitLocs(u);
     }
     us.infosyms = d.writeUnitInfo(u, abbrevsym, us.infoEpilog);
-
 }
 
 private static void dwarfGenerateDebugSyms(this ptr<dwctxt> _addr_d) => func((defer, _, _) => {
@@ -2347,7 +2235,6 @@ private static void dwarfGenerateDebugSyms(this ptr<dwctxt> _addr_d) => func((de
         }
 
         return syms;
-
     }; 
 
     // Stitch together the results.
@@ -2412,13 +2299,9 @@ private static slice<loader.Sym> collectUnitLocs(this ptr<dwctxt> _addr_d, ptr<s
                 syms = append(syms, rsym); 
                 // One location list entry per function, but many relocations to it. Don't duplicate.
                 break;
-
             }
-
         }
-
     }    return syms;
-
 }
 
 /*
@@ -2430,7 +2313,6 @@ private static void dwarfaddshstrings(ptr<Link> _addr_ctxt, ptr<loader.SymbolBui
 
     if (FlagW.val) { // disable dwarf
         return ;
-
     }
     @string secs = new slice<@string>(new @string[] { "abbrev", "frame", "info", "loc", "line", "gdb_scripts", "ranges" });
     foreach (var (_, sec) in secs) {
@@ -2450,7 +2332,6 @@ private static void dwarfaddelfsectionsyms(ptr<Link> _addr_ctxt) {
 
     if (FlagW.val) { // disable dwarf
         return ;
-
     }
     if (ctxt.LinkMode != LinkExternal) {
         return ;
@@ -2504,7 +2385,6 @@ private static void dwarfcompress(ptr<Link> _addr_ctxt) {
             dwarfSecInfo ds = new dwarfSecInfo(syms:z.syms);
             newDwarfp = append(newDwarfp, ds);
             Segdwarf.Sections = append(Segdwarf.Sections, ldr.SymSect(s));
-
         }
         else
  {
@@ -2563,7 +2443,6 @@ private static void dwarfcompress(ptr<Link> _addr_ctxt) {
             s = s__prev2;
         }
     }    Segdwarf.Length = pos - Segdwarf.Vaddr;
-
 }
 
 private partial struct compilationUnitByStartPC { // : slice<ptr<sym.CompilationUnit>>
@@ -2586,8 +2465,7 @@ private static bool Less(this compilationUnitByStartPC v, nint i, nint j) {
         return false;
     else 
         return v[i].PCs[0].Start < v[j].PCs[0].Start;
-    
-}
+    }
 
 // getPkgFromCUSym returns the package name for the compilation unit
 // represented by s.

@@ -3,22 +3,22 @@
 // license that can be found in the LICENSE file.
 
 // Package unreachable defines an Analyzer that checks for unreachable code.
-// package unreachable -- go2cs converted at 2022 March 06 23:34:52 UTC
+
+// package unreachable -- go2cs converted at 2022 March 13 06:42:08 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unreachable" ==> using unreachable = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unreachable_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unreachable\unreachable.go
+namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 // TODO(adonovan): use the new cfg package, which is more precise.
 
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using log = go.log_package;
 
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using log = log_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 
 public static partial class unreachable_package {
 
@@ -55,10 +55,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         d.findLabels(body);
         d.reachable = true;
         d.findDead(body);
-
     });
     return (null, error.As(null!)!);
-
 }
 
 private partial struct deadState {
@@ -198,7 +196,6 @@ private static void findLabels(this ptr<deadState> _addr_d, ast.Stmt stmt) {
             break;
         }
     }
-
 }
 
 // findDead walks the statement looking for dead code.
@@ -227,7 +224,6 @@ private static void findDead(this ptr<deadState> _addr_d, ast.Stmt stmt) {
 
     }
 
-
     if (!d.reachable) {
         switch (stmt.type()) {
             case ptr<ast.EmptyStmt> _:
@@ -239,7 +235,6 @@ private static void findDead(this ptr<deadState> _addr_d, ast.Stmt stmt) {
                 break;
             }
         }
-
     }
     switch (stmt.type()) {
         case ptr<ast.AssignStmt> x:
@@ -308,9 +303,7 @@ private static void findDead(this ptr<deadState> _addr_d, ast.Stmt stmt) {
  { 
                 // might not have executed if statement
                 d.reachable = true;
-
             }
-
             break;
         case ptr<ast.LabeledStmt> x:
             d.findDead(x.Stmt);
@@ -338,7 +331,6 @@ private static void findDead(this ptr<deadState> _addr_d, ast.Stmt stmt) {
                 }
 
                 anyReachable = anyReachable || d.reachable;
-
             }
             d.reachable = anyReachable || d.hasBreak[x];
             break;
@@ -367,7 +359,6 @@ private static void findDead(this ptr<deadState> _addr_d, ast.Stmt stmt) {
                     }
 
                     anyReachable = anyReachable || d.reachable;
-
                 }
 
                 cas = cas__prev1;
@@ -400,7 +391,6 @@ private static void findDead(this ptr<deadState> _addr_d, ast.Stmt stmt) {
                     }
 
                     anyReachable = anyReachable || d.reachable;
-
                 }
 
                 cas = cas__prev1;
@@ -415,7 +405,6 @@ private static void findDead(this ptr<deadState> _addr_d, ast.Stmt stmt) {
             break;
         }
     }
-
 }
 
 } // end unreachable_package

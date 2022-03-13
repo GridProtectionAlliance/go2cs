@@ -6,34 +6,33 @@
 // +build linux
 // +build mips64 mips64le
 
-// package unix -- go2cs converted at 2022 March 06 23:27:08 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:23 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_linux_mips64x.go
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
 
 public static partial class unix_package {
 
-    //sys    dup2(oldfd int, newfd int) (err error)
-    //sysnb    EpollCreate(size int) (fd int, err error)
-    //sys    EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
-    //sys    Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
-    //sys    Fchown(fd int, uid int, gid int) (err error)
-    //sys    Fstatfs(fd int, buf *Statfs_t) (err error)
-    //sys    Ftruncate(fd int, length int64) (err error)
-    //sysnb    Getegid() (egid int)
-    //sysnb    Geteuid() (euid int)
-    //sysnb    Getgid() (gid int)
-    //sysnb    Getrlimit(resource int, rlim *Rlimit) (err error)
-    //sysnb    Getuid() (uid int)
-    //sys    Lchown(path string, uid int, gid int) (err error)
-    //sys    Listen(s int, n int) (err error)
-    //sys    Pause() (err error)
-    //sys    Pread(fd int, p []byte, offset int64) (n int, err error) = SYS_PREAD64
-    //sys    Pwrite(fd int, p []byte, offset int64) (n int, err error) = SYS_PWRITE64
-    //sys    Renameat(olddirfd int, oldpath string, newdirfd int, newpath string) (err error)
-    //sys    Seek(fd int, offset int64, whence int) (off int64, err error) = SYS_LSEEK
+//sys    dup2(oldfd int, newfd int) (err error)
+//sysnb    EpollCreate(size int) (fd int, err error)
+//sys    EpollWait(epfd int, events []EpollEvent, msec int) (n int, err error)
+//sys    Fadvise(fd int, offset int64, length int64, advice int) (err error) = SYS_FADVISE64
+//sys    Fchown(fd int, uid int, gid int) (err error)
+//sys    Fstatfs(fd int, buf *Statfs_t) (err error)
+//sys    Ftruncate(fd int, length int64) (err error)
+//sysnb    Getegid() (egid int)
+//sysnb    Geteuid() (euid int)
+//sysnb    Getgid() (gid int)
+//sysnb    Getrlimit(resource int, rlim *Rlimit) (err error)
+//sysnb    Getuid() (uid int)
+//sys    Lchown(path string, uid int, gid int) (err error)
+//sys    Listen(s int, n int) (err error)
+//sys    Pause() (err error)
+//sys    Pread(fd int, p []byte, offset int64) (n int, err error) = SYS_PREAD64
+//sys    Pwrite(fd int, p []byte, offset int64) (n int, err error) = SYS_PWRITE64
+//sys    Renameat(olddirfd int, oldpath string, newdirfd int, newpath string) (err error)
+//sys    Seek(fd int, offset int64, whence int) (off int64, err error) = SYS_LSEEK
+
 public static (nint, error) Select(nint nfd, ptr<FdSet> _addr_r, ptr<FdSet> _addr_w, ptr<FdSet> _addr_e, ptr<Timeval> _addr_timeout) {
     nint n = default;
     error err = default!;
@@ -47,7 +46,6 @@ public static (nint, error) Select(nint nfd, ptr<FdSet> _addr_r, ptr<FdSet> _add
         ts = addr(new Timespec(Sec:timeout.Sec,Nsec:timeout.Usec*1000));
     }
     return Pselect(nfd, r, w, e, ts, null);
-
 }
 
 //sys    sendfile(outfd int, infd int, offset *int64, count int) (written int, err error)
@@ -99,7 +97,6 @@ public static (Time_t, error) Time(ptr<Time_t> _addr_t) {
         t = Time_t(tv.Sec);
     }
     return (Time_t(tv.Sec), error.As(null!)!);
-
 }
 
 //sys    Utime(path string, buf *Utimbuf) (err error)
@@ -124,7 +121,6 @@ public static error Pipe(slice<nint> p) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 //sysnb    pipe2(p *[2]_C_int, flags int) (err error)
@@ -140,7 +136,6 @@ public static error Pipe2(slice<nint> p, nint flags) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 public static error Ioperm(nint from, nint num, nint on) {
@@ -294,7 +289,6 @@ public static (nint, error) Poll(slice<PollFd> fds, nint timeout) {
         return poll(null, 0, timeout);
     }
     return poll(_addr_fds[0], len(fds), timeout);
-
 }
 
 } // end unix_package

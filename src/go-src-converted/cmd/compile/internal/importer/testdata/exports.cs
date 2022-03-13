@@ -6,18 +6,17 @@
 // This file is used to generate an object file which
 // serves as test file for gcimporter_test.go.
 
-// package exports -- go2cs converted at 2022 March 06 23:13:55 UTC
+// package exports -- go2cs converted at 2022 March 13 06:27:22 UTC
 // import "cmd/compile/internal/importer.exports" ==> using exports = go.cmd.compile.@internal.importer.exports_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\importer\testdata\exports.go
-using ast = go.go.ast_package;
-using System.ComponentModel;
-
-
 namespace go.cmd.compile.@internal;
+
+using ast = go.ast_package;
+using System.ComponentModel;
 
 public static partial class exports_package {
 
-    // Issue 3682: Correctly read dotted identifiers from export data.
+// Issue 3682: Correctly read dotted identifiers from export data.
 private static readonly nint init1 = 0;
 
 
@@ -33,7 +32,6 @@ public static readonly float C4 = +123.456e+789F;
 public static readonly nuint C5 = 1234i;
 public static readonly @string C6 = "foo\n";
 public static readonly @string C7 = "bar\\n";
-
 
 public partial struct T1 { // : nint
 }
@@ -101,8 +99,7 @@ public partial struct T26 { // : ptr<T27>
 }
 public partial struct T27 { // : ptr<T25>
 }
-public delegate  T28 T28(T28);
-public static nint V0 = default;public static float V1 = -991.0F;public static float V2 = 1.2F;
+public delegate  T28 T28(T28);public static nint V0 = default;public static float V1 = -991.0F;public static float V2 = 1.2F;
 
 public static void F1() {
 }

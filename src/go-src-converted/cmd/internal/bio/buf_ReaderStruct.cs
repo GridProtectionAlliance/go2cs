@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:32:21 UTC
+//     Generated on 2022 March 13 05:43:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class bio_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Reader
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator Reader(NilType nil) => default(Reader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Reader Reader_cast(dynamic value)
         {
             return new Reader(ref value.f, ref value.Reader>);

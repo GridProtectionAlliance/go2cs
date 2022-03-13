@@ -5,16 +5,18 @@
 //go:build aix || darwin || freebsd || linux || netbsd || openbsd || solaris || zos
 // +build aix darwin freebsd linux netbsd openbsd solaris zos
 
-// package unix -- go2cs converted at 2022 March 06 23:26:40 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:19 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\sockcmsg_unix_other.go
-using runtime = go.runtime_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using runtime = runtime_package;
+
+
+// Round the length of a raw sockaddr up to align it properly.
 
 public static partial class unix_package {
 
-    // Round the length of a raw sockaddr up to align it properly.
 private static nint cmsgAlignOf(nint salen) {
     var salign = SizeofPtr; 
 
@@ -68,7 +70,6 @@ private static nint cmsgAlignOf(nint salen) {
     }
 
     return (salen + salign - 1) & ~(salign - 1);
-
 }
 
 } // end unix_package

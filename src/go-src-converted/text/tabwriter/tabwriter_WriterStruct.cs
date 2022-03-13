@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:45 UTC
+//     Generated on 2022 March 13 05:28:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace text
 {
     public static partial class tabwriter_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Writer
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace text
             public static implicit operator Writer(NilType nil) => default(Writer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Writer Writer_cast(dynamic value)
         {
             return new Writer(value.output, value.minwidth, value.tabwidth, value.padding, value.padbytes, value.flags, value.buf, value.pos, value.cell, value.endChar, value.lines, value.widths);

@@ -5,12 +5,12 @@
 //go:build js && wasm
 // +build js,wasm
 
-// package net -- go2cs converted at 2022 March 06 22:16:39 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:06 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sockopt_stub.go
-using syscall = go.syscall_package;
-
 namespace go;
+
+using syscall = syscall_package;
 
 public static partial class net_package {
 

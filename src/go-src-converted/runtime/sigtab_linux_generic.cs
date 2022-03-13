@@ -5,11 +5,9 @@
 //go:build !mips && !mipsle && !mips64 && !mips64le && linux
 // +build !mips,!mipsle,!mips64,!mips64le,linux
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:49 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:01 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sigtab_linux_generic.go
-
-
 namespace go;
 
 public static partial class runtime_package {

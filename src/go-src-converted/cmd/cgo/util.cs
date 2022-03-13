@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:47:32 UTC
+// package main -- go2cs converted at 2022 March 13 05:58:48 UTC
 // Original source: C:\Program Files\Go\src\cmd\cgo\util.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using exec = go.@internal.execabs_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using token = go.token_package;
+using exec = @internal.execabs_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+
+
+// run runs the command argv, feeding in stdin on standard input.
+// It returns the output to standard output and standard error.
+// ok indicates whether the command exited successfully.
 
 public static partial class main_package {
 
-    // run runs the command argv, feeding in stdin on standard input.
-    // It returns the output to standard output and standard error.
-    // ok indicates whether the command exited successfully.
 private static (slice<byte>, slice<byte>, bool) run(slice<byte> stdin, slice<@string> argv) => func((defer, _, _) => {
     slice<byte> stdout = default;
     slice<byte> stderr = default;
@@ -48,7 +50,6 @@ private static (slice<byte>, slice<byte>, bool) run(slice<byte> stdin, slice<@st
                 err = err__prev2;
 
             }
-
             defer(os.Remove(name));
             defer(os.Remove(name + ".c")); 
 
@@ -70,10 +71,8 @@ private static (slice<byte>, slice<byte>, bool) run(slice<byte> stdin, slice<@st
 
             argv = new;
             stdin = null;
-
         }
     }
-
 
     var p = exec.Command(argv[0], argv[(int)1..]);
     p.Stdin = bytes.NewReader(stdin);
@@ -93,10 +92,8 @@ private static (slice<byte>, slice<byte>, bool) run(slice<byte> stdin, slice<@st
             fatalf("exec %s: %s", argv[0], err);
         }
     }
-
     ok = p.ProcessState.Success();
     (stdout, stderr) = (bout.Bytes(), berr.Bytes());    return ;
-
 });
 
 private static nint find(slice<@string> argv, @string target) {
@@ -105,7 +102,6 @@ private static nint find(slice<@string> argv, @string target) {
             return i;
         }
     }    return -1;
-
 }
 
 private static @string lineno(token.Pos pos) {
@@ -122,7 +118,6 @@ private static void fatalf(@string msg, params object[] args) {
         fmt.Fprintf(os.Stderr, "cgo: " + msg + "\n", args);
     }
     os.Exit(2);
-
 }
 
 private static nint nerrors = default;
@@ -140,7 +135,6 @@ private static void error_(token.Pos pos, @string msg, params object[] args) {
     }
     fmt.Fprintf(os.Stderr, msg, args);
     fmt.Fprintf(os.Stderr, "\n");
-
 }
 
 // isName reports whether s is a valid C identifier
@@ -153,7 +147,6 @@ private static bool isName(@string s) {
             return false;
         }
     }    return s != "";
-
 }
 
 private static ptr<os.File> creat(@string name) {
@@ -162,7 +155,6 @@ private static ptr<os.File> creat(@string name) {
         fatalf("%s", err);
     }
     return _addr_f!;
-
 }
 
 private static int slashToUnderscore(int c) {
@@ -170,7 +162,6 @@ private static int slashToUnderscore(int c) {
         c = '_';
     }
     return c;
-
 }
 
 } // end main_package

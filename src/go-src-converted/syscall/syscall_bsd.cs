@@ -11,13 +11,13 @@
 // used as input to mksyscall which parses the //sys
 // lines and generates system call stubs.
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:51 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:36 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\syscall_bsd.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
@@ -39,7 +39,6 @@ public static (@string, error) Getwd() {
         return ("", error.As(EINVAL)!);
     }
     return (string(buf[..(int)n]), error.As(null!)!);
-
 }
 
 /*
@@ -72,7 +71,6 @@ public static (slice<nint>, error) Getgroups() {
     foreach (var (i, v) in a[(int)0..(int)n]) {
         gids[i] = int(v);
     }    return ;
-
 }
 
 public static error Setgroups(slice<nint> gids) {
@@ -85,7 +83,6 @@ public static error Setgroups(slice<nint> gids) {
     foreach (var (i, v) in gids) {
         a[i] = _Gid_t(v);
     }    return error.As(setgroups(len(a), _addr_a[0]))!;
-
 }
 
 public static (nint, error) ReadDirent(nint fd, slice<byte> buf) {
@@ -98,7 +95,6 @@ public static (nint, error) ReadDirent(nint fd, slice<byte> buf) {
     // TODO(rsc): Can we use a single global basep for all calls?
     var @base = (uintptr.val)(@unsafe.Pointer(@new<uint64>()));
     return Getdirentries(fd, buf, base);
-
 }
 
 // Wait status is 7 bits at bottom, either 0 (exited),
@@ -117,7 +113,6 @@ private static readonly nint shift = 8;
 private static readonly nint exited = 0;
 private static readonly nuint stopped = 0x7F;
 
-
 public static bool Exited(this WaitStatus w) {
     return w & mask == exited;
 }
@@ -127,7 +122,6 @@ public static nint ExitStatus(this WaitStatus w) {
         return -1;
     }
     return int(w >> (int)(shift));
-
 }
 
 public static bool Signaled(this WaitStatus w) {
@@ -140,7 +134,6 @@ public static Signal Signal(this WaitStatus w) {
         return -1;
     }
     return sig;
-
 }
 
 public static bool CoreDump(this WaitStatus w) {
@@ -160,7 +153,6 @@ public static Signal StopSignal(this WaitStatus w) {
         return -1;
     }
     return Signal(w >> (int)(shift)) & 0xFF;
-
 }
 
 public static nint TrapCause(this WaitStatus w) {
@@ -181,7 +173,6 @@ public static (nint, error) Wait4(nint pid, ptr<WaitStatus> _addr_wstatus, nint 
         wstatus = WaitStatus(status);
     }
     return ;
-
 }
 
 //sys    accept(s int, rsa *RawSockaddrAny, addrlen *_Socklen) (fd int, err error)
@@ -212,7 +203,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrInet4
         sa.raw.Addr[i] = sa.Addr[i];
     }
     return (@unsafe.Pointer(_addr_sa.raw), _Socklen(sa.raw.Len), error.As(null!)!);
-
 }
 
 private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrInet6> _addr_sa) {
@@ -234,7 +224,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrInet6
         sa.raw.Addr[i] = sa.Addr[i];
     }
     return (@unsafe.Pointer(_addr_sa.raw), _Socklen(sa.raw.Len), error.As(null!)!);
-
 }
 
 private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrUnix> _addr_sa) {
@@ -254,7 +243,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrUnix>
         sa.raw.Path[i] = int8(name[i]);
     }
     return (@unsafe.Pointer(_addr_sa.raw), _Socklen(sa.raw.Len), error.As(null!)!);
-
 }
 
 private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrDatalink> _addr_sa) {
@@ -277,7 +265,6 @@ private static (unsafe.Pointer, _Socklen, error) sockaddr(this ptr<SockaddrDatal
         sa.raw.Data[i] = sa.Data[i];
     }
     return (@unsafe.Pointer(_addr_sa.raw), SizeofSockaddrDatalink, error.As(null!)!);
-
 }
 
 private static (Sockaddr, error) anyToSockaddr(ptr<RawSockaddrAny> _addr_rsa) {
@@ -328,9 +315,7 @@ private static (Sockaddr, error) anyToSockaddr(ptr<RawSockaddrAny> _addr_rsa) {
                     // or was overestimating.
                     n = i;
                     break;
-
                 }
-
             }
 
 
@@ -373,7 +358,6 @@ private static (Sockaddr, error) anyToSockaddr(ptr<RawSockaddrAny> _addr_rsa) {
         }
         return (sa, error.As(null!)!);
         return (null, error.As(EAFNOSUPPORT)!);
-
 }
 
 public static (nint, Sockaddr, error) Accept(nint fd) {
@@ -394,7 +378,6 @@ public static (nint, Sockaddr, error) Accept(nint fd) {
         // is accepted, but has no address.
         Close(nfd);
         return (0, null, error.As(ECONNABORTED)!);
-
     }
     sa, err = anyToSockaddr(_addr_rsa);
     if (err != null) {
@@ -402,7 +385,6 @@ public static (nint, Sockaddr, error) Accept(nint fd) {
         nfd = 0;
     }
     return ;
-
 }
 
 public static (Sockaddr, error) Getsockname(nint fd) {
@@ -421,7 +403,6 @@ public static (Sockaddr, error) Getsockname(nint fd) {
         rsa.Addr.Len = SizeofSockaddrUnix;
     }
     return anyToSockaddr(_addr_rsa);
-
 }
 
 //sysnb socketpair(domain int, typ int, proto int, fd *[2]int32) (err error)
@@ -512,11 +493,9 @@ public static (nint, nint, nint, Sockaddr, error) Recvmsg(nint fd, slice<byte> p
             _addr_iov.Base = _addr_dummy;
             iov.Base = ref _addr_iov.Base.val;
             iov.SetLen(1);
-
         }
         msg.Control = (byte.val)(@unsafe.Pointer(_addr_oob[0]));
         msg.SetControllen(len(oob));
-
     }
     _addr_msg.Iov = _addr_iov;
     msg.Iov = ref _addr_msg.Iov.val;
@@ -533,7 +512,6 @@ public static (nint, nint, nint, Sockaddr, error) Recvmsg(nint fd, slice<byte> p
         from, err = anyToSockaddr(_addr_rsa);
     }
     return ;
-
 }
 
 //sys    sendmsg(s int, msg *Msghdr, flags int) (n int, err error)
@@ -572,11 +550,9 @@ public static (nint, error) SendmsgN(nint fd, slice<byte> p, slice<byte> oob, So
             _addr_iov.Base = _addr_dummy;
             iov.Base = ref _addr_iov.Base.val;
             iov.SetLen(1);
-
         }
         msg.Control = (byte.val)(@unsafe.Pointer(_addr_oob[0]));
         msg.SetControllen(len(oob));
-
     }
     _addr_msg.Iov = _addr_iov;
     msg.Iov = ref _addr_msg.Iov.val;
@@ -590,7 +566,6 @@ public static (nint, error) SendmsgN(nint fd, slice<byte> p, slice<byte> oob, So
         n = 0;
     }
     return (n, error.As(null!)!);
-
 }
 
 //sys    kevent(kq int, change unsafe.Pointer, nchange int, event unsafe.Pointer, nevent int, timeout *Timespec) (n int, err error)
@@ -609,7 +584,6 @@ public static (nint, error) Kevent(nint kq, slice<Kevent_t> changes, slice<Keven
         event = @unsafe.Pointer(_addr_events[0]);
     }
     return kevent(kq, change, len(changes), event, len(events), timeout);
-
 }
 
 public static (@string, error) Sysctl(@string name) {
@@ -640,7 +614,6 @@ public static (@string, error) Sysctl(@string name) {
         n--;
     }
     return (string(buf[(int)0..(int)n]), error.As(null!)!);
-
 }
 
 public static (uint, error) SysctlUint32(@string name) {
@@ -663,7 +636,6 @@ public static (uint, error) SysctlUint32(@string name) {
         return (0, error.As(EIO)!);
     }
     return (new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(_addr_buf[0])), error.As(null!)!);
-
 }
 
 //sys    utimes(path string, timeval *[2]Timeval) (err error)
@@ -675,7 +647,6 @@ public static error Utimes(@string path, slice<Timeval> tv) {
         return error.As(EINVAL)!;
     }
     return error.As(utimes(path, new ptr<ptr<array<Timeval>>>(@unsafe.Pointer(_addr_tv[0]))))!;
-
 }
 
 public static error UtimesNano(@string path, slice<Timespec> ts) {
@@ -692,7 +663,6 @@ public static error UtimesNano(@string path, slice<Timespec> ts) {
     }
     array<Timeval> tv = new array<Timeval>(new Timeval[] { NsecToTimeval(TimespecToNsec(ts[0])), NsecToTimeval(TimespecToNsec(ts[1])) });
     return error.As(utimes(path, new ptr<ptr<array<Timeval>>>(@unsafe.Pointer(_addr_tv[0]))))!;
-
 }
 
 //sys    futimes(fd int, timeval *[2]Timeval) (err error)
@@ -704,7 +674,6 @@ public static error Futimes(nint fd, slice<Timeval> tv) {
         return error.As(EINVAL)!;
     }
     return error.As(futimes(fd, new ptr<ptr<array<Timeval>>>(@unsafe.Pointer(_addr_tv[0]))))!;
-
 }
 
 //sys    fcntl(fd int, cmd int, arg int) (val int, err error)

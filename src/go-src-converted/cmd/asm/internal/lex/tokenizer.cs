@@ -2,26 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lex -- go2cs converted at 2022 March 06 22:46:29 UTC
+// package lex -- go2cs converted at 2022 March 13 05:57:42 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\lex\tokenizer.go
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using scanner = go.text.scanner_package;
-using unicode = go.unicode_package;
-
-using flags = go.cmd.asm.@internal.flags_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.asm.@internal;
+
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+using scanner = text.scanner_package;
+using unicode = unicode_package;
+
+using flags = cmd.asm.@internal.flags_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+
+
+// A Tokenizer is a simple wrapping of text/scanner.Scanner, configured
+// for our purposes and made a TokenReader. It forms the lowest level,
+// turning text from readers into tokens.
 
 public static partial class lex_package {
 
-    // A Tokenizer is a simple wrapping of text/scanner.Scanner, configured
-    // for our purposes and made a TokenReader. It forms the lowest level,
-    // turning text from readers into tokens.
 public partial struct Tokenizer {
     public ScanToken tok;
     public ptr<scanner.Scanner> s;
@@ -42,7 +44,6 @@ public static ptr<Tokenizer> NewTokenizer(@string name, io.Reader r, ptr<os.File
     s.Position.Filename = name;
     s.IsIdentRune = isIdentRune;
     return addr(new Tokenizer(s:&s,base:src.NewFileBase(name,objabi.AbsFile(objabi.WorkingDir(),name,*flags.TrimPath)),line:1,file:file,));
-
 }
 
 // We want center dot (·) and division slash (∕) to work as identifier characters.
@@ -63,7 +64,6 @@ private static bool isIdentRune(int ch, nint i) {
     } 
     // Digits are OK only after the first character.
     return i > 0 && unicode.IsDigit(ch);
-
 }
 
 private static @string Text(this ptr<Tokenizer> _addr_t) {
@@ -79,7 +79,6 @@ private static @string Text(this ptr<Tokenizer> _addr_t) {
     else if (t.tok == ROT) 
         return "@>";
         return t.s.TokenText();
-
 }
 
 private static @string File(this ptr<Tokenizer> _addr_t) {
@@ -164,7 +163,6 @@ private static ScanToken Next(this ptr<Tokenizer> _addr_t) {
             break;
     }
     return t.tok;
-
 }
 
 private static void Close(this ptr<Tokenizer> _addr_t) {

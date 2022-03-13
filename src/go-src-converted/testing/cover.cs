@@ -4,25 +4,26 @@
 
 // Support for test coverage.
 
-// package testing -- go2cs converted at 2022 March 06 23:19:15 UTC
+// package testing -- go2cs converted at 2022 March 13 06:43:00 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Program Files\Go\src\testing\cover.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using atomic = go.sync.atomic_package;
-using System;
-
-
 namespace go;
 
+using fmt = fmt_package;
+using os = os_package;
+using atomic = sync.atomic_package;
+
+
+// CoverBlock records the coverage data for a single basic block.
+// The fields are 1-indexed, as in an editor: The opening line of
+// the file is number 1, for example. Columns are measured
+// in bytes.
+// NOTE: This struct is internal to the testing infrastructure and may change.
+// It is not covered (yet) by the Go 1 compatibility guidelines.
+
+using System;
 public static partial class testing_package {
 
-    // CoverBlock records the coverage data for a single basic block.
-    // The fields are 1-indexed, as in an editor: The opening line of
-    // the file is number 1, for example. Columns are measured
-    // in bytes.
-    // NOTE: This struct is internal to the testing infrastructure and may change.
-    // It is not covered (yet) by the Go 1 compatibility guidelines.
 public partial struct CoverBlock {
     public uint Line0; // Line number for block start.
     public ushort Col0; // Column number for block start.
@@ -64,7 +65,6 @@ public static double Coverage() {
         return 0;
     }
     return float64(n) / float64(d);
-
 }
 
 // RegisterCover records the coverage data accumulators for the tests.
@@ -93,7 +93,6 @@ private static void coverReport() => func((defer, _, _) => {
         defer(() => {
             mustBeNil(f.Close());
         }());
-
     }
     long active = default;    long total = default;
 
@@ -107,19 +106,16 @@ private static void coverReport() => func((defer, _, _) => {
             if (count > 0) {
                 active += stmts;
             }
-
             if (f != null) {
                 var (_, err) = fmt.Fprintf(f, "%s:%d.%d,%d.%d %d %d\n", name, blocks[i].Line0, blocks[i].Col0, blocks[i].Line1, blocks[i].Col1, stmts, count);
                 mustBeNil(err);
             }
-
         }
     }    if (total == 0) {
         fmt.Println("coverage: [no statements]");
         return ;
     }
     fmt.Printf("coverage: %.1f%% of statements%s\n", 100 * float64(active) / float64(total), cover.CoveredPackages);
-
 });
 
 } // end testing_package

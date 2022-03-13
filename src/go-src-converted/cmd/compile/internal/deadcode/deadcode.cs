@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package deadcode -- go2cs converted at 2022 March 06 23:12:13 UTC
+// package deadcode -- go2cs converted at 2022 March 13 06:25:34 UTC
 // import "cmd/compile/internal/deadcode" ==> using deadcode = go.cmd.compile.@internal.deadcode_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\deadcode\deadcode.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
 
 public static partial class deadcode_package {
 
@@ -43,13 +43,11 @@ public static void Func(ptr<ir.Func> _addr_fn) {
                 }
             else 
                 return ;
-            
-        }
+                    }
         n = n__prev1;
     }
 
     fn.Body = new slice<ir.Node>(new ir.Node[] { ir.NewBlockStmt(base.Pos,nil) });
-
 }
 
 private static void stmts(ptr<ir.Nodes> _addr_nn) {
@@ -85,7 +83,6 @@ private static void stmts(ptr<ir.Nodes> _addr_nn) {
             if (n == null) {
                 continue;
             }
-
             if (n.Op() == ir.OIF) {
                 ptr<ir.IfStmt> n = n._<ptr<ir.IfStmt>>();
                 n.Cond = expr(n.Cond);
@@ -116,21 +113,16 @@ private static void stmts(ptr<ir.Nodes> _addr_nn) {
                                 if (i > lastLabel) {
                                     cut = true;
                                 }
-                            
-                        }
+                                                    }
 
                         body = body__prev3;
 
                     }
-
                 }
-
             }
-
             if (len(n.Init()) != 0) {
                 stmts(_addr_n._<ir.InitNode>().PtrInit());
             }
-
 
             if (n.Op() == ir.OBLOCK) 
                 n = n._<ptr<ir.BlockStmt>>();
@@ -173,7 +165,6 @@ private static void stmts(ptr<ir.Nodes> _addr_nn) {
                 nn = (nn)[..(int)i + 1];
                 break;
             }
-
         }
         i = i__prev1;
         n = n__prev1;
@@ -197,7 +188,6 @@ private static ir.Node expr(ir.Node n) {
  {
                 return n.X; // false && x => false
             }
-
         }
     else if (n.Op() == ir.OOROR) 
         n = n._<ptr<ir.LogicalExpr>>();
@@ -211,10 +201,8 @@ private static ir.Node expr(ir.Node n) {
  {
                 return n.Y; // false || x => x
             }
-
         }
         return n;
-
 }
 
 } // end deadcode_package

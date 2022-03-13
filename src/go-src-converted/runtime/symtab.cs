@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:02 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\symtab.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// Frames may be used to get function/file/line information for a
+// slice of PC values returned by Callers.
 
 public static partial class runtime_package {
 
-    // Frames may be used to get function/file/line information for a
-    // slice of PC values returned by Callers.
 public partial struct Frames {
     public slice<System.UIntPtr> callers; // frames is a slice of Frames that have yet to be returned.
     public slice<Frame> frames;
@@ -83,11 +85,8 @@ private static (Frame, bool) Next(this ptr<Frames> _addr_ci) {
                 // incrementally, too, but there's no way to
                 // avoid allocation in this case anyway.
                 ci.frames = append(ci.frames, expandCgoFrames(pc));
-
             }
-
             continue;
-
         }
         var f = funcInfo._Func();
         var entry = f.Entry();
@@ -97,7 +96,6 @@ private static (Frame, bool) Next(this ptr<Frames> _addr_ci) {
             // This is done for historical reasons, and to make FuncForPC
             // work correctly for entries in the result of runtime.Callers.
             pc--;
-
         }
         var name = funcname(funcInfo);
         {
@@ -115,13 +113,10 @@ private static (Frame, bool) Next(this ptr<Frames> _addr_ci) {
                     // File/line is already correct.
                     // TODO: remove file/line from InlinedCall?
                 }
-
             }
 
         }
-
         ci.frames = append(ci.frames, new Frame(PC:pc,Func:f,Function:name,Entry:entry,funcInfo:funcInfo,));
-
     } 
 
     // Pop one frame from the frame list. Keep the rest.
@@ -153,7 +148,6 @@ private static (Frame, bool) Next(this ptr<Frames> _addr_ci) {
         (frame.File, frame.Line) = (file, int(line));
     }
     return ;
-
 }
 
 // runtime_expandFinalInlineFrame expands the final pc in stk to include all
@@ -171,13 +165,11 @@ private static slice<System.UIntPtr> runtime_expandFinalInlineFrame(slice<System
     if (!f.valid()) { 
         // Not a Go function.
         return stk;
-
     }
     var inldata = funcdata(f, _FUNCDATA_InlTree);
     if (inldata == null) { 
         // Nothing inline in f.
         return stk;
-
     }
     var lastFuncID = funcID_normal; 
 
@@ -205,14 +197,12 @@ private static slice<System.UIntPtr> runtime_expandFinalInlineFrame(slice<System
         // Back up to an instruction in the "caller".
         tracepc = f.entry + uintptr(inltree[ix].parentPc);
         pc = tracepc + 1;
-
     } 
 
     // N.B. we want to keep the last parentPC which is not inline.
     stk = append(stk, pc);
 
     return stk;
-
 }
 
 // expandCgoFrames expands frame information for pc, known to be
@@ -225,7 +215,6 @@ private static slice<Frame> expandCgoFrames(System.UIntPtr pc) {
     if (arg.file == null && arg.funcName == null) { 
         // No useful information from symbolizer.
         return null;
-
     }
     slice<Frame> frames = default;
     while (true) {
@@ -234,7 +223,6 @@ private static slice<Frame> expandCgoFrames(System.UIntPtr pc) {
             break;
         }
         callCgoSymbolizer(_addr_arg);
-
     } 
 
     // No more frames for this PC. Tell the symbolizer we are done.
@@ -245,7 +233,6 @@ private static slice<Frame> expandCgoFrames(System.UIntPtr pc) {
     callCgoSymbolizer(_addr_arg);
 
     return frames;
-
 }
 
 // NOTE: Func does not expose the actual unexported fields, because we return *Func
@@ -287,7 +274,6 @@ private static readonly nint _FUNCDATA_ArgInfo = 5;
 
 private static readonly nuint _ArgsSizeUnknown = -0x80000000;
 
-
  
 // PCDATA_UnsafePoint values.
 private static readonly nint _PCDATA_UnsafePointSafe = -1; // Safe for async preemption
@@ -304,7 +290,6 @@ private static readonly nint _PCDATA_Restart2 = -4;
 // Like _PCDATA_RestartAtEntry, but back to function entry if async
 // preempted.
 private static readonly nint _PCDATA_RestartAtEntry = -5;
-
 
 // A FuncID identifies particular functions that need to be treated
 // specially by the runtime.
@@ -360,7 +345,6 @@ private static readonly funcFlag funcFlag_TOPFRAME = 1 << (int)(iota);
 // to be an incomplete unwinding of the stack. In certain contexts
 // (in particular garbage collector stack scans) that is a fatal error.
 private static readonly var funcFlag_SPWRITE = 0;
-
 
 // pcHeader holds data used by the pclntab lookups.
 private partial struct pcHeader {
@@ -474,7 +458,6 @@ private static slice<ptr<moduledata>> activeModules() {
         return null;
     }
     return p.val;
-
 }
 
 // modulesinit creates the active modules slice out of all loaded modules.
@@ -507,13 +490,11 @@ private static void modulesinit() {
                 continue;
             md = md.next;
             }
-
             modules.val = append(modules.val, md);
             if (md.gcdatamask == (new bitvector())) {
                 md.gcdatamask = progToPointerMask((byte.val)(@unsafe.Pointer(md.gcdata)), md.edata - md.data);
                 md.gcbssmask = progToPointerMask((byte.val)(@unsafe.Pointer(md.gcbss)), md.ebss - md.bss);
             }
-
         }
 
         md = md__prev1;
@@ -544,7 +525,6 @@ private static void modulesinit() {
     }
 
     atomicstorep(@unsafe.Pointer(_addr_modulesSlice), @unsafe.Pointer(modules));
-
 }
 
 private partial struct functab {
@@ -596,7 +576,6 @@ private static void moduledataverify() {
             datap = datap.next;
         }
     }
-
 }
 
 private static readonly var debugPcln = false;
@@ -615,7 +594,6 @@ private static void moduledataverify1(ptr<moduledata> _addr_datap) {
         }
         println();
         throw("invalid function symbol table\n");
-
     }
     var nftab = len(datap.ftab) - 1;
     for (nint i = 0; i < nftab; i++) { 
@@ -685,12 +663,9 @@ public static ptr<Func> FuncForPC(System.UIntPtr pc) {
                 }
 
             }
-
         }
     }
-
     return _addr_f._Func()!;
-
 }
 
 // Name returns the name of the function.
@@ -704,10 +679,8 @@ private static @string Name(this ptr<Func> _addr_f) {
     if (fn.entry == 0) { // inlined version
         var fi = (funcinl.val)(@unsafe.Pointer(fn));
         return fi.name;
-
     }
     return funcname(f.funcInfo());
-
 }
 
 // Entry returns the entry address of the function.
@@ -718,10 +691,8 @@ private static System.UIntPtr Entry(this ptr<Func> _addr_f) {
     if (fn.entry == 0) { // inlined version
         var fi = (funcinl.val)(@unsafe.Pointer(fn));
         return fi.entry;
-
     }
     return fn.entry;
-
 }
 
 // FileLine returns the file name and line number of the
@@ -737,11 +708,9 @@ private static (@string, nint) FileLine(this ptr<Func> _addr_f, System.UIntPtr p
     if (fn.entry == 0) { // inlined version
         var fi = (funcinl.val)(@unsafe.Pointer(fn));
         return (fi.file, fi.line);
-
     }
     var (file, line32) = funcline1(f.funcInfo(), pc, false);
     return (file, int(line32));
-
 }
 
 // findmoduledatap looks up the moduledata for a PC.
@@ -759,11 +728,9 @@ private static ptr<moduledata> findmoduledatap(System.UIntPtr pc) {
                 return _addr_datap!;
             datap = datap.next;
             }
-
         }
     }
     return _addr_null!;
-
 }
 
 private partial struct funcInfo {
@@ -825,7 +792,6 @@ private static funcInfo findfunc(System.UIntPtr pc) {
         while (datap.ftab[idx + 1].entry <= pc) {
             idx++;
         }
-
     }
     var funcoff = datap.ftab[idx].funcoff;
     if (funcoff == ~uintptr(0)) { 
@@ -834,10 +800,8 @@ private static funcInfo findfunc(System.UIntPtr pc) {
         // range covered by the func table. The invalid funcoff value indicates a hole.
         // See also cmd/link/internal/ld/pcln.go:pclntab
         return new funcInfo();
-
     }
     return new funcInfo((*_func)(unsafe.Pointer(&datap.pclntable[funcoff])),datap);
-
 }
 
 private partial struct pcvalueCache {
@@ -880,7 +844,6 @@ private static (int, System.UIntPtr) pcvalue(funcInfo f, uint off, System.UIntPt
             if (ent.off == off && ent.targetpc == targetpc) {
                 return (ent.val, 0);
             }
-
         }
     }
     if (!f.valid()) {
@@ -889,7 +852,6 @@ private static (int, System.UIntPtr) pcvalue(funcInfo f, uint off, System.UIntPt
             throw("no module data");
         }
         return (-1, 0);
-
     }
     var datap = f.datap;
     var p = datap.pctab[(int)off..];
@@ -916,12 +878,9 @@ private static (int, System.UIntPtr) pcvalue(funcInfo f, uint off, System.UIntPt
                 e[ci] = e[0];
                 e[0] = new pcvalueCacheEnt(targetpc:targetpc,off:off,val:val,);
             }
-
             return (val, prevpc);
-
         }
         prevpc = pc;
-
     } 
 
     // If there was a table, it should have covered all program counters.
@@ -941,12 +900,10 @@ private static (int, System.UIntPtr) pcvalue(funcInfo f, uint off, System.UIntPt
             break;
         }
         print("\tvalue=", val, " until pc=", hex(pc), "\n");
-
     }
 
     throw("invalid runtime symbol table");
     return (-1, 0);
-
 }
 
 private static ptr<byte> cfuncname(funcInfo f) {
@@ -954,7 +911,6 @@ private static ptr<byte> cfuncname(funcInfo f) {
         return _addr_null!;
     }
     return _addr__addr_f.datap.funcnametab[f.nameoff]!;
-
 }
 
 private static @string funcname(funcInfo f) {
@@ -977,7 +933,6 @@ private static @string funcpkgpath(funcInfo f) {
         }
     }
     return name[..(int)i];
-
 }
 
 private static ptr<byte> cfuncnameFromNameoff(funcInfo f, int nameoff) {
@@ -985,7 +940,6 @@ private static ptr<byte> cfuncnameFromNameoff(funcInfo f, int nameoff) {
         return _addr_null!;
     }
     return _addr__addr_f.datap.funcnametab[nameoff]!;
-
 }
 
 private static @string funcnameFromNameoff(funcInfo f, int nameoff) {
@@ -1006,7 +960,6 @@ private static @string funcfile(funcInfo f, int fileno) {
     } 
     // pcln section is corrupt.
     return "?";
-
 }
 
 private static (@string, int) funcline1(funcInfo f, System.UIntPtr targetpc, bool strict) {
@@ -1022,11 +975,9 @@ private static (@string, int) funcline1(funcInfo f, System.UIntPtr targetpc, boo
     if (fileno == -1 || line == -1 || int(fileno) >= len(datap.filetab)) { 
         // print("looking for ", hex(targetpc), " in ", funcname(f), " got file=", fileno, " line=", lineno, "\n")
         return ("?", 0);
-
     }
     file = funcfile(f, fileno);
     return ;
-
 }
 
 private static (@string, int) funcline(funcInfo f, System.UIntPtr targetpc) {
@@ -1044,7 +995,6 @@ private static int funcspdelta(funcInfo f, System.UIntPtr targetpc, ptr<pcvalueC
         print("invalid spdelta ", funcname(f), " ", hex(f.entry), " ", hex(targetpc), " ", hex(f.pcsp), " ", x, "\n");
     }
     return x;
-
 }
 
 // funcMaxSPDelta returns the maximum spdelta at any point in f.
@@ -1064,7 +1014,6 @@ private static int funcMaxSPDelta(funcInfo f) {
             max = val;
         }
     }
-
 }
 
 private static uint pcdatastart(funcInfo f, uint table) {
@@ -1079,7 +1028,6 @@ private static int pcdatavalue(funcInfo f, uint table, System.UIntPtr targetpc, 
     }
     var (r, _) = pcvalue(f, pcdatastart(f, table), targetpc, _addr_cache, true);
     return r;
-
 }
 
 private static int pcdatavalue1(funcInfo f, uint table, System.UIntPtr targetpc, ptr<pcvalueCache> _addr_cache, bool strict) {
@@ -1090,7 +1038,6 @@ private static int pcdatavalue1(funcInfo f, uint table, System.UIntPtr targetpc,
     }
     var (r, _) = pcvalue(f, pcdatastart(f, table), targetpc, _addr_cache, strict);
     return r;
-
 }
 
 // Like pcdatavalue, but also return the start PC of this PCData value.
@@ -1103,7 +1050,6 @@ private static (int, System.UIntPtr) pcdatavalue2(funcInfo f, uint table, System
         return (-1, 0);
     }
     return pcvalue(f, pcdatastart(f, table), targetpc, _addr_null, true);
-
 }
 
 private static unsafe.Pointer funcdata(funcInfo f, byte i) {
@@ -1116,10 +1062,8 @@ private static unsafe.Pointer funcdata(funcInfo f, byte i) {
             println("runtime: misaligned func", f._func);
         }
         p = add(p, 4);
-
     }
     return new ptr<ptr<ptr<unsafe.Pointer>>>(add(p, uintptr(i) * sys.PtrSize));
-
 }
 
 // step advances to the next pc, value pair in the encoded table.
@@ -1150,7 +1094,6 @@ private static (slice<byte>, bool) step(slice<byte> p, ptr<System.UIntPtr> _addr
     p = p[(int)n..];
     pc += uintptr(pcdelta * sys.PCQuantum);
     return (p, true);
-
 }
 
 // readvarint reads a varint from p.
@@ -1168,10 +1111,8 @@ private static (uint, uint) readvarint(slice<byte> p) {
             break;
         }
         shift += 7;
-
     }
     return (n, v);
-
 }
 
 private partial struct stackmap {
@@ -1191,7 +1132,6 @@ private static bitvector stackmapdata(ptr<stackmap> _addr_stkmap, int n) {
         throw("stackmapdata: index out of range");
     }
     return new bitvector(stkmap.nbit,addb(&stkmap.bytedata[0],uintptr(n*((stkmap.nbit+7)>>3))));
-
 }
 
 // inlinedCall is the encoding of entries in the FUNCDATA_InlTree table.

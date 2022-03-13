@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2022 March 06 23:35:16 UTC
+// package xerrors -- go2cs converted at 2022 March 13 06:42:51 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\xerrors\errors.go
-using fmt = go.fmt_package;
-
 namespace go.cmd.vendor.golang.org.x;
+
+using fmt = fmt_package;
 
 public static partial class xerrors_package {
 
-    // errorString is a trivial implementation of error.
+// errorString is a trivial implementation of error.
 private partial struct errorString {
     public @string s;
     public Frame frame;

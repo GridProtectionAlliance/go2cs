@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:43 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:29 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mgcpacer.go
-using cpu = go.@internal.cpu_package;
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using cpu = @internal.cpu_package;
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -53,7 +52,6 @@ private static readonly nint gcOverAssistWork = 64 << 10;
 // defaultHeapMinimum is the value of heapMinimum for GOGC==100.
 private static readonly nint defaultHeapMinimum = 4 << 20;
 
-
 private static void init() {
     {
         var offset = @unsafe.Offsetof(gcController.heapLive);
@@ -63,7 +61,6 @@ private static void init() {
             throw("gcController.heapLive not aligned to 8 bytes");
         }
     }
-
 }
 
 // gcController implements the GC pacing controller that determines
@@ -242,7 +239,6 @@ private static void init(this ptr<gcControllerState> _addr_c, int gcPercent) {
 
     // This will also compute and set the GC trigger and goal.
     c.setGCPercent(gcPercent);
-
 }
 
 // startCycle resets the GC controller's state and computes estimates
@@ -281,10 +277,8 @@ private static void startCycle(this ptr<gcControllerState> _addr_c) {
         if (float64(c.dedicatedMarkWorkersNeeded) > totalUtilizationGoal) { 
             // Too many dedicated workers.
             c.dedicatedMarkWorkersNeeded--;
-
         }
         c.fractionalUtilizationGoal = (totalUtilizationGoal - float64(c.dedicatedMarkWorkersNeeded)) / float64(gomaxprocs);
-
     }
     else
  {
@@ -334,7 +328,6 @@ private static void revise(this ptr<gcControllerState> _addr_c) {
         // If GC is disabled but we're running a forced GC,
         // act like GOGC is huge for the below calculations.
         gcPercent = 100000;
-
     }
     var live = atomic.Load64(_addr_c.heapLive);
     var scan = atomic.Load64(_addr_c.heapScan);
@@ -365,7 +358,6 @@ private static void revise(this ptr<gcControllerState> _addr_c) {
 
         // Compute the upper bound on the scan work remaining.
         scanWorkExpected = int64(scan);
-
     }
     var scanWorkRemaining = scanWorkExpected - work;
     if (scanWorkRemaining < 1000) { 
@@ -378,20 +370,17 @@ private static void revise(this ptr<gcControllerState> _addr_c) {
         // may legitimately make the remaining scan work
         // negative, even in the hard goal regime.
         scanWorkRemaining = 1000;
-
     }
     var heapRemaining = heapGoal - int64(live);
     if (heapRemaining <= 0) { 
         // This shouldn't happen, but if it does, avoid
         // dividing by zero or setting the assist negative.
         heapRemaining = 1;
-
     }
     var assistWorkPerByte = float64(scanWorkRemaining) / float64(heapRemaining);
     var assistBytesPerWork = float64(heapRemaining) / float64(scanWorkRemaining);
     atomic.Store64(_addr_c.assistWorkPerByte, float64bits(assistWorkPerByte));
     atomic.Store64(_addr_c.assistBytesPerWork, float64bits(assistBytesPerWork));
-
 }
 
 // endCycle computes the trigger ratio for the next cycle.
@@ -406,7 +395,6 @@ private static double endCycle(this ptr<gcControllerState> _addr_c, bool userFor
         // information about how to adjust the trigger.
         // Just leave it where it is.
         return c.triggerRatio;
-
     }
     const float triggerGain = 0.5F; 
 
@@ -460,10 +448,8 @@ private static double endCycle(this ptr<gcControllerState> _addr_c, bool userFor
         var u_g = gcGoalUtilization;
         var W_a = c.scanWork;
         print("pacer: H_m_prev=", H_m_prev, " h_t=", h_t, " H_T=", H_T, " h_a=", h_a, " H_a=", H_a, " h_g=", h_g, " H_g=", H_g, " u_a=", u_a, " u_g=", u_g, " W_a=", W_a, " goalΔ=", goalGrowthRatio - h_t, " actualΔ=", h_a - h_t, " u_a/u_g=", u_a / u_g, "\n");
-
     }
     return triggerRatio;
-
 }
 
 // enlistWorker encourages another dedicated mark worker to start on
@@ -508,7 +494,6 @@ private static void enlistWorker(this ptr<gcControllerState> _addr_c) {
             return ;
         }
     }
-
 }
 
 // findRunnableGCWorker returns a background mark worker for _p_ if it
@@ -526,7 +511,6 @@ private static ptr<g> findRunnableGCWorker(this ptr<gcControllerState> _addr_c, 
         // assists tapering off. Don't bother running a worker
         // now because it'll just return immediately.
         return _addr_null!;
-
     }
     var node = (gcBgMarkWorkerNode.val)(gcBgMarkWorkerPool.pop());
     if (node == null) { 
@@ -542,7 +526,6 @@ private static ptr<g> findRunnableGCWorker(this ptr<gcControllerState> _addr_c, 
         // will be immediately eligible to re-run the worker G it was
         // just using, ensuring work can complete.
         return _addr_null!;
-
     }
     Func<ptr<long>, bool> decIfPositive = ptr => {
         while (true) {
@@ -560,13 +543,11 @@ private static ptr<g> findRunnableGCWorker(this ptr<gcControllerState> _addr_c, 
         // This P is now dedicated to marking until the end of
         // the concurrent mark phase.
         _p_.gcMarkWorkerMode = gcMarkWorkerDedicatedMode;
-
     }
     else if (c.fractionalUtilizationGoal == 0) { 
         // No need for fractional workers.
         gcBgMarkWorkerPool.push(_addr_node.node);
         return _addr_null!;
-
     }
     else
  { 
@@ -579,10 +560,8 @@ private static ptr<g> findRunnableGCWorker(this ptr<gcControllerState> _addr_c, 
             // Nope. No need to run a fractional worker.
             gcBgMarkWorkerPool.push(_addr_node.node);
             return _addr_null!;
-
         }
         _p_.gcMarkWorkerMode = gcMarkWorkerFractionalMode;
-
     }
     var gp = node.gp.ptr();
     casgstatus(gp, _Gwaiting, _Grunnable);
@@ -590,7 +569,6 @@ private static ptr<g> findRunnableGCWorker(this ptr<gcControllerState> _addr_c, 
         traceGoUnpark(gp, 0);
     }
     return _addr_gp!;
-
 }
 
 // commit sets the trigger ratio and updates everything
@@ -637,7 +615,6 @@ private static void commit(this ptr<gcControllerState> _addr_c, double triggerRa
         // just be defensive here; the triggerRatio being negative is almost
         // certainly undesirable.
         triggerRatio = 0;
-
     }
     c.triggerRatio = triggerRatio; 
 
@@ -660,7 +637,6 @@ private static void commit(this ptr<gcControllerState> _addr_c, double triggerRa
             if (sweepMin > minTrigger) {
                 minTrigger = sweepMin;
             }
-
         }
         if (trigger < minTrigger) {
             trigger = minTrigger;
@@ -674,7 +650,6 @@ private static void commit(this ptr<gcControllerState> _addr_c, double triggerRa
             // other bounds on the trigger may have raised it.
             // Push up the goal, too.
             goal = trigger;
-
         }
     }
     c.trigger = trigger;
@@ -704,7 +679,6 @@ private static void commit(this ptr<gcControllerState> _addr_c, double triggerRa
         if (heapDistance < _PageSize) { 
             // Avoid setting the sweep ratio extremely high
             heapDistance = _PageSize;
-
         }
         var pagesSwept = atomic.Load64(_addr_mheap_.pagesSwept);
         var pagesInUse = atomic.Load64(_addr_mheap_.pagesInUse);
@@ -720,11 +694,9 @@ private static void commit(this ptr<gcControllerState> _addr_c, double triggerRa
             // signals concurrent sweeps to recompute
             // their debt.
             atomic.Store64(_addr_mheap_.pagesSweptBasis, pagesSwept);
-
         }
     }
     gcPaceScavenger();
-
 }
 
 // effectiveGrowthRatio returns the current effective heap growth
@@ -745,10 +717,8 @@ private static double effectiveGrowthRatio(this ptr<gcControllerState> _addr_c) 
     if (egogc < 0) { 
         // Shouldn't happen, but just in case.
         egogc = 0;
-
     }
     return egogc;
-
 }
 
 // setGCPercent updates gcPercent and all related pacer state.
@@ -770,7 +740,6 @@ private static int setGCPercent(this ptr<gcControllerState> _addr_c, int @in) {
     c.commit(c.triggerRatio);
 
     return out;
-
 }
 
 //go:linkname setGCPercent runtime/debug.setGCPercent
@@ -790,7 +759,6 @@ private static int setGCPercent(int @in) {
         gcWaitOnMark(atomic.Load(_addr_work.cycles));
     }
     return out;
-
 }
 
 private static int readGOGC() {
@@ -805,9 +773,7 @@ private static int readGOGC() {
             return n;
         }
     }
-
     return 100;
-
 }
 
 } // end runtime_package

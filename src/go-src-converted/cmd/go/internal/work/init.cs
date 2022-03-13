@@ -4,21 +4,21 @@
 
 // Build initialization (after flag parsing).
 
-// package work -- go2cs converted at 2022 March 06 23:17:44 UTC
+// package work -- go2cs converted at 2022 March 13 06:31:05 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\init.go
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using modload = go.cmd.go.@internal.modload_package;
-using sys = go.cmd.@internal.sys_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using modload = cmd.go.@internal.modload_package;
+using sys = cmd.@internal.sys_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
 
 public static partial class work_package {
 
@@ -44,7 +44,6 @@ public static void BuildInit() {
             @base.Exit();
         }
         cfg.BuildPkgdir = p;
-
     }
     foreach (var (_, key) in new slice<@string>(new @string[] { "CC", "CXX" })) {
         {
@@ -54,7 +53,6 @@ public static void BuildInit() {
                 @base.Fatalf("go %s: %s environment variable is relative; must be absolute path: %s\n", flag.Args()[0], key, path);
             }
         }
-
     }
 }
 
@@ -100,7 +98,6 @@ private static void instrumentInit() {
         }
         @base.SetExitStatus(2);
         @base.Exit();
-
     }
     forcedGcflags = append(forcedGcflags, modeFlag);
     forcedLdflags = append(forcedLdflags, modeFlag);
@@ -110,7 +107,6 @@ private static void instrumentInit() {
     }
     cfg.BuildContext.InstallSuffix += mode;
     cfg.BuildContext.BuildTags = append(cfg.BuildContext.BuildTags, mode);
-
 }
 
 private static void buildModeInit() {
@@ -141,7 +137,6 @@ private static void buildModeInit() {
                                        codegenArg = "-shared";
                                        break;
                                }
-
                                break;
                            case "dragonfly": 
                                // Use -shared so that the result is
@@ -180,11 +175,9 @@ private static void buildModeInit() {
                                codegenArg = "-shared";
                                break;
                        }
-
                    }
                    cfg.ExeSuffix = ".a";
                    ldBuildmode = "c-archive";
-
             break;
         case "c-shared": 
                    pkgsFilter = oneMainPkg;
@@ -206,10 +199,8 @@ private static void buildModeInit() {
                                cfg.ExeSuffix = "";
                                break;
                        }
-
                    }
                    ldBuildmode = "c-shared";
-
             break;
         case "default": 
 
@@ -275,10 +266,8 @@ private static void buildModeInit() {
                                codegenArg = "-shared";
                                break;
                        }
-
                    }
                    ldBuildmode = "pie";
-
             break;
         case "shared": 
                    pkgsFilter = pkgsNotMain;
@@ -293,7 +282,6 @@ private static void buildModeInit() {
                        @base.Fatalf("-buildmode=shared and -o not supported together");
                    }
                    ldBuildmode = "shared";
-
             break;
         case "plugin": 
                    pkgsFilter = oneMainPkg;
@@ -306,7 +294,6 @@ private static void buildModeInit() {
                    }
                    cfg.ExeSuffix = ".so";
                    ldBuildmode = "plugin";
-
             break;
         default: 
             @base.Fatalf("buildmode=%s not supported", cfg.BuildBuildmode);
@@ -330,7 +317,6 @@ private static void buildModeInit() {
             forcedGcflags = append(forcedGcflags, "-linkshared"); 
             // TODO(mwhudson): remove -w when that gets fixed in linker.
             forcedLdflags = append(forcedLdflags, "-linkshared", "-w");
-
         }
     }
     if (codegenArg != "") {

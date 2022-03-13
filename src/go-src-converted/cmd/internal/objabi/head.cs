@@ -28,16 +28,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:23 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:22 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\head.go
-using fmt = go.fmt_package;
-
 namespace go.cmd.@internal;
+
+using fmt = fmt_package;
 
 public static partial class objabi_package {
 
-    // HeadType is the executable header type.
+// HeadType is the executable header type.
 public partial struct HeadType { // : byte
 }
 
@@ -53,7 +53,6 @@ public static readonly var Hplan9 = 7;
 public static readonly var Hsolaris = 8;
 public static readonly var Hwindows = 9;
 public static readonly var Haix = 10;
-
 
 private static error Set(this ptr<HeadType> _addr_h, @string s) {
     ref HeadType h = ref _addr_h.val;
@@ -103,7 +102,6 @@ private static error Set(this ptr<HeadType> _addr_h, @string s) {
             break;
     }
     return error.As(null!)!;
-
 }
 
 private static @string String(this ptr<HeadType> _addr_h) {
@@ -133,7 +131,6 @@ private static @string String(this ptr<HeadType> _addr_h) {
     else if (h.val == Hwindows) 
         return "windows";
         return fmt.Sprintf("HeadType(%d)", h.val);
-
 }
 
 } // end objabi_package

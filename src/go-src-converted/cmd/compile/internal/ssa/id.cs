@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:06 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:30 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\id.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
@@ -30,7 +28,6 @@ private static ID get(this ptr<idAlloc> _addr_a) => func((_, panic, _) => {
     }
     a.last = x;
     return x;
-
 });
 
 // num returns the maximum ID ever returned + 1.

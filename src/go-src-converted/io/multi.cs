@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package io -- go2cs converted at 2022 March 06 22:12:43 UTC
+// package io -- go2cs converted at 2022 March 13 05:27:45 UTC
 // import "io" ==> using io = go.io_package
 // Original source: C:\Program Files\Go\src\io\multi.go
-
-
 namespace go;
 
 public static partial class io_package {
@@ -42,7 +40,6 @@ private static (nint, error) Read(this ptr<multiReader> _addr_mr, slice<byte> p)
                 }
 
             }
-
         }
         n, err = mr.readers[0].Read(p);
         if (err == EOF) { 
@@ -50,21 +47,16 @@ private static (nint, error) Read(this ptr<multiReader> _addr_mr, slice<byte> p)
             // after performing flatten (Issue 18232).
             mr.readers[0] = new eofReader(); // permit earlier GC
             mr.readers = mr.readers[(int)1..];
-
         }
         if (n > 0 || err != EOF) {
             if (err == EOF && len(mr.readers) > 0) { 
                 // Don't return EOF yet. More readers remain.
                 err = null;
-
             }
-
             return ;
-
         }
     }
     return (0, error.As(EOF)!);
-
 }
 
 // MultiReader returns a Reader that's the logical concatenation of
@@ -98,7 +90,6 @@ private static (nint, error) Write(this ptr<multiWriter> _addr_t, slice<byte> p)
             return ;
         }
     }    return (len(p), error.As(null!)!);
-
 }
 
 private static StringWriter _ = (multiWriter.val)(null);
@@ -125,7 +116,6 @@ private static (nint, error) WriteString(this ptr<multiWriter> _addr_t, @string 
             }
 
         }
-
         if (err != null) {
             return ;
         }
@@ -134,7 +124,6 @@ private static (nint, error) WriteString(this ptr<multiWriter> _addr_t, @string 
             return ;
         }
     }    return (len(s), error.As(null!)!);
-
 }
 
 // MultiWriter creates a writer that duplicates its writes to all the
@@ -160,9 +149,7 @@ public static Writer MultiWriter(params Writer[] writers) {
             }
 
         }
-
     }    return addr(new multiWriter(allWriters));
-
 }
 
 } // end io_package

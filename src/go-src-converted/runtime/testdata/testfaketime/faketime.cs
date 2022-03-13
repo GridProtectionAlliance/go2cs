@@ -6,12 +6,12 @@
 // to build it with custom build tags and hence want to minimize
 // dependencies.
 
-// package main -- go2cs converted at 2022 March 06 22:25:57 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:17 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testfaketime\faketime.go
-using os = go.os_package;
-using time = go.time_package;
-
 namespace go;
+
+using os = os_package;
+using time = time_package;
 
 public static partial class main_package {
 
@@ -27,7 +27,6 @@ private static void Main() {
     os.Stdout.WriteString("line 5\n"); 
     // Print the current time.
     os.Stdout.WriteString(time.Now().UTC().Format(time.RFC3339));
-
 }
 
 } // end main_package

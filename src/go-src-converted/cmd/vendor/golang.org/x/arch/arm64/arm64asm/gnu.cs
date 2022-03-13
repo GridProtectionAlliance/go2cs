@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2022 March 06 23:24:56 UTC
+// package arm64asm -- go2cs converted at 2022 March 13 06:38:09 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\gnu.go
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.arm64;
+
+using strings = strings_package;
+
+
+// GNUSyntax returns the GNU assembler syntax for the instruction, as defined by GNU binutils.
+// This form typically matches the syntax defined in the ARM Reference Manual.
 
 public static partial class arm64asm_package {
 
-    // GNUSyntax returns the GNU assembler syntax for the instruction, as defined by GNU binutils.
-    // This form typically matches the syntax defined in the ARM Reference Manual.
 public static @string GNUSyntax(Inst inst) {
 
     if (inst.Op == RET) 
@@ -23,7 +25,6 @@ public static @string GNUSyntax(Inst inst) {
                 return "ret";
             }
         }
-
     else if (inst.Op == B) 
         {
             Cond (_, ok) = inst.Args[0]._<Cond>();
@@ -32,7 +33,6 @@ public static @string GNUSyntax(Inst inst) {
                 return strings.ToLower("b." + inst.Args[0].String() + " " + inst.Args[1].String());
             }
         }
-
     else if (inst.Op == SYSL) 
         var result = strings.ToLower(inst.String());
         return strings.Replace(result, "c", "C", -1);
@@ -44,7 +44,6 @@ public static @string GNUSyntax(Inst inst) {
             return strings.ToLower(result);
         }
         return strings.ToLower(inst.String());
-
 }
 
 } // end arm64asm_package

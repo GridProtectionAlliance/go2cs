@@ -4,16 +4,14 @@
 
 // Test cases for sort order of declarations.
 
-// package d -- go2cs converted at 2022 March 06 22:41:35 UTC
+// package d -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.d" ==> using d = go.go.doc.d_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\d1.go
-
-
 namespace go.go;
 
 public static partial class d_package {
 
-    // C2 should be third.
+// C2 should be third.
 public static readonly nint C2 = 2;
 
 // V2 should be third.
@@ -34,7 +32,6 @@ public static nint VB2 = default;public static nint VB1 = default;public static 
 // Single const declarations inside ()'s are considered ungrouped
 // and show up in sorted order.
 public static readonly nint Cungrouped = 0;
-
 
  
 // Single var declarations inside ()'s are considered ungrouped
@@ -57,8 +54,7 @@ public partial struct TG1 {
 
 // TG0 should be first.
 public partial struct TG0 {
-}
-public static void F2() {
+}public static void F2() {
 }
 
 } // end d_package

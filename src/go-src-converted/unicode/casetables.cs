@@ -7,11 +7,9 @@
 // and be generated automatically, but that requires some API
 // development first.
 
-// package unicode -- go2cs converted at 2022 March 06 22:14:11 UTC
+// package unicode -- go2cs converted at 2022 March 13 05:28:20 UTC
 // import "unicode" ==> using unicode = go.unicode_package
 // Original source: C:\Program Files\Go\src\unicode\casetables.go
-
-
 namespace go;
 
 public static partial class unicode_package {

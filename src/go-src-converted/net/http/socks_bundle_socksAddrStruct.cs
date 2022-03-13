@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:11 UTC
+//     Generated on 2022 March 13 05:37:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct socksAddr
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace net
             public static implicit operator socksAddr(NilType nil) => default(socksAddr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static socksAddr socksAddr_cast(dynamic value)
         {
             return new socksAddr(value.Name, value.IP, value.Port);

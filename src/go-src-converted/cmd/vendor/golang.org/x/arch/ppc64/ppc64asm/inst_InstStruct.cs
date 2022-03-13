@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:25:06 UTC
+//     Generated on 2022 March 13 06:38:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace ppc64
 {
     public static partial class ppc64asm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Inst
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace ppc64
             public static implicit operator Inst(NilType nil) => default(Inst);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Inst Inst_cast(dynamic value)
         {
             return new Inst(value.Op, value.Enc, value.Len, value.SuffixEnc, value.Args);

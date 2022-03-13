@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:47 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\iface.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -34,7 +33,6 @@ private static System.UIntPtr itabHashFunc(ptr<interfacetype> _addr_inter, ptr<_
  
     // compiler has provided some good hash codes for us.
     return uintptr(inter.typ.hash ^ typ.hash);
-
 }
 
 private static ptr<itab> getitab(ptr<interfacetype> _addr_inter, ptr<_type> _addr_typ, bool canfail) => func((_, panic, _) => {
@@ -50,7 +48,6 @@ private static ptr<itab> getitab(ptr<interfacetype> _addr_inter, ptr<_type> _add
         }
         var name = inter.typ.nameOff(inter.mhdr[0].name);
         panic(addr(new TypeAssertionError(nil,typ,&inter.typ,name.name())));
-
     }
     ptr<itab> m; 
 
@@ -91,7 +88,6 @@ finish:
         return _addr_null!;
     }
     panic(addr(new TypeAssertionError(concrete:typ,asserted:&inter.typ,missingMethod:m.init())));
-
 });
 
 // find finds the given interface/type pair in t.
@@ -106,7 +102,7 @@ private static ptr<itab> find(this ptr<itabTableType> _addr_t, ptr<interfacetype
     // We're guaranteed to hit all table entries using this probe sequence.
     var mask = t.size - 1;
     var h = itabHashFunc(_addr_inter, _addr_typ) & mask;
-    for (var i = uintptr(1); >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (var i = uintptr(1); ; i++) {
         var p = (itab.val)(add(@unsafe.Pointer(_addr_t.entries), h * sys.PtrSize)); 
         // Use atomic read here so if we see m != nil, we also see
         // the initializations of the fields of m.
@@ -120,9 +116,7 @@ private static ptr<itab> find(this ptr<itabTableType> _addr_t, ptr<interfacetype
         }
         h += i;
         h &= mask;
-
     }
-
 }
 
 // itabAdd adds the given itab to the itab hash table.
@@ -160,7 +154,6 @@ private static void itabAdd(ptr<itab> _addr_m) {
         // Note: the old table can be GC'ed here.
     }
     t.add(m);
-
 }
 
 // add adds the given itab to itab table t.
@@ -173,7 +166,7 @@ private static void add(this ptr<itabTableType> _addr_t, ptr<itab> _addr_m) {
     // Insert new itab in the first empty spot in the probe sequence.
     var mask = t.size - 1;
     var h = itabHashFunc(_addr_m.inter, _addr_m._type) & mask;
-    for (var i = uintptr(1); >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (var i = uintptr(1); ; i++) {
         var p = (itab.val)(add(@unsafe.Pointer(_addr_t.entries), h * sys.PtrSize));
         var m2 = p.val;
         if (m2 == m) { 
@@ -182,7 +175,6 @@ private static void add(this ptr<itabTableType> _addr_t, ptr<itab> _addr_m) {
             // pointed-to itab may already have been inserted into the
             // global 'hash'.
             return ;
-
         }
         if (m2 == null) { 
             // Use atomic write here so if a reader sees m, it also
@@ -192,13 +184,10 @@ private static void add(this ptr<itabTableType> _addr_t, ptr<itab> _addr_m) {
             atomic.StorepNoWB(@unsafe.Pointer(p), @unsafe.Pointer(m));
             t.count++;
             return ;
-
         }
         h += i;
         h &= mask;
-
     }
-
 }
 
 // init fills in the m.fun array with all the code pointers for
@@ -241,7 +230,6 @@ imethods:
                     pkgPath = typ.nameOff(x.pkgpath).name();
             j++;
                 }
-
                 if (tname.isExported() || pkgPath == ipkg) {
                     if (m != null) {
                         var ifn = typ.textOff(t.ifn);
@@ -252,24 +240,18 @@ imethods:
  {
                             methods[k] = ifn;
                         }
-
                     }
-
                     _continueimethods = true;
                     break;
                 }
-
             }
-
         } 
         // didn't find method
         m.fun[0] = 0;
         return iname;
-
     }
     m.fun[0] = uintptr(fun0);
     return "";
-
 }
 
 private static void itabsinit() {
@@ -280,7 +262,6 @@ private static void itabsinit() {
             itabAdd(_addr_i);
         }
     }    unlock(_addr_itabLock);
-
 }
 
 // panicdottypeE is called when doing an e.(T) conversion and the conversion fails.
@@ -307,7 +288,6 @@ private static void panicdottypeI(ptr<itab> _addr_have, ptr<_type> _addr_want, p
         t = have._type;
     }
     panicdottypeE(t, _addr_want, _addr_iface);
-
 }
 
 // panicnildottype is called when doing a i.(T) conversion and the interface i is nil.
@@ -336,8 +316,7 @@ private partial struct uint64InterfacePtr { // : ulong
 private partial struct stringInterfacePtr { // : @string
 }
 private partial struct sliceInterfacePtr { // : slice<byte>
-}
-private static var uint16Eface = uint16InterfacePtr(0);private static var uint32Eface = uint32InterfacePtr(0);private static var uint64Eface = uint64InterfacePtr(0);private static var stringEface = stringInterfacePtr("");private static var sliceEface = sliceInterfacePtr(null);private static ptr<_type> uint16TypeefaceOf(_addr_uint16Eface)._type;private static ptr<_type> uint32TypeefaceOf(_addr_uint32Eface)._type;private static ptr<_type> uint64TypeefaceOf(_addr_uint64Eface)._type;private static ptr<_type> stringTypeefaceOf(_addr_stringEface)._type;private static ptr<_type> sliceTypeefaceOf(_addr_sliceEface)._type;
+}private static var uint16Eface = uint16InterfacePtr(0);private static var uint32Eface = uint32InterfacePtr(0);private static var uint64Eface = uint64InterfacePtr(0);private static var stringEface = stringInterfacePtr("");private static var sliceEface = sliceInterfacePtr(null);private static ptr<_type> uint16TypeefaceOf(_addr_uint16Eface)._type;private static ptr<_type> uint32TypeefaceOf(_addr_uint32Eface)._type;private static ptr<_type> uint64TypeefaceOf(_addr_uint64Eface)._type;private static ptr<_type> stringTypeefaceOf(_addr_stringEface)._type;private static ptr<_type> sliceTypeefaceOf(_addr_sliceEface)._type;
 
 // The conv and assert functions below do very similar things.
 // The convXXX functions are guaranteed by the compiler to succeed.
@@ -363,7 +342,6 @@ private static eface convT2E(ptr<_type> _addr_t, unsafe.Pointer elem) {
     e._type = t;
     e.data = x;
     return ;
-
 }
 
 private static unsafe.Pointer convT16(ushort val) {
@@ -377,13 +355,11 @@ private static unsafe.Pointer convT16(ushort val) {
     }
     else
  {
-        x = mallocgc(2, uint16Type, false) * (uint16.val)(x);
+        x = mallocgc(2, uint16Type, false) * (uint16.val);
 
-        val;
-
+        (x) = val;
     }
     return ;
-
 }
 
 private static unsafe.Pointer convT32(uint val) {
@@ -397,13 +373,11 @@ private static unsafe.Pointer convT32(uint val) {
     }
     else
  {
-        x = mallocgc(4, uint32Type, false) * (uint32.val)(x);
+        x = mallocgc(4, uint32Type, false) * (uint32.val);
 
-        val;
-
+        (x) = val;
     }
     return ;
-
 }
 
 private static unsafe.Pointer convT64(ulong val) {
@@ -414,13 +388,11 @@ private static unsafe.Pointer convT64(ulong val) {
     }
     else
  {
-        x = mallocgc(8, uint64Type, false) * (uint64.val)(x);
+        x = mallocgc(8, uint64Type, false) * (uint64.val);
 
-        val;
-
+        (x) = val;
     }
     return ;
-
 }
 
 private static unsafe.Pointer convTstring(@string val) {
@@ -431,13 +403,11 @@ private static unsafe.Pointer convTstring(@string val) {
     }
     else
  {
-        x = mallocgc(@unsafe.Sizeof(val), stringType, true) * (string.val)(x);
+        x = mallocgc(@unsafe.Sizeof(val), stringType, true) * (string.val);
 
-        val;
-
+        (x) = val;
     }
     return ;
-
 }
 
 private static unsafe.Pointer convTslice(slice<byte> val) {
@@ -453,7 +423,6 @@ private static unsafe.Pointer convTslice(slice<byte> val) {
         new ptr<ptr<ptr<slice<byte>>>>(x) = val;
     }
     return ;
-
 }
 
 private static eface convT2Enoptr(ptr<_type> _addr_t, unsafe.Pointer elem) {
@@ -471,7 +440,6 @@ private static eface convT2Enoptr(ptr<_type> _addr_t, unsafe.Pointer elem) {
     e._type = t;
     e.data = x;
     return ;
-
 }
 
 private static iface convT2I(ptr<itab> _addr_tab, unsafe.Pointer elem) {
@@ -490,7 +458,6 @@ private static iface convT2I(ptr<itab> _addr_tab, unsafe.Pointer elem) {
     i.tab = tab;
     i.data = x;
     return ;
-
 }
 
 private static iface convT2Inoptr(ptr<itab> _addr_tab, unsafe.Pointer elem) {
@@ -509,7 +476,6 @@ private static iface convT2Inoptr(ptr<itab> _addr_tab, unsafe.Pointer elem) {
     i.tab = tab;
     i.data = x;
     return ;
-
 }
 
 private static iface convI2I(ptr<interfacetype> _addr_inter, iface i) {
@@ -528,7 +494,6 @@ private static iface convI2I(ptr<interfacetype> _addr_inter, iface i) {
     r.tab = getitab(_addr_inter, _addr_tab._type, false);
     r.data = i.data;
     return ;
-
 }
 
 private static ptr<itab> assertI2I(ptr<interfacetype> _addr_inter, ptr<itab> _addr_tab) => func((_, panic, _) => {
@@ -538,13 +503,11 @@ private static ptr<itab> assertI2I(ptr<interfacetype> _addr_inter, ptr<itab> _ad
     if (tab == null) { 
         // explicit conversions require non-nil interface value.
         panic(addr(new TypeAssertionError(nil,nil,&inter.typ,"")));
-
     }
     if (tab.inter == inter) {
         return _addr_tab!;
     }
     return _addr_getitab(_addr_inter, _addr_tab._type, false)!;
-
 });
 
 private static iface assertI2I2(ptr<interfacetype> _addr_inter, iface i) {
@@ -564,7 +527,6 @@ private static iface assertI2I2(ptr<interfacetype> _addr_inter, iface i) {
     r.tab = tab;
     r.data = i.data;
     return ;
-
 }
 
 private static ptr<itab> assertE2I(ptr<interfacetype> _addr_inter, ptr<_type> _addr_t) => func((_, panic, _) => {
@@ -574,10 +536,8 @@ private static ptr<itab> assertE2I(ptr<interfacetype> _addr_inter, ptr<_type> _a
     if (t == null) { 
         // explicit conversions require non-nil interface value.
         panic(addr(new TypeAssertionError(nil,nil,&inter.typ,"")));
-
     }
     return _addr_getitab(_addr_inter, _addr_t, false)!;
-
 });
 
 private static iface assertE2I2(ptr<interfacetype> _addr_inter, eface e) {
@@ -595,7 +555,6 @@ private static iface assertE2I2(ptr<interfacetype> _addr_inter, eface e) {
     r.tab = tab;
     r.data = e.data;
     return ;
-
 }
 
 //go:linkname reflect_ifaceE2I reflect.ifaceE2I
@@ -624,7 +583,6 @@ private static void iterate_itabs(Action<ptr<itab>> fn) {
             fn(m);
         }
     }
-
 }
 
 // staticuint64s is used to avoid allocating in convTx for small integer values.

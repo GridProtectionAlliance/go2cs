@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package c -- go2cs converted at 2022 March 06 22:41:35 UTC
+// package c -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.c" ==> using c = go.go.doc.c_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\c.go
-using a = go.a_package;
-
 namespace go.go;
+
+using a = a_package;
 
 public static partial class c_package {
 
-    // ----------------------------------------------------------------------------
-    // Test that empty declarations don't cause problems
-
+// ----------------------------------------------------------------------------
+// Test that empty declarations don't cause problems
 
 
 // ----------------------------------------------------------------------------
@@ -26,16 +25,13 @@ public partial struct A {
 
 // B (should see this)
 public partial struct B {
-}
- 
+} 
 // C (should see this)
 public partial struct C {
-}
- 
+} 
 // D (should see this)
 public partial struct D {
-}
- 
+} 
 // E1 (should see this)
 public partial struct E1 {
 }
@@ -45,8 +41,7 @@ public partial struct E3 {
 } 
 // E4 (should see this)
 public partial struct E4 {
-}
-public partial struct T1 {
+}public partial struct T1 {
 }
 
 private static void M(this ptr<T1> _addr_t1) {

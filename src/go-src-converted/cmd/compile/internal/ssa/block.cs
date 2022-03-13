@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:19 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:41 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\block.go
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+
+
+// Block represents a basic block in the control flow graph of a function.
 
 public static partial class ssa_package {
 
-    // Block represents a basic block in the control flow graph of a function.
 public partial struct Block {
     public ID ID; // Source position for block's control operation
     public src.XPos Pos; // The kind of block this is.
@@ -113,7 +115,6 @@ private static @string LongString(this ptr<Block> _addr_b) {
             s += fmt.Sprintf(" [%s]", t);
         }
     }
-
     {
         var c__prev1 = c;
 
@@ -143,7 +144,6 @@ private static @string LongString(this ptr<Block> _addr_b) {
     else if (b.Likely == BranchLikely) 
         s += " (likely)";
         return s;
-
 }
 
 // NumControls returns the number of non-nil control values the
@@ -158,7 +158,6 @@ private static nint NumControls(this ptr<Block> _addr_b) {
         return 1;
     }
     return 2;
-
 }
 
 // ControlValues returns a slice containing the non-nil control
@@ -175,7 +174,6 @@ private static slice<ptr<Value>> ControlValues(this ptr<Block> _addr_b) {
         return b.Controls[..(int)1];
     }
     return b.Controls[..(int)2];
-
 }
 
 // SetControl removes all existing control values and then adds
@@ -211,7 +209,6 @@ private static void AddControl(this ptr<Block> _addr_b, ptr<Value> _addr_v) {
     var i = b.NumControls();
     b.Controls[i] = v; // panics if array is full
     v.Uses++;
-
 }
 
 // ReplaceControl exchanges the existing control value at the index provided
@@ -324,12 +321,10 @@ private static void removePred(this ptr<Block> _addr_b, nint i) {
         b.Preds[i] = e; 
         // Update the other end of the edge we moved.
         e.b.Succs[e.i].i = i;
-
     }
     b.Preds[n] = new Edge();
     b.Preds = b.Preds[..(int)n];
     b.Func.invalidateCFG();
-
 }
 
 // removeSucc removes the ith output edge from b.
@@ -344,12 +339,10 @@ private static void removeSucc(this ptr<Block> _addr_b, nint i) {
         b.Succs[i] = e; 
         // Update the other end of the edge we moved.
         e.b.Preds[e.i].i = i;
-
     }
     b.Succs[n] = new Edge();
     b.Succs = b.Succs[..(int)n];
     b.Func.invalidateCFG();
-
 }
 
 private static void swapSuccessors(this ptr<Block> _addr_b) {
@@ -365,7 +358,6 @@ private static void swapSuccessors(this ptr<Block> _addr_b) {
     e0.b.Preds[e0.i].i = 1;
     e1.b.Preds[e1.i].i = 0;
     b.Likely *= -1;
-
 }
 
 // LackingPos indicates whether b is a block whose position should be inherited
@@ -389,9 +381,7 @@ private static bool LackingPos(this ptr<Block> _addr_b) {
             continue;
         }
         return false;
-
     }    return true;
-
 }
 
 private static @string AuxIntString(this ptr<Block> _addr_b) {
@@ -411,7 +401,6 @@ private static @string AuxIntString(this ptr<Block> _addr_b) {
             return fmt.Sprintf("%v", b.AuxInt);
             break;
     }
-
 }
 
 // likelyBranch reports whether block b is the likely branch of all of its predecessors.
@@ -427,9 +416,7 @@ private static bool likelyBranch(this ptr<Block> _addr_b) {
             continue;
         }
         return false;
-
     }    return true;
-
 }
 
 private static void Logf(this ptr<Block> _addr_b, @string msg, params object[] args) {
@@ -456,6 +443,5 @@ public partial struct BranchPrediction { // : sbyte
 public static readonly var BranchUnlikely = BranchPrediction(-1);
 public static readonly var BranchUnknown = BranchPrediction(0);
 public static readonly var BranchLikely = BranchPrediction(+1);
-
 
 } // end ssa_package

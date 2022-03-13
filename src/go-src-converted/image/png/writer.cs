@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package png -- go2cs converted at 2022 March 06 23:36:21 UTC
+// package png -- go2cs converted at 2022 March 13 06:44:23 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Program Files\Go\src\image\png\writer.go
-using bufio = go.bufio_package;
-using zlib = go.compress.zlib_package;
-using binary = go.encoding.binary_package;
-using crc32 = go.hash.crc32_package;
-using image = go.image_package;
-using color = go.image.color_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-
 namespace go.image;
+
+using bufio = bufio_package;
+using zlib = compress.zlib_package;
+using binary = encoding.binary_package;
+using crc32 = hash.crc32_package;
+using image = image_package;
+using color = image.color_package;
+using io = io_package;
+using strconv = strconv_package;
+
+
+// Encoder configures encoding PNG images.
 
 public static partial class png_package {
 
-    // Encoder configures encoding PNG images.
 public partial struct Encoder {
     public CompressionLevel CompressionLevel; // BufferPool optionally specifies a buffer pool to get temporary
 // EncoderBuffers when encoding an image.
@@ -78,7 +80,6 @@ private static bool opaque(image.Image m) {
             return o.Opaque();
         }
     }
-
     var b = m.Bounds();
     for (var y = b.Min.Y; y < b.Max.Y; y++) {
         for (var x = b.Min.X; x < b.Max.X; x++) {
@@ -89,7 +90,6 @@ private static bool opaque(image.Image m) {
         }
     }
     return true;
-
 }
 
 // The absolute value of a byte interpreted as a signed int8.
@@ -98,7 +98,6 @@ private static nint abs8(byte d) {
         return int(d);
     }
     return 256 - int(d);
-
 }
 
 private static void writeChunk(this ptr<encoder> _addr_e, slice<byte> b, @string name) {
@@ -131,7 +130,6 @@ private static void writeChunk(this ptr<encoder> _addr_e, slice<byte> b, @string
         return ;
     }
     _, e.err = e.w.Write(e.footer[..(int)4]);
-
 }
 
 private static void writeIHDR(this ptr<encoder> _addr_e) {
@@ -176,7 +174,6 @@ private static void writeIHDR(this ptr<encoder> _addr_e) {
     e.tmp[11] = 0; // default filter method
     e.tmp[12] = 0; // non-interlaced
     e.writeChunk(e.tmp[..(int)13], "IHDR");
-
 }
 
 private static void writePLTEAndTRNS(this ptr<encoder> _addr_e, color.Palette p) {
@@ -196,7 +193,6 @@ private static void writePLTEAndTRNS(this ptr<encoder> _addr_e, color.Palette p)
             last = i;
         }
         e.tmp[3 * 256 + i] = c1.A;
-
     }    e.writeChunk(e.tmp[..(int)3 * len(p)], "PLTE");
     if (last != -1) {
         e.writeChunk(e.tmp[(int)3 * 256..(int)3 * 256 + 1 + last], "tRNS");
@@ -219,7 +215,6 @@ private static (nint, error) Write(this ptr<encoder> _addr_e, slice<byte> b) {
         return (0, error.As(e.err)!);
     }
     return (len(b), error.As(null!)!);
-
 }
 
 // Chooses the filter to use for encoding the current row, and applies it.
@@ -356,7 +351,6 @@ private static nint filter(ptr<array<slice<byte>>> _addr_cr, slice<byte> pr, nin
         filter = ftAverage;
     }
     return filter;
-
 }
 
 private static void zeroMemory(slice<byte> v) {
@@ -375,7 +369,6 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
         }
         e.zw = zw;
         e.zwLevel = level;
-
     }
     else
  {
@@ -425,9 +418,7 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
  {
                 e.cr[i] = e.cr[i][..(int)sz];
             }
-
             e.cr[i][0] = uint8(i);
-
         }
         i = i__prev1;
     }
@@ -471,9 +462,7 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
 
                     x = x__prev2;
                 }
-
             }
-
         else if (cb == cbTC8) 
             // We have previously verified that the alpha value is fully opaque.
             var cr0 = cr[0];
@@ -485,7 +474,6 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
             else if (nrgba != null) {
                 (stride, pix) = (nrgba.Stride, nrgba.Pix);
             }
-
             if (stride != 0) {
                 var j0 = (y - b.Min.Y) * stride;
                 var j1 = j0 + b.Dx() * 4;
@@ -502,7 +490,6 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
             else
 
                 }
-
             } {
                 {
                     var x__prev2 = x;
@@ -518,9 +505,7 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
 
                     x = x__prev2;
                 }
-
             }
-
         else if (cb == cbP8) 
             if (paletted != null) {
                 offset = (y - b.Min.Y) * paletted.Stride;
@@ -540,9 +525,7 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
 
                     x = x__prev2;
                 }
-
             }
-
         else if (cb == cbP4 || cb == cbP2 || cb == cbP1) 
             pi = m._<image.PalettedImage>();
 
@@ -574,7 +557,6 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
 
                 cr[0][i] = a;
             }
-
         else if (cb == cbTCA8) 
             if (nrgba != null) {
                 offset = (y - b.Min.Y) * nrgba.Stride;
@@ -598,9 +580,7 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
 
                     x = x__prev2;
                 }
-
             }
-
         else if (cb == cbG16) 
             {
                 var x__prev2 = x;
@@ -665,7 +645,6 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
             // bitsPerPixel not being a multiple of 8
             var bpp = bitsPerPixel / 8;
             f = filter(_addr_cr, pr, bpp);
-
         }
         {
             var (_, err) = e.zw.Write(cr[f]);
@@ -682,7 +661,6 @@ private static error writeImage(this ptr<encoder> _addr_e, io.Writer w, image.Im
         (pr, cr[0]) = (cr[0], pr);
     }
     return error.As(null!)!;
-
 });
 
 // Write the actual image data to one or more IDAT chunks.
@@ -704,7 +682,6 @@ private static void writeIDATs(this ptr<encoder> _addr_e) {
         return ;
     }
     e.err = e.bw.Flush();
-
 }
 
 // This function is required because we want the zero value of
@@ -721,8 +698,7 @@ private static nint levelToZlib(CompressionLevel l) {
         return zlib.BestCompression;
     else 
         return zlib.DefaultCompression;
-    
-}
+    }
 
 private static void writeIEND(this ptr<encoder> _addr_e) {
     ref encoder e = ref _addr_e.val;
@@ -773,7 +749,6 @@ private static error Encode(this ptr<Encoder> _addr_enc, io.Writer w, image.Imag
             pal, _ = m.ColorModel()._<color.Palette>();
         }
     }
-
     if (pal != null) {
         if (len(pal) <= 2) {
             e.cb = cbP1;
@@ -804,7 +779,6 @@ private static error Encode(this ptr<Encoder> _addr_enc, io.Writer w, image.Imag
  {
                 e.cb = cbTCA8;
             }
-
         else 
             if (opaque(m)) {
                 e.cb = cbTC16;
@@ -813,7 +787,6 @@ private static error Encode(this ptr<Encoder> _addr_enc, io.Writer w, image.Imag
  {
                 e.cb = cbTCA16;
             }
-
             }
     _, e.err = io.WriteString(w, pngHeader);
     e.writeIHDR();
@@ -823,7 +796,6 @@ private static error Encode(this ptr<Encoder> _addr_enc, io.Writer w, image.Imag
     e.writeIDATs();
     e.writeIEND();
     return error.As(e.err)!;
-
 });
 
 } // end png_package

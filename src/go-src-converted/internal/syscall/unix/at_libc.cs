@@ -5,21 +5,22 @@
 //go:build aix || solaris
 // +build aix solaris
 
-// package unix -- go2cs converted at 2022 March 06 22:12:51 UTC
+// package unix -- go2cs converted at 2022 March 13 05:27:49 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
 // Original source: C:\Program Files\Go\src\internal\syscall\unix\at_libc.go
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal.syscall;
+
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
+
+
+//go:linkname procFstatat libc_fstatat
+//go:linkname procOpenat libc_openat
+//go:linkname procUnlinkat libc_unlinkat
 
 public static partial class unix_package {
 
-    //go:linkname procFstatat libc_fstatat
-    //go:linkname procOpenat libc_openat
-    //go:linkname procUnlinkat libc_unlinkat
 private static System.UIntPtr procFstatat = default;private static System.UIntPtr procOpenat = default;private static System.UIntPtr procUnlinkat = default;
-
 
 public static error Unlinkat(nint dirfd, @string path, nint flags) {
     var (p, err) = syscall.BytePtrFromString(path);
@@ -31,7 +32,6 @@ public static error Unlinkat(nint dirfd, @string path, nint flags) {
         return error.As(errno)!;
     }
     return error.As(null!)!;
-
 }
 
 public static (nint, error) Openat(nint dirfd, @string path, nint flags, uint perm) {
@@ -47,7 +47,6 @@ public static (nint, error) Openat(nint dirfd, @string path, nint flags, uint pe
         return (0, error.As(errno)!);
     }
     return (int(fd), error.As(null!)!);
-
 }
 
 public static error Fstatat(nint dirfd, @string path, ptr<syscall.Stat_t> _addr_stat, nint flags) {
@@ -62,7 +61,6 @@ public static error Fstatat(nint dirfd, @string path, ptr<syscall.Stat_t> _addr_
         return error.As(errno)!;
     }
     return error.As(null!)!;
-
 }
 
 } // end unix_package

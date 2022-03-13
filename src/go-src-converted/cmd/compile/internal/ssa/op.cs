@@ -2,26 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:18 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:42 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\op.go
-using abi = go.cmd.compile.@internal.abi_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using abi = cmd.compile.@internal.abi_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// An Op encodes the specific operation that a Value performs.
+// Opcodes' semantics can be modified by the type and aux fields of the Value.
+// For instance, OpAdd can be 32 or 64 bit, signed or unsigned, float or complex, depending on Value.Type.
+// Semantics of each op are described in the opcode files in gen/*Ops.go.
+// There is one file for generic (architecture-independent) ops and one file
+// for each architecture.
 
 public static partial class ssa_package {
 
-    // An Op encodes the specific operation that a Value performs.
-    // Opcodes' semantics can be modified by the type and aux fields of the Value.
-    // For instance, OpAdd can be 32 or 64 bit, signed or unsigned, float or complex, depending on Value.Type.
-    // Semantics of each op are described in the opcode files in gen/*Ops.go.
-    // There is one file for generic (architecture-independent) ops and one file
-    // for each architecture.
 public partial struct Op { // : int
 }
 
@@ -101,7 +103,6 @@ private static @string String(this ptr<regInfo> _addr_r) {
     mask = strings.Replace(mask, "0", ".", -1);
     s += fmt.Sprintf("   |%s|\n", mask);
     return s;
-
 }
 
 private partial struct auxType { // : sbyte
@@ -146,13 +147,11 @@ private static ptr<regInfo> Reg(this ptr<AuxCall> _addr_a, ptr<regInfo> _addr_i,
     if (a.reg.clobbers != 0) { 
         // Already updated
         return _addr_a.reg!;
-
     }
     if (a.abiInfo.InRegistersUsed() + a.abiInfo.OutRegistersUsed() == 0) { 
         // Shortcut for zero case, also handles old ABI.
         a.reg = i;
         return _addr_a.reg!;
-
     }
     var k = len(i.inputs);
     {
@@ -202,7 +201,6 @@ private static ptr<regInfo> Reg(this ptr<AuxCall> _addr_a, ptr<regInfo> _addr_i,
     a.reg.outputs = append(a.reg.outputs, i.outputs);
     a.reg.clobbers = i.clobbers;
     return _addr_a.reg!;
-
 }
 private static ptr<abi.ABIConfig> ABI(this ptr<AuxCall> _addr_a) {
     ref AuxCall a = ref _addr_a.val;
@@ -232,7 +230,6 @@ private static ptr<regInfo> ResultReg(this ptr<AuxCall> _addr_a, ptr<Config> _ad
             k++;
         }
     }    return _addr_a.reg!;
-
 }
 
 // For ABI register index r, returns the (dense) register number used in
@@ -249,7 +246,6 @@ private static byte archRegForAbiReg(abi.RegIndex r, ptr<Config> _addr_c) {
         m = c.floatParamRegs[int(r) - len(c.intParamRegs)];
     }
     return uint8(m);
-
 }
 
 // For ABI register index r, returns the register number used in the obj
@@ -321,7 +317,6 @@ private static ptr<ir.Name> NameOfResult(this ptr<AuxCall> _addr_a, long which) 
         return _addr_null!;
     }
     return name._<ptr<ir.Name>>();
-
 }
 
 // TypeOfResult returns the type of result which (indexed 0, 1, etc).
@@ -394,7 +389,6 @@ private static @string String(this ptr<AuxCall> _addr_a) {
         fn = fmt.Sprintf("AuxCall{%v", a.Fn);
     }
     return fn + "}";
-
 }
 
 // StaticAuxCall returns an AuxCall for a static call.
@@ -410,7 +404,6 @@ public static ptr<AuxCall> StaticAuxCall(ptr<obj.LSym> _addr_sym, ptr<abi.ABIPar
         reg = addr(new regInfo());
     }
     return addr(new AuxCall(Fn:sym,abiInfo:paramResultInfo,reg:reg));
-
 });
 
 // InterfaceAuxCall returns an AuxCall for an interface call.
@@ -422,7 +415,6 @@ public static ptr<AuxCall> InterfaceAuxCall(ptr<abi.ABIParamResultInfo> _addr_pa
         reg = addr(new regInfo());
     }
     return addr(new AuxCall(Fn:nil,abiInfo:paramResultInfo,reg:reg));
-
 }
 
 // ClosureAuxCall returns an AuxCall for a closure call.
@@ -434,7 +426,6 @@ public static ptr<AuxCall> ClosureAuxCall(ptr<abi.ABIParamResultInfo> _addr_para
         reg = addr(new regInfo());
     }
     return addr(new AuxCall(Fn:nil,abiInfo:paramResultInfo,reg:reg));
-
 }
 
 private static void CanBeAnSSAAux(this ptr<AuxCall> _addr__p0) {
@@ -453,7 +444,6 @@ public static ptr<AuxCall> OwnAuxCall(ptr<obj.LSym> _addr_fn, ptr<abi.ABIParamRe
         reg = addr(new regInfo());
     }
     return addr(new AuxCall(Fn:fn,abiInfo:paramResultInfo,reg:reg));
-
 }
 
 private static readonly auxType auxNone = iota;
@@ -495,7 +485,6 @@ public static readonly var SymWrite = 0;
 public static readonly SymRdWr SymAddr = SymRead | SymWrite;
 
 public static readonly SymEffect SymNone = 0;
-
 
 // A Sym represents a symbolic offset from a base register.
 // Currently a Sym can be one of 3 things:
@@ -564,14 +553,12 @@ public static ValAndOff addOffset32(this ValAndOff x, int off) => func((_, panic
         panic("invalid ValAndOff.addOffset32");
     }
     return makeValAndOff(x.Val(), x.Off() + off);
-
 });
 public static ValAndOff addOffset64(this ValAndOff x, long off) => func((_, panic, _) => {
     if (!x.canAdd64(off)) {
         panic("invalid ValAndOff.addOffset64");
     }
     return makeValAndOff(x.Val(), x.Off() + int32(off));
-
 });
 
 // int128 is a type that stores a 128-bit constant.
@@ -600,7 +587,6 @@ public static readonly var BoundsSlice3C = 13; // 3-arg slicing operation, 0 <= 
 public static readonly var BoundsSlice3CU = 14; // ... with unsigned low
 public static readonly var BoundsConvert = 15; // conversion to array pointer failed
 public static readonly var BoundsKindCount = 16;
-
 
 // boundsAPI determines which register arguments a bounds check call should use. For an [a:b:c] slice, we do:
 //   CMPQ c, cap
@@ -631,8 +617,7 @@ private static nint boundsABI(long b) => func((_, panic, _) => {
         return 2;
     else 
         panic("bad BoundsKind");
-    
-});
+    });
 
 // arm64BitFileld is the GO type of ARM64BitField auxInt.
 // if x is an ARM64BitField, then width=x&0xff, lsb=(x>>8)&0xff, and

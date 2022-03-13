@@ -5,19 +5,19 @@
 //go:build openbsd && !mips64
 // +build openbsd,!mips64
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:09 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sys_openbsd2.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    // This is exported via linkname to assembly in runtime/cgo.
-    //go:linkname exit
-    //go:nosplit
-    //go:cgo_unsafe_args
+// This is exported via linkname to assembly in runtime/cgo.
+//go:linkname exit
+//go:nosplit
+//go:cgo_unsafe_args
 private static void exit(int code) {
     libcCall(@unsafe.Pointer(funcPC(exit_trampoline)), @unsafe.Pointer(_addr_code));
 }

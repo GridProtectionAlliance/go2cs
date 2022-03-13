@@ -5,19 +5,20 @@
 // Pipe adapter to connect code expecting an io.Reader
 // with code expecting an io.Writer.
 
-// package io -- go2cs converted at 2022 March 06 22:12:44 UTC
+// package io -- go2cs converted at 2022 March 13 05:27:46 UTC
 // import "io" ==> using io = go.io_package
 // Original source: C:\Program Files\Go\src\io\pipe.go
-using errors = go.errors_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using sync = sync_package;
+
+
+// onceError is an object that will only store an error once.
+
+using System;
 public static partial class io_package {
 
-    // onceError is an object that will only store an error once.
 private partial struct onceError {
     public ref sync.Mutex Mutex => ref Mutex_val; // guards following
     public error err;
@@ -32,7 +33,6 @@ private static void Store(this ptr<onceError> _addr_a, error err) => func((defer
         return ;
     }
     a.err = err;
-
 });
 private static error Load(this ptr<onceError> _addr_a) => func((defer, _, _) => {
     ref onceError a = ref _addr_a.val;
@@ -79,9 +79,7 @@ private static error readCloseError(this ptr<pipe> _addr_p) {
             return error.As(werr)!;
         }
     }
-
     return error.As(ErrClosedPipe)!;
-
 }
 
 private static error CloseRead(this ptr<pipe> _addr_p, error err) {
@@ -95,7 +93,6 @@ private static error CloseRead(this ptr<pipe> _addr_p, error err) {
         close(p.done);
     });
     return error.As(null!)!;
-
 }
 
 private static (nint, error) Write(this ptr<pipe> _addr_p, slice<byte> b) => func((defer, _, _) => {
@@ -118,7 +115,6 @@ private static (nint, error) Write(this ptr<pipe> _addr_p, slice<byte> b) => fun
         }
     }
     return (n, error.As(null!)!);
-
 });
 
 private static error writeCloseError(this ptr<pipe> _addr_p) {
@@ -132,9 +128,7 @@ private static error writeCloseError(this ptr<pipe> _addr_p) {
             return error.As(rerr)!;
         }
     }
-
     return error.As(ErrClosedPipe)!;
-
 }
 
 private static error CloseWrite(this ptr<pipe> _addr_p, error err) {
@@ -148,7 +142,6 @@ private static error CloseWrite(this ptr<pipe> _addr_p, error err) {
         close(p.done);
     });
     return error.As(null!)!;
-
 }
 
 // A PipeReader is the read half of a pipe.

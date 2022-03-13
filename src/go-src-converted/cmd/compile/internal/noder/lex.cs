@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:13:57 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:24 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\lex.go
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using strings = go.strings_package;
-
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using strings = strings_package;
+
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
 
 public static partial class noder_package {
 
@@ -27,7 +27,6 @@ private static bool isQuoted(@string s) {
 private static readonly var funcPragmas = ir.Nointerface | ir.Noescape | ir.Norace | ir.Nosplit | ir.Noinline | ir.NoCheckPtr | ir.RegisterParams | ir.CgoUnsafeArgs | ir.UintptrEscapes | ir.Systemstack | ir.Nowritebarrier | ir.Nowritebarrierrec | ir.Yeswritebarrierrec;
 
 private static readonly var typePragmas = ir.NotInHeap;
-
 
 private static ir.PragmaFlag pragmaFlag(@string verb) {
     switch (verb) {
@@ -91,7 +90,6 @@ private static ir.PragmaFlag pragmaFlag(@string verb) {
             break;
     }
     return 0;
-
 }
 
 // pragcgo is called concurrently if files are parsed concurrently.
@@ -111,7 +109,6 @@ private static void pragcgo(this ptr<noder> _addr_p, syntax.Pos pos, @string tex
             if (len(f) == 2 && !isQuoted(f[1]))         else if (len(f) == 3 && !isQuoted(f[1]) && !isQuoted(f[2]))         else 
                 p.error(new syntax.Error(Pos:pos,Msg:fmt.Sprintf(`usage: //go:%s local [remote]`,verb)));
                 return ;
-
             break;
         case "cgo_import_dynamic": 
 
@@ -125,20 +122,16 @@ private static void pragcgo(this ptr<noder> _addr_p, syntax.Pos pos, @string tex
                         p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_import_dynamic local [remote ["lib.a/object.o"]]`));
                         return ;
                     }
-
                 }
-
             else 
                 p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_import_dynamic local [remote ["library"]]`));
                 return ;
-
             break;
         case "cgo_import_static": 
 
             if (len(f) == 2 && !isQuoted(f[1]))         else 
                 p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_import_static local`));
                 return ;
-
             break;
         case "cgo_dynamic_linker": 
 
@@ -147,7 +140,6 @@ private static void pragcgo(this ptr<noder> _addr_p, syntax.Pos pos, @string tex
             else 
                 p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_dynamic_linker "path"`));
                 return ;
-
             break;
         case "cgo_ldflag": 
 
@@ -156,14 +148,12 @@ private static void pragcgo(this ptr<noder> _addr_p, syntax.Pos pos, @string tex
             else 
                 p.error(new syntax.Error(Pos:pos,Msg:`usage: //go:cgo_ldflag "arg"`));
                 return ;
-
             break;
         default: 
             return ;
             break;
     }
     p.pragcgobuf = append(p.pragcgobuf, f);
-
 }
 
 // pragmaFields is similar to strings.FieldsFunc(s, isSpace)
@@ -191,7 +181,6 @@ private static slice<@string> pragmaFields(@string s) {
                 }
                 fieldStart = i;
             }
-
         else if (!inQuote && isSpace(c)) 
             if (fieldStart >= 0) {
                 a = append(a, s[(int)fieldStart..(int)i]);
@@ -201,13 +190,10 @@ private static slice<@string> pragmaFields(@string s) {
             if (fieldStart == -1) {
                 fieldStart = i;
             }
-        
-    }    if (!inQuote && fieldStart >= 0) { // Last field might end at the end of the string.
+            }    if (!inQuote && fieldStart >= 0) { // Last field might end at the end of the string.
         a = append(a, s[(int)fieldStart..]);
-
     }
     return a;
-
 }
 
 } // end noder_package

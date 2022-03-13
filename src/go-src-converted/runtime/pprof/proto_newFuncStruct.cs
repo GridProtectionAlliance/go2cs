@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:48 UTC
+//     Generated on 2022 March 13 05:28:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace runtime
 {
     public static partial class pprof_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct newFunc
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace runtime
             public static implicit operator newFunc(NilType nil) => default(newFunc);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static newFunc newFunc_cast(dynamic value)
         {
             return new newFunc(value.id, value.name, value.file);

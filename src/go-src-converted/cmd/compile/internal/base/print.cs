@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 23:14:31 UTC
+// package @base -- go2cs converted at 2022 March 13 06:28:00 UTC
 // import "cmd/compile/internal/base" ==> using @base = go.cmd.compile.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\base\print.go
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using os = go.os_package;
-using debug = go.runtime.debug_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using os = os_package;
+using debug = runtime.debug_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using src = cmd.@internal.src_package;
+
+
+// An errorMsg is a queued error message, waiting to be printed.
 
 public static partial class @base_package {
 
-    // An errorMsg is a queued error message, waiting to be printed.
 private partial struct errorMsg {
     public src.XPos pos;
     public @string msg;
@@ -51,7 +53,6 @@ private static void addErrorMsg(src.XPos pos, @string format, params object[] ar
         msg = fmt.Sprintf("%v: %s", FmtPos(pos), msg);
     }
     errorMsgs = append(errorMsgs, new errorMsg(pos:pos,msg:msg+"\n",));
-
 }
 
 // FmtPos formats pos as a file:line string.
@@ -60,7 +61,6 @@ public static @string FmtPos(src.XPos pos) {
         return "???";
     }
     return Ctxt.OutermostPos(pos).Format(Flag.C == 0, Flag.L == 1);
-
 }
 
 // byPos sorts errors by source position.
@@ -92,7 +92,6 @@ public static void FlushErrors() {
             fmt.Printf("%s", err.msg);
         }
     }    errorMsgs = errorMsgs[..(int)0];
-
 }
 
 // lasterror keeps track of the most recently issued error,
@@ -126,7 +125,6 @@ public static void ErrorfAt(src.XPos pos, @string format, params object[] args) 
             return ;
         }
         lasterror.syntax = pos;
-
     }
     else
  { 
@@ -140,7 +138,6 @@ public static void ErrorfAt(src.XPos pos, @string format, params object[] args) 
         }
         lasterror.other = pos;
         lasterror.msg = msg;
-
     }
     addErrorMsg(pos, "%s", msg);
     numErrors++;
@@ -248,12 +245,10 @@ public static void FatalfAt(src.XPos pos, @string format, params object[] args) 
             fmt.Println();
             os.Stdout.Write(debug.Stack());
             fmt.Println();
-
         }
     }
     hcrash();
     ErrorExit();
-
 }
 
 // hcrash crashes the compiler when -h is set, to find out where a message is generated.
@@ -264,7 +259,6 @@ private static void hcrash() => func((_, panic, _) => {
             os.Remove(Flag.LowerO);
         }
         panic("-h");
-
     }
 });
 
@@ -276,7 +270,6 @@ public static void ErrorExit() {
         os.Remove(Flag.LowerO);
     }
     os.Exit(2);
-
 }
 
 // ExitIfErrors calls ErrorExit if any errors have been reported.

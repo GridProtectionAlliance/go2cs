@@ -16,17 +16,17 @@
 // want to move the core parts of go/build into a top-level internal package.
 // These details change very infrequently, so the copy is fine.
 
-// package imports -- go2cs converted at 2022 March 06 23:16:42 UTC
+// package imports -- go2cs converted at 2022 March 13 06:30:09 UTC
 // import "cmd/go/internal/imports" ==> using imports = go.cmd.go.@internal.imports_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\imports\build.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using constraint = go.go.build.constraint_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using constraint = go.build.constraint_package;
+using strings = strings_package;
+using unicode = unicode_package;
 
 public static partial class imports_package {
 
@@ -39,7 +39,6 @@ private static bool isGoBuildComment(slice<byte> line) {
     line = bytes.TrimSpace(line);
     var rest = line[(int)len(goBuildComment)..];
     return len(rest) == 0 || len(bytes.TrimSpace(rest)) < len(rest);
-
 }
 
 // ShouldBuild reports whether it is okay to use this file,
@@ -94,17 +93,14 @@ public static bool ShouldBuild(slice<byte> content, map<@string, bool> tags) {
                 }
 
             }
-
             line = bytes.TrimSpace(line);
             if (!bytes.HasPrefix(line, bSlashSlash) || !bytes.Contains(line, bPlusBuild)) {
                 continue;
             }
-
             var text = string(line);
             if (!constraint.IsPlusBuild(text)) {
                 continue;
             }
-
             {
                 var x__prev1 = x;
 
@@ -119,10 +115,8 @@ public static bool ShouldBuild(slice<byte> content, map<@string, bool> tags) {
                 x = x__prev1;
 
             }
-
         }
         return shouldBuild;
-
 }
 
 private static (slice<byte>, slice<byte>, bool, error) parseFileHeader(slice<byte> content) {
@@ -156,7 +150,6 @@ Lines:
             i = i__prev1;
 
         }
-
         line = bytes.TrimSpace(line);
         if (len(line) == 0 && !ended) { // Blank line
             // Remember position of most recent blank line.
@@ -173,7 +166,6 @@ Lines:
         }
         if (!bytes.HasPrefix(line, bSlashSlash)) { // Not comment line
             ended = true;
-
         }
         if (!inSlashStar && isGoBuildComment(line)) {
             if (goBuild != null) {
@@ -199,16 +191,13 @@ Comments:
                     i = i__prev2;
 
                 }
-
                 _continueLines = true;
                 break;
             }
-
             if (bytes.HasPrefix(line, bSlashSlash)) {
                 _continueLines = true;
                 break;
             }
-
             if (bytes.HasPrefix(line, bSlashStar)) {
                 inSlashStar = true;
                 line = bytes.TrimSpace(line[(int)len(bSlashStar)..]);
@@ -219,10 +208,8 @@ Comments:
             _breakLines = true;
             break;
         }
-
     }
     return (content[..(int)end], goBuild, sawBinaryOnly, error.As(null!)!);
-
 }
 
 // matchTag reports whether the tag name is valid and tags[name] is true.
@@ -243,7 +230,6 @@ private static bool matchTag(@string name, map<@string, bool> tags, bool prefer)
         // except "ignore" are considered both present and not
         // (so we return true no matter how 'want' is set).
         return prefer;
-
     }
     var have = tags[name];
     if (name == "linux") {
@@ -256,7 +242,6 @@ private static bool matchTag(@string name, map<@string, bool> tags, bool prefer)
         have = have || tags["ios"];
     }
     return have;
-
 }
 
 // eval is like
@@ -279,7 +264,6 @@ private static bool eval(constraint.Expr x, map<@string, bool> tags, bool prefer
             break;
     }
     panic(fmt.Sprintf("unexpected constraint expression %T", x));
-
 });
 
 // MatchFile returns false if the name contains a $GOOS or $GOARCH
@@ -338,7 +322,6 @@ public static bool MatchFile(@string name, map<@string, bool> tags) {
         n = n__prev1;
 
     }
-
     n = len(l);
     if (n >= 2 && KnownOS[l[n - 2]] && KnownArch[l[n - 1]]) {
         return matchTag(l[n - 2], tags, true) && matchTag(l[n - 1], tags, true);
@@ -350,7 +333,6 @@ public static bool MatchFile(@string name, map<@string, bool> tags) {
         return matchTag(l[n - 1], tags, true);
     }
     return true;
-
 }
 
 public static map KnownOS = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"aix":true,"android":true,"darwin":true,"dragonfly":true,"freebsd":true,"hurd":true,"illumos":true,"ios":true,"js":true,"linux":true,"nacl":true,"netbsd":true,"openbsd":true,"plan9":true,"solaris":true,"windows":true,"zos":true,};

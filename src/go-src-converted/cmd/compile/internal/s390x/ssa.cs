@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package s390x -- go2cs converted at 2022 March 06 23:10:52 UTC
+// package s390x -- go2cs converted at 2022 March 13 06:24:09 UTC
 // import "cmd/compile/internal/s390x" ==> using s390x = go.cmd.compile.@internal.s390x_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\s390x\ssa.go
-using math = go.math_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using s390x = go.cmd.@internal.obj.s390x_package;
-
 namespace go.cmd.compile.@internal;
+
+using math = math_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using s390x = cmd.@internal.obj.s390x_package;
+
+
+// markMoves marks any MOVXconst ops that need to avoid clobbering flags.
 
 public static partial class s390x_package {
 
-    // markMoves marks any MOVXconst ops that need to avoid clobbering flags.
 private static void ssaMarkMoves(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_b) {
     ref ssagen.State s = ref _addr_s.val;
     ref ssa.Block b = ref _addr_b.val;
@@ -32,7 +34,6 @@ private static void ssaMarkMoves(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr
         if (flive && v.Op == ssa.OpS390XMOVDconst) { 
             // The "mark" is any non-nil Aux value.
             v.Aux = v;
-
         }
         if (v.Type.IsFlags()) {
             flive = false;
@@ -43,7 +44,6 @@ private static void ssaMarkMoves(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr
             }
         }
     }
-
 }
 
 // loadByType returns the load instruction of the given type.
@@ -59,7 +59,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 return s390x.AFMOVD;
                 break;
         }
-
     }
     else
  {
@@ -72,7 +71,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return s390x.AMOVBZ;
                            }
-
                 break;
             case 2: 
                            if (t.IsSigned()) {
@@ -82,7 +80,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return s390x.AMOVHZ;
                            }
-
                 break;
             case 4: 
                            if (t.IsSigned()) {
@@ -92,16 +89,13 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return s390x.AMOVWZ;
                            }
-
                 break;
             case 8: 
                 return s390x.AMOVD;
                 break;
         }
-
     }
     panic("bad load type");
-
 });
 
 // storeByType returns the store instruction of the given type.
@@ -118,7 +112,6 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return s390x.AFMOVD;
                 break;
         }
-
     }
     else
  {
@@ -136,10 +129,8 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return s390x.AMOVD;
                 break;
         }
-
     }
     panic("bad store type");
-
 });
 
 // moveByType returns the reg->reg move instruction of the given type.
@@ -160,7 +151,6 @@ private static obj.As moveByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return s390x.AMOVBZ;
                            }
-
                 break;
             case 2: 
                            if (t.IsSigned()) {
@@ -170,7 +160,6 @@ private static obj.As moveByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return s390x.AMOVHZ;
                            }
-
                 break;
             case 4: 
                            if (t.IsSigned()) {
@@ -180,16 +169,13 @@ private static obj.As moveByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 {
                                return s390x.AMOVWZ;
                            }
-
                 break;
             case 8: 
                 return s390x.AMOVD;
                 break;
         }
-
     }
     panic("bad load type");
-
 });
 
 // opregreg emits instructions for
@@ -378,7 +364,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                 n = s.Prog(s390x.ANEG);
                 n.To.Type = obj.TYPE_REG;
                 n.To.Reg = dividend;
-
             }
             else
  { 
@@ -388,12 +373,9 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                 n.From.Reg = dividend;
                 n.To.Type = obj.TYPE_REG;
                 n.To.Reg = dividend;
-
             }
-
             j.To.SetTarget(n);
             j2.To.SetTarget(s.Pc());
-
         }
     else if (v.Op == ssa.OpS390XADDconst || v.Op == ssa.OpS390XADDWconst) 
         opregregimm(_addr_s, v.Op.Asm(), v.Reg(), v.Args[0].Reg(), v.AuxInt);
@@ -638,7 +620,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         }
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Pos.Line()==1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
     else if (v.Op == ssa.OpS390XMVC) 
         var vo = v.AuxValAndOff();
@@ -881,8 +862,7 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         s.Prog(s390x.ASYNC);
     else if (v.Op == ssa.OpClobber || v.Op == ssa.OpClobberReg)     else 
         v.Fatalf("genValue not implemented: %s", v.LongString());
-    
-}
+    }
 
 private static obj.As blockAsm(ptr<ssa.Block> _addr_b) => func((_, panic, _) => {
     ref ssa.Block b = ref _addr_b.val;
@@ -908,7 +888,6 @@ private static obj.As blockAsm(ptr<ssa.Block> _addr_b) => func((_, panic, _) => 
         return s390x.ACLGIJ;
         b.Fatalf("blockAsm not implemented: %s", b.LongString());
     panic("unreachable");
-
 });
 
 private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_b, ptr<ssa.Block> _addr_next) {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:35 UTC
+//     Generated on 2022 March 13 05:28:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace os
 {
     public static partial class user_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct User
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace os
             public static implicit operator User(NilType nil) => default(User);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static User User_cast(dynamic value)
         {
             return new User(value.Uid, value.Gid, value.Username, value.Name, value.HomeDir);

@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package astutil -- go2cs converted at 2022 March 06 23:35:01 UTC
+// package astutil -- go2cs converted at 2022 March 13 06:42:35 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/astutil" ==> using astutil = go.cmd.vendor.golang.org.x.tools.go.ast.astutil_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\ast\astutil\rewrite.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.ast;
 
+using fmt = fmt_package;
+using ast = go.ast_package;
+using reflect = reflect_package;
+using sort = sort_package;
+
+
+// An ApplyFunc is invoked by Apply for each node n, even if n is nil,
+// before and/or after the node's children, using a Cursor describing
+// the current node and providing operations on it.
+//
+// The return value of ApplyFunc controls the syntax tree traversal.
+// See Apply for details.
+
+using System;
 public static partial class astutil_package {
 
-    // An ApplyFunc is invoked by Apply for each node n, even if n is nil,
-    // before and/or after the node's children, using a Cursor describing
-    // the current node and providing operations on it.
-    //
-    // The return value of ApplyFunc controls the syntax tree traversal.
-    // See Apply for details.
 public delegate  bool ApplyFunc(ptr<Cursor>);
 
 // Apply traverses a syntax tree recursively, starting with root,
@@ -58,14 +59,11 @@ public static ast.Node Apply(ast.Node root, ApplyFunc pre, ApplyFunc post) => fu
             }
 
         }
-
         result = parent.Node;
-
     }());
     ptr<application> a = addr(new application(pre:pre,post:post));
     a.apply(parent, "Node", null, root);
     return ;
-
 });
 
 private static ptr<object> abort = @new<int>(); // singleton, to signal termination of Apply
@@ -124,7 +122,6 @@ private static nint Index(this ptr<Cursor> _addr_c) {
         return c.iter.index;
     }
     return -1;
-
 }
 
 // field returns the current node's parent field value.
@@ -152,7 +149,6 @@ private static void Replace(this ptr<Cursor> _addr_c, ast.Node n) => func((_, pa
         }
     }
 
-
     var v = c.field();
     {
         var i = c.Index();
@@ -161,9 +157,7 @@ private static void Replace(this ptr<Cursor> _addr_c, ast.Node n) => func((_, pa
             v = v.Index(i);
         }
     }
-
     v.Set(reflect.ValueOf(n));
-
 });
 
 // Delete deletes the current Node from its containing slice.
@@ -182,7 +176,6 @@ private static void Delete(this ptr<Cursor> _addr_c) => func((_, panic, _) => {
         }
     }
 
-
     var i = c.Index();
     if (i < 0) {
         panic("Delete node not contained in slice");
@@ -193,7 +186,6 @@ private static void Delete(this ptr<Cursor> _addr_c) => func((_, panic, _) => {
     v.Index(l - 1).Set(reflect.Zero(v.Type().Elem()));
     v.SetLen(l - 1);
     c.iter.step--;
-
 });
 
 // InsertAfter inserts n after the current Node in its containing slice.
@@ -212,7 +204,6 @@ private static void InsertAfter(this ptr<Cursor> _addr_c, ast.Node n) => func((_
     reflect.Copy(v.Slice(i + 2, l), v.Slice(i + 1, l));
     v.Index(i + 1).Set(reflect.ValueOf(n));
     c.iter.step++;
-
 });
 
 // InsertBefore inserts n before the current Node in its containing slice.
@@ -231,7 +222,6 @@ private static void InsertBefore(this ptr<Cursor> _addr_c, ast.Node n) => func((
     reflect.Copy(v.Slice(i + 1, l), v.Slice(i, l));
     v.Index(i).Set(reflect.ValueOf(n));
     c.iter.index++;
-
 });
 
 // application carries all the shared data so we can pass it around cheaply.
@@ -529,7 +519,6 @@ private static void apply(this ptr<application> _addr_a, ast.Node parent, @strin
         panic(abort);
     }
     a.cursor = saved;
-
 });
 
 // An iterator controls iteration over a slice of nodes.
@@ -560,14 +549,11 @@ private static void applyList(this ptr<application> _addr_a, ast.Node parent, @s
 
         }
 
-
         a.iter.step = 1;
         a.apply(parent, name, _addr_a.iter, x);
         a.iter.index += a.iter.step;
-
     }
     a.iter = saved;
-
 }
 
 } // end astutil_package

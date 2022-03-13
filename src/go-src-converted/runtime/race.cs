@@ -5,16 +5,18 @@
 //go:build race
 // +build race
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:14 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:43 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\race.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+
+
+// Public race detection API, present iff build with -race.
 
 public static partial class runtime_package {
 
-    // Public race detection API, present iff build with -race.
 public static void RaceRead(unsafe.Pointer addr);
 public static void RaceWrite(unsafe.Pointer addr);
 public static void RaceReadRange(unsafe.Pointer addr, nint len);
@@ -74,7 +76,6 @@ public static void RaceDisable() {
         racecall(_addr___tsan_go_ignore_sync_begin, _g_.racectx, 0, 0, 0);
     }
     _g_.raceignore++;
-
 }
 
 //go:nosplit
@@ -108,14 +109,12 @@ private static void raceReadObjectPC(ptr<_type> _addr_t, unsafe.Pointer addr, Sy
         // for composite objects we have to read every address
         // because a write might happen to any subobject.
         racereadrangepc(addr, t.size, callerpc, pc);
-
     }
     else
  {>>MARKER:FUNCTION_RaceRead_BLOCK_PREFIX<< 
         // for non-composite objects we can read just the start
         // address, as any write must write the first byte.
         racereadpc(addr, callerpc, pc);
-
     }
 }
 
@@ -127,14 +126,12 @@ private static void raceWriteObjectPC(ptr<_type> _addr_t, unsafe.Pointer addr, S
         // for composite objects we have to write every address
         // because a write might happen to any subobject.
         racewriterangepc(addr, t.size, callerpc, pc);
-
     }
     else
  { 
         // for non-composite objects we can write just the start
         // address, as any write must write the first byte.
         racewritepc(addr, callerpc, pc);
-
     }
 }
 
@@ -160,7 +157,6 @@ private static readonly var raceGetProcCmd = iota;
 private static readonly var raceSymbolizeCodeCmd = 0;
 private static readonly var raceSymbolizeDataCmd = 1;
 
-
 // Callback from C into Go, runs on g0.
 private static void racecallback(System.UIntPtr cmd, unsafe.Pointer ctx) {
 
@@ -172,8 +168,7 @@ private static void racecallback(System.UIntPtr cmd, unsafe.Pointer ctx) {
         raceSymbolizeData(_addr_(symbolizeDataContext.val)(ctx));
     else 
         throw("unknown command");
-    
-}
+    }
 
 // raceSymbolizeCode reads ctx.pc and populates the rest of *ctx with
 // information about the code at that pc.
@@ -209,9 +204,7 @@ private static void raceSymbolizeCode(ptr<symbolizeCodeContext> _addr_ctx) {
                                 // Back up to an instruction in the "caller".
                                 pc = f.Entry() + uintptr(inltree[ix].parentPc);
                                 continue;
-
                             }
-
                             ctx.pc = f.Entry() + uintptr(inltree[ix].parentPc); // "caller" pc
                             ctx.fn = cfuncnameFromNameoff(fi, inltree[ix].func_);
                             ctx.line = uintptr(line);
@@ -219,25 +212,18 @@ private static void raceSymbolizeCode(ptr<symbolizeCodeContext> _addr_ctx) {
                             ctx.off = pc - f.Entry();
                             ctx.res = 1;
                             return ;
-
                         }
-
                         break;
-
                     }
-
-
                 }
 
             }
-
             ctx.fn = cfuncname(fi);
             ctx.line = uintptr(line);
             ctx.file = _addr_bytes(file)[0]; // assume NUL-terminated
             ctx.off = pc - f.Entry();
             ctx.res = 1;
             return ;
-
         }
     }
     ctx.fn = _addr_qq[0];
@@ -245,7 +231,6 @@ private static void raceSymbolizeCode(ptr<symbolizeCodeContext> _addr_ctx) {
     ctx.line = 0;
     ctx.off = ctx.pc;
     ctx.res = 1;
-
 }
 
 private partial struct symbolizeDataContext {
@@ -272,7 +257,6 @@ private static void raceSymbolizeData(ptr<symbolizeDataContext> _addr_ctx) {
             ctx.res = 1;
         }
     }
-
 }
 
 // Race runtime functions called via runtime·racecall.
@@ -440,7 +424,6 @@ private static (System.UIntPtr, System.UIntPtr) raceinit() {
     racedataend = start + size;
 
     return ;
-
 }
 
 private static mutex raceFiniLock = default;
@@ -457,7 +440,6 @@ private static void racefini() {
     // Windows.
     osPreemptExtEnter(getg().m);
     racecall(_addr___tsan_fini, 0, 0, 0, 0);
-
 }
 
 //go:nosplit
@@ -481,7 +463,6 @@ private static void racemapshadow(unsafe.Pointer addr, System.UIntPtr size) {
         racearenaend = uintptr(addr) + size;
     }
     racecall(_addr___tsan_map_shadow, uintptr(addr), size, 0, 0);
-
 }
 
 //go:nosplit
@@ -508,7 +489,6 @@ private static System.UIntPtr racegostart(System.UIntPtr pc) {
     ref System.UIntPtr racectx = ref heap(out ptr<System.UIntPtr> _addr_racectx);
     racecall(_addr___tsan_go_start, spawng.racectx, uintptr(@unsafe.Pointer(_addr_racectx)), pc, 0);
     return racectx;
-
 }
 
 //go:nosplit
@@ -528,7 +508,6 @@ private static void racewriterangepc(unsafe.Pointer addr, System.UIntPtr sz, Sys
         // The call is coming from manual instrumentation of Go code running on g0/gsignal.
         // Not interesting.
         return ;
-
     }
     if (callpc != 0) {
         racefuncenter(callpc);
@@ -546,7 +525,6 @@ private static void racereadrangepc(unsafe.Pointer addr, System.UIntPtr sz, Syst
         // The call is coming from manual instrumentation of Go code running on g0/gsignal.
         // Not interesting.
         return ;
-
     }
     if (callpc != 0) {
         racefuncenter(callpc);
@@ -570,7 +548,6 @@ private static void raceacquireg(ptr<g> _addr_gp, unsafe.Pointer addr) {
         return ;
     }
     racecall(_addr___tsan_acquire, gp.racectx, uintptr(addr), 0, 0);
-
 }
 
 //go:nosplit
@@ -579,7 +556,6 @@ private static void raceacquirectx(System.UIntPtr racectx, unsafe.Pointer addr) 
         return ;
     }
     racecall(_addr___tsan_acquire, racectx, uintptr(addr), 0, 0);
-
 }
 
 //go:nosplit
@@ -595,7 +571,6 @@ private static void racereleaseg(ptr<g> _addr_gp, unsafe.Pointer addr) {
         return ;
     }
     racecall(_addr___tsan_release, gp.racectx, uintptr(addr), 0, 0);
-
 }
 
 //go:nosplit
@@ -611,7 +586,6 @@ private static void racereleaseacquireg(ptr<g> _addr_gp, unsafe.Pointer addr) {
         return ;
     }
     racecall(_addr___tsan_release_acquire, gp.racectx, uintptr(addr), 0, 0);
-
 }
 
 //go:nosplit
@@ -627,7 +601,6 @@ private static void racereleasemergeg(ptr<g> _addr_gp, unsafe.Pointer addr) {
         return ;
     }
     racecall(_addr___tsan_release_merge, gp.racectx, uintptr(addr), 0, 0);
-
 }
 
 //go:nosplit

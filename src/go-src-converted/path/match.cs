@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package path -- go2cs converted at 2022 March 06 22:08:01 UTC
+// package path -- go2cs converted at 2022 March 13 05:23:50 UTC
 // import "path" ==> using path = go.path_package
 // Original source: C:\Program Files\Go\src\path\match.go
-using errors = go.errors_package;
-using bytealg = go.@internal.bytealg_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go;
+
+using errors = errors_package;
+using bytealg = @internal.bytealg_package;
+using utf8 = unicode.utf8_package;
+
+
+// ErrBadPattern indicates a pattern was malformed.
 
 public static partial class path_package {
 
-    // ErrBadPattern indicates a pattern was malformed.
 public static var ErrBadPattern = errors.New("syntax error in pattern");
 
 // Match reports whether name matches the shell pattern.
@@ -50,7 +52,6 @@ Pattern:
         if (star && chunk == "") { 
             // Trailing * matches rest of string unless it has a /.
             return (bytealg.IndexByteString(name, '/') < 0, error.As(null!)!);
-
         }
         var (t, ok, err) = matchChunk(chunk, name); 
         // if we're the last chunk, make sure we've exhausted the name
@@ -73,19 +74,14 @@ Pattern:
                     if (len(pattern) == 0 && len(t) > 0) {
                         continue;
                     }
-
                     name = t;
                     _continuePattern = true;
                     break;
                 }
-
                 if (err != null) {
                     return (false, error.As(err)!);
                 }
-
             }
-
-
         }
         while (len(pattern) > 0) {
             _, chunk, pattern = scanChunk(pattern);
@@ -97,13 +93,10 @@ Pattern:
                 }
 
             }
-
         }
         return (false, error.As(null!)!);
-
     }
     return (len(name) == 0, error.As(null!)!);
-
 }
 
 // scanChunk gets the next segment of pattern, which is a non-star string
@@ -139,13 +132,10 @@ Scan:
                     _breakScan = true;
                     break;
                 }
-
                 break;
         }
-
     }
     return (star, pattern[(int)0..(int)i], pattern[(int)i..]);
-
 }
 
 // matchChunk checks whether chunk matches the beginning of s.
@@ -196,7 +186,6 @@ private static (@string, bool, error) matchChunk(@string chunk, @string s) {
                 if (err != null) {
                     return ("", false, error.As(err)!);
                 }
-
                 hi = lo;
                 if (chunk[0] == '-') {
                     hi, chunk, err = getEsc(chunk[(int)1..]);
@@ -204,21 +193,16 @@ private static (@string, bool, error) matchChunk(@string chunk, @string s) {
                     if (err != null) {
                         return ("", false, error.As(err)!);
                     }
-
                 }
-
                 if (lo <= r && r <= hi) {
                     match = true;
                 }
-
                 nrange++;
-
             }
 
             if (match == negated) {
                 failed = true;
             }
-
             goto __switch_break0;
         }
         if (chunk[0] == '?')
@@ -250,13 +234,11 @@ private static (@string, bool, error) matchChunk(@string chunk, @string s) {
             chunk = chunk[(int)1..];
 
         __switch_break0:;
-
     }
     if (failed) {
         return ("", false, error.As(null!)!);
     }
     return (s, true, error.As(null!)!);
-
 }
 
 // getEsc gets a possibly-escaped character from chunk, for a character class.
@@ -285,7 +267,6 @@ private static (int, @string, error) getEsc(@string chunk) {
         err = ErrBadPattern;
     }
     return ;
-
 }
 
 } // end path_package

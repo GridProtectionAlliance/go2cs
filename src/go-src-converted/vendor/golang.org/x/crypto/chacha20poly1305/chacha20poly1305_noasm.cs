@@ -5,11 +5,9 @@
 //go:build !amd64 || !gc || purego
 // +build !amd64 !gc purego
 
-// package chacha20poly1305 -- go2cs converted at 2022 March 06 23:36:33 UTC
+// package chacha20poly1305 -- go2cs converted at 2022 March 13 06:44:36 UTC
 // import "vendor/golang.org/x/crypto/chacha20poly1305" ==> using chacha20poly1305 = go.vendor.golang.org.x.crypto.chacha20poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\chacha20poly1305\chacha20poly1305_noasm.go
-
-
 namespace go.vendor.golang.org.x.crypto;
 
 public static partial class chacha20poly1305_package {

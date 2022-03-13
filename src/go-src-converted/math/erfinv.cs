@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:04 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:56 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\erfinv.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    /*
-        Inverse of the floating-point error function.
-    */
+/*
+    Inverse of the floating-point error function.
+*/
 
-    // This implementation is based on the rational approximation
-    // of percentage points of normal distribution available from
-    // https://www.jstor.org/stable/2347330.
+// This implementation is based on the rational approximation
+// of percentage points of normal distribution available from
+// https://www.jstor.org/stable/2347330.
+
  
 // Coefficients for approximation to erf in |x| <= 0.85
 private static readonly float a0 = 1.1975323115670912564578e0F;
@@ -71,7 +70,6 @@ private static readonly float f5 = 2.611088405080593625138020e-5F;
 private static readonly float f6 = 2.010321207683943062279931e-7F;
 private static readonly float f7 = 2.891024605872965461538222e-15F;
 
-
 // Erfinv returns the inverse error function of x.
 //
 // Special cases are:
@@ -86,7 +84,6 @@ public static double Erfinv(double x) {
             return Inf(int(x));
         }
         return NaN();
-
     }
     var sign = false;
     if (x < 0) {
@@ -99,7 +96,6 @@ public static double Erfinv(double x) {
         var z1 = ((((((a7 * r + a6) * r + a5) * r + a4) * r + a3) * r + a2) * r + a1) * r + a0;
         var z2 = ((((((b7 * r + b6) * r + b5) * r + b4) * r + b3) * r + b2) * r + b1) * r + b0;
         ans = (x * z1) / z2;
-
     }
     else
  {
@@ -118,13 +114,11 @@ public static double Erfinv(double x) {
             z2 = ((((((f7 * r + f6) * r + f5) * r + f4) * r + f3) * r + f2) * r + f1) * r + f0;
         }
         ans = z1 / z2;
-
     }
     if (sign) {
         return -ans;
     }
     return ans;
-
 }
 
 // Erfcinv returns the inverse of Erfc(x).

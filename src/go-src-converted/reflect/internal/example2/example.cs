@@ -1,8 +1,6 @@
-// package example2 -- go2cs converted at 2022 March 06 22:31:01 UTC
+// package example2 -- go2cs converted at 2022 March 13 05:41:53 UTC
 // import "reflect/internal/example2" ==> using example2 = go.reflect.@internal.example2_package
 // Original source: C:\Program Files\Go\src\reflect\internal\example2\example.go
-
-
 namespace go.reflect.@internal;
 
 public static partial class example2_package {

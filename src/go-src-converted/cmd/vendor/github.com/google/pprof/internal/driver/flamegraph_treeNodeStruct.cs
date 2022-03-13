@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:28 UTC
+//     Generated on 2022 March 13 06:36:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct treeNode
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace @internal
             public static implicit operator treeNode(NilType nil) => default(treeNode);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static treeNode treeNode_cast(dynamic value)
         {
             return new treeNode(value.Name, value.FullName, value.Cum, value.CumFormat, value.Percent, value.Children);

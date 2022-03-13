@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2022 March 06 22:13:41 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:02 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\getwd.go
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using sync = sync_package;
+using syscall = syscall_package;
 
 public static partial class os_package {
 
@@ -60,7 +60,6 @@ public static (@string, error) Getwd() {
     if (err != null) { 
         // Can't stat root - no hope.
         return ("", error.As(err)!);
-
     }
     if (SameFile(root, dot)) {
         return ("/", error.As(null!)!);
@@ -69,17 +68,15 @@ public static (@string, error) Getwd() {
     {
         @string parent = "..";
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             if (len(parent) >= 1024) { // Sanity check
                 return ("", error.As(syscall.ENAMETOOLONG)!);
             parent = "../" + parent;
             }
-
             var (fd, err) = openFileNolog(parent, O_RDONLY, 0);
             if (err != null) {
                 return ("", error.As(err)!);
             }
-
             while (true) {
                 var (names, err) = fd.Readdirnames(100);
                 if (err != null) {
@@ -102,13 +99,11 @@ Found:
             if (err != null) {
                 return ("", error.As(err)!);
             }
-
             if (SameFile(pd, root)) {
                 break;
             } 
             // Set up for next round.
             dot = pd;
-
         }
     } 
 
@@ -118,7 +113,6 @@ Found:
     getwdCache.Unlock();
 
     return (dir, error.As(null!)!);
-
 }
 
 } // end os_package

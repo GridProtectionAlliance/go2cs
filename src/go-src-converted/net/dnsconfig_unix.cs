@@ -7,15 +7,15 @@
 
 // Read system DNS config from /etc/resolv.conf
 
-// package net -- go2cs converted at 2022 March 06 22:15:41 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:44 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\dnsconfig_unix.go
-using bytealg = go.@internal.bytealg_package;
-using os = go.os_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using os = os_package;
+using atomic = sync.atomic_package;
+using time = time_package;
 
 public static partial class net_package {
 
@@ -62,7 +62,6 @@ private static ptr<dnsConfig> dnsReadConfig(@string filename) => func((defer, _,
             return _addr_conf!;
         }
     }
-
     {
         var (line, ok) = file.readLine();
 
@@ -72,12 +71,10 @@ private static ptr<dnsConfig> dnsReadConfig(@string filename) => func((defer, _,
                 continue;
             line, ok = file.readLine();
             }
-
             var f = getFields(line);
             if (len(f) < 1) {
                 continue;
             }
-
             switch (f[0]) {
                 case "nameserver": // add one name server
                     if (len(f) > 1 && len(conf.servers) < 3) { // small, but the standard limit
@@ -95,9 +92,7 @@ private static ptr<dnsConfig> dnsReadConfig(@string filename) => func((defer, _,
                             }
 
                         }
-
                     }
-
                     break;
                 case "domain": // set search path to just this domain
                     if (len(f) > 1) {
@@ -122,7 +117,6 @@ private static ptr<dnsConfig> dnsReadConfig(@string filename) => func((defer, _,
                             else if (n > 15) {
                                 n = 15;
                             }
-
                             conf.ndots = n;
                         else if (hasPrefix(s, "timeout:")) 
                             (n, _, _) = dtoi(s[(int)8..]);
@@ -155,9 +149,7 @@ private static ptr<dnsConfig> dnsReadConfig(@string filename) => func((defer, _,
                             conf.useTCP = true;
                         else 
                             conf.unknownOpt = true;
-
-                    }
-
+                                        }
                     break;
                 case "lookup": 
                     // OpenBSD option:
@@ -169,7 +161,6 @@ private static ptr<dnsConfig> dnsReadConfig(@string filename) => func((defer, _,
                     conf.unknownOpt = true;
                     break;
             }
-
         }
     }
     if (len(conf.servers) == 0) {
@@ -179,7 +170,6 @@ private static ptr<dnsConfig> dnsReadConfig(@string filename) => func((defer, _,
         conf.search = dnsDefaultSearch();
     }
     return _addr_conf!;
-
 });
 
 // serverOffset returns an offset that can be used to determine
@@ -193,7 +183,6 @@ private static uint serverOffset(this ptr<dnsConfig> _addr_c) {
         return atomic.AddUint32(_addr_c.soffset, 1) - 1; // return 0 to start
     }
     return 0;
-
 }
 
 private static slice<@string> dnsDefaultSearch() {
@@ -201,7 +190,6 @@ private static slice<@string> dnsDefaultSearch() {
     if (err != null) { 
         // best effort
         return null;
-
     }
     {
         var i = bytealg.IndexByteString(hn, '.');
@@ -210,9 +198,7 @@ private static slice<@string> dnsDefaultSearch() {
             return new slice<@string>(new @string[] { ensureRooted(hn[i+1:]) });
         }
     }
-
     return null;
-
 }
 
 private static bool hasPrefix(@string s, @string prefix) {
@@ -224,7 +210,6 @@ private static @string ensureRooted(@string s) {
         return s;
     }
     return s + ".";
-
 }
 
 } // end net_package

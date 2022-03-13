@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httputil -- go2cs converted at 2022 March 06 22:24:02 UTC
+// package httputil -- go2cs converted at 2022 March 13 05:38:28 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Program Files\Go\src\net\http\httputil\persist.go
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using textproto = go.net.textproto_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.net.http;
+
+using bufio = bufio_package;
+using errors = errors_package;
+using io = io_package;
+using net = net_package;
+using http = net.http_package;
+using textproto = net.textproto_package;
+using sync = sync_package;
+using System;
 
 public static partial class httputil_package {
 
@@ -57,7 +56,6 @@ public static ptr<ServerConn> NewServerConn(net.Conn c, ptr<bufio.Reader> _addr_
         r = bufio.NewReader(c);
     }
     return addr(new ServerConn(c:c,r:r,pipereq:make(map[*http.Request]uint)));
-
 }
 
 // Hijack detaches the ServerConn and returns the underlying connection as well
@@ -87,7 +85,6 @@ private static error Close(this ptr<ServerConn> _addr_sc) {
         return error.As(c.Close())!;
     }
     return error.As(null!)!;
-
 }
 
 // Read returns the next request on the wire. An ErrPersistEOF is returned if
@@ -117,7 +114,6 @@ private static (ptr<http.Request>, error) Read(this ptr<ServerConn> _addr_sc) =>
             sc.mu.Lock();
             sc.pipereq[req] = id;
             sc.mu.Unlock();
-
         }
     }());
 
@@ -125,7 +121,6 @@ private static (ptr<http.Request>, error) Read(this ptr<ServerConn> _addr_sc) =>
     if (sc.we != null) { // no point receiving if write-side broken or closed
         defer(sc.mu.Unlock());
         return (_addr_null!, error.As(sc.we)!);
-
     }
     if (sc.re != null) {
         defer(sc.mu.Unlock());
@@ -134,7 +129,6 @@ private static (ptr<http.Request>, error) Read(this ptr<ServerConn> _addr_sc) =>
     if (sc.r == null) { // connection closed by user in the meantime
         defer(sc.mu.Unlock());
         return (_addr_null!, error.As(errClosed)!);
-
     }
     var r = sc.r;
     var lastbody = sc.lastbody;
@@ -164,7 +158,6 @@ private static (ptr<http.Request>, error) Read(this ptr<ServerConn> _addr_sc) =>
             // data before the close.
             sc.re = ErrPersistEOF;
             return (_addr_null!, error.As(sc.re)!);
-
         }
         else
  {
@@ -179,7 +172,6 @@ private static (ptr<http.Request>, error) Read(this ptr<ServerConn> _addr_sc) =>
         return (_addr_req!, error.As(sc.re)!);
     }
     return (_addr_req!, error.As(err)!);
-
 });
 
 // Pending returns the number of unanswered requests
@@ -222,7 +214,6 @@ private static error Write(this ptr<ServerConn> _addr_sc, ptr<http.Request> _add
     if (sc.c == null) { // connection closed by user in the meantime
         defer(sc.mu.Unlock());
         return error.As(ErrClosed)!;
-
     }
     var c = sc.c;
     if (sc.nread <= sc.nwritten) {
@@ -234,7 +225,6 @@ private static error Write(this ptr<ServerConn> _addr_sc, ptr<http.Request> _add
         // requests will be lost. It is up to the user to drain them
         // before signaling.
         sc.re = ErrPersistEOF;
-
     }
     sc.mu.Unlock();
 
@@ -248,7 +238,6 @@ private static error Write(this ptr<ServerConn> _addr_sc, ptr<http.Request> _add
     sc.nwritten++;
 
     return error.As(null!)!;
-
 });
 
 // ClientConn is an artifact of Go's early HTTP implementation.
@@ -282,7 +271,6 @@ public static ptr<ClientConn> NewClientConn(net.Conn c, ptr<bufio.Reader> _addr_
         r = bufio.NewReader(c);
     }
     return addr(new ClientConn(c:c,r:r,pipereq:make(map[*http.Request]uint),writeReq:(*http.Request).Write,));
-
 }
 
 // NewProxyClientConn is an artifact of Go's early HTTP implementation.
@@ -325,7 +313,6 @@ private static error Close(this ptr<ClientConn> _addr_cc) {
         return error.As(c.Close())!;
     }
     return error.As(null!)!;
-
 }
 
 // Write writes a request. An ErrPersistEOF error is returned if the connection
@@ -354,7 +341,6 @@ private static error Write(this ptr<ClientConn> _addr_cc, ptr<http.Request> _add
             cc.mu.Lock();
             cc.pipereq[req] = id;
             cc.mu.Unlock();
-
         }
     }());
 
@@ -362,7 +348,6 @@ private static error Write(this ptr<ClientConn> _addr_cc, ptr<http.Request> _add
     if (cc.re != null) { // no point sending if read-side closed or broken
         defer(cc.mu.Unlock());
         return error.As(cc.re)!;
-
     }
     if (cc.we != null) {
         defer(cc.mu.Unlock());
@@ -371,14 +356,12 @@ private static error Write(this ptr<ClientConn> _addr_cc, ptr<http.Request> _add
     if (cc.c == null) { // connection closed by user in the meantime
         defer(cc.mu.Unlock());
         return error.As(errClosed)!;
-
     }
     var c = cc.c;
     if (req.Close) { 
         // We write the EOF to the write-side error, because there
         // still might be some pipelined reads
         cc.we = ErrPersistEOF;
-
     }
     cc.mu.Unlock();
 
@@ -392,7 +375,6 @@ private static error Write(this ptr<ClientConn> _addr_cc, ptr<http.Request> _add
     cc.nwritten++;
 
     return error.As(null!)!;
-
 });
 
 // Pending returns the number of unanswered requests
@@ -437,7 +419,6 @@ private static (ptr<http.Response>, error) Read(this ptr<ClientConn> _addr_cc, p
     if (cc.r == null) { // connection closed by user in the meantime
         defer(cc.mu.Unlock());
         return (_addr_null!, error.As(errClosed)!);
-
     }
     var r = cc.r;
     var lastbody = cc.lastbody;
@@ -471,10 +452,8 @@ private static (ptr<http.Response>, error) Read(this ptr<ClientConn> _addr_cc, p
     if (resp.Close) {
         cc.re = ErrPersistEOF; // don't send any more requests
         return (_addr_resp!, error.As(cc.re)!);
-
     }
     return (_addr_resp!, error.As(err)!);
-
 });
 
 // Do is convenience method that writes a request and reads a response.
@@ -489,7 +468,6 @@ private static (ptr<http.Response>, error) Do(this ptr<ClientConn> _addr_cc, ptr
         return (_addr_null!, error.As(err)!);
     }
     return _addr_cc.Read(req)!;
-
 }
 
 } // end httputil_package

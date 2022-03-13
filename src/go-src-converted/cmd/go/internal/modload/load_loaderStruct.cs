@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:20 UTC
+//     Generated on 2022 March 13 06:31:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -49,7 +49,7 @@ namespace @internal
 {
     public static partial class modload_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(loaderParams))]
         private partial struct loader
         {
@@ -102,7 +102,7 @@ namespace @internal
             public static implicit operator loader(NilType nil) => default(loader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static loader loader_cast(dynamic value)
         {
             return new loader(value.loaderParams, value.allClosesOverTests, ref value.work, value.roots, ref value.pkgCache, value.pkgs);

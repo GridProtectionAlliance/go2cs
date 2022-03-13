@@ -10,18 +10,20 @@
 // See tzfile(5), https://en.wikipedia.org/wiki/Zoneinfo,
 // and ftp://munnari.oz.au/pub/oldtz/
 
-// package time -- go2cs converted at 2022 March 06 22:30:19 UTC
+// package time -- go2cs converted at 2022 March 13 05:41:08 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\zoneinfo_unix.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// Many systems use /usr/share/zoneinfo, Solaris 2 has
+// /usr/share/lib/zoneinfo, IRIX 6 has /usr/lib/locale/TZ.
 
 public static partial class time_package {
 
-    // Many systems use /usr/share/zoneinfo, Solaris 2 has
-    // /usr/share/lib/zoneinfo, IRIX 6 has /usr/lib/locale/TZ.
 private static @string zoneSources = new slice<@string>(new @string[] { "/usr/share/zoneinfo/", "/usr/share/lib/zoneinfo/", "/usr/lib/locale/TZ/", runtime.GOROOT()+"/lib/time/zoneinfo.zip" });
 
 private static void initLocal() { 
@@ -60,15 +62,12 @@ private static void initLocal() {
  {
                         localLoc.name = tz;
                     }
-
                     return ;
-
                 }
 
                 z = z__prev2;
 
             }
-
         }
         else if (tz != "" && tz != "UTC") {
             {
@@ -84,11 +83,9 @@ private static void initLocal() {
                 z = z__prev3;
 
             }
-
         }
     // Fall back to UTC.
     localLoc.name = "UTC";
-
 }
 
 } // end time_package

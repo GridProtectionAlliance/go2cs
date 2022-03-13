@@ -8,14 +8,14 @@
 //go:build linux
 // +build linux
 
-// package os -- go2cs converted at 2022 March 06 22:13:57 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:06 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\wait_waitid.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class os_package {
 
@@ -56,10 +56,8 @@ private static (bool, error) blockUntilWaitable(this ptr<Process> _addr_p) {
             return (false, error.As(null!)!);
         }
         return (false, error.As(NewSyscallError("waitid", e))!);
-
     }
     return (true, error.As(null!)!);
-
 }
 
 } // end os_package

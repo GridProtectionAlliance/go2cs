@@ -4,23 +4,24 @@
 
 // This file implements type-checking of identifiers and type expressions.
 
-// package types2 -- go2cs converted at 2022 March 06 23:13:07 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:32 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\typexpr.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// Disabled by default, but enabled when running tests (via types_test.go).
+
+using System;
 public static partial class types2_package {
 
-    // Disabled by default, but enabled when running tests (via types_test.go).
 private static bool acceptMethodTypeParams = default;
 
 // ident type-checks identifier e and initializes x with the value or type of e.
@@ -53,10 +54,8 @@ private static void ident(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
  {
                 check.errorf(e, "undeclared name: %s", e.Value);
             }
-
         }
         return ;
-
     }
     check.recordUse(e, obj); 
 
@@ -77,7 +76,6 @@ private static void ident(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
             typ = obj.Type(); // type must have been assigned by Checker.objDecl
         }
     }
-
     assert(typ != null); 
 
     // The object may have been dot-imported.
@@ -91,7 +89,6 @@ private static void ident(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
             pkgName.used = true;
         }
     }
-
 
     switch (obj.type()) {
         case ptr<PkgName> obj:
@@ -114,7 +111,6 @@ private static void ident(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
  {
                 x.val = obj.val;
             }
-
             assert(x.val != null);
             x.mode = constant_;
             break;
@@ -152,7 +148,6 @@ private static void ident(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
     }
 
     x.typ = typ;
-
 }
 
 // typ type-checks the type expression e and returns its type, or Typ[Invalid].
@@ -192,17 +187,13 @@ private static void ordinaryType(this ptr<Checker> _addr_check, syntax.Pos pos, 
                     check.softErrorf(pos, "interface contains type constraints (%s)", t.allTypes);
                     return ;
                 }
-
                 if (t.IsComparable()) {
                     check.softErrorf(pos, "interface is (or embeds) comparable");
                 }
-
             }
 
         }
-
     });
-
 }
 
 // anyType type-checks the type expression e and returns its type, or Typ[Invalid].
@@ -233,7 +224,6 @@ private static Type definedType(this ptr<Checker> _addr_check, syntax.Expr e, pt
     }
     check.recordTypeAndValue(e, typexpr, typ, null);
     return typ;
-
 }
 
 // genericType is like typ but the type must be an (uninstantiated) generic type.
@@ -247,11 +237,9 @@ private static Type genericType(this ptr<Checker> _addr_check, syntax.Expr e, bo
             check.errorf(e, "%s is not a generic type", typ);
         }
         typ = Typ[Invalid];
-
     }
     check.recordTypeAndValue(e, typexpr, typ, null);
     return typ;
-
 }
 
 // isubst returns an x with identifiers substituted per the substitution map smap.
@@ -328,7 +316,6 @@ private static syntax.Expr isubst(syntax.Expr x, map<ptr<syntax.Name>, ptr<synta
         }
     }
     return x;
-
 }
 
 // funcType type-checks a function or method type.
@@ -371,12 +358,9 @@ private static void funcType(this ptr<Checker> _addr_check, ptr<Signature> _addr
                         if (smap == null) {
                             smap = make_map<ptr<syntax.Name>, ptr<syntax.Name>>();
                         }
-
                         _addr_smap[p] = _addr_new;
                         smap[p] = ref _addr_smap[p].val;
-
                     }
-
                 }
 
                 i = i__prev1;
@@ -385,7 +369,6 @@ private static void funcType(this ptr<Checker> _addr_check, ptr<Signature> _addr
             if (smap != null) { 
                 // blank identifiers were found => use rewritten receiver type
                 recvTyp = isubst(recvPar.Type, smap);
-
             } 
             // TODO(gri) rework declareTypeParams
             sig.rparams = null;
@@ -412,7 +395,6 @@ private static void funcType(this ptr<Checker> _addr_check, ptr<Signature> _addr
                     recv = recv__prev4;
 
                 }
-
             } 
             // provide type parameter bounds
             // - only do this if we have the right number (otherwise an error is reported elsewhere)
@@ -450,13 +432,11 @@ private static void funcType(this ptr<Checker> _addr_check, ptr<Signature> _addr
                             bound = check.subst(tname.pos, bound, smap);
                             tname.typ._<ptr<TypeParam>>().bound = addr(bound);
                         }
-
                     }
 
                     i = i__prev1;
                 }
             }
-
         }
     }
     if (tparams != null) {
@@ -546,9 +526,7 @@ private static void funcType(this ptr<Checker> _addr_check, ptr<Signature> _addr
                                     err = "pointer or interface type";
                                     break;
                             }
-
                         }
-
                     }                    {
                         var T__prev4 = T;
 
@@ -571,29 +549,23 @@ private static void funcType(this ptr<Checker> _addr_check, ptr<Signature> _addr
 
                     }
 
-
                     T = T__prev3;
 
                 }
-
                 if (err != "") {
                     check.errorf(recv.pos, "invalid receiver type %s (%s)", recv.typ, err); 
                     // ok to continue
                 }
-
             }
 
             t = t__prev2;
 
         }
-
         sig.recv = recv;
-
     }
     sig.@params = NewTuple(params);
     sig.results = NewTuple(results);
     sig.variadic = variadic;
-
 });
 
 // goTypeName returns the Go type name for typ and
@@ -622,9 +594,7 @@ private static Type typInternal(this ptr<Checker> _addr_check, syntax.Expr e0, p
                 // TODO(gri) investigate if that's a bug or to be expected
                 // (see also analogous comment in Checker.instantiate).
                 under = T.Underlying();
-
             }
-
             if (T == under) {
                 check.trace(e0.Pos(), "=> %s // %s", T, goTypeName(T));
             }
@@ -632,9 +602,7 @@ private static Type typInternal(this ptr<Checker> _addr_check, syntax.Expr e0, p
  {
                 check.trace(e0.Pos(), "=> %s (under = %s) // %s", T, under, goTypeName(T));
             }
-
         }());
-
     }
     switch (e0.type()) {
         case ptr<syntax.BadExpr> e:
@@ -684,9 +652,7 @@ private static Type typInternal(this ptr<Checker> _addr_check, syntax.Expr e0, p
                 // [...]array
                 check.error(e, "invalid use of [...] array (outside a composite literal)");
                 typ.len = -1;
-
             }
-
             typ.elem = check.varType(e.Elem);
             if (typ.len >= 0) {
                 return typ;
@@ -789,7 +755,6 @@ private static Type typInternal(this ptr<Checker> _addr_check, syntax.Expr e0, p
     typ = Typ[Invalid];
     def.setUnderlying(typ);
     return typ;
-
 });
 
 // typeOrNil type-checks the type expression (or nil value) e
@@ -813,7 +778,6 @@ private static Type typOrNil(this ptr<Checker> _addr_check, syntax.Expr e) {
     else 
         check.errorf(_addr_x, "%s is not a type", _addr_x);
         return Typ[Invalid];
-
 }
 
 private static Type instantiatedType(this ptr<Checker> _addr_check, syntax.Expr x, slice<syntax.Expr> targs, ptr<Named> _addr_def) {
@@ -840,7 +804,6 @@ private static Type instantiatedType(this ptr<Checker> _addr_check, syntax.Expr 
     if (typ.targs == null) {
         def.setUnderlying(Typ[Invalid]); // avoid later errors due to lazy instantiation
         return Typ[Invalid];
-
     }
     typ.poslist = make_slice<syntax.Pos>(len(targs));
     foreach (var (i, arg) in targs) {
@@ -851,7 +814,6 @@ private static Type instantiatedType(this ptr<Checker> _addr_check, syntax.Expr 
     });
 
     return typ;
-
 }
 
 // arrayLength type-checks the array length expression e
@@ -867,7 +829,6 @@ private static long arrayLength(this ptr<Checker> _addr_check, syntax.Expr e) {
             check.errorf(_addr_x, "array length %s must be constant", _addr_x);
         }
         return -1;
-
     }
     if (isUntyped(x.typ) || isInteger(x.typ)) {
         {
@@ -883,20 +844,15 @@ private static long arrayLength(this ptr<Checker> _addr_check, syntax.Expr e) {
                         }
 
                     }
-
                     check.errorf(_addr_x, "invalid array length %s", _addr_x);
                     return -1;
-
                 }
-
             }
 
         }
-
     }
     check.errorf(_addr_x, "array length %s must be integer", _addr_x);
     return -1;
-
 }
 
 // typeList provides the list of types corresponding to the incoming expression list.
@@ -914,7 +870,6 @@ private static slice<Type> typeList(this ptr<Checker> _addr_check, slice<syntax.
             res[i] = t;
         }
     }    return res;
-
 }
 
 // collectParams declares the parameters of list in scope and returns the corresponding
@@ -955,13 +910,10 @@ private static (slice<ptr<Var>>, bool) collectParams(this ptr<Checker> _addr_che
                         check.softErrorf(t, "can only use ... with final parameter in list"); 
                         // ignore ... and continue
                     }
-
                 }
 
             }
-
             typ = check.varType(ftype);
-
         }
         if (field.Name != null) { 
             // named parameter
@@ -970,12 +922,10 @@ private static (slice<ptr<Var>>, bool) collectParams(this ptr<Checker> _addr_che
                 check.error(field.Name, invalidAST + "anonymous parameter"); 
                 // ok to continue
             }
-
             var par = NewParam(field.Name.Pos(), check.pkg, name, typ);
             check.declare(scope, field.Name, par, scope.pos);
             params = append(params, par);
             named = true;
-
         }
         else
  { 
@@ -984,7 +934,6 @@ private static (slice<ptr<Var>>, bool) collectParams(this ptr<Checker> _addr_che
             check.recordImplicit(field, par);
             params = append(params, par);
             anonymous = true;
-
         }
     }    if (named && anonymous) {
         check.error(list[0], invalidAST + "list contains both named and anonymous parameters"); 
@@ -996,7 +945,6 @@ private static (slice<ptr<Var>>, bool) collectParams(this ptr<Checker> _addr_che
         check.recordTypeAndValue(list[len(list) - 1].Type, typexpr, last.typ, null);
     }
     return ;
-
 }
 
 private static bool declareInSet(this ptr<Checker> _addr_check, ptr<objset> _addr_oset, syntax.Pos pos, Object obj) {
@@ -1014,9 +962,7 @@ private static bool declareInSet(this ptr<Checker> _addr_check, ptr<objset> _add
             return false;
         }
     }
-
     return true;
-
 }
 
 private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> _addr_ityp, ptr<syntax.InterfaceType> _addr_iface, ptr<Named> _addr_def) {
@@ -1040,10 +986,8 @@ private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> 
  {
                     check.error(f.Name, "invalid method name _");
                 }
-
                 continue; // ignore
             }
-
             if (name == "type") { 
                 // Always collect all type list entries, even from
                 // different type lists, under the assumption that
@@ -1052,12 +996,9 @@ private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> 
                 if (tname != null && tname != f.Name) {
                     check.error(f.Name, "cannot have multiple type lists in an interface");
                 }
-
                 tname = f.Name;
                 continue;
-
             }
-
             var typ = check.typ(f.Type);
             ptr<Signature> (sig, _) = typ._<ptr<Signature>>();
             if (sig == null) {
@@ -1079,13 +1020,11 @@ private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> 
             if (def != null) {
                 recvTyp = def;
             }
-
             sig.recv = NewVar(f.Name.Pos(), check.pkg, "", recvTyp);
 
             var m = NewFunc(f.Name.Pos(), check.pkg, name, sig);
             check.recordDef(f.Name, m);
             ityp.methods = append(ityp.methods, m);
-
         }
         else
  { 
@@ -1093,7 +1032,6 @@ private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> 
             // eventually verify that we have an interface.
             ityp.embeddeds = append(ityp.embeddeds, check.typ(f.Type));
             check.posMap[ityp] = append(check.posMap[ityp], f.Type.Pos());
-
         }
     }    ityp.types = NewSum(check.collectTypeConstraints(iface.Pos(), types));
 
@@ -1101,7 +1039,6 @@ private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> 
         // empty interface
         ityp.allMethods = markComplete;
         return ;
-
     }
     sortMethods(ityp.methods);
     sortTypes(ityp.embeddeds);
@@ -1109,7 +1046,6 @@ private static void interfaceType(this ptr<Checker> _addr_check, ptr<Interface> 
     check.later(() => {
         check.completeInterface(iface.Pos(), ityp);
     });
-
 }
 
 private static void completeInterface(this ptr<Checker> _addr_check, syntax.Pos pos, ptr<Interface> _addr_ityp) => func((defer, panic, _) => {
@@ -1135,7 +1071,6 @@ private static void completeInterface(this ptr<Checker> _addr_check, syntax.Pos 
             check.indent--;
             check.trace(pos, "=> %s (methods = %v, types = %v)", ityp, ityp.allMethods, ityp.allTypes);
         }());
-
     }
     ityp.allMethods = markComplete; 
 
@@ -1184,7 +1119,6 @@ private static void completeInterface(this ptr<Checker> _addr_check, syntax.Pos 
                 });
 
         }
-
     };
 
     {
@@ -1219,13 +1153,9 @@ private static void completeInterface(this ptr<Checker> _addr_check, syntax.Pos 
                     }
 
                 }
-
                 check.errorf(pos, format, typ);
-
             }
-
             continue;
-
         }
         check.completeInterface(pos, etyp);
         {
@@ -1240,13 +1170,11 @@ private static void completeInterface(this ptr<Checker> _addr_check, syntax.Pos 
         }
 
         allTypes = intersect(allTypes, etyp.allTypes);
-
     }    if (methods != null) {
         sortMethods(methods);
         ityp.allMethods = methods;
     }
     ityp.allTypes = allTypes;
-
 });
 
 // intersect computes the intersection of the types x and y.
@@ -1283,7 +1211,6 @@ private static Type intersect(Type x, Type y) => func((defer, _, _) => {
         return theBottom;
     }
     return NewSum(rtypes);
-
 });
 
 private static void sortTypes(slice<Type> list) {
@@ -1312,9 +1239,7 @@ private static @string sortName(Type t) {
             return named.obj.Id();
         }
     }
-
     return "";
-
 }
 
 private static void sortMethods(slice<ptr<Func>> list) {
@@ -1359,13 +1284,10 @@ private static @string tag(this ptr<Checker> _addr_check, ptr<syntax.BasicLit> _
                 }
 
             }
-
         }
         check.errorf(t, invalidAST + "incorrect tag syntax: %q", t.Value);
-
     }
     return "";
-
 }
 
 private static void structType(this ptr<Checker> _addr_check, ptr<Struct> _addr_styp, ptr<syntax.StructType> _addr_e) {
@@ -1426,7 +1348,6 @@ private static void structType(this ptr<Checker> _addr_check, ptr<Struct> _addr_
         if (f.Name != null) { 
             // named field
             add(f.Name, false, f.Name.Pos());
-
         }
         else
  { 
@@ -1441,9 +1362,7 @@ private static void structType(this ptr<Checker> _addr_check, ptr<Struct> _addr_
                 name = addr(new syntax.Name(Value:"_")); // TODO(gri) need to set position to pos
                 addInvalid(name, pos);
                 continue;
-
             }
-
             add(name, true, pos); 
 
             // Because we have a name, typ must be of the form T or *T, where T is the name
@@ -1459,13 +1378,11 @@ private static void structType(this ptr<Checker> _addr_check, ptr<Struct> _addr_
                         if (t == Typ[Invalid]) { 
                             // error was reported before
                             return ;
-
                         } 
                         // unsafe.Pointer is treated like a regular pointer
                         if (t.kind == UnsafePointer) {
                             check.error(embeddedPos, "embedded field type cannot be unsafe.Pointer");
                         }
-
                         break;
                     case ptr<Pointer> t:
                         check.error(embeddedPos, "embedded field type cannot be a pointer");
@@ -1476,13 +1393,10 @@ private static void structType(this ptr<Checker> _addr_check, ptr<Struct> _addr_
                         }
                         break;
                 }
-
             });
-
         }
     }    styp.fields = fields;
     styp.tags = tags;
-
 }
 
 private static ptr<syntax.Name> embeddedFieldIdent(syntax.Expr e) {
@@ -1504,11 +1418,9 @@ private static ptr<syntax.Name> embeddedFieldIdent(syntax.Expr e) {
                         }
 
                     }
-
                 }
 
             }
-
             break;
         case ptr<syntax.SelectorExpr> e:
             return _addr_e.Sel!;
@@ -1530,7 +1442,6 @@ private static slice<Type> collectTypeConstraints(this ptr<Checker> _addr_check,
             continue;
         }
         list = append(list, check.varType(texpr));
-
     }    check.later(() => {
         {
             var t__prev1 = t;
@@ -1550,11 +1461,9 @@ private static slice<Type> collectTypeConstraints(this ptr<Checker> _addr_check,
                     t = t__prev1;
 
                 }
-
                 if (includes(list[..(int)i], t)) {
                     check.softErrorf(types[i], "duplicate type %s in type list", t);
                 }
-
             }
 
             t = t__prev1;
@@ -1562,7 +1471,6 @@ private static slice<Type> collectTypeConstraints(this ptr<Checker> _addr_check,
     });
 
     return list;
-
 }
 
 // includes reports whether typ is in list
@@ -1572,7 +1480,6 @@ private static bool includes(slice<Type> list, Type typ) {
             return true;
         }
     }    return false;
-
 }
 
 private static syntax.Expr ptrBase(ptr<syntax.Operation> _addr_x) {
@@ -1582,7 +1489,6 @@ private static syntax.Expr ptrBase(ptr<syntax.Operation> _addr_x) {
         return x.X;
     }
     return null;
-
 }
 
 } // end types2_package

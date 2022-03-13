@@ -8,11 +8,9 @@
 // This is a large group of functions that most architectures don't
 // implement in assembly.
 
-// package math -- go2cs converted at 2022 March 06 22:31:11 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:05 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\stubs.go
-
-
 namespace go;
 
 public static partial class math_package {

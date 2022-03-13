@@ -5,12 +5,12 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows || plan9
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows plan9
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:39 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:24 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\env_posix.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -24,7 +24,6 @@ private static @string gogetenv(@string key) {
             return s[(int)len(key) + 1..];
         }
     }    return "";
-
 }
 
 // envKeyEqual reports whether a == b, with ASCII-only case insensitivity
@@ -37,15 +36,11 @@ private static bool envKeyEqual(@string a, @string b) {
             if (ca == cb || lowerASCII(ca) == lowerASCII(cb)) {
                 continue;
             }
-
             return false;
-
         }
         return true;
-
     }
     return a == b;
-
 }
 
 private static byte lowerASCII(byte c) {
@@ -53,7 +48,6 @@ private static byte lowerASCII(byte c) {
         return c + ('a' - 'A');
     }
     return c;
-
 }
 
 private static unsafe.Pointer _cgo_setenv = default; // pointer to C function
@@ -68,7 +62,6 @@ private static void syscall_setenv_c(@string k, @string v) {
     }
     ref array<unsafe.Pointer> arg = ref heap(new array<unsafe.Pointer>(new unsafe.Pointer[] { cstring(k), cstring(v) }), out ptr<array<unsafe.Pointer>> _addr_arg);
     asmcgocall(_cgo_setenv, @unsafe.Pointer(_addr_arg));
-
 }
 
 // Update the C environment if cgo is loaded.
@@ -80,7 +73,6 @@ private static void syscall_unsetenv_c(@string k) {
     }
     ref array<unsafe.Pointer> arg = ref heap(new array<unsafe.Pointer>(new unsafe.Pointer[] { cstring(k) }), out ptr<array<unsafe.Pointer>> _addr_arg);
     asmcgocall(_cgo_unsetenv, @unsafe.Pointer(_addr_arg));
-
 }
 
 private static unsafe.Pointer cstring(@string s) {

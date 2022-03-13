@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:30 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:52 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\search.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using imports = go.cmd.go.@internal.imports_package;
-using search = go.cmd.go.@internal.search_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using fmt = fmt_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using imports = cmd.go.@internal.imports_package;
+using search = cmd.go.@internal.search_package;
+
+using module = golang.org.x.mod.module_package;
+using System;
 
 public static partial class modload_package {
 
@@ -30,7 +29,6 @@ private partial struct stdFilter { // : sbyte
 
 private static readonly var omitStd = stdFilter(iota);
 private static readonly var includeStd = 0;
-
 
 // matchPackages is like m.MatchPackages, but uses a local variable (rather than
 // a global) for tags, can include or exclude packages in the standard library,
@@ -55,7 +53,6 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
     const var pruneVendor = pruning(1 << (int)(iota));
     const var pruneGoMod = 0;
 
-
     Action<@string, @string, pruning> walkPkgs = (root, importPathRoot, prune) => {
         root = filepath.Clean(root);
         var err = fsys.Walk(root, (path, fi, err) => {
@@ -79,18 +76,14 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
                 if (strings.HasPrefix(elem, ".") || strings.HasPrefix(elem, "_") || elem == "testdata") {
                     want = false;
                 }
-
             }
-
             var name = importPathRoot + filepath.ToSlash(path[(int)len(root)..]);
             if (importPathRoot == "") {
                 name = name[(int)1..]; // cut leading slash
             }
-
             if (!treeCanMatch(name)) {
                 want = false;
             }
-
             if (!fi.IsDir()) {
                 if (fi.Mode() & fs.ModeSymlink != 0 && want && strings.Contains(m.Pattern(), "...")) {
                     {
@@ -105,13 +98,9 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
                         err = err__prev3;
 
                     }
-
                 }
-
                 return null;
-
             }
-
             if (!want) {
                 return filepath.SkipDir;
             } 
@@ -129,9 +118,7 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
                     err = err__prev2;
 
                 }
-
             }
-
             if (!have[name]) {
                 have[name] = true;
                 if (isMatch(name)) {
@@ -147,17 +134,12 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
                         err = err__prev3;
 
                     }
-
                 }
-
             }
-
             if (elem == "vendor" && (prune & pruneVendor != 0)) {
                 return filepath.SkipDir;
             }
-
             return null;
-
         });
         if (err != null) {
             m.AddError(err);
@@ -176,7 +158,6 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
             walkPkgs(filepath.Join(ModRoot(), "vendor"), "", pruneVendor);
         }
         return ;
-
     }
     foreach (var (_, mod) in modules) {
         if (!treeCanMatch(mod.Path)) {
@@ -188,11 +169,9 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
             if (!HasModRoot()) {
                 continue; // If there is no main module, we can't search in it.
             }
-
             root = ModRoot();
             modPrefix = targetPrefix;
             isLocal = true;
-
         }
         else
  {
@@ -211,9 +190,7 @@ private static void matchPackages(context.Context ctx, ptr<search.Match> _addr_m
             prune |= pruneGoMod;
         }
         walkPkgs(root, modPrefix, prune);
-
     }    return ;
-
 }
 
 // MatchInModule identifies the packages matching the given pattern within the
@@ -255,14 +232,11 @@ public static ptr<search.Match> MatchInModule(context.Context ctx, @string patte
                 // problem with one or more of the Go source files, but such an error does
                 // not stop the package from existing, so it has no impact on matching.
                 match.Pkgs = new slice<@string>(new @string[] { pattern });
-
             }
 
         }
-
     }
     return _addr_match!;
-
 }
 
 } // end modload_package

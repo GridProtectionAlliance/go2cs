@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:08 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:35 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\scopes.go
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-
 namespace go.cmd.compile.@internal;
+
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using types2 = cmd.compile.@internal.types2_package;
+
+
+// recordScopes populates fn.Parents and fn.Marks based on the scoping
+// information provided by types2.
 
 public static partial class noder_package {
 
-    // recordScopes populates fn.Parents and fn.Marks based on the scoping
-    // information provided by types2.
 private static void recordScopes(this ptr<irgen> _addr_g, ptr<ir.Func> _addr_fn, ptr<syntax.FuncType> _addr_sig) {
     ref irgen g = ref _addr_g.val;
     ref ir.Func fn = ref _addr_fn.val;
@@ -33,7 +35,6 @@ private static void recordScopes(this ptr<irgen> _addr_g, ptr<ir.Func> _addr_fn,
     }
 
     g.marker.WriteTo(fn);
-
 }
 
 private static bool walkScope(this ptr<irgen> _addr_g, ptr<types2.Scope> _addr_scope) {
@@ -61,7 +62,6 @@ private static bool walkScope(this ptr<irgen> _addr_g, ptr<types2.Scope> _addr_s
             }
 
         }
-
     }    for (nint i = 0;
     var n = scope.NumChildren(); i < n; i++) {
         if (g.walkScope(scope.Child(i))) {
@@ -77,7 +77,6 @@ private static bool walkScope(this ptr<irgen> _addr_g, ptr<types2.Scope> _addr_s
         g.marker.Unpush();
     }
     return haveVars;
-
 }
 
 } // end noder_package

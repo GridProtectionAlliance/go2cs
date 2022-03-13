@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:42:22 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:31 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\type.go
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using atomic = go.sync.atomic_package;
-using System;
-
-
 namespace go.go;
 
+using fmt = fmt_package;
+using token = go.token_package;
+using atomic = sync.atomic_package;
+
+
+// A Type represents a type of Go.
+// All types implement the Type interface.
+
+using System;
 public static partial class types_package {
 
-    // A Type represents a type of Go.
-    // All types implement the Type interface.
 public partial interface Type {
     @string Underlying(); // String returns a string representation of a type.
     @string String();
@@ -58,7 +59,6 @@ public static readonly var UntypedString = 23;
 public static readonly Byte UntypedNil = Uint8;
 public static readonly var Rune = Int32;
 
-
 // BasicInfo is a set of flags describing properties of a basic type.
 public partial struct BasicInfo { // : nint
 }
@@ -73,7 +73,6 @@ public static readonly var IsString = 4;
 public static readonly IsOrdered IsUntyped = IsInteger | IsFloat | IsString;
 public static readonly var IsNumeric = IsInteger | IsFloat | IsComplex;
 public static readonly var IsConstType = IsBoolean | IsNumeric | IsString;
-
 
 // A Basic represents a basic type.
 public partial struct Basic {
@@ -167,7 +166,6 @@ public static ptr<Struct> NewStruct(slice<ptr<Var>> fields, slice<@string> tags)
         panic("more tags than fields");
     }
     return addr(new Struct(fields:fields,tags:tags));
-
 });
 
 // NumFields returns the number of fields in the struct (including blank and embedded fields).
@@ -192,7 +190,6 @@ private static @string Tag(this ptr<Struct> _addr_s, nint i) {
         return s.tags[i];
     }
     return "";
-
 }
 
 // A Pointer represents a pointer type.
@@ -228,7 +225,6 @@ public static ptr<Tuple> NewTuple(params ptr<ptr<Var>>[] _addr_x) {
         return addr(new Tuple(vars:x));
     }
     return _addr_null!;
-
 }
 
 // Len returns the number variables of tuple t.
@@ -239,7 +235,6 @@ private static nint Len(this ptr<Tuple> _addr_t) {
         return len(t.vars);
     }
     return 0;
-
 }
 
 // At returns the i'th variable of tuple t.
@@ -283,10 +278,8 @@ public static ptr<Signature> NewSignature(ptr<Var> _addr_recv, ptr<Tuple> _addr_
             }
 
         }
-
     }
     return addr(new Signature(recv:recv,params:params,results:results,variadic:variadic));
-
 });
 
 // Recv returns the receiver of signature s (if a method), or nil if a
@@ -361,12 +354,10 @@ private static Type _NewSum(slice<Type> types) => func((_, panic, _) => {
             }
 
         }
-
     }    if (len(types) == 1) {
         return types[0];
     }
     return addr(new _Sum(types:types));
-
 });
 
 // is reports whether all types in t satisfy pred.
@@ -381,7 +372,6 @@ private static bool @is(this ptr<_Sum> _addr_s, Func<Type, bool> pred) {
             return false;
         }
     }    return true;
-
 }
 
 // An Interface represents an interface type.
@@ -409,9 +399,7 @@ private static slice<Type> unpackType(Type typ) {
             return sum.types;
         }
     }
-
     return new slice<Type>(new Type[] { Type.As(typ)! });
-
 }
 
 // is reports whether interface t represents types that all satisfy pred.
@@ -426,7 +414,6 @@ private static bool @is(this ptr<Interface> _addr_t, Func<Type, bool> pred) {
             return false;
         }
     }    return true;
-
 }
 
 // emptyInterface represents the empty (completed) interface
@@ -471,7 +458,6 @@ public static ptr<Interface> NewInterfaceType(slice<ptr<Func>> methods, slice<Ty
             }
 
         }
-
     }    foreach (var (_, t) in embeddeds) {
         {
             ptr<Named> (_, ok) = t._<ptr<Named>>();
@@ -481,14 +467,12 @@ public static ptr<Interface> NewInterfaceType(slice<ptr<Func>> methods, slice<Ty
             }
 
         }
-
     }    sortMethods(methods);
     sortTypes(embeddeds);
 
     typ.methods = methods;
     typ.embeddeds = embeddeds;
     return _addr_typ!;
-
 });
 
 // NumExplicitMethods returns the number of explicitly declared methods of interface t.
@@ -569,12 +553,8 @@ private static bool Empty(this ptr<Interface> _addr_t) {
         // interface is complete - quick test
         // A non-nil allTypes may still be empty and represents the bottom type.
         return len(t.allMethods) == 0 && t.allTypes == null;
-
     }
-    return !t.iterate(t => {
-        return len(t.methods) > 0 || t.types != null;
-    }, null);
-
+    return !t.iterate(t => len(t.methods) > 0 || t.types != null, null);
 }
 
 // _HasTypeList reports whether interface t has a type list, possibly from an embedded type.
@@ -584,12 +564,8 @@ private static bool _HasTypeList(this ptr<Interface> _addr_t) {
     if (t.allMethods != null) { 
         // interface is complete - quick test
         return t.allTypes != null;
-
     }
-    return t.iterate(t => {
-        return t.types != null;
-    }, null);
-
+    return t.iterate(t => t.types != null, null);
 }
 
 // _IsComparable reports whether interface t is or embeds the predeclared interface "comparable".
@@ -600,13 +576,11 @@ private static bool _IsComparable(this ptr<Interface> _addr_t) {
         // interface is complete - quick test
         var (_, m) = lookupMethod(t.allMethods, null, "==");
         return m != null;
-
     }
     return t.iterate(t => {
         (_, m) = lookupMethod(t.methods, null, "==");
         return m != null;
     }, null);
-
 }
 
 // _IsConstraint reports t.HasTypeList() || t.IsComparable().
@@ -620,7 +594,6 @@ private static bool _IsConstraint(this ptr<Interface> _addr_t) {
         }
         var (_, m) = lookupMethod(t.allMethods, null, "==");
         return m != null;
-
     }
     return t.iterate(t => {
         if (t.types != null) {
@@ -628,9 +601,7 @@ private static bool _IsConstraint(this ptr<Interface> _addr_t) {
         }
         (_, m) = lookupMethod(t.methods, null, "==");
         return m != null;
-
     }, null);
-
 }
 
 // iterate calls f with t and then with any embedded interface of t, recursively, until f returns true.
@@ -658,28 +629,23 @@ private static bool iterate(this ptr<Interface> _addr_t, Func<ptr<Interface>, bo
                     if (seen[e]) {
                         continue;
                     }
-
                     if (seen == null) {
                         seen = make_map<ptr<Interface>, bool>();
                     }
-
                     seen[e] = true;
                     if (e.iterate(f, seen)) {
                         return true;
                     }
-
                 }
 
                 e = e__prev1;
 
             }
-
         }
         e = e__prev1;
     }
 
     return false;
-
 }
 
 // isSatisfiedBy reports whether interface t's type list is satisfied by the type typ.
@@ -695,7 +661,6 @@ private static bool isSatisfiedBy(this ptr<Interface> _addr_t, Type typ) {
     }
     var types = unpackType(t.allTypes);
     return includes(types, typ) || includes(types, under(typ));
-
 }
 
 // Complete computes the interface's method set. It must be called by users of
@@ -733,7 +698,6 @@ private static ptr<Interface> Complete(this ptr<Interface> _addr_t) => func((_, 
 
             other = other__prev1;
         }
-
     };
 
     {
@@ -770,7 +734,6 @@ private static ptr<Interface> Complete(this ptr<Interface> _addr_t) => func((_, 
         }
 
         allTypes = intersect(allTypes, etyp.allTypes);
-
     }    {
         nint i = 0;
 
@@ -781,7 +744,6 @@ private static ptr<Interface> Complete(this ptr<Interface> _addr_t) => func((_, 
                 panic("duplicate method " + m.name);
             i += 2;
             }
-
         }
     }
 
@@ -792,7 +754,6 @@ private static ptr<Interface> Complete(this ptr<Interface> _addr_t) => func((_, 
     t.allTypes = allTypes;
 
     return _addr_t!;
-
 });
 
 // A Map represents a map type.
@@ -834,7 +795,6 @@ public partial struct ChanDir { // : nint
 public static readonly ChanDir SendRecv = iota;
 public static readonly var SendOnly = 0;
 public static readonly var RecvOnly = 1;
-
 
 // NewChan returns a new channel type for the given direction and element type.
 public static ptr<Chan> NewChan(ChanDir dir, Type elem) {
@@ -880,9 +840,7 @@ public static ptr<Named> NewNamed(ptr<TypeName> _addr_obj, Type underlying, slic
             panic("types.NewNamed: underlying type must not be *Named");
         }
     }
-
     return _addr_(Checker.val)(null).newNamed(obj, underlying, methods)!;
-
 });
 
 private static ptr<Named> newNamed(this ptr<Checker> _addr_check, ptr<TypeName> _addr_obj, Type underlying, slice<ptr<Func>> methods) => func((_, panic, _) => {
@@ -904,12 +862,9 @@ private static ptr<Named> newNamed(this ptr<Checker> _addr_check, ptr<TypeName> 
                     break;
             }
             typ.check = null;
-
         });
-
     }
     return _addr_typ!;
-
 });
 
 // Obj returns the type name for the named type t.
@@ -972,9 +927,7 @@ private static void SetUnderlying(this ptr<Named> _addr_t, Type underlying) => f
             panic("types.Named.SetUnderlying: underlying type must not be *Named");
         }
     }
-
     t.underlying = underlying;
-
 });
 
 // AddMethod adds method m unless it is already in the method list.
@@ -989,7 +942,6 @@ private static void AddMethod(this ptr<Named> _addr_t, ptr<Func> _addr_m) {
             t.methods = append(t.methods, m);
         }
     }
-
 }
 
 // Note: This is a uint32 rather than a uint64 because the
@@ -1023,7 +975,6 @@ private static ptr<_TypeParam> newTypeParam(this ptr<Checker> _addr_check, ptr<T
         obj.typ = typ;
     }
     return _addr_typ!;
-
 }
 
 private static ptr<Interface> Bound(this ptr<_TypeParam> _addr_t) {
@@ -1042,7 +993,6 @@ private static ptr<Interface> Bound(this ptr<_TypeParam> _addr_t) {
     // TODO(rFindley) switch this to an unexported method on Checker.
     t.check.completeInterface(pos, iface);
     return _addr_iface!;
-
 }
 
 // optype returns a type's operational type. Except for
@@ -1069,18 +1019,13 @@ private static Type optype(Type typ) {
                 if (u != null && u != typ) { 
                     // u != typ and u is a type parameter => under(u) != typ, so this is ok
                     return under(u);
-
                 }
 
             }
-
             return theTop;
-
         }
     }
-
     return under(typ);
-
 }
 
 // An instance represents an instantiated generic type syntactically
@@ -1109,13 +1054,11 @@ private static Type expand(this ptr<instance> _addr_t) {
             v = Typ[Invalid];
         }
         t.value = v;
-
     }
     if (debug && v != Typ[Invalid]) {
         _ = v._<ptr<Named>>();
     }
     return v;
-
 }
 
 // expand expands a type instance into its instantiated
@@ -1129,9 +1072,7 @@ private static Type expand(Type typ) {
             return t.expand();
         }
     }
-
     return typ;
-
 }
 
 // expandf is set to expand.
@@ -1340,9 +1281,7 @@ private static Type under(Type t) {
             return n.under();
         }
     }
-
     return t;
-
 }
 
 // Converters

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:17:52 UTC
+//     Generated on 2022 March 13 06:31:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace @internal
 {
     public static partial class test_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lockedStdout
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace @internal
             public static implicit operator lockedStdout(NilType nil) => default(lockedStdout);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lockedStdout lockedStdout_cast(dynamic value)
         {
             return new lockedStdout();

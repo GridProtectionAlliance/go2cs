@@ -2,29 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:20:53 UTC
+// package tls -- go2cs converted at 2022 March 13 05:35:58 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\handshake_server.go
-using context = go.context_package;
-using crypto = go.crypto_package;
-using ecdsa = go.crypto.ecdsa_package;
-using ed25519 = go.crypto.ed25519_package;
-using rsa = go.crypto.rsa_package;
-using subtle = go.crypto.subtle_package;
-using x509 = go.crypto.x509_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-
 namespace go.crypto;
+
+using context = context_package;
+using crypto = crypto_package;
+using ecdsa = crypto.ecdsa_package;
+using ed25519 = crypto.ed25519_package;
+using rsa = crypto.rsa_package;
+using subtle = crypto.subtle_package;
+using x509 = crypto.x509_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using io = io_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+
+
+// serverHandshakeState contains details of a server handshake in progress.
+// It's discarded once the handshake has completed.
 
 public static partial class tls_package {
 
-    // serverHandshakeState contains details of a server handshake in progress.
-    // It's discarded once the handshake has completed.
 private partial struct serverHandshakeState {
     public ptr<Conn> c;
     public context.Context ctx;
@@ -55,7 +57,6 @@ private static error serverHandshake(this ptr<Conn> _addr_c, context.Context ctx
     }
     hs = new serverHandshakeState(c:c,ctx:ctx,clientHello:clientHello,);
     return error.As(hs.handshake())!;
-
 }
 
 private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
@@ -92,7 +93,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -105,7 +105,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -118,7 +117,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -131,7 +129,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -144,7 +141,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         c.clientFinishedIsFirst = false;
         {
             var err__prev2 = err;
@@ -158,7 +154,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     else
  { 
@@ -176,7 +171,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -189,7 +183,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -202,7 +195,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -215,7 +207,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         c.clientFinishedIsFirst = true;
         c.buffering = true;
         {
@@ -230,7 +221,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -243,7 +233,6 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -256,13 +245,11 @@ private static error handshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     c.ekm = ekmFromMasterSecret(c.vers, hs.suite, hs.masterSecret, hs.clientHello.random, hs.hello.random);
     atomic.StoreUint32(_addr_c.handshakeStatus, 1);
 
     return error.As(null!)!;
-
 }
 
 // readClientHello reads a ClientHello message and selects the protocol version.
@@ -310,7 +297,6 @@ private static (ptr<clientHelloMsg>, error) readClientHello(this ptr<Conn> _addr
     c.@out.version = c.vers;
 
     return (_addr_clientHello!, error.As(null!)!);
-
 }
 
 private static error processClientHello(this ptr<serverHandshakeState> _addr_hs) {
@@ -345,7 +331,6 @@ private static error processClientHello(this ptr<serverHandshakeState> _addr_hs)
             copy(serverRandom[(int)24..], downgradeCanaryTLS11);
         }
         serverRandom = serverRandom[..(int)24];
-
     }
     var (_, err) = io.ReadFull(c.config.rand(), serverRandom);
     if (err != null) {
@@ -379,7 +364,6 @@ private static error processClientHello(this ptr<serverHandshakeState> _addr_hs)
             c.sendAlert(alertInternalError);
         }
         return error.As(err)!;
-
     }
     if (hs.clientHello.scts) {
         hs.hello.scts = hs.cert.SignedCertificateTimestamps;
@@ -393,7 +377,6 @@ private static error processClientHello(this ptr<serverHandshakeState> _addr_hs)
         // Per RFC 4492, section 5.1.2, implementations MUST support the
         // uncompressed point format. See golang.org/issue/31943.
         hs.hello.supportedPoints = new slice<byte>(new byte[] { pointFormatUncompressed });
-
     }
     {
         crypto.Signer priv__prev1 = priv;
@@ -418,12 +401,10 @@ private static error processClientHello(this ptr<serverHandshakeState> _addr_hs)
                     break;
                 }
             }
-
         }
         priv = priv__prev1;
 
     }
-
     {
         crypto.Signer priv__prev1 = priv;
 
@@ -441,15 +422,12 @@ private static error processClientHello(this ptr<serverHandshakeState> _addr_hs)
                     break;
                 }
             }
-
         }
         priv = priv__prev1;
 
     }
 
-
     return error.As(null!)!;
-
 }
 
 // negotiateALPN picks a shared ALPN protocol that both sides support in server
@@ -476,7 +454,6 @@ private static (@string, error) negotiateALPN(slice<@string> serverProtos, slice
         return ("", error.As(null!)!);
     }
     return ("", error.As(fmt.Errorf("tls: client requested unsupported application protocols (%s)", clientProtos))!);
-
 }
 
 // supportsECDHE returns whether ECDHE key exchanges can be used with this
@@ -497,7 +474,6 @@ private static bool supportsECDHE(ptr<Config> _addr_c, slice<CurveID> supportedC
             break;
         }
     }    return supportsCurve && supportsPointFormat;
-
 }
 
 private static error pickCipherSuite(this ptr<serverHandshakeState> _addr_hs) {
@@ -543,17 +519,13 @@ private static error pickCipherSuite(this ptr<serverHandshakeState> _addr_hs) {
                     c.sendAlert(alertInappropriateFallback);
                     return error.As(errors.New("tls: client using inappropriate protocol fallback"))!;
                 }
-
                 break;
-
             }
-
         }
         id = id__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 private static bool cipherSuiteOk(this ptr<serverHandshakeState> _addr_hs, ptr<cipherSuite> _addr_c) {
@@ -580,7 +552,6 @@ private static bool cipherSuiteOk(this ptr<serverHandshakeState> _addr_hs, ptr<c
         return false;
     }
     return true;
-
 }
 
 // checkForResumption reports whether we should perform resumption on this connection.
@@ -631,7 +602,6 @@ private static bool checkForResumption(this ptr<serverHandshakeState> _addr_hs) 
         return false;
     }
     return true;
-
 }
 
 private static error doResumeHandshake(this ptr<serverHandshakeState> _addr_hs) {
@@ -661,7 +631,6 @@ private static error doResumeHandshake(this ptr<serverHandshakeState> _addr_hs) 
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -673,7 +642,6 @@ private static error doResumeHandshake(this ptr<serverHandshakeState> _addr_hs) 
         err = err__prev1;
 
     }
-
 
     if (c.config.VerifyConnection != null) {
         {
@@ -689,12 +657,10 @@ private static error doResumeHandshake(this ptr<serverHandshakeState> _addr_hs) 
             err = err__prev2;
 
         }
-
     }
     hs.masterSecret = hs.sessionState.masterSecret;
 
     return error.As(null!)!;
-
 }
 
 private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
@@ -713,7 +679,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
         // No need to keep a full record of the handshake if client
         // certificates won't be used.
         hs.finishedHash.discardHandshakeBuffer();
-
     }
     hs.finishedHash.Write(hs.clientHello.marshal());
     hs.finishedHash.Write(hs.hello.marshal());
@@ -729,7 +694,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
 
     }
 
-
     ptr<object> certMsg = @new<certificateMsg>();
     certMsg.certificates = hs.cert.Certificate;
     hs.finishedHash.Write(certMsg.marshal());
@@ -744,7 +708,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
         err = err__prev1;
 
     }
-
 
     if (hs.hello.ocspStapling) {
         ptr<object> certStatus = @new<certificateStatusMsg>();
@@ -762,7 +725,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     var keyAgreement = hs.suite.ka(c.vers);
     var (skx, err) = keyAgreement.generateServerKeyExchange(c.config, hs.cert, hs.clientHello, hs.hello);
@@ -784,7 +746,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     ptr<certificateRequestMsg> certReq;
     if (c.config.ClientAuth >= RequestClientCert) { 
@@ -811,7 +772,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     ptr<object> helloDone = @new<serverHelloDoneMsg>();
     hs.finishedHash.Write(helloDone.marshal());
@@ -827,7 +787,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -839,7 +798,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
         err = err__prev1;
 
     }
-
 
     crypto.PublicKey pub = default; // public key for client auth, if any
 
@@ -867,7 +825,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         if (len(certMsg.certificates) != 0) {
             pub = c.peerCertificates[0].PublicKey;
         }
@@ -890,7 +847,6 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     ptr<clientKeyExchangeMsg> (ckx, ok) = msg._<ptr<clientKeyExchangeMsg>>();
     if (!ok) {
@@ -969,14 +925,11 @@ private static error doFullHandshake(this ptr<serverHandshakeState> _addr_hs) {
 
         }
 
-
         hs.finishedHash.Write(certVerify.marshal());
-
     }
     hs.finishedHash.discardHandshakeBuffer();
 
     return error.As(null!)!;
-
 }
 
 private static error establishKeys(this ptr<serverHandshakeState> _addr_hs) {
@@ -1007,7 +960,6 @@ private static error establishKeys(this ptr<serverHandshakeState> _addr_hs) {
     c.@out.prepareCipherSpec(c.vers, serverCipher, serverHash);
 
     return error.As(null!)!;
-
 }
 
 private static error readFinished(this ptr<serverHandshakeState> _addr_hs, slice<byte> @out) {
@@ -1022,7 +974,6 @@ private static error readFinished(this ptr<serverHandshakeState> _addr_hs, slice
             return error.As(err)!;
         }
     }
-
 
     var (msg, err) = c.readHandshake();
     if (err != null) {
@@ -1041,7 +992,6 @@ private static error readFinished(this ptr<serverHandshakeState> _addr_hs, slice
     hs.finishedHash.Write(clientFinished.marshal());
     copy(out, verify);
     return error.As(null!)!;
-
 }
 
 private static error sendSessionTicket(this ptr<serverHandshakeState> _addr_hs) {
@@ -1061,7 +1011,6 @@ private static error sendSessionTicket(this ptr<serverHandshakeState> _addr_hs) 
         // If this is re-wrapping an old key, then keep
         // the original time it was created.
         createdAt = hs.sessionState.createdAt;
-
     }
     slice<slice<byte>> certsFromClient = default;
     foreach (var (_, cert) in c.peerCertificates) {
@@ -1081,9 +1030,7 @@ private static error sendSessionTicket(this ptr<serverHandshakeState> _addr_hs) 
         }
     }
 
-
     return error.As(null!)!;
-
 }
 
 private static error sendFinished(this ptr<serverHandshakeState> _addr_hs, slice<byte> @out) {
@@ -1099,7 +1046,6 @@ private static error sendFinished(this ptr<serverHandshakeState> _addr_hs, slice
         }
     }
 
-
     ptr<finishedMsg> finished = @new<finishedMsg>();
     finished.verifyData = hs.finishedHash.serverSum(hs.masterSecret);
     hs.finishedHash.Write(finished.marshal());
@@ -1111,11 +1057,9 @@ private static error sendFinished(this ptr<serverHandshakeState> _addr_hs, slice
         }
     }
 
-
     copy(out, finished.verifyData);
 
     return error.As(null!)!;
-
 }
 
 // processCertsFromClient takes a chain of client certificates either from a
@@ -1149,7 +1093,6 @@ private static error processCertsFromClient(this ptr<Conn> _addr_c, Certificate 
             return error.As(errors.New("tls: failed to verify client certificate: " + err.Error()))!;
         }
         c.verifiedChains = chains;
-
     }
     c.peerCertificates = certs;
     c.ocspResponse = certificate.OCSPStaple;
@@ -1170,7 +1113,6 @@ private static error processCertsFromClient(this ptr<Conn> _addr_c, Certificate 
                 break;
             }
         }
-
     }
     if (c.config.VerifyPeerCertificate != null) {
         {
@@ -1186,10 +1128,8 @@ private static error processCertsFromClient(this ptr<Conn> _addr_c, Certificate 
             err = err__prev2;
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 private static ptr<ClientHelloInfo> clientHelloInfo(context.Context ctx, ptr<Conn> _addr_c, ptr<clientHelloMsg> _addr_clientHello) {
@@ -1201,7 +1141,6 @@ private static ptr<ClientHelloInfo> clientHelloInfo(context.Context ctx, ptr<Con
         supportedVersions = supportedVersionsFromMax(clientHello.vers);
     }
     return addr(new ClientHelloInfo(CipherSuites:clientHello.cipherSuites,ServerName:clientHello.serverName,SupportedCurves:clientHello.supportedCurves,SupportedPoints:clientHello.supportedPoints,SignatureSchemes:clientHello.supportedSignatureAlgorithms,SupportedProtos:clientHello.alpnProtocols,SupportedVersions:supportedVersions,Conn:c.conn,config:c.config,ctx:ctx,));
-
 }
 
 } // end tls_package

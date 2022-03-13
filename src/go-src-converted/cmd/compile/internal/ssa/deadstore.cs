@@ -2,23 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:36 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:59 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\deadstore.go
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// dse does dead-store elimination on the Function.
+// Dead stores are those which are unconditionally followed by
+// another store to the same location, with no intervening load.
+// This implementation only works within a basic block. TODO: use something more global.
+
+using System;
 public static partial class ssa_package {
 
-    // dse does dead-store elimination on the Function.
-    // Dead stores are those which are unconditionally followed by
-    // another store to the same location, with no intervening load.
-    // This implementation only works within a basic block. TODO: use something more global.
 private static void dse(ptr<Func> _addr_f) => func((defer, _, _) => {
     ref Func f = ref _addr_f.val;
 
@@ -44,7 +45,6 @@ private static void dse(ptr<Func> _addr_f) => func((defer, _, _) => {
                 if (v.Op == OpPhi) { 
                     // Ignore phis - they will always be first and can't be eliminated
                     continue;
-
                 }
                 if (v.Type.IsMemory()) {
                     stores = append(stores, v);
@@ -59,7 +59,6 @@ private static void dse(ptr<Func> _addr_f) => func((defer, _, _) => {
                                     // CALL, DUFFCOPY, etc. are both
                                     // reads and writes.
                                     loadUse.add(a.ID);
-
                                 }
                             }
                         }
@@ -100,7 +99,6 @@ private static void dse(ptr<Func> _addr_f) => func((defer, _, _) => {
                     b.Fatalf("two final stores - simultaneous live stores %s %s", last.LongString(), v.LongString());
                 }
                 last = v;
-
             }
             v = v__prev2;
         }
@@ -116,7 +114,6 @@ walkloop:
             // Someone might be reading this memory state.
             // Clear all shadowed addresses.
             shadowed.clear();
-
         }
         if (v.Op == OpStore || v.Op == OpZero) {
             long sz = default;
@@ -126,7 +123,6 @@ walkloop:
             else
  { // OpZero
                 sz = v.AuxInt;
-
             }
             {
                 var shadowedSize = int64(shadowed.get(v.Args[0].ID));
@@ -137,30 +133,24 @@ walkloop:
                     if (v.Op == OpStore) { 
                         // store addr value mem
                         v.SetArgs1(v.Args[2]);
-
                     }
                     else
  { 
                         // zero addr mem
                         v.SetArgs1(v.Args[1]);
-
                     }
                     v.Aux = null;
                     v.AuxInt = 0;
                     v.Op = OpCopy;
-
                 }
                 else
  {
                     if (sz > 0x7fffffff) { // work around sparseMap's int32 value type
                         sz = 0x7fffffff;
-
                     }
                     shadowed.set(v.Args[0].ID, int32(sz), src.NoXPos);
-
                 }
             }
-
         }
         if (v.Op == OpPhi) { 
             // At start of block.  Move on to next block.
@@ -168,7 +158,6 @@ walkloop:
             // the first logical store in the block.
             // (Even if it isn't the first in the current b.Values order.)
             continue;
-
         }
         {
             var a__prev2 = a;
@@ -257,7 +246,6 @@ private static void elimDeadAutosGeneric(ptr<Func> _addr_f) => func((_, panic, _
             // Nil check has no use, but we need to keep it.
             // Also keep calls and values that have side effects.
             return ;
-
         }
         if (v.Type.IsMemory() || v.Type.IsFlags() || v.Op == OpPhi || v.MemoryArg() != null) {
             {
@@ -280,14 +268,12 @@ private static void elimDeadAutosGeneric(ptr<Func> _addr_f) => func((_, panic, _
                         n = n__prev2;
 
                     }
-
                 }
 
                 a = a__prev1;
             }
 
             return ;
-
         }
         ptr<ir.Name> node;
         {
@@ -312,15 +298,12 @@ private static void elimDeadAutosGeneric(ptr<Func> _addr_f) => func((_, panic, _
                             // value to keep things simple.
                             used.Add(n);
                             changed = true;
-
                         }
-
                     }
 
                     n = n__prev1;
 
                 }
-
             }
 
             a = a__prev1;
@@ -334,16 +317,13 @@ private static void elimDeadAutosGeneric(ptr<Func> _addr_f) => func((_, panic, _
             addr[v] = node;
             changed = true;
             return ;
-
         }
         if (addr[v] != node) { 
             // This doesn't happen in practice, but catch it just in case.
             used.Add(node);
             changed = true;
-
         }
         return ;
-
     };
 
     nint iterations = 0;
@@ -351,7 +331,6 @@ private static void elimDeadAutosGeneric(ptr<Func> _addr_f) => func((_, panic, _
         if (iterations == 4) { 
             // give up
             return ;
-
         }
         iterations++;
         var changed = false;
@@ -382,9 +361,7 @@ private static void elimDeadAutosGeneric(ptr<Func> _addr_f) => func((_, panic, _
                     n = n__prev1;
 
                 }
-
             }
-
         }        if (!changed) {
             break;
         }
@@ -406,7 +383,6 @@ private static void elimDeadAutosGeneric(ptr<Func> _addr_f) => func((_, panic, _
             v.Aux = null;
             v.AuxInt = 0;
             v.Op = OpCopy;
-
         }
         v = v__prev1;
         n = n__prev1;
@@ -450,8 +426,7 @@ private static void elimUnreadAutos(ptr<Func> _addr_f) {
                 if (v.Uses > 0) {
                     seen.Add(n);
                 }
-            
-        }
+                    }
     }    foreach (var (_, store) in stores) {
         ptr<ir.Name> (n, _) = store.Aux._<ptr<ir.Name>>();
         if (seen.Has(n)) {
@@ -461,7 +436,6 @@ private static void elimUnreadAutos(ptr<Func> _addr_f) {
         store.Aux = null;
         store.AuxInt = 0;
         store.Op = OpCopy;
-
     }
 }
 

@@ -12,25 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package graph -- go2cs converted at 2022 March 06 23:23:35 UTC
+// package graph -- go2cs converted at 2022 March 13 06:36:40 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/graph" ==> using graph = go.cmd.vendor.github.com.google.pprof.@internal.graph_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\graph\dotgraph.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
-using measurement = go.github.com.google.pprof.@internal.measurement_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+using measurement = github.com.google.pprof.@internal.measurement_package;
+
+
+// DotAttributes contains details about the graph itself, giving
+// insight into how its elements should be rendered.
+
+using System;
 public static partial class graph_package {
 
-    // DotAttributes contains details about the graph itself, giving
-    // insight into how its elements should be rendered.
 public partial struct DotAttributes {
     public map<ptr<Node>, ptr<DotNodeAttributes>> Nodes; // A map allowing each Node to have its own visualization option
 }
@@ -150,7 +151,6 @@ private static void start(this ptr<builder> _addr_b) {
     }
     fmt.Fprintln(b, "digraph \"" + graphname + "\" {");
     fmt.Fprintln(b, "node [style=filled fillcolor=\"#f8f8f8\"]");
-
 }
 
 // finish closes the opening curly bracket in the constructed DOT buffer.
@@ -178,7 +178,6 @@ private static void addLegend(this ptr<builder> _addr_b) {
         fmt.Fprintf(b, " tooltip=\"%s\"", b.config.Title);
     }
     fmt.Fprintf(b, "] }\n");
-
 }
 
 // addNode generates a graph node in DOT format.
@@ -218,7 +217,6 @@ private static void addNode(this ptr<builder> _addr_b, ptr<Node> _addr_node, nin
         }
         cumValue = b.config.FormatValue(cum);
         label = label + fmt.Sprintf("of %s (%s)", cumValue, strings.TrimSpace(measurement.Percentage(cum, b.config.Total)));
-
     }
     nint baseFontSize = 8;
     float maxFontGrowth = 16.0F;
@@ -247,7 +245,6 @@ private static void addNode(this ptr<builder> _addr_b, ptr<Node> _addr_node, nin
         }
     }
     fmt.Fprintf(b, "N%d [%s]\n", nodeID, attr);
-
 }
 
 // addNodelets generates the DOT boxes for the node tags if they exist.
@@ -316,7 +313,6 @@ private static bool addNodelets(this ptr<builder> _addr_b, ptr<Node> _addr_node,
                 nts = nts__prev1;
 
             }
-
         }
         t = t__prev1;
     }
@@ -333,10 +329,8 @@ private static bool addNodelets(this ptr<builder> _addr_b, ptr<Node> _addr_node,
 
     }
 
-
     fmt.Fprint(b, nodelets);
     return nodelets != "";
-
 }
 
 private static @string numericNodelets(this ptr<builder> _addr_b, slice<ptr<Tag>> nts, nint maxNumNodelets, bool flatTags, @string source) {
@@ -358,7 +352,6 @@ private static @string numericNodelets(this ptr<builder> _addr_b, slice<ptr<Tag>
             nodelets += fmt.Sprintf("%s -> N%s_%d [label=\" %s\" weight=100 tooltip=\"%s\" labeltooltip=\"%s\"%s]" + "\n", source, source, j, weight, weight, weight, attr);
         }
     }    return nodelets;
-
 }
 
 // addEdge generates a graph edge in DOT format.
@@ -382,7 +375,6 @@ private static void addEdge(this ptr<builder> _addr_b, ptr<Edge> _addr_edge, nin
             }
 
         }
-
         {
             nint width = 1 + int(min64(abs64(edge.WeightValue() * 5 / b.config.Total), 5));
 
@@ -391,9 +383,7 @@ private static void addEdge(this ptr<builder> _addr_b, ptr<Edge> _addr_edge, nin
             }
 
         }
-
         attr = fmt.Sprintf("%s color=\"%s\"", attr, dotColor(float64(edge.WeightValue()) / float64(abs64(b.config.Total)), false));
-
     }
     @string arrow = "->";
     if (edge.Residual) {
@@ -408,10 +398,8 @@ private static void addEdge(this ptr<builder> _addr_b, ptr<Edge> _addr_edge, nin
     if (hasNodelets) { 
         // Separate children further if source has tags.
         attr = attr + " minlen=2";
-
     }
     fmt.Fprintf(b, "N%d -> N%d [%s]\n", from, to, attr);
-
 }
 
 // dotColor returns a color for the given score (between -1.0 and
@@ -483,7 +471,6 @@ private static @string dotColor(double score, bool isBackground) {
     }
     b = value * (1 - saturation);
     return fmt.Sprintf("#%02x%02x%02x", uint8(r * 255.0F), uint8(g * 255.0F), uint8(b * 255.0F));
-
 }
 
 private static @string multilinePrintableName(ptr<NodeInfo> _addr_info) {
@@ -497,7 +484,6 @@ private static @string multilinePrintableName(ptr<NodeInfo> _addr_info) {
         infoCopy.File = filepath.Base(infoCopy.File);
     }
     return strings.Join(infoCopy.NameComponents(), "\\n") + "\\n";
-
 }
 
 // collapsedTags trims and sorts a slice of tags.
@@ -541,14 +527,12 @@ private static slice<ptr<Tag>> collapsedTags(this ptr<builder> _addr_b, slice<pt
                         }
 
                     }
-
                 }
 
 
                 i = i__prev2;
             }
             tagGroups[g] = append(tagGroups[g], t);
-
         }
         t = t__prev1;
     }
@@ -566,7 +550,6 @@ private static slice<ptr<Tag>> collapsedTags(this ptr<builder> _addr_b, slice<pt
     }
 
     return SortTags(nts, flatTags);
-
 }
 
 private static double tagDistance(ptr<Tag> _addr_t, ptr<Tag> _addr_u) {
@@ -578,7 +561,6 @@ private static double tagDistance(ptr<Tag> _addr_t, ptr<Tag> _addr_u) {
         return float64(t.Value) - v;
     }
     return v - float64(t.Value);
-
 }
 
 private static (@string, long, long) tagGroupLabel(this ptr<builder> _addr_b, slice<ptr<Tag>> g) {
@@ -614,7 +596,6 @@ private static (@string, long, long) tagGroupLabel(this ptr<builder> _addr_b, sl
                 v = v__prev1;
 
             }
-
             {
                 var v__prev1 = v;
 
@@ -627,12 +608,10 @@ private static (@string, long, long) tagGroupLabel(this ptr<builder> _addr_b, sl
                 v = v__prev1;
 
             }
-
             f += t.Flat;
             df += t.FlatDiv;
             c += t.Cum;
             dc += t.CumDiv;
-
         }
         t = t__prev1;
     }
@@ -644,7 +623,6 @@ private static (@string, long, long) tagGroupLabel(this ptr<builder> _addr_b, sl
         c = c / dc;
     }
     return (measurement.Label(min.Value, min.Unit) + ".." + measurement.Label(max.Value, max.Unit), f, c);
-
 }
 
 private static long min64(long a, long b) {
@@ -652,7 +630,6 @@ private static long min64(long a, long b) {
         return a;
     }
     return b;
-
 }
 
 // escapeAllForDot applies escapeForDot to all strings in the given slice.

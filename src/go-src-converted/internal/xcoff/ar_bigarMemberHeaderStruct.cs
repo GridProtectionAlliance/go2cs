@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:01 UTC
+//     Generated on 2022 March 13 05:52:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class xcoff_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct bigarMemberHeader
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace @internal
             public static implicit operator bigarMemberHeader(NilType nil) => default(bigarMemberHeader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static bigarMemberHeader bigarMemberHeader_cast(dynamic value)
         {
             return new bigarMemberHeader(value.Arsize, value.Arnxtmem, value.Arprvmem, value.Ardate, value.Aruid, value.Argid, value.Armode, value.Arnamlen);

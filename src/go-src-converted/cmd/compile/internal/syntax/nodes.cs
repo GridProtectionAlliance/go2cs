@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:10 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:26:36 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\nodes.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class syntax_package {
 
-    // ----------------------------------------------------------------------------
-    // Nodes
+// ----------------------------------------------------------------------------
+// Nodes
+
 public partial interface Node {
     Pos Pos();
     Pos aNode();
@@ -108,8 +107,7 @@ public partial struct FuncDecl {
     public ptr<FuncType> Type;
     public ptr<BlockStmt> Body; // nil means no body (forward declaration)
     public ref decl decl => ref decl_val;
-}
-private partial struct decl {
+}private partial struct decl {
     public ref node node => ref node_val;
 }
 
@@ -308,8 +306,7 @@ public partial struct ChanType {
     public ChanDir Dir; // 0 means no direction
     public Expr Elem;
     public ref expr expr => ref expr_val;
-}
-private partial struct expr {
+}private partial struct expr {
     public ref node node => ref node_val;
 }
 
@@ -324,7 +321,6 @@ public partial struct ChanDir { // : nuint
 private static readonly ChanDir _ = iota;
 public static readonly var SendOnly = 0;
 public static readonly var RecvOnly = 1;
-
 
 // ----------------------------------------------------------------------------
 // Statements
@@ -426,8 +422,7 @@ public partial struct SelectStmt {
     public slice<ptr<CommClause>> Body;
     public Pos Rbrace;
     public ref stmt stmt => ref stmt_val;
-}
-public partial struct RangeClause {
+}public partial struct RangeClause {
     public Expr Lhs; // nil means no Lhs = or Lhs :=
     public bool Def; // means :=
     public Expr X; // range X
@@ -446,8 +441,7 @@ public partial struct CommClause {
     public slice<Stmt> Body;
     public Pos Colon;
     public ref node node => ref node_val;
-}
-private partial struct stmt {
+}private partial struct stmt {
     public ref node node => ref node_val;
 }
 
@@ -473,7 +467,6 @@ public static readonly CommentKind Above = iota;
 public static readonly var Below = 0;
 public static readonly var Left = 1;
 public static readonly var Right = 2;
-
 
 public partial struct Comment {
     public CommentKind Kind;

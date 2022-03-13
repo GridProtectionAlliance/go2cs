@@ -4,16 +4,16 @@
 
 //go:generate go run mkbuiltin.go
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:45 UTC
+// package typecheck -- go2cs converted at 2022 March 13 06:00:05 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\target.go
-using ir = go.cmd.compile.@internal.ir_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
 
 public static partial class typecheck_package {
 
-    // Target is the package being compiled.
+// Target is the package being compiled.
 public static ptr<ir.Package> Target;
 
 } // end typecheck_package

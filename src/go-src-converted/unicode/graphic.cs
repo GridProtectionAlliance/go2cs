@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package unicode -- go2cs converted at 2022 March 06 22:14:11 UTC
+// package unicode -- go2cs converted at 2022 March 13 05:28:20 UTC
 // import "unicode" ==> using unicode = go.unicode_package
 // Original source: C:\Program Files\Go\src\unicode\graphic.go
-
-
 namespace go;
 
 public static partial class unicode_package {
 
-    // Bit masks for each code point under U+0100, for fast lookup.
+// Bit masks for each code point under U+0100, for fast lookup.
 private static readonly nint pC = 1 << (int)(iota); // a control character.
 private static readonly var pP = 0; // a punctuation character.
 private static readonly var pN = 1; // a numeral.
@@ -22,7 +20,6 @@ private static readonly var pLl = 5; // a lower-case letter.
 private static readonly pg pp = pp | pZ; // a graphical character according to the Unicode definition.
 private static readonly var pLo = pLl | pLu; // a letter that is neither upper nor lower case.
 private static readonly var pLmask = pLo;
-
 
 // GraphicRanges defines the set of graphic characters according to Unicode.
 public static ptr<RangeTable> GraphicRanges = new slice<ptr<RangeTable>>(new ptr<RangeTable>[] { L, M, N, P, S, Zs });
@@ -41,7 +38,6 @@ public static bool IsGraphic(int r) {
         return properties[uint8(r)] & pg != 0;
     }
     return In(r, _addr_GraphicRanges);
-
 }
 
 // IsPrint reports whether the rune is defined as printable by Go. Such
@@ -54,7 +50,6 @@ public static bool IsPrint(int r) {
         return properties[uint8(r)] & pp != 0;
     }
     return In(r, _addr_PrintRanges);
-
 }
 
 // IsOneOf reports whether the rune is a member of one of the ranges.
@@ -65,7 +60,6 @@ public static bool IsOneOf(slice<ptr<RangeTable>> ranges, int r) {
             return true;
         }
     }    return false;
-
 }
 
 // In reports whether the rune is a member of one of the ranges.
@@ -78,7 +72,6 @@ public static bool In(int r, params ptr<ptr<RangeTable>>[] _addr_ranges) {
             return true;
         }
     }    return false;
-
 }
 
 // IsControl reports whether the rune is a control character.
@@ -89,7 +82,6 @@ public static bool IsControl(int r) {
         return properties[uint8(r)] & pC != 0;
     }
     return false;
-
 }
 
 // IsLetter reports whether the rune is a letter (category L).
@@ -98,14 +90,12 @@ public static bool IsLetter(int r) {
         return properties[uint8(r)] & (pLmask) != 0;
     }
     return isExcludingLatin(Letter, r);
-
 }
 
 // IsMark reports whether the rune is a mark character (category M).
 public static bool IsMark(int r) { 
     // There are no mark characters in Latin-1.
     return isExcludingLatin(Mark, r);
-
 }
 
 // IsNumber reports whether the rune is a number (category N).
@@ -114,7 +104,6 @@ public static bool IsNumber(int r) {
         return properties[uint8(r)] & pN != 0;
     }
     return isExcludingLatin(Number, r);
-
 }
 
 // IsPunct reports whether the rune is a Unicode punctuation character
@@ -124,7 +113,6 @@ public static bool IsPunct(int r) {
         return properties[uint8(r)] & pP != 0;
     }
     return Is(Punct, r);
-
 }
 
 // IsSpace reports whether the rune is a space character as defined
@@ -156,10 +144,8 @@ public static bool IsSpace(int r) {
                 break;
         }
         return false;
-
     }
     return isExcludingLatin(White_Space, r);
-
 }
 
 // IsSymbol reports whether the rune is a symbolic character.
@@ -168,7 +154,6 @@ public static bool IsSymbol(int r) {
         return properties[uint8(r)] & pS != 0;
     }
     return isExcludingLatin(Symbol, r);
-
 }
 
 } // end unicode_package

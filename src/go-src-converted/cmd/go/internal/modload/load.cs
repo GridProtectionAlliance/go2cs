@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:19 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:42 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\load.go
+namespace go.cmd.go.@internal;
 // This file contains the module-mode package loader, as well as some accessory
 // functions pertaining to the package import graph.
 //
@@ -93,48 +94,48 @@
 // of whether those packages are in "all". Today, that requires two iterations
 // if those packages are not found in existing dependencies of the main module.
 
-using bytes = go.bytes_package;
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
 
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using imports = go.cmd.go.@internal.imports_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using mvs = go.cmd.go.@internal.mvs_package;
-using par = go.cmd.go.@internal.par_package;
-using search = go.cmd.go.@internal.search_package;
-using str = go.cmd.go.@internal.str_package;
+using bytes = bytes_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
 
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using imports = cmd.go.@internal.imports_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using mvs = cmd.go.@internal.mvs_package;
+using par = cmd.go.@internal.par_package;
+using search = cmd.go.@internal.search_package;
+using str = cmd.go.@internal.str_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+
+
+// loaded is the most recently-used package loader.
+// It holds details about individual packages.
+//
+// This variable should only be accessed directly in top-level exported
+// functions. All other functions that require or produce a *loader should pass
+// or return it as an explicit parameter.
+
 using System;
-
-
-namespace go.cmd.go.@internal;
-
 public static partial class modload_package {
 
-    // loaded is the most recently-used package loader.
-    // It holds details about individual packages.
-    //
-    // This variable should only be accessed directly in top-level exported
-    // functions. All other functions that require or produce a *loader should pass
-    // or return it as an explicit parameter.
 private static ptr<loader> loaded;
 
 // PackageOpts control the behavior of the LoadPackages function.
@@ -255,13 +256,9 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
                             if (ld != null) {
                                 m.AddError(err);
                             }
-
                             continue;
-
                         }
-
                         m.Pkgs = append(m.Pkgs, pkg);
-
                     }
                 else if (m.IsLiteral()) 
                     m.Pkgs = new slice<@string>(new @string[] { m.Pattern() });
@@ -276,9 +273,7 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
                         // modules. However, for cases like 'go list -e', the error should not
                         // necessarily prevent us from loading the packages we could find.
                         m.Errs = append(m.Errs, err);
-
                     }
-
                     matchPackages(ctx, m, opts.Tags, includeStd, mg.BuildList());
                 else if (m.Pattern() == "all") 
                     if (ld == null) { 
@@ -286,25 +281,20 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
                         // loadFromRoots will expand that to "all".
                         m.Errs = m.Errs[..(int)0];
                         matchPackages(ctx, m, opts.Tags, omitStd, new slice<module.Version>(new module.Version[] { Target }));
-
                     }
                     else
  { 
                         // Starting with the packages in the main module,
                         // enumerate the full list of "all".
                         m.Pkgs = ld.computePatternAll();
-
                     }
-
                 else if (m.Pattern() == "std" || m.Pattern() == "cmd") 
                     if (m.Pkgs == null) {
                         m.MatchPackages(); // Locate the packages within GOROOT/src.
                     }
-
                 else 
                     panic(fmt.Sprintf("internal error: modload missing case for pattern %s", m.Pattern()));
-                
-            }
+                            }
 
             m = m__prev1;
         }
@@ -346,7 +336,6 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
                         // was only demoted from direct to indirect, it may still be in use via
                         // a transitive import.
                         unused = mg.Selected(m.Path) == "none";
-
                     }
                     else
  { 
@@ -355,13 +344,10 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
                         // by any package or test in the main module.
                         var (_, ok) = ld.requirements.rootSelected(m.Path);
                         unused = !ok;
-
                     }
-
                     if (unused) {
                         fmt.Fprintf(os.Stderr, "unused %s\n", m.Path);
                     }
-
                 }
 
                 m = m__prev1;
@@ -389,7 +375,6 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
 
         }
 
-
         if (allowWriteGoMod) {
             modfetch.TrimGoSum(keep); 
 
@@ -399,7 +384,6 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
             // preserve checksums for) additional entities from compatRS, which are
             // only needed for compatibility with ld.TidyCompatibleVersion.
             modfetch.WriteGoSum(keep);
-
         }
     }
     loaded = ld;
@@ -419,7 +403,6 @@ public static (slice<ptr<search.Match>>, slice<@string>) LoadPackages(context.Co
 
     sort.Strings(loadedPackages);
     return (matches, loadedPackages);
-
 });
 
 // matchLocalDirs is like m.MatchDirs, but tries to avoid scanning directories
@@ -445,19 +428,15 @@ private static void matchLocalDirs(context.Context ctx, ptr<search.Match> _addr_
             if (!filepath.IsAbs(dir)) {
                 absDir = filepath.Join(@base.Cwd(), dir);
             }
-
             if (search.InDir(absDir, cfg.GOROOTsrc) == "" && search.InDir(absDir, ModRoot()) == "" && pathInModuleCache(ctx, absDir, _addr_rs) == "") {
                 m.Dirs = new slice<@string>(new @string[] {  });
                 m.AddError(fmt.Errorf("directory prefix %s outside available modules", @base.ShortPath(absDir)));
                 return ;
             }
-
         }
     }
 
-
     m.MatchDirs();
-
 });
 
 // resolveLocalPackage resolves a filesystem path to a package path.
@@ -491,15 +470,11 @@ private static (@string, error) resolveLocalPackage(context.Context ctx, @string
                     // Canonicalize OS-specific errors to errDirectoryNotFound so that error
                     // messages will be easier for users to search for.
                     return ("", error.As(addr(new fs.PathError(Op:"stat",Path:absDir,Err:errDirectoryNotFound))!)!);
-
                 }
-
                 return ("", error.As(err)!);
-
             }
 
         }
-
         {
             ptr<build.NoGoError> (_, noGo) = err._<ptr<build.NoGoError>>();
 
@@ -513,18 +488,15 @@ private static (@string, error) resolveLocalPackage(context.Context ctx, @string
                 // sense that it cannot exist in any other module), but has some other
                 // problem (such as a syntax error).
                 return ("", error.As(err)!);
-
             }
 
         }
-
     }
     if (modRoot != "" && absDir == modRoot) {
         if (absDir == cfg.GOROOTsrc) {
             return ("", error.As(errPkgIsGorootSrc)!);
         }
         return (targetPrefix, error.As(null!)!);
-
     }
     if (modRoot != "" && strings.HasPrefix(absDir, modRoot + string(filepath.Separator)) && !strings.Contains(absDir[(int)len(modRoot)..], "@")) {
         var suffix = filepath.ToSlash(absDir[(int)len(modRoot)..]);
@@ -542,9 +514,7 @@ private static (@string, error) resolveLocalPackage(context.Context ctx, @string
                 }
 
             }
-
             return (pkg, error.As(null!)!);
-
         }
         if (targetPrefix == "") {
             pkg = strings.TrimPrefix(suffix, "/");
@@ -553,11 +523,8 @@ private static (@string, error) resolveLocalPackage(context.Context ctx, @string
                 // It's not included in "std", so it shouldn't resolve from "."
                 // within module "std" either.
                 return ("", error.As(errPkgIsBuiltin)!);
-
             }
-
             return (pkg, error.As(null!)!);
-
         }
         pkg = targetPrefix + suffix;
         {
@@ -570,11 +537,8 @@ private static (@string, error) resolveLocalPackage(context.Context ctx, @string
                 return ("", error.As(addr(new PackageNotInModuleError(Mod:Target,Pattern:pkg))!)!);
             }
 
-
         }
-
         return (pkg, error.As(null!)!);
-
     }
     {
         var sub = search.InDir(absDir, cfg.GOROOTsrc);
@@ -588,13 +552,11 @@ private static (@string, error) resolveLocalPackage(context.Context ctx, @string
         }
     }
 
-
     pkg = pathInModuleCache(ctx, absDir, _addr_rs);
     if (pkg == "") {
         return ("", error.As(fmt.Errorf("directory %s outside available modules", @base.ShortPath(absDir)))!);
     }
     return (pkg, error.As(null!)!);
-
 }
 
 private static var errDirectoryNotFound = errors.New("directory not found");private static var errPkgIsGorootSrc = errors.New("GOROOT/src is not an importable package");private static var errPkgIsBuiltin = errors.New("\"builtin\" is a pseudo-package, not an importable package");
@@ -624,9 +586,7 @@ private static @string pathInModuleCache(context.Context ctx, @string dir, ptr<R
                 root, err = modfetch.DownloadDir(m);
             }
 
-
         }
-
         if (err != null) {
             return ("", false);
         }
@@ -639,7 +599,6 @@ private static @string pathInModuleCache(context.Context ctx, @string dir, ptr<R
             return ("", false);
         }
         return (path.Join(m.Path, filepath.ToSlash(sub)), true);
-
     };
 
     if (rs.depth == lazy) {
@@ -656,7 +615,6 @@ private static @string pathInModuleCache(context.Context ctx, @string dir, ptr<R
                     }
 
                 }
-
                 {
                     var importPath__prev2 = importPath;
 
@@ -666,13 +624,11 @@ private static @string pathInModuleCache(context.Context ctx, @string dir, ptr<R
                         // checkMultiplePaths ensures that a module can be used for at most one
                         // requirement, so this must be it.
                         return importPath;
-
                     }
 
                     importPath = importPath__prev2;
 
                 }
-
             }
 
             m = m__prev1;
@@ -695,7 +651,6 @@ private static @string pathInModuleCache(context.Context ctx, @string dir, ptr<R
     }
 
     return importPath;
-
 }
 
 // ImportFromFiles adds modules to the build list as needed
@@ -715,7 +670,6 @@ public static void ImportFromFiles(context.Context ctx, slice<@string> gofiles) 
     }
     loaded = loadFromRoots(ctx, new loaderParams(PackageOpts:PackageOpts{Tags:tags,ResolveMissingImports:true,SilencePackageErrors:true,},requirements:rs,listRoots:func(*Requirements)(roots[]string){roots=append(roots,imports...)roots=append(roots,testImports...)returnroots},));
     commitRequirements(ctx, loaded.GoVersion, loaded.requirements);
-
 }
 
 // DirImportPath returns the effective import path for dir,
@@ -742,10 +696,8 @@ public static @string DirImportPath(context.Context ctx, @string dir) {
             return strings.TrimPrefix(suffix, "/vendor/");
         }
         return targetPrefix + suffix;
-
     }
     return ".";
-
 }
 
 // ImportMap returns the actual package import path
@@ -758,7 +710,6 @@ public static @string ImportMap(@string path) {
         return "";
     }
     return pkg.path;
-
 }
 
 // PackageDir returns the directory containing the source code
@@ -769,7 +720,6 @@ public static @string PackageDir(@string path) {
         return "";
     }
     return pkg.dir;
-
 }
 
 // PackageModule returns the module providing the package named by the import path.
@@ -779,7 +729,6 @@ public static module.Version PackageModule(@string path) {
         return new module.Version();
     }
     return pkg.mod;
-
 }
 
 // Lookup returns the source directory, import path, and any loading error for
@@ -812,10 +761,8 @@ public static (@string, @string, error) Lookup(@string parentPath, bool parentIs
             return (dir, path, error.As(null!)!);
         }
         return ("", "", error.As(errMissing)!);
-
     }
     return (pkg.dir, pkg.path, error.As(pkg.err)!);
-
 });
 
 // A loader manages the process of loading information about
@@ -921,7 +868,6 @@ private static readonly var pkgFromRoot = 1;
 // loadPkg have been populated.
 private static readonly var pkgImportsLoaded = 2;
 
-
 // has reports whether all of the flags in cond are set in f.
 private static bool has(this loadPkgFlags f, loadPkgFlags cond) {
     return f & cond == cond;
@@ -948,7 +894,6 @@ private static loadPkgFlags update(this ptr<atomicLoadPkgFlags> _addr_af, loadPk
             return loadPkgFlags(old);
         }
     }
-
 }
 
 // has reports whether all of the flags in cond are set in af.
@@ -977,7 +922,6 @@ private static bool fromExternalModule(this ptr<loadPkg> _addr_pkg) {
         return false; // loaded from the main module.
     }
     return true;
-
 }
 
 private static var errMissing = errors.New("cannot find package");
@@ -1008,14 +952,12 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
             // go.sum files produced by all previous versions, so a compatibility
             // version higher than the go.mod version adds nothing.
             ld.TidyCompatibleVersion = ld.GoVersion;
-
         }
     }
     if (semver.Compare("v" + ld.GoVersion, narrowAllVersionV) < 0 && !ld.UseVendorAll) { 
         // The module's go version explicitly predates the change in "all" for lazy
         // loading, so continue to use the older interpretation.
         ld.allClosesOverTests = true;
-
     }
     error err = default!;
     ld.requirements, err = convertDepth(ctx, ld.requirements, modDepthFromGoVersion(ld.GoVersion));
@@ -1053,9 +995,7 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
                 // for an extra iteration of preloading than potentially end up
                 // discarding the result of a full iteration of loading.)
                 continue;
-
             }
-
         }
         map inRoots = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<loadPkg>, bool>{};
         foreach (var (_, path) in rootPkgs) {
@@ -1080,19 +1020,16 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
             // version specified by a new root than add a new dependency on an
             // unrelated version.
             continue;
-
         }
         if (!ld.ResolveMissingImports || (!HasModRoot() && !allowMissingModuleImports)) { 
             // We've loaded as much as we can without resolving missing imports.
             break;
-
         }
         var modAddedBy = ld.resolveMissingImports(ctx);
         if (len(modAddedBy) == 0) { 
             // The roots are stable, and we've resolved all of the missing packages
             // that we can.
             break;
-
         }
         var toAdd = make_slice<module.Version>(0, len(modAddedBy));
         {
@@ -1142,16 +1079,13 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
                         pkg = pkg__prev3;
 
                     }
-
                 }
 
                 err = err__prev2;
 
             }
-
             ld.errorf("go: %v\n", err);
             break;
-
         }
         if (reflect.DeepEqual(rs.rootModules, ld.requirements.rootModules)) { 
             // Something is deeply wrong. resolveMissingImports gave us a non-empty
@@ -1159,10 +1093,8 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
             // effect — either they were already in the graph, or updateRoots did not
             // add them as requested.
             panic(fmt.Sprintf("internal error: adding %v to module graph had no effect on root requirements (%v)", toAdd, rs.rootModules));
-
         }
         ld.requirements = rs;
-
     }
     @base.ExitIfErrors(); // TODO(bcmills): Is this actually needed?
 
@@ -1193,14 +1125,12 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
                         }
 
                     }
-
                 }
 
                 m = m__prev1;
             }
         }
         ld.requirements = rs;
-
     }
     {
         var pkg__prev1 = pkg;
@@ -1226,16 +1156,13 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
                         }
 
                     }
-
                 }
 
             }
 
-
             if (ld.SilencePackageErrors) {
                 continue;
             }
-
             {
                 ref var stdErr = ref heap((ImportMissingError.val)(null), out ptr<var> _addr_stdErr);
 
@@ -1244,20 +1171,16 @@ private static ptr<loader> loadFromRoots(context.Context ctx, loaderParams @para
                 }
 
             }
-
             if (ld.SilenceNoGoErrors && errors.Is(pkg.err, imports.ErrNoGo)) {
                 continue;
             }
-
             ld.errorf("%s: %v\n", pkg.stackText(), pkg.err);
-
         }
         pkg = pkg__prev1;
     }
 
     ld.checkMultiplePaths();
     return _addr_ld!;
-
 });
 
 // updateRequirements ensures that ld.requirements is consistent with the
@@ -1338,20 +1261,16 @@ private static (bool, error) updateRequirements(this ptr<loader> _addr_ld, conte
                             // cfg.BuildMod does not allow us to change dep.mod to be a direct
                             // dependency, so don't mark it as such.
                             continue;
-
                         }
 
                     }
-
                 } 
 
                 // dep is a package directly imported by a package or test in the main
                 // module and loaded from some other module (not the standard library).
                 // Mark its module as a direct dependency.
                 direct[dep.mod.Path] = true;
-
             }
-
         }
         pkg = pkg__prev1;
     }
@@ -1397,14 +1316,12 @@ private static (bool, error) updateRequirements(this ptr<loader> _addr_ld, conte
             return (false, error.As(err)!);
         }
         addRoots = tidy.rootModules;
-
     }
     rs, err = updateRoots(ctx, direct, rs, ld.pkgs, addRoots, ld.AssumeRootsImported);
     if (err != null) { 
         // We don't actually know what even the root requirements are supposed to be,
         // so we can't proceed with loading. Return the error to the caller
         return (false, error.As(err)!);
-
     }
     if (rs != ld.requirements && !reflect.DeepEqual(rs.rootModules, ld.requirements.rootModules)) { 
         // The roots of the module graph have changed in some way (not just the
@@ -1445,9 +1362,7 @@ private static (bool, error) updateRequirements(this ptr<loader> _addr_ld, conte
                         changed = true;
                         break;
                     }
-
                 }
-
             }
 
             pkg = pkg__prev1;
@@ -1455,7 +1370,6 @@ private static (bool, error) updateRequirements(this ptr<loader> _addr_ld, conte
     }
     ld.requirements = rs;
     return (changed, error.As(null!)!);
-
 }
 
 // resolveMissingImports returns a set of modules that could be added as
@@ -1485,15 +1399,11 @@ private static map<module.Version, ptr<loadPkg>> resolveMissingImports(this ptr<
                 // If we are missing a test, we are also missing its non-test version, and
                 // we should only add the missing import once.
                 continue;
-
             }
-
             if (!errors.As(pkg.err, @new<ImportMissingError.val>())) { 
                 // Leave other errors for Import or load.Packages to report.
                 continue;
-
             }
-
             var pkg = pkg;
             ref module.Version mod = ref heap(out ptr<module.Version> _addr_mod);
             ld.work.Add(() => {
@@ -1506,7 +1416,6 @@ private static map<module.Version, ptr<loadPkg>> resolveMissingImports(this ptr<
                     // the package, whereas the query error also explains why we didn't fix
                     // the problem — so we prefer the latter.
                     pkg.err = err;
-
                 } 
 
                 // err is nil, but we intentionally leave pkg.err non-nil and pkg.mod
@@ -1523,7 +1432,6 @@ private static map<module.Version, ptr<loadPkg>> resolveMissingImports(this ptr<
             });
 
             pkgMods = append(pkgMods, new pkgMod(pkg:pkg,mod:&mod));
-
         }
         pkg = pkg__prev1;
     }
@@ -1542,7 +1450,6 @@ private static map<module.Version, ptr<loadPkg>> resolveMissingImports(this ptr<
             modAddedBy[mod] = pkg;
         }
     }    return modAddedBy;
-
 }
 
 // pkg locates the *loadPkg for path, creating and queuing it for loading if
@@ -1566,12 +1473,10 @@ private static ptr<loadPkg> pkg(this ptr<loader> _addr_ld, context.Context ctx, 
             ld.load(ctx, pkg);
         });
         return _addr_pkg!;
-
     })._<ptr<loadPkg>>();
 
     ld.applyPkgFlags(ctx, pkg, flags);
     return _addr_pkg!;
-
 });
 
 // applyPkgFlags updates pkg.flags to set the given flags and propagate the
@@ -1587,7 +1492,6 @@ private static void applyPkgFlags(this ptr<loader> _addr_ld, context.Context ctx
     if (flags.has(pkgInAll) && ld.allPatternIsRoot && !pkg.isTest()) { 
         // This package matches a root pattern by virtue of being in "all".
         flags |= pkgIsRoot;
-
     }
     if (flags.has(pkgIsRoot)) {
         flags |= pkgFromRoot;
@@ -1599,7 +1503,6 @@ private static void applyPkgFlags(this ptr<loader> _addr_ld, context.Context ctx
         // its dependencies yet. Either way, we can't usefully load its test or
         // update its dependencies.
         return ;
-
     }
     if (!pkg.isTest()) { 
         // Check whether we should add (or update the flags for) a test for pkg.
@@ -1629,11 +1532,8 @@ private static void applyPkgFlags(this ptr<loader> _addr_ld, context.Context ctx
                 // they cause the packages they import to also be in "all". So are tests
                 // of packages in "all" if "all" closes over test dependencies.
                 testFlags |= pkgInAll;
-
             }
-
             ld.pkgTest(ctx, pkg, testFlags);
-
         }
     }
     if (@new.has(pkgInAll) && !old.has(pkgInAll | pkgImportsLoaded)) { 
@@ -1692,24 +1592,17 @@ private static bool preloadRootModules(this ptr<loader> _addr_ld, context.Contex
                         // This package isn't provided by any selected module.
                         // If we can find it, it will be a new root dependency.
                         m, err = queryImport(ctx, path, ld.requirements);
-
                     }
-
                     if (err != null) { 
                         // We couldn't identify the root module containing this package.
                         // Leave it unresolved; we will report it during loading.
                         return ;
-
                     }
-
                 }
-
                 if (m.Path == "") { 
                     // The package is in std or cmd. We don't need to change the root set.
                     return ;
-
                 }
-
                 var (v, ok) = ld.requirements.rootSelected(m.Path);
                 if (!ok || v != m.Version) { 
                     // We found the requested package in m, but m is not a root, so
@@ -1721,11 +1614,8 @@ private static bool preloadRootModules(this ptr<loader> _addr_ld, context.Contex
                     var need = needc.Receive();
                     need[m] = true;
                     needc.Send(need);
-
                 }
-
             });
-
         }
         path = path__prev1;
     }
@@ -1757,7 +1647,6 @@ private static bool preloadRootModules(this ptr<loader> _addr_ld, context.Contex
         ld.errorf("go: %v\n", err);
         @base.ExitIfErrors();
         return false;
-
     }
     if (reflect.DeepEqual(rs.rootModules, ld.requirements.rootModules)) { 
         // Something is deeply wrong. resolveMissingImports gave us a non-empty
@@ -1765,11 +1654,9 @@ private static bool preloadRootModules(this ptr<loader> _addr_ld, context.Contex
         // effect — either they were already in the graph, or updateRoots did not
         // add them as requested.
         panic(fmt.Sprintf("internal error: adding %v to module graph had no effect on root requirements (%v)", toAdd, rs.rootModules));
-
     }
     ld.requirements = rs;
     return true;
-
 });
 
 // load loads an individual package.
@@ -1780,13 +1667,11 @@ private static void load(this ptr<loader> _addr_ld, context.Context ctx, ptr<loa
     if (strings.Contains(pkg.path, "@")) { 
         // Leave for error during load.
         return ;
-
     }
     if (build.IsLocalImport(pkg.path) || filepath.IsAbs(pkg.path)) { 
         // Leave for error during load.
         // (Module mode does not allow local imports.)
         return ;
-
     }
     if (search.IsMetaPackage(pkg.path)) {
         pkg.err = addr(new invalidImportError(importPath:pkg.path,err:fmt.Errorf("%q is not an importable package; see 'go help packages'",pkg.path),));
@@ -1806,7 +1691,6 @@ private static void load(this ptr<loader> _addr_ld, context.Context ctx, ptr<loa
             // *ModuleGraph, which will cause mg to first try loading from only the
             // main module and root dependencies.
             mg = null;
-
         }
     }
     pkg.mod, pkg.dir, pkg.err = importFromModules(ctx, pkg.path, ld.requirements, mg);
@@ -1824,7 +1708,6 @@ private static void load(this ptr<loader> _addr_ld, context.Context ctx, ptr<loa
         // essentially nothing (these atomic flag ops are essentially free compared
         // to scanning source code for imports).
         ld.applyPkgFlags(ctx, pkg, pkgInAll);
-
     }
     if (ld.AllowPackage != null) {
         {
@@ -1839,7 +1722,6 @@ private static void load(this ptr<loader> _addr_ld, context.Context ctx, ptr<loa
             err = err__prev2;
 
         }
-
     }
     pkg.inStd = (search.IsStandardImportPath(pkg.path) && search.InDir(pkg.dir, cfg.GOROOTsrc) != "");
 
@@ -1869,14 +1751,11 @@ private static void load(this ptr<loader> _addr_ld, context.Context ctx, ptr<loa
             // Imports from packages in "std" and "cmd" should resolve using
             // GOROOT/src/vendor even when "std" is not the main module.
             path = ld.stdVendor(pkg.path, path);
-
         }
         pkg.imports = append(pkg.imports, ld.pkg(ctx, path, importFlags));
-
     }    pkg.testImports = testImports;
 
     ld.applyPkgFlags(ctx, pkg, pkgImportsLoaded);
-
 }
 
 // pkgTest locates the test of pkg, creating it if needed, and updates its state
@@ -1914,12 +1793,10 @@ private static ptr<loadPkg> pkgTest(this ptr<loader> _addr_ld, context.Context c
     else
         pkg.testImports = null;
         ld.applyPkgFlags(ctx, test, pkgImportsLoaded);
-
     } {
         ld.applyPkgFlags(ctx, test, testFlags);
     }
     return _addr_test!;
-
 });
 
 // stdVendor returns the canonical import path for the package with the given
@@ -1941,7 +1818,6 @@ private static @string stdVendor(this ptr<loader> _addr_ld, @string parentPath, 
                 }
 
             }
-
         }
     }
     else if (!ld.VendorModulesInGOROOTSrc || Target.Path != "std" || str.HasPathPrefix(parentPath, "vendor")) { 
@@ -1966,10 +1842,8 @@ private static @string stdVendor(this ptr<loader> _addr_ld, @string parentPath, 
             }
 
         }
-
     }
     return path;
-
 }
 
 // computePatternAll returns the list of packages matching pattern "all",
@@ -1984,7 +1858,6 @@ private static slice<@string> computePatternAll(this ptr<loader> _addr_ld) {
         }
     }    sort.Strings(all);
     return all;
-
 }
 
 // checkMultiplePaths verifies that a given module path is used as itself
@@ -2007,10 +1880,8 @@ private static void checkMultiplePaths(this ptr<loader> _addr_ld) {
                 }
 
             }
-
         }
     }
-
 
     map firstPath = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<module.Version, @string>{};
     foreach (var (_, mod) in mods) {
@@ -2025,9 +1896,7 @@ private static void checkMultiplePaths(this ptr<loader> _addr_ld) {
                 ld.errorf("go: %s@%s used for two different module paths (%s and %s)\n", src.Path, src.Version, prev, mod.Path);
             }
 
-
         }
-
     }
 }
 
@@ -2044,7 +1913,6 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
             // The user is explicitly ignoring these errors, so don't bother them with
             // other options.
             return ;
-
         }
         fmt.Fprintln(os.Stderr);
 
@@ -2071,13 +1939,11 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
             // wouldn't actually fix anything for Go 1.16 users, and *would* break
             // something for Go 1.17 users.
             fmt.Fprintf(os.Stderr, "To proceed despite packages unresolved in go %s:\n\tgo mod tidy -e%s%s\n", ld.TidyCompatibleVersion, goFlag, compatFlag);
-
         }
         fmt.Fprintf(os.Stderr, "If reproducibility with go %s is not needed:\n\tgo mod tidy%s -compat=%s\n", ld.TidyCompatibleVersion, goFlag, ld.GoVersion); 
 
         // TODO(#46141): Populate the linked wiki page.
         fmt.Fprintf(os.Stderr, "For other options, see:\n\thttps://golang.org/doc/modules/pruning\n");
-
     };
 
     var (mg, err) = rs.Graph(ctx);
@@ -2101,9 +1967,7 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
                 // This package is from the standard library (which does not vary based on
                 // the module graph).
                 continue;
-
             }
-
             var pkg = pkg;
             ld.work.Add(() => {
                 var (mod, _, err) = importFromModules(ctx, pkg.path, rs, mg);
@@ -2113,7 +1977,6 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
                     mismatchMu.Send(mismatches);
                 }
             });
-
         }
         pkg = pkg__prev1;
     }
@@ -2151,14 +2014,12 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
                     v = v__prev2;
 
                 }
-
             }
 
             m = m__prev1;
         }
 
         return ;
-
     }
     {
         var pkg__prev1 = pkg;
@@ -2180,11 +2041,8 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
                     }
 
                 }
-
                 continue;
-
             }
-
 
             if (mismatch.err != null) 
                 // pkg resolved successfully, but errors out using the requirements in rs.
@@ -2214,13 +2072,10 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
                             }
 
                         }
-
                         ld.errorf("%s loaded from %v,\n\tbut go %s would fail to locate it:\n\t%v\n", pkg.stackText(), pkg.mod, ld.TidyCompatibleVersion, mismatch.err);
-
                     }
 
                 }
-
 
                 suggestEFlag = true; 
 
@@ -2250,13 +2105,11 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
                                 v = v__prev2;
 
                             }
-
                         }
 
                         m = m__prev2;
                     }
                 }
-
             else if (pkg.err != null) 
                 // pkg had an error in lazy mode (presumably suppressed with the -e flag),
                 // but not in eager mode.
@@ -2284,14 +2137,12 @@ private static void checkTidyCompatibility(this ptr<loader> _addr_ld, context.Co
                 ld.errorf("%s loaded from %v,\n\tbut go %s would select %v\n", pkg.stackText(), pkg.mod, ld.TidyCompatibleVersion, mismatch.mod.Version);
             else 
                 @base.Fatalf("go: internal error: mismatch recorded for package %s, but no differences found", pkg.path);
-            
-        }
+                    }
         pkg = pkg__prev1;
     }
 
     suggestFixes();
     @base.ExitIfErrors();
-
 }
 
 // scanDir is like imports.ScanDir but elides known magic imports from the list,
@@ -2346,7 +2197,6 @@ private static void buildStacks(this ptr<loader> _addr_ld) => func((_, panic, _)
             pkg = __pkg;
             pkg.stack = pkg; // sentinel to avoid processing in next loop
             ld.pkgs = append(ld.pkgs, pkg);
-
         }
         pkg = pkg__prev1;
     }
@@ -2380,7 +2230,6 @@ private static void buildStacks(this ptr<loader> _addr_ld) => func((_, panic, _)
             next = next__prev1;
 
         }
-
     }
     {
         var pkg__prev1 = pkg;
@@ -2434,11 +2283,9 @@ private static @string stackText(this ptr<loadPkg> _addr_pkg) {
  {
                 fmt.Fprint(_addr_buf, " imports\n\t");
             }
-
         }
     }
     return buf.String();
-
 }
 
 // why returns the text to use in "go mod why" output about the given package.
@@ -2472,7 +2319,6 @@ private static @string why(this ptr<loadPkg> _addr_pkg) {
         }
     }
     return buf.String();
-
 }
 
 // Why returns the "go mod why" output stanza for the given package,
@@ -2486,7 +2332,6 @@ public static @string Why(@string path) {
         return "";
     }
     return pkg.why();
-
 }
 
 // WhyDepth returns the number of steps in the Why listing.
@@ -2504,7 +2349,6 @@ public static nint WhyDepth(@string path) {
         }
     }
     return n;
-
 }
 
 } // end modload_package

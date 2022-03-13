@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:09 UTC
+//     Generated on 2022 March 13 05:52:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct listImports
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace go
             public static implicit operator listImports(NilType nil) => default(listImports);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static listImports listImports_cast(dynamic value)
         {
             return new listImports(value.stdPackages, value.importDir, value.importMap);

@@ -6,21 +6,24 @@
 // for maps, on behalf of the fmt and text/template packages.
 // It is not guaranteed to be efficient and works only for types
 // that are valid map keys.
-// package fmtsort -- go2cs converted at 2022 March 06 22:24:40 UTC
+
+// package fmtsort -- go2cs converted at 2022 March 13 05:39:11 UTC
 // import "internal/fmtsort" ==> using fmtsort = go.@internal.fmtsort_package
 // Original source: C:\Program Files\Go\src\internal\fmtsort\sort.go
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-
 namespace go.@internal;
+
+using reflect = reflect_package;
+using sort = sort_package;
+
+
+// Note: Throughout this package we avoid calling reflect.Value.Interface as
+// it is not always legal to do so and it's easier to avoid the issue than to face it.
+
+// SortedMap represents a map's keys and values. The keys and values are
+// aligned in index order: Value[i] is the value in the map corresponding to Key[i].
 
 public static partial class fmtsort_package {
 
-    // Note: Throughout this package we avoid calling reflect.Value.Interface as
-    // it is not always legal to do so and it's easier to avoid the issue than to face it.
-
-    // SortedMap represents a map's keys and values. The keys and values are
-    // aligned in index order: Value[i] is the value in the map corresponding to Key[i].
 public partial struct SortedMap {
     public slice<reflect.Value> Key;
     public slice<reflect.Value> Value;
@@ -76,7 +79,6 @@ public static ptr<SortedMap> Sort(reflect.Value mapValue) {
     ptr<SortedMap> sorted = addr(new SortedMap(Key:key,Value:value,));
     sort.Stable(sorted);
     return _addr_sorted!;
-
 }
 
 // compare compares two values of the same type. It returns -1, 0, 1
@@ -137,7 +139,6 @@ private static nint compare(reflect.Value aVal, reflect.Value bVal) => func((_, 
             c = c__prev1;
 
         }
-
         return floatCompare(imag(a), imag(b));
     else if (aVal.Kind() == reflect.Bool) 
         a = aVal.Bool();
@@ -172,7 +173,6 @@ private static nint compare(reflect.Value aVal, reflect.Value bVal) => func((_, 
             c = c__prev1;
 
         }
-
         var ap = aVal.Pointer();
         var bp = bVal.Pointer();
 
@@ -199,7 +199,6 @@ private static nint compare(reflect.Value aVal, reflect.Value bVal) => func((_, 
                     c = c__prev1;
 
                 }
-
             }
 
 
@@ -223,7 +222,6 @@ private static nint compare(reflect.Value aVal, reflect.Value bVal) => func((_, 
                     c = c__prev1;
 
                 }
-
             }
 
 
@@ -243,7 +241,6 @@ private static nint compare(reflect.Value aVal, reflect.Value bVal) => func((_, 
             c = c__prev1;
 
         }
-
         c = compare(reflect.ValueOf(aVal.Elem().Type()), reflect.ValueOf(bVal.Elem().Type()));
         if (c != 0) {
             return c;
@@ -252,8 +249,7 @@ private static nint compare(reflect.Value aVal, reflect.Value bVal) => func((_, 
     else 
         // Certain types cannot appear as keys (maps, funcs, slices), but be explicit.
         panic("bad type in compare: " + aType.String());
-    
-});
+    });
 
 // nilCompare checks whether either value is nil. If not, the boolean is false.
 // If either value is nil, the boolean is true and the integer is the comparison
@@ -269,13 +265,11 @@ private static (nint, bool) nilCompare(reflect.Value aVal, reflect.Value bVal) {
             return (0, true);
         }
         return (-1, true);
-
     }
     if (bVal.IsNil()) {
         return (1, true);
     }
     return (0, false);
-
 }
 
 // floatCompare compares two floating-point values. NaNs compare low.
@@ -290,7 +284,6 @@ private static nint floatCompare(double a, double b) {
     else if (a > b) 
         return 1;
         return 0;
-
 }
 
 private static bool isNaN(double a) {

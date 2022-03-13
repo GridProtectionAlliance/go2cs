@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:07 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:34 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\object.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+using src = cmd.@internal.src_package;
 
 public static partial class noder_package {
 
@@ -28,7 +28,6 @@ private static (ptr<ir.Name>, types2.Object) def(this ptr<irgen> _addr_g, ptr<sy
         @base.FatalfAt(g.pos(name), "unknown name %v", name);
     }
     return (_addr_g.obj(obj)!, obj);
-
 }
 
 // use returns the Name node associated with the use of name. The returned node
@@ -47,10 +46,8 @@ private static ptr<ir.Name> use(this ptr<irgen> _addr_g, ptr<syntax.Name> _addr_
         // type of the captured name to the new closure variable.
         obj.SetTypecheck(1);
         obj.SetType(obj.Defn.Type());
-
     }
     return _addr_obj!;
-
 }
 
 // obj returns the Name that represents the given object. If no such Name exists
@@ -83,9 +80,7 @@ private static ptr<ir.Name> obj(this ptr<irgen> _addr_g, types2.Object obj) {
             n = n__prev2;
 
         }
-
         @base.FatalfAt(g.pos(obj), "failed to resolve %v", obj);
-
     }
     {
         var name__prev1 = name;
@@ -98,7 +93,6 @@ private static ptr<ir.Name> obj(this ptr<irgen> _addr_g, types2.Object obj) {
         name = name__prev1;
 
     }
-
 
     ptr<ir.Name> name;
     var pos = g.pos(obj);
@@ -126,9 +120,7 @@ private static ptr<ir.Name> obj(this ptr<irgen> _addr_g, types2.Object obj) {
  {
                         sym = g.sym(obj);
                     }
-
                     typ = g.typ(sig);
-
                 }
                 else
  {
@@ -140,7 +132,6 @@ private static ptr<ir.Name> obj(this ptr<irgen> _addr_g, types2.Object obj) {
                 }
 
             }
-
             name = g.objCommon(pos, ir.ONAME, sym, ir.PFUNC, typ);
             break;
         case ptr<types2.TypeName> obj:
@@ -152,7 +143,6 @@ private static ptr<ir.Name> obj(this ptr<irgen> _addr_g, types2.Object obj) {
                 name = ir.NewDeclNameAt(pos, ir.OTYPE, g.sym(obj));
                 g.objFinish(name, class, types.NewNamed(name));
             }
-
             break;
         case ptr<types2.Var> obj:
             sym = ;
@@ -167,13 +157,10 @@ private static ptr<ir.Name> obj(this ptr<irgen> _addr_g, types2.Object obj) {
                         sym = typecheck.LookupNum("~b", len(ir.CurFunc.Dcl)); // 'b' for "blank"
                         break;
                 }
-
             }
-
             if (sym == null) {
                 sym = g.sym(obj);
             }
-
             name = g.objCommon(pos, ir.ONAME, sym, class, g.typ(obj.Type()));
             break;
         default:
@@ -188,7 +175,6 @@ private static ptr<ir.Name> obj(this ptr<irgen> _addr_g, types2.Object obj) {
     g.objs[obj] = name;
     name.SetTypecheck(1);
     return _addr_name!;
-
 }
 
 private static ptr<ir.Name> objCommon(this ptr<irgen> _addr_g, src.XPos pos, ir.Op op, ptr<types.Sym> _addr_sym, ir.Class @class, ptr<types.Type> _addr_typ) {
@@ -251,7 +237,6 @@ private static void objFinish(this ptr<irgen> _addr_g, ptr<ir.Name> _addr_name, 
         }
 
     __switch_break0:;
-
 }
 
 } // end noder_package

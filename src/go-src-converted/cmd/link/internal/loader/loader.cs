@@ -2,27 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package loader -- go2cs converted at 2022 March 06 23:20:34 UTC
+// package loader -- go2cs converted at 2022 March 13 06:33:28 UTC
 // import "cmd/link/internal/loader" ==> using loader = go.cmd.link.@internal.loader_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\loader\loader.go
-using bytes = go.bytes_package;
-using bio = go.cmd.@internal.bio_package;
-using goobj = go.cmd.@internal.goobj_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using bits = go.math.bits_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using bytes = bytes_package;
+using bio = cmd.@internal.bio_package;
+using goobj = cmd.@internal.goobj_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using fmt = fmt_package;
+using log = log_package;
+using bits = math.bits_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+using System;
 
 public static partial class loader_package {
 
@@ -141,7 +140,6 @@ public static void Set(this Bitmap bm, Sym i) {
     var n = uint(i) / 32;
     var r = uint(i) % 32;
     bm[n] |= 1 << (int)(r);
-
 }
 
 // unset the i-th bit.
@@ -149,7 +147,6 @@ public static void Unset(this Bitmap bm, Sym i) {
     var n = uint(i) / 32;
     var r = uint(i) % 32;
     bm[n] &= (1 << (int)(r));
-
 }
 
 // whether the i-th bit is set.
@@ -157,7 +154,6 @@ public static bool Has(this Bitmap bm, Sym i) {
     var n = uint(i) / 32;
     var r = uint(i) % 32;
     return bm[n] & (1 << (int)(r)) != 0;
-
 }
 
 // return current length of bitmap in bits.
@@ -185,7 +181,6 @@ private static Bitmap growBitmap(nint reqLen, Bitmap b) {
         b = append(b, MakeBitmap(reqLen + 1 - curLen));
     }
     return b;
-
 }
 
 private partial struct symAndSize {
@@ -293,12 +288,10 @@ private static readonly var hashedDef = 1;
 private static readonly var nonPkgDef = 2;
 private static readonly var nonPkgRef = 3;
 
-
 // objidx
 private static readonly var nilObj = iota;
 private static readonly var extObj = 0;
 private static readonly var goObjStart = 1;
-
 
 public delegate void elfsetstringFunc(@string, nint);
 
@@ -319,7 +312,6 @@ private partial struct extSymPayload {
 // Loader.flags
 public static readonly nint FlagStrictDups = 1 << (int)(iota);
 public static readonly var FlagUseABIAlias = 0;
-
 
 public static ptr<Loader> NewLoader(uint flags, elfsetstringFunc elfsetstring, ptr<ErrorReporter> _addr_reporter) {
     ref ErrorReporter reporter = ref _addr_reporter.val;
@@ -343,7 +335,6 @@ private static Sym addObj(this ptr<Loader> _addr_l, @string pkg, ptr<oReader> _a
             panic("already added");
         }
     }
-
     pkg = objabi.PathToPrefix(pkg); // the object file contains escaped package path
     {
         (_, ok) = l.objByPkg[pkg];
@@ -352,7 +343,6 @@ private static Sym addObj(this ptr<Loader> _addr_l, @string pkg, ptr<oReader> _a
             l.objByPkg[pkg] = r.objidx;
         }
     }
-
     var i = Sym(len(l.objSyms));
     l.start[r] = i;
     l.objs = append(l.objs, new objIdx(r,i));
@@ -360,7 +350,6 @@ private static Sym addObj(this ptr<Loader> _addr_l, @string pkg, ptr<oReader> _a
         l.hasUnknownPkgPath = true;
     }
     return i;
-
 });
 
 // Add a symbol from an object file, return the global index.
@@ -388,7 +377,6 @@ private static Sym addSym(this ptr<loadState> _addr_st, @string name, nint ver, 
         // referenced by name.
         addToGlobal();
         return i;
-
     }
 
     if (kind == pkgDef) 
@@ -421,7 +409,6 @@ private static Sym addSym(this ptr<loadState> _addr_st, @string name, nint ver, 
                 st.hashed64Syms[h64] = ss;
             }
 ;
-
         } {
             checkHash = () => {
                 h = r.Hash(li - uint32(r.ndef + r.nhashed64def));
@@ -433,7 +420,6 @@ private static Sym addSym(this ptr<loadState> _addr_st, @string name, nint ver, 
                 st.hashedSyms[h.val] = ss;
             }
 ;
-
         }
         var siz = osym.Siz();
         {
@@ -455,17 +441,13 @@ private static Sym addSym(this ptr<loadState> _addr_st, @string name, nint ver, 
                     // New symbol has larger size, use the new one. Rewrite the index mapping.
                     l.objSyms[s.sym] = new objSym(r.objidx,li);
                     addToHashMap(new symAndSize(s.sym,siz));
-
                 }
-
                 return s.sym;
-
             }
 
             s = s__prev1;
 
         }
-
         addToHashMap(new symAndSize(i,siz));
         addToGlobal();
         return i;
@@ -485,10 +467,8 @@ private static Sym addSym(this ptr<loadState> _addr_st, @string name, nint ver, 
         if (szdup < sz) { 
             // new symbol overwrites old symbol.
             l.objSyms[oldi] = new objSym(r.objidx,li);
-
         }
         return oldi;
-
     }
     var (oldr, oldli) = l.toLocal(oldi);
     var oldsym = oldr.Sym(oldli);
@@ -503,7 +483,6 @@ private static Sym addSym(this ptr<loadState> _addr_st, @string name, nint ver, 
             log.Fatalf("duplicated definition of symbol %s, from %s and %s", name, r.unit.Lib.Pkg, oldr.unit.Lib.Pkg);
         }
         l.objSyms[oldi] = new objSym(r.objidx,li);
-
     }
     else
  { 
@@ -511,11 +490,9 @@ private static Sym addSym(this ptr<loadState> _addr_st, @string name, nint ver, 
         var typ = sym.AbiSymKindToSymKind[objabi.SymKind(oldsym.Type())];
         if (!typ.IsData()) { // only allow overwriting data symbol
             log.Fatalf("duplicated definition of symbol %s, from %s and %s", name, r.unit.Lib.Pkg, oldr.unit.Lib.Pkg);
-
         }
     }
     return oldi;
-
 });
 
 // newExtSym creates a new external sym with the specified
@@ -533,7 +510,6 @@ private static Sym newExtSym(this ptr<Loader> _addr_l, @string name, nint ver) {
     l.objSyms = append(l.objSyms, new objSym(l.extReader.objidx,uint32(pi)));
     l.extReader.syms = append(l.extReader.syms, i);
     return i;
-
 }
 
 // LookupOrCreateSym looks up the symbol with the specified name/version,
@@ -556,7 +532,6 @@ private static Sym LookupOrCreateSym(this ptr<Loader> _addr_l, @string name, nin
         l.symsByName[ver][name] = i;
     }
     return i;
-
 }
 
 // AddCgoExport records a cgo-exported symbol in l.CgoExports.
@@ -569,7 +544,6 @@ private static void AddCgoExport(this ptr<Loader> _addr_l, Sym s) {
         l.CgoExports = make_map<@string, Sym>();
     }
     l.CgoExports[l.SymName(s)] = s;
-
 }
 
 // LookupOrCreateCgoExport is like LookupOrCreateSym, but if ver
@@ -595,7 +569,6 @@ private static Sym LookupOrCreateCgoExport(this ptr<Loader> _addr_l, @string nam
     // Otherwise, this must just be a symbol in the host object.
     // Create a version 0 symbol for it.
     return l.LookupOrCreateSym(name, 0);
-
 });
 
 private static bool IsExternal(this ptr<Loader> _addr_l, Sym i) {
@@ -647,7 +620,6 @@ private static ptr<extSymPayload> getPayload(this ptr<Loader> _addr_l, Sym i) =>
     }
     var pi = l.extIndex(i);
     return _addr_l.payloads[pi]!;
-
 });
 
 // allocPayload allocates a new payload.
@@ -661,7 +633,6 @@ private static ptr<extSymPayload> allocPayload(this ptr<Loader> _addr_l) {
     var p = _addr_batch[0];
     l.payloadBatch = batch[(int)1..];
     return _addr_p!;
-
 }
 
 private static void Grow(this ptr<extSymPayload> _addr_ms, long siz) {
@@ -679,7 +650,6 @@ private static void Grow(this ptr<extSymPayload> _addr_ms, long siz) {
         ms.data = ms.data[(int)0..(int)cl];
     }
     ms.data = ms.data[..(int)siz];
-
 }
 
 // Convert a local index to a global index.
@@ -738,7 +708,6 @@ private static Sym resolve(this ptr<Loader> _addr_l, ptr<oReader> _addr_r, goobj
                 }
 
             }
-
             l.reportMissingBuiltin(int(s.SymIdx), r.unit.Lib.Pkg);
             return 0;
         else if (p == goobj.PkgIdxSelf) 
@@ -748,7 +717,6 @@ private static Sym resolve(this ptr<Loader> _addr_l, ptr<oReader> _addr_r, goobj
 
     }
     return l.toGlobal(rr, s.SymIdx);
-
 });
 
 // reportMissingBuiltin issues an error in the case where we have a
@@ -785,7 +753,6 @@ private static Sym Lookup(this ptr<Loader> _addr_l, @string name, nint ver) {
         return l.extStaticSyms[new nameVer(name,ver)];
     }
     return l.symsByName[ver][name];
-
 }
 
 // Check that duplicate symbols have same contents.
@@ -808,7 +775,6 @@ private static void checkdup(this ptr<Loader> _addr_l, @string name, ptr<oReader
             return ;
         }
         reason = fmt.Sprintf("different sizes: new size %d != old size %d", sz, szdup);
-
     }
     fmt.Fprintf(os.Stderr, "cmd/link: while reading object for '%v': duplicate symbol '%s', previous def at '%v', with mismatched payload: %s\n", r.unit.Lib, name, rdup.unit.Lib, reason); 
 
@@ -865,7 +831,6 @@ private static nint SymNameLen(this ptr<Loader> _addr_l, Sym i) {
         return le;
     }
     return len(l.SymName(i));
-
 }
 
 // Returns the raw (unpatched) name of the i-th symbol.
@@ -878,7 +843,6 @@ private static @string RawSymName(this ptr<Loader> _addr_l, Sym i) {
     }
     var (r, li) = l.toLocal(i);
     return r.Sym(li).Name(r.Reader);
-
 }
 
 // Returns the (patched) name of the i-th symbol.
@@ -898,7 +862,6 @@ private static @string SymName(this ptr<Loader> _addr_l, Sym i) {
         return name;
     }
     return strings.Replace(name, "\"\".", r.pkgprefix, -1);
-
 }
 
 // Returns the version of the i-th symbol.
@@ -911,7 +874,6 @@ private static nint SymVersion(this ptr<Loader> _addr_l, Sym i) {
     }
     var (r, li) = l.toLocal(i);
     return int(abiToVer(r.Sym(li).ABI(), r.version));
-
 }
 
 private static bool IsFileLocal(this ptr<Loader> _addr_l, Sym i) {
@@ -930,7 +892,6 @@ private static bool IsFromAssembly(this ptr<Loader> _addr_l, Sym i) {
     }
     var (r, _) = l.toLocal(i);
     return r.FromAssembly();
-
 }
 
 // Returns the type of the i-th symbol.
@@ -943,11 +904,9 @@ private static sym.SymKind SymType(this ptr<Loader> _addr_l, Sym i) {
             return pp.kind;
         }
         return 0;
-
     }
     var (r, li) = l.toLocal(i);
     return sym.AbiSymKindToSymKind[objabi.SymKind(r.Sym(li).Type())];
-
 }
 
 // Returns the attributes of the i-th symbol.
@@ -959,11 +918,9 @@ private static byte SymAttr(this ptr<Loader> _addr_l, Sym i) {
         // For now, ReflectMethod, NoSplit, GoType, and Typelink are used and they cannot be
         // set by external symbol.
         return 0;
-
     }
     var (r, li) = l.toLocal(i);
     return r.Sym(li).Flag();
-
 }
 
 // Returns the size of the i-th symbol.
@@ -976,7 +933,6 @@ private static long SymSize(this ptr<Loader> _addr_l, Sym i) {
     }
     var (r, li) = l.toLocal(i);
     return int64(r.Sym(li).Siz());
-
 }
 
 // AttrReachable returns true for symbols that are transitively
@@ -1076,7 +1032,6 @@ private static long SymAddr(this ptr<Loader> _addr_l, Sym i) => func((_, panic, 
         panic("unreachable symbol in symaddr");
     }
     return l.values[i];
-
 });
 
 // AttrNotInSymbolTable returns true for symbols that should not be
@@ -1112,7 +1067,6 @@ private static bool AttrVisibilityHidden(this ptr<Loader> _addr_l, Sym i) {
         return false;
     }
     return l.attrVisibilityHidden.Has(l.extIndex(i));
-
 }
 
 // SetAttrVisibilityHidden sets the "hidden visibility" property for a
@@ -1143,10 +1097,8 @@ private static bool AttrDuplicateOK(this ptr<Loader> _addr_l, Sym i) {
         // into a larger bitmap during preload.
         var (r, li) = l.toLocal(i);
         return r.Sym(li).Dupok();
-
     }
     return l.attrDuplicateOK.Has(l.extIndex(i));
-
 }
 
 // SetAttrDuplicateOK sets the "duplicate OK" property for an external
@@ -1176,10 +1128,8 @@ private static bool AttrShared(this ptr<Loader> _addr_l, Sym i) {
         // object into a larger bitmap during preload.
         var (r, _) = l.toLocal(i);
         return r.Shared();
-
     }
     return l.attrShared.Has(l.extIndex(i));
-
 }
 
 // SetAttrShared sets the "shared" property for an external
@@ -1208,7 +1158,6 @@ private static bool AttrExternal(this ptr<Loader> _addr_l, Sym i) {
         return false;
     }
     return l.attrExternal.Has(l.extIndex(i));
-
 }
 
 // SetAttrExternal sets the "external" property for an host object
@@ -1346,18 +1295,15 @@ private static bool AttrReadOnly(this ptr<Loader> _addr_l, Sym i) {
             return v;
         }
     }
-
     if (l.IsExternal(i)) {
         var pp = l.getPayload(i);
         if (pp.objidx != 0) {
             return l.objs[pp.objidx].r.ReadOnly();
         }
         return false;
-
     }
     var (r, _) = l.toLocal(i);
     return r.ReadOnly();
-
 }
 
 // SetAttrReadOnly sets the "data is read only" property for a symbol
@@ -1400,7 +1346,6 @@ private static bool AttrSubSymbol(this ptr<Loader> _addr_l, Sym i) {
         return false;
     }
     return l.SubSym(o) != 0;
-
 }
 
 // Note that we don't have a 'SetAttrSubSymbol' method in the loader;
@@ -1444,7 +1389,6 @@ private static bool IsItab(this ptr<Loader> _addr_l, Sym i) {
     }
     var (r, li) = l.toLocal(i);
     return r.Sym(li).IsItab();
-
 }
 
 // Return whether this is a trampoline of a deferreturn call.
@@ -1502,11 +1446,9 @@ private static slice<byte> Data(this ptr<Loader> _addr_l, Sym i) {
             return pp.data;
         }
         return null;
-
     }
     var (r, li) = l.toLocal(i);
     return r.Data(li);
-
 }
 
 // FreeData clears the symbol data of an external symbol, allowing the memory
@@ -1532,14 +1474,12 @@ private static int SymAlign(this ptr<Loader> _addr_l, Sym i) {
         // outside the range of the existing slice, then we assume its
         // alignment has not yet been set.
         return 0;
-
     }
     var abits = l.align[i];
     if (abits == 0) {
         return 0;
     }
     return int32(1 << (int)((abits - 1)));
-
 }
 
 // SetSymAlign sets the alignment for a symbol.
@@ -1557,7 +1497,6 @@ private static void SetSymAlign(this ptr<Loader> _addr_l, Sym i, int align) => f
         l.align[i] = 0;
     }
     l.align[i] = uint8(bits.Len32(uint32(align)));
-
 });
 
 // SymValue returns the section of the i-th symbol. i is global index.
@@ -1569,10 +1508,8 @@ private static ptr<sym.Section> SymSect(this ptr<Loader> _addr_l, Sym i) {
         // outside the range of the existing slice, then we assume its
         // section has not yet been set.
         return _addr_null!;
-
     }
     return _addr_l.sects[l.symSects[i]]!;
-
 }
 
 // SetSymSect sets the section of the i-th symbol. i is global index.
@@ -1584,7 +1521,6 @@ private static void SetSymSect(this ptr<Loader> _addr_l, Sym i, ptr<sym.Section>
         l.symSects = append(l.symSects, make_slice<ushort>(l.NSym() - len(l.symSects)));
     }
     l.symSects[i] = sect.Index;
-
 }
 
 // growSects grows the slice used to store symbol sections.
@@ -1609,7 +1545,6 @@ private static ptr<sym.Section> NewSection(this ptr<Loader> _addr_l) => func((_,
     sect.Index = uint16(idx);
     l.sects = append(l.sects, sect);
     return _addr_sect!;
-
 });
 
 // SymDynImplib returns the "dynimplib" attribute for the specified
@@ -1676,9 +1611,7 @@ private static @string SymExtname(this ptr<Loader> _addr_l, Sym i) {
             return s;
         }
     }
-
     return l.SymName(i);
-
 }
 
 // SetSymExtname sets the  "extname" attribute for a symbol.
@@ -1712,9 +1645,7 @@ private static elf.SymType SymElfType(this ptr<Loader> _addr_l, Sym i) {
             return et;
         }
     }
-
     return elf.STT_NOTYPE;
-
 }
 
 // SetSymElfType sets the elf type attribute for a symbol.
@@ -1793,9 +1724,7 @@ private static int SymPlt(this ptr<Loader> _addr_l, Sym s) {
             return v;
         }
     }
-
     return -1;
-
 }
 
 // SetPlt sets the PLT offset of symbol i.
@@ -1825,9 +1754,7 @@ private static int SymGot(this ptr<Loader> _addr_l, Sym s) {
             return v;
         }
     }
-
     return -1;
-
 }
 
 // SetGot sets the GOT offset of symbol i.
@@ -1857,9 +1784,7 @@ private static int SymDynid(this ptr<Loader> _addr_l, Sym i) {
             return s;
         }
     }
-
     return -1;
-
 }
 
 // SetSymDynid sets the "dynid" property for a symbol.
@@ -1919,9 +1844,7 @@ private static Sym SymGoType(this ptr<Loader> _addr_l, Sym i) {
 
         if (a.Type() == goobj.AuxGotype) 
             return l.resolve(r, a.Sym());
-        
-    }    return 0;
-
+            }    return 0;
 }
 
 // SymUnit returns the compilation unit for a given symbol (which will
@@ -1936,11 +1859,9 @@ private static ptr<sym.CompilationUnit> SymUnit(this ptr<Loader> _addr_l, Sym i)
             return _addr_r.unit!;
         }
         return _addr_null!;
-
     }
     var (r, _) = l.toLocal(i);
     return _addr_r.unit!;
-
 }
 
 // SymPkg returns the package where the symbol came from (for
@@ -1958,7 +1879,6 @@ private static @string SymPkg(this ptr<Loader> _addr_l, Sym i) {
             return f;
         }
     }
-
     if (l.IsExternal(i)) {
         var pp = l.getPayload(i);
         if (pp.objidx != 0) {
@@ -1966,11 +1886,9 @@ private static @string SymPkg(this ptr<Loader> _addr_l, Sym i) {
             return r.unit.Lib.Pkg;
         }
         return "";
-
     }
     var (r, _) = l.toLocal(i);
     return r.unit.Lib.Pkg;
-
 }
 
 // SetSymPkg sets the package/library for a symbol. This is
@@ -1984,7 +1902,6 @@ private static void SetSymPkg(this ptr<Loader> _addr_l, Sym i, @string pkg) => f
         panic("bad symbol index in SetSymPkg");
     }
     l.symPkg[i] = pkg;
-
 });
 
 // SymLocalentry returns the "local entry" value for the specified
@@ -2021,7 +1938,6 @@ private static nint NAux(this ptr<Loader> _addr_l, Sym i) {
     }
     var (r, li) = l.toLocal(i);
     return r.NAux(li);
-
 }
 
 // Returns the "handle" to the j-th aux symbol of the i-th symbol.
@@ -2036,7 +1952,6 @@ private static Aux Aux(this ptr<Loader> _addr_l, Sym i, nint j) {
         return new Aux();
     }
     return new Aux(r.Aux(li,j),r,l);
-
 }
 
 // GetFuncDwarfAuxSyms collects and returns the auxiliary DWARF
@@ -2058,7 +1973,6 @@ private static (Sym, Sym, Sym, Sym) GetFuncDwarfAuxSyms(this ptr<Loader> _addr_l
         // Current expectation is that any external function will
         // not have auxsyms.
         return ;
-
     }
     var (r, li) = l.toLocal(fnSymIdx);
     var auxs = r.Auxs(li);
@@ -2085,9 +1999,7 @@ private static (Sym, Sym, Sym, Sym) GetFuncDwarfAuxSyms(this ptr<Loader> _addr_l
             if (l.SymType(auxDwarfLines) != sym.SDWARFLINES) {
                 panic("aux dwarf lines sym with wrong type");
             }
-        
-    }    return ;
-
+            }    return ;
 });
 
 // AddInteriorSym sets up 'interior' as an interior symbol of
@@ -2133,7 +2045,6 @@ private static void AddInteriorSym(this ptr<Loader> _addr_l, Sym container, Sym 
     l.sub[interior] = l.sub[container];
     l.sub[container] = interior;
     l.outer[interior] = container;
-
 });
 
 // OuterSym gets the outer symbol for host object loaded symbols.
@@ -2142,7 +2053,6 @@ private static Sym OuterSym(this ptr<Loader> _addr_l, Sym i) {
  
     // FIXME: add check for isExternal?
     return l.outer[i];
-
 }
 
 // SubSym gets the subsymbol for host object loaded symbols.
@@ -2152,7 +2062,6 @@ private static Sym SubSym(this ptr<Loader> _addr_l, Sym i) {
     // NB: note -- no check for l.isExternal(), since I am pretty sure
     // that later phases in the linker set subsym for "type." syms
     return l.sub[i];
-
 }
 
 // SetCarrierSym declares that 'c' is the carrier or container symbol
@@ -2241,7 +2150,6 @@ private static Sym SortSub(this ptr<Loader> _addr_l, Sym s) {
     // Update sub for outer symbol, then return
     l.sub[s] = sl[0].s;
     return sl[0].s;
-
 }
 
 // SortSyms sorts a list of symbols by their value.
@@ -2262,10 +2170,8 @@ private static void growAttrBitmaps(this ptr<Loader> _addr_l, nint reqLen) {
         l.attrLocal = growBitmap(reqLen, l.attrLocal);
         l.attrNotInSymbolTable = growBitmap(reqLen, l.attrNotInSymbolTable);
         l.attrUsedInIface = growBitmap(reqLen, l.attrUsedInIface);
-
     }
     l.growExtAttrBitmaps();
-
 }
 
 private static void growExtAttrBitmaps(this ptr<Loader> _addr_l) {
@@ -2295,7 +2201,6 @@ private static Reloc At(this ptr<Relocs> _addr_relocs, nint j) {
         return new Reloc(&relocs.rs[j],relocs.r,relocs.l);
     }
     return new Reloc(&relocs.rs[j],relocs.r,relocs.l);
-
 }
 
 // Relocs returns a Relocs object for the given global sym.
@@ -2307,7 +2212,6 @@ private static Relocs Relocs(this ptr<Loader> _addr_l, Sym i) => func((_, panic,
         panic(fmt.Sprintf("trying to get oreader for invalid sym %d\n\n", i));
     }
     return l.relocs(r, li);
-
 });
 
 // Relocs returns a Relocs object given a local sym index and reader.
@@ -2325,7 +2229,6 @@ private static Relocs relocs(this ptr<Loader> _addr_l, ptr<oReader> _addr_r, uin
         rs = r.Relocs(li);
     }
     return new Relocs(rs:rs,li:li,r:r,l:l,);
-
 }
 
 // FuncInfo provides hooks to access goobj.FuncInfo in the objects.
@@ -2414,7 +2317,6 @@ private static slice<Sym> Pcdata(this ptr<FuncInfo> _addr_fi) => func((_, panic,
     foreach (var (i) in ret) {
         ret[i] = fi.l.resolve(fi.r, syms[i]);
     }    return ret;
-
 });
 
 private static uint NumFuncdataoff(this ptr<FuncInfo> _addr_fi) => func((_, panic, _) => {
@@ -2424,7 +2326,6 @@ private static uint NumFuncdataoff(this ptr<FuncInfo> _addr_fi) => func((_, pani
         panic("need to call Preload first");
     }
     return fi.lengths.NumFuncdataoff;
-
 });
 
 private static long Funcdataoff(this ptr<FuncInfo> _addr_fi, nint k) => func((_, panic, _) => {
@@ -2434,7 +2335,6 @@ private static long Funcdataoff(this ptr<FuncInfo> _addr_fi, nint k) => func((_,
         panic("need to call Preload first");
     }
     return (goobj.FuncInfo.val)(null).ReadFuncdataoff(fi.data, fi.lengths.FuncdataoffOff, uint32(k));
-
 });
 
 private static slice<Sym> Funcdata(this ptr<FuncInfo> _addr_fi, slice<Sym> syms) => func((_, panic, _) => {
@@ -2456,7 +2356,6 @@ private static slice<Sym> Funcdata(this ptr<FuncInfo> _addr_fi, slice<Sym> syms)
             syms = append(syms, fi.l.resolve(fi.r, a.Sym()));
         }
     }    return syms;
-
 });
 
 private static uint NumFile(this ptr<FuncInfo> _addr_fi) => func((_, panic, _) => {
@@ -2466,7 +2365,6 @@ private static uint NumFile(this ptr<FuncInfo> _addr_fi) => func((_, panic, _) =
         panic("need to call Preload first");
     }
     return fi.lengths.NumFile;
-
 });
 
 private static goobj.CUFileIndex File(this ptr<FuncInfo> _addr_fi, nint k) => func((_, panic, _) => {
@@ -2476,7 +2374,6 @@ private static goobj.CUFileIndex File(this ptr<FuncInfo> _addr_fi, nint k) => fu
         panic("need to call Preload first");
     }
     return (goobj.FuncInfo.val)(null).ReadFile(fi.data, fi.lengths.FileOff, uint32(k));
-
 });
 
 // TopFrame returns true if the function associated with this FuncInfo
@@ -2503,7 +2400,6 @@ private static uint NumInlTree(this ptr<FuncInfo> _addr_fi) => func((_, panic, _
         panic("need to call Preload first");
     }
     return fi.lengths.NumInlTree;
-
 });
 
 private static InlTreeNode InlTree(this ptr<FuncInfo> _addr_fi, nint k) => func((_, panic, _) => {
@@ -2514,7 +2410,6 @@ private static InlTreeNode InlTree(this ptr<FuncInfo> _addr_fi, nint k) => func(
     }
     var node = (goobj.FuncInfo.val)(null).ReadInlTree(fi.data, fi.lengths.InlTreeOff, uint32(k));
     return new InlTreeNode(Parent:node.Parent,File:node.File,Line:node.Line,Func:fi.l.resolve(fi.r,node.Func),ParentPC:node.ParentPC,);
-
 });
 
 private static FuncInfo FuncInfo(this ptr<Loader> _addr_l, Sym i) {
@@ -2529,7 +2424,6 @@ private static FuncInfo FuncInfo(this ptr<Loader> _addr_l, Sym i) {
         }
         r = l.objs[pp.objidx].r;
         auxs = pp.auxs;
-
     }
     else
  {
@@ -2544,7 +2438,6 @@ private static FuncInfo FuncInfo(this ptr<Loader> _addr_l, Sym i) {
             return new FuncInfo(l,r,b,auxs,goobj.FuncInfoLengths{});
         }
     }    return new FuncInfo();
-
 }
 
 // Preload a package: adds autolib.
@@ -2568,7 +2461,6 @@ private static goobj.FingerprintType Preload(this ptr<Loader> _addr_l, nint loca
             log.Fatalf("found object file %s in old format", f.File().Name());
         }
         panic("cannot read object file");
-
     }
     var pkgprefix = objabi.PathToPrefix(lib.Pkg) + ".";
     var ndef = r.NSym();
@@ -2590,7 +2482,6 @@ private static goobj.FingerprintType Preload(this ptr<Loader> _addr_l, nint loca
     f.MustSeek(length, os.SEEK_CUR);
 
     return r.Fingerprint();
-
 });
 
 // Holds the loader along with temporary states for loading symbols.
@@ -2627,7 +2518,6 @@ private static void preloadSyms(this ptr<loadState> _addr_st, ptr<oReader> _addr
             // function is simply the identity function, which doesn't depend on
             // name expansion.)
             kind = nonPkgDef;
-
         }
     else if (kind == nonPkgDef) 
         start = uint32(r.ndef + r.nhashed64def + r.nhasheddef);
@@ -2646,9 +2536,7 @@ private static void preloadSyms(this ptr<loadState> _addr_st, ptr<oReader> _addr
             if (needNameExpansion) {
                 name = strings.Replace(name, "\"\".", r.pkgprefix, -1);
             }
-
             v = abiToVer(osym.ABI(), r.version);
-
         }
         var gi = st.addSym(name, v, r, i, kind, osym);
         r.syms[i] = gi;
@@ -2665,11 +2553,9 @@ private static void preloadSyms(this ptr<loadState> _addr_st, ptr<oReader> _addr
                 if (bi != -1) { 
                     // This is a definition of a builtin symbol. Record where it is.
                     l.builtinSyms[bi] = gi;
-
                 }
 
             }
-
         }
         {
             var a = int32(osym.Align());
@@ -2679,9 +2565,7 @@ private static void preloadSyms(this ptr<loadState> _addr_st, ptr<oReader> _addr
             }
 
         }
-
     }
-
 });
 
 // Add syms, hashed (content-addressable) symbols, non-package symbols, and
@@ -2794,9 +2678,7 @@ private static void loadObjRefs(ptr<Loader> _addr_l, ptr<oReader> _addr_r, ptr<s
             if (!ok) {
                 log.Fatalf("%v: reference to nonexistent package %s", r.unit.Lib, pkg);
             }
-
             r.pkg[i] = objidx;
-
         }
 
         i = i__prev1;
@@ -2819,7 +2701,6 @@ private static void loadObjRefs(ptr<Loader> _addr_l, ptr<oReader> _addr_r, ptr<s
         i = i__prev1;
         n = n__prev1;
     }
-
 }
 
 private static nint abiToVer(ushort abi, nint localSymVersion) {
@@ -2827,7 +2708,6 @@ private static nint abiToVer(ushort abi, nint localSymVersion) {
     if (abi == goobj.SymABIstatic) { 
         // Static
         v = localSymVersion;
-
     }    {
         var abiver = sym.ABIToVersion(obj.ABI(abi));
 
@@ -2835,16 +2715,13 @@ private static nint abiToVer(ushort abi, nint localSymVersion) {
         else if (abiver != -1) { 
             // Note that data symbols are "ABI0", which maps to version 0.
             v = abiver;
-
         }
         else
  {
             log.Fatalf("invalid symbol ABI: %d", abi);
         }
     }
-
     return v;
-
 }
 
 // ResolveABIAlias given a symbol returns the ABI alias target of that
@@ -2868,7 +2745,6 @@ private static Sym ResolveABIAlias(this ptr<Loader> _addr_l, Sym s) => func((_, 
         panic(fmt.Sprintf("ABI alias %s references another ABI alias %s", l.SymName(s), l.SymName(target)));
     }
     return target;
-
 });
 
 // TopLevelSym tests a symbol (by name and kind) to determine whether
@@ -2894,8 +2770,7 @@ private static bool topLevelSym(@string sname, sym.SymKind skind) {
         return true;
     else 
         return false;
-    
-}
+    }
 
 // cloneToExternal takes the existing object file symbol (symIdx)
 // and creates a new external symbol payload that is a clone with
@@ -2938,9 +2813,7 @@ private static void cloneToExternal(this ptr<Loader> _addr_l, Sym symIdx) => fun
             // Convert local reference to global reference.
             var rel = relocs.At(i);
             pp.relocs[i].Set(rel.Off(), rel.Siz(), uint16(rel.Type()), rel.Add(), new goobj.SymRef(PkgIdx:0,SymIdx:uint32(rel.Sym())));
-
         }        pp.data = r.Data(li);
-
     }
     var auxs = r.Auxs(li);
     pp.auxs = auxs; 
@@ -2950,7 +2823,6 @@ private static void cloneToExternal(this ptr<Loader> _addr_l, Sym symIdx) => fun
     // need to access the old symbol content.)
     l.objSyms[symIdx] = new objSym(l.extReader.objidx,uint32(pi));
     l.extReader.syms = append(l.extReader.syms, symIdx);
-
 });
 
 // Copy the payload of symbol src to dst. Both src and dst must be external
@@ -3000,7 +2872,6 @@ private static void CopyAttributes(this ptr<Loader> _addr_l, Sym src, Sym dst) {
     l.SetAttrCgoExportDynamic(dst, l.AttrCgoExportDynamic(src));
     l.SetAttrCgoExportStatic(dst, l.AttrCgoExportStatic(src));
     l.SetAttrReadOnly(dst, l.AttrReadOnly(src));
-
 }
 
 // CreateExtSym creates a new external symbol with the specified name
@@ -3020,7 +2891,6 @@ private static Sym CreateStaticSym(this ptr<Loader> _addr_l, @string name) {
     // symbol so that it is not included in the name lookup table.
     l.anonVersion--;
     return l.newExtSym(name, l.anonVersion);
-
 }
 
 private static void FreeSym(this ptr<Loader> _addr_l, Sym i) {
@@ -3052,7 +2922,6 @@ private static void SetRelocVariant(this ptr<Loader> _addr_l, Sym s, nint ri, sy
             panic("invalid relocation ID");
         }
     }
-
     if (l.relocVariant == null) {
         l.relocVariant = make_map<relocId, sym.RelocVariant>();
     }
@@ -3172,20 +3041,16 @@ private static slice<Sym> AssignTextSymbolOrder(this ptr<Loader> _addr_l, slice<
                     }
 
                 }
-
                 if (dupok) {
                     lib.DupTextSyms = append(lib.DupTextSyms, sym.LoaderSym(gi));
                     continue;
                 }
-
                 lib.Textp = append(lib.Textp, sym.LoaderSym(gi));
-
             }
 
 
             i = i__prev2;
         }
-
     }    foreach (var (_, doInternal) in new array<bool>(new bool[] { true, false })) {
         {
             var lib__prev2 = lib;
@@ -3220,11 +3085,8 @@ private static slice<Sym> AssignTextSymbolOrder(this ptr<Loader> _addr_l, slice<
                                 if (i == 1 && l.SymPkg(sym) != lib.Pkg) {
                                     l.SetSymPkg(sym, lib.Pkg);
                                 }
-
                             }
-
                         }
-
                     }
 
                     i = i__prev3;
@@ -3232,13 +3094,11 @@ private static slice<Sym> AssignTextSymbolOrder(this ptr<Loader> _addr_l, slice<
 
                 lib.Textp = null;
                 lib.DupTextSyms = null;
-
             }
 
             lib = lib__prev2;
         }
     }    return textp;
-
 });
 
 // ErrorReporter is a helper class for reporting errors.
@@ -3270,7 +3130,6 @@ private static void Errorf(this ptr<ErrorReporter> _addr_reporter, Sym s, @strin
     format += "\n";
     fmt.Fprintf(os.Stderr, format, args);
     reporter.AfterErrorAction();
-
 }
 
 // GetErrorReporter returns the loader's associated error reporter.

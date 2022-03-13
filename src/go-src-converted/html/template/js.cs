@@ -2,32 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:46 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:16 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\js.go
-using bytes = go.bytes_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.html;
+
+using bytes = bytes_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+
+// nextJSCtx returns the context that determines whether a slash after the
+// given run of tokens starts a regular expression instead of a division
+// operator: / or /=.
+//
+// This assumes that the token run does not include any string tokens, comment
+// tokens, regular expression literal tokens, or division operators.
+//
+// This fails on some valid but nonsensical JavaScript programs like
+// "x = ++/foo/i" which is quite different than "x++/foo/i", but is not known to
+// fail on any known useful programs. It is based on the draft
+// JavaScript 2.0 lexical grammar and requires one token of lookbehind:
+// https://www.mozilla.org/js/language/js20-2000-07/rationale/syntax.html
 
 public static partial class template_package {
 
-    // nextJSCtx returns the context that determines whether a slash after the
-    // given run of tokens starts a regular expression instead of a division
-    // operator: / or /=.
-    //
-    // This assumes that the token run does not include any string tokens, comment
-    // tokens, regular expression literal tokens, or division operators.
-    //
-    // This fails on some valid but nonsensical JavaScript programs like
-    // "x = ++/foo/i" which is quite different than "x++/foo/i", but is not known to
-    // fail on any known useful programs. It is based on the draft
-    // JavaScript 2.0 lexical grammar and requires one token of lookbehind:
-    // https://www.mozilla.org/js/language/js20-2000-07/rationale/syntax.html
 private static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     s = bytes.TrimRight(s, "\t\n\f\r \u2028\u2029");
     if (len(s) == 0) {
@@ -54,10 +56,8 @@ private static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
                     // Reached for trailing minus signs since "---" is the
                     // same as "-- -".
                     return jsCtxRegexp;
-
                 }
                 return jsCtxDivOp;
-
                 break;
             case '.': 
                 // Handle "42."
@@ -143,7 +143,6 @@ private static jsCtx nextJSCtx(slice<byte> s, jsCtx preceding) {
     // a string which precedes a div op, or an identifier
     // which precedes a div op.
     return jsCtxDivOp;
-
 }
 
 // regexpPrecederKeywords is a set of reserved JS keywords that can precede a
@@ -167,7 +166,6 @@ private static void indirectToJSONMarshaler(object a) {
         v = v.Elem();
     }
     return v.Interface();
-
 }
 
 // jsValEscaper escapes its inputs to a JS Expression (section 11.14) that has
@@ -191,7 +189,6 @@ private static @string jsValEscaper(params object[] args) {
                 a = t.String();
                 break;
         }
-
     }
     else
  {
@@ -208,7 +205,6 @@ private static @string jsValEscaper(params object[] args) {
         }
 
         a = fmt.Sprint(args);
-
     }
     var (b, err) = json.Marshal(a);
     if (err != null) { 
@@ -219,13 +215,11 @@ private static @string jsValEscaper(params object[] args) {
         //     x//* error marshaling y:
         //          second line of error message */null
         return fmt.Sprintf(" /* %s */null ", strings.ReplaceAll(err.Error(), "*/", "* /"));
-
     }
     if (len(b) == 0) { 
         // In, `x=y/{{.}}*z` a json.Marshaler that produces "" should
         // not cause the output `x=y/*z`.
         return " null ";
-
     }
     var (first, _) = utf8.DecodeRune(b);
     var (last, _) = utf8.DecodeLastRune(b);
@@ -253,15 +247,12 @@ private static @string jsValEscaper(params object[] args) {
             else if (rune == 0x2029) {
                 repl = "\\u2029";
             }
-
             if (repl != "") {
                 buf.Write(b[(int)written..(int)i]);
                 buf.WriteString(repl);
                 written = i + n;
             }
-
             i += n;
-
         }
 
         i = i__prev1;
@@ -272,10 +263,8 @@ private static @string jsValEscaper(params object[] args) {
             buf.WriteByte(' ');
         }
         return buf.String();
-
     }
     return string(b);
-
 }
 
 // jsStrEscaper produces a string that can be included between quotes in
@@ -289,7 +278,6 @@ private static @string jsStrEscaper(params object[] args) {
         return replace(s, jsStrNormReplacementTable);
     }
     return replace(s, jsStrReplacementTable);
-
 }
 
 // jsRegexpEscaper behaves like jsStrEscaper but escapes regular expression
@@ -304,10 +292,8 @@ private static @string jsRegexpEscaper(params object[] args) {
     if (s == "") { 
         // /{{.X}}/ should not produce a line comment when .X == "".
         return "(?:)";
-
     }
     return s;
-
 }
 
 // replace replaces each rune r of s with replacementTable[r], provided that
@@ -342,11 +328,9 @@ private static @string replace(@string s, slice<@string> replacementTable) {
                 b.Grow(len(s));
             i += w;
             }
-
             b.WriteString(s[(int)written..(int)i]);
             b.WriteString(repl);
             written = i + w;
-
         }
     }
     if (written == 0) {
@@ -354,7 +338,6 @@ private static @string replace(@string s, slice<@string> replacementTable) {
     }
     b.WriteString(s[(int)written..]);
     return b.String();
-
 }
 
 private static @string lowUnicodeReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\u0000`), (1, `\u0001`), (2, `\u0002`), (3, `\u0003`), (4, `\u0004`), (5, `\u0005`), (6, `\u0006`), ('\a', `\u0007`), ('\b', `\u0008`), ('\t', `\t`), ('\n', `\n`), ('\v', `\u000b`), ('\f', `\f`), ('\r', `\r`), (0xe, `\u000e`), (0xf, `\u000f`), (0x10, `\u0010`), (0x11, `\u0011`), (0x12, `\u0012`), (0x13, `\u0013`), (0x14, `\u0014`), (0x15, `\u0015`), (0x16, `\u0016`), (0x17, `\u0017`), (0x18, `\u0018`), (0x19, `\u0019`), (0x1a, `\u001a`), (0x1b, `\u001b`), (0x1c, `\u001c`), (0x1d, `\u001d`), (0x1e, `\u001e`), (0x1f, `\u001f`)));
@@ -383,7 +366,6 @@ private static bool isJSIdentPart(int r) {
     else if ('a' <= r && r <= 'z') 
         return true;
         return false;
-
 }
 
 // isJSType reports whether the given MIME type should be considered JavaScript.
@@ -403,7 +385,6 @@ private static bool isJSType(@string mimeType) {
             mimeType = mimeType[..(int)i];
         }
     }
-
     mimeType = strings.ToLower(mimeType);
     mimeType = strings.TrimSpace(mimeType);
     switch (mimeType) {
@@ -450,7 +431,6 @@ private static bool isJSType(@string mimeType) {
             return false;
             break;
     }
-
 }
 
 } // end template_package

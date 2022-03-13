@@ -2,41 +2,42 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package codehost -- go2cs converted at 2022 March 06 23:18:45 UTC
+// package codehost -- go2cs converted at 2022 March 13 06:32:08 UTC
 // import "cmd/go/internal/modfetch/codehost" ==> using codehost = go.cmd.go.@internal.modfetch.codehost_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\codehost\vcs.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using par = go.cmd.go.@internal.par_package;
-using str = go.cmd.go.@internal.str_package;
-using System;
-
-
 namespace go.cmd.go.@internal.modfetch;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using lazyregexp = @internal.lazyregexp_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using par = cmd.go.@internal.par_package;
+using str = cmd.go.@internal.str_package;
+
+
+// A VCSError indicates an error using a version control system.
+// The implication of a VCSError is that we know definitively where
+// to get the code, but we can't access it due to the error.
+// The caller should report this error instead of continuing to probe
+// other possible module paths.
+//
+// TODO(golang.org/issue/31730): See if we can invert this. (Return a
+// distinguished error for “repo not found” and treat everything else
+// as terminal.)
+
+using System;
 public static partial class codehost_package {
 
-    // A VCSError indicates an error using a version control system.
-    // The implication of a VCSError is that we know definitively where
-    // to get the code, but we can't access it due to the error.
-    // The caller should report this error instead of continuing to probe
-    // other possible module paths.
-    //
-    // TODO(golang.org/issue/31730): See if we can invert this. (Return a
-    // distinguished error for “repo not found” and treat everything else
-    // as terminal.)
 public partial struct VCSError {
     public error Err;
 }
@@ -71,11 +72,9 @@ public static (Repo, error) NewRepo(@string vcs, @string remote) {
             err = addr(new VCSError(err));
         }
         return new cached(repo,err);
-
     })._<cached>();
 
     return (c.repo, error.As(c.err)!);
-
 }
 
 private static par.Cache vcsRepoCache = default;
@@ -136,12 +135,9 @@ private static (Repo, error) newVCSRepo(@string vcs, @string remote) => func((de
                 }
 
             }
-
         }
     }
-
     return (r, error.As(null!)!);
-
 });
 
 private static readonly @string vcsWorkDirType = "vcs1.";
@@ -182,7 +178,6 @@ private static void loadTags(this ptr<vcsRepo> _addr_r) {
             continue;
         }
         r.tags[tag] = true;
-
     }
 }
 
@@ -202,7 +197,6 @@ private static void loadBranches(this ptr<vcsRepo> _addr_r) {
             continue;
         }
         r.branches[branch] = true;
-
     }
 }
 
@@ -226,7 +220,6 @@ private static (slice<@string>, error) Tags(this ptr<vcsRepo> _addr_r, @string p
         }
     }    sort.Strings(tags);
     return (tags, error.As(null!)!);
-
 });
 
 private static (ptr<RevInfo>, error) Stat(this ptr<vcsRepo> _addr_r, @string rev) => func((defer, _, _) => {
@@ -258,7 +251,6 @@ private static (ptr<RevInfo>, error) Stat(this ptr<vcsRepo> _addr_r, @string rev
             info = info__prev2;
 
         }
-
     }
     r.fetchOnce.Do(r.fetch);
     if (r.fetchErr != null) {
@@ -272,7 +264,6 @@ private static (ptr<RevInfo>, error) Stat(this ptr<vcsRepo> _addr_r, @string rev
         info.Version = info.Name;
     }
     return (_addr_info!, error.As(null!)!);
-
 });
 
 private static void fetch(this ptr<vcsRepo> _addr_r) {
@@ -293,7 +284,6 @@ private static (ptr<RevInfo>, error) statLocal(this ptr<vcsRepo> _addr_r, @strin
         return (_addr_null!, error.As(addr(new UnknownRevisionError(Rev:rev))!)!);
     }
     return _addr_r.cmd.parseStat(rev, string(out))!;
-
 }
 
 private static (ptr<RevInfo>, error) Latest(this ptr<vcsRepo> _addr_r) {
@@ -327,7 +317,6 @@ private static (slice<byte>, error) ReadFile(this ptr<vcsRepo> _addr_r, @string 
         return (null, error.As(fs.ErrNotExist)!);
     }
     return (out, error.As(null!)!);
-
 });
 
 private static (map<@string, ptr<FileRev>>, error) ReadFileRevs(this ptr<vcsRepo> _addr_r, slice<@string> revs, @string file, long maxSize) => func((defer, _, _) => {
@@ -345,7 +334,6 @@ private static (map<@string, ptr<FileRev>>, error) ReadFileRevs(this ptr<vcsRepo
     defer(unlock());
 
     return (null, error.As(vcsErrorf("ReadFileRevs not implemented"))!);
-
 });
 
 private static (@string, error) RecentTag(this ptr<vcsRepo> _addr_r, @string rev, @string prefix, Func<@string, bool> allowed) => func((defer, _, _) => {
@@ -363,7 +351,6 @@ private static (@string, error) RecentTag(this ptr<vcsRepo> _addr_r, @string rev
     defer(unlock());
 
     return ("", error.As(vcsErrorf("RecentTag not implemented"))!);
-
 });
 
 private static (bool, error) DescendsFrom(this ptr<vcsRepo> _addr_r, @string rev, @string tag) => func((defer, _, _) => {
@@ -378,7 +365,6 @@ private static (bool, error) DescendsFrom(this ptr<vcsRepo> _addr_r, @string rev
     defer(unlock());
 
     return (false, error.As(vcsErrorf("DescendsFrom not implemented"))!);
-
 });
 
 private static (io.ReadCloser, error) ReadZip(this ptr<vcsRepo> _addr_r, @string rev, @string subdir, long maxSize) => func((defer, _, _) => {
@@ -423,7 +409,6 @@ private static (io.ReadCloser, error) ReadZip(this ptr<vcsRepo> _addr_r, @string
         }
     else
         _, err = Run(filepath.Dir(f.Name()), args);
-
     } {
         _, err = Run(r.dir, r.cmd.readZip(rev, subdir, r.remote, f.Name()));
     }
@@ -433,7 +418,6 @@ private static (io.ReadCloser, error) ReadZip(this ptr<vcsRepo> _addr_r, @string
         return (null, error.As(err)!);
     }
     return (addr(new deleteCloser(f)), error.As(null!)!);
-
 });
 
 // deleteCloser is a file that gets deleted on Close.
@@ -474,7 +458,6 @@ private static (ptr<RevInfo>, error) hgParseStat(@string rev, @string @out) {
 
     ptr<RevInfo> info = addr(new RevInfo(Name:hash,Short:ShortenSHA1(hash),Time:time.Unix(t,0).UTC(),Version:version,Tags:tags,));
     return (_addr_info!, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) bzrParseStat(@string rev, @string @out) {
@@ -487,7 +470,6 @@ private static (ptr<RevInfo>, error) bzrParseStat(@string rev, @string @out) {
         if (line == "" || line[0] == ' ' || line[0] == '\t') { 
             // End of header, start of commit message.
             break;
-
         }
         if (line[0] == '-') {
             continue;
@@ -496,7 +478,6 @@ private static (ptr<RevInfo>, error) bzrParseStat(@string rev, @string @out) {
         if (i < 0) { 
             // End of header, start of commit message.
             break;
-
         }
         var key = line[..(int)i];
         var val = strings.TrimSpace(line[(int)i + 1..]);
@@ -514,14 +495,11 @@ private static (ptr<RevInfo>, error) bzrParseStat(@string rev, @string @out) {
                     j = j__prev1;
 
                 }
-
                 var (i, err) = strconv.ParseInt(val, 10, 64);
                 if (err != null) {
                     return (_addr_null!, error.As(vcsErrorf("unexpected revno from bzr log: %q", line))!);
                 }
-
                 revno = i;
-
                 break;
             case "timestamp": 
                 j = strings.Index(val, " ");
@@ -535,13 +513,11 @@ private static (ptr<RevInfo>, error) bzrParseStat(@string rev, @string @out) {
                 tm = t.UTC();
                 break;
         }
-
     }    if (revno == 0 || tm.IsZero()) {
         return (_addr_null!, error.As(vcsErrorf("unexpected response from bzr log: %q", out))!);
     }
     ptr<RevInfo> info = addr(new RevInfo(Name:fmt.Sprintf("%d",revno),Short:fmt.Sprintf("%012d",revno),Time:tm,Version:rev,));
     return (_addr_info!, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) fossilParseStat(@string rev, @string @out) {
@@ -563,13 +539,10 @@ private static (ptr<RevInfo>, error) fossilParseStat(@string rev, @string @out) 
             if (strings.HasPrefix(hash, version)) {
                 version = hash; // extend to full hash
             }
-
             ptr<RevInfo> info = addr(new RevInfo(Name:hash,Short:ShortenSHA1(hash),Time:t,Version:version,));
             return (_addr_info!, error.As(null!)!);
-
         }
     }    return (_addr_null!, error.As(vcsErrorf("unexpected response from fossil info: %q", out))!);
-
 }
 
 private partial struct limitedWriter {
@@ -595,7 +568,6 @@ private static (nint, error) Write(this ptr<limitedWriter> _addr_l, slice<byte> 
         }
     }
     return (n, error.As(l.ErrLimitReached)!);
-
 }
 
 } // end codehost_package

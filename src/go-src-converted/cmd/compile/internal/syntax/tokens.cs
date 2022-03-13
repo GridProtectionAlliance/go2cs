@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:42 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:27:07 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\tokens.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class syntax_package {
@@ -87,7 +85,6 @@ public static readonly var Goto = _Goto;
 public static readonly var Go = _Go;
 public static readonly var Defer = _Defer;
 
-
 // Make sure we have at most 64 tokens so we can use them in a set.
 private static readonly ulong _ = 1 << (int)((tokenCount - 1));
 
@@ -110,7 +107,6 @@ public static readonly var FloatLit = 0;
 public static readonly var ImagLit = 1;
 public static readonly var RuneLit = 2;
 public static readonly var StringLit = 3;
-
 
 public partial struct Operator { // : nuint
 }
@@ -161,6 +157,5 @@ private static readonly var precAndAnd = 1;
 private static readonly var precCmp = 2;
 private static readonly var precAdd = 3;
 private static readonly var precMul = 4;
-
 
 } // end syntax_package

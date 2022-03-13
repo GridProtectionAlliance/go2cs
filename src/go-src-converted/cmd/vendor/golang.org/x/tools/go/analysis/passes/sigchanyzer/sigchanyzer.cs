@@ -4,22 +4,22 @@
 
 // Package sigchanyzer defines an Analyzer that detects
 // misuse of unbuffered signal as argument to signal.Notify.
-// package sigchanyzer -- go2cs converted at 2022 March 06 23:34:46 UTC
+
+// package sigchanyzer -- go2cs converted at 2022 March 13 06:42:02 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/sigchanyzer" ==> using sigchanyzer = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.sigchanyzer_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\sigchanyzer\sigchanyzer.go
-using bytes = go.bytes_package;
-using ast = go.go.ast_package;
-using format = go.go.format_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using bytes = bytes_package;
+using ast = go.ast_package;
+using format = go.format_package;
+using token = go.token_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class sigchanyzer_package {
 
@@ -57,7 +57,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     }
 
                 }
-
                 break;
             case ptr<ast.CallExpr> arg:
                 if (isBuiltinMake(_addr_pass.TypesInfo, _addr_arg)) {
@@ -83,12 +82,9 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             }
 
         }
-
         pass.Report(new analysis.Diagnostic(Pos:call.Pos(),End:call.End(),Message:"misuse of unbuffered os.Signal channel as argument to signal.Notify",SuggestedFixes:[]analysis.SuggestedFix{{Message:"Change to buffer channel",TextEdits:[]analysis.TextEdit{{Pos:chanDecl.Pos(),End:chanDecl.End(),NewText:buf.Bytes(),}},}},));
-
     });
     return (null, error.As(null!)!);
-
 }
 
 private static bool isSignalNotify(ptr<types.Info> _addr_info, ptr<ast.CallExpr> _addr_call) {
@@ -116,7 +112,6 @@ private static bool isSignalNotify(ptr<types.Info> _addr_info, ptr<ast.CallExpr>
                 fun = fun__prev1;
 
             }
-
             return false;
             break;
         default:
@@ -126,7 +121,6 @@ private static bool isSignalNotify(ptr<types.Info> _addr_info, ptr<ast.CallExpr>
             break;
         }
     }
-
 }
 
 private static ast.Node findDecl(ptr<ast.Ident> _addr_arg) {
@@ -178,7 +172,6 @@ private static ast.Node findDecl(ptr<ast.Ident> _addr_arg) {
             break;
     }
     return null;
-
 }
 
 private static bool isBuiltinMake(ptr<types.Info> _addr_info, ptr<ast.CallExpr> _addr_call) {
@@ -200,7 +193,6 @@ private static bool isBuiltinMake(ptr<types.Info> _addr_info, ptr<ast.CallExpr> 
             break;
         }
     }
-
 }
 
 } // end sigchanyzer_package

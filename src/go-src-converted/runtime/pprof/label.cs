@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2022 March 06 22:14:40 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:28:40 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\label.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.runtime;
+
+using context = context_package;
+using fmt = fmt_package;
+using sort = sort_package;
+using strings = strings_package;
+using System;
 
 public static partial class pprof_package {
 
@@ -36,7 +35,6 @@ private static labelMap labelValue(context.Context ctx) {
         return labelMap(null);
     }
     return labels.val;
-
 }
 
 // labelMap is the representation of the label set held in the context type.
@@ -60,7 +58,6 @@ private static @string String(this ptr<labelMap> _addr_l) {
     }    sort.Strings(keyVals);
 
     return "{" + strings.Join(keyVals, ", ") + "}";
-
 }
 
 // WithLabels returns a new context.Context with the given labels added.
@@ -76,7 +73,6 @@ public static context.Context WithLabels(context.Context ctx, LabelSet labels) {
     }    foreach (var (_, label) in labels.list) {
         childLabels[label.key] = label.value;
     }    return context.WithValue(ctx, new labelContextKey(), _addr_childLabels);
-
 }
 
 // Labels takes an even number of strings representing key-value pairs
@@ -101,7 +97,6 @@ public static LabelSet Labels(params @string[] args) => func((_, panic, _) => {
         }
     }
     return new LabelSet(list:list);
-
 });
 
 // Label returns the value of the label with the given key on ctx, and a boolean indicating

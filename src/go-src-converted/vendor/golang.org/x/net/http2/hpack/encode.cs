@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package hpack -- go2cs converted at 2022 March 06 23:37:12 UTC
+// package hpack -- go2cs converted at 2022 March 13 06:45:27 UTC
 // import "vendor/golang.org/x/net/http2/hpack" ==> using hpack = go.vendor.golang.org.x.net.http2.hpack_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\http2\hpack\encode.go
-using io = go.io_package;
-
 namespace go.vendor.golang.org.x.net.http2;
+
+using io = io_package;
 
 public static partial class hpack_package {
 
 private static readonly var uint32Max = ~uint32(0);
 private static readonly nint initialHeaderTableSize = 4096;
-
 
 public partial struct Encoder {
     public dynamicTable dynTab; // minSize is the minimum table size set by
@@ -53,7 +52,6 @@ private static error WriteField(this ptr<Encoder> _addr_e, HeaderField f) {
         }
         e.minSize = uint32Max;
         e.buf = appendTableSize(e.buf, e.dynTab.maxSize);
-
     }
     var (idx, nameValueMatch) = e.searchTable(f);
     if (nameValueMatch) {
@@ -78,7 +76,6 @@ private static error WriteField(this ptr<Encoder> _addr_e, HeaderField f) {
         err = io.ErrShortWrite;
     }
     return error.As(err)!;
-
 }
 
 // searchTable searches f in both stable and dynamic header tables.
@@ -102,7 +99,6 @@ private static (ulong, bool) searchTable(this ptr<Encoder> _addr_e, HeaderField 
         return (j + uint64(staticTable.len()), nameValueMatch);
     }
     return (i, false);
-
 }
 
 // SetMaxDynamicTableSize changes the dynamic header table size to v.
@@ -119,7 +115,6 @@ private static void SetMaxDynamicTableSize(this ptr<Encoder> _addr_e, uint v) {
     }
     e.tableSizeUpdate = true;
     e.dynTab.setMaxSize(v);
-
 }
 
 // SetMaxDynamicTableSizeLimit changes the maximum value that can be
@@ -188,7 +183,6 @@ private static slice<byte> appendIndexedName(slice<byte> dst, HeaderField f, ulo
     dst = appendVarInt(dst, n, i);
     dst[first] |= encodeTypeByte(indexing, f.Sensitive);
     return appendHpackString(dst, f.Value);
-
 }
 
 // appendTableSize appends v, as encoded in "Header Table Size Update"
@@ -217,7 +211,6 @@ private static slice<byte> appendVarInt(slice<byte> dst, byte n, ulong i) {
         i>>=7;
     }
     return append(dst, byte(i));
-
 }
 
 // appendHpackString appends s, as encoded in "String Literal"
@@ -239,7 +232,6 @@ private static slice<byte> appendHpackString(slice<byte> dst, @string s) {
         dst = append(dst, s);
     }
     return dst;
-
 }
 
 // encodeTypeByte returns type byte. If sensitive is true, type byte
@@ -255,7 +247,6 @@ private static byte encodeTypeByte(bool indexing, bool sensitive) {
         return 0x40;
     }
     return 0;
-
 }
 
 } // end hpack_package

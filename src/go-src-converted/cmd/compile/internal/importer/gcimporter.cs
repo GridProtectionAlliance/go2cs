@@ -4,26 +4,28 @@
 // license that can be found in the LICENSE file.
 
 // package importer implements Import for gc-generated object files.
-// package importer -- go2cs converted at 2022 March 06 23:13:52 UTC
+
+// package importer -- go2cs converted at 2022 March 13 06:27:19 UTC
 // import "cmd/compile/internal/importer" ==> using importer = go.cmd.compile.@internal.importer_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\importer\gcimporter.go
-using bufio = go.bufio_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bufio = bufio_package;
+using types2 = cmd.compile.@internal.types2_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// debugging/development support
+
+using System;
 public static partial class importer_package {
 
-    // debugging/development support
 private static readonly var debug = false;
 
 
@@ -63,16 +65,13 @@ public static (@string, @string) FindPkg(@string path, @string srcDir) {
 
             if (err == null) { // see issue 14282
                 srcDir = abs;
-
             }
 
         }
-
         var (bp, _) = build.Import(path, srcDir, build.FindOnly | build.AllowBinary);
         if (bp.PkgObj == "") {
             id = path; // make sure we have an id to print in error message
             return ;
-
         }
         noext = strings.TrimSuffix(bp.PkgObj, ".a");
         id = bp.ImportPath;
@@ -91,10 +90,8 @@ public static (@string, @string) FindPkg(@string path, @string srcDir) {
             }
 
         }
-
     }    filename = ""; // not found
     return ;
-
 }
 
 // Import imports a gc-generated package given its import path and srcDir, adds
@@ -126,7 +123,6 @@ public static (ptr<types2.Package>, error) Import(map<@string, ptr<types2.Packag
             return (_addr_null!, error.As(err)!);
         }
         rc = f;
-
     }
     else
  {
@@ -151,12 +147,9 @@ public static (ptr<types2.Package>, error) Import(map<@string, ptr<types2.Packag
             if (err != null) { 
                 // add file name to error
                 err = fmt.Errorf("%s: %v", filename, err);
-
             }
-
         }());
         rc = f;
-
     }
     defer(rc.Close());
 
@@ -191,7 +184,6 @@ public static (ptr<types2.Package>, error) Import(map<@string, ptr<types2.Packag
     }
 
     return ;
-
 });
 
 private partial struct byPath { // : slice<ptr<types2.Package>>

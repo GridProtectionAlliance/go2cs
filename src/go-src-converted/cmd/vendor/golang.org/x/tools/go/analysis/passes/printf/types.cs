@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package printf -- go2cs converted at 2022 March 06 23:34:44 UTC
+// package printf -- go2cs converted at 2022 March 13 06:42:01 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/printf" ==> using printf = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.printf_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\printf\types.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
 
 public static partial class printf_package {
 
@@ -61,7 +61,6 @@ private static bool matchArgTypeInternal(ptr<analysis.Pass> _addr_pass, printfAr
     if (inProgress[typ]) { 
         // We're already looking at this type. The call that started it will take care of it.
         return true;
-
     }
     inProgress[typ] = true;
 
@@ -86,7 +85,6 @@ private static bool matchArgTypeInternal(ptr<analysis.Pass> _addr_pass, printfAr
             if (types.Identical(typ.Elem().Underlying(), types.Typ[types.Byte]) && t & argString != 0) {
                 return true; // %s matches []byte
             }
-
             if (t == argPointer) {
                 return true; // %p prints a slice's 0th element
             } 
@@ -106,7 +104,6 @@ private static bool matchArgTypeInternal(ptr<analysis.Pass> _addr_pass, printfAr
             if (t == argPointer) {
                 return true;
             }
-
             var under = typ.Elem().Underlying();
             switch (under.type()) {
                 case ptr<types.Struct> _:
@@ -134,7 +131,6 @@ private static bool matchArgTypeInternal(ptr<analysis.Pass> _addr_pass, printfAr
             if (len(inProgress) > 1) {
                 return false;
             }
-
             return matchArgTypeInternal(_addr_pass, t, under, arg, inProgress);
             break;
         case ptr<types.Struct> typ:
@@ -172,7 +168,6 @@ private static bool matchArgTypeInternal(ptr<analysis.Pass> _addr_pass, printfAr
     }
 
     return false;
-
 });
 
 private static bool isConvertibleToString(ptr<analysis.Pass> _addr_pass, types.Type typ) {
@@ -186,10 +181,8 @@ private static bool isConvertibleToString(ptr<analysis.Pass> _addr_pass, types.T
             // convertible to both of the interfaces below, as it
             // would just panic anyway.
             return false;
-
         }
     }
-
     if (types.ConvertibleTo(typ, errorType)) {
         return true; // via .Error()
     }
@@ -208,13 +201,10 @@ private static bool isConvertibleToString(ptr<analysis.Pass> _addr_pass, types.T
                 }
 
             }
-
         }
     }
 
-
     return false;
-
 }
 
 // hasBasicType reports whether x's type is a types.Basic with the given kind.
@@ -227,7 +217,6 @@ private static bool hasBasicType(ptr<analysis.Pass> _addr_pass, ast.Expr x, type
     }
     ptr<types.Basic> (b, ok) = t._<ptr<types.Basic>>();
     return ok && b.Kind() == kind;
-
 }
 
 // matchStructArgType reports whether all the elements of the struct match the expected
@@ -244,11 +233,9 @@ private static bool matchStructArgType(ptr<analysis.Pass> _addr_pass, printfArgT
         if (t & argString != 0 && !typf.Exported() && isConvertibleToString(_addr_pass, typf.Type())) { 
             // Issue #17798: unexported Stringer or error cannot be properly formatted.
             return false;
-
         }
     }
     return true;
-
 }
 
 } // end printf_package

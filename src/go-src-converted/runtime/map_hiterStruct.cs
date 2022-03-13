@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:01 UTC
+//     Generated on 2022 March 13 05:24:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct hiter
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace go
             public static implicit operator hiter(NilType nil) => default(hiter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static hiter hiter_cast(dynamic value)
         {
             return new hiter(value.key, value.elem, ref value.t, ref value.h, value.buckets, ref value.bptr, ref value.overflow, ref value.oldoverflow, value.startBucket, value.offset, value.wrapped, value.B, value.i, value.bucket, value.checkBucket);

@@ -340,8 +340,10 @@
     methods to a reader without that capability, use
     bufio.NewReader.
 */
-// package fmt -- go2cs converted at 2022 March 06 22:08:00 UTC
+
+// package fmt -- go2cs converted at 2022 March 13 05:23:49 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Program Files\Go\src\fmt\doc.go
+namespace go;
 
 } // end fmt_package

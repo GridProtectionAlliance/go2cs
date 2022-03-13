@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:14 UTC
+//     Generated on 2022 March 13 05:37:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct byteReader
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace net
             public static implicit operator byteReader(NilType nil) => default(byteReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static byteReader byteReader_cast(dynamic value)
         {
             return new byteReader(value.b, value.done);

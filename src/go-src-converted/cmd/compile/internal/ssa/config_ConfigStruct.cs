@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:28 UTC
+//     Generated on 2022 March 13 06:00:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Config
         {
             // Constructors
@@ -120,7 +120,7 @@ namespace @internal
             public static implicit operator Config(NilType nil) => default(Config);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Config Config_cast(dynamic value)
         {
             return new Config(value.arch, value.PtrSize, value.RegSize, value.Types, value.lowerBlock, value.lowerValue, value.splitLoad, value.registers, value.gpRegMask, value.fpRegMask, value.fp32RegMask, value.fp64RegMask, value.specialRegMask, value.intParamRegs, value.floatParamRegs, ref value.ABI1, ref value.ABI0, value.GCRegMap, value.FPReg, value.LinkReg, value.hasGReg, ref value.ctxt, value.optimize, value.noDuffDevice, value.useSSE, value.useAvg, value.useHmul, value.SoftFloat, value.Race, value.BigEndian, value.UseFMA);

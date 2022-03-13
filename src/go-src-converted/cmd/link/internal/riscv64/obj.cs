@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package riscv64 -- go2cs converted at 2022 March 06 23:20:38 UTC
+// package riscv64 -- go2cs converted at 2022 March 13 06:33:32 UTC
 // import "cmd/link/internal/riscv64" ==> using riscv64 = go.cmd.link.@internal.riscv64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\riscv64\obj.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
 
 public static partial class riscv64_package {
 
@@ -39,7 +39,6 @@ private static void archinit(ptr<ld.Link> _addr_ctxt) {
         }
     else 
         ld.Exitf("unknown -H option: %v", ctxt.HeadType);
-    
-}
+    }
 
 } // end riscv64_package

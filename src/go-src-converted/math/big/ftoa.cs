@@ -6,47 +6,49 @@
 // It is closely following the corresponding implementation
 // in strconv/ftoa.go, but modified and simplified for Float.
 
-// package big -- go2cs converted at 2022 March 06 22:17:46 UTC
+// package big -- go2cs converted at 2022 March 13 05:31:56 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\ftoa.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-
 namespace go.math;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strconv = strconv_package;
+
+
+// Text converts the floating-point number x to a string according
+// to the given format and precision prec. The format is one of:
+//
+//    'e'    -d.dddde±dd, decimal exponent, at least two (possibly 0) exponent digits
+//    'E'    -d.ddddE±dd, decimal exponent, at least two (possibly 0) exponent digits
+//    'f'    -ddddd.dddd, no exponent
+//    'g'    like 'e' for large exponents, like 'f' otherwise
+//    'G'    like 'E' for large exponents, like 'f' otherwise
+//    'x'    -0xd.dddddp±dd, hexadecimal mantissa, decimal power of two exponent
+//    'p'    -0x.dddp±dd, hexadecimal mantissa, decimal power of two exponent (non-standard)
+//    'b'    -ddddddp±dd, decimal mantissa, decimal power of two exponent (non-standard)
+//
+// For the power-of-two exponent formats, the mantissa is printed in normalized form:
+//
+//    'x'    hexadecimal mantissa in [1, 2), or 0
+//    'p'    hexadecimal mantissa in [½, 1), or 0
+//    'b'    decimal integer mantissa using x.Prec() bits, or 0
+//
+// Note that the 'x' form is the one used by most other languages and libraries.
+//
+// If format is a different character, Text returns a "%" followed by the
+// unrecognized format character.
+//
+// The precision prec controls the number of digits (excluding the exponent)
+// printed by the 'e', 'E', 'f', 'g', 'G', and 'x' formats.
+// For 'e', 'E', 'f', and 'x', it is the number of digits after the decimal point.
+// For 'g' and 'G' it is the total number of digits. A negative precision selects
+// the smallest number of decimal digits necessary to identify the value x uniquely
+// using x.Prec() mantissa bits.
+// The prec value is ignored for the 'b' and 'p' formats.
 
 public static partial class big_package {
 
-    // Text converts the floating-point number x to a string according
-    // to the given format and precision prec. The format is one of:
-    //
-    //    'e'    -d.dddde±dd, decimal exponent, at least two (possibly 0) exponent digits
-    //    'E'    -d.ddddE±dd, decimal exponent, at least two (possibly 0) exponent digits
-    //    'f'    -ddddd.dddd, no exponent
-    //    'g'    like 'e' for large exponents, like 'f' otherwise
-    //    'G'    like 'E' for large exponents, like 'f' otherwise
-    //    'x'    -0xd.dddddp±dd, hexadecimal mantissa, decimal power of two exponent
-    //    'p'    -0x.dddp±dd, hexadecimal mantissa, decimal power of two exponent (non-standard)
-    //    'b'    -ddddddp±dd, decimal mantissa, decimal power of two exponent (non-standard)
-    //
-    // For the power-of-two exponent formats, the mantissa is printed in normalized form:
-    //
-    //    'x'    hexadecimal mantissa in [1, 2), or 0
-    //    'p'    hexadecimal mantissa in [½, 1), or 0
-    //    'b'    decimal integer mantissa using x.Prec() bits, or 0
-    //
-    // Note that the 'x' form is the one used by most other languages and libraries.
-    //
-    // If format is a different character, Text returns a "%" followed by the
-    // unrecognized format character.
-    //
-    // The precision prec controls the number of digits (excluding the exponent)
-    // printed by the 'e', 'E', 'f', 'g', 'G', and 'x' formats.
-    // For 'e', 'E', 'f', and 'x', it is the number of digits after the decimal point.
-    // For 'g' and 'G' it is the total number of digits. A negative precision selects
-    // the smallest number of decimal digits necessary to identify the value x uniquely
-    // using x.Prec() mantissa bits.
-    // The prec value is ignored for the 'b' and 'p' formats.
 private static @string Text(this ptr<Float> _addr_x, byte format, nint prec) {
     ref Float x = ref _addr_x.val;
 
@@ -55,7 +57,6 @@ private static @string Text(this ptr<Float> _addr_x, byte format, nint prec) {
         cap += prec;
     }
     return string(x.Append(make_slice<byte>(0, cap), format, prec));
-
 }
 
 // String formats x like x.Text('g', 10).
@@ -80,7 +81,6 @@ private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte
             buf = append(buf, '+');
         }
         return append(buf, "Inf");
-
     }
     switch (fmt) {
         case 'b': 
@@ -104,7 +104,6 @@ private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte
     if (x.form == finite) { 
         // x != 0
         d.init(x.mant, int(x.exp) - x.mant.bitLen());
-
     }
     var shortest = false;
     if (prec < 0) {
@@ -126,7 +125,6 @@ private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte
                 prec = len(d.mant);
                 break;
         }
-
     }
     else
  { 
@@ -152,7 +150,6 @@ private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte
                 d.round(prec);
                 break;
         }
-
     }
     switch (fmt) {
         case 'e': 
@@ -186,7 +183,6 @@ private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte
                 prec = len(d.mant);
             }
             return fmtF(buf, max(prec - d.exp, 0), d);
-
             break;
     } 
 
@@ -195,7 +191,6 @@ private static slice<byte> Append(this ptr<Float> _addr_x, slice<byte> buf, byte
         buf = buf[..(int)len(buf) - 1]; // sign was added prematurely - remove it again
     }
     return append(buf, '%', fmt);
-
 }
 
 private static void roundShortest(ptr<decimal> _addr_d, ptr<Float> _addr_x) {
@@ -258,8 +253,7 @@ private static void roundShortest(ptr<decimal> _addr_d, ptr<Float> _addr_x) {
         else if (okup) 
             d.roundUp(i + 1);
             return ;
-        
-    }
+            }
 }
 
 // %e: d.ddddde±dd
@@ -284,7 +278,6 @@ private static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, decimal d)
             buf = append(buf, '0');
             i++;
         }
-
     }
     buf = append(buf, fmt);
     long exp = default;
@@ -306,7 +299,6 @@ private static slice<byte> fmtE(slice<byte> buf, byte fmt, nint prec, decimal d)
         buf = append(buf, '0'); // at least 2 exponent digits
     }
     return strconv.AppendInt(buf, exp, 10);
-
 }
 
 // %f: ddddddd.ddddd
@@ -320,8 +312,6 @@ private static slice<byte> fmtF(slice<byte> buf, nint prec, decimal d) {
             m++;
         }
     else
-
-
     } {
         buf = append(buf, '0');
     }
@@ -332,7 +322,6 @@ private static slice<byte> fmtF(slice<byte> buf, nint prec, decimal d) {
         }
     }
     return buf;
-
 }
 
 // fmtB appends the string of x in the format mantissa "p" exponent
@@ -370,7 +359,6 @@ private static slice<byte> fmtB(this ptr<Float> _addr_x, slice<byte> buf) => fun
         buf = append(buf, '+');
     }
     return strconv.AppendInt(buf, e, 10);
-
 });
 
 // fmtX appends the string of x in the format "0x1." mantissa "p" exponent
@@ -392,7 +380,6 @@ private static slice<byte> fmtX(this ptr<Float> _addr_x, slice<byte> buf, nint p
         }
         buf = append(buf, "p+00");
         return buf;
-
     }
     if (debugFloat && x.form != finite) {
         panic("non-finite float");
@@ -443,7 +430,6 @@ private static slice<byte> fmtX(this ptr<Float> _addr_x, slice<byte> buf, nint p
         buf = append(buf, '0');
     }
     return strconv.AppendInt(buf, exp64, 10);
-
 });
 
 // fmtP appends the string of x in the format "0x." mantissa "p" exponent
@@ -475,7 +461,6 @@ private static slice<byte> fmtP(this ptr<Float> _addr_x, slice<byte> buf) => fun
         buf = append(buf, '+');
     }
     return strconv.AppendInt(buf, int64(x.exp), 10);
-
 });
 
 private static nint min(nint x, nint y) {
@@ -483,7 +468,6 @@ private static nint min(nint x, nint y) {
         return x;
     }
     return y;
-
 }
 
 private static fmt.Formatter _ = _addr_floatZero; // *Float must implement fmt.Formatter
@@ -564,7 +548,6 @@ private static void Format(this ptr<Float> _addr_x, fmt.State s, int format) {
     }
 
 
-
     if (s.Flag('0') && !x.IsInf()) 
         // 0-padding on left
         writeMultiple(s, sign, 1);
@@ -580,7 +563,6 @@ private static void Format(this ptr<Float> _addr_x, fmt.State s, int format) {
         writeMultiple(s, " ", padding);
         writeMultiple(s, sign, 1);
         s.Write(buf);
-    
-}
+    }
 
 } // end big_package

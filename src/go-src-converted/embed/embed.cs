@@ -122,30 +122,32 @@
 // are available in “go list” output. See the EmbedPatterns, TestEmbedPatterns,
 // and XTestEmbedPatterns fields in the “go help list” output.
 //
-// package embed -- go2cs converted at 2022 March 06 23:35:42 UTC
+
+// package embed -- go2cs converted at 2022 March 13 06:43:39 UTC
 // import "embed" ==> using embed = go.embed_package
 // Original source: C:\Program Files\Go\src\embed\embed.go
-using errors = go.errors_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using io = io_package;
+using fs = io.fs_package;
+using time = time_package;
+
+
+// An FS is a read-only collection of files, usually initialized with a //go:embed directive.
+// When declared without a //go:embed directive, an FS is an empty file system.
+//
+// An FS is a read-only value, so it is safe to use from multiple goroutines
+// simultaneously and also safe to assign values of type FS to each other.
+//
+// FS implements fs.FS, so it can be used with any package that understands
+// file system interfaces, including net/http, text/template, and html/template.
+//
+// See the package documentation for more details about initializing an FS.
+
+using System;
 public static partial class embed_package {
 
-    // An FS is a read-only collection of files, usually initialized with a //go:embed directive.
-    // When declared without a //go:embed directive, an FS is an empty file system.
-    //
-    // An FS is a read-only value, so it is safe to use from multiple goroutines
-    // simultaneously and also safe to assign values of type FS to each other.
-    //
-    // FS implements fs.FS, so it can be used with any package that understands
-    // file system interfaces, including net/http, text/template, and html/template.
-    //
-    // See the package documentation for more details about initializing an FS.
 public partial struct FS {
     public ptr<slice<file>> files;
 }
@@ -170,7 +172,6 @@ private static (@string, @string, bool) split(@string name) {
         return (".", name, isDir);
     }
     return (name[..(int)i], name[(int)i + 1..], isDir);
-
 }
 
 // trimSlash trims a trailing slash from name, if present,
@@ -180,7 +181,6 @@ private static @string trimSlash(@string name) {
         return name[..(int)len(name) - 1];
     }
     return name;
-
 }
 
 private static fs.ReadDirFS _ = new FS();private static fs.ReadFileFS _ = new FS();
@@ -244,7 +244,6 @@ private static fs.FileMode Mode(this ptr<file> _addr_f) {
         return fs.ModeDir | 0555;
     }
     return 0444;
-
 }
 
 // dotFile is a file for the root directory,
@@ -258,7 +257,6 @@ public static ptr<file> lookup(this FS f, @string name) {
         // so this check is not strictly necessary (if name is invalid,
         // we shouldn't find a match below), but it's a good backstop anyway.
         return _addr_null!;
-
     }
     if (name == ".") {
         return _addr_dotFile!;
@@ -276,7 +274,6 @@ public static ptr<file> lookup(this FS f, @string name) {
         return _addr__addr_files[i]!;
     }
     return _addr_null!;
-
 }
 
 // readDir returns the list of files corresponding to the directory dir.
@@ -294,7 +291,6 @@ public static slice<file> readDir(this FS f, @string dir) {
         return jdir > dir;
     });
     return files[(int)i..(int)j];
-
 }
 
 // Open opens the named file for reading and returns it as an fs.File.
@@ -310,7 +306,6 @@ public static (fs.File, error) Open(this FS f, @string name) {
         return (addr(new openDir(file,f.readDir(name),0)), error.As(null!)!);
     }
     return (addr(new openFile(file,0)), error.As(null!)!);
-
 }
 
 // ReadDir reads and returns the entire named directory.
@@ -330,7 +325,6 @@ public static (slice<fs.DirEntry>, error) ReadDir(this FS f, @string name) {
     foreach (var (i) in list) {
         list[i] = _addr_dir.files[i];
     }    return (list, error.As(null!)!);
-
 }
 
 // ReadFile reads and returns the content of the named file.
@@ -347,7 +341,6 @@ public static (slice<byte>, error) ReadFile(this FS f, @string name) {
         return (null, error.As(addr(new fs.PathError(Op:"read",Path:name,Err:errors.New("is a directory")))!)!);
     }
     return ((slice<byte>)ofile.f.data, error.As(null!)!);
-
 }
 
 // An openFile is a regular file open for reading.
@@ -383,7 +376,6 @@ private static (nint, error) Read(this ptr<openFile> _addr_f, slice<byte> b) {
     var n = copy(b, f.f.data[(int)f.offset..]);
     f.offset += int64(n);
     return (n, error.As(null!)!);
-
 }
 
 private static (long, error) Seek(this ptr<openFile> _addr_f, long offset, nint whence) {
@@ -407,7 +399,6 @@ private static (long, error) Seek(this ptr<openFile> _addr_f, long offset, nint 
     }
     f.offset = offset;
     return (offset, error.As(null!)!);
-
 }
 
 // An openDir is a directory open for reading.
@@ -449,7 +440,6 @@ private static (slice<fs.DirEntry>, error) ReadDir(this ptr<openDir> _addr_d, ni
             return (null, error.As(null!)!);
         }
         return (null, error.As(io.EOF)!);
-
     }
     if (count > 0 && n > count) {
         n = count;
@@ -459,7 +449,6 @@ private static (slice<fs.DirEntry>, error) ReadDir(this ptr<openDir> _addr_d, ni
         list[i] = _addr_d.files[d.offset + i];
     }    d.offset += n;
     return (list, error.As(null!)!);
-
 }
 
 // sortSearch is like sort.Search, avoiding an import.
@@ -481,7 +470,6 @@ private static nint sortSearch(nint n, Func<nint, bool> f) {
     } 
     // i == j, f(i-1) == false, and f(j) (= f(i)) == true  =>  answer is i.
     return i;
-
 }
 
 } // end embed_package

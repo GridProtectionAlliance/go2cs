@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:24 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:57 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\mac.go
-
-
 namespace go;
 
 public static partial class net_package {
@@ -31,9 +29,7 @@ public static @string String(this HardwareAddr a) {
         }
         buf = append(buf, hexDigit[b >> 4]);
         buf = append(buf, hexDigit[b & 0xF]);
-
     }    return string(buf);
-
 }
 
 // ParseMAC parses s as an IEEE 802 MAC-48, EUI-48, EUI-64, or a 20-octet
@@ -75,16 +71,13 @@ public static (HardwareAddr, error) ParseMAC(@string s) {
                 if (!ok) {
                     goto error;
                 }
-
                 x += 3;
-
             }
 
 
             x = x__prev1;
             i = i__prev1;
         }
-
     }
     else if (s[4] == '.') {
         if ((len(s) + 1) % 5 != 0) {
@@ -110,15 +103,12 @@ public static (HardwareAddr, error) ParseMAC(@string s) {
                     goto error;
                 i += 2;
                 }
-
                 hw[i + 1], ok = xtoi2(s[(int)x + 2..], s[4]);
 
                 if (!ok) {
                     goto error;
                 }
-
                 x += 5;
-
             }
     else
 
@@ -126,7 +116,6 @@ public static (HardwareAddr, error) ParseMAC(@string s) {
             x = x__prev1;
             i = i__prev1;
         }
-
     } {
         goto error;
     }
@@ -134,7 +123,6 @@ public static (HardwareAddr, error) ParseMAC(@string s) {
 
 error:
     return (null, error.As(addr(new AddrError(Err:"invalid MAC address",Addr:s))!)!);
-
 }
 
 } // end net_package

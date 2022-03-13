@@ -6,19 +6,19 @@
 // (cmd/dist must not import go/build because we do not want it to be
 // sensitive to the specific version of go/build present in $GOROOT_BOOTSTRAP.)
 
-// package main -- go2cs converted at 2022 March 06 23:15:22 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:51 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\imports.go
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go;
+
+using bufio = bufio_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
 
 public static partial class main_package {
 
@@ -66,10 +66,8 @@ private static byte readByte(this ptr<importReader> _addr_r) {
             r.err = err;
         }
         c = 0;
-
     }
     return c;
-
 }
 
 // peekByte returns the next byte from the input reader but does not advance beyond it.
@@ -84,7 +82,6 @@ private static byte peekByte(this ptr<importReader> _addr_r, bool skipSpace) => 
             panic("go/build: import reader looping");
         }
         return 0;
-
     }
     var c = r.peek;
     if (c == 0) {
@@ -125,25 +122,18 @@ private static byte peekByte(this ptr<importReader> _addr_r, bool skipSpace) => 
                             (c, c1) = (c1, r.readByte());
                         }
                     else
-
-
                     } {
                         r.syntaxError();
                     }
-
                     c = r.readByte();
                     continue;
-
                     break;
             }
-
         }
         break;
-
     }
     r.peek = c;
     return r.peek;
-
 });
 
 // nextByte is like peekByte but advances beyond the returned byte.
@@ -185,7 +175,6 @@ private static void readIdent(this ptr<importReader> _addr_r) {
     while (isIdent(r.peekByte(false))) {
         r.peek = 0;
     }
-
 }
 
 // readString reads a quoted string literal from the input.
@@ -231,7 +220,6 @@ private static void readString(this ptr<importReader> _addr_r, ptr<slice<@string
             r.syntaxError();
             break;
     }
-
 }
 
 // readImport reads an import clause - optional identifier followed by quoted string -
@@ -248,7 +236,6 @@ private static void readImport(this ptr<importReader> _addr_r, ptr<slice<@string
         r.readIdent();
     }
     r.readString(imports);
-
 }
 
 // readComments is like ioutil.ReadAll, except that it only reads the leading
@@ -262,10 +249,8 @@ private static (slice<byte>, error) readComments(io.Reader f) {
     if (r.err == null && !r.eof) { 
         // Didn't reach EOF, so must have found a non-space byte. Remove it.
         r.buf = r.buf[..(int)len(r.buf) - 1];
-
     }
     return (r.buf, error.As(r.err)!);
-
 }
 
 // readimports returns the imports found in the named file.
@@ -284,7 +269,6 @@ private static slice<@string> readimports(@string file) {
         else
 
             r.nextByte(false);
-
         } {
             r.readImport(_addr_imports);
         }
@@ -296,9 +280,7 @@ private static slice<@string> readimports(@string file) {
             fatalf("reading imports from %s: %v", file, err);
         }
         imports[i] = unquoted;
-
     }    return imports;
-
 }
 
 // resolveVendor returns a unique package path imported with the given import
@@ -321,7 +303,6 @@ private static @string resolveVendor(@string imp, @string srcDir) => func((_, pa
             first = imp[..(int)i];
         }
     }
-
     var isStandard = !strings.Contains(first, ".");
     if (isStandard) {
         return imp;

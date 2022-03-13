@@ -4,27 +4,26 @@
 
 // This file implements syntax tree walking.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:44 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:27:10 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\walk.go
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using System;
 
 public static partial class syntax_package {
 
-    // Walk traverses a syntax in pre-order: It starts by calling f(root);
-    // root must not be nil. If f returns false (== "continue"), Walk calls
-    // f recursively for each of the non-nil children of that node; if f
-    // returns true (== "stop"), Walk does not traverse the respective node's
-    // children.
-    // Some nodes may be shared among multiple parent nodes (e.g., types in
-    // field lists such as type T in "a, b, c T"). Such shared nodes are
-    // walked multiple times.
-    // TODO(gri) Revisit this design. It may make sense to walk those nodes
-    //           only once. A place where this matters is types2.TestResolveIdents.
+// Walk traverses a syntax in pre-order: It starts by calling f(root);
+// root must not be nil. If f returns false (== "continue"), Walk calls
+// f recursively for each of the non-nil children of that node; if f
+// returns true (== "stop"), Walk does not traverse the respective node's
+// children.
+// Some nodes may be shared among multiple parent nodes (e.g., types in
+// field lists such as type T in "a, b, c T"). Such shared nodes are
+// walked multiple times.
+// TODO(gri) Revisit this design. It may make sense to walk those nodes
+//           only once. A place where this matters is types2.TestResolveIdents.
 public static bool Walk(Node root, Func<Node, bool> f) {
     walker w = new walker(f);
     w.node(root);
@@ -316,7 +315,6 @@ private static void node(this ptr<walker> _addr_w, Node n) => func((_, panic, _)
             break;
         }
     }
-
 });
 
 private static void declList(this ptr<walker> _addr_w, slice<Decl> list) {

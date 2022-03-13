@@ -28,11 +28,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package amd64 -- go2cs converted at 2022 March 06 23:22:35 UTC
+// package amd64 -- go2cs converted at 2022 March 13 06:35:39 UTC
 // import "cmd/link/internal/amd64" ==> using amd64 = go.cmd.link.@internal.amd64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\amd64\l.go
-
-
 namespace go.cmd.link.@internal;
 
 public static partial class amd64_package {
@@ -41,10 +39,8 @@ private static readonly nint maxAlign = 32; // max data alignment
 private static readonly nint minAlign = 1; // min data alignment
 private static readonly nint funcAlign = 32;
 
-
 /* Used by ../internal/ld/dwarf.go */
 private static readonly nint dwarfRegSP = 7;
 private static readonly nint dwarfRegLR = 16;
-
 
 } // end amd64_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:16 UTC
+//     Generated on 2022 March 13 06:36:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class binutils_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct addr2LinerNM
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator addr2LinerNM(NilType nil) => default(addr2LinerNM);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static addr2LinerNM addr2LinerNM_cast(dynamic value)
         {
             return new addr2LinerNM(value.m);

@@ -5,31 +5,30 @@
 // Annotate Ref in Prog with C types by parsing gcc debug output.
 // Conversion of debug output to Go types.
 
-// package main -- go2cs converted at 2022 March 06 22:46:56 UTC
+// package main -- go2cs converted at 2022 March 13 05:58:10 UTC
 // Original source: C:\Program Files\Go\src\cmd\cgo\gcc.go
-using bytes = go.bytes_package;
-using dwarf = go.debug.dwarf_package;
-using elf = go.debug.elf_package;
-using macho = go.debug.macho_package;
-using pe = go.debug.pe_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using xcoff = go.@internal.xcoff_package;
-using math = go.math_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using dwarf = debug.dwarf_package;
+using elf = debug.elf_package;
+using macho = debug.macho_package;
+using pe = debug.pe_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using xcoff = @internal.xcoff_package;
+using math = math_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class main_package {
 
@@ -51,7 +50,6 @@ private static @string cname(@string s) {
         }
     }
 
-
     if (strings.HasPrefix(s, "struct_")) {
         return "struct " + s[(int)len("struct_")..];
     }
@@ -65,7 +63,6 @@ private static @string cname(@string s) {
         return "sizeof(" + cname(s[(int)len("sizeof_")..]) + ")";
     }
     return s;
-
 }
 
 // DiscardCgoDirectives processes the import C preamble, and discards
@@ -86,7 +83,6 @@ private static void DiscardCgoDirectives(this ptr<File> _addr_f) {
             linesOut = append(linesOut, "");
         }
     }    f.Preamble = strings.Join(linesOut, "\n");
-
 }
 
 // addToFlag appends args to flag. All flags are later written out onto the
@@ -158,7 +154,6 @@ private static (slice<@string>, error) splitQuoted(@string s) {
             continue;
                 arg[i] = r;
         i++;
-
     }    if (quoted || i > 0) {
         args = append(args, string(arg[..(int)i]));
     }
@@ -169,7 +164,6 @@ private static (slice<@string>, error) splitQuoted(@string s) {
         err = errors.New("unfinished escaping");
     }
     return (args, error.As(err)!);
-
 }
 
 // Translate rewrites f.AST, the original Go input, to remove
@@ -182,7 +176,6 @@ private static void Translate(this ptr<Package> _addr_p, ptr<File> _addr_f) {
     foreach (var (_, cref) in f.Ref) { 
         // Convert C.ulong to C.unsigned long, etc.
         cref.Name.C = cname(cref.Name.Go);
-
     }    ref typeConv conv = ref heap(out ptr<typeConv> _addr_conv);
     conv.Init(p.PtrSize, p.IntSize);
 
@@ -212,10 +205,8 @@ private static void Translate(this ptr<Package> _addr_p, ptr<File> _addr_f) {
     if (p.rewriteCalls(f)) { 
         // Add `import _cgo_unsafe "unsafe"` after the package statement.
         f.Edit.Insert(f.offset(f.AST.Name.End()), "; import _cgo_unsafe \"unsafe\"");
-
     }
     p.rewriteRef(f);
-
 }
 
 // loadDefines coerces gcc into spitting out the #defines in use
@@ -266,7 +257,6 @@ private static void loadDefines(this ptr<Package> _addr_p, ptr<File> _addr_f) {
             }
 
         }
-
     }
 }
 
@@ -299,7 +289,6 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
                     // in the cgo -godefs output half the constants
                     // are in hex and half are in whatever the #define used.
                     n.Const = fmt.Sprintf("%#x", i);
-
                 }
                 else if (n.Define[0] == '\'') {
                     {
@@ -311,7 +300,6 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
                         }
 
                     }
-
                 }
                 else if (n.Define[0] == '"') {
                     {
@@ -323,19 +311,15 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
                         }
 
                     }
-
                 }
-
 
                 i = i__prev2;
 
             }
 
-
             if (n.IsConst()) {
                 continue;
             }
-
         }
         if (strings.HasPrefix(n.C, "struct ") || strings.HasPrefix(n.C, "union ") || strings.HasPrefix(n.C, "enum ")) {
             n.Kind = "type";
@@ -348,10 +332,8 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
             n = addr(new Name(Go:s,C:s));
             names = append(names, n);
             optional[n] = true;
-
         }
         names = append(names, n);
-
     }    if (len(names) == 0) {
         return needType;
     }
@@ -385,7 +367,6 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
         // -fdiagnostics-color. Those versions can't print color anyway,
         // so just rerun without that option.
         stderr = p.gccErrors(b.Bytes());
-
     }
     if (stderr == "") {
         fatalf("%s produced no output\non input:\n%s", p.gccBaseCmd()[0], b.Bytes());
@@ -397,7 +378,6 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
     const var notNumConst = 1;
     const var notStrLiteral = 2;
     const var notDeclared = 3;
-
     var sawUnmatchedErrors = false;
     foreach (var (_, line) in strings.Split(stderr, "\n")) { 
         // Ignore warnings and random comments, with one
@@ -462,7 +442,6 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
         }
 
         sawUnmatchedErrors = false;
-
     }    if (!completed) {
         fatalf("%s did not produce error at completed:1\non input:\n%s\nfull error output:\n%s", p.gccBaseCmd()[0], b.Bytes(), stderr);
     }
@@ -489,12 +468,9 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
                     // Ignore optional undeclared identifiers.
                     // Don't report an error, and skip adding n to the needType array.
                     continue;
-
                 }
-
                 error_(f.NamePos[n], "could not determine kind of name for C.%s", fixGo(n.Go));
                         needType = append(needType, n);
-
         }
         i = i__prev1;
         n = n__prev1;
@@ -509,10 +485,8 @@ private static slice<ptr<Name>> guessKinds(this ptr<Package> _addr_p, ptr<File> 
             error_(token.NoPos, "\n%s errors for preamble:\n%s", p.gccBaseCmd()[0], preambleErrors);
         }
         fatalf("unresolved names");
-
     }
     return needType;
-
 }
 
 // loadDWARF parses the DWARF debug information generated
@@ -564,7 +538,6 @@ private static void loadDWARF(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<
  {
                 fmt.Fprintf(_addr_b, "\t0,\n");
             }
-
         }
         n = n__prev1;
     }
@@ -586,7 +559,6 @@ private static void loadDWARF(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<
  {
                 fmt.Fprintf(_addr_b, "\t0,\n");
             }
-
         }
         n = n__prev1;
     }
@@ -633,32 +605,24 @@ private static void loadDWARF(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<
                     // Since we are reading all the DWARF,
                     // assume we will see the variable elsewhere.
                     break;
-
                 }
-
                 fatalf("malformed DWARF TagVariable entry");
-
             }
-
             if (!strings.HasPrefix(name, "__cgo__")) {
                 break;
             }
-
             var (typ, err) = d.Type(typOff);
             if (err != null) {
                 fatalf("loading DWARF type: %s", err);
             }
-
             ptr<dwarf.PtrType> (t, ok) = typ._<ptr<dwarf.PtrType>>();
             if (!ok || t == null) {
                 fatalf("internal error: %s has non-pointer type", name);
             }
-
             var (i, err) = strconv.Atoi(name[(int)7..]);
             if (err != null) {
                 fatalf("malformed __cgo__ name: %s", name);
             }
-
             types[i] = t.Type;
             p.recordTypedefs(t.Type, f.NamePos[names[i]]);
                 if (e.Tag != dwarf.TagCompileUnit) {
@@ -716,9 +680,7 @@ private static void loadDWARF(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<
                                                    }
 
                                                }
-
                                            }
-
                         break;
                     case "fconst": 
                         if (i >= len(floats)) {
@@ -737,7 +699,6 @@ private static void loadDWARF(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<
                                 break;
                             }
                         }
-
                         break;
                     case "sconst": 
                         if (i < len(strs)) {
@@ -745,11 +706,8 @@ private static void loadDWARF(this ptr<Package> _addr_p, ptr<File> _addr_f, ptr<
                         }
                         break;
                 }
-
             }
-
             conv.FinishType(pos);
-
         }
         i = i__prev1;
         n = n__prev1;
@@ -778,15 +736,12 @@ private static void recordTypedefs1(this ptr<Package> _addr_p, dwarf.Type dtype,
             if (strings.HasPrefix(dt.Name, "__builtin")) { 
                 // Don't look inside builtin types. There be dragons.
                 return ;
-
             }
-
             if (!p.typedefs[dt.Name]) {
                 p.typedefs[dt.Name] = true;
                 p.typedefList = append(p.typedefList, new typedefInfo(dt.Name,pos));
                 p.recordTypedefs1(dt.Type, pos, visited);
             }
-
             break;
         case ptr<dwarf.PtrType> dt:
             p.recordTypedefs1(dt.Type, pos, visited);
@@ -809,7 +764,6 @@ private static void recordTypedefs1(this ptr<Package> _addr_p, dwarf.Type dtype,
             }
             break;
     }
-
 }
 
 // prepareNames finalizes the Kind field of not-type names and sets
@@ -828,7 +782,6 @@ private static void prepareNames(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                 n.Kind = "macro";
                 n.FuncType = addr(new FuncType(Result:n.Type,Go:&ast.FuncType{Results:&ast.FieldList{List:[]*ast.Field{{Type:n.Type.Go}}},},));
             }
-
         }
         p.mangleName(n);
         if (n.Kind == "type" && typedef[n.Mangle] == null) {
@@ -852,7 +805,6 @@ private static void mangleName(this ptr<Package> _addr_p, ptr<Name> _addr_n) {
         prefix = "C";
     }
     n.Mangle = prefix + n.Kind + "_" + n.Go;
-
 }
 
 private static bool isMangledName(this ptr<File> _addr_f, @string s) {
@@ -868,7 +820,6 @@ private static bool isMangledName(this ptr<File> _addr_f, @string s) {
         }
     }
     return false;
-
 }
 
 // rewriteCalls rewrites all calls that pass pointers to check that
@@ -894,7 +845,6 @@ private static bool rewriteCalls(this ptr<Package> _addr_p, ptr<File> _addr_f) {
             }
         }
     }    return needsUnsafe;
-
 }
 
 // rewriteCall rewrites one call to add pointer checks.
@@ -930,7 +880,6 @@ private static (@string, bool) rewriteCall(this ptr<Package> _addr_p, ptr<File> 
     if (name == null || name.Kind != "func") { 
         // Probably a type conversion.
         return ("", false);
-
     }
     var @params = name.FuncType.Params;
     var args = call.Call.Args; 
@@ -994,11 +943,8 @@ private static (@string, bool) rewriteCall(this ptr<Package> _addr_p, ptr<File> 
                 // An explicit void result looks odd but it
                 // seems to be how cgo has worked historically.
                 sb.WriteString("_Ctype_void");
-
             }
-
             sb.WriteString(", error)");
-
         }
     }
     sb.WriteString("{ "); 
@@ -1040,10 +986,8 @@ private static (@string, bool) rewriteCall(this ptr<Package> _addr_p, ptr<File> 
             if (p.checkAddr(_addr_sb, _addr_sbCheck, arg, i)) {
                 continue;
             }
-
             fmt.Fprintf(_addr_sb, "_cgo%d := %s; ", i, gofmtPos(arg, origArg.Pos()));
             fmt.Fprintf(_addr_sbCheck, "_cgoCheckPointer(_cgo%d, nil); ", i);
-
         }
         i = i__prev1;
         param = param__prev1;
@@ -1088,7 +1032,6 @@ private static (@string, bool) rewriteCall(this ptr<Package> _addr_p, ptr<File> 
     sb.WriteString("()");
 
     return (sb.String(), needsUnsafe);
-
 }
 
 // needsPointerCheck reports whether the type t needs a pointer check.
@@ -1110,9 +1053,7 @@ private static bool needsPointerCheck(this ptr<Package> _addr_p, ptr<File> _addr
         }
     }
 
-
     return p.hasPointer(f, t, true);
-
 }
 
 // hasPointer is used by needsPointerCheck. If top is true it returns
@@ -1150,7 +1091,6 @@ private static bool hasPointer(this ptr<Package> _addr_p, ptr<File> _addr_f, ast
             if (unionWithPointer[t.X]) {
                 return true;
             }
-
             return p.hasPointer(f, t.X, false);
             break;
         case ptr<ast.FuncType> t:
@@ -1189,15 +1129,12 @@ private static bool hasPointer(this ptr<Package> _addr_p, ptr<File> _addr_f, ast
                 }
 
             }
-
             if (t.Name == "string") {
                 return !top;
             }
-
             if (t.Name == "error") {
                 return true;
             }
-
             if (goTypes[t.Name] != null) {
                 return false;
             } 
@@ -1214,17 +1151,13 @@ private static bool hasPointer(this ptr<Package> _addr_p, ptr<File> _addr_f, ast
                     // Conservative approach is to assume it has a
                     // pointer.
                     return true;
-
                 }
 
             }
-
             if (f == null) { 
                 // Conservative approach: assume pointer.
                 return true;
-
             }
-
             var name = f.Name[t.Sel.Name];
             if (name != null && name.Kind == "type" && name.Type != null && name.Type.Go != null) {
                 return p.hasPointer(f, name.Type.Go, top);
@@ -1241,7 +1174,6 @@ private static bool hasPointer(this ptr<Package> _addr_p, ptr<File> _addr_f, ast
             break;
         }
     }
-
 }
 
 // mangle replaces references to C names in arg with the mangled names,
@@ -1273,7 +1205,6 @@ private static (ast.Expr, bool) mangle(this ptr<Package> _addr_p, ptr<File> _add
 
             }
 
-
             foreach (var (_, r) in f.Ref) {
                 if (r.Expr == px) {
                     px.val = p.rewriteName(f, r, addPosition);
@@ -1282,7 +1213,6 @@ private static (ast.Expr, bool) mangle(this ptr<Package> _addr_p, ptr<File> _add
                 }
             }
             return ;
-
         }
         ptr<ast.CallExpr> (call, ok) = (px.val)._<ptr<ast.CallExpr>>();
         if (!ok) {
@@ -1297,17 +1227,12 @@ private static (ast.Expr, bool) mangle(this ptr<Package> _addr_p, ptr<File> _add
                     if (nu) {
                         needsUnsafe = true;
                     }
-
                     c.Done = true;
-
                 }
-
             }
-
         }
     });
     return (arg, needsUnsafe);
-
 }
 
 // checkIndex checks whether arg has the form &a[i], possibly inside
@@ -1337,7 +1262,6 @@ private static bool checkIndex(this ptr<Package> _addr_p, ptr<bytes.Buffer> _add
             break;
         }
         x = c.Args[0];
-
     }
     ptr<ast.UnaryExpr> (u, ok) = x._<ptr<ast.UnaryExpr>>();
     if (!ok || u.Op != token.AND) {
@@ -1365,7 +1289,6 @@ private static bool checkIndex(this ptr<Package> _addr_p, ptr<bytes.Buffer> _add
     fmt.Fprintf(sbCheck, "_cgoCheckPointer(_cgo%d, %s_cgoIndex%d); ", i, deref, i);
 
     return true;
-
 }
 
 // checkAddr checks whether arg has the form &x, possibly inside type
@@ -1391,7 +1314,6 @@ private static bool checkAddr(this ptr<Package> _addr_p, ptr<bytes.Buffer> _addr
             break;
         }
         px = _addr_c.Args[0];
-
     }
     {
         ptr<ast.UnaryExpr> (u, ok) = (px.val)._<ptr<ast.UnaryExpr>>();
@@ -1400,7 +1322,6 @@ private static bool checkAddr(this ptr<Package> _addr_p, ptr<bytes.Buffer> _addr
             return false;
         }
     }
-
 
     fmt.Fprintf(sb, "_cgoBase%d := %s; ", i, gofmtPos(px.val, (px.val).Pos()));
 
@@ -1414,7 +1335,6 @@ private static bool checkAddr(this ptr<Package> _addr_p, ptr<bytes.Buffer> _addr
     fmt.Fprintf(sbCheck, "_cgoCheckPointer(_cgoBase%d, 0 == 0); ", i);
 
     return true;
-
 }
 
 // isType reports whether the expression is definitely a type.
@@ -1506,7 +1426,6 @@ private static bool isType(this ptr<Package> _addr_p, ast.Expr t) {
             if (strings.HasPrefix(t.Name, "_Ctype_")) {
                 return true;
             }
-
             break;
         case ptr<ast.ParenExpr> t:
             return p.isType(t.X);
@@ -1534,7 +1453,6 @@ private static bool isType(this ptr<Package> _addr_p, ast.Expr t) {
             break;
     }
     return false;
-
 }
 
 // isVariable reports whether x is a variable, possibly with field references.
@@ -1553,7 +1471,6 @@ private static bool isVariable(this ptr<Package> _addr_p, ast.Expr x) {
             break;
     }
     return false;
-
 }
 
 // rewriteUnsafe returns a version of t with references to unsafe.Pointer
@@ -1591,16 +1508,13 @@ private static ast.Expr rewriteUnsafe(this ptr<Package> _addr_p, ast.Expr t) {
                     fields.List = append(fields.List, _addr_fn);
                     changed = true;
                 }
-
             }
             if (changed) {
                 r = t.val;
                 _addr_r.Fields = _addr_fields;
                 r.Fields = ref _addr_r.Fields.val;
                 return _addr_r;
-
             }
-
             break;
         case ptr<ast.StarExpr> t:
             var x1 = p.rewriteUnsafe(t.X);
@@ -1612,7 +1526,6 @@ private static ast.Expr rewriteUnsafe(this ptr<Package> _addr_p, ast.Expr t) {
             break;
     }
     return t;
-
 }
 
 // rewriteRef rewrites all the C.xxx references in f.AST to refer to the
@@ -1640,8 +1553,7 @@ private static void rewriteRef(this ptr<Package> _addr_p, ptr<File> _addr_f) {
 
             if (r.Context == ctxCall || r.Context == ctxCall2) 
                 functions[r.Name.Go] = true;
-            
-        }
+                    }
         var expr = p.rewriteName(f, r, false);
 
         if (godefs.val) { 
@@ -1649,7 +1561,6 @@ private static void rewriteRef(this ptr<Package> _addr_p, ptr<File> _addr_f) {
             if (r.Name.Type != null && r.Name.Kind == "type") {
                 expr = r.Name.Type.Go;
             }
-
             {
                 ptr<ast.Ident> (id, ok) = expr._<ptr<ast.Ident>>();
 
@@ -1662,15 +1573,12 @@ private static void rewriteRef(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                         }
 
                     }
-
                     if (id.Name == r.Name.Mangle && r.Name.Const != "") {
                         expr = ast.NewIdent(r.Name.Const);
                     }
-
                 }
 
             }
-
         }
         var pos = (r.Expr.val).Pos();
         {
@@ -1703,17 +1611,13 @@ private static void rewriteRef(this ptr<Package> _addr_p, ptr<File> _addr_f) {
             if (r.Name.Kind != "type") {
                 sub = 1;
             }
-
             if (end.Column > sub) {
                 repl = fmt.Sprintf("%s /*line :%d:%d*/", repl, end.Line, end.Column - sub);
             }
-
             if (r.Name.Kind != "type") {
                 repl = "(" + repl + ")";
             }
-
             f.Edit.Replace(f.offset(old.Pos()), f.offset(old.End()), repl);
-
         }
     }    foreach (var (name, used) in functions) {
         if (!used) {
@@ -1771,11 +1675,9 @@ private static ast.Expr rewriteName(this ptr<Package> _addr_p, ptr<File> _addr_f
                 n.Mangle = "_C2func_" + n.Go;
                 f.Name["2" + r.Name.Go] = n;
             }
-
             expr = getNewIdent(n.Mangle);
             r.Name = n;
             break;
-
         }
     else if (r.Context == ctxExpr) 
         switch (r.Name.Kind) {
@@ -1793,13 +1695,11 @@ private static ast.Expr rewriteName(this ptr<Package> _addr_p, ptr<File> _addr_f
                     p.mangleName(name);
                     f.Name[fpName] = name;
                 }
-
                 r.Name = name; 
                 // Rewrite into call to _Cgo_ptr to prevent assignments. The _Cgo_ptr
                 // function is defined in out.go and simply returns its argument. See
                 // issue 7757.
                 expr = addr(new ast.CallExpr(Fun:&ast.Ident{NamePos:(*r.Expr).Pos(),Name:"_Cgo_ptr"},Args:[]ast.Expr{getNewIdent(name.Mangle)},));
-
                 break;
             case "type": 
                 // Okay - might be new(T)
@@ -1830,14 +1730,12 @@ private static ast.Expr rewriteName(this ptr<Package> _addr_p, ptr<File> _addr_f
             // Use of C.enum_x, C.struct_x or C.union_x without C definition.
             // GCC won't raise an error when using pointers to such unknown types.
             error_(r.Pos(), "type C.%s: undefined C type '%s'", fixGo(r.Name.Go), r.Name.C);
-
         }
     else 
         if (r.Name.Kind == "func") {
             error_(r.Pos(), "must call C.%s", fixGo(r.Name.Go));
         }
         return expr;
-
 }
 
 // gofmtPos returns the gofmt-formatted string for an AST node,
@@ -1849,7 +1747,6 @@ private static @string gofmtPos(ast.Expr n, token.Pos pos) {
         return s;
     }
     return fmt.Sprintf("/*line :%d:%d*/%s", p.Line, p.Column, s);
-
 }
 
 // gccBaseCmd returns the start of the compiler command line.
@@ -1883,9 +1780,7 @@ private static slice<@string> gccBaseCmd(this ptr<Package> _addr_p) {
         ret = ret__prev1;
 
     }
-
     return strings.Fields(defaultCC(goos, goarch));
-
 }
 
 // gccMachine returns the gcc -m flag to use, either "-m32", "-m64" or "-marm".
@@ -1898,7 +1793,6 @@ private static slice<@string> gccMachine(this ptr<Package> _addr_p) {
                 return new slice<@string>(new @string[] { "-arch", "x86_64", "-m64" });
             }
             return new slice<@string>(new @string[] { "-m64" });
-
             break;
         case "arm64": 
             if (goos == "darwin") {
@@ -1939,7 +1833,6 @@ private static slice<@string> gccMachine(this ptr<Package> _addr_p) {
             break;
     }
     return null;
-
 }
 
 private static @string gccTmp() {
@@ -1964,7 +1857,6 @@ private static slice<@string> gccCmd(this ptr<Package> _addr_p) {
     c = append(c, "-fno-lto");
     c = append(c, "-"); //read input from standard input
     return c;
-
 }
 
 // gccDebug runs gcc -gdwarf-2 over the C program stdin and
@@ -1981,12 +1873,10 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
     Func<@string, bool> isDebugInts = s => { 
         // Some systems use leading _ to denote non-assembly symbols.
         return _addr_s == "__cgodebug_ints" || s == "___cgodebug_ints"!;
-
     };
     Func<@string, bool> isDebugFloats = s => { 
         // Some systems use leading _ to denote non-assembly symbols.
         return _addr_s == "__cgodebug_floats" || s == "___cgodebug_floats"!;
-
     };
     Func<@string, nint> indexOfDebugStr = s => { 
         // Some systems use leading _ to denote non-assembly symbols.
@@ -2006,10 +1896,8 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                 n = n__prev2;
 
             }
-
         }
         return _addr_-1!;
-
     };
     Func<@string, nint> indexOfDebugStrlen = s => { 
         // Some systems use leading _ to denote non-assembly symbols.
@@ -2029,10 +1917,8 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                 n = n__prev2;
 
             }
-
         }
         return _addr_-1!;
-
     };
 
     strs = make_slice<@string>(nnames);
@@ -2113,15 +1999,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                             sdat = sdat__prev5;
 
                                         }
-
                                     }
-
                                 }
 
                                 i = i__prev3;
 
                             }
-
                         else if (isDebugFloats(s.Name)) 
                             // Found it. Now find data section.
                             {
@@ -2155,15 +2038,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                             sdat = sdat__prev5;
 
                                         }
-
                                     }
-
                                 }
 
                                 i = i__prev3;
 
                             }
-
                         else 
                             {
                                 var n__prev3 = n;
@@ -2193,23 +2073,18 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                     sdat = sdat__prev6;
 
                                                 }
-
                                             }
-
                                         }
 
                                         i = i__prev4;
 
                                     }
-
                                     break;
-
                                 }
 
                                 n = n__prev3;
 
                             }
-
                             {
                                 var n__prev3 = n;
 
@@ -2235,49 +2110,37 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                         var strlen = bo.Uint64(data[..(int)8]);
                                                         if (strlen > (1 << (int)((uint(p.IntSize * 8) - 1)) - 1)) { // greater than MaxInt?
                                                             fatalf("string literal too big");
-
                                                         }
-
                                                         strlens[n] = int(strlen);
-
                                                     }
 
                                                     sdat = sdat__prev6;
 
                                                 }
-
                                             }
-
                                         }
 
                                         i = i__prev4;
 
                                     }
-
                                     break;
-
                                 }
 
                                 n = n__prev3;
 
                             }
-
                                             }
 
                     i = i__prev1;
                 }
 
                 buildStrings();
-
             }
-
             return (_addr_d!, ints, floats, strs);
-
         }
         f = f__prev1;
 
     }
-
 
     {
         var f__prev1 = f;
@@ -2333,15 +2196,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                             sdat = sdat__prev5;
 
                                         }
-
                                     }
-
                                 }
 
                                 i = i__prev3;
 
                             }
-
                         else if (isDebugFloats(s.Name)) 
                             // Found it. Now find data section.
                             {
@@ -2375,15 +2235,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                             sdat = sdat__prev5;
 
                                         }
-
                                     }
-
                                 }
 
                                 i = i__prev3;
 
                             }
-
                         else 
                             {
                                 var n__prev3 = n;
@@ -2413,23 +2270,18 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                     sdat = sdat__prev6;
 
                                                 }
-
                                             }
-
                                         }
 
                                         i = i__prev4;
 
                                     }
-
                                     break;
-
                                 }
 
                                 n = n__prev3;
 
                             }
-
                             {
                                 var n__prev3 = n;
 
@@ -2455,49 +2307,37 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                         strlen = bo.Uint64(data[..(int)8]);
                                                         if (strlen > (1 << (int)((uint(p.IntSize * 8) - 1)) - 1)) { // greater than MaxInt?
                                                             fatalf("string literal too big");
-
                                                         }
-
                                                         strlens[n] = int(strlen);
-
                                                     }
 
                                                     sdat = sdat__prev6;
 
                                                 }
-
                                             }
-
                                         }
 
                                         i = i__prev4;
 
                                     }
-
                                     break;
-
                                 }
 
                                 n = n__prev3;
 
                             }
-
                                             }
 
                     i = i__prev1;
                 }
 
                 buildStrings();
-
             }
-
             return (_addr_d!, ints, floats, strs);
-
         }
         f = f__prev1;
 
     }
-
 
     {
         var f__prev1 = f;
@@ -2549,15 +2389,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                         sdat = sdat__prev4;
 
                                     }
-
                                 }
-
                             }
 
                             i = i__prev2;
 
                         }
-
                     else if (isDebugFloats(s.Name)) 
                         {
                             var i__prev2 = i;
@@ -2590,15 +2427,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                         sdat = sdat__prev4;
 
                                     }
-
                                 }
-
                             }
 
                             i = i__prev2;
 
                         }
-
                     else 
                         {
                             var n__prev2 = n;
@@ -2627,23 +2461,18 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                 sdat = sdat__prev5;
 
                                             }
-
                                         }
-
                                     }
 
                                     i = i__prev3;
 
                                 }
-
                                 break;
-
                             }
 
                             n = n__prev2;
 
                         }
-
                         {
                             var n__prev2 = n;
 
@@ -2668,33 +2497,25 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                     strlen = bo.Uint64(data[..(int)8]);
                                                     if (strlen > (1 << (int)((uint(p.IntSize * 8) - 1)) - 1)) { // greater than MaxInt?
                                                         fatalf("string literal too big");
-
                                                     }
-
                                                     strlens[n] = int(strlen);
-
                                                 }
 
                                                 sdat = sdat__prev5;
 
                                             }
-
                                         }
-
                                     }
 
                                     i = i__prev3;
 
                                 }
-
                                 break;
-
                             }
 
                             n = n__prev2;
 
                         }
-
                                     }
 
                 s = s__prev1;
@@ -2703,12 +2524,10 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
             buildStrings();
 
             return (_addr_d!, ints, floats, strs);
-
         }
         f = f__prev1;
 
     }
-
 
     {
         var f__prev1 = f;
@@ -2760,15 +2579,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                         sdat = sdat__prev4;
 
                                     }
-
                                 }
-
                             }
 
                             i = i__prev2;
 
                         }
-
                     else if (isDebugFloats(s.Name)) 
                         {
                             var i__prev2 = i;
@@ -2801,15 +2617,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                         sdat = sdat__prev4;
 
                                     }
-
                                 }
-
                             }
 
                             i = i__prev2;
 
                         }
-
                     else 
                         {
                             var n__prev2 = n;
@@ -2838,23 +2651,18 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                 sdat = sdat__prev5;
 
                                             }
-
                                         }
-
                                     }
 
                                     i = i__prev3;
 
                                 }
-
                                 break;
-
                             }
 
                             n = n__prev2;
 
                         }
-
                         {
                             var n__prev2 = n;
 
@@ -2879,33 +2687,25 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
                                                     strlen = bo.Uint64(data[..(int)8]);
                                                     if (strlen > (1 << (int)((uint(p.IntSize * 8) - 1)) - 1)) { // greater than MaxInt?
                                                         fatalf("string literal too big");
-
                                                     }
-
                                                     strlens[n] = int(strlen);
-
                                                 }
 
                                                 sdat = sdat__prev5;
 
                                             }
-
                                         }
-
                                     }
 
                                     i = i__prev3;
 
                                 }
-
                                 break;
-
                             }
 
                             n = n__prev2;
 
                         }
-
                                     }
 
                 s = s__prev1;
@@ -2913,15 +2713,12 @@ private static (ptr<dwarf.Data>, slice<long>, slice<double>, slice<@string>) gcc
 
             buildStrings();
             return (_addr_d!, ints, floats, strs);
-
         }
         f = f__prev1;
 
     }
-
     fatalf("cannot parse gcc output %s as ELF, Mach-O, PE, XCOFF object", gccTmp());
     panic("not reached");
-
 });
 
 // gccDefines runs gcc -E -dM -xc - over the C program stdin
@@ -2970,7 +2767,6 @@ private static @string gccErrors(this ptr<Package> _addr_p, slice<byte> stdin, p
         os.Stderr.Write(stderr);
     }
     return string(stderr);
-
 }
 
 // runGcc runs the gcc command line args with stdin on standard input.
@@ -2998,7 +2794,6 @@ private static (@string, @string) runGcc(slice<byte> stdin, slice<@string> args)
         os.Exit(2);
     }
     return (string(stdout), string(stderr));
-
 }
 
 // A typeConv is a translator from dwarf types to Go types
@@ -3099,7 +2894,6 @@ private static dwarf.Type @base(dwarf.Type dt) {
             d = d__prev1;
 
         }
-
         {
             ptr<dwarf.QualType> d__prev1 = d;
 
@@ -3113,12 +2907,9 @@ private static dwarf.Type @base(dwarf.Type dt) {
             d = d__prev1;
 
         }
-
         break;
-
     }
     return dt;
-
 }
 
 // unqual strips away qualifiers from a DWARF type.
@@ -3137,10 +2928,8 @@ private static dwarf.Type unqual(dwarf.Type dt) {
             }
 
         }
-
     }
     return dt;
-
 }
 
 // Map from dwarf text names to aliases we use in package "C".
@@ -3166,7 +2955,6 @@ private static @string String(this ptr<TypeRepr> _addr_tr) {
         return tr.Repr;
     }
     return fmt.Sprintf(tr.Repr, tr.FormatArgs);
-
 }
 
 // Empty reports whether the result of String would be "".
@@ -3208,7 +2996,6 @@ private static void FinishType(this ptr<typeConv> _addr_c, token.Pos pos) {
             ptr.C.Set("%s*", t.C);
         }
     }
-
 }
 
 // Type returns a *Type with the same memory layout as
@@ -3254,7 +3041,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             t = t__prev2;
 
         }
-
     }
     ptr<Type> t = @new<Type>();
     t.Size = dtype.Size(); // note: wrong for array of pointers, corrected below
@@ -3275,17 +3061,13 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 // Cannot represent bit-sized elements in Go.
                 t.Go = c.Opaque(t.Size);
                 break;
-
             }
-
             var count = dt.Count;
             if (count == -1) { 
                 // Indicates flexible array member, which Go doesn't support.
                 // Translate to zero-length array instead.
                 count = 0;
-
             }
-
             var sub = c.Type(dt.Type, pos);
             t.Align = sub.Align;
             t.Go = addr(new ast.ArrayType(Len:c.intExpr(count),Elt:sub.Go,)); 
@@ -3310,7 +3092,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             if (t.Align >= c.ptrSize) {
                 t.Align = c.ptrSize;
             }
-
             t.C.Set("enum " + dt.EnumName);
             nint signed = 0;
             t.EnumValues = make_map<@string, long>();
@@ -3367,7 +3148,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             if (t.Align >= c.ptrSize) {
                 t.Align = c.ptrSize;
             }
-
             break;
         case ptr<dwarf.ComplexType> dt:
             switch (t.Size) {
@@ -3386,7 +3166,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             if (t.Align >= c.ptrSize) {
                 t.Align = c.ptrSize;
             }
-
             break;
         case ptr<dwarf.FuncType> dt:
             t.Go = c.uintptr;
@@ -3421,7 +3200,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             if (t.Align >= c.ptrSize) {
                 t.Align = c.ptrSize;
             }
-
             break;
         case ptr<dwarf.PtrType> dt:
             if (t.Size != c.ptrSize && t.Size != -1) {
@@ -3451,11 +3229,9 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                             }
 
                         }
-
                     }
 
                     break;
-
                 } 
 
                 // Placeholder initialization; completed in FinishType.
@@ -3474,7 +3250,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 }
 
             }
-
             c.ptrs[key] = append(c.ptrs[key], t);
             break;
         case ptr<dwarf.QualType> dt:
@@ -3494,9 +3269,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             var tag = dt.StructName;
             if (dt.ByteSize < 0 && tag == "") { // opaque unnamed struct - should not be possible
                 break;
-
             }
-
             if (tag == "") {
                 tag = anonymousStructTag[dt];
                 if (tag == "") {
@@ -3508,7 +3281,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             else if (t.C.Empty()) {
                 t.C.Set(dt.Kind + " " + tag);
             }
-
             var name = c.Ident("_Ctype_" + dt.Kind + "_" + tag);
             t.Go = name; // publish before recursive calls
             goIdent[name.Name] = name;
@@ -3531,13 +3303,10 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     // on the Go heap, right? It currently doesn't work for unions because
                     // they are defined as a type alias for struct{}, not a defined type.
                 }
-
                 _addr_typedef[name.Name] = _addr_tt;
                 typedef[name.Name] = ref _addr_typedef[name.Name].val;
                 break;
-
             }
-
             switch (dt.Kind) {
                 case "class": 
 
@@ -3551,7 +3320,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
                     t.Align = 1; // TODO: should probably base this on field alignment.
                     typedef[name.Name] = t;
-
                     break;
                 case "struct": 
                     var (g, csyntax, align) = c.Struct(dt, pos);
@@ -3566,7 +3334,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     tt.Go = g;
                     _addr_typedef[name.Name] = _addr_tt;
                     typedef[name.Name] = ref _addr_typedef[name.Name].val;
-
                     break;
             }
             break;
@@ -3579,9 +3346,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 t.Size = c.ptrSize * 2;
                 t.Align = c.ptrSize;
                 break;
-
             }
-
             if (dt.Name == "_GoBytes_") { 
                 // Special C name for Go []byte type.
                 // Knows slice layout used by compilers: pointer, length, cap.
@@ -3589,9 +3354,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 t.Size = c.ptrSize + 4 + 4;
                 t.Align = c.ptrSize;
                 break;
-
             }
-
             name = c.Ident("_Ctype_" + dt.Name);
             goIdent[name.Name] = name;
             @string akey = "";
@@ -3599,9 +3362,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 // only load type recursively for typedefs of anonymous
                 // structs, see issues 37479 and 37621.
                 akey = key;
-
             }
-
             sub = c.loadType(dt.Type, pos, akey);
             if (c.badPointerTypedef(dt)) { 
                 // Treat this typedef as a uintptr.
@@ -3624,16 +3385,13 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     oldType = oldType__prev2;
 
                 }
-
             }
-
             t.Go = name;
             t.BadPointer = sub.BadPointer;
             t.NotInHeap = sub.NotInHeap;
             if (unionWithPointer[sub.Go]) {
                 unionWithPointer[t.Go] = true;
             }
-
             t.Size = sub.Size;
             t.Align = sub.Align;
             oldType = typedef[name.Name];
@@ -3644,7 +3402,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 tt.NotInHeap = sub.NotInHeap;
                 _addr_typedef[name.Name] = _addr_tt;
                 typedef[name.Name] = ref _addr_typedef[name.Name].val;
-
             } 
 
             // If sub.Go.Name is "_Ctype_struct_foo" or "_Ctype_union_foo" or "_Ctype_class_foo",
@@ -3657,7 +3414,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (isStructUnionClass(sub.Go)) { 
                     // Use the typedef name for C code.
                     typedef[sub.Go._<ptr<ast.Ident>>().Name].C = t.C;
-
                 } 
 
                 // If we've seen this typedef before, and it
@@ -3668,9 +3424,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (oldType != null && isStructUnionClass(oldType.Go)) {
                     t.Go = oldType.Go;
                 }
-
             }
-
             break;
         case ptr<dwarf.UcharType> dt:
             if (t.Size != 1) {
@@ -3708,7 +3462,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
             if (t.Align >= c.ptrSize) {
                 t.Align = c.ptrSize;
             }
-
             break;
         case ptr<dwarf.VoidType> dt:
             t.Go = c.goVoid;
@@ -3736,7 +3489,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3745,9 +3497,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
         case ptr<dwarf.BoolType> _:
             s = dtype.Common().Name;
@@ -3760,7 +3510,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3769,9 +3518,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
         case ptr<dwarf.CharType> _:
             s = dtype.Common().Name;
@@ -3784,7 +3531,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3793,9 +3539,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
         case ptr<dwarf.ComplexType> _:
             s = dtype.Common().Name;
@@ -3808,7 +3552,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3817,9 +3560,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
         case ptr<dwarf.IntType> _:
             s = dtype.Common().Name;
@@ -3832,7 +3573,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3841,9 +3581,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
         case ptr<dwarf.FloatType> _:
             s = dtype.Common().Name;
@@ -3856,7 +3594,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3865,9 +3602,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
         case ptr<dwarf.UcharType> _:
             s = dtype.Common().Name;
@@ -3880,7 +3615,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3889,9 +3623,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
         case ptr<dwarf.UintType> _:
             s = dtype.Common().Name;
@@ -3904,7 +3636,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                     }
 
                 }
-
                 s = strings.Replace(s, " ", "", -1);
                 name = c.Ident("_Ctype_" + s);
                 tt = t.val;
@@ -3913,9 +3644,7 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
                 if (!godefs.val) {
                     t.Go = name;
                 }
-
             }
-
             break;
 
     }
@@ -3949,7 +3678,6 @@ private static ptr<Type> loadType(this ptr<typeConv> _addr_c, dwarf.Type dtype, 
         fatalf("%s: internal error: did not create C name for %s", lineno(pos), dtype);
     }
     return _addr_t!;
-
 }
 
 // isStructUnionClass reports whether the type described by the Go syntax x
@@ -3961,7 +3689,6 @@ private static bool isStructUnionClass(ast.Expr x) {
     }
     var name = id.Name;
     return strings.HasPrefix(name, "_Ctype_struct_") || strings.HasPrefix(name, "_Ctype_union_") || strings.HasPrefix(name, "_Ctype_class_");
-
 }
 
 // FuncArg returns a Go type with the same memory layout as
@@ -3998,7 +3725,6 @@ private static ptr<Type> FuncArg(this ptr<typeConv> _addr_c, dwarf.Type dtype, t
                     if (c.baseBadPointerTypedef(dt)) {
                         break;
                     }
-
                     t = c.Type(ptr, pos);
                     if (t == null) {
                         return _addr_null!;
@@ -4010,15 +3736,12 @@ private static ptr<Type> FuncArg(this ptr<typeConv> _addr_c, dwarf.Type dtype, t
                     if (isStructUnionClass(t.Go)) {
                         t.Typedef = dt.Name;
                     }
-
                 }
 
             }
-
             break;
     }
     return _addr_t!;
-
 }
 
 // FuncType returns the Go type analogous to dtype.
@@ -4043,10 +3766,8 @@ private static ptr<FuncType> FuncType(this ptr<typeConv> _addr_c, ptr<dwarf.Func
             }
 
         }
-
         p[i] = c.FuncArg(f, pos);
         gp[i] = addr(new ast.Field(Type:p[i].Go));
-
     }    ptr<Type> r;
     slice<ptr<ast.Field>> gr = default;
     {
@@ -4061,9 +3782,7 @@ private static ptr<FuncType> FuncType(this ptr<typeConv> _addr_c, ptr<dwarf.Func
         }
 
     }
-
     return addr(new FuncType(Params:p,Result:r,Go:&ast.FuncType{Params:&ast.FieldList{List:gp},Results:&ast.FieldList{List:gr},},));
-
 }
 
 // Identifier
@@ -4156,9 +3875,7 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
 
                 used[goid] = true;
                 ident[cid] = goid;
-
             }
-
         }
     }
     nint anon = 0;
@@ -4186,7 +3903,6 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
                     }
 
                 }
-
             } 
 
             // TODO: Handle fields that are anonymous structs by
@@ -4200,9 +3916,7 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
                 // so we don't know how they correspond to Go fields
                 // even if they are aligned at byte boundaries.
                 continue;
-
             }
-
             if (talign > 0 && f.ByteOffset % talign != 0) { 
                 // Drop misaligned fields, the same way we drop integer bit fields.
                 // The goal is to make available what can be made available.
@@ -4210,7 +3924,6 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
                 // makes the whole program not compile. Much of the time these
                 // structs are in system headers that cannot be corrected.
                 continue;
-
             } 
 
             // Round off up to talign, assumed to be a power of 2.
@@ -4220,13 +3933,10 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
                 fld, sizes = c.pad(fld, sizes, f.ByteOffset - off);
                 off = f.ByteOffset;
             }
-
             if (f.ByteOffset < off) { 
                 // Drop a packed field that we can't represent.
                 continue;
-
             }
-
             var n = len(fld);
             fld = fld[(int)0..(int)n + 1];
             if (name == "") {
@@ -4234,7 +3944,6 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
                 anon++;
                 ident[name] = name;
             }
-
             fld[n] = addr(new ast.Field(Names:[]*ast.Ident{c.Ident(ident[name])},Type:tgo));
             sizes = sizes[(int)0..(int)n + 1];
             sizes[n] = size;
@@ -4246,7 +3955,6 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
             if (talign > align) {
                 align = talign;
             }
-
         }
         f = f__prev1;
     }
@@ -4272,7 +3980,6 @@ private static (ptr<ast.StructType>, @string, long) Struct(this ptr<typeConv> _a
     }
     expr = addr(new ast.StructType(Fields:&ast.FieldList{List:fld}));
     return ;
-
 }
 
 // dwarfHasPointer reports whether the DWARF type dt contains a pointer.
@@ -4344,7 +4051,6 @@ private static bool dwarfHasPointer(this ptr<typeConv> _addr_c, dwarf.Type dt, t
             break;
         }
     }
-
 }
 
 private static @string upper(@string s) {
@@ -4356,7 +4062,6 @@ private static @string upper(@string s) {
         return "X" + s;
     }
     return string(unicode.ToUpper(r)) + s[(int)size..];
-
 }
 
 // godefsFields rewrites field names for use in Go or C definitions.
@@ -4375,11 +4080,8 @@ private static void godefsFields(slice<ptr<ast.Field>> fld) {
                 // Use exported name instead.
                 n.Name = "Pad_cgo_" + strconv.Itoa(npad);
                 npad++;
-
             }
-
             n.Name = upper(n.Name);
-
         }
     }
 }
@@ -4405,22 +4107,18 @@ private static @string fieldPrefix(slice<ptr<ast.Field>> fld) {
             if (strings.HasPrefix(n.Name, "orig_") || strings.HasPrefix(n.Name, "_")) {
                 continue;
             }
-
             var i = strings.Index(n.Name, "_");
             if (i < 0) {
                 continue;
             }
-
             if (prefix == "") {
                 prefix = n.Name[..(int)i + 1];
             }
             else if (prefix != n.Name[..(int)i + 1]) {
                 return "";
             }
-
         }
     }    return prefix;
-
 }
 
 // anonymousStructTypedef reports whether dt is a C typedef for an anonymous
@@ -4453,7 +4151,6 @@ private static bool badPointerTypedef(this ptr<typeConv> _addr_c, ptr<dwarf.Type
         return true;
     }
     return false;
-
 }
 
 // baseBadPointerTypedef reports whether the base of a chain of typedefs is a bad typedef
@@ -4472,12 +4169,9 @@ private static bool baseBadPointerTypedef(this ptr<typeConv> _addr_c, ptr<dwarf.
             }
 
         }
-
         break;
-
     }
     return c.badPointerTypedef(dt);
-
 }
 
 private static bool badCFType(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt) {
@@ -4511,12 +4205,9 @@ private static bool badCFType(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType>
         if (i >= 0 && c.getTypeIDs[s[..(int)i] + s[(int)i + 7..]]) { 
             // Mutable and immutable variants share a type ID.
             return true;
-
         }
     }
-
     return false;
-
 }
 
 // Comment from Darwin's CFInternal.h
@@ -4626,21 +4317,15 @@ private static bool badJNI(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _a
                                         }
                                         break;
                                 }
-
                             }
-
                             break;
                     }
-
                 }
 
             }
-
         }
     }
-
     return false;
-
 }
 
 private static bool badEGLType(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType> _addr_dt) {
@@ -4662,12 +4347,9 @@ private static bool badEGLType(this ptr<typeConv> _addr_c, ptr<dwarf.TypedefType
                 }
 
             }
-
         }
     }
-
     return false;
-
 }
 
 // jniTypes maps from JNI types that we want to be uintptrs, to the underlying type to which

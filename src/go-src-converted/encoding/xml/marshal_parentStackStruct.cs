@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:28 UTC
+//     Generated on 2022 March 13 05:40:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace encoding
 {
     public static partial class xml_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct parentStack
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace encoding
             public static implicit operator parentStack(NilType nil) => default(parentStack);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static parentStack parentStack_cast(dynamic value)
         {
             return new parentStack(ref value.p, value.stack);

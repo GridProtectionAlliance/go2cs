@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2022 March 06 22:08:17 UTC
+// package sys -- go2cs converted at 2022 March 13 05:24:01 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Program Files\Go\src\runtime\internal\sys\arch.go
-
-
 namespace go.runtime.@internal;
 
 public static partial class sys_package {
@@ -24,7 +22,6 @@ public static readonly var PPC64 = 5;
 public static readonly var RISCV64 = 6;
 public static readonly var S390X = 7;
 public static readonly var WASM = 8;
-
 
 // PtrSize is the size of a pointer in bytes - unsafe.Sizeof(uintptr(0)) but as an ideal constant.
 // It is also the size of the machine's native word size (that is, 4 on 32-bit systems, 8 on 64-bit).

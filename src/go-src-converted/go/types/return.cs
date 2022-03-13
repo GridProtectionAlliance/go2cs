@@ -4,19 +4,21 @@
 
 // This file implements isTerminating.
 
-// package types -- go2cs converted at 2022 March 06 22:42:12 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:20 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\return.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-
 namespace go.go;
+
+using ast = go.ast_package;
+using token = go.token_package;
+
+
+// isTerminating reports if s is a terminating statement.
+// If s is labeled, label is the label name; otherwise s
+// is "".
 
 public static partial class types_package {
 
-    // isTerminating reports if s is a terminating statement.
-    // If s is labeled, label is the label name; otherwise s
-    // is "".
 private static bool isTerminating(this ptr<Checker> _addr_check, ast.Stmt s, @string label) {
     ref Checker check = ref _addr_check.val;
 
@@ -50,8 +52,6 @@ private static bool isTerminating(this ptr<Checker> _addr_check, ast.Stmt s, @st
                     return true;
                 }
             }
-
-
             break;
         case ptr<ast.ReturnStmt> s:
             return true;
@@ -106,7 +106,6 @@ private static bool isTerminating(this ptr<Checker> _addr_check, ast.Stmt s, @st
     }
 
     return false;
-
 }
 
 private static bool isTerminatingList(this ptr<Checker> _addr_check, slice<ast.Stmt> list, @string label) {
@@ -122,7 +121,6 @@ private static bool isTerminatingList(this ptr<Checker> _addr_check, slice<ast.S
             }
 
         }
-
     }
     return false; // all statements are empty
 }
@@ -141,7 +139,6 @@ private static bool isTerminatingSwitch(this ptr<Checker> _addr_check, ptr<ast.B
             return false;
         }
     }    return hasDefault;
-
 }
 
 // TODO(gri) For nested breakable statements, the current implementation of hasBreak
@@ -235,7 +232,6 @@ private static bool hasBreak(ast.Stmt s, @string label, bool @implicit) {
     }
 
     return false;
-
 }
 
 private static bool hasBreakList(slice<ast.Stmt> list, @string label, bool @implicit) {
@@ -244,7 +240,6 @@ private static bool hasBreakList(slice<ast.Stmt> list, @string label, bool @impl
             return true;
         }
     }    return false;
-
 }
 
 } // end types_package

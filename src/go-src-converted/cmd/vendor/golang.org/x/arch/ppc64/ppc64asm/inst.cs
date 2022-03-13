@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2022 March 06 23:25:06 UTC
+// package ppc64asm -- go2cs converted at 2022 March 13 06:38:20 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\inst.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.ppc64;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
 
 public static partial class ppc64asm_package {
 
@@ -35,9 +35,7 @@ public static @string String(this Inst i) {
             buf.WriteString(", ");
         }
         buf.WriteString(arg.String());
-
     }    return buf.String();
-
 }
 
 // An Op is an instruction operation.
@@ -49,7 +47,6 @@ public static @string String(this Op o) {
         return fmt.Sprintf("Op(%d)", int(o));
     }
     return opstr[o];
-
 }
 
 // An Arg is a single instruction argument, one of these types: Reg, CondReg, SpReg, Imm, PCRel, Label, or Offset.
@@ -239,7 +236,6 @@ public static readonly var A5 = 165;
 public static readonly var A6 = 166;
 public static readonly var A7 = 167;
 
-
 public static void IsArg(this Reg _p0) {
 }
 public static @string String(this Reg r) {
@@ -256,8 +252,7 @@ public static @string String(this Reg r) {
         return fmt.Sprintf("a%d", int(r - A0));
     else 
         return fmt.Sprintf("Reg(%d)", int(r));
-    
-}
+    }
 
 // CondReg is a bit or field in the condition register.
 public partial struct CondReg { // : sbyte
@@ -307,7 +302,6 @@ public static readonly var CR5 = 37;
 public static readonly var CR6 = 38;
 public static readonly var CR7 = 39;
 
-
 public static void IsArg(this CondReg _p0) {
 }
 public static @string String(this CondReg c) {
@@ -318,15 +312,13 @@ public static @string String(this CondReg c) {
         return fmt.Sprintf("Cond%d%s", int((c - Cond0LT) / 4), new array<@string>(new @string[] { "LT", "GT", "EQ", "SO" })[(c - Cond0LT) % 4]);
     else 
         return fmt.Sprintf("CondReg(%d)", int(c));
-    
-}
+    }
 
 // SpReg is a special register, its meaning depends on Op.
 public partial struct SpReg { // : ushort
 }
 
 public static readonly SpReg SpRegZero = 0;
-
 
 public static void IsArg(this SpReg _p0) {
 }

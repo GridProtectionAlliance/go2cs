@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:08 UTC
+//     Generated on 2022 March 13 05:37:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct response
         {
             // Constructors
@@ -124,7 +124,7 @@ namespace net
             public static implicit operator response(NilType nil) => default(response);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static response response_cast(dynamic value)
         {
             return new response(ref value.conn, ref value.req, value.reqBody, value.cancelCtx, value.wroteHeader, value.wroteContinue, value.wants10KeepAlive, value.wantsClose, value.canWriteContinue, value.writeContinueMu, ref value.w, value.cw, value.handlerHeader, value.calledHeader, value.written, value.contentLength, value.status, value.closeAfterReply, value.requestBodyLimitHit, value.trailers, value.handlerDone, value.dateBuf, value.clenBuf, value.statusBuf, value.closeNotifyCh, value.didCloseNotify);

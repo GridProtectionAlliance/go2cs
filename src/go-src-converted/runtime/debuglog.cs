@@ -13,19 +13,21 @@
 // This facility can be enabled by passing -tags debuglog when
 // building. Without this tag, dlog calls compile to nothing.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:32 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:23 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\debuglog.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// debugLogBytes is the size of each per-M ring buffer. This is
+// allocated off-heap to avoid blowing up the M and hence the GC'd
+// heap size.
 
 public static partial class runtime_package {
 
-    // debugLogBytes is the size of each per-M ring buffer. This is
-    // allocated off-heap to avoid blowing up the M and hence the GC'd
-    // heap size.
 private static readonly nint debugLogBytes = 16 << 10;
 
 // debugLogStringLimit is the maximum number of bytes in a string.
@@ -96,11 +98,9 @@ private static ptr<dlogger> dlog() {
                     break;
                 l1 = l1.allLink;
                 }
-
             }
 
         }
-
     }
     if (l == null) {
         l = (dlogger.val)(sysAlloc(@unsafe.Sizeof(new dlogger()), null));
@@ -119,7 +119,6 @@ private static ptr<dlogger> dlog() {
                 break;
             }
         }
-
     }
     const nint deltaLimit = 1 << (int)((3 * 7)) - 1; // ~2ms between sync packets
  // ~2ms between sync packets
@@ -141,7 +140,6 @@ private static ptr<dlogger> dlog() {
         l.w.varint(-1);
     }
     return _addr_l!;
-
 }
 
 // A dlogger writes to the debug log.
@@ -180,7 +178,6 @@ private static void end(this ptr<dlogger> _addr_l) {
         return ;
     }
     atomic.Store(_addr_l.owned, 0);
-
 }
 
 private static readonly nint debugLogUnknown = 1 + iota;
@@ -197,7 +194,6 @@ private static readonly var debugLogStringOverflow = 8;
 private static readonly var debugLogPC = 9;
 private static readonly var debugLogTraceback = 10;
 
-
 //go:nosplit
 private static ptr<dlogger> b(this ptr<dlogger> _addr_l, bool x) {
     ref dlogger l = ref _addr_l.val;
@@ -213,7 +209,6 @@ private static ptr<dlogger> b(this ptr<dlogger> _addr_l, bool x) {
         l.w.@byte(debugLogBoolFalse);
     }
     return _addr_l!;
-
 }
 
 //go:nosplit
@@ -254,7 +249,6 @@ private static ptr<dlogger> i64(this ptr<dlogger> _addr_l, long x) {
     l.w.@byte(debugLogInt);
     l.w.varint(x);
     return _addr_l!;
-
 }
 
 //go:nosplit
@@ -302,7 +296,6 @@ private static ptr<dlogger> u64(this ptr<dlogger> _addr_l, ulong x) {
     l.w.@byte(debugLogUint);
     l.w.uvarint(x);
     return _addr_l!;
-
 }
 
 //go:nosplit
@@ -315,7 +308,6 @@ private static ptr<dlogger> hex(this ptr<dlogger> _addr_l, ulong x) {
     l.w.@byte(debugLogHex);
     l.w.uvarint(x);
     return _addr_l!;
-
 }
 
 //go:nosplit
@@ -337,10 +329,8 @@ private static ptr<dlogger> p(this ptr<dlogger> _addr_l, object x) {
             l.w.uvarint(uint64(uintptr(v.data)));
         else 
             throw("not a pointer type");
-        
-    }
+            }
     return _addr_l!;
-
 }
 
 //go:nosplit
@@ -359,7 +349,6 @@ private static ptr<dlogger> s(this ptr<dlogger> _addr_l, @string x) {
         l.w.@byte(debugLogConstString);
         l.w.uvarint(uint64(str.len));
         l.w.uvarint(uint64(uintptr(str.str) - datap.etext));
-
     }
     else
  {
@@ -378,7 +367,6 @@ private static ptr<dlogger> s(this ptr<dlogger> _addr_l, @string x) {
         }
     }
     return _addr_l!;
-
 }
 
 //go:nosplit
@@ -391,7 +379,6 @@ private static ptr<dlogger> pc(this ptr<dlogger> _addr_l, System.UIntPtr x) {
     l.w.@byte(debugLogPC);
     l.w.uvarint(uint64(x));
     return _addr_l!;
-
 }
 
 //go:nosplit
@@ -406,7 +393,6 @@ private static ptr<dlogger> traceback(this ptr<dlogger> _addr_l, slice<System.UI
     foreach (var (_, pc) in x) {
         l.w.uvarint(uint64(pc));
     }    return _addr_l!;
-
 }
 
 // A debugLogWriter is a ring buffer of binary debug log records.
@@ -451,7 +437,6 @@ private static readonly nint debugLogHeaderSize = 2;
 // debugLogSyncSize is the number of bytes in a sync record.
 private static readonly var debugLogSyncSize = debugLogHeaderSize + 2 * 8;
 
-
 //go:nosplit
 private static void ensure(this ptr<debugLogWriter> _addr_l, ulong n) {
     ref debugLogWriter l = ref _addr_l.val;
@@ -466,10 +451,8 @@ private static void ensure(this ptr<debugLogWriter> _addr_l, ulong n) {
             // have to communicate that to the reader
             // somehow.
             throw("record wrapped around");
-
         }
     }
-
 }
 
 //go:nosplit
@@ -546,7 +529,6 @@ private static void varint(this ptr<debugLogWriter> _addr_l, long x) {
         u = (uint64(x) << 1); // do not complement i, bit 0 is 0
     }
     l.uvarint(u);
-
 }
 
 //go:nosplit
@@ -587,14 +569,12 @@ private static ulong skip(this ptr<debugLogReader> _addr_r) {
         r.tick = r.readUint64LEAt(r.begin + debugLogHeaderSize);
         r.nano = r.readUint64LEAt(r.begin + debugLogHeaderSize + 8);
         size = debugLogSyncSize;
-
     }
     if (r.begin + size > r.end) {
         return ~uint64(0);
     }
     r.begin += size;
     return size;
-
 }
 
 //go:nosplit
@@ -635,7 +615,6 @@ private static ulong peek(this ptr<debugLogReader> _addr_r) {
         r.tick = r.readUint64LEAt(r.begin + debugLogHeaderSize);
         r.nano = r.readUint64LEAt(r.begin + debugLogHeaderSize + 8);
         r.begin += debugLogSyncSize;
-
     } 
 
     // Peek tick delta.
@@ -647,7 +626,7 @@ private static ulong peek(this ptr<debugLogReader> _addr_r) {
     {
         var i = uint(0);
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             var b = r.data[pos % uint64(len(r.data))];
             pos++;
             u |= uint64(b & ~0x80) << (int)(i);
@@ -655,14 +634,12 @@ private static ulong peek(this ptr<debugLogReader> _addr_r) {
                 break;
             i += 7;
             }
-
         }
     }
     if (pos > r.begin + size) {
         return ~uint64(0);
     }
     return r.tick + u;
-
 }
 
 private static (ulong, ulong, ulong, nint) header(this ptr<debugLogReader> _addr_r) {
@@ -684,7 +661,6 @@ private static (ulong, ulong, ulong, nint) header(this ptr<debugLogReader> _addr
     p = int(r.varint());
 
     return ;
-
 }
 
 private static ulong uvarint(this ptr<debugLogReader> _addr_r) {
@@ -694,7 +670,7 @@ private static ulong uvarint(this ptr<debugLogReader> _addr_r) {
     {
         var i = uint(0);
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             var b = r.data[r.begin % uint64(len(r.data))];
             r.begin++;
             u |= uint64(b & ~0x80) << (int)(i);
@@ -702,11 +678,9 @@ private static ulong uvarint(this ptr<debugLogReader> _addr_r) {
                 break;
             i += 7;
             }
-
         }
     }
     return u;
-
 }
 
 private static long varint(this ptr<debugLogReader> _addr_r) {
@@ -722,7 +696,6 @@ private static long varint(this ptr<debugLogReader> _addr_r) {
         v = ~int64(u >> 1);
     }
     return v;
-
 }
 
 private static bool printVal(this ptr<debugLogReader> _addr_r) {
@@ -780,13 +753,11 @@ private static bool printVal(this ptr<debugLogReader> _addr_r) {
             //
             // TODO(austin): Expand inlined frames.
             printDebugLogPC(uintptr(r.uvarint()), true);
-
         }
     else 
         print("<unknown field type ", hex(typ), " pos ", r.begin - 1, " end ", r.end, ">\n");
         return false;
         return true;
-
 }
 
 // printDebugLog prints the debug log.
@@ -888,7 +859,6 @@ private static void printDebugLog() {
         if (pnano < 0) { 
             // Logged before runtimeInitTime was set.
             pnano = 0;
-
         }
         print(string(itoaDiv(tmpbuf[..], uint64(pnano), 9)));
         print(" P ", p, "] ");
@@ -905,9 +875,7 @@ private static void printDebugLog() {
                     print("<aborting P log>");
                     end = oldEnd;
                     break;
-
                 }
-
             }
 
 
@@ -919,11 +887,9 @@ private static void printDebugLog() {
         s.begin = end;
         s.end = oldEnd;
         s.nextTick = s.peek();
-
     }
 
     printunlock();
-
 }
 
 // printDebugLogPC prints a single symbolized PC. If returnPC is true,
@@ -934,7 +900,6 @@ private static void printDebugLogPC(System.UIntPtr pc, bool returnPC) {
         // TODO(austin): Don't back up if the previous frame
         // was a sigpanic.
         pc--;
-
     }
     print(hex(pc));
     if (!fn.valid()) {

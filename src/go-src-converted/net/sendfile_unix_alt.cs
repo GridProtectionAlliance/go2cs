@@ -5,26 +5,27 @@
 //go:build dragonfly || freebsd || solaris
 // +build dragonfly freebsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:16:32 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:05 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sendfile_unix_alt.go
-using poll = go.@internal.poll_package;
-using io = go.io_package;
-using os = go.os_package;
-using System;
-
-
 namespace go;
 
+using poll = @internal.poll_package;
+using io = io_package;
+using os = os_package;
+
+
+// sendFile copies the contents of r to c using the sendfile
+// system call to minimize copies.
+//
+// if handled == true, sendFile returns the number of bytes copied and any
+// non-EOF error.
+//
+// if handled == false, sendFile performed no work.
+
+using System;
 public static partial class net_package {
 
-    // sendFile copies the contents of r to c using the sendfile
-    // system call to minimize copies.
-    //
-    // if handled == true, sendFile returns the number of bytes copied and any
-    // non-EOF error.
-    //
-    // if handled == false, sendFile performed no work.
 private static (long, error, bool) sendFile(ptr<netFD> _addr_c, io.Reader r) {
     long written = default;
     error err = default!;
@@ -54,7 +55,6 @@ private static (long, error, bool) sendFile(ptr<netFD> _addr_c, io.Reader r) {
             return (0, error.As(err)!, false);
         }
         remain = fi.Size();
-
     }
     var (pos, err) = f.Seek(0, io.SeekCurrent);
     if (err != null) {
@@ -80,7 +80,6 @@ private static (long, error, bool) sendFile(ptr<netFD> _addr_c, io.Reader r) {
         return (written, error.As(err1)!, written > 0);
     }
     return (written, error.As(wrapSyscallError("sendfile", err))!, written > 0);
-
 }
 
 } // end net_package

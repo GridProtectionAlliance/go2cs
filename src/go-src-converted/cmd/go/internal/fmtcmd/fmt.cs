@@ -3,27 +3,27 @@
 // license that can be found in the LICENSE file.
 
 // Package fmtcmd implements the ``go fmt'' command.
-// package fmtcmd -- go2cs converted at 2022 March 06 23:16:02 UTC
+
+// package fmtcmd -- go2cs converted at 2022 March 13 06:29:31 UTC
 // import "cmd/go/internal/fmtcmd" ==> using fmtcmd = go.cmd.go.@internal.fmtcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\fmtcmd\fmt.go
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
+namespace go.cmd.go.@internal;
 
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using str = go.cmd.go.@internal.str_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using sync = sync_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using str = cmd.go.@internal.str_package;
 using System;
 using System.Threading;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class fmtcmd_package {
 
@@ -74,7 +74,6 @@ private static void runFmt(context.Context ctx, ptr<base.Command> _addr_cmd, sli
                 file = file__prev2;
             }
         }());
-
     }
     foreach (var (_, pkg) in load.PackagesAndErrors(ctx, new load.PackageOpts(), args)) {
         if (modload.Enabled() && pkg.Module != null && !pkg.Module.Main) {
@@ -96,7 +95,6 @@ private static void runFmt(context.Context ctx, ptr<base.Command> _addr_cmd, sli
                 @base.Errorf("%v", pkg.Error);
                 continue;
             }
-
         }
         var files = @base.RelPaths(pkg.InternalAllGoFiles());
         {
@@ -111,7 +109,6 @@ private static void runFmt(context.Context ctx, ptr<base.Command> _addr_cmd, sli
         }
     }    close(fileC);
     wg.Wait();
-
 });
 
 private static @string gofmtPath() {
@@ -128,7 +125,6 @@ private static @string gofmtPath() {
         }
     }
 
-
     gofmtPath = filepath.Join(cfg.GOROOT, "bin", gofmt);
     {
         (_, err) = os.Stat(gofmtPath);
@@ -140,7 +136,6 @@ private static @string gofmtPath() {
 
     // fallback to looking for gofmt in $PATH
     return "gofmt";
-
 }
 
 } // end fmtcmd_package

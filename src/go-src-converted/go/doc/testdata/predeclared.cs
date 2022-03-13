@@ -5,11 +5,10 @@
 // Package predeclared is a go/doc test for handling of
 // exported methods on locally-defined predeclared types.
 // See issue 9860.
-// package predeclared -- go2cs converted at 2022 March 06 22:41:35 UTC
+
+// package predeclared -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.predeclared" ==> using predeclared = go.go.doc.predeclared_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\predeclared.go
-
-
 namespace go.go;
 
 public static partial class predeclared_package {

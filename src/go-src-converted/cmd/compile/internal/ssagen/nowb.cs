@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssagen -- go2cs converted at 2022 March 06 23:09:45 UTC
+// package ssagen -- go2cs converted at 2022 March 13 06:23:01 UTC
 // import "cmd/compile/internal/ssagen" ==> using ssagen = go.cmd.compile.@internal.ssagen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssagen\nowb.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class ssagen_package {
 
@@ -30,7 +29,6 @@ public static void NoWriteBarrierRecCheck() {
     // call graph.
     nowritebarrierrecCheck.check();
     nowritebarrierrecCheck = null;
-
 }
 
 private static ptr<nowritebarrierrecChecker> nowritebarrierrecCheck;
@@ -65,13 +63,10 @@ private static ptr<nowritebarrierrecChecker> newNowritebarrierrecChecker() {
             // functions, not the generated ones within
             // their own ABI wrappers.
             continue;
-
         }
         ir.Visit(n, c.findExtraCalls);
-
     }    c.curfn = null;
     return _addr_c!;
-
 }
 
 private static void findExtraCalls(this ptr<nowritebarrierrecChecker> _addr_c, ir.Node nn) {
@@ -106,7 +101,6 @@ private static void findExtraCalls(this ptr<nowritebarrierrecChecker> _addr_c, i
         @base.Fatalf("expected ODCLFUNC node, got %+v", callee);
     }
     c.extraCalls[c.curfn] = append(c.extraCalls[c.curfn], new nowritebarrierrecCall(callee,n.Pos()));
-
 }
 
 // recordCall records a call from ODCLFUNC node "from", to function
@@ -127,7 +121,6 @@ private static void recordCall(this ptr<nowritebarrierrecChecker> _addr_c, ptr<i
         fn.NWBRCalls = @new<ir.SymAndPos>();
     }
     fn.NWBRCalls.val = append(fn.NWBRCalls.val, new ir.SymAndPos(Sym:to,Pos:pos));
-
 }
 
 private static void check(this ptr<nowritebarrierrecChecker> _addr_c) {
@@ -168,7 +161,6 @@ private static void check(this ptr<nowritebarrierrecChecker> _addr_c) {
         if (target.Pragma & ir.Yeswritebarrierrec != 0) { 
             // Don't flow into this function.
             return ;
-
         }
         {
             var (_, ok) = funcs[target];
@@ -176,7 +168,6 @@ private static void check(this ptr<nowritebarrierrecChecker> _addr_c) {
             if (ok) { 
                 // Already found a path to target.
                 return ;
-
             } 
 
             // Record the path.
@@ -186,7 +177,6 @@ private static void check(this ptr<nowritebarrierrecChecker> _addr_c) {
         // Record the path.
         funcs[target] = new nowritebarrierrecCall(target:src,lineno:pos);
         q.PushRight(target.Nname);
-
     };
     while (!q.Empty()) {
         fn = q.PopLeft().Func; 
@@ -231,7 +221,6 @@ private static void check(this ptr<nowritebarrierrecChecker> _addr_c) {
             callee = callee__prev2;
         }
     }
-
 }
 
 } // end ssagen_package

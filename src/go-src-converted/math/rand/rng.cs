@@ -2,27 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2022 March 06 22:17:54 UTC
+// package rand -- go2cs converted at 2022 March 13 05:32:04 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Program Files\Go\src\math\rand\rng.go
-
-
 namespace go.math;
 
 public static partial class rand_package {
 
-    /*
-     * Uniform distribution
-     *
-     * algorithm by
-     * DP Mitchell and JA Reeds
-     */
+/*
+ * Uniform distribution
+ *
+ * algorithm by
+ * DP Mitchell and JA Reeds
+ */
+
 private static readonly nint rngLen = 607;
 private static readonly nint rngTap = 273;
 private static readonly nint rngMax = 1 << 63;
 private static readonly var rngMask = rngMax - 1;
 private static readonly nint int32max = (1 << 31) - 1;
-
 
  
 // rngCooked used for seeding. See gen_cooked.go for details.
@@ -47,7 +45,6 @@ private static int seedrand(int x) {
         x += int32max;
     }
     return x;
-
 }
 
 // Seed uses the provided seed value to initialize the generator to a deterministic state.
@@ -78,7 +75,6 @@ private static void Seed(this ptr<rngSource> _addr_rng, long seed) {
             rng.vec[i] = u;
         }
     }
-
 }
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
@@ -103,7 +99,6 @@ private static ulong Uint64(this ptr<rngSource> _addr_rng) {
     var x = rng.vec[rng.feed] + rng.vec[rng.tap];
     rng.vec[rng.feed] = x;
     return uint64(x);
-
 }
 
 } // end rand_package

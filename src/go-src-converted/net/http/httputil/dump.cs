@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httputil -- go2cs converted at 2022 March 06 22:24:00 UTC
+// package httputil -- go2cs converted at 2022 March 13 05:38:26 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Program Files\Go\src\net\http\httputil\dump.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using url = go.net.url_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go.net.http;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using net = net_package;
+using http = net.http_package;
+using url = net.url_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// drainBody reads all of b to memory and then returns two equivalent
+// ReadClosers yielding the same bytes.
+//
+// It returns an error if the initial slurp of all bytes fails. It does not attempt
+// to make the returned ReadClosers have identical error-matching behavior.
+
+using System;
+using System.Threading;
 public static partial class httputil_package {
 
-    // drainBody reads all of b to memory and then returns two equivalent
-    // ReadClosers yielding the same bytes.
-    //
-    // It returns an error if the initial slurp of all bytes fails. It does not attempt
-    // to make the returned ReadClosers have identical error-matching behavior.
 private static (io.ReadCloser, io.ReadCloser, error) drainBody(io.ReadCloser b) {
     io.ReadCloser r1 = default;
     io.ReadCloser r2 = default;
@@ -36,7 +37,6 @@ private static (io.ReadCloser, io.ReadCloser, error) drainBody(io.ReadCloser b) 
     if (b == null || b == http.NoBody) { 
         // No copying needed. Preserve the magic sentinel meaning of NoBody.
         return (http.NoBody, http.NoBody, error.As(null!)!);
-
     }
     ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
     _, err = buf.ReadFrom(b);
@@ -50,7 +50,6 @@ private static (io.ReadCloser, io.ReadCloser, error) drainBody(io.ReadCloser b) 
         return (null, b, error.As(err)!);
     }
     return (io.NopCloser(_addr_buf), io.NopCloser(bytes.NewReader(buf.Bytes())), error.As(null!)!);
-
 }
 
 // dumpConn is a net.Conn which writes to Writer and reads from Reader
@@ -114,7 +113,6 @@ private static long outgoingLength(ptr<http.Request> _addr_req) {
         return req.ContentLength;
     }
     return -1;
-
 }
 
 // DumpRequestOut is like DumpRequest but for outgoing client requests. It
@@ -171,10 +169,8 @@ public static (slice<byte>, error) DumpRequestOut(ptr<http.Request> _addr_req, b
             // we'll get a partial dump.
             io.Copy(io.Discard, req.Body);
             req.Body.Close();
-
         }
         close(dr.c);
-
     }());
 
     var (_, err) = t.RoundTrip(reqSend);
@@ -202,10 +198,8 @@ public static (slice<byte>, error) DumpRequestOut(ptr<http.Request> _addr_req, b
             }
 
         }
-
     }
     return (dump, error.As(null!)!);
-
 });
 
 // delegateReader is a reader that delegates to another reader,
@@ -230,7 +224,6 @@ private static (nint, error) Read(this ptr<delegateReader> _addr_r, slice<byte> 
         }
     }
     return r.r.Read(p);
-
 }
 
 // Return value if nonempty, def otherwise.
@@ -239,7 +232,6 @@ private static @string valueOrDefault(@string value, @string def) {
         return value;
     }
     return def;
-
 }
 
 private static map reqWriteExcludeHeaderDump = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"Host":true,"Transfer-Encoding":true,"Trailer":true,};
@@ -330,7 +322,6 @@ public static (slice<byte>, error) DumpRequest(ptr<http.Request> _addr_req, bool
         return (null, error.As(err)!);
     }
     return (b.Bytes(), error.As(null!)!);
-
 }
 
 // errNoBody is a sentinel error value used by failureToReadBody so we
@@ -399,7 +390,6 @@ public static (slice<byte>, error) DumpResponse(ptr<http.Response> _addr_resp, b
         return (null, error.As(err)!);
     }
     return (b.Bytes(), error.As(null!)!);
-
 }
 
 } // end httputil_package

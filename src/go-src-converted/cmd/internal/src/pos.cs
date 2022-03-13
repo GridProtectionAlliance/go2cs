@@ -4,30 +4,32 @@
 
 // This file implements the encoding of source positions.
 
-// package src -- go2cs converted at 2022 March 06 22:31:49 UTC
+// package src -- go2cs converted at 2022 March 13 05:42:44 UTC
 // import "cmd/internal/src" ==> using src = go.cmd.@internal.src_package
 // Original source: C:\Program Files\Go\src\cmd\internal\src\pos.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.cmd.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// A Pos encodes a source position consisting of a (line, column) number pair
+// and a position base. A zero Pos is a ready to use "unknown" position (nil
+// position base and zero line number).
+//
+// The (line, column) values refer to a position in a file independent of any
+// position base ("absolute" file position).
+//
+// The position base is used to determine the "relative" position, that is the
+// filename and line number relative to the position base. If the base refers
+// to the current file, there is no difference between absolute and relative
+// positions. If it refers to a //line directive, a relative position is relative
+// to that directive. A position base in turn contains the position at which it
+// was introduced in the current file.
 
 public static partial class src_package {
 
-    // A Pos encodes a source position consisting of a (line, column) number pair
-    // and a position base. A zero Pos is a ready to use "unknown" position (nil
-    // position base and zero line number).
-    //
-    // The (line, column) values refer to a position in a file independent of any
-    // position base ("absolute" file position).
-    //
-    // The position base is used to determine the "relative" position, that is the
-    // filename and line number relative to the position base. If the base refers
-    // to the current file, there is no difference between absolute and relative
-    // positions. If it refers to a //line directive, a relative position is relative
-    // to that directive. A position base in turn contains the position at which it
-    // was introduced in the current file.
 public partial struct Pos {
     public ptr<PosBase> @base;
     public ref lico lico => ref lico_val;
@@ -57,7 +59,6 @@ public static bool Before(this Pos p, Pos q) {
     var n = p.Filename();
     var m = q.Filename();
     return n < m || n == m && p.lico < q.lico;
-
 }
 
 // After reports whether the position p comes after q in the source.
@@ -66,7 +67,6 @@ public static bool After(this Pos p, Pos q) {
     var n = p.Filename();
     var m = q.Filename();
     return n > m || n == m && p.lico > q.lico;
-
 }
 
 public static @string LineNumber(this Pos p) {
@@ -74,7 +74,6 @@ public static @string LineNumber(this Pos p) {
         return "?";
     }
     return p.lico.lineNumber();
-
 }
 
 public static @string LineNumberHTML(this Pos p) {
@@ -82,7 +81,6 @@ public static @string LineNumberHTML(this Pos p) {
         return "?";
     }
     return p.lico.lineNumberHTML();
-
 }
 
 // Filename returns the name of the actual file containing this position.
@@ -114,10 +112,8 @@ public static nuint RelLine(this Pos p) {
     if (b.Line() == 0) { 
         // base line is unknown => relative line is unknown
         return 0;
-
     }
     return b.Line() + (p.Line() - b.Pos().Line());
-
 }
 
 // RelCol returns the column number relative to the position's base.
@@ -129,15 +125,12 @@ public static nuint RelCol(this Pos p) {
         // this to apply until the next PosBase/line directive,
         // not just until the new newline)
         return 0;
-
     }
     if (p.Line() == b.Pos().Line()) { 
         // p on same line as p's base => column is relative to p's base
         return b.Col() + (p.Col() - b.Pos().Col());
-
     }
     return p.Col();
-
 }
 
 // AbsFilename() returns the absolute filename recorded with the position's base.
@@ -179,7 +172,6 @@ public static void WriteTo(this Pos p, io.Writer w, bool showCol, bool showOrig)
             // base is file base (incl. nil)
             format(w, p.Filename(), p.Line(), p.Col(), showCol);
             return ;
-
         }
     } 
 
@@ -267,7 +259,6 @@ public static ptr<PosBase> NewInliningBase(ptr<PosBase> _addr_old, nint inlTreeI
         @base.pos.@base = base;
     }
     return _addr_base!;
-
 }
 
 private static Pos noPos = default;
@@ -281,7 +272,6 @@ private static ptr<Pos> Pos(this ptr<PosBase> _addr_b) {
         return _addr__addr_b.pos!;
     }
     return _addr__addr_noPos!;
-
 }
 
 // Filename returns the filename recorded with the base.
@@ -293,7 +283,6 @@ private static @string Filename(this ptr<PosBase> _addr_b) {
         return b.filename;
     }
     return "";
-
 }
 
 // AbsFilename returns the absolute filename recorded with the base.
@@ -305,7 +294,6 @@ private static @string AbsFilename(this ptr<PosBase> _addr_b) {
         return b.absFilename;
     }
     return "";
-
 }
 
 public static readonly @string FileSymPrefix = "gofile..";
@@ -325,7 +313,6 @@ private static @string SymFilename(this ptr<PosBase> _addr_b) {
         return b.symFilename;
     }
     return FileSymPrefix + "??";
-
 }
 
 // Line returns the line number recorded with the base.
@@ -337,7 +324,6 @@ private static nuint Line(this ptr<PosBase> _addr_b) {
         return b.line;
     }
     return 0;
-
 }
 
 // Col returns the column number recorded with the base.
@@ -349,7 +335,6 @@ private static nuint Col(this ptr<PosBase> _addr_b) {
         return b.col;
     }
     return 0;
-
 }
 
 // InliningIndex returns the index into the global inlining
@@ -362,7 +347,6 @@ private static nint InliningIndex(this ptr<PosBase> _addr_b) {
         return b.inl;
     }
     return -1;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -398,7 +382,6 @@ private static readonly var xlogueShift = isStmtBits + isStmtShift;
 private static readonly var xlogueMask = xlogueMax << (int)(xlogueShift);
 private static readonly var colShift = xlogueBits + xlogueShift;
 private static readonly var lineShift = colBits + colShift;
-
  
 // It is expected that the front end or a phase in SSA will usually generate positions tagged with
 // PosDefaultStmt, but note statement boundaries with PosIsStmt.  Simple statements will have a single
@@ -438,7 +421,6 @@ public static readonly PosXlogue PosDefaultLogue = iota;
 public static readonly var PosPrologueEnd = 0;
 public static readonly var PosEpilogueBegin = 1;
 
-
 private static lico makeLicoRaw(nuint line, nuint col) {
     return lico(line << (int)(lineShift) | col << (int)(colShift));
 }
@@ -453,15 +435,12 @@ private static lico makeLico(nuint line, nuint col) {
     if (line > lineMax) { 
         // cannot represent line, use max. line so we have some information
         line = lineMax;
-
     }
     if (col > colMax) { 
         // cannot represent column, use max. column so we have some information
         col = colMax;
-
     }
     return makeLicoRaw(line, col);
-
 }
 
 private static nuint Line(this lico x) {
@@ -478,7 +457,6 @@ private static nuint IsStmt(this lico x) {
         return PosNotStmt;
     }
     return uint(x) >> (int)(isStmtShift) & isStmtMax;
-
 }
 private static PosXlogue Xlogue(this lico x) {
     return PosXlogue(uint(x) >> (int)(xlogueShift) & xlogueMax);
@@ -506,10 +484,8 @@ private static lico withXlogue(this lico x, PosXlogue xlogue) {
             return x;
         }
         x = lico(PosNotStmt << (int)(isStmtShift));
-
     }
     return lico(uint(x) & ~uint(xlogueMax << (int)(xlogueShift)) | (uint(xlogue) << (int)(xlogueShift)));
-
 }
 
 // withStmt returns a lico for the same location with specified is_stmt attribute
@@ -518,7 +494,6 @@ private static lico withStmt(this lico x, nuint stmt) {
         return lico(0);
     }
     return lico(uint(x) & ~uint(isStmtMax << (int)(isStmtShift)) | (stmt << (int)(isStmtShift)));
-
 }
 
 private static @string lineNumber(this lico x) {
@@ -534,10 +509,8 @@ private static @string lineNumberHTML(this lico x) {
     if (x.IsStmt() == PosNotStmt) {
         style = "s"; // /strike not supported in HTML5
         pfx = "";
-
     }
     return fmt.Sprintf("<%s>%s%d</%s>", style, pfx, x.Line(), style);
-
 }
 
 private static lico atColumn1(this lico x) {

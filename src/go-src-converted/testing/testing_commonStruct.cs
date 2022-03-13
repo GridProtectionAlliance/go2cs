@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:25 UTC
+//     Generated on 2022 March 13 06:43:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace go
 {
     public static partial class testing_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct common
         {
             // Constructors
@@ -124,7 +124,7 @@ namespace go
             public static implicit operator common(NilType nil) => default(common);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static common common_cast(dynamic value)
         {
             return new common(value.mu, value.output, value.w, value.ran, value.failed, value.skipped, value.done, value.cleanups, value.cleanupName, value.cleanupPc, value.finished, ref value.chatty, value.bench, value.hasSub, value.raceErrors, value.runner, ref value.parent, value.level, value.creator, value.name, value.start, value.duration, value.barrier, value.signal, value.sub, value.tempDirMu, value.tempDir, value.tempDirErr, value.tempDirSeq);

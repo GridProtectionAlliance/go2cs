@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:26:32 UTC
+//     Generated on 2022 March 13 05:40:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Credential
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace go
             public static implicit operator Credential(NilType nil) => default(Credential);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Credential Credential_cast(dynamic value)
         {
             return new Credential(value.Uid, value.Gid, value.Groups, value.NoSetGroups);

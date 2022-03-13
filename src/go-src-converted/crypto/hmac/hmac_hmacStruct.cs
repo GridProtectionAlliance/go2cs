@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:21 UTC
+//     Generated on 2022 March 13 05:34:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace crypto
 {
     public static partial class hmac_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct hmac
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace crypto
             public static implicit operator hmac(NilType nil) => default(hmac);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static hmac hmac_cast(dynamic value)
         {
             return new hmac(value.opad, value.ipad, value.outer, value.inner, value.marshaled);

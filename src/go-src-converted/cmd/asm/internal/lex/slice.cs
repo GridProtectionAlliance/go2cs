@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lex -- go2cs converted at 2022 March 06 22:46:28 UTC
+// package lex -- go2cs converted at 2022 March 13 05:57:41 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\lex\slice.go
-using scanner = go.text.scanner_package;
-
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.asm.@internal;
+
+using scanner = text.scanner_package;
+
+using src = cmd.@internal.src_package;
+
+
+// A Slice reads from a slice of Tokens.
 
 public static partial class lex_package {
 
-    // A Slice reads from a slice of Tokens.
 public partial struct Slice {
     public slice<Token> tokens;
     public ptr<src.PosBase> @base;
@@ -35,7 +37,6 @@ private static ScanToken Next(this ptr<Slice> _addr_s) {
         return scanner.EOF;
     }
     return s.tokens[s.pos].ScanToken;
-
 }
 
 private static @string Text(this ptr<Slice> _addr_s) {
@@ -63,7 +64,6 @@ private static void SetBase(this ptr<Slice> _addr_s, ptr<src.PosBase> _addr_@bas
     // Cannot happen because we only have slices of already-scanned text,
     // but be prepared.
     s.@base = base;
-
 }
 
 private static nint Line(this ptr<Slice> _addr_s) {
@@ -85,7 +85,6 @@ private static nint Col(this ptr<Slice> _addr_s) {
     // The first has definition of B has an argument, the second doesn't. Because we let
     // text/scanner strip the blanks for us, this is extremely rare, hard to fix, and not worth it.
     return s.pos;
-
 }
 
 private static void Close(this ptr<Slice> _addr_s) {

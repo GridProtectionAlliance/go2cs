@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package inspector -- go2cs converted at 2022 March 06 23:35:03 UTC
+// package inspector -- go2cs converted at 2022 March 13 06:42:36 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/inspector" ==> using inspector = go.cmd.vendor.golang.org.x.tools.go.ast.inspector_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\ast\inspector\typeof.go
+namespace go.cmd.vendor.golang.org.x.tools.go.ast;
 // This file defines func typeOf(ast.Node) uint64.
 //
 // The initial map-based implementation was too slow;
 // see https://go-review.googlesource.com/c/tools/+/135655/1/go/ast/inspector/inspector.go#196
 
-using ast = go.go.ast_package;
-
-namespace go.cmd.vendor.golang.org.x.tools.go.ast;
+using ast = go.ast_package;
 
 public static partial class inspector_package {
 
@@ -71,7 +70,6 @@ private static readonly var nTypeSpec = 50;
 private static readonly var nTypeSwitchStmt = 51;
 private static readonly var nUnaryExpr = 52;
 private static readonly var nValueSpec = 53;
-
 
 // typeOf returns a distinct single-bit value that represents the type of n.
 //
@@ -269,7 +267,6 @@ private static ulong typeOf(ast.Node n) {
             break;
     }
     return 0;
-
 }
 
 private static ulong maskOf(slice<ast.Node> nodes) {
@@ -280,7 +277,6 @@ private static ulong maskOf(slice<ast.Node> nodes) {
     foreach (var (_, n) in nodes) {
         mask |= typeOf(n);
     }    return mask;
-
 }
 
 } // end inspector_package

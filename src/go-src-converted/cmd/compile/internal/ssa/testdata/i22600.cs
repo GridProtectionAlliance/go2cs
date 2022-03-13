@@ -1,9 +1,9 @@
-// package main -- go2cs converted at 2022 March 06 23:09:38 UTC
+// package main -- go2cs converted at 2022 March 13 06:22:53 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\testdata\i22600.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
 
 public static partial class main_package {
 
@@ -14,13 +14,11 @@ private static void test() {
         os.Exit(1);
     }
     fmt.Println(pwd);
-
 }
 
 private static void Main() {
     growstack(); // Use stack early to prevent growth during test, which confuses gdb
     test();
-
 }
 
 private static @string snk = default;

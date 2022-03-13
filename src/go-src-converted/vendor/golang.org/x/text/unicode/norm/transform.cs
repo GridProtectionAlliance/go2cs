@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2022 March 06 23:40:04 UTC
+// package norm -- go2cs converted at 2022 March 13 06:48:20 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\transform.go
-using utf8 = go.unicode.utf8_package;
-
-using transform = go.golang.org.x.text.transform_package;
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using utf8 = unicode.utf8_package;
+
+using transform = golang.org.x.text.transform_package;
+
+
+// Reset implements the Reset method of the transform.Transformer interface.
 
 public static partial class norm_package {
 
-    // Reset implements the Reset method of the transform.Transformer interface.
 public static void Reset(this Form _p0) {
 }
 
@@ -38,7 +40,6 @@ public static (nint, nint, error) Transform(this Form f, slice<byte> dst, slice<
             b = b[..(int)ns];
         }
     }
-
     var (i, ok) = formTable[f].quickSpan(inputBytes(b), 0, len(b), eof);
     var n = copy(dst, b[..(int)i]);
     if (!ok) {
@@ -49,7 +50,6 @@ public static (nint, nint, error) Transform(this Form f, slice<byte> dst, slice<
         err = transform.ErrShortSrc;
     }
     return (n, n, error.As(err)!);
-
 }
 
 private static bool flushTransform(ptr<reorderBuffer> _addr_rb) {
@@ -61,7 +61,6 @@ private static bool flushTransform(ptr<reorderBuffer> _addr_rb) {
     }
     rb.@out = rb.@out[(int)rb.flushCopy(rb.@out)..];
     return true;
-
 }
 
 private static error errs = new slice<error>(new error[] { error.As(nil)!, error.As(transform.ErrShortDst)!, error.As(transform.ErrShortSrc)! });
@@ -103,7 +102,6 @@ public static (nint, nint, error) transform(this Form f, slice<byte> dst, slice<
             n = n__prev1;
 
         }
-
         var (end, ok) = rb.f.quickSpan(rb.src, nSrc, end, eof);
         n = copy(dst[(int)nDst..], rb.src.bytes[(int)nSrc..(int)end]);
         nSrc += n;
@@ -115,7 +113,6 @@ public static (nint, nint, error) transform(this Form f, slice<byte> dst, slice<
             return (nDst, nSrc, error.As(err)!);
         }
     }
-
 }
 
 } // end norm_package

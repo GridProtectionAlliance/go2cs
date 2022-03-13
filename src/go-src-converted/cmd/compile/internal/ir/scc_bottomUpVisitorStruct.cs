@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:15 UTC
+//     Generated on 2022 March 13 06:00:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct bottomUpVisitor
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace @internal
             public static implicit operator bottomUpVisitor(NilType nil) => default(bottomUpVisitor);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static bottomUpVisitor bottomUpVisitor_cast(dynamic value)
         {
             return new bottomUpVisitor(value.analyze, value.visitgen, value.nodeID, value.stack);

@@ -2,34 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rsa -- go2cs converted at 2022 March 06 22:18:18 UTC
+// package rsa -- go2cs converted at 2022 March 13 05:32:28 UTC
 // import "crypto/rsa" ==> using rsa = go.crypto.rsa_package
 // Original source: C:\Program Files\Go\src\crypto\rsa\pss.go
+namespace go.crypto;
 // This file implements the RSASSA-PSS signature scheme according to RFC 8017.
 
-using bytes = go.bytes_package;
-using crypto = go.crypto_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using big = go.math.big_package;
 
-namespace go.crypto;
+using bytes = bytes_package;
+using crypto = crypto_package;
+using errors = errors_package;
+using hash = hash_package;
+using io = io_package;
+using big = math.big_package;
+
+
+// Per RFC 8017, Section 9.1
+//
+//     EM = MGF1 xor DB || H( 8*0x00 || mHash || salt ) || 0xbc
+//
+// where
+//
+//     DB = PS || 0x01 || salt
+//
+// and PS can be empty so
+//
+//     emLen = dbLen + hLen + 1 = psLen + sLen + hLen + 2
+//
 
 public static partial class rsa_package {
 
-    // Per RFC 8017, Section 9.1
-    //
-    //     EM = MGF1 xor DB || H( 8*0x00 || mHash || salt ) || 0xbc
-    //
-    // where
-    //
-    //     DB = PS || 0x01 || salt
-    //
-    // and PS can be empty so
-    //
-    //     emLen = dbLen + hLen + 1 = psLen + sLen + hLen + 2
-    //
 private static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBits, slice<byte> salt, hash.Hash hash) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -102,7 +104,6 @@ private static (slice<byte>, error) emsaPSSEncode(slice<byte> mHash, nint emBits
 
     // 13. Output EM.
     return (em, error.As(null!)!);
-
 }
 
 private static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBits, nint sLen, hash.Hash hash) { 
@@ -148,7 +149,6 @@ private static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBit
             return error.As(ErrVerification)!;
         }
         sLen = len(db) - psLen - 1;
-
     }
     psLen = emLen - hLen - sLen - 2;
     foreach (var (_, e) in db[..(int)psLen]) {
@@ -176,10 +176,8 @@ private static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBit
     // 14. If H = H', output "consistent." Otherwise, output "inconsistent."
     if (!bytes.Equal(h0, h)) { // TODO: constant time?
         return error.As(ErrVerification)!;
-
     }
     return error.As(null!)!;
-
 }
 
 // signPSSWithSalt calculates the signature of hashed using PSS with specified salt.
@@ -203,7 +201,6 @@ private static (slice<byte>, error) signPSSWithSalt(io.Reader rand, ptr<PrivateK
     }
     var s = make_slice<byte>(priv.Size());
     return (c.FillBytes(s), error.As(null!)!);
-
 }
 
  
@@ -213,7 +210,6 @@ public static readonly nint PSSSaltLengthAuto = 0;
 // PSSSaltLengthEqualsHash causes the salt length to equal the length
 // of the hash used in the signature.
 public static readonly nint PSSSaltLengthEqualsHash = -1;
-
 
 // PSSOptions contains options for creating and verifying PSS signatures.
 public partial struct PSSOptions {
@@ -237,7 +233,6 @@ private static nint saltLength(this ptr<PSSOptions> _addr_opts) {
         return PSSSaltLengthAuto;
     }
     return opts.SaltLength;
-
 }
 
 // SignPSS calculates the signature of digest using PSS.
@@ -268,9 +263,7 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ptr<PrivateKey> _addr
             return (null, error.As(err)!);
         }
     }
-
     return signPSSWithSalt(rand, _addr_priv, hash, digest, salt);
-
 }
 
 // VerifyPSS verifies a PSS signature.
@@ -295,7 +288,6 @@ public static error VerifyPSS(ptr<PublicKey> _addr_pub, crypto.Hash hash, slice<
     }
     var em = m.FillBytes(make_slice<byte>(emLen));
     return error.As(emsaPSSVerify(digest, em, emBits, opts.saltLength(), hash.New()))!;
-
 }
 
 } // end rsa_package

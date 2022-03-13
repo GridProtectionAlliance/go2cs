@@ -2,35 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2022 March 06 23:18:49 UTC
+// package modfetch -- go2cs converted at 2022 March 13 06:32:11 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\coderepo.go
-using zip = go.archive.zip_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
-using codehost = go.cmd.go.@internal.modfetch.codehost_package;
-
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using modzip = go.golang.org.x.mod.zip_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using zip = archive.zip_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using sort = sort_package;
+using strings = strings_package;
+using time = time_package;
+
+using codehost = cmd.go.@internal.modfetch.codehost_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using modzip = golang.org.x.mod.zip_package;
+
+
+// A codeRepo implements modfetch.Repo using an underlying codehost.Repo.
+
+using System;
 public static partial class modfetch_package {
 
-    // A codeRepo implements modfetch.Repo using an underlying codehost.Repo.
 private partial struct codeRepo {
     public @string modPath; // code is the repository containing this module.
     public codehost.Repo code; // codeRoot is the import path at the root of code.
@@ -110,12 +111,10 @@ private static (Repo, error) newCodeRepo(codehost.Repo code, @string codeRoot, @
             return (null, error.As(fmt.Errorf("repository rooted at %s cannot contain module %s", codeRoot, path))!);
         }
         codeDir = strings.Trim(pathPrefix[(int)len(codeRoot)..], "/");
-
     }
     ptr<codeRepo> r = addr(new codeRepo(modPath:path,code:code,codeRoot:codeRoot,codeDir:codeDir,pathPrefix:pathPrefix,pathMajor:pathMajor,pseudoMajor:pseudoMajor,));
 
     return (r, error.As(null!)!);
-
 }
 
 private static @string ModulePath(this ptr<codeRepo> _addr_r) {
@@ -168,14 +167,11 @@ private static (slice<@string>, error) Versions(this ptr<codeRepo> _addr_r, @str
 
         }
 
-
         list = append(list, v);
-
     }    semver.Sort(list);
     semver.Sort(incompatible);
 
     return r.appendIncompatibleVersions(list, incompatible);
-
 }
 
 // appendIncompatibleVersions appends "+incompatible" versions to list if
@@ -193,7 +189,6 @@ private static (slice<@string>, error) appendIncompatibleVersions(this ptr<codeR
     if (len(incompatible) == 0 || r.pathMajor != "") { 
         // No +incompatible versions are possible, so no need to check them.
         return (list, error.As(null!)!);
-
     }
     Func<@string, (bool, error)> versionHasGoMod = v => {
         var (_, err) = r.code.ReadFile(v, "go.mod", codehost.MaxGoMod);
@@ -204,7 +199,6 @@ private static (slice<@string>, error) appendIncompatibleVersions(this ptr<codeR
             return (false, error.As(addr(new module.ModuleError(Path:r.modPath,Err:err,))!)!);
         }
         return (false, error.As(null!)!);
-
     };
 
     if (len(list) > 0) {
@@ -224,7 +218,6 @@ private static (slice<@string>, error) appendIncompatibleVersions(this ptr<codeR
             // github.com/libp2p/go-libp2p@v6.0.23), and (as of 2019-10-29) have no
             // concrete examples for which it is undesired.
             return (list, error.As(null!)!);
-
         }
     }
     @string lastMajor = default;    bool lastMajorHasGoMod = default;
@@ -233,9 +226,7 @@ private static (slice<@string>, error) appendIncompatibleVersions(this ptr<codeR
 
         if (major != lastMajor) {
             var rem = incompatible[(int)i..];
-            var j = sort.Search(len(rem), j => {
-                return semver.Major(rem[j]) != major;
-            });
+            var j = sort.Search(len(rem), j => semver.Major(rem[j]) != major);
             var latestAtMajor = rem[j - 1];
 
             error err = default!;
@@ -257,12 +248,9 @@ private static (slice<@string>, error) appendIncompatibleVersions(this ptr<codeR
             // won't appear in 'go list' or as the results for queries with inequality
             // bounds.
             continue;
-
         }
         list = append(list, v + "+incompatible");
-
     }    return (list, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) Stat(this ptr<codeRepo> _addr_r, @string rev) {
@@ -279,7 +267,6 @@ private static (ptr<RevInfo>, error) Stat(this ptr<codeRepo> _addr_r, @string re
         return (_addr_null!, error.As(addr(new module.ModuleError(Path:r.modPath,Err:&module.InvalidVersionError{Version:rev,Err:err,},))!)!);
     }
     return _addr_r.convert(info, rev)!;
-
 }
 
 private static (ptr<RevInfo>, error) Latest(this ptr<codeRepo> _addr_r) {
@@ -292,7 +279,6 @@ private static (ptr<RevInfo>, error) Latest(this ptr<codeRepo> _addr_r) {
         return (_addr_null!, error.As(err)!);
     }
     return _addr_r.convert(info, "")!;
-
 }
 
 // convert converts a version as reported by the code host to a version as
@@ -323,12 +309,9 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
         }
         canUseIncompatible = () => _addr_ok!;
         return _addr_ok!;
-
     };
 
-    Func<@string, object[], error> invalidf = (format, args) => {
-        return addr(new module.ModuleError(Path:r.modPath,Err:&module.InvalidVersionError{Version:info2.Version,Err:fmt.Errorf(format,args...),},));
-    }; 
+    Func<@string, object[], error> invalidf = (format, args) => addr(new module.ModuleError(Path:r.modPath,Err:&module.InvalidVersionError{Version:info2.Version,Err:fmt.Errorf(format,args...),},)); 
 
     // checkGoMod verifies that the go.mod file for the module exists or does not
     // exist as required by info2.Version and the module path represented by r.
@@ -348,7 +331,6 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
             // TODO: It would be nice to return an error like "not a module".
             // Right now we return "missing go.mod", which is a little confusing.
             return (_addr_null!, error.As(addr(new module.ModuleError(Path:r.modPath,Err:&module.InvalidVersionError{Version:info2.Version,Err:notExistError{err:err},},))!)!);
-
         }
         if (strings.HasSuffix(info2.Version, "+incompatible")) {
             if (!canUseIncompatible()) {
@@ -359,9 +341,7 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
  {
                     return (_addr_null!, error.As(invalidf("+incompatible suffix not allowed: module contains a go.mod file, so semantic import versioning is required"))!);
                 }
-
             }
-
             {
                 var err__prev2 = err;
 
@@ -374,10 +354,8 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
                 err = err__prev2;
 
             }
-
         }
         return (_addr_info2!, error.As(null!)!);
-
     }; 
 
     // Determine version.
@@ -402,9 +380,7 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
                 err = err__prev3;
 
             }
-
             return _addr_checkGoMod()!;
-
         }
         {
             var err__prev2 = err;
@@ -425,24 +401,18 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
                             // We're going to describe why the version is invalid in more detail,
                             // so strip out the existing “invalid version” wrapper.
                             err = vErr.Err;
-
                         }
 
                     }
-
                     return (_addr_null!, error.As(invalidf("module contains a go.mod file, so major version must be compatible: %v", err))!);
-
                 }
-
             }
 
             err = err__prev2;
 
         }
 
-
         return _addr_checkGoMod()!;
-
     }
     @string tagPrefix = "";
     if (r.codeDir != "") {
@@ -487,9 +457,7 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
 
         }
 
-
         return (_addr_v!, error.As(tagIsCanonical)!);
-
     }; 
 
     // If the VCS gave us a valid version, use that.
@@ -517,7 +485,6 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
                 // canonical equivalent refers to the same revision. Use it.
                 info2.Version = v;
                 return _addr_checkGoMod()!;
-
             }
             else
  { 
@@ -531,9 +498,7 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
                 if (semver.Compare(info2.Version, v) < 0) {
                     info2.Version = v;
                 }
-
             }
-
         }
         else if (v != "" && semver.Compare(v, statVers) == 0) { 
             // The user explicitly requested something equivalent to this tag. We
@@ -547,16 +512,11 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
             // If multiple tags match, tagToVersion will canonicalize them to the same
             // base version.
             pseudoBase = v;
-
         }
     }    if (info2.Version != "") {
         return _addr_checkGoMod()!;
     }
-    Func<@string, Func<@string, bool>> allowedMajor = major => {
-        return _addr_v => {
-            return _addr_(major == "" || semver.Major(v) == major) && !isRetracted(v)!;
-        }!;
-    };
+    Func<@string, Func<@string, bool>> allowedMajor = major => _addr_v => _addr_(major == "" || semver.Major(v) == major) && !isRetracted(v)!!;
     if (pseudoBase == "") {
         @string tag = default;
         if (r.pseudoMajor != "" || canUseIncompatible()) {
@@ -569,13 +529,11 @@ private static (ptr<RevInfo>, error) convert(this ptr<codeRepo> _addr_r, ptr<cod
             if (tag == "") {
                 tag, _ = r.code.RecentTag(info.Name, tagPrefix, allowedMajor("v0"));
             }
-
         }
         pseudoBase, _ = tagToVersion(tag); // empty if the tag is invalid
     }
     info2.Version = module.PseudoVersion(r.pseudoMajor, pseudoBase, info.Time, info.Short);
     return _addr_checkGoMod()!;
-
 }
 
 // validatePseudoVersion checks that version has a major version compatible with
@@ -606,13 +564,10 @@ private static error validatePseudoVersion(this ptr<codeRepo> _addr_r, ptr<codeh
                         }
 
                     }
-
                     err = addr(new module.ModuleError(Path:r.modPath,Err:err));
-
                 }
 
             }
-
         }
     }());
 
@@ -623,7 +578,6 @@ private static error validatePseudoVersion(this ptr<codeRepo> _addr_r, ptr<codeh
             return error.As(err)!;
         }
     }
-
 
     var (rev, err) = module.PseudoVersionRev(version);
     if (err != null) {
@@ -637,8 +591,7 @@ private static error validatePseudoVersion(this ptr<codeRepo> _addr_r, ptr<codeh
             return error.As(fmt.Errorf("revision is shorter than canonical (%s)", info.Short))!;
         else 
             return error.As(fmt.Errorf("does not match short name of revision (%s)", info.Short))!;
-        
-    }
+            }
     var (t, err) = module.PseudoVersionTime(version);
     if (err != null) {
         return error.As(err)!;
@@ -659,7 +612,6 @@ private static error validatePseudoVersion(this ptr<codeRepo> _addr_r, ptr<codeh
             return error.As(fmt.Errorf("major version without preceding tag must be v0, not v1"))!;
         }
         return error.As(null!)!;
-
     }
     else
  {
@@ -684,9 +636,7 @@ private static error validatePseudoVersion(this ptr<codeRepo> _addr_r, ptr<codeh
                     // derived from it. In that case, referring to the revision by a
                     // pseudo-version derived from its own canonical tag is just confusing.
                     return error.As(fmt.Errorf("tag (%s) found on revision %s is already canonical, so should not be replaced with a pseudo-version derived from that tag", tag, rev))!;
-
                 }
-
             }
 
             tag = tag__prev1;
@@ -727,10 +677,8 @@ private static error validatePseudoVersion(this ptr<codeRepo> _addr_r, ptr<codeh
             return error.As(fmt.Errorf("not a descendent of preceding tag (%s)", lastTag))!;
         }
         return error.As(fmt.Errorf("revision %s is not a descendent of preceding tag (%s)", rev, lastTag))!;
-
     }
     return error.As(null!)!;
-
 });
 
 private static @string revToRev(this ptr<codeRepo> _addr_r, @string rev) {
@@ -748,10 +696,8 @@ private static @string revToRev(this ptr<codeRepo> _addr_r, @string rev) {
             return rev;
         }
         return r.codeDir + "/" + rev;
-
     }
     return rev;
-
 }
 
 private static (@string, error) versionToRev(this ptr<codeRepo> _addr_r, @string version) {
@@ -763,7 +709,6 @@ private static (@string, error) versionToRev(this ptr<codeRepo> _addr_r, @string
         return ("", error.As(addr(new module.ModuleError(Path:r.modPath,Err:&module.InvalidVersionError{Version:version,Err:errors.New("syntax error"),},))!)!);
     }
     return (r.revToRev(version), error.As(null!)!);
-
 }
 
 // findDir locates the directory within the repo containing the module.
@@ -823,7 +768,6 @@ private static (@string, @string, slice<byte>, error) findDir(this ptr<codeRepo>
     if (found1) { 
         // Explicit go.mod with matching major version ok.
         return (rev, r.codeDir, gomod1, error.As(null!)!);
-
     }
     if (err1 == null) { 
         // Explicit go.mod with non-matching major version disallowed.
@@ -836,7 +780,6 @@ private static (@string, @string, slice<byte>, error) findDir(this ptr<codeRepo>
         }
         if (r.pathMajor != "") { // ".v1", ".v2" for gopkg.in
             return ("", "", null, error.As(fmt.Errorf("%s has non-...%s module path %q%s at revision %s", file1, r.pathMajor, mpath1, suffix, rev))!);
-
         }
         {
             var (_, _, ok) = module.SplitPathVersion(mpath1);
@@ -846,20 +789,16 @@ private static (@string, @string, slice<byte>, error) findDir(this ptr<codeRepo>
             }
 
         }
-
         return ("", "", null, error.As(fmt.Errorf("%s has post-%s module path %q%s at revision %s", file1, semver.Major(version), mpath1, suffix, rev))!);
-
     }
     if (r.codeDir == "" && (r.pathMajor == "" || strings.HasPrefix(r.pathMajor, "."))) { 
         // Implicit go.mod at root of repo OK for v0/v1 and for gopkg.in.
         return (rev, "", null, error.As(null!)!);
-
     }
     if (file2 != "") {
         return ("", "", null, error.As(fmt.Errorf("missing %s/go.mod and ...%s/go.mod at revision %s", r.pathPrefix, r.pathMajor, rev))!);
     }
     return ("", "", null, error.As(fmt.Errorf("missing %s/go.mod at revision %s", r.pathPrefix, rev))!);
-
 }
 
 // isMajor reports whether the versions allowed for mpath are compatible with
@@ -869,13 +808,11 @@ private static bool isMajor(@string mpath, @string pathMajor) {
     if (mpath == "") { 
         // If we don't have a path, we don't know what version(s) it is compatible with.
         return false;
-
     }
     var (_, mpathMajor, ok) = module.SplitPathVersion(mpath);
     if (!ok) { 
         // An invalid module path is not compatible with any version.
         return false;
-
     }
     if (pathMajor == "") { 
         // All of the valid versions for a gopkg.in module that requires major
@@ -893,7 +830,6 @@ private static bool isMajor(@string mpath, @string pathMajor) {
                 return false;
                 break;
         }
-
     }
     if (mpathMajor == "") { 
         // Even if pathMajor is ".v0" or ".v1", we can't be sure that a module
@@ -902,10 +838,8 @@ private static bool isMajor(@string mpath, @string pathMajor) {
         // non-gopkg.in mpath is probably the wrong module for any such pathMajor
         // anyway.
         return false;
-
     }
     return pathMajor[(int)1..] == mpathMajor[(int)1..];
-
 }
 
 // canReplaceMismatchedVersionDueToBug reports whether versions of r
@@ -919,7 +853,6 @@ private static bool canReplaceMismatchedVersionDueToBug(this ptr<codeRepo> _addr
     var unversioned = r.pathMajor == "";
     var replacingGopkgIn = strings.HasPrefix(mpath, "gopkg.in/");
     return unversioned && replacingGopkgIn;
-
 }
 
 private static (slice<byte>, error) GoMod(this ptr<codeRepo> _addr_r, @string version) {
@@ -953,10 +886,8 @@ private static (slice<byte>, error) GoMod(this ptr<codeRepo> _addr_r, @string ve
             return (LegacyGoMod(r.modPath), error.As(null!)!);
         }
         return (null, error.As(err)!);
-
     }
     return (data, error.As(null!)!);
-
 }
 
 // LegacyGoMod generates a fake go.mod file for a module that doesn't have one.
@@ -1058,9 +989,7 @@ private static (Func<@string, bool>, error) retractedVersions(this ptr<codeRepo>
         }
 
         return false;
-
     }, error.As(null!)!);
-
 }
 
 private static error Zip(this ptr<codeRepo> _addr_r, io.Writer dst, @string version) => func((defer, _, _) => {
@@ -1108,7 +1037,6 @@ private static error Zip(this ptr<codeRepo> _addr_r, io.Writer dst, @string vers
             return error.As(err)!;
         }
     }
-
     dl.Close();
     if (lr.N <= 0) {
         return error.As(fmt.Errorf("downloaded zip file too large"))!;
@@ -1163,7 +1091,6 @@ private static error Zip(this ptr<codeRepo> _addr_r, io.Writer dst, @string vers
         }
     }
     return error.As(modzip.Create(dst, new module.Version(Path:r.modPath,Version:version), files))!;
-
 });
 
 private partial struct zipFile {
@@ -1244,7 +1171,6 @@ private static bool hasPathPrefix(@string s, @string prefix) {
         return s[len(prefix)] == '/' && s[..(int)len(prefix)] == prefix;
     else 
         return false;
-    
-}
+    }
 
 } // end modfetch_package

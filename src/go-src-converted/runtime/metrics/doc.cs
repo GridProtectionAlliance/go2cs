@@ -171,8 +171,10 @@ Below is the full list of supported metrics, ordered lexicographically.
         Distribution of the time goroutines have spent in the scheduler
         in a runnable state before actually running.
 */
-// package metrics -- go2cs converted at 2022 March 06 22:14:35 UTC
+
+// package metrics -- go2cs converted at 2022 March 13 05:28:33 UTC
 // import "runtime/metrics" ==> using metrics = go.runtime.metrics_package
 // Original source: C:\Program Files\Go\src\runtime\metrics\doc.go
+namespace go.runtime;
 
 } // end metrics_package

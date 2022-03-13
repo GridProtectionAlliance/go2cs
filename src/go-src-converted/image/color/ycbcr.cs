@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package color -- go2cs converted at 2022 March 06 23:35:49 UTC
+// package color -- go2cs converted at 2022 March 13 06:43:47 UTC
 // import "image/color" ==> using color = go.image.color_package
 // Original source: C:\Program Files\Go\src\image\color\ycbcr.go
-
-
 namespace go.image;
 
 public static partial class color_package {
 
-    // RGBToYCbCr converts an RGB triple to a Y'CbCr triple.
+// RGBToYCbCr converts an RGB triple to a Y'CbCr triple.
 public static (byte, byte, byte) RGBToYCbCr(byte r, byte g, byte b) {
     byte _p0 = default;
     byte _p0 = default;
@@ -64,7 +62,6 @@ public static (byte, byte, byte) RGBToYCbCr(byte r, byte g, byte b) {
         cr = ~(cr >> 31);
     }
     return (uint8(yy), uint8(cb), uint8(cr));
-
 }
 
 // YCbCrToRGB converts a Y'CbCr triple to an RGB triple.
@@ -171,7 +168,6 @@ public static (byte, byte, byte) YCbCrToRGB(byte y, byte cb, byte cr) {
         b = ~(b >> 31);
     }
     return (uint8(r), uint8(g), uint8(b));
-
 }
 
 // YCbCr represents a fully opaque 24-bit Y'CbCr color, having 8 bits each for
@@ -254,7 +250,6 @@ public static (uint, uint, uint, uint) RGBA(this YCbCr c) {
         b = ~(b >> 31) & 0xffff;
     }
     return (uint32(r), uint32(g), uint32(b), 0xffff);
-
 }
 
 // YCbCrModel is the Model for Y'CbCr colors.
@@ -268,11 +263,9 @@ private static Color yCbCrModel(Color c) {
             return c;
         }
     }
-
     var (r, g, b, _) = c.RGBA();
     var (y, u, v) = RGBToYCbCr(uint8(r >> 8), uint8(g >> 8), uint8(b >> 8));
     return new YCbCr(y,u,v);
-
 }
 
 // NYCbCrA represents a non-alpha-premultiplied Y'CbCr-with-alpha color, having
@@ -330,7 +323,6 @@ public static (uint, uint, uint, uint) RGBA(this NYCbCrA c) {
     }
     var a = uint32(c.A) * 0x101;
     return (uint32(r) * a / 0xffff, uint32(g) * a / 0xffff, uint32(b) * a / 0xffff, a);
-
 }
 
 // NYCbCrAModel is the Model for non-alpha-premultiplied Y'CbCr-with-alpha
@@ -356,7 +348,6 @@ private static Color nYCbCrAModel(Color c) {
     }
     var (y, u, v) = RGBToYCbCr(uint8(r >> 8), uint8(g >> 8), uint8(b >> 8));
     return new NYCbCrA(YCbCr{Y:y,Cb:u,Cr:v},uint8(a>>8));
-
 }
 
 // RGBToCMYK converts an RGB triple to a CMYK quadruple.
@@ -383,7 +374,6 @@ public static (byte, byte, byte, byte) RGBToCMYK(byte r, byte g, byte b) {
     var m = (w - gg) * 0xff / w;
     var y = (w - bb) * 0xff / w;
     return (uint8(c), uint8(m), uint8(y), uint8(0xff - w));
-
 }
 
 // CMYKToRGB converts a CMYK quadruple to an RGB triple.
@@ -424,7 +414,6 @@ public static (uint, uint, uint, uint) RGBA(this CMYK c) {
     nuint g = (0xffff - uint32(c.M) * 0x101) * w / 0xffff;
     nuint b = (0xffff - uint32(c.Y) * 0x101) * w / 0xffff;
     return (r, g, b, 0xffff);
-
 }
 
 // CMYKModel is the Model for CMYK colors.
@@ -438,11 +427,9 @@ private static Color cmykModel(Color c) {
             return c;
         }
     }
-
     var (r, g, b, _) = c.RGBA();
     var (cc, mm, yy, kk) = RGBToCMYK(uint8(r >> 8), uint8(g >> 8), uint8(b >> 8));
     return new CMYK(cc,mm,yy,kk);
-
 }
 
 } // end color_package

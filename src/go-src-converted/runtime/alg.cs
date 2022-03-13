@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:17 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:01 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\alg.go
-using cpu = go.@internal.cpu_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using cpu = @internal.cpu_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
 private static readonly var c0 = uintptr((8 - sys.PtrSize) / 4 * (nint)2860486313L + (sys.PtrSize - 4) / 4 * (nint)33054211828000289L);
 private static readonly var c1 = uintptr((8 - sys.PtrSize) / 4 * (nint)3267000013L + (sys.PtrSize - 4) / 4 * (nint)23344194077549503L);
-
 
 private static System.UIntPtr memhash0(unsafe.Pointer p, System.UIntPtr h) {
     return h;
@@ -70,8 +69,7 @@ private static System.UIntPtr f32hash(unsafe.Pointer p, System.UIntPtr h) {
         return c1 * (c0 ^ h ^ uintptr(fastrand())); // any kind of NaN
     else 
         return memhash(p, h, 4);
-    
-}
+    }
 
 private static System.UIntPtr f64hash(unsafe.Pointer p, System.UIntPtr h) {
     ptr<ptr<double>> f = new ptr<ptr<ptr<double>>>(p);
@@ -82,8 +80,7 @@ private static System.UIntPtr f64hash(unsafe.Pointer p, System.UIntPtr h) {
         return c1 * (c0 ^ h ^ uintptr(fastrand())); // any kind of NaN
     else 
         return memhash(p, h, 8);
-    
-}
+    }
 
 private static System.UIntPtr c64hash(unsafe.Pointer p, System.UIntPtr h) {
     ptr<array<float>> x = new ptr<ptr<array<float>>>(p);
@@ -108,7 +105,6 @@ private static System.UIntPtr interhash(unsafe.Pointer p, System.UIntPtr h) => f
         // the error text (e.g. in a struct with a field of slice type
         // we want to report the struct, not the slice).
         panic(errorString("hash of unhashable type " + t.@string()));
-
     }
     if (isDirectIface(t)) {>>MARKER:FUNCTION_memhash32_BLOCK_PREFIX<<
         return c1 * typehash(_addr_t, @unsafe.Pointer(_addr_a.data), h ^ c0);
@@ -128,7 +124,6 @@ private static System.UIntPtr nilinterhash(unsafe.Pointer p, System.UIntPtr h) =
     if (t.equal == null) { 
         // See comment in interhash above.
         panic(errorString("hash of unhashable type " + t.@string()));
-
     }
     if (isDirectIface(t)) {
         return c1 * typehash(_addr_t, @unsafe.Pointer(_addr_a.data), h ^ c0);
@@ -165,7 +160,6 @@ private static System.UIntPtr typehash(ptr<_type> _addr_t, unsafe.Pointer p, Sys
                 return memhash(p, h, t.size);
                 break;
         }
-
     }
 
     if (t.kind & kindMask == kindFloat32) 
@@ -209,8 +203,7 @@ private static System.UIntPtr typehash(ptr<_type> _addr_t, unsafe.Pointer p, Sys
         // Should never happen, as typehash should only be called
         // with comparable types.
         panic(errorString("hash of unhashable type " + t.@string()));
-    
-});
+    });
 
 //go:linkname reflect_typehash reflect.typehash
 private static System.UIntPtr reflect_typehash(ptr<_type> _addr_t, unsafe.Pointer p, System.UIntPtr h) {
@@ -277,10 +270,8 @@ private static bool efaceeq(ptr<_type> _addr_t, unsafe.Pointer x, unsafe.Pointer
         // Maps and funcs are not comparable, so they can't reach here.
         // Ptrs, chans, and single-element items can be compared directly using ==.
         return x == y;
-
     }
     return eq(x, y);
-
 });
 private static bool ifaceeq(ptr<itab> _addr_tab, unsafe.Pointer x, unsafe.Pointer y) => func((_, panic, _) => {
     ref itab tab = ref _addr_tab.val;
@@ -296,10 +287,8 @@ private static bool ifaceeq(ptr<itab> _addr_tab, unsafe.Pointer x, unsafe.Pointe
     if (isDirectIface(t)) { 
         // See comment in efaceeq.
         return x == y;
-
     }
     return eq(x, y);
-
 });
 
 // Testing adapters for hash quality tests (see hash_test.go)
@@ -344,7 +333,6 @@ private static void alginit() {
     if ((GOARCH == "386" || GOARCH == "amd64") && cpu.X86.HasAES && cpu.X86.HasSSSE3 && cpu.X86.HasSSE41) { // PINSR{D,Q}
         initAlgAES();
         return ;
-
     }
     if (GOARCH == "arm64" && cpu.ARM64.HasAES) {
         initAlgAES();
@@ -355,14 +343,12 @@ private static void alginit() {
     hashkey[1] |= 1;
     hashkey[2] |= 1;
     hashkey[3] |= 1;
-
 }
 
 private static void initAlgAES() {
     useAeshash = true; 
     // Initialize with random data so hash collisions will be hard to engineer.
     getRandomData(aeskeysched[..]);
-
 }
 
 // Note: These routines perform the read with a native endianness.
@@ -372,7 +358,6 @@ private static uint readUnaligned32(unsafe.Pointer p) {
         return uint32(q[3]) | uint32(q[2]) << 8 | uint32(q[1]) << 16 | uint32(q[0]) << 24;
     }
     return uint32(q[0]) | uint32(q[1]) << 8 | uint32(q[2]) << 16 | uint32(q[3]) << 24;
-
 }
 
 private static ulong readUnaligned64(unsafe.Pointer p) {
@@ -381,7 +366,6 @@ private static ulong readUnaligned64(unsafe.Pointer p) {
         return uint64(q[7]) | uint64(q[6]) << 8 | uint64(q[5]) << 16 | uint64(q[4]) << 24 | uint64(q[3]) << 32 | uint64(q[2]) << 40 | uint64(q[1]) << 48 | uint64(q[0]) << 56;
     }
     return uint64(q[0]) | uint64(q[1]) << 8 | uint64(q[2]) << 16 | uint64(q[3]) << 24 | uint64(q[4]) << 32 | uint64(q[5]) << 40 | uint64(q[6]) << 48 | uint64(q[7]) << 56;
-
 }
 
 } // end runtime_package

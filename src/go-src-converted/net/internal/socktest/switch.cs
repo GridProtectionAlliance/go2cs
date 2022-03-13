@@ -3,18 +3,21 @@
 // license that can be found in the LICENSE file.
 
 // Package socktest provides utilities for socket testing.
-// package socktest -- go2cs converted at 2022 March 06 22:25:41 UTC
+
+// package socktest -- go2cs converted at 2022 March 13 05:40:13 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Program Files\Go\src\net\internal\socktest\switch.go
-using fmt = go.fmt_package;
-using sync = go.sync_package;
-
 namespace go.net.@internal;
+
+using fmt = fmt_package;
+using sync = sync_package;
+
+
+// A Switch represents a callpath point switch for socket system
+// calls.
 
 public static partial class socktest_package {
 
-    // A Switch represents a callpath point switch for socket system
-    // calls.
 public partial struct Switch {
     public sync.Once once;
     public sync.RWMutex fmu;
@@ -125,7 +128,6 @@ private static ptr<Stat> getLocked(this stats st, Cookie c) {
         st[c] = s;
     }
     return _addr_s!;
-
 }
 
 // A FilterType represents a filter type.
@@ -159,7 +161,6 @@ public static (AfterFilter, error) apply(this Filter f, ptr<Status> _addr_st) {
         return (null, error.As(null!)!);
     }
     return f(st);
-
 }
 
 // An AfterFilter represents a socket system call filter after an
@@ -178,7 +179,6 @@ public static error apply(this AfterFilter f, ptr<Status> _addr_st) {
         return error.As(null!)!;
     }
     return error.As(f(st))!;
-
 }
 
 // Set deploys the socket system call filter f for the filter type t.

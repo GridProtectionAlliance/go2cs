@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:33 UTC
+//     Generated on 2022 March 13 06:35:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct XcoffAuxCSect64
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator XcoffAuxCSect64(NilType nil) => default(XcoffAuxCSect64);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static XcoffAuxCSect64 XcoffAuxCSect64_cast(dynamic value)
         {
             return new XcoffAuxCSect64(value.Xscnlenlo, value.Xparmhash, value.Xsnhash, value.Xsmtyp, value.Xsmclas, value.Xscnlenhi, value.Xpad, value.Xauxtype);

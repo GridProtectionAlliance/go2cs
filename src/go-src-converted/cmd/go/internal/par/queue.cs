@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package par -- go2cs converted at 2022 March 06 23:16:43 UTC
+// package par -- go2cs converted at 2022 March 13 06:30:10 UTC
 // import "cmd/go/internal/par" ==> using par = go.cmd.go.@internal.par_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\par\queue.go
-using fmt = go.fmt_package;
+namespace go.cmd.go.@internal;
+
+using fmt = fmt_package;
 using System;
 using System.Threading;
 
-
-namespace go.cmd.go.@internal;
-
 public static partial class par_package {
 
-    // Queue manages a set of work items to be executed in parallel. The number of
-    // active work items is limited, and excess items are queued sequentially.
+// Queue manages a set of work items to be executed in parallel. The number of
+// active work items is limited, and excess items are queued sequentially.
 public partial struct Queue {
     public nint maxActive;
     public channel<queueState> st;
@@ -37,7 +36,6 @@ public static ptr<Queue> NewQueue(nint maxActive) => func((_, panic, _) => {
     ptr<Queue> q = addr(new Queue(maxActive:maxActive,st:make(chanqueueState,1),));
     q.st.Send(new queueState());
     return _addr_q!;
-
 });
 
 // Add adds f as a work item in the queue.
@@ -56,7 +54,6 @@ private static void Add(this ptr<Queue> _addr_q, Action f) {
     if (st.active == 0) { 
         // Mark q as non-idle.
         st.idle = null;
-
     }
     st.active++;
     q.st.Send(st);
@@ -72,18 +69,12 @@ private static void Add(this ptr<Queue> _addr_q, Action f) {
                 if (st.active == 0 && st.idle != null) {
                     close(st.idle);
                 }
-
                 q.st.Send(st);
                 return ;
-
             }
-
             (f, st.backlog) = (st.backlog[0], st.backlog[(int)1..]);            q.st.Send(st);
-
         }
-
     }());
-
 }
 
 // Idle returns a channel that will be closed when q has no (active or enqueued)
@@ -103,7 +94,6 @@ private static channel<object> Idle(this ptr<Queue> _addr_q) => func((defer, _, 
         }
     }
     return st.idle;
-
 });
 
 } // end par_package

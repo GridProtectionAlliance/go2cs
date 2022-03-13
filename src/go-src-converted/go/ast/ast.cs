@@ -5,34 +5,37 @@
 // Package ast declares the types used to represent syntax trees for Go
 // packages.
 //
-// package ast -- go2cs converted at 2022 March 06 22:41:10 UTC
+
+// package ast -- go2cs converted at 2022 March 13 05:52:15 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\ast.go
-using token = go.go.token_package;
-using strings = go.strings_package;
-
 namespace go.go;
+
+using token = go.token_package;
+using strings = strings_package;
+
+
+// ----------------------------------------------------------------------------
+// Interfaces
+//
+// There are 3 main classes of nodes: Expressions and type nodes,
+// statement nodes, and declaration nodes. The node names usually
+// match the corresponding Go spec production names to which they
+// correspond. The node fields correspond to the individual parts
+// of the respective productions.
+//
+// All nodes contain position information marking the beginning of
+// the corresponding source text segment; it is accessible via the
+// Pos accessor method. Nodes may contain additional position info
+// for language constructs where comments may be found between parts
+// of the construct (typically any larger, parenthesized subpart).
+// That position information is needed to properly position comments
+// when printing the construct.
+
+// All node types implement the Node interface.
 
 public static partial class ast_package {
 
-    // ----------------------------------------------------------------------------
-    // Interfaces
-    //
-    // There are 3 main classes of nodes: Expressions and type nodes,
-    // statement nodes, and declaration nodes. The node names usually
-    // match the corresponding Go spec production names to which they
-    // correspond. The node fields correspond to the individual parts
-    // of the respective productions.
-    //
-    // All nodes contain position information marking the beginning of
-    // the corresponding source text segment; it is accessible via the
-    // Pos accessor method. Nodes may contain additional position info
-    // for language constructs where comments may be found between parts
-    // of the construct (typically any larger, parenthesized subpart).
-    // That position information is needed to properly position comments
-    // when printing the construct.
-
-    // All node types implement the Node interface.
 public partial interface Node {
     token.Pos Pos(); // position of first character belonging to the node
     token.Pos End(); // position of first character immediately after the node
@@ -147,22 +150,16 @@ private static @string Text(this ptr<CommentGroup> _addr_g) {
                     if (len(c) == 0) { 
                         // empty line
                         break;
-
                     }
-
                     if (c[0] == ' ') { 
                         // strip first space - required for Example tests
                         c = c[(int)1..];
                         break;
-
                     }
-
                     if (isDirective(c)) { 
                         // Ignore //go:noinline, //line, and so on.
                         continue;
-
                     }
-
                     break;
                 case '*': 
                     /*-style comment */
@@ -177,7 +174,6 @@ private static @string Text(this ptr<CommentGroup> _addr_g) {
             foreach (var (_, l) in cl) {
                 lines = append(lines, stripTrailingWhitespace(l));
             }
-
         }
         c = c__prev1;
     }
@@ -195,7 +191,6 @@ private static @string Text(this ptr<CommentGroup> _addr_g) {
         lines = append(lines, "");
     }
     return strings.Join(lines, "\n");
-
 }
 
 // isDirective reports whether c is a comment directive.
@@ -219,7 +214,6 @@ private static bool isDirective(@string c) {
         }
     }
     return true;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -252,7 +246,6 @@ private static token.Pos Pos(this ptr<Field> _addr_f) {
         return f.Type.Pos();
     }
     return token.NoPos;
-
 }
 
 private static token.Pos End(this ptr<Field> _addr_f) {
@@ -268,7 +261,6 @@ private static token.Pos End(this ptr<Field> _addr_f) {
         return f.Names[len(f.Names) - 1].End();
     }
     return token.NoPos;
-
 }
 
 // A FieldList represents a list of Fields, enclosed by parentheses or braces.
@@ -288,7 +280,6 @@ private static token.Pos Pos(this ptr<FieldList> _addr_f) {
         return f.List[0].Pos();
     }
     return token.NoPos;
-
 }
 
 private static token.Pos End(this ptr<FieldList> _addr_f) {
@@ -304,9 +295,7 @@ private static token.Pos End(this ptr<FieldList> _addr_f) {
             return f.List[n - 1].End();
         }
     }
-
     return token.NoPos;
-
 }
 
 // NumFields returns the number of parameters or struct fields represented by a FieldList.
@@ -324,7 +313,6 @@ private static nint NumFields(this ptr<FieldList> _addr_f) {
         }
     }
     return n;
-
 }
 
 // An expression is represented by a tree consisting of one
@@ -460,13 +448,11 @@ public partial struct KeyValueExpr {
     public Expr Key;
     public token.Pos Colon; // position of ":"
     public Expr Value;
-}
-public partial struct ChanDir { // : nint
+}public partial struct ChanDir { // : nint
 }
 
 public static readonly ChanDir SEND = 1 << (int)(iota);
 public static readonly var RECV = 0;
-
 
 // A type is represented by a tree consisting of one
 // or more of the following type-specific expression
@@ -509,8 +495,7 @@ public partial struct ChanType {
     public token.Pos Arrow; // position of "<-" (token.NoPos if there is no "<-")
     public ChanDir Dir; // channel direction
     public Expr Value; // value type
-}
-private static token.Pos Pos(this ptr<BadExpr> _addr_x) {
+}private static token.Pos Pos(this ptr<BadExpr> _addr_x) {
     ref BadExpr x = ref _addr_x.val;
 
     return x.From;
@@ -542,7 +527,6 @@ private static token.Pos Pos(this ptr<CompositeLit> _addr_x) {
         return x.Type.Pos();
     }
     return x.Lbrace;
-
 }
 private static token.Pos Pos(this ptr<ParenExpr> _addr_x) {
     ref ParenExpr x = ref _addr_x.val;
@@ -609,7 +593,6 @@ private static token.Pos Pos(this ptr<FuncType> _addr_x) {
 
     if (x.Func.IsValid() || x.Params == null) { // see issue 3870
         return x.Func;
-
     }
     return x.Params.Pos(); // interface method declarations have no "func" keyword
 }
@@ -729,7 +712,6 @@ private static token.Pos End(this ptr<FuncType> _addr_x) {
         return x.Results.End();
     }
     return x.Params.End();
-
 }
 private static token.Pos End(this ptr<InterfaceType> _addr_x) {
     ref InterfaceType x = ref _addr_x.val;
@@ -871,7 +853,6 @@ private static @string String(this ptr<Ident> _addr_id) {
         return id.Name;
     }
     return "<nil>";
-
 }
 
 // ----------------------------------------------------------------------------
@@ -1041,8 +1022,7 @@ public partial struct RangeStmt {
     public token.Token Tok; // ILLEGAL if Key == nil, ASSIGN, DEFINE
     public Expr X; // value to range over
     public ptr<BlockStmt> Body;
-}
-private static token.Pos Pos(this ptr<BadStmt> _addr_s) {
+}private static token.Pos Pos(this ptr<BadStmt> _addr_s) {
     ref BadStmt s = ref _addr_s.val;
 
     return s.From;
@@ -1211,7 +1191,6 @@ private static token.Pos End(this ptr<ReturnStmt> _addr_s) {
             return s.Results[n - 1].End();
         }
     }
-
     return s.Return + 6; // len("return")
 }
 private static token.Pos End(this ptr<BranchStmt> _addr_s) {
@@ -1221,7 +1200,6 @@ private static token.Pos End(this ptr<BranchStmt> _addr_s) {
         return s.Label.End();
     }
     return token.Pos(int(s.TokPos) + len(s.Tok.String()));
-
 }
 private static token.Pos End(this ptr<BlockStmt> _addr_s) {
     ref BlockStmt s = ref _addr_s.val;
@@ -1236,9 +1214,7 @@ private static token.Pos End(this ptr<BlockStmt> _addr_s) {
             return s.List[n - 1].End();
         }
     }
-
     return s.Lbrace + 1;
-
 }
 private static token.Pos End(this ptr<IfStmt> _addr_s) {
     ref IfStmt s = ref _addr_s.val;
@@ -1247,7 +1223,6 @@ private static token.Pos End(this ptr<IfStmt> _addr_s) {
         return s.Else.End();
     }
     return s.Body.End();
-
 }
 private static token.Pos End(this ptr<CaseClause> _addr_s) {
     ref CaseClause s = ref _addr_s.val;
@@ -1259,9 +1234,7 @@ private static token.Pos End(this ptr<CaseClause> _addr_s) {
             return s.Body[n - 1].End();
         }
     }
-
     return s.Colon + 1;
-
 }
 private static token.Pos End(this ptr<SwitchStmt> _addr_s) {
     ref SwitchStmt s = ref _addr_s.val;
@@ -1283,9 +1256,7 @@ private static token.Pos End(this ptr<CommClause> _addr_s) {
             return s.Body[n - 1].End();
         }
     }
-
     return s.Colon + 1;
-
 }
 private static token.Pos End(this ptr<SelectStmt> _addr_s) {
     ref SelectStmt s = ref _addr_s.val;
@@ -1421,15 +1392,13 @@ public partial struct ValueSpec {
     public Expr Type; // value type; or nil
     public slice<Expr> Values; // initial values; or nil
     public ptr<CommentGroup> Comment; // line comments; or nil
-}
-private static token.Pos Pos(this ptr<ImportSpec> _addr_s) {
+}private static token.Pos Pos(this ptr<ImportSpec> _addr_s) {
     ref ImportSpec s = ref _addr_s.val;
 
     if (s.Name != null) {
         return s.Name.Pos();
     }
     return s.Path.Pos();
-
 }
 private static token.Pos Pos(this ptr<ValueSpec> _addr_s) {
     ref ValueSpec s = ref _addr_s.val;
@@ -1449,7 +1418,6 @@ private static token.Pos End(this ptr<ImportSpec> _addr_s) {
         return s.EndPos;
     }
     return s.Path.End();
-
 }
 
 private static token.Pos End(this ptr<ValueSpec> _addr_s) {
@@ -1462,12 +1430,10 @@ private static token.Pos End(this ptr<ValueSpec> _addr_s) {
             return s.Values[n - 1].End();
         }
     }
-
     if (s.Type != null) {
         return s.Type.End();
     }
     return s.Names[len(s.Names) - 1].End();
-
 }
 private static token.Pos End(this ptr<TypeSpec> _addr_s) {
     ref TypeSpec s = ref _addr_s.val;
@@ -1532,8 +1498,7 @@ public partial struct FuncDecl {
     public ptr<BlockStmt> Body; // function body; or nil for external (non-Go) function
 // TODO(rFindley) consider storing TParams here, rather than FuncType, as
 //                they are only valid for declared functions
-}
-private static token.Pos Pos(this ptr<BadDecl> _addr_d) {
+}private static token.Pos Pos(this ptr<BadDecl> _addr_d) {
     ref BadDecl d = ref _addr_d.val;
 
     return d.From;
@@ -1561,7 +1526,6 @@ private static token.Pos End(this ptr<GenDecl> _addr_d) {
         return d.Rparen + 1;
     }
     return d.Specs[0].End();
-
 }
 private static token.Pos End(this ptr<FuncDecl> _addr_d) {
     ref FuncDecl d = ref _addr_d.val;
@@ -1570,7 +1534,6 @@ private static token.Pos End(this ptr<FuncDecl> _addr_d) {
         return d.Body.End();
     }
     return d.Type.End();
-
 }
 
 // declNode() ensures that only declaration nodes can be
@@ -1637,9 +1600,7 @@ private static token.Pos End(this ptr<File> _addr_f) {
             return f.Decls[n - 1].End();
         }
     }
-
     return f.Name.End();
-
 }
 
 // A Package node represents a set of source files

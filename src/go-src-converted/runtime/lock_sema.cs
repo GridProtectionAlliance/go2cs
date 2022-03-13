@@ -5,35 +5,36 @@
 //go:build aix || darwin || netbsd || openbsd || plan9 || solaris || windows
 // +build aix darwin netbsd openbsd plan9 solaris windows
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:53 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:39 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\lock_sema.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// This implementation depends on OS-specific implementations of
+//
+//    func semacreate(mp *m)
+//        Create a semaphore for mp, if it does not already have one.
+//
+//    func semasleep(ns int64) int32
+//        If ns < 0, acquire m's semaphore and return 0.
+//        If ns >= 0, try to acquire m's semaphore for at most ns nanoseconds.
+//        Return 0 if the semaphore was acquired, -1 if interrupted or timed out.
+//
+//    func semawakeup(mp *m)
+//        Wake up mp, which is or will soon be sleeping on its semaphore.
+//
 
 public static partial class runtime_package {
 
-    // This implementation depends on OS-specific implementations of
-    //
-    //    func semacreate(mp *m)
-    //        Create a semaphore for mp, if it does not already have one.
-    //
-    //    func semasleep(ns int64) int32
-    //        If ns < 0, acquire m's semaphore and return 0.
-    //        If ns >= 0, try to acquire m's semaphore for at most ns nanoseconds.
-    //        Return 0 if the semaphore was acquired, -1 if interrupted or timed out.
-    //
-    //    func semawakeup(mp *m)
-    //        Wake up mp, which is or will soon be sleeping on its semaphore.
-    //
 private static readonly System.UIntPtr locked = 1;
 
 private static readonly nint active_spin = 4;
 private static readonly nint active_spin_cnt = 30;
 private static readonly nint passive_spin = 1;
-
 
 private static void @lock(ptr<mutex> _addr_l) {
     ref mutex l = ref _addr_l.val;
@@ -63,16 +64,14 @@ private static void lock2(ptr<mutex> _addr_l) {
         spin = active_spin;
     }
 Loop:
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         var v = atomic.Loaduintptr(_addr_l.key);
         if (v & locked == 0) { 
             // Unlocked. Try to lock.
             if (atomic.Casuintptr(_addr_l.key, v, v | locked)) {
                 return ;
             }
-
             i = 0;
-
         }
         if (i < spin) {
             procyield(active_spin_cnt);
@@ -96,19 +95,15 @@ Loop:
                     _continueLoop = true;
                     break;
                 }
-
             }
 
             if (v & locked != 0) { 
                 // Queued. Wait.
                 semasleep(-1);
                 i = 0;
-
             }
-
         }
     }
-
 }
 
 private static void unlock(ptr<mutex> _addr_l) {
@@ -140,9 +135,7 @@ private static void unlock2(ptr<mutex> _addr_l) {
                 // Dequeued an M.  Wake it.
                 semawakeup(mp);
                 break;
-
             }
-
         }
     }
     gp.m.locks--;
@@ -151,7 +144,6 @@ private static void unlock2(ptr<mutex> _addr_l) {
     }
     if (gp.m.locks == 0 && gp.preempt) { // restore the preemption request in case we've cleared it in newstack
         gp.stackguard0 = stackPreempt;
-
     }
 }
 
@@ -163,7 +155,6 @@ private static void noteclear(ptr<note> _addr_n) {
         // On AIX, semaphores might not synchronize the memory in some
         // rare cases. See issue #30189.
         atomic.Storeuintptr(_addr_n.key, 0);
-
     }
     else
  {
@@ -191,8 +182,7 @@ private static void notewakeup(ptr<note> _addr_n) {
     else 
         // Must be the waiting m. Wake it up.
         semawakeup((m.val)(@unsafe.Pointer(v)));
-    
-}
+    }
 
 private static void notesleep(ptr<note> _addr_n) {
     ref note n = ref _addr_n.val;
@@ -208,7 +198,6 @@ private static void notesleep(ptr<note> _addr_n) {
             throw("notesleep - waitm out of sync");
         }
         return ;
-
     }
     gp.m.blocked = true;
     if (cgo_yield == null.val) {
@@ -223,10 +212,8 @@ private static void notesleep(ptr<note> _addr_n) {
             semasleep(ns);
             asmcgocall(cgo_yield.val, null);
         }
-
     }
     gp.m.blocked = false;
-
 }
 
 //go:nosplit
@@ -247,7 +234,6 @@ private static bool notetsleep_internal(ptr<note> _addr_n, long ns, ptr<g> _addr
             throw("notetsleep - waitm out of sync");
         }
         return true;
-
     }
     if (ns < 0) { 
         // Queued. Sleep.
@@ -263,12 +249,9 @@ private static bool notetsleep_internal(ptr<note> _addr_n, long ns, ptr<g> _addr
             while (semasleep(ns) < 0) {
                 asmcgocall(cgo_yield.val, null);
             }
-
-
         }
         gp.m.blocked = false;
         return true;
-
     }
     deadline = nanotime() + ns;
     while (true) { 
@@ -282,7 +265,6 @@ private static bool notetsleep_internal(ptr<note> _addr_n, long ns, ptr<g> _addr
             // Acquired semaphore, semawakeup unregistered us.
             // Done.
             return true;
-
         }
         if (cgo_yield != null.val) {
             asmcgocall(cgo_yield.val, null);
@@ -318,9 +300,7 @@ private static bool notetsleep_internal(ptr<note> _addr_n, long ns, ptr<g> _addr
             return true;
         else 
             throw("runtime: unexpected waitm - semaphore out of sync");
-        
-    }
-
+            }
 }
 
 private static bool notetsleep(ptr<note> _addr_n, long ns) {
@@ -332,7 +312,6 @@ private static bool notetsleep(ptr<note> _addr_n, long ns) {
     }
     semacreate(gp.m);
     return notetsleep_internal(_addr_n, ns, _addr_null, 0);
-
 }
 
 // same as runtime·notetsleep, but called on user g (not g0)
@@ -349,7 +328,6 @@ private static bool notetsleepg(ptr<note> _addr_n, long ns) {
     var ok = notetsleep_internal(_addr_n, ns, _addr_null, 0);
     exitsyscall();
     return ok;
-
 }
 
 private static (ptr<g>, bool) beforeIdle(long _p0, long _p0) {

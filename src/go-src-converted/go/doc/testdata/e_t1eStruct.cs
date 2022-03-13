@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:35 UTC
+//     Generated on 2022 March 13 05:52:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class e_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(t1))]
         private partial struct t1e
         {
@@ -59,7 +59,7 @@ namespace go
             public static implicit operator t1e(NilType nil) => default(t1e);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static t1e t1e_cast(dynamic value)
         {
             return new t1e(value.t1);

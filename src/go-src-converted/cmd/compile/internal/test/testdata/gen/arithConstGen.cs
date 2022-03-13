@@ -8,17 +8,17 @@
 // launch with `go run arithConstGen.go` a file called arithConst.go
 // will be written into the parent directory containing the tests
 
-// package main -- go2cs converted at 2022 March 06 23:15:00 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:30 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\test\testdata\gen\arithConstGen.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using format = go.go.format_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using strings = go.strings_package;
-using template = go.text.template_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using format = go.format_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using strings = strings_package;
+using template = text.template_package;
 
 public static partial class main_package {
 
@@ -89,7 +89,6 @@ private static @string ansU(ulong i, ulong j, @string t, @string op) {
             break;
     }
     return fmt.Sprintf("%d", ans);
-
 }
 
 // compute the result of i op j, cast as type t.
@@ -143,7 +142,6 @@ private static @string ansS(long i, long j, @string t, @string op) {
             break;
     }
     return fmt.Sprintf("%d", ans);
-
 }
 
 private static void Main() => func((_, panic, _) => {
@@ -198,14 +196,10 @@ private static void Main() => func((_, panic, _) => {
                                     if ((o.name == "lsh" || o.name == "rsh") && uint64(uint32(i)) != i) {
                                         fd.Number = fmt.Sprintf("uint64(%s)", number);
                                     }
-
                                     fncCnst1.Execute(w, fd);
                                     fd.Number = number;
-
                                 }
-
                                 fncCnst2.Execute(w, fd);
-
                             }
 
                             i = i__prev3;
@@ -218,7 +212,6 @@ private static void Main() => func((_, panic, _) => {
                         if (o.name == "lsh" || o.name == "rsh") {
                             continue;
                         }
-
                         {
                             var i__prev3 = i;
 
@@ -231,15 +224,12 @@ private static void Main() => func((_, panic, _) => {
                                 if (o.name != "mod" && o.name != "div" || i != 0) {
                                     fncCnst1.Execute(w, fd);
                                 }
-
                                 fncCnst2.Execute(w, fd);
-
                             }
 
                             i = i__prev3;
                         }
                     }
-
                 }
 
                 o = o__prev2;
@@ -312,9 +302,7 @@ private static void Main() => func((_, panic, _) => {
                                                 err = err__prev3;
 
                                             }
-
                                         }
-
                                         if (o.name != "mod" && o.name != "div" || i != 0) {
                                             fd.Ans = ansU(j, i, s.name, o.symbol);
                                             fd.Input = fmt.Sprintf("%d", j);
@@ -330,9 +318,7 @@ private static void Main() => func((_, panic, _) => {
                                                 err = err__prev3;
 
                                             }
-
                                         }
-
                                     }
 
                                     j = j__prev4;
@@ -361,7 +347,6 @@ private static void Main() => func((_, panic, _) => {
                         if (o.name == "lsh" || o.name == "rsh") {
                             continue;
                         }
-
                         fd = new cfncData(s.name,o.name,s.name,o.symbol,"","","","");
                         {
                             var i__prev3 = i;
@@ -390,9 +375,7 @@ private static void Main() => func((_, panic, _) => {
                                                 err = err__prev3;
 
                                             }
-
                                         }
-
                                         if (o.name != "mod" && o.name != "div" || i != 0) {
                                             fd.Ans = ansS(j, i, s.name, o.symbol);
                                             fd.Input = fmt.Sprintf("%d", j);
@@ -408,9 +391,7 @@ private static void Main() => func((_, panic, _) => {
                                                 err = err__prev3;
 
                                             }
-
                                         }
-
                                     }
 
                                     j = j__prev4;
@@ -424,9 +405,7 @@ private static void Main() => func((_, panic, _) => {
                     o = o__prev2;
                 }
             }
-
             fmt.Fprintf(w, "}\n\n");
-
         }
         s = s__prev1;
     }
@@ -443,7 +422,6 @@ private static void Main() => func((_, panic, _) => {
             // Use WriteString here to avoid a vet warning about formatting directives.
             w.WriteString("if got := test.fn(test.in); got != test.want {\n\t\t\tt.Errorf(\"%s(%d) = %d, want %d\\" +
     "n\", test.fnname, test.in, got, test.want)\n\t\t}\n\t}\n");
-
         }
         s = s__prev1;
     }

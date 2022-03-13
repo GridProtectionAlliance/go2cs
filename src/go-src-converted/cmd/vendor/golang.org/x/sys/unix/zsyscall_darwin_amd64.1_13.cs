@@ -4,13 +4,13 @@
 //go:build darwin && amd64 && go1.13
 // +build darwin,amd64,go1.13
 
-// package unix -- go2cs converted at 2022 March 06 23:28:07 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:28 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\zsyscall_darwin_amd64.1_13.go
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 
@@ -26,7 +26,6 @@ private static error closedir(System.UIntPtr dir) {
         err = errnoErr(e1);
     }
     return ;
-
 }
 
 private static System.UIntPtr libc_closedir_trampoline_addr = default;

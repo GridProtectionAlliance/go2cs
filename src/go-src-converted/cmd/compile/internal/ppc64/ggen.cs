@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64 -- go2cs converted at 2022 March 06 23:10:57 UTC
+// package ppc64 -- go2cs converted at 2022 March 13 06:24:15 UTC
 // import "cmd/compile/internal/ppc64" ==> using ppc64 = go.cmd.compile.@internal.ppc64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ppc64\ggen.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using ppc64 = go.cmd.@internal.obj.ppc64_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using ppc64 = cmd.@internal.obj.ppc64_package;
 
 public static partial class ppc64_package {
 
@@ -33,7 +33,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
                 i += int64(types.PtrSize);
             }
         }
-
     }
     else if (cnt <= int64(128 * types.PtrSize)) {
         p = pp.Append(p, ppc64.AADD, obj.TYPE_CONST, 0, @base.Ctxt.FixedFrameSize() + off - 8, obj.TYPE_REG, ppc64.REGRT1, 0);
@@ -58,7 +57,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
         p.To.SetTarget(p1);
     }
     return _addr_p!;
-
 }
 
 private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {
@@ -99,7 +97,6 @@ private static ptr<obj.Prog> ginsnopdefer(ptr<objw.Progs> _addr_pp) {
         return _addr_p!;
     }
     return _addr_ginsnop(_addr_pp)!;
-
 }
 
 } // end ppc64_package

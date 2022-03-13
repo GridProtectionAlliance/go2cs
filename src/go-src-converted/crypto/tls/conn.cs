@@ -4,32 +4,33 @@
 
 // TLS low level connection and record layer
 
-// package tls -- go2cs converted at 2022 March 06 22:20:08 UTC
+// package tls -- go2cs converted at 2022 March 13 05:35:06 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\conn.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using cipher = go.crypto.cipher_package;
-using subtle = go.crypto.subtle_package;
-using x509 = go.crypto.x509_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using net = go.net_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go.crypto;
 
+using bytes = bytes_package;
+using context = context_package;
+using cipher = crypto.cipher_package;
+using subtle = crypto.subtle_package;
+using x509 = crypto.x509_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using io = io_package;
+using net = net_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+
+
+// A Conn represents a secured connection.
+// It implements the net.Conn interface.
+
+using System;
+using System.Threading;
 public static partial class tls_package {
 
-    // A Conn represents a secured connection.
-    // It implements the net.Conn interface.
 public partial struct Conn {
     public net.Conn conn;
     public bool isClient;
@@ -198,9 +199,7 @@ private static error setErrorLocked(this ptr<halfConn> _addr_hc, error err) {
             hc.err = err;
         }
     }
-
     return error.As(hc.err)!;
-
 }
 
 // prepareCipherSpec sets the encryption and MAC states
@@ -228,7 +227,6 @@ private static error changeCipherSpec(this ptr<halfConn> _addr_hc) {
     foreach (var (i) in hc.seq) {
         hc.seq[i] = 0;
     }    return error.As(null!)!;
-
 }
 
 private static void setTrafficSecret(this ptr<halfConn> _addr_hc, ptr<cipherSuiteTLS13> _addr_suite, slice<byte> secret) {
@@ -258,7 +256,6 @@ private static void incSeq(this ptr<halfConn> _addr_hc) => func((_, panic, _) =>
     // Instead, must renegotiate before it does.
     // Not likely enough to bother.
     panic("TLS: sequence number wraparound");
-
 });
 
 // explicitNonceLen returns the number of bytes of explicit nonce or IV included
@@ -290,7 +287,6 @@ private static nint explicitNonceLen(this ptr<halfConn> _addr_hc) => func((_, pa
             break;
         }
     }
-
 });
 
 // extractPadding returns, in constant time, the length of the padding to remove
@@ -320,7 +316,6 @@ private static (nint, byte) extractPadding(slice<byte> payload) {
         var mask = byte(int32(~t) >> 31);
         var b = payload[len(payload) - 1 - i];
         good &= mask & paddingLen ^ mask & b;
-
     } 
 
     // We AND together the bits of good and replicate the result across
@@ -343,7 +338,6 @@ private static (nint, byte) extractPadding(slice<byte> payload) {
 
     toRemove = int(paddingLen) + 1;
     return ;
-
 }
 
 private static nint roundUp(nint a, nint b) {
@@ -403,13 +397,11 @@ private static (slice<byte>, recordType, error) decrypt(this ptr<halfConn> _addr
                     var n = len(payload) - c.Overhead();
                     additionalData = append(additionalData, byte(n >> 8), byte(n));
                 }
-
                 error err = default!;
                 plaintext, err = c.Open(payload[..(int)0], nonce, payload, additionalData);
                 if (err != null) {
                     return (null, 0, error.As(alertBadRecordMAC)!);
                 }
-
                 break;
             case cbcMode c:
                 var blockSize = c.BlockSize();
@@ -458,8 +450,6 @@ private static (slice<byte>, recordType, error) decrypt(this ptr<halfConn> _addr
                     return (null, 0, error.As(alertUnexpectedMessage)!);
                 }
             }
-
-
         }
     else
     } {
@@ -489,11 +479,9 @@ private static (slice<byte>, recordType, error) decrypt(this ptr<halfConn> _addr
             return (null, 0, error.As(alertBadRecordMAC)!);
         }
         plaintext = payload[..(int)n];
-
     }
     hc.incSeq();
     return (plaintext, typ, error.As(null!)!);
-
 });
 
 // sliceForAppend extends the input slice by n bytes. head is the full extended
@@ -515,10 +503,8 @@ private static (slice<byte>, slice<byte>) sliceForAppend(slice<byte> @in, nint n
             copy(head, in);
         }
     }
-
     tail = head[(int)len(in)..];
     return ;
-
 }
 
 // encrypt encrypts payload, adding the appropriate nonce and/or MAC, and
@@ -551,7 +537,6 @@ private static (slice<byte>, error) encrypt(this ptr<halfConn> _addr_hc, slice<b
                     // collision is reached first due to its similarly small block size
                     // (see the Sweet32 attack).
                     copy(explicitNonce, hc.seq[..]);
-
                 }
                 else
  {
@@ -563,14 +548,11 @@ private static (slice<byte>, error) encrypt(this ptr<halfConn> _addr_hc, slice<b
                         }
 
                     }
-
                 }
 
             }
-
         }
     }
-
 
     slice<byte> dst = default;
     switch (hc.cipher.type()) {
@@ -597,7 +579,6 @@ private static (slice<byte>, error) encrypt(this ptr<halfConn> _addr_hc, slice<b
                 record[4] = byte(n);
 
                 record = c.Seal(record[..(int)recordHeaderLen], nonce, record[(int)recordHeaderLen..], record[..(int)recordHeaderLen]);
-
             }
             else
  {
@@ -605,7 +586,6 @@ private static (slice<byte>, error) encrypt(this ptr<halfConn> _addr_hc, slice<b
                 additionalData = append(additionalData, record[..(int)recordHeaderLen]);
                 record = c.Seal(record, nonce, payload, additionalData);
             }
-
             break;
         case cbcMode c:
             mac = tls10MAC(hc.mac, hc.scratchBuf[..(int)0], hc.seq[..], record[..(int)recordHeaderLen], payload, null);
@@ -641,7 +621,6 @@ private static (slice<byte>, error) encrypt(this ptr<halfConn> _addr_hc, slice<b
     hc.incSeq();
 
     return (record, error.As(null!)!);
-
 });
 
 // RecordHeaderError is returned when a TLS record header is invalid.
@@ -720,7 +699,6 @@ private static error readRecordOrCCS(this ptr<Conn> _addr_c, bool expectChangeCi
             if (err == io.ErrUnexpectedEOF && c.rawInput.Len() == 0) {
                 err = io.EOF;
             }
-
             {
                 net.Error e__prev2 = e;
 
@@ -733,14 +711,11 @@ private static error readRecordOrCCS(this ptr<Conn> _addr_c, bool expectChangeCi
                 e = e__prev2;
 
             }
-
             return error.As(err)!;
-
         }
         err = err__prev1;
 
     }
-
     var hdr = c.rawInput.Bytes()[..(int)recordHeaderLen];
     var typ = recordType(hdr[0]); 
 
@@ -791,9 +766,7 @@ private static error readRecordOrCCS(this ptr<Conn> _addr_c, bool expectChangeCi
                 e = e__prev2;
 
             }
-
             return error.As(err)!;
-
         }
         err = err__prev1;
 
@@ -814,7 +787,6 @@ private static error readRecordOrCCS(this ptr<Conn> _addr_c, bool expectChangeCi
     if (typ != recordTypeAlert && typ != recordTypeChangeCipherSpec && len(data) > 0) { 
         // This is a state-advancing message: reset the retry count.
         c.retryCount = 0;
-
     }
     if (c.vers == VersionTLS13 && typ != recordTypeHandshake && c.hand.Len() > 0) {
         return error.As(c.@in.setErrorLocked(c.sendAlert(alertUnexpectedMessage)))!;
@@ -863,8 +835,6 @@ private static error readRecordOrCCS(this ptr<Conn> _addr_c, bool expectChangeCi
             err = err__prev1;
 
         }
-
-
     else if (typ == recordTypeApplicationData) 
         if (!handshakeComplete || expectChangeCipherSpec) {
             return error.As(c.@in.setErrorLocked(c.sendAlert(alertUnexpectedMessage)))!;
@@ -881,7 +851,6 @@ private static error readRecordOrCCS(this ptr<Conn> _addr_c, bool expectChangeCi
     else 
         return error.As(c.@in.setErrorLocked(c.sendAlert(alertUnexpectedMessage)))!;
         return error.As(null!)!;
-
 }
 
 // retryReadRecord recurses into readRecordOrCCS to drop a non-advancing record, like
@@ -895,7 +864,6 @@ private static error retryReadRecord(this ptr<Conn> _addr_c, bool expectChangeCi
         return error.As(c.@in.setErrorLocked(errors.New("tls: too many ignored records")))!;
     }
     return error.As(c.readRecordOrCCS(expectChangeCipherSpec))!;
-
 }
 
 // atLeastReader reads from R, stopping with EOF once at least N bytes have been
@@ -923,7 +891,6 @@ private static (nint, error) Read(this ptr<atLeastReader> _addr_r, slice<byte> p
         return (n, error.As(io.EOF)!);
     }
     return (n, error.As(err)!);
-
 }
 
 // readFromUntil reads from r into c.rawInput until c.rawInput contains
@@ -941,7 +908,6 @@ private static error readFromUntil(this ptr<Conn> _addr_c, io.Reader r, nint n) 
     c.rawInput.Grow(needs + bytes.MinRead);
     var (_, err) = c.rawInput.ReadFrom(addr(new atLeastReader(r,int64(needs))));
     return error.As(err)!;
-
 }
 
 // sendAlert sends a TLS alert message.
@@ -959,10 +925,8 @@ private static error sendAlertLocked(this ptr<Conn> _addr_c, alert err) {
     if (err == alertCloseNotify) { 
         // closeNotify is a special case in that it isn't an error.
         return error.As(writeErr)!;
-
     }
     return error.As(c.@out.setErrorLocked(addr(new net.OpError(Op:"local error",Err:err))))!;
-
 }
 
 // sendAlert sends a TLS alert message.
@@ -986,7 +950,6 @@ private static readonly nint tcpMSSEstimate = 1208;
 // sent after which the TLS record size will be increased to the
 // maximum.
 private static readonly nint recordSizeBoostThreshold = 128 * 1024;
-
 
 // maxPayloadSizeForWrite returns the maximum TLS payload size to use for the
 // next application data record. There is the following trade-off:
@@ -1038,7 +1001,6 @@ private static nint maxPayloadSizeForWrite(this ptr<Conn> _addr_c, recordType ty
                 break;
             }
         }
-
     }
     if (c.vers == VersionTLS13) {
         payloadBytes--; // encrypted ContentType
@@ -1053,7 +1015,6 @@ private static nint maxPayloadSizeForWrite(this ptr<Conn> _addr_c, recordType ty
         n = maxPlaintext;
     }
     return n;
-
 });
 
 private static (nint, error) write(this ptr<Conn> _addr_c, slice<byte> data) {
@@ -1068,7 +1029,6 @@ private static (nint, error) write(this ptr<Conn> _addr_c, slice<byte> data) {
     var (n, err) = c.conn.Write(data);
     c.bytesSent += int64(n);
     return (n, error.As(err)!);
-
 }
 
 private static (nint, error) flush(this ptr<Conn> _addr_c) {
@@ -1084,7 +1044,6 @@ private static (nint, error) flush(this ptr<Conn> _addr_c) {
     c.sendBuf = null;
     c.buffering = false;
     return (n, error.As(err)!);
-
 }
 
 // outBufPool pools the record-sized scratch buffers used by writeRecordLocked.
@@ -1107,7 +1066,6 @@ private static (nint, error) writeRecordLocked(this ptr<Conn> _addr_c, recordTyp
         // heap, and overwrite and return that.
         outBufPtr.val = outBuf;
         outBufPool.Put(outBufPtr);
-
     }());
 
     nint n = default;
@@ -1122,7 +1080,6 @@ private static (nint, error) writeRecordLocked(this ptr<Conn> _addr_c, recordTyp
 
         }
 
-
         _, outBuf = sliceForAppend(outBuf[..(int)0], recordHeaderLen);
         outBuf[0] = byte(typ);
         var vers = c.vers;
@@ -1130,13 +1087,11 @@ private static (nint, error) writeRecordLocked(this ptr<Conn> _addr_c, recordTyp
             // Some TLS servers fail if the record version is
             // greater than TLS 1.0 for the initial ClientHello.
             vers = VersionTLS10;
-
         }
         else if (vers == VersionTLS13) { 
             // TLS 1.3 froze the record layer version to 1.2.
             // See RFC 8446, Section 5.1.
             vers = VersionTLS12;
-
         }
         outBuf[1] = byte(vers >> 8);
         outBuf[2] = byte(vers);
@@ -1160,10 +1115,8 @@ private static (nint, error) writeRecordLocked(this ptr<Conn> _addr_c, recordTyp
             err = err__prev1;
 
         }
-
         n += m;
         data = data[(int)m..];
-
     }
 
     if (typ == recordTypeChangeCipherSpec && c.vers != VersionTLS13) {
@@ -1179,10 +1132,8 @@ private static (nint, error) writeRecordLocked(this ptr<Conn> _addr_c, recordTyp
             err = err__prev2;
 
         }
-
     }
     return (n, error.As(null!)!);
-
 });
 
 // writeRecord writes a TLS record with the given type and payload to the
@@ -1218,7 +1169,6 @@ private static (object, error) readHandshake(this ptr<Conn> _addr_c) {
             err = err__prev1;
 
         }
-
     }
 
     var data = c.hand.Bytes();
@@ -1240,7 +1190,6 @@ private static (object, error) readHandshake(this ptr<Conn> _addr_c) {
             err = err__prev1;
 
         }
-
     }
     data = c.hand.Next(4 + n);
     handshakeMessage m = default;
@@ -1304,7 +1253,6 @@ private static (object, error) readHandshake(this ptr<Conn> _addr_c) {
         return (null, error.As(c.@in.setErrorLocked(c.sendAlert(alertUnexpectedMessage)))!);
     }
     return (m, error.As(null!)!);
-
 }
 
 private static var errShutdown = errors.New("tls: protocol is shutdown");
@@ -1344,7 +1292,6 @@ private static (nint, error) Write(this ptr<Conn> _addr_c, slice<byte> b) => fun
 
     }
 
-
     c.@out.Lock();
     defer(c.@out.Unlock());
 
@@ -1359,7 +1306,6 @@ private static (nint, error) Write(this ptr<Conn> _addr_c, slice<byte> b) => fun
         err = err__prev1;
 
     }
-
 
     if (!c.handshakeComplete()) {
         return (0, error.As(alertInternalError)!);
@@ -1381,11 +1327,9 @@ private static (nint, error) Write(this ptr<Conn> _addr_c, slice<byte> b) => fun
             }
 
         }
-
     }
     (n, err) = c.writeRecordLocked(recordTypeApplicationData, b);
     return (n + m, error.As(c.@out.setErrorLocked(err))!);
-
 });
 
 // handleRenegotiation processes a HelloRequest handshake message.
@@ -1427,7 +1371,6 @@ private static error handleRenegotiation(this ptr<Conn> _addr_c) => func((defer,
         c.handshakes++;
     }
     return error.As(c.handshakeErr)!;
-
 });
 
 // handlePostHandshakeMessage processes a handshake message arrived after the
@@ -1462,7 +1405,6 @@ private static error handlePostHandshakeMessage(this ptr<Conn> _addr_c) {
             break;
         }
     }
-
 }
 
 private static error handleKeyUpdate(this ptr<Conn> _addr_c, ptr<keyUpdateMsg> _addr_keyUpdate) => func((defer, _, _) => {
@@ -1486,14 +1428,11 @@ private static error handleKeyUpdate(this ptr<Conn> _addr_c, ptr<keyUpdateMsg> _
             // Surface the error at the next write.
             c.@out.setErrorLocked(err);
             return error.As(null!)!;
-
         }
         newSecret = cipherSuite.nextTrafficSecret(c.@out.trafficSecret);
         c.@out.setTrafficSecret(cipherSuite, newSecret);
-
     }
     return error.As(null!)!;
-
 });
 
 // Read reads data from the connection.
@@ -1518,12 +1457,10 @@ private static (nint, error) Read(this ptr<Conn> _addr_c, slice<byte> b) => func
         err = err__prev1;
 
     }
-
     if (len(b) == 0) { 
         // Put this after Handshake, in case people were calling
         // Read(nil) for the side effect of the Handshake.
         return (0, error.As(null!)!);
-
     }
     c.@in.Lock();
     defer(c.@in.Unlock());
@@ -1541,7 +1478,6 @@ private static (nint, error) Read(this ptr<Conn> _addr_c, slice<byte> b) => func
             err = err__prev1;
 
         }
-
         while (c.hand.Len() > 0) {
             {
                 var err__prev1 = err;
@@ -1555,9 +1491,7 @@ private static (nint, error) Read(this ptr<Conn> _addr_c, slice<byte> b) => func
                 err = err__prev1;
 
             }
-
         }
-
     }
 
     var (n, _) = c.input.Read(b); 
@@ -1582,10 +1516,8 @@ private static (nint, error) Read(this ptr<Conn> _addr_c, slice<byte> b) => func
             err = err__prev2;
 
         }
-
     }
     return (n, error.As(null!)!);
-
 });
 
 // Close closes the connection.
@@ -1611,7 +1543,6 @@ private static error Close(this ptr<Conn> _addr_c) {
         // avoid sending the alertCloseNotify, which may block
         // waiting on handshakeMutex or the c.out mutex.
         return error.As(c.conn.Close())!;
-
     }
     error alertErr = default!;
     if (c.handshakeComplete()) {
@@ -1627,7 +1558,6 @@ private static error Close(this ptr<Conn> _addr_c) {
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -1640,9 +1570,7 @@ private static error Close(this ptr<Conn> _addr_c) {
         err = err__prev1;
 
     }
-
     return error.As(alertErr)!;
-
 }
 
 private static var errEarlyCloseWrite = errors.New("tls: CloseWrite called before handshake complete");
@@ -1657,7 +1585,6 @@ private static error CloseWrite(this ptr<Conn> _addr_c) {
         return error.As(errEarlyCloseWrite)!;
     }
     return error.As(c.closeNotify())!;
-
 }
 
 private static error closeNotify(this ptr<Conn> _addr_c) => func((defer, _, _) => {
@@ -1673,10 +1600,8 @@ private static error closeNotify(this ptr<Conn> _addr_c) => func((defer, _, _) =
         c.closeNotifySent = true; 
         // Any subsequent writes will fail.
         c.SetWriteDeadline(time.Now());
-
     }
     return error.As(c.closeNotifyErr)!;
-
 });
 
 // Handshake runs the client or server handshake
@@ -1709,7 +1634,6 @@ private static error HandshakeContext(this ptr<Conn> _addr_c, context.Context ct
     // Delegate to unexported method for named return
     // without confusing documented signature.
     return error.As(c.handshakeContext(ctx))!;
-
 }
 
 private static error handshakeContext(this ptr<Conn> _addr_c, context.Context ctx) => func((defer, _, _) => {
@@ -1738,18 +1662,15 @@ private static error handshakeContext(this ptr<Conn> _addr_c, context.Context ct
                 if (ctxErr != null) { 
                     // Return context error to user.
                     ret = ctxErr;
-
                 }
 
             }
-
         }());
         go_(() => () => {
             _ = c.conn.Close();
             interruptRes.Send(handshakeCtx.Err());
             interruptRes.Send(null);
         }());
-
     }
     c.handshakeMutex.Lock();
     defer(c.handshakeMutex.Unlock());
@@ -1761,7 +1682,6 @@ private static error handshakeContext(this ptr<Conn> _addr_c, context.Context ct
             return error.As(err)!;
         }
     }
-
     if (c.handshakeComplete()) {
         return error.As(null!)!;
     }
@@ -1777,13 +1697,11 @@ private static error handshakeContext(this ptr<Conn> _addr_c, context.Context ct
         // If an error occurred during the handshake try to flush the
         // alert that might be left in the buffer.
         c.flush();
-
     }
     if (c.handshakeErr == null && !c.handshakeComplete()) {
         c.handshakeErr = errors.New("tls: internal error: handshake should have had a result");
     }
     return error.As(c.handshakeErr)!;
-
 });
 
 // ConnectionState returns basic TLS details about the connection.
@@ -1827,7 +1745,6 @@ private static ConnectionState connectionStateLocked(this ptr<Conn> _addr_c) {
         state.ekm = c.ekm;
     }
     return state;
-
 }
 
 // OCSPResponse returns the stapled OCSP response from the TLS server, if
@@ -1859,7 +1776,6 @@ private static error VerifyHostname(this ptr<Conn> _addr_c, @string host) => fun
         return error.As(errors.New("tls: handshake did not verify certificate chain"))!;
     }
     return error.As(c.peerCertificates[0].VerifyHostname(host))!;
-
 });
 
 private static bool handshakeComplete(this ptr<Conn> _addr_c) {

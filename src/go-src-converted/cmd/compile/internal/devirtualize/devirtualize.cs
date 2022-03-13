@@ -5,21 +5,23 @@
 // Package devirtualize implements a simple "devirtualization"
 // optimization pass, which replaces interface method calls with
 // direct concrete-type method calls where possible.
-// package devirtualize -- go2cs converted at 2022 March 06 23:12:13 UTC
+
+// package devirtualize -- go2cs converted at 2022 March 13 06:25:35 UTC
 // import "cmd/compile/internal/devirtualize" ==> using devirtualize = go.cmd.compile.@internal.devirtualize_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\devirtualize\devirtualize.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+
+
+// Func devirtualizes calls within fn where possible.
+
+using System;
 public static partial class devirtualize_package {
 
-    // Func devirtualizes calls within fn where possible.
 public static void Func(ptr<ir.Func> _addr_fn) {
     ref ir.Func fn = ref _addr_fn.val;
 
@@ -32,9 +34,7 @@ public static void Func(ptr<ir.Func> _addr_fn) {
                 Call(call);
             }
         }
-
     });
-
 }
 
 // Call devirtualizes the given call if possible.
@@ -102,7 +102,6 @@ public static void Call(ptr<ir.CallExpr> _addr_call) {
                 break;
         }
     }
-
 }
 
 } // end devirtualize_package

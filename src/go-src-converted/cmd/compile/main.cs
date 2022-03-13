@@ -2,29 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:47:32 UTC
+// package main -- go2cs converted at 2022 March 13 05:58:48 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\main.go
-using amd64 = go.cmd.compile.@internal.amd64_package;
-using arm = go.cmd.compile.@internal.arm_package;
-using arm64 = go.cmd.compile.@internal.arm64_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using gc = go.cmd.compile.@internal.gc_package;
-using mips = go.cmd.compile.@internal.mips_package;
-using mips64 = go.cmd.compile.@internal.mips64_package;
-using ppc64 = go.cmd.compile.@internal.ppc64_package;
-using riscv64 = go.cmd.compile.@internal.riscv64_package;
-using s390x = go.cmd.compile.@internal.s390x_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using wasm = go.cmd.compile.@internal.wasm_package;
-using x86 = go.cmd.compile.@internal.x86_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using os = go.os_package;
-using System;
-
-
 namespace go;
+
+using amd64 = cmd.compile.@internal.amd64_package;
+using arm = cmd.compile.@internal.arm_package;
+using arm64 = cmd.compile.@internal.arm64_package;
+using @base = cmd.compile.@internal.@base_package;
+using gc = cmd.compile.@internal.gc_package;
+using mips = cmd.compile.@internal.mips_package;
+using mips64 = cmd.compile.@internal.mips64_package;
+using ppc64 = cmd.compile.@internal.ppc64_package;
+using riscv64 = cmd.compile.@internal.riscv64_package;
+using s390x = cmd.compile.@internal.s390x_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using wasm = cmd.compile.@internal.wasm_package;
+using x86 = cmd.compile.@internal.x86_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using os = os_package;
+using System;
 
 public static partial class main_package {
 
@@ -43,7 +42,6 @@ private static void Main() {
     }
     gc.Main(archInit);
     @base.Exit(0);
-
 }
 
 } // end main_package

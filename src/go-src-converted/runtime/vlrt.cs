@@ -26,18 +26,17 @@
 //go:build arm || 386 || mips || mipsle
 // +build arm 386 mips mipsle
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:29 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\vlrt.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
 private static readonly nint sign32 = 1 << (int)((32 - 1));
 private static readonly nint sign64 = 1 << (int)((64 - 1));
-
 
 private static ulong float64toint64(double d) {
     ulong y = default;
@@ -58,7 +57,6 @@ private static double int64tofloat64(long y) {
         return -uint64tofloat64(-uint64(y));
     }
     return uint64tofloat64(uint64(y));
-
 }
 
 private static double uint64tofloat64(ulong y) {
@@ -92,7 +90,6 @@ private static void _d2v(ptr<ulong> _addr_y, double d) {
                 ylo = xlo >> (int)(sh) | xhi << (int)((32 - sh));
                 yhi = xhi >> (int)(sh);
             }
-
         }
         else
  {
@@ -102,7 +99,6 @@ private static void _d2v(ptr<ulong> _addr_y, double d) {
             else if (sh < 64) {
                 ylo = xhi >> (int)((sh - 32));
             }
-
         }
     }
     else
@@ -130,7 +126,6 @@ private static void _d2v(ptr<ulong> _addr_y, double d) {
         }
     }
     y = uint64(yhi) << 32 | uint64(ylo);
-
 }
 private static ulong uint64div(ulong n, ulong d) { 
     // Check for 32 bit operands
@@ -139,11 +134,9 @@ private static ulong uint64div(ulong n, ulong d) {
             panicdivide();
         }
         return uint64(uint32(n) / uint32(d));
-
     }
     var (q, _) = dodiv(n, d);
     return q;
-
 }
 
 private static ulong uint64mod(ulong n, ulong d) { 
@@ -153,11 +146,9 @@ private static ulong uint64mod(ulong n, ulong d) {
             panicdivide();
         }
         return uint64(uint32(n) % uint32(d));
-
     }
     var (_, r) = dodiv(n, d);
     return r;
-
 }
 
 private static long int64div(long n, long d) { 
@@ -167,13 +158,11 @@ private static long int64div(long n, long d) {
             // special case: 32-bit -0x80000000 / -1 = -0x80000000,
             // but 64-bit -0x80000000 / -1 = 0x80000000.
             return 0x80000000;
-
         }
         if (int32(d) == 0) {
             panicdivide();
         }
         return int64(int32(n) / int32(d));
-
     }
     var nneg = n < 0;
     var dneg = d < 0;
@@ -189,7 +178,6 @@ private static long int64div(long n, long d) {
         q = -q;
     }
     return q;
-
 }
 
 //go:nosplit
@@ -200,7 +188,6 @@ private static long int64mod(long n, long d) {
             panicdivide();
         }
         return int64(int32(n) % int32(d));
-
     }
     var nneg = n < 0;
     if (nneg) {
@@ -215,7 +202,6 @@ private static long int64mod(long n, long d) {
         r = -r;
     }
     return r;
-
 }
 
 //go:noescape
@@ -233,12 +219,10 @@ private static (ulong, ulong) dodiv(ulong n, ulong d) {
         // arm doesn't have a division instruction, so
         // slowdodiv is the best that we can do.
         return slowdodiv(n, d);
-
     }
     if (GOARCH == "mips" || GOARCH == "mipsle") {>>MARKER:FUNCTION__mul64by32_BLOCK_PREFIX<< 
         // No _div64by32 on mips and using only _mul64by32 doesn't bring much benefit
         return slowdodiv(n, d);
-
     }
     if (d > n) {
         return (0, n);
@@ -251,7 +235,6 @@ private static (ulong, ulong) dodiv(ulong n, ulong d) {
             return slowdodiv(n, d);
         }
         return (uint64(t), n - lo64);
-
     }
     uint qhi = default;
     if (uint32(n >> 32) >= uint32(d)) {
@@ -260,7 +243,6 @@ private static (ulong, ulong) dodiv(ulong n, ulong d) {
         }
         qhi = uint32(n >> 32) / uint32(d);
         n -= uint64(uint32(d) * qhi) << 32;
-
     }
     else
  {
@@ -269,7 +251,6 @@ private static (ulong, ulong) dodiv(ulong n, ulong d) {
     ref uint rlo = ref heap(out ptr<uint> _addr_rlo);
     var qlo = _div64by32(n, uint32(d), _addr_rlo);
     return (uint64(qhi) << 32 + uint64(qlo), uint64(rlo));
-
 }
 
 //go:nosplit
@@ -298,10 +279,8 @@ private static (ulong, ulong) slowdodiv(ulong n, ulong d) {
         i--;
         }
         d>>=1;
-
     }
     return (q, n);
-
 }
 
 // Floating point control word values.

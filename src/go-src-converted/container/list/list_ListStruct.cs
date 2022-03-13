@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:32 UTC
+//     Generated on 2022 March 13 05:34:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace container
 {
     public static partial class list_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct List
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace container
             public static implicit operator List(NilType nil) => default(List);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static List List_cast(dynamic value)
         {
             return new List(value.root, value.len);

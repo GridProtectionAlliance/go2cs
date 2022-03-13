@@ -2,29 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2022 March 06 23:19:14 UTC
+// package testing -- go2cs converted at 2022 March 13 06:42:59 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Program Files\Go\src\testing\benchmark.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using race = go.@internal.race_package;
-using sysinfo = go.@internal.sysinfo_package;
-using io = go.io_package;
-using math = go.math_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using unicode = go.unicode_package;
+namespace go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using race = @internal.race_package;
+using sysinfo = @internal.sysinfo_package;
+using io = io_package;
+using math = math_package;
+using os = os_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+using unicode = unicode_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class testing_package {
 
@@ -48,7 +47,6 @@ private static @string String(this ptr<benchTimeFlag> _addr_f) {
         return fmt.Sprintf("%dx", f.n);
     }
     return time.Duration(f.d).String();
-
 }
 
 private static error Set(this ptr<benchTimeFlag> _addr_f, @string s) {
@@ -61,7 +59,6 @@ private static error Set(this ptr<benchTimeFlag> _addr_f, @string s) {
         }
         f.val = new benchTimeFlag(n:int(n));
         return error.As(null!)!;
-
     }
     var (d, err) = time.ParseDuration(s);
     if (err != null || d <= 0) {
@@ -69,7 +66,6 @@ private static error Set(this ptr<benchTimeFlag> _addr_f, @string s) {
     }
     f.val = new benchTimeFlag(d:d);
     return error.As(null!)!;
-
 }
 
 // Global lock to ensure only one benchmark runs at a time.
@@ -161,7 +157,6 @@ private static void ResetTimer(this ptr<B> _addr_b) {
         // Allocate the extra map before reading memory stats.
         // Pre-size it to make more allocation unlikely.
         b.extra = make_map<@string, double>(16);
-
     }
     else
  {
@@ -178,7 +173,6 @@ private static void ResetTimer(this ptr<B> _addr_b) {
     b.duration = 0;
     b.netAllocs = 0;
     b.netBytes = 0;
-
 }
 
 // SetBytes records the number of bytes processed in a single operation.
@@ -228,7 +222,6 @@ private static long min(long x, long y) {
         return y;
     }
     return x;
-
 }
 
 private static long max(long x, long y) {
@@ -236,7 +229,6 @@ private static long max(long x, long y) {
         return y;
     }
     return x;
-
 }
 
 // run1 runs the first iteration of benchFunc. It reports whether more
@@ -257,10 +249,8 @@ private static bool run1(this ptr<B> _addr_b) => func((defer, _, _) => {
                 }
 
             }
-
         }
     }
-
     go_(() => () => { 
         // Signal that we're done whether we return normally
         // or by FailNow's runtime.Goexit.
@@ -269,7 +259,6 @@ private static bool run1(this ptr<B> _addr_b) => func((defer, _, _) => {
         }());
 
         b.runN(1);
-
     }());
     b.signal.Receive();
     if (b.failed) {
@@ -289,10 +278,8 @@ private static bool run1(this ptr<B> _addr_b) => func((defer, _, _) => {
             fmt.Fprintf(b.w, "--- %s: %s\n%s", tag, b.name, b.output);
         }
         return false;
-
     }
     return true;
-
 });
 
 private static sync.Once labelsOnce = default;
@@ -316,7 +303,6 @@ private static void run(this ptr<B> _addr_b) {
             }
 
         }
-
     });
     if (b.context != null) { 
         // Running go test --test.bench
@@ -326,7 +312,6 @@ private static void run(this ptr<B> _addr_b) {
  { 
         // Running func Benchmark.
         b.doBench();
-
     }
 }
 
@@ -370,7 +355,6 @@ private static void launch(this ptr<B> _addr_b) => func((defer, _, _) => {
                 if (prevns <= 0) { 
                     // Round up, to avoid div by zero.
                     prevns = 1;
-
                 } 
                 // Order of operations matters.
                 // For very fast benchmarks, prevIters ~= prevns.
@@ -387,14 +371,11 @@ private static void launch(this ptr<B> _addr_b) => func((defer, _, _) => {
                 // Don't run more than 1e9 times. (This also keeps n in int range on 32 bit platforms.)
                 n = min(n, 1e9F);
                 b.runN(int(n));
-
             }
 
         }
-
     }
     b.result = new BenchmarkResult(b.N,b.duration,b.bytes,b.netAllocs,b.netBytes,b.extra);
-
 });
 
 // ReportMetric adds "n unit" to the reported benchmark results.
@@ -416,7 +397,6 @@ private static void ReportMetric(this ptr<B> _addr_b, double n, @string unit) =>
         panic("metric unit must not contain whitespace");
     }
     b.extra[unit] = n;
-
 });
 
 // BenchmarkResult contains the results of a benchmark run.
@@ -440,12 +420,10 @@ public static long NsPerOp(this BenchmarkResult r) {
             return int64(v);
         }
     }
-
     if (r.N <= 0) {
         return 0;
     }
     return r.T.Nanoseconds() / int64(r.N);
-
 }
 
 // mbPerSec returns the "MB/s" metric.
@@ -457,12 +435,10 @@ public static double mbPerSec(this BenchmarkResult r) {
             return v;
         }
     }
-
     if (r.Bytes <= 0 || r.T <= 0 || r.N <= 0) {
         return 0;
     }
     return (float64(r.Bytes) * float64(r.N) / 1e6F) / r.T.Seconds();
-
 }
 
 // AllocsPerOp returns the "allocs/op" metric,
@@ -475,12 +451,10 @@ public static long AllocsPerOp(this BenchmarkResult r) {
             return int64(v);
         }
     }
-
     if (r.N <= 0) {
         return 0;
     }
     return int64(r.MemAllocs) / int64(r.N);
-
 }
 
 // AllocedBytesPerOp returns the "B/op" metric,
@@ -493,12 +467,10 @@ public static long AllocedBytesPerOp(this BenchmarkResult r) {
             return int64(v);
         }
     }
-
     if (r.N <= 0) {
         return 0;
     }
     return int64(r.MemBytes) / int64(r.N);
-
 }
 
 // String returns a summary of the benchmark results.
@@ -553,7 +525,6 @@ public static @string String(this BenchmarkResult r) {
                     break;
             }
             extraKeys = append(extraKeys, k);
-
         }
         k = k__prev1;
     }
@@ -571,7 +542,6 @@ public static @string String(this BenchmarkResult r) {
     }
 
     return buf.String();
-
 }
 
 private static void prettyPrint(io.Writer w, double x, @string unit) { 
@@ -603,7 +573,6 @@ private static void prettyPrint(io.Writer w, double x, @string unit) {
 
     }
     fmt.Fprintf(w, format, x, unit);
-
 }
 
 // MemString returns r.AllocedBytesPerOp and r.AllocsPerOp in the same format as 'go test'.
@@ -617,7 +586,6 @@ private static @string benchmarkName(@string name, nint n) {
         return fmt.Sprintf("%s-%d", name, n);
     }
     return name;
-
 }
 
 private partial struct benchContext {
@@ -666,11 +634,9 @@ private static bool runBenchmarks(@string importPath, Func<@string, @string, (bo
                         }
 
                     }
-
                 }
 
             }
-
         }
         Benchmark = Benchmark__prev1;
     }
@@ -681,7 +647,6 @@ private static bool runBenchmarks(@string importPath, Func<@string, @string, (bo
     }
     main.runN(1);
     return !main.failed;
-
 }
 
 // processBench runs bench b for the configured CPU counts and prints the results.
@@ -703,7 +668,6 @@ private static void processBench(this ptr<benchContext> _addr_ctx, ptr<B> _addr_
                 b = addr(new B(common:common{signal:make(chanbool),name:b.name,w:b.w,chatty:b.chatty,bench:true,},benchFunc:b.benchFunc,benchTime:b.benchTime,));
                 b.run1();
             }
-
             var r = b.doBench();
             if (b.failed) { 
                 // The output could be very long here, but probably isn't.
@@ -711,18 +675,14 @@ private static void processBench(this ptr<benchContext> _addr_ctx, ptr<B> _addr_
                 // the benchmark failed.
                 fmt.Fprintf(b.w, "--- FAIL: %s\n%s", benchName, b.output);
                 continue;
-
             }
-
             var results = r.String();
             if (b.chatty != null) {
                 fmt.Fprintf(b.w, "%-*s\t", ctx.maxLen, benchName);
             }
-
             if (benchmarkMemory || b.showAllocResult.val) {
                 results += "\t" + r.MemString();
             }
-
             fmt.Fprintln(b.w, results); 
             // Unlike with tests, we ignore the -chatty flag and always print output for
             // benchmarks since the output generation time will skew the results.
@@ -730,7 +690,6 @@ private static void processBench(this ptr<benchContext> _addr_ctx, ptr<B> _addr_
                 b.trimOutput();
                 fmt.Fprintf(b.w, "--- BENCH: %s\n%s", benchName, b.output);
             }
-
             {
                 var p = runtime.GOMAXPROCS(-1);
 
@@ -739,9 +698,7 @@ private static void processBench(this ptr<benchContext> _addr_ctx, ptr<B> _addr_
                 }
 
             }
-
         }
-
     }
 }
 
@@ -775,7 +732,6 @@ private static bool Run(this ptr<B> _addr_b, @string name, Action<ptr<B>> f) => 
         // Partial name match, like -bench=X/Y matching BenchmarkX.
         // Only process sub-benchmarks, if any.
         atomic.StoreInt32(_addr_sub.hasSub, 1);
-
     }
     if (b.chatty != null) {
         labelsOnce.Do(() => {
@@ -792,18 +748,15 @@ private static bool Run(this ptr<B> _addr_b, @string name, Action<ptr<B>> f) => 
                 }
 
             }
-
         });
 
         fmt.Println(benchName);
-
     }
     if (sub.run1()) {
         sub.run();
     }
     b.add(sub.result);
     return !sub.failed;
-
 });
 
 // add simulates running benchmarks in sequence in a single iteration. It is
@@ -822,14 +775,12 @@ private static void add(this ptr<B> _addr_b, BenchmarkResult other) {
         // set it.
         b.missingBytes = true;
         r.Bytes = 0;
-
     }
     if (!b.missingBytes) {
         r.Bytes += other.Bytes;
     }
     r.MemAllocs += uint64(other.AllocsPerOp());
     r.MemBytes += uint64(other.AllocedBytesPerOp());
-
 }
 
 // trimOutput shortens the output from a benchmark, which can be very long.
@@ -851,7 +802,6 @@ private static void trimOutput(this ptr<B> _addr_b) {
             }
         }
     }
-
 }
 
 // A PB is used by RunParallel for running parallel benchmarks.
@@ -881,7 +831,6 @@ private static bool Next(this ptr<PB> _addr_pb) {
     }
     pb.cache--;
     return true;
-
 }
 
 // RunParallel runs a benchmark in parallel.
@@ -952,7 +901,6 @@ public static BenchmarkResult Benchmark(Action<ptr<B>> f) {
         b.run();
     }
     return b.result;
-
 }
 
 private partial struct discard {

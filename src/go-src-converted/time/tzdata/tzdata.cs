@@ -18,23 +18,25 @@
 //
 // This package will be automatically imported if you build with
 // -tags timetzdata.
-// package tzdata -- go2cs converted at 2022 March 06 22:08:06 UTC
+
+// package tzdata -- go2cs converted at 2022 March 13 05:23:55 UTC
 // import "time/tzdata" ==> using tzdata = go.time.tzdata_package
 // Original source: C:\Program Files\Go\src\time\tzdata\tzdata.go
+namespace go.time;
 // The test for this package is time/tzdata_test.go.
 
-using errors = go.errors_package;
-using syscall = go.syscall_package;
-using _@unsafe_ = go.@unsafe_package;
+
+using errors = errors_package;
+using syscall = syscall_package;
+using _@unsafe_ = @unsafe_package; // for go:linkname
+
+
+// registerLoadFromEmbeddedTZData is defined in package time.
+//go:linkname registerLoadFromEmbeddedTZData time.registerLoadFromEmbeddedTZData
+
 using System;
-
-
-namespace go.time;
-
 public static partial class tzdata_package {
 
-    // registerLoadFromEmbeddedTZData is defined in package time.
-    //go:linkname registerLoadFromEmbeddedTZData time.registerLoadFromEmbeddedTZData
 private static (@string, error) registerLoadFromEmbeddedTZData(Func<@string, (@string, error)> _p0);
 
 private static void init() {
@@ -47,7 +49,6 @@ private static nint get4s(@string s) {
         return 0;
     }
     return int(s[0]) | int(s[1]) << 8 | int(s[2]) << 16 | int(s[3]) << 24;
-
 }
 
 // get2s returns the little-endian 16-bit value at the start of s.
@@ -56,7 +57,6 @@ private static nint get2s(@string s) {
         return 0;
     }
     return int(s[0]) | int(s[1]) << 8;
-
 }
 
 // loadFromEmbeddedTZData returns the contents of the file with the given
@@ -106,11 +106,9 @@ private static (@string, error) loadFromEmbeddedTZData(@string name) {
         xlen = get2s(z[(int)idx + 28..]);
         idx += 30 + namelen + xlen;
         return (z[(int)idx..(int)idx + size], error.As(null!)!);
-
     }
 
     return ("", error.As(syscall.ENOENT)!);
-
 }
 
 } // end tzdata_package

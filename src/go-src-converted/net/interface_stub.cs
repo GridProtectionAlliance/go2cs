@@ -5,18 +5,16 @@
 //go:build js && wasm
 // +build js,wasm
 
-// package net -- go2cs converted at 2022 March 06 22:16:07 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:48 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\interface_stub.go
-
-
 namespace go;
 
 public static partial class net_package {
 
-    // If the ifindex is zero, interfaceTable returns mappings of all
-    // network interfaces. Otherwise it returns a mapping of a specific
-    // interface.
+// If the ifindex is zero, interfaceTable returns mappings of all
+// network interfaces. Otherwise it returns a mapping of a specific
+// interface.
 private static (slice<Interface>, error) interfaceTable(nint ifindex) {
     slice<Interface> _p0 = default;
     error _p0 = default!;

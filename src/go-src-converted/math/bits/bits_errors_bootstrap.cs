@@ -8,11 +8,9 @@
 // This version used only for bootstrap (on this path we want
 // to avoid use of go:linkname as applied to variables).
 
-// package bits -- go2cs converted at 2022 March 06 22:14:59 UTC
+// package bits -- go2cs converted at 2022 March 13 05:29:04 UTC
 // import "math/bits" ==> using bits = go.math.bits_package
 // Original source: C:\Program Files\Go\src\math\bits\bits_errors_bootstrap.go
-
-
 namespace go.math;
 
 public static partial class bits_package {

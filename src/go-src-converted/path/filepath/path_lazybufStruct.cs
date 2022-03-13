@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:06 UTC
+//     Generated on 2022 March 13 05:28:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace path
 {
     public static partial class filepath_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lazybuf
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace path
             public static implicit operator lazybuf(NilType nil) => default(lazybuf);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lazybuf lazybuf_cast(dynamic value)
         {
             return new lazybuf(value.path, value.buf, value.w, value.volAndPath, value.volLen);

@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:38 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:31 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\net.go
-
-using System;
-
-
 namespace go;
 
+using System;
 public static partial class syscall_package {
 
-    // A RawConn is a raw network connection.
+// A RawConn is a raw network connection.
 public partial interface RawConn {
     error Control(Action<System.UIntPtr> f); // Read invokes f on the underlying connection's file
 // descriptor or handle; f is expected to try to read from the

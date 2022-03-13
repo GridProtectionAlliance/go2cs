@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:17 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:39 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\type.go
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+
+
+// Nodes that represent the syntax of a type before type-checking.
+// After type-checking, they serve only as shells around a *types.Type.
+// Calling TypeNode converts a *types.Type to a Node shell.
+
+// An Ntype is a Node that syntactically looks like a type.
+// It can be the raw syntax for a type before typechecking,
+// or it can be an OTYPE with Type() set to a *types.Type.
+// Note that syntax doesn't guarantee it's a type: an expression
+// like *fmt is an Ntype (we don't know whether names are types yet),
+// but at least 1+1 is not an Ntype.
+
+using System;
 public static partial class ir_package {
 
-    // Nodes that represent the syntax of a type before type-checking.
-    // After type-checking, they serve only as shells around a *types.Type.
-    // Calling TypeNode converts a *types.Type to a Node shell.
-
-    // An Ntype is a Node that syntactically looks like a type.
-    // It can be the raw syntax for a type before typechecking,
-    // or it can be an OTYPE with Type() set to a *types.Type.
-    // Note that syntax doesn't guarantee it's a type: an expression
-    // like *fmt is an Ntype (we don't know whether names are types yet),
-    // but at least 1+1 is not an Ntype.
 public partial interface Ntype {
     void CanBeNtype();
 }
@@ -67,7 +68,6 @@ private static void setOTYPE(this ptr<miniType> _addr_n, ptr<types.Type> _addr_t
     n.op = OTYPE;
     n.typ = t;
     t.SetNod(self);
-
 });
 
 private static ptr<types.Sym> Sym(this ptr<miniType> _addr_n) {
@@ -230,7 +230,6 @@ private static @string String(this ptr<Field> _addr_f) {
         return fmt.Sprintf("%v %v", f.Sym, typ);
     }
     return typ;
-
 }
 
 // TODO(mdempsky): Make Field a Node again so these can be generated?
@@ -244,7 +243,6 @@ private static ptr<Field> copyField(ptr<Field> _addr_f) {
     }
     ref Field c = ref heap(f, out ptr<Field> _addr_c);
     return _addr__addr_c!;
-
 }
 private static bool doField(ptr<Field> _addr_f, Func<Node, bool> @do) {
     ref Field f = ref _addr_f.val;
@@ -259,7 +257,6 @@ private static bool doField(ptr<Field> _addr_f, Func<Node, bool> @do) {
         return true;
     }
     return false;
-
 }
 private static Node editField(ptr<Field> _addr_f, Func<Node, Node> edit) {
     ref Field f = ref _addr_f.val;
@@ -287,7 +284,6 @@ private static bool doFields(slice<ptr<Field>> list, Func<Node, bool> @do) {
             return true;
         }
     }    return false;
-
 }
 private static Node editFields(slice<ptr<Field>> list, Func<Node, Node> edit) {
     foreach (var (_, f) in list) {
@@ -386,9 +382,7 @@ public static Ntype TypeNode(ptr<types.Type> _addr_t) {
             return n._<Ntype>();
         }
     }
-
     return newTypeNode(src.NoXPos, _addr_t);
-
 }
 
 } // end ir_package

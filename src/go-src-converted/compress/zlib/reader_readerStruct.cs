@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:32:04 UTC
+//     Generated on 2022 March 13 05:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace compress
 {
     public static partial class zlib_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct reader
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace compress
             public static implicit operator reader(NilType nil) => default(reader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static reader reader_cast(dynamic value)
         {
             return new reader(value.r, value.decompressor, value.digest, value.err, value.scratch);

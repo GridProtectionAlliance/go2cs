@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:46 UTC
+//     Generated on 2022 March 13 05:25:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct stackObject
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace go
             public static implicit operator stackObject(NilType nil) => default(stackObject);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static stackObject stackObject_cast(dynamic value)
         {
             return new stackObject(value.off, value.size, ref value.r, ref value.left, ref value.right);

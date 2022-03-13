@@ -4,22 +4,23 @@
 
 // This file defines operands and associated operations.
 
-// package types -- go2cs converted at 2022 March 06 22:42:07 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:14 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\operand.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.go;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+
+// An operandMode specifies the (addressing) mode of an operand.
+
+using System;
 public static partial class types_package {
 
-    // An operandMode specifies the (addressing) mode of an operand.
 private partial struct operandMode { // : byte
 }
 
@@ -62,7 +63,6 @@ private static token.Pos Pos(this ptr<operand> _addr_x) {
         return token.NoPos;
     }
     return x.expr.Pos();
-
 }
 
 // Operand string formats
@@ -117,8 +117,7 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
             expr = TypeString(x.typ, qf);
         else if (x.mode == constant_) 
             expr = x.val.String();
-        
-    }
+            }
     if (expr != "") {
         buf.WriteString(expr);
         buf.WriteString(" (");
@@ -149,7 +148,6 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
             }
 
         }
-
     }
     if (hasType) {
         if (x.typ != Typ[Invalid]) {
@@ -163,7 +161,6 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
                 intro = " of type ";
                         buf.WriteString(intro);
             WriteType(_addr_buf, x.typ, qf);
-
         }
         else
  {
@@ -174,7 +171,6 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
         buf.WriteByte(')');
     }
     return buf.String();
-
 }
 
 private static @string String(this ptr<operand> _addr_x) {
@@ -210,7 +206,6 @@ private static void setConst(this ptr<operand> _addr_x, token.Token tok, @string
     x.mode = constant_;
     x.typ = Typ[kind];
     x.val = val;
-
 }
 
 // isNil reports whether x is the nil value.
@@ -255,16 +250,12 @@ private static (bool, errorCode) assignableTo(this ptr<operand> _addr_x, ptr<Che
                     // TODO(gri) this could probably be more efficient
                     var (ok, _) = x.assignableTo(check, t, reason);
                     return ok;
-
                 }), _IncompatibleAssign);
-
             }
 
         }
-
         var (newType, _, _) = check.implicitTypeAndValue(x, Tu);
         return (newType != null, _IncompatibleAssign);
-
     }
     if (check.identical(Vu, Tu) && (!isNamed(V) || !isNamed(T))) {
         return (true, 0);
@@ -286,23 +277,17 @@ private static (bool, errorCode) assignableTo(this ptr<operand> _addr_x, ptr<Che
  {
                                 reason = fmt.Sprintf("wrong type for method %s (have %s, want %s)", m.Name(), wrongType.typ, m.typ);
                             }
-
                         }
                         else
  {
                             reason = "missing method " + m.Name();
                         }
-
                     }
-
                     return (false, _InvalidIfaceAssign);
-
                 }
 
             }
-
             return (true, 0);
-
         }
     } 
 
@@ -321,13 +306,10 @@ private static (bool, errorCode) assignableTo(this ptr<operand> _addr_x, ptr<Che
                 }
 
             }
-
         }
     }
 
-
     return (false, _IncompatibleAssign);
-
 }
 
 } // end types_package

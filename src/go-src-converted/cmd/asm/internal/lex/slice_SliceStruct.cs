@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:46:28 UTC
+//     Generated on 2022 March 13 05:57:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class lex_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Slice
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace @internal
             public static implicit operator Slice(NilType nil) => default(Slice);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Slice Slice_cast(dynamic value)
         {
             return new Slice(value.tokens, ref value.@base, value.line, value.pos);

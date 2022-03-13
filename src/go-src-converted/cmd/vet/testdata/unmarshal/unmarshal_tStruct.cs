@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:22 UTC
+//     Generated on 2022 March 13 06:43:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace testdata
 {
     public static partial class unmarshal_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct t
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace testdata
             public static implicit operator t(NilType nil) => default(t);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static t t_cast(dynamic value)
         {
             return new t(value.a);

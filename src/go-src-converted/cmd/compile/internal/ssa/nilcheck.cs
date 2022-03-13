@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:15 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:39 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\nilcheck.go
-using ir = go.cmd.compile.@internal.ir_package;
-using src = go.cmd.@internal.src_package;
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using src = cmd.@internal.src_package;
+using buildcfg = @internal.buildcfg_package;
+
+
+// nilcheckelim eliminates unnecessary nil checks.
+// runs on machine-independent code.
 
 public static partial class ssa_package {
 
-    // nilcheckelim eliminates unnecessary nil checks.
-    // runs on machine-independent code.
 private static void nilcheckelim(ptr<Func> _addr_f) => func((defer, _, _) => {
     ref Func f = ref _addr_f.val;
  
@@ -103,7 +105,6 @@ private static void nilcheckelim(ptr<Func> _addr_f) => func((defer, _, _) => {
                                         changed = true;
                                     }
                                     nonNilValues[v.ID] = true;
-
                                 }
                             }
                         }
@@ -145,7 +146,6 @@ private static void nilcheckelim(ptr<Func> _addr_f) => func((defer, _, _) => {
                         ptr = ptr__prev3;
 
                     }
-
                 }
             }
             b.Values = storeOrder(b.Values, sset, storeNumber);
@@ -170,7 +170,6 @@ private static void nilcheckelim(ptr<Func> _addr_f) => func((defer, _, _) => {
                             if (v.Pos.IsStmt() == src.PosIsStmt) { // Boolean true is a terrible statement boundary.
                                 pendingLines.add(v.Pos);
                                 v.Pos = v.Pos.WithNotStmt();
-
                             }
                             v.reset(OpConstBool);
                             v.AuxInt = 1; // true
@@ -189,13 +188,11 @@ private static void nilcheckelim(ptr<Func> _addr_f) => func((defer, _, _) => {
                             }
                             if (v.Pos.IsStmt() == src.PosIsStmt) { // About to lose a statement boundary
                                 pendingLines.add(v.Pos);
-
                             }
                             v.reset(OpUnknown);
                             f.freeValue(v);
                             i--;
                             continue;
-
                         }
                         nonNilValues[ptr.ID] = true;
                         work = append(work, new bp(op:ClearPtr,ptr:ptr));
@@ -207,7 +204,6 @@ private static void nilcheckelim(ptr<Func> _addr_f) => func((defer, _, _) => {
                         }
 
                     __switch_break0:;
-
                 }
                 v = v__prev2;
             }
@@ -237,9 +233,7 @@ private static void nilcheckelim(ptr<Func> _addr_f) => func((defer, _, _) => {
         else if (node.op == ClearPtr) 
             nonNilValues[node.ptr.ID] = false;
             continue;
-        
-    }
-
+            }
 });
 
 // All platforms are guaranteed to fault if we load/store to anything smaller than this address.
@@ -295,13 +289,10 @@ private static void nilcheckelim2(ptr<Func> _addr_f) => func((defer, _, _) => {
                     else if (v.Pos.IsStmt() == src.PosIsStmt) {
                         pendingLines.add(v.Pos);
                     }
-
                     v.reset(OpUnknown);
                     firstToRemove = i;
                     continue;
-
                 }
-
                 if (v.Type.IsMemory() || v.Type.IsTuple() && v.Type.FieldType(1).IsMemory()) {
                     if (v.Op == OpVarKill || v.Op == OpVarLive || (v.Op == OpVarDef && !v.Aux._<ptr<ir.Name>>().Type().HasPointers())) { 
                         // These ops don't really change memory.
@@ -332,7 +323,6 @@ private static void nilcheckelim2(ptr<Func> _addr_f) => func((defer, _, _) => {
                     // This op changes memory.  Any faulting instruction after v that
                     // we've recorded in the unnecessary map is now obsolete.
                     unnecessary.clear();
-
                 } 
 
                 // Find any pointers that this op is guaranteed to fault on if nil.
@@ -341,16 +331,12 @@ private static void nilcheckelim2(ptr<Func> _addr_f) => func((defer, _, _) => {
                 if (opcodeTable[v.Op].faultOnNilArg0 && (faultOnLoad || v.Type.IsMemory())) { 
                     // On AIX, only writing will fault.
                     ptrs = append(ptrs, v.Args[0]);
-
                 }
-
                 if (opcodeTable[v.Op].faultOnNilArg1 && (faultOnLoad || (v.Type.IsMemory() && v.Op != OpPPC64LoweredMove))) { 
                     // On AIX, only writing will fault.
                     // LoweredMove is a special case because it's considered as a "mem" as it stores on arg0 but arg1 is accessed as a load and should be checked.
                     ptrs = append(ptrs, v.Args[1]);
-
                 }
-
                 foreach (var (_, ptr) in ptrs) { 
                     // Check to make sure the offset is small.
 
@@ -372,9 +358,7 @@ private static void nilcheckelim2(ptr<Func> _addr_f) => func((defer, _, _) => {
                     // This instruction is guaranteed to fault if ptr is nil.
                     // Any previous nil check op is unnecessary.
                     unnecessary.set(ptr.ID, int32(i), src.NoXPos);
-
                 }
-
             } 
             // Remove values we've clobbered with OpUnknown.
 
@@ -389,14 +373,10 @@ private static void nilcheckelim2(ptr<Func> _addr_f) => func((defer, _, _) => {
                 if (!notStmtBoundary(v.Op) && pendingLines.contains(v.Pos)) { // Late in compilation, so any remaining NotStmt values are probably okay now.
                     v.Pos = v.Pos.WithIsStmt();
                     pendingLines.remove(v.Pos);
-
                 }
-
                 b.Values[i] = v;
                 i++;
-
             }
-
         }
 
         if (pendingLines.contains(b.Pos)) {

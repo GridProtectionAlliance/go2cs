@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:12 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:36 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\loopreschedchecks.go
-using types = go.cmd.compile.@internal.types_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
+using fmt = fmt_package;
+
+
+// an edgeMem records a backedge, together with the memory
+// phi functions at the target of the backedge that must
+// be updated when a rescheduling check replaces the backedge.
 
 public static partial class ssa_package {
 
-    // an edgeMem records a backedge, together with the memory
-    // phi functions at the target of the backedge that must
-    // be updated when a rescheduling check replaces the backedge.
 private partial struct edgeMem {
     public Edge e;
     public ptr<Value> m; // phi for memory at dest of e
@@ -70,12 +72,10 @@ private static void insertLoopReschedChecks(ptr<Func> _addr_f) {
 
     if (f.NoSplit) { // nosplit functions don't reschedule.
         return ;
-
     }
     var backedges = backedges(_addr_f);
     if (len(backedges) == 0) { // no backedges means no rescheduling checks.
         return ;
-
     }
     var lastMems = findLastMems(_addr_f);
 
@@ -97,7 +97,6 @@ private static void insertLoopReschedChecks(ptr<Func> _addr_f) {
         foreach (var (_, __e) in backedges) {
             e = __e; // TODO: could filter here by calls in loops, if declared and inferred nosplit are recorded in export data.
             tofixBackedges = append(tofixBackedges, new edgeMem(e,nil));
-
         }
         e = e__prev1;
     }
@@ -117,14 +116,12 @@ private static void insertLoopReschedChecks(ptr<Func> _addr_f) {
             for (nint j = 0; mem == null; j++) { // if there's no def, then there's no phi, so the visible mem is identical in all predecessors.
                 // loop because there might be backedges that haven't been visited yet.
                 mem = memDefsAtBlockEnds[b.Preds[j].b.ID];
-
             }
 
             memDefsAtBlockEnds[b.ID] = mem;
             if (f.pass.debug > 2) {
                 fmt.Printf("memDefsAtBlockEnds[%s] = %s\n", b, mem);
             }
-
         }
 
         i = i__prev1;
@@ -166,13 +163,8 @@ private static void insertLoopReschedChecks(ptr<Func> _addr_f) {
                 headerMemPhi = newPhiFor(_addr_h, _addr_mem0);
                 newmemphis[h] = new rewrite(before:mem0,after:headerMemPhi);
                 addDFphis(_addr_mem0, _addr_h, _addr_h, _addr_f, memDefsAtBlockEnds, newmemphis, sdom);
-
-
             }
-
             tofixBackedges[i].m = headerMemPhi;
-
-
         }
         i = i__prev1;
         emc = emc__prev1;
@@ -243,10 +235,8 @@ private static void insertLoopReschedChecks(ptr<Func> _addr_f) {
             if (p.i != 0) {
                 likely = BranchUnlikely;
             }
-
             if (bb.Kind != BlockPlain) { // backedges can be unconditional. e.g., if x { something; continue }
                 bb.Likely = likely;
-
             } 
 
             // rewrite edge to include reschedule check
@@ -290,7 +280,6 @@ private static void insertLoopReschedChecks(ptr<Func> _addr_f) {
             if (pt.Size() == 4) {
                 cmpOp = OpLess32U;
             }
-
             var limaddr = test.NewValue1I(bb.Pos, OpOffPtr, pt, 2 * pt.Size(), g);
             var lim = test.NewValue2(bb.Pos, OpLoad, pt, limaddr, mem0);
             var cmp = test.NewValue2(bb.Pos, cmpOp, cfgtypes.Bool, sp, lim);
@@ -381,7 +370,6 @@ private static void rewriteNewPhis(ptr<Block> _addr_h, ptr<Block> _addr_b, ptr<F
             h = b;
         }
     }
-
     var change = newphis[h];
     var x = change.before;
     var y = change.after; 
@@ -396,9 +384,7 @@ private static void rewriteNewPhis(ptr<Block> _addr_h, ptr<Block> _addr_b, ptr<F
                 v = __v;
                 if (v == y) { // don't rewrite self -- phi inputs are handled below.
                     continue;
-
                 }
-
                 foreach (var (i, w) in v.Args) {
                     if (w != x) {
                         continue;
@@ -411,14 +397,11 @@ private static void rewriteNewPhis(ptr<Block> _addr_h, ptr<Block> _addr_b, ptr<F
                     if (dfPhiTargets[tgt]) {
                         continue;
                     }
-
                     p.val = append(p.val, tgt);
                     if (f.pass.debug > 1) {
                         fmt.Printf("added block target for h=%v, b=%v, x=%v, y=%v, tgt.v=%s, tgt.i=%d\n", h, b, x, y, v, i);
                     }
-
                 }
-
             } 
 
             // Rewrite appropriate inputs of phis reached in successors
@@ -456,13 +439,10 @@ private static void rewriteNewPhis(ptr<Block> _addr_h, ptr<Block> _addr_b, ptr<F
                         v = v__prev2;
                     }
                 }
-
             }
 
         }
-
         newphis[h] = change;
-
     }
     {
         var c = sdom[b.ID].child;
@@ -472,7 +452,6 @@ private static void rewriteNewPhis(ptr<Block> _addr_h, ptr<Block> _addr_b, ptr<F
             c = sdom[c.ID].sibling;
         }
     }
-
 }
 
 // addDFphis creates new trivial phis that are necessary to correctly reflect (within SSA)
@@ -491,7 +470,6 @@ private static void addDFphis(ptr<Value> _addr_x, ptr<Block> _addr_h, ptr<Block>
     var oldv = defForUses[b.ID];
     if (oldv != x) { // either a new definition replacing x, or nil if it is proven that there are no uses reachable from b
         return ;
-
     }
     var idom = f.Idom();
 outer:
@@ -509,16 +487,13 @@ outer:
             }
 
         }
-
         if (x != null) {
             foreach (var (_, v) in s.Values) {
                 if (v.Op == OpPhi && v.Args[e.i] == x) {
                     _continueouter = true; // successor s of b has an old phi function, so there is no need to add another.
                     break;
                 }
-
             }
-
         }
         var old = defForUses[idom[s.ID].ID]; // new phi function is correct-but-redundant, combining value "old" on all inputs.
         var headerPhi = newPhiFor(_addr_s, _addr_old); 
@@ -533,7 +508,6 @@ outer:
             c = sdom[c.ID].sibling;
         }
     }
-
 }
 
 // findLastMems maps block ids to last memory-output op in a block, if any
@@ -600,9 +574,7 @@ private static slice<ptr<Value>> findLastMems(ptr<Func> _addr_f) => func((defer,
             b.Fatalf("no last store found - cycle?");
         }
         lastMems[b.ID] = last;
-
     }    return lastMems;
-
 });
 
 // mark values
@@ -645,7 +617,6 @@ private static slice<Edge> backedges(ptr<Func> _addr_f) {
             else if (mark[s.ID] == notExplored) {
                 edges = append(edges, e);
             }
-
         }
         else
  {
@@ -654,7 +625,6 @@ private static slice<Edge> backedges(ptr<Func> _addr_f) {
         }
     }
     return edges;
-
 }
 
 } // end ssa_package

@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fs -- go2cs converted at 2022 March 06 22:12:45 UTC
+// package fs -- go2cs converted at 2022 March 13 05:27:47 UTC
 // import "io/fs" ==> using fs = go.io.fs_package
 // Original source: C:\Program Files\Go\src\io\fs\readfile.go
-using io = go.io_package;
-
 namespace go.io;
+
+using io = io_package;
 
 public static partial class fs_package {
 
-    // ReadFileFS is the interface implemented by a file system
-    // that provides an optimized implementation of ReadFile.
+// ReadFileFS is the interface implemented by a file system
+// that provides an optimized implementation of ReadFile.
 public partial interface ReadFileFS {
     (slice<byte>, error) ReadFile(@string name);
 }
@@ -37,7 +37,6 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) => func((defe
         }
     }
 
-
     var (file, err) = fsys.Open(name);
     if (err != null) {
         return (null, error.As(err)!);
@@ -56,7 +55,6 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) => func((defe
         }
     }
 
-
     var data = make_slice<byte>(0, size + 1);
     while (true) {
         if (len(data) >= cap(data)) {
@@ -72,7 +70,6 @@ public static (slice<byte>, error) ReadFile(FS fsys, @string name) => func((defe
             return (data, error.As(err)!);
         }
     }
-
 });
 
 } // end fs_package

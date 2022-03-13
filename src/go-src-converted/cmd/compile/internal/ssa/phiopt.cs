@@ -2,34 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:43 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:02:07 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\phiopt.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // phiopt eliminates boolean Phis based on the previous if.
-    //
-    // Main use case is to transform:
-    //   x := false
-    //   if b {
-    //     x = true
-    //   }
-    // into x = b.
-    //
-    // In SSA code this appears as
-    //
-    // b0
-    //   If b -> b1 b2
-    // b1
-    //   Plain -> b2
-    // b2
-    //   x = (OpPhi (ConstBool [true]) (ConstBool [false]))
-    //
-    // In this case we can replace x with a copy of b.
+// phiopt eliminates boolean Phis based on the previous if.
+//
+// Main use case is to transform:
+//   x := false
+//   if b {
+//     x = true
+//   }
+// into x = b.
+//
+// In SSA code this appears as
+//
+// b0
+//   If b -> b1 b2
+// b1
+//   Plain -> b2
+// b2
+//   x = (OpPhi (ConstBool [true]) (ConstBool [false]))
+//
+// In this case we can replace x with a copy of b.
 private static void phiopt(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -42,7 +40,6 @@ private static void phiopt(ptr<Func> _addr_f) {
             if (len(b.Preds) != 2 || len(b.Values) == 0) { 
                 // TODO: handle more than 2 predecessors, e.g. a || b || c.
                 continue;
-
             }
             var pb0 = b;
             var b0 = b.Preds[0].b;
@@ -94,7 +91,6 @@ private static void phiopt(ptr<Func> _addr_f) {
                                 f.Warnl(b.Pos, "converted OpPhi to %v", v.Op);
                             }
                             continue;
-
                         }
                     }
                     if (v.Args[reverse].Op == OpConstBool && v.Args[reverse].AuxInt == 1) {
@@ -110,12 +106,10 @@ private static void phiopt(ptr<Func> _addr_f) {
                                     f.Warnl(b.Pos, "converted OpPhi to %v", v.Op);
                                 }
                                 continue;
-
                             }
                             tmp = tmp__prev2;
 
                         }
-
                     }
                     if (v.Args[1 - reverse].Op == OpConstBool && v.Args[1 - reverse].AuxInt == 0) {
                         {
@@ -130,12 +124,10 @@ private static void phiopt(ptr<Func> _addr_f) {
                                     f.Warnl(b.Pos, "converted OpPhi to %v", v.Op);
                                 }
                                 continue;
-
                             }
                             tmp = tmp__prev2;
 
                         }
-
                     }
                 }
                 v = v__prev2;
@@ -153,7 +145,6 @@ private static void phiopt(ptr<Func> _addr_f) {
             if (len(b.Preds) != 2 || len(b.Values) == 0) { 
                 // TODO: handle more than 2 predecessors, e.g. a || b || c.
                 continue;
-
             }
             {
                 var v__prev2 = v;
@@ -244,10 +235,8 @@ private static void phiopt(ptr<Func> _addr_f) {
                             //   if a || b { x = true }
                             // so the if statement can only have one condition.
                             break;
-
                         }
                         convertPhi(_addr_b0, _addr_v, reverse);
-
                     }
                 }
                 v = v__prev2;

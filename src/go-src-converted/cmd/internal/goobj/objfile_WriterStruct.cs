@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:32:29 UTC
+//     Generated on 2022 March 13 05:43:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class goobj_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Writer
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace @internal
             public static implicit operator Writer(NilType nil) => default(Writer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Writer Writer_cast(dynamic value)
         {
             return new Writer(ref value.wr, value.stringMap, value.off);

@@ -8,17 +8,17 @@
 //go:build dragonfly || freebsd || illumos || linux || netbsd || openbsd
 // +build dragonfly freebsd illumos linux netbsd openbsd
 
-// package poll -- go2cs converted at 2022 March 06 22:13:22 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:53 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\sock_cloexec.go
-using syscall = go.syscall_package;
-
 namespace go.@internal;
+
+using syscall = syscall_package;
 
 public static partial class poll_package {
 
-    // Wrapper around the accept system call that marks the returned file
-    // descriptor as nonblocking and close-on-exec.
+// Wrapper around the accept system call that marks the returned file
+// descriptor as nonblocking and close-on-exec.
 private static (nint, syscall.Sockaddr, @string, error) accept(nint s) {
     nint _p0 = default;
     syscall.Sockaddr _p0 = default;
@@ -54,7 +54,6 @@ private static (nint, syscall.Sockaddr, @string, error) accept(nint s) {
         return (-1, null, "setnonblock", error.As(err)!);
     }
     return (ns, sa, "", error.As(null!)!);
-
 }
 
 } // end poll_package

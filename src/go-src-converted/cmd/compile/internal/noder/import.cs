@@ -2,42 +2,43 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:13:51 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:17 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\import.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using os = go.os_package;
-using pathpkg = go.path_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using importer = go.cmd.compile.@internal.importer_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-using archive = go.cmd.@internal.archive_package;
-using bio = go.cmd.@internal.bio_package;
-using goobj = go.cmd.@internal.goobj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using os = os_package;
+using pathpkg = path_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using importer = cmd.compile.@internal.importer_package;
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+using archive = cmd.@internal.archive_package;
+using bio = cmd.@internal.bio_package;
+using goobj = cmd.@internal.goobj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+
+
+// Temporary import helper to get type2-based type-checking going.
+
+using System;
 public static partial class noder_package {
 
-    // Temporary import helper to get type2-based type-checking going.
 private partial struct gcimports {
     public map<@string, ptr<types2.Package>> packages;
 }
@@ -64,7 +65,6 @@ private static (ptr<types2.Package>, error) ImportFrom(this ptr<gcimports> _addr
     }
     Func<@string, (io.ReadCloser, error)> lookup = path => _addr_openPackage(path)!;
     return _addr_importer.Import(m.packages, path, srcDir, lookup)!;
-
 });
 
 private static bool isDriveLetter(byte b) {
@@ -99,7 +99,6 @@ private static (ptr<os.File>, error) openPackage(@string path) {
             file = file__prev2;
 
         }
-
         {
             var file__prev2 = file;
 
@@ -112,9 +111,7 @@ private static (ptr<os.File>, error) openPackage(@string path) {
             file = file__prev2;
 
         }
-
         return (_addr_null!, error.As(errors.New("file not found"))!);
-
     }
     {
         var q = pathpkg.Clean(path);
@@ -123,7 +120,6 @@ private static (ptr<os.File>, error) openPackage(@string path) {
             return (_addr_null!, error.As(fmt.Errorf("non-canonical import path %q (should be %q)", path, q))!);
         }
     }
-
 
     if (@base.Flag.Cfg.PackageFile != null) {
         return _addr_os.Open(@base.Flag.Cfg.PackageFile[path])!;
@@ -141,7 +137,6 @@ private static (ptr<os.File>, error) openPackage(@string path) {
             file = file__prev1;
 
         }
-
         {
             var file__prev1 = file;
 
@@ -154,7 +149,6 @@ private static (ptr<os.File>, error) openPackage(@string path) {
             file = file__prev1;
 
         }
-
     }    if (buildcfg.GOROOT != "") {
         @string suffix = "";
         if (@base.Flag.InstallSuffix != "") {
@@ -178,7 +172,6 @@ private static (ptr<os.File>, error) openPackage(@string path) {
             file = file__prev2;
 
         }
-
         {
             var file__prev2 = file;
 
@@ -191,10 +184,8 @@ private static (ptr<os.File>, error) openPackage(@string path) {
             file = file__prev2;
 
         }
-
     }
     return (_addr_null!, error.As(errors.New("file not found"))!);
-
 }
 
 // myheight tracks the local package's height based on packages
@@ -225,7 +216,6 @@ private static (@string, error) resolveImportPath(@string path) {
         }
     }
 
-
     if (islocalname(path)) {
         if (path[0] == '/') {
             return ("", error.As(errors.New("import path cannot be absolute path"))!);
@@ -237,7 +227,6 @@ private static (@string, error) resolveImportPath(@string path) {
             // compiler's current directory, not the respective source
             // file's directory.
             prefix = @base.Ctxt.Pathname;
-
         }
         path = pathpkg.Join(prefix, path);
 
@@ -249,10 +238,8 @@ private static (@string, error) resolveImportPath(@string path) {
             }
 
         }
-
     }
     return (path, error.As(null!)!);
-
 }
 
 // TODO(mdempsky): Return an error instead.
@@ -276,7 +263,6 @@ private static ptr<types.Pkg> importfile(ptr<syntax.ImportDecl> _addr_decl) => f
             return _addr_null!;
         }
     }
-
 
     path, err = resolveImportPath(path);
     if (err != null) {
@@ -384,7 +370,6 @@ private static ptr<types.Pkg> importfile(ptr<syntax.ImportDecl> _addr_decl) => f
                 @base.ErrorExit();
             }
             fingerprint = typecheck.ReadImports(importpkg, imp);
-
             break;
         default: 
             @base.Errorf("no import in %q", path);
@@ -396,19 +381,16 @@ private static ptr<types.Pkg> importfile(ptr<syntax.ImportDecl> _addr_decl) => f
     if (@base.Flag.Cfg.PackageFile != null) { 
         // If using a packageFile map, assume path_ can be recorded directly.
         @base.Ctxt.AddImport(path, fingerprint);
-
     }
     else
  { 
         // For file "/Users/foo/go/pkg/darwin_amd64/math.a" record "math.a".
         @base.Ctxt.AddImport(file[(int)len(file) - len(path) - len(".a")..], fingerprint);
-
     }
     if (importpkg.Height >= myheight) {
         myheight = importpkg.Height + 1;
     }
     return _addr_importpkg!;
-
 });
 
 // The linker uses the magic symbol prefixes "go." and "type."
@@ -441,9 +423,7 @@ private static error checkImportPath(@string path, bool allowSpace) {
             return error.As(fmt.Errorf("import path contains space character: %q", path))!;
         else if (strings.ContainsRune("!\"#$%&'()*,:;<=>?[]^`{|}", r)) 
             return error.As(fmt.Errorf("import path contains invalid character '%c': %q", r, path))!;
-        
-    }    return error.As(null!)!;
-
+            }    return error.As(null!)!;
 }
 
 private static void pkgnotused(src.XPos lineno, @string path, @string name) { 
@@ -461,7 +441,6 @@ private static void pkgnotused(src.XPos lineno, @string path, @string name) {
             elem = elem[(int)i + 1..];
         }
     }
-
     if (name == "" || elem == name) {
         @base.ErrorfAt(lineno, "imported and not used: %q", path);
     }
@@ -477,7 +456,6 @@ private static void mkpackage(@string pkgname) {
             @base.Errorf("invalid package name _");
         }
         types.LocalPkg.Name = pkgname;
-
     }
     else
  {
@@ -510,10 +488,8 @@ private static void clearImports() {
             if (!p.Used && @base.SyntaxErrors() == 0) {
                 unused = append(unused, new importedPkg(p.Pos(),p.Pkg.Path,s.Name));
             }
-
             s.Def = null;
             continue;
-
         }
         if (types.IsDotAlias(s)) { 
             // throw away top-level name left over
@@ -521,7 +497,6 @@ private static void clearImports() {
             // We'll report errors after type checking in CheckDotImports.
             s.Def = null;
             continue;
-
         }
     }    sort.Slice(unused, (i, j) => unused[i].pos.Before(unused[j].pos));
     foreach (var (_, pkg) in unused) {
@@ -537,7 +512,6 @@ public static void CheckDotImports() {
         }
     }    dotImports = null;
     typecheck.DotImportRefs = null;
-
 }
 
 // dotImports tracks all PkgNames that have been dot-imported.
@@ -562,11 +536,9 @@ private static void importDot(ptr<ir.PkgName> _addr_pack) {
                 }
 
             }
-
         }
         if (!types.IsExported(s.Name) || strings.ContainsRune(s.Name, 0xb7)) { // 0xb7 = center dot
             continue;
-
         }
         var s1 = typecheck.Lookup(s.Name);
         if (s1.Def != null) {
@@ -578,9 +550,7 @@ private static void importDot(ptr<ir.PkgName> _addr_pack) {
         typecheck.DotImportRefs[id] = pack;
         s1.Def = id;
         s1.Block = 1;
-
     }    dotImports = append(dotImports, pack);
-
 }
 
 // importName is like oldname,
@@ -594,7 +564,6 @@ private static ir.Node importName(ptr<types.Sym> _addr_sym) {
         @base.Errorf("cannot refer to unexported name %s.%s", sym.Pkg.Name, sym.Name);
     }
     return n;
-
 }
 
 } // end noder_package

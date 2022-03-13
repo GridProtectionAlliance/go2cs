@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:14 UTC
+//     Generated on 2022 March 13 06:36:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace pprof
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial interface ObjTool
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -48,7 +48,7 @@ namespace pprof
                 typeof(ObjTool<>).CreateInterfaceHandler<ObjTool>(target);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public class ObjTool<T> : ObjTool
         {
             private T m_target = default!;
@@ -178,7 +178,7 @@ namespace go
     {
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T _<T>(this go.cmd.vendor.github.com.google.pprof.driver_package.ObjTool target)
         {
             try
@@ -191,7 +191,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static bool _<T>(this go.cmd.vendor.github.com.google.pprof.driver_package.ObjTool target, out T result)
         {
             try
@@ -206,7 +206,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static object? _(this go.cmd.vendor.github.com.google.pprof.driver_package.ObjTool target, Type type)
         {
             try
@@ -225,7 +225,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static bool _(this go.cmd.vendor.github.com.google.pprof.driver_package.ObjTool target, Type type, out object? result)
         {
             try

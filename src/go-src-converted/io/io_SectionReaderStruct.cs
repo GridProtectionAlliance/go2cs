@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:12:43 UTC
+//     Generated on 2022 March 13 05:27:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class io_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SectionReader
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace go
             public static implicit operator SectionReader(NilType nil) => default(SectionReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SectionReader SectionReader_cast(dynamic value)
         {
             return new SectionReader(value.r, value.@base, value.off, value.limit);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:08:40 UTC
+//     Generated on 2022 March 13 06:21:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ValHeap
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator ValHeap(NilType nil) => default(ValHeap);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ValHeap ValHeap_cast(dynamic value)
         {
             return new ValHeap(value.a, value.score);

@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package aes -- go2cs converted at 2022 March 06 22:18:13 UTC
+// package aes -- go2cs converted at 2022 March 13 05:32:26 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Program Files\Go\src\crypto\aes\cipher.go
-using cipher = go.crypto.cipher_package;
-using subtle = go.crypto.@internal.subtle_package;
-using strconv = go.strconv_package;
-
 namespace go.crypto;
+
+using cipher = crypto.cipher_package;
+using subtle = crypto.@internal.subtle_package;
+using strconv = strconv_package;
+
+
+// The AES block size in bytes.
 
 public static partial class aes_package {
 
-    // The AES block size in bytes.
 public static readonly nint BlockSize = 16;
 
 // A cipher is an instance of AES encryption using a particular key.
@@ -54,7 +56,6 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
             break;
     }
     return newCipher(key);
-
 }
 
 // newCipherGeneric creates and returns a new cipher.Block
@@ -88,7 +89,6 @@ private static void Encrypt(this ptr<aesCipher> _addr_c, slice<byte> dst, slice<
         panic("crypto/aes: invalid buffer overlap");
     }
     encryptBlockGo(c.enc, dst, src);
-
 });
 
 private static void Decrypt(this ptr<aesCipher> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, _) => {
@@ -104,7 +104,6 @@ private static void Decrypt(this ptr<aesCipher> _addr_c, slice<byte> dst, slice<
         panic("crypto/aes: invalid buffer overlap");
     }
     decryptBlockGo(c.dec, dst, src);
-
 });
 
 } // end aes_package

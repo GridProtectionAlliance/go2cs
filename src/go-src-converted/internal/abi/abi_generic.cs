@@ -5,11 +5,9 @@
 //go:build !goexperiment.regabireflect
 // +build !goexperiment.regabireflect
 
-// package abi -- go2cs converted at 2022 March 06 22:30:03 UTC
+// package abi -- go2cs converted at 2022 March 13 05:40:50 UTC
 // import "internal/abi" ==> using abi = go.@internal.abi_package
 // Original source: C:\Program Files\Go\src\internal\abi\abi_generic.go
-
-
 namespace go.@internal;
 
 public static partial class abi_package {
@@ -43,6 +41,5 @@ public static readonly nint FloatArgRegs = 0;
 // such as x87's 80-bit "registers" (not that we support x87 currently),
 // use 8.
 public static readonly nint EffectiveFloatRegSize = 0;
-
 
 } // end abi_package

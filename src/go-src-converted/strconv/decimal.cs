@@ -9,11 +9,9 @@
 // because 2 divides 10; cannot do decimal floating point
 // in multiprecision binary precisely.
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:30 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:19 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\decimal.go
-
-
 namespace go;
 
 public static partial class strconv_package {
@@ -60,7 +58,6 @@ private static @string String(this ptr<decimal> _addr_a) {
         w += copy(buf[(int)w..], a.d[(int)0..(int)a.nd]);
         w += digitZero(buf[(int)w..(int)w + a.dp - a.nd]);
         return string(buf[(int)0..(int)w]);
-
 }
 
 private static nint digitZero(slice<byte> dst) {
@@ -110,7 +107,6 @@ private static void Assign(this ptr<decimal> _addr_a, ulong v) {
     }
     a.dp = a.nd;
     trim(_addr_a);
-
 }
 
 // Maximum shift that we can do in one pass without overflow.
@@ -139,18 +135,15 @@ private static void rightShift(ptr<decimal> _addr_a, nuint k) {
                 return ;
         r++;
             }
-
             while (n >> (int)(k) == 0) {
                 n = n * 10;
                 r++;
             }
 
             break;
-
         }
         var c = uint(a.d[r]);
         n = n * 10 + c - '0';
-
     }
     a.dp -= r - 1;
 
@@ -179,12 +172,10 @@ private static void rightShift(ptr<decimal> _addr_a, nuint k) {
             a.trunc = true;
         }
         n = n * 10;
-
     }
 
     a.nd = w;
     trim(_addr_a);
-
 }
 
 // Cheat sheet for left shift: table indexed by shift count giving
@@ -215,7 +206,6 @@ private static bool prefixIsLessThan(slice<byte> b, @string s) {
         }
     }
     return false;
-
 }
 
 // Binary shift left (* 2) by k bits.  k <= maxShift to avoid overflow.
@@ -246,7 +236,6 @@ private static void leftShift(ptr<decimal> _addr_a, nuint k) {
             a.trunc = true;
         }
         n = quo;
-
     } 
 
     // Put down extra digits.
@@ -261,7 +250,6 @@ private static void leftShift(ptr<decimal> _addr_a, nuint k) {
             a.trunc = true;
         }
         n = quo;
-
     }
 
     a.nd += delta;
@@ -270,7 +258,6 @@ private static void leftShift(ptr<decimal> _addr_a, nuint k) {
     }
     a.dp += delta;
     trim(_addr_a);
-
 }
 
 // Binary shift left (k > 0) or right (k < 0).
@@ -290,8 +277,7 @@ private static void Shift(this ptr<decimal> _addr_a, nint k) {
             k += maxShift;
         }
         rightShift(_addr_a, uint(-k));
-    
-}
+    }
 
 // If we chop a at nd digits, should we round up?
 private static bool shouldRoundUp(ptr<decimal> _addr_a, nint nd) {
@@ -306,10 +292,8 @@ private static bool shouldRoundUp(ptr<decimal> _addr_a, nint nd) {
             return true;
         }
         return nd > 0 && (a.d[nd - 1] - '0') % 2 != 0;
-
     }
     return a.d[nd] >= '5';
-
 }
 
 // Round a to nd digits (or fewer).
@@ -340,7 +324,6 @@ private static void RoundDown(this ptr<decimal> _addr_a, nint nd) {
     }
     a.nd = nd;
     trim(_addr_a);
-
 }
 
 // Round a up to nd digits (or fewer).
@@ -356,7 +339,6 @@ private static void RoundUp(this ptr<decimal> _addr_a, nint nd) {
             a.d[i]++;
             a.nd = i + 1;
             return ;
-
         }
     } 
 
@@ -365,7 +347,6 @@ private static void RoundUp(this ptr<decimal> _addr_a, nint nd) {
     a.d[0] = '1';
     a.nd = 1;
     a.dp++;
-
 }
 
 // Extract integer part, rounded appropriately.
@@ -389,7 +370,6 @@ private static ulong RoundedInteger(this ptr<decimal> _addr_a) {
         n++;
     }
     return n;
-
 }
 
 } // end strconv_package

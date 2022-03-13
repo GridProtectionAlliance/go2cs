@@ -82,21 +82,22 @@
 // crosscall2 restores the callee-save registers for gcc and returns
 // to GoF, which unpacks any result values and returns to f.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:21 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:10 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\cgocall.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// Addresses collected in a cgo backtrace when crashing.
+// Length must match arg.Max in x_cgo_callers in runtime/cgo/gcc_traceback.c.
+
+using System;
 public static partial class runtime_package {
 
-    // Addresses collected in a cgo backtrace when crashing.
-    // Length must match arg.Max in x_cgo_callers in runtime/cgo/gcc_traceback.c.
 private partial struct cgoCallers { // : array<System.UIntPtr>
 }
 
@@ -189,7 +190,6 @@ private static int cgocall(unsafe.Pointer fn, unsafe.Pointer arg) {
     KeepAlive(mp);
 
     return errno;
-
 }
 
 // Call from C back to Go. fn must point to an ABIInternal Go entry-point.
@@ -236,7 +236,6 @@ private static void cgocallbackg(unsafe.Pointer fn, unsafe.Pointer frame, System
     reentersyscall(savedpc, uintptr(savedsp));
 
     gp.m.syscall = syscall;
-
 }
 
 private static void cgocallbackg1(unsafe.Pointer fn, unsafe.Pointer frame, System.UIntPtr ctxt) => func((defer, _, _) => {
@@ -268,9 +267,7 @@ private static void cgocallbackg1(unsafe.Pointer fn, unsafe.Pointer frame, Syste
             // Decrease the length of the slice by one, safely.
             p = (slice.val)(@unsafe.Pointer(_addr_gp.cgoCtxt));
             p.len--;
-
         }(gp));
-
     }
     if (gp.m.ncgo == 0) { 
         // The C call to Go came from a thread not currently running
@@ -278,7 +275,6 @@ private static void cgocallbackg1(unsafe.Pointer fn, unsafe.Pointer frame, Syste
         // this call may be coming in before package initialization
         // is complete. Wait until it is.
         main_init_done.Receive();
-
     }
     ref var restore = ref heap(true, out ptr<var> _addr_restore);
     defer(unwindm(_addr_restore));
@@ -287,16 +283,15 @@ private static void cgocallbackg1(unsafe.Pointer fn, unsafe.Pointer frame, Syste
         raceacquire(@unsafe.Pointer(_addr_racecgosync));
     }
     ref Action<unsafe.Pointer> cb = ref heap(out ptr<Action<unsafe.Pointer>> _addr_cb);
-    ref funcval cbFV = ref heap(new funcval(uintptr(fn)) * (@unsafe.Pointer.val)(@unsafe.Pointer(_addr_cb)), out ptr<funcval> _addr_cbFV);
+    ref funcval cbFV = ref heap(new funcval(uintptr(fn)) * (@unsafe.Pointer.val), out ptr<funcval> _addr_cbFV);
 
-    noescape(@unsafe.Pointer(_addr_cbFV));
+    (@unsafe.Pointer(_addr_cb)) = noescape(@unsafe.Pointer(_addr_cbFV));
     cb(frame);
 
     if (raceenabled) {
         racereleasemerge(@unsafe.Pointer(_addr_racecgosync));
     }
     restore = false;
-
 });
 
 private static void unwindm(ptr<bool> _addr_restore) {
@@ -320,7 +315,6 @@ private static void unwindm(ptr<bool> _addr_restore) {
             osPreemptExtExit(mp);
         }
         releasem(mp);
-
     }
 }
 
@@ -390,9 +384,7 @@ private static void cgoCheckPointer(object ptr, object arg) {
             if (t.kind & kindMask == kindUnsafePointer) { 
                 // We don't know the type of the element.
                 break;
-
             }
-
             var pt = (ptrtype.val)(@unsafe.Pointer(t));
             cgoCheckArg(_addr_pt.elem, p, true, false, cgoCheckPointerFail);
             return ;
@@ -409,10 +401,8 @@ private static void cgoCheckPointer(object ptr, object arg) {
             top = false;
         else 
             throw("can't happen");
-        
-    }
+            }
     cgoCheckArg(_addr_t, ep.data, t.kind & kindDirectIface == 0, top, cgoCheckPointerFail);
-
 }
 
 private static readonly @string cgoCheckPointerFail = "cgo argument has Go pointer to Go pointer";
@@ -435,7 +425,6 @@ private static void cgoCheckArg(ptr<_type> _addr_t, unsafe.Pointer p, bool indir
     if (t.ptrdata == 0 || p == null) { 
         // If the type has no pointers there is nothing to do.
         return ;
-
     }
 
     if (t.kind & kindMask == kindArray) 
@@ -549,8 +538,7 @@ private static void cgoCheckArg(ptr<_type> _addr_t, unsafe.Pointer p, bool indir
         cgoCheckUnknownPointer(p, msg);
     else 
         throw("can't happen");
-    
-});
+    });
 
 // cgoCheckUnknownPointer is called for an arbitrary pointer into Go
 // memory. It checks whether that Go memory contains any other
@@ -576,27 +564,21 @@ private static (System.UIntPtr, System.UIntPtr) cgoCheckUnknownPointer(unsafe.Po
                 break;
             i += sys.PtrSize;
             }
-
             if (hbits.isPointer() && cgoIsGoPointer(new ptr<ptr<ptr<unsafe.Pointer>>>(@unsafe.Pointer(base + i)))) {
                 panic(errorString(msg));
             }
-
             hbits = hbits.next();
-
         }
 
         return ;
-
     }
     foreach (var (_, datap) in activeModules()) {
         if (cgoInRange(p, datap.data, datap.edata) || cgoInRange(p, datap.bss, datap.ebss)) { 
             // We have no way to know the size of the object.
             // We have to assume that it might contain a pointer.
             panic(errorString(msg));
-
         }
     }    return ;
-
 });
 
 // cgoIsGoPointer reports whether the pointer is a Go pointer--a
@@ -616,7 +598,6 @@ private static bool cgoIsGoPointer(unsafe.Pointer p) {
             return true;
         }
     }    return false;
-
 }
 
 // cgoInRange reports whether p is between start and end.
@@ -636,7 +617,6 @@ private static void cgoCheckResult(object val) {
     var ep = efaceOf(_addr_val);
     var t = ep._type;
     cgoCheckArg(_addr_t, ep.data, t.kind & kindDirectIface == 0, false, cgoResultFail);
-
 }
 
 } // end runtime_package

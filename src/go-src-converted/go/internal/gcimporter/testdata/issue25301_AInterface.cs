@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:32:40 UTC
+//     Generated on 2022 March 13 06:42:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class issue25301_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial interface A
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -39,7 +39,7 @@ namespace @internal
                 typeof(A<>).CreateInterfaceHandler<A>(target);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public class A<T> : A
         {
             private T m_target = default!;
@@ -140,7 +140,7 @@ namespace go
     {
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T _<T>(this go.go.@internal.gcimporter.issue25301_package.A target)
         {
             try
@@ -153,7 +153,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static bool _<T>(this go.go.@internal.gcimporter.issue25301_package.A target, out T result)
         {
             try
@@ -168,7 +168,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static object? _(this go.go.@internal.gcimporter.issue25301_package.A target, Type type)
         {
             try
@@ -187,7 +187,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static bool _(this go.go.@internal.gcimporter.issue25301_package.A target, Type type, out object? result)
         {
             try

@@ -29,20 +29,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:19 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:22 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\sym.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using runtime = go.runtime_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using runtime = runtime_package;
+using System;
 
 public static partial class ld_package {
 
@@ -63,7 +62,6 @@ private static ptr<Link> linknew(ptr<sys.Arch> _addr_arch) {
     });
 
     return _addr_ctxt!;
-
 }
 
 // computeTLSOffset records the thread-local storage offset.
@@ -102,7 +100,6 @@ private static void computeTLSOffset(this ptr<Link> _addr_ctxt) {
                          */
             else 
         log.Fatalf("unknown thread-local storage offset for %v", ctxt.HeadType);
-    
-}
+    }
 
 } // end ld_package

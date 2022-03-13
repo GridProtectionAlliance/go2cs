@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:10:14 UTC
+//     Generated on 2022 March 13 05:26:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pollDesc
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace go
             public static implicit operator pollDesc(NilType nil) => default(pollDesc);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pollDesc pollDesc_cast(dynamic value)
         {
             return new pollDesc(ref value.link, value.@lock, value.fd, value.closing, value.everr, value.user, value.rseq, value.rg, value.rt, value.rd, value.wseq, value.wg, value.wt, value.wd, ref value.self);

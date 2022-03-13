@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:13:55 UTC
+//     Generated on 2022 March 13 06:27:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class importer_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct iimporter
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator iimporter(NilType nil) => default(iimporter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static iimporter iimporter_cast(dynamic value)
         {
             return new iimporter(value.ipath, value.version, value.stringData, value.stringCache, value.pkgCache, value.declData, value.pkgIndex, value.typCache, value.interfaceList);

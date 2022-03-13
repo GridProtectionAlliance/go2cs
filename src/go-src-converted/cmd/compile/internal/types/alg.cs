@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:44 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:00 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\alg.go
-using @base = go.cmd.compile.@internal.@base_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
 
 public static partial class types_package {
 
-    // AlgKind describes the kind of algorithms used for comparing and
-    // hashing a Type.
+// AlgKind describes the kind of algorithms used for comparing and
+// hashing a Type.
 public partial struct AlgKind { // : nint
 }
 
@@ -40,7 +40,6 @@ public static readonly AlgKind AMEM = 100;
 
 // Type needs special comparison/hashing functions.
 public static readonly AlgKind ASPECIAL = -1;
-
 
 // AlgType returns the AlgKind used for comparing and hashing Type t.
 // If it returns ANOEQ, it also returns the component type of t that
@@ -120,11 +119,9 @@ public static (AlgKind, ptr<Type>) AlgType(ptr<Type> _addr_t) {
             if (a != AMEM || f.Sym.IsBlank() || IsPaddedField(_addr_t, i)) {
                 ret = ASPECIAL;
             }
-
         }        return (ret, _addr_null!);
         @base.Fatalf("AlgType: unexpected type %v", t);
     return (0, _addr_null!);
-
 }
 
 // TypeHasNoAlg reports whether t does not have any associated hash/eq
@@ -153,7 +150,6 @@ public static ptr<Field> IncomparableField(ptr<Type> _addr_t) {
             return _addr_f!;
         }
     }    return _addr_null!;
-
 }
 
 // IsPaddedField reports whether the i'th field of struct type t is followed
@@ -169,7 +165,6 @@ public static bool IsPaddedField(ptr<Type> _addr_t, nint i) {
         end = t.Field(i + 1).Offset;
     }
     return t.Field(i).End() != end;
-
 }
 
 } // end types_package

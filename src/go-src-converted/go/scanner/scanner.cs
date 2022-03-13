@@ -6,28 +6,30 @@
 // It takes a []byte as source which can then be tokenized
 // through repeated calls to the Scan method.
 //
-// package scanner -- go2cs converted at 2022 March 06 22:42:49 UTC
+
+// package scanner -- go2cs converted at 2022 March 13 05:53:58 UTC
 // import "go/scanner" ==> using scanner = go.go.scanner_package
 // Original source: C:\Program Files\Go\src\go\scanner\scanner.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using token = go.token_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// An ErrorHandler may be provided to Scanner.Init. If a syntax error is
+// encountered and a handler was installed, the handler is called with a
+// position and an error message. The position points to the beginning of
+// the offending token.
+//
+
+using System;
 public static partial class scanner_package {
 
-    // An ErrorHandler may be provided to Scanner.Init. If a syntax error is
-    // encountered and a handler was installed, the handler is called with a
-    // position and an error message. The position points to the beginning of
-    // the offending token.
-    //
 public delegate void ErrorHandler(token.Position, @string);
 
 // A Scanner holds the scanner's internal state while processing
@@ -83,10 +85,8 @@ private static void next(this ptr<Scanner> _addr_s) {
             else if (r == bom && s.offset > 0) {
                 s.error(s.offset, "illegal byte order mark");
             }
-
                 s.rdOffset += w;
         s.ch = r;
-
     }
     else
  {
@@ -96,7 +96,6 @@ private static void next(this ptr<Scanner> _addr_s) {
             s.file.AddLine(s.offset);
         }
         s.ch = eof;
-
     }
 }
 
@@ -109,7 +108,6 @@ private static byte peek(this ptr<Scanner> _addr_s) {
         return s.src[s.rdOffset];
     }
     return 0;
-
 }
 
 // A mode value is a set of flags (or 0).
@@ -170,7 +168,6 @@ private static void error(this ptr<Scanner> _addr_s, nint offs, @string msg) {
         s.err(s.file.Position(s.file.Pos(offs)), msg);
     }
     s.ErrorCount++;
-
 }
 
 private static void errorf(this ptr<Scanner> _addr_s, nint offs, @string format, params object[] args) {
@@ -204,7 +201,6 @@ private static @string scanComment(this ptr<Scanner> _addr_s) {
             next++;
         }
         goto exit;
-
     }
     s.next();
     while (s.ch >= 0) {
@@ -247,7 +243,6 @@ exit:
         lit = stripCR(lit, lit[1] == '*');
     }
     return string(lit);
-
 }
 
 private static slice<byte> prefix = (slice<byte>)"line ";
@@ -273,7 +268,6 @@ private static void updateLineInfo(this ptr<Scanner> _addr_s, nint next, nint of
         // text has a suffix :xxx but xxx is not a number
         s.error(offs + i, "invalid line number: " + string(text[(int)i..]));
         return ;
-
     }
     nint line = default;    nint col = default;
 
@@ -290,7 +284,6 @@ private static void updateLineInfo(this ptr<Scanner> _addr_s, nint next, nint of
  { 
         //line filename:line
         line = n;
-
     }
     if (line == 0) {
         s.error(offs + i, "invalid line number: " + string(text[(int)i..]));
@@ -310,7 +303,6 @@ private static void updateLineInfo(this ptr<Scanner> _addr_s, nint next, nint of
         }
     }
     s.file.AddLineColumnInfo(next, filename, line, col);
-
 }
 
 private static (nint, nint, bool) trailingDigits(slice<byte> text) {
@@ -324,7 +316,6 @@ private static (nint, nint, bool) trailingDigits(slice<byte> text) {
     }
     var (n, err) = strconv.ParseUint(string(text[(int)i + 1..]), 10, 0);
     return (i + 1, int(n), err == null);
-
 }
 
 private static bool findLineEnd(this ptr<Scanner> _addr_s) => func((defer, _, _) => {
@@ -345,7 +336,6 @@ private static bool findLineEnd(this ptr<Scanner> _addr_s) => func((defer, _, _)
         if (s.ch == '/') { 
             //-style comment always contains a newline
             return true;
-
         }
         s.next();
         while (s.ch >= 0) {
@@ -366,13 +356,11 @@ private static bool findLineEnd(this ptr<Scanner> _addr_s) => func((defer, _, _)
         if (s.ch != '/') { 
             // non-comment token
             return false;
-
         }
         s.next(); // consume '/'
     }
 
     return false;
-
 });
 
 private static bool isLetter(int ch) {
@@ -404,7 +392,6 @@ private static @string scanIdentifier(this ptr<Scanner> _addr_s) {
         if ('a' <= b && b <= 'z' || 'A' <= b && b <= 'Z' || b == '_' || '0' <= b && b <= '9') { 
             // Avoid assigning a rune for the common case of an ascii character.
             continue;
-
         }
         s.rdOffset += rdOffset;
         if (0 < b && b < utf8.RuneSelf) { 
@@ -418,21 +405,18 @@ private static @string scanIdentifier(this ptr<Scanner> _addr_s) {
             s.offset = s.rdOffset;
             s.rdOffset++;
             goto exit;
-
         }
         s.next();
         while (isLetter(s.ch) || isDigit(s.ch)) {
             s.next();
         }
         goto exit;
-
     }    s.offset = len(s.src);
     s.rdOffset = len(s.src);
     s.ch = eof;
 
 exit:
     return string(s.src[(int)offs..(int)s.offset]);
-
 }
 
 private static nint digitVal(int ch) {
@@ -475,14 +459,10 @@ private static nint digits(this ptr<Scanner> _addr_s, nint @base, ptr<nint> _add
             else if (s.ch >= max && invalid < 0.val) {
                 invalid = s.offset; // record invalid rune offset
             }
-
             digsep |= ds;
             s.next();
-
         }
     else
-
-
     } {
         while (isHex(s.ch) || s.ch == '_') {
             ds = 1;
@@ -494,7 +474,6 @@ private static nint digits(this ptr<Scanner> _addr_s, nint @base, ptr<nint> _add
         }
     }
     return ;
-
 }
 
 private static (token.Token, @string) scanNumber(this ptr<Scanner> _addr_s) {
@@ -532,10 +511,8 @@ private static (token.Token, @string) scanNumber(this ptr<Scanner> _addr_s) {
                     (base, prefix) = (8, '0');                digsep = 1; // leading 0
                     break;
             }
-
         }
         digsep |= s.digits(base, _addr_invalid);
-
     }
     if (s.ch == '.') {
         tok = token.FLOAT;
@@ -544,7 +521,6 @@ private static (token.Token, @string) scanNumber(this ptr<Scanner> _addr_s) {
         }
         s.next();
         digsep |= s.digits(base, _addr_invalid);
-
     }
     if (digsep & 1 == 0) {
         s.error(s.offset, litname(prefix) + " has no digits");
@@ -563,13 +539,11 @@ private static (token.Token, @string) scanNumber(this ptr<Scanner> _addr_s) {
             if (s.ch == '+' || s.ch == '-') {
                 s.next();
             }
-
             var ds = s.digits(10, null);
             digsep |= ds;
             if (ds & 1 == 0) {
                 s.error(s.offset, "exponent has no digits");
             }
-
         }
         else if (prefix == 'x' && tok == token.FLOAT) {
             s.error(s.offset, "hexadecimal mantissa requires a 'p' exponent");
@@ -595,10 +569,8 @@ private static (token.Token, @string) scanNumber(this ptr<Scanner> _addr_s) {
             }
 
         }
-
     }
     return (tok, lit);
-
 }
 
 private static @string litname(int prefix) {
@@ -616,7 +588,6 @@ private static @string litname(int prefix) {
             break;
     }
     return "decimal literal";
-
 }
 
 // invalidSep returns the index of the first invalid separator in x, or -1.
@@ -642,7 +613,6 @@ private static nint invalidSep(@string x) {
                 return i;
         i++;
             }
-
         else if (isDecimal(d) || x1 == 'x' && isHex(d)) 
             d = '0';
         else 
@@ -650,13 +620,11 @@ private static nint invalidSep(@string x) {
                 return i - 1;
             }
             d = '.';
-        
-    }
+            }
     if (d == '_') {
         return len(x) - 1;
     }
     return -1;
-
 }
 
 // scanEscape parses an escape sequence where rune is the accepted
@@ -703,7 +671,6 @@ private static bool scanEscape(this ptr<Scanner> _addr_s, int quote) {
         x = x * base + d;
         s.next();
         n--;
-
     }
 
     if (x > max || 0xD800 <= x && x < 0xE000) {
@@ -711,7 +678,6 @@ private static bool scanEscape(this ptr<Scanner> _addr_s, int quote) {
         return false;
     }
     return true;
-
 }
 
 private static @string scanRune(this ptr<Scanner> _addr_s) {
@@ -730,9 +696,7 @@ private static @string scanRune(this ptr<Scanner> _addr_s) {
                 s.error(offs, "rune literal not terminated");
                 valid = false;
             }
-
             break;
-
         }
         s.next();
         if (ch == '\'') {
@@ -751,7 +715,6 @@ private static @string scanRune(this ptr<Scanner> _addr_s) {
         s.error(offs, "illegal rune literal");
     }
     return string(s.src[(int)offs..(int)s.offset]);
-
 }
 
 private static @string scanString(this ptr<Scanner> _addr_s) {
@@ -776,7 +739,6 @@ private static @string scanString(this ptr<Scanner> _addr_s) {
     }
 
     return string(s.src[(int)offs..(int)s.offset]);
-
 }
 
 private static slice<byte> stripCR(slice<byte> b, bool comment) {
@@ -793,7 +755,6 @@ private static slice<byte> stripCR(slice<byte> b, bool comment) {
             i++;
         }
     }    return c[..(int)i];
-
 }
 
 private static @string scanRawString(this ptr<Scanner> _addr_s) {
@@ -823,7 +784,6 @@ private static @string scanRawString(this ptr<Scanner> _addr_s) {
         lit = stripCR(lit, false);
     }
     return string(lit);
-
 }
 
 private static void skipWhitespace(this ptr<Scanner> _addr_s) {
@@ -848,7 +808,6 @@ private static token.Token switch2(this ptr<Scanner> _addr_s, token.Token tok0, 
         return tok1;
     }
     return tok0;
-
 }
 
 private static token.Token switch3(this ptr<Scanner> _addr_s, token.Token tok0, token.Token tok1, int ch2, token.Token tok2) {
@@ -863,7 +822,6 @@ private static token.Token switch3(this ptr<Scanner> _addr_s, token.Token tok0, 
         return tok2;
     }
     return tok0;
-
 }
 
 private static token.Token switch4(this ptr<Scanner> _addr_s, token.Token tok0, token.Token tok1, int ch2, token.Token tok2, token.Token tok3) {
@@ -880,10 +838,8 @@ private static token.Token switch4(this ptr<Scanner> _addr_s, token.Token tok0, 
             return tok3;
         }
         return tok2;
-
     }
     return tok0;
-
 }
 
 // Scan scans the next token and returns the token position, the token,
@@ -945,14 +901,12 @@ scanAgain:
 
                 if (tok == token.IDENT || tok == token.BREAK || tok == token.CONTINUE || tok == token.FALLTHROUGH || tok == token.RETURN) 
                     insertSemi = true;
-                
-            }
+                            }
             else
  {
                 insertSemi = true;
                 tok = token.IDENT;
             }
-
         else if (isDecimal(ch) || ch == '.' && isDecimal(rune(s.peek()))) 
             insertSemi = true;
             tok, lit = s.scanNumber();
@@ -963,11 +917,8 @@ scanAgain:
                     if (s.insertSemi) {
                         s.insertSemi = false; // EOF consumed
                         return (pos, token.SEMICOLON, "\n");
-
                     }
-
                     tok = token.EOF;
-
                     break;
                 case '\n': 
                     // we only reach here if s.insertSemi was
@@ -975,7 +926,6 @@ scanAgain:
                     // from s.skipWhitespace()
                     s.insertSemi = false; // newline consumed
                     return (pos, token.SEMICOLON, "\n");
-
                     break;
                 case '"': 
                     insertSemi = true;
@@ -1002,9 +952,7 @@ scanAgain:
                         s.next();
                         s.next(); // consume last '.'
                         tok = token.ELLIPSIS;
-
                     }
-
                     break;
                 case ',': 
                     tok = token.COMMA;
@@ -1059,26 +1007,20 @@ scanAgain:
                                            s.rdOffset = s.offset + 1;
                                            s.insertSemi = false; // newline consumed
                                            return (pos, token.SEMICOLON, "\n");
-
                                        }
-
                                        var comment = s.scanComment();
                                        if (s.mode & ScanComments == 0) { 
                                            // skip comment
                                            s.insertSemi = false; // newline consumed
                                            goto scanAgain;
-
                                        }
-
                                        tok = token.COMMENT;
                                        lit = comment;
-
                                    }
                                    else
                     {
                                        tok = s.switch2(token.QUO, token.QUO_ASSIGN);
                                    }
-
                     break;
                 case '%': 
                     tok = s.switch2(token.REM, token.REM_ASSIGN);
@@ -1095,7 +1037,6 @@ scanAgain:
                     {
                                        tok = s.switch4(token.LSS, token.LEQ, '<', token.SHL, token.SHL_ASSIGN);
                                    }
-
                     break;
                 case '>': 
                     tok = s.switch4(token.GTR, token.GEQ, '>', token.SHR, token.SHR_ASSIGN);
@@ -1115,7 +1056,6 @@ scanAgain:
                     {
                                        tok = s.switch3(token.AND, token.AND_ASSIGN, '&', token.LAND);
                                    }
-
                     break;
                 case '|': 
                     tok = s.switch3(token.OR, token.OR_ASSIGN, '|', token.LOR);
@@ -1128,7 +1068,6 @@ scanAgain:
                     insertSemi = s.insertSemi; // preserve insertSemi info
                     tok = token.ILLEGAL;
                     lit = string(ch);
-
                     break;
             }
 
@@ -1137,7 +1076,6 @@ scanAgain:
         s.insertSemi = insertSemi;
     }
     return ;
-
 }
 
 } // end scanner_package

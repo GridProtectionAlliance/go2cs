@@ -2,23 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:09 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:02 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\log10.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Log10 returns the decimal logarithm of x.
-    // The special cases are the same as for Log.
+// Log10 returns the decimal logarithm of x.
+// The special cases are the same as for Log.
 public static double Log10(double x) {
     if (haveArchLog10) {
         return archLog10(x);
     }
     return log10(x);
-
 }
 
 private static double log10(double x) {
@@ -32,7 +29,6 @@ public static double Log2(double x) {
         return archLog2(x);
     }
     return log2(x);
-
 }
 
 private static double log2(double x) {
@@ -43,7 +39,6 @@ private static double log2(double x) {
         return float64(exp - 1);
     }
     return Log(frac) * (1 / Ln2) + float64(exp);
-
 }
 
 } // end math_package

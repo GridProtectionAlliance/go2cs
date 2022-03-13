@@ -5,13 +5,14 @@
 //go:build aix || darwin || solaris
 // +build aix darwin solaris
 
-// package unix -- go2cs converted at 2022 March 06 22:12:55 UTC
+// package unix -- go2cs converted at 2022 March 13 05:27:49 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
 // Original source: C:\Program Files\Go\src\internal\syscall\unix\nonblocking_libc.go
-using syscall = go.syscall_package;
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go.@internal.syscall;
+
+using syscall = syscall_package;
+using _@unsafe_ = @unsafe_package; // for go:linkname
+
 
 public static partial class unix_package {
 
@@ -24,7 +25,6 @@ public static (bool, error) IsNonblock(nint fd) {
         return (false, error.As(e1)!);
     }
     return (flag & syscall.O_NONBLOCK != 0, error.As(null!)!);
-
 }
 
 // Implemented in the syscall package.

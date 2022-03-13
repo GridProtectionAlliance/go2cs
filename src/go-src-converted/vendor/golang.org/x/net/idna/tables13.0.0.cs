@@ -3,16 +3,14 @@
 //go:build go1.16
 // +build go1.16
 
-// package idna -- go2cs converted at 2022 March 06 23:37:54 UTC
+// package idna -- go2cs converted at 2022 March 13 06:46:11 UTC
 // import "vendor/golang.org/x/net/idna" ==> using idna = go.vendor.golang.org.x.net.idna_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\idna\tables13.0.0.go
-
-
 namespace go.vendor.golang.org.x.net;
 
 public static partial class idna_package {
 
-    // UnicodeVersion is the Unicode version from which the tables in this package are derived.
+// UnicodeVersion is the Unicode version from which the tables in this package are derived.
 public static readonly @string UnicodeVersion = "13.0.0";
 
 
@@ -85,7 +83,6 @@ private static (ushort, nint) lookup(this ptr<idnaTrie> _addr_t, slice<byte> s) 
         return (t.lookupValue(uint32(i), c3), 4);
     // Illegal rune
     return (0, 1);
-
 }
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
@@ -96,25 +93,20 @@ private static ushort lookupUnsafe(this ptr<idnaTrie> _addr_t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return idnaValues[c0];
-
     }
     var i = idnaIndex[c0];
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue(uint32(i), s[1]);
-
     }
     i = idnaIndex[uint32(i) << 6 + uint32(s[1])];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue(uint32(i), s[2]);
-
     }
     i = idnaIndex[uint32(i) << 6 + uint32(s[2])];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue(uint32(i), s[3]);
-
     }
     return 0;
-
 }
 
 // lookupString returns the trie value for the first UTF-8 encoding in s and
@@ -181,7 +173,6 @@ private static (ushort, nint) lookupString(this ptr<idnaTrie> _addr_t, @string s
         return (t.lookupValue(uint32(i), c3), 4);
     // Illegal rune
     return (0, 1);
-
 }
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
@@ -192,25 +183,20 @@ private static ushort lookupStringUnsafe(this ptr<idnaTrie> _addr_t, @string s) 
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return idnaValues[c0];
-
     }
     var i = idnaIndex[c0];
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue(uint32(i), s[1]);
-
     }
     i = idnaIndex[uint32(i) << 6 + uint32(s[1])];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue(uint32(i), s[2]);
-
     }
     i = idnaIndex[uint32(i) << 6 + uint32(s[2])];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue(uint32(i), s[3]);
-
     }
     return 0;
-
 }
 
 // idnaTrie. Total size: 30288 bytes (29.58 KiB). Checksum: c0cd84404a2f6f19.
@@ -231,8 +217,7 @@ private static ushort lookupValue(this ptr<idnaTrie> _addr_t, uint n, byte b) {
     else 
         n -= 126;
         return uint16(idnaSparse.lookup(n, b));
-    
-}
+    }
 
 // idnaValues: 128 blocks, 8192 entries, 16384 bytes
 // The third block is the zero block.

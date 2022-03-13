@@ -2,36 +2,35 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modcmd -- go2cs converted at 2022 March 06 23:19:38 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:32:26 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\vendor.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using imports = go.cmd.go.@internal.imports_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using str = go.cmd.go.@internal.str_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using imports = cmd.go.@internal.imports_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using str = cmd.go.@internal.str_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using System;
 
 public static partial class modcmd_package {
 
@@ -82,7 +81,6 @@ private static void runVendor(context.Context ctx, ptr<base.Command> _addr_cmd, 
 
     }
 
-
     var modpkgs = make_map<module.Version, slice<@string>>();
     {
         var pkg__prev1 = pkg;
@@ -121,19 +119,14 @@ private static void runVendor(context.Context ctx, ptr<base.Command> _addr_cmd, 
                 }
 
                 includeAllReplacements = true;
-
             }
-
             if (semver.Compare("v" + gv.Version, "v1.17") >= 0) { 
                 // If the Go version is at least 1.17, annotate all modules with their
                 // 'go' version directives.
                 includeGoVersions = true;
-
             }
-
         }
     }
-
 
     slice<module.Version> vendorMods = default;
     {
@@ -213,15 +206,12 @@ private static void runVendor(context.Context ctx, ptr<base.Command> _addr_cmd, 
                     // We we already recorded this replacement in the entry for the replaced
                     // module with the packages it provides.
                     continue;
-
                 }
-
                 line = moduleLine(r.Old, r.New);
                 buf.WriteString(line);
                 if (cfg.BuildV) {
                     os.Stderr.WriteString(line);
                 }
-
             }
 
             r = r__prev1;
@@ -243,7 +233,6 @@ private static void runVendor(context.Context ctx, ptr<base.Command> _addr_cmd, 
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -255,7 +244,6 @@ private static void runVendor(context.Context ctx, ptr<base.Command> _addr_cmd, 
         err = err__prev1;
 
     }
-
 }
 
 private static @string moduleLine(module.Version m, module.Version r) {
@@ -276,7 +264,6 @@ private static @string moduleLine(module.Version m, module.Version r) {
     }
     b.WriteString("\n");
     return b.String();
-
 }
 
 private static void vendorPkg(@string vdir, @string pkg) { 
@@ -302,7 +289,6 @@ private static void vendorPkg(@string vdir, @string pkg) {
         }
     }
 
-
     var ctx = build.Default;
     ctx.UseAllFiles = true;
     var (bp, err) = ctx.ImportDir(src, build.IgnoreVendor); 
@@ -323,7 +309,6 @@ private static void vendorPkg(@string vdir, @string pkg) {
         }
         else if (!errors.As(err, _addr_multiplePackageError)) { // multiplePackgeErrors are okay, but others are not.
             @base.Fatalf("internal error: failed to find embedded files of %s: %v\n", pkg, err);
-
         }
     }
     var embedPatterns = str.StringList(bp.EmbedPatterns, bp.TestEmbedPatterns, bp.XTestEmbedPatterns);
@@ -352,7 +337,6 @@ private static void vendorPkg(@string vdir, @string pkg) {
             err = err__prev1;
 
         }
-
         var (w, err) = os.Create(embedDst);
         if (err != null) {
             @base.Fatalf("go mod vendor: %v", err);
@@ -369,7 +353,6 @@ private static void vendorPkg(@string vdir, @string pkg) {
             err = err__prev1;
 
         }
-
         r.Close();
         {
             var err__prev1 = err;
@@ -383,7 +366,6 @@ private static void vendorPkg(@string vdir, @string pkg) {
             err = err__prev1;
 
         }
-
     }
 }
 
@@ -397,7 +379,7 @@ private static var copiedMetadata = make_map<metakey, bool>();
 // copyMetadata copies metadata files from parents of src to parents of dst,
 // stopping after processing the src parent for modPath.
 private static void copyMetadata(@string modPath, @string pkg, @string dst, @string src, map<@string, bool> copiedFiles) {
-    for (nint parent = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; parent++) {
+    for (nint parent = 0; ; parent++) {
         if (copiedMetadata[new metakey(modPath,dst)]) {
             break;
         }
@@ -411,9 +393,7 @@ private static void copyMetadata(@string modPath, @string pkg, @string dst, @str
         pkg = path.Dir(pkg);
         dst = filepath.Dir(dst);
         src = filepath.Dir(src);
-
     }
-
 }
 
 // metaPrefixes is the list of metadata file prefixes.
@@ -433,7 +413,6 @@ private static bool matchMetadata(@string dir, fs.DirEntry info) {
             return true;
         }
     }    return false;
-
 }
 
 // matchPotentialSourceFile reports whether info may be relevant to a build operation.
@@ -451,11 +430,9 @@ private static bool matchPotentialSourceFile(@string dir, fs.DirEntry info) => f
                 // an arbitrary directory within the vendor tree as a module root.
                 // (See https://golang.org/issue/42970.)
                 return false;
-
             }
 
         }
-
     }
     if (strings.HasSuffix(info.Name(), ".go")) {
         var (f, err) = fsys.Open(filepath.Join(dir, info.Name()));
@@ -469,13 +446,10 @@ private static bool matchPotentialSourceFile(@string dir, fs.DirEntry info) => f
             // The file is explicitly tagged "ignore", so it can't affect the build.
             // Leave it out.
             return false;
-
         }
         return true;
-
     }
     return true;
-
 });
 
 // copyDir copies all regular files satisfying match(info) from src to dst.
@@ -495,7 +469,6 @@ private static bool copyDir(@string dst, @string src, Func<@string, fs.DirEntry,
         err = err__prev1;
 
     }
-
     foreach (var (_, file) in files) {
         if (file.IsDir() || !file.Type().IsRegular() || !match(src, file)) {
             continue;
@@ -523,7 +496,6 @@ private static bool copyDir(@string dst, @string src, Func<@string, fs.DirEntry,
             err = err__prev1;
 
         }
-
         r.Close();
         {
             var err__prev1 = err;
@@ -537,7 +509,6 @@ private static bool copyDir(@string dst, @string src, Func<@string, fs.DirEntry,
             err = err__prev1;
 
         }
-
     }
 }
 

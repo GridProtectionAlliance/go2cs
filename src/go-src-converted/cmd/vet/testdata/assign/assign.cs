@@ -4,12 +4,12 @@
 
 // This file contains tests for the useless-assignment checker.
 
-// package assign -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package assign -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata/assign" ==> using assign = go.cmd.vet.testdata.assign_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\assign\assign.go
-using rand = go.math.rand_package;
-
 namespace go.cmd.vet.testdata;
+
+using rand = math.rand_package;
 
 public static partial class assign_package {
 
@@ -33,7 +33,6 @@ private static void SetX(this ptr<ST> _addr_s, nint x, channel<nint> ch) {
     var rng = rand.New(rand.NewSource(0));
     s.l[rng.Intn(len(s.l))] = s.l[rng.Intn(len(s.l))];
     s.l[ch.Receive()] = s.l[ch.Receive()];
-
 }
 
 private static nint num() {

@@ -8,17 +8,16 @@
     Packages that import unsafe may be non-portable and are not protected by the
     Go 1 compatibility guidelines.
 */
-// package @unsafe -- go2cs converted at 2022 March 06 22:08:05 UTC
+
+// package @unsafe -- go2cs converted at 2022 March 13 05:23:55 UTC
 // import "unsafe" ==> using @unsafe = go.@unsafe_package
 // Original source: C:\Program Files\Go\src\unsafe\unsafe.go
-
-
 namespace go;
 
 public static partial class @unsafe_package {
 
-    // ArbitraryType is here for the purposes of documentation only and is not actually
-    // part of the unsafe package. It represents the type of an arbitrary Go expression.
+// ArbitraryType is here for the purposes of documentation only and is not actually
+// part of the unsafe package. It represents the type of an arbitrary Go expression.
 public partial struct ArbitraryType { // : nint
 }
 

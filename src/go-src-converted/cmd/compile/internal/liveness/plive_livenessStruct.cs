@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:10:45 UTC
+//     Generated on 2022 March 13 06:24:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace @internal
 {
     public static partial class liveness_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct liveness
         {
             // Constructors
@@ -102,7 +102,7 @@ namespace @internal
             public static implicit operator liveness(NilType nil) => default(liveness);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static liveness liveness_cast(dynamic value)
         {
             return new liveness(ref value.fn, ref value.f, value.vars, value.idx, value.stkptrsize, value.be, value.allUnsafe, value.unsafePoints, value.livevars, value.livenessMap, value.stackMapSet, value.stackMaps, value.cache, value.partLiveArgs, value.doClobber, value.noClobberArgs);

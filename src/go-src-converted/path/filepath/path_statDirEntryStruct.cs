@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:06 UTC
+//     Generated on 2022 March 13 05:28:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace path
 {
     public static partial class filepath_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct statDirEntry
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace path
             public static implicit operator statDirEntry(NilType nil) => default(statDirEntry);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static statDirEntry statDirEntry_cast(dynamic value)
         {
             return new statDirEntry(value.info);

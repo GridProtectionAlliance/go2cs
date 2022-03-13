@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:54 UTC
+// package typecheck -- go2cs converted at 2022 March 13 06:00:15 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\typecheck.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+
+
+// Function collecting autotmps generated during typechecking,
+// to be included in the package-level init function.
+
+using System;
 public static partial class typecheck_package {
 
-    // Function collecting autotmps generated during typechecking,
-    // to be included in the package-level init function.
 public static var InitTodoFunc = ir.NewFunc(@base.Pos);
 
 private static bool inimport = default; // set during import
@@ -135,9 +136,7 @@ private static Action<ptr<ir.Node>> tracePrint(@string title, ir.Node n) => func
             types.SkipSizeForTracing = false;
         }());
         fmt.Printf("%s: %s=> %p %s %v tc=%d type=%L\n", pos, indent, n, op, n, tc, typ);
-
     };
-
 });
 
 private static readonly nint ctxStmt = 1 << (int)(iota); // evaluated at statement level
@@ -182,17 +181,13 @@ public static ir.Node Resolve(ir.Node n) => func((defer, _, _) => {
                         }
 
                     }
-
                 }
 
             }
 
-
             return expandDecl(n);
-
         }
     }
-
 
     var r = ir.AsNode(n.Sym().Def);
     if (r == null) {
@@ -207,12 +202,9 @@ public static ir.Node Resolve(ir.Node n) => func((defer, _, _) => {
             }
 
         }
-
         return n;
-
     }
     return r;
-
 });
 
 private static void typecheckslice(slice<ir.Node> l, nint top) {
@@ -237,7 +229,6 @@ private static @string typekind(ptr<types.Type> _addr_t) {
         }
     }
     return fmt.Sprintf("etype=%d", et);
-
 }
 
 private static slice<ir.Node> cycleFor(ir.Node start) { 
@@ -259,7 +250,6 @@ private static slice<ir.Node> cycleFor(ir.Node start) {
             cycle = append(cycle, n);
         }
     }    return cycle;
-
 }
 
 private static @string cycleTrace(slice<ir.Node> cycle) {
@@ -319,8 +309,7 @@ private static ir.Node typecheck(ir.Node n, nint top) => func((defer, _, _) => {
         else 
             @base.Pos = lno;
             return n;
-        
-    }
+            }
     if (n.Typecheck() == 2) { 
         // Typechecking loop. Trying printing a meaningful message,
         // otherwise a stack trace of typechecking.
@@ -349,17 +338,12 @@ private static ir.Node typecheck(ir.Node n, nint top) => func((defer, _, _) => {
                             @base.Pos = n.Pos();
                             @base.Fatalf("cannot handle alias type declaration (issue #25838): %v", n);
                         }
-
                         @base.Pos = lno;
                         return n;
-
                     }
-
                 }
                 @base.ErrorfAt(n.Pos(), "invalid recursive type alias %v%s", n, cycleTrace(cycle));
-
             }
-
         else if (n.Op() == ir.OLITERAL) 
             if (top & (ctxExpr | ctxType) == ctxType) {
                 @base.Errorf("%v is not a type", n);
@@ -377,7 +361,6 @@ private static ir.Node typecheck(ir.Node n, nint top) => func((defer, _, _) => {
         }
         @base.Pos = lno;
         return n;
-
     }
     typecheck_tcstack = append(typecheck_tcstack, n);
 
@@ -411,7 +394,6 @@ private static ir.Node typecheck(ir.Node n, nint top) => func((defer, _, _) => {
             t = t__prev1;
 
         }
-
     else if (n.Op() == ir.OAPPEND) 
         // Must be used (and not BinaryExpr/UnaryExpr).
         isStmt = false;
@@ -429,8 +411,7 @@ private static ir.Node typecheck(ir.Node n, nint top) => func((defer, _, _) => {
             break;
         else 
             types.CheckSize(t);
-        
-    }
+            }
     if (t != null) {
         n = EvalConst(n);
         t = n.Type();
@@ -465,11 +446,9 @@ private static ir.Node typecheck(ir.Node n, nint top) => func((defer, _, _) => {
  {
                 n.SetType(null);
             }
-
         }
         @base.Pos = lno;
     return n;
-
 });
 
 // indexlit implements typechecking of untyped values as
@@ -483,7 +462,6 @@ private static ir.Node indexlit(ir.Node n) {
         return DefaultLit(n, types.Types[types.TINT]);
     }
     return n;
-
 }
 
 // typecheck1 should ONLY be called from typecheck.
@@ -499,7 +477,6 @@ private static ir.Node typecheck1(ir.Node n, nint top) => func((_, panic, _) => 
         n = n__prev1;
 
     }
-
 
 
     if (n.Op() == ir.OLITERAL) 
@@ -519,7 +496,6 @@ private static ir.Node typecheck1(ir.Node n, nint top) => func((_, panic, _) => 
             // adds context about the outer expression
             @base.ErrorfAt(n.Pos(), "undefined: %v", n.Sym());
             n.SetDiag(true);
-
         }
         n.SetType(null);
         return n;
@@ -540,9 +516,7 @@ private static ir.Node typecheck1(ir.Node n, nint top) => func((_, panic, _) => 
                 n.SetType(null);
                 return n;
             }
-
             n.SetUsed(true);
-
         }
         return n;
     else if (n.Op() == ir.OLINKSYMOFFSET) 
@@ -642,9 +616,7 @@ private static ir.Node typecheck1(ir.Node n, nint top) => func((_, panic, _) => 
                 }
 
             }
-
             n.X, n.Y = defaultlit2(l, r, true);
-
         }
         return n; 
 
@@ -663,7 +635,6 @@ private static ir.Node typecheck1(ir.Node n, nint top) => func((_, panic, _) => 
  {
                 add = ir.NewAddStringExpr(n.Pos(), new slice<ir.Node>(new ir.Node[] { l }));
             }
-
             if (r.Op() == ir.OADDSTR) {
                 ptr<ir.AddStringExpr> r = r._<ptr<ir.AddStringExpr>>();
                 add.List.Append(r.List.Take());
@@ -672,10 +643,8 @@ private static ir.Node typecheck1(ir.Node n, nint top) => func((_, panic, _) => 
  {
                 add.List.Append(r);
             }
-
             add.SetType(t);
             return add;
-
         }
         (n.X, n.Y) = (l, r);        n.SetType(t);
         return n;
@@ -821,7 +790,6 @@ private static ir.Node typecheck1(ir.Node n, nint top) => func((_, panic, _) => 
             // Eliminate now to simplify life later.
             // See issues 7538, 11589, 11593.
             n = ir.NewBlockStmt(n.Pos(), null);
-
         }
         return n;
     else if (n.Op() == ir.ODEFER || n.Op() == ir.OGO) 
@@ -911,7 +879,6 @@ private static void typecheckargs(ir.InitNode n) {
         n._<ir.OrigNode>().SetOrig(ir.SepCopy(n));
     }
     rewriteMultiValueCall(n, list[0]);
-
 }
 
 // rewriteMultiValueCall rewrites multi-valued f() to use temporaries,
@@ -983,7 +950,6 @@ private static void rewriteMultiValueCall(ir.InitNode n, ir.Node call) {
             break;
         }
     }
-
 }
 
 private static bool checksliceindex(ir.Node l, ir.Node r, ptr<types.Type> _addr_tp) {
@@ -1017,7 +983,6 @@ private static bool checksliceindex(ir.Node l, ir.Node r, ptr<types.Type> _addr_
         }
     }
     return true;
-
 }
 
 private static bool checksliceconst(ir.Node lo, ir.Node hi) {
@@ -1026,7 +991,6 @@ private static bool checksliceconst(ir.Node lo, ir.Node hi) {
         return false;
     }
     return true;
-
 }
 
 // The result of implicitstar MUST be assigned back to n, e.g.
@@ -1047,7 +1011,6 @@ private static ir.Node implicitstar(ir.Node n) {
     var star = ir.NewStarExpr(@base.Pos, n);
     star.SetImplicit(true);
     return Expr(star);
-
 }
 
 private static (ir.Node, bool) needOneArg(ptr<ir.CallExpr> _addr_n, @string f, params object[] args) {
@@ -1067,7 +1030,6 @@ private static (ir.Node, bool) needOneArg(ptr<ir.CallExpr> _addr_n, @string f, p
         return (n.Args[0], false);
     }
     return (n.Args[0], true);
-
 }
 
 private static (ir.Node, ir.Node, bool) needTwoArgs(ptr<ir.CallExpr> _addr_n) {
@@ -1085,10 +1047,8 @@ private static (ir.Node, ir.Node, bool) needTwoArgs(ptr<ir.CallExpr> _addr_n) {
             @base.Errorf("too many arguments in call to %v", n);
         }
         return (null, null, false);
-
     }
     return (n.Args[0], n.Args[1], true);
-
 }
 
 // Lookdot1 looks up the specified method s in the list fs of methods, returning
@@ -1122,14 +1082,10 @@ public static ptr<types.Field> Lookdot1(ir.Node errnode, ptr<types.Sym> _addr_s,
  {
                 @base.Errorf("ambiguous selector %v.%v", t, s);
             }
-
             break;
-
         }
         r = f;
-
     }    return _addr_r!;
-
 }
 
 // typecheckMethodExpr checks selector expressions (ODOT) where the
@@ -1188,10 +1144,8 @@ private static ir.Node typecheckMethodExpr(ptr<ir.SelectorExpr> _addr_n) => func
             }
 
         }
-
         n.SetType(null);
         return n;
-
     }
     if (!types.IsMethodApplicable(t, m)) {
         @base.Errorf("invalid method expression %v (needs pointer receiver: (*%v).%S)", n, t, s);
@@ -1202,7 +1156,6 @@ private static ir.Node typecheckMethodExpr(ptr<ir.SelectorExpr> _addr_n) => func
     n.Selection = m;
     n.SetType(NewMethodType(m.Type, n.X.Type()));
     return n;
-
 });
 
 private static ptr<types.Type> derefall(ptr<types.Type> _addr_t) {
@@ -1245,7 +1198,6 @@ public static ptr<types.Field> Lookdot(ptr<ir.SelectorExpr> _addr_n, ptr<types.T
         if (dostrcmp > 1 || f1.Broke()) { 
             // Already in the process of diagnosing an error.
             return _addr_f1!;
-
         }
         if (f2 != null) {
             @base.Errorf("%v is both field and method", n.Sel);
@@ -1264,13 +1216,11 @@ public static ptr<types.Field> Lookdot(ptr<ir.SelectorExpr> _addr_n, ptr<types.T
             n.SetOp(ir.ODOTINTER);
         }
         return _addr_f1!;
-
     }
     if (f2 != null) {
         if (dostrcmp > 1) { 
             // Already in the process of diagnosing an error.
             return _addr_f2!;
-
         }
         var orig = n.X;
         var tt = n.X.Type();
@@ -1295,27 +1245,22 @@ public static ptr<types.Field> Lookdot(ptr<ir.SelectorExpr> _addr_n, ptr<types.T
                     if (rcvr.IsPtr() && !tt.Elem().IsPtr()) {
                         break;
                     }
-
                     star = ir.NewStarExpr(@base.Pos, n.X);
                     star.SetImplicit(true);
                     n.X = typecheck(star, ctxType | ctxExpr);
                     tt = tt.Elem();
-
                 }
             else
-
-
             } {
                 @base.Fatalf("method mismatch: %v for %v", rcvr, tt);
             }
-
         }
         {
             var x__prev1 = x;
 
             var x = n.X;
 
-            while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+            while () {
                 ir.Node inner = default;
                 var @implicit = false;
                 switch (x.type()) {
@@ -1329,17 +1274,13 @@ public static ptr<types.Field> Lookdot(ptr<ir.SelectorExpr> _addr_n, ptr<types.T
                 if (!implicit) {
                     break;
                 }
-
                 if (inner.Type().Sym() != null && (x.Op() == ir.ODEREF || x.Op() == ir.ODOTPTR)) { 
                     // Found an implicit dereference of a defined pointer type.
                     // Restore n.X for better error message.
                     n.X = orig;
                     return _addr_null!;
-
                 }
-
                 x = inner;
-
             }
 
 
@@ -1351,10 +1292,8 @@ public static ptr<types.Field> Lookdot(ptr<ir.SelectorExpr> _addr_n, ptr<types.T
         n.SetOp(ir.ODOTMETH);
 
         return _addr_f2!;
-
     }
     return _addr_null!;
-
 }
 
 private static bool nokeys(ir.Nodes l) {
@@ -1363,7 +1302,6 @@ private static bool nokeys(ir.Nodes l) {
             return false;
         }
     }    return true;
-
 }
 
 private static bool hasddd(ptr<types.Type> _addr_t) {
@@ -1374,7 +1312,6 @@ private static bool hasddd(ptr<types.Type> _addr_t) {
             return true;
         }
     }    return false;
-
 }
 
 // typecheck assignment: type list = expression list
@@ -1453,11 +1390,9 @@ private static @string typecheckaste(ir.Op op, ir.Node call, bool isddd, ptr<typ
                     nl[i] = assignconvfn(n, t.Elem(), desc);
                 i++;
                 }
-
             }
 
             return ;
-
         }
         if (i >= len(nl)) {
             goto notenough;
@@ -1468,7 +1403,6 @@ private static @string typecheckaste(ir.Op op, ir.Node call, bool isddd, ptr<typ
             nl[i] = assignconvfn(n, t, desc);
         }
         i++;
-
     }    if (i < len(nl)) {
         goto toomany;
     }
@@ -1499,7 +1433,6 @@ notenough:
  {
                 @base.Errorf("not enough arguments in call to %v%s", call, details);
             }
-
         }
         else
  {
@@ -1541,7 +1474,6 @@ private static @string errorDetails(ir.Nodes nl, ptr<types.Type> _addr_tstruct, 
             return ""; // case 2
         }
     }    return fmt.Sprintf("\n\thave %s\n\twant %v", fmtSignature(nl, isddd), tstruct);
-
 }
 
 // sigrepr is a type's representation to the outside world,
@@ -1560,17 +1492,14 @@ private static @string sigrepr(ptr<types.Type> _addr_t, bool isddd) {
         // outside of the compiler, so let's use "number".
         // TODO(mdempsky): Revisit this.
         return "number";
-
     }
     if (isddd) {
         if (!t.IsSlice()) {
             @base.Fatalf("bad type for ... argument: %v", t);
         }
         return "..." + t.Elem().String();
-
     }
     return t.String();
-
 }
 
 // sigerr returns the signature of the types at the call or return.
@@ -1583,7 +1512,6 @@ private static @string fmtSignature(ir.Nodes nl, bool isddd) {
         var isdddArg = isddd && i == len(nl) - 1;
         typeStrings = append(typeStrings, sigrepr(_addr_n.Type(), isdddArg));
     }    return fmt.Sprintf("(%s)", strings.Join(typeStrings, ", "));
-
 }
 
 // type check composite
@@ -1593,7 +1521,6 @@ private static void fielddup(@string name, map<@string, bool> hash) {
         return ;
     }
     hash[name] = true;
-
 }
 
 // iscomptype reports whether type t is a composite literal type.
@@ -1605,8 +1532,7 @@ private static bool iscomptype(ptr<types.Type> _addr_t) {
         return true;
     else 
         return false;
-    
-}
+    }
 
 // pushtype adds elided type information for composite literals if
 // appropriate, and returns the resulting expression.
@@ -1632,7 +1558,6 @@ private static ir.Node pushtype(ir.Node nn, ptr<types.Type> _addr_t) {
         addr.SetImplicit(true);
         return addr;
         return n;
-
 }
 
 // typecheckarraylit type-checks a sequence of slice/array literal elements.
@@ -1679,19 +1604,13 @@ private static long typecheckarraylit(ptr<types.Type> _addr_elemType, long bound
  {
                             @base.Errorf("index must be non-negative integer constant");
                         }
-
                         elt.Key.SetDiag(true);
-
                     }
-
                     key = -(1 << 30); // stay negative for a while
                 }
-
                 kv = addr(elt);
                 r = elt.Value;
-
             }
-
             r = pushtype(r, _addr_elemType);
             r = Expr(r);
             r = AssignConv(r, elemType, ctx);
@@ -1702,7 +1621,6 @@ private static long typecheckarraylit(ptr<types.Type> _addr_elemType, long bound
  {
                 elts[i] = r;
             }
-
             if (key >= 0) {
                 if (indices != null) {
                     if (indices[key]) {
@@ -1712,27 +1630,21 @@ private static long typecheckarraylit(ptr<types.Type> _addr_elemType, long bound
  {
                         indices[key] = true;
                     }
-
                 }
-
                 if (bound >= 0 && key >= bound) {
                     @base.Errorf("array index %d out of bounds [0:%d]", key, bound);
                     bound = -1;
                 }
-
             }
-
             key++;
             if (key > length) {
                 length = key;
             }
-
         }
         elt = elt__prev1;
     }
 
     return length;
-
 }
 
 // visible reports whether sym is exported or locally defined.
@@ -1762,7 +1674,6 @@ private static void checkassign(ir.Node stmt, ir.Node n) => func((defer, _, _) =
             @base.Fatalf("expected an error about %v", n);
         }
         return ;
-
     }
     if (ir.IsAddressable(n)) {
         return ;
@@ -1785,8 +1696,7 @@ private static void checkassign(ir.Node stmt, ir.Node n) => func((defer, _, _) =
         @base.Errorf("cannot assign to %v (declared const)", n);
     else 
         @base.Errorf("cannot assign to %v", n);
-    
-});
+    });
 
 private static void checkassignto(ptr<types.Type> _addr_src, ir.Node dst) {
     ref types.Type src = ref _addr_src.val;
@@ -1803,7 +1713,6 @@ private static void checkassignto(ptr<types.Type> _addr_src, ir.Node dst) {
             return ;
         }
     }
-
 }
 
 // The result of stringtoruneslit MUST be assigned back to n, e.g.
@@ -1822,7 +1731,6 @@ private static ir.Node stringtoruneslit(ptr<ir.ConvExpr> _addr_n) {
     }    var nn = ir.NewCompLitExpr(@base.Pos, ir.OCOMPLIT, ir.TypeNode(n.Type()), null);
     nn.List = l;
     return Expr(nn);
-
 }
 
 private static slice<ptr<ir.MapType>> mapqueue = default;
@@ -1834,7 +1742,6 @@ public static void CheckMapKeys() {
             @base.ErrorfAt(n.Pos(), "invalid map key type %v", k);
         }
     }    mapqueue = null;
-
 }
 
 // TypeGen tracks the number of function-scoped defined types that
@@ -1875,15 +1782,12 @@ private static void typecheckdeftype(ptr<ir.Name> _addr_n) => func((defer, _, _)
             n.SetType(null);
         }
     }
-
     if (t.Kind() == types.TFORW && @base.Errors() > errorsBefore) { 
         // Something went wrong during type-checking,
         // but it was reported. Silence future errors.
         t.SetBroke(true);
-
     }
     types.ResumeCheckSize();
-
 });
 
 private static void typecheckdef(ptr<ir.Name> _addr_n) => func((defer, _, _) => {
@@ -1906,10 +1810,8 @@ private static void typecheckdef(ptr<ir.Name> _addr_n) => func((defer, _, _) => 
             }
 
         }
-
         n.SetWalkdef(1);
         return ;
-
     }
     var lno = ir.SetPos(n);
     typecheckdefstack = append(typecheckdefstack, n);
@@ -1955,13 +1857,9 @@ private static void typecheckdef(ptr<ir.Name> _addr_n) => func((defer, _, _) => 
  {
                     @base.ErrorfAt(n.Pos(), "const initializer %v is not a constant", e);
                 }
-
                 e.SetDiag(true);
-
             }
-
             goto ret;
-
         }
         var t = n.Type();
         if (t != null) {
@@ -1994,20 +1892,15 @@ private static void typecheckdef(ptr<ir.Name> _addr_n) => func((defer, _, _) => 
         if (n.Defn == null) {
             if (n.BuiltinOp != 0) { // like OPRINTN
                 break;
-
             }
-
             if (@base.Errors() > 0) { 
                 // Can have undefined variables in x := foo
                 // that make x have an n.name.Defn == nil.
                 // If there are other errors anyway, don't
                 // bother adding to the noise.
                 break;
-
             }
-
             @base.Fatalf("var without type, init: %v", n.Sym());
-
         }
         if (n.Defn.Op() == ir.ONAME) {
             n.Defn = Expr(n.Defn);
@@ -2032,11 +1925,8 @@ private static void typecheckdef(ptr<ir.Name> _addr_n) => func((defer, _, _) => 
                 if (n.Curfn == null) {
                     n.Sym().Def = n.Ntype;
                 }
-
             }
-
             break;
-
         }
         typecheckdeftype(_addr_n);
     else 
@@ -2054,7 +1944,6 @@ private static void typecheckdef(ptr<ir.Name> _addr_n) => func((defer, _, _) => 
 
     @base.Pos = lno;
     n.SetWalkdef(1);
-
 });
 
 private static bool checkmake(ptr<types.Type> _addr_t, @string arg, ptr<ir.Node> _addr_np) {
@@ -2081,7 +1970,6 @@ private static bool checkmake(ptr<types.Type> _addr_t, @string arg, ptr<ir.Node>
     np = n;
 
     return true;
-
 }
 
 // checkunsafeslice is like checkmake but for unsafe.Slice.
@@ -2108,7 +1996,6 @@ private static bool checkunsafeslice(ptr<ir.Node> _addr_np) {
     np = n;
 
     return true;
-
 }
 
 // markBreak marks control statements containing break statements with SetHasBreak(true).
@@ -2130,7 +2017,6 @@ private static void markBreak(ptr<ir.Func> _addr_fn) {
  {
                 setHasBreak(labels[n.Label]);
             }
-
         else if (n.Op() == ir.OFOR || n.Op() == ir.OFORUNTIL || n.Op() == ir.OSWITCH || n.Op() == ir.OSELECT || n.Op() == ir.ORANGE) 
             var old = implicit;
             implicit = n;
@@ -2153,27 +2039,20 @@ private static void markBreak(ptr<ir.Func> _addr_fn) {
                 if (labels == null) { 
                     // Map creation delayed until we need it - most functions don't.
                     labels = make_map<ptr<types.Sym>, ir.Node>();
-
                 }
-
                 labels[sym] = n;
-
             }
-
             ir.DoChildren(n, mark);
             if (sym != null) {
                 delete(labels, sym);
             }
-
             implicit = old;
         else 
             ir.DoChildren(n, mark);
                 return false;
-
     };
 
     mark(fn);
-
 }
 
 private static ptr<types.Sym> controlLabel(ir.Node n) {
@@ -2198,7 +2077,6 @@ private static ptr<types.Sym> controlLabel(ir.Node n) {
             break;
         }
     }
-
 }
 
 private static void setHasBreak(ir.Node n) {
@@ -2224,7 +2102,6 @@ private static void setHasBreak(ir.Node n) {
             break;
         }
     }
-
 }
 
 // isTermNodes reports whether the Nodes list ends with a terminating statement.
@@ -2235,7 +2112,6 @@ private static bool isTermNodes(ir.Nodes l) {
         return false;
     }
     return isTermNode(s[c - 1]);
-
 }
 
 // isTermNode reports whether the node n, the last one in a
@@ -2280,9 +2156,7 @@ private static bool isTermNode(ir.Node n) {
                 }
                 if (len(cas.List) == 0) { // default
                     def = true;
-
                 }
-
             }
 
             cas = cas__prev1;
@@ -2309,7 +2183,6 @@ private static bool isTermNode(ir.Node n) {
 
         return true;
         return false;
-
 }
 
 // CheckUnused checks for any declared variables that weren't used.
@@ -2335,9 +2208,7 @@ public static void CheckUnused(ptr<ir.Func> _addr_fn) {
                     }
 
                 }
-
             }
-
         }
         ln = ln__prev1;
     }
@@ -2366,7 +2237,6 @@ public static void CheckUnused(ptr<ir.Func> _addr_fn) {
                 }
 
             }
-
         }
         ln = ln__prev1;
     }
@@ -2399,16 +2269,13 @@ private static long getIotaValue() {
                 }
 
             }
-
         }
     }
-
 
     if (ir.CurFunc != null && ir.CurFunc.Iota >= 0) {
         return ir.CurFunc.Iota;
     }
     return -1;
-
 }
 
 // curpkg returns the current package, based on Curfn.
@@ -2417,10 +2284,8 @@ private static ptr<types.Pkg> curpkg() {
     if (fn == null) { 
         // Initialization expressions for package-scope variables.
         return _addr_types.LocalPkg!;
-
     }
     return _addr_fnpkg(fn.Nname)!;
-
 }
 
 public static ir.Node Conv(ir.Node n, ptr<types.Type> _addr_t) {
@@ -2433,7 +2298,6 @@ public static ir.Node Conv(ir.Node n, ptr<types.Type> _addr_t) {
     n.SetType(t);
     n = Expr(n);
     return n;
-
 }
 
 // ConvNop converts node n to type t using the OCONVNOP op
@@ -2448,7 +2312,6 @@ public static ir.Node ConvNop(ir.Node n, ptr<types.Type> _addr_t) {
     n.SetType(t);
     n = Expr(n);
     return n;
-
 }
 
 } // end typecheck_package

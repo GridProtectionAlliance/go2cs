@@ -5,17 +5,16 @@
 // Simple file i/o and string manipulation, to avoid
 // depending on strconv and bufio and strings.
 
-// package net -- go2cs converted at 2022 March 06 22:16:29 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:03 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\parse.go
-using bytealg = go.@internal.bytealg_package;
-using io = go.io_package;
-using os = go.os_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using io = io_package;
+using os = os_package;
+using time = time_package;
+using System;
 
 public static partial class net_package {
 
@@ -48,7 +47,6 @@ private static (@string, bool) getLineFromData(this ptr<file> _addr_f) {
             copy(data[(int)0..], data[(int)i..]);
             f.data = data[(int)0..(int)n];
             return ;
-
         }
     }
     if (f.atEOF && len(f.data) > 0) { 
@@ -56,10 +54,8 @@ private static (@string, bool) getLineFromData(this ptr<file> _addr_f) {
         s = string(data);
         f.data = f.data[(int)0..(int)0];
         ok = true;
-
     }
     return ;
-
 }
 
 private static (@string, bool) readLine(this ptr<file> _addr_f) {
@@ -84,7 +80,6 @@ private static (@string, bool) readLine(this ptr<file> _addr_f) {
     }
     s, ok = f.getLineFromData();
     return ;
-
 }
 
 private static (ptr<file>, error) open(@string name) {
@@ -96,7 +91,6 @@ private static (ptr<file>, error) open(@string name) {
         return (_addr_null!, error.As(err)!);
     }
     return (addr(new file(fd,make([]byte,0,64*1024),false)), error.As(null!)!);
-
 }
 
 private static (time.Time, long, error) stat(@string name) {
@@ -109,7 +103,6 @@ private static (time.Time, long, error) stat(@string name) {
         return (new time.Time(), 0, error.As(err)!);
     }
     return (st.ModTime(), st.Size(), error.As(null!)!);
-
 }
 
 // Count occurrences in s of any bytes in t.
@@ -121,7 +114,6 @@ private static nint countAnyByte(@string s, @string t) {
         }
     }
     return n;
-
 }
 
 // Split s at any bytes in t.
@@ -143,7 +135,6 @@ private static slice<@string> splitAtBytes(@string s, @string t) {
         n++;
     }
     return a[(int)0..(int)n];
-
 }
 
 private static slice<@string> getFields(@string s) {
@@ -175,7 +166,6 @@ private static (nint, nint, bool) dtoi(@string s) {
         return (0, 0, false);
     }
     return (n, i, true);
-
 }
 
 // Hexadecimal to integer.
@@ -211,7 +201,6 @@ private static (nint, nint, bool) xtoi(@string s) {
         return (0, i, false);
     }
     return (n, i, true);
-
 }
 
 // xtoi2 converts the next two hex digits of s into a byte.
@@ -227,7 +216,6 @@ private static (byte, bool) xtoi2(@string s, byte e) {
     }
     var (n, ei, ok) = xtoi(s[..(int)2]);
     return (byte(n), ok && ei == 2);
-
 }
 
 // Convert i to a hexadecimal string. Leading zeros are not printed.
@@ -242,7 +230,6 @@ private static slice<byte> appendHex(slice<byte> dst, uint i) {
         }
     }
     return dst;
-
 }
 
 // Number of occurrences of b in s.
@@ -254,7 +241,6 @@ private static nint count(@string s, byte b) {
         }
     }
     return n;
-
 }
 
 // Index of rightmost occurrence of b in s.
@@ -269,7 +255,6 @@ private static nint last(@string s, byte b) {
         }
     }
     return i;
-
 }
 
 // lowerASCIIBytes makes x ASCII lowercase in-place.
@@ -287,7 +272,6 @@ private static byte lowerASCII(byte b) {
         return b + ('a' - 'A');
     }
     return b;
-
 }
 
 // trimSpace returns x without any leading or trailing ASCII whitespace.
@@ -316,9 +300,7 @@ private static slice<byte> removeComment(slice<byte> line) {
             return line[..(int)i];
         }
     }
-
     return line;
-
 }
 
 // foreachLine runs fn on each line of x.
@@ -340,10 +322,8 @@ private static error foreachLine(slice<byte> x, Func<slice<byte>, error> fn) {
             }
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 // foreachField runs fn on each non-empty run of non-space bytes in x.
@@ -367,16 +347,12 @@ private static error foreachField(slice<byte> x, Func<slice<byte>, error> fn) {
                     }
 
                 }
-
             }
 
         }
-
         x = trimSpace(x[(int)sp + 1..]);
-
     }
     return error.As(null!)!;
-
 }
 
 // stringsHasSuffix is strings.HasSuffix. It reports whether s ends in
@@ -408,7 +384,6 @@ private static bool stringsEqualFold(@string s, @string t) {
         }
     }
     return true;
-
 }
 
 private static (slice<byte>, error) readFull(io.Reader r) {
@@ -426,7 +401,6 @@ private static (slice<byte>, error) readFull(io.Reader r) {
             return (null, error.As(err)!);
         }
     }
-
 }
 
 // goDebugString returns the value of the named GODEBUG key.
@@ -460,13 +434,11 @@ private static @string goDebugString(@string key) {
             }
 
             return val;
-
         }
 
         i = i__prev1;
     }
     return "";
-
 }
 
 } // end net_package

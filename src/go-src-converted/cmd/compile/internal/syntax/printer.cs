@@ -4,21 +4,22 @@
 
 // This file implements printing of syntax trees in source format.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:38 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:27:03 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\printer.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using strings = strings_package;
+
+
+// Form controls print formatting.
+
+using System;
 public static partial class syntax_package {
 
-    // Form controls print formatting.
 public partial struct Form { // : nuint
 }
 
@@ -44,14 +45,12 @@ public static (nint, error) Fprint(io.Writer w, Node x, Form form) => func((defe
             }
 
         }
-
     }());
 
     p.print(x);
     p.flush(_EOF);
 
     return ;
-
 });
 
 // String is a convenience functions that prints n in ShortForm
@@ -63,7 +62,6 @@ public static @string String(Node n) {
         fmt.Fprintf(_addr_buf, "<<< ERROR: %s", err);
     }
     return buf.String();
-
 }
 
 private partial struct ctrlSymbol { // : nint
@@ -124,11 +122,9 @@ private static void writeBytes(this ptr<printer> _addr_p, slice<byte> data) => f
             n -= len(tabBytes);
         }
         p.write(tabBytes[..(int)n]);
-
     }
     p.write(data);
     p.nlcount = 0;
-
 });
 
 private static void writeString(this ptr<printer> _addr_p, @string s) {
@@ -145,7 +141,6 @@ private static bool impliesSemi(token tok) {
     if (tok == _Name || tok == _Break || tok == _Continue || tok == _Fallthrough || tok == _Return || tok == _Rparen || tok == _Rbrack || tok == _Rbrace) // TODO(gri) fix this
         return true;
         return false;
-
 }
 
 // TODO(gri) provide table of []byte values for all tokens to avoid repeated string conversion
@@ -187,14 +182,12 @@ private static void flush(this ptr<printer> _addr_p, token next) => func((_, pan
                     sawNewline = false;
                     k = none; // eliminate semi
                 }
-
                 p.pending[i].kind = k;
             else if (p.pending[i].kind == newline) 
                 sawNewline = true;
             else if (p.pending[i].kind == blank || p.pending[i].kind == indent || p.pending[i].kind == outdent)             else 
                 panic("unreachable");
-            
-        }
+                    }
 
         i = i__prev1;
     } 
@@ -217,9 +210,7 @@ private static void flush(this ptr<printer> _addr_p, token next) => func((_, pan
                     p.writeBytes(blankByte);
                     p.nlcount = 0;
                     prev = blank;
-
                 }
-
             else if (p.pending[i].kind == newline) 
                 const nint maxEmptyLines = 1;
 
@@ -244,8 +235,7 @@ private static void flush(this ptr<printer> _addr_p, token next) => func((_, pan
                 //     // TODO(gri) should check that line comments are always followed by newline
             else 
                 panic("unreachable");
-            
-        }
+                    }
         i = i__prev1;
     }
 
@@ -303,11 +293,9 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                 if (mayCombine(p.lastTok, s[0])) {
                     panic("adjacent tokens combine without whitespace");
                 }
-
                 if (x == _Semi) { 
                     // delay printing of semi
                     p.addWhitespace(semi, "");
-
                 }
                 else
  {
@@ -316,7 +304,6 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                     p.nlcount = 0;
                     p.lastTok = x;
                 }
-
                 break;
             case Operator x:
                 if (x != 0) {
@@ -345,9 +332,7 @@ private static void print(this ptr<printer> _addr_p, params object[] args) => fu
                 break;
             }
         }
-
     }
-
 });
 
 private static void printNode(this ptr<printer> _addr_p, Node n) {
@@ -414,9 +399,7 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
  {
                     p.print(n.Body);
                 }
-
             }
-
             break;
         case ptr<CompositeLit> n:
             if (n.Type != null) {
@@ -437,9 +420,7 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
  {
                     p.printExprList(n.ElemList);
                 }
-
             }
-
             p.print(_Rbrace);
             break;
         case ptr<ParenExpr> n:
@@ -461,7 +442,6 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                 }
 
             }
-
             p.print(_Colon);
             {
                 var j = n.Index[1];
@@ -471,7 +451,6 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                 }
 
             }
-
             {
                 var k = n.Index[2];
 
@@ -480,7 +459,6 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                 }
 
             }
-
             p.print(_Rbrack);
             break;
         case ptr<AssertExpr> n:
@@ -508,7 +486,6 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                 //     p.print(blank)
                 // }
                 p.print(n.X);
-
             }
             else
  { 
@@ -516,9 +493,7 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                 // TODO(gri) eventually take precedence into account
                 // to control possibly missing parentheses
                 p.print(n.X, blank, n.Op, blank, n.Y);
-
             }
-
             break;
         case ptr<KeyValueExpr> n:
             p.print(n.Key, _Colon, blank, n.Value);
@@ -555,9 +530,7 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
  {
                     p.printFieldList(n.FieldList, n.TagList, _Semi);
                 }
-
             }
-
             p.print(_Rbrace);
             break;
         case ptr<FuncType> n:
@@ -575,21 +548,17 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
  { 
                     // method or embedded interface
                     methods = append(methods, f);
-
                 }
-
             }
             var multiLine = len(n.MethodList) > 0 && p.linebreaks;
             p.print(_Interface);
             if (multiLine) {
                 p.print(blank);
             }
-
             p.print(_Lbrace);
             if (multiLine) {
                 p.print(newline, indent);
             }
-
             if (len(types) > 0) {
                 p.print(_Type, blank);
                 p.printExprList(types);
@@ -597,15 +566,12 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                     p.print(_Semi, blank);
                 }
             }
-
             if (len(methods) > 0) {
                 p.printMethodList(methods);
             }
-
             if (multiLine) {
                 p.print(outdent, newline);
             }
-
             p.print(_Rbrace);
             break;
         case ptr<MapType> n:
@@ -628,7 +594,6 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                     p.print(_Lparen);
                     p.print(n.Elem);
                     p.print(_Rparen);
-
                 }
                 else
  {
@@ -667,7 +632,6 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                 p.print(blank, n.Op, _Assign, blank);
                 p.print(n.Rhs);
             }
-
             break;
         case ptr<CallStmt> n:
             p.print(n.Tok, blank, n.Call);
@@ -748,21 +712,16 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                         }
 
                     }
-
                 }
-
                 p.print(_Semi, blank);
                 if (n.Cond != null) {
                     p.print(n.Cond);
                 }
-
                 p.print(_Semi, blank);
                 if (n.Post != null) {
                     p.print(n.Post, blank);
                 }
-
             }
-
             p.print(n.Body);
             break;
         case ptr<ImportDecl> n:
@@ -829,19 +788,16 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
                 }
 
             }
-
             p.print(n.Name);
             if (n.TParamList != null) {
                 p.print(_Lbrack);
                 p.printFieldList(n.TParamList, null, _Comma);
                 p.print(_Rbrack);
             }
-
             p.printSignature(n.Type);
             if (n.Body != null) {
                 p.print(blank, n.Body);
             }
-
             break;
         case ptr<printGroup> n:
             p.print(n.Tok, blank, _Lparen);
@@ -871,7 +827,6 @@ private static void printRawNode(this ptr<printer> _addr_p, Node n) => func((_, 
             break;
         }
     }
-
 });
 
 private static void printFields(this ptr<printer> _addr_p, slice<ptr<Field>> fields, slice<ptr<BasicLit>> tags, nint i, nint j) {
@@ -880,7 +835,6 @@ private static void printFields(this ptr<printer> _addr_p, slice<ptr<Field>> fie
     if (i + 1 == j && fields[i].Name == null) { 
         // anonymous field
         p.printNode(fields[i].Type);
-
     }
     else
  {
@@ -913,7 +867,6 @@ private static void printFieldList(this ptr<printer> _addr_p, slice<ptr<Field>> 
             typ = f.Type;
         }
     }    p.printFields(fields, tags, i0, len(fields));
-
 }
 
 private static void printMethodList(this ptr<printer> _addr_p, slice<ptr<Field>> methods) {
@@ -942,7 +895,6 @@ private static void printNameList(this ptr<printer> _addr_p, slice<ptr<Name>> li
             p.print(_Comma, blank);
         }
         p.printNode(x);
-
     }
 }
 
@@ -954,7 +906,6 @@ private static void printExprList(this ptr<printer> _addr_p, slice<Expr> list) {
             p.print(_Comma, blank);
         }
         p.printNode(x);
-
     }
 }
 
@@ -996,7 +947,6 @@ private static (token, ptr<Group>) groupFor(Decl d) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 private partial struct printGroup {
@@ -1016,14 +966,12 @@ private static void printDecl(this ptr<printer> _addr_p, slice<Decl> list) => fu
         }
         p.printNode(list[0]);
         return ;
-
     }
     ref printGroup pg = ref heap(out ptr<printGroup> _addr_pg); 
     // *pg.Comments() = *group.Comments()
     pg.Tok = tok;
     pg.Decls = list;
     p.printNode(_addr_pg);
-
 });
 
 private static void printDeclList(this ptr<printer> _addr_p, slice<Decl> list) {
@@ -1045,18 +993,13 @@ private static void printDeclList(this ptr<printer> _addr_p, slice<Decl> list) {
                     if (g != group || s != tok || s == _Func) {
                         p.print(newline);
                     }
-
                     i0 = i;
-
                 }
-
                 (tok, group) = (s, g);
             }
 
         }
-
     }    p.printDecl(list[(int)i0..]);
-
 }
 
 private static void printSignature(this ptr<printer> _addr_p, ptr<FuncType> _addr_sig) {
@@ -1076,10 +1019,8 @@ private static void printSignature(this ptr<printer> _addr_p, ptr<FuncType> _add
  {
                 p.printParameterList(list);
             }
-
         }
     }
-
 }
 
 private static void printParameterList(this ptr<printer> _addr_p, slice<ptr<Field>> list) {
@@ -1098,19 +1039,13 @@ private static void printParameterList(this ptr<printer> _addr_p, slice<ptr<Fiel
                     if (f1.Name != null && f1.Type == f.Type) {
                         continue; // no need to print type
                     }
-
                 }
-
                 p.print(blank);
-
             }
-
             p.printNode(f.Type);
-
         }
     }
     p.print(_Rparen);
-
 }
 
 private static void printStmtList(this ptr<printer> _addr_p, slice<Stmt> list, bool braces) {
@@ -1133,7 +1068,6 @@ private static void printStmtList(this ptr<printer> _addr_p, slice<Stmt> list, b
                 }
 
             }
-
         }
     }
 }
@@ -1150,7 +1084,6 @@ private static void printSwitchBody(this ptr<printer> _addr_p, slice<ptr<CaseCla
         }
     }
     p.print(_Rbrace);
-
 }
 
 private static void printSelectBody(this ptr<printer> _addr_p, slice<ptr<CommClause>> list) {
@@ -1165,7 +1098,6 @@ private static void printSelectBody(this ptr<printer> _addr_p, slice<ptr<CommCla
         }
     }
     p.print(_Rbrace);
-
 }
 
 private static void printCaseClause(this ptr<printer> _addr_p, ptr<CaseClause> _addr_c, bool braces) {

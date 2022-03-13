@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modconv -- go2cs converted at 2022 March 06 23:18:11 UTC
+// package modconv -- go2cs converted at 2022 March 13 06:31:34 UTC
 // import "cmd/go/internal/modconv" ==> using modconv = go.cmd.go.@internal.modconv_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modconv\dep.go
-using fmt = go.fmt_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using url = go.net.url_package;
-using path = go.path_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-
 namespace go.cmd.go.@internal;
+
+using fmt = fmt_package;
+using lazyregexp = @internal.lazyregexp_package;
+using url = net.url_package;
+using path = path_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
 
 public static partial class modconv_package {
 
@@ -45,7 +45,6 @@ public static (ptr<modfile.File>, error) ParseGopkgLock(@string file, slice<byte
             i = i__prev1;
 
         }
-
         line = strings.TrimSpace(line);
         if (line == "[[projects]]") {
             list = append(list, new pkg());
@@ -71,7 +70,6 @@ public static (ptr<modfile.File>, error) ParseGopkgLock(@string file, slice<byte
                 return (_addr_null!, error.As(fmt.Errorf("%s:%d: invalid quoted string: %v", file, lineno, err))!);
             }
             val = q;
-
         }
         switch (key) {
             case "name": 
@@ -95,10 +93,8 @@ public static (ptr<modfile.File>, error) ParseGopkgLock(@string file, slice<byte
                     }
                 }
                 r.Version = val;
-
                 break;
         }
-
     }    {
         ptr<pkg> r__prev1 = r;
 
@@ -120,14 +116,12 @@ public static (ptr<modfile.File>, error) ParseGopkgLock(@string file, slice<byte
                 module.Version old = new module.Version(Path:r.Path,Version:r.Version);
                 module.Version @new = new module.Version(Path:source,Version:r.Version);
                 mf.Replace = append(mf.Replace, addr(new modfile.Replace(Old:old,New:new)));
-
             }
         }
         r = r__prev1;
     }
 
     return (_addr_mf!, error.As(null!)!);
-
 }
 
 private static var scpSyntaxReg = lazyregexp.New("^([a-zA-Z0-9_]+)@([a-zA-Z0-9._-]+):(.*)$");
@@ -146,7 +140,6 @@ private static (@string, error) decodeSource(@string source) {
             // Eg, "git@github.com:user/repo" becomes
             // "ssh://git@github.com/user/repo".
             u = addr(new url.URL(Scheme:"ssh",User:url.User(m[1]),Host:m[2],Path:"/"+m[3],));
-
         }
         else
  {
@@ -170,7 +163,6 @@ private static (@string, error) decodeSource(@string source) {
     p = strings.TrimSuffix(p, ".git");
     p = strings.TrimSuffix(p, ".hg");
     return (p, error.As(null!)!);
-
 }
 
 } // end modconv_package

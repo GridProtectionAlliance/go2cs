@@ -76,27 +76,29 @@ On Plan 9, the resolver always accesses /net/cs and /net/dns.
 On Windows, the resolver always uses C library functions, such as GetAddrInfo and DnsQuery.
 
 */
-// package net -- go2cs converted at 2022 March 06 22:16:25 UTC
+
+// package net -- go2cs converted at 2022 March 13 05:29:58 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\net.go
-using context = go.context_package;
-using errors = go.errors_package;
-using poll = go.@internal.poll_package;
-using io = go.io_package;
-using os = go.os_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
 
+using context = context_package;
+using errors = errors_package;
+using poll = @internal.poll_package;
+using io = io_package;
+using os = os_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using time = time_package;
+
+
+// netGo and netCgo contain the state of the build tags used
+// to build this binary, and whether cgo is available.
+// conf.go mirrors these into conf for easier testing.
+
+using System;
 public static partial class net_package {
 
-    // netGo and netCgo contain the state of the build tags used
-    // to build this binary, and whether cgo is available.
-    // conf.go mirrors these into conf for easier testing.
 private static bool netGo = default;private static bool netCgo = default;
 
 // Addr represents a network end point address.
@@ -178,7 +180,6 @@ private static (nint, error) Read(this ptr<conn> _addr_c, slice<byte> b) {
         err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // Write implements the Conn Write method.
@@ -195,7 +196,6 @@ private static (nint, error) Write(this ptr<conn> _addr_c, slice<byte> b) {
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // Close closes the connection.
@@ -210,7 +210,6 @@ private static error Close(this ptr<conn> _addr_c) {
         err = addr(new OpError(Op:"close",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return error.As(err)!;
-
 }
 
 // LocalAddr returns the local network address.
@@ -223,7 +222,6 @@ private static Addr LocalAddr(this ptr<conn> _addr_c) {
         return null;
     }
     return c.fd.laddr;
-
 }
 
 // RemoteAddr returns the remote network address.
@@ -236,7 +234,6 @@ private static Addr RemoteAddr(this ptr<conn> _addr_c) {
         return null;
     }
     return c.fd.raddr;
-
 }
 
 // SetDeadline implements the Conn SetDeadline method.
@@ -253,9 +250,7 @@ private static error SetDeadline(this ptr<conn> _addr_c, time.Time t) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:nil,Addr:c.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetReadDeadline implements the Conn SetReadDeadline method.
@@ -272,9 +267,7 @@ private static error SetReadDeadline(this ptr<conn> _addr_c, time.Time t) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:nil,Addr:c.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetWriteDeadline implements the Conn SetWriteDeadline method.
@@ -291,9 +284,7 @@ private static error SetWriteDeadline(this ptr<conn> _addr_c, time.Time t) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:nil,Addr:c.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetReadBuffer sets the size of the operating system's
@@ -311,9 +302,7 @@ private static error SetReadBuffer(this ptr<conn> _addr_c, nint bytes) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:nil,Addr:c.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetWriteBuffer sets the size of the operating system's
@@ -331,9 +320,7 @@ private static error SetWriteBuffer(this ptr<conn> _addr_c, nint bytes) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:nil,Addr:c.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // File returns a copy of the underlying os.File.
@@ -353,7 +340,6 @@ private static (ptr<os.File>, error) File(this ptr<conn> _addr_c) {
         err = addr(new OpError(Op:"file",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return ;
-
 }
 
 // PacketConn is a generic packet-oriented network connection.
@@ -407,7 +393,6 @@ private static nint listenerBacklog() {
         listenerBacklogCache.val = maxListenerBacklog();
     });
     return listenerBacklogCache.val;
-
 }
 
 // A Listener is a generic network listener for stream-oriented protocols.
@@ -444,8 +429,7 @@ private static error mapErr(error err) {
         return error.As(errTimeout)!;
     else 
         return error.As(err)!;
-    
-}
+    }
 
 // OpError is the error type usually returned by functions in the net
 // package. It describes the operation, network type, and address of
@@ -495,11 +479,9 @@ private static @string Error(this ptr<OpError> _addr_e) {
             s += " ";
         }
         s += e.Addr.String();
-
     }
     s += ": " + e.Err.Error();
     return s;
-
 }
 
  
@@ -522,10 +504,8 @@ private static bool Timeout(this ptr<OpError> _addr_e) {
             return ok && t.Timeout();
         }
     }
-
     (t, ok) = timeout.As(e.Err._<timeout>())!;
     return ok && t.Timeout();
-
 }
 
 private partial interface temporary {
@@ -548,10 +528,8 @@ private static bool Temporary(this ptr<OpError> _addr_e) {
             return ok && t.Temporary();
         }
     }
-
     (t, ok) = temporary.As(e.Err._<temporary>())!;
     return ok && t.Temporary();
-
 }
 
 // A ParseError is the error type of literal network address parsers.
@@ -593,7 +571,6 @@ private static @string Error(this ptr<AddrError> _addr_e) {
         s = "address " + e.Addr + ": " + s;
     }
     return s;
-
 }
 
 private static bool Timeout(this ptr<AddrError> _addr_e) {
@@ -713,7 +690,6 @@ private static @string Error(this ptr<DNSError> _addr_e) {
     }
     s += ": " + e.Err;
     return s;
-
 }
 
 // Timeout reports whether the DNS lookup is known to have timed out.
@@ -757,7 +733,6 @@ private static (long, error) genericReadFrom(io.Writer w, io.Reader r) {
  
     // Use wrapper to hide existing r.ReadFrom from io.Copy.
     return io.Copy(new writerOnly(w), r);
-
 }
 
 // Limit the number of concurrent cgo-using goroutines, because
@@ -811,7 +786,6 @@ private static (long, error) WriteTo(this ptr<Buffers> _addr_v, io.Writer w) {
             return wv.writeBuffers(v);
         }
     }
-
     foreach (var (_, b) in v.val) {
         var (nb, err) = w.Write(b);
         n += int64(nb);
@@ -821,7 +795,6 @@ private static (long, error) WriteTo(this ptr<Buffers> _addr_v, io.Writer w) {
         }
     }    v.consume(n);
     return (n, error.As(null!)!);
-
 }
 
 private static (nint, error) Read(this ptr<Buffers> _addr_v, slice<byte> p) {
@@ -839,7 +812,6 @@ private static (nint, error) Read(this ptr<Buffers> _addr_v, slice<byte> p) {
         err = io.EOF;
     }
     return ;
-
 }
 
 private static void consume(this ptr<Buffers> _addr_v, long n) {
@@ -854,9 +826,7 @@ private static void consume(this ptr<Buffers> _addr_v, long n) {
         n -= ln0;
         (v.val)[0] = null;
         v.val = (v.val)[(int)1..];
-
     }
-
 }
 
 } // end net_package

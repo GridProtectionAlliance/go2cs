@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:44 UTC
+// package typecheck -- go2cs converted at 2022 March 13 06:00:04 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\subr.go
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class typecheck_package {
 
@@ -38,7 +37,6 @@ public static ptr<types.Sym> LookupNum(@string prefix, nint n) {
     copy(buf[..], prefix);
     var b = strconv.AppendInt(buf[..(int)len(prefix)], int64(n), 10);
     return _addr_types.LocalPkg.LookupBytes(b)!;
-
 }
 
 // Given funarg struct list, return list of fn args.
@@ -53,20 +51,16 @@ public static slice<ptr<ir.Field>> NewFuncParams(ptr<types.Type> _addr_tl, bool 
             // invent a name so that we can refer to it in the trampoline
             s = LookupNum(".anon", gen);
             gen++;
-
         }
         else if (s != null && s.Pkg != types.LocalPkg) { 
             // TODO(mdempsky): Preserve original position, name, and package.
             s = Lookup(s.Name);
-
         }
         var a = ir.NewField(@base.Pos, s, null, t.Type);
         a.Pos = t.Pos;
         a.IsDDD = t.IsDDD();
         args = append(args, a);
-
     }    return args;
-
 }
 
 // newname returns a new ONAME Node associated with symbol s.
@@ -106,17 +100,14 @@ private static ir.Node markAddrOf(ir.Node n) {
             }
 
         }
-
     }
     else
  { 
         // Remember that we built an OADDR without computing the Addrtaken bit for
         // its argument. We'll do that later in bulk using computeAddrtaken.
         DirtyAddrtaken = true;
-
     }
     return n;
-
 }
 
 // If IncrementalAddrtaken is false, we do not compute Addrtaken for an OADDR Node
@@ -143,22 +134,16 @@ public static void ComputeAddrtaken(slice<ir.Node> top) {
                             // Mark the original variable as Addrtaken so that capturevars
                             // knows not to pass it by value.
                             x.Name().Defn.Name().SetAddrtaken(true);
-
                         }
-
                     }
 
                 }
-
             }
-
             if (n.Op() == ir.OCLOSURE) {
                 ir.VisitList(n._<ptr<ir.ClosureExpr>>().Func.Body, doVisit);
             }
-
         };
         ir.Visit(n, doVisit);
-
     }
 }
 
@@ -208,7 +193,6 @@ public static ptr<ir.SelectorExpr> AddImplicitDots(ptr<ir.SelectorExpr> _addr_n)
     }
 
     return _addr_n!;
-
 }
 
 public static void CalcMethods(ptr<types.Type> _addr_t) {
@@ -252,7 +236,6 @@ public static void CalcMethods(ptr<types.Type> _addr_t) {
                 break;
             }
         }        ms = append(ms, f);
-
     }    {
         var f__prev1 = f;
 
@@ -266,7 +249,6 @@ public static void CalcMethods(ptr<types.Type> _addr_t) {
     ms = append(ms, t.Methods().Slice());
     sort.Sort(types.MethodsByName(ms));
     t.SetAllMethods(ms);
-
 }
 
 // adddot1 returns the number of fields or methods named s at depth d in Type t.
@@ -321,7 +303,6 @@ private static (nint, bool) adddot1(ptr<types.Sym> _addr_s, ptr<types.Type> _add
         if (d < 0) { 
             // Found an embedded field at target depth.
             return (c, true);
-
         }
         var (a, more1) = adddot1(_addr_s, _addr_f.Type, d, _addr_save, ignorecase);
         if (a != 0 && c == 0) {
@@ -332,7 +313,6 @@ private static (nint, bool) adddot1(ptr<types.Sym> _addr_s, ptr<types.Type> _add
             more = true;
         }
     }    return (c, more);
-
 });
 
 // dotlist is used by adddot1 to record the path of embedded fields
@@ -378,7 +358,6 @@ private static ir.Node assignconvfn(ir.Node n, ptr<types.Type> _addr_t, Func<@st
     r.SetTypecheck(1);
     r.SetImplicit(true);
     return r;
-
 }
 
 // Is type src assignment compatible to type dst?
@@ -405,14 +384,12 @@ public static (ir.Op, @string) Assignop(ptr<types.Type> _addr_src, ptr<types.Typ
             // Conversion between two empty interfaces
             // requires no code.
             return (ir.OCONVNOP, "");
-
         }
         if ((src.Sym() == null || dst.Sym() == null) && !src.IsInterface()) { 
             // Conversion between two types, at least one unnamed,
             // needs no conversion. The exception is nonempty interfaces
             // which need to have their itab updated.
             return (ir.OCONVNOP, "");
-
         }
     }
     if (dst.IsInterface() && src.Kind() != types.TNIL) {
@@ -427,9 +404,7 @@ public static (ir.Op, @string) Assignop(ptr<types.Type> _addr_src, ptr<types.Typ
             if (types.IsDirectIface(src) && !dst.IsEmptyInterface()) {
                 NeedITab(src, dst);
             }
-
             return (ir.OCONVIFACE, "");
-
         }
         if (have != null && have.Sym == missing.Sym && (have.Type.Broke() || missing.Type.Broke())) {
             return (ir.OCONVIFACE, "");
@@ -455,7 +430,6 @@ public static (ir.Op, @string) Assignop(ptr<types.Type> _addr_src, ptr<types.Typ
             why = fmt.Sprintf(":\n\t%v does not implement %v (missing %v method)", src, dst, missing.Sym);
         }
         return (ir.OXXX, why);
-
     }
     if (isptrto(_addr_dst, types.TINTER)) {
         why = fmt.Sprintf(":\n\t%v is pointer to interface, not interface", dst);
@@ -470,7 +444,6 @@ public static (ir.Op, @string) Assignop(ptr<types.Type> _addr_src, ptr<types.Typ
             why = ": need type assertion";
         }
         return (ir.OXXX, why);
-
     }
     if (src.IsChan() && src.ChanDir() == types.Cboth && dst.IsChan()) {
         if (types.Identical(src.Elem(), dst.Elem()) && (src.Sym() == null || dst.Sym() == null)) {
@@ -481,13 +454,11 @@ public static (ir.Op, @string) Assignop(ptr<types.Type> _addr_src, ptr<types.Typ
 
         if (dst.Kind() == types.TPTR || dst.Kind() == types.TFUNC || dst.Kind() == types.TMAP || dst.Kind() == types.TCHAN || dst.Kind() == types.TINTER || dst.Kind() == types.TSLICE) 
             return (ir.OCONVNOP, "");
-        
-    }
+            }
     if (dst.Kind() == types.TBLANK) {
         return (ir.OCONVNOP, "");
     }
     return (ir.OXXX, "");
-
 }
 
 // Can we convert a value of type src to a value of type dst?
@@ -535,14 +506,12 @@ public static (ir.Op, @string) Convertop(bool srcConstant, ptr<types.Type> _addr
             return (ir.OCONVNOP, "");
         }
         return (ir.OCONV, "");
-
     }
     if (src.IsComplex() && dst.IsComplex()) {
         if (types.SimType[src.Kind()] == types.SimType[dst.Kind()]) {
             return (ir.OCONVNOP, "");
         }
         return (ir.OCONV, "");
-
     }
     if (srcConstant && (src.IsInteger() || src.IsFloat() || src.IsComplex()) && (dst.IsInteger() || dst.IsFloat() || dst.IsComplex())) {
         return (ir.OCONV, "");
@@ -580,10 +549,8 @@ public static (ir.Op, @string) Convertop(bool srcConstant, ptr<types.Type> _addr
             return (ir.OXXX, ":\n\tconversion of slices to array pointers only supported as of -lang=go1.17");
         }
         return (ir.OSLICE2ARRPTR, "");
-
     }
     return (ir.OXXX, "");
-
 }
 
 // Code to resolve elided DOTs in embedded types.
@@ -611,7 +578,7 @@ private static (slice<dlist>, bool) dotpath(ptr<types.Sym> _addr_s, ptr<types.Ty
     // a field or method named s in the subtree rooted at t. To accomplish
     // that, we iteratively perform depth-first searches of increasing depth
     // until we either find the named field/method or exhaust the tree.
-    for (nint d = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; d++) {
+    for (nint d = 0; ; d++) {
         if (d > len(dotlist)) {
             dotlist = append(dotlist, new dlist());
         }
@@ -628,11 +595,8 @@ private static (slice<dlist>, bool) dotpath(ptr<types.Sym> _addr_s, ptr<types.Ty
                 return (null, false);
             }
 
-
         }
-
     }
-
 }
 
 private static void expand0(ptr<types.Type> _addr_t) {
@@ -659,7 +623,6 @@ private static void expand0(ptr<types.Type> _addr_t) {
         }
 
         return ;
-
     }
     u = types.ReceiverBaseType(t);
     if (u != null) {
@@ -715,7 +678,6 @@ private static void expand1(ptr<types.Type> _addr_t, bool top) {
         }
     }
     t.SetRecur(false);
-
 }
 
 private static (ptr<types.Field>, bool) ifacelookdot(ptr<types.Sym> _addr_s, ptr<types.Type> _addr_t, bool ignorecase) {
@@ -733,7 +695,6 @@ private static (ptr<types.Field>, bool) ifacelookdot(ptr<types.Sym> _addr_s, ptr
             @base.Errorf("%v.%v is ambiguous", t, s);
         }
         return (_addr_null!, false);
-
     }
     foreach (var (_, d) in path) {
         if (d.field.Type.IsPtr()) {
@@ -745,7 +706,6 @@ private static (ptr<types.Field>, bool) ifacelookdot(ptr<types.Sym> _addr_s, ptr
         return (_addr_null!, followptr);
     }
     return (_addr_m!, followptr);
-
 }
 
 private static bool implements(ptr<types.Type> _addr_t, ptr<types.Type> _addr_iface, ptr<ptr<types.Field>> _addr_m, ptr<ptr<types.Field>> _addr_samename, ptr<nint> _addr_ptr) {
@@ -790,7 +750,6 @@ private static bool implements(ptr<types.Type> _addr_t, ptr<types.Type> _addr_if
         }
 
         return true;
-
     }
     t = types.ReceiverBaseType(t);
     tms = default;
@@ -838,13 +797,11 @@ private static bool implements(ptr<types.Type> _addr_t, ptr<types.Type> _addr_if
                 ptr = 1;
                 return false;
             }
-
         }
         im = im__prev1;
     }
 
     return true;
-
 }
 
 private static bool isptrto(ptr<types.Type> _addr_t, types.Kind et) {
@@ -864,7 +821,6 @@ private static bool isptrto(ptr<types.Type> _addr_t, types.Kind et) {
         return false;
     }
     return true;
-
 }
 
 // lookdot0 returns the number of fields or methods named s associated
@@ -909,7 +865,6 @@ private static nint lookdot0(ptr<types.Sym> _addr_s, ptr<types.Type> _addr_t, pt
     if (t.Sym() != null && t.IsPtr() && !t.Elem().IsPtr()) { 
         // If t is a defined pointer type, then x.m is shorthand for (*x).m.
         u = t.Elem();
-
     }
     u = types.ReceiverBaseType(u);
     if (u != null) {
@@ -930,7 +885,6 @@ private static nint lookdot0(ptr<types.Sym> _addr_s, ptr<types.Type> _addr_t, pt
         }
     }
     return c;
-
 }
 
 private static slice<symlink> slist = default;

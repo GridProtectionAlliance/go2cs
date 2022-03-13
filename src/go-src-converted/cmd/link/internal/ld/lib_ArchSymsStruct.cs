@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:37 UTC
+//     Generated on 2022 March 13 06:34:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ArchSyms
         {
             // Constructors
@@ -114,7 +114,7 @@ namespace @internal
             public static implicit operator ArchSyms(NilType nil) => default(ArchSyms);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ArchSyms ArchSyms_cast(dynamic value)
         {
             return new ArchSyms(value.Rel, value.Rela, value.RelPLT, value.RelaPLT, value.LinkEditGOT, value.LinkEditPLT, value.TOC, value.DotTOC, value.GOT, value.PLT, value.GOTPLT, value.Tlsg, value.Tlsoffset, value.Dynamic, value.DynSym, value.DynStr, value.unreachableMethod);

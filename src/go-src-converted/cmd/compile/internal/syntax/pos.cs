@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:32 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:26:57 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\pos.go
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
 
 public static partial class syntax_package {
 
-    // PosMax is the largest line or column value that can be represented without loss.
-    // Incoming values (arguments) larger than PosMax will be set to PosMax.
+// PosMax is the largest line or column value that can be represented without loss.
+// Incoming values (arguments) larger than PosMax will be set to PosMax.
 public static readonly nint PosMax = 1 << 30;
 
 // A Pos represents an absolute (line, col) source position
@@ -68,10 +68,8 @@ public static nuint RelLine(this Pos pos) {
     if (b.Line() == 0) { 
         // base line is unknown => relative line is unknown
         return 0;
-
     }
     return b.Line() + (pos.Line() - b.Pos().Line());
-
 }
 
 public static nuint RelCol(this Pos pos) {
@@ -82,15 +80,12 @@ public static nuint RelCol(this Pos pos) {
         // this to apply until the next PosBase/line directive,
         // not just until the new newline)
         return 0;
-
     }
     if (pos.Line() == b.Pos().Line()) { 
         // pos on same line as pos base => column is relative to pos base
         return b.Col() + (pos.Col() - b.Pos().Col());
-
     }
     return pos.Col();
-
 }
 
 // Cmp compares the positions p and q and returns a result r as follows:
@@ -124,7 +119,6 @@ public static nint Cmp(this Pos p, Pos q) {
     else if (pcol > qcol) 
         return +1;
         return 0;
-
 }
 
 public static @string String(this Pos pos) {
@@ -135,7 +129,6 @@ public static @string String(this Pos pos) {
         s += "[" + abs.String() + "]";
     }
     return s;
-
 }
 
 // TODO(gri) cleanup: find better name, avoid conflict with position in error_test.go
@@ -151,13 +144,11 @@ private static @string String(this position_ p) {
             return "<unknown position>";
         }
         return p.filename;
-
     }
     if (p.col == 0) {
         return fmt.Sprintf("%s:%d", p.filename, p.line);
     }
     return fmt.Sprintf("%s:%d:%d", p.filename, p.line, p.col);
-
 }
 
 // A PosBase represents the base for relative position information:
@@ -194,7 +185,6 @@ private static bool IsFileBase(this ptr<PosBase> _addr_@base) {
         return false;
     }
     return @base.pos.@base == base;
-
 }
 
 private static Pos Pos(this ptr<PosBase> _addr_@base) {
@@ -205,7 +195,6 @@ private static Pos Pos(this ptr<PosBase> _addr_@base) {
         return ;
     }
     return @base.pos;
-
 }
 
 private static @string Filename(this ptr<PosBase> _addr_@base) {
@@ -215,7 +204,6 @@ private static @string Filename(this ptr<PosBase> _addr_@base) {
         return "";
     }
     return @base.filename;
-
 }
 
 private static nuint Line(this ptr<PosBase> _addr_@base) {
@@ -225,7 +213,6 @@ private static nuint Line(this ptr<PosBase> _addr_@base) {
         return 0;
     }
     return uint(@base.line);
-
 }
 
 private static nuint Col(this ptr<PosBase> _addr_@base) {
@@ -235,7 +222,6 @@ private static nuint Col(this ptr<PosBase> _addr_@base) {
         return 0;
     }
     return uint(@base.col);
-
 }
 
 private static uint sat32(nuint x) {
@@ -243,7 +229,6 @@ private static uint sat32(nuint x) {
         return PosMax;
     }
     return uint32(x);
-
 }
 
 } // end syntax_package

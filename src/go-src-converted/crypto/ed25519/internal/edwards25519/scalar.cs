@@ -2,27 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package edwards25519 -- go2cs converted at 2022 March 06 22:17:34 UTC
+// package edwards25519 -- go2cs converted at 2022 March 13 05:31:41 UTC
 // import "crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\scalar.go
-using subtle = go.crypto.subtle_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-
 namespace go.crypto.ed25519.@internal;
+
+using subtle = crypto.subtle_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+
+
+// A Scalar is an integer modulo
+//
+//     l = 2^252 + 27742317777372353535851937790883648493
+//
+// which is the prime order of the edwards25519 group.
+//
+// This type works similarly to math/big.Int, and all arguments and
+// receivers are allowed to alias.
+//
+// The zero value is a valid zero element.
 
 public static partial class edwards25519_package {
 
-    // A Scalar is an integer modulo
-    //
-    //     l = 2^252 + 27742317777372353535851937790883648493
-    //
-    // which is the prime order of the edwards25519 group.
-    //
-    // This type works similarly to math/big.Int, and all arguments and
-    // receivers are allowed to alias.
-    //
-    // The zero value is a valid zero element.
 public partial struct Scalar {
     public array<byte> s;
 }
@@ -54,7 +56,6 @@ private static ptr<Scalar> Add(this ptr<Scalar> _addr_s, ptr<Scalar> _addr_x, pt
     // s = 1 * x + y mod l
     scMulAdd(_addr_s.s, _addr_scOne.s, _addr_x.s, _addr_y.s);
     return _addr_s!;
-
 }
 
 // Subtract sets s = x - y mod l, and returns s.
@@ -66,7 +67,6 @@ private static ptr<Scalar> Subtract(this ptr<Scalar> _addr_s, ptr<Scalar> _addr_
     // s = -1 * y + x mod l
     scMulAdd(_addr_s.s, _addr_scMinusOne.s, _addr_y.s, _addr_x.s);
     return _addr_s!;
-
 }
 
 // Negate sets s = -x mod l, and returns s.
@@ -77,7 +77,6 @@ private static ptr<Scalar> Negate(this ptr<Scalar> _addr_s, ptr<Scalar> _addr_x)
     // s = -1 * x + 0 mod l
     scMulAdd(_addr_s.s, _addr_scMinusOne.s, _addr_x.s, _addr_scZero.s);
     return _addr_s!;
-
 }
 
 // Multiply sets s = x * y mod l, and returns s.
@@ -89,7 +88,6 @@ private static ptr<Scalar> Multiply(this ptr<Scalar> _addr_s, ptr<Scalar> _addr_
     // s = x * y + 0 mod l
     scMulAdd(_addr_s.s, _addr_x.s, _addr_y.s, _addr_scZero.s);
     return _addr_s!;
-
 }
 
 // Set sets s = x, and returns s.
@@ -113,7 +111,6 @@ private static ptr<Scalar> SetUniformBytes(this ptr<Scalar> _addr_s, slice<byte>
     copy(wideBytes[..], x[..]);
     scReduce(_addr_s.s, _addr_wideBytes);
     return _addr_s!;
-
 });
 
 // SetCanonicalBytes sets s = x, where x is a 32-byte little-endian encoding of
@@ -134,7 +131,6 @@ private static (ptr<Scalar>, error) SetCanonicalBytes(this ptr<Scalar> _addr_s, 
     }
     s.s = ss.s;
     return (_addr_s!, error.As(null!)!);
-
 }
 
 // isReduced returns whether the given scalar is reduced modulo l.
@@ -147,10 +143,8 @@ private static bool isReduced(ptr<Scalar> _addr_s) {
             return false;
         else if (s.s[i] < scMinusOne.s[i]) 
             return true;
-        
-    }
+            }
     return true;
-
 }
 
 // SetBytesWithClamping applies the buffer pruning described in RFC 8032,
@@ -180,7 +174,6 @@ private static ptr<Scalar> SetBytesWithClamping(this ptr<Scalar> _addr_s, slice<
     wideBytes[31] |= 64;
     scReduce(_addr_s.s, _addr_wideBytes);
     return _addr_s!;
-
 });
 
 // Bytes returns the canonical 32-byte little-endian encoding of s.
@@ -1020,13 +1013,11 @@ private static array<sbyte> nonAdjacentForm(this ptr<Scalar> _addr_s, nuint w) =
         if (indexBit < 64 - w) { 
             // This window's bits are contained in a single u64
             bitBuf = digits[indexU64] >> (int)(indexBit);
-
         }
         else
  { 
             // Combine the current 64 bits with bits from the next 64
             bitBuf = (digits[indexU64] >> (int)(indexBit)) | (digits[1 + indexU64] << (int)((64 - indexBit)));
-
         }
         var window = carry + (bitBuf & windowMask);
 
@@ -1039,7 +1030,6 @@ private static array<sbyte> nonAdjacentForm(this ptr<Scalar> _addr_s, nuint w) =
             //    then bit_buf & 1 == 1 so the next carry should be 1
             pos += 1;
             continue;
-
         }
         if (window < width / 2) {
             carry = 0;
@@ -1051,10 +1041,8 @@ private static array<sbyte> nonAdjacentForm(this ptr<Scalar> _addr_s, nuint w) =
             naf[pos] = int8(window) - int8(width);
         }
         pos += w;
-
     }
     return naf;
-
 });
 
 private static array<sbyte> signedRadix16(this ptr<Scalar> _addr_s) => func((_, panic, _) => {
@@ -1091,7 +1079,6 @@ private static array<sbyte> signedRadix16(this ptr<Scalar> _addr_s) => func((_, 
     }
 
     return digits;
-
 });
 
 } // end edwards25519_package

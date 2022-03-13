@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:10 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:12 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\pcln.go
-using goobj = go.cmd.@internal.goobj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
+using goobj = cmd.@internal.goobj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using os = os_package;
+using filepath = path.filepath_package;
+
+
+// pclntab holds the state needed for pclntab generation.
+
+using System;
 public static partial class ld_package {
 
-    // pclntab holds the state needed for pclntab generation.
 private partial struct pclntab {
     public uint funcSize; // The first and last functions found.
     public loader.Sym firstFunc; // Running total size of pclntab.
@@ -99,7 +100,6 @@ private static (ptr<pclntab>, slice<ptr<sym.CompilationUnit>>, slice<loader.Sym>
             // the hole.
             state.nfunc++;
             prevSect = ss;
-
         }
         var cu = ldr.SymUnit(s);
         {
@@ -112,9 +112,7 @@ private static (ptr<pclntab>, slice<ptr<sym.CompilationUnit>>, slice<loader.Sym>
             }
 
         }
-
     }    return (_addr_state!, compUnits, funcs);
-
 }
 
 private static bool emitPcln(ptr<Link> _addr_ctxt, loader.Sym s, loader.Bitmap container) {
@@ -123,7 +121,6 @@ private static bool emitPcln(ptr<Link> _addr_ctxt, loader.Sym s, loader.Bitmap c
     // We want to generate func table entries only for the "lowest
     // level" symbols, not containers of subsymbols.
     return !container.Has(s);
-
 }
 
 private static uint computeDeferReturn(ptr<Link> _addr_ctxt, loader.Sym deferReturnSym, loader.Sym s) => func((_, panic, _) => {
@@ -144,7 +141,6 @@ private static uint computeDeferReturn(ptr<Link> _addr_ctxt, loader.Sym deferRet
             // The wasm code has a R_ADDR relocation which is used to
             // set the resumption point to PC_B.
             lastWasmAddr = uint32(r.Add());
-
         }
         if (r.Type().IsDirectCall() && (r.Sym() == deferReturnSym || ldr.IsDeferReturnTramp(r.Sym()))) {
             if (target.IsWasm()) {
@@ -169,14 +165,11 @@ private static uint computeDeferReturn(ptr<Link> _addr_ctxt, loader.Sym deferRet
                     deferreturn -= 2;
                 else 
                     panic(fmt.Sprint("Unhandled architecture:", target.Arch.Family));
-                
-            }
-
+                            }
             break; // only need one
         }
     }
     return deferreturn;
-
 });
 
 // genInlTreeSym generates the InlTree sym for a function with the
@@ -217,10 +210,8 @@ private static loader.Sym genInlTreeSym(ptr<Link> _addr_ctxt, ptr<sym.Compilatio
         inlTreeSym.SetUint32(arch, int64(i * 20 + 8), uint32(call.Line));
         inlTreeSym.SetUint32(arch, int64(i * 20 + 12), uint32(nameoff));
         inlTreeSym.SetUint32(arch, int64(i * 20 + 16), uint32(call.ParentPC));
-
     }
     return its;
-
 });
 
 // makeInlSyms returns a map of loader.Sym that are created inlSyms.
@@ -242,9 +233,7 @@ private static map<loader.Sym, loader.Sym> makeInlSyms(ptr<Link> _addr_ctxt, sli
             }
 
         }
-
     }    return inlSyms;
-
 }
 
 // generatePCHeader creates the runtime.pcheader symbol, setting it up as a
@@ -278,12 +267,10 @@ private static void generatePCHeader(this ptr<pclntab> _addr_state, ptr<Link> _a
         off = writeSymOffset(off, state.filetab);
         off = writeSymOffset(off, state.pctab);
         off = writeSymOffset(off, state.pclntab);
-
     };
 
     var size = int64(8 + 7 * ctxt.Arch.PtrSize);
     state.pcheader = state.addGeneratedSym(ctxt, "runtime.pcheader", size, writeHeader);
-
 });
 
 // walkFuncs iterates over the funcs, calling a function for each unique
@@ -304,7 +291,6 @@ private static void walkFuncs(ptr<Link> _addr_ctxt, slice<loader.Sym> funcs, Act
 
         }
 
-
         var fi = ldr.FuncInfo(s);
         if (!fi.Valid()) {
             continue;
@@ -322,9 +308,7 @@ private static void walkFuncs(ptr<Link> _addr_ctxt, slice<loader.Sym> funcs, Act
                 }
 
             }
-
         }
-
     }
 }
 
@@ -353,7 +337,6 @@ private static map<loader.Sym, uint> generateFuncnametab(this ptr<pclntab> _addr
 
     state.funcnametab = state.addGeneratedSym(ctxt, "runtime.funcnametab", size, writeFuncNameTab);
     return nameOffsets;
-
 }
 
 // walkFilenames walks funcs, calling a function for each filename used in each
@@ -395,7 +378,6 @@ private static void walkFilenames(ptr<Link> _addr_ctxt, slice<loader.Sym> funcs,
 
             i = i__prev2;
         }
-
     }
 }
 
@@ -480,7 +462,6 @@ private static slice<uint> generateFilenameTabs(this ptr<pclntab> _addr_state, p
             // number of bytes we've stored so far.
             cuOffsets[i] = totalEntries;
             totalEntries += uint32(entries);
-
         }
         i = i__prev1;
     }
@@ -504,14 +485,9 @@ private static slice<uint> generateFilenameTabs(this ptr<pclntab> _addr_state, p
                         // been deadcode eliminated, and although it's a valid file in the CU, it's
                         // not needed in this binary. When that happens, use an invalid offset.
                         fileOffset = ~uint32(0);
-
                     }
-
                     off = sb.SetUint32(ctxt.Arch, off, fileOffset);
-
                 }
-
-
             }
 
             i = i__prev1;
@@ -540,7 +516,6 @@ private static slice<uint> generateFilenameTabs(this ptr<pclntab> _addr_state, p
     state.filetab = state.addGeneratedSym(ctxt, "runtime.filetab", fileSize, writeFiletab);
 
     return cuOffsets;
-
 }
 
 // generatePctab creates the runtime.pctab variable, holding all the
@@ -571,16 +546,12 @@ private static void generatePctab(this ptr<pclntab> _addr_state, ptr<Link> _addr
  { 
                     // Invalid PC data, record as zero.
                     ldr.SetSymValue(pcSym, 0);
-
                 }
-
                 size += datSize;
                 seen[pcSym] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
-
             }
 
         }
-
     };
     foreach (var (_, s) in funcs) {
         var fi = ldr.FuncInfo(s);
@@ -624,7 +595,6 @@ private static void generatePctab(this ptr<pclntab> _addr_state, ptr<Link> _addr
     };
 
     state.pctab = state.addGeneratedSym(ctxt, "runtime.pctab", size, writePctab);
-
 }
 
 // numPCData returns the number of PCData syms for the FuncInfo.
@@ -640,7 +610,6 @@ private static uint numPCData(loader.FuncInfo fi) {
         }
     }
     return numPCData;
-
 }
 
 // Helper types for iterating pclntab.
@@ -699,22 +668,17 @@ private static void generateFunctab(this ptr<pclntab> _addr_state, ptr<Link> _ad
                     v = v__prev2;
 
                 }
-
                 return 0;
-
             }
         else
 ;
-
         } { 
             // We already wrote relocations.
             setAddr = (s, arch, off, tgt, add) => 0;
-
         }
         writePcToFunc(_addr_ctxt, _addr_sb, funcs, startLocations, setAddr, (loader.SymbolBuilder.val).SetUint);
         writeFuncs(_addr_ctxt, _addr_sb, funcs, inlSyms, startLocations, cuOffsets, nameOffsets);
         state.writeFuncData(ctxt, sb, funcs, inlSyms, startLocations, setAddr, (loader.SymbolBuilder.val).SetUint);
-
     };
 
     state.pclntab = state.addGeneratedSym(ctxt, "runtime.functab", size, writePcln); 
@@ -739,17 +703,13 @@ private static void generateFunctab(this ptr<pclntab> _addr_state, ptr<Link> _ad
                 v = v__prev2;
 
             }
-
             return 0;
-
         }
     else
 ;
-
     } { 
         // If we're externally linking, write a relocation.
         setAddr = (loader.SymbolBuilder.val).SetAddrPlus;
-
     }
     Func<ptr<loader.SymbolBuilder>, ptr<sys.Arch>, long, ulong, long> setUintNOP = (_p0, _p0, _p0, _p0) => 0;
     writePcToFunc(_addr_ctxt, _addr_sb, funcs, startLocations, setAddr, setUintNOP);
@@ -757,7 +717,6 @@ private static void generateFunctab(this ptr<pclntab> _addr_state, ptr<Link> _ad
         // Generate relocations for funcdata when externally linking.
         state.writeFuncData(ctxt, sb, funcs, inlSyms, startLocations, setAddr, setUintNOP);
         sb.SortRelocs();
-
     }
 }
 
@@ -791,7 +750,6 @@ private static (slice<loader.Sym>, slice<long>) funcData(loader.FuncInfo fi, loa
         }
     }
     return (fdSyms, fdOffs);
-
 }
 
 // calculateFunctabSize calculates the size of the pclntab, and the offsets in
@@ -828,14 +786,10 @@ private static (long, slice<uint>) calculateFunctabSize(this pclntab state, ptr<
             size += int64(numPCData(fi) * 4);
             if (numFuncData > 0) { // Func data is aligned.
                 size = Rnd(size, int64(ctxt.Arch.PtrSize));
-
             }
-
             size += int64(numFuncData * ctxt.Arch.PtrSize);
-
         }
     }    return (size, startLocations);
-
 }
 
 // writePcToFunc writes the PC->func lookup table.
@@ -862,11 +816,9 @@ private static void writePcToFunc(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilder
                 setUint(sb, ctxt.Arch, int64((funcIndex * 2 + 1) * ctxt.Arch.PtrSize), ~uint64(0));
                 funcIndex++;
                 prevSect = thisSect;
-
             }
 
         }
-
         prevFunc = s; 
         // TODO: We don't actually need these relocations, provided we go to a
         // module->func look-up-table like we do for filenames. We could have a
@@ -878,9 +830,7 @@ private static void writePcToFunc(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilder
 
         // Write the entry location.
         setAddr(sb, ctxt.Arch, int64(startLocations[i]), s, 0);
-
     }    setAddr(sb, ctxt.Arch, int64(funcIndex) * 2 * int64(ctxt.Arch.PtrSize), prevFunc, ldr.SymSize(prevFunc));
-
 }
 
 // writeFuncData writes the funcdata tables.
@@ -922,9 +872,7 @@ private static void writeFuncData(this ptr<pclntab> _addr_state, ptr<Link> _addr
                 } 
                 // TODO: Does this need deduping?
                 setAddr(sb, ctxt.Arch, dataoff, funcdata[j], funcdataoff[j]);
-
             }
-
         }
     }
 }
@@ -988,7 +936,6 @@ private static void writeFuncs(ptr<Link> _addr_ctxt, ptr<loader.SymbolBuilder> _
             }
 
         }
-
         off = uint32(sb.SetUint32(ctxt.Arch, int64(off), cuIdx)); 
 
         // funcID uint8
@@ -1080,7 +1027,6 @@ private static ptr<pclntab> pclntab(this ptr<Link> _addr_ctxt, loader.Bitmap con
     state.generateFunctab(ctxt, funcs, inlSyms, cuOffsets, nameOffsets);
 
     return _addr_state!;
-
 }
 
 private static @string gorootFinal() {
@@ -1092,9 +1038,7 @@ private static @string gorootFinal() {
             root = final;
         }
     }
-
     return root;
-
 }
 
 private static @string expandGoroot(@string s) {
@@ -1104,14 +1048,12 @@ private static @string expandGoroot(@string s) {
         return filepath.ToSlash(filepath.Join(gorootFinal(), s[(int)n..]));
     }
     return s;
-
 }
 
 public static readonly nint BUCKETSIZE = 256 * MINFUNC;
 public static readonly nint SUBBUCKETS = 16;
 public static readonly var SUBBUCKETSIZE = BUCKETSIZE / SUBBUCKETS;
 public static readonly nuint NOIDX = 0x7fffffff;
-
 
 // findfunctab generates a lookup table to quickly find the containing
 // function for a pc. See src/runtime/symtab.go:findfunc for details.
@@ -1181,7 +1123,6 @@ private static void findfunctab(this ptr<Link> _addr_ctxt, ptr<pclntab> _addr_st
                         indexes[i] = idx;
                     p += SUBBUCKETSIZE;
                     }
-
                 }
 
 
@@ -1189,9 +1130,7 @@ private static void findfunctab(this ptr<Link> _addr_ctxt, ptr<pclntab> _addr_st
                 if (indexes[i] > idx) {
                     indexes[i] = idx;
                 }
-
                 idx++;
-
             } 
 
             // fill in table
@@ -1223,13 +1162,11 @@ private static void findfunctab(this ptr<Link> _addr_ctxt, ptr<pclntab> _addr_st
 
             i = i__prev1;
         }
-
     };
 
     state.findfunctab = ctxt.createGeneratorSymbol("runtime.findfunctab", 0, sym.SRODATA, size, writeFindFuncTab);
     ldr.SetAttrReachable(state.findfunctab, true);
     ldr.SetAttrLocal(state.findfunctab, true);
-
 }
 
 // findContainerSyms returns a bitmap, indexed by symbol number, where there's
@@ -1246,7 +1183,6 @@ private static loader.Bitmap findContainerSyms(this ptr<Link> _addr_ctxt) {
             container.Set(outer);
         }
     }    return container;
-
 }
 
 } // end ld_package

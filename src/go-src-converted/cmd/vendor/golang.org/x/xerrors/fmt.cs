@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2022 March 06 23:35:17 UTC
+// package xerrors -- go2cs converted at 2022 March 13 06:42:51 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\xerrors\fmt.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
-using @internal = go.golang.org.x.xerrors.@internal_package;
-
 namespace go.cmd.vendor.golang.org.x;
+
+using fmt = fmt_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using @internal = golang.org.x.xerrors.@internal_package;
 
 public static partial class xerrors_package {
 
@@ -78,7 +78,6 @@ public static error Errorf(@string format, params object[] a) {
             return error.As(addr(new wrapError(msg,err,frame))!)!;
         }
         return error.As(addr(new noWrapError(msg,err,frame))!)!;
-
     }
     msg = fmt.Sprintf(format2, a);
     if (idx < 0) {
@@ -89,14 +88,12 @@ public static error Errorf(@string format, params object[] a) {
         // Too many %ws or argument of %w is not an error. Approximate the Go
         // 1.13 fmt.Errorf message.
         return error.As(addr(new noWrapError(fmt.Sprintf("%sw(%s)",percentBangString,msg),nil,Caller(1)))!)!;
-
     }
     frame = new Frame();
     if (@internal.EnableTrace) {
         frame = Caller(1);
     }
     return error.As(addr(new wrapError(msg,err,frame))!)!;
-
 }
 
 private static error errorAt(slice<object> args, nint i) {
@@ -108,7 +105,6 @@ private static error errorAt(slice<object> args, nint i) {
         return error.As(null!)!;
     }
     return error.As(err)!;
-
 }
 
 // formatPlusW is used to avoid the vet check that will barf at %w.
@@ -145,7 +141,6 @@ private static (nint, @string, bool) parsePercentW(@string format) {
                 sz = 2;
                 continue;
             }
-
             sz, isW = parsePrintfVerb(format[(int)i..]);
             if (isW) {
                 if (idx >= 0) {
@@ -158,15 +153,11 @@ private static (nint, @string, bool) parsePercentW(@string format) {
                 // "Replace" the last character, the 'w', with a 'v'.
                 var p = i + sz - 1;
                 format = format[..(int)p] + "v" + format[(int)p + 1..];
-
             }
-
             n++;
-
         }
     }
     return (idx, format, ok);
-
 }
 
 // Parse the printf verb starting with a % at s[0].
@@ -187,11 +178,9 @@ private static (nint, bool) parsePrintfVerb(@string s) {
                 return (i + sz, r == 'w');
             i += sz;
             }
-
         }
     }
     return (len(s), false);
-
 }
 
 private partial struct noWrapError {

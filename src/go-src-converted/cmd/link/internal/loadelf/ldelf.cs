@@ -3,56 +3,57 @@
 // license that can be found in the LICENSE file.
 
 // Package loadelf implements an ELF file reader.
-// package loadelf -- go2cs converted at 2022 March 06 23:21:41 UTC
+
+// package loadelf -- go2cs converted at 2022 March 13 06:34:41 UTC
 // import "cmd/link/internal/loadelf" ==> using loadelf = go.cmd.link.@internal.loadelf_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\loadelf\ldelf.go
-using bytes = go.bytes_package;
-using bio = go.cmd.@internal.bio_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
-public static partial class loadelf_package {
+using bytes = bytes_package;
+using bio = cmd.@internal.bio_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using strings = strings_package;
 
-    /*
-    Derived from Plan 9 from User Space's src/libmach/elf.h, elf.c
-    http://code.swtch.com/plan9port/src/tip/src/libmach/
 
-        Copyright © 2004 Russ Cox.
-        Portions Copyright © 2008-2010 Google Inc.
-        Portions Copyright © 2010 The Go Authors.
+/*
+Derived from Plan 9 from User Space's src/libmach/elf.h, elf.c
+http://code.swtch.com/plan9port/src/tip/src/libmach/
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
+    Copyright © 2004 Russ Cox.
+    Portions Copyright © 2008-2010 Google Inc.
+    Portions Copyright © 2010 The Go Authors.
 
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
-    */
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+
+using System;public static partial class loadelf_package {
+
 public static readonly nuint SHT_ARM_ATTRIBUTES = 0x70000003;
-
 
 public partial struct ElfSect {
     public @string name;
@@ -117,7 +118,6 @@ public static readonly nint TagNoDefaults = 64;
 public static readonly nint TagAlsoCompatibleWith = 65;
 public static readonly nint TagABIVFPArgs = 28;
 
-
 private partial struct elfAttribute {
     public ulong tag;
     public @string sval;
@@ -143,7 +143,6 @@ private static @string @string(this ptr<elfAttributeList> _addr_a) {
     var s = string(a.data[..(int)nul]);
     a.data = a.data[(int)nul + 1..];
     return s;
-
 }
 
 private static ulong uleb128(this ptr<elfAttributeList> _addr_a) {
@@ -155,7 +154,6 @@ private static ulong uleb128(this ptr<elfAttributeList> _addr_a) {
     var (v, size) = binary.Uvarint(a.data);
     a.data = a.data[(int)size..];
     return v;
-
 }
 
 // Read an elfAttribute from the list following the rules used on ARM systems.
@@ -177,7 +175,6 @@ private static elfAttribute armAttr(this ptr<elfAttributeList> _addr_a) {
     else // Tag with integer argument
         attr.ival = a.uleb128();
         return attr;
-
 }
 
 private static bool done(this ptr<elfAttributeList> _addr_a) {
@@ -187,7 +184,6 @@ private static bool done(this ptr<elfAttributeList> _addr_a) {
         return true;
     }
     return false;
-
 }
 
 // Look for the attribute that indicates the object uses the hard-float ABI (a
@@ -237,18 +233,14 @@ private static (bool, uint, error) parseArmAttributes(binary.ByteOrder e, slice<
                     found = true;
                     ehdrFlags = 0x5000402; // has entry point, Version5 EABI, hard-float ABI
                 }
-
             }
 
             if (attrList.err != null) {
                 return (false, 0, error.As(fmt.Errorf("could not parse .ARM.attributes\n"))!);
             }
-
         }
-
     }
     return (found, ehdrFlags, error.As(null!)!);
-
 }
 
 // Load loads the ELF file pn from f.
@@ -267,13 +259,9 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
     ref sys.Arch arch = ref _addr_arch.val;
     ref bio.Reader f = ref _addr_f.val;
 
-    Func<@string, nint, loader.Sym> newSym = (name, version) => {
-        return l.CreateStaticSym(name);
-    };
+    Func<@string, nint, loader.Sym> newSym = (name, version) => l.CreateStaticSym(name);
     var lookup = l.LookupOrCreateCgoExport;
-    Func<@string, object[], (slice<loader.Sym>, uint, error)> errorf = (str, args) => {
-        return (null, 0, error.As(fmt.Errorf("loadelf: %s: %v", pn, fmt.Sprintf(str, args)))!);
-    };
+    Func<@string, object[], (slice<loader.Sym>, uint, error)> errorf = (str, args) => (null, 0, error.As(fmt.Errorf("loadelf: %s: %v", pn, fmt.Sprintf(str, args)))!);
 
     ehdrFlags = initEhdrFlags;
 
@@ -291,7 +279,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
         err = err__prev1;
 
     }
-
 
     binary.ByteOrder e = default;
 
@@ -361,7 +348,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
         }
     }
 
-
     if (elf.Type(elfobj.type_) != elf.ET_REL) {
         return errorf("elf but not elf relocatable object");
     }
@@ -430,7 +416,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
 
                 }
 
-
                 sect.nameoff = b.Name;
                 sect.type_ = elf.SectionType(b.Type);
                 sect.flags = elf.SectionFlag(b.Flags);
@@ -441,7 +426,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 sect.info = b.Info;
                 sect.align = b.Addralign;
                 sect.entsize = b.Entsize;
-
             }
             else
  {
@@ -459,7 +443,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                     err = err__prev2;
 
                 }
-
                 sect.nameoff = b.Name;
                 sect.type_ = elf.SectionType(b.Type);
                 sect.flags = elf.SectionFlag(b.Flags);
@@ -470,9 +453,7 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 sect.info = b.Info;
                 sect.align = uint64(b.Addralign);
                 sect.entsize = uint64(b.Entsize);
-
             }
-
         }
 
         i = i__prev1;
@@ -494,7 +475,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
         err = err__prev1;
 
     }
-
     {
         nint i__prev1 = i;
 
@@ -513,7 +493,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
     if (elfobj.symtab == null) { 
         // our work is done here - no symbols means nothing can refer to this file
         return ;
-
     }
     if (elfobj.symtab.link <= 0 || elfobj.symtab.link >= uint32(elfobj.nsect)) {
         return errorf("elf object has symbol table with invalid string table link");
@@ -537,7 +516,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -585,24 +563,18 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
  {
                     ehdrFlags = initEhdrFlags;
                 }
-
                 var (found, newEhdrFlags, err) = parseArmAttributes(e, sect.@base[..(int)sect.size]);
                 if (err != null) { 
                     // TODO(dfc) should this return an error?
                     log.Printf("%s: %v", pn, err);
-
                 }
-
                 if (found) {
                     ehdrFlags = newEhdrFlags;
                 }
-
             }
-
             if ((sect.type_ != elf.SHT_PROGBITS && sect.type_ != elf.SHT_NOBITS) || sect.flags & elf.SHF_ALLOC == 0) {
                 continue;
             }
-
             if (sect.type_ != elf.SHT_NOBITS) {
                 {
                     var err__prev2 = err;
@@ -616,9 +588,7 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                     err = err__prev2;
 
                 }
-
             }
-
             var name = fmt.Sprintf("%s(%s)", pkg, sect.name);
             while (sectsymNames[name]) {
                 counter++;
@@ -640,7 +610,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
  {
                     sb.SetType(sym.SNOPTRDATA);
                 }
-
             else if (sect.flags & (elf.SHF_ALLOC | elf.SHF_WRITE | elf.SHF_EXECINSTR) == elf.SHF_ALLOC + elf.SHF_EXECINSTR) 
                 sb.SetType(sym.STEXT);
             else 
@@ -648,17 +617,14 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                         if (sect.name == ".got" || sect.name == ".toc") {
                 sb.SetType(sym.SELFGOT);
             }
-
             if (sect.type_ == elf.SHT_PROGBITS) {
                 sb.SetData(sect.@base[..(int)sect.size]);
             }
-
             sb.SetSize(int64(sect.size));
             sb.SetAlign(int32(sect.align));
             sb.SetReadOnly(sect.readOnlyMem);
 
             sect.sym = sb.Sym();
-
         }
 
         i = i__prev1;
@@ -685,12 +651,10 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 err = err__prev1;
 
             }
-
             symbols[i] = elfsym.sym;
             if (elfsym.type_ != elf.STT_FUNC && elfsym.type_ != elf.STT_OBJECT && elfsym.type_ != elf.STT_NOTYPE && elfsym.type_ != elf.STT_COMMON) {
                 continue;
             }
-
             if (elfsym.shndx == elf.SHN_COMMON || elfsym.type_ == elf.STT_COMMON) {
                 sb = l.MakeSymbolUpdater(elfsym.sym);
                 if (uint64(sb.Size()) < elfsym.size) {
@@ -701,7 +665,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 }
                 continue;
             }
-
             if (uint(elfsym.shndx) >= elfobj.nsect || elfsym.shndx == 0) {
                 continue;
             } 
@@ -710,38 +673,27 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
             if (elfsym.sym == 0) {
                 continue;
             }
-
             sect = _addr_elfobj.sect[elfsym.shndx];
             if (sect.sym == 0) {
                 if (strings.HasPrefix(elfsym.name, ".Linfo_string")) { // clang does this
                     continue;
-
                 }
-
                 if (elfsym.name == "" && elfsym.type_ == 0 && sect.name == ".debug_str") { 
                     // This reportedly happens with clang 3.7 on ARM.
                     // See issue 13139.
                     continue;
-
                 }
-
                 if (strings.HasPrefix(elfsym.name, "$d") && elfsym.type_ == 0 && sect.name == ".debug_frame") { 
                     // "$d" is a marker, not a real symbol.
                     // This happens with gcc on ARM64.
                     // See https://sourceware.org/bugzilla/show_bug.cgi?id=21809
                     continue;
-
                 }
-
                 if (strings.HasPrefix(elfsym.name, ".LASF")) { // gcc on s390x does this
                     continue;
-
                 }
-
                 return errorf("%v: sym#%d: ignoring symbol in section %d (type %d)", elfsym.sym, i, elfsym.shndx, elfsym.type_);
-
             }
-
             var s = elfsym.sym;
             if (l.OuterSym(s) != 0) {
                 if (l.AttrDuplicateOK(s)) {
@@ -749,7 +701,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 }
                 return errorf("duplicate symbol reference: %s in both %s and %s", l.SymName(s), l.SymName(l.OuterSym(s)), l.SymName(sect.sym));
             }
-
             var sectsb = l.MakeSymbolUpdater(sect.sym);
             sb = l.MakeSymbolUpdater(s);
 
@@ -758,7 +709,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
             if (!l.AttrCgoExportDynamic(s)) {
                 sb.SetDynimplib(""); // satisfy dynimport
             }
-
             sb.SetValue(int64(elfsym.value));
             sb.SetSize(int64(elfsym.size));
             if (sectsb.Type() == sym.STEXT) {
@@ -767,7 +717,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 }
                 l.SetAttrExternal(s, true);
             }
-
             if (elf.Machine(elfobj.machine) == elf.EM_PPC64) {
                 var flag = int(elfsym.other) >> 5;
                 if (2 <= flag && flag <= 6) {
@@ -776,9 +725,7 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 else if (flag == 7) {
                     return errorf("%s: invalid sym.other 0x%x", sb.Name(), elfsym.other);
                 }
-
             }
-
         }
 
         i = i__prev1;
@@ -812,16 +759,12 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                             return errorf("symbol %s listed multiple times", l.SymName(ss));
                         ss = l.SubSym(ss);
                         }
-
                         l.SetAttrOnList(ss, true);
                         textp = append(textp, ss);
-
                     }
 
                 }
-
             }
-
         }
 
         i = i__prev1;
@@ -852,12 +795,10 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                 err = err__prev1;
 
             }
-
             nint rela = 0;
             if (rsect.type_ == elf.SHT_RELA) {
                 rela = 1;
             }
-
             var n = int(rsect.size / uint64(4 + 4 * is64) / uint64(2 + rela));
             var p = rsect.@base;
             sb = l.MakeSymbolUpdater(sect.sym);
@@ -889,7 +830,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                         add = e.Uint64(p);
                         p = p[(int)8..];
                     }
-
                 }
                 else
  { 
@@ -905,19 +845,14 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                         add = uint64(e.Uint32(p));
                         p = p[(int)4..];
                     }
-
                 }
-
                 if (relocType == 0) { // skip R_*_NONE relocation
                     j--;
                     n--;
                     continue;
-
                 }
-
                 if (symIdx == 0) { // absolute relocation, don't bother reading the null symbol
                     rSym = 0;
-
                 }
                 else
  {
@@ -934,22 +869,17 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
                         err = err__prev2;
 
                     }
-
                     elfsym.sym = symbols[symIdx];
                     if (elfsym.sym == 0) {
                         return errorf("malformed elf file: %s#%d: reloc of invalid sym #%d %s shndx=%d type=%d", l.SymName(sect.sym), j, int(symIdx), elfsym.name, elfsym.shndx, elfsym.type_);
                     }
-
                     rSym = elfsym.sym;
-
                 }
-
                 var rType = objabi.ElfRelocOffset + objabi.RelocType(relocType);
                 var (rSize, addendSize, err) = relSize(_addr_arch, pn, uint32(relocType));
                 if (err != null) {
                     return (null, 0, error.As(err)!);
                 }
-
                 if (rela != 0) {
                     rAdd = int64(add);
                 }
@@ -966,23 +896,18 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
  {
                         return errorf("invalid rela size %d", rSize);
                     }
-
                 }
-
                 if (addendSize == 2) {
                     rAdd = int64(int16(rAdd));
                 }
-
                 if (addendSize == 4) {
                     rAdd = int64(int32(rAdd));
                 }
-
                 var (r, _) = sb.AddRel(rType);
                 r.SetOff(rOff);
                 r.SetSiz(rSize);
                 r.SetSym(rSym);
                 r.SetAdd(rAdd);
-
             }
 
 
@@ -993,7 +918,6 @@ public static (slice<loader.Sym>, uint, error) Load(ptr<loader.Loader> _addr_l, 
     }
 
     return (textp, ehdrFlags, error.As(null!)!);
-
 }
 
 private static ptr<ElfSect> section(ptr<ElfObj> _addr_elfobj, @string name) {
@@ -1005,7 +929,6 @@ private static ptr<ElfSect> section(ptr<ElfObj> _addr_elfobj, @string name) {
         }
     }
     return _addr_null!;
-
 }
 
 private static error elfmap(ptr<ElfObj> _addr_elfobj, ptr<ElfSect> _addr_sect) {
@@ -1026,7 +949,6 @@ private static error elfmap(ptr<ElfObj> _addr_elfobj, ptr<ElfSect> _addr_sect) {
         return error.As(fmt.Errorf("short read: %v", err))!;
     }
     return error.As(null!)!;
-
 }
 
 private static error readelfsym(Func<@string, nint, loader.Sym> newSym, Func<@string, nint, loader.Sym> lookup, ptr<loader.Loader> _addr_l, ptr<sys.Arch> _addr_arch, ptr<ElfObj> _addr_elfobj, nint i, ptr<ElfSym> _addr_elfsym, nint needSym, nint localSymVersion) {
@@ -1075,7 +997,6 @@ private static error readelfsym(Func<@string, nint, loader.Sym> newSym, Func<@st
         // Magic symbol on ppc64.  Will be set to this object
         // file's .got+0x8000.
         elfsym.bind = elf.STB_LOCAL;
-
     }
 
     if (elfsym.type_ == elf.STT_SECTION) 
@@ -1100,17 +1021,13 @@ private static error readelfsym(Func<@string, nint, loader.Sym> newSym, Func<@st
                     l.SetAttrDuplicateOK(s, true);
                     l.SetAttrVisibilityHidden(s, true);
                 }
-
             }
-
         else if (elfsym.bind == elf.STB_LOCAL) 
             if ((arch.Family == sys.ARM || arch.Family == sys.ARM64) && (strings.HasPrefix(elfsym.name, "$a") || strings.HasPrefix(elfsym.name, "$d") || strings.HasPrefix(elfsym.name, "$x"))) { 
                 // binutils for arm and arm64 generate these mapping
                 // symbols, ignore these
                 break;
-
             }
-
             if (elfsym.name == ".TOC.") { 
                 // We need to be able to look this up,
                 // so put it in the hash table.
@@ -1118,11 +1035,8 @@ private static error readelfsym(Func<@string, nint, loader.Sym> newSym, Func<@st
                     s = lookup(elfsym.name, localSymVersion);
                     l.SetAttrVisibilityHidden(s, true);
                 }
-
                 break;
-
             }
-
             if (needSym != 0) { 
                 // local names and hidden global names are unique
                 // and should only be referenced by their index, not name, so we
@@ -1132,9 +1046,7 @@ private static error readelfsym(Func<@string, nint, loader.Sym> newSym, Func<@st
                 // to debug problems.
                 s = newSym(elfsym.name, localSymVersion);
                 l.SetAttrVisibilityHidden(s, true);
-
             }
-
         else if (elfsym.bind == elf.STB_WEAK) 
             if (needSym != 0) {
                 s = lookup(elfsym.name, 0);
@@ -1146,9 +1058,7 @@ private static error readelfsym(Func<@string, nint, loader.Sym> newSym, Func<@st
                 if (l.OuterSym(s) != 0) {
                     l.SetAttrDuplicateOK(s, true);
                 }
-
             }
-
         else 
             err = fmt.Errorf("%s: invalid symbol binding %d", elfsym.name, elfsym.bind);
             return error.As(err)!;
@@ -1161,7 +1071,6 @@ private static error readelfsym(Func<@string, nint, loader.Sym> newSym, Func<@st
     elfsym.sym = s;
 
     return error.As(null!)!;
-
 }
 
 // Return the size of the relocated field, and the size of the addend as the first
@@ -1188,7 +1097,6 @@ private static (byte, byte, error) relSize(ptr<sys.Arch> _addr_arch, @string pn,
     const var S390X = uint32(sys.S390X);
 
 
-
     if (uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_HI16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_LO16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_GOT16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_GOT_HI16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_GOT_LO16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_GPREL16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_GOT_PAGE) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_JALR) << 16 || uint32(arch.Family) | elftype << 16 == MIPS | uint32(elf.R_MIPS_GOT_OFST) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_HI16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_LO16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GOT16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GOT_HI16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GOT_LO16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GPREL16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GOT_PAGE) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_JALR) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GOT_OFST) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_CALL16) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GPREL32) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_64) << 16 || uint32(arch.Family) | elftype << 16 == MIPS64 | uint32(elf.R_MIPS_GOT_DISP) << 16) 
         return (4, 4, error.As(null!)!);
     else if (uint32(arch.Family) | elftype << 16 == S390X | uint32(elf.R_390_8) << 16) 
@@ -1209,8 +1117,7 @@ private static (byte, byte, error) relSize(ptr<sys.Arch> _addr_arch, @string pn,
         return (2, 4, error.As(null!)!);
     else 
         return (0, 0, error.As(fmt.Errorf("%s: unknown relocation type %d; compiled without -fpic?", pn, elftype))!);
-    
-}
+    }
 
 private static @string cstring(slice<byte> x) {
     var i = bytes.IndexByte(x, '\x00');
@@ -1218,7 +1125,6 @@ private static @string cstring(slice<byte> x) {
         x = x[..(int)i];
     }
     return string(x);
-
 }
 
 } // end loadelf_package

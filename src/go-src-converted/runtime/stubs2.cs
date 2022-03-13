@@ -5,17 +5,17 @@
 //go:build !aix && !darwin && !js && !openbsd && !plan9 && !solaris && !windows
 // +build !aix,!darwin,!js,!openbsd,!plan9,!solaris,!windows
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:59 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\stubs2.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    // read calls the read system call.
-    // It returns a non-negative number of bytes written or a negative errno value.
+// read calls the read system call.
+// It returns a non-negative number of bytes written or a negative errno value.
 private static int read(int fd, unsafe.Pointer p, int n);
 
 private static int closefd(int fd);

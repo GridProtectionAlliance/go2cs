@@ -5,17 +5,17 @@
 //go:build openbsd && !mips64
 // +build openbsd,!mips64
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:09 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sys_openbsd1.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    //go:nosplit
-    //go:cgo_unsafe_args
+//go:nosplit
+//go:cgo_unsafe_args
 private static int thrsleep(System.UIntPtr ident, int clock_id, ptr<timespec> _addr_tsp, System.UIntPtr @lock, ptr<uint> _addr_abort) {
     ref timespec tsp = ref _addr_tsp.val;
     ref uint abort = ref _addr_abort.val;

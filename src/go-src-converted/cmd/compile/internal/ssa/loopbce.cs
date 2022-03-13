@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:10 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:34 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\loopbce.go
-using fmt = go.fmt_package;
-using math = go.math_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using math = math_package;
 
 public static partial class ssa_package {
 
@@ -67,7 +67,6 @@ private static (ptr<Value>, ptr<Value>, ptr<Value>) parseIndVar(ptr<Value> _addr
  { 
                 // Not a recognized induction variable.
                 return ;
-
             }
 
             n = n__prev2;
@@ -75,26 +74,21 @@ private static (ptr<Value>, ptr<Value>, ptr<Value>) parseIndVar(ptr<Value> _addr
         }
 
 
-
         n = n__prev1;
 
     }
 
-
     if (nxt.Args[0] == ind) { // nxt = ind + inc
         inc = nxt.Args[1];
-
     }
     else if (nxt.Args[1] == ind) { // nxt = inc + ind
         inc = nxt.Args[0];
-
     }
     else
  {
         panic("unreachable"); // one of the cases must be true from the above.
     }
     return ;
-
 });
 
 // findIndVar finds induction variables in a function.
@@ -166,13 +160,11 @@ private static slice<indVar> findIndVar(ptr<Func> _addr_f) {
             if (min == null) { 
                 // No recognied induction variable on either operand
                 continue;
-
             } 
 
             // Ok, the arguments were reversed. Swap them, and remember that we're
             // looking at a ind >/>= loop (so the induction must be decrementing).
             (ind, max) = (max, ind);            less = false;
-
         }
         if (inc.Op != OpConst64) {
             continue;
@@ -198,21 +190,17 @@ private static slice<indVar> findIndVar(ptr<Func> _addr_f) {
         if (len(b.Succs[0].b.Preds) != 1) { 
             // b.Succs[1] must exit the loop.
             continue;
-
         }
         if (!sdom.IsAncestorEq(b.Succs[0].b, nxt.Block)) { 
             // inc+ind can only be reached through the branch that enters the loop.
             continue;
-
         }
         if (step > 1) {
             var ok = false;
             if (min.Op == OpConst64 && max.Op == OpConst64) {
                 if (max.AuxInt > min.AuxInt && max.AuxInt % step == min.AuxInt % step) { // handle overflow
                     ok = true;
-
                 }
-
             } 
             // Handle induction variables of these forms.
             // KNN is known-not-negative.
@@ -258,7 +246,6 @@ private static slice<indVar> findIndVar(ptr<Func> _addr_f) {
                     if (knn.Op == OpConst64) {
                         (knn, kArg) = (kArg, knn);
                     }
-
                 
                 if (knn.Op == OpSliceLen || knn.Op == OpStringLen || knn.Op == OpSliceCap)                 else 
                     knn = null;
@@ -268,7 +255,6 @@ private static slice<indVar> findIndVar(ptr<Func> _addr_f) {
                         k = -k;
                     }
                 }
-
                 if (k >= 0 && knn != null) {
                     if (inc.AuxInt > 0) { // increasing iteration
                         // The concern for the relation between step and k is to ensure that iv never exceeds knn
@@ -276,7 +262,6 @@ private static slice<indVar> findIndVar(ptr<Func> _addr_f) {
                         if (step <= k || flags & indVarMaxInc == 0 && step - 1 == k) {
                             ok = true;
                         }
-
                     }
                     else
  { // decreasing iteration
@@ -285,11 +270,8 @@ private static slice<indVar> findIndVar(ptr<Func> _addr_f) {
                         // This all assumes signed integer arithmetic
                         // This is already assured by the test above: min.AuxInt >= step+math.MinInt64
                         ok = true;
-
                     }
-
                 }
-
             } 
 
             // TODO: other unrolling idioms
@@ -299,16 +281,13 @@ private static slice<indVar> findIndVar(ptr<Func> _addr_f) {
             if (!ok) {
                 continue;
             }
-
         }
         if (f.pass.debug >= 1) {
             printIndVar(_addr_b, ind, _addr_min, max, step, flags);
         }
         iv = append(iv, new indVar(ind:ind,min:min,max:max,entry:b.Succs[0].b,flags:flags,));
         b.Logf("found induction variable %v (inc = %v, min = %v, max = %v)\n", ind, inc, min, max);
-
     }    return iv;
-
 }
 
 private static (ptr<Value>, long) dropAdd64(ptr<Value> _addr_v) {
@@ -323,7 +302,6 @@ private static (ptr<Value>, long) dropAdd64(ptr<Value> _addr_v) {
         return (_addr_v.Args[0]!, v.Args[1].AuxInt);
     }
     return (_addr_v!, 0);
-
 }
 
 private static void printIndVar(ptr<Block> _addr_b, ptr<Value> _addr_i, ptr<Value> _addr_min, ptr<Value> _addr_max, long inc, indVarFlags flags) {
@@ -365,7 +343,6 @@ private static void printIndVar(ptr<Block> _addr_b, ptr<Value> _addr_i, ptr<Valu
         extra = fmt.Sprintf(" (%s)", i);
     }
     b.Func.Warnl(b.Pos, "Induction variable: limits %v%v,%v%v, increment %d%s", mb1, mlim1, mlim2, mb2, inc, extra);
-
 }
 
 } // end ssa_package

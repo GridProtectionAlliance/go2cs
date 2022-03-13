@@ -4,18 +4,20 @@
 
 // This file implements isTerminating.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:49 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:14 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\return.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-
 namespace go.cmd.compile.@internal;
+
+using syntax = cmd.compile.@internal.syntax_package;
+
+
+// isTerminating reports if s is a terminating statement.
+// If s is labeled, label is the label name; otherwise s
+// is "".
 
 public static partial class types2_package {
 
-    // isTerminating reports if s is a terminating statement.
-    // If s is labeled, label is the label name; otherwise s
-    // is "".
 private static bool isTerminating(this ptr<Checker> _addr_check, syntax.Stmt s, @string label) {
     ref Checker check = ref _addr_check.val;
 
@@ -41,8 +43,6 @@ private static bool isTerminating(this ptr<Checker> _addr_check, syntax.Stmt s, 
                     return true;
                 }
             }
-
-
             break;
         case ptr<syntax.ReturnStmt> s:
             return true;
@@ -85,7 +85,6 @@ private static bool isTerminating(this ptr<Checker> _addr_check, syntax.Stmt s, 
     }
 
     return false;
-
 }
 
 private static bool isTerminatingList(this ptr<Checker> _addr_check, slice<syntax.Stmt> list, @string label) {
@@ -101,7 +100,6 @@ private static bool isTerminatingList(this ptr<Checker> _addr_check, slice<synta
             }
 
         }
-
     }
     return false; // all statements are empty
 }
@@ -118,7 +116,6 @@ private static bool isTerminatingSwitch(this ptr<Checker> _addr_check, slice<ptr
             return false;
         }
     }    return hasDefault;
-
 }
 
 // TODO(gri) For nested breakable statements, the current implementation of hasBreak
@@ -190,7 +187,6 @@ private static bool hasBreak(syntax.Stmt s, @string label, bool @implicit) {
     }
 
     return false;
-
 }
 
 private static bool hasBreakList(slice<syntax.Stmt> list, @string label, bool @implicit) {
@@ -199,7 +195,6 @@ private static bool hasBreakList(slice<syntax.Stmt> list, @string label, bool @i
             return true;
         }
     }    return false;
-
 }
 
 private static bool hasBreakCaseList(slice<ptr<syntax.CaseClause>> list, @string label, bool @implicit) {
@@ -208,7 +203,6 @@ private static bool hasBreakCaseList(slice<ptr<syntax.CaseClause>> list, @string
             return true;
         }
     }    return false;
-
 }
 
 private static bool hasBreakCommList(slice<ptr<syntax.CommClause>> list, @string label, bool @implicit) {
@@ -217,7 +211,6 @@ private static bool hasBreakCommList(slice<ptr<syntax.CommClause>> list, @string
             return true;
         }
     }    return false;
-
 }
 
 } // end types2_package

@@ -2,26 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:47 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:16 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\main.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using format = go.go.format_package;
-using parser = go.go.parser_package;
-using scanner = go.go.scanner_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using diff = go.cmd.@internal.diff_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using format = go.format_package;
+using parser = go.parser_package;
+using scanner = go.scanner_package;
+using token = go.token_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using diff = cmd.@internal.diff_package;
 
 public static partial class main_package {
 
@@ -58,9 +58,7 @@ private static void usage() {
         var desc = strings.TrimSpace(f.desc);
         desc = strings.ReplaceAll(desc, "\n", "\n\t");
         fmt.Fprintf(os.Stderr, "\t%s\n", desc);
-
     }    os.Exit(2);
-
 }
 
 private static void Main() {
@@ -108,9 +106,7 @@ private static void Main() {
             err = err__prev2;
 
         }
-
         os.Exit(exitCode);
-
     }
     for (nint i = 0; i < flag.NArg(); i++) {
         var path = flag.Arg(i);
@@ -139,14 +135,11 @@ private static void Main() {
                 }
 
 
-
             err = err__prev1;
         }
-
     }
 
     os.Exit(exitCode);
-
 }
 
 private static readonly var parserMode = parser.ParseComments;
@@ -166,9 +159,7 @@ private static (slice<byte>, error) gofmtFile(ptr<ast.File> _addr_f) {
             return (null, error.As(err)!);
         }
     }
-
     return (buf.Bytes(), error.As(null!)!);
-
 }
 
 private static error processFile(@string filename, bool useStdin) => func((defer, _, _) => {
@@ -186,7 +177,6 @@ private static error processFile(@string filename, bool useStdin) => func((defer
             return error.As(err)!;
         }
         defer(f.Close());
-
     }
     var (src, err) = io.ReadAll(f);
     if (err != null) {
@@ -207,7 +197,6 @@ private static error processFile(@string filename, bool useStdin) => func((defer
         }
         file = newFile;
         fmt.Fprintf(_addr_fixlog, " fmt");
-
     }
     var newFile = file;
     var @fixed = false;
@@ -229,7 +218,6 @@ private static error processFile(@string filename, bool useStdin) => func((defer
             if (err != null) {
                 return error.As(err)!;
             }
-
             newFile, err = parser.ParseFile(fset, filename, newSrc, parserMode);
             if (err != null) {
                 if (debug) {
@@ -239,7 +227,6 @@ private static error processFile(@string filename, bool useStdin) => func((defer
                 }
                 return error.As(err)!;
             }
-
         }
     }    if (!fixed) {
         return error.As(null!)!;
@@ -264,14 +251,12 @@ private static error processFile(@string filename, bool useStdin) => func((defer
         fmt.Printf("diff %s fixed/%s\n", filename, filename);
         os.Stdout.Write(data);
         return error.As(null!)!;
-
     }
     if (useStdin) {
         os.Stdout.Write(newSrc);
         return error.As(null!)!;
     }
     return error.As(os.WriteFile(f.Name(), newSrc, 0))!;
-
 });
 
 private static @string gofmt(object n) {
@@ -283,9 +268,7 @@ private static @string gofmt(object n) {
             return "<" + err.Error() + ">";
         }
     }
-
     return gofmtBuf.String();
-
 }
 
 private static void report(error err) {
@@ -305,14 +288,12 @@ private static error visitFile(@string path, fs.DirEntry f, error err) {
         report(err);
     }
     return error.As(null!)!;
-
 }
 
 private static bool isGoFile(fs.DirEntry f) { 
     // ignore non-Go files
     var name = f.Name();
     return !f.IsDir() && !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".go");
-
 }
 
 } // end main_package

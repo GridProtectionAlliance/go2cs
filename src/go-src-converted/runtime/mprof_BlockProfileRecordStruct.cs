@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:10:06 UTC
+//     Generated on 2022 March 13 05:25:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(StackRecord))]
         public partial struct BlockProfileRecord
         {
@@ -64,7 +64,7 @@ namespace go
             public static implicit operator BlockProfileRecord(NilType nil) => default(BlockProfileRecord);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static BlockProfileRecord BlockProfileRecord_cast(dynamic value)
         {
             return new BlockProfileRecord(value.Count, value.Cycles, value.StackRecord);

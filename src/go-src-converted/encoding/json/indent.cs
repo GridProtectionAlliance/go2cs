@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2022 March 06 22:25:20 UTC
+// package json -- go2cs converted at 2022 March 13 05:39:53 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\indent.go
-using bytes = go.bytes_package;
-
 namespace go.encoding;
+
+using bytes = bytes_package;
+
+
+// Compact appends to dst the JSON-encoded src with
+// insignificant space characters elided.
 
 public static partial class json_package {
 
-    // Compact appends to dst the JSON-encoded src with
-    // insignificant space characters elided.
 public static error Compact(ptr<bytes.Buffer> _addr_dst, slice<byte> src) {
     ref bytes.Buffer dst = ref _addr_dst.val;
 
@@ -62,7 +64,6 @@ private static error compact(ptr<bytes.Buffer> _addr_dst, slice<byte> src, bool 
         dst.Write(src[(int)start..]);
     }
     return error.As(null!)!;
-
 });
 
 private static void newline(ptr<bytes.Buffer> _addr_dst, @string prefix, @string indent, nint depth) {
@@ -135,28 +136,23 @@ public static error Indent(ptr<bytes.Buffer> _addr_dst, slice<byte> src, @string
                            if (needIndent) { 
                                // suppress indent in empty object/array
                                needIndent = false;
-
                            }
                            else
                 {
                                depth--;
                                newline(_addr_dst, prefix, indent, depth);
                            }
-
                            dst.WriteByte(c);
-
                 break;
             default: 
                 dst.WriteByte(c);
                 break;
         }
-
     }    if (scan.eof() == scanError) {
         dst.Truncate(origLen);
         return error.As(scan.err)!;
     }
     return error.As(null!)!;
-
 });
 
 } // end json_package

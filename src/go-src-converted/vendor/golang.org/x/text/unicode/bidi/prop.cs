@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bidi -- go2cs converted at 2022 March 06 23:38:28 UTC
+// package bidi -- go2cs converted at 2022 March 13 06:46:42 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\bidi\prop.go
-using utf8 = go.unicode.utf8_package;
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using utf8 = unicode.utf8_package;
 
 public static partial class bidi_package {
 
-    // Properties provides access to BiDi properties of runes.
+// Properties provides access to BiDi properties of runes.
 public partial struct Properties {
     public byte entry;
     public byte last;
@@ -36,7 +36,6 @@ public static Class Class(this Properties p) {
         c = controlByteToClass[p.last & 0xF];
     }
     return c;
-
 }
 
 // IsBracket reports whether the rune is a bracket.
@@ -145,7 +144,6 @@ public static (Properties, nint) Lookup(slice<byte> s) {
         return (new Properties(entry:trie.lookupValue(uint32(i),c3)), 4);
     // Illegal rune
     return (new Properties(), 1);
-
 }
 
 // LookupString returns properties for the first rune in s and the width in
@@ -211,7 +209,6 @@ public static (Properties, nint) LookupString(@string s) {
         return (new Properties(entry:trie.lookupValue(uint32(i),c3)), 4);
     // Illegal rune
     return (new Properties(), 1);
-
 }
 
 } // end bidi_package

@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssagen -- go2cs converted at 2022 March 06 22:47:36 UTC
+// package ssagen -- go2cs converted at 2022 March 13 05:58:52 UTC
 // import "cmd/compile/internal/ssagen" ==> using ssagen = go.cmd.compile.@internal.ssagen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssagen\abi.go
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using staticdata = go.cmd.compile.@internal.staticdata_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using staticdata = cmd.compile.@internal.staticdata_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+
+
+// SymABIs records information provided by the assembler about symbol
+// definition ABIs and reference ABIs.
+
+using System;
 public static partial class ssagen_package {
 
-    // SymABIs records information provided by the assembler about symbol
-    // definition ABIs and reference ABIs.
 public partial struct SymABIs {
     public map<@string, obj.ABI> defs;
     public map<@string, obj.ABISet> refs;
@@ -40,7 +41,6 @@ public static ptr<SymABIs> NewSymABIs(@string myimportpath) {
         localPrefix = objabi.PathToPrefix(myimportpath) + ".";
     }
     return addr(new SymABIs(defs:make(map[string]obj.ABI),refs:make(map[string]obj.ABISet),localPrefix:localPrefix,));
-
 }
 
 // canonicalize returns the canonical name used for a linker symbol in
@@ -57,7 +57,6 @@ private static @string canonicalize(this ptr<SymABIs> _addr_s, @string linksym) 
         return "\"\"." + linksym[(int)len(s.localPrefix)..];
     }
     return linksym;
-
 }
 
 // ReadSymABIs reads a symabis file that specifies definitions and
@@ -98,7 +97,6 @@ private static void ReadSymABIs(this ptr<SymABIs> _addr_s, @string file) {
                            if (!valid) {
                                log.Fatalf("%s:%d: invalid symabi: unknown abi \"%s\"", file, lineNum, abistr);
                            }
-
                            sym = s.canonicalize(sym); 
 
                            // Record for later.
@@ -109,13 +107,11 @@ private static void ReadSymABIs(this ptr<SymABIs> _addr_s, @string file) {
                 {
                                s.refs[sym] |= obj.ABISetOf(abi);
                            }
-
                 break;
             default: 
                 log.Fatalf("%s:%d: invalid symabi type \"%s\"", file, lineNum, parts[0]);
                 break;
         }
-
     }
 }
 
@@ -142,7 +138,6 @@ private static void GenABIWrappers(this ptr<SymABIs> _addr_s) {
                 cgoExports[symName] = append(cgoExports[symName], pprag);
                 break;
         }
-
     }    {
         var fn__prev1 = fn;
 
@@ -165,7 +160,6 @@ private static void GenABIWrappers(this ptr<SymABIs> _addr_s) {
  { 
                 // These names will already be canonical.
                 symName = sym.Pkg.Prefix + "." + sym.Name;
-
             } 
 
             // Apply definitions.
@@ -173,13 +167,11 @@ private static void GenABIWrappers(this ptr<SymABIs> _addr_s) {
             if (hasDefABI) {
                 fn.ABI = defABI;
             }
-
             if (fn.Pragma & ir.CgoUnsafeArgs != 0) { 
                 // CgoUnsafeArgs indicates the function (or its callee) uses
                 // offsets to dispatch arguments, which currently using ABI0
                 // frame layout. Pin it to ABI0.
                 fn.ABI = obj.ABI0;
-
             } 
 
             // If cgo-exported, add the definition ABI to the cgo
@@ -205,7 +197,6 @@ private static void GenABIWrappers(this ptr<SymABIs> _addr_s) {
                     } 
                     // Add the ABI argument.
                     pprag.val = append(pprag.val, fn.ABI.String());
-
                 } 
 
                 // Apply references.
@@ -250,16 +241,12 @@ private static void GenABIWrappers(this ptr<SymABIs> _addr_s) {
             if (len(cgoExport) > 0 && fn.ABIRefs & ~obj.ABISetOf(fn.ABI) != 0) {
                 @base.Fatalf("cgo exported function %s cannot have ABI wrappers", fn);
             }
-
             if (!buildcfg.Experiment.RegabiWrappers) { 
                 // We'll generate ABI aliases instead of
                 // wrappers once we have LSyms in InitLSym.
                 continue;
-
             }
-
             forEachWrapperABI(_addr_fn, makeABIWrapper);
-
         }
         fn = fn__prev1;
     }
@@ -298,18 +285,13 @@ public static void InitLSym(ptr<ir.Func> _addr_f, bool hasBody) {
                 // ABI of a function, so we make the funcsym
                 // when we see that.
                 staticdata.NeedFuncSym(f);
-
             }
-
             if (!buildcfg.Experiment.RegabiWrappers) { 
                 // Create ABI aliases instead of wrappers.
                 forEachWrapperABI(_addr_f, makeABIAlias);
-
             }
-
         }
     }
-
     if (hasBody) {
         setupTextLSym(_addr_f, 0);
     }
@@ -327,9 +309,7 @@ private static void forEachWrapperABI(ptr<ir.Func> _addr_fn, Action<ptr<ir.Func>
             continue;
         }
         cb(fn, wrapperABI);
-
     }
-
 }
 
 // makeABIAlias creates a new ABI alias so calls to f via wrapperABI
@@ -344,7 +324,6 @@ private static void makeABIAlias(ptr<ir.Func> _addr_f, obj.ABI wrapperABI) {
     asym.SetABI(wrapperABI);
     asym.Set(obj.AttrDuplicateOK, true);
     @base.Ctxt.ABIAliases = append(@base.Ctxt.ABIAliases, asym);
-
 }
 
 // makeABIWrapper creates a new function that will be called with
@@ -419,13 +398,11 @@ private static void makeABIWrapper(ptr<ir.Func> _addr_f, obj.ABI wrapperABI) => 
         // cannot tailcall on PPC64 with dynamic linking, as we need
         // to restore R2 after call.
         tailcall = false;
-
     }
     if (@base.Ctxt.Arch.Name == "amd64" && wrapperABI == obj.ABIInternal) { 
         // cannot tailcall from ABIInternal to ABI0 on AMD64, as we need
         // to special registers (X15) when returning to ABIInternal.
         tailcall = false;
-
     }
     ir.Node tail = default;
     if (tailcall) {
@@ -459,7 +436,6 @@ private static void makeABIWrapper(ptr<ir.Func> _addr_f, obj.ABI wrapperABI) => 
     @base.Pos = savepos;
     typecheck.DeclContext = savedclcontext;
     ir.CurFunc = savedcurfn;
-
 });
 
 // setupTextLsym initializes the LSym for a with-body text symbol.
@@ -496,10 +472,8 @@ private static void setupTextLSym(ptr<ir.Func> _addr_f, nint flag) {
                 flag |= obj.WRAPPER;
                 break;
         }
-
     }
     @base.Ctxt.InitTextSym(f.LSym, flag);
-
 }
 
 } // end ssagen_package

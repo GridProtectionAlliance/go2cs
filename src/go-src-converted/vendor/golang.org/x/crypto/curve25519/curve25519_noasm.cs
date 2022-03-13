@@ -5,11 +5,9 @@
 //go:build !amd64 || !gc || purego
 // +build !amd64 !gc purego
 
-// package curve25519 -- go2cs converted at 2022 March 06 23:36:50 UTC
+// package curve25519 -- go2cs converted at 2022 March 13 06:44:56 UTC
 // import "vendor/golang.org/x/crypto/curve25519" ==> using curve25519 = go.vendor.golang.org.x.crypto.curve25519_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\curve25519\curve25519_noasm.go
-
-
 namespace go.vendor.golang.org.x.crypto;
 
 public static partial class curve25519_package {

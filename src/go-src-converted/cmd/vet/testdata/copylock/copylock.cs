@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package copylock -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package copylock -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata/copylock" ==> using copylock = go.cmd.vet.testdata.copylock_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\copylock\copylock.go
-using sync = go.sync_package;
-
 namespace go.cmd.vet.testdata;
+
+using sync = sync_package;
 
 public static partial class copylock_package {
 

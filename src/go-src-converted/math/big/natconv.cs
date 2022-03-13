@@ -4,17 +4,17 @@
 
 // This file implements nat-to-string conversion functions.
 
-// package big -- go2cs converted at 2022 March 06 22:18:01 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:13 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\natconv.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using bits = go.math.bits_package;
-using sync = go.sync_package;
-
 namespace go.math;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using bits = math.bits_package;
+using sync = sync_package;
 
 public static partial class big_package {
 
@@ -55,12 +55,10 @@ private static (Word, nint) maxPow(Word b) {
             // p == b**n && p <= max
             p *= b;
             n++;
-
         }
     } 
     // p == b**n && p <= _M
     return ;
-
 }
 
 // pow returns x**n for n > 0, and 1 otherwise.
@@ -77,10 +75,8 @@ private static Word pow(Word x, nint n) {
         }
         x *= x;
         n>>=1;
-
     }
     return ;
-
 }
 
 // scan errors
@@ -180,7 +176,6 @@ private static (nat, nint, nint, error) scan(this nat z, io.ByteScanner r, nint 
                         if (!fracOk) {
                             (b, prefix) = (8, '0');
                         }
-
                         break;
                 }
                 if (prefix != 0) {
@@ -188,11 +183,8 @@ private static (nat, nint, nint, error) scan(this nat z, io.ByteScanner r, nint 
                     if (prefix != '0') {
                         ch, err = r.ReadByte();
                     }
-
                 }
-
             }
-
         }
     }
     z = z[..(int)0];
@@ -233,15 +225,12 @@ private static (nat, nint, nint, error) scan(this nat z, io.ByteScanner r, nint 
  {
                     d1 = Word(ch - 'A' + maxBaseSmall);
                 }
-
             else 
                 d1 = MaxBase + 1;
                         if (d1 >= b1) {
                 r.UnreadByte(); // ch does not belong to number anymore
                 break;
-
             }
-
             prev = '0';
             count++; 
 
@@ -255,10 +244,8 @@ private static (nat, nint, nint, error) scan(this nat z, io.ByteScanner r, nint 
                 di = 0;
                 i = 0;
             }
-
         }
         ch, err = r.ReadByte();
-
     }
 
     if (err == io.EOF) {
@@ -273,7 +260,6 @@ private static (nat, nint, nint, error) scan(this nat z, io.ByteScanner r, nint 
             // there was only the octal prefix 0 (possibly followed by separators and digits > 7);
             // interpret as decimal 0
             return (z[..(int)0], 10, 1, error.As(err)!);
-
         }
         err = errNoDigits; // fall through; result will be 0
     }
@@ -286,10 +272,8 @@ private static (nat, nint, nint, error) scan(this nat z, io.ByteScanner r, nint 
     if (dp >= 0) { 
         // 0 <= dp <= count
         count = dp - count;
-
     }
     return ;
-
 });
 
 // utoa converts x to an ASCII representation in the given base;
@@ -343,7 +327,6 @@ private static slice<byte> itoa(this nat x, bool neg, nint @base) => func((_, pa
                     // no partial digit remaining, just advance
                     w = x[k];
                     nbits = _W;
-
                 }
                 else
  { 
@@ -355,9 +338,7 @@ private static slice<byte> itoa(this nat x, bool neg, nint @base) => func((_, pa
                     // advance
                     w = x[k] >> (int)((shift - nbits));
                     nbits = _W - (shift - nbits);
-
                 }
-
             } 
 
             // convert digits of most-significant word w (omit leading zeros)
@@ -369,8 +350,6 @@ private static slice<byte> itoa(this nat x, bool neg, nint @base) => func((_, pa
                 s[i] = digits[w & mask];
                 w>>=shift;
             }
-
-
 
         } {
             var (bb, ndigits) = maxPow(b); 
@@ -392,18 +371,14 @@ private static slice<byte> itoa(this nat x, bool neg, nint @base) => func((_, pa
             while (s[i] == '0') {
                 i++;
             }
-
-
         }
     }
-
 
     if (neg) {
         i--;
         s[i] = '-';
     }
     return s[(int)i..];
-
 });
 
 // Convert words of q to base b digits in s. If q is large, it is recursively "split in half"
@@ -451,7 +426,6 @@ private static void convertWords(this nat q, slice<byte> s, Word b, nint ndigits
             r.convertWords(s[(int)h..], b, ndigits, bb, table[(int)0..(int)index]);
             s = s[..(int)h]; // == q.convertWords(s, b, ndigits, bb, table[0:index+1])
         }
-
     }
     var i = len(s);
     r = default;
@@ -471,16 +445,13 @@ private static void convertWords(this nat q, slice<byte> s, Word b, nint ndigits
                     var t = r / 10;
                     s[i] = '0' + byte(r - t * 10);
                     r = t;
-
                 }
     else
 
 
                 j = j__prev2;
             }
-
         }
-
     } {
         while (len(q) > 0) { 
             // extract least significant, base bb "digit"
@@ -497,16 +468,12 @@ private static void convertWords(this nat q, slice<byte> s, Word b, nint ndigits
 
                 j = j__prev2;
             }
-
         }
-
     }
     while (i > 0) { // while need more leading zeros
         i--;
         s[i] = '0';
-
     }
-
 });
 
 // Split blocks greater than leafSize Words (or set to 0 to disable recursive conversion)
@@ -578,17 +545,13 @@ private static slice<divisor> divisors(nint m, Word b, nint ndigits, Word bb) {
 
 
                 table[i].nbits = table[i].bbb.bitLen();
-
             }
-
         }
-
     }
     if (b == 10) {
         cacheBase10.Unlock();
     }
     return table;
-
 }
 
 } // end big_package

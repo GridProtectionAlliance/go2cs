@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 22:23:36 UTC
+// package syntax -- go2cs converted at 2022 March 13 05:38:02 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Program Files\Go\src\regexp\syntax\parse.go
-using sort = go.sort_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.regexp;
+
+using sort = sort_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// An Error describes a failure to parse a regular expression
+// and gives the offending expression.
 
 public static partial class syntax_package {
 
-    // An Error describes a failure to parse a regular expression
-    // and gives the offending expression.
 public partial struct Error {
     public ErrorCode Code;
     public @string Expr;
@@ -50,7 +52,6 @@ public static readonly ErrorCode ErrMissingRepeatArgument = "missing argument to
 public static readonly ErrorCode ErrTrailingBackslash = "trailing backslash at end of expression";
 public static readonly ErrorCode ErrUnexpectedParen = "unexpected )";
 
-
 public static @string String(this ErrorCode e) {
     return string(e);
 }
@@ -77,7 +78,6 @@ public static readonly Flags POSIX = 0; // POSIX syntax
 private static readonly var opLeftParen = opPseudo + iota;
 private static readonly var opVerticalBar = 0;
 
-
 private partial struct parser {
     public Flags flags; // parse mode flags
     public slice<ptr<Regexp>> stack; // stack of parsed expressions
@@ -101,7 +101,6 @@ private static ptr<Regexp> newRegexp(this ptr<parser> _addr_p, Op op) {
     }
     re.Op = op;
     return _addr_re!;
-
 }
 
 private static void reuse(this ptr<parser> _addr_p, ptr<Regexp> _addr_re) {
@@ -127,7 +126,6 @@ private static ptr<Regexp> push(this ptr<parser> _addr_p, ptr<Regexp> _addr_re) 
         re.Op = OpLiteral;
         re.Rune = re.Rune[..(int)1];
         re.Flags = p.flags & ~FoldCase;
-
     }
     else if (re.Op == OpCharClass && len(re.Rune) == 4 && re.Rune[0] == re.Rune[1] && re.Rune[2] == re.Rune[3] && unicode.SimpleFold(re.Rune[0]) == re.Rune[2] && unicode.SimpleFold(re.Rune[2]) == re.Rune[0] || re.Op == OpCharClass && len(re.Rune) == 2 && re.Rune[0] + 1 == re.Rune[1] && unicode.SimpleFold(re.Rune[0]) == re.Rune[1] && unicode.SimpleFold(re.Rune[1]) == re.Rune[0]) { 
         // Case-insensitive rune like [Aa] or [Δδ].
@@ -137,17 +135,14 @@ private static ptr<Regexp> push(this ptr<parser> _addr_p, ptr<Regexp> _addr_re) 
         re.Op = OpLiteral;
         re.Rune = re.Rune[..(int)1];
         re.Flags = p.flags | FoldCase;
-
     }
     else
  { 
         // Incremental concatenation.
         p.maybeConcat(-1, 0);
-
     }
     p.stack = append(p.stack, re);
     return _addr_re!;
-
 }
 
 // maybeConcat implements incremental concatenation
@@ -197,7 +192,6 @@ private static void literal(this ptr<parser> _addr_p, int r) {
     re.Rune0[0] = r;
     re.Rune = re.Rune0[..(int)1];
     p.push(re);
-
 }
 
 // minFoldRune returns the minimum rune fold-equivalent to r.
@@ -216,7 +210,6 @@ private static int minFoldRune(int r) {
         }
     }
     return min;
-
 }
 
 // op pushes a regexp with the given op onto the stack
@@ -249,7 +242,6 @@ private static (@string, error) repeat(this ptr<parser> _addr_p, Op op, nint min
             // a** is a syntax error, not a doubled star, and a++ means
             // something else entirely, which we don't support!
             return ("", error.As(addr(new Error(ErrInvalidRepeatOp,lastRepeat[:len(lastRepeat)-len(after)]))!)!);
-
         }
     }
     var n = len(p.stack);
@@ -272,7 +264,6 @@ private static (@string, error) repeat(this ptr<parser> _addr_p, Op op, nint min
         return ("", error.As(addr(new Error(ErrInvalidRepeatSize,before[:len(before)-len(after)]))!)!);
     }
     return (after, error.As(null!)!);
-
 }
 
 // repeatIsValid reports whether the repetition re is valid.
@@ -307,7 +298,6 @@ private static bool repeatIsValid(ptr<Regexp> _addr_re, nint n) {
             return false;
         }
     }    return true;
-
 }
 
 // concat replaces the top of the stack (above the topmost '|' or '(') with its concatenation.
@@ -329,7 +319,6 @@ private static ptr<Regexp> concat(this ptr<parser> _addr_p) {
         return _addr_p.push(p.newRegexp(OpEmptyMatch))!;
     }
     return _addr_p.push(p.collapse(subs, OpConcat))!;
-
 }
 
 // alternate replaces the top of the stack (above the topmost '(') with its alternation.
@@ -354,7 +343,6 @@ private static ptr<Regexp> alternate(this ptr<parser> _addr_p) {
         return _addr_p.push(p.newRegexp(OpNoMatch))!;
     }
     return _addr_p.push(p.collapse(subs, OpAlternate))!;
-
 }
 
 // cleanAlt cleans re for eventual inclusion in an alternation.
@@ -378,7 +366,6 @@ private static void cleanAlt(ptr<Regexp> _addr_re) {
             // re.Rune will not grow any more.
             // Make a copy or inline to reclaim storage.
             re.Rune = append(re.Rune0[..(int)0], re.Rune);
-
         }
     }
 
@@ -412,7 +399,6 @@ private static ptr<Regexp> collapse(this ptr<parser> _addr_p, slice<ptr<Regexp>>
         }
     }
     return _addr_re!;
-
 }
 
 // factor factors common prefixes from the alternation list sub.
@@ -461,11 +447,8 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
                         // Keep going around.
                         str = str[..(int)same];
                         continue;
-
                     }
-
                 }
-
             } 
 
             // Found end of a run with common leading literal string:
@@ -479,7 +462,6 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
             else if (i == start + 1) { 
                 // Just one: don't bother factoring.
                 out = append(out, sub[start]);
-
             }
             else
  { 
@@ -503,14 +485,12 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
                 var re = p.newRegexp(OpConcat);
                 re.Sub = append(re.Sub[..(int)0], prefix, suffix);
                 out = append(out, re);
-
             } 
 
             // Prepare for next iteration.
             start = i;
             str = istr;
             strflags = iflags;
-
         }
 
         i = i__prev1;
@@ -555,7 +535,6 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
             else if (i == start + 1) { 
                 // Just one: don't bother factoring.
                 out = append(out, sub[start]);
-
             }
             else
  { 
@@ -567,7 +546,6 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
                     for (j = start; j < i; j++) {
                         var reuse = j != start; // prefix came from sub[start]
                         sub[j] = p.removeLeadingRegexp(sub[j], reuse);
-
                     }
 
 
@@ -578,13 +556,11 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
                 re = p.newRegexp(OpConcat);
                 re.Sub = append(re.Sub[..(int)0], prefix, suffix);
                 out = append(out, re);
-
             } 
 
             // Prepare for next iteration.
             start = i;
             first = addr(ifirst);
-
         }
 
         i = i__prev1;
@@ -646,16 +622,13 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
                 }
                 cleanAlt(_addr_sub[start]);
                 out = append(out, sub[start]);
-
             } 
 
             // ... and then emit sub[i].
             if (i < len(sub)) {
                 out = append(out, sub[i]);
             }
-
             start = i + 1;
-
         }
 
         i = i__prev1;
@@ -681,7 +654,6 @@ private static slice<ptr<Regexp>> factor(this ptr<parser> _addr_p, slice<ptr<Reg
     sub = out;
 
     return sub;
-
 }
 
 // leadingString returns the leading literal string that re begins with.
@@ -699,7 +671,6 @@ private static (slice<int>, Flags) leadingString(this ptr<parser> _addr_p, ptr<R
         return (null, 0);
     }
     return (re.Rune, re.Flags & FoldCase);
-
 }
 
 // removeLeadingString removes the first n leading runes
@@ -735,10 +706,8 @@ private static ptr<Regexp> removeLeadingString(this ptr<parser> _addr_p, ptr<Reg
                     re.Sub = re.Sub[..(int)len(re.Sub) - 1];
                     break;
             }
-
         }
         return _addr_re!;
-
     }
     if (re.Op == OpLiteral) {
         re.Rune = re.Rune[..(int)copy(re.Rune, re.Rune[(int)n..])];
@@ -747,7 +716,6 @@ private static ptr<Regexp> removeLeadingString(this ptr<parser> _addr_p, ptr<Reg
         }
     }
     return _addr_re!;
-
 }
 
 // leadingRegexp returns the leading regexp that re begins with.
@@ -765,10 +733,8 @@ private static ptr<Regexp> leadingRegexp(this ptr<parser> _addr_p, ptr<Regexp> _
             return _addr_null!;
         }
         return _addr_sub!;
-
     }
     return _addr_re!;
-
 }
 
 // removeLeadingRegexp removes the leading regexp in re.
@@ -795,13 +761,11 @@ private static ptr<Regexp> removeLeadingRegexp(this ptr<parser> _addr_p, ptr<Reg
                 break;
         }
         return _addr_re!;
-
     }
     if (reuse) {
         p.reuse(re);
     }
     return _addr_p.newRegexp(OpEmptyMatch)!;
-
 }
 
 private static ptr<Regexp> literalRegexp(@string s, Flags flags) {
@@ -813,12 +777,9 @@ private static ptr<Regexp> literalRegexp(@string s, Flags flags) {
             // string is too long to fit in Rune0.  let Go handle it
             re.Rune = (slice<int>)s;
             break;
-
         }
         re.Rune = append(re.Rune, c);
-
     }    return _addr_re!;
-
 }
 
 // Parsing.
@@ -844,9 +805,7 @@ public static (ptr<Regexp>, error) Parse(@string s, Flags flags) {
             err = err__prev2;
 
         }
-
         return (_addr_literalRegexp(s, flags)!, error.As(null!)!);
-
     }
     parser p = default;    err = default!;    int c = default;    Op op = default;    @string lastRepeat = default;
     p.flags = flags;
@@ -864,17 +823,13 @@ BigSwitch:
                     if (err != null) {
                         return (_addr_null!, error.As(err)!);
                     }
-
                     break;
-
                 }
-
                 p.numCap++;
-                p.op(opLeftParen).Cap;
+                p.op;
 
-                p.numCap;
+                (opLeftParen).Cap = p.numCap;
                 t = t[(int)1..];
-
                 break;
             case '|': 
                 err = p.parseVerticalBar();
@@ -882,9 +837,7 @@ BigSwitch:
                 if (err != null) {
                     return (_addr_null!, error.As(err)!);
                 }
-
                 t = t[(int)1..];
-
                 break;
             case ')': 
                 err = p.parseRightParen();
@@ -892,9 +845,7 @@ BigSwitch:
                 if (err != null) {
                     return (_addr_null!, error.As(err)!);
                 }
-
                 t = t[(int)1..];
-
                 break;
             case '^': 
                            if (p.flags & OneLine != 0) {
@@ -904,24 +855,19 @@ BigSwitch:
                 {
                                p.op(OpBeginLine);
                            }
-
                            t = t[(int)1..];
-
                 break;
             case '$': 
                            if (p.flags & OneLine != 0) {
-                               p.op(OpEndText).Flags;
+                               p.op;
 
-                               WasDollar;
-
+                               (OpEndText).Flags |= WasDollar;
                            }
                            else
                 {
                                p.op(OpEndLine);
                            }
-
                            t = t[(int)1..];
-
                 break;
             case '.': 
                            if (p.flags & DotNL != 0) {
@@ -931,9 +877,7 @@ BigSwitch:
                 {
                                p.op(OpAnyCharNotNL);
                            }
-
                            t = t[(int)1..];
-
                 break;
             case '[': 
                 t, err = p.parseClass(t);
@@ -941,7 +885,6 @@ BigSwitch:
                 if (err != null) {
                     return (_addr_null!, error.As(err)!);
                 }
-
                 break;
             case '*': 
 
@@ -966,10 +909,8 @@ BigSwitch:
                 if (err != null) {
                     return (_addr_null!, error.As(err)!);
                 }
-
                 repeat = before;
                 t = after;
-
                 break;
             case '{': 
                 op = OpRepeat;
@@ -980,24 +921,18 @@ BigSwitch:
                     p.literal('{');
                     t = t[(int)1..];
                     break;
-
                 }
-
                 if (min < 0 || min > 1000 || max > 1000 || max >= 0 && min > max) { 
                     // Numbers were too big, or max is present and min > max.
                     return (_addr_null!, error.As(addr(new Error(ErrInvalidRepeatSize,before[:len(before)-len(after)]))!)!);
-
                 }
-
                 after, err = p.repeat(op, min, max, before, after, lastRepeat);
 
                 if (err != null) {
                     return (_addr_null!, error.As(err)!);
                 }
-
                 repeat = before;
                 t = after;
-
                 break;
             case '\\': 
                 if (p.flags & PerlX != 0 && len(t) >= 2) {
@@ -1041,7 +976,6 @@ BigSwitch:
                                                    }
 
                                                }
-
                                                while (lit != "") {
                                                    var (c, rest, err) = nextRune(lit);
                                                    if (err != null) {
@@ -1061,9 +995,7 @@ BigSwitch:
                             break;
                             break;
                     }
-
                 }
-
                 var re = p.newRegexp(OpCharClass);
                 re.Flags = p.flags; 
 
@@ -1080,7 +1012,6 @@ BigSwitch:
                         _breakBigSwitch = true;
                         break;
                     }
-
                 } 
 
                 // Perl character class escape.
@@ -1100,7 +1031,6 @@ BigSwitch:
                     r = r__prev1;
 
                 }
-
                 p.reuse(re); 
 
                 // Ordinary single-character escape.
@@ -1109,9 +1039,7 @@ BigSwitch:
                 if (err != null) {
                     return (_addr_null!, error.As(err)!);
                 }
-
                 p.literal(c);
-
                 break;
             default: 
                 c, t, err = nextRune(t);
@@ -1119,20 +1047,16 @@ BigSwitch:
                 if (err != null) {
                     return (_addr_null!, error.As(err)!);
                 }
-
                 p.literal(c);
-
                 break;
         }
         lastRepeat = repeat;
-
     }
 
     p.concat();
     if (p.swapVerticalBar()) { 
         // pop vertical bar
         p.stack = p.stack[..(int)len(p.stack) - 1];
-
     }
     p.alternate();
 
@@ -1141,7 +1065,6 @@ BigSwitch:
         return (_addr_null!, error.As(addr(new Error(ErrMissingParen,s))!)!);
     }
     return (_addr_p.stack[0]!, error.As(null!)!);
-
 }
 
 // parseRepeat parses {min} (max=min) or {min,} (max=-1) or {min,max}.
@@ -1187,7 +1110,6 @@ private static (nint, nint, @string, bool) parseRepeat(this ptr<parser> _addr_p,
         else if (max < 0) { 
             // parseInt found too big a number
             min = -1;
-
         }
     }
     if (s == "" || s[0] != '}') {
@@ -1196,7 +1118,6 @@ private static (nint, nint, @string, bool) parseRepeat(this ptr<parser> _addr_p,
     rest = s[(int)1..];
     ok = true;
     return ;
-
 }
 
 // parsePerlFlags parses a Perl flag setting or non-capturing group or both,
@@ -1233,9 +1154,7 @@ private static (@string, error) parsePerlFlags(this ptr<parser> _addr_p, @string
             if (err != null) {
                 return ("", error.As(err)!);
             }
-
             return ("", error.As(addr(new Error(ErrInvalidNamedCapture,s))!)!);
-
         }
         var capture = t[..(int)end + 1]; // "(?P<name>"
         var name = t[(int)4..(int)end]; // "name"
@@ -1252,7 +1171,6 @@ private static (@string, error) parsePerlFlags(this ptr<parser> _addr_p, @string
         re.Cap = p.numCap;
         re.Name = name;
         return (t[(int)end + 1..], error.As(null!)!);
-
     }
     int c = default;
     t = t[(int)2..]; // skip (?
@@ -1291,7 +1209,6 @@ Loop:
                     _breakLoop = true;
                     break;
                 }
-
                 sign = -1; 
                 // Invert flags so that | above turn into &^ and vice versa.
                 // We'll invert flags again before using it below.
@@ -1308,20 +1225,14 @@ Loop:
                         _breakLoop = true;
                         break;
                     }
-
                     flags = ~flags;
-
                 }
-
                 if (c == ':') { 
                     // Open new group
                     p.op(opLeftParen);
-
                 }
-
                 p.flags = flags;
                 return (t, error.As(null!)!);
-
                 break;
             default: 
                 _breakLoop = true; 
@@ -1330,10 +1241,8 @@ Loop:
                 break;
                 break;
         }
-
     }
     return ("", error.As(addr(new Error(ErrInvalidPerlOp,s[:len(s)-len(t)]))!)!);
-
 }
 
 // isValidCaptureName reports whether name
@@ -1350,7 +1259,6 @@ private static bool isValidCaptureName(@string name) {
             return false;
         }
     }    return true;
-
 }
 
 // parseInt parses a decimal integer.
@@ -1381,10 +1289,8 @@ private static (nint, @string, bool) parseInt(this ptr<parser> _addr_p, @string 
             break;
         }
         n = n * 10 + int(t[i]) - '0';
-
     }
     return ;
-
 }
 
 // can this be represented as a character class?
@@ -1411,7 +1317,6 @@ private static bool matchRune(ptr<Regexp> _addr_re, int r) {
                     return true;
                 i += 2;
                 }
-
             }
 
         }
@@ -1421,7 +1326,6 @@ private static bool matchRune(ptr<Regexp> _addr_re, int r) {
     else if (re.Op == OpAnyChar) 
         return true;
         return false;
-
 }
 
 // parseVerticalBar handles a | in the input.
@@ -1438,7 +1342,6 @@ private static error parseVerticalBar(this ptr<parser> _addr_p) {
         p.op(opVerticalBar);
     }
     return error.As(null!)!;
-
 }
 
 // mergeCharClass makes dst = dst|src.
@@ -1471,8 +1374,7 @@ private static void mergeCharClass(ptr<Regexp> _addr_dst, ptr<Regexp> _addr_src)
         dst.Op = OpCharClass;
         dst.Rune = appendLiteral(dst.Rune[..(int)0], dst.Rune[0], dst.Flags);
         dst.Rune = appendLiteral(dst.Rune, src.Rune[0], src.Flags);
-    
-}
+    }
 
 // If the top of the stack is an element followed by an opVerticalBar
 // swapVerticalBar swaps the two and returns true.
@@ -1494,7 +1396,6 @@ private static bool swapVerticalBar(this ptr<parser> _addr_p) {
         p.reuse(re1);
         p.stack = p.stack[..(int)n - 1];
         return true;
-
     }
     if (n >= 2) {
         re1 = p.stack[n - 1];
@@ -1504,17 +1405,13 @@ private static bool swapVerticalBar(this ptr<parser> _addr_p) {
                 // Now out of reach.
                 // Clean opportunistically.
                 cleanAlt(_addr_p.stack[n - 3]);
-
             }
-
             p.stack[n - 2] = re1;
             p.stack[n - 1] = re2;
             return true;
-
         }
     }
     return false;
-
 }
 
 // parseRightParen handles a ) in the input.
@@ -1525,7 +1422,6 @@ private static error parseRightParen(this ptr<parser> _addr_p) {
     if (p.swapVerticalBar()) { 
         // pop vertical bar
         p.stack = p.stack[..(int)len(p.stack) - 1];
-
     }
     p.alternate();
 
@@ -1543,7 +1439,6 @@ private static error parseRightParen(this ptr<parser> _addr_p) {
     if (re2.Cap == 0) { 
         // Just for grouping.
         p.push(re1);
-
     }
     else
  {
@@ -1553,7 +1448,6 @@ private static error parseRightParen(this ptr<parser> _addr_p) {
         p.push(re2);
     }
     return error.As(null!)!;
-
 }
 
 // parseEscape parses an escape sequence at the beginning of s
@@ -1620,40 +1514,32 @@ Switch:
                     _breakSwitch = true;
                     break;
                 }
-
                 c, t, err = nextRune(t);
 
                 if (err != null) {
                     return (0, "", error.As(err)!);
                 }
-
                 if (c == '}') {
                     break;
                 }
-
                 var v = unhex(c);
                 if (v < 0) {
                     _breakSwitch = true;
                     break;
                 }
-
                 r = r * 16 + v;
                 if (r > unicode.MaxRune) {
                     _breakSwitch = true;
                     break;
                 }
-
                 nhex++;
-
             }
 
             if (nhex == 0) {
                 _breakSwitch = true;
                 break;
             }
-
             return (r, t, error.As(null!)!);
-
         }
         var x = unhex(c);
         c, t, err = nextRune(t);
@@ -1712,12 +1598,10 @@ Switch:
             // \q, but we don't. We once rejected \_, but too many
             // programs and people insist on using it, so allow \_.
             return (c, t, error.As(null!)!);
-
         }
 
     __switch_break0:;
     return (0, "", error.As(addr(new Error(ErrInvalidEscape,s[:len(s)-len(t)]))!)!);
-
 }
 
 // parseClassChar parses a character class character at the beginning of s
@@ -1735,7 +1619,6 @@ private static (int, @string, error) parseClassChar(this ptr<parser> _addr_p, @s
         return p.parseEscape(s);
     }
     return nextRune(s);
-
 }
 
 private partial struct charGroup {
@@ -1759,7 +1642,6 @@ private static (slice<int>, @string) parsePerlClassEscape(this ptr<parser> _addr
         return ;
     }
     return (p.appendGroup(r, g), s[(int)2..]);
-
 }
 
 // parseNamedClass parses a leading POSIX named character class like [:alnum:]
@@ -1786,7 +1668,6 @@ private static (slice<int>, @string, error) parseNamedClass(this ptr<parser> _ad
         return (null, "", error.As(addr(new Error(ErrInvalidCharRange,name))!)!);
     }
     return (p.appendGroup(r, g), s, error.As(null!)!);
-
 }
 
 private static slice<int> appendGroup(this ptr<parser> _addr_p, slice<int> r, charGroup g) {
@@ -1816,7 +1697,6 @@ private static slice<int> appendGroup(this ptr<parser> _addr_p, slice<int> r, ch
         }
     }
     return r;
-
 }
 
 private static ptr<unicode.RangeTable> anyTable = addr(new unicode.RangeTable(R16:[]unicode.Range16{{Lo:0,Hi:1<<16-1,Stride:1}},R32:[]unicode.Range32{{Lo:1<<16,Hi:unicode.MaxRune,Stride:1}},));
@@ -1842,7 +1722,6 @@ private static (ptr<unicode.RangeTable>, ptr<unicode.RangeTable>) unicodeTable(@
         t = t__prev1;
 
     }
-
     {
         var t__prev1 = t;
 
@@ -1854,9 +1733,7 @@ private static (ptr<unicode.RangeTable>, ptr<unicode.RangeTable>) unicodeTable(@
         t = t__prev1;
 
     }
-
     return (_addr_null!, _addr_null!);
-
 }
 
 // parseUnicodeClass parses a leading Unicode character class like \p{Han}
@@ -1886,7 +1763,6 @@ private static (slice<int>, @string, error) parseUnicodeClass(this ptr<parser> _
         // Single-letter name.
         seq = s[..(int)len(s) - len(t)];
         name = seq[(int)2..];
-
     }
     else
  { 
@@ -1898,9 +1774,7 @@ private static (slice<int>, @string, error) parseUnicodeClass(this ptr<parser> _
             if (err != null) {
                 return ;
             }
-
             return (null, "", error.As(addr(new Error(ErrInvalidCharRange,s))!)!);
-
         }
         (seq, t) = (s[..(int)end + 1], s[(int)end + 1..]);        name = s[(int)3..(int)end];
         err = checkUTF8(name);
@@ -1945,7 +1819,6 @@ private static (slice<int>, @string, error) parseUnicodeClass(this ptr<parser> _
         }
     }
     return (r, t, error.As(null!)!);
-
 }
 
 // parseClass parses a character class at the beginning of s
@@ -2032,12 +1905,10 @@ private static (@string, error) parseClass(this ptr<parser> _addr_p, @string s) 
             if (err != null) {
                 return ("", error.As(err)!);
             }
-
             if (hi < lo) {
                 rng = rng[..(int)len(rng) - len(t)];
                 return ("", error.As(addr(new Error(Code:ErrInvalidCharRange,Expr:rng))!)!);
             }
-
         }
         if (p.flags & FoldCase == 0) {
             class = appendRange(class, lo, hi);
@@ -2058,7 +1929,6 @@ private static (@string, error) parseClass(this ptr<parser> _addr_p, @string s) 
     re.Rune = class;
     p.push(re);
     return (t, error.As(null!)!);
-
 }
 
 // cleanClass sorts the ranges (pairs of elements of r),
@@ -2086,20 +1956,16 @@ private static slice<int> cleanClass(ptr<slice<int>> _addr_rp) {
                     r[w - 1] = hi;
             i += 2;
                 }
-
                 continue;
-
             } 
             // new disjoint range
             r[w] = lo;
             r[w + 1] = hi;
             w += 2;
-
         }
     }
 
     return r[..(int)w];
-
 }
 
 // appendLiteral returns the result of appending the literal x to the class r.
@@ -2108,7 +1974,6 @@ private static slice<int> appendLiteral(slice<int> r, int x, Flags flags) {
         return appendFoldedRange(r, x, x);
     }
     return appendRange(r, x, x);
-
 }
 
 // appendRange returns the result of appending the range lo-hi to the class r.
@@ -2130,22 +1995,16 @@ private static slice<int> appendRange(slice<int> r, int lo, int hi) {
                         r[n - i] = lo;
             i += 2;
                     }
-
                     if (hi > rhi) {
                         r[n - i + 1] = hi;
                     }
-
                     return r;
-
                 }
-
             }
-
         }
     }
 
     return append(r, lo, hi);
-
 }
 
  
@@ -2154,7 +2013,6 @@ private static slice<int> appendRange(slice<int> r, int lo, int hi) {
 private static readonly nuint minFold = 0x0041;
 private static readonly nuint maxFold = 0x1e943;
 
-
 // appendFoldedRange returns the result of appending the range lo-hi
 // and its case folding-equivalent runes to the class r.
 private static slice<int> appendFoldedRange(slice<int> r, int lo, int hi) { 
@@ -2162,24 +2020,20 @@ private static slice<int> appendFoldedRange(slice<int> r, int lo, int hi) {
     if (lo <= minFold && hi >= maxFold) { 
         // Range is full: folding can't add more.
         return appendRange(r, lo, hi);
-
     }
     if (hi < minFold || lo > maxFold) { 
         // Range is outside folding possibilities.
         return appendRange(r, lo, hi);
-
     }
     if (lo < minFold) { 
         // [lo, minFold-1] needs no folding.
         r = appendRange(r, lo, minFold - 1);
         lo = minFold;
-
     }
     if (hi > maxFold) { 
         // [maxFold+1, hi] needs no folding.
         r = appendRange(r, maxFold + 1, hi);
         hi = maxFold;
-
     }
     for (var c = lo; c <= hi; c++) {
         r = appendRange(r, c, c);
@@ -2190,7 +2044,6 @@ private static slice<int> appendFoldedRange(slice<int> r, int lo, int hi) {
         }
     }
     return r;
-
 }
 
 // appendClass returns the result of appending the class x to the class r.
@@ -2205,7 +2058,6 @@ private static slice<int> appendClass(slice<int> r, slice<int> x) {
         }
     }
     return r;
-
 }
 
 // appendFolded returns the result of appending the case folding of the class x to the class r.
@@ -2219,7 +2071,6 @@ private static slice<int> appendFoldedClass(slice<int> r, slice<int> x) {
         }
     }
     return r;
-
 }
 
 // appendNegatedClass returns the result of appending the negation of the class x to the class r.
@@ -2236,16 +2087,13 @@ private static slice<int> appendNegatedClass(slice<int> r, slice<int> x) {
                 r = appendRange(r, nextLo, lo - 1);
             i += 2;
             }
-
             nextLo = hi + 1;
-
         }
     }
     if (nextLo <= unicode.MaxRune) {
         r = appendRange(r, nextLo, unicode.MaxRune);
     }
     return r;
-
 }
 
 // appendTable returns the result of appending x to the class r.
@@ -2264,7 +2112,6 @@ private static slice<int> appendTable(slice<int> r, ptr<unicode.RangeTable> _add
                 r = appendRange(r, lo, hi);
                 continue;
             }
-
             {
                 var c__prev2 = c;
 
@@ -2278,7 +2125,6 @@ private static slice<int> appendTable(slice<int> r, ptr<unicode.RangeTable> _add
 
                 c = c__prev2;
             }
-
         }
         xr = xr__prev1;
     }
@@ -2295,7 +2141,6 @@ private static slice<int> appendTable(slice<int> r, ptr<unicode.RangeTable> _add
                 r = appendRange(r, lo, hi);
                 continue;
             }
-
             {
                 var c__prev2 = c;
 
@@ -2309,13 +2154,11 @@ private static slice<int> appendTable(slice<int> r, ptr<unicode.RangeTable> _add
 
                 c = c__prev2;
             }
-
         }
         xr = xr__prev1;
     }
 
     return r;
-
 }
 
 // appendNegatedTable returns the result of appending the negation of x to the class r.
@@ -2338,7 +2181,6 @@ private static slice<int> appendNegatedTable(slice<int> r, ptr<unicode.RangeTabl
                 nextLo = hi + 1;
                 continue;
             }
-
             {
                 var c__prev2 = c;
 
@@ -2349,15 +2191,12 @@ private static slice<int> appendNegatedTable(slice<int> r, ptr<unicode.RangeTabl
                         r = appendRange(r, nextLo, c - 1);
                     c += stride;
                     }
-
                     nextLo = c + 1;
-
                 }
 
 
                 c = c__prev2;
             }
-
         }
         xr = xr__prev1;
     }
@@ -2377,7 +2216,6 @@ private static slice<int> appendNegatedTable(slice<int> r, ptr<unicode.RangeTabl
                 nextLo = hi + 1;
                 continue;
             }
-
             {
                 var c__prev2 = c;
 
@@ -2388,15 +2226,12 @@ private static slice<int> appendNegatedTable(slice<int> r, ptr<unicode.RangeTabl
                         r = appendRange(r, nextLo, c - 1);
                     c += stride;
                     }
-
                     nextLo = c + 1;
-
                 }
 
 
                 c = c__prev2;
             }
-
         }
         xr = xr__prev1;
     }
@@ -2405,7 +2240,6 @@ private static slice<int> appendNegatedTable(slice<int> r, ptr<unicode.RangeTabl
         r = appendRange(r, nextLo, unicode.MaxRune);
     }
     return r;
-
 }
 
 // negateClass overwrites r and returns r's negation.
@@ -2425,9 +2259,7 @@ private static slice<int> negateClass(slice<int> r) {
                 w += 2;
             i += 2;
             }
-
             nextLo = hi + 1;
-
         }
     }
     r = r[..(int)w];
@@ -2435,10 +2267,8 @@ private static slice<int> negateClass(slice<int> r) {
         // It's possible for the negation to have one more
         // range - this one - than the original class, so use append.
         r = append(r, nextLo, unicode.MaxRune);
-
     }
     return r;
-
 }
 
 // ranges implements sort.Interface on a []rune.
@@ -2474,10 +2304,8 @@ private static error checkUTF8(@string s) {
             return error.As(addr(new Error(Code:ErrInvalidUTF8,Expr:s))!)!;
         }
         s = s[(int)size..];
-
     }
     return error.As(null!)!;
-
 }
 
 private static (int, @string, error) nextRune(@string s) {
@@ -2490,7 +2318,6 @@ private static (int, @string, error) nextRune(@string s) {
         return (0, "", error.As(addr(new Error(Code:ErrInvalidUTF8,Expr:s))!)!);
     }
     return (c, s[(int)size..], error.As(null!)!);
-
 }
 
 private static bool isalnum(int c) {
@@ -2508,7 +2335,6 @@ private static int unhex(int c) {
         return c - 'A' + 10;
     }
     return -1;
-
 }
 
 } // end syntax_package

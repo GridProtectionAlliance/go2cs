@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:41 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:04 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\initorder.go
-using heap = go.container.heap_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using heap = container.heap_package;
+using fmt = fmt_package;
+
+
+// initOrder computes the Info.InitOrder for package variables.
 
 public static partial class types2_package {
 
-    // initOrder computes the Info.InitOrder for package variables.
 private static void initOrder(this ptr<Checker> _addr_check) {
     ref Checker check = ref _addr_check.val;
  
@@ -56,7 +58,6 @@ private static void initOrder(this ptr<Checker> _addr_check) {
                     obj = obj__prev2;
 
                 }
-
             }
             obj = obj__prev1;
         }
@@ -86,7 +87,6 @@ private static void initOrder(this ptr<Checker> _addr_check) {
         fmt.Println();
 
         fmt.Println("Processing nodes:");
-
     }
     var emitted = make_map<ptr<declInfo>, bool>();
     while (len(pq) > 0) { 
@@ -137,7 +137,6 @@ private static void initOrder(this ptr<Checker> _addr_check) {
         }
         ptr<Initializer> init = addr(new Initializer(infoLhs,info.init));
         check.Info.InitOrder = append(check.Info.InitOrder, init);
-
     }
 
     if (debug) {
@@ -154,7 +153,6 @@ private static void initOrder(this ptr<Checker> _addr_check) {
         }
 
         fmt.Println();
-
     }
 }
 
@@ -179,9 +177,7 @@ private static slice<Object> findPath(map<Object, ptr<declInfo>> objMap, Object 
             }
 
         }
-
     }    return null;
-
 }
 
 // reportCycle reports an error for the given cycle.
@@ -204,7 +200,6 @@ private static void reportCycle(this ptr<Checker> _addr_check, slice<Object> cyc
     // print cycle[0] again to close the cycle
     err.errorf(obj, "%s", obj.Name());
     check.report(_addr_err);
-
 }
 
 // ----------------------------------------------------------------------------
@@ -241,7 +236,6 @@ private static void add(this ptr<nodeSet> _addr_s, ptr<graphNode> _addr_p) {
         s.val = make(nodeSet);
     }
     (s.val)[p] = true;
-
 }
 
 // dependencyGraph computes the object dependency graph from the given objMap,
@@ -268,7 +262,6 @@ private static slice<ptr<graphNode>> dependencyGraph(map<Object, ptr<declInfo>> 
                 obj = obj__prev1;
 
             }
-
         }
         obj = obj__prev1;
     }
@@ -301,7 +294,6 @@ private static slice<ptr<graphNode>> dependencyGraph(map<Object, ptr<declInfo>> 
                         d = d__prev1;
 
                     }
-
                 }
 
                 d = d__prev2;
@@ -337,21 +329,17 @@ private static slice<ptr<graphNode>> dependencyGraph(map<Object, ptr<declInfo>> 
                                     s.pred.add(p);
                                     delete(s.pred, n); // remove edge to n
                                 }
-
                             }
                             delete(p.succ, n); // remove edge to n
                         }
                 else
                     }
-
                 } { 
                     // collect non-function nodes
                     G = append(G, n);
-
                 }
 
             }
-
         }
         obj = obj__prev1;
         n = n__prev1;
@@ -370,7 +358,6 @@ private static slice<ptr<graphNode>> dependencyGraph(map<Object, ptr<declInfo>> 
     }
 
     return G;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -397,7 +384,6 @@ private static bool Less(this nodeQueue a, nint i, nint j) {
     // nodes are prioritized by number of incoming dependencies (1st key)
     // and source order (2nd key)
     return x.ndeps < y.ndeps || x.ndeps == y.ndeps && x.obj.order() < y.obj.order();
-
 }
 
 private static void Push(this ptr<nodeQueue> _addr_a, object x) => func((_, panic, _) => {
@@ -414,7 +400,6 @@ private static void Pop(this ptr<nodeQueue> _addr_a) {
     x.index = -1; // for safety
     a.val = (a.val)[..(int)n - 1];
     return x;
-
 }
 
 } // end types2_package

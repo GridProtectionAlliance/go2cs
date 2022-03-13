@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:07 UTC
+//     Generated on 2022 March 13 05:36:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct sessionStateTLS13
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace crypto
             public static implicit operator sessionStateTLS13(NilType nil) => default(sessionStateTLS13);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static sessionStateTLS13 sessionStateTLS13_cast(dynamic value)
         {
             return new sessionStateTLS13(value.cipherSuite, value.createdAt, value.resumptionSecret, value.certificate);

@@ -8,15 +8,16 @@
 //
 // MD5 is cryptographically broken and should not be used for secure
 // applications.
-// package md5 -- go2cs converted at 2022 March 06 22:19:22 UTC
+
+// package md5 -- go2cs converted at 2022 March 13 05:34:18 UTC
 // import "crypto/md5" ==> using md5 = go.crypto.md5_package
 // Original source: C:\Program Files\Go\src\crypto\md5\md5.go
-using crypto = go.crypto_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-
 namespace go.crypto;
+
+using crypto = crypto_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using hash = hash_package;
 
 public static partial class md5_package {
 
@@ -40,7 +41,6 @@ private static readonly nuint init1 = 0xEFCDAB89;
 private static readonly nuint init2 = 0x98BADCFE;
 private static readonly nuint init3 = 0x10325476;
 
-
 // digest represents the partial evaluation of a checksum.
 private partial struct digest {
     public array<uint> s;
@@ -63,7 +63,6 @@ private static void Reset(this ptr<digest> _addr_d) {
 private static readonly @string magic = "md5\x01";
 private static readonly var marshaledSize = len(magic) + 4 * 4 + BlockSize + 8;
 
-
 private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -79,7 +78,6 @@ private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     b = b[..(int)len(b) + len(d.x) - d.nx]; // already zero
     b = appendUint64(b, d.len);
     return (b, error.As(null!)!);
-
 }
 
 private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
@@ -100,7 +98,6 @@ private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
     b, d.len = consumeUint64(b);
     d.nx = int(d.len % BlockSize);
     return error.As(null!)!;
-
 }
 
 private static slice<byte> appendUint64(slice<byte> b, ulong x) {
@@ -171,12 +168,9 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
  {
                 blockGeneric(d, d.x[..]);
             }
-
             d.nx = 0;
-
         }
         p = p[(int)n..];
-
     }
     if (len(p) >= BlockSize) {
         n = len(p) & ~(BlockSize - 1);
@@ -188,13 +182,11 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
             blockGeneric(d, p[..(int)n]);
         }
         p = p[(int)n..];
-
     }
     if (len(p) > 0) {
         d.nx = copy(d.x[..], p);
     }
     return ;
-
 }
 
 private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
@@ -204,7 +196,6 @@ private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
     var d0 = d.val;
     var hash = d0.checkSum();
     return append(in, hash[..]);
-
 }
 
 private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic, _) => {
@@ -231,7 +222,6 @@ private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic,
     binary.LittleEndian.PutUint32(digest[(int)8..], d.s[2]);
     binary.LittleEndian.PutUint32(digest[(int)12..], d.s[3]);
     return digest;
-
 });
 
 // Sum returns the MD5 checksum of the data.

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:20 UTC
+//     Generated on 2022 March 13 06:36:24 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace @internal
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct source
         {
             // Constructors
@@ -85,7 +85,7 @@ namespace @internal
             public static implicit operator source(NilType nil) => default(source);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static source source_cast(dynamic value)
         {
             return new source(value.Sources, value.ExecName, value.BuildID, value.Base, value.DiffBase, value.Normalize, value.Seconds, value.Timeout, value.Symbolize, value.HTTPHostport, value.HTTPDisableBrowser, value.Comment);

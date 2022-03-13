@@ -43,27 +43,27 @@
 //
 // Note that this package does not provide hashing functionality. See
 // golang.org/x/mod/sumdb/dirhash.
-// package zip -- go2cs converted at 2022 March 06 23:26:22 UTC
+
+// package zip -- go2cs converted at 2022 March 13 06:41:15 UTC
 // import "cmd/vendor/golang.org/x/mod/zip" ==> using zip = go.cmd.vendor.golang.org.x.mod.zip_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\zip\zip.go
-using zip = go.archive.zip_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.mod;
+
+using zip = archive.zip_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using module = golang.org.x.mod.module_package;
+using System;
 
 public static partial class zip_package {
 
@@ -80,7 +80,6 @@ public static readonly nint MaxGoMod = 16 << 20;
 // MaxLICENSE is the maximum size in bytes of a LICENSE file within a
 // module zip file.
 public static readonly nint MaxLICENSE = 16 << 20;
-
 
 // File provides an abstraction for a file in a directory, zip, or anything
 // else that looks like a file.
@@ -121,7 +120,6 @@ public static error Err(this CheckedFiles cf) {
         return error.As(FileErrorList(cf.Invalid))!;
     }
     return error.As(null!)!;
-
 }
 
 public partial struct FileErrorList { // : slice<FileError>
@@ -191,7 +189,6 @@ private static (CheckedFiles, slice<File>, slice<long>) checkFiles(slice<File> f
             }
 
         }
-
         errPaths[path] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
         FileError fe = new FileError(Path:path,Err:err);
         if (omitted) {
@@ -270,9 +267,7 @@ private static (CheckedFiles, slice<File>, slice<long>) checkFiles(slice<File> f
                 // The go command drops this regardless of the VCS being used.
                 addError(p, true, errHgArchivalTxt);
                 continue;
-
             }
-
             {
                 var err__prev1 = err;
 
@@ -286,18 +281,15 @@ private static (CheckedFiles, slice<File>, slice<long>) checkFiles(slice<File> f
                 err = err__prev1;
 
             }
-
             if (strings.ToLower(p) == "go.mod" && p != "go.mod") {
                 addError(p, false, errGoModCase);
                 continue;
             }
-
             (info, err) = f.Lstat();
             if (err != null) {
                 addError(p, false, err);
                 continue;
             }
-
             {
                 var err__prev1 = err;
 
@@ -311,19 +303,15 @@ private static (CheckedFiles, slice<File>, slice<long>) checkFiles(slice<File> f
                 err = err__prev1;
 
             }
-
             if (info.Mode() & os.ModeType == os.ModeSymlink) { 
                 // Skip symbolic links (golang.org/issue/27093).
                 addError(p, true, errSymlink);
                 continue;
-
             }
-
             if (!info.Mode().IsRegular()) {
                 addError(p, true, errNotRegular);
                 continue;
             }
-
             var size = info.Size();
             if (size >= 0 && size <= maxSize) {
                 maxSize -= size;
@@ -331,27 +319,22 @@ private static (CheckedFiles, slice<File>, slice<long>) checkFiles(slice<File> f
             else if (cf.SizeError == null) {
                 cf.SizeError = fmt.Errorf("module source tree too large (max size is %d bytes)", MaxZipFile);
             }
-
             if (p == "go.mod" && size > MaxGoMod) {
                 addError(p, false, errGoModSize);
                 continue;
             }
-
             if (p == "LICENSE" && size > MaxLICENSE) {
                 addError(p, false, errLICENSESize);
                 continue;
             }
-
             cf.Valid = append(cf.Valid, p);
             validFiles = append(validFiles, f);
             validSizes = append(validSizes, info.Size());
-
         }
         f = f__prev1;
     }
 
     return (cf, validFiles, validSizes);
-
 }
 
 // CheckDir reports whether the files in dir satisfy the name and size
@@ -415,7 +398,6 @@ public static (CheckedFiles, error) CheckDir(@string dir) {
     }
 
     return (cf, error.As(cf.Err())!);
-
 }
 
 // CheckZip reports whether the files contained in a zip file satisfy the name
@@ -440,7 +422,6 @@ public static (CheckedFiles, error) CheckZip(module.Version m, @string zipFile) 
     defer(f.Close());
     var (_, cf, err) = checkZip(m, _addr_f);
     return (cf, error.As(err)!);
-
 });
 
 // checkZip implements checkZip and also returns the *zip.Reader. This is
@@ -459,7 +440,6 @@ private static (ptr<zip.Reader>, CheckedFiles, error) checkZip(module.Version m,
             return (_addr_null!, new CheckedFiles(), error.As(fmt.Errorf("version %q is not canonical (should be %q)", m.Version, vers))!);
         }
     }
-
     {
         var err__prev1 = err;
 
@@ -523,7 +503,6 @@ private static (ptr<zip.Reader>, CheckedFiles, error) checkZip(module.Version m,
             err = err__prev1;
 
         }
-
         {
             var err__prev1 = err;
 
@@ -537,7 +516,6 @@ private static (ptr<zip.Reader>, CheckedFiles, error) checkZip(module.Version m,
             err = err__prev1;
 
         }
-
         if (isDir) {
             continue;
         }
@@ -556,7 +534,6 @@ private static (ptr<zip.Reader>, CheckedFiles, error) checkZip(module.Version m,
             }
 
         }
-
         var sz = int64(zf.UncompressedSize64);
         if (sz >= 0 && MaxZipFile - size >= sz) {
             size += sz;
@@ -573,9 +550,7 @@ private static (ptr<zip.Reader>, CheckedFiles, error) checkZip(module.Version m,
             continue;
         }
         cf.Valid = append(cf.Valid, zf.Name);
-
     }    return (_addr_z!, cf, error.As(cf.Err())!);
-
 }
 
 // Create builds a zip archive for module m from an abstract list of files
@@ -605,7 +580,6 @@ public static error Create(io.Writer w, module.Version m, slice<File> files) => 
             return error.As(fmt.Errorf("version %q is not canonical (should be %q)", m.Version, vers))!;
         }
     }
-
     {
         var err__prev1 = err;
 
@@ -660,12 +634,10 @@ public static error Create(io.Writer w, module.Version m, slice<File> files) => 
             err = err__prev1;
 
         }
-
         if (lr.N <= 0) {
             return error.As(fmt.Errorf("file %q is larger than declared size", path))!;
         }
         return error.As(null!)!;
-
     };
 
     foreach (var (i, f) in validFiles) {
@@ -683,9 +655,7 @@ public static error Create(io.Writer w, module.Version m, slice<File> files) => 
             err = err__prev1;
 
         }
-
     }    return error.As(zw.Close())!;
-
 });
 
 // CreateFromDir creates a module zip file for module m from the contents of
@@ -713,9 +683,7 @@ public static error CreateFromDir(io.Writer w, module.Version m, @string dir) =>
                 err = addr(new zipError(verb:"create zip",path:dir,err:err));
             }
 
-
         }
-
     }());
 
     var (files, _, err) = listFilesInDir(dir);
@@ -723,7 +691,6 @@ public static error CreateFromDir(io.Writer w, module.Version m, @string dir) =>
         return error.As(err)!;
     }
     return error.As(Create(w, m, files))!;
-
 });
 
 private partial struct dirFile {
@@ -770,16 +737,13 @@ private static bool isVendoredPackage(@string name) {
             // (See https://golang.org/issue/31562 and https://golang.org/issue/37397.)
             // Unfortunately, we can't fix it without invalidating module checksums.
             i += len("/vendor/");
-
         }
         else
  {
             return false;
         }
     }
-
     return strings.Contains(name[(int)i..], "/");
-
 }
 
 // Unzip extracts the contents of a module zip file to a directory.
@@ -845,7 +809,6 @@ public static error Unzip(@string dir, module.Version m, @string zipFile) => fun
         err = err__prev1;
 
     }
-
     foreach (var (_, zf) in z.File) {
         var name = zf.Name[(int)len(prefix)..];
         if (name == "" || strings.HasSuffix(name, "/")) {
@@ -864,7 +827,6 @@ public static error Unzip(@string dir, module.Version m, @string zipFile) => fun
             err = err__prev1;
 
         }
-
         var (w, err) = os.OpenFile(dst, os.O_WRONLY | os.O_CREATE | os.O_EXCL, 0444);
         if (err != null) {
             return error.As(err)!;
@@ -893,12 +855,10 @@ public static error Unzip(@string dir, module.Version m, @string zipFile) => fun
             err = err__prev1;
 
         }
-
         if (lr.N <= 0) {
             return error.As(fmt.Errorf("uncompressed size of file %s is larger than declared size (%d bytes)", zf.Name, zf.UncompressedSize64))!;
         }
     }    return error.As(null!)!;
-
 });
 
 // collisionChecker finds case-insensitive name collisions and paths that
@@ -939,7 +899,6 @@ private static error check(this collisionChecker cc, @string p, bool isDir) {
         }
     }
 
-
     {
         var parent = path.Dir(p);
 
@@ -947,9 +906,7 @@ private static error check(this collisionChecker cc, @string p, bool isDir) {
             return error.As(cc.check(parent, true))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // listFilesInDir walks the directory tree rooted at dir and returns a list of
@@ -982,7 +939,6 @@ private static (slice<File>, slice<FileError>, error) listFilesInDir(@string dir
             if (filePath == dir) { 
                 // Don't skip the top-level directory.
                 return null;
-
             } 
 
             // Skip VCS directories.
@@ -1011,9 +967,7 @@ private static (slice<File>, slice<FileError>, error) listFilesInDir(@string dir
                 }
 
             }
-
             return null;
-
         }
         if (!info.Mode().IsRegular()) {
             omitted = append(omitted, new FileError(Path:slashPath,Err:errNotRegular));
@@ -1021,13 +975,11 @@ private static (slice<File>, slice<FileError>, error) listFilesInDir(@string dir
         }
         files = append(files, new dirFile(filePath:filePath,slashPath:slashPath,info:info,));
         return null;
-
     });
     if (err != null) {
         return (null, null, error.As(err)!);
     }
     return (files, omitted, error.As(null!)!);
-
 }
 
 private partial struct zipError {
@@ -1089,9 +1041,7 @@ Slow:
             r += 'a' - 'A';
         }
         buf.WriteRune(r);
-
     }    return buf.String();
-
 }
 
 } // end zip_package

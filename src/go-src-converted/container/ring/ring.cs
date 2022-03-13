@@ -3,23 +3,21 @@
 // license that can be found in the LICENSE file.
 
 // Package ring implements operations on circular lists.
-// package ring -- go2cs converted at 2022 March 06 23:35:27 UTC
+
+// package ring -- go2cs converted at 2022 March 13 06:43:23 UTC
 // import "container/ring" ==> using ring = go.container.ring_package
 // Original source: C:\Program Files\Go\src\container\ring\ring.go
-
-using System;
-
-
 namespace go.container;
 
+using System;
 public static partial class ring_package {
 
-    // A Ring is an element of a circular list, or ring.
-    // Rings do not have a beginning or end; a pointer to any ring element
-    // serves as reference to the entire ring. Empty rings are represented
-    // as nil Ring pointers. The zero value for a Ring is a one-element
-    // ring with a nil Value.
-    //
+// A Ring is an element of a circular list, or ring.
+// Rings do not have a beginning or end; a pointer to any ring element
+// serves as reference to the entire ring. Empty rings are represented
+// as nil Ring pointers. The zero value for a Ring is a one-element
+// ring with a nil Value.
+//
 public partial struct Ring {
     public ptr<Ring> next;
     public ptr<Ring> prev;
@@ -41,7 +39,6 @@ private static ptr<Ring> Next(this ptr<Ring> _addr_r) {
         return _addr_r.init()!;
     }
     return _addr_r.next!;
-
 }
 
 // Prev returns the previous ring element. r must not be empty.
@@ -52,7 +49,6 @@ private static ptr<Ring> Prev(this ptr<Ring> _addr_r) {
         return _addr_r.init()!;
     }
     return _addr_r.prev!;
-
 }
 
 // Move moves n % r.Len() elements backward (n < 0) or forward (n >= 0)
@@ -76,7 +72,6 @@ private static ptr<Ring> Move(this ptr<Ring> _addr_r, nint n) {
             n--;
         }
         return _addr_r!;
-
 }
 
 // New creates a ring of n elements.
@@ -93,7 +88,6 @@ public static ptr<Ring> New(nint n) {
     p.next = r;
     r.prev = p;
     return _addr_r!;
-
 }
 
 // Link connects ring r with ring s such that r.Next()
@@ -125,10 +119,8 @@ private static ptr<Ring> Link(this ptr<Ring> _addr_r, ptr<Ring> _addr_s) {
         s.prev = r;
         n.prev = p;
         p.next = n;
-
     }
     return _addr_n!;
-
 }
 
 // Unlink removes n % r.Len() elements from the ring r, starting
@@ -142,7 +134,6 @@ private static ptr<Ring> Unlink(this ptr<Ring> _addr_r, nint n) {
         return _addr_null!;
     }
     return _addr_r.Link(r.Move(n + 1))!;
-
 }
 
 // Len computes the number of elements in ring r.
@@ -163,10 +154,8 @@ private static nint Len(this ptr<Ring> _addr_r) {
             }
 
         }
-
     }
     return n;
-
 }
 
 // Do calls function f on each element of the ring, in forward order.
@@ -185,7 +174,6 @@ private static void Do(this ptr<Ring> _addr_r, Action<object> f) {
             }
 
         }
-
     }
 }
 

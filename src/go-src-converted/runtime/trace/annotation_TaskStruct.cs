@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:12 UTC
+//     Generated on 2022 March 13 05:38:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace runtime
 {
     public static partial class trace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Task
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace runtime
             public static implicit operator Task(NilType nil) => default(Task);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Task Task_cast(dynamic value)
         {
             return new Task(value.id);

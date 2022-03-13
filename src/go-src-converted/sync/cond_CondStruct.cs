@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:12 UTC
+//     Generated on 2022 March 13 05:24:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class sync_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Cond
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace go
             public static implicit operator Cond(NilType nil) => default(Cond);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Cond Cond_cast(dynamic value)
         {
             return new Cond(value.noCopy, value.L, value.notify, value.checker);

@@ -10,59 +10,60 @@
 // which reports whether if did something.
 // Ideas stolen from Swift: http://www.hpl.hp.com/techreports/Compaq-DEC/WRL-2000-2.html
 
-// package main -- go2cs converted at 2022 March 06 23:09:30 UTC
+// package main -- go2cs converted at 2022 March 13 06:22:51 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\gen\rulegen.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using format = go.go.format_package;
-using parser = go.go.parser_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using path = go.path_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using astutil = go.golang.org.x.tools.go.ast.astutil_package;
-using System;
-
-
 namespace go;
 
-public static partial class main_package {
+using bufio = bufio_package;
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using format = go.format_package;
+using parser = go.parser_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using path = path_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
-    // rule syntax:
-    //  sexpr [&& extra conditions] => [@block] sexpr
-    //
-    // sexpr are s-expressions (lisp-like parenthesized groupings)
-    // sexpr ::= [variable:](opcode sexpr*)
-    //         | variable
-    //         | <type>
-    //         | [auxint]
-    //         | {aux}
-    //
-    // aux      ::= variable | {code}
-    // type     ::= variable | {code}
-    // variable ::= some token
-    // opcode   ::= one of the opcodes from the *Ops.go files
+using astutil = golang.org.x.tools.go.ast.astutil_package;
 
-    // special rules: trailing ellipsis "..." (in the outermost sexpr?) must match on both sides of a rule.
-    //                trailing three underscore "___" in the outermost match sexpr indicate the presence of
-    //                   extra ignored args that need not appear in the replacement
 
-    // extra conditions is just a chunk of Go that evaluates to a boolean. It may use
-    // variables declared in the matching tsexpr. The variable "v" is predefined to be
-    // the value matched by the entire rule.
+// rule syntax:
+//  sexpr [&& extra conditions] => [@block] sexpr
+//
+// sexpr are s-expressions (lisp-like parenthesized groupings)
+// sexpr ::= [variable:](opcode sexpr*)
+//         | variable
+//         | <type>
+//         | [auxint]
+//         | {aux}
+//
+// aux      ::= variable | {code}
+// type     ::= variable | {code}
+// variable ::= some token
+// opcode   ::= one of the opcodes from the *Ops.go files
 
-    // If multiple rules match, the first one in file order is selected.
+// special rules: trailing ellipsis "..." (in the outermost sexpr?) must match on both sides of a rule.
+//                trailing three underscore "___" in the outermost match sexpr indicate the presence of
+//                   extra ignored args that need not appear in the replacement
+
+// extra conditions is just a chunk of Go that evaluates to a boolean. It may use
+// variables declared in the matching tsexpr. The variable "v" is predefined to be
+// the value matched by the entire rule.
+
+// If multiple rules match, the first one in file order is selected.
+
+
+using System;public static partial class main_package {
+
 private static var genLog = flag.Bool("log", false, "generate code that logs; for debugging only");private static var addLine = flag.Bool("line", false, "add line number comment to generated rules; for debugging only");
 
 public partial struct Rule {
@@ -96,9 +97,7 @@ public static (@string, @string, @string) parse(this Rule r) {
             match = normalizeSpaces(match[..(int)i]);
         }
     }
-
     return (match, cond, result);
-
 }
 
 private static void genRules(arch arch) {
@@ -115,10 +114,8 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
         if (suff == "") { 
             // All architectures must have a plain rules file.
             log.Fatalf("can't read rule file: %v", err);
-
         }
         return ;
-
     }
     map blockrules = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<Rule>>{};
     map oprules = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<Rule>>{}; 
@@ -138,11 +135,9 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
                 // Remove comments. Note that this isn't string safe, so
                 // it will truncate lines with // inside strings. Oh well.
                 line = line[..(int)i];
-
             }
 
         }
-
         rule += " " + line;
         rule = strings.TrimSpace(rule);
         if (rule == "") {
@@ -167,9 +162,7 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
                 break; // continuing the line can't help, and it will only make errors worse
             }
 
-
         }
-
 
         var loc = fmt.Sprintf("%s%s.rules:%d", arch.name, suff, ruleLineno);
         foreach (var (_, rule2) in expandOr(rule)) {
@@ -189,10 +182,8 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
             var (op, oparch, _, _, _, _) = parseValue(match, arch, loc);
             var opname = fmt.Sprintf("Op%s%s", oparch, op.name);
             oprules[opname] = append(oprules[opname], r);
-
         }        rule = "";
         ruleLineno = 0;
-
     }
     {
         var err__prev1 = err;
@@ -205,7 +196,6 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
         err = err__prev1;
 
     }
-
     if (balance(rule) != 0) {
         log.Fatalf("%s.rules:%d: unbalanced rule: %v\n", arch.name, lineno, rule);
     }
@@ -252,7 +242,6 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
 
     if (len(sw.List) > 0) { // skip if empty
         fn.add(sw);
-
     }
     fn.add(stmtf("return false"));
     genFile.add(fn); 
@@ -308,9 +297,7 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
             if (rr.CanFail) {
                 fn.add(stmtf("return false"));
             }
-
             genFile.add(fn);
-
         }
         op = op__prev1;
     }
@@ -351,14 +338,12 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
             }
 
             sw.add(swc);
-
         }
         op = op__prev1;
     }
 
     if (len(sw.List) > 0) { // skip if empty
         fn.add(sw);
-
     }
     fn.add(stmtf("return false"));
     genFile.add(fn); 
@@ -386,9 +371,7 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
             err = err__prev2;
 
         }
-
         log.Fatalf("failed to parse generated code for arch %s: %v", arch.name, err);
-
     }
     var tfile = fset.File(file.Pos()); 
 
@@ -409,10 +392,8 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
             // one line. Prevent leaving an empty line.
             tfile.MergeLine(tfile.Position(node.Pos()).Line);
             return false;
-
         }
         return true;
-
     };
     Func<ptr<astutil.Cursor>, bool> post = c => {
         switch (c.Node().type()) {
@@ -421,13 +402,10 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
                     // Don't leave a broken or empty GenDecl behind,
                     // such as "import ()".
                     c.Delete();
-
                 }
-
                 break;
         }
         return true;
-
     };
     file = astutil.Apply(file, pre, post)._<ptr<ast.File>>(); 
 
@@ -451,7 +429,6 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -463,7 +440,6 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -475,7 +451,6 @@ private static void genRulesSuffix(arch arch, @string suff) => func((defer, pani
         err = err__prev1;
 
     }
-
 });
 
 // unusedInspector can be used to detect unused variables and imports in an
@@ -516,22 +491,17 @@ private static Action scoped(this ptr<unusedInspector> _addr_u) {
                         if (used.numUses == 0) {
                             anyUnused = true;
                         }
-
                     } 
                     // We've decremented numUses for each of the
                     // objects in used. Zero this slice too, to keep
                     // everything consistent.
                     obj.used = null;
-
                 }
-
             }
 
         }
         u.scope = outer;
-
     };
-
 }
 
 private static void exprs(this ptr<unusedInspector> _addr_u, slice<ast.Expr> list) {
@@ -727,7 +697,6 @@ private static void node(this ptr<unusedInspector> _addr_u, ast.Node node) => fu
                 obj = obj__prev1;
 
             }
-
             break;
         case ptr<ast.BasicLit> node:
             break;
@@ -741,7 +710,6 @@ private static void node(this ptr<unusedInspector> _addr_u, ast.Node node) => fu
             break;
         }
     }
-
 });
 
 // scope keeps track of a certain scope and its declared names, as well as the
@@ -761,12 +729,10 @@ private static ptr<object> Lookup(this ptr<scope> _addr_s, @string name) {
             return _addr_obj!;
         }
     }
-
     if (s.outer == null) {
         return _addr_null!;
     }
     return _addr_s.outer.Lookup(name)!;
-
 }
 
 // object keeps track of a declared name, such as a variable or import.
@@ -808,9 +774,7 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
 
                             i = i__prev2;
                         }
-
                     }
-
                     {
                         var n__prev2 = n;
 
@@ -831,20 +795,16 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
                                         }
 
                                     }
-
                                     seenRewrite[k] = rr.Loc;
-
                                 }
 
                             }
-
                         }
 
                         n = n__prev2;
                     }
 
                     fmt.Fprintf(w, "}\n");
-
                 }
 
                 f = f__prev1;
@@ -906,7 +866,6 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
                         }
 
                     }
-
                     fprint(w, n);
                     {
                         StartCommuteLoop (loop, ok) = n._<StartCommuteLoop>();
@@ -919,7 +878,6 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
                         }
 
                     }
-
                 }
 
                 n = n__prev1;
@@ -939,7 +897,6 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
             if (n.CommuteDepth > 0 && n.CanFail) {
                 fmt.Fprint(w, "break\n");
             }
-
             fmt.Fprintf(w, "}\n");
             break;
         case ptr<Declare> n:
@@ -958,7 +915,6 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
  {
                 fmt.Fprintf(w, "break");
             }
-
             fmt.Fprintf(w, "\n}\n");
             break;
         case ast.Node n:
@@ -971,7 +927,6 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
                 }
 
             }
-
             break;
         case StartCommuteLoop n:
             fmt.Fprintf(w, "for _i%[1]d := 0; _i%[1]d <= 1; _i%[1]d, %[2]s_0, %[2]s_1 = _i%[1]d + 1, %[2]s_1, %[2]s_0 {\n", n.Depth, n.V);
@@ -983,7 +938,6 @@ private static void fprint(io.Writer w, Node n) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 private static printer.Config printConfig = new printer.Config(Mode:printer.RawFormat,);
@@ -1028,19 +982,15 @@ private static void add(this ptr<BodyBase> _addr_w, Statement node) {
                     // logical OR, which will save verbosity.
                     last.Cond = addr(new ast.BinaryExpr(Op:token.LOR,X:last.Cond,Y:node.Cond,));
                     return ;
-
                 }
 
                 last = last__prev2;
 
             }
-
         }
     }
 
-
     w.List = append(w.List, node);
-
 }
 
 // predeclared contains globally known tokens that should not be redefined.
@@ -1055,7 +1005,6 @@ private static bool declared(this ptr<BodyBase> _addr_w, @string name) {
         // This lets us use nil to match an aux field or
         // true and false to match an auxint field.
         return true;
-
     }
     foreach (var (_, s) in w.List) {
         {
@@ -1066,9 +1015,7 @@ private static bool declared(this ptr<BodyBase> _addr_w, @string name) {
             }
 
         }
-
     }    return false;
-
 }
 
 // These types define some high-level statement struct types, which can be used
@@ -1118,8 +1065,7 @@ public partial struct CondBreak {
 public partial struct StartCommuteLoop {
     public nint Depth;
     public @string V;
-}
-private static ast.Expr exprf(@string format, params object[] a) {
+}private static ast.Expr exprf(@string format, params object[] a) {
     a = a.Clone();
 
     var src = fmt.Sprintf(format, a);
@@ -1128,7 +1074,6 @@ private static ast.Expr exprf(@string format, params object[] a) {
         log.Fatalf("expr parse error on %q: %v", src, err);
     }
     return expr;
-
 }
 
 // stmtf parses a Go statement generated from fmt.Sprintf. This function is only
@@ -1144,7 +1089,6 @@ private static Statement stmtf(@string format, params object[] a) {
         log.Fatalf("stmt parse error on %q: %v", src, err);
     }
     return file.Decls[0]._<ptr<ast.FuncDecl>>().Body.List[0];
-
 }
 
 private static map reservedNames = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"v":true,"b":true,"config":true,"fe":true,"typ":true,};
@@ -1162,7 +1106,6 @@ private static ptr<Declare> declf(@string loc, @string name, @string format, par
         log.Fatalf("rule %s uses the reserved name %s", loc, name);
     }
     return addr(new Declare(name,exprf(format,a...)));
-
 }
 
 // declReserved is like declf, but the name must be one of reservedNames.
@@ -1172,7 +1115,6 @@ private static ptr<Declare> declReserved(@string name, @string value) => func((_
         panic(fmt.Sprintf("declReserved call does not use a reserved name: %q", name));
     }
     return addr(new Declare(name,exprf(value)));
-
 });
 
 // breakf constructs a simple "if cond { break }" statement, using exprf for its
@@ -1217,22 +1159,17 @@ private static ptr<RuleRewrite> genBlockRewrite(Rule rule, arch arch, blockData 
  {
                         rr.Check += " && " + check;
                     }
-
                 }
-
                 if (p == "") {
                     p = vname + ".Pos";
                 }
-
                 pos[i] = p;
-
             }
             else
  {
                 rr.add(declf(rr.Loc, arg, cname));
                 pos[i] = arg + ".Pos";
             }
-
         }
         i = i__prev1;
     }
@@ -1306,12 +1243,10 @@ private static ptr<RuleRewrite> genBlockRewrite(Rule rule, arch arch, blockData 
             if (i < len(pos) && pos[i] != "") { 
                 // Use the previous control value's source position.
                 newpos = pos[i];
-
             } 
 
             // Generate a new control value (or copy an existing value).
             genControls[i] = genResult0(rr, arch, control, false, false, newpos, null);
-
         }
         i = i__prev1;
     }
@@ -1334,12 +1269,10 @@ private static ptr<RuleRewrite> genBlockRewrite(Rule rule, arch arch, blockData 
     if (auxint != "") { 
         // Make sure auxint value has the right type.
         rr.add(stmtf("b.AuxInt = %sToAuxInt(%s)", unTitle(outdata.auxIntType()), auxint));
-
     }
     if (aux != "") { 
         // Make sure aux value has the right type.
         rr.add(stmtf("b.Aux = %sToAux(%s)", unTitle(outdata.auxType()), aux));
-
     }
     var succChanged = false;
     {
@@ -1361,13 +1294,11 @@ private static ptr<RuleRewrite> genBlockRewrite(Rule rule, arch arch, blockData 
             log.Fatalf("can only handle swapped successors in %s", rule);
         }
         rr.add(stmtf("b.swapSuccessors()"));
-
     }
     if (genLog.val) {
         rr.add(stmtf("logRule(%q)", rule.Loc));
     }
     return _addr_rr!;
-
 }
 
 // genMatch returns the variable whose source position should be used for the
@@ -1396,7 +1327,6 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
     if (op.faultOnNilArg0 || op.faultOnNilArg1) { 
         // Prefer the position of an instruction which could fault.
         pos = v + ".Pos";
-
     }
     if (op.argLength == -1) {
         var l = len(args);
@@ -1426,7 +1356,6 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
                     rr.add(breakf("%s.%s != %s", v, e.field, e.name));
                     break;
             }
-
         }
         else
  {
@@ -1441,7 +1370,6 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
                     rr.add(declf(rr.Loc, e.name, "%s.%s", v, e.field));
                     break;
             }
-
         }
     }    var commutative = op.commutative;
     if (commutative) {
@@ -1451,14 +1379,12 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
             // and even if x is not a variable,
             // we can skip the commutative match.
             commutative = false;
-
         }
         if (cnt[args[0]] == 1 && cnt[args[1]] == 1) { 
             // When we have (Add x y) with no other uses
             // of x and y in the matching rule and condition,
             // then we can skip the commutative match (Add y x).
             commutative = false;
-
         }
     }
     if (!pregenTop) { 
@@ -1472,17 +1398,13 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
                 rr.add(declf(rr.Loc, a, "%s.Args[%d]", v, n)); 
                 // delete the last argument so it is not reprocessed
                 args = args[..(int)n];
-
             }
             else
  {
                 rr.add(stmtf("_ = %s.Args[%d]", v, n));
             }
-
             break;
-
         }
-
     }
     if (commutative && !pregenTop) {
         {
@@ -1496,7 +1418,6 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
 
             i = i__prev1;
         }
-
     }
     if (commutative) {
         rr.add(new StartCommuteLoop(rr.CommuteDepth,v));
@@ -1519,7 +1440,6 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
  {
                 rhs = fmt.Sprintf("%s.Args[%d]", v, i);
             }
-
             if (!strings.Contains(arg, "(")) { 
                 // leaf variable
                 if (rr.declared(arg)) { 
@@ -1528,7 +1448,6 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
                     // For example, (add x x).  Equality is just pointer equality
                     // on Values (so cse is important to do before lowering).
                     rr.add(breakf("%s != %s", arg, rhs));
-
                 }
                 else
  {
@@ -1536,24 +1455,19 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
                         rr.add(declf(rr.Loc, arg, "%s", rhs));
                     }
                 }
-
                 continue;
-
             } 
             // compound sexpr
             var (argname, expr) = splitNameExpr(arg);
             if (argname == "") {
                 argname = fmt.Sprintf("%s_%d", v, i);
             }
-
             if (argname == "b") {
                 log.Fatalf("don't name args 'b', it is ambiguous with blocks");
             }
-
             if (argname != rhs) {
                 rr.add(declf(rr.Loc, argname, "%s", rhs));
             }
-
             var bexpr = exprf("%s.Op != addLater", argname);
             rr.add(addr(new CondBreak(Cond:bexpr)));
             var (argPos, argCheckOp) = genMatch0(_addr_rr, arch, expr, argname, cnt, false);
@@ -1566,15 +1480,12 @@ private static (@string, @string) genMatch0(ptr<RuleRewrite> _addr_rr, arch arch
                 // as that prefers the memory argument which is also earlier
                 // in the program flow.
                 pos = argPos;
-
             }
-
         }
         i = i__prev1;
     }
 
     return (pos, checkOp);
-
 }
 
 private static void genResult(ptr<RuleRewrite> _addr_rr, arch arch, @string result, @string pos) {
@@ -1586,11 +1497,9 @@ private static void genResult(ptr<RuleRewrite> _addr_rr, arch arch, @string resu
         var s = strings.SplitN(result[(int)1..], " ", 2);
         rr.add(stmtf("b = %s", s[0]));
         result = s[1];
-
     }
     var cse = make_map<@string, @string>();
     genResult0(_addr_rr, arch, result, true, move, pos, cse);
-
 }
 
 private static @string genResult0(ptr<RuleRewrite> _addr_rr, arch arch, @string result, bool top, bool move, @string pos, map<@string, @string> cse) {
@@ -1607,10 +1516,8 @@ private static @string genResult0(ptr<RuleRewrite> _addr_rr, arch arch, @string 
             // (and particularly not a phi node).
             // Introduce a copy.
             rr.add(stmtf("v.copyOf(%s)", result));
-
         }
         return result;
-
     }
     var w = normalizeWhitespace(result);
     {
@@ -1620,7 +1527,6 @@ private static @string genResult0(ptr<RuleRewrite> _addr_rr, arch arch, @string 
             return prev;
         }
     }
-
 
     var (op, oparch, typ, auxint, aux, args) = parseValue(result, arch, rr.Loc); 
 
@@ -1653,18 +1559,15 @@ private static @string genResult0(ptr<RuleRewrite> _addr_rr, arch arch, @string 
         if (move && top) { 
             // Rewrite original into a copy
             rr.add(stmtf("v.copyOf(%s)", v));
-
         }
     }
     if (auxint != "") { 
         // Make sure auxint value has the right type.
         rr.add(stmtf("%s.AuxInt = %sToAuxInt(%s)", v, unTitle(op.auxIntType()), auxint));
-
     }
     if (aux != "") { 
         // Make sure aux value has the right type.
         rr.add(stmtf("%s.Aux = %sToAux(%s)", v, unTitle(op.auxType()), aux));
-
     }
     ptr<object> all = @new<strings.Builder>();
     foreach (var (i, arg) in args) {
@@ -1673,7 +1576,6 @@ private static @string genResult0(ptr<RuleRewrite> _addr_rr, arch arch, @string 
             all.WriteString(", ");
         }
         all.WriteString(x);
-
     }    switch (len(args)) {
         case 0: 
 
@@ -1690,7 +1592,6 @@ private static @string genResult0(ptr<RuleRewrite> _addr_rr, arch arch, @string 
         cse[w] = v;
     }
     return v;
-
 }
 
 private static slice<@string> split(@string s) {
@@ -1719,15 +1620,13 @@ outer:
                     _continueouter = true;
                     break;
                 }
-
             else if (d > 0 && s[i] == open) 
                 d++;
             else if (d > 0 && s[i] == close) 
                 d--;
             else 
                 nonsp = true;
-            
-        }
+                    }
         if (d != 0) {
             log.Fatalf("imbalanced expression: %q", s);
         }
@@ -1735,10 +1634,8 @@ outer:
             r = append(r, strings.TrimSpace(s));
         }
         break;
-
     }
     return r;
-
 }
 
 // isBlock reports whether this op is a block opcode.
@@ -1768,7 +1665,6 @@ private static bool isBlock(@string name, arch arch) {
     }
 
     return false;
-
 }
 
 private static (@string, @string, @string, @string, slice<@string>) extract(@string val) {
@@ -1801,9 +1697,7 @@ private static (@string, @string, @string, @string, slice<@string>) extract(@str
                 args = append(args, a);
                 break;
         }
-
     }    return ;
-
 }
 
 // parseValue parses a parenthesized value from a rule.
@@ -1839,7 +1733,6 @@ private static (opData, @string, @string, @string, @string, slice<@string>) pars
             log.Printf("%s: op %s (%s) should have %d args, has %d", loc, s, archname, x.argLength, len(args));
         }
         return true;
-
     };
 
     {
@@ -1899,7 +1792,6 @@ private static (opData, @string, @string, @string, @string, slice<@string>) pars
         }
 
         log.Fatalf("%s: unknown op %s", loc, s);
-
     }
     if (auxint != "" && !opHasAuxInt(op)) {
         log.Fatalf("%s: op %s %s can't have auxint", loc, op.name, op.aux);
@@ -1908,7 +1800,6 @@ private static (opData, @string, @string, @string, @string, slice<@string>) pars
         log.Fatalf("%s: op %s %s can't have aux", loc, op.name, op.aux);
     }
     return ;
-
 }
 
 private static bool opHasAuxInt(opData op) {
@@ -1948,7 +1839,6 @@ private static bool opHasAuxInt(opData op) {
             break;
     }
     return false;
-
 }
 
 private static bool opHasAux(opData op) {
@@ -1976,7 +1866,6 @@ private static bool opHasAux(opData op) {
             break;
     }
     return false;
-
 }
 
 // splitNameExpr splits s-expr arg, possibly prefixed by "name:",
@@ -1998,10 +1887,8 @@ private static (@string, @string) splitNameExpr(@string arg) {
     if (colon > openparen) { 
         // colon is inside the parens, such as in "(Foo x:(Bar))".
         return ("", arg);
-
     }
     return (arg[..(int)colon], arg[(int)colon + 1..]);
-
 }
 
 private static (@string, blockData) getBlockInfo(@string op, arch arch) => func((_, panic, _) => {
@@ -2034,7 +1921,6 @@ private static (@string, blockData) getBlockInfo(@string op, arch arch) => func(
 
     log.Fatalf("could not find block data for %s", op);
     panic("unreachable");
-
 });
 
 // typeName returns the string to use to generate a type.
@@ -2045,7 +1931,6 @@ private static @string typeName(@string typ) {
             log.Fatalf("Tuple expect 2 arguments");
         }
         return "types.NewTuple(" + typeName(ts[0]) + ", " + typeName(ts[1]) + ")";
-
     }
     switch (typ) {
         case "Flags": 
@@ -2061,7 +1946,6 @@ private static @string typeName(@string typ) {
             return "typ." + typ;
             break;
     }
-
 }
 
 // balance returns the number of unclosed '(' characters in s.
@@ -2078,14 +1962,10 @@ private static nint balance(@string s) {
                 if (balance < 0) { 
                     // don't allow ")(" to return 0
                     return -1;
-
                 }
-
                 break;
         }
-
     }    return balance;
-
 }
 
 // findAllOpcode is a function to find the opcode portion of s-expressions.
@@ -2100,16 +1980,13 @@ private static bool excludeFromExpansion(@string s, slice<nint> idx) {
     if (strings.LastIndexByte(left, '[') > strings.LastIndexByte(left, ']')) { 
         // Inside an AuxInt expression.
         return true;
-
     }
     var right = s[(int)idx[1]..];
     if (strings.Contains(left, "&&") && strings.Contains(right, "=>")) { 
         // Inside && conditions.
         return true;
-
     }
     return false;
-
 }
 
 // expandOr converts a rule into multiple rules by expanding | ops.
@@ -2144,7 +2021,6 @@ private static slice<@string> expandOr(@string r) {
     if (n == 1) { 
         // No |-form in this rule.
         return new slice<@string>(new @string[] { r });
-
     }
     var res = make_slice<@string>(n);
     for (nint i = 0; i < n; i++) {
@@ -2169,10 +2045,8 @@ private static slice<@string> expandOr(@string r) {
 
         buf.WriteString(r[(int)x..]);
         res[i] = buf.String();
-
     }
     return res;
-
 }
 
 // varCount returns a map which counts the number of occurrences of
@@ -2196,14 +2070,10 @@ private static map<@string, nint> varCount(ptr<RuleRewrite> _addr_rr) {
                 }
 
             }
-
             return true;
-
         });
-
     }
     return cnt;
-
 }
 
 private static void varCount1(@string loc, @string m, map<@string, nint> cnt) {
@@ -2273,7 +2143,6 @@ private static bool opIsCommutative(@string op, arch arch) {
         }
     }
     return false;
-
 }
 
 private static @string normalizeMatch(@string m, arch arch) {
@@ -2292,7 +2161,6 @@ private static @string normalizeMatch(@string m, arch arch) {
         var (prefix, expr) = splitNameExpr(arg);
         fmt.Fprint(s, " ", prefix, normalizeMatch(expr, arch));
     }    return s.String();
-
 }
 
 private static (@string, bool) parseEllipsisRules(slice<Rule> rules, arch arch) {
@@ -2314,11 +2182,9 @@ private static (@string, bool) parseEllipsisRules(slice<Rule> rules, arch arch) 
         }
         checkEllipsisRuleCandidate(rule, arch);
         return ("", false);
-
     }
     var (op, oparch, _, _, _, _) = parseValue(result, arch, rule.Loc);
     return (fmt.Sprintf("Op%s%s", oparch, op.name), true);
-
 }
 
 // isEllipsisValue reports whether s is of the form (OpX ...).
@@ -2331,7 +2197,6 @@ private static bool isEllipsisValue(@string s) {
         return false;
     }
     return true;
-
 }
 
 private static void checkEllipsisRuleCandidate(Rule rule, arch arch) {
@@ -2349,7 +2214,6 @@ private static void checkEllipsisRuleCandidate(Rule rule, arch arch) {
         // Check for (Foo x) => x, which can be converted to (Foo ...) => (Copy ...).
         args2 = new slice<@string>(new @string[] { result });
         usingCopy = " using Copy";
-
     }
     else
  {
@@ -2372,8 +2236,7 @@ private static void checkEllipsisRuleCandidate(Rule rule, arch arch) {
         fmt.Printf("%s: rule silently zeros auxint, either copy auxint or explicitly zero\n", rule.Loc);
     else 
         fmt.Printf("%s: possible ellipsis rule candidate%s: %q\n", rule.Loc, usingCopy, rule.Rule);
-    
-}
+    }
 
 private static opData opByName(arch arch, @string name) => func((_, panic, _) => {
     name = name[(int)2..];
@@ -2406,7 +2269,6 @@ private static opData opByName(arch arch, @string name) => func((_, panic, _) =>
     }
     log.Fatalf("failed to find op named %s in arch %s", name, arch.name);
     panic("unreachable");
-
 });
 
 // auxType returns the Go type that this operation should store in its aux field.
@@ -2447,7 +2309,6 @@ private static @string auxType(this opData op) {
             return "invalid";
             break;
     }
-
 }
 
 // auxIntType returns the Go type that this operation should store in its auxInt field.
@@ -2505,7 +2366,6 @@ private static @string auxIntType(this opData op) {
             return "invalid";
             break;
     }
-
 }
 
 // auxType returns the Go type that this block should store in its aux field.
@@ -2525,7 +2385,6 @@ private static @string auxType(this blockData b) {
             return "invalid";
             break;
     }
-
 }
 
 // auxIntType returns the Go type that this block should store in its auxInt field.
@@ -2544,7 +2403,6 @@ private static @string auxIntType(this blockData b) {
             return "invalid";
             break;
     }
-
 }
 
 private static @string title(@string s) {
@@ -2560,12 +2418,9 @@ private static @string title(@string s) {
                     s = s[(int)i + 1..];
                     break;
             }
-
         }
     }
-
     return strings.Title(s);
-
 }
 
 private static @string unTitle(@string s) {
@@ -2581,12 +2436,9 @@ private static @string unTitle(@string s) {
                     s = s[(int)i + 1..];
                     break;
             }
-
         }
     }
-
     return strings.ToLower(s[..(int)1]) + s[(int)1..];
-
 }
 
 } // end main_package

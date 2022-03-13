@@ -5,12 +5,12 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || zos
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris zos
 
-// package nettest -- go2cs converted at 2022 March 06 23:38:10 UTC
+// package nettest -- go2cs converted at 2022 March 13 06:46:27 UTC
 // import "vendor/golang.org/x/net/nettest" ==> using nettest = go.vendor.golang.org.x.net.nettest_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\nettest\nettest_unix.go
-using syscall = go.syscall_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using syscall = syscall_package;
 
 public static partial class nettest_package {
 
@@ -22,9 +22,7 @@ private static bool supportsRawSocket() {
         }
         syscall.Close(s);
         return true;
-
     }    return false;
-
 }
 
 } // end nettest_package

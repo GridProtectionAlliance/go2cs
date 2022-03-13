@@ -5,12 +5,12 @@
 //go:build typeparams
 // +build typeparams
 
-// package types -- go2cs converted at 2022 March 06 22:41:37 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:42 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\api_typeparams.go
-using ast = go.go.ast_package;
-
 namespace go.go;
+
+using ast = go.ast_package;
 
 public static partial class types_package {
 
@@ -19,8 +19,7 @@ public partial struct Inferred { // : _Inferred
 public partial struct Sum { // : _Sum
 }
 public partial struct TypeParam { // : _TypeParam
-}
-public static Type NewSum(slice<Type> types) {
+}public static Type NewSum(slice<Type> types) {
     return _NewSum(types);
 }
 

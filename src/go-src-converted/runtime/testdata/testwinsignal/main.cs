@@ -1,11 +1,11 @@
-// package main -- go2cs converted at 2022 March 06 22:26:22 UTC
+// package main -- go2cs converted at 2022 March 13 05:40:28 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testwinsignal\main.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using signal = go.os.signal_package;
-using time = go.time_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using signal = os.signal_package;
+using time = time_package;
 
 public static partial class main_package {
 

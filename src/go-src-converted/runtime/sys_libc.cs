@@ -5,20 +5,20 @@
 //go:build darwin || (openbsd && !mips64)
 // +build darwin openbsd,!mips64
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:08 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sys_libc.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    // Call fn with arg as its argument. Return what fn returns.
-    // fn is the raw pc value of the entry point of the desired function.
-    // Switches to the system stack, if not already there.
-    // Preserves the calling point as the location where a profiler traceback will begin.
-    //go:nosplit
+// Call fn with arg as its argument. Return what fn returns.
+// fn is the raw pc value of the entry point of the desired function.
+// Switches to the system stack, if not already there.
+// Preserves the calling point as the location where a profiler traceback will begin.
+//go:nosplit
 private static int libcCall(unsafe.Pointer fn, unsafe.Pointer arg) { 
     // Leave caller's PC/SP/G around for traceback.
     var gp = getg();
@@ -32,7 +32,6 @@ private static int libcCall(unsafe.Pointer fn, unsafe.Pointer arg) {
         // sp must be the last, because once async cpu profiler finds
         // all three values to be non-zero, it will use them
         mp.libcallsp = getcallersp();
-
     }
     else
  { 
@@ -53,14 +52,12 @@ private static int libcCall(unsafe.Pointer fn, unsafe.Pointer arg) {
         // signals while we're handling a signal. That includes the
         // profile signal, which is the one that uses the libcall* info.
         mp = null;
-
     }
     var res = asmcgocall(fn, arg);
     if (mp != null) {
         mp.libcallsp = 0;
     }
     return res;
-
 }
 
 } // end runtime_package

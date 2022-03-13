@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:40 UTC
+//     Generated on 2022 March 13 06:43:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace database
 {
     public static partial class sql_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct driverStmt
         {
             // Locker.Lock function promotion
@@ -117,7 +117,7 @@ namespace database
             public static implicit operator driverStmt(NilType nil) => default(driverStmt);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static driverStmt driverStmt_cast(dynamic value)
         {
             return new driverStmt(value.Locker, value.si, value.closed, value.closeErr);

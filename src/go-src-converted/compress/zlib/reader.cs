@@ -21,17 +21,18 @@ and to read that data back:
     io.Copy(os.Stdout, r)
     r.Close()
 */
-// package zlib -- go2cs converted at 2022 March 06 22:32:04 UTC
+
+// package zlib -- go2cs converted at 2022 March 13 05:43:01 UTC
 // import "compress/zlib" ==> using zlib = go.compress.zlib_package
 // Original source: C:\Program Files\Go\src\compress\zlib\reader.go
-using bufio = go.bufio_package;
-using flate = go.compress.flate_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-using adler32 = go.hash.adler32_package;
-using io = go.io_package;
-
 namespace go.compress;
+
+using bufio = bufio_package;
+using flate = compress.flate_package;
+using errors = errors_package;
+using hash = hash_package;
+using adler32 = hash.adler32_package;
+using io = io_package;
 
 public static partial class zlib_package {
 
@@ -87,7 +88,6 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
         return (null, error.As(err)!);
     }
     return (z, error.As(null!)!);
-
 }
 
 private static (nint, error) Read(this ptr<reader> _addr_z, slice<byte> p) {
@@ -104,7 +104,6 @@ private static (nint, error) Read(this ptr<reader> _addr_z, slice<byte> p) {
     if (z.err != io.EOF) { 
         // In the normal case we return here.
         return (n, error.As(z.err)!);
-
     }
     {
         var (_, err) = io.ReadFull(z.r, z.scratch[(int)0..(int)4]);
@@ -124,7 +123,6 @@ private static (nint, error) Read(this ptr<reader> _addr_z, slice<byte> p) {
         return (n, error.As(z.err)!);
     }
     return (n, error.As(io.EOF)!);
-
 }
 
 // Calling Close does not close the wrapped io.Reader originally passed to NewReader.
@@ -138,7 +136,6 @@ private static error Close(this ptr<reader> _addr_z) {
     }
     z.err = z.decompressor.Close();
     return error.As(z.err)!;
-
 }
 
 private static error Reset(this ptr<reader> _addr_z, io.Reader r, slice<byte> dict) {
@@ -164,7 +161,6 @@ private static error Reset(this ptr<reader> _addr_z, io.Reader r, slice<byte> di
             z.err = io.ErrUnexpectedEOF;
         }
         return error.As(z.err)!;
-
     }
     var h = uint(z.scratch[0]) << 8 | uint(z.scratch[1]);
     if ((z.scratch[0] & 0x0f != zlibDeflate) || (h % 31 != 0)) {
@@ -201,7 +197,6 @@ private static error Reset(this ptr<reader> _addr_z, io.Reader r, slice<byte> di
     }
     z.digest = adler32.New();
     return error.As(null!)!;
-
 }
 
 } // end zlib_package

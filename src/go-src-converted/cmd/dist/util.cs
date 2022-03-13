@@ -2,31 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:35 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:04 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\util.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// pathf is fmt.Sprintf for generating paths
+// (on windows it turns / into \ after the printf).
+
+using System;
+using System.Threading;
 public static partial class main_package {
 
-    // pathf is fmt.Sprintf for generating paths
-    // (on windows it turns / into \ after the printf).
 private static @string pathf(@string format, params object[] args) {
     args = args.Clone();
 
@@ -41,7 +42,6 @@ private static slice<@string> filter(slice<@string> list, Func<@string, bool> f)
             out = append(out, x);
         }
     }    return out;
-
 }
 
 // uniq returns a sorted slice containing the unique elements of list.
@@ -55,13 +55,11 @@ private static slice<@string> uniq(slice<@string> list) {
             keep = append(keep, x);
         }
     }    return keep;
-
 }
 
 public static readonly nint CheckExit = 1 << (int)(iota);
 public static readonly var ShowOutput = 0;
 public static readonly var Background = 1;
-
 
 private static sync.Mutex outputLock = default;
 
@@ -109,10 +107,8 @@ private static @string run(@string dir, nint mode, params @string[] cmd) {
             // Prevent fatalf from waiting on our own goroutine's
             // bghelper to exit:
             bghelpers.Done();
-
         }
         fatalf("FAILED: %v: %v", strings.Join(cmd, " "), err);
-
     }
     if (mode & ShowOutput != 0) {
         outputLock.Lock();
@@ -123,7 +119,6 @@ private static @string run(@string dir, nint mode, params @string[] cmd) {
         errprintf("run: %s DONE\n", strings.Join(cmd, " "));
     }
     return string(data);
-
 }
 
 private static nint maxbg = 4;/* maximum number of jobs to run at once */
@@ -179,7 +174,6 @@ private static @string xgetwd() {
         fatalf("%s", err);
     }
     return wd;
-
 }
 
 // xrealwd returns the 'real' name for the given path.
@@ -197,7 +191,6 @@ private static @string xrealwd(@string path) {
         err = err__prev1;
 
     }
-
     var real = xgetwd();
     {
         var err__prev1 = err;
@@ -210,9 +203,7 @@ private static @string xrealwd(@string path) {
         err = err__prev1;
 
     }
-
     return real;
-
 }
 
 // isdir reports whether p names an existing directory.
@@ -234,7 +225,6 @@ private static time.Time mtime(@string p) {
         return new time.Time();
     }
     return fi.ModTime();
-
 }
 
 // readfile returns the content of the named file.
@@ -244,12 +234,10 @@ private static @string readfile(@string file) {
         fatalf("%v", err);
     }
     return string(data);
-
 }
 
 private static readonly nint writeExec = 1 << (int)(iota);
 private static readonly var writeSkipSame = 0;
-
 
 // writefile writes text to the named file, creating it if needed.
 // if exec is non-zero, marks the file as executable.
@@ -296,7 +284,6 @@ private static void xremove(@string p) {
         errprintf("rm %s\n", p);
     }
     os.Remove(p);
-
 }
 
 // xremoveall removes the file or directory tree rooted at p.
@@ -305,7 +292,6 @@ private static void xremoveall(@string p) {
         errprintf("rm -r %s\n", p);
     }
     os.RemoveAll(p);
-
 }
 
 // xreaddir replaces dst with a list of the names of the files and subdirectories in dir.
@@ -321,7 +307,6 @@ private static slice<@string> xreaddir(@string dir) => func((defer, _, _) => {
         fatalf("reading %s: %v", dir, err);
     }
     return names;
-
 });
 
 // xreaddir replaces dst with a list of the names of the files in dir.
@@ -342,7 +327,6 @@ private static slice<@string> xreaddirfiles(@string dir) => func((defer, _, _) =
             names = append(names, fi.Name());
         }
     }    return names;
-
 });
 
 // xworkdir creates a new temporary directory to hold object files
@@ -353,7 +337,6 @@ private static @string xworkdir() {
         fatalf("%v", err);
     }
     return name;
-
 }
 
 // fatalf prints an error message to standard error and exits.
@@ -372,7 +355,6 @@ private static void fatalf(@string format, params object[] args) {
     bghelpers.Wait();
 
     xexit(2);
-
 }
 
 private static slice<Action> atexits = default;
@@ -412,7 +394,6 @@ private static bool xsamefile(@string f1, @string f2) {
         return f1 == f2;
     }
     return os.SameFile(fi1, fi2);
-
 }
 
 private static @string xgetgoarm() {
@@ -421,17 +402,14 @@ private static @string xgetgoarm() {
         // These ports are also mostly cross-compiled, so it makes little
         // sense to auto-detect the setting.
         return "7";
-
     }
     if (goos == "windows") { 
         // windows/arm only works with ARMv7 executables.
         return "7";
-
     }
     if (gohostarch != "arm" || goos != gohostos) { 
         // Conservative default for cross-compilation.
         return "5";
-
     }
     var @out = run("", 0, os.Args[0], "-check-goarm");
     var v1ok = strings.Contains(out, "VFPv1 OK.");
@@ -444,7 +422,6 @@ private static @string xgetgoarm() {
         return "6";
     }
     return "5";
-
 }
 
 private static nint min(nint a, nint b) {
@@ -452,7 +429,6 @@ private static nint min(nint a, nint b) {
         return a;
     }
     return b;
-
 }
 
 // elfIsLittleEndian detects if the ELF file is little endian.
@@ -485,7 +461,6 @@ private static bool elfIsLittleEndian(@string fn) => func((defer, panic, _) => {
             break;
     }
     panic("unreachable");
-
 });
 
 // count is a flag.Value that is like a flag.Bool and a flag.Int.
@@ -516,11 +491,9 @@ private static error Set(this ptr<count> _addr_c, @string s) {
                 return error.As(fmt.Errorf("invalid count %q", s))!;
             }
             c.val = count(n);
-
             break;
     }
     return error.As(null!)!;
-
 }
 
 private static bool IsBoolFlag(this ptr<count> _addr_c) {

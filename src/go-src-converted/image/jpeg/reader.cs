@@ -5,19 +5,22 @@
 // Package jpeg implements a JPEG image decoder and encoder.
 //
 // JPEG is defined in ITU-T T.81: https://www.w3.org/Graphics/JPEG/itu-t81.pdf.
-// package jpeg -- go2cs converted at 2022 March 06 23:36:10 UTC
+
+// package jpeg -- go2cs converted at 2022 March 13 06:44:10 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Program Files\Go\src\image\jpeg\reader.go
-using image = go.image_package;
-using color = go.image.color_package;
-using imageutil = go.image.@internal.imageutil_package;
-using io = go.io_package;
-
 namespace go.image;
+
+using image = image_package;
+using color = image.color_package;
+using imageutil = image.@internal.imageutil_package;
+using io = io_package;
+
+
+// A FormatError reports that the input is not a valid JPEG.
 
 public static partial class jpeg_package {
 
-    // A FormatError reports that the input is not a valid JPEG.
 public partial struct FormatError { // : @string
 }
 
@@ -51,7 +54,6 @@ private static readonly nint maxTq = 3;
 
 private static readonly nint maxComponents = 4;
 
-
 private static readonly nuint sof0Marker = 0xc0; // Start Of Frame (Baseline Sequential).
 private static readonly nuint sof1Marker = 0xc1; // Start Of Frame (Extended Sequential).
 private static readonly nuint sof2Marker = 0xc2; // Start Of Frame (Progressive).
@@ -71,12 +73,10 @@ private static readonly nuint app0Marker = 0xe0;
 private static readonly nuint app14Marker = 0xee;
 private static readonly nuint app15Marker = 0xef;
 
-
 // See https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
 private static readonly nint adobeTransformUnknown = 0;
 private static readonly nint adobeTransformYCbCr = 1;
 private static readonly nint adobeTransformYCbCrK = 2;
-
 
 // unzig maps from the zig-zag ordering to the natural ordering. For example,
 // unzig[3] is the column and row of the fourth element in zig-zag order. The
@@ -147,7 +147,6 @@ private static error fill(this ptr<decoder> _addr_d) => func((_, panic, _) => {
         err = null;
     }
     return error.As(err)!;
-
 });
 
 // unreadByteStuffedByte undoes the most recent readByteStuffedByte call,
@@ -185,7 +184,6 @@ private static (byte, error) readByte(this ptr<decoder> _addr_d) {
     d.bytes.i++;
     d.bytes.nUnreadable = 0;
     return (x, error.As(null!)!);
-
 }
 
 // errMissingFF00 means that readByteStuffedByte encountered an 0xff byte (a
@@ -212,7 +210,6 @@ private static (byte, error) readByteStuffedByte(this ptr<decoder> _addr_d) {
         d.bytes.i++;
         d.bytes.nUnreadable = 2;
         return (0xff, error.As(null!)!);
-
     }
     d.bytes.nUnreadable = 0;
 
@@ -233,7 +230,6 @@ private static (byte, error) readByteStuffedByte(this ptr<decoder> _addr_d) {
         return (0, error.As(errMissingFF00)!);
     }
     return (0xff, error.As(null!)!);
-
 }
 
 // readFull reads exactly len(p) bytes into p. It does not care about byte
@@ -247,7 +243,6 @@ private static error readFull(this ptr<decoder> _addr_d, slice<byte> p) {
             d.unreadByteStuffedByte();
         }
         d.bytes.nUnreadable = 0;
-
     }
     while (true) {
         var n = copy(p, d.bytes.buf[(int)d.bytes.i..(int)d.bytes.j]);
@@ -267,10 +262,8 @@ private static error readFull(this ptr<decoder> _addr_d, slice<byte> p) {
             }
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 // ignore ignores the next n bytes.
@@ -283,7 +276,6 @@ private static error ignore(this ptr<decoder> _addr_d, nint n) {
             d.unreadByteStuffedByte();
         }
         d.bytes.nUnreadable = 0;
-
     }
     while (true) {
         var m = d.bytes.j - d.bytes.i;
@@ -306,10 +298,8 @@ private static error ignore(this ptr<decoder> _addr_d, nint n) {
             }
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 // Specified in section B.2.2.
@@ -415,7 +405,6 @@ private static error processSOF(this ptr<decoder> _addr_d, nint n) {
                         }
                         break;
                 }
-
                 break;
             case 4: 
                 // For 4-component images (either CMYK or YCbCrK), we only support two
@@ -446,16 +435,13 @@ private static error processSOF(this ptr<decoder> _addr_d, nint n) {
                         }
                         break;
                 }
-
                 break;
         }
 
         d.comp[i].h = h;
         d.comp[i].v = v;
-
     }
     return error.As(null!)!;
-
 }
 
 // Specified in section B.2.4.1.
@@ -479,7 +465,6 @@ loop:
                     _breakloop = true;
                     break;
                 }
-
                 n -= blockSize;
                 {
                     var err__prev1 = err;
@@ -493,7 +478,6 @@ loop:
                     err = err__prev1;
 
                 }
-
                 {
                     var i__prev2 = i;
 
@@ -510,7 +494,6 @@ loop:
                     _breakloop = true;
                     break;
                 }
-
                 n -= 2 * blockSize;
                 {
                     var err__prev1 = err;
@@ -524,7 +507,6 @@ loop:
                     err = err__prev1;
 
                 }
-
                 {
                     var i__prev2 = i;
 
@@ -540,13 +522,11 @@ loop:
                 return error.As(FormatError("bad Pq value"))!;
                 break;
         }
-
     }
     if (n != 0) {
         return error.As(FormatError("DQT has wrong length"))!;
     }
     return error.As(null!)!;
-
 }
 
 // Specified in section B.2.4.4.
@@ -563,10 +543,8 @@ private static error processDRI(this ptr<decoder> _addr_d, nint n) {
             return error.As(err)!;
         }
     }
-
     d.ri = int(d.tmp[0]) << 8 + int(d.tmp[1]);
     return error.As(null!)!;
-
 }
 
 private static error processApp0Marker(this ptr<decoder> _addr_d, nint n) {
@@ -582,7 +560,6 @@ private static error processApp0Marker(this ptr<decoder> _addr_d, nint n) {
             return error.As(err)!;
         }
     }
-
     n -= 5;
 
     d.jfif = d.tmp[0] == 'J' && d.tmp[1] == 'F' && d.tmp[2] == 'I' && d.tmp[3] == 'F' && d.tmp[4] == '\x00';
@@ -591,7 +568,6 @@ private static error processApp0Marker(this ptr<decoder> _addr_d, nint n) {
         return error.As(d.ignore(n))!;
     }
     return error.As(null!)!;
-
 }
 
 private static error processApp14Marker(this ptr<decoder> _addr_d, nint n) {
@@ -607,7 +583,6 @@ private static error processApp14Marker(this ptr<decoder> _addr_d, nint n) {
             return error.As(err)!;
         }
     }
-
     n -= 12;
 
     if (d.tmp[0] == 'A' && d.tmp[1] == 'd' && d.tmp[2] == 'o' && d.tmp[3] == 'b' && d.tmp[4] == 'e') {
@@ -618,7 +593,6 @@ private static error processApp14Marker(this ptr<decoder> _addr_d, nint n) {
         return error.As(d.ignore(n))!;
     }
     return error.As(null!)!;
-
 }
 
 // decode reads a JPEG image from r and returns it as an image.Image.
@@ -641,7 +615,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
         err = err__prev1;
 
     }
-
     if (d.tmp[0] != 0xff || d.tmp[1] != soiMarker) {
         return (null, error.As(FormatError("missing SOI marker"))!);
     }
@@ -676,13 +649,11 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
             if (err != null) {
                 return (null, error.As(err)!);
             }
-
         }
         var marker = d.tmp[1];
         if (marker == 0) { 
             // Treat "\xff\x00" as extraneous data.
             continue;
-
         }
         while (marker == 0xff) { 
             // Section B.1.1.2 says, "Any marker may optionally be preceded by any
@@ -691,11 +662,9 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
             if (err != null) {
                 return (null, error.As(err)!);
             }
-
         }
         if (marker == eoiMarker) { // End Of Image.
             break;
-
         }
         if (rst0Marker <= marker && marker <= rst7Marker) { 
             // Figures B.2 and B.16 of the specification suggest that restart markers should
@@ -705,7 +674,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
             // method, and is ignored as a harmless error. Restart markers have no extra data,
             // so we check for this before we read the 16-bit length of the segment.
             continue;
-
         }
         err = d.readFull(d.tmp[..(int)2]);
 
@@ -732,7 +700,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
  {
                 err = d.processDHT(n);
             }
-
         else if (marker == dqtMarker) 
             if (configOnly) {
                 err = d.ignore(n);
@@ -741,7 +708,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
  {
                 err = d.processDQT(n);
             }
-
         else if (marker == sosMarker) 
             if (configOnly) {
                 return (null, error.As(null!)!);
@@ -755,7 +721,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
  {
                 err = d.processDRI(n);
             }
-
         else if (marker == app0Marker) 
             err = d.processApp0Marker(n);
         else if (marker == app14Marker) 
@@ -766,13 +731,11 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
             }
             else if (marker < 0xc0) { // See Table B.1 "Marker code assignments".
                 err = FormatError("unknown marker");
-
             }
             else
  {
                 err = UnsupportedError("unknown marker");
             }
-
                 if (err != null) {
             return (null, error.As(err)!);
         }
@@ -791,7 +754,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
             err = err__prev2;
 
         }
-
     }
     if (d.img1 != null) {
         return (d.img1, error.As(null!)!);
@@ -804,10 +766,8 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d, io.Reader 
             return d.convertToRGB();
         }
         return (d.img3, error.As(null!)!);
-
     }
     return (null, error.As(FormatError("missing SOS marker"))!);
-
 }
 
 // applyBlack combines d.img3 and d.blackPix into a CMYK image. The formula
@@ -865,7 +825,6 @@ private static (image.Image, error) applyBlack(this ptr<decoder> _addr_d) {
             y = y__prev1;
         }
         return (addr(new image.CMYK(Pix:img.Pix,Stride:img.Stride,Rect:img.Rect,)), error.As(null!)!);
-
     }
     bounds = d.img3.Bounds();
     img = image.NewCMYK(bounds);
@@ -885,7 +844,6 @@ private static (image.Image, error) applyBlack(this ptr<decoder> _addr_d) {
                     sy /= 2;
                 (iBase, y) = (iBase + img.Stride, y + 1);
                 }
-
                 {
                     var i__prev3 = i;
                     var x__prev3 = x;
@@ -899,25 +857,20 @@ private static (image.Image, error) applyBlack(this ptr<decoder> _addr_d) {
                             sx /= 2;
                         (i, x) = (i + 4, x + 1);
                         }
-
                         img.Pix[i] = 255 - translation.src[sy * translation.stride + sx];
-
                     }
 
 
                     i = i__prev3;
                     x = x__prev3;
                 }
-
             }
 
 
             iBase = iBase__prev2;
             y = y__prev2;
         }
-
     }    return (img, error.As(null!)!);
-
 }
 
 private static bool isRGB(this ptr<decoder> _addr_d) {
@@ -930,10 +883,8 @@ private static bool isRGB(this ptr<decoder> _addr_d) {
         // https://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/JPEG.html#Adobe
         // says that 0 means Unknown (and in practice RGB) and 1 means YCbCr.
         return true;
-
     }
     return d.comp[0].c == 'R' && d.comp[1].c == 'G' && d.comp[2].c == 'B';
-
 }
 
 private static (image.Image, error) convertToRGB(this ptr<decoder> _addr_d) {
@@ -955,10 +906,8 @@ private static (image.Image, error) convertToRGB(this ptr<decoder> _addr_d) {
             img.Pix[po + 4 * i + 2] = d.img3.Cr[co + i / cScale];
             img.Pix[po + 4 * i + 3] = 255;
         }
-
     }
     return (img, error.As(null!)!);
-
 }
 
 // Decode reads a JPEG image from r and returns it as an image.Image.
@@ -984,7 +933,6 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             return (new image.Config(), error.As(err)!);
         }
     }
-
     switch (d.nComp) {
         case 1: 
             return (new image.Config(ColorModel:color.GrayModel,Width:d.width,Height:d.height,), error.As(null!)!);
@@ -995,14 +943,12 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
                 cm = color.RGBAModel;
             }
             return (new image.Config(ColorModel:cm,Width:d.width,Height:d.height,), error.As(null!)!);
-
             break;
         case 4: 
             return (new image.Config(ColorModel:color.CMYKModel,Width:d.width,Height:d.height,), error.As(null!)!);
             break;
     }
     return (new image.Config(), error.As(FormatError("missing SOF marker"))!);
-
 }
 
 private static void init() {

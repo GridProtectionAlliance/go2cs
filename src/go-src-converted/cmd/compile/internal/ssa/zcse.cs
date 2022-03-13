@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:09:23 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:42 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\zcse.go
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
-    // zcse does an initial pass of common-subexpression elimination on the
-    // function for values with zero arguments to allow the more expensive cse
-    // to begin with a reduced number of values. Values are just relinked,
-    // nothing is deleted. A subsequent deadcode pass is required to actually
-    // remove duplicate expressions.
+// zcse does an initial pass of common-subexpression elimination on the
+// function for values with zero arguments to allow the more expensive cse
+// to begin with a reduced number of values. Values are just relinked,
+// nothing is deleted. A subsequent deadcode pass is required to actually
+// remove duplicate expressions.
 private static void zcse(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -54,7 +54,6 @@ private static void zcse(ptr<Func> _addr_f) {
 
                 i = i__prev2;
             }
-
         }
         b = b__prev1;
     }
@@ -84,7 +83,6 @@ private static void zcse(ptr<Func> _addr_f) {
                                         v.SetArg(i, rv);
                                     }
                                 }
-
                             }
                         }
                         i = i__prev3;
@@ -121,7 +119,6 @@ private static long keyFor(ptr<Value> _addr_v) {
         return int64(int8(v.AuxInt));
     else 
         return v.AuxInt;
-    
-}
+    }
 
 } // end ssa_package

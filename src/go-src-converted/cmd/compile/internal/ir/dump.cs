@@ -6,24 +6,26 @@
 // for debugging purposes. The code is customized for Node graphs
 // and may be used for an alternative view of the node structure.
 
-// package ir -- go2cs converted at 2022 March 06 22:48:58 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:19 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\dump.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using regexp = go.regexp_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using reflect = reflect_package;
+using regexp = regexp_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// DumpAny is like FDumpAny but prints to stderr.
 
 public static partial class ir_package {
 
-    // DumpAny is like FDumpAny but prints to stderr.
 public static void DumpAny(object root, @string filter, nint depth) {
     FDumpAny(os.Stderr, root, filter, depth);
 }
@@ -57,7 +59,6 @@ public static void FDumpAny(io.Writer w, object root, @string filter, nint depth
 
     p.dump(reflect.ValueOf(root), depth);
     p.printf("\n");
-
 }
 
 private partial struct dumper {
@@ -103,13 +104,11 @@ private static (nint, error) Write(this ptr<dumper> _addr_p, slice<byte> data) {
             }
         }
         p.last = b;
-
     }    if (len(data) > n) {
         m, err = p.output.Write(data[(int)n..]);
         n += m;
     }
     return ;
-
 }
 
 // printf is a convenience wrapper.
@@ -124,7 +123,6 @@ private static void printf(this ptr<dumper> _addr_p, @string format, params obje
             panic(err);
         }
     }
-
 });
 
 // addr returns the (hexadecimal) address string of the object
@@ -146,10 +144,8 @@ private static @string addr(this ptr<dumper> _addr_p, reflect.Value x) {
             s = "0x…" + adr[(int)i..];
         }
     }
-
     p.lastadr = adr;
     return s;
-
 }
 
 // dump prints the contents of x.
@@ -168,7 +164,6 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, nint depth) 
             return ;
         }
     }
-
 
 
     if (x.Kind() == reflect.String) 
@@ -195,7 +190,6 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, nint depth) 
             }
 
         }
-
         p.ptrmap[ptr] = p.line;
         p.dump(x.Elem(), depth); // don't count pointer indirection towards depth
     else if (x.Kind() == reflect.Slice) 
@@ -223,7 +217,6 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, nint depth) 
                 n = n__prev1;
             }
             p.indent--;
-
         }
         p.printf("}");
     else if (x.Kind() == reflect.Struct) 
@@ -247,7 +240,6 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, nint depth) 
             n = n__prev1;
 
         }
-
         p.indent++;
 
         var first = true;
@@ -274,13 +266,11 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, nint depth) 
                             omitted = true;
                             continue; // Op field already printed for Nodes
                         }
-
                         var x = x.Field(i);
                         if (isZeroVal(x)) {
                             omitted = true;
                             continue; // exclude zero-valued fields
                         }
-
                         {
                             var n__prev2 = n;
 
@@ -295,20 +285,16 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, nint depth) 
 
                         }
 
-
                         if (first) {
                             p.printf("\n");
                             first = false;
                         }
-
                         p.printf("%s: ", name);
                         p.dump(x, depth - 1);
                         p.printf("\n");
-
                     }
 
                 }
-
             }
 
 
@@ -322,8 +308,7 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, nint depth) 
         p.printf("}");
     else 
         p.printf("%v", x.Interface());
-    
-}
+    }
 
 private static bool isZeroVal(reflect.Value x) {
 
@@ -338,7 +323,6 @@ private static bool isZeroVal(reflect.Value x) {
     else if (x.Kind() == reflect.Interface || x.Kind() == reflect.Ptr || x.Kind() == reflect.Slice) 
         return x.IsNil();
         return false;
-
 }
 
 private static nint commonPrefixLen(@string a, @string b) {

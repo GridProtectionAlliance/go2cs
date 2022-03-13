@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:43 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:06 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\debug.go
-using abi = go.cmd.compile.@internal.abi_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using dwarf = go.cmd.@internal.dwarf_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using hex = go.encoding.hex_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using bits = go.math.bits_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using abi = cmd.compile.@internal.abi_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using dwarf = cmd.@internal.dwarf_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+using hex = encoding.hex_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using bits = math.bits_package;
+using sort = sort_package;
+using strings = strings_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -116,7 +115,6 @@ private static void reset(this ptr<stateAtPC> _addr_state, slice<liveSlot> live)
 
             registers[reg] = append(registers[reg], live.slot);
         }
-
     }    (state.slots, state.registers) = (slots, registers);
 }
 
@@ -139,10 +137,8 @@ private static @string LocString(this ptr<debugState> _addr_s, VarLoc loc) {
         mask &= 1 << (int)(reg);
 
         storage = append(storage, s.registers[reg].String());
-
     }
     return strings.Join(storage, ",");
-
 }
 
 // A VarLoc describes the storage for part of a user variable.
@@ -321,7 +317,6 @@ private static void initializeCache(this ptr<debugState> _addr_state, ptr<Func> 
     }
     state.liveSlots = state.liveSlots[..(int)0];
     state.liveSlotSliceBegin = 0;
-
 }
 
 private static ptr<BlockDebug> allocBlock(this ptr<debugState> _addr_state, ptr<Block> _addr_b) {
@@ -375,7 +370,6 @@ private static @string stateString(this ptr<debugState> _addr_s, stateAtPC state
         return "(no vars)\n";
     }
     return strings.Join(strs, "");
-
 }
 
 // slotCanonicalizer is a table used to lookup and canonicalize
@@ -431,12 +425,10 @@ private static (SlKeyIdx, bool) lookup(this ptr<slotCanonicalizer> _addr_sc, Loc
             return (idx, true);
         }
     }
-
     var rv = SlKeyIdx(len(sc.slkeys));
     sc.slkeys = append(sc.slkeys, ls);
     sc.slmap[k] = rv;
     return (rv, false);
-
 }
 
 private static LocalSlot canonSlot(this ptr<slotCanonicalizer> _addr_sc, SlKeyIdx idx) {
@@ -505,7 +497,6 @@ public static void PopulateABIInRegArgOps(ptr<Func> _addr_f) {
             // Haven't seen this slot yet.
             var sla = f.localSlotAddr(sl);
             f.Names = append(f.Names, sla);
-
         }
         else
  {
@@ -517,7 +508,6 @@ public static void PopulateABIInRegArgOps(ptr<Func> _addr_f) {
         }
         values = append(values, v);
         f.NamedValues[sl] = values;
-
     };
 
     ptr<Value> newValues = new slice<ptr<Value>>(new ptr<Value>[] {  });
@@ -526,7 +516,6 @@ public static void PopulateABIInRegArgOps(ptr<Func> _addr_f) {
         var i = f.ABISelf.FloatIndexFor(reg);
         if (i >= 0) { // float PR
             return f.Config.floatParamRegs[i];
-
         }
         else
  {
@@ -570,14 +559,11 @@ public static void PopulateABIInRegArgOps(ptr<Func> _addr_f) {
                 var (idx, _) = sc.lookup(sl); 
                 // add to f.NamedValues if not already present
                 addToNV(v, sc.canonSlot(idx));
-
             }
             else if (v.Op.IsCall()) { 
                 // if we hit a call, we've gone too far.
                 break;
-
             }
-
         }
         v = v__prev1;
     }
@@ -612,12 +598,9 @@ public static void PopulateABIInRegArgOps(ptr<Func> _addr_f) {
                 // a portion of an in-param that is not live/used.
                 // Add a new dummy OpArg{Int,Float}Reg for it.
                 synthesizeOpIntFloatArg(n, t, inp.Registers[k], pieceSlot);
-
             }
-
         }
     }    f.Entry.Values = append(newValues, f.Entry.Values);
-
 }
 
 // BuildFuncDebug returns debug information for f.
@@ -685,9 +668,7 @@ public static ptr<FuncDebug> BuildFuncDebug(ptr<obj.Link> _addr_ctxt, ptr<Func> 
                 }
 
             }
-
             state.varParts[topSlot.N] = append(state.varParts[topSlot.N], SlotID(i));
-
         }
         i = i__prev1;
         slot = slot__prev1;
@@ -711,9 +692,7 @@ public static ptr<FuncDebug> BuildFuncDebug(ptr<obj.Link> _addr_ctxt, ptr<Func> 
                     }
 
                 }
-
             }
-
         }
     }    if (cap(state.varSlots) < len(state.vars)) {
         state.varSlots = make_slice<slice<SlotID>>(len(state.vars));
@@ -783,7 +762,6 @@ public static ptr<FuncDebug> BuildFuncDebug(ptr<obj.Link> _addr_ctxt, ptr<Func> 
     state.buildLocationLists(blockLocs);
 
     return addr(new FuncDebug(Slots:state.slots,VarSlots:state.varSlots,Vars:state.vars,LocationLists:state.lists,));
-
 }
 
 // liveness walks the function in control flow order, calculating the start
@@ -835,11 +813,9 @@ private static slice<ptr<BlockDebug>> liveness(this ptr<debugState> _addr_state)
                 slots = append(slots, state.valueNames[source.ID]);
                 state.valueNames[v.ID] = slots;
             }
-
             ptr<Register> (reg, _) = state.f.getHome(v.ID)._<ptr<Register>>();
             var c = state.processValue(v, slots, reg);
             changed = changed || c;
-
         }        if (state.loggingEnabled) {
             state.f.Logf("Block %v done, locs:\n%v", b, state.stateString(state.currentState));
         }
@@ -859,10 +835,8 @@ private static slice<ptr<BlockDebug>> liveness(this ptr<debugState> _addr_state)
             locs.endState = state.getLiveSlotSlice();
         }
         blockLocs[b.ID] = locs;
-
     }
     return blockLocs;
-
 }
 
 // mergePredecessors takes the end state of each of b's predecessors and
@@ -900,7 +874,6 @@ private static (slice<liveSlot>, bool) mergePredecessors(this ptr<debugState> _a
         var preds2 = make_slice<ptr<Block>>(len(preds));
         copy(preds2, preds);
         state.logf("Merging %v into %v\n", preds2, b);
-
     }
     Action<slice<liveSlot>> markChangedVars = slots => {
         foreach (var (_, live) in slots) {
@@ -912,22 +885,18 @@ private static (slice<liveSlot>, bool) mergePredecessors(this ptr<debugState> _a
         if (previousBlock != null) { 
             // Mark everything in previous block as changed because it is not a predecessor.
             markChangedVars(blockLocs[previousBlock.ID].endState);
-
         }
         state.currentState.reset(null);
         return (null, true);
-
     }
     var p0 = blockLocs[preds[0].ID].endState;
     if (len(preds) == 1) {
         if (previousBlock != null && preds[0].ID != previousBlock.ID) { 
             // Mark everything in previous block as changed because it is not a predecessor.
             markChangedVars(blockLocs[previousBlock.ID].endState);
-
         }
         state.currentState.reset(p0);
         return (p0, true);
-
     }
     var baseID = preds[0].ID;
     var baseState = p0; 
@@ -1021,11 +990,9 @@ private static (slice<liveSlot>, bool) mergePredecessors(this ptr<debugState> _a
         if (previousBlockIsNotPredecessor) { 
             // Mark everything in previous block as changed because it is not a predecessor.
             markChangedVars(blockLocs[previousBlock.ID].endState);
-
         }
         state.currentState.reset(baseState);
         return (baseState, true);
-
     }
     {
         var reg__prev1 = reg;
@@ -1048,7 +1015,6 @@ private static (slice<liveSlot>, bool) mergePredecessors(this ptr<debugState> _a
                 // Seen in only some predecessors. Clear it out.
                 slotLocs[predSlot.slot] = new VarLoc();
                 continue;
-
             } 
 
             // Present in all predecessors.
@@ -1061,8 +1027,6 @@ private static (slice<liveSlot>, bool) mergePredecessors(this ptr<debugState> _a
                 mask &= 1 << (int)(reg);
                 state.currentState.registers[reg] = append(state.currentState.registers[reg], predSlot.slot);
             }
-
-
         }
         predSlot = predSlot__prev1;
     }
@@ -1070,11 +1034,8 @@ private static (slice<liveSlot>, bool) mergePredecessors(this ptr<debugState> _a
     if (previousBlockIsNotPredecessor) { 
         // Mark everything in previous block as changed because it is not a predecessor.
         markChangedVars(blockLocs[previousBlock.ID].endState);
-
-
     }
     return (null, false);
-
 }
 
 // processValue updates locs and state.registerContents to reflect v, a value with
@@ -1126,7 +1087,6 @@ private static bool processValue(this ptr<debugState> _addr_state, ptr<Value> _a
         }
 
         locs.registers[reg] = locs.registers[reg][..(int)0];
-
     }
 
 
@@ -1149,7 +1109,6 @@ private static bool processValue(this ptr<debugState> _addr_state, ptr<Value> _a
  {
                 state.logf("at %v: stack-only var %v now dead\n", v, state.slots[slotID]);
             }
-
         }
     else if (v.Op == OpArg) 
         LocalSlot home = state.f.getHome(v.ID)._<LocalSlot>();
@@ -1173,11 +1132,8 @@ private static bool processValue(this ptr<debugState> _addr_state, ptr<Value> _a
                         last = last__prev2;
 
                     }
-
                 }
-
                 setSlot(slot, new VarLoc(0,StackOffset(stackOffset)));
-
             }
 
             slot = slot__prev1;
@@ -1261,7 +1217,6 @@ private static bool processValue(this ptr<debugState> _addr_state, ptr<Value> _a
             slot = slot__prev1;
         }
         return changed;
-
 }
 
 // varOffset returns the offset of slot within the user variable it was
@@ -1274,7 +1229,6 @@ private static long varOffset(LocalSlot slot) {
         s = s.SplitOf;
     }
     return offset;
-
 }
 
 private partial struct partsByVarOffset {
@@ -1330,7 +1284,6 @@ private static bool canMerge(VarLoc pending, VarLoc @new) {
         return firstReg(pending.Registers) == firstReg(@new.Registers);
     }
     return false;
-
 }
 
 // firstReg returns the first register in set that is present.
@@ -1339,10 +1292,8 @@ private static byte firstReg(RegisterSet set) {
         // This is wrong, but there seem to be some situations where we
         // produce locations with no storage.
         return 0;
-
     }
     return uint8(bits.TrailingZeros64(uint64(set)));
-
 }
 
 // buildLocationLists builds location lists for all the user variables in
@@ -1374,11 +1325,8 @@ private static void buildLocationLists(this ptr<debugState> _addr_state, slice<p
             }
 
             continue;
-
         }
-        Func<ptr<Value>, bool> mustBeFirst = v => {
-            return v.Op == OpPhi || v.Op.isLoweredGetClosurePtr() || v.Op == OpArgIntReg || v.Op == OpArgFloatReg;
-        };
+        Func<ptr<Value>, bool> mustBeFirst = v => v.Op == OpPhi || v.Op.isLoweredGetClosurePtr() || v.Op == OpArgIntReg || v.Op == OpArgFloatReg;
 
         var zeroWidthPending = false;
         var blockPrologComplete = false; // set to true at first non-zero-width op
@@ -1396,20 +1344,14 @@ private static void buildLocationLists(this ptr<debugState> _addr_state, slice<p
                         if (blockPrologComplete && mustBeFirst(v)) {
                             panic(fmt.Errorf("Unexpected placement of op '%s' appearing after non-pseudo-op at beginning of block %s in %s\n%s", v.LongString(), b, b.Func.Name, b.Func));
                         }
-
                         apcChangedSize = len(state.changedVars.contents()); 
                         // Other zero-width ops must wait on a "real" op.
                         zeroWidthPending = true;
                         continue;
-
                     }
-
                 }
-
                 continue;
-
             }
-
             if (!changed && !zeroWidthPending) {
                 continue;
             } 
@@ -1425,13 +1367,11 @@ private static void buildLocationLists(this ptr<debugState> _addr_state, slice<p
                     varID = __varID;
                     if (i < apcChangedSize) { // buffered true start-of-block changes
                         state.updateVar(VarID(varID), v.Block, BlockStart);
-
                     }
                     else
  {
                         state.updateVar(VarID(varID), v.Block, v);
                     }
-
                 }
 
                 i = i__prev3;
@@ -1440,7 +1380,6 @@ private static void buildLocationLists(this ptr<debugState> _addr_state, slice<p
 
             state.changedVars.clear();
             apcChangedSize = 0;
-
         }        {
             var i__prev2 = i;
             var varID__prev2 = varID;
@@ -1450,13 +1389,11 @@ private static void buildLocationLists(this ptr<debugState> _addr_state, slice<p
                 varID = __varID;
                 if (i < apcChangedSize) { // buffered true start-of-block changes
                     state.updateVar(VarID(varID), b, BlockStart);
-
                 }
                 else
  {
                     state.updateVar(VarID(varID), b, BlockEnd);
                 }
-
             }
 
             i = i__prev2;
@@ -1464,7 +1401,6 @@ private static void buildLocationLists(this ptr<debugState> _addr_state, slice<p
         }
 
         prevBlock = b;
-
     }    if (state.loggingEnabled) {
         state.logf("location lists:\n");
     }
@@ -1483,9 +1419,7 @@ private static void buildLocationLists(this ptr<debugState> _addr_state, slice<p
  {
                     state.logf("\t%v : %q\n", state.vars[varID], hex.EncodeToString(state.lists[varID]));
                 }
-
             }
-
         }
         varID = varID__prev1;
     }
@@ -1575,16 +1509,13 @@ private static void writePendingEntry(this ptr<debugState> _addr_state, VarID va
         // If someone writes a function that uses >65K values,
         // they get incomplete debug info on 32-bit platforms.
         return ;
-
     }
     if (start == end) {
         if (state.loggingEnabled) { 
             // Printf not logf so not gated by GOSSAFUNC; this should fire very rarely.
             fmt.Printf("Skipping empty location list for %v in %s\n", state.vars[varID], state.f.Name);
-
         }
         return ;
-
     }
     var list = state.lists[varID];
     list = appendPtr(_addr_state.ctxt, list, start);
@@ -1611,7 +1542,6 @@ private static void writePendingEntry(this ptr<debugState> _addr_state, VarID va
         }
 
         state.logf("Add entry for %v: \tb%vv%v-b%vv%v = \t%v\n", state.vars[varID], pending.startBlock, pending.startValue, endBlock, endValue, strings.Join(partStrs, " "));
-
     }
     {
         var i__prev1 = i;
@@ -1632,7 +1562,6 @@ private static void writePendingEntry(this ptr<debugState> _addr_state, VarID va
                         list = append(list, dwarf.DW_OP_fbreg);
                         list = dwarf.AppendSleb128(list, int64(loc.stackOffsetValue()));
                     }
-
                 }
                 else
  {
@@ -1645,23 +1574,18 @@ private static void writePendingEntry(this ptr<debugState> _addr_state, VarID va
                         list = append(list, dwarf.DW_OP_regx);
                         list = dwarf.AppendUleb128(list, uint64(regnum));
                     }
-
                 }
-
             }
-
             if (len(state.varSlots[varID]) > 1) {
                 list = append(list, dwarf.DW_OP_piece);
                 list = dwarf.AppendUleb128(list, uint64(slot.Type.Size()));
             }
-
         }
         i = i__prev1;
     }
 
     state.ctxt.Arch.ByteOrder.PutUint16(list[(int)sizeIdx..], uint16(len(list) - sizeIdx - 2));
     state.lists[varID] = list;
-
 }
 
 // PutLocationList adds list (a location list in its intermediate representation) to listSym.
@@ -1691,7 +1615,6 @@ private static void PutLocationList(this ptr<FuncDebug> _addr_debugInfo, slice<b
             if (begin == 0 && end == 0) {
                 end = 1;
             }
-
             if (ctxt.UseBASEntries) {
                 listSym.WriteInt(ctxt, listSym.Size, ctxt.Arch.PtrSize, int64(begin));
                 listSym.WriteInt(ctxt, listSym.Size, ctxt.Arch.PtrSize, int64(end));
@@ -1701,12 +1624,10 @@ private static void PutLocationList(this ptr<FuncDebug> _addr_debugInfo, slice<b
                 listSym.WriteCURelativeAddr(ctxt, listSym.Size, startPC, int64(begin));
                 listSym.WriteCURelativeAddr(ctxt, listSym.Size, startPC, int64(end));
             }
-
             i += 2 * ctxt.Arch.PtrSize;
             nint datalen = 2 + int(ctxt.Arch.ByteOrder.Uint16(list[(int)i..]));
             listSym.WriteBytes(ctxt, listSym.Size, list[(int)i..(int)i + datalen]); // copy datalen and location encoding
             i += datalen;
-
         }
     } 
 
@@ -1714,7 +1635,6 @@ private static void PutLocationList(this ptr<FuncDebug> _addr_debugInfo, slice<b
     // End entry.
     listSym.WriteInt(ctxt, listSym.Size, ctxt.Arch.PtrSize, 0);
     listSym.WriteInt(ctxt, listSym.Size, ctxt.Arch.PtrSize, 0);
-
 }
 
 // Pack a value and block ID into an address-sized uint, returning encoded
@@ -1731,7 +1651,6 @@ private static (ulong, bool) encodeValue(ptr<obj.Link> _addr_ctxt, ID b, ID v) =
         var result = uint64(b) << 32 | uint64(uint32(v)); 
         //ctxt.Logf("b %#x (%d) v %#x (%d) -> %#x\n", b, b, v, v, result)
         return (result, true);
-
     }
     if (ctxt.Arch.PtrSize != 4) {
         panic("unexpected pointer size");
@@ -1740,7 +1659,6 @@ private static (ulong, bool) encodeValue(ptr<obj.Link> _addr_ctxt, ID b, ID v) =
         return (0, false);
     }
     return (uint64(b) << 16 | uint64(uint16(v)), true);
-
 });
 
 // Unpack a value and block ID encoded by encodeValue.
@@ -1754,13 +1672,11 @@ private static (ID, ID) decodeValue(ptr<obj.Link> _addr_ctxt, ulong word) => fun
         var v = ID(word); 
         //ctxt.Logf("%#x -> b %#x (%d) v %#x (%d)\n", word, b, b, v, v)
         return (b, v);
-
     }
     if (ctxt.Arch.PtrSize != 4) {
         panic("unexpected pointer size");
     }
     return (ID(word >> 16), ID(int16(word)));
-
 });
 
 // Append a pointer-sized uint to buf.
@@ -1776,7 +1692,6 @@ private static slice<byte> appendPtr(ptr<obj.Link> _addr_ctxt, slice<byte> buf, 
     buf = buf[(int)0..(int)len(buf) + ctxt.Arch.PtrSize];
     writePtr(_addr_ctxt, buf[(int)writeAt..], word);
     return buf;
-
 }
 
 // Write a pointer-sized uint to the beginning of buf.
@@ -1794,8 +1709,6 @@ private static void writePtr(ptr<obj.Link> _addr_ctxt, slice<byte> buf, ulong wo
             panic("unexpected pointer size");
             break;
     }
-
-
 });
 
 // Read a pointer-sized uint from the beginning of buf.
@@ -1813,8 +1726,6 @@ private static ulong readPtr(ptr<obj.Link> _addr_ctxt, slice<byte> buf) => func(
             panic("unexpected pointer size");
             break;
     }
-
-
 });
 
 // setupLocList creates the initial portion of a location list for a
@@ -1834,7 +1745,6 @@ private static (slice<byte>, nint) setupLocList(ptr<obj.Link> _addr_ctxt, ptr<Fu
         // >65K values on a 32-bit platform. Hopefully a degraded debugging
         // experience is ok in that case.
         return (null, 0);
-
     }
     list = appendPtr(_addr_ctxt, list, start);
     list = appendPtr(_addr_ctxt, list, end); 
@@ -1844,7 +1754,6 @@ private static (slice<byte>, nint) setupLocList(ptr<obj.Link> _addr_ctxt, ptr<Fu
     var sizeIdx = len(list);
     list = list[..(int)len(list) + 2];
     return (list, sizeIdx);
-
 }
 
 // locatePrologEnd walks the entry block of a function with incoming
@@ -1894,9 +1803,7 @@ private static ID locatePrologEnd(ptr<Func> _addr_f) {
  {
                 return (false, r);
             }
-
         }        return (v.Type.IsMemory() && memInputs == 1 && regInputs == 1 && spInputs == 1, r);
-
     }; 
 
     // OpArg*Reg values we've seen so far on our forward walk,
@@ -1940,26 +1847,19 @@ private static ID locatePrologEnd(ptr<Func> _addr_f) {
                             if (k < len(f.Entry.Values) - 1) {
                                 return f.Entry.Values[k + 1].ID;
                             }
-
                             return BlockEnd.ID;
-
                         }
-
                     }
 
                 }
-
             }
 
         }
-
         if (v.Op.IsCall()) { 
             // if we hit a call, we've gone too far.
             return v.ID;
-
         }
     }    return ID(-1);
-
 }
 
 // isNamedRegParam returns true if the param corresponding to "p"
@@ -1977,7 +1877,6 @@ private static bool isNamedRegParam(abi.ABIParamAssignment p) {
         return false;
     }
     return true;
-
 }
 
 // BuildFuncDebugNoOptimized constructs a FuncDebug object with
@@ -2036,9 +1935,7 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
             if (!isNamedRegParam(inp)) { 
                 // will be sorted out elsewhere
                 continue;
-
             }
-
             ptr<ir.Name> n = inp.Name._<ptr<ir.Name>>();
             LocalSlot sl = new LocalSlot(N:n,Type:inp.Type,Off:0);
             fd.Vars = append(fd.Vars, n);
@@ -2054,10 +1951,8 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
                 if (loggingEnabled) {
                     state.logf("locatePrologEnd failed, skipping %v\n", n);
                 }
-
                 pidx++;
                 continue;
-
             } 
 
             // Param is arriving in one or more registers. We need a 2-element
@@ -2068,11 +1963,9 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
                 pidx++;
                 continue;
             }
-
             if (loggingEnabled) {
                 state.logf("param %v:\n  [<entry>, %d]:\n", n, afterPrologVal);
             }
-
             var (rtypes, _) = inp.RegisterTypesAndOffsets();
             var padding = make_slice<ulong>(0, 32);
             padding = inp.ComputePadding(padding);
@@ -2087,11 +1980,9 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
                     list = append(list, dwarf.DW_OP_regx);
                     list = dwarf.AppendUleb128(list, uint64(dwreg));
                 }
-
                 if (loggingEnabled) {
                     state.logf("    piece %d -> dwreg %d", k, dwreg);
                 }
-
                 if (len(inp.Registers) > 1) {
                     list = append(list, dwarf.DW_OP_piece);
                     var ts = rtypes[k].Width;
@@ -2104,11 +1995,9 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
                         list = dwarf.AppendUleb128(list, padding[k]);
                     }
                 }
-
                 if (loggingEnabled) {
                     state.logf("\n");
                 }
-
             } 
             // fill in length of location expression element
             ctxt.Arch.ByteOrder.PutUint16(list[(int)sizeIdx..], uint16(len(list) - sizeIdx - 2)); 
@@ -2120,7 +2009,6 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
                 pidx++;
                 continue;
             }
-
             var soff = stackOffset(sl);
             if (soff == 0) {
                 list = append(list, dwarf.DW_OP_call_frame_cfa);
@@ -2130,7 +2018,6 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
                 list = append(list, dwarf.DW_OP_fbreg);
                 list = dwarf.AppendSleb128(list, int64(soff));
             }
-
             if (loggingEnabled) {
                 state.logf("  [%d, <end>): stackOffset=%d\n", afterPrologVal, soff);
             } 
@@ -2140,13 +2027,11 @@ public static ptr<FuncDebug> BuildFuncDebugNoOptimized(ptr<obj.Link> _addr_ctxt,
 
             fd.LocationLists[pidx] = list;
             pidx++;
-
         }
         inp = inp__prev1;
     }
 
     return _addr__addr_fd!;
-
 }
 
 } // end ssa_package

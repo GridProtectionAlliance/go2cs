@@ -16,26 +16,27 @@
 // and typecheck flag set. If the transformation function replaces or adds new
 // nodes, it will set the type and typecheck flag for those new nodes.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:19 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:47 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\transform.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+
+
+// Transformation functions for expressions
+
+// transformAdd transforms an addition operation (currently just addition of
+// strings). Corresponds to the "binary operators" case in typecheck.typecheck1.
+
+using System;
 public static partial class noder_package {
 
-    // Transformation functions for expressions
-
-    // transformAdd transforms an addition operation (currently just addition of
-    // strings). Corresponds to the "binary operators" case in typecheck.typecheck1.
 private static ir.Node transformAdd(ptr<ir.BinaryExpr> _addr_n) {
     ref ir.BinaryExpr n = ref _addr_n.val;
 
@@ -62,10 +63,8 @@ private static ir.Node transformAdd(ptr<ir.BinaryExpr> _addr_n) {
         }
         typed(l.Type(), add);
         return add;
-
     }
     return n;
-
 }
 
 // Corresponds to typecheck.stringtoruneslit.
@@ -86,13 +85,11 @@ private static ir.Node stringtoruneslit(ptr<ir.ConvExpr> _addr_n) {
         elt.Value.SetType(eltType);
         list = append(list, elt);
         i++;
-
     }    var nn = ir.NewCompLitExpr(@base.Pos, ir.OCOMPLIT, ir.TypeNode(n.Type()), null);
     nn.List = list;
     typed(n.Type(), nn); 
     // Need to transform the OCOMPLIT.
     return transformCompLit(_addr_nn);
-
 }
 
 // transformConv transforms an OCONV node as needed, based on the types involved,
@@ -111,14 +108,12 @@ private static ir.Node transformConv(ptr<ir.ConvExpr> _addr_n) {
                 // Floating point casts imply rounding and
                 // so the conversion must be kept.
                 n.SetOp(ir.OCONV);
-            
-        }
+                    }
     else if (n.Op() == ir.OSTR2BYTES)     else if (n.Op() == ir.OSTR2RUNES) 
         if (n.X.Op() == ir.OLITERAL) {
             return stringtoruneslit(_addr_n);
         }
         return n;
-
 }
 
 // transformConvCall transforms a conversion call. Corresponds to the OTYPE part of
@@ -174,14 +169,11 @@ private static void transformCall(ptr<ir.CallExpr> _addr_n) {
                     // In this case, we know getg() always returns the same result within a given function
                     // and we want to avoid the temporaries, so we do the rewrite earlier than is typical.
                     n.SetOp(ir.OGETG);
-
                 }
 
             }
-
         }
         return ;
-
     }
 }
 
@@ -242,7 +234,6 @@ private static ir.Node implicitstar(ir.Node n) {
     var star = ir.NewStarExpr(@base.Pos, n);
     star.SetImplicit(true);
     return typed(t, star);
-
 }
 
 // transformIndex transforms an index operation.  Corresponds to typecheck.tcIndex.
@@ -261,7 +252,6 @@ private static void transformIndex(ptr<ir.IndexExpr> _addr_n) {
         // compiler better.
         n.SetType(t.Elem());
         n.Assigned = false;
-
     }
 }
 
@@ -324,7 +314,6 @@ private static void transformAssign(ir.Node stmt, slice<ir.Node> lhs, slice<ir.N
             rtyp = rtyp__prev2;
 
         }
-
     }
 assignOK:
 
@@ -347,7 +336,6 @@ assignOK:
                 checkLHS(0, r.Type());
         checkLHS(1, types.UntypedBool);
         return ;
-
     }
     if (len(lhs) != cr) {
         {
@@ -362,7 +350,6 @@ assignOK:
         }
 
         return ;
-
     }
     if (cr > len(rhs)) {
         stmt = stmt._<ptr<ir.AssignListStmt>>();
@@ -383,7 +370,6 @@ assignOK:
         }
 
         return ;
-
     }
     {
         var i__prev1 = i;
@@ -466,7 +452,6 @@ private static void transformArgs(ir.InitNode n) {
     transformAssign(as, @as.Lhs, @as.Rhs);
     @as.SetTypecheck(1);
     n.PtrInit().Append(as);
-
 }
 
 // assignconvfn converts node n for assignment to type t. Corresponds to
@@ -486,7 +471,6 @@ private static ir.Node assignconvfn(ir.Node n, ptr<types.Type> _addr_t) {
     r.SetTypecheck(1);
     r.SetImplicit(true);
     return r;
-
 }
 
 // Corresponds to typecheck.typecheckaste.
@@ -526,11 +510,9 @@ private static void typecheckaste(ir.Op op, ir.Node call, bool isddd, ptr<types.
                     nl[i] = assignconvfn(n, _addr_t.Elem());
                 i++;
                 }
-
             }
 
             return ;
-
         }
         n = nl[i];
         ir.SetPos(n);
@@ -538,7 +520,6 @@ private static void typecheckaste(ir.Op op, ir.Node call, bool isddd, ptr<types.
             nl[i] = assignconvfn(n, t);
         }
         i++;
-
     }
 });
 
@@ -561,7 +542,6 @@ private static void transformReturn(ptr<ir.ReturnStmt> _addr_rs) {
         return ;
     }
     typecheckaste(ir.ORETURN, null, false, _addr_ir.CurFunc.Type().Results(), nl);
-
 }
 
 // transformSelect transforms a select node, creating an assignment list as needed
@@ -600,7 +580,6 @@ private static void transformSelect(ptr<ir.SelectStmt> _addr_sel) {
                     r = r__prev2;
 
                 }
-
                 oselrecv2(n.X, n.Y, n.Def);
             else if (n.Op() == ir.OAS2RECV) 
                 n = n._<ptr<ir.AssignListStmt>>();
@@ -611,8 +590,7 @@ private static void transformSelect(ptr<ir.SelectStmt> _addr_sel) {
                 oselrecv2(ir.BlankNode, n, false);
             else if (n.Op() == ir.OSEND) 
                 break;
-            
-        }
+                    }
     }
 }
 
@@ -652,7 +630,6 @@ private static ir.Node transformDot(ptr<ir.SelectorExpr> _addr_n, bool isCall) {
         n.SetType(typecheck.MethodValueWrapper(n).Type());
     }
     return n;
-
 }
 
 // Corresponds to typecheck.typecheckMethodExpr.
@@ -692,7 +669,6 @@ private static ir.Node transformMethodExpr(ptr<ir.SelectorExpr> _addr_n) {
     n.Selection = m;
     n.SetType(typecheck.NewMethodType(m.Type, n.X.Type()));
     return n;
-
 }
 
 // Corresponds to typecheck.tcAppend.
@@ -710,14 +686,12 @@ private static ir.Node transformAppend(ptr<ir.CallExpr> _addr_n) {
         }
         args[1] = assignconvfn(args[1], _addr_t.Underlying());
         return n;
-
     }
     var @as = args[(int)1..];
     foreach (var (i, n) in as) {
         assert(n.Type() != null);
         as[i] = assignconvfn(n, _addr_t.Elem());
     }    return n;
-
 }
 
 // Corresponds to typecheck.tcComplex.
@@ -741,7 +715,6 @@ private static ir.Node transformComplex(ptr<ir.BinaryExpr> _addr_n) => func((_, 
     // by substitution of the generic types.
     typed(t, n);
     return n;
-
 });
 
 // Corresponds to typecheck.tcDelete.
@@ -809,7 +782,6 @@ private static ir.Node transformMake(ptr<ir.CallExpr> _addr_n) => func((_, panic
         assert(i == len(args));
     typed(n.Type(), nn);
     return nn;
-
 });
 
 // Corresponds to typecheck.tcPanic.
@@ -847,7 +819,6 @@ private static ir.Node transformRealImag(ptr<ir.UnaryExpr> _addr_n) => func((_, 
     // by substitution of the generic types.
     typed(t, n);
     return n;
-
 });
 
 // Corresponds to typecheck.tcLenCap.
@@ -916,7 +887,6 @@ private static ir.Node transformBuiltin(ptr<ir.CallExpr> _addr_n) => func((_, pa
         if (op != ir.OCOMPLEX) { 
             // nothing more to do
             return n1;
-
         }
         return transformComplex(n1._<ptr<ir.BinaryExpr>>());
         goto __switch_break0;
@@ -927,7 +897,6 @@ private static ir.Node transformBuiltin(ptr<ir.CallExpr> _addr_n) => func((_, pa
     __switch_break0:;
 
     return n;
-
 });
 
 private static bool hasKeys(ir.Nodes l) {
@@ -936,7 +905,6 @@ private static bool hasKeys(ir.Nodes l) {
             return true;
         }
     }    return false;
-
 }
 
 // transformArrayLit runs assignconvfn on each array element and returns the
@@ -971,18 +939,15 @@ private static long transformArrayLit(ptr<types.Type> _addr_elemType, long bound
  {
                 elts[i] = r;
             }
-
             key++;
             if (key > length) {
                 length = key;
             }
-
         }
         elt = elt__prev1;
     }
 
     return length;
-
 }
 
 // transformCompLit transforms n to an OARRAYLIT, OSLICELIT, OMAPLIT, or
@@ -1061,7 +1026,6 @@ private static ir.Node transformCompLit(ptr<ir.CompLitExpr> _addr_n) => func((de
             }
 
             assert(len(ls) >= t.NumFields());
-
         } { 
             // keyed list
             ls = n.List;
@@ -1104,9 +1068,7 @@ private static ir.Node transformCompLit(ptr<ir.CompLitExpr> _addr_n) => func((de
 
                         l = ir.NewStructKeyExpr(l.Pos(), s, kv.Value);
                         ls[i] = l;
-
                     }
-
                     assert(l.Op() == ir.OSTRUCTKEY);
                     l = l._<ptr<ir.StructKeyExpr>>();
 
@@ -1114,7 +1076,6 @@ private static ir.Node transformCompLit(ptr<ir.CompLitExpr> _addr_n) => func((de
                     l.Offset = f.Offset;
 
                     l.Value = assignconvfn(l.Value, _addr_f.Type);
-
                 }
 
                 i = i__prev1;
@@ -1125,7 +1086,6 @@ private static ir.Node transformCompLit(ptr<ir.CompLitExpr> _addr_n) => func((de
     else 
         @base.Fatalf("transformCompLit %v", t.Kind());
         return n;
-
 });
 
 } // end noder_package

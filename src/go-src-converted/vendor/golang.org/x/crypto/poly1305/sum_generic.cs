@@ -5,30 +5,31 @@
 // This file provides the generic implementation of Sum and MAC. Other files
 // might provide optimized assembly implementations of some of this code.
 
-// package poly1305 -- go2cs converted at 2022 March 06 23:36:53 UTC
+// package poly1305 -- go2cs converted at 2022 March 13 06:45:00 UTC
 // import "vendor/golang.org/x/crypto/poly1305" ==> using poly1305 = go.vendor.golang.org.x.crypto.poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\poly1305\sum_generic.go
-using binary = go.encoding.binary_package;
-
 namespace go.vendor.golang.org.x.crypto;
+
+using binary = encoding.binary_package;
 
 public static partial class poly1305_package {
 
-    // Poly1305 [RFC 7539] is a relatively simple algorithm: the authentication tag
-    // for a 64 bytes message is approximately
-    //
-    //     s + m[0:16] * r⁴ + m[16:32] * r³ + m[32:48] * r² + m[48:64] * r  mod  2¹³⁰ - 5
-    //
-    // for some secret r and s. It can be computed sequentially like
-    //
-    //     for len(msg) > 0:
-    //         h += read(msg, 16)
-    //         h *= r
-    //         h %= 2¹³⁰ - 5
-    //     return h + s
-    //
-    // All the complexity is about doing performant constant-time math on numbers
-    // larger than any available numeric type.
+// Poly1305 [RFC 7539] is a relatively simple algorithm: the authentication tag
+// for a 64 bytes message is approximately
+//
+//     s + m[0:16] * r⁴ + m[16:32] * r³ + m[32:48] * r² + m[48:64] * r  mod  2¹³⁰ - 5
+//
+// for some secret r and s. It can be computed sequentially like
+//
+//     for len(msg) > 0:
+//         h += read(msg, 16)
+//         h *= r
+//         h %= 2¹³⁰ - 5
+//     return h + s
+//
+// All the complexity is about doing performant constant-time math on numbers
+// larger than any available numeric type.
+
 private static void sumGeneric(ptr<array<byte>> _addr_@out, slice<byte> msg, ptr<array<byte>> _addr_key) {
     ref array<byte> @out = ref _addr_@out.val;
     ref array<byte> key = ref _addr_key.val;
@@ -77,7 +78,6 @@ private static (nint, error) Write(this ptr<macGeneric> _addr_h, slice<byte> p) 
         p = p[(int)n..];
         h.offset = 0;
         updateGeneric(_addr_h.macState, h.buffer[..]);
-
     }
     {
         var n__prev1 = n;
@@ -91,12 +91,10 @@ private static (nint, error) Write(this ptr<macGeneric> _addr_h, slice<byte> p) 
         n = n__prev1;
 
     }
-
     if (len(p) > 0) {
         h.offset += copy(h.buffer[(int)h.offset..], p);
     }
     return (nn, error.As(null!)!);
-
 }
 
 // Sum flushes the last incomplete chunk from the buffer, if any, and generates
@@ -111,7 +109,6 @@ private static void Sum(this ptr<macGeneric> _addr_h, ptr<array<byte>> _addr_@ou
         updateGeneric(_addr_state, h.buffer[..(int)h.offset]);
     }
     finalize(_addr_out, _addr_state.h, _addr_state.s);
-
 }
 
 // [rMask0, rMask1] is the specified Poly1305 clamping mask in little-endian. It
@@ -119,7 +116,6 @@ private static void Sum(this ptr<macGeneric> _addr_h, ptr<array<byte>> _addr_@ou
 // multiplication more efficiently.
 private static readonly nuint rMask0 = 0x0FFFFFFC0FFFFFFF;
 private static readonly nuint rMask1 = 0x0FFFFFFC0FFFFFFC;
-
 
 // initialize loads the 256-bit key into the two 128-bit secret values r and s.
 private static void initialize(ptr<array<byte>> _addr_key, ptr<macState> _addr_m) {
@@ -151,7 +147,6 @@ private static uint128 add128(uint128 a, uint128 b) => func((_, panic, _) => {
         panic("poly1305: unexpected overflow");
     }
     return new uint128(lo,hi);
-
 });
 
 private static uint128 shiftRightBy2(uint128 a) {
@@ -273,7 +268,6 @@ private static void updateGeneric(ptr<macState> _addr_state, slice<byte> msg) =>
 private static readonly ulong maskLow2Bits = 0x0000000000000003;
 private static readonly ulong maskNotLow2Bits = ~maskLow2Bits;
 
-
 // select64 returns x if v == 1 and y if v == 0, in constant time.
 private static ulong select64(ulong v, ulong x, ulong y) {
     return ~(v - 1) & x | (v - 1) & y;
@@ -283,7 +277,6 @@ private static ulong select64(ulong v, ulong x, ulong y) {
 private static readonly nuint p0 = 0xFFFFFFFFFFFFFFFB;
 private static readonly nuint p1 = 0xFFFFFFFFFFFFFFFF;
 private static readonly nuint p2 = 0x0000000000000003;
-
 
 // finalize completes the modular reduction of h and computes
 //
@@ -322,7 +315,6 @@ private static void finalize(ptr<array<byte>> _addr_@out, ptr<array<ulong>> _add
 
     binary.LittleEndian.PutUint64(out[(int)0..(int)8], h0);
     binary.LittleEndian.PutUint64(out[(int)8..(int)16], h1);
-
 }
 
 } // end poly1305_package

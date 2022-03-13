@@ -5,12 +5,12 @@
 //go:build !plan9
 // +build !plan9
 
-// package os -- go2cs converted at 2022 March 06 22:13:24 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:54 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\error_errno.go
-using syscall = go.syscall_package;
-
 namespace go;
+
+using syscall = syscall_package;
 
 public static partial class os_package {
 

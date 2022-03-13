@@ -5,18 +5,20 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd
 // +build aix darwin dragonfly freebsd linux netbsd openbsd
 
-// package ld -- go2cs converted at 2022 March 06 23:22:04 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:06 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\outbuf_mmap.go
-using syscall = go.syscall_package;
-
 namespace go.cmd.link.@internal;
+
+using syscall = syscall_package;
+
+
+// Mmap maps the output file with the given size. It unmaps the old mapping
+// if it is already mapped. It also flushes any in-heap data to the new
+// mapping.
 
 public static partial class ld_package {
 
-    // Mmap maps the output file with the given size. It unmaps the old mapping
-    // if it is already mapped. It also flushes any in-heap data to the new
-    // mapping.
 private static error Mmap(this ptr<OutBuf> _addr_@out, ulong filesize) => func((_, panic, _) => {
     error err = default!;
     ref OutBuf @out = ref _addr_@out.val;
@@ -54,7 +56,6 @@ private static error Mmap(this ptr<OutBuf> _addr_@out, ulong filesize) => func((
     copy(@out.buf[(int)oldlen..], @out.heap);
     @out.heap = @out.heap[..(int)0];
     return error.As(null!)!;
-
 });
 
 private static void munmap(this ptr<OutBuf> _addr_@out) {
@@ -65,7 +66,6 @@ private static void munmap(this ptr<OutBuf> _addr_@out) {
     }
     syscall.Munmap(@out.buf);
     @out.buf = null;
-
 }
 
 } // end ld_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:42:56 UTC
+//     Generated on 2022 March 13 05:54:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace go
 {
     public static partial class ast_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct commentListReader
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace go
             public static implicit operator commentListReader(NilType nil) => default(commentListReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static commentListReader commentListReader_cast(dynamic value)
         {
             return new commentListReader(ref value.fset, value.list, value.index, ref value.comment, value.pos, value.end);

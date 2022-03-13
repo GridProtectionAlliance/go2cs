@@ -5,11 +5,9 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:42 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:03 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\path_unix.go
-
-
 namespace go;
 
 public static partial class os_package {
@@ -42,7 +40,6 @@ private static @string basename(@string name) {
     }
 
     return name;
-
 }
 
 // splitPath returns the base name and parent directory.
@@ -82,15 +79,12 @@ private static (@string, @string) splitPath(@string path) {
  {
                 dirname = path[..(int)i];
             }
-
             basename = path[(int)i + 1..];
             break;
-
         }
     }
 
     return (dirname, basename);
-
 }
 
 private static @string fixRootDirectory(@string p) {

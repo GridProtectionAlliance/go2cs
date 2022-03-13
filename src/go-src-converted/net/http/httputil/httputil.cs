@@ -4,22 +4,25 @@
 
 // Package httputil provides HTTP utility functions, complementing the
 // more common ones in the net/http package.
-// package httputil -- go2cs converted at 2022 March 06 22:24:01 UTC
+
+// package httputil -- go2cs converted at 2022 March 13 05:38:26 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Program Files\Go\src\net\http\httputil\httputil.go
-using io = go.io_package;
-using @internal = go.net.http.@internal_package;
-
 namespace go.net.http;
+
+using io = io_package;
+using @internal = net.http.@internal_package;
+
+
+// NewChunkedReader returns a new chunkedReader that translates the data read from r
+// out of HTTP "chunked" format before returning it.
+// The chunkedReader returns io.EOF when the final 0-length chunk is read.
+//
+// NewChunkedReader is not needed by normal applications. The http package
+// automatically decodes chunking when reading response bodies.
 
 public static partial class httputil_package {
 
-    // NewChunkedReader returns a new chunkedReader that translates the data read from r
-    // out of HTTP "chunked" format before returning it.
-    // The chunkedReader returns io.EOF when the final 0-length chunk is read.
-    //
-    // NewChunkedReader is not needed by normal applications. The http package
-    // automatically decodes chunking when reading response bodies.
 public static io.Reader NewChunkedReader(io.Reader r) {
     return @internal.NewChunkedReader(r);
 }

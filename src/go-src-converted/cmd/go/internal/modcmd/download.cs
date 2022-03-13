@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modcmd -- go2cs converted at 2022 March 06 23:16:07 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:29:37 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\download.go
-using context = go.context_package;
-using json = go.encoding.json_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
+namespace go.cmd.go.@internal;
 
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modload = go.cmd.go.@internal.modload_package;
+using context = context_package;
+using json = encoding.json_package;
+using os = os_package;
+using runtime = runtime_package;
 
-using module = go.golang.org.x.mod.module_package;
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modload = cmd.go.@internal.modload_package;
+
+using module = golang.org.x.mod.module_package;
 using System.ComponentModel;
 using System;
 using System.Threading;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class modcmd_package {
 
@@ -69,7 +68,6 @@ private static void init() {
     // TODO(jayconrod): https://golang.org/issue/35849 Apply -x to other 'go mod' commands.
     cmdDownload.Flag.BoolVar(_addr_cfg.BuildX, "x", false, "");
     @base.AddModCommonFlags(_addr_cmdDownload.Flag);
-
 }
 
 private partial struct moduleJSON {
@@ -113,8 +111,7 @@ private static void runDownload(context.Context ctx, ptr<base.Command> _addr_cmd
 
             if (arg == modload.Target.Path || arg == targetAtUpgrade || arg == targetAtPatch) 
                 os.Stderr.WriteString("go mod download: skipping argument " + arg + " that resolves to the main module\n");
-            
-        }
+                    }
     }
     Action<ptr<moduleJSON>> downloadModule = m => {
         error err = default!;
@@ -162,7 +159,6 @@ private static void runDownload(context.Context ctx, ptr<base.Command> _addr_cmd
         // error if go.mod or go.sum need to be updated after loading the build
         // list.
         modload.DisallowWriteGoMod();
-
     }
     foreach (var (_, info) in infos) {
         if (info.Replace != null) {
@@ -172,7 +168,6 @@ private static void runDownload(context.Context ctx, ptr<base.Command> _addr_cmd
             // main module or module replaced with file path.
             // Nothing to download.
             continue;
-
         }
         ptr<moduleJSON> m = addr(new moduleJSON(Path:info.Path,Version:info.Version,));
         mods = append(mods, m);
@@ -184,7 +179,6 @@ private static void runDownload(context.Context ctx, ptr<base.Command> _addr_cmd
         go_(() => () => {
             downloadModule(m).Send(sem);
         }());
-
     }    for (var n = cap(sem); n > 0; n--) {
         sem.Send(new token());
     }
@@ -223,7 +217,6 @@ private static void runDownload(context.Context ctx, ptr<base.Command> _addr_cmd
         }
 
         @base.ExitIfErrors();
-
     }
     if (haveExplicitArgs) {
         modload.WriteGoMod(ctx);

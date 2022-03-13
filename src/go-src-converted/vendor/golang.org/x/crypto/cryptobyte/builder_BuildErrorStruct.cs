@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:38 UTC
+//     Generated on 2022 March 13 06:44:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace crypto
 {
     public static partial class cryptobyte_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct BuildError
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace crypto
             public static implicit operator BuildError(NilType nil) => default(BuildError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static BuildError BuildError_cast(dynamic value)
         {
             return new BuildError(value.Err);

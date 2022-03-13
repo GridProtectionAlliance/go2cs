@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modget -- go2cs converted at 2022 March 06 23:18:34 UTC
+// package modget -- go2cs converted at 2022 March 13 06:31:56 UTC
 // import "cmd/go/internal/modget" ==> using modget = go.cmd.go.@internal.modget_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modget\query.go
-using fmt = go.fmt_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using modload = go.cmd.go.@internal.modload_package;
-using search = go.cmd.go.@internal.search_package;
-using str = go.cmd.go.@internal.str_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using @base = cmd.go.@internal.@base_package;
+using modload = cmd.go.@internal.modload_package;
+using search = cmd.go.@internal.search_package;
+using str = cmd.go.@internal.str_package;
+
+using module = golang.org.x.mod.module_package;
+
+
+// A query describes a command-line argument and the modules and/or packages
+// to which that argument may resolve..
+
+using System;
 public static partial class modget_package {
 
-    // A query describes a command-line argument and the modules and/or packages
-    // to which that argument may resolve..
 private partial struct query {
     public @string raw; // rawVersion is the portion of raw corresponding to version, if any
     public @string rawVersion; // pattern is the part of the argument before "@" (or the whole argument
@@ -148,9 +149,7 @@ private static (ptr<query>, error) newQuery(@string raw) {
             return (_addr_q!, error.As(err)!);
         }
     }
-
     return (_addr_q!, error.As(null!)!);
-
 }
 
 // validate reports a non-nil error if q is not sensible and well-formed.
@@ -162,7 +161,6 @@ private static error validate(this ptr<query> _addr_q) {
             return error.As(fmt.Errorf("can't request explicit version %q of path %q in main module", q.rawVersion, q.pattern))!;
         }
         return error.As(null!)!;
-
     }
     if (q.pattern == "all") { 
         // If there is no main module, "all" is not meaningful.
@@ -174,7 +172,6 @@ private static error validate(this ptr<query> _addr_q) {
             // request that we remove all module requirements, leaving only the main
             // module and standard library. Perhaps we should implement that someday.
             return error.As(addr(new modload.QueryMatchesMainModuleError(Pattern:q.pattern,Query:q.version,))!)!;
-
         }
     }
     if (search.IsMetaPackage(q.pattern) && q.pattern != "all") {
@@ -183,7 +180,6 @@ private static error validate(this ptr<query> _addr_q) {
         }
     }
     return error.As(null!)!;
-
 }
 
 // String returns the original argument from which q was parsed.
@@ -202,13 +198,11 @@ private static @string ResolvedString(this ptr<query> _addr_q, module.Version m)
             return fmt.Sprintf("%v (matching %s@%s)", m, q.pattern, q.version);
         }
         return fmt.Sprintf("%v (matching %v)", m, q);
-
     }
     if (m.Version != q.version) {
         return fmt.Sprintf("%s@%s (%s)", q.pattern, q.version, m.Version);
     }
     return q.String();
-
 }
 
 // isWildcard reports whether q is a pattern that can match multiple paths.
@@ -226,7 +220,6 @@ private static bool matchesPath(this ptr<query> _addr_q, @string path) {
         return q.matchWildcard(path);
     }
     return path == q.pattern;
-
 }
 
 // canMatchInModule reports whether the given module path can potentially
@@ -238,7 +231,6 @@ private static bool canMatchInModule(this ptr<query> _addr_q, @string mPath) {
         return q.canMatchWildcardInModule(mPath);
     }
     return str.HasPathPrefix(q.pattern, mPath);
-
 }
 
 // pathOnce invokes f to generate the pathSet for the given path,
@@ -260,7 +252,6 @@ private static pathSet pathOnce(this ptr<query> _addr_q, @string path, Func<path
             return ;
         }
     }
-
 
     var cs = f();
 
@@ -307,7 +298,6 @@ private static void reportError(ptr<query> _addr_q, error err) {
             @base.Errorf("go get: %s", errStr);
         }
     }
-
 }
 
 private static void reportConflict(ptr<query> _addr_pq, module.Version m, versionReason conflict) {
@@ -317,7 +307,6 @@ private static void reportConflict(ptr<query> _addr_pq, module.Version m, versio
         // We've already reported a conflict for the proposed query.
         // Don't report it again, even if it has other conflicts.
         return ;
-
     }
     pq.conflict = conflict.reason;
 
@@ -327,7 +316,6 @@ private static void reportConflict(ptr<query> _addr_pq, module.Version m, versio
         (proposed, conflict) = (conflict, proposed);
     }
     reportError(_addr_pq, addr(new conflictError(mPath:m.Path,proposed:proposed,conflict:conflict,)));
-
 }
 
 private partial struct conflictError {
@@ -344,7 +332,6 @@ private static @string Error(this ptr<conflictError> _addr_e) {
             return fmt.Sprintf("%s@%s (%s)", q.pattern, q.version, v);
         }
         return q.String();
-
     };
 
     var pq = e.proposed.reason;
@@ -354,7 +341,6 @@ private static @string Error(this ptr<conflictError> _addr_e) {
         modDetail = fmt.Sprintf("for module %s, ", e.mPath);
     }
     return fmt.Sprintf("%s%s conflicts with %s", modDetail, argStr(pq, e.proposed.version), argStr(rq, e.conflict.version));
-
 }
 
 private static bool versionOkForMainModule(@string version) {

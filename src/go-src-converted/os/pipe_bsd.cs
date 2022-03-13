@@ -5,17 +5,17 @@
 //go:build aix || darwin || (js && wasm) || (solaris && !illumos)
 // +build aix darwin js,wasm solaris,!illumos
 
-// package os -- go2cs converted at 2022 March 06 22:13:43 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:03 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\pipe_bsd.go
-using syscall = go.syscall_package;
-
 namespace go;
+
+using syscall = syscall_package;
 
 public static partial class os_package {
 
-    // Pipe returns a connected pair of Files; reads from r return bytes written to w.
-    // It returns the files and an error, if any.
+// Pipe returns a connected pair of Files; reads from r return bytes written to w.
+// It returns the files and an error, if any.
 public static (ptr<File>, ptr<File>, error) Pipe() {
     ptr<File> r = default!;
     ptr<File> w = default!;
@@ -35,7 +35,6 @@ public static (ptr<File>, ptr<File>, error) Pipe() {
     syscall.ForkLock.RUnlock();
 
     return (_addr_newFile(uintptr(p[0]), "|0", kindPipe)!, _addr_newFile(uintptr(p[1]), "|1", kindPipe)!, error.As(null!)!);
-
 }
 
 } // end os_package

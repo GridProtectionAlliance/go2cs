@@ -2,33 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:17:59 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:22 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\buildlist.go
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using mvs = go.cmd.go.@internal.mvs_package;
-using par = go.cmd.go.@internal.par_package;
-using context = go.context_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using debug = go.runtime.debug_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using mvs = cmd.go.@internal.mvs_package;
+using par = cmd.go.@internal.par_package;
+using context = context_package;
+using fmt = fmt_package;
+using os = os_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using debug = runtime.debug_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+
+
+// capVersionSlice returns s with its cap reduced to its length.
+
+using System;
 public static partial class modload_package {
 
-    // capVersionSlice returns s with its cap reduced to its length.
 private static slice<module.Version> capVersionSlice(slice<module.Version> s) {
     return s.slice(-1, len(s), len(s));
 }
@@ -128,15 +129,12 @@ private static ptr<Requirements> newRequirements(modDepth depth, slice<module.Ve
                 }
 
             }
-
             rs.maxRootVersion[m.Path] = m.Version;
-
         }
         m = m__prev1;
     }
 
     return _addr_rs!;
-
 });
 
 // initVendor initializes rs.graph from the given list of vendored module
@@ -165,7 +163,6 @@ private static void initVendor(this ptr<Requirements> _addr_rs, slice<module.Ver
                     }
 
                 }
-
             }
         else
             if (inconsistent) {
@@ -176,7 +173,6 @@ private static void initVendor(this ptr<Requirements> _addr_rs, slice<module.Ver
             // out”, like a more aggressive version of lazy loading: in vendor mode,
             // the root requirements *are* the complete module graph.
             mg.g.Require(Target, rs.rootModules);
-
         } { 
             // The transitive requirements of the main module are not in general available
             // from the vendor directory, and we don't actually know how we got from
@@ -190,12 +186,9 @@ private static void initVendor(this ptr<Requirements> _addr_rs, slice<module.Ver
             module.Version vendorMod = new module.Version(Path:"vendor/modules.txt",Version:"");
             mg.g.Require(Target, append(rs.rootModules, vendorMod));
             mg.g.Require(vendorMod, vendorList);
-
         }
         rs.graph.Store(new cachedGraph(mg,nil));
-
     });
-
 }
 
 // rootSelected returns the version of the root dependency with the given module
@@ -216,9 +209,7 @@ private static (@string, bool) rootSelected(this ptr<Requirements> _addr_rs, @st
             return (v, true);
         }
     }
-
     return ("", false);
-
 }
 
 // hasRedundantRoot returns true if the root list contains multiple requirements
@@ -233,7 +224,6 @@ private static bool hasRedundantRoot(this ptr<Requirements> _addr_rs) {
             return true;
         }
     }    return false;
-
 }
 
 // Graph returns the graph of module requirements loaded from the current
@@ -309,11 +299,8 @@ private static (ptr<ModuleGraph>, error) readModGraph(context.Context ctx, modDe
                         @base.Fatalf("go: read full module graph (forbidden by GODEBUG=lazymod=strict).");
                         break;
                 }
-
             }
-
         });
-
     }
     sync.Mutex mu = default;    bool hasError = default;    ptr<ModuleGraph> mg = addr(new ModuleGraph(g:mvs.NewGraph(cmpVersion,[]module.Version{Target}),));
     mg.g.Require(Target, roots);
@@ -335,15 +322,12 @@ private static (ptr<ModuleGraph>, error) readModGraph(context.Context ctx, modDe
  {
                 hasError = true;
             }
-
             mu.Unlock();
 
             return _addr_new summaryError(summary,err)!;
-
         })._<summaryError>();
 
         return (_addr_cached.summary!, error.As(cached.err)!);
-
     };
 
     Action<module.Version, modDepth> enqueue = default;
@@ -360,11 +344,9 @@ private static (ptr<ModuleGraph>, error) readModGraph(context.Context ctx, modDe
                     // follow cycles in the the requirement graph, we need to return early
                     // to avoid making the load queue infinitely long.
                     return ;
-
                 }
 
             }
-
         }
         loadQueue.Add(() => {
             (summary, err) = loadOne(m);
@@ -382,9 +364,7 @@ private static (ptr<ModuleGraph>, error) readModGraph(context.Context ctx, modDe
                     enqueue(r, eager);
                 }
             }
-
         });
-
     };
 
     foreach (var (_, m) in roots) {
@@ -395,7 +375,6 @@ private static (ptr<ModuleGraph>, error) readModGraph(context.Context ctx, modDe
         return (_addr_mg!, error.As(mg.findError())!);
     }
     return (_addr_mg!, error.As(null!)!);
-
 }
 
 // RequiredBy returns the dependencies required by module m in the graph,
@@ -461,7 +440,6 @@ private static error findError(this ptr<ModuleGraph> _addr_mg) {
         return error.As(mvs.NewBuildListError(err, errStack, noUpgrade))!;
     }
     return error.As(null!)!;
-
 }
 
 private static bool allRootsSelected(this ptr<ModuleGraph> _addr_mg) {
@@ -473,7 +451,6 @@ private static bool allRootsSelected(this ptr<ModuleGraph> _addr_mg) {
             return false;
         }
     }    return true;
-
 }
 
 // LoadModGraph loads and returns the graph of module dependencies of the main module,
@@ -496,14 +473,12 @@ public static ptr<ModuleGraph> LoadModGraph(context.Context ctx, @string goVersi
             // also updates roots; here, we want to report the unmodified roots
             // even though they may seem inconsistent.
             rs = newRequirements(eager, rs.rootModules, rs.direct);
-
         }
         var (mg, err) = rs.Graph(ctx);
         if (err != null) {
             @base.Fatalf("go: %v", err);
         }
         return _addr_mg!;
-
     }
     var (rs, mg, err) = expandGraph(ctx, _addr_rs);
     if (err != null) {
@@ -511,7 +486,6 @@ public static ptr<ModuleGraph> LoadModGraph(context.Context ctx, @string goVersi
     }
     commitRequirements(ctx, modFileGoVersion(), rs);
     return _addr_mg!;
-
 }
 
 // expandGraph loads the complete module graph from rs.
@@ -537,7 +511,6 @@ private static (ptr<Requirements>, ptr<ModuleGraph>, error) expandGraph(context.
         // Without the graph, we can't update the roots: we don't know which
         // versions of transitive dependencies would be selected.
         return (_addr_rs!, _addr_mg!, error.As(mgErr)!);
-
     }
     if (!mg.allRootsSelected()) { 
         // The roots of rs are not consistent with the rest of the graph. Update
@@ -552,14 +525,11 @@ private static (ptr<Requirements>, ptr<ModuleGraph>, error) expandGraph(context.
             // dependency needed for the update. Return the original Requirements
             // instead.
             return (_addr_rs!, _addr_mg!, error.As(rsErr)!);
-
         }
         rs = newRS;
         mg, mgErr = rs.Graph(ctx);
-
     }
     return (_addr_rs!, _addr_mg!, error.As(mgErr)!);
-
 }
 
 // EditBuildList edits the global build list by first adding every module in add
@@ -588,7 +558,6 @@ public static (bool, error) EditBuildList(context.Context ctx, slice<module.Vers
     }
     commitRequirements(ctx, modFileGoVersion(), rs);
     return (changed, error.As(err)!);
-
 }
 
 // A ConstraintError describes inconsistent constraints in EditBuildList
@@ -626,7 +595,6 @@ private static (ptr<Requirements>, error) tidyRoots(context.Context ctx, ptr<Req
         return _addr_tidyEagerRoots(ctx, rs.direct, pkgs)!;
     }
     return _addr_tidyLazyRoots(ctx, rs.direct, pkgs)!;
-
 }
 
 private static (ptr<Requirements>, error) updateRoots(context.Context ctx, map<@string, bool> direct, ptr<Requirements> _addr_rs, slice<ptr<loadPkg>> pkgs, slice<module.Version> add, bool rootsImported) {
@@ -638,7 +606,6 @@ private static (ptr<Requirements>, error) updateRoots(context.Context ctx, map<@
         return _addr_updateEagerRoots(ctx, direct, _addr_rs, add)!;
     }
     return _addr_updateLazyRoots(ctx, direct, _addr_rs, pkgs, add, rootsImported)!;
-
 }
 
 // tidyLazyRoots returns a minimal set of root requirements that maintains the
@@ -729,11 +696,8 @@ private static (ptr<Requirements>, error) tidyLazyRoots(context.Context ctx, map
                         }
 
                     }
-
                     pathIncluded[m.Path] = true;
-
                 }
-
             }
 
             pkg = pkg__prev2;
@@ -750,7 +714,6 @@ private static (ptr<Requirements>, error) tidyLazyRoots(context.Context ctx, map
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_tidy!, error.As(null!)!);
-
 }
 
 // updateLazyRoots returns a set of root requirements that maintains the “lazy
@@ -815,7 +778,6 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
             // pkg was not loaded from a module dependency, so we don't need
             // to do anything special to maintain that dependency.
             continue;
-
         }
 
         if (pkg.flags.has(pkgInAll))         else if (rootsImported && pkg.flags.has(pkgFromRoot))         else if (pkg.flags.has(pkgIsRoot))         else 
@@ -854,7 +816,6 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 // or misleading requirements in dependencies that aren't obviously
                 // relevant to the packages in the main module.
                 spotCheckRoot[pkg.mod] = true;
-
             }
             else
  {
@@ -863,11 +824,9 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 // The roots slice was initially sorted because rs.rootModules was sorted,
                 // but the root we just added could be out of order.
                 needSort = true;
-
             }
 
         }
-
     }    {
         var m__prev1 = m;
 
@@ -887,7 +846,6 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 v = v__prev1;
 
             }
-
         }
         m = m__prev1;
     }
@@ -908,16 +866,13 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 // modules adding or removing an explicit root is a semantic change, not
                 // just a cosmetic one.)
                 return (_addr_rs!, error.As(errGoModDirty)!);
-
             }
-
             rs = newRequirements(lazy, roots, direct);
             error err = default!;
             mg, err = rs.Graph(ctx);
             if (err != null) {
                 return (_addr_rs!, error.As(err)!);
             }
-
         }
         else
  { 
@@ -931,7 +886,6 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 // requirements of all of the root modules — even the transitive
                 // requirements, if they are eager!
                 mg, _ = rs.Graph(ctx);
-
             }
             else if (cfg.BuildMod == "vendor") { 
                 // We can't spot-check the requirements of other modules because we
@@ -939,7 +893,6 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 // directory. (Fortunately this case is impossible, because mg.graph is
                 // always non-nil in vendor mode!)
                 panic("internal error: rs.graph is unexpectedly nil with -mod=vendor");
-
             }
             else if (!spotCheckRoots(ctx, _addr_rs, spotCheckRoot)) { 
                 // We spot-checked the explicit requirements of the roots that are
@@ -951,9 +904,7 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 if (err != null) {
                     return (_addr_rs!, error.As(err)!);
                 }
-
             }
-
         }
         roots = make_slice<module.Version>(0, len(rs.rootModules));
         rootsUpgraded = false;
@@ -982,9 +933,7 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                     // we don't need to mark this change as an upgrade. (This particular
                     // change cannot invalidate any other roots.)
                     continue;
-
                 }
-
                 @string v = default;
                 if (mg == null) {
                     v, _ = rs.rootSelected(m.Path);
@@ -993,13 +942,11 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
  {
                     v = mg.Selected(m.Path);
                 }
-
                 roots = append(roots, new module.Version(Path:m.Path,Version:v));
                 inRootPaths[m.Path] = true;
                 if (v != m.Version) {
                     rootsUpgraded = true;
                 }
-
             } 
             // Note that rs.rootModules was already sorted by module path and version,
             // and we appended to the roots slice in the same order and guaranteed that
@@ -1015,13 +962,11 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
                 // The requirements are consistent (if perhaps redundant), so keep the
                 // original rs to preserve its ModuleGraph.
                 return (_addr_rs!, error.As(null!)!);
-
             } 
             // The root set has converged: every root going into this iteration was
             // already at its selected version, although we have have removed other
             // (redundant) roots for the same path.
             break;
-
         }
     }
 
@@ -1029,10 +974,8 @@ private static (ptr<Requirements>, error) updateLazyRoots(context.Context ctx, m
         // The root set is unchanged and rs was already lazy, so keep rs to
         // preserve its cached ModuleGraph (if any).
         return (_addr_rs!, error.As(null!)!);
-
     }
     return (_addr_newRequirements(lazy, roots, direct)!, error.As(null!)!);
-
 });
 
 // spotCheckRoots reports whether the versions of the roots in rs satisfy the
@@ -1069,11 +1012,8 @@ private static bool spotCheckRoots(context.Context ctx, ptr<Requirements> _addr_
                         }
 
                     }
-
                 }
-
             });
-
         }
         m = m__prev1;
     }
@@ -1084,10 +1024,8 @@ private static bool spotCheckRoots(context.Context ctx, ptr<Requirements> _addr_
         // Either we failed a spot-check, or the caller no longer cares about our
         // answer anyway.
         return false;
-
     }
     return true;
-
 });
 
 // tidyEagerRoots returns a minimal set of root requirements that maintains the
@@ -1116,13 +1054,11 @@ private static (ptr<Requirements>, error) tidyEagerRoots(context.Context ctx, ma
             }
 
         }
-
     }    var (min, err) = mvs.Req(Target, rootPaths, addr(new mvsReqs(roots:keep)));
     if (err != null) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newRequirements(eager, min, direct)!, error.As(null!)!);
-
 }
 
 // updateEagerRoots returns a set of root requirements that includes the selected
@@ -1150,7 +1086,6 @@ private static (ptr<Requirements>, error) updateEagerRoots(context.Context ctx, 
         // flag to try to push past them. If we can't load the complete module
         // dependencies, then we can't reliably compute a minimal subset of them.
         return (_addr_rs!, error.As(err)!);
-
     }
     if (cfg.BuildMod != "mod") { 
         // Instead of actually updating the requirements, just check that no updates
@@ -1159,7 +1094,6 @@ private static (ptr<Requirements>, error) updateEagerRoots(context.Context ctx, 
             // We're being asked to reconstruct the requirements from scratch,
             // but we aren't even allowed to modify them.
             return (_addr_rs!, error.As(errGoModDirty)!);
-
         }
         {
             var m__prev1 = m;
@@ -1169,9 +1103,7 @@ private static (ptr<Requirements>, error) updateEagerRoots(context.Context ctx, 
                 if (m.Version != mg.Selected(m.Path)) { 
                     // The root version v is misleading: the actual selected version is higher.
                     return (_addr_rs!, error.As(errGoModDirty)!);
-
                 }
-
             }
 
             m = m__prev1;
@@ -1201,13 +1133,10 @@ private static (ptr<Requirements>, error) updateEagerRoots(context.Context ctx, 
                     // detail) earlier during package loading, so it shouldn't actually be
                     // possible at this point — this is just a defense in depth.
                     return (_addr_rs!, error.As(errGoModDirty)!);
-
                 }
 
             }
-
         }        return (_addr_rs!, error.As(null!)!);
-
     }
     slice<@string> rootPaths = default;    map inRootPaths = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{};
     foreach (var (_, root) in rs.rootModules) { 
@@ -1243,10 +1172,8 @@ private static (ptr<Requirements>, error) updateEagerRoots(context.Context ctx, 
         // The root set is unchanged and rs was already eager, so keep rs to
         // preserve its cached ModuleGraph (if any).
         return (_addr_rs!, error.As(null!)!);
-
     }
     return (_addr_newRequirements(eager, min, direct)!, error.As(null!)!);
-
 }
 
 // convertDepth returns a version of rs with the given depth.
@@ -1266,14 +1193,12 @@ private static (ptr<Requirements>, error) convertDepth(context.Context ctx, ptr<
         // redundant given eager loading, which is exactly what updateEagerRoots
         // does.
         return _addr_updateEagerRoots(ctx, rs.direct, _addr_rs, null)!;
-
     }
     var (mg, err) = rs.Graph(ctx);
     if (err != null) {
         return (_addr_rs!, error.As(err)!);
     }
     return (_addr_newRequirements(lazy, mg.BuildList()[(int)1..], rs.direct)!, error.As(null!)!);
-
 }
 
 } // end modload_package

@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:39 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:25 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\error.go
-using bytealg = go.@internal.bytealg_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
 
 public static partial class runtime_package {
 
-    // The Error interface identifies a run time error.
+// The Error interface identifies a run time error.
 public partial interface Error {
     void RuntimeError();
 }
@@ -52,13 +52,10 @@ private static @string Error(this ptr<TypeAssertionError> _addr_e) {
  {
                 msg += " (types from different scopes)";
             }
-
         }
         return msg;
-
     }
     return "interface conversion: " + cs + " is not " + as + ": missing method " + e.missingMethod;
-
 }
 
 //go:nosplit
@@ -168,7 +165,6 @@ private static slice<byte> appendIntStr(slice<byte> b, long v, bool signed) {
     array<byte> buf = new array<byte>(20);
     b = append(b, itoa(buf[..], uint64(v)));
     return b;
-
 }
 
 private static @string Error(this boundsError e) {
@@ -193,10 +189,8 @@ private static @string Error(this boundsError e) {
                 b = appendIntStr(b, int64(e.y), true);
                 break;
         }
-
     }
     return string(b);
-
 }
 
 private partial interface stringer {
@@ -215,6 +209,9 @@ private static void printany(object i) {
             print(v);
             break;
         case nint v:
+            print(v);
+            break;
+        case int v: /* Matches int literals */
             print(v);
             break;
         case sbyte v:
@@ -269,7 +266,6 @@ private static void printany(object i) {
             break;
         }
     }
-
 }
 
 private static void printanycustomtype(object i) {
@@ -313,8 +309,7 @@ private static void printanycustomtype(object i) {
         print(typestring, new ptr<ptr<ptr<System.Numerics.Complex128>>>(eface.data));
     else 
         print("(", typestring, ") ", eface.data);
-    
-}
+    }
 
 // panicwrap generates a panic for a call to a wrapped value method
 // with a nil pointer receiver.
@@ -345,7 +340,6 @@ private static void panicwrap() => func((_, panic, _) => {
     var typ = name[..(int)i];
     var meth = name[(int)i + 2..];
     panic(plainError("value method " + pkg + "." + typ + "." + meth + " called using nil *" + typ + " pointer"));
-
 });
 
 } // end runtime_package

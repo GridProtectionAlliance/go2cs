@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package parse -- go2cs converted at 2022 March 06 22:24:25 UTC
+// package parse -- go2cs converted at 2022 March 13 05:38:54 UTC
 // import "text/template/parse" ==> using parse = go.text.template.parse_package
 // Original source: C:\Program Files\Go\src\text\template\parse\lex.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System.Threading;
-
-
 namespace go.text.template;
 
+using fmt = fmt_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// item represents a token or text string returned from the scanner.
+
+using System.Threading;
 public static partial class parse_package {
 
-    // item represents a token or text string returned from the scanner.
 private partial struct item {
     public itemType typ; // The type of this item.
     public Pos pos; // The starting position, in bytes, of this item in the input string.
@@ -35,7 +36,6 @@ private static @string String(this item i) {
     else if (len(i.val) > 10) 
         return fmt.Sprintf("%.10q...", i.val);
         return fmt.Sprintf("%q", i.val);
-
 }
 
 // itemType identifies the type of lex items.
@@ -137,7 +137,6 @@ private static int next(this ptr<lexer> _addr_l) {
         l.line++;
     }
     return r;
-
 }
 
 // peek returns but does not consume the next rune in the input.
@@ -187,14 +186,14 @@ private static bool accept(this ptr<lexer> _addr_l, @string valid) {
     }
     l.backup();
     return false;
-
 }
 
 // acceptRun consumes a run of runes from the valid set.
 private static void acceptRun(this ptr<lexer> _addr_l, @string valid) {
     ref lexer l = ref _addr_l.val;
 
-    while (strings.ContainsRune(valid, l.next()))     }
+    while (strings.ContainsRune(valid, l.next())) {
+    }
     l.backup();
 }
 
@@ -236,7 +235,6 @@ private static ptr<lexer> lex(@string name, @string input, @string left, @string
     ptr<lexer> l = addr(new lexer(name:name,input:input,leftDelim:left,rightDelim:right,emitComment:emitComment,items:make(chanitem),line:1,startLine:1,));
     go_(() => l.run());
     return _addr_l!;
-
 }
 
 // run runs the state machine for the lexer.
@@ -251,7 +249,6 @@ private static void run(this ptr<lexer> _addr_l) {
         }
     }
     close(l.items);
-
 }
 
 // state functions
@@ -260,7 +257,6 @@ private static readonly @string leftDelim = "{{";
 private static readonly @string rightDelim = "}}";
 private static readonly @string leftComment = "/*";
 private static readonly @string rightComment = "*/";
-
 
 // lexText scans until an opening action delimiter, "{{".
 private static stateFn lexText(ptr<lexer> _addr_l) {
@@ -287,7 +283,6 @@ private static stateFn lexText(ptr<lexer> _addr_l) {
             return lexLeftDelim;
         }
     }
-
     l.pos = Pos(len(l.input)); 
     // Correctly reached EOF.
     if (l.pos > l.start) {
@@ -296,7 +291,6 @@ private static stateFn lexText(ptr<lexer> _addr_l) {
     }
     l.emit(itemEOF);
     return null;
-
 }
 
 // rightTrimLength returns the length of the spaces at the end of the string.
@@ -312,14 +306,11 @@ private static (bool, bool) atRightDelim(this ptr<lexer> _addr_l) {
 
     if (hasRightTrimMarker(l.input[(int)l.pos..]) && strings.HasPrefix(l.input[(int)l.pos + trimMarkerLen..], l.rightDelim)) { // With trim marker.
         return (true, true);
-
     }
     if (strings.HasPrefix(l.input[(int)l.pos..], l.rightDelim)) { // Without trim marker.
         return (true, false);
-
     }
     return (false, false);
-
 }
 
 // leftTrimLength returns the length of the spaces at the beginning of the string.
@@ -347,7 +338,6 @@ private static stateFn lexLeftDelim(ptr<lexer> _addr_l) {
     l.ignore();
     l.parenDepth = 0;
     return lexInsideAction;
-
 }
 
 // lexComment scans a comment. The left comment marker is known to be present.
@@ -376,7 +366,6 @@ private static stateFn lexComment(ptr<lexer> _addr_l) {
     }
     l.ignore();
     return lexText;
-
 }
 
 // lexRightDelim scans the right delimiter, which is known to be present, possibly with a trim marker.
@@ -395,7 +384,6 @@ private static stateFn lexRightDelim(ptr<lexer> _addr_l) {
         l.ignore();
     }
     return lexText;
-
 }
 
 // lexInsideAction scans the elements inside action delimiters.
@@ -411,7 +399,6 @@ private static stateFn lexInsideAction(ptr<lexer> _addr_l) {
             return lexRightDelim;
         }
         return l.errorf("unclosed left paren");
-
     }
     {
         var r__prev1 = r;
@@ -519,7 +506,6 @@ private static stateFn lexInsideAction(ptr<lexer> _addr_l) {
         r = r__prev1;
     }
     return lexInsideAction;
-
 }
 
 // lexSpace scans a run of space characters.
@@ -537,7 +523,6 @@ private static stateFn lexSpace(ptr<lexer> _addr_l) {
         }
         l.next();
         numSpaces++;
-
     } 
     // Be careful about a trim-marked closing delimiter, which has a minus
     // after a space. We know there is a space, so check for the '-' that might follow.
@@ -549,7 +534,6 @@ private static stateFn lexSpace(ptr<lexer> _addr_l) {
     }
     l.emit(itemSpace);
     return lexInsideAction;
-
 }
 
 // lexIdentifier scans an alphanumeric.
@@ -581,10 +565,8 @@ Loop:
                 break;
 
         }
-
     }
     return lexInsideAction;
-
 }
 
 // lexField scans a field: .Alphanumeric.
@@ -603,10 +585,8 @@ private static stateFn lexVariable(ptr<lexer> _addr_l) {
     if (l.atTerminator()) { // Nothing interesting follows -> "$".
         l.emit(itemVariable);
         return lexInsideAction;
-
     }
     return lexFieldOrVariable(_addr_l, itemVariable);
-
 }
 
 // lexVariable scans a field or variable: [.$]Alphanumeric.
@@ -623,7 +603,6 @@ private static stateFn lexFieldOrVariable(ptr<lexer> _addr_l, itemType typ) {
             l.emit(itemDot);
         }
         return lexInsideAction;
-
     }
     int r = default;
     while (true) {
@@ -638,7 +617,6 @@ private static stateFn lexFieldOrVariable(ptr<lexer> _addr_l, itemType typ) {
     }
     l.emit(typ);
     return lexInsideAction;
-
 }
 
 // atTerminator reports whether the input is at valid termination character to
@@ -665,9 +643,7 @@ private static bool atTerminator(this ptr<lexer> _addr_l) {
             return true;
         }
     }
-
     return false;
-
 }
 
 // lexChar scans a character constant. The initial quote is already
@@ -688,7 +664,6 @@ Loop:
                 }
 
             }
-
             fallthrough = true;
         }
         if (fallthrough || l.next() == eof || l.next() == '\n')
@@ -704,11 +679,9 @@ Loop:
         }
 
         __switch_break1:;
-
     }
     l.emit(itemCharConstant);
     return lexInsideAction;
-
 }
 
 // lexNumber scans a number: decimal, octal, hex, float, or imaginary. This
@@ -729,18 +702,14 @@ private static stateFn lexNumber(ptr<lexer> _addr_l) {
             if (!l.scanNumber() || l.input[l.pos - 1] != 'i') {
                 return l.errorf("bad number syntax: %q", l.input[(int)l.start..(int)l.pos]);
             }
-
             l.emit(itemComplex);
-
         }
         else
  {
             l.emit(itemNumber);
         }
     }
-
     return lexInsideAction;
-
 }
 
 private static bool scanNumber(this ptr<lexer> _addr_l) {
@@ -781,7 +750,6 @@ private static bool scanNumber(this ptr<lexer> _addr_l) {
         return false;
     }
     return true;
-
 }
 
 // lexQuote scans a quoted string.
@@ -801,7 +769,6 @@ Loop:
                 }
 
             }
-
             fallthrough = true;
         }
         if (fallthrough || l.next() == eof || l.next() == '\n')
@@ -817,11 +784,9 @@ Loop:
         }
 
         __switch_break2:;
-
     }
     l.emit(itemString);
     return lexInsideAction;
-
 }
 
 // lexRawQuote scans a raw quoted string.
@@ -839,7 +804,6 @@ Loop:
             }
     l.emit(itemRawString);
     return lexInsideAction;
-
 }
 
 // isSpace reports whether r is a space character.

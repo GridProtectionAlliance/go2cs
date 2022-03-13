@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x -- go2cs converted at 2022 March 06 22:30:03 UTC
+// package x -- go2cs converted at 2022 March 13 05:40:51 UTC
 // import "internal/abi.x" ==> using x = go.@internal.abi.x_package
 // Original source: C:\Program Files\Go\src\internal\abi\testdata\x.go
-using abi = go.@internal.abi_package;
-using System;
-
-
 namespace go.@internal;
+
+using abi = @internal.abi_package;
+using System;
 
 public static partial class x_package {
 

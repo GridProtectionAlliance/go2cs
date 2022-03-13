@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:31:17 UTC
+//     Generated on 2022 March 13 05:42:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class fmt_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct fmtFlags
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace go
             public static implicit operator fmtFlags(NilType nil) => default(fmtFlags);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static fmtFlags fmtFlags_cast(dynamic value)
         {
             return new fmtFlags(value.widPresent, value.precPresent, value.minus, value.plus, value.sharp, value.space, value.zero, value.plusV, value.sharpV);

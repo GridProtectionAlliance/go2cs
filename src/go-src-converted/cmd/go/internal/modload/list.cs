@@ -2,27 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:13 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:35 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\list.go
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
+namespace go.cmd.go.@internal;
 
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using modinfo = go.cmd.go.@internal.modinfo_package;
-using search = go.cmd.go.@internal.search_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using strings = strings_package;
 
-using module = go.golang.org.x.mod.module_package;
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using modinfo = cmd.go.@internal.modinfo_package;
+using search = cmd.go.@internal.search_package;
+
+using module = golang.org.x.mod.module_package;
 using System;
 using System.Threading;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class modload_package {
 
@@ -34,7 +33,6 @@ public static readonly var ListRetracted = 0;
 public static readonly var ListDeprecated = 1;
 public static readonly var ListVersions = 2;
 public static readonly var ListRetractedVersions = 3;
-
 
 // ListModules returns a description of the modules matching args, if known,
 // along with any error preventing additional matches from being identified.
@@ -85,7 +83,6 @@ public static (slice<ptr<modinfo.ModulePublic>>, error) ListModules(context.Cont
         commitRequirements(ctx, modFileGoVersion(), rs);
     }
     return (mods, error.As(err)!);
-
 }
 
 private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) listModules(context.Context ctx, ptr<Requirements> _addr_rs, slice<@string> args, ListMode mode) => func((_, panic, _) => {
@@ -136,17 +133,13 @@ private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) list
                             }
 
                         }
-
                     }
-
                     continue;
-
                 }
 
                 i = i__prev1;
 
             }
-
             {
                 (_, ok) = rs.rootSelected(arg);
 
@@ -158,7 +151,6 @@ private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) list
                 }
 
             }
-
         }
         arg = arg__prev1;
     }
@@ -190,26 +182,20 @@ private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) list
  {
                         current = mg.Selected(path);
                     }
-
                     if (current == "none" && mgErr != null) {
                         if (vers == "upgrade" || vers == "patch") { 
                             // The module graph is incomplete, so we don't know what version we're
                             // actually upgrading from.
                             // mgErr is already set, so just skip this module.
                             continue;
-
                         }
-
                     }
-
                     var allowed = CheckAllowed;
                     if (IsRevisionQuery(vers) || mode & ListRetracted != 0) { 
                         // Allow excluded and retracted versions if the user asked for a
                         // specific revision or used 'go list -retracted'.
                         allowed = null;
-
                     }
-
                     var (info, err) = Query(ctx, path, vers, current, allowed);
                     if (err != null) {
                         mods = append(mods, addr(new modinfo.ModulePublic(Path:path,Version:vers,Error:modinfoError(path,vers,err),)));
@@ -223,7 +209,6 @@ private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) list
                     var mod = moduleInfo(ctx, noRS, new module.Version(Path:path,Version:info.Version), mode);
                     mods = append(mods, mod);
                     continue;
-
                 } 
 
                 // Module path or pattern.
@@ -250,21 +235,16 @@ private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) list
                         // We checked rootSelected(arg) in the earlier args loop, so if there
                         // is no such root we should have loaded a non-nil mg.
                         panic(fmt.Sprintf("internal error: root requirement expected but not found for %v", arg));
-
                     }
-
                 }
                 else
  {
                     v = mg.Selected(arg);
                 }
-
                 if (v == "none" && mgErr != null) { 
                     // mgErr is already set, so just skip this module.
                     continue;
-
                 }
-
                 if (v != "none") {
                     mods = append(mods, moduleInfo(ctx, rs, new module.Version(Path:arg,Version:v), mode));
                 }
@@ -273,24 +253,19 @@ private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) list
                     // known dependency” because the module graph is incomplete.
                     // Give a more explicit error message.
                     mods = append(mods, addr(new modinfo.ModulePublic(Path:arg,Error:modinfoError(arg,"",errors.New("can't resolve module using the vendor directory\n\t(Use -mod=mod or -mod=readonly to bypass.)")),)));
-
                 }
                 else if (mode & ListVersions != 0) { 
                     // Don't make the user provide an explicit '@latest' when they're
                     // explicitly asking what the available versions are. Instead, return a
                     // module with version "none", to which we can add the requested list.
                     mods = append(mods, addr(new modinfo.ModulePublic(Path:arg)));
-
                 }
                 else
  {
                     mods = append(mods, addr(new modinfo.ModulePublic(Path:arg,Error:modinfoError(arg,"",errors.New("not a known dependency")),)));
                 }
-
                 continue;
-
             }
-
             var matched = false;
             foreach (var (_, m) in mg.BuildList()) {
                 if (match(m.Path)) {
@@ -304,13 +279,11 @@ private static (ptr<Requirements>, slice<ptr<modinfo.ModulePublic>>, error) list
             if (!matched) {
                 fmt.Fprintf(os.Stderr, "warning: pattern %q matched no module dependencies\n", arg);
             }
-
         }
         arg = arg__prev1;
     }
 
     return (_addr_rs!, mods, error.As(mgErr)!);
-
 });
 
 // modinfoError wraps an error to create an error message in
@@ -322,16 +295,13 @@ private static ptr<modinfo.ModuleError> modinfoError(@string path, @string vers,
         // NoMatchingVersionError contains the query, so we don't mention the
         // query again in ModuleError.
         err = addr(new module.ModuleError(Path:path,Err:err));
-
     }
     else if (!errors.As(err, _addr_merr)) { 
         // If the error does not contain path and version, wrap it in a
         // module.ModuleError.
         err = addr(new module.ModuleError(Path:path,Version:vers,Err:err));
-
     }
     return addr(new modinfo.ModuleError(Err:err.Error()));
-
 }
 
 } // end modload_package

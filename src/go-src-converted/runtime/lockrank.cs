@@ -22,11 +22,9 @@
 // (the lock ranking) is violated, but also if there is a missing entry in the
 // partial order.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:48 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:34 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\lockrank.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -110,7 +108,6 @@ private static readonly var lockRankRaceFini = 46;
 private static readonly var lockRankPollCache = 47;
 private static readonly var lockRankDebug = 48;
 
-
 // lockRankLeafRank is the rank of lock that does not have a declared rank, and hence is
 // a leaf lock.
 private static readonly lockRank lockRankLeafRank = 1000;
@@ -129,7 +126,6 @@ private static @string String(this lockRank rank) {
         return "LEAF";
     }
     return lockNames[rank];
-
 }
 
 // lockPartialOrder is a partial order among the various lock types, listing the

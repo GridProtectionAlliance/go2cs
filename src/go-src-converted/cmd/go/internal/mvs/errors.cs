@@ -2,23 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mvs -- go2cs converted at 2022 March 06 23:18:00 UTC
+// package mvs -- go2cs converted at 2022 March 13 06:31:22 UTC
 // import "cmd/go/internal/mvs" ==> using mvs = go.cmd.go.@internal.mvs_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\mvs\errors.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+using strings = strings_package;
+
+using module = golang.org.x.mod.module_package;
+
+
+// BuildListError decorates an error that occurred gathering requirements
+// while constructing a build list. BuildListError prints the chain
+// of requirements to the module where the error occurred.
+
+using System;
 public static partial class mvs_package {
 
-    // BuildListError decorates an error that occurred gathering requirements
-    // while constructing a build list. BuildListError prints the chain
-    // of requirements to the module where the error occurred.
 public partial struct BuildListError {
     public error Err;
     public slice<buildListErrorElem> stack;
@@ -47,12 +48,10 @@ public static ptr<BuildListError> NewBuildListError(error err, slice<module.Vers
         }
         stack = append(stack, new buildListErrorElem(m:path[0],nextReason:reason,));
         path = path[(int)1..];
-
     }
     stack = append(stack, new buildListErrorElem(m:path[0]));
 
     return addr(new BuildListError(Err:err,stack:stack,));
-
 }
 
 // Module returns the module where the error occurred. If the module stack
@@ -64,7 +63,6 @@ private static module.Version Module(this ptr<BuildListError> _addr_e) {
         return new module.Version();
     }
     return e.stack[len(e.stack) - 1].m;
-
 }
 
 private static @string Error(this ptr<BuildListError> _addr_e) {
@@ -101,7 +99,6 @@ private static @string Error(this ptr<BuildListError> _addr_e) {
                     }
 
                 }
-
                 if (actual == m) {
                     fmt.Fprintf(b, "%v", e.Err);
                 }
@@ -109,7 +106,6 @@ private static @string Error(this ptr<BuildListError> _addr_e) {
  {
                     fmt.Fprintf(b, "%s (replaced by %s): %v", m, actual, mErr.Err);
                 }
-
             }
             else
  {
@@ -117,10 +113,8 @@ private static @string Error(this ptr<BuildListError> _addr_e) {
             }
 
         }
-
     }
     return b.String();
-
 }
 
 } // end mvs_package

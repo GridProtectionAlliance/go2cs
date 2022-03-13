@@ -2,28 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modcmd -- go2cs converted at 2022 March 06 23:19:39 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:32:27 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\verify.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
+namespace go.cmd.go.@internal;
 
-using @base = go.cmd.go.@internal.@base_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modload = go.cmd.go.@internal.modload_package;
+using bytes = bytes_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using fs = io.fs_package;
+using os = os_package;
+using runtime = runtime_package;
 
-using module = go.golang.org.x.mod.module_package;
-using dirhash = go.golang.org.x.mod.sumdb.dirhash_package;
+using @base = cmd.go.@internal.@base_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modload = cmd.go.@internal.modload_package;
+
+using module = golang.org.x.mod.module_package;
+using dirhash = golang.org.x.mod.sumdb.dirhash_package;
 using System;
 using System.Threading;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class modcmd_package {
 
@@ -48,7 +47,6 @@ private static void runVerify(context.Context ctx, ptr<base.Command> _addr_cmd, 
     if (len(args) != 0) { 
         // NOTE(rsc): Could take a module pattern.
         @base.Fatalf("go mod verify: verify takes no arguments");
-
     }
     modload.ForceUseModules = true;
     modload.RootMode = modload.NeedRoot; 
@@ -78,7 +76,6 @@ private static void runVerify(context.Context ctx, ptr<base.Command> _addr_cmd, 
                 errsc.Send(verifyMod(mod));
                 sem.Receive();
             }());
-
         }
         mod = mod__prev1;
     }
@@ -115,11 +112,9 @@ private static slice<error> verifyMod(module.Version mod) {
         if (zipErr != null && errors.Is(zipErr, fs.ErrNotExist) && dirErr != null && errors.Is(dirErr, fs.ErrNotExist)) { 
             // Nothing downloaded yet. Nothing to verify.
             return null;
-
         }
         errs = append(errs, fmt.Errorf("%s %s: missing ziphash: %v", mod.Path, mod.Version, err));
         return errs;
-
     }
     var h = string(bytes.TrimSpace(data));
 
@@ -152,7 +147,6 @@ private static slice<error> verifyMod(module.Version mod) {
         }
     }
     return errs;
-
 }
 
 } // end modcmd_package

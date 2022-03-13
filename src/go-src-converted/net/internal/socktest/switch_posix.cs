@@ -5,13 +5,13 @@
 //go:build !plan9
 // +build !plan9
 
-// package socktest -- go2cs converted at 2022 March 06 22:25:41 UTC
+// package socktest -- go2cs converted at 2022 March 13 05:40:14 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Program Files\Go\src\net\internal\socktest\switch_posix.go
-using fmt = go.fmt_package;
-using syscall = go.syscall_package;
-
 namespace go.net.@internal;
+
+using fmt = fmt_package;
+using syscall = syscall_package;
 
 public static partial class socktest_package {
 
@@ -25,8 +25,7 @@ private static @string familyString(nint family) {
         return "local";
     else 
         return fmt.Sprintf("%d", family);
-    
-}
+    }
 
 private static @string typeString(nint sotype) {
     @string s = default;
@@ -48,9 +47,7 @@ private static @string typeString(nint sotype) {
             s += fmt.Sprintf("|%#x", flags);
         }
     }
-
     return s;
-
 }
 
 private static @string protocolString(nint proto) {
@@ -63,7 +60,6 @@ private static @string protocolString(nint proto) {
         return "udp";
     else 
         return fmt.Sprintf("%d", proto);
-    
-}
+    }
 
 } // end socktest_package

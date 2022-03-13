@@ -81,17 +81,18 @@
 // by a final event with Action == "bench" or "fail".
 // Benchmarks have no events with Action == "run", "pause", or "cont".
 //
-// package main -- go2cs converted at 2022 March 06 23:22:41 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:35:45 UTC
 // Original source: C:\Program Files\Go\src\cmd\test2json\main.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using os = go.os_package;
-
-using test2json = go.cmd.@internal.test2json_package;
-
 namespace go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using os = os_package;
+
+using test2json = cmd.@internal.test2json_package;
 
 public static partial class main_package {
 
@@ -132,7 +133,6 @@ private static void Main() => func((defer, _, _) => {
  {
                 fmt.Fprintf(c, "test2json: %v\n", err);
             }
-
         }
         c.Exited(err);
         if (err != null) {

@@ -2,31 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sumdb -- go2cs converted at 2022 March 06 23:26:12 UTC
+// package sumdb -- go2cs converted at 2022 March 13 06:41:03 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb" ==> using sumdb = go.cmd.vendor.golang.org.x.mod.sumdb_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\client.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using path = go.path_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-
-using module = go.golang.org.x.mod.module_package;
-using note = go.golang.org.x.mod.sumdb.note_package;
-using tlog = go.golang.org.x.mod.sumdb.tlog_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.vendor.golang.org.x.mod;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using path = path_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+using module = golang.org.x.mod.module_package;
+using note = golang.org.x.mod.sumdb.note_package;
+using tlog = golang.org.x.mod.sumdb.tlog_package;
+
+
+// A ClientOps provides the external operations
+// (file caching, HTTP fetches, and so on) needed by the Client.
+// The methods must be safe for concurrent use by multiple goroutines.
+
+using System;
+using System.Threading;
 public static partial class sumdb_package {
 
-    // A ClientOps provides the external operations
-    // (file caching, HTTP fetches, and so on) needed by the Client.
-    // The methods must be safe for concurrent use by multiple goroutines.
 public partial interface ClientOps {
     (slice<byte>, error) ReadRemote(@string path); // ReadConfig reads and returns the content of the named configuration file.
 // There are only a fixed set of configuration files.
@@ -143,7 +144,6 @@ private static void initWork(this ptr<Client> _addr_c) => func((defer, _, _) => 
             return ;
         }
     }
-
 });
 
 // SetTileHeight sets the tile height for the Client.
@@ -164,7 +164,6 @@ private static void SetTileHeight(this ptr<Client> _addr_c, nint height) => func
         panic("multiple calls to SetTileHeight");
     }
     c.tileHeight = height;
-
 });
 
 // SetGONOSUMDB sets the list of comma-separated GONOSUMDB patterns for the Client.
@@ -182,7 +181,6 @@ private static void SetGONOSUMDB(this ptr<Client> _addr_c, @string list) => func
         panic("multiple calls to SetGONOSUMDB");
     }
     c.nosumdb = list;
-
 });
 
 // ErrGONOSUMDB is returned by Lookup for paths that match
@@ -220,7 +218,6 @@ private static bool globsMatchPath(@string globs, @string target) {
             i = i__prev1;
 
         }
-
         if (glob == "") {
             continue;
         }
@@ -246,7 +243,6 @@ private static bool globsMatchPath(@string globs, @string target) {
         if (n > 0) { 
             // Not enough prefix elements.
             continue;
-
         }
         var (matched, _) = path.Match(glob, prefix);
         if (matched) {
@@ -254,7 +250,6 @@ private static bool globsMatchPath(@string globs, @string target) {
         }
     }
     return false;
-
 }
 
 // Lookup returns the go.sum lines for the given module path and version.
@@ -336,7 +331,6 @@ private static (slice<@string>, error) Lookup(this ptr<Client> _addr_c, @string 
             err = err__prev1;
 
         }
-
         {
             var err__prev1 = err;
 
@@ -359,7 +353,6 @@ private static (slice<@string>, error) Lookup(this ptr<Client> _addr_c, @string 
             c.ops.WriteCache(file, data);
         }
         return new cached(data,nil);
-
     })._<cached>();
     if (result.err != null) {
         return (null, error.As(result.err)!);
@@ -371,7 +364,6 @@ private static (slice<@string>, error) Lookup(this ptr<Client> _addr_c, @string 
             hashes = append(hashes, line);
         }
     }    return (hashes, error.As(null!)!);
-
 });
 
 // mergeLatest merges the tree head in msg
@@ -395,7 +387,6 @@ private static error mergeLatest(this ptr<Client> _addr_c, slice<byte> msg) {
         // msg matched our present or was in the past.
         // No change to our present, so no update of config file.
         return error.As(null!)!;
-
     }
     while (true) {
         var (msg, err) = c.ops.ReadConfig(c.name + "/latest");
@@ -410,7 +401,6 @@ private static error mergeLatest(this ptr<Client> _addr_c, slice<byte> msg) {
             // msg matched our present or was from the future,
             // and now our in-memory copy matches.
             return error.As(null!)!;
-
         }
         c.latestMu.Lock();
         var latestMsg = c.latestMsg;
@@ -421,19 +411,15 @@ private static error mergeLatest(this ptr<Client> _addr_c, slice<byte> msg) {
             if (err != ErrWriteConflict) { 
                 // Success or a non-write-conflict error.
                 return error.As(err)!;
-
             }
 
         }
-
     }
-
 }
 
 private static readonly nint msgPast = 1 + iota;
 private static readonly var msgNow = 0;
 private static readonly var msgFuture = 1;
-
 
 // mergeLatestMem is like mergeLatest but is only concerned with
 // updating the in-memory copy of the latest tree head (c.latest)
@@ -457,7 +443,6 @@ private static (nint, error) mergeLatestMem(this ptr<Client> _addr_c, slice<byte
             return (msgNow, error.As(null!)!);
         }
         return (msgPast, error.As(null!)!);
-
     }
     var (note, err) = note.Open(msg, c.verifiers);
     if (err != null) {
@@ -487,13 +472,10 @@ private static (nint, error) mergeLatestMem(this ptr<Client> _addr_c, slice<byte
                 err = err__prev2;
 
             }
-
             if (tree.N < latest.N) {
                 return (msgPast, error.As(null!)!);
             }
-
             return (msgNow, error.As(null!)!);
-
         }
         {
             var err__prev1 = err;
@@ -531,7 +513,6 @@ private static (nint, error) mergeLatestMem(this ptr<Client> _addr_c, slice<byte
             return (msgFuture, error.As(null!)!);
         }
     }
-
 }
 
 // checkTrees checks that older (from olderNote) is contained in newer (from newerNote).
@@ -548,7 +529,6 @@ private static error checkTrees(this ptr<Client> _addr_c, tlog.Tree older, slice
             return error.As(fmt.Errorf("checking tree#%d: %v", older.N, err))!;
         }
         return error.As(fmt.Errorf("checking tree#%d against tree#%d: %v", older.N, newer.N, err))!;
-
     }
     if (h == older.Hash) {
         return error.As(null!)!;
@@ -556,9 +536,7 @@ private static error checkTrees(this ptr<Client> _addr_c, tlog.Tree older, slice
     ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
     fmt.Fprintf(_addr_buf, "SECURITY ERROR\n");
     fmt.Fprintf(_addr_buf, "go.sum database server misbehavior detected!\n\n");
-    Func<slice<byte>, slice<byte>> indent = b => {
-        return error.As(bytes.Replace(b, (slice<byte>)"\n", (slice<byte>)"\n\t", -1))!;
-    };
+    Func<slice<byte>, slice<byte>> indent = b => error.As(bytes.Replace(b, (slice<byte>)"\n", (slice<byte>)"\n\t", -1))!;
     fmt.Fprintf(_addr_buf, "old database:\n\t%s\n", indent(olderNote));
     fmt.Fprintf(_addr_buf, "new database:\n\t%s\n", indent(newerNote)); 
 
@@ -601,12 +579,9 @@ private static error checkTrees(this ptr<Client> _addr_c, tlog.Tree older, slice
 
         }
 
-
     }
-
     c.ops.SecurityError(buf.String());
     return error.As(ErrSecurity)!;
-
 }
 
 // checkRecord checks that record #id's hash matches data.
@@ -628,7 +603,6 @@ private static error checkRecord(this ptr<Client> _addr_c, long id, slice<byte> 
         return error.As(null!)!;
     }
     return error.As(fmt.Errorf("cannot authenticate record data in server response"))!;
-
 }
 
 // tileReader is a *Client wrapper that implements tlog.TileReader.
@@ -668,7 +642,6 @@ private static (slice<slice<byte>>, error) ReadTiles(this ptr<tileReader> _addr_
             return (null, error.As(err)!);
         }
     }    return (data, error.As(null!)!);
-
 });
 
 // tileCacheKey returns the cache key for the tile.
@@ -710,9 +683,7 @@ private static (slice<byte>, error) readTile(this ptr<Client> _addr_c, tlog.Tile
             if (err == null) {
                 c.markTileSaved(tile); // don't save tile later; we already have full
                 return new cached(data[:len(data)/full.W*tile.W],nil);
-
             }
-
         }
         data, err = c.ops.ReadRemote(c.tileRemotePath(tile));
         if (err == null) {
@@ -727,16 +698,12 @@ private static (slice<byte>, error) readTile(this ptr<Client> _addr_c, tlog.Tile
                 // save the partial tile, and we'll just refetch the full tile later
                 // once we can validate more (or all) of it.
                 return new cached(data[:len(data)/full.W*tile.W],nil);
-
             }
-
         }
         return new cached(nil,err);
-
     })._<cached>();
 
     return (result.data, error.As(result.err)!);
-
 }
 
 // markTileSaved records that tile is already present in the on-disk cache,
@@ -790,9 +757,7 @@ private static void SaveTiles(this ptr<tileReader> _addr_r, slice<tlog.Tile> til
                 // Next time we run maybe we'll redownload it again and be
                 // more successful.
                 c.ops.WriteCache(c.name + "/" + tile.Path(), data[i]);
-
             }
-
         }
         i = i__prev1;
         tile = tile__prev1;

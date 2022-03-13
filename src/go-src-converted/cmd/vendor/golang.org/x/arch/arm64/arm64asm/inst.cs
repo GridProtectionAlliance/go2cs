@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2022 March 06 23:24:58 UTC
+// package arm64asm -- go2cs converted at 2022 March 13 06:38:11 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\inst.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.arm64;
+
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// An Op is an ARM64 opcode.
 
 public static partial class arm64asm_package {
 
-    // An Op is an ARM64 opcode.
 public partial struct Op { // : ushort
 }
 
@@ -26,7 +28,6 @@ public static @string String(this Op op) {
         return fmt.Sprintf("Op(%d)", int(op));
     }
     return opstr[op];
-
 }
 
 // An Inst is a single instruction.
@@ -43,9 +44,7 @@ public static @string String(this Inst i) {
             break;
         }
         args = append(args, arg.String());
-
     }    return i.Op.String() + " " + strings.Join(args, ", ");
-
 }
 
 // An Args holds the instruction arguments.
@@ -361,8 +360,7 @@ public static @string String(this Reg r) {
         return fmt.Sprintf("V%d", int(r - V0));
     else 
         return fmt.Sprintf("Reg(%d)", int(r));
-    
-}
+    }
 
 // A RegSP represent a register and X31/W31 is regarded as SP/WSP.
 public partial struct RegSP { // : Reg
@@ -379,8 +377,7 @@ public static @string String(this RegSP r) {
         return "SP";
     else 
         return Reg(r).String();
-    
-}
+    }
 
 public partial struct ImmShift {
     public ushort imm;
@@ -398,7 +395,6 @@ public static @string String(this ImmShift @is) {
         return fmt.Sprintf("#%#x, LSL #%d", @is.imm, @is.shift);
     }
     return fmt.Sprintf("#%#x, MSL #%d", @is.imm, @is.shift - 128);
-
 }
 
 public partial struct ExtShift { // : byte
@@ -417,7 +413,6 @@ private static readonly var lsl = 8;
 private static readonly var lsr = 9;
 private static readonly var asr = 10;
 private static readonly var ror = 11;
-
 
 public static @string String(this ExtShift extShift) {
 
@@ -446,7 +441,6 @@ public static @string String(this ExtShift extShift) {
     else if (extShift == ror) 
         return "ROR";
         return "";
-
 }
 
 public partial struct RegExtshiftAmount {
@@ -474,7 +468,6 @@ public static @string String(this RegExtshiftAmount rea) {
         }
     }
     return buf;
-
 }
 
 // A PCRel describes a memory address (usually a code label)
@@ -529,7 +522,6 @@ public static @string String(this MemImmediate m) {
         var postR = post.String();
         return fmt.Sprintf("[%s], %s", R, postR);
         return fmt.Sprintf("unimplemented!");
-
 }
 
 // A MemExtend is a memory reference made up of a base R and index expression X.
@@ -566,7 +558,6 @@ public static @string String(this MemExtend m) {
  {
                 return fmt.Sprintf("[%s,%s]", Rbase, RIndex);
             }
-
         }
     }
     else
@@ -583,7 +574,6 @@ public static @string String(this MemExtend m) {
  {
                 return fmt.Sprintf("[%s,%s]", Rbase, RIndex);
             }
-
         }
     }
 }
@@ -648,7 +638,6 @@ public static @string String(this Imm_clrex i) {
         return "";
     }
     return fmt.Sprintf("#%#x", uint32(i));
-
 }
 
 // An Imm_dcps is an integer constant for DCPS[123] instruction.
@@ -663,7 +652,6 @@ public static @string String(this Imm_dcps i) {
         return "";
     }
     return fmt.Sprintf("#%#x", uint32(i));
-
 }
 
 // Standard conditions.
@@ -748,7 +736,6 @@ public static @string String(this Cond c) {
             break;
     }
     return "";
-
 }
 
 // An Imm_c is an integer constant for SYS/SYSL/TLBI instruction.
@@ -809,7 +796,6 @@ public static @string String(this Imm_option i) {
             break;
     }
     return fmt.Sprintf("#%#02x", uint8(i));
-
 }
 
 // An Imm_prfop is an integer constant for PRFM instruction.
@@ -861,7 +847,6 @@ public static @string String(this Imm_prfop i) {
         result += "STRM";
     }
     return result;
-
 }
 
 public partial struct Pstatefield { // : byte
@@ -870,7 +855,6 @@ public partial struct Pstatefield { // : byte
 public static readonly Pstatefield SPSel = iota;
 public static readonly var DAIFSet = 0;
 public static readonly var DAIFClr = 1;
-
 
 public static void isArg(this Pstatefield _p0) {
 }
@@ -885,8 +869,7 @@ public static @string String(this Pstatefield p) {
         return "DAIFClr";
     else 
         return "unimplemented";
-    
-}
+    }
 
 public partial struct Systemreg {
     public byte op0;
@@ -936,7 +919,6 @@ public static @string String(this Imm_fp i) {
     }
     result = float64(numerator) / float64(denominator);
     return fmt.Sprintf("#%.18e", result);
-
 }
 
 public partial struct Arrangement { // : byte
@@ -956,7 +938,6 @@ public static readonly var ArrangementD = 9;
 public static readonly var Arrangement1D = 10;
 public static readonly var Arrangement2D = 11;
 public static readonly var Arrangement1Q = 12;
-
 
 public static @string String(this Arrangement a) {
     @string result = default;
@@ -989,7 +970,6 @@ public static @string String(this Arrangement a) {
     else if (a == Arrangement1Q) 
         result = ".1Q";
         return ;
-
 }
 
 // Register with arrangement: <Vd>.<T>, { <Vt>.8B, <Vt2>.8B},
@@ -1018,19 +998,14 @@ public static @string String(this RegisterWithArrangement r) {
                     result += ", " + cur.String() + r.a.String();
                 }
             else
-
-
             } {
                 r1 = V0 + Reg((uint16(r.r) - uint16(V0) + uint16(r.cnt) - 1) & 31);
                 result += "-" + r1.String() + r.a.String();
             }
-
         }
         result += "}";
-
     }
     return result;
-
 }
 
 // Register with arrangement and index: <Vm>.<Ts>[<index>],
@@ -1061,19 +1036,14 @@ public static @string String(this RegisterWithArrangementAndIndex r) {
                     result += ", " + cur.String() + r.a.String();
                 }
             else
-
-
             } {
                 r1 = V0 + Reg((uint16(r.r) - uint16(V0) + uint16(r.cnt) - 1) & 31);
                 result += "-" + r1.String() + r.a.String();
             }
-
         }
         result += "}";
-
     }
     return fmt.Sprintf("%s[%d]", result, r.index);
-
 }
 
 } // end arm64asm_package

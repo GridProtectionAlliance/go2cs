@@ -29,21 +29,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:21:26 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:25 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\ld.go
-using goobj = go.cmd.@internal.goobj_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.cmd.link.@internal;
+
+using goobj = cmd.@internal.goobj_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class ld_package {
 
@@ -82,7 +82,6 @@ private static void readImportCfg(this ptr<Link> _addr_ctxt, @string file) {
             i = i__prev1;
 
         }
-
         @string before = default;        @string after = default;
 
         {
@@ -96,27 +95,23 @@ private static void readImportCfg(this ptr<Link> _addr_ctxt, @string file) {
             i = i__prev1;
 
         }
-
         switch (verb) {
             case "packagefile": 
                 if (before == "" || after == "") {
                     log.Fatalf("%s:%d: invalid packagefile: syntax is \"packagefile path=filename\"", file, lineNum);
                 }
                 ctxt.PackageFile[before] = after;
-
                 break;
             case "packageshlib": 
                 if (before == "" || after == "") {
                     log.Fatalf("%s:%d: invalid packageshlib: syntax is \"packageshlib path=filename\"", file, lineNum);
                 }
                 ctxt.PackageShlib[before] = after;
-
                 break;
             default: 
                 log.Fatalf("%s:%d: unknown directive %q", file, lineNum, verb);
                 break;
         }
-
     }
 }
 
@@ -134,7 +129,6 @@ private static @string pkgname(ptr<Link> _addr_ctxt, @string lib) {
         pkg = pkg[..(int)len(pkg) - 2];
     }
     return pkg;
-
 }
 
 private static (@string, bool) findlib(ptr<Link> _addr_ctxt, @string lib) {
@@ -189,9 +183,7 @@ private static (@string, bool) findlib(ptr<Link> _addr_ctxt, @string lib) {
                         }
 
                     }
-
                 }
-
                 pname = filepath.Join(dir, name);
                 {
                     (_, err) = os.Stat(pname);
@@ -201,15 +193,11 @@ private static (@string, bool) findlib(ptr<Link> _addr_ctxt, @string lib) {
                     }
 
                 }
-
             }
-
         }
         pname = filepath.Clean(pname);
-
     }
     return (pname, isshlib);
-
 }
 
 private static ptr<sym.Library> addlib(ptr<Link> _addr_ctxt, @string src, @string obj, @string lib, goobj.FingerprintType fingerprint) {
@@ -229,10 +217,8 @@ private static ptr<sym.Library> addlib(ptr<Link> _addr_ctxt, @string src, @strin
             // checking.
             checkFingerprint(l, l.Fingerprint, src, fingerprint);
             return _addr_l!;
-
         }
     }
-
 
     var (pname, isshlib) = findlib(_addr_ctxt, lib);
 
@@ -243,7 +229,6 @@ private static ptr<sym.Library> addlib(ptr<Link> _addr_ctxt, @string src, @strin
         return _addr_addlibpath(_addr_ctxt, src, obj, "", pkg, pname, fingerprint)!;
     }
     return _addr_addlibpath(_addr_ctxt, src, obj, pname, pkg, "", fingerprint)!;
-
 }
 
 /*
@@ -271,7 +256,6 @@ private static ptr<sym.Library> addlibpath(ptr<Link> _addr_ctxt, @string srcref,
 
     }
 
-
     if (ctxt.Debugvlog > 1) {
         ctxt.Logf("addlibpath: srcref: %s objref: %s file: %s pkg: %s shlib: %s fingerprint: %x\n", srcref, objref, file, pkg, shlib, fingerprint);
     }
@@ -292,10 +276,8 @@ private static ptr<sym.Library> addlibpath(ptr<Link> _addr_ctxt, @string srcref,
             shlib = strings.TrimSpace(string(data));
         }
         l.Shlib = shlib;
-
     }
     return _addr_l!;
-
 }
 
 private static long atolwhex(@string s) {
@@ -322,7 +304,6 @@ public static (ptr<loader.SymbolBuilder>, loader.Sym) PrepareAddmoduledata(ptr<L
         // we're linking a module containing the runtime -> no need for
         // an init function
         return (_addr_null!, 0);
-
     }
     ctxt.loader.SetAttrReachable(amd, true); 
 
@@ -349,7 +330,6 @@ public static (ptr<loader.SymbolBuilder>, loader.Sym) PrepareAddmoduledata(ptr<L
     initarray_entry.AddAddr(ctxt.Arch, ifs);
 
     return (_addr_initfunc!, amd);
-
 }
 
 } // end ld_package

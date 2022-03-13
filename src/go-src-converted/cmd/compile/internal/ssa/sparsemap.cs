@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:43 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:00 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\sparsemap.go
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
 
 public static partial class ssa_package {
 
-    // from https://research.swtch.com/sparse
-    // in turn, from Briggs and Torczon
+// from https://research.swtch.com/sparse
+// in turn, from Briggs and Torczon
+
 private partial struct sparseEntry {
     public ID key;
     public int val;
@@ -59,7 +60,6 @@ private static int get(this ptr<sparseMap> _addr_s, ID k) {
         return s.dense[i].val;
     }
     return -1;
-
 }
 
 private static void set(this ptr<sparseMap> _addr_s, ID k, int v, src.XPos a) {
@@ -73,7 +73,6 @@ private static void set(this ptr<sparseMap> _addr_s, ID k, int v, src.XPos a) {
     }
     s.dense = append(s.dense, new sparseEntry(k,v,a));
     s.sparse[k] = int32(len(s.dense)) - 1;
-
 }
 
 // setBit sets the v'th bit of k's value, where 0 <= v < 32
@@ -90,7 +89,6 @@ private static void setBit(this ptr<sparseMap> _addr_s, ID k, nuint v) => func((
     }
     s.dense = append(s.dense, new sparseEntry(k,1<<v,src.NoXPos));
     s.sparse[k] = int32(len(s.dense)) - 1;
-
 });
 
 private static void remove(this ptr<sparseMap> _addr_s, ID k) {

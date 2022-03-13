@@ -28,11 +28,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:22 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\reloctype.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class objabi_package {
@@ -267,7 +265,6 @@ public static readonly R_WEAK R_XCOFFREF = -1 << 15;
 public static readonly var R_WEAKADDR = R_WEAK | R_ADDR;
 public static readonly var R_WEAKADDROFF = R_WEAK | R_ADDROFF;
 
-
 // IsDirectCall reports whether r is a relocation for a direct call.
 // A direct call is a CALL instruction that takes the target address
 // as an immediate. The address is embedded into the instruction, possibly
@@ -278,7 +275,6 @@ public static bool IsDirectCall(this RelocType r) {
     if (r == R_CALL || r == R_CALLARM || r == R_CALLARM64 || r == R_CALLMIPS || r == R_CALLPOWER || r == R_CALLRISCV) 
         return true;
         return false;
-
 }
 
 // IsDirectJump reports whether r is a relocation for a direct jump.
@@ -291,7 +287,6 @@ public static bool IsDirectJump(this RelocType r) {
     if (r == R_JMPMIPS) 
         return true;
         return false;
-
 }
 
 // IsDirectCallOrJump reports whether r is a relocation for a direct

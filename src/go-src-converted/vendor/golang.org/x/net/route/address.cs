@@ -5,18 +5,17 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:11 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:29 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\address.go
-using runtime = go.runtime_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.net;
+
+using runtime = runtime_package;
+using System;
 
 public static partial class route_package {
 
-    // An Addr represents an address associated with packet routing.
+// An Addr represents an address associated with packet routing.
 public partial interface Addr {
     nint Family();
 }
@@ -75,7 +74,6 @@ private static (nint, error) marshal(this ptr<LinkAddr> _addr_a, slice<byte> b) 
         data = data[(int)alen..];
     }
     return (ll, error.As(null!)!);
-
 }
 
 private static (Addr, error) parseLinkAddr(slice<byte> b) {
@@ -91,7 +89,6 @@ private static (Addr, error) parseLinkAddr(slice<byte> b) {
     }
     a._<ptr<LinkAddr>>().Index = int(nativeEndian.Uint16(b[(int)2..(int)4]));
     return (a, error.As(null!)!);
-
 }
 
 // parseKernelLinkAddr parses b as a link-layer address in
@@ -144,7 +141,6 @@ private static (nint, Addr, error) parseKernelLinkAddr(nint _, slice<byte> b) {
         data = data[(int)alen..];
     }
     return (l, addr(new LinkAddr(Name:name,Addr:addr)), error.As(null!)!);
-
 }
 
 // An Inet4Addr represents an internet address for IPv4.
@@ -180,7 +176,6 @@ private static (nint, error) marshal(this ptr<Inet4Addr> _addr_a, slice<byte> b)
     b[1] = sysAF_INET;
     copy(b[(int)4..(int)8], a.IP[..]);
     return (ll, error.As(null!)!);
-
 }
 
 // An Inet6Addr represents an internet address for IPv6.
@@ -220,7 +215,6 @@ private static (nint, error) marshal(this ptr<Inet6Addr> _addr_a, slice<byte> b)
         nativeEndian.PutUint32(b[(int)24..(int)28], uint32(a.ZoneID));
     }
     return (ll, error.As(null!)!);
-
 }
 
 // parseInetAddr parses b as an internet address for IPv4 or IPv6.
@@ -252,13 +246,11 @@ private static (Addr, error) parseInetAddr(nint af, slice<byte> b) {
                 a.ZoneID = id;
                 (a.IP[2], a.IP[3]) = (0, 0);
             }
-
         }
         return (a, error.As(null!)!);
     else 
         return (null, error.As(errInvalidAddr)!);
-    
-}
+    }
 
 // parseKernelInetAddr parses b as an internet address in conventional
 // BSD kernel form.
@@ -332,8 +324,7 @@ private static (nint, Addr, error) parseKernelInetAddr(nint af, slice<byte> b) {
             copy(a.IP[..], b[(int)l - off4..(int)l]);
         }
         return (int(b[0]), a, error.As(null!)!);
-    
-}
+    }
 
 // A DefaultAddr represents an address of various operating
 // system-specific features.
@@ -373,7 +364,6 @@ private static (nint, error) marshal(this ptr<DefaultAddr> _addr_a, slice<byte> 
     b[1] = byte(l);
     copy(b[..(int)l], a.Raw);
     return (ll, error.As(null!)!);
-
 }
 
 private static (Addr, error) parseDefaultAddr(slice<byte> b) {
@@ -385,7 +375,6 @@ private static (Addr, error) parseDefaultAddr(slice<byte> b) {
     }
     ptr<DefaultAddr> a = addr(new DefaultAddr(af:int(b[1]),Raw:b[:b[0]]));
     return (a, error.As(null!)!);
-
 }
 
 private static nint addrsSpace(slice<Addr> @as) {
@@ -413,13 +402,11 @@ private static nint addrsSpace(slice<Addr> @as) {
                     l += ll;
                     break;
             }
-
         }
         a = a__prev1;
     }
 
     return l;
-
 }
 
 // marshalAddrs marshals as and returns a bitmap indicating which
@@ -469,13 +456,11 @@ private static (nuint, error) marshalAddrs(slice<byte> b, slice<Addr> @as) {
                     attrs |= 1 << (int)(uint(i));
                     break;
             }
-
         }
         a = a__prev1;
     }
 
     return (attrs, error.As(null!)!);
-
 }
 
 private static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<byte>, (nint, Addr, error)> fn, slice<byte> b) {
@@ -527,7 +512,6 @@ private static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<byt
  {
                     b = b[(int)ll..];
                 }
-
                     }
         else
  {
@@ -544,7 +528,6 @@ private static (slice<Addr>, error) parseAddrs(nuint attrs, Func<nint, slice<byt
         }
     }
     return (as[..], error.As(null!)!);
-
 }
 
 } // end route_package

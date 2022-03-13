@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bzip2 -- go2cs converted at 2022 March 06 23:35:22 UTC
+// package bzip2 -- go2cs converted at 2022 March 13 06:43:18 UTC
 // import "compress/bzip2" ==> using bzip2 = go.compress.bzip2_package
 // Original source: C:\Program Files\Go\src\compress\bzip2\bit_reader.go
-using bufio = go.bufio_package;
-using io = go.io_package;
-
 namespace go.compress;
+
+using bufio = bufio_package;
+using io = io_package;
+
+
+// bitReader wraps an io.Reader and provides the ability to read values,
+// bit-by-bit, from it. Its Read* methods don't return the usual error
+// because the error handling was verbose. Instead, any error is kept and can
+// be checked afterwards.
 
 public static partial class bzip2_package {
 
-    // bitReader wraps an io.Reader and provides the ability to read values,
-    // bit-by-bit, from it. Its Read* methods don't return the usual error
-    // because the error handling was verbose. Instead, any error is kept and can
-    // be checked afterwards.
 private partial struct bitReader {
     public io.ByteReader r;
     public ulong n;
@@ -31,7 +33,6 @@ private static bitReader newBitReader(io.Reader r) {
         byter = bufio.NewReader(r);
     }
     return new bitReader(r:byter);
-
 }
 
 // ReadBits64 reads the given number of bits and returns them in the
@@ -53,7 +54,6 @@ private static ulong ReadBits64(this ptr<bitReader> _addr_br, nuint bits) {
         br.n<<=8;
         br.n |= uint64(b);
         br.bits += 8;
-
     } 
 
     // br.n looks like this (assuming that br.bits = 14 and bits = 6):
@@ -73,7 +73,6 @@ private static ulong ReadBits64(this ptr<bitReader> _addr_br, nuint bits) {
     n = (br.n >> (int)((br.bits - bits))) & ((1 << (int)(bits)) - 1);
     br.bits -= bits;
     return ;
-
 }
 
 private static nint ReadBits(this ptr<bitReader> _addr_br, nuint bits) {

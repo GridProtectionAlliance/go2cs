@@ -4,19 +4,18 @@
 
 //go:generate go run decgen.go -output dec_helpers.go
 
-// package gob -- go2cs converted at 2022 March 06 22:25:01 UTC
+// package gob -- go2cs converted at 2022 March 13 05:39:33 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Program Files\Go\src\encoding\gob\decode.go
-using encoding = go.encoding_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using math = go.math_package;
-using bits = go.math.bits_package;
-using reflect = go.reflect_package;
-using System;
-
-
 namespace go.encoding;
+
+using encoding = encoding_package;
+using errors = errors_package;
+using io = io_package;
+using math = math_package;
+using bits = math.bits_package;
+using reflect = reflect_package;
+using System;
 
 public static partial class gob_package {
 
@@ -52,7 +51,6 @@ private static (nint, error) Read(this ptr<decBuffer> _addr_d, slice<byte> p) {
     }
     d.offset += n;
     return (n, error.As(null!)!);
-
 }
 
 private static void Drop(this ptr<decBuffer> _addr_d, nint n) => func((_, panic, _) => {
@@ -62,7 +60,6 @@ private static void Drop(this ptr<decBuffer> _addr_d, nint n) => func((_, panic,
         panic("drop");
     }
     d.offset += n;
-
 });
 
 // Size grows the buffer to exactly n bytes, so d.Bytes() will
@@ -91,7 +88,6 @@ private static (byte, error) ReadByte(this ptr<decBuffer> _addr_d) {
     var c = d.data[d.offset];
     d.offset++;
     return (c, error.As(null!)!);
-
 }
 
 private static nint Len(this ptr<decBuffer> _addr_d) {
@@ -130,7 +126,6 @@ private static ptr<decoderState> newDecoderState(this ptr<Decoder> _addr_dec, pt
     }
     d.b = buf;
     return _addr_d!;
-
 }
 
 private static void freeDecoderState(this ptr<Decoder> _addr_dec, ptr<decoderState> _addr_d) {
@@ -172,7 +167,6 @@ private static (ulong, nint, error) decodeUintReader(io.Reader r, slice<byte> bu
             err = io.ErrUnexpectedEOF;
         }
         return ;
-
     }
     {
         var b__prev1 = b;
@@ -186,7 +180,6 @@ private static (ulong, nint, error) decodeUintReader(io.Reader r, slice<byte> bu
 
     width++; // +1 for length byte
     return ;
-
 }
 
 // decodeUint reads an encoded unsigned integer from state.r.
@@ -222,7 +215,6 @@ private static ulong decodeUint(this ptr<decoderState> _addr_state) {
 
     state.b.Drop(n);
     return x;
-
 }
 
 // decodeInt reads an encoded signed integer from state.r.
@@ -235,7 +227,6 @@ private static long decodeInt(this ptr<decoderState> _addr_state) {
         return ~int64(x >> 1);
     }
     return int64(x >> 1);
-
 }
 
 // getLength decodes the next uint and makes sure it is a possible
@@ -251,7 +242,6 @@ private static (nint, bool) getLength(this ptr<decoderState> _addr_state) {
         return (0, false);
     }
     return (n, true);
-
 }
 
 // decOp is the signature of a decoding operator for a given type.
@@ -300,10 +290,8 @@ private static reflect.Value decAlloc(reflect.Value v) {
             v.Set(reflect.New(v.Type().Elem()));
         }
         v = v.Elem();
-
     }
     return v;
-
 }
 
 // decBool decodes a uint and stores it as a boolean in value.
@@ -324,7 +312,6 @@ private static void decInt8(ptr<decInstr> _addr_i, ptr<decoderState> _addr_state
         error_(i.ovfl);
     }
     value.SetInt(v);
-
 }
 
 // decUint8 decodes an unsigned integer and stores it as a uint8 in value.
@@ -337,7 +324,6 @@ private static void decUint8(ptr<decInstr> _addr_i, ptr<decoderState> _addr_stat
         error_(i.ovfl);
     }
     value.SetUint(v);
-
 }
 
 // decInt16 decodes an integer and stores it as an int16 in value.
@@ -350,7 +336,6 @@ private static void decInt16(ptr<decInstr> _addr_i, ptr<decoderState> _addr_stat
         error_(i.ovfl);
     }
     value.SetInt(v);
-
 }
 
 // decUint16 decodes an unsigned integer and stores it as a uint16 in value.
@@ -363,7 +348,6 @@ private static void decUint16(ptr<decInstr> _addr_i, ptr<decoderState> _addr_sta
         error_(i.ovfl);
     }
     value.SetUint(v);
-
 }
 
 // decInt32 decodes an integer and stores it as an int32 in value.
@@ -376,7 +360,6 @@ private static void decInt32(ptr<decInstr> _addr_i, ptr<decoderState> _addr_stat
         error_(i.ovfl);
     }
     value.SetInt(v);
-
 }
 
 // decUint32 decodes an unsigned integer and stores it as a uint32 in value.
@@ -389,7 +372,6 @@ private static void decUint32(ptr<decInstr> _addr_i, ptr<decoderState> _addr_sta
         error_(i.ovfl);
     }
     value.SetUint(v);
-
 }
 
 // decInt64 decodes an integer and stores it as an int64 in value.
@@ -434,7 +416,6 @@ private static double float32FromBits(ulong u, error ovfl) {
         error_(ovfl);
     }
     return v;
-
 }
 
 // decFloat32 decodes an unsigned integer, treats it as a 32-bit floating-point
@@ -504,7 +485,6 @@ private static void decUint8Slice(ptr<decInstr> _addr_i, ptr<decoderState> _addr
             errorf("error decoding []byte: %s", err);
         }
     }
-
 }
 
 // decString decodes byte array and stores in value a string header
@@ -525,7 +505,6 @@ private static void decString(ptr<decInstr> _addr_i, ptr<decoderState> _addr_sta
     var s = string(data[..(int)n]);
     state.b.Drop(n);
     value.SetString(s);
-
 }
 
 // ignoreUint8Array skips over the data for a byte slice value with no destination.
@@ -542,7 +521,6 @@ private static void ignoreUint8Array(ptr<decInstr> _addr_i, ptr<decoderState> _a
         errorf("invalid slice length %d: exceeds input size %d", n, bn);
     }
     state.b.Drop(n);
-
 }
 
 // Execution engine
@@ -569,7 +547,6 @@ private static void decodeSingle(this ptr<Decoder> _addr_dec, ptr<decEngine> _ad
     }
     var instr = _addr_engine.instr[singletonField];
     instr.op(instr, state, value);
-
 });
 
 // decodeStruct decodes a top-level struct and stores it in value.
@@ -591,7 +568,6 @@ private static void decodeStruct(this ptr<Decoder> _addr_dec, ptr<decEngine> _ad
         }
         if (delta == 0) { // struct terminator is zero delta fieldnum
             break;
-
         }
         var fieldnum = state.fieldnum + delta;
         if (fieldnum >= len(engine.instr)) {
@@ -606,13 +582,10 @@ private static void decodeStruct(this ptr<Decoder> _addr_dec, ptr<decEngine> _ad
             if (field.Kind() == reflect.Ptr) {
                 field = decAlloc(field);
             }
-
         }
         instr.op(instr, state, field);
         state.fieldnum = fieldnum;
-
     }
-
 });
 
 private static reflect.Value noValue = default;
@@ -632,7 +605,6 @@ private static void ignoreStruct(this ptr<Decoder> _addr_dec, ptr<decEngine> _ad
         }
         if (delta == 0) { // struct terminator is zero delta fieldnum
             break;
-
         }
         var fieldnum = state.fieldnum + delta;
         if (fieldnum >= len(engine.instr)) {
@@ -641,9 +613,7 @@ private static void ignoreStruct(this ptr<Decoder> _addr_dec, ptr<decEngine> _ad
         var instr = _addr_engine.instr[fieldnum];
         instr.op(instr, state, noValue);
         state.fieldnum = fieldnum;
-
     }
-
 });
 
 // ignoreSingle discards the data for a top-level non-struct value with no
@@ -661,7 +631,6 @@ private static void ignoreSingle(this ptr<Decoder> _addr_dec, ptr<decEngine> _ad
     }
     var instr = _addr_engine.instr[singletonField];
     instr.op(instr, state, noValue);
-
 });
 
 // decodeArrayHelper does the work for decoding arrays and slices.
@@ -683,9 +652,7 @@ private static void decodeArrayHelper(this ptr<Decoder> _addr_dec, ptr<decoderSt
             v = decAlloc(v);
         }
         elemOp(instr, state, v);
-
     }
-
 }
 
 // decodeArray decodes an array and stores it in value.
@@ -702,9 +669,7 @@ private static void decodeArray(this ptr<Decoder> _addr_dec, ptr<decoderState> _
             errorf("length mismatch in decodeArray");
         }
     }
-
     dec.decodeArrayHelper(state, value, elemOp, length, ovfl, helper);
-
 }
 
 // decodeIntoValue is a helper for map decoding.
@@ -718,7 +683,6 @@ private static reflect.Value decodeIntoValue(ptr<decoderState> _addr_state, decO
     }
     op(instr, state, v);
     return value;
-
 }
 
 // decodeMap decodes a map and stores it in value.
@@ -748,7 +712,6 @@ private static void decodeMap(this ptr<Decoder> _addr_dec, reflect.Type mtyp, pt
         keyP.Elem().Set(keyZ);
         elemP.Elem().Set(elemZ);
     }
-
 }
 
 // ignoreArrayHelper does the work for discarding arrays and slices.
@@ -762,9 +725,7 @@ private static void ignoreArrayHelper(this ptr<Decoder> _addr_dec, ptr<decoderSt
             errorf("decoding array or slice: length exceeds input size (%d elements)", length);
         }
         elemOp(instr, state, noValue);
-
     }
-
 }
 
 // ignoreArray discards the data for an array value with no destination.
@@ -779,9 +740,7 @@ private static void ignoreArray(this ptr<Decoder> _addr_dec, ptr<decoderState> _
             errorf("length mismatch in ignoreArray");
         }
     }
-
     dec.ignoreArrayHelper(state, elemOp, length);
-
 }
 
 // ignoreMap discards the data for a map value with no destination.
@@ -814,7 +773,6 @@ private static void decodeSlice(this ptr<Decoder> _addr_dec, ptr<decoderState> _
         // We don't check n against buffer length here because if it's a slice
         // of interfaces, there will be buffer reloads.
         errorf("%s slice too big: %d elements of %d bytes", typ.Elem(), u, size);
-
     }
     if (value.Cap() < n) {
         value.Set(reflect.MakeSlice(typ, n, n));
@@ -824,7 +782,6 @@ private static void decodeSlice(this ptr<Decoder> _addr_dec, ptr<decoderState> _
         value.Set(value.Slice(0, n));
     }
     dec.decodeArrayHelper(state, value, elemOp, n, ovfl, helper);
-
 }
 
 // ignoreSlice skips over the data for a slice value with no destination.
@@ -846,7 +803,6 @@ private static void decodeInterface(this ptr<Decoder> _addr_dec, reflect.Type it
     var nr = state.decodeUint();
     if (nr > 1 << 31) { // zero is permissible for anonymous types
         errorf("invalid type name length %d", nr);
-
     }
     if (nr > uint64(state.b.Len())) {
         errorf("invalid type name length %d: exceeds input size", nr);
@@ -859,7 +815,6 @@ private static void decodeInterface(this ptr<Decoder> _addr_dec, reflect.Type it
         // Copy the nil interface value to the target.
         value.Set(reflect.Zero(value.Type()));
         return ;
-
     }
     if (len(name) > 1024) {
         errorf("name too long (%d bytes): %.20q...", len(name), name);
@@ -886,7 +841,6 @@ private static void decodeInterface(this ptr<Decoder> _addr_dec, reflect.Type it
         errorf("%s is not assignable to type %s", typ, ityp);
     }
     value.Set(v);
-
 }
 
 // ignoreInterface discards the data for an interface value with no destination.
@@ -913,7 +867,6 @@ private static void ignoreInterface(this ptr<Decoder> _addr_dec, ptr<decoderStat
         errorf("bad interface encoding: data length too large for buffer");
     }
     state.b.Drop(n);
-
 }
 
 // decodeGobDecoder decodes something implementing the GobDecoder interface.
@@ -963,7 +916,6 @@ private static void ignoreGobDecoder(this ptr<Decoder> _addr_dec, ptr<decoderSta
         errorf("GobDecoder: invalid data length %d: exceeds input size %d", n, bn);
     }
     state.b.Drop(n);
-
 }
 
 // Index by Go types.
@@ -989,7 +941,6 @@ private static ptr<decOp> decOpFor(this ptr<Decoder> _addr_dec, typeId wireId, r
             return _addr_opPtr!;
         }
     }
-
     var typ = ut.@base;
     ref decOp op = ref heap(out ptr<decOp> _addr_op);
     var k = typ.Kind();
@@ -1043,7 +994,6 @@ private static ptr<decOp> decOpFor(this ptr<Decoder> _addr_dec, typeId wireId, r
                     }
 
                 }
-
                 elemOp = dec.decOpFor(elemId, t.Elem(), name, inProgress);
                 ovfl = overflow(name);
                 helper = decSliceHelper[t.Elem().Kind()];
@@ -1061,7 +1011,6 @@ private static ptr<decOp> decOpFor(this ptr<Decoder> _addr_dec, typeId wireId, r
                 op = (i, state, value) => { 
                     // indirect through enginePtr to delay evaluation for recursive structs.
                     dec.decodeStruct(enginePtr.val, value);
-
                 }
 ;
             else if (t.Kind() == reflect.Interface) 
@@ -1071,13 +1020,11 @@ private static ptr<decOp> decOpFor(this ptr<Decoder> _addr_dec, typeId wireId, r
 ;
 
         }
-
     }
     if (op == null) {
         errorf("decode can't handle type %s", rt);
     }
     return _addr__addr_op!;
-
 }
 
 // decIgnoreOpFor returns the decoding op for a field that has no destination.
@@ -1093,7 +1040,6 @@ private static ptr<decOp> decIgnoreOpFor(this ptr<Decoder> _addr_dec, typeId wir
             return _addr_opPtr!;
         }
     }
-
     var (op, ok) = decIgnoreOpMap[wireId];
     if (!ok) {
         inProgress[wireId] = _addr_op;
@@ -1105,7 +1051,6 @@ private static ptr<decOp> decIgnoreOpFor(this ptr<Decoder> _addr_dec, typeId wir
             }
 ;
             return _addr__addr_op!;
-
         }
         var wire = dec.wireType[wireId];
 
@@ -1143,7 +1088,6 @@ private static ptr<decOp> decIgnoreOpFor(this ptr<Decoder> _addr_dec, typeId wir
             op = (i, state, value) => { 
                 // indirect through enginePtr to delay evaluation for recursive structs
                 state.dec.ignoreStruct(enginePtr.val);
-
             }
 ;
         else if (wire.GobEncoderT != null || wire.BinaryMarshalerT != null || wire.TextMarshalerT != null) 
@@ -1151,13 +1095,11 @@ private static ptr<decOp> decIgnoreOpFor(this ptr<Decoder> _addr_dec, typeId wir
                 state.dec.ignoreGobDecoder(state);
             }
 ;
-        
-    }
+            }
     if (op == null) {
         errorf("bad data: ignore can't handle type %s", wireId.@string());
     }
     return _addr__addr_op!;
-
 }
 
 // gobDecodeOpFor returns the op for a type that is known to implement
@@ -1182,10 +1124,8 @@ private static ptr<decOp> gobDecodeOpFor(this ptr<Decoder> _addr_dec, ptr<userTy
             value = value.Addr();
         }
         state.dec.decodeGobDecoder(ut, state, value);
-
     };
     return _addr__addr_op!;
-
 }
 
 // compatibleType asks: Are these two gob Types compatible?
@@ -1202,7 +1142,6 @@ private static bool compatibleType(this ptr<Decoder> _addr_dec, reflect.Type fr,
             return rhs == fw;
         }
     }
-
     inProgress[fr] = fw;
     var ut = userType(fr);
     var (wire, ok) = dec.wireType[fw]; 
@@ -1217,7 +1156,6 @@ private static bool compatibleType(this ptr<Decoder> _addr_dec, reflect.Type fr,
     }
     if (ut.externalDec != 0) { // This test trumps all others.
         return true;
-
     }
     {
         var t = ut.@base;
@@ -1266,9 +1204,7 @@ private static bool compatibleType(this ptr<Decoder> _addr_dec, reflect.Type fr,
                     sw = wire.SliceT;
                 }
 
-
             }
-
             var elem = userType(t.Elem()).@base;
             return sw != null && dec.compatibleType(elem, sw.Elem, inProgress);
         else if (t.Kind() == reflect.Struct) 
@@ -1278,7 +1214,6 @@ private static bool compatibleType(this ptr<Decoder> _addr_dec, reflect.Type fr,
             return false;
 
     }
-
 }
 
 // typeString returns a human-readable description of the type identified by remoteId.
@@ -1293,12 +1228,9 @@ private static @string typeString(this ptr<Decoder> _addr_dec, typeId remoteId) 
         if (t != null) { 
             // globally known type.
             return t.@string();
-
         }
     }
-
     return dec.wireType[remoteId].@string();
-
 });
 
 // compileSingle compiles the decoder engine for a non-struct top-level value, including
@@ -1320,14 +1252,12 @@ private static (ptr<decEngine>, error) compileSingle(this ptr<Decoder> _addr_dec
             return (_addr_null!, error.As(errors.New("gob: local interface type " + name + " can only be decoded from remote interface type; received concrete type " + remoteType))!);
         }
         return (_addr_null!, error.As(errors.New("gob: decoding into local type " + name + ", received remote type " + remoteType))!);
-
     }
     var op = dec.decOpFor(remoteId, rt, name, make_map<reflect.Type, ptr<decOp>>());
     var ovfl = errors.New("value for \"" + name + "\" out of range");
     engine.instr[singletonField] = new decInstr(*op,singletonField,nil,ovfl);
     engine.numInstr = 1;
     return ;
-
 }
 
 // compileIgnoreSingle compiles the decoder engine for a non-struct top-level value that will be discarded.
@@ -1341,7 +1271,6 @@ private static ptr<decEngine> compileIgnoreSingle(this ptr<Decoder> _addr_dec, t
     engine.instr[0] = new decInstr(*op,0,nil,ovfl);
     engine.numInstr = 1;
     return _addr_engine!;
-
 }
 
 // compileDec compiles the decoder engine for a value. If the value is not a struct,
@@ -1376,7 +1305,6 @@ private static (ptr<decEngine>, error) compileDec(this ptr<Decoder> _addr_dec, t
             wireStruct = wire.StructT;
         }
     }
-
     if (wireStruct == null) {
         errorf("type mismatch in decoder: want struct type %s; got non-struct", rt);
     }
@@ -1404,10 +1332,8 @@ private static (ptr<decEngine>, error) compileDec(this ptr<Decoder> _addr_dec, t
         op = dec.decOpFor(wireField.Id, localField.Type, localField.Name, seen);
         engine.instr[fieldnum] = new decInstr(*op,fieldnum,localField.Index,ovfl);
         engine.numInstr++;
-
     }
     return ;
-
 });
 
 // getDecEnginePtr returns the engine for the specified type.
@@ -1435,7 +1361,6 @@ private static (ptr<ptr<decEngine>>, error) getDecEnginePtr(this ptr<Decoder> _a
         }
     }
     return ;
-
 }
 
 // emptyStruct is the type we compile into when ignoring a struct value.
@@ -1470,7 +1395,6 @@ private static (ptr<ptr<decEngine>>, error) getIgnoreEnginePtr(this ptr<Decoder>
         }
     }
     return ;
-
 }
 
 // decodeValue decodes the data stream representing a value and stores it in value.
@@ -1508,7 +1432,6 @@ private static void decodeValue(this ptr<Decoder> _addr_dec, typeId wireId, refl
             dec.decodeSingle(engine, value);
         }
     }
-
 });
 
 // decodeIgnoredValue decodes the data stream representing a value of the specified type and discards it.
@@ -1562,7 +1485,6 @@ private static void init() => func((_, panic, _) => {
             break;
     }
     decOpTable[reflect.Uintptr] = uop;
-
 });
 
 // Gob depends on being able to take the address

@@ -4,19 +4,20 @@
 
 // +build solaris
 
-// package lif -- go2cs converted at 2022 March 06 23:38:03 UTC
+// package lif -- go2cs converted at 2022 March 13 06:46:20 UTC
 // import "vendor/golang.org/x/net/lif" ==> using lif = go.vendor.golang.org.x.net.lif_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\lif\address.go
-using errors = go.errors_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.net;
 
+using errors = errors_package;
+using @unsafe = @unsafe_package;
+
+
+// An Addr represents an address associated with packet routing.
+
+using System;
 public static partial class lif_package {
 
-    // An Addr represents an address associated with packet routing.
 public partial interface Addr {
     nint Family();
 }
@@ -106,13 +107,11 @@ public static (slice<Addr>, error) Addrs(nint af, @string name) => func((defer, 
                     a = addr(new Inet6Addr(PrefixLen:l,ZoneID:int(nativeEndian.Uint32(lifr.Lifru[24:28]))));
                     copy(a.IP[..], lifr.Lifru[(int)8..(int)24]);
                     as = append(as, a);
-                
-            }
+                            }
 
             ep = ep__prev2;
         }
     }    return (as, error.As(null!)!);
-
 });
 
 private static (slice<byte>, error) parseLinkAddr(slice<byte> b) {
@@ -136,7 +135,6 @@ private static (slice<byte>, error) parseLinkAddr(slice<byte> b) {
         copy(addr, b[..(int)alen]);
     }
     return (addr, error.As(null!)!);
-
 }
 
 } // end lif_package

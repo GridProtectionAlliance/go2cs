@@ -4,8 +4,10 @@
 
 // package sys contains system- and configuration- and architecture-specific
 // constants used by the runtime.
-// package sys -- go2cs converted at 2022 March 06 22:08:18 UTC
+
+// package sys -- go2cs converted at 2022 March 13 05:24:03 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Program Files\Go\src\runtime\internal\sys\sys.go
+namespace go.runtime.@internal;
 
 } // end sys_package

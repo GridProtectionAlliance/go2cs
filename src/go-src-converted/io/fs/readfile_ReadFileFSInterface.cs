@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:12:45 UTC
+//     Generated on 2022 March 13 05:27:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace io
 {
     public static partial class fs_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial interface ReadFileFS
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -38,7 +38,7 @@ namespace io
                 typeof(ReadFileFS<>).CreateInterfaceHandler<ReadFileFS>(target);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public class ReadFileFS<T> : ReadFileFS
         {
             private T m_target = default!;
@@ -135,7 +135,7 @@ namespace go
     {
         private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static T _<T>(this go.io.fs_package.ReadFileFS target)
         {
             try
@@ -148,7 +148,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static bool _<T>(this go.io.fs_package.ReadFileFS target, out T result)
         {
             try
@@ -163,7 +163,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static object? _(this go.io.fs_package.ReadFileFS target, Type type)
         {
             try
@@ -182,7 +182,7 @@ namespace go
             }
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
+        [GeneratedCode("go2cs", "0.1.2.0"), MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static bool _(this go.io.fs_package.ReadFileFS target, Type type, out object? result)
         {
             try

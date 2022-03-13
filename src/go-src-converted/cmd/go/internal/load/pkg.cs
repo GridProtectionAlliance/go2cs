@@ -3,55 +3,57 @@
 // license that can be found in the LICENSE file.
 
 // Package load loads packages.
-// package load -- go2cs converted at 2022 March 06 23:17:12 UTC
+
+// package load -- go2cs converted at 2022 March 13 06:30:30 UTC
 // import "cmd/go/internal/load" ==> using load = go.cmd.go.@internal.load_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\load\pkg.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using scanner = go.go.scanner_package;
-using token = go.go.token_package;
-using goroot = go.@internal.goroot_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
+namespace go.cmd.go.@internal;
 
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using imports = go.cmd.go.@internal.imports_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modinfo = go.cmd.go.@internal.modinfo_package;
-using modload = go.cmd.go.@internal.modload_package;
-using par = go.cmd.go.@internal.par_package;
-using search = go.cmd.go.@internal.search_package;
-using str = go.cmd.go.@internal.str_package;
-using trace = go.cmd.go.@internal.trace_package;
-using sys = go.cmd.@internal.sys_package;
+using bytes = bytes_package;
+using context = context_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using scanner = go.scanner_package;
+using token = go.token_package;
+using goroot = @internal.goroot_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
 
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using imports = cmd.go.@internal.imports_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modinfo = cmd.go.@internal.modinfo_package;
+using modload = cmd.go.@internal.modload_package;
+using par = cmd.go.@internal.par_package;
+using search = cmd.go.@internal.search_package;
+using str = cmd.go.@internal.str_package;
+using trace = cmd.go.@internal.trace_package;
+using sys = cmd.@internal.sys_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
+
+
+// A Package describes a single package found in a directory.
+
 using System.ComponentModel;
 using System;
 using System.Threading;
-
-
-namespace go.cmd.go.@internal;
-
 public static partial class load_package {
 
-    // A Package describes a single package found in a directory.
 public partial struct Package {
     public ref PackagePublic PackagePublic => ref PackagePublic_val; // visible in 'go list'
     public PackageInternal Internal; // for use inside go command only
@@ -229,21 +231,16 @@ private static slice<@string> AllFiles(this ptr<Package> _addr_p) {
                         file = file__prev2;
                     }
                 }
-
                 if (have[file]) {
                     continue;
                 }
-
             }
-
             files = append(files, file);
-
         }
         file = file__prev1;
     }
 
     return files;
-
 }
 
 // Desc returns the package "description", for use in b.showOutput.
@@ -254,7 +251,6 @@ private static @string Desc(this ptr<Package> _addr_p) {
         return p.ImportPath + " [" + p.ForTest + ".test]";
     }
     return p.ImportPath;
-
 }
 
 public partial struct PackageInternal {
@@ -299,17 +295,14 @@ private static @string Error(this ptr<NoGoError> _addr_e) {
     if (len(e.Package.IgnoredGoFiles) > 0) { 
         // Go files exist, but they were ignored due to build constraints.
         return "build constraints exclude all Go files in " + e.Package.Dir;
-
     }
     if (len(e.Package.TestGoFiles) + len(e.Package.XTestGoFiles) > 0) { 
         // Test Go files exist, but we're not interested in them.
         // The double-negative is unfortunate but we want e.Package.Dir
         // to appear at the end of error message.
         return "no non-test Go files in " + e.Package.Dir;
-
     }
     return "no Go files in " + e.Package.Dir;
-
 }
 
 // setLoadPackageDataError presents an error found when loading package data
@@ -331,7 +324,6 @@ private static void setLoadPackageDataError(this ptr<Package> _addr_p, error err
             // but close enough to seem redundant.
             // Unwrap the error so we don't show the pattern.
             err = matchErr.Err;
-
         }
     }
     ptr<build.NoGoError> nogoErr;
@@ -340,7 +332,6 @@ private static void setLoadPackageDataError(this ptr<Package> _addr_p, error err
             p.Dir = nogoErr.Dir;
         }
         err = addr(new NoGoError(Package:p));
-
     }
     @string pos = default;
     bool isScanErr = default;
@@ -354,7 +345,6 @@ private static void setLoadPackageDataError(this ptr<Package> _addr_p, error err
             scanPos.Filename = @base.ShortPath(scanPos.Filename);
             pos = scanPos.String();
             err = errors.New(scanErr[0].Msg);
-
         }
     } 
 
@@ -410,7 +400,6 @@ private static slice<@string> Resolve(this ptr<Package> _addr_p, slice<@string> 
         }
     }    sort.Strings(all);
     return all;
-
 });
 
 // CoverVar holds the name of the generated coverage variables targeting the named file.
@@ -481,7 +470,6 @@ private static void copyBuild(this ptr<Package> _addr_p, PackageOpts opts, ptr<b
     p.TestEmbedPatterns = pp.TestEmbedPatterns;
     p.XTestEmbedPatterns = pp.XTestEmbedPatterns;
     p.Internal.OrigImportPath = pp.ImportPath;
-
 }
 
 // A PackageError describes an error loading information about a package.
@@ -504,7 +492,6 @@ private static @string Error(this ptr<PackageError> _addr_p) {
         // Omit import stack. The full path to the file where the error
         // is the most important thing.
         return p.Pos + ": " + p.Err.Error();
-
     }
     if (len(p.ImportStack) == 0) {
         return p.Err.Error();
@@ -514,7 +501,6 @@ private static @string Error(this ptr<PackageError> _addr_p) {
         optpos = "\n\t" + p.Pos;
     }
     return "package " + strings.Join(p.ImportStack, "\n\timports ") + optpos + ": " + p.Err.Error();
-
 }
 
 private static error Unwrap(this ptr<PackageError> _addr_p) {
@@ -543,7 +529,6 @@ private static void setPos(this ptr<PackageError> _addr_p, slice<token.Position>
     var pos = posList[0];
     pos.Filename = @base.ShortPath(pos.Filename);
     p.Pos = pos.String();
-
 }
 
 // ImportPathError is a type of error that prevents a package from being loaded
@@ -576,9 +561,7 @@ public static ImportPathError ImportErrorf(@string path, @string format, params 
             panic(fmt.Sprintf("path %q not in error %q", path, errStr));
         }
     }
-
     return err;
-
 });
 
 private static @string Error(this ptr<importError> _addr_e) {
@@ -593,7 +576,6 @@ private static error Unwrap(this ptr<importError> _addr_e) {
     // Don't return e.err directly, since we're only wrapping an error if %w
     // was passed to ImportErrorf.
     return error.As(errors.Unwrap(e.err))!;
-
 }
 
 private static @string ImportPath(this ptr<importError> _addr_e) {
@@ -633,7 +615,6 @@ private static @string Top(this ptr<ImportStack> _addr_s) {
         return "";
     }
     return (s.val)[len(s.val) - 1];
-
 }
 
 // shorterThan reports whether sp is shorter than t.
@@ -684,14 +665,8 @@ public static void ClearPackageCachePartial(slice<@string> args) {
             }
 
         }
-
-    }    resolvedImportCache.DeleteIf(key => {
-        return shouldDelete[key._<importSpec>().path];
-    });
-    packageDataCache.DeleteIf(key => {
-        return shouldDelete[key._<@string>()];
-    });
-
+    }    resolvedImportCache.DeleteIf(key => shouldDelete[key._<importSpec>().path]);
+    packageDataCache.DeleteIf(key => shouldDelete[key._<@string>()]);
 }
 
 // ReloadPackageNoFlags is like LoadImport but makes sure
@@ -704,13 +679,10 @@ public static ptr<Package> ReloadPackageNoFlags(@string arg, ptr<ImportStack> _a
     var p = packageCache[arg];
     if (p != null) {
         delete(packageCache, arg);
-        resolvedImportCache.DeleteIf(key => {
-            return _addr_key._<importSpec>().path == p.ImportPath!;
-        });
+        resolvedImportCache.DeleteIf(key => _addr_key._<importSpec>().path == p.ImportPath!);
         packageDataCache.Delete(p.ImportPath);
     }
     return _addr_LoadImport(context.TODO(), new PackageOpts(), arg, @base.Cwd(), _addr_null, _addr_stk, null, 0)!;
-
 }
 
 // dirToImportPath returns the pseudo-import path we use for a package
@@ -732,7 +704,6 @@ private static int makeImportValid(int r) {
         return '_';
     }
     return r;
-
 }
 
 // Mode flags for loadImport and download (in get.go).
@@ -755,7 +726,6 @@ public static readonly var ResolveModule = 0;
 // GetTestDeps is for download (part of "go get") and indicates
 // that test dependencies should be fetched too.
 public static readonly var GetTestDeps = 1;
-
 
 // LoadImport scans the directory named by path, which must be an import path,
 // but possibly a local import path (an absolute file system path or one beginning
@@ -806,14 +776,11 @@ private static ptr<Package> loadImport(context.Context ctx, PackageOpts opts, pt
                 // condition and eliminate the explicit calls here.
                 stk.Push(path);
                 defer(stk.Pop());
-
             }
 
         }
-
         p.setLoadPackageDataError(err, path, stk, null);
         return _addr_p!;
-
     }
     var importPath = bp.ImportPath;
     p = packageCache[importPath];
@@ -852,7 +819,6 @@ private static ptr<Package> loadImport(context.Context ctx, PackageOpts opts, pt
         perr = perr__prev1;
 
     }
-
     if (mode & ResolveImport != 0) {
         {
             var perr__prev2 = perr;
@@ -867,7 +833,6 @@ private static ptr<Package> loadImport(context.Context ctx, PackageOpts opts, pt
             perr = perr__prev2;
 
         }
-
     }
     if (p.Name == "main" && parent != null && parent.Dir != p.Dir) {
         perr = p.val;
@@ -888,10 +853,8 @@ private static ptr<Package> loadImport(context.Context ctx, PackageOpts opts, pt
         perr.Error = addr(new PackageError(ImportStack:stk.Copy(),Err:err,));
         perr.Error.setPos(importPos);
         return _addr__addr_perr!;
-
     }
     return _addr_p!;
-
 });
 
 // loadPackageData loads information needed to construct a *Package. The result
@@ -918,7 +881,6 @@ private static (ptr<build.Package>, bool, error) loadPackageData(context.Context
         // standard library (since it does not begin with a domain name),
         // so it's OK to disallow entirely.
         return (_addr_null!, false, error.As(fmt.Errorf("disallowed import path %q", path))!);
-
     }
     if (strings.Contains(path, "@")) {
         return (_addr_null!, false, error.As(errors.New("can only use path@version syntax with 'go get' and 'go install' in module-aware mode"))!);
@@ -939,7 +901,6 @@ private static (ptr<build.Package>, bool, error) loadPackageData(context.Context
             // overhead of repeated calls to buildContext.Import.
             // The code is also needed in a few other places anyway.
             r.path = resolveImportPath(path, parentPath, parentDir, parentRoot, parentIsStd);
-
         }
         else if (mode & ResolveModule != 0) {
             r.path = moduleImportPath(path, parentPath, parentDir, parentRoot);
@@ -948,7 +909,6 @@ private static (ptr<build.Package>, bool, error) loadPackageData(context.Context
             r.path = path;
         }
         return _addr_r!;
-
     })._<resolvedImport>(); 
     // Invariant: r.path is set to the resolved import path. If the path cannot
     // be resolved, r.path is set to path, the source import path.
@@ -976,9 +936,7 @@ private static (ptr<build.Package>, bool, error) loadPackageData(context.Context
                     }
 
                 }
-
             }
-
             if (r.err != null) {
                 if (data.err != null) { 
                     // ImportDir gave us one error, and the module loader gave us another.
@@ -1002,9 +960,7 @@ private static (ptr<build.Package>, bool, error) loadPackageData(context.Context
  {
                     data.err = r.err;
                 }
-
             }
-
         }
         else if (r.err != null) {
             data.p = @new<build.Package>();
@@ -1020,11 +976,8 @@ private static (ptr<build.Package>, bool, error) loadPackageData(context.Context
             if (mode & ResolveImport == 0 || r.path != path) { 
                 // Not vendoring, or we already found the vendored path.
                 buildMode |= build.IgnoreVendor;
-
             }
-
             data.p, data.err = cfg.BuildContext.Import(r.path, parentDir, buildMode);
-
         }
         data.p.ImportPath = r.path; 
 
@@ -1037,17 +990,14 @@ private static (ptr<build.Package>, bool, error) loadPackageData(context.Context
             else if (cfg.ModulesEnabled) {
                 data.p.BinDir = modload.BinDir();
             }
-
         }
         if (!cfg.ModulesEnabled && data.err == null && data.p.ImportComment != "" && data.p.ImportComment != path && !strings.Contains(path, "/vendor/") && !strings.HasPrefix(path, "vendor/")) {
             data.err = fmt.Errorf("code in directory %s expects import %q", data.p.Dir, data.p.ImportComment);
         }
         return _addr_data!;
-
     })._<packageData>();
 
     return (_addr_data.p!, loaded, error.As(data.err)!);
-
 });
 
 // importSpec describes an import declaration in source code. It is used as a
@@ -1136,9 +1086,7 @@ private static void preloadMatches(this ptr<preload> _addr_pre, context.Context 
                 if (bp != null && loaded && err == null && !opts.IgnoreImports) {
                     pre.preloadImports(ctx, opts, bp.Imports, bp);
                 }
-
             }(pkg));
-
         }
     }
 }
@@ -1163,7 +1111,6 @@ private static void preloadImports(this ptr<preload> _addr_pre, context.Context 
                 pre.preloadImports(ctx, opts, bp.Imports, bp);
             }
         }(path));
-
     }
 }
 
@@ -1183,12 +1130,10 @@ private static void flush(this ptr<preload> _addr_pre) => func((_, panic, _) => 
         }
     }
 
-
     close(pre.cancel);
     for (nint i = 0; i < preloadWorkerCount; i++) {
         pre.sema.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
     }
-
 });
 
 private static @string cleanImport(@string path) {
@@ -1198,7 +1143,6 @@ private static @string cleanImport(@string path) {
         path = "./" + path;
     }
     return path;
-
 }
 
 private static par.Cache isDirCache = default;
@@ -1229,7 +1173,6 @@ public static @string ResolveImportPath(ptr<Package> _addr_parent, @string path)
         parentIsStd = parent.Standard;
     }
     return resolveImportPath(path, parentPath, parentDir, parentRoot, parentIsStd);
-
 }
 
 private static @string resolveImportPath(@string path, @string parentPath, @string parentDir, @string parentRoot, bool parentIsStd) {
@@ -1244,16 +1187,13 @@ private static @string resolveImportPath(@string path, @string parentPath, @stri
             }
 
         }
-
         return path;
-
     }
     found = vendoredImportPath(path, parentPath, parentDir, parentRoot);
     if (found != path) {
         return found;
     }
     return moduleImportPath(path, parentPath, parentDir, parentRoot);
-
 }
 
 // dirAndRoot returns the source directory and workspace root
@@ -1270,13 +1210,11 @@ private static (@string, @string) dirAndRoot(@string path, @string dir, @string 
         // Look for symlinks before reporting error.
         dir = expandPath(dir);
         root = expandPath(root);
-
     }
     if (!str.HasFilePathPrefix(dir, root) || len(dir) <= len(root) || dir[len(root)] != filepath.Separator || path != "command-line-arguments" && !build.IsLocalImport(path) && filepath.Join(root, path) != dir) {
         @base.Fatalf("unexpected directory layout:\n" + "	import path: %s\n" + "	root: %s\n" + "	dir: %s\n" + "	expand root: %s\n" + "	expand dir: %s\n" + "	separator: %s", path, filepath.Join(origRoot, "src"), filepath.Clean(origDir), origRoot, origDir, string(filepath.Separator));
     }
     return (dir, root);
-
 }
 
 // vendoredImportPath returns the vendor-expansion of path when it appears in parent.
@@ -1306,7 +1244,6 @@ private static @string vendoredImportPath(@string path, @string parentPath, @str
                 // If parent.ImportPath is 'command-line-arguments'.
                 // set to relative directory to root (also chopped root directory)
                 importPath = dir[(int)len(root) + 1..];
-
             } 
             // We started with parent's dir c:\gopath\src\foo\bar\baz\quux\xyzzy.
             // We know the import path for parent's dir.
@@ -1323,15 +1260,11 @@ private static @string vendoredImportPath(@string path, @string parentPath, @str
                 // We chopped \foo\bar (length 8) but the import path is "foo/bar" (length 7).
                 // Use "vendor/path" without any prefix.
                 return vpath;
-
             }
-
             return importPath[..(int)len(importPath) - chopped] + "/" + vpath;
-
         }
     }
     return path;
-
 }
 
 private static slice<byte> modulePrefix = (slice<byte>)"\nmodule ";private static par.Cache goModPathCache = default;
@@ -1368,7 +1301,6 @@ private static @string goModPath(@string dir) {
             }
 
         }
-
         if (line[len(line) - 1] == '\r') {
             line = line[..(int)len(line) - 1];
         }
@@ -1384,9 +1316,7 @@ private static @string goModPath(@string dir) {
             path = s;
         }
         return path;
-
     })._<@string>();
-
 }
 
 // findVersionElement returns the slice indices of the final version element /vN in path.
@@ -1405,7 +1335,6 @@ private static (nint, nint) findVersionElement(@string path) {
         }
     }
     return (-1, -1);
-
 }
 
 // isVersionElement reports whether s is a well-formed path version element:
@@ -1420,7 +1349,6 @@ private static bool isVersionElement(@string s) {
         }
     }
     return true;
-
 }
 
 // moduleImportPath translates import paths found in go modules
@@ -1448,7 +1376,6 @@ private static @string moduleImportPath(@string path, @string parentPath, @strin
         i = i__prev1;
 
     }
-
 
     var (dir, root) = dirAndRoot(parentPath, parentDir, parentRoot); 
 
@@ -1522,22 +1449,17 @@ HaveGoMod:
                         // and the go.mod indicates that we should
                         // not consider parent directories.
                         return path;
-
                     }
 
                 }
-
             }
 
             bp = bp__prev1;
 
         }
-
         limit = i;
-
     }
     return path;
-
 }
 
 // hasGoFiles reports whether dir contains any files with names ending in .go.
@@ -1551,7 +1473,6 @@ private static bool hasGoFiles(@string dir) {
             return true;
         }
     }    return false;
-
 }
 
 // reusePackage reuses package p to satisfy the import at the top
@@ -1573,16 +1494,13 @@ private static ptr<Package> reusePackage(ptr<Package> _addr_p, ptr<ImportStack> 
             // we are in an import cycle, set IsImportCycle so that we don't
             // end up stuck in a loop down the road.
             p.Error.IsImportCycle = true;
-
         }
         p.Incomplete = true;
-
     }
     if (p.Error != null && !p.Error.IsImportCycle && stk.shorterThan(p.Error.ImportStack)) {
         p.Error.ImportStack = stk.Copy();
     }
     return _addr_p!;
-
 }
 
 // disallowInternal checks that srcDir (containing package importerPath, if non-empty)
@@ -1645,7 +1563,6 @@ private static ptr<Package> disallowInternal(context.Context ctx, @string srcDir
             // If the directory is outside the main module, this will resolve to ".",
             // which is not a prefix of any valid module.
             importerPath = modload.DirImportPath(ctx, importer.Dir);
-
         }
         var parentOfInternal = p.ImportPath[..(int)i];
         if (str.HasPathPrefix(importerPath, parentOfInternal)) {
@@ -1656,7 +1573,6 @@ private static ptr<Package> disallowInternal(context.Context ctx, @string srcDir
     perr.Error = addr(new PackageError(alwaysPrintStack:true,ImportStack:stk.Copy(),Err:ImportErrorf(p.ImportPath,"use of internal package "+p.ImportPath+" not allowed"),));
     perr.Incomplete = true;
     return _addr__addr_perr!;
-
 }
 
 // findInternal looks for the final "internal" path element in the given import path.
@@ -1678,7 +1594,6 @@ private static (nint, bool) findInternal(@string path) {
     else if (path == "internal" || strings.HasPrefix(path, "internal/")) 
         return (0, true);
         return (0, false);
-
 }
 
 // disallowVendor checks that srcDir is allowed to import p as path.
@@ -1718,9 +1633,7 @@ private static ptr<Package> disallowVendor(@string srcDir, @string path, @string
         }
     }
 
-
     return _addr_p!;
-
 }
 
 // disallowVendorVisibility checks that srcDir is allowed to import p.
@@ -1763,7 +1676,6 @@ private static ptr<Package> disallowVendorVisibility(@string srcDir, ptr<Package
     perr.Error = addr(new PackageError(ImportStack:stk.Copy(),Err:errors.New("use of vendored package not allowed"),));
     perr.Incomplete = true;
     return _addr__addr_perr!;
-
 }
 
 // FindVendor looks for the last non-terminating "vendor" path element in the given import path.
@@ -1787,7 +1699,6 @@ public static (nint, bool) FindVendor(@string path) {
     else if (strings.HasPrefix(path, "vendor/")) 
         return (0, true);
         return (0, false);
-
 }
 
 public partial struct TargetDir { // : nint
@@ -1813,10 +1724,8 @@ public static TargetDir InstallTargetDir(ptr<Package> _addr_p) {
                 break;
         }
         return ToTool;
-
     }
     return ToBin;
-
 }
 
 private static map cgoExclude = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"runtime/cgo":true,};
@@ -1845,7 +1754,6 @@ private static @string exeFromImportPath(this ptr<Package> _addr_p) {
         }
     }
     return elem;
-
 }
 
 // exeFromFiles returns an executable name for a package
@@ -1868,7 +1776,6 @@ private static @string exeFromFiles(this ptr<Package> _addr_p) {
     }
     var (_, elem) = filepath.Split(src);
     return elem[..(int)len(elem) - len(".go")];
-
 }
 
 // DefaultExecName returns the default executable name for a package
@@ -1879,7 +1786,6 @@ private static @string DefaultExecName(this ptr<Package> _addr_p) {
         return p.exeFromFiles();
     }
     return p.exeFromImportPath();
-
 }
 
 // load populates p using information from bp, err, which should
@@ -1910,7 +1816,6 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
             if (path != stk.Top() && len(importPos) > 0) {
                 p.Error.setPos(importPos);
             }
-
         }
     };
 
@@ -1929,7 +1834,6 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
                 useBindir = false;
                 break;
         }
-
     }
     if (useBindir) { 
         // Report an error when the old code.google.com/p/go.tools paths are used.
@@ -1940,14 +1844,12 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
             var e = ImportErrorf(p.ImportPath, "the %v command has moved; use %v instead.", p.ImportPath, newPath);
             setError(e);
             return ;
-
         }
         var elem = p.DefaultExecName();
         var full = cfg.BuildContext.GOOS + "_" + cfg.BuildContext.GOARCH + "/" + elem;
         if (cfg.BuildContext.GOOS != @base.ToolGOOS || cfg.BuildContext.GOARCH != @base.ToolGOARCH) { 
             // Install cross-compiled binaries to subdirectories of bin.
             elem = full;
-
         }
         if (p.Internal.Build.BinDir == "" && cfg.ModulesEnabled) {
             p.Internal.Build.BinDir = modload.BinDir();
@@ -1959,9 +1861,7 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
                 // Do not create $GOBIN/goos_goarch/elem.
                 p.Target = "";
                 p.Internal.GobinSubdir = true;
-
             }
-
         }
         if (InstallTargetDir(_addr_p) == ToTool) { 
             // This is for 'go tool'.
@@ -1973,7 +1873,6 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
  {
                 p.Target = filepath.Join(cfg.GOROOTpkg, "tool", full);
             }
-
         }
         if (p.Target != "" && cfg.BuildContext.GOOS == "windows") {
             p.Target += ".exe";
@@ -1983,7 +1882,6 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
         // Local import turned into absolute path.
         // No permanent install target.
         p.Target = "";
-
     }
     else
  {
@@ -1997,7 +1895,6 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
             if (err != null && !os.IsNotExist(err)) {
                 @base.Fatalf("reading shlibname: %v", err);
             }
-
             if (err == null) {
                 var libname = strings.TrimSpace(string(shlib));
                 if (cfg.BuildContext.Compiler == "gccgo") {
@@ -2007,9 +1904,7 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
  {
                     p.Shlib = filepath.Join(p.Internal.Build.PkgTargetRoot, libname);
                 }
-
             }
-
         }
     }
     var importPaths = p.Imports;
@@ -2066,7 +1961,6 @@ private static void load(this ptr<Package> _addr_p, context.Context ctx, Package
         }
 
     }
-
 
     if (!SafeArg(p.ImportPath)) {
         setError(ImportErrorf(p.ImportPath, "invalid import path %q", p.ImportPath));
@@ -2250,7 +2144,6 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
                 if (err != null) {
                     return (null, null, error.As(err)!);
                 }
-
                 if (info.IsDir()) {
                     what = "directory";
                 } 
@@ -2270,7 +2163,6 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
                             }
 
                         }
-
                         if (dir != file) {
                             {
                                 var info__prev2 = info;
@@ -2284,9 +2176,7 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
                                 info = info__prev2;
 
                             }
-
                         }
-
                         dirOK[dir] = true;
                         {
                             var elem = filepath.Base(dir);
@@ -2299,11 +2189,9 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
  {
                                     return (null, null, error.As(fmt.Errorf("cannot embed %s %s: in invalid directory %s", what, rel, elem))!);
                                 }
-
                             }
 
                         }
-
                     }
 
                 }
@@ -2331,11 +2219,8 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
                             if (info.IsDir()) {
                                 return fs.SkipDir;
                             }
-
                             return null;
-
                         }
-
                         if (info.IsDir()) {
                             {
                                 (_, err) = fsys.Stat(filepath.Join(path, "go.mod"));
@@ -2345,36 +2230,27 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
                                 }
 
                             }
-
                             return null;
-
                         }
-
                         if (!info.Mode().IsRegular()) {
                             return null;
                         }
-
                         count++;
                         if (have[rel] != pid) {
                             have[rel] = pid;
                             list = append(list, rel);
                         }
-
                         return null;
-
                     });
                     if (err != null) {
                         return (null, null, error.As(err)!);
                     }
-
                     if (count == 0) {
                         return (null, null, error.As(fmt.Errorf("cannot embed directory %s: contains no embeddable files", rel))!);
                     }
-
                 else 
                     return (null, null, error.As(fmt.Errorf("cannot embed irregular file %s", rel))!);
-                
-            }
+                            }
 
             file = file__prev2;
         }
@@ -2384,7 +2260,6 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
         }
         sort.Strings(list);
         pmap[pattern] = list;
-
     }
     {
         var file__prev1 = file;
@@ -2398,7 +2273,6 @@ private static (slice<@string>, map<@string, slice<@string>>, error) resolveEmbe
 
     sort.Strings(files);
     return (files, pmap, error.As(null!)!);
-
 });
 
 private static bool validEmbedPattern(@string pattern) {
@@ -2416,7 +2290,6 @@ private static bool isBadEmbedName(@string name) {
             return true;
         }
     }
-
     switch (name) { 
     // Empty string should be impossible but make it bad.
         case "": 
@@ -2434,7 +2307,6 @@ private static bool isBadEmbedName(@string name) {
             break;
     }
     return false;
-
 }
 
 // collectDeps populates p.Deps and p.DepsErrors by iterating over
@@ -2509,7 +2381,6 @@ public static bool SafeArg(@string name) {
     }
     var c = name[0];
     return '0' <= c && c <= '9' || 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || c == '.' || c == '_' || c == '/' || c >= utf8.RuneSelf;
-
 }
 
 // LinkerDeps returns the list of linker-induced dependencies for main package p.
@@ -2533,7 +2404,6 @@ public static slice<@string> LinkerDeps(ptr<Package> _addr_p) {
         deps = append(deps, "runtime/msan");
     }
     return deps;
-
 }
 
 // externalLinkingForced reports whether external linking is being
@@ -2575,12 +2445,9 @@ private static bool externalLinkingForced(ptr<Package> _addr_p) {
             else if (a == "-linkmode=internal" || a == "-linkmode" && i + 1 < len(ldflags) && ldflags[i + 1] == "internal") {
                 break;
             }
-
         }
-
     }
     return cfg.BuildBuildmode == "c-shared" || cfg.BuildBuildmode == "plugin" || pieCgo || cfg.BuildLinkshared || linkmodeExternal;
-
 }
 
 // mkAbs rewrites list, which must be paths relative to p.Dir,
@@ -2648,12 +2515,10 @@ public static slice<ptr<Package>> PackageList(slice<ptr<Package>> roots) {
         foreach (var (_, p1) in p.Internal.Imports) {
             walk(p1);
         }        all = append(all, p);
-
     };
     foreach (var (_, root) in roots) {
         walk(root);
     }    return all;
-
 }
 
 // TestPackageList returns the list of packages in the dag rooted at roots
@@ -2680,7 +2545,6 @@ public static slice<ptr<Package>> TestPackageList(context.Context ctx, PackageOp
         }
 
         all = append(all, p);
-
     };
     Action<ptr<Package>, @string> walkTest = (root, path) => {
         ref ImportStack stk = ref heap(out ptr<ImportStack> _addr_stk);
@@ -2713,7 +2577,6 @@ public static slice<ptr<Package>> TestPackageList(context.Context ctx, PackageOp
             path = path__prev2;
         }
     }    return all;
-
 }
 
 // LoadImportWithFlags loads the package with the given import path and
@@ -2779,9 +2642,7 @@ public static slice<ptr<Package>> PackagesAndErrors(context.Context ctx, Package
                     }
 
                 }
-
             }
-
         }
         p = p__prev1;
     }
@@ -2816,16 +2677,12 @@ public static slice<ptr<Package>> PackagesAndErrors(context.Context ctx, Package
                 // because maybe we'll see p matching both
                 // a literal and also a non-literal pattern.
                 p.Internal.CmdlinePkgLiteral = true;
-
             }
-
             if (seenPkg[p]) {
                 continue;
             }
-
             seenPkg[p] = true;
             pkgs = append(pkgs, p);
-
         }        if (len(m.Errs) > 0) { 
             // In addition to any packages that were actually resolved from the
             // pattern, there was some error in resolving the pattern itself.
@@ -2842,9 +2699,7 @@ public static slice<ptr<Package>> PackagesAndErrors(context.Context ctx, Package
             if (m.IsLiteral()) {
                 p.Internal.CmdlinePkgLiteral = true;
             }
-
             pkgs = append(pkgs, p);
-
         }
     }    if (opts.MainOnly) {
         pkgs = mainPackagesOnly(pkgs, matches);
@@ -2852,7 +2707,6 @@ public static slice<ptr<Package>> PackagesAndErrors(context.Context ctx, Package
     setToolFlags(_addr_pkgs);
 
     return pkgs;
-
 });
 
 // CheckPackageErrors prints errors encountered loading pkgs and their
@@ -2877,9 +2731,7 @@ public static void CheckPackageErrors(slice<ptr<Package>> pkgs) {
                     printed[err] = true;
                     @base.Errorf("%v", err);
                 }
-
             }
-
         }
         pkg = pkg__prev1;
     }
@@ -2908,7 +2760,6 @@ public static void CheckPackageErrors(slice<ptr<Package>> pkgs) {
     }
 
     @base.ExitIfErrors();
-
 }
 
 // mainPackagesOnly filters out non-main packages matched only by arguments
@@ -2941,7 +2792,6 @@ private static slice<ptr<Package>> mainPackagesOnly(slice<ptr<Package>> pkgs, sl
                     path = path__prev2;
                 }
             }
-
         }
         m = m__prev1;
     }
@@ -2958,7 +2808,6 @@ private static slice<ptr<Package>> mainPackagesOnly(slice<ptr<Package>> pkgs, sl
             // tell whether one of them is "main". So assume that it could be, and
             // report an error for the package.
             treatAsMain[pkg.ImportPath] = true;
-
         }
         if (treatAsMain[pkg.ImportPath]) {
             if (pkg.Error == null) {
@@ -2992,13 +2841,11 @@ private static slice<ptr<Package>> mainPackagesOnly(slice<ptr<Package>> pkgs, sl
             if (!foundMain) {
                 fmt.Fprintf(os.Stderr, "go: warning: %q matched only non-main packages\n", m.Pattern());
             }
-
         }
         m = m__prev1;
     }
 
     return mains;
-
 }
 
 private partial struct mainPackageError {
@@ -3073,7 +2920,6 @@ public static ptr<Package> GoFilesPackage(context.Context ctx, PackageOpts opts,
             @base.Fatalf("named files must all be in one directory; have %s and %s", dir, dir1);
         }
         dirent = append(dirent, fi);
-
     }    ctxt.ReadDir = _p0 => (_addr_dirent!, null);
 
     if (cfg.ModulesEnabled) {
@@ -3113,7 +2959,6 @@ public static ptr<Package> GoFilesPackage(context.Context ctx, PackageOpts opts,
     setToolFlags(pkg);
 
     return _addr_pkg!;
-
 }
 
 // PackagesAndErrorsOutsideModule is like PackagesAndErrors but runs in
@@ -3163,7 +3008,6 @@ public static (slice<ptr<Package>>, error) PackagesAndErrorsOutsideModule(contex
                 i = i__prev1;
 
             }
-
         }
         arg = arg__prev1;
     }
@@ -3193,8 +3037,7 @@ public static (slice<ptr<Package>>, error) PackagesAndErrorsOutsideModule(contex
                 return (null, error.As(fmt.Errorf("%s: argument must not be a package in the standard library", arg))!);
             else 
                 patterns[i] = p;
-            
-        }
+                    }
         i = i__prev1;
         arg = arg__prev1;
     }
@@ -3203,7 +3046,6 @@ public static (slice<ptr<Package>>, error) PackagesAndErrorsOutsideModule(contex
     if (modload.IsRevisionQuery(version)) { 
         // Don't check for retractions if a specific revision is requested.
         allowed = null;
-
     }
     Func<@string, @string> noneSelected = path => "none";
     var (qrs, err) = modload.QueryPackages(ctx, patterns[0], version, noneSelected, allowed);
@@ -3244,7 +3086,6 @@ public static (slice<ptr<Package>>, error) PackagesAndErrorsOutsideModule(contex
             // Packages in std, cmd, and their vendored dependencies
             // don't have this field set.
             pkgErr = error.As(fmt.Errorf("package %s not provided by module %s", pkg.ImportPath, rootMod))!;
-
         }
         else if (pkg.Module.Path != rootMod.Path || pkg.Module.Version != rootMod.Version) {
             pkgErr = error.As(fmt.Errorf("package %s provided by module %s@%s\n\tAll packages must be provided by the same module (%s).", pkg.ImportPath, pkg.Module.Path, pkg.Module.Version, rootMod))!;
@@ -3269,7 +3110,6 @@ public static (slice<ptr<Package>>, error) PackagesAndErrorsOutsideModule(contex
     }
 
     return (pkgs, error.As(null!)!);
-
 });
 
 } // end load_package

@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:20 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:24 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\cli.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using binutils = go.github.com.google.pprof.@internal.binutils_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
+using strings = strings_package;
+
+using binutils = github.com.google.pprof.@internal.binutils_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using System;
 
 public static partial class driver_package {
 
@@ -97,7 +96,6 @@ private static (ptr<source>, slice<@string>, error) parseFlags(ptr<plugin.Option
  {
                 flagCommands[name] = flag.Bool(name, false, "Generate a report in " + name + " format");
             }
-
         }
         cmd = cmd__prev1;
     }
@@ -127,11 +125,9 @@ private static (ptr<source>, slice<@string>, error) parseFlags(ptr<plugin.Option
                 args = args[(int)1..];
             }
 
-
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -144,7 +140,6 @@ private static (ptr<source>, slice<@string>, error) parseFlags(ptr<plugin.Option
         err = err__prev1;
 
     }
-
 
     var (cmd, err) = outputFormat(flagCommands, flagParamCommands);
     if (err != null) {
@@ -183,7 +178,6 @@ private static (ptr<source>, slice<@string>, error) parseFlags(ptr<plugin.Option
 
     }
 
-
     var normalize = cfg.Normalize;
     if (normalize && len(source.Base) == 0) {
         return (_addr_null!, null, error.As(errors.New("must have base profile to normalize by"))!);
@@ -198,10 +192,8 @@ private static (ptr<source>, slice<@string>, error) parseFlags(ptr<plugin.Option
         }
     }
 
-
     setCurrentConfig(cfg);
     return (_addr_source!, cmd, error.As(null!)!);
-
 }
 
 // addBaseProfiles adds the list of base profiles or diff base profiles to
@@ -220,7 +212,6 @@ private static error addBaseProfiles(this ptr<source> _addr_source, slice<ptr<@s
         (source.Base, source.DiffBase) = (diffBase, true);
     }
     return error.As(null!)!;
-
 }
 
 // dropEmpty list takes a slice of string pointers, and outputs a slice of
@@ -232,7 +223,6 @@ private static slice<@string> dropEmpty(slice<ptr<@string>> list) {
             l = append(l, s.val);
         }
     }    return l;
-
 }
 
 // installConfigFlags creates command line flags for configuration
@@ -280,7 +270,6 @@ private static Func<error> installConfigFlags(plugin.FlagSet flag, ptr<config> _
                     }
                 else
 ;
-
                 } { 
                     // Make a separate flag per possible choice.
                     // Set all flags to initially false so we can
@@ -307,16 +296,12 @@ private static Func<error> installConfigFlags(plugin.FlagSet flag, ptr<config> _
                                 err = error.As(fmt.Errorf("conflicting options set: %v", set))!;
                                 break;
                         }
-
                     }
 ;
-
                 }
-
                 break;
         }
         setters = append(setters, setter);
-
     }    return () => { 
         // Apply the setter for every flag.
         {
@@ -334,9 +319,7 @@ private static Func<error> installConfigFlags(plugin.FlagSet flag, ptr<config> _
         }
 
         return null;
-
     };
-
 }
 
 // isBuildID determines if the profile may contain a build ID, by
@@ -353,10 +336,8 @@ private static @string sampleIndex(ptr<bool> _addr_flag, @string si, @string sam
             return sampleType;
         }
         ui.PrintErr("Multiple value selections, ignoring ", option);
-
     }
     return si;
-
 }
 
 private static (slice<@string>, error) outputFormat(map<@string, ptr<bool>> bcmd, map<@string, ptr<@string>> acmd) {
@@ -396,7 +377,6 @@ private static (slice<@string>, error) outputFormat(map<@string, ptr<bool>> bcmd
     }
 
     return (cmd, error.As(null!)!);
-
 }
 
 private static @string usageMsgHdr = @"usage:

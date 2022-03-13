@@ -70,72 +70,74 @@
 //
 // For more information about pprof, see
 // https://github.com/google/pprof/blob/master/doc/README.md.
-// package pprof -- go2cs converted at 2022 March 06 22:14:44 UTC
+
+// package pprof -- go2cs converted at 2022 March 13 05:28:44 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\pprof.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using tabwriter = go.text.tabwriter_package;
-using time = go.time_package;
-using @unsafe = go.@unsafe_package;
-using System;
-using System.Threading;
-
-
 namespace go.runtime;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using tabwriter = text.tabwriter_package;
+using time = time_package;
+using @unsafe = @unsafe_package;
+
+
+// BUG(rsc): Profiles are only as good as the kernel support used to generate them.
+// See https://golang.org/issue/13841 for details about known problems.
+
+// A Profile is a collection of stack traces showing the call sequences
+// that led to instances of a particular event, such as allocation.
+// Packages can create and maintain their own profiles; the most common
+// use is for tracking resources that must be explicitly closed, such as files
+// or network connections.
+//
+// A Profile's methods can be called from multiple goroutines simultaneously.
+//
+// Each Profile has a unique name. A few profiles are predefined:
+//
+//    goroutine    - stack traces of all current goroutines
+//    heap         - a sampling of memory allocations of live objects
+//    allocs       - a sampling of all past memory allocations
+//    threadcreate - stack traces that led to the creation of new OS threads
+//    block        - stack traces that led to blocking on synchronization primitives
+//    mutex        - stack traces of holders of contended mutexes
+//
+// These predefined profiles maintain themselves and panic on an explicit
+// Add or Remove method call.
+//
+// The heap profile reports statistics as of the most recently completed
+// garbage collection; it elides more recent allocation to avoid skewing
+// the profile away from live data and toward garbage.
+// If there has been no garbage collection at all, the heap profile reports
+// all known allocations. This exception helps mainly in programs running
+// without garbage collection enabled, usually for debugging purposes.
+//
+// The heap profile tracks both the allocation sites for all live objects in
+// the application memory and for all objects allocated since the program start.
+// Pprof's -inuse_space, -inuse_objects, -alloc_space, and -alloc_objects
+// flags select which to display, defaulting to -inuse_space (live objects,
+// scaled by size).
+//
+// The allocs profile is the same as the heap profile but changes the default
+// pprof display to -alloc_space, the total number of bytes allocated since
+// the program began (including garbage-collected bytes).
+//
+// The CPU profile is not available as a Profile. It has a special API,
+// the StartCPUProfile and StopCPUProfile functions, because it streams
+// output to a writer during profiling.
+//
+
+using System;
+using System.Threading;
 public static partial class pprof_package {
 
-    // BUG(rsc): Profiles are only as good as the kernel support used to generate them.
-    // See https://golang.org/issue/13841 for details about known problems.
-
-    // A Profile is a collection of stack traces showing the call sequences
-    // that led to instances of a particular event, such as allocation.
-    // Packages can create and maintain their own profiles; the most common
-    // use is for tracking resources that must be explicitly closed, such as files
-    // or network connections.
-    //
-    // A Profile's methods can be called from multiple goroutines simultaneously.
-    //
-    // Each Profile has a unique name. A few profiles are predefined:
-    //
-    //    goroutine    - stack traces of all current goroutines
-    //    heap         - a sampling of memory allocations of live objects
-    //    allocs       - a sampling of all past memory allocations
-    //    threadcreate - stack traces that led to the creation of new OS threads
-    //    block        - stack traces that led to blocking on synchronization primitives
-    //    mutex        - stack traces of holders of contended mutexes
-    //
-    // These predefined profiles maintain themselves and panic on an explicit
-    // Add or Remove method call.
-    //
-    // The heap profile reports statistics as of the most recently completed
-    // garbage collection; it elides more recent allocation to avoid skewing
-    // the profile away from live data and toward garbage.
-    // If there has been no garbage collection at all, the heap profile reports
-    // all known allocations. This exception helps mainly in programs running
-    // without garbage collection enabled, usually for debugging purposes.
-    //
-    // The heap profile tracks both the allocation sites for all live objects in
-    // the application memory and for all objects allocated since the program start.
-    // Pprof's -inuse_space, -inuse_objects, -alloc_space, and -alloc_objects
-    // flags select which to display, defaulting to -inuse_space (live objects,
-    // scaled by size).
-    //
-    // The allocs profile is the same as the heap profile but changes the default
-    // pprof display to -alloc_space, the total number of bytes allocated since
-    // the program began (including garbage-collected bytes).
-    //
-    // The CPU profile is not available as a Profile. It has a special API,
-    // the StartCPUProfile and StopCPUProfile functions, because it streams
-    // output to a writer during profiling.
-    //
 public partial struct Profile {
     public @string name;
     public sync.Mutex mu;
@@ -163,7 +165,6 @@ private static void lockProfiles() {
     if (profiles.m == null) { 
         // Initial built-in profiles.
         profiles.m = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, ptr<Profile>>{"goroutine":goroutineProfile,"threadcreate":threadcreateProfile,"heap":heapProfile,"allocs":allocsProfile,"block":blockProfile,"mutex":mutexProfile,};
-
     }
 }
 
@@ -189,7 +190,6 @@ public static ptr<Profile> NewProfile(@string name) => func((defer, panic, _) =>
     ptr<Profile> p = addr(new Profile(name:name,m:map[interface{}][]uintptr{},));
     profiles.m[name] = p;
     return _addr_p!;
-
 });
 
 // Lookup returns the profile with the given name, or nil if no such profile exists.
@@ -228,7 +228,6 @@ private static nint Count(this ptr<Profile> _addr_p) => func((defer, _, _) => {
         return p.count();
     }
     return len(p.m);
-
 });
 
 // Add adds the current execution stack to the profile, associated with value.
@@ -264,7 +263,6 @@ private static void Add(this ptr<Profile> _addr_p, object value, nint skip) => f
     if (len(stk) == 0) { 
         // The value for skip is too large, and there's no stack trace to record.
         stk = new slice<System.UIntPtr>(new System.UIntPtr[] { funcPC(lostProfileEvent) });
-
     }
     p.mu.Lock();
     defer(p.mu.Unlock());
@@ -272,7 +270,6 @@ private static void Add(this ptr<Profile> _addr_p, object value, nint skip) => f
         panic("pprof: Profile.Add of duplicate value");
     }
     p.m[value] = stk;
-
 });
 
 // Remove removes the execution stack associated with value from the profile.
@@ -325,11 +322,9 @@ private static error WriteTo(this ptr<Profile> _addr_p, io.Writer w, nint debug)
             }
         }
         return error.As(len(t) < len(u))!;
-
     });
 
     return error.As(printCountProfile(w, debug, p.name, stackProfile(all)))!;
-
 });
 
 private partial struct stackProfile { // : slice<slice<System.UIntPtr>>
@@ -380,10 +375,8 @@ private static error printCountCycleProfile(io.Writer w, @string countName, @str
         // return PCs, which is what appendLocsForStack expects.
         locs = b.appendLocsForStack(locs[..(int)0], r.Stack());
         b.pbSample(values, locs, null);
-
     }    b.build();
     return error.As(null!)!;
-
 }
 
 // printCountProfile prints a countProfile at the specified debug level.
@@ -401,7 +394,6 @@ private static error printCountProfile(io.Writer w, nint debug, @string name, co
             buf.WriteString(lbls.String());
         }
         return error.As(buf.String())!;
-
     };
     map count = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, nint>{};
     map index = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, nint>{};
@@ -414,7 +406,6 @@ private static error printCountProfile(io.Writer w, nint debug, @string name, co
             keys = append(keys, k);
         }
         count[k]++;
-
     }
 
     sort.Sort(addr(new keysByCount(keys,count)));
@@ -436,7 +427,6 @@ private static error printCountProfile(io.Writer w, nint debug, @string name, co
         }
 
         return error.As(tw.Flush())!;
-
     }
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, name, "count");
@@ -471,18 +461,14 @@ private static error printCountProfile(io.Writer w, nint debug, @string name, co
                     }
                 }
 ;
-
             }
-
             b.pbSample(values, locs, labels);
-
         }
         k = k__prev1;
     }
 
     b.build();
     return error.As(null!)!;
-
 }
 
 // keysByCount sorts keys with higher counts first, breaking ties by key string order.
@@ -512,7 +498,6 @@ private static bool Less(this ptr<keysByCount> _addr_x, nint i, nint j) {
         return ci > cj;
     }
     return ki < kj;
-
 }
 
 // printStackRecord prints the function + source line information
@@ -532,7 +517,6 @@ private static void printStackRecord(io.Writer w, slice<System.UIntPtr> stk, boo
             // This is useful mainly for allocation traces.
             show = true;
             fmt.Fprintf(w, "#\t%#x\t%s+%#x\t%s:%d\n", frame.PC, name, frame.PC - frame.Entry, frame.File, frame.Line);
-
         }
         if (!more) {
             break;
@@ -543,10 +527,8 @@ private static void printStackRecord(io.Writer w, slice<System.UIntPtr> stk, boo
         // and this time include runtime functions.
         printStackRecord(w, stk, true);
         return ;
-
     }
     fmt.Fprintf(w, "\n");
-
 }
 
 // Interface to system profiles.
@@ -581,7 +563,6 @@ private static error writeHeapInternal(io.Writer w, nint debug, @string defaultS
         // do not appear in the statistics.
         memStats = @new<runtime.MemStats>();
         runtime.ReadMemStats(memStats);
-
     }
     slice<runtime.MemProfileRecord> p = default;
     var (n, ok) = runtime.MemProfile(null, true);
@@ -676,7 +657,6 @@ private static error writeHeapInternal(io.Writer w, nint debug, @string defaultS
 
     tw.Flush();
     return error.As(b.Flush())!;
-
 }
 
 // countThreadCreate returns the size of the current ThreadCreateProfile.
@@ -690,10 +670,7 @@ private static error writeThreadCreate(io.Writer w, nint debug) {
     // Until https://golang.org/issues/6104 is addressed, wrap
     // ThreadCreateProfile because there's no point in tracking labels when we
     // don't get any stack-traces.
-    return error.As(writeRuntimeProfile(w, debug, "threadcreate", (p, _) => {
-        return error.As(runtime.ThreadCreateProfile(p))!;
-    }))!;
-
+    return error.As(writeRuntimeProfile(w, debug, "threadcreate", (p, _) => error.As(runtime.ThreadCreateProfile(p))!))!;
 }
 
 // countGoroutine returns the number of goroutines.
@@ -710,7 +687,6 @@ private static error writeGoroutine(io.Writer w, nint debug) {
         return error.As(writeGoroutineStacks(w))!;
     }
     return error.As(writeRuntimeProfile(w, debug, "goroutine", runtime_goroutineProfileWithLabels))!;
-
 }
 
 private static error writeGoroutineStacks(io.Writer w) { 
@@ -718,7 +694,7 @@ private static error writeGoroutineStacks(io.Writer w) {
     // all the goroutines. Start with 1 MB and try a few times, doubling each time.
     // Give up and use a truncated trace if 64 MB is not enough.
     var buf = make_slice<byte>(1 << 20);
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         var n = runtime.Stack(buf, true);
         if (n < len(buf)) {
             buf = buf[..(int)n];
@@ -727,14 +703,11 @@ private static error writeGoroutineStacks(io.Writer w) {
         if (len(buf) >= 64 << 20) { 
             // Filled 64 MB - stop there.
             break;
-
         }
         buf = make_slice<byte>(2 * len(buf));
-
     }
     var (_, err) = w.Write(buf);
     return error.As(err)!;
-
 }
 
 private static error writeRuntimeProfile(io.Writer w, nint debug, @string name, Func<slice<runtime.StackRecord>, slice<unsafe.Pointer>, (nint, bool)> fetch) { 
@@ -761,7 +734,6 @@ private static error writeRuntimeProfile(io.Writer w, nint debug, @string name, 
     }
 
     return error.As(printCountProfile(w, debug, name, addr(new runtimeProfile(p,labels))))!;
-
 }
 
 private partial struct runtimeProfile {
@@ -824,7 +796,6 @@ public static error StartCPUProfile(io.Writer w) => func((defer, _, _) => {
     runtime.SetCPUProfileRate(hz);
     go_(() => profileWriter(w));
     return error.As(null!)!;
-
 });
 
 // readProfile, provided by the runtime, returns the next chunk of
@@ -848,7 +819,6 @@ private static void profileWriter(io.Writer w) => func((_, panic, _) => {
             }
 
         }
-
         if (eof) {
             break;
         }
@@ -857,11 +827,9 @@ private static void profileWriter(io.Writer w) => func((_, panic, _) => {
         // The runtime should never produce an invalid or truncated profile.
         // It drops records that can't fit into its log buffers.
         panic("runtime/pprof: converting profile: " + err.Error());
-
     }
     b.build();
     cpu.done.Send(true);
-
 });
 
 // StopCPUProfile stops the current CPU profile, if any.
@@ -876,7 +844,6 @@ public static void StopCPUProfile() => func((defer, _, _) => {
     }
     cpu.profiling = false;
     runtime.SetCPUProfileRate(0).Send(cpu.done);
-
 });
 
 // countBlock returns the number of records in the blocking profile.
@@ -905,7 +872,6 @@ private static (long, double) scaleBlockProfile(long cnt, double ns) {
     // hard to compute the unsampled number. The legacy block
     // profile parse doesn't attempt to scale or unsample.
     return (cnt, ns);
-
 }
 
 // writeMutex writes the current mutex profile to w.
@@ -953,7 +919,6 @@ private static error writeProfileInternal(io.Writer w, nint debug, @string name,
         tw.Flush();
     }
     return error.As(b.Flush())!;
-
 }
 
 private static (long, double) scaleMutexProfile(long cnt, double ns) {

@@ -4,20 +4,20 @@
 
 // This file implements initialization and assignment checks.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:20 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:25:42 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\assignments.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-
 namespace go.cmd.compile.@internal;
+
+using syntax = cmd.compile.@internal.syntax_package;
 
 public static partial class types2_package {
 
-    // assignment reports whether x can be assigned to a variable of type T,
-    // if necessary by attempting to convert untyped values to the appropriate
-    // type. context describes the context in which the assignment takes place.
-    // Use T == nil to indicate assignment to an untyped blank identifier.
-    // x.mode is set to invalid if the assignment failed.
+// assignment reports whether x can be assigned to a variable of type T,
+// if necessary by attempting to convert untyped values to the appropriate
+// type. context describes the context in which the assignment takes place.
+// Use T == nil to indicate assignment to an untyped blank identifier.
+// x.mode is set to invalid if the assignment failed.
 private static void assignment(this ptr<Checker> _addr_check, ptr<operand> _addr_x, Type T, @string context) {
     ref Checker check = ref _addr_check.val;
     ref operand x = ref _addr_x.val;
@@ -59,7 +59,6 @@ private static void assignment(this ptr<Checker> _addr_check, ptr<operand> _addr
                         check.error(x, msg);
             x.mode = invalid;
             return ;
-
         }
         if (val != null) {
             x.val = val;
@@ -103,10 +102,8 @@ private static void assignment(this ptr<Checker> _addr_check, ptr<operand> _addr
                 }
             }
             x.mode = invalid;
-
         }
     }
-
 }
 
 private static void initConst(this ptr<Checker> _addr_check, ptr<Const> _addr_lhs, ptr<operand> _addr_x) {
@@ -119,7 +116,6 @@ private static void initConst(this ptr<Checker> _addr_check, ptr<Const> _addr_lh
             lhs.typ = Typ[Invalid];
         }
         return ;
-
     }
     if (x.mode != constant_) {
         check.errorf(x, "%s is not constant", x);
@@ -127,7 +123,6 @@ private static void initConst(this ptr<Checker> _addr_check, ptr<Const> _addr_lh
             lhs.typ = Typ[Invalid];
         }
         return ;
-
     }
     assert(isConstType(x.typ)); 
 
@@ -140,7 +135,6 @@ private static void initConst(this ptr<Checker> _addr_check, ptr<Const> _addr_lh
         return ;
     }
     lhs.val = x.val;
-
 }
 
 private static Type initVar(this ptr<Checker> _addr_check, ptr<Var> _addr_lhs, ptr<operand> _addr_x, @string context) {
@@ -154,7 +148,6 @@ private static Type initVar(this ptr<Checker> _addr_check, ptr<Var> _addr_lhs, p
         }
         lhs.used = true; // avoid follow-on "declared but not used" errors
         return null;
-
     }
     if (lhs.typ == null) {
         var typ = x.typ;
@@ -165,19 +158,15 @@ private static Type initVar(this ptr<Checker> _addr_check, ptr<Var> _addr_lhs, p
                 lhs.typ = Typ[Invalid];
                 return null;
             }
-
             typ = Default(typ);
-
         }
         lhs.typ = typ;
-
     }
     check.assignment(x, lhs.typ, context);
     if (x.mode == invalid) {
         return null;
     }
     return x.typ;
-
 }
 
 private static Type assignVar(this ptr<Checker> _addr_check, syntax.Expr lhs, ptr<operand> _addr_x) {
@@ -198,7 +187,6 @@ private static Type assignVar(this ptr<Checker> _addr_check, syntax.Expr lhs, pt
             return null;
         }
         return x.typ;
-
     }
     ptr<Var> v;
     bool v_used = default;
@@ -219,11 +207,9 @@ private static Type assignVar(this ptr<Checker> _addr_check, syntax.Expr lhs, pt
                     }
 
                 }
-
             }
 
         }
-
     }
     ref operand z = ref heap(out ptr<operand> _addr_z);
     check.expr(_addr_z, lhs);
@@ -253,7 +239,6 @@ private static Type assignVar(this ptr<Checker> _addr_check, syntax.Expr lhs, pt
             }
 
         }
-
         check.errorf(_addr_z, "cannot assign to %s", _addr_z);
         return null;
         check.assignment(x, z.typ, "assignment");
@@ -261,7 +246,6 @@ private static Type assignVar(this ptr<Checker> _addr_check, syntax.Expr lhs, pt
         return null;
     }
     return x.typ;
-
 }
 
 // If returnPos is valid, initVars is called to type-check the assignment of
@@ -287,7 +271,6 @@ private static void initVars(this ptr<Checker> _addr_check, slice<ptr<Var>> lhs,
         }
         check.errorf(rhs[0], "cannot initialize %d variables with %d values", len(lhs), len(rhs));
         return ;
-
     }
     @string context = "assignment";
     if (returnPos.IsKnown()) {
@@ -308,7 +291,6 @@ private static void initVars(this ptr<Checker> _addr_check, slice<ptr<Var>> lhs,
 
         check.recordCommaOkTypes(orig_rhs[0], a);
         return ;
-
     }
     {
         var i__prev1 = i;
@@ -336,7 +318,6 @@ private static void assignVars(this ptr<Checker> _addr_check, slice<syntax.Expr>
             }
         }        check.errorf(rhs[0], "cannot assign %d values to %d variables", len(rhs), len(lhs));
         return ;
-
     }
     if (commaOk) {
         array<Type> a = new array<Type>(2);
@@ -353,7 +334,6 @@ private static void assignVars(this ptr<Checker> _addr_check, slice<syntax.Expr>
 
         check.recordCommaOkTypes(orig_rhs[0], a);
         return ;
-
     }
     {
         var i__prev1 = i;
@@ -380,12 +360,10 @@ private static slice<syntax.Expr> unpackExpr(syntax.Expr x) {
             return x.ElemList;
         }
     }
-
     if (x != null) {
         return new slice<syntax.Expr>(new syntax.Expr[] { x });
     }
     return null;
-
 }
 
 private static void shortVarDecl(this ptr<Checker> _addr_check, syntax.Pos pos, slice<syntax.Expr> lhs, slice<syntax.Expr> rhs) {
@@ -449,9 +427,7 @@ private static void shortVarDecl(this ptr<Checker> _addr_check, syntax.Pos pos, 
                         obj = obj__prev2;
 
                     }
-
                     continue;
-
                 } 
 
                 // declare new variable
@@ -464,9 +440,7 @@ private static void shortVarDecl(this ptr<Checker> _addr_check, syntax.Pos pos, 
             if (name != "_") {
                 newVars = append(newVars, obj);
             }
-
             check.recordDef(ident, obj);
-
         }
         i = i__prev1;
     }

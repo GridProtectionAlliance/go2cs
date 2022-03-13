@@ -2,32 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:13 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:37 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\looprotate.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // loopRotate converts loops with a check-loop-condition-at-beginning
-    // to loops with a check-loop-condition-at-end.
-    // This helps loops avoid extra unnecessary jumps.
-    //
-    //   loop:
-    //     CMPQ ...
-    //     JGE exit
-    //     ...
-    //     JMP loop
-    //   exit:
-    //
-    //    JMP entry
-    //  loop:
-    //    ...
-    //  entry:
-    //    CMPQ ...
-    //    JLT loop
+// loopRotate converts loops with a check-loop-condition-at-beginning
+// to loops with a check-loop-condition-at-end.
+// This helps loops avoid extra unnecessary jumps.
+//
+//   loop:
+//     CMPQ ...
+//     JGE exit
+//     ...
+//     JMP loop
+//   exit:
+//
+//    JMP entry
+//  loop:
+//    ...
+//  entry:
+//    CMPQ ...
+//    JLT loop
 private static void loopRotate(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -64,7 +62,6 @@ private static void loopRotate(ptr<Func> _addr_f) {
                 continue;
             }
             p = e.b;
-
         }        if (p == null || p == b) {
             continue;
         }
@@ -73,18 +70,15 @@ private static void loopRotate(ptr<Func> _addr_f) {
             var nextIdx = idToIdx[b.ID] + 1;
             if (nextIdx >= len(f.Blocks)) { // reached end of function (maybe impossible?)
                 break;
-
             }
             var nextb = f.Blocks[nextIdx];
             if (nextb == p) { // original loop predecessor is next
                 break;
-
             }
             if (loopnest.b2l[nextb.ID] == loop) {
                 after[p.ID] = append(after[p.ID], nextb);
             }
             b = nextb;
-
         } 
         // Swap b and p so that we'll handle p before b when moving blocks.
         f.Blocks[idToIdx[loop.header.ID]] = p;
@@ -115,7 +109,6 @@ private static void loopRotate(ptr<Func> _addr_f) {
                     continue;
                 }
             }
-
             newOrder = append(newOrder, b);
             j++;
             foreach (var (_, a) in after[b.ID]) {
@@ -130,7 +123,6 @@ private static void loopRotate(ptr<Func> _addr_f) {
         f.Fatalf("bad reordering in looprotate");
     }
     f.Blocks = newOrder;
-
 }
 
 } // end ssa_package

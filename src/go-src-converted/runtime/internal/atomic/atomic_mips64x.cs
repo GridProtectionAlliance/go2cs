@@ -5,16 +5,16 @@
 //go:build mips64 || mips64le
 // +build mips64 mips64le
 
-// package atomic -- go2cs converted at 2022 March 06 22:08:19 UTC
+// package atomic -- go2cs converted at 2022 March 13 05:24:08 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Program Files\Go\src\runtime\internal\atomic\atomic_mips64x.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.runtime.@internal;
+
+using @unsafe = @unsafe_package;
 
 public static partial class atomic_package {
 
-    //go:noescape
+//go:noescape
 public static uint Xadd(ptr<uint> ptr, int delta);
 
 //go:noescape

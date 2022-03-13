@@ -5,14 +5,13 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:15 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:32 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\sys.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.net;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class route_package {
 
@@ -30,7 +29,6 @@ private static void init() {
     }
     rtmVersion = sysRTM_VERSION;
     kernelAlign, wireFormats = probeRoutingStack();
-
 }
 
 private static nint roundup(nint l) {
@@ -38,7 +36,6 @@ private static nint roundup(nint l) {
         return kernelAlign;
     }
     return (l + kernelAlign - 1) & ~(kernelAlign - 1);
-
 }
 
 private partial struct wireFormat {

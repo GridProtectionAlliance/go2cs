@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package token -- go2cs converted at 2022 March 06 22:25:54 UTC
+// package token -- go2cs converted at 2022 March 13 05:40:24 UTC
 // import "go/token" ==> using token = go.go.token_package
 // Original source: C:\Program Files\Go\src\go\token\position.go
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.go;
 
+using fmt = fmt_package;
+using sort = sort_package;
+using sync = sync_package;
+
+
+// -----------------------------------------------------------------------------
+// Positions
+
+// Position describes an arbitrary source position
+// including the file, line, and column location.
+// A Position is valid if the line number is > 0.
+//
+
+using System;
 public static partial class token_package {
 
-    // -----------------------------------------------------------------------------
-    // Positions
-
-    // Position describes an arbitrary source position
-    // including the file, line, and column location.
-    // A Position is valid if the line number is > 0.
-    //
 public partial struct Position {
     public @string Filename; // filename, if any
     public nint Offset; // offset, starting at 0
@@ -60,7 +61,6 @@ public static @string String(this Position pos) {
         s = "-";
     }
     return s;
-
 }
 
 // Pos is a compact encoding of a source position within a file set.
@@ -168,9 +168,7 @@ private static void AddLine(this ptr<File> _addr_f, nint offset) {
             f.lines = append(f.lines, offset);
         }
     }
-
     f.mutex.Unlock();
-
 }
 
 // MergeLine merges a line with the following line. It is akin to replacing
@@ -191,7 +189,6 @@ private static void MergeLine(this ptr<File> _addr_f, nint line) => func((defer,
     }
     copy(f.lines[(int)line..], f.lines[(int)line + 1..]);
     f.lines = f.lines[..(int)len(f.lines) - 1];
-
 });
 
 // SetLines sets the line offsets for a file and reports whether it succeeded.
@@ -216,7 +213,6 @@ private static bool SetLines(this ptr<File> _addr_f, slice<nint> lines) {
     f.lines = lines;
     f.mutex.Unlock();
     return true;
-
 }
 
 // SetLinesForContent sets the line offsets for the given file content.
@@ -237,7 +233,6 @@ private static void SetLinesForContent(this ptr<File> _addr_f, slice<byte> conte
     }    f.mutex.Lock();
     f.lines = lines;
     f.mutex.Unlock();
-
 }
 
 // LineStart returns the Pos value of the start of the specified line.
@@ -255,7 +250,6 @@ private static Pos LineStart(this ptr<File> _addr_f, nint line) => func((defer, 
         panic(fmt.Sprintf("invalid line number %d (should be < %d)", line, len(f.lines)));
     }
     return Pos(f.@base + f.lines[line - 1]);
-
 });
 
 // A lineInfo object describes alternative file, line, and column
@@ -297,9 +291,7 @@ private static void AddLineColumnInfo(this ptr<File> _addr_f, nint offset, @stri
             f.infos = append(f.infos, new lineInfo(offset,filename,line,column));
         }
     }
-
     f.mutex.Unlock();
-
 }
 
 // Pos returns the Pos value for the given file offset;
@@ -313,7 +305,6 @@ private static Pos Pos(this ptr<File> _addr_f, nint offset) => func((_, panic, _
         panic(fmt.Sprintf("invalid file offset %d (should be <= %d)", offset, f.size));
     }
     return Pos(f.@base + offset);
-
 });
 
 // Offset returns the offset for the given file position p;
@@ -327,7 +318,6 @@ private static nint Offset(this ptr<File> _addr_f, Pos p) => func((_, panic, _) 
         panic(fmt.Sprintf("invalid Pos value %d (should be in [%d, %d])", p, f.@base, f.@base + f.size));
     }
     return int(p) - f.@base;
-
 });
 
 // Line returns the line number for the given file position p;
@@ -367,7 +357,6 @@ private static (@string, nint, nint) unpack(this ptr<File> _addr_f, nint offset,
         i = i__prev1;
 
     }
-
     if (adjusted && len(f.infos) > 0) { 
         // few files have extra line infos
         {
@@ -393,30 +382,24 @@ private static (@string, nint, nint) unpack(this ptr<File> _addr_f, nint offset,
                             // this to apply until the next PosBase/line directive,
                             // not just until the new newline)
                             column = 0;
-
                         }
                         else if (d == 0) { 
                             // the alternative position base is on the current line
                             // => column is relative to alternative column
                             column = alt.Column + (offset - alt.Offset);
-
                         }
-
                     }
 
                     i = i__prev3;
 
                 }
-
             }
 
             i = i__prev2;
 
         }
-
     }
     return ;
-
 });
 
 private static Position position(this ptr<File> _addr_f, Pos p, bool adjusted) {
@@ -443,10 +426,8 @@ private static Position PositionFor(this ptr<File> _addr_f, Pos p, bool adjusted
             panic(fmt.Sprintf("invalid Pos value %d (should be in [%d, %d])", p, f.@base, f.@base + f.size));
         }
         pos = f.position(p, adjusted);
-
     }
     return ;
-
 });
 
 // Position returns the Position value for the given file position p.
@@ -545,7 +526,6 @@ private static ptr<File> AddFile(this ptr<FileSet> _addr_s, @string filename, ni
     s.files = append(s.files, f);
     s.last = f;
     return _addr_f!;
-
 });
 
 // Iterate calls f for the files in the file set in the order they were added
@@ -554,7 +534,7 @@ private static ptr<File> AddFile(this ptr<FileSet> _addr_s, @string filename, ni
 private static bool Iterate(this ptr<FileSet> _addr_s, Func<ptr<File>, bool> f) {
     ref FileSet s = ref _addr_s.val;
 
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         ptr<File> file;
         s.mutex.RLock();
         if (i < len(s.files)) {
@@ -565,7 +545,6 @@ private static bool Iterate(this ptr<FileSet> _addr_s, Func<ptr<File>, bool> f) 
             break;
         }
     }
-
 }
 
 private static nint searchFiles(slice<ptr<File>> a, nint x) {
@@ -602,15 +581,11 @@ private static ptr<File> file(this ptr<FileSet> _addr_s, Pos p) {
                 s.last = f; // race is ok - s.last is only a cache
                 s.mutex.Unlock();
                 return _addr_f!;
-
             }
-
         }
     }
-
     s.mutex.RUnlock();
     return _addr_null!;
-
 }
 
 // File returns the file that contains the position p.
@@ -625,7 +600,6 @@ private static ptr<File> File(this ptr<FileSet> _addr_s, Pos p) {
         f = s.file(p);
     }
     return ;
-
 }
 
 // PositionFor converts a Pos p in the fileset into a Position value.
@@ -646,10 +620,8 @@ private static Position PositionFor(this ptr<FileSet> _addr_s, Pos p, bool adjus
             }
 
         }
-
     }
     return ;
-
 }
 
 // Position converts a Pos p in the fileset into a Position value.
@@ -689,7 +661,6 @@ private static nint searchInts(slice<nint> a, nint x) {
         }
     }
     return i - 1;
-
 }
 
 } // end token_package

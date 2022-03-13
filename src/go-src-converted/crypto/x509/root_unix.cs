@@ -5,15 +5,15 @@
 //go:build aix || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:51 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:48 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\root_unix.go
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go.crypto;
+
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
 
 public static partial class x509_package {
 
@@ -27,7 +27,6 @@ private static readonly @string certFileEnv = "SSL_CERT_FILE";
 // It is a colon separated list of directories.
 // See https://www.openssl.org/docs/man1.0.2/man1/c_rehash.html.
 private static readonly @string certDirEnv = "SSL_CERT_DIR";
-
 
 private static (slice<slice<ptr<Certificate>>>, error) systemVerify(this ptr<Certificate> _addr_c, ptr<VerifyOptions> _addr_opts) {
     slice<slice<ptr<Certificate>>> chains = default;
@@ -53,7 +52,6 @@ private static (ptr<CertPool>, error) loadSystemRoots() {
         }
     }
 
-
     error firstErr = default!;
     foreach (var (_, file) in files) {
         var (data, err) = os.ReadFile(file);
@@ -74,10 +72,8 @@ private static (ptr<CertPool>, error) loadSystemRoots() {
             //  * https://golang.org/issue/35325
             //  * https://www.openssl.org/docs/man1.0.2/man1/c_rehash.html
             dirs = strings.Split(d, ":");
-
         }
     }
-
 
     foreach (var (_, directory) in dirs) {
         var (fis, err) = readUniqueDirectoryEntries(directory);
@@ -97,7 +93,6 @@ private static (ptr<CertPool>, error) loadSystemRoots() {
         return (_addr_roots!, error.As(null!)!);
     }
     return (_addr_null!, error.As(firstErr)!);
-
 }
 
 // readUniqueDirectoryEntries is like os.ReadDir but omits
@@ -116,7 +111,6 @@ private static (slice<fs.DirEntry>, error) readUniqueDirectoryEntries(@string di
             uniq = append(uniq, f);
         }
     }    return (uniq, error.As(null!)!);
-
 }
 
 // isSameDirSymlink reports whether fi in dir is a symlink with a
@@ -127,7 +121,6 @@ private static bool isSameDirSymlink(fs.DirEntry f, @string dir) {
     }
     var (target, err) = os.Readlink(filepath.Join(dir, f.Name()));
     return err == null && !strings.Contains(target, "/");
-
 }
 
 } // end x509_package

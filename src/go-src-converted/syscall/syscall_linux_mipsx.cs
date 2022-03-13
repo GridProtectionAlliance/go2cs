@@ -6,19 +6,19 @@
 // +build linux
 // +build mips mipsle
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:06 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:37 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\syscall_linux_mipsx.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
-    // archHonorsR2 captures the fact that r2 is honored by the
-    // runtime.GOARCH.  Syscall conventions are generally r1, r2, err :=
-    // syscall(trap, ...).  Not all architectures define r2 in their
-    // ABI. See "man syscall".
+// archHonorsR2 captures the fact that r2 is honored by the
+// runtime.GOARCH.  Syscall conventions are generally r1, r2, err :=
+// syscall(trap, ...).  Not all architectures define r2 in their
+// ABI. See "man syscall".
 private static readonly var archHonorsR2 = true;
 
 
@@ -94,7 +94,6 @@ public static error Fstatfs(nint fd, ptr<Statfs_t> _addr_buf) {
         err = errnoErr(e);
     }
     return ;
-
 }
 
 public static error Statfs(@string path, ptr<Statfs_t> _addr_buf) {
@@ -110,7 +109,6 @@ public static error Statfs(@string path, ptr<Statfs_t> _addr_buf) {
         err = errnoErr(e);
     }
     return ;
-
 }
 
 public static (long, error) Seek(nint fd, long offset, nint whence) {
@@ -122,7 +120,6 @@ public static (long, error) Seek(nint fd, long offset, nint whence) {
         err = errnoErr(e);
     }
     return ;
-
 }
 
 private static Timespec setTimespec(long sec, long nsec) {
@@ -146,7 +143,6 @@ public static error Pipe2(slice<nint> p, nint flags) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 //sysnb pipe() (p1 int, p2 int, err error)
@@ -159,7 +155,6 @@ public static error Pipe(slice<nint> p) {
     }
     p[0], p[1], err = pipe();
     return ;
-
 }
 
 //sys    mmap2(addr uintptr, length uintptr, prot int, flags int, fd int, pageOffset uintptr) (xaddr uintptr, err error)
@@ -173,7 +168,6 @@ private static (System.UIntPtr, error) mmap(System.UIntPtr addr, System.UIntPtr 
         return (0, error.As(EINVAL)!);
     }
     return mmap2(addr, length, prot, flags, fd, page);
-
 }
 
 private static readonly var rlimInf32 = ~uint32(0);
@@ -217,7 +211,6 @@ public static error Getrlimit(nint resource, ptr<Rlimit> _addr_rlim) {
         rlim.Max = uint64(rl.Max);
     }
     return ;
-
 }
 
 //sysnb setrlimit(resource int, rlim *rlimit32) (err error) = SYS_SETRLIMIT
@@ -252,7 +245,6 @@ public static error Setrlimit(nint resource, ptr<Rlimit> _addr_rlim) {
         return error.As(EINVAL)!;
     }
     return error.As(setrlimit(resource, _addr_rl))!;
-
 }
 
 private static ulong PC(this ptr<PtraceRegs> _addr_r) {

@@ -2,40 +2,41 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package build -- go2cs converted at 2022 March 06 22:41:16 UTC
+// package build -- go2cs converted at 2022 March 13 05:52:21 UTC
 // import "go/build" ==> using build = go.go.build_package
 // Original source: C:\Program Files\Go\src\go\build\build.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using constraint = go.go.build.constraint_package;
-using doc = go.go.doc_package;
-using token = go.go.token_package;
-using buildcfg = go.@internal.buildcfg_package;
-using exec = go.@internal.execabs_package;
-using goroot = go.@internal.goroot_package;
-using goversion = go.@internal.goversion_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using pathpkg = go.path_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using constraint = go.build.constraint_package;
+using doc = go.doc_package;
+using token = go.token_package;
+using buildcfg = @internal.buildcfg_package;
+using exec = @internal.execabs_package;
+using goroot = @internal.goroot_package;
+using goversion = @internal.goversion_package;
+using io = io_package;
+using fs = io.fs_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using pathpkg = path_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// A Context specifies the supporting context for a build.
+
+using System;
 public static partial class build_package {
 
-    // A Context specifies the supporting context for a build.
 public partial struct Context {
     public @string GOARCH; // target architecture
     public @string GOOS; // target operating system
@@ -112,9 +113,7 @@ private static @string joinPath(this ptr<Context> _addr_ctxt, params @string[] e
             return f(elem);
         }
     }
-
     return filepath.Join(elem);
-
 }
 
 // splitPathList calls ctxt.SplitPathList (if not nil) or else filepath.SplitList.
@@ -128,9 +127,7 @@ private static slice<@string> splitPathList(this ptr<Context> _addr_ctxt, @strin
             return f(s);
         }
     }
-
     return filepath.SplitList(s);
-
 }
 
 // isAbsPath calls ctxt.IsAbsPath (if not nil) or else filepath.IsAbs.
@@ -144,9 +141,7 @@ private static bool isAbsPath(this ptr<Context> _addr_ctxt, @string path) {
             return f(path);
         }
     }
-
     return filepath.IsAbs(path);
-
 }
 
 // isDir calls ctxt.IsDir (if not nil) or else uses os.Stat.
@@ -160,10 +155,8 @@ private static bool isDir(this ptr<Context> _addr_ctxt, @string path) {
             return f(path);
         }
     }
-
     var (fi, err) = os.Stat(path);
     return err == null && fi.IsDir();
-
 }
 
 // hasSubdir calls ctxt.HasSubdir (if not nil) or else uses
@@ -201,7 +194,6 @@ private static (@string, bool) hasSubdir(this ptr<Context> _addr_ctxt, @string r
         return ;
     }
     return hasSubdir(rootSym, dirSym);
-
 }
 
 // hasSubdir reports if dir is within root by performing lexical analysis only.
@@ -220,7 +212,6 @@ private static (@string, bool) hasSubdir(@string root, @string dir) {
         return ("", false);
     }
     return (filepath.ToSlash(dir[(int)len(root)..]), true);
-
 }
 
 // readDir calls ctxt.ReadDir (if not nil) or else ioutil.ReadDir.
@@ -238,7 +229,6 @@ private static (slice<fs.FileInfo>, error) readDir(this ptr<Context> _addr_ctxt,
     } 
     // TODO: use os.ReadDir
     return ioutil.ReadDir(path);
-
 }
 
 // openFile calls ctxt.OpenFile (if not nil) or else os.Open.
@@ -255,13 +245,11 @@ private static (io.ReadCloser, error) openFile(this ptr<Context> _addr_ctxt, @st
         }
     }
 
-
     var (f, err) = os.Open(path);
     if (err != null) {
         return (null, error.As(err)!); // nil interface
     }
     return (f, error.As(null!)!);
-
 }
 
 // isFile determines whether path is a file by trying to open it.
@@ -276,7 +264,6 @@ private static bool isFile(this ptr<Context> _addr_ctxt, @string path) {
     }
     f.Close();
     return true;
-
 }
 
 // gopath returns the list of Go path directories.
@@ -291,7 +278,6 @@ private static slice<@string> gopath(this ptr<Context> _addr_ctxt) {
             // People sometimes set GOPATH=$GOROOT.
             // Do not get confused by this common mistake.
             continue;
-
         }
         if (strings.HasPrefix(p, "~")) { 
             // Path segments starting with ~ on Unix are almost always
@@ -307,12 +293,9 @@ private static slice<@string> gopath(this ptr<Context> _addr_ctxt) {
             // On Windows, ~ is used in short names, such as c:\progra~1
             // for c:\program files.
             continue;
-
         }
         all = append(all, p);
-
     }    return all;
-
 }
 
 // SrcDirs returns a list of package source root directories.
@@ -334,7 +317,6 @@ private static slice<@string> SrcDirs(this ptr<Context> _addr_ctxt) {
             all = append(all, dir);
         }
     }    return all;
-
 }
 
 // Default is the default Context for builds.
@@ -359,16 +341,11 @@ private static @string defaultGOPATH() {
                 // Don't set the default GOPATH to GOROOT,
                 // as that will trigger warnings from the go tool.
                 return "";
-
             }
-
             return def;
-
         }
     }
-
     return "";
-
 }
 
 private static slice<@string> defaultToolTags = default;private static slice<@string> defaultReleaseTags = default;
@@ -424,12 +401,10 @@ private static Context defaultContext() {
                 break;
             }
             c.CgoEnabled = false;
-
             break;
     }
 
     return c;
-
 }
 
 private static @string envOr(@string name, @string def) {
@@ -438,7 +413,6 @@ private static @string envOr(@string name, @string def) {
         return def;
     }
     return s;
-
 }
 
 // An ImportMode controls the behavior of the Import method.
@@ -487,7 +461,6 @@ public static readonly var ImportComment = 1;
 // are always the exact import paths from the source files:
 // Import makes no attempt to resolve or check those paths.
 public static readonly var IgnoreVendor = 2;
-
 
 // A Package describes the Go package found in a directory.
 public partial struct Package {
@@ -601,7 +574,6 @@ private static @string Error(this ptr<MultiplePackageError> _addr_e) {
  
     // Error string limited to two entries for compatibility.
     return fmt.Sprintf("found packages %s (%s) and %s (%s) in %s", e.Packages[0], e.Files[0], e.Packages[1], e.Files[1], e.Dir);
-
 }
 
 private static @string nameExt(@string name) {
@@ -610,7 +582,6 @@ private static @string nameExt(@string name) {
         return "";
     }
     return name[(int)i..];
-
 }
 
 // Import returns details about the Go package named by the import path,
@@ -667,7 +638,6 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                 pkga = pkgtargetroot + "/" + p.ImportPath + ".a";
                 break;
         }
-
     };
     setPkga();
 
@@ -680,11 +650,9 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
         if (!ctxt.isAbsPath(path)) {
             p.Dir = ctxt.joinPath(srcDir, path);
         }
-        Func<@string, bool> inTestdata = sub => {
-            return _addr_strings.Contains(sub, "/testdata/") || strings.HasSuffix(sub, "/testdata") || strings.HasPrefix(sub, "testdata/") || sub == "testdata"!;
+        Func<@string, bool> inTestdata = sub => _addr_strings.Contains(sub, "/testdata/") || strings.HasSuffix(sub, "/testdata") || strings.HasPrefix(sub, "testdata/") || sub == "testdata"!;
         }
-    else
-;
+    else;
         if (ctxt.GOROOT != "") {
             var root = ctxt.joinPath(ctxt.GOROOT, "src");
             {
@@ -698,13 +666,11 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                     p.Root = ctxt.GOROOT;
                     setPkga(); // p.ImportPath changed
                     goto Found;
-
                 }
 
                 sub = sub__prev3;
 
             }
-
         }
         var all = ctxt.gopath();
         {
@@ -738,9 +704,7 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                                 dir = dir__prev4;
 
                             }
-
                         }
-
                         foreach (var (_, earlyRoot) in all[..(int)i]) {
                             {
                                 var dir__prev3 = dir;
@@ -755,7 +719,6 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                                 dir = dir__prev3;
 
                             }
-
                         } 
 
                         // sub would not name some other directory instead of this one.
@@ -764,13 +727,11 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                         p.Root = root;
                         setPkga(); // p.ImportPath changed
                         goto Found;
-
                     }
 
                     sub = sub__prev2;
 
                 }
-
             } 
             // It's okay that we didn't find a root containing dir.
             // Keep going with the information we have.
@@ -794,11 +755,9 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                 return (_addr_p!, error.As(err)!);
             }
 
-
             err = err__prev2;
 
         }
-
 
         var gopath = ctxt.gopath(); // needed twice below; avoid computing many times
 
@@ -823,30 +782,22 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                             p.Root = root;
                             setPkga(); // p.ImportPath changed
                             return _addr_true!;
-
                         }
-
                         tried.vendor = append(tried.vendor, dir);
-
                     }
-
                     var i = strings.LastIndex(sub, "/");
                     if (i < 0) {
                         break;
                     }
-
                     sub = sub[..(int)i];
-
                 }
 
                 return _addr_false!;
-
             }
 ;
             if (ctxt.Compiler != "gccgo" && searchVendor(ctxt.GOROOT, true)) {
                 goto Found;
             }
-
             {
                 var root__prev1 = root;
 
@@ -869,7 +820,6 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
             if (!gorootFirst) {
                 _, gorootFirst = ctxt.hasSubdir(ctxt.GOROOT, srcDir);
             }
-
             if (gorootFirst) {
                 dir = ctxt.joinPath(ctxt.GOROOT, "src", path);
                 if (ctxt.Compiler != "gccgo") {
@@ -884,7 +834,6 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
                 }
                 tried.goroot = dir;
             }
-
         }
         if (ctxt.Compiler == "gccgo" && goroot.IsStandardPackage(ctxt.GOROOT, ctxt.Compiler, path)) {
             p.Dir = ctxt.joinPath(ctxt.GOROOT, "src", path);
@@ -967,7 +916,6 @@ private static (ptr<Package>, error) Import(this ptr<Context> _addr_ctxt, @strin
             paths = append(paths, "\t($GOPATH not set. For more details see: 'go help gopath')");
         }
         return (_addr_p!, error.As(fmt.Errorf("cannot find package %q in any of:\n%s", path, strings.Join(paths, "\n")))!);
-
     }
 Found: 
 
@@ -989,10 +937,8 @@ Found:
         if (ctxt.Compiler == "gccgo" && p.Goroot) { 
             // gccgo has no sources for GOROOT packages.
             return (_addr_p!, error.As(null!)!);
-
         }
         return (_addr_p!, error.As(fmt.Errorf("cannot find package %q in:\n\t%s", path, p.Dir))!);
-
     }
     if (mode & FindOnly != 0) {
         return (_addr_p!, error.As(pkgerr)!);
@@ -1003,7 +949,6 @@ Found:
     if (ctxt.Compiler == "gccgo" && p.Goroot) { 
         // gccgo has no sources for GOROOT packages.
         return (_addr_p!, error.As(null!)!);
-
     }
     var (dirs, err) = ctxt.readDir(p.Dir);
     if (err != null) {
@@ -1040,9 +985,7 @@ Found:
             if (ctxt.isDir(ctxt.joinPath(p.Dir, d.Name()))) { 
                 // Symlinks to directories are not source files.
                 continue;
-
             }
-
         }
         var name = d.Name();
         var ext = nameExt(name);
@@ -1062,9 +1005,7 @@ Found:
             else if (fileListForExt(p, ext) != null) {
                 p.IgnoredOtherFiles = append(p.IgnoredOtherFiles, name);
             }
-
             continue;
-
         }
         var data = info.header;
         var filename = info.name; 
@@ -1091,9 +1032,7 @@ Found:
                     }
 
                 }
-
                 continue;
-
                 break;
         }
 
@@ -1125,7 +1064,6 @@ Found:
             // order. Instead of resolving p.Name arbitrarily, we should clear out the
             // existing name and mark the existing files as also invalid.
             badFile(name, addr(new MultiplePackageError(Dir:p.Dir,Packages:[]string{p.Name,pkg},Files:[]string{firstFile,name},)));
-
         }
         if (info.parsed != null && info.parsed.Doc != null && p.Doc == "" && !isTest && !isXTest) {
             p.Doc = doc.Synopsis(info.parsed.Doc.Text());
@@ -1144,9 +1082,7 @@ Found:
                 else if (p.ImportComment != com) {
                     badFile(name, fmt.Errorf("found import comments %q (%s) and %q (%s) in %s", p.ImportComment, firstCommentFile, com, name, p.Dir));
                 }
-
             }
-
         }
         var isCgo = false;
         {
@@ -1173,11 +1109,8 @@ Found:
                             err = err__prev3;
 
                         }
-
                     }
-
                 }
-
             }
 
             imp = imp__prev2;
@@ -1198,9 +1131,7 @@ Found:
  { 
                 // Ignore imports and embeds from cgo files if cgo is disabled.
                 fileList = _addr_p.IgnoredGoFiles;
-
             }
-
         else if (isXTest) 
             fileList = _addr_p.XTestGoFiles;
             importMap = xTestImportPos;
@@ -1262,7 +1193,6 @@ Found:
         return (_addr_p!, error.As(addr(new NoGoError(p.Dir))!)!);
     }
     return (_addr_p!, error.As(pkgerr)!);
-
 }
 
 private static ptr<slice<@string>> fileListForExt(ptr<Package> _addr_p, @string ext) {
@@ -1318,7 +1248,6 @@ private static ptr<slice<@string>> fileListForExt(ptr<Package> _addr_p, @string 
             break;
     }
     return _addr_null!;
-
 }
 
 private static slice<@string> uniq(slice<@string> list) {
@@ -1334,7 +1263,6 @@ private static slice<@string> uniq(slice<@string> list) {
             uniq = append(uniq, x);
         }
     }    return uniq;
-
 }
 
 private static var errNoModules = errors.New("not using modules");
@@ -1386,7 +1314,6 @@ private static error importGo(this ptr<Context> _addr_ctxt, ptr<Package> _addr_p
             if (err != null) {
                 return error.As(errNoModules)!;
             }
-
         }
         {
             var (_, ok) = ctxt.hasSubdir(filepath.Join(ctxt.GOROOT, "src"), absSrcDir);
@@ -1396,7 +1323,6 @@ private static error importGo(this ptr<Context> _addr_ctxt, ptr<Package> _addr_p
             }
 
         }
-
     }
     if (ctxt.GOROOT != "") {
         var dir = ctxt.joinPath(ctxt.GOROOT, "src", path);
@@ -1411,9 +1337,7 @@ private static error importGo(this ptr<Context> _addr_ctxt, ptr<Package> _addr_p
             if (err != null) { 
                 // A nonexistent working directory can't be in a module.
                 return error.As(errNoModules)!;
-
             }
-
         }
         else
  {
@@ -1422,9 +1346,7 @@ private static error importGo(this ptr<Context> _addr_ctxt, ptr<Package> _addr_p
                 // If the caller passed a bogus Dir explicitly, that's materially
                 // different from not having modules enabled.
                 return error.As(err)!;
-
             }
-
         }
         while (true) {
             {
@@ -1440,25 +1362,19 @@ private static error importGo(this ptr<Context> _addr_ctxt, ptr<Package> _addr_p
                     if (err == null || err == io.EOF) { 
                         // go.mod exists and is readable (is a file, not a directory).
                         break;
-
                     }
-
                 }
 
                 f = f__prev2;
                 err = err__prev2;
 
             }
-
             var d = filepath.Dir(parent);
             if (len(d) >= len(parent)) {
                 return error.As(errNoModules)!; // reached top of file system, no go.mod
             }
-
             parent = d;
-
         }
-
     }
     var cmd = exec.Command("go", "list", "-e", "-compiler=" + ctxt.Compiler, "-tags=" + strings.Join(ctxt.BuildTags, ","), "-installsuffix=" + ctxt.InstallSuffix, "-f={{.Dir}}\n{{.ImportPath}}\n{{.Root}}\n{{.Goroot}}\n{{if .Error}}{{.Error}}{{end}}\n", "--", path);
 
@@ -1490,7 +1406,6 @@ private static error importGo(this ptr<Context> _addr_ctxt, ptr<Package> _addr_p
 
     }
 
-
     var f = strings.SplitN(stdout.String(), "\n", 5);
     if (len(f) != 5) {
         return error.As(fmt.Errorf("go/build: importGo %s: unexpected output:\n%s\n", path, stdout.String()))!;
@@ -1501,14 +1416,12 @@ private static error importGo(this ptr<Context> _addr_ctxt, ptr<Package> _addr_p
         // If 'go list' could not locate the package (dir is empty),
         // return the same error that 'go list' reported.
         return error.As(errors.New(errStr))!;
-
     }
     p.Dir = dir;
     p.ImportPath = f[1];
     p.Root = f[2];
     p.Goroot = f[3] == "true";
     return error.As(null!)!;
-
 }
 
 private static bool equal(slice<@string> x, slice<@string> y) {
@@ -1520,7 +1433,6 @@ private static bool equal(slice<@string> x, slice<@string> y) {
             return false;
         }
     }    return true;
-
 }
 
 // hasGoFiles reports whether dir contains any files with names ending in .go.
@@ -1536,7 +1448,6 @@ private static bool hasGoFiles(ptr<Context> _addr_ctxt, @string dir) {
             return true;
         }
     }    return false;
-
 }
 
 private static (@string, nint) findImportComment(slice<byte> data) {
@@ -1570,7 +1481,6 @@ private static (@string, nint) findImportComment(slice<byte> data) {
         if (i < 0) { 
             // malformed comment
             return ("", 0);
-
         }
         comment = data[..(int)i];
         if (bytes.Contains(comment, newline)) {
@@ -1585,7 +1495,6 @@ private static (@string, nint) findImportComment(slice<byte> data) {
     }
     line = 1 + bytes.Count(data[..(int)cap(data) - cap(arg)], newline);
     return (strings.TrimSpace(string(arg)), line);
-
 }
 
 private static slice<byte> slashSlash = (slice<byte>)"//";private static slice<byte> slashStar = (slice<byte>)"/*";private static slice<byte> starSlash = (slice<byte>)"*/";private static slice<byte> newline = (slice<byte>)"\n";
@@ -1625,10 +1534,8 @@ private static slice<byte> skipSpaceOrComment(slice<byte> data) {
                 break;
         }
         break;
-
     }
     return data;
-
 }
 
 // parseWord skips any leading spaces or comments in data
@@ -1649,7 +1556,6 @@ private static (slice<byte>, slice<byte>) parseWord(slice<byte> data) {
             continue;
         }
         break;
-
     }
 
     word = data[..(int)len(data) - len(rest)];
@@ -1657,7 +1563,6 @@ private static (slice<byte>, slice<byte>) parseWord(slice<byte> data) {
         return (null, null);
     }
     return (word, rest);
-
 }
 
 // MatchFile reports whether the file with the given name in the given directory
@@ -1734,13 +1639,11 @@ private static (ptr<fileInfo>, error) matchFile(this ptr<Context> _addr_ctxt, @s
     if (ext != ".go" && fileListForExt(_addr_dummyPkg, ext) == null) { 
         // skip
         return (_addr_null!, error.As(null!)!);
-
     }
     ptr<fileInfo> info = addr(new fileInfo(name:ctxt.joinPath(dir,name),fset:fset));
     if (ext == ".syso") { 
         // binary, no reading
         return (_addr_info!, error.As(null!)!);
-
     }
     var (f, err) = ctxt.openFile(info.name);
     if (err != null) {
@@ -1756,7 +1659,6 @@ private static (ptr<fileInfo>, error) matchFile(this ptr<Context> _addr_ctxt, @s
  {
         binaryOnly = null; // ignore //go:binary-only-package comments in non-Go sources
         info.header, err = readComments(f);
-
     }
     f.Close();
     if (err != null) {
@@ -1773,7 +1675,6 @@ private static (ptr<fileInfo>, error) matchFile(this ptr<Context> _addr_ctxt, @s
         binaryOnly = true;
     }
     return (_addr_info!, error.As(null!)!);
-
 }
 
 private static (slice<@string>, map<@string, slice<token.Position>>) cleanDecls(map<@string, slice<token.Position>> m) {
@@ -1812,7 +1713,6 @@ private static bool isGoBuildComment(slice<byte> line) {
     line = bytes.TrimSpace(line);
     var rest = line[(int)len(goBuildComment)..];
     return len(rest) == 0 || len(bytes.TrimSpace(rest)) < len(rest);
-
 }
 
 // Special comment denoting a binary-only package.
@@ -1874,17 +1774,14 @@ private static (bool, bool, error) shouldBuild(this ptr<Context> _addr_ctxt, sli
                 }
 
             }
-
             line = bytes.TrimSpace(line);
             if (!bytes.HasPrefix(line, bSlashSlash) || !bytes.Contains(line, bPlusBuild)) {
                 continue;
             }
-
             var text = string(line);
             if (!constraint.IsPlusBuild(text)) {
                 continue;
             }
-
             {
                 var x__prev1 = x;
 
@@ -1899,10 +1796,8 @@ private static (bool, bool, error) shouldBuild(this ptr<Context> _addr_ctxt, sli
                 x = x__prev1;
 
             }
-
         }
         return (shouldBuild, sawBinaryOnly, error.As(null!)!);
-
 }
 
 private static (slice<byte>, slice<byte>, bool, error) parseFileHeader(slice<byte> content) {
@@ -1936,7 +1831,6 @@ Lines:
             i = i__prev1;
 
         }
-
         line = bytes.TrimSpace(line);
         if (len(line) == 0 && !ended) { // Blank line
             // Remember position of most recent blank line.
@@ -1953,7 +1847,6 @@ Lines:
         }
         if (!bytes.HasPrefix(line, slashSlash)) { // Not comment line
             ended = true;
-
         }
         if (!inSlashStar && isGoBuildComment(line)) {
             if (goBuild != null) {
@@ -1982,16 +1875,13 @@ Comments:
                     i = i__prev2;
 
                 }
-
                 _continueLines = true;
                 break;
             }
-
             if (bytes.HasPrefix(line, bSlashSlash)) {
                 _continueLines = true;
                 break;
             }
-
             if (bytes.HasPrefix(line, bSlashStar)) {
                 inSlashStar = true;
                 line = bytes.TrimSpace(line[(int)len(bSlashStar)..]);
@@ -2002,10 +1892,8 @@ Comments:
             _breakLines = true;
             break;
         }
-
     }
     return (content[..(int)end], goBuild, sawBinaryOnly, error.As(null!)!);
-
 }
 
 // saveCgo saves the information from the #cgo lines in the import "C" comment.
@@ -2038,7 +1926,6 @@ private static error saveCgo(this ptr<Context> _addr_ctxt, @string filename, ptr
             if (i < 0) {
                 return error.As(fmt.Errorf("%s: invalid #cgo line: %s", filename, orig))!;
             }
-
             var line = line[..(int)i];
             var argstr = line[(int)i + 1..]; 
 
@@ -2047,7 +1934,6 @@ private static error saveCgo(this ptr<Context> _addr_ctxt, @string filename, ptr
             if (len(f) < 1) {
                 return error.As(fmt.Errorf("%s: invalid #cgo line: %s", filename, orig))!;
             }
-
             var cond = f[..(int)len(f) - 1];
             var verb = f[len(f) - 1];
             if (len(cond) > 0) {
@@ -2062,12 +1948,10 @@ private static error saveCgo(this ptr<Context> _addr_ctxt, @string filename, ptr
                     continue;
                 }
             }
-
             var (args, err) = splitQuoted(argstr);
             if (err != null) {
                 return error.As(fmt.Errorf("%s: invalid #cgo line: %s", filename, orig))!;
             }
-
             ok = default;
             {
                 var i__prev2 = i;
@@ -2080,9 +1964,7 @@ private static error saveCgo(this ptr<Context> _addr_ctxt, @string filename, ptr
                     if (!ok) {
                         return error.As(fmt.Errorf("%s: malformed #cgo argument: %s", filename, arg))!;
                     }
-
                     args[i] = arg;
-
                 }
 
                 i = i__prev2;
@@ -2130,13 +2012,11 @@ private static error saveCgo(this ptr<Context> _addr_ctxt, @string filename, ptr
                     return error.As(fmt.Errorf("%s: invalid #cgo verb: %s", filename, orig))!;
                     break;
             }
-
         }
         line = line__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 // expandSrcDir expands any occurrence of ${SRCDIR}, making sure
@@ -2160,7 +2040,6 @@ private static (@string, bool) expandSrcDir(@string str, @string srcdir) {
     }    ok = ok && (srcdir == "" || safeCgoName(srcdir));
     var res = strings.Join(chunks, srcdir);
     return (res, ok && res != "");
-
 }
 
 // makePathsAbsolute looks for compiler options that take paths and
@@ -2195,7 +2074,6 @@ private static void makePathsAbsolute(this ptr<Context> _addr_ctxt, slice<@strin
                     args[i] = arg[..(int)2] + filepath.Join(srcDir, arg[(int)2..]);
                 }
             }
-
         }
     }
 }
@@ -2224,10 +2102,8 @@ private static bool safeCgoName(@string s) {
             }
 
         }
-
     }
     return true;
-
 }
 
 // splitQuoted splits the string s around each instance of one or more consecutive
@@ -2281,7 +2157,6 @@ private static (slice<@string>, error) splitQuoted(@string s) {
             continue;
                 arg[i] = rune;
         i++;
-
     }    if (quoted || i > 0) {
         args = append(args, string(arg[..(int)i]));
     }
@@ -2292,7 +2167,6 @@ private static (slice<@string>, error) splitQuoted(@string s) {
         err = errors.New("unfinished escaping");
     }
     return (args, error.As(err)!);
-
 }
 
 // matchAuto interprets text as either a +build or //go:build expression (whichever works),
@@ -2315,7 +2189,6 @@ private static bool matchAuto(this ptr<Context> _addr_ctxt, @string text, map<@s
         return false;
     }
     return ctxt.eval(x, allTags);
-
 }
 
 private static bool eval(this ptr<Context> _addr_ctxt, constraint.Expr x, map<@string, bool> allTags) {
@@ -2393,7 +2266,6 @@ private static bool matchTag(this ptr<Context> _addr_ctxt, @string name, map<@st
     }
 
     return false;
-
 }
 
 // goodOSArchFile returns false if the name contains a $GOOS or $GOARCH
@@ -2447,7 +2319,6 @@ private static bool goodOSArchFile(this ptr<Context> _addr_ctxt, @string name, m
         n = n__prev1;
 
     }
-
     n = len(l);
     if (n >= 2 && knownOS[l[n - 2]] && knownArch[l[n - 1]]) {
         return ctxt.matchTag(l[n - 1], allTags) && ctxt.matchTag(l[n - 2], allTags);
@@ -2456,7 +2327,6 @@ private static bool goodOSArchFile(this ptr<Context> _addr_ctxt, @string name, m
         return ctxt.matchTag(l[n - 1], allTags);
     }
     return true;
-
 }
 
 private static var knownOS = make_map<@string, bool>();

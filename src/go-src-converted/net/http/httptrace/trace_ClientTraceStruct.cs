@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:03 UTC
+//     Generated on 2022 March 13 05:37:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace http
 {
     public static partial class httptrace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ClientTrace
         {
             // Constructors
@@ -90,7 +90,7 @@ namespace http
             public static implicit operator ClientTrace(NilType nil) => default(ClientTrace);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ClientTrace ClientTrace_cast(dynamic value)
         {
             return new ClientTrace(value.GetConn, value.GotConn, value.PutIdleConn, value.GotFirstResponseByte, value.Got100Continue, value.Got1xxResponse, value.DNSStart, value.DNSDone, value.ConnectStart, value.ConnectDone, value.TLSHandshakeStart, value.TLSHandshakeDone, value.WroteHeaderField, value.WroteHeaders, value.Wait100Continue, value.WroteRequest);

@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typeutil -- go2cs converted at 2022 March 06 23:35:08 UTC
+// package typeutil -- go2cs converted at 2022 March 13 06:42:41 UTC
 // import "cmd/vendor/golang.org/x/tools/go/types/typeutil" ==> using typeutil = go.cmd.vendor.golang.org.x.tools.go.types.typeutil_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\types\typeutil\callee.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using astutil = go.golang.org.x.tools.go.ast.astutil_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.types;
+
+using ast = go.ast_package;
+using types = go.types_package;
+
+using astutil = golang.org.x.tools.go.ast.astutil_package;
+
+
+// Callee returns the named target of a function call, if any:
+// a function, method, builtin, or variable.
 
 public static partial class typeutil_package {
 
-    // Callee returns the named target of a function call, if any:
-    // a function, method, builtin, or variable.
 public static types.Object Callee(ptr<types.Info> _addr_info, ptr<ast.CallExpr> _addr_call) {
     ref types.Info info = ref _addr_info.val;
     ref ast.CallExpr call = ref _addr_call.val;
@@ -37,7 +39,6 @@ public static types.Object Callee(ptr<types.Info> _addr_info, ptr<ast.CallExpr> 
                     obj = info.Uses[fun.Sel]; // qualified identifier?
                 }
             }
-
             break;
     }
     {
@@ -47,9 +48,7 @@ public static types.Object Callee(ptr<types.Info> _addr_info, ptr<ast.CallExpr> 
             return null; // T(x) is a conversion, not a call
         }
     }
-
     return obj;
-
 }
 
 // StaticCallee returns the target (function or method) of a static
@@ -65,9 +64,7 @@ public static ptr<types.Func> StaticCallee(ptr<types.Info> _addr_info, ptr<ast.C
             return _addr_f!;
         }
     }
-
     return _addr_null!;
-
 }
 
 private static bool interfaceMethod(ptr<types.Func> _addr_f) {

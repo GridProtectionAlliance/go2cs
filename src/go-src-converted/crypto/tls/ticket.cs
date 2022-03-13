@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:21:07 UTC
+// package tls -- go2cs converted at 2022 March 13 05:36:14 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\ticket.go
-using bytes = go.bytes_package;
-using aes = go.crypto.aes_package;
-using cipher = go.crypto.cipher_package;
-using hmac = go.crypto.hmac_package;
-using sha256 = go.crypto.sha256_package;
-using subtle = go.crypto.subtle_package;
-using errors = go.errors_package;
-using io = go.io_package;
-
-using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
-using System;
-
-
 namespace go.crypto;
 
+using bytes = bytes_package;
+using aes = crypto.aes_package;
+using cipher = crypto.cipher_package;
+using hmac = crypto.hmac_package;
+using sha256 = crypto.sha256_package;
+using subtle = crypto.subtle_package;
+using errors = errors_package;
+using io = io_package;
+
+using cryptobyte = golang.org.x.crypto.cryptobyte_package;
+
+
+// sessionState contains the information that is serialized into a session
+// ticket in order to later resume a connection.
+
+using System;
 public static partial class tls_package {
 
-    // sessionState contains the information that is serialized into a session
-    // ticket in order to later resume a connection.
 private partial struct sessionState {
     public ushort vers;
     public ushort cipherSuite;
@@ -55,7 +56,6 @@ private static slice<byte> marshal(this ptr<sessionState> _addr_m) {
         }
     });
     return b.BytesOrPanic();
-
 }
 
 private static bool unmarshal(this ptr<sessionState> _addr_m, slice<byte> data) {
@@ -70,7 +70,6 @@ private static bool unmarshal(this ptr<sessionState> _addr_m, slice<byte> data) 
             return false;
         }
     }
-
     ref cryptobyte.String certList = ref heap(out ptr<cryptobyte.String> _addr_certList);
     if (!s.ReadUint24LengthPrefixed(_addr_certList)) {
         return false;
@@ -81,10 +80,8 @@ private static bool unmarshal(this ptr<sessionState> _addr_m, slice<byte> data) 
             return false;
         }
         m.certificates = append(m.certificates, cert);
-
     }
     return s.Empty();
-
 }
 
 // sessionStateTLS13 is the content of a TLS 1.3 session ticket. Its first
@@ -110,7 +107,6 @@ private static slice<byte> marshal(this ptr<sessionStateTLS13> _addr_m) {
     });
     marshalCertificate(_addr_b, m.certificate);
     return b.BytesOrPanic();
-
 }
 
 private static bool unmarshal(this ptr<sessionStateTLS13> _addr_m, slice<byte> data) {
@@ -143,7 +139,6 @@ private static (slice<byte>, error) encryptTicket(this ptr<Conn> _addr_c, slice<
             return (null, error.As(err)!);
         }
     }
-
     var key = c.ticketKeys[0];
     copy(keyName, key.keyName[..]);
     var (block, err) = aes.NewCipher(key.aesKey[..]);
@@ -157,7 +152,6 @@ private static (slice<byte>, error) encryptTicket(this ptr<Conn> _addr_c, slice<
     mac.Sum(macBytes[..(int)0]);
 
     return (encrypted, error.As(null!)!);
-
 }
 
 private static (slice<byte>, bool) decryptTicket(this ptr<Conn> _addr_c, slice<byte> encrypted) {
@@ -199,7 +193,6 @@ private static (slice<byte>, bool) decryptTicket(this ptr<Conn> _addr_c, slice<b
     cipher.NewCTR(block, iv).XORKeyStream(plaintext, ciphertext);
 
     return (plaintext, keyIndex > 0);
-
 }
 
 } // end tls_package

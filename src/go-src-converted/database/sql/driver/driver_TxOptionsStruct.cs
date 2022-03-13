@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:29 UTC
+//     Generated on 2022 March 13 06:43:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace sql
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct TxOptions
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace sql
             public static implicit operator TxOptions(NilType nil) => default(TxOptions);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static TxOptions TxOptions_cast(dynamic value)
         {
             return new TxOptions(value.Isolation, value.ReadOnly);

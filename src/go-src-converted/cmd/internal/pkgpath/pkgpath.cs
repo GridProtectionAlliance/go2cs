@@ -4,31 +4,33 @@
 
 // Package pkgpath determines the package path used by gccgo/GoLLVM symbols.
 // This package is not used for the gc compiler.
-// package pkgpath -- go2cs converted at 2022 March 06 22:47:31 UTC
+
+// package pkgpath -- go2cs converted at 2022 March 13 05:58:47 UTC
 // import "cmd/internal/pkgpath" ==> using pkgpath = go.cmd.@internal.pkgpath_package
 // Original source: C:\Program Files\Go\src\cmd\internal\pkgpath\pkgpath.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.@internal;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using strings = strings_package;
+
+
+// ToSymbolFunc returns a function that may be used to convert a
+// package path into a string suitable for use as a symbol.
+// cmd is the gccgo/GoLLVM compiler in use, and tmpdir is a temporary
+// directory to pass to ioutil.TempFile.
+// For example, this returns a function that converts "net/http"
+// into a string like "net..z2fhttp". The actual string varies for
+// different gccgo/GoLLVM versions, which is why this returns a function
+// that does the conversion appropriate for the compiler in use.
+
+using System;
 public static partial class pkgpath_package {
 
-    // ToSymbolFunc returns a function that may be used to convert a
-    // package path into a string suitable for use as a symbol.
-    // cmd is the gccgo/GoLLVM compiler in use, and tmpdir is a temporary
-    // directory to pass to ioutil.TempFile.
-    // For example, this returns a function that converts "net/http"
-    // into a string like "net..z2fhttp". The actual string varies for
-    // different gccgo/GoLLVM versions, which is why this returns a function
-    // that does the conversion appropriate for the compiler in use.
 public static (Func<@string, @string>, error) ToSymbolFunc(@string cmd, @string tmpdir) => func((defer, _, _) => {
     Func<@string, @string> _p0 = default;
     error _p0 = default!;
@@ -56,7 +58,6 @@ public static (Func<@string, @string>, error) ToSymbolFunc(@string cmd, @string 
             return (null, error.As(err)!);
         }
     }
-
 
     var command = exec.Command(cmd, "-S", "-o", "-", gofilename);
     var (buf, err) = command.Output();
@@ -91,10 +92,8 @@ private static @string toSymbolV1(@string ppath) {
         if ('A' <= r && r <= 'Z' || 'a' <= r && r <= 'z' || '0' <= r && r <= '9') 
             return r;
                 return '_';
-
     };
     return strings.Map(clean, ppath);
-
 }
 
 // toSymbolV2 converts a package path using the second mangling scheme.
@@ -120,12 +119,10 @@ private static @string toSymbolV2(@string ppath) {
             enc = fmt.Sprintf("..U%08x", c);
                 bsl = append(bsl, enc);
         changed = true;
-
     }    if (!changed) {
         return ppath;
     }
     return string(bsl);
-
 }
 
 // v3UnderscoreCodes maps from a character that supports an underscore
@@ -154,7 +151,6 @@ private static @string toSymbolV3(@string ppath) {
                 }
 
             }
-
         }
         @string enc = default;
 
@@ -166,12 +162,10 @@ private static @string toSymbolV3(@string ppath) {
             enc = fmt.Sprintf("_U%08x", c);
                 bsl = append(bsl, enc);
         changed = true;
-
     }    if (!changed) {
         return ppath;
     }
     return string(bsl);
-
 }
 
 } // end pkgpath_package

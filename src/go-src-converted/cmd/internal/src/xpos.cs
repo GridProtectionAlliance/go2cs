@@ -5,16 +5,14 @@
 // This file implements the compressed encoding of source
 // positions using a lookup table.
 
-// package src -- go2cs converted at 2022 March 06 22:31:54 UTC
+// package src -- go2cs converted at 2022 March 13 05:42:51 UTC
 // import "cmd/internal/src" ==> using src = go.cmd.@internal.src_package
 // Original source: C:\Program Files\Go\src\cmd\internal\src\xpos.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class src_package {
 
-    // XPos is a more compact representation of Pos.
+// XPos is a more compact representation of Pos.
 public partial struct XPos {
     public int index;
     public ref lico lico => ref lico_val;
@@ -36,7 +34,6 @@ public static bool Before(this XPos p, XPos q) {
     var n = p.index;
     var m = q.index;
     return n < m || n == m && p.lico < q.lico;
-
 }
 
 // SameFile reports whether p and q are positions in the same file.
@@ -55,7 +52,6 @@ public static bool After(this XPos p, XPos q) {
     var n = p.index;
     var m = q.index;
     return n > m || n == m && p.lico > q.lico;
-
 }
 
 // WithNotStmt returns the same location to be marked with DWARF is_stmt=0
@@ -85,11 +81,9 @@ public static XPos WithBogusLine(this XPos p) => func((_, panic, _) => {
     if (p.index == 0) { 
         // See #35652
         panic("Assigning a bogus line to XPos with no file will cause mysterious downstream failures.");
-
     }
     p.lico = makeBogusLico();
     return p;
-
 });
 
 // WithXlogue returns the same location but marked with DWARF function prologue/epilogue
@@ -104,7 +98,6 @@ public static @string LineNumber(this XPos p) {
         return "?";
     }
     return p.lico.lineNumber();
-
 }
 
 // FileIndex returns a smallish non-negative integer corresponding to the
@@ -119,7 +112,6 @@ public static @string LineNumberHTML(this XPos p) {
         return "?";
     }
     return p.lico.lineNumberHTML();
-
 }
 
 // AtColumn1 returns the same location but shifted to column 1.
@@ -149,7 +141,6 @@ private static XPos XPos(this ptr<PosTable> _addr_t, Pos pos) {
         m = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<PosBase>, nint>{nil:0};
         t.indexMap = m;
         t.nameMap = make_map<@string, nint>();
-
     }
     var (i, ok) = m[pos.@base];
     if (!ok) {
@@ -164,10 +155,8 @@ private static XPos XPos(this ptr<PosTable> _addr_t, Pos pos) {
             }
 
         }
-
     }
     return new XPos(int32(i),pos.lico);
-
 }
 
 // Pos returns the corresponding Pos for the given p.
@@ -180,7 +169,6 @@ private static Pos Pos(this ptr<PosTable> _addr_t, XPos p) {
         base = t.baseList[p.index];
     }
     return new Pos(base,p.lico);
-
 }
 
 // FileIndex returns the index of the given filename(symbol) in the PosTable, or -1 if not found.
@@ -194,9 +182,7 @@ private static nint FileIndex(this ptr<PosTable> _addr_t, @string filename) {
             return v;
         }
     }
-
     return -1;
-
 }
 
 // FileTable returns a slice of all files used to build this package.
@@ -210,7 +196,6 @@ private static slice<@string> FileTable(this ptr<PosTable> _addr_t) {
     foreach (var (str, i) in t.nameMap) {
         fileLUT[i] = str;
     }    return fileLUT;
-
 }
 
 } // end src_package

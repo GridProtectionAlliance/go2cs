@@ -5,22 +5,23 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:41 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:07 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sock_posix.go
-using context = go.context_package;
-using poll = go.@internal.poll_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using context = context_package;
+using poll = @internal.poll_package;
+using os = os_package;
+using syscall = syscall_package;
+
+
+// socket returns a network file descriptor that is ready for
+// asynchronous I/O using the network poller.
+
+using System;
 public static partial class net_package {
 
-    // socket returns a network file descriptor that is ready for
-    // asynchronous I/O using the network poller.
 private static (ptr<netFD>, error) socket(context.Context ctx, @string net, nint family, nint sotype, nint proto, bool ipv6only, sockaddr laddr, sockaddr raddr, Func<@string, @string, syscall.RawConn, error> ctrlFn) {
     ptr<netFD> fd = default!;
     error err = default!;
@@ -56,7 +57,6 @@ private static (ptr<netFD>, error) socket(context.Context ctx, @string net, nint
                 err = err__prev2;
 
             }
-
             return (_addr_fd!, error.As(null!)!);
         else if (sotype == syscall.SOCK_DGRAM) 
             {
@@ -71,10 +71,8 @@ private static (ptr<netFD>, error) socket(context.Context ctx, @string net, nint
                 err = err__prev2;
 
             }
-
             return (_addr_fd!, error.As(null!)!);
-        
-    }
+            }
     {
         var err__prev1 = err;
 
@@ -87,9 +85,7 @@ private static (ptr<netFD>, error) socket(context.Context ctx, @string net, nint
         err = err__prev1;
 
     }
-
     return (_addr_fd!, error.As(null!)!);
-
 }
 
 private static @string ctrlNetwork(this ptr<netFD> _addr_fd) {
@@ -115,7 +111,6 @@ private static @string ctrlNetwork(this ptr<netFD> _addr_fd) {
         return fd.net + "4";
     }
     return fd.net + "6";
-
 }
 
 private static Func<syscall.Sockaddr, Addr> addrFunc(this ptr<netFD> _addr_fd) {
@@ -139,7 +134,6 @@ private static Func<syscall.Sockaddr, Addr> addrFunc(this ptr<netFD> _addr_fd) {
         else if (fd.sotype == syscall.SOCK_SEQPACKET) 
             return sockaddrToUnixpacket;
                 return _p0 => null;
-
 }
 
 private static error dial(this ptr<netFD> _addr_fd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<@string, @string, syscall.RawConn, error> ctrlFn) {
@@ -169,7 +163,6 @@ private static error dial(this ptr<netFD> _addr_fd, context.Context ctx, sockadd
             err = err__prev2;
 
         }
-
     }
     err = default!;
     syscall.Sockaddr lsa = default;
@@ -185,7 +178,6 @@ private static error dial(this ptr<netFD> _addr_fd, context.Context ctx, sockadd
             if (err != null) {
                 return error.As(os.NewSyscallError("bind", err))!;
             }
-
         }
     }
     syscall.Sockaddr rsa = default; // remote address from the user
@@ -202,7 +194,6 @@ private static error dial(this ptr<netFD> _addr_fd, context.Context ctx, sockadd
             return error.As(err)!;
         }
         fd.isConnected = true;
-
     }
     else
  {
@@ -218,7 +209,6 @@ private static error dial(this ptr<netFD> _addr_fd, context.Context ctx, sockadd
             err = err__prev2;
 
         }
-
     }
     lsa, _ = syscall.Getsockname(fd.pfd.Sysfd);
     if (crsa != null) {
@@ -234,7 +224,6 @@ private static error dial(this ptr<netFD> _addr_fd, context.Context ctx, sockadd
         fd.setAddr(fd.addrFunc()(lsa), raddr);
     }
     return error.As(null!)!;
-
 }
 
 private static error listenStream(this ptr<netFD> _addr_fd, sockaddr laddr, nint backlog, Func<@string, @string, syscall.RawConn, error> ctrlFn) {
@@ -269,7 +258,6 @@ private static error listenStream(this ptr<netFD> _addr_fd, sockaddr laddr, nint
             err = err__prev2;
 
         }
-
     }
     err = error.As(syscall.Bind(fd.pfd.Sysfd, lsa))!;
 
@@ -289,7 +277,6 @@ private static error listenStream(this ptr<netFD> _addr_fd, sockaddr laddr, nint
     lsa, _ = syscall.Getsockname(fd.pfd.Sysfd);
     fd.setAddr(fd.addrFunc()(lsa), null);
     return error.As(null!)!;
-
 }
 
 private static error listenDatagram(this ptr<netFD> _addr_fd, sockaddr laddr, Func<@string, @string, syscall.RawConn, error> ctrlFn) {
@@ -310,7 +297,6 @@ private static error listenDatagram(this ptr<netFD> _addr_fd, sockaddr laddr, Fu
                     err = err__prev2;
 
                 }
-
                 ref var addr = ref heap(addr.val, out ptr<var> _addr_addr);
 
                 if (fd.family == syscall.AF_INET) 
@@ -319,9 +305,7 @@ private static error listenDatagram(this ptr<netFD> _addr_fd, sockaddr laddr, Fu
                     addr.IP = IPv6unspecified;
                                 _addr_laddr = _addr_addr;
                 laddr = ref _addr_laddr.val;
-
             }
-
             break;
     }
     err = default!;
@@ -348,7 +332,6 @@ private static error listenDatagram(this ptr<netFD> _addr_fd, sockaddr laddr, Fu
             err = err__prev2;
 
         }
-
     }
     err = syscall.Bind(fd.pfd.Sysfd, lsa);
 
@@ -363,7 +346,6 @@ private static error listenDatagram(this ptr<netFD> _addr_fd, sockaddr laddr, Fu
     lsa, _ = syscall.Getsockname(fd.pfd.Sysfd);
     fd.setAddr(fd.addrFunc()(lsa), null);
     return error.As(null!)!;
-
 }
 
 } // end net_package

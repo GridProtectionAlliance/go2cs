@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:26 UTC
+//     Generated on 2022 March 13 05:52:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
 {
     public static partial class constant_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct ratVal
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace go
             public static implicit operator ratVal(NilType nil) => default(ratVal);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ratVal ratVal_cast(dynamic value)
         {
             return new ratVal(ref value.val);

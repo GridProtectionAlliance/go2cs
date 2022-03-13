@@ -4,24 +4,26 @@
 
 // Package httptrace provides mechanisms to trace the events within
 // HTTP client requests.
-// package httptrace -- go2cs converted at 2022 March 06 22:22:03 UTC
+
+// package httptrace -- go2cs converted at 2022 March 13 05:37:13 UTC
 // import "net/http/httptrace" ==> using httptrace = go.net.http.httptrace_package
 // Original source: C:\Program Files\Go\src\net\http\httptrace\trace.go
-using context = go.context_package;
-using tls = go.crypto.tls_package;
-using nettrace = go.@internal.nettrace_package;
-using net = go.net_package;
-using textproto = go.net.textproto_package;
-using reflect = go.reflect_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.net.http;
 
+using context = context_package;
+using tls = crypto.tls_package;
+using nettrace = @internal.nettrace_package;
+using net = net_package;
+using textproto = net.textproto_package;
+using reflect = reflect_package;
+using time = time_package;
+
+
+// unique type to prevent assignment.
+
+using System;
 public static partial class httptrace_package {
 
-    // unique type to prevent assignment.
 private partial struct clientEventContextKey {
 }
 
@@ -66,10 +68,8 @@ public static context.Context WithClientTrace(context.Context ctx, ptr<ClientTra
 ;
         }
         ctx = context.WithValue(ctx, new nettrace.TraceKey(), nt);
-
     }
     return ctx;
-
 });
 
 // ClientTrace is a set of hooks to run at various stages of an outgoing
@@ -174,9 +174,7 @@ private static void compose(this ptr<ClientTrace> _addr_t, ptr<ClientTrace> _add
             return of.Call(args);
         });
         tv.Field(i).Set(newFunc);
-
     }
-
 }
 
 // DNSStartInfo contains information about a DNS request.
@@ -199,7 +197,6 @@ private static bool hasNetHooks(this ptr<ClientTrace> _addr_t) {
         return false;
     }
     return t.DNSStart != null || t.DNSDone != null || t.ConnectStart != null || t.ConnectDone != null;
-
 }
 
 // GotConnInfo is the argument to the ClientTrace.GotConn function and

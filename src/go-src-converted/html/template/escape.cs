@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:35 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:04 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\escape.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using html = go.html_package;
-using io = go.io_package;
-using template = go.text.template_package;
-using parse = go.text.template.parse_package;
-using System;
-
-
 namespace go.html;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using html = html_package;
+using io = io_package;
+using template = text.template_package;
+using parse = text.template.parse_package;
+
+
+// escapeTemplate rewrites the named template, which must be
+// associated with t, to guarantee that the output of any of the named
+// templates is properly escaped. If no error is returned, then the named templates have
+// been modified. Otherwise the named templates have been rendered
+// unusable.
+
+using System;
 public static partial class template_package {
 
-    // escapeTemplate rewrites the named template, which must be
-    // associated with t, to guarantee that the output of any of the named
-    // templates is properly escaped. If no error is returned, then the named templates have
-    // been modified. Otherwise the named templates have been rendered
-    // unusable.
 private static error escapeTemplate(ptr<Template> _addr_tmpl, parse.Node node, @string name) {
     ref Template tmpl = ref _addr_tmpl.val;
 
@@ -49,9 +50,7 @@ private static error escapeTemplate(ptr<Template> _addr_tmpl, parse.Node node, @
             t = t__prev2;
 
         }
-
         return error.As(err)!;
-
     }
     tmpl.esc.commit();
     {
@@ -66,9 +65,7 @@ private static error escapeTemplate(ptr<Template> _addr_tmpl, parse.Node node, @
         t = t__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 // evalArgs formats the list of arguments into a string. It is equivalent to
@@ -86,12 +83,10 @@ private static @string evalArgs(params object[] args) {
             }
 
         }
-
     }
     foreach (var (i, arg) in args) {
         args[i] = indirectToStringerOrError(arg);
     }    return fmt.Sprint(args);
-
 }
 
 // funcMap maps command names to functions that render their inputs safe.
@@ -161,7 +156,6 @@ private static context escape(this ptr<escaper> _addr_e, context c, parse.Node n
             break;
     }
     panic("escaping " + n.String() + " is unimplemented");
-
 });
 
 // escapeAction escapes an action template node.
@@ -172,7 +166,6 @@ private static context escapeAction(this ptr<escaper> _addr_e, context c, ptr<pa
     if (len(n.Pipe.Decl) != 0) { 
         // A local variable assignment, not an interpolation.
         return c;
-
     }
     c = nudge(c); 
     // Check for disallowed use of predefined escapers in the pipeline.
@@ -187,7 +180,6 @@ private static context escapeAction(this ptr<escaper> _addr_e, context c, ptr<pa
             //   not methods or fields of any types.
             // Therefore, it is safe to ignore these two node types.
             continue;
-
         }
         var ident = node.Ident;
         {
@@ -200,7 +192,6 @@ private static context escapeAction(this ptr<escaper> _addr_e, context c, ptr<pa
             }
 
         }
-
     }    var s = make_slice<@string>(0, 3);
 
     if (c.state == stateError) 
@@ -269,7 +260,6 @@ private static context escapeAction(this ptr<escaper> _addr_e, context c, ptr<pa
         s = append(s, "_html_template_attrescaper");
         e.editActionNode(n, s);
     return c;
-
 });
 
 // ensurePipelineContains ensures that the pipeline ends with the commands with
@@ -281,7 +271,6 @@ private static void ensurePipelineContains(ptr<parse.PipeNode> _addr_p, slice<@s
     if (len(s) == 0) { 
         // Do not rewrite pipeline if we have no escapers to insert.
         return ;
-
     }
     var pipelineLen = len(p.Cmds);
     if (pipelineLen > 0) {
@@ -306,7 +295,6 @@ private static void ensurePipelineContains(ptr<parse.PipeNode> _addr_p, slice<@s
                             lastCmd.Args[0] = parse.NewIdentifier("_eval_args_").SetTree(null).SetPos(lastCmd.Args[0].Position());
                             p.Cmds = appendCmd(p.Cmds, _addr_newIdentCmd(esc, p.Position()));
                             pipelineLen++;
-
                         } 
                         // If any of the commands in s that we are about to insert is equivalent
                         // to the predefined escaper, use the predefined escaper instead.
@@ -330,19 +318,15 @@ private static void ensurePipelineContains(ptr<parse.PipeNode> _addr_p, slice<@s
                             // The predefined escaper will already be inserted along with the
                             // escapers in s, so do not copy it to the rewritten pipeline.
                             pipelineLen--;
-
                         }
-
                     }
 
                 }
-
             }
 
             idNode = idNode__prev2;
 
         }
-
     }
     var newCmds = make_slice<ptr<parse.CommandNode>>(pipelineLen, pipelineLen + len(s));
     var insertedIdents = make_map<@string, bool>();
@@ -364,7 +348,6 @@ private static void ensurePipelineContains(ptr<parse.PipeNode> _addr_p, slice<@s
                 idNode = idNode__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -376,10 +359,8 @@ private static void ensurePipelineContains(ptr<parse.PipeNode> _addr_p, slice<@s
             // ensures that escapers that were already inserted into the pipeline on
             // the first escaping pass do not get inserted again.
             newCmds = appendCmd(newCmds, _addr_newIdentCmd(name, p.Position()));
-
         }
     }    p.Cmds = newCmds;
-
 }
 
 // predefinedEscapers contains template predefined escapers that are equivalent
@@ -405,9 +386,7 @@ private static @string normalizeEscFn(@string e) {
             return norm;
         }
     }
-
     return e;
-
 }
 
 // redundantFuncs[a][b] implies that funcMap[b](funcMap[a](x)) == funcMap[a](x)
@@ -430,9 +409,7 @@ private static slice<ptr<parse.CommandNode>> appendCmd(slice<ptr<parse.CommandNo
             }
         }
     }
-
     return append(cmds, cmd);
-
 }
 
 // newIdentCmd produces a command containing a single identifier node.
@@ -462,7 +439,6 @@ private static context nudge(context c) {
         (c.state, c.delim, c.attr) = (attrStartStates[c.attr], delimSpaceOrTagEnd, attrNone);    else if (c.state == stateAfterName) 
         // In `<foo bar {{.}}`, the action is an attribute name.
         (c.state, c.attr) = (stateAttrName, attrNone);        return c;
-
 }
 
 // join joins the two contexts of a branch template node. The result is an
@@ -484,7 +460,6 @@ private static context join(context a, context b, parse.Node node, @string nodeN
         // The contexts differ only by urlPart.
         c.urlPart = urlPartUnknown;
         return c;
-
     }
     c = a;
     c.jsCtx = b.jsCtx;
@@ -492,7 +467,6 @@ private static context join(context a, context b, parse.Node node, @string nodeN
         // The contexts differ only by jsCtx.
         c.jsCtx = jsCtxUnknown;
         return c;
-
     }
     {
         var c__prev1 = c;
@@ -509,15 +483,12 @@ private static context join(context a, context b, parse.Node node, @string nodeN
                 }
 
             }
-
         }
         c = c__prev1;
 
     }
 
-
     return new context(state:stateError,err:errorf(ErrBranchEnd,node,0,"{{%s}} branches end in different contexts: %v, %v",nodeName,a,b),);
-
 }
 
 // escapeBranch escapes a branch template node: "if", "range" and "with".
@@ -539,12 +510,10 @@ private static context escapeBranch(this ptr<escaper> _addr_e, context c, ptr<pa
             c0.err.Line = n.Line;
             c0.err.Description = "on range loop re-entry: " + c0.err.Description;
             return c0;
-
         }
     }
     var c1 = e.escapeList(c, n.ElseList);
     return join(c0, c1, n, nodeName);
-
 }
 
 // escapeList escapes a list template node.
@@ -558,7 +527,6 @@ private static context escapeList(this ptr<escaper> _addr_e, context c, ptr<pars
     foreach (var (_, m) in n.Nodes) {
         c = e.escape(c, m);
     }    return c;
-
 }
 
 // escapeListConditionally escapes a list node but only preserves edits and
@@ -675,7 +643,6 @@ private static (context, bool) escapeListConditionally(this ptr<escaper> _addr_e
         }
     }
     return (c, ok);
-
 }
 
 // escapeTemplate escapes a {{template}} call node.
@@ -688,7 +655,6 @@ private static context escapeTemplate(this ptr<escaper> _addr_e, context c, ptr<
         e.editTemplateNode(n, name);
     }
     return c;
-
 }
 
 // escapeTree escapes the named template starting in the given context as
@@ -708,10 +674,8 @@ private static (context, @string) escapeTree(this ptr<escaper> _addr_e, context 
         if (ok) { 
             // Already escaped.
             return (out, dname);
-
         }
     }
-
     var t = e.template(name);
     if (t == null) { 
         // Two cases: The template exists but is empty, or has never been mentioned at
@@ -720,7 +684,6 @@ private static (context, @string) escapeTree(this ptr<escaper> _addr_e, context 
             return (new context(state:stateError,err:errorf(ErrNoSuchTemplate,node,line,"%q is an incomplete or empty template",name),), dname);
         }
         return (new context(state:stateError,err:errorf(ErrNoSuchTemplate,node,line,"no such template %q",name),), dname);
-
     }
     if (dname != name) { 
         // Use any template derived during an earlier call to escapeTemplate
@@ -732,10 +695,8 @@ private static (context, @string) escapeTree(this ptr<escaper> _addr_e, context 
             e.derived[dname] = dt;
         }
         t = dt;
-
     }
     return (e.computeOutCtx(c, t), dname);
-
 }
 
 // computeOutCtx takes a template and its start context and computes the output
@@ -763,7 +724,6 @@ private static context computeOutCtx(this ptr<escaper> _addr_e, context c, ptr<t
         return new context(state:stateError,err:errorf(ErrOutputContext,t.Tree.Root,0,"cannot compute output context for template %s",t.Name()),);
     }
     return c1;
-
 }
 
 // escapeTemplateBody escapes the given template assuming the given output
@@ -779,16 +739,13 @@ private static (context, bool) escapeTemplateBody(this ptr<escaper> _addr_e, con
         if (c1.state == stateError) { 
             // Do not update the input escaper, e.
             return false;
-
         }
         if (!e1.called[t.Name()]) { 
             // If t is not recursively called, then c1 is an
             // accurate output context.
             return true;
-
         }
         return c.eq(c1);
-
     }; 
     // We need to assume an output context so that recursive template calls
     // take the fast path out of escapeTree instead of infinitely recursing.
@@ -796,7 +753,6 @@ private static (context, bool) escapeTemplateBody(this ptr<escaper> _addr_e, con
     // works >90% of the time.
     e.output[t.Name()] = c;
     return e.escapeListConditionally(c, t.Tree.Root, filter);
-
 }
 
 // delimEnds maps each delim to a string of characters that terminate it.
@@ -832,9 +788,7 @@ private static context escapeText(this ptr<escaper> _addr_e, context c, ptr<pars
 
                     j = j__prev2;
                 }
-
             }
-
             {
                 var j__prev2 = j;
 
@@ -849,7 +803,6 @@ private static context escapeText(this ptr<escaper> _addr_e, context c, ptr<pars
 
                 j = j__prev2;
             }
-
         }
         else if (isComment(c.state) && c.delim == delimNone) {
 
@@ -868,11 +821,9 @@ private static context escapeText(this ptr<escaper> _addr_e, context c, ptr<pars
  {
                     b.WriteByte(' ');
                 }
-
             else if (c.state == stateCSSBlockCmt) 
                 b.WriteByte(' ');
                         written = i1;
-
         }
         if (c.state != c1.state && isComment(c1.state) && c1.delim == delimNone) { 
             // Preserve the portion between written and the comment start.
@@ -880,12 +831,9 @@ private static context escapeText(this ptr<escaper> _addr_e, context c, ptr<pars
             if (c1.state == stateHTMLCmt) { 
                 // "<!--" instead of "/*" or "//"
                 cs -= 2;
-
             }
-
             b.Write(s[(int)written..(int)cs]);
             written = i1;
-
         }
         if (i == i1 && c.state == c1.state) {
             panic(fmt.Sprintf("infinite loop from %v to %v on %q..%q", c, c1, s[..(int)i], s[(int)i..]));
@@ -898,10 +846,8 @@ private static context escapeText(this ptr<escaper> _addr_e, context c, ptr<pars
             b.Write(n.Text[(int)written..]);
         }
         e.editTextNode(n, b.Bytes());
-
     }
     return c;
-
 });
 
 // contextAfterText starts in context c, consumes some tokens from the front of
@@ -916,10 +862,8 @@ private static (context, nint) contextAfterText(context c, slice<byte> s) {
             // A special end tag (`</script>`) has been seen and
             // all content preceding it has been consumed.
             return (c1, 0);
-
         }
         return transitionFunc[c.state](c, s[..(int)i]);
-
     }
     var i = bytes.IndexAny(s, delimEnds[c.delim]);
     if (i == -1) {
@@ -941,7 +885,6 @@ private static (context, nint) contextAfterText(context c, slice<byte> s) {
             }
 
         }
-
     }
     if (i == len(s)) { 
         // Remain inside the attribute.
@@ -958,7 +901,6 @@ private static (context, nint) contextAfterText(context c, slice<byte> s) {
 
         }
         return (c, len(s));
-
     }
     var element = c.element; 
 
@@ -969,10 +911,8 @@ private static (context, nint) contextAfterText(context c, slice<byte> s) {
     if (c.delim != delimSpaceOrTagEnd) { 
         // Consume any quote.
         i++;
-
     }
     return (new context(state:stateTag,element:element), i);
-
 }
 
 // editActionNode records a change to an action pipeline for later commit.
@@ -987,9 +927,7 @@ private static void editActionNode(this ptr<escaper> _addr_e, ptr<parse.ActionNo
             panic(fmt.Sprintf("node %s shared between templates", n));
         }
     }
-
     e.actionNodeEdits[n] = cmds;
-
 });
 
 // editTemplateNode records a change to a {{template}} callee for later commit.
@@ -1004,9 +942,7 @@ private static void editTemplateNode(this ptr<escaper> _addr_e, ptr<parse.Templa
             panic(fmt.Sprintf("node %s shared between templates", n));
         }
     }
-
     e.templateNodeEdits[n] = callee;
-
 });
 
 // editTextNode records a change to a text node for later commit.
@@ -1021,9 +957,7 @@ private static void editTextNode(this ptr<escaper> _addr_e, ptr<parse.TextNode> 
             panic(fmt.Sprintf("node %s shared between templates", n));
         }
     }
-
     e.textNodeEdits[n] = text;
-
 });
 
 // commit applies changes to actions and template calls needed to contextually
@@ -1051,7 +985,6 @@ private static void commit(this ptr<escaper> _addr_e) => func((_, panic, _) => {
             }
 
         }
-
     }    {
         var n__prev1 = n;
         var s__prev1 = s;
@@ -1095,7 +1028,6 @@ private static void commit(this ptr<escaper> _addr_e) => func((_, panic, _) => {
     e.actionNodeEdits = make_map<ptr<parse.ActionNode>, slice<@string>>();
     e.templateNodeEdits = make_map<ptr<parse.TemplateNode>, @string>();
     e.textNodeEdits = make_map<ptr<parse.TextNode>, slice<byte>>();
-
 });
 
 // template returns the named template given a mangled template name.
@@ -1109,7 +1041,6 @@ private static ptr<template.Template> template(this ptr<escaper> _addr_e, @strin
         t = e.derived[name];
     }
     return _addr_t!;
-
 }
 
 // arbitraryTemplate returns an arbitrary template from the name space

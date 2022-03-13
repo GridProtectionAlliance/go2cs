@@ -5,14 +5,14 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:15:47 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:46 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\file_unix.go
-using poll = go.@internal.poll_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using poll = @internal.poll_package;
+using os = os_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -27,7 +27,6 @@ private static (nint, error) dupSocket(ptr<os.File> _addr_f) {
             err = os.NewSyscallError(call, err);
         }
         return (-1, error.As(err)!);
-
     }
     {
         var err = syscall.SetNonblock(s, true);
@@ -37,9 +36,7 @@ private static (nint, error) dupSocket(ptr<os.File> _addr_f) {
             return (-1, error.As(os.NewSyscallError("setnonblock", err))!);
         }
     }
-
     return (s, error.As(null!)!);
-
 }
 
 private static (ptr<netFD>, error) newFileFD(ptr<os.File> _addr_f) {
@@ -92,10 +89,8 @@ private static (ptr<netFD>, error) newFileFD(ptr<os.File> _addr_f) {
             return (_addr_null!, error.As(err)!);
         }
     }
-
     fd.setAddr(laddr, raddr);
     return (_addr_fd!, error.As(null!)!);
-
 }
 
 private static (Conn, error) fileConn(ptr<os.File> _addr_f) {
@@ -123,7 +118,6 @@ private static (Conn, error) fileConn(ptr<os.File> _addr_f) {
     }
     fd.Close();
     return (null, error.As(syscall.EINVAL)!);
-
 }
 
 private static (Listener, error) fileListener(ptr<os.File> _addr_f) {
@@ -145,7 +139,6 @@ private static (Listener, error) fileListener(ptr<os.File> _addr_f) {
     }
     fd.Close();
     return (null, error.As(syscall.EINVAL)!);
-
 }
 
 private static (PacketConn, error) filePacketConn(ptr<os.File> _addr_f) {
@@ -170,7 +163,6 @@ private static (PacketConn, error) filePacketConn(ptr<os.File> _addr_f) {
     }
     fd.Close();
     return (null, error.As(syscall.EINVAL)!);
-
 }
 
 } // end net_package

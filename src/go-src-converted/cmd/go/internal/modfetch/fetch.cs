@@ -2,39 +2,38 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2022 March 06 23:18:55 UTC
+// package modfetch -- go2cs converted at 2022 March 13 06:32:15 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\fetch.go
-using zip = go.archive.zip_package;
-using bytes = go.bytes_package;
-using context = go.context_package;
-using sha256 = go.crypto.sha256_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using par = go.cmd.go.@internal.par_package;
-using robustio = go.cmd.go.@internal.robustio_package;
-using trace = go.cmd.go.@internal.trace_package;
-
-using module = go.golang.org.x.mod.module_package;
-using dirhash = go.golang.org.x.mod.sumdb.dirhash_package;
-using modzip = go.golang.org.x.mod.zip_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using zip = archive.zip_package;
+using bytes = bytes_package;
+using context = context_package;
+using sha256 = crypto.sha256_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using par = cmd.go.@internal.par_package;
+using robustio = cmd.go.@internal.robustio_package;
+using trace = cmd.go.@internal.trace_package;
+
+using module = golang.org.x.mod.module_package;
+using dirhash = golang.org.x.mod.sumdb.dirhash_package;
+using modzip = golang.org.x.mod.zip_package;
+using System;
 
 public static partial class modfetch_package {
 
@@ -67,10 +66,8 @@ public static (@string, error) Download(context.Context ctx, module.Version mod)
         }
         checkMod(mod);
         return new cached(dir,nil);
-
     })._<cached>();
     return (c.dir, error.As(c.err)!);
-
 }
 
 private static (@string, error) download(context.Context ctx, module.Version mod) => func((defer, _, _) => {
@@ -84,7 +81,6 @@ private static (@string, error) download(context.Context ctx, module.Version mod
     if (err == null) { 
         // The directory has already been completely extracted (no .partial file exists).
         return (dir, error.As(null!)!);
-
     }
     else if (dir == "" || !errors.Is(err, fs.ErrNotExist)) {
         return ("", error.As(err)!);
@@ -125,12 +121,10 @@ private static (@string, error) download(context.Context ctx, module.Version mod
             foreach (var (_, path) in old) {
                 RemoveAll(path); // best effort
             }
-
         }
         err = err__prev1;
 
     }
-
     if (dirExists) {
         {
             var err__prev2 = err;
@@ -144,7 +138,6 @@ private static (@string, error) download(context.Context ctx, module.Version mod
             err = err__prev2;
 
         }
-
     }
     var (partialPath, err) = CachePath(mod, "partial");
     if (err != null) {
@@ -161,7 +154,6 @@ private static (@string, error) download(context.Context ctx, module.Version mod
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -173,7 +165,6 @@ private static (@string, error) download(context.Context ctx, module.Version mod
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -189,14 +180,11 @@ private static (@string, error) download(context.Context ctx, module.Version mod
                 }
 
             }
-
             return ("", error.As(err)!);
-
         }
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -209,12 +197,10 @@ private static (@string, error) download(context.Context ctx, module.Version mod
 
     }
 
-
     if (!cfg.ModCacheRW) {
         makeDirsReadOnly(dir);
     }
     return (dir, error.As(null!)!);
-
 });
 
 private static par.Cache downloadZipCache = default;
@@ -250,7 +236,6 @@ public static (@string, error) DownloadZip(context.Context ctx, module.Version m
                     }
 
                 }
-
             } 
 
             // The zip or ziphash file does not exist. Acquire the lock and create them.
@@ -275,12 +260,9 @@ public static (@string, error) DownloadZip(context.Context ctx, module.Version m
             }
 
         }
-
         return new cached(zipfile,nil);
-
     })._<cached>();
     return (c.zipfile, error.As(c.err)!);
-
 });
 
 private static error downloadZip(context.Context ctx, module.Version mod, @string zipfile) => func((defer, _, _) => {
@@ -305,7 +287,6 @@ private static error downloadZip(context.Context ctx, module.Version mod, @strin
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -317,7 +298,6 @@ private static error downloadZip(context.Context ctx, module.Version mod, @strin
         err = err__prev1;
 
     }
-
     if (zipExists && ziphashExists) {
         return error.As(null!)!;
     }
@@ -346,7 +326,6 @@ private static error downloadZip(context.Context ctx, module.Version mod, @strin
             foreach (var (_, path) in old) {
                 os.Remove(path); // best effort
             }
-
         }
         err = err__prev1;
 
@@ -393,7 +372,6 @@ private static error downloadZip(context.Context ctx, module.Version mod, @strin
                 err = err__prev2;
 
             }
-
             {
                 var err__prev2 = err;
 
@@ -407,10 +385,8 @@ private static error downloadZip(context.Context ctx, module.Version mod, @strin
                 err = err__prev2;
 
             }
-
         }
         return error.As(err)!;
-
     });
     if (err != null) {
         return error.As(err)!;
@@ -460,7 +436,6 @@ private static error downloadZip(context.Context ctx, module.Version mod, @strin
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -476,7 +451,6 @@ private static error downloadZip(context.Context ctx, module.Version mod, @strin
     // TODO(bcmills): Should we make the .zip and .ziphash files read-only to discourage tampering?
 
     return error.As(null!)!;
-
 });
 
 // hashZip reads the zip file opened in f, then writes the hash to ziphashfile,
@@ -500,7 +474,6 @@ private static error hashZip(module.Version mod, @string zipfile, @string ziphas
         err = err__prev1;
 
     }
-
     var (hf, err) = lockedfile.Create(ziphashfile);
     if (err != null) {
         return error.As(err)!;
@@ -516,7 +489,6 @@ private static error hashZip(module.Version mod, @string zipfile, @string ziphas
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -528,7 +500,6 @@ private static error hashZip(module.Version mod, @string zipfile, @string ziphas
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -541,9 +512,7 @@ private static error hashZip(module.Version mod, @string zipfile, @string ziphas
 
     }
 
-
     return error.As(null!)!;
-
 }
 
 // makeDirsReadOnly makes a best-effort attempt to remove write permissions for dir
@@ -562,14 +531,12 @@ private static void makeDirsReadOnly(@string dir) {
             }
         }
         return null;
-
     }); 
 
     // Run over list backward to chmod children before parents.
     for (var i = len(dirs) - 1; i >= 0; i--) {
         os.Chmod(dirs[i].path, dirs[i].mode & ~0222);
     }
-
 }
 
 // RemoveAll removes a directory written by Download or Unzip, first applying
@@ -584,10 +551,8 @@ public static error RemoveAll(@string dir) {
             os.Chmod(path, 0777);
         }
         return error.As(null!)!;
-
     });
     return error.As(robustio.RemoveAll(dir))!;
-
 }
 
 public static @string GoSumFile = default; // path to go.sum; set by package modload
@@ -629,14 +594,12 @@ private static (bool, error) initGoSum() {
             // On Plan 9, locking requires chmod, and we don't want to modify any file
             // in the overlay. See #44700.
             data, err = os.ReadFile(actualSumFile);
-
         }
         else
  {
             data, err = lockedfile.Read(GoSumFile);
         }
     }
-
     if (err != null && !os.IsNotExist(err)) {
         return (false, error.As(err)!);
     }
@@ -644,7 +607,6 @@ private static (bool, error) initGoSum() {
     readGoSum(goSum.m, GoSumFile, data);
 
     return (true, error.As(null!)!);
-
 }
 
 // emptyGoModHash is the hash of a 1-file tree containing a 0-length go.mod.
@@ -675,7 +637,6 @@ private static error readGoSum(map<module.Version, slice<@string>> dst, @string 
         if (len(f) == 0) { 
             // blank line; skip it
             continue;
-
         }
         if (len(f) != 3) {
             return error.As(fmt.Errorf("malformed go.sum:\n%s:%d: wrong number of fields %v", file, lineno, len(f)))!;
@@ -683,14 +644,11 @@ private static error readGoSum(map<module.Version, slice<@string>> dst, @string 
         if (f[2] == emptyGoModHash) { 
             // Old bug; drop it.
             continue;
-
         }
         module.Version mod = new module.Version(Path:f[0],Version:f[1]);
         dst[mod] = append(dst[mod], f[2]);
-
     }
     return error.As(null!)!;
-
 }
 
 // HaveSum returns true if the go.sum file contains an entry for mod.
@@ -712,7 +670,6 @@ public static bool HaveSum(module.Version mod) => func((defer, _, _) => {
             return true;
         }
     }    return false;
-
 });
 
 // checkMod checks the given module's checksum.
@@ -738,7 +695,6 @@ private static void checkMod(module.Version mod) {
             @base.Fatalf("verifying %v", module.VersionError(mod, err));
         }
         return ;
-
     }
     var h = string(data);
     if (!strings.HasPrefix(h, "h1:")) {
@@ -751,7 +707,6 @@ private static void checkMod(module.Version mod) {
             @base.Fatalf("%s", err);
         }
     }
-
 }
 
 // goModSum returns the checksum for the go.mod contents.
@@ -759,9 +714,7 @@ private static (@string, error) goModSum(slice<byte> data) {
     @string _p0 = default;
     error _p0 = default!;
 
-    return dirhash.Hash1(new slice<@string>(new @string[] { "go.mod" }), _p0 => {
-        return (io.NopCloser(bytes.NewReader(data)), error.As(null!)!);
-    });
+    return dirhash.Hash1(new slice<@string>(new @string[] { "go.mod" }), _p0 => (io.NopCloser(bytes.NewReader(data)), error.As(null!)!));
 }
 
 // checkGoMod checks the given module's go.mod checksum;
@@ -772,7 +725,6 @@ private static error checkGoMod(@string path, @string version, slice<byte> data)
         return error.As(addr(new module.ModuleError(Path:path,Version:version,Err:fmt.Errorf("verifying go.mod: %v",err)))!)!;
     }
     return error.As(checkModSum(new module.Version(Path:path,Version:version+"/go.mod"), h))!;
-
 }
 
 // checkModSum checks that the recorded checksum for mod is h.
@@ -813,7 +765,6 @@ private static error checkModSum(module.Version mod, @string h) {
             }
 
         }
-
     }
     if (inited) {
         goSum.mu.Lock();
@@ -824,7 +775,6 @@ private static error checkModSum(module.Version mod, @string h) {
         goSum.mu.Unlock();
     }
     return error.As(null!)!;
-
 }
 
 // haveModSumLocked reports whether the pair mod,h is already listed in go.sum.
@@ -839,7 +789,6 @@ private static bool haveModSumLocked(module.Version mod, @string h) {
             @base.Fatalf("verifying %s@%s: checksum mismatch\n\tdownloaded: %v\n\tgo.sum:     %v" + goSumMismatch, mod.Path, mod.Version, h, vh);
         }
     }    return false;
-
 }
 
 // addModSumLocked adds the pair mod,h to go.sum.
@@ -852,7 +801,6 @@ private static void addModSumLocked(module.Version mod, @string h) {
         fmt.Fprintf(os.Stderr, "warning: verifying %s@%s: unknown hashes in go.sum: %v; adding %v" + hashVersionMismatch, mod.Path, mod.Version, strings.Join(goSum.m[mod], ", "), h);
     }
     goSum.m[mod] = append(goSum.m[mod], h);
-
 }
 
 // checkSumDB checks the mod, h pair against the Go checksum database.
@@ -878,7 +826,6 @@ private static error checkSumDB(module.Version mod, @string h) {
             return error.As(module.VersionError(modWithoutSuffix, fmt.Errorf("verifying %s: checksum mismatch\n\tdownloaded: %v\n\t%s: %v" + sumdbMismatch, noun, h, db, line[(int)len(prefix) - len("h1:")..])))!;
         }
     }    return error.As(null!)!;
-
 }
 
 // Sum returns the checksum for the downloaded copy of the given module,
@@ -887,7 +834,6 @@ public static @string Sum(module.Version mod) {
     if (cfg.GOMODCACHE == "") { 
         // Do not use current directory.
         return "";
-
     }
     var (ziphash, err) = CachePath(mod, "ziphash");
     if (err != null) {
@@ -902,7 +848,6 @@ public static @string Sum(module.Version mod) {
         return "";
     }
     return string(data);
-
 }
 
 // isValidSum returns true if data is the valid contents of a zip hash file.
@@ -918,7 +863,6 @@ private static bool isValidSum(slice<byte> data) {
         return false;
     }
     return true;
-
 }
 
 // WriteGoSum writes the go.sum file if it needs to be updated.
@@ -954,7 +898,6 @@ Outer:
                         _breakOuter = true;
                         break;
                     }
-
                 }
 
                 h = h__prev2;
@@ -985,7 +928,6 @@ Outer:
             defer(unlock());
         }
     }
-
 
     var err = lockedfile.Transform(GoSumFile, data => {
         if (!goSum.overwrite) { 
@@ -1050,7 +992,6 @@ Outer:
         }
 
         return (buf.Bytes(), null);
-
     });
 
     if (err != null) {
@@ -1058,7 +999,6 @@ Outer:
     }
     goSum.status = make_map<modSum, modSumStatus>();
     goSum.overwrite = false;
-
 });
 
 // TrimGoSum trims go.sum to contain only the modules needed for reproducible

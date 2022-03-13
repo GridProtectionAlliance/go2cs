@@ -4,18 +4,20 @@
 
 // This file implements Selections.
 
-// package types -- go2cs converted at 2022 March 06 22:42:14 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:22 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\selection.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
 namespace go.go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+
+
+// SelectionKind describes the kind of a selector expression x.f
+// (excluding qualified identifiers).
 
 public static partial class types_package {
 
-    // SelectionKind describes the kind of a selector expression x.f
-    // (excluding qualified identifiers).
 public partial struct SelectionKind { // : nint
 }
 
@@ -101,7 +103,6 @@ private static Type Type(this ptr<Selection> _addr_s) {
         return _addr_sig;
     // In all other cases, the type of x.f is the type of x.
     return s.obj.Type();
-
 }
 
 // Index describes the path from x to f in x.f.
@@ -173,9 +174,7 @@ public static @string SelectionString(ptr<Selection> _addr_s, Qualifier qf) {
             WriteSignature(_addr_buf, T._<ptr<Signature>>(), qf);
         }
     }
-
     return buf.String();
-
 }
 
 } // end types_package

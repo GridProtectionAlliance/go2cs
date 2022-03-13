@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:37 UTC
+//     Generated on 2022 March 13 06:33:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace @internal
 {
     public static partial class loader_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SymbolBuilder
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace @internal
             public static implicit operator SymbolBuilder(NilType nil) => default(SymbolBuilder);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SymbolBuilder SymbolBuilder_cast(dynamic value)
         {
             return new SymbolBuilder(ref value.ptr<extSymPayload>, value.symIdx, ref value.l);

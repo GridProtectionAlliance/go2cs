@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sym -- go2cs converted at 2022 March 06 23:20:35 UTC
+// package sym -- go2cs converted at 2022 March 13 06:33:29 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\sym\symbol.go
-using obj = go.cmd.@internal.obj_package;
-
 namespace go.cmd.link.@internal;
+
+using obj = cmd.@internal.obj_package;
 
 public static partial class sym_package {
 
@@ -22,7 +22,6 @@ public static nint ABIToVersion(obj.ABI abi) {
     else if (abi == obj.ABIInternal) 
         return SymVerABIInternal;
         return -1;
-
 }
 
 public static (obj.ABI, bool) VersionToABI(nint v) {
@@ -35,7 +34,6 @@ public static (obj.ABI, bool) VersionToABI(nint v) {
     else if (v == SymVerABIInternal) 
         return (obj.ABIInternal, true);
         return (~obj.ABI(0), false);
-
 }
 
 } // end sym_package

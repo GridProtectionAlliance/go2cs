@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package filepath -- go2cs converted at 2022 March 06 22:14:07 UTC
+// package filepath -- go2cs converted at 2022 March 13 05:28:17 UTC
 // import "path/filepath" ==> using filepath = go.path.filepath_package
 // Original source: C:\Program Files\Go\src\path\filepath\symlink.go
-using errors = go.errors_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go.path;
+
+using errors = errors_package;
+using fs = io.fs_package;
+using os = os_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class filepath_package {
 
@@ -51,12 +51,10 @@ private static (@string, error) walkSymlinks(@string path) {
             if (end == start) { 
                 // No more path components.
                 break;
-
             }
             else if (path[(int)start..(int)end] == "." && !isWindowsDot) { 
                 // Ignore path component ".".
                 continue;
-
             }
             else if (path[(int)start..(int)end] == "..") { 
                 // Back up to previous component if possible.
@@ -79,16 +77,13 @@ private static (@string, error) walkSymlinks(@string path) {
                         dest += pathSeparator;
                     }
                     dest += "..";
-
                 }
                 else
  { 
                     // Discard everything since the last slash.
                     dest = dest[..(int)r];
-
                 }
                 continue;
-
             }
             if (len(dest) > volumeNameLen(dest) && !os.IsPathSeparator(dest[len(dest) - 1])) {
                 dest += pathSeparator;
@@ -106,7 +101,6 @@ private static (@string, error) walkSymlinks(@string path) {
                     return ("", error.As(syscall.ENOTDIR)!);
                 }
                 continue;
-
             }
             linksWalked++;
             if (linksWalked > 255) {
@@ -120,7 +114,6 @@ private static (@string, error) walkSymlinks(@string path) {
                 // On Windows, if "." is a relative symlink,
                 // just return ".".
                 break;
-
             }
             path = link + path[(int)end..];
 
@@ -133,13 +126,11 @@ private static (@string, error) walkSymlinks(@string path) {
                 vol = link[..(int)v];
                 dest = vol;
                 end = len(vol);
-
             }
             else if (len(link) > 0 && os.IsPathSeparator(link[0])) { 
                 // Symlink to absolute path.
                 dest = link[..(int)1];
                 end = 1;
-
             }
             else
  { 
@@ -159,12 +150,10 @@ private static (@string, error) walkSymlinks(@string path) {
                     dest = dest[..(int)r];
                 }
                 end = 0;
-
             }
         }
     }
     return (Clean(dest), error.As(null!)!);
-
 }
 
 } // end filepath_package

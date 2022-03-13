@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:16:51 UTC
+//     Generated on 2022 March 13 05:30:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct UDPAddr
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace go
             public static implicit operator UDPAddr(NilType nil) => default(UDPAddr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static UDPAddr UDPAddr_cast(dynamic value)
         {
             return new UDPAddr(value.IP, value.Port, value.Zone);

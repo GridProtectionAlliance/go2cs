@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:59 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\stubs.go
-using abi = go.@internal.abi_package;
-using goexperiment = go.@internal.goexperiment_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using abi = @internal.abi_package;
+using goexperiment = @internal.goexperiment_package;
+using @unsafe = @unsafe_package;
+
+
+// Should be a built-in for unsafe.Pointer?
+//go:nosplit
+
+using System;
 public static partial class runtime_package {
 
-    // Should be a built-in for unsafe.Pointer?
-    //go:nosplit
 private static unsafe.Pointer add(unsafe.Pointer p, System.UIntPtr x) {
     return @unsafe.Pointer(uintptr(p) + x);
 }
@@ -138,7 +139,6 @@ private static uint fastrand() {
     s1 ^= s1 << 17;
     s1 = s1 ^ s0 ^ s1 >> 7 ^ s0 >> 16;
     (mp.fastrand[0], mp.fastrand[1]) = (s0, s1);    return s0 + s1;
-
 }
 
 //go:nosplit
@@ -146,7 +146,6 @@ private static uint fastrandn(uint n) {
     // This is similar to fastrand() % n, but faster.
     // See https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     return uint32(uint64(fastrand()) * uint64(n) >> 32);
-
 }
 
 //go:linkname sync_fastrand sync.fastrand
@@ -382,7 +381,6 @@ private static System.UIntPtr divRoundUp(System.UIntPtr n, System.UIntPtr a) {
     // a is generally a power of two. This will get inlined and
     // the compiler will optimize the division.
     return (n + a - 1) / a;
-
 }
 
 // checkASM reports whether assembly runtime checks have passed.
@@ -395,7 +393,6 @@ private static nint bool2int(bool x) {
     // Avoid branches. In the SSA compiler, this compiles to
     // exactly what you would want it to.
     return int(uint8(new ptr<ptr<ptr<byte>>>(@unsafe.Pointer(_addr_x))));
-
 }
 
 // abort crashes the runtime in situations where even throw might not

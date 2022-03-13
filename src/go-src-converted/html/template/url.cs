@@ -2,39 +2,41 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:25:40 UTC
+// package template -- go2cs converted at 2022 March 13 05:40:13 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\url.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.html;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// urlFilter returns its input unless it contains an unsafe scheme in which
+// case it defangs the entire URL.
+//
+// Schemes that cause unintended side effects that are irreversible without user
+// interaction are considered unsafe. For example, clicking on a "javascript:"
+// link can immediately trigger JavaScript code execution.
+//
+// This filter conservatively assumes that all schemes other than the following
+// are unsafe:
+//    * http:   Navigates to a new website, and may open a new window or tab.
+//              These side effects can be reversed by navigating back to the
+//              previous website, or closing the window or tab. No irreversible
+//              changes will take place without further user interaction with
+//              the new website.
+//    * https:  Same as http.
+//    * mailto: Opens an email program and starts a new draft. This side effect
+//              is not irreversible until the user explicitly clicks send; it
+//              can be undone by closing the email program.
+//
+// To allow URLs containing other schemes to bypass this filter, developers must
+// explicitly indicate that such a URL is expected and safe by encapsulating it
+// in a template.URL value.
 
 public static partial class template_package {
 
-    // urlFilter returns its input unless it contains an unsafe scheme in which
-    // case it defangs the entire URL.
-    //
-    // Schemes that cause unintended side effects that are irreversible without user
-    // interaction are considered unsafe. For example, clicking on a "javascript:"
-    // link can immediately trigger JavaScript code execution.
-    //
-    // This filter conservatively assumes that all schemes other than the following
-    // are unsafe:
-    //    * http:   Navigates to a new website, and may open a new window or tab.
-    //              These side effects can be reversed by navigating back to the
-    //              previous website, or closing the window or tab. No irreversible
-    //              changes will take place without further user interaction with
-    //              the new website.
-    //    * https:  Same as http.
-    //    * mailto: Opens an email program and starts a new draft. This side effect
-    //              is not irreversible until the user explicitly clicks send; it
-    //              can be undone by closing the email program.
-    //
-    // To allow URLs containing other schemes to bypass this filter, developers must
-    // explicitly indicate that such a URL is expected and safe by encapsulating it
-    // in a template.URL value.
 private static @string urlFilter(params object[] args) {
     args = args.Clone();
 
@@ -46,7 +48,6 @@ private static @string urlFilter(params object[] args) {
         return "#" + filterFailsafe;
     }
     return s;
-
 }
 
 // isSafeURL is true if s is a relative URL or if URL has a protocol in
@@ -62,9 +63,7 @@ private static bool isSafeURL(@string s) {
             }
         }
     }
-
     return true;
-
 }
 
 // urlEscaper produces an output that can be embedded in a URL query.
@@ -100,7 +99,6 @@ private static @string urlProcessor(bool norm, params object[] args) {
         return b.String();
     }
     return s;
-
 }
 
 // processURLOnto appends a normalized URL corresponding to its input to b
@@ -195,11 +193,9 @@ private static bool processURLOnto(@string s, bool norm, ptr<bytes.Buffer> _addr
         b.WriteString(s[(int)written..(int)i]);
         fmt.Fprintf(b, "%%%02x", c);
         written = i + 1;
-
     }
     b.WriteString(s[(int)written..]);
     return written != 0;
-
 }
 
 // Filters and normalizes srcset values which are comma separated
@@ -230,7 +226,6 @@ private static @string srcsetFilterAndEscaper(params object[] args) {
     }
     filterSrcsetElement(s, written, len(s), _addr_b);
     return b.String();
-
 }
 
 // Derived from https://play.golang.org/p/Dhmj7FORT5
@@ -296,13 +291,10 @@ private static void filterSrcsetElement(@string s, nint left, nint right, ptr<by
                 b.WriteString(s[(int)end..(int)right]);
                 return ;
             }
-
         }
     }
-
     b.WriteString("#");
     b.WriteString(filterFailsafe);
-
 }
 
 } // end template_package

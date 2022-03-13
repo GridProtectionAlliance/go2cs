@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:41 UTC
+//     Generated on 2022 March 13 05:29:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct dnsConfig
         {
             // Constructors
@@ -78,7 +78,7 @@ namespace go
             public static implicit operator dnsConfig(NilType nil) => default(dnsConfig);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static dnsConfig dnsConfig_cast(dynamic value)
         {
             return new dnsConfig(value.servers, value.search, value.ndots, value.timeout, value.attempts, value.rotate, value.unknownOpt, value.lookup, value.err, value.mtime, value.soffset, value.singleRequest, value.useTCP);

@@ -5,21 +5,22 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package poll -- go2cs converted at 2022 March 06 22:13:04 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:52 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\fd_unix.go
-using io = go.io_package;
-using atomic = go.sync.atomic_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go.@internal;
 
+using io = io_package;
+using atomic = sync.atomic_package;
+using syscall = syscall_package;
+
+
+// FD is a file descriptor. The net and os packages use this type as a
+// field of a larger type representing a network connection or OS file.
+
+using System;
 public static partial class poll_package {
 
-    // FD is a file descriptor. The net and os packages use this type as a
-    // field of a larger type representing a network connection or OS file.
 public partial struct FD {
     public fdMutex fdmu; // System file descriptor. Immutable until Close.
     public nint Sysfd; // I/O poller.
@@ -55,10 +56,8 @@ private static error Init(this ptr<FD> _addr_fd, @string net, bool pollable) {
         // If we could not initialize the runtime poller,
         // assume we are using blocking mode.
         fd.isBlocking = 1;
-
     }
     return error.As(err)!;
-
 }
 
 // Destroy closes the file descriptor. This is called when there are
@@ -80,7 +79,6 @@ private static error destroy(this ptr<FD> _addr_fd) {
     fd.Sysfd = -1;
     runtime_Semrelease(_addr_fd.csema);
     return error.As(err)!;
-
 }
 
 // Close closes the FD. The underlying file descriptor is closed by the
@@ -107,7 +105,6 @@ private static error Close(this ptr<FD> _addr_fd) {
         runtime_Semacquire(_addr_fd.csema);
     }
     return error.As(err)!;
-
 }
 
 // SetBlocking puts the file into blocking mode.
@@ -121,14 +118,12 @@ private static error SetBlocking(this ptr<FD> _addr_fd) => func((defer, _, _) =>
             return error.As(err)!;
         }
     }
-
     defer(fd.decref()); 
     // Atomic store so that concurrent calls to SetBlocking
     // do not cause a race condition. isBlocking only ever goes
     // from 0 to 1 so there is no real race here.
     atomic.StoreUint32(_addr_fd.isBlocking, 1);
     return error.As(syscall.SetNonblock(fd.Sysfd, false))!;
-
 });
 
 // Darwin and FreeBSD can't read or write 2GB+ files at a time,
@@ -158,7 +153,6 @@ private static (nint, error) Read(this ptr<FD> _addr_fd, slice<byte> p) => func(
         err = err__prev1;
 
     }
-
     defer(fd.readUnlock());
     if (len(p) == 0) { 
         // If the caller wanted a zero byte read, return immediately
@@ -167,7 +161,6 @@ private static (nint, error) Read(this ptr<FD> _addr_fd, slice<byte> p) => func(
         // io.EOF.
         // TODO(bradfitz): make it wait for readability? (Issue 15735)
         return (0, error.As(null!)!);
-
     }
     {
         var err__prev1 = err;
@@ -180,7 +173,6 @@ private static (nint, error) Read(this ptr<FD> _addr_fd, slice<byte> p) => func(
         err = err__prev1;
 
     }
-
     if (fd.IsStream && len(p) > maxRW) {
         p = p[..(int)maxRW];
     }
@@ -194,15 +186,11 @@ private static (nint, error) Read(this ptr<FD> _addr_fd, slice<byte> p) => func(
                 if (err == null) {
                     continue;
                 }
-
             }
-
         }
         err = fd.eofError(n, err);
         return (n, error.As(err)!);
-
     }
-
 });
 
 // Pread wraps the pread system call.
@@ -225,7 +213,6 @@ private static (nint, error) Pread(this ptr<FD> _addr_fd, slice<byte> p, long of
         err = err__prev1;
 
     }
-
     if (fd.IsStream && len(p) > maxRW) {
         p = p[..(int)maxRW];
     }
@@ -242,7 +229,6 @@ private static (nint, error) Pread(this ptr<FD> _addr_fd, slice<byte> p, long of
     fd.decref();
     err = fd.eofError(n, err);
     return (n, error.As(err)!);
-
 }
 
 // ReadFrom wraps the recvfrom network call.
@@ -263,7 +249,6 @@ private static (nint, syscall.Sockaddr, error) ReadFrom(this ptr<FD> _addr_fd, s
         err = err__prev1;
 
     }
-
     defer(fd.readUnlock());
     {
         var err__prev1 = err;
@@ -276,7 +261,6 @@ private static (nint, syscall.Sockaddr, error) ReadFrom(this ptr<FD> _addr_fd, s
         err = err__prev1;
 
     }
-
     while (true) {
         var (n, sa, err) = syscall.Recvfrom(fd.Sysfd, p, 0);
         if (err != null) {
@@ -290,15 +274,11 @@ private static (nint, syscall.Sockaddr, error) ReadFrom(this ptr<FD> _addr_fd, s
                 if (err == null) {
                     continue;
                 }
-
             }
-
         }
         err = fd.eofError(n, err);
         return (n, sa, error.As(err)!);
-
     }
-
 });
 
 // ReadMsg wraps the recvmsg network call.
@@ -321,7 +301,6 @@ private static (nint, nint, nint, syscall.Sockaddr, error) ReadMsg(this ptr<FD> 
         err = err__prev1;
 
     }
-
     defer(fd.readUnlock());
     {
         var err__prev1 = err;
@@ -334,7 +313,6 @@ private static (nint, nint, nint, syscall.Sockaddr, error) ReadMsg(this ptr<FD> 
         err = err__prev1;
 
     }
-
     while (true) {
         var (n, oobn, sysflags, sa, err) = syscall.Recvmsg(fd.Sysfd, p, oob, flags);
         if (err != null) {
@@ -348,15 +326,11 @@ private static (nint, nint, nint, syscall.Sockaddr, error) ReadMsg(this ptr<FD> 
                 if (err == null) {
                     continue;
                 }
-
             }
-
         }
         err = fd.eofError(n, err);
         return (n, oobn, sysflags, sa, error.As(err)!);
-
     }
-
 });
 
 // Write implements io.Writer.
@@ -376,7 +350,6 @@ private static (nint, error) Write(this ptr<FD> _addr_fd, slice<byte> p) => func
         err = err__prev1;
 
     }
-
     defer(fd.writeUnlock());
     {
         var err__prev1 = err;
@@ -389,7 +362,6 @@ private static (nint, error) Write(this ptr<FD> _addr_fd, slice<byte> p) => func
         err = err__prev1;
 
     }
-
     nint nn = default;
     while (true) {
         var max = len(p);
@@ -409,7 +381,6 @@ private static (nint, error) Write(this ptr<FD> _addr_fd, slice<byte> p) => func
             if (err == null) {
                 continue;
             }
-
         }
         if (err != null) {
             return (nn, error.As(err)!);
@@ -418,7 +389,6 @@ private static (nint, error) Write(this ptr<FD> _addr_fd, slice<byte> p) => func
             return (nn, error.As(io.ErrUnexpectedEOF)!);
         }
     }
-
 });
 
 // Pwrite wraps the pwrite system call.
@@ -437,7 +407,6 @@ private static (nint, error) Pwrite(this ptr<FD> _addr_fd, slice<byte> p, long o
             return (0, error.As(err)!);
         }
     }
-
     defer(fd.decref());
     nint nn = default;
     while (true) {
@@ -462,7 +431,6 @@ private static (nint, error) Pwrite(this ptr<FD> _addr_fd, slice<byte> p, long o
             return (nn, error.As(io.ErrUnexpectedEOF)!);
         }
     }
-
 });
 
 // WriteTo wraps the sendto network call.
@@ -482,7 +450,6 @@ private static (nint, error) WriteTo(this ptr<FD> _addr_fd, slice<byte> p, sysca
         err = err__prev1;
 
     }
-
     defer(fd.writeUnlock());
     {
         var err__prev1 = err;
@@ -495,7 +462,6 @@ private static (nint, error) WriteTo(this ptr<FD> _addr_fd, slice<byte> p, sysca
         err = err__prev1;
 
     }
-
     while (true) {
         err = syscall.Sendto(fd.Sysfd, p, 0, sa);
         if (err == syscall.EINTR) {
@@ -507,15 +473,12 @@ private static (nint, error) WriteTo(this ptr<FD> _addr_fd, slice<byte> p, sysca
             if (err == null) {
                 continue;
             }
-
         }
         if (err != null) {
             return (0, error.As(err)!);
         }
         return (len(p), error.As(null!)!);
-
     }
-
 });
 
 // WriteMsg wraps the sendmsg network call.
@@ -536,7 +499,6 @@ private static (nint, nint, error) WriteMsg(this ptr<FD> _addr_fd, slice<byte> p
         err = err__prev1;
 
     }
-
     defer(fd.writeUnlock());
     {
         var err__prev1 = err;
@@ -549,7 +511,6 @@ private static (nint, nint, error) WriteMsg(this ptr<FD> _addr_fd, slice<byte> p
         err = err__prev1;
 
     }
-
     while (true) {
         var (n, err) = syscall.SendmsgN(fd.Sysfd, p, oob, sa, 0);
         if (err == syscall.EINTR) {
@@ -561,15 +522,12 @@ private static (nint, nint, error) WriteMsg(this ptr<FD> _addr_fd, slice<byte> p
             if (err == null) {
                 continue;
             }
-
         }
         if (err != null) {
             return (n, 0, error.As(err)!);
         }
         return (n, len(oob), error.As(err)!);
-
     }
-
 });
 
 // Accept wraps the accept network call.
@@ -591,7 +549,6 @@ private static (nint, syscall.Sockaddr, @string, error) Accept(this ptr<FD> _add
         err = err__prev1;
 
     }
-
     defer(fd.readUnlock());
 
     {
@@ -605,7 +562,6 @@ private static (nint, syscall.Sockaddr, @string, error) Accept(this ptr<FD> _add
         err = err__prev1;
 
     }
-
     while (true) {
         var (s, rsa, errcall, err) = accept(fd.Sysfd);
         if (err == null) {
@@ -621,18 +577,14 @@ private static (nint, syscall.Sockaddr, @string, error) Accept(this ptr<FD> _add
                 if (err == null) {
                     continue;
                 }
-
             }
-
         else if (err == syscall.ECONNABORTED) 
             // This means that a socket on the listen
             // queue was closed before we Accept()ed it;
             // it's a silly error, so try again.
             continue;
                 return (-1, null, errcall, error.As(err)!);
-
     }
-
 });
 
 // Seek wraps syscall.Seek.
@@ -648,10 +600,8 @@ private static (long, error) Seek(this ptr<FD> _addr_fd, long offset, nint whenc
             return (0, error.As(err)!);
         }
     }
-
     defer(fd.decref());
     return syscall.Seek(fd.Sysfd, offset, whence);
-
 });
 
 // ReadDirent wraps syscall.ReadDirent.
@@ -669,7 +619,6 @@ private static (nint, error) ReadDirent(this ptr<FD> _addr_fd, slice<byte> buf) 
             return (0, error.As(err)!);
         }
     }
-
     defer(fd.decref());
     while (true) {
         var (n, err) = ignoringEINTRIO(syscall.ReadDirent, fd.Sysfd, buf);
@@ -681,14 +630,10 @@ private static (nint, error) ReadDirent(this ptr<FD> _addr_fd, slice<byte> buf) 
                 if (err == null) {
                     continue;
                 }
-
             }
-
         }
         return (n, error.As(err)!);
-
     }
-
 });
 
 // Fchmod wraps syscall.Fchmod.
@@ -702,12 +647,8 @@ private static error Fchmod(this ptr<FD> _addr_fd, uint mode) => func((defer, _,
             return error.As(err)!;
         }
     }
-
     defer(fd.decref());
-    return error.As(ignoringEINTR(() => {
-        return error.As(syscall.Fchmod(fd.Sysfd, mode))!;
-    }))!;
-
+    return error.As(ignoringEINTR(() => error.As(syscall.Fchmod(fd.Sysfd, mode))!))!;
 });
 
 // Fchdir wraps syscall.Fchdir.
@@ -721,10 +662,8 @@ private static error Fchdir(this ptr<FD> _addr_fd) => func((defer, _, _) => {
             return error.As(err)!;
         }
     }
-
     defer(fd.decref());
     return error.As(syscall.Fchdir(fd.Sysfd))!;
-
 });
 
 // Fstat wraps syscall.Fstat
@@ -739,12 +678,8 @@ private static error Fstat(this ptr<FD> _addr_fd, ptr<syscall.Stat_t> _addr_s) =
             return error.As(err)!;
         }
     }
-
     defer(fd.decref());
-    return error.As(ignoringEINTR(() => {
-        return error.As(syscall.Fstat(fd.Sysfd, s))!;
-    }))!;
-
+    return error.As(ignoringEINTR(() => error.As(syscall.Fstat(fd.Sysfd, s))!))!;
 });
 
 // tryDupCloexec indicates whether F_DUPFD_CLOEXEC should be used.
@@ -770,10 +705,8 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
             atomic.StoreInt32(_addr_tryDupCloexec, 0);
         else 
             return (-1, "fcntl", error.As(e1)!);
-        
-    }
+            }
     return dupCloseOnExecOld(fd);
-
 }
 
 // dupCloseOnExecOld is the traditional way to dup an fd and
@@ -791,7 +724,6 @@ private static (nint, @string, error) dupCloseOnExecOld(nint fd) => func((defer,
     }
     syscall.CloseOnExec(newfd);
     return (newfd, "", error.As(null!)!);
-
 });
 
 // Dup duplicates the file descriptor.
@@ -808,10 +740,8 @@ private static (nint, @string, error) Dup(this ptr<FD> _addr_fd) => func((defer,
             return (-1, "", error.As(err)!);
         }
     }
-
     defer(fd.decref());
     return DupCloseOnExec(fd.Sysfd);
-
 });
 
 // On Unix variants only, expose the IO event for the net code.
@@ -836,10 +766,8 @@ private static (nint, error) WriteOnce(this ptr<FD> _addr_fd, slice<byte> p) => 
             return (0, error.As(err)!);
         }
     }
-
     defer(fd.writeUnlock());
     return ignoringEINTRIO(syscall.Write, fd.Sysfd, p);
-
 });
 
 // RawRead invokes the user-defined function f for a read operation.
@@ -857,7 +785,6 @@ private static error RawRead(this ptr<FD> _addr_fd, Func<System.UIntPtr, bool> f
         err = err__prev1;
 
     }
-
     defer(fd.readUnlock());
     {
         var err__prev1 = err;
@@ -870,7 +797,6 @@ private static error RawRead(this ptr<FD> _addr_fd, Func<System.UIntPtr, bool> f
         err = err__prev1;
 
     }
-
     while (true) {
         if (f(uintptr(fd.Sysfd))) {
             return error.As(null!)!;
@@ -887,9 +813,7 @@ private static error RawRead(this ptr<FD> _addr_fd, Func<System.UIntPtr, bool> f
             err = err__prev1;
 
         }
-
     }
-
 });
 
 // RawWrite invokes the user-defined function f for a write operation.
@@ -907,7 +831,6 @@ private static error RawWrite(this ptr<FD> _addr_fd, Func<System.UIntPtr, bool> 
         err = err__prev1;
 
     }
-
     defer(fd.writeUnlock());
     {
         var err__prev1 = err;
@@ -920,7 +843,6 @@ private static error RawWrite(this ptr<FD> _addr_fd, Func<System.UIntPtr, bool> 
         err = err__prev1;
 
     }
-
     while (true) {
         if (f(uintptr(fd.Sysfd))) {
             return error.As(null!)!;
@@ -937,9 +859,7 @@ private static error RawWrite(this ptr<FD> _addr_fd, Func<System.UIntPtr, bool> 
             err = err__prev1;
 
         }
-
     }
-
 });
 
 // ignoringEINTRIO is like ignoringEINTR, but just for IO calls.
@@ -953,7 +873,6 @@ private static (nint, error) ignoringEINTRIO(Func<nint, slice<byte>, (nint, erro
             return (n, error.As(err)!);
         }
     }
-
 }
 
 } // end poll_package

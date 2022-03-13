@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:48 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:05 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\trim.go
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
 
 public static partial class ssa_package {
 
-    // trim removes blocks with no code in them.
-    // These blocks were inserted to remove critical edges.
+// trim removes blocks with no code in them.
+// These blocks were inserted to remove critical edges.
 private static void trim(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -41,7 +41,6 @@ private static void trim(ptr<Func> _addr_f) {
             i = e.i;
             p.Succs[i] = new Edge(s,len(s.Preds));
             s.Preds = append(s.Preds, new Edge(p,i));
-
         }        if (bIsStmt) {
             var sawStmt = false;
             {
@@ -57,7 +56,6 @@ private static void trim(ptr<Func> _addr_f) {
                     }
                     sawStmt = true;
                     break;
-
                 }
                 v = v__prev2;
             }
@@ -118,13 +116,11 @@ private static void trim(ptr<Func> _addr_f) {
                     }
                     b.Values[k] = v;
                     k++;
-
                 }
                 v = v__prev2;
             }
 
             b.Values = b.Values[..(int)k];
-
         }
         {
             var v__prev2 = v;
@@ -149,7 +145,6 @@ private static void trim(ptr<Func> _addr_f) {
         }
         copy(s.Values[(int)k..], s.Values[..(int)m]);
         copy(s.Values, b.Values);
-
     }    if (n < len(f.Blocks)) {
         f.invalidateCFG();
         var tail = f.Blocks[(int)n..];
@@ -164,7 +159,6 @@ private static void trim(ptr<Func> _addr_f) {
         }
 
         f.Blocks = f.Blocks[..(int)n];
-
     }
 }
 
@@ -178,7 +172,6 @@ private static bool emptyBlock(ptr<Block> _addr_b) {
             return false;
         }
     }    return true;
-
 }
 
 // trimmableBlock reports whether the block can be trimmed from the CFG,
@@ -196,7 +189,6 @@ private static bool trimmableBlock(ptr<Block> _addr_b) {
     }
     var s = b.Succs[0].b;
     return s != b && (len(s.Preds) == 1 || emptyBlock(_addr_b));
-
 }
 
 // mergePhi adjusts the number of `v`s arguments to account for merge
@@ -212,7 +204,6 @@ private static void mergePhi(ptr<Value> _addr_v, nint i, ptr<Block> _addr_b) {
         }
         v.SetArg(i, u.Args[0]);
         v.AddArgs(u.Args[(int)1..]);
-
     }
     else
  { 
@@ -225,7 +216,6 @@ private static void mergePhi(ptr<Value> _addr_v, nint i, ptr<Block> _addr_b) {
         for (nint j = 1; j < len(b.Preds); j++) {
             v.AddArg(v.Args[i]);
         }
-
     }
 }
 

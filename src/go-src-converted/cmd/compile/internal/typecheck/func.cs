@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:18 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:36 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\func.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+
+// package all the arguments that match a ... T parameter into a []T.
+
+using System;
 public static partial class typecheck_package {
 
-    // package all the arguments that match a ... T parameter into a []T.
 public static ir.Node MakeDotArgs(ptr<types.Type> _addr_typ, slice<ir.Node> args) {
     ref types.Type typ = ref _addr_typ.val;
 
@@ -40,7 +41,6 @@ public static ir.Node MakeDotArgs(ptr<types.Type> _addr_typ, slice<ir.Node> args
         @base.Fatalf("mkdotargslice: typecheck failed");
     }
     return n;
-
 }
 
 // FixVariadicCall rewrites calls to variadic functions to use an
@@ -62,7 +62,6 @@ public static void FixVariadicCall(ptr<ir.CallExpr> _addr_call) {
         extra[i] = null; // allow GC
     }    call.Args = append(args[..(int)vi], slice);
     call.IsDDD = true;
-
 }
 
 // ClosureType returns the struct type used to hold all the information
@@ -91,11 +90,9 @@ public static ptr<types.Type> ClosureType(ptr<ir.ClosureExpr> _addr_clo) {
             typ = types.NewPtr(typ);
         }
         fields = append(fields, types.NewField(@base.Pos, v.Sym(), typ));
-
     }    typ = types.NewStruct(types.NoPkg, fields);
     typ.SetNoalg(true);
     return _addr_typ!;
-
 }
 
 // PartialCallType returns the struct type used to hold all the information
@@ -136,10 +133,8 @@ public static void ImportedBody(ptr<ir.Func> _addr_fn) => func((defer, _, _) => 
         if (DirtyAddrtaken) {
             ComputeAddrtaken(fn.Inl.Body); // compute addrtaken marks once types are available
             DirtyAddrtaken = false;
-
         }
         IncrementalAddrtaken = true;
-
     }());
 
     ImportBody(fn); 
@@ -167,10 +162,8 @@ public static void ImportedBody(ptr<ir.Func> _addr_fn) => func((defer, _, _) => 
         Stmts(fn.Inl.Body);
         inTypeCheckInl = false;
         ir.CurFunc = savefn;
-
     }
     @base.Pos = lno;
-
 });
 
 // Get the function's package. For ordinary functions it's on the ->sym, but for imported methods
@@ -189,10 +182,8 @@ private static ptr<types.Pkg> fnpkg(ptr<ir.Name> _addr_fn) {
             @base.Fatalf("receiver with no sym: [%v] %L  (%v)", fn.Sym(), fn, rcvr);
         }
         return _addr_rcvr.Sym().Pkg!;
-
     }
     return _addr_fn.Sym().Pkg!;
-
 }
 
 // ClosureName generates a new unique name for a closure within
@@ -219,7 +210,6 @@ public static ptr<types.Sym> ClosureName(ptr<ir.Func> _addr_outerfunc) {
     }
     gen.val++;
     return _addr_Lookup(fmt.Sprintf("%s.%s%d", outer, prefix, gen.val))!;
-
 }
 
 // globClosgen is like Func.Closgen, but for the global scope.
@@ -305,7 +295,6 @@ public static ptr<ir.Func> MethodValueWrapper(ptr<ir.SelectorExpr> _addr_dot) {
     @base.Pos = saveLineNo;
 
     return _addr_fn!;
-
 }
 
 // tcClosure typechecks an OCLOSURE node. It also creates the named
@@ -325,7 +314,6 @@ private static void tcClosure(ptr<ir.ClosureExpr> _addr_clo, nint top) {
             fn.Iota = x;
         }
     }
-
 
     fn.SetClosureCalled(top & ctxCallee != 0); 
 
@@ -361,13 +349,11 @@ private static void tcClosure(ptr<ir.ClosureExpr> _addr_clo, nint top) {
             // literals like s{f: x} where we can't distinguish whether f is
             // a field identifier or expression until resolving s.
             continue;
-
         }
         Expr(v.Outer);
 
         fn.ClosureVars[out] = v;
         out++;
-
     }    fn.ClosureVars = fn.ClosureVars[..(int)out];
 
     if (@base.Flag.W > 1) {
@@ -377,7 +363,6 @@ private static void tcClosure(ptr<ir.ClosureExpr> _addr_clo, nint top) {
     if (!inTypeCheckInl) { 
         // Add function to Target.Decls once only when we give it a name
         Target.Decls = append(Target.Decls, fn);
-
     }
 }
 
@@ -403,7 +388,6 @@ private static void tcFunc(ptr<ir.Func> _addr_n) => func((defer, _, _) => {
         }
         n.Nname.SetSym(ir.MethodSym(rcvr.Type, n.Shortname));
         Declare(n.Nname, ir.PFUNC);
-
     }
 });
 
@@ -469,7 +453,6 @@ private static ir.Node tcCall(ptr<ir.CallExpr> _addr_n, nint top) => func((_, pa
 
         __switch_break0:;
         panic("unreachable");
-
     }
     n.X = DefaultLit(n.X, null);
     l = n.X;
@@ -488,7 +471,6 @@ private static ir.Node tcCall(ptr<ir.CallExpr> _addr_n, nint top) => func((_, pa
         var n = ir.NewConvExpr(n.Pos(), ir.OCONV, null, arg);
         n.SetType(l.Type());
         return tcConv(n);
-
     }
     typecheckargs(n);
     var t = l.Type();
@@ -524,7 +506,6 @@ private static ir.Node tcCall(ptr<ir.CallExpr> _addr_n, nint top) => func((_, pa
                     // be more specific when the non-function
                     // name matches a predeclared function
                     @base.Errorf("cannot call non-function %L, declared at %s", l, @base.FmtPos(o.Name().Pos()));
-
                 }
                 else
  {
@@ -532,10 +513,8 @@ private static ir.Node tcCall(ptr<ir.CallExpr> _addr_n, nint top) => func((_, pa
                 }
 
             }
-
             n.SetType(null);
             return n;
-
         }
         typecheckaste(ir.OCALL, n.X, n.IsDDD, t.Params(), n.Args, () => fmt.Sprintf("argument to %v", n.X));
     if (t.NumResults() == 0) {
@@ -556,14 +535,11 @@ private static ir.Node tcCall(ptr<ir.CallExpr> _addr_n, nint top) => func((_, pa
                     // In this case, we know getg() always returns the same result within a given function
                     // and we want to avoid the temporaries, so we do the rewrite earlier than is typical.
                     n.SetOp(ir.OGETG);
-
                 }
 
             }
-
         }
         return n;
-
     }
     if (top & (ctxMultiOK | ctxStmt) == 0) {
         @base.Errorf("multiple-value %v() in single-value context", l);
@@ -571,7 +547,6 @@ private static ir.Node tcCall(ptr<ir.CallExpr> _addr_n, nint top) => func((_, pa
     }
     n.SetType(l.Type().Results());
     return n;
-
 });
 
 // tcAppend typechecks an OAPPEND node.
@@ -600,7 +575,6 @@ private static ir.Node tcAppend(ptr<ir.CallExpr> _addr_n) {
         @base.Errorf("first argument to append must be slice; have %L", t);
         n.SetType(null);
         return n;
-
     }
     if (n.IsDDD) {
         if (len(args) == 1) {
@@ -619,7 +593,6 @@ private static ir.Node tcAppend(ptr<ir.CallExpr> _addr_n) {
         }
         args[1] = AssignConv(args[1], t.Underlying(), "append");
         return n;
-
     }
     var @as = args[(int)1..];
     foreach (var (i, n) in as) {
@@ -629,7 +602,6 @@ private static ir.Node tcAppend(ptr<ir.CallExpr> _addr_n) {
         as[i] = AssignConv(n, t.Elem(), "append");
         types.CheckSize(as[i].Type()); // ensure width is calculated for backend
     }    return n;
-
 }
 
 // tcClose typechecks an OCLOSE node.
@@ -655,7 +627,6 @@ private static ir.Node tcClose(ptr<ir.UnaryExpr> _addr_n) {
         return n;
     }
     return n;
-
 }
 
 // tcComplex typechecks an OCOMPLEX node.
@@ -695,7 +666,6 @@ private static ir.Node tcComplex(ptr<ir.BinaryExpr> _addr_n) {
         return n;
         n.SetType(t);
     return n;
-
 }
 
 // tcCopy typechecks an OCOPY node.
@@ -718,7 +688,6 @@ private static ir.Node tcCopy(ptr<ir.BinaryExpr> _addr_n) {
         @base.Errorf("arguments to copy have different element types: %L and string", n.X.Type());
         n.SetType(null);
         return n;
-
     }
     if (!n.X.Type().IsSlice() || !n.Y.Type().IsSlice()) {
         if (!n.X.Type().IsSlice() && !n.Y.Type().IsSlice()) {
@@ -733,7 +702,6 @@ private static ir.Node tcCopy(ptr<ir.BinaryExpr> _addr_n) {
         }
         n.SetType(null);
         return n;
-
     }
     if (!types.Identical(n.X.Type().Elem(), n.Y.Type().Elem())) {
         @base.Errorf("arguments to copy have different element types: %L and %L", n.X.Type(), n.Y.Type());
@@ -741,7 +709,6 @@ private static ir.Node tcCopy(ptr<ir.BinaryExpr> _addr_n) {
         return n;
     }
     return n;
-
 }
 
 // tcDelete typechecks an ODELETE node.
@@ -774,7 +741,6 @@ private static ir.Node tcDelete(ptr<ir.CallExpr> _addr_n) {
     }
     args[1] = AssignConv(r, l.Type().Key(), "delete");
     return n;
-
 }
 
 // tcMake typechecks an OMAKE node.
@@ -880,7 +846,6 @@ private static ir.Node tcMake(ptr<ir.CallExpr> _addr_n) {
     }
     nn.SetType(t);
     return nn;
-
 }
 
 // tcMakeSliceCopy typechecks an OMAKESLICECOPY node.
@@ -922,7 +887,6 @@ private static ir.Node tcMakeSliceCopy(ptr<ir.MakeExpr> _addr_n) {
         }
     }
     return n;
-
 }
 
 // tcNew typechecks an ONEW node.
@@ -933,7 +897,6 @@ private static ir.Node tcNew(ptr<ir.UnaryExpr> _addr_n) {
         // Fatalf because the OCALL above checked for us,
         // so this must be an internally-generated mistake.
         @base.Fatalf("missing argument to new");
-
     }
     var l = n.X;
     l = typecheck(l, ctxType);
@@ -945,7 +908,6 @@ private static ir.Node tcNew(ptr<ir.UnaryExpr> _addr_n) {
     n.X = l;
     n.SetType(types.NewPtr(t));
     return n;
-
 }
 
 // tcPanic typechecks an OPANIC node.
@@ -959,7 +921,6 @@ private static ir.Node tcPanic(ptr<ir.UnaryExpr> _addr_n) {
         return n;
     }
     return n;
-
 }
 
 // tcPrint typechecks an OPRINT or OPRINTN node.
@@ -978,7 +939,6 @@ private static ir.Node tcPrint(ptr<ir.CallExpr> _addr_n) {
             ls[i1] = DefaultLit(ls[i1], null);
         }
     }    return n;
-
 }
 
 // tcRealImag typechecks an OREAL or OIMAG node.
@@ -1004,7 +964,6 @@ private static ir.Node tcRealImag(ptr<ir.UnaryExpr> _addr_n) {
         n.SetType(null);
         return n;
         return n;
-
 }
 
 // tcRecover typechecks an ORECOVER node.
@@ -1018,7 +977,6 @@ private static ir.Node tcRecover(ptr<ir.CallExpr> _addr_n) {
     }
     n.SetType(types.Types[types.TINTER]);
     return n;
-
 }
 
 // tcUnsafeAdd typechecks an OUNSAFEADD node.
@@ -1042,7 +1000,6 @@ private static ptr<ir.BinaryExpr> tcUnsafeAdd(ptr<ir.BinaryExpr> _addr_n) {
     }
     n.SetType(n.X.Type());
     return _addr_n!;
-
 }
 
 // tcUnsafeSlice typechecks an OUNSAFESLICE node.
@@ -1070,7 +1027,6 @@ private static ptr<ir.BinaryExpr> tcUnsafeSlice(ptr<ir.BinaryExpr> _addr_n) {
         // types due to incomplete C structs in cgo, and those types don't
         // have a meaningful size anyway.
         @base.Errorf("unsafe.Slice of incomplete (or unallocatable) type not allowed");
-
     }
     if (!checkunsafeslice(_addr_n.Y)) {
         n.SetType(null);
@@ -1078,7 +1034,6 @@ private static ptr<ir.BinaryExpr> tcUnsafeSlice(ptr<ir.BinaryExpr> _addr_n) {
     }
     n.SetType(types.NewSlice(t.Elem()));
     return _addr_n!;
-
 }
 
 } // end typecheck_package

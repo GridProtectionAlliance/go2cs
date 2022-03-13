@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:18 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mcache.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// Per-thread (in Go, per-P) cache for small objects.
+// This includes a small object cache and local allocation stats.
+// No locking needed because it is per-thread (per-P).
+//
+// mcaches are allocated from non-GC'd memory, so any heap pointers
+// must be specially handled.
+//
+//go:notinheap
+
+using System;
 public static partial class runtime_package {
 
-    // Per-thread (in Go, per-P) cache for small objects.
-    // This includes a small object cache and local allocation stats.
-    // No locking needed because it is per-thread (per-P).
-    //
-    // mcaches are allocated from non-GC'd memory, so any heap pointers
-    // must be specially handled.
-    //
-    //go:notinheap
 private partial struct mcache {
     public System.UIntPtr nextSample; // trigger heap sample after allocating this many bytes
     public System.UIntPtr scanAlloc; // bytes of scannable heap allocated
@@ -116,9 +117,7 @@ private static void freemcache(ptr<mcache> _addr_c) {
         lock(_addr_mheap_.@lock);
         mheap_.cachealloc.free(@unsafe.Pointer(c));
         unlock(_addr_mheap_.@lock);
-
     });
-
 }
 
 // getMCache is a convenience function which tries to obtain an mcache.
@@ -135,14 +134,12 @@ private static ptr<mcache> getMCache() {
         // mcache0 is cleared when bootstrapping is complete,
         // by procresize.
         c = mcache0;
-
     }
     else
  {
         c = pp.mcache;
     }
     return _addr_c!;
-
 }
 
 // refill acquires a new span of span class spc for c. This span will
@@ -165,7 +162,6 @@ private static void refill(this ptr<mcache> _addr_c, spanClass spc) {
             throw("bad sweepgen in refill");
         }
         mheap_.central[spc].mcentral.uncacheSpan(s);
-
     }
     s = mheap_.central[spc].mcentral.cacheSpan();
     if (s == null) {
@@ -200,15 +196,12 @@ private static void refill(this ptr<mcache> _addr_c, spanClass spc) {
     if (trace.enabled) { 
         // gcController.heapLive changed.
         traceHeapAlloc();
-
     }
     if (gcBlackenEnabled != 0) { 
         // gcController.heapLive and heapScan changed.
         gcController.revise();
-
     }
     c.alloc[spc] = s;
-
 }
 
 // allocLarge allocates a span for a large object.
@@ -244,7 +237,6 @@ private static (ptr<mspan>, bool) allocLarge(this ptr<mcache> _addr_c, System.UI
     if (trace.enabled) { 
         // Trace that a heap alloc occurred because gcController.heapLive changed.
         traceHeapAlloc();
-
     }
     if (gcBlackenEnabled != 0) {
         gcController.revise();
@@ -253,7 +245,6 @@ private static (ptr<mspan>, bool) allocLarge(this ptr<mcache> _addr_c, System.UI
     s.limit = s.@base() + size;
     heapBitsForAddr(s.@base()).initSpan(s);
     return (_addr_s!, isZeroed);
-
 }
 
 private static void releaseAll(this ptr<mcache> _addr_c) {
@@ -281,12 +272,10 @@ private static void releaseAll(this ptr<mcache> _addr_c) {
                 // caching this span, so we don't do this for
                 // stale spans.
                 atomic.Xadd64(_addr_gcController.heapLive, -int64(n) * int64(s.elemsize));
-
             } 
             // Release the span to the mcentral.
             mheap_.central[i].mcentral.uncacheSpan(s);
             c.alloc[i] = _addr_emptymspan;
-
         }
     }    c.tiny = 0;
     c.tinyoffset = 0; 

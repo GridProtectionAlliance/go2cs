@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:54 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:10 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\sort.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class types_package {
 
-    // MethodsByName sorts methods by symbol.
+// MethodsByName sorts methods by symbol.
 public partial struct MethodsByName { // : slice<ptr<Field>>
 }
 

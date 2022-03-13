@@ -24,29 +24,27 @@
 // should be applied. See https://golang.org/s/go1.4-syscall for more
 // information.
 //
-// package syscall -- go2cs converted at 2022 March 06 22:26:48 UTC
+
+// package syscall -- go2cs converted at 2022 March 13 05:40:33 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\syscall.go
-
-
 namespace go;
 
 public static partial class syscall_package {
 
-    //go:generate go run ./mksyscall_windows.go -systemdll -output zsyscall_windows.go syscall_windows.go security_windows.go
+//go:generate go run ./mksyscall_windows.go -systemdll -output zsyscall_windows.go syscall_windows.go security_windows.go
 
-    // StringByteSlice converts a string to a NUL-terminated []byte,
-    // If s contains a NUL byte this function panics instead of
-    // returning an error.
-    //
-    // Deprecated: Use ByteSliceFromString instead.
+// StringByteSlice converts a string to a NUL-terminated []byte,
+// If s contains a NUL byte this function panics instead of
+// returning an error.
+//
+// Deprecated: Use ByteSliceFromString instead.
 public static slice<byte> StringByteSlice(@string s) => func((_, panic, _) => {
     var (a, err) = ByteSliceFromString(s);
     if (err != null) {
         panic("syscall: string with NUL passed to StringByteSlice");
     }
     return a;
-
 });
 
 // ByteSliceFromString returns a NUL-terminated slice of bytes
@@ -64,7 +62,6 @@ public static (slice<byte>, error) ByteSliceFromString(@string s) {
     var a = make_slice<byte>(len(s) + 1);
     copy(a, s);
     return (a, error.As(null!)!);
-
 }
 
 // StringBytePtr returns a pointer to a NUL-terminated array of bytes.
@@ -88,7 +85,6 @@ public static (ptr<byte>, error) BytePtrFromString(@string s) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr__addr_a[0]!, error.As(null!)!);
-
 }
 
 // Single-word zero for use when we need a valid pointer to 0 bytes.

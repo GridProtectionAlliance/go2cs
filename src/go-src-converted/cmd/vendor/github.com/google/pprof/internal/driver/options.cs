@@ -12,28 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:29 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:34 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\options.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using binutils = go.github.com.google.pprof.@internal.binutils_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using symbolizer = go.github.com.google.pprof.@internal.symbolizer_package;
-using transport = go.github.com.google.pprof.@internal.transport_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+
+using binutils = github.com.google.pprof.@internal.binutils_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using symbolizer = github.com.google.pprof.@internal.symbolizer_package;
+using transport = github.com.google.pprof.@internal.transport_package;
+
+
+// setDefaults returns a new plugin.Options with zero fields sets to
+// sensible defaults.
+
+using System;
 public static partial class driver_package {
 
-    // setDefaults returns a new plugin.Options with zero fields sets to
-    // sensible defaults.
 private static ptr<plugin.Options> setDefaults(ptr<plugin.Options> _addr_o) {
     ref plugin.Options o = ref _addr_o.val;
 
@@ -60,7 +61,6 @@ private static ptr<plugin.Options> setDefaults(ptr<plugin.Options> _addr_o) {
         d.Sym = addr(new symbolizer.Symbolizer(Obj:d.Obj,UI:d.UI,Transport:d.HTTPTransport));
     }
     return _addr_d!;
-
 }
 
 private partial struct stdUI {
@@ -116,7 +116,6 @@ private static void fprint(this ptr<stdUI> _addr_ui, ptr<os.File> _addr_f, slice
         text += "\n";
     }
     f.WriteString(text);
-
 }
 
 // oswriter implements the Writer interface using a regular file.

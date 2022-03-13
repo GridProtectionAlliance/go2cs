@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:32:20 UTC
+//     Generated on 2022 March 13 05:43:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
 {
     public static partial class archive_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ErrGoObjOtherVersion
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace @internal
             public static implicit operator ErrGoObjOtherVersion(NilType nil) => default(ErrGoObjOtherVersion);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ErrGoObjOtherVersion ErrGoObjOtherVersion_cast(dynamic value)
         {
             return new ErrGoObjOtherVersion(value.magic);

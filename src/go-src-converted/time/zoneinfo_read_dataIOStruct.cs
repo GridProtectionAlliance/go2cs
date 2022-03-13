@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:19 UTC
+//     Generated on 2022 March 13 05:41:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class time_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct dataIO
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator dataIO(NilType nil) => default(dataIO);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static dataIO dataIO_cast(dynamic value)
         {
             return new dataIO(value.p, value.error);

@@ -2,32 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package load -- go2cs converted at 2022 March 06 23:17:15 UTC
+// package load -- go2cs converted at 2022 March 13 06:30:33 UTC
 // import "cmd/go/internal/load" ==> using load = go.cmd.go.@internal.load_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\load\test.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using build = go.go.build_package;
-using doc = go.go.doc_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using lazytemplate = go.@internal.lazytemplate_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
-using fsys = go.cmd.go.@internal.fsys_package;
-using str = go.cmd.go.@internal.str_package;
-using trace = go.cmd.go.@internal.trace_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using build = go.build_package;
+using doc = go.doc_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using lazytemplate = @internal.lazytemplate_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using fsys = cmd.go.@internal.fsys_package;
+using str = cmd.go.@internal.str_package;
+using trace = cmd.go.@internal.trace_package;
+using System;
 
 public static partial class load_package {
 
@@ -58,7 +57,6 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>, error) TestPackagesFor(
         if (p1 == null) { 
             // pxtest may be nil
             continue;
-
         }
         if (p1.Error != null) {
             err = p1.Error;
@@ -79,7 +77,6 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>, error) TestPackagesFor(
         pxtest = null;
     }
     return (_addr_pmain!, _addr_ptest!, _addr_pxtest!, error.As(err)!);
-
 }
 
 // TestPackagesAndErrors returns three packages:
@@ -138,12 +135,9 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>) TestPackagesAndErrors(c
                 // Can't change that code, because that code is only for loading the
                 // non-test copy of a package.
                 ptestErr = addr(new PackageError(ImportStack:importCycleStack(p1,p.ImportPath),Err:errors.New("import cycle not allowed in test"),IsImportCycle:true,));
-
             }
-
             p.TestImports[i] = p1.ImportPath;
             imports = append(imports, p1);
-
         }
         i = i__prev1;
         path = path__prev1;
@@ -176,9 +170,7 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>) TestPackagesAndErrors(c
  {
                 ximports = append(ximports, p1);
             }
-
             p.XTestImports[i] = p1.ImportPath;
-
         }
         i = i__prev1;
         path = path__prev1;
@@ -273,7 +265,6 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>) TestPackagesAndErrors(c
         ptest.EmbedFiles = str.StringList(p.EmbedFiles, p.TestEmbedFiles);
         ptest.Internal.OrigImportPath = p.Internal.OrigImportPath;
         ptest.collectDeps();
-
     } {
         ptest = p;
     }
@@ -283,7 +274,6 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>) TestPackagesAndErrors(c
             pxtest.Internal.Imports = append(pxtest.Internal.Imports, ptest);
         }
         pxtest.collectDeps();
-
     }
     pmain = addr(new Package(PackagePublic:PackagePublic{Name:"main",Dir:p.Dir,GoFiles:[]string{"_testmain.go"},ImportPath:p.ImportPath+".test",Root:p.Root,Imports:str.StringList(TestMainDeps),Module:p.Module,},Internal:PackageInternal{Build:&build.Package{Name:"main"},BuildInfo:p.Internal.BuildInfo,Asmflags:p.Internal.Asmflags,Gcflags:p.Internal.Gcflags,Ldflags:p.Internal.Ldflags,Gccgoflags:p.Internal.Gccgoflags,OrigImportPath:p.Internal.OrigImportPath,},)); 
 
@@ -326,12 +316,9 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>) TestPackagesAndErrors(c
                 if (seen[p1]) { 
                     // Don't add duplicate imports.
                     continue;
-
                 }
-
                 seen[p1] = true;
                 pmain.Internal.Imports = append(pmain.Internal.Imports, p1);
-
             }
 
             p1 = p1__prev1;
@@ -410,7 +397,6 @@ public static (ptr<Package>, ptr<Package>, ptr<Package>) TestPackagesAndErrors(c
         pmain.Internal.TestmainGo = _addr_data;
     }
     return (_addr_pmain!, _addr_ptest!, _addr_pxtest!);
-
 });
 
 // importCycleStack returns an import stack from p to the package whose import
@@ -450,7 +436,6 @@ private static slice<@string> importCycleStack(ptr<Package> _addr_p, @string tar
             }
 
         }
-
         foreach (var (_, dep) in p.Internal.Imports) {
             {
                 var (_, ok) = importerOf[dep.ImportPath];
@@ -461,12 +446,10 @@ private static slice<@string> importCycleStack(ptr<Package> _addr_p, @string tar
                 }
 
             }
-
         }
     }
 
     panic("lost path to cycle");
-
 });
 
 // recompileForTest copies and replaces certain packages in pmain's dependency
@@ -530,7 +513,6 @@ private static void recompileForTest(ptr<Package> _addr_pmain, ptr<Package> _add
                 p1 = p1__prev1;
 
             }
-
         }        if (p.Name == "main" && p != pmain && p != ptest) {
             split();
         }
@@ -556,7 +538,6 @@ private static bool isTestFunc(ptr<ast.FuncDecl> _addr_fn, @string arg) {
             return true;
         }
     }
-
     {
         ptr<ast.SelectorExpr> (sel, ok) = ptr.X._<ptr<ast.SelectorExpr>>();
 
@@ -564,9 +545,7 @@ private static bool isTestFunc(ptr<ast.FuncDecl> _addr_fn, @string arg) {
             return true;
         }
     }
-
     return false;
-
 }
 
 // isTest tells whether name looks like a test (or benchmark, according to prefix).
@@ -578,11 +557,9 @@ private static bool isTest(@string name, @string prefix) {
     }
     if (len(name) == len(prefix)) { // "Test" is ok
         return true;
-
     }
     var (rune, _) = utf8.DecodeRuneInString(name[(int)len(prefix)..]);
     return !unicode.IsLower(rune);
-
 }
 
 private partial struct coverInfo {
@@ -617,7 +594,6 @@ private static (ptr<testFuncs>, error) loadTestFuncs(ptr<Package> _addr_ptest) {
                 lerr = lerr__prev1;
 
             }
-
         }
         file = file__prev1;
     }
@@ -639,13 +615,11 @@ private static (ptr<testFuncs>, error) loadTestFuncs(ptr<Package> _addr_ptest) {
                 lerr = lerr__prev1;
 
             }
-
         }
         file = file__prev1;
     }
 
     return (_addr_t!, error.As(err)!);
-
 }
 
 // formatTestmain returns the content of the _testmain.go file for t.
@@ -662,9 +636,7 @@ private static (slice<byte>, error) formatTestmain(ptr<testFuncs> _addr_t) {
             return (null, error.As(err)!);
         }
     }
-
     return (buf.Bytes(), error.As(null!)!);
-
 }
 
 private partial struct testFuncs {
@@ -693,7 +665,6 @@ private static @string ImportPath(this ptr<testFuncs> _addr_t) {
         return "";
     }
     return pkg;
-
 }
 
 // Covered returns a string describing which packages are being tested for coverage.
@@ -707,7 +678,6 @@ private static @string Covered(this ptr<testFuncs> _addr_t) {
         return "";
     }
     return " in " + strings.Join(t.Cover.Paths, ", ");
-
 }
 
 // Tested returns the name of the package being tested.
@@ -784,13 +754,10 @@ private static error load(this ptr<testFuncs> _addr_t, @string filename, @string
         if (e.Output == "" && !e.EmptyOutput) { 
             // Don't run examples with no output.
             continue;
-
         }
         t.Examples = append(t.Examples, new testFunc(pkg,"Example"+e.Name,e.Output,e.Unordered));
         seen = true;
-
     }    return error.As(null!)!;
-
 });
 
 private static error checkTestFunc(ptr<ast.FuncDecl> _addr_fn, @string arg) {
@@ -802,7 +769,6 @@ private static error checkTestFunc(ptr<ast.FuncDecl> _addr_fn, @string arg) {
         return error.As(fmt.Errorf("%s: wrong signature for %s, must be: func %s(%s *testing.%s)", pos, name, name, strings.ToLower(arg), arg))!;
     }
     return error.As(null!)!;
-
 }
 
 private static var testmainTmpl = lazytemplate.New("main", "\n// Code generated by \'go test\'. DO NOT EDIT.\n\npackage main\n\nimport (\n\t\"os\"\n{{if " +

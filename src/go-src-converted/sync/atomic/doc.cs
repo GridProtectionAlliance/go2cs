@@ -37,25 +37,28 @@
 // functions, are the atomic equivalents of "return *addr" and
 // "*addr = val".
 //
-// package atomic -- go2cs converted at 2022 March 06 22:08:12 UTC
+
+// package atomic -- go2cs converted at 2022 March 13 05:24:02 UTC
 // import "sync/atomic" ==> using atomic = go.sync.atomic_package
 // Original source: C:\Program Files\Go\src\sync\atomic\doc.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.sync;
+
+using @unsafe = @unsafe_package;
+
+
+// BUG(rsc): On 386, the 64-bit functions use instructions unavailable before the Pentium MMX.
+//
+// On non-Linux ARM, the 64-bit functions use instructions unavailable before the ARMv6k core.
+//
+// On ARM, 386, and 32-bit MIPS, it is the caller's responsibility
+// to arrange for 64-bit alignment of 64-bit words accessed atomically.
+// The first word in a variable or in an allocated struct, array, or slice can
+// be relied upon to be 64-bit aligned.
+
+// SwapInt32 atomically stores new into *addr and returns the previous *addr value.
 
 public static partial class atomic_package {
 
-    // BUG(rsc): On 386, the 64-bit functions use instructions unavailable before the Pentium MMX.
-    //
-    // On non-Linux ARM, the 64-bit functions use instructions unavailable before the ARMv6k core.
-    //
-    // On ARM, 386, and 32-bit MIPS, it is the caller's responsibility
-    // to arrange for 64-bit alignment of 64-bit words accessed atomically.
-    // The first word in a variable or in an allocated struct, array, or slice can
-    // be relied upon to be 64-bit aligned.
-
-    // SwapInt32 atomically stores new into *addr and returns the previous *addr value.
 public static int SwapInt32(ptr<int> addr, int @new);
 
 // SwapInt64 atomically stores new into *addr and returns the previous *addr value.

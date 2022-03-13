@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:50:49 UTC
+//     Generated on 2022 March 13 06:02:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct posetNode
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace @internal
             public static implicit operator posetNode(NilType nil) => default(posetNode);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static posetNode posetNode_cast(dynamic value)
         {
             return new posetNode(value.l, value.r);

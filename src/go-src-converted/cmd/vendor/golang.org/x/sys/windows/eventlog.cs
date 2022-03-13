@@ -4,11 +4,9 @@
 
 // +build windows
 
-// package windows -- go2cs converted at 2022 March 06 23:30:33 UTC
+// package windows -- go2cs converted at 2022 March 13 06:41:28 UTC
 // import "cmd/vendor/golang.org/x/sys/windows" ==> using windows = go.cmd.vendor.golang.org.x.sys.windows_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\windows\eventlog.go
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
 
 public static partial class windows_package {
@@ -19,7 +17,6 @@ public static readonly nint EVENTLOG_WARNING_TYPE = 2;
 public static readonly nint EVENTLOG_INFORMATION_TYPE = 4;
 public static readonly nint EVENTLOG_AUDIT_SUCCESS = 8;
 public static readonly nint EVENTLOG_AUDIT_FAILURE = 16;
-
 
 //sys    RegisterEventSource(uncServerName *uint16, sourceName *uint16) (handle Handle, err error) [failretval==0] = advapi32.RegisterEventSourceW
 //sys    DeregisterEventSource(handle Handle) (err error) = advapi32.DeregisterEventSource

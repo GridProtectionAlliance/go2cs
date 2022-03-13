@@ -28,27 +28,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:20:06 UTC
+// package ld -- go2cs converted at 2022 March 13 06:32:56 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\ar.go
-using bio = go.cmd.@internal.bio_package;
-using sym = go.cmd.link.@internal.sym_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using os = go.os_package;
-
 namespace go.cmd.link.@internal;
+
+using bio = cmd.@internal.bio_package;
+using sym = cmd.link.@internal.sym_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using os = os_package;
 
 public static partial class ld_package {
 
 public static readonly nint SARMAG = 8;
 public static readonly nint SAR_HDR = 16 + 44;
 
-
 public static readonly @string ARMAG = "!<arch>\n";
-
 
 public partial struct ArHdr {
     public @string name;
@@ -75,12 +73,9 @@ private static void hostArchive(ptr<Link> _addr_ctxt, @string name) => func((def
             if (ctxt.Debugvlog != 0) {
                 ctxt.Logf("skipping libgcc file: %v\n", err);
             }
-
             return ;
-
         }
         Exitf("cannot open file %s: %v", name, err);
-
     }
     defer(f.Close());
 
@@ -92,7 +87,6 @@ private static void hostArchive(ptr<Link> _addr_ctxt, @string name) => func((def
             Exitf("file %s too short", name);
         }
     }
-
 
     if (string(magbuf[..]) != ARMAG) {
         Exitf("%s is not an archive file", name);
@@ -131,7 +125,6 @@ private static void hostArchive(ptr<Link> _addr_ctxt, @string name) => func((def
                 off = off__prev1;
 
             }
-
         }        {
             var off__prev2 = off;
 
@@ -158,9 +151,7 @@ private static void hostArchive(ptr<Link> _addr_ctxt, @string name) => func((def
         }
 
         any = len(load) > 0;
-
     }
-
 });
 
 // archiveMap is an archive symbol map: a mapping from symbol name to
@@ -185,7 +176,6 @@ private static archiveMap readArmap(@string filename, ptr<bio.Reader> _addr_f, A
             Exitf("short read from %s", filename);
         }
     }
-
 
     ulong c = default;
     if (is64) {
@@ -226,11 +216,9 @@ private static archiveMap readArmap(@string filename, ptr<bio.Reader> _addr_f, A
         contents = contents[(int)wordSize..];
 
         ret[name] = off;
-
     }
 
     return ret;
-
 }
 
 } // end ld_package

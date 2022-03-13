@@ -12,19 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:27 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:31 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\flags.go
-using flag = go.flag_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using flag = flag_package;
+using strings = strings_package;
+
+
+// GoFlags implements the plugin.FlagSet interface.
+
+using System;
 public static partial class driver_package {
 
-    // GoFlags implements the plugin.FlagSet interface.
 public partial struct GoFlags {
     public slice<@string> UsageMsgs;
 }
@@ -89,7 +90,6 @@ private static slice<@string> Parse(this ptr<GoFlags> _addr__p0, Action usage) {
         usage();
     }
     return args;
-
 }
 
 } // end driver_package

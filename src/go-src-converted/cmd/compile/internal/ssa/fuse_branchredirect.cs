@@ -2,34 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:03 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:27 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\fuse_branchredirect.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // fuseBranchRedirect checks for a CFG in which the outbound branch
-    // of an If block can be derived from its predecessor If block, in
-    // some such cases, we can redirect the predecessor If block to the
-    // corresponding successor block directly. For example:
-    // p:
-    //   v11 = Less64 <bool> v10 v8
-    //   If v11 goto b else u
-    // b: <- p ...
-    //   v17 = Leq64 <bool> v10 v8
-    //   If v17 goto s else o
-    // We can redirect p to s directly.
-    //
-    // The implementation here borrows the framework of the prove pass.
-    // 1, Traverse all blocks of function f to find If blocks.
-    // 2,   For any If block b, traverse all its predecessors to find If blocks.
-    // 3,     For any If block predecessor p, update relationship p->b.
-    // 4,     Traverse all successors of b.
-    // 5,       For any successor s of b, try to update relationship b->s, if a
-    //          contradiction is found then redirect p to another successor of b.
+// fuseBranchRedirect checks for a CFG in which the outbound branch
+// of an If block can be derived from its predecessor If block, in
+// some such cases, we can redirect the predecessor If block to the
+// corresponding successor block directly. For example:
+// p:
+//   v11 = Less64 <bool> v10 v8
+//   If v11 goto b else u
+// b: <- p ...
+//   v17 = Leq64 <bool> v10 v8
+//   If v17 goto s else o
+// We can redirect p to s directly.
+//
+// The implementation here borrows the framework of the prove pass.
+// 1, Traverse all blocks of function f to find If blocks.
+// 2,   For any If block b, traverse all its predecessors to find If blocks.
+// 3,     For any If block predecessor p, update relationship p->b.
+// 4,     Traverse all successors of b.
+// 5,       For any successor s of b, try to update relationship b->s, if a
+//          contradiction is found then redirect p to another successor of b.
 private static bool fuseBranchRedirect(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -88,7 +86,6 @@ private static bool fuseBranchRedirect(ptr<Func> _addr_f) {
                         }
                         v.RemoveArg(k);
                         phielimValue(v);
-
                     }
                     v = v__prev4;
                 }
@@ -104,7 +101,6 @@ private static bool fuseBranchRedirect(ptr<Func> _addr_f) {
                             continue;
                         }
                         v.AddArg(v.Args[ai]);
-
                     }
                     v = v__prev4;
                 }
@@ -115,20 +111,16 @@ private static bool fuseBranchRedirect(ptr<Func> _addr_f) {
                 changed = true;
                 k--;
                 break;
-
             }            ft.restore();
-
         }
         if (len(b.Preds) == 0 && b != f.Entry) { 
             // Block is now dead.
             b.Kind = BlockInvalid;
-
         }
     }
     ft.restore();
     ft.cleanup(f);
     return changed;
-
 }
 
 } // end ssa_package

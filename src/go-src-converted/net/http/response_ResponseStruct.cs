@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:53 UTC
+//     Generated on 2022 March 13 05:37:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Response
         {
             // Constructors
@@ -89,7 +89,7 @@ namespace net
             public static implicit operator Response(NilType nil) => default(Response);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Response Response_cast(dynamic value)
         {
             return new Response(value.Status, value.StatusCode, value.Proto, value.ProtoMajor, value.ProtoMinor, value.Header, value.Body, value.ContentLength, value.TransferEncoding, value.Close, value.Uncompressed, value.Trailer, ref value.Request, ref value.TLS);

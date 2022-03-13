@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2022 March 06 23:22:55 UTC
+// package trace -- go2cs converted at 2022 March 13 06:35:59 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Program Files\Go\src\internal\trace\order.go
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-
 namespace go.@internal;
+
+using fmt = fmt_package;
+using sort = sort_package;
 
 public static partial class trace_package {
 
@@ -41,7 +41,6 @@ private static readonly var garbage = ~uint64(0) - 1;
 private static readonly var noseq = ~uint64(0);
 private static readonly var seqinc = ~uint64(0) - 1;
 
-
 // order1007 merges a set of per-P event batches into a single, consistent stream.
 // The high level idea is as follows. Events within an individual batch are in
 // correct order, because they are emitted by a single P. So we need to produce
@@ -73,7 +72,6 @@ private static (slice<ptr<Event>>, error) order1007(map<nint, slice<ptr<Event>>>
                 continue;
         pending--;
             }
-
             frontier = append(frontier, new orderEvent(ev,i,g,init,next));
             b.events = b.events[(int)1..];
             b.selected = true; 
@@ -85,8 +83,7 @@ private static (slice<ptr<Event>>, error) order1007(map<nint, slice<ptr<Event>>>
                 ev.Type = EvGoUnblock;
             else if (ev.Type == EvGoSysExitLocal) 
                 ev.Type = EvGoSysExit;
-            
-        }        if (len(frontier) == 0) {
+                    }        if (len(frontier) == 0) {
             return (null, error.As(fmt.Errorf("no consistent ordering of events possible"))!);
         }
         sort.Sort(orderEventList(frontier));
@@ -99,7 +96,6 @@ private static (slice<ptr<Event>>, error) order1007(map<nint, slice<ptr<Event>>>
             panic("frontier batch is not selected");
         }
         batches[f.batch].selected = false;
-
     } 
 
     // At this point we have a consistent stream of events.
@@ -130,15 +126,13 @@ private static (slice<ptr<Event>>, error) order1007(map<nint, slice<ptr<Event>>>
                     return (null, error.As(ErrTimeOrder)!);
                 }
                 ev.Ts = ts;
-            
-        }
+                    }
         ev = ev__prev1;
     }
 
     sort.Stable(eventList(events));
 
     return ;
-
 });
 
 // stateTransition returns goroutine state (sequence and status) when the event
@@ -196,7 +190,6 @@ private static (ulong, gState, gState) stateTransition(ptr<Event> _addr_ev) {
         // no ordering requirements
         g = unordered;
         return ;
-
 }
 
 private static bool transitionReady(ulong g, gState curr, gState init) {
@@ -217,7 +210,6 @@ private static void transition(map<ulong, gState> gs, ulong g, gState init, gSta
     else if (next.seq == seqinc) 
         next.seq = curr.seq + 1;
         gs[g] = next;
-
 });
 
 // order1005 merges a set of per-P event batches into a single, consistent stream.
@@ -235,14 +227,12 @@ private static (slice<ptr<Event>>, error) order1005(map<nint, slice<ptr<Event>>>
             if (ev.Args[2] != 0) {
                 ev.Ts = int64(ev.Args[2]);
             }
-
         }
     }    sort.Sort(eventSeqList(events));
     if (!sort.IsSorted(eventList(events))) {
         return (null, error.As(ErrTimeOrder)!);
     }
     return ;
-
 }
 
 private partial struct orderEventList { // : slice<orderEvent>

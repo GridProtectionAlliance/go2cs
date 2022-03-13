@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:30 UTC
+//     Generated on 2022 March 13 05:41:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class strconv_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct leftCheat
         {
             // Constructors
@@ -53,7 +53,7 @@ namespace go
             public static implicit operator leftCheat(NilType nil) => default(leftCheat);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static leftCheat leftCheat_cast(dynamic value)
         {
             return new leftCheat(value.delta, value.cutoff);

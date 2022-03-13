@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package chacha20poly1305 -- go2cs converted at 2022 March 06 23:36:33 UTC
+// package chacha20poly1305 -- go2cs converted at 2022 March 13 06:44:37 UTC
 // import "vendor/golang.org/x/crypto/chacha20poly1305" ==> using chacha20poly1305 = go.vendor.golang.org.x.crypto.chacha20poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\chacha20poly1305\xchacha20poly1305.go
-using cipher = go.crypto.cipher_package;
-using errors = go.errors_package;
-
-using chacha20 = go.golang.org.x.crypto.chacha20_package;
-
 namespace go.vendor.golang.org.x.crypto;
+
+using cipher = crypto.cipher_package;
+using errors = errors_package;
+
+using chacha20 = golang.org.x.crypto.chacha20_package;
 
 public static partial class chacha20poly1305_package {
 
@@ -34,7 +34,6 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     ptr<xchacha20poly1305> ret = @new<xchacha20poly1305>();
     copy(ret.key[..], key);
     return (ret, error.As(null!)!);
-
 }
 
 private static nint NonceSize(this ptr<xchacha20poly1305> _addr__p0) {
@@ -67,7 +66,6 @@ private static slice<byte> Seal(this ptr<xchacha20poly1305> _addr_x, slice<byte>
     copy(cNonce[(int)4..(int)12], nonce[(int)16..(int)24]);
 
     return c.seal(dst, cNonce[..], plaintext, additionalData);
-
 });
 
 private static (slice<byte>, error) Open(this ptr<xchacha20poly1305> _addr_x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => func((_, panic, _) => {
@@ -93,7 +91,6 @@ private static (slice<byte>, error) Open(this ptr<xchacha20poly1305> _addr_x, sl
     copy(cNonce[(int)4..(int)12], nonce[(int)16..(int)24]);
 
     return c.open(dst, cNonce[..], ciphertext, additionalData);
-
 });
 
 } // end chacha20poly1305_package

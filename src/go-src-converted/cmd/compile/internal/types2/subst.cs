@@ -6,16 +6,15 @@
 // through substitution of type parameters by actual
 // types.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:57 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:22 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\subst.go
-using bytes = go.bytes_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using System;
 
 public static partial class types2_package {
 
@@ -36,9 +35,7 @@ private static ptr<substMap> makeSubstMap(slice<ptr<TypeName>> tpars, slice<Type
         var targ = expand(targs[i]); // possibly nil
         targs[i] = targ;
         proj[tpar.typ._<ptr<TypeParam>>()] = targ;
-
     }    return addr(new substMap(targs,proj));
-
 }
 
 private static @string String(this ptr<substMap> _addr_m) {
@@ -64,9 +61,7 @@ private static Type lookup(this ptr<substMap> _addr_m, ptr<TypeParam> _addr_tpar
             return t;
         }
     }
-
     return tpar;
-
 }
 
 private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, Type typ, slice<Type> targs, slice<syntax.Pos> poslist) => func((defer, _, _) => {
@@ -84,13 +79,9 @@ private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, T
                 // Test case: type T[P any] T[P]
                 // TODO(gri) investigate if that's a bug or to be expected.
                 under = res.Underlying();
-
             }
-
             check.trace(pos, "=> %s (under = %s)", res, under);
-
         }());
-
     }
     assert(len(poslist) <= len(targs)); 
 
@@ -124,12 +115,10 @@ private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, T
                     ref var copy = ref heap(t.val, out ptr<var> _addr_copy);
                     _addr_res = _addr_copy;
                     res = ref _addr_res.val;
-
                 } 
                 // After instantiating a generic signature, it is not generic
                 // anymore; we need to set tparams to nil.
                 res._<ptr<Signature>>().tparams = null;
-
             }());
             break;
         default:
@@ -148,7 +137,6 @@ private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, T
         // TODO(gri) provide better error message
         check.errorf(pos, "got %d arguments but %d type parameters", len(targs), len(tparams));
         return Typ[Invalid];
-
     }
     if (len(tparams) == 0) {
         return typ; // nothing to do (minor optimization)
@@ -187,7 +175,6 @@ private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, T
                 }
 
             }
-
             {
                 var (m, wrong) = check.missingMethod(targ, iface, true);
 
@@ -199,25 +186,20 @@ private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, T
                     if (m.name == "==") { 
                         // We don't want to report "missing method ==".
                         check.softErrorf(pos, "%s does not satisfy comparable", targ);
-
                     }
                     else if (wrong != null) { 
                         // TODO(gri) This can still report uninstantiated types which makes the error message
                         //           more difficult to read then necessary.
                         check.softErrorf(pos, "%s does not satisfy %s: wrong method signature\n\tgot  %s\n\twant %s", targ, tpar.bound, wrong, m);
-
                     }
                     else
  {
                         check.softErrorf(pos, "%s does not satisfy %s (missing method %s)", targ, tpar.bound, m.name);
                     }
-
                     break;
-
                 }
 
             }
-
         }
         if (iface.allTypes == null) {
             continue; // nothing to do
@@ -242,16 +224,13 @@ private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, T
                             // TODO(gri) match this error message with the one below (or vice versa)
                             check.softErrorf(pos, "%s does not satisfy %s (%s type constraint %s not found in %s)", targ, tpar.bound, targ, t, iface.allTypes);
                             break;
-
                         }
-
                     }
 
                     t = t__prev2;
                 }
 
                 break;
-
             } 
 
             // Otherwise, targ's type or underlying type must also be one of the interface types listed, if any.
@@ -266,7 +245,6 @@ private static Type instantiate(this ptr<Checker> _addr_check, syntax.Pos pos, T
             break;
         }
     }    return check.subst(pos, typ, smap);
-
 });
 
 // subst returns the type typ with its type parameters tpars replaced by
@@ -295,7 +273,6 @@ private static Type subst(this ptr<Checker> _addr_check, syntax.Pos pos, Type ty
     // general case
     subster subst = new subster(check,pos,make(map[Type]Type),smap);
     return subst.typ(typ);
-
 }
 
 private partial struct subster {
@@ -339,8 +316,6 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
                 }
 
             }
-
-
             break;
         case ptr<Pointer> t:
             var @base = subst.typ(t.@base);
@@ -366,9 +341,7 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
                 // types list may not be unique and NewSum may remove
                 // duplicates.
                 return NewSum(types);
-
             }
-
             break;
         case ptr<Interface> t:
             var (methods, mcopied) = subst.funcList(t.methods);
@@ -385,9 +358,7 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
                 subst.check.posMap[iface] = subst.check.posMap[t]; // satisfy completeInterface requirement
                 subst.check.completeInterface(nopos, iface);
                 return iface;
-
             }
-
             break;
         case ptr<Map> t:
             var key = subst.typ(t.key);
@@ -416,12 +387,10 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
                 }
 ;
             }
-
             if (t.tparams == null) {
                 dump(">>> %s is not parameterized", t);
                 return t; // type is not parameterized
             }
-
             slice<Type> new_targs = default;
 
             if (len(t.targs) > 0) { 
@@ -449,12 +418,10 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
                     dump(">>> nothing to substitute in %s", t);
                     return t; // nothing to substitute
                 }
-
             } { 
                 // not yet instantiated
                 dump(">>> first instantiation of %s", t);
                 new_targs = subst.smap.targs;
-
             } 
 
             // before creating a new named type, check if we have this one already
@@ -475,7 +442,6 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
                     named = named__prev2;
 
                 }
-
             } 
 
             // create a new named type and populate caches to avoid endless recursion
@@ -485,7 +451,6 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
             if (subst.check != null) {
                 subst.check.typMap[h] = named;
             }
-
             subst.cache[t] = named; 
 
             // do the substitution
@@ -511,7 +476,6 @@ private static Type typ(this ptr<subster> _addr_subst, Type typ) => func((defer,
     }
 
     return typ;
-
 });
 
 // TODO(gri) Eventually, this should be more sophisticated.
@@ -537,7 +501,6 @@ private static @string instantiatedHash(ptr<Named> _addr_typ, slice<Type> targs)
             i++;
         }
     }    return string(res[..(int)i]);
-
 }
 
 private static @string typeListString(slice<Type> list) {
@@ -556,7 +519,6 @@ private static Type typOrNil(this ptr<subster> _addr_subst, Type typ) {
         return Typ[Invalid];
     }
     return subst.typ(typ);
-
 }
 
 private static ptr<Var> var_(this ptr<subster> _addr_subst, ptr<Var> _addr_v) {
@@ -574,10 +536,8 @@ private static ptr<Var> var_(this ptr<subster> _addr_subst, ptr<Var> _addr_v) {
             }
 
         }
-
     }
     return _addr_v!;
-
 }
 
 private static ptr<Tuple> tuple(this ptr<subster> _addr_subst, ptr<Tuple> _addr_t) {
@@ -593,10 +553,8 @@ private static ptr<Tuple> tuple(this ptr<subster> _addr_subst, ptr<Tuple> _addr_
             }
 
         }
-
     }
     return _addr_t!;
-
 }
 
 private static (slice<ptr<Var>>, bool) varList(this ptr<subster> _addr_subst, slice<ptr<Var>> @in) {
@@ -617,17 +575,12 @@ private static (slice<ptr<Var>>, bool) varList(this ptr<subster> _addr_subst, sl
                     copy(new, out);
                     out = new;
                     copied = true;
-
                 }
-
                 out[i] = w;
-
             }
 
         }
-
     }    return ;
-
 }
 
 private static ptr<Func> func_(this ptr<subster> _addr_subst, ptr<Func> _addr_f) {
@@ -645,10 +598,8 @@ private static ptr<Func> func_(this ptr<subster> _addr_subst, ptr<Func> _addr_f)
             }
 
         }
-
     }
     return _addr_f!;
-
 }
 
 private static (slice<ptr<Func>>, bool) funcList(this ptr<subster> _addr_subst, slice<ptr<Func>> @in) {
@@ -669,17 +620,12 @@ private static (slice<ptr<Func>>, bool) funcList(this ptr<subster> _addr_subst, 
                     copy(new, out);
                     out = new;
                     copied = true;
-
                 }
-
                 out[i] = g;
-
             }
 
         }
-
     }    return ;
-
 }
 
 private static (slice<Type>, bool) typeList(this ptr<subster> _addr_subst, slice<Type> @in) {
@@ -700,17 +646,12 @@ private static (slice<Type>, bool) typeList(this ptr<subster> _addr_subst, slice
                     copy(new, out);
                     out = new;
                     copied = true;
-
                 }
-
                 out[i] = u;
-
             }
 
         }
-
     }    return ;
-
 }
 
 } // end types2_package

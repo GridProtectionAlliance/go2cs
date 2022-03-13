@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:08 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:35 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\sizes.go
-using fmt = go.fmt_package;
-
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+
+
+// Code below based on go/types.StdSizes.
+// Intentional differences are marked with "gc:".
 
 public static partial class noder_package {
 
-    // Code below based on go/types.StdSizes.
-    // Intentional differences are marked with "gc:".
 private partial struct gcSizes {
 }
 
@@ -44,7 +46,6 @@ private static long Alignof(this ptr<gcSizes> _addr_s, types2.Type T) {
                     a = a__prev1;
 
                 }
-
             }
 
             return max;
@@ -73,7 +74,6 @@ private static long Alignof(this ptr<gcSizes> _addr_s, types2.Type T) {
         return int64(types.RegSize);
     }
     return a;
-
 }
 
 private static bool isComplex(types2.Type T) {
@@ -110,9 +110,7 @@ private static long Sizeof(this ptr<gcSizes> _addr_s, types2.Type T) => func((_,
                     }
 
                 }
-
             }
-
 
             if (k == types2.String) 
                 return int64(types.PtrSize) * 2;
@@ -175,7 +173,6 @@ private static long Sizeof(this ptr<gcSizes> _addr_s, types2.Type T) => func((_,
             break;
         }
     }
-
 });
 
 private static array<byte> basicSizes = new array<byte>(InitKeyedValues<byte>((types2.Bool, 1), (types2.Int8, 1), (types2.Int16, 2), (types2.Int32, 4), (types2.Int64, 8), (types2.Uint8, 1), (types2.Uint16, 2), (types2.Uint32, 4), (types2.Uint64, 8), (types2.Float32, 4), (types2.Float64, 8), (types2.Complex64, 8), (types2.Complex128, 16)));

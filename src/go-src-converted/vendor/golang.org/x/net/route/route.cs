@@ -11,14 +11,15 @@
 // The package supports any version of Darwin, any version of
 // DragonFly BSD, FreeBSD 7 and above, NetBSD 6 and above, and OpenBSD
 // 5.6 and above.
-// package route -- go2cs converted at 2022 March 06 23:38:14 UTC
+
+// package route -- go2cs converted at 2022 March 13 06:46:32 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\route.go
-using errors = go.errors_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using errors = errors_package;
+using os = os_package;
+using syscall = syscall_package;
 
 public static partial class route_package {
 
@@ -96,7 +97,6 @@ public partial struct RIBType { // : nint
 public static readonly RIBType RIBTypeRoute = syscall.NET_RT_DUMP;
 public static readonly RIBType RIBTypeInterface = syscall.NET_RT_IFLIST;
 
-
 // FetchRIB fetches a routing information base from the operating
 // system.
 //
@@ -128,7 +128,6 @@ public static (slice<byte>, error) FetchRIB(nint af, RIBType typ, nint arg) {
             err = err__prev1;
 
         }
-
         if (n == 0) {
             return (null, error.As(null!)!);
         }
@@ -147,19 +146,14 @@ public static (slice<byte>, error) FetchRIB(nint af, RIBType typ, nint arg) {
                 if (err == syscall.ENOMEM && try < maxTries) {
                     continue;
                 }
-
                 return (null, error.As(os.NewSyscallError("sysctl", err))!);
-
             }
 
             err = err__prev1;
 
         }
-
         return (b[..(int)n], error.As(null!)!);
-
     }
-
 }
 
 } // end route_package

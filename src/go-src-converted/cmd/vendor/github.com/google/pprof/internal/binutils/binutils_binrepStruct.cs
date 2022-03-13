@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:18 UTC
+//     Generated on 2022 March 13 06:36:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace @internal
 {
     public static partial class binutils_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct binrep
         {
             // Constructors
@@ -92,7 +92,7 @@ namespace @internal
             public static implicit operator binrep(NilType nil) => default(binrep);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static binrep binrep_cast(dynamic value)
         {
             return new binrep(value.llvmSymbolizer, value.llvmSymbolizerFound, value.addr2line, value.addr2lineFound, value.nm, value.nmFound, value.objdump, value.objdumpFound, value.isLLVMObjdump, value.fast);

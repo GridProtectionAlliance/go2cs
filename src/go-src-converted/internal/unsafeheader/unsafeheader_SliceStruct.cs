@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:12:32 UTC
+//     Generated on 2022 March 13 05:27:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace @internal
 {
     public static partial class unsafeheader_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Slice
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace @internal
             public static implicit operator Slice(NilType nil) => default(Slice);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Slice Slice_cast(dynamic value)
         {
             return new Slice(value.Data, value.Len, value.Cap);

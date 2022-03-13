@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:55 UTC
+//     Generated on 2022 March 13 05:28:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace hash
 {
     public static partial class crc64_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct digest
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace hash
             public static implicit operator digest(NilType nil) => default(digest);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static digest digest_cast(dynamic value)
         {
             return new digest(value.crc, ref value.tab);

@@ -5,28 +5,30 @@
 //go:build darwin || dragonfly || freebsd || linux || netbsd || openbsd
 // +build darwin dragonfly freebsd linux netbsd openbsd
 
-// package bio -- go2cs converted at 2022 March 06 22:32:21 UTC
+// package bio -- go2cs converted at 2022 March 13 05:43:19 UTC
 // import "cmd/internal/bio" ==> using bio = go.cmd.@internal.bio_package
 // Original source: C:\Program Files\Go\src\cmd\internal\bio\buf_mmap.go
-using runtime = go.runtime_package;
-using atomic = go.sync.atomic_package;
-using syscall = go.syscall_package;
-
 namespace go.cmd.@internal;
+
+using runtime = runtime_package;
+using atomic = sync.atomic_package;
+using syscall = syscall_package;
+
+
+// mmapLimit is the maximum number of mmaped regions to create before
+// falling back to reading into a heap-allocated slice. This exists
+// because some operating systems place a limit on the number of
+// distinct mapped regions per process. As of this writing:
+//
+//  Darwin    unlimited
+//  DragonFly   1000000 (vm.max_proc_mmap)
+//  FreeBSD   unlimited
+//  Linux         65530 (vm.max_map_count) // TODO: query /proc/sys/vm/max_map_count?
+//  NetBSD    unlimited
+//  OpenBSD   unlimited
 
 public static partial class bio_package {
 
-    // mmapLimit is the maximum number of mmaped regions to create before
-    // falling back to reading into a heap-allocated slice. This exists
-    // because some operating systems place a limit on the number of
-    // distinct mapped regions per process. As of this writing:
-    //
-    //  Darwin    unlimited
-    //  DragonFly   1000000 (vm.max_proc_mmap)
-    //  FreeBSD   unlimited
-    //  Linux         65530 (vm.max_map_count) // TODO: query /proc/sys/vm/max_map_count?
-    //  NetBSD    unlimited
-    //  OpenBSD   unlimited
 private static int mmapLimit = 1 << 31 - 1;
 
 private static void init() { 
@@ -63,7 +65,6 @@ private static (slice<byte>, bool) sliceOS(this ptr<Reader> _addr_r, ulong lengt
     data = data[(int)off - aoff..];
     r.MustSeek(int64(length), 1);
     return (data, true);
-
 }
 
 } // end bio_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:39 UTC
+//     Generated on 2022 March 13 06:36:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
 {
     public static partial class graph_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct tags
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace @internal
             public static implicit operator tags(NilType nil) => default(tags);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static tags tags_cast(dynamic value)
         {
             return new tags(value.t, value.flat);

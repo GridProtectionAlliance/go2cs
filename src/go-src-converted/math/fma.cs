@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:05 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:58 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\fma.go
-using bits = go.math.bits_package;
-
 namespace go;
+
+using bits = math.bits_package;
 
 public static partial class math_package {
 
@@ -73,7 +73,6 @@ private static (ulong, ulong) shrcompress(ulong u1, ulong u2, nuint n) {
         r1, r2 = shr(u1, u2, n);
         r2 |= nonzero(u1 & (1 << (int)((n - 64)) - 1) | u2);
         return ;
-
 }
 
 private static int lz(ulong u1, ulong u2) {
@@ -84,7 +83,6 @@ private static int lz(ulong u1, ulong u2) {
         l += int32(bits.LeadingZeros64(u2));
     }
     return l;
-
 }
 
 // split splits b into sign, biased exponent, and mantissa.
@@ -104,16 +102,13 @@ private static (uint, int, ulong) split(ulong b) {
         var shift = uint(bits.LeadingZeros64(mantissa) - 11);
         mantissa<<=shift;
         exp = 1 - int32(shift);
-
     }
     else
  { 
         // Add implicit 1 bit
         mantissa |= 1 << 52;
-
     }
     return ;
-
 }
 
 // FMA returns x * y + z, computed with only one rounding.
@@ -166,7 +161,6 @@ public static double FMA(double x, double y, double z) {
         pm1, _ = bits.Add64(pm1, zm1, c);
         pe -= int32(~pm1 >> 63);
         pm1, m = shrcompress(pm1, pm2, uint(64 + pm1 >> 63));
-
     }
     else
  { 
@@ -178,12 +172,10 @@ public static double FMA(double x, double y, double z) {
         pe -= nz;
         m, pm2 = shl(pm1, pm2, uint(nz - 1));
         m |= nonzero(pm2);
-
     }
     if (pe > 1022 + bias || pe == 1022 + bias && (m + 1 << 9) >> 63 == 1) { 
         // rounded value overflows exponent range
         return Float64frombits(uint64(ps) << 63 | uvinf);
-
     }
     if (pe < 0) {
         var n = uint(-pe);
@@ -193,7 +185,6 @@ public static double FMA(double x, double y, double z) {
     m = ((m + 1 << 9) >> 10) & ~zero((m & (1 << 10 - 1)) ^ 1 << 9);
     pe &= -int32(nonzero(m));
     return Float64frombits(uint64(ps) << 63 + uint64(pe) << 52 + m);
-
 }
 
 } // end math_package

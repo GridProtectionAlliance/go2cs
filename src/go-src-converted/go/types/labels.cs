@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:42:03 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:11 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\labels.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.go;
 
+using ast = go.ast_package;
+using token = go.token_package;
+
+
+// labels checks correct label use in body.
+
+using System;
 public static partial class types_package {
 
-    // labels checks correct label use in body.
 private static void labels(this ptr<Checker> _addr_check, ptr<ast.BlockStmt> _addr_body) {
     ref Checker check = ref _addr_check.val;
     ref ast.BlockStmt body = ref _addr_body.val;
@@ -39,7 +40,6 @@ private static void labels(this ptr<Checker> _addr_check, ptr<ast.BlockStmt> _ad
                 msg = "goto %s jumps into block";
                 alt._<ptr<Label>>().used = true; // avoid another error
                 code = _JumpIntoBlock;
-
             }
             else
  {
@@ -47,9 +47,7 @@ private static void labels(this ptr<Checker> _addr_check, ptr<ast.BlockStmt> _ad
                 code = _UndeclaredLabel;
             }
         }
-
         check.errorf(jmp.Label, code, msg, name);
-
     }    foreach (var (_, obj) in all.elems) {
         {
             ptr<Label> lbl = obj._<ptr<Label>>();
@@ -58,7 +56,6 @@ private static void labels(this ptr<Checker> _addr_check, ptr<ast.BlockStmt> _ad
                 check.softErrorf(lbl, _UnusedLabel, "label %s declared but not used", lbl.name);
             }
         }
-
     }
 }
 
@@ -85,7 +82,6 @@ private static void insert(this ptr<block> _addr_b, ptr<ast.LabeledStmt> _addr_s
         b.labels = labels;
     }
     labels[name] = s;
-
 }
 
 // gotoTarget returns the labeled statement in the current
@@ -106,11 +102,9 @@ private static ptr<ast.LabeledStmt> gotoTarget(this ptr<block> _addr_b, @string 
                 }
 
             }
-
         }
     }
     return _addr_null!;
-
 }
 
 // enclosingTarget returns the innermost enclosing labeled
@@ -131,11 +125,9 @@ private static ptr<ast.LabeledStmt> enclosingTarget(this ptr<block> _addr_b, @st
                 }
 
             }
-
         }
     }
     return _addr_null!;
-
 }
 
 // blockBranches processes a block's statement list and returns the set of outgoing forward jumps.
@@ -168,14 +160,12 @@ private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_
             }
         }
         return false;
-
     };
 
     Action<ptr<ast.LabeledStmt>, slice<ast.Stmt>> blockBranches = (lstmt, list) => { 
         // Unresolved forward jumps inside the nested block
         // become forward jumps in the current block.
         fwdJumps = append(fwdJumps, check.blockBranches(all, b, lstmt, list));
-
     };
 
     Action<ast.Stmt> stmtBranches = default;
@@ -190,8 +180,6 @@ private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_
                     }
 
                 }
-
-
                 break;
             case ptr<ast.LabeledStmt> s:
                 {
@@ -228,26 +216,21 @@ private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_
                                     check.softErrorf(jmp.Label, _JumpOverDecl, "goto %s jumps over variable declaration at line %d", name, check.fset.Position(varDeclPos).Line); 
                                     // ok to continue
                                 }
-
                             }
                             else
  { 
                                 // no match - record new forward jump
                                 fwdJumps[i] = jmp;
                                 i++;
-
                             }
-
                         }
                         fwdJumps = fwdJumps[..(int)i];
                         lstmt = s;
-
                     }
 
                     name = name__prev1;
 
                 }
-
                 stmtBranches(s.Stmt);
                 break;
             case ptr<ast.BranchStmt> s:
@@ -286,18 +269,15 @@ private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_
                                     valid = true;
                                     break;
                             }
-
                         }
 
                         t = t__prev1;
 
                     }
-
                     if (!valid) {
                         check.errorf(s.Label, _MisplacedLabel, "invalid break label %s", name);
                         return ;
                     }
-
                 else if (s.Tok == token.CONTINUE) 
                     // spec: "If there is a label, it must be that of an enclosing
                     // "for" statement, and that is the one whose execution advances."
@@ -316,26 +296,21 @@ private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_
                                     valid = true;
                                     break;
                             }
-
                         }
 
                         t = t__prev1;
 
                     }
-
                     if (!valid) {
                         check.errorf(s.Label, _MisplacedLabel, "invalid continue label %s", name);
                         return ;
                     }
-
                 else if (s.Tok == token.GOTO) 
                     if (b.gotoTarget(name) == null) { 
                         // label may be declared later - add branch to forward jumps
                         fwdJumps = append(fwdJumps, s);
                         return ;
-
                     }
-
                 else 
                     check.invalidAST(s, "branch statement: %s %s", s.Tok, name);
                     return ;
@@ -380,7 +355,6 @@ private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_
                 stmtBranches(s.Body);
                 break;
         }
-
     };
 
     {
@@ -394,7 +368,6 @@ private static slice<ptr<ast.BranchStmt>> blockBranches(this ptr<Checker> _addr_
     }
 
     return fwdJumps;
-
 }
 
 } // end types_package

@@ -5,15 +5,16 @@
 // Package chacha20poly1305 implements the ChaCha20-Poly1305 AEAD and its
 // extended nonce variant XChaCha20-Poly1305, as specified in RFC 8439 and
 // draft-irtf-cfrg-xchacha-01.
-// package chacha20poly1305 -- go2cs converted at 2022 March 06 23:36:32 UTC
+
+// package chacha20poly1305 -- go2cs converted at 2022 March 13 06:44:36 UTC
 // import "vendor/golang.org/x/crypto/chacha20poly1305" ==> using chacha20poly1305 = go.vendor.golang.org.x.crypto.chacha20poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\chacha20poly1305\chacha20poly1305.go
+namespace go.vendor.golang.org.x.crypto;
 // import "golang.org/x/crypto/chacha20poly1305"
 
-using cipher = go.crypto.cipher_package;
-using errors = go.errors_package;
 
-namespace go.vendor.golang.org.x.crypto;
+using cipher = crypto.cipher_package;
+using errors = errors_package;
 
 public static partial class chacha20poly1305_package {
 
@@ -32,7 +33,6 @@ public static readonly nint NonceSize = 12;
 // variant of this AEAD, in bytes.
 public static readonly nint NonceSizeX = 24;
 
-
 private partial struct chacha20poly1305 {
     public array<byte> key;
 }
@@ -48,7 +48,6 @@ public static (cipher.AEAD, error) New(slice<byte> key) {
     ptr<chacha20poly1305> ret = @new<chacha20poly1305>();
     copy(ret.key[..], key);
     return (ret, error.As(null!)!);
-
 }
 
 private static nint NonceSize(this ptr<chacha20poly1305> _addr_c) {
@@ -73,7 +72,6 @@ private static slice<byte> Seal(this ptr<chacha20poly1305> _addr_c, slice<byte> 
         panic("chacha20poly1305: plaintext too large");
     }
     return c.seal(dst, nonce, plaintext, additionalData);
-
 });
 
 private static var errOpen = errors.New("chacha20poly1305: message authentication failed");
@@ -93,7 +91,6 @@ private static (slice<byte>, error) Open(this ptr<chacha20poly1305> _addr_c, sli
         panic("chacha20poly1305: ciphertext too large");
     }
     return c.open(dst, nonce, ciphertext, additionalData);
-
 });
 
 // sliceForAppend takes a slice and a requested number of bytes. It returns a
@@ -116,10 +113,8 @@ private static (slice<byte>, slice<byte>) sliceForAppend(slice<byte> @in, nint n
             copy(head, in);
         }
     }
-
     tail = head[(int)len(in)..];
     return ;
-
 }
 
 } // end chacha20poly1305_package

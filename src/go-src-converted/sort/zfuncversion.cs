@@ -4,16 +4,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sort -- go2cs converted at 2022 March 06 22:12:37 UTC
+// package sort -- go2cs converted at 2022 March 13 05:27:41 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Program Files\Go\src\sort\zfuncversion.go
-
-
 namespace go;
 
 public static partial class sort_package {
 
-    // Auto-generated variant of sort.go:insertionSort
+// Auto-generated variant of sort.go:insertionSort
 private static void insertionSort_func(lessSwap data, nint a, nint b) {
     for (var i = a + 1; i < b; i++) {
         for (var j = i; j > a && data.Less(j, j - 1); j--) {
@@ -38,9 +36,7 @@ private static void siftDown_func(lessSwap data, nint lo, nint hi, nint first) {
         }
         data.Swap(first + root, first + child);
         root = child;
-
     }
-
 }
 
 // Auto-generated variant of sort.go:heapSort
@@ -67,7 +63,6 @@ private static void heapSort_func(lessSwap data, nint a, nint b) {
 
         i = i__prev1;
     }
-
 }
 
 // Auto-generated variant of sort.go:medianOfThree
@@ -123,7 +118,6 @@ private static (nint, nint) doPivot_func(lessSwap data, nint lo, nint hi) {
         data.Swap(b, c - 1);
         b++;
         c--;
-
     }
     var protect = hi - c < 5;
     if (!protect && hi - c < (hi - lo) / 4) {
@@ -143,7 +137,6 @@ private static (nint, nint) doPivot_func(lessSwap data, nint lo, nint hi) {
             dups++;
         }
         protect = dups > 1;
-
     }
     if (protect) {
         while (true) {
@@ -158,17 +151,13 @@ private static (nint, nint) doPivot_func(lessSwap data, nint lo, nint hi) {
             if (a >= b) {
                 break;
             }
-
             data.Swap(a, b - 1);
             a++;
             b--;
-
         }
-
     }
     data.Swap(pivot, b - 1);
     return (b - 1, c);
-
 }
 
 // Auto-generated variant of sort.go:quickSort
@@ -225,11 +214,8 @@ private static void stable_func(lessSwap data, nint n) {
             }
 
         }
-
         blockSize *= 2;
-
     }
-
 }
 
 // Auto-generated variant of sort.go:symMerge
@@ -246,7 +232,6 @@ private static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
  {
                 j = h;
             }
-
         }
         {
             var k__prev1 = k;
@@ -259,7 +244,6 @@ private static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
             k = k__prev1;
         }
         return ;
-
     }
     if (b - m == 1) {
         i = a;
@@ -273,7 +257,6 @@ private static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
  {
                 j = h;
             }
-
         }
         {
             var k__prev1 = k;
@@ -286,7 +269,6 @@ private static void symMerge_func(lessSwap data, nint a, nint m, nint b) {
             k = k__prev1;
         }
         return ;
-
     }
     var mid = int(uint(a + b) >> 1);
     var n = mid + m;
@@ -340,7 +322,6 @@ private static void rotate_func(lessSwap data, nint a, nint m, nint b) {
         }
     }
     swapRange_func(data, m - i, m, i);
-
 }
 
 } // end sort_package

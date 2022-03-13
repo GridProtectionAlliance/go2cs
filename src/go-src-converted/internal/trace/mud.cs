@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2022 March 06 23:22:54 UTC
+// package trace -- go2cs converted at 2022 March 13 06:35:58 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Program Files\Go\src\internal\trace\mud.go
-using math = go.math_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.@internal;
 
+using math = math_package;
+using sort = sort_package;
+
+
+// mud is an updatable mutator utilization distribution.
+//
+// This is a continuous distribution of duration over mutator
+// utilization. For example, the integral from mutator utilization a
+// to b is the total duration during which the mutator utilization was
+// in the range [a, b].
+//
+// This distribution is *not* normalized (it is not a probability
+// distribution). This makes it easier to work with as it's being
+// updated.
+//
+// It is represented as the sum of scaled uniform distribution
+// functions and Dirac delta functions (which are treated as
+// degenerate uniform distributions).
+
+using System;
 public static partial class trace_package {
 
-    // mud is an updatable mutator utilization distribution.
-    //
-    // This is a continuous distribution of duration over mutator
-    // utilization. For example, the integral from mutator utilization a
-    // to b is the total duration during which the mutator utilization was
-    // in the range [a, b].
-    //
-    // This distribution is *not* normalized (it is not a probability
-    // distribution). This makes it easier to work with as it's being
-    // updated.
-    //
-    // It is represented as the sum of scaled uniform distribution
-    // functions and Dirac delta functions (which are treated as
-    // degenerate uniform distributions).
 private partial struct mud {
     public slice<edge> sorted; // trackMass is the inverse cumulative sum to track as the
 // distribution is updated.
@@ -46,7 +47,6 @@ private partial struct mud {
 // mudDegree is the number of buckets in the MUD summary
 // histogram.
 private static readonly nint mudDegree = 1024;
-
 
 private partial struct edge {
     public double x; // Additionally at x is a Dirac delta function with area dirac.
@@ -113,17 +113,13 @@ private static void add(this ptr<mud> _addr_d, double l, double r, double area) 
  {
                 d.trackSum += area * (thresh - l) / (r - l);
             }
-
             if (d.trackSum >= d.trackMass) { 
                 // The tracked mass now falls in a different
                 // bucket. Recompute the inverse cumulative sum.
                 d.setTrackMass(d.trackMass);
-
             }
-
         }
     }
-
 }
 
 // setTrackMass sets the mass to track the inverse cumulative sum for.
@@ -146,13 +142,10 @@ private static void setTrackMass(this ptr<mud> _addr_d, double mass) {
             d.trackBucket = i;
             d.trackSum = sum;
             return ;
-
         }
         sum = newSum;
-
     }    d.trackBucket = len(d.hist);
     d.trackSum = sum;
-
 }
 
 // approxInvCumulativeSum is like invCumulativeSum, but specifically
@@ -170,7 +163,6 @@ private static (double, double, bool) approxInvCumulativeSum(this ptr<mud> _addr
         return (math.NaN(), math.NaN(), false);
     }
     return (float64(d.trackBucket) / mudDegree, float64(d.trackBucket + 1) / mudDegree, true);
-
 }
 
 // invCumulativeSum returns x such that the integral of d from -∞ to x
@@ -189,9 +181,7 @@ private static (double, bool) invCumulativeSum(this ptr<mud> _addr_d, double y) 
         return (math.NaN(), false);
     }
     var edges = d.unsorted;
-    sort.Slice(edges, (i, j) => {
-        return edges[i].x < edges[j].x;
-    }); 
+    sort.Slice(edges, (i, j) => edges[i].x < edges[j].x); 
     // Merge with sorted edges.
     d.unsorted = null;
     if (d.sorted == null) {
@@ -221,9 +211,7 @@ private static (double, bool) invCumulativeSum(this ptr<mud> _addr_d, double y) 
                 newSorted[o] = edges[j];
                 j++;
             }
-
         }        d.sorted = newSorted;
-
     }
     float csum = 0.0F;
     float rate = 0.0F;
@@ -239,22 +227,16 @@ private static (double, bool) invCumulativeSum(this ptr<mud> _addr_d, double y) 
                 // because that takes care of
                 // the y==0 case naturally.
                 return (e.x, true);
-
             }
-
             return ((y - csum) / rate + prevX, true);
-
         }
         newCsum += e.dirac;
         if (newCsum >= y) { 
             // y was exceeded by the Dirac delta at e.x.
             return (e.x, true);
-
         }
         (csum, prevX) = (newCsum, e.x);        rate += e.delta;
-
     }    return (prevX, false);
-
 }
 
 } // end trace_package

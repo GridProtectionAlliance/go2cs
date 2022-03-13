@@ -5,19 +5,20 @@
 // Parallel cache.
 // This file is copied from cmd/go/internal/par.
 
-// package sumdb -- go2cs converted at 2022 March 06 23:26:09 UTC
+// package sumdb -- go2cs converted at 2022 March 13 06:41:00 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb" ==> using sumdb = go.cmd.vendor.golang.org.x.mod.sumdb_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\cache.go
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.mod;
 
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+
+// parCache runs an action once per key and caches the result.
+
+using System;
 public static partial class sumdb_package {
 
-    // parCache runs an action once per key and caches the result.
 private partial struct parCache {
     public sync.Map m;
 }
@@ -45,10 +46,8 @@ private static void Do(this ptr<parCache> _addr_c, object key, Action f) {
             atomic.StoreUint32(_addr_e.done, 1);
         }
         e.mu.Unlock();
-
     }
     return e.result;
-
 }
 
 // Get returns the cached result associated with key.
@@ -66,7 +65,6 @@ private static void Get(this ptr<parCache> _addr_c, object key) {
         return null;
     }
     return e.result;
-
 }
 
 } // end sumdb_package

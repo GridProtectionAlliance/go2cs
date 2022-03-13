@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:25:40 UTC
+// package template -- go2cs converted at 2022 March 13 05:40:12 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\transition.go
-using bytes = go.bytes_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.html;
 
+using bytes = bytes_package;
+using strings = strings_package;
+
+
+// transitionFunc is the array of context transition functions for text nodes.
+// A transition function takes a context and template text input, and returns
+// the updated context and the number of bytes consumed from the front of the
+// input.
+
+using System;
 public static partial class template_package {
 
-    // transitionFunc is the array of context transition functions for text nodes.
-    // A transition function takes a context and template text input, and returns
-    // the updated context and the number of bytes consumed from the front of the
-    // input.
 private static array<Func<context, slice<byte>, (context, nint)>> transitionFunc = new array<Func<context, slice<byte>, (context, nint)>>(InitKeyedValues<Func<context, slice<byte>, (context, nint)>>((stateText, tText), (stateTag, tTag), (stateAttrName, tAttrName), (stateAfterName, tAfterName), (stateBeforeValue, tBeforeValue), (stateHTMLCmt, tHTMLCmt), (stateRCDATA, tSpecialTagEnd), (stateAttr, tAttr), (stateURL, tURL), (stateSrcset, tURL), (stateJS, tJS), (stateJSDqStr, tJSDelimited), (stateJSSqStr, tJSDelimited), (stateJSRegexp, tJSDelimited), (stateJSBlockCmt, tBlockCmt), (stateJSLineCmt, tLineCmt), (stateCSS, tCSS), (stateCSSDqStr, tCSSStr), (stateCSSSqStr, tCSSStr), (stateCSSDqURL, tCSSStr), (stateCSSSqURL, tCSSStr), (stateCSSURL, tCSSStr), (stateCSSBlockCmt, tBlockCmt), (stateCSSLineCmt, tLineCmt), (stateError, tError)));
 
 private static slice<byte> commentStart = (slice<byte>)"<!--";
@@ -52,12 +53,9 @@ private static (context, nint) tText(context c, slice<byte> s) {
             } 
             // We've found an HTML tag.
             return (new context(state:stateTag,element:e), j);
-
         }
         k = j;
-
     }
-
 }
 
 private static array<state> elementContentType = new array<state>(InitKeyedValues<state>((elementNone, stateText), (elementScript, stateJS), (elementStyle, stateCSS), (elementTextarea, stateRCDATA), (elementTitle, stateRCDATA)));
@@ -99,8 +97,7 @@ private static (context, nint) tTag(context c, slice<byte> s) {
             attr = attrScript;
         else if (attrType(attrName) == contentTypeSrcset) 
             attr = attrSrcset;
-        
-    }
+            }
     if (j == len(s)) {
         state = stateAttrName;
     }
@@ -109,7 +106,6 @@ private static (context, nint) tTag(context c, slice<byte> s) {
         state = stateAfterName;
     }
     return (new context(state:state,element:c.element,attr:attr), j);
-
 }
 
 // tAttrName is the context transition function for stateAttrName.
@@ -125,7 +121,6 @@ private static (context, nint) tAttrName(context c, slice<byte> s) {
         c.state = stateAfterName;
     }
     return (c, i);
-
 }
 
 // tAfterName is the context transition function for stateAfterName.
@@ -142,12 +137,10 @@ private static (context, nint) tAfterName(context c, slice<byte> s) {
         // Occurs due to tag ending '>', and valueless attribute.
         c.state = stateTag;
         return (c, i);
-
     }
     c.state = stateBeforeValue; 
     // Consume the "=".
     return (c, i + 1);
-
 }
 
 private static array<state> attrStartStates = new array<state>(InitKeyedValues<state>((attrNone, stateAttr), (attrScript, stateJS), (attrScriptType, stateAttr), (attrStyle, stateCSS), (attrURL, stateURL), (attrSrcset, stateSrcset)));
@@ -171,7 +164,6 @@ private static (context, nint) tBeforeValue(context c, slice<byte> s) {
             break;
     }
     (c.state, c.delim) = (attrStartStates[c.attr], delim);    return (c, i);
-
 }
 
 // tHTMLCmt is the context transition function for stateHTMLCmt.
@@ -186,9 +178,7 @@ private static (context, nint) tHTMLCmt(context c, slice<byte> s) {
             return (new context(), i + 3);
         }
     }
-
     return (c, len(s));
-
 }
 
 // specialTagEndMarkers maps element types to the character sequence that
@@ -212,10 +202,8 @@ private static (context, nint) tSpecialTagEnd(context c, slice<byte> s) {
             }
 
         }
-
     }
     return (c, len(s));
-
 }
 
 // indexTagEnd finds the index of a special tag end in a case insensitive way, or returns -1
@@ -236,15 +224,11 @@ private static nint indexTagEnd(slice<byte> s, slice<byte> tag) {
             if (len(s) > 0 && bytes.IndexByte(tagEndSeparators, s[0]) != -1) {
                 return res + i;
             }
-
             res += len(tag);
-
         }
         res += i + plen;
-
     }
     return -1;
-
 }
 
 // tAttr is the context transition function for the attribute state.
@@ -267,10 +251,8 @@ private static (context, nint) tURL(context c, slice<byte> s) {
         // HTML5 uses "Valid URL potentially surrounded by spaces" for
         // attrs: https://www.w3.org/TR/html5/index.html#attributes-1
         c.urlPart = urlPartPreQuery;
-
     }
     return (c, len(s));
-
 }
 
 // tJS is the context transition function for the JS state.
@@ -283,7 +265,6 @@ private static (context, nint) tJS(context c, slice<byte> s) => func((_, panic, 
         // Entire input is non string, comment, regexp tokens.
         c.jsCtx = nextJSCtx(s, c.jsCtx);
         return (c, len(s));
-
     }
     c.jsCtx = nextJSCtx(s[..(int)i], c.jsCtx);
     switch (s[i]) {
@@ -303,14 +284,12 @@ private static (context, nint) tJS(context c, slice<byte> s) => func((_, panic, 
                 c.jsCtx = jsCtxRegexp;
             else 
                 return (new context(state:stateError,err:errorf(ErrSlashAmbig,nil,0,"'/' could start a division or regexp: %.32q",s[i:]),), len(s));
-
             break;
         default: 
             panic("unreachable");
             break;
     }
     return (c, i + 1);
-
 });
 
 // tJSDelimited is the context transition function for the JS string and regexp
@@ -353,17 +332,14 @@ private static (context, nint) tJSDelimited(context c, slice<byte> s) {
                 break;
         }
         k = i + 1;
-
     }
 
     if (inCharset) { 
         // This can be fixed by making context richer if interpolation
         // into charsets is desired.
         return (new context(state:stateError,err:errorf(ErrPartialCharset,nil,0,"unfinished JS regexp charset: %q",s),), len(s));
-
     }
     return (c, len(s));
-
 }
 
 private static slice<byte> blockCommentEnd = (slice<byte>)"*/";
@@ -385,7 +361,6 @@ private static (context, nint) tBlockCmt(context c, slice<byte> s) => func((_, p
     else 
         panic(c.state.String());
         return (c, i + 2);
-
 });
 
 // tLineCmt is the context transition function for //comment states.
@@ -411,7 +386,6 @@ private static (context, nint) tLineCmt(context c, slice<byte> s) => func((_, pa
     // recognized separately by the lexical grammar and becomes part
     // of the stream of input elements for the syntactic grammar."
     return (c, i);
-
 });
 
 // tCSS is the context transition function for the CSS state.
@@ -464,9 +438,7 @@ private static (context, nint) tCSS(context c, slice<byte> s) {
                         (c.state, j) = (stateCSSSqURL, j + 1);                else 
                         c.state = stateCSSURL;
                                     return (c, j);
-
                 }
-
                 break;
             case '/': 
                 if (i + 1 < len(s)) {
@@ -480,9 +452,7 @@ private static (context, nint) tCSS(context c, slice<byte> s) {
                             return (c, i + 2);
                             break;
                     }
-
                 }
-
                 break;
             case '"': 
                 c.state = stateCSSDqStr;
@@ -494,9 +464,7 @@ private static (context, nint) tCSS(context c, slice<byte> s) {
                 break;
         }
         k = i + 1;
-
     }
-
 }
 
 // tCSSStr is the context transition function for the CSS string and URL states.
@@ -536,9 +504,7 @@ private static (context, nint) tCSSStr(context c, slice<byte> s) => func((_, pan
         }
         c, _ = tURL(c, decodeCSS(s[..(int)i + 1]));
         k = i + 1;
-
     }
-
 });
 
 // tError is the context transition function for the error state.
@@ -594,10 +560,8 @@ private static (nint, ptr<Error>) eatAttrName(slice<byte> s, nint i) {
 
                 break;
         }
-
     }
     return (len(s), _addr_null!);
-
 }
 
 private static map elementNameMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, element>{"script":elementScript,"style":elementStyle,"textarea":elementTextarea,"title":elementTitle,};
@@ -632,10 +596,8 @@ private static (nint, element) eatTagName(slice<byte> s, nint i) {
             continue;
         }
         break;
-
     }
     return (j, elementNameMap[strings.ToLower(string(s[(int)i..(int)j]))]);
-
 }
 
 // eatWhiteSpace returns the largest j such that s[i:j] is white space.
@@ -657,10 +619,8 @@ private static nint eatWhiteSpace(slice<byte> s, nint i) {
                 return j;
                 break;
         }
-
     }
     return len(s);
-
 }
 
 } // end template_package

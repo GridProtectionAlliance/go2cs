@@ -9,15 +9,16 @@
 // Note that it does NOT provide access to the build configuration used to
 // build the currently-running binary. For that, use runtime.GOOS etc
 // as well as internal/goexperiment.
-// package buildcfg -- go2cs converted at 2022 March 06 22:32:22 UTC
+
+// package buildcfg -- go2cs converted at 2022 March 13 05:43:21 UTC
 // import "internal/buildcfg" ==> using buildcfg = go.@internal.buildcfg_package
 // Original source: C:\Program Files\Go\src\internal\buildcfg\cfg.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go.@internal;
+
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
 
 public static partial class buildcfg_package {
 
@@ -42,9 +43,7 @@ private static @string envOr(@string key, @string value) {
             return x;
         }
     }
-
     return value;
-
 }
 
 private static nint goarm() {
@@ -52,7 +51,6 @@ private static nint goarm() {
     if (GOOS == "android" && GOARCH == "arm") { 
         // Android arm devices always support GOARM=7.
         def = "7";
-
     }
     {
         var v = envOr("GOARM", def);
@@ -71,7 +69,6 @@ private static nint goarm() {
     }
     Error = fmt.Errorf("invalid GOARM: must be 5, 6, 7");
     return int(def[0] - '0');
-
 }
 
 private static @string gomips() {
@@ -88,7 +85,6 @@ private static @string gomips() {
     }
     Error = fmt.Errorf("invalid GOMIPS: must be hardfloat, softfloat");
     return defaultGOMIPS;
-
 }
 
 private static @string gomips64() {
@@ -105,7 +101,6 @@ private static @string gomips64() {
     }
     Error = fmt.Errorf("invalid GOMIPS64: must be hardfloat, softfloat");
     return defaultGOMIPS64;
-
 }
 
 private static nint goppc64() {
@@ -123,7 +118,6 @@ private static nint goppc64() {
     }
     Error = fmt.Errorf("invalid GOPPC64: must be power8, power9");
     return int(defaultGOPPC64[len("power")] - '0');
-
 }
 
 private partial struct gowasmFeatures {
@@ -140,7 +134,6 @@ private static @string String(this gowasmFeatures f) {
         flags = append(flags, "signext");
     }
     return strings.Join(flags, ",");
-
 }
 
 private static gowasmFeatures gowasm() {
@@ -161,9 +154,7 @@ private static gowasmFeatures gowasm() {
                 Error = fmt.Errorf("invalid GOWASM: no such feature %q", opt);
                 break;
         }
-
     }    return ;
-
 }
 
 public static @string Getgoextlinkenabled() {

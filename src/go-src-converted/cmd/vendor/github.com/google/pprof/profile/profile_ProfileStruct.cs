@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:24:03 UTC
+//     Generated on 2022 March 13 06:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace pprof
 {
     public static partial class profile_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Profile
         {
             // Constructors
@@ -104,7 +104,7 @@ namespace pprof
             public static implicit operator Profile(NilType nil) => default(Profile);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Profile Profile_cast(dynamic value)
         {
             return new Profile(value.SampleType, value.DefaultSampleType, value.Sample, value.Mapping, value.Location, value.Function, value.Comments, value.DropFrames, value.KeepFrames, value.TimeNanos, value.DurationNanos, ref value.PeriodType, value.Period, value.encodeMu, value.commentX, value.dropFramesX, value.keepFramesX, value.stringTable, value.defaultSampleTypeX);

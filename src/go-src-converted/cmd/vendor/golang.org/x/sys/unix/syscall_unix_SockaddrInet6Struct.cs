@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:27:19 UTC
+//     Generated on 2022 March 13 06:41:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace sys
 {
     public static partial class unix_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SockaddrInet6
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace sys
             public static implicit operator SockaddrInet6(NilType nil) => default(SockaddrInet6);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SockaddrInet6 SockaddrInet6_cast(dynamic value)
         {
             return new SockaddrInet6(value.Port, value.ZoneId, value.Addr, value.raw);

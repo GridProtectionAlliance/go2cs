@@ -4,16 +4,13 @@
 
 // This file contains tests for the rangeloop checker.
 
-// package rangeloop -- go2cs converted at 2022 March 06 23:35:21 UTC
+// package rangeloop -- go2cs converted at 2022 March 13 06:43:18 UTC
 // import "cmd/vet/testdata/rangeloop" ==> using rangeloop = go.cmd.vet.testdata.rangeloop_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\rangeloop\rangeloop.go
+namespace go.cmd.vet.testdata;
 
 using System;
 using System.Threading;
-
-
-namespace go.cmd.vet.testdata;
-
 public static partial class rangeloop_package {
 
 public static void RangeLoopTests() {
@@ -23,7 +20,6 @@ public static void RangeLoopTests() {
             println(i); // ERROR "loop variable i captured by func literal"
             println(v); // ERROR "loop variable v captured by func literal"
         }());
-
     }
 }
 

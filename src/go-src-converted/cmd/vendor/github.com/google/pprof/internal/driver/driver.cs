@@ -15,29 +15,31 @@
 // Package driver implements the core pprof functionality. It can be
 // parameterized with a flag implementation, fetch and symbolize
 // mechanisms.
-// package driver -- go2cs converted at 2022 March 06 23:23:23 UTC
+
+// package driver -- go2cs converted at 2022 March 13 06:36:28 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\driver.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using report = go.github.com.google.pprof.@internal.report_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using strings = strings_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using report = github.com.google.pprof.@internal.report_package;
+using profile = github.com.google.pprof.profile_package;
+
+
+// PProf acquires a profile, and symbolizes it using a profile
+// manager. Then it generates a report formatted according to the
+// options selected through the flags package.
+
+using System;
 public static partial class driver_package {
 
-    // PProf acquires a profile, and symbolizes it using a profile
-    // manager. Then it generates a report formatted according to the
-    // options selected through the flags package.
 public static error PProf(ptr<plugin.Options> _addr_eo) => func((defer, _, _) => {
     ref plugin.Options eo = ref _addr_eo.val;
  
@@ -61,7 +63,6 @@ public static error PProf(ptr<plugin.Options> _addr_eo) => func((defer, _, _) =>
         return error.As(serveWebInterface(src.HTTPHostport, p, o, src.HTTPDisableBrowser))!;
     }
     return error.As(interactive(p, o))!;
-
 });
 
 private static (ptr<command>, ptr<report.Report>, error) generateRawReport(ptr<profile.Profile> _addr_p, slice<@string> cmd, config cfg, ptr<plugin.Options> _addr_o) => func((_, panic, _) => {
@@ -98,7 +99,6 @@ private static (ptr<command>, ptr<report.Report>, error) generateRawReport(ptr<p
             err = err__prev2;
 
         }
-
     }
     var (ropt, err) = reportOptions(_addr_p, numLabelUnits, cfg);
     if (err != null) {
@@ -111,7 +111,6 @@ private static (ptr<command>, ptr<report.Report>, error) generateRawReport(ptr<p
             return (_addr_null!, _addr_null!, error.As(fmt.Errorf("parsing argument regexp %s: %v", cmd[1], err))!);
         }
         ropt.Symbol = s;
-
     }
     var rpt = report.New(p, ropt);
     if (!relative) {
@@ -127,7 +126,6 @@ private static (ptr<command>, ptr<report.Report>, error) generateRawReport(ptr<p
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -141,9 +139,7 @@ private static (ptr<command>, ptr<report.Report>, error) generateRawReport(ptr<p
 
     }
 
-
     return (_addr_c!, _addr_rpt!, error.As(null!)!);
-
 });
 
 private static error generateReport(ptr<profile.Profile> _addr_p, slice<@string> cmd, config cfg, ptr<plugin.Options> _addr_o) {
@@ -166,7 +162,6 @@ private static error generateReport(ptr<profile.Profile> _addr_p, slice<@string>
         err = err__prev1;
 
     }
-
     var src = dst; 
 
     // If necessary, perform any data post-processing.
@@ -184,9 +179,7 @@ private static error generateReport(ptr<profile.Profile> _addr_p, slice<@string>
             err = err__prev2;
 
         }
-
         src = dst;
-
     }
     var output = cfg.Output;
     if (output == "") {
@@ -195,7 +188,6 @@ private static error generateReport(ptr<profile.Profile> _addr_p, slice<@string>
         }
         var (_, err) = src.WriteTo(os.Stdout);
         return error.As(err)!;
-
     }
     o.UI.PrintErr("Generating report in ", output);
     var (out, err) = o.Writer.Open(output);
@@ -214,9 +206,7 @@ private static error generateReport(ptr<profile.Profile> _addr_p, slice<@string>
         err = err__prev1;
 
     }
-
     return error.As(@out.Close())!;
-
 }
 
 private static config applyCommandOverrides(@string cmd, nint outputFormat, config cfg) { 
@@ -240,7 +230,6 @@ private static config applyCommandOverrides(@string cmd, nint outputFormat, conf
             // This is because the merge is done by address and in case of an inlined
             // stack each of the inlined entries is a separate callgraph node.
             cfg.NoInlines = true;
-
             break;
         case "weblist": 
             trim = false;
@@ -283,7 +272,6 @@ private static config applyCommandOverrides(@string cmd, nint outputFormat, conf
         cfg.EdgeFraction = 0;
     }
     return cfg;
-
 }
 
 private static error aggregate(ptr<profile.Profile> _addr_prof, config cfg) {
@@ -301,7 +289,6 @@ private static error aggregate(ptr<profile.Profile> _addr_prof, config cfg) {
             filename = true;
             linenumber = true;
             address = true;
-
             break;
         case "lines": 
             function = true;
@@ -323,7 +310,6 @@ private static error aggregate(ptr<profile.Profile> _addr_prof, config cfg) {
             break;
     }
     return error.As(prof.Aggregate(inlines, function, filename, linenumber, address))!;
-
 }
 
 private static (ptr<report.Options>, error) reportOptions(ptr<profile.Profile> _addr_p, map<@string, @string> numLabelUnits, config cfg) {
@@ -366,7 +352,6 @@ private static (ptr<report.Options>, error) reportOptions(ptr<profile.Profile> _
         ropt.Title = filepath.Base(p.Mapping[0].File);
     }
     return (_addr_ropt!, error.As(null!)!);
-
 }
 
 // identifyNumLabelUnits returns a map of numeric label keys to the units
@@ -381,7 +366,6 @@ private static map<@string, @string> identifyNumLabelUnits(ptr<profile.Profile> 
     foreach (var (k, units) in ignoredUnits) {
         ui.PrintErr(fmt.Sprintf("For tag %s used unit %s, also encountered unit(s) %s", k, numLabelUnits[k], strings.Join(units, ", ")));
     }    return numLabelUnits;
-
 }
 
 public delegate  long sampleValueFunc(slice<long>);
@@ -408,13 +392,10 @@ private static (sampleValueFunc, sampleValueFunc, ptr<profile.ValueType>, error)
     }
     v = p.SampleType[index];
     return ;
-
 }
 
 private static sampleValueFunc valueExtractor(nint ix) {
-    return v => {
-        return v[ix];
-    };
+    return v => v[ix];
 }
 
 } // end driver_package

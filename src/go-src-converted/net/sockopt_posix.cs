@@ -5,24 +5,25 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:38 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:06 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sockopt_posix.go
-using bytealg = go.@internal.bytealg_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// Boolean to int.
 
 public static partial class net_package {
 
-    // Boolean to int.
 private static nint boolint(bool b) {
     if (b) {
         return 1;
     }
     return 0;
-
 }
 
 private static (ptr<Interface>, error) ipv4AddrToInterface(IP ip) {
@@ -51,13 +52,11 @@ private static (ptr<Interface>, error) ipv4AddrToInterface(IP ip) {
                     }
                     break;
             }
-
         }
     }    if (ip.Equal(IPv4zero)) {
         return (_addr_null!, error.As(null!)!);
     }
     return (_addr_null!, error.As(errNoSuchInterface)!);
-
 }
 
 private static (IP, error) interfaceToIPv4Addr(ptr<Interface> _addr_ifi) {
@@ -85,9 +84,7 @@ private static (IP, error) interfaceToIPv4Addr(ptr<Interface> _addr_ifi) {
                 }
                 break;
         }
-
     }    return (null, error.As(errNoSuchInterface)!);
-
 }
 
 private static error setIPv4MreqToInterface(ptr<syscall.IPMreq> _addr_mreq, ptr<Interface> _addr_ifi) {
@@ -117,7 +114,6 @@ private static error setIPv4MreqToInterface(ptr<syscall.IPMreq> _addr_mreq, ptr<
                     a = a__prev1;
 
                 }
-
                 break;
             case ptr<IPNet> v:
                 {
@@ -133,16 +129,13 @@ private static error setIPv4MreqToInterface(ptr<syscall.IPMreq> _addr_mreq, ptr<
                     a = a__prev1;
 
                 }
-
                 break;
         }
-
     }done:
     if (bytealg.Equal(mreq.Multiaddr[..], IPv4zero.To4())) {
         return error.As(errNoSuchMulticastInterface)!;
     }
     return error.As(null!)!;
-
 }
 
 private static error setReadBuffer(ptr<netFD> _addr_fd, nint bytes) {
@@ -185,7 +178,6 @@ private static error setLinger(ptr<netFD> _addr_fd, nint sec) {
     var err = fd.pfd.SetsockoptLinger(syscall.SOL_SOCKET, syscall.SO_LINGER, _addr_l);
     runtime.KeepAlive(fd);
     return error.As(wrapSyscallError("setsockopt", err))!;
-
 }
 
 } // end net_package

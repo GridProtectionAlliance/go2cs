@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:31:07 UTC
+//     Generated on 2022 March 13 06:41:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
 {
     public static partial class analysis_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CycleInRequiresGraphError
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace go
             public static implicit operator CycleInRequiresGraphError(NilType nil) => default(CycleInRequiresGraphError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CycleInRequiresGraphError CycleInRequiresGraphError_cast(dynamic value)
         {
             return new CycleInRequiresGraphError(value.AnalyzerNames);

@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2022 March 06 23:23:16 UTC
+// package binutils -- go2cs converted at 2022 March 13 06:36:20 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\addr2liner_nm.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using io = go.io_package;
-using exec = go.os.exec_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using io = io_package;
+using exec = os.exec_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
 
 public static partial class binutils_package {
 
 private static readonly @string defaultNM = "nm";
-
 
 // addr2LinerNM is a connection to an nm command for obtaining symbol
 // information from a binary.
@@ -58,7 +57,6 @@ private static bool isData(this ptr<symbolInfo> _addr_s) {
     //      weak object symbol. Experiments with some binaries, showed these to be
     //      mostly data objects.
     return strings.ContainsAny(s.symType, "bBdDrRvVW");
-
 }
 
 // newAddr2LinerNM starts the given nm command reporting information about the
@@ -82,9 +80,7 @@ private static (ptr<addr2LinerNM>, error) newAddr2LinerNM(@string cmd, @string f
             return (_addr_null!, error.As(err)!);
         }
     }
-
     return _addr_parseAddr2LinerNM(base, _addr_b)!;
-
 }
 
 private static (ptr<addr2LinerNM>, error) parseAddr2LinerNM(ulong @base, io.Reader nm) {
@@ -118,11 +114,9 @@ private static (ptr<addr2LinerNM>, error) parseAddr2LinerNM(ulong @base, io.Read
             continue;
         }
         a.m = append(a.m, new symbolInfo(address:address+base,size:size,name:fields[0],symType:fields[1],));
-
     }
 
     return (_addr_a!, error.As(null!)!);
-
 }
 
 // addrInfo returns the stack frame information for a specific program
@@ -160,7 +154,6 @@ private static (slice<plugin.Frame>, error) addrInfo(this ptr<addr2LinerNM> _add
         return (null, error.As(null!)!);
     }
     return (new slice<plugin.Frame>(new plugin.Frame[] { {Func:a.m[low].name} }), error.As(null!)!);
-
 }
 
 } // end binutils_package

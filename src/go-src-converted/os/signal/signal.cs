@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package signal -- go2cs converted at 2022 March 06 22:14:25 UTC
+// package signal -- go2cs converted at 2022 March 13 05:28:33 UTC
 // import "os/signal" ==> using signal = go.os.signal_package
 // Original source: C:\Program Files\Go\src\os\signal\signal.go
-using context = go.context_package;
-using os = go.os_package;
-using sync = go.sync_package;
+namespace go.os;
+
+using context = context_package;
+using os = os_package;
+using sync = sync_package;
 using System;
 using System.Threading;
-
-
-namespace go.os;
 
 public static partial class signal_package {
 
@@ -71,8 +70,6 @@ private static void cancel(slice<os.Signal> sigs, Action<nint> action) => func((
             remove(n);
         }
     else
-
-
     } {
         foreach (var (_, s) in sigs) {
             remove(signum(s));
@@ -135,7 +132,6 @@ public static void Notify(channel<os.Signal> c, params os.Signal[] sig) => func(
         }
         h = @new<handler>();
         handlers.m[c] = h;
-
     }
     Action<nint> add = n => {
         if (n < 0) {
@@ -153,11 +149,8 @@ public static void Notify(channel<os.Signal> c, params os.Signal[] sig) => func(
                         go_(() => watchSignalLoop());
                     }
                 });
-
             }
-
             handlers.@ref[n]++;
-
         }
     };
 
@@ -166,8 +159,6 @@ public static void Notify(channel<os.Signal> c, params os.Signal[] sig) => func(
             add(n);
         }
     else
-
-
     } {
         foreach (var (_, s) in sig) {
             add(signum(s));
@@ -231,7 +222,6 @@ public static void Stop(channel<os.Signal> c) {
             break;
         }
     }    handlers.Unlock();
-
 }
 
 // Wait until there are no more signals waiting to be delivered.
@@ -251,7 +241,8 @@ private static void process(os.Signal sig) => func((defer, _, _) => {
             // send but do not block for it
         }
     }    foreach (var (_, d) in handlers.stopping) {
-        if (d.h.want(n))         }
+        if (d.h.want(n)) {
+        }
     }
 });
 
@@ -285,7 +276,6 @@ public static (context.Context, context.CancelFunc) NotifyContext(context.Contex
         }());
     }
     return (c, c.stop);
-
 }
 
 private partial struct signalCtx : context.Context {
@@ -326,7 +316,6 @@ private static @string String(this ptr<signalCtx> _addr_c) {
     }
     buf = append(buf, ')');
     return string(buf);
-
 }
 
 } // end signal_package

@@ -129,8 +129,10 @@ ASCII character classes:
 
 Unicode character classes are those in unicode.Categories and unicode.Scripts.
 */
-// package syntax -- go2cs converted at 2022 March 06 22:23:30 UTC
+
+// package syntax -- go2cs converted at 2022 March 13 05:37:55 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Program Files\Go\src\regexp\syntax\doc.go
+namespace go.regexp;
 
 } // end syntax_package

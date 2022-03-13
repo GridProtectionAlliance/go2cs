@@ -12,17 +12,19 @@
 //go:linkname Load64
 //go:linkname Store64
 
-// package atomic -- go2cs converted at 2022 March 06 22:08:19 UTC
+// package atomic -- go2cs converted at 2022 March 13 05:24:09 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Program Files\Go\src\runtime\internal\atomic\atomic_mipsx.go
-using cpu = go.@internal.cpu_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.runtime.@internal;
+
+using cpu = @internal.cpu_package;
+using @unsafe = @unsafe_package;
+
+
+// TODO implement lock striping
 
 public static partial class atomic_package {
 
-    // TODO implement lock striping
 private static var @lock = default;
 
 //go:noescape
@@ -42,7 +44,6 @@ private static void lockAndCheck(ptr<ulong> _addr_addr) {
     _ = addr;
 
     spinLock(_addr_@lock.state);
-
 }
 
 //go:nosplit
@@ -97,7 +98,6 @@ public static bool Cas64(ptr<ulong> _addr_addr, ulong old, ulong @new) {
     }
     unlockNoFence();
     return false;
-
 }
 
 //go:nosplit

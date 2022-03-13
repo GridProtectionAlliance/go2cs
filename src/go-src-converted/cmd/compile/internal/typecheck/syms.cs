@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:44 UTC
+// package typecheck -- go2cs converted at 2022 March 13 06:00:04 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\syms.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
 
 public static partial class typecheck_package {
 
@@ -21,7 +21,6 @@ public static ptr<ir.Name> LookupRuntime(@string name) {
         @base.Fatalf("LookupRuntime: can't find runtime.%s", name);
     }
     return ir.AsNode(s.Def)._<ptr<ir.Name>>();
-
 }
 
 // SubstArgTypes substitutes the given list of types for
@@ -44,7 +43,6 @@ public static ptr<ir.Name> SubstArgTypes(ptr<ir.Name> _addr_old, params ptr<ptr<
         @base.Fatalf("SubstArgTypes: too many argument types");
     }
     return _addr_n!;
-
 }
 
 // AutoLabel generates a new Name node for use with
@@ -64,7 +62,6 @@ public static ptr<types.Sym> AutoLabel(@string prefix) {
     var n = fn.Label;
     fn.Label++;
     return _addr_LookupNum(prefix, int(n))!;
-
 }
 
 public static ptr<types.Sym> Lookup(@string name) {
@@ -89,8 +86,7 @@ public static void InitRuntime() {
             importvar(ir.Pkgs.Runtime, src.NoXPos, sym, typ);
         else 
             @base.Fatalf("unhandled declaration tag %v", d.tag);
-        
-    }
+            }
 }
 
 // LookupRuntimeFunc looks up Go function name in package runtime. This function

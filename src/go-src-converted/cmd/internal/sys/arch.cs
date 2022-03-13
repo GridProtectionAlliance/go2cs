@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2022 March 06 22:32:20 UTC
+// package sys -- go2cs converted at 2022 March 13 05:43:19 UTC
 // import "cmd/internal/sys" ==> using sys = go.cmd.@internal.sys_package
 // Original source: C:\Program Files\Go\src\cmd\internal\sys\arch.go
-using binary = go.encoding.binary_package;
-
 namespace go.cmd.@internal;
+
+using binary = encoding.binary_package;
 
 public static partial class sys_package {
 
-    // ArchFamily represents a family of one or more related architectures.
-    // For example, ppc64 and ppc64le are both members of the PPC64 family.
+// ArchFamily represents a family of one or more related architectures.
+// For example, ppc64 and ppc64le are both members of the PPC64 family.
 public partial struct ArchFamily { // : byte
 }
 
@@ -27,7 +27,6 @@ public static readonly var PPC64 = 6;
 public static readonly var RISCV64 = 7;
 public static readonly var S390X = 8;
 public static readonly var Wasm = 9;
-
 
 // Arch represents an individual architecture.
 public partial struct Arch {
@@ -55,7 +54,6 @@ private static bool InFamily(this ptr<Arch> _addr_a, params ArchFamily[] xs) {
             return true;
         }
     }    return false;
-
 }
 
 public static ptr<Arch> Arch386 = addr(new Arch(Name:"386",Family:I386,ByteOrder:binary.LittleEndian,PtrSize:4,RegSize:4,MinLC:1,Alignment:1,));

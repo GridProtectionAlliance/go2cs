@@ -2,28 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package facts -- go2cs converted at 2022 March 06 23:34:24 UTC
+// package facts -- go2cs converted at 2022 March 13 06:41:40 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/internal/facts" ==> using facts = go.cmd.vendor.golang.org.x.tools.go.analysis.@internal.facts_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\internal\facts\imports.go
-using types = go.go.types_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.@internal;
+
+using types = go.types_package;
+using System;
 
 public static partial class facts_package {
 
-    // importMap computes the import map for a package by traversing the
-    // entire exported API each of its imports.
-    //
-    // This is a workaround for the fact that we cannot access the map used
-    // internally by the types.Importer returned by go/importer. The entries
-    // in this map are the packages and objects that may be relevant to the
-    // current analysis unit.
-    //
-    // Packages in the map that are only indirectly imported may be
-    // incomplete (!pkg.Complete()).
-    //
+// importMap computes the import map for a package by traversing the
+// entire exported API each of its imports.
+//
+// This is a workaround for the fact that we cannot access the map used
+// internally by the types.Importer returned by go/importer. The entries
+// in this map are the packages and objects that may be relevant to the
+// current analysis unit.
+//
+// Packages in the map that are only indirectly imported may be
+// incomplete (!pkg.Complete()).
+//
 private static map<@string, ptr<types.Package>> importMap(slice<ptr<types.Package>> imports) {
     var objects = make_map<types.Object, bool>();
     var packages = make_map<@string, ptr<types.Package>>();
@@ -42,12 +41,9 @@ private static map<@string, ptr<types.Package>> importMap(slice<ptr<types.Packag
                     packages[pkg.Path()] = pkg;
                 }
             }
-
             return true;
-
         }
         return false;
-
     };
 
     addType = T => {
@@ -65,7 +61,6 @@ private static map<@string, ptr<types.Package>> importMap(slice<ptr<types.Packag
 
                         i = i__prev1;
                     }
-
                 }
                 break;
             case ptr<types.Pointer> T:
@@ -122,7 +117,6 @@ private static map<@string, ptr<types.Package>> importMap(slice<ptr<types.Packag
                 }
                 break;
         }
-
     };
 
     foreach (var (_, imp) in imports) {
@@ -133,7 +127,6 @@ private static map<@string, ptr<types.Package>> importMap(slice<ptr<types.Packag
             addObj(scope.Lookup(name));
         }
     }    return packages;
-
 }
 
 } // end facts_package

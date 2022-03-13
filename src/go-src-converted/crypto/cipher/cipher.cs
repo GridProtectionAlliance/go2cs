@@ -6,19 +6,18 @@
 // around low-level block cipher implementations.
 // See https://csrc.nist.gov/groups/ST/toolkit/BCM/current_modes.html
 // and NIST Special Publication 800-38A.
-// package cipher -- go2cs converted at 2022 March 06 22:18:08 UTC
+
+// package cipher -- go2cs converted at 2022 March 13 05:32:21 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Program Files\Go\src\crypto\cipher\cipher.go
-
-
 namespace go.crypto;
 
 public static partial class cipher_package {
 
-    // A Block represents an implementation of block cipher
-    // using a given key. It provides the capability to encrypt
-    // or decrypt individual blocks. The mode implementations
-    // extend that capability to streams of blocks.
+// A Block represents an implementation of block cipher
+// using a given key. It provides the capability to encrypt
+// or decrypt individual blocks. The mode implementations
+// extend that capability to streams of blocks.
 public partial interface Block {
     nint BlockSize(); // Encrypt encrypts the first block in src into dst.
 // Dst and src must overlap entirely or not at all.

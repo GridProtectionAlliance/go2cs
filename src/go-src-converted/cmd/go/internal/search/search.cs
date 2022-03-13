@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package search -- go2cs converted at 2022 March 06 23:16:39 UTC
+// package search -- go2cs converted at 2022 March 13 06:30:08 UTC
 // import "cmd/go/internal/search" ==> using search = go.cmd.go.@internal.search_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\search\search.go
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using strings = strings_package;
+
+
+// A Match represents the result of matching a single package pattern.
+
+using System;
 public static partial class search_package {
 
-    // A Match represents the result of matching a single package pattern.
 public partial struct Match {
     public @string pattern; // the pattern itself
     public slice<@string> Dirs; // if the pattern is local, directories that potentially contain matching packages
@@ -100,7 +101,6 @@ private static @string Error(this ptr<MatchError> _addr_e) {
         return fmt.Sprintf("%s: %v", e.Match.Pattern(), e.Err);
     }
     return fmt.Sprintf("pattern %s: %v", e.Match.Pattern(), e.Err);
-
 }
 
 private static error Unwrap(this ptr<MatchError> _addr_e) {
@@ -151,30 +151,24 @@ private static void MatchPackages(this ptr<Match> _addr_m) {
             if (err != null) {
                 return err; // Likely a permission error, which could interfere with matching.
             }
-
             if (path == src) {
                 return null; // GOROOT/src and GOPATH/src cannot contain packages.
             }
-
             var want = true; 
             // Avoid .foo, _foo, and testdata directory trees.
             var (_, elem) = filepath.Split(path);
             if (strings.HasPrefix(elem, ".") || strings.HasPrefix(elem, "_") || elem == "testdata") {
                 want = false;
             }
-
             var name = filepath.ToSlash(path[(int)len(src)..]);
             if (m.pattern == "std" && (!IsStandardImportPath(name) || name == "cmd")) { 
                 // The name "std" is only the standard library.
                 // If the name is cmd, it's the root of the command tree.
                 want = false;
-
             }
-
             if (!treeCanMatch(name)) {
                 want = false;
             }
-
             if (!fi.IsDir()) {
                 if (fi.Mode() & fs.ModeSymlink != 0 && want && strings.Contains(m.pattern, "...")) {
                     {
@@ -185,26 +179,19 @@ private static void MatchPackages(this ptr<Match> _addr_m) {
                         }
 
                     }
-
                 }
-
                 return null;
-
             }
-
             if (!want) {
                 return filepath.SkipDir;
             }
-
             if (have[name]) {
                 return null;
             }
-
             have[name] = true;
             if (!match(name)) {
                 return null;
             }
-
             var (pkg, err) = cfg.BuildContext.ImportDir(path, 0);
             if (err != null) {
                 {
@@ -214,7 +201,6 @@ private static void MatchPackages(this ptr<Match> _addr_m) {
                         // The package does not actually exist, so record neither the package
                         // nor the error.
                         return null;
-
                     } 
                     // There was an error importing path, but not matching it,
                     // which is all that Match promises to do.
@@ -233,10 +219,8 @@ private static void MatchPackages(this ptr<Match> _addr_m) {
             if (m.pattern == "cmd" && pkg != null && strings.HasPrefix(pkg.ImportPath, "cmd/vendor") && pkg.Name == "main") {
                 return null;
             }
-
             m.Pkgs = append(m.Pkgs, name);
             return null;
-
         });
         if (err != null) {
             m.AddError(err);
@@ -321,7 +305,6 @@ private static void MatchDirs(this ptr<Match> _addr_m) {
             // result in "././io", and match("././io") returns false.
             top = true;
             path = filepath.Clean(path);
-
         }
         var (_, elem) = filepath.Split(path);
         var dot = strings.HasPrefix(elem, ".") && elem != "." && elem != "..";
@@ -338,7 +321,6 @@ private static void MatchDirs(this ptr<Match> _addr_m) {
                 }
 
             }
-
         }
         var name = prefix + filepath.ToSlash(path);
         if (!match(name)) {
@@ -355,7 +337,6 @@ private static void MatchDirs(this ptr<Match> _addr_m) {
                         // The package does not actually exist, so record neither the package
                         // nor the error.
                         return null;
-
                     } 
                     // There was an error importing path, but not matching it,
                     // which is all that Match promises to do.
@@ -368,10 +349,8 @@ private static void MatchDirs(this ptr<Match> _addr_m) {
             }
 
         }
-
         m.Dirs = append(m.Dirs, name);
         return null;
-
     });
     if (err != null) {
         m.AddError(err);
@@ -391,11 +370,7 @@ public static Func<@string, bool> TreeCanMatchPattern(@string pattern) {
             pattern = pattern[..(int)i];
         }
     }
-
-    return name => {
-        return len(name) <= len(pattern) && hasPathPrefix(pattern, name) || wildCard && strings.HasPrefix(name, pattern);
-    };
-
+    return name => len(name) <= len(pattern) && hasPathPrefix(pattern, name) || wildCard && strings.HasPrefix(name, pattern);
 }
 
 // MatchPattern(pattern)(name) reports whether
@@ -449,9 +424,7 @@ public static Func<@string, bool> MatchPattern(@string pattern) {
             return false;
         }
         return reg.MatchString(replaceVendor(name, vendorChar));
-
     };
-
 }
 
 // replaceVendor returns the result of replacing
@@ -467,7 +440,6 @@ private static @string replaceVendor(@string x, @string repl) {
         }
     }
     return strings.Join(elem, "/");
-
 }
 
 // WarnUnmatched warns about patterns that didn't match any packages.
@@ -516,16 +488,13 @@ public static slice<ptr<Match>> ImportPathsQuiet(slice<@string> patterns) {
                     }
 
                 }
-
             }
         else
         } {
             m.MatchPackages();
         }
         out = append(out, m);
-
     }    return out;
-
 }
 
 // CleanPatterns returns the patterns to use for the given command line. It
@@ -586,12 +555,9 @@ public static slice<@string> CleanPatterns(slice<@string> patterns) {
  {
                 p = path.Clean(p);
             }
-
         }
         out = append(out, p + v);
-
     }    return out;
-
 }
 
 // hasPathPrefix reports whether the path s begins with the
@@ -607,8 +573,7 @@ private static bool hasPathPrefix(@string s, @string prefix) {
         return s[len(prefix)] == '/' && s[..(int)len(prefix)] == prefix;
     else 
         return false;
-    
-}
+    }
 
 // hasFilepathPrefix reports whether the path s begins with the
 // elements in prefix.
@@ -623,8 +588,7 @@ private static bool hasFilepathPrefix(@string s, @string prefix) {
         return s[len(prefix)] == filepath.Separator && s[..(int)len(prefix)] == prefix;
     else 
         return false;
-    
-}
+    }
 
 // IsStandardImportPath reports whether $GOROOT/src/path should be considered
 // part of the standard distribution. For historical reasons we allow people to add
@@ -643,7 +607,6 @@ public static bool IsStandardImportPath(@string path) {
     }
     var elem = path[..(int)i];
     return !strings.Contains(elem, ".");
-
 }
 
 // IsRelativePath reports whether pattern should be interpreted as a directory
@@ -669,7 +632,6 @@ public static @string InDir(@string path, @string dir) {
         rel = rel__prev1;
 
     }
-
     var (xpath, err) = filepath.EvalSymlinks(path);
     if (err != null || xpath == path) {
         xpath = "";
@@ -688,7 +650,6 @@ public static @string InDir(@string path, @string dir) {
             rel = rel__prev2;
 
         }
-
     }
     var (xdir, err) = filepath.EvalSymlinks(dir);
     if (err == null && xdir != dir) {
@@ -704,7 +665,6 @@ public static @string InDir(@string path, @string dir) {
             rel = rel__prev2;
 
         }
-
         if (xpath != "") {
             {
                 var rel__prev3 = rel;
@@ -718,11 +678,9 @@ public static @string InDir(@string path, @string dir) {
                 rel = rel__prev3;
 
             }
-
         }
     }
     return "";
-
 }
 
 // inDirLex is like inDir but only checks the lexical form of the file names.
@@ -761,7 +719,6 @@ private static @string inDirLex(@string path, @string dir) {
         return "";
     else 
         return "";
-    
-}
+    }
 
 } // end search_package

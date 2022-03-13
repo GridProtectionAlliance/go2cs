@@ -2,39 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:11 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:05 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\sinh.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    /*
-        Floating-point hyperbolic sine and cosine.
+/*
+    Floating-point hyperbolic sine and cosine.
 
-        The exponential func is called for arguments
-        greater in magnitude than 0.5.
+    The exponential func is called for arguments
+    greater in magnitude than 0.5.
 
-        A series is used for arguments smaller in magnitude than 0.5.
+    A series is used for arguments smaller in magnitude than 0.5.
 
-        Cosh(x) is computed from the exponential func for
-        all arguments.
-    */
+    Cosh(x) is computed from the exponential func for
+    all arguments.
+*/
 
-    // Sinh returns the hyperbolic sine of x.
-    //
-    // Special cases are:
-    //    Sinh(±0) = ±0
-    //    Sinh(±Inf) = ±Inf
-    //    Sinh(NaN) = NaN
+// Sinh returns the hyperbolic sine of x.
+//
+// Special cases are:
+//    Sinh(±0) = ±0
+//    Sinh(±Inf) = ±Inf
+//    Sinh(NaN) = NaN
 public static double Sinh(double x) {
     if (haveArchSinh) {
         return archSinh(x);
     }
     return sinh(x);
-
 }
 
 private static double sinh(double x) { 
@@ -46,7 +43,6 @@ private static double sinh(double x) {
     const float Q0 = -0.6307673640497716991212077277e+6F;
     const float Q1 = 0.1521517378790019070696485176e+5F;
     const float Q2 = -0.173678953558233699533450911e+3F;
-
 
     var sign = false;
     if (x < 0) {
@@ -68,7 +64,6 @@ private static double sinh(double x) {
         temp = -temp;
     }
     return temp;
-
 }
 
 // Cosh returns the hyperbolic cosine of x.
@@ -82,7 +77,6 @@ public static double Cosh(double x) {
         return archCosh(x);
     }
     return cosh(x);
-
 }
 
 private static double cosh(double x) {
@@ -92,7 +86,6 @@ private static double cosh(double x) {
     }
     var ex = Exp(x);
     return (ex + 1 / ex) * 0.5F;
-
 }
 
 } // end math_package

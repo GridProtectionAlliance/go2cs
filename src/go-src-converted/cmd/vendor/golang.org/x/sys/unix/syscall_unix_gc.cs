@@ -8,12 +8,12 @@
 // +build !ppc64le
 // +build !ppc64
 
-// package unix -- go2cs converted at 2022 March 06 23:27:19 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:25 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_unix_gc.go
-using syscall = go.syscall_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using syscall = syscall_package;
 
 public static partial class unix_package {
 

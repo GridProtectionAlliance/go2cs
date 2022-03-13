@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:51 UTC
+//     Generated on 2022 March 13 05:39:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace encoding
 {
     public static partial class json_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct UnmarshalFieldError
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace encoding
             public static implicit operator UnmarshalFieldError(NilType nil) => default(UnmarshalFieldError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static UnmarshalFieldError UnmarshalFieldError_cast(dynamic value)
         {
             return new UnmarshalFieldError(value.Key, value.Type, value.Field);

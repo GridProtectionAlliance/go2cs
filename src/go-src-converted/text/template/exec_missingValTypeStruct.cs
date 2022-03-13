@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:40 UTC
+//     Generated on 2022 March 13 05:39:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace text
 {
     public static partial class template_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct missingValType
         {
             // Constructors
@@ -52,7 +52,7 @@ namespace text
             public static implicit operator missingValType(NilType nil) => default(missingValType);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static missingValType missingValType_cast(dynamic value)
         {
             return new missingValType();

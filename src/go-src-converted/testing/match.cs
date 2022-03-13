@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2022 March 06 23:19:16 UTC
+// package testing -- go2cs converted at 2022 March 13 06:43:01 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Program Files\Go\src\testing\match.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go;
 
+using fmt = fmt_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// matcher sanitizes, uniques, and filters names of subtests and subbenchmarks.
+
+using System;
 public static partial class testing_package {
 
-    // matcher sanitizes, uniques, and filters names of subtests and subbenchmarks.
 private partial struct matcher {
     public slice<@string> filter;
     public Func<@string, @string, (bool, error)> matchFunc;
@@ -64,7 +65,6 @@ private static ptr<matcher> newMatcher(Func<@string, @string, (bool, error)> mat
                     }
 
                 }
-
             }
 
             i = i__prev1;
@@ -72,7 +72,6 @@ private static ptr<matcher> newMatcher(Func<@string, @string, (bool, error)> mat
         }
     }
     return addr(new matcher(filter:filter,matchFunc:matchString,subNames:map[string]int64{},));
-
 }
 
 private static (@string, bool, bool) fullName(this ptr<matcher> _addr_m, ptr<common> _addr_c, @string subname) => func((defer, _, _) => {
@@ -108,9 +107,7 @@ private static (@string, bool, bool) fullName(this ptr<matcher> _addr_m, ptr<com
             }
 
         }
-
     }    return (name, true, len(elem) < len(m.filter));
-
 });
 
 private static slice<@string> splitRegexp(@string s) {
@@ -130,9 +127,7 @@ private static slice<@string> splitRegexp(@string s) {
 
                     if (cs < 0) { // An unmatched ']' is legal.
                         cs = 0;
-
                     }
-
                     break;
                 case '(': 
                     if (cs == 0) {
@@ -157,11 +152,9 @@ private static slice<@string> splitRegexp(@string s) {
                     break;
             }
             i++;
-
         }
     }
     return append(a, s);
-
 }
 
 // unique creates a unique name for the given parent and subname by affixing it
@@ -176,16 +169,13 @@ private static @string unique(this ptr<matcher> _addr_m, @string parent, @string
         if (!empty && !exists) {
             m.subNames[name] = 1; // next count is 1
             return name;
-
         }
         m.subNames[name] = next + 1; 
 
         // Add a count to guarantee uniqueness.
         name = fmt.Sprintf("%s#%02d", name, next);
         empty = false;
-
     }
-
 }
 
 // rewrite rewrites a subname to having only printable characters and no white
@@ -201,9 +191,7 @@ private static @string rewrite(@string s) {
             b = append(b, s[(int)1..(int)len(s) - 1]);
         else 
             b = append(b, string(r));
-        
-    }    return string(b);
-
+            }    return string(b);
 }
 
 private static bool isSpace(int r) {
@@ -230,7 +218,6 @@ private static bool isSpace(int r) {
                 return true;
                 break;
         }
-
     }
     else
  {
@@ -250,10 +237,8 @@ private static bool isSpace(int r) {
                 return true;
                 break;
         }
-
     }
     return false;
-
 }
 
 } // end testing_package

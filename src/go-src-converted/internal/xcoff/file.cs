@@ -3,21 +3,24 @@
 // license that can be found in the LICENSE file.
 
 // Package xcoff implements access to XCOFF (Extended Common Object File Format) files.
-// package xcoff -- go2cs converted at 2022 March 06 22:41:04 UTC
+
+// package xcoff -- go2cs converted at 2022 March 13 05:52:08 UTC
 // import "internal/xcoff" ==> using xcoff = go.@internal.xcoff_package
 // Original source: C:\Program Files\Go\src\internal\xcoff\file.go
-using dwarf = go.debug.dwarf_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
 namespace go.@internal;
+
+using dwarf = debug.dwarf_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+
+
+// SectionHeader holds information about an XCOFF section header.
 
 public static partial class xcoff_package {
 
-    // SectionHeader holds information about an XCOFF section header.
 public partial struct SectionHeader {
     public @string Name;
     public ulong VirtualAddress;
@@ -101,7 +104,6 @@ public static (ptr<File>, error) Open(@string name) {
     }
     ff.closer = f;
     return (_addr_ff!, error.As(null!)!);
-
 }
 
 // Close closes the File.
@@ -116,7 +118,6 @@ private static error Close(this ptr<File> _addr_f) {
         f.closer = null;
     }
     return error.As(err)!;
-
 }
 
 // Section returns the first section with the given name, or nil if no such
@@ -131,7 +132,6 @@ private static ptr<Section> Section(this ptr<File> _addr_f, @string name) {
             return _addr_s!;
         }
     }    return _addr_null!;
-
 }
 
 // SectionByType returns the first section in f with the
@@ -144,14 +144,14 @@ private static ptr<Section> SectionByType(this ptr<File> _addr_f, uint typ) {
             return _addr_s!;
         }
     }    return _addr_null!;
-
 }
 
 // cstring converts ASCII byte sequence b to string.
 // It stops once it finds 0 or reaches end of b.
 private static @string cstring(slice<byte> b) {
     nint i = default;
-    for (i = 0; i < len(b) && b[i] != 0; i++)     }
+    for (i = 0; i < len(b) && b[i] != 0; i++) {
+    }
     return string(b[..(int)i]);
 }
 
@@ -164,7 +164,6 @@ private static (@string, bool) getString(slice<byte> st, uint offset) {
         return ("", false);
     }
     return (cstring(st[(int)offset..]), true);
-
 }
 
 // NewFile creates a new File for accessing an XCOFF binary in an underlying reader.
@@ -186,7 +185,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
         err = err__prev1;
 
     }
-
     if (magic != U802TOCMAGIC && magic != U64_TOCMAGIC) {
         return (_addr_null!, error.As(fmt.Errorf("unrecognised XCOFF magic: 0x%x", magic))!);
     }
@@ -205,7 +203,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
         err = err__prev1;
 
     }
-
     ushort nscns = default;
     ulong symptr = default;
     int nsyms = default;
@@ -226,7 +223,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
             err = err__prev1;
 
         }
-
         nscns = fhdr.Fnscns;
         symptr = uint64(fhdr.Fsymptr);
         nsyms = fhdr.Fnsyms;
@@ -246,7 +242,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
             err = err__prev1;
 
         }
-
         nscns = fhdr.Fnscns;
         symptr = fhdr.Fsymptr;
         nsyms = fhdr.Fnsyms;
@@ -280,7 +275,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
         err = err__prev1;
 
     }
-
     if (l > 4) {
         {
             var err__prev2 = err;
@@ -294,7 +288,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
             err = err__prev2;
 
         }
-
         f.StringTable = make_slice<byte>(l);
         {
             var err__prev2 = err;
@@ -308,7 +301,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -321,7 +313,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
         err = err__prev1;
 
     }
-
     f.Sections = make_slice<ptr<Section>>(nscns);
     {
         nint i__prev1 = i;
@@ -344,7 +335,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                     err = err__prev1;
 
                 }
-
                 s.Name = cstring(shdr.Sname[..]);
                 s.VirtualAddress = uint64(shdr.Svaddr);
                 s.Size = uint64(shdr.Ssize);
@@ -366,7 +356,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                     err = err__prev1;
 
                 }
-
                 s.Name = cstring(shdr.Sname[..]);
                 s.VirtualAddress = shdr.Svaddr;
                 s.Size = shdr.Ssize;
@@ -377,13 +366,10 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                         var r2 = r;
             if (scnptr == 0) { // .bss must have all 0s
                 r2 = new zeroReaderAt();
-
             }
-
             s.sr = io.NewSectionReader(r2, int64(scnptr), int64(s.Size));
             s.ReaderAt = s.sr;
             f.Sections[i] = s;
-
         }
 
         i = i__prev1;
@@ -404,7 +390,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
         err = err__prev1;
 
     }
-
     f.Symbols = make_slice<ptr<Symbol>>(0);
     {
         nint i__prev1 = i;
@@ -429,7 +414,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                     err = err__prev1;
 
                 }
-
                 numaux = int(se.Nnumaux);
                 sym.SectionNumber = int(se.Nscnum);
                 sym.StorageClass = int(se.Nsclass);
@@ -447,7 +431,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                         goto skip;
                     }
                 }
-
             else if (f.TargetMachine == U64_TOCMAGIC) 
                 se = @new<SymEnt64>();
                 {
@@ -462,7 +445,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                     err = err__prev1;
 
                 }
-
                 numaux = int(se.Nnumaux);
                 sym.SectionNumber = int(se.Nscnum);
                 sym.StorageClass = int(se.Nsclass);
@@ -472,7 +454,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                 if (!ok) {
                     goto skip;
                 }
-
                         if (sym.StorageClass != C_EXT && sym.StorageClass != C_WEAKEXT && sym.StorageClass != C_HIDEXT) {
                 goto skip;
             } 
@@ -480,11 +461,9 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
             if (numaux < 1 || i + numaux >= int(nsyms)) {
                 goto skip;
             }
-
             if (sym.SectionNumber > int(nscns)) {
                 goto skip;
             }
-
             if (sym.SectionNumber == 0) {
                 sym.Value = 0;
             }
@@ -492,7 +471,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
  {
                 sym.Value -= f.Sections[sym.SectionNumber - 1].VirtualAddress;
             }
-
             idxToSym[i] = sym; 
 
             // If this symbol is a function, it must retrieve its size from
@@ -515,7 +493,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                         err = err__prev2;
 
                     }
-
                     sym.AuxFcn.Size = int64(aux.Xfsize);
                 else if (f.TargetMachine == U64_TOCMAGIC) 
                     aux = @new<AuxFcn64>();
@@ -531,10 +508,8 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                         err = err__prev2;
 
                     }
-
                     sym.AuxFcn.Size = int64(aux.Xfsize);
-                
-            } 
+                            } 
 
             // Read csect auxiliary entry (by convention, it is the last).
             if (!needAuxFcn) {
@@ -550,9 +525,7 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                     err = err__prev2;
 
                 }
-
             }
-
             i += numaux;
             numaux = 0;
 
@@ -570,7 +543,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                     err = err__prev1;
 
                 }
-
                 sym.AuxCSect.SymbolType = int(aux.Xsmtyp & 0x7);
                 sym.AuxCSect.StorageMappingClass = int(aux.Xsmclas);
                 sym.AuxCSect.Length = int64(aux.Xscnlen);
@@ -588,7 +560,6 @@ public static (ptr<File>, error) NewFile(io.ReaderAt r) {
                     err = err__prev1;
 
                 }
-
                 sym.AuxCSect.SymbolType = int(aux.Xsmtyp & 0x7);
                 sym.AuxCSect.StorageMappingClass = int(aux.Xsmclas);
                 sym.AuxCSect.Length = int64(aux.Xscnlenhi) << 32 | int64(aux.Xscnlenlo);
@@ -607,7 +578,6 @@ skip: // Skip auxiliary entries
                 err = err__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -635,7 +605,6 @@ skip: // Skip auxiliary entries
             err = err__prev1;
 
         }
-
         {
             nint i__prev2 = i;
 
@@ -655,7 +624,6 @@ skip: // Skip auxiliary entries
                         err = err__prev1;
 
                     }
-
                     sect.Relocs[i].VirtualAddress = uint64(rel.Rvaddr);
                     sect.Relocs[i].Symbol = idxToSym[int(rel.Rsymndx)];
                     sect.Relocs[i].Type = rel.Rtype;
@@ -664,11 +632,9 @@ skip: // Skip auxiliary entries
                     if (rel.Rsize & 0x80 != 0) {
                         sect.Relocs[i].Signed = true;
                     }
-
                     if (rel.Rsize & 0x40 != 0) {
                         sect.Relocs[i].InstructionFixed = true;
                     }
-
                 else if (f.TargetMachine == U64_TOCMAGIC) 
                     rel = @new<Reloc64>();
                     {
@@ -683,7 +649,6 @@ skip: // Skip auxiliary entries
                         err = err__prev1;
 
                     }
-
                     sect.Relocs[i].VirtualAddress = rel.Rvaddr;
                     sect.Relocs[i].Symbol = idxToSym[int(rel.Rsymndx)];
                     sect.Relocs[i].Type = rel.Rtype;
@@ -691,19 +656,15 @@ skip: // Skip auxiliary entries
                     if (rel.Rsize & 0x80 != 0) {
                         sect.Relocs[i].Signed = true;
                     }
-
                     if (rel.Rsize & 0x40 != 0) {
                         sect.Relocs[i].InstructionFixed = true;
                     }
-
                             }
 
 
             i = i__prev2;
         }
-
     }    return (_addr_f!, error.As(null!)!);
-
 }
 
 // zeroReaderAt is ReaderAt that reads 0s.
@@ -732,7 +693,6 @@ private static (slice<byte>, error) Data(this ptr<Section> _addr_s) {
         err = null;
     }
     return (dat[..(int)n], error.As(err)!);
-
 }
 
 // CSect reads and returns the contents of a csect.
@@ -757,12 +717,9 @@ private static slice<byte> CSect(this ptr<File> _addr_f, @string name) {
                 }
 
             }
-
             break;
-
         }
     }    return null;
-
 }
 
 private static (ptr<dwarf.Data>, error) DWARF(this ptr<File> _addr_f) {
@@ -790,7 +747,6 @@ private static (ptr<dwarf.Data>, error) DWARF(this ptr<File> _addr_f) {
     var ranges = dat[3];
     var str = dat[4];
     return _addr_dwarf.New(abbrev, null, null, info, line, null, ranges, str)!;
-
 }
 
 // readImportID returns the import file IDs stored inside the .loader section.
@@ -813,7 +769,6 @@ private static (slice<@string>, error) readImportIDs(this ptr<File> _addr_f, ptr
         err = err__prev1;
 
     }
-
     uint istlen = default;
     int nimpid = default;
     ulong impoff = default;
@@ -832,7 +787,6 @@ private static (slice<@string>, error) readImportIDs(this ptr<File> _addr_f, ptr
             err = err__prev1;
 
         }
-
         istlen = lhdr.Listlen;
         nimpid = lhdr.Lnimpid;
         impoff = uint64(lhdr.Limpoff);
@@ -850,7 +804,6 @@ private static (slice<@string>, error) readImportIDs(this ptr<File> _addr_f, ptr
             err = err__prev1;
 
         }
-
         istlen = lhdr.Listlen;
         nimpid = lhdr.Lnimpid;
         impoff = lhdr.Limpoff;
@@ -866,7 +819,6 @@ private static (slice<@string>, error) readImportIDs(this ptr<File> _addr_f, ptr
         err = err__prev1;
 
     }
-
     var table = make_slice<byte>(istlen);
     {
         var err__prev1 = err;
@@ -879,7 +831,6 @@ private static (slice<@string>, error) readImportIDs(this ptr<File> _addr_f, ptr
         err = err__prev1;
 
     }
-
 
     nint offset = 0; 
     // First import file ID is the default LIBPATH value
@@ -903,11 +854,9 @@ private static (slice<@string>, error) readImportIDs(this ptr<File> _addr_f, ptr
             path = impidbase + "/" + impidmem;
         }
         all = append(all, path);
-
     }
 
     return (all, error.As(null!)!);
-
 }
 
 // ImportedSymbols returns the names of all symbols
@@ -934,7 +883,6 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
         err = err__prev1;
 
     }
-
     uint stlen = default;
     ulong stoff = default;
     int nsyms = default;
@@ -954,7 +902,6 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
             err = err__prev1;
 
         }
-
         stlen = lhdr.Lstlen;
         stoff = uint64(lhdr.Lstoff);
         nsyms = lhdr.Lnsyms;
@@ -973,7 +920,6 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
             err = err__prev1;
 
         }
-
         stlen = lhdr.Lstlen;
         stoff = lhdr.Lstoff;
         nsyms = lhdr.Lnsyms;
@@ -990,7 +936,6 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
         err = err__prev1;
 
     }
-
     var st = make_slice<byte>(stlen);
     {
         var err__prev1 = err;
@@ -1020,7 +965,6 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
         err = err__prev1;
 
     }
-
     var all = make_slice<ImportedSymbol>(0);
     for (nint i = 0; i < int(nsyms); i++) {
         @string name = default;
@@ -1041,11 +985,9 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
                 err = err__prev1;
 
             }
-
             if (ldsym.Lsmtype & 0x40 == 0) {
                 continue; // Imported symbols only
             }
-
             var zeroes = binary.BigEndian.Uint32(ldsym.Lname[..(int)4]);
             if (zeroes != 0) {
                 name = cstring(ldsym.Lname[..]);
@@ -1058,7 +1000,6 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
                     continue;
                 }
             }
-
             ifile = ldsym.Lifile;
         else if (f.TargetMachine == U64_TOCMAGIC) 
             ldsym = @new<LoaderSymbol64>();
@@ -1074,16 +1015,13 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
                 err = err__prev1;
 
             }
-
             if (ldsym.Lsmtype & 0x40 == 0) {
                 continue; // Imported symbols only
             }
-
             name, ok = getString(st, ldsym.Loffset);
             if (!ok) {
                 continue;
             }
-
             ifile = ldsym.Lifile;
                 ImportedSymbol sym = default;
         sym.Name = name;
@@ -1091,11 +1029,9 @@ private static (slice<ImportedSymbol>, error) ImportedSymbols(this ptr<File> _ad
             sym.Library = libs[ifile - 1];
         }
         all = append(all, sym);
-
     }
 
     return (all, error.As(null!)!);
-
 }
 
 // ImportedLibraries returns the names of all libraries
@@ -1112,7 +1048,6 @@ private static (slice<@string>, error) ImportedLibraries(this ptr<File> _addr_f)
     }
     var (all, err) = f.readImportIDs(s);
     return (all, error.As(err)!);
-
 }
 
 } // end xcoff_package

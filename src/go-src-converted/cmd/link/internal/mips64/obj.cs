@@ -28,15 +28,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips64 -- go2cs converted at 2022 March 06 23:20:38 UTC
+// package mips64 -- go2cs converted at 2022 March 13 06:33:33 UTC
 // import "cmd/link/internal/mips64" ==> using mips64 = go.cmd.link.@internal.mips64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\mips64\obj.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using buildcfg = @internal.buildcfg_package;
 
 public static partial class mips64_package {
 
@@ -51,7 +51,6 @@ public static (ptr<sys.Arch>, ld.Arch) Init() {
     ld.Arch theArch = new ld.Arch(Funcalign:funcAlign,Maxalign:maxAlign,Minalign:minAlign,Dwarfregsp:dwarfRegSP,Dwarfreglr:dwarfRegLR,Archinit:archinit,Archreloc:archreloc,Archrelocvariant:archrelocvariant,Extreloc:extreloc,Elfreloc1:elfreloc1,ElfrelocSize:24,Elfsetupplt:elfsetupplt,Gentext:gentext,Machoreloc1:machoreloc1,Linuxdynld:"/lib64/ld64.so.1",Freebsddynld:"XXX",Openbsddynld:"/usr/libexec/ld.so",Netbsddynld:"XXX",Dragonflydynld:"XXX",Solarisdynld:"XXX",);
 
     return (_addr_arch!, theArch);
-
 }
 
 private static void archinit(ptr<ld.Link> _addr_ctxt) {
@@ -78,7 +77,6 @@ private static void archinit(ptr<ld.Link> _addr_ctxt) {
         }
     else 
         ld.Exitf("unknown -H option: %v", ctxt.HeadType);
-    
-}
+    }
 
 } // end mips64_package

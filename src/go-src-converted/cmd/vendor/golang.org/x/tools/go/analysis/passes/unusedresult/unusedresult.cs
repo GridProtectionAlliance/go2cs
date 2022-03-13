@@ -4,29 +4,31 @@
 
 // Package unusedresult defines an analyzer that checks for unused
 // results of calls to certain pure functions.
-// package unusedresult -- go2cs converted at 2022 March 06 23:34:53 UTC
+
+// package unusedresult -- go2cs converted at 2022 March 13 06:42:10 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unusedresult" ==> using unusedresult = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unusedresult_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unusedresult\unusedresult.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 
-public static partial class unusedresult_package {
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+using sort = sort_package;
+using strings = strings_package;
 
-    // TODO(adonovan): make this analysis modular: export a mustUseResult
-    // fact for each function that tail-calls one of the functions that we
-    // check, and check those functions too.
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+
+
+// TODO(adonovan): make this analysis modular: export a mustUseResult
+// fact for each function that tail-calls one of the functions that we
+// check, and check those functions too.
+
+
+using System;public static partial class unusedresult_package {
+
 public static readonly @string Doc = @"check for unused results of calls to some functions
 
 Some functions like fmt.Errorf return a result and have no side effects,
@@ -52,7 +54,6 @@ private static void init() {
 
     stringMethods.Set("Error,String");
     Analyzer.Flags.Var(_addr_stringMethods, "stringmethods", "comma-separated list of names of methods of type func() string whose results must be used");
-
 }
 
 private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
@@ -87,7 +88,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     pass.Reportf(call.Lparen, "result of (%s).%s call not used", sig.Recv().Type(), obj.Name());
                 }
             }
-
         }
         else if (!ok) { 
             // package-qualified function (e.g. fmt.Errorf)
@@ -107,11 +107,9 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 obj = obj__prev3;
 
             }
-
         }
     });
     return (null, error.As(null!)!);
-
 }
 
 // func() string
@@ -139,14 +137,11 @@ private static error Set(this ptr<stringSetFlag> _addr_ss, @string s) {
             if (name == "") {
                 continue; // TODO: report error? proceed?
             }
-
             m[name] = true;
-
         }
     }
     ss.val = m;
     return error.As(null!)!;
-
 }
 
 } // end unusedresult_package

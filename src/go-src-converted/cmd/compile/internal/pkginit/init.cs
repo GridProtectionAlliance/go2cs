@@ -2,27 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pkginit -- go2cs converted at 2022 March 06 23:12:17 UTC
+// package pkginit -- go2cs converted at 2022 March 13 06:25:39 UTC
 // import "cmd/compile/internal/pkginit" ==> using pkginit = go.cmd.compile.@internal.pkginit_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\pkginit\init.go
-using @base = go.cmd.compile.@internal.@base_package;
-using deadcode = go.cmd.compile.@internal.deadcode_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using deadcode = cmd.compile.@internal.deadcode_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+
+
+// Task makes and returns an initialization record for the package.
+// See runtime/proc.go:initTask for its layout.
+// The 3 tasks for initialization are:
+//   1) Initialize all of the packages the current package depends on.
+//   2) Initialize all the variables that have initializers.
+//   3) Run any init functions.
 
 public static partial class pkginit_package {
 
-    // Task makes and returns an initialization record for the package.
-    // See runtime/proc.go:initTask for its layout.
-    // The 3 tasks for initialization are:
-    //   1) Initialize all of the packages the current package depends on.
-    //   2) Initialize all the variables that have initializers.
-    //   3) Run any init functions.
 public static ptr<ir.Name> Task() {
     var nf = initOrder(typecheck.Target.Decls);
 
@@ -39,7 +41,6 @@ public static ptr<ir.Name> Task() {
             @base.Fatalf("bad inittask: %v", n);
         }
         deps = append(deps, n._<ptr<ir.Name>>().Linksym());
-
     }    if (len(nf) > 0) {
         @base.Pos = nf[0].Pos(); // prolog/epilog gets line number of first init stmt
         var initializers = typecheck.Lookup("init");
@@ -58,14 +59,12 @@ public static ptr<ir.Name> Task() {
         ir.CurFunc = null;
         typecheck.Target.Decls = append(typecheck.Target.Decls, fn);
         fns = append(fns, fn.Linksym());
-
     }
     if (typecheck.InitTodoFunc.Dcl != null) { 
         // We only generate temps using InitTodoFunc if there
         // are package-scope initialization statements, so
         // something's weird if we get here.
         @base.Fatalf("InitTodoFunc still has declarations");
-
     }
     typecheck.InitTodoFunc = null; 
 
@@ -87,10 +86,8 @@ public static ptr<ir.Name> Task() {
                         continue;
                     }
                 }
-
             }
             fns = append(fns, fn.Nname.Linksym());
-
         }
         fn = fn__prev1;
     }
@@ -114,7 +111,6 @@ public static ptr<ir.Name> Task() {
         ot = objw.SymPtr(lsym, ot, f, 0);
     }    objw.Global(lsym, int32(ot), obj.NOPTR);
     return _addr_task!;
-
 }
 
 } // end pkginit_package

@@ -13,24 +13,23 @@
 // limitations under the License.
 
 // Package elfexec provides utility routines to examine ELF binaries.
-// package elfexec -- go2cs converted at 2022 March 06 23:23:34 UTC
+
+// package elfexec -- go2cs converted at 2022 March 13 06:36:38 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/elfexec" ==> using elfexec = go.cmd.vendor.github.com.google.pprof.@internal.elfexec_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\elfexec\elfexec.go
-using bufio = go.bufio_package;
-using elf = go.debug.elf_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using bufio = bufio_package;
+using elf = debug.elf_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using System;
 
 public static partial class elfexec_package {
 
 private static readonly nint maxNoteSize = 1 << 20; // in bytes
 private static readonly nint noteTypeGNUBuildID = 3;
-
 
 // elfNote is the payload of a Note Section in an ELF file.
 private partial struct elfNote {
@@ -48,9 +47,7 @@ private static (slice<elfNote>, error) parseNotes(io.Reader reader, nint alignme
 
     // padding returns the number of bytes required to pad the given size to an
     // alignment boundary.
-    Func<nint, nint> padding = size => {
-        return ((size + (alignment - 1)) & ~(alignment - 1)) - size;
-    };
+    Func<nint, nint> padding = size => ((size + (alignment - 1)) & ~(alignment - 1)) - size;
 
     slice<elfNote> notes = default;
     while (true) {
@@ -65,9 +62,7 @@ private static (slice<elfNote>, error) parseNotes(io.Reader reader, nint alignme
                 return (null, error.As(err)!);
             }
 
-
         }
-
         var namesz = order.Uint32(noteHeader[(int)0..(int)4]);
         var descsz = order.Uint32(noteHeader[(int)4..(int)8]);
         var typ = order.Uint32(noteHeader[(int)8..(int)12]);
@@ -88,10 +83,8 @@ private static (slice<elfNote>, error) parseNotes(io.Reader reader, nint alignme
             else if (err != null) {
                 return (null, error.As(err)!);
             }
-
             namesz = uint32(len(name));
             name = name[..(int)len(name) - 1];
-
         }
         {
             var n__prev2 = n;
@@ -107,9 +100,7 @@ private static (slice<elfNote>, error) parseNotes(io.Reader reader, nint alignme
                         return (null, error.As(err)!);
                     }
 
-
                 }
-
             }
 
 
@@ -130,9 +121,7 @@ private static (slice<elfNote>, error) parseNotes(io.Reader reader, nint alignme
                 return (null, error.As(err)!);
             }
 
-
         }
-
 
         notes = append(notes, new elfNote(Name:name,Desc:desc,Type:typ)); 
 
@@ -150,24 +139,19 @@ private static (slice<elfNote>, error) parseNotes(io.Reader reader, nint alignme
                         // This can happen if this section is at the end of the file or the next
                         // section has a smaller alignment requirement.
                         break;
-
                     }
                     else if (err != null) {
                         return (null, error.As(err)!);
                     }
 
-
                 }
-
             }
 
 
             n = n__prev2;
         }
-
     }
     return (notes, error.As(null!)!);
-
 }
 
 // GetBuildID returns the GNU build-ID for an ELF binary.
@@ -193,11 +177,8 @@ public static (slice<byte>, error) GetBuildID(io.ReaderAt binary) {
  {
                     return (null, error.As(fmt.Errorf("multiple build ids found, don't know which to use"))!);
                 }
-
             }
-
         }        return (buildID, error.As(null!)!);
-
     };
 
     foreach (var (_, p) in f.Progs) {
@@ -220,7 +201,6 @@ public static (slice<byte>, error) GetBuildID(io.ReaderAt binary) {
             b = b__prev1;
 
         }
-
     }    foreach (var (_, s) in f.Sections) {
         if (s.Type != elf.SHT_NOTE) {
             continue;
@@ -241,9 +221,7 @@ public static (slice<byte>, error) GetBuildID(io.ReaderAt binary) {
             b = b__prev1;
 
         }
-
     }    return (null, error.As(null!)!);
-
 }
 
 // GetBase determines the base address to subtract from virtual
@@ -263,20 +241,17 @@ public static (ulong, error) GetBase(ptr<elf.FileHeader> _addr_fh, ptr<elf.ProgH
     // PAGE_OFFSET for PowerPC64, see arch/powerpc/Kconfig in the kernel sources.
     const nuint pageOffsetPpc64 = 0xc000000000000000;
 
-
     if (start == 0 && offset == 0 && (limit == ~uint64(0) || limit == 0)) { 
         // Some tools may introduce a fake mapping that spans the entire
         // address space. Assume that the address has already been
         // adjusted, so no additional base adjustment is necessary.
         return (0, error.As(null!)!);
-
     }
 
     if (fh.Type == elf.ET_EXEC) 
         if (loadSegment == null) { 
             // Assume fixed-address executable and so no adjustment.
             return (0, error.As(null!)!);
-
         }
         if (stextOffset == null && start > 0 && start < 0x8000000000000000) { 
             // A regular user-mode executable. Compute the base offset using same
@@ -288,7 +263,6 @@ public static (ulong, error) GetBase(ptr<elf.FileHeader> _addr_fh, ptr<elf.ProgH
             // So additionally check that the start is within the user-mode half of
             // the 64-bit address space.
             return (start - offset + loadSegment.Off - loadSegment.Vaddr, error.As(null!)!);
-
         }
         if (loadSegment.Vaddr == start - offset) {
             return (offset, error.As(null!)!);
@@ -301,9 +275,7 @@ public static (ulong, error) GetBase(ptr<elf.FileHeader> _addr_fh, ptr<elf.ProgH
             if (stextOffset != null) {
                 return (-stextOffset, error.As(null!)!);
             }
-
             return (-loadSegment.Vaddr, error.As(null!)!);
-
         }
         if (start >= loadSegment.Vaddr && limit > start && (offset == 0 || offset == pageOffsetPpc64 || offset == start)) { 
             // Some kernels look like:
@@ -318,11 +290,8 @@ public static (ulong, error) GetBase(ptr<elf.FileHeader> _addr_fh, ptr<elf.ProgH
                 // adjust for this before calling GetBase, in which case the page
                 // alignment should be different from that of stextOffset.
                 return (start - stextOffset, error.As(null!)!);
-
             }
-
             return (start - loadSegment.Vaddr, error.As(null!)!);
-
         }
         else if (start % pageSize != 0 && stextOffset != null && stextOffset % pageSize == start % pageSize.val) { 
             // ChromeOS remaps its kernel to 0 + start%pageSize. Nothing
@@ -331,7 +300,6 @@ public static (ulong, error) GetBase(ptr<elf.FileHeader> _addr_fh, ptr<elf.ProgH
             //       VADDR=0xffffffff81000000
             // stextOffset=0xffffffff81000198
             return (start - stextOffset, error.As(null!)!);
-
         }
         return (0, error.As(fmt.Errorf("don't know how to handle EXEC segment: %v start=0x%x limit=0x%x offset=0x%x", loadSegment, start, limit, offset))!);
     else if (fh.Type == elf.ET_REL) 
@@ -349,7 +317,6 @@ public static (ulong, error) GetBase(ptr<elf.FileHeader> _addr_fh, ptr<elf.ProgH
         }
         return (start - offset + loadSegment.Off - loadSegment.Vaddr, error.As(null!)!);
         return (0, error.As(fmt.Errorf("don't know how to handle FileHeader.Type %v", fh.Type))!);
-
 }
 
 // FindTextProgHeader finds the program segment header containing the .text
@@ -365,10 +332,8 @@ public static ptr<elf.ProgHeader> FindTextProgHeader(ptr<elf.File> _addr_f) {
                     return _addr__addr_p.ProgHeader!;
                 }
             }
-
         }
     }    return _addr_null!;
-
 }
 
 // ProgramHeadersForMapping returns the loadable program segment headers that
@@ -390,7 +355,6 @@ public static (slice<ptr<elf.ProgHeader>>, bool) ProgramHeadersForMapping(ptr<el
     const nint pageSize = 4096;
     const var pageOffsetMask = pageSize - 1;
     const var pageMask = ~uint64(pageOffsetMask);
-
     slice<ptr<elf.ProgHeader>> headers = default;
     var hasLoadables = false;
     foreach (var (_, p) in f.Progs) { 
@@ -423,18 +387,14 @@ public static (slice<ptr<elf.ProgHeader>>, bool) ProgramHeadersForMapping(ptr<el
             // Found a second program header matching, so return all previously
             // identified headers.
             return (headers, hasLoadables);
-
         }
         ph = h;
-
     }    if (ph == null) { 
         // No matching header for the strict check. Return all previously identified
         // headers.
         return (headers, hasLoadables);
-
     }
     return (new slice<ptr<elf.ProgHeader>>(new ptr<elf.ProgHeader>[] { ph }), hasLoadables);
-
 }
 
 } // end elfexec_package

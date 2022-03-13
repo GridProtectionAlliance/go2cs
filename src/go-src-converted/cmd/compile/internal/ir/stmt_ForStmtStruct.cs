@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:16 UTC
+//     Generated on 2022 March 13 06:00:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(miniStmt))]
         public partial struct ForStmt
         {
@@ -77,7 +77,7 @@ namespace @internal
             public static implicit operator ForStmt(NilType nil) => default(ForStmt);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ForStmt ForStmt_cast(dynamic value)
         {
             return new ForStmt(value.miniStmt, ref value.Label, value.Cond, value.Late, value.Post, value.Body, value.HasBreak);

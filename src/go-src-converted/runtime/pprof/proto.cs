@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2022 March 06 22:14:48 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:28:51 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\proto.go
-using bytes = go.bytes_package;
-using gzip = go.compress.gzip_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using time = go.time_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.runtime;
 
+using bytes = bytes_package;
+using gzip = compress.gzip_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using time = time_package;
+using @unsafe = @unsafe_package;
+
+
+// lostProfileEvent is the function to which lost profiling
+// events are attributed.
+// (The name shows up in the pprof graphs.)
+
+using System;
 public static partial class pprof_package {
 
-    // lostProfileEvent is the function to which lost profiling
-    // events are attributed.
-    // (The name shows up in the pprof graphs.)
 private static void lostProfileEvent() {
     lostProfileEvent();
 }
@@ -71,7 +72,6 @@ private partial struct symbolizeFlag { // : byte
 
 private static readonly symbolizeFlag lookupTried = 1 << (int)(iota);
 private static readonly symbolizeFlag lookupFailed = 1 << (int)(iota);
-
 
  
 // message Profile
@@ -145,7 +145,6 @@ private static long stringIndex(this ptr<profileBuilder> _addr_b, @string s) {
         b.stringMap[s] = id;
     }
     return int64(id);
-
 }
 
 private static void flush(this ptr<profileBuilder> _addr_b) {
@@ -181,7 +180,6 @@ private static void pbSample(this ptr<profileBuilder> _addr_b, slice<long> value
     }
     b.pb.endMessage(tagProfile_Sample, start);
     b.flush();
-
 }
 
 // pbLabel encodes a Label message to b.pb.
@@ -226,7 +224,6 @@ private static void pbMapping(this ptr<profileBuilder> _addr_b, nint tag, ulong 
         b.pb.@bool(tagMapping_HasFunctions, true);
     }
     b.pb.endMessage(tag, start);
-
 }
 
 private static (slice<runtime.Frame>, symbolizeFlag) allFrames(System.UIntPtr addr) {
@@ -243,7 +240,6 @@ private static (slice<runtime.Frame>, symbolizeFlag) allFrames(System.UIntPtr ad
         // Short-circuit if we see runtime.goexit so the loop
         // below doesn't allocate a useless empty location.
         return (null, 0);
-
     }
     var symbolizeResult = lookupTried;
     if (frame.PC == 0 || frame.Function == "" || frame.File == "" || frame.Line == 0) {
@@ -253,7 +249,6 @@ private static (slice<runtime.Frame>, symbolizeFlag) allFrames(System.UIntPtr ad
         // If we failed to resolve the frame, at least make up
         // a reasonable call PC. This mostly happens in tests.
         frame.PC = addr - 1;
-
     }
     runtime.Frame ret = new slice<runtime.Frame>(new runtime.Frame[] { frame });
     while (frame.Function != "runtime.goexit" && more == true) {
@@ -261,7 +256,6 @@ private static (slice<runtime.Frame>, symbolizeFlag) allFrames(System.UIntPtr ad
         ret = append(ret, frame);
     }
     return (ret, symbolizeResult);
-
 }
 
 private partial struct locInfo {
@@ -299,7 +293,6 @@ private static error addCPUData(this ptr<profileBuilder> _addr_b, slice<ulong> d
         b.period = 1e9F / int64(data[2]);
         b.havePeriod = true;
         data = data[(int)3..];
-
     }
     while (len(data) > 0) {
         if (len(data) < 3 || data[0] > uint64(len(data))) {
@@ -320,13 +313,10 @@ private static error addCPUData(this ptr<profileBuilder> _addr_b, slice<ulong> d
             // overflow record
             count = uint64(stk[0]);
             stk = new slice<ulong>(new ulong[] { uint64(funcPC(lostProfileEvent)+1) });
-
         }
         b.m.lookup(stk, tag).count += int64(count);
-
     }
     return error.As(null!)!;
-
 }
 
 // build completes and returns the constructed profile.
@@ -342,7 +332,6 @@ private static void build(this ptr<profileBuilder> _addr_b) {
         b.pb.int64Opt(tagProfile_DurationNanos, b.end.Sub(b.start).Nanoseconds());
         b.pbValueType(tagProfile_PeriodType, "cpu", "nanoseconds");
         b.pb.int64Opt(tagProfile_Period, b.period);
-
     }
     long values = new slice<long>(new long[] { 0, 0 });
     slice<ulong> locs = default;
@@ -363,24 +352,19 @@ private static void build(this ptr<profileBuilder> _addr_b) {
             e = e.nextAll;
                 }
 ;
-
             }
-
             locs = b.appendLocsForStack(locs[..(int)0], e.stk);
 
             b.pbSample(values, locs, labels);
-
         }
     }
 
     foreach (var (i, m) in b.mem) {
         var hasFunctions = m.funcs == lookupTried; // lookupTried but not lookupFailed
         b.pbMapping(tagProfile_Mapping, uint64(i + 1), uint64(m.start), uint64(m.end), m.offset, m.file, m.buildID, hasFunctions);
-
     }    b.pb.strings(tagProfile_StringTable, b.strings);
     b.zw.Write(b.pb.data);
     b.zw.Close();
-
 }
 
 // appendLocsForStack appends the location IDs for the given stack trace to the given
@@ -431,13 +415,11 @@ private static slice<ulong> appendLocsForStack(this ptr<profileBuilder> _addr_b,
                 // fixed the truncation, ensuring it is long enough.
                 stk = stk[(int)len(l.pcs)..];
                 continue;
-
             }
 
             l = l__prev1;
 
         }
-
 
         var (frames, symbolizeResult) = allFrames(addr);
         if (len(frames) == 0) { // runtime.goexit.
@@ -453,10 +435,8 @@ private static slice<ulong> appendLocsForStack(this ptr<profileBuilder> _addr_b,
                 id = id__prev2;
 
             }
-
             stk = stk[(int)1..];
             continue;
-
         }
         {
             var added = b.deck.tryAdd(addr, frames, symbolizeResult);
@@ -502,13 +482,11 @@ private static slice<ulong> appendLocsForStack(this ptr<profileBuilder> _addr_b,
  {
                 b.deck.tryAdd(addr, frames, symbolizeResult); // must succeed.
                 stk = stk[(int)1..];
-
             }
 
             l = l__prev1;
 
         }
-
     }
     {
         var id__prev1 = id;
@@ -517,14 +495,11 @@ private static slice<ulong> appendLocsForStack(this ptr<profileBuilder> _addr_b,
 
         if (id > 0) { // emit remaining location.
             locs = append(locs, id);
-
         }
         id = id__prev1;
 
     }
-
     return locs;
-
 }
 
 // pcDeck is a helper to detect a sequence of inlined functions from
@@ -578,32 +553,22 @@ private static bool tryAdd(this ptr<pcDeck> _addr_d, System.UIntPtr pc, slice<ru
             var last = d.frames[existing - 1];
             if (last.Func != null) { // the last frame can't be inlined. Flush.
                 return false;
-
             }
-
             if (last.Entry == 0 || newFrame.Entry == 0) { // Possibly not a Go function. Don't try to merge.
                 return false;
-
             }
-
             if (last.Entry != newFrame.Entry) { // newFrame is for a different function.
                 return false;
-
             }
-
             if (last.Function == newFrame.Function) { // maybe recursion.
                 return false;
-
             }
-
         }
     }
-
     d.pcs = append(d.pcs, pc);
     d.frames = append(d.frames, frames);
     d.symbolizeResult |= symbolizeResult;
     return true;
-
 }
 
 // emitLocation emits the new location and function information recorded in the deck
@@ -646,7 +611,6 @@ private static ulong emitLocation(this ptr<profileBuilder> _addr_b) => func((def
             newFuncs = append(newFuncs, new newFunc(funcID,frame.Function,frame.File));
         }
         b.pbLine(tagLocation_Line, funcID, int64(frame.Line));
-
     }    foreach (var (i) in b.mem) {
         if (b.mem[i].start <= addr && addr < b.mem[i].end || b.mem[i].fake) {
             b.pb.uint64Opt(tagLocation_MappingID, uint64(i + 1));
@@ -668,7 +632,6 @@ private static ulong emitLocation(this ptr<profileBuilder> _addr_b) => func((def
         b.pb.endMessage(tagProfile_Function, start);
     }    b.flush();
     return id;
-
 });
 
 // readMapping reads /proc/self/maps and writes mappings to b.pb.
@@ -725,7 +688,6 @@ private static void parseProcSelfMaps(slice<byte> data, Action<ulong, ulong, ulo
             line = line[(int)1..];
         }
         return f;
-
     };
 
     while (len(data) > 0) {
@@ -754,7 +716,6 @@ private static void parseProcSelfMaps(slice<byte> data, Action<ulong, ulong, ulo
         if (len(perm) < 4 || perm[2] != 'x') { 
             // Only interested in executable mappings.
             continue;
-
         }
         var (offset, err) = strconv.ParseUint(string(next()), 16, 64);
         if (err != null) {
@@ -779,13 +740,10 @@ private static void parseProcSelfMaps(slice<byte> data, Action<ulong, ulong, ulo
             // Don't report that part.
             // But [vdso] and [vsyscall] are inode 0, so let non-empty file names through.
             continue;
-
         }
         var (buildID, _) = elfBuildID(file);
         addMapping(lo, hi, offset, file, buildID);
-
     }
-
 }
 
 private static void addMapping(this ptr<profileBuilder> _addr_b, ulong lo, ulong hi, ulong offset, @string file, @string buildID) {

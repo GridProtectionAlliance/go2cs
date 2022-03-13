@@ -5,29 +5,31 @@
 // Package png implements a PNG image decoder and encoder.
 //
 // The PNG specification is at https://www.w3.org/TR/PNG/.
-// package png -- go2cs converted at 2022 March 06 23:36:19 UTC
+
+// package png -- go2cs converted at 2022 March 13 06:44:20 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Program Files\Go\src\image\png\reader.go
-using zlib = go.compress.zlib_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using crc32 = go.hash.crc32_package;
-using image = go.image_package;
-using color = go.image.color_package;
-using io = go.io_package;
-
 namespace go.image;
+
+using zlib = compress.zlib_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using crc32 = hash.crc32_package;
+using image = image_package;
+using color = image.color_package;
+using io = io_package;
+
+
+// Color type, as per the PNG spec.
 
 public static partial class png_package {
 
-    // Color type, as per the PNG spec.
 private static readonly nint ctGrayscale = 0;
 private static readonly nint ctTrueColor = 2;
 private static readonly nint ctPaletted = 3;
 private static readonly nint ctGrayscaleAlpha = 4;
 private static readonly nint ctTrueColorAlpha = 6;
-
 
 // A cb is a combination of color type and bit depth.
 private static readonly var cbInvalid = iota;
@@ -47,7 +49,6 @@ private static readonly var cbGA16 = 12;
 private static readonly var cbTC16 = 13;
 private static readonly var cbTCA16 = 14;
 
-
 private static bool cbPaletted(nint cb) {
     return cbP1 <= cb && cb <= cbP8;
 }
@@ -60,11 +61,9 @@ private static readonly nint ftAverage = 3;
 private static readonly nint ftPaeth = 4;
 private static readonly nint nFilter = 5;
 
-
 // Interlace type.
 private static readonly nint itNone = 0;
 private static readonly nint itAdam7 = 1;
-
 
 // interlaceScan defines the placement and size of a pass for Adam7 interlacing.
 private partial struct interlaceScan {
@@ -90,7 +89,6 @@ private static readonly var dsSeenPLTE = 1;
 private static readonly var dsSeentRNS = 2;
 private static readonly var dsSeenIDAT = 3;
 private static readonly var dsSeenIEND = 4;
-
 
 private static readonly @string pngHeader = "\x89PNG\r\n\x1a\n";
 
@@ -137,7 +135,6 @@ private static nint min(nint a, nint b) {
         return a;
     }
     return b;
-
 }
 
 private static error parseIHDR(this ptr<decoder> _addr_d, uint length) {
@@ -153,7 +150,6 @@ private static error parseIHDR(this ptr<decoder> _addr_d, uint length) {
             return error.As(err)!;
         }
     }
-
     d.crc.Write(d.tmp[..(int)13]);
     if (d.tmp[10] != 0) {
         return error.As(UnsupportedError("compression method"))!;
@@ -188,7 +184,6 @@ private static error parseIHDR(this ptr<decoder> _addr_d, uint length) {
                 d.cb = cbG1;
             else if (d.tmp[9] == ctPaletted) 
                 d.cb = cbP1;
-
             break;
         case 2: 
 
@@ -196,7 +191,6 @@ private static error parseIHDR(this ptr<decoder> _addr_d, uint length) {
                 d.cb = cbG2;
             else if (d.tmp[9] == ctPaletted) 
                 d.cb = cbP2;
-
             break;
         case 4: 
 
@@ -204,7 +198,6 @@ private static error parseIHDR(this ptr<decoder> _addr_d, uint length) {
                 d.cb = cbG4;
             else if (d.tmp[9] == ctPaletted) 
                 d.cb = cbP4;
-
             break;
         case 8: 
 
@@ -218,7 +211,6 @@ private static error parseIHDR(this ptr<decoder> _addr_d, uint length) {
                 d.cb = cbGA8;
             else if (d.tmp[9] == ctTrueColorAlpha) 
                 d.cb = cbTCA8;
-
             break;
         case 16: 
 
@@ -230,14 +222,12 @@ private static error parseIHDR(this ptr<decoder> _addr_d, uint length) {
                 d.cb = cbGA16;
             else if (d.tmp[9] == ctTrueColorAlpha) 
                 d.cb = cbTCA16;
-
             break;
     }
     if (d.cb == cbInvalid) {
         return error.As(UnsupportedError(fmt.Sprintf("bit depth %d, color type %d", d.tmp[8], d.tmp[9])))!;
     }
     (d.width, d.height) = (int(w), int(h));    return error.As(d.verifyChecksum())!;
-
 }
 
 private static error parsePLTE(this ptr<decoder> _addr_d, uint length) {
@@ -275,7 +265,6 @@ private static error parsePLTE(this ptr<decoder> _addr_d, uint length) {
                 // values. We fall back to opaque black, the same as libpng 1.5.13;
                 // ImageMagick 6.5.7 returns an error.
                 d.palette[i] = new color.RGBA(0x00,0x00,0x00,0xff);
-
             }
 
 
@@ -285,7 +274,6 @@ private static error parsePLTE(this ptr<decoder> _addr_d, uint length) {
     else if (d.cb == cbTC8 || d.cb == cbTCA8 || d.cb == cbTC16 || d.cb == cbTCA16)     else 
         return error.As(FormatError("PLTE, color type mismatch"))!;
         return error.As(d.verifyChecksum())!;
-
 }
 
 private static error parsetRNS(this ptr<decoder> _addr_d, uint length) {
@@ -343,7 +331,6 @@ private static error parsetRNS(this ptr<decoder> _addr_d, uint length) {
     else 
         return error.As(FormatError("tRNS, color type mismatch"))!;
         return error.As(d.verifyChecksum())!;
-
 }
 
 // Read presents one or more IDAT chunks as one continuous stream (minus the
@@ -383,14 +370,12 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
             }
 
         }
-
         d.idatLength = binary.BigEndian.Uint32(d.tmp[..(int)4]);
         if (string(d.tmp[(int)4..(int)8]) != "IDAT") {
             return (0, error.As(FormatError("not enough pixel data"))!);
         }
         d.crc.Reset();
         d.crc.Write(d.tmp[(int)4..(int)8]);
-
     }
     if (int(d.idatLength) < 0) {
         return (0, error.As(UnsupportedError("IDAT chunk length overflow"))!);
@@ -399,7 +384,6 @@ private static (nint, error) Read(this ptr<decoder> _addr_d, slice<byte> p) {
     d.crc.Write(p[..(int)n]);
     d.idatLength -= uint32(n);
     return (n, error.As(err)!);
-
 }
 
 // decode decodes the IDAT data into an image.
@@ -435,7 +419,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d) => func((d
                 d.mergePassInto(img, imagePass, pass);
             }
         }
-
     }
     nint n = 0;
     for (nint i = 0; n == 0 && err == null; i++) {
@@ -443,7 +426,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d) => func((d
             return (null, error.As(io.ErrNoProgress)!);
         }
         n, err = r.Read(d.tmp[..(int)1]);
-
     }
     if (err != null && err != io.EOF) {
         return (null, error.As(FormatError(err.Error()))!);
@@ -452,7 +434,6 @@ private static (image.Image, error) decode(this ptr<decoder> _addr_d) => func((d
         return (null, error.As(FormatError("too much pixel data"))!);
     }
     return (img, error.As(null!)!);
-
 });
 
 // readImagePass reads a single image pass, sized according to the pass number.
@@ -651,13 +632,11 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                             x2 = x2__prev3;
                         }
-
                     }
 
 
                     x = x__prev2;
                 }
-
             } {
                 {
                     nint x__prev2 = x;
@@ -683,9 +662,7 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             }
-
         else if (d.cb == cbG2) 
             if (d.useTransparent) {
                 ty = d.transparent[1];
@@ -714,13 +691,11 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                             x2 = x2__prev3;
                         }
-
                     }
 
 
                     x = x__prev2;
                 }
-
             } {
                 {
                     nint x__prev2 = x;
@@ -746,9 +721,7 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             }
-
         else if (d.cb == cbG4) 
             if (d.useTransparent) {
                 ty = d.transparent[1];
@@ -777,13 +750,11 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                             x2 = x2__prev3;
                         }
-
                     }
 
 
                     x = x__prev2;
                 }
-
             } {
                 {
                     nint x__prev2 = x;
@@ -809,9 +780,7 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             }
-
         else if (d.cb == cbG8) 
             if (d.useTransparent) {
                 ty = d.transparent[1];
@@ -831,12 +800,10 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             } {
                 copy(gray.Pix[(int)pixOffset..], cdat);
                 pixOffset += gray.Stride;
             }
-
         else if (d.cb == cbGA8) 
             {
                 nint x__prev2 = x;
@@ -881,7 +848,6 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
                     x = x__prev2;
                 }
                 pixOffset += nrgba.Stride;
-
             } {
                 pix = rgba.Pix;
                 i = pixOffset;
@@ -902,9 +868,7 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
                     x = x__prev2;
                 }
                 pixOffset += rgba.Stride;
-
             }
-
         else if (d.cb == cbP1) 
             {
                 nint x__prev2 = x;
@@ -929,7 +893,6 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                         x2 = x2__prev3;
                     }
-
                 }
 
 
@@ -959,7 +922,6 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                         x2 = x2__prev3;
                     }
-
                 }
 
 
@@ -989,7 +951,6 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                         x2 = x2__prev3;
                     }
-
                 }
 
 
@@ -1009,9 +970,7 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             }
-
             copy(paletted.Pix[(int)pixOffset..], cdat);
             pixOffset += paletted.Stride;
         else if (d.cb == cbTCA8) 
@@ -1036,7 +995,6 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             } {
                 {
                     nint x__prev2 = x;
@@ -1049,9 +1007,7 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             }
-
         else if (d.cb == cbGA16) 
             {
                 nint x__prev2 = x;
@@ -1088,7 +1044,6 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             } {
                 {
                     nint x__prev2 = x;
@@ -1103,9 +1058,7 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
 
                     x = x__prev2;
                 }
-
             }
-
         else if (d.cb == cbTCA16) 
             {
                 nint x__prev2 = x;
@@ -1126,7 +1079,6 @@ private static (image.Image, error) readImagePass(this ptr<decoder> _addr_d, io.
     }
 
     return (img, error.As(null!)!);
-
 }
 
 // mergePassInto merges a single pass into a full sized image.
@@ -1183,7 +1135,6 @@ private static void mergePassInto(this ptr<decoder> _addr_d, image.Image dst, im
             s += bytesPerPixel;
         }
     }
-
 }
 
 private static error parseIDAT(this ptr<decoder> _addr_d, uint length) {
@@ -1196,7 +1147,6 @@ private static error parseIDAT(this ptr<decoder> _addr_d, uint length) {
         return error.As(err)!;
     }
     return error.As(d.verifyChecksum())!;
-
 }
 
 private static error parseIEND(this ptr<decoder> _addr_d, uint length) {
@@ -1206,7 +1156,6 @@ private static error parseIEND(this ptr<decoder> _addr_d, uint length) {
         return error.As(FormatError("bad IEND length"))!;
     }
     return error.As(d.verifyChecksum())!;
-
 }
 
 private static error parseChunk(this ptr<decoder> _addr_d) {
@@ -1220,7 +1169,6 @@ private static error parseChunk(this ptr<decoder> _addr_d) {
             return error.As(err)!;
         }
     }
-
     var length = binary.BigEndian.Uint32(d.tmp[..(int)4]);
     d.crc.Reset();
     d.crc.Write(d.tmp[(int)4..(int)8]); 
@@ -1233,7 +1181,6 @@ private static error parseChunk(this ptr<decoder> _addr_d) {
             }
             d.stage = dsSeenIHDR;
             return error.As(d.parseIHDR(length))!;
-
             break;
         case "PLTE": 
             if (d.stage != dsSeenIHDR) {
@@ -1241,7 +1188,6 @@ private static error parseChunk(this ptr<decoder> _addr_d) {
             }
             d.stage = dsSeenPLTE;
             return error.As(d.parsePLTE(length))!;
-
             break;
         case "tRNS": 
             if (cbPaletted(d.cb)) {
@@ -1254,7 +1200,6 @@ private static error parseChunk(this ptr<decoder> _addr_d) {
             }
             d.stage = dsSeentRNS;
             return error.As(d.parsetRNS(length))!;
-
             break;
         case "IDAT": 
             if (d.stage < dsSeenIHDR || d.stage > dsSeenIDAT || (d.stage == dsSeenIHDR && cbPaletted(d.cb))) {
@@ -1267,11 +1212,9 @@ private static error parseChunk(this ptr<decoder> _addr_d) {
                 // chunks, since the first call to parseIDAT below will consume all
                 // consecutive IDAT chunks required for decoding the image.
                 break;
-
             }
             d.stage = dsSeenIDAT;
             return error.As(d.parseIDAT(length))!;
-
             break;
         case "IEND": 
             if (d.stage != dsSeenIDAT) {
@@ -1279,7 +1222,6 @@ private static error parseChunk(this ptr<decoder> _addr_d) {
             }
             d.stage = dsSeenIEND;
             return error.As(d.parseIEND(length))!;
-
             break;
     }
     if (length > 0x7fffffff) {
@@ -1293,10 +1235,8 @@ private static error parseChunk(this ptr<decoder> _addr_d) {
         }
         d.crc.Write(ignored[..(int)n]);
         length -= uint32(n);
-
     }
     return error.As(d.verifyChecksum())!;
-
 }
 
 private static error verifyChecksum(this ptr<decoder> _addr_d) {
@@ -1309,12 +1249,10 @@ private static error verifyChecksum(this ptr<decoder> _addr_d) {
             return error.As(err)!;
         }
     }
-
     if (binary.BigEndian.Uint32(d.tmp[..(int)4]) != d.crc.Sum32()) {
         return error.As(FormatError("invalid checksum"))!;
     }
     return error.As(null!)!;
-
 }
 
 private static error checkHeader(this ptr<decoder> _addr_d) {
@@ -1328,7 +1266,6 @@ private static error checkHeader(this ptr<decoder> _addr_d) {
         return error.As(FormatError("not a PNG file"))!;
     }
     return error.As(null!)!;
-
 }
 
 // Decode reads a PNG image from r and returns it as an image.Image.
@@ -1352,7 +1289,6 @@ public static (image.Image, error) Decode(io.Reader r) {
         err = err__prev1;
 
     }
-
     while (d.stage != dsSeenIEND) {
         {
             var err__prev1 = err;
@@ -1369,10 +1305,8 @@ public static (image.Image, error) Decode(io.Reader r) {
             err = err__prev1;
 
         }
-
     }
     return (d.img, error.As(null!)!);
-
 }
 
 // DecodeConfig returns the color model and dimensions of a PNG image without
@@ -1396,7 +1330,6 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
         err = err__prev1;
 
     }
-
     while (true) {
         {
             var err__prev1 = err;
@@ -1413,7 +1346,6 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
             err = err__prev1;
 
         }
-
         var paletted = cbPaletted(d.cb);
         if (d.stage == dsSeenIHDR && !paletted) {
             break;
@@ -1443,7 +1375,6 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
     else if (d.cb == cbTCA16) 
         cm = color.NRGBA64Model;
         return (new image.Config(ColorModel:cm,Width:d.width,Height:d.height,), error.As(null!)!);
-
 }
 
 private static void init() {

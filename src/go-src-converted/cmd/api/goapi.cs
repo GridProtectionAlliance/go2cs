@@ -3,33 +3,33 @@
 // license that can be found in the LICENSE file.
 
 // Binary api computes the exported API of a set of Go packages.
-// package main -- go2cs converted at 2022 March 06 22:41:08 UTC
+
+// package main -- go2cs converted at 2022 March 13 05:52:13 UTC
 // Original source: C:\Program Files\Go\src\cmd\api\goapi.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using json = go.encoding.json_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using build = go.go.build_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
+namespace go;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using json = encoding.json_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using build = go.build_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using types = go.types_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -46,9 +46,7 @@ private static @string goCmd() {
             return path;
         }
     }
-
     return "go";
-
 }
 
 // Flags
@@ -69,7 +67,6 @@ private static @string contextName(ptr<build.Context> _addr_c) {
         s += fmt.Sprintf(" [%s]", c.Dir);
     }
     return s;
-
 }
 
 private static ptr<build.Context> parseContext(@string c) {
@@ -88,7 +85,6 @@ private static ptr<build.Context> parseContext(@string c) {
         }
     }
     return _addr_bc!;
-
 }
 
 private static void setContexts() {
@@ -130,7 +126,6 @@ private static void Main() => func((defer, _, _) => {
                 defer(wg.Done());
                 walkers[i] = NewWalker(_addr_context, filepath.Join(build.Default.GOROOT, "src"));
             }());
-
         }
         i = i__prev1;
         context = context__prev1;
@@ -154,13 +149,10 @@ private static void Main() => func((defer, _, _) => {
                 }
 
             }
-
             if (err != null) {
                 log.Fatalf("Import(%q): %v", name, err);
             }
-
             w.export(pkg);
-
         }        var ctxName = contextName(_addr_w.context);
         {
             var f__prev2 = f;
@@ -219,7 +211,6 @@ private static void Main() => func((defer, _, _) => {
         }
 
         return ;
-
     }
     slice<@string> required = default;
     foreach (var (_, file) in strings.Split(checkFile.val, ",")) {
@@ -227,7 +218,6 @@ private static void Main() => func((defer, _, _) => {
     }    var optional = fileFeatures(nextFile.val);
     var exception = fileFeatures(exceptFile.val);
     fail = !compareAPI(bw, features, required, optional, exception, allowNew.val);
-
 });
 
 // export emits the exported package features.
@@ -246,7 +236,6 @@ private static void export(this ptr<Walker> _addr_w, ptr<types.Package> _addr_pk
             w.emitObj(scope.Lookup(name));
         }
     }    pop();
-
 }
 
 private static map<@string, bool> set(slice<@string> items) {
@@ -263,7 +252,6 @@ private static @string featureWithoutContext(@string f) {
         return f;
     }
     return spaceParensRx.ReplaceAllString(f, "");
-
 }
 
 // portRemoved reports whether the given port-specific API feature is
@@ -313,7 +301,6 @@ private static bool compareAPI(io.Writer w, slice<@string> features, slice<@stri
                 fmt.Fprintf(w, "-%s\n", feature);
                 ok = false; // broke compatibility
             }
-
         else if (len(required) == 0 || (len(features) > 0 && required[0] > features[0])) 
             var newFeature = take(_addr_features);
             if (optionalSet[newFeature]) { 
@@ -321,7 +308,6 @@ private static bool compareAPI(io.Writer w, slice<@string> features, slice<@stri
                 // Delete it from the map so we can detect any upcoming features
                 // which were never seen.  (so we can clean up the nextFile)
                 delete(optionalSet, newFeature);
-
             }
             else
  {
@@ -329,14 +315,11 @@ private static bool compareAPI(io.Writer w, slice<@string> features, slice<@stri
                 if (!allowAdd) {
                     ok = false; // we're in lock-down mode for next release
                 }
-
             }
-
         else 
             take(_addr_required);
             take(_addr_features);
-        
-    } 
+            } 
 
     // In next file, but not in API.
     slice<@string> missing = default;
@@ -362,7 +345,6 @@ private static bool compareAPI(io.Writer w, slice<@string> features, slice<@stri
     }
 
     return ;
-
 }
 
 // aliasReplacer applies type aliases to earlier API files,
@@ -391,7 +373,6 @@ private static slice<@string> fileFeatures(@string filename) {
             nonblank = append(nonblank, line);
         }
     }    return nonblank;
-
 }
 
 private static var fset = token.NewFileSet();
@@ -447,7 +428,6 @@ private static (ptr<ast.File>, error) parseFile(this ptr<Walker> _addr_w, @strin
 
     }
 
-
     var (f, err) = parser.ParseFile(fset, filename, null, 0);
     if (err != null) {
         return (_addr_null!, error.As(err)!);
@@ -455,7 +435,6 @@ private static (ptr<ast.File>, error) parseFile(this ptr<Walker> _addr_w, @strin
     parsedFileCache[filename] = f;
 
     return (_addr_f!, error.As(null!)!);
-
 }
 
 // Disable before debugging non-obvious errors from the type-checker.
@@ -510,7 +489,6 @@ private static @string tagKey(@string dir, ptr<build.Context> _addr_context, sli
     }
 
     return key;
-
 }
 
 private partial struct listImports {
@@ -597,28 +575,23 @@ private static void loadImports(this ptr<Walker> _addr_w) => func((defer, _, _) 
                 }
 
             }
-
             importDir[pkg.ImportPath] = pkg.Dir;
             if (len(pkg.ImportMap) > 0) {
                 importMap[pkg.Dir] = make_map<@string, @string>(len(pkg.ImportMap));
             }
-
             foreach (var (k, v) in pkg.ImportMap) {
                 importMap[pkg.Dir][k] = v;
             }
-
         }
 
         sort.Strings(stdPackages);
         imports = new listImports(stdPackages:stdPackages,importMap:importMap,importDir:importDir,);
         imports, _ = listCache.LoadOrStore(name, imports);
-
     }
     listImports li = imports._<listImports>();
     w.stdPackages = li.stdPackages;
     w.importDir = li.importDir;
     w.importMap = li.importMap;
-
 });
 
 // listEnv returns the process environment to use when invoking 'go list' for
@@ -638,7 +611,6 @@ private static slice<@string> listEnv(ptr<build.Context> _addr_c) {
         environ = append(environ, "CGO_ENABLED=0");
     }
     return environ;
-
 }
 
 // Importing is a sentinel taking the place in Walker.imported
@@ -667,14 +639,12 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Walker> _addr_w, 
         }
     }
 
-
     var pkg = w.imported[name];
     if (pkg != null) {
         if (pkg == _addr_importing) {
             log.Fatalf("cycle importing package %q", name);
         }
         return (_addr_pkg!, error.As(null!)!);
-
     }
     w.imported[name] = _addr_importing; 
 
@@ -690,7 +660,6 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Walker> _addr_w, 
             log.Panicf("no source in tree for import %q (from import %s in %s): %v", name, fromPath, fromDir, err);
         }
     }
-
 
     var context = w.context;
     if (context == null) {
@@ -716,11 +685,9 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Walker> _addr_w, 
                     pkg = pkg__prev3;
 
                 }
-
             }
 
         }
-
     }
     var (info, err) = context.ImportDir(dir, 0);
     if (err != null) {
@@ -732,9 +699,7 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Walker> _addr_w, 
             }
 
         }
-
         log.Fatalf("pkg %q, dir %q: ScanDir: %v", name, dir, err);
-
     }
     if (usePkgCache) {
         {
@@ -746,7 +711,6 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Walker> _addr_w, 
             }
 
         }
-
     }
     var filenames = append(append(new slice<@string>(new @string[] {  }), info.GoFiles), info.CgoFiles); 
 
@@ -758,7 +722,6 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Walker> _addr_w, 
             log.Fatalf("error parsing package %s: %s", name, err);
         }
         files = append(files, f);
-
     }    types.Config conf = new types.Config(IgnoreFuncBodies:true,FakeImportC:true,Importer:w,);
     pkg, err = conf.Check(name, fset, files, null);
     if (err != null) {
@@ -767,14 +730,12 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Walker> _addr_w, 
             ctxt = fmt.Sprintf("%s-%s", w.context.GOOS, w.context.GOARCH);
         }
         log.Fatalf("error typechecking package %s: %s (%s)", name, err, ctxt);
-
     }
     if (usePkgCache) {
         pkgCache[key] = pkg;
     }
     w.imported[name] = pkg;
     return (_addr_pkg!, error.As(null!)!);
-
 }
 
 // pushScope enters a new scope (walking a package, type, node, etc)
@@ -793,9 +754,7 @@ private static Action pushScope(this ptr<Walker> _addr_w, @string name) {
             log.Fatalf("attempt to leave scope %q, but scope is currently %#v", name, w.scope);
         }
         w.scope = w.scope[..(int)len(w.scope) - 1];
-
     };
-
 }
 
 private static slice<@string> sortedMethodNames(ptr<types.Interface> _addr_typ) {
@@ -913,7 +872,6 @@ private static void writeType(this ptr<Walker> _addr_w, ptr<bytes.Buffer> _addr_
             break;
         }
     }
-
 });
 
 private static void writeSignature(this ptr<Walker> _addr_w, ptr<bytes.Buffer> _addr_buf, ptr<types.Signature> _addr_sig) {
@@ -939,7 +897,6 @@ private static void writeSignature(this ptr<Walker> _addr_w, ptr<bytes.Buffer> _
                 break;
         }
     }
-
 }
 
 private static void writeParams(this ptr<Walker> _addr_w, ptr<bytes.Buffer> _addr_buf, ptr<types.Tuple> _addr_t, bool variadic) {
@@ -959,10 +916,8 @@ private static void writeParams(this ptr<Walker> _addr_w, ptr<bytes.Buffer> _add
             typ = typ._<ptr<types.Slice>>().Elem();
         }
         w.writeType(buf, typ);
-
     }
     buf.WriteByte(')');
-
 }
 
 private static @string typeString(this ptr<Walker> _addr_w, types.Type typ) {
@@ -998,7 +953,6 @@ private static void emitObj(this ptr<Walker> _addr_w, types.Object obj) => func(
  {
                 w.emitf("const %s = %s  // %s", obj.Name(), short, exact);
             }
-
             break;
         case ptr<types.Var> obj:
             w.emitf("var %s %s", obj.Name(), w.typeString(obj.Type()));
@@ -1016,7 +970,6 @@ private static void emitObj(this ptr<Walker> _addr_w, types.Object obj) => func(
             break;
         }
     }
-
 });
 
 private static void emitType(this ptr<Walker> _addr_w, ptr<types.TypeName> _addr_obj) {
@@ -1089,7 +1042,6 @@ private static void emitType(this ptr<Walker> _addr_w, ptr<types.TypeName> _addr
         i = i__prev1;
         n = n__prev1;
     }
-
 }
 
 private static void emitStructType(this ptr<Walker> _addr_w, @string name, ptr<types.Struct> _addr_typ) => func((defer, _, _) => {
@@ -1111,9 +1063,7 @@ private static void emitStructType(this ptr<Walker> _addr_w, @string name, ptr<t
             continue;
         }
         w.emitf("%s %s", f.Name(), w.typeString(typ));
-
     }
-
 });
 
 private static void emitIfaceType(this ptr<Walker> _addr_w, @string name, ptr<types.Interface> _addr_typ) {
@@ -1134,7 +1084,6 @@ private static void emitIfaceType(this ptr<Walker> _addr_w, @string name, ptr<ty
         }
         methodNames = append(methodNames, m.Name());
         w.emitf("%s%s", m.Name(), w.signatureString(m.Type()._<ptr<types.Signature>>()));
-
     }
 
     if (!complete) { 
@@ -1146,7 +1095,6 @@ private static void emitIfaceType(this ptr<Walker> _addr_w, @string name, ptr<ty
         // because a method signature emitted during the last loop
         // will disappear.)
         w.emitf("unexported methods");
-
     }
     pop();
 
@@ -1159,7 +1107,6 @@ private static void emitIfaceType(this ptr<Walker> _addr_w, @string name, ptr<ty
     }
     sort.Strings(methodNames);
     w.emitf("type %s interface { %s }", name, strings.Join(methodNames, ", "));
-
 }
 
 private static void emitFunc(this ptr<Walker> _addr_w, ptr<types.Func> _addr_f) => func((_, panic, _) => {
@@ -1171,7 +1118,6 @@ private static void emitFunc(this ptr<Walker> _addr_w, ptr<types.Func> _addr_f) 
         panic("method considered a regular function: " + f.String());
     }
     w.emitf("func %s%s", f.Name(), w.signatureString(sig));
-
 });
 
 private static void emitMethod(this ptr<Walker> _addr_w, ptr<types.Selection> _addr_m) {
@@ -1191,7 +1137,6 @@ private static void emitMethod(this ptr<Walker> _addr_w, ptr<types.Selection> _a
             }
 
         }
-
         {
             ptr<types.Named> obj = base._<ptr<types.Named>>().Obj();
 
@@ -1200,10 +1145,8 @@ private static void emitMethod(this ptr<Walker> _addr_w, ptr<types.Selection> _a
             }
 
         }
-
     }
     w.emitf("method (%s) %s%s", w.typeString(recv), m.Obj().Name(), w.signatureString(sig));
-
 }
 
 private static void emitf(this ptr<Walker> _addr_w, @string format, params object[] args) => func((_, panic, _) => {
@@ -1221,7 +1164,6 @@ private static void emitf(this ptr<Walker> _addr_w, @string format, params objec
             panic("duplicate feature inserted: " + f);
         }
     }
-
     w.features[f] = true;
 
     if (verbose.val) {

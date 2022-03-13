@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gccgoimporter -- go2cs converted at 2022 March 06 23:32:40 UTC
+// package gccgoimporter -- go2cs converted at 2022 March 13 06:42:20 UTC
 // import "go/internal/gccgoimporter" ==> using gccgoimporter = go.go.@internal.gccgoimporter_package
 // Original source: C:\Program Files\Go\src\go\internal\gccgoimporter\gccgoinstallation.go
-using bufio = go.bufio_package;
-using types = go.go.types_package;
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go.go.@internal;
+
+using bufio = bufio_package;
+using types = go.types_package;
+using exec = @internal.execabs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// Information about a specific installation of gccgo.
 
 public static partial class gccgoimporter_package {
 
-    // Information about a specific installation of gccgo.
 public partial struct GccgoInstallation {
     public @string GccVersion; // Target triple (e.g. x86_64-unknown-linux-gnu).
     public @string TargetTriple; // Built-in library paths used by this installation.
@@ -53,8 +55,7 @@ private static error InitFromDriver(this ptr<GccgoInstallation> _addr_inst, @str
                     inst.LibPaths = append(inst.LibPaths, arg[(int)2..]);
                 }
             }
-        
-    }
+            }
 
     argv = append(new slice<@string>(new @string[] { "-dumpversion" }), args);
     var (stdout, err) = exec.Command(gccgoPath, argv).Output();
@@ -64,7 +65,6 @@ private static error InitFromDriver(this ptr<GccgoInstallation> _addr_inst, @str
     inst.GccVersion = strings.TrimSpace(string(stdout));
 
     return ;
-
 }
 
 // Return the list of export search paths for this GccgoInstallation.
@@ -86,11 +86,9 @@ private static slice<@string> SearchPaths(this ptr<GccgoInstallation> _addr_inst
             continue;
         }
         paths = append(paths, spath);
-
     }    paths = append(paths, inst.LibPaths);
 
     return ;
-
 }
 
 // Return an importer that searches incpaths followed by the gcc installation's

@@ -4,62 +4,63 @@
 
 // This file implements typechecking of expressions.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:36 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:25:59 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\expr.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using math = go.math_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
-public static partial class types2_package {
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using math = math_package;
 
-    /*
-    Basic algorithm:
 
-    Expressions are checked recursively, top down. Expression checker functions
-    are generally of the form:
+/*
+Basic algorithm:
 
-      func f(x *operand, e *syntax.Expr, ...)
+Expressions are checked recursively, top down. Expression checker functions
+are generally of the form:
 
-    where e is the expression to be checked, and x is the result of the check.
-    The check performed by f may fail in which case x.mode == invalid, and
-    related error messages will have been issued by f.
+  func f(x *operand, e *syntax.Expr, ...)
 
-    If a hint argument is present, it is the composite literal element type
-    of an outer composite literal; it is used to type-check composite literal
-    elements that have no explicit type specification in the source
-    (e.g.: []T{{...}, {...}}, the hint is the type T in this case).
+where e is the expression to be checked, and x is the result of the check.
+The check performed by f may fail in which case x.mode == invalid, and
+related error messages will have been issued by f.
 
-    All expressions are checked via rawExpr, which dispatches according
-    to expression kind. Upon returning, rawExpr is recording the types and
-    constant values for all expressions that have an untyped type (those types
-    may change on the way up in the expression tree). Usually these are constants,
-    but the results of comparisons or non-constant shifts of untyped constants
-    may also be untyped, but not constant.
+If a hint argument is present, it is the composite literal element type
+of an outer composite literal; it is used to type-check composite literal
+elements that have no explicit type specification in the source
+(e.g.: []T{{...}, {...}}, the hint is the type T in this case).
 
-    Untyped expressions may eventually become fully typed (i.e., not untyped),
-    typically when the value is assigned to a variable, or is used otherwise.
-    The updateExprType method is used to record this final type and update
-    the recorded types: the type-checked expression tree is again traversed down,
-    and the new type is propagated as needed. Untyped constant expression values
-    that become fully typed must now be representable by the full type (constant
-    sub-expression trees are left alone except for their roots). This mechanism
-    ensures that a client sees the actual (run-time) type an untyped value would
-    have. It also permits type-checking of lhs shift operands "as if the shift
-    were not present": when updateExprType visits an untyped lhs shift operand
-    and assigns it it's final type, that type must be an integer type, and a
-    constant lhs must be representable as an integer.
+All expressions are checked via rawExpr, which dispatches according
+to expression kind. Upon returning, rawExpr is recording the types and
+constant values for all expressions that have an untyped type (those types
+may change on the way up in the expression tree). Usually these are constants,
+but the results of comparisons or non-constant shifts of untyped constants
+may also be untyped, but not constant.
 
-    When an expression gets its final type, either on the way out from rawExpr,
-    on the way down in updateExprType, or at the end of the type checker run,
-    the type (and constant value, if any) is recorded via Info.Types, if present.
-    */
+Untyped expressions may eventually become fully typed (i.e., not untyped),
+typically when the value is assigned to a variable, or is used otherwise.
+The updateExprType method is used to record this final type and update
+the recorded types: the type-checked expression tree is again traversed down,
+and the new type is propagated as needed. Untyped constant expression values
+that become fully typed must now be representable by the full type (constant
+sub-expression trees are left alone except for their roots). This mechanism
+ensures that a client sees the actual (run-time) type an untyped value would
+have. It also permits type-checking of lhs shift operands "as if the shift
+were not present": when updateExprType visits an untyped lhs shift operand
+and assigns it it's final type, that type must be an integer type, and a
+constant lhs must be representable as an integer.
+
+When an expression gets its final type, either on the way out from rawExpr,
+on the way down in updateExprType, or at the end of the type checker run,
+the type (and constant value, if any) is recorded via Info.Types, if present.
+*/
+
+
+using System;public static partial class types2_package {
+
 private partial struct opPredicates { // : map<syntax.Operator, Func<Type, bool>>
 }
 
@@ -68,7 +69,6 @@ private static opPredicates unaryOpPredicates = default;
 private static void init() { 
     // Setting unaryOpPredicates in init avoids declaration cycles.
     unaryOpPredicates = new opPredicates(syntax.Add:isNumeric,syntax.Sub:isNumeric,syntax.Xor:isInteger,syntax.Not:isBoolean,);
-
 }
 
 private static bool op(this ptr<Checker> _addr_check, opPredicates m, ptr<operand> _addr_x, syntax.Operator op) {
@@ -87,11 +87,8 @@ private static bool op(this ptr<Checker> _addr_check, opPredicates m, ptr<operan
  {
                     check.errorf(x, invalidOp + "operator %s not defined for %s", op, x);
                 }
-
                 return false;
-
             }
-
         }
         else
  {
@@ -99,9 +96,7 @@ private static bool op(this ptr<Checker> _addr_check, opPredicates m, ptr<operan
             return false;
         }
     }
-
     return true;
-
 }
 
 // overflow checks that the constant x is representable by its type.
@@ -127,14 +122,12 @@ private static void overflow(this ptr<Checker> _addr_check, ptr<operand> _addr_x
         }
     }
 
-
     if (x.val.Kind() == constant.Unknown) { 
         // TODO(gri) We should report exactly what went wrong. At the
         //           moment we don't have the (go/constant) API for that.
         //           See also TODO in go/constant/value.go.
         check.error(pos, "constant result is not representable");
         return ;
-
     }
     if (isTyped(x.typ)) {
         check.representable(x, asBasic(x.typ));
@@ -168,7 +161,6 @@ private static @string opName(ptr<syntax.Operation> _addr_e) {
         }
     }
     return "";
-
 }
 
 private static array<@string> op2str1 = new array<@string>(InitKeyedValues<@string>((syntax.Xor, "bitwise complement")));
@@ -199,7 +191,6 @@ private static void unary(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
             }
 
         }
-
         x.mode = value;
         x.typ = addr(new Pointer(base:x.typ));
         return ;
@@ -227,7 +218,6 @@ private static void unary(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
         if (x.val.Kind() == constant.Unknown) { 
             // nothing to do (and don't cause an error below in the overflow check)
             return ;
-
         }
         nuint prec = default;
         if (isUnsigned(x.typ)) {
@@ -237,7 +227,6 @@ private static void unary(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
         x.expr = e;
         check.overflow(x);
         return ;
-
     }
     x.mode = value; 
     // x.typ remains unchanged
@@ -253,7 +242,6 @@ private static bool isComparison(syntax.Operator op) {
     if (op == syntax.Eql || op == syntax.Neq || op == syntax.Lss || op == syntax.Leq || op == syntax.Gtr || op == syntax.Geq) 
         return true;
         return false;
-
 }
 
 private static bool fitsFloat32(constant.Value x) {
@@ -269,7 +257,6 @@ private static constant.Value roundFloat32(constant.Value x) {
         return constant.MakeFloat64(f);
     }
     return null;
-
 }
 
 private static bool fitsFloat64(constant.Value x) {
@@ -283,7 +270,6 @@ private static constant.Value roundFloat64(constant.Value x) {
         return constant.MakeFloat64(f);
     }
     return null;
-
 }
 
 // representableConst reports whether x can be represented as
@@ -356,7 +342,6 @@ private static bool representableConst(constant.Value x, ptr<Checker> _addr_chec
                         s = s__prev2;
 
                     }
-
                     return 0 <= x;
                 else if (typ.kind == Uint8) 
                     const nint s = 8;
@@ -374,8 +359,7 @@ private static bool representableConst(constant.Value x, ptr<Checker> _addr_chec
                     return 0 <= x;
                 else 
                     unreachable();
-                
-            } 
+                            } 
             // x does not fit into int64
 
             x = x__prev1;
@@ -458,7 +442,6 @@ private static bool representableConst(constant.Value x, ptr<Checker> _addr_chec
     else if (isBoolean(typ)) 
         return x.Kind() == constant.Bool;
         return false;
-
 }
 
 // An errorCode is a (constant) value uniquely identifing a specific error.
@@ -484,7 +467,6 @@ private static readonly var _IncompatibleAssign = 4;
 private static readonly var _InvalidIfaceAssign = 5;
 private static readonly var _InvalidChanAssign = 6;
 
-
 // representable checks that a constant operand is representable in the given
 // basic type.
 private static void representable(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<Basic> _addr_typ) {
@@ -500,7 +482,6 @@ private static void representable(this ptr<Checker> _addr_check, ptr<operand> _a
     }
     assert(v != null);
     x.val = v;
-
 }
 
 // representation returns the representation of the constant operand x as the
@@ -532,13 +513,10 @@ private static (constant.Value, errorCode) representation(this ptr<Checker> _add
  {
                 return (null, _NumericOverflow);
             }
-
         }
         return (null, _InvalidConstVal);
-
     }
     return (v, 0);
-
 }
 
 private static void invalidConversion(this ptr<Checker> _addr_check, errorCode code, ptr<operand> _addr_x, Type target) {
@@ -552,7 +530,6 @@ private static void invalidConversion(this ptr<Checker> _addr_check, errorCode c
     else if (code == _NumericOverflow) 
         msg = "%s overflows %s";
         check.errorf(x, msg, x, target);
-
 }
 
 // updateExprType updates the type of x to typ and invokes itself
@@ -702,9 +679,7 @@ private static void updateExprType(this ptr<Checker> _addr_check, syntax.Expr x,
                     if (debug) {
                         unimplemented();
                     }
-
                     return ;
-
                 } 
                 // If x is a constant, the operands were constants.
                 // The operands don't need to be updated since they
@@ -714,17 +689,14 @@ private static void updateExprType(this ptr<Checker> _addr_check, syntax.Expr x,
                 if (old.val != null) {
                     break;
                 }
-
                 check.updateExprType(x.X, typ, final);
                 break;
-
             } 
 
             // binary expression
             if (old.val != null) {
                 break; // see comment for unary expressions
             }
-
             if (isComparison(x.Op)) { 
                 // The result type is independent of operand types
                 // and the operand types must have final types.
@@ -733,16 +705,13 @@ private static void updateExprType(this ptr<Checker> _addr_check, syntax.Expr x,
                 // The result type depends only on lhs operand.
                 // The rhs type was updated when checking the shift.
                 check.updateExprType(x.X, typ, final);
-
             }
             else
  { 
                 // The operand types match the result type.
                 check.updateExprType(x.X, typ, final);
                 check.updateExprType(x.Y, typ, final);
-
             }
-
             break;
         default:
         {
@@ -782,7 +751,6 @@ private static void updateExprType(this ptr<Checker> _addr_check, syntax.Expr x,
         }
     }
     check.recordTypeAndValue(x, old.mode, typ, old.val);
-
 }
 
 // updateExprVal updates the value of x to val.
@@ -797,7 +765,6 @@ private static void updateExprVal(this ptr<Checker> _addr_check, syntax.Expr x, 
             check.untyped[x] = info;
         }
     }
-
 }
 
 // convertUntyped attempts to set the type of an untyped value to the target type.
@@ -851,7 +818,6 @@ private static (Type, constant.Value, errorCode) implicitTypeAndValue(this ptr<C
             return (null, null, _InvalidUntypedConversion);
         }
         return (x.typ, null, 0);
-
     }
     if (x.isNil()) {
         assert(isUntyped(x.typ));
@@ -859,7 +825,6 @@ private static (Type, constant.Value, errorCode) implicitTypeAndValue(this ptr<C
             return (target, null, 0);
         }
         return (null, null, _InvalidUntypedConversion);
-
     }
     switch (optype(target).type()) {
         case ptr<Basic> t:
@@ -907,7 +872,6 @@ private static (Type, constant.Value, errorCode) implicitTypeAndValue(this ptr<C
             if (!t.Empty()) {
                 return (null, null, _InvalidUntypedConversion); // cannot assign untyped values to non-empty interfaces
             }
-
             return (Default(x.typ), null, 0); // default type for nil is nil
             break;
         default:
@@ -918,7 +882,6 @@ private static (Type, constant.Value, errorCode) implicitTypeAndValue(this ptr<C
         }
     }
     return (target, null, 0);
-
 }
 
 private static void comparison(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<operand> _addr_y, syntax.Operator op) {
@@ -954,7 +917,6 @@ private static void comparison(this ptr<Checker> _addr_check, ptr<operand> _addr
  {
                 err = check.sprintf("operator %s not defined for %s", op, typ);
             }
-
         }
     }
     else
@@ -966,7 +928,6 @@ private static void comparison(this ptr<Checker> _addr_check, ptr<operand> _addr
         check.errorf(x, invalidOp + "cannot compare %s %s %s (%s)", x.expr, op, y.expr, err);
         x.mode = invalid;
         return ;
-
     }
     if (x.mode == constant_ && y.mode == constant_) {
         x.val = constant.MakeBool(constant.Compare(x.val, op2tok[op], y.val)); 
@@ -982,10 +943,8 @@ private static void comparison(this ptr<Checker> _addr_check, ptr<operand> _addr
         // is the respective default type.
         check.updateExprType(x.expr, Default(x.typ), true);
         check.updateExprType(y.expr, Default(y.typ), true);
-
     }
     x.typ = Typ[UntypedBool];
-
 }
 
 // If e != nil, it must be the shift expression; it may be nil for non-constant shifts.
@@ -1010,7 +969,6 @@ private static void shift(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
         check.errorf(x, invalidOp + "shifted operand %s must be integer", x);
         x.mode = invalid;
         return ;
-
     }
     if (y.mode == constant_) {
         var yval = constant.ToInt(y.val); // consider -1, 1.0, but not -1.1
@@ -1046,9 +1004,7 @@ private static void shift(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
                 if (!isInteger(x.typ)) {
                     x.typ = Typ[UntypedInt];
                 }
-
                 return ;
-
             } 
             // rhs must be within reasonable bounds in constant shifts
             const nint shiftBound = 1023 - 1 + 52; // so we can express smallestFloat64 (see issue #44057)
@@ -1071,7 +1027,6 @@ private static void shift(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
             x.expr = e;
             check.overflow(x);
             return ;
-
         }
         if (isUntyped(x.typ)) { 
             // spec: "If the left operand of a non-constant shift
@@ -1106,7 +1061,6 @@ private static void shift(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
             // keep x's type
             x.mode = value;
             return ;
-
         }
     }
     if (!isInteger(x.typ)) {
@@ -1115,7 +1069,6 @@ private static void shift(this ptr<Checker> _addr_check, ptr<operand> _addr_x, p
         return ;
     }
     x.mode = value;
-
 }
 
 private static opPredicates binaryOpPredicates = default;
@@ -1123,7 +1076,6 @@ private static opPredicates binaryOpPredicates = default;
 private static void init() { 
     // Setting binaryOpPredicates in init avoids declaration cycles.
     binaryOpPredicates = new opPredicates(syntax.Add:isNumericOrString,syntax.Sub:isNumeric,syntax.Mul:isNumeric,syntax.Div:isNumeric,syntax.Rem:isInteger,syntax.And:isInteger,syntax.Or:isInteger,syntax.Xor:isInteger,syntax.AndNot:isInteger,syntax.AndAnd:isBoolean,syntax.OrOr:isBoolean,);
-
 }
 
 // If e != nil, it must be the binary expression; it may be nil for non-constant expressions
@@ -1170,7 +1122,6 @@ private static void binary(this ptr<Checker> _addr_check, ptr<operand> _addr_x, 
         }
         x.mode = invalid;
         return ;
-
     }
     if (!check.op(binaryOpPredicates, x, op)) {
         x.mode = invalid;
@@ -1193,7 +1144,6 @@ private static void binary(this ptr<Checker> _addr_check, ptr<operand> _addr_x, 
                 x.mode = invalid;
                 return ;
             }
-
         }
     }
     if (x.mode == constant_ && y.mode == constant_) { 
@@ -1202,7 +1152,6 @@ private static void binary(this ptr<Checker> _addr_check, ptr<operand> _addr_x, 
             x.val = constant.MakeUnknown(); 
             // x.typ is unchanged
             return ;
-
         }
         var tok = op2tok[op];
         if (op == syntax.Div && isInteger(x.typ)) {
@@ -1212,7 +1161,6 @@ private static void binary(this ptr<Checker> _addr_check, ptr<operand> _addr_x, 
         x.expr = e;
         check.overflow(x);
         return ;
-
     }
     x.mode = value; 
     // x.typ is unchanged
@@ -1226,7 +1174,6 @@ private partial struct exprKind { // : nint
 private static readonly exprKind conversion = iota;
 private static readonly var expression = 0;
 private static readonly var statement = 1;
-
 
 // rawExpr typechecks expression e and initializes x with the expression
 // value or type. If an error occurred, x.mode is set to invalid.
@@ -1248,7 +1195,6 @@ private static exprKind rawExpr(this ptr<Checker> _addr_check, ptr<operand> _add
     check.record(x);
 
     return kind;
-
 });
 
 // exprInternal contains the core of type checking of expressions.
@@ -1282,7 +1228,6 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                 goto Error; // error reported during parsing
             }
 
-
             if (e.Kind == syntax.IntLit || e.Kind == syntax.FloatLit || e.Kind == syntax.ImagLit) 
                 check.langCompat(e); 
                 // The max. mantissa precision for untyped numeric values
@@ -1300,7 +1245,6 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                     check.errorf(e, "excessively long constant: %s... (%d chars)", e.Value[..(int)10], len(e.Value));
                     goto Error;
                 }
-
                         x.setConst(e.Kind, e.Value);
             if (x.mode == invalid) { 
                 // The parser already establishes syntactic correctness.
@@ -1309,9 +1253,7 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                 // should return an error describing the issue.
                 check.errorf(e, "malformed constant: %s", e.Value);
                 goto Error;
-
             }
-
             break;
         case ptr<syntax.FuncLit> e:
             {
@@ -1331,20 +1273,16 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                         check.later(() => {
                             check.funcBody(decl, "<function literal>", sig, e.Body, iota);
                         });
-
                     }
                 else
                     x.mode = value;
                     x.typ = sig;
-
                 } {
                     check.errorf(e, invalidAST + "invalid function literal %v", e);
                     goto Error;
                 }
 
             }
-
-
             break;
         case ptr<syntax.CompositeLit> e:
             Type typ = default;            Type @base = default;
@@ -1366,11 +1304,9 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                         typ = addr(new Array(len:-1,elem:check.varType(atyp.Elem)));
                         base = typ;
                         break;
-
                     }
 
                 }
-
                 typ = check.typ(e.Type);
                 base = typ;
             else if (hint != null) 
@@ -1411,7 +1347,6 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                                         check.errorf(kv, "invalid field name %s in struct literal", kv.Key);
                                         continue;
                                     }
-
                                     var i = fieldIndex(utyp.fields, check.pkg, key.Value);
                                     if (i < 0) {
                                         if (check.conf.CompilerErrorMessages) {
@@ -1421,11 +1356,8 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
  {
                                             check.errorf(kv.Key, "unknown field %s in struct literal", key.Value);
                                         }
-
                                         continue;
-
                                     }
-
                                     var fld = fields[i];
                                     check.recordUse(key, fld);
                                     var etyp = fld.typ;
@@ -1435,9 +1367,7 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                                         check.errorf(kv, "duplicate field name %s in struct literal", key.Value);
                                         continue;
                                     }
-
                                     visited[i] = true;
-
                                 }
                         else
 
@@ -1465,7 +1395,6 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                                         kv = kv__prev2;
 
                                     }
-
                                     check.expr(x, e);
                                     if (i >= len(fields)) {
                                         check.error(x, "too many values in struct literal");
@@ -1477,10 +1406,8 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                                         check.errorf(x, "implicit assignment to unexported field %s in %s literal", fld.name, typ);
                                         continue;
                                     }
-
                                     etyp = fld.typ;
                                     check.assignment(x, etyp, "struct literal");
-
                                 }
 
                                 i = i__prev1;
@@ -1491,12 +1418,9 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                                 check.error(e.Rbrace, "too few values in struct literal"); 
                                 // ok to continue
                             }
-
                         }
 
                     }
-
-
                     break;
                 case ptr<Array> utyp:
                     if (utyp.elem == null) {
@@ -1521,9 +1445,7 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                         if (e.Type != null) {
                             check.recordTypeAndValue(e.Type, typexpr, utyp, null);
                         }
-
                     }
-
                     break;
                 case ptr<Slice> utyp:
                     if (utyp.elem == null) {
@@ -1566,22 +1488,17 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                                     }
                                 else
                                     visited[xkey] = append(visited[xkey], x.typ);
-
                                 } {
                                     _, duplicate = visited[xkey];
                                     visited[xkey] = null;
                                 }
-
                                 if (duplicate) {
                                     check.errorf(x, "duplicate key %s in map literal", x.val);
                                     continue;
                                 }
-
                             }
-
                             check.exprWithHint(x, kv.Value, utyp.elem);
                             check.assignment(x, utyp.elem, "map literal");
-
                         }
 
                         e = e__prev1;
@@ -1605,15 +1522,12 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                                     // if it's an externally defined struct key or not. Going
                                     // forward anyway can lead to other errors. Give up instead.
                                     e = kv.Value;
-
                                 }
 
                                 kv = kv__prev1;
 
                             }
-
                             check.use(e);
-
                         } 
                         // if utyp is invalid, an error was reported before
 
@@ -1624,7 +1538,6 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                         check.errorf(e, "invalid composite literal type %s", typ);
                         goto Error;
                     }
-
                     break;
                 }
 
@@ -1671,12 +1584,10 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                 check.error(e, invalidAST + "invalid use of AssertExpr");
                 goto Error;
             }
-
             var T = check.varType(e.Type);
             if (T == Typ[Invalid]) {
                 goto Error;
             }
-
             check.typeAssertion(posFor(x), x, xtyp, T);
             x.mode = commaok;
             x.typ = T;
@@ -1742,23 +1653,17 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
                             typ = typ__prev3;
 
                         }
-
                                         break;
-
                 }
-
                 check.unary(x, e);
                 if (x.mode == invalid) {
                     goto Error;
                 }
-
                 if (e.Op == syntax.Recv) {
                     x.expr = e;
                     return statement; // receive operations may appear in statement context
                 }
-
                 break;
-
             } 
 
             // binary expression
@@ -1766,7 +1671,6 @@ private static exprKind exprInternal(this ptr<Checker> _addr_check, ptr<operand>
             if (x.mode == invalid) {
                 goto Error;
             }
-
             break;
         case ptr<syntax.KeyValueExpr> e:
             check.error(e, invalidAST + "no key:value expected");
@@ -1874,7 +1778,6 @@ private static void keyVal(constant.Value x) {
             v = v__prev1;
 
         }
-
         {
             var v__prev1 = v;
 
@@ -1887,7 +1790,6 @@ private static void keyVal(constant.Value x) {
             v = v__prev1;
 
         }
-
     else if (x.Kind() == constant.Float) 
         var (v, _) = constant.Float64Val(x);
         return v;
@@ -1896,7 +1798,6 @@ private static void keyVal(constant.Value x) {
         var (i, _) = constant.Float64Val(constant.Imag(x));
         return complex(r, i);
         return x;
-
 }
 
 // typeAssertion checks that x.(T) is legal; xtyp must be the type of x.
@@ -1997,7 +1898,6 @@ private static void exclude(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
  {
                 msg = "%s used as value or type";
             }
-
         else if (x.mode == builtin) 
             msg = "%s must be called";
         else if (x.mode == typexpr) 
@@ -2006,7 +1906,6 @@ private static void exclude(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
             unreachable();
                 check.errorf(x, msg, x);
         x.mode = invalid;
-
     }
 }
 
@@ -2027,7 +1926,6 @@ private static void singleValue(this ptr<Checker> _addr_check, ptr<operand> _add
             }
 
         }
-
     }
 }
 

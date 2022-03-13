@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2022 March 06 22:25:08 UTC
+// package gob -- go2cs converted at 2022 March 13 05:39:40 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Program Files\Go\src\encoding\gob\encoder.go
-using errors = go.errors_package;
-using io = go.io_package;
-using reflect = go.reflect_package;
-using sync = go.sync_package;
-
 namespace go.encoding;
+
+using errors = errors_package;
+using io = io_package;
+using reflect = reflect_package;
+using sync = sync_package;
+
+
+// An Encoder manages the transmission of type and data information to the
+// other side of a connection.  It is safe for concurrent use by multiple
+// goroutines.
 
 public static partial class gob_package {
 
-    // An Encoder manages the transmission of type and data information to the
-    // other side of a connection.  It is safe for concurrent use by multiple
-    // goroutines.
 public partial struct Encoder {
     public sync.Mutex mutex; // each item must be sent atomically
     public slice<io.Writer> w; // where to send the data
@@ -69,7 +71,6 @@ private static void setError(this ptr<Encoder> _addr_enc, error err) {
 
     if (enc.err == null) { // remember the first.
         enc.err = err;
-
     }
 }
 
@@ -118,7 +119,6 @@ private static bool sendActualType(this ptr<Encoder> _addr_enc, io.Writer w, ptr
             return false;
         }
     }
-
     var (info, err) = getTypeInfo(ut);
     if (err != null) {
         enc.setError(err);
@@ -153,7 +153,6 @@ private static bool sendActualType(this ptr<Encoder> _addr_enc, io.Writer w, ptr
 
     }
     return true;
-
 }
 
 // sendType sends the type info to the other side, if necessary.
@@ -167,7 +166,6 @@ private static bool sendType(this ptr<Encoder> _addr_enc, io.Writer w, ptr<encod
         // The rules are different: regardless of the underlying type's representation,
         // we need to tell the other side that the base type is a GobEncoder.
         return enc.sendActualType(w, state, ut, ut.@base);
-
     }
     {
         var rt = ut.@base;
@@ -199,7 +197,6 @@ private static bool sendType(this ptr<Encoder> _addr_enc, io.Writer w, ptr<encod
     }
 
     return enc.sendActualType(w, state, ut, ut.@base);
-
 }
 
 // Encode transmits the data item represented by the empty interface value,
@@ -245,10 +242,8 @@ private static void sendTypeDescriptor(this ptr<Encoder> _addr_enc, io.Writer w,
                 }
                 enc.sent[rt] = info.id;
             }
-
         }
     }
-
 }
 
 // sendTypeId sends the id, which must have already been defined.
@@ -259,7 +254,6 @@ private static void sendTypeId(this ptr<Encoder> _addr_enc, ptr<encoderState> _a
  
     // Identify the type of this top-level value.
     state.encodeInt(int64(enc.sent[ut.@base]));
-
 }
 
 // EncodeValue transmits the data item represented by the reflection value,
@@ -300,7 +294,6 @@ private static error EncodeValue(this ptr<Encoder> _addr_enc, reflect.Value valu
     }
     enc.freeEncoderState(state);
     return error.As(enc.err)!;
-
 });
 
 } // end gob_package

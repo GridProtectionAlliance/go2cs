@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objw -- go2cs converted at 2022 March 06 22:47:44 UTC
+// package objw -- go2cs converted at 2022 March 13 05:59:00 UTC
 // import "cmd/compile/internal/objw" ==> using objw = go.cmd.compile.@internal.objw_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\objw\objw.go
-using @base = go.cmd.compile.@internal.@base_package;
-using bitvec = go.cmd.compile.@internal.bitvec_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using bitvec = cmd.compile.@internal.bitvec_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+
+
+// Uint8 writes an unsigned byte v into s at offset off,
+// and returns the next unused offset (i.e., off+1).
 
 public static partial class objw_package {
 
-    // Uint8 writes an unsigned byte v into s at offset off,
-    // and returns the next unused offset (i.e., off+1).
 public static nint Uint8(ptr<obj.LSym> _addr_s, nint off, byte v) {
     ref obj.LSym s = ref _addr_s.val;
 
@@ -50,7 +52,6 @@ public static nint UintN(ptr<obj.LSym> _addr_s, nint off, ulong v, nint wid) {
     }
     s.WriteInt(@base.Ctxt, int64(off), wid, int64(v));
     return off + wid;
-
 }
 
 public static nint SymPtr(ptr<obj.LSym> _addr_s, nint off, ptr<obj.LSym> _addr_x, nint xoff) {
@@ -99,7 +100,6 @@ public static void Global(ptr<obj.LSym> _addr_s, int width, short flags) {
         flags &= obj.LOCAL;
     }
     @base.Ctxt.Globl(s, int64(width), int(flags));
-
 }
 
 // Bitvec writes the contents of bv into s as sequence of bytes
@@ -118,7 +118,6 @@ public static nint BitVec(ptr<obj.LSym> _addr_s, nint off, bitvec.BitVec bv) {
         }
     }
     return off;
-
 }
 
 } // end objw_package

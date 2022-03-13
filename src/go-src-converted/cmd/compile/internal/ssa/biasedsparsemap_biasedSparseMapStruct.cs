@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:18 UTC
+//     Generated on 2022 March 13 06:00:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct biasedSparseMap
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace @internal
             public static implicit operator biasedSparseMap(NilType nil) => default(biasedSparseMap);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static biasedSparseMap biasedSparseMap_cast(dynamic value)
         {
             return new biasedSparseMap(ref value.s, value.first);

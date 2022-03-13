@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:15:46 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:45 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\file.go
-using os = go.os_package;
-
 namespace go;
+
+using os = os_package;
 
 public static partial class net_package {
 
-    // BUG(mikio): On JS and Windows, the FileConn, FileListener and
-    // FilePacketConn functions are not implemented.
+// BUG(mikio): On JS and Windows, the FileConn, FileListener and
+// FilePacketConn functions are not implemented.
+
 private partial struct fileAddr { // : @string
 }
 
@@ -37,7 +38,6 @@ public static (Conn, error) FileConn(ptr<os.File> _addr_f) {
         err = addr(new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err));
     }
     return ;
-
 }
 
 // FileListener returns a copy of the network listener corresponding
@@ -54,7 +54,6 @@ public static (Listener, error) FileListener(ptr<os.File> _addr_f) {
         err = addr(new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err));
     }
     return ;
-
 }
 
 // FilePacketConn returns a copy of the packet network connection
@@ -71,7 +70,6 @@ public static (PacketConn, error) FilePacketConn(ptr<os.File> _addr_f) {
         err = addr(new OpError(Op:"file",Net:"file+net",Source:nil,Addr:fileAddr(f.Name()),Err:err));
     }
     return ;
-
 }
 
 } // end net_package

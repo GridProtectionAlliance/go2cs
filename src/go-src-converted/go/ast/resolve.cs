@@ -4,15 +4,15 @@
 
 // This file implements NewPackage.
 
-// package ast -- go2cs converted at 2022 March 06 22:42:59 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:09 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\resolve.go
-using fmt = go.fmt_package;
-using scanner = go.go.scanner_package;
-using token = go.go.token_package;
-using strconv = go.strconv_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
+using scanner = go.scanner_package;
+using token = go.token_package;
+using strconv = strconv_package;
 
 public static partial class ast_package {
 
@@ -44,7 +44,6 @@ private static void declare(this ptr<pkgBuilder> _addr_p, ptr<Scope> _addr_scope
     if (alt == null && altScope != null) { 
         // see if there is a conflicting declaration in altScope
         alt = altScope.Lookup(obj.Name);
-
     }
     if (alt != null) {
         @string prevDecl = "";
@@ -56,9 +55,7 @@ private static void declare(this ptr<pkgBuilder> _addr_p, ptr<Scope> _addr_scope
             }
 
         }
-
         p.error(obj.Pos(), fmt.Sprintf("%s redeclared in this block%s", obj.Name, prevDecl));
-
     }
 }
 
@@ -77,10 +74,8 @@ private static bool resolve(ptr<Scope> _addr_scope, ptr<Ident> _addr_ident) {
             }
 
         }
-
     }
     return false;
-
 }
 
 // An Importer resolves import paths to package Objects.
@@ -214,9 +209,7 @@ public static (ptr<Package>, error) NewPackage(ptr<token.FileSet> _addr_fset, ma
                     obj.Decl = spec;
                     obj.Data = pkg.Data;
                     p.declare(fileScope, pkgScope, obj);
-
                 }
-
             } 
 
             // resolve identifiers
@@ -226,9 +219,7 @@ public static (ptr<Package>, error) NewPackage(ptr<token.FileSet> _addr_fset, ma
                 // with missing imports, identifiers might get resolved
                 // incorrectly to universe objects)
                 pkgScope.Outer = null;
-
             }
-
             nint i = 0;
             foreach (var (_, ident) in file.Unresolved) {
                 if (!resolve(_addr_fileScope, _addr_ident)) {
@@ -245,7 +236,6 @@ public static (ptr<Package>, error) NewPackage(ptr<token.FileSet> _addr_fset, ma
 
     p.errors.Sort();
     return (addr(new Package(pkgName,pkgScope,imports,files)), error.As(p.errors.Err())!);
-
 }
 
 } // end ast_package

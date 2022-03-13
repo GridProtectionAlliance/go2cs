@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bitvec -- go2cs converted at 2022 March 06 22:47:45 UTC
+// package bitvec -- go2cs converted at 2022 March 13 05:59:01 UTC
 // import "cmd/compile/internal/bitvec" ==> using bitvec = go.cmd.compile.@internal.bitvec_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\bitvec\bv.go
-using bits = go.math.bits_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-
 namespace go.cmd.compile.@internal;
+
+using bits = math.bits_package;
+
+using @base = cmd.compile.@internal.@base_package;
 
 public static partial class bitvec_package {
 
 private static readonly nint wordBits = 32;
 private static readonly var wordMask = wordBits - 1;
 private static readonly nint wordShift = 5;
-
 
 // A BitVec is a bit vector.
 public partial struct BitVec {
@@ -42,7 +41,6 @@ public static Bulk NewBulk(int nbit, int count) {
         @base.Fatalf("NewBulk too big: nbit=%d count=%d nword=%d size=%d", nbit, count, nword, size);
     }
     return new Bulk(words:make([]uint32,size),nbit:nbit,nword:nword,);
-
 }
 
 private static BitVec Next(this ptr<Bulk> _addr_b) {
@@ -62,7 +60,6 @@ public static bool Eq(this BitVec bv1, BitVec bv2) {
             return false;
         }
     }    return true;
-
 }
 
 public static void Copy(this BitVec dst, BitVec src) {
@@ -75,7 +72,6 @@ public static bool Get(this BitVec bv, int i) {
     }
     var mask = uint32(1 << (int)(uint(i % wordBits)));
     return bv.B[i >> (int)(wordShift)] & mask != 0;
-
 }
 
 public static void Set(this BitVec bv, int i) {
@@ -84,7 +80,6 @@ public static void Set(this BitVec bv, int i) {
     }
     var mask = uint32(1 << (int)(uint(i % wordBits)));
     bv.B[i / wordBits] |= mask;
-
 }
 
 public static void Unset(this BitVec bv, int i) {
@@ -93,7 +88,6 @@ public static void Unset(this BitVec bv, int i) {
     }
     var mask = uint32(1 << (int)(uint(i % wordBits)));
     bv.B[i / wordBits] &= mask;
-
 }
 
 // bvnext returns the smallest index >= i for which bvget(bv, i) == 1.
@@ -116,7 +110,6 @@ public static int Next(this BitVec bv, int i) {
     i += int32(bits.TrailingZeros32(w));
 
     return i;
-
 }
 
 public static bool IsEmpty(this BitVec bv) {
@@ -125,7 +118,6 @@ public static bool IsEmpty(this BitVec bv) {
             return false;
         }
     }    return true;
-
 }
 
 public static void Not(this BitVec bv) {
@@ -173,10 +165,8 @@ public static @string String(this BitVec bv) {
             ch = '1';
         }
         s[2 + i] = ch;
-
     }
     return string(s);
-
 }
 
 public static void Clear(this BitVec bv) {

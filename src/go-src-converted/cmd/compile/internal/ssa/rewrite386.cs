@@ -1,13 +1,13 @@
 // Code generated from gen/386.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 22:52:19 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:03:53 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewrite386.go
-using math = go.math_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using math = math_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -694,7 +694,6 @@ private static bool rewriteValue386(ptr<Value> _addr_v) {
     else if (v.Op == OpZeromask) 
         return rewriteValue386_OpZeromask(_addr_v);
         return false;
-
 }
 private static bool rewriteValue386_Op386ADCL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -714,22 +713,18 @@ private static bool rewriteValue386_Op386ADCL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 var f = v_2;
                 v.reset(Op386ADCLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, f);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -750,20 +745,17 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(Op386ADDLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL (SHLLconst [c] x) (SHRLconst [d] x))
     // cond: d == 32-c
@@ -779,30 +771,25 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRLconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(Op386ROLLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL <t> (SHLLconst x [c]) (SHRWconst x [d]))
     // cond: c < 16 && d == int16(16-c) && t.Size() == 2
@@ -819,30 +806,25 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(c < 16 && d == int16(16 - c) && t.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(Op386ROLWconst);
                 v.AuxInt = int16ToAuxInt(int16(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL <t> (SHLLconst x [c]) (SHRBconst x [d]))
     // cond: c < 8 && d == int8(8-c) && t.Size() == 1
@@ -859,30 +841,25 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRBconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(c < 8 && d == int8(8 - c) && t.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(Op386ROLBconst);
                 v.AuxInt = int8ToAuxInt(int8(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (SHLLconst [3] y))
     // result: (LEAL8 x y)
@@ -898,19 +875,16 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[0];
                 v.reset(Op386LEAL8);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (SHLLconst [2] y))
     // result: (LEAL4 x y)
@@ -926,19 +900,16 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(Op386LEAL4);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (SHLLconst [1] y))
     // result: (LEAL2 x y)
@@ -954,19 +925,16 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(Op386LEAL2);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (ADDL y y))
     // result: (LEAL2 x y)
@@ -982,23 +950,19 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[1];
                 if (y != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(Op386LEAL2);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (ADDL x y))
     // result: (LEAL2 y x)
@@ -1014,7 +978,6 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -1026,23 +989,19 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         y = v_1_1;
                         v.reset(Op386LEAL2);
                         v.AddArg2(y, x);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL (ADDLconst [c] x) y)
     // result: (LEAL1 [c] x y)
@@ -1057,7 +1016,6 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 y = v_1;
@@ -1065,14 +1023,12 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (LEAL [c] {s} y))
     // cond: x.Op != OpSB && y.Op != OpSB
@@ -1089,27 +1045,23 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var s = auxToSym(v_1.Aux);
                 y = v_1.Args[0];
                 if (!(x.Op != OpSB && y.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(Op386LEAL1);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -1127,7 +1079,6 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -1135,20 +1086,17 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386ADDLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDL x (NEGL y))
     // result: (SUBL x y)
@@ -1164,22 +1112,18 @@ private static bool rewriteValue386_Op386ADDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(Op386SUBL);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDLcarry(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1198,21 +1142,17 @@ private static bool rewriteValue386_Op386ADDLcarry(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(Op386ADDLconstcarry);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1231,7 +1171,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL [d] {s} x))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1252,7 +1191,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDLconst [c] x:(SP))
     // result: (LEAL [c] x)
@@ -1266,7 +1204,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL1 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1288,7 +1225,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL2 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1310,7 +1246,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL4 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1332,7 +1267,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] (LEAL8 [d] {s} x y))
     // cond: is32Bit(int64(c)+int64(d))
@@ -1354,7 +1288,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDLconst [c] x)
     // cond: c==0
@@ -1367,7 +1300,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c+d])
@@ -1380,7 +1312,6 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(c + d);
         return true;
-
     } 
     // match: (ADDLconst [c] (ADDLconst [d] x))
     // result: (ADDLconst [c+d] x)
@@ -1395,10 +1326,8 @@ private static bool rewriteValue386_Op386ADDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1427,7 +1356,6 @@ private static bool rewriteValue386_Op386ADDLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ADDLconstmodify [valoff1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: valoff1.canAdd32(off2) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -1450,10 +1378,8 @@ private static bool rewriteValue386_Op386ADDLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1484,7 +1410,6 @@ private static bool rewriteValue386_Op386ADDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDLload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -1508,10 +1433,8 @@ private static bool rewriteValue386_Op386ADDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1542,7 +1465,6 @@ private static bool rewriteValue386_Op386ADDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ADDLmodify [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -1566,10 +1488,8 @@ private static bool rewriteValue386_Op386ADDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1590,7 +1510,6 @@ private static bool rewriteValue386_Op386ADDSD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -1598,21 +1517,17 @@ private static bool rewriteValue386_Op386ADDSD(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386ADDSDload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1643,7 +1558,6 @@ private static bool rewriteValue386_Op386ADDSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDSDload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -1667,10 +1581,8 @@ private static bool rewriteValue386_Op386ADDSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1691,7 +1603,6 @@ private static bool rewriteValue386_Op386ADDSS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -1699,21 +1610,17 @@ private static bool rewriteValue386_Op386ADDSS(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386ADDSSload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ADDSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1744,7 +1651,6 @@ private static bool rewriteValue386_Op386ADDSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ADDSSload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -1768,10 +1674,8 @@ private static bool rewriteValue386_Op386ADDSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ANDL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1792,20 +1696,17 @@ private static bool rewriteValue386_Op386ANDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(Op386ANDLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -1823,7 +1724,6 @@ private static bool rewriteValue386_Op386ANDL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -1831,20 +1731,17 @@ private static bool rewriteValue386_Op386ANDL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386ANDLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDL x x)
     // result: x
@@ -1855,10 +1752,8 @@ private static bool rewriteValue386_Op386ANDL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ANDLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1877,7 +1772,6 @@ private static bool rewriteValue386_Op386ANDLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDLconst [c] _)
     // cond: c==0
@@ -1890,7 +1784,6 @@ private static bool rewriteValue386_Op386ANDLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDLconst [c] x)
     // cond: c==-1
@@ -1903,7 +1796,6 @@ private static bool rewriteValue386_Op386ANDLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c&d])
@@ -1916,10 +1808,8 @@ private static bool rewriteValue386_Op386ANDLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(c & d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ANDLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1948,7 +1838,6 @@ private static bool rewriteValue386_Op386ANDLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ANDLconstmodify [valoff1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: valoff1.canAdd32(off2) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -1971,10 +1860,8 @@ private static bool rewriteValue386_Op386ANDLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ANDLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2005,7 +1892,6 @@ private static bool rewriteValue386_Op386ANDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ANDLload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -2029,10 +1915,8 @@ private static bool rewriteValue386_Op386ANDLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ANDLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2063,7 +1947,6 @@ private static bool rewriteValue386_Op386ANDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ANDLmodify [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -2087,10 +1970,8 @@ private static bool rewriteValue386_Op386ANDLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2110,7 +1991,6 @@ private static bool rewriteValue386_Op386CMPB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPB (MOVLconst [c]) x)
     // result: (InvertFlags (CMPBconst x [int8(c)]))
@@ -2126,7 +2006,6 @@ private static bool rewriteValue386_Op386CMPB(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPB x y)
     // cond: canonLessThan(x,y)
@@ -2142,7 +2021,6 @@ private static bool rewriteValue386_Op386CMPB(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPB l:(MOVBload {sym} [off] ptr mem) x)
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -2165,7 +2043,6 @@ private static bool rewriteValue386_Op386CMPB(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (CMPB x l:(MOVBload {sym} [off] ptr mem))
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -2190,10 +2067,8 @@ private static bool rewriteValue386_Op386CMPB(ptr<Value> _addr_v) {
         v0.AddArg3(ptr, x, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2214,7 +2089,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagEQ);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)<y && uint8(x)<uint8(y)
@@ -2230,7 +2104,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)<y && uint8(x)>uint8(y)
@@ -2246,7 +2119,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)>y && uint8(x)<uint8(y)
@@ -2262,7 +2134,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPBconst (MOVLconst [x]) [y])
     // cond: int8(x)>y && uint8(x)>uint8(y)
@@ -2278,7 +2149,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPBconst (ANDLconst _ [m]) [n])
     // cond: 0 <= int8(m) && int8(m) < n
@@ -2294,7 +2164,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPBconst l:(ANDL x y) [0])
     // cond: l.Uses==1
@@ -2315,7 +2184,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         v.reset(Op386TESTB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPBconst l:(ANDLconst [c] x) [0])
     // cond: l.Uses==1
@@ -2337,7 +2205,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPBconst x [0])
     // result: (TESTB x x)
@@ -2349,7 +2216,6 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         v.reset(Op386TESTB);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPBconst l:(MOVBload {sym} [off] ptr mem) [c])
     // cond: l.Uses == 1 && clobber(l)
@@ -2374,10 +2240,8 @@ private static bool rewriteValue386_Op386CMPBconst(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2401,10 +2265,8 @@ private static bool rewriteValue386_Op386CMPBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2424,7 +2286,6 @@ private static bool rewriteValue386_Op386CMPL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPL (MOVLconst [c]) x)
     // result: (InvertFlags (CMPLconst x [c]))
@@ -2440,7 +2301,6 @@ private static bool rewriteValue386_Op386CMPL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPL x y)
     // cond: canonLessThan(x,y)
@@ -2456,7 +2316,6 @@ private static bool rewriteValue386_Op386CMPL(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPL l:(MOVLload {sym} [off] ptr mem) x)
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -2479,7 +2338,6 @@ private static bool rewriteValue386_Op386CMPL(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (CMPL x l:(MOVLload {sym} [off] ptr mem))
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -2504,10 +2362,8 @@ private static bool rewriteValue386_Op386CMPL(ptr<Value> _addr_v) {
         v0.AddArg3(ptr, x, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2528,7 +2384,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagEQ);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x<y && uint32(x)<uint32(y)
@@ -2544,7 +2399,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x<y && uint32(x)>uint32(y)
@@ -2560,7 +2414,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x>y && uint32(x)<uint32(y)
@@ -2576,7 +2429,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPLconst (MOVLconst [x]) [y])
     // cond: x>y && uint32(x)>uint32(y)
@@ -2592,7 +2444,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPLconst (SHRLconst _ [c]) [n])
     // cond: 0 <= n && 0 < c && c <= 32 && (1<<uint64(32-c)) <= uint64(n)
@@ -2608,7 +2459,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPLconst (ANDLconst _ [m]) [n])
     // cond: 0 <= m && m < n
@@ -2624,7 +2474,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPLconst l:(ANDL x y) [0])
     // cond: l.Uses==1
@@ -2645,7 +2494,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         v.reset(Op386TESTL);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPLconst l:(ANDLconst [c] x) [0])
     // cond: l.Uses==1
@@ -2667,7 +2515,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPLconst x [0])
     // result: (TESTL x x)
@@ -2679,7 +2526,6 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         v.reset(Op386TESTL);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPLconst l:(MOVLload {sym} [off] ptr mem) [c])
     // cond: l.Uses == 1 && clobber(l)
@@ -2704,10 +2550,8 @@ private static bool rewriteValue386_Op386CMPLconst(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2731,10 +2575,8 @@ private static bool rewriteValue386_Op386CMPLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2754,7 +2596,6 @@ private static bool rewriteValue386_Op386CMPW(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPW (MOVLconst [c]) x)
     // result: (InvertFlags (CMPWconst x [int16(c)]))
@@ -2770,7 +2611,6 @@ private static bool rewriteValue386_Op386CMPW(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPW x y)
     // cond: canonLessThan(x,y)
@@ -2786,7 +2626,6 @@ private static bool rewriteValue386_Op386CMPW(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPW l:(MOVWload {sym} [off] ptr mem) x)
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -2809,7 +2648,6 @@ private static bool rewriteValue386_Op386CMPW(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (CMPW x l:(MOVWload {sym} [off] ptr mem))
     // cond: canMergeLoad(v, l) && clobber(l)
@@ -2834,10 +2672,8 @@ private static bool rewriteValue386_Op386CMPW(ptr<Value> _addr_v) {
         v0.AddArg3(ptr, x, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2858,7 +2694,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagEQ);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)<y && uint16(x)<uint16(y)
@@ -2874,7 +2709,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)<y && uint16(x)>uint16(y)
@@ -2890,7 +2724,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_UGT);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)>y && uint16(x)<uint16(y)
@@ -2906,7 +2739,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagGT_ULT);
         return true;
-
     } 
     // match: (CMPWconst (MOVLconst [x]) [y])
     // cond: int16(x)>y && uint16(x)>uint16(y)
@@ -2922,7 +2754,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagGT_UGT);
         return true;
-
     } 
     // match: (CMPWconst (ANDLconst _ [m]) [n])
     // cond: 0 <= int16(m) && int16(m) < n
@@ -2938,7 +2769,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(Op386FlagLT_ULT);
         return true;
-
     } 
     // match: (CMPWconst l:(ANDL x y) [0])
     // cond: l.Uses==1
@@ -2959,7 +2789,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         v.reset(Op386TESTW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPWconst l:(ANDLconst [c] x) [0])
     // cond: l.Uses==1
@@ -2981,7 +2810,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPWconst x [0])
     // result: (TESTW x x)
@@ -2993,7 +2821,6 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         v.reset(Op386TESTW);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPWconst l:(MOVWload {sym} [off] ptr mem) [c])
     // cond: l.Uses == 1 && clobber(l)
@@ -3018,10 +2845,8 @@ private static bool rewriteValue386_Op386CMPWconst(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386CMPWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3045,10 +2870,8 @@ private static bool rewriteValue386_Op386CMPWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386DIVSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3076,10 +2899,8 @@ private static bool rewriteValue386_Op386DIVSD(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386DIVSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3110,7 +2931,6 @@ private static bool rewriteValue386_Op386DIVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (DIVSDload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -3134,10 +2954,8 @@ private static bool rewriteValue386_Op386DIVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386DIVSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3165,10 +2983,8 @@ private static bool rewriteValue386_Op386DIVSS(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386DIVSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3199,7 +3015,6 @@ private static bool rewriteValue386_Op386DIVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (DIVSSload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -3223,10 +3038,8 @@ private static bool rewriteValue386_Op386DIVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3251,7 +3064,6 @@ private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAL [c] {s} (ADDL x y))
     // cond: x.Op != OpSB && y.Op != OpSB
@@ -3275,18 +3087,15 @@ private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.reset(Op386LEAL1);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (LEAL [off1] {sym1} (LEAL [off2] {sym2} x))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3308,7 +3117,6 @@ private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEAL [off1] {sym1} (LEAL1 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3331,7 +3139,6 @@ private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL [off1] {sym1} (LEAL2 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3354,7 +3161,6 @@ private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL [off1] {sym1} (LEAL4 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3377,7 +3183,6 @@ private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL [off1] {sym1} (LEAL8 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3400,10 +3205,8 @@ private static bool rewriteValue386_Op386LEAL(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3426,27 +3229,23 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var d = auxIntToInt32(v_0.AuxInt);
                 var x = v_0.Args[0];
                 var y = v_1;
                 if (!(is32Bit(int64(c) + int64(d)) && x.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(Op386LEAL1);
                 v.AuxInt = int32ToAuxInt(c + d);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [c] {s} x (SHLLconst [1] y))
     // result: (LEAL2 [c] {s} x y)
@@ -3464,21 +3263,18 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(Op386LEAL2);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [c] {s} x (SHLLconst [2] y))
     // result: (LEAL4 [c] {s} x y)
@@ -3496,21 +3292,18 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(Op386LEAL4);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [c] {s} x (SHLLconst [3] y))
     // result: (LEAL8 [c] {s} x y)
@@ -3528,21 +3321,18 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(Op386LEAL8);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [off1] {sym1} (LEAL [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -3560,7 +3350,6 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off2 = auxIntToInt32(v_0.AuxInt);
                 var sym2 = auxToSym(v_0.Aux);
                 x = v_0.Args[0];
@@ -3568,20 +3357,17 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                 if (!(is32Bit(int64(off1) + int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(Op386LEAL1);
                 v.AuxInt = int32ToAuxInt(off1 + off2);
                 v.Aux = symToAux(mergeSym(sym1, sym2));
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [off1] {sym1} x (LEAL1 [off2] {sym2} y y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3600,27 +3386,23 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off2 = auxIntToInt32(v_1.AuxInt);
                 sym2 = auxToSym(v_1.Aux);
                 y = v_1.Args[1];
                 if (y != v_1.Args[0] || !(is32Bit(int64(off1) + int64(off2)) && canMergeSym(sym1, sym2))) {
                     continue;
                 }
-
                 v.reset(Op386LEAL2);
                 v.AuxInt = int32ToAuxInt(off1 + off2);
                 v.Aux = symToAux(mergeSym(sym1, sym2));
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [off1] {sym1} x (LEAL1 [off2] {sym2} x y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -3639,7 +3421,6 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off2 = auxIntToInt32(v_1.AuxInt);
                 sym2 = auxToSym(v_1.Aux);
                 _ = v_1.Args[1];
@@ -3653,29 +3434,24 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         y = v_1_1;
                         if (!(is32Bit(int64(off1) + int64(off2)) && canMergeSym(sym1, sym2))) {
                             continue;
                         }
-
                         v.reset(Op386LEAL2);
                         v.AuxInt = int32ToAuxInt(off1 + off2);
                         v.Aux = symToAux(mergeSym(sym1, sym2));
                         v.AddArg2(y, x);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (LEAL1 [0] {nil} x y)
     // result: (ADDL x y)
@@ -3688,10 +3464,8 @@ private static bool rewriteValue386_Op386LEAL1(ptr<Value> _addr_v) {
         v.reset(Op386ADDL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386LEAL2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3718,7 +3492,6 @@ private static bool rewriteValue386_Op386LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [c] {s} x (ADDLconst [d] y))
     // cond: is32Bit(int64(c)+2*int64(d)) && y.Op != OpSB
@@ -3740,7 +3513,6 @@ private static bool rewriteValue386_Op386LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [c] {s} x (SHLLconst [1] y))
     // result: (LEAL4 [c] {s} x y)
@@ -3757,7 +3529,6 @@ private static bool rewriteValue386_Op386LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [c] {s} x (SHLLconst [2] y))
     // result: (LEAL8 [c] {s} x y)
@@ -3774,7 +3545,6 @@ private static bool rewriteValue386_Op386LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [off1] {sym1} (LEAL [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -3797,7 +3567,6 @@ private static bool rewriteValue386_Op386LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL2 [off1] {sym} x (LEAL1 [off2] {nil} y y))
     // cond: is32Bit(int64(off1)+2*int64(off2))
@@ -3822,10 +3591,8 @@ private static bool rewriteValue386_Op386LEAL2(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386LEAL4(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3852,7 +3619,6 @@ private static bool rewriteValue386_Op386LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL4 [c] {s} x (ADDLconst [d] y))
     // cond: is32Bit(int64(c)+4*int64(d)) && y.Op != OpSB
@@ -3874,7 +3640,6 @@ private static bool rewriteValue386_Op386LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL4 [c] {s} x (SHLLconst [1] y))
     // result: (LEAL8 [c] {s} x y)
@@ -3891,7 +3656,6 @@ private static bool rewriteValue386_Op386LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL4 [off1] {sym1} (LEAL [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -3914,7 +3678,6 @@ private static bool rewriteValue386_Op386LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL4 [off1] {sym} x (LEAL1 [off2] {nil} y y))
     // cond: is32Bit(int64(off1)+4*int64(off2))
@@ -3939,10 +3702,8 @@ private static bool rewriteValue386_Op386LEAL4(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386LEAL8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3969,7 +3730,6 @@ private static bool rewriteValue386_Op386LEAL8(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL8 [c] {s} x (ADDLconst [d] y))
     // cond: is32Bit(int64(c)+8*int64(d)) && y.Op != OpSB
@@ -3991,7 +3751,6 @@ private static bool rewriteValue386_Op386LEAL8(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (LEAL8 [off1] {sym1} (LEAL [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -4014,10 +3773,8 @@ private static bool rewriteValue386_Op386LEAL8(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVBLSX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4046,7 +3803,6 @@ private static bool rewriteValue386_Op386MOVBLSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBLSX (ANDLconst [c] x))
     // cond: c & 0x80 == 0
@@ -4064,10 +3820,8 @@ private static bool rewriteValue386_Op386MOVBLSX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7f);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVBLSXload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4096,7 +3850,6 @@ private static bool rewriteValue386_Op386MOVBLSXload(ptr<Value> _addr_v) {
         v.reset(Op386MOVBLSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBLSXload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -4119,10 +3872,8 @@ private static bool rewriteValue386_Op386MOVBLSXload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVBLZX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4151,7 +3902,6 @@ private static bool rewriteValue386_Op386MOVBLZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBLZX (ANDLconst [c] x))
     // result: (ANDLconst [c & 0xff] x)
@@ -4165,10 +3915,8 @@ private static bool rewriteValue386_Op386MOVBLZX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xff);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4197,7 +3945,6 @@ private static bool rewriteValue386_Op386MOVBload(ptr<Value> _addr_v) {
         v.reset(Op386MOVBLZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym} (ADDLconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -4219,7 +3966,6 @@ private static bool rewriteValue386_Op386MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -4242,7 +3988,6 @@ private static bool rewriteValue386_Op386MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVBload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -4256,10 +4001,8 @@ private static bool rewriteValue386_Op386MOVBload(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(int32(read8(sym, int64(off))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4285,7 +4028,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBLZX x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -4303,7 +4045,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym} (ADDLconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -4326,7 +4067,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVLconst [c]) mem)
     // result: (MOVBstoreconst [makeValAndOff(c,off)] {sym} ptr mem)
@@ -4344,7 +4084,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -4368,7 +4107,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRWconst [8] w) x:(MOVBstore [i-1] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4394,7 +4132,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRLconst [8] w) x:(MOVBstore [i-1] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4420,7 +4157,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x:(MOVBstore {s} [i+1] p (SHRWconst [8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4447,7 +4183,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x:(MOVBstore {s} [i+1] p (SHRLconst [8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4474,7 +4209,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SHRLconst [j] w) x:(MOVBstore [i-1] {s} p w0:(SHRLconst [j-8] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4505,7 +4239,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRWconst [8] w) x:(MOVBstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -4532,7 +4265,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRLconst [8] w) x:(MOVBstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -4559,7 +4291,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p0 w x:(MOVBstore {s} [i] p1 (SHRWconst [8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -4584,7 +4315,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p0 w x:(MOVBstore {s} [i] p1 (SHRLconst [8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -4609,7 +4339,6 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p1 (SHRLconst [j] w) x:(MOVBstore [i] {s} p0 w0:(SHRLconst [j-8] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -4638,10 +4367,8 @@ private static bool rewriteValue386_Op386MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVBstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4670,7 +4397,6 @@ private static bool rewriteValue386_Op386MOVBstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [sc] {sym1} (LEAL [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && sc.canAdd32(off) && (ptr.Op != OpSB || !config.ctxt.Flag_shared)
@@ -4693,7 +4419,6 @@ private static bool rewriteValue386_Op386MOVBstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [c] {s} p x:(MOVBstoreconst [a] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 1 == c.Off() && clobber(x)
@@ -4719,7 +4444,6 @@ private static bool rewriteValue386_Op386MOVBstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [a] {s} p x:(MOVBstoreconst [c] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 1 == c.Off() && clobber(x)
@@ -4745,7 +4469,6 @@ private static bool rewriteValue386_Op386MOVBstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [c] {s} p1 x:(MOVBstoreconst [a] {s} p0 mem))
     // cond: x.Uses == 1 && a.Off() == c.Off() && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -4772,7 +4495,6 @@ private static bool rewriteValue386_Op386MOVBstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p0, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [a] {s} p0 x:(MOVBstoreconst [c] {s} p1 mem))
     // cond: x.Uses == 1 && a.Off() == c.Off() && sequentialAddresses(p0, p1, 1) && clobber(x)
@@ -4799,10 +4521,8 @@ private static bool rewriteValue386_Op386MOVBstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4830,7 +4550,6 @@ private static bool rewriteValue386_Op386MOVLload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVLload [off1] {sym} (ADDLconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -4852,7 +4571,6 @@ private static bool rewriteValue386_Op386MOVLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -4875,7 +4593,6 @@ private static bool rewriteValue386_Op386MOVLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVLload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -4889,10 +4606,8 @@ private static bool rewriteValue386_Op386MOVLload(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(int32(read32(sym, int64(off), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4923,7 +4638,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVLstore [off] {sym} ptr (MOVLconst [c]) mem)
     // result: (MOVLstoreconst [makeValAndOff(c,off)] {sym} ptr mem)
@@ -4941,7 +4655,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -4965,7 +4678,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ADDLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -4988,7 +4700,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ANDLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -5011,7 +4722,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ORLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -5034,7 +4744,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(XORLload x [off] {sym} ptr mem) mem)
     // cond: y.Uses==1 && clobber(y)
@@ -5057,7 +4766,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ADDL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5084,30 +4792,25 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(Op386ADDLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(SUBL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5134,7 +4837,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ANDL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5161,30 +4863,25 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(Op386ANDLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ORL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5211,30 +4908,25 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(Op386ORLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(XORL l:(MOVLload [off] {sym} ptr mem) x) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5261,30 +4953,25 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
                     continue;
                 (_i0, y_0, y_1) = (_i0 + 1, y_1, y_0);
                 }
-
                 mem = l.Args[1];
                 if (ptr != l.Args[0]) {
                     continue;
                 }
-
                 x = y_1;
                 if (mem != v_2 || !(y.Uses == 1 && l.Uses == 1 && clobber(y, l))) {
                     continue;
                 }
-
                 v.reset(Op386XORLmodify);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(ptr, x, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ADDLconst [c] l:(MOVLload [off] {sym} ptr mem)) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5311,7 +4998,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ANDLconst [c] l:(MOVLload [off] {sym} ptr mem)) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5338,7 +5024,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(ORLconst [c] l:(MOVLload [off] {sym} ptr mem)) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5365,7 +5050,6 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstore {sym} [off] ptr y:(XORLconst [c] l:(MOVLload [off] {sym} ptr mem)) mem)
     // cond: y.Uses==1 && l.Uses==1 && clobber(y, l)
@@ -5392,10 +5076,8 @@ private static bool rewriteValue386_Op386MOVLstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVLstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5424,7 +5106,6 @@ private static bool rewriteValue386_Op386MOVLstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVLstoreconst [sc] {sym1} (LEAL [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && sc.canAdd32(off) && (ptr.Op != OpSB || !config.ctxt.Flag_shared)
@@ -5447,10 +5128,8 @@ private static bool rewriteValue386_Op386MOVLstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVSDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5471,10 +5150,8 @@ private static bool rewriteValue386_Op386MOVSDconst(ptr<Value> _addr_v) {
         v0.AuxInt = float64ToAuxInt(c);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5503,7 +5180,6 @@ private static bool rewriteValue386_Op386MOVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVSDload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -5526,10 +5202,8 @@ private static bool rewriteValue386_Op386MOVSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVSDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5560,7 +5234,6 @@ private static bool rewriteValue386_Op386MOVSDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVSDstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -5584,10 +5257,8 @@ private static bool rewriteValue386_Op386MOVSDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVSSconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5608,10 +5279,8 @@ private static bool rewriteValue386_Op386MOVSSconst(ptr<Value> _addr_v) {
         v0.AuxInt = float32ToAuxInt(c);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5640,7 +5309,6 @@ private static bool rewriteValue386_Op386MOVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVSSload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -5663,10 +5331,8 @@ private static bool rewriteValue386_Op386MOVSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVSSstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5697,7 +5363,6 @@ private static bool rewriteValue386_Op386MOVSSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVSSstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -5721,10 +5386,8 @@ private static bool rewriteValue386_Op386MOVSSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVWLSX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5753,7 +5416,6 @@ private static bool rewriteValue386_Op386MOVWLSX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWLSX (ANDLconst [c] x))
     // cond: c & 0x8000 == 0
@@ -5771,10 +5433,8 @@ private static bool rewriteValue386_Op386MOVWLSX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7fff);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVWLSXload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5803,7 +5463,6 @@ private static bool rewriteValue386_Op386MOVWLSXload(ptr<Value> _addr_v) {
         v.reset(Op386MOVWLSX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWLSXload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -5826,10 +5485,8 @@ private static bool rewriteValue386_Op386MOVWLSXload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVWLZX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5858,7 +5515,6 @@ private static bool rewriteValue386_Op386MOVWLZX(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWLZX (ANDLconst [c] x))
     // result: (ANDLconst [c & 0xffff] x)
@@ -5872,10 +5528,8 @@ private static bool rewriteValue386_Op386MOVWLZX(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xffff);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5904,7 +5558,6 @@ private static bool rewriteValue386_Op386MOVWload(ptr<Value> _addr_v) {
         v.reset(Op386MOVWLZX);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym} (ADDLconst [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -5926,7 +5579,6 @@ private static bool rewriteValue386_Op386MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -5949,7 +5601,6 @@ private static bool rewriteValue386_Op386MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVWload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -5963,10 +5614,8 @@ private static bool rewriteValue386_Op386MOVWload(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(int32(read16(sym, int64(off), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5992,7 +5641,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWLZX x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -6010,7 +5658,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym} (ADDLconst [off2] ptr) val mem)
     // cond: is32Bit(int64(off1)+int64(off2))
@@ -6033,7 +5680,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVLconst [c]) mem)
     // result: (MOVWstoreconst [makeValAndOff(c,off)] {sym} ptr mem)
@@ -6051,7 +5697,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -6075,7 +5720,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p (SHRLconst [16] w) x:(MOVWstore [i-2] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -6101,7 +5745,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p (SHRLconst [j] w) x:(MOVWstore [i-2] {s} p w0:(SHRLconst [j-16] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -6132,7 +5775,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p1 (SHRLconst [16] w) x:(MOVWstore [i] {s} p0 w mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -6159,7 +5801,6 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p1 (SHRLconst [j] w) x:(MOVWstore [i] {s} p0 w0:(SHRLconst [j-16] w) mem))
     // cond: x.Uses == 1 && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -6188,10 +5829,8 @@ private static bool rewriteValue386_Op386MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p0, w0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MOVWstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6220,7 +5859,6 @@ private static bool rewriteValue386_Op386MOVWstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [sc] {sym1} (LEAL [off] {sym2} ptr) mem)
     // cond: canMergeSym(sym1, sym2) && sc.canAdd32(off) && (ptr.Op != OpSB || !config.ctxt.Flag_shared)
@@ -6243,7 +5881,6 @@ private static bool rewriteValue386_Op386MOVWstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [c] {s} p x:(MOVWstoreconst [a] {s} p mem))
     // cond: x.Uses == 1 && a.Off() + 2 == c.Off() && clobber(x)
@@ -6269,7 +5906,6 @@ private static bool rewriteValue386_Op386MOVWstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [a] {s} p x:(MOVWstoreconst [c] {s} p mem))
     // cond: x.Uses == 1 && ValAndOff(a).Off() + 2 == ValAndOff(c).Off() && clobber(x)
@@ -6295,7 +5931,6 @@ private static bool rewriteValue386_Op386MOVWstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [c] {s} p1 x:(MOVWstoreconst [a] {s} p0 mem))
     // cond: x.Uses == 1 && a.Off() == c.Off() && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -6322,7 +5957,6 @@ private static bool rewriteValue386_Op386MOVWstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p0, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [a] {s} p0 x:(MOVWstoreconst [c] {s} p1 mem))
     // cond: x.Uses == 1 && a.Off() == c.Off() && sequentialAddresses(p0, p1, 2) && clobber(x)
@@ -6349,10 +5983,8 @@ private static bool rewriteValue386_Op386MOVWstoreconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(p0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MULL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6373,20 +6005,17 @@ private static bool rewriteValue386_Op386MULL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(Op386MULLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MULL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -6404,7 +6033,6 @@ private static bool rewriteValue386_Op386MULL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -6412,23 +6040,19 @@ private static bool rewriteValue386_Op386MULL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386MULLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6448,7 +6072,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c * d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MULLconst [-9] x)
     // result: (NEGL (LEAL8 <v.Type> x x))
@@ -6462,7 +6085,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [-5] x)
     // result: (NEGL (LEAL4 <v.Type> x x))
@@ -6476,7 +6098,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [-3] x)
     // result: (NEGL (LEAL2 <v.Type> x x))
@@ -6490,7 +6111,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [-1] x)
     // result: (NEGL x)
@@ -6502,7 +6122,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v.reset(Op386NEGL);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MULLconst [0] _)
     // result: (MOVLconst [0])
@@ -6513,7 +6132,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (MULLconst [1] x)
     // result: x
@@ -6524,7 +6142,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (MULLconst [3] x)
     // result: (LEAL2 x x)
@@ -6536,7 +6153,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v.reset(Op386LEAL2);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULLconst [5] x)
     // result: (LEAL4 x x)
@@ -6548,7 +6164,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v.reset(Op386LEAL4);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULLconst [7] x)
     // result: (LEAL2 x (LEAL2 <v.Type> x x))
@@ -6562,7 +6177,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [9] x)
     // result: (LEAL8 x x)
@@ -6574,7 +6188,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v.reset(Op386LEAL8);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (MULLconst [11] x)
     // result: (LEAL2 x (LEAL4 <v.Type> x x))
@@ -6588,7 +6201,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [13] x)
     // result: (LEAL4 x (LEAL2 <v.Type> x x))
@@ -6602,7 +6214,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [19] x)
     // result: (LEAL2 x (LEAL8 <v.Type> x x))
@@ -6616,7 +6227,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [21] x)
     // result: (LEAL4 x (LEAL4 <v.Type> x x))
@@ -6630,7 +6240,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [25] x)
     // result: (LEAL8 x (LEAL2 <v.Type> x x))
@@ -6644,7 +6253,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [27] x)
     // result: (LEAL8 (LEAL2 <v.Type> x x) (LEAL2 <v.Type> x x))
@@ -6658,7 +6266,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULLconst [37] x)
     // result: (LEAL4 x (LEAL8 <v.Type> x x))
@@ -6672,7 +6279,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [41] x)
     // result: (LEAL8 x (LEAL4 <v.Type> x x))
@@ -6686,7 +6292,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [45] x)
     // result: (LEAL8 (LEAL4 <v.Type> x x) (LEAL4 <v.Type> x x))
@@ -6700,7 +6305,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULLconst [73] x)
     // result: (LEAL8 x (LEAL8 <v.Type> x x))
@@ -6714,7 +6318,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLconst [81] x)
     // result: (LEAL8 (LEAL8 <v.Type> x x) (LEAL8 <v.Type> x x))
@@ -6728,7 +6331,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c+1) && c >= 15
@@ -6745,7 +6347,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-1) && c >= 17
@@ -6762,7 +6363,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-2) && c >= 34
@@ -6779,7 +6379,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-4) && c >= 68
@@ -6796,7 +6395,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: isPowerOfTwo32(c-8) && c >= 136
@@ -6813,7 +6411,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -6830,7 +6427,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -6847,7 +6443,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [c] x)
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -6864,7 +6459,6 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (MULLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c*d])
@@ -6877,10 +6471,8 @@ private static bool rewriteValue386_Op386MULLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(c * d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MULLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6911,7 +6503,6 @@ private static bool rewriteValue386_Op386MULLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (MULLload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -6935,10 +6526,8 @@ private static bool rewriteValue386_Op386MULLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MULSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6959,7 +6548,6 @@ private static bool rewriteValue386_Op386MULSD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -6967,21 +6555,17 @@ private static bool rewriteValue386_Op386MULSD(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386MULSDload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MULSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7012,7 +6596,6 @@ private static bool rewriteValue386_Op386MULSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (MULSDload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -7036,10 +6619,8 @@ private static bool rewriteValue386_Op386MULSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MULSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7060,7 +6641,6 @@ private static bool rewriteValue386_Op386MULSS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -7068,21 +6648,17 @@ private static bool rewriteValue386_Op386MULSS(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386MULSSload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386MULSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7113,7 +6689,6 @@ private static bool rewriteValue386_Op386MULSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (MULSSload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -7137,10 +6712,8 @@ private static bool rewriteValue386_Op386MULSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386NEGL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7156,10 +6729,8 @@ private static bool rewriteValue386_Op386NEGL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(-c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386NOTL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7175,10 +6746,8 @@ private static bool rewriteValue386_Op386NOTL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(~c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7201,20 +6770,17 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(Op386ORLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( ORL (SHLLconst [c] x) (SHRLconst [d] x))
     // cond: d == 32-c
@@ -7230,30 +6796,25 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRLconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(Op386ROLLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( ORL <t> (SHLLconst x [c]) (SHRWconst x [d]))
     // cond: c < 16 && d == int16(16-c) && t.Size() == 2
@@ -7270,30 +6831,25 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(c < 16 && d == int16(16 - c) && t.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(Op386ROLWconst);
                 v.AuxInt = int16ToAuxInt(int16(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: ( ORL <t> (SHLLconst x [c]) (SHRBconst x [d]))
     // cond: c < 8 && d == int8(8-c) && t.Size() == 1
@@ -7310,30 +6866,25 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRBconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(c < 8 && d == int8(8 - c) && t.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(Op386ROLBconst);
                 v.AuxInt = int8ToAuxInt(int8(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -7351,7 +6902,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -7359,20 +6909,17 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386ORLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x x)
     // result: x
@@ -7383,7 +6930,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORL x0:(MOVBload [i0] {s} p mem) s0:(SHLLconst [8] x1:(MOVBload [i1] {s} p mem)))
     // cond: i1 == i0+1 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, s0)
@@ -7400,7 +6946,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i0 = auxIntToInt32(x0.AuxInt);
                 var s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -7409,22 +6954,18 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                 if (s0.Op != Op386SHLLconst || auxIntToInt32(s0.AuxInt) != 8) {
                     continue;
                 }
-
                 var x1 = s0.Args[0];
                 if (x1.Op != Op386MOVBload) {
                     continue;
                 }
-
                 var i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, s0))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 var v0 = b.NewValue0(x1.Pos, Op386MOVWload, typ.UInt16);
                 v.copyOf(v0);
@@ -7432,14 +6973,12 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL x0:(MOVBload [i] {s} p0 mem) s0:(SHLLconst [8] x1:(MOVBload [i] {s} p1 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b,x0,x1) != nil && clobber(x0, x1, s0)
@@ -7456,7 +6995,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -7465,18 +7003,15 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                 if (s0.Op != Op386SHLLconst || auxIntToInt32(s0.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = s0.Args[0];
                 if (x1.Op != Op386MOVBload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 var p1 = x1.Args[0];
                 if (mem != x1.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && sequentialAddresses(p0, p1, 1) && mergePoint(b, x0, x1) != null && clobber(x0, x1, s0))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, Op386MOVWload, typ.UInt16);
                 v.copyOf(v0);
@@ -7484,14 +7019,12 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p0, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL o0:(ORL x0:(MOVWload [i0] {s} p mem) s0:(SHLLconst [16] x1:(MOVBload [i2] {s} p mem))) s1:(SHLLconst [24] x2:(MOVBload [i3] {s} p mem)))
     // cond: i2 == i0+2 && i3 == i0+3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && o0.Uses == 1 && mergePoint(b,x0,x1,x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -7508,7 +7041,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = o0.Args[1];
                 var o0_0 = o0.Args[0];
                 var o0_1 = o0.Args[1];
@@ -7523,7 +7055,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         s = auxToSym(x0.Aux);
                         mem = x0.Args[1];
@@ -7532,42 +7063,34 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                         if (s0.Op != Op386SHLLconst || auxIntToInt32(s0.AuxInt) != 16) {
                             continue;
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != Op386MOVBload) {
                             continue;
                         }
-
                         var i2 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         var s1 = v_1;
                         if (s1.Op != Op386SHLLconst || auxIntToInt32(s1.AuxInt) != 24) {
                             continue;
                         }
-
                         var x2 = s1.Args[0];
                         if (x2.Op != Op386MOVBload) {
                             continue;
                         }
-
                         var i3 = auxIntToInt32(x2.AuxInt);
                         if (auxToSym(x2.Aux) != s) {
                             continue;
                         }
-
                         _ = x2.Args[1];
                         if (p != x2.Args[0] || mem != x2.Args[1] || !(i2 == i0 + 2 && i3 == i0 + 3 && x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && o0.Uses == 1 && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x2.Pos, Op386MOVLload, typ.UInt32);
                         v.copyOf(v0);
@@ -7575,20 +7098,17 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                         v0.Aux = symToAux(s);
                         v0.AddArg2(p, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORL o0:(ORL x0:(MOVWload [i] {s} p0 mem) s0:(SHLLconst [16] x1:(MOVBload [i] {s} p1 mem))) s1:(SHLLconst [24] x2:(MOVBload [i] {s} p2 mem)))
     // cond: x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && o0.Uses == 1 && sequentialAddresses(p0, p1, 2) && sequentialAddresses(p1, p2, 1) && mergePoint(b,x0,x1,x2) != nil && clobber(x0, x1, x2, s0, s1, o0)
@@ -7605,7 +7125,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = o0.Args[1];
                 o0_0 = o0.Args[0];
                 o0_1 = o0.Args[1];
@@ -7620,7 +7139,6 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                             continue;
                         (_i1, o0_0, o0_1) = (_i1 + 1, o0_1, o0_0);
                         }
-
                         i = auxIntToInt32(x0.AuxInt);
                         s = auxToSym(x0.Aux);
                         mem = x0.Args[1];
@@ -7629,34 +7147,28 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                         if (s0.Op != Op386SHLLconst || auxIntToInt32(s0.AuxInt) != 16) {
                             continue;
                         }
-
                         x1 = s0.Args[0];
                         if (x1.Op != Op386MOVBload || auxIntToInt32(x1.AuxInt) != i || auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         p1 = x1.Args[0];
                         if (mem != x1.Args[1]) {
                             continue;
                         }
-
                         s1 = v_1;
                         if (s1.Op != Op386SHLLconst || auxIntToInt32(s1.AuxInt) != 24) {
                             continue;
                         }
-
                         x2 = s1.Args[0];
                         if (x2.Op != Op386MOVBload || auxIntToInt32(x2.AuxInt) != i || auxToSym(x2.Aux) != s) {
                             continue;
                         }
-
                         _ = x2.Args[1];
                         var p2 = x2.Args[0];
                         if (mem != x2.Args[1] || !(x0.Uses == 1 && x1.Uses == 1 && x2.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && o0.Uses == 1 && sequentialAddresses(p0, p1, 2) && sequentialAddresses(p1, p2, 1) && mergePoint(b, x0, x1, x2) != null && clobber(x0, x1, x2, s0, s1, o0))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, x2);
                         v0 = b.NewValue0(x2.Pos, Op386MOVLload, typ.UInt32);
                         v.copyOf(v0);
@@ -7664,23 +7176,19 @@ private static bool rewriteValue386_Op386ORL(ptr<Value> _addr_v) {
                         v0.Aux = symToAux(s);
                         v0.AddArg2(p0, mem);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ORLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7697,7 +7205,6 @@ private static bool rewriteValue386_Op386ORLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORLconst [c] _)
     // cond: c==-1
@@ -7710,7 +7217,6 @@ private static bool rewriteValue386_Op386ORLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c|d])
@@ -7723,10 +7229,8 @@ private static bool rewriteValue386_Op386ORLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(c | d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ORLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7755,7 +7259,6 @@ private static bool rewriteValue386_Op386ORLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (ORLconstmodify [valoff1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: valoff1.canAdd32(off2) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -7778,10 +7281,8 @@ private static bool rewriteValue386_Op386ORLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ORLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7812,7 +7313,6 @@ private static bool rewriteValue386_Op386ORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (ORLload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -7836,10 +7336,8 @@ private static bool rewriteValue386_Op386ORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ORLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7870,7 +7368,6 @@ private static bool rewriteValue386_Op386ORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (ORLmodify [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -7894,10 +7391,8 @@ private static bool rewriteValue386_Op386ORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ROLBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7916,7 +7411,6 @@ private static bool rewriteValue386_Op386ROLBconst(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt((c + d) & 7);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLBconst [0] x)
     // result: x
@@ -7927,10 +7421,8 @@ private static bool rewriteValue386_Op386ROLBconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ROLLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7949,7 +7441,6 @@ private static bool rewriteValue386_Op386ROLLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt((c + d) & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLLconst [0] x)
     // result: x
@@ -7960,10 +7451,8 @@ private static bool rewriteValue386_Op386ROLLconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386ROLWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7982,7 +7471,6 @@ private static bool rewriteValue386_Op386ROLWconst(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt((c + d) & 15);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ROLWconst [0] x)
     // result: x
@@ -7993,10 +7481,8 @@ private static bool rewriteValue386_Op386ROLWconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SARB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8015,10 +7501,8 @@ private static bool rewriteValue386_Op386SARB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(min(int64(c & 31), 7)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SARBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8033,7 +7517,6 @@ private static bool rewriteValue386_Op386SARBconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SARBconst [c] (MOVLconst [d]))
     // result: (MOVLconst [d>>uint64(c)])
@@ -8046,10 +7529,8 @@ private static bool rewriteValue386_Op386SARBconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(d >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SARL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8068,7 +7549,6 @@ private static bool rewriteValue386_Op386SARL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SARL x (ANDLconst [31] y))
     // result: (SARL x y)
@@ -8081,10 +7561,8 @@ private static bool rewriteValue386_Op386SARL(ptr<Value> _addr_v) {
         v.reset(Op386SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SARLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8099,7 +7577,6 @@ private static bool rewriteValue386_Op386SARLconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SARLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [d>>uint64(c)])
@@ -8112,10 +7589,8 @@ private static bool rewriteValue386_Op386SARLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(d >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SARW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8134,10 +7609,8 @@ private static bool rewriteValue386_Op386SARW(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(min(int64(c & 31), 15)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SARWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8152,7 +7625,6 @@ private static bool rewriteValue386_Op386SARWconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SARWconst [c] (MOVLconst [d]))
     // result: (MOVLconst [d>>uint64(c)])
@@ -8165,10 +7637,8 @@ private static bool rewriteValue386_Op386SARWconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(d >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SBBL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8189,10 +7659,8 @@ private static bool rewriteValue386_Op386SBBL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, f);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SBBLcarrymask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8207,7 +7675,6 @@ private static bool rewriteValue386_Op386SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagLT_ULT))
     // result: (MOVLconst [-1])
@@ -8218,7 +7685,6 @@ private static bool rewriteValue386_Op386SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -8229,7 +7695,6 @@ private static bool rewriteValue386_Op386SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagGT_ULT))
     // result: (MOVLconst [-1])
@@ -8240,7 +7705,6 @@ private static bool rewriteValue386_Op386SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (SBBLcarrymask (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -8251,10 +7715,8 @@ private static bool rewriteValue386_Op386SBBLcarrymask(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8270,7 +7732,6 @@ private static bool rewriteValue386_Op386SETA(ptr<Value> _addr_v) {
         v.reset(Op386SETB);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETA (FlagEQ))
     // result: (MOVLconst [0])
@@ -8281,7 +7742,6 @@ private static bool rewriteValue386_Op386SETA(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETA (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -8292,7 +7752,6 @@ private static bool rewriteValue386_Op386SETA(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETA (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -8303,7 +7762,6 @@ private static bool rewriteValue386_Op386SETA(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETA (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -8314,7 +7772,6 @@ private static bool rewriteValue386_Op386SETA(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETA (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -8325,10 +7782,8 @@ private static bool rewriteValue386_Op386SETA(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETAE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8344,7 +7799,6 @@ private static bool rewriteValue386_Op386SETAE(ptr<Value> _addr_v) {
         v.reset(Op386SETBE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETAE (FlagEQ))
     // result: (MOVLconst [1])
@@ -8355,7 +7809,6 @@ private static bool rewriteValue386_Op386SETAE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETAE (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -8366,7 +7819,6 @@ private static bool rewriteValue386_Op386SETAE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETAE (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -8377,7 +7829,6 @@ private static bool rewriteValue386_Op386SETAE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETAE (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -8388,7 +7839,6 @@ private static bool rewriteValue386_Op386SETAE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETAE (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -8399,10 +7849,8 @@ private static bool rewriteValue386_Op386SETAE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8418,7 +7866,6 @@ private static bool rewriteValue386_Op386SETB(ptr<Value> _addr_v) {
         v.reset(Op386SETA);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETB (FlagEQ))
     // result: (MOVLconst [0])
@@ -8429,7 +7876,6 @@ private static bool rewriteValue386_Op386SETB(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETB (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -8440,7 +7886,6 @@ private static bool rewriteValue386_Op386SETB(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETB (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -8451,7 +7896,6 @@ private static bool rewriteValue386_Op386SETB(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETB (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -8462,7 +7906,6 @@ private static bool rewriteValue386_Op386SETB(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETB (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -8473,10 +7916,8 @@ private static bool rewriteValue386_Op386SETB(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETBE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8492,7 +7933,6 @@ private static bool rewriteValue386_Op386SETBE(ptr<Value> _addr_v) {
         v.reset(Op386SETAE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETBE (FlagEQ))
     // result: (MOVLconst [1])
@@ -8503,7 +7943,6 @@ private static bool rewriteValue386_Op386SETBE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETBE (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -8514,7 +7953,6 @@ private static bool rewriteValue386_Op386SETBE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETBE (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -8525,7 +7963,6 @@ private static bool rewriteValue386_Op386SETBE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETBE (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -8536,7 +7973,6 @@ private static bool rewriteValue386_Op386SETBE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETBE (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -8547,10 +7983,8 @@ private static bool rewriteValue386_Op386SETBE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETEQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8566,7 +8000,6 @@ private static bool rewriteValue386_Op386SETEQ(ptr<Value> _addr_v) {
         v.reset(Op386SETEQ);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETEQ (FlagEQ))
     // result: (MOVLconst [1])
@@ -8577,7 +8010,6 @@ private static bool rewriteValue386_Op386SETEQ(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETEQ (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -8588,7 +8020,6 @@ private static bool rewriteValue386_Op386SETEQ(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETEQ (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -8599,7 +8030,6 @@ private static bool rewriteValue386_Op386SETEQ(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETEQ (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -8610,7 +8040,6 @@ private static bool rewriteValue386_Op386SETEQ(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETEQ (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -8621,10 +8050,8 @@ private static bool rewriteValue386_Op386SETEQ(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8640,7 +8067,6 @@ private static bool rewriteValue386_Op386SETG(ptr<Value> _addr_v) {
         v.reset(Op386SETL);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETG (FlagEQ))
     // result: (MOVLconst [0])
@@ -8651,7 +8077,6 @@ private static bool rewriteValue386_Op386SETG(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETG (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -8662,7 +8087,6 @@ private static bool rewriteValue386_Op386SETG(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETG (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -8673,7 +8097,6 @@ private static bool rewriteValue386_Op386SETG(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETG (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -8684,7 +8107,6 @@ private static bool rewriteValue386_Op386SETG(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETG (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -8695,10 +8117,8 @@ private static bool rewriteValue386_Op386SETG(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETGE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8714,7 +8134,6 @@ private static bool rewriteValue386_Op386SETGE(ptr<Value> _addr_v) {
         v.reset(Op386SETLE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETGE (FlagEQ))
     // result: (MOVLconst [1])
@@ -8725,7 +8144,6 @@ private static bool rewriteValue386_Op386SETGE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETGE (FlagLT_ULT))
     // result: (MOVLconst [0])
@@ -8736,7 +8154,6 @@ private static bool rewriteValue386_Op386SETGE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETGE (FlagLT_UGT))
     // result: (MOVLconst [0])
@@ -8747,7 +8164,6 @@ private static bool rewriteValue386_Op386SETGE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETGE (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -8758,7 +8174,6 @@ private static bool rewriteValue386_Op386SETGE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETGE (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -8769,10 +8184,8 @@ private static bool rewriteValue386_Op386SETGE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8788,7 +8201,6 @@ private static bool rewriteValue386_Op386SETL(ptr<Value> _addr_v) {
         v.reset(Op386SETG);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETL (FlagEQ))
     // result: (MOVLconst [0])
@@ -8799,7 +8211,6 @@ private static bool rewriteValue386_Op386SETL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETL (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -8810,7 +8221,6 @@ private static bool rewriteValue386_Op386SETL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETL (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -8821,7 +8231,6 @@ private static bool rewriteValue386_Op386SETL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETL (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -8832,7 +8241,6 @@ private static bool rewriteValue386_Op386SETL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETL (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -8843,10 +8251,8 @@ private static bool rewriteValue386_Op386SETL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETLE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8862,7 +8268,6 @@ private static bool rewriteValue386_Op386SETLE(ptr<Value> _addr_v) {
         v.reset(Op386SETGE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETLE (FlagEQ))
     // result: (MOVLconst [1])
@@ -8873,7 +8278,6 @@ private static bool rewriteValue386_Op386SETLE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETLE (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -8884,7 +8288,6 @@ private static bool rewriteValue386_Op386SETLE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETLE (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -8895,7 +8298,6 @@ private static bool rewriteValue386_Op386SETLE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETLE (FlagGT_ULT))
     // result: (MOVLconst [0])
@@ -8906,7 +8308,6 @@ private static bool rewriteValue386_Op386SETLE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETLE (FlagGT_UGT))
     // result: (MOVLconst [0])
@@ -8917,10 +8318,8 @@ private static bool rewriteValue386_Op386SETLE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SETNE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8936,7 +8335,6 @@ private static bool rewriteValue386_Op386SETNE(ptr<Value> _addr_v) {
         v.reset(Op386SETNE);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SETNE (FlagEQ))
     // result: (MOVLconst [0])
@@ -8947,7 +8345,6 @@ private static bool rewriteValue386_Op386SETNE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SETNE (FlagLT_ULT))
     // result: (MOVLconst [1])
@@ -8958,7 +8355,6 @@ private static bool rewriteValue386_Op386SETNE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETNE (FlagLT_UGT))
     // result: (MOVLconst [1])
@@ -8969,7 +8365,6 @@ private static bool rewriteValue386_Op386SETNE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETNE (FlagGT_ULT))
     // result: (MOVLconst [1])
@@ -8980,7 +8375,6 @@ private static bool rewriteValue386_Op386SETNE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     } 
     // match: (SETNE (FlagGT_UGT))
     // result: (MOVLconst [1])
@@ -8991,10 +8385,8 @@ private static bool rewriteValue386_Op386SETNE(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9013,7 +8405,6 @@ private static bool rewriteValue386_Op386SHLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHLL x (ANDLconst [31] y))
     // result: (SHLL x y)
@@ -9026,10 +8417,8 @@ private static bool rewriteValue386_Op386SHLL(ptr<Value> _addr_v) {
         v.reset(Op386SHLL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHLLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9044,10 +8433,8 @@ private static bool rewriteValue386_Op386SHLLconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHRB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9070,7 +8457,6 @@ private static bool rewriteValue386_Op386SHRB(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRB _ (MOVLconst [c]))
     // cond: c&31 >= 8
@@ -9086,10 +8472,8 @@ private static bool rewriteValue386_Op386SHRB(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHRBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9104,10 +8488,8 @@ private static bool rewriteValue386_Op386SHRBconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9126,7 +8508,6 @@ private static bool rewriteValue386_Op386SHRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRL x (ANDLconst [31] y))
     // result: (SHRL x y)
@@ -9139,10 +8520,8 @@ private static bool rewriteValue386_Op386SHRL(ptr<Value> _addr_v) {
         v.reset(Op386SHRL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHRLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9157,10 +8536,8 @@ private static bool rewriteValue386_Op386SHRLconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHRW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9183,7 +8560,6 @@ private static bool rewriteValue386_Op386SHRW(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SHRW _ (MOVLconst [c]))
     // cond: c&31 >= 16
@@ -9199,10 +8575,8 @@ private static bool rewriteValue386_Op386SHRW(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SHRWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9217,10 +8591,8 @@ private static bool rewriteValue386_Op386SHRWconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9240,7 +8612,6 @@ private static bool rewriteValue386_Op386SUBL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBL (MOVLconst [c]) x)
     // result: (NEGL (SUBLconst <v.Type> x [c]))
@@ -9256,7 +8627,6 @@ private static bool rewriteValue386_Op386SUBL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -9279,7 +8649,6 @@ private static bool rewriteValue386_Op386SUBL(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (SUBL x x)
     // result: (MOVLconst [0])
@@ -9291,10 +8660,8 @@ private static bool rewriteValue386_Op386SUBL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBLcarry(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9313,10 +8680,8 @@ private static bool rewriteValue386_Op386SUBLcarry(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9333,7 +8698,6 @@ private static bool rewriteValue386_Op386SUBLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUBLconst [c] x)
     // result: (ADDLconst [-c] x)
@@ -9345,7 +8709,6 @@ private static bool rewriteValue386_Op386SUBLconst(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValue386_Op386SUBLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9376,7 +8739,6 @@ private static bool rewriteValue386_Op386SUBLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBLload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -9400,10 +8762,8 @@ private static bool rewriteValue386_Op386SUBLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9434,7 +8794,6 @@ private static bool rewriteValue386_Op386SUBLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (SUBLmodify [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -9458,10 +8817,8 @@ private static bool rewriteValue386_Op386SUBLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBSD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9489,10 +8846,8 @@ private static bool rewriteValue386_Op386SUBSD(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBSDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9523,7 +8878,6 @@ private static bool rewriteValue386_Op386SUBSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBSDload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -9547,10 +8901,8 @@ private static bool rewriteValue386_Op386SUBSDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBSS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9578,10 +8930,8 @@ private static bool rewriteValue386_Op386SUBSS(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386SUBSSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9612,7 +8962,6 @@ private static bool rewriteValue386_Op386SUBSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (SUBSSload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -9636,10 +8985,8 @@ private static bool rewriteValue386_Op386SUBSSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9660,20 +9007,17 @@ private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(Op386XORLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL (SHLLconst [c] x) (SHRLconst [d] x))
     // cond: d == 32-c
@@ -9689,30 +9033,25 @@ private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRLconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(d == 32 - c)) {
                     continue;
                 }
-
                 v.reset(Op386ROLLconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL <t> (SHLLconst x [c]) (SHRWconst x [d]))
     // cond: c < 16 && d == int16(16-c) && t.Size() == 2
@@ -9729,30 +9068,25 @@ private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRWconst) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(c < 16 && d == int16(16 - c) && t.Size() == 2)) {
                     continue;
                 }
-
                 v.reset(Op386ROLWconst);
                 v.AuxInt = int16ToAuxInt(int16(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL <t> (SHLLconst x [c]) (SHRBconst x [d]))
     // cond: c < 8 && d == int8(8-c) && t.Size() == 1
@@ -9769,30 +9103,25 @@ private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != Op386SHRBconst) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 if (x != v_1.Args[0] || !(c < 8 && d == int8(8 - c) && t.Size() == 1)) {
                     continue;
                 }
-
                 v.reset(Op386ROLBconst);
                 v.AuxInt = int8ToAuxInt(int8(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL x l:(MOVLload [off] {sym} ptr mem))
     // cond: canMergeLoadClobber(v, l, x) && clobber(l)
@@ -9810,7 +9139,6 @@ private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(l.AuxInt);
                 var sym = auxToSym(l.Aux);
                 var mem = l.Args[1];
@@ -9818,20 +9146,17 @@ private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
                 if (!(canMergeLoadClobber(v, l, x) && clobber(l))) {
                     continue;
                 }
-
                 v.reset(Op386XORLload);
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORL x x)
     // result: (MOVLconst [0])
@@ -9843,10 +9168,8 @@ private static bool rewriteValue386_Op386XORL(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386XORLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9865,7 +9188,6 @@ private static bool rewriteValue386_Op386XORLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c ^ d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORLconst [c] x)
     // cond: c==0
@@ -9878,7 +9200,6 @@ private static bool rewriteValue386_Op386XORLconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (XORLconst [c] (MOVLconst [d]))
     // result: (MOVLconst [c^d])
@@ -9891,10 +9212,8 @@ private static bool rewriteValue386_Op386XORLconst(ptr<Value> _addr_v) {
         v.reset(Op386MOVLconst);
         v.AuxInt = int32ToAuxInt(c ^ d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386XORLconstmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9923,7 +9242,6 @@ private static bool rewriteValue386_Op386XORLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (XORLconstmodify [valoff1] {sym1} (LEAL [off2] {sym2} base) mem)
     // cond: valoff1.canAdd32(off2) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -9946,10 +9264,8 @@ private static bool rewriteValue386_Op386XORLconstmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386XORLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9980,7 +9296,6 @@ private static bool rewriteValue386_Op386XORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(val, base, mem);
         return true;
-
     } 
     // match: (XORLload [off1] {sym1} val (LEAL [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -10004,10 +9319,8 @@ private static bool rewriteValue386_Op386XORLload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(val, base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_Op386XORLmodify(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10038,7 +9351,6 @@ private static bool rewriteValue386_Op386XORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (XORLmodify [off1] {sym1} (LEAL [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || !config.ctxt.Flag_shared)
@@ -10062,10 +9374,8 @@ private static bool rewriteValue386_Op386XORLmodify(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10081,7 +9391,6 @@ private static bool rewriteValue386_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10094,7 +9403,6 @@ private static bool rewriteValue386_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
     }
-
 }
 private static bool rewriteValue386_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10107,7 +9415,6 @@ private static bool rewriteValue386_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
     }
-
 }
 private static bool rewriteValue386_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10120,7 +9427,6 @@ private static bool rewriteValue386_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(b2i32(c));
         return true;
     }
-
 }
 private static bool rewriteValue386_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10132,7 +9438,6 @@ private static bool rewriteValue386_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpCtz16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10151,7 +9456,6 @@ private static bool rewriteValue386_OpCtz16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10173,7 +9477,6 @@ private static bool rewriteValue386_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10195,7 +9498,6 @@ private static bool rewriteValue386_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10214,7 +9516,6 @@ private static bool rewriteValue386_OpEq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10233,7 +9534,6 @@ private static bool rewriteValue386_OpEq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpEq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10252,7 +9552,6 @@ private static bool rewriteValue386_OpEq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpEq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10271,7 +9570,6 @@ private static bool rewriteValue386_OpEq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10290,7 +9588,6 @@ private static bool rewriteValue386_OpEq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10309,7 +9606,6 @@ private static bool rewriteValue386_OpEqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10328,7 +9624,6 @@ private static bool rewriteValue386_OpEqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpIsInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10347,7 +9642,6 @@ private static bool rewriteValue386_OpIsInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10364,7 +9658,6 @@ private static bool rewriteValue386_OpIsNonNil(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpIsSliceInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10383,7 +9676,6 @@ private static bool rewriteValue386_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10402,7 +9694,6 @@ private static bool rewriteValue386_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10421,7 +9712,6 @@ private static bool rewriteValue386_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10440,7 +9730,6 @@ private static bool rewriteValue386_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10459,7 +9748,6 @@ private static bool rewriteValue386_OpLeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10478,7 +9766,6 @@ private static bool rewriteValue386_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10497,7 +9784,6 @@ private static bool rewriteValue386_OpLeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10516,7 +9802,6 @@ private static bool rewriteValue386_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10535,7 +9820,6 @@ private static bool rewriteValue386_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10554,7 +9838,6 @@ private static bool rewriteValue386_OpLess16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10573,7 +9856,6 @@ private static bool rewriteValue386_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10592,7 +9874,6 @@ private static bool rewriteValue386_OpLess32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10611,7 +9892,6 @@ private static bool rewriteValue386_OpLess32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10630,7 +9910,6 @@ private static bool rewriteValue386_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10649,7 +9928,6 @@ private static bool rewriteValue386_OpLess64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10668,7 +9946,6 @@ private static bool rewriteValue386_OpLess8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10687,7 +9964,6 @@ private static bool rewriteValue386_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10707,7 +9983,6 @@ private static bool rewriteValue386_OpLoad(ptr<Value> _addr_v) {
         v.reset(Op386MOVLload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is16BitInt(t)
@@ -10722,7 +9997,6 @@ private static bool rewriteValue386_OpLoad(ptr<Value> _addr_v) {
         v.reset(Op386MOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (t.IsBoolean() || is8BitInt(t))
@@ -10737,7 +10011,6 @@ private static bool rewriteValue386_OpLoad(ptr<Value> _addr_v) {
         v.reset(Op386MOVBload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitFloat(t)
@@ -10752,7 +10025,6 @@ private static bool rewriteValue386_OpLoad(ptr<Value> _addr_v) {
         v.reset(Op386MOVSSload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -10767,10 +10039,8 @@ private static bool rewriteValue386_OpLoad(ptr<Value> _addr_v) {
         v.reset(Op386MOVSDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10786,7 +10056,6 @@ private static bool rewriteValue386_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10814,7 +10083,6 @@ private static bool rewriteValue386_OpLsh16x16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh16x16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -10830,10 +10098,8 @@ private static bool rewriteValue386_OpLsh16x16(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10861,7 +10127,6 @@ private static bool rewriteValue386_OpLsh16x32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh16x32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -10877,10 +10142,8 @@ private static bool rewriteValue386_OpLsh16x32(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10903,7 +10166,6 @@ private static bool rewriteValue386_OpLsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh16x64 _ (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -10919,10 +10181,8 @@ private static bool rewriteValue386_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10950,7 +10210,6 @@ private static bool rewriteValue386_OpLsh16x8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh16x8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -10966,10 +10225,8 @@ private static bool rewriteValue386_OpLsh16x8(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10997,7 +10254,6 @@ private static bool rewriteValue386_OpLsh32x16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh32x16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -11013,10 +10269,8 @@ private static bool rewriteValue386_OpLsh32x16(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11044,7 +10298,6 @@ private static bool rewriteValue386_OpLsh32x32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh32x32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -11060,10 +10313,8 @@ private static bool rewriteValue386_OpLsh32x32(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11086,7 +10337,6 @@ private static bool rewriteValue386_OpLsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh32x64 _ (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -11102,10 +10352,8 @@ private static bool rewriteValue386_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11133,7 +10381,6 @@ private static bool rewriteValue386_OpLsh32x8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh32x8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -11149,10 +10396,8 @@ private static bool rewriteValue386_OpLsh32x8(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11180,7 +10425,6 @@ private static bool rewriteValue386_OpLsh8x16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh8x16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -11196,10 +10440,8 @@ private static bool rewriteValue386_OpLsh8x16(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11227,7 +10469,6 @@ private static bool rewriteValue386_OpLsh8x32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh8x32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -11243,10 +10484,8 @@ private static bool rewriteValue386_OpLsh8x32(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11269,7 +10508,6 @@ private static bool rewriteValue386_OpLsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh8x64 _ (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -11285,10 +10523,8 @@ private static bool rewriteValue386_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11316,7 +10552,6 @@ private static bool rewriteValue386_OpLsh8x8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Lsh8x8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -11332,10 +10567,8 @@ private static bool rewriteValue386_OpLsh8x8(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11357,7 +10590,6 @@ private static bool rewriteValue386_OpMod8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11379,7 +10611,6 @@ private static bool rewriteValue386_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11399,7 +10630,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (MOVBstore dst (MOVBload src mem) mem)
@@ -11415,7 +10645,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (MOVWstore dst (MOVWload src mem) mem)
@@ -11431,7 +10660,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (MOVLstore dst (MOVLload src mem) mem)
@@ -11447,7 +10675,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (MOVBstore [2] dst (MOVBload [2] src mem) (MOVWstore dst (MOVWload src mem) mem))
@@ -11469,7 +10696,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [5] dst src mem)
     // result: (MOVBstore [4] dst (MOVBload [4] src mem) (MOVLstore dst (MOVLload src mem) mem))
@@ -11491,7 +10717,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [6] dst src mem)
     // result: (MOVWstore [4] dst (MOVWload [4] src mem) (MOVLstore dst (MOVLload src mem) mem))
@@ -11513,7 +10738,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [7] dst src mem)
     // result: (MOVLstore [3] dst (MOVLload [3] src mem) (MOVLstore dst (MOVLload src mem) mem))
@@ -11535,7 +10759,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [8] dst src mem)
     // result: (MOVLstore [4] dst (MOVLload [4] src mem) (MOVLstore dst (MOVLload src mem) mem))
@@ -11557,7 +10780,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 8 && s%4 != 0
@@ -11584,7 +10806,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v2.AddArg3(dst, v3, mem);
         v.AddArg3(v0, v1, v2);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 8 && s <= 4*128 && s%4 == 0 && !config.noDuffDevice && logLargeCopy(v, s)
@@ -11601,7 +10822,6 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(10 * (128 - s / 4));
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: (s > 4*128 || config.noDuffDevice) && s%4 == 0 && logLargeCopy(v, s)
@@ -11619,10 +10839,8 @@ private static bool rewriteValue386_OpMove(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(int32(s / 4));
         v.AddArg4(dst, src, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpNeg32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11640,7 +10858,6 @@ private static bool rewriteValue386_OpNeg32F(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeg64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11658,7 +10875,6 @@ private static bool rewriteValue386_OpNeg64F(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11677,7 +10893,6 @@ private static bool rewriteValue386_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11696,7 +10911,6 @@ private static bool rewriteValue386_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11715,7 +10929,6 @@ private static bool rewriteValue386_OpNeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11734,7 +10947,6 @@ private static bool rewriteValue386_OpNeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11753,7 +10965,6 @@ private static bool rewriteValue386_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11772,7 +10983,6 @@ private static bool rewriteValue386_OpNeqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11791,7 +11001,6 @@ private static bool rewriteValue386_OpNeqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpNot(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11806,7 +11015,6 @@ private static bool rewriteValue386_OpNot(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11822,7 +11030,6 @@ private static bool rewriteValue386_OpOffPtr(ptr<Value> _addr_v) {
         v.AddArg(ptr);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpPanicBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11845,7 +11052,6 @@ private static bool rewriteValue386_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 1
@@ -11862,7 +11068,6 @@ private static bool rewriteValue386_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 2
@@ -11879,10 +11084,8 @@ private static bool rewriteValue386_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpPanicExtend(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11907,7 +11110,6 @@ private static bool rewriteValue386_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     } 
     // match: (PanicExtend [kind] hi lo y mem)
     // cond: boundsABI(kind) == 1
@@ -11925,7 +11127,6 @@ private static bool rewriteValue386_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     } 
     // match: (PanicExtend [kind] hi lo y mem)
     // cond: boundsABI(kind) == 2
@@ -11943,10 +11144,8 @@ private static bool rewriteValue386_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11965,10 +11164,8 @@ private static bool rewriteValue386_OpRotateLeft16(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c & 15));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRotateLeft32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11987,10 +11184,8 @@ private static bool rewriteValue386_OpRotateLeft32(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12009,10 +11204,8 @@ private static bool rewriteValue386_OpRotateLeft8(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c & 7));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12040,7 +11233,6 @@ private static bool rewriteValue386_OpRsh16Ux16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh16Ux16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12056,10 +11248,8 @@ private static bool rewriteValue386_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12087,7 +11277,6 @@ private static bool rewriteValue386_OpRsh16Ux32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh16Ux32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12103,10 +11292,8 @@ private static bool rewriteValue386_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12129,7 +11316,6 @@ private static bool rewriteValue386_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh16Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -12145,10 +11331,8 @@ private static bool rewriteValue386_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12176,7 +11360,6 @@ private static bool rewriteValue386_OpRsh16Ux8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh16Ux8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12192,10 +11375,8 @@ private static bool rewriteValue386_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12226,7 +11407,6 @@ private static bool rewriteValue386_OpRsh16x16(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12240,10 +11420,8 @@ private static bool rewriteValue386_OpRsh16x16(ptr<Value> _addr_v) {
         v.reset(Op386SARW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12274,7 +11452,6 @@ private static bool rewriteValue386_OpRsh16x32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12288,10 +11465,8 @@ private static bool rewriteValue386_OpRsh16x32(ptr<Value> _addr_v) {
         v.reset(Op386SARW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12314,7 +11489,6 @@ private static bool rewriteValue386_OpRsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(int16(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh16x64 x (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -12332,10 +11506,8 @@ private static bool rewriteValue386_OpRsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = int16ToAuxInt(15);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12366,7 +11538,6 @@ private static bool rewriteValue386_OpRsh16x8(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12380,10 +11551,8 @@ private static bool rewriteValue386_OpRsh16x8(ptr<Value> _addr_v) {
         v.reset(Op386SARW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12411,7 +11580,6 @@ private static bool rewriteValue386_OpRsh32Ux16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh32Ux16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12427,10 +11595,8 @@ private static bool rewriteValue386_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12458,7 +11624,6 @@ private static bool rewriteValue386_OpRsh32Ux32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh32Ux32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12474,10 +11639,8 @@ private static bool rewriteValue386_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12500,7 +11663,6 @@ private static bool rewriteValue386_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -12516,10 +11678,8 @@ private static bool rewriteValue386_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12547,7 +11707,6 @@ private static bool rewriteValue386_OpRsh32Ux8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh32Ux8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12563,10 +11722,8 @@ private static bool rewriteValue386_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12597,7 +11754,6 @@ private static bool rewriteValue386_OpRsh32x16(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12611,10 +11767,8 @@ private static bool rewriteValue386_OpRsh32x16(ptr<Value> _addr_v) {
         v.reset(Op386SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12645,7 +11799,6 @@ private static bool rewriteValue386_OpRsh32x32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12659,10 +11812,8 @@ private static bool rewriteValue386_OpRsh32x32(ptr<Value> _addr_v) {
         v.reset(Op386SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12685,7 +11836,6 @@ private static bool rewriteValue386_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32x64 x (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -12703,10 +11853,8 @@ private static bool rewriteValue386_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12737,7 +11885,6 @@ private static bool rewriteValue386_OpRsh32x8(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12751,10 +11898,8 @@ private static bool rewriteValue386_OpRsh32x8(ptr<Value> _addr_v) {
         v.reset(Op386SARL);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12782,7 +11927,6 @@ private static bool rewriteValue386_OpRsh8Ux16(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh8Ux16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12798,10 +11942,8 @@ private static bool rewriteValue386_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12829,7 +11971,6 @@ private static bool rewriteValue386_OpRsh8Ux32(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh8Ux32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12845,10 +11986,8 @@ private static bool rewriteValue386_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12871,7 +12010,6 @@ private static bool rewriteValue386_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh8Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -12887,10 +12025,8 @@ private static bool rewriteValue386_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12918,7 +12054,6 @@ private static bool rewriteValue386_OpRsh8Ux8(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Rsh8Ux8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12934,10 +12069,8 @@ private static bool rewriteValue386_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.Type = t;
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12968,7 +12101,6 @@ private static bool rewriteValue386_OpRsh8x16(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x16 <t> x y)
     // cond: shiftIsBounded(v)
@@ -12982,10 +12114,8 @@ private static bool rewriteValue386_OpRsh8x16(ptr<Value> _addr_v) {
         v.reset(Op386SARB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13016,7 +12146,6 @@ private static bool rewriteValue386_OpRsh8x32(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x32 <t> x y)
     // cond: shiftIsBounded(v)
@@ -13030,10 +12159,8 @@ private static bool rewriteValue386_OpRsh8x32(ptr<Value> _addr_v) {
         v.reset(Op386SARB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13056,7 +12183,6 @@ private static bool rewriteValue386_OpRsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(int8(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh8x64 x (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -13074,10 +12200,8 @@ private static bool rewriteValue386_OpRsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = int8ToAuxInt(7);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13108,7 +12232,6 @@ private static bool rewriteValue386_OpRsh8x8(ptr<Value> _addr_v) {
         v0.AddArg2(y, v1);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x8 <t> x y)
     // cond: shiftIsBounded(v)
@@ -13122,10 +12245,8 @@ private static bool rewriteValue386_OpRsh8x8(ptr<Value> _addr_v) {
         v.reset(Op386SARB);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpSelect0(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13147,10 +12268,8 @@ private static bool rewriteValue386_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpSelect1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13173,10 +12292,8 @@ private static bool rewriteValue386_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpSignmask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13191,7 +12308,6 @@ private static bool rewriteValue386_OpSignmask(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13210,7 +12326,6 @@ private static bool rewriteValue386_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13232,7 +12347,6 @@ private static bool rewriteValue386_OpStore(ptr<Value> _addr_v) {
         v.reset(Op386MOVSDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitFloat(val.Type)
@@ -13248,7 +12362,6 @@ private static bool rewriteValue386_OpStore(ptr<Value> _addr_v) {
         v.reset(Op386MOVSSstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4
@@ -13264,7 +12377,6 @@ private static bool rewriteValue386_OpStore(ptr<Value> _addr_v) {
         v.reset(Op386MOVLstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -13280,7 +12392,6 @@ private static bool rewriteValue386_OpStore(ptr<Value> _addr_v) {
         v.reset(Op386MOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 1
@@ -13296,10 +12407,8 @@ private static bool rewriteValue386_OpStore(ptr<Value> _addr_v) {
         v.reset(Op386MOVBstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13318,7 +12427,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] destptr mem)
     // result: (MOVBstoreconst [0] destptr mem)
@@ -13332,7 +12440,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(0);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [2] destptr mem)
     // result: (MOVWstoreconst [0] destptr mem)
@@ -13346,7 +12453,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(0);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [4] destptr mem)
     // result: (MOVLstoreconst [0] destptr mem)
@@ -13360,7 +12466,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(0);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [3] destptr mem)
     // result: (MOVBstoreconst [makeValAndOff(0,2)] destptr (MOVWstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -13377,7 +12482,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [5] destptr mem)
     // result: (MOVBstoreconst [makeValAndOff(0,4)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -13394,7 +12498,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [6] destptr mem)
     // result: (MOVWstoreconst [makeValAndOff(0,4)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -13411,7 +12514,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [7] destptr mem)
     // result: (MOVLstoreconst [makeValAndOff(0,3)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -13428,7 +12530,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s%4 != 0 && s > 4
@@ -13450,7 +12551,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v1.AddArg2(destptr, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Zero [8] destptr mem)
     // result: (MOVLstoreconst [makeValAndOff(0,4)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))
@@ -13467,7 +12567,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [12] destptr mem)
     // result: (MOVLstoreconst [makeValAndOff(0,8)] destptr (MOVLstoreconst [makeValAndOff(0,4)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem)))
@@ -13487,7 +12586,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, v1);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [16] destptr mem)
     // result: (MOVLstoreconst [makeValAndOff(0,12)] destptr (MOVLstoreconst [makeValAndOff(0,8)] destptr (MOVLstoreconst [makeValAndOff(0,4)] destptr (MOVLstoreconst [makeValAndOff(0,0)] destptr mem))))
@@ -13510,7 +12608,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, v1);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s > 16 && s <= 4*128 && s%4 == 0 && !config.noDuffDevice
@@ -13528,7 +12625,6 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(destptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: (s > 4*128 || (config.noDuffDevice && s > 16)) && s%4 == 0
@@ -13547,10 +12643,8 @@ private static bool rewriteValue386_OpZero(ptr<Value> _addr_v) {
         v1.AuxInt = int32ToAuxInt(0);
         v.AddArg4(destptr, v0, v1, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValue386_OpZeromask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13572,7 +12666,6 @@ private static bool rewriteValue386_OpZeromask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteBlock386(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -14379,7 +13472,6 @@ private static bool rewriteBlock386(ptr<Block> _addr_b) {
             return true;
         }
         return false;
-
 }
 
 } // end ssa_package

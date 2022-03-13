@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:24:18 UTC
+//     Generated on 2022 March 13 06:37:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace ianlancetaylor
 {
     public static partial class demangle_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Closure
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace ianlancetaylor
             public static implicit operator Closure(NilType nil) => default(Closure);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Closure Closure_cast(dynamic value)
         {
             return new Closure(value.Types, value.Num);

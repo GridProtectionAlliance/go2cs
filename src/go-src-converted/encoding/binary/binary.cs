@@ -19,21 +19,24 @@
 // high-performance serialization, especially for large data structures,
 // should look at more advanced solutions such as the encoding/gob
 // package or protocol buffers.
-// package binary -- go2cs converted at 2022 March 06 22:14:39 UTC
+
+// package binary -- go2cs converted at 2022 March 13 05:28:39 UTC
 // import "encoding/binary" ==> using binary = go.encoding.binary_package
 // Original source: C:\Program Files\Go\src\encoding\binary\binary.go
-using errors = go.errors_package;
-using io = go.io_package;
-using math = go.math_package;
-using reflect = go.reflect_package;
-using sync = go.sync_package;
-
 namespace go.encoding;
+
+using errors = errors_package;
+using io = io_package;
+using math = math_package;
+using reflect = reflect_package;
+using sync = sync_package;
+
+
+// A ByteOrder specifies how to convert byte sequences into
+// 16-, 32-, or 64-bit unsigned integers.
 
 public static partial class binary_package {
 
-    // A ByteOrder specifies how to convert byte sequences into
-    // 16-, 32-, or 64-bit unsigned integers.
 public partial interface ByteOrder {
     @string Uint16(slice<byte> _p0);
     @string Uint32(slice<byte> _p0);
@@ -56,20 +59,17 @@ private partial struct littleEndian {
 private static ushort Uint16(this littleEndian _p0, slice<byte> b) {
     _ = b[1]; // bounds check hint to compiler; see golang.org/issue/14808
     return uint16(b[0]) | uint16(b[1]) << 8;
-
 }
 
 private static void PutUint16(this littleEndian _p0, slice<byte> b, ushort v) {
     _ = b[1]; // early bounds check to guarantee safety of writes below
     b[0] = byte(v);
     b[1] = byte(v >> 8);
-
 }
 
 private static uint Uint32(this littleEndian _p0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
     return uint32(b[0]) | uint32(b[1]) << 8 | uint32(b[2]) << 16 | uint32(b[3]) << 24;
-
 }
 
 private static void PutUint32(this littleEndian _p0, slice<byte> b, uint v) {
@@ -78,13 +78,11 @@ private static void PutUint32(this littleEndian _p0, slice<byte> b, uint v) {
     b[1] = byte(v >> 8);
     b[2] = byte(v >> 16);
     b[3] = byte(v >> 24);
-
 }
 
 private static ulong Uint64(this littleEndian _p0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
     return uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24 | uint64(b[4]) << 32 | uint64(b[5]) << 40 | uint64(b[6]) << 48 | uint64(b[7]) << 56;
-
 }
 
 private static void PutUint64(this littleEndian _p0, slice<byte> b, ulong v) {
@@ -97,7 +95,6 @@ private static void PutUint64(this littleEndian _p0, slice<byte> b, ulong v) {
     b[5] = byte(v >> 40);
     b[6] = byte(v >> 48);
     b[7] = byte(v >> 56);
-
 }
 
 private static @string String(this littleEndian _p0) {
@@ -114,20 +111,17 @@ private partial struct bigEndian {
 private static ushort Uint16(this bigEndian _p0, slice<byte> b) {
     _ = b[1]; // bounds check hint to compiler; see golang.org/issue/14808
     return uint16(b[1]) | uint16(b[0]) << 8;
-
 }
 
 private static void PutUint16(this bigEndian _p0, slice<byte> b, ushort v) {
     _ = b[1]; // early bounds check to guarantee safety of writes below
     b[0] = byte(v >> 8);
     b[1] = byte(v);
-
 }
 
 private static uint Uint32(this bigEndian _p0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
     return uint32(b[3]) | uint32(b[2]) << 8 | uint32(b[1]) << 16 | uint32(b[0]) << 24;
-
 }
 
 private static void PutUint32(this bigEndian _p0, slice<byte> b, uint v) {
@@ -136,13 +130,11 @@ private static void PutUint32(this bigEndian _p0, slice<byte> b, uint v) {
     b[1] = byte(v >> 16);
     b[2] = byte(v >> 8);
     b[3] = byte(v);
-
 }
 
 private static ulong Uint64(this bigEndian _p0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
     return uint64(b[7]) | uint64(b[6]) << 8 | uint64(b[5]) << 16 | uint64(b[4]) << 24 | uint64(b[3]) << 32 | uint64(b[2]) << 40 | uint64(b[1]) << 48 | uint64(b[0]) << 56;
-
 }
 
 private static void PutUint64(this bigEndian _p0, slice<byte> b, ulong v) {
@@ -155,7 +147,6 @@ private static void PutUint64(this bigEndian _p0, slice<byte> b, ulong v) {
     b[5] = byte(v >> 16);
     b[6] = byte(v >> 8);
     b[7] = byte(v);
-
 }
 
 private static @string String(this bigEndian _p0) {
@@ -197,7 +188,6 @@ public static error Read(io.Reader r, ByteOrder order, object data) {
                 }
 
             }
-
             switch (data.type()) {
                 case ptr<bool> data:
                     data.val = bs[0] != 0;
@@ -241,7 +231,6 @@ public static error Read(io.Reader r, ByteOrder order, object data) {
                             i = __i;
                             x = __x; // Easier to loop over the input for 8-bit values.
                             data[i] = x != 0;
-
                         }
 
                         i = i__prev1;
@@ -372,7 +361,6 @@ public static error Read(io.Reader r, ByteOrder order, object data) {
             if (n != 0) {
                 return error.As(null!)!;
             }
-
         }
     } 
 
@@ -396,10 +384,8 @@ public static error Read(io.Reader r, ByteOrder order, object data) {
             return error.As(err)!;
         }
     }
-
     d.value(v);
     return error.As(null!)!;
-
 }
 
 // Write writes the binary representation of data into w.
@@ -426,7 +412,6 @@ public static error Write(io.Writer w, ByteOrder order, object data) {
  {
                         bs[0] = 0;
                     }
-
                     break;
                 case bool v:
                     if (v) {
@@ -436,7 +421,6 @@ public static error Write(io.Writer w, ByteOrder order, object data) {
  {
                         bs[0] = 0;
                     }
-
                     break;
                 case slice<bool> v:
                     {
@@ -453,7 +437,6 @@ public static error Write(io.Writer w, ByteOrder order, object data) {
  {
                                 bs[i] = 0;
                             }
-
                         }
 
                         i = i__prev1;
@@ -661,7 +644,6 @@ public static error Write(io.Writer w, ByteOrder order, object data) {
             }
             var (_, err) = w.Write(bs);
             return error.As(err)!;
-
         }
     } 
 
@@ -676,7 +658,6 @@ public static error Write(io.Writer w, ByteOrder order, object data) {
     e.value(v);
     (_, err) = w.Write(buf);
     return error.As(err)!;
-
 }
 
 // Size returns how many bytes Write would generate to encode the value v, which
@@ -703,7 +684,6 @@ private static nint dataSize(reflect.Value v) {
             }
 
         }
-
         return -1;
     else if (v.Kind() == reflect.Struct) 
         var t = v.Type();
@@ -719,14 +699,12 @@ private static nint dataSize(reflect.Value v) {
             size = size__prev1;
 
         }
-
         var size = sizeof(t);
         structSize.Store(t, size);
         return size;
     else 
         return sizeof(v.Type());
-    
-}
+    }
 
 // sizeof returns the size >= 0 of variables for the given type or -1 if the type is not acceptable.
 private static nint @sizeof(reflect.Type t) {
@@ -744,8 +722,6 @@ private static nint @sizeof(reflect.Type t) {
             s = s__prev1;
 
         }
-
-
     else if (t.Kind() == reflect.Struct) 
         nint sum = 0;
         for (nint i = 0;
@@ -760,7 +736,6 @@ private static nint @sizeof(reflect.Type t) {
     else if (t.Kind() == reflect.Bool || t.Kind() == reflect.Uint8 || t.Kind() == reflect.Uint16 || t.Kind() == reflect.Uint32 || t.Kind() == reflect.Uint64 || t.Kind() == reflect.Int8 || t.Kind() == reflect.Int16 || t.Kind() == reflect.Int32 || t.Kind() == reflect.Int64 || t.Kind() == reflect.Float32 || t.Kind() == reflect.Float64 || t.Kind() == reflect.Complex64 || t.Kind() == reflect.Complex128) 
         return int(t.Size());
         return -1;
-
 }
 
 private partial struct coder {
@@ -793,7 +768,6 @@ private static void @bool(this ptr<encoder> _addr_e, bool x) {
         e.buf[e.offset] = 0;
     }
     e.offset++;
-
 }
 
 private static byte uint8(this ptr<decoder> _addr_d) {
@@ -944,7 +918,6 @@ private static void value(this ptr<decoder> _addr_d, reflect.Value v) {
                     }
 
                 }
-
             }
 
 
@@ -988,8 +961,7 @@ private static void value(this ptr<decoder> _addr_d, reflect.Value v) {
         v.SetComplex(complex(float64(math.Float32frombits(d.uint32())), float64(math.Float32frombits(d.uint32()))));
     else if (v.Kind() == reflect.Complex128) 
         v.SetComplex(complex(math.Float64frombits(d.uint64()), math.Float64frombits(d.uint64())));
-    
-}
+    }
 
 private static void value(this ptr<encoder> _addr_e, reflect.Value v) {
     ref encoder e = ref _addr_e.val;
@@ -1027,7 +999,6 @@ private static void value(this ptr<encoder> _addr_e, reflect.Value v) {
                     }
 
                 }
-
             }
 
 
@@ -1083,8 +1054,7 @@ private static void value(this ptr<encoder> _addr_e, reflect.Value v) {
             x = v.Complex();
             e.uint64(math.Float64bits(real(x)));
             e.uint64(math.Float64bits(imag(x)));
-            
-}
+            }
 
 private static void skip(this ptr<decoder> _addr_d, reflect.Value v) {
     ref decoder d = ref _addr_d.val;
@@ -1207,7 +1177,6 @@ private static nint intDataSize(object data) {
             break;
     }
     return 0;
-
 }
 
 } // end binary_package

@@ -7,20 +7,19 @@
 //go:build (linux && amd64) || (linux && arm64)
 // +build linux,amd64 linux,arm64
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:22 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\cgo_mmap.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
-    // _cgo_mmap is filled in by runtime/cgo when it is linked into the
-    // program, so it is only non-nil when using cgo.
-    //go:linkname _cgo_mmap _cgo_mmap
+// _cgo_mmap is filled in by runtime/cgo when it is linked into the
+// program, so it is only non-nil when using cgo.
+//go:linkname _cgo_mmap _cgo_mmap
 private static unsafe.Pointer _cgo_mmap = default;
 
 // _cgo_munmap is filled in by runtime/cgo when it is linked into the
@@ -51,10 +50,8 @@ private static (unsafe.Pointer, nint) mmap(unsafe.Pointer addr, System.UIntPtr n
             return (null, int(ret));
         }
         return (@unsafe.Pointer(ret), 0);
-
     }
     return sysMmap(addr, n, prot, flags, fd, off);
-
 }
 
 private static void munmap(unsafe.Pointer addr, System.UIntPtr n) {
@@ -63,10 +60,8 @@ private static void munmap(unsafe.Pointer addr, System.UIntPtr n) {
             callCgoMunmap(addr, n);
         });
         return ;
-
     }
     sysMunmap(addr, n);
-
 }
 
 // sysMmap calls the mmap system call. It is implemented in assembly.

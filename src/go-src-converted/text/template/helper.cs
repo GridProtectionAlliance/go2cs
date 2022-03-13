@@ -4,27 +4,28 @@
 
 // Helper functions to make constructing templates easier.
 
-// package template -- go2cs converted at 2022 March 06 22:24:43 UTC
+// package template -- go2cs converted at 2022 March 13 05:39:14 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Program Files\Go\src\text\template\helper.go
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using System;
-
-
 namespace go.text;
 
+using fmt = fmt_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+
+
+// Functions and methods to parse templates.
+
+// Must is a helper that wraps a call to a function returning (*Template, error)
+// and panics if the error is non-nil. It is intended for use in variable
+// initializations such as
+//    var t = template.Must(template.New("name").Parse("text"))
+
+using System;
 public static partial class template_package {
 
-    // Functions and methods to parse templates.
-
-    // Must is a helper that wraps a call to a function returning (*Template, error)
-    // and panics if the error is non-nil. It is intended for use in variable
-    // initializations such as
-    //    var t = template.Must(template.New("name").Parse("text"))
 public static ptr<Template> Must(ptr<Template> _addr_t, error err) => func((_, panic, _) => {
     ref Template t = ref _addr_t.val;
 
@@ -32,7 +33,6 @@ public static ptr<Template> Must(ptr<Template> _addr_t, error err) => func((_, p
         panic(err);
     }
     return _addr_t!;
-
 });
 
 // ParseFiles creates a new Template and parses the template definitions from
@@ -84,7 +84,6 @@ private static (ptr<Template>, error) parseFiles(ptr<Template> _addr_t, Func<@st
     if (len(filenames) == 0) { 
         // Not really a problem, but be consistent.
         return (_addr_null!, error.As(fmt.Errorf("template: no files named in call to ParseFiles"))!);
-
     }
     foreach (var (_, filename) in filenames) {
         var (name, b, err) = readFile(filename);
@@ -114,7 +113,6 @@ private static (ptr<Template>, error) parseFiles(ptr<Template> _addr_t, Func<@st
             return (_addr_null!, error.As(err)!);
         }
     }    return (_addr_t!, error.As(null!)!);
-
 }
 
 // ParseGlob creates a new Template and parses the template definitions from
@@ -164,7 +162,6 @@ private static (ptr<Template>, error) parseGlob(ptr<Template> _addr_t, @string p
         return (_addr_null!, error.As(fmt.Errorf("template: pattern matches no files: %#q", pattern))!);
     }
     return _addr_parseFiles(_addr_t, readFileOS, filenames)!;
-
 }
 
 // ParseFS is like ParseFiles or ParseGlob but reads from the file system fsys
@@ -208,9 +205,7 @@ private static (ptr<Template>, error) parseFS(ptr<Template> _addr_t, fs.FS fsys,
             return (_addr_null!, error.As(fmt.Errorf("template: pattern matches no files: %#q", pattern))!);
         }
         filenames = append(filenames, list);
-
     }    return _addr_parseFiles(_addr_t, readFileFS(fsys), filenames)!;
-
 }
 
 private static (@string, slice<byte>, error) readFileOS(@string file) {

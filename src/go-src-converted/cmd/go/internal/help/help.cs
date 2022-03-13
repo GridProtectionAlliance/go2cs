@@ -3,27 +3,30 @@
 // license that can be found in the LICENSE file.
 
 // Package help implements the ``go help'' command.
-// package help -- go2cs converted at 2022 March 06 23:16:06 UTC
+
+// package help -- go2cs converted at 2022 March 13 06:29:36 UTC
 // import "cmd/go/internal/help" ==> using help = go.cmd.go.@internal.help_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\help\help.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using template = go.text.template_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using modload = go.cmd.go.@internal.modload_package;
-
 namespace go.cmd.go.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+using template = text.template_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using @base = cmd.go.@internal.@base_package;
+using modload = cmd.go.@internal.modload_package;
+
+
+// Help implements the 'help' command.
 
 public static partial class help_package {
 
-    // Help implements the 'help' command.
 public static void Help(io.Writer w, slice<@string> args) { 
     // 'go help documentation' generates doc.go.
     if (len(args) == 1 && args[0] == "documentation") {
@@ -52,7 +55,6 @@ public static void Help(io.Writer w, slice<@string> args) {
                 }
                 cmds = append(cmds, cmd);
                 cmds = append(cmds, cmd.Commands);
-
             }
             cmd = cmd__prev1;
         }
@@ -60,7 +62,6 @@ public static void Help(io.Writer w, slice<@string> args) {
         tmpl(addr(new commentWriter(W:w)), documentationTemplate, cmds);
         fmt.Fprintln(w, "package main");
         return ;
-
     }
     var cmd = @base.Go;
 Args:
@@ -79,7 +80,6 @@ Args:
         fmt.Fprintf(os.Stderr, "go help %s: unknown help topic. Run '%s'.\n", strings.Join(args, " "), helpSuccess);
         @base.SetExitStatus(2); // failed at 'go help cmd'
         @base.Exit();
-
     }    if (len(cmd.Commands) > 0) {
         PrintUsage(os.Stdout, _addr_cmd);
     }
@@ -88,7 +88,6 @@ Args:
         tmpl(os.Stdout, helpTemplate, cmd);
     }
     return ;
-
 }
 
 private static @string usageTemplate = @"{{.Long | trim}}
@@ -143,9 +142,7 @@ private static (nint, error) Write(this ptr<commentWriter> _addr_c, slice<byte> 
                 }
 
             }
-
             c.wroteSlashes = true;
-
         }
         var (n0, err) = c.W.Write(p[(int)i..(int)i + 1]);
         n += n0;
@@ -156,7 +153,6 @@ private static (nint, error) Write(this ptr<commentWriter> _addr_c, slice<byte> 
             c.wroteSlashes = false;
         }
     }    return (len(p), error.As(null!)!);
-
 }
 
 // An errWriter wraps a writer, recording whether a write error occurred.
@@ -175,7 +171,6 @@ private static (nint, error) Write(this ptr<errWriter> _addr_w, slice<byte> b) {
         w.err = err;
     }
     return (n, error.As(err)!);
-
 }
 
 // tmpl executes the given template text on data, writing the result to w.
@@ -192,7 +187,6 @@ private static void tmpl(io.Writer w, @string text, object data) => func((_, pan
             @base.Exit();
         }
         @base.Fatalf("writing output: %v", ew.err);
-
     }
     if (err != null) {
         panic(err);
@@ -205,7 +199,6 @@ private static @string capitalize(@string s) {
     }
     var (r, n) = utf8.DecodeRuneInString(s);
     return string(unicode.ToTitle(r)) + s[(int)n..];
-
 }
 
 public static void PrintUsage(io.Writer w, ptr<base.Command> _addr_cmd) {

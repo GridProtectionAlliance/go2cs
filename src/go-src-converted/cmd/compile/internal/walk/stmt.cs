@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:12:03 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:24 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\stmt.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+
+
+// The result of walkStmt MUST be assigned back to n, e.g.
+//     n.Left = walkStmt(n.Left)
 
 public static partial class walk_package {
 
-    // The result of walkStmt MUST be assigned back to n, e.g.
-    //     n.Left = walkStmt(n.Left)
 private static ir.Node walkStmt(ir.Node n) => func((_, panic, _) => {
     if (n == null) {
         return n;
@@ -36,7 +38,6 @@ private static ir.Node walkStmt(ir.Node n) => func((_, panic, _) => {
             // Throw away the temp to avoid plain values as statements.
             n = ir.NewBlockStmt(n.Pos(), init);
             init = null;
-
         }
         if (len(init) > 0) {
 
@@ -45,8 +46,7 @@ private static ir.Node walkStmt(ir.Node n) => func((_, panic, _) => {
             else 
                 init.Append(n);
                 n = ir.NewBlockStmt(n.Pos(), init);
-            
-        }
+                    }
         return n; 
 
         // special case for a receive where we throw away
@@ -87,13 +87,11 @@ private static ir.Node walkStmt(ir.Node n) => func((_, panic, _) => {
             // 8 defers in the function, since we use a single
             // byte to record active defers.
             ir.CurFunc.SetOpenCodedDeferDisallowed(true);
-
         }
         if (n.Esc() != ir.EscNever) { 
             // If n.Esc is not EscNever, then this defer occurs in a loop,
             // so open-coded defers cannot be used in this function.
             ir.CurFunc.SetOpenCodedDeferDisallowed(true);
-
         }
         fallthrough = true;
     }
@@ -194,7 +192,6 @@ private static ir.Node walkFor(ptr<ir.ForStmt> _addr_n) {
     }
     walkStmtList(n.Body);
     return n;
-
 }
 
 // walkGoDefer walks an OGO or ODEFER node.
@@ -226,7 +223,6 @@ private static ir.Node walkGoDefer(ptr<ir.GoDeferStmt> _addr_n) {
  {
                 n.Call = walkExpr(call, _addr_init);
             }
-
         else 
             n.Call = walkExpr(call, _addr_init);
 
@@ -238,7 +234,6 @@ private static ir.Node walkGoDefer(ptr<ir.GoDeferStmt> _addr_n) {
         return ir.NewBlockStmt(n.Pos(), init);
     }
     return n;
-
 }
 
 // walkIf walks an OIF node.
@@ -336,7 +331,6 @@ private static ir.Node wrapCall(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_in
         recv = typecheck.Expr(args[0]);
         n.X._<ptr<ir.SelectorExpr>>().X = addr(recv);
         args = args[(int)1..];
-
     }
     var call = ir.NewCallExpr(@base.Pos, n.Op(), n.X, args);
     if (!isBuiltinCall) {
@@ -353,7 +347,6 @@ private static ir.Node wrapCall(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_in
 
     call = ir.NewCallExpr(@base.Pos, ir.OCALL, fn.Nname, wrapArgs);
     return walkExpr(typecheck.Stmt(call), init);
-
 }
 
 // undoVariadic turns a call to a variadic function of the form
@@ -383,7 +376,6 @@ private static void undoVariadic(ptr<ir.CallExpr> _addr_call) {
             va = va__prev2;
 
         }
-
     }
 }
 

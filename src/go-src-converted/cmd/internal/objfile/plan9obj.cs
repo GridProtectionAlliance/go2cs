@@ -4,19 +4,18 @@
 
 // Parsing of Plan 9 a.out executables.
 
-// package objfile -- go2cs converted at 2022 March 06 22:40:59 UTC
+// package objfile -- go2cs converted at 2022 March 13 05:52:03 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\plan9obj.go
-using dwarf = go.debug.dwarf_package;
-using plan9obj = go.debug.plan9obj_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.@internal;
+
+using dwarf = debug.dwarf_package;
+using plan9obj = debug.plan9obj_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using sort = sort_package;
+using System;
 
 public static partial class objfile_package {
 
@@ -35,7 +34,6 @@ private static (rawFile, error) openPlan9(io.ReaderAt r) {
         return (null, error.As(err)!);
     }
     return (addr(new plan9File(f)), error.As(null!)!);
-
 }
 
 private static (slice<Sym>, error) symbols(this ptr<plan9File> _addr_f) {
@@ -84,7 +82,6 @@ private static (slice<Sym>, error) symbols(this ptr<plan9File> _addr_f) {
     }
 
     return (syms, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<plan9File> _addr_f) {
@@ -119,7 +116,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<plan9File>
         }
     }
     return (textStart, symtab, pclntab, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, error) text(this ptr<plan9File> _addr_f) {
@@ -135,7 +131,6 @@ private static (ulong, slice<byte>, error) text(this ptr<plan9File> _addr_f) {
     textStart = f.plan9.LoadAddress + f.plan9.HdrSize;
     text, err = sect.Data();
     return ;
-
 }
 
 private static (ptr<plan9obj.Sym>, error) findPlan9Symbol(ptr<plan9obj.File> _addr_f, @string name) {
@@ -152,9 +147,7 @@ private static (ptr<plan9obj.Sym>, error) findPlan9Symbol(ptr<plan9obj.File> _ad
             continue;
         }
         return (_addr__addr_s!, error.As(null!)!);
-
     }    return (_addr_null!, error.As(fmt.Errorf("no %s symbol found", name))!);
-
 }
 
 private static (slice<byte>, error) loadPlan9Table(ptr<plan9obj.File> _addr_f, @string sname, @string ename) {
@@ -180,7 +173,6 @@ private static (slice<byte>, error) loadPlan9Table(ptr<plan9obj.File> _addr_f, @
     }
     var textStart = f.LoadAddress + f.HdrSize;
     return (data[(int)ssym.Value - textStart..(int)esym.Value - textStart], error.As(null!)!);
-
 }
 
 private static @string goarch(this ptr<plan9File> _addr_f) {
@@ -194,7 +186,6 @@ private static @string goarch(this ptr<plan9File> _addr_f) {
     else if (f.plan9.Magic == plan9obj.MagicARM) 
         return "arm";
         return "";
-
 }
 
 private static (ulong, error) loadAddress(this ptr<plan9File> _addr_f) {

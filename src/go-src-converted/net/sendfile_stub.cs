@@ -5,12 +5,12 @@
 //go:build aix || darwin || (js && wasm) || netbsd || openbsd
 // +build aix darwin js,wasm netbsd openbsd
 
-// package net -- go2cs converted at 2022 March 06 22:16:32 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:04 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sendfile_stub.go
-using io = go.io_package;
-
 namespace go;
+
+using io = io_package;
 
 public static partial class net_package {
 

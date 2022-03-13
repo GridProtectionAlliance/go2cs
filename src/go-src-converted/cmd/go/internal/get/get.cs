@@ -3,30 +3,30 @@
 // license that can be found in the LICENSE file.
 
 // Package get implements the ``go get'' command.
-// package get -- go2cs converted at 2022 March 06 23:16:05 UTC
+
+// package get -- go2cs converted at 2022 March 13 06:29:35 UTC
 // import "cmd/go/internal/get" ==> using get = go.cmd.go.@internal.get_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\get\get.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using search = go.cmd.go.@internal.search_package;
-using str = go.cmd.go.@internal.str_package;
-using vcs = go.cmd.go.@internal.vcs_package;
-using web = go.cmd.go.@internal.web_package;
-using work = go.cmd.go.@internal.work_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using search = cmd.go.@internal.search_package;
+using str = cmd.go.@internal.str_package;
+using vcs = cmd.go.@internal.vcs_package;
+using web = cmd.go.@internal.web_package;
+using work = cmd.go.@internal.work_package;
+
+using module = golang.org.x.mod.module_package;
+using System;
 
 public static partial class get_package {
 
@@ -107,7 +107,6 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
     if (cfg.ModulesEnabled) { 
         // Should not happen: main.go should install the separate module-enabled get code.
         @base.Fatalf("go get: modules not implemented");
-
     }
     work.BuildInit();
 
@@ -153,10 +152,8 @@ private static void runGet(context.Context ctx, ptr<base.Command> _addr_cmd, sli
         // Check delayed until now so that downloadPaths
         // and CheckPackageErrors have a chance to print errors.
         return ;
-
     }
     work.InstallPackages(ctx, args, pkgs);
-
 }
 
 // downloadPaths prepares the list of paths to pass to download.
@@ -183,7 +180,6 @@ private static slice<@string> downloadPaths(slice<@string> patterns) {
                 }
 
             }
-
         }
     }    @base.ExitIfErrors();
 
@@ -197,7 +193,6 @@ private static slice<@string> downloadPaths(slice<@string> patterns) {
             pkgs = append(pkgs, m.Pkgs);
         }
     }    return pkgs;
-
 }
 
 // downloadCache records the import paths we have already
@@ -222,16 +217,13 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
     if (mode & load.ResolveImport != 0) { 
         // Caller is responsible for expanding vendor paths.
         panic("internal error: download mode has useVendor set");
-
     }
     Func<@string, nint, ptr<load.Package>> load1 = (path, mode) => {
         if (parent == null) {
             nint mode = 0; // don't do module or vendor resolution
             return load.LoadImport(context.TODO(), new load.PackageOpts(), path, @base.Cwd(), null, stk, null, mode);
-
         }
         return load.LoadImport(context.TODO(), new load.PackageOpts(), path, parent.Dir, parent, stk, null, mode | load.ResolveModule);
-
     };
 
     var p = load1(arg, mode);
@@ -281,7 +273,6 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
                 match.MatchPackages();
                 args = match.Pkgs;
             }
-
             {
                 var err__prev1 = err;
 
@@ -294,7 +285,6 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
             }
 
             isWildcard = true;
-
         }
         load.ClearPackageCachePartial(args);
 
@@ -308,9 +298,7 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
                 @base.Errorf("%s", p.Error);
                 continue;
             }
-
             pkgs = append(pkgs, p);
-
         }
     }
     {
@@ -328,14 +316,11 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
                     @base.Errorf("%s", p.Error);
                     return ;
                 }
-
             }
-
             if (isWildcard) { 
                 // Report both the real package and the
                 // wildcard in any error message.
                 stk.Push(p.ImportPath);
-
             } 
 
             // Process dependencies, now that we know what they are.
@@ -345,9 +330,7 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
                 // (But don't get test dependencies for test dependencies:
                 // we always pass mode 0 to the recursive calls below.)
                 imports = str.StringList(imports, p.TestImports, p.XTestImports);
-
             }
-
             foreach (var (i, path) in imports) {
                 if (path == "C") {
                     continue;
@@ -359,7 +342,6 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
                 if (i < len(p.Internal.Build.Imports)) {
                     orig = p.Internal.Build.Imports[i];
                 }
-
                 {
                     var (j, ok) = load.FindVendor(orig);
 
@@ -383,14 +365,11 @@ private static void download(@string arg, ptr<load.Package> _addr_parent, ptr<lo
                 if (i >= len(p.Imports)) {
                     path = load.ResolveImportPath(p, path);
                 }
-
                 download(path, _addr_p, _addr_stk, 0);
-
             }
             if (isWildcard) {
                 stk.Pop();
             }
-
         }
         p = p__prev1;
     }
@@ -425,7 +404,6 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
         i = i__prev1;
 
     }
-
     {
         error err__prev1 = err;
 
@@ -437,7 +415,6 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
         err = err__prev1;
 
     }
-
     var security = web.SecureOnly;
     if (module.MatchPrefixPatterns(cfg.GOINSECURE, importPrefix)) {
         security = web.Insecure;
@@ -458,9 +435,7 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
                 // Proceed anyway. The package is present; we likely just don't understand
                 // the repo configuration (e.g. unusual remote protocol).
                 blindRepo = true;
-
             }
-
             repo = remote;
             if (!getF && err == null.val) {
                 {
@@ -486,9 +461,7 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
                     err = err__prev4;
 
                 }
-
             }
-
         }
     }
     else
@@ -525,11 +498,9 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
             err = err__prev2;
 
         }
-
         p.Internal.Build.Root = list[0];
         p.Internal.Build.SrcRoot = filepath.Join(list[0], "src");
         p.Internal.Build.PkgRoot = filepath.Join(list[0], "pkg");
-
     }
     var root = filepath.Join(p.Internal.Build.SrcRoot, filepath.FromSlash(rootPath));
 
@@ -577,7 +548,6 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
 
             }
 
-
             (_, err) = os.Stat(p.Internal.Build.Root);
             var gopathExisted = err == null; 
 
@@ -588,17 +558,14 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
             if (err != null) {
                 return error.As(err)!;
             }
-
             if (cfg.BuildV && !gopathExisted && p.Internal.Build.Root == cfg.BuildContext.GOPATH) {
                 fmt.Fprintf(os.Stderr, "created GOPATH=%s; see 'go help gopath'\n", p.Internal.Build.Root);
             }
-
             err = error.As(vcsCmd.Create(root, repo))!;
 
             if (err != null) {
                 return error.As(err)!;
             }
-
         }
         else
  { 
@@ -608,12 +575,10 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
             if (err != null) {
                 return error.As(err)!;
             }
-
         }
         err = err__prev1;
 
     }
-
 
     if (cfg.BuildN) { 
         // Do not show tag sync in -n; it's noise more than anything,
@@ -621,7 +586,6 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
         // But avoid printing nothing.
         fmt.Fprintf(os.Stderr, "# cd %s; %s sync/update\n", root, vcsCmd.Cmd);
         return error.As(null!)!;
-
     }
     var (tags, err) = vcsCmd.Tags(root);
     if (err != null) {
@@ -639,7 +603,6 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
         i = i__prev1;
 
     }
-
     {
         error err__prev1 = err;
 
@@ -652,9 +615,7 @@ private static error downloadPackage(ptr<load.Package> _addr_p) {
 
     }
 
-
     return error.As(null!)!;
-
 }
 
 // selectTag returns the closest matching tag for a given version.
@@ -673,7 +634,6 @@ private static @string selectTag(@string goVersion, slice<@string> tags) {
             return "go1";
         }
     }    return "";
-
 }
 
 // checkImportPath is like module.CheckImportPath, but it forbids leading dots
@@ -691,13 +651,11 @@ private static error checkImportPath(@string path) {
         err = err__prev1;
 
     }
-
     Func<@string, error> checkElem = elem => {
         if (elem[0] == '.') {
             return error.As(fmt.Errorf("malformed import path %q: leading dot in path element", path))!;
         }
         return error.As(null!)!;
-
     };
     nint elemStart = 0;
     foreach (var (i, r) in path) {
@@ -714,9 +672,7 @@ private static error checkImportPath(@string path) {
                 err = err__prev2;
 
             }
-
             elemStart = i + 1;
-
         }
     }    {
         var err__prev1 = err;
@@ -729,9 +685,7 @@ private static error checkImportPath(@string path) {
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 } // end get_package

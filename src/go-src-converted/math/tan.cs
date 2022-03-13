@@ -2,71 +2,69 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:11 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:06 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\tan.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    /*
-        Floating-point tangent.
-    */
+/*
+    Floating-point tangent.
+*/
 
-    // The original C code, the long comment, and the constants
-    // below were from http://netlib.sandia.gov/cephes/cmath/sin.c,
-    // available from http://www.netlib.org/cephes/cmath.tgz.
-    // The go code is a simplified version of the original C.
-    //
-    //      tan.c
-    //
-    //      Circular tangent
-    //
-    // SYNOPSIS:
-    //
-    // double x, y, tan();
-    // y = tan( x );
-    //
-    // DESCRIPTION:
-    //
-    // Returns the circular tangent of the radian argument x.
-    //
-    // Range reduction is modulo pi/4.  A rational function
-    //       x + x**3 P(x**2)/Q(x**2)
-    // is employed in the basic interval [0, pi/4].
-    //
-    // ACCURACY:
-    //                      Relative error:
-    // arithmetic   domain     # trials      peak         rms
-    //    DEC      +-1.07e9      44000      4.1e-17     1.0e-17
-    //    IEEE     +-1.07e9      30000      2.9e-16     8.1e-17
-    //
-    // Partial loss of accuracy begins to occur at x = 2**30 = 1.074e9.  The loss
-    // is not gradual, but jumps suddenly to about 1 part in 10e7.  Results may
-    // be meaningless for x > 2**49 = 5.6e14.
-    // [Accuracy loss statement from sin.go comments.]
-    //
-    // Cephes Math Library Release 2.8:  June, 2000
-    // Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
-    //
-    // The readme file at http://netlib.sandia.gov/cephes/ says:
-    //    Some software in this archive may be from the book _Methods and
-    // Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
-    // International, 1989) or from the Cephes Mathematical Library, a
-    // commercial product. In either event, it is copyrighted by the author.
-    // What you see here may be used freely but it comes with no support or
-    // guarantee.
-    //
-    //   The two known misprints in the book are repaired here in the
-    // source listings for the gamma function and the incomplete beta
-    // integral.
-    //
-    //   Stephen L. Moshier
-    //   moshier@na-net.ornl.gov
+// The original C code, the long comment, and the constants
+// below were from http://netlib.sandia.gov/cephes/cmath/sin.c,
+// available from http://www.netlib.org/cephes/cmath.tgz.
+// The go code is a simplified version of the original C.
+//
+//      tan.c
+//
+//      Circular tangent
+//
+// SYNOPSIS:
+//
+// double x, y, tan();
+// y = tan( x );
+//
+// DESCRIPTION:
+//
+// Returns the circular tangent of the radian argument x.
+//
+// Range reduction is modulo pi/4.  A rational function
+//       x + x**3 P(x**2)/Q(x**2)
+// is employed in the basic interval [0, pi/4].
+//
+// ACCURACY:
+//                      Relative error:
+// arithmetic   domain     # trials      peak         rms
+//    DEC      +-1.07e9      44000      4.1e-17     1.0e-17
+//    IEEE     +-1.07e9      30000      2.9e-16     8.1e-17
+//
+// Partial loss of accuracy begins to occur at x = 2**30 = 1.074e9.  The loss
+// is not gradual, but jumps suddenly to about 1 part in 10e7.  Results may
+// be meaningless for x > 2**49 = 5.6e14.
+// [Accuracy loss statement from sin.go comments.]
+//
+// Cephes Math Library Release 2.8:  June, 2000
+// Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
+//
+// The readme file at http://netlib.sandia.gov/cephes/ says:
+//    Some software in this archive may be from the book _Methods and
+// Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
+// International, 1989) or from the Cephes Mathematical Library, a
+// commercial product. In either event, it is copyrighted by the author.
+// What you see here may be used freely but it comes with no support or
+// guarantee.
+//
+//   The two known misprints in the book are repaired here in the
+// source listings for the gamma function and the incomplete beta
+// integral.
+//
+//   Stephen L. Moshier
+//   moshier@na-net.ornl.gov
 
-    // tan coefficients
+// tan coefficients
 private static array<double> _tanP = new array<double>(new double[] { -1.30936939181383777646e4, 1.15351664838587416140e6, -1.79565251976484877988e7 });
 private static array<double> _tanQ = new array<double>(new double[] { 1.00000000000000000000e0, 1.36812963470692954678e4, -1.32089234440210967447e6, 2.50083801823357915839e7, -5.38695755929454629881e7 });
 
@@ -81,7 +79,6 @@ public static double Tan(double x) {
         return archTan(x);
     }
     return tan(x);
-
 }
 
 private static double tan(double x) {
@@ -117,7 +114,6 @@ private static double tan(double x) {
             y++;
         }
         z = ((x - y * PI4A) - y * PI4B) - y * PI4C;
-
     }
     var zz = z * z;
 
@@ -135,7 +131,6 @@ private static double tan(double x) {
         y = -y;
     }
     return y;
-
 }
 
 } // end math_package

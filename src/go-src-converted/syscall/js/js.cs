@@ -9,24 +9,26 @@
 //
 // This package is EXPERIMENTAL. Its current scope is only to allow tests to run, but not yet to provide a
 // comprehensive API for users. It is exempt from the Go compatibility promise.
-// package js -- go2cs converted at 2022 March 06 22:17:20 UTC
+
+// package js -- go2cs converted at 2022 March 13 05:40:41 UTC
 // import "syscall/js" ==> using js = go.syscall.js_package
 // Original source: C:\Program Files\Go\src\syscall\js\js.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.syscall;
 
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
+
+
+// ref is used to identify a JavaScript value, since the value itself can not be passed to WebAssembly.
+//
+// The JavaScript value "undefined" is represented by the value 0.
+// A JavaScript number (64-bit float, except 0 and NaN) is represented by its IEEE 754 binary representation.
+// All other values are represented as an IEEE 754 binary representation of NaN with bits 0-31 used as
+// an ID and bits 32-34 used to differentiate between string, symbol, function and object.
+
+using System;
 public static partial class js_package {
 
-    // ref is used to identify a JavaScript value, since the value itself can not be passed to WebAssembly.
-    //
-    // The JavaScript value "undefined" is represented by the value 0.
-    // A JavaScript number (64-bit float, except 0 and NaN) is represented by its IEEE 754 binary representation.
-    // All other values are represented as an IEEE 754 binary representation of NaN with bits 0-31 used as
-    // an ID and bits 32-34 used to differentiate between string, symbol, function and object.
 private partial struct @ref { // : ulong
 }
 
@@ -57,7 +59,6 @@ private static readonly var typeFlagString = 1;
 private static readonly var typeFlagSymbol = 2;
 private static readonly var typeFlagFunction = 3;
 
-
 // JSValue implements Wrapper interface.
 public static Value JSValue(this Value v) {
     return v;
@@ -74,7 +75,6 @@ private static Value makeValue(ref r) {
         });
     }
     return new Value(ref:r,gcPtr:gcPtr);
-
 }
 
 private static void finalizeRef(ref r);
@@ -91,7 +91,6 @@ private static Value floatValue(double f) {
         return valueNaN;
     }
     return new Value(ref:*(*ref)(unsafe.Pointer(&f)));
-
 }
 
 // Error wraps a JavaScript error.
@@ -174,9 +173,11 @@ public static Value ValueOf(object x) => func((_, panic, _) => {
  {
                 return valueFalse;
             }
-
             break;
         case nint x:
+            return floatValue(float64(x));
+            break;
+        case int x: /* Matches int literals */
             return floatValue(float64(x));
             break;
         case sbyte x:
@@ -242,7 +243,6 @@ public static Value ValueOf(object x) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 private static ref stringVal(@string x);
@@ -259,7 +259,6 @@ public static readonly var TypeString = 3;
 public static readonly var TypeSymbol = 4;
 public static readonly var TypeObject = 5;
 public static readonly var TypeFunction = 6;
-
 
 public static @string String(this Type t) => func((_, panic, _) => {
 
@@ -281,8 +280,7 @@ public static @string String(this Type t) => func((_, panic, _) => {
         return "function";
     else 
         panic("bad type");
-    
-});
+    });
 
 public static bool isObject(this Type t) {
     return t == TypeObject || t == TypeFunction;
@@ -313,8 +311,7 @@ public static Type Type(this Value v) => func((_, panic, _) => {
         return TypeFunction;
     else 
         panic("bad type flag");
-    
-});
+    });
 
 // Get returns the JavaScript property p of value v.
 // It panics if v is not a JavaScript object.
@@ -326,11 +323,9 @@ public static Value Get(this Value v, @string p) => func((_, panic, _) => {
             panic(addr(new ValueError("Value.Get",vType)));
         }
     }
-
     var r = makeValue(valueGet(v.@ref, p));
     runtime.KeepAlive(v);
     return r;
-
 });
 
 private static ref valueGet(ref v, @string p);
@@ -345,12 +340,10 @@ public static void Set(this Value v, @string p, object x) => func((_, panic, _) 
             panic(addr(new ValueError("Value.Set",vType)));
         }
     }
-
     var xv = ValueOf(x);
     valueSet(v.@ref, p, xv.@ref);
     runtime.KeepAlive(v);
     runtime.KeepAlive(xv);
-
 });
 
 private static void valueSet(ref v, @string p, ref x);
@@ -365,10 +358,8 @@ public static void Delete(this Value v, @string p) => func((_, panic, _) => {
             panic(addr(new ValueError("Value.Delete",vType)));
         }
     }
-
     valueDelete(v.@ref, p);
     runtime.KeepAlive(v);
-
 });
 
 private static void valueDelete(ref v, @string p);
@@ -383,11 +374,9 @@ public static Value Index(this Value v, nint i) => func((_, panic, _) => {
             panic(addr(new ValueError("Value.Index",vType)));
         }
     }
-
     var r = makeValue(valueIndex(v.@ref, i));
     runtime.KeepAlive(v);
     return r;
-
 });
 
 private static ref valueIndex(ref v, nint i);
@@ -402,12 +391,10 @@ public static void SetIndex(this Value v, nint i, object x) => func((_, panic, _
             panic(addr(new ValueError("Value.SetIndex",vType)));
         }
     }
-
     var xv = ValueOf(x);
     valueSetIndex(v.@ref, i, xv.@ref);
     runtime.KeepAlive(v);
     runtime.KeepAlive(xv);
-
 });
 
 private static void valueSetIndex(ref v, nint i, ref x);
@@ -435,11 +422,9 @@ public static nint Length(this Value v) => func((_, panic, _) => {
             panic(addr(new ValueError("Value.SetIndex",vType)));
         }
     }
-
     var r = valueLength(v.@ref);
     runtime.KeepAlive(v);
     return r;
-
 });
 
 private static nint valueLength(ref v);
@@ -460,11 +445,9 @@ public static Value Call(this Value v, @string m, params object[] args) => func(
 
             if (!vType.isObject()) { // check here to avoid overhead in success case
                 panic(addr(new ValueError("Value.Call",vType)));
-
             }
 
         }
-
         {
             var propType = v.Get(m).Type();
 
@@ -473,12 +456,9 @@ public static Value Call(this Value v, @string m, params object[] args) => func(
             }
 
         }
-
         panic(new Error(makeValue(res)));
-
     }
     return makeValue(res);
-
 });
 
 private static (ref, bool) valueCall(ref v, @string m, slice<ref> args);
@@ -499,16 +479,12 @@ public static Value Invoke(this Value v, params object[] args) => func((_, panic
 
             if (vType != TypeFunction) { // check here to avoid overhead in success case
                 panic(addr(new ValueError("Value.Invoke",vType)));
-
             }
 
         }
-
         panic(new Error(makeValue(res)));
-
     }
     return makeValue(res);
-
 });
 
 private static (ref, bool) valueInvoke(ref v, slice<ref> args);
@@ -529,16 +505,12 @@ public static Value New(this Value v, params object[] args) => func((_, panic, _
 
             if (vType != TypeFunction) { // check here to avoid overhead in success case
                 panic(addr(new ValueError("Value.Invoke",vType)));
-
             }
 
         }
-
         panic(new Error(makeValue(res)));
-
     }
     return makeValue(res);
-
 });
 
 private static (ref, bool) valueNew(ref v, slice<ref> args);
@@ -555,7 +527,6 @@ public static double @float(this Value v, @string method) => func((_, panic, _) 
         return 0;
     }
     return new ptr<ptr<ptr<double>>>(@unsafe.Pointer(_addr_v.@ref));
-
 });
 
 // Float returns the value v as a float64.
@@ -580,8 +551,7 @@ public static bool Bool(this Value v) => func((_, panic, _) => {
         return false;
     else 
         panic(addr(new ValueError("Value.Bool",v.Type())));
-    
-});
+    });
 
 // Truthy returns the JavaScript "truthiness" of the value v. In JavaScript,
 // false, 0, "", null, undefined, and NaN are "falsy", and everything else is
@@ -600,8 +570,7 @@ public static bool Truthy(this Value v) => func((_, panic, _) => {
         return true;
     else 
         panic("bad type");
-    
-});
+    });
 
 // String returns the value v as a string.
 // String is a special case because of Go's String method convention. Unlike the other getters,
@@ -627,8 +596,7 @@ public static @string String(this Value v) => func((_, panic, _) => {
         return "<function>";
     else 
         panic("bad type");
-    
-});
+    });
 
 private static @string jsString(Value v) {
     var (str, length) = valuePrepareString(v.@ref);
@@ -677,7 +645,6 @@ public static nint CopyBytesToGo(slice<byte> dst, Value src) => func((_, panic, 
         panic("syscall/js: CopyBytesToGo: expected src to be an Uint8Array or Uint8ClampedArray");
     }
     return n;
-
 });
 
 private static (nint, bool) copyBytesToGo(slice<byte> dst, ref src);
@@ -692,7 +659,6 @@ public static nint CopyBytesToJS(Value dst, slice<byte> src) => func((_, panic, 
         panic("syscall/js: CopyBytesToJS: expected dst to be an Uint8Array or Uint8ClampedArray");
     }
     return n;
-
 });
 
 private static (nint, bool) copyBytesToJS(ref dst, slice<byte> src);

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2022 March 06 22:25:21 UTC
+// package json -- go2cs converted at 2022 March 13 05:39:54 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\scanner.go
+namespace go.encoding;
 // JSON value parser state machine.
 // Just about at the limit of what is reasonable to write by hand.
 // Some parts are a bit tedious, but overall it nicely factors out the
@@ -14,16 +15,16 @@
 // This file starts with two simple examples using the scanner
 // before diving into the scanner itself.
 
-using strconv = go.strconv_package;
-using sync = go.sync_package;
+
+using strconv = strconv_package;
+using sync = sync_package;
+
+
+// Valid reports whether data is a valid JSON encoding.
+
 using System;
-
-
-namespace go.encoding;
-
 public static partial class json_package {
 
-    // Valid reports whether data is a valid JSON encoding.
 public static bool Valid(slice<byte> data) => func((defer, _, _) => {
     var scan = newScanner();
     defer(freeScanner(_addr_scan));
@@ -45,7 +46,6 @@ private static error checkValid(slice<byte> data, ptr<scanner> _addr_scan) {
         return error.As(scan.err)!;
     }
     return error.As(null!)!;
-
 }
 
 // A SyntaxError is a description of a JSON syntax error.
@@ -89,7 +89,6 @@ private static ptr<scanner> newScanner() {
     scan.bytes = 0;
     scan.reset();
     return _addr_scan!;
-
 }
 
 private static void freeScanner(ptr<scanner> _addr_scan) {
@@ -100,7 +99,6 @@ private static void freeScanner(ptr<scanner> _addr_scan) {
         scan.parseState = null;
     }
     scannerPool.Put(scan);
-
 }
 
 // These values are returned by the state transition functions
@@ -173,7 +171,6 @@ private static nint eof(this ptr<scanner> _addr_s) {
         s.err = addr(new SyntaxError("unexpected end of JSON input",s.bytes));
     }
     return scanError;
-
 }
 
 // pushParseState pushes a new parse state p onto the parse stack.
@@ -186,7 +183,6 @@ private static nint pushParseState(this ptr<scanner> _addr_s, byte c, nint newPa
         return successState;
     }
     return s.error(c, "exceeded max depth");
-
 }
 
 // popParseState pops a parse state (already obtained) off the stack
@@ -221,7 +217,6 @@ private static nint stateBeginValueOrEmpty(ptr<scanner> _addr_s, byte c) {
         return stateEndValue(_addr_s, c);
     }
     return stateBeginValue(_addr_s, c);
-
 }
 
 // stateBeginValue is the state at the beginning of the input.
@@ -268,10 +263,8 @@ private static nint stateBeginValue(ptr<scanner> _addr_s, byte c) {
     if ('1' <= c && c <= '9') { // beginning of 1234.5
         s.step = state1;
         return scanBeginLiteral;
-
     }
     return s.error(c, "looking for beginning of value");
-
 }
 
 // stateBeginStringOrEmpty is the state after reading `{`.
@@ -287,7 +280,6 @@ private static nint stateBeginStringOrEmpty(ptr<scanner> _addr_s, byte c) {
         return stateEndValue(_addr_s, c);
     }
     return stateBeginString(_addr_s, c);
-
 }
 
 // stateBeginString is the state after reading `{"key": value,`.
@@ -302,7 +294,6 @@ private static nint stateBeginString(ptr<scanner> _addr_s, byte c) {
         return scanBeginLiteral;
     }
     return s.error(c, "looking for beginning of object key string");
-
 }
 
 // stateEndValue is the state after completing a value,
@@ -316,7 +307,6 @@ private static nint stateEndValue(ptr<scanner> _addr_s, byte c) {
         s.step = stateEndTop;
         s.endTop = true;
         return stateEndTop(_addr_s, c);
-
     }
     if (isSpace(c)) {
         s.step = stateEndValue;
@@ -353,7 +343,6 @@ private static nint stateEndValue(ptr<scanner> _addr_s, byte c) {
         }
         return s.error(c, "after array element");
         return s.error(c, "");
-
 }
 
 // stateEndTop is the state after finishing the top-level value,
@@ -365,10 +354,8 @@ private static nint stateEndTop(ptr<scanner> _addr_s, byte c) {
     if (!isSpace(c)) { 
         // Complain about non-space byte on next call.
         s.error(c, "after top-level value");
-
     }
     return scanEnd;
-
 }
 
 // stateInString is the state after reading `"`.
@@ -387,7 +374,6 @@ private static nint stateInString(ptr<scanner> _addr_s, byte c) {
         return s.error(c, "in string literal");
     }
     return scanContinue;
-
 }
 
 // stateInStringEsc is the state after reading `"\` during a quoted string.
@@ -419,7 +405,6 @@ private static nint stateInStringEsc(ptr<scanner> _addr_s, byte c) {
             break;
     }
     return s.error(c, "in string escape code");
-
 }
 
 // stateInStringEscU is the state after reading `"\u` during a quoted string.
@@ -431,7 +416,6 @@ private static nint stateInStringEscU(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in \\u hexadecimal character escape");
-
 }
 
 // stateInStringEscU1 is the state after reading `"\u1` during a quoted string.
@@ -443,7 +427,6 @@ private static nint stateInStringEscU1(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in \\u hexadecimal character escape");
-
 }
 
 // stateInStringEscU12 is the state after reading `"\u12` during a quoted string.
@@ -455,7 +438,6 @@ private static nint stateInStringEscU12(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in \\u hexadecimal character escape");
-
 }
 
 // stateInStringEscU123 is the state after reading `"\u123` during a quoted string.
@@ -467,7 +449,6 @@ private static nint stateInStringEscU123(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in \\u hexadecimal character escape");
-
 }
 
 // stateNeg is the state after reading `-` during a number.
@@ -483,7 +464,6 @@ private static nint stateNeg(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in numeric literal");
-
 }
 
 // state1 is the state after reading a non-zero integer during a number,
@@ -496,7 +476,6 @@ private static nint state1(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return state0(_addr_s, c);
-
 }
 
 // state0 is the state after reading `0` during a number.
@@ -512,7 +491,6 @@ private static nint state0(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return stateEndValue(_addr_s, c);
-
 }
 
 // stateDot is the state after reading the integer and decimal point in a number,
@@ -525,7 +503,6 @@ private static nint stateDot(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "after decimal point in numeric literal");
-
 }
 
 // stateDot0 is the state after reading the integer, decimal point, and subsequent
@@ -541,7 +518,6 @@ private static nint stateDot0(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return stateEndValue(_addr_s, c);
-
 }
 
 // stateE is the state after reading the mantissa and e in a number,
@@ -554,7 +530,6 @@ private static nint stateE(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return stateESign(_addr_s, c);
-
 }
 
 // stateESign is the state after reading the mantissa, e, and sign in a number,
@@ -567,7 +542,6 @@ private static nint stateESign(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in exponent of numeric literal");
-
 }
 
 // stateE0 is the state after reading the mantissa, e, optional sign,
@@ -580,7 +554,6 @@ private static nint stateE0(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return stateEndValue(_addr_s, c);
-
 }
 
 // stateT is the state after reading `t`.
@@ -592,7 +565,6 @@ private static nint stateT(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal true (expecting 'r')");
-
 }
 
 // stateTr is the state after reading `tr`.
@@ -604,7 +576,6 @@ private static nint stateTr(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal true (expecting 'u')");
-
 }
 
 // stateTru is the state after reading `tru`.
@@ -616,7 +587,6 @@ private static nint stateTru(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal true (expecting 'e')");
-
 }
 
 // stateF is the state after reading `f`.
@@ -628,7 +598,6 @@ private static nint stateF(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal false (expecting 'a')");
-
 }
 
 // stateFa is the state after reading `fa`.
@@ -640,7 +609,6 @@ private static nint stateFa(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal false (expecting 'l')");
-
 }
 
 // stateFal is the state after reading `fal`.
@@ -652,7 +620,6 @@ private static nint stateFal(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal false (expecting 's')");
-
 }
 
 // stateFals is the state after reading `fals`.
@@ -664,7 +631,6 @@ private static nint stateFals(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal false (expecting 'e')");
-
 }
 
 // stateN is the state after reading `n`.
@@ -676,7 +642,6 @@ private static nint stateN(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal null (expecting 'u')");
-
 }
 
 // stateNu is the state after reading `nu`.
@@ -688,7 +653,6 @@ private static nint stateNu(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal null (expecting 'l')");
-
 }
 
 // stateNul is the state after reading `nul`.
@@ -700,7 +664,6 @@ private static nint stateNul(ptr<scanner> _addr_s, byte c) {
         return scanContinue;
     }
     return s.error(c, "in literal null (expecting 'l')");
-
 }
 
 // stateError is the state after reaching a syntax error,
@@ -731,7 +694,6 @@ private static @string quoteChar(byte c) {
     }
     var s = strconv.Quote(string(c));
     return "'" + s[(int)1..(int)len(s) - 1] + "'";
-
 }
 
 } // end json_package

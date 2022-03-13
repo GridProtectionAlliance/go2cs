@@ -1,12 +1,12 @@
 // Code generated from gen/dec.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:00:14 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:12:36 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewritedec.go
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -39,7 +39,6 @@ private static bool rewriteValuedec(ptr<Value> _addr_v) {
     else if (v.Op == OpStringPtr) 
         return rewriteValuedec_OpStringPtr(_addr_v);
         return false;
-
 }
 private static bool rewriteValuedec_OpComplexImag(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -54,10 +53,8 @@ private static bool rewriteValuedec_OpComplexImag(ptr<Value> _addr_v) {
         var imag = v_0.Args[1];
         v.copyOf(imag);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpComplexReal(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -72,10 +69,8 @@ private static bool rewriteValuedec_OpComplexReal(ptr<Value> _addr_v) {
         var real = v_0.Args[0];
         v.copyOf(real);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpIData(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -90,10 +85,8 @@ private static bool rewriteValuedec_OpIData(ptr<Value> _addr_v) {
         var data = v_0.Args[1];
         v.copyOf(data);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpITab(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -108,10 +101,8 @@ private static bool rewriteValuedec_OpITab(ptr<Value> _addr_v) {
         var itab = v_0.Args[0];
         v.copyOf(itab);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -141,7 +132,6 @@ private static bool rewriteValuedec_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg2(v2, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsComplex() && t.Size() == 16
@@ -163,7 +153,6 @@ private static bool rewriteValuedec_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg2(v2, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsString()
@@ -185,7 +174,6 @@ private static bool rewriteValuedec_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg2(v2, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsSlice()
@@ -212,7 +200,6 @@ private static bool rewriteValuedec_OpLoad(ptr<Value> _addr_v) {
         v3.AddArg2(v4, mem);
         v.AddArg3(v0, v1, v3);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsInterface()
@@ -234,10 +221,8 @@ private static bool rewriteValuedec_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg2(v2, mem);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpSliceCap(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -252,10 +237,8 @@ private static bool rewriteValuedec_OpSliceCap(ptr<Value> _addr_v) {
         var cap = v_0.Args[2];
         v.copyOf(cap);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpSliceLen(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -270,10 +253,8 @@ private static bool rewriteValuedec_OpSliceLen(ptr<Value> _addr_v) {
         var len = v_0.Args[1];
         v.copyOf(len);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpSlicePtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -288,10 +269,8 @@ private static bool rewriteValuedec_OpSlicePtr(ptr<Value> _addr_v) {
         var ptr = v_0.Args[0];
         v.copyOf(ptr);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpSlicePtrUnchecked(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -306,10 +285,8 @@ private static bool rewriteValuedec_OpSlicePtrUnchecked(ptr<Value> _addr_v) {
         var ptr = v_0.Args[0];
         v.copyOf(ptr);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -345,7 +322,6 @@ private static bool rewriteValuedec_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(dst, real, mem);
         v.AddArg3(v0, imag, v1);
         return true;
-
     } 
     // match: (Store {t} dst (ComplexMake real imag) mem)
     // cond: t.Size() == 16
@@ -372,7 +348,6 @@ private static bool rewriteValuedec_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(dst, real, mem);
         v.AddArg3(v0, imag, v1);
         return true;
-
     } 
     // match: (Store dst (StringMake ptr len) mem)
     // result: (Store {typ.Int} (OffPtr <typ.IntPtr> [config.PtrSize] dst) len (Store {typ.BytePtr} dst ptr mem))
@@ -394,7 +369,6 @@ private static bool rewriteValuedec_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(dst, ptr, mem);
         v.AddArg3(v0, len, v1);
         return true;
-
     } 
     // match: (Store {t} dst (SliceMake ptr len cap) mem)
     // result: (Store {typ.Int} (OffPtr <typ.IntPtr> [2*config.PtrSize] dst) cap (Store {typ.Int} (OffPtr <typ.IntPtr> [config.PtrSize] dst) len (Store {t.Elem().PtrTo()} dst ptr mem)))
@@ -424,7 +398,6 @@ private static bool rewriteValuedec_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(v2, len, v3);
         v.AddArg3(v0, cap, v1);
         return true;
-
     } 
     // match: (Store dst (IMake itab data) mem)
     // result: (Store {typ.BytePtr} (OffPtr <typ.BytePtrPtr> [config.PtrSize] dst) data (Store {typ.Uintptr} dst itab mem))
@@ -446,10 +419,8 @@ private static bool rewriteValuedec_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(dst, itab, mem);
         v.AddArg3(v0, data, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpStringLen(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -464,10 +435,8 @@ private static bool rewriteValuedec_OpStringLen(ptr<Value> _addr_v) {
         var len = v_0.Args[1];
         v.copyOf(len);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec_OpStringPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -482,10 +451,8 @@ private static bool rewriteValuedec_OpStringPtr(ptr<Value> _addr_v) {
         var ptr = v_0.Args[0];
         v.copyOf(ptr);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteBlockdec(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;

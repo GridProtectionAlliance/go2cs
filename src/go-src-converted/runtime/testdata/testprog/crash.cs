@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:25:58 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:19 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\crash.go
-using fmt = go.fmt_package;
-using runtime = go.runtime_package;
+namespace go;
+
+using fmt = fmt_package;
+using runtime = runtime_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -29,15 +28,12 @@ private static void test(@string name) => func((defer, _, _) => {
             }
 
         }
-
         fmt.Printf(" done\n");
-
     }());
     fmt.Printf("%s:", name);
     ptr<@string> s;
     _ = s.val;
     fmt.Print("SHOULD NOT BE HERE");
-
 });
 
 private static void testInNewThread(@string name) {
@@ -68,7 +64,6 @@ public static @string String(this P p) {
     runtime.GC();
     runtime.GC();
     return string(p);
-
 }
 
 // Test that panic message is not clobbered.

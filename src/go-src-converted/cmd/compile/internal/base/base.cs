@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 22:47:34 UTC
+// package @base -- go2cs converted at 2022 March 13 05:58:49 UTC
 // import "cmd/compile/internal/base" ==> using @base = go.cmd.compile.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\base\base.go
-using os = go.os_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using os = os_package;
+using System;
 
 public static partial class @base_package {
 
@@ -42,7 +41,6 @@ public static bool Compiling(slice<@string> pkgs) {
         }
     }
     return false;
-
 }
 
 // The racewalk pass is currently handled in three parts.

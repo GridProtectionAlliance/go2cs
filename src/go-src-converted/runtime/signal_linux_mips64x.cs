@@ -6,13 +6,13 @@
 // +build linux
 // +build mips64 mips64le
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:32 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:53 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\signal_linux_mips64x.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -264,10 +264,9 @@ private static void set_sigcode(this ptr<sigctxt> _addr_c, uint x) {
 private static void set_sigaddr(this ptr<sigctxt> _addr_c, ulong x) {
     ref sigctxt c = ref _addr_c.val;
 
-    (uintptr.val)(add(@unsafe.Pointer(c.info), 2 * sys.PtrSize)).val;
+    (uintptr.val).val;
 
-    uintptr(x);
-
+    (add(@unsafe.Pointer(c.info), 2 * sys.PtrSize)) = uintptr(x);
 }
 
 } // end runtime_package

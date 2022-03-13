@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package dwarf -- go2cs converted at 2022 March 06 22:46:11 UTC
+// package dwarf -- go2cs converted at 2022 March 13 05:57:23 UTC
 // import "cmd/internal/dwarf" ==> using dwarf = go.cmd.@internal.dwarf_package
 // Original source: C:\Program Files\Go\src\cmd\internal\dwarf\dwarf_defs.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class dwarf_package {
 
-    // Cut, pasted, tr-and-awk'ed from tables in
-    // http://dwarfstd.org/doc/Dwarf3.pdf
+// Cut, pasted, tr-and-awk'ed from tables in
+// http://dwarfstd.org/doc/Dwarf3.pdf
 
-    // Table 18
+// Table 18
 public static readonly nuint DW_TAG_array_type = 0x01;
 public static readonly nuint DW_TAG_class_type = 0x02;
 public static readonly nuint DW_TAG_entry_point = 0x03;
@@ -82,11 +80,9 @@ public static readonly nuint DW_TAG_template_alias = 0x43;
 public static readonly nuint DW_TAG_lo_user = 0x4080;
 public static readonly nuint DW_TAG_hi_user = 0xffff;
 
-
 // Table 19
 public static readonly nuint DW_CHILDREN_no = 0x00;
 public static readonly nuint DW_CHILDREN_yes = 0x01;
-
 
 // Not from the spec, but logically belongs here
 public static readonly nuint DW_CLS_ADDRESS = 0x01 + iota;
@@ -100,7 +96,6 @@ public static readonly var DW_CLS_STRING = 6;
 
 // Go-specific internal hackery.
 public static readonly var DW_CLS_GO_TYPEREF = 7;
-
 
 // Table 20
 public static readonly nuint DW_AT_sibling = 0x01; // reference
@@ -224,7 +219,6 @@ public static readonly nuint DW_FORM_ref_sig8 = 0x20; // reference
 // Pseudo-form: expanded to data4 on IOS, udata elsewhere.
 public static readonly nuint DW_FORM_udata_pseudo = 0x99;
 
-
 // Table 24 (#operands, notes)
 public static readonly nuint DW_OP_addr = 0x03; // 1 constant address (size target specific)
 public static readonly nuint DW_OP_deref = 0x06; // 0
@@ -291,7 +285,6 @@ public static readonly nuint DW_OP_bit_piece = 0x9d; // 2
 public static readonly nuint DW_OP_lo_user = 0xe0;
 public static readonly nuint DW_OP_hi_user = 0xff;
 
-
 // Table 25
 public static readonly nuint DW_ATE_address = 0x01;
 public static readonly nuint DW_ATE_boolean = 0x02;
@@ -311,14 +304,12 @@ public static readonly nuint DW_ATE_decimal_float = 0x0f;
 public static readonly nuint DW_ATE_lo_user = 0x80;
 public static readonly nuint DW_ATE_hi_user = 0xff;
 
-
 // Table 26
 public static readonly nuint DW_DS_unsigned = 0x01;
 public static readonly nuint DW_DS_leading_overpunch = 0x02;
 public static readonly nuint DW_DS_trailing_overpunch = 0x03;
 public static readonly nuint DW_DS_leading_separate = 0x04;
 public static readonly nuint DW_DS_trailing_separate = 0x05;
-
 
 // Table 27
 public static readonly nuint DW_END_default = 0x00;
@@ -327,24 +318,20 @@ public static readonly nuint DW_END_little = 0x02;
 public static readonly nuint DW_END_lo_user = 0x40;
 public static readonly nuint DW_END_hi_user = 0xff;
 
-
 // Table 28
 public static readonly nuint DW_ACCESS_public = 0x01;
 public static readonly nuint DW_ACCESS_protected = 0x02;
 public static readonly nuint DW_ACCESS_private = 0x03;
-
 
 // Table 29
 public static readonly nuint DW_VIS_local = 0x01;
 public static readonly nuint DW_VIS_exported = 0x02;
 public static readonly nuint DW_VIS_qualified = 0x03;
 
-
 // Table 30
 public static readonly nuint DW_VIRTUALITY_none = 0x00;
 public static readonly nuint DW_VIRTUALITY_virtual = 0x01;
 public static readonly nuint DW_VIRTUALITY_pure_virtual = 0x02;
-
 
 // Table 31
 public static readonly nuint DW_LANG_C89 = 0x0001;
@@ -375,13 +362,11 @@ public static readonly nuint DW_LANG_Go = 0x0016;
 public static readonly nuint DW_LANG_lo_user = 0x8000;
 public static readonly nuint DW_LANG_hi_user = 0xffff;
 
-
 // Table 32
 public static readonly nuint DW_ID_case_sensitive = 0x00;
 public static readonly nuint DW_ID_up_case = 0x01;
 public static readonly nuint DW_ID_down_case = 0x02;
 public static readonly nuint DW_ID_case_insensitive = 0x03;
-
 
 // Table 33
 public static readonly nuint DW_CC_normal = 0x01;
@@ -390,23 +375,19 @@ public static readonly nuint DW_CC_nocall = 0x03;
 public static readonly nuint DW_CC_lo_user = 0x40;
 public static readonly nuint DW_CC_hi_user = 0xff;
 
-
 // Table 34
 public static readonly nuint DW_INL_not_inlined = 0x00;
 public static readonly nuint DW_INL_inlined = 0x01;
 public static readonly nuint DW_INL_declared_not_inlined = 0x02;
 public static readonly nuint DW_INL_declared_inlined = 0x03;
 
-
 // Table 35
 public static readonly nuint DW_ORD_row_major = 0x00;
 public static readonly nuint DW_ORD_col_major = 0x01;
 
-
 // Table 36
 public static readonly nuint DW_DSC_label = 0x00;
 public static readonly nuint DW_DSC_range = 0x01;
-
 
 // Table 37
 public static readonly nuint DW_LNS_copy = 0x01;
@@ -423,7 +404,6 @@ public static readonly nuint DW_LNS_set_prologue_end = 0x0a;
 public static readonly nuint DW_LNS_set_epilogue_begin = 0x0b;
 public static readonly nuint DW_LNS_set_isa = 0x0c;
 
-
 // Table 38
 public static readonly nuint DW_LNE_end_sequence = 0x01;
 public static readonly nuint DW_LNE_set_address = 0x02;
@@ -431,14 +411,12 @@ public static readonly nuint DW_LNE_define_file = 0x03;
 public static readonly nuint DW_LNE_lo_user = 0x80;
 public static readonly nuint DW_LNE_hi_user = 0xff;
 
-
 // Table 39
 public static readonly nuint DW_MACINFO_define = 0x01;
 public static readonly nuint DW_MACINFO_undef = 0x02;
 public static readonly nuint DW_MACINFO_start_file = 0x03;
 public static readonly nuint DW_MACINFO_end_file = 0x04;
 public static readonly nuint DW_MACINFO_vendor_ext = 0xff;
-
 
 // Table 40.
  

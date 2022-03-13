@@ -1,22 +1,23 @@
-// package driver -- go2cs converted at 2022 March 06 23:23:22 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:27 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\config.go
-using fmt = go.fmt_package;
-using url = go.net.url_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System.ComponentModel;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using fmt = fmt_package;
+using url = net.url_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// config holds settings for a single named config.
+// The JSON tag name for a field is used both for JSON encoding and as
+// a named variable.
+
+using System.ComponentModel;
 public static partial class driver_package {
 
-    // config holds settings for a single named config.
-    // The JSON tag name for a field is used both for JSON encoding and as
-    // a named variable.
 private partial struct config {
     [Description("json:\"-\"")]
     public @string Output; // Display options.
@@ -145,9 +146,7 @@ private static void init() {
             if (name == "") { 
                 // Not a configurable field.
                 continue;
-
             }
-
         }
         configField f = new configField(name:name,urlparam:urlparam[name],saved:(name==js[0]),field:field,choices:choices[name],);
         f.defaultValue = def.get(f);
@@ -157,7 +156,6 @@ private static void init() {
             configFieldMap[choice] = f;
         }
     }
-
 }
 
 // fieldPtr returns a pointer to the field identified by f in *cfg.
@@ -170,7 +168,6 @@ private static void fieldPtr(this ptr<config> _addr_cfg, configField f) {
     // Addr: takes address of field
     // Interface: converts back from reflect.Value to a regular value
     return reflect.ValueOf(cfg).Elem().FieldByIndex(f.field.Index).Addr().Interface();
-
 }
 
 // get returns the value of field f in cfg.
@@ -192,7 +189,6 @@ private static @string get(this ptr<config> _addr_cfg, configField f) => func((_
             break;
     }
     panic(fmt.Sprintf("unsupported config field type %v", f.field.Type));
-
 });
 
 // set sets the value of field f in cfg to value.
@@ -210,9 +206,7 @@ private static error set(this ptr<config> _addr_cfg, configField f, @string valu
                     }
                 }
                 return error.As(fmt.Errorf("invalid %q value %q", f.name, value))!;
-
             }
-
             ptr.val = value;
             break;
         case ptr<nint> ptr:
@@ -244,7 +238,6 @@ private static error set(this ptr<config> _addr_cfg, configField f, @string valu
         }
     }
     return error.As(null!)!;
-
 });
 
 // isConfigurable returns true if name is either the name of a config field, or
@@ -267,7 +260,6 @@ private static bool isBoolConfig(@string name) {
     config cfg = default;
     _, ok = cfg.fieldPtr(f)._<ptr<bool>>();
     return ok;
-
 }
 
 // completeConfig returns the list of configurable names starting with prefix.
@@ -278,7 +270,6 @@ private static slice<@string> completeConfig(@string prefix) {
             result = append(result, v);
         }
     }    return result;
-
 }
 
 // configure stores the name=value mapping into the current config, correctly
@@ -300,9 +291,7 @@ private static error configure(@string name, @string value) => func((defer, _, _
             return error.As(currentCfg.set(f, name))!;
         }
     }
-
     return error.As(fmt.Errorf("unknown config field %q", name))!;
-
 });
 
 // resetTransient sets all transient fields in *cfg to their currently
@@ -338,9 +327,7 @@ private static error applyURL(this ptr<config> _addr_cfg, url.Values @params) {
             }
 
         }
-
     }    return error.As(null!)!;
-
 }
 
 // makeURL returns a URL based on initialURL that contains the config contents
@@ -363,7 +350,6 @@ private static (url.URL, bool) makeURL(this ptr<config> _addr_cfg, url.URL initi
         else if (f.field.Type.Kind() == reflect.Bool) { 
             // Shorten bool values to "f" or "t"
             v = v[..(int)1];
-
         }
         if (q.Get(f.urlparam) == v) {
             continue;
@@ -380,7 +366,6 @@ private static (url.URL, bool) makeURL(this ptr<config> _addr_cfg, url.URL initi
         initialURL.RawQuery = q.Encode();
     }
     return (initialURL, changed);
-
 }
 
 } // end driver_package

@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:34 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:24 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\ftoaryu.go
-using bits = go.math.bits_package;
-
 namespace go;
+
+using bits = math.bits_package;
+
+
+// binary to decimal conversion using the Ryū algorithm.
+//
+// See Ulf Adams, "Ryū: Fast Float-to-String Conversion" (doi:10.1145/3192366.3192369)
+//
+// Fixed precision formatting is a variant of the original paper's
+// algorithm, where a single multiplication by 10^k is required,
+// sharing the same rounding guarantees.
+
+// ryuFtoaFixed32 formats mant*(2^exp) with prec decimal digits.
 
 public static partial class strconv_package {
 
-    // binary to decimal conversion using the Ryū algorithm.
-    //
-    // See Ulf Adams, "Ryū: Fast Float-to-String Conversion" (doi:10.1145/3192366.3192369)
-    //
-    // Fixed precision formatting is a variant of the original paper's
-    // algorithm, where a single multiplication by 10^k is required,
-    // sharing the same rounding guarantees.
-
-    // ryuFtoaFixed32 formats mant*(2^exp) with prec decimal digits.
 private static void ryuFtoaFixed32(ptr<decimalSlice> _addr_d, uint mant, nint exp, nint prec) => func((_, panic, _) => {
     ref decimalSlice d = ref _addr_d.val;
 
@@ -72,14 +74,12 @@ private static void ryuFtoaFixed32(ptr<decimalSlice> _addr_d, uint mant, nint ex
         // If we computed an exact product, d + 1/2
         // should round to d+1 if 'd' is odd.
         roundUp = dfrac > 1 << (int)((extra - 1)) || (dfrac == 1 << (int)((extra - 1)) && !d0) || (dfrac == 1 << (int)((extra - 1)) && d0 && di & 1 == 1);
-
     }
     else
  { 
         // otherwise, d+1/2 always rounds up because
         // we truncated below.
         roundUp = dfrac >> (int)((extra - 1)) == 1;
-
     }
     if (dfrac != 0) {
         d0 = false;
@@ -87,7 +87,6 @@ private static void ryuFtoaFixed32(ptr<decimalSlice> _addr_d, uint mant, nint ex
     formatDecimal(_addr_d, uint64(di), !d0, roundUp, prec); 
     // Adjust exponent
     d.dp -= q;
-
 });
 
 // ryuFtoaFixed64 formats mant*(2^exp) with prec decimal digits.
@@ -143,14 +142,12 @@ private static void ryuFtoaFixed64(ptr<decimalSlice> _addr_d, ulong mant, nint e
         // If we computed an exact product, d + 1/2
         // should round to d+1 if 'd' is odd.
         roundUp = dfrac > 1 << (int)((extra - 1)) || (dfrac == 1 << (int)((extra - 1)) && !d0) || (dfrac == 1 << (int)((extra - 1)) && d0 && di & 1 == 1);
-
     }
     else
  { 
         // otherwise, d+1/2 always rounds up because
         // we truncated below.
         roundUp = dfrac >> (int)((extra - 1)) == 1;
-
     }
     if (dfrac != 0) {
         d0 = false;
@@ -158,7 +155,6 @@ private static void ryuFtoaFixed64(ptr<decimalSlice> _addr_d, ulong mant, nint e
     formatDecimal(_addr_d, di, !d0, roundUp, prec); 
     // Adjust exponent
     d.dp -= q;
-
 });
 
 private static array<ulong> uint64pow10 = new array<ulong>(new ulong[] { 1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19 });
@@ -187,7 +183,6 @@ private static void formatDecimal(ptr<decimalSlice> _addr_d, ulong m, bool trunc
             // round up if there are trailing digits,
             // or if the new value of m is odd (round-to-even convention)
             roundUp = trunc || m & 1 == 1;
-
         }
         if (b != 0) {
             trunc = true;
@@ -200,7 +195,6 @@ private static void formatDecimal(ptr<decimalSlice> _addr_d, ulong m, bool trunc
         // Happens if di was originally 99999....xx
         m /= 10;
         trimmed++;
-
     }
     var n = uint(prec);
     d.nd = int(prec);
@@ -219,7 +213,6 @@ private static void formatDecimal(ptr<decimalSlice> _addr_d, ulong m, bool trunc
         d.d[n + 1] = smallsString[2 * v2 + 1];
         d.d[n + 0] = smallsString[2 * v2 + 0];
         v = v1;
-
     }
     if (v > 0) {
         n--;
@@ -234,7 +227,6 @@ private static void formatDecimal(ptr<decimalSlice> _addr_d, ulong m, bool trunc
         trimmed++;
     }
     d.dp = d.nd + trimmed;
-
 }
 
 // ryuFtoaShortest formats mant*2^exp with prec decimal digits.
@@ -322,14 +314,12 @@ private static void ryuFtoaShortest(ptr<decimalSlice> _addr_d, ulong mant, nint 
         // If we computed an exact product, the half integer
         // should round to next (even) integer if 'dc' is odd.
         cup = fracc > 1 << (int)((extra - 1)) || (fracc == 1 << (int)((extra - 1)) && dc & 1 == 1);
-
     }
     else
  { 
         // otherwise, the result is a lower truncation of the ideal
         // result.
         cup = fracc >> (int)((extra - 1)) == 1;
-
     }
     var lok = dl0 && fracl == 0 && (mant & 1 == 0);
     if (!lok) {
@@ -339,7 +329,6 @@ private static void ryuFtoaShortest(ptr<decimalSlice> _addr_d, ulong mant, nint 
     // render digits
     ryuDigits(_addr_d, dl, dc, du, c0, cup);
     d.dp -= q;
-
 });
 
 // mulByLog2Log10 returns math.Floor(x * log(2)/log(10)) for an integer x in
@@ -350,7 +339,6 @@ private static void ryuFtoaShortest(ptr<decimalSlice> _addr_d, ulong mant, nint 
 private static nint mulByLog2Log10(nint x) { 
     // log(2)/log(10) ≈ 0.30102999566 ≈ 78913 / 2^18
     return (x * 78913) >> 18;
-
 }
 
 // mulByLog10Log2 returns math.Floor(x * log(10)/log(2)) for an integer x in
@@ -361,7 +349,6 @@ private static nint mulByLog2Log10(nint x) {
 private static nint mulByLog10Log2(nint x) { 
     // log(10)/log(2) ≈ 3.32192809489 ≈ 108853 / 2^15
     return (x * 108853) >> 15;
-
 }
 
 // computeBounds returns a floating-point vector (l, c, u)×2^e2
@@ -378,14 +365,12 @@ private static (ulong, ulong, ulong, nint) computeBounds(ulong mant, nint exp, p
         // regular case (or denormals)
         (lower, central, upper) = (2 * mant - 1, 2 * mant, 2 * mant + 1);        e2 = exp - 1;
         return ;
-
     }
     else
  { 
         // border of an exponent
         (lower, central, upper) = (4 * mant - 1, 4 * mant, 4 * mant + 2);        e2 = exp - 2;
         return ;
-
     }
 }
 
@@ -398,7 +383,6 @@ private static void ryuDigits(ptr<decimalSlice> _addr_d, ulong lower, ulong cent
     if (uhi == 0) { 
         // only low digits (for denormals)
         ryuDigits32(_addr_d, llo, clo, ulo, c0, cup, 8);
-
     }
     else if (lhi < uhi) { 
         // truncate 9 digits at once.
@@ -409,7 +393,6 @@ private static void ryuDigits(ptr<decimalSlice> _addr_d, ulong lower, ulong cent
         cup = (clo > 5e8F) || (clo == 5e8F && cup);
         ryuDigits32(_addr_d, lhi, chi, uhi, c0, cup, 8);
         d.dp += 9;
-
     }
     else
  {
@@ -425,7 +408,6 @@ private static void ryuDigits(ptr<decimalSlice> _addr_d, ulong lower, ulong cent
                 v = v1;
                 n--;
                 d.d[n] = byte(v2 + '0');
-
             }
 
         }
@@ -433,7 +415,6 @@ private static void ryuDigits(ptr<decimalSlice> _addr_d, ulong lower, ulong cent
         d.nd = int(9 - n); 
         // emit low part
         ryuDigits32(_addr_d, llo, clo, ulo, c0, cup, d.nd + 8);
-
     }
     while (d.nd > 0 && d.d[d.nd - 1] == '0') {
         d.nd--;
@@ -444,7 +425,6 @@ private static void ryuDigits(ptr<decimalSlice> _addr_d, ulong lower, ulong cent
         d.dp--;
         d.d = d.d[(int)1..];
     }
-
 }
 
 // ryuDigits32 emits decimal digits for a number less than 1e9.
@@ -473,7 +453,6 @@ private static void ryuDigits32(ptr<decimalSlice> _addr_d, uint lower, uint cent
             // don't trim the last digit as it is forbidden to go below l
             // other, trim and exit now.
             break;
-
         }
         if (l == c + 1 && c < u) {
             c++;
@@ -503,14 +482,12 @@ private static void ryuDigits32(ptr<decimalSlice> _addr_d, uint lower, uint cent
         d.d[n - 1] = smallsString[2 * v2 + 0];
         n -= 2;
         v = v1;
-
     }
     if (n == d.nd) {
         d.d[n] = byte(v + '0');
     }
     d.nd = endindex + 1;
     d.dp = d.nd + trimmed;
-
 }
 
 // mult64bitPow10 takes a floating-point input with a 25-bit
@@ -530,23 +507,19 @@ private static (uint, nint, bool) mult64bitPow10(uint m, nint e2, nint q) => fun
     if (q == 0) { 
         // P == 1<<63
         return (m << 6, e2 - 6, true);
-
     }
     if (q < detailedPowersOfTenMinExp10 || detailedPowersOfTenMaxExp10 < q) { 
         // This never happens due to the range of float32/float64 exponent
         panic("mult64bitPow10: power of 10 is out of range");
-
     }
     var pow = detailedPowersOfTen[q - detailedPowersOfTenMinExp10][1];
     if (q < 0) { 
         // Inverse powers of ten must be rounded up.
         pow += 1;
-
     }
     var (hi, lo) = bits.Mul64(uint64(m), pow);
     e2 += mulByLog10Log2(q) - 63 + 57;
     return (uint32(hi << 7 | lo >> 57), e2, lo << 7 == 0);
-
 });
 
 // mult128bitPow10 takes a floating-point input with a 55-bit
@@ -566,18 +539,15 @@ private static (ulong, nint, bool) mult128bitPow10(ulong m, nint e2, nint q) => 
     if (q == 0) { 
         // P == 1<<127
         return (m << 8, e2 - 8, true);
-
     }
     if (q < detailedPowersOfTenMinExp10 || detailedPowersOfTenMaxExp10 < q) { 
         // This never happens due to the range of float32/float64 exponent
         panic("mult128bitPow10: power of 10 is out of range");
-
     }
     var pow = detailedPowersOfTen[q - detailedPowersOfTenMinExp10];
     if (q < 0) { 
         // Inverse powers of ten must be rounded up.
         pow[0] += 1;
-
     }
     e2 += mulByLog10Log2(q) - 127 + 119; 
 
@@ -587,7 +557,6 @@ private static (ulong, nint, bool) mult128bitPow10(ulong m, nint e2, nint q) => 
     var (mid, carry) = bits.Add64(l1, h0, 0);
     h1 += carry;
     return (h1 << 9 | mid >> 55, e2, mid << 9 == 0 && l0 == 0);
-
 });
 
 private static bool divisibleByPower5(ulong m, nint k) {
@@ -599,10 +568,8 @@ private static bool divisibleByPower5(ulong m, nint k) {
             return false;
         }
         m /= 5;
-
     }
     return true;
-
 }
 
 // divmod1e9 computes quotient and remainder of division by 1e9,
@@ -617,7 +584,6 @@ private static (uint, uint) divmod1e9(ulong x) {
     var (hi, _) = bits.Mul64(x >> 1, 0x89705f4136b4a598); // binary digits of 1e-9
     var q = hi >> 28;
     return (uint32(q), uint32(x - q * 1e9F));
-
 }
 
 } // end strconv_package

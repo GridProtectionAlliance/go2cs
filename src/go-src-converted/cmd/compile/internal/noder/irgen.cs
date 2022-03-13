@@ -2,29 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:13:56 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:23 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\irgen.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using dwarfgen = go.cmd.compile.@internal.dwarfgen_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using os = os_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using dwarfgen = cmd.compile.@internal.dwarfgen_package;
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+using src = cmd.@internal.src_package;
+
+
+// check2 type checks a Go package using types2, and then generates IR
+// using the results.
+
+using System;
 public static partial class noder_package {
 
-    // check2 type checks a Go package using types2, and then generates IR
-    // using the results.
 private static void check2(slice<ptr<noder>> noders) {
     if (@base.SyntaxErrors() != 0) {
         @base.ErrorExit();
@@ -118,7 +119,6 @@ Outer:
                             break;
                         }
                     }
-
                 }
 
                 j = j__prev2;
@@ -156,7 +156,6 @@ Outer:
                             g.typeDecl((ir.Nodes.val)(_addr_g.target.Decls), decl);
                             break;
                     }
-
                 }
 
                 decl = decl__prev2;
@@ -200,7 +199,6 @@ Outer:
                 g.validate(n);
                 return false;
             });
-
         }
         p = p__prev1;
     }
@@ -228,7 +226,6 @@ Outer:
     }
 
     g.target.Decls = g.target.Decls[..(int)j];
-
 }
 
 private static void unhandled(this ptr<irgen> _addr_g, @string what, poser p) => func((_, panic, _) => {

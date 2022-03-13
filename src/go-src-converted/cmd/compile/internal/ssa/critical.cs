@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:32 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:55 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\critical.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // critical splits critical edges (those that go from a block with
-    // more than one outedge to a block with more than one inedge).
-    // Regalloc wants a critical-edge-free CFG so it can implement phi values.
+// critical splits critical edges (those that go from a block with
+// more than one outedge to a block with more than one inedge).
+// Regalloc wants a critical-edge-free CFG so it can implement phi values.
 private static void critical(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
  
@@ -41,7 +39,6 @@ private static void critical(ptr<Func> _addr_f) {
                         break;
                     }
                     phi = v;
-
                 }
             }
             v = v__prev2;
@@ -131,13 +128,10 @@ private static void critical(ptr<Func> _addr_f) {
                     d.Preds = append(d.Preds, new Edge(p,pi));
                     d.Succs = append(d.Succs, new Edge(b,i));
                     i++;
-
                 }
             }
         }
-
     }
-
 }
 
 } // end ssa_package

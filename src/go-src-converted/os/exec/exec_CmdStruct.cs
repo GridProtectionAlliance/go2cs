@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:00 UTC
+//     Generated on 2022 March 13 05:28:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace os
 {
     public static partial class exec_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Cmd
         {
             // Constructors
@@ -102,7 +102,7 @@ namespace os
             public static implicit operator Cmd(NilType nil) => default(Cmd);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Cmd Cmd_cast(dynamic value)
         {
             return new Cmd(value.Path, value.Args, value.Env, value.Dir, value.Stdin, value.Stdout, value.Stderr, value.ExtraFiles, ref value.SysProcAttr, ref value.Process, ref value.ProcessState, value.ctx, value.lookPathErr, value.finished, value.childFiles, value.closeAfterStart, value.closeAfterWait, value.goroutine, value.errch, value.waitDone);

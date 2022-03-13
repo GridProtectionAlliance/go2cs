@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package analysis -- go2cs converted at 2022 March 06 23:31:06 UTC
+// package analysis -- go2cs converted at 2022 March 13 06:41:34 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis" ==> using analysis = go.cmd.vendor.golang.org.x.tools.go.analysis_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\analysis.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using reflect = go.reflect_package;
-
-using analysisinternal = go.golang.org.x.tools.@internal.analysisinternal_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go;
 
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+using reflect = reflect_package;
+
+using analysisinternal = golang.org.x.tools.@internal.analysisinternal_package;
+
+
+// An Analyzer describes an analysis function and its options.
+
+using System;
 public static partial class analysis_package {
 
-    // An Analyzer describes an analysis function and its options.
 public partial struct Analyzer {
     public @string Name; // Doc is the documentation for the analyzer.
 // The part before the first "\n\n" is the title
@@ -74,10 +75,7 @@ private static void init() {
     analysisinternal.SetTypeErrors = (p, errors) => {
         p._<ptr<Pass>>().typeErrors = errors;
     };
-    analysisinternal.GetTypeErrors = p => {
-        return p._<ptr<Pass>>().typeErrors;
-    };
-
+    analysisinternal.GetTypeErrors = p => p._<ptr<Pass>>().typeErrors;
 }
 
 // A Pass provides information to the Run function that

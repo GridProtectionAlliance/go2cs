@@ -20,17 +20,15 @@
 // Make sure this source is extended such that it exercises
 // whatever export format change has taken place.
 
-// package test -- go2cs converted at 2022 March 06 23:13:55 UTC
+// package test -- go2cs converted at 2022 March 13 06:27:22 UTC
 // import "cmd/compile/internal/importer/testdata.test" ==> using test = go.cmd.compile.@internal.importer.testdata.test_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\importer\testdata\versions\test.go
-
-
 namespace go.cmd.compile.@internal.importer;
 
 public static partial class test_package {
 
-    // Any release before and including Go 1.7 didn't encode
-    // the package for a blank struct field.
+// Any release before and including Go 1.7 didn't encode
+// the package for a blank struct field.
 public partial struct BlankField {
     public nint _;
 }

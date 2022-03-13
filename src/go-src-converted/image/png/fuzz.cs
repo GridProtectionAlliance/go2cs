@@ -5,13 +5,13 @@
 //go:build gofuzz
 // +build gofuzz
 
-// package png -- go2cs converted at 2022 March 06 23:36:15 UTC
+// package png -- go2cs converted at 2022 March 13 06:44:15 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Program Files\Go\src\image\png\fuzz.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
 namespace go.image;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
 
 public static partial class png_package {
 
@@ -47,7 +47,6 @@ public static nint Fuzz(slice<byte> data) => func((_, panic, _) => {
             panic("bounds have changed");
         }
     }    return 1;
-
 });
 
 } // end png_package

@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package auth -- go2cs converted at 2022 March 06 23:17:19 UTC
+// package auth -- go2cs converted at 2022 March 13 06:30:37 UTC
 // import "cmd/go/internal/auth" ==> using auth = go.cmd.go.@internal.auth_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\auth\netrc.go
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
 namespace go.cmd.go.@internal;
+
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using sync = sync_package;
 
 public static partial class auth_package {
 
@@ -69,16 +69,13 @@ private static slice<netrcLine> parseNetrc(@string data) {
                 l = new netrcLine();
             i += 2;
             }
-
         }
 
         if (i < len(f) && f[i] == "default") { 
             // “There can be only one default token, and it must be after all machine tokens.”
             break;
-
         }
     }    return nrc;
-
 }
 
 private static (@string, error) netrcPath() {
@@ -92,7 +89,6 @@ private static (@string, error) netrcPath() {
             return (env, error.As(null!)!);
         }
     }
-
     var (dir, err) = os.UserHomeDir();
     if (err != null) {
         return ("", error.As(err)!);
@@ -102,7 +98,6 @@ private static (@string, error) netrcPath() {
         base = "_netrc";
     }
     return (filepath.Join(dir, base), error.As(null!)!);
-
 }
 
 private static void readNetrc() {
@@ -117,10 +112,8 @@ private static void readNetrc() {
             netrcErr = err;
         }
         return ;
-
     }
     netrc = parseNetrc(string(data));
-
 }
 
 } // end auth_package

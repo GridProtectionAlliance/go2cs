@@ -4,18 +4,17 @@
 
 //go:generate go run makeisprint.go -output isprint.go
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:36 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:26 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\quote.go
-using utf8 = go.unicode.utf8_package;
-
 namespace go;
+
+using utf8 = unicode.utf8_package;
 
 public static partial class strconv_package {
 
 private static readonly @string lowerhex = "0123456789abcdef";
 private static readonly @string upperhex = "0123456789ABCDEF";
-
 
 // contains reports whether the string contains the byte c.
 private static bool contains(@string s, byte c) {
@@ -49,21 +48,17 @@ private static slice<byte> appendQuotedWith(slice<byte> buf, @string s, byte quo
                 r, width = utf8.DecodeRuneInString(s);
             s = s[(int)width..];
             }
-
             if (width == 1 && r == utf8.RuneError) {
                 buf = append(buf, "\\x");
                 buf = append(buf, lowerhex[s[0] >> 4]);
                 buf = append(buf, lowerhex[s[0] & 0xF]);
                 continue;
             }
-
             buf = appendEscapedRune(buf, r, quote, ASCIIonly, graphicOnly);
-
         }
     }
     buf = append(buf, quote);
     return buf;
-
 }
 
 private static slice<byte> appendQuotedRuneWith(slice<byte> buf, int r, byte quote, bool ASCIIonly, bool graphicOnly) {
@@ -74,7 +69,6 @@ private static slice<byte> appendQuotedRuneWith(slice<byte> buf, int r, byte quo
     buf = appendEscapedRune(buf, r, quote, ASCIIonly, graphicOnly);
     buf = append(buf, quote);
     return buf;
-
 }
 
 private static slice<byte> appendEscapedRune(slice<byte> buf, int r, byte quote, bool ASCIIonly, bool graphicOnly) {
@@ -83,7 +77,6 @@ private static slice<byte> appendEscapedRune(slice<byte> buf, int r, byte quote,
         buf = append(buf, '\\');
         buf = append(buf, byte(r));
         return buf;
-
     }
     if (ASCIIonly) {
         if (r < utf8.RuneSelf && IsPrint(r)) {
@@ -167,11 +160,9 @@ private static slice<byte> appendEscapedRune(slice<byte> buf, int r, byte quote,
                 }
 
             __switch_break0:;
-
             break;
     }
     return buf;
-
 }
 
 // Quote returns a double-quoted Go string literal representing s. The
@@ -267,7 +258,6 @@ public static bool CanBackquote(@string s) {
             if (r == '\ufeff') {
                 return false; // BOMs are invisible and should not be quoted.
             }
-
             continue; // All other multibyte runes are correctly encoded and assumed printable.
         }
         if (r == utf8.RuneError) {
@@ -278,7 +268,6 @@ public static bool CanBackquote(@string s) {
         }
     }
     return true;
-
 }
 
 private static (int, bool) unhex(byte b) {
@@ -294,7 +283,6 @@ private static (int, bool) unhex(byte b) {
     else if ('A' <= c && c <= 'F') 
         return (c - 'A' + 10, true);
         return ;
-
 }
 
 // UnquoteChar decodes the first character or byte in the escaped string
@@ -413,7 +401,6 @@ public static (int, bool, @string, error) UnquoteChar(@string s, byte quote) {
                 // single-byte string, possibly not UTF-8
                 value = v;
                 break;
-
             }
             if (v > utf8.MaxRune) {
                 err = ErrSyntax;
@@ -421,7 +408,6 @@ public static (int, bool, @string, error) UnquoteChar(@string s, byte quote) {
             }
             value = v;
             multibyte = true;
-
             break;
         case '0': 
 
@@ -452,9 +438,7 @@ public static (int, bool, @string, error) UnquoteChar(@string s, byte quote) {
                         err = ErrSyntax;
                         return ;
                     }
-
                     v = (v << 3) | x;
-
                 }
 
 
@@ -466,7 +450,6 @@ public static (int, bool, @string, error) UnquoteChar(@string s, byte quote) {
                 return ;
             }
             value = v;
-
             break;
         case '\\': 
             value = '\\';
@@ -479,7 +462,6 @@ public static (int, bool, @string, error) UnquoteChar(@string s, byte quote) {
                 return ;
             }
             value = rune(c);
-
             break;
         default: 
             err = ErrSyntax;
@@ -488,7 +470,6 @@ public static (int, bool, @string, error) UnquoteChar(@string s, byte quote) {
     }
     tail = s;
     return ;
-
 }
 
 // QuotedPrefix returns the quoted string (as understood by Unquote) at the prefix of s.
@@ -515,7 +496,6 @@ public static (@string, error) Unquote(@string s) {
         return ("", error.As(ErrSyntax)!);
     }
     return (out, error.As(err)!);
-
 }
 
 // unquote parses a quoted string at the start of the input,
@@ -562,7 +542,6 @@ private static (@string, @string, error) unquote(@string @in, bool unescape) {
             // but only mention that it is implicitly valid for Go source code
             // (which must be valid UTF-8).
             return (out, in[(int)end..], error.As(null!)!);
-
             break;
         case '"': 
             // Handle quoted strings without any escape sequences.
@@ -585,11 +564,8 @@ private static (@string, @string, error) unquote(@string @in, bool unescape) {
                            if (unescape) {
                                out = out[(int)1..(int)end - 1]; // exclude quotes
                            }
-
                            return (out, in[(int)end..], error.As(null!)!);
-
                        }
-
                    }
                    buf = default;
                    var in0 = in;
@@ -604,7 +580,6 @@ private static (@string, @string, error) unquote(@string @in, bool unescape) {
                        if (in[0] == '\n' || err != null) {
                            return ("", in0, error.As(ErrSyntax)!);
                        }
-
                        in = rem; 
 
                        // Append the character if unescaping the input.
@@ -618,14 +593,12 @@ private static (@string, @string, error) unquote(@string @in, bool unescape) {
                                var n = utf8.EncodeRune(arr[..], r);
                                buf = append(buf, arr[..(int)n]);
                            }
-
                        } 
 
                        // Single quoted strings must be a single character.
                        if (quote == '\'') {
                            break;
                        }
-
                    } 
 
                    // Verify that the string ends with a terminating quote.
@@ -638,13 +611,11 @@ private static (@string, @string, error) unquote(@string @in, bool unescape) {
                        return (string(buf), in, error.As(null!)!);
                    }
                    return (in0[..(int)len(in0) - len(in)], in, error.As(null!)!);
-
             break;
         default: 
             return ("", in, error.As(ErrSyntax)!);
             break;
     }
-
 }
 
 // bsearch16 returns the smallest i such that a[i] >= x.
@@ -663,7 +634,6 @@ private static nint bsearch16(slice<ushort> a, ushort x) {
         }
     }
     return i;
-
 }
 
 // bsearch32 returns the smallest i such that a[i] >= x.
@@ -682,7 +652,6 @@ private static nint bsearch32(slice<uint> a, uint x) {
         }
     }
     return i;
-
 }
 
 // TODO: IsPrint is a local implementation of unicode.IsPrint, verified by the tests
@@ -700,14 +669,12 @@ public static bool IsPrint(int r) {
         if (0x20 <= r && r <= 0x7E) { 
             // All the ASCII is printable from space through DEL-1.
             return true;
-
         }
         if (0xA1 <= r && r <= 0xFF) { 
             // Similarly for ¡ through ÿ...
             return r != 0xAD; // ...except for the bizarre soft hyphen.
         }
         return false;
-
     }
     if (0 <= r && r < 1 << 16) {
         var rr = uint16(r);
@@ -719,7 +686,6 @@ public static bool IsPrint(int r) {
         }
         var j = bsearch16(isNotPrint, rr);
         return j >= len(isNotPrint) || isNotPrint[j] != rr;
-
     }
     rr = uint32(r);
     isPrint = isPrint32;
@@ -734,7 +700,6 @@ public static bool IsPrint(int r) {
     r -= 0x10000;
     j = bsearch16(isNotPrint, uint16(r));
     return j >= len(isNotPrint) || isNotPrint[j] != uint16(r);
-
 }
 
 // IsGraphic reports whether the rune is defined as a Graphic by Unicode. Such
@@ -745,7 +710,6 @@ public static bool IsGraphic(int r) {
         return true;
     }
     return isInGraphicList(r);
-
 }
 
 // isInGraphicList reports whether the rune is in the isGraphic list. This separation
@@ -759,7 +723,6 @@ private static bool isInGraphicList(int r) {
     var rr = uint16(r);
     var i = bsearch16(isGraphic, rr);
     return i < len(isGraphic) && rr == isGraphic[i];
-
 }
 
 } // end strconv_package

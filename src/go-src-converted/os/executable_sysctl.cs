@@ -5,13 +5,13 @@
 //go:build freebsd || dragonfly
 // +build freebsd dragonfly
 
-// package os -- go2cs converted at 2022 March 06 22:13:26 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:55 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\executable_sysctl.go
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class os_package {
 
@@ -29,7 +29,6 @@ private static (@string, error) executable() {
     }
     if (n == 0) { // shouldn't happen
         return ("", error.As(null!)!);
-
     }
     var buf = make_slice<byte>(n);
     _, _, err = syscall.Syscall6(syscall.SYS___SYSCTL, uintptr(@unsafe.Pointer(_addr_mib[0])), 4, uintptr(@unsafe.Pointer(_addr_buf[0])), uintptr(@unsafe.Pointer(_addr_n)), 0, 0);
@@ -38,10 +37,8 @@ private static (@string, error) executable() {
     }
     if (n == 0) { // shouldn't happen
         return ("", error.As(null!)!);
-
     }
     return (string(buf[..(int)n - 1]), error.As(null!)!);
-
 }
 
 } // end os_package

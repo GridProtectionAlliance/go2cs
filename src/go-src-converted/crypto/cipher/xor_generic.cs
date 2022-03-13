@@ -5,18 +5,20 @@
 //go:build !amd64 && !ppc64 && !ppc64le && !arm64
 // +build !amd64,!ppc64,!ppc64le,!arm64
 
-// package cipher -- go2cs converted at 2022 March 06 22:18:10 UTC
+// package cipher -- go2cs converted at 2022 March 13 05:32:23 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Program Files\Go\src\crypto\cipher\xor_generic.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.crypto;
+
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
+
+
+// xorBytes xors the bytes in a and b. The destination should have enough
+// space, otherwise xorBytes will panic. Returns the number of bytes xor'd.
 
 public static partial class cipher_package {
 
-    // xorBytes xors the bytes in a and b. The destination should have enough
-    // space, otherwise xorBytes will panic. Returns the number of bytes xor'd.
 private static nint xorBytes(slice<byte> dst, slice<byte> a, slice<byte> b) {
     var n = len(a);
     if (len(b) < n) {
@@ -36,7 +38,6 @@ private static nint xorBytes(slice<byte> dst, slice<byte> a, slice<byte> b) {
         // accelerated.
         safeXORBytes(dst, a, b, n);
         return n;
-
 }
 
 private static readonly var wordSize = int(@unsafe.Sizeof(uintptr(0)));
@@ -70,7 +71,6 @@ private static void fastXORBytes(slice<byte> dst, slice<byte> a, slice<byte> b, 
 
             i = i__prev1;
         }
-
     }
     {
         nint i__prev1 = i;
@@ -81,7 +81,6 @@ private static void fastXORBytes(slice<byte> dst, slice<byte> a, slice<byte> b, 
 
         i = i__prev1;
     }
-
 }
 
 // n needs to be smaller or equal than the length of a and b.

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:24:33 UTC
+//     Generated on 2022 March 13 06:37:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace arm
 {
     public static partial class armasm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct instFormat
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace arm
             public static implicit operator instFormat(NilType nil) => default(instFormat);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static instFormat instFormat_cast(dynamic value)
         {
             return new instFormat(value.mask, value.value, value.priority, value.op, value.opBits, value.args);

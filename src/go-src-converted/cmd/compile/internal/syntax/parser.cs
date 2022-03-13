@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:26 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:26:52 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\parser.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class syntax_package {
 
@@ -57,7 +56,6 @@ private static void init(this ptr<parser> _addr_p, ptr<PosBase> _addr_file, io.R
             if (msg[1] == '/') { 
                 // line comment (newline is part of the comment)
                 pos = MakePos(p.file, line + 1, colbase);
-
             }
             else
  { 
@@ -66,12 +64,9 @@ private static void init(this ptr<parser> _addr_p, ptr<PosBase> _addr_file, io.R
                 // a valid line directive and will be discarded
                 // by updateBase)
                 pos = MakePos(p.file, line, col + uint(len(msg)));
-
             }
-
             p.updateBase(pos, line, col + 2 + 5, text[(int)5..]); // +2 to skip over // or /*
             return ;
-
         }
         if (pragh != null && strings.HasPrefix(text, "go:")) {
             p.pragma = pragh(p.posAt(line, col + 2), p.scanner.blank, text, p.pragma); // +2 to skip over // or /*
@@ -86,7 +81,6 @@ private static void init(this ptr<parser> _addr_p, ptr<PosBase> _addr_file, io.R
     p.fnest = 0;
     p.xnest = 0;
     p.indent = null;
-
 }
 
 // takePragma returns the current parsed pragmas
@@ -126,7 +120,6 @@ private static void updateBase(this ptr<parser> _addr_p, Pos pos, nuint tline, n
         // text has a suffix :xxx but xxx is not a number
         p.errorAt(p.posAt(tline, tcol + i), "invalid line number: " + text[(int)i..]);
         return ;
-
     }
     nuint line = default;    nuint col = default;
 
@@ -143,7 +136,6 @@ private static void updateBase(this ptr<parser> _addr_p, Pos pos, nuint tline, n
  { 
         //line filename:line
         line = n;
-
     }
     if (line == 0 || line > PosMax) {
         p.errorAt(p.posAt(tline, tcol + i), "invalid line number: " + text[(int)i..]);
@@ -154,7 +146,6 @@ private static void updateBase(this ptr<parser> _addr_p, Pos pos, nuint tline, n
         filename = p.@base.Filename();
     }
     p.@base = NewLineBase(pos, filename, line, col);
-
 }
 
 private static @string commentText(@string s) {
@@ -180,7 +171,6 @@ private static (nuint, nuint, bool) trailingDigits(@string text) {
     }
     var (n, err) = strconv.ParseUint(text[(int)i + 1..], 10, 0);
     return (uint(i + 1), uint(n), err == null);
-
 }
 
 private static bool got(this ptr<parser> _addr_p, token tok) {
@@ -191,7 +181,6 @@ private static bool got(this ptr<parser> _addr_p, token tok) {
         return true;
     }
     return false;
-
 }
 
 private static void want(this ptr<parser> _addr_p, token tok) {
@@ -223,7 +212,6 @@ private static bool gotAssign(this ptr<parser> _addr_p) {
 
     __switch_break0:;
     return false;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -249,7 +237,6 @@ private static void errorAt(this ptr<parser> _addr_p, Pos pos, @string msg) => f
         panic(p.first);
     }
     p.errh(err);
-
 });
 
 // syntaxErrorAt reports a syntax error at the given position.
@@ -288,7 +275,6 @@ private static void syntaxErrorAt(this ptr<parser> _addr_p, Pos pos, @string msg
     else 
         tok = tokstring(p.tok);
         p.errorAt(pos, "syntax error: unexpected " + tok + msg);
-
 }
 
 // tokstring returns the English word for selected punctuation tokens
@@ -300,7 +286,6 @@ private static @string tokstring(token tok) {
     else if (tok == _Semi) 
         return "semicolon or newline";
         return tok.String();
-
 }
 
 // Convenience methods using the current token position.
@@ -384,11 +369,8 @@ private static Action trace(this ptr<parser> _addr_p, @string msg) => func((_, p
             }
 
         }
-
         p.print(")");
-
     };
-
 });
 
 private static void print(this ptr<parser> _addr_p, @string msg) {
@@ -457,19 +439,15 @@ private static ptr<File> fileOrNil(this ptr<parser> _addr_p) => func((defer, _, 
                 }
 
             }
-
-
         else 
             if (p.tok == _Lbrace && len(f.DeclList) > 0 && isEmptyFuncDecl(f.DeclList[len(f.DeclList) - 1])) { 
                 // opening { of function declaration on next line
                 p.syntaxError("unexpected semicolon or newline before {");
-
             }
             else
  {
                 p.syntaxError("non-declaration statement outside function body");
             }
-
             p.advance(_Const, _Type, _Var, _Func);
             continue;
         // Reset p.pragma BEFORE advancing to the next token (consuming ';')
@@ -487,7 +465,6 @@ private static ptr<File> fileOrNil(this ptr<parser> _addr_p) => func((defer, _, 
     f.EOF = p.pos();
 
     return _addr_f!;
-
 });
 
 private static bool isEmptyFuncDecl(Decl dcl) {
@@ -524,16 +501,13 @@ private static Pos list(this ptr<parser> _addr_p, token sep, token close, Func<b
             if (p.tok != close) { 
                 // position could be better but we had an error so we don't care
                 return p.pos();
-
             }
-
         }
     }
 
     var pos = p.pos();
     p.want(close);
     return pos;
-
 });
 
 // appendGroup(f) = f | "(" { f ";" } ")" . // ";" is optional before ")"
@@ -557,13 +531,10 @@ private static slice<Decl> appendGroup(this ptr<parser> _addr_p, slice<Decl> lis
                 x = x__prev2;
 
             }
-
             return false;
-
         }
     else
 );
-
     } {
         {
             var x__prev2 = x;
@@ -577,10 +548,8 @@ private static slice<Decl> appendGroup(this ptr<parser> _addr_p, slice<Decl> lis
             x = x__prev2;
 
         }
-
     }
     return list;
-
 }
 
 // ImportSpec = [ "." | PackageName ] ImportPath .
@@ -614,7 +583,6 @@ private static Decl importDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group)
         d.Path.Bad = true;
     }
     return d;
-
 });
 
 // ConstSpec = IdentifierList [ [ Type ] "=" ExpressionList ] .
@@ -638,7 +606,6 @@ private static Decl constDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) 
         }
     }
     return d;
-
 });
 
 // TypeSpec = identifier [ TypeParams ] [ "=" ] Type .
@@ -678,9 +645,7 @@ private static Decl typeDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) =
                     if (p.gotAssign()) {
                         p.syntaxErrorAt(pos, "generic type cannot be alias");
                     }
-
                     d.Type = p.typeOrNil();
-
                 }
                 else
  { 
@@ -688,17 +653,13 @@ private static Decl typeDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) =
                     if (debug && x == null) {
                         panic("internal error: nil expression");
                     }
-
                     d.Type = p.arrayType(pos, x);
-
                 }
 
             }
-
         else 
             d.Type = p.arrayType(pos, null);
-        
-    }
+            }
     else
  {
         d.Alias = p.gotAssign();
@@ -710,7 +671,6 @@ private static Decl typeDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) =
         p.advance(_Semi, _Rparen);
     }
     return d;
-
 });
 
 // VarSpec = IdentifierList ( Type [ "=" ExpressionList ] | "=" ExpressionList ) .
@@ -738,7 +698,6 @@ private static Decl varDecl(this ptr<parser> _addr_p, ptr<Group> _addr_group) =>
         }
     }
     return d;
-
 });
 
 // FunctionDecl = "func" FunctionName [ TypeParams ] ( Function | Signature ) .
@@ -769,7 +728,6 @@ private static ptr<FuncDecl> funcDeclOrNil(this ptr<parser> _addr_p) => func((de
                 p.error("method has multiple receivers");
                 break;
         }
-
     }
     if (p.tok != _Name) {
         p.syntaxError("expecting name or (");
@@ -792,7 +750,6 @@ private static ptr<FuncDecl> funcDeclOrNil(this ptr<parser> _addr_p) => func((de
         f.Body = p.funcBody();
     }
     return _addr_f!;
-
 });
 
 private static ptr<BlockStmt> funcBody(this ptr<parser> _addr_p) {
@@ -810,7 +767,6 @@ private static ptr<BlockStmt> funcBody(this ptr<parser> _addr_p) {
         checkBranches(body, p.errh);
     }
     return _addr_body!;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -823,7 +779,6 @@ private static Expr expr(this ptr<parser> _addr_p) => func((defer, _, _) => {
         defer(p.trace("expr")());
     }
     return p.binaryExpr(0);
-
 });
 
 // Expression = UnaryExpr | Expression binary_op Expression .
@@ -844,7 +799,6 @@ private static Expr binaryExpr(this ptr<parser> _addr_p, nint prec) {
         x = t;
     }
     return x;
-
 }
 
 // UnaryExpr = PrimaryExpr | unary_op UnaryExpr .
@@ -914,10 +868,8 @@ private static Expr unaryExpr(this ptr<parser> _addr_p) => func((defer, _, _) =>
                         p.syntaxError("unexpected <-, expecting chan"); 
                         // already progressed, no need to advance
                     }
-
                     c.Dir = RecvOnly;
                     t = c.Elem;
-
                 }
 
                 if (dir == SendOnly) { 
@@ -926,9 +878,7 @@ private static Expr unaryExpr(this ptr<parser> _addr_p) => func((defer, _, _) =>
                     p.syntaxError(fmt.Sprintf("unexpected %s, expecting chan", String(t))); 
                     // already progressed, no need to advance
                 }
-
                 return x;
-
             } 
 
             // x is not a channel type => we have a receive op
@@ -945,7 +895,6 @@ private static Expr unaryExpr(this ptr<parser> _addr_p) => func((defer, _, _) =>
     // error for "(x) := true". It should be possible to detect
     // and reject that more efficiently though.
     return p.pexpr(true);
-
 });
 
 // callStmt parses call-like statements that can be preceded by 'defer' and 'go'.
@@ -968,10 +917,8 @@ private static ptr<CallStmt> callStmt(this ptr<parser> _addr_p) => func((defer, 
             p.errorAt(x.Pos(), fmt.Sprintf("expression in %s must not be parenthesized", s.Tok)); 
             // already progressed, no need to advance
             x = t;
-
         }
     }
-
 
     ptr<CallExpr> (cx, ok) = x._<ptr<CallExpr>>();
     if (!ok) {
@@ -983,7 +930,6 @@ private static ptr<CallStmt> callStmt(this ptr<parser> _addr_p) => func((defer, 
     }
     s.Call = cx;
     return _addr_s!;
-
 });
 
 // Operand     = Literal | OperandName | MethodExpr | "(" Expression ")" .
@@ -1103,7 +1049,6 @@ loop:
                     t.pos = pos;
                     t.X = x;
                     x = t;
-
                 }
                 else
  {
@@ -1113,7 +1058,6 @@ loop:
                     t.Type = p.type_();
                     x = t;
                 }
-
                 p.want(_Rparen);
             else 
                 p.syntaxError("expecting name or (");
@@ -1126,9 +1070,7 @@ loop:
                 p.syntaxError("expecting operand");
                 p.next();
                 break;
-
             }
-
             Expr i = default;
             if (p.tok != _Colon) {
                 if (p.mode & AllowGenerics == 0) {
@@ -1143,9 +1085,7 @@ loop:
                         t.Index = i;
                         x = t;
                         break;
-
                     }
-
                 }
                 else
  {
@@ -1160,11 +1100,8 @@ loop:
                         t.Index = i;
                         x = t;
                         break;
-
                     }
-
                 }
-
             } 
 
             // x[i:...
@@ -1177,9 +1114,7 @@ loop:
             if (p.tok != _Colon && p.tok != _Rbrack) { 
                 // x[i:j...
                 t.Index[1] = p.expr();
-
             }
-
             if (p.tok == _Colon) {
                 t.Full = true; 
                 // x[i:j:...]
@@ -1187,21 +1122,17 @@ loop:
                     p.error("middle index required in 3-index slice");
                     t.Index[1] = p.badExpr();
                 }
-
                 p.next();
                 if (p.tok != _Rbrack) { 
                     // x[i:j:k...
                     t.Index[2] = p.expr();
-
                 }
                 else
  {
                     p.error("final index required in 3-index slice");
                     t.Index[2] = p.badExpr();
                 }
-
             }
-
             p.xnest--;
             p.want(_Rbrack);
             x = t;
@@ -1223,25 +1154,19 @@ loop:
                     if (p.xnest >= 0) { 
                         // x is possibly a composite literal type
                         complit_ok = true;
-
                     }
-
                     break;
                 case ptr<SelectorExpr> _:
                     if (p.xnest >= 0) { 
                         // x is possibly a composite literal type
                         complit_ok = true;
-
                     }
-
                     break;
                 case ptr<IndexExpr> _:
                     if (p.xnest >= 0) { 
                         // x is possibly a composite literal type
                         complit_ok = true;
-
                     }
-
                     break;
                 case ptr<ArrayType> _:
                     complit_ok = true;
@@ -1260,12 +1185,10 @@ loop:
                 _breakloop = true;
                 break;
             }
-
             if (t != x) {
                 p.syntaxError("cannot parenthesize type in composite literal"); 
                 // already progressed, no need to advance
             }
-
             var n = p.complitexpr();
             n.Type = x;
             x = n;
@@ -1274,7 +1197,6 @@ loop:
             break;
             }
     return x;
-
 });
 
 // Element = Expression | LiteralValue .
@@ -1287,10 +1209,8 @@ private static Expr bare_complitexpr(this ptr<parser> _addr_p) => func((defer, _
     if (p.tok == _Lbrace) { 
         // '{' start_complit braced_keyval_list '}'
         return p.complitexpr();
-
     }
     return p.expr();
-
 });
 
 // LiteralValue = "{" [ ElementList [ "," ] ] "}" .
@@ -1317,16 +1237,13 @@ private static ptr<CompositeLit> complitexpr(this ptr<parser> _addr_p) => func((
             l.Value = p.bare_complitexpr();
             e = l;
             x.NKeys++;
-
         }
         x.ElemList = append(x.ElemList, e);
         return _addr_false!;
-
     });
     p.xnest--;
 
     return _addr_x!;
-
 });
 
 // ----------------------------------------------------------------------------
@@ -1345,7 +1262,6 @@ private static Expr type_(this ptr<parser> _addr_p) => func((defer, _, _) => {
         p.advance(_Comma, _Colon, _Semi, _Rparen, _Rbrack, _Rbrace);
     }
     return typ;
-
 });
 
 private static Expr newIndirect(Pos pos, Expr typ) {
@@ -1429,7 +1345,6 @@ private static Expr typeOrNil(this ptr<parser> _addr_p) => func((defer, _, _) =>
         p.want(_Rparen);
         return t;
         return null;
-
 });
 
 private static Expr typeInstance(this ptr<parser> _addr_p, Expr typ) => func((defer, _, _) => {
@@ -1453,7 +1368,6 @@ private static Expr typeInstance(this ptr<parser> _addr_p, Expr typ) => func((de
     }
     p.want(_Rbrack);
     return x;
-
 });
 
 private static ptr<FuncType> funcType(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1469,7 +1383,6 @@ private static ptr<FuncType> funcType(this ptr<parser> _addr_p) => func((defer, 
     typ.ResultList = p.funcResult();
 
     return _addr_typ!;
-
 });
 
 // "[" has already been consumed, and pos is its position.
@@ -1491,7 +1404,6 @@ private static Expr arrayType(this ptr<parser> _addr_p, Pos pos, Expr len) => fu
     t.Len = len;
     t.Elem = p.type_();
     return t;
-
 });
 
 // "[" and "]" have already been consumed, and pos is the position of "[".
@@ -1517,7 +1429,6 @@ private static Expr chanElem(this ptr<parser> _addr_p) => func((defer, _, _) => 
         // assume element type is simply absent - don't advance
     }
     return typ;
-
 });
 
 // StructType = "struct" "{" { FieldDecl ";" } "}" .
@@ -1538,7 +1449,6 @@ private static ptr<StructType> structType(this ptr<parser> _addr_p) => func((def
     });
 
     return _addr_typ!;
-
 });
 
 // InterfaceType = "interface" "{" { ( MethodDecl | EmbeddedElem | TypeList ) ";" } "}" .
@@ -1598,30 +1508,22 @@ private static ptr<InterfaceType> interfaceType(this ptr<parser> _addr_p) => fun
                         typ.MethodList = append(typ.MethodList, f);
                     }
                 else
-
-
                 } {
                     p.syntaxError("expecting type");
                 }
-
                 return _addr_false!;
-
             }
-
                 if (p.mode & AllowGenerics != 0) {
             p.syntaxError("expecting method, type list, or embedded element");
             p.advance(_Semi, _Rbrace, _Type); // TODO(gri) remove _Type if we don't accept it anymore
             return _addr_false!;
-
         }
         p.syntaxError("expecting method or interface name");
         p.advance(_Semi, _Rbrace);
         return _addr_false!;
-
     });
 
     return _addr_typ!;
-
 });
 
 // Result = Parameters | Type .
@@ -1646,9 +1548,7 @@ private static slice<ptr<Field>> funcResult(this ptr<parser> _addr_p) => func((d
         }
     }
 
-
     return null;
-
 });
 
 private static void addField(this ptr<parser> _addr_p, ptr<StructType> _addr_styp, Pos pos, ptr<Name> _addr_name, Expr typ, ptr<BasicLit> _addr_tag) => func((_, panic, _) => {
@@ -1694,7 +1594,6 @@ private static void fieldDecl(this ptr<parser> _addr_p, ptr<StructType> _addr_st
             var tag = p.oliteral();
             p.addField(styp, pos, null, typ, tag);
             break;
-
         }
         var names = p.nameList(name);
         typ = default; 
@@ -1714,19 +1613,16 @@ private static void fieldDecl(this ptr<parser> _addr_p, ptr<StructType> _addr_st
                     tag = p.oliteral();
                     p.addField(styp, pos, null, typ, tag);
                     break;
-
                 }
 
                 typ = typ__prev2;
 
             }
-
         }
         else
  { 
             // T P
             typ = p.type_();
-
         }
         tag = p.oliteral();
 
@@ -1754,7 +1650,6 @@ private static void fieldDecl(this ptr<parser> _addr_p, ptr<StructType> _addr_st
  { 
             // *T
             typ = p.qualifiedName(null);
-
         }
         tag = p.oliteral();
         p.addField(styp, pos, null, newIndirect(pos, typ), tag);
@@ -1767,13 +1662,11 @@ private static void fieldDecl(this ptr<parser> _addr_p, ptr<StructType> _addr_st
             pos = p.pos();
             p.next();
             typ = newIndirect(pos, p.qualifiedName(null));
-
         }
         else
  { 
             // (T)
             typ = p.qualifiedName(null);
-
         }
         p.got(_Rparen); // no need to complain if missing
         tag = p.oliteral();
@@ -1781,8 +1674,7 @@ private static void fieldDecl(this ptr<parser> _addr_p, ptr<StructType> _addr_st
     else 
         p.syntaxError("expecting field name or embedded type");
         p.advance(_Semi, _Rbrace);
-    
-});
+    });
 
 private static Expr arrayOrTArgs(this ptr<parser> _addr_p) => func((defer, _, _) => {
     ref parser p = ref _addr_p.val;
@@ -1808,18 +1700,15 @@ private static Expr arrayOrTArgs(this ptr<parser> _addr_p) => func((defer, _, _)
                 t.Len = n;
                 t.Elem = elem;
                 return t;
-
             }
 
         }
-
     }
     t = @new<IndexExpr>();
     t.pos = pos; 
     // t.X will be filled in by caller
     t.Index = n;
     return t;
-
 });
 
 private static ptr<BasicLit> oliteral(this ptr<parser> _addr_p) {
@@ -1835,7 +1724,6 @@ private static ptr<BasicLit> oliteral(this ptr<parser> _addr_p) {
         return _addr_b!;
     }
     return _addr_null!;
-
 }
 
 // MethodSpec        = MethodName Signature | InterfaceTypeName .
@@ -1892,16 +1780,13 @@ private static ptr<Field> methodDecl(this ptr<parser> _addr_p) => func((defer, _
                     p.errorAt(pos, "empty type parameter list");
                     f.Name = name;
                     f.Type = p.funcType();
-
                 }
                 else
  {
                     p.errorAt(pos, "empty type argument list");
                     f.Type = name;
                 }
-
                 break;
-
             } 
 
             // A type argument list looks like a parameter list with only
@@ -1919,9 +1804,7 @@ private static ptr<Field> methodDecl(this ptr<parser> _addr_p) => func((defer, _
  {
                     f.Type = name;
                 }
-
                 break;
-
             } 
 
             // len(list) > 0
@@ -1934,7 +1817,6 @@ private static ptr<Field> methodDecl(this ptr<parser> _addr_p) => func((defer, _
                 //           For now, report an error so this is not a silent event.
                 p.errorAt(pos, "interface method cannot have type parameters");
                 break;
-
             } 
 
             // embedded instantiated type
@@ -1954,12 +1836,9 @@ private static ptr<Field> methodDecl(this ptr<parser> _addr_p) => func((defer, _
                     l.ElemList[i] = list[i].Type;
                 }
                 t.Index = l;
-
             }
-
             f.Type = t;
             break;
-
         }
     }
     // default: 
@@ -1969,7 +1848,6 @@ private static ptr<Field> methodDecl(this ptr<parser> _addr_p) => func((defer, _
     __switch_break1:;
 
     return _addr_f!;
-
 });
 
 // EmbeddedElem = MethodSpec | EmbeddedTerm { "|" EmbeddedTerm } .
@@ -1996,7 +1874,6 @@ private static ptr<Field> embeddedElem(this ptr<parser> _addr_p, ptr<Field> _add
     }
 
     return _addr_f!;
-
 });
 
 // EmbeddedTerm = [ "~" ] Type .
@@ -2021,7 +1898,6 @@ private static Expr embeddedTerm(this ptr<parser> _addr_p) => func((defer, _, _)
         p.advance(_Operator, _Semi, _Rparen, _Rbrack, _Rbrace);
     }
     return t;
-
 });
 
 // ParameterDecl = [ IdentifierList ] [ "..." ] Type .
@@ -2053,18 +1929,14 @@ private static ptr<Field> paramDeclOrNil(this ptr<parser> _addr_p, ptr<Name> _ad
                 }
 
             }
-
             return _addr_f!;
-
         }
         if (p.tok == _Dot) { 
             // name_or_type
             f.Type = p.qualifiedName(name);
             return _addr_f!;
-
         }
         f.Name = name;
-
     }
     if (p.tok == _DotDotDot) {
         ptr<object> t = @new<DotsType>();
@@ -2077,7 +1949,6 @@ private static ptr<Field> paramDeclOrNil(this ptr<parser> _addr_p, ptr<Name> _ad
         }
         f.Type = t;
         return _addr_f!;
-
     }
     f.Type = p.typeOrNil();
     if (f.Name != null || f.Type != null) {
@@ -2086,7 +1957,6 @@ private static ptr<Field> paramDeclOrNil(this ptr<parser> _addr_p, ptr<Name> _ad
     p.syntaxError("expecting )");
     p.advance(_Comma, _Rparen);
     return _addr_null!;
-
 });
 
 // Parameters    = "(" [ ParameterList [ "," ] ] ")" .
@@ -2116,7 +1986,6 @@ private static slice<ptr<Field>> paramList(this ptr<parser> _addr_p, ptr<Name> _
             list = append(list, par);
         }
         return false;
-
     });
 
     if (len(list) == 0) {
@@ -2142,7 +2011,6 @@ private static slice<ptr<Field>> paramList(this ptr<parser> _addr_p, ptr<Name> _
                     typ = typ__prev2;
 
                 }
-
             }
 
             par = par__prev1;
@@ -2179,14 +2047,11 @@ private static slice<ptr<Field>> paramList(this ptr<parser> _addr_p, ptr<Name> _
                     var t = p.badExpr();
                     t.pos = pos; // correct position
                     par.Type = t;
-
                 }
-
 
                 par = par__prev3;
 
             }
-
         }
         if (pos.IsKnown()) {
             @string msg = default;
@@ -2197,13 +2062,10 @@ private static slice<ptr<Field>> paramList(this ptr<parser> _addr_p, ptr<Name> _
  {
                 msg = "mixed named and unnamed parameters";
             }
-
             p.syntaxErrorAt(pos, msg);
-
         }
     }
     return ;
-
 });
 
 private static ptr<BadExpr> badExpr(this ptr<parser> _addr_p) {
@@ -2230,7 +2092,6 @@ private static SimpleStmt simpleStmt(this ptr<parser> _addr_p, Expr lhs, token k
             panic("invalid call of simpleStmt");
         }
         return p.newRangeClause(null, false);
-
     }
     if (lhs == null) {
         lhs = p.exprList();
@@ -2266,8 +2127,7 @@ private static SimpleStmt simpleStmt(this ptr<parser> _addr_p, Expr lhs, token k
                 s.pos = lhs.Pos();
                 s.X = lhs;
                 return s;
-            
-        }
+                    }
     } 
 
     // expr_list
@@ -2283,7 +2143,6 @@ private static SimpleStmt simpleStmt(this ptr<parser> _addr_p, Expr lhs, token k
         if (keyword == _For && p.tok == _Range) { 
             // expr_list op= _Range expr
             return p.newRangeClause(lhs, op == Def);
-
         }
         var rhs = p.exprList();
 
@@ -2303,17 +2162,14 @@ private static SimpleStmt simpleStmt(this ptr<parser> _addr_p, Expr lhs, token k
                         s.pos = x.Pos();
                         s.X = x;
                         return s;
-
                     }
 
                 }
-
             }
 
             x = x__prev1;
 
         }
-
 
         return p.newAssignStmt(pos, op, lhs, rhs);
     else 
@@ -2332,13 +2188,11 @@ private static SimpleStmt simpleStmt(this ptr<parser> _addr_p, Expr lhs, token k
             x = x__prev1;
 
         }
-
         s = @new<ExprStmt>();
         s.pos = lhs.Pos();
         s.X = lhs;
         return s;
-    
-});
+    });
 
 private static ptr<RangeClause> newRangeClause(this ptr<parser> _addr_p, Expr lhs, bool def) {
     ref parser p = ref _addr_p.val;
@@ -2350,7 +2204,6 @@ private static ptr<RangeClause> newRangeClause(this ptr<parser> _addr_p, Expr lh
     r.Def = def;
     r.X = p.expr();
     return _addr_r!;
-
 }
 
 private static ptr<AssignStmt> newAssignStmt(this ptr<parser> _addr_p, Pos pos, Operator op, Expr lhs, Expr rhs) {
@@ -2385,7 +2238,6 @@ private static Stmt labeledStmtOrNil(this ptr<parser> _addr_p, ptr<Name> _addr_l
         e.pos = p.pos();
         s.Stmt = e;
         return s;
-
     }
     s.Stmt = p.stmtOrNil();
     if (s.Stmt != null) {
@@ -2420,7 +2272,6 @@ private static ptr<BlockStmt> blockStmt(this ptr<parser> _addr_p, @string contex
     p.want(_Rbrace);
 
     return _addr_s!;
-
 });
 
 private static ptr<DeclStmt> declStmt(this ptr<parser> _addr_p, Func<ptr<Group>, Decl> f) => func((defer, _, _) => {
@@ -2436,7 +2287,6 @@ private static ptr<DeclStmt> declStmt(this ptr<parser> _addr_p, Func<ptr<Group>,
     s.DeclList = p.appendGroup(null, f);
 
     return _addr_s!;
-
 });
 
 private static Stmt forStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2452,7 +2302,6 @@ private static Stmt forStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
     s.Body = p.blockStmt("for clause");
 
     return s;
-
 });
 
 private static (SimpleStmt, Expr, SimpleStmt) header(this ptr<parser> _addr_p, token keyword) {
@@ -2469,7 +2318,6 @@ private static (SimpleStmt, Expr, SimpleStmt) header(this ptr<parser> _addr_p, t
             cond = p.badExpr();
         }
         return ;
-
     }
     var outer = p.xnest;
     p.xnest = -1;
@@ -2490,7 +2338,6 @@ private static (SimpleStmt, Expr, SimpleStmt) header(this ptr<parser> _addr_p, t
             }
 
         }
-
     }
     SimpleStmt condStmt = default;
     var semi = default;
@@ -2507,7 +2354,6 @@ private static (SimpleStmt, Expr, SimpleStmt) header(this ptr<parser> _addr_p, t
             if (p.tok != _Lbrace) {
                 p.advance(_Lbrace, _Rbrace); // for better synchronization (e.g., issue #22581)
             }
-
         }
         if (keyword == _For) {
             if (p.tok != _Semi) {
@@ -2528,9 +2374,7 @@ private static (SimpleStmt, Expr, SimpleStmt) header(this ptr<parser> _addr_p, t
                     }
 
                 }
-
             }
-
         }
         else if (p.tok != _Lbrace) {
             condStmt = p.simpleStmt(null, keyword);
@@ -2553,13 +2397,10 @@ done:
  {
                     p.syntaxErrorAt(semi.pos, "missing condition in if statement");
                 }
-
                 ptr<BadExpr> b = @new<BadExpr>();
                 b.pos = semi.pos;
                 cond = b;
-
             }
-
             break;
         case ptr<ExprStmt> s:
             cond = s.X;
@@ -2576,7 +2417,6 @@ done:
                     // Do it always - it's not worth going through the trouble of doing it
                     // only for "complex" left and right sides.
                     str = "assignment (" + String(@as.Lhs) + ") = (" + String(@as.Rhs) + ")";
-
                 }
                 else
  {
@@ -2584,7 +2424,6 @@ done:
                 }
 
             }
-
             p.syntaxErrorAt(s.Pos(), fmt.Sprintf("cannot use %s as value", str));
             break;
         }
@@ -2592,7 +2431,6 @@ done:
     }
     p.xnest = outer;
     return ;
-
 }
 
 private static ptr<IfStmt> ifStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2616,10 +2454,8 @@ private static ptr<IfStmt> ifStmt(this ptr<parser> _addr_p) => func((defer, _, _
         else 
             p.syntaxError("else must be followed by if or statement block");
             p.advance(_Name, _Rbrace);
-        
-    }
+            }
     return _addr_s!;
-
 });
 
 private static ptr<SwitchStmt> switchStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2644,7 +2480,6 @@ private static ptr<SwitchStmt> switchStmt(this ptr<parser> _addr_p) => func((def
     p.want(_Rbrace);
 
     return _addr_s!;
-
 });
 
 private static ptr<SelectStmt> selectStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2668,7 +2503,6 @@ private static ptr<SelectStmt> selectStmt(this ptr<parser> _addr_p) => func((def
     p.want(_Rbrace);
 
     return _addr_s!;
-
 });
 
 private static ptr<CaseClause> caseClause(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2694,7 +2528,6 @@ private static ptr<CaseClause> caseClause(this ptr<parser> _addr_p) => func((def
     c.Body = p.stmtList();
 
     return _addr_c!;
-
 });
 
 private static ptr<CommClause> commClause(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2732,7 +2565,6 @@ private static ptr<CommClause> commClause(this ptr<parser> _addr_p) => func((def
     c.Body = p.stmtList();
 
     return _addr_c!;
-
 });
 
 // Statement =
@@ -2757,9 +2589,7 @@ private static Stmt stmtOrNil(this ptr<parser> _addr_p) => func((defer, _, _) =>
             }
 
         }
-
         return p.simpleStmt(lhs, 0);
-
     }
 
     if (p.tok == _Var) 
@@ -2824,7 +2654,6 @@ private static Stmt stmtOrNil(this ptr<parser> _addr_p) => func((defer, _, _) =>
         s.pos = p.pos();
         return s;
         return null;
-
 });
 
 // StatementList = { Statement ";" } .
@@ -2850,7 +2679,6 @@ private static slice<Stmt> stmtList(this ptr<parser> _addr_p) => func((defer, _,
         }
     }
     return ;
-
 });
 
 // argList parses a possibly empty, comma-separated list of arguments,
@@ -2875,7 +2703,6 @@ private static (slice<Expr>, bool) argList(this ptr<parser> _addr_p) => func((de
     p.xnest--;
 
     return ;
-
 });
 
 // ----------------------------------------------------------------------------
@@ -2895,7 +2722,6 @@ private static ptr<Name> name(this ptr<parser> _addr_p) {
     p.syntaxError("expecting name");
     p.advance();
     return _addr_n!;
-
 }
 
 // IdentifierList = identifier { "," identifier } .
@@ -2916,7 +2742,6 @@ private static slice<ptr<Name>> nameList(this ptr<parser> _addr_p, ptr<Name> _ad
     }
 
     return l;
-
 });
 
 // The first name may be provided, or nil.
@@ -2949,7 +2774,6 @@ private static Expr qualifiedName(this ptr<parser> _addr_p, ptr<Name> _addr_name
         x = p.typeInstance(x);
     }
     return x;
-
 });
 
 // ExpressionList = Expression { "," Expression } .
@@ -2971,7 +2795,6 @@ private static Expr exprList(this ptr<parser> _addr_p) => func((defer, _, _) => 
         x = t;
     }
     return x;
-
 });
 
 // typeList parses a non-empty, comma-separated list of expressions,
@@ -3005,24 +2828,19 @@ private static (Expr, bool) typeList(this ptr<parser> _addr_p) => func((defer, _
                     if (t == null) {
                         break;
                     }
-
                     list = append(list, t);
-
                 }
 
                 ptr<ListExpr> l = @new<ListExpr>();
                 l.pos = x.Pos(); // == list[0].Pos()
                 l.ElemList = list;
                 x = l;
-
             }
 
         }
-
     }
     p.xnest--;
     return ;
-
 });
 
 // unparen removes all parentheses around an expression.
@@ -3033,10 +2851,8 @@ private static Expr unparen(Expr x) {
             break;
         }
         x = p.X;
-
     }
     return x;
-
 }
 
 } // end syntax_package

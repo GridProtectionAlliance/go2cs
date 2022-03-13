@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sys -- go2cs converted at 2022 March 06 22:32:21 UTC
+// package sys -- go2cs converted at 2022 March 13 05:43:20 UTC
 // import "cmd/internal/sys" ==> using sys = go.cmd.@internal.sys_package
 // Original source: C:\Program Files\Go\src\cmd\internal\sys\supported.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class sys_package {
 
-    // RaceDetectorSupported reports whether goos/goarch supports the race
-    // detector. There is a copy of this function in cmd/dist/test.go.
-    // Race detector only supports 48-bit VMA on arm64. But it will always
-    // return true for arm64, because we don't have VMA size information during
-    // the compile time.
+// RaceDetectorSupported reports whether goos/goarch supports the race
+// detector. There is a copy of this function in cmd/dist/test.go.
+// Race detector only supports 48-bit VMA on arm64. But it will always
+// return true for arm64, because we don't have VMA size information during
+// the compile time.
 public static bool RaceDetectorSupported(@string goos, @string goarch) {
     switch (goos) {
         case "linux": 
@@ -37,7 +35,6 @@ public static bool RaceDetectorSupported(@string goos, @string goarch) {
             return false;
             break;
     }
-
 }
 
 // MSanSupported reports whether goos/goarch supports the memory
@@ -52,7 +49,6 @@ public static bool MSanSupported(@string goos, @string goarch) {
             return false;
             break;
     }
-
 }
 
 // MustLinkExternal reports whether goos/goarch requires external linking.
@@ -71,7 +67,6 @@ public static bool MustLinkExternal(@string goos, @string goarch) {
             break;
     }
     return false;
-
 }
 
 // BuildModeSupported reports whether goos/goarch supports the given build mode
@@ -128,7 +123,6 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
                     break;
             }
             return false;
-
             break;
         case "default": 
             return true;
@@ -181,7 +175,6 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
                     break;
             }
             return false;
-
             break;
         case "shared": 
             switch (platform) {
@@ -200,7 +193,6 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
                     break;
             }
             return false;
-
             break;
         case "plugin": 
             switch (platform) {
@@ -233,13 +225,11 @@ public static bool BuildModeSupported(@string compiler, @string buildmode, @stri
                     break;
             }
             return false;
-
             break;
         default: 
             return false;
             break;
     }
-
 }
 
 public static bool InternalLinkPIESupported(@string goos, @string goarch) {
@@ -263,7 +253,6 @@ public static bool InternalLinkPIESupported(@string goos, @string goarch) {
             break;
     }
     return false;
-
 }
 
 } // end sys_package

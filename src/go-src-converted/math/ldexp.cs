@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:08 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:01 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\ldexp.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Ldexp is the inverse of Frexp.
-    // It returns frac × 2**exp.
-    //
-    // Special cases are:
-    //    Ldexp(±0, exp) = ±0
-    //    Ldexp(±Inf, exp) = ±Inf
-    //    Ldexp(NaN, exp) = NaN
+// Ldexp is the inverse of Frexp.
+// It returns frac × 2**exp.
+//
+// Special cases are:
+//    Ldexp(±0, exp) = ±0
+//    Ldexp(±Inf, exp) = ±Inf
+//    Ldexp(NaN, exp) = NaN
 public static double Ldexp(double frac, nint exp) {
     if (haveArchLdexp) {
         return archLdexp(frac, exp);
     }
     return ldexp(frac, exp);
-
 }
 
 private static double ldexp(double frac, nint exp) { 
@@ -45,7 +42,6 @@ private static double ldexp(double frac, nint exp) {
             return Inf(-1);
         }
         return Inf(1);
-
     }
     double m = 1;
     if (exp < -1022) { // denormal
@@ -55,7 +51,6 @@ private static double ldexp(double frac, nint exp) {
     x &= mask << (int)(shift);
     x |= uint64(exp + bias) << (int)(shift);
     return m * Float64frombits(x);
-
 }
 
 } // end math_package

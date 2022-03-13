@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2022 March 06 22:31:35 UTC
+// package tar -- go2cs converted at 2022 March 13 05:42:28 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Program Files\Go\src\archive\tar\strconv.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
 namespace go.archive;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// hasNUL reports whether the NUL character exists within s.
 
 public static partial class tar_package {
 
-    // hasNUL reports whether the NUL character exists within s.
 private static bool hasNUL(@string s) {
     return strings.IndexByte(s, 0) >= 0;
 }
@@ -27,7 +29,6 @@ private static bool isASCII(@string s) {
             return false;
         }
     }    return true;
-
 }
 
 // toASCII converts the input to an ASCII C-style string.
@@ -42,7 +43,6 @@ private static @string toASCII(@string s) {
             b = append(b, byte(c));
         }
     }    return string(b);
-
 }
 
 private partial struct parser {
@@ -65,9 +65,7 @@ private static @string parseString(this ptr<parser> _addr__p0, slice<byte> b) {
             return string(b[..(int)i]);
         }
     }
-
     return string(b);
-
 }
 
 // formatString copies s into b, NUL-terminating if possible.
@@ -124,28 +122,21 @@ private static long parseNumeric(this ptr<parser> _addr_p, slice<byte> b) {
             if (i == 0) {
                 c &= 0x7f; // Ignore signal bit in first byte
             }
-
             if ((x >> 56) > 0) {
                 p.err = ErrHeader; // Integer overflow
                 return 0;
-
             }
-
             x = x << 8 | uint64(c);
-
         }        if ((x >> 63) > 0) {
             p.err = ErrHeader; // Integer overflow
             return 0;
-
         }
         if (inv == 0xff) {
             return ~int64(x);
         }
         return int64(x);
-
     }
     return p.parseOctal(b);
-
 }
 
 // formatNumeric encodes x into b using base-8 (octal) encoding if possible.
@@ -164,11 +155,9 @@ private static void formatNumeric(this ptr<formatter> _addr_f, slice<byte> b, lo
         }
         b[0] |= 0x80; // Highest bit indicates binary format
         return ;
-
     }
     f.formatOctal(b, 0); // Last resort, just write zero
     f.err = ErrFieldTooLong;
-
 }
 
 private static long parseOctal(this ptr<parser> _addr_p, slice<byte> b) {
@@ -189,7 +178,6 @@ private static long parseOctal(this ptr<parser> _addr_p, slice<byte> b) {
         p.err = ErrHeader;
     }
     return int64(x);
-
 }
 
 private static void formatOctal(this ptr<formatter> _addr_f, slice<byte> b, long x) {
@@ -198,7 +186,6 @@ private static void formatOctal(this ptr<formatter> _addr_f, slice<byte> b, long
     if (!fitsInOctal(len(b), x)) {
         x = 0; // Last resort, just write zero
         f.err = ErrFieldTooLong;
-
     }
     var s = strconv.FormatInt(x, 8); 
     // Add leading zeros, but leave room for a NUL.
@@ -209,9 +196,7 @@ private static void formatOctal(this ptr<formatter> _addr_f, slice<byte> b, long
             s = strings.Repeat("0", n) + s;
         }
     }
-
     f.formatString(b, s);
-
 }
 
 // fitsInOctal reports whether the integer x fits in a field n-bytes long
@@ -267,7 +252,6 @@ private static (time.Time, error) parsePAXTime(@string s) {
         return (time.Unix(secs, -1 * nsecs), error.As(null!)!); // Negative correction
     }
     return (time.Unix(secs, nsecs), error.As(null!)!);
-
 }
 
 // formatPAXTime converts ts into a time of the form %d.%d as described in the
@@ -287,7 +271,6 @@ private static @string formatPAXTime(time.Time ts) {
         nsecs = -(nsecs - 1e9F); // Take that second away from nsecs
     }
     return strings.TrimRight(fmt.Sprintf("%s%d.%09d", sign, secs, nsecs), "0");
-
 }
 
 // parsePAXRecord parses the input PAX record string into a key-value pair.
@@ -340,7 +323,6 @@ private static (@string, @string, @string, error) parsePAXRecord(@string s) {
         return ("", "", s, error.As(ErrHeader)!);
     }
     return (k, v, rem, error.As(null!)!);
-
 }
 
 // formatPAXRecord formats a single PAX record, prefixing it with the
@@ -364,7 +346,6 @@ private static (@string, error) formatPAXRecord(@string k, @string v) {
         record = strconv.Itoa(size) + " " + k + "=" + v + "\n";
     }
     return (record, error.As(null!)!);
-
 }
 
 // validPAXRecord reports whether the key-value pair is valid where each
@@ -385,7 +366,6 @@ private static bool validPAXRecord(@string k, @string v) {
         return !hasNUL(v);
     else 
         return !hasNUL(k);
-    
-}
+    }
 
 } // end tar_package

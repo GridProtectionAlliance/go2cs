@@ -7,25 +7,28 @@
 //
 // If the cmd_go_bootstrap build tag is present, web avoids the use of the net
 // package and returns errors for all network operations.
-// package web -- go2cs converted at 2022 March 06 23:16:30 UTC
+
+// package web -- go2cs converted at 2022 March 13 06:30:00 UTC
 // import "cmd/go/internal/web" ==> using web = go.cmd.go.@internal.web_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\web\api.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using url = go.net.url_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using url = net.url_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// SecurityMode specifies whether a function should make network
+// calls using insecure transports (eg, plain text HTTP).
+// The zero value is "secure".
 
 public static partial class web_package {
 
-    // SecurityMode specifies whether a function should make network
-    // calls using insecure transports (eg, plain text HTTP).
-    // The zero value is "secure".
 public partial struct SecurityMode { // : nint
 }
 
@@ -45,7 +48,6 @@ public partial struct HTTPError {
 private static readonly nint maxErrorDetailLines = 8;
 private static readonly var maxErrorDetailBytes = maxErrorDetailLines * 81;
 
-
 private static @string Error(this ptr<HTTPError> _addr_e) {
     ref HTTPError e = ref _addr_e.val;
 
@@ -55,7 +57,6 @@ private static @string Error(this ptr<HTTPError> _addr_e) {
             detailSep = "\n\t";
         }
         return fmt.Sprintf("reading %s: %v\n\tserver response:%s%s", e.URL, e.Status, detailSep, e.Detail);
-
     }
     {
         var err = e.Err;
@@ -67,19 +68,14 @@ private static @string Error(this ptr<HTTPError> _addr_e) {
                 if (ok && strings.HasSuffix(e.URL, pErr.Path)) { 
                     // Remove the redundant copy of the path.
                     err = pErr.Err;
-
                 }
 
             }
-
             return fmt.Sprintf("reading %s: %v", e.URL, err);
-
         }
     }
 
-
     return fmt.Sprintf("reading %s: %v", e.URL, e.Status);
-
 }
 
 private static bool Is(this ptr<HTTPError> _addr_e, error target) {
@@ -115,13 +111,11 @@ public static (slice<byte>, error) GetBytes(ptr<url.URL> _addr_u) => func((defer
             return (null, error.As(err)!);
         }
     }
-
     var (b, err) = io.ReadAll(resp.Body);
     if (err != null) {
         return (null, error.As(fmt.Errorf("reading %s: %v", u.Redacted(), err))!);
     }
     return (b, error.As(null!)!);
-
 });
 
 public partial struct Response {
@@ -145,7 +139,6 @@ private static error Err(this ptr<Response> _addr_r) {
         return error.As(null!)!;
     }
     return error.As(addr(new HTTPError(URL:r.URL,Status:r.Status,StatusCode:r.StatusCode,Err:r.fileErr,Detail:r.formatErrorDetail(),))!)!;
-
 }
 
 // formatErrorDetail converts r.errorDetail (a prefix of the output of r.Body)
@@ -183,9 +176,7 @@ private static @string formatErrorDetail(this ptr<Response> _addr_r) {
             break;
         }
         detail.WriteString(line);
-
     }    return detail.String();
-
 }
 
 // Get returns the body of the HTTP or HTTPS resource specified at the given URL.
@@ -230,7 +221,6 @@ public static ptr<url.URL> Join(ptr<url.URL> _addr_u, @string path) {
     j.Path = strings.TrimSuffix(u.Path, "/") + "/" + strings.TrimPrefix(path, "/");
     j.RawPath = strings.TrimSuffix(u.RawPath, "/") + "/" + strings.TrimPrefix(path, "/");
     return _addr__addr_j!;
-
 }
 
 // An errorDetailBuffer is an io.ReadCloser that copies up to
@@ -272,7 +262,6 @@ private static (nint, error) Read(this ptr<errorDetailBuffer> _addr_b, slice<byt
         }
     }
     return (n, error.As(err)!);
-
 }
 
 } // end web_package

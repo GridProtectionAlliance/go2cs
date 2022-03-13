@@ -5,15 +5,15 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:30 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:56 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\exec_unix.go
-using errors = go.errors_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go;
+
+using errors = errors_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+using time = time_package;
 
 public static partial class os_package {
 
@@ -37,7 +37,6 @@ private static (ptr<ProcessState>, error) wait(this ptr<Process> _addr_p) {
         // active call to the signal method to complete.
         p.sigMu.Lock();
         p.sigMu.Unlock();
-
     }
     ref syscall.WaitStatus status = ref heap(out ptr<syscall.WaitStatus> _addr_status);    ref syscall.Rusage rusage = ref heap(out ptr<syscall.Rusage> _addr_rusage);    nint pid1 = default;    error e = default!;
     while (true) {
@@ -54,7 +53,6 @@ private static (ptr<ProcessState>, error) wait(this ptr<Process> _addr_p) {
     }
     ps = addr(new ProcessState(pid:pid1,status:status,rusage:&rusage,));
     return (_addr_ps!, error.As(null!)!);
-
 }
 
 private static error signal(this ptr<Process> _addr_p, Signal sig) => func((defer, _, _) => {
@@ -85,9 +83,7 @@ private static error signal(this ptr<Process> _addr_p, Signal sig) => func((defe
             return error.As(e)!;
         }
     }
-
     return error.As(null!)!;
-
 });
 
 private static error release(this ptr<Process> _addr_p) {
@@ -98,7 +94,6 @@ private static error release(this ptr<Process> _addr_p) {
     // no need for a finalizer anymore
     runtime.SetFinalizer(p, null);
     return error.As(null!)!;
-
 }
 
 private static (ptr<Process>, error) findProcess(nint pid) {
@@ -107,7 +102,6 @@ private static (ptr<Process>, error) findProcess(nint pid) {
  
     // NOOP for unix.
     return (_addr_newProcess(pid, 0)!, error.As(null!)!);
-
 }
 
 private static time.Duration userTime(this ptr<ProcessState> _addr_p) {

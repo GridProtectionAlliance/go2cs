@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2022 March 06 22:12:38 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:42 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\dir.go
-using fs = go.io.fs_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go;
+
+using fs = io.fs_package;
+using sort = sort_package;
+using System;
 
 public static partial class os_package {
 
@@ -20,7 +19,6 @@ private partial struct readdirMode { // : nint
 private static readonly readdirMode readdirName = iota;
 private static readonly var readdirDirEntry = 0;
 private static readonly var readdirFileInfo = 1;
-
 
 // Readdir reads the contents of the directory associated with file and
 // returns a slice of up to n FileInfo values, as would be returned
@@ -53,10 +51,8 @@ private static (slice<FileInfo>, error) Readdir(this ptr<File> _addr_f, nint n) 
         // even on error (except misuse with nil receiver above).
         // Keep it that way to avoid breaking overly sensitive callers.
         infos = new slice<FileInfo>(new FileInfo[] {  });
-
     }
     return (infos, error.As(err)!);
-
 }
 
 // Readdirnames reads the contents of the directory associated with file
@@ -88,10 +84,8 @@ private static (slice<@string>, error) Readdirnames(this ptr<File> _addr_f, nint
         // even on error (except misuse with nil receiver above).
         // Keep it that way to avoid breaking overly sensitive callers.
         names = new slice<@string>(new @string[] {  });
-
     }
     return (names, error.As(err)!);
-
 }
 
 // A DirEntry is an entry read from a directory
@@ -121,10 +115,8 @@ private static (slice<DirEntry>, error) ReadDir(this ptr<File> _addr_f, nint n) 
     if (dirents == null) { 
         // Match Readdir and Readdirnames: don't return nil slices.
         dirents = new slice<DirEntry>(new DirEntry[] {  });
-
     }
     return (dirents, error.As(err)!);
-
 }
 
 // testingForceReadDirLstat forces ReadDir to call Lstat, for testing that code path.
@@ -149,7 +141,6 @@ public static (slice<DirEntry>, error) ReadDir(@string name) => func((defer, _, 
     var (dirs, err) = f.ReadDir(-1);
     sort.Slice(dirs, (i, j) => dirs[i].Name() < dirs[j].Name());
     return (dirs, error.As(err)!);
-
 });
 
 } // end os_package

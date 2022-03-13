@@ -5,14 +5,13 @@
 //go:build amd64
 // +build amd64
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:29 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:18 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\debugcall.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -20,7 +19,6 @@ private static readonly @string debugCallSystemStack = "executing on Go runtime 
 private static readonly @string debugCallUnknownFunc = "call from unknown function";
 private static readonly @string debugCallRuntime = "call from within the Go runtime";
 private static readonly @string debugCallUnsafePoint = "call not at safe point";
-
 
 private static void debugCallV2();
 private static void debugCallPanicked(object val);
@@ -44,7 +42,6 @@ private static @string debugCallCheck(System.UIntPtr pc) {
             // a call in this state. (We can't even safely
             // systemstack.)
             return debugCallSystemStack;
-
         }
     } 
 
@@ -136,11 +133,9 @@ private static @string debugCallCheck(System.UIntPtr pc) {
         if (up != _PCDATA_UnsafePointSafe) { 
             // Not at a safe point.
             ret = debugCallUnsafePoint;
-
         }
     });
     return ret;
-
 }
 
 // debugCallWrap starts a new goroutine to run a debug call and blocks
@@ -177,7 +172,6 @@ private static void debugCallWrap(System.UIntPtr dispatch) {
             if (mp != gp.lockedm.ptr()) {
                 throw("inconsistent lockedm");
             }
-
             lockedm = true;
             lockedExt = mp.lockedExt; 
 
@@ -189,14 +183,12 @@ private static void debugCallWrap(System.UIntPtr dispatch) {
             mp.lockedg.set(newg);
             newg.lockedm.set(mp);
             gp.lockedm = 0;
-
         }
         gp.asyncSafePoint = true; 
 
         // Stash newg away so we can execute it below (mcall's
         // closure can't capture anything).
         gp.schedlink.set(newg);
-
     }); 
 
     // Switch to the new goroutine.
@@ -218,7 +210,6 @@ private static void debugCallWrap(System.UIntPtr dispatch) {
         // it's important we not just let the scheduler do
         // this or it may resume a different goroutine.
         execute(newg, true);
-
     }); 
 
     // We'll resume here when the call returns.
@@ -232,7 +223,6 @@ private static void debugCallWrap(System.UIntPtr dispatch) {
         gp.lockedm.set(mp);
     }
     gp.asyncSafePoint = false;
-
 }
 
 private partial struct debugCallWrapArgs {
@@ -278,17 +268,15 @@ private static void debugCallWrap1() {
         }
         casgstatus(callingG, _Gwaiting, _Grunnable);
         execute(callingG, true);
-
     });
-
 }
 
 private static void debugCallWrap2(System.UIntPtr dispatch) => func((defer, _, _) => { 
     // Call the dispatch function and trap panics.
     ref Action dispatchF = ref heap(out ptr<Action> _addr_dispatchF);
-    ref funcval dispatchFV = ref heap(new funcval(dispatch) * (@unsafe.Pointer.val)(@unsafe.Pointer(_addr_dispatchF)), out ptr<funcval> _addr_dispatchFV);
+    ref funcval dispatchFV = ref heap(new funcval(dispatch) * (@unsafe.Pointer.val), out ptr<funcval> _addr_dispatchFV);
 
-    noescape(@unsafe.Pointer(_addr_dispatchFV));
+    (@unsafe.Pointer(_addr_dispatchF)) = noescape(@unsafe.Pointer(_addr_dispatchFV));
 
     bool ok = default;
     defer(() => {
@@ -299,7 +287,6 @@ private static void debugCallWrap2(System.UIntPtr dispatch) => func((defer, _, _
     }());
     dispatchF();
     ok = true;
-
 });
 
 } // end runtime_package

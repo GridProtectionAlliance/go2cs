@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:25 UTC
+//     Generated on 2022 March 13 06:43:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,7 +18,7 @@ namespace go
 {
     public static partial class testing_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct panicHandling
         {
             // Value of the panicHandling struct

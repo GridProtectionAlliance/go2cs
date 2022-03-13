@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:15:42 UTC
+//     Generated on 2022 March 13 06:29:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace nested
 {
     public static partial class nested_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Foo
         {
             // Constructors
@@ -49,7 +49,7 @@ namespace nested
             public static implicit operator Foo(NilType nil) => default(Foo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Foo Foo_cast(dynamic value)
         {
             return new Foo();

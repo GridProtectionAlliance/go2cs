@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:21 UTC
+//     Generated on 2022 March 13 05:39:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace encoding
 {
     public static partial class json_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SyntaxError
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace encoding
             public static implicit operator SyntaxError(NilType nil) => default(SyntaxError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SyntaxError SyntaxError_cast(dynamic value)
         {
             return new SyntaxError(value.msg, value.Offset);

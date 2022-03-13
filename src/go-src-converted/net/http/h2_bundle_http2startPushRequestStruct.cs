@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:01 UTC
+//     Generated on 2022 March 13 05:37:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2startPushRequest
         {
             // Constructors
@@ -90,7 +90,7 @@ namespace net
             public static implicit operator http2startPushRequest(NilType nil) => default(http2startPushRequest);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2startPushRequest http2startPushRequest_cast(dynamic value)
         {
             return new http2startPushRequest(ref value.parent, value.method, ref value.url, value.header, value.done);

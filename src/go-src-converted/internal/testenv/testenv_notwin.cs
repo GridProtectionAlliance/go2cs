@@ -5,12 +5,12 @@
 //go:build !windows
 // +build !windows
 
-// package testenv -- go2cs converted at 2022 March 06 23:36:29 UTC
+// package testenv -- go2cs converted at 2022 March 13 06:44:33 UTC
 // import "internal/testenv" ==> using testenv = go.@internal.testenv_package
 // Original source: C:\Program Files\Go\src\internal\testenv\testenv_notwin.go
-using runtime = go.runtime_package;
-
 namespace go.@internal;
+
+using runtime = runtime_package;
 
 public static partial class testenv_package {
 
@@ -27,7 +27,6 @@ private static (bool, @string) hasSymlink() {
     }
 
     return (true, "");
-
 }
 
 } // end testenv_package

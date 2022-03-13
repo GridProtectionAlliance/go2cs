@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:02 UTC
+//     Generated on 2022 March 13 06:35:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace @internal
 {
     public static partial class benchmark_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Metrics
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace @internal
             public static implicit operator Metrics(NilType nil) => default(Metrics);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Metrics Metrics_cast(dynamic value)
         {
             return new Metrics(value.gc, value.marks, ref value.curMark, value.filebase, ref value.pprofFile);

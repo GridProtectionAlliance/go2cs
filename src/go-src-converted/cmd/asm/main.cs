@@ -2,27 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:43:02 UTC
+// package main -- go2cs converted at 2022 March 13 05:54:11 UTC
 // Original source: C:\Program Files\Go\src\cmd\asm\main.go
-using bufio = go.bufio_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using os = go.os_package;
-
-using arch = go.cmd.asm.@internal.arch_package;
-using asm = go.cmd.asm.@internal.asm_package;
-using flags = go.cmd.asm.@internal.flags_package;
-using lex = go.cmd.asm.@internal.lex_package;
-
-using bio = go.cmd.@internal.bio_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using System;
-
-
 namespace go;
+
+using bufio = bufio_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using os = os_package;
+
+using arch = cmd.asm.@internal.arch_package;
+using asm = cmd.asm.@internal.asm_package;
+using flags = cmd.asm.@internal.flags_package;
+using lex = cmd.asm.@internal.lex_package;
+
+using bio = cmd.@internal.bio_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using System;
 
 public static partial class main_package {
 
@@ -122,7 +121,6 @@ private static void Main() => func((defer, _, _) => {
         buf.Close();
         os.Remove(flags.OutputFile.val);
         os.Exit(1);
-
     }
 });
 

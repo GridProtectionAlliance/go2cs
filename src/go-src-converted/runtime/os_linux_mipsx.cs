@@ -6,11 +6,9 @@
 // +build linux
 // +build mips mipsle
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:30 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\os_linux_mipsx.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -26,7 +24,6 @@ private static long cputicks() {
     // Currently cputicks() is used in blocking profiler and to seed fastrand().
     // nanotime() is a poor approximation of CPU ticks that is enough for the profiler.
     return nanotime();
-
 }
 
 private static readonly nint _SS_DISABLE = 2;
@@ -35,7 +32,6 @@ private static readonly nint _SI_USER = 0;
 private static readonly nint _SIG_BLOCK = 1;
 private static readonly nint _SIG_UNBLOCK = 2;
 private static readonly nint _SIG_SETMASK = 3;
-
 
 private partial struct sigset { // : array<uint>
 }

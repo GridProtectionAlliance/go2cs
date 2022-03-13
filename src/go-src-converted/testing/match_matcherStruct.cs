@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:16 UTC
+//     Generated on 2022 March 13 06:43:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace go
 {
     public static partial class testing_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct matcher
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace go
             public static implicit operator matcher(NilType nil) => default(matcher);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static matcher matcher_cast(dynamic value)
         {
             return new matcher(value.filter, value.matchFunc, value.mu, value.subNames);

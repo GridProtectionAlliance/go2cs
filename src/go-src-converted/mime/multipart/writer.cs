@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package multipart -- go2cs converted at 2022 March 06 22:21:18 UTC
+// package multipart -- go2cs converted at 2022 March 13 05:36:26 UTC
 // import "mime/multipart" ==> using multipart = go.mime.multipart_package
 // Original source: C:\Program Files\Go\src\mime\multipart\writer.go
-using bytes = go.bytes_package;
-using rand = go.crypto.rand_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using textproto = go.net.textproto_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
 namespace go.mime;
+
+using bytes = bytes_package;
+using rand = crypto.rand_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using textproto = net.textproto_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// A Writer generates multipart messages.
 
 public static partial class multipart_package {
 
-    // A Writer generates multipart messages.
 public partial struct Writer {
     public io.Writer w;
     public @string boundary;
@@ -91,10 +93,8 @@ private static error SetBoundary(this ptr<Writer> _addr_w, @string boundary) {
                 break;
         }
         return error.As(errors.New("mime: invalid boundary character"))!;
-
     }    w.boundary = boundary;
     return error.As(null!)!;
-
 }
 
 // FormDataContentType returns the Content-Type for an HTTP
@@ -109,7 +109,6 @@ private static @string FormDataContentType(this ptr<Writer> _addr_w) {
         b = "\"" + b + "\"";
     }
     return "multipart/form-data; boundary=" + b;
-
 }
 
 private static @string randomBoundary() => func((_, panic, _) => {
@@ -119,7 +118,6 @@ private static @string randomBoundary() => func((_, panic, _) => {
         panic(err);
     }
     return fmt.Sprintf("%x", buf[..]);
-
 });
 
 // CreatePart creates a new multipart section with the provided
@@ -140,7 +138,6 @@ private static (io.Writer, error) CreatePart(this ptr<Writer> _addr_w, textproto
             }
 
         }
-
     }
     ref bytes.Buffer b = ref heap(out ptr<bytes.Buffer> _addr_b);
     if (w.lastpart != null) {
@@ -182,7 +179,6 @@ private static (io.Writer, error) CreatePart(this ptr<Writer> _addr_w, textproto
     ptr<part> p = addr(new part(mw:w,));
     w.lastpart = p;
     return (p, error.As(null!)!);
-
 }
 
 private static var quoteEscaper = strings.NewReplacer("\\", "\\\\", "\"", "\\\"");
@@ -226,7 +222,6 @@ private static error WriteField(this ptr<Writer> _addr_w, @string fieldname, @st
     }
     _, err = p.Write((slice<byte>)value);
     return error.As(err)!;
-
 }
 
 // Close finishes the multipart message and writes the trailing
@@ -243,13 +238,10 @@ private static error Close(this ptr<Writer> _addr_w) {
             }
 
         }
-
         w.lastpart = null;
-
     }
     var (_, err) = fmt.Fprintf(w.w, "\r\n--%s--\r\n", w.boundary);
     return error.As(err)!;
-
 }
 
 private partial struct part {
@@ -278,7 +270,6 @@ private static (nint, error) Write(this ptr<part> _addr_p, slice<byte> d) {
         p.we = err;
     }
     return ;
-
 }
 
 } // end multipart_package

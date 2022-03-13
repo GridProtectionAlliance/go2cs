@@ -7,19 +7,19 @@
 
 // Package subtle implements functions that are often useful in cryptographic
 // code but require careful thought to use correctly.
-// package subtle -- go2cs converted at 2022 March 06 23:36:51 UTC
+
+// package subtle -- go2cs converted at 2022 March 13 06:44:57 UTC
 // import "vendor/golang.org/x/crypto/internal/subtle" ==> using subtle = go.vendor.golang.org.x.crypto.@internal.subtle_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\internal\subtle\aliasing.go
+namespace go.vendor.golang.org.x.crypto.@internal;
 // import "golang.org/x/crypto/internal/subtle"
 
-using @unsafe = go.@unsafe_package;
-
-namespace go.vendor.golang.org.x.crypto.@internal;
+using @unsafe = @unsafe_package;
 
 public static partial class subtle_package {
 
-    // AnyOverlap reports whether x and y share memory at any (not necessarily
-    // corresponding) index. The memory beyond the slice length is ignored.
+// AnyOverlap reports whether x and y share memory at any (not necessarily
+// corresponding) index. The memory beyond the slice length is ignored.
 public static bool AnyOverlap(slice<byte> x, slice<byte> y) {
     return len(x) > 0 && len(y) > 0 && uintptr(@unsafe.Pointer(_addr_x[0])) <= uintptr(@unsafe.Pointer(_addr_y[len(y) - 1])) && uintptr(@unsafe.Pointer(_addr_y[0])) <= uintptr(@unsafe.Pointer(_addr_x[len(x) - 1]));
 }
@@ -35,7 +35,6 @@ public static bool InexactOverlap(slice<byte> x, slice<byte> y) {
         return false;
     }
     return AnyOverlap(x, y);
-
 }
 
 } // end subtle_package

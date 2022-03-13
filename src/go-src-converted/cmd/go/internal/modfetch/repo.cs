@@ -2,28 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2022 March 06 23:18:59 UTC
+// package modfetch -- go2cs converted at 2022 March 13 06:32:19 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\repo.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using time = go.time_package;
+namespace go.cmd.go.@internal;
 
-using cfg = go.cmd.go.@internal.cfg_package;
-using codehost = go.cmd.go.@internal.modfetch.codehost_package;
-using par = go.cmd.go.@internal.par_package;
-using vcs = go.cmd.go.@internal.vcs_package;
-using web = go.cmd.go.@internal.web_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using strconv = strconv_package;
+using time = time_package;
 
-using module = go.golang.org.x.mod.module_package;
+using cfg = cmd.go.@internal.cfg_package;
+using codehost = cmd.go.@internal.modfetch.codehost_package;
+using par = cmd.go.@internal.par_package;
+using vcs = cmd.go.@internal.vcs_package;
+using web = cmd.go.@internal.web_package;
+
+using module = golang.org.x.mod.module_package;
 using System.ComponentModel;
 using System;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class modfetch_package {
 
@@ -209,7 +208,6 @@ public static Repo Lookup(@string proxy, @string path) => func((defer, _, _) => 
     })._<cached>();
 
     return c.r;
-
 });
 
 // lookup returns the module with the given module path.
@@ -231,7 +229,6 @@ private static (Repo, error) lookup(@string proxy, @string path) {
                 return (null, error.As(errNoproxy)!);
                 break;
         }
-
     }
     switch (proxy) {
         case "off": 
@@ -247,7 +244,6 @@ private static (Repo, error) lookup(@string proxy, @string path) {
             return newProxyRepo(proxy, path);
             break;
     }
-
 }
 
 private partial struct lookupDisabledError {
@@ -258,7 +254,6 @@ private static @string Error(this lookupDisabledError _p0) {
         return fmt.Sprintf("module lookup disabled by -mod=%s", cfg.BuildMod);
     }
     return fmt.Sprintf("module lookup disabled by -mod=%s\n\t(%s)", cfg.BuildMod, cfg.BuildModReason);
-
 }
 
 private static error errLookupDisabled = error.As(new lookupDisabledError())!;
@@ -278,19 +273,16 @@ private static (Repo, error) lookupDirect(@string path) {
     if (err != null) { 
         // We don't know where to find code for a module with this path.
         return (null, error.As(new notExistError(err:err))!);
-
     }
     if (rr.VCS.Name == "mod") { 
         // Fetch module from proxy with base URL rr.Repo.
         return newProxyRepo(rr.Repo, path);
-
     }
     var (code, err) = lookupCodeRepo(_addr_rr);
     if (err != null) {
         return (null, error.As(err)!);
     }
     return newCodeRepo(code, rr.Root, path);
-
 }
 
 private static (codehost.Repo, error) lookupCodeRepo(ptr<vcs.RepoRoot> _addr_rr) {
@@ -308,12 +300,9 @@ private static (codehost.Repo, error) lookupCodeRepo(ptr<vcs.RepoRoot> _addr_rr)
             }
 
         }
-
         return (null, error.As(fmt.Errorf("lookup %s: %v", rr.Root, err))!);
-
     }
     return (code, error.As(null!)!);
-
 }
 
 // A loggingRepo is a wrapper around an underlying Repo
@@ -397,10 +386,8 @@ private static error Zip(this ptr<loggingRepo> _addr_l, io.Writer dst, @string v
             dstName = strconv.Quote(dst.Name());
         }
     }
-
     defer(logCall("Repo[%s]: Zip(%s, %q)", l.r.ModulePath(), dstName, version)());
     return error.As(l.r.Zip(dst, version))!;
-
 });
 
 // errRepo is a Repo that returns the same error for all operations.

@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:05 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:22 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\const.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using math = go.math_package;
-using big = go.math.big_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using math = math_package;
+using big = math.big_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class typecheck_package {
 
@@ -37,7 +36,6 @@ private static constant.Value roundFloat(constant.Value v, long sz) => func((_, 
     }
     @base.Fatalf("unexpected size: %v", sz);
     panic("unreachable");
-
 });
 
 // truncate float literal fv to 32-bit or 64-bit precision
@@ -50,10 +48,8 @@ private static constant.Value truncfltlit(constant.Value v, ptr<types.Type> _add
         // value to Inf which in turn would lead to spurious follow-on
         // errors. Avoid this by returning the existing value.
         return v;
-
     }
     return roundFloat(v, t.Size());
-
 }
 
 // truncate Real and Imag parts of Mpcplx to 32-bit or 64-bit
@@ -67,11 +63,9 @@ private static constant.Value trunccmplxlit(constant.Value v, ptr<types.Type> _a
         // value to Inf which in turn would lead to spurious follow-on
         // errors. Avoid this by returning the existing value.
         return v;
-
     }
     var fsz = t.Size() / 2;
     return makeComplex(roundFloat(constant.Real(v), fsz), roundFloat(constant.Imag(v), fsz));
-
 }
 
 // TODO(mdempsky): Replace these with better APIs.
@@ -109,12 +103,10 @@ private static ir.Node convlit1(ir.Node n, ptr<types.Type> _addr_t, bool @explic
     if (n == null || n.Type() == null) { 
         // Allow sloppy callers.
         return n;
-
     }
     if (!n.Type().IsUntyped()) { 
         // Already typed; nothing to do.
         return n;
-
     }
     if (n.Type().Kind() == types.TNIL) {
         if (n.Op() != ir.ONIL) {
@@ -130,11 +122,9 @@ private static ir.Node convlit1(ir.Node n, ptr<types.Type> _addr_t, bool @explic
         if (!t.HasNil()) { 
             // Leave for caller to handle.
             return n;
-
         }
         n.SetType(t);
         return n;
-
     }
     if (t == null || !ir.OKForConst[t.Kind()]) {
         t = defaultType(_addr_n.Type());
@@ -224,14 +214,11 @@ private static ir.Node convlit1(ir.Node n, ptr<types.Type> _addr_t, bool @explic
  {
                 @base.Errorf("cannot use %L as type %v", n, t);
             }
-
         }
         n.SetDiag(true);
-
     }
     n.SetType(null);
     return n;
-
 }
 
 private static ptr<types.Type> operandType(ir.Op op, ptr<types.Type> _addr_t) {
@@ -251,7 +238,6 @@ private static ptr<types.Type> operandType(ir.Op op, ptr<types.Type> _addr_t) {
             return _addr_t!;
         }
         return _addr_null!;
-
 }
 
 // convertVal converts v into a representation appropriate for t. If
@@ -309,7 +295,6 @@ private static constant.Value convertVal(constant.Value v, ptr<types.Type> _addr
     }
 
     return constant.MakeUnknown();
-
 }
 
 private static constant.Value tocplx(constant.Value v) {
@@ -322,10 +307,8 @@ private static constant.Value toflt(constant.Value v) {
             @base.Errorf("constant %v truncated to real", v);
         }
         v = constant.Real(v);
-
     }
     return constant.ToFloat(v);
-
 }
 
 private static constant.Value toint(constant.Value v) {
@@ -334,7 +317,6 @@ private static constant.Value toint(constant.Value v) {
             @base.Errorf("constant %v truncated to integer", v);
         }
         v = constant.Real(v);
-
     }
     {
         var v = constant.ToInt(v);
@@ -370,7 +352,6 @@ private static constant.Value toint(constant.Value v) {
         }
     }
     return constant.MakeInt64(1);
-
 }
 
 // overflow reports whether constant value v is too large
@@ -392,7 +373,6 @@ private static bool overflow(constant.Value v, ptr<types.Type> _addr_t) {
         return true;
     }
     return false;
-
 }
 
 private static constant.Value tostr(constant.Value v) {
@@ -406,12 +386,9 @@ private static constant.Value tostr(constant.Value v) {
             }
 
         }
-
         v = constant.MakeString(string(r));
-
     }
     return v;
-
 }
 
 private static array<token.Token> tokenForOp = new array<token.Token>(InitKeyedValues<token.Token>((ir.OPLUS, token.ADD), (ir.ONEG, token.SUB), (ir.ONOT, token.NOT), (ir.OBITNOT, token.XOR), (ir.OADD, token.ADD), (ir.OSUB, token.SUB), (ir.OMUL, token.MUL), (ir.ODIV, token.QUO), (ir.OMOD, token.REM), (ir.OOR, token.OR), (ir.OXOR, token.XOR), (ir.OAND, token.AND), (ir.OANDNOT, token.AND_NOT), (ir.OOROR, token.LOR), (ir.OANDAND, token.LAND), (ir.OEQ, token.EQL), (ir.ONE, token.NEQ), (ir.OLT, token.LSS), (ir.OLE, token.LEQ), (ir.OGT, token.GTR), (ir.OGE, token.GEQ), (ir.OLSH, token.SHL), (ir.ORSH, token.SHR)));
@@ -446,20 +423,16 @@ public static ir.Node EvalConst(ir.Node n) {
                 n.SetType(null);
                 return n;
             }
-
             if ((n.Op() == ir.ODIV || n.Op() == ir.OMOD) && constant.Sign(rval) == 0) {
                 @base.Errorf("division by zero");
                 n.SetType(null);
                 return n;
             }
-
             var tok = tokenForOp[n.Op()];
             if (n.Op() == ir.ODIV && n.Type().IsInteger()) {
                 tok = token.QUO_ASSIGN; // integer division
             }
-
             return OrigConst(n, constant.BinaryOp(nl.Val(), tok, rval));
-
         }
     else if (n.Op() == ir.OOROR || n.Op() == ir.OANDAND) 
         n = n._<ptr<ir.LogicalExpr>>();
@@ -489,9 +462,7 @@ public static ir.Node EvalConst(ir.Node n) {
                 n.SetType(null);
                 break;
             }
-
             return OrigConst(n, constant.Shift(toint(nl.Val()), tokenForOp[n.Op()], uint(s)));
-
         }
     else if (n.Op() == ir.OCONV || n.Op() == ir.ORUNESTR) 
         n = n._<ptr<ir.ConvExpr>>();
@@ -506,7 +477,6 @@ public static ir.Node EvalConst(ir.Node n) {
             // set so n.Orig gets OCONV instead of OCONVNOP
             n.SetOp(ir.OCONV);
             return OrigConst(n, nl.Val());
-
         }
     else if (n.Op() == ir.OADDSTR) 
         // Merge adjacent constants in the argument list.
@@ -520,9 +490,7 @@ public static ir.Node EvalConst(ir.Node n) {
                 if (i == 0 || !ir.IsConst(s[i - 1], constant.String) || !ir.IsConst(s[i], constant.String)) { 
                     // Can't merge s[i] into s[i-1]; need a slot in the list.
                     need++;
-
                 }
-
             }
 
 
@@ -559,11 +527,9 @@ public static ir.Node EvalConst(ir.Node n) {
                     nl.List = s[(int)i..(int)i2];
                     newList = append(newList, OrigConst(nl, constant.MakeString(strings.Join(strs, ""))));
                     i = i2 - 1;
-
                 } {
                     newList = append(newList, s[i]);
                 }
-
             }
 
 
@@ -608,7 +574,6 @@ public static ir.Node EvalConst(ir.Node n) {
             return OrigConst(n, makeComplex(nl.Val(), nr.Val()));
         }
         return n;
-
 }
 
 private static constant.Value makeFloat64(double f) {
@@ -616,7 +581,6 @@ private static constant.Value makeFloat64(double f) {
         @base.Fatalf("infinity is not a valid constant");
     }
     return constant.MakeFloat64(f);
-
 }
 
 private static constant.Value makeComplex(constant.Value real, constant.Value imag) {
@@ -660,7 +624,6 @@ public static ir.Node OrigConst(ir.Node n, constant.Value v) {
     __switch_break1:;
 
     return ir.NewConstExpr(v, n);
-
 }
 
 public static ir.Node OrigBool(ir.Node n, bool v) {
@@ -711,7 +674,6 @@ private static (ir.Node, ir.Node) defaultlit2(ir.Node l, ir.Node r, bool force) 
     l = convlit(l, _addr_t);
     r = convlit(r, _addr_t);
     return (l, r);
-
 }
 
 private static ptr<types.Type> mixUntyped(ptr<types.Type> _addr_t1, ptr<types.Type> _addr_t2) => func((_, panic, _) => {
@@ -733,14 +695,12 @@ private static ptr<types.Type> mixUntyped(ptr<types.Type> _addr_t1, ptr<types.Ty
             return _addr_3!;
                 @base.Fatalf("bad type %v", t);
         panic("unreachable");
-
     };
 
     if (rank(t2) > rank(t1)) {
         return _addr_t2!;
     }
     return _addr_t1!;
-
 });
 
 private static ptr<types.Type> defaultType(ptr<types.Type> _addr_t) {
@@ -764,7 +724,6 @@ private static ptr<types.Type> defaultType(ptr<types.Type> _addr_t) {
         return _addr_types.Types[types.TCOMPLEX128]!;
         @base.Fatalf("bad type %v", t);
     return _addr_null!;
-
 }
 
 // IndexConst checks if Node n contains a constant expression
@@ -787,7 +746,6 @@ public static long IndexConst(ir.Node n) {
         return -2;
     }
     return ir.IntVal(types.Types[types.TINT], v);
-
 }
 
 // anyCallOrChan reports whether n contains any calls or channel operations.
@@ -797,9 +755,7 @@ private static bool anyCallOrChan(ir.Node n) {
         if (n.Op() == ir.OAPPEND || n.Op() == ir.OCALL || n.Op() == ir.OCALLFUNC || n.Op() == ir.OCALLINTER || n.Op() == ir.OCALLMETH || n.Op() == ir.OCAP || n.Op() == ir.OCLOSE || n.Op() == ir.OCOMPLEX || n.Op() == ir.OCOPY || n.Op() == ir.ODELETE || n.Op() == ir.OIMAG || n.Op() == ir.OLEN || n.Op() == ir.OMAKE || n.Op() == ir.ONEW || n.Op() == ir.OPANIC || n.Op() == ir.OPRINT || n.Op() == ir.OPRINTN || n.Op() == ir.OREAL || n.Op() == ir.ORECOVER || n.Op() == ir.ORECV || n.Op() == ir.OUNSAFEADD || n.Op() == ir.OUNSAFESLICE) 
             return true;
                 return false;
-
     });
-
 }
 
 // A constSet represents a set of Go constant expressions.
@@ -838,7 +794,6 @@ private static void add(this ptr<constSet> _addr_s, src.XPos pos, ir.Node n, @st
 
     }
 
-
     if (!ir.IsConstNode(n) || n.Type() == null) {
         return ;
     }
@@ -870,7 +825,6 @@ private static void add(this ptr<constSet> _addr_s, src.XPos pos, ir.Node n, @st
             s.m[k] = pos;
         }
     }
-
 }
 
 // nodeAndVal reports both an expression and its constant value, if
@@ -887,9 +841,7 @@ private static @string nodeAndVal(ir.Node n) {
             show += " (value " + s + ")";
         }
     }
-
     return show;
-
 }
 
 // evalunsafe evaluates a package unsafe operation and returns the result.
@@ -958,7 +910,6 @@ private static long evalunsafe(ir.Node n) {
                         return 0;
                 r = next;
                     }
-
                     fallthrough = true;
                 }
                 if (fallthrough || r.Op() == ir.ODOT)
@@ -973,7 +924,6 @@ private static long evalunsafe(ir.Node n) {
                     @base.Fatalf("impossible %v node after dot insertion", r.Op());
 
                 __switch_break2:;
-
             }
 
 
@@ -982,7 +932,6 @@ private static long evalunsafe(ir.Node n) {
         return v;
         @base.Fatalf("unexpected op %v", n.Op());
     return 0;
-
 }
 
 } // end typecheck_package

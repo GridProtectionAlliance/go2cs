@@ -14,24 +14,24 @@
 
 // Package symbolz symbolizes a profile using the output from the symbolz
 // service.
-// package symbolz -- go2cs converted at 2022 March 06 23:23:50 UTC
+
+// package symbolz -- go2cs converted at 2022 March 13 06:36:56 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/symbolz" ==> using symbolz = go.cmd.vendor.github.com.google.pprof.@internal.symbolz_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\symbolz\symbolz.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using url = go.net.url_package;
-using path = go.path_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using url = net.url_package;
+using path = path_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using profile = github.com.google.pprof.profile_package;
+using System;
 
 public static partial class symbolz_package {
 
@@ -50,7 +50,6 @@ public static error Symbolize(ptr<profile.Profile> _addr_p, bool force, plugin.M
         if (!force && m.HasFunctions) { 
             // Only check for HasFunctions as symbolz only populates function names.
             continue;
-
         }
         if (m.Unsymbolizable()) {
             continue;
@@ -72,17 +71,13 @@ public static error Symbolize(ptr<profile.Profile> _addr_p, bool force, plugin.M
                         }
 
                     }
-
                     m.HasFunctions = true;
                     break;
-
                 }
 
             }
-
         }
     }    return error.As(null!)!;
-
 }
 
 // hasGperftoolsSuffix checks whether path ends with one of the suffixes listed in
@@ -94,7 +89,6 @@ private static bool hasGperftoolsSuffix(@string path) {
             return true;
         }
     }    return false;
-
 }
 
 // symbolz returns the corresponding symbolz source for a profile URL.
@@ -111,16 +105,12 @@ private static @string symbolz(@string source) {
  {
                 url.Path = "/symbolz";
             }
-
             url.RawQuery = "";
             return url.String();
-
         }
     }
 
-
     return "";
-
 }
 
 // symbolizeMapping symbolizes locations belonging to a Mapping by querying
@@ -143,11 +133,8 @@ private static error symbolizeMapping(@string source, long offset, Func<@string,
                 if (overflow) {
                     return error.As(fmt.Errorf("cannot adjust address %d by %d, it would overflow (mapping %v)", l.Address, offset, l.Mapping))!;
                 }
-
                 a = append(a, fmt.Sprintf("%#x", addr));
-
             }
-
         }
         l = l__prev1;
     }
@@ -155,7 +142,6 @@ private static error symbolizeMapping(@string source, long offset, Func<@string,
     if (len(a) == 0) { 
         // No addresses to symbolize.
         return error.As(null!)!;
-
     }
     var lines = make_map<ulong, profile.Line>();
     var functions = make_map<@string, ptr<profile.Function>>();
@@ -187,7 +173,6 @@ private static error symbolizeMapping(@string source, long offset, Func<@string,
                 if (overflow) {
                     return error.As(fmt.Errorf("cannot adjust symbolz address %d by %d, it would overflow", origAddr, -offset))!;
                 }
-
                 var name = symbol[2];
                 var fn = functions[name];
                 if (fn == null) {
@@ -195,13 +180,10 @@ private static error symbolizeMapping(@string source, long offset, Func<@string,
                     functions[name] = fn;
                     p.Function = append(p.Function, fn);
                 }
-
                 lines[addr] = new profile.Line(Function:fn);
-
             }
 
         }
-
     }
 
     {
@@ -220,13 +202,11 @@ private static error symbolizeMapping(@string source, long offset, Func<@string,
                 }
 
             }
-
         }
         l = l__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 // adjust shifts the specified address by the signed offset. It returns the
@@ -249,7 +229,6 @@ private static (ulong, bool) adjust(ulong addr, long offset) {
         }
     }
     return (adj, false);
-
 }
 
 } // end symbolz_package

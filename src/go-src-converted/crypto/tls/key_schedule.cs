@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:21:04 UTC
+// package tls -- go2cs converted at 2022 March 13 05:36:11 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\key_schedule.go
-using elliptic = go.crypto.elliptic_package;
-using hmac = go.crypto.hmac_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using big = go.math.big_package;
-
-using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
-using curve25519 = go.golang.org.x.crypto.curve25519_package;
-using hkdf = go.golang.org.x.crypto.hkdf_package;
-using System;
-
-
 namespace go.crypto;
 
-public static partial class tls_package {
+using elliptic = crypto.elliptic_package;
+using hmac = crypto.hmac_package;
+using errors = errors_package;
+using hash = hash_package;
+using io = io_package;
+using big = math.big_package;
 
-    // This file contains the functions necessary to compute the TLS 1.3 key
-    // schedule. See RFC 8446, Section 7.
+using cryptobyte = golang.org.x.crypto.cryptobyte_package;
+using curve25519 = golang.org.x.crypto.curve25519_package;
+using hkdf = golang.org.x.crypto.hkdf_package;
+
+
+// This file contains the functions necessary to compute the TLS 1.3 key
+// schedule. See RFC 8446, Section 7.
+
+
+using System;public static partial class tls_package {
+
 private static readonly @string resumptionBinderLabel = "res binder";
 private static readonly @string clientHandshakeTrafficLabel = "c hs traffic";
 private static readonly @string serverHandshakeTrafficLabel = "s hs traffic";
@@ -32,7 +33,6 @@ private static readonly @string serverApplicationTrafficLabel = "s ap traffic";
 private static readonly @string exporterLabel = "exp master";
 private static readonly @string resumptionLabel = "res master";
 private static readonly @string trafficUpdateLabel = "traffic upd";
-
 
 // expandLabel implements HKDF-Expand-Label from RFC 8446, Section 7.1.
 private static slice<byte> expandLabel(this ptr<cipherSuiteTLS13> _addr_c, slice<byte> secret, @string label, slice<byte> context, nint length) => func((_, panic, _) => {
@@ -53,7 +53,6 @@ private static slice<byte> expandLabel(this ptr<cipherSuiteTLS13> _addr_c, slice
         panic("tls: HKDF-Expand-Label invocation failed unexpectedly");
     }
     return out;
-
 });
 
 // deriveSecret implements Derive-Secret from RFC 8446, Section 7.1.
@@ -64,7 +63,6 @@ private static slice<byte> deriveSecret(this ptr<cipherSuiteTLS13> _addr_c, slic
         transcript = c.hash.New();
     }
     return c.expandLabel(secret, label, transcript.Sum(null), c.hash.Size());
-
 }
 
 // extract implements HKDF-Extract with the cipher suite hash.
@@ -75,7 +73,6 @@ private static slice<byte> extract(this ptr<cipherSuiteTLS13> _addr_c, slice<byt
         newSecret = make_slice<byte>(c.hash.Size());
     }
     return hkdf.Extract(c.hash.New, newSecret, currentSecret);
-
 }
 
 // nextTrafficSecret generates the next traffic secret, given the current one,
@@ -145,13 +142,11 @@ private static (ecdheParameters, error) generateECDHEParameters(io.Reader rand, 
             }
 
         }
-
         var (publicKey, err) = curve25519.X25519(privateKey, curve25519.Basepoint);
         if (err != null) {
             return (null, error.As(err)!);
         }
         return (addr(new x25519Parameters(privateKey:privateKey,publicKey:publicKey)), error.As(null!)!);
-
     }
     var (curve, ok) = curveForCurveID(curveID);
     if (!ok) {
@@ -164,7 +159,6 @@ private static (ecdheParameters, error) generateECDHEParameters(io.Reader rand, 
         return (null, error.As(err)!);
     }
     return (p, error.As(null!)!);
-
 }
 
 private static (elliptic.Curve, bool) curveForCurveID(CurveID id) {
@@ -180,8 +174,7 @@ private static (elliptic.Curve, bool) curveForCurveID(CurveID id) {
         return (elliptic.P521(), true);
     else 
         return (null, false);
-    
-}
+    }
 
 private partial struct nistParameters {
     public slice<byte> privateKey;
@@ -215,7 +208,6 @@ private static slice<byte> SharedKey(this ptr<nistParameters> _addr_p, slice<byt
     var (xShared, _) = curve.ScalarMult(x, y, p.privateKey);
     var sharedKey = make_slice<byte>((curve.Params().BitSize + 7) / 8);
     return xShared.FillBytes(sharedKey);
-
 }
 
 private partial struct x25519Parameters {
@@ -243,7 +235,6 @@ private static slice<byte> SharedKey(this ptr<x25519Parameters> _addr_p, slice<b
         return null;
     }
     return sharedKey;
-
 }
 
 } // end tls_package

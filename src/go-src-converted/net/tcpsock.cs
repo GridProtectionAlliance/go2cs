@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:44 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:09 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\tcpsock.go
-using context = go.context_package;
-using itoa = go.@internal.itoa_package;
-using io = go.io_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go;
+
+using context = context_package;
+using itoa = @internal.itoa_package;
+using io = io_package;
+using os = os_package;
+using syscall = syscall_package;
+using time = time_package;
+
+
+// BUG(mikio): On JS and Windows, the File method of TCPConn and
+// TCPListener is not implemented.
+
+// TCPAddr represents the address of a TCP end point.
 
 public static partial class net_package {
 
-    // BUG(mikio): On JS and Windows, the File method of TCPConn and
-    // TCPListener is not implemented.
-
-    // TCPAddr represents the address of a TCP end point.
 public partial struct TCPAddr {
     public IP IP;
     public nint Port;
@@ -44,7 +46,6 @@ private static @string String(this ptr<TCPAddr> _addr_a) {
         return JoinHostPort(ip + "%" + a.Zone, itoa.Itoa(a.Port));
     }
     return JoinHostPort(ip, itoa.Itoa(a.Port));
-
 }
 
 private static bool isWildcard(this ptr<TCPAddr> _addr_a) {
@@ -54,7 +55,6 @@ private static bool isWildcard(this ptr<TCPAddr> _addr_a) {
         return true;
     }
     return a.IP.IsUnspecified();
-
 }
 
 private static Addr opAddr(this ptr<TCPAddr> _addr_a) {
@@ -64,7 +64,6 @@ private static Addr opAddr(this ptr<TCPAddr> _addr_a) {
         return null;
     }
     return a;
-
 }
 
 // ResolveTCPAddr returns an address of TCP end point.
@@ -106,7 +105,6 @@ public static (ptr<TCPAddr>, error) ResolveTCPAddr(@string network, @string addr
         return (_addr_null!, error.As(err)!);
     }
     return (addrs.forResolve(network, address)._<ptr<TCPAddr>>(), error.As(null!)!);
-
 }
 
 // TCPConn is an implementation of the Conn interface for TCP network
@@ -126,7 +124,6 @@ private static (syscall.RawConn, error) SyscallConn(this ptr<TCPConn> _addr_c) {
         return (null, error.As(syscall.EINVAL)!);
     }
     return newRawConn(c.fd);
-
 }
 
 // ReadFrom implements the io.ReaderFrom ReadFrom method.
@@ -143,7 +140,6 @@ private static (long, error) ReadFrom(this ptr<TCPConn> _addr_c, io.Reader r) {
         err = addr(new OpError(Op:"readfrom",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // CloseRead shuts down the reading side of the TCP connection.
@@ -161,9 +157,7 @@ private static error CloseRead(this ptr<TCPConn> _addr_c) {
             return error.As(addr(new OpError(Op:"close",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // CloseWrite shuts down the writing side of the TCP connection.
@@ -181,9 +175,7 @@ private static error CloseWrite(this ptr<TCPConn> _addr_c) {
             return error.As(addr(new OpError(Op:"close",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetLinger sets the behavior of Close on a connection which still
@@ -211,9 +203,7 @@ private static error SetLinger(this ptr<TCPConn> _addr_c, nint sec) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetKeepAlive sets whether the operating system should send
@@ -231,9 +221,7 @@ private static error SetKeepAlive(this ptr<TCPConn> _addr_c, bool keepalive) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetKeepAlivePeriod sets period between keep-alives.
@@ -250,9 +238,7 @@ private static error SetKeepAlivePeriod(this ptr<TCPConn> _addr_c, time.Duration
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetNoDelay controls whether the operating system should delay
@@ -272,9 +258,7 @@ private static error SetNoDelay(this ptr<TCPConn> _addr_c, bool noDelay) {
             return error.As(addr(new OpError(Op:"set",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 private static ptr<TCPConn> newTCPConn(ptr<netFD> _addr_fd) {
@@ -319,7 +303,6 @@ public static (ptr<TCPConn>, error) DialTCP(@string network, ptr<TCPAddr> _addr_
         return (_addr_null!, error.As(addr(new OpError(Op:"dial",Net:network,Source:laddr.opAddr(),Addr:raddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // TCPListener is a TCP network listener. Clients should typically
@@ -343,7 +326,6 @@ private static (syscall.RawConn, error) SyscallConn(this ptr<TCPListener> _addr_
         return (null, error.As(syscall.EINVAL)!);
     }
     return newRawListener(l.fd);
-
 }
 
 // AcceptTCP accepts the next incoming call and returns the new
@@ -361,7 +343,6 @@ private static (ptr<TCPConn>, error) AcceptTCP(this ptr<TCPListener> _addr_l) {
         return (_addr_null!, error.As(addr(new OpError(Op:"accept",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // Accept implements the Accept method in the Listener interface; it
@@ -379,7 +360,6 @@ private static (Conn, error) Accept(this ptr<TCPListener> _addr_l) {
         return (null, error.As(addr(new OpError(Op:"accept",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!);
     }
     return (c, error.As(null!)!);
-
 }
 
 // Close stops listening on the TCP address.
@@ -397,9 +377,7 @@ private static error Close(this ptr<TCPListener> _addr_l) {
             return error.As(addr(new OpError(Op:"close",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Addr returns the listener's network address, a *TCPAddr.
@@ -426,9 +404,7 @@ private static error SetDeadline(this ptr<TCPListener> _addr_l, time.Time t) {
             return error.As(addr(new OpError(Op:"set",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // File returns a copy of the underlying os.File.
@@ -451,7 +427,6 @@ private static (ptr<os.File>, error) File(this ptr<TCPListener> _addr_l) {
         return (_addr_null!, error.As(addr(new OpError(Op:"file",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!);
     }
     return ;
-
 }
 
 // ListenTCP acts like Listen for TCP networks.
@@ -489,7 +464,6 @@ public static (ptr<TCPListener>, error) ListenTCP(@string network, ptr<TCPAddr> 
         return (_addr_null!, error.As(addr(new OpError(Op:"listen",Net:network,Source:nil,Addr:laddr.opAddr(),Err:err))!)!);
     }
     return (_addr_ln!, error.As(null!)!);
-
 }
 
 // roundDurationUp rounds d to the next multiple of to.

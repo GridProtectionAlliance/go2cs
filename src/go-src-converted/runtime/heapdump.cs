@@ -9,19 +9,20 @@
 // The format of the dumped file is described at
 // https://golang.org/s/go15heapdump.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:44 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:31 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\heapdump.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+//go:linkname runtime_debug_WriteHeapDump runtime/debug.WriteHeapDump
+
+using System;
 public static partial class runtime_package {
 
-    //go:linkname runtime_debug_WriteHeapDump runtime/debug.WriteHeapDump
 private static void runtime_debug_WriteHeapDump(System.UIntPtr fd) {
     stopTheWorld("write heap dump"); 
 
@@ -38,11 +39,9 @@ private static void runtime_debug_WriteHeapDump(System.UIntPtr fd) {
         // otherwise.
         readmemstats_m(_addr_m);
         writeheapdump_m(fd, _addr_m);
-
     });
 
     startTheWorld();
-
 }
 
 private static readonly nint fieldKindEol = 0;
@@ -68,13 +67,11 @@ private static readonly nint tagPanic = 15;
 private static readonly nint tagMemProf = 16;
 private static readonly nint tagAllocSample = 17;
 
-
 private static System.UIntPtr dumpfd = default; // fd to write the dump to.
 private static slice<byte> tmpbuf = default;
 
 // buffer of pending write data
 private static readonly nint bufSize = 4096;
-
 
 private static array<byte> buf = new array<byte>(bufSize);
 private static System.UIntPtr nbuf = default;
@@ -117,7 +114,6 @@ private static void flush() {
 // serializing a type more than once. That's ok.
 private static readonly nint typeCacheBuckets = 256;
 private static readonly nint typeCacheAssoc = 4;
-
 
 private partial struct typeCacheBucket {
     public array<ptr<_type>> t;
@@ -193,7 +189,6 @@ private static void dumptype(ptr<_type> _addr_t) {
             }
             b.t[0] = t;
             return ;
-
         }
     } 
 
@@ -232,9 +227,7 @@ private static void dumptype(ptr<_type> _addr_t) {
             dwrite(name.str, uintptr(name.len));
         }
     }
-
     dumpbool(t.kind & kindDirectIface == 0 || t.ptrdata != 0);
-
 }
 
 // dump an object
@@ -282,7 +275,6 @@ private static void dumpbv(ptr<bitvector> _addr_cbv, System.UIntPtr offset) {
             dumpint(uint64(offset + i * sys.PtrSize));
         }
     }
-
 }
 
 private static bool dumpframe(ptr<stkframe> _addr_s, unsafe.Pointer arg) {
@@ -303,7 +295,6 @@ private static bool dumpframe(ptr<stkframe> _addr_s, unsafe.Pointer arg) {
         // stackmap for this function. It is likely that we are looking
         // at the function prologue, assume so and hope for the best.
         pcdata = 0;
-
     }
     var stkmap = (stackmap.val)(funcdata(f, _FUNCDATA_LocalsPointerMaps));
 
@@ -350,7 +341,6 @@ private static bool dumpframe(ptr<stkframe> _addr_s, unsafe.Pointer arg) {
 
             off = off__prev1;
         }
-
     }
     if (stkmap == null) { 
         // No locals information, dump everything.
@@ -368,7 +358,6 @@ private static bool dumpframe(ptr<stkframe> _addr_s, unsafe.Pointer arg) {
 
             off = off__prev1;
         }
-
     }
     else if (stkmap.n < 0) { 
         // Locals size information, dump just the locals.
@@ -387,13 +376,11 @@ private static bool dumpframe(ptr<stkframe> _addr_s, unsafe.Pointer arg) {
 
             off = off__prev1;
         }
-
     }
     else if (stkmap.n > 0) { 
         // Locals bitmap information, scan just the pointers in
         // locals.
         dumpbv(_addr_bv, s.varp - uintptr(bv.n) * sys.PtrSize - s.sp);
-
     }
     dumpint(fieldKindEol); 
 
@@ -411,7 +398,6 @@ private static bool dumpframe(ptr<stkframe> _addr_s, unsafe.Pointer arg) {
         child.args.n = -1;
     }
     return true;
-
 }
 
 private static void dumpgoroutine(ptr<g> _addr_gp) {
@@ -473,9 +459,7 @@ private static void dumpgoroutine(ptr<g> _addr_gp) {
  {
                 dumpint(uint64(uintptr(@unsafe.Pointer(d.fn.fn))));
             }
-
             dumpint(uint64(uintptr(@unsafe.Pointer(d.link))));
-
         }
     }
     {
@@ -493,7 +477,6 @@ private static void dumpgoroutine(ptr<g> _addr_gp) {
             p = p.link;
         }
     }
-
 }
 
 private static void dumpgs() {
@@ -508,9 +491,7 @@ private static void dumpgs() {
         else 
             print("runtime: unexpected G.status ", hex(status), "\n");
             throw("dumpgs in STW - bad status");
-        
-    });
-
+            });
 }
 
 private static void finq_callback(ptr<funcval> _addr_fn, unsafe.Pointer obj, System.UIntPtr nret, ptr<_type> _addr_fint, ptr<ptrtype> _addr_ot) {
@@ -555,18 +536,14 @@ private static void dumproots() {
                         continue;
                     sp = sp.next;
                     }
-
                     var spf = (specialfinalizer.val)(@unsafe.Pointer(sp));
                     var p = @unsafe.Pointer(s.@base() + uintptr(spf.special.offset));
                     dumpfinalizer(p, _addr_spf.fn, _addr_spf.fint, _addr_spf.ot);
-
                 }
 
             }
-
         }
     }    iterate_finq(finq_callback);
-
 }
 
 // Bit vector of free marks.
@@ -602,13 +579,10 @@ private static void dumpobjs() {
                     continue;
                 (j, p) = (j + 1, p + size);
                 }
-
                 dumpobj(@unsafe.Pointer(p), size, makeheapobjbv(p, size));
-
             }
 
         }
-
     }
 }
 
@@ -646,7 +620,6 @@ private static void dumpparams() {
     dumpstr(sys.GOARCH);
     dumpstr(buildVersion);
     dumpint(uint64(ncpu));
-
 }
 
 private static void itab_callback(ptr<itab> _addr_tab) {
@@ -675,7 +648,6 @@ private static void dumpms() {
             mp = mp.alllink;
         }
     }
-
 }
 
 //go:systemstack
@@ -716,7 +688,6 @@ private static void dumpmemstats(ptr<MemStats> _addr_m) {
         dumpint(m.PauseNs[i]);
     }
     dumpint(uint64(m.NumGC));
-
 }
 
 private static void dumpmemprof_callback(ptr<bucket> _addr_b, System.UIntPtr nstk, ptr<System.UIntPtr> _addr_pstk, System.UIntPtr size, System.UIntPtr allocs, System.UIntPtr frees) {
@@ -758,7 +729,6 @@ private static void dumpmemprof_callback(ptr<bucket> _addr_b, System.UIntPtr nst
             dumpslice(buf[(int)n..]);
             dumpstr("?");
             dumpint(0);
-
         } {
             dumpstr(funcname(f));
             if (i > 0 && pc > f.entry) {
@@ -771,7 +741,6 @@ private static void dumpmemprof_callback(ptr<bucket> _addr_b, System.UIntPtr nst
     }
     dumpint(uint64(allocs));
     dumpint(uint64(frees));
-
 }
 
 private static void dumpmemprof() { 
@@ -791,17 +760,14 @@ private static void dumpmemprof() {
                     continue;
                 sp = sp.next;
                 }
-
                 var spp = (specialprofile.val)(@unsafe.Pointer(sp));
                 var p = s.@base() + uintptr(spp.special.offset);
                 dumpint(tagAllocSample);
                 dumpint(uint64(p));
                 dumpint(uint64(uintptr(@unsafe.Pointer(spp.b))));
-
             }
 
         }
-
     }
 }
 
@@ -829,7 +795,6 @@ private static void mdump(ptr<MemStats> _addr_m) {
     dumpmemprof();
     dumpint(tagEOF);
     flush();
-
 }
 
 private static void writeheapdump_m(System.UIntPtr fd, ptr<MemStats> _addr_m) {
@@ -859,7 +824,6 @@ private static void writeheapdump_m(System.UIntPtr fd, ptr<MemStats> _addr_m) {
         tmpbuf = null;
     }
     casgstatus(_g_.m.curg, _Gwaiting, _Grunning);
-
 }
 
 // dumpint() the kind & offset of each field in an object.
@@ -881,7 +845,6 @@ private static bitvector makeheapobjbv(System.UIntPtr p, System.UIntPtr size) {
             throw("heapdump: out of memory");
         }
         tmpbuf = new ptr<ptr<array<byte>>>(p)[..(int)n];
-
     }
     {
         var i__prev1 = i;
@@ -903,10 +866,8 @@ private static bitvector makeheapobjbv(System.UIntPtr p, System.UIntPtr size) {
             tmpbuf[i / 8] |= 1 << (int)((i % 8));
         }
         hbits = hbits.next();
-
     }
     return new bitvector(int32(i),&tmpbuf[0]);
-
 }
 
 } // end runtime_package

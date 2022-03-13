@@ -3,14 +3,15 @@
 // license that can be found in the LICENSE file.
 
 // Package doc implements the ``go doc'' command.
-// package doc -- go2cs converted at 2022 March 06 23:15:59 UTC
+
+// package doc -- go2cs converted at 2022 March 13 06:29:27 UTC
 // import "cmd/go/internal/doc" ==> using doc = go.cmd.go.@internal.doc_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\doc\doc.go
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using context = go.context_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using context = context_package;
 
 public static partial class doc_package {
 

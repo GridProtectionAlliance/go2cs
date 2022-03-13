@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:08 UTC
+//     Generated on 2022 March 13 05:40:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class time_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct runtimeTimer
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace go
             public static implicit operator runtimeTimer(NilType nil) => default(runtimeTimer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static runtimeTimer runtimeTimer_cast(dynamic value)
         {
             return new runtimeTimer(value.pp, value.when, value.period, value.f, value.seq, value.nextwhen, value.status);

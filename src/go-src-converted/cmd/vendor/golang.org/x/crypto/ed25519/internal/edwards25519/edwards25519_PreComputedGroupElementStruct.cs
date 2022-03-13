@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:25:56 UTC
+//     Generated on 2022 March 13 06:40:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace @internal
 {
     public static partial class edwards25519_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PreComputedGroupElement
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace @internal
             public static implicit operator PreComputedGroupElement(NilType nil) => default(PreComputedGroupElement);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static PreComputedGroupElement PreComputedGroupElement_cast(dynamic value)
         {
             return new PreComputedGroupElement(value.yPlusX, value.yMinusX, value.xy2d);

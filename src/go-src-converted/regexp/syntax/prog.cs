@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 22:23:37 UTC
+// package syntax -- go2cs converted at 2022 March 13 05:38:03 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Program Files\Go\src\regexp\syntax\prog.go
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
 namespace go.regexp;
+
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// Compiled program.
+// May not belong in this package, but convenient for now.
+
+// A Prog is a compiled regular expression program.
 
 public static partial class syntax_package {
 
-    // Compiled program.
-    // May not belong in this package, but convenient for now.
-
-    // A Prog is a compiled regular expression program.
 public partial struct Prog {
     public slice<Inst> Inst;
     public nint Start; // index of start instruction
@@ -39,7 +41,6 @@ public static readonly var InstRune1 = 7;
 public static readonly var InstRuneAny = 8;
 public static readonly var InstRuneAnyNotNL = 9;
 
-
 private static @string instOpNames = new slice<@string>(new @string[] { "InstAlt", "InstAltMatch", "InstCapture", "InstEmptyWidth", "InstMatch", "InstFail", "InstNop", "InstRune", "InstRune1", "InstRuneAny", "InstRuneAnyNotNL" });
 
 public static @string String(this InstOp i) {
@@ -47,7 +48,6 @@ public static @string String(this InstOp i) {
         return "";
     }
     return instOpNames[i];
-
 }
 
 // An EmptyOp specifies a kind or mixture of zero-width assertions.
@@ -60,7 +60,6 @@ public static readonly var EmptyBeginText = 1;
 public static readonly var EmptyEndText = 2;
 public static readonly var EmptyWordBoundary = 3;
 public static readonly var EmptyNoWordBoundary = 4;
-
 
 // EmptyOpContext returns the zero-width assertions
 // satisfied at the position between the runes r1 and r2.
@@ -87,10 +86,8 @@ public static EmptyOp EmptyOpContext(int r1, int r2) {
         op |= EmptyEndText | EmptyEndLine;
         if (boundary != 0) { // IsWordChar(r1) != IsWordChar(r2)
         op ^= (EmptyWordBoundary | EmptyNoWordBoundary);
-
     }
     return op;
-
 }
 
 // IsWordChar reports whether r is consider a ``word character''
@@ -136,7 +133,6 @@ private static InstOp op(this ptr<Inst> _addr_i) {
     if (op == InstRune1 || op == InstRuneAny || op == InstRuneAnyNotNL) 
         op = InstRune;
         return op;
-
 }
 
 // Prefix returns a literal string that all matches for the
@@ -159,7 +155,6 @@ private static (@string, bool) Prefix(this ptr<Prog> _addr_p) {
         i = p.skipNop(i.Out);
     }
     return (buf.String(), i.Op == InstMatch);
-
 }
 
 // StartCond returns the leading empty-width conditions that must
@@ -182,10 +177,8 @@ Loop:
             break;
                 pc = i.Out;
         i = _addr_p.Inst[pc];
-
     }
     return flag;
-
 }
 
 private static readonly nint noMatch = -1;
@@ -231,21 +224,17 @@ private static nint MatchRunePos(this ptr<Inst> _addr_i, int r) {
                             return 0;
                         r1 = unicode.SimpleFold(r1);
                         }
-
                     }
 
                 }
-
             }
             return noMatch;
-
             break;
         case 2: 
             if (r >= rune[0] && r <= rune[1]) {
                 return 0;
             }
             return noMatch;
-
             break;
         case 4: 
             // Linear search for a few pairs.
@@ -266,16 +255,13 @@ private static nint MatchRunePos(this ptr<Inst> _addr_i, int r) {
                         return noMatch;
                     j += 2;
                     }
-
                     if (r <= rune[j + 1]) {
                         return j / 2;
                     }
-
                 }
 
             }
             return noMatch;
-
             break;
     } 
 
@@ -299,10 +285,8 @@ private static nint MatchRunePos(this ptr<Inst> _addr_i, int r) {
             }
 
         }
-
     }
     return noMatch;
-
 }
 
 // MatchEmptyWidth reports whether the instruction matches
@@ -325,7 +309,6 @@ private static bool MatchEmptyWidth(this ptr<Inst> _addr_i, int before, int afte
     else if (EmptyOp(i.Arg) == EmptyNoWordBoundary) 
         return IsWordChar(before) == IsWordChar(after);
         panic("unknown empty width arg");
-
 });
 
 private static @string String(this ptr<Inst> _addr_i) {
@@ -361,7 +344,6 @@ private static void dumpProg(ptr<strings.Builder> _addr_b, ptr<Prog> _addr_p) {
         bw(_addr_b, pc, "\t");
         dumpInst(_addr_b, _addr_i);
         bw(_addr_b, "\n");
-
     }
 }
 
@@ -392,7 +374,6 @@ private static void dumpInst(ptr<strings.Builder> _addr_b, ptr<Inst> _addr_i) {
         if (i.Rune == null) { 
             // shouldn't happen
             bw(_addr_b, "rune <nil>");
-
         }
         bw(_addr_b, "rune ", strconv.QuoteToASCII(string(i.Rune)));
         if (Flags(i.Arg) & FoldCase != 0) {
@@ -405,7 +386,6 @@ private static void dumpInst(ptr<strings.Builder> _addr_b, ptr<Inst> _addr_i) {
         bw(_addr_b, "any -> ", u32(i.Out));
     else if (i.Op == InstRuneAnyNotNL) 
         bw(_addr_b, "anynotnl -> ", u32(i.Out));
-    
-}
+    }
 
 } // end syntax_package

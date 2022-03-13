@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:16:27 UTC
+//     Generated on 2022 March 13 05:30:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct netFD
         {
             // Constructors
@@ -81,7 +81,7 @@ namespace go
             public static implicit operator netFD(NilType nil) => default(netFD);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static netFD netFD_cast(dynamic value)
         {
             return new netFD(ref value.r, ref value.w, value.incoming, value.closedMu, value.closed, value.listener, value.family, value.sotype, value.net, value.laddr, value.raddr, value.pfd, value.isConnected);

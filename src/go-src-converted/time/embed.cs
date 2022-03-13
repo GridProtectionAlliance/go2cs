@@ -8,8 +8,10 @@
 //go:build timetzdata
 // +build timetzdata
 
-// package time -- go2cs converted at 2022 March 06 22:08:03 UTC
+// package time -- go2cs converted at 2022 March 13 05:23:51 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\embed.go
-using _tzdata_ = go.time.tzdata_package;
+namespace go;
+
+using _tzdata_ = time.tzdata_package;
 } // end time_package

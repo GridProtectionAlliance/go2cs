@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:59 UTC
+//     Generated on 2022 March 13 05:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2serverConn
         {
             // Constructors
@@ -176,7 +176,7 @@ namespace net
             public static implicit operator http2serverConn(NilType nil) => default(http2serverConn);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2serverConn http2serverConn_cast(dynamic value)
         {
             return new http2serverConn(ref value.srv, ref value.hs, value.conn, ref value.bw, value.handler, value.baseCtx, ref value.framer, value.doneServing, value.readFrameCh, value.wantWriteFrameCh, value.wroteFrameCh, value.bodyReadCh, value.serveMsgCh, value.flow, value.inflow, ref value.tlsState, value.remoteAddrStr, value.writeSched, value.serveG, value.pushEnabled, value.sawFirstSettings, value.needToSendSettingsAck, value.unackedSettings, value.queuedControlFrames, value.clientMaxStreams, value.advMaxStreams, value.curClientStreams, value.curPushedStreams, value.maxClientStreamID, value.maxPushPromiseID, value.streams, value.initialStreamSendWindowSize, value.maxFrameSize, value.headerTableSize, value.peerMaxHeaderListSize, value.canonHeader, value.writingFrame, value.writingFrameAsync, value.needsFrameFlush, value.inGoAway, value.inFrameScheduleLoop, value.needToSendGoAway, value.goAwayCode, ref value.shutdownTimer, ref value.idleTimer, value.headerWriteBuf, ref value.hpackEncoder, value.shutdownOnce);

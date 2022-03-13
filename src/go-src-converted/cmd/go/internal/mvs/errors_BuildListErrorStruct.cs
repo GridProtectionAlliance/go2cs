@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:00 UTC
+//     Generated on 2022 March 13 06:31:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class mvs_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct BuildListError
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator BuildListError(NilType nil) => default(BuildListError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static BuildListError BuildListError_cast(dynamic value)
         {
             return new BuildListError(value.Err, value.stack);

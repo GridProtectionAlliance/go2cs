@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package help -- go2cs converted at 2022 March 06 23:19:42 UTC
+// package help -- go2cs converted at 2022 March 13 06:32:31 UTC
 // import "cmd/go/internal/help" ==> using help = go.cmd.go.@internal.help_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\help\helpdoc.go
-using @base = go.cmd.go.@internal.@base_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
 
 public static partial class help_package {
 

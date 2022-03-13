@@ -1,28 +1,30 @@
 // Package fsys is an abstraction for reading files that
 // allows for virtual overlays on top of the files on disk.
-// package fsys -- go2cs converted at 2022 March 06 23:16:32 UTC
+
+// package fsys -- go2cs converted at 2022 March 13 06:30:02 UTC
 // import "cmd/go/internal/fsys" ==> using fsys = go.cmd.go.@internal.fsys_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\fsys\fsys.go
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using fs = io.fs_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// OverlayFile is the path to a text file in the OverlayJSON format.
+// It is the value of the -overlay flag.
+
+using System;
 public static partial class fsys_package {
 
-    // OverlayFile is the path to a text file in the OverlayJSON format.
-    // It is the value of the -overlay flag.
 public static @string OverlayFile = default;
 
 // OverlayJSON is the format overlay files are expected to be in.
@@ -78,13 +80,11 @@ private static @string canonicalize(@string path) {
             // paths that start with "\" which implies the path is relative to the
             // volume of the working directory. See golang.org/issue/8130.
             return filepath.Join(v, path);
-
         }
     } 
 
     // Make the path absolute.
     return filepath.Join(cwd, path);
-
 }
 
 // Init initializes the overlay, if one is being used.
@@ -92,7 +92,6 @@ public static error Init(@string wd) {
     if (overlay != null) { 
         // already initialized
         return error.As(null!)!;
-
     }
     cwd = wd;
 
@@ -112,9 +111,7 @@ public static error Init(@string wd) {
         }
     }
 
-
     return error.As(initFromJSON(overlayJSON))!;
-
 }
 
 private static error initFromJSON(OverlayJSON overlayJSON) { 
@@ -141,7 +138,6 @@ private static error initFromJSON(OverlayJSON overlayJSON) {
         if (to != "") { 
             // Don't canonicalize "", meaning to delete a file, because then it will turn into ".".
             to = canonicalize(to);
-
         }
         {
             var (otherFrom, seen) = reverseCanonicalized[cfrom];
@@ -151,7 +147,6 @@ private static error initFromJSON(OverlayJSON overlayJSON) {
             }
 
         }
-
         reverseCanonicalized[cfrom] = from;
         from = cfrom; 
 
@@ -176,11 +171,9 @@ private static error initFromJSON(OverlayJSON overlayJSON) {
                         return error.As(fmt.Errorf("invalid overlay: path %v is used as both file and directory", from))!;
                     }
                 }
-
             }
 
         }
-
         overlay[from] = addr(new node(actualFilePath:to)); 
 
         // Add parent directory nodes to overlay structure.
@@ -199,30 +192,21 @@ private static error initFromJSON(OverlayJSON overlayJSON) {
                 if (dirNode.isDir()) {
                     dirNode.children[base] = childNode;
                 }
-
                 break;
-
             }
-
             if (!dirNode.isDir()) { 
                 // This path already exists as a file, so it can't be a parent
                 // directory. See comment at error above.
                 return error.As(fmt.Errorf("invalid overlay: path %v is used as both file and directory", dir))!;
-
             }
-
             dirNode.children[base] = childNode;
             var parent = filepath.Dir(dir);
             if (parent == dir) {
                 break; // reached the top; there is no parent
             }
-
             (dir, base) = (parent, filepath.Base(dir));            childNode = dirNode;
-
         }
-
     }    return error.As(null!)!;
-
 }
 
 // IsDir returns true if path is a directory on disk or in the
@@ -241,7 +225,6 @@ public static (bool, error) IsDir(@string path) {
         }
     }
 
-
     {
         var (n, ok) = overlay[path];
 
@@ -250,13 +233,11 @@ public static (bool, error) IsDir(@string path) {
         }
     }
 
-
     var (fi, err) = os.Stat(path);
     if (err != null) {
         return (false, error.As(err)!);
     }
     return (fi.IsDir(), error.As(null!)!);
-
 }
 
 // parentIsOverlayFile returns whether name or any of
@@ -282,10 +263,8 @@ private static (@string, bool) parentIsOverlayFile(@string name) {
             }
             prefix = parent;
         }
-
     }
     return ("", false);
-
 }
 
 // errNotDir is used to communicate from ReadDir to IsDirWithGoFiles
@@ -314,9 +293,7 @@ private static (slice<fs.FileInfo>, error) readDir(@string dir) {
             return (null, error.As(addr(new fs.PathError(Op:"ReadDir",Path:dir,Err:errNotDir))!)!);
         }
     }
-
     return (null, error.As(err)!);
-
 }
 
 // ReadDir provides a slice of fs.FileInfo entries corresponding
@@ -333,7 +310,6 @@ public static (slice<fs.FileInfo>, error) ReadDir(@string dir) {
             return (null, error.As(addr(new fs.PathError(Op:"ReadDir",Path:dir,Err:errNotDir))!)!);
         }
     }
-
 
     var dirNode = overlay[dir];
     if (dirNode == null) {
@@ -376,8 +352,7 @@ public static (slice<fs.FileInfo>, error) ReadDir(@string dir) {
             // Add a fileinfo for the overlaid file, so that it has
             // the original file's name, but the overlaid file's metadata.
             files[name] = new fakeFile(name,f);
-        
-    }    var sortedFiles = diskfis[..(int)0];
+            }    var sortedFiles = diskfis[..(int)0];
     {
         var f__prev1 = f;
 
@@ -390,7 +365,6 @@ public static (slice<fs.FileInfo>, error) ReadDir(@string dir) {
 
     sort.Slice(sortedFiles, (i, j) => sortedFiles[i].Name() < sortedFiles[j].Name());
     return (sortedFiles, error.As(null!)!);
-
 }
 
 // OverlayPath returns the path to the overlaid contents of the
@@ -411,9 +385,7 @@ public static (@string, bool) OverlayPath(@string path) {
         }
     }
 
-
     return (path, false);
-
 }
 
 // Open opens the file at or overlaid on the given path.
@@ -442,12 +414,9 @@ public static (ptr<os.File>, error) OpenFile(@string path, nint flag, os.FileMod
             if (perm != os.FileMode(os.O_RDONLY)) {
                 return (_addr_null!, error.As(addr(new fs.PathError(Op:"OpenFile",Path:path,Err:errors.New("overlaid files can't be opened for write")))!)!);
             }
-
             return _addr_os.OpenFile(node.actualFilePath, flag, perm)!;
-
         }
     }
-
     {
         var (parent, ok) = parentIsOverlayFile(filepath.Dir(cpath));
 
@@ -456,12 +425,9 @@ public static (ptr<os.File>, error) OpenFile(@string path, nint flag, os.FileMod
             // or implicitly because one of its parent directories was
             // replaced by a file.
             return (_addr_null!, error.As(addr(new fs.PathError(Op:"Open",Path:path,Err:fmt.Errorf("file %s does not exist: parent directory %s is replaced by a file in overlay",path,parent),))!)!);
-
         }
     }
-
     return _addr_os.OpenFile(cpath, flag, perm)!;
-
 }
 
 // IsDirWithGoFiles reports whether dir is a directory containing Go files
@@ -494,7 +460,6 @@ public static (bool, error) IsDirWithGoFiles(@string dir) {
             if (!strings.HasSuffix(fi.Name(), ".go")) {
                 continue;
             }
-
             if (fi.Mode().IsRegular()) {
                 return (true, error.As(null!)!);
             } 
@@ -507,17 +472,14 @@ public static (bool, error) IsDirWithGoFiles(@string dir) {
             if (err == null && fi.Mode().IsRegular()) {
                 return (true, error.As(null!)!);
             }
-
             if (err != null && firstErr == null) {
                 firstErr = error.As(err)!;
             }
-
         }
         fi = fi__prev1;
     }
 
     return (false, error.As(firstErr)!);
-
 }
 
 // walk recursively descends path, calling walkFn. Copied, with some
@@ -537,7 +499,6 @@ private static error walk(@string path, fs.FileInfo info, filepath.WalkFunc walk
         // If walkFn returns SkipDir, it will be handled by the caller.
         // So walk should return whatever walkFn returns.
         return error.As(walkErr)!;
-
     }
     foreach (var (_, fi) in fis) {
         var filename = filepath.Join(path, fi.Name());
@@ -549,7 +510,6 @@ private static error walk(@string path, fs.FileInfo info, filepath.WalkFunc walk
             }
         }
     }    return error.As(null!)!;
-
 }
 
 // Walk walks the file tree rooted at root, calling walkFn for each file or
@@ -567,7 +527,6 @@ public static error Walk(@string root, filepath.WalkFunc walkFn) {
         return error.As(null!)!;
     }
     return error.As(err)!;
-
 }
 
 // lstat implements a version of os.Lstat that operates on the overlay filesystem.
@@ -601,12 +560,10 @@ private static (fs.FileInfo, error) overlayStat(@string path, Func<@string, (fs.
         }
     }
 
-
     var (node, ok) = overlay[cpath];
     if (!ok) { 
         // The file or directory is not overlaid.
         return osStat(path);
-
     }
 
     if (node.isDeleted()) 
@@ -619,8 +576,7 @@ private static (fs.FileInfo, error) overlayStat(@string path, Func<@string, (fs.
             return (null, error.As(err)!);
         }
         return (new fakeFile(name:filepath.Base(path),real:fi), error.As(null!)!);
-    
-}
+    }
 
 // fakeFile provides an fs.FileInfo implementation for an overlaid file,
 // so that the file has the name of the overlaid file, but takes all
@@ -713,7 +669,6 @@ public static (slice<@string>, error) Glob(@string pattern) {
             return (null, error.As(err)!);
         }
     }
-
     if (!hasMeta(pattern)) {
         _, err = Lstat(pattern);
 
@@ -721,7 +676,6 @@ public static (slice<@string>, error) Glob(@string pattern) {
             return (null, error.As(null!)!);
         }
         return (new slice<@string>(new @string[] { pattern }), error.As(null!)!);
-
     }
     var (dir, file) = filepath.Split(pattern);
     nint volumeLen = 0;
@@ -749,7 +703,6 @@ public static (slice<@string>, error) Glob(@string pattern) {
             return ;
         }
     }    return ;
-
 }
 
 // cleanGlobPath prepares path for glob matching.
@@ -765,9 +718,7 @@ private static @string cleanGlobPath(@string path) {
     }
 
 private static nint volumeNameLen(@string path) {
-    Func<byte, bool> isSlash = c => {
-        return c == '\\' || c == '/';
-    };
+    Func<byte, bool> isSlash = c => c == '\\' || c == '/';
     if (len(path) < 2) {
         return 0;
     }
@@ -794,25 +745,16 @@ private static nint volumeNameLen(@string path) {
                                 break;
                             n++;
                             }
-
                         }
 
                         return n;
-
                     }
-
                     break;
-
                 }
-
             }
-
-
         }
     }
-
     return 0;
-
 }
 
 // cleanGlobPathWindows is windows version of cleanGlobPath.
@@ -870,7 +812,6 @@ private static (slice<@string>, error) glob(@string dir, @string pattern, slice<
             m = append(m, filepath.Join(dir, n));
         }
     }    return ;
-
 }
 
 // hasMeta reports whether path contains any of the magic characters
@@ -881,7 +822,6 @@ private static bool hasMeta(@string path) {
         magicChars = "*?[\\";
     }
     return strings.ContainsAny(path, magicChars);
-
 }
 
 } // end fsys_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:25 UTC
+//     Generated on 2022 March 13 05:28:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace os
 {
     public static partial class signal_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct handler
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace os
             public static implicit operator handler(NilType nil) => default(handler);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static handler handler_cast(dynamic value)
         {
             return new handler(value.mask);

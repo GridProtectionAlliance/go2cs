@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:51 UTC
+//     Generated on 2022 March 13 05:35:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace x509
 {
     public static partial class macOS_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct OSStatus
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace x509
             public static implicit operator OSStatus(NilType nil) => default(OSStatus);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static OSStatus OSStatus_cast(dynamic value)
         {
             return new OSStatus(value.call, value.status);

@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ast -- go2cs converted at 2022 March 06 22:43:01 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:10 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\walk.go
-
-using System;
-
-
 namespace go.go;
 
+using System;
 public static partial class ast_package {
 
-    // A Visitor's Visit method is invoked for each node encountered by Walk.
-    // If the result visitor w is not nil, Walk visits each of the children
-    // of node with the visitor w, followed by a call of w.Visit(nil).
+// A Visitor's Visit method is invoked for each node encountered by Walk.
+// If the result visitor w is not nil, Walk visits each of the children
+// of node with the visitor w, followed by a call of w.Visit(nil).
 public partial interface Visitor {
     Visitor Visit(Node node);
 }
@@ -396,7 +393,6 @@ public static void Walk(Visitor v, Node node) {
     }
 
     v.Visit(null);
-
 }
 
 public delegate  bool inspector(Node);
@@ -406,7 +402,6 @@ private static Visitor Visit(this inspector f, Node node) {
         return f;
     }
     return null;
-
 }
 
 // Inspect traverses an AST in depth-first order: It starts by calling

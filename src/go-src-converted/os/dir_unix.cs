@@ -5,22 +5,23 @@
 //go:build aix || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2022 March 06 22:12:47 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:44 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\dir_unix.go
-using io = go.io_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using io = io_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
+
+
+// Auxiliary information if the File describes a directory
+
+using System;
 public static partial class os_package {
 
-    // Auxiliary information if the File describes a directory
 private partial struct dirInfo {
     public ptr<slice<byte>> buf; // buffer for directory I/O
     public nint nbuf; // length of buf; return value from Getdirentries
@@ -30,7 +31,6 @@ private partial struct dirInfo {
  
 // More than 5760 to work around https://golang.org/issue/24015.
 private static readonly nint blockSize = 8192;
-
 
 private static sync.Pool dirBufPool = new sync.Pool(New:func()interface{}{buf:=make([]byte,blockSize)return&buf},);
 
@@ -82,7 +82,6 @@ private static (slice<@string>, slice<DirEntry>, slice<FileInfo>, error) readdir
             if (d.nbuf <= 0) {
                 break; // EOF
             }
-
         }
         var buf = (d.buf.val)[(int)d.bufp..(int)d.nbuf];
         var (reclen, ok) = direntReclen(buf);
@@ -115,7 +114,6 @@ private static (slice<@string>, slice<DirEntry>, slice<FileInfo>, error) readdir
         }
         if (n > 0) { // see 'n == 0' comment above
             n--;
-
         }
         if (mode == readdirName) {
             names = append(names, string(name));
@@ -126,15 +124,11 @@ private static (slice<@string>, slice<DirEntry>, slice<FileInfo>, error) readdir
                 // File disappeared between readdir and stat.
                 // Treat as if it didn't exist.
                 continue;
-
             }
-
             if (err != null) {
                 return (null, dirents, null, error.As(err)!);
             }
-
             dirents = append(dirents, de);
-
         }
         else
  {
@@ -143,15 +137,11 @@ private static (slice<@string>, slice<DirEntry>, slice<FileInfo>, error) readdir
                 // File disappeared between readdir + stat.
                 // Treat as if it didn't exist.
                 continue;
-
             }
-
             if (err != null) {
                 return (null, null, infos, error.As(err)!);
             }
-
             infos = append(infos, info);
-
         }
     }
 
@@ -159,7 +149,6 @@ private static (slice<@string>, slice<DirEntry>, slice<FileInfo>, error) readdir
         return (null, null, null, error.As(io.EOF)!);
     }
     return (names, dirents, infos, error.As(null!)!);
-
 }
 
 // readInt returns the size-bytes unsigned integer in native byte order at offset off.
@@ -174,7 +163,6 @@ private static (ulong, bool) readInt(slice<byte> b, System.UIntPtr off, System.U
         return (readIntBE(b[(int)off..], size), true);
     }
     return (readIntLE(b[(int)off..], size), true);
-
 }
 
 private static ulong readIntBE(slice<byte> b, System.UIntPtr size) => func((_, panic, _) => {
@@ -185,23 +173,19 @@ private static ulong readIntBE(slice<byte> b, System.UIntPtr size) => func((_, p
         case 2: 
             _ = b[1]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[1]) | uint64(b[0]) << 8;
-
             break;
         case 4: 
             _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[3]) | uint64(b[2]) << 8 | uint64(b[1]) << 16 | uint64(b[0]) << 24;
-
             break;
         case 8: 
             _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[7]) | uint64(b[6]) << 8 | uint64(b[5]) << 16 | uint64(b[4]) << 24 | uint64(b[3]) << 32 | uint64(b[2]) << 40 | uint64(b[1]) << 48 | uint64(b[0]) << 56;
-
             break;
         default: 
             panic("syscall: readInt with unsupported size");
             break;
     }
-
 });
 
 private static ulong readIntLE(slice<byte> b, System.UIntPtr size) => func((_, panic, _) => {
@@ -212,23 +196,19 @@ private static ulong readIntLE(slice<byte> b, System.UIntPtr size) => func((_, p
         case 2: 
             _ = b[1]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[0]) | uint64(b[1]) << 8;
-
             break;
         case 4: 
             _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24;
-
             break;
         case 8: 
             _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
             return uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24 | uint64(b[4]) << 32 | uint64(b[5]) << 40 | uint64(b[6]) << 48 | uint64(b[7]) << 56;
-
             break;
         default: 
             panic("syscall: readInt with unsupported size");
             break;
     }
-
 });
 
 } // end os_package

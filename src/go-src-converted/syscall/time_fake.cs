@@ -5,12 +5,12 @@
 //go:build faketime
 // +build faketime
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:19 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:38 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\time_fake.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
@@ -36,7 +36,6 @@ private static nint faketimeWrite(nint fd, slice<byte> p) {
         pp = _addr_p[0];
     }
     return int(runtimeWrite(uintptr(fd), @unsafe.Pointer(pp), int32(len(p))));
-
 }
 
 } // end syscall_package

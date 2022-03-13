@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2022 March 06 22:13:24 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:54 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\exec.go
-using errors = go.errors_package;
-using testlog = go.@internal.testlog_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go;
+
+using errors = errors_package;
+using testlog = @internal.testlog_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using syscall = syscall_package;
+using time = time_package;
+
+
+// ErrProcessDone indicates a Process has finished.
 
 public static partial class os_package {
 
-    // ErrProcessDone indicates a Process has finished.
 public static var ErrProcessDone = errors.New("os: process already finished");
 
 // Process stores the information about a process created by StartProcess.

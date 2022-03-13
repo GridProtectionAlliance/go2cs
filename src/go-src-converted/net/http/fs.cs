@@ -4,48 +4,49 @@
 
 // HTTP file system request handler
 
-// package http -- go2cs converted at 2022 March 06 22:21:23 UTC
+// package http -- go2cs converted at 2022 March 13 05:36:32 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\fs.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using mime = go.mime_package;
-using multipart = go.mime.multipart_package;
-using textproto = go.net.textproto_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go.net;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using mime = mime_package;
+using multipart = mime.multipart_package;
+using textproto = net.textproto_package;
+using url = net.url_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// A Dir implements FileSystem using the native file system restricted to a
+// specific directory tree.
+//
+// While the FileSystem.Open method takes '/'-separated paths, a Dir's string
+// value is a filename on the native file system, not a URL, so it is separated
+// by filepath.Separator, which isn't necessarily '/'.
+//
+// Note that Dir could expose sensitive files and directories. Dir will follow
+// symlinks pointing out of the directory tree, which can be especially dangerous
+// if serving from a directory in which users are able to create arbitrary symlinks.
+// Dir will also allow access to files and directories starting with a period,
+// which could expose sensitive directories like .git or sensitive files like
+// .htpasswd. To exclude files with a leading period, remove the files/directories
+// from the server or create a custom FileSystem implementation.
+//
+// An empty Dir is treated as ".".
+
+using System;
+using System.Threading;
 public static partial class http_package {
 
-    // A Dir implements FileSystem using the native file system restricted to a
-    // specific directory tree.
-    //
-    // While the FileSystem.Open method takes '/'-separated paths, a Dir's string
-    // value is a filename on the native file system, not a URL, so it is separated
-    // by filepath.Separator, which isn't necessarily '/'.
-    //
-    // Note that Dir could expose sensitive files and directories. Dir will follow
-    // symlinks pointing out of the directory tree, which can be especially dangerous
-    // if serving from a directory in which users are able to create arbitrary symlinks.
-    // Dir will also allow access to files and directories starting with a period,
-    // which could expose sensitive directories like .git or sensitive files like
-    // .htpasswd. To exclude files with a leading period, remove the files/directories
-    // from the server or create a custom FileSystem implementation.
-    //
-    // An empty Dir is treated as ".".
 public partial struct Dir { // : @string
 }
 
@@ -69,7 +70,6 @@ private static error mapDirOpenError(error originalErr, @string name) {
             return error.As(fs.ErrNotExist)!;
         }
     }    return error.As(originalErr)!;
-
 }
 
 // Open implements FileSystem using os.Open, opening files for reading rooted
@@ -91,7 +91,6 @@ public static (File, error) Open(this Dir d, @string name) {
         return (null, error.As(mapDirOpenError(err, fullName))!);
     }
     return (f, error.As(null!)!);
-
 }
 
 // A FileSystem implements access to a collection of named files.
@@ -170,7 +169,6 @@ private static void dirList(ResponseWriter w, ptr<Request> _addr_r, File f) {
         }
     }
 
-
     if (err != null) {
         logf(r, "http: error reading directory: %v", err);
         Error(w, "Error reading directory", StatusInternalServerError);
@@ -188,10 +186,8 @@ private static void dirList(ResponseWriter w, ptr<Request> _addr_r, File f) {
         }
         url.URL url = new url.URL(Path:name);
         fmt.Fprintf(w, "<a href=\"%s\">%s</a>\n", url.String(), htmlReplacer.Replace(name));
-
     }
     fmt.Fprintf(w, "</pre>\n");
-
 }
 
 // ServeContent replies to the request using the content in the
@@ -232,10 +228,8 @@ public static void ServeContent(ResponseWriter w, ptr<Request> _addr_req, @strin
             return (0, errSeeker);
         }
         return (size, null);
-
     };
     serveContent(w, _addr_req, name, modtime, sizeFunc, content);
-
 }
 
 // errSeeker is returned by ServeContent's sizeFunc when the content
@@ -280,10 +274,8 @@ private static (long, error) serveContent(ResponseWriter w, ptr<Request> _addr_r
                 Error(w, "seeker can't seek", StatusInternalServerError);
                 return ;
             }
-
         }
         w.Header().Set("Content-Type", ctype);
-
     }
     else if (len(ctypes) > 0) {
         ctype = ctypes[0];
@@ -310,7 +302,6 @@ private static (long, error) serveContent(ResponseWriter w, ptr<Request> _addr_r
             // itself, so this is probably an attack, or a
             // dumb client. Ignore the range request.
             ranges = null;
-
         }
 
         if (len(ranges) == 1) 
@@ -335,7 +326,6 @@ private static (long, error) serveContent(ResponseWriter w, ptr<Request> _addr_r
                 }
 
             }
-
             sendSize = ra.length;
             code = StatusPartialContent;
             w.Header().Set("Content-Range", ra.contentRange(size));
@@ -368,7 +358,6 @@ private static (long, error) serveContent(ResponseWriter w, ptr<Request> _addr_r
                             }
 
                         }
-
                         {
                             (_, err) = io.CopyN(part, content, ra.length);
 
@@ -378,7 +367,6 @@ private static (long, error) serveContent(ResponseWriter w, ptr<Request> _addr_r
                             }
 
                         }
-
                     }
 
                     ra = ra__prev1;
@@ -386,7 +374,6 @@ private static (long, error) serveContent(ResponseWriter w, ptr<Request> _addr_r
 
                 mw.Close();
                 pw.Close();
-
             }());
                 w.Header().Set("Accept-Ranges", "bytes");
         if (w.Header().Get("Content-Encoding") == "") {
@@ -423,10 +410,8 @@ private static (@string, @string) scanETag(@string s) {
             return (s[..(int)i + 1], s[(int)i + 1..]);
         else 
             return ("", "");
-        
-    }
+            }
     return ("", "");
-
 }
 
 // etagStrongMatch reports whether a and b match using strong ETag comparison.
@@ -449,7 +434,6 @@ private partial struct condResult { // : nint
 private static readonly condResult condNone = iota;
 private static readonly var condTrue = 0;
 private static readonly var condFalse = 1;
-
 
 private static condResult checkIfMatch(ResponseWriter w, ptr<Request> _addr_r) {
     ref Request r = ref _addr_r.val;
@@ -478,11 +462,9 @@ private static condResult checkIfMatch(ResponseWriter w, ptr<Request> _addr_r) {
             return condTrue;
         }
         im = remain;
-
     }
 
     return condFalse;
-
 }
 
 private static condResult checkIfUnmodifiedSince(ptr<Request> _addr_r, time.Time modtime) {
@@ -501,7 +483,6 @@ private static condResult checkIfUnmodifiedSince(ptr<Request> _addr_r, time.Time
         return condTrue;
     }
     return condFalse;
-
 }
 
 private static condResult checkIfNoneMatch(ResponseWriter w, ptr<Request> _addr_r) {
@@ -532,10 +513,8 @@ private static condResult checkIfNoneMatch(ResponseWriter w, ptr<Request> _addr_
             return condFalse;
         }
         buf = remain;
-
     }
     return condTrue;
-
 }
 
 private static condResult checkIfModifiedSince(ptr<Request> _addr_r, time.Time modtime) {
@@ -557,7 +536,6 @@ private static condResult checkIfModifiedSince(ptr<Request> _addr_r, time.Time m
         return condFalse;
     }
     return condTrue;
-
 }
 
 private static condResult checkIfRange(ResponseWriter w, ptr<Request> _addr_r, time.Time modtime) {
@@ -591,7 +569,6 @@ private static condResult checkIfRange(ResponseWriter w, ptr<Request> _addr_r, t
         return condTrue;
     }
     return condFalse;
-
 }
 
 private static var unixEpochTime = time.Unix(0, 0);
@@ -620,7 +597,6 @@ private static void writeNotModified(ResponseWriter w) {
         delete(h, "Last-Modified");
     }
     w.WriteHeader(StatusNotModified);
-
 }
 
 // checkPreconditions evaluates request preconditions and reports whether a precondition
@@ -660,7 +636,6 @@ private static (bool, @string) checkPreconditions(ResponseWriter w, ptr<Request>
         rangeHeader = "";
     }
     return (false, rangeHeader);
-
 }
 
 // name is '/'-separated, not filepath.Separator.
@@ -740,11 +715,9 @@ private static void serveFile(ResponseWriter w, ptr<Request> _addr_r, FileSystem
         setLastModified(w, d.ModTime());
         dirList(w, _addr_r, f);
         return ;
-
     }
     Func<(long, error)> sizeFunc = () => (d.Size(), null);
     serveContent(w, _addr_r, d.Name(), d.ModTime(), sizeFunc, f);
-
 });
 
 // toHTTPError returns a non-specific HTTP error message and status code
@@ -763,7 +736,6 @@ private static (@string, nint) toHTTPError(error err) {
         return ("403 Forbidden", StatusForbidden);
     }
     return ("500 Internal Server Error", StatusInternalServerError);
-
 }
 
 // localRedirect gives a Moved Permanently response.
@@ -778,10 +750,8 @@ private static void localRedirect(ResponseWriter w, ptr<Request> _addr_r, @strin
             newPath += "?" + q;
         }
     }
-
     w.Header().Set("Location", newPath);
     w.WriteHeader(StatusMovedPermanently);
-
 }
 
 // ServeFile replies to the request with the contents of the named
@@ -816,11 +786,9 @@ public static void ServeFile(ResponseWriter w, ptr<Request> _addr_r, @string nam
         // incorrectly) used filepath.Join(myDir, r.URL.Path).
         Error(w, "invalid URL path", StatusBadRequest);
         return ;
-
     }
     var (dir, file) = filepath.Split(name);
     serveFile(w, _addr_r, Dir(dir), file, false);
-
 }
 
 private static bool containsDotDot(@string v) {
@@ -832,7 +800,6 @@ private static bool containsDotDot(@string v) {
             return true;
         }
     }    return false;
-
 }
 
 private static bool isSlashRune(int r) {
@@ -867,7 +834,6 @@ private static (File, error) Open(this ioFS f, @string name) {
         return (null, error.As(err)!);
     }
     return (new ioFile(file), error.As(null!)!);
-
 }
 
 private static error Close(this ioFile f) {
@@ -898,7 +864,6 @@ private static (long, error) Seek(this ioFile f, long offset, nint whence) {
         return (0, error.As(errMissingSeek)!);
     }
     return s.Seek(offset, whence);
-
 }
 
 private static (slice<fs.DirEntry>, error) ReadDir(this ioFile f, nint count) {
@@ -910,7 +875,6 @@ private static (slice<fs.DirEntry>, error) ReadDir(this ioFile f, nint count) {
         return (null, error.As(errMissingReadDir)!);
     }
     return d.ReadDir(count);
-
 }
 
 private static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
@@ -929,11 +893,8 @@ private static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
             if (err != null) { 
                 // Pretend it doesn't exist, like (*os.File).Readdir does.
                 continue;
-
             }
-
             list = append(list, info);
-
         }        if (err != null) {
             return (list, error.As(err)!);
         }
@@ -942,7 +903,6 @@ private static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
         }
     }
     return (list, error.As(null!)!);
-
 }
 
 // FS converts fsys to a FileSystem implementation,
@@ -981,7 +941,6 @@ private static void ServeHTTP(this ptr<fileHandler> _addr_f, ResponseWriter w, p
         r.URL.Path = upath;
     }
     serveFile(w, _addr_r, f.root, path.Clean(upath), true);
-
 }
 
 // httpRange specifies the byte range to be sent to the client.
@@ -1035,19 +994,15 @@ private static (slice<httpRange>, error) parseRange(@string s, long size) {
             if (end == "" || end[0] == '-') {
                 return (null, error.As(errors.New("invalid range"))!);
             }
-
             var (i, err) = strconv.ParseInt(end, 10, 64);
             if (i < 0 || err != null) {
                 return (null, error.As(errors.New("invalid range"))!);
             }
-
             if (i > size) {
                 i = size;
             }
-
             r.start = size - i;
             r.length = size - r.start;
-
         }
         else
  {
@@ -1060,14 +1015,11 @@ private static (slice<httpRange>, error) parseRange(@string s, long size) {
                 // then it does not overlap.
                 noOverlap = true;
                 continue;
-
             }
-
             r.start = i;
             if (end == "") { 
                 // If no end is specified, range extends to end of the file.
                 r.length = size - r.start;
-
             }
             else
  {
@@ -1080,17 +1032,13 @@ private static (slice<httpRange>, error) parseRange(@string s, long size) {
                 }
                 r.length = i - r.start + 1;
             }
-
         }
         ranges = append(ranges, r);
-
     }    if (noOverlap && len(ranges) == 0) { 
         // The specified ranges did not overlap with the content.
         return (null, error.As(errNoOverlap)!);
-
     }
     return (ranges, error.As(null!)!);
-
 }
 
 // countingWriter counts how many bytes have been written to it.

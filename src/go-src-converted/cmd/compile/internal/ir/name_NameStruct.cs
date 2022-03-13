@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:09 UTC
+//     Generated on 2022 March 13 06:00:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Name
         {
             // Constructors
@@ -93,7 +93,7 @@ namespace @internal
             public static implicit operator Name(NilType nil) => default(Name);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Name Name_cast(dynamic value)
         {
             return new Name(value.miniExpr, value.BuiltinOp, value.Class, value.pragma, value.flags, ref value.sym, ref value.Func, value.Offset_, value.val, ref value.Embed, ref value.PkgName, value.Defn, ref value.Curfn, value.Ntype, ref value.Heapaddr, ref value.Innermost, ref value.Outer);

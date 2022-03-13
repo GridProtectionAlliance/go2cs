@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:13 UTC
+//     Generated on 2022 March 13 05:26:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct profBuf
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace go
             public static implicit operator profBuf(NilType nil) => default(profBuf);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static profBuf profBuf_cast(dynamic value)
         {
             return new profBuf(value.r, value.w, value.overflow, value.overflowTime, value.eof, value.hdrsize, value.data, value.tags, value.rNext, value.overflowBuf, value.wait);

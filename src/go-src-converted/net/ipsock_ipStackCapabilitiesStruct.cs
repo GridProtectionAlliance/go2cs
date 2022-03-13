@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:16:13 UTC
+//     Generated on 2022 March 13 05:29:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(sync.Once))]
         private partial struct ipStackCapabilities
         {
@@ -70,7 +70,7 @@ namespace go
             public static implicit operator ipStackCapabilities(NilType nil) => default(ipStackCapabilities);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ipStackCapabilities ipStackCapabilities_cast(dynamic value)
         {
             return new ipStackCapabilities(value.Once, value.ipv4Enabled, value.ipv6Enabled, value.ipv4MappedIPv6Enabled);

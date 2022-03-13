@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:17 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:55 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\lookup.go
-using context = go.context_package;
-using nettrace = go.@internal.nettrace_package;
-using singleflight = go.@internal.singleflight_package;
-using sync = go.sync_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using context = context_package;
+using nettrace = @internal.nettrace_package;
+using singleflight = @internal.singleflight_package;
+using sync = sync_package;
+
+
+// protocols contains minimal mappings between internet protocol
+// names and numbers for platforms that don't have a complete list of
+// protocol numbers.
+//
+// See https://www.iana.org/assignments/protocol-numbers
+//
+// On Unix, this map is augmented by readProtocols via lookupProtocol.
+
+using System;
+using System.Threading;
 public static partial class net_package {
 
-    // protocols contains minimal mappings between internet protocol
-    // names and numbers for platforms that don't have a complete list of
-    // protocol numbers.
-    //
-    // See https://www.iana.org/assignments/protocol-numbers
-    //
-    // On Unix, this map is augmented by readProtocols via lookupProtocol.
 private static map protocols = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, nint>{"icmp":1,"igmp":2,"tcp":6,"udp":17,"ipv6-icmp":58,};
 
 // services contains minimal mappings between services names and port
@@ -54,7 +55,6 @@ private static (nint, error) lookupProtocolMap(@string name) {
         return (0, error.As(addr(new AddrError(Err:"unknown IP protocol specified",Addr:name))!)!);
     }
     return (proto, error.As(null!)!);
-
 }
 
 // maxPortBufSize is the longest reasonable name of a service
@@ -98,12 +98,9 @@ private static (nint, error) lookupPortMap(@string network, @string service) {
                 }
 
             }
-
         }
     }
-
     return (0, error.As(addr(new AddrError(Err:"unknown port",Addr:network+"/"+service))!)!);
-
 }
 
 // ipVersion returns the provided network's IP version: '4', '6' or 0
@@ -117,7 +114,6 @@ private static byte ipVersion(@string network) {
         n = 0;
     }
     return n;
-
 }
 
 // DefaultResolver is the resolver used by the package-level Lookup
@@ -172,7 +168,6 @@ private static ptr<singleflight.Group> getLookupGroup(this ptr<Resolver> _addr_r
         return _addr__addr_DefaultResolver.lookupGroup!;
     }
     return _addr__addr_r.lookupGroup!;
-
 }
 
 // LookupHost looks up the given host using the local resolver.
@@ -206,9 +201,7 @@ private static (slice<@string>, error) LookupHost(this ptr<Resolver> _addr_r, co
             return (new slice<@string>(new @string[] { host }), error.As(null!)!);
         }
     }
-
     return r.lookupHost(ctx, host);
-
 }
 
 // LookupIP looks up host using the local resolver.
@@ -225,7 +218,6 @@ public static (slice<IP>, error) LookupIP(@string host) {
     foreach (var (i, ia) in addrs) {
         ips[i] = ia.IP;
     }    return (ips, error.As(null!)!);
-
 }
 
 // LookupIPAddr looks up host using the local resolver.
@@ -271,7 +263,6 @@ private static (slice<IP>, error) LookupIP(this ptr<Resolver> _addr_r, context.C
     foreach (var (_, addr) in addrs) {
         ips = append(ips, addr._<ptr<IPAddr>>().IP);
     }    return (ips, error.As(null!)!);
-
 }
 
 // onlyValuesCtx is a context that uses an underlying context
@@ -318,7 +309,6 @@ private static (slice<IPAddr>, error) lookupIPAddr(this ptr<Resolver> _addr_r, c
             return (new slice<IPAddr>(new IPAddr[] { {IP:ip,Zone:zone} }), error.As(null!)!);
         }
     }
-
     ptr<nettrace.Trace> (trace, _) = ctx.Value(new nettrace.TraceKey())._<ptr<nettrace.Trace>>();
     if (trace != null && trace.DNSStart != null) {
         trace.DNSStart(host);
@@ -369,7 +359,6 @@ private static (slice<IPAddr>, error) lookupIPAddr(this ptr<Resolver> _addr_r, c
         trace.DNSDone(ipAddrsEface(addrs), r.Shared, r.Err);
     }
     return lookupIPReturn(r.Val, r.Err, r.Shared);
-
 });
 
 // lookupIPReturn turns the return values from singleflight.Do into
@@ -388,7 +377,6 @@ private static (slice<IPAddr>, error) lookupIPReturn(object addrsi, error err, b
         addrs = clone;
     }
     return (addrs, error.As(null!)!);
-
 }
 
 // ipAddrsEface returns an empty interface slice of addrs.
@@ -448,7 +436,6 @@ private static (nint, error) LookupPort(this ptr<Resolver> _addr_r, context.Cont
         return (0, error.As(addr(new AddrError(Err:"invalid port",Addr:service))!)!);
     }
     return (port, error.As(null!)!);
-
 }
 
 // LookupCNAME returns the canonical name for the given host.
@@ -500,7 +487,6 @@ private static (@string, error) LookupCNAME(this ptr<Resolver> _addr_r, context.
         return ("", error.As(addr(new DNSError(Err:errMalformedDNSRecordsDetail,Name:host))!)!);
     }
     return (cname, error.As(null!)!);
-
 }
 
 // LookupSRV tries to resolve an SRV query of the given service,
@@ -561,12 +547,10 @@ private static (@string, slice<ptr<SRV>>, error) LookupSRV(this ptr<Resolver> _a
             continue;
         }
         filteredAddrs = append(filteredAddrs, addr);
-
     }    if (len(addrs) != len(filteredAddrs)) {
         return (cname, filteredAddrs, error.As(addr(new DNSError(Err:errMalformedDNSRecordsDetail,Name:name))!)!);
     }
     return (cname, filteredAddrs, error.As(null!)!);
-
 }
 
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
@@ -609,12 +593,10 @@ private static (slice<ptr<MX>>, error) LookupMX(this ptr<Resolver> _addr_r, cont
             continue;
         }
         filteredMX = append(filteredMX, mx);
-
     }    if (len(records) != len(filteredMX)) {
         return (filteredMX, error.As(addr(new DNSError(Err:errMalformedDNSRecordsDetail,Name:name))!)!);
     }
     return (filteredMX, error.As(null!)!);
-
 }
 
 // LookupNS returns the DNS NS records for the given domain name.
@@ -657,12 +639,10 @@ private static (slice<ptr<NS>>, error) LookupNS(this ptr<Resolver> _addr_r, cont
             continue;
         }
         filteredNS = append(filteredNS, ns);
-
     }    if (len(records) != len(filteredNS)) {
         return (filteredNS, error.As(addr(new DNSError(Err:errMalformedDNSRecordsDetail,Name:name))!)!);
     }
     return (filteredNS, error.As(null!)!);
-
 }
 
 // LookupTXT returns the DNS TXT records for the given domain name.
@@ -728,7 +708,6 @@ private static (slice<@string>, error) LookupAddr(this ptr<Resolver> _addr_r, co
         return (filteredNames, error.As(addr(new DNSError(Err:errMalformedDNSRecordsDetail,Name:addr))!)!);
     }
     return (filteredNames, error.As(null!)!);
-
 }
 
 // errMalformedDNSRecordsDetail is the DNSError detail which is returned when a Resolver.Lookup...

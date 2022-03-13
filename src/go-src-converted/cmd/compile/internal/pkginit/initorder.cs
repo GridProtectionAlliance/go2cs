@@ -2,68 +2,68 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pkginit -- go2cs converted at 2022 March 06 23:13:45 UTC
+// package pkginit -- go2cs converted at 2022 March 13 06:27:11 UTC
 // import "cmd/compile/internal/pkginit" ==> using pkginit = go.cmd.compile.@internal.pkginit_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\pkginit\initorder.go
-using bytes = go.bytes_package;
-using heap = go.container.heap_package;
-using fmt = go.fmt_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using staticinit = go.cmd.compile.@internal.staticinit_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using heap = container.heap_package;
+using fmt = fmt_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using staticinit = cmd.compile.@internal.staticinit_package;
+
+
+// Package initialization
+//
+// Here we implement the algorithm for ordering package-level variable
+// initialization. The spec is written in terms of variable
+// initialization, but multiple variables initialized by a single
+// assignment are handled together, so here we instead focus on
+// ordering initialization assignments. Conveniently, this maps well
+// to how we represent package-level initializations using the Node
+// AST.
+//
+// Assignments are in one of three phases: NotStarted, Pending, or
+// Done. For assignments in the Pending phase, we use Xoffset to
+// record the number of unique variable dependencies whose
+// initialization assignment is not yet Done. We also maintain a
+// "blocking" map that maps assignments back to all of the assignments
+// that depend on it.
+//
+// For example, for an initialization like:
+//
+//     var x = f(a, b, b)
+//     var a, b = g()
+//
+// the "x = f(a, b, b)" assignment depends on two variables (a and b),
+// so its Xoffset will be 2. Correspondingly, the "a, b = g()"
+// assignment's "blocking" entry will have two entries back to x's
+// assignment.
+//
+// Logically, initialization works by (1) taking all NotStarted
+// assignments, calculating their dependencies, and marking them
+// Pending; (2) adding all Pending assignments with Xoffset==0 to a
+// "ready" priority queue (ordered by variable declaration position);
+// and (3) iteratively processing the next Pending assignment from the
+// queue, decreasing the Xoffset of assignments it's blocking, and
+// adding them to the queue if decremented to 0.
+//
+// As an optimization, we actually apply each of these three steps for
+// each assignment. This yields the same order, but keeps queue size
+// down and thus also heap operation costs.
+
+// Static initialization phase.
+// These values are stored in two bits in Node.flags.
+
+using System;
 public static partial class pkginit_package {
 
-    // Package initialization
-    //
-    // Here we implement the algorithm for ordering package-level variable
-    // initialization. The spec is written in terms of variable
-    // initialization, but multiple variables initialized by a single
-    // assignment are handled together, so here we instead focus on
-    // ordering initialization assignments. Conveniently, this maps well
-    // to how we represent package-level initializations using the Node
-    // AST.
-    //
-    // Assignments are in one of three phases: NotStarted, Pending, or
-    // Done. For assignments in the Pending phase, we use Xoffset to
-    // record the number of unique variable dependencies whose
-    // initialization assignment is not yet Done. We also maintain a
-    // "blocking" map that maps assignments back to all of the assignments
-    // that depend on it.
-    //
-    // For example, for an initialization like:
-    //
-    //     var x = f(a, b, b)
-    //     var a, b = g()
-    //
-    // the "x = f(a, b, b)" assignment depends on two variables (a and b),
-    // so its Xoffset will be 2. Correspondingly, the "a, b = g()"
-    // assignment's "blocking" entry will have two entries back to x's
-    // assignment.
-    //
-    // Logically, initialization works by (1) taking all NotStarted
-    // assignments, calculating their dependencies, and marking them
-    // Pending; (2) adding all Pending assignments with Xoffset==0 to a
-    // "ready" priority queue (ordered by variable declaration position);
-    // and (3) iteratively processing the next Pending assignment from the
-    // queue, decreasing the Xoffset of assignments it's blocking, and
-    // adding them to the queue if decremented to 0.
-    //
-    // As an optimization, we actually apply each of these three steps for
-    // each assignment. This yields the same order, but keeps queue size
-    // down and thus also heap operation costs.
-
-    // Static initialization phase.
-    // These values are stored in two bits in Node.flags.
 public static readonly var InitNotStarted = iota;
 public static readonly var InitDone = 0;
 public static readonly var InitPending = 1;
-
 
 public partial struct InitOrder {
     public map<ir.Node, slice<ir.Node>> blocking; // ready is the queue of Pending initialization assignments
@@ -92,8 +92,7 @@ private static slice<ir.Node> initOrder(slice<ir.Node> l) {
                 o.flushReady(s.StaticInit);
             else if (n.Op() == ir.ODCLCONST || n.Op() == ir.ODCLFUNC || n.Op() == ir.ODCLTYPE)             else 
                 @base.Fatalf("unexpected package-level statement: %v", n);
-            
-        }
+                    }
         n = n__prev1;
     }
 
@@ -114,9 +113,7 @@ private static slice<ir.Node> initOrder(slice<ir.Node> l) {
 
                     o.findInitLoopAndExit(firstLHS(n), @new<*ir.Name>(), @new<ir.NameSet>());
                     @base.Fatalf("initialization unfinished, but failed to identify loop");
-
                 }
-
                     }
         n = n__prev1;
     }
@@ -125,7 +122,6 @@ private static slice<ir.Node> initOrder(slice<ir.Node> l) {
         @base.Fatalf("expected empty map: %v", o.blocking);
     }
     return s.Out;
-
 }
 
 private static void processAssign(this ptr<InitOrder> _addr_o, ir.Node n) {
@@ -138,7 +134,6 @@ private static void processAssign(this ptr<InitOrder> _addr_o, ir.Node n) {
             @base.Fatalf("unexpected state: %v, %v", n, o.order[n]);
         }
     }
-
     o.order[n] = 0; 
 
     // Compute number of variable dependencies and build the
@@ -152,7 +147,6 @@ private static void processAssign(this ptr<InitOrder> _addr_o, ir.Node n) {
         }
         o.order[n]++;
         o.blocking[defn] = append(o.blocking[defn], n);
-
     }    if (o.order[n] == 0) {
         heap.Push(_addr_o.ready, n);
     }
@@ -182,7 +176,6 @@ private static void flushReady(this ptr<InitOrder> _addr_o, Action<ir.Node> init
 
         }
 
-
         initialize(n);
         o.order[n] = orderDone;
 
@@ -195,10 +188,8 @@ private static void flushReady(this ptr<InitOrder> _addr_o, Action<ir.Node> init
             if (o.order[m] == 0) {
                 heap.Push(_addr_o.ready, m);
             }
-
         }
     }
-
 }
 
 // findInitLoopAndExit searches for an initialization loop involving variable
@@ -218,9 +209,7 @@ private static void findInitLoopAndExit(this ptr<InitOrder> _addr_o, ptr<ir.Name
             reportInitLoopAndExit((path.val)[(int)i..]);
             return ;
         }
-    }    var refers = collectDeps(n.Defn, false).Sorted((ni, nj) => {
-        return ni.Pos().Before(nj.Pos());
-    });
+    }    var refers = collectDeps(n.Defn, false).Sorted((ni, nj) => ni.Pos().Before(nj.Pos()));
 
     path.val = append(path.val, n);
     foreach (var (_, ref) in refers) { 
@@ -229,11 +218,9 @@ private static void findInitLoopAndExit(this ptr<InitOrder> _addr_o, ptr<ir.Name
             continue;
         }
         o.findInitLoopAndExit(ref, path, ok);
-
     }    ok.Add(n);
 
     path.val = (path.val)[..(int)len(path.val) - 1];
-
 }
 
 // reportInitLoopAndExit reports and initialization loop as an error
@@ -261,7 +248,6 @@ private static void reportInitLoopAndExit(slice<ptr<ir.Name>> l) {
         // functions. Return so that findInitLoop can continue
         // searching.
         return ;
-
     }
     l = append(l[(int)i..], l[..(int)i]); 
 
@@ -284,7 +270,6 @@ private static void reportInitLoopAndExit(slice<ptr<ir.Name>> l) {
 
     @base.ErrorfAt(l[0].Pos(), msg.String());
     @base.ErrorExit();
-
 }
 
 // collectDeps returns all of the package-level functions and
@@ -306,7 +291,6 @@ private static ir.NameSet collectDeps(ir.Node n, bool transitive) {
     else 
         @base.Fatalf("unexpected Op: %v", n.Op());
         return d.seen;
-
 }
 
 private partial struct initDeps {
@@ -322,7 +306,6 @@ private static Action<ir.Node> cachedVisit(this ptr<initDeps> _addr_d) {
         d.cvisit = d.visit; // cache closure
     }
     return d.cvisit;
-
 }
 
 private static void inspect(this ptr<initDeps> _addr_d, ir.Node n) {
@@ -352,8 +335,7 @@ private static void visit(this ptr<initDeps> _addr_d, ir.Node n) {
         d.inspectList(n.Func.Body);
     else if (n.Op() == ir.ODOTMETH || n.Op() == ir.OCALLPART || n.Op() == ir.OMETHEXPR) 
         d.foundDep(ir.MethodExprName(n));
-    
-}
+    }
 
 // foundDep records that we've found a dependency on n by adding it to
 // seen.
@@ -423,7 +405,6 @@ private static ptr<ir.Name> firstLHS(ir.Node n) {
         return _addr_n.Lhs[0].Name()!;
         @base.Fatalf("unexpected Op: %v", n.Op());
     return _addr_null!;
-
 }
 
 } // end pkginit_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:11 UTC
+//     Generated on 2022 March 13 06:46:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace net
 {
     public static partial class route_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Inet4Addr
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace net
             public static implicit operator Inet4Addr(NilType nil) => default(Inet4Addr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Inet4Addr Inet4Addr_cast(dynamic value)
         {
             return new Inet4Addr(value.IP);

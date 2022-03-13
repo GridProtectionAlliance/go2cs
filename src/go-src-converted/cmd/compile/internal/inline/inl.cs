@@ -24,28 +24,29 @@
 // The Debug.m flag enables diagnostic output.  a single -m is useful for verifying
 // which calls get inlined or not, more is for debugging, and may go away at any point.
 
-// package inline -- go2cs converted at 2022 March 06 23:09:20 UTC
+// package inline -- go2cs converted at 2022 March 13 06:22:39 UTC
 // import "cmd/compile/internal/inline" ==> using inline = go.cmd.compile.@internal.inline_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\inline\inl.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using constant = go.constant_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+
+
+// Inlining budget parameters, gathered in one place
+
+using System;
 public static partial class inline_package {
 
-    // Inlining budget parameters, gathered in one place
 private static readonly nint inlineMaxBudget = 80;
 private static readonly nint inlineExtraAppendCost = 0; 
 // default is to inline if there's at most one call. -l=4 overrides this by using 1 instead.
@@ -66,7 +67,6 @@ public static void InlinePackage() {
                 // recursion, or the recursion cycle is
                 // across more than one function.
                 CanInline(_addr_n);
-
             }
             else
  {
@@ -74,12 +74,9 @@ public static void InlinePackage() {
                     fmt.Printf("%v: cannot inline %v: recursive\n", ir.Line(n), n.Nname);
                 }
             }
-
             InlineCalls(_addr_n);
-
         }
     });
-
 }
 
 // CanInline determines whether fn is inlineable.
@@ -205,14 +202,12 @@ public static void Inline_Flood(ptr<ir.Name> _addr_n, Action<ptr<ir.Name>> expor
             // VisitList doesn't visit closure bodies, so force a
             // recursive call to VisitList on the body of the closure.
             ir.VisitList(n._<ptr<ir.ClosureExpr>>().Func.Body, doFlood);
-        
-    }; 
+            }; 
 
     // Recursively identify all referenced functions for
     // reexport. We want to include even non-called functions,
     // because after inlining they might be callable.
     ir.VisitList(ir.Nodes(fn.Inl.Body), doFlood);
-
 }
 
 // hairyVisitor visits a function body to determine its inlining
@@ -238,7 +233,6 @@ private static bool tooHairy(this ptr<hairyVisitor> _addr_v, ptr<ir.Func> _addr_
         return true;
     }
     return false;
-
 }
 
 private static bool doNode(this ptr<hairyVisitor> _addr_v, ir.Node n) {
@@ -272,7 +266,6 @@ private static bool doNode(this ptr<hairyVisitor> _addr_v, ir.Node n) {
         if (ir.IsIntrinsicCall(n)) { 
             // Treat like any other node.
             break;
-
         }
         {
             var fn__prev1 = fn;
@@ -308,7 +301,6 @@ private static bool doNode(this ptr<hairyVisitor> _addr_v, ir.Node n) {
             // it calls slow-path
             // runtime.heapBits.nextArena.
             break;
-
         }
         if (fn.Inl != null) {
             v.budget -= fn.Inl.Cost;
@@ -327,7 +319,6 @@ private static bool doNode(this ptr<hairyVisitor> _addr_v, ir.Node n) {
             // Before CL 284412, these conversions were introduced later in the
             // compiler, so they didn't count against inlining budget.
             v.budget++;
-
         }
         v.budget -= inlineExtraPanicCost;
     else if (n.Op() == ir.ORECOVER) 
@@ -386,7 +377,6 @@ private static bool doNode(this ptr<hairyVisitor> _addr_v, ir.Node n) {
         if (n.Label != null) { 
             // Should have short-circuited due to labeled control error above.
             @base.Fatalf("unexpected labeled break/continue: %v", n);
-
         }
     else if (n.Op() == ir.OIF) 
         n = n._<ptr<ir.IfStmt>>();
@@ -394,7 +384,6 @@ private static bool doNode(this ptr<hairyVisitor> _addr_v, ir.Node n) {
             // This if and the condition cost nothing.
             // TODO(rsc): It seems strange that we visit the dead branch.
             return doList(n.Init(), v.@do) || doList(n.Body, v.@do) || doList(n.Else, v.@do);
-
         }
     else if (n.Op() == ir.ONAME) 
         n = n._<ptr<ir.Name>>();
@@ -418,7 +407,6 @@ private static bool doNode(this ptr<hairyVisitor> _addr_v, ir.Node n) {
         return true;
     }
     return ir.DoChildren(n, v.@do);
-
 }
 
 private static bool isBigFunc(ptr<ir.Func> _addr_fn) {
@@ -460,7 +448,6 @@ private static ir.Node inlcopy(ir.Node n) {
             if (oldfn.ClosureCalled()) {
                 newfn.SetClosureCalled(true);
             }
-
             m._<ptr<ir.ClosureExpr>>().Func = newfn;
             newfn.Nname = ir.NewNameAt(oldfn.Nname.Pos(), oldfn.Nname.Sym()); 
             // XXX OK to share fn.Type() ??
@@ -469,18 +456,14 @@ private static ir.Node inlcopy(ir.Node n) {
             if (oldfn.Nname.Ntype != null) {
                 newfn.Nname.Ntype = inlcopy(oldfn.Nname.Ntype)._<ir.Ntype>();
             }
-
             newfn.Body = inlcopylist(oldfn.Body); 
             // Make shallow copy of the Dcl and ClosureVar slices
             newfn.Dcl = append((slice<ptr<ir.Name>>)null, oldfn.Dcl);
             newfn.ClosureVars = append((slice<ptr<ir.Name>>)null, oldfn.ClosureVars);
-
         }
         return m;
-
     };
     return edit(n);
-
 }
 
 // InlineCalls/inlnode walks fn's statements and expressions and substitutes any
@@ -496,12 +479,9 @@ public static void InlineCalls(ptr<ir.Func> _addr_fn) {
     }
     var inlMap = make_map<ptr<ir.Func>, bool>();
     Func<ir.Node, ir.Node> edit = default;
-    edit = n => {
-        return inlnode(n, maxCost, inlMap, edit);
-    };
+    edit = n => inlnode(n, maxCost, inlMap, edit);
     ir.EditChildren(fn, edit);
     ir.CurFunc = savefn;
-
 }
 
 // Turn an OINLCALL into a statement.
@@ -538,7 +518,6 @@ private static slice<ir.Node> inlconv2list(ptr<ir.InlinedCallExpr> _addr_n) {
     var s = n.ReturnVars;
     s[0] = ir.InitExpr(append(n.Init(), n.Body), s[0]);
     return s;
-
 }
 
 // inlnode recurses over the tree to find inlineable calls, which will
@@ -591,7 +570,6 @@ private static ir.Node inlnode(ir.Node n, int maxCost, map<ptr<ir.Func>, bool> i
             }
 
         }
-
         var lno = ir.SetPos(n);
 
     ir.EditChildren(n, edit);
@@ -641,8 +619,6 @@ private static ir.Node inlnode(ir.Node n, int maxCost, map<ptr<ir.Func>, bool> i
             }
 
         }
-
-
     else if (n.Op() == ir.OCALLMETH) 
         call = n._<ptr<ir.CallExpr>>();
         if (@base.Flag.LowerM > 3) {
@@ -664,10 +640,8 @@ private static ir.Node inlnode(ir.Node n, int maxCost, map<ptr<ir.Func>, bool> i
         else if (call.Use == ir.CallUseList)         else 
             ir.Dump("call", call);
             @base.Fatalf("call missing use");
-        
-    }
+            }
     return n;
-
 }
 
 // inlCallee takes a function-typed expression and returns the underlying function ONAME
@@ -696,7 +670,6 @@ private static ptr<ir.Func> inlCallee(ir.Node fn) {
         CanInline(_addr_c);
         return _addr_c!;
         return _addr_null!;
-
 }
 
 private static ir.Node inlParam(ptr<types.Field> _addr_t, ir.InitNode @as, map<ptr<ir.Name>, ptr<ir.Name>> inlvars) {
@@ -716,7 +689,6 @@ private static ir.Node inlParam(ptr<types.Field> _addr_t, ir.InitNode @as, map<p
     @as.PtrInit().Append(ir.NewDecl(@base.Pos, ir.ODCL, inlvar));
     inlvar.Name().Defn = as;
     return inlvar;
-
 }
 
 private static nint inlgen = default;
@@ -742,7 +714,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
             logopt.LogOpt(n.Pos(), "cannotInlineCall", "inline", ir.FuncName(ir.CurFunc), fmt.Sprintf("%s cannot be inlined", ir.PkgFuncName(fn)));
         }
         return n;
-
     }
     if (fn.Inl.Cost > maxCost) { 
         // The inlined function body is too big. Typically we use this check to restrict
@@ -751,7 +722,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
             logopt.LogOpt(n.Pos(), "cannotInlineCall", "inline", ir.FuncName(ir.CurFunc), fmt.Sprintf("cost %d of %s exceeds max large caller cost %d", fn.Inl.Cost, ir.PkgFuncName(fn), maxCost));
         }
         return n;
-
     }
     if (fn == ir.CurFunc) { 
         // Can't recursively inline a function into itself.
@@ -759,7 +729,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
             logopt.LogOpt(n.Pos(), "cannotInlineCall", "inline", fmt.Sprintf("recursive call to %s", ir.FuncName(ir.CurFunc)));
         }
         return n;
-
     }
     if (@base.Flag.Cfg.Instrumenting && types.IsRuntimePkg(fn.Sym().Pkg)) { 
         // Runtime package must not be instrumented.
@@ -769,14 +738,12 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
         // The example that we observed is inlining of LockOSThread,
         // which lead to false race reports on m contents.
         return n;
-
     }
     if (inlMap[fn]) {
         if (@base.Flag.LowerM > 1) {
             fmt.Printf("%v: cannot inline %v into %v: repeated recursive cycle\n", ir.Line(n), fn, ir.FuncName(ir.CurFunc));
         }
         return n;
-
     }
     inlMap[fn] = true;
     defer(() => {
@@ -824,7 +791,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
         }
         if (ln.Class == ir.PPARAMOUT) { // return values handled below.
             continue;
-
         }
         ptr<ir.Name> inlf = typecheck.Expr(inlvar(_addr_ln))._<ptr<ir.Name>>();
         inlvars[ln] = inlf;
@@ -836,10 +802,8 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
  {
                 inlf.Name().SetInlLocal(true);
             }
-
             inlf.SetPos(ln.Pos());
             inlfvars = append(inlfvars, inlf);
-
         }
     }    var delayretvars = true;
 
@@ -855,13 +819,11 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
                 if (len(n.Results) == 0) {
                     delayretvars = false; // empty return statement (case 2)
                 }
-
             }
 
             n = n__prev1;
 
         }
-
     });
 
     if (nreturns != 1) {
@@ -884,11 +846,9 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
  { 
                 // anonymous return values, synthesize names for use in assignment that replaces return
                 m = retvar(_addr_t, i);
-
             }
 
         }
-
 
         if (@base.Flag.GenDwarfInl > 0) { 
             // Don't update the src.Pos on a return variable if it
@@ -899,10 +859,8 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
                 m.SetPos(t.Pos);
                 inlfvars = append(inlfvars, m);
             }
-
         }
         retvars = append(retvars, m);
-
     }    var @as = ir.NewAssignListStmt(@base.Pos, ir.OAS2, null, null);
     @as.Def = true;
     if (n.Op() == ir.OCALLMETH) {
@@ -911,7 +869,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
             @base.Fatalf("method call without receiver: %+v", n);
         }
         @as.Rhs.Append(sel.X);
-
     }
     @as.Rhs.Append(n.Args); 
 
@@ -926,7 +883,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
             @as.Lhs.Append(inlParam(_addr_recv, as, inlvars));
         }
     }
-
     foreach (var (_, param) in fn.Type().Params().Fields().Slice()) { 
         // For ordinary parameters or variadic parameters in
         // dotted calls, just add the variable to the
@@ -987,7 +943,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
         }
     }
 
-
     var sym = fn.Linksym();
     var newIndex = @base.Ctxt.InlTree.Add(parent, n.Pos(), sym); 
 
@@ -1042,7 +997,6 @@ private static ir.Node mkinlcall(ptr<ir.CallExpr> _addr_n, ptr<ir.Func> _addr_fn
         fmt.Printf("%v: After inlining %+v\n\n", ir.Line(call), call);
     }
     return call;
-
 });
 
 // Every time we expand a function we generate a new set of tmpnames,
@@ -1063,7 +1017,6 @@ private static ptr<ir.Name> inlvar(ptr<ir.Name> _addr_var_) {
 
     ir.CurFunc.Dcl = append(ir.CurFunc.Dcl, n);
     return _addr_n!;
-
 }
 
 // Synthesize a variable to store the inlined function's results in.
@@ -1077,7 +1030,6 @@ private static ptr<ir.Name> retvar(ptr<types.Field> _addr_t, nint i) {
     n.Curfn = ir.CurFunc; // the calling function, not the called one
     ir.CurFunc.Dcl = append(ir.CurFunc.Dcl, n);
     return _addr_n!;
-
 }
 
 // Synthesize a variable to store the inlined function's arguments
@@ -1092,7 +1044,6 @@ private static ir.Node argvar(ptr<types.Type> _addr_t, nint i) {
     n.Curfn = ir.CurFunc; // the calling function, not the called one
     ir.CurFunc.Dcl = append(ir.CurFunc.Dcl, n);
     return n;
-
 }
 
 // The inlsubst type implements the actual inlining of a single
@@ -1147,7 +1098,6 @@ private static slice<ptr<types.Field>> fields(this ptr<inlsubst> _addr_subst, pt
             newfields[i].Nname = subst.node(oldfields[i].Nname._<ptr<ir.Name>>());
         }
     }    return newfields;
-
 }
 
 // clovar creates a new ONAME node for a local variable or param of a closure
@@ -1186,7 +1136,6 @@ private static ptr<ir.Name> clovar(this ptr<inlsubst> _addr_subst, ptr<ir.Name> 
                 // go/internal/srcimporter'. TODO(mdempsky) - maybe change
                 // how we create closure structs?
                 m.SetSym(types.LocalPkg.Lookup(n.Sym().Name));
-
             } 
             // Make sure any inlvar which is the Defn
             // of an ONAME closure var is rewritten
@@ -1195,7 +1144,6 @@ private static ptr<ir.Name> clovar(this ptr<inlsubst> _addr_subst, ptr<ir.Name> 
             if (subst.inlvars[n.Defn._<ptr<ir.Name>>()] != null) {
                 m.Defn = subst.node(n.Defn);
             }
-
             break;
         case ptr<ir.AssignStmt> defn:
             m.Defn = _addr_subst.defnMarker;
@@ -1225,10 +1173,8 @@ private static ptr<ir.Name> clovar(this ptr<inlsubst> _addr_subst, ptr<ir.Name> 
             s = n.Outer.Outer;
         }
         m.Outer = s;
-
     }
     return _addr_m!;
-
 }
 
 // closure does the necessary substitions for a ClosureExpr n and returns the new
@@ -1352,7 +1298,6 @@ private static ir.Node closure(this ptr<inlsubst> _addr_subst, ptr<ir.ClosureExp
         typecheck.Expr(m);
     }
     return m;
-
 });
 
 // node recursively copies a node from the saved pristine body of the
@@ -1384,13 +1329,10 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
             if (o == null || o.Curfn != ir.CurFunc) {
                 @base.Fatalf("%v: unresolvable capture %v\n", ir.Line(n), n);
             }
-
             if (@base.Flag.LowerM > 2) {
                 fmt.Printf("substituting captured name %+v  ->  %+v\n", n, o);
             }
-
             return o;
-
         }
         {
             var inlvar = subst.inlvars[n];
@@ -1399,13 +1341,10 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
                 if (@base.Flag.LowerM > 2) {
                     fmt.Printf("substituting name %+v  ->  %+v\n", n, inlvar);
                 }
-
                 return inlvar;
-
             }
 
         }
-
 
         if (@base.Flag.LowerM > 2) {
             fmt.Printf("not substituting name %+v\n", n);
@@ -1425,7 +1364,6 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
         if (subst.newclofn != null) { 
             // Don't do special substitutions if inside a closure
             break;
-
         }
         n = n._<ptr<ir.ReturnStmt>>();
         var init = subst.list(n.Init());
@@ -1461,9 +1399,7 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
                     n = n__prev1;
                 }
             }
-
             init = append(init, typecheck.Stmt(as));
-
         }
         init = append(init, ir.NewBranchStmt(@base.Pos, ir.OGOTO, subst.retlabel));
         typecheck.Stmts(init);
@@ -1472,7 +1408,6 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
         if (subst.newclofn != null) { 
             // Don't do special substitutions if inside a closure
             break;
-
         }
         n = n._<ptr<ir.BranchStmt>>();
         ptr<ir.BranchStmt> m = ir.Copy(n)._<ptr<ir.BranchStmt>>();
@@ -1485,7 +1420,6 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
         if (subst.newclofn != null) { 
             // Don't do special substitutions if inside a closure
             break;
-
         }
         n = n._<ptr<ir.LabelStmt>>();
         m = ir.Copy(n)._<ptr<ir.LabelStmt>>();
@@ -1514,7 +1448,6 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
                 lhs = lhs__prev1;
 
             }
-
             break;
         case ptr<ir.AssignListStmt> m:
             {
@@ -1534,7 +1467,6 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
                         lhs = lhs__prev1;
 
                     }
-
                 }
 
                 lhs = lhs__prev1;
@@ -1544,7 +1476,6 @@ private static ir.Node node(this ptr<inlsubst> _addr_subst, ir.Node n) {
     }
 
     return m;
-
 }
 
 private static src.XPos updatedPos(this ptr<inlsubst> _addr_subst, src.XPos xpos) {
@@ -1562,7 +1493,6 @@ private static src.XPos updatedPos(this ptr<inlsubst> _addr_subst, src.XPos xpos
     }
     pos.SetBase(newbase);
     return @base.Ctxt.PosTable.XPos(pos);
-
 }
 
 private static slice<ptr<ir.Name>> pruneUnusedAutos(slice<ptr<ir.Name>> ll, ptr<hairyVisitor> _addr_vis) {
@@ -1576,9 +1506,7 @@ private static slice<ptr<ir.Name>> pruneUnusedAutos(slice<ptr<ir.Name>> ll, ptr<
             }
         }
         s = append(s, n);
-
     }    return s;
-
 }
 
 // numNonClosures returns the number of functions in list which are not closures.
@@ -1589,7 +1517,6 @@ private static nint numNonClosures(slice<ptr<ir.Func>> list) {
             count++;
         }
     }    return count;
-
 }
 
 private static bool doList(slice<ir.Node> list, Func<ir.Node, bool> @do) {
@@ -1600,7 +1527,6 @@ private static bool doList(slice<ir.Node> list, Func<ir.Node, bool> @do) {
             }
         }
     }    return false;
-
 }
 
 } // end inline_package

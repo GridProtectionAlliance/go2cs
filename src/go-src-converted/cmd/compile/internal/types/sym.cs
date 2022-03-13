@@ -2,33 +2,35 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:54 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:10 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\sym.go
-using @base = go.cmd.compile.@internal.@base_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Sym represents an object name in a segmented (pkg, name) namespace.
+// Most commonly, this is a Go identifier naming an object declared within a package,
+// but Syms are also used to name internal synthesized objects.
+//
+// As an exception, field and method names that are exported use the Sym
+// associated with localpkg instead of the package that declared them. This
+// allows using Sym pointer equality to test for Go identifier uniqueness when
+// handling selector expressions.
+//
+// Ideally, Sym should be used for representing Go language constructs,
+// while cmd/internal/obj.LSym is used for representing emitted artifacts.
+//
+// NOTE: In practice, things can be messier than the description above
+// for various reasons (historical, convenience).
 
 public static partial class types_package {
 
-    // Sym represents an object name in a segmented (pkg, name) namespace.
-    // Most commonly, this is a Go identifier naming an object declared within a package,
-    // but Syms are also used to name internal synthesized objects.
-    //
-    // As an exception, field and method names that are exported use the Sym
-    // associated with localpkg instead of the package that declared them. This
-    // allows using Sym pointer equality to test for Go identifier uniqueness when
-    // handling selector expressions.
-    //
-    // Ideally, Sym should be used for representing Go language constructs,
-    // while cmd/internal/obj.LSym is used for representing emitted artifacts.
-    //
-    // NOTE: In practice, things can be messier than the description above
-    // for various reasons (historical, convenience).
 public partial struct Sym {
     public @string Linkname; // link name
 
@@ -123,7 +125,6 @@ private static ptr<obj.LSym> Linksym(this ptr<Sym> _addr_sym) {
         abi = obj.ABIInternal;
     }
     return _addr_sym.LinksymABI(abi)!;
-
 }
 
 // Deprecated: This method should not be used directly. Instead, use a
@@ -140,7 +141,6 @@ private static ptr<obj.LSym> LinksymABI(this ptr<Sym> _addr_sym, obj.ABI abi) {
         return _addr_@base.Linkname(sym.Linkname, abi)!;
     }
     return _addr_@base.PkgLinksym(sym.Pkg.Prefix, sym.Name, abi)!;
-
 }
 
 // Less reports whether symbol a is ordered before symbol b.
@@ -174,10 +174,8 @@ private static bool Less(this ptr<Sym> _addr_a, ptr<Sym> _addr_b) {
             return a.Pkg.Height < b.Pkg.Height;
         }
         return a.Pkg.Path < b.Pkg.Path;
-
     }
     return false;
-
 }
 
 // IsExported reports whether name is an exported Go symbol (that is,
@@ -194,10 +192,8 @@ public static bool IsExported(@string name) {
         r = r__prev1;
 
     }
-
     var (r, _) = utf8.DecodeRuneInString(name);
     return unicode.IsUpper(r);
-
 }
 
 } // end types_package

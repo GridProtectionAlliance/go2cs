@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm -- go2cs converted at 2022 March 06 22:47:33 UTC
+// package arm -- go2cs converted at 2022 March 13 05:58:48 UTC
 // import "cmd/compile/internal/arm" ==> using arm = go.cmd.compile.@internal.arm_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\arm\galign.go
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using arm = go.cmd.@internal.obj.arm_package;
-using buildcfg = go.@internal.buildcfg_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using arm = cmd.@internal.obj.arm_package;
+using buildcfg = @internal.buildcfg_package;
+using System;
 
 public static partial class arm_package {
 
@@ -31,7 +30,6 @@ public static void Init(ptr<ssagen.ArchInfo> _addr_arch) {
     };
     arch.SSAGenValue = ssaGenValue;
     arch.SSAGenBlock = ssaGenBlock;
-
 }
 
 } // end arm_package

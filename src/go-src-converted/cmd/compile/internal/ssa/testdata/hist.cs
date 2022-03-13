@@ -8,16 +8,16 @@
 // step is time-consuming, the tests for different bugs are all accumulated here
 // so that their cost is only the time to "n" through the additional code.
 
-// package main -- go2cs converted at 2022 March 06 23:09:37 UTC
+// package main -- go2cs converted at 2022 March 13 06:22:52 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\testdata\hist.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go;
+
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class main_package {
 
@@ -72,11 +72,9 @@ private static void test() {
         if (err != null) { //gdb-dbg=(i) //gdb-opt=(err,hist,i)
             fmt.Fprintf(os.Stderr, "There was an error: %v\n", err);
             return ;
-
         }
         hist = ensure(int(i), hist);
         hist[int(i)]++;
-
     }
     nint t = 0;
     nint n = 0;
@@ -88,9 +86,7 @@ private static void test() {
             a = __a;
             if (a == 0) { //gdb-opt=(a,n,t)
                 continue;
-
             }
-
             t += i * a;
             n += a;
             fmt.Fprintf(os.Stderr, "%d\t%d\t%d\t%d\t%d\n", i, a, n, i * a, t); //gdb-dbg=(n,i,t)
@@ -102,7 +98,6 @@ private static void test() {
 private static void Main() {
     growstack(); // Use stack early to prevent growth during test, which confuses gdb
     test();
-
 }
 
 private static @string snk = default;

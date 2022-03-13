@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:06 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:25 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\preempt.go
-using runtime = go.runtime_package;
-using debug = go.runtime.debug_package;
-using atomic = go.sync.atomic_package;
+namespace go;
+
+using runtime = runtime_package;
+using debug = runtime.debug_package;
+using atomic = sync.atomic_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -46,7 +45,8 @@ public static void AsyncPreempt() {
     // Also test empty infinite loop.
     go_(() => () => {
         atomic.AddUint32(_addr_ready2, 1);
-        while (true)         }
+        while (true) {
+        }
     }()); 
 
     // Wait for the goroutine to stop passing through sync
@@ -61,7 +61,6 @@ public static void AsyncPreempt() {
     runtime.GC();
 
     println("OK");
-
 }
 
 //go:noinline

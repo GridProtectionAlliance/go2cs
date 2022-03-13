@@ -3,17 +3,17 @@
 // license that can be found in the LICENSE file.
 
 // The package e is a go/doc test for embedded methods.
-// package e -- go2cs converted at 2022 March 06 22:41:35 UTC
+
+// package e -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.e" ==> using e = go.go.doc.e_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\e.go
-
-
 namespace go.go;
 
 public static partial class e_package {
 
-    // ----------------------------------------------------------------------------
-    // Conflicting methods M must not show up.
+// ----------------------------------------------------------------------------
+// Conflicting methods M must not show up.
+
 private partial struct t1 {
 }
 

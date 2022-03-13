@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package field -- go2cs converted at 2022 March 06 22:17:27 UTC
+// package field -- go2cs converted at 2022 March 13 05:30:48 UTC
 // import "crypto/ed25519/internal/edwards25519/field" ==> using field = go.crypto.ed25519.@internal.edwards25519.field_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\field\fe_generic.go
-using bits = go.math.bits_package;
-
 namespace go.crypto.ed25519.@internal.edwards25519;
+
+using bits = math.bits_package;
 
 public static partial class field_package {
 
-    // uint128 holds a 128-bit number as two 64-bit limbs, for use with the
-    // bits.Mul64 and bits.Add64 intrinsics.
+// uint128 holds a 128-bit number as two 64-bit limbs, for use with the
+// bits.Mul64 and bits.Add64 intrinsics.
 private partial struct uint128 {
     public ulong lo;
     public ulong hi;
@@ -170,7 +170,6 @@ private static void feMulGeneric(ptr<Element> _addr_v, ptr<Element> _addr_a, ptr
     // where the carries will be small enough to fit in the wiggle room above 2⁵¹.
     v = new Element(rr0,rr1,rr2,rr3,rr4);
     v.carryPropagate();
-
 }
 
 private static void feSquareGeneric(ptr<Element> _addr_v, ptr<Element> _addr_a) {
@@ -257,7 +256,6 @@ private static void feSquareGeneric(ptr<Element> _addr_v, ptr<Element> _addr_a) 
 
     v = new Element(rr0,rr1,rr2,rr3,rr4);
     v.carryPropagate();
-
 }
 
 // carryPropagate brings the limbs below 52 bits by applying the reduction

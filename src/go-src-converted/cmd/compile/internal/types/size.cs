@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:54 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:10 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\size.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using sort = sort_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class types_package {
 
@@ -54,10 +53,8 @@ private static src.XPos typePos(ptr<Type> _addr_t) => func((_, panic, _) => {
             return pos;
         }
     }
-
     @base.Fatalf("bad type: %v", t);
     panic("unreachable");
-
 });
 
 // MaxWidth is the maximum size of a value on the target architecture.
@@ -76,7 +73,6 @@ public static long Rnd(long o, long r) {
         @base.Fatalf("rnd %d", r);
     }
     return (o + r - 1) & ~(r - 1);
-
 }
 
 // expandiface computes the method set for interface type t by
@@ -101,7 +97,6 @@ private static void expandiface(ptr<Type> _addr_t) {
 
         }
         methods = append(methods, m);
-
     };
 
     {
@@ -136,7 +131,6 @@ private static void expandiface(ptr<Type> _addr_t) {
                 // TODO(mdempsky): Revisit this.
                 methods = append(methods, m);
                 continue;
-
             } 
 
             // Embedded interface: duplicate all methods
@@ -146,9 +140,7 @@ private static void expandiface(ptr<Type> _addr_t) {
                 // Use m.Pos rather than t1.Pos to preserve embedding position.
                 var f = NewField(m.Pos, t1.Sym, t1.Type);
                 addMethod(f, false);
-
             }
-
         }
         m = m__prev1;
     }
@@ -170,7 +162,6 @@ private static void expandiface(ptr<Type> _addr_t) {
     }
 
     t.SetAllMethods(methods);
-
 }
 
 private static long calcStructOffset(ptr<Type> _addr_errtype, ptr<Type> _addr_t, long o, nint flag) {
@@ -190,7 +181,6 @@ private static long calcStructOffset(ptr<Type> _addr_errtype, ptr<Type> _addr_t,
             // broken field, just skip it so that other valid fields
             // get a width.
             continue;
-
         }
         CalcSize(_addr_f.Type);
         if (int32(f.Type.Align) > maxalign) {
@@ -201,7 +191,6 @@ private static long calcStructOffset(ptr<Type> _addr_errtype, ptr<Type> _addr_t,
         }
         if (isStruct) { // For receiver/args/results, do not set, it depends on ABI
             f.Offset = o;
-
         }
         var w = f.Type.Width;
         if (w < 0) {
@@ -233,7 +222,6 @@ private static long calcStructOffset(ptr<Type> _addr_errtype, ptr<Type> _addr_t,
     t.Width = o - starto;
 
     return o;
-
 }
 
 // findTypeLoop searches for an invalid type declaration loop involving
@@ -273,7 +261,6 @@ private static bool findTypeLoop(ptr<Type> _addr_t, ptr<slice<ptr<Type>>> _addr_
             return true;
         }
         path.val = (path.val)[..(int)len(path.val) - 1];
-
     } { 
         // Anonymous type. Recurse on contained types.
 
@@ -294,14 +281,10 @@ private static bool findTypeLoop(ptr<Type> _addr_t, ptr<slice<ptr<Type>>> _addr_
                     if (findTypeLoop(_addr_m.Type, _addr_path)) {
                         return true;
                     }
-
                 }
-
             }
-        
-    }
+            }
     return false;
-
 }
 
 private static void reportTypeLoop(ptr<Type> _addr_t) {
@@ -345,7 +328,6 @@ private static void reportTypeLoop(ptr<Type> _addr_t) {
 
     fmt.Fprintf(_addr_msg, "\t%v: %v", @base.FmtPos(typePos(_addr_l[0])), l[0]);
     @base.ErrorfAt(typePos(_addr_l[0]), msg.String());
-
 }
 
 // CalcSize calculates and stores the size and alignment for t.
@@ -363,7 +345,6 @@ public static void CalcSize(ptr<Type> _addr_t) {
     if (PtrSize == 0) { 
         // Assume this is a test.
         return ;
-
     }
     if (t == null) {
         return ;
@@ -381,11 +362,9 @@ public static void CalcSize(ptr<Type> _addr_t) {
         if (t.Broke()) { 
             // break infinite recursion from Fatal call below
             return ;
-
         }
         t.SetBroke(true);
         @base.Fatalf("width not calculated: %v", t);
-
     }
     if (t.Broke() && t.Width == 0) {
         return ;
@@ -400,7 +379,6 @@ public static void CalcSize(ptr<Type> _addr_t) {
             @base.Pos = pos;
         }
     }
-
 
     t.Width = -2;
     t.Align = 0; // 0 means use t.Width, below
@@ -536,12 +514,10 @@ public static void CalcSize(ptr<Type> _addr_t) {
             @base.Fatalf("invalid alignment for %v", t);
         }
         t.Align = uint8(w);
-
     }
     @base.Pos = lno;
 
     ResumeCheckSize();
-
 }
 
 // CalcStructSize calculates the size of s,
@@ -604,7 +580,6 @@ public static void ResumeCheckSize() {
         }
     }
     defercalc--;
-
 }
 
 // PtrDataSize returns the length in bytes of the prefix of t
@@ -646,7 +621,6 @@ public static long PtrDataSize(ptr<Type> _addr_t) {
     else 
         @base.Fatalf("PtrDataSize: unexpected type, %v", t);
         return 0;
-    
-}
+    }
 
 } // end types_package

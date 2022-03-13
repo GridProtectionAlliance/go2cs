@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:02 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:50 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mpagecache.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -60,10 +60,8 @@ private static (System.UIntPtr, System.UIntPtr) alloc(this ptr<pageCache> _addr_
         c.cache &= 1 << (int)(i); // set bit to mark in-use
         c.scav &= 1 << (int)(i); // clear bit to mark unscavenged
         return (c.@base + i * pageSize, uintptr(scav) * pageSize);
-
     }
     return c.allocN(npages);
-
 }
 
 // allocN is a helper which attempts to allocate npages worth of pages
@@ -86,7 +84,6 @@ private static (System.UIntPtr, System.UIntPtr) allocN(this ptr<pageCache> _addr
     c.cache &= mask; // mark in-use bits
     c.scav &= mask; // clear scavenged bits
     return (c.@base + uintptr(i * pageSize), uintptr(scav) * pageSize);
-
 }
 
 // flush empties out unallocated free pages in the given cache
@@ -129,10 +126,8 @@ private static void flush(this ptr<pageCache> _addr_c, ptr<pageAlloc> _addr_p) {
             p.searchAddr = b;
         }
     }
-
     p.update(c.@base, pageCachePages, false, false);
     c.val = new pageCache();
-
 }
 
 // allocToCache acquires a pageCachePages-aligned chunk of free pages which
@@ -164,7 +159,6 @@ private static pageCache allocToCache(this ptr<pageAlloc> _addr_p) {
             throw("bad summary data");
         }
         c = new pageCache(base:chunkBase(ci)+alignDown(uintptr(j),64)*pageSize,cache:^chunk.pages64(j),scav:chunk.scavenged.block64(j),);
-
     }
     else
  { 
@@ -176,12 +170,10 @@ private static pageCache allocToCache(this ptr<pageAlloc> _addr_p) {
             // and return an empty pageCache.
             p.searchAddr = maxSearchAddr;
             return new pageCache();
-
         }
         ci = chunkIndex(addr);
         chunk = p.chunkOf(ci);
         c = new pageCache(base:alignDown(addr,64*pageSize),cache:^chunk.pages64(chunkPageIndex(addr)),scav:chunk.scavenged.block64(chunkPageIndex(addr)),);
-
     }
     p.allocRange(c.@base, pageCachePages); 
 
@@ -198,7 +190,6 @@ private static pageCache allocToCache(this ptr<pageAlloc> _addr_p) {
     // the page after.
     p.searchAddr = new offAddr(c.base+pageSize*(pageCachePages-1));
     return c;
-
 }
 
 } // end runtime_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:12 UTC
+//     Generated on 2022 March 13 06:41:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace mod
 {
     public static partial class sumdb_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Client
         {
             // Constructors
@@ -96,7 +96,7 @@ namespace mod
             public static implicit operator Client(NilType nil) => default(Client);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Client Client_cast(dynamic value)
         {
             return new Client(value.ops, value.didLookup, value.initOnce, value.initErr, value.name, value.verifiers, value.tileReader, value.tileHeight, value.nosumdb, value.record, value.tileCache, value.latestMu, value.latest, value.latestMsg, value.tileSavedMu, value.tileSaved);

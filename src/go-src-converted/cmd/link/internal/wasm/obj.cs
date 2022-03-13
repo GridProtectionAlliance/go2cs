@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package wasm -- go2cs converted at 2022 March 06 23:20:38 UTC
+// package wasm -- go2cs converted at 2022 March 13 06:33:32 UTC
 // import "cmd/link/internal/wasm" ==> using wasm = go.cmd.link.@internal.wasm_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\wasm\obj.go
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-
 namespace go.cmd.link.@internal;
+
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
 
 public static partial class wasm_package {
 

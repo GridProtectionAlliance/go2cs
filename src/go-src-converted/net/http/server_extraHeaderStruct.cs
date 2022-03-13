@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:08 UTC
+//     Generated on 2022 March 13 05:37:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct extraHeader
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace net
             public static implicit operator extraHeader(NilType nil) => default(extraHeader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static extraHeader extraHeader_cast(dynamic value)
         {
             return new extraHeader(value.contentType, value.connection, value.transferEncoding, value.date, value.contentLength);

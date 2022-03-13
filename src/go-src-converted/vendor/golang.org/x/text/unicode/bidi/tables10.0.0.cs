@@ -3,16 +3,14 @@
 //go:build go1.10 && !go1.13
 // +build go1.10,!go1.13
 
-// package bidi -- go2cs converted at 2022 March 06 23:38:32 UTC
+// package bidi -- go2cs converted at 2022 March 13 06:46:46 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\bidi\tables10.0.0.go
-
-
 namespace go.vendor.golang.org.x.text.unicode;
 
 public static partial class bidi_package {
 
-    // UnicodeVersion is the Unicode version from which the tables in this package are derived.
+// UnicodeVersion is the Unicode version from which the tables in this package are derived.
 public static readonly @string UnicodeVersion = "10.0.0";
 
 // xorMasks contains masks to be xor-ed with brackets to get the reverse
@@ -87,7 +85,6 @@ private static (byte, nint) lookup(this ptr<bidiTrie> _addr_t, slice<byte> s) {
         return (t.lookupValue(uint32(i), c3), 4);
     // Illegal rune
     return (0, 1);
-
 }
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
@@ -98,25 +95,20 @@ private static byte lookupUnsafe(this ptr<bidiTrie> _addr_t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
-
     }
     var i = bidiIndex[c0];
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue(uint32(i), s[1]);
-
     }
     i = bidiIndex[uint32(i) << 6 + uint32(s[1])];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue(uint32(i), s[2]);
-
     }
     i = bidiIndex[uint32(i) << 6 + uint32(s[2])];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue(uint32(i), s[3]);
-
     }
     return 0;
-
 }
 
 // lookupString returns the trie value for the first UTF-8 encoding in s and
@@ -183,7 +175,6 @@ private static (byte, nint) lookupString(this ptr<bidiTrie> _addr_t, @string s) 
         return (t.lookupValue(uint32(i), c3), 4);
     // Illegal rune
     return (0, 1);
-
 }
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
@@ -194,25 +185,20 @@ private static byte lookupStringUnsafe(this ptr<bidiTrie> _addr_t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
-
     }
     var i = bidiIndex[c0];
     if (c0 < 0xE0) { // 2-byte UTF-8
         return t.lookupValue(uint32(i), s[1]);
-
     }
     i = bidiIndex[uint32(i) << 6 + uint32(s[1])];
     if (c0 < 0xF0) { // 3-byte UTF-8
         return t.lookupValue(uint32(i), s[2]);
-
     }
     i = bidiIndex[uint32(i) << 6 + uint32(s[2])];
     if (c0 < 0xF8) { // 4-byte UTF-8
         return t.lookupValue(uint32(i), s[3]);
-
     }
     return 0;
-
 }
 
 // bidiTrie. Total size: 16128 bytes (15.75 KiB). Checksum: 8122d83e461996f.
@@ -230,8 +216,7 @@ private static byte lookupValue(this ptr<bidiTrie> _addr_t, uint n, byte b) {
 
     else 
         return uint8(bidiValues[n << 6 + uint32(b)]);
-    
-}
+    }
 
 // bidiValues: 228 blocks, 14592 entries, 14592 bytes
 // The third block is the zero block.

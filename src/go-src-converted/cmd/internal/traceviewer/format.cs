@@ -7,15 +7,13 @@
 //
 // The official description of the format is in this file:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-// package traceviewer -- go2cs converted at 2022 March 06 23:16:44 UTC
+
+// package traceviewer -- go2cs converted at 2022 March 13 06:30:10 UTC
 // import "cmd/internal/traceviewer" ==> using traceviewer = go.cmd.@internal.traceviewer_package
 // Original source: C:\Program Files\Go\src\cmd\internal\traceviewer\format.go
-
-using System.ComponentModel;
-
-
 namespace go.cmd.@internal;
 
+using System.ComponentModel;
 public static partial class traceviewer_package {
 
 public partial struct Data {

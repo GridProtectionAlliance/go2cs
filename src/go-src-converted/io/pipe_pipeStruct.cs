@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:12:44 UTC
+//     Generated on 2022 March 13 05:27:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class io_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pipe
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace go
             public static implicit operator pipe(NilType nil) => default(pipe);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pipe pipe_cast(dynamic value)
         {
             return new pipe(value.wrMu, value.wrCh, value.rdCh, value.once, value.done, value.rerr, value.werr);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:33 UTC
+//     Generated on 2022 March 13 05:28:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class bufio_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Scanner
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace go
             public static implicit operator Scanner(NilType nil) => default(Scanner);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Scanner Scanner_cast(dynamic value)
         {
             return new Scanner(value.r, value.split, value.maxTokenSize, value.token, value.buf, value.start, value.end, value.err, value.empties, value.scanCalled, value.done);

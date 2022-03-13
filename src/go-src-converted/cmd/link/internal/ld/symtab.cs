@@ -28,37 +28,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:25 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:28 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\symtab.go
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
-public static partial class ld_package {
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
 
-    // Symbol table.
+
+// Symbol table.
+
+
+using System;public static partial class ld_package {
+
 private static nint putelfstr(@string s) {
     if (len(Elfstrdat) == 0 && s != "") { 
         // first entry must be empty string
         putelfstr("");
-
     }
     var off = len(Elfstrdat);
     Elfstrdat = append(Elfstrdat, s);
     Elfstrdat = append(Elfstrdat, 0);
     return off;
-
 }
 
 private static void putelfsyment(ptr<OutBuf> _addr_@out, nint off, long addr, long size, byte info, elf.SectionIndex shndx, nint other) {
@@ -115,7 +114,6 @@ private static void putelfsym(ptr<Link> _addr_ctxt, loader.Sym x, elf.SymType ty
             return ;
         }
         elfshnum = xosect.Elfsect._<ptr<ElfShdr>>().shnum;
-
     }
     var sname = ldr.SymExtname(x);
     sname = mangleABIName(_addr_ctxt, _addr_ldr, x, sname); 
@@ -127,7 +125,6 @@ private static void putelfsym(ptr<Link> _addr_ctxt, loader.Sym x, elf.SymType ty
         // Static tmp is package local, but a package can be shared among multiple DSOs.
         // They need to have a single view of the static tmp that are writable.
         bind = elf.STB_LOCAL;
-
     }
     if (!ctxt.DynlinkingGo() && ctxt.IsExternal() && !ldr.AttrCgoExportStatic(x) && elfshnum != elf.SHN_UNDEF) {
         bind = elf.STB_LOCAL;
@@ -143,7 +140,6 @@ private static void putelfsym(ptr<Link> _addr_ctxt, loader.Sym x, elf.SymType ty
         // internal linking for shared libraries and only create object files when
         // externally linking, I don't think this makes a lot of sense.
         other = int(elf.STV_HIDDEN);
-
     }
     if (ctxt.IsPPC64() && typ == elf.STT_FUNC && ldr.AttrShared(x) && ldr.SymName(x) != "runtime.duffzero" && ldr.SymName(x) != "runtime.duffcopy") { 
         // On ppc64 the top three bits of the st_other field indicate how
@@ -153,12 +149,10 @@ private static void putelfsym(ptr<Link> _addr_ctxt, loader.Sym x, elf.SymType ty
         // cmd/internal/obj/ppc64/obj9.go, which is where the
         // instructions are inserted.
         other |= 3 << 5;
-
     }
     if (!ctxt.DynlinkingGo()) { 
         // Rewrite · to . for ASCII-only tools like DTrace (sigh)
         sname = strings.Replace(sname, "·", ".", -1);
-
     }
     if (ctxt.DynlinkingGo() && bind == elf.STB_GLOBAL && curbind == elf.STB_LOCAL && ldr.SymType(x) == sym.STEXT) { 
         // When dynamically linking, we want references to functions defined
@@ -173,7 +167,6 @@ private static void putelfsym(ptr<Link> _addr_ctxt, loader.Sym x, elf.SymType ty
         ldr.SetSymLocalElfSym(x, int32(ctxt.numelfsym));
         ctxt.numelfsym++;
         return ;
-
     }
     else if (bind != curbind) {
         return ;
@@ -181,7 +174,6 @@ private static void putelfsym(ptr<Link> _addr_ctxt, loader.Sym x, elf.SymType ty
     putelfsyment(_addr_ctxt.Out, putelfstr(sname), addr, size, elf.ST_INFO(bind, typ), elfshnum, other);
     ldr.SetSymElfSym(x, int32(ctxt.numelfsym));
     ctxt.numelfsym++;
-
 }
 
 private static void putelfsectionsym(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, loader.Sym s, elf.SectionIndex shndx) {
@@ -206,7 +198,6 @@ private static void genelfsym(ptr<Link> _addr_ctxt, elf.SymBind elfbind) => func
         if (sect.Name != ".text" || (ctxt.IsAIX() && ctxt.IsExternal())) { 
             // On AIX, runtime.text.X are symbols already in the symtab.
             break;
-
         }
         s = ldr.Lookup(fmt.Sprintf("runtime.text.%d", n), 0);
         if (s == 0) {
@@ -216,7 +207,6 @@ private static void genelfsym(ptr<Link> _addr_ctxt, elf.SymBind elfbind) => func
             panic("unexpected type for runtime.text symbol");
         }
         putelfsym(_addr_ctxt, s, elf.STT_FUNC, elfbind);
-
     }    {
         var s__prev1 = s;
 
@@ -243,7 +233,6 @@ private static void genelfsym(ptr<Link> _addr_ctxt, elf.SymBind elfbind) => func
             return false;
         }
         return true;
-
     }; 
 
     // Data symbols.
@@ -276,7 +265,6 @@ private static void genelfsym(ptr<Link> _addr_ctxt, elf.SymBind elfbind) => func
 
         s = s__prev1;
     }
-
 });
 
 private static void asmElfSym(ptr<Link> _addr_ctxt) {
@@ -300,7 +288,6 @@ private static void asmElfSym(ptr<Link> _addr_ctxt) {
             elfglobalsymndx = ctxt.numelfsym;
         }
         genelfsym(_addr_ctxt, elfbind);
-
     }
 }
 
@@ -326,7 +313,6 @@ private static void putplan9sym(ptr<Link> _addr_ctxt, ptr<loader.Loader> _addr_l
     ctxt.Out.Write8(0);
 
     symSize += int32(l) + 1 + int32(len(name)) + 1;
-
 }
 
 private static void asmbPlan9Sym(ptr<Link> _addr_ctxt) {
@@ -362,7 +348,6 @@ private static void asmbPlan9Sym(ptr<Link> _addr_ctxt) {
             return false;
         }
         return true;
-
     }; 
 
     // Add data symbols and external references.
@@ -378,25 +363,19 @@ private static void asmbPlan9Sym(ptr<Link> _addr_ctxt) {
                 if (t == sym.STLSBSS) {
                     continue;
                 }
-
                 if (!shouldBeInSymbolTable(s)) {
                     continue;
                 }
-
                 var @char = DataSym;
                 if (t == sym.SBSS || t == sym.SNOPTRBSS) {
                     char = BSSSym;
                 }
-
                 putplan9sym(_addr_ctxt, _addr_ldr, s, char);
-
             }
-
         }
 
         s = s__prev1;
     }
-
 }
 
 private partial struct byPkg { // : slice<ptr<sym.Library>>
@@ -438,7 +417,6 @@ private static (loader.Sym, uint) textsectionmap(ptr<Link> _addr_ctxt) {
  {
                 break;
             }
-
         }
         sect = sect__prev1;
     }
@@ -483,15 +461,12 @@ private static (loader.Sym, uint) textsectionmap(ptr<Link> _addr_ctxt) {
                 }
                 off = t.SetAddr(ctxt.Arch, off, s);
             }
-
             n++;
-
         }
         sect = sect__prev1;
     }
 
     return (t.Sym(), uint32(n));
-
 }
 
 private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab> _addr_pcln) => func((_, panic, _) => {
@@ -507,8 +482,7 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
             if (s != 0) {
                 addinitarrdata(ctxt, ldr, s);
             }
-        
-    }
+            }
     ctxt.xdefine("runtime.rodata", sym.SRODATA, 0);
     ctxt.xdefine("runtime.erodata", sym.SRODATA, 0);
     ctxt.xdefine("runtime.types", sym.SRODATA, 0);
@@ -561,7 +535,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
         }
         setCarrierSym(sym.STYPE, symtype);
         setCarrierSym(sym.STYPERELRO, symtyperel);
-
     }
     Func<@string, sym.SymKind, loader.Sym> groupSym = (name, t) => {
         s = ldr.CreateSymForUpdate(name, 0);
@@ -623,7 +596,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
                         ldr.SetCarrierSym(s, symtype);
                     }
                 }
-
             else if (strings.HasPrefix(name, "go.importpath.") && ctxt.UseRelro()) 
                 // Keep go.importpath symbols in the same section as types and
                 // names, as they can be referred to by a section offset.
@@ -651,7 +623,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
                     symGroupType[s] = sym.SGOFUNC;
                     ldr.SetCarrierSym(s, symgofunc);
                 }
-
             else if (strings.HasPrefix(name, "gcargs.") || strings.HasPrefix(name, "gclocals.") || strings.HasPrefix(name, "gclocals·") || ldr.SymType(s) == sym.SGOFUNC && s != symgofunc || strings.HasSuffix(name, ".opendefer") || strings.HasSuffix(name, ".arginfo0") || strings.HasSuffix(name, ".arginfo1")) 
                 symGroupType[s] = sym.SGOFUNC;
                 ldr.SetAttrNotInSymbolTable(s, true);
@@ -669,10 +640,8 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
                     }
 
                 }
-
                 liveness += (ldr.SymSize(s) + int64(align) - 1) & ~(int64(align) - 1);
-            
-        }
+                    }
 
         s = s__prev1;
     }
@@ -769,7 +738,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
         addRef("runtime.rodata");
         addRef("runtime.erodata");
         addRef("runtime.epclntab");
-
     }
     moduledata.AddAddr(ctxt.Arch, textsectionmapSym);
     moduledata.AddUint(ctxt.Arch, uint64(nsections));
@@ -800,7 +768,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
             moduledata.AddAddr(ctxt.Arch, ptab);
             moduledata.AddUint(ctxt.Arch, nentries);
             moduledata.AddUint(ctxt.Arch, nentries);
-
         }
         else
  {
@@ -809,7 +776,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
             moduledata.AddUint(ctxt.Arch, 0);
         }
     }
-
     if (ctxt.BuildMode == BuildModePlugin) {
         addgostring(ctxt, ldr, moduledata, "go.link.thispluginpath", objabi.PathToPrefix(flagPluginPath.val));
 
@@ -831,7 +797,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
                 // pkghashes[i].runtimehash
                 var hash = ldr.Lookup("go.link.pkghash." + l.Pkg, 0);
                 pkghashes.AddAddr(ctxt.Arch, hash);
-
             }
     else
 
@@ -842,14 +807,12 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
         moduledata.AddAddr(ctxt.Arch, pkghashes.Sym());
         moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Library)));
         moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Library)));
-
     } {
         moduledata.AddUint(ctxt.Arch, 0); // pluginpath
         moduledata.AddUint(ctxt.Arch, 0);
         moduledata.AddUint(ctxt.Arch, 0); // pkghashes slice
         moduledata.AddUint(ctxt.Arch, 0);
         moduledata.AddUint(ctxt.Arch, 0);
-
     }
     if (len(ctxt.Shlibs) > 0) {
         var thismodulename = filepath.Base(flagOutfile.val);
@@ -881,7 +844,6 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
                 var abihash = ldr.LookupOrCreateSym("go.link.abihash." + modulename, 0);
                 ldr.SetAttrReachable(abihash, true);
                 modulehashes.AddAddr(ctxt.Arch, abihash);
-
             }
     else
 
@@ -892,14 +854,12 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
         moduledata.AddAddr(ctxt.Arch, modulehashes.Sym());
         moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Shlibs)));
         moduledata.AddUint(ctxt.Arch, uint64(len(ctxt.Shlibs)));
-
     } {
         moduledata.AddUint(ctxt.Arch, 0); // modulename
         moduledata.AddUint(ctxt.Arch, 0);
         moduledata.AddUint(ctxt.Arch, 0); // moduleshashes slice
         moduledata.AddUint(ctxt.Arch, 0);
         moduledata.AddUint(ctxt.Arch, 0);
-
     }
     var hasmain = ctxt.BuildMode == BuildModeExe || ctxt.BuildMode == BuildModePIE;
     if (hasmain) {
@@ -919,10 +879,8 @@ private static slice<sym.SymKind> symtab(this ptr<Link> _addr_ctxt, ptr<pclntab>
         lastmoduledatap.SetSize(0); // overwrite existing value
         lastmoduledatap.SetData(null);
         lastmoduledatap.AddAddr(ctxt.Arch, moduledata.Sym());
-
     }
     return symGroupType;
-
 });
 
 // CarrierSymByType tracks carrier symbols and their sizes.
@@ -933,7 +891,6 @@ private static void setCarrierSym(sym.SymKind typ, loader.Sym s) => func((_, pan
         panic(fmt.Sprintf("carrier symbol for type %v already set", typ));
     }
     CarrierSymByType[typ].Sym = s;
-
 });
 
 private static void setCarrierSize(sym.SymKind typ, long sz) => func((_, panic, _) => {
@@ -941,7 +898,6 @@ private static void setCarrierSize(sym.SymKind typ, long sz) => func((_, panic, 
         panic(fmt.Sprintf("carrier symbol size for type %v already set", typ));
     }
     CarrierSymByType[typ].Size = sz;
-
 });
 
 private static bool isStaticTmp(@string name) {
@@ -975,7 +931,6 @@ private static @string mangleABIName(ptr<Link> _addr_ctxt, ptr<loader.Loader> _a
             }
 
         }
-
     }
     if (ctxt.IsShared()) {
         if (ldr.SymType(x) == sym.STEXT && ldr.SymVersion(x) == sym.SymVerABIInternal && !ldr.AttrCgoExport(x) && !strings.HasPrefix(name, "type.")) {
@@ -983,7 +938,6 @@ private static @string mangleABIName(ptr<Link> _addr_ctxt, ptr<loader.Loader> _a
         }
     }
     return name;
-
 }
 
 } // end ld_package

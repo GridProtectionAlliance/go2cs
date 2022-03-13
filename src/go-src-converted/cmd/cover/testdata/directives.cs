@@ -8,18 +8,17 @@
 //go:a
 
 //go:b
-// package main -- go2cs converted at 2022 March 06 23:15:11 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:28:40 UTC
 // Original source: C:\Program Files\Go\src\cmd\cover\testdata\directives.go
-
-
 namespace go;
 
 public static partial class main_package {
 
-    //go:c1
+//go:c1
 
-    //go:c2
-    //doc
+//go:c2
+//doc
 private static void c() {
 }
 
@@ -38,5 +37,4 @@ private partial struct e { // : nint
 }
 private partial struct f { // : nint
 }
-
 } // end main_package

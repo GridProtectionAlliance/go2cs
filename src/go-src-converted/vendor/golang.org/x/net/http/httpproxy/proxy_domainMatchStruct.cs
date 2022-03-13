@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:37:11 UTC
+//     Generated on 2022 March 13 06:45:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace http
 {
     public static partial class httpproxy_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct domainMatch
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace http
             public static implicit operator domainMatch(NilType nil) => default(domainMatch);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static domainMatch domainMatch_cast(dynamic value)
         {
             return new domainMatch(value.host, value.port, value.matchHost);

@@ -6,15 +6,16 @@
 //
 // SHA-1 is cryptographically broken and should not be used for secure
 // applications.
-// package sha1 -- go2cs converted at 2022 March 06 22:19:25 UTC
+
+// package sha1 -- go2cs converted at 2022 March 13 05:34:22 UTC
 // import "crypto/sha1" ==> using sha1 = go.crypto.sha1_package
 // Original source: C:\Program Files\Go\src\crypto\sha1\sha1.go
-using crypto = go.crypto_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-
 namespace go.crypto;
+
+using crypto = crypto_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using hash = hash_package;
 
 public static partial class sha1_package {
 
@@ -40,7 +41,6 @@ private static readonly nuint init2 = 0x98BADCFE;
 private static readonly nuint init3 = 0x10325476;
 private static readonly nuint init4 = 0xC3D2E1F0;
 
-
 // digest represents the partial evaluation of a checksum.
 private partial struct digest {
     public array<uint> h;
@@ -51,7 +51,6 @@ private partial struct digest {
 
 private static readonly @string magic = "sha\x01";
 private static readonly var marshaledSize = len(magic) + 5 * 4 + chunk + 8;
-
 
 private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     slice<byte> _p0 = default;
@@ -69,7 +68,6 @@ private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     b = b[..(int)len(b) + len(d.x) - int(d.nx)]; // already zero
     b = appendUint64(b, d.len);
     return (b, error.As(null!)!);
-
 }
 
 private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
@@ -91,7 +89,6 @@ private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
     b, d.len = consumeUint64(b);
     d.nx = int(d.len % chunk);
     return error.As(null!)!;
-
 }
 
 private static slice<byte> appendUint64(slice<byte> b, ulong x) {
@@ -172,7 +169,6 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
             d.nx = 0;
         }
         p = p[(int)n..];
-
     }
     if (len(p) >= chunk) {
         n = len(p) & ~(chunk - 1);
@@ -183,7 +179,6 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
         d.nx = copy(d.x[..], p);
     }
     return ;
-
 }
 
 private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
@@ -193,7 +188,6 @@ private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
     var d0 = d.val;
     var hash = d0.checkSum();
     return append(in, hash[..]);
-
 }
 
 private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic, _) => {
@@ -226,7 +220,6 @@ private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic,
     binary.BigEndian.PutUint32(digest[(int)16..], d.h[4]);
 
     return digest;
-
 });
 
 // ConstantTimeSum computes the same result of Sum() but in constant time
@@ -273,9 +266,7 @@ private static array<byte> constSum(this ptr<digest> _addr_d) {
             if (i >= 56) { 
                 // we might have to write the length here if all fit in one block
                 d.x[i] |= mask1b & length[i - 56];
-
             }
-
         }
 
         i = i__prev1;
@@ -314,7 +305,6 @@ private static array<byte> constSum(this ptr<digest> _addr_d) {
  {
                 d.x[i] = length[i - 56];
             }
-
         }
 
         i = i__prev1;
@@ -340,7 +330,6 @@ private static array<byte> constSum(this ptr<digest> _addr_d) {
     }
 
     return digest;
-
 }
 
 // Sum returns the SHA-1 checksum of the data.

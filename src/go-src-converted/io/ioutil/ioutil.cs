@@ -8,26 +8,28 @@
 // by package io or package os, and those implementations
 // should be preferred in new code.
 // See the specific function documentation for details.
-// package ioutil -- go2cs converted at 2022 March 06 22:12:46 UTC
+
+// package ioutil -- go2cs converted at 2022 March 13 05:27:48 UTC
 // import "io/ioutil" ==> using ioutil = go.io.ioutil_package
 // Original source: C:\Program Files\Go\src\io\ioutil\ioutil.go
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.io;
 
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using sort = sort_package;
+
+
+// ReadAll reads from r until an error or EOF and returns the data it read.
+// A successful call returns err == nil, not err == EOF. Because ReadAll is
+// defined to read from src until EOF, it does not treat an EOF from Read
+// as an error to be reported.
+//
+// As of Go 1.16, this function simply calls io.ReadAll.
+
+using System;
 public static partial class ioutil_package {
 
-    // ReadAll reads from r until an error or EOF and returns the data it read.
-    // A successful call returns err == nil, not err == EOF. Because ReadAll is
-    // defined to read from src until EOF, it does not treat an EOF from Read
-    // as an error to be reported.
-    //
-    // As of Go 1.16, this function simply calls io.ReadAll.
 public static (slice<byte>, error) ReadAll(io.Reader r) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -81,7 +83,6 @@ public static (slice<fs.FileInfo>, error) ReadDir(@string dirname) {
     }
     sort.Slice(list, (i, j) => list[i].Name() < list[j].Name());
     return (list, error.As(null!)!);
-
 }
 
 // NopCloser returns a ReadCloser with a no-op Close method wrapping

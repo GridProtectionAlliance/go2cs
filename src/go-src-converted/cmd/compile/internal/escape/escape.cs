@@ -2,96 +2,97 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package escape -- go2cs converted at 2022 March 06 23:09:14 UTC
+// package escape -- go2cs converted at 2022 March 13 06:22:33 UTC
 // import "cmd/compile/internal/escape" ==> using escape = go.cmd.compile.@internal.escape_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\escape\escape.go
-using fmt = go.fmt_package;
-using math = go.math_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using math = math_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// Escape analysis.
+//
+// Here we analyze functions to determine which Go variables
+// (including implicit allocations such as calls to "new" or "make",
+// composite literals, etc.) can be allocated on the stack. The two
+// key invariants we have to ensure are: (1) pointers to stack objects
+// cannot be stored in the heap, and (2) pointers to a stack object
+// cannot outlive that object (e.g., because the declaring function
+// returned and destroyed the object's stack frame, or its space is
+// reused across loop iterations for logically distinct variables).
+//
+// We implement this with a static data-flow analysis of the AST.
+// First, we construct a directed weighted graph where vertices
+// (termed "locations") represent variables allocated by statements
+// and expressions, and edges represent assignments between variables
+// (with weights representing addressing/dereference counts).
+//
+// Next we walk the graph looking for assignment paths that might
+// violate the invariants stated above. If a variable v's address is
+// stored in the heap or elsewhere that may outlive it, then v is
+// marked as requiring heap allocation.
+//
+// To support interprocedural analysis, we also record data-flow from
+// each function's parameters to the heap and to its result
+// parameters. This information is summarized as "parameter tags",
+// which are used at static call sites to improve escape analysis of
+// function arguments.
+
+// Constructing the location graph.
+//
+// Every allocating statement (e.g., variable declaration) or
+// expression (e.g., "new" or "make") is first mapped to a unique
+// "location."
+//
+// We also model every Go assignment as a directed edges between
+// locations. The number of dereference operations minus the number of
+// addressing operations is recorded as the edge's weight (termed
+// "derefs"). For example:
+//
+//     p = &q    // -1
+//     p = q     //  0
+//     p = *q    //  1
+//     p = **q   //  2
+//
+//     p = **&**&q  // 2
+//
+// Note that the & operator can only be applied to addressable
+// expressions, and the expression &x itself is not addressable, so
+// derefs cannot go below -1.
+//
+// Every Go language construct is lowered into this representation,
+// generally without sensitivity to flow, path, or context; and
+// without distinguishing elements within a compound variable. For
+// example:
+//
+//     var x struct { f, g *int }
+//     var u []*int
+//
+//     x.f = u[0]
+//
+// is modeled simply as
+//
+//     x = *u
+//
+// That is, we don't distinguish x.f from x.g, or u[0] from u[1],
+// u[2], etc. However, we do record the implicit dereference involved
+// in indexing a slice.
+
+// A batch holds escape analysis state that's shared across an entire
+// batch of functions being analyzed at once.
+
+using System;
 public static partial class escape_package {
 
-    // Escape analysis.
-    //
-    // Here we analyze functions to determine which Go variables
-    // (including implicit allocations such as calls to "new" or "make",
-    // composite literals, etc.) can be allocated on the stack. The two
-    // key invariants we have to ensure are: (1) pointers to stack objects
-    // cannot be stored in the heap, and (2) pointers to a stack object
-    // cannot outlive that object (e.g., because the declaring function
-    // returned and destroyed the object's stack frame, or its space is
-    // reused across loop iterations for logically distinct variables).
-    //
-    // We implement this with a static data-flow analysis of the AST.
-    // First, we construct a directed weighted graph where vertices
-    // (termed "locations") represent variables allocated by statements
-    // and expressions, and edges represent assignments between variables
-    // (with weights representing addressing/dereference counts).
-    //
-    // Next we walk the graph looking for assignment paths that might
-    // violate the invariants stated above. If a variable v's address is
-    // stored in the heap or elsewhere that may outlive it, then v is
-    // marked as requiring heap allocation.
-    //
-    // To support interprocedural analysis, we also record data-flow from
-    // each function's parameters to the heap and to its result
-    // parameters. This information is summarized as "parameter tags",
-    // which are used at static call sites to improve escape analysis of
-    // function arguments.
-
-    // Constructing the location graph.
-    //
-    // Every allocating statement (e.g., variable declaration) or
-    // expression (e.g., "new" or "make") is first mapped to a unique
-    // "location."
-    //
-    // We also model every Go assignment as a directed edges between
-    // locations. The number of dereference operations minus the number of
-    // addressing operations is recorded as the edge's weight (termed
-    // "derefs"). For example:
-    //
-    //     p = &q    // -1
-    //     p = q     //  0
-    //     p = *q    //  1
-    //     p = **q   //  2
-    //
-    //     p = **&**&q  // 2
-    //
-    // Note that the & operator can only be applied to addressable
-    // expressions, and the expression &x itself is not addressable, so
-    // derefs cannot go below -1.
-    //
-    // Every Go language construct is lowered into this representation,
-    // generally without sensitivity to flow, path, or context; and
-    // without distinguishing elements within a compound variable. For
-    // example:
-    //
-    //     var x struct { f, g *int }
-    //     var u []*int
-    //
-    //     x.f = u[0]
-    //
-    // is modeled simply as
-    //
-    //     x = *u
-    //
-    // That is, we don't distinguish x.f from x.g, or u[0] from u[1],
-    // u[2], etc. However, we do record the implicit dereference involved
-    // in indexing a slice.
-
-    // A batch holds escape analysis state that's shared across an entire
-    // batch of functions being analyzed at once.
 private partial struct batch {
     public slice<ptr<location>> allLocs;
     public slice<closure> closures;
@@ -188,10 +189,8 @@ public static @string Fmt(ir.Node n) {
             }
 
         }
-
     }
     return text;
-
 }
 
 // Batch performs escape analysis on a minimal batch of
@@ -252,10 +251,8 @@ public static void Batch(slice<ptr<ir.Func>> fns, bool recursive) {
             }
 
         }
-
     }    b.walkAll();
     b.finish(fns);
-
 }
 
 private static ptr<escape> with(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn) {
@@ -282,10 +279,9 @@ private static void initFunc(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn) {
             e.newLoc(n, false);
         }
     }    foreach (var (i, f) in fn.Type().Results().FieldSlice()) {
-        e.oldLoc(f.Nname._<ptr<ir.Name>>()).resultIndex;
+        e.oldLoc;
 
-        1 + i;
-
+        (f.Nname._<ptr<ir.Name>>()).resultIndex = 1 + i;
     }
 }
 
@@ -312,8 +308,7 @@ private static void walkFunc(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn) {
             if (e.labels[n.Label] == nonlooping) {
                 e.labels[n.Label] = looping;
             }
-        
-    });
+            });
 
     e.block(fn.Body);
 
@@ -348,7 +343,6 @@ private static void flowClosure(this ptr<batch> _addr_b, hole k, ptr<ir.ClosureE
             k = k.addr(cv, "reference");
         }
         b.flow(k.note(cv, "captured by a closure"), loc);
-
     }
 }
 
@@ -472,7 +466,6 @@ private static void stmt(this ptr<escape> _addr_e, ir.Node n) => func((defer, _,
                             if (cv.Type().HasPointers()) {
                                 ks = append(ks, k.dotType(cv.Type(), cas, "switch case"));
                             }
-
                         }
 
                         cas = cas__prev1;
@@ -480,13 +473,11 @@ private static void stmt(this ptr<escape> _addr_e, ir.Node n) => func((defer, _,
                 }
             else
                 e.expr(e.teeHole(ks), n.Tag._<ptr<ir.TypeSwitchGuard>>().X);
-
             } {
                 e.discard(n.Tag);
             }
 
         }
-
 
         {
             var cas__prev1 = cas;
@@ -560,8 +551,7 @@ private static void stmt(this ptr<escape> _addr_e, ir.Node n) => func((defer, _,
         e.call(null, n.Call, n);
     else if (n.Op() == ir.OTAILCALL)     else 
         @base.Fatalf("unexpected stmt: %v", n);
-    
-});
+    });
 
 private static void stmts(this ptr<escape> _addr_e, ir.Nodes l) {
     ref escape e = ref _addr_e.val;
@@ -590,7 +580,6 @@ private static void expr(this ptr<escape> _addr_e, hole k, ir.Node n) {
     }
     e.stmts(n.Init());
     e.exprSkipInit(k, n);
-
 }
 
 private static void exprSkipInit(this ptr<escape> _addr_e, hole k, ir.Node n) => func((defer, _, _) => {
@@ -658,7 +647,6 @@ private static void exprSkipInit(this ptr<escape> _addr_e, hole k, ir.Node n) =>
  { 
             // TODO(mdempsky): Fix why reason text.
             e.expr(k.deref(n, "dot of pointer"), n.X);
-
         }
         e.discard(n.Index);
     else if (n.Op() == ir.OINDEXMAP) 
@@ -681,7 +669,6 @@ private static void exprSkipInit(this ptr<escape> _addr_e, hole k, ir.Node n) =>
             // easily detect object boundaries on the heap
             // than the stack.
             e.assignHeap(n.X, "conversion to unsafe.Pointer", n);
-
         }
         else if (n.Type().IsUnsafePtr() && n.X.Type().IsUintptr()) {
             e.unsafeValue(k, n.X);
@@ -829,11 +816,9 @@ private static void exprSkipInit(this ptr<escape> _addr_e, hole k, ir.Node n) =>
                             if (loc.loopDepth == e.loopDepth) {
                                 loc.reassigned = false;
                             }
-
                         }
 
                     }
-
                 }
                 {
                     ptr<ir.Name> n__prev1 = n;
@@ -848,19 +833,15 @@ private static void exprSkipInit(this ptr<escape> _addr_e, hole k, ir.Node n) =>
                         if (n.Op() == ir.ONAME && n.Opt == null) {
                             e.with(fn).newLoc(n, false);
                         }
-
                     }
 
                     n = n__prev1;
                 }
 
                 e.walkFunc(fn);
-
             }
 
         }
-
-
     else if (n.Op() == ir.ORUNES2STR || n.Op() == ir.OBYTES2STR || n.Op() == ir.OSTR2RUNES || n.Op() == ir.OSTR2BYTES || n.Op() == ir.ORUNESTR) 
         n = n._<ptr<ir.ConvExpr>>();
         e.spill(k, n);
@@ -874,8 +855,7 @@ private static void exprSkipInit(this ptr<escape> _addr_e, hole k, ir.Node n) =>
         e.discards(n.List);
     else 
         @base.Fatalf("unexpected expr: %s %v", n.Op().String(), n);
-    
-});
+    });
 
 // unsafeValue evaluates a uintptr-typed arithmetic expression looking
 // for conversions from an unsafe.Pointer.
@@ -924,8 +904,7 @@ private static void unsafeValue(this ptr<escape> _addr_e, hole k, ir.Node n) {
         e.discard(n.Y);
     else 
         e.exprSkipInit(e.discardHole(), n);
-    
-}
+    }
 
 // discard evaluates an expression n for side-effects, but discards
 // its value.
@@ -951,7 +930,6 @@ private static hole addr(this ptr<escape> _addr_e, ir.Node n) {
     if (n == null || ir.IsBlank(n)) { 
         // Can happen in select case, range, maybe others.
         return e.discardHole();
-
     }
     var k = e.heapHole();
 
@@ -986,7 +964,6 @@ private static hole addr(this ptr<escape> _addr_e, ir.Node n) {
     else 
         @base.Fatalf("unexpected addr: %v", n);
         return k;
-
 }
 
 private static slice<hole> addrs(this ptr<escape> _addr_e, ir.Nodes l) {
@@ -1016,14 +993,11 @@ private static void reassigned(this ptr<escape> _addr_e, slice<hole> ks, ir.Node
                     // explicit initial value. Assume this is its initialization
                     // statement.
                     return ;
-
                 }
 
             }
-
         }
     }
-
 
     foreach (var (_, k) in ks) {
         var loc = k.dst; 
@@ -1036,9 +1010,7 @@ private static void reassigned(this ptr<escape> _addr_e, slice<hole> ks, ir.Node
             }
 
         }
-
         loc.reassigned = true;
-
     }
 }
 
@@ -1070,16 +1042,12 @@ private static void assignList(this ptr<escape> _addr_e, slice<ir.Node> dsts, sl
                     }
                     k = e.discardHole();
                 }
-
             }
 
         }
 
-
         e.expr(k.note(where, why), src);
-
     }    e.reassigned(ks, where);
-
 }
 
 private static void assignHeap(this ptr<escape> _addr_e, ir.Node src, @string why, ir.Node where) {
@@ -1099,7 +1067,6 @@ private static void call(this ptr<escape> _addr_e, slice<hole> ks, ir.Node call,
         // force stack allocation of defer record, unless
         // open-coded defers are used (see ssa.go)
         where.SetEsc(ir.EscNever);
-
     }
     Action<hole, ir.Node> argument = (k, arg) => {
         if (topLevelDefer) { 
@@ -1107,13 +1074,11 @@ private static void call(this ptr<escape> _addr_e, slice<hole> ks, ir.Node call,
             // heap, but they do need to last until end of
             // function.
             k = e.later(k);
-
         }
         else if (where != null) {
             k = e.heapHole();
         }
         e.expr(k.note(call, "call parameter"), arg);
-
     };
 
 
@@ -1164,11 +1129,9 @@ private static void call(this ptr<escape> _addr_e, slice<hole> ks, ir.Node call,
  { 
                 // Evaluate callee function expression.
                 argument(e.discardHole(), call.X);
-
             }
 
         }
-
 
         var args = call.Args;
         {
@@ -1254,8 +1217,7 @@ private static void call(this ptr<escape> _addr_e, slice<hole> ks, ir.Node call,
     else 
         ir.Dump("esc", call);
         @base.Fatalf("unexpected call op: %v", call.Op());
-    
-}
+    }
 
 // tagHole returns a hole for evaluating an argument passed to param.
 // ks should contain the holes representing where the function
@@ -1293,7 +1255,6 @@ private static hole tagHole(this ptr<escape> _addr_e, slice<hole> ks, ptr<ir.Nam
 
     }
 
-
     if (ks != null) {
         for (nint i = 0; i < numEscResults; i++) {
             {
@@ -1308,12 +1269,9 @@ private static hole tagHole(this ptr<escape> _addr_e, slice<hole> ks, ptr<ir.Nam
                 x = x__prev2;
 
             }
-
         }
-
     }
     return e.teeHole(tagKs);
-
 }
 
 // inMutualBatch reports whether function fn is in the batch of
@@ -1330,10 +1288,8 @@ private static bool inMutualBatch(this ptr<escape> _addr_e, ptr<ir.Name> _addr_f
             @base.Fatalf("graph inconsistency: %v", fn);
         }
         return true;
-
     }
     return false;
-
 }
 
 // An hole represents a context for evaluation a Go
@@ -1364,7 +1320,6 @@ private static hole note(this hole k, ir.Node where, @string why) {
         k.notes = addr(new note(next:k.notes,where:where,why:why,));
     }
     return k;
-
 }
 
 private static hole shift(this hole k, nint delta) {
@@ -1374,7 +1329,6 @@ private static hole shift(this hole k, nint delta) {
     }
     k.addrtaken = delta < 0;
     return k;
-
 }
 
 private static hole deref(this hole k, ir.Node where, @string why) {
@@ -1391,7 +1345,6 @@ private static hole dotType(this hole k, ptr<types.Type> _addr_t, ir.Node where,
         k = k.shift(1);
     }
     return k.note(where, why);
-
 }
 
 // teeHole returns a new hole that flows into each hole of ks,
@@ -1417,9 +1370,7 @@ private static hole teeHole(this ptr<escape> _addr_e, params hole[] ks) {
             @base.Fatalf("teeHole: negative derefs");
         }
         e.flow(k, loc);
-
     }    return loc.asHole();
-
 }
 
 private static hole dcl(this ptr<escape> _addr_e, ptr<ir.Name> _addr_n) {
@@ -1432,7 +1383,6 @@ private static hole dcl(this ptr<escape> _addr_e, ptr<ir.Name> _addr_n) {
     var loc = e.oldLoc(n);
     loc.loopDepth = e.loopDepth;
     return loc.asHole();
-
 }
 
 // spill allocates a new location associated with expression n, flows
@@ -1484,7 +1434,6 @@ private static ptr<location> newLoc(this ptr<escape> _addr_e, ir.Node n, bool tr
         }
     }
     return _addr_loc!;
-
 }
 
 private static ptr<location> oldLoc(this ptr<batch> _addr_b, ptr<ir.Name> _addr_n) {
@@ -1495,7 +1444,6 @@ private static ptr<location> oldLoc(this ptr<batch> _addr_b, ptr<ir.Name> _addr_
         @base.Fatalf("%v has no location", n);
     }
     return n.Canonical().Opt._<ptr<location>>();
-
 }
 
 private static hole asHole(this ptr<location> _addr_l) {
@@ -1517,7 +1465,6 @@ private static void flow(this ptr<batch> _addr_b, hole k, ptr<location> _addr_sr
     }
     if (dst == src && k.derefs >= 0) { // dst = dst, dst = *dst, ...
         return ;
-
     }
     if (dst.escapes && k.derefs < 0) { // dst = &src
         if (@base.Flag.LowerM >= 2 || logopt.Enabled()) {
@@ -1529,16 +1476,12 @@ private static void flow(this ptr<batch> _addr_b, hole k, ptr<location> _addr_sr
             if (logopt.Enabled()) {
                 ptr<ir.Func> e_curfn; // TODO(mdempsky): Fix.
                 logopt.LogOpt(src.n.Pos(), "escapes", "escape", ir.FuncName(e_curfn), fmt.Sprintf("%v escapes to heap", src.n), explanation);
-
             }
-
         }
         src.escapes = true;
         return ;
-
     }
     dst.edges = append(dst.edges, new edge(src:src,derefs:k.derefs,notes:k.notes));
-
 }
 
 private static hole heapHole(this ptr<batch> _addr_b) {
@@ -1587,7 +1530,6 @@ private static void walkAll(this ptr<batch> _addr_b) {
         walkgen++;
         b.walkOne(root, walkgen, enqueue);
     }
-
 }
 
 // walkOne computes the minimal number of dereferences from root to
@@ -1628,7 +1570,6 @@ private static void walkOne(this ptr<batch> _addr_b, ptr<location> _addr_root, u
                 l.transient = false;
                 enqueue(l);
             }
-
         }
         if (b.outlives(root, l)) { 
             // l's value flows to root. If l is a function
@@ -1645,13 +1586,9 @@ private static void walkOne(this ptr<batch> _addr_b, ptr<location> _addr_root, u
                     if (logopt.Enabled()) {
                         ptr<ir.Func> e_curfn; // TODO(mdempsky): Fix.
                         logopt.LogOpt(l.n.Pos(), "leak", "escape", ir.FuncName(e_curfn), fmt.Sprintf("parameter %v leaks to %s with derefs=%d", l.n, b.explainLoc(root), derefs), explanation);
-
                     }
-
                 }
-
                 l.leakTo(root, derefs);
-
             } 
 
             // If l's address flows somewhere that
@@ -1666,17 +1603,12 @@ private static void walkOne(this ptr<batch> _addr_b, ptr<location> _addr_root, u
                     if (logopt.Enabled()) {
                         e_curfn = ; // TODO(mdempsky): Fix.
                         logopt.LogOpt(l.n.Pos(), "escape", "escape", ir.FuncName(e_curfn), fmt.Sprintf("%v escapes to heap", l.n), explanation);
-
                     }
-
                 }
-
                 l.escapes = true;
                 enqueue(l);
                 continue;
-
             }
-
         }
         foreach (var (i, edge) in l.edges) {
             if (edge.src.escapes) {
@@ -1692,7 +1624,6 @@ private static void walkOne(this ptr<batch> _addr_b, ptr<location> _addr_root, u
             }
         }
     }
-
 }
 
 // explainPath prints an explanation of how src flows to the walk root.
@@ -1724,11 +1655,9 @@ private static slice<ptr<logopt.LoggedOpt>> explainPath(this ptr<batch> _addr_b,
             break;
         }
         src = dst;
-
     }
 
     return explanation;
-
 }
 
 private static slice<ptr<logopt.LoggedOpt>> explainFlow(this ptr<batch> _addr_b, @string pos, ptr<location> _addr_dst, ptr<location> _addr_srcloc, nint derefs, ptr<note> _addr_notes, slice<ptr<logopt.LoggedOpt>> explanation) {
@@ -1757,7 +1686,6 @@ private static slice<ptr<logopt.LoggedOpt>> explainFlow(this ptr<batch> _addr_b,
         }
         ptr<ir.Func> e_curfn; // TODO(mdempsky): Fix.
         explanation = append(explanation, logopt.NewLoggedOpt(epos, "escflow", "escape", ir.FuncName(e_curfn), flow));
-
     }
     {
         var note = notes;
@@ -1767,17 +1695,13 @@ private static slice<ptr<logopt.LoggedOpt>> explainFlow(this ptr<batch> _addr_b,
                 fmt.Printf("%s:     from %v (%v) at %s\n", pos, note.where, note.why, @base.FmtPos(note.where.Pos()));
             note = note.next;
             }
-
             if (logopt.Enabled()) {
                 e_curfn = ; // TODO(mdempsky): Fix.
                 explanation = append(explanation, logopt.NewLoggedOpt(note.where.Pos(), "escflow", "escape", ir.FuncName(e_curfn), fmt.Sprintf("     from %v (%v)", note.where, note.why)));
-
             }
-
         }
     }
     return explanation;
-
 }
 
 private static @string explainLoc(this ptr<batch> _addr_b, ptr<location> _addr_l) {
@@ -1790,13 +1714,11 @@ private static @string explainLoc(this ptr<batch> _addr_b, ptr<location> _addr_l
     if (l.n == null) { 
         // TODO(mdempsky): Omit entirely.
         return "{temp}";
-
     }
     if (l.n.Op() == ir.ONAME) {
         return fmt.Sprintf("%v", l.n);
     }
     return fmt.Sprintf("{storage for %v}", l.n);
-
 }
 
 // outlives reports whether values stored in l may survive beyond
@@ -1821,7 +1743,6 @@ private static bool outlives(this ptr<batch> _addr_b, ptr<location> _addr_l, ptr
             return false;
         }
         return true;
-
     }
     if (l.curfn == other.curfn && l.loopDepth < other.loopDepth) {
         return true;
@@ -1830,7 +1751,6 @@ private static bool outlives(this ptr<batch> _addr_b, ptr<location> _addr_l, ptr
         return true;
     }
     return false;
-
 }
 
 // containsClosure reports whether c is a closure contained within f.
@@ -1845,7 +1765,6 @@ private static bool containsClosure(ptr<ir.Func> _addr_f, ptr<ir.Func> _addr_c) 
     var fn = f.Sym().Name;
     var cn = c.Sym().Name;
     return len(cn) > len(fn) && cn[..(int)len(fn)] == fn && cn[len(fn)] == '.';
-
 }
 
 // leak records that parameter l leaks to sink.
@@ -1862,11 +1781,9 @@ private static void leakTo(this ptr<location> _addr_l, ptr<location> _addr_sink,
             // Leak to result parameter.
             l.paramEsc.AddResult(ri, derefs);
             return ;
-
         }
     }
     l.paramEsc.AddHeap(derefs);
-
 }
 
 private static void finish(this ptr<batch> _addr_b, slice<ptr<ir.Func>> fns) {
@@ -1909,13 +1826,9 @@ private static void finish(this ptr<batch> _addr_b, slice<ptr<ir.Func>> fns) {
                 if (logopt.Enabled()) {
                     ptr<ir.Func> e_curfn; // TODO(mdempsky): Fix.
                     logopt.LogOpt(n.Pos(), "escape", "escape", ir.FuncName(e_curfn));
-
                 }
-
             }
-
             n.SetEsc(ir.EscHeap);
-
         }
         else
  {
@@ -1934,9 +1847,7 @@ private static void finish(this ptr<batch> _addr_b, slice<ptr<ir.Func>> fns) {
                 else if (n.Op() == ir.OSLICELIT) 
                     n = n._<ptr<ir.CompLitExpr>>();
                     n.SetTransient(true);
-                
-            }
-
+                            }
         }
     }
 }
@@ -2013,7 +1924,6 @@ private static void add(this ptr<leaks> _addr_l, nint i, nint derefs) {
             l.set(i, derefs);
         }
     }
-
 }
 
 private static void set(this ptr<leaks> _addr_l, nint i, nint derefs) {
@@ -2027,7 +1937,6 @@ private static void set(this ptr<leaks> _addr_l, nint i, nint derefs) {
         v = math.MaxUint8;
     }
     l[i] = uint8(v);
-
 }
 
 // Optimize removes result flow paths that are equal in length or
@@ -2048,7 +1957,6 @@ private static void Optimize(this ptr<leaks> _addr_l) {
             }
         }
     }
-
 }
 
 private static map leakTagCache = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<leaks, @string>{};
@@ -2059,7 +1967,6 @@ private static @string Encode(this leaks l) {
         // Space optimization: empty string encodes more
         // efficiently in export data.
         return "";
-
     }
     {
         var s__prev1 = s;
@@ -2073,7 +1980,6 @@ private static @string Encode(this leaks l) {
 
     }
 
-
     var n = len(l);
     while (n > 0 && l[n - 1] == 0) {
         n--;
@@ -2081,7 +1987,6 @@ private static @string Encode(this leaks l) {
     @string s = "esc:" + string(l[..(int)n]);
     leakTagCache[l] = s;
     return s;
-
 }
 
 // parseLeaks parses a binary string representing a leaks
@@ -2093,7 +1998,6 @@ private static leaks parseLeaks(@string s) {
     }
     copy(l[..], s[(int)4..]);
     return l;
-
 }
 
 public static void Funcs(slice<ir.Node> all) {
@@ -2105,14 +2009,12 @@ private static readonly var escFuncPlanned = 0;
 private static readonly var escFuncStarted = 1;
 private static readonly var escFuncTagged = 2;
 
-
 // Mark labels that have no backjumps to them as not increasing e.loopdepth.
 private partial struct labelState { // : nint
 }
 
 private static readonly labelState looping = 1 + iota;
 private static readonly var nonlooping = 0;
-
 
 private static bool isSliceSelfAssign(ir.Node dst, ir.Node src) { 
     // Detect the following special case.
@@ -2185,7 +2087,6 @@ private static bool isSliceSelfAssign(ir.Node dst, ir.Node src) {
         return false;
     }
     return dstX._<ptr<ir.Name>>() == baseX._<ptr<ir.Name>>();
-
 }
 
 // isSelfAssign reports whether assignment from src to dst can
@@ -2212,8 +2113,7 @@ private static bool isSelfAssign(ir.Node dst, ir.Node src) {
         return ir.SameSafeExpr(dst.X, src.X);
     else 
         return false;
-    
-}
+    }
 
 // mayAffectMemory reports whether evaluation of n may affect the program's
 // memory state. If the expression can't affect memory state, then it can be
@@ -2252,8 +2152,7 @@ private static bool mayAffectMemory(ir.Node n) {
         return mayAffectMemory(n.X);
     else 
         return true;
-    
-}
+    }
 
 // HeapAllocReason returns the reason the given Node must be heap
 // allocated, or the empty string if it doesn't.
@@ -2296,10 +2195,8 @@ public static @string HeapAllocReason(ir.Node n) {
             }
 
         }
-
     }
     return "";
-
 }
 
 // This special tag is applied to uintptr variables
@@ -2327,7 +2224,6 @@ private static @string paramTag(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn, 
             return f.Sym.Name;
         }
         return fmt.Sprintf("arg#%d", narg);
-
     };
 
     if (len(fn.Body) == 0) { 
@@ -2345,7 +2241,6 @@ private static @string paramTag(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn, 
         }
         if (!f.Type.HasPointers()) { // don't bother tagging for scalars
             return "";
-
         }
         leaks esc = default; 
 
@@ -2364,7 +2259,6 @@ private static @string paramTag(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn, 
             esc.AddHeap(0);
         }
         return esc.Encode();
-
     }
     if (fn.Pragma & ir.UintptrEscapes != 0) {
         if (f.Type.IsUintptr()) {
@@ -2378,14 +2272,11 @@ private static @string paramTag(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn, 
             if (@base.Flag.LowerM != 0) {
                 @base.WarnfAt(f.Pos, "marking %v as escaping ...uintptr", name());
             }
-
             return UintptrEscapesNote;
-
         }
     }
     if (!f.Type.HasPointers()) { // don't bother tagging for scalars
         return "";
-
     }
     if (f.Sym == null || f.Sym.IsBlank()) {
         esc = default;
@@ -2413,15 +2304,12 @@ private static @string paramTag(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn, 
  { 
                     // TODO(mdempsky): Mention level=x like below?
                     @base.WarnfAt(f.Pos, "leaking param content: %v", name());
-
                 }
-
             }
 
             x = x__prev2;
 
         }
-
         for (nint i = 0; i < numEscResults; i++) {
             {
                 var x__prev2 = x;
@@ -2436,12 +2324,9 @@ private static @string paramTag(this ptr<batch> _addr_b, ptr<ir.Func> _addr_fn, 
                 x = x__prev2;
 
             }
-
         }
-
     }
     return esc.Encode();
-
 }
 
 } // end escape_package

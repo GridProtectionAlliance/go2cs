@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:42 UTC
+//     Generated on 2022 March 13 06:32:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class @base_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct explicitStringFlag
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace @internal
             public static implicit operator explicitStringFlag(NilType nil) => default(explicitStringFlag);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static explicitStringFlag explicitStringFlag_cast(dynamic value)
         {
             return new explicitStringFlag(ref value.value, ref value.@explicit);

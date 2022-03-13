@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:28 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:50 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\config.go
-using abi = go.cmd.compile.@internal.abi_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.compile.@internal;
+
+using abi = cmd.compile.@internal.abi_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+using buildcfg = @internal.buildcfg_package;
+
+
+// A Config holds readonly compilation information.
+// It is created once, early during compilation,
+// and shared across all compilations.
 
 public static partial class ssa_package {
 
-    // A Config holds readonly compilation information.
-    // It is created once, early during compilation,
-    // and shared across all compilations.
 public partial struct Config {
     public @string arch; // "amd64", etc.
     public long PtrSize; // 4 or 8; copy of cmd/internal/sys.Arch.PtrSize
@@ -54,8 +56,7 @@ public partial struct Config {
 }
 
 public delegate  bool blockRewriter(ptr<Block>);
-public delegate  bool valueRewriter(ptr<Value>);
-public partial struct Types {
+public delegate  bool valueRewriter(ptr<Value>);public partial struct Types {
     public ptr<types.Type> Bool;
     public ptr<types.Type> Int8;
     public ptr<types.Type> Int16;
@@ -383,7 +384,6 @@ public static ptr<Config> NewConfig(@string arch, Types types, ptr<obj.Link> _ad
     }
 
     return _addr_c!;
-
 }
 
 private static ptr<obj.Link> Ctxt(this ptr<Config> _addr_c) {

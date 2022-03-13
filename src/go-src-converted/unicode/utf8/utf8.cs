@@ -5,20 +5,19 @@
 // Package utf8 implements functions and constants to support text encoded in
 // UTF-8. It includes functions to translate between runes and UTF-8 byte sequences.
 // See https://en.wikipedia.org/wiki/UTF-8
-// package utf8 -- go2cs converted at 2022 March 06 22:08:05 UTC
+
+// package utf8 -- go2cs converted at 2022 March 13 05:23:54 UTC
 // import "unicode/utf8" ==> using utf8 = go.unicode.utf8_package
 // Original source: C:\Program Files\Go\src\unicode\utf8\utf8.go
-
-
 namespace go.unicode;
 
 public static partial class utf8_package {
 
-    // The conditions RuneError==unicode.ReplacementChar and
-    // MaxRune==unicode.MaxRune are verified in the tests.
-    // Defining them locally avoids this package depending on package unicode.
+// The conditions RuneError==unicode.ReplacementChar and
+// MaxRune==unicode.MaxRune are verified in the tests.
+// Defining them locally avoids this package depending on package unicode.
 
-    // Numbers fundamental to the encoding.
+// Numbers fundamental to the encoding.
 public static readonly char RuneError = '\uFFFD'; // the "error" Rune or "Unicode replacement character"
 public static readonly nuint RuneSelf = 0x80; // characters below RuneSelf are represented as themselves in a single byte.
 public static readonly char MaxRune = '\U0010FFFF'; // Maximum valid Unicode code point.
@@ -27,7 +26,6 @@ public static readonly nint UTFMax = 4; // maximum number of bytes of a UTF-8 en
 // Code points in the surrogate range are not valid for UTF-8.
 private static readonly nuint surrogateMin = 0xD800;
 private static readonly nuint surrogateMax = 0xDFFF;
-
 
 private static readonly nuint t1 = 0b00000000;
 private static readonly nuint tx = 0b10000000;
@@ -95,7 +93,6 @@ public static bool FullRune(slice<byte> p) {
         return true;
     }
     return false;
-
 }
 
 // FullRuneInString is like FullRune but its input is a string.
@@ -116,7 +113,6 @@ public static bool FullRuneInString(@string s) {
         return true;
     }
     return false;
-
 }
 
 // DecodeRune unpacks the first UTF-8 encoding in p and returns the rune and
@@ -143,7 +139,6 @@ public static (int, nint) DecodeRune(slice<byte> p) {
         // approach prevents an additional branch.
         var mask = rune(x) << 31 >> 31; // Create 0x0000 or 0xFFFF.
         return (rune(p[0]) & ~mask | RuneError & mask, 1);
-
     }
     var sz = int(x & 7);
     var accept = acceptRanges[x >> 4];
@@ -156,7 +151,6 @@ public static (int, nint) DecodeRune(slice<byte> p) {
     }
     if (sz <= 2) { // <= instead of == to help the compiler eliminate some bounds checks
         return (rune(p0 & mask2) << 6 | rune(b1 & maskx), 2);
-
     }
     var b2 = p[2];
     if (b2 < locb || hicb < b2) {
@@ -170,7 +164,6 @@ public static (int, nint) DecodeRune(slice<byte> p) {
         return (RuneError, 1);
     }
     return (rune(p0 & mask4) << 18 | rune(b1 & maskx) << 12 | rune(b2 & maskx) << 6 | rune(b3 & maskx), 4);
-
 }
 
 // DecodeRuneInString is like DecodeRune but its input is a string. If s is
@@ -197,7 +190,6 @@ public static (int, nint) DecodeRuneInString(@string s) {
         // approach prevents an additional branch.
         var mask = rune(x) << 31 >> 31; // Create 0x0000 or 0xFFFF.
         return (rune(s[0]) & ~mask | RuneError & mask, 1);
-
     }
     var sz = int(x & 7);
     var accept = acceptRanges[x >> 4];
@@ -210,7 +202,6 @@ public static (int, nint) DecodeRuneInString(@string s) {
     }
     if (sz <= 2) { // <= instead of == to help the compiler eliminate some bounds checks
         return (rune(s0 & mask2) << 6 | rune(s1 & maskx), 2);
-
     }
     var s2 = s[2];
     if (s2 < locb || hicb < s2) {
@@ -224,7 +215,6 @@ public static (int, nint) DecodeRuneInString(@string s) {
         return (RuneError, 1);
     }
     return (rune(s0 & mask4) << 18 | rune(s1 & maskx) << 12 | rune(s2 & maskx) << 6 | rune(s3 & maskx), 4);
-
 }
 
 // DecodeLastRune unpacks the last UTF-8 encoding in p and returns the rune and
@@ -268,7 +258,6 @@ public static (int, nint) DecodeLastRune(slice<byte> p) {
         return (RuneError, 1);
     }
     return (r, size);
-
 }
 
 // DecodeLastRuneInString is like DecodeLastRune but its input is a string. If
@@ -312,7 +301,6 @@ public static (int, nint) DecodeLastRuneInString(@string s) {
         return (RuneError, 1);
     }
     return (r, size);
-
 }
 
 // RuneLen returns the number of bytes required to encode the rune.
@@ -332,7 +320,6 @@ public static nint RuneLen(int r) {
     else if (r <= MaxRune) 
         return 4;
         return -1;
-
 }
 
 // EncodeRune writes into p (which must be large enough) the UTF-8 encoding of the rune.
@@ -382,7 +369,6 @@ public static nint EncodeRune(slice<byte> p, int r) {
 
         __switch_break0:;
     }
-
 }
 
 // RuneCount returns the number of runes in p. Erroneous and short
@@ -400,23 +386,17 @@ public static nint RuneCount(slice<byte> p) {
                 // ASCII fast path
                 i++;
                 continue;
-
             }
-
             var x = first[c];
             if (x == xx) {
                 i++; // invalid.
                 continue;
-
             }
-
             var size = int(x & 7);
             if (i + size > np) {
                 i++; // Short or invalid.
                 continue;
-
             }
-
             var accept = acceptRanges[x >> 4];
             {
                 var c__prev1 = c;
@@ -426,7 +406,8 @@ public static nint RuneCount(slice<byte> p) {
                 if (c < accept.lo || accept.hi < c) {
                     size = 1;
                 }
-                else if (size == 2)                 }                {
+                else if (size == 2) {
+                }                {
                     var c__prev3 = c;
 
                     c = p[i + 2];
@@ -435,7 +416,8 @@ public static nint RuneCount(slice<byte> p) {
                     else if (c < locb || hicb < c) {
                         size = 1;
                     }
-                    else if (size == 3)                     }                    {
+                    else if (size == 3) {
+                    }                    {
                         var c__prev5 = c;
 
                         c = p[i + 3];
@@ -449,22 +431,17 @@ public static nint RuneCount(slice<byte> p) {
 
                     }
 
-
                     c = c__prev3;
 
                 }
 
-
                 c = c__prev1;
 
             }
-
             i += size;
-
         }
     }
     return n;
-
 }
 
 // RuneCountInString is like RuneCount but its input is a string.
@@ -478,19 +455,16 @@ public static nint RuneCountInString(@string s) {
             // ASCII fast path
             i++;
             continue;
-
         }
         var x = first[c];
         if (x == xx) {
             i++; // invalid.
             continue;
-
         }
         var size = int(x & 7);
         if (i + size > ns) {
             i++; // Short or invalid.
             continue;
-
         }
         var accept = acceptRanges[x >> 4];
         {
@@ -501,7 +475,8 @@ public static nint RuneCountInString(@string s) {
             if (c < accept.lo || accept.hi < c) {
                 size = 1;
             }
-            else if (size == 2)             }            {
+            else if (size == 2) {
+            }            {
                 var c__prev3 = c;
 
                 c = s[i + 2];
@@ -510,7 +485,8 @@ public static nint RuneCountInString(@string s) {
                 else if (c < locb || hicb < c) {
                     size = 1;
                 }
-                else if (size == 3)                 }                {
+                else if (size == 3) {
+                }                {
                     var c__prev5 = c;
 
                     c = s[i + 3];
@@ -524,21 +500,16 @@ public static nint RuneCountInString(@string s) {
 
                 }
 
-
                 c = c__prev3;
 
             }
 
-
             c = c__prev1;
 
         }
-
         i += size;
-
     }
     return n;
-
 }
 
 // RuneStart reports whether the byte could be the first byte of an encoded,
@@ -561,10 +532,8 @@ public static bool Valid(slice<byte> p) {
         if ((first32 | second32) & 0x80808080 != 0) { 
             // Found a non ASCII byte (>= RuneSelf).
             break;
-
         }
         p = p[(int)8..];
-
     }
     var n = len(p);
     {
@@ -580,12 +549,10 @@ public static bool Valid(slice<byte> p) {
             if (x == xx) {
                 return false; // Illegal starter byte.
             }
-
             var size = int(x & 7);
             if (i + size > n) {
                 return false; // Short or invalid.
             }
-
             var accept = acceptRanges[x >> 4];
             {
                 var c__prev1 = c;
@@ -595,7 +562,8 @@ public static bool Valid(slice<byte> p) {
                 if (c < accept.lo || accept.hi < c) {
                     return false;
                 }
-                else if (size == 2)                 }                {
+                else if (size == 2) {
+                }                {
                     var c__prev3 = c;
 
                     c = p[i + 2];
@@ -604,7 +572,8 @@ public static bool Valid(slice<byte> p) {
                     else if (c < locb || hicb < c) {
                         return false;
                     }
-                    else if (size == 3)                     }                    {
+                    else if (size == 3) {
+                    }                    {
                         var c__prev5 = c;
 
                         c = p[i + 3];
@@ -618,22 +587,17 @@ public static bool Valid(slice<byte> p) {
 
                     }
 
-
                     c = c__prev3;
 
                 }
 
-
                 c = c__prev1;
 
             }
-
             i += size;
-
         }
     }
     return true;
-
 }
 
 // ValidString reports whether s consists entirely of valid UTF-8-encoded runes.
@@ -649,10 +613,8 @@ public static bool ValidString(@string s) {
         if ((first32 | second32) & 0x80808080 != 0) { 
             // Found a non ASCII byte (>= RuneSelf).
             break;
-
         }
         s = s[(int)8..];
-
     }
     var n = len(s);
     {
@@ -668,12 +630,10 @@ public static bool ValidString(@string s) {
             if (x == xx) {
                 return false; // Illegal starter byte.
             }
-
             var size = int(x & 7);
             if (i + size > n) {
                 return false; // Short or invalid.
             }
-
             var accept = acceptRanges[x >> 4];
             {
                 var c__prev1 = c;
@@ -683,7 +643,8 @@ public static bool ValidString(@string s) {
                 if (c < accept.lo || accept.hi < c) {
                     return false;
                 }
-                else if (size == 2)                 }                {
+                else if (size == 2) {
+                }                {
                     var c__prev3 = c;
 
                     c = s[i + 2];
@@ -692,7 +653,8 @@ public static bool ValidString(@string s) {
                     else if (c < locb || hicb < c) {
                         return false;
                     }
-                    else if (size == 3)                     }                    {
+                    else if (size == 3) {
+                    }                    {
                         var c__prev5 = c;
 
                         c = s[i + 3];
@@ -706,22 +668,17 @@ public static bool ValidString(@string s) {
 
                     }
 
-
                     c = c__prev3;
 
                 }
 
-
                 c = c__prev1;
 
             }
-
             i += size;
-
         }
     }
     return true;
-
 }
 
 // ValidRune reports whether r can be legally encoded as UTF-8.
@@ -733,7 +690,6 @@ public static bool ValidRune(int r) {
     else if (surrogateMax < r && r <= MaxRune) 
         return true;
         return false;
-
 }
 
 } // end utf8_package

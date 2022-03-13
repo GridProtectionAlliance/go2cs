@@ -4,22 +4,23 @@
 
 // This file defines operands and associated operations.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:45 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:10 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\operand.go
-using bytes = go.bytes_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+
+// An operandMode specifies the (addressing) mode of an operand.
+
+using System;
 public static partial class types2_package {
 
-    // An operandMode specifies the (addressing) mode of an operand.
 private partial struct operandMode { // : byte
 }
 
@@ -63,7 +64,6 @@ private static syntax.Pos Pos(this ptr<operand> _addr_x) {
         return nopos;
     }
     return x.expr.Pos();
-
 }
 
 // Operand string formats
@@ -115,8 +115,7 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
             return "untyped nil";
         else 
             return fmt.Sprintf("nil (of type %s)", TypeString(x.typ, qf));
-        
-    }
+            }
     ref bytes.Buffer buf = ref heap(out ptr<bytes.Buffer> _addr_buf);
 
     @string expr = default;
@@ -132,8 +131,7 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
             expr = TypeString(x.typ, qf);
         else if (x.mode == constant_) 
             expr = x.val.String();
-        
-    }
+            }
     if (expr != "") {
         buf.WriteString(expr);
         buf.WriteString(" (");
@@ -164,7 +162,6 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
             }
 
         }
-
     }
     if (hasType) {
         if (x.typ != Typ[Invalid]) {
@@ -178,7 +175,6 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
                 intro = " of type ";
                         buf.WriteString(intro);
             WriteType(_addr_buf, x.typ, qf);
-
         }
         else
  {
@@ -189,7 +185,6 @@ private static @string operandString(ptr<operand> _addr_x, Qualifier qf) {
         buf.WriteByte(')');
     }
     return buf.String();
-
 }
 
 private static @string String(this ptr<operand> _addr_x) {
@@ -225,7 +220,6 @@ private static void setConst(this ptr<operand> _addr_x, syntax.LitKind k, @strin
     x.mode = constant_;
     x.typ = Typ[kind];
     x.val = val;
-
 }
 
 // isNil reports whether x is a typed or the untyped nil value.
@@ -270,16 +264,12 @@ private static (bool, errorCode) assignableTo(this ptr<operand> _addr_x, ptr<Che
                     // TODO(gri) this could probably be more efficient
                     var (ok, _) = x.assignableTo(check, t, reason);
                     return ok;
-
                 }), _IncompatibleAssign);
-
             }
 
         }
-
         var (newType, _, _) = check.implicitTypeAndValue(x, Tu);
         return (newType != null, _IncompatibleAssign);
-
     }
     if (check.identical(Vu, Tu) && (!isNamed(V) || !isNamed(T))) {
         return (true, 0);
@@ -301,23 +291,17 @@ private static (bool, errorCode) assignableTo(this ptr<operand> _addr_x, ptr<Che
  {
                                 reason = fmt.Sprintf("wrong type for method %s (have %s, want %s)", m.Name(), wrongType.typ, m.typ);
                             }
-
                         }
                         else
  {
                             reason = "missing method " + m.Name();
                         }
-
                     }
-
                     return (false, _InvalidIfaceAssign);
-
                 }
 
             }
-
             return (true, 0);
-
         }
     } 
 
@@ -336,13 +320,10 @@ private static (bool, errorCode) assignableTo(this ptr<operand> _addr_x, ptr<Che
                 }
 
             }
-
         }
     }
 
-
     return (false, _IncompatibleAssign);
-
 }
 
 // kind2tok translates syntax.LitKinds into token.Tokens.

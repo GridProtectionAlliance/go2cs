@@ -5,19 +5,21 @@
 //go:build darwin && go1.13
 // +build darwin,go1.13
 
-// package unix -- go2cs converted at 2022 March 06 23:26:46 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:23 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_darwin.1_13.go
-using @unsafe = go.@unsafe_package;
-
-using unsafeheader = go.golang.org.x.sys.@internal.unsafeheader_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using @unsafe = @unsafe_package;
+
+using unsafeheader = golang.org.x.sys.@internal.unsafeheader_package;
+
+
+//sys    closedir(dir uintptr) (err error)
+//sys    readdir_r(dir uintptr, entry *Dirent, result **Dirent) (res Errno)
 
 public static partial class unix_package {
 
-    //sys    closedir(dir uintptr) (err error)
-    //sys    readdir_r(dir uintptr, entry *Dirent, result **Dirent) (res Errno)
 private static (System.UIntPtr, error) fdopendir(nint fd) {
     System.UIntPtr dir = default;
     error err = default!;
@@ -28,7 +30,6 @@ private static (System.UIntPtr, error) fdopendir(nint fd) {
         err = errnoErr(e1);
     }
     return ;
-
 }
 
 private static System.UIntPtr libc_fdopendir_trampoline_addr = default;
@@ -85,7 +86,6 @@ public static (nint, error) Getdirentries(nint fd, slice<byte> buf, ptr<System.U
             // Note: this strategy for suspending in the middle and
             // restarting is O(n^2) in the length of the directory. Oh well.
             break;
-
         }
         ref slice<byte> s = ref heap(out ptr<slice<byte>> _addr_s);
         var hdr = (unsafeheader.Slice.val)(@unsafe.Pointer(_addr_s));
@@ -97,7 +97,6 @@ public static (nint, error) Getdirentries(nint fd, slice<byte> buf, ptr<System.U
         buf = buf[(int)reclen..];
         n += reclen;
         cnt++;
-
     } 
     // Set the seek offset of the input fd to record
     // how many files we've already returned.
@@ -106,7 +105,6 @@ public static (nint, error) Getdirentries(nint fd, slice<byte> buf, ptr<System.U
         return (n, error.As(err)!);
     }
     return (n, error.As(null!)!);
-
 });
 
 } // end unix_package

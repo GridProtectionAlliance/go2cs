@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:28 UTC
+// package walk -- go2cs converted at 2022 March 13 06:24:49 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\assign.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// walkAssign walks an OAS (AssignExpr) or OASOP (AssignOpExpr) node.
+
+using System;
 public static partial class walk_package {
 
-    // walkAssign walks an OAS (AssignExpr) or OASOP (AssignOpExpr) node.
 private static ir.Node walkAssign(ptr<ir.Nodes> _addr_init, ir.Node n) {
     ref ir.Nodes init = ref _addr_init.val;
 
@@ -51,7 +52,6 @@ private static ir.Node walkAssign(ptr<ir.Nodes> _addr_init, ir.Node n) {
     if (n.Op() == ir.OASOP) { 
         // Rewrite x op= y into x = x op y.
         n = ir.NewAssignStmt(@base.Pos, left, typecheck.Expr(ir.NewBinaryExpr(@base.Pos, n._<ptr<ir.AssignOpStmt>>().AsOp, left, right)));
-
     }
     else
  {
@@ -65,7 +65,6 @@ private static ir.Node walkAssign(ptr<ir.Nodes> _addr_init, ir.Node n) {
     if (@as.Y == null) { 
         // TODO(austin): Check all "implicit zeroing"
         return as;
-
     }
     if (!@base.Flag.Cfg.Instrumenting && ir.IsZero(@as.Y)) {
         return as;
@@ -102,7 +101,6 @@ private static ir.Node walkAssign(ptr<ir.Nodes> _addr_init, ir.Node n) {
             // Set up address of type for back end.
             r._<ptr<ir.CallExpr>>().X = reflectdata.TypePtr(r.Type().Elem());
             return as;
-
         }
     else 
         @as.Y = walkExpr(@as.Y, init);
@@ -110,7 +108,6 @@ private static ir.Node walkAssign(ptr<ir.Nodes> _addr_init, ir.Node n) {
         return convas(as, init);
     }
     return as;
-
 }
 
 // walkAssignDotType walks an OAS2DOTTYPE node.
@@ -142,7 +139,6 @@ private static ir.Node walkAssignFunc(ptr<ir.Nodes> _addr_init, ptr<ir.AssignLis
 
     var ll = ascompatet(n.Lhs, _addr_r.Type());
     return ir.NewBlockStmt(src.NoXPos, ll);
-
 }
 
 // walkAssignList walks an OAS2 node.
@@ -200,13 +196,11 @@ private static ir.Node walkAssignMapRead(ptr<ir.Nodes> _addr_init, ptr<ir.Assign
         var ok = n.Lhs[1];
 
         if (!ir.IsBlank(ok) && ok.Type().IsBoolean()) {
-            call.Type().Field(1).Type;
+            call.Type().Field;
 
-            ok.Type();
-
+            (1).Type = ok.Type();
         }
     }
-
     n.Rhs = new slice<ir.Node>(new ir.Node[] { call });
     n.SetOp(ir.OAS2FUNC); 
 
@@ -223,7 +217,6 @@ private static ir.Node walkAssignMapRead(ptr<ir.Nodes> _addr_init, ptr<ir.Assign
 
     var @as = ir.NewAssignStmt(@base.Pos, a, ir.NewStarExpr(@base.Pos, var_));
     return walkExpr(typecheck.Stmt(as), init);
-
 }
 
 // walkAssignRecv walks an OAS2RECV node.
@@ -248,7 +241,6 @@ private static ir.Node walkAssignRecv(ptr<ir.Nodes> _addr_init, ptr<ir.AssignLis
     var ok = n.Lhs[1];
     var call = mkcall1(fn, types.Types[types.TBOOL], init, r.X, n1);
     return typecheck.Stmt(ir.NewAssignStmt(@base.Pos, ok, call));
-
 }
 
 // walkReturn walks an ORETURN node.
@@ -266,10 +258,8 @@ private static ir.Node walkReturn(ptr<ir.ReturnStmt> _addr_n) {
     foreach (var (i, v) in results) { 
         // TODO(mdempsky): typecheck should have already checked the result variables.
         dsts[i] = typecheck.AssignExpr(v.Nname._<ptr<ir.Name>>());
-
     }    n.Results = ascompatee(n.Op(), dsts, n.Results);
     return n;
-
 }
 
 // check assign type list to
@@ -299,16 +289,13 @@ private static slice<ir.Node> ascompatet(ir.Nodes nl, ptr<types.Type> _addr_nr) 
 
         }
 
-
         var res = ir.NewResultExpr(@base.Pos, null, types.BADWIDTH);
         res.Index = int64(i);
         res.SetType(r.Type);
         res.SetTypecheck(1);
 
         nn.Append(ir.NewAssignStmt(@base.Pos, l, res));
-
     }    return nn;
-
 }
 
 // check assign expression list to
@@ -341,7 +328,6 @@ private static slice<ir.Node> ascompatee(ir.Op op, slice<ir.Node> nl, slice<ir.N
             }
             return false;
         });
-
     }; 
 
     // If a needed expression may be affected by an
@@ -357,7 +343,6 @@ private static slice<ir.Node> ascompatee(ir.Op op, slice<ir.Node> nl, slice<ir.N
             }
 
         }
-
     };
 
     ref ir.Nodes late = ref heap(out ptr<ir.Nodes> _addr_late);
@@ -397,7 +382,6 @@ private static slice<ir.Node> ascompatee(ir.Op op, slice<ir.Node> nl, slice<ir.N
                     break;
             }
             break;
-
         }
 
         ptr<ir.Name> name;
@@ -429,7 +413,6 @@ private static slice<ir.Node> ascompatee(ir.Op op, slice<ir.Node> nl, slice<ir.N
             // Conservatively assume any memory access might alias.
             memWrite = true;
             continue;
-
         }
         if (name.Class == ir.PPARAMOUT && ir.CurFunc.HasDefer()) { 
             // Assignments to a result parameter in a function with defers
@@ -437,7 +420,6 @@ private static slice<ir.Node> ascompatee(ir.Op op, slice<ir.Node> nl, slice<ir.N
             // panics (#43835).
             deferResultWrite = true;
             continue;
-
         }
         {
             var sym = types.OrigSym(name.Sym());
@@ -446,24 +428,19 @@ private static slice<ir.Node> ascompatee(ir.Op op, slice<ir.Node> nl, slice<ir.N
                 // We can ignore assignments to blank or anonymous result parameters.
                 // These can't appear in expressions anyway.
                 continue;
-
             }
 
         }
-
 
         if (name.Addrtaken() || !name.OnStack()) { 
             // Global variable, heap escaped, or just addrtaken.
             // Conservatively assume any memory access might alias.
             memWrite = true;
             continue;
-
         }
         assigned.Add(name);
-
     }    early.Append(late.Take());
     return early;
-
 }
 
 // readsMemory reports whether the evaluation n directly reads from
@@ -480,7 +457,6 @@ private static bool readsMemory(ir.Node n) {
         return false;
     // Be conservative.
     return true;
-
 }
 
 // expand append(l1, l2...) to
@@ -553,7 +529,6 @@ private static ir.Node appendSlice(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr
         var (ptr1, len1) = backingArrayPtrLen(cheapExpr(slice, _addr_nodes));
         var (ptr2, len2) = backingArrayPtrLen(l2);
         ncopy = mkcall1(fn, types.Types[types.TINT], _addr_nodes, reflectdata.TypePtr(elemtype), ptr1, len1, ptr2, len2);
-
     }
     else if (@base.Flag.Cfg.Instrumenting && !@base.Flag.CompilingRuntime) { 
         // rely on runtime to instrument:
@@ -568,7 +543,6 @@ private static ir.Node appendSlice(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr
         fn = typecheck.LookupRuntime("slicecopy");
         fn = typecheck.SubstArgTypes(fn, ptr1.Type().Elem(), ptr2.Type().Elem());
         ncopy = mkcall1(fn, types.Types[types.TINT], _addr_nodes, ptr1, len1, ptr2, len2, ir.NewInt(elemtype.Width));
-
     }
     else
  { 
@@ -586,7 +560,6 @@ private static ir.Node appendSlice(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr
         fn = typecheck.LookupRuntime("memmove");
         fn = typecheck.SubstArgTypes(fn, elemtype, elemtype);
         ncopy = mkcall1(fn, null, _addr_nodes, addr, sptr, nwid);
-
     }
     var ln = append(nodes, ncopy);
 
@@ -594,7 +567,6 @@ private static ir.Node appendSlice(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr
     walkStmtList(ln);
     init.Append(ln);
     return s;
-
 }
 
 // isAppendOfMake reports whether n is of the form append(x, make([]T, y)...).
@@ -622,7 +594,6 @@ private static bool isAppendOfMake(ir.Node n) {
         return false;
     }
     return true;
-
 }
 
 // extendSlice rewrites append(l1, make([]T, l2)...) to
@@ -739,7 +710,6 @@ private static ir.Node extendSlice(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr
         var nifclr = ir.NewIfStmt(@base.Pos, ir.NewBinaryExpr(@base.Pos, ir.OEQ, l1ptr, sptr), null, null);
         nifclr.Body = clr;
         nodes = append(nodes, nifclr);
-
     }
     else
  {
@@ -749,7 +719,6 @@ private static ir.Node extendSlice(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr
     walkStmtList(nodes);
     init.Append(nodes);
     return s;
-
 }
 
 } // end walk_package

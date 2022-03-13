@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:13 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:31 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\expr.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+
+
+// tcAddr typechecks an OADDR node.
+
+using System;
 public static partial class typecheck_package {
 
-    // tcAddr typechecks an OADDR node.
 private static ir.Node tcAddr(ptr<ir.AddrExpr> _addr_n) {
     ref ir.AddrExpr n = ref _addr_n.val;
 
@@ -48,7 +49,6 @@ private static ir.Node tcAddr(ptr<ir.AddrExpr> _addr_n) {
         }
         n.SetType(types.NewPtr(n.X.Type()));
     return n;
-
 }
 
 private static (ir.Node, ir.Node, ptr<types.Type>) tcShift(ir.Node n, ir.Node l, ir.Node r) {
@@ -79,7 +79,6 @@ private static (ir.Node, ir.Node, ptr<types.Type>) tcShift(ir.Node n, ir.Node l,
         t = types.UntypedInt;
     }
     return (l, r, _addr_t!);
-
 }
 
 public static bool IsCmp(ir.Op op) {
@@ -196,7 +195,6 @@ private static (ir.Node, ir.Node, ptr<types.Type>) tcArith(ir.Node n, ir.Op op, 
             }
 
         }
-
     }
     if ((op == ir.ODIV || op == ir.OMOD) && ir.IsConst(r, constant.Int)) {
         if (constant.Sign(r.Val()) == 0) {
@@ -205,7 +203,6 @@ private static (ir.Node, ir.Node, ptr<types.Type>) tcArith(ir.Node n, ir.Op op, 
         }
     }
     return (l, r, _addr_t!);
-
 }
 
 // The result of tcCompLit MUST be assigned back to n, e.g.
@@ -249,7 +246,6 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
             return n;
         }
     }
-
 
     n.Ntype = typecheckNtype(n.Ntype);
     var t = n.Ntype.Type();
@@ -336,7 +332,6 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
                     var sk = ir.NewStructKeyExpr(@base.Pos, f.Sym, n1);
                     sk.Offset = f.Offset;
                     ls[i] = sk;
-
                 }
         else
 
@@ -346,7 +341,6 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
             if (len(ls) < t.NumFields()) {
                 @base.Errorf("too few values in %v", n);
             }
-
         } {
             var hash = make_map<@string, bool>(); 
 
@@ -391,12 +385,9 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
                             @base.Errorf("invalid field name %v in struct initializer", key);
                             continue;
                         }
-
                         l = ir.NewStructKeyExpr(l.Pos(), s, kv.Value);
                         ls[i] = l;
-
                     }
-
                     if (l.Op() != ir.OSTRUCTKEY) {
                         if (!errored) {
                             @base.Errorf("mixture of field:value and value initializers");
@@ -405,7 +396,6 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
                         ls[i] = Expr(ls[i]);
                         continue;
                     }
-
                     l = l._<ptr<ir.StructKeyExpr>>();
 
                     f = Lookdot1(null, l.Field, t, t.Fields(), 0);
@@ -419,19 +409,15 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
                                 }
                                 else if (nonexported(l.Field) && l.Field.Name == ci.Sym.Name) { // Ensure exactness before the suggestion.
                                     @base.Errorf("cannot refer to unexported field '%v' in struct literal of type %v", l.Field, t);
-
                                 }
                                 else
  {
                                     @base.Errorf("unknown field '%v' in struct literal of type %v", l.Field, t);
                                 }
-
                                 continue;
-
                             }
 
                         }
-
                         f = ;
                         var (p, _) = dotpath(l.Field, t, _addr_f, true);
                         if (p == null || f.IsMethod()) {
@@ -447,16 +433,13 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
                         ep = append(ep, l.Field.Name);
                         @base.Errorf("cannot use promoted field %v in struct literal of type %v", strings.Join(ep, "."), t);
                         continue;
-
                     }
-
                     fielddup(f.Sym.Name, hash);
                     l.Offset = f.Offset; 
 
                     // No pushtype allowed here. Tried and rejected.
                     l.Value = Expr(l.Value);
                     l.Value = AssignConv(l.Value, f.Type, "field value");
-
                 }
 
                 i = i__prev1;
@@ -469,7 +452,6 @@ private static ir.Node tcCompLit(ptr<ir.CompLitExpr> _addr_n) => func((defer, _,
         @base.Errorf("invalid composite literal type %v", t);
         n.SetType(null);
         return n;
-
 });
 
 // tcConv typechecks an OCONV node.
@@ -493,7 +475,6 @@ private static ir.Node tcConv(ptr<ir.ConvExpr> _addr_n) {
         n.SetOp(ir.OCONV);
         n.SetType(null);
         return n;
-
     }
     n.SetOp(op);
 
@@ -504,14 +485,12 @@ private static ir.Node tcConv(ptr<ir.ConvExpr> _addr_n) {
                 // Floating point casts imply rounding and
                 // so the conversion must be kept.
                 n.SetOp(ir.OCONV);
-            
-        }
+                    }
     else if (n.Op() == ir.OSTR2BYTES)     else if (n.Op() == ir.OSTR2RUNES) 
         if (n.X.Op() == ir.OLITERAL) {
             return stringtoruneslit(n);
         }
         return n;
-
 }
 
 // tcDot typechecks an OXDOT or ODOT node.
@@ -546,7 +525,6 @@ private static ir.Node tcDot(ptr<ir.SelectorExpr> _addr_n, nint top) {
         }
         n.SetOp(ir.ODOTPTR);
         types.CheckSize(t);
-
     }
     if (n.Sel.IsBlank()) {
         @base.Errorf("cannot refer to blank field or method");
@@ -570,7 +548,6 @@ private static ir.Node tcDot(ptr<ir.SelectorExpr> _addr_n, nint top) {
 
                 if (mt != null && visible(mt.Sym)) { // Case-insensitive lookup.
                     @base.Errorf("%v undefined (type %v has no field or method %v, but does have %v)", n, n.X.Type(), n.Sel, mt.Sym);
-
                 }
                 else
  {
@@ -578,17 +555,14 @@ private static ir.Node tcDot(ptr<ir.SelectorExpr> _addr_n, nint top) {
                 }
 
             }
-
                 n.SetType(null);
         return n;
-
     }
     if ((n.Op() == ir.ODOTINTER || n.Op() == ir.ODOTMETH) && top & ctxCallee == 0) {
         n.SetOp(ir.OCALLPART);
         n.SetType(MethodValueWrapper(n).Type());
     }
     return n;
-
 }
 
 // tcDotType typechecks an ODOTTYPE node.
@@ -634,14 +608,11 @@ private static ir.Node tcDotType(ptr<ir.TypeAssertExpr> _addr_n) {
  {
                 @base.Errorf("impossible type assertion:\n\t%v does not implement %v (missing %v method)", n.Type(), t, missing.Sym);
             }
-
             n.SetType(null);
             return n;
-
         }
     }
     return n;
-
 }
 
 // tcITab typechecks an OITAB node.
@@ -659,7 +630,6 @@ private static ir.Node tcITab(ptr<ir.UnaryExpr> _addr_n) {
     }
     n.SetType(types.NewPtr(types.Types[types.TUINTPTR]));
     return n;
-
 }
 
 // tcIndex typechecks an OINDEX node.
@@ -712,7 +682,6 @@ private static ir.Node tcIndex(ptr<ir.IndexExpr> _addr_n) {
             else if (ir.ConstOverflow(x, types.Types[types.TINT])) {
                 @base.Errorf("invalid %s index %v (index too large)", why, n.Index);
             }
-
         }
     else if (t.Kind() == types.TMAP) 
         n.Index = AssignConv(n.Index, t.Key(), "map index");
@@ -724,7 +693,6 @@ private static ir.Node tcIndex(ptr<ir.IndexExpr> _addr_n) {
         n.SetType(null);
         return n;
         return n;
-
 }
 
 // tcLenCap typechecks an OLEN or OCAP node.
@@ -755,7 +723,6 @@ private static ir.Node tcLenCap(ptr<ir.UnaryExpr> _addr_n) {
     }
     n.SetType(types.Types[types.TINT]);
     return n;
-
 }
 
 // tcRecv typechecks an ORECV node.
@@ -782,7 +749,6 @@ private static ir.Node tcRecv(ptr<ir.UnaryExpr> _addr_n) {
     }
     n.SetType(t.Elem());
     return n;
-
 }
 
 // tcSPtr typechecks an OSPTR node.
@@ -806,7 +772,6 @@ private static ir.Node tcSPtr(ptr<ir.UnaryExpr> _addr_n) {
         n.SetType(types.NewPtr(t.Elem()));
     }
     return n;
-
 }
 
 // tcSlice typechecks an OSLICE or OSLICE3 node.
@@ -833,7 +798,6 @@ private static ir.Node tcSlice(ptr<ir.SliceExpr> _addr_n) {
         addr.SetImplicit(true);
         n.X = Expr(addr);
         l = n.X;
-
     }
     var t = l.Type();
     ptr<types.Type> tp;
@@ -845,7 +809,6 @@ private static ir.Node tcSlice(ptr<ir.SliceExpr> _addr_n) {
         }
         n.SetType(t);
         n.SetOp(ir.OSLICESTR);
-
     }
     else if (t.IsPtr() && t.Elem().IsArray()) {
         tp = t.Elem();
@@ -885,7 +848,6 @@ private static ir.Node tcSlice(ptr<ir.SliceExpr> _addr_n) {
         return n;
     }
     return n;
-
 }
 
 // tcSliceHeader typechecks an OSLICEHEADER node.
@@ -920,7 +882,6 @@ private static ir.Node tcSliceHeader(ptr<ir.SliceHeaderExpr> _addr_n) {
         @base.Fatalf("len larger than cap for OSLICEHEADER");
     }
     return n;
-
 }
 
 // tcStar typechecks an ODEREF node, which may be an expression or a type.
@@ -939,7 +900,6 @@ private static ir.Node tcStar(ptr<ir.StarExpr> _addr_n, nint top) {
         // Ensure l.Type gets CalcSize'd for the backend. Issue 20174.
         types.CheckSize(l.Type());
         return n;
-
     }
     if (!t.IsPtr()) {
         if (top & (ctxExpr | ctxStmt) != 0) {
@@ -949,11 +909,9 @@ private static ir.Node tcStar(ptr<ir.StarExpr> _addr_n, nint top) {
         }
         @base.Errorf("%v is not a type", l);
         return n;
-
     }
     n.SetType(t.Elem());
     return n;
-
 }
 
 // tcUnaryArith typechecks a unary arithmetic expression.
@@ -974,7 +932,6 @@ private static ir.Node tcUnaryArith(ptr<ir.UnaryExpr> _addr_n) {
     }
     n.SetType(t);
     return n;
-
 }
 
 } // end typecheck_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:43:14 UTC
+//     Generated on 2022 March 13 05:54:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class lex_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Input
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator Input(NilType nil) => default(Input);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Input Input_cast(dynamic value)
         {
             return new Input(value.Stack, value.includes, value.beginningOfLine, value.ifdefStack, value.macros, value.text, value.peek, value.peekToken, value.peekText);

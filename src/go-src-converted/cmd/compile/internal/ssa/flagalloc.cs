@@ -2,18 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:58 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:22 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\flagalloc.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // flagalloc allocates the flag register among all the flag-generating
-    // instructions. Flag values are recomputed if they need to be
-    // spilled/restored.
+// flagalloc allocates the flag register among all the flag-generating
+// instructions. Flag values are recomputed if they need to be
+// spilled/restored.
 private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
     ref Func f = ref _addr_f.val;
  
@@ -42,7 +40,6 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                                 panic("cannot have multiple controls using flags");
                             }
                             flag = c;
-
                         }
                     }
                     c = c__prev3;
@@ -106,7 +103,6 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                 // Defer blocks internally use/clobber the flags value.
                 end[b.ID] = null;
                 continue;
-
             }
             {
                 var v__prev2 = v;
@@ -151,7 +147,6 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                             }
                             spill[a.ID] = true;
                             flag = a;
-
                         }
                         a = a__prev3;
                     }
@@ -189,7 +184,6 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                 v = v__prev1;
 
             }
-
         }
         b = b__prev1;
     }
@@ -253,7 +247,6 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                             v.SetArg(i, c); 
                             // Remember the most-recently computed flag value.
                             flag = a;
-
                         }
                         i = i__prev3;
                         a = a__prev3;
@@ -283,7 +276,6 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                         c = copyFlags(_addr_v, _addr_b);
                         b.ReplaceControl(i, c);
                         flag = v;
-
                     }
                 }
                 i = i__prev2;
@@ -311,7 +303,6 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                 v = v__prev1;
 
             }
-
         }
         b = b__prev1;
     }
@@ -379,13 +370,11 @@ private static void flagalloc(ptr<Func> _addr_f) => func((defer, panic, _) => {
                     }
                     b.Values[i] = v;
                     i++;
-
                 }
 
                 j = j__prev2;
             }
             b.truncateValues(i);
-
         }
         b = b__prev1;
     }
@@ -402,10 +391,8 @@ private static bool clobbersFlags(this ptr<Value> _addr_v) {
         // In that case, there's no corresponding Select to overwrite the flags value,
         // so we must consider flags clobbered by the tuple-generating instruction.
         return true;
-
     }
     return false;
-
 }
 
 // copyFlags copies v (flag generator) into b, returns the copy.
@@ -445,7 +432,6 @@ private static ptr<Value> copyFlags(ptr<Value> _addr_v, ptr<Block> _addr_b) {
     }
 
     return _addr_c!;
-
 }
 
 } // end ssa_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:42:04 UTC
+//     Generated on 2022 March 13 05:53:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class types_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct embeddedType
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace go
             public static implicit operator embeddedType(NilType nil) => default(embeddedType);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static embeddedType embeddedType_cast(dynamic value)
         {
             return new embeddedType(value.typ, value.index, value.indirect, value.multiples);

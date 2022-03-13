@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package metrics -- go2cs converted at 2022 March 06 22:14:35 UTC
+// package metrics -- go2cs converted at 2022 March 13 05:28:34 UTC
 // import "runtime/metrics" ==> using metrics = go.runtime.metrics_package
 // Original source: C:\Program Files\Go\src\runtime\metrics\value.go
-using math = go.math_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.runtime;
+
+using math = math_package;
+using @unsafe = @unsafe_package;
+
+
+// ValueKind is a tag for a metric Value which indicates its type.
 
 public static partial class metrics_package {
 
-    // ValueKind is a tag for a metric Value which indicates its type.
 public partial struct ValueKind { // : nint
 }
 
@@ -28,7 +30,6 @@ public static readonly var KindFloat64 = 1;
 
 // KindFloat64Histogram indicates that the type of the Value is a *Float64Histogram.
 public static readonly var KindFloat64Histogram = 2;
-
 
 // Value represents a metric value returned by the runtime.
 public partial struct Value {
@@ -50,7 +51,6 @@ public static ulong Uint64(this Value v) => func((_, panic, _) => {
         panic("called Uint64 on non-uint64 metric value");
     }
     return v.scalar;
-
 });
 
 // Float64 returns the internal float64 value for the metric.
@@ -61,7 +61,6 @@ public static double Float64(this Value v) => func((_, panic, _) => {
         panic("called Float64 on non-float64 metric value");
     }
     return math.Float64frombits(v.scalar);
-
 });
 
 // Float64Histogram returns the internal *Float64Histogram value for the metric.
@@ -72,7 +71,6 @@ public static ptr<Float64Histogram> Float64Histogram(this Value v) => func((_, p
         panic("called Float64Histogram on non-Float64Histogram metric value");
     }
     return _addr_(Float64Histogram.val)(v.pointer)!;
-
 });
 
 } // end metrics_package

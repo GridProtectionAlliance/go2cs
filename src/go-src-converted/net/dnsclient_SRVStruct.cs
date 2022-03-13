@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:22 UTC
+//     Generated on 2022 March 13 05:29:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SRV
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace go
             public static implicit operator SRV(NilType nil) => default(SRV);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SRV SRV_cast(dynamic value)
         {
             return new SRV(value.Target, value.Port, value.Priority, value.Weight);

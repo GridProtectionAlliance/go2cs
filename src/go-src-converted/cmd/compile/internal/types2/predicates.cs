@@ -4,19 +4,16 @@
 
 // This file implements commonly used type predicates.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:47 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:11 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\predicates.go
-
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using System;
 public static partial class types2_package {
 
-    // isNamed reports whether typ has a name.
-    // isNamed may be called with types that are not fully set up.
+// isNamed reports whether typ has a name.
+// isNamed may be called with types that are not fully set up.
 private static bool isNamed(Type typ) {
     switch (typ.type()) {
         case ptr<Basic> _:
@@ -33,7 +30,6 @@ private static bool isNamed(Type typ) {
             break;
     }
     return false;
-
 }
 
 // isGeneric reports whether a type is a generic, uninstantiated type (generic
@@ -42,7 +38,6 @@ private static bool isGeneric(Type typ) {
     // A parameterized type is only instantiated if it doesn't have an instantiation already.
     ptr<Named> (named, _) = typ._<ptr<Named>>();
     return named != null && named.obj != null && named.tparams != null && named.targs == null;
-
 }
 
 private static bool @is(Type typ, BasicInfo what) {
@@ -55,7 +50,6 @@ private static bool @is(Type typ, BasicInfo what) {
             break;
     }
     return false;
-
 }
 
 private static bool isBoolean(Type typ) {
@@ -104,7 +98,6 @@ private static bool isTyped(Type typ) {
     // type.
     ptr<Basic> (t, _) = typ._<ptr<Basic>>();
     return t == null || t.info & IsUntyped == 0;
-
 }
 
 // isUntyped(typ) is the same as !isTyped(typ).
@@ -120,7 +113,6 @@ private static bool isConstType(Type typ) {
     // Type parameters are never const types.
     ptr<Basic> (t, _) = under(typ)._<ptr<Basic>>();
     return t != null && t.info & IsConstType != 0;
-
 }
 
 // IsInterface reports whether typ is an interface type.
@@ -162,7 +154,6 @@ private static bool comparable(Type T, map<Type, bool> seen) {
 
     }
 
-
     switch (optype(T).type()) {
         case ptr<Basic> t:
             return t.kind != UntypedNil;
@@ -188,10 +179,7 @@ private static bool comparable(Type T, map<Type, bool> seen) {
             return comparable(t.elem, seen);
             break;
         case ptr<Sum> t:
-            Func<Type, bool> pred = t => {
-                return comparable(t, seen);
-            }
-;
+            Func<Type, bool> pred = t => comparable(t, seen);
             return t.@is(pred);
             break;
         case ptr<TypeParam> t:
@@ -199,7 +187,6 @@ private static bool comparable(Type T, map<Type, bool> seen) {
             break;
     }
     return false;
-
 }
 
 // hasNil reports whether a type includes the nil value.
@@ -231,7 +218,6 @@ private static bool hasNil(Type typ) {
             break;
     }
     return false;
-
 }
 
 // identical reports whether x and y are identical types.
@@ -290,8 +276,6 @@ private static bool identical0(this ptr<Checker> _addr_check, Type x, Type y, bo
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Array> x:
             {
@@ -303,14 +287,11 @@ private static bool identical0(this ptr<Checker> _addr_check, Type x, Type y, bo
                     // If one or both array lengths are unknown (< 0) due to some error,
                     // assume they are the same to avoid spurious follow-on errors.
                     return (x.len < 0 || y.len < 0 || x.len == y.len) && check.identical0(x.elem, y.elem, cmpTags, p);
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Slice> x:
             {
@@ -325,8 +306,6 @@ private static bool identical0(this ptr<Checker> _addr_check, Type x, Type y, bo
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Struct> x:
             {
@@ -354,16 +333,12 @@ private static bool identical0(this ptr<Checker> _addr_check, Type x, Type y, bo
                         }
 
                         return true;
-
                     }
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Pointer> x:
             {
@@ -378,8 +353,6 @@ private static bool identical0(this ptr<Checker> _addr_check, Type x, Type y, bo
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Tuple> x:
             {
@@ -405,18 +378,13 @@ private static bool identical0(this ptr<Checker> _addr_check, Type x, Type y, bo
                                 i = i__prev1;
                             }
                         }
-
                         return true;
-
                     }
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Signature> x:
             {
@@ -431,8 +399,6 @@ private static bool identical0(this ptr<Checker> _addr_check, Type x, Type y, bo
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Sum> x:
             {
@@ -459,7 +425,6 @@ L:
                                         _continueL = true; // x is in y.types
                                         break;
                                     }
-
                                 }
 
                                 y = y__prev2;
@@ -471,14 +436,11 @@ L:
                         x = x__prev1;
                     }
                     return true;
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Interface> x:
             {
@@ -495,7 +457,6 @@ L:
                         check.completeInterface(nopos, x);
                         check.completeInterface(nopos, y);
                     }
-
                     var a = x.allMethods;
                     var b = y.allMethods;
                     if (len(a) == len(b)) { 
@@ -526,16 +487,13 @@ L:
                             if (p.identical(q)) {
                                 return true; // same pair was compared before
                             }
-
                             p = p.prev;
-
                         }
 
                         if (debug) {
                             assertSortedMethods(a);
                             assertSortedMethods(b);
                         }
-
                         {
                             var i__prev1 = i;
                             var f__prev1 = f;
@@ -554,16 +512,12 @@ L:
                         }
 
                         return true;
-
                     }
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Map> x:
             {
@@ -578,8 +532,6 @@ L:
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Chan> x:
             {
@@ -594,8 +546,6 @@ L:
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Named> x:
             {
@@ -608,14 +558,11 @@ L:
                     //           we can just return false here because x == y
                     //           is caught in the very beginning of this function.
                     return x.obj == y.obj;
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<TypeParam> x:
             break;
@@ -635,7 +582,6 @@ L:
     }
 
     return false;
-
 }
 
 private static bool identicalTParams(this ptr<Checker> _addr_check, slice<ptr<TypeName>> x, slice<ptr<TypeName>> y, bool cmpTags, ptr<ifacePair> _addr_p) {
@@ -651,7 +597,6 @@ private static bool identicalTParams(this ptr<Checker> _addr_check, slice<ptr<Ty
             return false;
         }
     }    return true;
-
 }
 
 // Default returns the default "typed" type for an "untyped" type;
@@ -676,12 +621,9 @@ public static Type Default(Type typ) {
                 return Typ[Complex128];
             else if (t.kind == UntypedString) 
                 return Typ[String];
-            
-        }
+                    }
     }
-
     return typ;
-
 }
 
 } // end types2_package

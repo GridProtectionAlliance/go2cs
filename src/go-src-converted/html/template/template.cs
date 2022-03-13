@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:25:38 UTC
+// package template -- go2cs converted at 2022 March 13 05:40:11 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\template.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using sync = go.sync_package;
-using template = go.text.template_package;
-using parse = go.text.template.parse_package;
-using System;
-
-
 namespace go.html;
 
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using sync = sync_package;
+using template = text.template_package;
+using parse = text.template.parse_package;
+
+
+// Template is a specialized Template from "text/template" that produces a safe
+// HTML document fragment.
+
+using System;
 public static partial class template_package {
 
-    // Template is a specialized Template from "text/template" that produces a safe
-    // HTML document fragment.
 public partial struct Template {
     public error escapeErr; // We could embed the text/template field, but it's safer not to because
 // we need to keep our version of the name space and the underlying
@@ -56,7 +57,6 @@ private static slice<ptr<Template>> Templates(this ptr<Template> _addr_t) => fun
     foreach (var (_, v) in ns.set) {
         m = append(m, v);
     }    return m;
-
 });
 
 // Option sets options for the template. Options are described by
@@ -99,7 +99,6 @@ private static error checkCanParse(this ptr<Template> _addr_t) => func((defer, _
         return error.As(fmt.Errorf("html/template: cannot Parse after Execute"))!;
     }
     return error.As(null!)!;
-
 });
 
 // escape escapes all associated templates.
@@ -121,13 +120,11 @@ private static error escape(this ptr<Template> _addr_t) => func((defer, _, _) =>
             }
 
         }
-
     }
     else if (t.escapeErr != escapeOK) {
         return error.As(t.escapeErr)!;
     }
     return error.As(null!)!;
-
 });
 
 // Execute applies a parsed template to the specified data object,
@@ -147,9 +144,7 @@ private static error Execute(this ptr<Template> _addr_t, io.Writer wr, object da
             return error.As(err)!;
         }
     }
-
     return error.As(t.text.Execute(wr, data))!;
-
 }
 
 // ExecuteTemplate applies the template associated with t that has the given
@@ -167,7 +162,6 @@ private static error ExecuteTemplate(this ptr<Template> _addr_t, io.Writer wr, @
         return error.As(err)!;
     }
     return error.As(tmpl.text.Execute(wr, data))!;
-
 }
 
 // lookupAndEscapeTemplate guarantees that the template with the given name
@@ -198,7 +192,6 @@ private static (ptr<Template>, error) lookupAndEscapeTemplate(this ptr<Template>
         err = escapeTemplate(tmpl, tmpl.text.Root, name);
     }
     return (_addr_tmpl!, error.As(err)!);
-
 });
 
 // DefinedTemplates returns a string listing the defined templates,
@@ -234,7 +227,6 @@ private static (ptr<Template>, error) Parse(this ptr<Template> _addr_t, @string 
         }
     }
 
-
     var (ret, err) = t.text.Parse(text);
     if (err != null) {
         return (_addr_null!, error.As(err)!);
@@ -249,9 +241,7 @@ private static (ptr<Template>, error) Parse(this ptr<Template> _addr_t, @string 
         }
         tmpl.text = v;
         tmpl.Tree = v.Tree;
-
     }    return (_addr_t!, error.As(null!)!);
-
 });
 
 // AddParseTree creates a new template with the name and parse tree
@@ -272,7 +262,6 @@ private static (ptr<Template>, error) AddParseTree(this ptr<Template> _addr_t, @
         }
     }
 
-
     t.nameSpace.mu.Lock();
     defer(t.nameSpace.mu.Unlock());
     var (text, err) = t.text.AddParseTree(name, tree);
@@ -282,7 +271,6 @@ private static (ptr<Template>, error) AddParseTree(this ptr<Template> _addr_t, @
     ptr<Template> ret = addr(new Template(nil,text,text.Tree,t.nameSpace,));
     t.set[name] = ret;
     return (_addr_ret!, error.As(null!)!);
-
 });
 
 // Clone returns a duplicate of the template, including all associated
@@ -319,9 +307,7 @@ private static (ptr<Template>, error) Clone(this ptr<Template> _addr_t) => func(
         }
         x.Tree = x.Tree.Copy();
         ret.set[name] = addr(new Template(nil,x,x.Tree,ret.nameSpace,));
-
     }    return (_addr_ret.set[ret.Name()]!, error.As(null!)!);
-
 });
 
 // New allocates a new HTML template with the given name.
@@ -361,10 +347,8 @@ private static ptr<Template> @new(this ptr<Template> _addr_t, @string name) {
             existing.val = emptyTmpl.val;
         }
     }
-
     tmpl.set[name] = tmpl;
     return _addr_tmpl!;
-
 }
 
 // Name returns the name of the template.
@@ -421,7 +405,6 @@ public static ptr<Template> Must(ptr<Template> _addr_t, error err) => func((_, p
         panic(err);
     }
     return _addr_t!;
-
 });
 
 // ParseFiles creates a new Template and parses the template definitions from
@@ -474,11 +457,9 @@ private static (ptr<Template>, error) parseFiles(ptr<Template> _addr_t, Func<@st
         }
     }
 
-
     if (len(filenames) == 0) { 
         // Not really a problem, but be consistent.
         return (_addr_null!, error.As(fmt.Errorf("html/template: no files named in call to ParseFiles"))!);
-
     }
     foreach (var (_, filename) in filenames) {
         var (name, b, err) = readFile(filename);
@@ -508,7 +489,6 @@ private static (ptr<Template>, error) parseFiles(ptr<Template> _addr_t, Func<@st
             return (_addr_null!, error.As(err)!);
         }
     }    return (_addr_t!, error.As(null!)!);
-
 }
 
 // ParseGlob creates a new Template and parses the template definitions from
@@ -558,7 +538,6 @@ private static (ptr<Template>, error) parseGlob(ptr<Template> _addr_t, @string p
             return (_addr_null!, error.As(err)!);
         }
     }
-
     var (filenames, err) = filepath.Glob(pattern);
     if (err != null) {
         return (_addr_null!, error.As(err)!);
@@ -567,7 +546,6 @@ private static (ptr<Template>, error) parseGlob(ptr<Template> _addr_t, @string p
         return (_addr_null!, error.As(fmt.Errorf("html/template: pattern matches no files: %#q", pattern))!);
     }
     return _addr_parseFiles(_addr_t, readFileOS, filenames)!;
-
 }
 
 // IsTrue reports whether the value is 'true', in the sense of not the zero of its type,
@@ -620,9 +598,7 @@ private static (ptr<Template>, error) parseFS(ptr<Template> _addr_t, fs.FS fsys,
             return (_addr_null!, error.As(fmt.Errorf("template: pattern matches no files: %#q", pattern))!);
         }
         filenames = append(filenames, list);
-
     }    return _addr_parseFiles(_addr_t, readFileFS(fsys), filenames)!;
-
 }
 
 private static (@string, slice<byte>, error) readFileOS(@string file) {

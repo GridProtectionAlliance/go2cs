@@ -5,21 +5,21 @@
 // Package bufio implements buffered I/O. It wraps an io.Reader or io.Writer
 // object, creating another object (Reader or Writer) that also implements
 // the interface but provides buffering and some help for textual I/O.
-// package bufio -- go2cs converted at 2022 March 06 22:14:32 UTC
+
+// package bufio -- go2cs converted at 2022 March 13 05:28:46 UTC
 // import "bufio" ==> using bufio = go.bufio_package
 // Original source: C:\Program Files\Go\src\bufio\bufio.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using io = io_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
 
 public static partial class bufio_package {
 
 private static readonly nint defaultBufSize = 4096;
-
 
 public static var ErrInvalidUnreadByte = errors.New("bufio: invalid use of UnreadByte");public static var ErrInvalidUnreadRune = errors.New("bufio: invalid use of UnreadRune");public static var ErrBufferFull = errors.New("bufio: buffer full");public static var ErrNegativeCount = errors.New("bufio: negative count");
 
@@ -60,7 +60,6 @@ public static ptr<Reader> NewReaderSize(io.Reader rd, nint size) {
     ptr<Reader> r = @new<Reader>();
     r.reset(make_slice<byte>(size), rd);
     return _addr_r!;
-
 }
 
 // NewReader returns a new Reader whose buffer has the default size.
@@ -119,7 +118,6 @@ private static void fill(this ptr<Reader> _addr_b) => func((_, panic, _) => {
         }
     }
     b.err = io.ErrNoProgress;
-
 });
 
 private static error readErr(this ptr<Reader> _addr_b) {
@@ -166,12 +164,9 @@ private static (slice<byte>, error) Peek(this ptr<Reader> _addr_b, nint n) {
             if (err == null) {
                 err = error.As(ErrBufferFull)!;
             }
-
         }
     }
-
     return (b.buf[(int)b.r..(int)b.r + n], error.As(err)!);
-
 }
 
 // Discard skips the next n bytes, returning the number of bytes discarded.
@@ -209,7 +204,6 @@ private static (nint, error) Discard(this ptr<Reader> _addr_b, nint n) {
             return (n - remain, error.As(b.readErr())!);
         }
     }
-
 }
 
 // Read reads data into p.
@@ -229,7 +223,6 @@ private static (nint, error) Read(this ptr<Reader> _addr_b, slice<byte> p) => fu
             return (0, error.As(null!)!);
         }
         return (0, error.As(b.readErr())!);
-
     }
     if (b.r == b.w) {
         if (b.err != null) {
@@ -242,14 +235,11 @@ private static (nint, error) Read(this ptr<Reader> _addr_b, slice<byte> p) => fu
             if (n < 0) {
                 panic(errNegativeRead);
             }
-
             if (n > 0) {
                 b.lastByte = int(p[n - 1]);
                 b.lastRuneSize = -1;
             }
-
             return (n, error.As(b.readErr())!);
-
         }
         b.r = 0;
         b.w = 0;
@@ -261,14 +251,12 @@ private static (nint, error) Read(this ptr<Reader> _addr_b, slice<byte> p) => fu
             return (0, error.As(b.readErr())!);
         }
         b.w += n;
-
     }
     n = copy(p, b.buf[(int)b.r..(int)b.w]);
     b.r += n;
     b.lastByte = int(b.buf[b.r - 1]);
     b.lastRuneSize = -1;
     return (n, error.As(null!)!);
-
 });
 
 // ReadByte reads and returns a single byte.
@@ -289,7 +277,6 @@ private static (byte, error) ReadByte(this ptr<Reader> _addr_b) {
     b.r++;
     b.lastByte = int(c);
     return (c, error.As(null!)!);
-
 }
 
 // UnreadByte unreads the last byte. Only the most recently read byte can be unread.
@@ -310,13 +297,11 @@ private static error UnreadByte(this ptr<Reader> _addr_b) {
  { 
         // b.r == 0 && b.w == 0
         b.w = 1;
-
     }
     b.buf[b.r] = byte(b.lastByte);
     b.lastByte = -1;
     b.lastRuneSize = -1;
     return error.As(null!)!;
-
 }
 
 // ReadRune reads a single UTF-8 encoded Unicode character and returns the
@@ -342,7 +327,6 @@ private static (int, nint, error) ReadRune(this ptr<Reader> _addr_b) {
     b.lastByte = int(b.buf[b.r - 1]);
     b.lastRuneSize = size;
     return (r, size, error.As(null!)!);
-
 }
 
 // UnreadRune unreads the last rune. If the most recent method called on
@@ -359,7 +343,6 @@ private static error UnreadRune(this ptr<Reader> _addr_b) {
     b.lastByte = -1;
     b.lastRuneSize = -1;
     return error.As(null!)!;
-
 }
 
 // Buffered returns the number of bytes that can be read from the current buffer.
@@ -437,9 +420,7 @@ private static (slice<byte>, error) ReadSlice(this ptr<Reader> _addr_b, byte del
 
     }
 
-
     return ;
-
 }
 
 // ReadLine is a low-level line-reading primitive. Most callers should use
@@ -473,22 +454,17 @@ private static (slice<byte>, bool, error) ReadLine(this ptr<Reader> _addr_b) => 
             if (b.r == 0) { 
                 // should be unreachable
                 panic("bufio: tried to rewind past start of buffer");
-
             }
-
             b.r--;
             line = line[..(int)len(line) - 1];
-
         }
         return (line, true, error.As(null!)!);
-
     }
     if (len(line) == 0) {
         if (err != null) {
             line = null;
         }
         return ;
-
     }
     err = null;
 
@@ -498,10 +474,8 @@ private static (slice<byte>, bool, error) ReadLine(this ptr<Reader> _addr_b) => 
             drop = 2;
         }
         line = line[..(int)len(line) - drop];
-
     }
     return ;
-
 });
 
 // collectFragments reads until the first occurrence of delim in the input. It
@@ -525,23 +499,19 @@ private static (slice<slice<byte>>, slice<byte>, nint, error) collectFragments(t
         frag, e = b.ReadSlice(delim);
         if (e == null) { // got final fragment
             break;
-
         }
         if (e != ErrBufferFull) { // unexpected error
             err = e;
             break;
-
         }
         var buf = make_slice<byte>(len(frag));
         copy(buf, frag);
         fullBuffers = append(fullBuffers, buf);
         totalLen += len(buf);
-
     }
 
     totalLen += len(frag);
     return (fullBuffers, frag, totalLen, error.As(err)!);
-
 }
 
 // ReadBytes reads until the first occurrence of delim in the input,
@@ -565,7 +535,6 @@ private static (slice<byte>, error) ReadBytes(this ptr<Reader> _addr_b, byte del
         n += copy(buf[(int)n..], full[i]);
     }    copy(buf[(int)n..], frag);
     return (buf, error.As(err)!);
-
 }
 
 // ReadString reads until the first occurrence of delim in the input,
@@ -589,7 +558,6 @@ private static (@string, error) ReadString(this ptr<Reader> _addr_b, byte delim)
         buf.Write(fb);
     }    buf.Write(frag);
     return (buf.String(), error.As(err)!);
-
 }
 
 // WriteTo implements io.WriterTo.
@@ -615,7 +583,6 @@ private static (long, error) WriteTo(this ptr<Reader> _addr_b, io.Writer w) {
         }
     }
 
-
     {
         io.ReaderFrom (w, ok) = w._<io.ReaderFrom>();
 
@@ -625,7 +592,6 @@ private static (long, error) WriteTo(this ptr<Reader> _addr_b, io.Writer w) {
             return (n, error.As(err)!);
         }
     }
-
 
     if (b.w - b.r < len(b.buf)) {
         b.fill(); // buffer not full
@@ -644,7 +610,6 @@ private static (long, error) WriteTo(this ptr<Reader> _addr_b, io.Writer w) {
         b.err = null;
     }
     return (n, error.As(b.readErr())!);
-
 }
 
 private static var errNegativeWrite = errors.New("bufio: writer returned negative count from Write");
@@ -661,7 +626,6 @@ private static (long, error) writeBuf(this ptr<Reader> _addr_b, io.Writer w) => 
     }
     b.r += n;
     return (int64(n), error.As(err)!);
-
 });
 
 // buffered output
@@ -692,7 +656,6 @@ public static ptr<Writer> NewWriterSize(io.Writer w, nint size) {
         size = defaultBufSize;
     }
     return addr(new Writer(buf:make([]byte,size),wr:w,));
-
 }
 
 // NewWriter returns a new Writer whose buffer has the default size.
@@ -738,11 +701,9 @@ private static error Flush(this ptr<Writer> _addr_b) {
         b.n -= n;
         b.err = err;
         return error.As(err)!;
-
     }
     b.n = 0;
     return error.As(null!)!;
-
 }
 
 // Available returns how many bytes are unused in the buffer.
@@ -774,7 +735,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_b, slice<byte> p) {
             // Large write, empty buffer.
             // Write directly from p to avoid copy.
             n, b.err = b.wr.Write(p);
-
         }
         else
  {
@@ -784,7 +744,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_b, slice<byte> p) {
         }
         nn += n;
         p = p[(int)n..];
-
     }
     if (b.err != null) {
         return (nn, error.As(b.err)!);
@@ -793,7 +752,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_b, slice<byte> p) {
     b.n += n;
     nn += n;
     return (nn, error.As(null!)!);
-
 }
 
 // WriteByte writes a single byte.
@@ -809,7 +767,6 @@ private static error WriteByte(this ptr<Writer> _addr_b, byte c) {
     b.buf[b.n] = c;
     b.n++;
     return error.As(null!)!;
-
 }
 
 // WriteRune writes a single Unicode code point, returning
@@ -826,7 +783,6 @@ private static (nint, error) WriteRune(this ptr<Writer> _addr_b, int r) {
             return (0, error.As(err)!);
         }
         return (1, error.As(null!)!);
-
     }
     if (b.err != null) {
         return (0, error.As(b.err)!);
@@ -842,13 +798,11 @@ private static (nint, error) WriteRune(this ptr<Writer> _addr_b, int r) {
         if (n < utf8.UTFMax) { 
             // Can only happen if buffer is silly small.
             return b.WriteString(string(r));
-
         }
     }
     size = utf8.EncodeRune(b.buf[(int)b.n..], r);
     b.n += size;
     return (size, error.As(null!)!);
-
 }
 
 // WriteString writes a string.
@@ -875,7 +829,6 @@ private static (nint, error) WriteString(this ptr<Writer> _addr_b, @string s) {
     b.n += n;
     nn += n;
     return (nn, error.As(null!)!);
-
 }
 
 // ReadFrom implements io.ReaderFrom. If the underlying writer
@@ -900,7 +853,6 @@ private static (long, error) ReadFrom(this ptr<Writer> _addr_b, io.Reader r) {
             }
 
         }
-
     }
     nint m = default;
     while (true) {
@@ -913,7 +865,6 @@ private static (long, error) ReadFrom(this ptr<Writer> _addr_b, io.Reader r) {
                 }
 
             }
-
         }
         nint nr = 0;
         while (nr < maxConsecutiveEmptyReads) {
@@ -943,7 +894,6 @@ private static (long, error) ReadFrom(this ptr<Writer> _addr_b, io.Reader r) {
         }
     }
     return (n, error.As(err)!);
-
 }
 
 // buffered input and output

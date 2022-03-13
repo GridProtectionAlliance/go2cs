@@ -4,47 +4,48 @@
 
 // HTTP reverse proxy handler
 
-// package httputil -- go2cs converted at 2022 March 06 22:24:05 UTC
+// package httputil -- go2cs converted at 2022 March 13 05:38:31 UTC
 // import "net/http/httputil" ==> using httputil = go.net.http.httputil_package
 // Original source: C:\Program Files\Go\src\net\http\httputil\reverseproxy.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using ascii = go.net.http.@internal.ascii_package;
-using textproto = go.net.textproto_package;
-using url = go.net.url_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using httpguts = go.golang.org.x.net.http.httpguts_package;
-using System;
-using System.Threading;
-
-
 namespace go.net.http;
 
+using context = context_package;
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using net = net_package;
+using http = net.http_package;
+using ascii = net.http.@internal.ascii_package;
+using textproto = net.textproto_package;
+using url = net.url_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using httpguts = golang.org.x.net.http.httpguts_package;
+
+
+// ReverseProxy is an HTTP Handler that takes an incoming request and
+// sends it to another server, proxying the response back to the
+// client.
+//
+// ReverseProxy by default sets the client IP as the value of the
+// X-Forwarded-For header.
+//
+// If an X-Forwarded-For header already exists, the client IP is
+// appended to the existing values. As a special case, if the header
+// exists in the Request.Header map but has a nil value (such as when
+// set by the Director func), the X-Forwarded-For header is
+// not modified.
+//
+// To prevent IP spoofing, be sure to delete any pre-existing
+// X-Forwarded-For header coming from the client or
+// an untrusted proxy.
+
+using System;
+using System.Threading;
 public static partial class httputil_package {
 
-    // ReverseProxy is an HTTP Handler that takes an incoming request and
-    // sends it to another server, proxying the response back to the
-    // client.
-    //
-    // ReverseProxy by default sets the client IP as the value of the
-    // X-Forwarded-For header.
-    //
-    // If an X-Forwarded-For header already exists, the client IP is
-    // appended to the existing values. As a special case, if the header
-    // exists in the Request.Header map but has a nil value (such as when
-    // set by the Director func), the X-Forwarded-For header is
-    // not modified.
-    //
-    // To prevent IP spoofing, be sure to delete any pre-existing
-    // X-Forwarded-For header coming from the client or
-    // an untrusted proxy.
 public partial struct ReverseProxy {
     public Action<ptr<http.Request>> Director; // The transport used to perform proxy requests.
 // If nil, http.DefaultTransport is used.
@@ -97,7 +98,6 @@ private static @string singleJoiningSlash(@string a, @string b) {
     else if (!aslash && !bslash) 
         return a + "/" + b;
         return a + b;
-
 }
 
 private static (@string, @string) joinURLPath(ptr<url.URL> _addr_a, ptr<url.URL> _addr_b) {
@@ -121,7 +121,6 @@ private static (@string, @string) joinURLPath(ptr<url.URL> _addr_a, ptr<url.URL>
     else if (!aslash && !bslash) 
         return (a.Path + "/" + b.Path, apath + "/" + bpath);
         return (a.Path + b.Path, apath + bpath);
-
 }
 
 // NewSingleHostReverseProxy returns a new ReverseProxy that routes
@@ -152,14 +151,11 @@ public static ptr<ReverseProxy> NewSingleHostReverseProxy(ptr<url.URL> _addr_tar
             if (!ok) { 
                 // explicitly disable User-Agent so it's not set to default value
                 req.Header.Set("User-Agent", "");
-
             }
 
         }
-
     };
     return addr(new ReverseProxy(Director:director));
-
 }
 
 private static void copyHeader(http.Header dst, http.Header src) {
@@ -192,7 +188,6 @@ private static Action<http.ResponseWriter, ptr<http.Request>, error> getErrorHan
         return p.ErrorHandler;
     }
     return p.defaultErrorHandler;
-
 }
 
 // modifyResponse conditionally runs the optional ModifyResponse hook
@@ -214,9 +209,7 @@ private static bool modifyResponse(this ptr<ReverseProxy> _addr_p, http.Response
             return false;
         }
     }
-
     return true;
-
 }
 
 private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWriter rw, ptr<http.Request> _addr_req) => func((defer, panic, _) => {
@@ -242,7 +235,6 @@ private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWrite
         }
     }
 
-
     var outreq = req.Clone(ctx);
     if (req.ContentLength == 0) {
         outreq.Body = null; // Issue 16036: nil Body for http.Transport retries
@@ -255,7 +247,6 @@ private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWrite
         // any Read in flight after the handle returns, in practice it's safe to
         // read after closing it.
         defer(outreq.Body.Close());
-
     }
     if (outreq.Header == null) {
         outreq.Header = make(http.Header); // Issue 33142: historical behavior was to always allocate
@@ -302,14 +293,11 @@ private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWrite
             if (len(prior) > 0) {
                 clientIP = strings.Join(prior, ", ") + ", " + clientIP;
             }
-
             if (!omit) {
                 outreq.Header.Set("X-Forwarded-For", clientIP);
             }
-
         }
     }
-
 
     var (res, err) = transport.RoundTrip(outreq);
     if (err != null) {
@@ -322,7 +310,6 @@ private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWrite
         }
         p.handleUpgradeResponse(rw, outreq, res);
         return ;
-
     }
     removeConnectionHeaders(res.Header);
 
@@ -358,7 +345,6 @@ private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWrite
         }
 
         rw.Header().Add("Trailer", strings.Join(trailerKeys, ", "));
-
     }
     rw.WriteHeader(res.StatusCode);
 
@@ -373,7 +359,6 @@ private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWrite
             return ;
         }
         panic(http.ErrAbortHandler);
-
     }
     res.Body.Close(); // close now, instead of defer, to populate res.Trailer
 
@@ -389,7 +374,6 @@ private static void ServeHTTP(this ptr<ReverseProxy> _addr_p, http.ResponseWrite
             }
 
         }
-
     }
     if (len(res.Trailer) == announcedTrailers) {
         copyHeader(rw.Header(), res.Trailer);
@@ -423,16 +407,13 @@ private static bool shouldPanicOnCopyError(ptr<http.Request> _addr_req) {
     if (inOurTests) { 
         // Our tests know to handle this panic.
         return true;
-
     }
     if (req.Context().Value(http.ServerContextKey) != null) { 
         // We seem to be running under an HTTP server, so
         // it'll recover the panic.
         return true;
-
     }
     return false;
-
 }
 
 // removeConnectionHeaders removes hop-by-hop headers listed in the "Connection" header of h.
@@ -445,7 +426,6 @@ private static void removeConnectionHeaders(http.Header h) {
             if (sf != "") {
                 h.Del(sf);
             }
-
         }
     }
 }
@@ -467,7 +447,6 @@ private static time.Duration flushInterval(this ptr<ReverseProxy> _addr_p, ptr<h
         return -1;
     }
     return p.FlushInterval;
-
 }
 
 private static error copyResponse(this ptr<ReverseProxy> _addr_p, io.Writer dst, io.Reader src, time.Duration flushInterval) => func((defer, _, _) => {
@@ -486,11 +465,9 @@ private static error copyResponse(this ptr<ReverseProxy> _addr_p, io.Writer dst,
                 mlw.t = time.AfterFunc(flushInterval, mlw.delayedFlush);
 
                 dst = mlw;
-
             }
 
         }
-
     }
     slice<byte> buf = default;
     if (p.BufferPool != null) {
@@ -499,7 +476,6 @@ private static error copyResponse(this ptr<ReverseProxy> _addr_p, io.Writer dst,
     }
     var (_, err) = p.copyBuffer(dst, src, buf);
     return error.As(err)!;
-
 });
 
 // copyBuffer returns any write errors or non-EOF read errors, and the amount
@@ -537,7 +513,6 @@ private static (long, error) copyBuffer(this ptr<ReverseProxy> _addr_p, io.Write
             return (written, error.As(rerr)!);
         }
     }
-
 }
 
 private static void logf(this ptr<ReverseProxy> _addr_p, @string format, params object[] args) {
@@ -589,7 +564,6 @@ private static (nint, error) Write(this ptr<maxLatencyWriter> _addr_m, slice<byt
     }
     m.flushPending = true;
     return ;
-
 });
 
 private static void delayedFlush(this ptr<maxLatencyWriter> _addr_m) => func((defer, _, _) => {
@@ -599,11 +573,9 @@ private static void delayedFlush(this ptr<maxLatencyWriter> _addr_m) => func((de
     defer(m.mu.Unlock());
     if (!m.flushPending) { // if stop was called but AfterFunc already started this goroutine
         return ;
-
     }
     m.dst.Flush();
     m.flushPending = false;
-
 });
 
 private static void stop(this ptr<maxLatencyWriter> _addr_m) => func((defer, _, _) => {
@@ -622,7 +594,6 @@ private static @string upgradeType(http.Header h) {
         return "";
     }
     return h.Get("Upgrade");
-
 }
 
 private static void handleUpgradeResponse(this ptr<ReverseProxy> _addr_p, http.ResponseWriter rw, ptr<http.Request> _addr_req, ptr<http.Response> _addr_res) => func((defer, _, _) => {
@@ -634,7 +605,6 @@ private static void handleUpgradeResponse(this ptr<ReverseProxy> _addr_p, http.R
     var resUpType = upgradeType(res.Header);
     if (!ascii.IsPrint(resUpType)) { // We know reqUpType is ASCII, it's checked by the caller.
         p.getErrorHandler()(rw, req, fmt.Errorf("backend tried to switch to invalid protocol %q", resUpType));
-
     }
     if (!ascii.EqualFold(reqUpType, resUpType)) {
         p.getErrorHandler()(rw, req, fmt.Errorf("backend tried to switch protocol %q when %q was requested", resUpType, reqUpType));
@@ -655,7 +625,6 @@ private static void handleUpgradeResponse(this ptr<ReverseProxy> _addr_p, http.R
         // Ensure that the cancellation of a request closes the backend.
         // See issue https://golang.org/issue/35559.
         backConn.Close();
-
     }());
 
     defer(close(backConnCloseCh));
@@ -683,7 +652,6 @@ private static void handleUpgradeResponse(this ptr<ReverseProxy> _addr_p, http.R
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -696,14 +664,12 @@ private static void handleUpgradeResponse(this ptr<ReverseProxy> _addr_p, http.R
         err = err__prev1;
 
     }
-
     var errc = make_channel<error>(1);
     switchProtocolCopier spc = new switchProtocolCopier(user:conn,backend:backConn);
     go_(() => spc.copyToBackend(errc));
     go_(() => spc.copyFromBackend(errc));
     errc.Receive();
     return ;
-
 });
 
 // switchProtocolCopier exists so goroutines proxying data back and

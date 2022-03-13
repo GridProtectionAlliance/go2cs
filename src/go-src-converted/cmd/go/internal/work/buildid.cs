@@ -2,98 +2,100 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2022 March 06 23:17:24 UTC
+// package work -- go2cs converted at 2022 March 13 06:30:43 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\buildid.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cache = go.cmd.go.@internal.cache_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using str = go.cmd.go.@internal.str_package;
-using buildid = go.cmd.@internal.buildid_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using os = os_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cache = cmd.go.@internal.cache_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using str = cmd.go.@internal.str_package;
+using buildid = cmd.@internal.buildid_package;
+
+
+// Build IDs
+//
+// Go packages and binaries are stamped with build IDs that record both
+// the action ID, which is a hash of the inputs to the action that produced
+// the packages or binary, and the content ID, which is a hash of the action
+// output, namely the archive or binary itself. The hash is the same one
+// used by the build artifact cache (see cmd/go/internal/cache), but
+// truncated when stored in packages and binaries, as the full length is not
+// needed and is a bit unwieldy. The precise form is
+//
+//    actionID/[.../]contentID
+//
+// where the actionID and contentID are prepared by buildid.HashToString below.
+// and are found by looking for the first or last slash.
+// Usually the buildID is simply actionID/contentID, but see below for an
+// exception.
+//
+// The build ID serves two primary purposes.
+//
+// 1. The action ID half allows installed packages and binaries to serve as
+// one-element cache entries. If we intend to build math.a with a given
+// set of inputs summarized in the action ID, and the installed math.a already
+// has that action ID, we can reuse the installed math.a instead of rebuilding it.
+//
+// 2. The content ID half allows the easy preparation of action IDs for steps
+// that consume a particular package or binary. The content hash of every
+// input file for a given action must be included in the action ID hash.
+// Storing the content ID in the build ID lets us read it from the file with
+// minimal I/O, instead of reading and hashing the entire file.
+// This is especially effective since packages and binaries are typically
+// the largest inputs to an action.
+//
+// Separating action ID from content ID is important for reproducible builds.
+// The compiler is compiled with itself. If an output were represented by its
+// own action ID (instead of content ID) when computing the action ID of
+// the next step in the build process, then the compiler could never have its
+// own input action ID as its output action ID (short of a miraculous hash collision).
+// Instead we use the content IDs to compute the next action ID, and because
+// the content IDs converge, so too do the action IDs and therefore the
+// build IDs and the overall compiler binary. See cmd/dist's cmdbootstrap
+// for the actual convergence sequence.
+//
+// The “one-element cache” purpose is a bit more complex for installed
+// binaries. For a binary, like cmd/gofmt, there are two steps: compile
+// cmd/gofmt/*.go into main.a, and then link main.a into the gofmt binary.
+// We do not install gofmt's main.a, only the gofmt binary. Being able to
+// decide that the gofmt binary is up-to-date means computing the action ID
+// for the final link of the gofmt binary and comparing it against the
+// already-installed gofmt binary. But computing the action ID for the link
+// means knowing the content ID of main.a, which we did not keep.
+// To sidestep this problem, each binary actually stores an expanded build ID:
+//
+//    actionID(binary)/actionID(main.a)/contentID(main.a)/contentID(binary)
+//
+// (Note that this can be viewed equivalently as:
+//
+//    actionID(binary)/buildID(main.a)/contentID(binary)
+//
+// Storing the buildID(main.a) in the middle lets the computations that care
+// about the prefix or suffix halves ignore the middle and preserves the
+// original build ID as a contiguous string.)
+//
+// During the build, when it's time to build main.a, the gofmt binary has the
+// information needed to decide whether the eventual link would produce
+// the same binary: if the action ID for main.a's inputs matches and then
+// the action ID for the link step matches when assuming the given main.a
+// content ID, then the binary as a whole is up-to-date and need not be rebuilt.
+//
+// This is all a bit complex and may be simplified once we can rely on the
+// main cache, but at least at the start we will be using the content-based
+// staleness determination without a cache beyond the usual installed
+// package and binary locations.
 
 public static partial class work_package {
 
-    // Build IDs
-    //
-    // Go packages and binaries are stamped with build IDs that record both
-    // the action ID, which is a hash of the inputs to the action that produced
-    // the packages or binary, and the content ID, which is a hash of the action
-    // output, namely the archive or binary itself. The hash is the same one
-    // used by the build artifact cache (see cmd/go/internal/cache), but
-    // truncated when stored in packages and binaries, as the full length is not
-    // needed and is a bit unwieldy. The precise form is
-    //
-    //    actionID/[.../]contentID
-    //
-    // where the actionID and contentID are prepared by buildid.HashToString below.
-    // and are found by looking for the first or last slash.
-    // Usually the buildID is simply actionID/contentID, but see below for an
-    // exception.
-    //
-    // The build ID serves two primary purposes.
-    //
-    // 1. The action ID half allows installed packages and binaries to serve as
-    // one-element cache entries. If we intend to build math.a with a given
-    // set of inputs summarized in the action ID, and the installed math.a already
-    // has that action ID, we can reuse the installed math.a instead of rebuilding it.
-    //
-    // 2. The content ID half allows the easy preparation of action IDs for steps
-    // that consume a particular package or binary. The content hash of every
-    // input file for a given action must be included in the action ID hash.
-    // Storing the content ID in the build ID lets us read it from the file with
-    // minimal I/O, instead of reading and hashing the entire file.
-    // This is especially effective since packages and binaries are typically
-    // the largest inputs to an action.
-    //
-    // Separating action ID from content ID is important for reproducible builds.
-    // The compiler is compiled with itself. If an output were represented by its
-    // own action ID (instead of content ID) when computing the action ID of
-    // the next step in the build process, then the compiler could never have its
-    // own input action ID as its output action ID (short of a miraculous hash collision).
-    // Instead we use the content IDs to compute the next action ID, and because
-    // the content IDs converge, so too do the action IDs and therefore the
-    // build IDs and the overall compiler binary. See cmd/dist's cmdbootstrap
-    // for the actual convergence sequence.
-    //
-    // The “one-element cache” purpose is a bit more complex for installed
-    // binaries. For a binary, like cmd/gofmt, there are two steps: compile
-    // cmd/gofmt/*.go into main.a, and then link main.a into the gofmt binary.
-    // We do not install gofmt's main.a, only the gofmt binary. Being able to
-    // decide that the gofmt binary is up-to-date means computing the action ID
-    // for the final link of the gofmt binary and comparing it against the
-    // already-installed gofmt binary. But computing the action ID for the link
-    // means knowing the content ID of main.a, which we did not keep.
-    // To sidestep this problem, each binary actually stores an expanded build ID:
-    //
-    //    actionID(binary)/actionID(main.a)/contentID(main.a)/contentID(binary)
-    //
-    // (Note that this can be viewed equivalently as:
-    //
-    //    actionID(binary)/buildID(main.a)/contentID(binary)
-    //
-    // Storing the buildID(main.a) in the middle lets the computations that care
-    // about the prefix or suffix halves ignore the middle and preserves the
-    // original build ID as a contiguous string.)
-    //
-    // During the build, when it's time to build main.a, the gofmt binary has the
-    // information needed to decide whether the eventual link would produce
-    // the same binary: if the action ID for main.a's inputs matches and then
-    // the action ID for the link step matches when assuming the given main.a
-    // content ID, then the binary as a whole is up-to-date and need not be rebuilt.
-    //
-    // This is all a bit complex and may be simplified once we can rely on the
-    // main cache, but at least at the start we will be using the content-based
-    // staleness determination without a cache beyond the usual installed
-    // package and binary locations.
 private static readonly @string buildIDSeparator = "/";
 
 // actionID returns the action ID half of a build ID.
@@ -106,7 +108,6 @@ private static @string actionID(@string buildID) {
         return buildID;
     }
     return buildID[..(int)i];
-
 }
 
 // contentID returns the content ID half of a build ID.
@@ -181,7 +182,6 @@ private static @string toolID(this ptr<Builder> _addr_b, @string name) {
         }
     }
 
-
     var line = stdout.String();
     var f = strings.Fields(line);
     if (len(f) < 3 || f[0] != name && path != VetTool || f[1] != "version" || f[2] == "devel" && !strings.HasPrefix(f[len(f) - 1], "buildID=")) {
@@ -190,21 +190,18 @@ private static @string toolID(this ptr<Builder> _addr_b, @string name) {
     if (f[2] == "devel") { 
         // On the development branch, use the content ID part of the build ID.
         id = contentID(f[len(f) - 1]);
-
     }
     else
  { 
         // For a release, the output is like: "compile version go1.9.1 X:framepointer".
         // Use the whole line.
         id = strings.TrimSpace(line);
-
     }
     b.id.Lock();
     b.toolIDCache[name] = id;
     b.id.Unlock();
 
     return id;
-
 }
 
 // gccToolID returns the unique ID to use for a tool that is invoked
@@ -264,7 +261,6 @@ private static (@string, error) gccToolID(this ptr<Builder> _addr_b, @string nam
                 fields = fields__prev1;
 
             }
-
         }
         line = line__prev1;
     }
@@ -275,7 +271,6 @@ private static (@string, error) gccToolID(this ptr<Builder> _addr_b, @string nam
     if (!strings.Contains(version, "experimental")) { 
         // This is a release. Use this line as the tool ID.
         id = version;
-
     }
     else
  { 
@@ -313,7 +308,6 @@ private static (@string, error) gccToolID(this ptr<Builder> _addr_b, @string nam
                 }
 
             }
-
         }
         id, err = buildid.ReadFile(exe);
         if (err != null) {
@@ -328,7 +322,6 @@ private static (@string, error) gccToolID(this ptr<Builder> _addr_b, @string nam
     b.id.Unlock();
 
     return (id, error.As(null!)!);
-
 }
 
 // Check if assembler used by gccgo is GNU as.
@@ -370,7 +363,6 @@ private static (@string, error) gccgoBuildIDFile(this ptr<Builder> _addr_b, ptr<
     else
  { // cfg.Goarch == "386" || cfg.Goarch == "amd64"
         fmt.Fprintf(_addr_buf, "\t" + ".section .go.buildid,#exclude" + "\n");
-
     }
     fmt.Fprintf(_addr_buf, "\t.byte ");
     for (nint i = 0; i < len(a.buildID); i++) {
@@ -382,10 +374,8 @@ private static (@string, error) gccgoBuildIDFile(this ptr<Builder> _addr_b, ptr<
  {
                 fmt.Fprintf(_addr_buf, ",");
             }
-
         }
         fmt.Fprintf(_addr_buf, "%#02x", a.buildID[i]);
-
     }
     fmt.Fprintf(_addr_buf, "\n");
     if (cfg.Goos != "solaris" && cfg.Goos != "illumos" && cfg.Goos != "aix") {
@@ -395,7 +385,6 @@ private static (@string, error) gccgoBuildIDFile(this ptr<Builder> _addr_b, ptr<
         }
         fmt.Fprintf(_addr_buf, "\t" + ".section .note.GNU-stack,\"\",%s" + "\n", secType);
         fmt.Fprintf(_addr_buf, "\t" + ".section .note.GNU-split-stack,\"\",%s" + "\n", secType);
-
     }
     if (cfg.BuildN || cfg.BuildX) {
         foreach (var (_, line) in bytes.Split(buf.Bytes(), (slice<byte>)"\n")) {
@@ -412,9 +401,7 @@ private static (@string, error) gccgoBuildIDFile(this ptr<Builder> _addr_b, ptr<
         }
     }
 
-
     return (sfile, error.As(null!)!);
-
 }
 
 // buildID returns the build ID found in the given file.
@@ -438,7 +425,6 @@ private static @string buildID(this ptr<Builder> _addr_b, @string file) {
     b.id.Unlock();
 
     return id;
-
 }
 
 // fileHash returns the content hash of the named file.
@@ -451,7 +437,6 @@ private static @string fileHash(this ptr<Builder> _addr_b, @string file) {
         return "";
     }
     return buildid.HashToString(sum);
-
 }
 
 // useCache tries to satisfy the action a, which has action ID actionHash,
@@ -502,7 +487,6 @@ private static bool useCache(this ptr<Builder> _addr_b, ptr<Action> _addr_a, cac
             // Poison a.Target to catch uses later in the build.
             a.Target = "DO NOT USE - " + a.Mode;
             return true;
-
         }
     }
     if (target != "" && !cfg.BuildA && !b.NeedExport && a.Mode == "build" && len(a.triggers) == 1 && a.triggers[0].Mode == "link") {
@@ -549,15 +533,11 @@ private static bool useCache(this ptr<Builder> _addr_b, ptr<Action> _addr_a, cac
                     if (a.json != null) {
                         a.json.BuildID = a.buildID;
                     }
-
                     return true;
-
                 } 
                 // Otherwise restore old build ID for main build.
                 a.buildID = oldBuildID;
-
             }
-
         }
     }
     if (!cfg.BuildA && len(a.triggers) == 1 && a.triggers[0].TryCache != null && a.triggers[0].TryCache(b, a.triggers[0])) { 
@@ -584,7 +564,6 @@ private static bool useCache(this ptr<Builder> _addr_b, ptr<Action> _addr_a, cac
         a.Target = "DO NOT USE -  pseudo-cache Target";
         a.built = "DO NOT USE - pseudo-cache built";
         return true;
-
     }
     if (b.IsCmdList) { 
         // Invoked during go list to compute and record staleness.
@@ -613,7 +592,6 @@ private static bool useCache(this ptr<Builder> _addr_b, ptr<Action> _addr_a, cac
                         }
                     }
                 }
-
             } 
 
             // Fall through to update a.buildID from the build artifact cache,
@@ -663,42 +641,33 @@ private static bool useCache(this ptr<Builder> _addr_b, ptr<Action> _addr_a, cac
                                             if (p != null) { 
                                                 // Clearer than explaining that something else is stale.
                                                 p.StaleReason = "not installed but available in build cache";
-
                                             }
 
                                             p = p__prev6;
 
                                         }
-
                                         return true;
-
                                     }
 
                                 }
-
                             }
 
                             buildID = buildID__prev4;
 
                         }
-
                     }
 
                 }
-
             } 
 
             // Begin saving output for later writing to cache.
             a.output = new slice<byte>(new byte[] {  });
-
         }
         c = c__prev1;
 
     }
 
-
     return false;
-
 }
 
 private static error showStdout(ptr<Builder> _addr_b, ptr<cache.Cache> _addr_c, cache.ActionID actionID, @string key) {
@@ -718,7 +687,6 @@ private static error showStdout(ptr<Builder> _addr_b, ptr<cache.Cache> _addr_c, 
         }
     }
     return error.As(null!)!;
-
 }
 
 // flushOutput flushes the output being queued in a.
@@ -776,12 +744,9 @@ private static error updateBuildID(this ptr<Builder> _addr_b, ptr<Action> _addr_
                             }
 
                         }
-
                     }
-
                     break;
             }
-
         }
         c = c__prev1;
 
@@ -808,7 +773,6 @@ private static error updateBuildID(this ptr<Builder> _addr_b, ptr<Action> _addr_
     if (len(matches) == 0) { 
         // Assume the user specified -buildid= to override what we were going to choose.
         return error.As(null!)!;
-
     }
     if (rewrite) {
         var (w, err) = os.OpenFile(target, os.O_RDWR, 0);
@@ -828,7 +792,6 @@ private static error updateBuildID(this ptr<Builder> _addr_b, ptr<Action> _addr_
             }
 
         }
-
     }
     {
         var c__prev1 = c;
@@ -859,9 +822,7 @@ private static error updateBuildID(this ptr<Builder> _addr_b, ptr<Action> _addr_
 
     }
 
-
     return error.As(null!)!;
-
 });
 
 } // end work_package

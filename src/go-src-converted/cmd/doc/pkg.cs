@@ -2,36 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:42 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:10 UTC
 // Original source: C:\Program Files\Go\src\cmd\doc\pkg.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using build = go.go.build_package;
-using doc = go.go.doc_package;
-using format = go.go.format_package;
-using parser = go.go.parser_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using log = go.log_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using build = go.build_package;
+using doc = go.doc_package;
+using format = go.format_package;
+using parser = go.parser_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using io = io_package;
+using fs = io.fs_package;
+using log = log_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class main_package {
 
 private static readonly nint punchedCardWidth = 80; // These things just won't leave us alone.
 private static readonly var indentedWidth = punchedCardWidth - len(indent);
 private static readonly @string indent = "    ";
-
 
 public partial struct Package {
     public io.Writer writer; // Destination for output.
@@ -111,7 +109,6 @@ private static @string prettyPath(this ptr<Package> _addr_pkg) {
         p = p__prev1;
 
     }
-
     foreach (var (_, gopath) in splitGopath()) {
         {
             var p__prev1 = p;
@@ -125,9 +122,7 @@ private static @string prettyPath(this ptr<Package> _addr_pkg) {
             p = p__prev1;
 
         }
-
     }    return path;
-
 }
 
 // trim trims the directory prefix from the path, paying attention
@@ -197,7 +192,6 @@ private static ptr<Package> parsePackage(io.Writer writer, ptr<build.Package> _a
         }
 
         return _addr_false!;
-
     };
     var fset = token.NewFileSet();
     var (pkgs, err) = parser.ParseDir(fset, pkg.Dir, include, parser.ParseComments);
@@ -258,14 +252,11 @@ private static ptr<Package> parsePackage(io.Writer writer, ptr<build.Package> _a
                 // We don't count it as a constructor bound to the type
                 // if the type itself is not exported.
                 constructor[fun] = true;
-
             }
-
         }
     }    ptr<Package> p = addr(new Package(writer:writer,name:pkg.Name,userPath:userPath,pkg:astPkg,file:ast.MergePackageFiles(astPkg,0),doc:docPkg,typedValue:typedValue,constructor:constructor,build:pkg,fs:fset,));
     p.buf.pkg = p;
     return _addr_p!;
-
 }
 
 private static void Printf(this ptr<Package> _addr_pkg, @string format, params object[] args) {
@@ -307,7 +298,6 @@ private static void emit(this ptr<Package> _addr_pkg, @string comment, ast.Node 
         if (showSrc) { 
             // Need an extra little dance to get internal comments to appear.
             arg = addr(new printer.CommentedNode(Node:node,Comments:pkg.file.Comments,));
-
         }
         var err = format.Node(_addr_pkg.buf, pkg.fs, arg);
         if (err != null) {
@@ -369,18 +359,14 @@ private static @string oneLineNodeDepth(this ptr<Package> _addr_pkg, ast.Node no
                 else if (len(valueSpec.Values) > 0) {
                     typ = "";
                 }
-
                 if (!isExported(valueSpec.Names[0].Name)) {
                     continue;
                 }
-
                 @string val = "";
                 if (i < len(valueSpec.Values) && valueSpec.Values[i] != null) {
                     val = fmt.Sprintf(" = %s", pkg.oneLineNodeDepth(valueSpec.Values[i], depth));
                 }
-
                 return fmt.Sprintf("%s %s%s%s%s", n.Tok, valueSpec.Names[0], typ, val, trailer);
-
             }
             return "";
             break;
@@ -417,7 +403,6 @@ private static @string oneLineNodeDepth(this ptr<Package> _addr_pkg, ast.Node no
                     field = field__prev1;
                 }
             }
-
             var needParens = false;
             slice<@string> results = default;
             if (n.Results != null) {
@@ -434,17 +419,14 @@ private static @string oneLineNodeDepth(this ptr<Package> _addr_pkg, ast.Node no
                     field = field__prev1;
                 }
             }
-
             var param = joinStrings(params);
             if (len(results) == 0) {
                 return fmt.Sprintf("func(%s)", param);
             }
-
             var result = joinStrings(results);
             if (!needParens) {
                 return fmt.Sprintf("func(%s) %s", param, result);
             }
-
             return fmt.Sprintf("func(%s) (%s)", param, result);
             break;
         case ptr<ast.StructType> n:
@@ -515,7 +497,6 @@ private static @string oneLineNodeDepth(this ptr<Package> _addr_pkg, ast.Node no
             break;
         }
     }
-
 }
 
 // oneLineField returns a one-line summary of the field.
@@ -530,7 +511,6 @@ private static @string oneLineField(this ptr<Package> _addr_pkg, ptr<ast.Field> 
         return pkg.oneLineNodeDepth(field.Type, depth);
     }
     return joinStrings(names) + " " + pkg.oneLineNodeDepth(field.Type, depth);
-
 }
 
 // joinStrings formats the input as a comma-separated list,
@@ -544,7 +524,6 @@ private static @string joinStrings(slice<@string> ss) {
             break;
         }
     }    return strings.Join(ss, ", ");
-
 }
 
 // allDoc prints all the docs for the package.
@@ -641,7 +620,6 @@ private static void packageDoc(this ptr<Package> _addr_pkg) {
     if (pkg.pkg.Name == "main" && !showCmd) { 
         // Show only package docs for commands.
         return ;
-
     }
     if (!short) {
         pkg.newlines(2); // Guarantee blank line before the components.
@@ -681,11 +659,8 @@ private static void packageClause(this ptr<Package> _addr_pkg) {
  {
                     importPath = root.importPath + "/" + suffix;
                 }
-
                 break;
-
             }
-
         }
     }
     pkg.Printf("package %s // import %q\n\n", pkg.name, importPath);
@@ -725,7 +700,6 @@ private static void valueSummary(this ptr<Package> _addr_pkg, slice<ptr<doc.Valu
                 }
 
             }
-
         }
     }
 }
@@ -768,7 +742,6 @@ private static void typeSummary(this ptr<Package> _addr_pkg) {
                         decl = decl__prev2;
 
                     }
-
                 }
                 foreach (var (_, v) in typ.Vars) {
                     {
@@ -783,16 +756,13 @@ private static void typeSummary(this ptr<Package> _addr_pkg) {
                         decl = decl__prev2;
 
                     }
-
                 }
                 foreach (var (_, constructor) in typ.Funcs) {
                     if (isExported(constructor.Name)) {
                         pkg.Printf(indent + "%s\n", pkg.oneLineNode(constructor.Decl));
                     }
                 }
-
             }
-
         }
     }
 }
@@ -823,7 +793,6 @@ private static slice<ptr<doc.Value>> findValues(this ptr<Package> _addr_pkg, @st
             }
         }
     }    return ;
-
 }
 
 // findFuncs finds the doc.Funcs that describes the symbol.
@@ -836,7 +805,6 @@ private static slice<ptr<doc.Func>> findFuncs(this ptr<Package> _addr_pkg, @stri
             funcs = append(funcs, fun);
         }
     }    return ;
-
 }
 
 // findTypes finds the doc.Types that describes the symbol.
@@ -850,7 +818,6 @@ private static slice<ptr<doc.Type>> findTypes(this ptr<Package> _addr_pkg, @stri
             types = append(types, typ);
         }
     }    return ;
-
 }
 
 // findTypeSpec returns the ast.TypeSpec within the declaration that defines the symbol.
@@ -865,7 +832,6 @@ private static ptr<ast.TypeSpec> findTypeSpec(this ptr<Package> _addr_pkg, ptr<a
             return _addr_typeSpec!;
         }
     }    return _addr_null!;
-
 }
 
 // symbolDoc prints the docs for symbol. There may be multiple matches.
@@ -881,7 +847,6 @@ private static bool symbolDoc(this ptr<Package> _addr_pkg, @string symbol) {
         var decl = fun.Decl;
         pkg.emit(fun.Doc, decl);
         found = true;
-
     }    var values = pkg.findValues(symbol, pkg.doc.Consts);
     values = append(values, pkg.findValues(symbol, pkg.doc.Vars)); 
     // A declaration like
@@ -902,7 +867,6 @@ private static bool symbolDoc(this ptr<Package> _addr_pkg, @string symbol) {
         }
     }
     return true;
-
 }
 
 // valueDoc prints the docs for a constant or variable.
@@ -929,15 +893,11 @@ private static void valueDoc(this ptr<Package> _addr_pkg, ptr<doc.Value> _addr_v
                     // This a standalone identifier, as in the case of iota usage.
                     // Thus, assume the type comes from the previous type.
                     vspec.Type = addr(new ast.Ident(Name:pkg.oneLineNode(typ),NamePos:vspec.End()-1,));
-
                 }
-
                 specs = append(specs, vspec);
                 typ = null; // Only inject type on first exported identifier
                 break;
-
             }
-
         }
     }    if (len(specs) == 0) {
         return ;
@@ -945,7 +905,6 @@ private static void valueDoc(this ptr<Package> _addr_pkg, ptr<doc.Value> _addr_v
     value.Decl.Specs = specs;
     pkg.emit(value.Doc, value.Decl);
     printed[value.Decl] = true;
-
 }
 
 // typeDoc prints the docs for a type, including constructors and other items
@@ -1012,7 +971,6 @@ private static void trimUnexportedElems(ptr<ast.TypeSpec> _addr_spec) {
             typ.Methods = trimUnexportedFields(_addr_typ.Methods, true);
             break;
     }
-
 }
 
 // trimUnexportedFields returns the field list trimmed of unexported fields.
@@ -1039,11 +997,9 @@ private static ptr<ast.FieldList> trimUnexportedFields(ptr<ast.FieldList> _addr_
                     // The form *ident or *pkg.ident is only valid on
                     // embedded types in structs.
                     ty = se.X;
-
                 }
 
             }
-
             switch (ty.type()) {
                 case ptr<ast.Ident> ident:
                     if (isInterface && ident.Name == "error" && ident.Obj == null) { 
@@ -1052,9 +1008,7 @@ private static ptr<ast.FieldList> trimUnexportedFields(ptr<ast.FieldList> _addr_
                         // always gets shown publicly.
                         list = append(list, field);
                         continue;
-
                     }
-
                     names = new slice<ptr<ast.Ident>>(new ptr<ast.Ident>[] { ident });
                     break;
                 case ptr<ast.SelectorExpr> ident:
@@ -1064,9 +1018,7 @@ private static ptr<ast.FieldList> trimUnexportedFields(ptr<ast.FieldList> _addr_
             if (names == null) { 
                 // Can only happen if AST is incorrect. Safe to continue with a nil list.
                 log.Print("invalid program: unexpected type for embedded field");
-
             }
-
         }
         var ok = true;
         foreach (var (_, name) in names) {
@@ -1083,7 +1035,6 @@ private static ptr<ast.FieldList> trimUnexportedFields(ptr<ast.FieldList> _addr_
     }
     ptr<ast.Field> unexportedField = addr(new ast.Field(Type:&ast.Ident{Name:"",NamePos:fields.Closing-1,},Comment:&ast.CommentGroup{List:[]*ast.Comment{{Text:fmt.Sprintf("// Has unexported %s.\n",what)}},},));
     return addr(new ast.FieldList(Opening:fields.Opening,List:append(list,unexportedField),Closing:fields.Closing,));
-
 }
 
 // printMethodDoc prints the docs for matches of symbol.method.
@@ -1098,7 +1049,6 @@ private static bool printMethodDoc(this ptr<Package> _addr_pkg, @string symbol, 
             return false;
         }
         pkg.Fatalf("symbol %s is not a type in package %s installed in %q", symbol, pkg.name, pkg.build.ImportPath);
-
     }
     var found = false;
     foreach (var (_, typ) in types) {
@@ -1120,7 +1070,6 @@ private static bool printMethodDoc(this ptr<Package> _addr_pkg, @string symbol, 
         if (!ok) { 
             // Not an interface type.
             continue;
-
         }
         slice<ptr<ast.Field>> methods = default;
         foreach (var (_, iMethod) in inter.Methods.List) { 
@@ -1129,13 +1078,11 @@ private static bool printMethodDoc(this ptr<Package> _addr_pkg, @string symbol, 
             if (len(iMethod.Names) == 0) {
                 continue;
             }
-
             var name = iMethod.Names[0].Name;
             if (match(method, name)) {
                 methods = append(methods, iMethod);
                 found = true;
             }
-
         }        if (found) {
             pkg.Printf("type %s ", spec.Name);
             (inter.Methods.List, methods) = (methods, inter.Methods.List);            var err = format.Node(_addr_pkg.buf, pkg.fs, inter);
@@ -1145,10 +1092,8 @@ private static bool printMethodDoc(this ptr<Package> _addr_pkg, @string symbol, 
             pkg.newlines(1); 
             // Restore the original methods.
             inter.Methods.List = methods;
-
         }
     }    return found;
-
 }
 
 // printFieldDoc prints the docs for matches of symbol.fieldName.
@@ -1173,7 +1118,6 @@ private static bool printFieldDoc(this ptr<Package> _addr_pkg, @string symbol, @
         if (!ok) { 
             // Not a struct type.
             continue;
-
         }
         foreach (var (_, field) in structType.Fields.List) { 
             // TODO: Anonymous fields.
@@ -1194,31 +1138,23 @@ private static bool printFieldDoc(this ptr<Package> _addr_pkg, @string symbol, @
                     while (scanner.Scan()) {
                         fmt.Fprintf(_addr_pkg.buf, "%s// %s\n", indent, scanner.Bytes());
                     }
-
-
                 }
-
                 var s = pkg.oneLineNode(field.Type);
                 @string lineComment = "";
                 if (field.Comment != null) {
                     lineComment = fmt.Sprintf("  %s", field.Comment.List[0].Text);
                 }
-
                 pkg.Printf("%s%s %s%s\n", indent, name, s, lineComment);
                 found = true;
-
             }
-
         }
     }    if (found) {
         if (numUnmatched > 0) {
             pkg.Printf("\n    // ... other fields elided ...\n");
         }
         pkg.Printf("}\n");
-
     }
     return found;
-
 }
 
 // methodDoc prints the docs for matches of symbol.method.
@@ -1255,9 +1191,7 @@ private static bool match(@string user, @string program) {
             continue;
         }
         return false;
-
     }    return program == "";
-
 }
 
 // simpleFold returns the minimum rune equivalent to r
@@ -1269,9 +1203,7 @@ private static int simpleFold(int r) {
             return r1; // wrapped around, found min
         }
         r = r1;
-
     }
-
 }
 
 } // end main_package

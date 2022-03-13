@@ -51,17 +51,16 @@
 //    }
 //
 // because the former will succeed if err wraps an *fs.PathError.
-// package errors -- go2cs converted at 2022 March 06 22:08:00 UTC
+
+// package errors -- go2cs converted at 2022 March 13 05:23:49 UTC
 // import "errors" ==> using errors = go.errors_package
 // Original source: C:\Program Files\Go\src\errors\errors.go
-
-
 namespace go;
 
 public static partial class errors_package {
 
-    // New returns an error that formats as the given text.
-    // Each call to New returns a distinct error value even if the text is identical.
+// New returns an error that formats as the given text.
+// Each call to New returns a distinct error value even if the text is identical.
 public static error New(@string text) {
     return error.As(addr(new errorString(text))!)!;
 }

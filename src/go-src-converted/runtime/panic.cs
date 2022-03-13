@@ -2,44 +2,44 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:47 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\panic.go
-using abi = go.@internal.abi_package;
-using goexperiment = go.@internal.goexperiment_package;
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using abi = @internal.abi_package;
+using goexperiment = @internal.goexperiment_package;
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// We have two different ways of doing defers. The older way involves creating a
+// defer record at the time that a defer statement is executing and adding it to a
+// defer chain. This chain is inspected by the deferreturn call at all function
+// exits in order to run the appropriate defer calls. A cheaper way (which we call
+// open-coded defers) is used for functions in which no defer statements occur in
+// loops. In that case, we simply store the defer function/arg information into
+// specific stack slots at the point of each defer statement, as well as setting a
+// bit in a bitmask. At each function exit, we add inline code to directly make
+// the appropriate defer calls based on the bitmask and fn/arg information stored
+// on the stack. During panic/Goexit processing, the appropriate defer calls are
+// made using extra funcdata info that indicates the exact stack slots that
+// contain the bitmask and defer fn/args.
+
+// Check to make sure we can really generate a panic. If the panic
+// was generated from the runtime, or from inside malloc, then convert
+// to a throw of msg.
+// pc should be the program counter of the compiler-generated code that
+// triggered this panic.
+
+using System;
 public static partial class runtime_package {
 
-    // We have two different ways of doing defers. The older way involves creating a
-    // defer record at the time that a defer statement is executing and adding it to a
-    // defer chain. This chain is inspected by the deferreturn call at all function
-    // exits in order to run the appropriate defer calls. A cheaper way (which we call
-    // open-coded defers) is used for functions in which no defer statements occur in
-    // loops. In that case, we simply store the defer function/arg information into
-    // specific stack slots at the point of each defer statement, as well as setting a
-    // bit in a bitmask. At each function exit, we add inline code to directly make
-    // the appropriate defer calls based on the bitmask and fn/arg information stored
-    // on the stack. During panic/Goexit processing, the appropriate defer calls are
-    // made using extra funcdata info that indicates the exact stack slots that
-    // contain the bitmask and defer fn/args.
-
-    // Check to make sure we can really generate a panic. If the panic
-    // was generated from the runtime, or from inside malloc, then convert
-    // to a throw of msg.
-    // pc should be the program counter of the compiler-generated code that
-    // triggered this panic.
 private static void panicCheck1(System.UIntPtr pc, @string msg) {
     if (sys.GoarchWasm == 0 && hasPrefix(funcname(findfunc(pc)), "runtime.")) { 
         // Note: wasm can't tail call, so we can't get the original caller's pc.
         throw(msg);
-
     }
     var gp = getg();
     if (gp != null && gp.m != null && gp.m.mallocing != 0) {
@@ -240,12 +240,10 @@ private static void deferproc(int siz, ptr<funcval> _addr_fn) {
     if (gp.m.curg != gp) {>>MARKER:FUNCTION_panicSliceConvert_BLOCK_PREFIX<< 
         // go code on the system stack can't defer
         throw("defer on system stack");
-
     }
     if (goexperiment.RegabiDefer && siz != 0) {>>MARKER:FUNCTION_panicSlice3CU_BLOCK_PREFIX<< 
         // TODO: Make deferproc just take a func().
         throw("defer with non-empty frame");
-
     }
     var sp = getcallersp();
     var argp = uintptr(@unsafe.Pointer(_addr_fn)) + @unsafe.Sizeof(fn);
@@ -262,9 +260,9 @@ private static void deferproc(int siz, ptr<funcval> _addr_fn) {
     d.sp = sp;
 
     if (siz == 0)     else if (siz == sys.PtrSize) 
-        (uintptr.val)(deferArgs(_addr_d)).val;
+        (uintptr.val).val;
 
-        new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(argp));
+        (deferArgs(_addr_d)) = new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(argp));
     else 
         memmove(deferArgs(_addr_d), @unsafe.Pointer(argp), uintptr(siz));
     // deferproc returns 0 normally.
@@ -293,7 +291,6 @@ private static void deferprocStack(ptr<_defer> _addr_d) {
     if (gp.m.curg != gp) {>>MARKER:FUNCTION_panicSlice3BU_BLOCK_PREFIX<< 
         // go code on the system stack can't defer
         throw("defer on system stack");
-
     }
     if (goexperiment.RegabiDefer && d.siz != 0) {>>MARKER:FUNCTION_panicSlice3B_BLOCK_PREFIX<<
         throw("defer with non-empty frame");
@@ -304,15 +301,15 @@ private static void deferprocStack(ptr<_defer> _addr_d) {
     d.sp = getcallersp();
     d.pc = getcallerpc();
     d.framepc = 0;
-    d.varp = 0 * (uintptr.val)(@unsafe.Pointer(_addr_d._panic));
+    d.varp = 0 * (uintptr.val);
 
-    0 * (uintptr.val)(@unsafe.Pointer(_addr_d.fd));
+    (@unsafe.Pointer(_addr_d._panic)) = 0 * (uintptr.val);
 
-    0 * (uintptr.val)(@unsafe.Pointer(_addr_d.link));
+    (@unsafe.Pointer(_addr_d.fd)) = 0 * (uintptr.val);
 
-    uintptr(@unsafe.Pointer(gp._defer)) * (uintptr.val)(@unsafe.Pointer(_addr_gp._defer));
+    (@unsafe.Pointer(_addr_d.link)) = uintptr(@unsafe.Pointer(gp._defer)) * (uintptr.val);
 
-    uintptr(@unsafe.Pointer(d));
+    (@unsafe.Pointer(_addr_gp._defer)) = uintptr(@unsafe.Pointer(d));
 
     return0(); 
     // No code can go here - the C return register has
@@ -327,7 +324,6 @@ private static readonly var deferHeaderSize = @unsafe.Sizeof(new _defer());
 private static readonly var minDeferAlloc = (deferHeaderSize + 15) & ~15;
 private static readonly var minDeferArgs = minDeferAlloc - deferHeaderSize;
 
-
 // defer size class for arg size sz
 //go:nosplit
 private static System.UIntPtr deferclass(System.UIntPtr siz) {
@@ -335,7 +331,6 @@ private static System.UIntPtr deferclass(System.UIntPtr siz) {
         return 0;
     }
     return (siz - minDeferArgs + 15) / 16;
-
 }
 
 // total size of memory block for defer with arg size sz
@@ -344,7 +339,6 @@ private static System.UIntPtr totaldefersize(System.UIntPtr siz) {
         return minDeferAlloc;
     }
     return deferHeaderSize + siz;
-
 }
 
 // Ensure that defer arg sizes that map to the same defer size class
@@ -365,7 +359,7 @@ private static void testdefersizes() {
     {
         var i__prev1 = i;
 
-        for (var i = uintptr(0); >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {>>MARKER:FUNCTION_panicSlice3AlenU_BLOCK_PREFIX<<
+        for (var i = uintptr(0); ; i++) {>>MARKER:FUNCTION_panicSlice3AlenU_BLOCK_PREFIX<<
             var defersc = deferclass(i);
             if (defersc >= uintptr(len(m))) {>>MARKER:FUNCTION_panicSlice3Alen_BLOCK_PREFIX<<
                 break;
@@ -383,7 +377,6 @@ private static void testdefersizes() {
 
         i = i__prev1;
     }
-
 }
 
 // The arguments associated with a deferred call are stored
@@ -395,10 +388,8 @@ private static unsafe.Pointer deferArgs(ptr<_defer> _addr_d) {
     if (d.siz == 0) {>>MARKER:FUNCTION_panicSliceAcapU_BLOCK_PREFIX<< 
         // Avoid pointer past the defer allocation.
         return null;
-
     }
     return add(@unsafe.Pointer(d), @unsafe.Sizeof(d));
-
 }
 
 // deferFunc returns d's deferred function. This is temporary while we
@@ -412,11 +403,10 @@ private static Action deferFunc(ptr<_defer> _addr_d) {
         throw("requires GOEXPERIMENT=regabidefer");
     }
     ref Action fn = ref heap(out ptr<Action> _addr_fn);
-    (funcval.val)(@unsafe.Pointer(_addr_fn)).val;
+    (funcval.val).val;
 
-    d.fn;
+    (@unsafe.Pointer(_addr_fn)) = d.fn;
     return fn;
-
 }
 
 private static ptr<_type> deferType; // type of _defer struct
@@ -455,7 +445,6 @@ private static ptr<_defer> newdefer(int siz) {
 
                 unlock(_addr_sched.deferlock);
             });
-
         }
         {
             var n = len(pp.deferpool[sc]);
@@ -467,7 +456,6 @@ private static ptr<_defer> newdefer(int siz) {
             }
 
         }
-
     }
     if (d == null) { 
         // Allocate new defer+args.
@@ -475,12 +463,10 @@ private static ptr<_defer> newdefer(int siz) {
             var total = roundupsize(totaldefersize(uintptr(siz)));
             d = (_defer.val)(mallocgc(total, deferType, true));
         });
-
     }
     d.siz = siz;
     d.heap = true;
     return _addr_d!;
-
 }
 
 // Free the given defer.
@@ -527,18 +513,14 @@ private static void freedefer(ptr<_defer> _addr_d) {
  {
                     last.link = d;
                 }
-
                 last = d;
-
             }
 
             lock(_addr_sched.deferlock);
             last.link = sched.deferpool[sc];
             sched.deferpool[sc] = first;
             unlock(_addr_sched.deferlock);
-
         });
-
     }
     d.siz = 0;
     d.started = false;
@@ -554,7 +536,6 @@ private static void freedefer(ptr<_defer> _addr_d) {
     d.link = null;
 
     pp.deferpool[sc] = append(pp.deferpool[sc], d);
-
 }
 
 // Separate function so that it can split stack.
@@ -562,13 +543,11 @@ private static void freedefer(ptr<_defer> _addr_d) {
 private static void freedeferpanic() { 
     // _panic must be cleared before d is unlinked from gp.
     throw("freedefer with d._panic != nil");
-
 }
 
 private static void freedeferfn() { 
     // fn must be cleared before d is unlinked from gp.
     throw("freedefer with d.fn != nil");
-
 }
 
 // Run a deferred function if there is one.
@@ -603,14 +582,13 @@ private static void deferreturn() {
         gp._defer = d.link;
         freedefer(_addr_d);
         return ;
-
     }
     var argp = getcallersp() + sys.MinFrameSize;
 
     if (d.siz == 0)     else if (d.siz == sys.PtrSize) 
-        (uintptr.val)(@unsafe.Pointer(argp)).val;
+        (uintptr.val).val;
 
-        new ptr<ptr<ptr<System.UIntPtr>>>(deferArgs(_addr_d));
+        (@unsafe.Pointer(argp)) = new ptr<ptr<ptr<System.UIntPtr>>>(deferArgs(_addr_d));
     else 
         memmove(@unsafe.Pointer(argp), deferArgs(_addr_d), uintptr(d.siz));
         var fn = d.fn;
@@ -624,7 +602,6 @@ private static void deferreturn() {
     // issue #8153).
     _ = fn.fn;
     jmpdefer(fn, argp);
-
 }
 
 // Goexit terminates the goroutine that calls it. No other goroutine is affected.
@@ -675,21 +652,17 @@ public static void Goexit() {
                 // since there is no panic associated with this
                 // defer that can be recovered.
                 throw("unfinished open-coded defers in Goexit");
-
             }
-
             if (p.aborted) { 
                 // Since our current defer caused a panic and may
                 // have been already freed, just restart scanning
                 // for open-coded defers from this frame again.
                 addOneOpenDeferFrame(_addr_gp, getcallerpc(), @unsafe.Pointer(getcallersp()));
-
             }
             else
  {
                 addOneOpenDeferFrame(_addr_gp, 0, null);
             }
-
         }
         else
  {
@@ -697,16 +670,13 @@ public static void Goexit() {
                 // Save the pc/sp in deferCallSave(), so we can "recover" back to this
                 // loop if necessary.
                 deferCallSave(_addr_p, deferFunc(_addr_d));
-
             }
             else
  { 
                 // Save the pc/sp in reflectcallSave(), so we can "recover" back to this
                 // loop if necessary.
                 reflectcallSave(_addr_p, @unsafe.Pointer(d.fn), deferArgs(_addr_d), uint32(d.siz));
-
             }
-
         }
         if (p.aborted) { 
             // We had a recursive panic in the defer d we started, and
@@ -717,7 +687,6 @@ public static void Goexit() {
             // immediately to the next defer on the chain.
             p.aborted = false;
             continue;
-
         }
         if (gp._defer != d) {
             throw("bad defer entry in Goexit");
@@ -729,7 +698,6 @@ public static void Goexit() {
         // Note: we ignore recovers here because Goexit isn't a panic
     }
     goexit1();
-
 }
 
 // Call all Error and String methods before freezing the world.
@@ -752,9 +720,7 @@ private static void preprintpanics(ptr<_panic> _addr_p) => func((defer, _, _) =>
                 break;
         }
         p = p.link;
-
     }
-
 });
 
 // Print all currently active panics. Used when crashing.
@@ -777,7 +743,6 @@ private static void printpanics(ptr<_panic> _addr_p) {
         print(" [recovered]");
     }
     print("\n");
-
 }
 
 // addOneOpenDeferFrame scans the stack for the first frame (if any) with
@@ -810,9 +775,7 @@ private static void addOneOpenDeferFrame(ptr<g> _addr_gp, System.UIntPtr pc, uns
                 // we just finished (and was used to set
                 // where we restarted the stack scan)
                 return true;
-
             }
-
             var f = frame.fn;
             var fd = funcdata(f, _FUNCDATA_OpenCodedDeferInfo);
             if (fd == null) {
@@ -840,7 +803,6 @@ private static void addOneOpenDeferFrame(ptr<g> _addr_gp, System.UIntPtr pc, uns
             if (frame.fn.deferreturn == 0) {
                 throw("missing deferreturn");
             }
-
             var (maxargsize, _) = readvarintUnsafe(fd);
             var d1 = newdefer(int32(maxargsize));
             d1.openDefer = true;
@@ -868,11 +830,8 @@ private static void addOneOpenDeferFrame(ptr<g> _addr_gp, System.UIntPtr pc, uns
             } 
             // Stop stack scanning after adding one open defer record
             return false;
-
         }, null, 0);
-
     });
-
 }
 
 // readvarintUnsafe reads the uint32 in varint format starting at fd, and returns the
@@ -900,7 +859,6 @@ private static (uint, unsafe.Pointer) readvarintUnsafe(unsafe.Pointer fd) => fun
             panic("Bad varint");
         }
     }
-
 });
 
 // runOpenDeferFrame runs the active open-coded defers in the frame specified by
@@ -944,7 +902,6 @@ private static bool runOpenDeferFrame(ptr<g> _addr_gp, ptr<_defer> _addr_d) {
                 j = j__prev2;
             }
             continue;
-
         }
         ptr<ptr<ptr<funcval>>> closure = new ptr<ptr<ptr<ptr<funcval>>>>(@unsafe.Pointer(d.varp - uintptr(closureOffset)));
         d.fn = closure;
@@ -966,9 +923,9 @@ private static bool runOpenDeferFrame(ptr<g> _addr_gp, ptr<_defer> _addr_d) {
 
             j = j__prev2;
         }
-        deferBits = deferBits & ~(1 << (int)(i)) * (uint8.val)(@unsafe.Pointer(d.varp - uintptr(deferBitsOffset)));
+        deferBits = deferBits & ~(1 << (int)(i)) * (uint8.val);
 
-        deferBits;
+        (@unsafe.Pointer(d.varp - uintptr(deferBitsOffset))) = deferBits;
         var p = d._panic;
         if (goexperiment.RegabiDefer) {
             deferCallSave(_addr_p, deferFunc(_addr_d));
@@ -990,7 +947,6 @@ private static bool runOpenDeferFrame(ptr<g> _addr_gp, ptr<_defer> _addr_d) {
     }
 
     return done;
-
 }
 
 // reflectcallSave calls reflectcall after saving the caller's pc and sp in the
@@ -1104,9 +1060,7 @@ private static void gopanic(object e) {
                 gp._defer = d.link;
                 freedefer(_addr_d);
                 continue;
-
             }
-
         }
         d.started = true; 
 
@@ -1136,9 +1090,7 @@ private static void gopanic(object e) {
                 // we're not using the register ABI.
                 ref abi.RegArgs regs = ref heap(out ptr<abi.RegArgs> _addr_regs);
                 reflectcall(null, @unsafe.Pointer(d.fn), deferArgs(_addr_d), uint32(d.siz), uint32(d.siz), uint32(d.siz), _addr_regs);
-
             }
-
         }
         p.argp = null; 
 
@@ -1168,7 +1120,6 @@ private static void gopanic(object e) {
                 mcall(recovery);
                 throw("bypassed recovery failed"); // mcall should not return
             }
-
             atomic.Xadd(_addr_runningPanicDefers, -1); 
 
             // Remove any remaining non-started, open-coded
@@ -1185,9 +1136,7 @@ private static void gopanic(object e) {
                 // deferreturn()
                 prev = d;
                 d = d.link;
-
             }
-
             while (d != null) {
                 if (d.started) { 
                     // This defer is started but we
@@ -1196,9 +1145,7 @@ private static void gopanic(object e) {
                     // it, so don't remove it or any
                     // further defer entries
                     break;
-
                 }
-
                 if (d.openDefer) {
                     if (prev == null) {
                         gp._defer = d.link;
@@ -1207,18 +1154,15 @@ private static void gopanic(object e) {
  {
                         prev.link = d.link;
                     }
-
                     var newd = d.link;
                     freedefer(_addr_d);
                     d = newd;
-
                 }
                 else
  {
                     prev = d;
                     d = d.link;
                 }
-
             }
 
 
@@ -1231,7 +1175,6 @@ private static void gopanic(object e) {
 
             if (gp._panic == null) { // must be done with signal
                 gp.sig = 0;
-
             } 
             // Pass information about recovering frame to recovery.
             gp.sigcode0 = uintptr(sp);
@@ -1247,9 +1190,9 @@ private static void gopanic(object e) {
     // and String methods to prepare the panic strings before startpanic.
     preprintpanics(_addr_gp._panic);
 
-    fatalpanic(_addr_gp._panic) * (int.val)(null);
+    fatalpanic(_addr_gp._panic) * (int.val);
 
-    0; // not reached
+    (null) = 0; // not reached
 }
 
 // getargp returns the location where the caller
@@ -1281,7 +1224,6 @@ private static void gorecover(System.UIntPtr argp) {
         return p.arg;
     }
     return null;
-
 }
 
 //go:linkname sync_throw sync.throw
@@ -1300,9 +1242,9 @@ private static void @throw(@string s) {
     if (gp.m.throwing == 0) {
         gp.m.throwing = 1;
     }
-    fatalthrow() * (int.val)(null);
+    fatalthrow() * (int.val);
 
-    0; // not reached
+    (null) = 0; // not reached
 }
 
 // runningPanicDefers is non-zero while running deferred functions for panic.
@@ -1338,7 +1280,6 @@ private static void recovery(ptr<g> _addr_gp) {
     gp.sched.lr = 0;
     gp.sched.ret = 1;
     gogo(_addr_gp.sched);
-
 }
 
 // fatalthrow implements an unrecoverable runtime throw. It freezes the
@@ -1360,13 +1301,11 @@ private static void fatalthrow() {
             // low on stack in throw, so crash on the system stack (unlike
             // fatalpanic).
             crash();
-
         }
         exit(2);
+    }) * (int.val);
 
-    }) * (int.val)(null);
-
-    0; // not reached
+    (null) = 0; // not reached
 }
 
 // fatalpanic implements an unrecoverable panic. It is like fatalthrow, except
@@ -1394,10 +1333,8 @@ private static void fatalpanic(ptr<_panic> _addr_msgs) {
             atomic.Xadd(_addr_runningPanicDefers, -1);
 
             printpanics(_addr_msgs);
-
         }
         docrash = dopanic_m(_addr_gp, pc, sp);
-
     });
 
     if (docrash) { 
@@ -1405,13 +1342,12 @@ private static void fatalpanic(ptr<_panic> _addr_msgs) {
         // will not be confused when generating a backtrace.
         // Function crash is marked nosplit to avoid stack growth.
         crash();
-
     }
     systemstack(() => {
         exit(2);
-    }) * (int.val)(null);
+    }) * (int.val);
 
-    0; // not reached
+    (null) = 0; // not reached
 }
 
 // startpanic_m prepares for an unrecoverable panic.
@@ -1430,7 +1366,6 @@ private static bool startpanic_m() {
     var _g_ = getg();
     if (mheap_.cachealloc.size == 0) { // very early
         print("runtime: panic before malloc heap initialized\n");
-
     }
     _g_.m.mallocing++; 
 
@@ -1476,7 +1411,6 @@ private static bool startpanic_m() {
         return false; // Need to return something.
 
     __switch_break0:;
-
 }
 
 private static bool didothers = default;
@@ -1495,7 +1429,6 @@ private static bool dopanic_m(ptr<g> _addr_gp, System.UIntPtr pc, System.UIntPtr
             print("[signal ", hex(gp.sig));
         }
         print(" code=", hex(gp.sigcode0), " addr=", hex(gp.sigcode1), " pc=", hex(gp.sigpc), "]\n");
-
     }
     var (level, all, docrash) = gotraceback();
     var _g_ = getg();
@@ -1526,12 +1459,10 @@ private static bool dopanic_m(ptr<g> _addr_gp, System.UIntPtr pc, System.UIntPtr
         // It will exit when it's done.
         lock(_addr_deadlock);
         lock(_addr_deadlock);
-
     }
     printDebugLog();
 
     return docrash;
-
 }
 
 // canpanic returns false if a signal should throw instead of
@@ -1564,7 +1495,6 @@ private static bool canpanic(ptr<g> _addr_gp) {
         return false;
     }
     return true;
-
 }
 
 // shouldPushSigpanic reports whether pc should be used as sigpanic's
@@ -1582,22 +1512,18 @@ private static bool shouldPushSigpanic(ptr<g> _addr_gp, System.UIntPtr pc, Syste
         // instead. (Otherwise the trace will end at sigpanic
         // and we won't get to see who faulted.)
         return false;
-
     }
     if (gp.m.incgo || findfunc(pc).valid()) { 
         // This wasn't a bad call, so use PC as sigpanic's
         // return PC.
         return true;
-
     }
     if (findfunc(lr).valid()) { 
         // This was a bad call, but the LR is good, so use the
         // LR as sigpanic's return PC.
         return false;
-
     }
     return true;
-
 }
 
 // isAbortPC reports whether pc is the program counter at which
@@ -1613,7 +1539,6 @@ private static bool isAbortPC(System.UIntPtr pc) {
         return false;
     }
     return f.funcID == funcID_abort;
-
 }
 
 } // end runtime_package

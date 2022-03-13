@@ -8,17 +8,15 @@
 // are identified by their unique id, instead of their
 // object name.
 
-// package types -- go2cs converted at 2022 March 06 22:42:06 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:14 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\objset.go
-
-
 namespace go.go;
 
 public static partial class types_package {
 
-    // An objset is a set of objects identified by their unique id.
-    // The zero value for objset is a ready-to-use empty objset.
+// An objset is a set of objects identified by their unique id.
+// The zero value for objset is a ready-to-use empty objset.
 private partial struct objset { // : map<@string, Object>
 } // initialized lazily
 
@@ -37,13 +35,11 @@ private static Object insert(this ptr<objset> _addr_s, Object obj) {
             return alt;
         }
     }
-
     if (s == null.val) {
         s.val = make_map<@string, Object>();
     }
     (s.val)[id] = obj;
     return null;
-
 }
 
 } // end types_package

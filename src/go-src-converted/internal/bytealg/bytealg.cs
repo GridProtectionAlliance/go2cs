@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bytealg -- go2cs converted at 2022 March 06 22:08:05 UTC
+// package bytealg -- go2cs converted at 2022 March 13 05:23:55 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
 // Original source: C:\Program Files\Go\src\internal\bytealg\bytealg.go
-using cpu = go.@internal.cpu_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal;
+
+using cpu = @internal.cpu_package;
+using @unsafe = @unsafe_package;
+
+
+// Offsets into internal/cpu records for use in assembly.
 
 public static partial class bytealg_package {
 
-    // Offsets into internal/cpu records for use in assembly.
 private static readonly var offsetX86HasSSE2 = @unsafe.Offsetof(cpu.X86.HasSSE2);
 private static readonly var offsetX86HasSSE42 = @unsafe.Offsetof(cpu.X86.HasSSE42);
 private static readonly var offsetX86HasAVX2 = @unsafe.Offsetof(cpu.X86.HasAVX2);
@@ -21,7 +23,6 @@ private static readonly var offsetX86HasPOPCNT = @unsafe.Offsetof(cpu.X86.HasPOP
 private static readonly var offsetS390xHasVX = @unsafe.Offsetof(cpu.S390X.HasVX);
 
 private static readonly var offsetPPC64HasPOWER9 = @unsafe.Offsetof(cpu.PPC64.IsPOWER9);
-
 
 // MaxLen is the maximum length of the string to be searched for (argument b) in Index.
 // If MaxLen is not 0, make sure MaxLen >= 4.
@@ -66,15 +67,12 @@ public static (uint, uint) HashStrBytes(slice<byte> sep) {
                 pow *= sq;
             i>>=1;
             }
-
             sq *= sq;
-
         }
 
         i = i__prev1;
     }
     return (hash, pow);
-
 }
 
 // HashStr returns the hash and the appropriate multiplicative
@@ -105,15 +103,12 @@ public static (uint, uint) HashStr(@string sep) {
                 pow *= sq;
             i>>=1;
             }
-
             sq *= sq;
-
         }
 
         i = i__prev1;
     }
     return (hash, pow);
-
 }
 
 // HashStrRevBytes returns the hash of the reverse of sep and the
@@ -144,15 +139,12 @@ public static (uint, uint) HashStrRevBytes(slice<byte> sep) {
                 pow *= sq;
             i>>=1;
             }
-
             sq *= sq;
-
         }
 
         i = i__prev1;
     }
     return (hash, pow);
-
 }
 
 // HashStrRev returns the hash of the reverse of sep and the
@@ -183,15 +175,12 @@ public static (uint, uint) HashStrRev(@string sep) {
                 pow *= sq;
             i>>=1;
             }
-
             sq *= sq;
-
         }
 
         i = i__prev1;
     }
     return (hash, pow);
-
 }
 
 // IndexRabinKarpBytes uses the Rabin-Karp search algorithm to return the index of the
@@ -231,7 +220,6 @@ public static nint IndexRabinKarpBytes(slice<byte> s, slice<byte> sep) {
         i = i__prev1;
     }
     return -1;
-
 }
 
 // IndexRabinKarp uses the Rabin-Karp search algorithm to return the index of the
@@ -271,7 +259,6 @@ public static nint IndexRabinKarp(@string s, @string substr) {
         i = i__prev1;
     }
     return -1;
-
 }
 
 } // end bytealg_package

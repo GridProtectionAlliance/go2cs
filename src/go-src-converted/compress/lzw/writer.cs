@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lzw -- go2cs converted at 2022 March 06 23:35:26 UTC
+// package lzw -- go2cs converted at 2022 March 13 06:43:23 UTC
 // import "compress/lzw" ==> using lzw = go.compress.lzw_package
 // Original source: C:\Program Files\Go\src\compress\lzw\writer.go
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using System;
-
-
 namespace go.compress;
 
+using bufio = bufio_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// A writer is a buffered, flushable writer.
+
+using System;
 public static partial class lzw_package {
 
-    // A writer is a buffered, flushable writer.
 private partial interface writer {
     error Flush();
 }
@@ -33,7 +34,6 @@ private static readonly var tableMask = tableSize - 1;
 // A hash table entry is a uint32. Zero is an invalid entry since the
 // lower 12 bits of a valid entry must be a non-literal code.
 private static readonly nint invalidEntry = 0;
-
 
 // Writer is an LZW compressor. It writes the compressed form of the data
 // to an underlying writer (see NewWriter).
@@ -75,13 +75,10 @@ private static error writeLSB(this ptr<Writer> _addr_w, uint c) {
             }
 
         }
-
         w.bits>>=8;
         w.nBits -= 8;
-
     }
     return error.As(null!)!;
-
 }
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
@@ -99,13 +96,10 @@ private static error writeMSB(this ptr<Writer> _addr_w, uint c) {
             }
 
         }
-
         w.bits<<=8;
         w.nBits -= 8;
-
     }
     return error.As(null!)!;
-
 }
 
 // errOutOfCodes is an internal error that means that the writer has run out
@@ -133,17 +127,14 @@ private static error incHi(this ptr<Writer> _addr_w) {
             }
 
         }
-
         w.width = w.litWidth + 1;
         w.hi = clear + 1;
         w.overflow = clear << 1;
         foreach (var (i) in w.table) {
             w.table[i] = invalidEntry;
         }        return error.As(errOutOfCodes)!;
-
     }
     return error.As(null!)!;
-
 }
 
 // Write writes a compressed representation of p to w's underlying writer.
@@ -177,7 +168,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> p) {
             }
         }
     }
-
     n = len(p);
     var code = w.savedCode;
     if (code == invalidCode) { 
@@ -205,10 +195,8 @@ loop:
                         _continueloop = true;
                         break;
                     }
-
                     h = (h + 1) & tableMask;
                     t = w.table[h];
-
                 } 
                 // Otherwise, write the current code, and literal becomes the start of
                 // the next emitted code.
@@ -221,7 +209,6 @@ loop:
             if (w.err != null) {
                 return (0, error.As(w.err)!);
             }
-
             code = literal; 
             // Increment e.hi, the next implied code. If we run out of codes, reset
             // the writer state (including clearing the hash table) and continue.
@@ -246,14 +233,11 @@ loop:
                 }
                 hash = (hash + 1) & tableMask;
             }
-
-
         }
         x = x__prev1;
     }
     w.savedCode = code;
     return (n, error.As(null!)!);
-
 }
 
 // Close closes the Writer, flushing any pending output. It does not close
@@ -266,7 +250,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             return error.As(null!)!;
         }
         return error.As(w.err)!;
-
     }
     w.err = errClosed; 
     // Write the savedCode if valid.
@@ -283,7 +266,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -296,7 +278,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             err = err__prev2;
 
         }
-
     }
     var eof = uint32(1) << (int)(w.litWidth) + 1;
     {
@@ -327,10 +308,8 @@ private static error Close(this ptr<Writer> _addr_w) {
             err = err__prev2;
 
         }
-
     }
     return error.As(w.w.Flush())!;
-
 }
 
 // Reset clears the Writer's state and allows it to be reused again
@@ -388,7 +367,6 @@ private static void init(this ptr<Writer> _addr_w, io.Writer dst, Order order, n
     w.hi = 1 << (int)(lw) + 1;
     w.overflow = 1 << (int)((lw + 1));
     w.savedCode = invalidCode;
-
 }
 
 } // end lzw_package

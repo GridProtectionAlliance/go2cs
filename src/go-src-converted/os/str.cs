@@ -4,22 +4,19 @@
 
 // Simple conversions to avoid depending on strconv.
 
-// package os -- go2cs converted at 2022 March 06 22:13:52 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:05 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\str.go
-
-
 namespace go;
 
 public static partial class os_package {
 
-    // itox converts val (an int) to a hexdecimal string.
+// itox converts val (an int) to a hexdecimal string.
 private static @string itox(nint val) {
     if (val < 0) {
         return "-" + uitox(uint(-val));
     }
     return uitox(uint(val));
-
 }
 
 private static readonly @string hex = "0123456789abcdef";
@@ -31,7 +28,6 @@ private static readonly @string hex = "0123456789abcdef";
 private static @string uitox(nuint val) {
     if (val == 0) { // avoid string allocation
         return "0x0";
-
     }
     array<byte> buf = new array<byte>(20); // big enough for 64bit value base 16 + 0x
     var i = len(buf) - 1;
@@ -48,7 +44,6 @@ private static @string uitox(nuint val) {
     i--;
     buf[i] = '0';
     return string(buf[(int)i..]);
-
 }
 
 } // end os_package

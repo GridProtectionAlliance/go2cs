@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:17 UTC
+//     Generated on 2022 March 13 05:26:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct schedt
         {
             // Constructors
@@ -125,7 +125,7 @@ namespace go
             public static implicit operator schedt(NilType nil) => default(schedt);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static schedt schedt_cast(dynamic value)
         {
             return new schedt(value.goidgen, value.lastpoll, value.pollUntil, value.@lock, value.midle, value.nmidle, value.nmidlelocked, value.mnext, value.maxmcount, value.nmsys, value.nmfreed, value.ngsys, value.pidle, value.npidle, value.nmspinning, value.runq, value.runqsize, value.sudoglock, ref value.sudogcache, value.deferlock, value.deferpool, ref value.freem, value.gcwaiting, value.stopwait, value.stopnote, value.sysmonwait, value.sysmonnote, value.sysmonStarting, value.safePointFn, value.safePointWait, value.safePointNote, value.profilehz, value.procresizetime, value.totaltime, value.sysmonlock, value._, value.timeToRun);

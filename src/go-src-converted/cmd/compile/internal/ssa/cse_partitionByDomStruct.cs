@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:33 UTC
+//     Generated on 2022 March 13 06:00:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct partitionByDom
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace @internal
             public static implicit operator partitionByDom(NilType nil) => default(partitionByDom);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static partitionByDom partitionByDom_cast(dynamic value)
         {
             return new partitionByDom(value.a, value.sdom);

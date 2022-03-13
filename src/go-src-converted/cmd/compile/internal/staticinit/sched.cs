@@ -2,24 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package staticinit -- go2cs converted at 2022 March 06 23:11:42 UTC
+// package staticinit -- go2cs converted at 2022 March 13 06:25:02 UTC
 // import "cmd/compile/internal/staticinit" ==> using staticinit = go.cmd.compile.@internal.staticinit_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\staticinit\sched.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using staticdata = go.cmd.compile.@internal.staticdata_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using staticdata = cmd.compile.@internal.staticdata_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class staticinit_package {
 
@@ -57,7 +56,6 @@ private static void StaticInit(this ptr<Schedule> _addr_s, ir.Node n) {
             ir.Dump("nonstatic", n);
         }
         s.append(n);
-
     }
 }
 
@@ -78,7 +76,6 @@ private static bool tryStaticInit(this ptr<Schedule> _addr_s, ir.Node nn) => fun
     if (ir.IsBlank(n.X) && !AnySideEffects(n.Y)) { 
         // Discard.
         return true;
-
     }
     var lno = ir.SetPos(n);
     defer(() => {
@@ -86,7 +83,6 @@ private static bool tryStaticInit(this ptr<Schedule> _addr_s, ir.Node nn) => fun
     }());
     ptr<ir.Name> nam = n.X._<ptr<ir.Name>>();
     return s.StaticAssign(nam, 0, n.Y, nam.Type());
-
 });
 
 // like staticassign but we are copying an already
@@ -101,7 +97,6 @@ private static bool staticcopy(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_l,
         // TODO if roff != 0 { panic }
         staticdata.InitAddr(l, loff, staticdata.FuncLinksym(rn));
         return true;
-
     }
     if (rn.Class != ir.PEXTERN || rn.Sym().Pkg != types.LocalPkg) {
         return false;
@@ -111,7 +106,6 @@ private static bool staticcopy(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_l,
     }
     if (rn.Type().IsString()) { // perhaps overwritten by cmd/link -X (#34675)
         return false;
-
     }
     if (rn.Embed != null) {
         return false;
@@ -122,7 +116,6 @@ private static bool staticcopy(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_l,
         // No explicit initialization value. Probably zeroed but perhaps
         // supplied externally and of unknown value.
         return false;
-
     }
     while (r.Op() == ir.OCONVNOP && !types.Identical(r.Type(), typ)) {
         r = r._<ptr<ir.ConvExpr>>().X;
@@ -174,8 +167,6 @@ private static bool staticcopy(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_l,
             }
 
         }
-
-
         goto __switch_break0;
     }
     if (r.Op() == ir.OPTRLIT)
@@ -220,7 +211,6 @@ private static bool staticcopy(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_l,
             var rr = ir.NewNameOffsetExpr(@base.Pos, orig, e.Xoffset, typ);
             ir.SetPos(rr);
             s.append(ir.NewAssignStmt(@base.Pos, ll, rr));
-
         }        return true;
         goto __switch_break0;
     }
@@ -228,7 +218,6 @@ private static bool staticcopy(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_l,
     __switch_break0:;
 
     return false;
-
 }
 
 private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_l, long loff, ir.Node r, ptr<types.Type> _addr_typ) {
@@ -240,7 +229,6 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
         // No explicit initialization value. Either zero or supplied
         // externally.
         return true;
-
     }
     while (r.Op() == ir.OCONVNOP) {
         r = r._<ptr<ir.ConvExpr>>().X;
@@ -254,14 +242,12 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
         if (ir.IsBlank(a)) { 
             // Don't use NameOffsetExpr with blank (#43677).
             lhs = ir.BlankNode;
-
         }
         else
  {
             lhs = ir.NewNameOffsetExpr(pos, a, aoff, v.Type());
         }
         s.append(ir.NewAssignStmt(pos, lhs, v));
-
     };
 
 
@@ -303,7 +289,6 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
             }
 
         }
-
         fallthrough = true;
 
     }
@@ -384,7 +369,6 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
             // TODO if roff != 0 { panic }
             staticdata.InitAddr(l, loff, staticdata.FuncLinksym(r.Func.Nname));
             return true;
-
         }
         ir.ClosureDebugRuntimeCheck(r);
         goto __switch_break1;
@@ -408,7 +392,6 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
             // If val is non-nil, we have no concrete type to record,
             // and we won't be able to statically initialize its value, so report failure.
             return val.Op() == ir.ONIL;
-
         }
         reflectdata.MarkTypeUsedInInterface(val.Type(), l.Linksym());
 
@@ -427,12 +410,10 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
             if (val.Op() == ir.ONIL) { 
                 // Nil is zero, nothing to do.
                 return true;
-
             } 
             // Copy val directly into n.
             ir.SetPos(val);
             assign(@base.Pos, l, loff + int64(types.PtrSize), val);
-
         }
         else
  { 
@@ -441,7 +422,6 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
             s.Temps[val] = a;
             assign(@base.Pos, a, 0, val);
             staticdata.InitAddr(l, loff + int64(types.PtrSize), a.Linksym());
-
         }
         return true;
         goto __switch_break1;
@@ -451,7 +431,6 @@ private static bool StaticAssign(this ptr<Schedule> _addr_s, ptr<ir.Name> _addr_
 
     //dump("not static", r);
     return false;
-
 }
 
 private static void initplan(this ptr<Schedule> _addr_s, ir.Node n) {
@@ -522,8 +501,7 @@ private static void initplan(this ptr<Schedule> _addr_s, ir.Node n) {
         }
     else 
         @base.Fatalf("initplan");
-    
-}
+    }
 
 private static void addvalue(this ptr<Schedule> _addr_s, ptr<Plan> _addr_p, long xoffset, ir.Node n) {
     ref Schedule s = ref _addr_s.val;
@@ -540,12 +518,9 @@ private static void addvalue(this ptr<Schedule> _addr_s, ptr<Plan> _addr_p, long
             // qe is a copy; we are not modifying entries in q.E
             qe.Xoffset += xoffset;
             p.E = append(p.E, qe);
-
         }        return ;
-
     }
     p.E = append(p.E, new Entry(Xoffset:xoffset,Expr:n));
-
 }
 
 // from here down is the walk analysis
@@ -567,7 +542,6 @@ public static ptr<ir.Name> StaticName(ptr<types.Type> _addr_t) {
     typecheck.Declare(n, ir.PEXTERN);
     n.SetType(t);
     return _addr_n!;
-
 }
 
 // StaticLoc returns the static address of n, if n has one, or else nil.
@@ -615,7 +589,6 @@ public static (ptr<ir.Name>, long, bool) StaticLoc(ir.Node n) {
         offset += int64(l) * n.Type().Width;
         return (_addr_name!, offset, true);
         return (_addr_null!, 0, false);
-
 }
 
 // AnySideEffects reports whether n contains any operations that could have observable side effects.
@@ -650,9 +623,7 @@ public static bool AnySideEffects(ir.Node n) {
 
             // No side effects here (arguments are checked separately).
                 return false;
-
     });
-
 }
 
 private static nint getlit(ir.Node lit) {
@@ -660,7 +631,6 @@ private static nint getlit(ir.Node lit) {
         return int(ir.Int64Val(lit));
     }
     return -1;
-
 }
 
 private static bool isvaluelit(ir.Node n) {

@@ -3,17 +3,17 @@
 // license that can be found in the LICENSE file.
 
 // Package mime implements parts of the MIME spec.
-// package mime -- go2cs converted at 2022 March 06 22:21:17 UTC
+
+// package mime -- go2cs converted at 2022 March 13 05:36:25 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Program Files\Go\src\mime\type.go
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using System;
 
 public static partial class mime_package {
 
@@ -82,9 +82,7 @@ private static void setMimeTypes(map<@string, @string> lowerExt, map<@string, @s
                 }
 
             }
-
             extensions.Store(justType, append(exts, k));
-
         }
         k = k__prev1;
         v = v__prev1;
@@ -112,7 +110,6 @@ private static void initMime() {
             osInitMime();
         }
     }
-
 }
 
 // TypeByExtension returns the MIME type associated with the file extension ext.
@@ -160,7 +157,6 @@ public static @string TypeByExtension(@string ext) {
             var (si, _) = mimeTypesLower.Load(strings.ToLower(ext));
             @string (s, _) = si._<@string>();
             return s;
-
         }
         if ('A' <= c && c <= 'Z') {
             lower = append(lower, c + ('a' - 'A'));
@@ -173,7 +169,6 @@ public static @string TypeByExtension(@string ext) {
     (si, _) = mimeTypesLower.Load(string(lower));
     (s, _) = si._<@string>();
     return s;
-
 }
 
 // ExtensionsByType returns the extensions known to be associated with the MIME
@@ -196,7 +191,6 @@ public static (slice<@string>, error) ExtensionsByType(@string typ) {
     var ret = append((slice<@string>)null, s._<slice<@string>>());
     sort.Strings(ret);
     return (ret, error.As(null!)!);
-
 }
 
 // AddExtensionType sets the MIME type associated with
@@ -208,7 +202,6 @@ public static error AddExtensionType(@string ext, @string typ) {
     }
     once.Do(initMime);
     return error.As(setExtensionType(ext, typ))!;
-
 }
 
 private static error setExtensionType(@string extension, @string mimeType) => func((defer, _, _) => {
@@ -235,14 +228,12 @@ private static error setExtensionType(@string extension, @string mimeType) => fu
             exts = ei._<slice<@string>>();
         }
     }
-
     foreach (var (_, v) in exts) {
         if (v == extLower) {
             return error.As(null!)!;
         }
     }    extensions.Store(justType, append(exts, extLower));
     return error.As(null!)!;
-
 });
 
 } // end mime_package

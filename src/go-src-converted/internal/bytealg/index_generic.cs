@@ -5,11 +5,9 @@
 //go:build !amd64 && !arm64 && !s390x && !ppc64le && !ppc64
 // +build !amd64,!arm64,!s390x,!ppc64le,!ppc64
 
-// package bytealg -- go2cs converted at 2022 March 06 22:30:04 UTC
+// package bytealg -- go2cs converted at 2022 March 13 05:40:52 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
 // Original source: C:\Program Files\Go\src\internal\bytealg\index_generic.go
-
-
 namespace go.@internal;
 
 public static partial class bytealg_package {

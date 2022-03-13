@@ -5,11 +5,9 @@
 //go:build aix || darwin
 // +build aix darwin
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:12 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:01 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\nbpipe_pipe.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -28,7 +26,6 @@ private static (int, int, int) nonblockingPipe() {
     closeonexec(w);
     setNonblock(w);
     return (r, w, errno);
-
 }
 
 } // end runtime_package

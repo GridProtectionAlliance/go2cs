@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:50:01 UTC
+//     Generated on 2022 March 13 06:01:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Func
         {
             // Constructors
@@ -142,7 +142,7 @@ namespace @internal
             public static implicit operator Func(NilType nil) => default(Func);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Func Func_cast(dynamic value)
         {
             return new Func(ref value.Config, ref value.Cache, value.fe, ref value.pass, value.Name, ref value.Type, value.Blocks, ref value.Entry, value.bid, value.vid, value.logfiles, ref value.HTMLWriter, value.DebugTest, value.PrintOrHtmlSSA, value.ruleMatches, ref value.ABI0, ref value.ABI1, ref value.ABISelf, ref value.ABIDefault, value.scheduled, value.laidout, value.NoSplit, value.dumpFileSeq, value.RegAlloc, value.NamedValues, value.Names, value.CanonicalLocalSlots, value.CanonicalLocalSplits, value.RegArgs, ref value.OwnAux, value.WBLoads, ref value.freeValues, ref value.freeBlocks, value.cachedPostorder, value.cachedIdom, value.cachedSdom, ref value.cachedLoopnest, ref value.cachedLineStarts, value.auxmap, value.constants);

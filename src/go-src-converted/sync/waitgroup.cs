@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2022 March 06 22:26:25 UTC
+// package sync -- go2cs converted at 2022 March 13 05:24:08 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\waitgroup.go
-using race = go.@internal.race_package;
-using atomic = go.sync.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using race = @internal.race_package;
+using atomic = sync.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// A WaitGroup waits for a collection of goroutines to finish.
+// The main goroutine calls Add to set the number of
+// goroutines to wait for. Then each of the goroutines
+// runs and calls Done when finished. At the same time,
+// Wait can be used to block until all goroutines have finished.
+//
+// A WaitGroup must not be copied after first use.
 
 public static partial class sync_package {
 
-    // A WaitGroup waits for a collection of goroutines to finish.
-    // The main goroutine calls Add to set the number of
-    // goroutines to wait for. Then each of the goroutines
-    // runs and calls Done when finished. At the same time,
-    // Wait can be used to block until all goroutines have finished.
-    //
-    // A WaitGroup must not be copied after first use.
 public partial struct WaitGroup {
     public noCopy noCopy; // 64-bit value: high 32 bits are counter, low 32 bits are waiter count.
 // 64-bit atomic operations require 64-bit alignment, but 32-bit
@@ -66,11 +68,9 @@ private static void Add(this ptr<WaitGroup> _addr_wg, nint delta) => func((defer
         if (delta < 0) { 
             // Synchronize decrements with Wait.
             race.ReleaseMerge(@unsafe.Pointer(wg));
-
         }
         race.Disable();
         defer(race.Enable());
-
     }
     var state = atomic.AddUint64(statep, uint64(delta) << 32);
     var v = int32(state >> 32);
@@ -80,7 +80,6 @@ private static void Add(this ptr<WaitGroup> _addr_wg, nint delta) => func((defer
         // Need to model this as a read, because there can be
         // several concurrent wg.counter transitions from 0.
         race.Read(@unsafe.Pointer(semap));
-
     }
     if (v < 0) {
         panic("sync: negative WaitGroup counter");
@@ -99,7 +98,6 @@ private static void Add(this ptr<WaitGroup> _addr_wg, nint delta) => func((defer
         runtime_Semrelease(semap, false, 0);
         w--;
     }
-
 });
 
 // Done decrements the WaitGroup counter by one.
@@ -117,7 +115,6 @@ private static void Wait(this ptr<WaitGroup> _addr_wg) => func((_, panic, _) => 
     if (race.Enabled) {
         _ = statep.val; // trigger nil deref early
         race.Disable();
-
     }
     while (true) {
         var state = atomic.LoadUint64(statep);
@@ -129,9 +126,7 @@ private static void Wait(this ptr<WaitGroup> _addr_wg) => func((_, panic, _) => 
                 race.Enable();
                 race.Acquire(@unsafe.Pointer(wg));
             }
-
             return ;
-
         }
         if (atomic.CompareAndSwapUint64(statep, state, state + 1)) {
             if (race.Enabled && w == 0) { 
@@ -140,24 +135,18 @@ private static void Wait(this ptr<WaitGroup> _addr_wg) => func((_, panic, _) => 
                 // As a consequence, can do the write only for the first waiter,
                 // otherwise concurrent Waits will race with each other.
                 race.Write(@unsafe.Pointer(semap));
-
             }
-
             runtime_Semacquire(semap);
             if (statep != 0.val) {
                 panic("sync: WaitGroup is reused before previous Wait has returned");
             }
-
             if (race.Enabled) {
                 race.Enable();
                 race.Acquire(@unsafe.Pointer(wg));
             }
-
             return ;
-
         }
     }
-
 });
 
 } // end sync_package

@@ -2,22 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:47 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:11 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\dom.go
-
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using System;
 public static partial class ssa_package {
 
-    // This file contains code to compute the dominator tree
-    // of a control-flow graph.
+// This file contains code to compute the dominator tree
+// of a control-flow graph.
 
-    // postorder computes a postorder traversal ordering for the
-    // basic blocks in f. Unreachable blocks will not appear.
+// postorder computes a postorder traversal ordering for the
+// basic blocks in f. Unreachable blocks will not appear.
 private static slice<ptr<Block>> postorder(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -63,16 +60,13 @@ private static slice<ptr<Block>> postorderWithNumbering(ptr<Func> _addr_f, slice
             }
 
         }
-
         s = s[..(int)tos];
         if (ponums != null) {
             ponums[b.ID] = int32(len(order));
         }
         order = append(order, b);
-
     }
     return order;
-
 }
 
 public delegate  slice<Edge> linkedBlocks(ptr<Block>);
@@ -112,7 +106,6 @@ private static (slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>
         }
         scratch = make_slice<ID>(req);
         cache.domblockstore = scratch;
-
     }
     else
  { 
@@ -131,7 +124,6 @@ private static (slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>, slice<ID>
     g = scratch[(int)6 * maxBlockID..(int)7 * maxBlockID];
 
     return ;
-
 }
 
 private static slice<ptr<Block>> dominators(ptr<Func> _addr_f) {
@@ -143,7 +135,6 @@ private static slice<ptr<Block>> dominators(ptr<Func> _addr_f) {
     //TODO: benchmark and try to find criteria for swapping between
     // dominatorsSimple and dominatorsLT
     return f.dominatorsLTOrig(f.Entry, preds, succs);
-
 }
 
 // dominatorsLTOrig runs Lengauer-Tarjan to compute a dominator tree starting at
@@ -191,14 +182,11 @@ private static slice<ptr<Block>> dominatorsLTOrig(this ptr<Func> _addr_f, ptr<Bl
                     // skip unreachable predecessor
                     // not in original, but we're using existing pred instead of building one.
                     continue;
-
                 }
-
                 var u = evalOrig(v.ID, ancestor, semi, label);
                 if (semi[u] < semi[w]) {
                     semi[w] = semi[u];
                 }
-
             } 
 
             // add w to bucket[vertex[semi[w]]]
@@ -226,13 +214,11 @@ private static slice<ptr<Block>> dominatorsLTOrig(this ptr<Func> _addr_f, ptr<Bl
  {
                         idom[v] = fromID[parent[w]];
                     }
-
                 }
 
 
                 v = v__prev2;
             }
-
         }
 
         i = i__prev1;
@@ -252,7 +238,6 @@ private static slice<ptr<Block>> dominatorsLTOrig(this ptr<Func> _addr_f, ptr<Bl
     }
 
     return idom;
-
 }
 
 // dfs performs a depth first search over the blocks starting at entry block
@@ -288,11 +273,9 @@ private static ID dfsOrig(this ptr<Func> _addr_f, ptr<Block> _addr_entry, linked
                 s = append(s, w);
                 parent[w.ID] = v.ID; // keep overwriting this till it is visited.
             }
-
         }
     }
     return n;
-
 }
 
 // compressOrig is the "simple" compress function from LT paper
@@ -303,7 +286,6 @@ private static void compressOrig(ID v, slice<ID> ancestor, slice<ID> semi, slice
             label[v] = label[ancestor[v]];
         }
         ancestor[v] = ancestor[ancestor[v]];
-
     }
 }
 
@@ -314,7 +296,6 @@ private static ID evalOrig(ID v, slice<ID> ancestor, slice<ID> semi, slice<ID> l
     }
     compressOrig(v, ancestor, semi, label);
     return label[v];
-
 }
 
 private static void linkOrig(ID v, ID w, slice<ID> ancestor) {
@@ -389,7 +370,6 @@ private static slice<ptr<Block>> dominatorsSimple(ptr<Func> _addr_f) {
     // Set idom of entry block to nil instead of itself.
     idom[f.Entry.ID] = null;
     return idom;
-
 }
 
 // intersect finds the closest dominator of both b and c.
@@ -410,7 +390,6 @@ private static ptr<Block> intersect(ptr<Block> _addr_b, ptr<Block> _addr_c, slic
         }
     }
     return _addr_b!;
-
 }
 
 } // end ssa_package

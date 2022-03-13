@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:15:33 UTC
+//     Generated on 2022 March 13 06:29:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct tester
         {
             // Constructors
@@ -100,7 +100,7 @@ namespace go
             public static implicit operator tester(NilType nil) => default(tester);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static tester tester_cast(dynamic value)
         {
             return new tester(value.race, value.listMode, value.rebuild, value.failed, value.keepGoing, value.compileOnly, value.runRxStr, ref value.runRx, value.runRxWant, value.runNames, value.banner, value.lastHeading, value.cgoEnabled, value.partial, value.haveTime, value.tests, value.timeoutScale, value.worklist);

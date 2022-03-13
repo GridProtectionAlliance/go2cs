@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tar -- go2cs converted at 2022 March 06 22:31:37 UTC
+// package tar -- go2cs converted at 2022 March 13 05:42:30 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Program Files\Go\src\archive\tar\writer.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using path = go.path_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.archive;
 
+using fmt = fmt_package;
+using io = io_package;
+using path = path_package;
+using sort = sort_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// Writer provides sequential writing of a tar archive.
+// Write.WriteHeader begins a new file with the provided Header,
+// and then Writer can be treated as an io.Writer to supply that file's data.
+
+using System;
 public static partial class tar_package {
 
-    // Writer provides sequential writing of a tar archive.
-    // Write.WriteHeader begins a new file with the provided Header,
-    // and then Writer can be treated as an io.Writer to supply that file's data.
 public partial struct Writer {
     public io.Writer w;
     public long pad; // Amount of padding to write after current file entry
@@ -61,7 +62,6 @@ private static error Flush(this ptr<Writer> _addr_tw) {
             return error.As(fmt.Errorf("archive/tar: missed writing %d bytes", nb))!;
         }
     }
-
     _, tw.err = tw.w.Write(zeroBlock[..(int)tw.pad]);
 
     if (tw.err != null) {
@@ -69,7 +69,6 @@ private static error Flush(this ptr<Writer> _addr_tw) {
     }
     tw.pad = 0;
     return error.As(null!)!;
-
 }
 
 // WriteHeader writes hdr and prepares to accept the file's contents.
@@ -87,7 +86,6 @@ private static error WriteHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr_hd
             return error.As(err)!;
         }
     }
-
     tw.hdr = hdr; // Shallow copy of Header
 
     // Avoid usage of the legacy TypeRegA flag, and automatically promote
@@ -144,7 +142,6 @@ private static error writeUSTARHeader(this ptr<Writer> _addr_tw, ptr<Header> _ad
         return error.As(f.err)!; // Should never happen since header is validated
     }
     return error.As(tw.writeRawHeader(blk, hdr.Size, hdr.Typeflag))!;
-
 }
 
 private static error writePAXHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr_hdr, map<@string, @string> paxHdrs) {
@@ -255,7 +252,6 @@ private static error writePAXHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr
             err = err__prev2;
 
         }
-
     }
     formatter f = default; // Ignore errors since they are expected
     Action<slice<byte>, @string> fmtStr = (b, s) => {
@@ -288,7 +284,6 @@ private static error writePAXHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr
             }
         */
     return error.As(null!)!;
-
 }
 
 private static error writeGNUHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr_hdr) {
@@ -312,7 +307,6 @@ private static error writeGNUHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr
             err = err__prev2;
 
         }
-
     }
     if (len(hdr.Linkname) > nameSize) {
         data = hdr.Linkname + "\x00";
@@ -328,7 +322,6 @@ private static error writeGNUHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr
             err = err__prev2;
 
         }
-
     }
     formatter f = default; // Ignore errors since they are expected
     sparseDatas spd = default;
@@ -368,17 +361,13 @@ private static error writeGNUHeader(this ptr<Writer> _addr_tw, ptr<Header> _addr
             err = err__prev2;
 
         }
-
         tw.curr = addr(new sparseFileWriter(tw.curr,spd,0));
-
     }
     return error.As(null!)!;
-
 }
 
 public delegate void stringFormatter(slice<byte>, @string);
-public delegate void numberFormatter(slice<byte>, long);
-private static ptr<block> templateV7Plus(this ptr<Writer> _addr_tw, ptr<Header> _addr_hdr, stringFormatter fmtStr, numberFormatter fmtNum) {
+public delegate void numberFormatter(slice<byte>, long);private static ptr<block> templateV7Plus(this ptr<Writer> _addr_tw, ptr<Header> _addr_hdr, stringFormatter fmtStr, numberFormatter fmtNum) {
     ref Writer tw = ref _addr_tw.val;
     ref Header hdr = ref _addr_hdr.val;
 
@@ -405,7 +394,6 @@ private static ptr<block> templateV7Plus(this ptr<Writer> _addr_tw, ptr<Header> 
     fmtNum(ustar.DevMinor(), hdr.Devminor);
 
     return _addr__addr_tw.blk!;
-
 }
 
 // writeRawFile writes a minimal file with the given name and flag type.
@@ -443,10 +431,8 @@ private static error writeRawFile(this ptr<Writer> _addr_tw, @string name, @stri
             return error.As(err)!;
         }
     }
-
     var (_, err) = io.WriteString(tw, data);
     return error.As(err)!;
-
 }
 
 // writeRawHeader writes the value of blk, regardless of its value.
@@ -463,7 +449,6 @@ private static error writeRawHeader(this ptr<Writer> _addr_tw, ptr<block> _addr_
             return error.As(err)!;
         }
     }
-
     {
         var (_, err) = tw.w.Write(blk[..]);
 
@@ -471,14 +456,12 @@ private static error writeRawHeader(this ptr<Writer> _addr_tw, ptr<block> _addr_
             return error.As(err)!;
         }
     }
-
     if (isHeaderOnlyType(flag)) {
         size = 0;
     }
     tw.curr = addr(new regFileWriter(tw.w,size));
     tw.pad = blockPadding(size);
     return error.As(null!)!;
-
 }
 
 // splitUSTARPath splits a path according to USTAR prefix and suffix rules.
@@ -505,7 +488,6 @@ private static (@string, @string, bool) splitUSTARPath(@string name) {
         return ("", "", false);
     }
     return (name[..(int)i], name[(int)i + 1..], true);
-
 }
 
 // Write writes to the current file in the tar archive.
@@ -528,7 +510,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_tw, slice<byte> b) {
         tw.err = err;
     }
     return (n, error.As(err)!);
-
 }
 
 // readFrom populates the content of the current file by reading from r.
@@ -554,7 +535,6 @@ private static (long, error) readFrom(this ptr<Writer> _addr_tw, io.Reader r) {
         tw.err = err;
     }
     return (n, error.As(err)!);
-
 }
 
 // Close closes the tar archive by flushing the padding, and writing the footer.
@@ -605,8 +585,7 @@ private static (nint, error) Write(this ptr<regFileWriter> _addr_fw, slice<byte>
         return (n, error.As(ErrWriteTooLong)!);
     else 
         return (n, error.As(null!)!);
-    
-}
+    }
 
 private static (long, error) ReadFrom(this ptr<regFileWriter> _addr_fw, io.Reader r) {
     long _p0 = default;
@@ -648,13 +627,11 @@ private static (nint, error) Write(this ptr<sparseFileWriter> _addr_sw, slice<by
         if (sw.pos < dataStart) { // In a hole fragment
             var bf = b[..(int)min(int64(len(b)), dataStart - sw.pos)];
             nf, err = new zeroWriter().Write(bf);
-
         }
         else
  { // In a data fragment
             bf = b[..(int)min(int64(len(b)), dataEnd - sw.pos)];
             nf, err = sw.fw.Write(bf);
-
         }
         b = b[(int)nf..];
         sw.pos += int64(nf);
@@ -675,8 +652,7 @@ private static (nint, error) Write(this ptr<sparseFileWriter> _addr_sw, slice<by
         return (n, error.As(ErrWriteTooLong)!);
     else 
         return (n, error.As(null!)!);
-    
-}
+    }
 
 private static (long, error) ReadFrom(this ptr<sparseFileWriter> _addr_sw, io.Reader r) {
     long n = default;
@@ -693,7 +669,6 @@ private static (long, error) ReadFrom(this ptr<sparseFileWriter> _addr_sw, io.Re
             }
 
         }
-
     }
     if (!ok) {
         return io.Copy(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{io.Writer}{sw}, r);
@@ -710,15 +685,12 @@ private static (long, error) ReadFrom(this ptr<sparseFileWriter> _addr_sw, io.Re
                 readLastByte = true;
                 nf--;
             }
-
             _, err = rs.Seek(nf, io.SeekCurrent);
-
         }
         else
  { // In a data fragment
             nf = dataEnd - sw.pos;
             nf, err = io.CopyN(sw.fw, rs, nf);
-
         }
         sw.pos += nf;
         if (sw.pos >= dataEnd && len(sw.sp) > 1) {
@@ -744,8 +716,7 @@ private static (long, error) ReadFrom(this ptr<sparseFileWriter> _addr_sw, io.Re
         return (n, error.As(errUnrefData)!); // Not possible; implies bug in validation logic
     else 
         return (n, error.As(ensureEOF(rs))!);
-    
-}
+    }
 
 private static long LogicalRemaining(this sparseFileWriter sw) {
     return sw.sp[len(sw.sp) - 1].endOffset() - sw.pos;
@@ -767,7 +738,6 @@ private static (nint, error) Write(this zeroWriter _p0, slice<byte> b) {
             return (i, error.As(errWriteHole)!);
         }
     }    return (len(b), error.As(null!)!);
-
 }
 
 // ensureEOF checks whether r is at EOF, reporting ErrWriteTooLong if not so.
@@ -780,7 +750,6 @@ private static error ensureEOF(io.Reader r) {
         return error.As(null!)!;
     else 
         return error.As(err)!;
-    
-}
+    }
 
 } // end tar_package

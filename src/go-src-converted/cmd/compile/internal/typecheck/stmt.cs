@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:41 UTC
+// package typecheck -- go2cs converted at 2022 March 13 06:00:01 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\stmt.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class typecheck_package {
 
@@ -23,7 +22,6 @@ public static ptr<types.Type> RangeExprType(ptr<types.Type> _addr_t) {
         return _addr_t.Elem()!;
     }
     return _addr_t!;
-
 }
 
 private static void typecheckrangeExpr(ptr<ir.RangeStmt> _addr_n) {
@@ -84,16 +82,12 @@ private static void typecheckrangeExpr(ptr<ir.RangeStmt> _addr_n) {
                     }
 
                 }
-
             }
-
             checkassign(n, nn);
-
         }
     };
     do(n.Key, tk);
     do(n.Value, tv);
-
 }
 
 // type check assignment.
@@ -124,7 +118,6 @@ private static void tcAssignList(ptr<ir.AssignListStmt> _addr_n) => func((defer,
         defer(tracePrint("tcAssignList", n)(null));
     }
     assign(n, n.Lhs, n.Rhs);
-
 });
 
 private static void assign(ir.Node stmt, slice<ir.Node> lhs, slice<ir.Node> rhs) { 
@@ -149,16 +142,13 @@ private static void assign(ir.Node stmt, slice<ir.Node> lhs, slice<ir.Node> rhs)
  {
                     @base.Errorf("use of untyped nil");
                 }
-
             }
 
         }
-
         if (lhs[i].Typecheck() == 0) {
             lhs[i] = AssignExpr(lhs[i]);
         }
         checkassign(stmt, lhs[i]);
-
     };
 
     Action<nint, ptr<types.Type>> assignType = (i, typ) => {
@@ -183,7 +173,6 @@ private static void assign(ir.Node stmt, slice<ir.Node> lhs, slice<ir.Node> rhs)
             rtyp = rtyp__prev2;
 
         }
-
     }
     else
  {
@@ -210,7 +199,6 @@ assignOK:
                 assignType(0, r.Type());
         assignType(1, types.UntypedBool);
         return ;
-
     }
     if (len(lhs) != cr) {
         {
@@ -232,7 +220,6 @@ assignOK:
 
         }
 
-
         {
             var i__prev1 = i;
 
@@ -245,7 +232,6 @@ assignOK:
         }
 
         return ;
-
     }
     if (cr > len(rhs)) {
         stmt = stmt._<ptr<ir.AssignListStmt>>();
@@ -270,7 +256,6 @@ assignOK:
                 else if (lhs[i] != ir.BlankNode && !types.Identical(lhs[i].Type(), result)) {
                     mismatched = true;
                 }
-
             }
 
             i = i__prev1;
@@ -280,7 +265,6 @@ assignOK:
             rewriteMultiValueCall(stmt, r);
         }
         return ;
-
     }
     {
         var i__prev1 = i;
@@ -304,7 +288,6 @@ private static @string plural(nint n) {
         return "";
     }
     return "s";
-
 }
 
 // tcFor typechecks an OFOR node.
@@ -326,7 +309,6 @@ private static ir.Node tcFor(ptr<ir.ForStmt> _addr_n) {
     }
     Stmts(n.Body);
     return n;
-
 }
 
 private static void tcGoDefer(ptr<ir.GoDeferStmt> _addr_n) {
@@ -349,7 +331,6 @@ private static void tcGoDefer(ptr<ir.GoDeferStmt> _addr_n) {
             }
 
         }
-
         @base.ErrorfAt(n.Pos(), "%s discards result of %v", what, n.Call);
         return ;
     // type is broken or missing, most likely a method call on a broken type
@@ -362,7 +343,6 @@ private static void tcGoDefer(ptr<ir.GoDeferStmt> _addr_n) {
         // a conversion.
         n.SetDiag(true);
         @base.ErrorfAt(n.Pos(), "%s requires function call, not conversion", what);
-
     }
 }
 
@@ -382,7 +362,6 @@ private static ir.Node tcIf(ptr<ir.IfStmt> _addr_n) {
     Stmts(n.Body);
     Stmts(n.Else);
     return n;
-
 }
 
 // range
@@ -409,7 +388,6 @@ private static void tcRange(ptr<ir.RangeStmt> _addr_n) {
         n.Value = AssignExpr(n.Value);
     }
     Stmts(n.Body);
-
 }
 
 // tcReturn typechecks an ORETURN node.
@@ -427,7 +405,6 @@ private static ir.Node tcReturn(ptr<ir.ReturnStmt> _addr_n) {
     }
     typecheckaste(ir.ORETURN, null, false, ir.CurFunc.Type().Results(), n.Results, () => "return argument");
     return n;
-
 }
 
 // select
@@ -447,7 +424,6 @@ private static void tcSelect(ptr<ir.SelectStmt> _addr_sel) {
  {
                 def = ncase;
             }
-
         }
         else
  {
@@ -481,12 +457,10 @@ private static void tcSelect(ptr<ir.SelectStmt> _addr_sel) {
                     r = r__prev2;
 
                 }
-
                 if (n.Y.Op() != ir.ORECV) {
                     @base.ErrorfAt(n.Pos(), "select assignment must have receive on right hand side");
                     break;
                 }
-
                 oselrecv2(n.X, n.Y, n.Def);
             else if (n.Op() == ir.OAS2RECV) 
                 n = n._<ptr<ir.AssignListStmt>>();
@@ -509,16 +483,11 @@ private static void tcSelect(ptr<ir.SelectStmt> _addr_sel) {
                     // line number (assuming the expression follows the "case" keyword
                     // on the same line). This matches the approach before 1.10.
                     pos = ncase.Pos();
-
                 }
-
                 @base.ErrorfAt(pos, "select case must be receive, send or assign recv");
-            
-        }
+                    }
         Stmts(ncase.Body);
-
     }    @base.Pos = lno;
-
 }
 
 // tcSend typechecks an OSEND node.
@@ -545,7 +514,6 @@ private static ir.Node tcSend(ptr<ir.SendStmt> _addr_n) {
         return n;
     }
     return n;
-
 }
 
 // tcSwitch typechecks a switch statement.
@@ -588,10 +556,8 @@ private static void tcSwitchExpr(ptr<ir.SwitchStmt> _addr_n) {
  {
                 @base.ErrorfAt(n.Pos(), "cannot switch on %L", n.Tag);
             }
-
             t = null;
-        
-    }
+            }
     ir.Node defCase = default;
     constSet cs = default;
     foreach (var (_, ncase) in n.Cases) {
@@ -604,7 +570,6 @@ private static void tcSwitchExpr(ptr<ir.SwitchStmt> _addr_n) {
  {
                 defCase = ncase;
             }
-
         }
         foreach (var (i) in ls) {
             ir.SetPos(ncase);
@@ -632,9 +597,7 @@ private static void tcSwitchExpr(ptr<ir.SwitchStmt> _addr_n) {
  {
                         @base.ErrorfAt(ncase.Pos(), "invalid case %v in switch (mismatched types %v and bool)", n1, n1.Type());
                     }
-
                 }
-
             } 
 
             // Don't check for duplicate bools. Although the spec allows it,
@@ -646,9 +609,7 @@ private static void tcSwitchExpr(ptr<ir.SwitchStmt> _addr_n) {
             if (!n1.Type().IsBoolean()) {
                 cs.add(ncase.Pos(), n1, "case", "switch");
             }
-
         }        Stmts(ncase.Body);
-
     }
 }
 
@@ -670,7 +631,6 @@ private static void tcSwitchType(ptr<ir.SwitchStmt> _addr_n) {
         }
     }
 
-
     ir.Node defCase = default;    ir.Node nilCase = default;
 
     typeSet ts = default;
@@ -684,7 +644,6 @@ private static void tcSwitchType(ptr<ir.SwitchStmt> _addr_n) {
  {
                 defCase = ncase;
             }
-
         }
         foreach (var (i) in ls) {
             ls[i] = typecheck(ls[i], ctxExpr | ctxType);
@@ -703,16 +662,12 @@ private static void tcSwitchType(ptr<ir.SwitchStmt> _addr_n) {
  {
                     nilCase = ncase;
                 }
-
                 continue;
-
             }
-
             if (n1.Op() != ir.OTYPE) {
                 @base.ErrorfAt(ncase.Pos(), "%L is not a type", n1);
                 continue;
             }
-
             if (!n1.Type().IsInterface() && !implements(n1.Type(), t, _addr_missing, _addr_have, _addr_ptr) && !missing.Broke()) {
                 if (have != null && !have.Broke()) {
                     @base.ErrorfAt(ncase.Pos(), "impossible type switch case: %L cannot have dynamic type %v" + " (wrong type for %v method)\n\thave %v%S\n\twant %v%S", guard.X, n1.Type(), missing.Sym, have.Sym, have.Type, missing.Sym, missing.Type);
@@ -724,13 +679,9 @@ private static void tcSwitchType(ptr<ir.SwitchStmt> _addr_n) {
  {
                     @base.ErrorfAt(ncase.Pos(), "impossible type switch case: %L cannot have dynamic type %v" + " (missing %v method)", guard.X, n1.Type(), missing.Sym);
                 }
-
                 continue;
-
             }
-
             ts.add(ncase.Pos(), n1.Type());
-
         }        if (ncase.Var != null) { 
             // Assign the clause variable's type.
             var vt = t;
@@ -742,11 +693,8 @@ private static void tcSwitchType(ptr<ir.SwitchStmt> _addr_n) {
                     // Invalid single-type case;
                     // mark variable as broken.
                     vt = null;
-
                 }
-
             }
-
             var nvar = ncase.Var;
             nvar.SetType(vt);
             if (vt != null) {
@@ -757,14 +705,10 @@ private static void tcSwitchType(ptr<ir.SwitchStmt> _addr_n) {
                 // Clause variable is broken; prevent typechecking.
                 nvar.SetTypecheck(1);
                 nvar.SetWalkdef(1);
-
             }
-
             ncase.Var = nvar;
-
         }
         Stmts(ncase.Body);
-
     }
 }
 
@@ -792,7 +736,6 @@ private static void add(this ptr<typeSet> _addr_s, src.XPos pos, ptr<types.Type>
             return ;
         }
     }    s.m[ls] = append(prevs, new typeSetEntry(pos,typ));
-
 }
 
 } // end typecheck_package

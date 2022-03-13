@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:29 UTC
+//     Generated on 2022 March 13 05:24:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct debugCallWrapArgs
         {
             // Constructors
@@ -53,7 +53,7 @@ namespace go
             public static implicit operator debugCallWrapArgs(NilType nil) => default(debugCallWrapArgs);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static debugCallWrapArgs debugCallWrapArgs_cast(dynamic value)
         {
             return new debugCallWrapArgs(value.dispatch, ref value.callingG);

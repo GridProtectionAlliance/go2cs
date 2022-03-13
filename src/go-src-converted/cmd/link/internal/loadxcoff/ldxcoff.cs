@@ -3,25 +3,27 @@
 // license that can be found in the LICENSE file.
 
 // Package loadxcoff implements a XCOFF file reader.
-// package loadxcoff -- go2cs converted at 2022 March 06 23:21:48 UTC
+
+// package loadxcoff -- go2cs converted at 2022 March 13 06:34:48 UTC
 // import "cmd/link/internal/loadxcoff" ==> using loadxcoff = go.cmd.link.@internal.loadxcoff_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\loadxcoff\ldxcoff.go
-using bio = go.cmd.@internal.bio_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using xcoff = go.@internal.xcoff_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
+using bio = cmd.@internal.bio_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using xcoff = @internal.xcoff_package;
+
+
+// ldSection is an XCOFF section with its symbols.
+
+using System;
 public static partial class loadxcoff_package {
 
-    // ldSection is an XCOFF section with its symbols.
 private partial struct ldSection {
     public ref xcoff.Section Section => ref Section_val;
     public loader.Sym sym;
@@ -47,7 +49,6 @@ private static (nint, error) ReadAt(this ptr<xcoffBiobuf> _addr_f, slice<byte> p
         return (0, error.As(err)!);
     }
     return (n, error.As(null!)!);
-
 }
 
 // loads the Xcoff file pn from f.
@@ -59,9 +60,7 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
     ref sys.Arch arch = ref _addr_arch.val;
     ref bio.Reader input = ref _addr_input.val;
 
-    Func<@string, object[], (slice<loader.Sym>, error)> errorf = (str, args) => {
-        return (null, error.As(fmt.Errorf("loadxcoff: %v: %v", pn, fmt.Sprintf(str, args)))!);
-    };
+    Func<@string, object[], (slice<loader.Sym>, error)> errorf = (str, args) => (null, error.As(fmt.Errorf("loadxcoff: %v: %v", pn, fmt.Sprintf(str, args)))!);
 
     slice<ptr<ldSection>> ldSections = default;
 
@@ -80,7 +79,6 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
             if (sect.Type < xcoff.STYP_TEXT || sect.Type > xcoff.STYP_BSS) {
                 continue;
             }
-
             ptr<ldSection> lds = @new<ldSection>();
             lds.Section = sect.val;
             var name = fmt.Sprintf("%s(%s)", pkg, lds.Name);
@@ -104,10 +102,8 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                 }
                 s.SetData(data);
             }
-
             lds.sym = symbol;
             ldSections = append(ldSections, lds);
-
         }
         sect = sect__prev1;
     }
@@ -140,7 +136,6 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
             if (sect.Type != xcoff.STYP_TEXT && sect.Type != xcoff.STYP_DATA) {
                 continue;
             }
-
             var sb = l.MakeSymbolUpdater(sect.sym);
             foreach (var (_, rx) in sect.Relocs) {
                 var rSym = l.LookupOrCreateCgoExport(rx.Symbol.Name, 0);
@@ -172,16 +167,12 @@ public static (slice<loader.Sym>, error) Load(ptr<loader.Loader> _addr_l, ptr<sy
                 r.SetSiz(rSize);
                 r.SetSym(rSym);
                 r.SetAdd(rAdd);
-
             }
-
         }
         sect = sect__prev1;
     }
 
     return (textp, error.As(null!)!);
-
-
 });
 
 // Convert symbol xcoff type to sym.SymKind
@@ -198,7 +189,6 @@ private static (sym.SymKind, @string) getSymbolType(ptr<xcoff.File> _addr_f, ptr
             return (sym.Sxxx, "");
         }
         return (sym.Sxxx, "unrecognised StorageClass for sectionNumber = -2");
-
     }
     if (s.SectionNumber == 0) {
         return (sym.Sxxx, "");
@@ -247,7 +237,6 @@ private static (sym.SymKind, @string) getSymbolType(ptr<xcoff.File> _addr_f, ptr
             // Program Code
             else 
         return (sym.Sxxx, fmt.Sprintf("getSymbolType for Storage class 0x%x not implemented", s.StorageClass));
-    
-}
+    }
 
 } // end loadxcoff_package

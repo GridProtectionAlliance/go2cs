@@ -38,7 +38,9 @@
 //    -type
 //        print symbol type after name
 //
-// package main -- go2cs converted at 2022 March 06 23:22:35 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:35:39 UTC
 // Original source: C:\Program Files\Go\src\cmd\nm\doc.go
+namespace go;
 
 } // end main_package

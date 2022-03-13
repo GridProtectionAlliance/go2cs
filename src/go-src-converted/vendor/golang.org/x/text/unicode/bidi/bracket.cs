@@ -2,52 +2,53 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bidi -- go2cs converted at 2022 March 06 23:38:25 UTC
+// package bidi -- go2cs converted at 2022 March 13 06:46:38 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\bidi\bracket.go
-using list = go.container.list_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using list = container.list_package;
+using fmt = fmt_package;
+using sort = sort_package;
+
+
+// This file contains a port of the reference implementation of the
+// Bidi Parentheses Algorithm:
+// https://www.unicode.org/Public/PROGRAMS/BidiReferenceJava/BidiPBAReference.java
+//
+// The implementation in this file covers definitions BD14-BD16 and rule N0
+// of UAX#9.
+//
+// Some preprocessing is done for each rune before data is passed to this
+// algorithm:
+//  - opening and closing brackets are identified
+//  - a bracket pair type, like '(' and ')' is assigned a unique identifier that
+//    is identical for the opening and closing bracket. It is left to do these
+//    mappings.
+//  - The BPA algorithm requires that bracket characters that are canonical
+//    equivalents of each other be able to be substituted for each other.
+//    It is the responsibility of the caller to do this canonicalization.
+//
+// In implementing BD16, this implementation departs slightly from the "logical"
+// algorithm defined in UAX#9. In particular, the stack referenced there
+// supports operations that go beyond a "basic" stack. An equivalent
+// implementation based on a linked list is used here.
+
+// Bidi_Paired_Bracket_Type
+// BD14. An opening paired bracket is a character whose
+// Bidi_Paired_Bracket_Type property value is Open.
+//
+// BD15. A closing paired bracket is a character whose
+// Bidi_Paired_Bracket_Type property value is Close.
 
 public static partial class bidi_package {
 
-    // This file contains a port of the reference implementation of the
-    // Bidi Parentheses Algorithm:
-    // https://www.unicode.org/Public/PROGRAMS/BidiReferenceJava/BidiPBAReference.java
-    //
-    // The implementation in this file covers definitions BD14-BD16 and rule N0
-    // of UAX#9.
-    //
-    // Some preprocessing is done for each rune before data is passed to this
-    // algorithm:
-    //  - opening and closing brackets are identified
-    //  - a bracket pair type, like '(' and ')' is assigned a unique identifier that
-    //    is identical for the opening and closing bracket. It is left to do these
-    //    mappings.
-    //  - The BPA algorithm requires that bracket characters that are canonical
-    //    equivalents of each other be able to be substituted for each other.
-    //    It is the responsibility of the caller to do this canonicalization.
-    //
-    // In implementing BD16, this implementation departs slightly from the "logical"
-    // algorithm defined in UAX#9. In particular, the stack referenced there
-    // supports operations that go beyond a "basic" stack. An equivalent
-    // implementation based on a linked list is used here.
-
-    // Bidi_Paired_Bracket_Type
-    // BD14. An opening paired bracket is a character whose
-    // Bidi_Paired_Bracket_Type property value is Open.
-    //
-    // BD15. A closing paired bracket is a character whose
-    // Bidi_Paired_Bracket_Type property value is Close.
 private partial struct bracketType { // : byte
 }
 
 private static readonly bracketType bpNone = iota;
 private static readonly var bpOpen = 0;
 private static readonly var bpClose = 1;
-
 
 // bracketPair holds a pair of index values for opening and closing bracket
 // location of a bracket pair.
@@ -94,7 +95,6 @@ private static void resolvePairedBrackets(ptr<isolatingRunSequence> _addr_s) {
     }
     p.locateBrackets(s.p.pairTypes, s.p.pairValues);
     p.resolveBrackets(dirEmbed, s.p.initialTypes);
-
 }
 
 private partial struct bracketPairer {
@@ -160,7 +160,6 @@ private static void locateBrackets(this ptr<bracketPairer> _addr_p, slice<bracke
         if (pairTypes[index] == bpNone || p.codesIsolatedRun[i] != ON) { 
             // continue scanning
             continue;
-
         }
 
         if (pairTypes[index] == bpOpen) 
@@ -192,7 +191,6 @@ private static void locateBrackets(this ptr<bracketPairer> _addr_p, slice<bracke
                         break;
                     elem = elem.Next();
                     }
-
                 }
 
             }
@@ -268,8 +266,7 @@ private static Class getStrongTypeN0(this ptr<bracketPairer> _addr_p, nint index
         return L;
     else 
         return ON;
-    
-}
+    }
 
 // classifyPairContent reports the strong types contained inside a Bracket Pair,
 // assuming the given embedding direction.
@@ -291,11 +288,9 @@ private static Class classifyPairContent(this ptr<bracketPairer> _addr_p, bracke
             return dir; // type matching embedding direction found
         }
         dirOpposite = dir;
-
     } 
     // return ON if no strong type found, or class opposite to dirEmbed
     return dirOpposite;
-
 }
 
 // classBeforePair determines which strong types are present before a Bracket
@@ -312,11 +307,9 @@ private static Class classBeforePair(this ptr<bracketPairer> _addr_p, bracketPai
             }
 
         }
-
     } 
     // no strong types found, return sos
     return p.sos;
-
 }
 
 // assignBracketType implements rule N0 for a single bracket pair.
@@ -339,11 +332,9 @@ private static void assignBracketType(this ptr<bracketPairer> _addr_p, bracketPa
         if (dirPair == dirEmbed || dirPair == ON) { 
             // no strong opposite type found before - use embedding (c.2)
             dirPair = dirEmbed;
-
         }
     }
     p.setBracketsToType(loc, dirPair, initialTypes);
-
 }
 
 private static void setBracketsToType(this ptr<bracketPairer> _addr_p, bracketPair loc, Class dirPair, slice<Class> initialTypes) {
@@ -379,7 +370,6 @@ private static void setBracketsToType(this ptr<bracketPairer> _addr_p, bracketPa
 
         i = i__prev1;
     }
-
 }
 
 // resolveBrackets implements rule N0 for a list of pairs.

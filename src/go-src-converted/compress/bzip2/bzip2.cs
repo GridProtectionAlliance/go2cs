@@ -3,22 +3,23 @@
 // license that can be found in the LICENSE file.
 
 // Package bzip2 implements bzip2 decompression.
-// package bzip2 -- go2cs converted at 2022 March 06 23:35:23 UTC
+
+// package bzip2 -- go2cs converted at 2022 March 13 06:43:20 UTC
 // import "compress/bzip2" ==> using bzip2 = go.compress.bzip2_package
 // Original source: C:\Program Files\Go\src\compress\bzip2\bzip2.go
-using io = go.io_package;
-
 namespace go.compress;
+
+using io = io_package;
 
 public static partial class bzip2_package {
 
-    // There's no RFC for bzip2. I used the Wikipedia page for reference and a lot
-    // of guessing: https://en.wikipedia.org/wiki/Bzip2
-    // The source code to pyflate was useful for debugging:
-    // http://www.paul.sladen.org/projects/pyflate
+// There's no RFC for bzip2. I used the Wikipedia page for reference and a lot
+// of guessing: https://en.wikipedia.org/wiki/Bzip2
+// The source code to pyflate was useful for debugging:
+// http://www.paul.sladen.org/projects/pyflate
 
-    // A StructuralError is returned when the bzip2 data is found to be
-    // syntactically invalid.
+// A StructuralError is returned when the bzip2 data is found to be
+// syntactically invalid.
 public partial struct StructuralError { // : @string
 }
 
@@ -90,7 +91,6 @@ private static error setup(this ptr<reader> _addr_bz2, bool needMagic) {
         bz2.tt = make_slice<uint>(bz2.blockSize);
     }
     return error.As(null!)!;
-
 }
 
 private static (nint, error) Read(this ptr<reader> _addr_bz2, slice<byte> buf) {
@@ -111,7 +111,6 @@ private static (nint, error) Read(this ptr<reader> _addr_bz2, slice<byte> buf) {
             return (0, error.As(err)!);
         }
         bz2.setupDone = true;
-
     }
     n, err = bz2.read(buf);
     brErr = bz2.br.Err();
@@ -119,7 +118,6 @@ private static (nint, error) Read(this ptr<reader> _addr_bz2, slice<byte> buf) {
         err = brErr;
     }
     return ;
-
 }
 
 private static nint readFromBlock(this ptr<reader> _addr_bz2, slice<byte> buf) {
@@ -172,11 +170,9 @@ private static nint readFromBlock(this ptr<reader> _addr_bz2, slice<byte> buf) {
 
         buf[n] = b;
         n++;
-
     }
 
     return n;
-
 }
 
 private static (nint, error) read(this ptr<reader> _addr_bz2, slice<byte> buf) {
@@ -219,19 +215,16 @@ private static (nint, error) read(this ptr<reader> _addr_bz2, slice<byte> buf) {
             if (br.bits % 8 != 0) {
                 br.ReadBits(br.bits % 8);
             }
-
             var (b, err) = br.r.ReadByte();
             if (err == io.EOF) {
                 br.err = io.EOF;
                 bz2.eof = true;
                 return (0, error.As(io.EOF)!);
             }
-
             if (err != null) {
                 br.err = err;
                 return (0, error.As(err)!);
             }
-
             var (z, err) = br.r.ReadByte();
             if (err != null) {
                 if (err == io.EOF) {
@@ -240,11 +233,9 @@ private static (nint, error) read(this ptr<reader> _addr_bz2, slice<byte> buf) {
                 br.err = err;
                 return (0, error.As(err)!);
             }
-
             if (b != 'B' || z != 'Z') {
                 return (0, error.As(StructuralError("bad magic value in continuation file"))!);
             }
-
             {
                 var err__prev1 = err;
 
@@ -257,12 +248,9 @@ private static (nint, error) read(this ptr<reader> _addr_bz2, slice<byte> buf) {
                 err = err__prev1;
 
             }
-
         else 
             return (0, error.As(StructuralError("bad magic value found"))!);
-        
-    }
-
+            }
 }
 
 // readBlock reads a bzip2 block. The magic number should already have been consumed.
@@ -301,7 +289,6 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
     if (numSymbols == 0) { 
         // There must be an EOF symbol.
         return error.As(StructuralError("no symbols in input"))!;
-
     }
     var numHuffmanTrees = br.ReadBits(3);
     if (numHuffmanTrees < 2 || numHuffmanTrees > 6) {
@@ -378,17 +365,14 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
  {
                         length++;
                     }
-
                 }
 
                 lengths[j] = uint8(length);
-
             }
             huffmanTrees[i], err = newHuffmanTree(lengths);
             if (err != null) {
                 return error.As(err)!;
             }
-
         }
         i = i__prev1;
     }
@@ -441,7 +425,6 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
             if (repeat == 0) {
                 repeatPower = 1;
             }
-
             repeat += repeatPower << (int)(v);
             repeatPower<<=1; 
 
@@ -450,9 +433,7 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
             if (repeat > 2 * 1024 * 1024) {
                 return error.As(StructuralError("repeat count too large"))!;
             }
-
             continue;
-
         }
         if (repeat > 0) { 
             // We have decoded a complete run-length so we need to
@@ -460,7 +441,6 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
             if (repeat > bz2.blockSize - bufIndex) {
                 return error.As(StructuralError("repeats past end of block"))!;
             }
-
             {
                 var i__prev2 = i;
 
@@ -475,14 +455,12 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
                 i = i__prev2;
             }
             repeat = 0;
-
         }
         if (int(v) == numSymbols - 1) { 
             // This is the EOF symbol. Because it's always at the
             // end of the move-to-front list, and never gets moved
             // to the front, it has this unique value.
             break;
-
         }
         b = mtf.Decode(int(v - 1));
         if (bufIndex >= bz2.blockSize) {
@@ -491,7 +469,6 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
         bz2.tt[bufIndex] = uint32(b);
         bz2.c[b]++;
         bufIndex++;
-
     }
 
     if (origPtr >= uint(bufIndex)) {
@@ -505,7 +482,6 @@ private static error readBlock(this ptr<reader> _addr_bz2) {
     bz2.repeats = 0;
 
     return error.As(null!)!;
-
 }
 
 // inverseBWT implements the inverse Burrows-Wheeler transform as described in
@@ -544,7 +520,6 @@ private static uint inverseBWT(slice<uint> tt, nuint origPtr, slice<nuint> c) {
     }
 
     return tt[origPtr] >> 8;
-
 }
 
 // This is a standard CRC32 like in hash/crc32 except that all the shifts are reversed,
@@ -565,10 +540,8 @@ private static void init() {
  {
                 crc<<=1;
             }
-
         }
         crctab[i] = crc;
-
     }
 }
 

@@ -5,12 +5,12 @@
 //go:build dragonfly || freebsd || netbsd || (openbsd && mips64)
 // +build dragonfly freebsd netbsd openbsd,mips64
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:26 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:29 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\exec_bsd.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
@@ -98,7 +98,6 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
         // parent; return PID
         runtime_AfterFork();
         return (int(r1), 0);
-
     }
     if (sys.Ptrace) {
         _, _, err1 = RawSyscall(SYS_PTRACE, uintptr(PTRACE_TRACEME), 0, 0);
@@ -185,24 +184,19 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
         RawSyscall(SYS_FCNTL, uintptr(nextfd), F_SETFD, FD_CLOEXEC);
         pipe = nextfd;
         nextfd++;
-
     }
     for (i = 0; i < len(fd); i++) {
         if (fd[i] >= 0 && fd[i] < int(i)) {
             if (nextfd == pipe) { // don't stomp on pipe
                 nextfd++;
-
             }
-
             _, _, err1 = RawSyscall(SYS_DUP2, uintptr(fd[i]), uintptr(nextfd), 0);
             if (err1 != 0) {
                 goto childerror;
             }
-
             RawSyscall(SYS_FCNTL, uintptr(nextfd), F_SETFD, FD_CLOEXEC);
             fd[i] = nextfd;
             nextfd++;
-
         }
     } 
 
@@ -219,9 +213,7 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
             if (err1 != 0) {
                 goto childerror;
             }
-
             continue;
-
         }
         _, _, err1 = RawSyscall(SYS_DUP2, uintptr(fd[i]), uintptr(i), 0);
         if (err1 != 0) {
@@ -257,7 +249,6 @@ childerror:
     while (true) {
         RawSyscall(SYS_EXIT, 253, 0, 0);
     }
-
 }
 
 } // end syscall_package

@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:00 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:21 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\deadlock.go
-using fmt = go.fmt_package;
-using runtime = go.runtime_package;
-using debug = go.runtime.debug_package;
-using time = go.time_package;
+namespace go;
+
+using fmt = fmt_package;
+using runtime = runtime_package;
+using debug = runtime.debug_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -67,7 +66,8 @@ public static void LockedDeadlock2() {
 
 public static void GoexitDeadlock() {
     Action F = () => {
-        for (nint i = 0; i < 10; i++)         }
+        for (nint i = 0; i < 10; i++) {
+        }
     };
 
     go_(() => F());
@@ -113,15 +113,11 @@ public static void RecursivePanic() => func((defer, panic, _) => {
                     }
 
                 }
-
             }());
             panic("bad");
-
         }(x);
-
     }();
     panic("again");
-
 });
 
 // Same as RecursivePanic, but do the first recover and the second panic in
@@ -183,14 +179,16 @@ private static void one() {
 
 //go:noinline
 private static void two() => func((defer, _, _) => {
-    defer(() =>     }());
+    defer(() => {
+    }());
 
     three();
 });
 
 //go:noinline
 private static void three() => func((defer, panic, _) => {
-    defer(() =>     }());
+    defer(() => {
+    }());
 
     defer(() => {
         fmt.Println(recover());
@@ -217,7 +215,6 @@ public static void GoexitExit() {
     runtime.GC();
     println("t4");
     runtime.Goexit();
-
 }
 
 public static void GoNil() => func((defer, _, recover) => {
@@ -239,7 +236,6 @@ public static void NoHelperGoroutines() => func((_, panic, _) => {
     time.AfterFunc(time.Hour, () => {
     });
     panic("oops");
-
 });
 
 public static void Breakpoint() {
@@ -319,12 +315,12 @@ public static void RecoverBeforePanicAfterGoexit() => func((defer, panic, _) => 
         panic("hello");
     }());
     runtime.Goexit();
-
 });
 
 public static void RecoverBeforePanicAfterGoexit2() => func((defer, panic, _) => {
     for (nint i = 0; i < 2; i++) {
-        defer(() =>         }());
+        defer(() => {
+        }());
     } 
     // 1. defer a function that recovers
     // 2. defer a function that panics
@@ -343,7 +339,6 @@ public static void RecoverBeforePanicAfterGoexit2() => func((defer, panic, _) =>
         panic("hello");
     }());
     runtime.Goexit();
-
 });
 
 public static void PanicTraceback() {

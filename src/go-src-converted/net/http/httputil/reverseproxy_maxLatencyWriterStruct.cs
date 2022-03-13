@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:05 UTC
+//     Generated on 2022 March 13 05:38:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace http
 {
     public static partial class httputil_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct maxLatencyWriter
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace http
             public static implicit operator maxLatencyWriter(NilType nil) => default(maxLatencyWriter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static maxLatencyWriter maxLatencyWriter_cast(dynamic value)
         {
             return new maxLatencyWriter(value.dst, value.latency, value.mu, ref value.t, value.flushPending);

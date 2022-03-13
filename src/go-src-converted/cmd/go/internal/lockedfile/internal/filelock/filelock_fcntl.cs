@@ -14,18 +14,18 @@
 // or an F_OFD_SETLK command for 'fcntl', that allows for better concurrency and
 // does not require per-inode bookkeeping in the application.
 
-// package filelock -- go2cs converted at 2022 March 06 23:17:00 UTC
+// package filelock -- go2cs converted at 2022 March 13 06:30:18 UTC
 // import "cmd/go/internal/lockedfile/internal/filelock" ==> using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\lockedfile\internal\filelock\filelock_fcntl.go
-using errors = go.errors_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using rand = go.math.rand_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go.cmd.go.@internal.lockedfile.@internal;
+
+using errors = errors_package;
+using io = io_package;
+using fs = io.fs_package;
+using rand = math.rand_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using time = time_package;
 
 public static partial class filelock_package {
 
@@ -34,7 +34,6 @@ private partial struct lockType { // : short
 
 private static readonly lockType readLock = syscall.F_RDLCK;
 private static readonly lockType writeLock = syscall.F_WRLCK;
-
 
 private partial struct inode { // : ulong
 } // type of syscall.Stat_t.Ino
@@ -71,7 +70,6 @@ private static error @lock(File f, lockType lt) {
             return error.As(addr(new fs.PathError(Op:lt.String(),Path:f.Name(),Err:errors.New("inode for file changed since last Lock or RLock"),))!)!;
         }
     }
-
     inodes[f] = ino;
 
     channel<File> wait = default;
@@ -82,14 +80,12 @@ private static error @lock(File f, lockType lt) {
     else if (l.owner == null) { 
         // No owner: it's ours now.
         l.owner = f;
-
     }
     else
  { 
         // Already owned: add a channel to wait on.
         wait = make_channel<File>();
         l.queue = append(l.queue, wait);
-
     }
     locks[ino] = l;
     mu.Unlock();
@@ -112,7 +108,6 @@ private static error @lock(File f, lockType lt) {
             nextSleep = maxSleep;
         }
         nextSleep += time.Duration((0.1F * rand.Float64() - 0.05F) * float64(nextSleep));
-
     }
 
     if (err != null) {
@@ -120,7 +115,6 @@ private static error @lock(File f, lockType lt) {
         return error.As(addr(new fs.PathError(Op:lt.String(),Path:f.Name(),Err:err,))!)!;
     }
     return error.As(null!)!;
-
 }
 
 private static error unlock(File f) => func((_, panic, _) => {
@@ -143,7 +137,6 @@ private static error unlock(File f) => func((_, panic, _) => {
     if (len(l.queue) == 0) { 
         // No waiters: remove the map entry.
         delete(locks, ino);
-
     }
     else
  { 
@@ -152,13 +145,11 @@ private static error unlock(File f) => func((_, panic, _) => {
         l.owner = l.queue[0].Receive();
         l.queue = l.queue[(int)1..];
         locks[ino] = l;
-
     }
     delete(inodes, f);
     mu.Unlock();
 
     return error.As(err)!;
-
 });
 
 // setlkw calls FcntlFlock with F_SETLKW for the entire file indicated by fd.
@@ -169,7 +160,6 @@ private static error setlkw(System.UIntPtr fd, lockType lt) {
             return error.As(err)!;
         }
     }
-
 }
 
 private static bool isNotSupported(error err) {

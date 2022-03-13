@@ -10,23 +10,24 @@
 // (`go tool compile scanner.go source.go tokens.go token_string.go` compiles)
 // and thus could be made into their own package.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:40 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:27:06 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\scanner.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using io = io_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// The mode flags below control which comments are reported
+// by calling the error handler. If no flag is set, comments
+// are ignored.
+
+using System;
 public static partial class syntax_package {
 
-    // The mode flags below control which comments are reported
-    // by calling the error handler. If no flag is set, comments
-    // are ignored.
 private static readonly nuint comments = 1 << (int)(iota); // call handler for all comments
 private static readonly var directives = 0; // call handler for directives only
 
@@ -129,7 +130,6 @@ redo:
                 break;
             }
             s.tok = _EOF;
-
             break;
         case '\n': 
             s.nextch();
@@ -210,7 +210,6 @@ redo:
                 break;
             }
             s.tok = _Colon;
-
             break;
         case '.': 
             s.nextch();
@@ -229,7 +228,6 @@ redo:
                 s.nextch(); // consume 1st '.' again
             }
             s.tok = _Dot;
-
             break;
         case '+': 
             s.nextch();
@@ -239,7 +237,6 @@ redo:
             s.nextch();
             s.nlsemi = true;
             s.tok = _IncOp;
-
             break;
         case '-': 
             s.nextch();
@@ -249,7 +246,6 @@ redo:
             s.nextch();
             s.nlsemi = true;
             s.tok = _IncOp;
-
             break;
         case '*': 
             s.nextch();
@@ -259,7 +255,6 @@ redo:
                 break;
             }
             s.tok = _Star;
-
             break;
         case '/': 
             s.nextch();
@@ -280,16 +275,12 @@ redo:
                         s.lit = "newline";
                         s.tok = _Semi;
                         break;
-
                     }
 
                 }
-
                 goto redo;
-
             }
             (s.op, s.prec) = (Div, precMul);        goto assignop;
-
             break;
         case '%': 
             s.nextch();
@@ -307,7 +298,6 @@ redo:
                 s.op = AndNot;
             }
             goto assignop;
-
             break;
         case '|': 
             s.nextch();
@@ -317,7 +307,6 @@ redo:
                 break;
             }
             (s.op, s.prec) = (Or, precAdd);        goto assignop;
-
             break;
         case '^': 
             s.nextch();
@@ -340,7 +329,6 @@ redo:
                 break;
             }
             (s.op, s.prec) = (Lss, precCmp);        s.tok = _Operator;
-
             break;
         case '>': 
             s.nextch();
@@ -354,7 +342,6 @@ redo:
                 (s.op, s.prec) = (Shr, precMul);            goto assignop;
             }
             (s.op, s.prec) = (Gtr, precCmp);        s.tok = _Operator;
-
             break;
         case '=': 
             s.nextch();
@@ -364,7 +351,6 @@ redo:
                 break;
             }
             s.tok = _Assign;
-
             break;
         case '!': 
             s.nextch();
@@ -374,7 +360,6 @@ redo:
                 break;
             }
             (s.op, s.prec) = (Not, 0);        s.tok = _Operator;
-
             break;
         case '~': 
             s.nextch();
@@ -396,7 +381,6 @@ assignop:
         return ;
     }
     s.tok = _Operator;
-
 }
 
 private static void ident(this ptr<scanner> _addr_s) {
@@ -425,12 +409,10 @@ private static void ident(this ptr<scanner> _addr_s) {
             }
 
         }
-
     }
     s.nlsemi = true;
     s.lit = string(lit);
     s.tok = _Name;
-
 }
 
 // tokStrFast is a faster version of token.String, which assumes that tok
@@ -452,7 +434,6 @@ private static bool atIdentChar(this ptr<scanner> _addr_s, bool first) {
     else 
         return false;
         return true;
-
 }
 
 // hash is a perfect hash function for keywords.
@@ -471,9 +452,7 @@ private static void init() => func((_, panic, _) => {
             panic("imperfect hash");
         }
         keywordMap[h] = tok;
-
     }
-
 });
 
 private static int lower(int ch) {
@@ -511,14 +490,10 @@ private static nint digits(this ptr<scanner> _addr_s, nint @base, ptr<nint> _add
                 var (_, col) = s.pos();
                 invalid = int(col - s.col); // record invalid rune index
             }
-
             digsep |= ds;
             s.nextch();
-
         }
     else
-
-
     } {
         while (isHex(s.ch) || s.ch == '_') {
             ds = 1;
@@ -530,7 +505,6 @@ private static nint digits(this ptr<scanner> _addr_s, nint @base, ptr<nint> _add
         }
     }
     return ;
-
 }
 
 private static void number(this ptr<scanner> _addr_s, bool seenPoint) {
@@ -564,7 +538,6 @@ private static void number(this ptr<scanner> _addr_s, bool seenPoint) {
                     (base, prefix) = (8, '0');                digsep = 1; // leading 0
                     break;
             }
-
         }
         digsep |= s.digits(base, _addr_invalid);
         if (s.ch == '.') {
@@ -596,21 +569,17 @@ private static void number(this ptr<scanner> _addr_s, bool seenPoint) {
                 else if (e == 'p' && prefix != 'x') 
                     s.errorf("%q exponent requires hexadecimal mantissa", s.ch);
                     ok = false;
-                
-            }
-
+                            }
             s.nextch();
             kind = FloatLit;
             if (s.ch == '+' || s.ch == '-') {
                 s.nextch();
             }
-
             digsep = s.digits(10, null) | digsep & 2; // don't lose sep bit
             if (digsep & 1 == 0 && ok) {
                 s.errorf("exponent has no digits");
                 ok = false;
             }
-
         }
         else if (prefix == 'x' && kind == FloatLit && ok) {
             s.errorf("hexadecimal mantissa requires a 'p' exponent");
@@ -640,7 +609,6 @@ private static void number(this ptr<scanner> _addr_s, bool seenPoint) {
             }
 
         }
-
     }
     s.bad = !ok; // correct s.bad
 }
@@ -661,7 +629,6 @@ private static @string baseName(nint @base) => func((_, panic, _) => {
             break;
     }
     panic("invalid base");
-
 });
 
 // invalidSep returns the index of the first invalid separator in x, or -1.
@@ -687,7 +654,6 @@ private static nint invalidSep(@string x) {
                 return i;
         i++;
             }
-
         else if (isDecimal(d) || x1 == 'x' && isHex(d)) 
             d = '0';
         else 
@@ -695,13 +661,11 @@ private static nint invalidSep(@string x) {
                 return i - 1;
             }
             d = '.';
-        
-    }
+            }
     if (d == '_') {
         return len(x) - 1;
     }
     return -1;
-
 }
 
 private static void rune(this ptr<scanner> _addr_s) {
@@ -711,7 +675,7 @@ private static void rune(this ptr<scanner> _addr_s) {
     s.nextch();
 
     nint n = 0;
-    while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+    while () {
         if (s.ch == '\'') {
             if (ok) {
                 if (n == 0) {
@@ -723,12 +687,9 @@ private static void rune(this ptr<scanner> _addr_s) {
                     s.errorAtf(0, "more than one character in rune literal");
                     ok = false;
                 }
-
             }
-
             s.nextch();
             break;
-
         }
         if (s.ch == '\\') {
             s.nextch();
@@ -752,11 +713,9 @@ private static void rune(this ptr<scanner> _addr_s) {
             break;
         }
         s.nextch();
-
     }
 
     s.setLit(RuneLit, ok);
-
 }
 
 private static void stdString(this ptr<scanner> _addr_s) {
@@ -788,11 +747,9 @@ private static void stdString(this ptr<scanner> _addr_s) {
             break;
         }
         s.nextch();
-
     }
 
     s.setLit(StringLit, ok);
-
 }
 
 private static void rawString(this ptr<scanner> _addr_s) {
@@ -812,14 +769,12 @@ private static void rawString(this ptr<scanner> _addr_s) {
             break;
         }
         s.nextch();
-
     } 
     // We leave CRs in the string since they are part of the
     // literal (even though they are not part of the literal
     // value).
 
     s.setLit(StringLit, ok);
-
 }
 
 private static void comment(this ptr<scanner> _addr_s, @string text) {
@@ -835,7 +790,6 @@ private static void skipLine(this ptr<scanner> _addr_s) {
     while (s.ch >= 0 && s.ch != '\n') {
         s.nextch();
     }
-
 }
 
 private static void lineComment(this ptr<scanner> _addr_s) {
@@ -864,10 +818,8 @@ private static void lineComment(this ptr<scanner> _addr_s) {
             return ;
         }
         s.nextch();
-
     }    s.skipLine();
     s.comment(string(s.segment()));
-
 }
 
 private static bool skipComment(this ptr<scanner> _addr_s) {
@@ -897,7 +849,6 @@ private static void fullComment(this ptr<scanner> _addr_s) {
             s.comment(string(s.segment()));
         }
         return ;
-
     }
     if (s.mode & directives == 0 || s.ch != 'l') {
         s.stop();
@@ -913,7 +864,6 @@ private static void fullComment(this ptr<scanner> _addr_s) {
             return ;
         }
         s.nextch();
-
     }    if (s.skipComment()) {
         s.comment(string(s.segment()));
     }
@@ -962,7 +912,6 @@ private static bool escape(this ptr<scanner> _addr_s, int quote) {
         }
         x = x * base + d;
         s.nextch();
-
     }
 
     if (x > max && base == 8) {
@@ -974,7 +923,6 @@ private static bool escape(this ptr<scanner> _addr_s, int quote) {
         return false;
     }
     return true;
-
 }
 
 } // end syntax_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:37 UTC
+//     Generated on 2022 March 13 06:32:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace @internal
 {
     public static partial class modfetch_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct cachingRepo
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace @internal
             public static implicit operator cachingRepo(NilType nil) => default(cachingRepo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static cachingRepo cachingRepo_cast(dynamic value)
         {
             return new cachingRepo(value.path, value.cache, value.once, value.initRepo, value.r);

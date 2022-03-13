@@ -5,19 +5,20 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:51 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:05 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\stat_unix.go
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using syscall = syscall_package;
+
+
+// Stat returns the FileInfo structure describing file.
+// If there is an error, it will be of type *PathError.
+
+using System;
 public static partial class os_package {
 
-    // Stat returns the FileInfo structure describing file.
-    // If there is an error, it will be of type *PathError.
 private static (FileInfo, error) Stat(this ptr<File> _addr_f) {
     FileInfo _p0 = default;
     error _p0 = default!;
@@ -33,7 +34,6 @@ private static (FileInfo, error) Stat(this ptr<File> _addr_f) {
     }
     fillFileStatFromSys(_addr_fs, f.name);
     return (_addr_fs, error.As(null!)!);
-
 }
 
 // statNolog stats a file with no test logging.
@@ -42,15 +42,12 @@ private static (FileInfo, error) statNolog(@string name) {
     error _p0 = default!;
 
     ref fileStat fs = ref heap(out ptr<fileStat> _addr_fs);
-    var err = ignoringEINTR(() => {
-        return syscall.Stat(name, _addr_fs.sys);
-    });
+    var err = ignoringEINTR(() => syscall.Stat(name, _addr_fs.sys));
     if (err != null) {
         return (null, error.As(addr(new PathError(Op:"stat",Path:name,Err:err))!)!);
     }
     fillFileStatFromSys(_addr_fs, name);
     return (_addr_fs, error.As(null!)!);
-
 }
 
 // lstatNolog lstats a file with no test logging.
@@ -59,15 +56,12 @@ private static (FileInfo, error) lstatNolog(@string name) {
     error _p0 = default!;
 
     ref fileStat fs = ref heap(out ptr<fileStat> _addr_fs);
-    var err = ignoringEINTR(() => {
-        return syscall.Lstat(name, _addr_fs.sys);
-    });
+    var err = ignoringEINTR(() => syscall.Lstat(name, _addr_fs.sys));
     if (err != null) {
         return (null, error.As(addr(new PathError(Op:"lstat",Path:name,Err:err))!)!);
     }
     fillFileStatFromSys(_addr_fs, name);
     return (_addr_fs, error.As(null!)!);
-
 }
 
 } // end os_package

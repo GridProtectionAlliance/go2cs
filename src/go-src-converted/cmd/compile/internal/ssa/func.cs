@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:01 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:25 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\func.go
-using abi = go.cmd.compile.@internal.abi_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using sha1 = go.crypto.sha1_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using abi = cmd.compile.@internal.abi_package;
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using sha1 = crypto.sha1_package;
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using os = os_package;
+using strings = strings_package;
 
 public static partial class ssa_package {
 
@@ -121,7 +121,6 @@ private static ptr<sparseSet> newSparseSet(this ptr<Func> _addr_f, nint n) {
             return _addr_scr!;
         }
     }    return _addr_newSparseSet(n)!;
-
 }
 
 // retSparseSet returns a sparse set to the config's cache of sparse
@@ -136,7 +135,6 @@ private static void retSparseSet(this ptr<Func> _addr_f, ptr<sparseSet> _addr_ss
             return ;
         }
     }    f.Cache.scrSparseSet = append(f.Cache.scrSparseSet, ss);
-
 }
 
 // newSparseMap returns a sparse map that can store at least up to n integers.
@@ -150,7 +148,6 @@ private static ptr<sparseMap> newSparseMap(this ptr<Func> _addr_f, nint n) {
             return _addr_scr!;
         }
     }    return _addr_newSparseMap(n)!;
-
 }
 
 // retSparseMap returns a sparse map to the config's cache of sparse
@@ -165,7 +162,6 @@ private static void retSparseMap(this ptr<Func> _addr_f, ptr<sparseMap> _addr_ss
             return ;
         }
     }    f.Cache.scrSparseMap = append(f.Cache.scrSparseMap, ss);
-
 }
 
 // newPoset returns a new poset from the internal cache
@@ -178,7 +174,6 @@ private static ptr<poset> newPoset(this ptr<Func> _addr_f) {
         return _addr_po!;
     }
     return _addr_newPoset()!;
-
 }
 
 // retPoset returns a poset to the internal cache
@@ -232,10 +227,8 @@ private static ptr<LocalSlot> localSlotAddr(this ptr<Func> _addr_f, LocalSlot sl
         a = @new<LocalSlot>();
         a.val = slot; // don't escape slot
         f.CanonicalLocalSlots[slot] = a;
-
     }
     return _addr_a!;
-
 }
 
 private static (ptr<LocalSlot>, ptr<LocalSlot>) SplitString(this ptr<Func> _addr_f, ptr<LocalSlot> _addr_name) {
@@ -250,7 +243,6 @@ private static (ptr<LocalSlot>, ptr<LocalSlot>) SplitString(this ptr<Func> _addr
     var p = f.SplitSlot(name, ".ptr", 0, ptrType);
     var l = f.SplitSlot(name, ".len", ptrType.Size(), lenType);
     return (_addr_p!, _addr_l!);
-
 }
 
 private static (ptr<LocalSlot>, ptr<LocalSlot>) SplitInterface(this ptr<Func> _addr_f, ptr<LocalSlot> _addr_name) {
@@ -270,7 +262,6 @@ private static (ptr<LocalSlot>, ptr<LocalSlot>) SplitInterface(this ptr<Func> _a
     var c = f.SplitSlot(name, sfx, 0, u); // see comment in typebits.Set
     var d = f.SplitSlot(name, ".data", u.Size(), t);
     return (_addr_c!, _addr_d!);
-
 }
 
 private static (ptr<LocalSlot>, ptr<LocalSlot>, ptr<LocalSlot>) SplitSlice(this ptr<Func> _addr_f, ptr<LocalSlot> _addr_name) {
@@ -306,7 +297,6 @@ private static (ptr<LocalSlot>, ptr<LocalSlot>) SplitComplex(this ptr<Func> _add
     var r = f.SplitSlot(name, ".real", 0, t);
     var i = f.SplitSlot(name, ".imag", t.Size(), t);
     return (_addr_r!, _addr_i!);
-
 }
 
 private static (ptr<LocalSlot>, ptr<LocalSlot>) SplitInt64(this ptr<Func> _addr_f, ptr<LocalSlot> _addr_name) {
@@ -327,7 +317,6 @@ private static (ptr<LocalSlot>, ptr<LocalSlot>) SplitInt64(this ptr<Func> _addr_
         return (_addr_f.SplitSlot(name, ".hi", 0, t)!, _addr_f.SplitSlot(name, ".lo", t.Size(), types.Types[types.TUINT32])!);
     }
     return (_addr_f.SplitSlot(name, ".hi", t.Size(), t)!, _addr_f.SplitSlot(name, ".lo", 0, types.Types[types.TUINT32])!);
-
 }
 
 private static ptr<LocalSlot> SplitStruct(this ptr<Func> _addr_f, ptr<LocalSlot> _addr_name, nint i) {
@@ -348,7 +337,6 @@ private static ptr<LocalSlot> SplitArray(this ptr<Func> _addr_f, ptr<LocalSlot> 
     }
     var et = at.Elem();
     return _addr_f.SplitSlot(name, "[0]", 0, et)!;
-
 }
 
 private static ptr<LocalSlot> SplitSlot(this ptr<Func> _addr_f, ptr<LocalSlot> _addr_name, @string sfx, long offset, ptr<types.Type> _addr_t) {
@@ -371,7 +359,6 @@ private static ptr<LocalSlot> SplitSlot(this ptr<Func> _addr_f, ptr<LocalSlot> _
     _addr_f.CanonicalLocalSplits[lssk] = _addr_ls;
     f.CanonicalLocalSplits[lssk] = ref _addr_f.CanonicalLocalSplits[lssk].val;
     return _addr__addr_ls!;
-
 }
 
 // newValue allocates a new Value with the given fields and places it at the end of b.Values.
@@ -407,7 +394,6 @@ private static ptr<Value> newValue(this ptr<Func> _addr_f, Op op, ptr<types.Type
     v.Pos = pos;
     b.Values = append(b.Values, v);
     return _addr_v!;
-
 }
 
 // newValueNoBlock allocates a new Value with the given fields.
@@ -444,7 +430,6 @@ private static ptr<Value> newValueNoBlock(this ptr<Func> _addr_f, Op op, ptr<typ
     }
     v.Pos = pos;
     return _addr_v!;
-
 }
 
 // logPassStat writes a string key and int value as a warning in a
@@ -465,7 +450,6 @@ private static void LogStat(this ptr<Func> _addr_f, @string key, params object[]
         n = strings.Replace(f.pass.name, " ", "_", -1);
     }
     f.Warnl(f.Entry.Pos, "\t%s\t%s%s\t%s", n, key, value, f.Name);
-
 }
 
 // unCacheLine removes v from f's constant cache "line" for aux,
@@ -485,7 +469,6 @@ private static bool unCacheLine(this ptr<Func> _addr_f, ptr<Value> _addr_v, long
             return true;
         }
     }    return false;
-
 }
 
 // unCache removes v from f's constant cache.
@@ -511,10 +494,8 @@ private static void unCache(this ptr<Func> _addr_f, ptr<Value> _addr_v) {
                         if (aux != 0 && f.unCacheLine(v, aux)) {
                 return ;
             }
-
         }
         f.Fatalf("unCached value %s not found in cache, auxInt=0x%x, adjusted aux=0x%x", v.LongString(), v.AuxInt, aux);
-
     }
 }
 
@@ -540,7 +521,6 @@ private static void freeValue(this ptr<Func> _addr_f, ptr<Value> _addr_v) {
     v.ID = id;
     v.argstorage[0] = f.freeValues;
     f.freeValues = v;
-
 }
 
 // newBlock allocates a new Block of the given kind and places it at the end of f.Blocks.
@@ -573,7 +553,6 @@ private static ptr<Block> NewBlock(this ptr<Func> _addr_f, BlockKind kind) {
     f.Blocks = append(f.Blocks, b);
     f.invalidateCFG();
     return _addr_b!;
-
 }
 
 private static void freeBlock(this ptr<Func> _addr_f, ptr<Block> _addr_b) {
@@ -588,7 +567,6 @@ private static void freeBlock(this ptr<Func> _addr_f, ptr<Block> _addr_b) {
     b.ID = id;
     b.succstorage[0].b = f.freeBlocks;
     f.freeBlocks = b;
-
 }
 
 // NewValue0 returns a new value in the block with no arguments and zero aux values.
@@ -899,7 +877,6 @@ private static ptr<Value> constVal(this ptr<Func> _addr_f, Op op, ptr<types.Type
     f.constants[c] = append(vv, v);
     v.InCache = true;
     return _addr_v!;
-
 });
 
 // These magic auxint values let us easily cache non-numeric constants
@@ -911,7 +888,6 @@ private static readonly nint constInterfaceMagic = (nint)2233445566L;
 private static readonly nint constNilMagic = (nint)3344556677L;
 private static readonly nint constEmptyStringMagic = (nint)4455667788L;
 
-
 // ConstInt returns an int constant representing its argument.
 private static ptr<Value> ConstBool(this ptr<Func> _addr_f, ptr<types.Type> _addr_t, bool c) {
     ref Func f = ref _addr_f.val;
@@ -922,7 +898,6 @@ private static ptr<Value> ConstBool(this ptr<Func> _addr_f, ptr<types.Type> _add
         i = 1;
     }
     return _addr_f.constVal(OpConstBool, t, i, true)!;
-
 }
 private static ptr<Value> ConstInt8(this ptr<Func> _addr_f, ptr<types.Type> _addr_t, sbyte c) {
     ref Func f = ref _addr_f.val;
@@ -997,8 +972,6 @@ private static ptr<Value> ConstOffPtrSP(this ptr<Func> _addr_f, ptr<types.Type> 
         v.AddArg(sp);
     }
     return _addr_v!;
-
-
 }
 
 private static Frontend Frontend(this ptr<Func> _addr_f) {
@@ -1038,7 +1011,6 @@ private static void Fatalf(this ptr<Func> _addr_f, @string msg, params object[] 
         f.HTMLWriter.flushPhases();
     }
     f.fe.Fatalf(f.Entry.Pos, msg, args);
-
 }
 
 // postorder returns the reachable blocks in f in a postorder traversal.
@@ -1049,7 +1021,6 @@ private static slice<ptr<Block>> postorder(this ptr<Func> _addr_f) {
         f.cachedPostorder = postorder(f);
     }
     return f.cachedPostorder;
-
 }
 
 private static slice<ptr<Block>> Postorder(this ptr<Func> _addr_f) {
@@ -1067,7 +1038,6 @@ private static slice<ptr<Block>> Idom(this ptr<Func> _addr_f) {
         f.cachedIdom = dominators(f);
     }
     return f.cachedIdom;
-
 }
 
 // Sdom returns a sparse tree representing the dominator relationships
@@ -1079,7 +1049,6 @@ private static SparseTree Sdom(this ptr<Func> _addr_f) {
         f.cachedSdom = newSparseTree(f, f.Idom());
     }
     return f.cachedSdom;
-
 }
 
 // loopnest returns the loop nest information for f.
@@ -1090,7 +1059,6 @@ private static ptr<loopnest> loopnest(this ptr<Func> _addr_f) {
         f.cachedLoopnest = loopnestfor(f);
     }
     return _addr_f.cachedLoopnest!;
-
 }
 
 // invalidateCFG tells f that its CFG has changed.
@@ -1160,7 +1128,6 @@ private static bool DebugHashMatch(this ptr<Func> _addr_f, @string evname) {
         }
     }
     return false;
-
 }
 
 private static void logDebugHashMatch(this ptr<Func> _addr_f, @string evname, @string name) {
@@ -1184,13 +1151,10 @@ private static void logDebugHashMatch(this ptr<Func> _addr_f, @string evname, @s
             }
 
         }
-
         f.logfiles[evname] = file;
-
     }
     fmt.Fprintf(file, "%s triggered %s\n", evname, name);
     file.Sync();
-
 }
 
 public static bool DebugNameMatch(@string evname, @string name) {
@@ -1220,7 +1184,6 @@ private static (ptr<Value>, ptr<Value>) spSb(this ptr<Func> _addr_f) {
         sp = f.Entry.NewValue0(initpos.WithNotStmt(), OpSP, f.Config.Types.Uintptr);
     }
     return ;
-
 }
 
 } // end ssa_package

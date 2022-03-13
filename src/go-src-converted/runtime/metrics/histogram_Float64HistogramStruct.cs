@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:35 UTC
+//     Generated on 2022 March 13 05:28:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace runtime
 {
     public static partial class metrics_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Float64Histogram
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace runtime
             public static implicit operator Float64Histogram(NilType nil) => default(Float64Histogram);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Float64Histogram Float64Histogram_cast(dynamic value)
         {
             return new Float64Histogram(value.Counts, value.Buckets);

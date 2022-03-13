@@ -184,21 +184,22 @@ GOARCH, GOOS, and GOROOT are recorded at compile time and made available by
 constants or functions in this package, but they do not influence the execution
 of the run-time system.
 */
-// package runtime -- go2cs converted at 2022 March 06 22:08:40 UTC
+
+// package runtime -- go2cs converted at 2022 March 13 05:24:25 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\extern.go
-using sys = go.runtime.@internal.sys_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
 
 public static partial class runtime_package {
 
-    // Caller reports file and line number information about function invocations on
-    // the calling goroutine's stack. The argument skip is the number of stack frames
-    // to ascend, with 0 identifying the caller of Caller.  (For historical reasons the
-    // meaning of skip differs between Caller and Callers.) The return values report the
-    // program counter, file name, and line number within the file of the corresponding
-    // call. The boolean ok is false if it was not possible to recover the information.
+// Caller reports file and line number information about function invocations on
+// the calling goroutine's stack. The argument skip is the number of stack frames
+// to ascend, with 0 identifying the caller of Caller.  (For historical reasons the
+// meaning of skip differs between Caller and Callers.) The return values report the
+// program counter, file name, and line number within the file of the corresponding
+// call. The boolean ok is false if it was not possible to recover the information.
 public static (System.UIntPtr, @string, nint, bool) Caller(nint skip) {
     System.UIntPtr pc = default;
     @string file = default;
@@ -212,7 +213,6 @@ public static (System.UIntPtr, @string, nint, bool) Caller(nint skip) {
     }
     var (frame, _) = CallersFrames(rpc).Next();
     return (frame.PC, frame.File, frame.Line, frame.PC != 0);
-
 }
 
 // Callers fills the slice pc with the return program counters of function invocations
@@ -236,7 +236,6 @@ public static nint Callers(nint skip, slice<System.UIntPtr> pc) {
         return 0;
     }
     return callers(skip, pc);
-
 }
 
 private static @string defaultGOROOT = default; // set by cmd/link
@@ -250,7 +249,6 @@ public static @string GOROOT() {
         return s;
     }
     return defaultGOROOT;
-
 }
 
 // buildVersion is the Go tree's version string at build time.

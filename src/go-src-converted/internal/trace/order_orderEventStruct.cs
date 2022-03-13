@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:55 UTC
+//     Generated on 2022 March 13 06:35:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace @internal
 {
     public static partial class trace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct orderEvent
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace @internal
             public static implicit operator orderEvent(NilType nil) => default(orderEvent);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static orderEvent orderEvent_cast(dynamic value)
         {
             return new orderEvent(ref value.ev, value.batch, value.g, value.init, value.next);

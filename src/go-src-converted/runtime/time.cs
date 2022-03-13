@@ -4,21 +4,22 @@
 
 // Time-related runtime and pieces of package time.
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:13 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:18 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\time.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// Package time knows the layout of this structure.
+// If this struct changes, adjust ../time/sleep.go:/runtimeTimer.
+
+using System;
 public static partial class runtime_package {
 
-    // Package time knows the layout of this structure.
-    // If this struct changes, adjust ../time/sleep.go:/runtimeTimer.
 private partial struct timer {
     public puintptr pp; // Timer wakes up at when, and then at when+period, ... (period > 0 only)
 // each time calling f(arg, now) in the timer goroutine, so f must be
@@ -153,7 +154,6 @@ private static readonly var timerModifiedLater = 7;
 // The timer will only have this status briefly.
 private static readonly var timerMoving = 8;
 
-
 // maxWhen is the maximum value for timer's when field.
 private static readonly nint maxWhen = 1 << 63 - 1;
 
@@ -196,10 +196,8 @@ private static void timeSleep(long ns) {
     t.nextwhen = nanotime() + ns;
     if (t.nextwhen < 0) { // check for overflow.
         t.nextwhen = maxWhen;
-
     }
     gopark(resetForSleep, @unsafe.Pointer(t), waitReasonSleep, traceEvGoSleep, 1);
-
 }
 
 // resetForSleep is called after the goroutine is parked for timeSleep.
@@ -223,7 +221,6 @@ private static void startTimer(ptr<timer> _addr_t) {
         racerelease(@unsafe.Pointer(t));
     }
     addtimer(_addr_t);
-
 }
 
 // stopTimer stops a timer.
@@ -245,7 +242,6 @@ private static bool resetTimer(ptr<timer> _addr_t, long when) {
         racerelease(@unsafe.Pointer(t));
     }
     return resettimer(_addr_t, when);
-
 }
 
 // modTimer modifies an existing timer.
@@ -298,7 +294,6 @@ private static void addtimer(ptr<timer> _addr_t) {
     wakeNetPoller(when);
 
     releasem(mp);
-
 }
 
 // doaddtimer adds t to the current P's heap.
@@ -323,7 +318,6 @@ private static void doaddtimer(ptr<p> _addr_pp, ptr<timer> _addr_t) {
         atomic.Store64(_addr_pp.timer0When, uint64(t.when));
     }
     atomic.Xadd(_addr_pp.numTimers, 1);
-
 }
 
 // deltimer deletes the timer t. It may be on some other P, so we can't
@@ -350,18 +344,15 @@ private static bool deltimer(ptr<timer> _addr_t) {
                     if (!atomic.Cas(_addr_t.status, timerModifying, timerDeleted)) {
                         badTimer();
                     }
-
                     releasem(mp);
                     atomic.Xadd(_addr_tpp.deletedTimers, 1); 
                     // Timer was not yet run.
                     return true;
-
                 }
                 else
  {
                     releasem(mp);
                 }
-
             else if (s == timerModifiedEarlier) 
                 // Prevent preemption while the timer is in timerModifying.
                 // This could lead to a self-deadlock. See #38070.
@@ -373,18 +364,15 @@ private static bool deltimer(ptr<timer> _addr_t) {
                     if (!atomic.Cas(_addr_t.status, timerModifying, timerDeleted)) {
                         badTimer();
                     }
-
                     releasem(mp);
                     atomic.Xadd(_addr_tpp.deletedTimers, 1); 
                     // Timer was not yet run.
                     return true;
-
                 }
                 else
  {
                     releasem(mp);
                 }
-
             else if (s == timerDeleted || s == timerRemoving || s == timerRemoved) 
                 // Timer was already run.
                 return false;
@@ -404,9 +392,7 @@ private static bool deltimer(ptr<timer> _addr_t) {
                 badTimer();
 
         }
-
     }
-
 }
 
 // dodeltimer removes timer i from the current P's heap.
@@ -427,7 +413,6 @@ private static nint dodeltimer(ptr<p> _addr_pp, nint i) {
             t.pp = 0;
         }
     }
-
     var last = len(pp.timers) - 1;
     if (i != last) {
         pp.timers[i] = pp.timers[last];
@@ -440,14 +425,12 @@ private static nint dodeltimer(ptr<p> _addr_pp, nint i) {
         // so sift up to preserve the heap guarantee.
         smallestChanged = siftupTimer(pp.timers, i);
         siftdownTimer(pp.timers, i);
-
     }
     if (i == 0) {
         updateTimer0When(_addr_pp);
     }
     atomic.Xadd(_addr_pp.numTimers, -1);
     return smallestChanged;
-
 }
 
 // dodeltimer0 removes timer 0 from the current P's heap.
@@ -468,7 +451,6 @@ private static void dodeltimer0(ptr<p> _addr_pp) {
             t.pp = 0;
         }
     }
-
     var last = len(pp.timers) - 1;
     if (last > 0) {
         pp.timers[0] = pp.timers[last];
@@ -480,7 +462,6 @@ private static void dodeltimer0(ptr<p> _addr_pp) {
     }
     updateTimer0When(_addr_pp);
     atomic.Xadd(_addr_pp.numTimers, -1);
-
 }
 
 // modtimer modifies an existing timer.
@@ -514,7 +495,6 @@ loop:
                 _breakloop = true;
                 break;
             }
-
             releasem(mp);
         else if (status == timerNoStatus || status == timerRemoved) 
             // Prevent preemption while the timer is in timerModifying.
@@ -529,7 +509,6 @@ loop:
                 _breakloop = true;
                 break;
             }
-
             releasem(mp);
         else if (status == timerDeleted) 
             // Prevent preemption while the timer is in timerModifying.
@@ -541,7 +520,6 @@ loop:
                 _breakloop = true;
                 break;
             }
-
             releasem(mp);
         else if (status == timerRunning || status == timerRemoving || status == timerMoving) 
             // The timer is being run or moved, by a different P.
@@ -553,7 +531,6 @@ loop:
             osyield();
         else 
             badTimer();
-
     }
     t.period = period;
     t.f = f;
@@ -571,7 +548,6 @@ loop:
         }
         releasem(mp);
         wakeNetPoller(when);
-
     }
     else
  { 
@@ -602,7 +578,6 @@ loop:
         }
     }
     return pending;
-
 }
 
 // resettimer resets the time when a timer should fire.
@@ -660,15 +635,12 @@ private static void cleantimers(ptr<p> _addr_pp) {
                 if (!atomic.Cas(_addr_t.status, timerMoving, timerWaiting)) {
                     badTimer();
                 }
-
             else 
                 // Head of timers does not need adjustment.
                 return ;
 
         }
-
     }
-
 }
 
 // moveTimers moves a slice of timers to pp. The slice has been taken
@@ -730,9 +702,7 @@ loop:
                     badTimer();
 
             }
-
         }
-
     }
 }
 
@@ -755,7 +725,6 @@ private static void adjusttimers(ptr<p> _addr_pp, long now) {
             verifyTimerHeap(_addr_pp);
         }
         return ;
-
     }
     atomic.Store64(_addr_pp.timerModifiedEarliest, 0);
 
@@ -779,9 +748,7 @@ private static void adjusttimers(ptr<p> _addr_pp, long now) {
                     // Go back to the earliest changed heap entry.
                     // "- 1" because the loop will add 1.
                     i = changed - 1;
-
                 }
-
             else if (s == timerModifiedEarlier || s == timerModifiedLater) 
                 if (atomic.Cas(_addr_t.status, s, timerMoving)) { 
                     // Now we can change the when field.
@@ -795,9 +762,7 @@ private static void adjusttimers(ptr<p> _addr_pp, long now) {
                     // Go back to the earliest changed heap entry.
                     // "- 1" because the loop will add 1.
                     i = changed - 1;
-
                 }
-
             else if (s == timerNoStatus || s == timerRunning || s == timerRemoving || s == timerRemoved || s == timerMoving) 
                 badTimer();
             else if (s == timerWaiting)             else if (s == timerModifying) 
@@ -808,7 +773,6 @@ private static void adjusttimers(ptr<p> _addr_pp, long now) {
                 badTimer();
 
         }
-
     }
 
     if (len(moved) > 0) {
@@ -846,7 +810,6 @@ private static long nobarrierWakeTime(ptr<p> _addr_pp) {
         next = nextAdj;
     }
     return next;
-
 }
 
 // runtimer examines the first timer in timers. If it is ready based on now,
@@ -872,9 +835,7 @@ private static long runtimer(ptr<p> _addr_pp, long now) {
                 if (t.when > now) { 
                     // Not ready to run.
                     return t.when;
-
                 }
-
                 if (!atomic.Cas(_addr_t.status, s, timerRunning)) {
                     continue;
                 } 
@@ -918,9 +879,7 @@ private static long runtimer(ptr<p> _addr_pp, long now) {
                 badTimer();
 
         }
-
     }
-
 }
 
 // runOneTimer runs a single timer.
@@ -937,7 +896,6 @@ private static void runOneTimer(ptr<p> _addr_pp, ptr<timer> _addr_t, long now) {
             ppcur.timerRaceCtx = racegostart(funcPC(runtimer) + sys.PCQuantum);
         }
         raceacquirectx(ppcur.timerRaceCtx, @unsafe.Pointer(t));
-
     }
     var f = t.f;
     var arg = t.arg;
@@ -949,14 +907,12 @@ private static void runOneTimer(ptr<p> _addr_pp, ptr<timer> _addr_t, long now) {
         t.when += t.period * (1 + -delta / t.period);
         if (t.when < 0) { // check for overflow.
             t.when = maxWhen;
-
         }
         siftdownTimer(pp.timers, 0);
         if (!atomic.Cas(_addr_t.status, timerRunning, timerWaiting)) {
             badTimer();
         }
         updateTimer0When(_addr_pp);
-
     }
     else
  { 
@@ -973,7 +929,6 @@ private static void runOneTimer(ptr<p> _addr_pp, ptr<timer> _addr_t, long now) {
             throw("runOneTimer: unexpected racectx");
         }
         gp.racectx = gp.m.p.ptr().timerRaceCtx;
-
     }
     unlock(_addr_pp.timersLock);
 
@@ -1038,7 +993,6 @@ nextTimer:
                         _continuenextTimer = true;
                         break;
                     }
-
                 else if (s == timerDeleted) 
                     if (atomic.Cas(_addr_t.status, s, timerRemoving)) {
                         t.pp = 0;
@@ -1050,7 +1004,6 @@ nextTimer:
                         _continuenextTimer = true;
                         break;
                     }
-
                 else if (s == timerModifying) 
                     // Loop until modification complete.
                     osyield();
@@ -1065,9 +1018,7 @@ nextTimer:
                     badTimer();
 
             }
-
         }
-
     }    for (var i = to; i < len(timers); i++) {
         timers[i] = null;
     }
@@ -1094,7 +1045,6 @@ private static void verifyTimerHeap(ptr<p> _addr_pp) {
         if (i == 0) { 
             // First timer has no parent.
             continue;
-
         }
         var p = (i - 1) / 4;
         if (t.when < pp.timers[p].when) {
@@ -1109,7 +1059,6 @@ private static void verifyTimerHeap(ptr<p> _addr_pp) {
             throw("bad timer heap len");
         }
     }
-
 }
 
 // updateTimer0When sets the P's timer0When field.
@@ -1141,7 +1090,6 @@ private static void updateTimerModifiedEarliest(ptr<p> _addr_pp, long nextwhen) 
             return ;
         }
     }
-
 }
 
 // timeSleepUntil returns the time when the next timer should fire,
@@ -1161,7 +1109,6 @@ private static (long, ptr<p>) timeSleepUntil() {
             // This can happen if procresize has grown
             // allp but not yet created new Ps.
             continue;
-
         }
         var w = int64(atomic.Load64(_addr_pp.timer0When));
         if (w != 0 && w < next) {
@@ -1176,7 +1123,6 @@ private static (long, ptr<p>) timeSleepUntil() {
     }    unlock(_addr_allpLock);
 
     return (next, _addr_pret!);
-
 }
 
 // Heap maintenance algorithms.
@@ -1206,13 +1152,11 @@ private static nint siftupTimer(slice<ptr<timer>> t, nint i) {
         }
         t[i] = t[p];
         i = p;
-
     }
     if (tmp != t[i]) {
         t[i] = tmp;
     }
     return i;
-
 }
 
 // siftdownTimer puts the timer at position i in the right place
@@ -1254,7 +1198,6 @@ private static void siftdownTimer(slice<ptr<timer>> t, nint i) {
         }
         t[i] = t[c];
         i = c;
-
     }
     if (tmp != t[i]) {
         t[i] = tmp;

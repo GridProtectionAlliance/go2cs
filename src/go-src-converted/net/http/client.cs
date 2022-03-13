@@ -7,60 +7,61 @@
 // This is the high-level Client interface.
 // The low-level implementation is in transport.go.
 
-// package http -- go2cs converted at 2022 March 06 22:16:59 UTC
+// package http -- go2cs converted at 2022 March 13 05:30:17 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\client.go
-using context = go.context_package;
-using tls = go.crypto.tls_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using ascii = go.net.http.@internal.ascii_package;
-using url = go.net.url_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go.net;
 
+using context = context_package;
+using tls = crypto.tls_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using ascii = net.http.@internal.ascii_package;
+using url = net.url_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// A Client is an HTTP client. Its zero value (DefaultClient) is a
+// usable client that uses DefaultTransport.
+//
+// The Client's Transport typically has internal state (cached TCP
+// connections), so Clients should be reused instead of created as
+// needed. Clients are safe for concurrent use by multiple goroutines.
+//
+// A Client is higher-level than a RoundTripper (such as Transport)
+// and additionally handles HTTP details such as cookies and
+// redirects.
+//
+// When following redirects, the Client will forward all headers set on the
+// initial Request except:
+//
+// • when forwarding sensitive headers like "Authorization",
+// "WWW-Authenticate", and "Cookie" to untrusted targets.
+// These headers will be ignored when following a redirect to a domain
+// that is not a subdomain match or exact match of the initial domain.
+// For example, a redirect from "foo.com" to either "foo.com" or "sub.foo.com"
+// will forward the sensitive headers, but a redirect to "bar.com" will not.
+//
+// • when forwarding the "Cookie" header with a non-nil cookie Jar.
+// Since each redirect may mutate the state of the cookie jar,
+// a redirect may possibly alter a cookie set in the initial request.
+// When forwarding the "Cookie" header, any mutated cookies will be omitted,
+// with the expectation that the Jar will insert those mutated cookies
+// with the updated values (assuming the origin matches).
+// If Jar is nil, the initial cookies are forwarded without change.
+//
+
+using System;
+using System.Threading;
 public static partial class http_package {
 
-    // A Client is an HTTP client. Its zero value (DefaultClient) is a
-    // usable client that uses DefaultTransport.
-    //
-    // The Client's Transport typically has internal state (cached TCP
-    // connections), so Clients should be reused instead of created as
-    // needed. Clients are safe for concurrent use by multiple goroutines.
-    //
-    // A Client is higher-level than a RoundTripper (such as Transport)
-    // and additionally handles HTTP details such as cookies and
-    // redirects.
-    //
-    // When following redirects, the Client will forward all headers set on the
-    // initial Request except:
-    //
-    // • when forwarding sensitive headers like "Authorization",
-    // "WWW-Authenticate", and "Cookie" to untrusted targets.
-    // These headers will be ignored when following a redirect to a domain
-    // that is not a subdomain match or exact match of the initial domain.
-    // For example, a redirect from "foo.com" to either "foo.com" or "sub.foo.com"
-    // will forward the sensitive headers, but a redirect to "bar.com" will not.
-    //
-    // • when forwarding the "Cookie" header with a non-nil cookie Jar.
-    // Since each redirect may mutate the state of the cookie jar,
-    // a redirect may possibly alter a cookie set in the initial request.
-    // When forwarding the "Cookie" header, any mutated cookies will be omitted,
-    // with the expectation that the Jar will insert those mutated cookies
-    // with the updated values (assuming the origin matches).
-    // If Jar is nil, the initial cookies are forwarded without change.
-    //
 public partial struct Client {
     public RoundTripper Transport; // CheckRedirect specifies the policy for handling redirects.
 // If CheckRedirect is not nil, the client calls it before
@@ -138,10 +139,8 @@ private static @string refererForURL(ptr<url.URL> _addr_lastReq, ptr<url.URL> _a
         //   maintenance problems down the line
         var auth = lastReq.User.String() + "@";
         referer = strings.Replace(referer, auth, "", 1);
-
     }
     return referer;
-
 }
 
 // didTimeout is non-nil only if err != nil.
@@ -170,10 +169,8 @@ private static (ptr<Response>, Func<bool>, error) send(this ptr<Client> _addr_c,
             }
 
         }
-
     }
     return (_addr_resp!, null, error.As(null!)!);
-
 }
 
 private static time.Time deadline(this ptr<Client> _addr_c) {
@@ -183,7 +180,6 @@ private static time.Time deadline(this ptr<Client> _addr_c) {
         return time.Now().Add(c.Timeout);
     }
     return new time.Time();
-
 }
 
 private static RoundTripper transport(this ptr<Client> _addr_c) {
@@ -193,7 +189,6 @@ private static RoundTripper transport(this ptr<Client> _addr_c) {
         return c.Transport;
     }
     return DefaultTransport;
-
 }
 
 // send issues an HTTP request.
@@ -244,7 +239,6 @@ private static (ptr<Response>, Func<bool>, error) send(ptr<Request> _addr_ireq, 
         }
     }
 
-
     if (!deadline.IsZero()) {
         forkReq();
     }
@@ -266,13 +260,10 @@ private static (ptr<Response>, Func<bool>, error) send(ptr<Request> _addr_ireq, 
                 if (string(tlsErr.RecordHeader[..]) == "HTTP/") {
                     err = errors.New("http: server gave HTTP response to HTTPS client");
                 }
-
             }
 
         }
-
         return (_addr_null!, didTimeout, error.As(err)!);
-
     }
     if (resp == null) {
         return (_addr_null!, didTimeout, error.As(fmt.Errorf("http: RoundTripper implementation (%T) returned a nil *Response with a nil error", rt))!);
@@ -292,13 +283,11 @@ private static (ptr<Response>, Func<bool>, error) send(ptr<Request> _addr_ireq, 
             return (_addr_null!, didTimeout, error.As(fmt.Errorf("http: RoundTripper implementation (%T) returned a *Response with content length %d but a nil Body", rt, resp.ContentLength))!);
         }
         resp.Body = io.NopCloser(strings.NewReader(""));
-
     }
     if (!deadline.IsZero()) {
         resp.Body = addr(new cancelTimerBody(stop:stopTimer,rc:resp.Body,reqDidTimeout:didTimeout,));
     }
     return (_addr_resp!, null, error.As(null!)!);
-
 }
 
 // timeBeforeContextDeadline reports whether the non-zero Time t is
@@ -310,7 +299,6 @@ private static bool timeBeforeContextDeadline(time.Time t, context.Context ctx) 
         return true;
     }
     return t.Before(d);
-
 }
 
 // knownRoundTripperImpl reports whether rt is a RoundTripper that's
@@ -331,7 +319,6 @@ private static bool knownRoundTripperImpl(RoundTripper rt, ptr<Request> _addr_re
                 }
 
             }
-
             return true;
             break;
         case ptr<http2Transport> t:
@@ -357,7 +344,6 @@ private static bool knownRoundTripperImpl(RoundTripper rt, ptr<Request> _addr_re
         return true;
     }
     return false;
-
 }
 
 // setRequestCancel sets req.Cancel and adds a deadline context to req
@@ -389,7 +375,6 @@ private static (Action, Func<bool>) setRequestCancel(ptr<Request> _addr_req, Rou
         Action cancelCtx = default;
         req.ctx, cancelCtx = context.WithDeadline(oldCtx, deadline);
         return (cancelCtx, () => time.Now().After(deadline));
-
     }
     var initialReqCancel = req.Cancel; // the user's original Request.Cancel, if any
 
@@ -405,7 +390,6 @@ private static (Action, Func<bool>) setRequestCancel(ptr<Request> _addr_req, Rou
         oldCtx = oldCtx__prev1;
 
     }
-
 
     var cancel = make_channel<object>();
     req.Cancel = cancel;
@@ -426,7 +410,6 @@ private static (Action, Func<bool>) setRequestCancel(ptr<Request> _addr_req, Rou
             }
 
         }
-
     };
 
     var stopTimerCh = make_channel<object>();
@@ -452,7 +435,6 @@ private static (Action, Func<bool>) setRequestCancel(ptr<Request> _addr_req, Rou
     }());
 
     return (stopTimer, timedOut.isSet);
-
 }
 
 // See 2 (end of page 4) https://www.ietf.org/rfc/rfc2617.txt
@@ -530,7 +512,6 @@ private static (ptr<Response>, error) Get(this ptr<Client> _addr_c, @string url)
         return (_addr_null!, error.As(err)!);
     }
     return _addr_c.Do(req)!;
-
 }
 
 private static bool alwaysFalse() {
@@ -554,7 +535,6 @@ private static error checkRedirect(this ptr<Client> _addr_c, ptr<Request> _addr_
         fn = defaultCheckRedirect;
     }
     return error.As(fn(req, via))!;
-
 }
 
 // redirectBehavior describes what should happen when the
@@ -601,7 +581,6 @@ private static (@string, bool, bool) redirectBehavior(@string reqMethod, ptr<Res
                 // See Issue 17773.
                 shouldRedirect = false;
                 break;
-
             }
             if (ireq.GetBody == null && ireq.outgoingLength() != 0) { 
                 // We had a request body, and 307/308 require
@@ -609,12 +588,10 @@ private static (@string, bool, bool) redirectBehavior(@string reqMethod, ptr<Res
                 // return this response to the user instead of an
                 // error, like we did in Go 1.7 and earlier.
                 shouldRedirect = false;
-
             }
             break;
     }
     return (redirectMethod, shouldRedirect, includeBody);
-
 }
 
 // urlErrorOp returns the (*url.Error).Op value to use for the
@@ -630,9 +607,7 @@ private static @string urlErrorOp(@string method) {
             return method[..(int)1] + lowerMethod[(int)1..];
         }
     }
-
     return method;
-
 }
 
 // Do sends an HTTP request and returns an HTTP response, following
@@ -692,7 +667,6 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
         defer(() => {
             testHookClientDoResult(retres, reterr);
         }());
-
     }
     if (req.URL == null) {
         req.closeBody();
@@ -713,7 +687,6 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
             urlStr = stripPassword(_addr_req.URL);
         }
         return addr(new url.Error(Op:urlErrorOp(reqs[0].Method),URL:urlStr,Err:err,));
-
     };
     while (true) { 
         // For all but the first request, create the next
@@ -746,9 +719,7 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
                     u = u__prev3;
 
                 }
-
             }
-
             var ireq = reqs[0];
             req = addr(new Request(Method:redirectMethod,Response:resp,URL:u,Header:make(Header),Host:host,Cancel:ireq.Cancel,ctx:ireq.ctx,));
             if (includeBody && ireq.GetBody != null) {
@@ -776,7 +747,6 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
                 }
 
             }
-
             err = c.checkRedirect(req, reqs); 
 
             // Sentinel error to let users select the
@@ -796,7 +766,6 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
             if (resp.ContentLength == -1 || resp.ContentLength <= maxBodySlurpSize) {
                 io.CopyN(io.Discard, resp.Body, maxBodySlurpSize);
             }
-
             resp.Body.Close();
 
             if (err != null) { 
@@ -807,9 +776,7 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
                 var ue = uerr(err);
                 ue._<ptr<url.Error>>().URL = loc;
                 return (_addr_resp!, error.As(ue)!);
-
             }
-
         }
         reqs = append(reqs, req);
         error err = default!;
@@ -822,9 +789,7 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
             if (!deadline.IsZero() && didTimeout()) {
                 err = error.As(addr(new httpError(err:err.Error()+" (Client.Timeout exceeded while awaiting headers)",timeout:true,)))!;
             }
-
             return (_addr_null!, error.As(uerr(err))!);
-
         }
         bool shouldRedirect = default;
         redirectMethod, shouldRedirect, includeBody = redirectBehavior(req.Method, resp, _addr_reqs[0]);
@@ -832,9 +797,7 @@ private static (ptr<Response>, error) @do(this ptr<Client> _addr_c, ptr<Request>
             return (_addr_resp!, error.As(null!)!);
         }
         req.closeBody();
-
     }
-
 });
 
 // makeHeadersCopier makes a function that copies headers from the
@@ -890,7 +853,6 @@ private static Action<ptr<Request>> makeHeadersCopier(this ptr<Client> _addr_c, 
                         }
 
                     }
-
                 }
 
                 c = c__prev1;
@@ -913,9 +875,7 @@ private static Action<ptr<Request>> makeHeadersCopier(this ptr<Client> _addr_c, 
                 }
                 sort.Strings(ss); // Ensure deterministic headers
                 ireqhdr.Set("Cookie", strings.Join(ss, "; "));
-
             }
-
         }
         foreach (var (k, vv) in ireqhdr) {
             if (shouldCopyHeaderOnRedirect(k, _addr_preq.URL, _addr_req.URL)) {
@@ -923,7 +883,6 @@ private static Action<ptr<Request>> makeHeadersCopier(this ptr<Client> _addr_c, 
             }
         }        preq = req; // Update previous Request with the current request
     };
-
 }
 
 private static error defaultCheckRedirect(ptr<Request> _addr_req, slice<ptr<Request>> via) {
@@ -933,7 +892,6 @@ private static error defaultCheckRedirect(ptr<Request> _addr_req, slice<ptr<Requ
         return error.As(errors.New("stopped after 10 redirects"))!;
     }
     return error.As(null!)!;
-
 }
 
 // Post issues a POST to the specified URL.
@@ -984,7 +942,6 @@ private static (ptr<Response>, error) Post(this ptr<Client> _addr_c, @string url
     }
     req.Header.Set("Content-Type", contentType);
     return _addr_c.Do(req)!;
-
 }
 
 // PostForm issues a POST to the specified URL, with data's keys and
@@ -1075,7 +1032,6 @@ private static (ptr<Response>, error) Head(this ptr<Client> _addr_c, @string url
         return (_addr_null!, error.As(err)!);
     }
     return _addr_c.Do(req)!;
-
 }
 
 // CloseIdleConnections closes any connections on its Transport which
@@ -1098,7 +1054,6 @@ private static void CloseIdleConnections(this ptr<Client> _addr_c) {
             tr.CloseIdleConnections();
         }
     }
-
 }
 
 // cancelTimerBody is an io.ReadCloser that wraps rc with two features:
@@ -1128,7 +1083,6 @@ private static (nint, error) Read(this ptr<cancelTimerBody> _addr_b, slice<byte>
         err = addr(new httpError(err:err.Error()+" (Client.Timeout or context cancellation while reading body)",timeout:true,));
     }
     return (n, error.As(err)!);
-
 }
 
 private static error Close(this ptr<cancelTimerBody> _addr_b) {
@@ -1210,7 +1164,6 @@ private static bool shouldCopyHeaderOnRedirect(@string headerKey, ptr<url.URL> _
     } 
     // All other headers are copied:
     return true;
-
 }
 
 // isDomainOrSubdomain reports whether sub is a subdomain (or exact
@@ -1225,7 +1178,6 @@ private static bool isDomainOrSubdomain(@string sub, @string parent) {
         return false;
     }
     return sub[len(sub) - len(parent) - 1] == '.';
-
 }
 
 private static @string stripPassword(ptr<url.URL> _addr_u) {
@@ -1236,7 +1188,6 @@ private static @string stripPassword(ptr<url.URL> _addr_u) {
         return strings.Replace(u.String(), u.User.String() + "@", u.User.Username() + ":***@", 1);
     }
     return u.String();
-
 }
 
 } // end http_package

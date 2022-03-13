@@ -3,22 +3,24 @@
 // license that can be found in the LICENSE file.
 
 // Package par implements parallel execution helpers.
-// package par -- go2cs converted at 2022 March 06 23:16:53 UTC
+
+// package par -- go2cs converted at 2022 March 13 06:30:11 UTC
 // import "cmd/go/internal/par" ==> using par = go.cmd.go.@internal.par_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\par\work.go
-using rand = go.math.rand_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.go.@internal;
 
+using rand = math.rand_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+
+// Work manages a set of work items to be executed in parallel, at most once each.
+// The items in the set must all be valid map keys.
+
+using System;
+using System.Threading;
 public static partial class par_package {
 
-    // Work manages a set of work items to be executed in parallel, at most once each.
-    // The items in the set must all be valid map keys.
 public partial struct Work {
     public Action<object> f; // function to run for each item
     public nint running; // total number of runners
@@ -51,7 +53,6 @@ private static void Add(this ptr<Work> _addr_w, object item) {
         }
     }
     w.mu.Unlock();
-
 }
 
 // Do runs f in parallel on items from the work set,
@@ -78,7 +79,6 @@ private static void Do(this ptr<Work> _addr_w, nint n, Action<object> f) => func
         go_(() => w.runner());
     }
     w.runner();
-
 });
 
 // runner executes work in w until both nothing is left to do
@@ -97,12 +97,9 @@ private static void runner(this ptr<Work> _addr_w) {
                 w.wait.Broadcast();
                 w.mu.Unlock();
                 return ;
-
             }
-
             w.wait.Wait();
             w.waiting--;
-
         } 
 
         // Pick something to do at random,
@@ -116,9 +113,7 @@ private static void runner(this ptr<Work> _addr_w) {
         w.mu.Unlock();
 
         w.f(item);
-
     }
-
 }
 
 // Cache runs an action once per key and caches the result.
@@ -149,10 +144,8 @@ private static void Do(this ptr<Cache> _addr_c, object key, Action f) {
             atomic.StoreUint32(_addr_e.done, 1);
         }
         e.mu.Unlock();
-
     }
     return e.result;
-
 }
 
 // Get returns the cached result associated with key.
@@ -170,7 +163,6 @@ private static void Get(this ptr<Cache> _addr_c, object key) {
         return null;
     }
     return e.result;
-
 }
 
 // Clear removes all entries in the cache.
@@ -217,9 +209,7 @@ private static bool DeleteIf(this ptr<Cache> _addr_c, Func<object, bool> pred) {
             c.Delete(key);
         }
         return true;
-
     });
-
 }
 
 } // end par_package

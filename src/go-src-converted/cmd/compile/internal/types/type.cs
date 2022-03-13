@@ -2,23 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:59 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:16 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\type.go
-using @base = go.cmd.compile.@internal.@base_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using sync = sync_package;
+
+
+// Object represents an ir.Node, but without needing to import cmd/compile/internal/ir,
+// which would cause an import cycle. The uses in other packages must type assert
+// values of type Object to ir.Node or a more specific type.
+
+using System;
 public static partial class types_package {
 
-    // Object represents an ir.Node, but without needing to import cmd/compile/internal/ir,
-    // which would cause an import cycle. The uses in other packages must type assert
-    // values of type Object to ir.Node or a more specific type.
 public partial interface Object {
     ptr<Type> Pos();
     ptr<Type> Sym();
@@ -93,7 +94,6 @@ public static readonly var TRESULTS = 36; // multiple types; the result of calli
 
 public static readonly var NTYPE = 37;
 
-
 // ChanDir is whether a channel can send, receive, or both.
 public partial struct ChanDir { // : byte
 }
@@ -111,7 +111,6 @@ public static bool CanSend(this ChanDir c) {
 public static readonly ChanDir Crecv = 1 << 0;
 public static readonly ChanDir Csend = 1 << 1;
 public static readonly ChanDir Cboth = Crecv | Csend;
-
 
 // Types stores pointers to predeclared named types.
 //
@@ -271,7 +270,6 @@ private static src.XPos Pos(this ptr<Type> _addr_t) {
         return t.nod.Pos();
     }
     return src.NoXPos;
-
 }
 
 private static slice<ptr<Type>> RParams(this ptr<Type> _addr_t) {
@@ -281,7 +279,6 @@ private static slice<ptr<Type>> RParams(this ptr<Type> _addr_t) {
         return null;
     }
     return t.rparams.val;
-
 }
 
 private static void SetRParams(this ptr<Type> _addr_t, slice<ptr<Type>> rparams) {
@@ -326,8 +323,7 @@ private static ptr<Pkg> Pkg(this ptr<Type> _addr_t) {
     else 
         @base.Fatalf("Pkg: unexpected kind: %v", t);
         return _addr_null!;
-    
-}
+    }
 
 // Map contains Type fields specific to maps.
 public partial struct Map {
@@ -490,7 +486,6 @@ private static readonly nint fieldIsDDD = 1 << (int)(iota); // field is ... argu
 private static readonly var fieldBroke = 0; // broken field definition
 private static readonly var fieldNointerface = 1;
 
-
 private static bool IsDDD(this ptr<Field> _addr_f) {
     ref Field f = ref _addr_f.val;
 
@@ -552,7 +547,6 @@ private static nint Len(this ptr<Fields> _addr_f) {
         return 0;
     }
     return len(f.s.val);
-
 }
 
 // Slice returns the entries in f as a slice.
@@ -564,7 +558,6 @@ private static slice<ptr<Field>> Slice(this ptr<Fields> _addr_f) {
         return null;
     }
     return f.s.val;
-
 }
 
 // Index returns the i'th element of Fields.
@@ -590,7 +583,6 @@ private static void Set(this ptr<Fields> _addr_f, slice<ptr<Field>> s) {
         ref var t = ref heap(s, out ptr<var> _addr_t);
         _addr_f.s = _addr_t;
         f.s = ref _addr_f.s.val;
-
     }
 }
 
@@ -604,7 +596,6 @@ private static void Append(this ptr<Fields> _addr_f, params ptr<ptr<Field>>[] _a
         f.s = @new<*Field>();
     }
     f.s.val = append(f.s.val, s);
-
 }
 
 // New returns a new Type of the specified kind.
@@ -638,7 +629,6 @@ public static ptr<Type> New(Kind et) {
     else if (t.kind == TTYPEPARAM) 
         t.Extra = @new<Interface>();
         return _addr_t!;
-
 }
 
 // NewArray returns a new fixed-length array Type.
@@ -655,7 +645,6 @@ public static ptr<Type> NewArray(ptr<Type> _addr_elem, long bound) {
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 // NewSlice returns the slice Type with element type elem.
@@ -677,7 +666,6 @@ public static ptr<Type> NewSlice(ptr<Type> _addr_elem) {
 
     }
 
-
     t = New(TSLICE);
     t.Extra = new Slice(Elem:elem);
     elem.cache.slice = t;
@@ -685,7 +673,6 @@ public static ptr<Type> NewSlice(ptr<Type> _addr_elem) {
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 // NewChan returns a new chan Type with direction dir.
@@ -700,7 +687,6 @@ public static ptr<Type> NewChan(ptr<Type> _addr_elem, ChanDir dir) {
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 public static ptr<Type> NewTuple(ptr<Type> _addr_t1, ptr<Type> _addr_t2) {
@@ -714,7 +700,6 @@ public static ptr<Type> NewTuple(ptr<Type> _addr_t1, ptr<Type> _addr_t2) {
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 private static ptr<Type> newResults(slice<ptr<Type>> types) {
@@ -728,7 +713,6 @@ public static ptr<Type> NewResults(slice<ptr<Type>> types) {
         return _addr_TypeResultMem!;
     }
     return _addr_newResults(types)!;
-
 }
 
 private static ptr<Type> newSSA(@string name) {
@@ -750,7 +734,6 @@ public static ptr<Type> NewMap(ptr<Type> _addr_k, ptr<Type> _addr_v) {
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 // NewPtrCacheEnabled controls whether *T Types are cached in T.
@@ -779,16 +762,12 @@ public static ptr<Type> NewPtr(ptr<Type> _addr_elem) {
                 // might have still been undetermined (i.e. a TFORW type)
                 // when this entry was cached.
                 t.SetHasTParam(true);
-
             }
-
             return _addr_t!;
-
         }
         t = t__prev1;
 
     }
-
 
     t = New(TPTR);
     t.Extra = new Ptr(Elem:elem);
@@ -801,7 +780,6 @@ public static ptr<Type> NewPtr(ptr<Type> _addr_elem) {
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 // NewChanArgs returns a new TCHANARGS type for channel type c.
@@ -831,7 +809,6 @@ public static ptr<Field> NewField(src.XPos pos, ptr<Sym> _addr_sym, ptr<Type> _a
         f.SetBroke(true);
     }
     return _addr_f!;
-
 }
 
 // SubstAny walks t, replacing instances of "any" with successive
@@ -905,7 +882,6 @@ public static ptr<Type> SubstAny(ptr<Type> _addr_t, ptr<slice<ptr<Type>>> _addr_
         }        t = t.copy();
         t.SetFields(nfs);
     else         return _addr_t!;
-
 }
 
 // copy returns a shallow copy of the Type.
@@ -945,10 +921,8 @@ private static ptr<Type> copy(this ptr<Type> _addr_t) {
     if (t.underlying == t) {
         _addr_nt.underlying = _addr_nt;
         nt.underlying = ref _addr_nt.underlying.val;
-
     }
     return _addr__addr_nt!;
-
 }
 
 private static ptr<Field> Copy(this ptr<Field> _addr_f) {
@@ -1025,7 +999,6 @@ private static ptr<Field> Recv(this ptr<Type> _addr_t) {
         return _addr_null!;
     }
     return _addr_s.Field(0)!;
-
 }
 
 // RecvsParamsResults stores the accessor functions for a function Type's
@@ -1065,7 +1038,6 @@ private static ptr<Type> Elem(this ptr<Type> _addr_t) {
         return t.Extra._<ptr<Map>>().Elem;
         @base.Fatalf("Type.Elem %s", t.kind);
     return _addr_null!;
-
 }
 
 // ChanArgs returns the channel type for TCHANARGS type t.
@@ -1109,10 +1081,8 @@ private static ptr<Fields> AllMethods(this ptr<Type> _addr_t) {
         // Calculate the full method set of an interface type on the fly
         // now, if not done yet.
         CalcSize(t);
-
     }
     return _addr__addr_t.allMethods!;
-
 }
 
 // SetAllMethods sets the set of all methods (including embedding) for type t.
@@ -1172,7 +1142,6 @@ private static void SetFields(this ptr<Type> _addr_t, slice<ptr<Field>> fields) 
             break;
         }
     }    t.Fields().Set(fields);
-
 }
 
 // SetInterface sets the base methods of an interface type t.
@@ -1206,11 +1175,9 @@ private static long Size(this ptr<Type> _addr_t) {
             return 16;
         }
         return 0;
-
     }
     CalcSize(t);
     return t.Width;
-
 }
 
 private static long Alignment(this ptr<Type> _addr_t) {
@@ -1237,7 +1204,6 @@ public static readonly var CMPlt = Cmp(-1);
 public static readonly var CMPeq = Cmp(0);
 public static readonly var CMPgt = Cmp(1);
 
-
 // Compare compares types for purposes of the SSA back
 // end, returning a Cmp (one of CMPlt, CMPeq, CMPgt).
 // The answers are correct for an optimizer
@@ -1252,7 +1218,6 @@ private static Cmp Compare(this ptr<Type> _addr_t, ptr<Type> _addr_x) {
         return CMPeq;
     }
     return t.cmp(x);
-
 }
 
 private static Cmp cmpForNe(bool x) {
@@ -1260,7 +1225,6 @@ private static Cmp cmpForNe(bool x) {
         return CMPlt;
     }
     return CMPgt;
-
 }
 
 private static Cmp cmpsym(this ptr<Sym> _addr_r, ptr<Sym> _addr_s) {
@@ -1291,7 +1255,6 @@ private static Cmp cmpsym(this ptr<Sym> _addr_r, ptr<Sym> _addr_s) {
         return cmpForNe(r.Name < s.Name);
     }
     return CMPeq;
-
 }
 
 // cmp compares two *Types t and x, returning CMPlt,
@@ -1332,8 +1295,7 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
             if ((t == Types[RuneType.kind] || t == RuneType) && (x == Types[RuneType.kind] || x == RuneType)) {
                 return CMPeq;
             }
-        
-    }
+            }
     {
         var c__prev1 = c;
 
@@ -1346,14 +1308,12 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
 
     }
 
-
     if (x.sym != null) { 
         // Syms non-nil, if vargens match then equal.
         if (t.Vargen != x.Vargen) {
             return cmpForNe(t.Vargen < x.Vargen);
         }
         return CMPeq;
-
     }
 
     if (t.kind == TBOOL || t.kind == TFLOAT32 || t.kind == TFLOAT64 || t.kind == TCOMPLEX64 || t.kind == TCOMPLEX128 || t.kind == TUNSAFEPTR || t.kind == TUINTPTR || t.kind == TINT8 || t.kind == TINT16 || t.kind == TINT32 || t.kind == TINT64 || t.kind == TINT || t.kind == TUINT8 || t.kind == TUINT16 || t.kind == TUINT32 || t.kind == TUINT64 || t.kind == TUINT) 
@@ -1390,7 +1350,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
             c = c__prev1;
 
         }
-
         return ttup.second.Compare(xtup.second);
     else if (t.kind == TRESULTS) 
         ptr<Results> xResults = x.Extra._<ptr<Results>>();
@@ -1419,7 +1378,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
                     c = c__prev1;
 
                 }
-
             }
 
 
@@ -1439,7 +1397,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
             c = c__prev1;
 
         }
-
         return t.Elem().cmp(x.Elem());
     else if (t.kind == TPTR || t.kind == TSLICE)     else if (t.kind == TSTRUCT) 
         if (t.StructType().Map == null) {
@@ -1457,9 +1414,7 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
             if (x.StructType().Map.MapType().Bucket != x) {
                 return CMPlt; // bucket maps are least
             }
-
             return t.StructType().Map.cmp(x.StructType().Map);
-
         }
         else if (x.StructType().Map.MapType().Bucket == x) {
             return CMPgt; // bucket maps are least
@@ -1475,11 +1430,9 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
                 if (t1.Embedded != x1.Embedded) {
                     return cmpForNe(t1.Embedded < x1.Embedded);
                 }
-
                 if (t1.Note != x1.Note) {
                     return cmpForNe(t1.Note < x1.Note);
                 }
-
                 {
                     var c__prev1 = c;
 
@@ -1492,7 +1445,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
                     c = c__prev1;
 
                 }
-
                 {
                     var c__prev1 = c;
 
@@ -1505,7 +1457,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
                     c = c__prev1;
 
                 }
-
             }
 
 
@@ -1536,7 +1487,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
                     c = c__prev1;
 
                 }
-
                 {
                     var c__prev1 = c;
 
@@ -1549,7 +1499,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
                     c = c__prev1;
 
                 }
-
             }
 
 
@@ -1585,7 +1534,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
                         c = c__prev1;
 
                     }
-
                 }
 
 
@@ -1594,7 +1542,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
             if (len(tfs) != len(xfs)) {
                 return cmpForNe(len(tfs) < len(xfs));
             }
-
         }        return CMPeq;
     else if (t.kind == TARRAY) 
         if (t.NumElem() != x.NumElem()) {
@@ -1609,7 +1556,6 @@ private static Cmp cmp(this ptr<Type> _addr_t, ptr<Type> _addr_x) => func((_, pa
         panic(e);
     // Common element type comparison for TARRAY, TCHAN, TPTR, and TSLICE.
     return t.Elem().cmp(x.Elem());
-
 });
 
 // IsKind reports whether t is a Type of the specified kind.
@@ -1635,7 +1581,6 @@ private static ptr<Type> ToUnsigned(this ptr<Type> _addr_t) {
         @base.Fatalf("unsignedType(%v)", t);
     }
     return _addr_Types[unsignedEType[t.kind]]!;
-
 }
 
 private static bool IsInteger(this ptr<Type> _addr_t) {
@@ -1645,7 +1590,6 @@ private static bool IsInteger(this ptr<Type> _addr_t) {
     if (t.kind == TINT8 || t.kind == TUINT8 || t.kind == TINT16 || t.kind == TUINT16 || t.kind == TINT32 || t.kind == TUINT32 || t.kind == TINT64 || t.kind == TUINT64 || t.kind == TINT || t.kind == TUINT || t.kind == TUINTPTR) 
         return true;
         return t == UntypedInt || t == UntypedRune;
-
 }
 
 private static bool IsSigned(this ptr<Type> _addr_t) {
@@ -1655,7 +1599,6 @@ private static bool IsSigned(this ptr<Type> _addr_t) {
     if (t.kind == TINT8 || t.kind == TINT16 || t.kind == TINT32 || t.kind == TINT64 || t.kind == TINT) 
         return true;
         return false;
-
 }
 
 private static bool IsUnsigned(this ptr<Type> _addr_t) {
@@ -1665,7 +1608,6 @@ private static bool IsUnsigned(this ptr<Type> _addr_t) {
     if (t.kind == TUINT8 || t.kind == TUINT16 || t.kind == TUINT32 || t.kind == TUINT64 || t.kind == TUINT || t.kind == TUINTPTR) 
         return true;
         return false;
-
 }
 
 private static bool IsFloat(this ptr<Type> _addr_t) {
@@ -1728,7 +1670,6 @@ private static bool HasNil(this ptr<Type> _addr_t) {
     if (t.kind == TCHAN || t.kind == TFUNC || t.kind == TINTER || t.kind == TMAP || t.kind == TNIL || t.kind == TPTR || t.kind == TSLICE || t.kind == TUNSAFEPTR) 
         return true;
         return false;
-
 }
 
 private static bool IsString(this ptr<Type> _addr_t) {
@@ -1791,7 +1732,6 @@ private static bool IsScalar(this ptr<Type> _addr_t) {
     if (t.kind == TBOOL || t.kind == TINT8 || t.kind == TUINT8 || t.kind == TINT16 || t.kind == TUINT16 || t.kind == TINT32 || t.kind == TUINT32 || t.kind == TINT64 || t.kind == TUINT64 || t.kind == TINT || t.kind == TUINT || t.kind == TUINTPTR || t.kind == TCOMPLEX64 || t.kind == TCOMPLEX128 || t.kind == TFLOAT32 || t.kind == TFLOAT64) 
         return true;
         return false;
-
 }
 
 private static ptr<Type> PtrTo(this ptr<Type> _addr_t) {
@@ -1807,7 +1747,6 @@ private static nint NumFields(this ptr<Type> _addr_t) {
         return len(t.Extra._<ptr<Results>>().Types);
     }
     return t.Fields().Len();
-
 }
 private static ptr<Type> FieldType(this ptr<Type> _addr_t, nint i) => func((_, panic, _) => {
     ref Type t = ref _addr_t.val;
@@ -1824,13 +1763,11 @@ private static ptr<Type> FieldType(this ptr<Type> _addr_t, nint i) => func((_, p
                 panic("bad tuple index");
                 break;
         }
-
     }
     if (t.kind == TRESULTS) {
         return t.Extra._<ptr<Results>>().Types[i];
     }
     return _addr_t.Field(i).Type!;
-
 });
 private static long FieldOff(this ptr<Type> _addr_t, nint i) {
     ref Type t = ref _addr_t.val;
@@ -1856,7 +1793,6 @@ private partial struct componentsIncludeBlankFields { // : bool
 public static readonly componentsIncludeBlankFields IgnoreBlankFields = false;
 public static readonly componentsIncludeBlankFields CountBlankFields = true;
 
-
 // NumComponents returns the number of primitive elements that compose t.
 // Struct and array types are flattened for the purpose of counting.
 // All other types (including string, slice, and interface types) count as one element.
@@ -1881,7 +1817,6 @@ private static long NumComponents(this ptr<Type> _addr_t, componentsIncludeBlank
     else if (t.kind == TARRAY) 
         return t.NumElem() * t.Elem().NumComponents(countBlank);
         return 1;
-
 }
 
 // SoleComponent returns the only primitive component in t,
@@ -1905,7 +1840,6 @@ private static ptr<Type> SoleComponent(this ptr<Type> _addr_t) {
         }
         return _addr_t.Elem().SoleComponent()!;
         return _addr_t!;
-
 }
 
 // ChanDir returns the direction of a channel type t.
@@ -1932,10 +1866,8 @@ private static bool IsMemory(this ptr<Type> _addr_t) {
             }
 
         }
-
     }
     return false;
-
 }
 private static bool IsFlags(this ptr<Type> _addr_t) {
     ref Type t = ref _addr_t.val;
@@ -1972,7 +1904,6 @@ private static bool IsUntyped(this ptr<Type> _addr_t) {
     if (t.kind == TNIL || t.kind == TIDEAL) 
         return true;
         return false;
-
 }
 
 // HasPointers reports whether t contains a heap pointer.
@@ -1986,7 +1917,6 @@ private static bool HasPointers(this ptr<Type> _addr_t) {
     else if (t.kind == TARRAY) 
         if (t.NumElem() == 0) { // empty array has no pointers
             return false;
-
         }
         return t.Elem().HasPointers();
     else if (t.kind == TSTRUCT) 
@@ -2008,7 +1938,6 @@ private static bool HasPointers(this ptr<Type> _addr_t) {
             }
         }        return false;
         return true;
-
 }
 
 // Tie returns 'T' if t is a concrete type,
@@ -2024,7 +1953,6 @@ private static byte Tie(this ptr<Type> _addr_t) {
         return 'I';
     }
     return 'T';
-
 }
 
 private static ptr<Type> recvType;
@@ -2035,7 +1963,6 @@ public static ptr<Type> FakeRecvType() {
         recvType = NewPtr(_addr_New(TSTRUCT));
     }
     return _addr_recvType!;
-
 }
 
  
@@ -2062,7 +1989,6 @@ private static Object Obj(this ptr<Type> _addr_t) {
         return t.nod;
     }
     return null;
-
 }
 
 // SetUnderlying sets the underlying type. SetUnderlying automatically updates any
@@ -2075,7 +2001,6 @@ private static void SetUnderlying(this ptr<Type> _addr_t, ptr<Type> _addr_underl
         // This type isn't computed yet; when it is, update n.
         underlying.ForwardType().Copyto = append(underlying.ForwardType().Copyto, t);
         return ;
-
     }
     var ft = t.ForwardType(); 
 
@@ -2114,7 +2039,6 @@ private static bool fieldsHasTParam(slice<ptr<Field>> fields) {
             return true;
         }
     }    return false;
-
 }
 
 // NewBasic returns a new basic type of the given kind.
@@ -2143,7 +2067,6 @@ public static ptr<Type> NewInterface(ptr<Pkg> _addr_pkg, slice<ptr<Field>> metho
     }
     t.Extra._<ptr<Interface>>().pkg = pkg;
     return _addr_t!;
-
 }
 
 // NewTypeParam returns a new type param.
@@ -2186,7 +2109,6 @@ public static ptr<Type> NewSignature(ptr<Pkg> _addr_pkg, ptr<Field> _addr_recv, 
             t.SetBroke(true);
         }
         return _addr_s!;
-
     };
 
     if (recv != null) {
@@ -2204,7 +2126,6 @@ public static ptr<Type> NewSignature(ptr<Pkg> _addr_pkg, ptr<Field> _addr_recv, 
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 // NewStruct returns a new struct with the given fields.
@@ -2221,7 +2142,6 @@ public static ptr<Type> NewStruct(ptr<Pkg> _addr_pkg, slice<ptr<Field>> fields) 
         t.SetHasTParam(true);
     }
     return _addr_t!;
-
 }
 
 private static bool anyBroke(slice<ptr<Field>> fields) {
@@ -2230,7 +2150,6 @@ private static bool anyBroke(slice<ptr<Field>> fields) {
             return true;
         }
     }    return false;
-
 }
 
 public static array<bool> IsInt = new array<bool>(NTYPE);public static array<bool> IsFloat = new array<bool>(NTYPE);public static array<bool> IsComplex = new array<bool>(NTYPE);public static array<bool> IsSimple = new array<bool>(NTYPE);
@@ -2258,8 +2177,7 @@ public static bool IsReflexive(ptr<Type> _addr_t) {
     else 
         @base.Fatalf("bad type for map key: %v", t);
         return false;
-    
-}
+    }
 
 // Can this type be stored directly in an interface word?
 // Yes, if the representation is a single pointer.
@@ -2282,7 +2200,6 @@ public static bool IsDirectIface(ptr<Type> _addr_t) {
         // Struct with 1 field of direct iface type can be direct.
         return t.NumFields() == 1 && IsDirectIface(_addr_t.Field(0).Type);
         return false;
-
 }
 
 // IsInterfaceMethod reports whether (field) m is
@@ -2313,7 +2230,6 @@ public static bool IsRuntimePkg(ptr<Pkg> _addr_p) {
         return true;
     }
     return p.Path == "runtime";
-
 }
 
 // IsReflectPkg reports whether p is package reflect.
@@ -2324,7 +2240,6 @@ public static bool IsReflectPkg(ptr<Pkg> _addr_p) {
         return @base.Ctxt.Pkgpath == "reflect";
     }
     return p.Path == "reflect";
-
 }
 
 // ReceiverBaseType returns the underlying type, if any,
@@ -2355,7 +2270,6 @@ public static ptr<Type> ReceiverBaseType(ptr<Type> _addr_t) {
     if (t.Kind() == TARRAY || t.Kind() == TCHAN || t.Kind() == TFUNC || t.Kind() == TMAP || t.Kind() == TSLICE || t.Kind() == TSTRING || t.Kind() == TSTRUCT) 
         return _addr_t!;
         return _addr_null!;
-
 }
 
 public static ptr<Type> FloatForComplex(ptr<Type> _addr_t) {
@@ -2368,7 +2282,6 @@ public static ptr<Type> FloatForComplex(ptr<Type> _addr_t) {
         return _addr_Types[TFLOAT64]!;
         @base.Fatalf("unexpected type: %v", t);
     return _addr_null!;
-
 }
 
 public static ptr<Type> ComplexForFloat(ptr<Type> _addr_t) {
@@ -2381,7 +2294,6 @@ public static ptr<Type> ComplexForFloat(ptr<Type> _addr_t) {
         return _addr_Types[TCOMPLEX128]!;
         @base.Fatalf("unexpected type: %v", t);
     return _addr_null!;
-
 }
 
 public static ptr<Sym> TypeSym(ptr<Type> _addr_t) {
@@ -2406,7 +2318,6 @@ public static @string TypeSymName(ptr<Type> _addr_t) {
         name = "noalg." + name;
     }
     return name;
-
 }
 
 // Fake package for runtime type info (headers)

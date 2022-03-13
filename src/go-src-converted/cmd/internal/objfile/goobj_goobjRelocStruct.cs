@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:32:18 UTC
+//     Generated on 2022 March 13 05:43:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace @internal
 {
     public static partial class objfile_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct goobjReloc
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace @internal
             public static implicit operator goobjReloc(NilType nil) => default(goobjReloc);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static goobjReloc goobjReloc_cast(dynamic value)
         {
             return new goobjReloc(value.Off, value.Size, value.Type, value.Add, value.Sym);

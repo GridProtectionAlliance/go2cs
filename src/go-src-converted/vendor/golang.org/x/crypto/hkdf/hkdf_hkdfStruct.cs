@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:51 UTC
+//     Generated on 2022 March 13 06:44:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace crypto
 {
     public static partial class hkdf_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct hkdf
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace crypto
             public static implicit operator hkdf(NilType nil) => default(hkdf);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static hkdf hkdf_cast(dynamic value)
         {
             return new hkdf(value.expander, value.size, value.info, value.counter, value.prev, value.buf);

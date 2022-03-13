@@ -2,84 +2,82 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:07 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:59 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\j0.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    /*
-        Bessel function of the first and second kinds of order zero.
-    */
+/*
+    Bessel function of the first and second kinds of order zero.
+*/
 
-    // The original C code and the long comment below are
-    // from FreeBSD's /usr/src/lib/msun/src/e_j0.c and
-    // came with this notice. The go code is a simplified
-    // version of the original C.
-    //
-    // ====================================================
-    // Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
-    //
-    // Developed at SunPro, a Sun Microsystems, Inc. business.
-    // Permission to use, copy, modify, and distribute this
-    // software is freely granted, provided that this notice
-    // is preserved.
-    // ====================================================
-    //
-    // __ieee754_j0(x), __ieee754_y0(x)
-    // Bessel function of the first and second kinds of order zero.
-    // Method -- j0(x):
-    //      1. For tiny x, we use j0(x) = 1 - x**2/4 + x**4/64 - ...
-    //      2. Reduce x to |x| since j0(x)=j0(-x),  and
-    //         for x in (0,2)
-    //              j0(x) = 1-z/4+ z**2*R0/S0,  where z = x*x;
-    //         (precision:  |j0-1+z/4-z**2R0/S0 |<2**-63.67 )
-    //         for x in (2,inf)
-    //              j0(x) = sqrt(2/(pi*x))*(p0(x)*cos(x0)-q0(x)*sin(x0))
-    //         where x0 = x-pi/4. It is better to compute sin(x0),cos(x0)
-    //         as follow:
-    //              cos(x0) = cos(x)cos(pi/4)+sin(x)sin(pi/4)
-    //                      = 1/sqrt(2) * (cos(x) + sin(x))
-    //              sin(x0) = sin(x)cos(pi/4)-cos(x)sin(pi/4)
-    //                      = 1/sqrt(2) * (sin(x) - cos(x))
-    //         (To avoid cancellation, use
-    //              sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
-    //         to compute the worse one.)
-    //
-    //      3 Special cases
-    //              j0(nan)= nan
-    //              j0(0) = 1
-    //              j0(inf) = 0
-    //
-    // Method -- y0(x):
-    //      1. For x<2.
-    //         Since
-    //              y0(x) = 2/pi*(j0(x)*(ln(x/2)+Euler) + x**2/4 - ...)
-    //         therefore y0(x)-2/pi*j0(x)*ln(x) is an even function.
-    //         We use the following function to approximate y0,
-    //              y0(x) = U(z)/V(z) + (2/pi)*(j0(x)*ln(x)), z= x**2
-    //         where
-    //              U(z) = u00 + u01*z + ... + u06*z**6
-    //              V(z) = 1  + v01*z + ... + v04*z**4
-    //         with absolute approximation error bounded by 2**-72.
-    //         Note: For tiny x, U/V = u0 and j0(x)~1, hence
-    //              y0(tiny) = u0 + (2/pi)*ln(tiny), (choose tiny<2**-27)
-    //      2. For x>=2.
-    //              y0(x) = sqrt(2/(pi*x))*(p0(x)*cos(x0)+q0(x)*sin(x0))
-    //         where x0 = x-pi/4. It is better to compute sin(x0),cos(x0)
-    //         by the method mentioned above.
-    //      3. Special cases: y0(0)=-inf, y0(x<0)=NaN, y0(inf)=0.
-    //
+// The original C code and the long comment below are
+// from FreeBSD's /usr/src/lib/msun/src/e_j0.c and
+// came with this notice. The go code is a simplified
+// version of the original C.
+//
+// ====================================================
+// Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+//
+// Developed at SunPro, a Sun Microsystems, Inc. business.
+// Permission to use, copy, modify, and distribute this
+// software is freely granted, provided that this notice
+// is preserved.
+// ====================================================
+//
+// __ieee754_j0(x), __ieee754_y0(x)
+// Bessel function of the first and second kinds of order zero.
+// Method -- j0(x):
+//      1. For tiny x, we use j0(x) = 1 - x**2/4 + x**4/64 - ...
+//      2. Reduce x to |x| since j0(x)=j0(-x),  and
+//         for x in (0,2)
+//              j0(x) = 1-z/4+ z**2*R0/S0,  where z = x*x;
+//         (precision:  |j0-1+z/4-z**2R0/S0 |<2**-63.67 )
+//         for x in (2,inf)
+//              j0(x) = sqrt(2/(pi*x))*(p0(x)*cos(x0)-q0(x)*sin(x0))
+//         where x0 = x-pi/4. It is better to compute sin(x0),cos(x0)
+//         as follow:
+//              cos(x0) = cos(x)cos(pi/4)+sin(x)sin(pi/4)
+//                      = 1/sqrt(2) * (cos(x) + sin(x))
+//              sin(x0) = sin(x)cos(pi/4)-cos(x)sin(pi/4)
+//                      = 1/sqrt(2) * (sin(x) - cos(x))
+//         (To avoid cancellation, use
+//              sin(x) +- cos(x) = -cos(2x)/(sin(x) -+ cos(x))
+//         to compute the worse one.)
+//
+//      3 Special cases
+//              j0(nan)= nan
+//              j0(0) = 1
+//              j0(inf) = 0
+//
+// Method -- y0(x):
+//      1. For x<2.
+//         Since
+//              y0(x) = 2/pi*(j0(x)*(ln(x/2)+Euler) + x**2/4 - ...)
+//         therefore y0(x)-2/pi*j0(x)*ln(x) is an even function.
+//         We use the following function to approximate y0,
+//              y0(x) = U(z)/V(z) + (2/pi)*(j0(x)*ln(x)), z= x**2
+//         where
+//              U(z) = u00 + u01*z + ... + u06*z**6
+//              V(z) = 1  + v01*z + ... + v04*z**4
+//         with absolute approximation error bounded by 2**-72.
+//         Note: For tiny x, U/V = u0 and j0(x)~1, hence
+//              y0(tiny) = u0 + (2/pi)*ln(tiny), (choose tiny<2**-27)
+//      2. For x>=2.
+//              y0(x) = sqrt(2/(pi*x))*(p0(x)*cos(x0)+q0(x)*sin(x0))
+//         where x0 = x-pi/4. It is better to compute sin(x0),cos(x0)
+//         by the method mentioned above.
+//      3. Special cases: y0(0)=-inf, y0(x<0)=NaN, y0(inf)=0.
+//
 
-    // J0 returns the order-zero Bessel function of the first kind.
-    //
-    // Special cases are:
-    //    J0(±Inf) = 0
-    //    J0(0) = 1
-    //    J0(NaN) = NaN
+// J0 returns the order-zero Bessel function of the first kind.
+//
+// Special cases are:
+//    J0(±Inf) = 0
+//    J0(0) = 1
+//    J0(NaN) = NaN
 public static double J0(double x) {
     const float Huge = 1e300F;
     const float TwoM27 = 1.0F / (1 << 27); // 2**-27 0x3e40000000000000
@@ -122,7 +120,6 @@ public static double J0(double x) {
         z = default;
         if (x > Two129) { // |x| > ~6.8056e+38
             z = (1 / SqrtPi) * cc / Sqrt(x);
-
         }
         else
  {
@@ -207,12 +204,10 @@ public static double Y0(double x) {
  {
                 ss = z / cc;
             }
-
         }
         z = default;
         if (x > Two129) { // |x| > ~6.8056e+38
             z = (1 / SqrtPi) * ss / Sqrt(x);
-
         }
         else
  {
@@ -279,7 +274,6 @@ private static double pzero(double x) {
     var r = p[0] + z * (p[1] + z * (p[2] + z * (p[3] + z * (p[4] + z * p[5]))));
     nint s = 1 + z * (q[0] + z * (q[1] + z * (q[2] + z * (q[3] + z * q[4]))));
     return 1 + r / s;
-
 }
 
 // For x >= 8, the asymptotic expansions of qzero is
@@ -330,7 +324,6 @@ private static double qzero(double x) {
     var r = p[0] + z * (p[1] + z * (p[2] + z * (p[3] + z * (p[4] + z * p[5]))));
     nint s = 1 + z * (q[0] + z * (q[1] + z * (q[2] + z * (q[3] + z * (q[4] + z * q[5])))));
     return (-0.125F + r / s) / x;
-
 }
 
 } // end math_package

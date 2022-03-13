@@ -6,20 +6,22 @@
 // efficiently representing HTTP header fields in the context of HTTP/2.
 //
 // See http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-09
-// package hpack -- go2cs converted at 2022 March 06 23:37:13 UTC
+
+// package hpack -- go2cs converted at 2022 March 13 06:45:29 UTC
 // import "vendor/golang.org/x/net/http2/hpack" ==> using hpack = go.vendor.golang.org.x.net.http2.hpack_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\http2\hpack\hpack.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.net.http2;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+
+
+// A DecodingError is something the spec defines as a decoding error.
+
+using System;
 public static partial class hpack_package {
 
-    // A DecodingError is something the spec defines as a decoding error.
 public partial struct DecodingError {
     public error Err;
 }
@@ -61,7 +63,6 @@ public static @string String(this HeaderField hf) {
         suffix = " (sensitive)";
     }
     return fmt.Sprintf("header field %q = %q%s", hf.Name, hf.Value, suffix);
-
 }
 
 // Size returns the size of an entry per RFC 7541 section 4.1.
@@ -79,7 +80,6 @@ public static uint Size(this HeaderField hf) {
     // won't happen on the wire because the encoding doesn't allow
     // it.
     return uint32(len(hf.Name) + len(hf.Value) + 32);
-
 }
 
 // A Decoder is the decoding context for incremental processing of
@@ -216,7 +216,6 @@ private static nint maxTableIndex(this ptr<Decoder> _addr_d) {
     // the dynamic table to 2^32 bytes, where each entry will occupy more than
     // one byte. Further, the staticTable has a fixed, small length.
     return d.dynTab.table.len() + staticTable.len();
-
 }
 
 private static (HeaderField, bool) at(this ptr<Decoder> _addr_d, ulong i) {
@@ -236,7 +235,6 @@ private static (HeaderField, bool) at(this ptr<Decoder> _addr_d, ulong i) {
     }
     var dt = d.dynTab.table;
     return (dt.ents[dt.len() - (int(i) - staticTable.len())], true);
-
 }
 
 // Decode decodes an entire block.
@@ -263,7 +261,6 @@ private static (slice<HeaderField>, error) DecodeFull(this ptr<Decoder> _addr_d,
             return (null, error.As(err)!);
         }
     }
-
     {
         var err = d.Close();
 
@@ -271,9 +268,7 @@ private static (slice<HeaderField>, error) DecodeFull(this ptr<Decoder> _addr_d,
             return (null, error.As(err)!);
         }
     }
-
     return (hf, error.As(null!)!);
-
 });
 
 // Close declares that the decoding is complete and resets the Decoder
@@ -288,7 +283,6 @@ private static error Close(this ptr<Decoder> _addr_d) {
     }
     d.firstField = true;
     return error.As(null!)!;
-
 }
 
 private static (nint, error) Write(this ptr<Decoder> _addr_d, slice<byte> p) {
@@ -301,7 +295,6 @@ private static (nint, error) Write(this ptr<Decoder> _addr_d, slice<byte> p) {
         // work up to the point of finding out we don't have
         // enough data)
         return ;
-
     }
     if (d.saveBuf.Len() == 0) {
         d.buf = p;
@@ -325,10 +318,8 @@ private static (nint, error) Write(this ptr<Decoder> _addr_d, slice<byte> p) {
             if (d.maxStrLen != 0 && int64(len(d.buf)) > 2 * (int64(d.maxStrLen) + varIntOverhead)) {
                 return (0, error.As(ErrStringLength)!);
             }
-
             d.saveBuf.Write(d.buf);
             return (len(p), error.As(null!)!);
-
         }
         d.firstField = false;
         if (err != null) {
@@ -336,7 +327,6 @@ private static (nint, error) Write(this ptr<Decoder> _addr_d, slice<byte> p) {
         }
     }
     return (len(p), error.As(err)!);
-
 }
 
 // errNeedMore is an internal sentinel error value that means the
@@ -350,7 +340,6 @@ private partial struct indexType { // : nint
 private static readonly indexType indexedTrue = iota;
 private static readonly var indexedFalse = 0;
 private static readonly var indexedNever = 1;
-
 
 private static bool indexed(this indexType v) {
     return v == indexedTrue;
@@ -394,7 +383,6 @@ private static error parseHeaderFieldRepr(this ptr<Decoder> _addr_d) {
         // http://http2.github.io/http2-spec/compression.html#rfc.section.6.3
         return error.As(d.parseDynamicTableSizeUpdate())!;
         return error.As(new DecodingError(errors.New("invalid encoding")))!;
-
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
@@ -412,7 +400,6 @@ private static error parseFieldIndexed(this ptr<Decoder> _addr_d) {
     }
     d.buf = buf;
     return error.As(d.callEmit(new HeaderField(Name:hf.Name,Value:hf.Value)))!;
-
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
@@ -432,7 +419,6 @@ private static error parseFieldLiteral(this ptr<Decoder> _addr_d, byte n, indexT
             return error.As(new DecodingError(InvalidIndexError(nameIdx)))!;
         }
         hf.Name = ihf.Name;
-
     }
     else
  {
@@ -451,7 +437,6 @@ private static error parseFieldLiteral(this ptr<Decoder> _addr_d, byte n, indexT
     }
     hf.Sensitive = it.sensitive();
     return error.As(d.callEmit(hf))!;
-
 }
 
 private static error callEmit(this ptr<Decoder> _addr_d, HeaderField hf) {
@@ -466,7 +451,6 @@ private static error callEmit(this ptr<Decoder> _addr_d, HeaderField hf) {
         d.emit(hf);
     }
     return error.As(null!)!;
-
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
@@ -489,7 +473,6 @@ private static error parseDynamicTableSizeUpdate(this ptr<Decoder> _addr_d) {
     d.dynTab.setMaxSize(uint32(size));
     d.buf = buf;
     return error.As(null!)!;
-
 }
 
 private static DecodingError errVarintOverflow = new DecodingError(errors.New("varint integer overflow"));
@@ -533,11 +516,9 @@ private static (ulong, slice<byte>, error) readVarInt(byte n, slice<byte> p) => 
         m += 7;
         if (m >= 63) { // TODO: proper overflow check. making this up.
             return (0, origP, error.As(errVarintOverflow)!);
-
         }
     }
     return (0, origP, error.As(errNeedMore)!);
-
 });
 
 // readString decodes an hpack string from p.
@@ -573,7 +554,6 @@ private static (@string, slice<byte>, error) readString(this ptr<Decoder> _addr_
             s = string(p[..(int)strLen]);
         }
         return (s, p[(int)strLen..], error.As(null!)!);
-
     }
     if (wantStr) {
         ptr<bytes.Buffer> buf = bufPool.Get()._<ptr<bytes.Buffer>>();
@@ -588,12 +568,10 @@ private static (@string, slice<byte>, error) readString(this ptr<Decoder> _addr_
             }
 
         }
-
         s = buf.String();
         buf.Reset(); // be nice to GC
     }
     return (s, p[(int)strLen..], error.As(null!)!);
-
 });
 
 } // end hpack_package

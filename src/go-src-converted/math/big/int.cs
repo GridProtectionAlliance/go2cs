@@ -4,27 +4,29 @@
 
 // This file implements signed multi-precision integers.
 
-// package big -- go2cs converted at 2022 March 06 22:17:51 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:02 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\int.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using rand = go.math.rand_package;
-using strings = go.strings_package;
-
 namespace go.math;
+
+using fmt = fmt_package;
+using io = io_package;
+using rand = math.rand_package;
+using strings = strings_package;
+
+
+// An Int represents a signed multi-precision integer.
+// The zero value for an Int represents the value 0.
+//
+// Operations always take pointer arguments (*Int) rather
+// than Int values, and each unique Int value requires
+// its own unique *Int pointer. To "copy" an Int value,
+// an existing (or newly allocated) Int must be set to
+// a new value using the Int.Set method; shallow copies
+// of Ints are not supported and may lead to errors.
 
 public static partial class big_package {
 
-    // An Int represents a signed multi-precision integer.
-    // The zero value for an Int represents the value 0.
-    //
-    // Operations always take pointer arguments (*Int) rather
-    // than Int values, and each unique Int value requires
-    // its own unique *Int pointer. To "copy" an Int value,
-    // an existing (or newly allocated) Int must be set to
-    // a new value using the Int.Set method; shallow copies
-    // of Ints are not supported and may lead to errors.
 public partial struct Int {
     public bool neg; // sign
     public nat abs; // absolute value of the integer
@@ -48,7 +50,6 @@ private static nint Sign(this ptr<Int> _addr_x) {
         return -1;
     }
     return 1;
-
 }
 
 // SetInt64 sets z to x and returns z.
@@ -63,7 +64,6 @@ private static ptr<Int> SetInt64(this ptr<Int> _addr_z, long x) {
     z.abs = z.abs.setUint64(uint64(x));
     z.neg = neg;
     return _addr_z!;
-
 }
 
 // SetUint64 sets z to x and returns z.
@@ -90,7 +90,6 @@ private static ptr<Int> Set(this ptr<Int> _addr_z, ptr<Int> _addr_x) {
         z.neg = x.neg;
     }
     return _addr_z!;
-
 }
 
 // Bits provides raw (unchecked but fast) access to x by returning its
@@ -135,7 +134,6 @@ private static ptr<Int> Neg(this ptr<Int> _addr_z, ptr<Int> _addr_x) {
     z.Set(x);
     z.neg = len(z.abs) > 0 && !z.neg; // 0 has no sign
     return _addr_z!;
-
 }
 
 // Add sets z to the sum x+y and returns z.
@@ -149,7 +147,6 @@ private static ptr<Int> Add(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
         // x + y == x + y
         // (-x) + (-y) == -(x + y)
         z.abs = z.abs.add(x.abs, y.abs);
-
     }
     else
  { 
@@ -166,7 +163,6 @@ private static ptr<Int> Add(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
     }
     z.neg = len(z.abs) > 0 && neg; // 0 has no sign
     return _addr_z!;
-
 }
 
 // Sub sets z to the difference x-y and returns z.
@@ -180,7 +176,6 @@ private static ptr<Int> Sub(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
         // x - (-y) == x + y
         // (-x) - y == -(x + y)
         z.abs = z.abs.add(x.abs, y.abs);
-
     }
     else
  { 
@@ -197,7 +192,6 @@ private static ptr<Int> Sub(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
     }
     z.neg = len(z.abs) > 0 && neg; // 0 has no sign
     return _addr_z!;
-
 }
 
 // Mul sets z to the product x*y and returns z.
@@ -218,7 +212,6 @@ private static ptr<Int> Mul(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
     z.abs = z.abs.mul(x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg != y.neg; // 0 has no sign
     return _addr_z!;
-
 }
 
 // MulRange sets z to the product of all integers
@@ -242,7 +235,6 @@ private static ptr<Int> MulRange(this ptr<Int> _addr_z, long a, long b) {
     z.abs = z.abs.mulRange(uint64(a), uint64(b));
     z.neg = neg;
     return _addr_z!;
-
 }
 
 // Binomial sets z to the binomial coefficient of (n, k) and returns z.
@@ -258,7 +250,6 @@ private static ptr<Int> Binomial(this ptr<Int> _addr_z, long n, long k) {
     a.MulRange(n - k + 1, n);
     b.MulRange(1, k);
     return _addr_z.Quo(_addr_a, _addr_b)!;
-
 }
 
 // Quo sets z to the quotient x/y for y != 0 and returns z.
@@ -272,7 +263,6 @@ private static ptr<Int> Quo(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
     z.abs, _ = z.abs.div(null, x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg != y.neg; // 0 has no sign
     return _addr_z!;
-
 }
 
 // Rem sets z to the remainder x%y for y != 0 and returns z.
@@ -286,7 +276,6 @@ private static ptr<Int> Rem(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
     _, z.abs = nat(null).div(z.abs, x.abs, y.abs);
     z.neg = len(z.abs) > 0 && x.neg; // 0 has no sign
     return _addr_z!;
-
 }
 
 // QuoRem sets z to the quotient x/y and r to the remainder x%y
@@ -334,7 +323,6 @@ private static ptr<Int> Div(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
         }
     }
     return _addr_z!;
-
 }
 
 // Mod sets z to the modulus x%y for y != 0 and returns z.
@@ -361,7 +349,6 @@ private static ptr<Int> Mod(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
         }
     }
     return _addr_z!;
-
 }
 
 // DivMod sets z to the quotient x div y and m to the modulus x mod y
@@ -404,7 +391,6 @@ private static (ptr<Int>, ptr<Int>) DivMod(this ptr<Int> _addr_z, ptr<Int> _addr
         }
     }
     return (_addr_z!, _addr_m!);
-
 }
 
 // Cmp compares x and y and returns:
@@ -433,7 +419,6 @@ private static nint Cmp(this ptr<Int> _addr_x, ptr<Int> _addr_y) {
     else 
         r = 1;
         return ;
-
 }
 
 // CmpAbs compares the absolute values of x and y and returns:
@@ -455,7 +440,6 @@ private static uint low32(nat x) {
         return 0;
     }
     return uint32(x[0]);
-
 }
 
 // low64 returns the least significant 64 bits of x.
@@ -468,7 +452,6 @@ private static ulong low64(nat x) {
         return uint64(x[1]) << 32 | v;
     }
     return v;
-
 }
 
 // Int64 returns the int64 representation of x.
@@ -481,7 +464,6 @@ private static long Int64(this ptr<Int> _addr_x) {
         v = -v;
     }
     return v;
-
 }
 
 // Uint64 returns the uint64 representation of x.
@@ -501,7 +483,6 @@ private static bool IsInt64(this ptr<Int> _addr_x) {
         return w >= 0 || x.neg && w == -w;
     }
     return false;
-
 }
 
 // IsUint64 reports whether x can be represented as a uint64.
@@ -564,7 +545,6 @@ private static (ptr<Int>, bool) setFromScanner(this ptr<Int> _addr_z, io.ByteSca
             return (_addr_null!, false);
         }
     }
-
     return (_addr_z!, true); // err == io.EOF => scan consumed all content of r
 }
 
@@ -600,7 +580,6 @@ private static slice<byte> FillBytes(this ptr<Int> _addr_x, slice<byte> buf) {
         buf[i] = 0;
     }    x.abs.bytes(buf);
     return buf;
-
 }
 
 // BitLen returns the length of the absolute value of x in bits.
@@ -642,7 +621,6 @@ private static ptr<Int> Exp(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
             return _addr_null!;
         }
         xWords = inverse.abs;
-
     }
     var yWords = y.abs;
 
@@ -656,10 +634,8 @@ private static ptr<Int> Exp(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
         // make modulus result positive
         z.abs = z.abs.sub(mWords, z.abs); // z == x**y mod |m| && 0 <= z < |m|
         z.neg = false;
-
     }
     return _addr_z!;
-
 }
 
 // GCD sets z to the greatest common divisor of a and b and returns z.
@@ -702,7 +678,6 @@ private static ptr<Int> GCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
                 x.SetUint64(1);
                 x.neg = negA;
             }
-
         }
         if (y != null) {
             if (lenB == 0) {
@@ -713,13 +688,10 @@ private static ptr<Int> GCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
                 y.SetUint64(1);
                 y.neg = negB;
             }
-
         }
         return _addr_z!;
-
     }
     return _addr_z.lehmerGCD(x, y, a, b)!;
-
 }
 
 // lehmerSimulate attempts to simulate several Euclidean update steps
@@ -771,10 +743,8 @@ private static (Word, Word, Word, Word, bool) lehmerSimulate(ptr<Int> _addr_A, p
         var q = a1 / a2;
         var r = a1 % a2;
         (a1, a2) = (a2, r);        (u0, u1, u2) = (u1, u2, u1 + q * u2);        (v0, v1, v2) = (v1, v2, v1 + q * v2);        even = !even;
-
     }
     return ;
-
 }
 
 // lehmerUpdate updates the inputs A and B such that:
@@ -832,7 +802,6 @@ private static void euclidUpdate(ptr<Int> _addr_A, ptr<Int> _addr_B, ptr<Int> _a
         s.Mul(Ub, q);
         Ub.Sub(Ua, s);
         Ua.Set(t);
-
     }
 }
 
@@ -866,7 +835,6 @@ private static ptr<Int> lehmerGCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<I
         // Ua (Ub) tracks how many times input a has been accumulated into A (B).
         Ua = @new<Int>().SetInt64(1);
         Ub = @new<Int>();
-
     }
     ptr<Int> q = @new<Int>();
     ptr<Int> r = @new<Int>();
@@ -892,16 +860,13 @@ private static ptr<Int> lehmerGCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<I
                 // Ua = u0*Ua + v0*Ub
                 // Ub = u1*Ua + v1*Ub
                 lehmerUpdate(Ua, Ub, q, r, s, t, u0, u1, v0, v1, even);
-
             }
-
         }
         else
  { 
             // Single-digit calculations failed to simulate any quotients.
             // Do a standard Euclidean step.
             euclidUpdate(A, B, Ua, Ub, q, r, s, t, extended);
-
         }
     }
 
@@ -910,7 +875,6 @@ private static ptr<Int> lehmerGCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<I
         if (len(A.abs) > 1) { 
             // A is longer than a single Word, so one update is needed.
             euclidUpdate(A, B, Ua, Ub, q, r, s, t, extended);
-
         }
         if (len(B.abs) > 0) { 
             // A and B are both a single Word.
@@ -924,7 +888,6 @@ private static ptr<Int> lehmerGCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<I
                     q = aWord / bWord;
                     r = aWord % bWord;
                     (aWord, bWord) = (bWord, r);                    (ua, ub) = (ub, ua + q * ub);                    (va, vb) = (vb, va + q * vb);                    even = !even;
-
                 }
             else
 
@@ -939,17 +902,12 @@ private static ptr<Int> lehmerGCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<I
                 s.Mul(Ub, s);
 
                 Ua.Add(t, s);
-
             } {
                 while (bWord != 0) {
                     (aWord, bWord) = (bWord, aWord % bWord);
                 }
-
-
             }
-
             A.abs[0] = aWord;
-
         }
     }
     var negA = a.neg;
@@ -968,7 +926,6 @@ private static ptr<Int> lehmerGCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<I
         }
         y.Sub(A, y);
         y.Div(y, B);
-
     }
     if (x != null) {
         x = Ua.val;
@@ -979,7 +936,6 @@ private static ptr<Int> lehmerGCD(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<I
     z.val = A.val;
 
     return _addr_z!;
-
 }
 
 // Rand sets z to a pseudo-random number in [0, n) and returns z.
@@ -998,7 +954,6 @@ private static ptr<Int> Rand(this ptr<Int> _addr_z, ptr<rand.Rand> _addr_rnd, pt
     }
     z.abs = z.abs.random(rnd, n.abs, n.abs.bitLen());
     return _addr_z!;
-
 }
 
 // ModInverse sets z to the multiplicative inverse of g in the ring ℤ/nℤ
@@ -1035,7 +990,6 @@ private static ptr<Int> ModInverse(this ptr<Int> _addr_z, ptr<Int> _addr_g, ptr<
         z.Set(_addr_x);
     }
     return _addr_z!;
-
 }
 
 // Jacobi returns the Jacobi symbol (x/y), either +1, -1, or 0.
@@ -1058,7 +1012,6 @@ public static nint Jacobi(ptr<Int> _addr_x, ptr<Int> _addr_y) => func((_, panic,
             j = -1;
         }
         b.neg = false;
-
     }
     while (true) {
         if (b.Cmp(intOne) == 0) {
@@ -1086,9 +1039,7 @@ public static nint Jacobi(ptr<Int> _addr_x, ptr<Int> _addr_y) => func((_, panic,
         }
         a.Set(_addr_b);
         b.Set(_addr_c);
-
     }
-
 });
 
 // modSqrt3Mod4 uses the identity
@@ -1106,7 +1057,6 @@ private static ptr<Int> modSqrt3Mod4Prime(this ptr<Int> _addr_z, ptr<Int> _addr_
     e.Rsh(e, 2); // e = (p + 1) / 4
     z.Exp(x, e, p); // z = x^e mod p
     return _addr_z!;
-
 }
 
 // modSqrt5Mod8 uses Atkin's observation that 2 is not a square mod p
@@ -1135,7 +1085,6 @@ private static ptr<Int> modSqrt5Mod8Prime(this ptr<Int> _addr_z, ptr<Int> _addr_
     beta.Mul(beta, alpha);
     z.Mod(beta, p);
     return _addr_z!;
-
 }
 
 // modSqrtTonelliShanks uses the Tonelli-Shanks algorithm to find the square
@@ -1188,9 +1137,7 @@ private static ptr<Int> modSqrtTonelliShanks(this ptr<Int> _addr_z, ptr<Int> _ad
         y.Mul(_addr_y, _addr_t).Mod(_addr_y, p);
         b.Mul(_addr_b, _addr_g).Mod(_addr_b, p);
         r = m;
-
     }
-
 }
 
 // ModSqrt sets z to a square root of x mod p if such a square root exists, and
@@ -1215,7 +1162,6 @@ private static ptr<Int> ModSqrt(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int
     }
     if (x.neg || x.Cmp(p) >= 0) { // ensure 0 <= x < p
         x = @new<Int>().Mod(x, p);
-
     }
 
     if (p.abs[0] % 4 == 3) 
@@ -1227,8 +1173,7 @@ private static ptr<Int> ModSqrt(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int
     else 
         // Otherwise, use Tonelli-Shanks.
         return _addr_z.modSqrtTonelliShanks(x, p)!;
-    
-}
+    }
 
 // Lsh sets z = x << n and returns z.
 private static ptr<Int> Lsh(this ptr<Int> _addr_z, ptr<Int> _addr_x, nuint n) {
@@ -1252,12 +1197,10 @@ private static ptr<Int> Rsh(this ptr<Int> _addr_z, ptr<Int> _addr_x, nuint n) {
         z.abs = t.add(t, natOne);
         z.neg = true; // z cannot be zero if x is negative
         return _addr_z!;
-
     }
     z.abs = z.abs.shr(x.abs, n);
     z.neg = false;
     return _addr_z!;
-
 }
 
 // Bit returns the value of the i'th bit of x. That is, it
@@ -1271,7 +1214,6 @@ private static nuint Bit(this ptr<Int> _addr_x, nint i) => func((_, panic, _) =>
             return uint(x.abs[0] & 1); // bit 0 is same for -x
         }
         return 0;
-
     }
     if (i < 0) {
         panic("negative bit index");
@@ -1281,7 +1223,6 @@ private static nuint Bit(this ptr<Int> _addr_x, nint i) => func((_, panic, _) =>
         return t.bit(uint(i)) ^ 1;
     }
     return x.abs.bit(uint(i));
-
 });
 
 // SetBit sets z to x, with x's i'th bit set to b (0 or 1).
@@ -1305,7 +1246,6 @@ private static ptr<Int> SetBit(this ptr<Int> _addr_z, ptr<Int> _addr_x, nint i, 
     z.abs = z.abs.setBit(x.abs, uint(i), b);
     z.neg = false;
     return _addr_z!;
-
 });
 
 // And sets z = x & y and returns z.
@@ -1322,12 +1262,10 @@ private static ptr<Int> And(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
             z.abs = z.abs.add(z.abs.or(x1, y1), natOne);
             z.neg = true; // z cannot be zero if x and y are negative
             return _addr_z!;
-
         }
         z.abs = z.abs.and(x.abs, y.abs);
         z.neg = false;
         return _addr_z!;
-
     }
     if (x.neg) {
         (x, y) = (y, x);
@@ -1336,7 +1274,6 @@ private static ptr<Int> And(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
     z.abs = z.abs.andNot(x.abs, y1);
     z.neg = false;
     return _addr_z!;
-
 }
 
 // AndNot sets z = x &^ y and returns z.
@@ -1353,12 +1290,10 @@ private static ptr<Int> AndNot(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int>
             z.abs = z.abs.andNot(y1, x1);
             z.neg = false;
             return _addr_z!;
-
         }
         z.abs = z.abs.andNot(x.abs, y.abs);
         z.neg = false;
         return _addr_z!;
-
     }
     if (x.neg) { 
         // (-x) &^ y == ^(x-1) &^ y == ^(x-1) & ^y == ^((x-1) | y) == -(((x-1) | y) + 1)
@@ -1366,13 +1301,11 @@ private static ptr<Int> AndNot(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int>
         z.abs = z.abs.add(z.abs.or(x1, y.abs), natOne);
         z.neg = true; // z cannot be zero if x is negative and y is positive
         return _addr_z!;
-
     }
     y1 = nat(null).sub(y.abs, natOne);
     z.abs = z.abs.and(x.abs, y1);
     z.neg = false;
     return _addr_z!;
-
 }
 
 // Or sets z = x | y and returns z.
@@ -1389,12 +1322,10 @@ private static ptr<Int> Or(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _ad
             z.abs = z.abs.add(z.abs.and(x1, y1), natOne);
             z.neg = true; // z cannot be zero if x and y are negative
             return _addr_z!;
-
         }
         z.abs = z.abs.or(x.abs, y.abs);
         z.neg = false;
         return _addr_z!;
-
     }
     if (x.neg) {
         (x, y) = (y, x);
@@ -1403,7 +1334,6 @@ private static ptr<Int> Or(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _ad
     z.abs = z.abs.add(z.abs.andNot(y1, x.abs), natOne);
     z.neg = true; // z cannot be zero if one of x or y is negative
     return _addr_z!;
-
 }
 
 // Xor sets z = x ^ y and returns z.
@@ -1420,12 +1350,10 @@ private static ptr<Int> Xor(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
             z.abs = z.abs.xor(x1, y1);
             z.neg = false;
             return _addr_z!;
-
         }
         z.abs = z.abs.xor(x.abs, y.abs);
         z.neg = false;
         return _addr_z!;
-
     }
     if (x.neg) {
         (x, y) = (y, x);
@@ -1434,7 +1362,6 @@ private static ptr<Int> Xor(this ptr<Int> _addr_z, ptr<Int> _addr_x, ptr<Int> _a
     z.abs = z.abs.add(z.abs.xor(x.abs, y1), natOne);
     z.neg = true; // z cannot be zero if only one of x or y is negative
     return _addr_z!;
-
 }
 
 // Not sets z = ^x and returns z.
@@ -1447,12 +1374,10 @@ private static ptr<Int> Not(this ptr<Int> _addr_z, ptr<Int> _addr_x) {
         z.abs = z.abs.sub(x.abs, natOne);
         z.neg = false;
         return _addr_z!;
-
     }
     z.abs = z.abs.add(x.abs, natOne);
     z.neg = true; // z cannot be zero if x is positive
     return _addr_z!;
-
 }
 
 // Sqrt sets z to ⌊√x⌋, the largest integer such that z² ≤ x, and returns z.
@@ -1467,7 +1392,6 @@ private static ptr<Int> Sqrt(this ptr<Int> _addr_z, ptr<Int> _addr_x) => func((_
     z.neg = false;
     z.abs = z.abs.sqrt(x.abs);
     return _addr_z!;
-
 });
 
 } // end big_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:47:10 UTC
+//     Generated on 2022 March 13 05:58:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace go
 {
     public static partial class printer_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(Config))]
         [PromotedStruct(typeof(commentInfo))]
         private partial struct printer
@@ -131,7 +131,7 @@ namespace go
             public static implicit operator printer(NilType nil) => default(printer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static printer printer_cast(dynamic value)
         {
             return new printer(value.Config, ref value.fset, value.output, value.indent, value.level, value.mode, value.endAlignment, value.impliedSemi, value.lastTok, value.prevOpen, value.wsbuf, value.goBuild, value.plusBuild, value.pos, value.@out, value.last, ref value.linePtr, value.comments, value.useNodeComments, value.commentInfo, value.nodeSizes, value.cachedPos, value.cachedLine);

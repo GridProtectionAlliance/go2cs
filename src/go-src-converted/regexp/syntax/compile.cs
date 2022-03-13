@@ -2,25 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 22:23:30 UTC
+// package syntax -- go2cs converted at 2022 March 13 05:37:55 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Program Files\Go\src\regexp\syntax\compile.go
-using unicode = go.unicode_package;
-
 namespace go.regexp;
+
+using unicode = unicode_package;
 
 public static partial class syntax_package {
 
-    // A patchList is a list of instruction pointers that need to be filled in (patched).
-    // Because the pointers haven't been filled in yet, we can reuse their storage
-    // to hold the list. It's kind of sleazy, but works well in practice.
-    // See https://swtch.com/~rsc/regexp/regexp1.html for inspiration.
-    //
-    // These aren't really pointers: they're integers, so we can reinterpret them
-    // this way without using package unsafe. A value l.head denotes
-    // p.inst[l.head>>1].Out (l.head&1==0) or .Arg (l.head&1==1).
-    // head == 0 denotes the empty list, okay because we start every program
-    // with a fail instruction, so we'll never want to point at its output link.
+// A patchList is a list of instruction pointers that need to be filled in (patched).
+// Because the pointers haven't been filled in yet, we can reuse their storage
+// to hold the list. It's kind of sleazy, but works well in practice.
+// See https://swtch.com/~rsc/regexp/regexp1.html for inspiration.
+//
+// These aren't really pointers: they're integers, so we can reinterpret them
+// this way without using package unsafe. A value l.head denotes
+// p.inst[l.head>>1].Out (l.head&1==0) or .Arg (l.head&1==1).
+// head == 0 denotes the empty list, okay because we start every program
+// with a fail instruction, so we'll never want to point at its output link.
 private partial struct patchList {
     public uint head;
     public uint tail;
@@ -46,7 +46,6 @@ private static void patch(this patchList l, ptr<Prog> _addr_p, uint val) {
             i.Arg = val;
         }
     }
-
 }
 
 private static patchList append(this patchList l1, ptr<Prog> _addr_p, patchList l2) {
@@ -67,7 +66,6 @@ private static patchList append(this patchList l1, ptr<Prog> _addr_p, patchList 
         i.Arg = l2.head;
     }
     return new patchList(l1.head,l2.tail);
-
 }
 
 // A frag represents a compiled program fragment.
@@ -102,7 +100,6 @@ private static void init(this ptr<compiler> _addr_c) {
     c.p = @new<Prog>();
     c.p.NumCap = 2; // implicit ( and ) for whole match $0
     c.inst(InstFail);
-
 }
 
 private static int anyRuneNotNL = new slice<int>(new int[] { 0, '\n'-1, '\n'+1, unicode.MaxRune });
@@ -131,7 +128,6 @@ private static frag compile(this ptr<compiler> _addr_c, ptr<Regexp> _addr_re) =>
  {
                 f = c.cat(f, f1);
             }
-
         }        return f;
     else if (re.Op == OpCharClass) 
         return c.rune(re.Rune, re.Flags);
@@ -180,7 +176,6 @@ private static frag compile(this ptr<compiler> _addr_c, ptr<Regexp> _addr_re) =>
  {
                     f = c.cat(f, c.compile(sub));
                 }
-
             }
 
             sub = sub__prev1;
@@ -202,7 +197,6 @@ private static frag compile(this ptr<compiler> _addr_c, ptr<Regexp> _addr_re) =>
 
         return f;
         panic("regexp: unhandled case in compile");
-
 });
 
 private static frag inst(this ptr<compiler> _addr_c, InstOp op) {
@@ -212,7 +206,6 @@ private static frag inst(this ptr<compiler> _addr_c, InstOp op) {
     frag f = new frag(i:uint32(len(c.p.Inst)),nullable:true);
     c.p.Inst = append(c.p.Inst, new Inst(Op:op));
     return f;
-
 }
 
 private static frag nop(this ptr<compiler> _addr_c) {
@@ -240,7 +233,6 @@ private static frag cap(this ptr<compiler> _addr_c, uint arg) {
         c.p.NumCap = int(arg) + 1;
     }
     return f;
-
 }
 
 private static frag cat(this ptr<compiler> _addr_c, frag f1, frag f2) {
@@ -252,7 +244,6 @@ private static frag cat(this ptr<compiler> _addr_c, frag f1, frag f2) {
     }
     f1.@out.patch(c.p, f2.i);
     return new frag(f1.i,f2.out,f1.nullable&&f2.nullable);
-
 }
 
 private static frag alt(this ptr<compiler> _addr_c, frag f1, frag f2) {
@@ -272,7 +263,6 @@ private static frag alt(this ptr<compiler> _addr_c, frag f1, frag f2) {
     f.@out = f1.@out.append(c.p, f2.@out);
     f.nullable = f1.nullable || f2.nullable;
     return f;
-
 }
 
 private static frag quest(this ptr<compiler> _addr_c, frag f1, bool nongreedy) {
@@ -291,7 +281,6 @@ private static frag quest(this ptr<compiler> _addr_c, frag f1, bool nongreedy) {
     }
     f.@out = f.@out.append(c.p, f1.@out);
     return f;
-
 }
 
 // loop returns the fragment for the main loop of a plus or star.
@@ -315,7 +304,6 @@ private static frag loop(this ptr<compiler> _addr_c, frag f1, bool nongreedy) {
     }
     f1.@out.patch(c.p, f.i);
     return f;
-
 }
 
 private static frag star(this ptr<compiler> _addr_c, frag f1, bool nongreedy) {
@@ -325,10 +313,8 @@ private static frag star(this ptr<compiler> _addr_c, frag f1, bool nongreedy) {
         // Use (f1+)? to get priority match order correct.
         // See golang.org/issue/46123.
         return c.quest(c.plus(f1, nongreedy), nongreedy);
-
     }
     return c.loop(f1, nongreedy);
-
 }
 
 private static frag plus(this ptr<compiler> _addr_c, frag f1, bool nongreedy) {
@@ -357,7 +343,6 @@ private static frag rune(this ptr<compiler> _addr_c, slice<int> r, Flags flags) 
     if (len(r) != 1 || unicode.SimpleFold(r[0]) == r[0]) { 
         // and sometimes not even that
         flags &= FoldCase;
-
     }
     i.Arg = uint32(flags);
     f.@out = makePatchList(f.i << 1); 
@@ -371,7 +356,6 @@ private static frag rune(this ptr<compiler> _addr_c, slice<int> r, Flags flags) 
     else if (len(r) == 4 && r[0] == 0 && r[1] == '\n' - 1 && r[2] == '\n' + 1 && r[3] == unicode.MaxRune) 
         i.Op = InstRuneAnyNotNL;
         return f;
-
 }
 
 } // end syntax_package

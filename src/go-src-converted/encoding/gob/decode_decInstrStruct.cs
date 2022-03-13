@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:02 UTC
+//     Generated on 2022 March 13 05:39:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace encoding
 {
     public static partial class gob_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct decInstr
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace encoding
             public static implicit operator decInstr(NilType nil) => default(decInstr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static decInstr decInstr_cast(dynamic value)
         {
             return new decInstr(value.op, value.field, value.index, value.ovfl);

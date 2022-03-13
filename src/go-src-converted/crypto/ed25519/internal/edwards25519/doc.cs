@@ -19,8 +19,10 @@
 //
 // (Note that filippo.io/edwards25519 and github.com/gtank/ristretto255 are not
 // maintained by the Go team and are not covered by the Go 1 Compatibility Promise.)
-// package edwards25519 -- go2cs converted at 2022 March 06 22:17:16 UTC
+
+// package edwards25519 -- go2cs converted at 2022 March 13 05:30:38 UTC
 // import "crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\doc.go
+namespace go.crypto.ed25519.@internal;
 
 } // end edwards25519_package

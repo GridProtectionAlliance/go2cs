@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssagen -- go2cs converted at 2022 March 06 23:09:49 UTC
+// package ssagen -- go2cs converted at 2022 March 13 06:23:05 UTC
 // import "cmd/compile/internal/ssagen" ==> using ssagen = go.cmd.compile.@internal.ssagen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssagen\phi.go
-using heap = go.container.heap_package;
-using fmt = go.fmt_package;
-
-using ir = go.cmd.compile.@internal.ir_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
-public static partial class ssagen_package {
+using heap = container.heap_package;
+using fmt = fmt_package;
 
-    // This file contains the algorithm to place phi nodes in a function.
-    // For small functions, we use Braun, Buchwald, Hack, Leißa, Mallon, and Zwinkau.
-    // https://pp.info.uni-karlsruhe.de/uploads/publikationen/braun13cc.pdf
-    // For large functions, we use Sreedhar & Gao: A Linear Time Algorithm for Placing Φ-Nodes.
-    // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.8.1979&rep=rep1&type=pdf
+using ir = cmd.compile.@internal.ir_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// This file contains the algorithm to place phi nodes in a function.
+// For small functions, we use Braun, Buchwald, Hack, Leißa, Mallon, and Zwinkau.
+// https://pp.info.uni-karlsruhe.de/uploads/publikationen/braun13cc.pdf
+// For large functions, we use Sreedhar & Gao: A Linear Time Algorithm for Placing Φ-Nodes.
+// http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.8.1979&rep=rep1&type=pdf
+
+
+using System;public static partial class ssagen_package {
+
 private static readonly nint smallBlocks = 500;
 
 
@@ -59,7 +60,6 @@ private static void insertPhis(this ptr<state> _addr_s) {
     }
     phiState ps = new phiState(s:s,f:s.f,defvars:s.defvars);
     ps.insertPhis();
-
 }
 
 private partial struct phiState {
@@ -123,9 +123,7 @@ private static void insertPhis(this ptr<phiState> _addr_s) {
                             }
 
                         }
-
                     }
-
                     {
                         var (_, ok) = s.varnum[var_];
 
@@ -134,15 +132,12 @@ private static void insertPhis(this ptr<phiState> _addr_s) {
                         }
 
                     }
-
                     s.varnum[var_] = int32(len(vartypes));
                     if (debugPhi) {
                         fmt.Printf("var%d = %v\n", len(vartypes), var_);
                     }
-
                     vars = append(vars, var_);
                     vartypes = append(vartypes, v.Type);
-
                 }
 
                 v = v__prev2;
@@ -177,7 +172,6 @@ private static void insertPhis(this ptr<phiState> _addr_s) {
                         n = n__prev1;
 
                     }
-
                 }
 
                 var_ = var___prev2;
@@ -223,7 +217,6 @@ levels:
             p = p__prev1;
 
         }
-
         {
             var c__prev1 = c;
 
@@ -237,7 +230,6 @@ levels:
             c = c__prev1;
 
         }
-
         while (true) {
             {
                 var c__prev1 = c;
@@ -253,15 +245,12 @@ levels:
                 c = c__prev1;
 
             }
-
             b = s.idom[b.ID];
             if (b == null) {
                 _breaklevels = true;
                 break;
             }
-
         }
-
     } 
 
     // Allocate scratch locations.
@@ -304,7 +293,6 @@ levels:
                         v.Op = ssa.OpUnknown;
                         v.Aux = null;
                     }
-
                 }
 
                 v = v__prev2;
@@ -368,9 +356,7 @@ private static void insertVarPhis(this ptr<phiState> _addr_s, nint n, ir.Node va
                 if (s.level[c.ID] > currentRootLevel) { 
                     // a D-edge, or an edge whose target is in currentRoot's subtree.
                     continue;
-
                 }
-
                 if (hasPhi.contains(c.ID)) {
                     continue;
                 } 
@@ -381,22 +367,18 @@ private static void insertVarPhis(this ptr<phiState> _addr_s, nint n, ir.Node va
                 if (var_.Op() == ir.ONAME) {
                     s.s.addNamedValue(var_._<ptr<ir.Name>>(), v);
                 }
-
                 foreach (>>MARKER:FORRANGEEXPRESSIONS_LEVEL_4<< in c.Preds) {>>MARKER:FORRANGEMUTABLEEXPRESSIONS_LEVEL_4<<
                     v.AddArg(s.placeholder); // Actual args will be filled in by resolveFwdRefs.
                 }
                 if (debugPhi) {
                     fmt.Printf("new phi for var%d in %s: %s\n", n, c, v);
                 }
-
                 if (!hasDef.contains(c.ID)) { 
                     // There's now a new definition of this variable in block c.
                     // Add it to the priority queue to explore.
                     heap.Push(priq, c);
                     hasDef.add(c.ID);
-
                 }
-
             } 
 
             // Visit children if they have not been visited yet.
@@ -411,17 +393,13 @@ private static void insertVarPhis(this ptr<phiState> _addr_s, nint n, ir.Node va
                         queued.add(c.ID);
                     c = s.tree[c.ID].sibling;
                     }
-
                 }
 
 
                 c = c__prev3;
             }
-
         }
-
     }
-
 }
 
 // resolveFwdRefs links all FwdRef uses up to their nearest dominating definition.
@@ -462,7 +440,6 @@ private static void resolveFwdRefs(this ptr<phiState> _addr_s) {
             // On exit from a block, this case will undo any assignments done below.
             values[work.n] = work.v;
             continue;
-
         }
         {
             var v__prev2 = v;
@@ -477,7 +454,6 @@ private static void resolveFwdRefs(this ptr<phiState> _addr_s) {
                 stk = append(stk, new stackEntry(n:n,v:values[n])); 
                 // Record the new assignment.
                 values[n] = v;
-
             } 
 
             // Replace a FwdRef op with the current incoming value for its variable.
@@ -514,13 +490,11 @@ private static void resolveFwdRefs(this ptr<phiState> _addr_s) {
                 if (!ok) { 
                     // some variable not live across a basic block boundary.
                     continue;
-
                 } 
                 // Remember the old assignment so we can undo it when we exit b.
                 stk = append(stk, new stackEntry(n:n,v:values[n])); 
                 // Record the new assignment.
                 values[n] = v;
-
             } 
 
             // Replace phi args in successors with the current incoming value.
@@ -547,10 +521,7 @@ private static void resolveFwdRefs(this ptr<phiState> _addr_s) {
                     }
 
                 }
-
             }
-
-
         }        {
             var c__prev2 = c;
 
@@ -564,9 +535,7 @@ private static void resolveFwdRefs(this ptr<phiState> _addr_s) {
 
             c = c__prev2;
         }
-
     }
-
 }
 
 // domBlock contains extra per-block information to record the dominator tree.
@@ -652,7 +621,6 @@ private static void add(this ptr<sparseSet> _addr_s, ssa.ID x) {
     }
     s.dense = append(s.dense, x);
     s.sparse[x] = int32(len(s.dense)) - 1;
-
 }
 
 private static void clear(this ptr<sparseSet> _addr_s) {
@@ -699,7 +667,6 @@ private static void insertPhis(this ptr<simplePhiState> _addr_s) {
                         }
 
                     }
-
                 }
 
                 v = v__prev2;
@@ -719,7 +686,6 @@ loop:
         if (b == s.f.Entry) { 
             // No variable should be live at entry.
             s.s.Fatalf("Value live at entry. It shouldn't be. func %s, node %v, value %v", s.f.Name, var_, v);
-
         }
         if (!s.reachable[b.ID]) { 
             // This block is dead.
@@ -727,7 +693,6 @@ loop:
             v.Op = ssa.OpUnknown;
             v.Aux = null;
             continue;
-
         }
         args = args[..(int)0];
         foreach (var (_, e) in b.Preds) {
@@ -737,11 +702,9 @@ loop:
             if (a == v) {
                 continue; // self-reference
             }
-
             if (a == w) {
                 continue; // already have this witness
             }
-
             if (w != null) { 
                 // two witnesses, need a phi value
                 v.Op = ssa.OpPhi;
@@ -750,7 +713,6 @@ loop:
                 _continueloop = true;
                 break;
             }
-
             w = a; // save witness
         }        if (w == null) {
             s.s.Fatalf("no witness for reachable phi %s", v);
@@ -758,9 +720,7 @@ loop:
         v.Op = ssa.OpCopy;
         v.Aux = null;
         v.AddArg(w);
-
     }
-
 }
 
 // lookupVarOutgoing finds the variable's value at the end of block b.
@@ -796,7 +756,6 @@ private static ptr<ssa.Value> lookupVarOutgoing(this ptr<simplePhiState> _addr_s
             // This is rare; it happens with oddly interleaved infinite loops in dead code.
             // See issue 19783.
             break;
-
         }
     } 
     // Generate a FwdRef for the variable and return that.
@@ -807,7 +766,6 @@ private static ptr<ssa.Value> lookupVarOutgoing(this ptr<simplePhiState> _addr_s
     }
     s.fwdrefs = append(s.fwdrefs, v);
     return _addr_v!;
-
 }
 
 } // end ssagen_package

@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:15:51 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:48 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\interface.go
-using errors = go.errors_package;
-using itoa = go.@internal.itoa_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
 namespace go;
+
+using errors = errors_package;
+using itoa = @internal.itoa_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// BUG(mikio): On JS, methods and functions related to
+// Interface are not implemented.
+
+// BUG(mikio): On AIX, DragonFly BSD, NetBSD, OpenBSD, Plan 9 and
+// Solaris, the MulticastAddrs method of Interface is not implemented.
 
 public static partial class net_package {
 
-    // BUG(mikio): On JS, methods and functions related to
-    // Interface are not implemented.
-
-    // BUG(mikio): On AIX, DragonFly BSD, NetBSD, OpenBSD, Plan 9 and
-    // Solaris, the MulticastAddrs method of Interface is not implemented.
 private static var errInvalidInterface = errors.New("invalid network interface");private static var errInvalidInterfaceIndex = errors.New("invalid network interface index");private static var errInvalidInterfaceName = errors.New("invalid network interface name");private static var errNoSuchInterface = errors.New("no such network interface");private static var errNoSuchMulticastInterface = errors.New("no such multicast network interface");
 
 // Interface represents a mapping between network interface name
@@ -56,7 +58,6 @@ public static @string String(this Flags f) {
         s = "0";
     }
     return s;
-
 }
 
 // Addrs returns a list of unicast interface addresses for a specific
@@ -74,7 +75,6 @@ private static (slice<Addr>, error) Addrs(this ptr<Interface> _addr_ifi) {
         err = addr(new OpError(Op:"route",Net:"ip+net",Source:nil,Addr:nil,Err:err));
     }
     return (ifat, error.As(err)!);
-
 }
 
 // MulticastAddrs returns a list of multicast, joined group addresses
@@ -92,7 +92,6 @@ private static (slice<Addr>, error) MulticastAddrs(this ptr<Interface> _addr_ifi
         err = addr(new OpError(Op:"route",Net:"ip+net",Source:nil,Addr:nil,Err:err));
     }
     return (ifat, error.As(err)!);
-
 }
 
 // Interfaces returns a list of the system's network interfaces.
@@ -108,7 +107,6 @@ public static (slice<Interface>, error) Interfaces() {
         zoneCache.update(ift, false);
     }
     return (ift, error.As(null!)!);
-
 }
 
 // InterfaceAddrs returns a list of the system's unicast interface
@@ -125,7 +123,6 @@ public static (slice<Addr>, error) InterfaceAddrs() {
         err = addr(new OpError(Op:"route",Net:"ip+net",Source:nil,Addr:nil,Err:err));
     }
     return (ifat, error.As(err)!);
-
 }
 
 // InterfaceByIndex returns the interface specified by index.
@@ -149,7 +146,6 @@ public static (ptr<Interface>, error) InterfaceByIndex(nint index) {
         err = addr(new OpError(Op:"route",Net:"ip+net",Source:nil,Addr:nil,Err:err));
     }
     return (_addr_ifi!, error.As(err)!);
-
 }
 
 private static (ptr<Interface>, error) interfaceByIndex(slice<Interface> ift, nint index) {
@@ -161,7 +157,6 @@ private static (ptr<Interface>, error) interfaceByIndex(slice<Interface> ift, ni
             return (_addr__addr_ifi!, error.As(null!)!);
         }
     }    return (_addr_null!, error.As(errNoSuchInterface)!);
-
 }
 
 // InterfaceByName returns the interface specified by name.
@@ -184,7 +179,6 @@ public static (ptr<Interface>, error) InterfaceByName(@string name) {
             return (_addr__addr_ifi!, error.As(null!)!);
         }
     }    return (_addr_null!, error.As(addr(new OpError(Op:"route",Net:"ip+net",Source:nil,Addr:nil,Err:errNoSuchInterface))!)!);
-
 }
 
 // An ipv6ZoneCache represents a cache holding partial network
@@ -236,9 +230,7 @@ private static bool update(this ptr<ipv6ZoneCache> _addr_zc, slice<Interface> if
             }
 
         }
-
     }    return true;
-
 });
 
 private static @string name(this ptr<ipv6ZoneCache> _addr_zc, nint index) {
@@ -259,10 +251,8 @@ private static @string name(this ptr<ipv6ZoneCache> _addr_zc, nint index) {
     }
     if (!ok) { // last resort
         name = itoa.Uitoa(uint(index));
-
     }
     return name;
-
 }
 
 private static nint index(this ptr<ipv6ZoneCache> _addr_zc, @string name) {
@@ -283,10 +273,8 @@ private static nint index(this ptr<ipv6ZoneCache> _addr_zc, @string name) {
     }
     if (!ok) { // last resort
         index, _, _ = dtoi(name);
-
     }
     return index;
-
 }
 
 } // end net_package

@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:09:22 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:41 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\xposmap.go
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -49,7 +48,6 @@ private static void clear(this ptr<xposmap> _addr_m) {
         }
     }    m.lastIndex = -1;
     m.lastMap = null;
-
 }
 
 // mapFor returns the line range map for a given file index.
@@ -63,7 +61,6 @@ private static ptr<biasedSparseMap> mapFor(this ptr<xposmap> _addr_m, int index)
     m.lastIndex = index;
     m.lastMap = mf;
     return _addr_mf!;
-
 }
 
 // set inserts p->v into the map.
@@ -76,7 +73,6 @@ private static void set(this ptr<xposmap> _addr_m, src.XPos p, int v) => func((_
         panic(fmt.Sprintf("xposmap.set(%d), file index not found in map\n", p.FileIndex()));
     }
     s.set(p.Line(), v);
-
 });
 
 // get returns the int32 associated with the file index and line of p.
@@ -88,7 +84,6 @@ private static int get(this ptr<xposmap> _addr_m, src.XPos p) {
         return -1;
     }
     return s.get(p.Line());
-
 }
 
 // add adds p to m, treating m as a set instead of as a map.
@@ -110,7 +105,6 @@ private static bool contains(this ptr<xposmap> _addr_m, src.XPos p) {
         return false;
     }
     return s.contains(p.Line());
-
 }
 
 // remove removes the file index and line for p from m,
@@ -123,7 +117,6 @@ private static void remove(this ptr<xposmap> _addr_m, src.XPos p) {
         return ;
     }
     s.remove(p.Line());
-
 }
 
 // foreachEntry applies f to each (fileindex, line, value) triple in m.

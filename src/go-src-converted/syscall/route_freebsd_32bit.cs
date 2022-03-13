@@ -5,12 +5,12 @@
 //go:build (freebsd && 386) || (freebsd && arm)
 // +build freebsd,386 freebsd,arm
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:44 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:32 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\route_freebsd_32bit.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
@@ -23,7 +23,6 @@ private static ptr<RouteMessage> parseRouteMessage(this ptr<anyMessage> _addr_an
         off += SizeofRtMetrics; // rt_metrics on amd64 is simply doubled
     }
     return addr(new RouteMessage(Header:p.Header,Data:b[rsaAlignOf(off):any.Msglen]));
-
 }
 
 private static ptr<InterfaceMessage> parseInterfaceMessage(this ptr<anyMessage> _addr_any, slice<byte> b) {
@@ -41,7 +40,6 @@ private static ptr<InterfaceMessage> parseInterfaceMessage(this ptr<anyMessage> 
         return addr(new InterfaceMessage(Header:p.Header,Data:b[int(unsafe.Offsetof(p.Header.Data))+int(p.Header.Data.Datalen):any.Msglen]));
     }
     return addr(new InterfaceMessage(Header:p.Header,Data:b[int(unsafe.Offsetof(p.Header.Data))+int(p.Header.Data.Datalen):any.Msglen]));
-
 }
 
 } // end syscall_package

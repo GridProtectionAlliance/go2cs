@@ -4,18 +4,17 @@
 
 // Parsing of PE executables (Microsoft Windows).
 
-// package objfile -- go2cs converted at 2022 March 06 22:32:34 UTC
+// package objfile -- go2cs converted at 2022 March 13 05:43:33 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\pe.go
-using dwarf = go.debug.dwarf_package;
-using pe = go.debug.pe_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.@internal;
+
+using dwarf = debug.dwarf_package;
+using pe = debug.pe_package;
+using fmt = fmt_package;
+using io = io_package;
+using sort = sort_package;
+using System;
 
 public static partial class objfile_package {
 
@@ -32,7 +31,6 @@ private static (rawFile, error) openPE(io.ReaderAt r) {
         return (null, error.As(err)!);
     }
     return (addr(new peFile(f)), error.As(null!)!);
-
 }
 
 private static (slice<Sym>, error) symbols(this ptr<peFile> _addr_f) {
@@ -89,13 +87,11 @@ private static (slice<Sym>, error) symbols(this ptr<peFile> _addr_f) {
  {
                     sym.Code = 'D';
                 }
-
             else if (ch & bss != 0) 
                 sym.Code = 'B';
                         sym.Addr += imageBase + uint64(sect.VirtualAddress);
                 syms = append(syms, sym);
         addrs = append(addrs, sym.Addr);
-
     }    sort.Sort(uint64s(addrs));
     foreach (var (i) in syms) {
         var j = sort.Search(len(addrs), x => addrs[x] > syms[i].Addr);
@@ -103,7 +99,6 @@ private static (slice<Sym>, error) symbols(this ptr<peFile> _addr_f) {
             syms[i].Size = int64(addrs[j] - syms[i].Addr);
         }
     }    return (syms, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<peFile> _addr_f) {
@@ -135,7 +130,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<peFile> _a
             textStart = imageBase + uint64(sect.VirtualAddress);
         }
     }
-
     pclntab, err = loadPETable(_addr_f.pe, "runtime.pclntab", "runtime.epclntab");
 
     if (err != null) { 
@@ -160,7 +154,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<peFile> _a
         }
     }
     return (textStart, symtab, pclntab, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, error) text(this ptr<peFile> _addr_f) {
@@ -191,7 +184,6 @@ private static (ulong, slice<byte>, error) text(this ptr<peFile> _addr_f) {
     textStart = imageBase + uint64(sect.VirtualAddress);
     text, err = sect.Data();
     return ;
-
 }
 
 private static (ptr<pe.Symbol>, error) findPESymbol(ptr<pe.File> _addr_f, @string name) {
@@ -210,9 +202,7 @@ private static (ptr<pe.Symbol>, error) findPESymbol(ptr<pe.File> _addr_f, @strin
             return (_addr_null!, error.As(fmt.Errorf("symbol %s: section number %d is larger than max %d", name, s.SectionNumber, len(f.Sections)))!);
         }
         return (_addr_s!, error.As(null!)!);
-
     }    return (_addr_null!, error.As(fmt.Errorf("no %s symbol found", name))!);
-
 }
 
 private static (slice<byte>, error) loadPETable(ptr<pe.File> _addr_f, @string sname, @string ename) {
@@ -237,7 +227,6 @@ private static (slice<byte>, error) loadPETable(ptr<pe.File> _addr_f, @string sn
         return (null, error.As(err)!);
     }
     return (data[(int)ssym.Value..(int)esym.Value], error.As(null!)!);
-
 }
 
 private static @string goarch(this ptr<peFile> _addr_f) {
@@ -254,8 +243,7 @@ private static @string goarch(this ptr<peFile> _addr_f) {
         return "arm64";
     else 
         return "";
-    
-}
+    }
 
 private static (ulong, error) loadAddress(this ptr<peFile> _addr_f) {
     ulong _p0 = default;

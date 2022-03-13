@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:10 UTC
+//     Generated on 2022 March 13 06:00:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct NameQueue
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator NameQueue(NilType nil) => default(NameQueue);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static NameQueue NameQueue_cast(dynamic value)
         {
             return new NameQueue(value.ring, value.head, value.tail);

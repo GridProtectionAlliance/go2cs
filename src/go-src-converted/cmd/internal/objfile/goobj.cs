@@ -4,23 +4,22 @@
 
 // Parsing of Go intermediate object files and archives.
 
-// package objfile -- go2cs converted at 2022 March 06 22:32:18 UTC
+// package objfile -- go2cs converted at 2022 March 13 05:43:16 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\goobj.go
-using archive = go.cmd.@internal.archive_package;
-using goobj = go.cmd.@internal.goobj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using dwarf = go.debug.dwarf_package;
-using gosym = go.debug.gosym_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using System;
-
-
 namespace go.cmd.@internal;
+
+using archive = cmd.@internal.archive_package;
+using goobj = cmd.@internal.goobj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using dwarf = debug.dwarf_package;
+using gosym = debug.gosym_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using System;
 
 public static partial class objfile_package {
 
@@ -84,12 +83,9 @@ L:
                     }
 
                 }
-
             }
                 return (_addr_null!, error.As(fmt.Errorf("open %s: unrecognized archive member %s", f.Name(), e.Name))!);
-
     }    return (addr(new File(f,entries)), error.As(null!)!);
-
 }
 
 private static @string goobjName(@string name, nint ver) {
@@ -97,7 +93,6 @@ private static @string goobjName(@string name, nint ver) {
         return name;
     }
     return fmt.Sprintf("%s<%d>", name, ver);
-
 }
 
 private partial struct goobjReloc {
@@ -116,13 +111,11 @@ private static @string String(this goobjReloc r, ulong insnOffset) {
             return fmt.Sprintf("%s:%s+%d", s, r.Sym, r.Add);
         }
         return fmt.Sprintf("%s:%s", s, r.Sym);
-
     }
     if (r.Add != 0) {
         return fmt.Sprintf("%s:%d", s, r.Add);
     }
     return s;
-
 }
 
 private static (slice<Sym>, error) symbols(this ptr<goobjFile> _addr_f) => func((_, panic, _) => {
@@ -152,10 +145,8 @@ private static (slice<Sym>, error) symbols(this ptr<goobjFile> _addr_f) => func(
         if (abi == goobj.SymABIstatic) { 
             // Static symbol
             ver = 1;
-
         }
         return ver;
-
     };
 
     Func<goobj.SymRef, @string> resolveSymRef = s => {
@@ -186,7 +177,6 @@ private static (slice<Sym>, error) symbols(this ptr<goobjFile> _addr_f) => func(
         }
         var sym = r.Sym(i);
         return goobjName(sym.Name(r), abiToVer(sym.ABI()));
-
     }; 
 
     // Defined symbols
@@ -199,7 +189,6 @@ private static (slice<Sym>, error) symbols(this ptr<goobjFile> _addr_f) => func(
             if (osym.Name(r) == "") {
                 continue; // not a real symbol
             }
-
             var name = osym.Name(r);
             ver = osym.ABI();
             name = goobjName(name, abiToVer(ver));
@@ -217,7 +206,6 @@ private static (slice<Sym>, error) symbols(this ptr<goobjFile> _addr_f) => func(
                         if (ver >= goobj.SymABIstatic) {
                 code += 'a' - 'A';
             }
-
             sym = new Sym(Name:name,Addr:uint64(r.DataOff(i)),Size:int64(osym.Siz()),Code:code,);
 
             var relocs = r.Relocs(i);
@@ -227,7 +215,6 @@ private static (slice<Sym>, error) symbols(this ptr<goobjFile> _addr_f) => func(
                 sym.Relocs[j] = new Reloc(Addr:uint64(r.DataOff(i))+uint64(rel.Off()),Size:uint64(rel.Siz()),Stringer:goobjReloc{Off:rel.Off(),Size:rel.Siz(),Type:objabi.RelocType(rel.Type()),Add:rel.Add(),Sym:resolveSymRef(rel.Sym()),},);
             }
             syms = append(syms, sym);
-
         }
 
         i = i__prev1;
@@ -259,7 +246,6 @@ private static (slice<Sym>, error) symbols(this ptr<goobjFile> _addr_f) => func(
     }
 
     return (syms, error.As(null!)!);
-
 });
 
 private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<goobjFile> _addr_f) {
@@ -272,7 +258,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<goobjFile>
     // Should never be called. We implement Liner below, callers
     // should use that instead.
     return (0, null, null, error.As(fmt.Errorf("pcln not available in go object file"))!);
-
 }
 
 // Find returns the file name, line, and function data for the given pc.
@@ -292,11 +277,9 @@ private static (@string, nint, ptr<gosym.Func>) PCToLine(this ptr<goobjFile> _ad
         if (s.PkgIdx != goobj.PkgIdxHashed) { 
             // We don't need the data for non-hashed symbols, yet.
             panic("not supported");
-
         }
         var i = uint32(s.SymIdx + uint32(r.NSym() + r.NHashed64def()));
         return r.BytesAt(r.DataOff(i), r.DataSize(i));
-
     };
 
     var ndef = uint32(r.NSym() + r.NHashed64def() + r.NHasheddef() + r.NNonpkgdef());
@@ -334,13 +317,11 @@ private static (@string, nint, ptr<gosym.Func>) PCToLine(this ptr<goobjFile> _ad
             // Note: we provide only the name in the Func structure.
             // We could provide more if needed.
             return (fileName, line, addr(new gosym.Func(Sym:&gosym.Sym{Name:osym.Name(r)})));
-
         }
 
         i = i__prev1;
     }
     return ("", 0, _addr_null!);
-
 });
 
 // pcValue looks up the given PC in a pc value table. target is the
@@ -356,7 +337,6 @@ private static int pcValue(slice<byte> tab, ulong target, ptr<sys.Arch> _addr_ar
         }
     }
     return -1;
-
 }
 
 // step advances to the next pc, value pair in the encoded table.
@@ -382,7 +362,6 @@ private static bool step(ptr<slice<byte>> _addr_p, ptr<ulong> _addr_pc, ptr<int>
     pc += uint64(pcdelta);
     val += vdelta;
     return true;
-
 }
 
 // readvarint reads, removes, and returns a varint from *p.
@@ -394,7 +373,7 @@ private static uint readvarint(ptr<slice<byte>> _addr_p) {
     slice<byte> s = p;
     shift = 0;
 
-    while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+    while () {
         var b = s[0];
         s = s[(int)1..];
         v |= (uint32(b) & 0x7F) << (int)(shift);
@@ -405,7 +384,6 @@ private static uint readvarint(ptr<slice<byte>> _addr_p) {
     }
     p = s;
     return v;
-
 }
 
 // We treat the whole object file as the text section.

@@ -5,21 +5,22 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:38 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:01 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\file_unix.go
-using poll = go.@internal.poll_package;
-using unix = go.@internal.syscall.unix_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using poll = @internal.poll_package;
+using unix = @internal.syscall.unix_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// fixLongPath is a noop on non-Windows platforms.
+
+using System;
 public static partial class os_package {
 
-    // fixLongPath is a noop on non-Windows platforms.
 private static @string fixLongPath(@string path) {
     return path;
 }
@@ -47,26 +48,19 @@ private static error rename(@string oldname, @string newname) {
                     }
 
                 }
-
                 return error.As(addr(new LinkError("rename",oldname,newname,err))!)!;
-
             }
             else if (newname == oldname || !SameFile(fi, ofi)) {
                 return error.As(addr(new LinkError("rename",oldname,newname,syscall.EEXIST))!)!;
             }
 
-
         }
-
     }
-    err = ignoringEINTR(() => {
-        return error.As(syscall.Rename(oldname, newname))!;
-    });
+    err = ignoringEINTR(() => error.As(syscall.Rename(oldname, newname))!);
     if (err != null) {
         return error.As(addr(new LinkError("rename",oldname,newname,err))!)!;
     }
     return error.As(null!)!;
-
 }
 
 // file is the real representation of *File.
@@ -104,7 +98,6 @@ private static System.UIntPtr Fd(this ptr<File> _addr_f) {
         f.pfd.SetBlocking();
     }
     return uintptr(f.pfd.Sysfd);
-
 }
 
 // NewFile returns a new File with the given file descriptor and
@@ -125,9 +118,7 @@ public static ptr<File> NewFile(System.UIntPtr fd, @string name) {
             kind = kindNonBlock;
         }
     }
-
     return _addr_newFile(fd, name, kind)!;
-
 }
 
 // newFileKind describes the kind of file to newFile.
@@ -138,7 +129,6 @@ private static readonly newFileKind kindNewFile = iota;
 private static readonly var kindOpenFile = 0;
 private static readonly var kindPipe = 1;
 private static readonly var kindNonBlock = 2;
-
 
 // newFile is like NewFile, but if called from OpenFile or Pipe
 // (as passed in the kind parameter) it tries to add the file to
@@ -169,9 +159,7 @@ private static ptr<File> newFile(System.UIntPtr fd, @string name, newFileKind ki
 
             case "openbsd": 
                 ref syscall.Stat_t st = ref heap(out ptr<syscall.Stat_t> _addr_st);
-                var err = ignoringEINTR(() => {
-                    return _addr_syscall.Fstat(fdi, _addr_st)!;
-                });
+                var err = ignoringEINTR(() => _addr_syscall.Fstat(fdi, _addr_st)!);
                 var typ = st.Mode & syscall.S_IFMT; 
                 // Don't try to use kqueue with regular files on *BSDs.
                 // On FreeBSD a regular file is always
@@ -191,10 +179,8 @@ private static ptr<File> newFile(System.UIntPtr fd, @string name, newFileKind ki
                 if ((runtime.GOOS == "darwin" || runtime.GOOS == "ios") && typ == syscall.S_IFIFO) {
                     pollable = false;
                 }
-
                 break;
         }
-
     }
     {
         var err__prev1 = err;
@@ -224,17 +210,14 @@ private static ptr<File> newFile(System.UIntPtr fd, @string name, newFileKind ki
                 err = err__prev3;
 
             }
-
         }
 
         err = err__prev1;
 
     }
 
-
     runtime.SetFinalizer(f.file, (file.val).close);
     return _addr_f!;
-
 }
 
 // epipecheck raises SIGPIPE if we get an EPIPE error on standard
@@ -272,7 +255,6 @@ private static (ptr<File>, error) openFileNolog(@string name, nint flag, FileMod
             }
 
         }
-
     }
     nint r = default;
     while (true) {
@@ -285,7 +267,6 @@ private static (ptr<File>, error) openFileNolog(@string name, nint flag, FileMod
             continue;
         }
         return (_addr_null!, error.As(addr(new PathError(Op:"open",Path:name,Err:e))!)!);
-
     } 
 
     // open(2) itself won't handle the sticky bit on *BSD and Solaris
@@ -296,7 +277,6 @@ private static (ptr<File>, error) openFileNolog(@string name, nint flag, FileMod
         syscall.CloseOnExec(r);
     }
     return (_addr_newFile(uintptr(r), name, kindOpenFile)!, error.As(null!)!);
-
 }
 
 private static error close(this ptr<file> _addr_file) {
@@ -324,7 +304,6 @@ private static error close(this ptr<file> _addr_file) {
     // no need for a finalizer anymore
     runtime.SetFinalizer(file, null);
     return error.As(err)!;
-
 }
 
 // seek sets the offset for the next Read or Write on file to offset, interpreted
@@ -341,26 +320,21 @@ private static (long, error) seek(this ptr<File> _addr_f, long offset, nint when
         // access this file as a directory again. See #35767 and #37161.
         f.dirinfo.close();
         f.dirinfo = null;
-
     }
     ret, err = f.pfd.Seek(offset, whence);
     runtime.KeepAlive(f);
     return (ret, error.As(err)!);
-
 }
 
 // Truncate changes the size of the named file.
 // If the file is a symbolic link, it changes the size of the link's target.
 // If there is an error, it will be of type *PathError.
 public static error Truncate(@string name, long size) {
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Truncate(name, size))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Truncate(name, size))!);
     if (e != null) {
         return error.As(addr(new PathError(Op:"truncate",Path:name,Err:e))!)!;
     }
     return error.As(null!)!;
-
 }
 
 // Remove removes the named file or (empty) directory.
@@ -370,15 +344,11 @@ public static error Remove(@string name) {
     // whether name is a file or directory.
     // Try both: it is cheaper on average than
     // doing a Stat plus the right one.
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Unlink(name))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Unlink(name))!);
     if (e == null) {
         return error.As(null!)!;
     }
-    var e1 = ignoringEINTR(() => {
-        return error.As(syscall.Rmdir(name))!;
-    });
+    var e1 = ignoringEINTR(() => error.As(syscall.Rmdir(name))!);
     if (e1 == null) {
         return error.As(null!)!;
     }
@@ -386,7 +356,6 @@ public static error Remove(@string name) {
         e = e1;
     }
     return error.As(addr(new PathError(Op:"remove",Path:name,Err:e))!)!;
-
 }
 
 private static @string tempDir() {
@@ -401,20 +370,16 @@ private static @string tempDir() {
         }
     }
     return dir;
-
 }
 
 // Link creates newname as a hard link to the oldname file.
 // If there is an error, it will be of type *LinkError.
 public static error Link(@string oldname, @string newname) {
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Link(oldname, newname))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Link(oldname, newname))!);
     if (e != null) {
         return error.As(addr(new LinkError("link",oldname,newname,e))!)!;
     }
     return error.As(null!)!;
-
 }
 
 // Symlink creates newname as a symbolic link to oldname.
@@ -422,14 +387,11 @@ public static error Link(@string oldname, @string newname) {
 // if oldname is later created as a directory the symlink will not work.
 // If there is an error, it will be of type *LinkError.
 public static error Symlink(@string oldname, @string newname) {
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Symlink(oldname, newname))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Symlink(oldname, newname))!);
     if (e != null) {
         return error.As(addr(new LinkError("symlink",oldname,newname,e))!)!;
     }
     return error.As(null!)!;
-
 }
 
 // Readlink returns the destination of the named symbolic link.
@@ -441,7 +403,7 @@ public static (@string, error) Readlink(@string name) {
     {
         nint len = 128;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             var b = make_slice<byte>(len);
             nint n = default;            error e = default!;
             while (true) {
@@ -450,7 +412,6 @@ public static (@string, error) Readlink(@string name) {
                     break;
             len *= 2;
                 }
-
             } 
             // buffer too small
  
@@ -458,18 +419,14 @@ public static (@string, error) Readlink(@string name) {
             if (runtime.GOOS == "aix" && e == syscall.ERANGE) {
                 continue;
             }
-
             if (e != null) {
                 return ("", error.As(addr(new PathError(Op:"readlink",Path:name,Err:e))!)!);
             }
-
             if (n < len) {
                 return (string(b[(int)0..(int)n]), error.As(null!)!);
             }
-
         }
     }
-
 }
 
 private partial struct unixDirent {
@@ -504,7 +461,6 @@ private static (FileInfo, error) Info(this ptr<unixDirent> _addr_d) {
         return (d.info, error.As(null!)!);
     }
     return lstat(d.parent + "/" + d.name);
-
 }
 
 private static (DirEntry, error) newUnixDirent(@string parent, @string name, FileMode typ) {
@@ -522,7 +478,6 @@ private static (DirEntry, error) newUnixDirent(@string parent, @string name, Fil
     ude.typ = info.Mode().Type();
     ude.info = info;
     return (ude, error.As(null!)!);
-
 }
 
 } // end os_package

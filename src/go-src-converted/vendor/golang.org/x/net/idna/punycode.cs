@@ -4,23 +4,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package idna -- go2cs converted at 2022 March 06 23:37:19 UTC
+// package idna -- go2cs converted at 2022 March 13 06:45:35 UTC
 // import "vendor/golang.org/x/net/idna" ==> using idna = go.vendor.golang.org.x.net.idna_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\idna\punycode.go
+namespace go.vendor.golang.org.x.net;
 // This file implements the Punycode algorithm from RFC 3492.
 
-using math = go.math_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
 
-namespace go.vendor.golang.org.x.net;
+using math = math_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+
+// These parameter values are specified in section 5.
+//
+// All computation is done with int32s, so that overflow behavior is identical
+// regardless of whether int is 32-bit or 64-bit.
 
 public static partial class idna_package {
 
-    // These parameter values are specified in section 5.
-    //
-    // All computation is done with int32s, so that overflow behavior is identical
-    // regardless of whether int is 32-bit or 64-bit.
 private static readonly int base = 36;
 private static readonly int damp = 700;
 private static readonly int initialBias = 72;
@@ -28,7 +30,6 @@ private static readonly int initialN = 128;
 private static readonly int skew = 38;
 private static readonly int tmax = 26;
 private static readonly int tmin = 1;
-
 
 private static error punyError(@string s) {
     return error.As(addr(new labelError(s,"A3"))!)!;
@@ -64,23 +65,20 @@ private static (@string, error) decode(@string encoded) {
         {
             var k = base;
 
-            while (>>MARKER:FOREXPRESSION_LEVEL_2<<) {
+            while () {
                 if (pos == len(encoded)) {
                     return ("", error.As(punyError(encoded))!);
                 k += base;
                 }
-
                 var (digit, ok) = decodeDigit(encoded[pos]);
                 if (!ok) {
                     return ("", error.As(punyError(encoded))!);
                 }
-
                 pos++;
                 i += digit * w;
                 if (i < 0) {
                     return ("", error.As(punyError(encoded))!);
                 }
-
                 var t = k - bias;
                 if (t < tmin) {
                     t = tmin;
@@ -88,16 +86,13 @@ private static (@string, error) decode(@string encoded) {
                 else if (t > tmax) {
                     t = tmax;
                 }
-
                 if (digit < t) {
                     break;
                 }
-
                 w *= base - t;
                 if (w >= math.MaxInt32 / base) {
                     return ("", error.As(punyError(encoded))!);
                 }
-
             }
 
         }
@@ -112,10 +107,8 @@ private static (@string, error) decode(@string encoded) {
         copy(output[(int)i + 1..], output[(int)i..]);
         output[i] = n;
         i++;
-
     }
     return (string(output), error.As(null!)!);
-
 }
 
 // encode encodes a string as specified in section 6.3 and prepends prefix to
@@ -147,7 +140,6 @@ private static (@string, error) encode(@string prefix, @string s) {
  {
                 remaining++;
             }
-
         }
         r = r__prev1;
     }
@@ -195,7 +187,7 @@ private static (@string, error) encode(@string prefix, @string s) {
                 {
                     var k = base;
 
-                    while (>>MARKER:FOREXPRESSION_LEVEL_3<<) {
+                    while () {
                         var t = k - bias;
                         if (t < tmin) {
                             t = tmin;
@@ -204,14 +196,11 @@ private static (@string, error) encode(@string prefix, @string s) {
                         else if (t > tmax) {
                             t = tmax;
                         }
-
                         if (q < t) {
                             break;
                         }
-
                         output = append(output, encodeDigit(t + (q - t) % (base - t)));
                         q = (q - t) / (base - t);
-
                     }
 
                 }
@@ -220,7 +209,6 @@ private static (@string, error) encode(@string prefix, @string s) {
                 delta = 0;
                 h++;
                 remaining--;
-
             }
 
             r = r__prev2;
@@ -228,10 +216,8 @@ private static (@string, error) encode(@string prefix, @string s) {
 
         delta++;
         n++;
-
     }
     return (string(output), error.As(null!)!);
-
 }
 
 private static (int, bool) decodeDigit(byte x) {
@@ -246,7 +232,6 @@ private static (int, bool) decodeDigit(byte x) {
     else if ('a' <= x && x <= 'z') 
         return (int32(x - 'a'), true);
         return (0, false);
-
 }
 
 private static byte encodeDigit(int digit) => func((_, panic, _) => {
@@ -256,7 +241,6 @@ private static byte encodeDigit(int digit) => func((_, panic, _) => {
     else if (26 <= digit && digit < 36) 
         return byte(digit + ('0' - 26));
         panic("idna: internal error in punycode encoding");
-
 });
 
 // adapt is the bias adaptation function specified in section 6.1.
@@ -275,7 +259,6 @@ private static int adapt(int delta, int numPoints, bool firstTime) {
         k += base;
     }
     return k + (base - tmin + 1) * delta / (delta + skew);
-
 }
 
 } // end idna_package

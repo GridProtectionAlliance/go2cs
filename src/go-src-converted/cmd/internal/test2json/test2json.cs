@@ -6,27 +6,29 @@
 // It is used by cmd/test2json and cmd/go.
 //
 // See the cmd/test2json documentation for details of the JSON encoding.
-// package test2json -- go2cs converted at 2022 March 06 23:17:54 UTC
+
+// package test2json -- go2cs converted at 2022 March 13 06:31:16 UTC
 // import "cmd/internal/test2json" ==> using test2json = go.cmd.@internal.test2json_package
 // Original source: C:\Program Files\Go\src\cmd\internal\test2json\test2json.go
-using bytes = go.bytes_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System.ComponentModel;
-using System;
-
-
 namespace go.cmd.@internal;
 
+using bytes = bytes_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Mode controls details of the conversion.
+
+using System.ComponentModel;
+using System;
 public static partial class test2json_package {
 
-    // Mode controls details of the conversion.
 public partial struct Mode { // : nint
 }
 
@@ -164,7 +166,6 @@ private static void handleInputLine(this ptr<Converter> _addr_c, slice<byte> lin
             c.result = "fail";
         }
         return ;
-
     }
     if (bytes.HasPrefix(line, skipLinePrefix) && bytes.HasSuffix(line, skipLineSuffix) && len(c.report) == 0) {
         c.result = "skip";
@@ -224,7 +225,6 @@ private static void handleInputLine(this ptr<Converter> _addr_c, slice<byte> lin
         }
         c.output.write(origLine);
         return ;
-
     }
     nint i = 0;
     if (actionColon) {
@@ -259,13 +259,11 @@ private static void handleInputLine(this ptr<Converter> _addr_c, slice<byte> lin
             i = i__prev2;
 
         }
-
         if (len(c.report) < indent) { 
             // Nested deeper than expected.
             // Treat this line as plain output.
             c.output.write(origLine);
             return ;
-
         }
         c.flushReport(indent);
         e.Test = name;
@@ -273,7 +271,6 @@ private static void handleInputLine(this ptr<Converter> _addr_c, slice<byte> lin
         c.report = append(c.report, e);
         c.output.write(origLine);
         return ;
-
     }
     c.flushReport(0);
     c.testName = name;
@@ -283,14 +280,12 @@ private static void handleInputLine(this ptr<Converter> _addr_c, slice<byte> lin
         // delivering the pause event, just so it doesn't look like the test
         // is generating output immediately after being paused.
         c.output.write(origLine);
-
     }
     c.writeEvent(e);
     if (action != "pause") {
         c.output.write(origLine);
     }
     return ;
-
 }
 
 // flushReport flushes all pending PASS/FAIL reports at levels >= depth.
@@ -319,13 +314,10 @@ private static error Close(this ptr<Converter> _addr_c) {
             ref var dt = ref heap(time.Since(c.start).Round(1 * time.Millisecond).Seconds(), out ptr<var> _addr_dt);
             _addr_e.Elapsed = _addr_dt;
             e.Elapsed = ref _addr_e.Elapsed.val;
-
         }
         c.writeEvent(e);
-
     }
     return error.As(null!)!;
-
 }
 
 // writeOutputEvent writes a single output event with the given bytes.
@@ -346,7 +338,6 @@ private static void writeEvent(this ptr<Converter> _addr_c, ptr<event> _addr_e) 
         ref var t = ref heap(time.Now(), out ptr<var> _addr_t);
         _addr_e.Time = _addr_t;
         e.Time = ref _addr_e.Time.val;
-
     }
     if (e.Test == "") {
         e.Test = c.testName;
@@ -356,11 +347,9 @@ private static void writeEvent(this ptr<Converter> _addr_c, ptr<event> _addr_e) 
         // Should not happen - event is valid for json.Marshal.
         c.w.Write((slice<byte>)fmt.Sprintf("testjson internal error: %v\n", err));
         return ;
-
     }
     js = append(js, '\n');
     c.w.Write(js);
-
 }
 
 // A lineBuffer is an I/O buffer that reacts to writes by invoking
@@ -412,29 +401,21 @@ private static void write(this ptr<lineBuffer> _addr_l, slice<byte> b) {
                         j = j__prev3;
 
                     }
-
                 }
-
                 break;
-
             }
-
             var e = i + j + 1;
             if (l.mid) { 
                 // Found the end of a partial line.
                 l.part(l.b[(int)i..(int)e]);
                 l.mid = false;
-
             }
             else
  { 
                 // Found a whole line.
                 l.line(l.b[(int)i..(int)e]);
-
             }
-
             i = e;
-
         } 
 
         // Whatever's left in l.b is a line fragment.
@@ -445,13 +426,11 @@ private static void write(this ptr<lineBuffer> _addr_l, slice<byte> b) {
             l.part(l.b[..(int)t]);
             l.b = l.b[..(int)copy(l.b, l.b[(int)t..])];
             l.mid = true;
-
         }
         if (i > 0) {
             l.b = l.b[..(int)copy(l.b, l.b[(int)i..])];
         }
     }
-
 }
 
 // flush flushes the line buffer.
@@ -462,7 +441,6 @@ private static void flush(this ptr<lineBuffer> _addr_l) {
         // Must be a line without a \n, so a partial line.
         l.part(l.b);
         l.b = l.b[..(int)0];
-
     }
 }
 
@@ -476,11 +454,9 @@ private static bool isBenchmarkName(slice<byte> b) {
     }
     if (len(b) == len(benchmark)) { // just "Benchmark"
         return true;
-
     }
     var (r, _) = utf8.DecodeRune(b[(int)len(benchmark)..]);
     return !unicode.IsLower(r);
-
 }
 
 // trimUTF8 returns a length t as close to len(b) as possible such that b[:t]
@@ -509,14 +485,11 @@ private static nint trimUTF8(slice<byte> b) {
                         return len(b) - i;
                     }
                                 break;
-
             }
 
         }
-
     }
     return len(b);
-
 }
 
 } // end test2json_package

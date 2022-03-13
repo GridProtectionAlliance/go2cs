@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:18 UTC
+//     Generated on 2022 March 13 06:41:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace sumdb
 {
     public static partial class tlog_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct tileHashReader
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace sumdb
             public static implicit operator tileHashReader(NilType nil) => default(tileHashReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static tileHashReader tileHashReader_cast(dynamic value)
         {
             return new tileHashReader(value.tree, value.tr);

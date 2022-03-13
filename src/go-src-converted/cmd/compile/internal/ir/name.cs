@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:09 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:30 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\name.go
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-
-using constant = go.go.constant_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+
+using constant = go.constant_package;
+
+
+// An Ident is an identifier, possibly qualified.
+
+using System;
 public static partial class ir_package {
 
-    // An Ident is an identifier, possibly qualified.
 public partial struct Ident {
     public ref miniExpr miniExpr => ref miniExpr_val;
     public ptr<types.Sym> sym;
@@ -189,7 +190,6 @@ public static ptr<Name> NewNameAt(src.XPos pos, ptr<types.Sym> _addr_sym) {
         @base.Fatalf("NewNameAt nil");
     }
     return _addr_newNameAt(pos, ONAME, _addr_sym)!;
-
 }
 
 // NewIota returns a new OIOTA Node.
@@ -200,7 +200,6 @@ public static ptr<Name> NewIota(src.XPos pos, ptr<types.Sym> _addr_sym) {
         @base.Fatalf("NewIota nil");
     }
     return _addr_newNameAt(pos, OIOTA, _addr_sym)!;
-
 }
 
 // NewDeclNameAt returns a new Name associated with symbol s at position pos.
@@ -215,7 +214,6 @@ public static ptr<Name> NewDeclNameAt(src.XPos pos, Op op, ptr<types.Sym> _addr_
     if (op == ONAME || op == OTYPE || op == OLITERAL)     else 
         @base.Fatalf("NewDeclNameAt op %v", op);
         return _addr_newNameAt(pos, op, _addr_sym)!;
-
 }
 
 // NewConstAt returns a new OLITERAL Node associated with symbol s at position pos.
@@ -230,7 +228,6 @@ public static ptr<Name> NewConstAt(src.XPos pos, ptr<types.Sym> _addr_sym, ptr<t
     n.SetType(typ);
     n.SetVal(val);
     return _addr_n!;
-
 }
 
 // newNameAt is like NewNameAt but allows sym == nil.
@@ -320,7 +317,6 @@ private static void SetWalkdef(this ptr<Name> _addr_n, byte x) => func((_, panic
         panic(fmt.Sprintf("cannot SetWalkdef %d", x));
     }
     n.bits.set2(miniWalkdefShift, x);
-
 });
 
 private static ptr<obj.LSym> Linksym(this ptr<Name> _addr_n) {
@@ -522,10 +518,8 @@ private static bool OnStack(this ptr<Name> _addr_n) => func((_, panic, _) => {
             return n.Esc() != EscHeap;
         else if (n.Class == PEXTERN || n.Class == PAUTOHEAP) 
             return false;
-        
-    }
+            }
     panic(fmt.Sprintf("%v: not a variable: %v", @base.FmtPos(n.Pos()), n));
-
 });
 
 // MarkReadonly indicates that n is an ONAME with readonly contents.
@@ -540,7 +534,6 @@ private static void MarkReadonly(this ptr<Name> _addr_n) {
     // so that the SSA backend can use this information.
     // It will be overridden later during dumpglobls.
     n.Linksym().Type = objabi.SRODATA;
-
 }
 
 // Val returns the constant.Value for the node.
@@ -551,7 +544,6 @@ private static constant.Value Val(this ptr<Name> _addr_n) {
         return constant.MakeUnknown();
     }
     return n.val;
-
 }
 
 // SetVal sets the constant.Value for the node.
@@ -563,7 +555,6 @@ private static void SetVal(this ptr<Name> _addr_n, constant.Value v) => func((_,
     }
     AssertValidTypeForConst(n.Type(), v);
     n.val = v;
-
 });
 
 // Canonical returns the logical declaration that n represents. If n
@@ -577,7 +568,6 @@ private static ptr<Name> Canonical(this ptr<Name> _addr_n) {
         n = n.Defn._<ptr<Name>>();
     }
     return _addr_n!;
-
 }
 
 private static void SetByval(this ptr<Name> _addr_n, bool b) {
@@ -587,7 +577,6 @@ private static void SetByval(this ptr<Name> _addr_n, bool b) {
         @base.Fatalf("SetByval called on non-canonical variable: %v", n);
     }
     n.flags.set(nameByval, b);
-
 }
 
 private static bool Byval(this ptr<Name> _addr_n) {
@@ -596,7 +585,6 @@ private static bool Byval(this ptr<Name> _addr_n) {
     // We require byval to be set on the canonical variable, but we
     // allow it to be accessed from any instance.
     return n.Canonical().flags & nameByval != 0;
-
 }
 
 // CaptureName returns a Name suitable for referring to n from within function
@@ -634,7 +622,6 @@ public static ptr<Name> CaptureName(src.XPos pos, ptr<Func> _addr_fn, ptr<Name> 
     fn.ClosureVars = append(fn.ClosureVars, c);
 
     return _addr_c!;
-
 }
 
 // FinishCaptureNames handles any work leftover from calling CaptureName
@@ -676,7 +663,6 @@ public static void FinishCaptureNames(src.XPos pos, ptr<Func> _addr_outerfn, ptr
         //
         // We'll decide later in walk whether to use v directly or &v.
         cv.Outer = CaptureName(pos, _addr_outerfn, n);
-
     }
 }
 
@@ -708,7 +694,6 @@ public static bool Uses(Node x, ptr<Name> _addr_v) {
         @base.Fatalf("RefersTo bad Name: %v", v);
     }
     return x.Op() == ONAME && x.Name() == v;
-
 }
 
 // DeclaredBy reports whether expression x refers (directly) to a
@@ -718,7 +703,6 @@ public static bool DeclaredBy(Node x, Node stmt) {
         @base.Fatalf("DeclaredBy nil");
     }
     return x.Op() == ONAME && SameSource(x.Name().Defn, stmt);
-
 }
 
 // The Class of a variable/function describes the "storage class"

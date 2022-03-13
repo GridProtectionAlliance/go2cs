@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:44 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:12 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\context.go
-using ast = go.go.ast_package;
-
 namespace go;
+
+using ast = go.ast_package;
 
 public static partial class main_package {
 

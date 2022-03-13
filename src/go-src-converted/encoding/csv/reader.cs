@@ -49,25 +49,27 @@
 //
 //    {`Multi-line
 //    field`, `comma is ,`}
-// package csv -- go2cs converted at 2022 March 06 22:24:56 UTC
+
+// package csv -- go2cs converted at 2022 March 13 05:39:27 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
 // Original source: C:\Program Files\Go\src\encoding\csv\reader.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.encoding;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// A ParseError is returned for parsing errors.
+// Line numbers are 1-indexed and columns are 0-indexed.
+
+using System;
 public static partial class csv_package {
 
-    // A ParseError is returned for parsing errors.
-    // Line numbers are 1-indexed and columns are 0-indexed.
 public partial struct ParseError {
     public nint StartLine; // Line where the record starts
     public nint Line; // Line where the error occurred
@@ -85,7 +87,6 @@ private static @string Error(this ptr<ParseError> _addr_e) {
         return fmt.Sprintf("record on line %d; parse error on line %d, column %d: %v", e.StartLine, e.Line, e.Column, e.Err);
     }
     return fmt.Sprintf("parse error on line %d, column %d: %v", e.Line, e.Column, e.Err);
-
 }
 
 private static error Unwrap(this ptr<ParseError> _addr_e) {
@@ -177,7 +178,6 @@ private static (slice<@string>, error) Read(this ptr<Reader> _addr_r) {
         record, err = r.readRecord(null);
     }
     return (record, error.As(err)!);
-
 }
 
 // FieldPos returns the line and column corresponding to
@@ -196,7 +196,6 @@ private static (nint, nint) FieldPos(this ptr<Reader> _addr_r, nint field) => fu
     }
     var p = _addr_r.fieldPositions[field];
     return (p.line, p.col);
-
 });
 
 // pos holds the position of a field in the current line.
@@ -224,9 +223,7 @@ private static (slice<slice<@string>>, error) ReadAll(this ptr<Reader> _addr_r) 
             return (null, error.As(err)!);
         }
         records = append(records, record);
-
     }
-
 }
 
 // readLine reads the next line (with the trailing endline).
@@ -264,9 +261,7 @@ private static (slice<byte>, error) readLine(this ptr<Reader> _addr_r) {
             line = line[..(int)n - 1];
         }
     }
-
     return (line, error.As(err)!);
-
 }
 
 // lengthNL reports the number of bytes for the trailing \n.
@@ -275,7 +270,6 @@ private static nint lengthNL(slice<byte> b) {
         return 1;
     }
     return 0;
-
 }
 
 // nextRune returns the next rune in b or utf8.RuneError.
@@ -305,7 +299,6 @@ private static (slice<@string>, error) readRecord(this ptr<Reader> _addr_r, slic
             continue; // Skip empty lines
         }
         break;
-
     }
     if (errRead == io.EOF) {
         return (null, error.As(errRead)!);
@@ -322,9 +315,7 @@ private static (slice<@string>, error) readRecord(this ptr<Reader> _addr_r, slic
 parseField:
     while (true) {
         if (r.TrimLeadingSpace) {
-            var i = bytes.IndexFunc(line, r => {
-                return !unicode.IsSpace(r);
-            });
+            var i = bytes.IndexFunc(line, r => !unicode.IsSpace(r));
             if (i < 0) {
                 i = len(line);
                 pos.col -= lengthNL(line);
@@ -356,9 +347,7 @@ parseField:
                     }
 
                 }
-
             }
-
             r.recordBuffer = append(r.recordBuffer, field);
             r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
             r.fieldPositions = append(r.fieldPositions, pos);
@@ -368,7 +357,6 @@ parseField:
                 _continueparseField = true;
                 break;
             }
-
             _breakparseField = true;
             break;
         }
@@ -418,7 +406,6 @@ parseField:
                             break;
 
                     }
-
                 }
                 else if (len(line) > 0) { 
                     // Hit end of line (copy all data so far).
@@ -427,18 +414,15 @@ parseField:
                         _breakparseField = true;
                         break;
                     }
-
                     pos.col += len(line);
                     line, errRead = r.readLine();
                     if (len(line) > 0) {
                         pos.line++;
                         pos.col = 1;
                     }
-
                     if (errRead == io.EOF) {
                         errRead = error.As(null)!;
                     }
-
                 }
                 else
  { 
@@ -448,16 +432,12 @@ parseField:
                         _breakparseField = true;
                         break;
                     }
-
                     r.fieldIndexes = append(r.fieldIndexes, len(r.recordBuffer));
                     r.fieldPositions = append(r.fieldPositions, fieldPos);
                     _breakparseField = true;
                     break;
                 }
-
             }
-
-
         }
     }
     if (err == null) {
@@ -491,7 +471,6 @@ parseField:
         r.FieldsPerRecord = len(dst);
     }
     return (dst, error.As(err)!);
-
 }
 
 } // end csv_package

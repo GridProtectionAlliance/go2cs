@@ -9,7 +9,9 @@
 //    go tool pprof binary profile
 //
 // For more information, see https://blog.golang.org/profiling-go-programs.
-// package main -- go2cs converted at 2022 March 06 23:22:38 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:35:42 UTC
 // Original source: C:\Program Files\Go\src\cmd\pprof\doc.go
+namespace go;
 
 } // end main_package

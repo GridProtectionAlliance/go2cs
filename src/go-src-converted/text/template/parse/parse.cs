@@ -6,20 +6,23 @@
 // and html/template. Clients should use those packages to construct templates
 // rather than this one, which provides shared internal data structures not
 // intended for general use.
-// package parse -- go2cs converted at 2022 March 06 22:24:32 UTC
+
+// package parse -- go2cs converted at 2022 March 13 05:39:01 UTC
 // import "text/template/parse" ==> using parse = go.text.template.parse_package
 // Original source: C:\Program Files\Go\src\text\template\parse\parse.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.text.template;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// Tree is the representation of a single parsed template.
 
 public static partial class parse_package {
 
-    // Tree is the representation of a single parsed template.
 public partial struct Tree {
     public @string Name; // name of the template represented by the tree.
     public @string ParseName; // name of the top-level template during parsing, for error messages.
@@ -52,7 +55,6 @@ private static ptr<Tree> Copy(this ptr<Tree> _addr_t) {
         return _addr_null!;
     }
     return addr(new Tree(Name:t.Name,ParseName:t.ParseName,Root:t.Root.CopyList(),text:t.text,));
-
 }
 
 // Parse returns a map from template name to parse.Tree, created by parsing the
@@ -83,7 +85,6 @@ private static item next(this ptr<Tree> _addr_t) {
         t.token[0] = t.lex.nextItem();
     }
     return t.token[t.peekCount];
-
 }
 
 // backup backs the input stream up one token.
@@ -110,7 +111,6 @@ private static void backup3(this ptr<Tree> _addr_t, item t2, item t1) {
     t.token[1] = t1;
     t.token[2] = t2;
     t.peekCount = 3;
-
 }
 
 // peek returns but does not consume the next token.
@@ -123,7 +123,6 @@ private static item peek(this ptr<Tree> _addr_t) {
     t.peekCount = 1;
     t.token[0] = t.lex.nextItem();
     return t.token[0];
-
 }
 
 // nextNonSpace returns the next non-space token.
@@ -138,7 +137,6 @@ private static item nextNonSpace(this ptr<Tree> _addr_t) {
         }
     }
     return token;
-
 }
 
 // peekNonSpace returns but does not consume the next non-space token.
@@ -181,12 +179,10 @@ private static (@string, @string) ErrorContext(this ptr<Tree> _addr_t, Node n) {
  {
         byteNum++; // After the newline.
         byteNum = pos - byteNum;
-
     }
     nint lineNum = 1 + strings.Count(text, "\n");
     context = n.String();
     return (fmt.Sprintf("%s:%d:%d", tree.ParseName, lineNum, byteNum), context);
-
 }
 
 // errorf formats the error and terminates processing.
@@ -215,7 +211,6 @@ private static item expect(this ptr<Tree> _addr_t, itemType expected, @string co
         t.unexpected(token, context);
     }
     return token;
-
 }
 
 // expectOneOf consumes the next token and guarantees it has one of the required types.
@@ -227,7 +222,6 @@ private static item expectOneOf(this ptr<Tree> _addr_t, itemType expected1, item
         t.unexpected(token, context);
     }
     return token;
-
 }
 
 // unexpected complains about the token and terminates processing.
@@ -241,13 +235,10 @@ private static void unexpected(this ptr<Tree> _addr_t, item token, @string conte
             if (strings.HasSuffix(token.val, " action")) {
                 extra = extra[(int)len(" in action")..]; // avoid "action in action"
             }
-
         }
         t.errorf("%s%s", token, extra);
-
     }
     t.errorf("unexpected %s in %s", token, context);
-
 }
 
 // recover is the handler that turns panics into returns from the top level of Parse.
@@ -265,13 +256,11 @@ private static void recover(this ptr<Tree> _addr_t, ptr<error> _addr_errp) => fu
             }
 
         }
-
         if (t != null) {
             t.lex.drain();
             t.stopParse();
         }
         errp = error.As(e._<error>())!;
-
     }
 });
 
@@ -370,7 +359,6 @@ public static bool IsEmptyTree(Node n) => func((_, panic, _) => {
         }
     }
     return false;
-
 });
 
 // parse is the top-level parser for a template, essentially the same
@@ -391,11 +379,8 @@ private static void parse(this ptr<Tree> _addr_t) {
                 newT.startParse(t.funcs, t.lex, t.treeSet);
                 newT.parseDefinition();
                 continue;
-
             }
-
             t.backup2(delim);
-
         }
         {
             var n = t.textOrAction();
@@ -407,9 +392,7 @@ private static void parse(this ptr<Tree> _addr_t) {
                 t.Root.append(n);
 
         }
-
     }
-
 }
 
 // parseDefinition parses a {{define}} ...  {{end}} template definition and
@@ -434,7 +417,6 @@ private static void parseDefinition(this ptr<Tree> _addr_t) {
     }
     t.add();
     t.stopParse();
-
 }
 
 // itemList:
@@ -452,11 +434,9 @@ private static (ptr<ListNode>, Node) itemList(this ptr<Tree> _addr_t) {
         if (n.Type() == nodeEnd || n.Type() == nodeElse) 
             return (_addr_list!, n);
                 list.append(n);
-
     }
     t.errorf("unexpected EOF");
     return ;
-
 }
 
 // textOrAction:
@@ -481,7 +461,6 @@ private static Node textOrAction(this ptr<Tree> _addr_t) => func((defer, _, _) =
 
     }
     return null;
-
 });
 
 private static void clearActionLine(this ptr<Tree> _addr_t) {
@@ -527,7 +506,6 @@ private static Node action(this ptr<Tree> _addr_t) {
     token = t.peek(); 
     // Do not pop variables; they persist until "end".
     return t.newAction(token.pos, token.line, t.pipeline("command", itemRightDelim));
-
 }
 
 // Pipeline:
@@ -568,18 +546,14 @@ decls:
                         goto decls;
                     else 
                         t.errorf("range can only initialize variables");
-                    
-                }
-
+                                    }
                 t.errorf("too many declarations in %s", context);
             else if (tokenAfterVariable.typ == itemSpace) 
                 t.backup3(v, tokenAfterVariable);
             else 
                 t.backup2(v);
-            
-        }
+                    }
     }
-
     while (true) {
         {
             var token__prev1 = token;
@@ -600,9 +574,7 @@ decls:
 
             token = token__prev1;
         }
-
     }
-
 }
 
 private static void checkPipeline(this ptr<Tree> _addr_t, ptr<PipeNode> _addr_pipe, @string context) {
@@ -618,8 +590,7 @@ private static void checkPipeline(this ptr<Tree> _addr_t, ptr<PipeNode> _addr_pi
         if (c.Args[0].Type() == NodeBool || c.Args[0].Type() == NodeDot || c.Args[0].Type() == NodeNil || c.Args[0].Type() == NodeNumber || c.Args[0].Type() == NodeString) 
             // With A|B|C, pipeline stage 2 is B
             t.errorf("non executable command in pipeline stage %d", i + 2);
-        
-    }
+            }
 }
 
 private static (Pos, nint, ptr<PipeNode>, ptr<ListNode>, ptr<ListNode>) parseControl(this ptr<Tree> _addr_t, bool allowElseIf, @string context) => func((defer, _, _) => {
@@ -651,16 +622,13 @@ private static (Pos, nint, ptr<PipeNode>, ptr<ListNode>, ptr<ListNode>) parseCon
                 elseList.append(t.ifControl()); 
                 // Do not consume the next item - only one {{end}} required.
                 break;
-
             }
-
         }
         elseList, next = t.itemList();
         if (next.Type() != nodeEnd) {
             t.errorf("expected end; found %s", next);
         }
         return (pipe.Position(), pipe.Line, _addr_pipe!, _addr_list!, _addr_elseList!);
-
 });
 
 // If:
@@ -713,11 +681,9 @@ private static Node elseControl(this ptr<Tree> _addr_t) {
     if (peek.typ == itemIf) { 
         // We see "{{else if ... " but in effect rewrite it to {{else}}{{if ... ".
         return t.newElse(peek.pos, peek.line);
-
     }
     var token = t.expect(itemRightDelim, "else");
     return t.newElse(token.pos, token.line);
-
 }
 
 // Block:
@@ -750,7 +716,6 @@ private static Node blockControl(this ptr<Tree> _addr_t) {
     block.stopParse();
 
     return t.newTemplate(token.pos, token.line, name, pipe);
-
 }
 
 // Template:
@@ -769,10 +734,8 @@ private static Node templateControl(this ptr<Tree> _addr_t) {
         t.backup(); 
         // Do not pop variables; they persist until "end".
         pipe = t.pipeline(context, itemRightDelim);
-
     }
     return t.newTemplate(token.pos, token.line, name, pipe);
-
 }
 
 private static @string parseTemplateName(this ptr<Tree> _addr_t, item token, @string context) {
@@ -789,7 +752,6 @@ private static @string parseTemplateName(this ptr<Tree> _addr_t, item token, @st
     else 
         t.unexpected(token, context);
         return ;
-
 }
 
 // command:
@@ -819,13 +781,11 @@ private static ptr<CommandNode> command(this ptr<Tree> _addr_t) {
 
         }
         break;
-
     }
     if (len(cmd.Args) == 0) {
         t.errorf("empty command");
     }
     return _addr_cmd!;
-
 }
 
 // operand:
@@ -859,10 +819,8 @@ private static Node operand(this ptr<Tree> _addr_t) {
             t.errorf("unexpected . after term %q", node.String());
         else 
             node = chain;
-        
-    }
+            }
     return node;
-
 }
 
 // term:
@@ -915,7 +873,6 @@ private static Node term(this ptr<Tree> _addr_t) {
     }
     t.backup();
     return null;
-
 }
 
 // hasFunction reports if a function name exists in the Tree's maps.
@@ -930,7 +887,6 @@ private static bool hasFunction(this ptr<Tree> _addr_t, @string name) {
             return true;
         }
     }    return false;
-
 }
 
 // popVars trims the variable list to the specified length
@@ -952,7 +908,6 @@ private static Node useVar(this ptr<Tree> _addr_t, Pos pos, @string name) {
         }
     }    t.errorf("undefined variable %q", v.Ident[0]);
     return null;
-
 }
 
 } // end parse_package

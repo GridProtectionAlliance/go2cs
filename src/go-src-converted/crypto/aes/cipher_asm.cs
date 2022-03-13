@@ -5,20 +5,22 @@
 //go:build amd64 || arm64
 // +build amd64 arm64
 
-// package aes -- go2cs converted at 2022 March 06 22:18:13 UTC
+// package aes -- go2cs converted at 2022 March 13 05:32:27 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Program Files\Go\src\crypto\aes\cipher_asm.go
-using cipher = go.crypto.cipher_package;
-using subtle = go.crypto.@internal.subtle_package;
-using cpu = go.@internal.cpu_package;
-
 namespace go.crypto;
+
+using cipher = crypto.cipher_package;
+using subtle = crypto.@internal.subtle_package;
+using cpu = @internal.cpu_package;
+
+
+// defined in asm_*.s
+
+//go:noescape
 
 public static partial class aes_package {
 
-    // defined in asm_*.s
-
-    //go:noescape
 private static void encryptBlockAsm(nint nr, ptr<uint> xk, ptr<byte> dst, ptr<byte> src);
 
 //go:noescape
@@ -61,7 +63,6 @@ private static (cipher.Block, error) newCipher(slice<byte> key) {
         return (addr(new aesCipherGCM(c)), error.As(null!)!);
     }
     return (_addr_c, error.As(null!)!);
-
 }
 
 private static nint BlockSize(this ptr<aesCipherAsm> _addr_c) {
@@ -83,7 +84,6 @@ private static void Encrypt(this ptr<aesCipherAsm> _addr_c, slice<byte> dst, sli
         panic("crypto/aes: invalid buffer overlap");
     }
     encryptBlockAsm(len(c.enc) / 4 - 1, _addr_c.enc[0], _addr_dst[0], _addr_src[0]);
-
 });
 
 private static void Decrypt(this ptr<aesCipherAsm> _addr_c, slice<byte> dst, slice<byte> src) => func((_, panic, _) => {
@@ -99,7 +99,6 @@ private static void Decrypt(this ptr<aesCipherAsm> _addr_c, slice<byte> dst, sli
         panic("crypto/aes: invalid buffer overlap");
     }
     decryptBlockAsm(len(c.dec) / 4 - 1, _addr_c.dec[0], _addr_dst[0], _addr_src[0]);
-
 });
 
 // expandKey is used by BenchmarkExpand to ensure that the asm implementation
@@ -116,7 +115,6 @@ private static void expandKey(slice<byte> key, slice<uint> enc, slice<uint> dec)
                 break;
         }
         expandKeyAsm(rounds, _addr_key[0], _addr_enc[0], _addr_dec[0]);
-
     }
     else
  {

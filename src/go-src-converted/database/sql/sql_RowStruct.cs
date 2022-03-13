@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:41 UTC
+//     Generated on 2022 March 13 06:43:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace database
 {
     public static partial class sql_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Row
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace database
             public static implicit operator Row(NilType nil) => default(Row);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Row Row_cast(dynamic value)
         {
             return new Row(value.err, ref value.rows);

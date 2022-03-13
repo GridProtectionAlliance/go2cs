@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:51 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:07 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\goversion.go
-using fmt = go.fmt_package;
-using goversion = go.@internal.goversion_package;
-using log = go.log_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using goversion = @internal.goversion_package;
+using log = log_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+
+using @base = cmd.compile.@internal.@base_package;
+
+
+// A lang is a language version broken into major and minor numbers.
 
 public static partial class types_package {
 
-    // A lang is a language version broken into major and minor numbers.
 private partial struct lang {
     public nint major;
     public nint minor;
@@ -38,18 +40,15 @@ public static bool AllowsGoVersion(ptr<Pkg> _addr_pkg, nint major, nint minor) {
     if (pkg == null) { 
         // TODO(mdempsky): Set Pkg for local types earlier.
         pkg = LocalPkg;
-
     }
     if (pkg != LocalPkg) { 
         // Assume imported packages passed type-checking.
         return true;
-
     }
     if (langWant.major == 0 && langWant.minor == 0) {
         return true;
     }
     return langWant.major > major || (langWant.major == major && langWant.minor >= minor);
-
 }
 
 // ParseLangFlag verifies that the -lang flag holds a valid value, and
@@ -76,7 +75,6 @@ public static void ParseLangFlag() {
             }
         }
     }
-
 }
 
 // parseLang parses a -lang option into a langVer.
@@ -97,7 +95,6 @@ private static (lang, error) parseLang(@string s) {
         return (new lang(), error.As(err)!);
     }
     return (new lang(major:major,minor:minor), error.As(null!)!);
-
 }
 
 // currentLang returns the current language version.

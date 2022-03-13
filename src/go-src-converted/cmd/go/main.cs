@@ -4,45 +4,44 @@
 
 //go:generate ./mkalldocs.sh
 
-// package main -- go2cs converted at 2022 March 06 23:15:54 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:22 UTC
 // Original source: C:\Program Files\Go\src\cmd\go\main.go
-using context = go.context_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using bug = go.cmd.go.@internal.bug_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using clean = go.cmd.go.@internal.clean_package;
-using doc = go.cmd.go.@internal.doc_package;
-using envcmd = go.cmd.go.@internal.envcmd_package;
-using fix = go.cmd.go.@internal.fix_package;
-using fmtcmd = go.cmd.go.@internal.fmtcmd_package;
-using generate = go.cmd.go.@internal.generate_package;
-using get = go.cmd.go.@internal.get_package;
-using help = go.cmd.go.@internal.help_package;
-using list = go.cmd.go.@internal.list_package;
-using modcmd = go.cmd.go.@internal.modcmd_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modget = go.cmd.go.@internal.modget_package;
-using modload = go.cmd.go.@internal.modload_package;
-using run = go.cmd.go.@internal.run_package;
-using test = go.cmd.go.@internal.test_package;
-using tool = go.cmd.go.@internal.tool_package;
-using trace = go.cmd.go.@internal.trace_package;
-using version = go.cmd.go.@internal.version_package;
-using vet = go.cmd.go.@internal.vet_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go;
+
+using context = context_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using bug = cmd.go.@internal.bug_package;
+using cfg = cmd.go.@internal.cfg_package;
+using clean = cmd.go.@internal.clean_package;
+using doc = cmd.go.@internal.doc_package;
+using envcmd = cmd.go.@internal.envcmd_package;
+using fix = cmd.go.@internal.fix_package;
+using fmtcmd = cmd.go.@internal.fmtcmd_package;
+using generate = cmd.go.@internal.generate_package;
+using get = cmd.go.@internal.get_package;
+using help = cmd.go.@internal.help_package;
+using list = cmd.go.@internal.list_package;
+using modcmd = cmd.go.@internal.modcmd_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modget = cmd.go.@internal.modget_package;
+using modload = cmd.go.@internal.modload_package;
+using run = cmd.go.@internal.run_package;
+using test = cmd.go.@internal.test_package;
+using tool = cmd.go.@internal.tool_package;
+using trace = cmd.go.@internal.trace_package;
+using version = cmd.go.@internal.version_package;
+using vet = cmd.go.@internal.vet_package;
+using work = cmd.go.@internal.work_package;
+using System;
 
 public static partial class main_package {
 
@@ -64,7 +63,6 @@ private static void Main() {
         if (!modload.WillBeEnabled()) { 
             // Replace module-aware get with GOPATH get if appropriate.
             modget.CmdGet.val = get.CmdGet.val;
-
         }
     }
     cfg.CmdName = args[0]; // for error messages
@@ -93,27 +91,21 @@ private static void Main() {
                     fmt.Fprintf(os.Stderr, "go: GOPATH entry cannot start with shell metacharacter '~': %q\n", p);
                     os.Exit(2);
                 }
-
                 if (!filepath.IsAbs(p)) {
                     if (cfg.Getenv("GOPATH") == "") { 
                         // We inferred $GOPATH from $HOME and did a bad job at it.
                         // Instead of dying, uninfer it.
                         cfg.BuildContext.GOPATH = "";
-
                     }
                     else
  {
                         fmt.Fprintf(os.Stderr, "go: GOPATH entry is relative; must be absolute path: %q.\nFor more details see: 'go help gopath'\n", p);
                         os.Exit(2);
                     }
-
                 }
-
             }
-
         }
     }
-
 
     {
         var (fi, err) = os.Stat(cfg.GOROOT);
@@ -124,12 +116,11 @@ private static void Main() {
         }
     }
 
-
 BigCmdLoop:
     {
         var bigCmd = @base.Go;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             foreach (var (_, cmd) in bigCmd.Commands) {
                 if (cmd.Name() != args[0]) {
                     continue;
@@ -146,22 +137,17 @@ BigCmdLoop:
                         // Accept 'go mod help' and 'go mod help foo' for 'go help mod' and 'go help mod foo'.
                         help.Help(os.Stdout, append(strings.Split(cfg.CmdName, " "), args[(int)1..]));
                         return ;
-
                     }
-
                     cfg.CmdName += " " + args[0];
                     _continueBigCmdLoop = true;
                     break;
                 }
-
                 if (!cmd.Runnable()) {
                     continue;
                 }
-
                 invoke(_addr_cmd, args);
                 @base.Exit();
                 return ;
-
             }
             @string helpArg = "";
             {
@@ -172,14 +158,11 @@ BigCmdLoop:
                 }
 
             }
-
             fmt.Fprintf(os.Stderr, "go %s: unknown command\nRun 'go help%s' for usage.\n", cfg.CmdName, helpArg);
             @base.SetExitStatus(2);
             @base.Exit();
-
         }
     }
-
 }
 
 private static void invoke(ptr<base.Command> _addr_cmd, slice<@string> args) {
@@ -211,7 +194,6 @@ private static void invoke(ptr<base.Command> _addr_cmd, slice<@string> args) {
     var (ctx, span) = trace.StartSpan(ctx, fmt.Sprint("Running ", cmd.Name(), " command"));
     cmd.Run(ctx, cmd, args);
     span.Done();
-
 }
 
 private static void init() {
@@ -240,11 +222,9 @@ private static context.Context maybeStartTrace(context.Context pctx) {
             }
 
         }
-
     });
 
     return ctx;
-
 }
 
 } // end main_package

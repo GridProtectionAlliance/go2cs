@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:13:05 UTC
+//     Generated on 2022 March 13 05:27:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class poll_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct FD
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace @internal
             public static implicit operator FD(NilType nil) => default(FD);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static FD FD_cast(dynamic value)
         {
             return new FD(value.fdmu, value.Sysfd, value.pd, ref value.iovecs, value.csema, value.isBlocking, value.IsStream, value.ZeroReadIsEOF, value.isFile);

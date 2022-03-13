@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package edwards25519 -- go2cs converted at 2022 March 06 22:17:36 UTC
+// package edwards25519 -- go2cs converted at 2022 March 13 05:31:43 UTC
 // import "crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\tables.go
-using subtle = go.crypto.subtle_package;
-
 namespace go.crypto.ed25519.@internal;
+
+using subtle = crypto.subtle_package;
+
+
+// A dynamic lookup table for variable-base, constant-time scalar muls.
 
 public static partial class edwards25519_package {
 
-    // A dynamic lookup table for variable-base, constant-time scalar muls.
 private partial struct projLookupTable {
     public array<projCached> points;
 }
@@ -48,9 +50,7 @@ private static void FromP3(this ptr<projLookupTable> _addr_v, ptr<Point> _addr_q
         // This is needlessly complicated because the API has explicit
         // recievers instead of creating stack objects and relying on RVO
         v.points[i + 1].FromP3(tmpP3.fromP1xP1(tmpP1xP1.Add(q, _addr_v.points[i])));
-
     }
-
 }
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
@@ -66,9 +66,7 @@ private static void FromP3(this ptr<affineLookupTable> _addr_v, ptr<Point> _addr
     for (nint i = 0; i < 7; i++) { 
         // Compute (i+1)*Q as Q + i*Q and convert to AffineCached
         v.points[i + 1].FromP3(tmpP3.fromP1xP1(tmpP1xP1.AddAffine(q, _addr_v.points[i])));
-
     }
-
 }
 
 // Builds a lookup table at runtime. Fast.
@@ -86,7 +84,6 @@ private static void FromP3(this ptr<nafLookupTable5> _addr_v, ptr<Point> _addr_q
     for (nint i = 0; i < 7; i++) {
         v.points[i + 1].FromP3(tmpP3.fromP1xP1(tmpP1xP1.Add(_addr_q2, _addr_v.points[i])));
     }
-
 }
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
@@ -120,11 +117,9 @@ private static void SelectInto(this ptr<projLookupTable> _addr_v, ptr<projCached
         // Set dest = j*Q if |x| = j
         var cond = subtle.ConstantTimeByteEq(xabs, uint8(j));
         dest.Select(_addr_v.points[j - 1], dest, cond);
-
     } 
     // Now dest = |x|*Q, conditionally negate to get x*Q
     dest.CondNeg(int(xmask & 1));
-
 }
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
@@ -141,11 +136,9 @@ private static void SelectInto(this ptr<affineLookupTable> _addr_v, ptr<affineCa
         // Set dest = j*Q if |x| = j
         var cond = subtle.ConstantTimeByteEq(xabs, uint8(j));
         dest.Select(_addr_v.points[j - 1], dest, cond);
-
     } 
     // Now dest = |x|*Q, conditionally negate to get x*Q
     dest.CondNeg(int(xmask & 1));
-
 }
 
 // Given odd x with 0 < x < 2^4, return x*Q (in variable time).

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:16:59 UTC
+// package tls -- go2cs converted at 2022 March 13 05:30:18 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\alert.go
-using strconv = go.strconv_package;
-
 namespace go.crypto;
+
+using strconv = strconv_package;
 
 public static partial class tls_package {
 
@@ -18,7 +18,6 @@ private partial struct alert { // : byte
 // alert level
 private static readonly nint alertLevelWarning = 1;
 private static readonly nint alertLevelError = 2;
-
 
 private static readonly alert alertCloseNotify = 0;
 private static readonly alert alertUnexpectedMessage = 10;
@@ -54,7 +53,6 @@ private static readonly alert alertUnknownPSKIdentity = 115;
 private static readonly alert alertCertificateRequired = 116;
 private static readonly alert alertNoApplicationProtocol = 120;
 
-
 private static map alertText = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<alert, @string>{alertCloseNotify:"close notify",alertUnexpectedMessage:"unexpected message",alertBadRecordMAC:"bad record MAC",alertDecryptionFailed:"decryption failed",alertRecordOverflow:"record overflow",alertDecompressionFailure:"decompression failure",alertHandshakeFailure:"handshake failure",alertBadCertificate:"bad certificate",alertUnsupportedCertificate:"unsupported certificate",alertCertificateRevoked:"revoked certificate",alertCertificateExpired:"expired certificate",alertCertificateUnknown:"unknown certificate",alertIllegalParameter:"illegal parameter",alertUnknownCA:"unknown certificate authority",alertAccessDenied:"access denied",alertDecodeError:"error decoding message",alertDecryptError:"error decrypting message",alertExportRestriction:"export restriction",alertProtocolVersion:"protocol version not supported",alertInsufficientSecurity:"insufficient security level",alertInternalError:"internal error",alertInappropriateFallback:"inappropriate fallback",alertUserCanceled:"user canceled",alertNoRenegotiation:"no renegotiation",alertMissingExtension:"missing extension",alertUnsupportedExtension:"unsupported extension",alertCertificateUnobtainable:"certificate unobtainable",alertUnrecognizedName:"unrecognized name",alertBadCertificateStatusResponse:"bad certificate status response",alertBadCertificateHashValue:"bad certificate hash value",alertUnknownPSKIdentity:"unknown PSK identity",alertCertificateRequired:"certificate required",alertNoApplicationProtocol:"no application protocol",};
 
 private static @string String(this alert e) {
@@ -63,7 +61,6 @@ private static @string String(this alert e) {
         return "tls: " + s;
     }
     return "tls: alert(" + strconv.Itoa(int(e)) + ")";
-
 }
 
 private static @string Error(this alert e) {

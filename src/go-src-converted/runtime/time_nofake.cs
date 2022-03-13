@@ -5,19 +5,19 @@
 //go:build !faketime
 // +build !faketime
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:15 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:19 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\time_nofake.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    // faketime is the simulated time in nanoseconds since 1970 for the
-    // playground.
-    //
-    // Zero means not to use faketime.
+// faketime is the simulated time in nanoseconds since 1970 for the
+// playground.
+//
+// Zero means not to use faketime.
 private static long faketime = default;
 
 //go:nosplit

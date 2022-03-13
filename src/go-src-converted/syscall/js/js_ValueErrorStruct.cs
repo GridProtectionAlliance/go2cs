@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:20 UTC
+//     Generated on 2022 March 13 05:40:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace syscall
 {
     public static partial class js_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ValueError
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace syscall
             public static implicit operator ValueError(NilType nil) => default(ValueError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ValueError ValueError_cast(dynamic value)
         {
             return new ValueError(value.Method, value.Type);

@@ -1,13 +1,13 @@
 // Code generated from gen/ARM.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 22:57:34 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:09:42 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewriteARM.go
-using buildcfg = go.@internal.buildcfg_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using buildcfg = @internal.buildcfg_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -897,7 +897,6 @@ private static bool rewriteValueARM(ptr<Value> _addr_v) {
     else if (v.Op == OpZeromask) 
         return rewriteValueARM_OpZeromask(_addr_v);
         return false;
-
 }
 private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -918,7 +917,6 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 var x = v_1;
                 var flags = v_2;
@@ -926,14 +924,12 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, flags);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADC x (SLLconst [c] y) flags)
     // result: (ADCshiftLL x y [c] flags)
@@ -949,7 +945,6 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 flags = v_2;
@@ -957,14 +952,12 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg3(x, y, flags);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADC x (SRLconst [c] y) flags)
     // result: (ADCshiftRL x y [c] flags)
@@ -980,7 +973,6 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 flags = v_2;
@@ -988,14 +980,12 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg3(x, y, flags);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADC x (SRAconst [c] y) flags)
     // result: (ADCshiftRA x y [c] flags)
@@ -1011,7 +1001,6 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 flags = v_2;
@@ -1019,14 +1008,12 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg3(x, y, flags);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADC x (SLL y z) flags)
     // result: (ADCshiftLLreg x y z flags)
@@ -1042,21 +1029,18 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 flags = v_2;
                 v.reset(OpARMADCshiftLLreg);
                 v.AddArg4(x, y, z, flags);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADC x (SRL y z) flags)
     // result: (ADCshiftRLreg x y z flags)
@@ -1072,21 +1056,18 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 flags = v_2;
                 v.reset(OpARMADCshiftRLreg);
                 v.AddArg4(x, y, z, flags);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADC x (SRA y z) flags)
     // result: (ADCshiftRAreg x y z flags)
@@ -1102,24 +1083,20 @@ private static bool rewriteValueARM_OpARMADC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 flags = v_2;
                 v.reset(OpARMADCshiftRAreg);
                 v.AddArg4(x, y, z, flags);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADCconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1140,7 +1117,6 @@ private static bool rewriteValueARM_OpARMADCconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg2(x, flags);
         return true;
-
     } 
     // match: (ADCconst [c] (SUBconst [d] x) flags)
     // result: (ADCconst [c-d] x flags)
@@ -1156,10 +1132,8 @@ private static bool rewriteValueARM_OpARMADCconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - d);
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADCshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1185,7 +1159,6 @@ private static bool rewriteValueARM_OpARMADCshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (ADCshiftLL x (MOVWconst [c]) [d] flags)
     // result: (ADCconst x [c<<uint64(d)] flags)
@@ -1201,10 +1174,8 @@ private static bool rewriteValueARM_OpARMADCshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADCshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1230,7 +1201,6 @@ private static bool rewriteValueARM_OpARMADCshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (ADCshiftLLreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -1250,10 +1220,8 @@ private static bool rewriteValueARM_OpARMADCshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADCshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1279,7 +1247,6 @@ private static bool rewriteValueARM_OpARMADCshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (ADCshiftRA x (MOVWconst [c]) [d] flags)
     // result: (ADCconst x [c>>uint64(d)] flags)
@@ -1295,10 +1262,8 @@ private static bool rewriteValueARM_OpARMADCshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADCshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1324,7 +1289,6 @@ private static bool rewriteValueARM_OpARMADCshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (ADCshiftRAreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -1344,10 +1308,8 @@ private static bool rewriteValueARM_OpARMADCshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADCshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1373,7 +1335,6 @@ private static bool rewriteValueARM_OpARMADCshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (ADCshiftRL x (MOVWconst [c]) [d] flags)
     // result: (ADCconst x [int32(uint32(c)>>uint64(d))] flags)
@@ -1389,10 +1350,8 @@ private static bool rewriteValueARM_OpARMADCshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADCshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1418,7 +1377,6 @@ private static bool rewriteValueARM_OpARMADCshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (ADCshiftRLreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -1438,10 +1396,8 @@ private static bool rewriteValueARM_OpARMADCshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1463,20 +1419,17 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMADDconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (SLLconst [c] y))
     // result: (ADDshiftLL x y [c])
@@ -1492,21 +1445,18 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMADDshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (SRLconst [c] y))
     // result: (ADDshiftRL x y [c])
@@ -1522,21 +1472,18 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMADDshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (SRAconst [c] y))
     // result: (ADDshiftRA x y [c])
@@ -1552,21 +1499,18 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMADDshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (SLL y z))
     // result: (ADDshiftLLreg x y z)
@@ -1582,20 +1526,17 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMADDshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (SRL y z))
     // result: (ADDshiftRLreg x y z)
@@ -1611,20 +1552,17 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMADDshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (SRA y z))
     // result: (ADDshiftRAreg x y z)
@@ -1640,20 +1578,17 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMADDshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (RSBconst [0] y))
     // result: (SUB x y)
@@ -1669,19 +1604,16 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpARMSUB);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD <t> (RSBconst [c] x) (RSBconst [d] y))
     // result: (RSBconst [c+d] (ADD <t> x y))
@@ -1697,13 +1629,11 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpARMRSBconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMRSBconst);
@@ -1712,14 +1642,12 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                 v0.AddArg2(x, y);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (MUL x y) a)
     // result: (MULA x y a)
@@ -1734,24 +1662,20 @@ private static bool rewriteValueARM_OpARMADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_0.Args[1];
                 x = v_0.Args[0];
                 var a = v_1;
                 v.reset(OpARMMULA);
                 v.AddArg3(x, y, a);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1773,24 +1697,20 @@ private static bool rewriteValueARM_OpARMADDD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[1];
                 var x = v_1.Args[0];
                 if (!(a.Uses == 1 && buildcfg.GOARM >= 6)) {
                     continue;
                 }
-
                 v.reset(OpARMMULAD);
                 v.AddArg3(a, x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDD a (NMULD x y))
     // cond: a.Uses == 1 && buildcfg.GOARM >= 6
@@ -1807,27 +1727,22 @@ private static bool rewriteValueARM_OpARMADDD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[1];
                 x = v_1.Args[0];
                 if (!(a.Uses == 1 && buildcfg.GOARM >= 6)) {
                     continue;
                 }
-
                 v.reset(OpARMMULSD);
                 v.AddArg3(a, x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDF(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1849,24 +1764,20 @@ private static bool rewriteValueARM_OpARMADDF(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[1];
                 var x = v_1.Args[0];
                 if (!(a.Uses == 1 && buildcfg.GOARM >= 6)) {
                     continue;
                 }
-
                 v.reset(OpARMMULAF);
                 v.AddArg3(a, x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDF a (NMULF x y))
     // cond: a.Uses == 1 && buildcfg.GOARM >= 6
@@ -1883,27 +1794,22 @@ private static bool rewriteValueARM_OpARMADDF(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[1];
                 x = v_1.Args[0];
                 if (!(a.Uses == 1 && buildcfg.GOARM >= 6)) {
                     continue;
                 }
-
                 v.reset(OpARMMULSF);
                 v.AddArg3(a, x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1924,20 +1830,17 @@ private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMADDSconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDS x (SLLconst [c] y))
     // result: (ADDSshiftLL x y [c])
@@ -1953,21 +1856,18 @@ private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMADDSshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDS x (SRLconst [c] y))
     // result: (ADDSshiftRL x y [c])
@@ -1983,21 +1883,18 @@ private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMADDSshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDS x (SRAconst [c] y))
     // result: (ADDSshiftRA x y [c])
@@ -2013,21 +1910,18 @@ private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMADDSshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDS x (SLL y z))
     // result: (ADDSshiftLLreg x y z)
@@ -2043,20 +1937,17 @@ private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMADDSshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDS x (SRL y z))
     // result: (ADDSshiftRLreg x y z)
@@ -2072,20 +1963,17 @@ private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMADDSshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDS x (SRA y z))
     // result: (ADDSshiftRAreg x y z)
@@ -2101,23 +1989,19 @@ private static bool rewriteValueARM_OpARMADDS(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMADDSshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDSshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2141,7 +2025,6 @@ private static bool rewriteValueARM_OpARMADDSshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDSshiftLL x (MOVWconst [c]) [d])
     // result: (ADDSconst x [c<<uint64(d)])
@@ -2156,10 +2039,8 @@ private static bool rewriteValueARM_OpARMADDSshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDSshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2183,7 +2064,6 @@ private static bool rewriteValueARM_OpARMADDSshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDSshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -2202,10 +2082,8 @@ private static bool rewriteValueARM_OpARMADDSshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDSshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2229,7 +2107,6 @@ private static bool rewriteValueARM_OpARMADDSshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDSshiftRA x (MOVWconst [c]) [d])
     // result: (ADDSconst x [c>>uint64(d)])
@@ -2244,10 +2121,8 @@ private static bool rewriteValueARM_OpARMADDSshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDSshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2271,7 +2146,6 @@ private static bool rewriteValueARM_OpARMADDSshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDSshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -2290,10 +2164,8 @@ private static bool rewriteValueARM_OpARMADDSshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDSshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2317,7 +2189,6 @@ private static bool rewriteValueARM_OpARMADDSshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDSshiftRL x (MOVWconst [c]) [d])
     // result: (ADDSconst x [int32(uint32(c)>>uint64(d))])
@@ -2332,10 +2203,8 @@ private static bool rewriteValueARM_OpARMADDSshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDSshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2359,7 +2228,6 @@ private static bool rewriteValueARM_OpARMADDSshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDSshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -2378,10 +2246,8 @@ private static bool rewriteValueARM_OpARMADDSshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2402,7 +2268,6 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (ADDconst [0] x)
     // result: x
@@ -2413,7 +2278,6 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDconst [c] x)
     // cond: !isARMImmRot(uint32(c)) && isARMImmRot(uint32(-c))
@@ -2428,7 +2292,6 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] x)
     // cond: buildcfg.GOARM==7 && !isARMImmRot(uint32(c)) && uint32(c)>0xffff && uint32(-c)<=0xffff
@@ -2443,7 +2306,6 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] (MOVWconst [d]))
     // result: (MOVWconst [c+d])
@@ -2456,7 +2318,6 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c + d);
         return true;
-
     } 
     // match: (ADDconst [c] (ADDconst [d] x))
     // result: (ADDconst [c+d] x)
@@ -2471,7 +2332,6 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] (SUBconst [d] x))
     // result: (ADDconst [c-d] x)
@@ -2486,7 +2346,6 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] (RSBconst [d] x))
     // result: (RSBconst [c+d] x)
@@ -2501,10 +2360,8 @@ private static bool rewriteValueARM_OpARMADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2529,7 +2386,6 @@ private static bool rewriteValueARM_OpARMADDshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDshiftLL x (MOVWconst [c]) [d])
     // result: (ADDconst x [c<<uint64(d)])
@@ -2544,7 +2400,6 @@ private static bool rewriteValueARM_OpARMADDshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDshiftLL [c] (SRLconst x [32-c]) x)
     // result: (SRRconst [32-c] x)
@@ -2561,7 +2416,6 @@ private static bool rewriteValueARM_OpARMADDshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(32 - c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDshiftLL <typ.UInt16> [8] (BFXU <typ.UInt16> [int32(armBFAuxInt(8, 8))] x) x)
     // result: (REV16 x)
@@ -2576,7 +2430,6 @@ private static bool rewriteValueARM_OpARMADDshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMREV16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDshiftLL <typ.UInt16> [8] (SRLconst <typ.UInt16> [24] (SLLconst [16] x)) x)
     // cond: buildcfg.GOARM>=6
@@ -2596,10 +2449,8 @@ private static bool rewriteValueARM_OpARMADDshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMREV16);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2623,7 +2474,6 @@ private static bool rewriteValueARM_OpARMADDshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -2642,10 +2492,8 @@ private static bool rewriteValueARM_OpARMADDshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2669,7 +2517,6 @@ private static bool rewriteValueARM_OpARMADDshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDshiftRA x (MOVWconst [c]) [d])
     // result: (ADDconst x [c>>uint64(d)])
@@ -2684,10 +2531,8 @@ private static bool rewriteValueARM_OpARMADDshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2711,7 +2556,6 @@ private static bool rewriteValueARM_OpARMADDshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -2730,10 +2574,8 @@ private static bool rewriteValueARM_OpARMADDshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2757,7 +2599,6 @@ private static bool rewriteValueARM_OpARMADDshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDshiftRL x (MOVWconst [c]) [d])
     // result: (ADDconst x [int32(uint32(c)>>uint64(d))])
@@ -2772,7 +2613,6 @@ private static bool rewriteValueARM_OpARMADDshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDshiftRL [c] (SLLconst x [32-c]) x)
     // result: (SRRconst [ c] x)
@@ -2789,10 +2629,8 @@ private static bool rewriteValueARM_OpARMADDshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMADDshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2816,7 +2654,6 @@ private static bool rewriteValueARM_OpARMADDshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ADDshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -2835,10 +2672,8 @@ private static bool rewriteValueARM_OpARMADDshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2859,20 +2694,17 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMANDconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (SLLconst [c] y))
     // result: (ANDshiftLL x y [c])
@@ -2888,21 +2720,18 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMANDshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (SRLconst [c] y))
     // result: (ANDshiftRL x y [c])
@@ -2918,21 +2747,18 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMANDshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (SRAconst [c] y))
     // result: (ANDshiftRA x y [c])
@@ -2948,21 +2774,18 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMANDshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (SLL y z))
     // result: (ANDshiftLLreg x y z)
@@ -2978,20 +2801,17 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMANDshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (SRL y z))
     // result: (ANDshiftRLreg x y z)
@@ -3007,20 +2827,17 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMANDshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (SRA y z))
     // result: (ANDshiftRAreg x y z)
@@ -3036,20 +2853,17 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMANDshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x x)
     // result: x
@@ -3060,7 +2874,6 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (AND x (MVN y))
     // result: (BIC x y)
@@ -3076,19 +2889,16 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 y = v_1.Args[0];
                 v.reset(OpARMBIC);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (MVNshiftLL y [c]))
     // result: (BICshiftLL x y [c])
@@ -3104,21 +2914,18 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMBICshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (MVNshiftRL y [c]))
     // result: (BICshiftRL x y [c])
@@ -3134,21 +2941,18 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMBICshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (MVNshiftRA y [c]))
     // result: (BICshiftRA x y [c])
@@ -3164,24 +2968,20 @@ private static bool rewriteValueARM_OpARMAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMBICshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMANDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3196,7 +2996,6 @@ private static bool rewriteValueARM_OpARMANDconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDconst [c] x)
     // cond: int32(c)==-1
@@ -3209,7 +3008,6 @@ private static bool rewriteValueARM_OpARMANDconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDconst [c] x)
     // cond: !isARMImmRot(uint32(c)) && isARMImmRot(^uint32(c))
@@ -3224,7 +3022,6 @@ private static bool rewriteValueARM_OpARMANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(~uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] x)
     // cond: buildcfg.GOARM==7 && !isARMImmRot(uint32(c)) && uint32(c)>0xffff && ^uint32(c)<=0xffff
@@ -3239,7 +3036,6 @@ private static bool rewriteValueARM_OpARMANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(~uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVWconst [d]))
     // result: (MOVWconst [c&d])
@@ -3252,7 +3048,6 @@ private static bool rewriteValueARM_OpARMANDconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c & d);
         return true;
-
     } 
     // match: (ANDconst [c] (ANDconst [d] x))
     // result: (ANDconst [c&d] x)
@@ -3267,10 +3062,8 @@ private static bool rewriteValueARM_OpARMANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMANDshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3294,7 +3087,6 @@ private static bool rewriteValueARM_OpARMANDshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ANDshiftLL x (MOVWconst [c]) [d])
     // result: (ANDconst x [c<<uint64(d)])
@@ -3309,7 +3101,6 @@ private static bool rewriteValueARM_OpARMANDshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDshiftLL y:(SLLconst x [c]) x [c])
     // result: y
@@ -3325,10 +3116,8 @@ private static bool rewriteValueARM_OpARMANDshiftLL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMANDshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3352,7 +3141,6 @@ private static bool rewriteValueARM_OpARMANDshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ANDshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -3371,10 +3159,8 @@ private static bool rewriteValueARM_OpARMANDshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMANDshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3398,7 +3184,6 @@ private static bool rewriteValueARM_OpARMANDshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ANDshiftRA x (MOVWconst [c]) [d])
     // result: (ANDconst x [c>>uint64(d)])
@@ -3413,7 +3198,6 @@ private static bool rewriteValueARM_OpARMANDshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDshiftRA y:(SRAconst x [c]) x [c])
     // result: y
@@ -3429,10 +3213,8 @@ private static bool rewriteValueARM_OpARMANDshiftRA(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMANDshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3456,7 +3238,6 @@ private static bool rewriteValueARM_OpARMANDshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ANDshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -3475,10 +3256,8 @@ private static bool rewriteValueARM_OpARMANDshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMANDshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3502,7 +3281,6 @@ private static bool rewriteValueARM_OpARMANDshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ANDshiftRL x (MOVWconst [c]) [d])
     // result: (ANDconst x [int32(uint32(c)>>uint64(d))])
@@ -3517,7 +3295,6 @@ private static bool rewriteValueARM_OpARMANDshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDshiftRL y:(SRLconst x [c]) x [c])
     // result: y
@@ -3533,10 +3310,8 @@ private static bool rewriteValueARM_OpARMANDshiftRL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMANDshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3560,7 +3335,6 @@ private static bool rewriteValueARM_OpARMANDshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ANDshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -3579,10 +3353,8 @@ private static bool rewriteValueARM_OpARMANDshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBFX(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3599,10 +3371,8 @@ private static bool rewriteValueARM_OpARMBFX(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(d << (int)((32 - uint32(c & 0xff) - uint32(c >> 8))) >> (int)((32 - uint32(c >> 8))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBFXU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3619,10 +3389,8 @@ private static bool rewriteValueARM_OpARMBFXU(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint32(d) << (int)((32 - uint32(c & 0xff) - uint32(c >> 8))) >> (int)((32 - uint32(c >> 8)))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3641,7 +3409,6 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (BIC x (SLLconst [c] y))
     // result: (BICshiftLL x y [c])
@@ -3656,7 +3423,6 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (BIC x (SRLconst [c] y))
     // result: (BICshiftRL x y [c])
@@ -3671,7 +3437,6 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (BIC x (SRAconst [c] y))
     // result: (BICshiftRA x y [c])
@@ -3686,7 +3451,6 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (BIC x (SLL y z))
     // result: (BICshiftLLreg x y z)
@@ -3700,7 +3464,6 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.reset(OpARMBICshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (BIC x (SRL y z))
     // result: (BICshiftRLreg x y z)
@@ -3714,7 +3477,6 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.reset(OpARMBICshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (BIC x (SRA y z))
     // result: (BICshiftRAreg x y z)
@@ -3728,7 +3490,6 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.reset(OpARMBICshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (BIC x x)
     // result: (MOVWconst [0])
@@ -3740,10 +3501,8 @@ private static bool rewriteValueARM_OpARMBIC(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBICconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3758,7 +3517,6 @@ private static bool rewriteValueARM_OpARMBICconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (BICconst [c] _)
     // cond: int32(c)==-1
@@ -3771,7 +3529,6 @@ private static bool rewriteValueARM_OpARMBICconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (BICconst [c] x)
     // cond: !isARMImmRot(uint32(c)) && isARMImmRot(^uint32(c))
@@ -3786,7 +3543,6 @@ private static bool rewriteValueARM_OpARMBICconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(~uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BICconst [c] x)
     // cond: buildcfg.GOARM==7 && !isARMImmRot(uint32(c)) && uint32(c)>0xffff && ^uint32(c)<=0xffff
@@ -3801,7 +3557,6 @@ private static bool rewriteValueARM_OpARMBICconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(~uint32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BICconst [c] (MOVWconst [d]))
     // result: (MOVWconst [d&^c])
@@ -3814,7 +3569,6 @@ private static bool rewriteValueARM_OpARMBICconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(d & ~c);
         return true;
-
     } 
     // match: (BICconst [c] (BICconst [d] x))
     // result: (BICconst [c|d] x)
@@ -3829,10 +3583,8 @@ private static bool rewriteValueARM_OpARMBICconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c | d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBICshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3852,7 +3604,6 @@ private static bool rewriteValueARM_OpARMBICshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BICshiftLL (SLLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -3868,10 +3619,8 @@ private static bool rewriteValueARM_OpARMBICshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBICshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3896,10 +3645,8 @@ private static bool rewriteValueARM_OpARMBICshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBICshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3919,7 +3666,6 @@ private static bool rewriteValueARM_OpARMBICshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BICshiftRA (SRAconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -3935,10 +3681,8 @@ private static bool rewriteValueARM_OpARMBICshiftRA(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBICshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3963,10 +3707,8 @@ private static bool rewriteValueARM_OpARMBICshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBICshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3986,7 +3728,6 @@ private static bool rewriteValueARM_OpARMBICshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (BICshiftRL (SRLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -4002,10 +3743,8 @@ private static bool rewriteValueARM_OpARMBICshiftRL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMBICshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4030,10 +3769,8 @@ private static bool rewriteValueARM_OpARMBICshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4054,20 +3791,17 @@ private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMCMNconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (CMN x (SLLconst [c] y))
     // result: (CMNshiftLL x y [c])
@@ -4083,21 +3817,18 @@ private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMCMNshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (CMN x (SRLconst [c] y))
     // result: (CMNshiftRL x y [c])
@@ -4113,21 +3844,18 @@ private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMCMNshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (CMN x (SRAconst [c] y))
     // result: (CMNshiftRA x y [c])
@@ -4143,21 +3871,18 @@ private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMCMNshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (CMN x (SLL y z))
     // result: (CMNshiftLLreg x y z)
@@ -4173,20 +3898,17 @@ private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMCMNshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (CMN x (SRL y z))
     // result: (CMNshiftRLreg x y z)
@@ -4202,20 +3924,17 @@ private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMCMNshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (CMN x (SRA y z))
     // result: (CMNshiftRAreg x y z)
@@ -4231,23 +3950,19 @@ private static bool rewriteValueARM_OpARMCMN(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMCMNshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMNconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4264,10 +3979,8 @@ private static bool rewriteValueARM_OpARMCMNconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(addFlags32(x, y));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMNshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4291,7 +4004,6 @@ private static bool rewriteValueARM_OpARMCMNshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMNshiftLL x (MOVWconst [c]) [d])
     // result: (CMNconst x [c<<uint64(d)])
@@ -4306,10 +4018,8 @@ private static bool rewriteValueARM_OpARMCMNshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMNshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4333,7 +4043,6 @@ private static bool rewriteValueARM_OpARMCMNshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMNshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -4352,10 +4061,8 @@ private static bool rewriteValueARM_OpARMCMNshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMNshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4379,7 +4086,6 @@ private static bool rewriteValueARM_OpARMCMNshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMNshiftRA x (MOVWconst [c]) [d])
     // result: (CMNconst x [c>>uint64(d)])
@@ -4394,10 +4100,8 @@ private static bool rewriteValueARM_OpARMCMNshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMNshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4421,7 +4125,6 @@ private static bool rewriteValueARM_OpARMCMNshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMNshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -4440,10 +4143,8 @@ private static bool rewriteValueARM_OpARMCMNshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMNshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4467,7 +4168,6 @@ private static bool rewriteValueARM_OpARMCMNshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMNshiftRL x (MOVWconst [c]) [d])
     // result: (CMNconst x [int32(uint32(c)>>uint64(d))])
@@ -4482,10 +4182,8 @@ private static bool rewriteValueARM_OpARMCMNshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMNshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4509,7 +4207,6 @@ private static bool rewriteValueARM_OpARMCMNshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMNshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -4528,10 +4225,8 @@ private static bool rewriteValueARM_OpARMCMNshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMOVWHSconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4553,7 +4248,6 @@ private static bool rewriteValueARM_OpARMCMOVWHSconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     } 
     // match: (CMOVWHSconst x (FlagConstant [fc]) [c])
     // cond: fc.ult()
@@ -4569,7 +4263,6 @@ private static bool rewriteValueARM_OpARMCMOVWHSconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWHSconst x (InvertFlags flags) [c])
     // result: (CMOVWLSconst x flags [c])
@@ -4584,10 +4277,8 @@ private static bool rewriteValueARM_OpARMCMOVWHSconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMOVWLSconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4609,7 +4300,6 @@ private static bool rewriteValueARM_OpARMCMOVWLSconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     } 
     // match: (CMOVWLSconst x (FlagConstant [fc]) [c])
     // cond: fc.ugt()
@@ -4625,7 +4315,6 @@ private static bool rewriteValueARM_OpARMCMOVWLSconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (CMOVWLSconst x (InvertFlags flags) [c])
     // result: (CMOVWHSconst x flags [c])
@@ -4640,10 +4329,8 @@ private static bool rewriteValueARM_OpARMCMOVWLSconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4663,7 +4350,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMP (MOVWconst [c]) x)
     // result: (InvertFlags (CMPconst [c] x))
@@ -4679,7 +4365,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x y)
     // cond: canonLessThan(x,y)
@@ -4695,7 +4380,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x (SLLconst [c] y))
     // result: (CMPshiftLL x y [c])
@@ -4710,7 +4394,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMP (SLLconst [c] y) x)
     // result: (InvertFlags (CMPshiftLL x y [c]))
@@ -4727,7 +4410,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x (SRLconst [c] y))
     // result: (CMPshiftRL x y [c])
@@ -4742,7 +4424,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMP (SRLconst [c] y) x)
     // result: (InvertFlags (CMPshiftRL x y [c]))
@@ -4759,7 +4440,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x (SRAconst [c] y))
     // result: (CMPshiftRA x y [c])
@@ -4774,7 +4454,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMP (SRAconst [c] y) x)
     // result: (InvertFlags (CMPshiftRA x y [c]))
@@ -4791,7 +4470,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x (SLL y z))
     // result: (CMPshiftLLreg x y z)
@@ -4805,7 +4483,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v.reset(OpARMCMPshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (CMP (SLL y z) x)
     // result: (InvertFlags (CMPshiftLLreg x y z))
@@ -4821,7 +4498,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg3(x, y, z);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x (SRL y z))
     // result: (CMPshiftRLreg x y z)
@@ -4835,7 +4511,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v.reset(OpARMCMPshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (CMP (SRL y z) x)
     // result: (InvertFlags (CMPshiftRLreg x y z))
@@ -4851,7 +4526,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg3(x, y, z);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x (SRA y z))
     // result: (CMPshiftRAreg x y z)
@@ -4865,7 +4539,6 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v.reset(OpARMCMPshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (CMP (SRA y z) x)
     // result: (InvertFlags (CMPshiftRAreg x y z))
@@ -4881,10 +4554,8 @@ private static bool rewriteValueARM_OpARMCMP(ptr<Value> _addr_v) {
         v0.AddArg3(x, y, z);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4901,10 +4572,8 @@ private static bool rewriteValueARM_OpARMCMPD(ptr<Value> _addr_v) {
         v.reset(OpARMCMPD0);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPF(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4921,10 +4590,8 @@ private static bool rewriteValueARM_OpARMCMPF(ptr<Value> _addr_v) {
         v.reset(OpARMCMPF0);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4941,7 +4608,6 @@ private static bool rewriteValueARM_OpARMCMPconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(subFlags32(x, y));
         return true;
-
     } 
     // match: (CMPconst (MOVBUreg _) [c])
     // cond: 0xff < c
@@ -4954,7 +4620,6 @@ private static bool rewriteValueARM_OpARMCMPconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(subFlags32(0, 1));
         return true;
-
     } 
     // match: (CMPconst (MOVHUreg _) [c])
     // cond: 0xffff < c
@@ -4967,7 +4632,6 @@ private static bool rewriteValueARM_OpARMCMPconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(subFlags32(0, 1));
         return true;
-
     } 
     // match: (CMPconst (ANDconst _ [m]) [n])
     // cond: 0 <= m && m < n
@@ -4984,7 +4648,6 @@ private static bool rewriteValueARM_OpARMCMPconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(subFlags32(0, 1));
         return true;
-
     } 
     // match: (CMPconst (SRLconst _ [c]) [n])
     // cond: 0 <= n && 0 < c && c <= 32 && (1<<uint32(32-c)) <= uint32(n)
@@ -5001,10 +4664,8 @@ private static bool rewriteValueARM_OpARMCMPconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(subFlags32(0, 1));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5030,7 +4691,6 @@ private static bool rewriteValueARM_OpARMCMPshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPshiftLL x (MOVWconst [c]) [d])
     // result: (CMPconst x [c<<uint64(d)])
@@ -5045,10 +4705,8 @@ private static bool rewriteValueARM_OpARMCMPshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5074,7 +4732,6 @@ private static bool rewriteValueARM_OpARMCMPshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -5093,10 +4750,8 @@ private static bool rewriteValueARM_OpARMCMPshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5122,7 +4777,6 @@ private static bool rewriteValueARM_OpARMCMPshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPshiftRA x (MOVWconst [c]) [d])
     // result: (CMPconst x [c>>uint64(d)])
@@ -5137,10 +4791,8 @@ private static bool rewriteValueARM_OpARMCMPshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5166,7 +4818,6 @@ private static bool rewriteValueARM_OpARMCMPshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -5185,10 +4836,8 @@ private static bool rewriteValueARM_OpARMCMPshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5214,7 +4863,6 @@ private static bool rewriteValueARM_OpARMCMPshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPshiftRL x (MOVWconst [c]) [d])
     // result: (CMPconst x [int32(uint32(c)>>uint64(d))])
@@ -5229,10 +4877,8 @@ private static bool rewriteValueARM_OpARMCMPshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMCMPshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5258,7 +4904,6 @@ private static bool rewriteValueARM_OpARMCMPshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -5277,10 +4922,8 @@ private static bool rewriteValueARM_OpARMCMPshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5296,7 +4939,6 @@ private static bool rewriteValueARM_OpARMEqual(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.eq()));
         return true;
-
     } 
     // match: (Equal (InvertFlags x))
     // result: (Equal x)
@@ -5308,10 +4950,8 @@ private static bool rewriteValueARM_OpARMEqual(ptr<Value> _addr_v) {
         v.reset(OpARMEqual);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMGreaterEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5327,7 +4967,6 @@ private static bool rewriteValueARM_OpARMGreaterEqual(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.ge()));
         return true;
-
     } 
     // match: (GreaterEqual (InvertFlags x))
     // result: (LessEqual x)
@@ -5339,10 +4978,8 @@ private static bool rewriteValueARM_OpARMGreaterEqual(ptr<Value> _addr_v) {
         v.reset(OpARMLessEqual);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMGreaterEqualU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5358,7 +4995,6 @@ private static bool rewriteValueARM_OpARMGreaterEqualU(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.uge()));
         return true;
-
     } 
     // match: (GreaterEqualU (InvertFlags x))
     // result: (LessEqualU x)
@@ -5370,10 +5006,8 @@ private static bool rewriteValueARM_OpARMGreaterEqualU(ptr<Value> _addr_v) {
         v.reset(OpARMLessEqualU);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMGreaterThan(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5389,7 +5023,6 @@ private static bool rewriteValueARM_OpARMGreaterThan(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.gt()));
         return true;
-
     } 
     // match: (GreaterThan (InvertFlags x))
     // result: (LessThan x)
@@ -5401,10 +5034,8 @@ private static bool rewriteValueARM_OpARMGreaterThan(ptr<Value> _addr_v) {
         v.reset(OpARMLessThan);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMGreaterThanU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5420,7 +5051,6 @@ private static bool rewriteValueARM_OpARMGreaterThanU(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.ugt()));
         return true;
-
     } 
     // match: (GreaterThanU (InvertFlags x))
     // result: (LessThanU x)
@@ -5432,10 +5062,8 @@ private static bool rewriteValueARM_OpARMGreaterThanU(ptr<Value> _addr_v) {
         v.reset(OpARMLessThanU);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMLessEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5451,7 +5079,6 @@ private static bool rewriteValueARM_OpARMLessEqual(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.le()));
         return true;
-
     } 
     // match: (LessEqual (InvertFlags x))
     // result: (GreaterEqual x)
@@ -5463,10 +5090,8 @@ private static bool rewriteValueARM_OpARMLessEqual(ptr<Value> _addr_v) {
         v.reset(OpARMGreaterEqual);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMLessEqualU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5482,7 +5107,6 @@ private static bool rewriteValueARM_OpARMLessEqualU(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.ule()));
         return true;
-
     } 
     // match: (LessEqualU (InvertFlags x))
     // result: (GreaterEqualU x)
@@ -5494,10 +5118,8 @@ private static bool rewriteValueARM_OpARMLessEqualU(ptr<Value> _addr_v) {
         v.reset(OpARMGreaterEqualU);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMLessThan(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5513,7 +5135,6 @@ private static bool rewriteValueARM_OpARMLessThan(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.lt()));
         return true;
-
     } 
     // match: (LessThan (InvertFlags x))
     // result: (GreaterThan x)
@@ -5525,10 +5146,8 @@ private static bool rewriteValueARM_OpARMLessThan(ptr<Value> _addr_v) {
         v.reset(OpARMGreaterThan);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMLessThanU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5544,7 +5163,6 @@ private static bool rewriteValueARM_OpARMLessThanU(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.ult()));
         return true;
-
     } 
     // match: (LessThanU (InvertFlags x))
     // result: (GreaterThanU x)
@@ -5556,10 +5174,8 @@ private static bool rewriteValueARM_OpARMLessThanU(ptr<Value> _addr_v) {
         v.reset(OpARMGreaterThanU);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBUload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5582,7 +5198,6 @@ private static bool rewriteValueARM_OpARMMOVBUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBUload [off1] {sym} (SUBconst [off2] ptr) mem)
     // result: (MOVBUload [off1-off2] {sym} ptr mem)
@@ -5600,7 +5215,6 @@ private static bool rewriteValueARM_OpARMMOVBUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBUload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -5623,7 +5237,6 @@ private static bool rewriteValueARM_OpARMMOVBUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBUload [off] {sym} ptr (MOVBstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -5645,7 +5258,6 @@ private static bool rewriteValueARM_OpARMMOVBUload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBUreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUload [0] {sym} (ADD ptr idx) mem)
     // cond: sym == nil
@@ -5667,7 +5279,6 @@ private static bool rewriteValueARM_OpARMMOVBUload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBUloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVBUload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -5681,10 +5292,8 @@ private static bool rewriteValueARM_OpARMMOVBUload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(read8(sym, int64(off))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBUloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5709,7 +5318,6 @@ private static bool rewriteValueARM_OpARMMOVBUloadidx(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBUreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUloadidx ptr (MOVWconst [c]) mem)
     // result: (MOVBUload [c] ptr mem)
@@ -5724,7 +5332,6 @@ private static bool rewriteValueARM_OpARMMOVBUloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBUloadidx (MOVWconst [c]) ptr mem)
     // result: (MOVBUload [c] ptr mem)
@@ -5739,10 +5346,8 @@ private static bool rewriteValueARM_OpARMMOVBUloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBUreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5758,7 +5363,6 @@ private static bool rewriteValueARM_OpARMMOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg (ANDconst [c] x))
     // result: (ANDconst [c&0xff] x)
@@ -5772,7 +5376,6 @@ private static bool rewriteValueARM_OpARMMOVBUreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg x:(MOVBUreg _))
     // result: (MOVWreg x)
@@ -5784,7 +5387,6 @@ private static bool rewriteValueARM_OpARMMOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg (MOVWconst [c]))
     // result: (MOVWconst [int32(uint8(c))])
@@ -5796,10 +5398,8 @@ private static bool rewriteValueARM_OpARMMOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint8(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5822,7 +5422,6 @@ private static bool rewriteValueARM_OpARMMOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym} (SUBconst [off2] ptr) mem)
     // result: (MOVBload [off1-off2] {sym} ptr mem)
@@ -5840,7 +5439,6 @@ private static bool rewriteValueARM_OpARMMOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -5863,7 +5461,6 @@ private static bool rewriteValueARM_OpARMMOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off] {sym} ptr (MOVBstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -5885,7 +5482,6 @@ private static bool rewriteValueARM_OpARMMOVBload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBload [0] {sym} (ADD ptr idx) mem)
     // cond: sym == nil
@@ -5907,10 +5503,8 @@ private static bool rewriteValueARM_OpARMMOVBload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5935,7 +5529,6 @@ private static bool rewriteValueARM_OpARMMOVBloadidx(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBloadidx ptr (MOVWconst [c]) mem)
     // result: (MOVBload [c] ptr mem)
@@ -5950,7 +5543,6 @@ private static bool rewriteValueARM_OpARMMOVBloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBloadidx (MOVWconst [c]) ptr mem)
     // result: (MOVBload [c] ptr mem)
@@ -5965,10 +5557,8 @@ private static bool rewriteValueARM_OpARMMOVBloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5984,7 +5574,6 @@ private static bool rewriteValueARM_OpARMMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (ANDconst [c] x))
     // cond: c & 0x80 == 0
@@ -6002,7 +5591,6 @@ private static bool rewriteValueARM_OpARMMOVBreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7f);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg x:(MOVBreg _))
     // result: (MOVWreg x)
@@ -6014,7 +5602,6 @@ private static bool rewriteValueARM_OpARMMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg (MOVWconst [c]))
     // result: (MOVWconst [int32(int8(c))])
@@ -6026,10 +5613,8 @@ private static bool rewriteValueARM_OpARMMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(int8(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6054,7 +5639,6 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym} (SUBconst [off2] ptr) val mem)
     // result: (MOVBstore [off1-off2] {sym} ptr val mem)
@@ -6073,7 +5657,6 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -6097,7 +5680,6 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -6115,7 +5697,6 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBUreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -6133,7 +5714,6 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -6151,7 +5731,6 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHUreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -6169,7 +5748,6 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [0] {sym} (ADD ptr idx) val mem)
     // cond: sym == nil
@@ -6192,10 +5770,8 @@ private static bool rewriteValueARM_OpARMMOVBstore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBstoreidx);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVBstoreidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6218,7 +5794,6 @@ private static bool rewriteValueARM_OpARMMOVBstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstoreidx (MOVWconst [c]) ptr val mem)
     // result: (MOVBstore [c] ptr val mem)
@@ -6234,10 +5809,8 @@ private static bool rewriteValueARM_OpARMMOVBstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6260,7 +5833,6 @@ private static bool rewriteValueARM_OpARMMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym} (SUBconst [off2] ptr) mem)
     // result: (MOVDload [off1-off2] {sym} ptr mem)
@@ -6278,7 +5850,6 @@ private static bool rewriteValueARM_OpARMMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -6301,7 +5872,6 @@ private static bool rewriteValueARM_OpARMMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDload [off] {sym} ptr (MOVDstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -6322,10 +5892,8 @@ private static bool rewriteValueARM_OpARMMOVDload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6350,7 +5918,6 @@ private static bool rewriteValueARM_OpARMMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off1] {sym} (SUBconst [off2] ptr) val mem)
     // result: (MOVDstore [off1-off2] {sym} ptr val mem)
@@ -6369,7 +5936,6 @@ private static bool rewriteValueARM_OpARMMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -6393,10 +5959,8 @@ private static bool rewriteValueARM_OpARMMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVFload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6419,7 +5983,6 @@ private static bool rewriteValueARM_OpARMMOVFload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVFload [off1] {sym} (SUBconst [off2] ptr) mem)
     // result: (MOVFload [off1-off2] {sym} ptr mem)
@@ -6437,7 +6000,6 @@ private static bool rewriteValueARM_OpARMMOVFload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVFload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -6460,7 +6022,6 @@ private static bool rewriteValueARM_OpARMMOVFload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVFload [off] {sym} ptr (MOVFstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -6481,10 +6042,8 @@ private static bool rewriteValueARM_OpARMMOVFload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVFstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6509,7 +6068,6 @@ private static bool rewriteValueARM_OpARMMOVFstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVFstore [off1] {sym} (SUBconst [off2] ptr) val mem)
     // result: (MOVFstore [off1-off2] {sym} ptr val mem)
@@ -6528,7 +6086,6 @@ private static bool rewriteValueARM_OpARMMOVFstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVFstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -6552,10 +6109,8 @@ private static bool rewriteValueARM_OpARMMOVFstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHUload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6580,7 +6135,6 @@ private static bool rewriteValueARM_OpARMMOVHUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHUload [off1] {sym} (SUBconst [off2] ptr) mem)
     // result: (MOVHUload [off1-off2] {sym} ptr mem)
@@ -6598,7 +6152,6 @@ private static bool rewriteValueARM_OpARMMOVHUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHUload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -6621,7 +6174,6 @@ private static bool rewriteValueARM_OpARMMOVHUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHUload [off] {sym} ptr (MOVHstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -6643,7 +6195,6 @@ private static bool rewriteValueARM_OpARMMOVHUload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHUreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUload [0] {sym} (ADD ptr idx) mem)
     // cond: sym == nil
@@ -6665,7 +6216,6 @@ private static bool rewriteValueARM_OpARMMOVHUload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHUloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVHUload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -6679,10 +6229,8 @@ private static bool rewriteValueARM_OpARMMOVHUload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(read16(sym, int64(off), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHUloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6707,7 +6255,6 @@ private static bool rewriteValueARM_OpARMMOVHUloadidx(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHUreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUloadidx ptr (MOVWconst [c]) mem)
     // result: (MOVHUload [c] ptr mem)
@@ -6722,7 +6269,6 @@ private static bool rewriteValueARM_OpARMMOVHUloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHUloadidx (MOVWconst [c]) ptr mem)
     // result: (MOVHUload [c] ptr mem)
@@ -6737,10 +6283,8 @@ private static bool rewriteValueARM_OpARMMOVHUloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHUreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6756,7 +6300,6 @@ private static bool rewriteValueARM_OpARMMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVHUload _ _))
     // result: (MOVWreg x)
@@ -6768,7 +6311,6 @@ private static bool rewriteValueARM_OpARMMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg (ANDconst [c] x))
     // result: (ANDconst [c&0xffff] x)
@@ -6782,7 +6324,6 @@ private static bool rewriteValueARM_OpARMMOVHUreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0xffff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVBUreg _))
     // result: (MOVWreg x)
@@ -6794,7 +6335,6 @@ private static bool rewriteValueARM_OpARMMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVHUreg _))
     // result: (MOVWreg x)
@@ -6806,7 +6346,6 @@ private static bool rewriteValueARM_OpARMMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg (MOVWconst [c]))
     // result: (MOVWconst [int32(uint16(c))])
@@ -6818,10 +6357,8 @@ private static bool rewriteValueARM_OpARMMOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint16(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6844,7 +6381,6 @@ private static bool rewriteValueARM_OpARMMOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHload [off1] {sym} (SUBconst [off2] ptr) mem)
     // result: (MOVHload [off1-off2] {sym} ptr mem)
@@ -6862,7 +6398,6 @@ private static bool rewriteValueARM_OpARMMOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -6885,7 +6420,6 @@ private static bool rewriteValueARM_OpARMMOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHload [off] {sym} ptr (MOVHstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -6907,7 +6441,6 @@ private static bool rewriteValueARM_OpARMMOVHload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHload [0] {sym} (ADD ptr idx) mem)
     // cond: sym == nil
@@ -6929,10 +6462,8 @@ private static bool rewriteValueARM_OpARMMOVHload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6957,7 +6488,6 @@ private static bool rewriteValueARM_OpARMMOVHloadidx(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHloadidx ptr (MOVWconst [c]) mem)
     // result: (MOVHload [c] ptr mem)
@@ -6972,7 +6502,6 @@ private static bool rewriteValueARM_OpARMMOVHloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHloadidx (MOVWconst [c]) ptr mem)
     // result: (MOVHload [c] ptr mem)
@@ -6987,10 +6516,8 @@ private static bool rewriteValueARM_OpARMMOVHloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7006,7 +6533,6 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBUload _ _))
     // result: (MOVWreg x)
@@ -7018,7 +6544,6 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHload _ _))
     // result: (MOVWreg x)
@@ -7030,7 +6555,6 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (ANDconst [c] x))
     // cond: c & 0x8000 == 0
@@ -7048,7 +6572,6 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & 0x7fff);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBreg _))
     // result: (MOVWreg x)
@@ -7060,7 +6583,6 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBUreg _))
     // result: (MOVWreg x)
@@ -7072,7 +6594,6 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHreg _))
     // result: (MOVWreg x)
@@ -7084,7 +6605,6 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg (MOVWconst [c]))
     // result: (MOVWconst [int32(int16(c))])
@@ -7096,10 +6616,8 @@ private static bool rewriteValueARM_OpARMMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(int16(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7124,7 +6642,6 @@ private static bool rewriteValueARM_OpARMMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off1] {sym} (SUBconst [off2] ptr) val mem)
     // result: (MOVHstore [off1-off2] {sym} ptr val mem)
@@ -7143,7 +6660,6 @@ private static bool rewriteValueARM_OpARMMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -7167,7 +6683,6 @@ private static bool rewriteValueARM_OpARMMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -7185,7 +6700,6 @@ private static bool rewriteValueARM_OpARMMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHUreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -7203,7 +6717,6 @@ private static bool rewriteValueARM_OpARMMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [0] {sym} (ADD ptr idx) val mem)
     // cond: sym == nil
@@ -7226,10 +6739,8 @@ private static bool rewriteValueARM_OpARMMOVHstore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHstoreidx);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVHstoreidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7252,7 +6763,6 @@ private static bool rewriteValueARM_OpARMMOVHstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstoreidx (MOVWconst [c]) ptr val mem)
     // result: (MOVHstore [c] ptr val mem)
@@ -7268,10 +6778,8 @@ private static bool rewriteValueARM_OpARMMOVHstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7296,7 +6804,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym} (SUBconst [off2] ptr) mem)
     // result: (MOVWload [off1-off2] {sym} ptr mem)
@@ -7314,7 +6821,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) mem)
     // cond: canMergeSym(sym1,sym2)
@@ -7337,7 +6843,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off] {sym} ptr (MOVWstore [off2] {sym2} ptr2 x _))
     // cond: sym == sym2 && off == off2 && isSamePtr(ptr, ptr2)
@@ -7358,7 +6863,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWload [0] {sym} (ADD ptr idx) mem)
     // cond: sym == nil
@@ -7380,7 +6884,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWloadidx);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWload [0] {sym} (ADDshiftLL ptr idx [c]) mem)
     // cond: sym == nil
@@ -7404,7 +6907,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWload [0] {sym} (ADDshiftRL ptr idx [c]) mem)
     // cond: sym == nil
@@ -7428,7 +6930,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWload [0] {sym} (ADDshiftRA ptr idx [c]) mem)
     // cond: sym == nil
@@ -7452,7 +6953,6 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWload [off] {sym} (SB) _)
     // cond: symIsRO(sym)
@@ -7466,10 +6966,8 @@ private static bool rewriteValueARM_OpARMMOVWload(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(read32(sym, int64(off), config.ctxt.Arch.ByteOrder)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7493,7 +6991,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWloadidx ptr (MOVWconst [c]) mem)
     // result: (MOVWload [c] ptr mem)
@@ -7508,7 +7005,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWloadidx (MOVWconst [c]) ptr mem)
     // result: (MOVWload [c] ptr mem)
@@ -7523,7 +7019,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWloadidx ptr (SLLconst idx [c]) mem)
     // result: (MOVWloadshiftLL ptr idx [c] mem)
@@ -7539,7 +7034,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWloadidx (SLLconst idx [c]) ptr mem)
     // result: (MOVWloadshiftLL ptr idx [c] mem)
@@ -7555,7 +7049,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWloadidx ptr (SRLconst idx [c]) mem)
     // result: (MOVWloadshiftRL ptr idx [c] mem)
@@ -7571,7 +7064,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWloadidx (SRLconst idx [c]) ptr mem)
     // result: (MOVWloadshiftRL ptr idx [c] mem)
@@ -7587,7 +7079,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWloadidx ptr (SRAconst idx [c]) mem)
     // result: (MOVWloadshiftRA ptr idx [c] mem)
@@ -7603,7 +7094,6 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     } 
     // match: (MOVWloadidx (SRAconst idx [c]) ptr mem)
     // result: (MOVWloadshiftRA ptr idx [c] mem)
@@ -7619,10 +7109,8 @@ private static bool rewriteValueARM_OpARMMOVWloadidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, idx, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWloadshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7648,7 +7136,6 @@ private static bool rewriteValueARM_OpARMMOVWloadshiftLL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWloadshiftLL ptr (MOVWconst [c]) [d] mem)
     // result: (MOVWload [int32(uint32(c)<<uint64(d))] ptr mem)
@@ -7664,10 +7151,8 @@ private static bool rewriteValueARM_OpARMMOVWloadshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) << (int)(uint64(d))));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWloadshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7693,7 +7178,6 @@ private static bool rewriteValueARM_OpARMMOVWloadshiftRA(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWloadshiftRA ptr (MOVWconst [c]) [d] mem)
     // result: (MOVWload [c>>uint64(d)] ptr mem)
@@ -7709,10 +7193,8 @@ private static bool rewriteValueARM_OpARMMOVWloadshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWloadshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7738,7 +7220,6 @@ private static bool rewriteValueARM_OpARMMOVWloadshiftRL(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWloadshiftRL ptr (MOVWconst [c]) [d] mem)
     // result: (MOVWload [int32(uint32(c)>>uint64(d))] ptr mem)
@@ -7754,10 +7235,8 @@ private static bool rewriteValueARM_OpARMMOVWloadshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWnop(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7773,10 +7252,8 @@ private static bool rewriteValueARM_OpARMMOVWnop(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7793,7 +7270,6 @@ private static bool rewriteValueARM_OpARMMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWnop);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg (MOVWconst [c]))
     // result: (MOVWconst [c])
@@ -7805,10 +7281,8 @@ private static bool rewriteValueARM_OpARMMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7833,7 +7307,6 @@ private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym} (SUBconst [off2] ptr) val mem)
     // result: (MOVWstore [off1-off2] {sym} ptr val mem)
@@ -7852,7 +7325,6 @@ private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym1} (MOVWaddr [off2] {sym2} ptr) val mem)
     // cond: canMergeSym(sym1,sym2)
@@ -7876,7 +7348,6 @@ private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [0] {sym} (ADD ptr idx) val mem)
     // cond: sym == nil
@@ -7899,7 +7370,6 @@ private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWstoreidx);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [0] {sym} (ADDshiftLL ptr idx [c]) val mem)
     // cond: sym == nil
@@ -7924,7 +7394,6 @@ private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [0] {sym} (ADDshiftRL ptr idx [c]) val mem)
     // cond: sym == nil
@@ -7949,7 +7418,6 @@ private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [0] {sym} (ADDshiftRA ptr idx [c]) val mem)
     // cond: sym == nil
@@ -7974,10 +7442,8 @@ private static bool rewriteValueARM_OpARMMOVWstore(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8000,7 +7466,6 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx (MOVWconst [c]) ptr val mem)
     // result: (MOVWstore [c] ptr val mem)
@@ -8016,7 +7481,6 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx ptr (SLLconst idx [c]) val mem)
     // result: (MOVWstoreshiftLL ptr idx [c] val mem)
@@ -8033,7 +7497,6 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx (SLLconst idx [c]) ptr val mem)
     // result: (MOVWstoreshiftLL ptr idx [c] val mem)
@@ -8050,7 +7513,6 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx ptr (SRLconst idx [c]) val mem)
     // result: (MOVWstoreshiftRL ptr idx [c] val mem)
@@ -8067,7 +7529,6 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx (SRLconst idx [c]) ptr val mem)
     // result: (MOVWstoreshiftRL ptr idx [c] val mem)
@@ -8084,7 +7545,6 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx ptr (SRAconst idx [c]) val mem)
     // result: (MOVWstoreshiftRA ptr idx [c] val mem)
@@ -8101,7 +7561,6 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     } 
     // match: (MOVWstoreidx (SRAconst idx [c]) ptr val mem)
     // result: (MOVWstoreshiftRA ptr idx [c] val mem)
@@ -8118,10 +7577,8 @@ private static bool rewriteValueARM_OpARMMOVWstoreidx(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg4(ptr, idx, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWstoreshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8145,10 +7602,8 @@ private static bool rewriteValueARM_OpARMMOVWstoreshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) << (int)(uint64(d))));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWstoreshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8172,10 +7627,8 @@ private static bool rewriteValueARM_OpARMMOVWstoreshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMOVWstoreshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8199,10 +7652,8 @@ private static bool rewriteValueARM_OpARMMOVWstoreshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8225,24 +7676,20 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 if (!(int32(c) == -1)) {
                     continue;
                 }
-
                 v.reset(OpARMRSBconst);
                 v.AuxInt = int32ToAuxInt(0);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL _ (MOVWconst [0]))
     // result: (MOVWconst [0])
@@ -8257,18 +7704,15 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpARMMOVWconst);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [1]))
     // result: x
@@ -8284,17 +7728,14 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [c]))
     // cond: isPowerOfTwo32(c)
@@ -8311,24 +7752,20 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(isPowerOfTwo32(c))) {
                     continue;
                 }
-
                 v.reset(OpARMSLLconst);
                 v.AuxInt = int32ToAuxInt(int32(log32(c)));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [c]))
     // cond: isPowerOfTwo32(c-1) && c >= 3
@@ -8345,24 +7782,20 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(isPowerOfTwo32(c - 1) && c >= 3)) {
                     continue;
                 }
-
                 v.reset(OpARMADDshiftLL);
                 v.AuxInt = int32ToAuxInt(int32(log32(c - 1)));
                 v.AddArg2(x, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [c]))
     // cond: isPowerOfTwo32(c+1) && c >= 7
@@ -8379,24 +7812,20 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(isPowerOfTwo32(c + 1) && c >= 7)) {
                     continue;
                 }
-
                 v.reset(OpARMRSBshiftLL);
                 v.AuxInt = int32ToAuxInt(int32(log32(c + 1)));
                 v.AddArg2(x, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [c]))
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -8413,12 +7842,10 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(c % 3 == 0 && isPowerOfTwo32(c / 3))) {
                     continue;
                 }
-
                 v.reset(OpARMSLLconst);
                 v.AuxInt = int32ToAuxInt(int32(log32(c / 3)));
                 var v0 = b.NewValue0(v.Pos, OpARMADDshiftLL, x.Type);
@@ -8426,14 +7853,12 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                 v0.AddArg2(x, x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [c]))
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -8450,12 +7875,10 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(c % 5 == 0 && isPowerOfTwo32(c / 5))) {
                     continue;
                 }
-
                 v.reset(OpARMSLLconst);
                 v.AuxInt = int32ToAuxInt(int32(log32(c / 5)));
                 v0 = b.NewValue0(v.Pos, OpARMADDshiftLL, x.Type);
@@ -8463,14 +7886,12 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                 v0.AddArg2(x, x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [c]))
     // cond: c%7 == 0 && isPowerOfTwo32(c/7)
@@ -8487,12 +7908,10 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(c % 7 == 0 && isPowerOfTwo32(c / 7))) {
                     continue;
                 }
-
                 v.reset(OpARMSLLconst);
                 v.AuxInt = int32ToAuxInt(int32(log32(c / 7)));
                 v0 = b.NewValue0(v.Pos, OpARMRSBshiftLL, x.Type);
@@ -8500,14 +7919,12 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                 v0.AddArg2(x, x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL x (MOVWconst [c]))
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -8524,12 +7941,10 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(c % 9 == 0 && isPowerOfTwo32(c / 9))) {
                     continue;
                 }
-
                 v.reset(OpARMSLLconst);
                 v.AuxInt = int32ToAuxInt(int32(log32(c / 9)));
                 v0 = b.NewValue0(v.Pos, OpARMADDshiftLL, x.Type);
@@ -8537,14 +7952,12 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                 v0.AddArg2(x, x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MUL (MOVWconst [c]) (MOVWconst [d]))
     // result: (MOVWconst [c*d])
@@ -8559,27 +7972,22 @@ private static bool rewriteValueARM_OpARMMUL(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpARMMOVWconst) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMMOVWconst);
                 v.AuxInt = int32ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8604,7 +8012,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v.reset(OpARMSUB);
         v.AddArg2(a, x);
         return true;
-
     } 
     // match: (MULA _ (MOVWconst [0]) a)
     // result: a
@@ -8615,7 +8022,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         a = v_2;
         v.copyOf(a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [1]) a)
     // result: (ADD x a)
@@ -8628,7 +8034,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v.reset(OpARMADD);
         v.AddArg2(x, a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [c]) a)
     // cond: isPowerOfTwo32(c)
@@ -8649,7 +8054,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [c]) a)
     // cond: isPowerOfTwo32(c-1) && c >= 3
@@ -8670,7 +8074,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [c]) a)
     // cond: isPowerOfTwo32(c+1) && c >= 7
@@ -8691,7 +8094,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [c]) a)
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -8715,7 +8117,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [c]) a)
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -8739,7 +8140,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [c]) a)
     // cond: c%7 == 0 && isPowerOfTwo32(c/7)
@@ -8763,7 +8163,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA x (MOVWconst [c]) a)
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -8787,7 +8186,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: c == -1
@@ -8805,7 +8203,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v.reset(OpARMSUB);
         v.AddArg2(a, x);
         return true;
-
     } 
     // match: (MULA (MOVWconst [0]) _ a)
     // result: a
@@ -8816,7 +8213,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         a = v_2;
         v.copyOf(a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [1]) x a)
     // result: (ADD x a)
@@ -8829,7 +8225,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v.reset(OpARMADD);
         v.AddArg2(x, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: isPowerOfTwo32(c)
@@ -8850,7 +8245,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: isPowerOfTwo32(c-1) && c >= 3
@@ -8871,7 +8265,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: isPowerOfTwo32(c+1) && c >= 7
@@ -8892,7 +8285,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -8916,7 +8308,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -8940,7 +8331,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: c%7 == 0 && isPowerOfTwo32(c/7)
@@ -8964,7 +8354,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) x a)
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -8988,7 +8377,6 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULA (MOVWconst [c]) (MOVWconst [d]) a)
     // result: (ADDconst [c*d] a)
@@ -9006,10 +8394,8 @@ private static bool rewriteValueARM_OpARMMULA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c * d);
         v.AddArg(a);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMULD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9028,25 +8414,20 @@ private static bool rewriteValueARM_OpARMMULD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_0.Args[0];
                 var y = v_1;
                 if (!(buildcfg.GOARM >= 6)) {
                     continue;
                 }
-
                 v.reset(OpARMNMULD);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMULF(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9065,25 +8446,20 @@ private static bool rewriteValueARM_OpARMMULF(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_0.Args[0];
                 var y = v_1;
                 if (!(buildcfg.GOARM >= 6)) {
                     continue;
                 }
-
                 v.reset(OpARMNMULF);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9108,7 +8484,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v.reset(OpARMADD);
         v.AddArg2(a, x);
         return true;
-
     } 
     // match: (MULS _ (MOVWconst [0]) a)
     // result: a
@@ -9119,7 +8494,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         a = v_2;
         v.copyOf(a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [1]) a)
     // result: (RSB x a)
@@ -9132,7 +8506,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v.reset(OpARMRSB);
         v.AddArg2(x, a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [c]) a)
     // cond: isPowerOfTwo32(c)
@@ -9153,7 +8526,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [c]) a)
     // cond: isPowerOfTwo32(c-1) && c >= 3
@@ -9174,7 +8546,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [c]) a)
     // cond: isPowerOfTwo32(c+1) && c >= 7
@@ -9195,7 +8566,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [c]) a)
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -9219,7 +8589,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [c]) a)
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -9243,7 +8612,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [c]) a)
     // cond: c%7 == 0 && isPowerOfTwo32(c/7)
@@ -9267,7 +8635,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS x (MOVWconst [c]) a)
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -9291,7 +8658,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: c == -1
@@ -9309,7 +8675,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v.reset(OpARMADD);
         v.AddArg2(a, x);
         return true;
-
     } 
     // match: (MULS (MOVWconst [0]) _ a)
     // result: a
@@ -9320,7 +8685,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         a = v_2;
         v.copyOf(a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [1]) x a)
     // result: (RSB x a)
@@ -9333,7 +8697,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v.reset(OpARMRSB);
         v.AddArg2(x, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: isPowerOfTwo32(c)
@@ -9354,7 +8717,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: isPowerOfTwo32(c-1) && c >= 3
@@ -9375,7 +8737,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: isPowerOfTwo32(c+1) && c >= 7
@@ -9396,7 +8757,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg2(x, x);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: c%3 == 0 && isPowerOfTwo32(c/3)
@@ -9420,7 +8780,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: c%5 == 0 && isPowerOfTwo32(c/5)
@@ -9444,7 +8803,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: c%7 == 0 && isPowerOfTwo32(c/7)
@@ -9468,7 +8826,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) x a)
     // cond: c%9 == 0 && isPowerOfTwo32(c/9)
@@ -9492,7 +8849,6 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, a);
         return true;
-
     } 
     // match: (MULS (MOVWconst [c]) (MOVWconst [d]) a)
     // result: (SUBconst [c*d] a)
@@ -9510,10 +8866,8 @@ private static bool rewriteValueARM_OpARMMULS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c * d);
         v.AddArg(a);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9529,7 +8883,6 @@ private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(~c);
         return true;
-
     } 
     // match: (MVN (SLLconst [c] x))
     // result: (MVNshiftLL x [c])
@@ -9543,7 +8896,6 @@ private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MVN (SRLconst [c] x))
     // result: (MVNshiftRL x [c])
@@ -9557,7 +8909,6 @@ private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MVN (SRAconst [c] x))
     // result: (MVNshiftRA x [c])
@@ -9571,7 +8922,6 @@ private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MVN (SLL x y))
     // result: (MVNshiftLLreg x y)
@@ -9584,7 +8934,6 @@ private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
         v.reset(OpARMMVNshiftLLreg);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (MVN (SRL x y))
     // result: (MVNshiftRLreg x y)
@@ -9597,7 +8946,6 @@ private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
         v.reset(OpARMMVNshiftRLreg);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (MVN (SRA x y))
     // result: (MVNshiftRAreg x y)
@@ -9610,10 +8958,8 @@ private static bool rewriteValueARM_OpARMMVN(ptr<Value> _addr_v) {
         v.reset(OpARMMVNshiftRAreg);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMVNshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9630,10 +8976,8 @@ private static bool rewriteValueARM_OpARMMVNshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(~(c << (int)(uint64(d))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMVNshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9656,10 +9000,8 @@ private static bool rewriteValueARM_OpARMMVNshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMVNshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9676,10 +9018,8 @@ private static bool rewriteValueARM_OpARMMVNshiftRA(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(c) >> (int)(uint64(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMVNshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9702,10 +9042,8 @@ private static bool rewriteValueARM_OpARMMVNshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMVNshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9722,10 +9060,8 @@ private static bool rewriteValueARM_OpARMMVNshiftRL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(~int32(uint32(c) >> (int)(uint64(d))));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMMVNshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9748,10 +9084,8 @@ private static bool rewriteValueARM_OpARMMVNshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMNEGD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9772,10 +9106,8 @@ private static bool rewriteValueARM_OpARMNEGD(ptr<Value> _addr_v) {
         v.reset(OpARMNMULD);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMNEGF(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9796,10 +9128,8 @@ private static bool rewriteValueARM_OpARMNEGF(ptr<Value> _addr_v) {
         v.reset(OpARMNMULF);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMNMULD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9817,21 +9147,17 @@ private static bool rewriteValueARM_OpARMNMULD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_0.Args[0];
                 var y = v_1;
                 v.reset(OpARMMULD);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMNMULF(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9849,21 +9175,17 @@ private static bool rewriteValueARM_OpARMNMULF(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_0.Args[0];
                 var y = v_1;
                 v.reset(OpARMMULF);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMNotEqual(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9879,7 +9201,6 @@ private static bool rewriteValueARM_OpARMNotEqual(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(b2i32(fc.ne()));
         return true;
-
     } 
     // match: (NotEqual (InvertFlags x))
     // result: (NotEqual x)
@@ -9891,10 +9212,8 @@ private static bool rewriteValueARM_OpARMNotEqual(ptr<Value> _addr_v) {
         v.reset(OpARMNotEqual);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9915,20 +9234,17 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMORconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x (SLLconst [c] y))
     // result: (ORshiftLL x y [c])
@@ -9944,21 +9260,18 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMORshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x (SRLconst [c] y))
     // result: (ORshiftRL x y [c])
@@ -9974,21 +9287,18 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMORshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x (SRAconst [c] y))
     // result: (ORshiftRA x y [c])
@@ -10004,21 +9314,18 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMORshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x (SLL y z))
     // result: (ORshiftLLreg x y z)
@@ -10034,20 +9341,17 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMORshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x (SRL y z))
     // result: (ORshiftRLreg x y z)
@@ -10063,20 +9367,17 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMORshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x (SRA y z))
     // result: (ORshiftRAreg x y z)
@@ -10092,20 +9393,17 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMORshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x x)
     // result: x
@@ -10116,10 +9414,8 @@ private static bool rewriteValueARM_OpARMOR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10134,7 +9430,6 @@ private static bool rewriteValueARM_OpARMORconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORconst [c] _)
     // cond: int32(c)==-1
@@ -10147,7 +9442,6 @@ private static bool rewriteValueARM_OpARMORconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORconst [c] (MOVWconst [d]))
     // result: (MOVWconst [c|d])
@@ -10160,7 +9454,6 @@ private static bool rewriteValueARM_OpARMORconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c | d);
         return true;
-
     } 
     // match: (ORconst [c] (ORconst [d] x))
     // result: (ORconst [c|d] x)
@@ -10175,10 +9468,8 @@ private static bool rewriteValueARM_OpARMORconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c | d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMORshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10203,7 +9494,6 @@ private static bool rewriteValueARM_OpARMORshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ORshiftLL x (MOVWconst [c]) [d])
     // result: (ORconst x [c<<uint64(d)])
@@ -10218,7 +9508,6 @@ private static bool rewriteValueARM_OpARMORshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: ( ORshiftLL [c] (SRLconst x [32-c]) x)
     // result: (SRRconst [32-c] x)
@@ -10235,7 +9524,6 @@ private static bool rewriteValueARM_OpARMORshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(32 - c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORshiftLL <typ.UInt16> [8] (BFXU <typ.UInt16> [int32(armBFAuxInt(8, 8))] x) x)
     // result: (REV16 x)
@@ -10250,7 +9538,6 @@ private static bool rewriteValueARM_OpARMORshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMREV16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORshiftLL <typ.UInt16> [8] (SRLconst <typ.UInt16> [24] (SLLconst [16] x)) x)
     // cond: buildcfg.GOARM>=6
@@ -10270,7 +9557,6 @@ private static bool rewriteValueARM_OpARMORshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMREV16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORshiftLL y:(SLLconst x [c]) x [c])
     // result: y
@@ -10286,10 +9572,8 @@ private static bool rewriteValueARM_OpARMORshiftLL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMORshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10313,7 +9597,6 @@ private static bool rewriteValueARM_OpARMORshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ORshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -10332,10 +9615,8 @@ private static bool rewriteValueARM_OpARMORshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMORshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10359,7 +9640,6 @@ private static bool rewriteValueARM_OpARMORshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ORshiftRA x (MOVWconst [c]) [d])
     // result: (ORconst x [c>>uint64(d)])
@@ -10374,7 +9654,6 @@ private static bool rewriteValueARM_OpARMORshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORshiftRA y:(SRAconst x [c]) x [c])
     // result: y
@@ -10390,10 +9669,8 @@ private static bool rewriteValueARM_OpARMORshiftRA(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMORshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10417,7 +9694,6 @@ private static bool rewriteValueARM_OpARMORshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ORshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -10436,10 +9712,8 @@ private static bool rewriteValueARM_OpARMORshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMORshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10463,7 +9737,6 @@ private static bool rewriteValueARM_OpARMORshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ORshiftRL x (MOVWconst [c]) [d])
     // result: (ORconst x [int32(uint32(c)>>uint64(d))])
@@ -10478,7 +9751,6 @@ private static bool rewriteValueARM_OpARMORshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: ( ORshiftRL [c] (SLLconst x [32-c]) x)
     // result: (SRRconst [ c] x)
@@ -10495,7 +9767,6 @@ private static bool rewriteValueARM_OpARMORshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ORshiftRL y:(SRLconst x [c]) x [c])
     // result: y
@@ -10511,10 +9782,8 @@ private static bool rewriteValueARM_OpARMORshiftRL(ptr<Value> _addr_v) {
         }
         v.copyOf(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMORshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10538,7 +9807,6 @@ private static bool rewriteValueARM_OpARMORshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (ORshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -10557,10 +9825,8 @@ private static bool rewriteValueARM_OpARMORshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10579,7 +9845,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RSB x (MOVWconst [c]))
     // result: (RSBconst [c] x)
@@ -10593,7 +9858,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RSB x (SLLconst [c] y))
     // result: (RSBshiftLL x y [c])
@@ -10608,7 +9872,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RSB (SLLconst [c] y) x)
     // result: (SUBshiftLL x y [c])
@@ -10623,7 +9886,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RSB x (SRLconst [c] y))
     // result: (RSBshiftRL x y [c])
@@ -10638,7 +9900,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RSB (SRLconst [c] y) x)
     // result: (SUBshiftRL x y [c])
@@ -10653,7 +9914,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RSB x (SRAconst [c] y))
     // result: (RSBshiftRA x y [c])
@@ -10668,7 +9928,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RSB (SRAconst [c] y) x)
     // result: (SUBshiftRA x y [c])
@@ -10683,7 +9942,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (RSB x (SLL y z))
     // result: (RSBshiftLLreg x y z)
@@ -10697,7 +9955,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMRSBshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (RSB (SLL y z) x)
     // result: (SUBshiftLLreg x y z)
@@ -10711,7 +9968,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMSUBshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (RSB x (SRL y z))
     // result: (RSBshiftRLreg x y z)
@@ -10725,7 +9981,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMRSBshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (RSB (SRL y z) x)
     // result: (SUBshiftRLreg x y z)
@@ -10739,7 +9994,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMSUBshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (RSB x (SRA y z))
     // result: (RSBshiftRAreg x y z)
@@ -10753,7 +10007,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMRSBshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (RSB (SRA y z) x)
     // result: (SUBshiftRAreg x y z)
@@ -10767,7 +10020,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMSUBshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (RSB x x)
     // result: (MOVWconst [0])
@@ -10779,7 +10031,6 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (RSB (MUL x y) a)
     // cond: buildcfg.GOARM == 7
@@ -10797,10 +10048,8 @@ private static bool rewriteValueARM_OpARMRSB(ptr<Value> _addr_v) {
         v.reset(OpARMMULS);
         v.AddArg3(x, y, a);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBSshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10824,7 +10073,6 @@ private static bool rewriteValueARM_OpARMRSBSshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBSshiftLL x (MOVWconst [c]) [d])
     // result: (RSBSconst x [c<<uint64(d)])
@@ -10839,10 +10087,8 @@ private static bool rewriteValueARM_OpARMRSBSshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBSshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10866,7 +10112,6 @@ private static bool rewriteValueARM_OpARMRSBSshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBSshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -10885,10 +10130,8 @@ private static bool rewriteValueARM_OpARMRSBSshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBSshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10912,7 +10155,6 @@ private static bool rewriteValueARM_OpARMRSBSshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBSshiftRA x (MOVWconst [c]) [d])
     // result: (RSBSconst x [c>>uint64(d)])
@@ -10927,10 +10169,8 @@ private static bool rewriteValueARM_OpARMRSBSshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBSshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10954,7 +10194,6 @@ private static bool rewriteValueARM_OpARMRSBSshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBSshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -10973,10 +10212,8 @@ private static bool rewriteValueARM_OpARMRSBSshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBSshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11000,7 +10237,6 @@ private static bool rewriteValueARM_OpARMRSBSshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBSshiftRL x (MOVWconst [c]) [d])
     // result: (RSBSconst x [int32(uint32(c)>>uint64(d))])
@@ -11015,10 +10251,8 @@ private static bool rewriteValueARM_OpARMRSBSshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBSshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11042,7 +10276,6 @@ private static bool rewriteValueARM_OpARMRSBSshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBSshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -11061,10 +10294,8 @@ private static bool rewriteValueARM_OpARMRSBSshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11081,7 +10312,6 @@ private static bool rewriteValueARM_OpARMRSBconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c - d);
         return true;
-
     } 
     // match: (RSBconst [c] (RSBconst [d] x))
     // result: (ADDconst [c-d] x)
@@ -11096,7 +10326,6 @@ private static bool rewriteValueARM_OpARMRSBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RSBconst [c] (ADDconst [d] x))
     // result: (RSBconst [c-d] x)
@@ -11111,7 +10340,6 @@ private static bool rewriteValueARM_OpARMRSBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RSBconst [c] (SUBconst [d] x))
     // result: (RSBconst [c+d] x)
@@ -11126,10 +10354,8 @@ private static bool rewriteValueARM_OpARMRSBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11153,7 +10379,6 @@ private static bool rewriteValueARM_OpARMRSBshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBshiftLL x (MOVWconst [c]) [d])
     // result: (RSBconst x [c<<uint64(d)])
@@ -11168,7 +10393,6 @@ private static bool rewriteValueARM_OpARMRSBshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RSBshiftLL (SLLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -11184,10 +10408,8 @@ private static bool rewriteValueARM_OpARMRSBshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11211,7 +10433,6 @@ private static bool rewriteValueARM_OpARMRSBshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -11230,10 +10451,8 @@ private static bool rewriteValueARM_OpARMRSBshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11257,7 +10476,6 @@ private static bool rewriteValueARM_OpARMRSBshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBshiftRA x (MOVWconst [c]) [d])
     // result: (RSBconst x [c>>uint64(d)])
@@ -11272,7 +10490,6 @@ private static bool rewriteValueARM_OpARMRSBshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RSBshiftRA (SRAconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -11288,10 +10505,8 @@ private static bool rewriteValueARM_OpARMRSBshiftRA(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11315,7 +10530,6 @@ private static bool rewriteValueARM_OpARMRSBshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -11334,10 +10548,8 @@ private static bool rewriteValueARM_OpARMRSBshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11361,7 +10573,6 @@ private static bool rewriteValueARM_OpARMRSBshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBshiftRL x (MOVWconst [c]) [d])
     // result: (RSBconst x [int32(uint32(c)>>uint64(d))])
@@ -11376,7 +10587,6 @@ private static bool rewriteValueARM_OpARMRSBshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RSBshiftRL (SRLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -11392,10 +10602,8 @@ private static bool rewriteValueARM_OpARMRSBshiftRL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSBshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11419,7 +10627,6 @@ private static bool rewriteValueARM_OpARMRSBshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (RSBshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -11438,10 +10645,8 @@ private static bool rewriteValueARM_OpARMRSBshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSCconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11462,7 +10667,6 @@ private static bool rewriteValueARM_OpARMRSCconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - d);
         v.AddArg2(x, flags);
         return true;
-
     } 
     // match: (RSCconst [c] (SUBconst [d] x) flags)
     // result: (RSCconst [c+d] x flags)
@@ -11478,10 +10682,8 @@ private static bool rewriteValueARM_OpARMRSCconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSCshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11507,7 +10709,6 @@ private static bool rewriteValueARM_OpARMRSCshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (RSCshiftLL x (MOVWconst [c]) [d] flags)
     // result: (RSCconst x [c<<uint64(d)] flags)
@@ -11523,10 +10724,8 @@ private static bool rewriteValueARM_OpARMRSCshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSCshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11552,7 +10751,6 @@ private static bool rewriteValueARM_OpARMRSCshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (RSCshiftLLreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -11572,10 +10770,8 @@ private static bool rewriteValueARM_OpARMRSCshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSCshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11601,7 +10797,6 @@ private static bool rewriteValueARM_OpARMRSCshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (RSCshiftRA x (MOVWconst [c]) [d] flags)
     // result: (RSCconst x [c>>uint64(d)] flags)
@@ -11617,10 +10812,8 @@ private static bool rewriteValueARM_OpARMRSCshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSCshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11646,7 +10839,6 @@ private static bool rewriteValueARM_OpARMRSCshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (RSCshiftRAreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -11666,10 +10858,8 @@ private static bool rewriteValueARM_OpARMRSCshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSCshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11695,7 +10885,6 @@ private static bool rewriteValueARM_OpARMRSCshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (RSCshiftRL x (MOVWconst [c]) [d] flags)
     // result: (RSCconst x [int32(uint32(c)>>uint64(d))] flags)
@@ -11711,10 +10900,8 @@ private static bool rewriteValueARM_OpARMRSCshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMRSCshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11740,7 +10927,6 @@ private static bool rewriteValueARM_OpARMRSCshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (RSCshiftRLreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -11760,10 +10946,8 @@ private static bool rewriteValueARM_OpARMRSCshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11784,7 +10968,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, flags);
         return true;
-
     } 
     // match: (SBC x (MOVWconst [c]) flags)
     // result: (SBCconst [c] x flags)
@@ -11799,7 +10982,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, flags);
         return true;
-
     } 
     // match: (SBC x (SLLconst [c] y) flags)
     // result: (SBCshiftLL x y [c] flags)
@@ -11815,7 +10997,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     } 
     // match: (SBC (SLLconst [c] y) x flags)
     // result: (RSCshiftLL x y [c] flags)
@@ -11831,7 +11012,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     } 
     // match: (SBC x (SRLconst [c] y) flags)
     // result: (SBCshiftRL x y [c] flags)
@@ -11847,7 +11027,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     } 
     // match: (SBC (SRLconst [c] y) x flags)
     // result: (RSCshiftRL x y [c] flags)
@@ -11863,7 +11042,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     } 
     // match: (SBC x (SRAconst [c] y) flags)
     // result: (SBCshiftRA x y [c] flags)
@@ -11879,7 +11057,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     } 
     // match: (SBC (SRAconst [c] y) x flags)
     // result: (RSCshiftRA x y [c] flags)
@@ -11895,7 +11072,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     } 
     // match: (SBC x (SLL y z) flags)
     // result: (SBCshiftLLreg x y z flags)
@@ -11910,7 +11086,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.reset(OpARMSBCshiftLLreg);
         v.AddArg4(x, y, z, flags);
         return true;
-
     } 
     // match: (SBC (SLL y z) x flags)
     // result: (RSCshiftLLreg x y z flags)
@@ -11925,7 +11100,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.reset(OpARMRSCshiftLLreg);
         v.AddArg4(x, y, z, flags);
         return true;
-
     } 
     // match: (SBC x (SRL y z) flags)
     // result: (SBCshiftRLreg x y z flags)
@@ -11940,7 +11114,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.reset(OpARMSBCshiftRLreg);
         v.AddArg4(x, y, z, flags);
         return true;
-
     } 
     // match: (SBC (SRL y z) x flags)
     // result: (RSCshiftRLreg x y z flags)
@@ -11955,7 +11128,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.reset(OpARMRSCshiftRLreg);
         v.AddArg4(x, y, z, flags);
         return true;
-
     } 
     // match: (SBC x (SRA y z) flags)
     // result: (SBCshiftRAreg x y z flags)
@@ -11970,7 +11142,6 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.reset(OpARMSBCshiftRAreg);
         v.AddArg4(x, y, z, flags);
         return true;
-
     } 
     // match: (SBC (SRA y z) x flags)
     // result: (RSCshiftRAreg x y z flags)
@@ -11985,10 +11156,8 @@ private static bool rewriteValueARM_OpARMSBC(ptr<Value> _addr_v) {
         v.reset(OpARMRSCshiftRAreg);
         v.AddArg4(x, y, z, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBCconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12009,7 +11178,6 @@ private static bool rewriteValueARM_OpARMSBCconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - d);
         v.AddArg2(x, flags);
         return true;
-
     } 
     // match: (SBCconst [c] (SUBconst [d] x) flags)
     // result: (SBCconst [c+d] x flags)
@@ -12025,10 +11193,8 @@ private static bool rewriteValueARM_OpARMSBCconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBCshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12054,7 +11220,6 @@ private static bool rewriteValueARM_OpARMSBCshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (SBCshiftLL x (MOVWconst [c]) [d] flags)
     // result: (SBCconst x [c<<uint64(d)] flags)
@@ -12070,10 +11235,8 @@ private static bool rewriteValueARM_OpARMSBCshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBCshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12099,7 +11262,6 @@ private static bool rewriteValueARM_OpARMSBCshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (SBCshiftLLreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -12119,10 +11281,8 @@ private static bool rewriteValueARM_OpARMSBCshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBCshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12148,7 +11308,6 @@ private static bool rewriteValueARM_OpARMSBCshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (SBCshiftRA x (MOVWconst [c]) [d] flags)
     // result: (SBCconst x [c>>uint64(d)] flags)
@@ -12164,10 +11323,8 @@ private static bool rewriteValueARM_OpARMSBCshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBCshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12193,7 +11350,6 @@ private static bool rewriteValueARM_OpARMSBCshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (SBCshiftRAreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -12213,10 +11369,8 @@ private static bool rewriteValueARM_OpARMSBCshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBCshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12242,7 +11396,6 @@ private static bool rewriteValueARM_OpARMSBCshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (SBCshiftRL x (MOVWconst [c]) [d] flags)
     // result: (SBCconst x [int32(uint32(c)>>uint64(d))] flags)
@@ -12258,10 +11411,8 @@ private static bool rewriteValueARM_OpARMSBCshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg2(x, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSBCshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12287,7 +11438,6 @@ private static bool rewriteValueARM_OpARMSBCshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg2(v0, flags);
         return true;
-
     } 
     // match: (SBCshiftRLreg x y (MOVWconst [c]) flags)
     // cond: 0 <= c && c < 32
@@ -12307,10 +11457,8 @@ private static bool rewriteValueARM_OpARMSBCshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg3(x, y, flags);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12333,10 +11481,8 @@ private static bool rewriteValueARM_OpARMSLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSLLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12353,10 +11499,8 @@ private static bool rewriteValueARM_OpARMSLLconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(d << (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12379,10 +11523,8 @@ private static bool rewriteValueARM_OpARMSRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSRAcond(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12406,7 +11548,6 @@ private static bool rewriteValueARM_OpARMSRAcond(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRAcond x y (FlagConstant [fc]))
     // cond: fc.ult()
@@ -12424,10 +11565,8 @@ private static bool rewriteValueARM_OpARMSRAcond(ptr<Value> _addr_v) {
         v.reset(OpARMSRA);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSRAconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12444,7 +11583,6 @@ private static bool rewriteValueARM_OpARMSRAconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(d >> (int)(uint64(c)));
         return true;
-
     } 
     // match: (SRAconst (SLLconst x [c]) [d])
     // cond: buildcfg.GOARM==7 && uint64(d)>=uint64(c) && uint64(d)<=31
@@ -12463,10 +11601,8 @@ private static bool rewriteValueARM_OpARMSRAconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt((d - c) | (32 - d) << 8);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12489,10 +11625,8 @@ private static bool rewriteValueARM_OpARMSRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSRLconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12509,7 +11643,6 @@ private static bool rewriteValueARM_OpARMSRLconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint32(d) >> (int)(uint64(c))));
         return true;
-
     } 
     // match: (SRLconst (SLLconst x [c]) [d])
     // cond: buildcfg.GOARM==7 && uint64(d)>=uint64(c) && uint64(d)<=31
@@ -12528,10 +11661,8 @@ private static bool rewriteValueARM_OpARMSRLconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt((d - c) | (32 - d) << 8);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12550,7 +11681,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUB x (MOVWconst [c]))
     // result: (SUBconst [c] x)
@@ -12564,7 +11694,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUB x (SLLconst [c] y))
     // result: (SUBshiftLL x y [c])
@@ -12579,7 +11708,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUB (SLLconst [c] y) x)
     // result: (RSBshiftLL x y [c])
@@ -12594,7 +11722,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUB x (SRLconst [c] y))
     // result: (SUBshiftRL x y [c])
@@ -12609,7 +11736,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUB (SRLconst [c] y) x)
     // result: (RSBshiftRL x y [c])
@@ -12624,7 +11750,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUB x (SRAconst [c] y))
     // result: (SUBshiftRA x y [c])
@@ -12639,7 +11764,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUB (SRAconst [c] y) x)
     // result: (RSBshiftRA x y [c])
@@ -12654,7 +11778,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUB x (SLL y z))
     // result: (SUBshiftLLreg x y z)
@@ -12668,7 +11791,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMSUBshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUB (SLL y z) x)
     // result: (RSBshiftLLreg x y z)
@@ -12682,7 +11804,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMRSBshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUB x (SRL y z))
     // result: (SUBshiftRLreg x y z)
@@ -12696,7 +11817,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMSUBshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUB (SRL y z) x)
     // result: (RSBshiftRLreg x y z)
@@ -12710,7 +11830,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMRSBshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUB x (SRA y z))
     // result: (SUBshiftRAreg x y z)
@@ -12724,7 +11843,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMSUBshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUB (SRA y z) x)
     // result: (RSBshiftRAreg x y z)
@@ -12738,7 +11856,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMRSBshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUB x x)
     // result: (MOVWconst [0])
@@ -12750,7 +11867,6 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (SUB a (MUL x y))
     // cond: buildcfg.GOARM == 7
@@ -12768,10 +11884,8 @@ private static bool rewriteValueARM_OpARMSUB(ptr<Value> _addr_v) {
         v.reset(OpARMMULS);
         v.AddArg3(x, y, a);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12794,7 +11908,6 @@ private static bool rewriteValueARM_OpARMSUBD(ptr<Value> _addr_v) {
         v.reset(OpARMMULSD);
         v.AddArg3(a, x, y);
         return true;
-
     } 
     // match: (SUBD a (NMULD x y))
     // cond: a.Uses == 1 && buildcfg.GOARM >= 6
@@ -12812,10 +11925,8 @@ private static bool rewriteValueARM_OpARMSUBD(ptr<Value> _addr_v) {
         v.reset(OpARMMULAD);
         v.AddArg3(a, x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBF(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12838,7 +11949,6 @@ private static bool rewriteValueARM_OpARMSUBF(ptr<Value> _addr_v) {
         v.reset(OpARMMULSF);
         v.AddArg3(a, x, y);
         return true;
-
     } 
     // match: (SUBF a (NMULF x y))
     // cond: a.Uses == 1 && buildcfg.GOARM >= 6
@@ -12856,10 +11966,8 @@ private static bool rewriteValueARM_OpARMSUBF(ptr<Value> _addr_v) {
         v.reset(OpARMMULAF);
         v.AddArg3(a, x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12878,7 +11986,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBS x (SLLconst [c] y))
     // result: (SUBSshiftLL x y [c])
@@ -12893,7 +12000,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBS (SLLconst [c] y) x)
     // result: (RSBSshiftLL x y [c])
@@ -12908,7 +12014,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBS x (SRLconst [c] y))
     // result: (SUBSshiftRL x y [c])
@@ -12923,7 +12028,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBS (SRLconst [c] y) x)
     // result: (RSBSshiftRL x y [c])
@@ -12938,7 +12042,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBS x (SRAconst [c] y))
     // result: (SUBSshiftRA x y [c])
@@ -12953,7 +12056,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBS (SRAconst [c] y) x)
     // result: (RSBSshiftRA x y [c])
@@ -12968,7 +12070,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBS x (SLL y z))
     // result: (SUBSshiftLLreg x y z)
@@ -12982,7 +12083,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.reset(OpARMSUBSshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUBS (SLL y z) x)
     // result: (RSBSshiftLLreg x y z)
@@ -12996,7 +12096,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.reset(OpARMRSBSshiftLLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUBS x (SRL y z))
     // result: (SUBSshiftRLreg x y z)
@@ -13010,7 +12109,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.reset(OpARMSUBSshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUBS (SRL y z) x)
     // result: (RSBSshiftRLreg x y z)
@@ -13024,7 +12122,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.reset(OpARMRSBSshiftRLreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUBS x (SRA y z))
     // result: (SUBSshiftRAreg x y z)
@@ -13038,7 +12135,6 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.reset(OpARMSUBSshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (SUBS (SRA y z) x)
     // result: (RSBSshiftRAreg x y z)
@@ -13052,10 +12148,8 @@ private static bool rewriteValueARM_OpARMSUBS(ptr<Value> _addr_v) {
         v.reset(OpARMRSBSshiftRAreg);
         v.AddArg3(x, y, z);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBSshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13079,7 +12173,6 @@ private static bool rewriteValueARM_OpARMSUBSshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBSshiftLL x (MOVWconst [c]) [d])
     // result: (SUBSconst x [c<<uint64(d)])
@@ -13094,10 +12187,8 @@ private static bool rewriteValueARM_OpARMSUBSshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBSshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13121,7 +12212,6 @@ private static bool rewriteValueARM_OpARMSUBSshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBSshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -13140,10 +12230,8 @@ private static bool rewriteValueARM_OpARMSUBSshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBSshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13167,7 +12255,6 @@ private static bool rewriteValueARM_OpARMSUBSshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBSshiftRA x (MOVWconst [c]) [d])
     // result: (SUBSconst x [c>>uint64(d)])
@@ -13182,10 +12269,8 @@ private static bool rewriteValueARM_OpARMSUBSshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBSshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13209,7 +12294,6 @@ private static bool rewriteValueARM_OpARMSUBSshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBSshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -13228,10 +12312,8 @@ private static bool rewriteValueARM_OpARMSUBSshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBSshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13255,7 +12337,6 @@ private static bool rewriteValueARM_OpARMSUBSshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBSshiftRL x (MOVWconst [c]) [d])
     // result: (SUBSconst x [int32(uint32(c)>>uint64(d))])
@@ -13270,10 +12351,8 @@ private static bool rewriteValueARM_OpARMSUBSshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBSshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13297,7 +12376,6 @@ private static bool rewriteValueARM_OpARMSUBSshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBSshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -13316,10 +12394,8 @@ private static bool rewriteValueARM_OpARMSUBSshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13340,7 +12416,6 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (SUBconst [0] x)
     // result: x
@@ -13351,7 +12426,6 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUBconst [c] x)
     // cond: !isARMImmRot(uint32(c)) && isARMImmRot(uint32(-c))
@@ -13366,7 +12440,6 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBconst [c] x)
     // cond: buildcfg.GOARM==7 && !isARMImmRot(uint32(c)) && uint32(c)>0xffff && uint32(-c)<=0xffff
@@ -13381,7 +12454,6 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBconst [c] (MOVWconst [d]))
     // result: (MOVWconst [d-c])
@@ -13394,7 +12466,6 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(d - c);
         return true;
-
     } 
     // match: (SUBconst [c] (SUBconst [d] x))
     // result: (ADDconst [-c-d] x)
@@ -13409,7 +12480,6 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c - d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBconst [c] (ADDconst [d] x))
     // result: (ADDconst [-c+d] x)
@@ -13424,7 +12494,6 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c + d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBconst [c] (RSBconst [d] x))
     // result: (RSBconst [-c+d] x)
@@ -13439,10 +12508,8 @@ private static bool rewriteValueARM_OpARMSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c + d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13466,7 +12533,6 @@ private static bool rewriteValueARM_OpARMSUBshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBshiftLL x (MOVWconst [c]) [d])
     // result: (SUBconst x [c<<uint64(d)])
@@ -13481,7 +12547,6 @@ private static bool rewriteValueARM_OpARMSUBshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBshiftLL (SLLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -13497,10 +12562,8 @@ private static bool rewriteValueARM_OpARMSUBshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13524,7 +12587,6 @@ private static bool rewriteValueARM_OpARMSUBshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -13543,10 +12605,8 @@ private static bool rewriteValueARM_OpARMSUBshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13570,7 +12630,6 @@ private static bool rewriteValueARM_OpARMSUBshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBshiftRA x (MOVWconst [c]) [d])
     // result: (SUBconst x [c>>uint64(d)])
@@ -13585,7 +12644,6 @@ private static bool rewriteValueARM_OpARMSUBshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBshiftRA (SRAconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -13601,10 +12659,8 @@ private static bool rewriteValueARM_OpARMSUBshiftRA(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13628,7 +12684,6 @@ private static bool rewriteValueARM_OpARMSUBshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -13647,10 +12702,8 @@ private static bool rewriteValueARM_OpARMSUBshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13674,7 +12727,6 @@ private static bool rewriteValueARM_OpARMSUBshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBshiftRL x (MOVWconst [c]) [d])
     // result: (SUBconst x [int32(uint32(c)>>uint64(d))])
@@ -13689,7 +12741,6 @@ private static bool rewriteValueARM_OpARMSUBshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBshiftRL (SRLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -13705,10 +12756,8 @@ private static bool rewriteValueARM_OpARMSUBshiftRL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMSUBshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13732,7 +12781,6 @@ private static bool rewriteValueARM_OpARMSUBshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -13751,10 +12799,8 @@ private static bool rewriteValueARM_OpARMSUBshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13775,20 +12821,17 @@ private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMTEQconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TEQ x (SLLconst [c] y))
     // result: (TEQshiftLL x y [c])
@@ -13804,21 +12847,18 @@ private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMTEQshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TEQ x (SRLconst [c] y))
     // result: (TEQshiftRL x y [c])
@@ -13834,21 +12874,18 @@ private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMTEQshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TEQ x (SRAconst [c] y))
     // result: (TEQshiftRA x y [c])
@@ -13864,21 +12901,18 @@ private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMTEQshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TEQ x (SLL y z))
     // result: (TEQshiftLLreg x y z)
@@ -13894,20 +12928,17 @@ private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMTEQshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TEQ x (SRL y z))
     // result: (TEQshiftRLreg x y z)
@@ -13923,20 +12954,17 @@ private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMTEQshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TEQ x (SRA y z))
     // result: (TEQshiftRAreg x y z)
@@ -13952,23 +12980,19 @@ private static bool rewriteValueARM_OpARMTEQ(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMTEQshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13985,10 +13009,8 @@ private static bool rewriteValueARM_OpARMTEQconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(logicFlags32(x ^ y));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14012,7 +13034,6 @@ private static bool rewriteValueARM_OpARMTEQshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TEQshiftLL x (MOVWconst [c]) [d])
     // result: (TEQconst x [c<<uint64(d)])
@@ -14027,10 +13048,8 @@ private static bool rewriteValueARM_OpARMTEQshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14054,7 +13073,6 @@ private static bool rewriteValueARM_OpARMTEQshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TEQshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -14073,10 +13091,8 @@ private static bool rewriteValueARM_OpARMTEQshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14100,7 +13116,6 @@ private static bool rewriteValueARM_OpARMTEQshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TEQshiftRA x (MOVWconst [c]) [d])
     // result: (TEQconst x [c>>uint64(d)])
@@ -14115,10 +13130,8 @@ private static bool rewriteValueARM_OpARMTEQshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14142,7 +13155,6 @@ private static bool rewriteValueARM_OpARMTEQshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TEQshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -14161,10 +13173,8 @@ private static bool rewriteValueARM_OpARMTEQshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14188,7 +13198,6 @@ private static bool rewriteValueARM_OpARMTEQshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TEQshiftRL x (MOVWconst [c]) [d])
     // result: (TEQconst x [int32(uint32(c)>>uint64(d))])
@@ -14203,10 +13212,8 @@ private static bool rewriteValueARM_OpARMTEQshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTEQshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14230,7 +13237,6 @@ private static bool rewriteValueARM_OpARMTEQshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TEQshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -14249,10 +13255,8 @@ private static bool rewriteValueARM_OpARMTEQshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14273,20 +13277,17 @@ private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMTSTconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TST x (SLLconst [c] y))
     // result: (TSTshiftLL x y [c])
@@ -14302,21 +13303,18 @@ private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMTSTshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TST x (SRLconst [c] y))
     // result: (TSTshiftRL x y [c])
@@ -14332,21 +13330,18 @@ private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMTSTshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TST x (SRAconst [c] y))
     // result: (TSTshiftRA x y [c])
@@ -14362,21 +13357,18 @@ private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMTSTshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TST x (SLL y z))
     // result: (TSTshiftLLreg x y z)
@@ -14392,20 +13384,17 @@ private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMTSTshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TST x (SRL y z))
     // result: (TSTshiftRLreg x y z)
@@ -14421,20 +13410,17 @@ private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMTSTshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (TST x (SRA y z))
     // result: (TSTshiftRAreg x y z)
@@ -14450,23 +13436,19 @@ private static bool rewriteValueARM_OpARMTST(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMTSTshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTSTconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14483,10 +13465,8 @@ private static bool rewriteValueARM_OpARMTSTconst(ptr<Value> _addr_v) {
         v.reset(OpARMFlagConstant);
         v.AuxInt = flagConstantToAuxInt(logicFlags32(x & y));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTSTshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14510,7 +13490,6 @@ private static bool rewriteValueARM_OpARMTSTshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TSTshiftLL x (MOVWconst [c]) [d])
     // result: (TSTconst x [c<<uint64(d)])
@@ -14525,10 +13504,8 @@ private static bool rewriteValueARM_OpARMTSTshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTSTshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14552,7 +13529,6 @@ private static bool rewriteValueARM_OpARMTSTshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TSTshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -14571,10 +13547,8 @@ private static bool rewriteValueARM_OpARMTSTshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTSTshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14598,7 +13572,6 @@ private static bool rewriteValueARM_OpARMTSTshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TSTshiftRA x (MOVWconst [c]) [d])
     // result: (TSTconst x [c>>uint64(d)])
@@ -14613,10 +13586,8 @@ private static bool rewriteValueARM_OpARMTSTshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTSTshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14640,7 +13611,6 @@ private static bool rewriteValueARM_OpARMTSTshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TSTshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -14659,10 +13629,8 @@ private static bool rewriteValueARM_OpARMTSTshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTSTshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14686,7 +13654,6 @@ private static bool rewriteValueARM_OpARMTSTshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TSTshiftRL x (MOVWconst [c]) [d])
     // result: (TSTconst x [int32(uint32(c)>>uint64(d))])
@@ -14701,10 +13668,8 @@ private static bool rewriteValueARM_OpARMTSTshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMTSTshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14728,7 +13693,6 @@ private static bool rewriteValueARM_OpARMTSTshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (TSTshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -14747,10 +13711,8 @@ private static bool rewriteValueARM_OpARMTSTshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14771,20 +13733,17 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpARMXORconst);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (SLLconst [c] y))
     // result: (XORshiftLL x y [c])
@@ -14800,21 +13759,18 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var y = v_1.Args[0];
                 v.reset(OpARMXORshiftLL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (SRLconst [c] y))
     // result: (XORshiftRL x y [c])
@@ -14830,21 +13786,18 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMXORshiftRL);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (SRAconst [c] y))
     // result: (XORshiftRA x y [c])
@@ -14860,21 +13813,18 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMXORshiftRA);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (SRRconst [c] y))
     // result: (XORshiftRR x y [c])
@@ -14890,21 +13840,18 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 y = v_1.Args[0];
                 v.reset(OpARMXORshiftRR);
                 v.AuxInt = int32ToAuxInt(c);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (SLL y z))
     // result: (XORshiftLLreg x y z)
@@ -14920,20 +13867,17 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMXORshiftLLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (SRL y z))
     // result: (XORshiftRLreg x y z)
@@ -14949,20 +13893,17 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMXORshiftRLreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x (SRA y z))
     // result: (XORshiftRAreg x y z)
@@ -14978,20 +13919,17 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_1.Args[1];
                 y = v_1.Args[0];
                 v.reset(OpARMXORshiftRAreg);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x x)
     // result: (MOVWconst [0])
@@ -15003,10 +13941,8 @@ private static bool rewriteValueARM_OpARMXOR(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15021,7 +13957,6 @@ private static bool rewriteValueARM_OpARMXORconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (XORconst [c] (MOVWconst [d]))
     // result: (MOVWconst [c^d])
@@ -15034,7 +13969,6 @@ private static bool rewriteValueARM_OpARMXORconst(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(c ^ d);
         return true;
-
     } 
     // match: (XORconst [c] (XORconst [d] x))
     // result: (XORconst [c^d] x)
@@ -15049,10 +13983,8 @@ private static bool rewriteValueARM_OpARMXORconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c ^ d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORshiftLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15077,7 +14009,6 @@ private static bool rewriteValueARM_OpARMXORshiftLL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (XORshiftLL x (MOVWconst [c]) [d])
     // result: (XORconst x [c<<uint64(d)])
@@ -15092,7 +14023,6 @@ private static bool rewriteValueARM_OpARMXORshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORshiftLL [c] (SRLconst x [32-c]) x)
     // result: (SRRconst [32-c] x)
@@ -15109,7 +14039,6 @@ private static bool rewriteValueARM_OpARMXORshiftLL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(32 - c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORshiftLL <typ.UInt16> [8] (BFXU <typ.UInt16> [int32(armBFAuxInt(8, 8))] x) x)
     // result: (REV16 x)
@@ -15124,7 +14053,6 @@ private static bool rewriteValueARM_OpARMXORshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMREV16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORshiftLL <typ.UInt16> [8] (SRLconst <typ.UInt16> [24] (SLLconst [16] x)) x)
     // cond: buildcfg.GOARM>=6
@@ -15144,7 +14072,6 @@ private static bool rewriteValueARM_OpARMXORshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMREV16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORshiftLL (SLLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -15160,10 +14087,8 @@ private static bool rewriteValueARM_OpARMXORshiftLL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORshiftLLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15187,7 +14112,6 @@ private static bool rewriteValueARM_OpARMXORshiftLLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (XORshiftLLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -15206,10 +14130,8 @@ private static bool rewriteValueARM_OpARMXORshiftLLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORshiftRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15233,7 +14155,6 @@ private static bool rewriteValueARM_OpARMXORshiftRA(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (XORshiftRA x (MOVWconst [c]) [d])
     // result: (XORconst x [c>>uint64(d)])
@@ -15248,7 +14169,6 @@ private static bool rewriteValueARM_OpARMXORshiftRA(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORshiftRA (SRAconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -15264,10 +14184,8 @@ private static bool rewriteValueARM_OpARMXORshiftRA(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORshiftRAreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15291,7 +14209,6 @@ private static bool rewriteValueARM_OpARMXORshiftRAreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (XORshiftRAreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -15310,10 +14227,8 @@ private static bool rewriteValueARM_OpARMXORshiftRAreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORshiftRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15337,7 +14252,6 @@ private static bool rewriteValueARM_OpARMXORshiftRL(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (XORshiftRL x (MOVWconst [c]) [d])
     // result: (XORconst x [int32(uint32(c)>>uint64(d))])
@@ -15352,7 +14266,6 @@ private static bool rewriteValueARM_OpARMXORshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORshiftRL [c] (SLLconst x [32-c]) x)
     // result: (SRRconst [ c] x)
@@ -15369,7 +14282,6 @@ private static bool rewriteValueARM_OpARMXORshiftRL(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (XORshiftRL (SRLconst x [c]) x [c])
     // result: (MOVWconst [0])
@@ -15385,10 +14297,8 @@ private static bool rewriteValueARM_OpARMXORshiftRL(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORshiftRLreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15412,7 +14322,6 @@ private static bool rewriteValueARM_OpARMXORshiftRLreg(ptr<Value> _addr_v) {
         v0.AddArg2(x, y);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (XORshiftRLreg x y (MOVWconst [c]))
     // cond: 0 <= c && c < 32
@@ -15431,10 +14340,8 @@ private static bool rewriteValueARM_OpARMXORshiftRLreg(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpARMXORshiftRR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15458,7 +14365,6 @@ private static bool rewriteValueARM_OpARMXORshiftRR(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (XORshiftRR x (MOVWconst [c]) [d])
     // result: (XORconst x [int32(uint32(c)>>uint64(d)|uint32(c)<<uint64(32-d))])
@@ -15473,10 +14379,8 @@ private static bool rewriteValueARM_OpARMXORshiftRR(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d)) | uint32(c) << (int)(uint64(32 - d))));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15492,7 +14396,6 @@ private static bool rewriteValueARM_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpAvg32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15515,7 +14418,6 @@ private static bool rewriteValueARM_OpAvg32u(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpBitLen32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15534,7 +14436,6 @@ private static bool rewriteValueARM_OpBitLen32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpBswap32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15568,7 +14469,6 @@ private static bool rewriteValueARM_OpBswap32(ptr<Value> _addr_v) {
         v4.AddArg(x);
         v.AddArg2(v0, v4);
         return true;
-
     } 
     // match: (Bswap32 x)
     // cond: buildcfg.GOARM>=6
@@ -15581,10 +14481,8 @@ private static bool rewriteValueARM_OpBswap32(ptr<Value> _addr_v) {
         v.reset(OpARMREV);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15597,7 +14495,6 @@ private static bool rewriteValueARM_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(val));
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpConst32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15610,7 +14507,6 @@ private static bool rewriteValueARM_OpConst32(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(val));
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpConst32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15623,7 +14519,6 @@ private static bool rewriteValueARM_OpConst32F(ptr<Value> _addr_v) {
         v.AuxInt = float64ToAuxInt(float64(val));
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpConst64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15636,7 +14531,6 @@ private static bool rewriteValueARM_OpConst64F(ptr<Value> _addr_v) {
         v.AuxInt = float64ToAuxInt(float64(val));
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15649,7 +14543,6 @@ private static bool rewriteValueARM_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(val));
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15662,7 +14555,6 @@ private static bool rewriteValueARM_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(b2i32(t));
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15674,7 +14566,6 @@ private static bool rewriteValueARM_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpCtz16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15708,7 +14599,6 @@ private static bool rewriteValueARM_OpCtz16(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Ctz16 <t> x)
     // cond: buildcfg.GOARM==7
@@ -15728,10 +14618,8 @@ private static bool rewriteValueARM_OpCtz16(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpCtz32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15761,7 +14649,6 @@ private static bool rewriteValueARM_OpCtz32(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Ctz32 <t> x)
     // cond: buildcfg.GOARM==7
@@ -15778,10 +14665,8 @@ private static bool rewriteValueARM_OpCtz32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpCtz8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15815,7 +14700,6 @@ private static bool rewriteValueARM_OpCtz8(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Ctz8 <t> x)
     // cond: buildcfg.GOARM==7
@@ -15835,10 +14719,8 @@ private static bool rewriteValueARM_OpCtz8(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15860,7 +14742,6 @@ private static bool rewriteValueARM_OpDiv16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15882,7 +14763,6 @@ private static bool rewriteValueARM_OpDiv16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15922,7 +14802,6 @@ private static bool rewriteValueARM_OpDiv32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v9);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpDiv32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15943,7 +14822,6 @@ private static bool rewriteValueARM_OpDiv32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15965,7 +14843,6 @@ private static bool rewriteValueARM_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15987,7 +14864,6 @@ private static bool rewriteValueARM_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16011,7 +14887,6 @@ private static bool rewriteValueARM_OpEq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16030,7 +14905,6 @@ private static bool rewriteValueARM_OpEq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpEq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16049,7 +14923,6 @@ private static bool rewriteValueARM_OpEq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpEq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16068,7 +14941,6 @@ private static bool rewriteValueARM_OpEq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16092,7 +14964,6 @@ private static bool rewriteValueARM_OpEq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16113,7 +14984,6 @@ private static bool rewriteValueARM_OpEqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16132,7 +15002,6 @@ private static bool rewriteValueARM_OpEqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpFMA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16150,7 +15019,6 @@ private static bool rewriteValueARM_OpFMA(ptr<Value> _addr_v) {
         v.AddArg3(z, x, y);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpIsInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16169,7 +15037,6 @@ private static bool rewriteValueARM_OpIsInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16187,7 +15054,6 @@ private static bool rewriteValueARM_OpIsNonNil(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpIsSliceInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16206,7 +15072,6 @@ private static bool rewriteValueARM_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16230,7 +15095,6 @@ private static bool rewriteValueARM_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16254,7 +15118,6 @@ private static bool rewriteValueARM_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16273,7 +15136,6 @@ private static bool rewriteValueARM_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16292,7 +15154,6 @@ private static bool rewriteValueARM_OpLeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16311,7 +15172,6 @@ private static bool rewriteValueARM_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16330,7 +15190,6 @@ private static bool rewriteValueARM_OpLeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16354,7 +15213,6 @@ private static bool rewriteValueARM_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16378,7 +15236,6 @@ private static bool rewriteValueARM_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16402,7 +15259,6 @@ private static bool rewriteValueARM_OpLess16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16426,7 +15282,6 @@ private static bool rewriteValueARM_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16445,7 +15300,6 @@ private static bool rewriteValueARM_OpLess32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16464,7 +15318,6 @@ private static bool rewriteValueARM_OpLess32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16483,7 +15336,6 @@ private static bool rewriteValueARM_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16502,7 +15354,6 @@ private static bool rewriteValueARM_OpLess64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16526,7 +15377,6 @@ private static bool rewriteValueARM_OpLess8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16550,7 +15400,6 @@ private static bool rewriteValueARM_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16570,7 +15419,6 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is8BitInt(t) && isSigned(t))
@@ -16585,7 +15433,6 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is8BitInt(t) && !isSigned(t))
@@ -16600,7 +15447,6 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is16BitInt(t) && isSigned(t))
@@ -16615,7 +15461,6 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is16BitInt(t) && !isSigned(t))
@@ -16630,7 +15475,6 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is32BitInt(t) || isPtr(t))
@@ -16645,7 +15489,6 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitFloat(t)
@@ -16660,7 +15503,6 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVFload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -16675,10 +15517,8 @@ private static bool rewriteValueARM_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpARMMOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16694,7 +15534,6 @@ private static bool rewriteValueARM_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16720,7 +15559,6 @@ private static bool rewriteValueARM_OpLsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16743,7 +15581,6 @@ private static bool rewriteValueARM_OpLsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16766,7 +15603,6 @@ private static bool rewriteValueARM_OpLsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh16x64 _ (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -16782,10 +15618,8 @@ private static bool rewriteValueARM_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16805,7 +15639,6 @@ private static bool rewriteValueARM_OpLsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16831,7 +15664,6 @@ private static bool rewriteValueARM_OpLsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16854,7 +15686,6 @@ private static bool rewriteValueARM_OpLsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16877,7 +15708,6 @@ private static bool rewriteValueARM_OpLsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh32x64 _ (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -16893,10 +15723,8 @@ private static bool rewriteValueARM_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16916,7 +15744,6 @@ private static bool rewriteValueARM_OpLsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16942,7 +15769,6 @@ private static bool rewriteValueARM_OpLsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16965,7 +15791,6 @@ private static bool rewriteValueARM_OpLsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16988,7 +15813,6 @@ private static bool rewriteValueARM_OpLsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Lsh8x64 _ (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -17004,10 +15828,8 @@ private static bool rewriteValueARM_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17027,7 +15849,6 @@ private static bool rewriteValueARM_OpLsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17049,7 +15870,6 @@ private static bool rewriteValueARM_OpMod16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17071,7 +15891,6 @@ private static bool rewriteValueARM_OpMod16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17107,7 +15926,6 @@ private static bool rewriteValueARM_OpMod32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v5);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpMod32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17128,7 +15946,6 @@ private static bool rewriteValueARM_OpMod32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17150,7 +15967,6 @@ private static bool rewriteValueARM_OpMod8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17172,7 +15988,6 @@ private static bool rewriteValueARM_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17192,7 +16007,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (MOVBstore dst (MOVBUload src mem) mem)
@@ -17208,7 +16022,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -17229,7 +16042,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (MOVBstore [1] dst (MOVBUload [1] src mem) (MOVBstore dst (MOVBUload src mem) mem))
@@ -17251,7 +16063,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [4] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -17272,7 +16083,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -17299,7 +16109,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (MOVBstore [3] dst (MOVBUload [3] src mem) (MOVBstore [2] dst (MOVBUload [2] src mem) (MOVBstore [1] dst (MOVBUload [1] src mem) (MOVBstore dst (MOVBUload src mem) mem))))
@@ -17333,7 +16142,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (MOVBstore [2] dst (MOVBUload [2] src mem) (MOVBstore [1] dst (MOVBUload [1] src mem) (MOVBstore dst (MOVBUload src mem) mem)))
@@ -17361,7 +16169,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] {t} dst src mem)
     // cond: s%4 == 0 && s > 4 && s <= 512 && t.Alignment()%4 == 0 && !config.noDuffDevice && logLargeCopy(v, s)
@@ -17379,7 +16186,6 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(8 * (128 - s / 4));
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Move [s] {t} dst src mem)
     // cond: ((s > 512 || config.noDuffDevice) || t.Alignment()%4 != 0) && logLargeCopy(v, s)
@@ -17400,10 +16206,8 @@ private static bool rewriteValueARM_OpMove(ptr<Value> _addr_v) {
         v0.AddArg(src);
         v.AddArg4(dst, src, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpNeg16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17418,7 +16222,6 @@ private static bool rewriteValueARM_OpNeg16(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeg32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17433,7 +16236,6 @@ private static bool rewriteValueARM_OpNeg32(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeg8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17448,7 +16250,6 @@ private static bool rewriteValueARM_OpNeg8(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17472,7 +16273,6 @@ private static bool rewriteValueARM_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17491,7 +16291,6 @@ private static bool rewriteValueARM_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17510,7 +16309,6 @@ private static bool rewriteValueARM_OpNeq32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17529,7 +16327,6 @@ private static bool rewriteValueARM_OpNeq64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17553,7 +16350,6 @@ private static bool rewriteValueARM_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17572,7 +16368,6 @@ private static bool rewriteValueARM_OpNeqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpNot(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17587,7 +16382,6 @@ private static bool rewriteValueARM_OpNot(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17605,7 +16399,6 @@ private static bool rewriteValueARM_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(off));
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (OffPtr [off] ptr)
     // result: (ADDconst [int32(off)] ptr)
@@ -17617,7 +16410,6 @@ private static bool rewriteValueARM_OpOffPtr(ptr<Value> _addr_v) {
         v.AddArg(ptr);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpPanicBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17640,7 +16432,6 @@ private static bool rewriteValueARM_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 1
@@ -17657,7 +16448,6 @@ private static bool rewriteValueARM_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 2
@@ -17674,10 +16464,8 @@ private static bool rewriteValueARM_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpPanicExtend(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17702,7 +16490,6 @@ private static bool rewriteValueARM_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     } 
     // match: (PanicExtend [kind] hi lo y mem)
     // cond: boundsABI(kind) == 1
@@ -17720,7 +16507,6 @@ private static bool rewriteValueARM_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     } 
     // match: (PanicExtend [kind] hi lo y mem)
     // cond: boundsABI(kind) == 2
@@ -17738,10 +16524,8 @@ private static bool rewriteValueARM_OpPanicExtend(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg4(hi, lo, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17770,10 +16554,8 @@ private static bool rewriteValueARM_OpRotateLeft16(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRotateLeft32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17793,7 +16575,6 @@ private static bool rewriteValueARM_OpRotateLeft32(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c & 31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RotateLeft32 x y)
     // result: (SRR x (RSBconst [0] <y.Type> y))
@@ -17807,7 +16588,6 @@ private static bool rewriteValueARM_OpRotateLeft32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17836,10 +16616,8 @@ private static bool rewriteValueARM_OpRotateLeft8(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17867,7 +16645,6 @@ private static bool rewriteValueARM_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17893,7 +16670,6 @@ private static bool rewriteValueARM_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17921,7 +16697,6 @@ private static bool rewriteValueARM_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -17937,10 +16712,8 @@ private static bool rewriteValueARM_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17962,7 +16735,6 @@ private static bool rewriteValueARM_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17987,7 +16759,6 @@ private static bool rewriteValueARM_OpRsh16x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18010,7 +16781,6 @@ private static bool rewriteValueARM_OpRsh16x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, y, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18038,7 +16808,6 @@ private static bool rewriteValueARM_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16x64 x (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -18059,10 +16828,8 @@ private static bool rewriteValueARM_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18084,7 +16851,6 @@ private static bool rewriteValueARM_OpRsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18110,7 +16876,6 @@ private static bool rewriteValueARM_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18133,7 +16898,6 @@ private static bool rewriteValueARM_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18156,7 +16920,6 @@ private static bool rewriteValueARM_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -18172,10 +16935,8 @@ private static bool rewriteValueARM_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18195,7 +16956,6 @@ private static bool rewriteValueARM_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18218,7 +16978,6 @@ private static bool rewriteValueARM_OpRsh32x16(ptr<Value> _addr_v) {
         v.AddArg3(x, v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18238,7 +16997,6 @@ private static bool rewriteValueARM_OpRsh32x32(ptr<Value> _addr_v) {
         v.AddArg3(x, y, v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18261,7 +17019,6 @@ private static bool rewriteValueARM_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32x64 x (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -18279,10 +17036,8 @@ private static bool rewriteValueARM_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(31);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18302,7 +17057,6 @@ private static bool rewriteValueARM_OpRsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18330,7 +17084,6 @@ private static bool rewriteValueARM_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18356,7 +17109,6 @@ private static bool rewriteValueARM_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18384,7 +17136,6 @@ private static bool rewriteValueARM_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -18400,10 +17151,8 @@ private static bool rewriteValueARM_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18425,7 +17174,6 @@ private static bool rewriteValueARM_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18450,7 +17198,6 @@ private static bool rewriteValueARM_OpRsh8x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18473,7 +17220,6 @@ private static bool rewriteValueARM_OpRsh8x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, y, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18501,7 +17247,6 @@ private static bool rewriteValueARM_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8x64 x (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -18522,10 +17267,8 @@ private static bool rewriteValueARM_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18547,7 +17290,6 @@ private static bool rewriteValueARM_OpRsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpSelect0(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18567,7 +17309,6 @@ private static bool rewriteValueARM_OpSelect0(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Select0 (CALLudiv x (MOVWconst [c])))
     // cond: isPowerOfTwo32(c)
@@ -18590,7 +17331,6 @@ private static bool rewriteValueARM_OpSelect0(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(log32(c)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (Select0 (CALLudiv (MOVWconst [c]) (MOVWconst [d])))
     // cond: d != 0
@@ -18616,10 +17356,8 @@ private static bool rewriteValueARM_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint32(c) / uint32(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpSelect1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18639,7 +17377,6 @@ private static bool rewriteValueARM_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Select1 (CALLudiv x (MOVWconst [c])))
     // cond: isPowerOfTwo32(c)
@@ -18662,7 +17399,6 @@ private static bool rewriteValueARM_OpSelect1(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c - 1);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Select1 (CALLudiv (MOVWconst [c]) (MOVWconst [d])))
     // cond: d != 0
@@ -18688,10 +17424,8 @@ private static bool rewriteValueARM_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWconst);
         v.AuxInt = int32ToAuxInt(int32(uint32(c) % uint32(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpSignmask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18706,7 +17440,6 @@ private static bool rewriteValueARM_OpSignmask(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18726,7 +17459,6 @@ private static bool rewriteValueARM_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueARM_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18748,7 +17480,6 @@ private static bool rewriteValueARM_OpStore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVBstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -18764,7 +17495,6 @@ private static bool rewriteValueARM_OpStore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVHstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && !is32BitFloat(val.Type)
@@ -18780,7 +17510,6 @@ private static bool rewriteValueARM_OpStore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitFloat(val.Type)
@@ -18796,7 +17525,6 @@ private static bool rewriteValueARM_OpStore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVFstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8 && is64BitFloat(val.Type)
@@ -18812,10 +17540,8 @@ private static bool rewriteValueARM_OpStore(ptr<Value> _addr_v) {
         v.reset(OpARMMOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18834,7 +17560,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] ptr mem)
     // result: (MOVBstore ptr (MOVWconst [0]) mem)
@@ -18849,7 +17574,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [2] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -18869,7 +17593,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [2] ptr mem)
     // result: (MOVBstore [1] ptr (MOVWconst [0]) (MOVBstore [0] ptr (MOVWconst [0]) mem))
@@ -18888,7 +17611,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [4] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -18908,7 +17630,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [4] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -18932,7 +17653,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [4] ptr mem)
     // result: (MOVBstore [3] ptr (MOVWconst [0]) (MOVBstore [2] ptr (MOVWconst [0]) (MOVBstore [1] ptr (MOVWconst [0]) (MOVBstore [0] ptr (MOVWconst [0]) mem))))
@@ -18957,7 +17677,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [3] ptr mem)
     // result: (MOVBstore [2] ptr (MOVWconst [0]) (MOVBstore [1] ptr (MOVWconst [0]) (MOVBstore [0] ptr (MOVWconst [0]) mem)))
@@ -18979,7 +17698,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [s] {t} ptr mem)
     // cond: s%4 == 0 && s > 4 && s <= 512 && t.Alignment()%4 == 0 && !config.noDuffDevice
@@ -18998,7 +17716,6 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [s] {t} ptr mem)
     // cond: (s > 512 || config.noDuffDevice) || t.Alignment()%4 != 0
@@ -19020,10 +17737,8 @@ private static bool rewriteValueARM_OpZero(ptr<Value> _addr_v) {
         v1.AuxInt = int32ToAuxInt(0);
         v.AddArg4(ptr, v0, v1, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueARM_OpZeromask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19043,7 +17758,6 @@ private static bool rewriteValueARM_OpZeromask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteBlockARM(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -19117,20 +17831,17 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     y = v_0_1.Args[0];
                     v0 = b.NewValue0(v_0.Pos, OpARMCMP, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMEQ, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (CMPconst [0] l:(SUB x y)) yes no)
         // cond: l.Uses==1
@@ -19370,19 +18081,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMCMN, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMEQ, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (CMPconst [0] l:(MULA x y a)) yes no)
         // cond: l.Uses==1
@@ -19600,19 +18308,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTST, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMEQ, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (CMPconst [0] l:(ANDconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -19805,19 +18510,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTEQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMEQ, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (EQ (CMPconst [0] l:(XORconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -20051,20 +18753,17 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     y = v_0_1.Args[0];
                     v0 = b.NewValue0(v_0.Pos, OpARMCMP, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GE (CMPconst [0] l:(SUB x y)) yes no)
         // cond: l.Uses==1
@@ -20304,19 +19003,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMCMN, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGEnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GE (CMPconst [0] l:(MULA x y a)) yes no)
         // cond: l.Uses==1
@@ -20534,19 +19230,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTST, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGEnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GE (CMPconst [0] l:(ANDconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -20739,19 +19432,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTEQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGEnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GE (CMPconst [0] l:(XORconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -21019,20 +19709,17 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     y = v_0_1.Args[0];
                     v0 = b.NewValue0(v_0.Pos, OpARMCMP, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GT (CMPconst [0] l:(SUB x y)) yes no)
         // cond: l.Uses==1
@@ -21272,19 +19959,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMCMN, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGTnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GT (CMPconst [0] l:(ADDconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -21502,19 +20186,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTST, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGTnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GT (CMPconst [0] l:(ANDconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -21707,19 +20388,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTEQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMGTnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (GT (CMPconst [0] l:(XORconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -22078,20 +20756,17 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     y = v_0_1.Args[0];
                     v0 = b.NewValue0(v_0.Pos, OpARMCMP, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LE (CMPconst [0] l:(SUB x y)) yes no)
         // cond: l.Uses==1
@@ -22331,19 +21006,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMCMN, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLEnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LE (CMPconst [0] l:(MULA x y a)) yes no)
         // cond: l.Uses==1
@@ -22561,19 +21233,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTST, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLEnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LE (CMPconst [0] l:(ANDconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -22766,19 +21435,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTEQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLEnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LE (CMPconst [0] l:(XORconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -23046,20 +21712,17 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     y = v_0_1.Args[0];
                     v0 = b.NewValue0(v_0.Pos, OpARMCMP, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLT, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LT (CMPconst [0] l:(SUB x y)) yes no)
         // cond: l.Uses==1
@@ -23299,19 +21962,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMCMN, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLTnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LT (CMPconst [0] l:(MULA x y a)) yes no)
         // cond: l.Uses==1
@@ -23529,19 +22189,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTST, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLTnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LT (CMPconst [0] l:(ANDconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -23734,19 +22391,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTEQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMLTnoov, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (LT (CMPconst [0] l:(XORconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -24164,20 +22818,17 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                     }
-
                     y = v_0_1.Args[0];
                     v0 = b.NewValue0(v_0.Pos, OpARMCMP, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMNE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (CMPconst [0] l:(SUB x y)) yes no)
         // cond: l.Uses==1
@@ -24417,19 +23068,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMCMN, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMNE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (CMPconst [0] l:(MULA x y a)) yes no)
         // cond: l.Uses==1
@@ -24647,19 +23295,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTST, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMNE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (CMPconst [0] l:(ANDconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -24852,19 +23497,16 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
                         continue;
                     (_i0, l_0, l_1) = (_i0 + 1, l_1, l_0);
                     }
-
                     v0 = b.NewValue0(v_0.Pos, OpARMTEQ, types.TypeFlags);
                     v0.AddArg2(x, y);
                     b.resetWithControl(BlockARMNE, v0);
                     return true;
-
                 }
 
 
                 _i0 = _i0__prev2;
             }
             break;
-
         } 
         // match: (NE (CMPconst [0] l:(XORconst [c] x)) yes no)
         // cond: l.Uses==1
@@ -25167,7 +23809,6 @@ private static bool rewriteBlockARM(ptr<Block> _addr_b) {
             return true;
         }
         return false;
-
 }
 
 } // end ssa_package

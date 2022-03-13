@@ -2,27 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:05 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:57 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\floor.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Floor returns the greatest integer value less than or equal to x.
-    //
-    // Special cases are:
-    //    Floor(±0) = ±0
-    //    Floor(±Inf) = ±Inf
-    //    Floor(NaN) = NaN
+// Floor returns the greatest integer value less than or equal to x.
+//
+// Special cases are:
+//    Floor(±0) = ±0
+//    Floor(±Inf) = ±Inf
+//    Floor(NaN) = NaN
 public static double Floor(double x) {
     if (haveArchFloor) {
         return archFloor(x);
     }
     return floor(x);
-
 }
 
 private static double floor(double x) {
@@ -35,11 +32,9 @@ private static double floor(double x) {
             d = d + 1;
         }
         return -d;
-
     }
     var (d, _) = Modf(x);
     return d;
-
 }
 
 // Ceil returns the least integer value greater than or equal to x.
@@ -53,7 +48,6 @@ public static double Ceil(double x) {
         return archCeil(x);
     }
     return ceil(x);
-
 }
 
 private static double ceil(double x) {
@@ -71,7 +65,6 @@ public static double Trunc(double x) {
         return archTrunc(x);
     }
     return trunc(x);
-
 }
 
 private static double trunc(double x) {
@@ -80,7 +73,6 @@ private static double trunc(double x) {
     }
     var (d, _) = Modf(x);
     return d;
-
 }
 
 // Round returns the nearest integer, rounding half away from zero.
@@ -118,10 +110,8 @@ public static double Round(double x) {
         e -= bias;
         bits += half >> (int)(e);
         bits &= fracMask >> (int)(e);
-
     }
     return Float64frombits(bits);
-
 }
 
 // RoundToEven returns the nearest integer, rounding ties to even.
@@ -153,7 +143,6 @@ public static double RoundToEven(double x) {
         e -= bias;
         bits += (halfMinusULP + (bits >> (int)((shift - e))) & 1) >> (int)(e);
         bits &= fracMask >> (int)(e);
-
     }
     else if (e == bias - 1 && bits & fracMask != 0) { 
         // Round 0.5 < abs(x) < 1.
@@ -165,7 +154,6 @@ public static double RoundToEven(double x) {
         bits &= signMask; // +-0
     }
     return Float64frombits(bits);
-
 }
 
 } // end math_package

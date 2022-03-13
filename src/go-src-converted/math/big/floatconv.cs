@@ -4,14 +4,14 @@
 
 // This file implements string-to-Float conversion functions.
 
-// package big -- go2cs converted at 2022 March 06 22:17:44 UTC
+// package big -- go2cs converted at 2022 March 13 05:31:53 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\floatconv.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strings = go.strings_package;
-
 namespace go.math;
+
+using fmt = fmt_package;
+using io = io_package;
+using strings = strings_package;
 
 public static partial class big_package {
 
@@ -34,9 +34,7 @@ private static (ptr<Float>, bool) SetString(this ptr<Float> _addr_z, @string s) 
             return (_addr_f!, true);
         }
     }
-
     return (_addr_null!, false);
-
 }
 
 // scan is like Parse but reads the longest possible prefix representing a valid
@@ -147,7 +145,6 @@ private static (ptr<Float>, nint, error) scan(this ptr<Float> _addr_z, io.ByteSc
         // no decimal exponent contribution
         z.round(0);
         return ;
-
     }
     ptr<Float> p = @new<Float>().SetPrec(z.Prec() + 64); // use more bits for p -- TODO(gri) what is the right number?
     if (exp5 < 0) {
@@ -158,7 +155,6 @@ private static (ptr<Float>, nint, error) scan(this ptr<Float> _addr_z, io.ByteSc
         z.Mul(z, p.pow5(uint64(exp5)));
     }
     return ;
-
 });
 
 // These powers of 5 fit into a uint64.
@@ -192,11 +188,9 @@ private static ptr<Float> pow5(this ptr<Float> _addr_z, ulong n) {
         }
         f.Mul(f, f);
         n>>=1;
-
     }
 
     return _addr_z!;
-
 }
 
 // Parse parses s which must contain a text representation of a floating-
@@ -278,9 +272,7 @@ private static (ptr<Float>, nint, error) Parse(this ptr<Float> _addr_z, @string 
 
     }
 
-
     return ;
-
 }
 
 // ParseFloat is like f.Parse(s, base) with f set to the given precision

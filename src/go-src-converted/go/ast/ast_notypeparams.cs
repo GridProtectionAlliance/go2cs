@@ -5,12 +5,12 @@
 //go:build !typeparams
 // +build !typeparams
 
-// package ast -- go2cs converted at 2022 March 06 22:42:55 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:04 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\ast_notypeparams.go
-using token = go.go.token_package;
-
 namespace go.go;
+
+using token = go.token_package;
 
 public static partial class ast_package {
 
@@ -30,5 +30,4 @@ public partial struct TypeSpec {
     public Expr Type; // *Ident, *ParenExpr, *SelectorExpr, *StarExpr, or any of the *XxxTypes
     public ptr<CommentGroup> Comment; // line comments; or nil
 }
-
 } // end ast_package

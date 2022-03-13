@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package edwards25519 -- go2cs converted at 2022 March 06 22:17:35 UTC
+// package edwards25519 -- go2cs converted at 2022 March 13 05:31:43 UTC
 // import "crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\scalarmult.go
-using sync = go.sync_package;
-using System;
-
-
 namespace go.crypto.ed25519.@internal;
+
+using sync = sync_package;
+using System;
 
 public static partial class edwards25519_package {
 
-    // basepointTable is a set of 32 affineLookupTables, where table i is generated
-    // from 256i * basepoint. It is precomputed the first time it's used.
+// basepointTable is a set of 32 affineLookupTables, where table i is generated
+// from 256i * basepoint. It is precomputed the first time it's used.
 private static ptr<array<affineLookupTable>> basepointTable() {
     basepointTablePrecomp.initOnce.Do(() => {
         var p = NewGeneratorPoint();
@@ -102,7 +101,6 @@ private static ptr<Point> ScalarBaseMult(this ptr<Point> _addr_v, ptr<Scalar> _a
     }
 
     return _addr_v!;
-
 }
 
 // ScalarMult sets v = x * q, and returns v.
@@ -150,7 +148,6 @@ private static ptr<Point> ScalarMult(this ptr<Point> _addr_v, ptr<Scalar> _addr_
     }
     v.fromP1xP1(tmp1);
     return _addr_v!;
-
 }
 
 // basepointNafTable is the nafLookupTable8 for the basepoint.
@@ -241,12 +238,10 @@ private static ptr<Point> VarTimeDoubleScalarBaseMult(this ptr<Point> _addr_v, p
             tmp1.SubAffine(v, multB);
         }
         tmp2.FromP1xP1(tmp1);
-
     }
 
     v.fromP2(tmp2);
     return _addr_v!;
-
 }
 
 } // end edwards25519_package

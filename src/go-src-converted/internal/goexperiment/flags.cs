@@ -40,27 +40,26 @@
 // at run time based on the GOEXPERIMENT variable.
 // The code used in builds to interpret the GOEXPERIMENT variable
 // is in the separate package internal/buildcfg.
-// package goexperiment -- go2cs converted at 2022 March 06 22:30:03 UTC
+
+// package goexperiment -- go2cs converted at 2022 March 13 05:40:50 UTC
 // import "internal/goexperiment" ==> using goexperiment = go.@internal.goexperiment_package
 // Original source: C:\Program Files\Go\src\internal\goexperiment\flags.go
-
-
 namespace go.@internal;
 
 public static partial class goexperiment_package {
 
-    //go:generate go run mkconsts.go
+//go:generate go run mkconsts.go
 
-    // Flags is the set of experiments that can be enabled or disabled in
-    // the current toolchain.
-    //
-    // When specified in the GOEXPERIMENT environment variable or as build
-    // tags, experiments use the strings.ToLower of their field name.
-    //
-    // For the baseline experimental configuration, see
-    // objabi.experimentBaseline.
-    //
-    // If you change this struct definition, run "go generate".
+// Flags is the set of experiments that can be enabled or disabled in
+// the current toolchain.
+//
+// When specified in the GOEXPERIMENT environment variable or as build
+// tags, experiments use the strings.ToLower of their field name.
+//
+// For the baseline experimental configuration, see
+// objabi.experimentBaseline.
+//
+// If you change this struct definition, run "go generate".
 public partial struct Flags {
     public bool FieldTrack;
     public bool PreemptibleLoops;

@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:17 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:40 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\val.go
-using constant = go.go.constant_package;
-using math = go.math_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+using math = math_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ir_package {
 
@@ -20,7 +20,6 @@ public static constant.Kind ConstType(Node n) {
         return constant.Unknown;
     }
     return n.Val().Kind();
-
 }
 
 // ConstValue returns the constant value stored in n as an interface{}.
@@ -46,7 +45,6 @@ public static void ConstValue(Node n) => func((_, panic, _) => {
             panic("unreachable");
 
     }
-
 });
 
 // IntVal returns v converted to int64.
@@ -67,7 +65,6 @@ public static long IntVal(ptr<types.Type> _addr_t, constant.Value v) => func((_,
             x = x__prev2;
 
         }
-
     }
     else
  {
@@ -83,11 +80,9 @@ public static long IntVal(ptr<types.Type> _addr_t, constant.Value v) => func((_,
             x = x__prev2;
 
         }
-
     }
     @base.Fatalf("%v out of range for %v", v, t);
     panic("unreachable");
-
 });
 
 public static double Float64Val(constant.Value v) => func((_, panic, _) => {
@@ -98,10 +93,8 @@ public static double Float64Val(constant.Value v) => func((_, panic, _) => {
             return x + 0; // avoid -0 (should not be needed, but be conservative)
         }
     }
-
     @base.Fatalf("bad float64 value: %v", v);
     panic("unreachable");
-
 });
 
 public static void AssertValidTypeForConst(ptr<types.Type> _addr_t, constant.Value v) {
@@ -130,7 +123,6 @@ public static bool ValidTypeForConst(ptr<types.Type> _addr_t, constant.Value v) 
         return t.IsComplex();
         @base.Fatalf("unexpected constant kind: %v", v);
     panic("unreachable");
-
 });
 
 // NewLiteral returns a new untyped constant with value v.
@@ -152,7 +144,6 @@ private static ptr<types.Type> idealType(constant.Kind ct) {
         return _addr_types.UntypedComplex!;
         @base.Fatalf("unexpected Ctype: %v", ct);
     return _addr_null!;
-
 }
 
 public static array<bool> OKForConst = new array<bool>(types.NTYPE);
@@ -164,7 +155,6 @@ public static bool CanInt64(Node n) {
     }
     var (_, ok) = constant.Int64Val(n.Val());
     return ok;
-
 }
 
 // Int64Val returns n as an int64.
@@ -178,7 +168,6 @@ public static long Int64Val(Node n) {
         @base.Fatalf("Int64Val(%v)", n);
     }
     return x;
-
 }
 
 // Uint64Val returns n as an uint64.
@@ -192,7 +181,6 @@ public static ulong Uint64Val(Node n) {
         @base.Fatalf("Uint64Val(%v)", n);
     }
     return x;
-
 }
 
 // BoolVal returns n as a bool.
@@ -202,7 +190,6 @@ public static bool BoolVal(Node n) {
         @base.Fatalf("BoolVal(%v)", n);
     }
     return constant.BoolVal(n.Val());
-
 }
 
 // StringVal returns the value of a literal string Node as a string.
@@ -212,7 +199,6 @@ public static @string StringVal(Node n) {
         @base.Fatalf("StringVal(%v)", n);
     }
     return constant.StringVal(n.Val());
-
 }
 
 } // end ir_package

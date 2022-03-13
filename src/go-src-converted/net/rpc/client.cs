@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rpc -- go2cs converted at 2022 March 06 22:25:49 UTC
+// package rpc -- go2cs converted at 2022 March 13 05:40:20 UTC
 // import "net/rpc" ==> using rpc = go.net.rpc_package
 // Original source: C:\Program Files\Go\src\net\rpc\client.go
-using bufio = go.bufio_package;
-using gob = go.encoding.gob_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using log = go.log_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using sync = go.sync_package;
-using System.Threading;
-
-
 namespace go.net;
 
+using bufio = bufio_package;
+using gob = encoding.gob_package;
+using errors = errors_package;
+using io = io_package;
+using log = log_package;
+using net = net_package;
+using http = net.http_package;
+using sync = sync_package;
+
+
+// ServerError represents an error that has been returned from
+// the remote side of the RPC connection.
+
+using System.Threading;
 public static partial class rpc_package {
 
-    // ServerError represents an error that has been returned from
-    // the remote side of the RPC connection.
 public partial struct ServerError { // : @string
 }
 
@@ -149,8 +150,7 @@ private static void input(this ptr<Client> _addr_client) {
                 call.Error = errors.New("reading body " + err.Error());
             }
             call.done();
-        
-    } 
+            } 
     // Terminate pending calls.
     client.reqMutex.Lock();
     client.mutex.Lock();
@@ -237,7 +237,6 @@ private static error WriteRequest(this ptr<gobClientCodec> _addr_c, ptr<Request>
         return ;
     }
     return error.As(c.encBuf.Flush())!;
-
 }
 
 private static error ReadResponseHeader(this ptr<gobClientCodec> _addr_c, ptr<Response> _addr_r) {
@@ -291,7 +290,6 @@ public static (ptr<Client>, error) DialHTTPPath(@string network, @string address
     }
     conn.Close();
     return (_addr_null!, error.As(addr(new net.OpError(Op:"dial-http",Net:network+" "+address,Addr:nil,Err:err,))!)!);
-
 }
 
 // Dial connects to an RPC server at the specified network address.
@@ -304,7 +302,6 @@ public static (ptr<Client>, error) Dial(@string network, @string address) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_NewClient(conn)!, error.As(null!)!);
-
 }
 
 // Close calls the underlying codec's Close method. If the connection is already
@@ -320,7 +317,6 @@ private static error Close(this ptr<Client> _addr_client) {
     client.closing = true;
     client.mutex.Unlock();
     return error.As(client.codec.Close())!;
-
 }
 
 // Go invokes the function asynchronously. It returns the Call structure representing
@@ -350,7 +346,6 @@ private static ptr<Call> Go(this ptr<Client> _addr_client, @string serviceMethod
     call.Done = done;
     client.send(call);
     return _addr_call!;
-
 }
 
 // Call invokes the named function, waits for it to complete, and returns its error status.

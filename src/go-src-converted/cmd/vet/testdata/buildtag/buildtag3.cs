@@ -8,11 +8,9 @@
 // ERRORNEXT "[+]build lines do not match //go:build condition"
 // +build bad
 
-// package testdata -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package testdata -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata.testdata" ==> using testdata = go.cmd.vet.testdata.testdata_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\buildtag\buildtag3.go
-
-
 namespace go.cmd.vet;
 
 public static partial class testdata_package {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:48 UTC
+//     Generated on 2022 March 13 05:37:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct headerSorter
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace net
             public static implicit operator headerSorter(NilType nil) => default(headerSorter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static headerSorter headerSorter_cast(dynamic value)
         {
             return new headerSorter(value.kvs);

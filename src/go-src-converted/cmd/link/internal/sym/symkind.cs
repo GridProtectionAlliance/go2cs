@@ -28,16 +28,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package sym -- go2cs converted at 2022 March 06 23:20:35 UTC
+// package sym -- go2cs converted at 2022 March 13 06:33:29 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\sym\symkind.go
-
-
 namespace go.cmd.link.@internal;
 
 public static partial class sym_package {
 
-    // A SymKind describes the kind of memory represented by a symbol.
+// A SymKind describes the kind of memory represented by a symbol.
 public partial struct SymKind { // : byte
 }
 
@@ -128,7 +126,6 @@ public static readonly var SDWARFLINES = 55;
 
 // ABI aliases (these never appear in the output)
 public static readonly var SABIALIAS = 56;
-
 
 // AbiSymKindToSymKind maps values read from object files (which are
 // of type cmd/internal/objabi.SymKind) to values of type SymKind.

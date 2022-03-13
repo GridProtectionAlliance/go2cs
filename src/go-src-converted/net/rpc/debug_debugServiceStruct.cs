@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:49 UTC
+//     Generated on 2022 March 13 05:40:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace net
 {
     public static partial class rpc_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct debugService
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace net
             public static implicit operator debugService(NilType nil) => default(debugService);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static debugService debugService_cast(dynamic value)
         {
             return new debugService(ref value.Service, value.Name, value.Method);

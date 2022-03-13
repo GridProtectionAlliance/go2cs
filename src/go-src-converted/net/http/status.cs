@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2022 March 06 22:23:11 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:35 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\status.go
-
-
 namespace go.net;
 
 public static partial class http_package {
 
-    // HTTP status codes as registered with IANA.
-    // See: https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+// HTTP status codes as registered with IANA.
+// See: https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
 public static readonly nint StatusContinue = 100; // RFC 7231, 6.2.1
 public static readonly nint StatusSwitchingProtocols = 101; // RFC 7231, 6.2.2
 public static readonly nint StatusProcessing = 102; // RFC 2518, 10.1

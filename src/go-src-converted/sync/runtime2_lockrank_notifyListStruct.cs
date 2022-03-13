@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:26:23 UTC
+//     Generated on 2022 March 13 05:24:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class sync_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct notifyList
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace go
             public static implicit operator notifyList(NilType nil) => default(notifyList);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static notifyList notifyList_cast(dynamic value)
         {
             return new notifyList(value.wait, value.notify, value.rank, value.pad, value.@lock, value.head, value.tail);

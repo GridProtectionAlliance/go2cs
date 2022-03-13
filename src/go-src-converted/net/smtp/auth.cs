@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package smtp -- go2cs converted at 2022 March 06 22:25:55 UTC
+// package smtp -- go2cs converted at 2022 March 13 05:40:26 UTC
 // import "net/smtp" ==> using smtp = go.net.smtp_package
 // Original source: C:\Program Files\Go\src\net\smtp\auth.go
-using hmac = go.crypto.hmac_package;
-using md5 = go.crypto.md5_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-
 namespace go.net;
+
+using hmac = crypto.hmac_package;
+using md5 = crypto.md5_package;
+using errors = errors_package;
+using fmt = fmt_package;
+
+
+// Auth is implemented by an SMTP authentication mechanism.
 
 public static partial class smtp_package {
 
-    // Auth is implemented by an SMTP authentication mechanism.
 public partial interface Auth {
     (slice<byte>, error) Start(ptr<ServerInfo> server); // Next continues the authentication. The server has just sent
 // the fromServer data. If more is true, the server expects a
@@ -75,7 +77,6 @@ private static (@string, slice<byte>, error) Start(this ptr<plainAuth> _addr_a, 
     }
     slice<byte> resp = (slice<byte>)a.identity + "\x00" + a.username + "\x00" + a.password;
     return ("PLAIN", resp, error.As(null!)!);
-
 }
 
 private static (slice<byte>, error) Next(this ptr<plainAuth> _addr_a, slice<byte> fromServer, bool more) {
@@ -86,10 +87,8 @@ private static (slice<byte>, error) Next(this ptr<plainAuth> _addr_a, slice<byte
     if (more) { 
         // We've already sent everything.
         return (null, error.As(errors.New("unexpected server challenge"))!);
-
     }
     return (null, error.As(null!)!);
-
 }
 
 private partial struct cramMD5Auth {
@@ -127,7 +126,6 @@ private static (slice<byte>, error) Next(this ptr<cramMD5Auth> _addr_a, slice<by
         return ((slice<byte>)fmt.Sprintf("%s %x", a.username, d.Sum(s)), error.As(null!)!);
     }
     return (null, error.As(null!)!);
-
 }
 
 } // end smtp_package

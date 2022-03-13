@@ -5,11 +5,9 @@
 //go:build !darwin && !dragonfly && !freebsd && !linux && !netbsd && !openbsd
 // +build !darwin,!dragonfly,!freebsd,!linux,!netbsd,!openbsd
 
-// package bio -- go2cs converted at 2022 March 06 22:32:21 UTC
+// package bio -- go2cs converted at 2022 March 13 05:43:19 UTC
 // import "cmd/internal/bio" ==> using bio = go.cmd.@internal.bio_package
 // Original source: C:\Program Files\Go\src\cmd\internal\bio\buf_nommap.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class bio_package {

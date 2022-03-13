@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:37 UTC
+//     Generated on 2022 March 13 05:41:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class reflect_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(makeFuncCtxt))]
         private partial struct methodValue
         {
@@ -70,7 +70,7 @@ namespace go
             public static implicit operator methodValue(NilType nil) => default(methodValue);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static methodValue methodValue_cast(dynamic value)
         {
             return new methodValue(value.makeFuncCtxt, value.method, value.rcvr);

@@ -10,18 +10,16 @@
 // The slicing-by-8 algorithm is a faster implementation that uses a bigger
 // table (8*256*4 bytes).
 
-// package crc32 -- go2cs converted at 2022 March 06 22:14:54 UTC
+// package crc32 -- go2cs converted at 2022 March 13 05:28:57 UTC
 // import "hash/crc32" ==> using crc32 = go.hash.crc32_package
 // Original source: C:\Program Files\Go\src\hash\crc32\crc32_generic.go
-
-
 namespace go.hash;
 
 public static partial class crc32_package {
 
-    // simpleMakeTable allocates and constructs a Table for the specified
-    // polynomial. The table is suitable for use with the simple algorithm
-    // (simpleUpdate).
+// simpleMakeTable allocates and constructs a Table for the specified
+// polynomial. The table is suitable for use with the simple algorithm
+// (simpleUpdate).
 private static ptr<Table> simpleMakeTable(uint poly) {
     ptr<Table> t = @new<Table>();
     simplePopulateTable(poly, t);
@@ -43,12 +41,9 @@ private static void simplePopulateTable(uint poly, ptr<Table> _addr_t) {
  {
                 crc>>=1;
             }
-
         }
         t[i] = crc;
-
     }
-
 }
 
 // simpleUpdate uses the simple algorithm to update the CRC, given a table that
@@ -105,7 +100,6 @@ private static uint slicingUpdate(uint crc, ptr<slicing8Table> _addr_tab, slice<
         return crc;
     }
     return simpleUpdate(crc, _addr_tab[0], p);
-
 }
 
 } // end crc32_package

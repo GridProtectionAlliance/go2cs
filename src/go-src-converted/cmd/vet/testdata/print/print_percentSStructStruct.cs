@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:21 UTC
+//     Generated on 2022 March 13 06:42:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace testdata
 {
     public static partial class print_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct percentSStruct
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace testdata
             public static implicit operator percentSStruct(NilType nil) => default(percentSStruct);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static percentSStruct percentSStruct_cast(dynamic value)
         {
             return new percentSStruct(value.a, value.b, value.C);

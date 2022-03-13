@@ -10,29 +10,31 @@
 //
 // NOTE: UNDER CONSTRUCTION. This API may change in backwards incompatible ways
 // and without notice.
-// package bidi -- go2cs converted at 2022 March 06 23:38:25 UTC
+
+// package bidi -- go2cs converted at 2022 March 13 06:46:38 UTC
 // import "vendor/golang.org/x/text/unicode/bidi" ==> using bidi = go.vendor.golang.org.x.text.unicode.bidi_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\bidi\bidi.go
+namespace go.vendor.golang.org.x.text.unicode;
 // import "golang.org/x/text/unicode/bidi"
 
 // TODO
 // - Transformer for reordering?
 // - Transformer (validator, really) for Bidi Rule.
 
-using bytes = go.bytes_package;
+
+using bytes = bytes_package;
+
+
+// This API tries to avoid dealing with embedding levels for now. Under the hood
+// these will be computed, but the question is to which extent the user should
+// know they exist. We should at some point allow the user to specify an
+// embedding hierarchy, though.
+
+// A Direction indicates the overall flow of text.
+
 using System;
-
-
-namespace go.vendor.golang.org.x.text.unicode;
-
 public static partial class bidi_package {
 
-    // This API tries to avoid dealing with embedding levels for now. Under the hood
-    // these will be computed, but the question is to which extent the user should
-    // know they exist. We should at some point allow the user to specify an
-    // embedding hierarchy, though.
-
-    // A Direction indicates the overall flow of text.
 public partial struct Direction { // : nint
 }
 
@@ -54,7 +56,6 @@ public static readonly var Mixed = 1;
 // Neutral means that text contains no left-to-right and right-to-left
 // characters and that no default direction has been set.
 public static readonly var Neutral = 2;
-
 
 private partial struct options {
     public Direction defaultDirection;
@@ -130,7 +131,6 @@ private static (nint, error) prepareInput(this ptr<Paragraph> _addr_p) {
             // since IsOpeningBracket is not true
             p.pairTypes = append(p.pairTypes, bpClose);
             p.pairValues = append(p.pairValues, r);
-
         }
         else
  {
@@ -138,7 +138,6 @@ private static (nint, error) prepareInput(this ptr<Paragraph> _addr_p) {
             p.pairValues = append(p.pairValues, 0);
         }
     }    return (bytecount, error.As(null!)!);
-
 }
 
 // SetBytes configures p for the given paragraph text. It replaces text
@@ -207,7 +206,6 @@ private static Run RunAt(this ptr<Paragraph> _addr_p, nint pos) {
             runNumber = i;
         }
     }    return p.o.Run(runNumber);
-
 }
 
 private static Ordering calculateOrdering(slice<level> levels, slice<int> runes) {
@@ -240,7 +238,6 @@ private static Ordering calculateOrdering(slice<level> levels, slice<int> runes)
     o.directions = append(o.directions, prevDir);
     o.startpos = append(o.startpos, prevI);
     return o;
-
 }
 
 // Order computes the visual ordering of all the runs in a Paragraph.
@@ -266,7 +263,6 @@ private static (Ordering, error) Order(this ptr<Paragraph> _addr_p) {
 
     p.o = calculateOrdering(levels, p.runes);
     return (p.o, error.As(null!)!);
-
 }
 
 // Line computes the visual ordering of runs for a single line starting and
@@ -284,7 +280,6 @@ private static (Ordering, error) Line(this ptr<Paragraph> _addr_p, nint start, n
     var levels = para.getLevels(new slice<nint>(new nint[] { len(lineTypes) }));
     var o = calculateOrdering(levels, p.runes[(int)start..(int)end]);
     return (o, error.As(null!)!);
-
 }
 
 // An Ordering holds the computed visual order of runs of a Paragraph. Calling
@@ -407,7 +402,6 @@ public static slice<byte> AppendReverse(slice<byte> @out, slice<byte> @in) {
     copy(ret[(int)len(out)..], string(inRunes));
 
     return ret;
-
 }
 
 // ReverseString reverses the order of characters in s and returns a new string.
@@ -427,7 +421,6 @@ public static @string ReverseString(@string s) {
             ret[li - i - 1] = r;
         }
     }    return string(ret);
-
 }
 
 } // end bidi_package

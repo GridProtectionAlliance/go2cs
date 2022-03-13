@@ -1,13 +1,13 @@
 // Code generated from gen/generic.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:02:36 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:15:14 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewritegeneric.go
-using math = go.math_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using math = math_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -454,7 +454,6 @@ private static bool rewriteValuegeneric(ptr<Value> _addr_v) {
     else if (v.Op == OpZeroExt8to64) 
         return rewriteValuegeneric_OpZeroExt8to64(_addr_v);
         return false;
-
 }
 private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -475,24 +474,20 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 var d = auxIntToInt16(v_1.AuxInt);
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(c + d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add16 <t> (Mul16 x y) (Mul16 x z))
     // result: (Mul16 x (Add16 <t> y z))
@@ -508,7 +503,6 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -524,7 +518,6 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         _ = v_1.Args[1];
                         var v_1_0 = v_1.Args[0];
                         var v_1_1 = v_1.Args[1];
@@ -536,31 +529,26 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, v_1_0, v_1_1) = (_i2 + 1, v_1_1, v_1_0);
                                 }
-
                                 var z = v_1_1;
                                 v.reset(OpMul16);
                                 var v0 = b.NewValue0(v.Pos, OpAdd16, t);
                                 v0.AddArg2(y, z);
                                 v.AddArg2(x, v0);
                                 return true;
-
                             }
 
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add16 (Const16 [0]) x)
     // result: x
@@ -575,18 +563,15 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add16 (Const16 [1]) (Com16 x))
     // result: (Neg16 x)
@@ -601,19 +586,16 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1.Args[0];
                 v.reset(OpNeg16);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add16 (Add16 i:(Const16 <t>) z) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -629,7 +611,6 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -644,33 +625,28 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                             continue;
                         }
-
                         v.reset(OpAdd16);
                         v0 = b.NewValue0(v.Pos, OpAdd16, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add16 (Sub16 i:(Const16 <t>) z) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -686,32 +662,27 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_0.Args[1];
                 i = v_0.Args[0];
                 if (i.Op != OpConst16) {
                     continue;
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                     continue;
                 }
-
                 v.reset(OpAdd16);
                 v0 = b.NewValue0(v.Pos, OpSub16, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add16 (Const16 <t> [c]) (Add16 (Const16 <t> [d]) x))
     // result: (Add16 (Const16 <t> [c+d]) x)
@@ -726,13 +697,11 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpAdd16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -746,7 +715,6 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt16(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAdd16);
@@ -754,20 +722,17 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                         v0.AuxInt = int16ToAuxInt(c + d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add16 (Const16 <t> [c]) (Sub16 (Const16 <t> [d]) x))
     // result: (Sub16 (Const16 <t> [c+d]) x)
@@ -782,36 +747,30 @@ private static bool rewriteValuegeneric_OpAdd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpSub16) {
                     continue;
                 }
-
                 x = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpConst16 || v_1_0.Type != t) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_0.AuxInt);
                 v.reset(OpSub16);
                 v0 = b.NewValue0(v.Pos, OpConst16, t);
                 v0.AuxInt = int16ToAuxInt(c + d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -832,24 +791,20 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(c + d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add32 <t> (Mul32 x y) (Mul32 x z))
     // result: (Mul32 x (Add32 <t> y z))
@@ -865,7 +820,6 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -881,7 +835,6 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         _ = v_1.Args[1];
                         var v_1_0 = v_1.Args[0];
                         var v_1_1 = v_1.Args[1];
@@ -893,31 +846,26 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, v_1_0, v_1_1) = (_i2 + 1, v_1_1, v_1_0);
                                 }
-
                                 var z = v_1_1;
                                 v.reset(OpMul32);
                                 var v0 = b.NewValue0(v.Pos, OpAdd32, t);
                                 v0.AddArg2(y, z);
                                 v.AddArg2(x, v0);
                                 return true;
-
                             }
 
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add32 (Const32 [0]) x)
     // result: x
@@ -932,18 +880,15 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add32 (Const32 [1]) (Com32 x))
     // result: (Neg32 x)
@@ -958,19 +903,16 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1.Args[0];
                 v.reset(OpNeg32);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add32 (Add32 i:(Const32 <t>) z) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -986,7 +928,6 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -1001,33 +942,28 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                             continue;
                         }
-
                         v.reset(OpAdd32);
                         v0 = b.NewValue0(v.Pos, OpAdd32, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add32 (Sub32 i:(Const32 <t>) z) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -1043,32 +979,27 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_0.Args[1];
                 i = v_0.Args[0];
                 if (i.Op != OpConst32) {
                     continue;
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                     continue;
                 }
-
                 v.reset(OpAdd32);
                 v0 = b.NewValue0(v.Pos, OpSub32, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add32 (Const32 <t> [c]) (Add32 (Const32 <t> [d]) x))
     // result: (Add32 (Const32 <t> [c+d]) x)
@@ -1083,13 +1014,11 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpAdd32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -1103,7 +1032,6 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAdd32);
@@ -1111,20 +1039,17 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                         v0.AuxInt = int32ToAuxInt(c + d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add32 (Const32 <t> [c]) (Sub32 (Const32 <t> [d]) x))
     // result: (Sub32 (Const32 <t> [c+d]) x)
@@ -1139,36 +1064,30 @@ private static bool rewriteValuegeneric_OpAdd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpSub32) {
                     continue;
                 }
-
                 x = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpConst32 || v_1_0.Type != t) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_0.AuxInt);
                 v.reset(OpSub32);
                 v0 = b.NewValue0(v.Pos, OpConst32, t);
                 v0.AuxInt = int32ToAuxInt(c + d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAdd32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1187,29 +1106,23 @@ private static bool rewriteValuegeneric_OpAdd32F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat32(v_0.AuxInt);
                 if (v_1.Op != OpConst32F) {
                     continue;
                 }
-
                 var d = auxIntToFloat32(v_1.AuxInt);
                 if (!(c + d == c + d)) {
                     continue;
                 }
-
                 v.reset(OpConst32F);
                 v.AuxInt = float32ToAuxInt(c + d);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1230,24 +1143,20 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(c + d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add64 <t> (Mul64 x y) (Mul64 x z))
     // result: (Mul64 x (Add64 <t> y z))
@@ -1263,7 +1172,6 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -1279,7 +1187,6 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         _ = v_1.Args[1];
                         var v_1_0 = v_1.Args[0];
                         var v_1_1 = v_1.Args[1];
@@ -1291,31 +1198,26 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, v_1_0, v_1_1) = (_i2 + 1, v_1_1, v_1_0);
                                 }
-
                                 var z = v_1_1;
                                 v.reset(OpMul64);
                                 var v0 = b.NewValue0(v.Pos, OpAdd64, t);
                                 v0.AddArg2(y, z);
                                 v.AddArg2(x, v0);
                                 return true;
-
                             }
 
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add64 (Const64 [0]) x)
     // result: x
@@ -1330,18 +1232,15 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add64 (Const64 [1]) (Com64 x))
     // result: (Neg64 x)
@@ -1356,19 +1255,16 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1.Args[0];
                 v.reset(OpNeg64);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add64 (Add64 i:(Const64 <t>) z) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -1384,7 +1280,6 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -1399,33 +1294,28 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                             continue;
                         }
-
                         v.reset(OpAdd64);
                         v0 = b.NewValue0(v.Pos, OpAdd64, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add64 (Sub64 i:(Const64 <t>) z) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -1441,32 +1331,27 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_0.Args[1];
                 i = v_0.Args[0];
                 if (i.Op != OpConst64) {
                     continue;
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                     continue;
                 }
-
                 v.reset(OpAdd64);
                 v0 = b.NewValue0(v.Pos, OpSub64, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add64 (Const64 <t> [c]) (Add64 (Const64 <t> [d]) x))
     // result: (Add64 (Const64 <t> [c+d]) x)
@@ -1481,13 +1366,11 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpAdd64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -1501,7 +1384,6 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAdd64);
@@ -1509,20 +1391,17 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                         v0.AuxInt = int64ToAuxInt(c + d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add64 (Const64 <t> [c]) (Sub64 (Const64 <t> [d]) x))
     // result: (Sub64 (Const64 <t> [c+d]) x)
@@ -1537,36 +1416,30 @@ private static bool rewriteValuegeneric_OpAdd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpSub64) {
                     continue;
                 }
-
                 x = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpConst64 || v_1_0.Type != t) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_0.AuxInt);
                 v.reset(OpSub64);
                 v0 = b.NewValue0(v.Pos, OpConst64, t);
                 v0.AuxInt = int64ToAuxInt(c + d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAdd64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1585,29 +1458,23 @@ private static bool rewriteValuegeneric_OpAdd64F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat64(v_0.AuxInt);
                 if (v_1.Op != OpConst64F) {
                     continue;
                 }
-
                 var d = auxIntToFloat64(v_1.AuxInt);
                 if (!(c + d == c + d)) {
                     continue;
                 }
-
                 v.reset(OpConst64F);
                 v.AuxInt = float64ToAuxInt(c + d);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1628,24 +1495,20 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(c + d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add8 <t> (Mul8 x y) (Mul8 x z))
     // result: (Mul8 x (Add8 <t> y z))
@@ -1661,7 +1524,6 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -1677,7 +1539,6 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         _ = v_1.Args[1];
                         var v_1_0 = v_1.Args[0];
                         var v_1_1 = v_1.Args[1];
@@ -1689,31 +1550,26 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, v_1_0, v_1_1) = (_i2 + 1, v_1_1, v_1_0);
                                 }
-
                                 var z = v_1_1;
                                 v.reset(OpMul8);
                                 var v0 = b.NewValue0(v.Pos, OpAdd8, t);
                                 v0.AddArg2(y, z);
                                 v.AddArg2(x, v0);
                                 return true;
-
                             }
 
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add8 (Const8 [0]) x)
     // result: x
@@ -1728,18 +1584,15 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add8 (Const8 [1]) (Com8 x))
     // result: (Neg8 x)
@@ -1754,19 +1607,16 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1.Args[0];
                 v.reset(OpNeg8);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add8 (Add8 i:(Const8 <t>) z) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -1782,7 +1632,6 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -1797,33 +1646,28 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                             continue;
                         }
-
                         v.reset(OpAdd8);
                         v0 = b.NewValue0(v.Pos, OpAdd8, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add8 (Sub8 i:(Const8 <t>) z) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -1839,32 +1683,27 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 z = v_0.Args[1];
                 i = v_0.Args[0];
                 if (i.Op != OpConst8) {
                     continue;
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                     continue;
                 }
-
                 v.reset(OpAdd8);
                 v0 = b.NewValue0(v.Pos, OpSub8, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add8 (Const8 <t> [c]) (Add8 (Const8 <t> [d]) x))
     // result: (Add8 (Const8 <t> [c+d]) x)
@@ -1879,13 +1718,11 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpAdd8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -1899,7 +1736,6 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt8(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAdd8);
@@ -1907,20 +1743,17 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                         v0.AuxInt = int8ToAuxInt(c + d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Add8 (Const8 <t> [c]) (Sub8 (Const8 <t> [d]) x))
     // result: (Sub8 (Const8 <t> [c+d]) x)
@@ -1935,36 +1768,30 @@ private static bool rewriteValuegeneric_OpAdd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpSub8) {
                     continue;
                 }
-
                 x = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpConst8 || v_1_0.Type != t) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_0.AuxInt);
                 v.reset(OpSub8);
                 v0 = b.NewValue0(v.Pos, OpConst8, t);
                 v0.AuxInt = int8ToAuxInt(c + d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAddPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1985,7 +1812,6 @@ private static bool rewriteValuegeneric_OpAddPtr(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (AddPtr <t> x (Const32 [c]))
     // result: (OffPtr <t> x [int64(c)])
@@ -2001,10 +1827,8 @@ private static bool rewriteValuegeneric_OpAddPtr(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(c));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2025,24 +1849,20 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 var d = auxIntToInt16(v_1.AuxInt);
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(c & d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And16 (Const16 [m]) (Rsh16Ux64 _ (Const64 [c])))
     // cond: c >= int64(16-ntz16(m))
@@ -2058,34 +1878,28 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var m = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpRsh16Ux64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(16 - ntz16(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And16 (Const16 [m]) (Lsh16x64 _ (Const64 [c])))
     // cond: c >= int64(16-nlz16(m))
@@ -2101,34 +1915,28 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 m = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpLsh16x64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(16 - nlz16(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And16 x x)
     // result: x
@@ -2139,7 +1947,6 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (And16 (Const16 [-1]) x)
     // result: x
@@ -2154,18 +1961,15 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And16 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -2180,18 +1984,15 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And16 x (And16 x y))
     // result: (And16 x y)
@@ -2207,7 +2008,6 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -2221,25 +2021,21 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpAnd16);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And16 (And16 i:(Const16 <t>) z) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -2255,7 +2051,6 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -2270,33 +2065,28 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                             continue;
                         }
-
                         v.reset(OpAnd16);
                         var v0 = b.NewValue0(v.Pos, OpAnd16, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And16 (Const16 <t> [c]) (And16 (Const16 <t> [d]) x))
     // result: (And16 (Const16 <t> [c&d]) x)
@@ -2311,13 +2101,11 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpAnd16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -2331,7 +2119,6 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt16(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAnd16);
@@ -2339,23 +2126,19 @@ private static bool rewriteValuegeneric_OpAnd16(ptr<Value> _addr_v) {
                         v0.AuxInt = int16ToAuxInt(c & d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2376,24 +2159,20 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(c & d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And32 (Const32 [m]) (Rsh32Ux64 _ (Const64 [c])))
     // cond: c >= int64(32-ntz32(m))
@@ -2409,34 +2188,28 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var m = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpRsh32Ux64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(32 - ntz32(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And32 (Const32 [m]) (Lsh32x64 _ (Const64 [c])))
     // cond: c >= int64(32-nlz32(m))
@@ -2452,34 +2225,28 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 m = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpLsh32x64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(32 - nlz32(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And32 x x)
     // result: x
@@ -2490,7 +2257,6 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (And32 (Const32 [-1]) x)
     // result: x
@@ -2505,18 +2271,15 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And32 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -2531,18 +2294,15 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And32 x (And32 x y))
     // result: (And32 x y)
@@ -2558,7 +2318,6 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -2572,25 +2331,21 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpAnd32);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And32 (And32 i:(Const32 <t>) z) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -2606,7 +2361,6 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -2621,33 +2375,28 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                             continue;
                         }
-
                         v.reset(OpAnd32);
                         var v0 = b.NewValue0(v.Pos, OpAnd32, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And32 (Const32 <t> [c]) (And32 (Const32 <t> [d]) x))
     // result: (And32 (Const32 <t> [c&d]) x)
@@ -2662,13 +2411,11 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpAnd32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -2682,7 +2429,6 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAnd32);
@@ -2690,23 +2436,19 @@ private static bool rewriteValuegeneric_OpAnd32(ptr<Value> _addr_v) {
                         v0.AuxInt = int32ToAuxInt(c & d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2727,24 +2469,20 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(c & d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And64 (Const64 [m]) (Rsh64Ux64 _ (Const64 [c])))
     // cond: c >= int64(64-ntz64(m))
@@ -2760,34 +2498,28 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var m = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpRsh64Ux64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(64 - ntz64(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And64 (Const64 [m]) (Lsh64x64 _ (Const64 [c])))
     // cond: c >= int64(64-nlz64(m))
@@ -2803,34 +2535,28 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 m = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpLsh64x64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(64 - nlz64(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And64 x x)
     // result: x
@@ -2841,7 +2567,6 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (And64 (Const64 [-1]) x)
     // result: x
@@ -2856,18 +2581,15 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And64 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -2882,18 +2604,15 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And64 x (And64 x y))
     // result: (And64 x y)
@@ -2909,7 +2628,6 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -2923,25 +2641,21 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpAnd64);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And64 (And64 i:(Const64 <t>) z) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -2957,7 +2671,6 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -2972,33 +2685,28 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                             continue;
                         }
-
                         v.reset(OpAnd64);
                         var v0 = b.NewValue0(v.Pos, OpAnd64, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And64 (Const64 <t> [c]) (And64 (Const64 <t> [d]) x))
     // result: (And64 (Const64 <t> [c&d]) x)
@@ -3013,13 +2721,11 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpAnd64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -3033,7 +2739,6 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAnd64);
@@ -3041,23 +2746,19 @@ private static bool rewriteValuegeneric_OpAnd64(ptr<Value> _addr_v) {
                         v0.AuxInt = int64ToAuxInt(c & d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3078,24 +2779,20 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(c & d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And8 (Const8 [m]) (Rsh8Ux64 _ (Const64 [c])))
     // cond: c >= int64(8-ntz8(m))
@@ -3111,34 +2808,28 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var m = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpRsh8Ux64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(8 - ntz8(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And8 (Const8 [m]) (Lsh8x64 _ (Const64 [c])))
     // cond: c >= int64(8-nlz8(m))
@@ -3154,34 +2845,28 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 m = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpLsh8x64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= int64(8 - nlz8(m)))) {
                     continue;
                 }
-
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And8 x x)
     // result: x
@@ -3192,7 +2877,6 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (And8 (Const8 [-1]) x)
     // result: x
@@ -3207,18 +2891,15 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And8 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -3233,18 +2914,15 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And8 x (And8 x y))
     // result: (And8 x y)
@@ -3260,7 +2938,6 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -3274,25 +2951,21 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpAnd8);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And8 (And8 i:(Const8 <t>) z) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -3308,7 +2981,6 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -3323,33 +2995,28 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                             continue;
                         }
-
                         v.reset(OpAnd8);
                         var v0 = b.NewValue0(v.Pos, OpAnd8, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (And8 (Const8 <t> [c]) (And8 (Const8 <t> [d]) x))
     // result: (And8 (Const8 <t> [c&d]) x)
@@ -3364,13 +3031,11 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpAnd8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -3384,7 +3049,6 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt8(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAnd8);
@@ -3392,23 +3056,19 @@ private static bool rewriteValuegeneric_OpAnd8(ptr<Value> _addr_v) {
                         v0.AuxInt = int8ToAuxInt(c & d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3430,33 +3090,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 var c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 var v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 var v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -3466,14 +3120,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq64 (Const64 [c]) x) (Leq64 x (Const64 [d])))
     // cond: d >= c
@@ -3489,33 +3141,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -3525,14 +3171,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq32 (Const32 [c]) x) (Less32 x (Const32 [d])))
     // cond: d >= c
@@ -3548,33 +3192,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -3584,14 +3222,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq32 (Const32 [c]) x) (Leq32 x (Const32 [d])))
     // cond: d >= c
@@ -3607,33 +3243,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -3643,14 +3273,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq16 (Const16 [c]) x) (Less16 x (Const16 [d])))
     // cond: d >= c
@@ -3666,33 +3294,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -3702,14 +3324,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq16 (Const16 [c]) x) (Leq16 x (Const16 [d])))
     // cond: d >= c
@@ -3725,33 +3345,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -3761,14 +3375,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq8 (Const8 [c]) x) (Less8 x (Const8 [d])))
     // cond: d >= c
@@ -3784,33 +3396,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -3820,14 +3426,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq8 (Const8 [c]) x) (Leq8 x (Const8 [d])))
     // cond: d >= c
@@ -3843,33 +3447,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(d >= c)) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -3879,14 +3477,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less64 (Const64 [c]) x) (Less64 x (Const64 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -3902,33 +3498,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -3938,14 +3528,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less64 (Const64 [c]) x) (Leq64 x (Const64 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -3961,33 +3549,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -3997,14 +3579,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less32 (Const32 [c]) x) (Less32 x (Const32 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -4020,33 +3600,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -4056,14 +3630,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less32 (Const32 [c]) x) (Leq32 x (Const32 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -4079,33 +3651,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -4115,14 +3681,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less16 (Const16 [c]) x) (Less16 x (Const16 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -4138,33 +3702,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -4174,14 +3732,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less16 (Const16 [c]) x) (Leq16 x (Const16 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -4197,33 +3753,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -4233,14 +3783,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less8 (Const8 [c]) x) (Less8 x (Const8 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -4256,33 +3804,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -4292,14 +3834,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less8 (Const8 [c]) x) (Leq8 x (Const8 [d])))
     // cond: d >= c+1 && c+1 > c
@@ -4315,33 +3855,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(d >= c + 1 && c + 1 > c)) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -4351,14 +3885,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq64U (Const64 [c]) x) (Less64U x (Const64 [d])))
     // cond: uint64(d) >= uint64(c)
@@ -4374,33 +3906,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(d) >= uint64(c))) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -4410,14 +3936,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq64U (Const64 [c]) x) (Leq64U x (Const64 [d])))
     // cond: uint64(d) >= uint64(c)
@@ -4433,33 +3957,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(d) >= uint64(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -4469,14 +3987,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq32U (Const32 [c]) x) (Less32U x (Const32 [d])))
     // cond: uint32(d) >= uint32(c)
@@ -4492,33 +4008,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(d) >= uint32(c))) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -4528,14 +4038,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq32U (Const32 [c]) x) (Leq32U x (Const32 [d])))
     // cond: uint32(d) >= uint32(c)
@@ -4551,33 +4059,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(d) >= uint32(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -4587,14 +4089,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq16U (Const16 [c]) x) (Less16U x (Const16 [d])))
     // cond: uint16(d) >= uint16(c)
@@ -4610,33 +4110,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(d) >= uint16(c))) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -4646,14 +4140,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq16U (Const16 [c]) x) (Leq16U x (Const16 [d])))
     // cond: uint16(d) >= uint16(c)
@@ -4669,33 +4161,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(d) >= uint16(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -4705,14 +4191,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq8U (Const8 [c]) x) (Less8U x (Const8 [d])))
     // cond: uint8(d) >= uint8(c)
@@ -4728,33 +4212,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(d) >= uint8(c))) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -4764,14 +4242,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Leq8U (Const8 [c]) x) (Leq8U x (Const8 [d])))
     // cond: uint8(d) >= uint8(c)
@@ -4787,33 +4263,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(d) >= uint8(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -4823,14 +4293,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less64U (Const64 [c]) x) (Less64U x (Const64 [d])))
     // cond: uint64(d) >= uint64(c+1) && uint64(c+1) > uint64(c)
@@ -4846,33 +4314,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(d) >= uint64(c + 1) && uint64(c + 1) > uint64(c))) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -4882,14 +4344,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less64U (Const64 [c]) x) (Leq64U x (Const64 [d])))
     // cond: uint64(d) >= uint64(c+1) && uint64(c+1) > uint64(c)
@@ -4905,33 +4365,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(d) >= uint64(c + 1) && uint64(c + 1) > uint64(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpSub64, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst64, x.Type);
@@ -4941,14 +4395,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int64ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less32U (Const32 [c]) x) (Less32U x (Const32 [d])))
     // cond: uint32(d) >= uint32(c+1) && uint32(c+1) > uint32(c)
@@ -4964,33 +4416,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(d) >= uint32(c + 1) && uint32(c + 1) > uint32(c))) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -5000,14 +4446,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less32U (Const32 [c]) x) (Leq32U x (Const32 [d])))
     // cond: uint32(d) >= uint32(c+1) && uint32(c+1) > uint32(c)
@@ -5023,33 +4467,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(d) >= uint32(c + 1) && uint32(c + 1) > uint32(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpSub32, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst32, x.Type);
@@ -5059,14 +4497,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int32ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less16U (Const16 [c]) x) (Less16U x (Const16 [d])))
     // cond: uint16(d) >= uint16(c+1) && uint16(c+1) > uint16(c)
@@ -5082,33 +4518,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(d) >= uint16(c + 1) && uint16(c + 1) > uint16(c))) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -5118,14 +4548,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less16U (Const16 [c]) x) (Leq16U x (Const16 [d])))
     // cond: uint16(d) >= uint16(c+1) && uint16(c+1) > uint16(c)
@@ -5141,33 +4569,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(d) >= uint16(c + 1) && uint16(c + 1) > uint16(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpSub16, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst16, x.Type);
@@ -5177,14 +4599,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int16ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less8U (Const8 [c]) x) (Less8U x (Const8 [d])))
     // cond: uint8(d) >= uint8(c+1) && uint8(c+1) > uint8(c)
@@ -5200,33 +4620,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(d) >= uint8(c + 1) && uint8(c + 1) > uint8(c))) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -5236,14 +4650,12 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AndB (Less8U (Const8 [c]) x) (Leq8U x (Const8 [d])))
     // cond: uint8(d) >= uint8(c+1) && uint8(c+1) > uint8(c)
@@ -5259,33 +4671,27 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(d) >= uint8(c + 1) && uint8(c + 1) > uint8(c))) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpSub8, x.Type);
                 v1 = b.NewValue0(v.Pos, OpConst8, x.Type);
@@ -5295,17 +4701,14 @@ private static bool rewriteValuegeneric_OpAndB(ptr<Value> _addr_v) {
                 v2.AuxInt = int8ToAuxInt(d - c - 1);
                 v.AddArg2(v0, v2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpArraySelect(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5320,7 +4723,6 @@ private static bool rewriteValuegeneric_OpArraySelect(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (ArraySelect [0] (IData x))
     // result: (IData x)
@@ -5332,10 +4734,8 @@ private static bool rewriteValuegeneric_OpArraySelect(ptr<Value> _addr_v) {
         v.reset(OpIData);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCom16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5350,7 +4750,6 @@ private static bool rewriteValuegeneric_OpCom16(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Com16 (Const16 [c]))
     // result: (Const16 [^c])
@@ -5362,7 +4761,6 @@ private static bool rewriteValuegeneric_OpCom16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(~c);
         return true;
-
     } 
     // match: (Com16 (Add16 (Const16 [-1]) x))
     // result: (Neg16 x)
@@ -5381,20 +4779,16 @@ private static bool rewriteValuegeneric_OpCom16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.reset(OpNeg16);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCom32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5409,7 +4803,6 @@ private static bool rewriteValuegeneric_OpCom32(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Com32 (Const32 [c]))
     // result: (Const32 [^c])
@@ -5421,7 +4814,6 @@ private static bool rewriteValuegeneric_OpCom32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(~c);
         return true;
-
     } 
     // match: (Com32 (Add32 (Const32 [-1]) x))
     // result: (Neg32 x)
@@ -5440,20 +4832,16 @@ private static bool rewriteValuegeneric_OpCom32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.reset(OpNeg32);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCom64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5468,7 +4856,6 @@ private static bool rewriteValuegeneric_OpCom64(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Com64 (Const64 [c]))
     // result: (Const64 [^c])
@@ -5480,7 +4867,6 @@ private static bool rewriteValuegeneric_OpCom64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(~c);
         return true;
-
     } 
     // match: (Com64 (Add64 (Const64 [-1]) x))
     // result: (Neg64 x)
@@ -5499,20 +4885,16 @@ private static bool rewriteValuegeneric_OpCom64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.reset(OpNeg64);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCom8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5527,7 +4909,6 @@ private static bool rewriteValuegeneric_OpCom8(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Com8 (Const8 [c]))
     // result: (Const8 [^c])
@@ -5539,7 +4920,6 @@ private static bool rewriteValuegeneric_OpCom8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(~c);
         return true;
-
     } 
     // match: (Com8 (Add8 (Const8 [-1]) x))
     // result: (Neg8 x)
@@ -5558,20 +4938,16 @@ private static bool rewriteValuegeneric_OpCom8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.reset(OpNeg8);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpConstInterface(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5587,7 +4963,6 @@ private static bool rewriteValuegeneric_OpConstInterface(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuegeneric_OpConstSlice(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5608,7 +4983,6 @@ private static bool rewriteValuegeneric_OpConstSlice(ptr<Value> _addr_v) {
         v1.AuxInt = int32ToAuxInt(0);
         v.AddArg3(v0, v1, v1);
         return true;
-
     } 
     // match: (ConstSlice)
     // cond: config.PtrSize == 8
@@ -5623,10 +4997,8 @@ private static bool rewriteValuegeneric_OpConstSlice(ptr<Value> _addr_v) {
         v1.AuxInt = int64ToAuxInt(0);
         v.AddArg3(v0, v1, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpConstString(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5649,7 +5021,6 @@ private static bool rewriteValuegeneric_OpConstString(ptr<Value> _addr_v) {
         v1.AuxInt = int32ToAuxInt(0);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (ConstString {str})
     // cond: config.PtrSize == 8 && str == ""
@@ -5665,7 +5036,6 @@ private static bool rewriteValuegeneric_OpConstString(ptr<Value> _addr_v) {
         v1.AuxInt = int64ToAuxInt(0);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (ConstString {str})
     // cond: config.PtrSize == 4 && str != ""
@@ -5684,7 +5054,6 @@ private static bool rewriteValuegeneric_OpConstString(ptr<Value> _addr_v) {
         v2.AuxInt = int32ToAuxInt(int32(len(str)));
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (ConstString {str})
     // cond: config.PtrSize == 8 && str != ""
@@ -5703,10 +5072,8 @@ private static bool rewriteValuegeneric_OpConstString(ptr<Value> _addr_v) {
         v2.AuxInt = int64ToAuxInt(int64(len(str)));
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpConvert(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5732,25 +5099,21 @@ private static bool rewriteValuegeneric_OpConvert(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var mem = v_0_0.Args[1];
                 var ptr = v_0_0.Args[0];
                 var off = v_0_1;
                 if (mem != v_1) {
                     continue;
                 }
-
                 v.reset(OpAddPtr);
                 v.AddArg2(ptr, off);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Convert (Add32 (Convert ptr mem) off) mem)
     // result: (AddPtr ptr off)
@@ -5771,25 +5134,21 @@ private static bool rewriteValuegeneric_OpConvert(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 mem = v_0_0.Args[1];
                 ptr = v_0_0.Args[0];
                 off = v_0_1;
                 if (mem != v_1) {
                     continue;
                 }
-
                 v.reset(OpAddPtr);
                 v.AddArg2(ptr, off);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Convert (Convert ptr mem) mem)
     // result: ptr
@@ -5804,10 +5163,8 @@ private static bool rewriteValuegeneric_OpConvert(ptr<Value> _addr_v) {
         }
         v.copyOf(ptr);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCtz16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5829,7 +5186,6 @@ private static bool rewriteValuegeneric_OpCtz16(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(ntz16(c)));
         return true;
-
     } 
     // match: (Ctz16 (Const16 [c]))
     // cond: config.PtrSize == 8
@@ -5845,10 +5201,8 @@ private static bool rewriteValuegeneric_OpCtz16(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(ntz16(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCtz32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5870,7 +5224,6 @@ private static bool rewriteValuegeneric_OpCtz32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(ntz32(c)));
         return true;
-
     } 
     // match: (Ctz32 (Const32 [c]))
     // cond: config.PtrSize == 8
@@ -5886,10 +5239,8 @@ private static bool rewriteValuegeneric_OpCtz32(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(ntz32(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCtz64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5911,7 +5262,6 @@ private static bool rewriteValuegeneric_OpCtz64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(ntz64(c)));
         return true;
-
     } 
     // match: (Ctz64 (Const64 [c]))
     // cond: config.PtrSize == 8
@@ -5927,10 +5277,8 @@ private static bool rewriteValuegeneric_OpCtz64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(ntz64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCtz8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5952,7 +5300,6 @@ private static bool rewriteValuegeneric_OpCtz8(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(ntz8(c)));
         return true;
-
     } 
     // match: (Ctz8 (Const8 [c]))
     // cond: config.PtrSize == 8
@@ -5968,10 +5315,8 @@ private static bool rewriteValuegeneric_OpCtz8(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(ntz8(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt32Fto32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5987,10 +5332,8 @@ private static bool rewriteValuegeneric_OpCvt32Fto32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt32Fto64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6006,10 +5349,8 @@ private static bool rewriteValuegeneric_OpCvt32Fto64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt32Fto64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6025,10 +5366,8 @@ private static bool rewriteValuegeneric_OpCvt32Fto64F(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(float64(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt32to32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6044,10 +5383,8 @@ private static bool rewriteValuegeneric_OpCvt32to32F(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(float32(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt32to64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6063,10 +5400,8 @@ private static bool rewriteValuegeneric_OpCvt32to64F(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(float64(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt64Fto32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6082,10 +5417,8 @@ private static bool rewriteValuegeneric_OpCvt64Fto32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt64Fto32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6101,7 +5434,6 @@ private static bool rewriteValuegeneric_OpCvt64Fto32F(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(float32(c));
         return true;
-
     } 
     // match: (Cvt64Fto32F sqrt0:(Sqrt (Cvt32Fto64F x)))
     // cond: sqrt0.Uses==1
@@ -6122,10 +5454,8 @@ private static bool rewriteValuegeneric_OpCvt64Fto32F(ptr<Value> _addr_v) {
         v.reset(OpSqrt32);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt64Fto64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6141,10 +5471,8 @@ private static bool rewriteValuegeneric_OpCvt64Fto64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt64to32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6160,10 +5488,8 @@ private static bool rewriteValuegeneric_OpCvt64to32F(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(float32(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvt64to64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6179,10 +5505,8 @@ private static bool rewriteValuegeneric_OpCvt64to64F(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(float64(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpCvtBoolToUint8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6197,7 +5521,6 @@ private static bool rewriteValuegeneric_OpCvtBoolToUint8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (CvtBoolToUint8 (ConstBool [true]))
     // result: (Const8 [1])
@@ -6208,10 +5531,8 @@ private static bool rewriteValuegeneric_OpCvtBoolToUint8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6238,7 +5559,6 @@ private static bool rewriteValuegeneric_OpDiv16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(c / d);
         return true;
-
     } 
     // match: (Div16 n (Const16 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo16(c)
@@ -6257,7 +5577,6 @@ private static bool rewriteValuegeneric_OpDiv16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log16(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div16 <t> n (Const16 [c]))
     // cond: c < 0 && c != -1<<15
@@ -6279,7 +5598,6 @@ private static bool rewriteValuegeneric_OpDiv16(ptr<Value> _addr_v) {
         v0.AddArg2(n, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div16 <t> x (Const16 [-1<<15]))
     // result: (Rsh16Ux64 (And16 <t> x (Neg16 <t> x)) (Const64 <typ.UInt64> [15]))
@@ -6298,7 +5616,6 @@ private static bool rewriteValuegeneric_OpDiv16(ptr<Value> _addr_v) {
         v2.AuxInt = int64ToAuxInt(15);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Div16 <t> n (Const16 [c]))
     // cond: isPowerOfTwo16(c)
@@ -6328,7 +5645,6 @@ private static bool rewriteValuegeneric_OpDiv16(ptr<Value> _addr_v) {
         v5.AuxInt = int64ToAuxInt(int64(log16(c)));
         v.AddArg2(v0, v5);
         return true;
-
     } 
     // match: (Div16 <t> x (Const16 [c]))
     // cond: smagicOK16(c)
@@ -6361,10 +5677,8 @@ private static bool rewriteValuegeneric_OpDiv16(ptr<Value> _addr_v) {
         v5.AddArg2(v3, v6);
         v.AddArg2(v0, v5);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6392,7 +5706,6 @@ private static bool rewriteValuegeneric_OpDiv16u(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(int16(uint16(c) / uint16(d)));
         return true;
-
     } 
     // match: (Div16u n (Const16 [c]))
     // cond: isPowerOfTwo16(c)
@@ -6411,7 +5724,6 @@ private static bool rewriteValuegeneric_OpDiv16u(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log16(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div16u x (Const16 [c]))
     // cond: umagicOK16(c) && config.RegSize == 8
@@ -6438,7 +5750,6 @@ private static bool rewriteValuegeneric_OpDiv16u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v4);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div16u x (Const16 [c]))
     // cond: umagicOK16(c) && config.RegSize == 4 && umagic16(c).m&1 == 0
@@ -6465,7 +5776,6 @@ private static bool rewriteValuegeneric_OpDiv16u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v4);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div16u x (Const16 [c]))
     // cond: umagicOK16(c) && config.RegSize == 4 && c&1 == 0
@@ -6496,7 +5806,6 @@ private static bool rewriteValuegeneric_OpDiv16u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v6);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div16u x (Const16 [c]))
     // cond: umagicOK16(c) && config.RegSize == 4 && config.useAvg
@@ -6529,10 +5838,8 @@ private static bool rewriteValuegeneric_OpDiv16u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v7);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6560,7 +5867,6 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(c / d);
         return true;
-
     } 
     // match: (Div32 n (Const32 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo32(c)
@@ -6579,7 +5885,6 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log32(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div32 <t> n (Const32 [c]))
     // cond: c < 0 && c != -1<<31
@@ -6601,7 +5906,6 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v0.AddArg2(n, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div32 <t> x (Const32 [-1<<31]))
     // result: (Rsh32Ux64 (And32 <t> x (Neg32 <t> x)) (Const64 <typ.UInt64> [31]))
@@ -6620,7 +5924,6 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v2.AuxInt = int64ToAuxInt(31);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Div32 <t> n (Const32 [c]))
     // cond: isPowerOfTwo32(c)
@@ -6650,7 +5953,6 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v5.AuxInt = int64ToAuxInt(int64(log32(c)));
         v.AddArg2(v0, v5);
         return true;
-
     } 
     // match: (Div32 <t> x (Const32 [c]))
     // cond: smagicOK32(c) && config.RegSize == 8
@@ -6683,7 +5985,6 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v5.AddArg2(v3, v6);
         v.AddArg2(v0, v5);
         return true;
-
     } 
     // match: (Div32 <t> x (Const32 [c]))
     // cond: smagicOK32(c) && config.RegSize == 4 && smagic32(c).m&1 == 0 && config.useHmul
@@ -6714,7 +6015,6 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v4.AddArg2(x, v5);
         v.AddArg2(v0, v4);
         return true;
-
     } 
     // match: (Div32 <t> x (Const32 [c]))
     // cond: smagicOK32(c) && config.RegSize == 4 && smagic32(c).m&1 != 0 && config.useHmul
@@ -6747,10 +6047,8 @@ private static bool rewriteValuegeneric_OpDiv32(ptr<Value> _addr_v) {
         v5.AddArg2(x, v6);
         v.AddArg2(v0, v5);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6776,7 +6074,6 @@ private static bool rewriteValuegeneric_OpDiv32F(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(c / d);
         return true;
-
     } 
     // match: (Div32F x (Const32F <t> [c]))
     // cond: reciprocalExact32(c)
@@ -6796,10 +6093,8 @@ private static bool rewriteValuegeneric_OpDiv32F(ptr<Value> _addr_v) {
         v0.AuxInt = float32ToAuxInt(1 / c);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6827,7 +6122,6 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(uint32(c) / uint32(d)));
         return true;
-
     } 
     // match: (Div32u n (Const32 [c]))
     // cond: isPowerOfTwo32(c)
@@ -6846,7 +6140,6 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log32(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div32u x (Const32 [c]))
     // cond: umagicOK32(c) && config.RegSize == 4 && umagic32(c).m&1 == 0 && config.useHmul
@@ -6870,7 +6163,6 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v2.AuxInt = int64ToAuxInt(umagic32(c).s - 1);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Div32u x (Const32 [c]))
     // cond: umagicOK32(c) && config.RegSize == 4 && c&1 == 0 && config.useHmul
@@ -6898,7 +6190,6 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v4.AuxInt = int64ToAuxInt(umagic32(c).s - 2);
         v.AddArg2(v0, v4);
         return true;
-
     } 
     // match: (Div32u x (Const32 [c]))
     // cond: umagicOK32(c) && config.RegSize == 4 && config.useAvg && config.useHmul
@@ -6924,7 +6215,6 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v3.AuxInt = int64ToAuxInt(umagic32(c).s - 1);
         v.AddArg2(v0, v3);
         return true;
-
     } 
     // match: (Div32u x (Const32 [c]))
     // cond: umagicOK32(c) && config.RegSize == 8 && umagic32(c).m&1 == 0
@@ -6951,7 +6241,6 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v4);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div32u x (Const32 [c]))
     // cond: umagicOK32(c) && config.RegSize == 8 && c&1 == 0
@@ -6982,7 +6271,6 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v6);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div32u x (Const32 [c]))
     // cond: umagicOK32(c) && config.RegSize == 8 && config.useAvg
@@ -7015,10 +6303,8 @@ private static bool rewriteValuegeneric_OpDiv32u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v7);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7046,7 +6332,6 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(c / d);
         return true;
-
     } 
     // match: (Div64 n (Const64 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo64(c)
@@ -7065,7 +6350,6 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log64(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div64 n (Const64 [-1<<63]))
     // cond: isNonNegative(n)
@@ -7078,7 +6362,6 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Div64 <t> n (Const64 [c]))
     // cond: c < 0 && c != -1<<63
@@ -7100,7 +6383,6 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v0.AddArg2(n, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div64 <t> x (Const64 [-1<<63]))
     // result: (Rsh64Ux64 (And64 <t> x (Neg64 <t> x)) (Const64 <typ.UInt64> [63]))
@@ -7119,7 +6401,6 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v2.AuxInt = int64ToAuxInt(63);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Div64 <t> n (Const64 [c]))
     // cond: isPowerOfTwo64(c)
@@ -7149,7 +6430,6 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v5.AuxInt = int64ToAuxInt(int64(log64(c)));
         v.AddArg2(v0, v5);
         return true;
-
     } 
     // match: (Div64 <t> x (Const64 [c]))
     // cond: smagicOK64(c) && smagic64(c).m&1 == 0 && config.useHmul
@@ -7180,7 +6460,6 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v4.AddArg2(x, v5);
         v.AddArg2(v0, v4);
         return true;
-
     } 
     // match: (Div64 <t> x (Const64 [c]))
     // cond: smagicOK64(c) && smagic64(c).m&1 != 0 && config.useHmul
@@ -7213,10 +6492,8 @@ private static bool rewriteValuegeneric_OpDiv64(ptr<Value> _addr_v) {
         v5.AddArg2(x, v6);
         v.AddArg2(v0, v5);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7242,7 +6519,6 @@ private static bool rewriteValuegeneric_OpDiv64F(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(c / d);
         return true;
-
     } 
     // match: (Div64F x (Const64F <t> [c]))
     // cond: reciprocalExact64(c)
@@ -7262,10 +6538,8 @@ private static bool rewriteValuegeneric_OpDiv64F(ptr<Value> _addr_v) {
         v0.AuxInt = float64ToAuxInt(1 / c);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7293,7 +6567,6 @@ private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(uint64(c) / uint64(d)));
         return true;
-
     } 
     // match: (Div64u n (Const64 [c]))
     // cond: isPowerOfTwo64(c)
@@ -7312,7 +6585,6 @@ private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log64(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div64u n (Const64 [-1<<63]))
     // result: (Rsh64Ux64 n (Const64 <typ.UInt64> [63]))
@@ -7326,7 +6598,6 @@ private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(63);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div64u x (Const64 [c]))
     // cond: c > 0 && c <= 0xFFFF && umagicOK32(int32(c)) && config.RegSize == 4 && config.useHmul
@@ -7387,7 +6658,6 @@ private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
         v16.AddArg(v17);
         v.AddArg2(v0, v16);
         return true;
-
     } 
     // match: (Div64u x (Const64 [c]))
     // cond: umagicOK64(c) && config.RegSize == 8 && umagic64(c).m&1 == 0 && config.useHmul
@@ -7411,7 +6681,6 @@ private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
         v2.AuxInt = int64ToAuxInt(umagic64(c).s - 1);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Div64u x (Const64 [c]))
     // cond: umagicOK64(c) && config.RegSize == 8 && c&1 == 0 && config.useHmul
@@ -7439,7 +6708,6 @@ private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
         v4.AuxInt = int64ToAuxInt(umagic64(c).s - 2);
         v.AddArg2(v0, v4);
         return true;
-
     } 
     // match: (Div64u x (Const64 [c]))
     // cond: umagicOK64(c) && config.RegSize == 8 && config.useAvg && config.useHmul
@@ -7465,10 +6733,8 @@ private static bool rewriteValuegeneric_OpDiv64u(ptr<Value> _addr_v) {
         v3.AuxInt = int64ToAuxInt(umagic64(c).s - 1);
         v.AddArg2(v0, v3);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7495,7 +6761,6 @@ private static bool rewriteValuegeneric_OpDiv8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(c / d);
         return true;
-
     } 
     // match: (Div8 n (Const8 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo8(c)
@@ -7514,7 +6779,6 @@ private static bool rewriteValuegeneric_OpDiv8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log8(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div8 <t> n (Const8 [c]))
     // cond: c < 0 && c != -1<<7
@@ -7536,7 +6800,6 @@ private static bool rewriteValuegeneric_OpDiv8(ptr<Value> _addr_v) {
         v0.AddArg2(n, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Div8 <t> x (Const8 [-1<<7 ]))
     // result: (Rsh8Ux64 (And8 <t> x (Neg8 <t> x)) (Const64 <typ.UInt64> [7 ]))
@@ -7555,7 +6818,6 @@ private static bool rewriteValuegeneric_OpDiv8(ptr<Value> _addr_v) {
         v2.AuxInt = int64ToAuxInt(7);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Div8 <t> n (Const8 [c]))
     // cond: isPowerOfTwo8(c)
@@ -7585,7 +6847,6 @@ private static bool rewriteValuegeneric_OpDiv8(ptr<Value> _addr_v) {
         v5.AuxInt = int64ToAuxInt(int64(log8(c)));
         v.AddArg2(v0, v5);
         return true;
-
     } 
     // match: (Div8 <t> x (Const8 [c]))
     // cond: smagicOK8(c)
@@ -7618,10 +6879,8 @@ private static bool rewriteValuegeneric_OpDiv8(ptr<Value> _addr_v) {
         v5.AddArg2(v3, v6);
         v.AddArg2(v0, v5);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7648,7 +6907,6 @@ private static bool rewriteValuegeneric_OpDiv8u(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(int8(uint8(c) / uint8(d)));
         return true;
-
     } 
     // match: (Div8u n (Const8 [c]))
     // cond: isPowerOfTwo8(c)
@@ -7667,7 +6925,6 @@ private static bool rewriteValuegeneric_OpDiv8u(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(log8(c));
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Div8u x (Const8 [c]))
     // cond: umagicOK8(c)
@@ -7694,10 +6951,8 @@ private static bool rewriteValuegeneric_OpDiv8u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v4);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7717,7 +6972,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (Eq16 (Const16 <t> [c]) (Add16 (Const16 <t> [d]) x))
     // result: (Eq16 (Const16 <t> [c-d]) x)
@@ -7732,13 +6986,11 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpAdd16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -7752,7 +7004,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt16(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpEq16);
@@ -7760,20 +7011,17 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                         v0.AuxInt = int16ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 (Const16 [c]) (Const16 [d]))
     // result: (ConstBool [c == d])
@@ -7788,24 +7036,20 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 (Mod16u x (Const16 [c])) (Const16 [0]))
     // cond: x.Op != OpConst16 && udivisibleOK16(c) && !hasSmallRotate(config)
@@ -7821,19 +7065,16 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_1.AuxInt);
                 if (v_1.Op != OpConst16 || auxIntToInt16(v_1.AuxInt) != 0 || !(x.Op != OpConst16 && udivisibleOK16(c) && !hasSmallRotate(config))) {
                     continue;
                 }
-
                 v.reset(OpEq32);
                 v0 = b.NewValue0(v.Pos, OpMod32u, typ.UInt32);
                 var v1 = b.NewValue0(v.Pos, OpZeroExt16to32, typ.UInt32);
@@ -7845,14 +7086,12 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                 v3.AuxInt = int32ToAuxInt(0);
                 v.AddArg2(v0, v3);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 (Mod16 x (Const16 [c])) (Const16 [0]))
     // cond: x.Op != OpConst16 && sdivisibleOK16(c) && !hasSmallRotate(config)
@@ -7868,19 +7107,16 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_1.AuxInt);
                 if (v_1.Op != OpConst16 || auxIntToInt16(v_1.AuxInt) != 0 || !(x.Op != OpConst16 && sdivisibleOK16(c) && !hasSmallRotate(config))) {
                     continue;
                 }
-
                 v.reset(OpEq32);
                 v0 = b.NewValue0(v.Pos, OpMod32, typ.Int32);
                 v1 = b.NewValue0(v.Pos, OpSignExt16to32, typ.Int32);
@@ -7892,14 +7128,12 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                 v3.AuxInt = int32ToAuxInt(0);
                 v.AddArg2(v0, v3);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 x (Mul16 (Const16 [c]) (Trunc64to16 (Rsh64Ux64 mul:(Mul64 (Const64 [m]) (ZeroExt16to64 x)) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1<<16+umagic16(c).m) && s == 16+umagic16(c).s && x.Op != OpConst16 && udivisibleOK16(c)
@@ -7916,7 +7150,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -7930,23 +7163,19 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt16(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc64to16) {
                             continue;
                         }
-
                         var v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh64Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         var mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul64) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         var mul_0 = mul.Args[0];
                         var mul_1 = mul.Args[1];
@@ -7960,22 +7189,18 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 var m = auxIntToInt64(mul_0.AuxInt);
                                 if (mul_1.Op != OpZeroExt16to64 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 var v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 var s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1 << 16 + umagic16(c).m) && s == 16 + umagic16(c).s && x.Op != OpConst16 && udivisibleOK16(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq16U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft16, typ.UInt16);
                                 v1 = b.NewValue0(v.Pos, OpMul16, typ.UInt16);
@@ -7989,26 +7214,22 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                 v4.AuxInt = int16ToAuxInt(int16(udivisible16(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 x (Mul16 (Const16 [c]) (Trunc32to16 (Rsh32Ux64 mul:(Mul32 (Const32 [m]) (ZeroExt16to32 x)) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1<<15+umagic16(c).m/2) && s == 16+umagic16(c).s-1 && x.Op != OpConst16 && udivisibleOK16(c)
@@ -8025,7 +7246,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -8039,23 +7259,19 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt16(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc32to16) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul32) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -8069,22 +7285,18 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (mul_1.Op != OpZeroExt16to32 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1 << 15 + umagic16(c).m / 2) && s == 16 + umagic16(c).s - 1 && x.Op != OpConst16 && udivisibleOK16(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq16U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft16, typ.UInt16);
                                 v1 = b.NewValue0(v.Pos, OpMul16, typ.UInt16);
@@ -8098,26 +7310,22 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                 v4.AuxInt = int16ToAuxInt(int16(udivisible16(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 x (Mul16 (Const16 [c]) (Trunc32to16 (Rsh32Ux64 mul:(Mul32 (Const32 [m]) (Rsh32Ux64 (ZeroExt16to32 x) (Const64 [1]))) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1<<15+(umagic16(c).m+1)/2) && s == 16+umagic16(c).s-2 && x.Op != OpConst16 && udivisibleOK16(c)
@@ -8134,7 +7342,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -8148,23 +7355,19 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt16(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc32to16) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul32) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -8178,33 +7381,27 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (mul_1.Op != OpRsh32Ux64) {
                                     continue;
                                 }
-
                                 _ = mul_1.Args[1];
                                 var mul_1_0 = mul_1.Args[0];
                                 if (mul_1_0.Op != OpZeroExt16to32 || x != mul_1_0.Args[0]) {
                                     continue;
                                 }
-
                                 var mul_1_1 = mul_1.Args[1];
                                 if (mul_1_1.Op != OpConst64 || auxIntToInt64(mul_1_1.AuxInt) != 1) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1 << 15 + (umagic16(c).m + 1) / 2) && s == 16 + umagic16(c).s - 2 && x.Op != OpConst16 && udivisibleOK16(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq16U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft16, typ.UInt16);
                                 v1 = b.NewValue0(v.Pos, OpMul16, typ.UInt16);
@@ -8218,26 +7415,22 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                 v4.AuxInt = int16ToAuxInt(int16(udivisible16(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 x (Mul16 (Const16 [c]) (Trunc32to16 (Rsh32Ux64 (Avg32u (Lsh32x64 (ZeroExt16to32 x) (Const64 [16])) mul:(Mul32 (Const32 [m]) (ZeroExt16to32 x))) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(umagic16(c).m) && s == 16+umagic16(c).s-1 && x.Op != OpConst16 && udivisibleOK16(c)
@@ -8254,7 +7447,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -8268,45 +7460,37 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt16(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc32to16) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         var v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAvg32u) {
                             continue;
                         }
-
                         _ = v_1_1_0_0.Args[1];
                         var v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpLsh32x64) {
                             continue;
                         }
-
                         _ = v_1_1_0_0_0.Args[1];
                         var v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpZeroExt16to32 || x != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_1_0_0_0_1 = v_1_1_0_0_0.Args[1];
                         if (v_1_1_0_0_0_1.Op != OpConst64 || auxIntToInt64(v_1_1_0_0_0_1.AuxInt) != 16) {
                             continue;
                         }
-
                         mul = v_1_1_0_0.Args[1];
                         if (mul.Op != OpMul32) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -8320,22 +7504,18 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (mul_1.Op != OpZeroExt16to32 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(umagic16(c).m) && s == 16 + umagic16(c).s - 1 && x.Op != OpConst16 && udivisibleOK16(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq16U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft16, typ.UInt16);
                                 v1 = b.NewValue0(v.Pos, OpMul16, typ.UInt16);
@@ -8349,26 +7529,22 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                 v4.AuxInt = int16ToAuxInt(int16(udivisible16(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 x (Mul16 (Const16 [c]) (Sub16 (Rsh32x64 mul:(Mul32 (Const32 [m]) (SignExt16to32 x)) (Const64 [s])) (Rsh32x64 (SignExt16to32 x) (Const64 [31]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic16(c).m) && s == 16+smagic16(c).s && x.Op != OpConst16 && sdivisibleOK16(c)
@@ -8385,7 +7561,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -8399,24 +7574,20 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt16(v_1_0.AuxInt);
                         if (v_1_1.Op != OpSub16) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32x64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul32) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -8430,34 +7601,28 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (mul_1.Op != OpSignExt16to32 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 var v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpRsh32x64) {
                                     continue;
                                 }
-
                                 _ = v_1_1_1.Args[1];
                                 var v_1_1_1_0 = v_1_1_1.Args[0];
                                 if (v_1_1_1_0.Op != OpSignExt16to32 || x != v_1_1_1_0.Args[0]) {
                                     continue;
                                 }
-
                                 var v_1_1_1_1 = v_1_1_1.Args[1];
                                 if (v_1_1_1_1.Op != OpConst64 || auxIntToInt64(v_1_1_1_1.AuxInt) != 31 || !(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic16(c).m) && s == 16 + smagic16(c).s && x.Op != OpConst16 && sdivisibleOK16(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq16U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft16, typ.UInt16);
                                 v1 = b.NewValue0(v.Pos, OpAdd16, typ.UInt16);
@@ -8475,26 +7640,22 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                                 v6.AuxInt = int16ToAuxInt(int16(sdivisible16(c).max));
                                 v.AddArg2(v0, v6);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 n (Lsh16x64 (Rsh16x64 (Add16 <t> n (Rsh16Ux64 <t> (Rsh16x64 <t> n (Const64 <typ.UInt64> [15])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 15 && kbar == 16 - k
@@ -8511,19 +7672,16 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh16x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd16) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -8538,40 +7696,33 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh16x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 15) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 15 && kbar == 16 - k)) {
                             continue;
                         }
-
                         v.reset(OpEq16);
                         v0 = b.NewValue0(v.Pos, OpAnd16, t);
                         v1 = b.NewValue0(v.Pos, OpConst16, t);
@@ -8581,20 +7732,17 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                         v2.AuxInt = int16ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 s:(Sub16 x y) (Const16 [0]))
     // cond: s.Uses == 1
@@ -8611,24 +7759,20 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst16 || auxIntToInt16(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpEq16);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq16 (And16 <t> x (Const16 <t> [y])) (Const16 <t> [y]))
     // cond: oneBit16(y)
@@ -8644,7 +7788,6 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -8660,12 +7803,10 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt16(v_0_1.AuxInt);
                         if (v_1.Op != OpConst16 || v_1.Type != t || auxIntToInt16(v_1.AuxInt) != y || !(oneBit16(y))) {
                             continue;
                         }
-
                         v.reset(OpNeq16);
                         v0 = b.NewValue0(v.Pos, OpAnd16, t);
                         v1 = b.NewValue0(v.Pos, OpConst16, t);
@@ -8675,23 +7816,19 @@ private static bool rewriteValuegeneric_OpEq16(ptr<Value> _addr_v) {
                         v2.AuxInt = int16ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8710,7 +7847,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (Eq32 (Const32 <t> [c]) (Add32 (Const32 <t> [d]) x))
     // result: (Eq32 (Const32 <t> [c-d]) x)
@@ -8725,13 +7861,11 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpAdd32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -8745,7 +7879,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpEq32);
@@ -8753,20 +7886,17 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                         v0.AuxInt = int32ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 (Const32 [c]) (Const32 [d]))
     // result: (ConstBool [c == d])
@@ -8781,24 +7911,20 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Rsh32Ux64 mul:(Hmul32u (Const32 [m]) x) (Const64 [s])) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1<<31+umagic32(c).m/2) && s == umagic32(c).s-1 && x.Op != OpConst32 && udivisibleOK32(c)
@@ -8815,7 +7941,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -8829,18 +7954,15 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpRsh32Ux64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         var mul = v_1_1.Args[0];
                         if (mul.Op != OpHmul32u) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         var mul_0 = mul.Args[0];
                         var mul_1 = mul.Args[1];
@@ -8854,22 +7976,18 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 var m = auxIntToInt32(mul_0.AuxInt);
                                 if (x != mul_1) {
                                     continue;
                                 }
-
                                 var v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 var s = auxIntToInt64(v_1_1_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1 << 31 + umagic32(c).m / 2) && s == umagic32(c).s - 1 && x.Op != OpConst32 && udivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 var v1 = b.NewValue0(v.Pos, OpMul32, typ.UInt32);
@@ -8883,26 +8001,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v4.AuxInt = int32ToAuxInt(int32(udivisible32(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Rsh32Ux64 mul:(Hmul32u (Const32 <typ.UInt32> [m]) (Rsh32Ux64 x (Const64 [1]))) (Const64 [s])) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1<<31+(umagic32(c).m+1)/2) && s == umagic32(c).s-2 && x.Op != OpConst32 && udivisibleOK32(c)
@@ -8919,7 +8033,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -8933,18 +8046,15 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpRsh32Ux64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         mul = v_1_1.Args[0];
                         if (mul.Op != OpHmul32u) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -8958,32 +8068,26 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (mul_1.Op != OpRsh32Ux64) {
                                     continue;
                                 }
-
                                 _ = mul_1.Args[1];
                                 if (x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 var mul_1_1 = mul_1.Args[1];
                                 if (mul_1_1.Op != OpConst64 || auxIntToInt64(mul_1_1.AuxInt) != 1) {
                                     continue;
                                 }
-
                                 v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1 << 31 + (umagic32(c).m + 1) / 2) && s == umagic32(c).s - 2 && x.Op != OpConst32 && udivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 v1 = b.NewValue0(v.Pos, OpMul32, typ.UInt32);
@@ -8997,26 +8101,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v4.AuxInt = int32ToAuxInt(int32(udivisible32(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Rsh32Ux64 (Avg32u x mul:(Hmul32u (Const32 [m]) x)) (Const64 [s])) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(umagic32(c).m) && s == umagic32(c).s-1 && x.Op != OpConst32 && udivisibleOK32(c)
@@ -9033,7 +8133,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -9047,28 +8146,23 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpRsh32Ux64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         var v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAvg32u) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         if (x != v_1_1_0.Args[0]) {
                             continue;
                         }
-
                         mul = v_1_1_0.Args[1];
                         if (mul.Op != OpHmul32u) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -9082,22 +8176,18 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (x != mul_1) {
                                     continue;
                                 }
-
                                 v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(umagic32(c).m) && s == umagic32(c).s - 1 && x.Op != OpConst32 && udivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 v1 = b.NewValue0(v.Pos, OpMul32, typ.UInt32);
@@ -9111,26 +8201,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v4.AuxInt = int32ToAuxInt(int32(udivisible32(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Trunc64to32 (Rsh64Ux64 mul:(Mul64 (Const64 [m]) (ZeroExt32to64 x)) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1<<31+umagic32(c).m/2) && s == 32+umagic32(c).s-1 && x.Op != OpConst32 && udivisibleOK32(c)
@@ -9147,7 +8233,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -9161,23 +8246,19 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc64to32) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh64Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul64) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -9191,22 +8272,18 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt64(mul_0.AuxInt);
                                 if (mul_1.Op != OpZeroExt32to64 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 var v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1 << 31 + umagic32(c).m / 2) && s == 32 + umagic32(c).s - 1 && x.Op != OpConst32 && udivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 v1 = b.NewValue0(v.Pos, OpMul32, typ.UInt32);
@@ -9220,26 +8297,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v4.AuxInt = int32ToAuxInt(int32(udivisible32(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Trunc64to32 (Rsh64Ux64 mul:(Mul64 (Const64 [m]) (Rsh64Ux64 (ZeroExt32to64 x) (Const64 [1]))) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1<<31+(umagic32(c).m+1)/2) && s == 32+umagic32(c).s-2 && x.Op != OpConst32 && udivisibleOK32(c)
@@ -9256,7 +8329,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -9270,23 +8342,19 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc64to32) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh64Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul64) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -9300,33 +8368,27 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt64(mul_0.AuxInt);
                                 if (mul_1.Op != OpRsh64Ux64) {
                                     continue;
                                 }
-
                                 _ = mul_1.Args[1];
                                 var mul_1_0 = mul_1.Args[0];
                                 if (mul_1_0.Op != OpZeroExt32to64 || x != mul_1_0.Args[0]) {
                                     continue;
                                 }
-
                                 mul_1_1 = mul_1.Args[1];
                                 if (mul_1_1.Op != OpConst64 || auxIntToInt64(mul_1_1.AuxInt) != 1) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1 << 31 + (umagic32(c).m + 1) / 2) && s == 32 + umagic32(c).s - 2 && x.Op != OpConst32 && udivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 v1 = b.NewValue0(v.Pos, OpMul32, typ.UInt32);
@@ -9340,26 +8402,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v4.AuxInt = int32ToAuxInt(int32(udivisible32(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Trunc64to32 (Rsh64Ux64 (Avg64u (Lsh64x64 (ZeroExt32to64 x) (Const64 [32])) mul:(Mul64 (Const64 [m]) (ZeroExt32to64 x))) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(umagic32(c).m) && s == 32+umagic32(c).s-1 && x.Op != OpConst32 && udivisibleOK32(c)
@@ -9376,7 +8434,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -9390,45 +8447,37 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc64to32) {
                             continue;
                         }
-
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh64Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         var v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAvg64u) {
                             continue;
                         }
-
                         _ = v_1_1_0_0.Args[1];
                         var v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         if (v_1_1_0_0_0.Op != OpLsh64x64) {
                             continue;
                         }
-
                         _ = v_1_1_0_0_0.Args[1];
                         var v_1_1_0_0_0_0 = v_1_1_0_0_0.Args[0];
                         if (v_1_1_0_0_0_0.Op != OpZeroExt32to64 || x != v_1_1_0_0_0_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_1_0_0_0_1 = v_1_1_0_0_0.Args[1];
                         if (v_1_1_0_0_0_1.Op != OpConst64 || auxIntToInt64(v_1_1_0_0_0_1.AuxInt) != 32) {
                             continue;
                         }
-
                         mul = v_1_1_0_0.Args[1];
                         if (mul.Op != OpMul64) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -9442,22 +8491,18 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt64(mul_0.AuxInt);
                                 if (mul_1.Op != OpZeroExt32to64 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(umagic32(c).m) && s == 32 + umagic32(c).s - 1 && x.Op != OpConst32 && udivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 v1 = b.NewValue0(v.Pos, OpMul32, typ.UInt32);
@@ -9471,26 +8516,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v4.AuxInt = int32ToAuxInt(int32(udivisible32(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Sub32 (Rsh64x64 mul:(Mul64 (Const64 [m]) (SignExt32to64 x)) (Const64 [s])) (Rsh64x64 (SignExt32to64 x) (Const64 [63]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(smagic32(c).m) && s == 32+smagic32(c).s && x.Op != OpConst32 && sdivisibleOK32(c)
@@ -9507,7 +8548,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -9521,24 +8561,20 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpSub32) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh64x64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul64) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -9552,34 +8588,28 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt64(mul_0.AuxInt);
                                 if (mul_1.Op != OpSignExt32to64 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpRsh64x64) {
                                     continue;
                                 }
-
                                 _ = v_1_1_1.Args[1];
                                 var v_1_1_1_0 = v_1_1_1.Args[0];
                                 if (v_1_1_1_0.Op != OpSignExt32to64 || x != v_1_1_1_0.Args[0]) {
                                     continue;
                                 }
-
                                 var v_1_1_1_1 = v_1_1_1.Args[1];
                                 if (v_1_1_1_1.Op != OpConst64 || auxIntToInt64(v_1_1_1_1.AuxInt) != 63 || !(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(smagic32(c).m) && s == 32 + smagic32(c).s && x.Op != OpConst32 && sdivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 v1 = b.NewValue0(v.Pos, OpAdd32, typ.UInt32);
@@ -9597,26 +8627,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v6.AuxInt = int32ToAuxInt(int32(sdivisible32(c).max));
                                 v.AddArg2(v0, v6);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Sub32 (Rsh32x64 mul:(Hmul32 (Const32 [m]) x) (Const64 [s])) (Rsh32x64 x (Const64 [31]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic32(c).m/2) && s == smagic32(c).s-1 && x.Op != OpConst32 && sdivisibleOK32(c)
@@ -9633,7 +8659,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -9647,24 +8672,20 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpSub32) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32x64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpHmul32) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -9678,33 +8699,27 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (x != mul_1) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpRsh32x64) {
                                     continue;
                                 }
-
                                 _ = v_1_1_1.Args[1];
                                 if (x != v_1_1_1.Args[0]) {
                                     continue;
                                 }
-
                                 v_1_1_1_1 = v_1_1_1.Args[1];
                                 if (v_1_1_1_1.Op != OpConst64 || auxIntToInt64(v_1_1_1_1.AuxInt) != 31 || !(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic32(c).m / 2) && s == smagic32(c).s - 1 && x.Op != OpConst32 && sdivisibleOK32(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq32U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                 v1 = b.NewValue0(v.Pos, OpAdd32, typ.UInt32);
@@ -9722,26 +8737,22 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                 v6.AuxInt = int32ToAuxInt(int32(sdivisible32(c).max));
                                 v.AddArg2(v0, v6);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 x (Mul32 (Const32 [c]) (Sub32 (Rsh32x64 (Add32 mul:(Hmul32 (Const32 [m]) x) x) (Const64 [s])) (Rsh32x64 x (Const64 [31]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic32(c).m) && s == smagic32(c).s && x.Op != OpConst32 && sdivisibleOK32(c)
@@ -9758,7 +8769,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -9772,24 +8782,20 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt32(v_1_0.AuxInt);
                         if (v_1_1.Op != OpSub32) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32x64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAdd32) {
                             continue;
                         }
-
                         _ = v_1_1_0_0.Args[1];
                         v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         var v_1_1_0_0_1 = v_1_1_0_0.Args[1];
@@ -9804,7 +8810,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, v_1_1_0_0_0, v_1_1_0_0_1) = (_i2 + 1, v_1_1_0_0_1, v_1_1_0_0_0);
                                 }
-
                                 _ = mul.Args[1];
                                 mul_0 = mul.Args[0];
                                 mul_1 = mul.Args[1];
@@ -9816,33 +8821,27 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                             continue;
                                         (_i3, mul_0, mul_1) = (_i3 + 1, mul_1, mul_0);
                                         }
-
                                         m = auxIntToInt32(mul_0.AuxInt);
                                         if (x != mul_1 || x != v_1_1_0_0_1) {
                                             continue;
                                         }
-
                                         v_1_1_0_1 = v_1_1_0.Args[1];
                                         if (v_1_1_0_1.Op != OpConst64) {
                                             continue;
                                         }
-
                                         s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                         v_1_1_1 = v_1_1.Args[1];
                                         if (v_1_1_1.Op != OpRsh32x64) {
                                             continue;
                                         }
-
                                         _ = v_1_1_1.Args[1];
                                         if (x != v_1_1_1.Args[0]) {
                                             continue;
                                         }
-
                                         v_1_1_1_1 = v_1_1_1.Args[1];
                                         if (v_1_1_1_1.Op != OpConst64 || auxIntToInt64(v_1_1_1_1.AuxInt) != 31 || !(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic32(c).m) && s == smagic32(c).s && x.Op != OpConst32 && sdivisibleOK32(c))) {
                                             continue;
                                         }
-
                                         v.reset(OpLeq32U);
                                         v0 = b.NewValue0(v.Pos, OpRotateLeft32, typ.UInt32);
                                         v1 = b.NewValue0(v.Pos, OpAdd32, typ.UInt32);
@@ -9860,30 +8859,25 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                                         v6.AuxInt = int32ToAuxInt(int32(sdivisible32(c).max));
                                         v.AddArg2(v0, v6);
                                         return true;
-
                                     }
 
                                 }
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 n (Lsh32x64 (Rsh32x64 (Add32 <t> n (Rsh32Ux64 <t> (Rsh32x64 <t> n (Const64 <typ.UInt64> [31])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 31 && kbar == 32 - k
@@ -9900,19 +8894,16 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh32x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd32) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -9927,40 +8918,33 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh32x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 31) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 31 && kbar == 32 - k)) {
                             continue;
                         }
-
                         v.reset(OpEq32);
                         v0 = b.NewValue0(v.Pos, OpAnd32, t);
                         v1 = b.NewValue0(v.Pos, OpConst32, t);
@@ -9970,20 +8954,17 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                         v2.AuxInt = int32ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 s:(Sub32 x y) (Const32 [0]))
     // cond: s.Uses == 1
@@ -10000,24 +8981,20 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst32 || auxIntToInt32(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpEq32);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq32 (And32 <t> x (Const32 <t> [y])) (Const32 <t> [y]))
     // cond: oneBit32(y)
@@ -10033,7 +9010,6 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -10049,12 +9025,10 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt32(v_0_1.AuxInt);
                         if (v_1.Op != OpConst32 || v_1.Type != t || auxIntToInt32(v_1.AuxInt) != y || !(oneBit32(y))) {
                             continue;
                         }
-
                         v.reset(OpNeq32);
                         v0 = b.NewValue0(v.Pos, OpAnd32, t);
                         v1 = b.NewValue0(v.Pos, OpConst32, t);
@@ -10064,23 +9038,19 @@ private static bool rewriteValuegeneric_OpEq32(ptr<Value> _addr_v) {
                         v2.AuxInt = int32ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10098,25 +9068,20 @@ private static bool rewriteValuegeneric_OpEq32F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat32(v_0.AuxInt);
                 if (v_1.Op != OpConst32F) {
                     continue;
                 }
-
                 var d = auxIntToFloat32(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10135,7 +9100,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (Eq64 (Const64 <t> [c]) (Add64 (Const64 <t> [d]) x))
     // result: (Eq64 (Const64 <t> [c-d]) x)
@@ -10150,13 +9114,11 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpAdd64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -10170,7 +9132,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpEq64);
@@ -10178,20 +9139,17 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                         v0.AuxInt = int64ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 (Const64 [c]) (Const64 [d]))
     // result: (ConstBool [c == d])
@@ -10206,24 +9164,20 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 x (Mul64 (Const64 [c]) (Rsh64Ux64 mul:(Hmul64u (Const64 [m]) x) (Const64 [s])) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1<<63+umagic64(c).m/2) && s == umagic64(c).s-1 && x.Op != OpConst64 && udivisibleOK64(c)
@@ -10240,7 +9194,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -10254,18 +9207,15 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt64(v_1_0.AuxInt);
                         if (v_1_1.Op != OpRsh64Ux64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         var mul = v_1_1.Args[0];
                         if (mul.Op != OpHmul64u) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         var mul_0 = mul.Args[0];
                         var mul_1 = mul.Args[1];
@@ -10279,22 +9229,18 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 var m = auxIntToInt64(mul_0.AuxInt);
                                 if (x != mul_1) {
                                     continue;
                                 }
-
                                 var v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 var s = auxIntToInt64(v_1_1_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1 << 63 + umagic64(c).m / 2) && s == umagic64(c).s - 1 && x.Op != OpConst64 && udivisibleOK64(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq64U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft64, typ.UInt64);
                                 var v1 = b.NewValue0(v.Pos, OpMul64, typ.UInt64);
@@ -10308,26 +9254,22 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                 v4.AuxInt = int64ToAuxInt(int64(udivisible64(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 x (Mul64 (Const64 [c]) (Rsh64Ux64 mul:(Hmul64u (Const64 [m]) (Rsh64Ux64 x (Const64 [1]))) (Const64 [s])) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1<<63+(umagic64(c).m+1)/2) && s == umagic64(c).s-2 && x.Op != OpConst64 && udivisibleOK64(c)
@@ -10344,7 +9286,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -10358,18 +9299,15 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt64(v_1_0.AuxInt);
                         if (v_1_1.Op != OpRsh64Ux64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         mul = v_1_1.Args[0];
                         if (mul.Op != OpHmul64u) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -10383,32 +9321,26 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt64(mul_0.AuxInt);
                                 if (mul_1.Op != OpRsh64Ux64) {
                                     continue;
                                 }
-
                                 _ = mul_1.Args[1];
                                 if (x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 var mul_1_1 = mul_1.Args[1];
                                 if (mul_1_1.Op != OpConst64 || auxIntToInt64(mul_1_1.AuxInt) != 1) {
                                     continue;
                                 }
-
                                 v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(1 << 63 + (umagic64(c).m + 1) / 2) && s == umagic64(c).s - 2 && x.Op != OpConst64 && udivisibleOK64(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq64U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft64, typ.UInt64);
                                 v1 = b.NewValue0(v.Pos, OpMul64, typ.UInt64);
@@ -10422,26 +9354,22 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                 v4.AuxInt = int64ToAuxInt(int64(udivisible64(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 x (Mul64 (Const64 [c]) (Rsh64Ux64 (Avg64u x mul:(Hmul64u (Const64 [m]) x)) (Const64 [s])) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(umagic64(c).m) && s == umagic64(c).s-1 && x.Op != OpConst64 && udivisibleOK64(c)
@@ -10458,7 +9386,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -10472,28 +9399,23 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt64(v_1_0.AuxInt);
                         if (v_1_1.Op != OpRsh64Ux64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         var v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpAvg64u) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         if (x != v_1_1_0.Args[0]) {
                             continue;
                         }
-
                         mul = v_1_1_0.Args[1];
                         if (mul.Op != OpHmul64u) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -10507,22 +9429,18 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt64(mul_0.AuxInt);
                                 if (x != mul_1) {
                                     continue;
                                 }
-
                                 v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(umagic64(c).m) && s == umagic64(c).s - 1 && x.Op != OpConst64 && udivisibleOK64(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq64U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft64, typ.UInt64);
                                 v1 = b.NewValue0(v.Pos, OpMul64, typ.UInt64);
@@ -10536,26 +9454,22 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                 v4.AuxInt = int64ToAuxInt(int64(udivisible64(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 x (Mul64 (Const64 [c]) (Sub64 (Rsh64x64 mul:(Hmul64 (Const64 [m]) x) (Const64 [s])) (Rsh64x64 x (Const64 [63]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(smagic64(c).m/2) && s == smagic64(c).s-1 && x.Op != OpConst64 && sdivisibleOK64(c)
@@ -10572,7 +9486,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -10586,24 +9499,20 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt64(v_1_0.AuxInt);
                         if (v_1_1.Op != OpSub64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh64x64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpHmul64) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -10617,33 +9526,27 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt64(mul_0.AuxInt);
                                 if (x != mul_1) {
                                     continue;
                                 }
-
                                 var v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpRsh64x64) {
                                     continue;
                                 }
-
                                 _ = v_1_1_1.Args[1];
                                 if (x != v_1_1_1.Args[0]) {
                                     continue;
                                 }
-
                                 var v_1_1_1_1 = v_1_1_1.Args[1];
                                 if (v_1_1_1_1.Op != OpConst64 || auxIntToInt64(v_1_1_1_1.AuxInt) != 63 || !(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(smagic64(c).m / 2) && s == smagic64(c).s - 1 && x.Op != OpConst64 && sdivisibleOK64(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq64U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft64, typ.UInt64);
                                 v1 = b.NewValue0(v.Pos, OpAdd64, typ.UInt64);
@@ -10661,26 +9564,22 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                 v6.AuxInt = int64ToAuxInt(int64(sdivisible64(c).max));
                                 v.AddArg2(v0, v6);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 x (Mul64 (Const64 [c]) (Sub64 (Rsh64x64 (Add64 mul:(Hmul64 (Const64 [m]) x) x) (Const64 [s])) (Rsh64x64 x (Const64 [63]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(smagic64(c).m) && s == smagic64(c).s && x.Op != OpConst64 && sdivisibleOK64(c)
@@ -10697,7 +9596,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -10711,24 +9609,20 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt64(v_1_0.AuxInt);
                         if (v_1_1.Op != OpSub64) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh64x64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         var v_1_1_0_0 = v_1_1_0.Args[0];
                         if (v_1_1_0_0.Op != OpAdd64) {
                             continue;
                         }
-
                         _ = v_1_1_0_0.Args[1];
                         var v_1_1_0_0_0 = v_1_1_0_0.Args[0];
                         var v_1_1_0_0_1 = v_1_1_0_0.Args[1];
@@ -10743,7 +9637,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, v_1_1_0_0_0, v_1_1_0_0_1) = (_i2 + 1, v_1_1_0_0_1, v_1_1_0_0_0);
                                 }
-
                                 _ = mul.Args[1];
                                 mul_0 = mul.Args[0];
                                 mul_1 = mul.Args[1];
@@ -10755,33 +9648,27 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                             continue;
                                         (_i3, mul_0, mul_1) = (_i3 + 1, mul_1, mul_0);
                                         }
-
                                         m = auxIntToInt64(mul_0.AuxInt);
                                         if (x != mul_1 || x != v_1_1_0_0_1) {
                                             continue;
                                         }
-
                                         v_1_1_0_1 = v_1_1_0.Args[1];
                                         if (v_1_1_0_1.Op != OpConst64) {
                                             continue;
                                         }
-
                                         s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                         v_1_1_1 = v_1_1.Args[1];
                                         if (v_1_1_1.Op != OpRsh64x64) {
                                             continue;
                                         }
-
                                         _ = v_1_1_1.Args[1];
                                         if (x != v_1_1_1.Args[0]) {
                                             continue;
                                         }
-
                                         v_1_1_1_1 = v_1_1_1.Args[1];
                                         if (v_1_1_1_1.Op != OpConst64 || auxIntToInt64(v_1_1_1_1.AuxInt) != 63 || !(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int64(smagic64(c).m) && s == smagic64(c).s && x.Op != OpConst64 && sdivisibleOK64(c))) {
                                             continue;
                                         }
-
                                         v.reset(OpLeq64U);
                                         v0 = b.NewValue0(v.Pos, OpRotateLeft64, typ.UInt64);
                                         v1 = b.NewValue0(v.Pos, OpAdd64, typ.UInt64);
@@ -10799,30 +9686,25 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                                         v6.AuxInt = int64ToAuxInt(int64(sdivisible64(c).max));
                                         v.AddArg2(v0, v6);
                                         return true;
-
                                     }
 
                                 }
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 n (Lsh64x64 (Rsh64x64 (Add64 <t> n (Rsh64Ux64 <t> (Rsh64x64 <t> n (Const64 <typ.UInt64> [63])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 63 && kbar == 64 - k
@@ -10839,19 +9721,16 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh64x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd64) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -10866,40 +9745,33 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh64x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 63) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 63 && kbar == 64 - k)) {
                             continue;
                         }
-
                         v.reset(OpEq64);
                         v0 = b.NewValue0(v.Pos, OpAnd64, t);
                         v1 = b.NewValue0(v.Pos, OpConst64, t);
@@ -10909,20 +9781,17 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                         v2.AuxInt = int64ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 s:(Sub64 x y) (Const64 [0]))
     // cond: s.Uses == 1
@@ -10939,24 +9808,20 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst64 || auxIntToInt64(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpEq64);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq64 (And64 <t> x (Const64 <t> [y])) (Const64 <t> [y]))
     // cond: oneBit64(y)
@@ -10972,7 +9837,6 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -10988,12 +9852,10 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt64(v_0_1.AuxInt);
                         if (v_1.Op != OpConst64 || v_1.Type != t || auxIntToInt64(v_1.AuxInt) != y || !(oneBit64(y))) {
                             continue;
                         }
-
                         v.reset(OpNeq64);
                         v0 = b.NewValue0(v.Pos, OpAnd64, t);
                         v1 = b.NewValue0(v.Pos, OpConst64, t);
@@ -11003,23 +9865,19 @@ private static bool rewriteValuegeneric_OpEq64(ptr<Value> _addr_v) {
                         v2.AuxInt = int64ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11037,25 +9895,20 @@ private static bool rewriteValuegeneric_OpEq64F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat64(v_0.AuxInt);
                 if (v_1.Op != OpConst64F) {
                     continue;
                 }
-
                 var d = auxIntToFloat64(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11075,7 +9928,6 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (Eq8 (Const8 <t> [c]) (Add8 (Const8 <t> [d]) x))
     // result: (Eq8 (Const8 <t> [c-d]) x)
@@ -11090,13 +9942,11 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpAdd8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -11110,7 +9960,6 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt8(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpEq8);
@@ -11118,20 +9967,17 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                         v0.AuxInt = int8ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 (Const8 [c]) (Const8 [d]))
     // result: (ConstBool [c == d])
@@ -11146,24 +9992,20 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 (Mod8u x (Const8 [c])) (Const8 [0]))
     // cond: x.Op != OpConst8 && udivisibleOK8(c) && !hasSmallRotate(config)
@@ -11179,19 +10021,16 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_1.AuxInt);
                 if (v_1.Op != OpConst8 || auxIntToInt8(v_1.AuxInt) != 0 || !(x.Op != OpConst8 && udivisibleOK8(c) && !hasSmallRotate(config))) {
                     continue;
                 }
-
                 v.reset(OpEq32);
                 v0 = b.NewValue0(v.Pos, OpMod32u, typ.UInt32);
                 var v1 = b.NewValue0(v.Pos, OpZeroExt8to32, typ.UInt32);
@@ -11203,14 +10042,12 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                 v3.AuxInt = int32ToAuxInt(0);
                 v.AddArg2(v0, v3);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 (Mod8 x (Const8 [c])) (Const8 [0]))
     // cond: x.Op != OpConst8 && sdivisibleOK8(c) && !hasSmallRotate(config)
@@ -11226,19 +10063,16 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 x = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
                 if (v_0_1.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_1.AuxInt);
                 if (v_1.Op != OpConst8 || auxIntToInt8(v_1.AuxInt) != 0 || !(x.Op != OpConst8 && sdivisibleOK8(c) && !hasSmallRotate(config))) {
                     continue;
                 }
-
                 v.reset(OpEq32);
                 v0 = b.NewValue0(v.Pos, OpMod32, typ.Int32);
                 v1 = b.NewValue0(v.Pos, OpSignExt8to32, typ.Int32);
@@ -11250,14 +10084,12 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                 v3.AuxInt = int32ToAuxInt(0);
                 v.AddArg2(v0, v3);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 x (Mul8 (Const8 [c]) (Trunc32to8 (Rsh32Ux64 mul:(Mul32 (Const32 [m]) (ZeroExt8to32 x)) (Const64 [s]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1<<8+umagic8(c).m) && s == 8+umagic8(c).s && x.Op != OpConst8 && udivisibleOK8(c)
@@ -11274,7 +10106,6 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -11288,23 +10119,19 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt8(v_1_0.AuxInt);
                         if (v_1_1.Op != OpTrunc32to8) {
                             continue;
                         }
-
                         var v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32Ux64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         var mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul32) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         var mul_0 = mul.Args[0];
                         var mul_1 = mul.Args[1];
@@ -11318,22 +10145,18 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 var m = auxIntToInt32(mul_0.AuxInt);
                                 if (mul_1.Op != OpZeroExt8to32 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 var v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 var s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 if (!(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(1 << 8 + umagic8(c).m) && s == 8 + umagic8(c).s && x.Op != OpConst8 && udivisibleOK8(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq8U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft8, typ.UInt8);
                                 v1 = b.NewValue0(v.Pos, OpMul8, typ.UInt8);
@@ -11347,26 +10170,22 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                                 v4.AuxInt = int8ToAuxInt(int8(udivisible8(c).max));
                                 v.AddArg2(v0, v4);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 x (Mul8 (Const8 [c]) (Sub8 (Rsh32x64 mul:(Mul32 (Const32 [m]) (SignExt8to32 x)) (Const64 [s])) (Rsh32x64 (SignExt8to32 x) (Const64 [31]))) ) )
     // cond: v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic8(c).m) && s == 8+smagic8(c).s && x.Op != OpConst8 && sdivisibleOK8(c)
@@ -11383,7 +10202,6 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -11397,24 +10215,20 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         c = auxIntToInt8(v_1_0.AuxInt);
                         if (v_1_1.Op != OpSub8) {
                             continue;
                         }
-
                         _ = v_1_1.Args[1];
                         v_1_1_0 = v_1_1.Args[0];
                         if (v_1_1_0.Op != OpRsh32x64) {
                             continue;
                         }
-
                         _ = v_1_1_0.Args[1];
                         mul = v_1_1_0.Args[0];
                         if (mul.Op != OpMul32) {
                             continue;
                         }
-
                         _ = mul.Args[1];
                         mul_0 = mul.Args[0];
                         mul_1 = mul.Args[1];
@@ -11428,34 +10242,28 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                                     continue;
                                 (_i2, mul_0, mul_1) = (_i2 + 1, mul_1, mul_0);
                                 }
-
                                 m = auxIntToInt32(mul_0.AuxInt);
                                 if (mul_1.Op != OpSignExt8to32 || x != mul_1.Args[0]) {
                                     continue;
                                 }
-
                                 v_1_1_0_1 = v_1_1_0.Args[1];
                                 if (v_1_1_0_1.Op != OpConst64) {
                                     continue;
                                 }
-
                                 s = auxIntToInt64(v_1_1_0_1.AuxInt);
                                 var v_1_1_1 = v_1_1.Args[1];
                                 if (v_1_1_1.Op != OpRsh32x64) {
                                     continue;
                                 }
-
                                 _ = v_1_1_1.Args[1];
                                 var v_1_1_1_0 = v_1_1_1.Args[0];
                                 if (v_1_1_1_0.Op != OpSignExt8to32 || x != v_1_1_1_0.Args[0]) {
                                     continue;
                                 }
-
                                 var v_1_1_1_1 = v_1_1_1.Args[1];
                                 if (v_1_1_1_1.Op != OpConst64 || auxIntToInt64(v_1_1_1_1.AuxInt) != 31 || !(v.Block.Func.pass.name != "opt" && mul.Uses == 1 && m == int32(smagic8(c).m) && s == 8 + smagic8(c).s && x.Op != OpConst8 && sdivisibleOK8(c))) {
                                     continue;
                                 }
-
                                 v.reset(OpLeq8U);
                                 v0 = b.NewValue0(v.Pos, OpRotateLeft8, typ.UInt8);
                                 v1 = b.NewValue0(v.Pos, OpAdd8, typ.UInt8);
@@ -11473,26 +10281,22 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                                 v6.AuxInt = int8ToAuxInt(int8(sdivisible8(c).max));
                                 v.AddArg2(v0, v6);
                                 return true;
-
                             }
 
 
                             _i2 = _i2__prev4;
                         }
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 n (Lsh8x64 (Rsh8x64 (Add8 <t> n (Rsh8Ux64 <t> (Rsh8x64 <t> n (Const64 <typ.UInt64> [ 7])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 7 && kbar == 8 - k
@@ -11509,19 +10313,16 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh8x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd8) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -11536,40 +10337,33 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh8x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 7) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 7 && kbar == 8 - k)) {
                             continue;
                         }
-
                         v.reset(OpEq8);
                         v0 = b.NewValue0(v.Pos, OpAnd8, t);
                         v1 = b.NewValue0(v.Pos, OpConst8, t);
@@ -11579,20 +10373,17 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                         v2.AuxInt = int8ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 s:(Sub8 x y) (Const8 [0]))
     // cond: s.Uses == 1
@@ -11609,24 +10400,20 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst8 || auxIntToInt8(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpEq8);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Eq8 (And8 <t> x (Const8 <t> [y])) (Const8 <t> [y]))
     // cond: oneBit8(y)
@@ -11642,7 +10429,6 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -11658,12 +10444,10 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt8(v_0_1.AuxInt);
                         if (v_1.Op != OpConst8 || v_1.Type != t || auxIntToInt8(v_1.AuxInt) != y || !(oneBit8(y))) {
                             continue;
                         }
-
                         v.reset(OpNeq8);
                         v0 = b.NewValue0(v.Pos, OpAnd8, t);
                         v1 = b.NewValue0(v.Pos, OpConst8, t);
@@ -11673,23 +10457,19 @@ private static bool rewriteValuegeneric_OpEq8(ptr<Value> _addr_v) {
                         v2.AuxInt = int8ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11709,24 +10489,20 @@ private static bool rewriteValuegeneric_OpEqB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToBool(v_0.AuxInt);
                 if (v_1.Op != OpConstBool) {
                     continue;
                 }
-
                 var d = auxIntToBool(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqB (ConstBool [false]) x)
     // result: (Not x)
@@ -11741,19 +10517,16 @@ private static bool rewriteValuegeneric_OpEqB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_1;
                 v.reset(OpNot);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqB (ConstBool [true]) x)
     // result: x
@@ -11768,21 +10541,17 @@ private static bool rewriteValuegeneric_OpEqB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEqInter(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11804,7 +10573,6 @@ private static bool rewriteValuegeneric_OpEqInter(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11823,7 +10591,6 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (EqPtr (Addr {x} _) (Addr {y} _))
     // result: (ConstBool [x == y])
@@ -11838,24 +10605,20 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpAddr) {
                     continue;
                 }
-
                 var y = auxToSym(v_1.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x == y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (Addr {x} _) (OffPtr [o] (Addr {y} _)))
     // result: (ConstBool [x == y && o == 0])
@@ -11870,30 +10633,25 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 var o = auxIntToInt64(v_1.AuxInt);
                 var v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x == y && o == 0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (OffPtr [o1] (Addr {x} _)) (OffPtr [o2] (Addr {y} _)))
     // result: (ConstBool [x == y && o1 == o2])
@@ -11908,36 +10666,30 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var o1 = auxIntToInt64(v_0.AuxInt);
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAddr) {
                     continue;
                 }
-
                 x = auxToSym(v_0_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 var o2 = auxIntToInt64(v_1.AuxInt);
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x == y && o1 == o2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (LocalAddr {x} _ _) (LocalAddr {y} _ _))
     // result: (ConstBool [x == y])
@@ -11952,24 +10704,20 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpLocalAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x == y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (LocalAddr {x} _ _) (OffPtr [o] (LocalAddr {y} _ _)))
     // result: (ConstBool [x == y && o == 0])
@@ -11984,30 +10732,25 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 o = auxIntToInt64(v_1.AuxInt);
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpLocalAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x == y && o == 0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (OffPtr [o1] (LocalAddr {x} _ _)) (OffPtr [o2] (LocalAddr {y} _ _)))
     // result: (ConstBool [x == y && o1 == o2])
@@ -12022,36 +10765,30 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = auxIntToInt64(v_0.AuxInt);
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpLocalAddr) {
                     continue;
                 }
-
                 x = auxToSym(v_0_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 o2 = auxIntToInt64(v_1.AuxInt);
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpLocalAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x == y && o1 == o2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (OffPtr [o1] p1) p2)
     // cond: isSamePtr(p1, p2)
@@ -12067,25 +10804,21 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = auxIntToInt64(v_0.AuxInt);
                 var p1 = v_0.Args[0];
                 var p2 = v_1;
                 if (!(isSamePtr(p1, p2))) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(o1 == 0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (OffPtr [o1] p1) (OffPtr [o2] p2))
     // cond: isSamePtr(p1, p2)
@@ -12101,30 +10834,25 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = auxIntToInt64(v_0.AuxInt);
                 p1 = v_0.Args[0];
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 o2 = auxIntToInt64(v_1.AuxInt);
                 p2 = v_1.Args[0];
                 if (!(isSamePtr(p1, p2))) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(o1 == o2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (Const32 [c]) (Const32 [d]))
     // result: (ConstBool [c == d])
@@ -12139,24 +10867,20 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (Const64 [c]) (Const64 [d]))
     // result: (ConstBool [c == d])
@@ -12171,24 +10895,20 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c == d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (LocalAddr _ _) (Addr _))
     // result: (ConstBool [false])
@@ -12203,18 +10923,15 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(false);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (OffPtr (LocalAddr _ _)) (Addr _))
     // result: (ConstBool [false])
@@ -12229,23 +10946,19 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpLocalAddr || v_1.Op != OpAddr) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(false);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (LocalAddr _ _) (OffPtr (Addr _)))
     // result: (ConstBool [false])
@@ -12260,23 +10973,19 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(false);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (OffPtr (LocalAddr _ _)) (OffPtr (Addr _)))
     // result: (ConstBool [false])
@@ -12291,28 +11000,23 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpLocalAddr || v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(false);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (AddPtr p1 o1) p2)
     // cond: isSamePtr(p1, p2)
@@ -12328,27 +11032,23 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = v_0.Args[1];
                 p1 = v_0.Args[0];
                 p2 = v_1;
                 if (!(isSamePtr(p1, p2))) {
                     continue;
                 }
-
                 v.reset(OpNot);
                 var v0 = b.NewValue0(v.Pos, OpIsNonNil, typ.Bool);
                 v0.AddArg(o1);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (Const32 [0]) p)
     // result: (Not (IsNonNil p))
@@ -12363,21 +11063,18 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var p = v_1;
                 v.reset(OpNot);
                 v0 = b.NewValue0(v.Pos, OpIsNonNil, typ.Bool);
                 v0.AddArg(p);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (Const64 [0]) p)
     // result: (Not (IsNonNil p))
@@ -12392,21 +11089,18 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 p = v_1;
                 v.reset(OpNot);
                 v0 = b.NewValue0(v.Pos, OpIsNonNil, typ.Bool);
                 v0.AddArg(p);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (EqPtr (ConstNil) p)
     // result: (Not (IsNonNil p))
@@ -12421,24 +11115,20 @@ private static bool rewriteValuegeneric_OpEqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 p = v_1;
                 v.reset(OpNot);
                 v0 = b.NewValue0(v.Pos, OpIsNonNil, typ.Bool);
                 v0.AddArg(p);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpEqSlice(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12460,7 +11150,6 @@ private static bool rewriteValuegeneric_OpEqSlice(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuegeneric_OpIMake(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12478,7 +11167,6 @@ private static bool rewriteValuegeneric_OpIMake(ptr<Value> _addr_v) {
         v.reset(OpIMake);
         v.AddArg2(_typ, val);
         return true;
-
     } 
     // match: (IMake _typ (ArrayMake1 val))
     // result: (IMake _typ val)
@@ -12491,10 +11179,8 @@ private static bool rewriteValuegeneric_OpIMake(ptr<Value> _addr_v) {
         v.reset(OpIMake);
         v.AddArg2(_typ, val);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpInterLECall(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12535,10 +11221,8 @@ private static bool rewriteValuegeneric_OpInterLECall(ptr<Value> _addr_v) {
         }
         v.copyOf(devirtLECall(v, devirtLESym(v, auxCall, itab, off)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12559,7 +11243,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt8to64 _) (Const64 [c]))
     // cond: (1 << 8) <= c
@@ -12575,7 +11258,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt16to32 _) (Const32 [c]))
     // cond: (1 << 16) <= c
@@ -12591,7 +11273,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt16to64 _) (Const64 [c]))
     // cond: (1 << 16) <= c
@@ -12607,7 +11288,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds x x)
     // result: (ConstBool [false])
@@ -12619,7 +11299,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (IsInBounds (And8 (Const8 [c]) _) (Const8 [d]))
     // cond: 0 <= c && c < d
@@ -12640,28 +11319,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 if (!(0 <= c && c < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (ZeroExt8to16 (And8 (Const8 [c]) _)) (Const16 [d]))
     // cond: 0 <= c && int16(c) < d
@@ -12686,28 +11360,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0_0, v_0_0_1) = (_i0 + 1, v_0_0_1, v_0_0_0);
                 }
-
                 c = auxIntToInt8(v_0_0_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1.AuxInt);
                 if (!(0 <= c && int16(c) < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (ZeroExt8to32 (And8 (Const8 [c]) _)) (Const32 [d]))
     // cond: 0 <= c && int32(c) < d
@@ -12732,28 +11401,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0_0, v_0_0_1) = (_i0 + 1, v_0_0_1, v_0_0_0);
                 }
-
                 c = auxIntToInt8(v_0_0_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1.AuxInt);
                 if (!(0 <= c && int32(c) < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (ZeroExt8to64 (And8 (Const8 [c]) _)) (Const64 [d]))
     // cond: 0 <= c && int64(c) < d
@@ -12778,28 +11442,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0_0, v_0_0_1) = (_i0 + 1, v_0_0_1, v_0_0_0);
                 }
-
                 c = auxIntToInt8(v_0_0_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (!(0 <= c && int64(c) < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (And16 (Const16 [c]) _) (Const16 [d]))
     // cond: 0 <= c && c < d
@@ -12820,28 +11479,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1.AuxInt);
                 if (!(0 <= c && c < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (ZeroExt16to32 (And16 (Const16 [c]) _)) (Const32 [d]))
     // cond: 0 <= c && int32(c) < d
@@ -12866,28 +11520,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0_0, v_0_0_1) = (_i0 + 1, v_0_0_1, v_0_0_0);
                 }
-
                 c = auxIntToInt16(v_0_0_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1.AuxInt);
                 if (!(0 <= c && int32(c) < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (ZeroExt16to64 (And16 (Const16 [c]) _)) (Const64 [d]))
     // cond: 0 <= c && int64(c) < d
@@ -12912,28 +11561,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0_0, v_0_0_1) = (_i0 + 1, v_0_0_1, v_0_0_0);
                 }
-
                 c = auxIntToInt16(v_0_0_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (!(0 <= c && int64(c) < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (And32 (Const32 [c]) _) (Const32 [d]))
     // cond: 0 <= c && c < d
@@ -12954,28 +11598,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1.AuxInt);
                 if (!(0 <= c && c < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (ZeroExt32to64 (And32 (Const32 [c]) _)) (Const64 [d]))
     // cond: 0 <= c && int64(c) < d
@@ -13000,28 +11639,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0_0, v_0_0_1) = (_i0 + 1, v_0_0_1, v_0_0_0);
                 }
-
                 c = auxIntToInt32(v_0_0_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (!(0 <= c && int64(c) < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (And64 (Const64 [c]) _) (Const64 [d]))
     // cond: 0 <= c && c < d
@@ -13042,28 +11676,23 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (!(0 <= c && c < d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsInBounds (Const32 [c]) (Const32 [d]))
     // result: (ConstBool [0 <= c && c < d])
@@ -13079,7 +11708,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(0 <= c && c < d);
         return true;
-
     } 
     // match: (IsInBounds (Const64 [c]) (Const64 [d]))
     // result: (ConstBool [0 <= c && c < d])
@@ -13095,7 +11723,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(0 <= c && c < d);
         return true;
-
     } 
     // match: (IsInBounds (Mod32u _ y) y)
     // result: (ConstBool [true])
@@ -13110,7 +11737,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (Mod64u _ y) y)
     // result: (ConstBool [true])
@@ -13125,7 +11751,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt8to64 (Rsh8Ux64 _ (Const64 [c]))) (Const64 [d]))
     // cond: 0 < c && c < 8 && 1<<uint( 8-c)-1 < d
@@ -13154,7 +11779,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt8to32 (Rsh8Ux64 _ (Const64 [c]))) (Const32 [d]))
     // cond: 0 < c && c < 8 && 1<<uint( 8-c)-1 < d
@@ -13183,7 +11807,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt8to16 (Rsh8Ux64 _ (Const64 [c]))) (Const16 [d]))
     // cond: 0 < c && c < 8 && 1<<uint( 8-c)-1 < d
@@ -13212,7 +11835,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (Rsh8Ux64 _ (Const64 [c])) (Const64 [d]))
     // cond: 0 < c && c < 8 && 1<<uint( 8-c)-1 < d
@@ -13237,7 +11859,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt16to64 (Rsh16Ux64 _ (Const64 [c]))) (Const64 [d]))
     // cond: 0 < c && c < 16 && 1<<uint(16-c)-1 < d
@@ -13266,7 +11887,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt16to32 (Rsh16Ux64 _ (Const64 [c]))) (Const64 [d]))
     // cond: 0 < c && c < 16 && 1<<uint(16-c)-1 < d
@@ -13295,7 +11915,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (Rsh16Ux64 _ (Const64 [c])) (Const64 [d]))
     // cond: 0 < c && c < 16 && 1<<uint(16-c)-1 < d
@@ -13320,7 +11939,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (ZeroExt32to64 (Rsh32Ux64 _ (Const64 [c]))) (Const64 [d]))
     // cond: 0 < c && c < 32 && 1<<uint(32-c)-1 < d
@@ -13349,7 +11967,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (Rsh32Ux64 _ (Const64 [c])) (Const64 [d]))
     // cond: 0 < c && c < 32 && 1<<uint(32-c)-1 < d
@@ -13374,7 +11991,6 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsInBounds (Rsh64Ux64 _ (Const64 [c])) (Const64 [d]))
     // cond: 0 < c && c < 64 && 1<<uint(64-c)-1 < d
@@ -13399,10 +12015,8 @@ private static bool rewriteValuegeneric_OpIsInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13417,7 +12031,6 @@ private static bool rewriteValuegeneric_OpIsNonNil(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (IsNonNil (Const32 [c]))
     // result: (ConstBool [c != 0])
@@ -13429,7 +12042,6 @@ private static bool rewriteValuegeneric_OpIsNonNil(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c != 0);
         return true;
-
     } 
     // match: (IsNonNil (Const64 [c]))
     // result: (ConstBool [c != 0])
@@ -13441,7 +12053,6 @@ private static bool rewriteValuegeneric_OpIsNonNil(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c != 0);
         return true;
-
     } 
     // match: (IsNonNil (Addr _))
     // result: (ConstBool [true])
@@ -13452,7 +12063,6 @@ private static bool rewriteValuegeneric_OpIsNonNil(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsNonNil (LocalAddr _ _))
     // result: (ConstBool [true])
@@ -13463,10 +12073,8 @@ private static bool rewriteValuegeneric_OpIsNonNil(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13483,7 +12091,6 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsSliceInBounds (And32 (Const32 [c]) _) (Const32 [d]))
     // cond: 0 <= c && c <= d
@@ -13504,28 +12111,23 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 if (!(0 <= c && c <= d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsSliceInBounds (And64 (Const64 [c]) _) (Const64 [d]))
     // cond: 0 <= c && c <= d
@@ -13546,28 +12148,23 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 if (!(0 <= c && c <= d)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (IsSliceInBounds (Const32 [0]) _)
     // result: (ConstBool [true])
@@ -13578,7 +12175,6 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsSliceInBounds (Const64 [0]) _)
     // result: (ConstBool [true])
@@ -13589,7 +12185,6 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     } 
     // match: (IsSliceInBounds (Const32 [c]) (Const32 [d]))
     // result: (ConstBool [0 <= c && c <= d])
@@ -13605,7 +12200,6 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(0 <= c && c <= d);
         return true;
-
     } 
     // match: (IsSliceInBounds (Const64 [c]) (Const64 [d]))
     // result: (ConstBool [0 <= c && c <= d])
@@ -13621,7 +12215,6 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(0 <= c && c <= d);
         return true;
-
     } 
     // match: (IsSliceInBounds (SliceLen x) (SliceCap x))
     // result: (ConstBool [true])
@@ -13636,10 +12229,8 @@ private static bool rewriteValuegeneric_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13660,7 +12251,6 @@ private static bool rewriteValuegeneric_OpLeq16(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c <= d);
         return true;
-
     } 
     // match: (Leq16 (Const16 [0]) (And16 _ (Const16 [c])))
     // cond: c >= 0
@@ -13680,21 +12270,17 @@ private static bool rewriteValuegeneric_OpLeq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt16(v_1_1.AuxInt);
                 if (!(c >= 0)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Leq16 (Const16 [0]) (Rsh16Ux64 _ (Const64 [c])))
     // cond: c > 0
@@ -13715,10 +12301,8 @@ private static bool rewriteValuegeneric_OpLeq16(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13739,7 +12323,6 @@ private static bool rewriteValuegeneric_OpLeq16U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint16(c) <= uint16(d));
         return true;
-
     } 
     // match: (Leq16U (Const16 [0]) _)
     // result: (ConstBool [true])
@@ -13750,10 +12333,8 @@ private static bool rewriteValuegeneric_OpLeq16U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13774,7 +12355,6 @@ private static bool rewriteValuegeneric_OpLeq32(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c <= d);
         return true;
-
     } 
     // match: (Leq32 (Const32 [0]) (And32 _ (Const32 [c])))
     // cond: c >= 0
@@ -13794,21 +12374,17 @@ private static bool rewriteValuegeneric_OpLeq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt32(v_1_1.AuxInt);
                 if (!(c >= 0)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Leq32 (Const32 [0]) (Rsh32Ux64 _ (Const64 [c])))
     // cond: c > 0
@@ -13829,10 +12405,8 @@ private static bool rewriteValuegeneric_OpLeq32(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13853,10 +12427,8 @@ private static bool rewriteValuegeneric_OpLeq32F(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c <= d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13877,7 +12449,6 @@ private static bool rewriteValuegeneric_OpLeq32U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint32(c) <= uint32(d));
         return true;
-
     } 
     // match: (Leq32U (Const32 [0]) _)
     // result: (ConstBool [true])
@@ -13888,10 +12459,8 @@ private static bool rewriteValuegeneric_OpLeq32U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13912,7 +12481,6 @@ private static bool rewriteValuegeneric_OpLeq64(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c <= d);
         return true;
-
     } 
     // match: (Leq64 (Const64 [0]) (And64 _ (Const64 [c])))
     // cond: c >= 0
@@ -13932,21 +12500,17 @@ private static bool rewriteValuegeneric_OpLeq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= 0)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Leq64 (Const64 [0]) (Rsh64Ux64 _ (Const64 [c])))
     // cond: c > 0
@@ -13967,10 +12531,8 @@ private static bool rewriteValuegeneric_OpLeq64(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13991,10 +12553,8 @@ private static bool rewriteValuegeneric_OpLeq64F(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c <= d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14015,7 +12575,6 @@ private static bool rewriteValuegeneric_OpLeq64U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint64(c) <= uint64(d));
         return true;
-
     } 
     // match: (Leq64U (Const64 [0]) _)
     // result: (ConstBool [true])
@@ -14026,10 +12585,8 @@ private static bool rewriteValuegeneric_OpLeq64U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14050,7 +12607,6 @@ private static bool rewriteValuegeneric_OpLeq8(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c <= d);
         return true;
-
     } 
     // match: (Leq8 (Const8 [0]) (And8 _ (Const8 [c])))
     // cond: c >= 0
@@ -14070,21 +12626,17 @@ private static bool rewriteValuegeneric_OpLeq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt8(v_1_1.AuxInt);
                 if (!(c >= 0)) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (Leq8 (Const8 [0]) (Rsh8Ux64 _ (Const64 [c])))
     // cond: c > 0
@@ -14105,10 +12657,8 @@ private static bool rewriteValuegeneric_OpLeq8(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14129,7 +12679,6 @@ private static bool rewriteValuegeneric_OpLeq8U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint8(c) <= uint8(d));
         return true;
-
     } 
     // match: (Leq8U (Const8 [0]) _)
     // result: (ConstBool [true])
@@ -14140,10 +12689,8 @@ private static bool rewriteValuegeneric_OpLeq8U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(true);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14164,10 +12711,8 @@ private static bool rewriteValuegeneric_OpLess16(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c < d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14188,7 +12733,6 @@ private static bool rewriteValuegeneric_OpLess16U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint16(c) < uint16(d));
         return true;
-
     } 
     // match: (Less16U _ (Const16 [0]))
     // result: (ConstBool [false])
@@ -14199,10 +12743,8 @@ private static bool rewriteValuegeneric_OpLess16U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14223,10 +12765,8 @@ private static bool rewriteValuegeneric_OpLess32(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c < d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14247,10 +12787,8 @@ private static bool rewriteValuegeneric_OpLess32F(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c < d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14271,7 +12809,6 @@ private static bool rewriteValuegeneric_OpLess32U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint32(c) < uint32(d));
         return true;
-
     } 
     // match: (Less32U _ (Const32 [0]))
     // result: (ConstBool [false])
@@ -14282,10 +12819,8 @@ private static bool rewriteValuegeneric_OpLess32U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14306,10 +12841,8 @@ private static bool rewriteValuegeneric_OpLess64(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c < d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14330,10 +12863,8 @@ private static bool rewriteValuegeneric_OpLess64F(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c < d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14354,7 +12885,6 @@ private static bool rewriteValuegeneric_OpLess64U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint64(c) < uint64(d));
         return true;
-
     } 
     // match: (Less64U _ (Const64 [0]))
     // result: (ConstBool [false])
@@ -14365,10 +12895,8 @@ private static bool rewriteValuegeneric_OpLess64U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14389,10 +12917,8 @@ private static bool rewriteValuegeneric_OpLess8(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(c < d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14413,7 +12939,6 @@ private static bool rewriteValuegeneric_OpLess8U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(uint8(c) < uint8(d));
         return true;
-
     } 
     // match: (Less8U _ (Const8 [0]))
     // result: (ConstBool [false])
@@ -14424,10 +12949,8 @@ private static bool rewriteValuegeneric_OpLess8U(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14453,7 +12976,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Load <t1> p1 (Store {t2} p2 _ (Store {t3} p3 x _)))
     // cond: isSamePtr(p1, p3) && t1.Compare(x.Type) == types.CMPeq && t1.Size() == t2.Size() && disjoint(p3, t3.Size(), p2, t2.Size())
@@ -14479,7 +13001,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Load <t1> p1 (Store {t2} p2 _ (Store {t3} p3 _ (Store {t4} p4 x _))))
     // cond: isSamePtr(p1, p4) && t1.Compare(x.Type) == types.CMPeq && t1.Size() == t2.Size() && disjoint(p4, t4.Size(), p2, t2.Size()) && disjoint(p4, t4.Size(), p3, t3.Size())
@@ -14512,7 +13033,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Load <t1> p1 (Store {t2} p2 _ (Store {t3} p3 _ (Store {t4} p4 _ (Store {t5} p5 x _)))))
     // cond: isSamePtr(p1, p5) && t1.Compare(x.Type) == types.CMPeq && t1.Size() == t2.Size() && disjoint(p5, t5.Size(), p2, t2.Size()) && disjoint(p5, t5.Size(), p3, t3.Size()) && disjoint(p5, t5.Size(), p4, t4.Size())
@@ -14552,7 +13072,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Load <t1> p1 (Store {t2} p2 (Const64 [x]) _))
     // cond: isSamePtr(p1,p2) && sizeof(t2) == 8 && is64BitFloat(t1) && !math.IsNaN(math.Float64frombits(uint64(x)))
@@ -14577,7 +13096,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(math.Float64frombits(uint64(x)));
         return true;
-
     } 
     // match: (Load <t1> p1 (Store {t2} p2 (Const32 [x]) _))
     // cond: isSamePtr(p1,p2) && sizeof(t2) == 4 && is32BitFloat(t1) && !math.IsNaN(float64(math.Float32frombits(uint32(x))))
@@ -14602,7 +13120,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(math.Float32frombits(uint32(x)));
         return true;
-
     } 
     // match: (Load <t1> p1 (Store {t2} p2 (Const64F [x]) _))
     // cond: isSamePtr(p1,p2) && sizeof(t2) == 8 && is64BitInt(t1)
@@ -14627,7 +13144,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(math.Float64bits(x)));
         return true;
-
     } 
     // match: (Load <t1> p1 (Store {t2} p2 (Const32F [x]) _))
     // cond: isSamePtr(p1,p2) && sizeof(t2) == 4 && is32BitInt(t1)
@@ -14652,7 +13168,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(math.Float32bits(x)));
         return true;
-
     } 
     // match: (Load <t1> op:(OffPtr [o1] p1) (Store {t2} p2 _ mem:(Zero [n] p3 _)))
     // cond: o1 >= 0 && o1+t1.Size() <= n && isSamePtr(p1, p3) && fe.CanSSA(t1) && disjoint(op, t1.Size(), p2, t2.Size())
@@ -14688,7 +13203,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg(p3);
         v0.AddArg2(v1, mem);
         return true;
-
     } 
     // match: (Load <t1> op:(OffPtr [o1] p1) (Store {t2} p2 _ (Store {t3} p3 _ mem:(Zero [n] p4 _))))
     // cond: o1 >= 0 && o1+t1.Size() <= n && isSamePtr(p1, p4) && fe.CanSSA(t1) && disjoint(op, t1.Size(), p2, t2.Size()) && disjoint(op, t1.Size(), p3, t3.Size())
@@ -14731,7 +13245,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg(p4);
         v0.AddArg2(v1, mem);
         return true;
-
     } 
     // match: (Load <t1> op:(OffPtr [o1] p1) (Store {t2} p2 _ (Store {t3} p3 _ (Store {t4} p4 _ mem:(Zero [n] p5 _)))))
     // cond: o1 >= 0 && o1+t1.Size() <= n && isSamePtr(p1, p5) && fe.CanSSA(t1) && disjoint(op, t1.Size(), p2, t2.Size()) && disjoint(op, t1.Size(), p3, t3.Size()) && disjoint(op, t1.Size(), p4, t4.Size())
@@ -14781,7 +13294,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg(p5);
         v0.AddArg2(v1, mem);
         return true;
-
     } 
     // match: (Load <t1> op:(OffPtr [o1] p1) (Store {t2} p2 _ (Store {t3} p3 _ (Store {t4} p4 _ (Store {t5} p5 _ mem:(Zero [n] p6 _))))))
     // cond: o1 >= 0 && o1+t1.Size() <= n && isSamePtr(p1, p6) && fe.CanSSA(t1) && disjoint(op, t1.Size(), p2, t2.Size()) && disjoint(op, t1.Size(), p3, t3.Size()) && disjoint(op, t1.Size(), p4, t4.Size()) && disjoint(op, t1.Size(), p5, t5.Size())
@@ -14838,7 +13350,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg(p6);
         v0.AddArg2(v1, mem);
         return true;
-
     } 
     // match: (Load <t1> (OffPtr [o] p1) (Zero [n] p2 _))
     // cond: t1.IsBoolean() && isSamePtr(p1, p2) && n >= o + 1
@@ -14861,7 +13372,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (Load <t1> (OffPtr [o] p1) (Zero [n] p2 _))
     // cond: is8BitInt(t1) && isSamePtr(p1, p2) && n >= o + 1
@@ -14884,7 +13394,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Load <t1> (OffPtr [o] p1) (Zero [n] p2 _))
     // cond: is16BitInt(t1) && isSamePtr(p1, p2) && n >= o + 2
@@ -14907,7 +13416,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Load <t1> (OffPtr [o] p1) (Zero [n] p2 _))
     // cond: is32BitInt(t1) && isSamePtr(p1, p2) && n >= o + 4
@@ -14930,7 +13438,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Load <t1> (OffPtr [o] p1) (Zero [n] p2 _))
     // cond: is64BitInt(t1) && isSamePtr(p1, p2) && n >= o + 8
@@ -14953,7 +13460,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Load <t1> (OffPtr [o] p1) (Zero [n] p2 _))
     // cond: is32BitFloat(t1) && isSamePtr(p1, p2) && n >= o + 4
@@ -14976,7 +13482,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(0);
         return true;
-
     } 
     // match: (Load <t1> (OffPtr [o] p1) (Zero [n] p2 _))
     // cond: is64BitFloat(t1) && isSamePtr(p1, p2) && n >= o + 8
@@ -14999,7 +13504,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(0);
         return true;
-
     } 
     // match: (Load <t> _ _)
     // cond: t.IsStruct() && t.NumFields() == 0 && fe.CanSSA(t)
@@ -15011,7 +13515,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         }
         v.reset(OpStructMake0);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsStruct() && t.NumFields() == 1 && fe.CanSSA(t)
@@ -15031,7 +13534,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v0.AddArg2(v1, mem);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsStruct() && t.NumFields() == 2 && fe.CanSSA(t)
@@ -15056,7 +13558,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v2.AddArg2(v3, mem);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsStruct() && t.NumFields() == 3 && fe.CanSSA(t)
@@ -15086,7 +13587,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v4.AddArg2(v5, mem);
         v.AddArg3(v0, v2, v4);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsStruct() && t.NumFields() == 4 && fe.CanSSA(t)
@@ -15121,7 +13621,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v6.AddArg2(v7, mem);
         v.AddArg4(v0, v2, v4, v6);
         return true;
-
     } 
     // match: (Load <t> _ _)
     // cond: t.IsArray() && t.NumElem() == 0
@@ -15133,7 +13632,6 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         }
         v.reset(OpArrayMake0);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: t.IsArray() && t.NumElem() == 1 && fe.CanSSA(t)
@@ -15150,10 +13648,8 @@ private static bool rewriteValuegeneric_OpLoad(ptr<Value> _addr_v) {
         v0.AddArg2(ptr, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15175,7 +13671,6 @@ private static bool rewriteValuegeneric_OpLsh16x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh16x16 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -15186,10 +13681,8 @@ private static bool rewriteValuegeneric_OpLsh16x16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15211,7 +13704,6 @@ private static bool rewriteValuegeneric_OpLsh16x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh16x32 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -15222,10 +13714,8 @@ private static bool rewriteValuegeneric_OpLsh16x32(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15248,7 +13738,6 @@ private static bool rewriteValuegeneric_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(c << (int)(uint64(d)));
         return true;
-
     } 
     // match: (Lsh16x64 x (Const64 [0]))
     // result: x
@@ -15259,7 +13748,6 @@ private static bool rewriteValuegeneric_OpLsh16x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Lsh16x64 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -15270,7 +13758,6 @@ private static bool rewriteValuegeneric_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh16x64 _ (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -15286,7 +13773,6 @@ private static bool rewriteValuegeneric_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh16x64 <t> (Lsh16x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -15315,7 +13801,6 @@ private static bool rewriteValuegeneric_OpLsh16x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh16x64 (Rsh16Ux64 (Lsh16x64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -15353,10 +13838,8 @@ private static bool rewriteValuegeneric_OpLsh16x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15378,7 +13861,6 @@ private static bool rewriteValuegeneric_OpLsh16x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh16x8 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -15389,10 +13871,8 @@ private static bool rewriteValuegeneric_OpLsh16x8(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15414,7 +13894,6 @@ private static bool rewriteValuegeneric_OpLsh32x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh32x16 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -15425,10 +13904,8 @@ private static bool rewriteValuegeneric_OpLsh32x16(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15450,7 +13927,6 @@ private static bool rewriteValuegeneric_OpLsh32x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh32x32 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -15461,10 +13937,8 @@ private static bool rewriteValuegeneric_OpLsh32x32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15487,7 +13961,6 @@ private static bool rewriteValuegeneric_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(c << (int)(uint64(d)));
         return true;
-
     } 
     // match: (Lsh32x64 x (Const64 [0]))
     // result: x
@@ -15498,7 +13971,6 @@ private static bool rewriteValuegeneric_OpLsh32x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Lsh32x64 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -15509,7 +13981,6 @@ private static bool rewriteValuegeneric_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh32x64 _ (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -15525,7 +13996,6 @@ private static bool rewriteValuegeneric_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh32x64 <t> (Lsh32x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -15554,7 +14024,6 @@ private static bool rewriteValuegeneric_OpLsh32x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh32x64 (Rsh32Ux64 (Lsh32x64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -15592,10 +14061,8 @@ private static bool rewriteValuegeneric_OpLsh32x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15617,7 +14084,6 @@ private static bool rewriteValuegeneric_OpLsh32x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh32x8 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -15628,10 +14094,8 @@ private static bool rewriteValuegeneric_OpLsh32x8(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15653,7 +14117,6 @@ private static bool rewriteValuegeneric_OpLsh64x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh64x16 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -15664,10 +14127,8 @@ private static bool rewriteValuegeneric_OpLsh64x16(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15689,7 +14150,6 @@ private static bool rewriteValuegeneric_OpLsh64x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh64x32 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -15700,10 +14160,8 @@ private static bool rewriteValuegeneric_OpLsh64x32(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15726,7 +14184,6 @@ private static bool rewriteValuegeneric_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(c << (int)(uint64(d)));
         return true;
-
     } 
     // match: (Lsh64x64 x (Const64 [0]))
     // result: x
@@ -15737,7 +14194,6 @@ private static bool rewriteValuegeneric_OpLsh64x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Lsh64x64 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -15748,7 +14204,6 @@ private static bool rewriteValuegeneric_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh64x64 _ (Const64 [c]))
     // cond: uint64(c) >= 64
@@ -15764,7 +14219,6 @@ private static bool rewriteValuegeneric_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh64x64 <t> (Lsh64x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -15793,7 +14247,6 @@ private static bool rewriteValuegeneric_OpLsh64x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh64x64 (Rsh64Ux64 (Lsh64x64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -15831,10 +14284,8 @@ private static bool rewriteValuegeneric_OpLsh64x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15856,7 +14307,6 @@ private static bool rewriteValuegeneric_OpLsh64x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh64x8 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -15867,10 +14317,8 @@ private static bool rewriteValuegeneric_OpLsh64x8(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15892,7 +14340,6 @@ private static bool rewriteValuegeneric_OpLsh8x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh8x16 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -15903,10 +14350,8 @@ private static bool rewriteValuegeneric_OpLsh8x16(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15928,7 +14373,6 @@ private static bool rewriteValuegeneric_OpLsh8x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh8x32 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -15939,10 +14383,8 @@ private static bool rewriteValuegeneric_OpLsh8x32(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15965,7 +14407,6 @@ private static bool rewriteValuegeneric_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(c << (int)(uint64(d)));
         return true;
-
     } 
     // match: (Lsh8x64 x (Const64 [0]))
     // result: x
@@ -15976,7 +14417,6 @@ private static bool rewriteValuegeneric_OpLsh8x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Lsh8x64 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -15987,7 +14427,6 @@ private static bool rewriteValuegeneric_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh8x64 _ (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -16003,7 +14442,6 @@ private static bool rewriteValuegeneric_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh8x64 <t> (Lsh8x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -16032,7 +14470,6 @@ private static bool rewriteValuegeneric_OpLsh8x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh8x64 (Rsh8Ux64 (Lsh8x64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -16070,10 +14507,8 @@ private static bool rewriteValuegeneric_OpLsh8x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16095,7 +14530,6 @@ private static bool rewriteValuegeneric_OpLsh8x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh8x8 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -16106,10 +14540,8 @@ private static bool rewriteValuegeneric_OpLsh8x8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16135,7 +14567,6 @@ private static bool rewriteValuegeneric_OpMod16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(c % d);
         return true;
-
     } 
     // match: (Mod16 <t> n (Const16 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo16(c)
@@ -16155,7 +14586,6 @@ private static bool rewriteValuegeneric_OpMod16(ptr<Value> _addr_v) {
         v0.AuxInt = int16ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod16 <t> n (Const16 [c]))
     // cond: c < 0 && c != -1<<15
@@ -16176,7 +14606,6 @@ private static bool rewriteValuegeneric_OpMod16(ptr<Value> _addr_v) {
         v0.AuxInt = int16ToAuxInt(-c);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod16 <t> x (Const16 [c]))
     // cond: x.Op != OpConst16 && (c > 0 || c == -1<<15)
@@ -16200,10 +14629,8 @@ private static bool rewriteValuegeneric_OpMod16(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16229,7 +14656,6 @@ private static bool rewriteValuegeneric_OpMod16u(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(int16(uint16(c) % uint16(d)));
         return true;
-
     } 
     // match: (Mod16u <t> n (Const16 [c]))
     // cond: isPowerOfTwo16(c)
@@ -16249,7 +14675,6 @@ private static bool rewriteValuegeneric_OpMod16u(ptr<Value> _addr_v) {
         v0.AuxInt = int16ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod16u <t> x (Const16 [c]))
     // cond: x.Op != OpConst16 && c > 0 && umagicOK16(c)
@@ -16273,10 +14698,8 @@ private static bool rewriteValuegeneric_OpMod16u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16302,7 +14725,6 @@ private static bool rewriteValuegeneric_OpMod32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(c % d);
         return true;
-
     } 
     // match: (Mod32 <t> n (Const32 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo32(c)
@@ -16322,7 +14744,6 @@ private static bool rewriteValuegeneric_OpMod32(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod32 <t> n (Const32 [c]))
     // cond: c < 0 && c != -1<<31
@@ -16343,7 +14764,6 @@ private static bool rewriteValuegeneric_OpMod32(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(-c);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod32 <t> x (Const32 [c]))
     // cond: x.Op != OpConst32 && (c > 0 || c == -1<<31)
@@ -16367,10 +14787,8 @@ private static bool rewriteValuegeneric_OpMod32(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16396,7 +14814,6 @@ private static bool rewriteValuegeneric_OpMod32u(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(uint32(c) % uint32(d)));
         return true;
-
     } 
     // match: (Mod32u <t> n (Const32 [c]))
     // cond: isPowerOfTwo32(c)
@@ -16416,7 +14833,6 @@ private static bool rewriteValuegeneric_OpMod32u(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod32u <t> x (Const32 [c]))
     // cond: x.Op != OpConst32 && c > 0 && umagicOK32(c)
@@ -16440,10 +14856,8 @@ private static bool rewriteValuegeneric_OpMod32u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16469,7 +14883,6 @@ private static bool rewriteValuegeneric_OpMod64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(c % d);
         return true;
-
     } 
     // match: (Mod64 <t> n (Const64 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo64(c)
@@ -16489,7 +14902,6 @@ private static bool rewriteValuegeneric_OpMod64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod64 n (Const64 [-1<<63]))
     // cond: isNonNegative(n)
@@ -16501,7 +14913,6 @@ private static bool rewriteValuegeneric_OpMod64(ptr<Value> _addr_v) {
         }
         v.copyOf(n);
         return true;
-
     } 
     // match: (Mod64 <t> n (Const64 [c]))
     // cond: c < 0 && c != -1<<63
@@ -16522,7 +14933,6 @@ private static bool rewriteValuegeneric_OpMod64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(-c);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod64 <t> x (Const64 [c]))
     // cond: x.Op != OpConst64 && (c > 0 || c == -1<<63)
@@ -16546,10 +14956,8 @@ private static bool rewriteValuegeneric_OpMod64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16575,7 +14983,6 @@ private static bool rewriteValuegeneric_OpMod64u(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(uint64(c) % uint64(d)));
         return true;
-
     } 
     // match: (Mod64u <t> n (Const64 [c]))
     // cond: isPowerOfTwo64(c)
@@ -16595,7 +15002,6 @@ private static bool rewriteValuegeneric_OpMod64u(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod64u <t> n (Const64 [-1<<63]))
     // result: (And64 n (Const64 <t> [1<<63-1]))
@@ -16610,7 +15016,6 @@ private static bool rewriteValuegeneric_OpMod64u(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(1 << 63 - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod64u <t> x (Const64 [c]))
     // cond: x.Op != OpConst64 && c > 0 && umagicOK64(c)
@@ -16634,10 +15039,8 @@ private static bool rewriteValuegeneric_OpMod64u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16663,7 +15066,6 @@ private static bool rewriteValuegeneric_OpMod8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(c % d);
         return true;
-
     } 
     // match: (Mod8 <t> n (Const8 [c]))
     // cond: isNonNegative(n) && isPowerOfTwo8(c)
@@ -16683,7 +15085,6 @@ private static bool rewriteValuegeneric_OpMod8(ptr<Value> _addr_v) {
         v0.AuxInt = int8ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod8 <t> n (Const8 [c]))
     // cond: c < 0 && c != -1<<7
@@ -16704,7 +15105,6 @@ private static bool rewriteValuegeneric_OpMod8(ptr<Value> _addr_v) {
         v0.AuxInt = int8ToAuxInt(-c);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod8 <t> x (Const8 [c]))
     // cond: x.Op != OpConst8 && (c > 0 || c == -1<<7)
@@ -16728,10 +15128,8 @@ private static bool rewriteValuegeneric_OpMod8(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16757,7 +15155,6 @@ private static bool rewriteValuegeneric_OpMod8u(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(int8(uint8(c) % uint8(d)));
         return true;
-
     } 
     // match: (Mod8u <t> n (Const8 [c]))
     // cond: isPowerOfTwo8(c)
@@ -16777,7 +15174,6 @@ private static bool rewriteValuegeneric_OpMod8u(ptr<Value> _addr_v) {
         v0.AuxInt = int8ToAuxInt(c - 1);
         v.AddArg2(n, v0);
         return true;
-
     } 
     // match: (Mod8u <t> x (Const8 [c]))
     // cond: x.Op != OpConst8 && c > 0 && umagicOK8( c)
@@ -16801,10 +15197,8 @@ private static bool rewriteValuegeneric_OpMod8u(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16835,7 +15229,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t);
         v.AddArg2(dst1, mem);
         return true;
-
     } 
     // match: (Move {t} [n] dst1 src mem:(VarDef (Zero {t} [n] dst0 _)))
     // cond: isSamePtr(src, dst0)
@@ -16862,7 +15255,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t);
         v.AddArg2(dst1, mem);
         return true;
-
     } 
     // match: (Move {t} [n] dst (Addr {sym} (SB)) mem)
     // cond: symIsROZero(sym)
@@ -16888,7 +15280,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t);
         v.AddArg2(dst, mem);
         return true;
-
     } 
     // match: (Move {t1} [n] dst1 src1 store:(Store {t2} op:(OffPtr [o2] dst2) _ mem))
     // cond: isSamePtr(dst1, dst2) && store.Uses == 1 && n >= o2 + t2.Size() && disjoint(src1, n, op, t2.Size()) && clobber(store)
@@ -16918,7 +15309,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t1);
         v.AddArg3(dst1, src1, mem);
         return true;
-
     } 
     // match: (Move {t} [n] dst1 src1 move:(Move {t} [n] dst2 _ mem))
     // cond: move.Uses == 1 && isSamePtr(dst1, dst2) && disjoint(src1, n, dst2, n) && clobber(move)
@@ -16942,7 +15332,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t);
         v.AddArg3(dst1, src1, mem);
         return true;
-
     } 
     // match: (Move {t} [n] dst1 src1 vardef:(VarDef {x} move:(Move {t} [n] dst2 _ mem)))
     // cond: move.Uses == 1 && vardef.Uses == 1 && isSamePtr(dst1, dst2) && disjoint(src1, n, dst2, n) && clobber(move, vardef)
@@ -16974,7 +15363,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v0.AddArg(mem);
         v.AddArg3(dst1, src1, v0);
         return true;
-
     } 
     // match: (Move {t} [n] dst1 src1 zero:(Zero {t} [n] dst2 mem))
     // cond: zero.Uses == 1 && isSamePtr(dst1, dst2) && disjoint(src1, n, dst2, n) && clobber(zero)
@@ -16998,7 +15386,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t);
         v.AddArg3(dst1, src1, mem);
         return true;
-
     } 
     // match: (Move {t} [n] dst1 src1 vardef:(VarDef {x} zero:(Zero {t} [n] dst2 mem)))
     // cond: zero.Uses == 1 && vardef.Uses == 1 && isSamePtr(dst1, dst2) && disjoint(src1, n, dst2, n) && clobber(zero, vardef)
@@ -17030,7 +15417,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v0.AddArg(mem);
         v.AddArg3(dst1, src1, v0);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Store {t3} op3:(OffPtr <tt3> [0] p3) d2 _)))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && o2 == t3.Size() && n == t2.Size() + t3.Size()
@@ -17085,7 +15471,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, mem);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Store {t3} op3:(OffPtr <tt3> [o3] p3) d2 (Store {t4} op4:(OffPtr <tt4> [0] p4) d3 _))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && o3 == t4.Size() && o2-o3 == t3.Size() && n == t2.Size() + t3.Size() + t4.Size()
@@ -17160,7 +15545,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Store {t3} op3:(OffPtr <tt3> [o3] p3) d2 (Store {t4} op4:(OffPtr <tt4> [o4] p4) d3 (Store {t5} op5:(OffPtr <tt5> [0] p5) d4 _)))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && t5.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && registerizable(b, t5) && o4 == t5.Size() && o3-o4 == t4.Size() && o2-o3 == t3.Size() && n == t2.Size() + t3.Size() + t4.Size() + t5.Size()
@@ -17255,7 +15639,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(VarDef (Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Store {t3} op3:(OffPtr <tt3> [0] p3) d2 _))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && o2 == t3.Size() && n == t2.Size() + t3.Size()
@@ -17314,7 +15697,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, mem);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(VarDef (Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Store {t3} op3:(OffPtr <tt3> [o3] p3) d2 (Store {t4} op4:(OffPtr <tt4> [0] p4) d3 _)))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && o3 == t4.Size() && o2-o3 == t3.Size() && n == t2.Size() + t3.Size() + t4.Size()
@@ -17393,7 +15775,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(VarDef (Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Store {t3} op3:(OffPtr <tt3> [o3] p3) d2 (Store {t4} op4:(OffPtr <tt4> [o4] p4) d3 (Store {t5} op5:(OffPtr <tt5> [0] p5) d4 _))))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && t5.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && registerizable(b, t5) && o4 == t5.Size() && o3-o4 == t4.Size() && o2-o3 == t3.Size() && n == t2.Size() + t3.Size() + t4.Size() + t5.Size()
@@ -17492,7 +15873,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Zero {t3} [n] p3 _)))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && registerizable(b, t2) && n >= o2 + t2.Size()
@@ -17536,7 +15916,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg2(dst, mem);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(Store {t2} (OffPtr <tt2> [o2] p2) d1 (Store {t3} (OffPtr <tt3> [o3] p3) d2 (Zero {t4} [n] p4 _))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && n >= o2 + t2.Size() && n >= o3 + t3.Size()
@@ -17600,7 +15979,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(Store {t2} (OffPtr <tt2> [o2] p2) d1 (Store {t3} (OffPtr <tt3> [o3] p3) d2 (Store {t4} (OffPtr <tt4> [o4] p4) d3 (Zero {t5} [n] p5 _)))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && t5.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && n >= o2 + t2.Size() && n >= o3 + t3.Size() && n >= o4 + t4.Size()
@@ -17684,7 +16062,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(Store {t2} (OffPtr <tt2> [o2] p2) d1 (Store {t3} (OffPtr <tt3> [o3] p3) d2 (Store {t4} (OffPtr <tt4> [o4] p4) d3 (Store {t5} (OffPtr <tt5> [o5] p5) d4 (Zero {t6} [n] p6 _))))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && isSamePtr(p5, p6) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && t5.Alignment() <= t1.Alignment() && t6.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && registerizable(b, t5) && n >= o2 + t2.Size() && n >= o3 + t3.Size() && n >= o4 + t4.Size() && n >= o5 + t5.Size()
@@ -17788,7 +16165,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(VarDef (Store {t2} op2:(OffPtr <tt2> [o2] p2) d1 (Zero {t3} [n] p3 _))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && registerizable(b, t2) && n >= o2 + t2.Size()
@@ -17836,7 +16212,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg2(dst, mem);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(VarDef (Store {t2} (OffPtr <tt2> [o2] p2) d1 (Store {t3} (OffPtr <tt3> [o3] p3) d2 (Zero {t4} [n] p4 _)))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && n >= o2 + t2.Size() && n >= o3 + t3.Size()
@@ -17904,7 +16279,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(VarDef (Store {t2} (OffPtr <tt2> [o2] p2) d1 (Store {t3} (OffPtr <tt3> [o3] p3) d2 (Store {t4} (OffPtr <tt4> [o4] p4) d3 (Zero {t5} [n] p5 _))))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && t5.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && n >= o2 + t2.Size() && n >= o3 + t3.Size() && n >= o4 + t4.Size()
@@ -17992,7 +16366,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [n] dst p1 mem:(VarDef (Store {t2} (OffPtr <tt2> [o2] p2) d1 (Store {t3} (OffPtr <tt3> [o3] p3) d2 (Store {t4} (OffPtr <tt4> [o4] p4) d3 (Store {t5} (OffPtr <tt5> [o5] p5) d4 (Zero {t6} [n] p6 _)))))))
     // cond: isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && isSamePtr(p5, p6) && t2.Alignment() <= t1.Alignment() && t3.Alignment() <= t1.Alignment() && t4.Alignment() <= t1.Alignment() && t5.Alignment() <= t1.Alignment() && t6.Alignment() <= t1.Alignment() && registerizable(b, t2) && registerizable(b, t3) && registerizable(b, t4) && registerizable(b, t5) && n >= o2 + t2.Size() && n >= o3 + t3.Size() && n >= o4 + t4.Size() && n >= o5 + t5.Size()
@@ -18100,7 +16473,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(v2, d2, v3);
         v.AddArg3(v0, d1, v1);
         return true;
-
     } 
     // match: (Move {t1} [s] dst tmp1 midmem:(Move {t2} [s] tmp2 src _))
     // cond: t1.Compare(t2) == types.CMPeq && isSamePtr(tmp1, tmp2) && isStackPtr(src) && !isVolatile(src) && disjoint(src, s, tmp2, s) && (disjoint(src, s, dst, s) || isInlinableMemmove(dst, src, s, config))
@@ -18125,7 +16497,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t1);
         v.AddArg3(dst, src, midmem);
         return true;
-
     } 
     // match: (Move {t1} [s] dst tmp1 midmem:(VarDef (Move {t2} [s] tmp2 src _)))
     // cond: t1.Compare(t2) == types.CMPeq && isSamePtr(tmp1, tmp2) && isStackPtr(src) && !isVolatile(src) && disjoint(src, s, tmp2, s) && (disjoint(src, s, dst, s) || isInlinableMemmove(dst, src, s, config))
@@ -18154,7 +16525,6 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t1);
         v.AddArg3(dst, src, midmem);
         return true;
-
     } 
     // match: (Move dst src mem)
     // cond: isSamePtr(dst, src)
@@ -18168,10 +16538,8 @@ private static bool rewriteValuegeneric_OpMove(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18193,24 +16561,20 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 var d = auxIntToInt16(v_1.AuxInt);
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul16 (Const16 [1]) x)
     // result: x
@@ -18225,18 +16589,15 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul16 (Const16 [-1]) x)
     // result: (Neg16 x)
@@ -18251,19 +16612,16 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.reset(OpNeg16);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul16 <t> n (Const16 [c]))
     // cond: isPowerOfTwo16(c)
@@ -18281,26 +16639,22 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt16(v_1.AuxInt);
                 if (!(isPowerOfTwo16(c))) {
                     continue;
                 }
-
                 v.reset(OpLsh16x64);
                 v.Type = t;
                 var v0 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
                 v0.AuxInt = int64ToAuxInt(log16(c));
                 v.AddArg2(n, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul16 <t> n (Const16 [c]))
     // cond: t.IsSigned() && isPowerOfTwo16(-c)
@@ -18318,12 +16672,10 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt16(v_1.AuxInt);
                 if (!(t.IsSigned() && isPowerOfTwo16(-c))) {
                     continue;
                 }
-
                 v.reset(OpNeg16);
                 v0 = b.NewValue0(v.Pos, OpLsh16x64, t);
                 var v1 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
@@ -18331,14 +16683,12 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                 v0.AddArg2(n, v1);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul16 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -18353,18 +16703,15 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul16 (Mul16 i:(Const16 <t>) z) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -18380,7 +16727,6 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -18395,33 +16741,28 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                             continue;
                         }
-
                         v.reset(OpMul16);
                         v0 = b.NewValue0(v.Pos, OpMul16, t);
                         v0.AddArg2(x, z);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul16 (Const16 <t> [c]) (Mul16 (Const16 <t> [d]) x))
     // result: (Mul16 (Const16 <t> [c*d]) x)
@@ -18436,13 +16777,11 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpMul16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -18456,7 +16795,6 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt16(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpMul16);
@@ -18464,23 +16802,19 @@ private static bool rewriteValuegeneric_OpMul16(ptr<Value> _addr_v) {
                         v0.AuxInt = int16ToAuxInt(c * d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18502,24 +16836,20 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 (Const32 [1]) x)
     // result: x
@@ -18534,18 +16864,15 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 (Const32 [-1]) x)
     // result: (Neg32 x)
@@ -18560,19 +16887,16 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.reset(OpNeg32);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 <t> n (Const32 [c]))
     // cond: isPowerOfTwo32(c)
@@ -18590,26 +16914,22 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(isPowerOfTwo32(c))) {
                     continue;
                 }
-
                 v.reset(OpLsh32x64);
                 v.Type = t;
                 var v0 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
                 v0.AuxInt = int64ToAuxInt(log32(c));
                 v.AddArg2(n, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 <t> n (Const32 [c]))
     // cond: t.IsSigned() && isPowerOfTwo32(-c)
@@ -18627,12 +16947,10 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 if (!(t.IsSigned() && isPowerOfTwo32(-c))) {
                     continue;
                 }
-
                 v.reset(OpNeg32);
                 v0 = b.NewValue0(v.Pos, OpLsh32x64, t);
                 var v1 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
@@ -18640,14 +16958,12 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                 v0.AddArg2(n, v1);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 (Const32 <t> [c]) (Add32 <t> (Const32 <t> [d]) x))
     // result: (Add32 (Const32 <t> [c*d]) (Mul32 <t> (Const32 <t> [c]) x))
@@ -18662,13 +16978,11 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpAdd32 || v_1.Type != t) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -18682,7 +16996,6 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAdd32);
@@ -18694,20 +17007,17 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                         v1.AddArg2(v2, x);
                         v.AddArg2(v0, v1);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -18722,18 +17032,15 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 (Mul32 i:(Const32 <t>) z) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -18749,7 +17056,6 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -18764,33 +17070,28 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                             continue;
                         }
-
                         v.reset(OpMul32);
                         v0 = b.NewValue0(v.Pos, OpMul32, t);
                         v0.AddArg2(x, z);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32 (Const32 <t> [c]) (Mul32 (Const32 <t> [d]) x))
     // result: (Mul32 (Const32 <t> [c*d]) x)
@@ -18805,13 +17106,11 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpMul32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -18825,7 +17124,6 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpMul32);
@@ -18833,23 +17131,19 @@ private static bool rewriteValuegeneric_OpMul32(ptr<Value> _addr_v) {
                         v0.AuxInt = int32ToAuxInt(c * d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMul32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18870,28 +17164,23 @@ private static bool rewriteValuegeneric_OpMul32F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat32(v_0.AuxInt);
                 if (v_1.Op != OpConst32F) {
                     continue;
                 }
-
                 var d = auxIntToFloat32(v_1.AuxInt);
                 if (!(c * d == c * d)) {
                     continue;
                 }
-
                 v.reset(OpConst32F);
                 v.AuxInt = float32ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32F x (Const32F [1]))
     // result: x
@@ -18907,17 +17196,14 @@ private static bool rewriteValuegeneric_OpMul32F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32F x (Const32F [-1]))
     // result: (Neg32F x)
@@ -18933,18 +17219,15 @@ private static bool rewriteValuegeneric_OpMul32F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpNeg32F);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul32F x (Const32F [2]))
     // result: (Add32F x x)
@@ -18960,21 +17243,17 @@ private static bool rewriteValuegeneric_OpMul32F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpAdd32F);
                 v.AddArg2(x, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18996,24 +17275,20 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 (Const64 [1]) x)
     // result: x
@@ -19028,18 +17303,15 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 (Const64 [-1]) x)
     // result: (Neg64 x)
@@ -19054,19 +17326,16 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.reset(OpNeg64);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 <t> n (Const64 [c]))
     // cond: isPowerOfTwo64(c)
@@ -19084,26 +17353,22 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(isPowerOfTwo64(c))) {
                     continue;
                 }
-
                 v.reset(OpLsh64x64);
                 v.Type = t;
                 var v0 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
                 v0.AuxInt = int64ToAuxInt(log64(c));
                 v.AddArg2(n, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 <t> n (Const64 [c]))
     // cond: t.IsSigned() && isPowerOfTwo64(-c)
@@ -19121,12 +17386,10 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(t.IsSigned() && isPowerOfTwo64(-c))) {
                     continue;
                 }
-
                 v.reset(OpNeg64);
                 v0 = b.NewValue0(v.Pos, OpLsh64x64, t);
                 var v1 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
@@ -19134,14 +17397,12 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                 v0.AddArg2(n, v1);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 (Const64 <t> [c]) (Add64 <t> (Const64 <t> [d]) x))
     // result: (Add64 (Const64 <t> [c*d]) (Mul64 <t> (Const64 <t> [c]) x))
@@ -19156,13 +17417,11 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpAdd64 || v_1.Type != t) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -19176,7 +17435,6 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpAdd64);
@@ -19188,20 +17446,17 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                         v1.AddArg2(v2, x);
                         v.AddArg2(v0, v1);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -19216,18 +17471,15 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 (Mul64 i:(Const64 <t>) z) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -19243,7 +17495,6 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -19258,33 +17509,28 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                             continue;
                         }
-
                         v.reset(OpMul64);
                         v0 = b.NewValue0(v.Pos, OpMul64, t);
                         v0.AddArg2(x, z);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64 (Const64 <t> [c]) (Mul64 (Const64 <t> [d]) x))
     // result: (Mul64 (Const64 <t> [c*d]) x)
@@ -19299,13 +17545,11 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpMul64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -19319,7 +17563,6 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpMul64);
@@ -19327,23 +17570,19 @@ private static bool rewriteValuegeneric_OpMul64(ptr<Value> _addr_v) {
                         v0.AuxInt = int64ToAuxInt(c * d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMul64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19364,28 +17603,23 @@ private static bool rewriteValuegeneric_OpMul64F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat64(v_0.AuxInt);
                 if (v_1.Op != OpConst64F) {
                     continue;
                 }
-
                 var d = auxIntToFloat64(v_1.AuxInt);
                 if (!(c * d == c * d)) {
                     continue;
                 }
-
                 v.reset(OpConst64F);
                 v.AuxInt = float64ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64F x (Const64F [1]))
     // result: x
@@ -19401,17 +17635,14 @@ private static bool rewriteValuegeneric_OpMul64F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64F x (Const64F [-1]))
     // result: (Neg64F x)
@@ -19427,18 +17658,15 @@ private static bool rewriteValuegeneric_OpMul64F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpNeg64F);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul64F x (Const64F [2]))
     // result: (Add64F x x)
@@ -19454,21 +17682,17 @@ private static bool rewriteValuegeneric_OpMul64F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpAdd64F);
                 v.AddArg2(x, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19490,24 +17714,20 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(c * d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul8 (Const8 [1]) x)
     // result: x
@@ -19522,18 +17742,15 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul8 (Const8 [-1]) x)
     // result: (Neg8 x)
@@ -19548,19 +17765,16 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.reset(OpNeg8);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul8 <t> n (Const8 [c]))
     // cond: isPowerOfTwo8(c)
@@ -19578,26 +17792,22 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_1.AuxInt);
                 if (!(isPowerOfTwo8(c))) {
                     continue;
                 }
-
                 v.reset(OpLsh8x64);
                 v.Type = t;
                 var v0 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
                 v0.AuxInt = int64ToAuxInt(log8(c));
                 v.AddArg2(n, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul8 <t> n (Const8 [c]))
     // cond: t.IsSigned() && isPowerOfTwo8(-c)
@@ -19615,12 +17825,10 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_1.AuxInt);
                 if (!(t.IsSigned() && isPowerOfTwo8(-c))) {
                     continue;
                 }
-
                 v.reset(OpNeg8);
                 v0 = b.NewValue0(v.Pos, OpLsh8x64, t);
                 var v1 = b.NewValue0(v.Pos, OpConst64, typ.UInt64);
@@ -19628,14 +17836,12 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                 v0.AddArg2(n, v1);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul8 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -19650,18 +17856,15 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul8 (Mul8 i:(Const8 <t>) z) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -19677,7 +17880,6 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -19692,33 +17894,28 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                             continue;
                         }
-
                         v.reset(OpMul8);
                         v0 = b.NewValue0(v.Pos, OpMul8, t);
                         v0.AddArg2(x, z);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Mul8 (Const8 <t> [c]) (Mul8 (Const8 <t> [d]) x))
     // result: (Mul8 (Const8 <t> [c*d]) x)
@@ -19733,13 +17930,11 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpMul8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -19753,7 +17948,6 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt8(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpMul8);
@@ -19761,23 +17955,19 @@ private static bool rewriteValuegeneric_OpMul8(ptr<Value> _addr_v) {
                         v0.AuxInt = int8ToAuxInt(c * d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeg16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19794,7 +17984,6 @@ private static bool rewriteValuegeneric_OpNeg16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(-c);
         return true;
-
     } 
     // match: (Neg16 (Sub16 x y))
     // result: (Sub16 y x)
@@ -19807,7 +17996,6 @@ private static bool rewriteValuegeneric_OpNeg16(ptr<Value> _addr_v) {
         v.reset(OpSub16);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Neg16 (Neg16 x))
     // result: x
@@ -19818,7 +18006,6 @@ private static bool rewriteValuegeneric_OpNeg16(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Neg16 <t> (Com16 x))
     // result: (Add16 (Const16 <t> [1]) x)
@@ -19833,10 +18020,8 @@ private static bool rewriteValuegeneric_OpNeg16(ptr<Value> _addr_v) {
         v0.AuxInt = int16ToAuxInt(1);
         v.AddArg2(v0, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeg32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19853,7 +18038,6 @@ private static bool rewriteValuegeneric_OpNeg32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(-c);
         return true;
-
     } 
     // match: (Neg32 (Sub32 x y))
     // result: (Sub32 y x)
@@ -19866,7 +18050,6 @@ private static bool rewriteValuegeneric_OpNeg32(ptr<Value> _addr_v) {
         v.reset(OpSub32);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Neg32 (Neg32 x))
     // result: x
@@ -19877,7 +18060,6 @@ private static bool rewriteValuegeneric_OpNeg32(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Neg32 <t> (Com32 x))
     // result: (Add32 (Const32 <t> [1]) x)
@@ -19892,10 +18074,8 @@ private static bool rewriteValuegeneric_OpNeg32(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(1);
         v.AddArg2(v0, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeg32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19915,10 +18095,8 @@ private static bool rewriteValuegeneric_OpNeg32F(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(-c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeg64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19935,7 +18113,6 @@ private static bool rewriteValuegeneric_OpNeg64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(-c);
         return true;
-
     } 
     // match: (Neg64 (Sub64 x y))
     // result: (Sub64 y x)
@@ -19948,7 +18125,6 @@ private static bool rewriteValuegeneric_OpNeg64(ptr<Value> _addr_v) {
         v.reset(OpSub64);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Neg64 (Neg64 x))
     // result: x
@@ -19959,7 +18135,6 @@ private static bool rewriteValuegeneric_OpNeg64(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Neg64 <t> (Com64 x))
     // result: (Add64 (Const64 <t> [1]) x)
@@ -19974,10 +18149,8 @@ private static bool rewriteValuegeneric_OpNeg64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(1);
         v.AddArg2(v0, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeg64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -19997,10 +18170,8 @@ private static bool rewriteValuegeneric_OpNeg64F(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(-c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeg8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20017,7 +18188,6 @@ private static bool rewriteValuegeneric_OpNeg8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(-c);
         return true;
-
     } 
     // match: (Neg8 (Sub8 x y))
     // result: (Sub8 y x)
@@ -20030,7 +18200,6 @@ private static bool rewriteValuegeneric_OpNeg8(ptr<Value> _addr_v) {
         v.reset(OpSub8);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Neg8 (Neg8 x))
     // result: x
@@ -20041,7 +18210,6 @@ private static bool rewriteValuegeneric_OpNeg8(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Neg8 <t> (Com8 x))
     // result: (Add8 (Const8 <t> [1]) x)
@@ -20056,10 +18224,8 @@ private static bool rewriteValuegeneric_OpNeg8(ptr<Value> _addr_v) {
         v0.AuxInt = int8ToAuxInt(1);
         v.AddArg2(v0, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20078,7 +18244,6 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (Neq16 (Const16 <t> [c]) (Add16 (Const16 <t> [d]) x))
     // result: (Neq16 (Const16 <t> [c-d]) x)
@@ -20093,13 +18258,11 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpAdd16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -20113,7 +18276,6 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt16(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpNeq16);
@@ -20121,20 +18283,17 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                         v0.AuxInt = int16ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq16 (Const16 [c]) (Const16 [d]))
     // result: (ConstBool [c != d])
@@ -20149,24 +18308,20 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq16 n (Lsh16x64 (Rsh16x64 (Add16 <t> n (Rsh16Ux64 <t> (Rsh16x64 <t> n (Const64 <typ.UInt64> [15])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 15 && kbar == 16 - k
@@ -20183,19 +18338,16 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh16x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd16) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -20210,40 +18362,33 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh16x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 15) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 15 && kbar == 16 - k)) {
                             continue;
                         }
-
                         v.reset(OpNeq16);
                         v0 = b.NewValue0(v.Pos, OpAnd16, t);
                         var v1 = b.NewValue0(v.Pos, OpConst16, t);
@@ -20253,20 +18398,17 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                         v2.AuxInt = int16ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq16 s:(Sub16 x y) (Const16 [0]))
     // cond: s.Uses == 1
@@ -20283,24 +18425,20 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst16 || auxIntToInt16(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpNeq16);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq16 (And16 <t> x (Const16 <t> [y])) (Const16 <t> [y]))
     // cond: oneBit16(y)
@@ -20316,7 +18454,6 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -20332,12 +18469,10 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt16(v_0_1.AuxInt);
                         if (v_1.Op != OpConst16 || v_1.Type != t || auxIntToInt16(v_1.AuxInt) != y || !(oneBit16(y))) {
                             continue;
                         }
-
                         v.reset(OpEq16);
                         v0 = b.NewValue0(v.Pos, OpAnd16, t);
                         v1 = b.NewValue0(v.Pos, OpConst16, t);
@@ -20347,23 +18482,19 @@ private static bool rewriteValuegeneric_OpNeq16(ptr<Value> _addr_v) {
                         v2.AuxInt = int16ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20382,7 +18513,6 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (Neq32 (Const32 <t> [c]) (Add32 (Const32 <t> [d]) x))
     // result: (Neq32 (Const32 <t> [c-d]) x)
@@ -20397,13 +18527,11 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpAdd32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -20417,7 +18545,6 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpNeq32);
@@ -20425,20 +18552,17 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                         v0.AuxInt = int32ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq32 (Const32 [c]) (Const32 [d]))
     // result: (ConstBool [c != d])
@@ -20453,24 +18577,20 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq32 n (Lsh32x64 (Rsh32x64 (Add32 <t> n (Rsh32Ux64 <t> (Rsh32x64 <t> n (Const64 <typ.UInt64> [31])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 31 && kbar == 32 - k
@@ -20487,19 +18607,16 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh32x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd32) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -20514,40 +18631,33 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh32x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 31) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 31 && kbar == 32 - k)) {
                             continue;
                         }
-
                         v.reset(OpNeq32);
                         v0 = b.NewValue0(v.Pos, OpAnd32, t);
                         var v1 = b.NewValue0(v.Pos, OpConst32, t);
@@ -20557,20 +18667,17 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                         v2.AuxInt = int32ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq32 s:(Sub32 x y) (Const32 [0]))
     // cond: s.Uses == 1
@@ -20587,24 +18694,20 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst32 || auxIntToInt32(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpNeq32);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq32 (And32 <t> x (Const32 <t> [y])) (Const32 <t> [y]))
     // cond: oneBit32(y)
@@ -20620,7 +18723,6 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -20636,12 +18738,10 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt32(v_0_1.AuxInt);
                         if (v_1.Op != OpConst32 || v_1.Type != t || auxIntToInt32(v_1.AuxInt) != y || !(oneBit32(y))) {
                             continue;
                         }
-
                         v.reset(OpEq32);
                         v0 = b.NewValue0(v.Pos, OpAnd32, t);
                         v1 = b.NewValue0(v.Pos, OpConst32, t);
@@ -20651,23 +18751,19 @@ private static bool rewriteValuegeneric_OpNeq32(ptr<Value> _addr_v) {
                         v2.AuxInt = int32ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20685,25 +18781,20 @@ private static bool rewriteValuegeneric_OpNeq32F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat32(v_0.AuxInt);
                 if (v_1.Op != OpConst32F) {
                     continue;
                 }
-
                 var d = auxIntToFloat32(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -20722,7 +18813,6 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (Neq64 (Const64 <t> [c]) (Add64 (Const64 <t> [d]) x))
     // result: (Neq64 (Const64 <t> [c-d]) x)
@@ -20737,13 +18827,11 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpAdd64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -20757,7 +18845,6 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpNeq64);
@@ -20765,20 +18852,17 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                         v0.AuxInt = int64ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq64 (Const64 [c]) (Const64 [d]))
     // result: (ConstBool [c != d])
@@ -20793,24 +18877,20 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq64 n (Lsh64x64 (Rsh64x64 (Add64 <t> n (Rsh64Ux64 <t> (Rsh64x64 <t> n (Const64 <typ.UInt64> [63])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 63 && kbar == 64 - k
@@ -20827,19 +18907,16 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh64x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd64) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -20854,40 +18931,33 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh64x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 63) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 63 && kbar == 64 - k)) {
                             continue;
                         }
-
                         v.reset(OpNeq64);
                         v0 = b.NewValue0(v.Pos, OpAnd64, t);
                         var v1 = b.NewValue0(v.Pos, OpConst64, t);
@@ -20897,20 +18967,17 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                         v2.AuxInt = int64ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq64 s:(Sub64 x y) (Const64 [0]))
     // cond: s.Uses == 1
@@ -20927,24 +18994,20 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst64 || auxIntToInt64(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpNeq64);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq64 (And64 <t> x (Const64 <t> [y])) (Const64 <t> [y]))
     // cond: oneBit64(y)
@@ -20960,7 +19023,6 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -20976,12 +19038,10 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt64(v_0_1.AuxInt);
                         if (v_1.Op != OpConst64 || v_1.Type != t || auxIntToInt64(v_1.AuxInt) != y || !(oneBit64(y))) {
                             continue;
                         }
-
                         v.reset(OpEq64);
                         v0 = b.NewValue0(v.Pos, OpAnd64, t);
                         v1 = b.NewValue0(v.Pos, OpConst64, t);
@@ -20991,23 +19051,19 @@ private static bool rewriteValuegeneric_OpNeq64(ptr<Value> _addr_v) {
                         v2.AuxInt = int64ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -21025,25 +19081,20 @@ private static bool rewriteValuegeneric_OpNeq64F(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToFloat64(v_0.AuxInt);
                 if (v_1.Op != OpConst64F) {
                     continue;
                 }
-
                 var d = auxIntToFloat64(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -21062,7 +19113,6 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (Neq8 (Const8 <t> [c]) (Add8 (Const8 <t> [d]) x))
     // result: (Neq8 (Const8 <t> [c-d]) x)
@@ -21077,13 +19127,11 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_0.Type;
                 var c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpAdd8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -21097,7 +19145,6 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var d = auxIntToInt8(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpNeq8);
@@ -21105,20 +19152,17 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                         v0.AuxInt = int8ToAuxInt(c - d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq8 (Const8 [c]) (Const8 [d]))
     // result: (ConstBool [c != d])
@@ -21133,24 +19177,20 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq8 n (Lsh8x64 (Rsh8x64 (Add8 <t> n (Rsh8Ux64 <t> (Rsh8x64 <t> n (Const64 <typ.UInt64> [ 7])) (Const64 <typ.UInt64> [kbar]))) (Const64 <typ.UInt64> [k])) (Const64 <typ.UInt64> [k])) )
     // cond: k > 0 && k < 7 && kbar == 8 - k
@@ -21167,19 +19207,16 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpRsh8x64) {
                     continue;
                 }
-
                 _ = v_1_0.Args[1];
                 var v_1_0_0 = v_1_0.Args[0];
                 if (v_1_0_0.Op != OpAdd8) {
                     continue;
                 }
-
                 t = v_1_0_0.Type;
                 _ = v_1_0_0.Args[1];
                 var v_1_0_0_0 = v_1_0_0.Args[0];
@@ -21194,40 +19231,33 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0_0_0, v_1_0_0_1) = (_i1 + 1, v_1_0_0_1, v_1_0_0_0);
                         }
-
                         _ = v_1_0_0_1.Args[1];
                         var v_1_0_0_1_0 = v_1_0_0_1.Args[0];
                         if (v_1_0_0_1_0.Op != OpRsh8x64 || v_1_0_0_1_0.Type != t) {
                             continue;
                         }
-
                         _ = v_1_0_0_1_0.Args[1];
                         if (n != v_1_0_0_1_0.Args[0]) {
                             continue;
                         }
-
                         var v_1_0_0_1_0_1 = v_1_0_0_1_0.Args[1];
                         if (v_1_0_0_1_0_1.Op != OpConst64 || v_1_0_0_1_0_1.Type != typ.UInt64 || auxIntToInt64(v_1_0_0_1_0_1.AuxInt) != 7) {
                             continue;
                         }
-
                         var v_1_0_0_1_1 = v_1_0_0_1.Args[1];
                         if (v_1_0_0_1_1.Op != OpConst64 || v_1_0_0_1_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var kbar = auxIntToInt64(v_1_0_0_1_1.AuxInt);
                         var v_1_0_1 = v_1_0.Args[1];
                         if (v_1_0_1.Op != OpConst64 || v_1_0_1.Type != typ.UInt64) {
                             continue;
                         }
-
                         var k = auxIntToInt64(v_1_0_1.AuxInt);
                         v_1_1 = v_1.Args[1];
                         if (v_1_1.Op != OpConst64 || v_1_1.Type != typ.UInt64 || auxIntToInt64(v_1_1.AuxInt) != k || !(k > 0 && k < 7 && kbar == 8 - k)) {
                             continue;
                         }
-
                         v.reset(OpNeq8);
                         v0 = b.NewValue0(v.Pos, OpAnd8, t);
                         var v1 = b.NewValue0(v.Pos, OpConst8, t);
@@ -21237,20 +19267,17 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                         v2.AuxInt = int8ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq8 s:(Sub8 x y) (Const8 [0]))
     // cond: s.Uses == 1
@@ -21267,24 +19294,20 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = s.Args[1];
                 x = s.Args[0];
                 if (v_1.Op != OpConst8 || auxIntToInt8(v_1.AuxInt) != 0 || !(s.Uses == 1)) {
                     continue;
                 }
-
                 v.reset(OpNeq8);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Neq8 (And8 <t> x (Const8 <t> [y])) (Const8 <t> [y]))
     // cond: oneBit8(y)
@@ -21300,7 +19323,6 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
@@ -21316,12 +19338,10 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         y = auxIntToInt8(v_0_1.AuxInt);
                         if (v_1.Op != OpConst8 || v_1.Type != t || auxIntToInt8(v_1.AuxInt) != y || !(oneBit8(y))) {
                             continue;
                         }
-
                         v.reset(OpEq8);
                         v0 = b.NewValue0(v.Pos, OpAnd8, t);
                         v1 = b.NewValue0(v.Pos, OpConst8, t);
@@ -21331,23 +19351,19 @@ private static bool rewriteValuegeneric_OpNeq8(ptr<Value> _addr_v) {
                         v2.AuxInt = int8ToAuxInt(0);
                         v.AddArg2(v0, v2);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -21367,24 +19383,20 @@ private static bool rewriteValuegeneric_OpNeqB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToBool(v_0.AuxInt);
                 if (v_1.Op != OpConstBool) {
                     continue;
                 }
-
                 var d = auxIntToBool(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqB (ConstBool [false]) x)
     // result: x
@@ -21399,18 +19411,15 @@ private static bool rewriteValuegeneric_OpNeqB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqB (ConstBool [true]) x)
     // result: (Not x)
@@ -21425,19 +19434,16 @@ private static bool rewriteValuegeneric_OpNeqB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.reset(OpNot);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqB (Not x) (Not y))
     // result: (NeqB x y)
@@ -21452,27 +19458,22 @@ private static bool rewriteValuegeneric_OpNeqB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[0];
                 if (v_1.Op != OpNot) {
                     continue;
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpNeqB);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeqInter(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -21494,7 +19495,6 @@ private static bool rewriteValuegeneric_OpNeqInter(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -21511,7 +19511,6 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(false);
         return true;
-
     } 
     // match: (NeqPtr (Addr {x} _) (Addr {y} _))
     // result: (ConstBool [x != y])
@@ -21526,24 +19525,20 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpAddr) {
                     continue;
                 }
-
                 var y = auxToSym(v_1.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x != y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (Addr {x} _) (OffPtr [o] (Addr {y} _)))
     // result: (ConstBool [x != y || o != 0])
@@ -21558,30 +19553,25 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 var o = auxIntToInt64(v_1.AuxInt);
                 var v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x != y || o != 0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (OffPtr [o1] (Addr {x} _)) (OffPtr [o2] (Addr {y} _)))
     // result: (ConstBool [x != y || o1 != o2])
@@ -21596,36 +19586,30 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var o1 = auxIntToInt64(v_0.AuxInt);
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpAddr) {
                     continue;
                 }
-
                 x = auxToSym(v_0_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 var o2 = auxIntToInt64(v_1.AuxInt);
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x != y || o1 != o2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (LocalAddr {x} _ _) (LocalAddr {y} _ _))
     // result: (ConstBool [x != y])
@@ -21640,24 +19624,20 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpLocalAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x != y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (LocalAddr {x} _ _) (OffPtr [o] (LocalAddr {y} _ _)))
     // result: (ConstBool [x != y || o != 0])
@@ -21672,30 +19652,25 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = auxToSym(v_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 o = auxIntToInt64(v_1.AuxInt);
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpLocalAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x != y || o != 0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (OffPtr [o1] (LocalAddr {x} _ _)) (OffPtr [o2] (LocalAddr {y} _ _)))
     // result: (ConstBool [x != y || o1 != o2])
@@ -21710,36 +19685,30 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = auxIntToInt64(v_0.AuxInt);
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpLocalAddr) {
                     continue;
                 }
-
                 x = auxToSym(v_0_0.Aux);
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 o2 = auxIntToInt64(v_1.AuxInt);
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpLocalAddr) {
                     continue;
                 }
-
                 y = auxToSym(v_1_0.Aux);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(x != y || o1 != o2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (OffPtr [o1] p1) p2)
     // cond: isSamePtr(p1, p2)
@@ -21755,25 +19724,21 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = auxIntToInt64(v_0.AuxInt);
                 var p1 = v_0.Args[0];
                 var p2 = v_1;
                 if (!(isSamePtr(p1, p2))) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(o1 != 0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (OffPtr [o1] p1) (OffPtr [o2] p2))
     // cond: isSamePtr(p1, p2)
@@ -21789,30 +19754,25 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = auxIntToInt64(v_0.AuxInt);
                 p1 = v_0.Args[0];
                 if (v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 o2 = auxIntToInt64(v_1.AuxInt);
                 p2 = v_1.Args[0];
                 if (!(isSamePtr(p1, p2))) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(o1 != o2);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (Const32 [c]) (Const32 [d]))
     // result: (ConstBool [c != d])
@@ -21827,24 +19787,20 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (Const64 [c]) (Const64 [d]))
     // result: (ConstBool [c != d])
@@ -21859,24 +19815,20 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(c != d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (LocalAddr _ _) (Addr _))
     // result: (ConstBool [true])
@@ -21891,18 +19843,15 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (OffPtr (LocalAddr _ _)) (Addr _))
     // result: (ConstBool [true])
@@ -21917,23 +19866,19 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpLocalAddr || v_1.Op != OpAddr) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (LocalAddr _ _) (OffPtr (Addr _)))
     // result: (ConstBool [true])
@@ -21948,23 +19893,19 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (OffPtr (LocalAddr _ _)) (OffPtr (Addr _)))
     // result: (ConstBool [true])
@@ -21979,28 +19920,23 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpLocalAddr || v_1.Op != OpOffPtr) {
                     continue;
                 }
-
                 v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpAddr) {
                     continue;
                 }
-
                 v.reset(OpConstBool);
                 v.AuxInt = boolToAuxInt(true);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (AddPtr p1 o1) p2)
     // cond: isSamePtr(p1, p2)
@@ -22016,25 +19952,21 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 o1 = v_0.Args[1];
                 p1 = v_0.Args[0];
                 p2 = v_1;
                 if (!(isSamePtr(p1, p2))) {
                     continue;
                 }
-
                 v.reset(OpIsNonNil);
                 v.AddArg(o1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (Const32 [0]) p)
     // result: (IsNonNil p)
@@ -22049,19 +19981,16 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var p = v_1;
                 v.reset(OpIsNonNil);
                 v.AddArg(p);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (Const64 [0]) p)
     // result: (IsNonNil p)
@@ -22076,19 +20005,16 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 p = v_1;
                 v.reset(OpIsNonNil);
                 v.AddArg(p);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (NeqPtr (ConstNil) p)
     // result: (IsNonNil p)
@@ -22103,22 +20029,18 @@ private static bool rewriteValuegeneric_OpNeqPtr(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 p = v_1;
                 v.reset(OpIsNonNil);
                 v.AddArg(p);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNeqSlice(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22140,7 +20062,6 @@ private static bool rewriteValuegeneric_OpNeqSlice(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValuegeneric_OpNilCheck(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22161,7 +20082,6 @@ private static bool rewriteValuegeneric_OpNilCheck(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (NilCheck (SelectN [0] call:(StaticLECall _ _)) _)
     // cond: isSameCall(call.Aux, "runtime.newobject") && warnRule(fe.Debug_checknil(), v, "removed nil check")
@@ -22176,7 +20096,6 @@ private static bool rewriteValuegeneric_OpNilCheck(ptr<Value> _addr_v) {
         }
         v.reset(OpInvalid);
         return true;
-
     } 
     // match: (NilCheck (OffPtr (SelectN [0] call:(StaticLECall _ _))) _)
     // cond: isSameCall(call.Aux, "runtime.newobject") && warnRule(fe.Debug_checknil(), v, "removed nil check")
@@ -22195,10 +20114,8 @@ private static bool rewriteValuegeneric_OpNilCheck(ptr<Value> _addr_v) {
         }
         v.reset(OpInvalid);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22214,7 +20131,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpConstBool);
         v.AuxInt = boolToAuxInt(!c);
         return true;
-
     } 
     // match: (Not (Eq64 x y))
     // result: (Neq64 x y)
@@ -22227,7 +20143,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeq64);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Eq32 x y))
     // result: (Neq32 x y)
@@ -22240,7 +20155,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeq32);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Eq16 x y))
     // result: (Neq16 x y)
@@ -22253,7 +20167,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeq16);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Eq8 x y))
     // result: (Neq8 x y)
@@ -22266,7 +20179,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeq8);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (EqB x y))
     // result: (NeqB x y)
@@ -22279,7 +20191,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeqB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (EqPtr x y))
     // result: (NeqPtr x y)
@@ -22292,7 +20203,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeqPtr);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Eq64F x y))
     // result: (Neq64F x y)
@@ -22305,7 +20215,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeq64F);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Eq32F x y))
     // result: (Neq32F x y)
@@ -22318,7 +20227,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpNeq32F);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Neq64 x y))
     // result: (Eq64 x y)
@@ -22331,7 +20239,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEq64);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Neq32 x y))
     // result: (Eq32 x y)
@@ -22344,7 +20251,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEq32);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Neq16 x y))
     // result: (Eq16 x y)
@@ -22357,7 +20263,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEq16);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Neq8 x y))
     // result: (Eq8 x y)
@@ -22370,7 +20275,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEq8);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (NeqB x y))
     // result: (EqB x y)
@@ -22383,7 +20287,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEqB);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (NeqPtr x y))
     // result: (EqPtr x y)
@@ -22396,7 +20299,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEqPtr);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Neq64F x y))
     // result: (Eq64F x y)
@@ -22409,7 +20311,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEq64F);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Neq32F x y))
     // result: (Eq32F x y)
@@ -22422,7 +20323,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpEq32F);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Not (Less64 x y))
     // result: (Leq64 y x)
@@ -22435,7 +20335,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq64);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Less32 x y))
     // result: (Leq32 y x)
@@ -22448,7 +20347,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq32);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Less16 x y))
     // result: (Leq16 y x)
@@ -22461,7 +20359,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq16);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Less8 x y))
     // result: (Leq8 y x)
@@ -22474,7 +20371,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq8);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Less64U x y))
     // result: (Leq64U y x)
@@ -22487,7 +20383,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq64U);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Less32U x y))
     // result: (Leq32U y x)
@@ -22500,7 +20395,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq32U);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Less16U x y))
     // result: (Leq16U y x)
@@ -22513,7 +20407,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq16U);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Less8U x y))
     // result: (Leq8U y x)
@@ -22526,7 +20419,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLeq8U);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq64 x y))
     // result: (Less64 y x)
@@ -22539,7 +20431,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess64);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq32 x y))
     // result: (Less32 y x)
@@ -22552,7 +20443,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess32);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq16 x y))
     // result: (Less16 y x)
@@ -22565,7 +20455,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess16);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq8 x y))
     // result: (Less8 y x)
@@ -22578,7 +20467,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess8);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq64U x y))
     // result: (Less64U y x)
@@ -22591,7 +20479,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess64U);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq32U x y))
     // result: (Less32U y x)
@@ -22604,7 +20491,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess32U);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq16U x y))
     // result: (Less16U y x)
@@ -22617,7 +20503,6 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess16U);
         v.AddArg2(y, x);
         return true;
-
     } 
     // match: (Not (Leq8U x y))
     // result: (Less8U y x)
@@ -22630,10 +20515,8 @@ private static bool rewriteValuegeneric_OpNot(ptr<Value> _addr_v) {
         v.reset(OpLess8U);
         v.AddArg2(y, x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22652,7 +20535,6 @@ private static bool rewriteValuegeneric_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(x + y);
         v.AddArg(p);
         return true;
-
     } 
     // match: (OffPtr p [0])
     // cond: v.Type.Compare(p.Type) == types.CMPeq
@@ -22667,10 +20549,8 @@ private static bool rewriteValuegeneric_OpOffPtr(ptr<Value> _addr_v) {
         }
         v.copyOf(p);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -22691,24 +20571,20 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 var d = auxIntToInt16(v_1.AuxInt);
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(c | d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or16 x x)
     // result: x
@@ -22719,7 +20595,6 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Or16 (Const16 [0]) x)
     // result: x
@@ -22734,18 +20609,15 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or16 (Const16 [-1]) _)
     // result: (Const16 [-1])
@@ -22760,18 +20632,15 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(-1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or16 x (Or16 x y))
     // result: (Or16 x y)
@@ -22787,7 +20656,6 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -22801,25 +20669,21 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpOr16);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or16 (And16 x (Const16 [c2])) (Const16 <t> [c1]))
     // cond: ^(c1 | c2) == 0
@@ -22835,7 +20699,6 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -22850,37 +20713,31 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var c2 = auxIntToInt16(v_0_1.AuxInt);
                         if (v_1.Op != OpConst16) {
                             continue;
                         }
-
                         var t = v_1.Type;
                         var c1 = auxIntToInt16(v_1.AuxInt);
                         if (!(~(c1 | c2) == 0)) {
                             continue;
                         }
-
                         v.reset(OpOr16);
                         var v0 = b.NewValue0(v.Pos, OpConst16, t);
                         v0.AuxInt = int16ToAuxInt(c1);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or16 (Or16 i:(Const16 <t>) z) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -22896,7 +20753,6 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -22911,33 +20767,28 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                             continue;
                         }
-
                         v.reset(OpOr16);
                         v0 = b.NewValue0(v.Pos, OpOr16, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or16 (Const16 <t> [c]) (Or16 (Const16 <t> [d]) x))
     // result: (Or16 (Const16 <t> [c|d]) x)
@@ -22952,13 +20803,11 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpOr16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -22972,7 +20821,6 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt16(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpOr16);
@@ -22980,23 +20828,19 @@ private static bool rewriteValuegeneric_OpOr16(ptr<Value> _addr_v) {
                         v0.AuxInt = int16ToAuxInt(c | d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23017,24 +20861,20 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(c | d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or32 x x)
     // result: x
@@ -23045,7 +20885,6 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Or32 (Const32 [0]) x)
     // result: x
@@ -23060,18 +20899,15 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or32 (Const32 [-1]) _)
     // result: (Const32 [-1])
@@ -23086,18 +20922,15 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(-1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or32 x (Or32 x y))
     // result: (Or32 x y)
@@ -23113,7 +20946,6 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -23127,25 +20959,21 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpOr32);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or32 (And32 x (Const32 [c2])) (Const32 <t> [c1]))
     // cond: ^(c1 | c2) == 0
@@ -23161,7 +20989,6 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -23176,37 +21003,31 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var c2 = auxIntToInt32(v_0_1.AuxInt);
                         if (v_1.Op != OpConst32) {
                             continue;
                         }
-
                         var t = v_1.Type;
                         var c1 = auxIntToInt32(v_1.AuxInt);
                         if (!(~(c1 | c2) == 0)) {
                             continue;
                         }
-
                         v.reset(OpOr32);
                         var v0 = b.NewValue0(v.Pos, OpConst32, t);
                         v0.AuxInt = int32ToAuxInt(c1);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or32 (Or32 i:(Const32 <t>) z) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -23222,7 +21043,6 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -23237,33 +21057,28 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                             continue;
                         }
-
                         v.reset(OpOr32);
                         v0 = b.NewValue0(v.Pos, OpOr32, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or32 (Const32 <t> [c]) (Or32 (Const32 <t> [d]) x))
     // result: (Or32 (Const32 <t> [c|d]) x)
@@ -23278,13 +21093,11 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpOr32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -23298,7 +21111,6 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpOr32);
@@ -23306,23 +21118,19 @@ private static bool rewriteValuegeneric_OpOr32(ptr<Value> _addr_v) {
                         v0.AuxInt = int32ToAuxInt(c | d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23343,24 +21151,20 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(c | d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or64 x x)
     // result: x
@@ -23371,7 +21175,6 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Or64 (Const64 [0]) x)
     // result: x
@@ -23386,18 +21189,15 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or64 (Const64 [-1]) _)
     // result: (Const64 [-1])
@@ -23412,18 +21212,15 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(-1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or64 x (Or64 x y))
     // result: (Or64 x y)
@@ -23439,7 +21236,6 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -23453,25 +21249,21 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpOr64);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or64 (And64 x (Const64 [c2])) (Const64 <t> [c1]))
     // cond: ^(c1 | c2) == 0
@@ -23487,7 +21279,6 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -23502,37 +21293,31 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var c2 = auxIntToInt64(v_0_1.AuxInt);
                         if (v_1.Op != OpConst64) {
                             continue;
                         }
-
                         var t = v_1.Type;
                         var c1 = auxIntToInt64(v_1.AuxInt);
                         if (!(~(c1 | c2) == 0)) {
                             continue;
                         }
-
                         v.reset(OpOr64);
                         var v0 = b.NewValue0(v.Pos, OpConst64, t);
                         v0.AuxInt = int64ToAuxInt(c1);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or64 (Or64 i:(Const64 <t>) z) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -23548,7 +21333,6 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -23563,33 +21347,28 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                             continue;
                         }
-
                         v.reset(OpOr64);
                         v0 = b.NewValue0(v.Pos, OpOr64, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or64 (Const64 <t> [c]) (Or64 (Const64 <t> [d]) x))
     // result: (Or64 (Const64 <t> [c|d]) x)
@@ -23604,13 +21383,11 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpOr64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -23624,7 +21401,6 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpOr64);
@@ -23632,23 +21408,19 @@ private static bool rewriteValuegeneric_OpOr64(ptr<Value> _addr_v) {
                         v0.AuxInt = int64ToAuxInt(c | d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23669,24 +21441,20 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(c | d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or8 x x)
     // result: x
@@ -23697,7 +21465,6 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Or8 (Const8 [0]) x)
     // result: x
@@ -23712,18 +21479,15 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or8 (Const8 [-1]) _)
     // result: (Const8 [-1])
@@ -23738,18 +21502,15 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(-1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or8 x (Or8 x y))
     // result: (Or8 x y)
@@ -23765,7 +21526,6 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -23779,25 +21539,21 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.reset(OpOr8);
                         v.AddArg2(x, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or8 (And8 x (Const8 [c2])) (Const8 <t> [c1]))
     // cond: ^(c1 | c2) == 0
@@ -23813,7 +21569,6 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -23828,37 +21583,31 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var c2 = auxIntToInt8(v_0_1.AuxInt);
                         if (v_1.Op != OpConst8) {
                             continue;
                         }
-
                         var t = v_1.Type;
                         var c1 = auxIntToInt8(v_1.AuxInt);
                         if (!(~(c1 | c2) == 0)) {
                             continue;
                         }
-
                         v.reset(OpOr8);
                         var v0 = b.NewValue0(v.Pos, OpConst8, t);
                         v0.AuxInt = int8ToAuxInt(c1);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or8 (Or8 i:(Const8 <t>) z) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -23874,7 +21623,6 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 v_0_1 = v_0.Args[1];
@@ -23889,33 +21637,28 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                             continue;
                         }
-
                         v.reset(OpOr8);
                         v0 = b.NewValue0(v.Pos, OpOr8, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or8 (Const8 <t> [c]) (Or8 (Const8 <t> [d]) x))
     // result: (Or8 (Const8 <t> [c|d]) x)
@@ -23930,13 +21673,11 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpOr8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -23950,7 +21691,6 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt8(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpOr8);
@@ -23958,23 +21698,19 @@ private static bool rewriteValuegeneric_OpOr8(ptr<Value> _addr_v) {
                         v0.AuxInt = int8ToAuxInt(c | d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -23996,33 +21732,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var x = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 var c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 var v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 var v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d);
@@ -24032,14 +21762,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq64 (Const64 [c]) x) (Less64 x (Const64 [d])))
     // cond: c >= d
@@ -24055,33 +21783,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d);
@@ -24091,14 +21813,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less32 (Const32 [c]) x) (Less32 x (Const32 [d])))
     // cond: c >= d
@@ -24114,33 +21834,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d);
@@ -24150,14 +21864,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq32 (Const32 [c]) x) (Less32 x (Const32 [d])))
     // cond: c >= d
@@ -24173,33 +21885,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d);
@@ -24209,14 +21915,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less16 (Const16 [c]) x) (Less16 x (Const16 [d])))
     // cond: c >= d
@@ -24232,33 +21936,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d);
@@ -24268,14 +21966,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq16 (Const16 [c]) x) (Less16 x (Const16 [d])))
     // cond: c >= d
@@ -24291,33 +21987,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d);
@@ -24327,14 +22017,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less8 (Const8 [c]) x) (Less8 x (Const8 [d])))
     // cond: c >= d
@@ -24350,33 +22038,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d);
@@ -24386,14 +22068,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq8 (Const8 [c]) x) (Less8 x (Const8 [d])))
     // cond: c >= d
@@ -24409,33 +22089,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(c >= d)) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d);
@@ -24445,14 +22119,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less64 (Const64 [c]) x) (Leq64 x (Const64 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24468,33 +22140,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d - 1);
@@ -24504,14 +22170,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq64 (Const64 [c]) x) (Leq64 x (Const64 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24527,33 +22191,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d - 1);
@@ -24563,14 +22221,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less32 (Const32 [c]) x) (Leq32 x (Const32 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24586,33 +22242,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d - 1);
@@ -24622,14 +22272,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq32 (Const32 [c]) x) (Leq32 x (Const32 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24645,33 +22293,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d - 1);
@@ -24681,14 +22323,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less16 (Const16 [c]) x) (Leq16 x (Const16 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24704,33 +22344,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d - 1);
@@ -24740,14 +22374,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq16 (Const16 [c]) x) (Leq16 x (Const16 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24763,33 +22395,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d - 1);
@@ -24799,14 +22425,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less8 (Const8 [c]) x) (Leq8 x (Const8 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24822,33 +22446,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d - 1);
@@ -24858,14 +22476,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq8 (Const8 [c]) x) (Leq8 x (Const8 [d])))
     // cond: c >= d+1 && d+1 > d
@@ -24881,33 +22497,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(c >= d + 1 && d + 1 > d)) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d - 1);
@@ -24917,14 +22527,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less64U (Const64 [c]) x) (Less64U x (Const64 [d])))
     // cond: uint64(c) >= uint64(d)
@@ -24940,33 +22548,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(c) >= uint64(d))) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d);
@@ -24976,14 +22578,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq64U (Const64 [c]) x) (Less64U x (Const64 [d])))
     // cond: uint64(c) >= uint64(d)
@@ -24999,33 +22599,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLess64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(c) >= uint64(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d);
@@ -25035,14 +22629,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less32U (Const32 [c]) x) (Less32U x (Const32 [d])))
     // cond: uint32(c) >= uint32(d)
@@ -25058,33 +22650,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(c) >= uint32(d))) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d);
@@ -25094,14 +22680,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq32U (Const32 [c]) x) (Less32U x (Const32 [d])))
     // cond: uint32(c) >= uint32(d)
@@ -25117,33 +22701,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLess32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(c) >= uint32(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d);
@@ -25153,14 +22731,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less16U (Const16 [c]) x) (Less16U x (Const16 [d])))
     // cond: uint16(c) >= uint16(d)
@@ -25176,33 +22752,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(c) >= uint16(d))) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d);
@@ -25212,14 +22782,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq16U (Const16 [c]) x) (Less16U x (Const16 [d])))
     // cond: uint16(c) >= uint16(d)
@@ -25235,33 +22803,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLess16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(c) >= uint16(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d);
@@ -25271,14 +22833,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less8U (Const8 [c]) x) (Less8U x (Const8 [d])))
     // cond: uint8(c) >= uint8(d)
@@ -25294,33 +22854,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(c) >= uint8(d))) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d);
@@ -25330,14 +22884,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq8U (Const8 [c]) x) (Less8U x (Const8 [d])))
     // cond: uint8(c) >= uint8(d)
@@ -25353,33 +22905,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLess8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(c) >= uint8(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d);
@@ -25389,14 +22935,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less64U (Const64 [c]) x) (Leq64U x (Const64 [d])))
     // cond: uint64(c) >= uint64(d+1) && uint64(d+1) > uint64(d)
@@ -25412,33 +22956,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(c) >= uint64(d + 1) && uint64(d + 1) > uint64(d))) {
                     continue;
                 }
-
                 v.reset(OpLess64U);
                 v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d - 1);
@@ -25448,14 +22986,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq64U (Const64 [c]) x) (Leq64U x (Const64 [d])))
     // cond: uint64(c) >= uint64(d+1) && uint64(d+1) > uint64(d)
@@ -25471,33 +23007,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst64) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq64U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst64) {
                     continue;
                 }
-
                 d = auxIntToInt64(v_1_1.AuxInt);
                 if (!(uint64(c) >= uint64(d + 1) && uint64(d + 1) > uint64(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq64U);
                 v0 = b.NewValue0(v.Pos, OpConst64, x.Type);
                 v0.AuxInt = int64ToAuxInt(c - d - 1);
@@ -25507,14 +23037,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less32U (Const32 [c]) x) (Leq32U x (Const32 [d])))
     // cond: uint32(c) >= uint32(d+1) && uint32(d+1) > uint32(d)
@@ -25530,33 +23058,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(c) >= uint32(d + 1) && uint32(d + 1) > uint32(d))) {
                     continue;
                 }
-
                 v.reset(OpLess32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d - 1);
@@ -25566,14 +23088,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq32U (Const32 [c]) x) (Leq32U x (Const32 [d])))
     // cond: uint32(c) >= uint32(d+1) && uint32(d+1) > uint32(d)
@@ -25589,33 +23109,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq32U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst32) {
                     continue;
                 }
-
                 d = auxIntToInt32(v_1_1.AuxInt);
                 if (!(uint32(c) >= uint32(d + 1) && uint32(d + 1) > uint32(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq32U);
                 v0 = b.NewValue0(v.Pos, OpConst32, x.Type);
                 v0.AuxInt = int32ToAuxInt(c - d - 1);
@@ -25625,14 +23139,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less16U (Const16 [c]) x) (Leq16U x (Const16 [d])))
     // cond: uint16(c) >= uint16(d+1) && uint16(d+1) > uint16(d)
@@ -25648,33 +23160,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(c) >= uint16(d + 1) && uint16(d + 1) > uint16(d))) {
                     continue;
                 }
-
                 v.reset(OpLess16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d - 1);
@@ -25684,14 +23190,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq16U (Const16 [c]) x) (Leq16U x (Const16 [d])))
     // cond: uint16(c) >= uint16(d+1) && uint16(d+1) > uint16(d)
@@ -25707,33 +23211,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst16) {
                     continue;
                 }
-
                 c = auxIntToInt16(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq16U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst16) {
                     continue;
                 }
-
                 d = auxIntToInt16(v_1_1.AuxInt);
                 if (!(uint16(c) >= uint16(d + 1) && uint16(d + 1) > uint16(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq16U);
                 v0 = b.NewValue0(v.Pos, OpConst16, x.Type);
                 v0.AuxInt = int16ToAuxInt(c - d - 1);
@@ -25743,14 +23241,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Less8U (Const8 [c]) x) (Leq8U x (Const8 [d])))
     // cond: uint8(c) >= uint8(d+1) && uint8(d+1) > uint8(d)
@@ -25766,33 +23262,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(c) >= uint8(d + 1) && uint8(d + 1) > uint8(d))) {
                     continue;
                 }
-
                 v.reset(OpLess8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d - 1);
@@ -25802,14 +23292,12 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OrB (Leq8U (Const8 [c]) x) (Leq8U x (Const8 [d])))
     // cond: uint8(c) >= uint8(d+1) && uint8(d+1) > uint8(d)
@@ -25825,33 +23313,27 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_0.Args[1];
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst8) {
                     continue;
                 }
-
                 c = auxIntToInt8(v_0_0.AuxInt);
                 if (v_1.Op != OpLeq8U) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 if (x != v_1.Args[0]) {
                     continue;
                 }
-
                 v_1_1 = v_1.Args[1];
                 if (v_1_1.Op != OpConst8) {
                     continue;
                 }
-
                 d = auxIntToInt8(v_1_1.AuxInt);
                 if (!(uint8(c) >= uint8(d + 1) && uint8(d + 1) > uint8(d))) {
                     continue;
                 }
-
                 v.reset(OpLeq8U);
                 v0 = b.NewValue0(v.Pos, OpConst8, x.Type);
                 v0.AuxInt = int8ToAuxInt(c - d - 1);
@@ -25861,17 +23343,14 @@ private static bool rewriteValuegeneric_OpOrB(ptr<Value> _addr_v) {
                 v1.AddArg2(x, v2);
                 v.AddArg2(v0, v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpPhi(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -25895,7 +23374,6 @@ private static bool rewriteValuegeneric_OpPhi(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(c);
         return true;
-
     } 
     // match: (Phi (Const16 [c]) (Const16 [c]))
     // result: (Const16 [c])
@@ -25916,7 +23394,6 @@ private static bool rewriteValuegeneric_OpPhi(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(c);
         return true;
-
     } 
     // match: (Phi (Const32 [c]) (Const32 [c]))
     // result: (Const32 [c])
@@ -25937,7 +23414,6 @@ private static bool rewriteValuegeneric_OpPhi(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     } 
     // match: (Phi (Const64 [c]) (Const64 [c]))
     // result: (Const64 [c])
@@ -25958,10 +23434,8 @@ private static bool rewriteValuegeneric_OpPhi(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpPtrIndex(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -25988,7 +23462,6 @@ private static bool rewriteValuegeneric_OpPtrIndex(ptr<Value> _addr_v) {
         v0.AddArg2(idx, v1);
         v.AddArg2(ptr, v0);
         return true;
-
     } 
     // match: (PtrIndex <t> ptr idx)
     // cond: config.PtrSize == 8
@@ -26007,10 +23480,8 @@ private static bool rewriteValuegeneric_OpPtrIndex(ptr<Value> _addr_v) {
         v0.AddArg2(idx, v1);
         v.AddArg2(ptr, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26031,10 +23502,8 @@ private static bool rewriteValuegeneric_OpRotateLeft16(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRotateLeft32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26055,10 +23524,8 @@ private static bool rewriteValuegeneric_OpRotateLeft32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRotateLeft64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26079,10 +23546,8 @@ private static bool rewriteValuegeneric_OpRotateLeft64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26103,10 +23568,8 @@ private static bool rewriteValuegeneric_OpRotateLeft8(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRound32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26121,10 +23584,8 @@ private static bool rewriteValuegeneric_OpRound32F(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRound64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26139,10 +23600,8 @@ private static bool rewriteValuegeneric_OpRound64F(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26164,7 +23623,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16Ux16 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26175,10 +23633,8 @@ private static bool rewriteValuegeneric_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26200,7 +23656,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16Ux32 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26211,10 +23666,8 @@ private static bool rewriteValuegeneric_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26237,7 +23690,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(int16(uint16(c) >> (int)(uint64(d))));
         return true;
-
     } 
     // match: (Rsh16Ux64 x (Const64 [0]))
     // result: x
@@ -26248,7 +23700,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh16Ux64 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26259,7 +23710,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh16Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 16
@@ -26275,7 +23725,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh16Ux64 <t> (Rsh16Ux64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -26304,7 +23753,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16Ux64 (Rsh16x64 x _) (Const64 <t> [15]))
     // result: (Rsh16Ux64 x (Const64 <t> [15]))
@@ -26325,7 +23773,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(15);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16Ux64 (Lsh16x64 (Rsh16Ux64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -26363,7 +23810,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16Ux64 (Lsh16x64 x (Const64 [8])) (Const64 [8]))
     // result: (ZeroExt8to16 (Trunc16to8 <typ.UInt8> x))
@@ -26382,10 +23828,8 @@ private static bool rewriteValuegeneric_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26407,7 +23851,6 @@ private static bool rewriteValuegeneric_OpRsh16Ux8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16Ux8 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26418,10 +23861,8 @@ private static bool rewriteValuegeneric_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26443,7 +23884,6 @@ private static bool rewriteValuegeneric_OpRsh16x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x16 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26454,10 +23894,8 @@ private static bool rewriteValuegeneric_OpRsh16x16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26479,7 +23917,6 @@ private static bool rewriteValuegeneric_OpRsh16x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x32 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26490,10 +23927,8 @@ private static bool rewriteValuegeneric_OpRsh16x32(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26516,7 +23951,6 @@ private static bool rewriteValuegeneric_OpRsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(c >> (int)(uint64(d)));
         return true;
-
     } 
     // match: (Rsh16x64 x (Const64 [0]))
     // result: x
@@ -26527,7 +23961,6 @@ private static bool rewriteValuegeneric_OpRsh16x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh16x64 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26538,7 +23971,6 @@ private static bool rewriteValuegeneric_OpRsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh16x64 <t> (Rsh16x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -26567,7 +23999,6 @@ private static bool rewriteValuegeneric_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x64 (Lsh16x64 x (Const64 [8])) (Const64 [8]))
     // result: (SignExt8to16 (Trunc16to8 <typ.Int8> x))
@@ -26586,10 +24017,8 @@ private static bool rewriteValuegeneric_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26611,7 +24040,6 @@ private static bool rewriteValuegeneric_OpRsh16x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x8 (Const16 [0]) _)
     // result: (Const16 [0])
@@ -26622,10 +24050,8 @@ private static bool rewriteValuegeneric_OpRsh16x8(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26647,7 +24073,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux16 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -26658,10 +24083,8 @@ private static bool rewriteValuegeneric_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26683,7 +24106,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux32 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -26694,10 +24116,8 @@ private static bool rewriteValuegeneric_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26720,7 +24140,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(uint32(c) >> (int)(uint64(d))));
         return true;
-
     } 
     // match: (Rsh32Ux64 x (Const64 [0]))
     // result: x
@@ -26731,7 +24150,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh32Ux64 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -26742,7 +24160,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh32Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 32
@@ -26758,7 +24175,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh32Ux64 <t> (Rsh32Ux64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -26787,7 +24203,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 (Rsh32x64 x _) (Const64 <t> [31]))
     // result: (Rsh32Ux64 x (Const64 <t> [31]))
@@ -26808,7 +24223,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(31);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 (Lsh32x64 (Rsh32Ux64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -26846,7 +24260,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 (Lsh32x64 x (Const64 [24])) (Const64 [24]))
     // result: (ZeroExt8to32 (Trunc32to8 <typ.UInt8> x))
@@ -26865,7 +24278,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 (Lsh32x64 x (Const64 [16])) (Const64 [16]))
     // result: (ZeroExt16to32 (Trunc32to16 <typ.UInt16> x))
@@ -26884,10 +24296,8 @@ private static bool rewriteValuegeneric_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26909,7 +24319,6 @@ private static bool rewriteValuegeneric_OpRsh32Ux8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux8 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -26920,10 +24329,8 @@ private static bool rewriteValuegeneric_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26945,7 +24352,6 @@ private static bool rewriteValuegeneric_OpRsh32x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x16 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -26956,10 +24362,8 @@ private static bool rewriteValuegeneric_OpRsh32x16(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -26981,7 +24385,6 @@ private static bool rewriteValuegeneric_OpRsh32x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x32 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -26992,10 +24395,8 @@ private static bool rewriteValuegeneric_OpRsh32x32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27018,7 +24419,6 @@ private static bool rewriteValuegeneric_OpRsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(c >> (int)(uint64(d)));
         return true;
-
     } 
     // match: (Rsh32x64 x (Const64 [0]))
     // result: x
@@ -27029,7 +24429,6 @@ private static bool rewriteValuegeneric_OpRsh32x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh32x64 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -27040,7 +24439,6 @@ private static bool rewriteValuegeneric_OpRsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh32x64 <t> (Rsh32x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -27069,7 +24467,6 @@ private static bool rewriteValuegeneric_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x64 (Lsh32x64 x (Const64 [24])) (Const64 [24]))
     // result: (SignExt8to32 (Trunc32to8 <typ.Int8> x))
@@ -27088,7 +24485,6 @@ private static bool rewriteValuegeneric_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh32x64 (Lsh32x64 x (Const64 [16])) (Const64 [16]))
     // result: (SignExt16to32 (Trunc32to16 <typ.Int16> x))
@@ -27107,10 +24503,8 @@ private static bool rewriteValuegeneric_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27132,7 +24526,6 @@ private static bool rewriteValuegeneric_OpRsh32x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x8 (Const32 [0]) _)
     // result: (Const32 [0])
@@ -27143,10 +24536,8 @@ private static bool rewriteValuegeneric_OpRsh32x8(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27168,7 +24559,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux16 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27179,10 +24569,8 @@ private static bool rewriteValuegeneric_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27204,7 +24592,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux32 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27215,10 +24602,8 @@ private static bool rewriteValuegeneric_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27241,7 +24626,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(uint64(c) >> (int)(uint64(d))));
         return true;
-
     } 
     // match: (Rsh64Ux64 x (Const64 [0]))
     // result: x
@@ -27252,7 +24636,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh64Ux64 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27263,7 +24646,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh64Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 64
@@ -27279,7 +24661,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh64Ux64 <t> (Rsh64Ux64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -27308,7 +24689,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 (Rsh64x64 x _) (Const64 <t> [63]))
     // result: (Rsh64Ux64 x (Const64 <t> [63]))
@@ -27329,7 +24709,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(63);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 (Lsh64x64 (Rsh64Ux64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -27367,7 +24746,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 (Lsh64x64 x (Const64 [56])) (Const64 [56]))
     // result: (ZeroExt8to64 (Trunc64to8 <typ.UInt8> x))
@@ -27386,7 +24764,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 (Lsh64x64 x (Const64 [48])) (Const64 [48]))
     // result: (ZeroExt16to64 (Trunc64to16 <typ.UInt16> x))
@@ -27405,7 +24782,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 (Lsh64x64 x (Const64 [32])) (Const64 [32]))
     // result: (ZeroExt32to64 (Trunc64to32 <typ.UInt32> x))
@@ -27424,10 +24800,8 @@ private static bool rewriteValuegeneric_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27449,7 +24823,6 @@ private static bool rewriteValuegeneric_OpRsh64Ux8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux8 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27460,10 +24833,8 @@ private static bool rewriteValuegeneric_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27485,7 +24856,6 @@ private static bool rewriteValuegeneric_OpRsh64x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x16 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27496,10 +24866,8 @@ private static bool rewriteValuegeneric_OpRsh64x16(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27521,7 +24889,6 @@ private static bool rewriteValuegeneric_OpRsh64x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x32 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27532,10 +24899,8 @@ private static bool rewriteValuegeneric_OpRsh64x32(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27558,7 +24923,6 @@ private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(c >> (int)(uint64(d)));
         return true;
-
     } 
     // match: (Rsh64x64 x (Const64 [0]))
     // result: x
@@ -27569,7 +24933,6 @@ private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh64x64 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27580,7 +24943,6 @@ private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh64x64 <t> (Rsh64x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -27609,7 +24971,6 @@ private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 (Lsh64x64 x (Const64 [56])) (Const64 [56]))
     // result: (SignExt8to64 (Trunc64to8 <typ.Int8> x))
@@ -27628,7 +24989,6 @@ private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh64x64 (Lsh64x64 x (Const64 [48])) (Const64 [48]))
     // result: (SignExt16to64 (Trunc64to16 <typ.Int16> x))
@@ -27647,7 +25007,6 @@ private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh64x64 (Lsh64x64 x (Const64 [32])) (Const64 [32]))
     // result: (SignExt32to64 (Trunc64to32 <typ.Int32> x))
@@ -27666,10 +25025,8 @@ private static bool rewriteValuegeneric_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27691,7 +25048,6 @@ private static bool rewriteValuegeneric_OpRsh64x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x8 (Const64 [0]) _)
     // result: (Const64 [0])
@@ -27702,10 +25058,8 @@ private static bool rewriteValuegeneric_OpRsh64x8(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27727,7 +25081,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8Ux16 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -27738,10 +25091,8 @@ private static bool rewriteValuegeneric_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27763,7 +25114,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8Ux32 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -27774,10 +25124,8 @@ private static bool rewriteValuegeneric_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27800,7 +25148,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(int8(uint8(c) >> (int)(uint64(d))));
         return true;
-
     } 
     // match: (Rsh8Ux64 x (Const64 [0]))
     // result: x
@@ -27811,7 +25158,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh8Ux64 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -27822,7 +25168,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh8Ux64 _ (Const64 [c]))
     // cond: uint64(c) >= 8
@@ -27838,7 +25183,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh8Ux64 <t> (Rsh8Ux64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -27867,7 +25211,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8Ux64 (Rsh8x64 x _) (Const64 <t> [7] ))
     // result: (Rsh8Ux64 x (Const64 <t> [7] ))
@@ -27888,7 +25231,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(7);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8Ux64 (Lsh8x64 (Rsh8Ux64 x (Const64 [c1])) (Const64 [c2])) (Const64 [c3]))
     // cond: uint64(c1) >= uint64(c2) && uint64(c3) >= uint64(c2) && !uaddOvf(c1-c2, c3)
@@ -27926,10 +25268,8 @@ private static bool rewriteValuegeneric_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c1 - c2 + c3);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27951,7 +25291,6 @@ private static bool rewriteValuegeneric_OpRsh8Ux8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8Ux8 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -27962,10 +25301,8 @@ private static bool rewriteValuegeneric_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -27987,7 +25324,6 @@ private static bool rewriteValuegeneric_OpRsh8x16(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint16(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x16 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -27998,10 +25334,8 @@ private static bool rewriteValuegeneric_OpRsh8x16(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28023,7 +25357,6 @@ private static bool rewriteValuegeneric_OpRsh8x32(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint32(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x32 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -28034,10 +25367,8 @@ private static bool rewriteValuegeneric_OpRsh8x32(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28059,7 +25390,6 @@ private static bool rewriteValuegeneric_OpRsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(c >> (int)(uint64(d)));
         return true;
-
     } 
     // match: (Rsh8x64 x (Const64 [0]))
     // result: x
@@ -28070,7 +25400,6 @@ private static bool rewriteValuegeneric_OpRsh8x64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (Rsh8x64 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -28081,7 +25410,6 @@ private static bool rewriteValuegeneric_OpRsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh8x64 <t> (Rsh8x64 x (Const64 [c])) (Const64 [d]))
     // cond: !uaddOvf(c,d)
@@ -28110,10 +25438,8 @@ private static bool rewriteValuegeneric_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c + d);
         v.AddArg2(x, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28135,7 +25461,6 @@ private static bool rewriteValuegeneric_OpRsh8x8(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(int64(uint8(c)));
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x8 (Const8 [0]) _)
     // result: (Const8 [0])
@@ -28146,10 +25471,8 @@ private static bool rewriteValuegeneric_OpRsh8x8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSelect0(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28170,10 +25493,8 @@ private static bool rewriteValuegeneric_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpDiv64u);
         v.AddArg2(lo, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSelect1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28194,10 +25515,8 @@ private static bool rewriteValuegeneric_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpMod64u);
         v.AddArg2(lo, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28214,7 +25533,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (SelectN [1] (MakeResult x y ___))
     // result: y
@@ -28225,7 +25543,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         var y = v_0.Args[1];
         v.copyOf(y);
         return true;
-
     } 
     // match: (SelectN [2] (MakeResult x y z ___))
     // result: z
@@ -28236,7 +25553,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         var z = v_0.Args[2];
         v.copyOf(z);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticCall {sym} s1:(Store _ (Const64 [sz]) s2:(Store _ src s3:(Store {t} _ dst mem)))))
     // cond: sz >= 0 && isSameCall(sym, "runtime.memmove") && t.IsPtr() && s1.Uses == 1 && s2.Uses == 1 && s3.Uses == 1 && isInlinableMemmove(dst, src, int64(sz), config) && clobber(s1, s2, s3, call)
@@ -28281,7 +25597,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t.Elem());
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticCall {sym} s1:(Store _ (Const32 [sz]) s2:(Store _ src s3:(Store {t} _ dst mem)))))
     // cond: sz >= 0 && isSameCall(sym, "runtime.memmove") && t.IsPtr() && s1.Uses == 1 && s2.Uses == 1 && s3.Uses == 1 && isInlinableMemmove(dst, src, int64(sz), config) && clobber(s1, s2, s3, call)
@@ -28326,7 +25641,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t.Elem());
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticCall {sym} dst src (Const64 [sz]) mem))
     // cond: sz >= 0 && call.Uses == 1 && isSameCall(sym, "runtime.memmove") && dst.Type.IsPtr() && isInlinableMemmove(dst, src, int64(sz), config) && clobber(call)
@@ -28356,7 +25670,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         v.Aux = typeToAux(dst.Type.Elem());
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticCall {sym} dst src (Const32 [sz]) mem))
     // cond: sz >= 0 && call.Uses == 1 && isSameCall(sym, "runtime.memmove") && dst.Type.IsPtr() && isInlinableMemmove(dst, src, int64(sz), config) && clobber(call)
@@ -28386,7 +25699,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         v.Aux = typeToAux(dst.Type.Elem());
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticLECall {sym} dst src (Const64 [sz]) mem))
     // cond: sz >= 0 && call.Uses == 1 && isSameCall(sym, "runtime.memmove") && dst.Type.IsPtr() && isInlinableMemmove(dst, src, int64(sz), config) && clobber(call)
@@ -28416,7 +25728,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         v.Aux = typeToAux(dst.Type.Elem());
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticLECall {sym} dst src (Const32 [sz]) mem))
     // cond: sz >= 0 && call.Uses == 1 && isSameCall(sym, "runtime.memmove") && dst.Type.IsPtr() && isInlinableMemmove(dst, src, int64(sz), config) && clobber(call)
@@ -28446,7 +25757,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         v.Aux = typeToAux(dst.Type.Elem());
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticLECall {sym} a x))
     // cond: needRaceCleanup(sym, call) && clobber(call)
@@ -28466,7 +25776,6 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SelectN [0] call:(StaticLECall {sym} x))
     // cond: needRaceCleanup(sym, call) && clobber(call)
@@ -28486,10 +25795,8 @@ private static bool rewriteValuegeneric_OpSelectN(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSignExt16to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28505,7 +25812,6 @@ private static bool rewriteValuegeneric_OpSignExt16to32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
-
     } 
     // match: (SignExt16to32 (Trunc32to16 x:(Rsh32x64 _ (Const64 [s]))))
     // cond: s >= 16
@@ -28529,10 +25835,8 @@ private static bool rewriteValuegeneric_OpSignExt16to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSignExt16to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28548,7 +25852,6 @@ private static bool rewriteValuegeneric_OpSignExt16to64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
-
     } 
     // match: (SignExt16to64 (Trunc64to16 x:(Rsh64x64 _ (Const64 [s]))))
     // cond: s >= 48
@@ -28572,10 +25875,8 @@ private static bool rewriteValuegeneric_OpSignExt16to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSignExt32to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28591,7 +25892,6 @@ private static bool rewriteValuegeneric_OpSignExt32to64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
-
     } 
     // match: (SignExt32to64 (Trunc64to32 x:(Rsh64x64 _ (Const64 [s]))))
     // cond: s >= 32
@@ -28615,10 +25915,8 @@ private static bool rewriteValuegeneric_OpSignExt32to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSignExt8to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28634,7 +25932,6 @@ private static bool rewriteValuegeneric_OpSignExt8to16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(int16(c));
         return true;
-
     } 
     // match: (SignExt8to16 (Trunc16to8 x:(Rsh16x64 _ (Const64 [s]))))
     // cond: s >= 8
@@ -28658,10 +25955,8 @@ private static bool rewriteValuegeneric_OpSignExt8to16(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSignExt8to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28677,7 +25972,6 @@ private static bool rewriteValuegeneric_OpSignExt8to32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
-
     } 
     // match: (SignExt8to32 (Trunc32to8 x:(Rsh32x64 _ (Const64 [s]))))
     // cond: s >= 24
@@ -28701,10 +25995,8 @@ private static bool rewriteValuegeneric_OpSignExt8to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSignExt8to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28720,7 +26012,6 @@ private static bool rewriteValuegeneric_OpSignExt8to64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(c));
         return true;
-
     } 
     // match: (SignExt8to64 (Trunc64to8 x:(Rsh64x64 _ (Const64 [s]))))
     // cond: s >= 56
@@ -28744,10 +26035,8 @@ private static bool rewriteValuegeneric_OpSignExt8to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSliceCap(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28770,7 +26059,6 @@ private static bool rewriteValuegeneric_OpSliceCap(ptr<Value> _addr_v) {
         v.Type = t;
         v.AuxInt = int64ToAuxInt(c);
         return true;
-
     } 
     // match: (SliceCap (SliceMake _ _ (Const32 <t> [c])))
     // result: (Const32 <t> [c])
@@ -28789,7 +26077,6 @@ private static bool rewriteValuegeneric_OpSliceCap(ptr<Value> _addr_v) {
         v.Type = t;
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     } 
     // match: (SliceCap (SliceMake _ _ (SliceCap x)))
     // result: (SliceCap x)
@@ -28806,7 +26093,6 @@ private static bool rewriteValuegeneric_OpSliceCap(ptr<Value> _addr_v) {
         v.reset(OpSliceCap);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SliceCap (SliceMake _ _ (SliceLen x)))
     // result: (SliceLen x)
@@ -28823,10 +26109,8 @@ private static bool rewriteValuegeneric_OpSliceCap(ptr<Value> _addr_v) {
         v.reset(OpSliceLen);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSliceLen(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28849,7 +26133,6 @@ private static bool rewriteValuegeneric_OpSliceLen(ptr<Value> _addr_v) {
         v.Type = t;
         v.AuxInt = int64ToAuxInt(c);
         return true;
-
     } 
     // match: (SliceLen (SliceMake _ (Const32 <t> [c]) _))
     // result: (Const32 <t> [c])
@@ -28868,7 +26151,6 @@ private static bool rewriteValuegeneric_OpSliceLen(ptr<Value> _addr_v) {
         v.Type = t;
         v.AuxInt = int32ToAuxInt(c);
         return true;
-
     } 
     // match: (SliceLen (SliceMake _ (SliceLen x) _))
     // result: (SliceLen x)
@@ -28885,10 +26167,8 @@ private static bool rewriteValuegeneric_OpSliceLen(ptr<Value> _addr_v) {
         v.reset(OpSliceLen);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSlicePtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28908,10 +26188,8 @@ private static bool rewriteValuegeneric_OpSlicePtr(ptr<Value> _addr_v) {
         v.reset(OpSlicePtr);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28931,7 +26209,6 @@ private static bool rewriteValuegeneric_OpSlicemask(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(-1);
         return true;
-
     } 
     // match: (Slicemask (Const32 [0]))
     // result: (Const32 [0])
@@ -28942,7 +26219,6 @@ private static bool rewriteValuegeneric_OpSlicemask(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Slicemask (Const64 [x]))
     // cond: x > 0
@@ -28958,7 +26234,6 @@ private static bool rewriteValuegeneric_OpSlicemask(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(-1);
         return true;
-
     } 
     // match: (Slicemask (Const64 [0]))
     // result: (Const64 [0])
@@ -28969,10 +26244,8 @@ private static bool rewriteValuegeneric_OpSlicemask(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSqrt(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -28992,10 +26265,8 @@ private static bool rewriteValuegeneric_OpSqrt(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(math.Sqrt(c));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpStaticLECall(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29034,10 +26305,8 @@ private static bool rewriteValuegeneric_OpStaticLECall(ptr<Value> _addr_v) {
         v0.AddArg2(v1, v2);
         v.AddArg2(v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29064,7 +26333,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t1} p1 (Load <t2> p2 oldmem) mem:(Store {t3} p3 _ oldmem))
     // cond: isSamePtr(p1, p2) && t2.Size() == t1.Size() && disjoint(p1, t1.Size(), p3, t3.Size())
@@ -29090,7 +26358,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t1} p1 (Load <t2> p2 oldmem) mem:(Store {t3} p3 _ (Store {t4} p4 _ oldmem)))
     // cond: isSamePtr(p1, p2) && t2.Size() == t1.Size() && disjoint(p1, t1.Size(), p3, t3.Size()) && disjoint(p1, t1.Size(), p4, t4.Size())
@@ -29123,7 +26390,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t1} p1 (Load <t2> p2 oldmem) mem:(Store {t3} p3 _ (Store {t4} p4 _ (Store {t5} p5 _ oldmem))))
     // cond: isSamePtr(p1, p2) && t2.Size() == t1.Size() && disjoint(p1, t1.Size(), p3, t3.Size()) && disjoint(p1, t1.Size(), p4, t4.Size()) && disjoint(p1, t1.Size(), p5, t5.Size())
@@ -29163,7 +26429,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t} (OffPtr [o] p1) x mem:(Zero [n] p2 _))
     // cond: isConstZero(x) && o >= 0 && t.Size() + o <= n && isSamePtr(p1, p2)
@@ -29187,7 +26452,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t1} op:(OffPtr [o1] p1) x mem:(Store {t2} p2 _ (Zero [n] p3 _)))
     // cond: isConstZero(x) && o1 >= 0 && t1.Size() + o1 <= n && isSamePtr(p1, p3) && disjoint(op, t1.Size(), p2, t2.Size())
@@ -29219,7 +26483,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t1} op:(OffPtr [o1] p1) x mem:(Store {t2} p2 _ (Store {t3} p3 _ (Zero [n] p4 _))))
     // cond: isConstZero(x) && o1 >= 0 && t1.Size() + o1 <= n && isSamePtr(p1, p4) && disjoint(op, t1.Size(), p2, t2.Size()) && disjoint(op, t1.Size(), p3, t3.Size())
@@ -29258,7 +26521,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t1} op:(OffPtr [o1] p1) x mem:(Store {t2} p2 _ (Store {t3} p3 _ (Store {t4} p4 _ (Zero [n] p5 _)))))
     // cond: isConstZero(x) && o1 >= 0 && t1.Size() + o1 <= n && isSamePtr(p1, p5) && disjoint(op, t1.Size(), p2, t2.Size()) && disjoint(op, t1.Size(), p3, t3.Size()) && disjoint(op, t1.Size(), p4, t4.Size())
@@ -29304,7 +26566,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store _ (StructMake0) mem)
     // result: mem
@@ -29315,7 +26576,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store dst (StructMake1 <t> f0) mem)
     // result: (Store {t.FieldType(0)} (OffPtr <t.FieldType(0).PtrTo()> [0] dst) f0 mem)
@@ -29334,7 +26594,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg(dst);
         v.AddArg3(v0, f0, mem);
         return true;
-
     } 
     // match: (Store dst (StructMake2 <t> f0 f1) mem)
     // result: (Store {t.FieldType(1)} (OffPtr <t.FieldType(1).PtrTo()> [t.FieldOff(1)] dst) f1 (Store {t.FieldType(0)} (OffPtr <t.FieldType(0).PtrTo()> [0] dst) f0 mem))
@@ -29360,7 +26619,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(v2, f0, mem);
         v.AddArg3(v0, f1, v1);
         return true;
-
     } 
     // match: (Store dst (StructMake3 <t> f0 f1 f2) mem)
     // result: (Store {t.FieldType(2)} (OffPtr <t.FieldType(2).PtrTo()> [t.FieldOff(2)] dst) f2 (Store {t.FieldType(1)} (OffPtr <t.FieldType(1).PtrTo()> [t.FieldOff(1)] dst) f1 (Store {t.FieldType(0)} (OffPtr <t.FieldType(0).PtrTo()> [0] dst) f0 mem)))
@@ -29393,7 +26651,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(v2, f1, v3);
         v.AddArg3(v0, f2, v1);
         return true;
-
     } 
     // match: (Store dst (StructMake4 <t> f0 f1 f2 f3) mem)
     // result: (Store {t.FieldType(3)} (OffPtr <t.FieldType(3).PtrTo()> [t.FieldOff(3)] dst) f3 (Store {t.FieldType(2)} (OffPtr <t.FieldType(2).PtrTo()> [t.FieldOff(2)] dst) f2 (Store {t.FieldType(1)} (OffPtr <t.FieldType(1).PtrTo()> [t.FieldOff(1)] dst) f1 (Store {t.FieldType(0)} (OffPtr <t.FieldType(0).PtrTo()> [0] dst) f0 mem))))
@@ -29433,7 +26690,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(v2, f2, v3);
         v.AddArg3(v0, f3, v1);
         return true;
-
     } 
     // match: (Store {t} dst (Load src mem) mem)
     // cond: !fe.CanSSA(t)
@@ -29454,7 +26710,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t);
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Store {t} dst (Load src mem) (VarDef {x} mem))
     // cond: !fe.CanSSA(t)
@@ -29482,7 +26737,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg(mem);
         v.AddArg3(dst, src, v0);
         return true;
-
     } 
     // match: (Store _ (ArrayMake0) mem)
     // result: mem
@@ -29493,7 +26747,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store dst (ArrayMake1 e) mem)
     // result: (Store {e.Type} dst e mem)
@@ -29508,7 +26761,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v.Aux = typeToAux(e.Type);
         v.AddArg3(dst, e, mem);
         return true;
-
     } 
     // match: (Store (SelectN [0] call:(StaticLECall _ _)) x mem:(SelectN [1] call))
     // cond: isConstZero(x) && isSameCall(call.Aux, "runtime.newobject")
@@ -29528,7 +26780,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store (OffPtr (SelectN [0] call:(StaticLECall _ _))) x mem:(SelectN [1] call))
     // cond: isConstZero(x) && isSameCall(call.Aux, "runtime.newobject")
@@ -29552,7 +26803,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Store {t1} op1:(OffPtr [o1] p1) d1 m2:(Store {t2} op2:(OffPtr [0] p2) d2 m3:(Move [n] p3 _ mem)))
     // cond: m2.Uses == 1 && m3.Uses == 1 && o1 == t2.Size() && n == t2.Size() + t1.Size() && isSamePtr(p1, p2) && isSamePtr(p2, p3) && clobber(m2, m3)
@@ -29595,7 +26845,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg3(op2, d2, mem);
         v.AddArg3(op1, d1, v0);
         return true;
-
     } 
     // match: (Store {t1} op1:(OffPtr [o1] p1) d1 m2:(Store {t2} op2:(OffPtr [o2] p2) d2 m3:(Store {t3} op3:(OffPtr [0] p3) d3 m4:(Move [n] p4 _ mem))))
     // cond: m2.Uses == 1 && m3.Uses == 1 && m4.Uses == 1 && o2 == t3.Size() && o1-o2 == t2.Size() && n == t3.Size() + t2.Size() + t1.Size() && isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && clobber(m2, m3, m4)
@@ -29654,7 +26903,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg3(op2, d2, v1);
         v.AddArg3(op1, d1, v0);
         return true;
-
     } 
     // match: (Store {t1} op1:(OffPtr [o1] p1) d1 m2:(Store {t2} op2:(OffPtr [o2] p2) d2 m3:(Store {t3} op3:(OffPtr [o3] p3) d3 m4:(Store {t4} op4:(OffPtr [0] p4) d4 m5:(Move [n] p5 _ mem)))))
     // cond: m2.Uses == 1 && m3.Uses == 1 && m4.Uses == 1 && m5.Uses == 1 && o3 == t4.Size() && o2-o3 == t3.Size() && o1-o2 == t2.Size() && n == t4.Size() + t3.Size() + t2.Size() + t1.Size() && isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && clobber(m2, m3, m4, m5)
@@ -29729,7 +26977,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg3(op2, d2, v1);
         v.AddArg3(op1, d1, v0);
         return true;
-
     } 
     // match: (Store {t1} op1:(OffPtr [o1] p1) d1 m2:(Store {t2} op2:(OffPtr [0] p2) d2 m3:(Zero [n] p3 mem)))
     // cond: m2.Uses == 1 && m3.Uses == 1 && o1 == t2.Size() && n == t2.Size() + t1.Size() && isSamePtr(p1, p2) && isSamePtr(p2, p3) && clobber(m2, m3)
@@ -29772,7 +27019,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg3(op2, d2, mem);
         v.AddArg3(op1, d1, v0);
         return true;
-
     } 
     // match: (Store {t1} op1:(OffPtr [o1] p1) d1 m2:(Store {t2} op2:(OffPtr [o2] p2) d2 m3:(Store {t3} op3:(OffPtr [0] p3) d3 m4:(Zero [n] p4 mem))))
     // cond: m2.Uses == 1 && m3.Uses == 1 && m4.Uses == 1 && o2 == t3.Size() && o1-o2 == t2.Size() && n == t3.Size() + t2.Size() + t1.Size() && isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && clobber(m2, m3, m4)
@@ -29831,7 +27077,6 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg3(op2, d2, v1);
         v.AddArg3(op1, d1, v0);
         return true;
-
     } 
     // match: (Store {t1} op1:(OffPtr [o1] p1) d1 m2:(Store {t2} op2:(OffPtr [o2] p2) d2 m3:(Store {t3} op3:(OffPtr [o3] p3) d3 m4:(Store {t4} op4:(OffPtr [0] p4) d4 m5:(Zero [n] p5 mem)))))
     // cond: m2.Uses == 1 && m3.Uses == 1 && m4.Uses == 1 && m5.Uses == 1 && o3 == t4.Size() && o2-o3 == t3.Size() && o1-o2 == t2.Size() && n == t4.Size() + t3.Size() + t2.Size() + t1.Size() && isSamePtr(p1, p2) && isSamePtr(p2, p3) && isSamePtr(p3, p4) && isSamePtr(p4, p5) && clobber(m2, m3, m4, m5)
@@ -29906,10 +27151,8 @@ private static bool rewriteValuegeneric_OpStore(ptr<Value> _addr_v) {
         v0.AddArg3(op2, d2, v1);
         v.AddArg3(op1, d1, v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpStringLen(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29932,10 +27175,8 @@ private static bool rewriteValuegeneric_OpStringLen(ptr<Value> _addr_v) {
         v.Type = t;
         v.AuxInt = int64ToAuxInt(c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpStringPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29959,10 +27200,8 @@ private static bool rewriteValuegeneric_OpStringPtr(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(base);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -29979,7 +27218,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [0] (StructMake2 x _))
     // result: x
@@ -29990,7 +27228,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [1] (StructMake2 _ x))
     // result: x
@@ -30001,7 +27238,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[1];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [0] (StructMake3 x _ _))
     // result: x
@@ -30012,7 +27248,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [1] (StructMake3 _ x _))
     // result: x
@@ -30023,7 +27258,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[1];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [2] (StructMake3 _ _ x))
     // result: x
@@ -30034,7 +27268,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[2];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [0] (StructMake4 x _ _ _))
     // result: x
@@ -30045,7 +27278,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [1] (StructMake4 _ x _ _))
     // result: x
@@ -30056,7 +27288,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[1];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [2] (StructMake4 _ _ x _))
     // result: x
@@ -30067,7 +27298,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[2];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [3] (StructMake4 _ _ _ x))
     // result: x
@@ -30078,7 +27308,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         x = v_0.Args[3];
         v.copyOf(x);
         return true;
-
     } 
     // match: (StructSelect [i] x:(Load <t> ptr mem))
     // cond: !fe.CanSSA(t)
@@ -30103,7 +27332,6 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         v1.AddArg(ptr);
         v0.AddArg2(v1, mem);
         return true;
-
     } 
     // match: (StructSelect [0] (IData x))
     // result: (IData x)
@@ -30115,10 +27343,8 @@ private static bool rewriteValuegeneric_OpStructSelect(ptr<Value> _addr_v) {
         v.reset(OpIData);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30140,7 +27366,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(c - d);
         return true;
-
     } 
     // match: (Sub16 x (Const16 <t> [c]))
     // cond: x.Op != OpConst16
@@ -30160,7 +27385,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
         v0.AuxInt = int16ToAuxInt(-c);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub16 <t> (Mul16 x y) (Mul16 x z))
     // result: (Mul16 x (Sub16 <t> y z))
@@ -30184,7 +27408,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -30196,25 +27419,21 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var z = v_1_1;
                         v.reset(OpMul16);
                         v0 = b.NewValue0(v.Pos, OpSub16, t);
                         v0.AddArg2(y, z);
                         v.AddArg2(x, v0);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub16 x x)
     // result: (Const16 [0])
@@ -30226,7 +27445,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Sub16 (Add16 x y) x)
     // result: y
@@ -30249,17 +27467,14 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub16 (Add16 x y) y)
     // result: x
@@ -30282,17 +27497,14 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub16 x (Sub16 i:(Const16 <t>) z))
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -30316,7 +27528,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
         v0.AddArg2(x, z);
         v.AddArg2(v0, i);
         return true;
-
     } 
     // match: (Sub16 x (Add16 z i:(Const16 <t>)))
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -30341,25 +27552,21 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 t = i.Type;
                 if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                     continue;
                 }
-
                 v.reset(OpSub16);
                 v0 = b.NewValue0(v.Pos, OpSub16, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(v0, i);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub16 (Sub16 i:(Const16 <t>) z) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -30383,7 +27590,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
         v0.AddArg2(z, x);
         v.AddArg2(i, v0);
         return true;
-
     } 
     // match: (Sub16 (Add16 z i:(Const16 <t>)) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -30407,26 +27613,22 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                     continue;
                 }
-
                 v.reset(OpAdd16);
                 v0 = b.NewValue0(v.Pos, OpSub16, t);
                 v0.AddArg2(z, x);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub16 (Const16 <t> [c]) (Sub16 (Const16 <t> [d]) x))
     // result: (Add16 (Const16 <t> [c-d]) x)
@@ -30450,7 +27652,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
         v0.AuxInt = int16ToAuxInt(c - d);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub16 (Const16 <t> [c]) (Add16 (Const16 <t> [d]) x))
     // result: (Sub16 (Const16 <t> [c-d]) x)
@@ -30476,7 +27677,6 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 d = auxIntToInt16(v_1_0.AuxInt);
                 x = v_1_1;
                 v.reset(OpSub16);
@@ -30484,17 +27684,14 @@ private static bool rewriteValuegeneric_OpSub16(ptr<Value> _addr_v) {
                 v0.AuxInt = int16ToAuxInt(c - d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30516,7 +27713,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(c - d);
         return true;
-
     } 
     // match: (Sub32 x (Const32 <t> [c]))
     // cond: x.Op != OpConst32
@@ -30536,7 +27732,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(-c);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub32 <t> (Mul32 x y) (Mul32 x z))
     // result: (Mul32 x (Sub32 <t> y z))
@@ -30560,7 +27755,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -30572,25 +27766,21 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var z = v_1_1;
                         v.reset(OpMul32);
                         v0 = b.NewValue0(v.Pos, OpSub32, t);
                         v0.AddArg2(y, z);
                         v.AddArg2(x, v0);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub32 x x)
     // result: (Const32 [0])
@@ -30602,7 +27792,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Sub32 (Add32 x y) x)
     // result: y
@@ -30625,17 +27814,14 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub32 (Add32 x y) y)
     // result: x
@@ -30658,17 +27844,14 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub32 x (Sub32 i:(Const32 <t>) z))
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -30692,7 +27875,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
         v0.AddArg2(x, z);
         v.AddArg2(v0, i);
         return true;
-
     } 
     // match: (Sub32 x (Add32 z i:(Const32 <t>)))
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -30717,25 +27899,21 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 t = i.Type;
                 if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                     continue;
                 }
-
                 v.reset(OpSub32);
                 v0 = b.NewValue0(v.Pos, OpSub32, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(v0, i);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub32 (Sub32 i:(Const32 <t>) z) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -30759,7 +27937,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
         v0.AddArg2(z, x);
         v.AddArg2(i, v0);
         return true;
-
     } 
     // match: (Sub32 (Add32 z i:(Const32 <t>)) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -30783,26 +27960,22 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                     continue;
                 }
-
                 v.reset(OpAdd32);
                 v0 = b.NewValue0(v.Pos, OpSub32, t);
                 v0.AddArg2(z, x);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub32 (Const32 <t> [c]) (Sub32 (Const32 <t> [d]) x))
     // result: (Add32 (Const32 <t> [c-d]) x)
@@ -30826,7 +27999,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
         v0.AuxInt = int32ToAuxInt(c - d);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub32 (Const32 <t> [c]) (Add32 (Const32 <t> [d]) x))
     // result: (Sub32 (Const32 <t> [c-d]) x)
@@ -30852,7 +28024,6 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 d = auxIntToInt32(v_1_0.AuxInt);
                 x = v_1_1;
                 v.reset(OpSub32);
@@ -30860,17 +28031,14 @@ private static bool rewriteValuegeneric_OpSub32(ptr<Value> _addr_v) {
                 v0.AuxInt = int32ToAuxInt(c - d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSub32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30895,10 +28063,8 @@ private static bool rewriteValuegeneric_OpSub32F(ptr<Value> _addr_v) {
         v.reset(OpConst32F);
         v.AuxInt = float32ToAuxInt(c - d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -30920,7 +28086,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(c - d);
         return true;
-
     } 
     // match: (Sub64 x (Const64 <t> [c]))
     // cond: x.Op != OpConst64
@@ -30940,7 +28105,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(-c);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub64 <t> (Mul64 x y) (Mul64 x z))
     // result: (Mul64 x (Sub64 <t> y z))
@@ -30964,7 +28128,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -30976,25 +28139,21 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var z = v_1_1;
                         v.reset(OpMul64);
                         v0 = b.NewValue0(v.Pos, OpSub64, t);
                         v0.AddArg2(y, z);
                         v.AddArg2(x, v0);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub64 x x)
     // result: (Const64 [0])
@@ -31006,7 +28165,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Sub64 (Add64 x y) x)
     // result: y
@@ -31029,17 +28187,14 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub64 (Add64 x y) y)
     // result: x
@@ -31062,17 +28217,14 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub64 x (Sub64 i:(Const64 <t>) z))
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -31096,7 +28248,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
         v0.AddArg2(x, z);
         v.AddArg2(v0, i);
         return true;
-
     } 
     // match: (Sub64 x (Add64 z i:(Const64 <t>)))
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -31121,25 +28272,21 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 t = i.Type;
                 if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                     continue;
                 }
-
                 v.reset(OpSub64);
                 v0 = b.NewValue0(v.Pos, OpSub64, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(v0, i);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub64 (Sub64 i:(Const64 <t>) z) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -31163,7 +28310,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
         v0.AddArg2(z, x);
         v.AddArg2(i, v0);
         return true;
-
     } 
     // match: (Sub64 (Add64 z i:(Const64 <t>)) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -31187,26 +28333,22 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                     continue;
                 }
-
                 v.reset(OpAdd64);
                 v0 = b.NewValue0(v.Pos, OpSub64, t);
                 v0.AddArg2(z, x);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub64 (Const64 <t> [c]) (Sub64 (Const64 <t> [d]) x))
     // result: (Add64 (Const64 <t> [c-d]) x)
@@ -31230,7 +28372,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(c - d);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub64 (Const64 <t> [c]) (Add64 (Const64 <t> [d]) x))
     // result: (Sub64 (Const64 <t> [c-d]) x)
@@ -31256,7 +28397,6 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 d = auxIntToInt64(v_1_0.AuxInt);
                 x = v_1_1;
                 v.reset(OpSub64);
@@ -31264,17 +28404,14 @@ private static bool rewriteValuegeneric_OpSub64(ptr<Value> _addr_v) {
                 v0.AuxInt = int64ToAuxInt(c - d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSub64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31299,10 +28436,8 @@ private static bool rewriteValuegeneric_OpSub64F(ptr<Value> _addr_v) {
         v.reset(OpConst64F);
         v.AuxInt = float64ToAuxInt(c - d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31324,7 +28459,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(c - d);
         return true;
-
     } 
     // match: (Sub8 x (Const8 <t> [c]))
     // cond: x.Op != OpConst8
@@ -31344,7 +28478,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
         v0.AuxInt = int8ToAuxInt(-c);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub8 <t> (Mul8 x y) (Mul8 x z))
     // result: (Mul8 x (Sub8 <t> y z))
@@ -31368,7 +28501,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -31380,25 +28512,21 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var z = v_1_1;
                         v.reset(OpMul8);
                         v0 = b.NewValue0(v.Pos, OpSub8, t);
                         v0.AddArg2(y, z);
                         v.AddArg2(x, v0);
                         return true;
-
                     }
 
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub8 x x)
     // result: (Const8 [0])
@@ -31410,7 +28538,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Sub8 (Add8 x y) x)
     // result: y
@@ -31433,17 +28560,14 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub8 (Add8 x y) y)
     // result: x
@@ -31466,17 +28590,14 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub8 x (Sub8 i:(Const8 <t>) z))
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -31500,7 +28621,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
         v0.AddArg2(x, z);
         v.AddArg2(v0, i);
         return true;
-
     } 
     // match: (Sub8 x (Add8 z i:(Const8 <t>)))
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -31525,25 +28645,21 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 t = i.Type;
                 if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                     continue;
                 }
-
                 v.reset(OpSub8);
                 v0 = b.NewValue0(v.Pos, OpSub8, t);
                 v0.AddArg2(x, z);
                 v.AddArg2(v0, i);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub8 (Sub8 i:(Const8 <t>) z) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -31567,7 +28683,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
         v0.AddArg2(z, x);
         v.AddArg2(i, v0);
         return true;
-
     } 
     // match: (Sub8 (Add8 z i:(Const8 <t>)) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -31591,26 +28706,22 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 t = i.Type;
                 x = v_1;
                 if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                     continue;
                 }
-
                 v.reset(OpAdd8);
                 v0 = b.NewValue0(v.Pos, OpSub8, t);
                 v0.AddArg2(z, x);
                 v.AddArg2(i, v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Sub8 (Const8 <t> [c]) (Sub8 (Const8 <t> [d]) x))
     // result: (Add8 (Const8 <t> [c-d]) x)
@@ -31634,7 +28745,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
         v0.AuxInt = int8ToAuxInt(c - d);
         v.AddArg2(v0, x);
         return true;
-
     } 
     // match: (Sub8 (Const8 <t> [c]) (Add8 (Const8 <t> [d]) x))
     // result: (Sub8 (Const8 <t> [c-d]) x)
@@ -31660,7 +28770,6 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 d = auxIntToInt8(v_1_0.AuxInt);
                 x = v_1_1;
                 v.reset(OpSub8);
@@ -31668,17 +28777,14 @@ private static bool rewriteValuegeneric_OpSub8(ptr<Value> _addr_v) {
                 v0.AuxInt = int8ToAuxInt(c - d);
                 v.AddArg2(v0, x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpTrunc16to8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31694,7 +28800,6 @@ private static bool rewriteValuegeneric_OpTrunc16to8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(int8(c));
         return true;
-
     } 
     // match: (Trunc16to8 (ZeroExt8to16 x))
     // result: x
@@ -31705,7 +28810,6 @@ private static bool rewriteValuegeneric_OpTrunc16to8(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc16to8 (SignExt8to16 x))
     // result: x
@@ -31716,7 +28820,6 @@ private static bool rewriteValuegeneric_OpTrunc16to8(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc16to8 (And16 (Const16 [y]) x))
     // cond: y&0xFF == 0xFF
@@ -31736,25 +28839,20 @@ private static bool rewriteValuegeneric_OpTrunc16to8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var y = auxIntToInt16(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(y & 0xFF == 0xFF)) {
                     continue;
                 }
-
                 v.reset(OpTrunc16to8);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpTrunc32to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31770,7 +28868,6 @@ private static bool rewriteValuegeneric_OpTrunc32to16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(int16(c));
         return true;
-
     } 
     // match: (Trunc32to16 (ZeroExt8to32 x))
     // result: (ZeroExt8to16 x)
@@ -31782,7 +28879,6 @@ private static bool rewriteValuegeneric_OpTrunc32to16(ptr<Value> _addr_v) {
         v.reset(OpZeroExt8to16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc32to16 (ZeroExt16to32 x))
     // result: x
@@ -31793,7 +28889,6 @@ private static bool rewriteValuegeneric_OpTrunc32to16(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc32to16 (SignExt8to32 x))
     // result: (SignExt8to16 x)
@@ -31805,7 +28900,6 @@ private static bool rewriteValuegeneric_OpTrunc32to16(ptr<Value> _addr_v) {
         v.reset(OpSignExt8to16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc32to16 (SignExt16to32 x))
     // result: x
@@ -31816,7 +28910,6 @@ private static bool rewriteValuegeneric_OpTrunc32to16(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc32to16 (And32 (Const32 [y]) x))
     // cond: y&0xFFFF == 0xFFFF
@@ -31836,25 +28929,20 @@ private static bool rewriteValuegeneric_OpTrunc32to16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var y = auxIntToInt32(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(y & 0xFFFF == 0xFFFF)) {
                     continue;
                 }
-
                 v.reset(OpTrunc32to16);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpTrunc32to8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31870,7 +28958,6 @@ private static bool rewriteValuegeneric_OpTrunc32to8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(int8(c));
         return true;
-
     } 
     // match: (Trunc32to8 (ZeroExt8to32 x))
     // result: x
@@ -31881,7 +28968,6 @@ private static bool rewriteValuegeneric_OpTrunc32to8(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc32to8 (SignExt8to32 x))
     // result: x
@@ -31892,7 +28978,6 @@ private static bool rewriteValuegeneric_OpTrunc32to8(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc32to8 (And32 (Const32 [y]) x))
     // cond: y&0xFF == 0xFF
@@ -31912,25 +28997,20 @@ private static bool rewriteValuegeneric_OpTrunc32to8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var y = auxIntToInt32(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(y & 0xFF == 0xFF)) {
                     continue;
                 }
-
                 v.reset(OpTrunc32to8);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpTrunc64to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -31946,7 +29026,6 @@ private static bool rewriteValuegeneric_OpTrunc64to16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(int16(c));
         return true;
-
     } 
     // match: (Trunc64to16 (ZeroExt8to64 x))
     // result: (ZeroExt8to16 x)
@@ -31958,7 +29037,6 @@ private static bool rewriteValuegeneric_OpTrunc64to16(ptr<Value> _addr_v) {
         v.reset(OpZeroExt8to16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to16 (ZeroExt16to64 x))
     // result: x
@@ -31969,7 +29047,6 @@ private static bool rewriteValuegeneric_OpTrunc64to16(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc64to16 (SignExt8to64 x))
     // result: (SignExt8to16 x)
@@ -31981,7 +29058,6 @@ private static bool rewriteValuegeneric_OpTrunc64to16(ptr<Value> _addr_v) {
         v.reset(OpSignExt8to16);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to16 (SignExt16to64 x))
     // result: x
@@ -31992,7 +29068,6 @@ private static bool rewriteValuegeneric_OpTrunc64to16(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc64to16 (And64 (Const64 [y]) x))
     // cond: y&0xFFFF == 0xFFFF
@@ -32012,25 +29087,20 @@ private static bool rewriteValuegeneric_OpTrunc64to16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var y = auxIntToInt64(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(y & 0xFFFF == 0xFFFF)) {
                     continue;
                 }
-
                 v.reset(OpTrunc64to16);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32046,7 +29116,6 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(c));
         return true;
-
     } 
     // match: (Trunc64to32 (ZeroExt8to64 x))
     // result: (ZeroExt8to32 x)
@@ -32058,7 +29127,6 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
         v.reset(OpZeroExt8to32);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to32 (ZeroExt16to64 x))
     // result: (ZeroExt16to32 x)
@@ -32070,7 +29138,6 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
         v.reset(OpZeroExt16to32);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to32 (ZeroExt32to64 x))
     // result: x
@@ -32081,7 +29148,6 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc64to32 (SignExt8to64 x))
     // result: (SignExt8to32 x)
@@ -32093,7 +29159,6 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
         v.reset(OpSignExt8to32);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to32 (SignExt16to64 x))
     // result: (SignExt16to32 x)
@@ -32105,7 +29170,6 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
         v.reset(OpSignExt16to32);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Trunc64to32 (SignExt32to64 x))
     // result: x
@@ -32116,7 +29180,6 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc64to32 (And64 (Const64 [y]) x))
     // cond: y&0xFFFFFFFF == 0xFFFFFFFF
@@ -32136,25 +29199,20 @@ private static bool rewriteValuegeneric_OpTrunc64to32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var y = auxIntToInt64(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(y & 0xFFFFFFFF == 0xFFFFFFFF)) {
                     continue;
                 }
-
                 v.reset(OpTrunc64to32);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpTrunc64to8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32170,7 +29228,6 @@ private static bool rewriteValuegeneric_OpTrunc64to8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(int8(c));
         return true;
-
     } 
     // match: (Trunc64to8 (ZeroExt8to64 x))
     // result: x
@@ -32181,7 +29238,6 @@ private static bool rewriteValuegeneric_OpTrunc64to8(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc64to8 (SignExt8to64 x))
     // result: x
@@ -32192,7 +29248,6 @@ private static bool rewriteValuegeneric_OpTrunc64to8(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     } 
     // match: (Trunc64to8 (And64 (Const64 [y]) x))
     // cond: y&0xFF == 0xFF
@@ -32212,25 +29267,20 @@ private static bool rewriteValuegeneric_OpTrunc64to8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var y = auxIntToInt64(v_0_0.AuxInt);
                 x = v_0_1;
                 if (!(y & 0xFF == 0xFF)) {
                     continue;
                 }
-
                 v.reset(OpTrunc64to8);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32251,24 +29301,20 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpConst16) {
                     continue;
                 }
-
                 var d = auxIntToInt16(v_1.AuxInt);
                 v.reset(OpConst16);
                 v.AuxInt = int16ToAuxInt(c ^ d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor16 x x)
     // result: (Const16 [0])
@@ -32280,7 +29326,6 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(0);
         return true;
-
     } 
     // match: (Xor16 (Const16 [0]) x)
     // result: x
@@ -32295,18 +29340,15 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor16 x (Xor16 x y))
     // result: y
@@ -32322,7 +29364,6 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -32336,24 +29377,20 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.copyOf(y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor16 (Xor16 i:(Const16 <t>) z) x)
     // cond: (z.Op != OpConst16 && x.Op != OpConst16)
@@ -32369,7 +29406,6 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -32384,33 +29420,28 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst16 && x.Op != OpConst16)) {
                             continue;
                         }
-
                         v.reset(OpXor16);
                         var v0 = b.NewValue0(v.Pos, OpXor16, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor16 (Const16 <t> [c]) (Xor16 (Const16 <t> [d]) x))
     // result: (Xor16 (Const16 <t> [c^d]) x)
@@ -32425,13 +29456,11 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt16(v_0.AuxInt);
                 if (v_1.Op != OpXor16) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -32445,7 +29474,6 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt16(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpXor16);
@@ -32453,23 +29481,19 @@ private static bool rewriteValuegeneric_OpXor16(ptr<Value> _addr_v) {
                         v0.AuxInt = int16ToAuxInt(c ^ d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32490,24 +29514,20 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpConst32) {
                     continue;
                 }
-
                 var d = auxIntToInt32(v_1.AuxInt);
                 v.reset(OpConst32);
                 v.AuxInt = int32ToAuxInt(c ^ d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor32 x x)
     // result: (Const32 [0])
@@ -32519,7 +29539,6 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Xor32 (Const32 [0]) x)
     // result: x
@@ -32534,18 +29553,15 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor32 x (Xor32 x y))
     // result: y
@@ -32561,7 +29577,6 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -32575,24 +29590,20 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.copyOf(y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor32 (Xor32 i:(Const32 <t>) z) x)
     // cond: (z.Op != OpConst32 && x.Op != OpConst32)
@@ -32608,7 +29619,6 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -32623,33 +29633,28 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst32 && x.Op != OpConst32)) {
                             continue;
                         }
-
                         v.reset(OpXor32);
                         var v0 = b.NewValue0(v.Pos, OpXor32, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor32 (Const32 <t> [c]) (Xor32 (Const32 <t> [d]) x))
     // result: (Xor32 (Const32 <t> [c^d]) x)
@@ -32664,13 +29669,11 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt32(v_0.AuxInt);
                 if (v_1.Op != OpXor32) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -32684,7 +29687,6 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt32(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpXor32);
@@ -32692,23 +29694,19 @@ private static bool rewriteValuegeneric_OpXor32(ptr<Value> _addr_v) {
                         v0.AuxInt = int32ToAuxInt(c ^ d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32729,24 +29727,20 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpConst64) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpConst64);
                 v.AuxInt = int64ToAuxInt(c ^ d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor64 x x)
     // result: (Const64 [0])
@@ -32758,7 +29752,6 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Xor64 (Const64 [0]) x)
     // result: x
@@ -32773,18 +29766,15 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor64 x (Xor64 x y))
     // result: y
@@ -32800,7 +29790,6 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -32814,24 +29803,20 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.copyOf(y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor64 (Xor64 i:(Const64 <t>) z) x)
     // cond: (z.Op != OpConst64 && x.Op != OpConst64)
@@ -32847,7 +29832,6 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -32862,33 +29846,28 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst64 && x.Op != OpConst64)) {
                             continue;
                         }
-
                         v.reset(OpXor64);
                         var v0 = b.NewValue0(v.Pos, OpXor64, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor64 (Const64 <t> [c]) (Xor64 (Const64 <t> [d]) x))
     // result: (Xor64 (Const64 <t> [c^d]) x)
@@ -32903,13 +29882,11 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpXor64) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -32923,7 +29900,6 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt64(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpXor64);
@@ -32931,23 +29907,19 @@ private static bool rewriteValuegeneric_OpXor64(ptr<Value> _addr_v) {
                         v0.AuxInt = int64ToAuxInt(c ^ d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -32968,24 +29940,20 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpConst8) {
                     continue;
                 }
-
                 var d = auxIntToInt8(v_1.AuxInt);
                 v.reset(OpConst8);
                 v.AuxInt = int8ToAuxInt(c ^ d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor8 x x)
     // result: (Const8 [0])
@@ -32997,7 +29965,6 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
         v.reset(OpConst8);
         v.AuxInt = int8ToAuxInt(0);
         return true;
-
     } 
     // match: (Xor8 (Const8 [0]) x)
     // result: x
@@ -33012,18 +29979,15 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x = v_1;
                 v.copyOf(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor8 x (Xor8 x y))
     // result: y
@@ -33039,7 +30003,6 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_1.Args[1];
                 var v_1_0 = v_1.Args[0];
                 var v_1_1 = v_1.Args[1];
@@ -33053,24 +30016,20 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         var y = v_1_1;
                         v.copyOf(y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor8 (Xor8 i:(Const8 <t>) z) x)
     // cond: (z.Op != OpConst8 && x.Op != OpConst8)
@@ -33086,7 +30045,6 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 _ = v_0.Args[1];
                 var v_0_0 = v_0.Args[0];
                 var v_0_1 = v_0.Args[1];
@@ -33101,33 +30059,28 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_0_0, v_0_1) = (_i1 + 1, v_0_1, v_0_0);
                         }
-
                         var t = i.Type;
                         var z = v_0_1;
                         x = v_1;
                         if (!(z.Op != OpConst8 && x.Op != OpConst8)) {
                             continue;
                         }
-
                         v.reset(OpXor8);
                         var v0 = b.NewValue0(v.Pos, OpXor8, t);
                         v0.AddArg2(z, x);
                         v.AddArg2(i, v0);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Xor8 (Const8 <t> [c]) (Xor8 (Const8 <t> [d]) x))
     // result: (Xor8 (Const8 <t> [c^d]) x)
@@ -33142,13 +30095,11 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 t = v_0.Type;
                 c = auxIntToInt8(v_0.AuxInt);
                 if (v_1.Op != OpXor8) {
                     continue;
                 }
-
                 _ = v_1.Args[1];
                 v_1_0 = v_1.Args[0];
                 v_1_1 = v_1.Args[1];
@@ -33162,7 +30113,6 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                             continue;
                         (_i1, v_1_0, v_1_1) = (_i1 + 1, v_1_1, v_1_0);
                         }
-
                         d = auxIntToInt8(v_1_0.AuxInt);
                         x = v_1_1;
                         v.reset(OpXor8);
@@ -33170,23 +30120,19 @@ private static bool rewriteValuegeneric_OpXor8(ptr<Value> _addr_v) {
                         v0.AuxInt = int8ToAuxInt(c ^ d);
                         v.AddArg2(v0, x);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33211,7 +30157,6 @@ private static bool rewriteValuegeneric_OpZero(ptr<Value> _addr_v) {
         }
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero {t1} [n] p1 store:(Store {t2} (OffPtr [o2] p2) _ mem))
     // cond: isSamePtr(p1, p2) && store.Uses == 1 && n >= o2 + t2.Size() && clobber(store)
@@ -33240,7 +30185,6 @@ private static bool rewriteValuegeneric_OpZero(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t1);
         v.AddArg2(p1, mem);
         return true;
-
     } 
     // match: (Zero {t} [n] dst1 move:(Move {t} [n] dst2 _ mem))
     // cond: move.Uses == 1 && isSamePtr(dst1, dst2) && clobber(move)
@@ -33263,7 +30207,6 @@ private static bool rewriteValuegeneric_OpZero(ptr<Value> _addr_v) {
         v.Aux = typeToAux(t);
         v.AddArg2(dst1, mem);
         return true;
-
     } 
     // match: (Zero {t} [n] dst1 vardef:(VarDef {x} move:(Move {t} [n] dst2 _ mem)))
     // cond: move.Uses == 1 && vardef.Uses == 1 && isSamePtr(dst1, dst2) && clobber(move, vardef)
@@ -33294,7 +30237,6 @@ private static bool rewriteValuegeneric_OpZero(ptr<Value> _addr_v) {
         v0.AddArg(mem);
         v.AddArg2(dst1, v0);
         return true;
-
     } 
     // match: (Zero {t} [s] dst1 zero:(Zero {t} [s] dst2 _))
     // cond: isSamePtr(dst1, dst2)
@@ -33313,7 +30255,6 @@ private static bool rewriteValuegeneric_OpZero(ptr<Value> _addr_v) {
         }
         v.copyOf(zero);
         return true;
-
     } 
     // match: (Zero {t} [s] dst1 vardef:(VarDef (Zero {t} [s] dst2 _)))
     // cond: isSamePtr(dst1, dst2)
@@ -33336,10 +30277,8 @@ private static bool rewriteValuegeneric_OpZero(ptr<Value> _addr_v) {
         }
         v.copyOf(vardef);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpZeroExt16to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33355,7 +30294,6 @@ private static bool rewriteValuegeneric_OpZeroExt16to32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(uint16(c)));
         return true;
-
     } 
     // match: (ZeroExt16to32 (Trunc32to16 x:(Rsh32Ux64 _ (Const64 [s]))))
     // cond: s >= 16
@@ -33379,10 +30317,8 @@ private static bool rewriteValuegeneric_OpZeroExt16to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpZeroExt16to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33398,7 +30334,6 @@ private static bool rewriteValuegeneric_OpZeroExt16to64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(uint16(c)));
         return true;
-
     } 
     // match: (ZeroExt16to64 (Trunc64to16 x:(Rsh64Ux64 _ (Const64 [s]))))
     // cond: s >= 48
@@ -33422,10 +30357,8 @@ private static bool rewriteValuegeneric_OpZeroExt16to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpZeroExt32to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33441,7 +30374,6 @@ private static bool rewriteValuegeneric_OpZeroExt32to64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(uint32(c)));
         return true;
-
     } 
     // match: (ZeroExt32to64 (Trunc64to32 x:(Rsh64Ux64 _ (Const64 [s]))))
     // cond: s >= 32
@@ -33465,10 +30397,8 @@ private static bool rewriteValuegeneric_OpZeroExt32to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpZeroExt8to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33484,7 +30414,6 @@ private static bool rewriteValuegeneric_OpZeroExt8to16(ptr<Value> _addr_v) {
         v.reset(OpConst16);
         v.AuxInt = int16ToAuxInt(int16(uint8(c)));
         return true;
-
     } 
     // match: (ZeroExt8to16 (Trunc16to8 x:(Rsh16Ux64 _ (Const64 [s]))))
     // cond: s >= 8
@@ -33508,10 +30437,8 @@ private static bool rewriteValuegeneric_OpZeroExt8to16(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpZeroExt8to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33527,7 +30454,6 @@ private static bool rewriteValuegeneric_OpZeroExt8to32(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(int32(uint8(c)));
         return true;
-
     } 
     // match: (ZeroExt8to32 (Trunc32to8 x:(Rsh32Ux64 _ (Const64 [s]))))
     // cond: s >= 24
@@ -33551,10 +30477,8 @@ private static bool rewriteValuegeneric_OpZeroExt8to32(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuegeneric_OpZeroExt8to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -33570,7 +30494,6 @@ private static bool rewriteValuegeneric_OpZeroExt8to64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(int64(uint8(c)));
         return true;
-
     } 
     // match: (ZeroExt8to64 (Trunc64to8 x:(Rsh64Ux64 _ (Const64 [s]))))
     // cond: s >= 56
@@ -33594,10 +30517,8 @@ private static bool rewriteValuegeneric_OpZeroExt8to64(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteBlockgeneric(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -33639,7 +30560,6 @@ private static bool rewriteBlockgeneric(ptr<Block> _addr_b) {
             return true;
         }
         return false;
-
 }
 
 } // end ssa_package

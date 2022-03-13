@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:25:57 UTC
+//     Generated on 2022 March 13 06:40:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace @internal
 {
     public static partial class lazyregexp_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Regexp
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace @internal
             public static implicit operator Regexp(NilType nil) => default(Regexp);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Regexp Regexp_cast(dynamic value)
         {
             return new Regexp(value.str, value.once, ref value.rx);

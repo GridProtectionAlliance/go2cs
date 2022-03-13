@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:19 UTC
+//     Generated on 2022 March 13 06:35:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct peBaseRelocTable
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace @internal
             public static implicit operator peBaseRelocTable(NilType nil) => default(peBaseRelocTable);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static peBaseRelocTable peBaseRelocTable_cast(dynamic value)
         {
             return new peBaseRelocTable(value.blocks, value.pages);

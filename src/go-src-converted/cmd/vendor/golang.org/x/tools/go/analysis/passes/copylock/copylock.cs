@@ -4,23 +4,23 @@
 
 // Package copylock defines an Analyzer that checks for locks
 // erroneously passed by value.
-// package copylock -- go2cs converted at 2022 March 06 23:34:34 UTC
+
+// package copylock -- go2cs converted at 2022 March 13 06:41:50 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/copylock" ==> using copylock = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.copylock_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\copylock\copylock.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class copylock_package {
 
@@ -67,10 +67,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 checkCopyLocksReturnStmt(_addr_pass, _addr_node);
                 break;
         }
-
     });
     return (null, error.As(null!)!);
-
 }
 
 // checkCopyLocksAssign checks whether an assignment
@@ -88,7 +86,6 @@ private static void checkCopyLocksAssign(ptr<analysis.Pass> _addr_pass, ptr<ast.
             }
 
         }
-
     }
 }
 
@@ -112,7 +109,6 @@ private static void checkCopyLocksGenDecl(ptr<analysis.Pass> _addr_pass, ptr<ast
                 }
 
             }
-
         }
     }
 }
@@ -131,7 +127,6 @@ private static void checkCopyLocksCompositeLit(ptr<analysis.Pass> _addr_pass, pt
             }
 
         }
-
         {
             var path = lockPathRhs(_addr_pass, x);
 
@@ -140,7 +135,6 @@ private static void checkCopyLocksCompositeLit(ptr<analysis.Pass> _addr_pass, pt
             }
 
         }
-
     }
 }
 
@@ -158,7 +152,6 @@ private static void checkCopyLocksReturnStmt(ptr<analysis.Pass> _addr_pass, ptr<
             }
 
         }
-
     }
 }
 
@@ -193,12 +186,10 @@ private static void checkCopyLocksCallExpr(ptr<analysis.Pass> _addr_pass, ptr<as
                     return ;
                     break;
             }
-
         }
         fun = fun__prev1;
 
     }
-
     foreach (var (_, x) in ce.Args) {
         {
             var path = lockPathRhs(_addr_pass, x);
@@ -208,7 +199,6 @@ private static void checkCopyLocksCallExpr(ptr<analysis.Pass> _addr_pass, ptr<as
             }
 
         }
-
     }
 }
 
@@ -235,7 +225,6 @@ private static void checkCopyLocksFunc(ptr<analysis.Pass> _addr_pass, @string na
             path = path__prev2;
 
         }
-
     }
     if (typ.Params != null) {
         foreach (var (_, field) in typ.Params.List) {
@@ -252,7 +241,6 @@ private static void checkCopyLocksFunc(ptr<analysis.Pass> _addr_pass, @string na
                 path = path__prev2;
 
             }
-
         }
     }
 }
@@ -288,7 +276,6 @@ private static void checkCopyLocksRangeVar(ptr<analysis.Pass> _addr_pass, token.
             return ;
         }
         typ = obj.Type();
-
     }
     else
  {
@@ -304,7 +291,6 @@ private static void checkCopyLocksRangeVar(ptr<analysis.Pass> _addr_pass, token.
             pass.Reportf(e.Pos(), "range var %s copies lock: %v", analysisutil.Format(pass.Fset, e), path);
         }
     }
-
 }
 
 private partial struct typePath { // : slice<types.Type>
@@ -319,9 +305,7 @@ private static @string String(this typePath path) {
             fmt.Fprint(_addr_buf, " contains ");
         }
         fmt.Fprint(_addr_buf, path[n - i - 1].String());
-
     }    return buf.String();
-
 }
 
 private static typePath lockPathRhs(ptr<analysis.Pass> _addr_pass, ast.Expr x) {
@@ -334,17 +318,14 @@ private static typePath lockPathRhs(ptr<analysis.Pass> _addr_pass, ast.Expr x) {
             return null;
         }
     }
-
     {
         (_, ok) = x._<ptr<ast.CallExpr>>();
 
         if (ok) { 
             // A call may return a zero value.
             return null;
-
         }
     }
-
     {
         ptr<ast.StarExpr> (star, ok) = x._<ptr<ast.StarExpr>>();
 
@@ -355,16 +336,12 @@ private static typePath lockPathRhs(ptr<analysis.Pass> _addr_pass, ast.Expr x) {
                 if (ok) { 
                     // A call may return a pointer to a zero value.
                     return null;
-
                 }
 
             }
-
         }
     }
-
     return lockPath(_addr_pass.Pkg, pass.TypesInfo.Types[x].Type);
-
 }
 
 // lockPath returns a typePath describing the location of a lock value
@@ -381,7 +358,6 @@ private static typePath lockPath(ptr<types.Package> _addr_tpkg, types.Type typ) 
             break;
         }
         typ = atyp.Elem();
-
     } 
 
     // We're only interested in the case in which the underlying
@@ -401,7 +377,6 @@ private static typePath lockPath(ptr<types.Package> _addr_tpkg, types.Type typ) 
         }
     }
 
-
     var nfields = styp.NumFields();
     for (nint i = 0; i < nfields; i++) {
         var ftyp = styp.Field(i).Type();
@@ -412,7 +387,6 @@ private static typePath lockPath(ptr<types.Package> _addr_tpkg, types.Type typ) 
     }
 
     return null;
-
 }
 
 private static ptr<types.Interface> lockerType;
@@ -422,7 +396,6 @@ private static void init() {
     var nullary = types.NewSignature(null, null, null, false); // func()
     ptr<types.Func> methods = new slice<ptr<types.Func>>(new ptr<types.Func>[] { types.NewFunc(token.NoPos,nil,"Lock",nullary), types.NewFunc(token.NoPos,nil,"Unlock",nullary) });
     lockerType = types.NewInterface(methods, null).Complete();
-
 }
 
 } // end copylock_package

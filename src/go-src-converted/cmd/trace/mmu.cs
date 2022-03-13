@@ -23,22 +23,21 @@
 // could potentially put confidence intervals on these estimates and
 // render this progressively as we refine the distributions.
 
-// package main -- go2cs converted at 2022 March 06 23:23:05 UTC
+// package main -- go2cs converted at 2022 March 13 06:36:09 UTC
 // Original source: C:\Program Files\Go\src\cmd\trace\mmu.go
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using trace = go.@internal.trace_package;
-using log = go.log_package;
-using math = go.math_package;
-using http = go.net.http_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
+
+using json = encoding.json_package;
+using fmt = fmt_package;
+using trace = @internal.trace_package;
+using log = log_package;
+using math = math_package;
+using http = net.http_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+using System;
 
 public static partial class main_package {
 
@@ -92,7 +91,6 @@ private static (slice<slice<trace.MutatorUtil>>, ptr<trace.MMUCurve>, error) get
         }
     });
     return (c.util, _addr_c.mmuCurve!, error.As(c.err)!);
-
 }
 
 // httpMMU serves the MMU plot page.
@@ -127,9 +125,7 @@ private static void httpMMUPlot(http.ResponseWriter w, ptr<http.Request> _addr_r
             }
 
         }
-
         xMin /= 1000;
-
     } 
     // Cover six orders of magnitude.
     var xMax = xMin * 1e6F; 
@@ -168,7 +164,6 @@ private static void httpMMUPlot(http.ResponseWriter w, ptr<http.Request> _addr_r
             copy(plot[i][(int)1..], mmuCurve.MUD(window, quantiles));
         }
         plot[i][0] = float64(window);
-
     } 
 
     // Create JSON response.
@@ -315,7 +310,6 @@ private static linkedUtilWindow newLinkedUtilWindow(trace.UtilWindow ui, time.Du
         }
     }
     return new linkedUtilWindow(ui,fmt.Sprintf("%s#%v:%v",r.URL(),float64(ui.Time)/1e6,float64(ui.Time+int64(window))/1e6));
-
 }
 
 } // end main_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:17 UTC
+//     Generated on 2022 March 13 05:26:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct m
         {
             // Constructors
@@ -177,7 +177,7 @@ namespace go
             public static implicit operator m(NilType nil) => default(m);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static m m_cast(dynamic value)
         {
             return new m(ref value.g0, value.morebuf, value.divmod, value.procid, ref value.gsignal, value.goSigStack, value.sigmask, value.tls, value.mstartfn, ref value.curg, value.caughtsig, value.p, value.nextp, value.oldp, value.id, value.mallocing, value.throwing, value.preemptoff, value.locks, value.dying, value.profilehz, value.spinning, value.blocked, value.newSigstack, value.printlock, value.incgo, value.freeWait, value.fastrand, value.needextram, value.traceback, value.ncgocall, value.ncgo, value.cgoCallersUse, ref value.cgoCallers, value.doesPark, value.park, ref value.alllink, value.schedlink, value.lockedg, value.createstack, value.lockedExt, value.lockedInt, value.nextwaitm, value.waitunlockf, value.waitlock, value.waittraceev, value.waittraceskip, value.startingtrace, value.syscalltick, ref value.freelink, value.libcall, value.libcallpc, value.libcallsp, value.libcallg, value.syscall, value.vdsoSP, value.vdsoPC, value.preemptGen, value.signalPending, value.dlogPerM, value.mOS, value.locksHeldLen, value.locksHeld);

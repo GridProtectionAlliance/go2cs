@@ -4,18 +4,20 @@
 
 // This file implements encoding/decoding of Rats.
 
-// package big -- go2cs converted at 2022 March 06 22:18:06 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:19 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\ratmarsh.go
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-
 namespace go.math;
+
+using binary = encoding.binary_package;
+using errors = errors_package;
+using fmt = fmt_package;
+
+
+// Gob codec version. Permits backward-compatible changes to the encoding.
 
 public static partial class big_package {
 
-    // Gob codec version. Permits backward-compatible changes to the encoding.
 private static readonly byte ratGobVersion = 1;
 
 // GobEncode implements the gob.GobEncoder interface.
@@ -37,7 +39,6 @@ private static (slice<byte>, error) GobEncode(this ptr<Rat> _addr_x) {
     if (int(uint32(n)) != n) { 
         // this should never happen
         return (null, error.As(errors.New("Rat.GobEncode: numerator too large"))!);
-
     }
     binary.BigEndian.PutUint32(buf[(int)j - 4..(int)j], uint32(n));
     j -= 1 + 4;
@@ -47,7 +48,6 @@ private static (slice<byte>, error) GobEncode(this ptr<Rat> _addr_x) {
     }
     buf[j] = b;
     return (buf[(int)j..], error.As(null!)!);
-
 }
 
 // GobDecode implements the gob.GobDecoder interface.
@@ -58,7 +58,6 @@ private static error GobDecode(this ptr<Rat> _addr_z, slice<byte> buf) {
         // Other side sent a nil or default value.
         z.val = new Rat();
         return error.As(null!)!;
-
     }
     var b = buf[0];
     if (b >> 1 != ratGobVersion) {
@@ -71,7 +70,6 @@ private static error GobDecode(this ptr<Rat> _addr_z, slice<byte> buf) {
     z.a.abs = z.a.abs.setBytes(buf[(int)j..(int)i]);
     z.b.abs = z.b.abs.setBytes(buf[(int)i..]);
     return error.As(null!)!;
-
 }
 
 // MarshalText implements the encoding.TextMarshaler interface.
@@ -84,7 +82,6 @@ private static (slice<byte>, error) MarshalText(this ptr<Rat> _addr_x) {
         return x.a.MarshalText();
     }
     return (x.marshal(), error.As(null!)!);
-
 }
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
@@ -99,9 +96,7 @@ private static error UnmarshalText(this ptr<Rat> _addr_z, slice<byte> text) {
             return error.As(fmt.Errorf("math/big: cannot unmarshal %q into a *big.Rat", text))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 } // end big_package

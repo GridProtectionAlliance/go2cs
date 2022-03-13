@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:01 UTC
+//     Generated on 2022 March 13 05:37:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2clientStream
         {
             // Constructors
@@ -146,7 +146,7 @@ namespace net
             public static implicit operator http2clientStream(NilType nil) => default(http2clientStream);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2clientStream http2clientStream_cast(dynamic value)
         {
             return new http2clientStream(ref value.cc, value.ctx, value.reqCancel, ref value.trace, value.ID, value.bufPipe, value.requestedGzip, value.isHead, value.abortOnce, value.abort, value.abortErr, value.peerClosed, value.donec, value.on100, value.respHeaderRecv, ref value.res, value.flow, value.inflow, value.bytesRemain, value.readErr, value.reqBody, value.reqBodyContentLength, value.reqBodyClosed, value.sentEndStream, value.sentHeaders, value.firstByte, value.pastHeaders, value.pastTrailers, value.num1xx, value.readClosed, value.readAborted, value.trailer, ref value.resTrailer);

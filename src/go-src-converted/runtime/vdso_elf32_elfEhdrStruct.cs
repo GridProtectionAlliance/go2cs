@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:12:27 UTC
+//     Generated on 2022 March 13 05:27:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct elfEhdr
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace go
             public static implicit operator elfEhdr(NilType nil) => default(elfEhdr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static elfEhdr elfEhdr_cast(dynamic value)
         {
             return new elfEhdr(value.e_ident, value.e_type, value.e_machine, value.e_version, value.e_entry, value.e_phoff, value.e_shoff, value.e_flags, value.e_ehsize, value.e_phentsize, value.e_phnum, value.e_shentsize, value.e_shnum, value.e_shstrndx);

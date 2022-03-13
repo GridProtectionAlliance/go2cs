@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package dwarfgen -- go2cs converted at 2022 March 06 23:14:23 UTC
+// package dwarfgen -- go2cs converted at 2022 March 13 06:27:52 UTC
 // import "cmd/compile/internal/dwarfgen" ==> using dwarfgen = go.cmd.compile.@internal.dwarfgen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\dwarfgen\dwinl.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using dwarf = go.cmd.@internal.dwarf_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using dwarf = cmd.@internal.dwarf_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+
+
+// To identify variables by original source position.
 
 public static partial class dwarfgen_package {
 
-    // To identify variables by original source position.
 private partial struct varPos {
     public @string DeclName;
     public @string DeclFile;
@@ -51,14 +53,11 @@ private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<p
                 continue;
             p = p.Link;
             }
-
             var ii = posInlIndex(p.Pos);
             if (ii >= 0) {
                 insertInlCall(_addr_inlcalls, ii, imap);
             }
-
             prevpos = p.Pos;
-
         }
 
         p = p__prev1;
@@ -85,10 +84,8 @@ private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<p
             // inliner for which there is no remaining prog; add a new
             // entry to the call list in this scenario.
             idx = insertInlCall(_addr_inlcalls, ii, imap);
-
         }
         inlcalls.Calls[idx].InlVars = append(inlcalls.Calls[idx].InlVars, dwv);
-
     }    {
         var ii__prev1 = ii;
 
@@ -111,11 +108,9 @@ private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<p
                     }
 
                     continue;
-
                 }
             else
                 m = makePreinlineDclMap(_addr_fnsym);
-
             } {
                 var ifnlsym = @base.Ctxt.InlTree.InlinedFunction(int(ii - 1));
                 m = makePreinlineDclMap(_addr_ifnlsym);
@@ -159,13 +154,11 @@ private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<p
                             // lowering, or unnamed params ("_").
                             v.ChildIndex = int32(synthCount);
                             synthCount++;
-
                         }
 
                         idx = idx__prev1;
 
                     }
-
                 }
 
                 v = v__prev2;
@@ -187,7 +180,6 @@ private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<p
                 continue;
             (prevp, p) = (p, p.Link);
             }
-
             ii = posInlIndex(p.Pos);
             if (ii == curii) {
                 continue;
@@ -199,7 +191,6 @@ private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<p
             // Begin new range
             start = p.Pc;
             curii = ii;
-
         }
 
         p = p__prev1;
@@ -242,7 +233,6 @@ private static dwarf.InlCalls assembleInlines(ptr<obj.LSym> _addr_fnsym, slice<p
     }
 
     return inlcalls;
-
 }
 
 // Secondary hook for DWARF inlined subroutine generation. This is called
@@ -262,7 +252,6 @@ public static void AbstractFunc(ptr<obj.LSym> _addr_fn) {
         @base.Ctxt.Logf("DwarfAbstractFunc(%v)\n", fn.Name);
     }
     @base.Ctxt.DwarfAbstractFunc(ifn, fn, @base.Ctxt.Pkgpath);
-
 }
 
 // Undo any versioning performed when a name was written
@@ -275,9 +264,7 @@ private static @string unversion(@string name) {
             name = name[..(int)i];
         }
     }
-
     return name;
-
 }
 
 // Given a function that was inlined as part of the compilation, dig
@@ -300,15 +287,11 @@ private static map<varPos, nint> makePreinlineDclMap(ptr<obj.LSym> _addr_fnsym) 
             if (found) { 
                 // We can see collisions (variables with the same name/file/line/col) in obfuscated or machine-generated code -- see issue 44378 for an example. Skip duplicates in such cases, since it is unlikely that a human will be debugging such code.
                 continue;
-
             }
 
         }
-
         m[vp] = i;
-
     }    return m;
-
 }
 
 private static nint insertInlCall(ptr<dwarf.InlCalls> _addr_dwcalls, nint inlIdx, map<nint, nint> imap) {
@@ -336,10 +319,8 @@ private static nint insertInlCall(ptr<dwarf.InlCalls> _addr_dwcalls, nint inlIdx
     if (parCallIdx != -1) { 
         // Add this inline to parent's child list
         dwcalls.Calls[parCallIdx].Children = append(dwcalls.Calls[parCallIdx].Children, callIdx);
-
     }
     return callIdx;
-
 }
 
 // Given a src.XPos, return its associated inlining index if it
@@ -361,9 +342,7 @@ private static nint posInlIndex(src.XPos xpos) {
             }
         }
     }
-
     return -1;
-
 }
 
 private static void addRange(slice<dwarf.InlCall> calls, long start, long end, nint ii, map<nint, nint> imap) => func((_, panic, _) => {
@@ -385,7 +364,6 @@ private static void addRange(slice<dwarf.InlCall> calls, long start, long end, n
     }
     var call = _addr_calls[callIdx];
     call.Ranges = append(call.Ranges, new dwarf.Range(Start:start,End:end));
-
 });
 
 private static void dumpInlCall(dwarf.InlCalls inlcalls, nint idx, nint ilevel) {
@@ -442,7 +420,6 @@ private static void dumpInlVars(slice<ptr<dwarf.Var>> dwvars) {
             ia = 1;
         }
         @base.Ctxt.Logf("V%d: %s CI:%d II:%d IA:%d %s\n", i, dwv.Name, dwv.ChildIndex, dwv.InlIndex - 1, ia, typ);
-
     }
 }
 
@@ -475,7 +452,6 @@ private static (bool, @string) rangesContains(slice<dwarf.Range> par, dwarf.Rang
 
     msg += " }";
     return (false, msg);
-
 }
 
 private static (bool, @string) rangesContainsAll(slice<dwarf.Range> parent, slice<dwarf.Range> child) {
@@ -488,7 +464,6 @@ private static (bool, @string) rangesContainsAll(slice<dwarf.Range> parent, slic
             return (false, m);
         }
     }    return (true, "");
-
 }
 
 // checkInlCall verifies that the PC ranges for inline info 'idx' are
@@ -530,7 +505,6 @@ private static void unifyCallRanges(dwarf.InlCalls inlcalls, nint idx) {
         // Then merge child ranges into ranges for this inline.
         var cic = inlcalls.Calls[childIdx];
         ic.Ranges = dwarf.MergeRanges(ic.Ranges, cic.Ranges);
-
     }
 }
 

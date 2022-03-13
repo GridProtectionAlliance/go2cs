@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:29 UTC
+//     Generated on 2022 March 13 06:29:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace @internal
 {
     public static partial class work_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct actionJSON
         {
             // Constructors
@@ -119,7 +119,7 @@ namespace @internal
             public static implicit operator actionJSON(NilType nil) => default(actionJSON);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static actionJSON actionJSON_cast(dynamic value)
         {
             return new actionJSON(value.ID, value.Mode, value.Package, value.Deps, value.IgnoreFail, value.Args, value.Link, value.Objdir, value.Target, value.Priority, value.Failed, value.Built, value.VetxOnly, value.NeedVet, value.NeedBuild, value.ActionID, value.BuildID, value.TimeReady, value.TimeStart, value.TimeDone, value.Cmd, value.CmdReal, value.CmdUser, value.CmdSys);

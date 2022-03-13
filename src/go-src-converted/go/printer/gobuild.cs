@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package printer -- go2cs converted at 2022 March 06 22:46:57 UTC
+// package printer -- go2cs converted at 2022 March 13 05:58:11 UTC
 // import "go/printer" ==> using printer = go.go.printer_package
 // Original source: C:\Program Files\Go\src\go\printer\gobuild.go
-using constraint = go.go.build.constraint_package;
-using sort = go.sort_package;
-using tabwriter = go.text.tabwriter_package;
-
 namespace go.go;
+
+using constraint = go.build.constraint_package;
+using sort = sort_package;
+using tabwriter = text.tabwriter_package;
 
 public static partial class printer_package {
 
@@ -25,7 +25,7 @@ private static void fixGoBuildLines(this ptr<printer> _addr_p) {
 
         nint pos = 0;
 
-        while (toDelete) { 
+        while () { 
             // Skip leading space at beginning of line.
             var blank = true;
             while (pos < len(p.output) && (p.output[pos] == ' ' || p.output[pos] == '\t')) {
@@ -148,7 +148,6 @@ private static void fixGoBuildLines(this ptr<printer> _addr_p) {
         }
         after = appendLines(after, p.output[(int)start..(int)end]);
         start = end + len(p.lineAt(end));
-
     }    after = appendLines(after, p.output[(int)start..]);
     {
         var n = len(after);
@@ -158,11 +157,9 @@ private static void fixGoBuildLines(this ptr<printer> _addr_p) {
         }
     }
 
-
     p.output = p.output[..(int)insert];
     p.output = append(p.output, block);
     p.output = append(p.output, after);
-
 }
 
 // appendLines is like append(x, y...)
@@ -175,7 +172,6 @@ private static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
         y = y[(int)1..]; // delete y's leading blank line
     }
     return append(x, y);
-
 }
 
 private static slice<byte> lineAt(this ptr<printer> _addr_p, nint start) {
@@ -189,7 +185,6 @@ private static slice<byte> lineAt(this ptr<printer> _addr_p, nint start) {
         pos++;
     }
     return p.output[(int)start..(int)pos];
-
 }
 
 private static @string commentTextAt(this ptr<printer> _addr_p, nint start) {
@@ -203,7 +198,6 @@ private static @string commentTextAt(this ptr<printer> _addr_p, nint start) {
         pos++;
     }
     return string(p.output[(int)start..(int)pos]);
-
 }
 
 private static bool isNL(byte b) {

@@ -2,30 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:23:04 UTC
+// package main -- go2cs converted at 2022 March 13 06:36:07 UTC
 // Original source: C:\Program Files\Go\src\cmd\trace\main.go
-using bufio = go.bufio_package;
-using browser = go.cmd.@internal.browser_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using template = go.html.template_package;
-using trace = go.@internal.trace_package;
-using io = go.io_package;
-using log = go.log_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using debug = go.runtime.debug_package;
-using sync = go.sync_package;
-
-using _pprof_ = go.net.http.pprof_package;
-using System;
-
-
 namespace go;
 
-public static partial class main_package {
+using bufio = bufio_package;
+using browser = cmd.@internal.browser_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using template = html.template_package;
+using trace = @internal.trace_package;
+using io = io_package;
+using log = log_package;
+using net = net_package;
+using http = net.http_package;
+using os = os_package;
+using runtime = runtime_package;
+using debug = runtime.debug_package;
+using sync = sync_package;
+
+using _pprof_ = net.http.pprof_package; // Required to use pprof
+
+
+
+using System;public static partial class main_package {
 
 private static readonly @string usageMessage = "" + @"Usage of 'go tool trace':
 Given a trace file produced by 'go test':
@@ -107,9 +107,7 @@ private static void Main() {
             }
 
         }
-
         os.Exit(0);
-
     }
     if (pprofFlag != "".val) {
         dief("unknown pprof type %s\n", pprofFlag.val);
@@ -143,7 +141,6 @@ private static void Main() {
     http.HandleFunc("/", httpMain);
     err = http.Serve(ln, null);
     dief("failed to start http server: %v\n", err);
-
 }
 
 private static slice<Range> ranges = default;
@@ -161,7 +158,6 @@ private static (slice<ptr<trace.Event>>, error) parseEvents() {
         return (null, error.As(err)!);
     }
     return (res.Events, error.As(err)!);
-
 }
 
 private static (trace.ParseResult, error) parseTrace() => func((defer, _, _) => {
@@ -183,10 +179,8 @@ private static (trace.ParseResult, error) parseTrace() => func((defer, _, _) => 
             return ;
         }
         loader.res = res;
-
     });
     return (loader.res, error.As(loader.err)!);
-
 });
 
 // httpMain serves the starting page.
@@ -201,7 +195,6 @@ private static void httpMain(http.ResponseWriter w, ptr<http.Request> _addr_r) {
             return ;
         }
     }
-
 }
 
 private static var templMain = template.Must(template.New("").Parse(@"
@@ -258,7 +251,6 @@ private static void reportMemoryUsage(@string msg) {
     ref @string dummy = ref heap(out ptr<@string> _addr_dummy);
     fmt.Printf("Enter to continue...");
     fmt.Scanf("%s", _addr_dummy);
-
 }
 
 } // end main_package

@@ -28,16 +28,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objw -- go2cs converted at 2022 March 06 22:47:46 UTC
+// package objw -- go2cs converted at 2022 March 13 05:59:02 UTC
 // import "cmd/compile/internal/objw" ==> using objw = go.cmd.compile.@internal.objw_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\objw\prog.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
 
 public static partial class objw_package {
 
@@ -65,7 +65,6 @@ public static ptr<Progs> NewProgs(ptr<ir.Func> _addr_fn, nint worker) {
     pp.PrevLive = new LivenessIndex(-1,false);
     pp.NextLive = pp.PrevLive;
     return _addr_pp!;
-
 }
 
 // Progs accumulates Progs for a function and converts them into machine code.
@@ -129,7 +128,6 @@ private static ptr<obj.Prog> NewProg(this ptr<Progs> _addr_pp) {
     }
     p.Ctxt = @base.Ctxt;
     return _addr_p!;
-
 }
 
 // Flush converts from pp to machine code.
@@ -152,7 +150,6 @@ private static void Free(this ptr<Progs> _addr_pp) {
         }
     }
     pp.val = new Progs();
-
 }
 
 // Prog adds a Prog with instruction As to pp.
@@ -166,7 +163,6 @@ private static ptr<obj.Prog> Prog(this ptr<Progs> _addr_pp, obj.As @as) {
         var p = pp.Prog(obj.APCDATA);
         p.From.SetConst(objabi.PCDATA_StackMapIndex);
         p.To.SetConst(int64(idx));
-
     }
     if (pp.NextLive.IsUnsafePoint != pp.PrevLive.IsUnsafePoint) { 
         // Emit unsafe-point marker.
@@ -197,10 +193,8 @@ private static ptr<obj.Prog> Prog(this ptr<Progs> _addr_pp, obj.As @as) {
             return _addr_p!;
         }
         pp.Pos = pp.Pos.WithNotStmt();
-
     }
     return _addr_p!;
-
 }
 
 private static void Clear(this ptr<Progs> _addr_pp, ptr<obj.Prog> _addr_p) {
@@ -246,7 +240,6 @@ private static void SetText(this ptr<Progs> _addr_pp, ptr<ir.Func> _addr_fn) {
     ptxt.From.Type = obj.TYPE_MEM;
     ptxt.From.Name = obj.NAME_EXTERN;
     ptxt.From.Sym = fn.LSym;
-
 }
 
 // LosesStmtMark reports whether a prog with op as loses its statement mark on the way to DWARF.
@@ -256,7 +249,6 @@ private static void SetText(this ptr<Progs> _addr_pp, ptr<ir.Func> _addr_fn) {
 public static bool LosesStmtMark(obj.As @as) { 
     // is_stmt does not work for these; it DOES for ANOP even though that generates no code.
     return as == obj.APCDATA || as == obj.AFUNCDATA;
-
 }
 
 } // end objw_package

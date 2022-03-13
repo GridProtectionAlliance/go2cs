@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:55 UTC
+//     Generated on 2022 March 13 05:32:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace math
 {
     public static partial class big_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct byteReader
         {
             // ScanState.ReadRune function promotion
@@ -182,7 +182,7 @@ namespace math
             public static implicit operator byteReader(NilType nil) => default(byteReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static byteReader byteReader_cast(dynamic value)
         {
             return new byteReader(value.ScanState);

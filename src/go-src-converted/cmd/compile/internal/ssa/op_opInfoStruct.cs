@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:50:18 UTC
+//     Generated on 2022 March 13 06:01:42 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct opInfo
         {
             // Constructors
@@ -100,7 +100,7 @@ namespace @internal
             public static implicit operator opInfo(NilType nil) => default(opInfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static opInfo opInfo_cast(dynamic value)
         {
             return new opInfo(value.name, value.reg, value.auxType, value.argLen, value.asm, value.generic, value.rematerializeable, value.commutative, value.resultInArg0, value.resultNotInArgs, value.clobberFlags, value.call, value.nilCheck, value.faultOnNilArg0, value.faultOnNilArg1, value.usesScratch, value.hasSideEffects, value.zeroWidth, value.unsafePoint, value.symEffect, value.scale);

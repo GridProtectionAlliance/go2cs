@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:12:02 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:23 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\select.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using System;
 
 public static partial class walk_package {
 
@@ -34,7 +33,6 @@ private static void walkSelect(ptr<ir.SelectStmt> _addr_sel) {
     walkStmtList(sel.Compiled);
 
     @base.Pos = lno;
-
 }
 
 private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
@@ -63,12 +61,10 @@ private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
             else 
                 @base.Fatalf("select %v", n.Op());
                         l = append(l, n);
-
         }
         l = append(l, cas.Body);
         l = append(l, ir.NewBranchStmt(@base.Pos, ir.OBREAK, null));
         return l;
-
     }
     ptr<ir.CommClause> dflt;
     {
@@ -93,8 +89,7 @@ private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
                     n.Lhs[0] = typecheck.NodAddr(n.Lhs[0]);
                     n.Lhs[0] = typecheck.Expr(n.Lhs[0]);
                 }
-            
-        }
+                    }
         cas = cas__prev1;
     }
 
@@ -133,7 +128,6 @@ private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
         r.Body = cas.Body;
         r.Else = append(dflt.Init(), dflt.Body);
         return new slice<ir.Node>(new ir.Node[] { r, ir.NewBranchStmt(base.Pos,ir.OBREAK,nil) });
-
     }
     if (dflt != null) {
         ncas--;
@@ -174,9 +168,7 @@ private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
             n = cas.Comm;
             if (n == null) { // default:
                 continue;
-
             }
-
             nint i = default;
             ir.Node c = default;            elem = default;
 
@@ -217,7 +209,6 @@ private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
                 r = mkcallstmt("selectsetpc", typecheck.NodAddr(ir.NewIndexExpr(@base.Pos, pcs, ir.NewInt(int64(i)))));
                 init = append(init, r);
             }
-
         }
         cas = cas__prev1;
     }
@@ -265,11 +256,9 @@ private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
 
         }
 
-
         r.Body.Append(cas.Body.Take());
         r.Body.Append(ir.NewBranchStmt(@base.Pos, ir.OBREAK, null));
         init = append(init, r);
-
     };
 
     if (dflt != null) {
@@ -291,7 +280,6 @@ private static slice<ir.Node> walkSelectCases(slice<ptr<ir.CommClause>> cases) {
     }
 
     return init;
-
 }
 
 // bytePtrToIndex returns a Node representing "(*byte)(&n[i])".
@@ -310,7 +298,6 @@ private static ptr<types.Type> scasetype() {
         scase.SetNoalg(true);
     }
     return _addr_scase!;
-
 }
 
 } // end walk_package

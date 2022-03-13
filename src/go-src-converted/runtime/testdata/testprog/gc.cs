@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:01 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:22 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\gc.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using debug = go.runtime.debug_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using @unsafe = go.@unsafe_package;
+namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using debug = runtime.debug_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+using @unsafe = @unsafe_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -57,7 +56,6 @@ public static void GCSys() {
         return ;
     }
     fmt.Printf("OK\n");
-
 }
 
 private static slice<byte> sink = default;
@@ -75,7 +73,6 @@ public static void GCFairness() {
         // If there is no /dev/null, we just don't execute the test.
         fmt.Println("OK");
         return ;
-
     }
     if (err != null) {
         fmt.Println(err);
@@ -90,7 +87,6 @@ public static void GCFairness() {
     }
     time.Sleep(10 * time.Millisecond);
     fmt.Println("OK");
-
 }
 
 public static void GCFairness2() { 
@@ -147,7 +143,6 @@ public static void GCFairness2() {
         }
     }
     fmt.Println("OK");
-
 }
 
 public static void GCPhys() => func((defer, _, _) => { 
@@ -179,8 +174,7 @@ public static void GCPhys() => func((defer, _, _) => {
     // The page cache will hold at most maxPageCache of memory per-P, so this
     // bounds the amount of memory hidden from the scavenger to 4*maxPageCache
     // at most.
-    const nint maxProcs = 4;
- 
+    const nint maxProcs = 4; 
     // Set GOGC so that this test operates under consistent assumptions.
     debug.SetGCPercent(100);
     var procs = runtime.GOMAXPROCS(-1);
@@ -254,7 +248,6 @@ public static void GCPhys() => func((defer, _, _) => {
     }
     fmt.Printf("exceeded physical memory overuse threshold of %3.2f%%: %3.2f%%\n" + "(alloc: %d, goal: %d, sys: %d, rel: %d, objs: %d)\n", threshold * 100, overuse * 100, stats.HeapAlloc, stats.NextGC, stats.HeapSys, stats.HeapReleased, len(saved));
     runtime.KeepAlive(saved);
-
 });
 
 // Test that defer closure is correctly scanned when the stack is scanned.
@@ -272,7 +265,6 @@ public static void DeferLiveness() => func((defer, panic, _) => {
     runtime.GC();
     runtime.GC();
     runtime.GC();
-
 });
 
 //go:noinline
@@ -325,7 +317,6 @@ public static void GCZombie() {
     println("failed");
     runtime.KeepAlive(keep);
     runtime.KeepAlive(zombies);
-
 }
 
 } // end main_package

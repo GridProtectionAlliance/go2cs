@@ -10,19 +10,21 @@
 // Because these interfaces and primitives wrap lower-level operations with
 // various implementations, unless otherwise informed clients should not
 // assume they are safe for parallel execution.
-// package io -- go2cs converted at 2022 March 06 22:12:43 UTC
+
+// package io -- go2cs converted at 2022 March 13 05:27:45 UTC
 // import "io" ==> using io = go.io_package
 // Original source: C:\Program Files\Go\src\io\io.go
-using errors = go.errors_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using sync = sync_package;
+
+
+// Seek whence values.
+
+using System;
 public static partial class io_package {
 
-    // Seek whence values.
 public static readonly nint SeekStart = 0; // seek relative to the origin of the file
 public static readonly nint SeekCurrent = 1; // seek relative to the current offset
 public static readonly nint SeekEnd = 2; // seek relative to the end
@@ -297,9 +299,7 @@ public static (nint, error) WriteString(Writer w, @string s) {
             return sw.WriteString(s);
         }
     }
-
     return w.Write((slice<byte>)s);
-
 }
 
 // ReadAtLeast reads from r into buf until it has read at least min bytes.
@@ -329,7 +329,6 @@ public static (nint, error) ReadAtLeast(Reader r, slice<byte> buf, nint min) {
         err = ErrUnexpectedEOF;
     }
     return ;
-
 }
 
 // ReadFull reads exactly len(buf) bytes from r into buf.
@@ -364,10 +363,8 @@ public static (long, error) CopyN(Writer dst, Reader src, long n) {
     if (written < n && err == null) { 
         // src stopped early; must have been EOF.
         err = EOF;
-
     }
     return ;
-
 }
 
 // Copy copies from src to dst until either EOF is reached
@@ -404,7 +401,6 @@ public static (long, error) CopyBuffer(Writer dst, Reader src, slice<byte> buf) 
         panic("empty buffer in CopyBuffer");
     }
     return copyBuffer(dst, src, buf);
-
 });
 
 // copyBuffer is the actual implementation of Copy and CopyBuffer.
@@ -430,7 +426,6 @@ private static (long, error) copyBuffer(Writer dst, Reader src, slice<byte> buf)
             return rt.ReadFrom(src);
         }
     }
-
     if (buf == null) {
         nint size = 32 * 1024;
         {
@@ -444,13 +439,10 @@ private static (long, error) copyBuffer(Writer dst, Reader src, slice<byte> buf)
  {
                     size = int(l.N);
                 }
-
             }
 
         }
-
         buf = make_slice<byte>(size);
-
     }
     while (true) {
         var (nr, er) = src.Read(buf);
@@ -480,7 +472,6 @@ private static (long, error) copyBuffer(Writer dst, Reader src, slice<byte> buf)
         }
     }
     return (written, error.As(err)!);
-
 }
 
 // LimitReader returns a Reader that reads from r
@@ -513,7 +504,6 @@ private static (nint, error) Read(this ptr<LimitedReader> _addr_l, slice<byte> p
     n, err = l.R.Read(p);
     l.N -= int64(n);
     return ;
-
 }
 
 // NewSectionReader returns a SectionReader that reads from r
@@ -546,11 +536,9 @@ private static (nint, error) Read(this ptr<SectionReader> _addr_s, slice<byte> p
             p = p[(int)0..(int)max];
         }
     }
-
     n, err = s.r.ReadAt(p, s.off);
     s.off += int64(n);
     return ;
-
 }
 
 private static var errWhence = errors.New("Seek: invalid whence");
@@ -575,7 +563,6 @@ private static (long, error) Seek(this ptr<SectionReader> _addr_s, long offset, 
     }
     s.off = offset;
     return (offset - s.@base, error.As(null!)!);
-
 }
 
 private static (nint, error) ReadAt(this ptr<SectionReader> _addr_s, slice<byte> p, long off) {
@@ -599,9 +586,7 @@ private static (nint, error) ReadAt(this ptr<SectionReader> _addr_s, slice<byte>
             return (n, error.As(err)!);
         }
     }
-
     return s.r.ReadAt(p, off);
-
 }
 
 // Size returns the size of the section in bytes.
@@ -640,10 +625,8 @@ private static (nint, error) Read(this ptr<teeReader> _addr_t, slice<byte> p) {
             }
 
         }
-
     }
     return ;
-
 }
 
 // Discard is a Writer on which all Write calls succeed
@@ -690,7 +673,6 @@ private static (long, error) ReadFrom(this discard _p0, Reader r) {
             return ;
         }
     }
-
 }
 
 // NopCloser returns a ReadCloser with a no-op Close method wrapping
@@ -720,7 +702,6 @@ public static (slice<byte>, error) ReadAll(Reader r) {
         if (len(b) == cap(b)) { 
             // Add more capacity (let append pick how much).
             b = append(b, 0)[..(int)len(b)];
-
         }
         var (n, err) = r.Read(b[(int)len(b)..(int)cap(b)]);
         b = b[..(int)len(b) + n];
@@ -731,7 +712,6 @@ public static (slice<byte>, error) ReadAll(Reader r) {
             return (b, error.As(err)!);
         }
     }
-
 }
 
 } // end io_package

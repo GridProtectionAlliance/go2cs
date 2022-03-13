@@ -28,17 +28,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips -- go2cs converted at 2022 March 06 23:20:07 UTC
+// package mips -- go2cs converted at 2022 March 13 06:32:57 UTC
 // import "cmd/link/internal/mips" ==> using mips = go.cmd.link.@internal.mips_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\mips\asm.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
 
 public static partial class mips_package {
 
@@ -74,7 +74,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
     else 
         return false;
         return true;
-
 }
 
 private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_gotplt, loader.Sym dynamic) {
@@ -107,8 +106,7 @@ private static long applyrel(ptr<sys.Arch> _addr_arch, ptr<loader.Loader> _addr_
         return int64(o & 0xfc000000 | uint32(t >> 2) & ~0xfc000000);
     else 
         return val;
-    
-}
+    }
 
 private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, loader.Reloc r, loader.Sym s, long val) {
     long o = default;
@@ -131,8 +129,7 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             return (applyrel(_addr_target.Arch, _addr_ldr, r.Type(), r.Off(), s, val, r.Add()), 1, true);
         else 
             return (val, 0, false);
-        
-    }
+            }
     const var isOk = true;
 
     const nint noExtReloc = 0;
@@ -155,7 +152,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             if ((ldr.SymValue(s) + int64(r.Off()) + 4) & 0xf0000000 != (t & 0xf0000000)) {
                 ldr.Errorf(s, "direct call too far: %s %x", ldr.SymName(rs), t);
             }
-
             return (applyrel(_addr_target.Arch, _addr_ldr, rt, r.Off(), s, val, t), noExtReloc, isOk);
         else if (rt == objabi.R_ADDRMIPSTLS) 
             // thread pointer is at 0x7000 offset from the start of TLS data area
@@ -168,7 +164,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
     }
 
     return (val, 0, false);
-
 }
 
 private static long archrelocvariant(ptr<ld.Target> _addr__p0, ptr<loader.Loader> _addr__p0, loader.Reloc _p0, sym.RelocVariant _p0, loader.Sym _p0, long _p0, slice<byte> _p0) {
@@ -190,7 +185,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<ld.Target> _addr_target, ptr
     else if (r.Type() == objabi.R_ADDRMIPSTLS || r.Type() == objabi.R_CALLMIPS || r.Type() == objabi.R_JMPMIPS) 
         return (ld.ExtrelocSimple(ldr, r), true);
         return (new loader.ExtReloc(), false);
-
 }
 
 } // end mips_package

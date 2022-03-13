@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:01 UTC
+//     Generated on 2022 March 13 05:30:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace encoding
 {
     public static partial class base64_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct decoder
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace encoding
             public static implicit operator decoder(NilType nil) => default(decoder);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static decoder decoder_cast(dynamic value)
         {
             return new decoder(value.err, value.readErr, ref value.enc, value.r, value.buf, value.nbuf, value.@out, value.outbuf);

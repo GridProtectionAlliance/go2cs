@@ -2,30 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package shift -- go2cs converted at 2022 March 06 23:34:44 UTC
+// package shift -- go2cs converted at 2022 March 13 06:42:01 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/shift" ==> using shift = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.shift_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\shift\dead.go
+namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 // Simplified dead code detector.
 // Used for skipping shift checks on unreachable arch-specific code.
 
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using types = go.go.types_package;
+
+using ast = go.ast_package;
+using constant = go.constant_package;
+using types = go.types_package;
+
+
+// updateDead puts unreachable "if" and "case" nodes into dead.
+
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
-
 public static partial class shift_package {
 
-    // updateDead puts unreachable "if" and "case" nodes into dead.
 private static void updateDead(ptr<types.Info> _addr_info, map<ast.Node, bool> dead, ast.Node node) {
     ref types.Info info = ref _addr_info.val;
 
     if (dead[node]) { 
         // The node is already marked as dead.
         return ;
-
     }
     Action<ast.Node> setDead = n => {
         ast.Inspect(n, node => {
@@ -33,9 +33,7 @@ private static void updateDead(ptr<types.Info> _addr_info, map<ast.Node, bool> d
                 dead[node] = true;
             }
             return true;
-
         });
-
     };
 
     switch (node.type()) {
@@ -64,7 +62,6 @@ BodyLoopBool:
                         if (cc.List == null) { 
                             // Skip default case.
                             continue;
-
                         }
                         {
                             var expr__prev2 = expr;
@@ -81,12 +78,10 @@ BodyLoopBool:
                         }
 
                         setDead(cc);
-
                     }
                     stmt = stmt__prev1;
                 }
                 return ;
-
             }
             v = info.Types[stmt.Tag].Value;
             if (v == null || v.Kind() != constant.Int) {
@@ -102,7 +97,6 @@ BodyLoopInt:
                 if (cc.List == null) { 
                     // Skip default case.
                     continue;
-
                 }
                 {
                     var expr__prev2 = expr;
@@ -124,10 +118,8 @@ BodyLoopInt:
                 }
 
                 setDead(cc);
-
             }            break;
     }
-
 }
 
 } // end shift_package

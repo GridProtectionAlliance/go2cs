@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:56 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:53 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\verify.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using net = go.net_package;
-using url = go.net.url_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.crypto;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using net = net_package;
+using url = net.url_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using time = time_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class x509_package {
 
@@ -61,7 +60,6 @@ public static readonly var TooManyConstraints = 7;
 // certificate does not permit a requested extended key usage.
 public static readonly var CANotAuthorizedForExtKeyUsage = 8;
 
-
 // CertificateInvalidError results when an odd error occurs. Users of this
 // library probably want to handle all these errors uniformly.
 public partial struct CertificateInvalidError {
@@ -91,7 +89,6 @@ public static @string Error(this CertificateInvalidError e) {
     else if (e.Reason == UnconstrainedName) 
         return "x509: issuer has name constraints but leaf contains unknown or unconstrained name: " + e.Detail;
         return "x509: unknown error";
-
 }
 
 // HostnameError results when the set of authorized names doesn't match the
@@ -116,7 +113,6 @@ public static @string Error(this HostnameError h) {
             if (len(c.IPAddresses) == 0) {
                 return "x509: cannot validate certificate for " + h.Host + " because it doesn't contain any IP SANs";
             }
-
             foreach (var (_, san) in c.IPAddresses) {
                 if (len(valid) > 0) {
                     valid += ", ";
@@ -129,12 +125,10 @@ public static @string Error(this HostnameError h) {
         }
     }
 
-
     if (len(valid) == 0) {
         return "x509: certificate is not valid for any names, but wanted to match " + h.Host;
     }
     return "x509: certificate is valid for " + valid + ", not " + h.Host;
-
 }
 
 // UnknownAuthorityError results when the certificate issuer is unknown
@@ -158,13 +152,10 @@ public static @string Error(this UnknownAuthorityError e) {
  {
                 certName = "serial:" + e.hintCert.SerialNumber.String();
             }
-
         }
         s += fmt.Sprintf(" (possibly because of %q while trying to verify candidate authority certificate %q)", e.hintErr, certName);
-
     }
     return s;
-
 }
 
 // SystemRootsError results when we fail to load the system root certificates.
@@ -178,7 +169,6 @@ public static @string Error(this SystemRootsError se) {
         return msg + "; " + se.Err.Error();
     }
     return msg;
-
 }
 
 public static error Unwrap(this SystemRootsError se) {
@@ -212,7 +202,6 @@ public partial struct VerifyOptions {
 private static readonly var leafCertificate = iota;
 private static readonly var intermediateCertificate = 0;
 private static readonly var rootCertificate = 1;
-
 
 // rfc2821Mailbox represents a “mailbox” (which is an email address to most
 // people) by breaking it into the “local” (i.e. before the '@') and “domain”
@@ -273,14 +262,12 @@ QuotedString:
  {
                     return (mailbox, false);
                 }
-
             else if (c == 11 || c == 12 || c == 32 || c == 33 || c == 127 || (1 <= c && c <= 8) || (14 <= c && c <= 31) || (35 <= c && c <= 91) || (93 <= c && c <= 126)) 
                 // qtext
                 localPartBytes = append(localPartBytes, c);
             else 
                 return (mailbox, false);
-            
-        }
+                    }
     else
     } { 
         // Atom ("." Atom)*
@@ -316,7 +303,6 @@ NextChar:
                 break;
 
             __switch_break0:;
-
         }
         if (len(localPartBytes) == 0) {
             return (mailbox, false);
@@ -342,11 +328,9 @@ NextChar:
         }
     }
 
-
     mailbox.local = string(localPartBytes);
     mailbox.domain = in;
     return (mailbox, true);
-
 }
 
 // domainToReverseLabels converts a textual domain name like foo.example.com to
@@ -370,30 +354,24 @@ private static (slice<@string>, bool) domainToReverseLabels(@string domain) {
             }
 
         }
-
     }
 
     if (len(reverseLabels) > 0 && len(reverseLabels[0]) == 0) { 
         // An empty label at the end indicates an absolute value.
         return (null, false);
-
     }
     foreach (var (_, label) in reverseLabels) {
         if (len(label) == 0) { 
             // Empty labels are otherwise invalid.
             return (null, false);
-
         }
         foreach (var (_, c) in label) {
             if (c < 33 || c > 126) { 
                 // Invalid character.
                 return (null, false);
-
             }
-
         }
     }    return (reverseLabels, true);
-
 }
 
 private static (bool, error) matchEmailConstraint(rfc2821Mailbox mailbox, @string constraint) {
@@ -408,10 +386,8 @@ private static (bool, error) matchEmailConstraint(rfc2821Mailbox mailbox, @strin
             return (false, error.As(fmt.Errorf("x509: internal error: cannot parse constraint %q", constraint))!);
         }
         return (mailbox.local == constraintMailbox.local && strings.EqualFold(mailbox.domain, constraintMailbox.domain), error.As(null!)!);
-
     }
     return matchDomainConstraint(mailbox.domain, constraint);
-
 }
 
 private static (bool, error) matchURIConstraint(ptr<url.URL> _addr_uri, @string constraint) {
@@ -442,7 +418,6 @@ private static (bool, error) matchURIConstraint(ptr<url.URL> _addr_uri, @string 
         return (false, error.As(fmt.Errorf("URI with IP (%q) cannot be matched against constraints", uri.String()))!);
     }
     return matchDomainConstraint(host, constraint);
-
 }
 
 private static (bool, error) matchIPConstraint(net.IP ip, ptr<net.IPNet> _addr_constraint) {
@@ -462,9 +437,7 @@ private static (bool, error) matchIPConstraint(net.IP ip, ptr<net.IPNet> _addr_c
             }
 
         }
-
     }    return (true, error.As(null!)!);
-
 }
 
 private static (bool, error) matchDomainConstraint(@string domain, @string constraint) {
@@ -497,7 +470,6 @@ private static (bool, error) matchDomainConstraint(@string domain, @string const
             return (false, error.As(null!)!);
         }
     }    return (true, error.As(null!)!);
-
 }
 
 // checkNameConstraints checks that c permits a child certificate to claim the
@@ -551,11 +523,9 @@ private static error checkNameConstraints(this ptr<Certificate> _addr_c, ptr<nin
             if (err != null) {
                 return error.As(new CertificateInvalidError(c,CANotAuthorizedForThisName,err.Error()))!;
             }
-
             if (ok) {
                 break;
             }
-
         }
 
         i = i__prev1;
@@ -565,7 +535,6 @@ private static error checkNameConstraints(this ptr<Certificate> _addr_c, ptr<nin
         return error.As(new CertificateInvalidError(c,CANotAuthorizedForThisName,fmt.Sprintf("%s %q is not permitted by any constraint",nameType,name)))!;
     }
     return error.As(null!)!;
-
 }
 
 // isValid performs validity checks on c given that it is a candidate to append
@@ -605,7 +574,6 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
             return error.As(errors.New("x509: internal error: empty chain when appending CA cert"))!;
         }
         leaf = currentChain[0];
-
     }
     if ((certType == intermediateCertificate || certType == rootCertificate) && c.hasNameConstraints() && leaf.hasSANExtension()) {
         err = forEachSAN(leaf.getSANExtension(), (tag, data) => {
@@ -619,9 +587,7 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
                 {
                     var err__prev2 = err;
 
-                    var err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "email address", name, mailbox, (parsedName, constraint) => {
-                        return error.As(matchEmailConstraint(parsedName._<rfc2821Mailbox>(), constraint._<@string>()))!;
-                    }, c.PermittedEmailAddresses, c.ExcludedEmailAddresses);
+                    var err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "email address", name, mailbox, (parsedName, constraint) => error.As(matchEmailConstraint(parsedName._<rfc2821Mailbox>(), constraint._<@string>()))!, c.PermittedEmailAddresses, c.ExcludedEmailAddresses);
 
                     if (err != null) {
                         return error.As(err)!;
@@ -630,8 +596,6 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
                     err = err__prev2;
 
                 }
-
-
             else if (tag == nameTypeDNS) 
                 name = string(data);
                 {
@@ -643,13 +607,10 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
 
                 }
 
-
                 {
                     var err__prev2 = err;
 
-                    err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "DNS name", name, name, (parsedName, constraint) => {
-                        return error.As(matchDomainConstraint(parsedName._<@string>(), constraint._<@string>()))!;
-                    }, c.PermittedDNSDomains, c.ExcludedDNSDomains);
+                    err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "DNS name", name, name, (parsedName, constraint) => error.As(matchDomainConstraint(parsedName._<@string>(), constraint._<@string>()))!, c.PermittedDNSDomains, c.ExcludedDNSDomains);
 
                     if (err != null) {
                         return error.As(err)!;
@@ -658,8 +619,6 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
                     err = err__prev2;
 
                 }
-
-
             else if (tag == nameTypeURI) 
                 name = string(data);
                 var (uri, err) = url.Parse(name);
@@ -669,9 +628,7 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
                 {
                     var err__prev2 = err;
 
-                    err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "URI", name, uri, (parsedName, constraint) => {
-                        return error.As(matchURIConstraint(parsedName._<ptr<url.URL>>(), constraint._<@string>()))!;
-                    }, c.PermittedURIDomains, c.ExcludedURIDomains);
+                    err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "URI", name, uri, (parsedName, constraint) => error.As(matchURIConstraint(parsedName._<ptr<url.URL>>(), constraint._<@string>()))!, c.PermittedURIDomains, c.ExcludedURIDomains);
 
                     if (err != null) {
                         return error.As(err)!;
@@ -680,8 +637,6 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
                     err = err__prev2;
 
                 }
-
-
             else if (tag == nameTypeIP) 
                 var ip = net.IP(data);
                 {
@@ -693,13 +648,10 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
 
                 }
 
-
                 {
                     var err__prev2 = err;
 
-                    err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "IP address", ip.String(), ip, (parsedName, constraint) => {
-                        return error.As(matchIPConstraint(parsedName._<net.IP>(), constraint._<ptr<net.IPNet>>()))!;
-                    }, c.PermittedIPRanges, c.ExcludedIPRanges);
+                    err = c.checkNameConstraints(_addr_comparisonCount, maxConstraintComparisons, "IP address", ip.String(), ip, (parsedName, constraint) => error.As(matchIPConstraint(parsedName._<net.IP>(), constraint._<ptr<net.IPNet>>()))!, c.PermittedIPRanges, c.ExcludedIPRanges);
 
                     if (err != null) {
                         return error.As(err)!;
@@ -708,10 +660,7 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
                     err = err__prev2;
 
                 }
-
-
             else                         return error.As(null!)!;
-
         });
 
         if (err != null) {
@@ -728,7 +677,6 @@ private static error isValid(this ptr<Certificate> _addr_c, nint certType, slice
         }
     }
     return error.As(null!)!;
-
 }
 
 // Verify attempts to verify c by building one or more chains from c to a
@@ -826,7 +774,6 @@ private static (slice<slice<ptr<Certificate>>>, error) Verify(this ptr<Certifica
         return (null, error.As(new CertificateInvalidError(c,IncompatibleUsage,""))!);
     }
     return (chains, error.As(null!)!);
-
 }
 
 private static slice<ptr<Certificate>> appendToFreshChain(slice<ptr<Certificate>> chain, ptr<Certificate> _addr_cert) {
@@ -881,7 +828,6 @@ private static (slice<slice<ptr<Certificate>>>, error) buildChains(this ptr<Cert
 
         }
 
-
         err = candidate.isValid(certType, currentChain, opts);
         if (err != null) {
             return ;
@@ -899,8 +845,7 @@ private static (slice<slice<ptr<Certificate>>>, error) buildChains(this ptr<Cert
                 cache[candidate] = childChains;
             }
             chains = append(chains, childChains);
-        
-    };
+            };
 
     foreach (var (_, root) in opts.Roots.findPotentialParents(c)) {
         considerCandidate(rootCertificate, root);
@@ -913,7 +858,6 @@ private static (slice<slice<ptr<Certificate>>>, error) buildChains(this ptr<Cert
         err = new UnknownAuthorityError(c,hintErr,hintCert);
     }
     return ;
-
 }
 
 private static bool validHostnamePattern(@string host) {
@@ -937,14 +881,12 @@ private static bool validHostname(@string host, bool isPattern) {
         if (part == "") { 
             // Empty label.
             return false;
-
         }
         if (isPattern && i == 0 && part == "*") { 
             // Only allow full left-most wildcards, as those are the only ones
             // we match, and matching literal '*' characters is probably never
             // the expected behavior.
             continue;
-
         }
         foreach (var (j, c) in part) {
             if ('a' <= c && c <= 'z') {
@@ -963,14 +905,10 @@ private static bool validHostname(@string host, bool isPattern) {
                 // Not a valid character in hostnames, but commonly
                 // found in deployments outside the WebPKI.
                 continue;
-
             }
-
             return false;
-
         }
     }    return true;
-
 }
 
 private static bool matchExactly(@string hostA, @string hostB) {
@@ -978,7 +916,6 @@ private static bool matchExactly(@string hostA, @string hostB) {
         return false;
     }
     return toLowerCaseASCII(hostA) == toLowerCaseASCII(hostB);
-
 }
 
 private static bool matchHostnames(@string pattern, @string host) {
@@ -1002,7 +939,6 @@ private static bool matchHostnames(@string pattern, @string host) {
             return false;
         }
     }    return true;
-
 }
 
 // toLowerCaseASCII returns a lower-case version of in. See RFC 6125 6.4.1. We use
@@ -1021,14 +957,11 @@ private static @string toLowerCaseASCII(@string @in) {
                 // upper-case ASCII bytes in the invalid sequence.
                 isAlreadyLowerCase = false;
                 break;
-
             }
-
             if ('A' <= c && c <= 'Z') {
                 isAlreadyLowerCase = false;
                 break;
             }
-
         }
         c = c__prev1;
     }
@@ -1051,7 +984,6 @@ private static @string toLowerCaseASCII(@string @in) {
     }
 
     return string(out);
-
 }
 
 // VerifyHostname returns nil if c is a valid certificate for the named host.
@@ -1083,10 +1015,8 @@ private static error VerifyHostname(this ptr<Certificate> _addr_c, @string h) {
                 }
             }
             return error.As(new HostnameError(c,candidateIP))!;
-
         }
     }
-
 
     var candidateName = toLowerCaseASCII(h); // Save allocations inside the loop.
     var validCandidateName = validHostnameInput(candidateName);
@@ -1109,7 +1039,6 @@ private static error VerifyHostname(this ptr<Certificate> _addr_c, @string h) {
             }
         }
     }    return error.As(new HostnameError(c,h))!;
-
 }
 
 private static bool checkChainForKeyUsage(slice<ptr<Certificate>> chain, slice<ExtKeyUsage> keyUsages) {
@@ -1135,9 +1064,7 @@ NextCert:
             if (len(cert.ExtKeyUsage) == 0 && len(cert.UnknownExtKeyUsage) == 0) { 
                 // The certificate doesn't have any extended key usage specified.
                 continue;
-
             }
-
             {
                 var usage__prev2 = usage;
 
@@ -1148,7 +1075,6 @@ NextCert:
                         _continueNextCert = true;
                         break;
                     }
-
                 }
 
                 usage = usage__prev2;
@@ -1185,7 +1111,6 @@ NextRequestedUsage:
                                 _continueNextRequestedUsage = true;
                                 break;
                             }
-
                         }
 
                         usage = usage__prev3;
@@ -1196,7 +1121,6 @@ NextRequestedUsage:
                     if (usagesRemaining == 0) {
                         return false;
                     }
-
                 }
 
                 i = i__prev2;
@@ -1206,7 +1130,6 @@ NextRequestedUsage:
         i = i__prev1;
     }
     return true;
-
 }
 
 } // end x509_package

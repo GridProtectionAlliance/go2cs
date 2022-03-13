@@ -18,50 +18,52 @@
 // If you need a standalone tool, use multichecker,
 // which supports this mode but can also load packages
 // from source using go/packages.
-// package unitchecker -- go2cs converted at 2022 March 06 23:34:56 UTC
+
+// package unitchecker -- go2cs converted at 2022 March 13 06:42:13 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/unitchecker" ==> using unitchecker = go.cmd.vendor.golang.org.x.tools.go.analysis.unitchecker_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\unitchecker\unitchecker.go
+namespace go.cmd.vendor.golang.org.x.tools.go.analysis;
 // TODO(adonovan):
 // - with gccgo, go build does not build standard library,
 //   so we will not get to analyze it. Yet we must in order
 //   to create base facts for, say, the fmt package for the
 //   printf checker.
 
-using gob = go.encoding.gob_package;
-using json = go.encoding.json_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using build = go.go.build_package;
-using importer = go.go.importer_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
 
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using analysisflags = go.golang.org.x.tools.go.analysis.@internal.analysisflags_package;
-using facts = go.golang.org.x.tools.go.analysis.@internal.facts_package;
+using gob = encoding.gob_package;
+using json = encoding.json_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using build = go.build_package;
+using importer = go.importer_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using types = go.types_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using analysisflags = golang.org.x.tools.go.analysis.@internal.analysisflags_package;
+using facts = golang.org.x.tools.go.analysis.@internal.facts_package;
+
+
+// A Config describes a compilation unit to be analyzed.
+// It is provided to the tool in a JSON-encoded file
+// whose name ends with ".cfg".
+
 using System;
 using System.Threading;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.analysis;
-
 public static partial class unitchecker_package {
 
-    // A Config describes a compilation unit to be analyzed.
-    // It is provided to the tool in a JSON-encoded file
-    // whose name ends with ".cfg".
 public partial struct Config {
     public @string ID; // e.g. "fmt [fmt.test]"
     public @string Compiler;
@@ -105,7 +107,6 @@ public static void Main(params ptr<ptr<analysis.Analyzer>>[] _addr_analyzers) {
         }
     }
 
-
     flag.Usage = () => {
         fmt.Fprintf(os.Stderr, @"%[1]s is a tool for static analysis of Go programs.
 
@@ -131,7 +132,6 @@ Usage of %[1]s:
         log.Fatalf("invoking \"go tool vet\" directly is unsupported; use \"go vet\"");
     }
     Run(args[0], analyzers);
-
 }
 
 // Run reads the *.cfg file, runs the analysis,
@@ -164,7 +164,6 @@ public static void Run(@string configFile, slice<ptr<analysis.Analyzer>> analyze
             }
 
             tree.Print();
-
         } { 
             // plain text
             nint exit = 0;
@@ -197,11 +196,9 @@ public static void Run(@string configFile, slice<ptr<analysis.Analyzer>> analyze
             }
 
             os.Exit(exit);
-
         }
     }
     os.Exit(0);
-
 }
 
 private static (ptr<Config>, error) readConfig(@string filename) {
@@ -220,22 +217,18 @@ private static (ptr<Config>, error) readConfig(@string filename) {
             return (_addr_null!, error.As(fmt.Errorf("cannot decode JSON config file %s: %v", filename, err))!);
         }
     }
-
     if (len(cfg.GoFiles) == 0) { 
         // The go command disallows packages with no files.
         // The only exception is unsafe, but the go command
         // doesn't call vet on it.
         return (_addr_null!, error.As(fmt.Errorf("package has no files: %s", cfg.ImportPath))!);
-
     }
     return (_addr_cfg!, error.As(null!)!);
-
 }
 
 private static Func<ptr<token.FileSet>, @string, importer.Lookup, types.Importer> importerForCompiler = (_, compiler, lookup) => { 
     // broken legacy implementation (https://golang.org/issue/28995)
     return importer.For(compiler, lookup);
-
 };
 
 private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Config> _addr_cfg, slice<ptr<analysis.Analyzer>> analyzers) {
@@ -253,14 +246,10 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
                 // Silently succeed; let the compiler
                 // report parse errors.
                 err = null;
-
             }
-
             return (null, error.As(err)!);
-
         }
         files = append(files, f);
-
     }    var compilerImporter = importerForCompiler(fset, cfg.Compiler, path => { 
         // path is a resolved package path, not an import path.
         var (file, ok) = cfg.PackageFile[path];
@@ -268,12 +257,9 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
             if (cfg.Compiler == "gccgo" && cfg.Standard[path]) {
                 return (null, error.As(null!)!); // fall back to default gccgo lookup
             }
-
             return (null, error.As(fmt.Errorf("no package file for %q", path))!);
-
         }
         return os.Open(file);
-
     });
     var importer = importerFunc(importPath => {
         var (path, ok) = cfg.ImportMap[importPath]; // resolve vendoring, etc
@@ -281,7 +267,6 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
             return (null, error.As(fmt.Errorf("can't resolve import %q", path))!);
         }
         return compilerImporter.Import(path);
-
     });
     ptr<types.Config> tc = addr(new types.Config(Importer:importer,Sizes:types.SizesFor("gc",build.Default.GOARCH),));
     ptr<types.Info> info = addr(new types.Info(Types:make(map[ast.Expr]types.TypeAndValue),Defs:make(map[*ast.Ident]types.Object),Uses:make(map[*ast.Ident]types.Object),Implicits:make(map[ast.Node]types.Object),Scopes:make(map[ast.Node]*types.Scope),Selections:make(map[*ast.SelectorExpr]*types.Selection),));
@@ -291,10 +276,8 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
             // Silently succeed; let the compiler
             // report type errors.
             err = null;
-
         }
         return (null, error.As(err)!);
-
     }
     private partial struct action {
         public sync.Once once;
@@ -336,10 +319,8 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
 
             act.usesFacts = usesFacts;
             actions[a] = act;
-
         }
         return act.usesFacts;
-
     };
     slice<ptr<analysis.Analyzer>> filtered = default;
     {
@@ -366,7 +347,6 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
             }
 
         }
-
         return (null, error.As(null!)!); // no .vetx file, no facts
     };
     var (facts, err) = facts.Decode(pkg, read);
@@ -407,7 +387,6 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
                 act.err = fmt.Errorf("failed prerequisites: %s", strings.Join(failed, ", "));
                 return ;
             }
-
             var factFilter = make_map<reflect.Type, bool>();
             {
                 var f__prev1 = f;
@@ -427,10 +406,8 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
             if (false) {
                 log.Printf("analysis %s = %s", pass, time.Since(t0));
             }
-
         });
         return act;
-
     };
     execAll = analyzers => {
         sync.WaitGroup wg = default;
@@ -450,7 +427,6 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
         }
 
         wg.Wait();
-
     };
 
     execAll(analyzers); 
@@ -480,9 +456,7 @@ private static (slice<result>, error) run(ptr<token.FileSet> _addr_fset, ptr<Con
         }
     }
 
-
     return (results, error.As(null!)!);
-
 }
 
 private partial struct result {

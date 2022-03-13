@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:45 UTC
+//     Generated on 2022 March 13 05:52:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace go
 {
     public static partial class types_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(context))]
         public partial struct Checker
         {
@@ -121,7 +121,7 @@ namespace go
             public static implicit operator Checker(NilType nil) => default(Checker);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Checker Checker_cast(dynamic value)
         {
             return new Checker(ref value.conf, ref value.fset, ref value.pkg, ref value.ptr<Info>, value.version, value.objMap, value.impMap, value.posMap, value.typMap, value.pkgPathMap, value.seenPkgMap, value.files, value.imports, value.dotImportMap, value.firstErr, value.methods, value.untyped, value.delayed, value.objPath, value.context, value.indent);

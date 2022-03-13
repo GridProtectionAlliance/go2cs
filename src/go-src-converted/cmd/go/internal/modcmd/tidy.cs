@@ -4,20 +4,20 @@
 
 // go mod tidy
 
-// package modcmd -- go2cs converted at 2022 March 06 23:19:36 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:32:25 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\tidy.go
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using imports = go.cmd.go.@internal.imports_package;
-using modload = go.cmd.go.@internal.modload_package;
-using context = go.context_package;
-using fmt = go.fmt_package;
-
-using modfile = go.golang.org.x.mod.modfile_package;
-using semver = go.golang.org.x.mod.semver_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using imports = cmd.go.@internal.imports_package;
+using modload = cmd.go.@internal.modload_package;
+using context = context_package;
+using fmt = fmt_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using semver = golang.org.x.mod.semver_package;
 
 public static partial class modcmd_package {
 
@@ -94,7 +94,6 @@ private static error Set(this ptr<goVersionFlag> _addr_f, @string s) {
     }
     f.v = s;
     return error.As(null!)!;
-
 }
 
 private static void runTidy(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
@@ -107,7 +106,6 @@ private static void runTidy(context.Context ctx, ptr<base.Command> _addr_cmd, sl
     modload.RootMode = modload.NeedRoot;
 
     modload.LoadPackages(ctx, new modload.PackageOpts(GoVersion:tidyGo.String(),Tags:imports.AnyTags(),Tidy:true,TidyCompatibleVersion:tidyCompat.String(),VendorModulesInGOROOTSrc:true,ResolveMissingImports:true,LoadTests:true,AllowErrors:tidyE,SilenceMissingStdImports:true,), "all");
-
 }
 
 } // end modcmd_package

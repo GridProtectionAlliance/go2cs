@@ -4,24 +4,25 @@
 
 // This file implements typechecking of builtin function calls.
 
-// package types -- go2cs converted at 2022 March 06 22:41:41 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:46 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\builtins.go
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.go;
 
+using ast = go.ast_package;
+using constant = go.constant_package;
+using token = go.token_package;
+
+
+// builtin type-checks a call to the built-in specified by id and
+// reports whether the call is valid, with *x holding the result;
+// but x.expr is not set. If the call is invalid, the result is
+// false, and *x is undefined.
+//
+
+using System;
 public static partial class types_package {
 
-    // builtin type-checks a call to the built-in specified by id and
-    // reports whether the call is valid, with *x holding the result;
-    // but x.expr is not set. If the call is invalid, the result is
-    // false, and *x is undefined.
-    //
 private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.CallExpr> _addr_call, builtinId id) => func((defer, _, _) => {
     bool _ = default;
     ref Checker check = ref _addr_check.val;
@@ -119,13 +120,11 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                         x.mode = value;
                         x.typ = S;
                         break;
-
                     }
                     alist = append(alist, x); 
                     // fallthrough
                 }
             }
-
         }
         sig = makeSig(S, S, NewSlice(T)); // []T required for variadic signature
         sig.variadic = true;
@@ -233,7 +232,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                             break;
                     }
                     return false;
-
                 })) {
                     mode = value;
                 }
@@ -248,7 +246,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
             }
             check.invalidArg(x, code, "%s for %s", x, bin.name);
             return ;
-
         }
         x.mode = mode;
         x.typ = Typ[Int];
@@ -316,7 +313,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                 ;
                                 toFloat(x);
                                 toFloat(_addr_y);
-
                             } {
                                 check.convertUntyped(x, Typ[Float64]);
                                 check.convertUntyped(_addr_y, Typ[Float64]); 
@@ -346,14 +342,11 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                         return Typ[Complex128];
                     else if (t.kind == UntypedFloat) 
                         return Typ[UntypedComplex];
-                    
-                }
+                                    }
                 t = t__prev1;
 
             }
-
             return null;
-
         };
         var resTyp = check.applyTypeFunc(f, x.typ);
         if (resTyp == null) {
@@ -385,7 +378,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
             t = t__prev1;
 
         }
-
 
         y = default;
         arg(_addr_y, 1);
@@ -477,14 +469,11 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                         return Typ[Float64];
                     else if (t.kind == UntypedComplex) 
                         return Typ[UntypedFloat];
-                    
-                }
+                                    }
                 t = t__prev1;
 
             }
-
             return null;
-
         };
         resTyp = check.applyTypeFunc(f, x.typ);
         if (resTyp == null) {
@@ -494,7 +483,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
             }
             check.invalidArg(x, code, "argument has type %s, expected complex type", x.typ);
             return ;
-
         }
         if (x.mode == constant_) {
             if (id == _Real) {
@@ -554,7 +542,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                 max = m + 1;
             }
             return true;
-
         };
 
         if (!valid(T)) {
@@ -570,7 +557,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                 check.errorf(call, _WrongArgCount, "%v expects %d or %d arguments; found %d", call, min, max, nargs);
             }
             return ;
-
         }
         Type types = new slice<Type>(new Type[] { T });
         slice<long> sizes = default; // constant integer arguments, if any
@@ -620,10 +606,8 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                 // allocate lazily
                 p = make_map<ptr<ast.CallExpr>, bool>();
                 check.isPanic = p;
-
             }
             p[call] = true;
-
         }
         check.assignment(x, _addr_emptyInterface, "argument to panic");
         if (x.mode == invalid) {
@@ -650,15 +634,12 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
                     if (x.mode == invalid) { 
                         // TODO(gri) "use" all arguments?
                         return ;
-
                     }
                     params[i] = x.typ;
-
                 }
 
                 i = i__prev1;
             }
-
         }
         x.mode = novalue;
         if (check.Types != null) {
@@ -822,7 +803,6 @@ private static bool builtin(this ptr<Checker> _addr_check, ptr<operand> _addr_x,
     else 
         unreachable();
         return true;
-
 });
 
 // applyTypeFunc applies f to x. If x is a type parameter,
@@ -852,9 +832,7 @@ private static Type applyTypeFunc(this ptr<Checker> _addr_check, Func<Type, Type
                     }
 
                 }
-
                 return false;
-
             })) {
                 return null;
             } 
@@ -866,13 +844,10 @@ private static Type applyTypeFunc(this ptr<Checker> _addr_check, Func<Type, Type
             ptyp.bound = addr(new Interface(types:tsum,allMethods:markComplete,allTypes:tsum));
 
             return ptyp;
-
         }
     }
 
-
     return f(x);
-
 }
 
 // makeSig makes a signature for the given argument and result types.
@@ -890,7 +865,6 @@ private static ptr<Signature> makeSig(Type res, params Type[] args) {
         result = NewTuple(NewVar(token.NoPos, null, "", res));
     }
     return addr(new Signature(params:params,results:result));
-
 }
 
 // implicitArrayDeref returns A if typ is of the form *A and A is an array;
@@ -909,12 +883,9 @@ private static Type implicitArrayDeref(Type typ) {
                 }
 
             }
-
         }
     }
-
     return typ;
-
 }
 
 // unparen returns e with any enclosing parentheses stripped.
@@ -925,9 +896,7 @@ private static ast.Expr unparen(ast.Expr e) {
             return e;
         }
         e = p.X;
-
     }
-
 }
 
 } // end types_package

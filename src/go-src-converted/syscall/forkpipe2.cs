@@ -5,11 +5,9 @@
 //go:build dragonfly || freebsd || netbsd || openbsd
 // +build dragonfly freebsd netbsd openbsd
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:35 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:31 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\forkpipe2.go
-
-
 namespace go;
 
 public static partial class syscall_package {

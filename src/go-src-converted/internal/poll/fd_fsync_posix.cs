@@ -5,18 +5,17 @@
 //go:build aix || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package poll -- go2cs converted at 2022 March 06 22:12:59 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:50 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\fd_fsync_posix.go
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go.@internal;
+
+using syscall = syscall_package;
+using System;
 
 public static partial class poll_package {
 
-    // Fsync wraps syscall.Fsync.
+// Fsync wraps syscall.Fsync.
 private static error Fsync(this ptr<FD> _addr_fd) => func((defer, _, _) => {
     ref FD fd = ref _addr_fd.val;
 
@@ -27,12 +26,8 @@ private static error Fsync(this ptr<FD> _addr_fd) => func((defer, _, _) => {
             return error.As(err)!;
         }
     }
-
     defer(fd.decref());
-    return error.As(ignoringEINTR(() => {
-        return error.As(syscall.Fsync(fd.Sysfd))!;
-    }))!;
-
+    return error.As(ignoringEINTR(() => error.As(syscall.Fsync(fd.Sysfd))!))!;
 });
 
 } // end poll_package

@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 22:23:39 UTC
+// package syntax -- go2cs converted at 2022 March 13 05:38:05 UTC
 // import "regexp/syntax" ==> using syntax = go.regexp.syntax_package
 // Original source: C:\Program Files\Go\src\regexp\syntax\regexp.go
+namespace go.regexp;
 // Note to implementers:
 // In this package, re is always a *Regexp and r is always a rune.
 
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
 
-namespace go.regexp;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// A Regexp is a node in a regular expression syntax tree.
 
 public static partial class syntax_package {
 
-    // A Regexp is a node in a regular expression syntax tree.
 public partial struct Regexp {
     public Op Op; // operator
     public Flags Flags;
@@ -129,7 +131,6 @@ private static bool Equal(this ptr<Regexp> _addr_x, ptr<Regexp> _addr_y) {
             return false;
         }
         return true;
-
 }
 
 // writeRegexp writes the Perl syntax for the regular expression re to b.
@@ -178,14 +179,12 @@ private static void writeRegexp(ptr<strings.Builder> _addr_b, ptr<Regexp> _addr_
                         escape(_addr_b, hi, hi == '-');
                     i += 2;
                     }
-
                 }
         else
 
 
                 i = i__prev1;
             }
-
         } {
             {
                 nint i__prev1 = i;
@@ -201,13 +200,11 @@ private static void writeRegexp(ptr<strings.Builder> _addr_b, ptr<Regexp> _addr_
                         escape(_addr_b, hi, hi == '-');
                     i += 2;
                     }
-
                 }
 
 
                 i = i__prev1;
             }
-
         }
         b.WriteRune(']');
     else if (re.Op == OpAnyCharNotNL) 
@@ -266,7 +263,6 @@ private static void writeRegexp(ptr<strings.Builder> _addr_b, ptr<Regexp> _addr_
 
         }
 
-
         if (re.Op == OpStar) 
             b.WriteRune('*');
         else if (re.Op == OpPlus) 
@@ -301,7 +297,6 @@ private static void writeRegexp(ptr<strings.Builder> _addr_b, ptr<Regexp> _addr_
  {
                     writeRegexp(_addr_b, _addr_sub);
                 }
-
             }
 
             sub = sub__prev1;
@@ -325,8 +320,7 @@ private static void writeRegexp(ptr<strings.Builder> _addr_b, ptr<Regexp> _addr_
         }
     else 
         b.WriteString("<invalid op" + strconv.Itoa(int(re.Op)) + ">");
-    
-}
+    }
 
 private static @string String(this ptr<Regexp> _addr_re) {
     ref Regexp re = ref _addr_re.val;
@@ -349,7 +343,6 @@ private static void escape(ptr<strings.Builder> _addr_b, int r, bool force) {
         }
         b.WriteRune(r);
         return ;
-
     }
     switch (r) {
         case '\a': 
@@ -383,10 +376,8 @@ private static void escape(ptr<strings.Builder> _addr_b, int r, bool force) {
             b.WriteString("\\x{");
             b.WriteString(strconv.FormatInt(int64(r), 16));
             b.WriteString("}");
-
             break;
     }
-
 }
 
 // MaxCap walks the regexp to find the maximum capture index.
@@ -406,9 +397,7 @@ private static nint MaxCap(this ptr<Regexp> _addr_re) {
             }
 
         }
-
     }    return m;
-
 }
 
 // CapNames walks the regexp to find the names of capturing groups.

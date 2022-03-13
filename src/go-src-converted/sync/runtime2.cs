@@ -5,17 +5,17 @@
 //go:build !goexperiment.staticlockranking
 // +build !goexperiment.staticlockranking
 
-// package sync -- go2cs converted at 2022 March 06 22:26:23 UTC
+// package sync -- go2cs converted at 2022 March 13 05:24:07 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\runtime2.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class sync_package {
 
-    // Approximation of notifyList in runtime/sema.go. Size and alignment must
-    // agree.
+// Approximation of notifyList in runtime/sema.go. Size and alignment must
+// agree.
 private partial struct notifyList {
     public uint wait;
     public uint notify;

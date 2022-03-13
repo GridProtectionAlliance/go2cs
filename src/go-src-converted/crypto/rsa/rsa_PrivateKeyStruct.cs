@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:18:20 UTC
+//     Generated on 2022 March 13 05:32:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace crypto
 {
     public static partial class rsa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PrivateKey
         {            
             [DebuggerStepperBoundary]
@@ -74,7 +74,7 @@ namespace crypto
             public static implicit operator PrivateKey(NilType nil) => default(PrivateKey);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static PrivateKey PrivateKey_cast(dynamic value)
         {
             return new PrivateKey(value.PublicKey, ref value.D, value.Primes, value.Precomputed);

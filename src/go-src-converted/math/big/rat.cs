@@ -4,25 +4,27 @@
 
 // This file implements multi-precision rational numbers.
 
-// package big -- go2cs converted at 2022 March 06 22:18:05 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:18 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\rat.go
-using fmt = go.fmt_package;
-using math = go.math_package;
-
 namespace go.math;
+
+using fmt = fmt_package;
+using math = math_package;
+
+
+// A Rat represents a quotient a/b of arbitrary precision.
+// The zero value for a Rat represents the value 0.
+//
+// Operations always take pointer arguments (*Rat) rather
+// than Rat values, and each unique Rat value requires
+// its own unique *Rat pointer. To "copy" a Rat value,
+// an existing (or newly allocated) Rat must be set to
+// a new value using the Rat.Set method; shallow copies
+// of Rats are not supported and may lead to errors.
 
 public static partial class big_package {
 
-    // A Rat represents a quotient a/b of arbitrary precision.
-    // The zero value for a Rat represents the value 0.
-    //
-    // Operations always take pointer arguments (*Rat) rather
-    // than Rat values, and each unique Rat value requires
-    // its own unique *Rat pointer. To "copy" a Rat value,
-    // an existing (or newly allocated) Rat must be set to
-    // a new value using the Rat.Set method; shallow copies
-    // of Rats are not supported and may lead to errors.
 public partial struct Rat {
     public Int a;
     public Int b;
@@ -70,7 +72,6 @@ private static ptr<Rat> SetFloat64(this ptr<Rat> _addr_z, double f) {
         z.a.Lsh(_addr_z.a, uint(-shift));
     }
     return _addr_z.norm()!;
-
 }
 
 // quotToFloat32 returns the non-negative float32 value
@@ -94,8 +95,7 @@ private static (float, bool) quotToFloat32(nat a, nat b) => func((_, panic, _) =
     const var Esize = Fsize - Msize1;
     const nint Ebias = 1 << (int)((Esize - 1)) - 1;
     const nint Emin = 1 - Ebias;
-    const var Emax = Ebias;
- 
+    const var Emax = Ebias; 
 
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     var alen = a.bitLen();
@@ -143,7 +143,6 @@ private static (float, bool) quotToFloat32(nat a, nat b) => func((_, panic, _) =
         }
         mantissa>>=1;
         exp++;
-
     }
     if (mantissa >> (int)(Msize1) != 1) {
         panic(fmt.Sprintf("expected exactly %d bits of result", Msize2));
@@ -166,9 +165,7 @@ private static (float, bool) quotToFloat32(nat a, nat b) => func((_, panic, _) =
                 // Complete rollover 11...1 => 100...0, so shift is safe
                 mantissa>>=1;
                 exp++;
-
             }
-
         }
     }
     mantissa>>=1; // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
@@ -178,7 +175,6 @@ private static (float, bool) quotToFloat32(nat a, nat b) => func((_, panic, _) =
         exact = false;
     }
     return ;
-
 });
 
 // quotToFloat64 returns the non-negative float64 value
@@ -202,8 +198,7 @@ private static (double, bool) quotToFloat64(nat a, nat b) => func((_, panic, _) 
     const var Esize = Fsize - Msize1;
     const nint Ebias = 1 << (int)((Esize - 1)) - 1;
     const nint Emin = 1 - Ebias;
-    const var Emax = Ebias;
- 
+    const var Emax = Ebias; 
 
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     var alen = a.bitLen();
@@ -251,7 +246,6 @@ private static (double, bool) quotToFloat64(nat a, nat b) => func((_, panic, _) 
         }
         mantissa>>=1;
         exp++;
-
     }
     if (mantissa >> (int)(Msize1) != 1) {
         panic(fmt.Sprintf("expected exactly %d bits of result", Msize2));
@@ -274,9 +268,7 @@ private static (double, bool) quotToFloat64(nat a, nat b) => func((_, panic, _) 
                 // Complete rollover 11...1 => 100...0, so shift is safe
                 mantissa>>=1;
                 exp++;
-
             }
-
         }
     }
     mantissa>>=1; // discard rounding bit.  Mantissa now scaled by 1<<Msize1.
@@ -286,7 +278,6 @@ private static (double, bool) quotToFloat64(nat a, nat b) => func((_, panic, _) 
         exact = false;
     }
     return ;
-
 });
 
 // Float32 returns the nearest float32 value for x and a bool indicating
@@ -307,7 +298,6 @@ private static (float, bool) Float32(this ptr<Rat> _addr_x) {
         f = -f;
     }
     return ;
-
 }
 
 // Float64 returns the nearest float64 value for x and a bool indicating
@@ -328,7 +318,6 @@ private static (double, bool) Float64(this ptr<Rat> _addr_x) {
         f = -f;
     }
     return ;
-
 }
 
 // SetFrac sets z to a/b and returns z.
@@ -349,7 +338,6 @@ private static ptr<Rat> SetFrac(this ptr<Rat> _addr_z, ptr<Int> _addr_a, ptr<Int
     z.a.abs = z.a.abs.set(a.abs);
     z.b.abs = z.b.abs.set(babs);
     return _addr_z.norm()!;
-
 });
 
 // SetFrac64 sets z to a/b and returns z.
@@ -367,7 +355,6 @@ private static ptr<Rat> SetFrac64(this ptr<Rat> _addr_z, long a, long b) => func
     }
     z.b.abs = z.b.abs.setUint64(uint64(b));
     return _addr_z.norm()!;
-
 });
 
 // SetInt sets z to x (by making a copy of x) and returns z.
@@ -411,7 +398,6 @@ private static ptr<Rat> Set(this ptr<Rat> _addr_z, ptr<Rat> _addr_x) {
         z.b.abs = z.b.abs.setWord(1);
     }
     return _addr_z!;
-
 }
 
 // Abs sets z to |x| (the absolute value of x) and returns z.
@@ -432,7 +418,6 @@ private static ptr<Rat> Neg(this ptr<Rat> _addr_z, ptr<Rat> _addr_x) {
     z.Set(x);
     z.a.neg = len(z.a.abs) > 0 && !z.a.neg; // 0 has no sign
     return _addr_z!;
-
 }
 
 // Inv sets z to 1/x and returns z.
@@ -446,7 +431,6 @@ private static ptr<Rat> Inv(this ptr<Rat> _addr_z, ptr<Rat> _addr_x) => func((_,
     }
     z.Set(x);
     (z.a.abs, z.b.abs) = (z.b.abs, z.a.abs);    return _addr_z!;
-
 });
 
 // Sign returns:
@@ -494,10 +478,8 @@ private static ptr<Int> Denom(this ptr<Rat> _addr_x) {
         //       panic instead and require the Rat to
         //       be explicitly initialized.
         return addr(new Int(abs:nat{1}));
-
     }
     return _addr__addr_x.b!;
-
 }
 
 private static ptr<Rat> norm(this ptr<Rat> _addr_z) {
@@ -530,12 +512,10 @@ private static ptr<Rat> norm(this ptr<Rat> _addr_z) {
             }
 
         }
-
         z.a.neg = neg;
 
     __switch_break0:;
     return _addr_z!;
-
 }
 
 // mulDenom sets z to the denominator product x*y (by taking into
@@ -550,7 +530,6 @@ private static nat mulDenom(nat z, nat x, nat y) {
     else if (len(y) == 0) 
         return z.set(x);
         return z.mul(x, y);
-
 }
 
 // scaleDenom sets z to the product x*f.
@@ -565,7 +544,6 @@ private static void scaleDenom(this ptr<Int> _addr_z, ptr<Int> _addr_x, nat f) {
     }
     z.abs = z.abs.mul(x.abs, f);
     z.neg = x.neg;
-
 }
 
 // Cmp compares x and y and returns:
@@ -633,12 +611,10 @@ private static ptr<Rat> Mul(this ptr<Rat> _addr_z, ptr<Rat> _addr_x, ptr<Rat> _a
             z.b.abs = z.b.abs.sqr(x.b.abs);
         }
         return _addr_z!;
-
     }
     z.a.Mul(_addr_x.a, _addr_y.a);
     z.b.abs = mulDenom(z.b.abs, x.b.abs, y.b.abs);
     return _addr_z.norm()!;
-
 }
 
 // Quo sets z to the quotient x/y and returns z.
@@ -659,7 +635,6 @@ private static ptr<Rat> Quo(this ptr<Rat> _addr_z, ptr<Rat> _addr_x, ptr<Rat> _a
     z.b.abs = b.abs;
     z.a.neg = a.neg != b.neg;
     return _addr_z.norm()!;
-
 });
 
 } // end big_package

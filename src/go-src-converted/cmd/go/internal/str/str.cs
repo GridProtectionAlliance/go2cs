@@ -3,20 +3,23 @@
 // license that can be found in the LICENSE file.
 
 // Package str provides string manipulation utilities.
-// package str -- go2cs converted at 2022 March 06 23:17:20 UTC
+
+// package str -- go2cs converted at 2022 March 13 06:30:38 UTC
 // import "cmd/go/internal/str" ==> using str = go.cmd.go.@internal.str_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\str\str.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// StringList flattens its arguments into a single []string.
+// Each argument in args must have type string or []string.
 
 public static partial class str_package {
 
-    // StringList flattens its arguments into a single []string.
-    // Each argument in args must have type string or []string.
 public static slice<@string> StringList(params object[] args) => func((_, panic, _) => {
     args = args.Clone();
 
@@ -40,13 +43,11 @@ public static slice<@string> StringList(params object[] args) => func((_, panic,
                     break;
                 }
             }
-
         }
         arg = arg__prev1;
     }
 
     return x;
-
 });
 
 // ToFold returns a string with the property that
@@ -84,9 +85,7 @@ Slow:
             r += 'a' - 'A';
         }
         buf.WriteRune(r);
-
     }    return buf.String();
-
 }
 
 // FoldDup reports a pair of strings from the list that are
@@ -106,17 +105,12 @@ public static (@string, @string) FoldDup(slice<@string> list) {
                 if (s > t) {
                     (s, t) = (t, s);
                 }
-
                 return (s, t);
-
             }
 
         }
-
         clash[fold] = s;
-
     }    return ("", "");
-
 }
 
 // Contains reports whether x contains s.
@@ -126,7 +120,6 @@ public static bool Contains(slice<@string> x, @string s) {
             return true;
         }
     }    return false;
-
 }
 
 // Uniq removes consecutive duplicate strings from ss.
@@ -142,7 +135,6 @@ public static void Uniq(ptr<slice<@string>> _addr_ss) {
             uniq = append(uniq, s);
         }
     }    ss = uniq;
-
 }
 
 private static bool isSpaceByte(byte c) {
@@ -188,10 +180,8 @@ public static (slice<@string>, error) SplitQuotedFields(@string s) {
         }
         f = append(f, s[..(int)i]);
         s = s[(int)i..];
-
     }
     return (f, error.As(null!)!);
-
 }
 
 } // end str_package

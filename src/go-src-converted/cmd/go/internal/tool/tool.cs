@@ -3,24 +3,24 @@
 // license that can be found in the LICENSE file.
 
 // Package tool implements the ``go tool'' command.
-// package tool -- go2cs converted at 2022 March 06 23:16:22 UTC
+
+// package tool -- go2cs converted at 2022 March 13 06:29:52 UTC
 // import "cmd/go/internal/tool" ==> using tool = go.cmd.go.@internal.tool_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\tool\tool.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using signal = go.os.signal_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
+namespace go.cmd.go.@internal;
 
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
+using context = context_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using os = os_package;
+using signal = os.signal_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
 using System;
 using System.Threading;
-
-
-namespace go.cmd.go.@internal;
 
 public static partial class tool_package {
 
@@ -54,7 +54,6 @@ private static bool isGccgoTool(@string tool) {
             break;
     }
     return false;
-
 }
 
 private static void init() {
@@ -80,8 +79,7 @@ private static void runTool(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                 fmt.Fprintf(os.Stderr, "go tool: bad tool name %q\n", toolName);
                 @base.SetExitStatus(2);
                 return ;
-            
-        }
+                    }
         c = c__prev1;
     }
 
@@ -96,7 +94,6 @@ private static void runTool(context.Context ctx, ptr<base.Command> _addr_cmd, sl
         }
         fmt.Printf("%s\n", cmd);
         return ;
-
     }
     args[0] = toolPath; // in case the tool wants to re-exec itself, e.g. cmd/dist
     ptr<exec.Cmd> toolCmd = addr(new exec.Cmd(Path:toolPath,Args:args,Stdin:os.Stdin,Stdout:os.Stdout,Stderr:os.Stderr,));
@@ -127,10 +124,8 @@ private static void runTool(context.Context ctx, ptr<base.Command> _addr_cmd, sl
             }
 
         }
-
         @base.SetExitStatus(1);
         return ;
-
     }
 }
 
@@ -161,7 +156,6 @@ private static void listTools() => func((defer, _, _) => {
             continue;
         }
         fmt.Println(name);
-
     }
 });
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:26:25 UTC
+//     Generated on 2022 March 13 05:24:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class sync_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct WaitGroup
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator WaitGroup(NilType nil) => default(WaitGroup);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static WaitGroup WaitGroup_cast(dynamic value)
         {
             return new WaitGroup(value.noCopy, value.state1);

@@ -2,32 +2,33 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:19:29 UTC
+// package tls -- go2cs converted at 2022 March 13 05:34:27 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\cipher_suites.go
-using crypto = go.crypto_package;
-using aes = go.crypto.aes_package;
-using cipher = go.crypto.cipher_package;
-using des = go.crypto.des_package;
-using hmac = go.crypto.hmac_package;
-using rc4 = go.crypto.rc4_package;
-using sha1 = go.crypto.sha1_package;
-using sha256 = go.crypto.sha256_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using cpu = go.@internal.cpu_package;
-using runtime = go.runtime_package;
-
-using chacha20poly1305 = go.golang.org.x.crypto.chacha20poly1305_package;
-using System;
-
-
 namespace go.crypto;
 
+using crypto = crypto_package;
+using aes = crypto.aes_package;
+using cipher = crypto.cipher_package;
+using des = crypto.des_package;
+using hmac = crypto.hmac_package;
+using rc4 = crypto.rc4_package;
+using sha1 = crypto.sha1_package;
+using sha256 = crypto.sha256_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using cpu = @internal.cpu_package;
+using runtime = runtime_package;
+
+using chacha20poly1305 = golang.org.x.crypto.chacha20poly1305_package;
+
+
+// CipherSuite is a TLS cipher suite. Note that most functions in this package
+// accept and expose cipher suite IDs instead of this type.
+
+using System;
 public static partial class tls_package {
 
-    // CipherSuite is a TLS cipher suite. Note that most functions in this package
-    // accept and expose cipher suite IDs instead of this type.
 public partial struct CipherSuite {
     public ushort ID;
     public @string Name; // Supported versions is the list of TLS protocol versions that can
@@ -59,7 +60,6 @@ public static slice<ptr<CipherSuite>> InsecureCipherSuites() {
     // This list includes RC4, CBC_SHA256, and 3DES cipher suites. See
     // cipherSuitesPreferenceOrder for details.
     return new slice<ptr<CipherSuite>>(new ptr<CipherSuite>[] { {TLS_RSA_WITH_RC4_128_SHA,"TLS_RSA_WITH_RC4_128_SHA",supportedUpToTLS12,true}, {TLS_RSA_WITH_3DES_EDE_CBC_SHA,"TLS_RSA_WITH_3DES_EDE_CBC_SHA",supportedUpToTLS12,true}, {TLS_RSA_WITH_AES_128_CBC_SHA256,"TLS_RSA_WITH_AES_128_CBC_SHA256",supportedOnlyTLS12,true}, {TLS_ECDHE_ECDSA_WITH_RC4_128_SHA,"TLS_ECDHE_ECDSA_WITH_RC4_128_SHA",supportedUpToTLS12,true}, {TLS_ECDHE_RSA_WITH_RC4_128_SHA,"TLS_ECDHE_RSA_WITH_RC4_128_SHA",supportedUpToTLS12,true}, {TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,"TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA",supportedUpToTLS12,true}, {TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,"TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",supportedOnlyTLS12,true}, {TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,"TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",supportedOnlyTLS12,true} });
-
 }
 
 // CipherSuiteName returns the standard name for the passed cipher suite ID
@@ -91,7 +91,6 @@ public static @string CipherSuiteName(ushort id) {
     }
 
     return fmt.Sprintf("0x%04X", id);
-
 }
 
  
@@ -111,7 +110,6 @@ private static readonly var suiteTLS12 = 1;
 // suiteSHA384 indicates that the cipher suite uses SHA384 as the
 // handshake hash.
 private static readonly var suiteSHA384 = 2;
-
 
 // A cipherSuite is a TLS 1.0–1.2 cipher suite, and defines the key exchange
 // mechanism, as well as the cipher+MAC pair or the AEAD.
@@ -143,7 +141,6 @@ private static ptr<cipherSuite> selectCipherSuite(slice<ushort> ids, slice<ushor
             }
         }
     }    return _addr_null!;
-
 }
 
 // A cipherSuiteTLS13 defines only the pair of the AEAD algorithm and hash
@@ -261,7 +258,6 @@ private static bool aesgcmPreferred(slice<ushort> ciphers) {
             c = c__prev1;
 
         }
-
         {
             var c__prev1 = c;
 
@@ -274,9 +270,7 @@ private static bool aesgcmPreferred(slice<ushort> ciphers) {
             c = c__prev1;
 
         }
-
     }    return false;
-
 }
 
 private static void cipherRC4(slice<byte> key, slice<byte> iv, bool isRead) {
@@ -290,7 +284,6 @@ private static void cipher3DES(slice<byte> key, slice<byte> iv, bool isRead) {
         return cipher.NewCBCDecrypter(block, iv);
     }
     return cipher.NewCBCEncrypter(block, iv);
-
 }
 
 private static void cipherAES(slice<byte> key, slice<byte> iv, bool isRead) {
@@ -299,7 +292,6 @@ private static void cipherAES(slice<byte> key, slice<byte> iv, bool isRead) {
         return cipher.NewCBCDecrypter(block, iv);
     }
     return cipher.NewCBCEncrypter(block, iv);
-
 }
 
 // macSHA1 returns a SHA-1 based constant time MAC.
@@ -319,7 +311,6 @@ private partial interface aead {
 
 private static readonly nint aeadNonceLength = 12;
 private static readonly nint noncePrefixLength = 4;
-
 
 // prefixNonceAEAD wraps an AEAD and prefixes a fixed portion of the nonce to
 // each call.
@@ -414,7 +405,6 @@ private static slice<byte> Seal(this ptr<xorNonceAEAD> _addr_f, slice<byte> @out
     }
 
     return result;
-
 }
 
 private static (slice<byte>, error) Open(this ptr<xorNonceAEAD> _addr_f, slice<byte> @out, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
@@ -450,7 +440,6 @@ private static (slice<byte>, error) Open(this ptr<xorNonceAEAD> _addr_f, slice<b
     }
 
     return (result, error.As(err)!);
-
 }
 
 private static aead aeadAESGCM(slice<byte> key, slice<byte> noncePrefix) => func((_, panic, _) => {
@@ -468,7 +457,6 @@ private static aead aeadAESGCM(slice<byte> key, slice<byte> noncePrefix) => func
     ptr<prefixNonceAEAD> ret = addr(new prefixNonceAEAD(aead:aead));
     copy(ret.nonce[..], noncePrefix);
     return ret;
-
 });
 
 private static aead aeadAESGCMTLS13(slice<byte> key, slice<byte> nonceMask) => func((_, panic, _) => {
@@ -486,7 +474,6 @@ private static aead aeadAESGCMTLS13(slice<byte> key, slice<byte> nonceMask) => f
     ptr<xorNonceAEAD> ret = addr(new xorNonceAEAD(aead:aead));
     copy(ret.nonceMask[..], nonceMask);
     return ret;
-
 });
 
 private static aead aeadChaCha20Poly1305(slice<byte> key, slice<byte> nonceMask) => func((_, panic, _) => {
@@ -500,7 +487,6 @@ private static aead aeadChaCha20Poly1305(slice<byte> key, slice<byte> nonceMask)
     ptr<xorNonceAEAD> ret = addr(new xorNonceAEAD(aead:aead));
     copy(ret.nonceMask[..], nonceMask);
     return ret;
-
 });
 
 private partial interface constantTimeHash {
@@ -542,9 +528,7 @@ private static slice<byte> Sum(this ptr<cthWrapper> _addr_c, slice<byte> b) {
 }
 
 private static Func<hash.Hash> newConstantTimeHash(Func<hash.Hash> h) {
-    return () => {
-        return addr(new cthWrapper(h().(constantTimeHash)));
-    };
+    return () => addr(new cthWrapper(h().(constantTimeHash)));
 }
 
 // tls10MAC implements the TLS 1.0 MAC function. RFC 2246, Section 6.2.3.
@@ -558,7 +542,6 @@ private static slice<byte> tls10MAC(hash.Hash h, slice<byte> @out, slice<byte> s
         h.Write(extra);
     }
     return res;
-
 }
 
 private static keyAgreement rsaKA(ushort version) {
@@ -581,7 +564,6 @@ private static ptr<cipherSuite> mutualCipherSuite(slice<ushort> have, ushort wan
             return _addr_cipherSuiteByID(id)!;
         }
     }    return _addr_null!;
-
 }
 
 private static ptr<cipherSuite> cipherSuiteByID(ushort id) {
@@ -590,7 +572,6 @@ private static ptr<cipherSuite> cipherSuiteByID(ushort id) {
             return _addr_cipherSuite!;
         }
     }    return _addr_null!;
-
 }
 
 private static ptr<cipherSuiteTLS13> mutualCipherSuiteTLS13(slice<ushort> have, ushort want) {
@@ -599,7 +580,6 @@ private static ptr<cipherSuiteTLS13> mutualCipherSuiteTLS13(slice<ushort> have, 
             return _addr_cipherSuiteTLS13ByID(id)!;
         }
     }    return _addr_null!;
-
 }
 
 private static ptr<cipherSuiteTLS13> cipherSuiteTLS13ByID(ushort id) {
@@ -608,7 +588,6 @@ private static ptr<cipherSuiteTLS13> cipherSuiteTLS13ByID(ushort id) {
             return _addr_cipherSuite!;
         }
     }    return _addr_null!;
-
 }
 
 // A list of cipher suite IDs that are, or have been, implemented by this
@@ -653,6 +632,5 @@ public static readonly ushort TLS_FALLBACK_SCSV = 0x5600;
 // suffix, retained for backward compatibility.
 public static readonly var TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305 = TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256;
 public static readonly var TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305 = TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256;
-
 
 } // end tls_package

@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2022 March 06 23:24:56 UTC
+// package arm64asm -- go2cs converted at 2022 March 13 06:38:09 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\decode.go
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.arch.arm64;
+
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using System;
 
 public static partial class arm64asm_package {
 
@@ -68,15 +67,11 @@ Search:
                 _continueSearch = true;
                 break;
             }
-
             args[j] = arg;
-
         }        decoderCover[i] = true;
         inst = new Inst(Op:f.op,Args:args,Enc:x,);
         return (inst, error.As(null!)!);
-
     }    return (new Inst(), error.As(errUnknown)!);
-
 }
 
 // decodeArg decodes the arg described by aop from the instruction bits x.
@@ -1599,7 +1594,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
             }
-
         }
         else if (imm5 & 2 == 2) {
             if (Q == 0) {
@@ -1609,7 +1603,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
             }
-
         }
         else if (imm5 & 4 == 4) {
             if (Q == 0) {
@@ -1619,7 +1612,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
             }
-
         }
         else if ((imm5 & 8 == 8) && (Q == 1)) {
             return new RegisterWithArrangement(V0+Reg(Rd),Arrangement2D,0);
@@ -1643,7 +1635,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
             }
-
         }
         else if (immh >> 3 == 1) {
             if (Q == 1) {
@@ -1666,7 +1657,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
             }
-
         }
         else if (immh >> 1 == 1) {
             if (Q == 0) {
@@ -1676,7 +1666,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
             }
-
         }
         else if (immh >> 2 == 1) {
             if (Q == 0) {
@@ -1686,7 +1675,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
             }
-
         }
         return null;
         goto __switch_break0;
@@ -1704,7 +1692,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement16B,0);
             }
-
         }
         else if (immh >> 1 == 1) {
             if (Q == 0) {
@@ -1714,7 +1701,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement8H,0);
             }
-
         }
         else if (immh >> 2 == 1) {
             if (Q == 0) {
@@ -1724,7 +1710,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rd),Arrangement4S,0);
             }
-
         }
         else if (immh >> 3 == 1) {
             if (Q == 1) {
@@ -2677,7 +2662,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
             }
-
         }
         else if (immh >> 3 == 1) {
             if (Q == 1) {
@@ -2700,7 +2684,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rn),Arrangement16B,0);
             }
-
         }
         else if (immh >> 1 == 1) {
             if (Q == 0) {
@@ -2710,7 +2693,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rn),Arrangement8H,0);
             }
-
         }
         else if (immh >> 2 == 1) {
             if (Q == 0) {
@@ -2720,7 +2702,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
             }
-
         }
         return null;
         goto __switch_break0;
@@ -2738,7 +2719,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rn),Arrangement16B,0);
             }
-
         }
         else if (immh >> 1 == 1) {
             if (Q == 0) {
@@ -2748,7 +2728,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rn),Arrangement8H,0);
             }
-
         }
         else if (immh >> 2 == 1) {
             if (Q == 0) {
@@ -2758,7 +2737,6 @@ private static Arg decodeArg(instArg aop, uint x) {
  {
                 return new RegisterWithArrangement(V0+Reg(Rn),Arrangement4S,0);
             }
-
         }
         else if (immh >> 3 == 1) {
             if (Q == 1) {
@@ -3624,7 +3602,6 @@ private static Arg decodeArg(instArg aop, uint x) {
         return null;
 
     __switch_break0:;
-
 }
 
 private static Arg handle_ExtendedRegister(uint x, bool has_width) {
@@ -3665,7 +3642,6 @@ private static Arg handle_ExtendedRegister(uint x, bool has_width) {
             {
                            rea.extShift = ExtShift(0);
                        }
-
                    }
                    else
             {
@@ -3681,7 +3657,6 @@ private static Arg handle_ExtendedRegister(uint x, bool has_width) {
             {
                            rea.extShift = ExtShift(0);
                        }
-
                    }
                    else
             {
@@ -3704,7 +3679,6 @@ private static Arg handle_ExtendedRegister(uint x, bool has_width) {
     rea.show_zero = false;
     rea.amount = uint8(imm3);
     return rea;
-
 }
 
 private static Arg handle_ImmediateShiftedRegister(uint x, byte max, bool is_w, bool has_ror) {
@@ -3745,7 +3719,6 @@ private static Arg handle_ImmediateShiftedRegister(uint x, byte max, bool is_w, 
         return null;
     }
     return rsa;
-
 }
 
 private static Arg handle_MemExtend(uint x, byte mult, bool absent) {
@@ -3779,7 +3752,6 @@ private static Arg handle_MemExtend(uint x, byte mult, bool absent) {
     }
     var amount = (uint8((x >> 12) & 1)) * mult;
     return new MemExtend(Rn,Rm,extend,amount,absent);
-
 }
 
 private static Arg handle_bitmasks(uint x, byte datasize) {
@@ -3830,7 +3802,6 @@ private static Arg handle_bitmasks(uint x, byte datasize) {
         i += esize;
     }
     return new Imm64(wmask,false);
-
 }
 
 } // end arm64asm_package

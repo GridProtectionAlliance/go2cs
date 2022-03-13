@@ -4,19 +4,19 @@
 
 // Package singleflight provides a duplicate function call suppression
 // mechanism.
-// package singleflight -- go2cs converted at 2022 March 06 22:16:17 UTC
+
+// package singleflight -- go2cs converted at 2022 March 13 05:29:56 UTC
 // import "internal/singleflight" ==> using singleflight = go.@internal.singleflight_package
 // Original source: C:\Program Files\Go\src\internal\singleflight\singleflight.go
-using sync = go.sync_package;
+namespace go.@internal;
+
+using sync = sync_package;
 using System;
 using System.Threading;
 
-
-namespace go.@internal;
-
 public static partial class singleflight_package {
 
-    // call is an in-flight or completed singleflight.Do call
+// call is an in-flight or completed singleflight.Do call
 private partial struct call {
     public sync.WaitGroup wg; // These fields are written once before the WaitGroup is done
 // and are only read after the WaitGroup is done.
@@ -70,7 +70,6 @@ private static (object, error, bool) Do(this ptr<Group> _addr_g, @string key, Fu
         c = c__prev1;
 
     }
-
     ptr<call> c = @new<call>();
     c.wg.Add(1);
     g.m[key] = c;
@@ -78,7 +77,6 @@ private static (object, error, bool) Do(this ptr<Group> _addr_g, @string key, Fu
 
     g.doCall(c, key, fn);
     return (c.val, error.As(c.err)!, c.dups > 0);
-
 }
 
 // DoChan is like Do but returns a channel that will receive the
@@ -109,7 +107,6 @@ private static (channel<Result>, bool) DoChan(this ptr<Group> _addr_g, @string k
         c = c__prev1;
 
     }
-
     ptr<call> c = addr(new call(chans:[]chan<-Result{ch}));
     c.wg.Add(1);
     g.m[key] = c;
@@ -118,7 +115,6 @@ private static (channel<Result>, bool) DoChan(this ptr<Group> _addr_g, @string k
     go_(() => g.doCall(c, key, fn));
 
     return (ch, true);
-
 }
 
 // doCall handles the single call for a key.
@@ -157,7 +153,6 @@ private static bool ForgetUnshared(this ptr<Group> _addr_g, @string key) => func
         return true;
     }
     return false;
-
 });
 
 } // end singleflight_package

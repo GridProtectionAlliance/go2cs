@@ -8,17 +8,15 @@
 // are identified by their unique id, instead of their
 // object name.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:45 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:08 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\objset.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class types2_package {
 
-    // An objset is a set of objects identified by their unique id.
-    // The zero value for objset is a ready-to-use empty objset.
+// An objset is a set of objects identified by their unique id.
+// The zero value for objset is a ready-to-use empty objset.
 private partial struct objset { // : map<@string, Object>
 } // initialized lazily
 
@@ -37,13 +35,11 @@ private static Object insert(this ptr<objset> _addr_s, Object obj) {
             return alt;
         }
     }
-
     if (s == null.val) {
         s.val = make_map<@string, Object>();
     }
     (s.val)[id] = obj;
     return null;
-
 }
 
 } // end types2_package

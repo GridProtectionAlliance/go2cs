@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:35 UTC
+//     Generated on 2022 March 13 05:39:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace html
 {
     public static partial class template_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct escaper
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace html
             public static implicit operator escaper(NilType nil) => default(escaper);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static escaper escaper_cast(dynamic value)
         {
             return new escaper(ref value.ns, value.output, value.derived, value.called, value.actionNodeEdits, value.templateNodeEdits, value.textNodeEdits);

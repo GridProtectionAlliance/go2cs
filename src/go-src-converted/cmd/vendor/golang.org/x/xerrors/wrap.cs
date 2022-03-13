@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2022 March 06 23:35:17 UTC
+// package xerrors -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\xerrors\wrap.go
-using reflect = go.reflect_package;
-
 namespace go.cmd.vendor.golang.org.x;
+
+using reflect = reflect_package;
+
+
+// A Wrapper provides context around another error.
 
 public static partial class xerrors_package {
 
-    // A Wrapper provides context around another error.
 public partial interface Wrapper {
     error Unwrap();
 }
@@ -36,10 +38,8 @@ private static error FormatError(this noWrapper e, Printer p) {
             return error.As(f.FormatError(p))!;
         }
     }
-
     p.Print(e.error);
     return error.As(null!)!;
-
 }
 
 // Unwrap returns the result of calling the Unwrap method on err, if err implements
@@ -50,7 +50,6 @@ public static error Unwrap(error err) {
         return error.As(null!)!;
     }
     return error.As(u.Unwrap())!;
-
 }
 
 // Is reports whether any error in err's chain matches target.
@@ -85,7 +84,6 @@ public static bool Is(error err, error target) {
             return false;
         }
     }
-
 }
 
 // As finds the first error in err's chain that matches the type to which target
@@ -112,7 +110,6 @@ public static bool As(error err, object target) => func((_, panic, _) => {
             panic("errors: *target must be interface or implement error");
         }
     }
-
     var targetType = typ.Elem();
     while (err != null) {
         if (reflect.TypeOf(err).AssignableTo(targetType)) {
@@ -126,12 +123,9 @@ public static bool As(error err, object target) => func((_, panic, _) => {
             }
 
         }
-
         err = Unwrap(err);
-
     }
     return false;
-
 });
 
 private static var errorType = reflect.TypeOf((error.val)(null)).Elem();

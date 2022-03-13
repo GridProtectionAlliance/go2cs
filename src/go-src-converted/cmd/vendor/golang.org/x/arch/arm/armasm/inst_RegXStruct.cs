@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:24:34 UTC
+//     Generated on 2022 March 13 06:37:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace arm
 {
     public static partial class armasm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct RegX
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace arm
             public static implicit operator RegX(NilType nil) => default(RegX);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static RegX RegX_cast(dynamic value)
         {
             return new RegX(value.Reg, value.Index);

@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:08 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:25 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\export.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// importalias declares symbol s as an imported type alias with type t.
+// ipkg is the package being imported
 
 public static partial class typecheck_package {
 
-    // importalias declares symbol s as an imported type alias with type t.
-    // ipkg is the package being imported
 private static ptr<ir.Name> importalias(ptr<types.Pkg> _addr_ipkg, src.XPos pos, ptr<types.Sym> _addr_s, ptr<types.Type> _addr_t) {
     ref types.Pkg ipkg = ref _addr_ipkg.val;
     ref types.Sym s = ref _addr_s.val;
@@ -64,7 +66,6 @@ private static ptr<ir.Name> importobj(ptr<types.Pkg> _addr_ipkg, src.XPos pos, p
         n.Sym().SetFunc(true);
     }
     return _addr_n!;
-
 }
 
 private static ptr<ir.Name> importsym(ptr<types.Pkg> _addr_ipkg, src.XPos pos, ptr<types.Sym> _addr_s, ir.Op op, ir.Class ctxt) {
@@ -83,12 +84,10 @@ private static ptr<ir.Name> importsym(ptr<types.Pkg> _addr_ipkg, src.XPos pos, p
 
     }
 
-
     n = ir.NewDeclNameAt(pos, op, s);
     n.Class = ctxt; // TODO(mdempsky): Move this into NewDeclNameAt too?
     s.SetPkgDef(n);
     return _addr_n!;
-
 }
 
 // importtype returns the named type declared by symbol s.

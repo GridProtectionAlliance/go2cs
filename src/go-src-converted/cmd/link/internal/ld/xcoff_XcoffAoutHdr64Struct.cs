@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:33 UTC
+//     Generated on 2022 March 13 06:35:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct XcoffAoutHdr64
         {
             // Constructors
@@ -128,7 +128,7 @@ namespace @internal
             public static implicit operator XcoffAoutHdr64(NilType nil) => default(XcoffAoutHdr64);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static XcoffAoutHdr64 XcoffAoutHdr64_cast(dynamic value)
         {
             return new XcoffAoutHdr64(value.Omagic, value.Ovstamp, value.Odebugger, value.Otextstart, value.Odatastart, value.Otoc, value.Osnentry, value.Osntext, value.Osndata, value.Osntoc, value.Osnloader, value.Osnbss, value.Oalgntext, value.Oalgndata, value.Omodtype, value.Ocpuflag, value.Ocputype, value.Otextpsize, value.Odatapsize, value.Ostackpsize, value.Oflags, value.Otsize, value.Odsize, value.Obsize, value.Oentry, value.Omaxstack, value.Omaxdata, value.Osntdata, value.Osntbss, value.Ox64flags, value.Oresv3a, value.Oresv3);

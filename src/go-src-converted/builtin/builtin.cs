@@ -8,16 +8,15 @@
     but their descriptions here allow godoc to present documentation
     for the language's special identifiers.
 */
-// package builtin -- go2cs converted at 2022 March 06 22:31:45 UTC
+
+// package builtin -- go2cs converted at 2022 March 13 05:42:40 UTC
 // import "builtin" ==> using builtin = go.builtin_package
 // Original source: C:\Program Files\Go\src\builtin\builtin.go
-
-
 namespace go;
 
 public static partial class builtin_package {
 
-    // bool is the set of boolean values, true and false.
+// bool is the set of boolean values, true and false.
 private partial struct @bool { // : bool
 }
 

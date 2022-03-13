@@ -27,15 +27,16 @@
 //         return nil
 //     }
 //
-// package inspect -- go2cs converted at 2022 March 06 23:34:37 UTC
+
+// package inspect -- go2cs converted at 2022 March 13 06:41:53 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/inspect" ==> using inspect = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.inspect_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\inspect\inspect.go
-using reflect = go.reflect_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using reflect = reflect_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
 
 public static partial class inspect_package {
 

@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2022 March 06 22:15:09 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:29:16 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\protobuf.go
-
-
 namespace go.runtime;
 
 public static partial class pprof_package {
 
-    // A protobuf is a simple protocol buffer encoder.
+// A protobuf is a simple protocol buffer encoder.
 private partial struct protobuf {
     public slice<byte> data;
     public array<byte> tmp;
@@ -41,7 +39,6 @@ private static void uint64(this ptr<protobuf> _addr_b, nint tag, ulong x) {
     // append varint to b.data
     b.varint(uint64(tag) << 3 | 0);
     b.varint(x);
-
 }
 
 private static void uint64s(this ptr<protobuf> _addr_b, nint tag, slice<ulong> x) {
@@ -68,7 +65,6 @@ private static void uint64s(this ptr<protobuf> _addr_b, nint tag, slice<ulong> x
         copy(b.data[(int)n1 + (n3 - n2)..], b.data[(int)n1..(int)n2]);
         copy(b.data[(int)n1..], b.tmp[..(int)n3 - n2]);
         return ;
-
     }
     {
         var u__prev1 = u;
@@ -88,7 +84,6 @@ private static void uint64Opt(this ptr<protobuf> _addr_b, nint tag, ulong x) {
         return ;
     }
     b.uint64(tag, x);
-
 }
 
 private static void int64(this ptr<protobuf> _addr_b, nint tag, long x) {
@@ -105,7 +100,6 @@ private static void int64Opt(this ptr<protobuf> _addr_b, nint tag, long x) {
         return ;
     }
     b.int64(tag, x);
-
 }
 
 private static void int64s(this ptr<protobuf> _addr_b, nint tag, slice<long> x) {
@@ -132,7 +126,6 @@ private static void int64s(this ptr<protobuf> _addr_b, nint tag, slice<long> x) 
         copy(b.data[(int)n1 + (n3 - n2)..], b.data[(int)n1..(int)n2]);
         copy(b.data[(int)n1..], b.tmp[..(int)n3 - n2]);
         return ;
-
     }
     {
         var u__prev1 = u;
@@ -167,7 +160,6 @@ private static void stringOpt(this ptr<protobuf> _addr_b, nint tag, @string x) {
         return ;
     }
     b.@string(tag, x);
-
 }
 
 private static void @bool(this ptr<protobuf> _addr_b, nint tag, bool x) {
@@ -189,7 +181,6 @@ private static void boolOpt(this ptr<protobuf> _addr_b, nint tag, bool x) {
         return ;
     }
     b.@bool(tag, x);
-
 }
 
 private partial struct msgOffset { // : nint

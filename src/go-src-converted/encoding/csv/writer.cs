@@ -2,34 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package csv -- go2cs converted at 2022 March 06 22:24:56 UTC
+// package csv -- go2cs converted at 2022 March 13 05:39:28 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
 // Original source: C:\Program Files\Go\src\encoding\csv\writer.go
-using bufio = go.bufio_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.encoding;
+
+using bufio = bufio_package;
+using io = io_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// A Writer writes records using CSV encoding.
+//
+// As returned by NewWriter, a Writer writes records terminated by a
+// newline and uses ',' as the field delimiter. The exported fields can be
+// changed to customize the details before the first call to Write or WriteAll.
+//
+// Comma is the field delimiter.
+//
+// If UseCRLF is true, the Writer ends each output line with \r\n instead of \n.
+//
+// The writes of individual records are buffered.
+// After all data has been written, the client should call the
+// Flush method to guarantee all data has been forwarded to
+// the underlying io.Writer.  Any errors that occurred should
+// be checked by calling the Error method.
 
 public static partial class csv_package {
 
-    // A Writer writes records using CSV encoding.
-    //
-    // As returned by NewWriter, a Writer writes records terminated by a
-    // newline and uses ',' as the field delimiter. The exported fields can be
-    // changed to customize the details before the first call to Write or WriteAll.
-    //
-    // Comma is the field delimiter.
-    //
-    // If UseCRLF is true, the Writer ends each output line with \r\n instead of \n.
-    //
-    // The writes of individual records are buffered.
-    // After all data has been written, the client should call the
-    // Flush method to guarantee all data has been forwarded to
-    // the underlying io.Writer.  Any errors that occurred should
-    // be checked by calling the Error method.
 public partial struct Writer {
     public int Comma; // Field delimiter (set to ',' by NewWriter)
     public bool UseCRLF; // True to use \r\n as the line terminator
@@ -65,7 +67,6 @@ private static error Write(this ptr<Writer> _addr_w, slice<@string> record) {
                 err = err__prev2;
 
             }
-
         }
         if (!w.fieldNeedsQuotes(field)) {
             {
@@ -80,9 +81,7 @@ private static error Write(this ptr<Writer> _addr_w, slice<@string> record) {
                 err = err__prev2;
 
             }
-
             continue;
-
         }
         {
             var err__prev1 = err;
@@ -96,7 +95,6 @@ private static error Write(this ptr<Writer> _addr_w, slice<@string> record) {
             err = err__prev1;
 
         }
-
         while (len(field) > 0) { 
             // Search for special characters.
             var i = strings.IndexAny(field, "\"\r\n");
@@ -117,7 +115,6 @@ private static error Write(this ptr<Writer> _addr_w, slice<@string> record) {
                 err = err__prev1;
 
             }
-
             field = field[(int)i..]; 
 
             // Encode the special character.
@@ -140,16 +137,13 @@ private static error Write(this ptr<Writer> _addr_w, slice<@string> record) {
                         {
                                                err = w.w.WriteByte('\n');
                                            }
-
                         break;
                 }
                 field = field[(int)1..];
                 if (err != null) {
                     return error.As(err)!;
                 }
-
             }
-
         }
         {
             var err__prev1 = err;
@@ -163,7 +157,6 @@ private static error Write(this ptr<Writer> _addr_w, slice<@string> record) {
             err = err__prev1;
 
         }
-
     }    err = default!;
     if (w.UseCRLF) {
         _, err = w.w.WriteString("\r\n");
@@ -173,7 +166,6 @@ private static error Write(this ptr<Writer> _addr_w, slice<@string> record) {
         err = w.w.WriteByte('\n');
     }
     return error.As(err)!;
-
 }
 
 // Flush writes any buffered data to the underlying io.Writer.
@@ -203,7 +195,6 @@ private static error WriteAll(this ptr<Writer> _addr_w, slice<slice<@string>> re
             return error.As(err)!;
         }
     }    return error.As(w.w.Flush())!;
-
 }
 
 // fieldNeedsQuotes reports whether our field must be enclosed in quotes.
@@ -235,8 +226,6 @@ private static bool fieldNeedsQuotes(this ptr<Writer> _addr_w, @string field) {
             }
         }
     else
-
-
     } {
         if (strings.ContainsRune(field, w.Comma) || strings.ContainsAny(field, "\"\r\n")) {
             return true;
@@ -244,7 +233,6 @@ private static bool fieldNeedsQuotes(this ptr<Writer> _addr_w, @string field) {
     }
     var (r1, _) = utf8.DecodeRuneInString(field);
     return unicode.IsSpace(r1);
-
 }
 
 } // end csv_package

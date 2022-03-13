@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:30 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:25:53 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\decl.go
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using System;
 
 public static partial class types2_package {
 
@@ -26,10 +25,8 @@ private static void recordAltDecl(this ptr<error_> _addr_err, Object obj) {
             // the first declaration seen may not be textually
             // earlier in the source.
             err.errorf(pos, "other declaration of %s", obj.Name());
-
         }
     }
-
 }
 
 private static void declare(this ptr<Checker> _addr_check, ptr<Scope> _addr_scope, ptr<syntax.Name> _addr_id, Object obj, syntax.Pos pos) {
@@ -54,9 +51,7 @@ private static void declare(this ptr<Checker> _addr_check, ptr<Scope> _addr_scop
             }
 
         }
-
         obj.setScopePos(pos);
-
     }
     if (id != null) {
         check.recordDef(id, obj);
@@ -71,9 +66,7 @@ private static @string pathString(slice<Object> path) {
             s += "->";
         }
         s += p.Name();
-
     }    return s;
-
 }
 
 // objDecl type-checks the declaration of obj in its respective (file) context.
@@ -92,7 +85,6 @@ private static void objDecl(this ptr<Checker> _addr_check, Object obj, ptr<Named
             check.indent--;
             check.trace(obj.Pos(), "=> %s (%s)", obj, obj.color());
         }());
-
     }
     if (obj.color() == white && obj.Type() != null) {
         obj.setColor(black);
@@ -141,9 +133,7 @@ private static void objDecl(this ptr<Checker> _addr_check, Object obj, ptr<Named
                     // if we have a cycle for a defined
                     // (*Named) type)
                     obj.typ = Typ[Invalid];
-
                 }
-
                 break;
             case ptr<Func> obj:
                 if (check.cycle(obj)) { 
@@ -154,7 +144,6 @@ private static void objDecl(this ptr<Checker> _addr_check, Object obj, ptr<Named
                     // signature which makes it impossible to
                     // initialize a variable with the function.
                 }
-
                 break;
             default:
             {
@@ -205,7 +194,6 @@ private static void objDecl(this ptr<Checker> _addr_check, Object obj, ptr<Named
             break;
         }
     }
-
 });
 
 // cycle checks if the cycle starting with obj is valid and
@@ -255,11 +243,9 @@ private static bool cycle(this ptr<Checker> _addr_check, Object obj) => func((de
                         }
 
                     }
-
                     if (!alias) {
                         ndef++;
                     }
-
                     break;
                 case ptr<Func> obj:
                     break;
@@ -270,7 +256,6 @@ private static bool cycle(this ptr<Checker> _addr_check, Object obj) => func((de
                     break;
                 }
             }
-
         }
         obj = obj__prev1;
     }
@@ -293,7 +278,6 @@ private static bool cycle(this ptr<Checker> _addr_check, Object obj) => func((de
     check.cycleError(cycle);
 
     return true;
-
 });
 
 private partial struct typeInfo { // : nuint
@@ -342,7 +326,6 @@ private static typeInfo validType(this ptr<Checker> _addr_check, Type typ, slice
                 return invalid;
             }
 
-
             if (t.info == unknown) 
                 t.info = marked;
                 t.info = check.validType(t.fromRHS, append(path, t.obj)); // only types of current package added to path
@@ -368,7 +351,6 @@ private static typeInfo validType(this ptr<Checker> _addr_check, Type typ, slice
     }
 
     return valid;
-
 });
 
 // cycleError reports a declaration cycle starting with
@@ -396,10 +378,8 @@ private static void cycleError(this ptr<Checker> _addr_check, slice<Object> cycl
             i = 0;
         }
         obj = cycle[i];
-
     }    err.errorf(obj, "%s", obj.Name());
     check.report(_addr_err);
-
 }
 
 // firstInSrc reports the index of the object with the "smallest"
@@ -412,7 +392,6 @@ private static nint firstInSrc(slice<Object> path) {
             (fst, pos) = (i + 1, t.Pos());
         }
     }    return fst;
-
 }
 
 private static void constDecl(this ptr<Checker> _addr_check, ptr<Const> _addr_obj, syntax.Expr typ, syntax.Expr init, bool inherited) => func((defer, _, _) => {
@@ -441,13 +420,10 @@ private static void constDecl(this ptr<Checker> _addr_check, ptr<Const> _addr_ob
             if (under(t) != Typ[Invalid]) {
                 check.errorf(typ, "invalid constant type %s", t);
             }
-
             obj.typ = Typ[Invalid];
             return ;
-
         }
         obj.typ = t;
-
     }
     ref operand x = ref heap(out ptr<operand> _addr_x);
     if (init != null) {
@@ -459,13 +435,10 @@ private static void constDecl(this ptr<Checker> _addr_check, ptr<Const> _addr_ob
             // init expression evaluation since that is all we have
             // (see issues #42991, #42992).
             check.errpos = obj.pos;
-
         }
         check.expr(_addr_x, init);
-
     }
     check.initConst(obj, _addr_x);
-
 });
 
 private static void varDecl(this ptr<Checker> _addr_check, ptr<Var> _addr_obj, slice<ptr<Var>> lhs, syntax.Expr typ, syntax.Expr init) => func((defer, panic, _) => {
@@ -511,10 +484,8 @@ private static void varDecl(this ptr<Checker> _addr_check, ptr<Var> _addr_obj, s
         if (typ == null) { 
             // error reported before by arityMatch
             obj.typ = Typ[Invalid];
-
         }
         return ;
-
     }
     if (lhs == null || len(lhs) == 1) {
         assert(lhs == null || lhs[0] == obj);
@@ -557,7 +528,6 @@ private static void varDecl(this ptr<Checker> _addr_check, ptr<Var> _addr_obj, s
         }
     }
     check.initVars(lhs, new slice<syntax.Expr>(new syntax.Expr[] { init }), nopos);
-
 });
 
 // under returns the expanded underlying type of n0; possibly by following
@@ -603,14 +573,11 @@ private static Type under(this ptr<Named> _addr_n0) => func((_, panic, _) => {
                 if (n0.check != null) {
                     n0.check.cycleError(path[(int)i..]);
                 }
-
                 u = Typ[Invalid];
                 break;
-
             }
 
         }
-
     }
 
     {
@@ -625,15 +592,12 @@ private static Type under(this ptr<Named> _addr_n0) => func((_, panic, _) => {
             if (n0.check != null && n.obj.pkg != n0.check.pkg) {
                 panic("internal error: imported type with unresolved underlying type");
             }
-
             n.underlying = u;
-
         }
         n = n__prev1;
     }
 
     return u;
-
 });
 
 private static void setUnderlying(this ptr<Named> _addr_n, Type typ) {
@@ -662,7 +626,6 @@ private static void typeDecl(this ptr<Checker> _addr_check, ptr<TypeName> _addr_
         // Complain and continue as regular type definition.
         check.error(tdecl, "generic type cannot be alias");
         alias = false;
-
     }
     if (alias) { 
         // type alias declaration
@@ -674,12 +637,9 @@ private static void typeDecl(this ptr<Checker> _addr_check, ptr<TypeName> _addr_
  {
                 check.error(tdecl, "type aliases requires go1.9 or later");
             }
-
         }
         obj.typ = Typ[Invalid];
         obj.typ = check.anyType(tdecl.Type);
-
-
     }
     else
  { 
@@ -711,7 +671,6 @@ private static void typeDecl(this ptr<Checker> _addr_check, ptr<TypeName> _addr_
         // TODO(gri) Investigate if we can just use named.fromRHS here
         //           and rely on lazy computation of the underlying type.
         named.underlying = under(named);
-
     }
 });
 
@@ -794,21 +753,16 @@ private static slice<ptr<TypeName>> collectTypeParams(this ptr<Checker> _addr_ch
                         tparams[i].typ._<ptr<TypeParam>>().bound = bound;
                         i++;
                     }
-
-
                 }
                 else if (bound != Typ[Invalid]) {
                     check.errorf(f.Type, "%s is not an interface", bound);
                 }
 
-
             }
-
         }
     }
 
     return ;
-
 }
 
 private static slice<ptr<TypeName>> declareTypeParam(this ptr<Checker> _addr_check, slice<ptr<TypeName>> tparams, ptr<syntax.Name> _addr_name) {
@@ -824,7 +778,6 @@ private static slice<ptr<TypeName>> declareTypeParam(this ptr<Checker> _addr_che
         check.trace(name.Pos(), "type param = %v", tparams[len(tparams) - 1]);
     }
     return tparams;
-
 }
 
 private static void collectMethods(this ptr<Checker> _addr_check, ptr<TypeName> _addr_obj) {
@@ -906,7 +859,6 @@ private static void collectMethods(this ptr<Checker> _addr_check, ptr<TypeName> 
  {
                                 err.errorf(m.pos, "method %s already declared for %s", m.name, obj);
                             }
-
                             break;
                         default:
                         {
@@ -917,16 +869,13 @@ private static void collectMethods(this ptr<Checker> _addr_check, ptr<TypeName> 
                     err.recordAltDecl(alt);
                     check.report(_addr_err);
                     continue;
-
                 }
 
             }
 
-
             if (base != null) {
                 @base.methods = append(@base.methods, m);
             }
-
         }
         m = m__prev1;
     }
@@ -983,7 +932,6 @@ private static void declStmt(this ptr<Checker> _addr_check, slice<syntax.Decl> l
 
         }
 
-
         switch (decl.type()) {
             case ptr<syntax.ConstDecl> s:
                 var top = len(check.delayed); 
@@ -993,7 +941,6 @@ private static void declStmt(this ptr<Checker> _addr_check, slice<syntax.Decl> l
                     first = index;
                     last = null;
                 }
-
                 var iota = constant.MakeInt64(int64(index - first)); 
 
                 // determine which initialization expressions to use
@@ -1116,11 +1063,8 @@ private static void declStmt(this ptr<Checker> _addr_check, slice<syntax.Decl> l
                                     obj = obj__prev3;
                                 }
                             }
-
                             break;
-
                         }
-
                     } 
 
                     // If we have no type, we must have values.
@@ -1148,7 +1092,6 @@ private static void declStmt(this ptr<Checker> _addr_check, slice<syntax.Decl> l
                         name = __name; 
                         // see constant declarations
                         check.declare(check.scope, name, lhs0[i], scopePos);
-
                     }
 
                     i = i__prev2;
@@ -1174,7 +1117,6 @@ private static void declStmt(this ptr<Checker> _addr_check, slice<syntax.Decl> l
                 break;
             }
         }
-
     }
 }
 

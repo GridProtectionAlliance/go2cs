@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:48:30 UTC
+//     Generated on 2022 March 13 05:59:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace @internal
 {
     public static partial class typecheck_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct iexporter
         {
             // Constructors
@@ -83,7 +83,7 @@ namespace @internal
             public static implicit operator iexporter(NilType nil) => default(iexporter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static iexporter iexporter_cast(dynamic value)
         {
             return new iexporter(value.allPkgs, value.declTodo, value.strings, value.stringIndex, value.data0, value.declIndex, value.inlineIndex, value.typIndex);

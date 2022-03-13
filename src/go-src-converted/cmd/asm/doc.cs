@@ -53,7 +53,9 @@ run through a simplified C preprocessor that implements #include,
 
 For more information, see https://golang.org/doc/asm.
 */
-// package main -- go2cs converted at 2022 March 06 22:43:01 UTC
+
+// package main -- go2cs converted at 2022 March 13 05:54:11 UTC
 // Original source: C:\Program Files\Go\src\cmd\asm\doc.go
+namespace go;
 
 } // end main_package

@@ -2,63 +2,61 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:02 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:54 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\atan.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    /*
-        Floating-point arctangent.
-    */
+/*
+    Floating-point arctangent.
+*/
 
-    // The original C code, the long comment, and the constants below were
-    // from http://netlib.sandia.gov/cephes/cmath/atan.c, available from
-    // http://www.netlib.org/cephes/cmath.tgz.
-    // The go code is a version of the original C.
-    //
-    // atan.c
-    // Inverse circular tangent (arctangent)
-    //
-    // SYNOPSIS:
-    // double x, y, atan();
-    // y = atan( x );
-    //
-    // DESCRIPTION:
-    // Returns radian angle between -pi/2 and +pi/2 whose tangent is x.
-    //
-    // Range reduction is from three intervals into the interval from zero to 0.66.
-    // The approximant uses a rational function of degree 4/5 of the form
-    // x + x**3 P(x)/Q(x).
-    //
-    // ACCURACY:
-    //                      Relative error:
-    // arithmetic   domain    # trials  peak     rms
-    //    DEC       -10, 10   50000     2.4e-17  8.3e-18
-    //    IEEE      -10, 10   10^6      1.8e-16  5.0e-17
-    //
-    // Cephes Math Library Release 2.8:  June, 2000
-    // Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
-    //
-    // The readme file at http://netlib.sandia.gov/cephes/ says:
-    //    Some software in this archive may be from the book _Methods and
-    // Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
-    // International, 1989) or from the Cephes Mathematical Library, a
-    // commercial product. In either event, it is copyrighted by the author.
-    // What you see here may be used freely but it comes with no support or
-    // guarantee.
-    //
-    //   The two known misprints in the book are repaired here in the
-    // source listings for the gamma function and the incomplete beta
-    // integral.
-    //
-    //   Stephen L. Moshier
-    //   moshier@na-net.ornl.gov
+// The original C code, the long comment, and the constants below were
+// from http://netlib.sandia.gov/cephes/cmath/atan.c, available from
+// http://www.netlib.org/cephes/cmath.tgz.
+// The go code is a version of the original C.
+//
+// atan.c
+// Inverse circular tangent (arctangent)
+//
+// SYNOPSIS:
+// double x, y, atan();
+// y = atan( x );
+//
+// DESCRIPTION:
+// Returns radian angle between -pi/2 and +pi/2 whose tangent is x.
+//
+// Range reduction is from three intervals into the interval from zero to 0.66.
+// The approximant uses a rational function of degree 4/5 of the form
+// x + x**3 P(x)/Q(x).
+//
+// ACCURACY:
+//                      Relative error:
+// arithmetic   domain    # trials  peak     rms
+//    DEC       -10, 10   50000     2.4e-17  8.3e-18
+//    IEEE      -10, 10   10^6      1.8e-16  5.0e-17
+//
+// Cephes Math Library Release 2.8:  June, 2000
+// Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
+//
+// The readme file at http://netlib.sandia.gov/cephes/ says:
+//    Some software in this archive may be from the book _Methods and
+// Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
+// International, 1989) or from the Cephes Mathematical Library, a
+// commercial product. In either event, it is copyrighted by the author.
+// What you see here may be used freely but it comes with no support or
+// guarantee.
+//
+//   The two known misprints in the book are repaired here in the
+// source listings for the gamma function and the incomplete beta
+// integral.
+//
+//   Stephen L. Moshier
+//   moshier@na-net.ornl.gov
 
-    // xatan evaluates a series valid in the range [0, 0.66].
+// xatan evaluates a series valid in the range [0, 0.66].
 private static double xatan(double x) {
     const float P0 = -8.750608600031904122785e-01F;
     const float P1 = -1.615753718733365076637e+01F;
@@ -88,7 +86,6 @@ private static double satan(double x) {
         return Pi / 2 - xatan(1 / x) + Morebits;
     }
     return Pi / 4 + xatan((x - 1) / (x + 1)) + 0.5F * Morebits;
-
 }
 
 // Atan returns the arctangent, in radians, of x.
@@ -101,7 +98,6 @@ public static double Atan(double x) {
         return archAtan(x);
     }
     return atan(x);
-
 }
 
 private static double atan(double x) {
@@ -112,7 +108,6 @@ private static double atan(double x) {
         return satan(x);
     }
     return -satan(-x);
-
 }
 
 } // end math_package

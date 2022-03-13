@@ -7,16 +7,14 @@
 // See malloc.go for overview.
 // See also mksizeclasses.go for how we decide what size classes to use.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:08 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:57 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\msize.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // Returns size of the memory block that mallocgc will allocate if you ask for the size.
+// Returns size of the memory block that mallocgc will allocate if you ask for the size.
 private static System.UIntPtr roundupsize(System.UIntPtr size) {
     if (size < _MaxSmallSize) {
         if (size <= smallSizeMax - 8) {
@@ -31,7 +29,6 @@ private static System.UIntPtr roundupsize(System.UIntPtr size) {
         return size;
     }
     return alignUp(size, _PageSize);
-
 }
 
 } // end runtime_package

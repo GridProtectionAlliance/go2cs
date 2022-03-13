@@ -6,20 +6,18 @@
 // +build linux
 // +build arm64 riscv64
 
-// package unix -- go2cs converted at 2022 March 06 22:12:56 UTC
+// package unix -- go2cs converted at 2022 March 13 05:27:49 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
 // Original source: C:\Program Files\Go\src\internal\syscall\unix\sysnum_linux_generic.go
-
-
 namespace go.@internal.syscall;
 
 public static partial class unix_package {
 
-    // This file is named "generic" because at a certain point Linux started
-    // standardizing on system call numbers across architectures. So far this
-    // means only arm64 and riscv64 use the standard numbers.
+// This file is named "generic" because at a certain point Linux started
+// standardizing on system call numbers across architectures. So far this
+// means only arm64 and riscv64 use the standard numbers.
+
 private static readonly System.UIntPtr getrandomTrap = 278;
 private static readonly System.UIntPtr copyFileRangeTrap = 285;
-
 
 } // end unix_package

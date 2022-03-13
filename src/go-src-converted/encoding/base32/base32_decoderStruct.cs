@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:54 UTC
+//     Generated on 2022 March 13 05:39:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace encoding
 {
     public static partial class base32_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct decoder
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace encoding
             public static implicit operator decoder(NilType nil) => default(decoder);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static decoder decoder_cast(dynamic value)
         {
             return new decoder(value.err, ref value.enc, value.r, value.end, value.buf, value.nbuf, value.@out, value.outbuf);

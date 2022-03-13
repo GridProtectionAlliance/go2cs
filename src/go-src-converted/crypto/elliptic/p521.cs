@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package elliptic -- go2cs converted at 2022 March 06 22:19:10 UTC
+// package elliptic -- go2cs converted at 2022 March 13 05:34:07 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Program Files\Go\src\crypto\elliptic\p521.go
-using fiat = go.crypto.elliptic.@internal.fiat_package;
-using big = go.math.big_package;
-
 namespace go.crypto;
+
+using fiat = crypto.elliptic.@internal.fiat_package;
+using big = math.big_package;
 
 public static partial class elliptic_package {
 
@@ -28,7 +28,6 @@ private static void initP521() {
     p521.Gx, _ = @new<big.Int>().SetString("c6858e06b70404e9cd9e3ecb662395b4429c648139053fb521f828af606b4d3dbaa14b5e77efe75928fe1dc127a2ffa8de3348b3c1856a429bf97e7e31c2e5bd66", 16);
     p521.Gy, _ = @new<big.Int>().SetString("11839296a789a3bc0045c8a5fb42c7d1bd998f54449579b446817afbd17273e662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd16650", 16);
     p521.BitSize = 521;
-
 }
 
 private static ptr<CurveParams> Params(this p521Curve curve) {
@@ -57,7 +56,6 @@ private static bool IsOnCurve(this p521Curve curve, ptr<big.Int> _addr_x, ptr<bi
     ptr<object> y2 = @new<fiat.P521Element>().Square(y1);
 
     return x3.Equal(y2) == 1;
-
 }
 
 private partial struct p521Point {
@@ -73,7 +71,6 @@ private static ptr<big.Int> fiatP521ToBigInt(ptr<fiat.P521Element> _addr_x) {
     foreach (var (i) in xBytes[..(int)len(xBytes) / 2]) {
         (xBytes[i], xBytes[len(xBytes) - i - 1]) = (xBytes[len(xBytes) - i - 1], xBytes[i]);
     }    return @new<big.Int>().SetBytes(xBytes);
-
 }
 
 // affineFromJacobian brings a point in Jacobian coordinates back to affine
@@ -95,7 +92,6 @@ private static (ptr<big.Int>, ptr<big.Int>) affineFromJacobian(this p521Curve cu
     ptr<fiat.P521Element> yy = @new<fiat.P521Element>().Mul(p.y, zinvsq);
 
     return (_addr_fiatP521ToBigInt(xx)!, _addr_fiatP521ToBigInt(yy)!);
-
 }
 
 private static ptr<fiat.P521Element> bigIntToFiatP521(ptr<big.Int> _addr_x) => func((_, panic, _) => {
@@ -109,10 +105,8 @@ private static ptr<fiat.P521Element> bigIntToFiatP521(ptr<big.Int> _addr_x) => f
         // The input is reduced modulo P and encoded in a fixed size bytes
         // slice, this should be impossible.
         panic("internal error: bigIntToFiatP521");
-
     }
     return _addr_x1!;
-
 });
 
 // jacobianFromAffine converts (x, y) affine coordinates into (x, y, z) Jacobian
@@ -128,7 +122,6 @@ private static ptr<p521Point> jacobianFromAffine(this p521Curve curve, ptr<big.I
         return addr(new p521Point(x:new(fiat.P521Element),y:new(fiat.P521Element),z:new(fiat.P521Element),));
     }
     return addr(new p521Point(x:bigIntToFiatP521(x),y:bigIntToFiatP521(y),z:new(fiat.P521Element).One(),));
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) Add(this p521Curve curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1, ptr<big.Int> _addr_x2, ptr<big.Int> _addr_y2) {
@@ -207,7 +200,6 @@ private static ptr<p521Point> addJacobian(this ptr<p521Point> _addr_q, ptr<p521P
     q.y.Set(y);
     q.z.Set(z);
     return _addr_q!;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) Double(this p521Curve curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1) {
@@ -261,7 +253,6 @@ private static ptr<p521Point> doubleJacobian(this ptr<p521Point> _addr_q, ptr<p5
     q.y.Sub(q.y, gamma);
 
     return _addr_q!;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this p521Curve curve, ptr<big.Int> _addr_Bx, ptr<big.Int> _addr_By, slice<byte> scalar) {
@@ -284,7 +275,6 @@ private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this p521Curve curve, ptr
             p.z.Select(t.z, p.z, int(bit));
         }
     }    return _addr_curve.affineFromJacobian(p)!;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this p521Curve curve, slice<byte> k) {

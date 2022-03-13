@@ -277,8 +277,10 @@ document for background: https://golang.org/doc/go1compat
 See "Gobs of data" for a design discussion of the gob wire format:
 https://blog.golang.org/gobs-of-data
 */
-// package gob -- go2cs converted at 2022 March 06 22:25:04 UTC
+
+// package gob -- go2cs converted at 2022 March 13 05:39:36 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Program Files\Go\src\encoding\gob\doc.go
+namespace go.encoding;
 
 } // end gob_package

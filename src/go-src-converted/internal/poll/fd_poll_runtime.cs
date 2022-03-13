@@ -5,21 +5,23 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || windows || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd windows solaris
 
-// package poll -- go2cs converted at 2022 March 06 22:13:02 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:51 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\fd_poll_runtime.go
-using errors = go.errors_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go.@internal;
+
+using errors = errors_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using time = time_package;
+using _@unsafe_ = @unsafe_package; // for go:linkname
+
+
+// runtimeNano returns the current value of the runtime clock in nanoseconds.
+//go:linkname runtimeNano runtime.nanotime
 
 public static partial class poll_package {
 
-    // runtimeNano returns the current value of the runtime clock in nanoseconds.
-    //go:linkname runtimeNano runtime.nanotime
 private static long runtimeNano();
 
 private static void runtime_pollServerInit();
@@ -49,7 +51,6 @@ private static error init(this ptr<pollDesc> _addr_pd, ptr<FD> _addr_fd) {
     }
     pd.runtimeCtx = ctx;
     return error.As(null!)!;
-
 }
 
 private static void close(this ptr<pollDesc> _addr_pd) {
@@ -60,7 +61,6 @@ private static void close(this ptr<pollDesc> _addr_pd) {
     }
     runtime_pollClose(pd.runtimeCtx);
     pd.runtimeCtx = 0;
-
 }
 
 // Evict evicts fd from the pending list, unblocking any I/O running on fd.
@@ -71,7 +71,6 @@ private static void evict(this ptr<pollDesc> _addr_pd) {
         return ;
     }
     runtime_pollUnblock(pd.runtimeCtx);
-
 }
 
 private static error prepare(this ptr<pollDesc> _addr_pd, nint mode, bool isFile) {
@@ -82,7 +81,6 @@ private static error prepare(this ptr<pollDesc> _addr_pd, nint mode, bool isFile
     }
     var res = runtime_pollReset(pd.runtimeCtx, mode);
     return error.As(convertErr(res, isFile))!;
-
 }
 
 private static error prepareRead(this ptr<pollDesc> _addr_pd, bool isFile) {
@@ -105,7 +103,6 @@ private static error wait(this ptr<pollDesc> _addr_pd, nint mode, bool isFile) {
     }
     var res = runtime_pollWait(pd.runtimeCtx, mode);
     return error.As(convertErr(res, isFile))!;
-
 }
 
 private static error waitRead(this ptr<pollDesc> _addr_pd, bool isFile) {
@@ -127,7 +124,6 @@ private static void waitCanceled(this ptr<pollDesc> _addr_pd, nint mode) {
         return ;
     }
     runtime_pollWaitCanceled(pd.runtimeCtx, mode);
-
 }
 
 private static bool pollable(this ptr<pollDesc> _addr_pd) {
@@ -143,7 +139,6 @@ private static readonly nint pollErrClosing = 1;
 private static readonly nint pollErrTimeout = 2;
 private static readonly nint pollErrNotPollable = 3;
 
-
 private static error convertErr(nint res, bool isFile) => func((_, panic, _) => {
 
     if (res == pollNoError) 
@@ -156,7 +151,6 @@ private static error convertErr(nint res, bool isFile) => func((_, panic, _) => 
         return error.As(ErrNotPollable)!;
         println("unreachable: ", res);
     panic("unreachable");
-
 });
 
 // SetDeadline sets the read and write deadlines associated with fd.
@@ -197,14 +191,12 @@ private static error setDeadlineImpl(ptr<FD> _addr_fd, time.Time t, nint mode) =
             return error.As(err)!;
         }
     }
-
     defer(fd.decref());
     if (fd.pd.runtimeCtx == 0) {>>MARKER:FUNCTION_runtimeNano_BLOCK_PREFIX<<
         return error.As(ErrNoDeadline)!;
     }
     runtime_pollSetDeadline(fd.pd.runtimeCtx, d, mode);
     return error.As(null!)!;
-
 });
 
 // IsPollDescriptor reports whether fd is the descriptor being used by the poller.

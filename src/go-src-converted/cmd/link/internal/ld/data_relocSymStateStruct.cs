@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:55 UTC
+//     Generated on 2022 March 13 06:33:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -40,7 +40,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct relocSymState
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace @internal
             public static implicit operator relocSymState(NilType nil) => default(relocSymState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static relocSymState relocSymState_cast(dynamic value)
         {
             return new relocSymState(ref value.target, ref value.ldr, ref value.err, ref value.syms);

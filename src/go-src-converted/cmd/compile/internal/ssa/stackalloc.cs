@@ -4,15 +4,15 @@
 
 // TODO: live at start of block instead?
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:47 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:04 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\stackalloc.go
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
 
 public static partial class ssa_package {
 
@@ -45,7 +45,6 @@ private static ptr<stackAllocState> newStackAllocState(ptr<Func> _addr_f) {
         f.fe.Fatalf(src.NoXPos, "newStackAllocState called without previous free");
     }
     return _addr_s!;
-
 }
 
 private static void putStackAllocState(ptr<stackAllocState> _addr_s) {
@@ -133,7 +132,6 @@ private static slice<slice<ID>> @stackalloc(ptr<Func> _addr_f, slice<slice<ID>> 
         f.LogStat("stack_alloc_stats", s.nArgSlot, "arg_slots", s.nNotNeed, "slot_not_needed", s.nNamedSlot, "named_slots", s.nAuto, "auto_slots", s.nReuse, "reused_slots", s.nSelfInterfere, "self_interfering");
     }
     return s.live;
-
 });
 
 private static void init(this ptr<stackAllocState> _addr_s, ptr<Func> _addr_f, slice<slice<ID>> spillLive) {
@@ -154,7 +152,6 @@ private static void init(this ptr<stackAllocState> _addr_s, ptr<Func> _addr_f, s
             s.values = make_slice<stackValState>(n);
         }
     }
-
     foreach (var (_, b) in f.Blocks) {
         foreach (var (_, v) in b.Values) {
             s.values[v.ID].typ = v.Type;
@@ -171,7 +168,6 @@ private static void init(this ptr<stackAllocState> _addr_s, ptr<Func> _addr_f, s
 
     // Build interference graph among values needing a slot.
     s.buildInterferenceGraph();
-
 }
 
 private static void @stackalloc(this ptr<stackAllocState> _addr_s) {
@@ -197,7 +193,6 @@ private static void @stackalloc(this ptr<stackAllocState> _addr_s) {
         n = n__prev1;
 
     }
-
     var names = s.names;
     LocalSlot empty = new LocalSlot();
     {
@@ -221,25 +216,20 @@ private static void @stackalloc(this ptr<stackAllocState> _addr_s) {
                             }
                             continue;
                         }
-
                     }
                     else if (name.N.Class == ir.PPARAM && v.Op != OpArg) { 
                         // PPARAM's only bind to OpArg
                         if (f.pass.debug > stackDebug) {
                             fmt.Printf("stackalloc PPARAM name %s skipping non-Arg %s\n", name, v);
                         }
-
                         continue;
-
                     }
-
                     if (names[v.ID] == empty) {
                         if (f.pass.debug > stackDebug) {
                             fmt.Printf("stackalloc value %s to name %s\n", v, name.val);
                         }
                         names[v.ID] = name.val;
                     }
-
                 }
 
                 v = v__prev2;
@@ -310,7 +300,6 @@ private static void @stackalloc(this ptr<stackAllocState> _addr_s) {
         n = n__prev1;
 
     }
-
     {
         var i__prev1 = i;
 
@@ -338,7 +327,6 @@ private static void @stackalloc(this ptr<stackAllocState> _addr_s) {
         n = n__prev1;
 
     }
-
     foreach (var (_, b) in f.Blocks) {
         {
             var v__prev2 = v;
@@ -364,7 +352,6 @@ private static void @stackalloc(this ptr<stackAllocState> _addr_s) {
  {
                     name = names[v.ID];
                 }
-
                 if (name.N != null && v.Type.Compare(name.Type) == types.CMPeq) {
                     foreach (var (_, id) in s.interfere[v.ID]) {
                         var h = f.getHome(id);
@@ -373,20 +360,15 @@ private static void @stackalloc(this ptr<stackAllocState> _addr_s) {
                             // It is rare, but it can happen.
                             s.nSelfInterfere++;
                             goto noname;
-
                         }
-
                     }
                     if (f.pass.debug > stackDebug) {
                         fmt.Printf("stackalloc %s to %s\n", v, name);
                     }
-
                     s.nNamedSlot++;
                     f.setHome(v, name);
                     continue;
-
                 }
-
 noname: 
                 // Mark all positions in locs used by interfering values.
                 var locs = locations[v.Type]; 
@@ -428,10 +410,8 @@ noname:
                 if (f.pass.debug > stackDebug) {
                     fmt.Printf("stackalloc %s to %s\n", v, loc);
                 }
-
                 f.setHome(v, loc);
                 slots[v.ID] = i;
-
             }
 
             v = v__prev2;
@@ -484,11 +464,8 @@ private static void computeLive(this ptr<stackAllocState> _addr_s, slice<slice<I
                             if (!v.Type.IsMemory() && !v.Type.IsVoid()) {
                                 phis = append(phis, v);
                             }
-
                             continue;
-
                         }
-
                         {
                             var a__prev4 = a;
 
@@ -538,11 +515,9 @@ private static void computeLive(this ptr<stackAllocState> _addr_s, slice<slice<I
                                     if (spill != null) { 
                                         //TODO: remove?  Subsumed by SpillUse?
                                         t.add(spill.ID);
-
                                     }
 
                                 }
-
                             }
 
                             v = v__prev4;
@@ -554,7 +529,6 @@ private static void computeLive(this ptr<stackAllocState> _addr_s, slice<slice<I
                         // grow p's live set
                         s.live[p.ID] = append(s.live[p.ID][..(int)0], t.contents());
                         changed = true;
-
                     }
 
                     i = i__prev3;
@@ -589,7 +563,6 @@ private static Location getHome(this ptr<Func> _addr_f, ID vid) {
         return null;
     }
     return f.RegAlloc[vid];
-
 }
 
 private static void setHome(this ptr<Func> _addr_f, ptr<Value> _addr_v, Location loc) {
@@ -617,7 +590,6 @@ private static void buildInterferenceGraph(this ptr<stackAllocState> _addr_s) =>
             s.interfere = make_slice<slice<ID>>(n);
         }
     }
-
     var live = f.newSparseSet(f.NumValues());
     defer(f.retSparseSet(live));
     foreach (var (_, b) in f.Blocks) { 
@@ -639,11 +611,8 @@ private static void buildInterferenceGraph(this ptr<stackAllocState> _addr_s) =>
                             s.interfere[v.ID] = append(s.interfere[v.ID], id);
                             s.interfere[id] = append(s.interfere[id], v.ID);
                         }
-
                     }
-
                 }
-
                 foreach (var (_, a) in v.Args) {
                     if (s.values[a.ID].needSlot) {
                         live.add(a.ID);
@@ -659,15 +628,12 @@ private static void buildInterferenceGraph(this ptr<stackAllocState> _addr_s) =>
 
                     // TODO(register args) this is apparently not wrong for register args -- is it necessary?
                     live.add(v.ID);
-
                 }
-
             }
 
 
             i = i__prev2;
         }
-
     }    if (f.pass.debug > stackDebug) {
         {
             var i__prev1 = i;

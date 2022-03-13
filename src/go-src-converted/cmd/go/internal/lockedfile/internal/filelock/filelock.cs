@@ -5,20 +5,23 @@
 // Package filelock provides a platform-independent API for advisory file
 // locking. Calls to functions in this package on platforms that do not support
 // advisory locks will return errors for which IsNotSupported returns true.
-// package filelock -- go2cs converted at 2022 March 06 23:16:59 UTC
+
+// package filelock -- go2cs converted at 2022 March 13 06:30:18 UTC
 // import "cmd/go/internal/lockedfile/internal/filelock" ==> using filelock = go.cmd.go.@internal.lockedfile.@internal.filelock_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\lockedfile\internal\filelock\filelock.go
-using errors = go.errors_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-
 namespace go.cmd.go.@internal.lockedfile.@internal;
+
+using errors = errors_package;
+using fs = io.fs_package;
+using os = os_package;
+
+
+// A File provides the minimal set of methods required to lock an open file.
+// File implementations must be usable as map keys.
+// The usual implementation is *os.File.
 
 public static partial class filelock_package {
 
-    // A File provides the minimal set of methods required to lock an open file.
-    // File implementations must be usable as map keys.
-    // The usual implementation is *os.File.
 public partial interface File {
     (fs.FileInfo, error) Name(); // Fd returns a valid file descriptor.
 // (If the File is an *os.File, it must not be closed.)
@@ -71,8 +74,7 @@ private static @string String(this lockType lt) {
         return "Lock";
     else 
         return "Unlock";
-    
-}
+    }
 
 // IsNotSupported returns a boolean indicating whether the error is known to
 // report that a function is not supported (possibly for a specific input).
@@ -97,7 +99,6 @@ private static error underlyingError(error err) {
             break;
     }
     return error.As(err)!;
-
 }
 
 } // end filelock_package

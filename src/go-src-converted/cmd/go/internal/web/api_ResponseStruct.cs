@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:30 UTC
+//     Generated on 2022 March 13 06:30:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class web_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Response
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace @internal
             public static implicit operator Response(NilType nil) => default(Response);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Response Response_cast(dynamic value)
         {
             return new Response(value.URL, value.Status, value.StatusCode, value.Header, value.Body, value.fileErr, value.errorDetail);

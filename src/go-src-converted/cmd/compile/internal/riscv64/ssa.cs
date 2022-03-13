@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package riscv64 -- go2cs converted at 2022 March 06 23:10:57 UTC
+// package riscv64 -- go2cs converted at 2022 March 13 06:24:14 UTC
 // import "cmd/compile/internal/riscv64" ==> using riscv64 = go.cmd.compile.@internal.riscv64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\riscv64\ssa.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using riscv = go.cmd.@internal.obj.riscv_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using riscv = cmd.@internal.obj.riscv_package;
+
+
+// ssaRegToReg maps ssa register numbers to obj register numbers.
 
 public static partial class riscv64_package {
 
-    // ssaRegToReg maps ssa register numbers to obj register numbers.
 private static short ssaRegToReg = new slice<short>(new short[] { riscv.REG_X0, riscv.REG_X2, riscv.REG_X3, riscv.REG_X4, riscv.REG_X5, riscv.REG_X6, riscv.REG_X7, riscv.REG_X8, riscv.REG_X9, riscv.REG_X10, riscv.REG_X11, riscv.REG_X12, riscv.REG_X13, riscv.REG_X14, riscv.REG_X15, riscv.REG_X16, riscv.REG_X17, riscv.REG_X18, riscv.REG_X19, riscv.REG_X20, riscv.REG_X21, riscv.REG_X22, riscv.REG_X23, riscv.REG_X24, riscv.REG_X25, riscv.REG_X26, riscv.REG_X27, riscv.REG_X28, riscv.REG_X29, riscv.REG_X30, riscv.REG_X31, riscv.REG_F0, riscv.REG_F1, riscv.REG_F2, riscv.REG_F3, riscv.REG_F4, riscv.REG_F5, riscv.REG_F6, riscv.REG_F7, riscv.REG_F8, riscv.REG_F9, riscv.REG_F10, riscv.REG_F11, riscv.REG_F12, riscv.REG_F13, riscv.REG_F14, riscv.REG_F15, riscv.REG_F16, riscv.REG_F17, riscv.REG_F18, riscv.REG_F19, riscv.REG_F20, riscv.REG_F21, riscv.REG_F22, riscv.REG_F23, riscv.REG_F24, riscv.REG_F25, riscv.REG_F26, riscv.REG_F27, riscv.REG_F28, riscv.REG_F29, riscv.REG_F30, riscv.REG_F31, 0 });
 
 private static obj.As loadByType(ptr<types.Type> _addr_t) {
@@ -38,7 +40,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) {
                 return 0;
                 break;
         }
-
     }
     switch (width) {
         case 1: 
@@ -76,7 +77,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) {
             return 0;
             break;
     }
-
 }
 
 // storeByType returns the store instruction of the given type.
@@ -98,7 +98,6 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) {
                 return 0;
                 break;
         }
-
     }
     switch (width) {
         case 1: 
@@ -118,7 +117,6 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) {
             return 0;
             break;
     }
-
 }
 
 // largestMove returns the largest move instruction possible and its size,
@@ -143,8 +141,7 @@ private static (obj.As, long) largestMove(long alignment) {
         return (riscv.AMOVH, 2);
     else 
         return (riscv.AMOVB, 1);
-    
-}
+    }
 
 // markMoves marks any MOVXconst ops that need to avoid clobbering flags.
 // RISC-V has no flags, so this is a no-op.
@@ -288,7 +285,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             }
 
         }
-
     else if (v.Op == ssa.OpRISCV64MOVBload || v.Op == ssa.OpRISCV64MOVHload || v.Op == ssa.OpRISCV64MOVWload || v.Op == ssa.OpRISCV64MOVDload || v.Op == ssa.OpRISCV64MOVBUload || v.Op == ssa.OpRISCV64MOVHUload || v.Op == ssa.OpRISCV64MOVWUload || v.Op == ssa.OpRISCV64FMOVWload || v.Op == ssa.OpRISCV64FMOVDload) 
         p = s.Prog(v.Op.Asm());
         p.From.Type = obj.TYPE_MEM;
@@ -536,7 +532,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         p.To.Reg = riscv.REG_ZERO;
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Pos == 1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
     else if (v.Op == ssa.OpRISCV64LoweredGetClosurePtr) 
         // Closure pointer is S4 (riscv.REG_CTXT).
@@ -567,8 +562,7 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         p.To.Offset = v.AuxInt;
     else if (v.Op == ssa.OpClobber || v.Op == ssa.OpClobberReg)     else 
         v.Fatalf("Unhandled op %v", v.Op);
-    
-}
+    }
 
 private static array<obj.As> blockBranch = new array<obj.As>(InitKeyedValues<obj.As>((ssa.BlockRISCV64BEQ, riscv.ABEQ), (ssa.BlockRISCV64BEQZ, riscv.ABEQZ), (ssa.BlockRISCV64BGE, riscv.ABGE), (ssa.BlockRISCV64BGEU, riscv.ABGEU), (ssa.BlockRISCV64BGEZ, riscv.ABGEZ), (ssa.BlockRISCV64BGTZ, riscv.ABGTZ), (ssa.BlockRISCV64BLEZ, riscv.ABLEZ), (ssa.BlockRISCV64BLT, riscv.ABLT), (ssa.BlockRISCV64BLTU, riscv.ABLTU), (ssa.BlockRISCV64BLTZ, riscv.ABLTZ), (ssa.BlockRISCV64BNE, riscv.ABNE), (ssa.BlockRISCV64BNEZ, riscv.ABNEZ)));
 
@@ -629,7 +623,6 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
                 p = s.Br(invAs, b.Succs[1].Block());
                 s.Br(obj.AJMP, b.Succs[0].Block());
             }
-
                 p.From.Type = obj.TYPE_REG;
 
         if (b.Kind == ssa.BlockRISCV64BEQ || b.Kind == ssa.BlockRISCV64BNE || b.Kind == ssa.BlockRISCV64BLT || b.Kind == ssa.BlockRISCV64BGE || b.Kind == ssa.BlockRISCV64BLTU || b.Kind == ssa.BlockRISCV64BGEU) 
@@ -645,7 +638,6 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
             p.From.Reg = b.Controls[0].Reg();
             else 
         b.Fatalf("Unhandled block: %s", b.LongString());
-    
-}
+    }
 
 } // end riscv64_package

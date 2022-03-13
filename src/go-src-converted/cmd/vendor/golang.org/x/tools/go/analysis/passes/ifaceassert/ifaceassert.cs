@@ -4,19 +4,19 @@
 
 // Package ifaceassert defines an Analyzer that flags
 // impossible interface-interface type assertions.
-// package ifaceassert -- go2cs converted at 2022 March 06 23:34:36 UTC
+
+// package ifaceassert -- go2cs converted at 2022 March 13 06:41:53 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/ifaceassert" ==> using ifaceassert = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.ifaceassert_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\ifaceassert\ifaceassert.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class ifaceassert_package {
 
@@ -46,7 +46,6 @@ private static ptr<types.Func> assertableTo(types.Type v, types.Type t) {
     if (t == null || v == null) { 
         // not assertable to, but there is no missing method
         return _addr_null!;
-
     }
     ptr<types.Interface> (V, _) = v.Underlying()._<ptr<types.Interface>>();
     ptr<types.Interface> (T, _) = t.Underlying()._<ptr<types.Interface>>();
@@ -60,9 +59,7 @@ private static ptr<types.Func> assertableTo(types.Type v, types.Type t) {
             return _addr_f!;
         }
     }
-
     return _addr_null!;
-
 }
 
 private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
@@ -109,11 +106,9 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 }
 
             }
-
         }
     });
     return (null, error.As(null!)!);
-
 }
 
 } // end ifaceassert_package

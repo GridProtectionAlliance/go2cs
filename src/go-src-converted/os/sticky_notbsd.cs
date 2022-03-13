@@ -12,11 +12,9 @@
 // +build !openbsd
 // +build !solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:52 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:05 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\sticky_notbsd.go
-
-
 namespace go;
 
 public static partial class os_package {

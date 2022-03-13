@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:49 UTC
+//     Generated on 2022 March 13 05:25:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct sweepdata
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace go
             public static implicit operator sweepdata(NilType nil) => default(sweepdata);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static sweepdata sweepdata_cast(dynamic value)
         {
             return new sweepdata(value.@lock, ref value.g, value.parked, value.started, value.nbgsweep, value.npausesweep, value.centralIndex);

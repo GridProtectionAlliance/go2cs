@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package test -- go2cs converted at 2022 March 06 23:16:21 UTC
+// package test -- go2cs converted at 2022 March 13 06:29:51 UTC
 // import "cmd/go/internal/test" ==> using test = go.cmd.go.@internal.test_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\test\cover.go
-using @base = go.cmd.go.@internal.@base_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sync = go.sync_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sync = sync_package;
 
 public static partial class test_package {
 
@@ -38,7 +38,6 @@ private static void initCoverProfile() {
         @base.Fatalf("%v", err);
     }
     coverMerge.f = f;
-
 }
 
 // mergeCoverProfile merges file into the profile stored in testCoverProfile.
@@ -56,7 +55,6 @@ private static void mergeCoverProfile(io.Writer ew, @string file) => func((defer
     if (err != null) { 
         // Test did not create profile, which is OK.
         return ;
-
     }
     defer(r.Close());
 
@@ -85,7 +83,6 @@ private static void closeCoverProfile() {
             @base.Errorf("closing coverage profile: %v", err);
         }
     }
-
 }
 
 } // end test_package

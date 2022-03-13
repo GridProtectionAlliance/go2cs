@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:36 UTC
+//     Generated on 2022 March 13 06:36:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace @internal
 {
     public static partial class graph_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct DotNodeAttributes
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace @internal
             public static implicit operator DotNodeAttributes(NilType nil) => default(DotNodeAttributes);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static DotNodeAttributes DotNodeAttributes_cast(dynamic value)
         {
             return new DotNodeAttributes(value.Shape, value.Bold, value.Peripheries, value.URL, value.Formatter);

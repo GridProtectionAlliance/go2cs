@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:09 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:27 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\traceback_ancestors.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using System.Threading;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using System.Threading;
 
 public static partial class main_package {
 
@@ -52,7 +51,6 @@ private static void printStack() {
  {
                     next += len("\n\n");
                 }
-
                 if (strings.HasPrefix(tb[(int)pos..], "goroutine ")) {
                     var id = tb[(int)pos + len("goroutine ")..];
                     id = id[..(int)strings.IndexByte(id, ' ')];
@@ -61,20 +59,15 @@ private static void printStack() {
                         next = pos;
                     }
                 }
-
                 pos = next;
-
             }
 
 
             fmt.Print(tb);
             return ;
-
         }
         buf = make_slice<byte>(2 * len(buf));
-
     }
-
 }
 
 private static void recurseThenCallGo(channel<object> w, nint frames, nint goroutines, bool main) {
@@ -83,7 +76,6 @@ private static void recurseThenCallGo(channel<object> w, nint frames, nint gorou
         w.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
         w.Receive();
         return ;
-
     }
     if (goroutines == 0) { 
         // Record which goroutine this is so we can ignore it
@@ -94,10 +86,8 @@ private static void recurseThenCallGo(channel<object> w, nint frames, nint gorou
         }
         go_(() => recurseThenCallGo(w, frames - 1, numFrames, false));
         return ;
-
     }
     recurseThenCallGo(w, frames, goroutines - 1, main);
-
 }
 
 private static @string goroutineID() => func((_, panic, _) => {
@@ -111,7 +101,6 @@ private static @string goroutineID() => func((_, panic, _) => {
     buf = buf[(int)len(prefix)..];
     var n = bytes.IndexByte(buf, ' ');
     return string(buf[..(int)n]);
-
 });
 
 } // end main_package

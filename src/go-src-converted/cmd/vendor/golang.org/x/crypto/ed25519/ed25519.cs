@@ -16,23 +16,24 @@
 // representation includes a public key suffix to make multiple signing
 // operations with the same key more efficient. This package refers to the RFC
 // 8032 private key as the “seed”.
-// package ed25519 -- go2cs converted at 2022 March 06 23:25:42 UTC
+
+// package ed25519 -- go2cs converted at 2022 March 13 06:38:57 UTC
 // import "cmd/vendor/golang.org/x/crypto/ed25519" ==> using ed25519 = go.cmd.vendor.golang.org.x.crypto.ed25519_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\crypto\ed25519\ed25519.go
+namespace go.cmd.vendor.golang.org.x.crypto;
 // This code is a port of the public domain, “ref10” implementation of ed25519
 // from SUPERCOP.
 
-using bytes = go.bytes_package;
-using crypto = go.crypto_package;
-using cryptorand = go.crypto.rand_package;
-using sha512 = go.crypto.sha512_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
 
-using edwards25519 = go.golang.org.x.crypto.ed25519.@internal.edwards25519_package;
+using bytes = bytes_package;
+using crypto = crypto_package;
+using cryptorand = crypto.rand_package;
+using sha512 = crypto.sha512_package;
+using errors = errors_package;
+using io = io_package;
+using strconv = strconv_package;
 
-namespace go.cmd.vendor.golang.org.x.crypto;
+using edwards25519 = golang.org.x.crypto.ed25519.@internal.edwards25519_package;
 
 public static partial class ed25519_package {
 
@@ -45,7 +46,6 @@ public static readonly nint PrivateKeySize = 64;
 public static readonly nint SignatureSize = 64; 
 // SeedSize is the size, in bytes, of private key seeds. These are the private key representations used by RFC 8032.
 public static readonly nint SeedSize = 32;
-
 
 // PublicKey is the type of Ed25519 public keys.
 public partial struct PublicKey { // : slice<byte>
@@ -84,7 +84,6 @@ public static (slice<byte>, error) Sign(this PrivateKey priv, io.Reader rand, sl
         return (null, error.As(errors.New("ed25519: cannot sign hashed message"))!);
     }
     return (Sign(priv, message), error.As(null!)!);
-
 }
 
 // GenerateKey generates a public/private key pair using entropy from rand.
@@ -106,13 +105,11 @@ public static (PublicKey, PrivateKey, error) GenerateKey(io.Reader rand) {
         }
     }
 
-
     var privateKey = NewKeyFromSeed(seed);
     var publicKey = make_slice<byte>(PublicKeySize);
     copy(publicKey, privateKey[(int)32..]);
 
     return (publicKey, privateKey, error.As(null!)!);
-
 }
 
 // NewKeyFromSeed calculates a private key from a seed. It will panic if
@@ -127,7 +124,6 @@ public static PrivateKey NewKeyFromSeed(slice<byte> seed) => func((_, panic, _) 
             panic("ed25519: bad seed length: " + strconv.Itoa(l));
         }
     }
-
 
     var digest = sha512.Sum512(seed);
     digest[0] &= 248;
@@ -146,7 +142,6 @@ public static PrivateKey NewKeyFromSeed(slice<byte> seed) => func((_, panic, _) 
     copy(privateKey[(int)32..], publicKeyBytes[..]);
 
     return privateKey;
-
 });
 
 // Sign signs the message with privateKey and returns a signature. It will
@@ -159,7 +154,6 @@ public static slice<byte> Sign(PrivateKey privateKey, slice<byte> message) => fu
             panic("ed25519: bad private key length: " + strconv.Itoa(l));
         }
     }
-
 
     var h = sha512.New();
     h.Write(privateKey[..(int)32]);
@@ -202,7 +196,6 @@ public static slice<byte> Sign(PrivateKey privateKey, slice<byte> message) => fu
     copy(signature[(int)32..], s[..]);
 
     return signature;
-
 });
 
 // Verify reports whether sig is a valid signature of message by publicKey. It
@@ -215,7 +208,6 @@ public static bool Verify(PublicKey publicKey, slice<byte> message, slice<byte> 
             panic("ed25519: bad public key length: " + strconv.Itoa(l));
         }
     }
-
 
     if (len(sig) != SignatureSize || sig[63] & 224 != 0) {
         return false;
@@ -253,7 +245,6 @@ public static bool Verify(PublicKey publicKey, slice<byte> message, slice<byte> 
     ref array<byte> checkR = ref heap(new array<byte>(32), out ptr<array<byte>> _addr_checkR);
     R.ToBytes(_addr_checkR);
     return bytes.Equal(sig[..(int)32], checkR[..]);
-
 });
 
 } // end ed25519_package

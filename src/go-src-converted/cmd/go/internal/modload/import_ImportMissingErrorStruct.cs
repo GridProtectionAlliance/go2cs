@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:06 UTC
+//     Generated on 2022 March 13 06:31:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace @internal
 {
     public static partial class modload_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ImportMissingError
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace @internal
             public static implicit operator ImportMissingError(NilType nil) => default(ImportMissingError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ImportMissingError ImportMissingError_cast(dynamic value)
         {
             return new ImportMissingError(value.Path, value.Module, value.QueryErr, value.isStd, value.replaced, value.newMissingVersion);

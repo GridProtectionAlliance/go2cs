@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package codehost -- go2cs converted at 2022 March 06 23:18:43 UTC
+// package codehost -- go2cs converted at 2022 March 13 06:32:05 UTC
 // import "cmd/go/internal/modfetch/codehost" ==> using codehost = go.cmd.go.@internal.modfetch.codehost_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\codehost\svn.go
-using zip = go.archive.zip_package;
-using xml = go.encoding.xml_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using time = go.time_package;
-using System.ComponentModel;
-
-
 namespace go.cmd.go.@internal.modfetch;
+
+using zip = archive.zip_package;
+using xml = encoding.xml_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using time = time_package;
+using System.ComponentModel;
 
 public static partial class codehost_package {
 
@@ -33,14 +32,12 @@ private static (ptr<RevInfo>, error) svnParseStat(@string rev, @string @out) {
         }
     }
 
-
     var (t, err) = time.Parse(time.RFC3339, log.Logentry.Date);
     if (err != null) {
         return (_addr_null!, error.As(vcsErrorf("unexpected response from svn log --xml: %v\n%s", err, out))!);
     }
     ptr<RevInfo> info = addr(new RevInfo(Name:fmt.Sprintf("%d",log.Logentry.Revision),Short:fmt.Sprintf("%012d",log.Logentry.Revision),Time:t.UTC(),Version:rev,));
     return (_addr_info!, error.As(null!)!);
-
 }
 
 private static error svnReadZip(io.Writer dst, @string workDir, @string rev, @string subdir, @string remote) => func((defer, _, _) => {
@@ -93,7 +90,6 @@ private static error svnReadZip(io.Writer dst, @string workDir, @string rev, @st
 
     }
 
-
     var exportDir = filepath.Join(workDir, "export"); 
     // Remove any existing contents from a previous (failed) run.
     {
@@ -107,7 +103,6 @@ private static error svnReadZip(io.Writer dst, @string workDir, @string rev, @st
         err = err__prev1;
 
     }
-
     defer(os.RemoveAll(exportDir)); // best-effort
 
     _, err = Run(workDir, new slice<@string>(new @string[] { "svn", "export", "--non-interactive", "--quiet", "--native-eol", "LF", "--ignore-externals", "--ignore-keywords", "--revision", rev, "--", remotePath, exportDir }));
@@ -141,7 +136,6 @@ private static error svnReadZip(io.Writer dst, @string workDir, @string rev, @st
             return error.As(vcsErrorf("file size differs between 'svn list' and 'svn export': file %s listed as %v bytes, but exported as %v bytes", e.Name, e.Size, n))!;
         }
     }    return error.As(zw.Close())!;
-
 });
 
 } // end codehost_package

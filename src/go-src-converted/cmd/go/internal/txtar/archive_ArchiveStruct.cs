@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:44 UTC
+//     Generated on 2022 March 13 06:32:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class txtar_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Archive
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace @internal
             public static implicit operator Archive(NilType nil) => default(Archive);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Archive Archive_cast(dynamic value)
         {
             return new Archive(value.Comment, value.Files);

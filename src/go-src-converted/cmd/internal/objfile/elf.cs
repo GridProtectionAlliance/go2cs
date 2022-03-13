@@ -4,16 +4,16 @@
 
 // Parsing of ELF executables (Linux, FreeBSD, and so on).
 
-// package objfile -- go2cs converted at 2022 March 06 22:31:55 UTC
+// package objfile -- go2cs converted at 2022 March 13 05:42:51 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\elf.go
-using dwarf = go.debug.dwarf_package;
-using elf = go.debug.elf_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.cmd.@internal;
+
+using dwarf = debug.dwarf_package;
+using elf = debug.elf_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
 
 public static partial class objfile_package {
 
@@ -30,7 +30,6 @@ private static (rawFile, error) openElf(io.ReaderAt r) {
         return (null, error.As(err)!);
     }
     return (addr(new elfFile(f)), error.As(null!)!);
-
 }
 
 private static (slice<Sym>, error) symbols(this ptr<elfFile> _addr_f) {
@@ -67,9 +66,7 @@ private static (slice<Sym>, error) symbols(this ptr<elfFile> _addr_f) {
             sym.Code += 'a' - 'A';
         }
         syms = append(syms, sym);
-
     }    return (syms, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<elfFile> _addr_f) {
@@ -90,7 +87,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<elfFile> _
         sect = sect__prev1;
 
     }
-
     {
         var sect__prev1 = sect;
 
@@ -102,12 +98,10 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<elfFile> _
             if (err != null) {
                 return (0, null, null, error.As(err)!);
             }
-
         }
         sect = sect__prev1;
 
     }
-
     {
         var sect__prev1 = sect;
 
@@ -119,14 +113,11 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<elfFile> _
             if (err != null) {
                 return (0, null, null, error.As(err)!);
             }
-
         }
         sect = sect__prev1;
 
     }
-
     return (textStart, symtab, pclntab, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, error) text(this ptr<elfFile> _addr_f) {
@@ -142,7 +133,6 @@ private static (ulong, slice<byte>, error) text(this ptr<elfFile> _addr_f) {
     textStart = sect.Addr;
     text, err = sect.Data();
     return ;
-
 }
 
 private static @string goarch(this ptr<elfFile> _addr_f) {
@@ -165,7 +155,6 @@ private static @string goarch(this ptr<elfFile> _addr_f) {
     else if (f.elf.Machine == elf.EM_S390) 
         return "s390x";
         return "";
-
 }
 
 private static (ulong, error) loadAddress(this ptr<elfFile> _addr_f) {
@@ -178,7 +167,6 @@ private static (ulong, error) loadAddress(this ptr<elfFile> _addr_f) {
             return (p.Vaddr, error.As(null!)!);
         }
     }    return (0, error.As(fmt.Errorf("unknown load address"))!);
-
 }
 
 private static (ptr<dwarf.Data>, error) dwarf(this ptr<elfFile> _addr_f) {

@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package hpack -- go2cs converted at 2022 March 06 23:37:14 UTC
+// package hpack -- go2cs converted at 2022 March 13 06:45:30 UTC
 // import "vendor/golang.org/x/net/http2/hpack" ==> using hpack = go.vendor.golang.org.x.net.http2.hpack_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\http2\hpack\tables.go
-using fmt = go.fmt_package;
-
 namespace go.vendor.golang.org.x.net.http2;
+
+using fmt = fmt_package;
+
+
+// headerFieldTable implements a list of HeaderFields.
+// This is used to implement the static and dynamic tables.
 
 public static partial class hpack_package {
 
-    // headerFieldTable implements a list of HeaderFields.
-    // This is used to implement the static and dynamic tables.
 private partial struct headerFieldTable {
     public slice<HeaderField> ents;
     public ulong evictCount; // byName maps a HeaderField name to the unique id of the newest entry with
@@ -75,7 +77,6 @@ private static void evictOldest(this ptr<headerFieldTable> _addr_t, nint n) => f
                 }
 
             }
-
         }
 
         k = k__prev1;
@@ -95,7 +96,6 @@ private static void evictOldest(this ptr<headerFieldTable> _addr_t, nint n) => f
         panic("evictCount overflow");
     }
     t.evictCount += uint64(n);
-
 });
 
 // search finds f in the table. If there is no match, i is 0.
@@ -130,7 +130,6 @@ private static (ulong, bool) search(this ptr<headerFieldTable> _addr_t, HeaderFi
             id = id__prev2;
 
         }
-
     }
     {
         var id__prev1 = id;
@@ -143,9 +142,7 @@ private static (ulong, bool) search(this ptr<headerFieldTable> _addr_t, HeaderFi
         id = id__prev1;
 
     }
-
     return (0, false);
-
 }
 
 // idToIndex converts a unique id to an HPACK index.
@@ -161,7 +158,6 @@ private static ulong idToIndex(this ptr<headerFieldTable> _addr_t, ulong id) => 
         return uint64(t.len()) - k; // dynamic table
     }
     return k + 1;
-
 });
 
 // http://tools.ietf.org/html/draft-ietf-httpbis-header-compression-07#appendix-B

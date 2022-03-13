@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modconv -- go2cs converted at 2022 March 06 23:18:10 UTC
+// package modconv -- go2cs converted at 2022 March 13 06:31:33 UTC
 // import "cmd/go/internal/modconv" ==> using modconv = go.cmd.go.@internal.modconv_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modconv\convert.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+
+
+// ConvertLegacyConfig converts legacy config to modfile.
+// The file argument is slash-delimited.
+
+using System;
+using System.Threading;
 public static partial class modconv_package {
 
-    // ConvertLegacyConfig converts legacy config to modfile.
-    // The file argument is slash-delimited.
 public static error ConvertLegacyConfig(ptr<modfile.File> _addr_f, @string file, slice<byte> data, Func<@string, @string, (module.Version, error)> queryPackage) => func((defer, _, _) => {
     ref modfile.File f = ref _addr_f.val;
 
@@ -84,7 +85,6 @@ public static error ConvertLegacyConfig(ptr<modfile.File> _addr_f, @string file,
                 re = re__prev1;
 
             }
-
             sem.Send(new token());
             go_(() => (i, m) => {
                 defer(() => {
@@ -96,9 +96,7 @@ public static error ConvertLegacyConfig(ptr<modfile.File> _addr_f, @string file,
                     return ;
                 }
                 versions[i] = version;
-
             }(i, m));
-
         }
         i = i__prev1;
         r = r__prev1;
@@ -120,7 +118,6 @@ public static error ConvertLegacyConfig(ptr<modfile.File> _addr_f, @string file,
                 need[v.Path] = v.Version;
             }
         }
-
     }    var paths = make_slice<@string>(0, len(need));
     {
         var path__prev1 = path;
@@ -152,16 +149,13 @@ public static error ConvertLegacyConfig(ptr<modfile.File> _addr_f, @string file,
                 re = re__prev1;
 
             }
-
             f.AddNewRequire(path, need[path], false);
-
         }
         path = path__prev1;
     }
 
     f.Cleanup();
     return error.As(null!)!;
-
 });
 
 } // end modconv_package

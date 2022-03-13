@@ -6,11 +6,9 @@
 // +build mips mipsle
 // +build linux
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:34 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:24 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\defs_linux_mipsx.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -100,7 +98,6 @@ private static readonly nuint _EPOLL_CTL_ADD = 0x1;
 private static readonly nuint _EPOLL_CTL_DEL = 0x2;
 private static readonly nuint _EPOLL_CTL_MOD = 0x3;
 
-
 private partial struct timespec {
     public int tv_sec;
     public int tv_nsec;
@@ -155,7 +152,6 @@ private static readonly nuint _O_RDONLY = 0x0;
 private static readonly nuint _O_NONBLOCK = 0x80;
 private static readonly nuint _O_CLOEXEC = 0x80000;
 private static readonly nint _SA_RESTORER = 0;
-
 
 private partial struct stackt {
     public ptr<byte> ss_sp;

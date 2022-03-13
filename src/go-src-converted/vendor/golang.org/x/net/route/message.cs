@@ -5,16 +5,14 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:14 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:31 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\message.go
-
-
 namespace go.vendor.golang.org.x.net;
 
 public static partial class route_package {
 
-    // A Message represents a routing message.
+// A Message represents a routing message.
 public partial interface Message {
     slice<Sys> Sys();
 }
@@ -31,7 +29,6 @@ public partial struct SysType { // : nint
 
 public static readonly SysType SysMetrics = iota;
 public static readonly var SysStats = 0;
-
 
 // ParseRIB parses b as a routing information base and returns a list
 // of routing messages.
@@ -77,20 +74,16 @@ public static (slice<Message>, error) ParseRIB(RIBType typ, slice<byte> b) {
  {
                     msgs = append(msgs, m);
                 }
-
             }
 
         }
-
         b = b[(int)l..];
-
     } 
     // We failed to parse any of the messages - version mismatch?
     if (nmsgs != len(msgs) + nskips) {
         return (null, error.As(errMessageMismatch)!);
     }
     return (msgs, error.As(null!)!);
-
 }
 
 } // end route_package

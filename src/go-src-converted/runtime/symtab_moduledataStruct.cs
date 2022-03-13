@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:12:02 UTC
+//     Generated on 2022 March 13 05:27:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct moduledata
         {
             // Constructors
@@ -129,7 +129,7 @@ namespace go
             public static implicit operator moduledata(NilType nil) => default(moduledata);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static moduledata moduledata_cast(dynamic value)
         {
             return new moduledata(ref value.pcHeader, value.funcnametab, value.cutab, value.filetab, value.pctab, value.pclntable, value.ftab, value.findfunctab, value.minpc, value.maxpc, value.text, value.etext, value.noptrdata, value.enoptrdata, value.data, value.edata, value.bss, value.ebss, value.noptrbss, value.enoptrbss, value.end, value.gcdata, value.gcbss, value.types, value.etypes, value.textsectmap, value.typelinks, value.itablinks, value.ptab, value.pluginpath, value.pkghashes, value.modulename, value.modulehashes, value.hasmain, value.gcdatamask, value.gcbssmask, value.typemap, value.bad, ref value.next);

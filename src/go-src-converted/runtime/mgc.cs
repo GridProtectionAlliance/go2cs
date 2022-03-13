@@ -126,17 +126,16 @@
 // object, it scans only the first oblet and enqueues the remaining
 // oblets as new scan jobs.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:36 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:21 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mgc.go
-using cpu = go.@internal.cpu_package;
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
+namespace go;
+
+using cpu = @internal.cpu_package;
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
 using System.Threading;
 using System;
-
-
-namespace go;
 
 public static partial class runtime_package {
 
@@ -153,7 +152,6 @@ private static readonly var debugScanConservative = false;
 // cycles.
 private static readonly nint sweepMinHeapDistance = 1024 * 1024;
 
-
 private static void gcinit() {
     if (@unsafe.Sizeof(new workbuf()) != _WorkbufSize) {
         throw("size of Workbuf is suboptimal");
@@ -169,7 +167,6 @@ private static void gcinit() {
     lockInit(_addr_work.sweepWaiters.@lock, lockRankSweepWaiters);
     lockInit(_addr_work.assistQueue.@lock, lockRankAssistQueue);
     lockInit(_addr_work.wbufSpans.@lock, lockRankWbufSpans);
-
 }
 
 // Temporary in order to enable register ABI work.
@@ -252,7 +249,6 @@ private static readonly var gcMarkWorkerFractionalMode = 1;
 // against gcController.idleMarkTime.
 private static readonly var gcMarkWorkerIdleMode = 2;
 
-
 // gcMarkWorkerModeStrings are the strings labels of gcMarkWorkerModes
 // to use in execution traces.
 private static array<@string> gcMarkWorkerModeStrings = new array<@string>(new @string[] { "Not worker", "GC (dedicated)", "GC (fractional)", "GC (idle)" });
@@ -273,7 +269,6 @@ private static bool pollFractionalWorkerExit() {
     // Add some slack to the utilization goal so that the
     // fractional worker isn't behind again the instant it exits.
     return float64(selfTime) / float64(delta) > 1.2F * gcController.fractionalUtilizationGoal;
-
 }
 
 private static var work = default;
@@ -352,7 +347,6 @@ public static void GC() {
         mProf_PostSweep();
     }
     releasem(mp);
-
 }
 
 // gcWaitOnMark blocks until GC finishes the Nth mark phase. If GC has
@@ -365,19 +359,15 @@ private static void gcWaitOnMark(uint n) {
         if (gcphase != _GCmark) { 
             // We've already completed this cycle's mark.
             nMarks++;
-
         }
         if (nMarks > n) { 
             // We're done.
             unlock(_addr_work.sweepWaiters.@lock);
             return ;
-
         }
         work.sweepWaiters.list.push(getg());
         goparkunlock(_addr_work.sweepWaiters.@lock, waitReasonWaitForGCCycle, traceEvGoBlock, 1);
-
     }
-
 }
 
 // gcMode indicates how concurrent a GC cycle should be.
@@ -415,7 +405,6 @@ private static readonly var gcTriggerTime = 0;
 // to work.cycles).
 private static readonly var gcTriggerCycle = 1;
 
-
 // test reports whether the trigger condition is satisfied, meaning
 // that the exit condition for the _GCoff phase has been met. The exit
 // condition should be tested when allocating.
@@ -440,7 +429,6 @@ private static bool test(this gcTrigger t) {
         // t.n > work.cycles, but accounting for wraparound.
         return int32(t.n - work.cycles) > 0;
         return true;
-
 }
 
 // gcStart starts the GC. It transitions from _GCoff to _GCmark (if
@@ -463,7 +451,6 @@ private static void gcStart(gcTrigger trigger) {
             return ;
         }
     }
-
     releasem(mp);
     mp = null; 
 
@@ -518,7 +505,6 @@ private static void gcStart(gcTrigger trigger) {
             }
 
         }
-
     }    gcBgMarkStartWorkers();
 
     systemstack(gcResetMarkState);
@@ -527,7 +513,6 @@ private static void gcStart(gcTrigger trigger) {
         // This is used to compute CPU time of the STW phases,
         // so it can't be more than ncpu, even if GOMAXPROCS is.
         work.stwprocs = ncpu;
-
     }
     work.heap0 = atomic.Load64(_addr_gcController.heapLive);
     work.pauseNS = 0;
@@ -608,7 +593,6 @@ private static void gcStart(gcTrigger trigger) {
         Gosched();
     }
     semrelease(_addr_work.startSema);
-
 }
 
 // gcMarkDoneFlushed counts the number of P's with flushed work.
@@ -680,10 +664,8 @@ top:
                 atomic.Xadd(_addr_gcMarkDoneFlushed, 1);
                 _p_.gcw.flushedWork = false;
             }
-
         });
         casgstatus(gp, _Gwaiting, _Grunning);
-
     });
 
     if (gcMarkDoneFlushed != 0) { 
@@ -694,7 +676,6 @@ top:
         // ragged barrier, so re-check it.
         semrelease(_addr_worldsema);
         goto top;
-
     }
     var now = nanotime();
     work.tMarkTerm = now;
@@ -759,7 +740,6 @@ top:
 
     // Perform mark termination. This will restart the world.
     gcMarkTermination(nextTriggerRatio);
-
 }
 
 // World must be stopped and mark assists and background workers must be
@@ -809,11 +789,9 @@ private static void gcMarkTermination(double nextTriggerRatio) {
             wbBufFlush1(getg().m.p.ptr());
             gcw.dispose();
             endCheckmarks();
-
         }
         setGCPhase(_GCoff);
         gcSweep(work.mode);
-
     });
 
     _g_.m.traceback = 0;
@@ -951,14 +929,11 @@ private static void gcMarkTermination(double nextTriggerRatio) {
                 if (i == 2 || i == 3) { 
                     // Separate mark time components with /.
                     print("/");
-
                 }
                 else if (i != 0) {
                     print("+");
                 }
-
                 print(string(fmtNSAsMS(sbuf[..], uint64(ns))));
-
             }
 
             i = i__prev1;
@@ -971,7 +946,6 @@ private static void gcMarkTermination(double nextTriggerRatio) {
         }
         print("\n");
         printunlock();
-
     }
     semrelease(_addr_worldsema);
     semrelease(_addr_gcsema); 
@@ -984,7 +958,6 @@ private static void gcMarkTermination(double nextTriggerRatio) {
     if (!concurrentSweep) { 
         // give the queued finalizers, if any, a chance to run
         Gosched();
-
     }
 }
 
@@ -1007,9 +980,7 @@ private static void gcBgMarkStartWorkers() {
         // its P's next findRunnableGCWorker.
 
         gcBgMarkWorkerCount++;
-
     }
-
 }
 
 // gcBgMarkPrepare sets up state for background marking.
@@ -1026,7 +997,6 @@ private static void gcBgMarkPrepare() {
     // there are no workers.
     work.nproc = ~uint32(0);
     work.nwait = ~uint32(0);
-
 }
 
 // gcBgMarkWorker is an entry in the gcBgMarkWorkerPool. It points to a single
@@ -1096,7 +1066,6 @@ private static void gcBgMarkWorker() {
                     // again. Thus, we defer the release until
                     // after parking the G.
                     releasem(mp);
-
                 } 
 
                 // Release this G to the pool.
@@ -1108,7 +1077,6 @@ private static void gcBgMarkWorker() {
             // Note that at this point, the G may immediately be
             // rescheduled and may be running.
             return true;
-
         }, @unsafe.Pointer(node), waitReasonGCWorkerIdle, traceEvGoBlock, 0); 
 
         // Preemption must not occur here, or another G might see
@@ -1163,7 +1131,6 @@ private static void gcBgMarkWorker() {
                         }
 
                     }
-
                 } 
                 // Go back to draining, this time
                 // without preemption.
@@ -1175,7 +1142,6 @@ private static void gcBgMarkWorker() {
             else 
                 throw("gcBgMarkWorker: unexpected gcMarkWorkerMode");
                         casgstatus(gp, _Gwaiting, _Grunning);
-
         }); 
 
         // Account for time.
@@ -1208,10 +1174,8 @@ private static void gcBgMarkWorker() {
             node.m.set(null);
 
             gcMarkDone();
-
         }
     }
-
 }
 
 // gcMarkWorkAvailable reports whether executing a mark worker
@@ -1230,7 +1194,6 @@ private static bool gcMarkWorkAvailable(ptr<p> _addr_p) {
         return true; // root scan work available
     }
     return false;
-
 }
 
 // gcMark runs the mark (or, for concurrent GC, mark termination)
@@ -1254,7 +1217,6 @@ private static void gcMark(long startTime) => func((_, panic, _) => {
         // This is expensive when there's a large number of
         // Gs, so only do it if checkmark is also enabled.
         gcMarkRootCheck();
-
     }
     if (work.full != 0) {
         throw("work.full != 0");
@@ -1273,13 +1235,11 @@ private static void gcMark(long startTime) => func((_, panic, _) => {
                 // For debugging, flush the buffer and make
                 // sure it really was all marked.
                 wbBufFlush1(p);
-
             }
             else
  {
                 p.wbBuf.reset();
             }
-
             var gcw = _addr_p.gcw;
             if (!gcw.empty()) {
                 printlock();
@@ -1291,7 +1251,6 @@ private static void gcMark(long startTime) => func((_, panic, _) => {
  {
                     print(" wbuf1.n=", gcw.wbuf1.nobj);
                 }
-
                 if (gcw.wbuf2 == null) {
                     print(" wbuf2=<nil>");
                 }
@@ -1299,17 +1258,14 @@ private static void gcMark(long startTime) => func((_, panic, _) => {
  {
                     print(" wbuf2.n=", gcw.wbuf2.nobj);
                 }
-
                 print("\n");
                 throw("P has cached GC work at end of mark termination");
-
             } 
             // There may still be cached empty buffers, which we
             // need to flush since we're going to free them. Also,
             // there may be non-zero stats because we allocated
             // black after the gcMarkDone barrier.
             gcw.dispose();
-
         }
         p = p__prev1;
     }
@@ -1377,14 +1333,14 @@ private static void gcSweep(gcMode mode) {
         } 
         // Free workbufs eagerly.
         prepareFreeWorkbufs();
-        while (freeSomeWbufs(false))         } 
+        while (freeSomeWbufs(false)) {
+        } 
         // All "free" events for this mark/sweep cycle have
         // now happened, so we can make this profile cycle
         // available immediately.
         mProf_NextCycle();
         mProf_Flush();
         return ;
-
     }
     lock(_addr_sweep.@lock);
     if (sweep.parked) {
@@ -1392,7 +1348,6 @@ private static void gcSweep(gcMode mode) {
         ready(sweep.g, 0, true);
     }
     unlock(_addr_sweep.@lock);
-
 }
 
 // gcResetMarkState resets global state prior to marking (concurrent
@@ -1411,7 +1366,6 @@ private static void gcResetMarkState() {
     forEachG(gp => {
         gp.gcscandone = false; // set to true in gcphasework
         gp.gcAssistBytes = 0;
-
     }); 
 
     // Clear page marks. This is just 1MB per 64GB of heap, so the
@@ -1426,7 +1380,6 @@ private static void gcResetMarkState() {
         }
     }    work.bytesMarked = 0;
     work.initialHeapLive = atomic.Load64(_addr_gcController.heapLive);
-
 }
 
 // Hooks for other packages
@@ -1472,9 +1425,7 @@ private static void clearpools() {
             d = addr(dlink);
         }
         sched.deferpool[i] = null;
-
     }    unlock(_addr_sched.deferlock);
-
 }
 
 // Timing
@@ -1491,11 +1442,9 @@ private static slice<byte> itoaDiv(slice<byte> buf, ulong val, nint dec) {
             i--;
         }
         val /= 10;
-
     }
     buf[i] = byte(val + '0');
     return buf[(int)i..];
-
 }
 
 // fmtNSAsMS nicely formats ns nanoseconds as milliseconds.
@@ -1503,7 +1452,6 @@ private static slice<byte> fmtNSAsMS(slice<byte> buf, ulong ns) {
     if (ns >= 10e6F) { 
         // Format as whole milliseconds.
         return itoaDiv(buf, ns / 1e6F, 0);
-
     }
     var x = ns / 1e3F;
     if (x == 0) {
@@ -1516,7 +1464,6 @@ private static slice<byte> fmtNSAsMS(slice<byte> buf, ulong ns) {
         dec--;
     }
     return itoaDiv(buf, x, dec);
-
 }
 
 // Helpers for testing GC.
@@ -1567,7 +1514,6 @@ private static ulong gcTestIsReachable(params unsafe.Pointer[] ptrs) => func((_,
             specials[i] = s; 
             // Make sure we don't retain ptrs.
             ptrs[i] = null;
-
         }
         i = i__prev1;
     }
@@ -1602,7 +1548,6 @@ private static ulong gcTestIsReachable(params unsafe.Pointer[] ptrs) => func((_,
     }
 
     return mask;
-
 });
 
 // gcTestPointerClass returns the category of what p points to, one of:
@@ -1626,7 +1571,6 @@ private static @string gcTestPointerClass(unsafe.Pointer p) {
             return "heap";
         }
     }
-
     foreach (var (_, datap) in activeModules()) {
         if (datap.data <= p2 && p2 < datap.edata || datap.noptrdata <= p2 && p2 < datap.enoptrdata) {
             return "data";
@@ -1636,7 +1580,6 @@ private static @string gcTestPointerClass(unsafe.Pointer p) {
         }
     }    KeepAlive(p);
     return "other";
-
 }
 
 } // end runtime_package

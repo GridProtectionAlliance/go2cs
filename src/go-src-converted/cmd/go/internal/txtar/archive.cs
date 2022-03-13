@@ -29,19 +29,22 @@
 // parsers should consider a final newline to be present anyway.
 //
 // There are no possible syntax errors in a txtar archive.
-// package txtar -- go2cs converted at 2022 March 06 23:19:44 UTC
+
+// package txtar -- go2cs converted at 2022 March 13 06:32:32 UTC
 // import "cmd/go/internal/txtar" ==> using txtar = go.cmd.go.@internal.txtar_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\txtar\archive.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using os = os_package;
+using strings = strings_package;
+
+
+// An Archive is a collection of files.
 
 public static partial class txtar_package {
 
-    // An Archive is a collection of files.
 public partial struct Archive {
     public slice<byte> Comment;
     public slice<File> Files;
@@ -78,7 +81,6 @@ public static (ptr<Archive>, error) ParseFile(@string file) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_Parse(data)!, error.As(null!)!);
-
 }
 
 // Parse parses the serialized form of an Archive.
@@ -119,7 +121,6 @@ private static (slice<byte>, @string, slice<byte>) findFileMarker(slice<byte> da
         }
         i += j + 1; // positioned at start of new possible marker
     }
-
 }
 
 // isMarker checks whether data begins with a file marker line.
@@ -139,12 +140,10 @@ private static (@string, slice<byte>) isMarker(slice<byte> data) {
             (data, after) = (data[..(int)i], data[(int)i + 1..]);
         }
     }
-
     if (!bytes.HasSuffix(data, markerEnd)) {
         return ("", null);
     }
     return (strings.TrimSpace(string(data[(int)len(marker)..(int)len(data) - len(markerEnd)])), after);
-
 }
 
 // If data is empty or ends in \n, fixNL returns data.
@@ -157,7 +156,6 @@ private static slice<byte> fixNL(slice<byte> data) {
     copy(d, data);
     d[len(data)] = '\n';
     return d;
-
 }
 
 } // end txtar_package

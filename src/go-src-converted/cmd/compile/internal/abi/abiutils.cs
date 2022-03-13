@@ -2,33 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package abi -- go2cs converted at 2022 March 06 22:49:31 UTC
+// package abi -- go2cs converted at 2022 March 13 06:00:54 UTC
 // import "cmd/compile/internal/abi" ==> using abi = go.cmd.compile.@internal.abi_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\abi\abiutils.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using sync = sync_package;
+
+
+//......................................................................
+//
+// Public/exported bits of the ABI utilities.
+//
+
+// ABIParamResultInfo stores the results of processing a given
+// function type to compute stack layout and register assignments. For
+// each input and output parameter we capture whether the param was
+// register-assigned (and to which register(s)) or the stack offset
+// for the param if is not going to be passed in registers according
+// to the rules in the Go internal ABI specification (1.17).
+
+using System;
 public static partial class abi_package {
 
-    //......................................................................
-    //
-    // Public/exported bits of the ABI utilities.
-    //
-
-    // ABIParamResultInfo stores the results of processing a given
-    // function type to compute stack layout and register assignments. For
-    // each input and output parameter we capture whether the param was
-    // register-assigned (and to which register(s)) or the stack offset
-    // for the param if is not going to be passed in registers according
-    // to the rules in the Go internal ABI specification (1.17).
 public partial struct ABIParamResultInfo {
     public slice<ABIParamAssignment> inparams; // Includes receiver for method calls.  Does NOT include hidden closure pointer.
     public slice<ABIParamAssignment> outparams;
@@ -136,7 +137,6 @@ private static int Offset(this ptr<ABIParamAssignment> _addr_a) {
         @base.Fatalf("register allocated parameters have no offset");
     }
     return a.offset;
-
 }
 
 // RegisterTypes returns a slice of the types of the registers
@@ -157,7 +157,6 @@ public static slice<ptr<types.Type>> RegisterTypes(slice<ABIParamAssignment> apa
     if (rcount == 0) { 
         // Note that this catches top-level struct{} and [0]Foo, which are stack allocated.
         return make_slice<ptr<types.Type>>(0, 1);
-
     }
     var rts = make_slice<ptr<types.Type>>(0, rcount + 1);
     {
@@ -174,7 +173,6 @@ public static slice<ptr<types.Type>> RegisterTypes(slice<ABIParamAssignment> apa
     }
 
     return rts;
-
 }
 
 private static (slice<ptr<types.Type>>, slice<long>) RegisterTypesAndOffsets(this ptr<ABIParamAssignment> _addr_pa) {
@@ -190,7 +188,6 @@ private static (slice<ptr<types.Type>>, slice<long>) RegisterTypesAndOffsets(thi
     var offs = make_slice<long>(0, l);
     offs, _ = appendParamOffsets(offs, 0, _addr_pa.Type);
     return (appendParamTypes(typs, _addr_pa.Type), offs);
-
 }
 
 private static slice<ptr<types.Type>> appendParamTypes(slice<ptr<types.Type>> rts, ptr<types.Type> _addr_t) {
@@ -219,9 +216,7 @@ private static slice<ptr<types.Type>> appendParamTypes(slice<ptr<types.Type>> rt
  {
                 rts = append(rts, types.Types[types.TUINT32]);
             }
-
             return append(rts, types.Types[types.TUINT32]);
-
         }
     }
     else
@@ -231,15 +226,12 @@ private static slice<ptr<types.Type>> appendParamTypes(slice<ptr<types.Type>> rt
         if (typ == types.TARRAY) 
             for (var i = int64(0); i < t.NumElem(); i++) { // 0 gets no registers, plus future-proofing.
                 rts = appendParamTypes(rts, _addr_t.Elem());
-
             }
         else if (typ == types.TSTRUCT) 
             foreach (var (_, f) in t.FieldSlice()) {
                 if (f.Type.Size() > 0) { // embedded zero-width types receive no registers
                     rts = appendParamTypes(rts, _addr_f.Type);
-
                 }
-
             }
         else if (typ == types.TSLICE) 
             return appendParamTypes(rts, _addr_synthSlice);
@@ -247,10 +239,8 @@ private static slice<ptr<types.Type>> appendParamTypes(slice<ptr<types.Type>> rt
             return appendParamTypes(rts, _addr_synthString);
         else if (typ == types.TINTER) 
             return appendParamTypes(rts, _addr_synthIface);
-        
-    }
+            }
     return rts;
-
 }
 
 // appendParamOffsets appends the offset(s) of type t, starting from "at",
@@ -269,7 +259,6 @@ private static (slice<long>, long) appendParamOffsets(slice<long> offsets, long 
         if (t.IsComplex() || int(t.Width) > types.RegSize) { // complex and *int64 on 32-bit
             var s = w / 2;
             return (append(offsets, at, at + s), at + w);
-
         }
         else
  {
@@ -302,7 +291,6 @@ private static (slice<long>, long) appendParamOffsets(slice<long> offsets, long 
                     if (f.Type.Width == 0 && i == t.NumFields() - 1) {
                         at++; // last field has zero width
                     }
-
                 }
 
                 i = i__prev1;
@@ -315,10 +303,8 @@ private static (slice<long>, long) appendParamOffsets(slice<long> offsets, long 
             return appendParamOffsets(offsets, at, _addr_synthString);
         else if (typ == types.TINTER) 
             return appendParamOffsets(offsets, at, _addr_synthIface);
-        
-    }
+            }
     return (offsets, at);
-
 }
 
 // FrameOffset returns the frame-pointer-relative location that a function
@@ -337,10 +323,8 @@ private static long FrameOffset(this ptr<ABIParamAssignment> _addr_a, ptr<ABIPar
     }
     if (len(a.Registers) == 0) { // passed on stack
         return int64(a.offset) - i.config.LocalsOffset();
-
     }
     return int64(a.offset) + i.SpillAreaOffset() - i.config.LocalsOffset();
-
 }
 
 // RegAmounts holds a specified number of integer/float registers.
@@ -409,7 +393,6 @@ private static nint NumParamRegs(this ptr<ABIConfig> _addr_a, ptr<types.Type> _a
 
     }
 
-
     if (t.IsScalar() || t.IsPtrShaped()) {
         if (t.IsComplex()) {
             n = 2;
@@ -435,12 +418,10 @@ private static nint NumParamRegs(this ptr<ABIConfig> _addr_a, ptr<types.Type> _a
             n = a.NumParamRegs(synthString);
         else if (typ == types.TINTER) 
             n = a.NumParamRegs(synthIface);
-        
-    }
+            }
     a.regsForTypeCache[t] = n;
 
     return n;
-
 }
 
 // preAllocateParams gets the slice sizes right for inputs and outputs.
@@ -452,7 +433,6 @@ private static void preAllocateParams(this ptr<ABIParamResultInfo> _addr_a, bool
     }
     a.inparams = make_slice<ABIParamAssignment>(0, nIns);
     a.outparams = make_slice<ABIParamAssignment>(0, nOuts);
-
 }
 
 // ABIAnalyzeTypes takes an optional receiver type, arrays of ins and outs, and returns an ABIParamResultInfo,
@@ -502,7 +482,6 @@ private static ptr<ABIParamResultInfo> ABIAnalyzeTypes(this ptr<ABIConfig> _addr
     result.outRegistersUsed = s.rUsed.intRegs + s.rUsed.floatRegs;
 
     return _addr_result!;
-
 }
 
 // ABIAnalyzeFuncType takes a function type 'ft' and an ABI rules description
@@ -555,7 +534,6 @@ private static ptr<ABIParamResultInfo> ABIAnalyzeFuncType(this ptr<ABIConfig> _a
     result.spillAreaSize = alignTo(s.spillOffset, types.RegSize);
     result.outRegistersUsed = s.rUsed.intRegs + s.rUsed.floatRegs;
     return _addr_result!;
-
 }
 
 // ABIAnalyze returns the same result as ABIAnalyzeFuncType, but also
@@ -605,7 +583,6 @@ private static ptr<ABIParamResultInfo> ABIAnalyze(this ptr<ABIConfig> _addr_conf
     }
 
     return _addr_result!;
-
 }
 
 private static void updateOffset(this ptr<ABIConfig> _addr_config, ptr<ABIParamResultInfo> _addr_result, ptr<types.Field> _addr_f, ABIParamAssignment a, bool isReturn, bool setNname) {
@@ -655,7 +632,6 @@ private static @string regString(this ptr<RegAmounts> _addr_c, RegIndex r) {
         return fmt.Sprintf("F%d", int(r) - c.intRegs);
     }
     return fmt.Sprintf("<?>%d", r);
-
 }
 
 // ToString method renders an ABIParamAssignment in human-readable
@@ -678,7 +654,6 @@ private static @string ToString(this ptr<ABIParamAssignment> _addr_ri, ptr<ABICo
         regs += fmt.Sprintf(" | #I=%d, #F=%d", config.regAmounts.intRegs, config.regAmounts.floatRegs);
     }
     return fmt.Sprintf("%s } %s: %d typ: %v", regs, offname, ri.offset, ri.Type);
-
 }
 
 // String method renders an ABIParamResultInfo in human-readable
@@ -711,7 +686,6 @@ private static @string String(this ptr<ABIParamResultInfo> _addr_ri) {
 
     res += fmt.Sprintf("offsetToSpillArea: %d spillAreaSize: %d", ri.offsetToSpillArea, ri.spillAreaSize);
     return res;
-
 }
 
 // assignState holds intermediate state during the register assigning process
@@ -737,7 +711,6 @@ private static long alignTo(long a, nint t) {
         return a;
     }
     return types.Rnd(a, int64(t));
-
 }
 
 // stackSlot returns a stack offset for a param or result of the
@@ -781,19 +754,16 @@ private static slice<RegIndex> allocateRegs(this ptr<assignState> _addr_state, s
                 for (nint i = 0; i < n; i++) { // looking ahead to really big integers
                     regs = append(regs, RegIndex(ri));
                     ri += 1;
-
                 }
 
 
                 i = i__prev1;
             }
-
         }
     else
         state.rUsed.intRegs = ri;
         state.rUsed.floatRegs = rf;
         return regs;
-
     } {
         var typ = t.Kind();
 
@@ -820,11 +790,9 @@ private static slice<RegIndex> allocateRegs(this ptr<assignState> _addr_state, s
             return state.allocateRegs(regs, synthString);
         else if (typ == types.TINTER) 
             return state.allocateRegs(regs, synthIface);
-        
-    }
+            }
     @base.Fatalf("was not expecting type %s", t);
     panic("unreachable");
-
 });
 
 // regAllocate creates a register ABIParamAssignment object for a param
@@ -839,10 +807,8 @@ private static ABIParamAssignment regAllocate(this ptr<assignState> _addr_state,
         // Spill for register-resident t must be aligned for storage of a t.
         spillLoc = align(state.spillOffset, _addr_t);
         state.spillOffset = spillLoc + t.Size();
-
     }
     return new ABIParamAssignment(Type:t,Name:name,Registers:state.allocateRegs([]RegIndex{},t),offset:int32(spillLoc),);
-
 }
 
 // stackAllocate creates a stack memory ABIParamAssignment object for
@@ -887,20 +853,16 @@ private static bool regassignIntegral(this ptr<assignState> _addr_state, ptr<typ
         if (regsNeeded + state.floatUsed() > state.rTotal.floatRegs) { 
             // not enough regs
             return false;
-
         }
         state.pUsed.floatRegs += regsNeeded;
         return true;
-
     }
     if (regsNeeded + state.intUsed() > state.rTotal.intRegs) { 
         // not enough regs
         return false;
-
     }
     state.pUsed.intRegs += regsNeeded;
     return true;
-
 }
 
 // regassignArray processes an array type (or array component within some
@@ -917,10 +879,8 @@ private static bool regassignArray(this ptr<assignState> _addr_state, ptr<types.
     if (nel > 1) { 
         // Not an array of length 1: stack assign
         return false;
-
     }
     return state.regassign(t.Elem());
-
 }
 
 // regassignStruct processes a struct type (or struct component within
@@ -935,7 +895,6 @@ private static bool regassignStruct(this ptr<assignState> _addr_state, ptr<types
             return false;
         }
     }    return true;
-
 }
 
 // synthOnce ensures that we only create the synth* fake types once.
@@ -986,8 +945,7 @@ private static bool regassign(this ptr<assignState> _addr_state, ptr<types.Type>
     else 
         @base.Fatalf("not expected");
         panic("unreachable");
-    
-});
+    });
 
 // assignParamOrReturn processes a given receiver, param, or result
 // of field f to determine whether it can be register assigned.
@@ -1061,7 +1019,6 @@ private static slice<ulong> ComputePadding(this ptr<ABIParamAssignment> _addr_pa
             }
         }
     }    return padding;
-
 });
 
 } // end abi_package

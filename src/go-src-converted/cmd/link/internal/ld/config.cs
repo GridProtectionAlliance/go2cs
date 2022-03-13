@@ -2,23 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:20:40 UTC
+// package ld -- go2cs converted at 2022 March 13 06:33:35 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\config.go
-using sys = go.cmd.@internal.sys_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
+using sys = cmd.@internal.sys_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+
+
+// A BuildMode indicates the sort of object we are building.
+//
+// Possible build modes are the same as those for the -buildmode flag
+// in cmd/go, and are documented in 'go help buildmode'.
+
+using System;
 public static partial class ld_package {
 
-    // A BuildMode indicates the sort of object we are building.
-    //
-    // Possible build modes are the same as those for the -buildmode flag
-    // in cmd/go, and are documented in 'go help buildmode'.
 public partial struct BuildMode { // : byte
 }
 
@@ -30,13 +31,10 @@ public static readonly var BuildModeCShared = 3;
 public static readonly var BuildModeShared = 4;
 public static readonly var BuildModePlugin = 5;
 
-
 private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
     ref BuildMode mode = ref _addr_mode.val;
 
-    Func<error> badmode = () => {
-        return error.As(fmt.Errorf("buildmode %s not supported on %s/%s", s, buildcfg.GOOS, buildcfg.GOARCH))!;
-    };
+    Func<error> badmode = () => error.As(fmt.Errorf("buildmode %s not supported on %s/%s", s, buildcfg.GOOS, buildcfg.GOARCH))!;
     switch (s) {
         case "exe": 
             switch (buildcfg.GOOS + "/" + buildcfg.GOARCH) {
@@ -51,7 +49,6 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                     mode.val = BuildModeExe;
                     break;
             }
-
             break;
         case "pie": 
             switch (buildcfg.GOOS) {
@@ -77,14 +74,12 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                             return error.As(badmode())!;
                             break;
                     }
-
                     break;
                 default: 
                     return error.As(badmode())!;
                     break;
             }
             mode.val = BuildModePIE;
-
             break;
         case "c-archive": 
             switch (buildcfg.GOOS) {
@@ -106,7 +101,6 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                             return error.As(badmode())!;
                             break;
                     }
-
                     break;
                 case "windows": 
                     switch (buildcfg.GOARCH) {
@@ -123,14 +117,12 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                             return error.As(badmode())!;
                             break;
                     }
-
                     break;
                 default: 
                     return error.As(badmode())!;
                     break;
             }
             mode.val = BuildModeCArchive;
-
             break;
         case "c-shared": 
             switch (buildcfg.GOARCH) {
@@ -152,7 +144,6 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                     break;
             }
             mode.val = BuildModeCShared;
-
             break;
         case "shared": 
             switch (buildcfg.GOOS) {
@@ -175,14 +166,12 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                             return error.As(badmode())!;
                             break;
                     }
-
                     break;
                 default: 
                     return error.As(badmode())!;
                     break;
             }
             mode.val = BuildModeShared;
-
             break;
         case "plugin": 
             switch (buildcfg.GOOS) {
@@ -205,7 +194,6 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                             return error.As(badmode())!;
                             break;
                     }
-
                     break;
                 case "darwin": 
                     switch (buildcfg.GOARCH) {
@@ -218,7 +206,6 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                             return error.As(badmode())!;
                             break;
                     }
-
                     break;
                 case "freebsd": 
                     switch (buildcfg.GOARCH) {
@@ -229,21 +216,18 @@ private static error Set(this ptr<BuildMode> _addr_mode, @string s) {
                             return error.As(badmode())!;
                             break;
                     }
-
                     break;
                 default: 
                     return error.As(badmode())!;
                     break;
             }
             mode.val = BuildModePlugin;
-
             break;
         default: 
             return error.As(fmt.Errorf("invalid buildmode: %q", s))!;
             break;
     }
     return error.As(null!)!;
-
 }
 
 private static @string String(this ptr<BuildMode> _addr_mode) {
@@ -265,7 +249,6 @@ private static @string String(this ptr<BuildMode> _addr_mode) {
     else if (mode.val == BuildModePlugin) 
         return "plugin";
         return fmt.Sprintf("BuildMode(%d)", uint8(mode.val));
-
 }
 
 // LinkMode indicates whether an external linker is used for the final link.
@@ -275,7 +258,6 @@ public partial struct LinkMode { // : byte
 public static readonly LinkMode LinkAuto = iota;
 public static readonly var LinkInternal = 0;
 public static readonly var LinkExternal = 1;
-
 
 private static error Set(this ptr<LinkMode> _addr_mode, @string s) {
     ref LinkMode mode = ref _addr_mode.val;
@@ -295,7 +277,6 @@ private static error Set(this ptr<LinkMode> _addr_mode, @string s) {
             break;
     }
     return error.As(null!)!;
-
 }
 
 private static @string String(this ptr<LinkMode> _addr_mode) {
@@ -309,7 +290,6 @@ private static @string String(this ptr<LinkMode> _addr_mode) {
     else if (mode.val == LinkExternal) 
         return "external";
         return fmt.Sprintf("LinkMode(%d)", uint8(mode.val));
-
 }
 
 // mustLinkExternal reports whether the program being linked requires
@@ -340,12 +320,10 @@ private static (bool, @string) mustLinkExternal(ptr<Link> _addr_ctxt) => func((d
         // set up by the dynamic linker, so internal cgo linking
         // doesn't work. Test case is "go test runtime/cgo".
         return (true, buildcfg.GOOS + " does not support internal cgo");
-
     }
     if (iscgo && buildcfg.GOOS == "windows" && buildcfg.GOARCH == "arm64") { 
         // windows/arm64 internal linking is not implemented.
         return (true, buildcfg.GOOS + "/" + buildcfg.GOARCH + " does not support internal cgo");
-
     }
     if (flagRace && ctxt.Arch.InFamily(sys.PPC64).val) {
         return (true, "race on " + buildcfg.GOARCH);
@@ -394,7 +372,6 @@ private static (bool, @string) mustLinkExternal(ptr<Link> _addr_ctxt) => func((d
         return (true, "some input objects have an unrecognized file format");
     }
     return (false, "");
-
 });
 
 // determineLinkMode sets ctxt.LinkMode.
@@ -430,10 +407,8 @@ private static void determineLinkMode(ptr<Link> _addr_ctxt) {
                 {
                                ctxt.LinkMode = LinkInternal;
                            }
-
                 break;
         }
-
     }
 
     if (ctxt.LinkMode == LinkInternal) 
@@ -444,7 +419,6 @@ private static void determineLinkMode(ptr<Link> _addr_ctxt) {
 
         if (buildcfg.GOARCH == "ppc64" && buildcfg.GOOS != "aix") 
             Exitf("external linking not supported for %s/ppc64", buildcfg.GOOS);
-            
-}
+            }
 
 } // end ld_package

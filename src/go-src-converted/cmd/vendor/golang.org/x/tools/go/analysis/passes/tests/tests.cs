@@ -4,18 +4,19 @@
 
 // Package tests defines an Analyzer that checks for common mistaken
 // usages of tests and examples.
-// package tests -- go2cs converted at 2022 March 06 23:34:50 UTC
+
+// package tests -- go2cs converted at 2022 March 13 06:42:06 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/tests" ==> using tests = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.tests_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\tests\tests.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
 
 public static partial class tests_package {
 
@@ -46,9 +47,7 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             if (!ok || fn.Recv != null) { 
                 // Ignore non-functions or functions with receivers.
                 continue;
-
             }
-
 
             if (strings.HasPrefix(fn.Name.Name, "Example")) 
                 checkExample(_addr_pass, fn);
@@ -56,10 +55,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 checkTest(_addr_pass, fn, "Test");
             else if (strings.HasPrefix(fn.Name.Name, "Benchmark")) 
                 checkTest(_addr_pass, fn, "Benchmark");
-            
-        }
+                    }
     }    return (null, error.As(null!)!);
-
 }
 
 private static bool isExampleSuffix(@string s) {
@@ -71,11 +68,9 @@ private static bool isTestSuffix(@string name) {
     if (len(name) == 0) { 
         // "Test" is ok.
         return true;
-
     }
     var (r, _) = utf8.DecodeRuneInString(name);
     return !unicode.IsLower(r);
-
 }
 
 private static bool isTestParam(ast.Expr typ, @string wantType) {
@@ -83,7 +78,6 @@ private static bool isTestParam(ast.Expr typ, @string wantType) {
     if (!ok) { 
         // Not a pointer.
         return false;
-
     }
     {
         ptr<ast.Ident> (name, ok) = ptr.X._<ptr<ast.Ident>>();
@@ -92,7 +86,6 @@ private static bool isTestParam(ast.Expr typ, @string wantType) {
             return name.Name == wantType;
         }
     }
-
     {
         ptr<ast.SelectorExpr> (sel, ok) = ptr.X._<ptr<ast.SelectorExpr>>();
 
@@ -100,9 +93,7 @@ private static bool isTestParam(ast.Expr typ, @string wantType) {
             return sel.Sel.Name == wantType;
         }
     }
-
     return false;
-
 }
 
 private static slice<types.Object> lookup(ptr<types.Package> _addr_pkg, @string name) {
@@ -115,7 +106,6 @@ private static slice<types.Object> lookup(ptr<types.Package> _addr_pkg, @string 
             return new slice<types.Object>(new types.Object[] { o });
         }
     }
-
 
     slice<types.Object> ret = default; 
     // Search through the imports to see if any of them define name.
@@ -134,9 +124,7 @@ private static slice<types.Object> lookup(ptr<types.Package> _addr_pkg, @string 
             }
 
         }
-
     }    return ret;
-
 }
 
 private static void checkExample(ptr<analysis.Pass> _addr_pass, ptr<ast.FuncDecl> _addr_fn) {
@@ -151,7 +139,6 @@ private static void checkExample(ptr<analysis.Pass> _addr_pass, ptr<ast.FuncDecl
             pass.Reportf(fn.Pos(), "%s should be niladic", fnName);
         }
     }
-
     {
         var results = fn.Type.Results;
 
@@ -160,11 +147,9 @@ private static void checkExample(ptr<analysis.Pass> _addr_pass, ptr<ast.FuncDecl
         }
     }
 
-
     if (fnName == "Example") { 
         // Nothing more to do.
         return ;
-
     }
     var exName = strings.TrimPrefix(fnName, "Example");    var elems = strings.SplitN(exName, "_", 3);    var ident = elems[0];    var objs = lookup(_addr_pass.Pkg, ident);
     if (ident != "" && len(objs) == 0) { 
@@ -172,12 +157,10 @@ private static void checkExample(ptr<analysis.Pass> _addr_pass, ptr<ast.FuncDecl
         pass.Reportf(fn.Pos(), "%s refers to unknown identifier: %s", fnName, ident); 
         // Abort since obj is absent and no subsequent checks can be performed.
         return ;
-
     }
     if (len(elems) < 2) { 
         // Nothing more to do.
         return ;
-
     }
     if (ident == "") { 
         // Check Example_suffix and Example_BadSuffix.
@@ -189,9 +172,7 @@ private static void checkExample(ptr<analysis.Pass> _addr_pass, ptr<ast.FuncDecl
             }
 
         }
-
         return ;
-
     }
     var mmbr = elems[1];
     if (!isExampleSuffix(mmbr)) { 
@@ -216,7 +197,6 @@ private static void checkExample(ptr<analysis.Pass> _addr_pass, ptr<ast.FuncDecl
                     obj = obj__prev2;
 
                 }
-
             }
 
             obj = obj__prev1;
@@ -229,7 +209,6 @@ private static void checkExample(ptr<analysis.Pass> _addr_pass, ptr<ast.FuncDecl
     if (len(elems) == 3 && !isExampleSuffix(elems[2])) { 
         // Check ExampleFoo_Method_suffix and ExampleFoo_Method_Badsuffix.
         pass.Reportf(fn.Pos(), "%s has malformed example suffix: %s", fnName, elems[2]);
-
     }
 }
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:34:56 UTC
+//     Generated on 2022 March 13 06:42:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -50,7 +50,7 @@ namespace analysis
 {
     public static partial class unitchecker_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct result
         {
             // Constructors
@@ -85,7 +85,7 @@ namespace analysis
             public static implicit operator result(NilType nil) => default(result);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static result result_cast(dynamic value)
         {
             return new result(ref value.a, value.diagnostics, value.err);

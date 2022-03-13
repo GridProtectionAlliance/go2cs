@@ -5,12 +5,12 @@
 //go:build darwin && go1.12 && !go1.13
 // +build darwin,go1.12,!go1.13
 
-// package unix -- go2cs converted at 2022 March 06 23:26:45 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:22 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_darwin.1_12.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 
@@ -40,7 +40,6 @@ public static (nint, error) Getdirentries(nint fd, slice<byte> buf, ptr<System.U
         return (n, error.As(errnoErr(e1))!);
     }
     return (n, error.As(null!)!);
-
 }
 
 } // end unix_package

@@ -12,22 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package profile -- go2cs converted at 2022 March 06 23:23:55 UTC
+// package profile -- go2cs converted at 2022 March 13 06:37:00 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\filter.go
+namespace go.cmd.vendor.github.com.google.pprof;
 // Implements methods to filter samples from profiles.
 
-using regexp = go.regexp_package;
+using regexp = regexp_package;
 using System;
-
-
-namespace go.cmd.vendor.github.com.google.pprof;
 
 public static partial class profile_package {
 
-    // FilterSamplesByName filters the samples in a profile and only keeps
-    // samples where at least one frame matches focus but none match ignore.
-    // Returns true is the corresponding regexp matched at least one sample.
+// FilterSamplesByName filters the samples in a profile and only keeps
+// samples where at least one frame matches focus but none match ignore.
+// Returns true is the corresponding regexp matched at least one sample.
 private static (bool, bool, bool, bool) FilterSamplesByName(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_focus, ptr<regexp.Regexp> _addr_ignore, ptr<regexp.Regexp> _addr_hide, ptr<regexp.Regexp> _addr_show) {
     bool fm = default;
     bool im = default;
@@ -79,18 +77,14 @@ private static (bool, bool, bool, bool) FilterSamplesByName(this ptr<Profile> _a
                 }                if (len(locs) == 0) { 
                     // Remove sample with no locations (by not adding it to s).
                     continue;
-
                 }
                 sample.Location = locs;
-
             }
             s = append(s, sample);
-
         }
     }    p.Sample = s;
 
     return ;
-
 }
 
 // ShowFrom drops all stack frames above the highest matching frame and returns
@@ -129,7 +123,6 @@ private static bool ShowFrom(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr
         }
     }    p.Sample = s;
     return matched;
-
 }
 
 // filterShowFromLocation tests a showFrom regex against a location, removes
@@ -146,7 +139,6 @@ private static bool filterShowFromLocation(ptr<Location> _addr_loc, ptr<regexp.R
             return true;
         }
     }
-
     {
         var i = loc.lastMatchedLineIndex(showFrom);
 
@@ -155,9 +147,7 @@ private static bool filterShowFromLocation(ptr<Location> _addr_loc, ptr<regexp.R
             return true;
         }
     }
-
     return false;
-
 }
 
 // lastMatchedLineIndex returns the index of the last line that matches a regex,
@@ -177,10 +167,8 @@ private static nint lastMatchedLineIndex(this ptr<Location> _addr_loc, ptr<regex
             }
 
         }
-
     }
     return -1;
-
 }
 
 // FilterTagsByName filters the tags in a profile and only keeps
@@ -203,7 +191,6 @@ private static (bool, bool) FilterTagsByName(this ptr<Profile> _addr_p, ptr<rege
             hm = true;
         }
         return !matchShow || matchHide;
-
     };
     foreach (var (_, s) in p.Sample) {
         {
@@ -232,7 +219,6 @@ private static (bool, bool) FilterTagsByName(this ptr<Profile> _addr_p, ptr<rege
             lab = lab__prev2;
         }
     }    return ;
-
 }
 
 // matchesName returns whether the location matches the regular
@@ -253,7 +239,6 @@ private static bool matchesName(this ptr<Location> _addr_loc, ptr<regexp.Regexp>
             }
 
         }
-
     }    {
         var m = loc.Mapping;
 
@@ -261,9 +246,7 @@ private static bool matchesName(this ptr<Location> _addr_loc, ptr<regexp.Regexp>
             return true;
         }
     }
-
     return false;
-
 }
 
 // unmatchedLines returns the lines in the location that do not match
@@ -279,7 +262,6 @@ private static slice<Line> unmatchedLines(this ptr<Location> _addr_loc, ptr<rege
             return null;
         }
     }
-
     slice<Line> lines = default;
     foreach (var (_, ln) in loc.Line) {
         {
@@ -292,11 +274,8 @@ private static slice<Line> unmatchedLines(this ptr<Location> _addr_loc, ptr<rege
             }
 
         }
-
         lines = append(lines, ln);
-
     }    return lines;
-
 }
 
 // matchedLines returns the lines in the location that match
@@ -312,7 +291,6 @@ private static slice<Line> matchedLines(this ptr<Location> _addr_loc, ptr<regexp
             return loc.Line;
         }
     }
-
     slice<Line> lines = default;
     foreach (var (_, ln) in loc.Line) {
         {
@@ -325,11 +303,8 @@ private static slice<Line> matchedLines(this ptr<Location> _addr_loc, ptr<regexp
             }
 
         }
-
         lines = append(lines, ln);
-
     }    return lines;
-
 }
 
 // focusedAndNotIgnored looks up a slice of ids against a map of
@@ -347,21 +322,16 @@ private static bool focusedAndNotIgnored(slice<ptr<Location>> locs, map<ulong, b
                     // Found focused location. Must keep searching in case there
                     // is an ignored one as well.
                     f = true;
-
                 }
                 else
  { 
                     // Found ignored location. Can return false right away.
                     return false;
-
                 }
-
             }
 
         }
-
     }    return f;
-
 }
 
 // TagMatch selects tags for filtering
@@ -392,7 +362,6 @@ private static (bool, bool) FilterSamplesByTag(this ptr<Profile> _addr_p, TagMat
         }
     }    p.Sample = samples;
     return ;
-
 }
 
 } // end profile_package

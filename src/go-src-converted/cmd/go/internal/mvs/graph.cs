@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mvs -- go2cs converted at 2022 March 06 23:18:00 UTC
+// package mvs -- go2cs converted at 2022 March 13 06:31:23 UTC
 // import "cmd/go/internal/mvs" ==> using mvs = go.cmd.go.@internal.mvs_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\mvs\graph.go
-using fmt = go.fmt_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+
+using module = golang.org.x.mod.module_package;
+
+
+// Graph implements an incremental version of the MVS algorithm, with the
+// requirements pushed by the caller instead of pulled by the MVS traversal.
+
+using System;
 public static partial class mvs_package {
 
-    // Graph implements an incremental version of the MVS algorithm, with the
-    // requirements pushed by the caller instead of pulled by the MVS traversal.
 public partial struct Graph {
     public Func<@string, @string, nint> cmp;
     public slice<module.Version> roots;
@@ -39,7 +40,6 @@ public static ptr<Graph> NewGraph(Func<@string, @string, nint> cmp, slice<module
             g.selected[m.Path] = m.Version;
         }
     }    return _addr_g!;
-
 }
 
 // Require adds the information that module m requires all modules in reqs.
@@ -75,7 +75,6 @@ private static void Require(this ptr<Graph> _addr_g, module.Version m, slice<mod
             panic(fmt.Sprintf("requirements of %v have already been set", m));
         }
     }
-
     g.required[m] = reqs;
 
     foreach (var (_, dep) in reqs) { 
@@ -88,7 +87,6 @@ private static void Require(this ptr<Graph> _addr_g, module.Version m, slice<mod
             }
 
         }
-
 
         if (g.cmp(g.Selected(dep.Path), dep.Version) < 0) {
             g.selected[dep.Path] = dep.Version;
@@ -123,7 +121,6 @@ private static @string Selected(this ptr<Graph> _addr_g, @string path) {
         return "none";
     }
     return v;
-
 }
 
 // BuildList returns the selected versions of all modules present in the Graph,
@@ -146,7 +143,6 @@ private static slice<module.Version> BuildList(this ptr<Graph> _addr_g) {
             // seenRoot map for later anyway — it is simpler to support this
             // degenerate case than to forbid it.
             continue;
-
         }
         {
             var v = g.Selected(r.Path);
@@ -156,9 +152,7 @@ private static slice<module.Version> BuildList(this ptr<Graph> _addr_g) {
             }
 
         }
-
         seenRoot[r.Path] = true;
-
     }    var uniqueRoots = list;
 
     foreach (var (path, version) in g.selected) {
@@ -168,7 +162,6 @@ private static slice<module.Version> BuildList(this ptr<Graph> _addr_g) {
     }    module.Sort(list[(int)len(uniqueRoots)..]);
 
     return list;
-
 }
 
 // WalkBreadthFirst invokes f once, in breadth-first order, for each module
@@ -206,7 +199,6 @@ private static void WalkBreadthFirst(this ptr<Graph> _addr_g, Action<module.Vers
             }
         }
     }
-
 }
 
 // FindPath reports a shortest requirement path starting at one of the roots of
@@ -256,7 +248,6 @@ private static slice<module.Version> FindPath(this ptr<Graph> _addr_g, Func<modu
 
 
             return path;
-
         }
         var (reqs, _) = g.RequiredBy(m);
         foreach (var (_, r) in reqs) {
@@ -269,12 +260,10 @@ private static slice<module.Version> FindPath(this ptr<Graph> _addr_g, Func<modu
                 }
 
             }
-
         }
     }
 
     return null;
-
 }
 
 } // end mvs_package

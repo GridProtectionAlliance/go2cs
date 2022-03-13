@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package image -- go2cs converted at 2022 March 06 23:35:44 UTC
+// package image -- go2cs converted at 2022 March 13 06:43:41 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Program Files\Go\src\image\format.go
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using System;
-
-
 namespace go;
 
+using bufio = bufio_package;
+using errors = errors_package;
+using io = io_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+
+// ErrFormat indicates that decoding encountered an unknown format.
+
+using System;
 public static partial class image_package {
 
-    // ErrFormat indicates that decoding encountered an unknown format.
 public static var ErrFormat = errors.New("image: unknown format");
 
 // A format holds an image format's name, magic header and how to decode it.
@@ -61,9 +62,7 @@ private static reader asReader(io.Reader r) {
             return rr;
         }
     }
-
     return bufio.NewReader(r);
-
 }
 
 // Match reports whether magic matches b. Magic may contain "?" wildcards.
@@ -76,7 +75,6 @@ private static bool match(@string magic, slice<byte> b) {
             return false;
         }
     }    return true;
-
 }
 
 // Sniff determines the format of r's data.
@@ -88,7 +86,6 @@ private static format sniff(reader r) {
             return f;
         }
     }    return new format();
-
 }
 
 // Decode decodes an image that has been encoded in a registered format.
@@ -107,7 +104,6 @@ public static (Image, @string, error) Decode(io.Reader r) {
     }
     var (m, err) = f.decode(rr);
     return (m, f.name, error.As(err)!);
-
 }
 
 // DecodeConfig decodes the color model and dimensions of an image that has
@@ -126,7 +122,6 @@ public static (Config, @string, error) DecodeConfig(io.Reader r) {
     }
     var (c, err) = f.decodeConfig(rr);
     return (c, f.name, error.As(err)!);
-
 }
 
 } // end image_package

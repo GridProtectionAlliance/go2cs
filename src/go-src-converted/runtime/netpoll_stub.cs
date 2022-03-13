@@ -5,12 +5,12 @@
 //go:build plan9
 // +build plan9
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:17 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\netpoll_stub.go
-using atomic = go.runtime.@internal.atomic_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
 
 public static partial class runtime_package {
 
@@ -36,7 +36,6 @@ private static void netpollBreak() {
         notewakeup(_addr_netpollNote);
     }
     unlock(_addr_netpollBrokenLock);
-
 }
 
 // Polls for ready network connections.
@@ -59,10 +58,8 @@ private static gList netpoll(long delay) {
         // Guard against starvation in case the lock is contended
         // (eg when running TestNetpollBreak).
         osyield();
-
     }
     return new gList();
-
 }
 
 private static bool netpollinited() {

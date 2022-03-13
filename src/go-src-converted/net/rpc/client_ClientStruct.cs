@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:49 UTC
+//     Generated on 2022 March 13 05:40:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace net
 {
     public static partial class rpc_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Client
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace net
             public static implicit operator Client(NilType nil) => default(Client);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Client Client_cast(dynamic value)
         {
             return new Client(value.codec, value.reqMutex, value.request, value.mutex, value.seq, value.pending, value.closing, value.shutdown);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:38 UTC
+//     Generated on 2022 March 13 06:32:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace modfetch
 {
     public static partial class codehost_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct RunError
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace modfetch
             public static implicit operator RunError(NilType nil) => default(RunError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static RunError RunError_cast(dynamic value)
         {
             return new RunError(value.Cmd, value.Err, value.Stderr, value.HelpText);

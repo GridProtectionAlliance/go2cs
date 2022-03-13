@@ -7,17 +7,19 @@
 
 // Socket control messages
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:47 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:33 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\sockcmsg_unix.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+
+
+// CmsgLen returns the value to store in the Len field of the Cmsghdr
+// structure, taking into account any necessary alignment.
 
 public static partial class syscall_package {
 
-    // CmsgLen returns the value to store in the Len field of the Cmsghdr
-    // structure, taking into account any necessary alignment.
 public static nint CmsgLen(nint datalen) {
     return cmsgAlignOf(SizeofCmsghdr) + datalen;
 }
@@ -56,10 +58,8 @@ public static (slice<SocketControlMessage>, error) ParseSocketControlMessage(sli
         SocketControlMessage m = new SocketControlMessage(Header:*h,Data:dbuf);
         msgs = append(msgs, m);
         i += cmsgAlignOf(int(h.Len));
-
     }
     return (msgs, error.As(null!)!);
-
 }
 
 private static (ptr<Cmsghdr>, slice<byte>, error) socketControlMessageHeaderAndData(slice<byte> b) {
@@ -72,7 +72,6 @@ private static (ptr<Cmsghdr>, slice<byte>, error) socketControlMessageHeaderAndD
         return (_addr_null!, null, error.As(EINVAL)!);
     }
     return (_addr_h!, b[(int)cmsgAlignOf(SizeofCmsghdr)..(int)h.Len], error.As(null!)!);
-
 }
 
 // UnixRights encodes a set of open file descriptors into a socket
@@ -87,12 +86,10 @@ public static slice<byte> UnixRights(params nint[] fds) {
     h.Type = SCM_RIGHTS;
     h.SetLen(CmsgLen(datalen));
     foreach (var (i, fd) in fds) {
-        (int32.val)(h.data(4 * uintptr(i))).val;
+        (int32.val).val;
 
-        int32(fd);
-
+        (h.data(4 * uintptr(i))) = int32(fd);
     }    return b;
-
 }
 
 // ParseUnixRights decodes a socket control message that contains an
@@ -120,7 +117,6 @@ public static (slice<nint>, error) ParseUnixRights(ptr<SocketControlMessage> _ad
         }
     }
     return (fds, error.As(null!)!);
-
 }
 
 } // end syscall_package

@@ -2,35 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:20:58 UTC
+// package ld -- go2cs converted at 2022 March 13 06:33:54 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\decodesym.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using binary = go.encoding.binary_package;
-using log = go.log_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using binary = encoding.binary_package;
+using log = log_package;
+
+
+// Decoding the type.* symbols.     This has to be in sync with
+// ../../runtime/type.go, or more specifically, with what
+// cmd/compile/internal/reflectdata/reflect.go stuffs in these.
+
+// tflag is documented in reflect/type.go.
+//
+// tflag values must be kept in sync with copies in:
+//    cmd/compile/internal/reflectdata/reflect.go
+//    cmd/link/internal/ld/decodesym.go
+//    reflect/type.go
+//    runtime/type.go
 
 public static partial class ld_package {
 
-    // Decoding the type.* symbols.     This has to be in sync with
-    // ../../runtime/type.go, or more specifically, with what
-    // cmd/compile/internal/reflectdata/reflect.go stuffs in these.
-
-    // tflag is documented in reflect/type.go.
-    //
-    // tflag values must be kept in sync with copies in:
-    //    cmd/compile/internal/reflectdata/reflect.go
-    //    cmd/link/internal/ld/decodesym.go
-    //    reflect/type.go
-    //    runtime/type.go
 private static readonly nint tflagUncommon = 1 << 0;
 private static readonly nint tflagExtraStar = 1 << 1;
-
 
 private static ulong decodeInuxi(ptr<sys.Arch> _addr_arch, slice<byte> p, nint sz) => func((_, panic, _) => {
     ref sys.Arch arch = ref _addr_arch.val;
@@ -50,7 +51,6 @@ private static ulong decodeInuxi(ptr<sys.Arch> _addr_arch, slice<byte> p, nint s
             panic("unreachable");
             break;
     }
-
 });
 
 private static nint commonsize(ptr<sys.Arch> _addr_arch) {
@@ -140,7 +140,6 @@ private static readonly nint kindSlice = 23;
 private static readonly nint kindStruct = 25;
 private static readonly nint kindMask = (1 << 5) - 1;
 
-
 private static loader.Reloc decodeReloc(ptr<loader.Loader> _addr_ldr, loader.Sym symIdx, ptr<loader.Relocs> _addr_relocs, int off) {
     ref loader.Loader ldr = ref _addr_ldr.val;
     ref loader.Relocs relocs = ref _addr_relocs.val;
@@ -152,7 +151,6 @@ private static loader.Reloc decodeReloc(ptr<loader.Loader> _addr_ldr, loader.Sym
         }
     }
     return new loader.Reloc();
-
 }
 
 private static loader.Sym decodeRelocSym(ptr<loader.Loader> _addr_ldr, loader.Sym symIdx, ptr<loader.Relocs> _addr_relocs, int off) {
@@ -174,7 +172,6 @@ private static @string decodetypeName(ptr<loader.Loader> _addr_ldr, loader.Sym s
     var data = ldr.Data(r);
     var (nameLen, nameLenLen) = binary.Uvarint(data[(int)1..]);
     return string(data[(int)1 + nameLenLen..(int)1 + nameLenLen + int(nameLen)]);
-
 }
 
 private static loader.Sym decodetypeFuncInType(ptr<loader.Loader> _addr_ldr, ptr<sys.Arch> _addr_arch, loader.Sym symIdx, ptr<loader.Relocs> _addr_relocs, nint i) {
@@ -190,7 +187,6 @@ private static loader.Sym decodetypeFuncInType(ptr<loader.Loader> _addr_ldr, ptr
         uadd += uncommonSize();
     }
     return decodeRelocSym(_addr_ldr, symIdx, _addr_relocs, int32(uadd + i * arch.PtrSize));
-
 }
 
 private static loader.Sym decodetypeFuncOutType(ptr<loader.Loader> _addr_ldr, ptr<sys.Arch> _addr_arch, loader.Sym symIdx, ptr<loader.Relocs> _addr_relocs, nint i) {
@@ -268,7 +264,6 @@ private static nint decodetypeStructFieldArrayOff(ptr<loader.Loader> _addr_ldr, 
     }
     off += i * structfieldSize(_addr_arch);
     return off;
-
 }
 
 private static @string decodetypeStructFieldName(ptr<loader.Loader> _addr_ldr, ptr<sys.Arch> _addr_arch, loader.Sym symIdx, nint i) {
@@ -310,7 +305,6 @@ private static @string decodetypeStr(ptr<loader.Loader> _addr_ldr, ptr<sys.Arch>
         return str[(int)1..];
     }
     return str;
-
 }
 
 private static slice<byte> decodetypeGcmask(ptr<Link> _addr_ctxt, loader.Sym s) {
@@ -331,18 +325,14 @@ private static slice<byte> decodetypeGcmask(ptr<Link> _addr_ctxt, loader.Sym s) 
             if (err != null) {
                 log.Fatal(err);
             }
-
             return r;
-
         }
         Exitf("cannot find gcmask for %s", ctxt.loader.SymName(s));
         return null;
-
     }
     ref var relocs = ref heap(ctxt.loader.Relocs(s), out ptr<var> _addr_relocs);
     var mask = decodeRelocSym(_addr_ctxt.loader, s, _addr_relocs, 2 * int32(ctxt.Arch.PtrSize) + 8 + 1 * int32(ctxt.Arch.PtrSize));
     return ctxt.loader.Data(mask);
-
 }
 
 // Type.commonType.gc
@@ -361,24 +351,19 @@ private static slice<byte> decodetypeGcprog(ptr<Link> _addr_ctxt, loader.Sym s) 
             if (err != null) {
                 log.Fatal(err);
             }
-
             var progbytes = make_slice<byte>(ctxt.Arch.ByteOrder.Uint32(progsize));
             _, err = sect.ReadAt(progbytes, int64(addr - sect.Addr + 4));
             if (err != null) {
                 log.Fatal(err);
             }
-
             return append(progsize, progbytes);
-
         }
         Exitf("cannot find gcmask for %s", ctxt.loader.SymName(s));
         return null;
-
     }
     ref var relocs = ref heap(ctxt.loader.Relocs(s), out ptr<var> _addr_relocs);
     var rs = decodeRelocSym(_addr_ctxt.loader, s, _addr_relocs, 2 * int32(ctxt.Arch.PtrSize) + 8 + 1 * int32(ctxt.Arch.PtrSize));
     return ctxt.loader.Data(rs);
-
 }
 
 // Find the elf.Section of a given shared library that contains a given address.
@@ -391,12 +376,9 @@ private static ptr<elf.Section> findShlibSection(ptr<Link> _addr_ctxt, @string p
                 if (sect.Addr <= addr && addr < sect.Addr + sect.Size) {
                     return _addr_sect!;
                 }
-
             }
-
         }
     }    return _addr_null!;
-
 }
 
 private static ulong decodetypeGcprogShlib(ptr<Link> _addr_ctxt, slice<byte> data) {

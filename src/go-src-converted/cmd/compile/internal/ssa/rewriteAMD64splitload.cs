@@ -1,11 +1,9 @@
 // Code generated from gen/AMD64splitload.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 22:55:36 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:07:32 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewriteAMD64splitload.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
@@ -59,7 +57,6 @@ private static bool rewriteValueAMD64splitload(ptr<Value> _addr_v) {
     else if (v.Op == OpAMD64CMPWloadidx2) 
         return rewriteValueAMD64splitload_OpAMD64CMPWloadidx2(_addr_v);
         return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPBconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -86,7 +83,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPBconstload(ptr<Value> _
         x.AddArg2(ptr, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPBconstload {sym} [vo] ptr mem)
     // cond: vo.Val() != 0
@@ -107,10 +103,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPBconstload(ptr<Value> _
         v0.AddArg2(ptr, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPBconstloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -139,7 +133,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPBconstloadidx1(ptr<Valu
         x.AddArg3(ptr, idx, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPBconstloadidx1 {sym} [vo] ptr idx mem)
     // cond: vo.Val() != 0
@@ -161,10 +154,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPBconstloadidx1(ptr<Valu
         v0.AddArg3(ptr, idx, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -190,7 +181,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPBload(ptr<Value> _addr_
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPBloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -218,7 +208,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPBloadidx1(ptr<Value> _a
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -245,7 +234,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstload(ptr<Value> _
         x.AddArg2(ptr, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPLconstload {sym} [vo] ptr mem)
     // cond: vo.Val() != 0
@@ -266,10 +254,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstload(ptr<Value> _
         v0.AddArg2(ptr, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -298,7 +284,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstloadidx1(ptr<Valu
         x.AddArg3(ptr, idx, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPLconstloadidx1 {sym} [vo] ptr idx mem)
     // cond: vo.Val() != 0
@@ -320,10 +305,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstloadidx1(ptr<Valu
         v0.AddArg3(ptr, idx, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstloadidx4(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -352,7 +335,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstloadidx4(ptr<Valu
         x.AddArg3(ptr, idx, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPLconstloadidx4 {sym} [vo] ptr idx mem)
     // cond: vo.Val() != 0
@@ -374,10 +356,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLconstloadidx4(ptr<Valu
         v0.AddArg3(ptr, idx, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -403,7 +383,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLload(ptr<Value> _addr_
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPLloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -431,7 +410,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLloadidx1(ptr<Value> _a
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPLloadidx4(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -459,7 +437,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPLloadidx4(ptr<Value> _a
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -486,7 +463,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstload(ptr<Value> _
         x.AddArg2(ptr, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPQconstload {sym} [vo] ptr mem)
     // cond: vo.Val() != 0
@@ -507,10 +483,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstload(ptr<Value> _
         v0.AddArg2(ptr, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -539,7 +513,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstloadidx1(ptr<Valu
         x.AddArg3(ptr, idx, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPQconstloadidx1 {sym} [vo] ptr idx mem)
     // cond: vo.Val() != 0
@@ -561,10 +534,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstloadidx1(ptr<Valu
         v0.AddArg3(ptr, idx, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstloadidx8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -593,7 +564,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstloadidx8(ptr<Valu
         x.AddArg3(ptr, idx, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPQconstloadidx8 {sym} [vo] ptr idx mem)
     // cond: vo.Val() != 0
@@ -615,10 +585,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQconstloadidx8(ptr<Valu
         v0.AddArg3(ptr, idx, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPQload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -644,7 +612,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQload(ptr<Value> _addr_
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPQloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -672,7 +639,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQloadidx1(ptr<Value> _a
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPQloadidx8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -700,7 +666,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPQloadidx8(ptr<Value> _a
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -727,7 +692,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstload(ptr<Value> _
         x.AddArg2(ptr, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPWconstload {sym} [vo] ptr mem)
     // cond: vo.Val() != 0
@@ -748,10 +712,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstload(ptr<Value> _
         v0.AddArg2(ptr, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -780,7 +742,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstloadidx1(ptr<Valu
         x.AddArg3(ptr, idx, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPWconstloadidx1 {sym} [vo] ptr idx mem)
     // cond: vo.Val() != 0
@@ -802,10 +763,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstloadidx1(ptr<Valu
         v0.AddArg3(ptr, idx, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstloadidx2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -834,7 +793,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstloadidx2(ptr<Valu
         x.AddArg3(ptr, idx, mem);
         v.AddArg2(x, x);
         return true;
-
     } 
     // match: (CMPWconstloadidx2 {sym} [vo] ptr idx mem)
     // cond: vo.Val() != 0
@@ -856,10 +814,8 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWconstloadidx2(ptr<Valu
         v0.AddArg3(ptr, idx, mem);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -885,7 +841,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWload(ptr<Value> _addr_
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPWloadidx1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -913,7 +868,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWloadidx1(ptr<Value> _a
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueAMD64splitload_OpAMD64CMPWloadidx2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -941,7 +895,6 @@ private static bool rewriteValueAMD64splitload_OpAMD64CMPWloadidx2(ptr<Value> _a
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteBlockAMD64splitload(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;

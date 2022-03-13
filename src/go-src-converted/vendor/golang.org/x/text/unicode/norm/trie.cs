@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2022 March 06 23:40:04 UTC
+// package norm -- go2cs converted at 2022 March 13 06:48:20 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\trie.go
-
-
 namespace go.vendor.golang.org.x.text.unicode;
 
 public static partial class norm_package {
@@ -54,7 +52,6 @@ private static ushort lookup(this ptr<sparseBlocks> _addr_t, uint n, byte b) {
         }
     }
     return 0;
-
 }
 
 } // end norm_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:55 UTC
+//     Generated on 2022 March 13 06:47:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace unicode
 {
     public static partial class norm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct normReader
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace unicode
             public static implicit operator normReader(NilType nil) => default(normReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static normReader normReader_cast(dynamic value)
         {
             return new normReader(value.rb, value.r, value.inbuf, value.outbuf, value.bufStart, value.lastBoundary, value.err);

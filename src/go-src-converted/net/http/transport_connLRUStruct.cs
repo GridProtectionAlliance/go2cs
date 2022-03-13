@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:24 UTC
+//     Generated on 2022 March 13 05:37:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct connLRU
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace net
             public static implicit operator connLRU(NilType nil) => default(connLRU);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static connLRU connLRU_cast(dynamic value)
         {
             return new connLRU(ref value.ll, value.m);

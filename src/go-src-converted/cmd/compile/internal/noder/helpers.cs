@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:13:49 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:15 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\helpers.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// Helpers for constructing typed IR nodes.
+//
+// TODO(mdempsky): Move into their own package so they can be easily
+// reused by iimport and frontend optimizations.
 
 public static partial class noder_package {
 
-    // Helpers for constructing typed IR nodes.
-    //
-    // TODO(mdempsky): Move into their own package so they can be easily
-    // reused by iimport and frontend optimizations.
 public partial interface ImplicitNode {
     void SetImplicit(bool x);
 }
@@ -63,7 +65,6 @@ public static ptr<ir.AddrExpr> Addr(src.XPos pos, ir.Node x) {
         n.SetOp(ir.OPTRLIT);
         typed(_addr_types.NewPtr(x.Type()), n);
     return _addr_n!;
-
 }
 
 public static ir.Node Assert(src.XPos pos, ir.Node x, ptr<types.Type> _addr_typ) {
@@ -87,14 +88,12 @@ public static ir.Node Binary(src.XPos pos, ir.Op op, ptr<types.Type> _addr_typ, 
             n.SetType(typ);
             n.SetTypecheck(3);
             return n;
-
         }
         typed(_addr_typ, n);
         return transformAdd(n);
     else 
         return typed(_addr_x.Type(), ir.NewBinaryExpr(pos, op, x, y));
-    
-}
+    }
 
 public static ir.Node Call(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node fun, slice<ir.Node> args, bool dots) {
     ref types.Type typ = ref _addr_typ.val;
@@ -111,11 +110,9 @@ public static ir.Node Call(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node fun,
             // For type params, don't typecheck until we actually know
             // the type.
             return typed(_addr_typ, n);
-
         }
         typed(_addr_typ, n);
         return transformConvCall(n);
-
     }
     {
         ptr<ir.Name> fun__prev1 = fun;
@@ -151,7 +148,6 @@ public static ir.Node Call(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node fun,
                 }
                         typed(_addr_typ, n);
             return transformBuiltin(n);
-
         }
         fun = fun__prev1;
 
@@ -172,9 +168,7 @@ public static ir.Node Call(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node fun,
                 // Set the type to include the receiver, since that's what
                 // later parts of the compiler expect
                 fun.SetType(fun.Selection.Type);
-
             }
-
             break;
 
     }
@@ -186,7 +180,6 @@ public static ir.Node Call(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node fun,
         // described by a structural constraint that requires it to be a
         // certain function type, etc., but we don't want to analyze that.
         return typed(_addr_typ, n);
-
     }
     if (fun.Op() == ir.OXDOT) {
         if (!fun._<ptr<ir.SelectorExpr>>().X.Type().HasTParam()) {
@@ -194,7 +187,6 @@ public static ir.Node Call(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node fun,
         }
         typed(_addr_typ, n);
         return n;
-
     }
     if (fun.Op() != ir.OFUNCINST) { 
         // If no type params, do the normal call transformations. This
@@ -202,11 +194,9 @@ public static ir.Node Call(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node fun,
         typed(_addr_typ, n);
         transformCall(n);
         return n;
-
     }
     typed(_addr_typ, n);
     return n;
-
 }
 
 public static ir.Node Compare(src.XPos pos, ptr<types.Type> _addr_typ, ir.Op op, ir.Node x, ir.Node y) {
@@ -219,12 +209,10 @@ public static ir.Node Compare(src.XPos pos, ptr<types.Type> _addr_typ, ir.Op op,
         n.SetType(typ);
         n.SetTypecheck(3);
         return n;
-
     }
     typed(_addr_typ, n);
     transformCompare(n);
     return n;
-
 }
 
 public static ptr<ir.StarExpr> Deref(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node x) {
@@ -248,7 +236,6 @@ public static ptr<ir.SelectorExpr> DotField(src.XPos pos, ir.Node x, nint index)
 
     var field = typ.Field(index);
     return _addr_dot(pos, _addr_field.Type, op, x, _addr_field)!;
-
 }
 
 public static ptr<ir.SelectorExpr> DotMethod(src.XPos pos, ir.Node x, nint index) {
@@ -257,7 +244,6 @@ public static ptr<ir.SelectorExpr> DotMethod(src.XPos pos, ir.Node x, nint index
     // Method value.
     var typ = typecheck.NewMethodType(method.Type, null);
     return _addr_dot(pos, _addr_typ, ir.OCALLPART, x, _addr_method)!;
-
 }
 
 // MethodExpr returns a OMETHEXPR node with the indicated index into the methods
@@ -281,7 +267,6 @@ public static ptr<ir.SelectorExpr> MethodExpr(src.XPos pos, ir.Node recv, ptr<ty
         typecheck.NeedRuntimeType(recv.Type());
     }
     return _addr_dot(pos, _addr_typ, ir.OMETHEXPR, recv, _addr_method)!;
-
 }
 
 private static ptr<ir.SelectorExpr> dot(src.XPos pos, ptr<types.Type> _addr_typ, ir.Op op, ir.Node x, ptr<types.Field> _addr_selection) {
@@ -302,7 +287,6 @@ private static ptr<types.Field> method(ptr<types.Type> _addr_typ, nint index) {
         return _addr_typ.AllMethods().Index(index)!;
     }
     return _addr_types.ReceiverBaseType(typ).Methods().Index(index)!;
-
 }
 
 public static ir.Node Index(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node x, ir.Node index) {
@@ -314,13 +298,11 @@ public static ir.Node Index(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node x, 
         n.SetType(typ);
         n.SetTypecheck(3);
         return n;
-
     }
     typed(_addr_typ, n); 
     // transformIndex will modify n.Type() for OINDEXMAP.
     transformIndex(n);
     return n;
-
 }
 
 public static ir.Node Slice(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node x, ir.Node low, ir.Node high, ir.Node max) {
@@ -336,12 +318,10 @@ public static ir.Node Slice(src.XPos pos, ptr<types.Type> _addr_typ, ir.Node x, 
         n.SetType(typ);
         n.SetTypecheck(3);
         return n;
-
     }
     typed(_addr_typ, n);
     transformSlice(n);
     return n;
-
 }
 
 public static ir.Node Unary(src.XPos pos, ptr<types.Type> _addr_typ, ir.Op op, ir.Node x) {
@@ -359,11 +339,9 @@ public static ir.Node Unary(src.XPos pos, ptr<types.Type> _addr_typ, ir.Op op, i
             // (which will add it back in later).
             assert(typ.Field(1).Type.Kind() == types.TBOOL);
             typ = typ.Field(0).Type;
-
         }
     }
     return typed(_addr_typ, ir.NewUnaryExpr(pos, op, x));
-
 }
 
 // Statements

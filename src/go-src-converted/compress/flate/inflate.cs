@@ -5,18 +5,18 @@
 // Package flate implements the DEFLATE compressed data format, described in
 // RFC 1951.  The gzip and zlib packages implement access to DEFLATE-based file
 // formats.
-// package flate -- go2cs converted at 2022 March 06 22:15:07 UTC
+
+// package flate -- go2cs converted at 2022 March 13 05:29:14 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Program Files\Go\src\compress\flate\inflate.go
-using bufio = go.bufio_package;
-using io = go.io_package;
-using bits = go.math.bits_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.compress;
+
+using bufio = bufio_package;
+using io = io_package;
+using bits = math.bits_package;
+using strconv = strconv_package;
+using sync = sync_package;
+using System;
 
 public static partial class flate_package {
 
@@ -107,7 +107,6 @@ private static readonly nint huffmanChunkBits = 9;
 private static readonly nint huffmanNumChunks = 1 << (int)(huffmanChunkBits);
 private static readonly nint huffmanCountMask = 15;
 private static readonly nint huffmanValueShift = 4;
-
 
 private partial struct huffmanDecoder {
     public nint min; // the minimum code length
@@ -206,7 +205,6 @@ private static bool init(this ptr<huffmanDecoder> _addr_h, slice<nint> lengths) 
 
             j = j__prev1;
         }
-
     }
     {
         var i__prev1 = i;
@@ -239,25 +237,20 @@ private static bool init(this ptr<huffmanDecoder> _addr_h, slice<nint> lengths) 
                             panic("impossible: overwriting existing chunk");
                         off += 1 << (int)(uint(n));
                         }
-
                         h.chunks[off] = chunk;
-
                     }
             else
 
 
                     off = off__prev2;
                 }
-
             } {
                 j = reverse & (huffmanNumChunks - 1);
                 if (sanity && h.chunks[j] & huffmanCountMask != huffmanChunkBits + 1) { 
                     // Longer codes should have been
                     // associated with a link table above.
                     panic("impossible: not an indirect chunk");
-
                 }
-
                 var value = h.chunks[j] >> (int)(huffmanValueShift);
                 var linktab = h.links[value];
                 reverse>>=huffmanChunkBits;
@@ -271,17 +264,13 @@ private static bool init(this ptr<huffmanDecoder> _addr_h, slice<nint> lengths) 
                             panic("impossible: overwriting existing chunk");
                         off += 1 << (int)(uint(n - huffmanChunkBits));
                         }
-
                         linktab[off] = chunk;
-
                     }
 
 
                     off = off__prev2;
                 }
-
             }
-
         }
         i = i__prev1;
         n = n__prev1;
@@ -305,11 +294,8 @@ private static bool init(this ptr<huffmanDecoder> _addr_h, slice<nint> lengths) 
                     if (code == 1 && i % 2 == 1) {
                         continue;
                     }
-
                     panic("impossible: missing chunk");
-
                 }
-
             }
 
             i = i__prev1;
@@ -339,7 +325,6 @@ private static bool init(this ptr<huffmanDecoder> _addr_h, slice<nint> lengths) 
         }
     }
     return true;
-
 });
 
 // The actual read interface needed by NewReader.
@@ -407,14 +392,12 @@ private static void nextBlock(this ptr<decompressor> _addr_f) {
             f.hl = _addr_f.h1;
             f.hd = _addr_f.h2;
             f.huffmanBlock();
-
             break;
         default: 
             // 3 is reserved.
             f.err = CorruptInputError(f.roffset);
             break;
     }
-
 }
 
 private static (nint, error) Read(this ptr<decompressor> _addr_f, slice<byte> b) {
@@ -439,7 +422,6 @@ private static (nint, error) Read(this ptr<decompressor> _addr_f, slice<byte> b)
             f.toRead = f.dict.readFlush(); // Flush what's left in case of error
         }
     }
-
 }
 
 private static error Close(this ptr<decompressor> _addr_f) {
@@ -449,7 +431,6 @@ private static error Close(this ptr<decompressor> _addr_f) {
         return error.As(null!)!;
     }
     return error.As(f.err)!;
-
 }
 
 // RFC 1951 section 3.2.7.
@@ -474,7 +455,6 @@ private static error readHuffman(this ptr<decompressor> _addr_f) {
             err = err__prev1;
 
         }
-
     }
     var nlit = int(f.b & 0x1F) + 257;
     if (nlit > maxNumLit) {
@@ -509,13 +489,11 @@ private static error readHuffman(this ptr<decompressor> _addr_f) {
                     err = err__prev1;
 
                 }
-
             }
 
             f.codebits[codeOrder[i]] = int(f.b & 0x7);
             f.b>>=3;
             f.nb -= 3;
-
         }
 
         i = i__prev1;
@@ -548,7 +526,6 @@ private static error readHuffman(this ptr<decompressor> _addr_f) {
                 f.bits[i] = x;
                 i++;
                 continue;
-
             } 
             // Repeat previous length or zero.
             nint rep = default;
@@ -590,7 +567,6 @@ private static error readHuffman(this ptr<decompressor> _addr_f) {
                     err = err__prev1;
 
                 }
-
             }
 
             rep += int(f.b & uint32(1 << (int)(nb) - 1));
@@ -599,13 +575,10 @@ private static error readHuffman(this ptr<decompressor> _addr_f) {
             if (i + rep > n) {
                 return error.As(CorruptInputError(f.roffset))!;
             }
-
             for (nint j = 0; j < rep; j++) {
                 f.bits[i] = b;
                 i++;
             }
-
-
         }
 
         i = i__prev1;
@@ -618,7 +591,6 @@ private static error readHuffman(this ptr<decompressor> _addr_f) {
         f.h1.min = f.bits[endBlockMarker];
     }
     return error.As(null!)!;
-
 }
 
 // Decode a single Huffman block from f.
@@ -630,7 +602,6 @@ private static void huffmanBlock(this ptr<decompressor> _addr_f) {
 
     const var stateInit = iota; // Zero value must be stateInit
     const var stateDict = 0;
-
 
 
     if (f.stepState == stateInit) 
@@ -693,13 +664,11 @@ private static void huffmanBlock(this ptr<decompressor> _addr_f) {
                     f.err = err;
                     return ;
                 }
-
             }
 
             length += int(f.b & uint32(1 << (int)(n) - 1));
             f.b>>=n;
             f.nb -= n;
-
         }
         nint dist = default;
         if (f.hd == null) {
@@ -710,14 +679,12 @@ private static void huffmanBlock(this ptr<decompressor> _addr_f) {
                     f.err = err;
                     return ;
                 }
-
             }
         else
 
             dist = int(bits.Reverse8(uint8(f.b & 0x1F << 3)));
             f.b>>=5;
             f.nb -= 5;
-
         } {
             dist, err = f.huffSym(f.hd);
 
@@ -725,7 +692,6 @@ private static void huffmanBlock(this ptr<decompressor> _addr_f) {
                 f.err = err;
                 return ;
             }
-
         }
 
         if (dist < 4) 
@@ -741,7 +707,6 @@ private static void huffmanBlock(this ptr<decompressor> _addr_f) {
                     f.err = err;
                     return ;
                 }
-
             }
 
             extra |= int(f.b & uint32(1 << (int)(nb) - 1));
@@ -757,7 +722,6 @@ private static void huffmanBlock(this ptr<decompressor> _addr_f) {
             return ;
         }
         (f.copyLen, f.copyDist) = (length, dist);        goto copyHistory;
-
     }copyHistory:
  {
         var cnt = f.dict.tryWriteCopy(f.copyDist, f.copyLen);
@@ -771,10 +735,8 @@ private static void huffmanBlock(this ptr<decompressor> _addr_f) {
             f.step = (decompressor.val).huffmanBlock; // We need to continue this work
             f.stepState = stateDict;
             return ;
-
         }
         goto readLiteral;
-
     }
 }
 
@@ -807,7 +769,6 @@ private static void dataBlock(this ptr<decompressor> _addr_f) {
     }
     f.copyLen = n;
     f.copyData();
-
 }
 
 // copyData copies f.copyLen bytes from the underlying reader into f.hist.
@@ -833,7 +794,6 @@ private static void copyData(this ptr<decompressor> _addr_f) {
         return ;
     }
     f.finishBlock();
-
 }
 
 private static void finishBlock(this ptr<decompressor> _addr_f) {
@@ -844,10 +804,8 @@ private static void finishBlock(this ptr<decompressor> _addr_f) {
             f.toRead = f.dict.readFlush();
         }
         f.err = io.EOF;
-
     }
     f.step = (decompressor.val).nextBlock;
-
 }
 
 // noEOF returns err, unless err == io.EOF, in which case it returns io.ErrUnexpectedEOF.
@@ -856,7 +814,6 @@ private static error noEOF(error e) {
         return error.As(io.ErrUnexpectedEOF)!;
     }
     return error.As(e)!;
-
 }
 
 private static error moreBits(this ptr<decompressor> _addr_f) {
@@ -870,7 +827,6 @@ private static error moreBits(this ptr<decompressor> _addr_f) {
     f.b |= uint32(c) << (int)(f.nb);
     f.nb += 8;
     return error.As(null!)!;
-
 }
 
 // Read the next Huffman-encoded symbol from f according to h.
@@ -920,7 +876,6 @@ private static (nint, error) huffSym(this ptr<decompressor> _addr_f, ptr<huffman
             return (int(chunk >> (int)(huffmanValueShift)), error.As(null!)!);
         }
     }
-
 }
 
 private static Reader makeReader(io.Reader r) {
@@ -931,9 +886,7 @@ private static Reader makeReader(io.Reader r) {
             return rr;
         }
     }
-
     return bufio.NewReader(r);
-
 }
 
 private static void fixedHuffmanDecoderInit() {
@@ -981,9 +934,7 @@ private static void fixedHuffmanDecoderInit() {
             i = i__prev1;
         }
         fixedHuffmanDecoder.init(bits[..]);
-
     });
-
 }
 
 private static error Reset(this ptr<decompressor> _addr_f, io.Reader r, slice<byte> dict) {

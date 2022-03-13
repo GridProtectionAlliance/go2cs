@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:09:45 UTC
+//     Generated on 2022 March 13 06:23:01 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class ssagen_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct nowritebarrierrecChecker
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator nowritebarrierrecChecker(NilType nil) => default(nowritebarrierrecChecker);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static nowritebarrierrecChecker nowritebarrierrecChecker_cast(dynamic value)
         {
             return new nowritebarrierrecChecker(value.extraCalls, ref value.curfn);

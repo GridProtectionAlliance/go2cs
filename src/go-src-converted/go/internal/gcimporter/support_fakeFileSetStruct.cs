@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:32:40 UTC
+//     Generated on 2022 March 13 06:42:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class gcimporter_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct fakeFileSet
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator fakeFileSet(NilType nil) => default(fakeFileSet);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static fakeFileSet fakeFileSet_cast(dynamic value)
         {
             return new fakeFileSet(ref value.fset, value.files);

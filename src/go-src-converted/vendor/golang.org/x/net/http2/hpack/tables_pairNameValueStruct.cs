@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:37:15 UTC
+//     Generated on 2022 March 13 06:45:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace http2
 {
     public static partial class hpack_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pairNameValue
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace http2
             public static implicit operator pairNameValue(NilType nil) => default(pairNameValue);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pairNameValue pairNameValue_cast(dynamic value)
         {
             return new pairNameValue(value.name, value.value);

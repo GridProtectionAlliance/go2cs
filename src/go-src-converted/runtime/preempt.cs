@@ -50,14 +50,14 @@
 // is not designed to run from a signal handler, as it tends to
 // allocate memory and start threads in the preemption path.)
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:50 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:16 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\preempt.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -112,7 +112,6 @@ private static suspendGState suspendG(ptr<g> _addr_gp) {
             // G is stuck at an unsafe point. If another goroutine
             // were to try to preempt m.curg, it could deadlock.
             throw("suspendG from non-preemptible goroutine");
-
         }
     } 
 
@@ -126,7 +125,7 @@ private static suspendGState suspendG(ptr<g> _addr_gp) {
     ptr<m> asyncM;
     uint asyncGen = default;
     long nextPreemptM = default;
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         {
             var s = readgstatus(gp);
 
@@ -235,9 +234,7 @@ private static suspendGState suspendG(ptr<g> _addr_gp) {
                         nextPreemptM = now + yieldDelay / 2;
                         preemptM(asyncM);
                     }
-
                 }
-
                 goto __switch_break0;
             }
             // default: 
@@ -248,9 +245,7 @@ private static suspendGState suspendG(ptr<g> _addr_gp) {
                     // TODO: It would be nicer if we could
                     // coalesce suspends.
                     break;
-
                 }
-
                 dumpgstatus(gp);
                 throw("invalid g status");
 
@@ -276,7 +271,6 @@ private static suspendGState suspendG(ptr<g> _addr_gp) {
             nextYield = nanotime() + yieldDelay / 2;
         }
     }
-
 }
 
 // resumeG undoes the effects of suspendG, allowing the suspended
@@ -285,7 +279,6 @@ private static void resumeG(suspendGState state) {
     if (state.dead) { 
         // We didn't actually stop anything.
         return ;
-
     }
     var gp = state.g;
     {
@@ -303,7 +296,6 @@ private static void resumeG(suspendGState state) {
     if (state.stopped) { 
         // We stopped it, so we need to re-schedule it.
         ready(gp, 0, true);
-
     }
 }
 
@@ -340,7 +332,6 @@ private static void asyncPreempt2() {
         mcall(gopreempt_m);
     }
     gp.asyncSafePoint = false;
-
 }
 
 // asyncPreemptStack is the bytes of stack space required to inject an
@@ -367,7 +358,6 @@ private static void init() {
         // new context for the P.
         print("runtime: asyncPreemptStack=", asyncPreemptStack, "\n");
         throw("async stack too large");
-
     }
 }
 
@@ -378,7 +368,6 @@ private static bool wantAsyncPreempt(ptr<g> _addr_gp) {
  
     // Check both the G and the P.
     return (gp.preempt || gp.m.p != 0 && gp.m.p.ptr().preempt) && readgstatus(gp) & ~_Gscan == _Grunning;
-
 }
 
 // isAsyncSafePoint reports whether gp at instruction PC is an
@@ -420,7 +409,6 @@ private static (bool, System.UIntPtr) isAsyncSafePoint(ptr<g> _addr_gp, System.U
     if (!f.valid()) { 
         // Not Go code.
         return (false, 0);
-
     }
     if ((GOARCH == "mips" || GOARCH == "mipsle" || GOARCH == "mips64" || GOARCH == "mips64le") && lr == pc + 8 && funcspdelta(f, pc, null) == 0) { 
         // We probably stopped at a half-executed CALL instruction,
@@ -432,7 +420,6 @@ private static (bool, System.UIntPtr) isAsyncSafePoint(ptr<g> _addr_gp, System.U
         // call to morestack, we haven't created the frame, and we'll
         // use the LR for unwinding, which will be bad.
         return (false, 0);
-
     }
     var (up, startpc) = pcdatavalue2(f, _PCDATA_UnsafePoint, pc);
     if (up != _PCDATA_UnsafePointSafe) { 
@@ -440,7 +427,6 @@ private static (bool, System.UIntPtr) isAsyncSafePoint(ptr<g> _addr_gp, System.U
         // atomic sequences (e.g., write barrier) and nosplit
         // functions (except at calls).
         return (false, 0);
-
     }
     {
         var fd = funcdata(f, _FUNCDATA_LocalsPointerMaps);
@@ -457,10 +443,8 @@ private static (bool, System.UIntPtr) isAsyncSafePoint(ptr<g> _addr_gp, System.U
             // It might be possible to preempt any assembly functions
             // except the ones that have funcFlag_SPWRITE set in f.flag.
             return (false, 0);
-
         }
     }
-
     var name = funcname(f);
     {
         var inldata = funcdata(f, _FUNCDATA_InlTree);
@@ -473,7 +457,6 @@ private static (bool, System.UIntPtr) isAsyncSafePoint(ptr<g> _addr_gp, System.U
             }
         }
     }
-
     if (hasPrefix(name, "runtime.") || hasPrefix(name, "runtime/internal/") || hasPrefix(name, "reflect.")) { 
         // For now we never async preempt the runtime or
         // anything closely tied to the runtime. Known issues
@@ -486,7 +469,6 @@ private static (bool, System.UIntPtr) isAsyncSafePoint(ptr<g> _addr_gp, System.U
         // TODO(austin): We should improve this, or opt things
         // in incrementally.
         return (false, 0);
-
     }
 
     if (up == _PCDATA_Restart1 || up == _PCDATA_Restart2) 
@@ -500,7 +482,6 @@ private static (bool, System.UIntPtr) isAsyncSafePoint(ptr<g> _addr_gp, System.U
         // Restart from the function entry at resumption.
         return (true, f.entry);
         return (true, pc);
-
 }
 
 private static ulong no_pointers_stackmap = default; // defined in assembly, for NO_LOCAL_POINTERS macro

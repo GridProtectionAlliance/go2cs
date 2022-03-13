@@ -4,19 +4,21 @@
 
 // Implements methods to remove frames from profiles.
 
-// package profile -- go2cs converted at 2022 March 06 22:24:20 UTC
+// package profile -- go2cs converted at 2022 March 13 05:38:48 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Program Files\Go\src\internal\profile\prune.go
-using fmt = go.fmt_package;
-using regexp = go.regexp_package;
-
 namespace go.@internal;
+
+using fmt = fmt_package;
+using regexp = regexp_package;
+
+
+// Prune removes all nodes beneath a node matching dropRx, and not
+// matching keepRx. If the root node of a Sample matches, the sample
+// will have an empty stack.
 
 public static partial class profile_package {
 
-    // Prune removes all nodes beneath a node matching dropRx, and not
-    // matching keepRx. If the root node of a Sample matches, the sample
-    // will have an empty stack.
 private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dropRx, ptr<regexp.Regexp> _addr_keepRx) {
     ref Profile p = ref _addr_p.val;
     ref regexp.Regexp dropRx = ref _addr_dropRx.val;
@@ -44,7 +46,6 @@ private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dr
                     }
                 }
             }
-
         }
 
         if (i >= 0) { 
@@ -55,7 +56,6 @@ private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dr
             if (i == len(loc.Line) - 1) { 
                 // Matched the top entry: prune the whole location.
                 prune[loc.ID] = true;
-
             }
             else
  {
@@ -91,7 +91,6 @@ private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dr
 
             i = i__prev2;
         }
-
     }
 }
 
@@ -116,13 +115,10 @@ private static error RemoveUninteresting(this ptr<Profile> _addr_p) {
             if (err != null) {
                 return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.KeepFrames, err))!;
             }
-
         }
         p.Prune(drop, keep);
-
     }
     return error.As(null!)!;
-
 }
 
 } // end profile_package

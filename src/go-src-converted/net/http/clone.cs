@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2022 March 06 22:21:08 UTC
+// package http -- go2cs converted at 2022 March 13 05:36:16 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\clone.go
-using multipart = go.mime.multipart_package;
-using textproto = go.net.textproto_package;
-using url = go.net.url_package;
-
 namespace go.net;
+
+using multipart = mime.multipart_package;
+using textproto = net.textproto_package;
+using url = net.url_package;
 
 public static partial class http_package {
 
@@ -18,7 +18,6 @@ private static url.Values cloneURLValues(url.Values v) {
         return null;
     }
     return url.Values(Header(v).Clone());
-
 }
 
 private static ptr<url.URL> cloneURL(ptr<url.URL> _addr_u) {
@@ -34,7 +33,6 @@ private static ptr<url.URL> cloneURL(ptr<url.URL> _addr_u) {
         u2.User.val = u.User.val;
     }
     return _addr_u2!;
-
 }
 
 private static ptr<multipart.Form> cloneMultipartForm(ptr<multipart.Form> _addr_f) {
@@ -55,7 +53,6 @@ private static ptr<multipart.Form> cloneMultipartForm(ptr<multipart.Form> _addr_
         }        f2.File = m;
     }
     return _addr_f2!;
-
 }
 
 private static ptr<multipart.FileHeader> cloneMultipartFileHeader(ptr<multipart.FileHeader> _addr_fh) {
@@ -68,7 +65,6 @@ private static ptr<multipart.FileHeader> cloneMultipartFileHeader(ptr<multipart.
     fh2.val = fh;
     fh2.Header = textproto.MIMEHeader(Header(fh.Header).Clone());
     return _addr_fh2!;
-
 }
 
 // cloneOrMakeHeader invokes Header.Clone but if the
@@ -79,7 +75,6 @@ private static Header cloneOrMakeHeader(Header hdr) {
         clone = make(Header);
     }
     return clone;
-
 }
 
 } // end http_package

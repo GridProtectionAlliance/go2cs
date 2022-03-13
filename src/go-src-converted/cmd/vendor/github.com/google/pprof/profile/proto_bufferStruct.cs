@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:24:05 UTC
+//     Generated on 2022 March 13 06:37:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace pprof
 {
     public static partial class profile_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct buffer
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace pprof
             public static implicit operator buffer(NilType nil) => default(buffer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static buffer buffer_cast(dynamic value)
         {
             return new buffer(value.field, value.typ, value.u64, value.data, value.tmp);

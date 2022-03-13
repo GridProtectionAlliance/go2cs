@@ -6,15 +6,15 @@
 // instruction set, to minimize its interaction with the core of the
 // assembler.
 
-// package arch -- go2cs converted at 2022 March 06 22:46:37 UTC
+// package arch -- go2cs converted at 2022 March 13 05:57:50 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\arch\arm.go
-using strings = go.strings_package;
-
-using obj = go.cmd.@internal.obj_package;
-using arm = go.cmd.@internal.obj.arm_package;
-
 namespace go.cmd.asm.@internal;
+
+using strings = strings_package;
+
+using obj = cmd.@internal.obj_package;
+using arm = cmd.@internal.obj.arm_package;
 
 public static partial class arch_package {
 
@@ -35,7 +35,6 @@ public static bool IsARMCMP(obj.As op) {
     if (op == arm.ACMN || op == arm.ACMP || op == arm.ATEQ || op == arm.ATST) 
         return true;
         return false;
-
 }
 
 // IsARMSTREX reports whether the op (as defined by an arm.A* constant) is
@@ -45,7 +44,6 @@ public static bool IsARMSTREX(obj.As op) {
     if (op == arm.ASTREX || op == arm.ASTREXD || op == arm.ASWPW || op == arm.ASWPBU) 
         return true;
         return false;
-
 }
 
 // MCR is not defined by the obj/arm; instead we define it privately here.
@@ -64,7 +62,6 @@ public static bool IsARMMRC(obj.As op) {
     if (op == arm.AMRC || op == aMCR) // Note: aMCR is defined in this package.
         return true;
         return false;
-
 }
 
 // IsARMBFX reports whether the op (as defined by an arm.A* constant) is one the
@@ -74,7 +71,6 @@ public static bool IsARMBFX(obj.As op) {
     if (op == arm.ABFX || op == arm.ABFXU || op == arm.ABFC || op == arm.ABFI) 
         return true;
         return false;
-
 }
 
 // IsARMFloatCmp reports whether the op is a floating comparison instruction.
@@ -83,7 +79,6 @@ public static bool IsARMFloatCmp(obj.As op) {
     if (op == arm.ACMPF || op == arm.ACMPD) 
         return true;
         return false;
-
 }
 
 // ARMMRCOffset implements the peculiar encoding of the MRC and MCR instructions.
@@ -105,7 +100,6 @@ public static (long, obj.As, bool) ARMMRCOffset(obj.As op, @string cond, long x0
     }
     offset = (0xe << 24) | (op1 << 20) | ((int64(bits) ^ arm.C_SCOND_XOR) << 28) | ((x0 & 15) << 8) | ((x1 & 7) << 21) | ((x2 & 15) << 12) | ((x3 & 15) << 16) | ((x4 & 15) << 0) | ((x5 & 7) << 5) | (1 << 4); /* must be set */
     return (offset, arm.AMRC, true);
-
 }
 
 // IsARMMULA reports whether the op (as defined by an arm.A* constant) is
@@ -115,7 +109,6 @@ public static bool IsARMMULA(obj.As op) {
     if (op == arm.AMULA || op == arm.AMULS || op == arm.AMMULA || op == arm.AMMULS || op == arm.AMULABB || op == arm.AMULAWB || op == arm.AMULAWT) 
         return true;
         return false;
-
 }
 
 private static obj.As bcode = new slice<obj.As>(new obj.As[] { arm.ABEQ, arm.ABNE, arm.ABCS, arm.ABCC, arm.ABMI, arm.ABPL, arm.ABVS, arm.ABVC, arm.ABHI, arm.ABLS, arm.ABGE, arm.ABLT, arm.ABGT, arm.ABLE, arm.AB, obj.ANOP });
@@ -138,7 +131,6 @@ public static bool ARMConditionCodes(ptr<obj.Prog> _addr_prog, @string cond) {
     }
     prog.Scond = bits;
     return true;
-
 }
 
 // ParseARMCondition parses the conditions attached to an ARM instruction.
@@ -175,7 +167,6 @@ private static (byte, bool) parseARMCondition(@string cond, map<@string, byte> l
             b = b__prev1;
 
         }
-
         {
             var b__prev1 = b;
 
@@ -189,11 +180,8 @@ private static (byte, bool) parseARMCondition(@string cond, map<@string, byte> l
             b = b__prev1;
 
         }
-
         return (0, false);
-
     }    return (bits, true);
-
 }
 
 private static (short, bool) armRegisterNumber(@string name, short n) {
@@ -212,7 +200,6 @@ private static (short, bool) armRegisterNumber(@string name, short n) {
             break;
     }
     return (0, false);
-
 }
 
 } // end arch_package

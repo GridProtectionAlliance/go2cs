@@ -4,11 +4,9 @@
 
 // +build plan9
 
-// package plan9 -- go2cs converted at 2022 March 06 23:26:24 UTC
+// package plan9 -- go2cs converted at 2022 March 13 06:41:15 UTC
 // import "cmd/vendor/golang.org/x/sys/plan9" ==> using plan9 = go.cmd.vendor.golang.org.x.sys.plan9_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\plan9\str.go
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
 
 public static partial class plan9_package {
@@ -26,7 +24,6 @@ private static @string itoa(nint val) { // do it here rather than with fmt to av
     }
     buf[i] = byte(val + '0');
     return string(buf[(int)i..]);
-
 }
 
 } // end plan9_package

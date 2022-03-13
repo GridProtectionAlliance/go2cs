@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:49 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:47 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\pkcs8.go
-using ecdsa = go.crypto.ecdsa_package;
-using ed25519 = go.crypto.ed25519_package;
-using rsa = go.crypto.rsa_package;
-using pkix = go.crypto.x509.pkix_package;
-using asn1 = go.encoding.asn1_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-
 namespace go.crypto;
+
+using ecdsa = crypto.ecdsa_package;
+using ed25519 = crypto.ed25519_package;
+using rsa = crypto.rsa_package;
+using pkix = crypto.x509.pkix_package;
+using asn1 = encoding.asn1_package;
+using errors = errors_package;
+using fmt = fmt_package;
+
+
+// pkcs8 reflects an ASN.1, PKCS #8 PrivateKey. See
+// ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-8/pkcs-8v1_2.asn
+// and RFC 5208.
 
 public static partial class x509_package {
 
-    // pkcs8 reflects an ASN.1, PKCS #8 PrivateKey. See
-    // ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-8/pkcs-8v1_2.asn
-    // and RFC 5208.
 private partial struct pkcs8 {
     public nint Version;
     public pkix.AlgorithmIdentifier Algo;
@@ -49,7 +51,6 @@ public static (object, error) ParsePKCS8PrivateKey(slice<byte> der) {
                 }
 
             }
-
             {
                 (_, err) = asn1.Unmarshal(der, addr(new pkcs1PrivateKey()));
 
@@ -58,12 +59,9 @@ public static (object, error) ParsePKCS8PrivateKey(slice<byte> der) {
                 }
 
             }
-
             return (null, error.As(err)!);
-
         }
     }
-
 
     if (privKey.Algo.Algorithm.Equal(oidPublicKeyRSA)) 
         key, err = ParsePKCS1PrivateKey(privKey.PrivateKey);
@@ -82,7 +80,6 @@ public static (object, error) ParsePKCS8PrivateKey(slice<byte> der) {
             }
 
         }
-
         key, err = parseECPrivateKey(namedCurveOID, privKey.PrivateKey);
         if (err != null) {
             return (null, error.As(errors.New("x509: failed to parse EC private key embedded in PKCS#8: " + err.Error()))!);
@@ -101,7 +98,6 @@ public static (object, error) ParsePKCS8PrivateKey(slice<byte> der) {
             l = l__prev1;
 
         }
-
         ref slice<byte> curvePrivateKey = ref heap(out ptr<slice<byte>> _addr_curvePrivateKey);
         {
             (_, err) = asn1.Unmarshal(privKey.PrivateKey, _addr_curvePrivateKey);
@@ -111,7 +107,6 @@ public static (object, error) ParsePKCS8PrivateKey(slice<byte> der) {
             }
 
         }
-
         {
             var l__prev1 = l;
 
@@ -124,12 +119,10 @@ public static (object, error) ParsePKCS8PrivateKey(slice<byte> der) {
             l = l__prev1;
 
         }
-
         return (ed25519.NewKeyFromSeed(curvePrivateKey), error.As(null!)!);
     else 
         return (null, error.As(fmt.Errorf("x509: PKCS#8 wrapping contained private key with unknown algorithm: %v", privKey.Algo.Algorithm))!);
-    
-}
+    }
 
 // MarshalPKCS8PrivateKey converts a private key to PKCS #8, ASN.1 DER form.
 //
@@ -164,7 +157,6 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(object key) {
             if (err != null) {
                 return (null, error.As(errors.New("x509: failed to marshal EC private key while building PKCS#8: " + err.Error()))!);
             }
-
             break;
         case ed25519.PrivateKey k:
             privKey.Algo = new pkix.AlgorithmIdentifier(Algorithm:oidPublicKeyEd25519,);
@@ -184,7 +176,6 @@ public static (slice<byte>, error) MarshalPKCS8PrivateKey(object key) {
     }
 
     return asn1.Marshal(privKey);
-
 }
 
 } // end x509_package

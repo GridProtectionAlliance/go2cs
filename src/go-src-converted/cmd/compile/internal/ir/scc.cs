@@ -2,41 +2,39 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:15 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:37 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\scc.go
-
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using System;
 public static partial class ir_package {
 
-    // Strongly connected components.
-    //
-    // Run analysis on minimal sets of mutually recursive functions
-    // or single non-recursive functions, bottom up.
-    //
-    // Finding these sets is finding strongly connected components
-    // by reverse topological order in the static call graph.
-    // The algorithm (known as Tarjan's algorithm) for doing that is taken from
-    // Sedgewick, Algorithms, Second Edition, p. 482, with two adaptations.
-    //
-    // First, a hidden closure function (n.Func.IsHiddenClosure()) cannot be the
-    // root of a connected component. Refusing to use it as a root
-    // forces it into the component of the function in which it appears.
-    // This is more convenient for escape analysis.
-    //
-    // Second, each function becomes two virtual nodes in the graph,
-    // with numbers n and n+1. We record the function's node number as n
-    // but search from node n+1. If the search tells us that the component
-    // number (min) is n+1, we know that this is a trivial component: one function
-    // plus its closures. If the search tells us that the component number is
-    // n, then there was a path from node n+1 back to node n, meaning that
-    // the function set is mutually recursive. The escape analysis can be
-    // more precise when analyzing a single non-recursive function than
-    // when analyzing a set of mutually recursive functions.
+// Strongly connected components.
+//
+// Run analysis on minimal sets of mutually recursive functions
+// or single non-recursive functions, bottom up.
+//
+// Finding these sets is finding strongly connected components
+// by reverse topological order in the static call graph.
+// The algorithm (known as Tarjan's algorithm) for doing that is taken from
+// Sedgewick, Algorithms, Second Edition, p. 482, with two adaptations.
+//
+// First, a hidden closure function (n.Func.IsHiddenClosure()) cannot be the
+// root of a connected component. Refusing to use it as a root
+// forces it into the component of the function in which it appears.
+// This is more convenient for escape analysis.
+//
+// Second, each function becomes two virtual nodes in the graph,
+// with numbers n and n+1. We record the function's node number as n
+// but search from node n+1. If the search tells us that the component
+// number (min) is n+1, we know that this is a trivial component: one function
+// plus its closures. If the search tells us that the component number is
+// n, then there was a path from node n+1 back to node n, meaning that
+// the function set is mutually recursive. The escape analysis can be
+// more precise when analyzing a single non-recursive function than
+// when analyzing a set of mutually recursive functions.
+
 private partial struct bottomUpVisitor {
     public Action<slice<ptr<Func>>, bool> analyze;
     public uint visitgen;
@@ -89,12 +87,10 @@ private static uint visit(this ptr<bottomUpVisitor> _addr_v, ptr<Func> _addr_n) 
         if (id > 0) { 
             // already visited
             return id;
-
         }
         id = id__prev1;
 
     }
-
 
     v.visitgen++;
     id = v.visitgen;
@@ -113,7 +109,6 @@ private static uint visit(this ptr<bottomUpVisitor> _addr_v, ptr<Func> _addr_n) 
                 }
 
             }
-
         }
     };
 
@@ -132,7 +127,6 @@ private static uint visit(this ptr<bottomUpVisitor> _addr_v, ptr<Func> _addr_n) 
                 n = n__prev1;
 
             }
-
         else if (n.Op() == ODOTMETH || n.Op() == OCALLPART || n.Op() == OMETHEXPR) 
             {
                 var fn = MethodExprName(n);
@@ -142,12 +136,10 @@ private static uint visit(this ptr<bottomUpVisitor> _addr_v, ptr<Func> _addr_n) 
                 }
 
             }
-
         else if (n.Op() == OCLOSURE) 
             n = n._<ptr<ClosureExpr>>();
             do(n.Func);
-        
-    });
+            });
 
     if ((min == id || min == id + 1) && !n.IsHiddenClosure()) { 
         // This node is the root of a strongly connected component.
@@ -175,10 +167,8 @@ private static uint visit(this ptr<bottomUpVisitor> _addr_v, ptr<Func> _addr_n) 
         // Run escape analysis on this set of functions.
         v.stack = v.stack[..(int)i];
         v.analyze(block, recursive);
-
     }
     return min;
-
 }
 
 } // end ir_package

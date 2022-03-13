@@ -2,23 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2022 March 06 22:25:10 UTC
+// package gob -- go2cs converted at 2022 March 13 05:39:42 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Program Files\Go\src\encoding\gob\error.go
-using fmt = go.fmt_package;
-
 namespace go.encoding;
+
+using fmt = fmt_package;
 
 public static partial class gob_package {
 
-    // Errors in decoding and encoding are handled using panic and recover.
-    // Panics caused by user error (that is, everything except run-time panics
-    // such as "index out of bounds" errors) do not leave the file that caused
-    // them, but are instead turned into plain error returns. Encoding and
-    // decoding functions and methods that do not return an error either use
-    // panic to report an error or are guaranteed error-free.
+// Errors in decoding and encoding are handled using panic and recover.
+// Panics caused by user error (that is, everything except run-time panics
+// such as "index out of bounds" errors) do not leave the file that caused
+// them, but are instead turned into plain error returns. Encoding and
+// decoding functions and methods that do not return an error either use
+// panic to report an error or are guaranteed error-free.
 
-    // A gobError is used to distinguish errors (panics) generated in this package.
+// A gobError is used to distinguish errors (panics) generated in this package.
 private partial struct gobError {
     public error err;
 }
@@ -52,7 +52,6 @@ private static void catchError(ptr<error> _addr_err) => func((_, panic, _) => {
             err = error.As(ge.err)!;
         }
     }
-
 });
 
 } // end gob_package

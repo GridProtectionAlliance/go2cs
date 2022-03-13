@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:02 UTC
+//     Generated on 2022 March 13 05:23:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class reflect_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct abiSeq
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace go
             public static implicit operator abiSeq(NilType nil) => default(abiSeq);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static abiSeq abiSeq_cast(dynamic value)
         {
             return new abiSeq(value.steps, value.valueStart, value.stackBytes, value.iregs, value.fregs);

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:01 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:47 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\map.go
+namespace go;
 // This file contains the implementation of Go's map type.
 //
 // A map is just a hash table. The data is arranged
@@ -54,12 +55,11 @@
 // Keep in mind this data is for maximally loaded tables, i.e. just
 // before the table grows. Typical tables will be somewhat less loaded.
 
-using atomic = go.runtime.@internal.atomic_package;
-using math = go.runtime.@internal.math_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
 
-namespace go;
+using atomic = runtime.@internal.atomic_package;
+using math = runtime.@internal.math_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -104,7 +104,6 @@ private static readonly nint sameSizeGrow = 8; // the current map growth is to a
 
 // sentinel bucket ID for iterator checks
 private static readonly nint noCheck = 1 << (int)((8 * sys.PtrSize)) - 1;
-
 
 // isEmpty reports whether the given tophash array entry represents an empty bucket entry.
 private static bool isEmpty(byte x) {
@@ -167,7 +166,6 @@ private partial struct hiter {
 private static System.UIntPtr bucketShift(byte b) { 
     // Masking the shift amount allows overflow checks to be elided.
     return uintptr(1) << (int)((b & (sys.PtrSize * 8 - 1)));
-
 }
 
 // bucketMask returns 1<<b - 1, optimized for code generation.
@@ -182,7 +180,6 @@ private static byte tophash(System.UIntPtr hash) {
         top += minTopHash;
     }
     return top;
-
 }
 
 private static bool evacuated(ptr<bmap> _addr_b) {
@@ -204,10 +201,9 @@ private static void setoverflow(this ptr<bmap> _addr_b, ptr<maptype> _addr_t, pt
     ref maptype t = ref _addr_t.val;
     ref bmap ovf = ref _addr_ovf.val;
 
-    (bmap.val)(add(@unsafe.Pointer(b), uintptr(t.bucketsize) - sys.PtrSize)).val;
+    (bmap.val).val;
 
-    ovf;
-
+    (add(@unsafe.Pointer(b), uintptr(t.bucketsize) - sys.PtrSize)) = ovf;
 }
 
 private static unsafe.Pointer keys(this ptr<bmap> _addr_b) {
@@ -254,7 +250,6 @@ private static ptr<bmap> newoverflow(this ptr<hmap> _addr_h, ptr<maptype> _addr_
         if (ovf.overflow(t) == null) { 
             // We're not at the end of the preallocated overflow buckets. Bump the pointer.
             h.extra.nextOverflow = (bmap.val)(add(@unsafe.Pointer(ovf), uintptr(t.bucketsize)));
-
         }
         else
  { 
@@ -263,7 +258,6 @@ private static ptr<bmap> newoverflow(this ptr<hmap> _addr_h, ptr<maptype> _addr_
             // which was set to a non-nil sentinel value.
             ovf.setoverflow(t, null);
             h.extra.nextOverflow = null;
-
         }
     }
     else
@@ -277,7 +271,6 @@ private static ptr<bmap> newoverflow(this ptr<hmap> _addr_h, ptr<maptype> _addr_
     }
     b.setoverflow(t, ovf);
     return _addr_ovf!;
-
 }
 
 private static void createOverflow(this ptr<hmap> _addr_h) {
@@ -299,7 +292,6 @@ private static ptr<hmap> makemap64(ptr<maptype> _addr_t, long hint, ptr<hmap> _a
         hint = 0;
     }
     return _addr_makemap(_addr_t, int(hint), _addr_h)!;
-
 }
 
 // makemap_small implements Go map creation for make(map[k]v) and
@@ -349,7 +341,6 @@ private static ptr<hmap> makemap(ptr<maptype> _addr_t, nint hint, ptr<hmap> _add
         }
     }
     return _addr_h!;
-
 }
 
 // makeBucketArray initializes a backing array for map buckets.
@@ -405,10 +396,8 @@ private static (unsafe.Pointer, ptr<bmap>) makeBucketArray(ptr<maptype> _addr_t,
         nextOverflow = (bmap.val)(add(buckets, base * uintptr(t.bucketsize)));
         var last = (bmap.val)(add(buckets, (nbuckets - 1) * uintptr(t.bucketsize)));
         last.setoverflow(t, (bmap.val)(buckets));
-
     }
     return (buckets, _addr_nextOverflow!);
-
 }
 
 // mapaccess1 returns a pointer to h[key].  Never returns nil, instead
@@ -434,7 +423,6 @@ private static unsafe.Pointer mapaccess1(ptr<maptype> _addr_t, ptr<hmap> _addr_h
             t.hasher(key, 0); // see issue 23734
         }
         return @unsafe.Pointer(_addr_zeroVal[0]);
-
     }
     if (h.flags & hashWriting != 0) {
         throw("concurrent map read and map write");
@@ -449,17 +437,13 @@ private static unsafe.Pointer mapaccess1(ptr<maptype> _addr_t, ptr<hmap> _addr_h
             if (!h.sameSizeGrow()) { 
                 // There used to be half as many buckets; mask down one more power of two.
                 m>>=1;
-
             }
-
             var oldb = (bmap.val)(add(c, (hash & m) * uintptr(t.bucketsize)));
             if (!evacuated(_addr_oldb)) {
                 b = oldb;
             }
-
         }
     }
-
     var top = tophash(hash);
 bucketloop:
     while (b != null) {
@@ -469,16 +453,13 @@ bucketloop:
                     _breakbucketloop = true;
                     break;
                 }
-
                 continue;
         b = b.overflow(t);
             }
-
             var k = add(@unsafe.Pointer(b), dataOffset + i * uintptr(t.keysize));
             if (t.indirectkey()) {
                 k = ((@unsafe.Pointer.val)(k)).val;
             }
-
             if (t.key.equal(key, k)) {
                 var e = add(@unsafe.Pointer(b), dataOffset + bucketCnt * uintptr(t.keysize) + i * uintptr(t.elemsize));
                 if (t.indirectelem()) {
@@ -486,12 +467,9 @@ bucketloop:
                 }
                 return e;
             }
-
         }
-
     }
     return @unsafe.Pointer(_addr_zeroVal[0]);
-
 }
 
 private static (unsafe.Pointer, bool) mapaccess2(ptr<maptype> _addr_t, ptr<hmap> _addr_h, unsafe.Pointer key) {
@@ -514,7 +492,6 @@ private static (unsafe.Pointer, bool) mapaccess2(ptr<maptype> _addr_t, ptr<hmap>
             t.hasher(key, 0); // see issue 23734
         }
         return (@unsafe.Pointer(_addr_zeroVal[0]), false);
-
     }
     if (h.flags & hashWriting != 0) {
         throw("concurrent map read and map write");
@@ -529,17 +506,13 @@ private static (unsafe.Pointer, bool) mapaccess2(ptr<maptype> _addr_t, ptr<hmap>
             if (!h.sameSizeGrow()) { 
                 // There used to be half as many buckets; mask down one more power of two.
                 m>>=1;
-
             }
-
             var oldb = (bmap.val)(add(c, (hash & m) * uintptr(t.bucketsize)));
             if (!evacuated(_addr_oldb)) {
                 b = oldb;
             }
-
         }
     }
-
     var top = tophash(hash);
 bucketloop:
     while (b != null) {
@@ -549,16 +522,13 @@ bucketloop:
                     _breakbucketloop = true;
                     break;
                 }
-
                 continue;
         b = b.overflow(t);
             }
-
             var k = add(@unsafe.Pointer(b), dataOffset + i * uintptr(t.keysize));
             if (t.indirectkey()) {
                 k = ((@unsafe.Pointer.val)(k)).val;
             }
-
             if (t.key.equal(key, k)) {
                 var e = add(@unsafe.Pointer(b), dataOffset + bucketCnt * uintptr(t.keysize) + i * uintptr(t.elemsize));
                 if (t.indirectelem()) {
@@ -566,12 +536,9 @@ bucketloop:
                 }
                 return (e, true);
             }
-
         }
-
     }
     return (@unsafe.Pointer(_addr_zeroVal[0]), false);
-
 }
 
 // returns both key and elem. Used by map iterator
@@ -594,17 +561,13 @@ private static (unsafe.Pointer, unsafe.Pointer) mapaccessK(ptr<maptype> _addr_t,
             if (!h.sameSizeGrow()) { 
                 // There used to be half as many buckets; mask down one more power of two.
                 m>>=1;
-
             }
-
             var oldb = (bmap.val)(add(c, (hash & m) * uintptr(t.bucketsize)));
             if (!evacuated(_addr_oldb)) {
                 b = oldb;
             }
-
         }
     }
-
     var top = tophash(hash);
 bucketloop:
     while (b != null) {
@@ -614,16 +577,13 @@ bucketloop:
                     _breakbucketloop = true;
                     break;
                 }
-
                 continue;
         b = b.overflow(t);
             }
-
             var k = add(@unsafe.Pointer(b), dataOffset + i * uintptr(t.keysize));
             if (t.indirectkey()) {
                 k = ((@unsafe.Pointer.val)(k)).val;
             }
-
             if (t.key.equal(key, k)) {
                 var e = add(@unsafe.Pointer(b), dataOffset + bucketCnt * uintptr(t.keysize) + i * uintptr(t.elemsize));
                 if (t.indirectelem()) {
@@ -631,12 +591,9 @@ bucketloop:
                 }
                 return (k, e);
             }
-
         }
-
     }
     return (null, null);
-
 }
 
 private static unsafe.Pointer mapaccess1_fat(ptr<maptype> _addr_t, ptr<hmap> _addr_h, unsafe.Pointer key, unsafe.Pointer zero) {
@@ -648,7 +605,6 @@ private static unsafe.Pointer mapaccess1_fat(ptr<maptype> _addr_t, ptr<hmap> _ad
         return zero;
     }
     return e;
-
 }
 
 private static (unsafe.Pointer, bool) mapaccess2_fat(ptr<maptype> _addr_t, ptr<hmap> _addr_h, unsafe.Pointer key, unsafe.Pointer zero) {
@@ -662,7 +618,6 @@ private static (unsafe.Pointer, bool) mapaccess2_fat(ptr<maptype> _addr_t, ptr<h
         return (zero, false);
     }
     return (e, true);
-
 }
 
 // Like mapaccess, but allocates a slot for the key if it is not present in the map.
@@ -723,16 +678,12 @@ bucketloop:
                     _breakbucketloop = true;
                     break;
                 }
-
                 continue;
-
             }
-
             var k = add(@unsafe.Pointer(b), dataOffset + i * uintptr(t.keysize));
             if (t.indirectkey()) {
                 k = ((@unsafe.Pointer.val)(k)).val;
             }
-
             if (!t.key.equal(key, k)) {
                 continue;
             } 
@@ -740,17 +691,14 @@ bucketloop:
             if (t.needkeyupdate()) {
                 typedmemmove(t.key, k, key);
             }
-
             elem = add(@unsafe.Pointer(b), dataOffset + bucketCnt * uintptr(t.keysize) + i * uintptr(t.elemsize));
             goto done;
-
         }
         var ovf = b.overflow(t);
         if (ovf == null) {
             break;
         }
         b = ovf;
-
     } 
 
     // Did not find mapping for key. Allocate new cell & add entry.
@@ -767,20 +715,17 @@ bucketloop:
         inserti = _addr_newb.tophash[0];
         insertk = add(@unsafe.Pointer(newb), dataOffset);
         elem = add(insertk, bucketCnt * uintptr(t.keysize));
-
     }
     if (t.indirectkey()) {
-        var kmem = newobject(t.key) * (@unsafe.Pointer.val)(insertk);
+        var kmem = newobject(t.key) * (@unsafe.Pointer.val);
 
-        kmem;
+        (insertk) = kmem;
         insertk = kmem;
-
     }
     if (t.indirectelem()) {
-        var vmem = newobject(t.elem) * (@unsafe.Pointer.val)(elem);
+        var vmem = newobject(t.elem) * (@unsafe.Pointer.val);
 
-        vmem;
-
+        (elem) = vmem;
     }
     typedmemmove(t.key, insertk, key);
     inserti.val = top;
@@ -795,7 +740,6 @@ done:
         elem = ((@unsafe.Pointer.val)(elem)).val;
     }
     return elem;
-
 });
 
 private static void mapdelete(ptr<maptype> _addr_t, ptr<hmap> _addr_h, unsafe.Pointer key) {
@@ -816,7 +760,6 @@ private static void mapdelete(ptr<maptype> _addr_t, ptr<hmap> _addr_h, unsafe.Po
             t.hasher(key, 0); // see issue 23734
         }
         return ;
-
     }
     if (h.flags & hashWriting != 0) {
         throw("concurrent map writes");
@@ -843,37 +786,31 @@ search:
                     _breaksearch = true;
                     break;
                 }
-
                 continue;
         b = b.overflow(t);
             }
-
             var k = add(@unsafe.Pointer(b), dataOffset + i * uintptr(t.keysize));
             var k2 = k;
             if (t.indirectkey()) {
                 k2 = ((@unsafe.Pointer.val)(k2)).val;
             }
-
             if (!t.key.equal(key, k2)) {
                 continue;
             } 
             // Only clear key if there are pointers in it.
             if (t.indirectkey()) {
-                (@unsafe.Pointer.val)(k).val;
+                (@unsafe.Pointer.val).val;
 
-                null;
-
+                (k) = null;
             }
             else if (t.key.ptrdata != 0) {
                 memclrHasPointers(k, t.key.size);
             }
-
             var e = add(@unsafe.Pointer(b), dataOffset + bucketCnt * uintptr(t.keysize) + i * uintptr(t.elemsize));
             if (t.indirectelem()) {
-                (@unsafe.Pointer.val)(e).val;
+                (@unsafe.Pointer.val).val;
 
-                null;
-
+                (e) = null;
             }
             else if (t.elem.ptrdata != 0) {
                 memclrHasPointers(e, t.elem.size);
@@ -882,7 +819,6 @@ search:
  {
                 memclrNoHeapPointers(e, t.elem.size);
             }
-
             b.tophash[i] = emptyOne; 
             // If the bucket now ends in a bunch of emptyOne states,
             // change those to emptyRest states.
@@ -899,7 +835,6 @@ search:
                     goto notLast;
                 }
             }
-
             while (true) {
                 b.tophash[i] = emptyRest;
                 if (i == 0) {
@@ -916,15 +851,12 @@ search:
                 else
 
                     i = bucketCnt - 1;
-
                 } {
                     i--;
                 }
-
                 if (b.tophash[i] != emptyOne) {
                     break;
                 }
-
             }
 
 notLast: 
@@ -936,17 +868,14 @@ notLast:
             if (h.count == 0) {
                 h.hash0 = fastrand();
             }
-
             _breaksearch = true;
             break;
         }
-
     }
     if (h.flags & hashWriting == 0) {
         throw("concurrent map writes");
     }
     h.flags &= hashWriting;
-
 }
 
 // mapiterinit initializes the hiter struct used for ranging over maps.
@@ -982,7 +911,6 @@ private static void mapiterinit(ptr<maptype> _addr_t, ptr<hmap> _addr_h, ptr<hit
         h.createOverflow();
         it.overflow = h.extra.overflow;
         it.oldoverflow = h.extra.oldoverflow;
-
     }
     var r = uintptr(fastrand());
     if (h.B > 31 - bucketCntBits) {
@@ -1004,9 +932,7 @@ private static void mapiterinit(ptr<maptype> _addr_t, ptr<hmap> _addr_h, ptr<hit
         }
     }
 
-
     mapiternext(_addr_it);
-
 }
 
 private static void mapiternext(ptr<hiter> _addr_it) {
@@ -1033,7 +959,6 @@ next:
             it.key = null;
             it.elem = null;
             return ;
-
         }
         if (h.growing() && it.B == h.B) { 
             // Iterator was started in the middle of a grow, and the grow isn't done yet.
@@ -1050,7 +975,6 @@ next:
                 b = (bmap.val)(add(it.buckets, bucket * uintptr(t.bucketsize)));
                 checkBucket = noCheck;
             }
-
         }
         else
  {
@@ -1063,7 +987,6 @@ next:
             it.wrapped = true;
         }
         i = 0;
-
     }
     while (i < bucketCnt) {
         var offi = (i + it.offset) & (bucketCnt - 1);
@@ -1093,7 +1016,6 @@ next:
                 if (hash & bucketMask(it.B) != checkBucket) {
                     continue;
                 }
-
             }
             else
  { 
@@ -1107,9 +1029,7 @@ next:
                 if (checkBucket >> (int)((it.B - 1)) != uintptr(b.tophash[offi] & 1)) {
                     continue;
                 }
-
             }
-
         }
         if ((b.tophash[offi] != evacuatedX && b.tophash[offi] != evacuatedY) || !(t.reflexivekey() || t.key.equal(k, k))) { 
             // This is the golden data, we can return it.
@@ -1120,9 +1040,7 @@ next:
             if (t.indirectelem()) {
                 e = ((@unsafe.Pointer.val)(e)).val;
             }
-
             it.elem = e;
-
         }
         else
  { 
@@ -1137,25 +1055,20 @@ next:
             if (rk == null) {
                 continue; // key has been deleted
             }
-
             it.key = rk;
             it.elem = re;
-
         }
         it.bucket = bucket;
         if (it.bptr != b) { // avoid unnecessary write barrier; see issue 14921
             it.bptr = b;
-
         }
         it.i = i + 1;
         it.checkBucket = checkBucket;
         return ;
-
     }
     b = b.overflow(t);
     i = 0;
     goto next;
-
 }
 
 // mapclear deletes all keys from a map.
@@ -1195,13 +1108,11 @@ private static void mapclear(ptr<maptype> _addr_t, ptr<hmap> _addr_h) {
         // If overflow buckets are created then h.extra
         // will have been allocated during initial bucket creation.
         h.extra.nextOverflow = nextOverflow;
-
     }
     if (h.flags & hashWriting == 0) {
         throw("concurrent map writes");
     }
     h.flags &= hashWriting;
-
 }
 
 private static void hashGrow(ptr<maptype> _addr_t, ptr<hmap> _addr_h) {
@@ -1237,14 +1148,12 @@ private static void hashGrow(ptr<maptype> _addr_t, ptr<hmap> _addr_h) {
         }
         h.extra.oldoverflow = h.extra.overflow;
         h.extra.overflow = null;
-
     }
     if (nextOverflow != null) {
         if (h.extra == null) {
             h.extra = @new<mapextra>();
         }
         h.extra.nextOverflow = nextOverflow;
-
     }
 }
 
@@ -1265,7 +1174,6 @@ private static bool tooManyOverflowBuckets(ushort noverflow, byte B) {
         B = 15;
     }
     return noverflow >= uint16(1) << (int)((B & 15));
-
 }
 
 // growing reports whether h is growing. The growth may be to the same size or bigger.
@@ -1291,7 +1199,6 @@ private static System.UIntPtr noldbuckets(this ptr<hmap> _addr_h) {
         oldB--;
     }
     return bucketShift(oldB);
-
 }
 
 // oldbucketmask provides a mask that can be applied to calculate n % noldbuckets().
@@ -1355,7 +1262,6 @@ private static void evacuate(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIn
             y.b = (bmap.val)(add(h.buckets, (oldbucket + newbit) * uintptr(t.bucketsize)));
             y.k = add(@unsafe.Pointer(y.b), dataOffset);
             y.e = add(y.k, bucketCnt * uintptr(t.keysize));
-
         }
         while (b != null) {
             var k = add(@unsafe.Pointer(b), dataOffset);
@@ -1370,17 +1276,14 @@ private static void evacuate(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIn
                         continue;
                     (i, k, e) = (i + 1, add(k, uintptr(t.keysize)), add(e, uintptr(t.elemsize)));
                     }
-
                     if (top < minTopHash) {
                         throw("bad map state");
             b = b.overflow(t);
                     }
-
                     var k2 = k;
                     if (t.indirectkey()) {
                         k2 = ((@unsafe.Pointer.val)(k2)).val;
                     }
-
                     byte useY = default;
                     if (!h.sameSizeGrow()) { 
                         // Compute hash to make our evacuation decision (whether we need
@@ -1400,7 +1303,6 @@ private static void evacuate(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIn
                             // after multiple grows.
                             useY = top & 1;
                             top = tophash(hash);
-
                         }
                         else
  {
@@ -1408,13 +1310,10 @@ private static void evacuate(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIn
                                 useY = 1;
                             }
                         }
-
                     }
-
                     if (evacuatedX + 1 != evacuatedY || evacuatedX ^ 1 != evacuatedY) {
                         throw("bad evacuatedN");
                     }
-
                     b.tophash[i] = evacuatedX + useY; // evacuatedX + 1 == evacuatedY
                     var dst = _addr_xy[useY]; // evacuation destination
 
@@ -1424,29 +1323,25 @@ private static void evacuate(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIn
                         dst.k = add(@unsafe.Pointer(dst.b), dataOffset);
                         dst.e = add(dst.k, bucketCnt * uintptr(t.keysize));
                     }
-
                     dst.b.tophash[dst.i & (bucketCnt - 1)] = top; // mask dst.i as an optimization, to avoid a bounds check
                     if (t.indirectkey()) {
-                        (@unsafe.Pointer.val)(dst.k).val;
+                        (@unsafe.Pointer.val).val;
 
-                        k2; // copy pointer
+                        (dst.k) = k2; // copy pointer
                     }
                     else
  {
                         typedmemmove(t.key, dst.k, k); // copy elem
                     }
-
                     if (t.indirectelem()) {
-                        (@unsafe.Pointer.val)(dst.e).val;
+                        (@unsafe.Pointer.val).val;
 
-                        new ptr<ptr<ptr<unsafe.Pointer>>>(e);
-
+                        (dst.e) = new ptr<ptr<ptr<unsafe.Pointer>>>(e);
                     }
                     else
  {
                         typedmemmove(t.elem, dst.e, e);
                     }
-
                     dst.i++; 
                     // These updates might push these pointers past the end of the
                     // key or elem arrays.  That's ok, as we have the overflow pointer
@@ -1454,11 +1349,9 @@ private static void evacuate(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIn
                     // end of the bucket.
                     dst.k = add(dst.k, uintptr(t.keysize));
                     dst.e = add(dst.e, uintptr(t.elemsize));
-
                 }
 
             }
-
         } 
         // Unlink the overflow buckets & clear key/elem to help GC.
         if (h.flags & oldIterator == 0 && t.bucket.ptrdata != 0) {
@@ -1468,7 +1361,6 @@ private static void evacuate(ptr<maptype> _addr_t, ptr<hmap> _addr_h, System.UIn
             var ptr = add(b, dataOffset);
             var n = uintptr(t.bucketsize) - dataOffset;
             memclrHasPointers(ptr, n);
-
         }
     }
     if (oldbucket == h.nevacuate) {
@@ -1500,7 +1392,6 @@ private static void advanceEvacuationMark(ptr<hmap> _addr_h, ptr<maptype> _addr_
             h.extra.oldoverflow = null;
         }
         h.flags &= sameSizeGrow;
-
     }
 }
 
@@ -1542,7 +1433,6 @@ private static ptr<hmap> reflect_makemap(ptr<maptype> _addr_t, nint cap) {
         throw("need padding in bucket (elem)");
     }
     return _addr_makemap(_addr_t, cap, _addr_null)!;
-
 }
 
 //go:linkname reflect_mapaccess reflect.mapaccess
@@ -1554,10 +1444,8 @@ private static unsafe.Pointer reflect_mapaccess(ptr<maptype> _addr_t, ptr<hmap> 
     if (!ok) { 
         // reflect wants nil for a missing element
         elem = null;
-
     }
     return elem;
-
 }
 
 //go:linkname reflect_mapassign reflect.mapassign
@@ -1620,7 +1508,6 @@ private static nint reflect_maplen(ptr<hmap> _addr_h) {
         racereadpc(@unsafe.Pointer(h), callerpc, funcPC(reflect_maplen));
     }
     return h.count;
-
 }
 
 //go:linkname reflectlite_maplen internal/reflectlite.maplen
@@ -1635,7 +1522,6 @@ private static nint reflectlite_maplen(ptr<hmap> _addr_h) {
         racereadpc(@unsafe.Pointer(h), callerpc, funcPC(reflect_maplen));
     }
     return h.count;
-
 }
 
 private static readonly nint maxZero = 1024; // must match value in reflect/value.go:maxZero cmd/compile/internal/gc/walk.go:zeroValSize

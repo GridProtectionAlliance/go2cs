@@ -8,16 +8,15 @@
 //
 // DES is cryptographically broken and should not be used for secure
 // applications.
-// package des -- go2cs converted at 2022 March 06 22:19:20 UTC
+
+// package des -- go2cs converted at 2022 March 13 05:34:15 UTC
 // import "crypto/des" ==> using des = go.crypto.des_package
 // Original source: C:\Program Files\Go\src\crypto\des\const.go
-
-
 namespace go.crypto;
 
 public static partial class des_package {
 
-    // Used to perform an initial permutation of a 64-bit input block.
+// Used to perform an initial permutation of a 64-bit input block.
 private static array<byte> initialPermutation = new array<byte>(new byte[] { 6, 14, 22, 30, 38, 46, 54, 62, 4, 12, 20, 28, 36, 44, 52, 60, 2, 10, 18, 26, 34, 42, 50, 58, 0, 8, 16, 24, 32, 40, 48, 56, 7, 15, 23, 31, 39, 47, 55, 63, 5, 13, 21, 29, 37, 45, 53, 61, 3, 11, 19, 27, 35, 43, 51, 59, 1, 9, 17, 25, 33, 41, 49, 57 });
 
 // Used to perform a final permutation of a 4-bit preoutput block. This is the

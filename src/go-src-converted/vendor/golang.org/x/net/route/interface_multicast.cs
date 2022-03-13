@@ -5,11 +5,9 @@
 //go:build darwin || dragonfly || freebsd
 // +build darwin dragonfly freebsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:13 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:31 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\interface_multicast.go
-
-
 namespace go.vendor.golang.org.x.net;
 
 public static partial class route_package {
@@ -33,7 +31,6 @@ private static (Message, error) parseInterfaceMulticastAddrMessage(this ptr<wire
         return (null, error.As(err)!);
     }
     return (m, error.As(null!)!);
-
 }
 
 } // end route_package

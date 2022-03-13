@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:56 UTC
+//     Generated on 2022 March 13 05:25:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct mheap
         {
             // Constructors
@@ -114,7 +114,7 @@ namespace go
             public static implicit operator mheap(NilType nil) => default(mheap);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static mheap mheap_cast(dynamic value)
         {
             return new mheap(value.@lock, value.pages, value.sweepgen, value.sweepDrained, value.sweepers, value.allspans, value._, value.pagesInUse, value.pagesSwept, value.pagesSweptBasis, value.sweepHeapLiveBasis, value.sweepPagesPerByte, value.scavengeGoal, value.reclaimIndex, value.reclaimCredit, value.arenas, value.heapArenaAlloc, ref value.arenaHints, value.arena, value.allArenas, value.sweepArenas, value.markArenas, value._, value.spanalloc, value.cachealloc, value.specialfinalizeralloc, value.specialprofilealloc, value.specialReachableAlloc, value.speciallock, value.arenaHintAlloc, ref value.unused);

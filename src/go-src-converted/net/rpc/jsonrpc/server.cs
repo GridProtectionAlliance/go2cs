@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jsonrpc -- go2cs converted at 2022 March 06 22:25:55 UTC
+// package jsonrpc -- go2cs converted at 2022 March 13 05:40:26 UTC
 // import "net/rpc/jsonrpc" ==> using jsonrpc = go.net.rpc.jsonrpc_package
 // Original source: C:\Program Files\Go\src\net\rpc\jsonrpc\server.go
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using rpc = go.net.rpc_package;
-using sync = go.sync_package;
-using System.ComponentModel;
-
-
 namespace go.net.rpc;
+
+using json = encoding.json_package;
+using errors = errors_package;
+using io = io_package;
+using rpc = net.rpc_package;
+using sync = sync_package;
+using System.ComponentModel;
 
 public static partial class jsonrpc_package {
 
@@ -73,7 +72,6 @@ private static error ReadRequestHeader(this ptr<serverCodec> _addr_c, ptr<rpc.Re
             return error.As(err)!;
         }
     }
-
     r.ServiceMethod = c.req.Method; 
 
     // JSON request id can be any JSON value;
@@ -87,7 +85,6 @@ private static error ReadRequestHeader(this ptr<serverCodec> _addr_c, ptr<rpc.Re
     c.mutex.Unlock();
 
     return error.As(null!)!;
-
 }
 
 private static error ReadRequestBody(this ptr<serverCodec> _addr_c, object x) {
@@ -102,7 +99,6 @@ private static error ReadRequestBody(this ptr<serverCodec> _addr_c, object x) {
     ref var @params = ref heap(out ptr<var> _addr_@params);
     params[0] = x;
     return error.As(json.Unmarshal(c.req.Params.val, _addr_params))!;
-
 }
 
 private static var @null = json.RawMessage((slice<byte>)"null");
@@ -123,7 +119,6 @@ private static error WriteResponse(this ptr<serverCodec> _addr_c, ptr<rpc.Respon
     if (b == null) { 
         // Invalid request so no id. Use JSON null.
         b = _addr_null;
-
     }
     serverResponse resp = new serverResponse(Id:b);
     if (r.Error == "") {
@@ -134,7 +129,6 @@ private static error WriteResponse(this ptr<serverCodec> _addr_c, ptr<rpc.Respon
         resp.Error = r.Error;
     }
     return error.As(c.enc.Encode(resp))!;
-
 }
 
 private static error Close(this ptr<serverCodec> _addr_c) {

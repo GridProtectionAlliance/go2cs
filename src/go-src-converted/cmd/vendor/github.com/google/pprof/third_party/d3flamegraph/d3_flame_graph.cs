@@ -3,16 +3,14 @@
 // Version 2.0.0-alpha4
 // See LICENSE file for license details
 
-// package d3flamegraph -- go2cs converted at 2022 March 06 23:24:05 UTC
+// package d3flamegraph -- go2cs converted at 2022 March 13 06:37:12 UTC
 // import "cmd/vendor/github.com/google/pprof/third_party/d3flamegraph" ==> using d3flamegraph = go.cmd.vendor.github.com.google.pprof.third_party.d3flamegraph_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\third_party\d3flamegraph\d3_flame_graph.go
-
-
 namespace go.cmd.vendor.github.com.google.pprof.third_party;
 
 public static partial class d3flamegraph_package {
 
-    // JSSource returns the d3-flamegraph.js file
+// JSSource returns the d3-flamegraph.js file
 public static readonly @string JSSource = "\n(function (global, factory) {\n\ttypeof exports === \'object\' && typeof module !== " +
     "\'undefined\' ? factory(exports, require(\'d3\')) :\n\ttypeof define === \'function\' &&" +
     " define.amd ? define([\'exports\', \'d3\'], factory) :\n\t(factory((global.d3 = global" +

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:48 UTC
+//     Generated on 2022 March 13 05:34:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct rfc1423Algo
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace crypto
             public static implicit operator rfc1423Algo(NilType nil) => default(rfc1423Algo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static rfc1423Algo rfc1423Algo_cast(dynamic value)
         {
             return new rfc1423Algo(value.cipher, value.name, value.cipherFunc, value.keySize, value.blockSize);

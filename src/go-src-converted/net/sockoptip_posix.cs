@@ -5,13 +5,13 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:34 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:05 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sockoptip_posix.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -31,11 +31,9 @@ private static error joinIPv4Group(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi
         err = err__prev1;
 
     }
-
     err = fd.pfd.SetsockoptIPMreq(syscall.IPPROTO_IP, syscall.IP_ADD_MEMBERSHIP, mreq);
     runtime.KeepAlive(fd);
     return error.As(wrapSyscallError("setsockopt", err))!;
-
 }
 
 private static error setIPv6MulticastInterface(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi) {
@@ -49,7 +47,6 @@ private static error setIPv6MulticastInterface(ptr<netFD> _addr_fd, ptr<Interfac
     var err = fd.pfd.SetsockoptInt(syscall.IPPROTO_IPV6, syscall.IPV6_MULTICAST_IF, v);
     runtime.KeepAlive(fd);
     return error.As(wrapSyscallError("setsockopt", err))!;
-
 }
 
 private static error setIPv6MulticastLoopback(ptr<netFD> _addr_fd, bool v) {
@@ -72,7 +69,6 @@ private static error joinIPv6Group(ptr<netFD> _addr_fd, ptr<Interface> _addr_ifi
     var err = fd.pfd.SetsockoptIPv6Mreq(syscall.IPPROTO_IPV6, syscall.IPV6_JOIN_GROUP, mreq);
     runtime.KeepAlive(fd);
     return error.As(wrapSyscallError("setsockopt", err))!;
-
 }
 
 } // end net_package

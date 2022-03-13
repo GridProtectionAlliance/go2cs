@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:05 UTC
+//     Generated on 2022 March 13 06:42:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace go
 {
     public static partial class cfg_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct lblock
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace go
             public static implicit operator lblock(NilType nil) => default(lblock);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static lblock lblock_cast(dynamic value)
         {
             return new lblock(ref value._goto, ref value._break, ref value._continue);

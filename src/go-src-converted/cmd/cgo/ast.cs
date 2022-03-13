@@ -4,19 +4,18 @@
 
 // Parse input AST and prepare Prog structure.
 
-// package main -- go2cs converted at 2022 March 06 22:46:44 UTC
+// package main -- go2cs converted at 2022 March 13 05:57:58 UTC
 // Original source: C:\Program Files\Go\src\cmd\cgo\ast.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using scanner = go.go.scanner_package;
-using token = go.go.token_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using scanner = go.scanner_package;
+using token = go.token_package;
+using os = os_package;
+using strings = strings_package;
+using System;
 
 public static partial class main_package {
 
@@ -34,15 +33,11 @@ private static ptr<ast.File> parse(@string name, slice<byte> src, parser.Mode fl
                 foreach (var (_, e) in list) {
                     fmt.Fprintln(os.Stderr, e);
                 }                os.Exit(2);
-
             }
         }
-
         fatalf("parsing %s: %s", name, err);
-
     }
     return _addr_ast1!;
-
 }
 
 private static nint sourceLine(ast.Node n) {
@@ -149,18 +144,15 @@ private static void ParseGo(this ptr<File> _addr_f, @string abspath, slice<byte>
                 if (ws == 0) {
                     continue;
                 }
-
                 d.Specs = d.Specs[(int)0..(int)ws];
                 ast2.Decls[w] = d;
                 w++;
-
             }
 
             decl = decl__prev1;
         }
 
         ast2.Decls = ast2.Decls[(int)0..(int)w];
-
     } {
         {
             var decl__prev1 = decl;
@@ -186,13 +178,11 @@ private static void ParseGo(this ptr<File> _addr_f, @string abspath, slice<byte>
                                 // (Deleting import statement or clause is not safe if it is followed
                                 // in the source by an explicit semicolon.)
                                 f.Edit.Replace(f.offset(s.Path.Pos()), f.offset(s.Path.End()), "_ \"unsafe\"");
-
                             }
 
                             s = s__prev2;
 
                         }
-
                     }
 
                     spec = spec__prev2;
@@ -219,7 +209,6 @@ private static void ParseGo(this ptr<File> _addr_f, @string abspath, slice<byte>
 
     f.Comments = ast1.Comments;
     f.AST = ast2;
-
 }
 
 // Like ast.CommentGroup's Text method but preserves
@@ -243,9 +232,7 @@ private static @string commentText(ptr<ast.CommentGroup> _addr_g) {
                 break;
         }
         pieces = append(pieces, c);
-
     }    return strings.Join(pieces, "");
-
 }
 
 private static void validateIdents(this ptr<File> _addr_f, object x, astContext context) {
@@ -260,7 +247,6 @@ private static void validateIdents(this ptr<File> _addr_f, object x, astContext 
             }
         }
     }
-
 }
 
 // Save various references we are going to need later.
@@ -279,7 +265,6 @@ private static void saveExprs(this ptr<File> _addr_f, object x, astContext conte
             f.saveCall(x, context);
             break;
     }
-
 }
 
 // Save references to C.xxx for later processing.
@@ -300,7 +285,6 @@ private static void saveRef(this ptr<File> _addr_f, ptr<ast.Expr> _addr_n, astCo
             return ;
         }
     }
-
     if (context == ctxAssign2) {
         context = ctxExpr;
     }
@@ -326,7 +310,6 @@ private static void saveRef(this ptr<File> _addr_f, ptr<ast.Expr> _addr_n, astCo
         f.NamePos[name] = sel.Pos();
     }
     f.Ref = append(f.Ref, addr(new Ref(Name:name,Expr:n,Context:context,)));
-
 }
 
 // Save calls to C.xxx for later processing.
@@ -345,10 +328,8 @@ private static void saveCall(this ptr<File> _addr_f, ptr<ast.CallExpr> _addr_cal
             return ;
         }
     }
-
     ptr<Call> c = addr(new Call(Call:call,Deferred:context==ctxDefer));
     f.Calls = append(f.Calls, c);
-
 }
 
 // If a function should be exported add it to ExpFunc.
@@ -380,7 +361,6 @@ private static void saveExport(this ptr<File> _addr_f, object x, astContext cont
             }
         }        f.ExpFunc = append(f.ExpFunc, addr(new ExpFunc(Func:n,ExpName:name,Doc:doc,)));
         break;
-
     }
 }
 
@@ -421,7 +401,6 @@ private static readonly var ctxCall = 13; // any function call other than ctxCal
 private static readonly var ctxCall2 = 14; // function call whose result is assigned to two variables
 private static readonly var ctxSelector = 15;
 
-
 // walk walks the AST x, calling visit(f, x, context) for each node.
 private static void walk(this ptr<File> _addr_f, object x, astContext context, Action<ptr<File>, object, astContext> visit) => func((_, panic, _) => {
     ref File f = ref _addr_f.val;
@@ -443,7 +422,6 @@ private static void walk(this ptr<File> _addr_f, object x, astContext context, A
  {
                 f.walk(_addr_n.Type, ctxType, visit);
             }
-
             break;
         case ptr<ast.FieldList> n:
             foreach (var (_, field) in n.List) {
@@ -501,7 +479,6 @@ private static void walk(this ptr<File> _addr_f, object x, astContext context, A
  {
                 f.walk(_addr_n.Fun, ctxCall, visit);
             }
-
             f.walk(n.Args, ctxExpr, visit);
             break;
         case ptr<ast.StarExpr> n:
@@ -570,7 +547,6 @@ private static void walk(this ptr<File> _addr_f, object x, astContext context, A
  {
                 f.walk(n.Rhs, ctxExpr, visit);
             }
-
             break;
         case ptr<ast.GoStmt> n:
             f.walk(n.Call, ctxExpr, visit);
@@ -600,7 +576,6 @@ private static void walk(this ptr<File> _addr_f, object x, astContext context, A
  {
                 context = ctxExpr;
             }
-
             f.walk(n.List, context, visit);
             f.walk(n.Body, ctxStmt, visit);
             break;
@@ -644,7 +619,6 @@ private static void walk(this ptr<File> _addr_f, object x, astContext context, A
  {
                 f.walk(n.Values, ctxExpr, visit);
             }
-
             break;
         case ptr<ast.TypeSpec> n:
             f.walk(_addr_n.Type, ctxType, visit);
@@ -713,7 +687,6 @@ private static void walk(this ptr<File> _addr_f, object x, astContext context, A
             break;
         }
     }
-
 });
 
 } // end main_package

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package httpresponse -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package httpresponse -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata/httpresponse" ==> using httpresponse = go.cmd.vet.testdata.httpresponse_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\httpresponse\httpresponse.go
-using log = go.log_package;
-using http = go.net.http_package;
-
 namespace go.cmd.vet.testdata;
+
+using log = log_package;
+using http = net.http_package;
 
 public static partial class httpresponse_package {
 
@@ -18,7 +18,6 @@ private static void goodHTTPGet() => func((defer, _, _) => {
         log.Fatal(err);
     }
     defer(res.Body.Close());
-
 });
 
 private static void badHTTPGet() => func((defer, _, _) => {

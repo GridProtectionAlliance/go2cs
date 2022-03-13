@@ -4,21 +4,23 @@
 
 // This file implements typechecking of call and selector expressions.
 
-// package types -- go2cs converted at 2022 March 06 22:41:43 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:49 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\call.go
-using ast = go.go.ast_package;
-using typeparams = go.go.@internal.typeparams_package;
-using token = go.go.token_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
 namespace go.go;
+
+using ast = go.ast_package;
+using typeparams = go.@internal.typeparams_package;
+using token = go.token_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// funcInst type-checks a function instantiation inst and returns the result in x.
+// The operand x must be the evaluation of inst.X and its type must be a signature.
 
 public static partial class types_package {
 
-    // funcInst type-checks a function instantiation inst and returns the result in x.
-    // The operand x must be the evaluation of inst.X and its type must be a signature.
 private static void funcInst(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.IndexExpr> _addr_inst) {
     ref Checker check = ref _addr_check.val;
     ref operand x = ref _addr_x.val;
@@ -52,11 +54,9 @@ private static void funcInst(this ptr<Checker> _addr_check, ptr<operand> _addr_x
             x.mode = invalid;
             x.expr = inst;
             return ;
-
         }
         got = len(targs);
         inferred = true;
-
     }
     assert(got == want); 
 
@@ -74,7 +74,6 @@ private static void funcInst(this ptr<Checker> _addr_check, ptr<operand> _addr_x
     x.typ = res;
     x.mode = value;
     x.expr = inst;
-
 }
 
 private static exprKind callExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.CallExpr> _addr_call) {
@@ -93,19 +92,15 @@ private static exprKind callExpr(this ptr<Checker> _addr_check, ptr<operand> _ad
                 // inference.
                 assert(x.mode == value);
                 inst = iexpr;
-
             }
-
             x.expr = iexpr;
             check.record(x);
-
         }
         else
  {
             check.exprOrType(x, call.Fun);
         }
     }
-
 
 
     if (x.mode == invalid) 
@@ -142,11 +137,8 @@ private static exprKind callExpr(this ptr<Checker> _addr_check, ptr<operand> _ad
                             }
 
                         }
-
                         check.conversion(x, T);
-
                     }
-
                     break;
                 default: 
                     check.use(call.Args);
@@ -232,7 +224,6 @@ private static exprKind callExpr(this ptr<Checker> _addr_check, ptr<operand> _ad
         x.mode = invalid;
     }
     return statement;
-
 }
 
 private static (slice<ptr<operand>>, bool) exprList(this ptr<Checker> _addr_check, slice<ast.Expr> elist, bool allowCommaOk) {
@@ -268,7 +259,6 @@ private static (slice<ptr<operand>>, bool) exprList(this ptr<Checker> _addr_chec
                     }
 
                     break;
-
                 } 
 
                 // exactly one (possibly invalid or comma-ok) value
@@ -300,7 +290,6 @@ private static (slice<ptr<operand>>, bool) exprList(this ptr<Checker> _addr_chec
                     check.expr(_addr_x, e);
                     _addr_xlist[i] = _addr_x;
                     xlist[i] = ref _addr_xlist[i].val;
-
                 }
 
                 i = i__prev1;
@@ -310,7 +299,6 @@ private static (slice<ptr<operand>>, bool) exprList(this ptr<Checker> _addr_chec
     }
 
     return ;
-
 }
 
 private static ptr<Signature> arguments(this ptr<Checker> _addr_check, ptr<ast.CallExpr> _addr_call, ptr<Signature> _addr_sig, slice<Type> targs, slice<ptr<operand>> args) {
@@ -333,8 +321,7 @@ private static ptr<Signature> arguments(this ptr<Checker> _addr_check, ptr<ast.C
                 return ;
             else if (a.mode == invalid) 
                 return ;
-            
-        }
+                    }
         a = a__prev1;
     }
 
@@ -352,9 +339,7 @@ private static ptr<Signature> arguments(this ptr<Checker> _addr_check, ptr<ast.C
                 // f()... is not permitted if f() is multi-valued
                 check.errorf(inNode(call, call.Ellipsis), _InvalidDotDotDot, "cannot use ... with %d-valued %s", nargs, call.Args[0]);
                 return ;
-
             }
-
         }
         else
  { 
@@ -375,12 +360,10 @@ private static ptr<Signature> arguments(this ptr<Checker> _addr_check, ptr<ast.C
                 sigParams = NewTuple(vars); // possibly nil!
                 adjusted = true;
                 npars = nargs;
-
             } { 
                 // nargs < npars-1
                 npars--; // for correct error message below
             }
-
         }
     else
     } {
@@ -388,7 +371,6 @@ private static ptr<Signature> arguments(this ptr<Checker> _addr_check, ptr<ast.C
             // standard_func(a, b, c...)
             check.errorf(inNode(call, call.Ellipsis), _NonVariadicDotDotDot, "cannot use ... in call to non-variadic %s", call.Fun);
             return ;
-
         }
     }
 
@@ -433,7 +415,6 @@ private static ptr<Signature> arguments(this ptr<Checker> _addr_check, ptr<ast.C
     }
 
     return ;
-
 }
 
 private static array<@string> cgoPrefixes = new array<@string>(new @string[] { "_Ciconst_", "_Cfconst_", "_Csconst_", "_Ctype_", "_Cvar_", "_Cfpvar_fp_", "_Cfunc_", "_Cmacro_" });
@@ -478,7 +459,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
  {
                             funcMode = cgofunc;
                         }
-
                         foreach (var (_, prefix) in cgoPrefixes) { 
                             // cgo objects are part of the current package (in file
                             // _cgo_gotypes.go). Use regular lookup.
@@ -486,16 +466,13 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                             if (exp != null) {
                                 break;
                             }
-
                         }
                     else
                         if (exp == null) {
                             check.errorf(e.Sel, _UndeclaredImportedName, "%s not declared by package C", sel);
                             goto Error;
                         }
-
                         check.objDecl(exp, null);
-
                     } {
                         exp = pkg.scope.Lookup(sel);
                         if (exp == null) {
@@ -508,9 +485,7 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                             check.errorf(e.Sel, _UnexportedName, "%s not exported by package %s", sel, pkg.name); 
                             // ok to continue
                         }
-
                     }
-
                     check.recordUse(e.Sel, exp); 
 
                     // Simplified version of the code for *ast.Idents:
@@ -556,14 +531,11 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                     }
                     x.expr = e;
                     return ;
-
                 }
 
             }
-
         }
     }
-
 
     check.exprOrType(x, e.X);
     if (x.mode == invalid) {
@@ -594,7 +566,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                             why = check.sprintf("interface %s has no method %s", obj.name, sel);
                             break;
                     }
-
                 }
                 else
  {
@@ -620,18 +591,14 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                     }
 
                 }
-
                 obj, _, _ = check.lookupFieldOrMethod(x.typ, x.mode == variable, check.pkg, changeCase);
 
                 if (obj != null) {
                     why += ", but does have " + changeCase;
                 }
-
             }
-
             check.errorf(e.Sel, _MissingFieldOrMethod, "%s.%s undefined (%s)", x.expr, sel, why);
                 goto Error;
-
     }
     {
         ptr<Func> m__prev1 = m;
@@ -656,7 +623,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                     // The embedded type is either a struct or a pointer to
                     // a struct except for the last one (which we don't need).
                     recv = asStruct(derefStructPtr(recv)).Field(index[i]).typ;
-
                 } 
 
                 // The method may have a pointer receiver, but the actually provided receiver
@@ -680,7 +646,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
  {
                             recv = recv._<ptr<Pointer>>().@base;
                         }
-
                     } 
                     // Disable reporting of errors during inference below. If we're unable to infer
                     // the receiver type arguments here, the receiver must be be otherwise invalid
@@ -695,7 +660,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                 if (targs == null) { 
                     // We may reach here if there were other errors (see issue #40056).
                     goto Error;
-
                 } 
                 // Don't modify m. Instead - for now - make a copy of m and use that instead.
                 // (If we modify m, some tests will fail; possibly because the m is in use.)
@@ -704,7 +668,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                 copy.typ = check.subst(e.Pos(), m.typ, makeSubstMap(sig.rparams, targs));
                 _addr_obj = _addr_copy;
                 obj = ref _addr_obj.val;
-
             } 
             // TODO(gri) we also need to do substitution for parameterized interface methods
             //           (this breaks code in testdata/linalg.go2 at the moment)
@@ -714,7 +677,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
 
     }
 
-
     if (x.mode == typexpr) { 
         // method expression
         (m, _) = obj._<ptr<Func>>();
@@ -722,7 +684,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
             // TODO(gri) should check if capitalization of sel matters and provide better error message in that case
             check.errorf(e.Sel, _MissingFieldOrMethod, "%s.%s undefined (type %s has no method %s)", x.expr, sel, x.typ, sel);
             goto Error;
-
         }
         check.recordSelection(e, MethodExpr, x.typ, m, index, indirect); 
 
@@ -737,8 +698,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
         x.typ = addr(new Signature(tparams:sig.tparams,params:NewTuple(append([]*Var{NewVar(token.NoPos,check.pkg,"_",x.typ)},params...)...),results:sig.results,variadic:sig.variadic,));
 
         check.addDeclDep(m);
-
-
     }
     else
  { 
@@ -753,7 +712,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
  {
                     x.mode = value;
                 }
-
                 x.typ = obj.typ;
                 break;
             case ptr<Func> obj:
@@ -787,7 +745,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                             }
 
                         }
-
                     } 
                     // If we created a synthetic pointer type above, we will throw
                     // away the method set computed here after use.
@@ -812,15 +769,12 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                             // to fix since we only run this code in debug mode.
                             // TODO(gri) fix this eventually.
                             panic("method sets and lookup don't agree");
-
                         }
 
                         m = m__prev3;
 
                     }
-
                 }
-
                 x.mode = value; 
 
                 // remove receiver
@@ -837,7 +791,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
                 break;
             }
         }
-
     }
     x.expr = e;
     return ;
@@ -845,7 +798,6 @@ private static void selector(this ptr<Checker> _addr_check, ptr<operand> _addr_x
 Error:
     x.mode = invalid;
     x.expr = e;
-
 });
 
 // use type-checks each argument.
@@ -889,7 +841,6 @@ private static void useLHS(this ptr<Checker> _addr_check, params ast.Expr[] arg)
                 if (ident.Name == "_") {
                     continue;
                 }
-
                 {
                     var (_, obj) = check.scope.LookupParent(ident.Name, token.NoPos);
 
@@ -906,15 +857,12 @@ private static void useLHS(this ptr<Checker> _addr_check, params ast.Expr[] arg)
                             }
 
                         }
-
                     }
 
                 }
-
             }
 
         }
-
         check.rawExpr(_addr_x, e, null);
         if (v != null) {
             v.used = v_used; // restore v.used

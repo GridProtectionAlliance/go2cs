@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:22:01 UTC
+//     Generated on 2022 March 13 05:37:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2ClientConn
         {
             // Constructors
@@ -160,7 +160,7 @@ namespace net
             public static implicit operator http2ClientConn(NilType nil) => default(http2ClientConn);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2ClientConn http2ClientConn_cast(dynamic value)
         {
             return new http2ClientConn(ref value.t, value.tconn, ref value.tlsState, value.reused, value.singleUse, value.getConnCalled, value.readerDone, value.readerErr, value.idleTimeout, ref value.idleTimer, value.mu, ref value.cond, value.flow, value.inflow, value.doNotReuse, value.closing, value.closed, value.seenSettings, value.wantSettingsAck, ref value.goAway, value.goAwayDebug, value.streams, value.streamsReserved, value.nextStreamID, value.pendingRequests, value.pings, ref value.br, value.lastActive, value.lastIdle, value.maxFrameSize, value.maxConcurrentStreams, value.peerMaxHeaderListSize, value.initialWindowSize, value.reqHeaderMu, value.wmu, ref value.bw, ref value.fr, value.werr, value.hbuf, ref value.henc);

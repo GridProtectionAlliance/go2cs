@@ -12,20 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package profile -- go2cs converted at 2022 March 06 23:23:55 UTC
+// package profile -- go2cs converted at 2022 March 13 06:37:00 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\index.go
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.github.com.google.pprof;
+
+using fmt = fmt_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// SampleIndexByName returns the appropriate index for a value of sample index.
+// If numeric, it returns the number, otherwise it looks up the text in the
+// profile sample types.
 
 public static partial class profile_package {
 
-    // SampleIndexByName returns the appropriate index for a value of sample index.
-    // If numeric, it returns the number, otherwise it looks up the text in the
-    // profile sample types.
 private static (nint, error) SampleIndexByName(this ptr<Profile> _addr_p, @string sampleIndex) {
     nint _p0 = default;
     error _p0 = default!;
@@ -54,7 +56,6 @@ private static (nint, error) SampleIndexByName(this ptr<Profile> _addr_p, @strin
         } 
         // By default select the last sample value
         return (len(p.SampleType) - 1, error.As(null!)!);
-
     }
     {
         var i__prev1 = i;
@@ -66,7 +67,6 @@ private static (nint, error) SampleIndexByName(this ptr<Profile> _addr_p, @strin
                 return (0, error.As(fmt.Errorf("sample_index %s is outside the range [0..%d]", sampleIndex, len(p.SampleType) - 1))!);
             }
             return (i, error.As(null!)!);
-
         }
         i = i__prev1;
 
@@ -92,7 +92,6 @@ private static (nint, error) SampleIndexByName(this ptr<Profile> _addr_p, @strin
     }
 
     return (0, error.As(fmt.Errorf("sample_index %q must be one of: %v", sampleIndex, sampleTypes(_addr_p)))!);
-
 }
 
 private static slice<@string> sampleTypes(ptr<Profile> _addr_p) {

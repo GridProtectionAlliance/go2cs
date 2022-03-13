@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2022 March 06 23:38:55 UTC
+// package norm -- go2cs converted at 2022 March 13 06:47:09 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\readwriter.go
-using io = go.io_package;
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using io = io_package;
 
 public static partial class norm_package {
 
@@ -54,14 +54,11 @@ private static (nint, error) Write(this ptr<normWriter> _addr_w, slice<byte> dat
             if (err != null) {
                 break;
             }
-
             var bn = copy(w.buf, w.buf[(int)i..]);
             w.buf = w.buf[..(int)bn];
-
         }
     }
     return (n, error.As(err)!);
-
 }
 
 // Close forces data that remains in the buffer to be written.
@@ -75,7 +72,6 @@ private static error Close(this ptr<normWriter> _addr_w) {
         }
     }
     return error.As(null!)!;
-
 }
 
 // Writer returns a new writer that implements Write(b)
@@ -136,7 +132,6 @@ private static (nint, error) Read(this ptr<normReader> _addr_r, slice<byte> p) {
             }
         }
     }
-
 }
 
 // Reader returns a new reader that implements Read

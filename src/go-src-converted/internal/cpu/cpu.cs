@@ -4,18 +4,17 @@
 
 // Package cpu implements processor feature detection
 // used by the Go standard library.
-// package cpu -- go2cs converted at 2022 March 06 22:08:06 UTC
+
+// package cpu -- go2cs converted at 2022 March 13 05:23:56 UTC
 // import "internal/cpu" ==> using cpu = go.@internal.cpu_package
 // Original source: C:\Program Files\Go\src\internal\cpu\cpu.go
-
-
 namespace go.@internal;
 
 public static partial class cpu_package {
 
-    // DebugOptions is set to true by the runtime if the OS supports reading
-    // GODEBUG early in runtime startup.
-    // This should not be changed after it is initialized.
+// DebugOptions is set to true by the runtime if the OS supports reading
+// GODEBUG early in runtime startup.
+// This should not be changed after it is initialized.
 public static bool DebugOptions = default;
 
 // CacheLinePad is used to pad structs to avoid false sharing.
@@ -149,14 +148,12 @@ field:
                     _continuefield = true;
                     break;
                 }
-
             }
 
             i = i__prev2;
         }
 
         print("GODEBUG: unknown cpu feature \"", key, "\"\n");
-
     }
     foreach (var (_, o) in options) {
         if (!o.Specified) {
@@ -171,7 +168,6 @@ field:
             continue;
         }
         o.Feature.val = o.Enable;
-
     }
 }
 
@@ -184,7 +180,6 @@ private static nint indexByte(@string s, byte c) {
         }
     }
     return -1;
-
 }
 
 } // end cpu_package

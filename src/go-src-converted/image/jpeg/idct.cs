@@ -2,47 +2,46 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2022 March 06 23:36:08 UTC
+// package jpeg -- go2cs converted at 2022 March 13 06:44:08 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Program Files\Go\src\image\jpeg\idct.go
-
-
 namespace go.image;
 
 public static partial class jpeg_package {
 
-    // This is a Go translation of idct.c from
-    //
-    // http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_IEC_13818-4_2004_Conformance_Testing/Video/verifier/mpeg2decode_960109.tar.gz
-    //
-    // which carries the following notice:
+// This is a Go translation of idct.c from
+//
+// http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_IEC_13818-4_2004_Conformance_Testing/Video/verifier/mpeg2decode_960109.tar.gz
+//
+// which carries the following notice:
 
-    /* Copyright (C) 1996, MPEG Software Simulation Group. All Rights Reserved. */
+/* Copyright (C) 1996, MPEG Software Simulation Group. All Rights Reserved. */
 
-    /*
-     * Disclaimer of Warranty
-     *
-     * These software programs are available to the user without any license fee or
-     * royalty on an "as is" basis.  The MPEG Software Simulation Group disclaims
-     * any and all warranties, whether express, implied, or statuary, including any
-     * implied warranties or merchantability or of fitness for a particular
-     * purpose.  In no event shall the copyright-holder be liable for any
-     * incidental, punitive, or consequential damages of any kind whatsoever
-     * arising from the use of these programs.
-     *
-     * This disclaimer of warranty extends to the user of these programs and user's
-     * customers, employees, agents, transferees, successors, and assigns.
-     *
-     * The MPEG Software Simulation Group does not represent or warrant that the
-     * programs furnished hereunder are free of infringement of any third-party
-     * patents.
-     *
-     * Commercial implementations of MPEG-1 and MPEG-2 video, including shareware,
-     * are subject to royalty fees to patent holders.  Many of these patents are
-     * general enough such that they are unavoidable regardless of implementation
-     * design.
-     *
-     */
+/*
+ * Disclaimer of Warranty
+ *
+ * These software programs are available to the user without any license fee or
+ * royalty on an "as is" basis.  The MPEG Software Simulation Group disclaims
+ * any and all warranties, whether express, implied, or statuary, including any
+ * implied warranties or merchantability or of fitness for a particular
+ * purpose.  In no event shall the copyright-holder be liable for any
+ * incidental, punitive, or consequential damages of any kind whatsoever
+ * arising from the use of these programs.
+ *
+ * This disclaimer of warranty extends to the user of these programs and user's
+ * customers, employees, agents, transferees, successors, and assigns.
+ *
+ * The MPEG Software Simulation Group does not represent or warrant that the
+ * programs furnished hereunder are free of infringement of any third-party
+ * patents.
+ *
+ * Commercial implementations of MPEG-1 and MPEG-2 video, including shareware,
+ * are subject to royalty fees to patent holders.  Many of these patents are
+ * general enough such that they are unavoidable regardless of implementation
+ * design.
+ *
+ */
+
 private static readonly nint blockSize = 64; // A DCT block is 8x8.
 
  // A DCT block is 8x8.
@@ -141,7 +140,6 @@ private static void idct(ptr<block> _addr_src) {
         s[5] = (x0 - x4) >> 8;
         s[6] = (x3 - x2) >> 8;
         s[7] = (x7 - x1) >> 8;
-
     } 
 
     // Vertical 1-D IDCT.
@@ -197,9 +195,7 @@ private static void idct(ptr<block> _addr_src) {
         s[8 * 5] = (y0 - y4) >> 14;
         s[8 * 6] = (y3 - y2) >> 14;
         s[8 * 7] = (y7 - y1) >> 14;
-
     }
-
 }
 
 } // end jpeg_package

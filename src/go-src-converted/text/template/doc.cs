@@ -452,8 +452,10 @@ or to invoke a particular template explicitly by name,
     }
 
 */
-// package template -- go2cs converted at 2022 March 06 22:24:35 UTC
+
+// package template -- go2cs converted at 2022 March 13 05:39:04 UTC
 // import "text/template" ==> using template = go.text.template_package
 // Original source: C:\Program Files\Go\src\text\template\doc.go
+namespace go.text;
 
 } // end template_package

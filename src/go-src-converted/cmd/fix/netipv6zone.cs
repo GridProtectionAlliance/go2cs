@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:49 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:17 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\netipv6zone.go
-using ast = go.go.ast_package;
-using System;
-
-
 namespace go;
+
+using ast = go.ast_package;
+using System;
 
 public static partial class main_package {
 
@@ -58,7 +57,6 @@ private static bool netipv6zone(ptr<ast.File> _addr_f) {
                             }
 
                         }
-
                         switch (i) {
                             case 0: 
                                 cl.Elts[i] = addr(new ast.KeyValueExpr(Key:ast.NewIdent("IP"),Value:e,));
@@ -76,20 +74,15 @@ private static bool netipv6zone(ptr<ast.File> _addr_f) {
                                                            }
 
                                                        }
-
                                 break;
                         }
                         fixed = true;
-
                     }
-
                     break;
             }
         }
-
     });
     return fixed;
-
 }
 
 } // end main_package

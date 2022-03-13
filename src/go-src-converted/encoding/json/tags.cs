@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2022 March 06 22:25:24 UTC
+// package json -- go2cs converted at 2022 March 13 05:39:56 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\tags.go
-using strings = go.strings_package;
-
 namespace go.encoding;
+
+using strings = strings_package;
+
+
+// tagOptions is the string following a comma in a struct field's "json"
+// tag, or the empty string. It does not include the leading comma.
 
 public static partial class json_package {
 
-    // tagOptions is the string following a comma in a struct field's "json"
-    // tag, or the empty string. It does not include the leading comma.
 private partial struct tagOptions { // : @string
 }
 
@@ -29,9 +31,7 @@ private static (@string, tagOptions) parseTag(@string tag) {
             return (tag[..(int)idx], tagOptions(tag[(int)idx + 1..]));
         }
     }
-
     return (tag, tagOptions(""));
-
 }
 
 // Contains reports whether a comma-separated list of options
@@ -52,10 +52,8 @@ private static bool Contains(this tagOptions o, @string optionName) {
             return true;
         }
         s = next;
-
     }
     return false;
-
 }
 
 } // end json_package

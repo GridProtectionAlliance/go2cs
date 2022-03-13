@@ -10,20 +10,21 @@
 // trace is captured for most events.
 // See https://golang.org/s/go15trace for more info.
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:20 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:24 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\trace.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// Event types in the trace, args are given in square brackets.
+
+using System;
 public static partial class runtime_package {
 
-    // Event types in the trace, args are given in square brackets.
 private static readonly nint traceEvNone = 0; // unused
 private static readonly nint traceEvBatch = 1; // start of per-P batch of events [pid, timestamp]
 private static readonly nint traceEvFrequency = 2; // contains tracer timer frequency [frequency (ticks per second)]
@@ -106,7 +107,6 @@ private static readonly nint traceArgCountShift = 6;
 // Such wakeups happen on buffered channels and sync.Mutex,
 // but are generally not interesting for end user.
 private static readonly byte traceFutileWakeup = 128;
-
 
 // trace is global tracing context.
 private static var trace = default;
@@ -199,13 +199,11 @@ public static error StartTrace() {
             // +PCQuantum because traceFrameForPC expects return PCs and subtracts PCQuantum.
             var id = trace.stackTab.put(new slice<System.UIntPtr>(new System.UIntPtr[] { gp.startpc+sys.PCQuantum }));
             traceEvent(traceEvGoCreate, -1, uint64(gp.goid), uint64(id), stackID);
-
         }
         if (status == _Gwaiting) { 
             // traceEvGoWaiting is implied to have seq=1.
             gp.traceseq++;
             traceEvent(traceEvGoWaiting, -1, uint64(gp.goid));
-
         }
         if (status == _Gsyscall) {
             gp.traceseq++;
@@ -249,7 +247,6 @@ public static error StartTrace() {
 
     startTheWorldGC();
     return error.As(null!)!;
-
 }
 
 // StopTrace stops tracing, if it was previously enabled.
@@ -304,7 +301,6 @@ public static void StopTrace() {
             break;
         }
         osyield();
-
     }
 
     trace.enabled = false;
@@ -351,7 +347,6 @@ public static void StopTrace() {
     trace.strings = null;
     trace.shutdown = false;
     unlock(_addr_trace.@lock);
-
 }
 
 // ReadTrace returns the next chunk of binary tracing data, blocking until data
@@ -377,7 +372,6 @@ public static slice<byte> ReadTrace() {
         unlock(_addr_trace.@lock);
         println("runtime: ReadTrace called from multiple goroutines simultaneously");
         return null;
-
     }
     {
         var buf__prev1 = buf;
@@ -424,7 +418,6 @@ public static slice<byte> ReadTrace() {
         // on the next iteration.
         trace.stackTab.dump();
         return data;
-
     }
     if (trace.shutdown) {
         trace.lockOwner = null;
@@ -434,17 +427,14 @@ public static slice<byte> ReadTrace() {
             // detector does not see. This is required to avoid false
             // race reports on writer passed to trace.Start.
             racerelease(@unsafe.Pointer(_addr_trace.shutdownSema));
-
         }
         semrelease(_addr_trace.shutdownSema);
         return null;
-
     }
     trace.lockOwner = null;
     unlock(_addr_trace.@lock);
     println("runtime: spurious wakeup of trace reader");
     return null;
-
 }
 
 // traceReader returns the trace reader that should be woken up, if any.
@@ -461,7 +451,6 @@ private static ptr<g> traceReader() {
     trace.reader.set(null);
     unlock(_addr_trace.@lock);
     return _addr_gp!;
-
 }
 
 // traceProcFree frees trace buffer associated with pp.
@@ -476,7 +465,6 @@ private static void traceProcFree(ptr<p> _addr_pp) {
     lock(_addr_trace.@lock);
     traceFullQueue(buf);
     unlock(_addr_trace.@lock);
-
 }
 
 // traceFullQueue queues buf into queue of full buffers.
@@ -490,7 +478,6 @@ private static void traceFullQueue(traceBufPtr buf) {
         trace.fullTail.ptr().link = buf;
     }
     trace.fullTail = buf;
-
 }
 
 // traceFullDequeue dequeues from queue of full buffers.
@@ -505,7 +492,6 @@ private static traceBufPtr traceFullDequeue() {
     }
     buf.ptr().link = 0;
     return buf;
-
 }
 
 // traceEvent writes a single event to trace buffer, flushing the buffer if necessary.
@@ -539,7 +525,6 @@ private static void traceEvent(byte ev, nint skip, params ulong[] args) {
     }
     traceEventLocked(0, _addr_mp, pid, _addr_bufp, ev, skip, args);
     traceReleaseBuffer(pid);
-
 }
 
 private static void traceEventLocked(nint extraBytes, ptr<m> _addr_mp, int pid, ptr<traceBufPtr> _addr_bufp, byte ev, nint skip, params ulong[] args) {
@@ -571,7 +556,6 @@ private static void traceEventLocked(nint extraBytes, ptr<m> _addr_mp, int pid, 
         // Reserve the byte for length assuming that length < 128.
         buf.varint(0);
         lenp = _addr_buf.arr[buf.pos - 1];
-
     }
     buf.varint(tickDiff);
     foreach (var (_, a) in args) {
@@ -589,7 +573,6 @@ private static void traceEventLocked(nint extraBytes, ptr<m> _addr_mp, int pid, 
     if (lenp != null) { 
         // Fill in actual length.
         lenp.val = byte(evSize - 2);
-
     }
 }
 
@@ -614,7 +597,6 @@ private static ulong traceStackID(ptr<m> _addr_mp, slice<System.UIntPtr> buf, ni
     }
     var id = trace.stackTab.put(buf[..(int)nstk]);
     return uint64(id);
-
 }
 
 // traceAcquireBuffer returns trace buffer to use and, if necessary, locks it.
@@ -631,10 +613,8 @@ private static (ptr<m>, int, ptr<traceBufPtr>) traceAcquireBuffer() {
             return (_addr_mp!, p.id, _addr__addr_p.tracebuf!);
         }
     }
-
     lock(_addr_trace.bufLock);
     return (_addr_mp!, traceGlobProc, _addr__addr_trace.buf!);
-
 }
 
 // traceReleaseBuffer releases a buffer previously acquired with traceAcquireBuffer.
@@ -643,7 +623,6 @@ private static void traceReleaseBuffer(int pid) {
         unlock(_addr_trace.bufLock);
     }
     releasem(getg().m);
-
 }
 
 // traceFlush puts buf onto stack of full buffers and returns an empty buffer.
@@ -682,7 +661,6 @@ private static traceBufPtr traceFlush(traceBufPtr buf, int pid) {
         unlock(_addr_trace.@lock);
     }
     return buf;
-
 }
 
 // traceString adds a string to the trace.strings and returns the id.
@@ -699,7 +677,6 @@ private static (ulong, ptr<traceBufPtr>) traceString(ptr<traceBufPtr> _addr_bufp
         // raceacquire is necessary because the map access
         // below is race annotated.
         raceacquire(@unsafe.Pointer(_addr_trace.stringsLock));
-
     }
     {
         var id__prev1 = id;
@@ -717,7 +694,6 @@ private static (ulong, ptr<traceBufPtr>) traceString(ptr<traceBufPtr> _addr_bufp
         id = id__prev1;
 
     }
-
 
     trace.stringSeq++;
     var id = trace.stringSeq;
@@ -753,13 +729,11 @@ private static (ulong, ptr<traceBufPtr>) traceString(ptr<traceBufPtr> _addr_bufp
         }
     }
 
-
     buf.varint(uint64(slen));
     buf.pos += copy(buf.arr[(int)buf.pos..], s[..(int)slen]);
 
     bufp.set(buf);
     return (id, _addr_bufp!);
-
 }
 
 // traceAppend appends v to buf in little-endian-base-128 encoding.
@@ -770,7 +744,6 @@ private static slice<byte> traceAppend(slice<byte> buf, ulong v) {
     }
     buf = append(buf, byte(v));
     return buf;
-
 }
 
 // varint appends v to buf in little-endian-base-128 encoding.
@@ -786,7 +759,6 @@ private static void varint(this ptr<traceBuf> _addr_buf, ulong v) {
     buf.arr[pos] = byte(v);
     pos++;
     buf.pos = pos;
-
 }
 
 // byte appends v to buf.
@@ -878,7 +850,6 @@ private static uint put(this ptr<traceStackTable> _addr_tab, slice<System.UIntPt
     atomicstorep(@unsafe.Pointer(_addr_tab.tab[part]), @unsafe.Pointer(stk));
     unlock(_addr_tab.@lock);
     return stk.id;
-
 }
 
 // find checks if the stack trace pcs is already present in the table.
@@ -897,17 +868,13 @@ Search:
                         _continueSearch = true;
                         break;
                     }
-
             stk = stk.link.ptr();
                 }
                 return stk.id;
-
             }
-
         }
     }
     return 0;
-
 }
 
 // newStack allocates a new stack of size n.
@@ -928,7 +895,6 @@ private static slice<Frame> allFrames(slice<System.UIntPtr> pcs) {
             return frames;
         }
     }
-
 }
 
 // dump writes all previously cached stacks to trace buffers,
@@ -972,15 +938,11 @@ private static void dump(this ptr<traceStackTable> _addr_tab) {
                     buf = buf__prev1;
 
                 }
-
                 buf = bufp.ptr();
                 buf.@byte(traceEvStack | 3 << (int)(traceArgCountShift));
                 buf.varint(uint64(len(tmpbuf)));
                 buf.pos += copy(buf.arr[(int)buf.pos..], tmpbuf);
-
             }
-
-
         }
         stk = stk__prev1;
     }
@@ -992,7 +954,6 @@ private static void dump(this ptr<traceStackTable> _addr_tab) {
     tab.mem.drop();
     tab.val = new traceStackTable();
     lockInit(_addr_((tab.val).@lock), lockRankTraceStackTab);
-
 }
 
 private partial struct traceFrame {
@@ -1024,7 +985,6 @@ private static (traceFrame, traceBufPtr) traceFrameForPC(traceBufPtr buf, int pi
     }
     frame.fileID, bufp = traceString(_addr_bufp, pid, file);
     return (frame, (bufp.val));
-
 }
 
 // traceAlloc is a non-thread-safe region allocator.
@@ -1076,12 +1036,10 @@ private static unsafe.Pointer alloc(this ptr<traceAlloc> _addr_a, System.UIntPtr
         block.next.set(a.head.ptr());
         a.head.set(block);
         a.off = 0;
-
     }
     var p = _addr_a.head.ptr().data[a.off];
     a.off += n;
     return @unsafe.Pointer(p);
-
 }
 
 // drop frees all previously allocated memory and resets the allocator.
@@ -1116,7 +1074,6 @@ private static void traceProcStop(ptr<p> _addr_pp) {
     traceEvent(traceEvProcStop, -1);
     mp.p = oldp;
     releasem(mp);
-
 }
 
 private static void traceGCStart() {
@@ -1162,7 +1119,6 @@ private static void traceGCSweepSpan(System.UIntPtr bytesSwept) {
             traceEvent(traceEvGCSweepStart, 1);
         }
         _p_.traceSwept += bytesSwept;
-
     }
 }
 
@@ -1175,7 +1131,6 @@ private static void traceGCSweepDone() {
         traceEvent(traceEvGCSweepDone, -1, uint64(_p_.traceSwept), uint64(_p_.traceReclaimed));
     }
     _p_.traceSweep = false;
-
 }
 
 private static void traceGCMarkAssistStart() {
@@ -1194,7 +1149,6 @@ private static void traceGoCreate(ptr<g> _addr_newg, System.UIntPtr pc) {
     // +PCQuantum because traceFrameForPC expects return PCs and subtracts PCQuantum.
     var id = trace.stackTab.put(new slice<System.UIntPtr>(new System.UIntPtr[] { pc+sys.PCQuantum }));
     traceEvent(traceEvGoCreate, 2, uint64(newg.goid), uint64(id));
-
 }
 
 private static void traceGoStart() {
@@ -1235,7 +1189,6 @@ private static void traceGoPark(byte traceEv, nint skip) {
         traceEvent(traceEvFutileWakeup, -1);
     }
     traceEvent(traceEv & ~traceFutileWakeup, skip);
-
 }
 
 private static void traceGoUnpark(ptr<g> _addr_gp, nint skip) {
@@ -1269,13 +1222,11 @@ private static void traceGoSysExit(long ts) {
         // exit (but before we actually managed to start the goroutine,
         // aka right now), and assign a fresh time stamp to keep the log consistent.
         ts = 0;
-
     }
     var _g_ = getg().m.curg;
     _g_.traceseq++;
     _g_.tracelastp = _g_.m.p;
     traceEvent(traceEvGoSysExit, -1, uint64(_g_.goid), _g_.traceseq, uint64(ts) / traceTickDiv);
-
 }
 
 private static void traceGoSysBlock(ptr<p> _addr_pp) {
@@ -1289,7 +1240,6 @@ private static void traceGoSysBlock(ptr<p> _addr_pp) {
     traceEvent(traceEvGoSysBlock, -1);
     mp.p = oldp;
     releasem(mp);
-
 }
 
 private static void traceHeapAlloc() {
@@ -1303,14 +1253,12 @@ private static void traceHeapGoal() {
         if (heapGoal == ~uint64(0)) { 
             // Heap-based triggering is disabled.
             traceEvent(traceEvHeapGoal, -1, 0);
-
         }
         else
  {
             traceEvent(traceEvHeapGoal, -1, heapGoal);
         }
     }
-
 }
 
 // To access runtime functions from runtime/trace.
@@ -1329,7 +1277,6 @@ private static void trace_userTaskCreate(ulong id, ulong parentID, @string taskT
     var (typeStringID, bufp) = traceString(_addr_bufp, pid, taskType);
     traceEventLocked(0, _addr_mp, pid, _addr_bufp, traceEvUserTaskCreate, 3, id, parentID, typeStringID);
     traceReleaseBuffer(pid);
-
 }
 
 //go:linkname trace_userTaskEnd runtime/trace.userTaskEnd
@@ -1350,7 +1297,6 @@ private static void trace_userRegion(ulong id, ulong mode, @string name) {
     var (nameStringID, bufp) = traceString(_addr_bufp, pid, name);
     traceEventLocked(0, _addr_mp, pid, _addr_bufp, traceEvUserRegion, 3, id, mode, nameStringID);
     traceReleaseBuffer(pid);
-
 }
 
 //go:linkname trace_userLog runtime/trace.userLog
@@ -1381,12 +1327,10 @@ private static void trace_userLog(ulong id, @string category, @string message) {
             slen = room;
         }
     }
-
     buf.varint(uint64(slen));
     buf.pos += copy(buf.arr[(int)buf.pos..], message[..(int)slen]);
 
     traceReleaseBuffer(pid);
-
 }
 
 } // end runtime_package

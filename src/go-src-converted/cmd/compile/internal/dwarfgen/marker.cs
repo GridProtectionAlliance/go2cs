@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package dwarfgen -- go2cs converted at 2022 March 06 23:14:24 UTC
+// package dwarfgen -- go2cs converted at 2022 March 13 06:27:53 UTC
 // import "cmd/compile/internal/dwarfgen" ==> using dwarfgen = go.cmd.compile.@internal.dwarfgen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\dwarfgen\marker.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using src = cmd.@internal.src_package;
+
+
+// A ScopeMarker tracks scope nesting and boundaries for later use
+// during DWARF generation.
 
 public static partial class dwarfgen_package {
 
-    // A ScopeMarker tracks scope nesting and boundaries for later use
-    // during DWARF generation.
 public partial struct ScopeMarker {
     public slice<ir.ScopeID> parents;
     public slice<ir.Mark> marks;
@@ -35,7 +37,6 @@ private static ir.ScopeID checkPos(this ptr<ScopeMarker> _addr_m, src.XPos pos) 
         @base.FatalfAt(pos, "non-monotonic scope positions\n\t%v: previous scope position", @base.FmtPos(last.Pos));
     }
     return last.Scope;
-
 }
 
 // Push records a transition to a new child scope of the current scope.
@@ -73,7 +74,6 @@ private static void Unpush(this ptr<ScopeMarker> _addr_m) {
     }
     m.parents = m.parents[..(int)current - 1];
     m.marks = m.marks[..(int)i];
-
 }
 
 // WriteTo writes the recorded scope marks to the given function,
@@ -104,9 +104,7 @@ private static void compactMarks(this ptr<ScopeMarker> _addr_m) {
         }
         m.marks[n] = next;
         n++;
-
     }    m.marks = m.marks[..(int)n];
-
 }
 
 } // end dwarfgen_package

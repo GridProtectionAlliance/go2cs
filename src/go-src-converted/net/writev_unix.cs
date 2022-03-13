@@ -5,13 +5,13 @@
 //go:build darwin || dragonfly || freebsd || illumos || linux || netbsd || openbsd
 // +build darwin dragonfly freebsd illumos linux netbsd openbsd
 
-// package net -- go2cs converted at 2022 March 06 22:16:56 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:15 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\writev_unix.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -29,7 +29,6 @@ private static (long, error) writeBuffers(this ptr<conn> _addr_c, ptr<Buffers> _
         return (n, error.As(addr(new OpError(Op:"writev",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!);
     }
     return (n, error.As(null!)!);
-
 }
 
 private static (long, error) writeBuffers(this ptr<netFD> _addr_fd, ptr<Buffers> _addr_v) {

@@ -5,16 +5,18 @@
 //go:build msan
 // +build msan
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:08 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:56 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\msan.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+
+
+// Public memory sanitizer API.
 
 public static partial class runtime_package {
 
-    // Public memory sanitizer API.
 public static void MSanRead(unsafe.Pointer addr, nint len) {
     msanread(addr, uintptr(len));
 }
@@ -48,7 +50,6 @@ private static void msanread(unsafe.Pointer addr, System.UIntPtr sz) {
         return ;
     }
     domsanread(addr, sz);
-
 }
 
 //go:noescape

@@ -45,15 +45,14 @@
 // additional virtual address space. The choice of managing large arrays also means
 // that a large amount of virtual address space may be reserved by the runtime.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:59 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:48 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mpagealloc.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -86,7 +85,6 @@ private static readonly var summaryL0Bits = heapAddrBits - logPallocChunkBytes -
 // there should this change.
 private static readonly var pallocChunksL2Bits = heapAddrBits - logPallocChunkBytes - pallocChunksL1Bits;
 private static readonly var pallocChunksL1Shift = pallocChunksL2Bits;
-
 
 // Maximum searchAddr value, which indicates that the heap has no free space.
 //
@@ -125,7 +123,6 @@ private static nuint l1(this chunkIdx i) {
         // Let the compiler optimize this away if there's no
         // L1 map.
         return 0;
-
     }
     else
  {
@@ -176,7 +173,6 @@ private static (nint, nint) addrsToSummaryRange(nint level, System.UIntPtr @base
     lo = int((base - arenaBaseOffset) >> (int)(levelShift[level]));
     hi = int(((limit - 1) - arenaBaseOffset) >> (int)(levelShift[level])) + 1;
     return ;
-
 }
 
 // blockAlignSummaryRange aligns indices into the given level to that
@@ -279,7 +275,6 @@ private static void init(this ptr<pageAlloc> _addr_p, ptr<mutex> _addr_mheapLock
         print("runtime: root level max pages = ", 1 << (int)(levelLogPages[0]), "\n");
         print("runtime: summary max pages = ", maxPackedValue, "\n");
         throw("root level max pages doesn't fit in summary");
-
     }
     p.sysStat = sysStat; 
 
@@ -297,7 +292,6 @@ private static void init(this ptr<pageAlloc> _addr_p, ptr<mutex> _addr_mheapLock
 
     // Initialize scavenge tracking state.
     p.scav.scavLWM = maxSearchAddr;
-
 }
 
 // tryChunkOf returns the bitmap data for the given chunk.
@@ -311,7 +305,6 @@ private static ptr<pallocData> tryChunkOf(this ptr<pageAlloc> _addr_p, chunkIdx 
         return _addr_null!;
     }
     return _addr__addr_l2[ci.l2()]!;
-
 }
 
 // chunkOf returns the chunk at the given chunk index.
@@ -381,19 +374,15 @@ private static void grow(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Syst
             if (r == null) {
                 throw("pageAlloc: out of memory");
             }
-
             atomic.StorepNoWB(@unsafe.Pointer(_addr_p.chunks[c.l1()]), r);
-
         }
         p.chunkOf(c).scavenged.setRange(0, pallocChunkPages);
-
     } 
 
     // Update summaries accordingly. The grow acts like a free, so
     // we need to ensure this newly-free memory is visible in the
     // summaries.
     p.update(base, size / pageSize, true, false);
-
 }
 
 // update updates heap metadata. It must be called each time the bitmap
@@ -424,7 +413,6 @@ private static void update(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Sy
             return ;
         }
         p.summary[len(p.summary) - 1][sc] = y;
-
     }
     else if (contig) { 
         // Slow contiguous path: the allocation spans more than one chunk
@@ -464,7 +452,6 @@ private static void update(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Sy
             }
         }
         summary[ec] = p.chunkOf(ec).summarize();
-
     } { 
         // Slow general path: the allocation spans more than one chunk
         // and at least one summary is guaranteed to change.
@@ -475,7 +462,6 @@ private static void update(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Sy
         for (var c = sc; c <= ec; c++) {
             summary[c] = p.chunkOf(c).summarize();
         }
-
     }
     var changed = true;
     for (var l = len(p.summary) - 2; l >= 0 && changed; l--) { 
@@ -507,9 +493,7 @@ private static void update(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Sy
 
             i = i__prev2;
         }
-
     }
-
 }
 
 // allocRange marks the range of memory [base, base+npages*pageSize) as
@@ -537,7 +521,6 @@ private static System.UIntPtr allocRange(this ptr<pageAlloc> _addr_p, System.UIn
         var chunk = p.chunkOf(sc);
         scav += chunk.scavenged.popcntRange(si, ei + 1 - si);
         chunk.allocRange(si, ei + 1 - si);
-
     }
     else
  { 
@@ -553,11 +536,9 @@ private static System.UIntPtr allocRange(this ptr<pageAlloc> _addr_p, System.UIn
         chunk = p.chunkOf(ec);
         scav += chunk.scavenged.popcntRange(0, ei + 1);
         chunk.allocRange(0, ei + 1);
-
     }
     p.update(base, npages, true, true);
     return uintptr(scav) * pageSize;
-
 }
 
 // findMappedAddr returns the smallest mapped offAddr that is
@@ -585,11 +566,9 @@ private static offAddr findMappedAddr(this ptr<pageAlloc> _addr_p, offAddr addr)
             // known address, which means we definitely have no
             // free memory left.
             return maxOffAddr;
-
         }
     }
     return addr;
-
 }
 
 // find searches for the first (address-ordered) contiguous free region of
@@ -672,7 +651,6 @@ private static (System.UIntPtr, offAddr) find(this ptr<pageAlloc> _addr_p, Syste
             // down the firstFree window to the base and bound of this range.
             firstFree.@base = addr;
             firstFree.bound = addr.add(size - 1);
-
         }
         else if (!(addr.add(size - 1).lessThan(firstFree.@base) || firstFree.bound.lessThan(addr))) { 
             // This range only partially overlaps with the firstFree range,
@@ -680,7 +658,6 @@ private static (System.UIntPtr, offAddr) find(this ptr<pageAlloc> _addr_p, Syste
             print("runtime: addr = ", hex(addr.addr()), ", size = ", size, "\n");
             print("runtime: base = ", hex(firstFree.@base.addr()), ", bound = ", hex(firstFree.bound.addr()), "\n");
             throw("range partially overlaps");
-
         }
     }; 
 
@@ -759,7 +736,6 @@ nextLevel:
                     // that we should skip it altogether.
                     size = 0;
                     continue;
-
                 } 
 
                 // We've encountered a non-zero summary which means
@@ -777,9 +753,7 @@ nextLevel:
                     // We hit npages; we're done!
                     size += s;
                     break;
-
                 }
-
                 if (sum.max() >= uint(npages)) { 
                     // The entry itself contains npages contiguous
                     // free pages, so continue on the next level
@@ -790,7 +764,6 @@ nextLevel:
                     _continuenextLevel = true;
                     break;
                 }
-
                 if (size == 0 || s < 1 << (int)(logMaxPages)) { 
                     // We either don't have a current run started, or this entry
                     // isn't totally free (meaning we can't continue the current
@@ -799,11 +772,9 @@ nextLevel:
                     size = sum.end();
                     base = uint(j + 1) << (int)(logMaxPages) - size;
                     continue;
-
                 } 
                 // The entry is completely free, so continue the run.
                 size += 1 << (int)(logMaxPages);
-
             }
 
 
@@ -814,12 +785,10 @@ nextLevel:
             // some boundary, so compute the address and return it.
             var addr = levelIndexToOffAddr(l, i).add(uintptr(base) * pageSize).addr();
             return (addr, p.findMappedAddr(firstFree.@base));
-
         }
         if (l == 0) { 
             // We're at level zero, so that means we've exhausted our search.
             return (0, maxSearchAddr);
-
         }
         print("runtime: summary[", l - 1, "][", lastSumIdx, "] = ", lastSum.start(), ", ", lastSum.max(), ", ", lastSum.end(), "\n");
         print("runtime: level = ", l, ", npages = ", npages, ", j0 = ", j0, "\n");
@@ -837,7 +806,6 @@ nextLevel:
             j = j__prev2;
         }
         throw("bad summary data");
-
     } 
 
     // Since we've gotten to this point, that means we haven't found a
@@ -856,7 +824,6 @@ nextLevel:
         print("runtime: summary[", len(p.summary) - 1, "][", i, "] = (", sum.start(), ", ", sum.max(), ", ", sum.end(), ")\n");
         print("runtime: npages = ", npages, "\n");
         throw("bad summary data");
-
     }
     addr = chunkBase(ci) + uintptr(j) * pageSize; 
 
@@ -865,7 +832,6 @@ nextLevel:
     var searchAddr = chunkBase(ci) + uintptr(searchIdx) * pageSize;
     foundFree(new offAddr(searchAddr), chunkBase(ci + 1) - searchAddr);
     return (addr, p.findMappedAddr(firstFree.@base));
-
 }
 
 // alloc allocates npages worth of memory from the page heap, returning the base
@@ -912,7 +878,6 @@ private static (System.UIntPtr, System.UIntPtr) alloc(this ptr<pageAlloc> _addr_
             }
 
         }
-
     }
     addr, searchAddr = p.find(npages);
     if (addr == 0) {
@@ -923,10 +888,8 @@ private static (System.UIntPtr, System.UIntPtr) alloc(this ptr<pageAlloc> _addr_
             // space in it, just not enough contiguous space to
             // accommodate npages.
             p.searchAddr = maxSearchAddr;
-
         }
         return (0, 0);
-
     }
 Found: 
 
@@ -942,7 +905,6 @@ Found:
         p.searchAddr = searchAddr;
     }
     return (addr, scav);
-
 }
 
 // free returns npages worth of memory starting at base back to the page heap.
@@ -974,13 +936,11 @@ private static void free(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Syst
             p.scav.freeHWM = offLimit;
         }
     }
-
     if (npages == 1) { 
         // Fast path: we're clearing a single bit, and we know exactly
         // where it is, so mark it directly.
         var i = chunkIndex(base);
         p.chunkOf(i).free1(chunkPageIndex(base));
-
     }
     else
  { 
@@ -993,7 +953,6 @@ private static void free(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Syst
         if (sc == ec) { 
             // The range doesn't cross any chunk boundaries.
             p.chunkOf(sc).free(si, ei + 1 - si);
-
         }
         else
  { 
@@ -1004,11 +963,9 @@ private static void free(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, Syst
             }
 
             p.chunkOf(ec).free(0, ei + 1);
-
         }
     }
     p.update(base, npages, true, false);
-
 }
 
 private static readonly var pallocSumBytes = @unsafe.Sizeof(pallocSum(0)); 
@@ -1019,7 +976,6 @@ private static readonly nint maxPackedValue = 1 << (int)(logMaxPackedValue);
 private static readonly var logMaxPackedValue = logPallocChunkPages + (summaryLevels - 1) * summaryLevelBits;
 
 private static readonly var freeChunkSum = pallocSum(uint64(pallocChunkPages) | uint64(pallocChunkPages << (int)(logMaxPackedValue)) | uint64(pallocChunkPages << (int)((2 * logMaxPackedValue))));
-
 
 // pallocSum is a packed summary type which packs three numbers: start, max,
 // and end into a single 8-byte value. Each of these values are a summary of
@@ -1035,7 +991,6 @@ private static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
         return pallocSum(uint64(1 << 63));
     }
     return pallocSum((uint64(start) & (maxPackedValue - 1)) | ((uint64(max) & (maxPackedValue - 1)) << (int)(logMaxPackedValue)) | ((uint64(end) & (maxPackedValue - 1)) << (int)((2 * logMaxPackedValue))));
-
 }
 
 // start extracts the start value from a packed sum.
@@ -1044,7 +999,6 @@ private static nuint start(this pallocSum p) {
         return maxPackedValue;
     }
     return uint(uint64(p) & (maxPackedValue - 1));
-
 }
 
 // max extracts the max value from a packed sum.
@@ -1053,7 +1007,6 @@ private static nuint max(this pallocSum p) {
         return maxPackedValue;
     }
     return uint((uint64(p) >> (int)(logMaxPackedValue)) & (maxPackedValue - 1));
-
 }
 
 // end extracts the end value from a packed sum.
@@ -1062,7 +1015,6 @@ private static nuint end(this pallocSum p) {
         return maxPackedValue;
     }
     return uint((uint64(p) >> (int)((2 * logMaxPackedValue))) & (maxPackedValue - 1));
-
 }
 
 // unpack unpacks all three values from the summary.
@@ -1075,7 +1027,6 @@ private static (nuint, nuint, nuint) unpack(this pallocSum p) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }
     return (uint(uint64(p) & (maxPackedValue - 1)), uint((uint64(p) >> (int)(logMaxPackedValue)) & (maxPackedValue - 1)), uint((uint64(p) >> (int)((2 * logMaxPackedValue))) & (maxPackedValue - 1)));
-
 }
 
 // mergeSummaries merges consecutive summaries which may each represent at
@@ -1111,7 +1062,6 @@ private static pallocSum mergeSummaries(slice<pallocSum> sums, nuint logMaxPages
         }
     }
     return packPallocSum(start, max, end);
-
 }
 
 } // end runtime_package

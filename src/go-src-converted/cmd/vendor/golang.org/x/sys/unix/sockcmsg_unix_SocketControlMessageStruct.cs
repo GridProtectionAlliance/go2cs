@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:40 UTC
+//     Generated on 2022 March 13 06:41:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace sys
 {
     public static partial class unix_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SocketControlMessage
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace sys
             public static implicit operator SocketControlMessage(NilType nil) => default(SocketControlMessage);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SocketControlMessage SocketControlMessage_cast(dynamic value)
         {
             return new SocketControlMessage(value.Header, value.Data);

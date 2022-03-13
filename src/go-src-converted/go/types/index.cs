@@ -4,22 +4,23 @@
 
 // This file implements typechecking of index/slice expressions.
 
-// package types -- go2cs converted at 2022 March 06 22:41:59 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:06 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\index.go
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using typeparams = go.go.@internal.typeparams_package;
-using System;
-
-
 namespace go.go;
 
+using ast = go.ast_package;
+using constant = go.constant_package;
+using typeparams = go.@internal.typeparams_package;
+
+
+// If e is a valid function instantiation, indexExpr returns true.
+// In that case x represents the uninstantiated function value and
+// it is the caller's responsibility to instantiate the function.
+
+using System;
 public static partial class types_package {
 
-    // If e is a valid function instantiation, indexExpr returns true.
-    // In that case x represents the uninstantiated function value and
-    // it is the caller's responsibility to instantiate the function.
 private static bool indexExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.IndexExpr> _addr_e) => func((_, panic, _) => {
     bool isFuncInst = default;
     ref Checker check = ref _addr_check.val;
@@ -47,10 +48,8 @@ private static bool indexExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
             if (sig != null && len(sig.tparams) > 0) { 
                 // function instantiation
                 return true;
-
             }
         }
-
         var valid = false;
     var length = int64(-1); // valid if >= 0
     switch (optype(x.typ).type()) {
@@ -87,8 +86,6 @@ private static bool indexExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                 typ = typ__prev1;
 
             }
-
-
             break;
         case ptr<Slice> typ:
             valid = true;
@@ -137,7 +134,6 @@ private static bool indexExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                             t = t__prev2;
 
                         }
-
                         break;
                     case ptr<Slice> t:
                         e = t.elem;
@@ -162,7 +158,6 @@ private static bool indexExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                 }
                 telem = e;
                 return true;
-
             })) { 
                 // If there are maps, the index expression must be assignable
                 // to the map key type (as for simple map index expressions).
@@ -197,10 +192,8 @@ private static bool indexExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                     // no maps
                     valid = true;
                     x.mode = variable;
-
                 }
                 x.typ = telem;
-
             }
             break;
 
@@ -221,7 +214,6 @@ private static bool indexExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
     }
     check.index(index, length);
     return false;
-
 });
 
 private static void sliceExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_x, ptr<ast.SliceExpr> _addr_e) {
@@ -253,9 +245,7 @@ private static void sliceExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                 if (typ.kind == UntypedString) {
                     x.typ = Typ[String];
                 }
-
             }
-
             break;
         case ptr<Array> typ:
             valid = true;
@@ -282,8 +272,6 @@ private static void sliceExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                 typ = typ__prev1;
 
             }
-
-
             break;
         case ptr<Slice> typ:
             valid = true; 
@@ -340,7 +328,6 @@ private static void sliceExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                     }
 
                 }
-
             else if (i == 0) 
                 // default is 0 for the first index
                 x = 0;
@@ -348,7 +335,6 @@ private static void sliceExpr(this ptr<Checker> _addr_check, ptr<operand> _addr_
                 // default is length (== capacity) otherwise
                 x = length;
                         ind[i] = x;
-
         }
         i = i__prev1;
     }
@@ -368,11 +354,8 @@ L:
                         _breakL = true; // only report one error, ok to continue
                         break;
                     }
-
                 }
-
             }
-
         }
         i = i__prev1;
         x = x__prev1;
@@ -399,10 +382,8 @@ private static ast.Expr singleIndex(this ptr<Checker> _addr_check, ptr<ast.Index
     if (len(indexes) > 1) { 
         // TODO(rFindley) should this get a distinct error code?
         check.invalidOp(indexes[1], _InvalidIndex, "more than one index");
-
     }
     return indexes[0];
-
 }
 
 // index checks an index expression for validity.
@@ -435,7 +416,6 @@ private static (Type, long) index(this ptr<Checker> _addr_check, ast.Expr index,
         return ;
     }
     return (x.typ, v);
-
 }
 
 private static bool isValidIndex(this ptr<Checker> _addr_check, ptr<operand> _addr_x, errorCode code, @string what, bool allowNegative) {
@@ -465,7 +445,6 @@ private static bool isValidIndex(this ptr<Checker> _addr_check, ptr<operand> _ad
         }
     }
     return true;
-
 }
 
 // indexElts checks the elements (elts) of an array or slice composite literal
@@ -499,13 +478,10 @@ private static long indexedElts(this ptr<Checker> _addr_check, slice<ast.Expr> e
  {
                             check.errorf(e, _InvalidLitIndex, "index %s must be integer constant", kv.Key);
                         }
-
                     }
 
                 }
-
                 eval = kv.Value;
-
             }
             else if (length >= 0 && index >= length) {
                 check.errorf(e, _OversizeArrayLit, "index %d is out of bounds (>= %d)", index, length);
@@ -533,9 +509,7 @@ private static long indexedElts(this ptr<Checker> _addr_check, slice<ast.Expr> e
         ref operand x = ref heap(out ptr<operand> _addr_x);
         check.exprWithHint(_addr_x, eval, typ);
         check.assignment(_addr_x, typ, "array or slice literal");
-
     }    return max;
-
 }
 
 } // end types_package

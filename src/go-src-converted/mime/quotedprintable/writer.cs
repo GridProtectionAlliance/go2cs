@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package quotedprintable -- go2cs converted at 2022 March 06 22:21:15 UTC
+// package quotedprintable -- go2cs converted at 2022 March 13 05:36:23 UTC
 // import "mime/quotedprintable" ==> using quotedprintable = go.mime.quotedprintable_package
 // Original source: C:\Program Files\Go\src\mime\quotedprintable\writer.go
-using io = go.io_package;
-
 namespace go.mime;
+
+using io = io_package;
 
 public static partial class quotedprintable_package {
 
@@ -58,9 +58,7 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> p) {
                 err = err__prev2;
 
             }
-
             n = i;
-
         }
         {
             var err__prev1 = err;
@@ -74,9 +72,7 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> p) {
             err = err__prev1;
 
         }
-
         n++;
-
     }    if (n == len(p)) {
         return (n, error.As(null!)!);
     }
@@ -92,9 +88,7 @@ private static (nint, error) Write(this ptr<Writer> _addr_w, slice<byte> p) {
 
     }
 
-
     return (len(p), error.As(null!)!);
-
 }
 
 // Close closes the Writer, flushing any unwritten data to the underlying
@@ -110,9 +104,7 @@ private static error Close(this ptr<Writer> _addr_w) {
         }
     }
 
-
     return error.As(w.flush())!;
-
 }
 
 // write limits text encoded in quoted-printable to 76 characters per line.
@@ -126,11 +118,9 @@ private static error write(this ptr<Writer> _addr_w, slice<byte> p) {
                 w.cr = false;
                 continue;
             }
-
             if (b == '\r') {
                 w.cr = true;
             }
-
             {
                 var err__prev2 = err;
 
@@ -143,7 +133,6 @@ private static error write(this ptr<Writer> _addr_w, slice<byte> p) {
                 err = err__prev2;
 
             }
-
             {
                 var err__prev2 = err;
 
@@ -156,9 +145,7 @@ private static error write(this ptr<Writer> _addr_w, slice<byte> p) {
                 err = err__prev2;
 
             }
-
             continue;
-
         }
         if (w.i == lineMaxLen - 1) {
             {
@@ -173,14 +160,11 @@ private static error write(this ptr<Writer> _addr_w, slice<byte> p) {
                 err = err__prev2;
 
             }
-
         }
         w.line[w.i] = b;
         w.i++;
         w.cr = false;
-
     }    return error.As(null!)!;
-
 }
 
 private static error encode(this ptr<Writer> _addr_w, byte b) {
@@ -195,7 +179,6 @@ private static error encode(this ptr<Writer> _addr_w, byte b) {
             }
 
         }
-
     }
     w.line[w.i] = '=';
     w.line[w.i + 1] = upperhex[b >> 4];
@@ -203,7 +186,6 @@ private static error encode(this ptr<Writer> _addr_w, byte b) {
     w.i += 3;
 
     return error.As(null!)!;
-
 }
 
 private static readonly @string upperhex = "0123456789ABCDEF";
@@ -229,10 +211,8 @@ private static error checkLastByte(this ptr<Writer> _addr_w) {
             }
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 private static error insertSoftLineBreak(this ptr<Writer> _addr_w) {
@@ -265,10 +245,8 @@ private static error flush(this ptr<Writer> _addr_w) {
         }
     }
 
-
     w.i = 0;
     return error.As(null!)!;
-
 }
 
 private static bool isWhitespace(byte b) {

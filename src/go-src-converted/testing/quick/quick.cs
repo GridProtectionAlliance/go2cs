@@ -5,20 +5,20 @@
 // Package quick implements utility functions to help with black box testing.
 //
 // The testing/quick package is frozen and is not accepting new features.
-// package quick -- go2cs converted at 2022 March 06 23:19:32 UTC
+
+// package quick -- go2cs converted at 2022 March 13 06:43:17 UTC
 // import "testing/quick" ==> using quick = go.testing.quick_package
 // Original source: C:\Program Files\Go\src\testing\quick\quick.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using math = go.math_package;
-using rand = go.math.rand_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.testing;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using math = math_package;
+using rand = math.rand_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using time = time_package;
+using System;
 
 public static partial class quick_package {
 
@@ -38,7 +38,6 @@ private static float randFloat32(ptr<rand.Rand> _addr_rand) {
         f = -f;
     }
     return float32(f);
-
 }
 
 // randFloat64 generates a random float taking the full range of a float64.
@@ -50,7 +49,6 @@ private static double randFloat64(ptr<rand.Rand> _addr_rand) {
         f = -f;
     }
     return f;
-
 }
 
 // randInt64 returns a random int64.
@@ -95,7 +93,6 @@ private static (reflect.Value, bool) sizedValue(reflect.Type t, ptr<rand.Rand> _
             return (m.Generate(rand, size), true);
         }
     }
-
 
     var v = reflect.New(t).Elem();
     {
@@ -165,7 +162,6 @@ private static (reflect.Value, bool) sizedValue(reflect.Type t, ptr<rand.Rand> _
                 v.Set(reflect.New(concrete.Elem()));
                 v.Elem().Set(elem);
             }
-
         else if (concrete.Kind() == reflect.Slice) 
             numElems = rand.Intn(size);
             var sizeLeft = size - numElems;
@@ -223,7 +219,6 @@ private static (reflect.Value, bool) sizedValue(reflect.Type t, ptr<rand.Rand> _
             else if (n > 0) {
                 sizeLeft /= n;
             }
-
             {
                 nint i__prev1 = i;
 
@@ -244,7 +239,6 @@ private static (reflect.Value, bool) sizedValue(reflect.Type t, ptr<rand.Rand> _
     }
 
     return (v, true);
-
 }
 
 // A Config structure contains options for running a test.
@@ -272,7 +266,6 @@ private static ptr<rand.Rand> getRand(this ptr<Config> _addr_c) {
         return _addr_rand.New(rand.NewSource(time.Now().UnixNano()))!;
     }
     return _addr_c.Rand!;
-
 }
 
 // getMaxCount returns the maximum number of iterations to run for a given
@@ -292,7 +285,6 @@ private static nint getMaxCount(this ptr<Config> _addr_c) {
         }
     }
     return ;
-
 }
 
 // A SetupError is the result of an error in the way that check is being
@@ -375,7 +367,6 @@ public static error Check(object f, ptr<Config> _addr_config) {
     }
 
     return error.As(null!)!;
-
 }
 
 // CheckEqual looks for an input on which f and g return different results.
@@ -417,7 +408,6 @@ public static error CheckEqual(object f, object g, ptr<Config> _addr_config) {
     }
 
     return error.As(null!)!;
-
 }
 
 // arbitraryValues writes Values to args such that args contains Values
@@ -441,7 +431,6 @@ private static error arbitraryValues(slice<reflect.Value> args, reflect.Type f, 
     }
 
     return ;
-
 }
 
 private static (reflect.Value, reflect.Type, bool) functionAndType(object f) {
@@ -456,7 +445,6 @@ private static (reflect.Value, reflect.Type, bool) functionAndType(object f) {
     }
     t = v.Type();
     return ;
-
 }
 
 private static slice<object> toInterfaces(slice<reflect.Value> values) {

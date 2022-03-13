@@ -5,30 +5,31 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:15 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:54 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\ipsock_posix.go
-using context = go.context_package;
-using poll = go.@internal.poll_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using context = context_package;
+using poll = @internal.poll_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// probe probes IPv4, IPv6 and IPv4-mapped IPv6 communication
+// capabilities which are controlled by the IPV6_V6ONLY socket option
+// and kernel configuration.
+//
+// Should we try to use the IPv4 socket interface if we're only
+// dealing with IPv4 sockets? As long as the host system understands
+// IPv4-mapped IPv6, it's okay to pass IPv4-mapped IPv6 addresses to
+// the IPv6 interface. That simplifies our code and is most
+// general. Unfortunately, we need to run on kernels built without
+// IPv6 support too. So probe the kernel to figure it out.
+
+using System;
 public static partial class net_package {
 
-    // probe probes IPv4, IPv6 and IPv4-mapped IPv6 communication
-    // capabilities which are controlled by the IPV6_V6ONLY socket option
-    // and kernel configuration.
-    //
-    // Should we try to use the IPv4 socket interface if we're only
-    // dealing with IPv4 sockets? As long as the host system understands
-    // IPv4-mapped IPv6, it's okay to pass IPv4-mapped IPv6 addresses to
-    // the IPv6 interface. That simplifies our code and is most
-    // general. Unfortunately, we need to run on kernels built without
-    // IPv6 support too. So probe the kernel to figure it out.
 private static void probe(this ptr<ipStackCapabilities> _addr_p) => func((defer, _, _) => {
     ref ipStackCapabilities p = ref _addr_p.val;
 
@@ -69,7 +70,6 @@ private static void probe(this ptr<ipStackCapabilities> _addr_p) => func((defer,
                 continue;
             }
         }
-
         if (i == 0) {
             p.ipv6Enabled = true;
         }
@@ -140,13 +140,11 @@ private static (nint, bool) favoriteAddrFamily(@string network, sockaddr laddr, 
             return (syscall.AF_INET, false);
         }
         return (laddr.family(), false);
-
     }
     if ((laddr == null || laddr.family() == syscall.AF_INET) && (raddr == null || raddr.family() == syscall.AF_INET)) {
         return (syscall.AF_INET, false);
     }
     return (syscall.AF_INET6, false);
-
 }
 
 private static (ptr<netFD>, error) internetSocket(context.Context ctx, @string net, sockaddr laddr, sockaddr raddr, nint sotype, nint proto, @string mode, Func<@string, @string, syscall.RawConn, error> ctrlFn) {
@@ -158,7 +156,6 @@ private static (ptr<netFD>, error) internetSocket(context.Context ctx, @string n
     }
     var (family, ipv6only) = favoriteAddrFamily(net, laddr, raddr, mode);
     return _addr_socket(ctx, net, family, sotype, proto, ipv6only, laddr, raddr, ctrlFn)!;
-
 }
 
 private static (syscall.Sockaddr, error) ipToSockaddr(nint family, IP ip, nint port, @string zone) {
@@ -199,7 +196,6 @@ private static (syscall.Sockaddr, error) ipToSockaddr(nint family, IP ip, nint p
         copy(sa.Addr[..], ip6);
         return (sa, error.As(null!)!);
         return (null, error.As(addr(new AddrError(Err:"invalid address family",Addr:ip.String()))!)!);
-
 }
 
 } // end net_package

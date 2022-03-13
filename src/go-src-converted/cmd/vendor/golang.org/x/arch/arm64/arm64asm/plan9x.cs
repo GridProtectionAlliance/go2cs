@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2022 March 06 23:25:00 UTC
+// package arm64asm -- go2cs converted at 2022 March 13 06:38:13 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\plan9x.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.arch.arm64;
 
+using fmt = fmt_package;
+using io = io_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// GoSyntax returns the Go assembler syntax for the instruction.
+// The syntax was originally defined by Plan 9.
+// The pc is the program counter of the instruction, used for
+// expanding PC-relative addresses into absolute ones.
+// The symname function queries the symbol table for the program
+// being disassembled. Given a target address it returns the name
+// and base address of the symbol containing the target, if any;
+// otherwise it returns "", 0.
+// The reader text should read from the text segment using text addresses
+// as offsets; it is used to display pc-relative loads as constant loads.
+
+using System;
 public static partial class arm64asm_package {
 
-    // GoSyntax returns the Go assembler syntax for the instruction.
-    // The syntax was originally defined by Plan 9.
-    // The pc is the program counter of the instruction, used for
-    // expanding PC-relative addresses into absolute ones.
-    // The symname function queries the symbol table for the program
-    // being disassembled. Given a target address it returns the name
-    // and base address of the symbol containing the target, if any;
-    // otherwise it returns "", 0.
-    // The reader text should read from the text segment using text addresses
-    // as offsets; it is used to display pc-relative loads as constant loads.
 public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)> symname, io.ReaderAt text) {
     if (symname == null) {
         symname = _p0 => ("", 0);
@@ -40,7 +41,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                 break;
             }
             args = append(args, plan9Arg(_addr_inst, pc, symname, a));
-
         }
         a = a__prev1;
     }
@@ -62,7 +62,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                         break;
                     }
                 }
-
                 {
                     var (s, base) = symname(addr);
 
@@ -70,10 +69,8 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                         args[1] = fmt.Sprintf("$%s(SB)", s);
                     }
                 }
-
             }
         }
-
     // Move addressing mode into opcode suffix.
     @string suffix = "";
 
@@ -124,8 +121,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
-
         goto __switch_break0;
     }
     if (inst.Op == B)
@@ -137,7 +132,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                 return "B" + cond.String() + " " + args[1];
             }
         }
-
         return "JMP" + " " + args[0];
         goto __switch_break0;
     }
@@ -178,8 +172,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                 op = "VMOV";
             }
         }
-
-
         goto __switch_break0;
     }
     if (inst.Op == LDR || inst.Op == LDUR)
@@ -200,7 +192,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         if (rno <= uint16(WZR)) {
             op = "MOVWU" + suffix;
         }
@@ -265,7 +256,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         goto __switch_break0;
     }
     if (inst.Op == LDRSH)
@@ -288,7 +278,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         goto __switch_break0;
     }
     if (inst.Op == STR || inst.Op == STUR)
@@ -309,7 +298,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         if (rno <= uint16(WZR)) {
             op = "MOVW" + suffix;
         }
@@ -369,7 +357,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         (args[2], args[3]) = (args[3], args[2]);        goto __switch_break0;
     }
     if (inst.Op == STLR)
@@ -388,7 +375,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         (args[0], args[1]) = (args[1], args[0]);        goto __switch_break0;
     }
     if (inst.Op == STLRB || inst.Op == STLRH)
@@ -411,7 +397,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         (args[1], args[2]) = (args[2], args[1]);        goto __switch_break0;
     }
     if (inst.Op == STLXRB || inst.Op == STLXRH || inst.Op == STXRB || inst.Op == STXRH)
@@ -434,7 +419,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         (args[1], args[2], args[3]) = (args[3], args[1], args[2]);        goto __switch_break0;
     }
     if (inst.Op == LDAXP || inst.Op == LDXP)
@@ -453,7 +437,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         args[0] = fmt.Sprintf("(%s, %s)", args[0], args[1]);
         args[1] = args[2];
         return op + " " + args[1] + ", " + args[0];
@@ -506,7 +489,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         args[1] = fmt.Sprintf("(%s, %s)", args[1], args[2]);
         args[2] = args[3];
         return op + " " + args[1] + ", " + args[2] + ", " + args[0];
@@ -526,7 +508,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                 args[1] = "$(0.0)";
             }
         }
-
         fallthrough = true;
 
     }
@@ -552,8 +533,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
-
         goto __switch_break0;
     }
     if (inst.Op == FCVT)
@@ -582,7 +561,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                     r = r__prev1;
 
                 }
-
             }
 
             i = i__prev1;
@@ -608,8 +586,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
-
         goto __switch_break0;
     }
     if (inst.Op == FCVTZS || inst.Op == FCVTZU || inst.Op == SCVTF || inst.Op == UCVTF)
@@ -642,16 +618,12 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                             r = r__prev2;
 
                         }
-
                     }
 
                     i = i__prev1;
                 }
-
             }
         }
-
-
         goto __switch_break0;
     }
     if (inst.Op == FMOV)
@@ -679,7 +651,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                     r = r__prev1;
 
                 }
-
             }
 
             i = i__prev1;
@@ -713,7 +684,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             r = r__prev1;
 
         }
-
         (args[0], args[1]) = (args[1], args[0]);        goto __switch_break0;
     }
     if (inst.Op == ADR || inst.Op == ADRP)
@@ -770,7 +740,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
             if (rno >= 0 && rno <= int(WZR)) { 
                 // Add "w" to opcode suffix.
                 op += "W";
-
             }
         }
         op = op + suffix;
@@ -793,7 +762,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
                     (args[0], args[2]) = (args[2], args[0]);
                 }
             }
-
         }
     } 
     // Reverse args, placing dest last.
@@ -814,7 +782,6 @@ public static @string GoSyntax(Inst inst, ulong pc, Func<ulong, (@string, ulong)
         op += " " + strings.Join(args, ", ");
     }
     return op;
-
 }
 
 // No need add "W" to opcode suffix.
@@ -858,7 +825,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                 base = base__prev1;
 
             }
-
             return fmt.Sprintf("%d(PC)", a / 4);
             break;
         case Reg a:
@@ -870,21 +836,16 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                     // FP registers are the same ones as SIMD registers
                     // Print Fn for scalar variant to align with assembler (e.g., FCVT, SCVTF, UCVTF, etc.)
                     return fmt.Sprintf("F%d", regno);
-
                 }
                 else
  { 
                     // Print Vn to align with assembler (e.g., SHA256H)
                     return fmt.Sprintf("V%d", regno);
-
                 }
-
             }
-
             if (regno == 31) {
                 return "ZR";
             }
-
             return fmt.Sprintf("R%d", regno);
             break;
         case RegSP a:
@@ -904,7 +865,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                 reg = fmt.Sprintf("R%d", uint16(a.reg) & 31);
             }
-
             @string extshift = "";
             @string amount = "";
             if (a.extShift != ExtShift(0)) {
@@ -930,9 +890,7 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                                 if (a.amount != 0) {
                     amount = fmt.Sprintf("<<%d", a.amount);
                 }
-
             }
-
             return reg + extshift + amount;
             break;
         case MemImmediate a:
@@ -946,7 +904,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                 base = fmt.Sprintf("(R%d)", regno);
             }
-
             if (a.imm != 0 && a.Mode != AddrPostReg) {
                 off = fmt.Sprintf("%d", a.imm);
             }
@@ -954,7 +911,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                 var postR = fmt.Sprintf("(R%d)", a.imm);
                 return base + postR;
             }
-
             return off + base;
             break;
         case MemExtend a:
@@ -969,7 +925,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                 base = fmt.Sprintf("(R%d)", regno);
             }
-
             regno = uint16(a.Index) & 31;
             if (regno == 31) {
                 indexreg = "ZR";
@@ -978,7 +933,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                 indexreg = fmt.Sprintf("R%d", regno);
             }
-
             if (a.Extend == lsl) { 
                 // Refer to ARM reference manual, for byte load/store(register), the index
                 // shift amount must be 0, encoded in "S" as 0 if omitted, or as 1 if present.
@@ -993,13 +947,11 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                     // When a.ShiftMustBeZero is ture, Go syntax prints "(Rm<<0)" if "a.Amount"
                     // equals to 1.
                     index = fmt.Sprintf("(%s<<0)", indexreg);
-
                 }
                 else
  {
                     index = fmt.Sprintf("(%s)", indexreg);
                 }
-
             }
             else
  {
@@ -1010,9 +962,7 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                     index = fmt.Sprintf("(%s.%s)", indexreg, a.Extend.String());
                 }
-
             }
-
             return base + index;
             break;
         case Cond a:
@@ -1048,7 +998,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
  {
                 s = -1;
             }
-
             pre = s * int16(16 + a.pre);
             if (a.exp > 0) {
                 numerator = (pre << (int)(uint8(a.exp)));
@@ -1059,7 +1008,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                 numerator = pre;
                 denominator = (16 << (int)(uint8(-1 * a.exp)));
             }
-
             result = float64(numerator) / float64(denominator);
             return strings.TrimRight(fmt.Sprintf("$%f", result), "0");
             break;
@@ -1091,9 +1039,7 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                     i = i__prev1;
                 }
                 result += "]";
-
             }
-
             return result;
             break;
         case RegisterWithArrangementAndIndex a:
@@ -1114,9 +1060,7 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
                     i = i__prev1;
                 }
                 result += "]";
-
             }
-
             return fmt.Sprintf("%s[%d]", result, a.index);
             break;
         case Systemreg a:
@@ -1131,7 +1075,6 @@ private static @string plan9Arg(ptr<Inst> _addr_inst, ulong pc, Func<ulong, (@st
     }
 
     return strings.ToUpper(arg.String());
-
 }
 
 } // end arm64asm_package

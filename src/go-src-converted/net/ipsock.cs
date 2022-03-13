@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:13 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:53 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\ipsock.go
-using context = go.context_package;
-using bytealg = go.@internal.bytealg_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go;
 
-public static partial class net_package {
+using context = context_package;
+using bytealg = @internal.bytealg_package;
+using runtime = runtime_package;
+using sync = sync_package;
 
-    // BUG(rsc,mikio): On DragonFly BSD and OpenBSD, listening on the
-    // "tcp" and "udp" networks does not listen for both IPv4 and IPv6
-    // connections. This is due to the fact that IPv4 traffic will not be
-    // routed to an IPv6 socket - two separate sockets are required if
-    // both address families are to be supported.
-    // See inet6(4) for details.
+
+// BUG(rsc,mikio): On DragonFly BSD and OpenBSD, listening on the
+// "tcp" and "udp" networks does not listen for both IPv4 and IPv6
+// connections. This is due to the fact that IPv4 traffic will not be
+// routed to an IPv6 socket - two separate sockets are required if
+// both address families are to be supported.
+// See inet6(4) for details.
+
+
+using System;public static partial class net_package {
+
 private partial struct ipStackCapabilities {
     public ref sync.Once Once => ref Once_val; // guards following
     public bool ipv4Enabled;
@@ -61,7 +62,6 @@ private static bool supportsIPv4map() {
 
     ipStackCaps.Once.Do(ipStackCaps.probe);
     return ipStackCaps.ipv4MappedIPv6Enabled;
-
 }
 
 // An addrList represents a list of network endpoint addresses.
@@ -82,7 +82,6 @@ private static bool isIPv4(Addr addr) {
             break;
     }
     return false;
-
 }
 
 // isNotIPv4 reports whether addr does not contain an IPv4 address.
@@ -112,7 +111,6 @@ private static Addr forResolve(this addrList addrs, @string network, @string add
         return addrs.first(isNotIPv4);
     }
     return addrs.first(isIPv4);
-
 }
 
 // first returns the first address which satisfies strategy, or if
@@ -123,7 +121,6 @@ private static Addr first(this addrList addrs, Func<Addr, bool> strategy) {
             return addr;
         }
     }    return addrs[0];
-
 }
 
 // partition divides an address list into two categories, using a
@@ -148,7 +145,6 @@ private static (addrList, addrList) partition(this addrList addrs, Func<Addr, bo
             fallbacks = append(fallbacks, addr);
         }
     }    return ;
-
 }
 
 // filterAddrList applies a filter to a list of IP addresses,
@@ -168,7 +164,6 @@ private static (addrList, error) filterAddrList(Func<IPAddr, bool> filter, slice
         return (null, error.As(addr(new AddrError(Err:errNoSuitableAddress.Error(),Addr:originalAddr))!)!);
     }
     return (addrs, error.As(null!)!);
-
 }
 
 // ipv4only reports whether addr is an IPv4 address.
@@ -197,9 +192,7 @@ public static (@string, @string, error) SplitHostPort(@string hostport) {
 
     const @string missingPort = "missing port in address";
     const @string tooManyColons = "too many colons in address";
-    Func<@string, @string, (@string, @string, error)> addrErr = (addr, why) => {
-        return ("", "", error.As(addr(new AddrError(Err:why,Addr:addr))!)!);
-    };
+    Func<@string, @string, (@string, @string, error)> addrErr = (addr, why) => ("", "", error.As(addr(new AddrError(Err:why,Addr:addr))!)!);
     nint j = 0;
     nint k = 0; 
 
@@ -243,7 +236,6 @@ public static (@string, @string, error) SplitHostPort(@string hostport) {
     }
     port = hostport[(int)i + 1..];
     return (host, port, error.As(null!)!);
-
 }
 
 private static (@string, @string) splitHostZone(@string s) {
@@ -263,9 +255,7 @@ private static (@string, @string) splitHostZone(@string s) {
             host = s;
         }
     }
-
     return ;
-
 }
 
 // JoinHostPort combines host and port into a network address of the
@@ -280,7 +270,6 @@ public static @string JoinHostPort(@string host, @string port) {
         return "[" + host + "]:" + port;
     }
     return host + ":" + port;
-
 }
 
 // internetAddrList resolves addr, which may be a literal IP
@@ -312,13 +301,11 @@ private static (addrList, error) internetAddrList(this ptr<Resolver> _addr_r, co
                 if (err != null) {
                     return (null, error.As(err)!);
                 }
-
                 portnum, err = r.LookupPort(ctx, net, port);
 
                 if (err != null) {
                     return (null, error.As(err)!);
                 }
-
             }
             break;
         case "ip": 
@@ -361,7 +348,6 @@ private static (addrList, error) internetAddrList(this ptr<Resolver> _addr_r, co
                 panic("unexpected network: " + net);
                 break;
         }
-
     };
     if (host == "") {
         return (new addrList(inetaddr(IPAddr{})), error.As(null!)!);
@@ -381,7 +367,6 @@ private static (addrList, error) internetAddrList(this ptr<Resolver> _addr_r, co
         filter = ipv6only;
     }
     return filterAddrList(filter, ips, inetaddr, host);
-
 });
 
 private static IP loopbackIP(@string net) {
@@ -389,7 +374,6 @@ private static IP loopbackIP(@string net) {
         return IPv6loopback;
     }
     return new IP(127,0,0,1);
-
 }
 
 } // end net_package

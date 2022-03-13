@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package build -- go2cs converted at 2022 March 06 22:42:54 UTC
+// package build -- go2cs converted at 2022 March 13 05:54:04 UTC
 // import "go/build" ==> using build = go.go.build_package
 // Original source: C:\Program Files\Go\src\go\build\read.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class build_package {
 
@@ -49,9 +48,7 @@ private static ptr<importReader> newImportReader(@string name, io.Reader r) {
             b.Discard(3);
         }
     }
-
     return addr(new importReader(b:b,pos:token.Position{Filename:name,Line:1,Column:1,},));
-
 }
 
 private static bool isIdent(byte c) {
@@ -89,10 +86,8 @@ private static byte readByte(this ptr<importReader> _addr_r) {
             r.err = err;
         }
         c = 0;
-
     }
     return c;
-
 }
 
 // readByteNoBuf is like readByte but doesn't buffer the byte.
@@ -121,7 +116,6 @@ private static byte readByteNoBuf(this ptr<importReader> _addr_r) {
             r.err = err;
         }
         return 0;
-
     }
     r.pos.Offset++;
     if (c == '\n') {
@@ -133,7 +127,6 @@ private static byte readByteNoBuf(this ptr<importReader> _addr_r) {
         r.pos.Column++;
     }
     return c;
-
 }
 
 // peekByte returns the next byte from the input reader but does not advance beyond it.
@@ -148,7 +141,6 @@ private static byte peekByte(this ptr<importReader> _addr_r, bool skipSpace) => 
             panic("go/build: import reader looping");
         }
         return 0;
-
     }
     var c = r.peek;
     if (c == 0) {
@@ -189,25 +181,18 @@ private static byte peekByte(this ptr<importReader> _addr_r, bool skipSpace) => 
                             (c, c1) = (c1, r.readByte());
                         }
                     else
-
-
                     } {
                         r.syntaxError();
                     }
-
                     c = r.readByte();
                     continue;
-
                     break;
             }
-
         }
         break;
-
     }
     r.peek = c;
     return r.peek;
-
 });
 
 // nextByte is like peekByte but advances beyond the returned byte.
@@ -295,7 +280,6 @@ Reswitch:
                         }
 
                         startLine = false;
-
                         break;
                     case '/': 
                                         if (startLine) { 
@@ -310,33 +294,26 @@ Reswitch:
                                             if (c == ' ' || c == '\t') { 
                                                 // Found one!
                                                 return true;
-
                                             }
-
                                         }
-
                         SkipSlashSlash:
                                         while (c != '\n' && r.err == null && !r.eof) {
                                             c = r.readByteNoBuf();
                                         }
                                         startLine = true;
-
                         break;
                     default: 
                         startLine = false;
                         goto Reswitch;
                         break;
                 }
-
                 break;
             default: 
                 startLine = false;
                 break;
         }
-
     }
     return false;
-
 }
 
 // readKeyword reads the given keyword from the input.
@@ -369,7 +346,6 @@ private static void readIdent(this ptr<importReader> _addr_r) {
     while (isIdent(r.peekByte(false))) {
         r.peek = 0;
     }
-
 }
 
 // readString reads a quoted string literal from the input.
@@ -406,7 +382,6 @@ private static void readString(this ptr<importReader> _addr_r) {
             r.syntaxError();
             break;
     }
-
 }
 
 // readImport reads an import clause - optional identifier followed by quoted string -
@@ -422,7 +397,6 @@ private static void readImport(this ptr<importReader> _addr_r) {
         r.readIdent();
     }
     r.readString();
-
 }
 
 // readComments is like io.ReadAll, except that it only reads the leading
@@ -436,10 +410,8 @@ private static (slice<byte>, error) readComments(io.Reader f) {
     if (r.err == null && !r.eof) { 
         // Didn't reach EOF, so must have found a non-space byte. Remove it.
         r.buf = r.buf[..(int)len(r.buf) - 1];
-
     }
     return (r.buf, error.As(r.err)!);
-
 }
 
 // readGoInfo expects a Go file as input and reads the file up to and including the import section.
@@ -466,7 +438,6 @@ private static error readGoInfo(io.Reader f, ptr<fileInfo> _addr_info) {
         else
 
             r.nextByte(false);
-
         } {
             r.readImport();
         }
@@ -535,9 +506,7 @@ private static error readGoInfo(io.Reader f, ptr<fileInfo> _addr_info) {
                         break;
                 first = false;
                     }
-
                     line = append(line, c);
-
                 } 
                 // Add args if line is well-formed.
                 // Ignore badly-formed lines - the compiler will report them when it finds them,
@@ -550,14 +519,11 @@ private static error readGoInfo(io.Reader f, ptr<fileInfo> _addr_info) {
                 if (err == null) {
                     info.embeds = append(info.embeds, embs);
                 }
-
             }
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 // parseGoEmbed parses the text following "//go:embed" to extract the glob patterns.
@@ -603,7 +569,6 @@ Switch:
                         continue;
                     i++;
                     }
-
                     if (args[i] == '"') {
                         var (q, err) = strconv.Unquote(args[..(int)i + 1]);
                         if (err != null) {
@@ -614,13 +579,11 @@ Switch:
                         _breakSwitch = true;
                         break;
                     }
-
                 }
 
                 if (i >= len(args)) {
                     return (null, error.As(fmt.Errorf("invalid quoted string in //go:embed: %s", args))!);
                 }
-
                 break;
             default: 
                         var i = len(args);
@@ -633,7 +596,6 @@ Switch:
                         }
                         path = args[..(int)i];
                         trimBytes(i);
-
                 break;
         }
         if (args != "") {
@@ -643,10 +605,8 @@ Switch:
             }
         }
         list = append(list, new fileEmbed(path,pathPos));
-
     }
     return (list, error.As(null!)!);
-
 }
 
 } // end build_package

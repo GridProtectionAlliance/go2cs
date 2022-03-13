@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modinfo -- go2cs converted at 2022 March 06 23:16:44 UTC
+// package modinfo -- go2cs converted at 2022 March 13 06:30:10 UTC
 // import "cmd/go/internal/modinfo" ==> using modinfo = go.cmd.go.@internal.modinfo_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modinfo\info.go
-using time = go.time_package;
+namespace go.cmd.go.@internal;
+
+using time = time_package;
 using System.ComponentModel;
 using System;
 
-
-namespace go.cmd.go.@internal;
-
 public static partial class modinfo_package {
 
-    // Note that these structs are publicly visible (part of go list's API)
-    // and the fields are documented in the help text in ../list/list.go
+// Note that these structs are publicly visible (part of go list's API)
+// and the fields are documented in the help text in ../list/list.go
+
 public partial struct ModulePublic {
     [Description("json:\",omitempty\"")]
     public @string Path; // module path
@@ -61,7 +61,6 @@ private static @string String(this ptr<ModulePublic> _addr_m) {
             return v;
         }
         return v + " (retracted)";
-
     };
 
     if (m.Version != "") {
@@ -86,7 +85,6 @@ private static @string String(this ptr<ModulePublic> _addr_m) {
         }
     }
     return s;
-
 }
 
 } // end modinfo_package

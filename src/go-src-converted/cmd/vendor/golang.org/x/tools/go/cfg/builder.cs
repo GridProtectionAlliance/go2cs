@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cfg -- go2cs converted at 2022 March 06 23:35:05 UTC
+// package cfg -- go2cs converted at 2022 March 13 06:42:39 UTC
 // import "cmd/vendor/golang.org/x/tools/go/cfg" ==> using cfg = go.cmd.vendor.golang.org.x.tools.go.cfg_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\cfg\builder.go
+namespace go.cmd.vendor.golang.org.x.tools.go;
 // This file implements the CFG construction pass.
 
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go;
 
 public static partial class cfg_package {
 
@@ -64,12 +63,9 @@ start:
                 if (ok && !b.mayReturn(call)) { 
                     // Calls to panic, os.Exit, etc, never return.
                     b.current = b.newBlock("unreachable.call");
-
                 }
 
             }
-
-
             break;
         case ptr<ast.DeclStmt> s:
             ptr<ast.GenDecl> d = s.Decl._<ptr<ast.GenDecl>>();
@@ -91,13 +87,11 @@ start:
                             spec = spec__prev2;
 
                         }
-
                     }
 
                     spec = spec__prev1;
                 }
             }
-
             break;
         case ptr<ast.LabeledStmt> s:
             label = b.labeledBlock(s.Label);
@@ -161,7 +155,6 @@ start:
             break;
         }
     }
-
 });
 
 private static void stmtList(this ptr<builder> _addr_b, slice<ast.Stmt> list) {
@@ -192,7 +185,6 @@ private static void branchStmt(this ptr<builder> _addr_b, ptr<ast.BranchStmt> _a
                 lb = lb__prev2;
 
             }
-
         }
         else
  {
@@ -209,7 +201,6 @@ private static void branchStmt(this ptr<builder> _addr_b, ptr<ast.BranchStmt> _a
 
                 t = t__prev1;
             }
-
         }
     else if (s.Tok == token.CONTINUE) 
         if (s.Label != null) {
@@ -225,7 +216,6 @@ private static void branchStmt(this ptr<builder> _addr_b, ptr<ast.BranchStmt> _a
                 lb = lb__prev2;
 
             }
-
         }
         else
  {
@@ -242,7 +232,6 @@ private static void branchStmt(this ptr<builder> _addr_b, ptr<ast.BranchStmt> _a
 
                 t = t__prev1;
             }
-
         }
     else if (s.Tok == token.FALLTHROUGH) 
         {
@@ -267,7 +256,6 @@ private static void branchStmt(this ptr<builder> _addr_b, ptr<ast.BranchStmt> _a
     }
     b.jump(block);
     b.current = b.newBlock("unreachable.branch");
-
 }
 
 private static void switchStmt(this ptr<builder> _addr_b, ptr<ast.SwitchStmt> _addr_s, ptr<lblock> _addr_label) {
@@ -306,7 +294,6 @@ private static void switchStmt(this ptr<builder> _addr_b, ptr<ast.SwitchStmt> _a
             defaultFallthrough = addr(fallthru);
             defaultBlock = body;
             continue;
-
         }
         ptr<Block> nextCond;
         foreach (var (_, cond) in cc.List) {
@@ -314,14 +301,12 @@ private static void switchStmt(this ptr<builder> _addr_b, ptr<ast.SwitchStmt> _a
             b.add(cond); // one half of the tag==cond condition
             b.ifelse(body, nextCond);
             b.current = nextCond;
-
         }        b.current = body;
         b.targets = addr(new targets(tail:b.targets,_break:done,_fallthrough:fallthru,));
         b.stmtList(cc.Body);
         b.targets = b.targets.tail;
         b.jump(done);
         b.current = nextCond;
-
     }    if (defaultBlock != null) {
         b.jump(defaultBlock);
         b.current = defaultBlock;
@@ -331,7 +316,6 @@ private static void switchStmt(this ptr<builder> _addr_b, ptr<ast.SwitchStmt> _a
     }
     b.jump(done);
     b.current = done;
-
 }
 
 private static void typeSwitchStmt(this ptr<builder> _addr_b, ptr<ast.TypeSwitchStmt> _addr_s, ptr<lblock> _addr_label) {
@@ -366,11 +350,9 @@ private static void typeSwitchStmt(this ptr<builder> _addr_b, ptr<ast.TypeSwitch
             _ = casetype;
             b.ifelse(body, next);
             b.current = next;
-
         }        b.current = body;
         b.typeCaseBody(cc, done);
         b.current = next;
-
     }    if (default_ != null) {
         b.typeCaseBody(default_, done);
     }
@@ -379,7 +361,6 @@ private static void typeSwitchStmt(this ptr<builder> _addr_b, ptr<ast.TypeSwitch
         b.jump(done);
     }
     b.current = done;
-
 }
 
 private static void typeCaseBody(this ptr<builder> _addr_b, ptr<ast.CaseClause> _addr_cc, ptr<Block> _addr_done) {
@@ -417,7 +398,6 @@ private static void selectStmt(this ptr<builder> _addr_b, ptr<ast.SelectStmt> _a
                 comm = comm__prev1;
 
             }
-
         }
         clause = clause__prev1;
     }
@@ -449,7 +429,6 @@ private static void selectStmt(this ptr<builder> _addr_b, ptr<ast.SelectStmt> _a
         b.targets = b.targets.tail;
         b.jump(done);
         b.current = next;
-
     }    if (defaultBody != null) {
         b.targets = addr(new targets(tail:b.targets,_break:done,));
         b.stmtList(defaultBody.val);
@@ -457,7 +436,6 @@ private static void selectStmt(this ptr<builder> _addr_b, ptr<ast.SelectStmt> _a
         b.jump(done);
     }
     b.current = done;
-
 }
 
 private static void forStmt(this ptr<builder> _addr_b, ptr<ast.ForStmt> _addr_s, ptr<lblock> _addr_label) {
@@ -511,7 +489,6 @@ private static void forStmt(this ptr<builder> _addr_b, ptr<ast.ForStmt> _addr_s,
         b.jump(loop); // back-edge
     }
     b.current = done;
-
 }
 
 private static void rangeStmt(this ptr<builder> _addr_b, ptr<ast.RangeStmt> _addr_s, ptr<lblock> _addr_label) {
@@ -545,7 +522,6 @@ private static void rangeStmt(this ptr<builder> _addr_b, ptr<ast.RangeStmt> _add
     b.targets = b.targets.tail;
     b.jump(loop); // back-edge
     b.current = done;
-
 }
 
 // -------- helpers --------
@@ -585,10 +561,8 @@ private static ptr<lblock> labeledBlock(this ptr<builder> _addr_b, ptr<ast.Ident
             b.lblocks = make_map<ptr<ast.Object>, ptr<lblock>>();
         }
         b.lblocks[label.Obj] = lb;
-
     }
     return _addr_lb!;
-
 }
 
 // newBlock appends a new unconnected basic block to b.cfg's block

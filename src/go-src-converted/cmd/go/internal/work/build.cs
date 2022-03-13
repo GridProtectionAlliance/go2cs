@@ -2,30 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2022 March 06 23:17:22 UTC
+// package work -- go2cs converted at 2022 March 13 06:30:40 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\build.go
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using search = go.cmd.go.@internal.search_package;
-using trace = go.cmd.go.@internal.trace_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using exec = @internal.execabs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using search = cmd.go.@internal.search_package;
+using trace = cmd.go.@internal.trace_package;
+using System;
 
 public static partial class work_package {
 
@@ -204,7 +203,6 @@ private static void init() {
 
     AddBuildFlags(_addr_CmdBuild, DefaultBuildFlags);
     AddBuildFlags(_addr_CmdInstall, DefaultBuildFlags);
-
 }
 
 // Note that flags consulted by other parts of the code
@@ -238,7 +236,6 @@ private static error Set(this buildCompiler c, @string value) {
     cfg.BuildToolchainLinker = BuildToolchain.linker;
     cfg.BuildContext.Compiler = value;
     return error.As(null!)!;
-
 }
 
 private static @string String(this buildCompiler c) {
@@ -253,7 +250,6 @@ private static void init() {
             new buildCompiler().Set(build.Default.Compiler);
             break;
     }
-
 }
 
 public partial struct BuildFlagMask { // : nint
@@ -263,7 +259,6 @@ public static readonly BuildFlagMask DefaultBuildFlags = 0;
 public static readonly BuildFlagMask OmitModFlag = 1 << (int)(iota);
 public static readonly var OmitModCommonFlags = 0;
 public static readonly var OmitVFlag = 1;
-
 
 // AddBuildFlags adds the flags common to the build, clean, get,
 // install, list, run, and test commands.
@@ -293,7 +288,6 @@ public static void AddBuildFlags(ptr<base.Command> _addr_cmd, BuildFlagMask mask
         // This only affects 'go get' in GOPATH mode, but add the flag anyway for
         // consistency.
         cmd.Flag.StringVar(_addr_fsys.OverlayFile, "overlay", "", "");
-
     }
     cmd.Flag.StringVar(_addr_cfg.BuildContext.InstallSuffix, "installsuffix", "", "");
     cmd.Flag.Var(_addr_load.BuildLdflags, "ldflags", "");
@@ -309,7 +303,6 @@ public static void AddBuildFlags(ptr<base.Command> _addr_cmd, BuildFlagMask mask
     // Undocumented, unstable debugging flags.
     cmd.Flag.StringVar(_addr_cfg.DebugActiongraph, "debug-actiongraph", "", "");
     cmd.Flag.StringVar(_addr_cfg.DebugTrace, "debug-trace", "", "");
-
 }
 
 // tagsFlag is the implementation of the -tags flag.
@@ -329,7 +322,6 @@ private static error Set(this ptr<tagsFlag> _addr_v, @string s) {
             v.val = append(v.val, s);
         }
     }    return error.As(null!)!;
-
 }
 
 private static @string String(this ptr<tagsFlag> _addr_v) {
@@ -351,7 +343,6 @@ private static (@string, @string) fileExtSplit(@string file) {
         ext = dotExt[(int)1..];
     }
     return ;
-
 }
 
 private static slice<ptr<load.Package>> pkgsMain(slice<ptr<load.Package>> pkgs) {
@@ -362,7 +353,6 @@ private static slice<ptr<load.Package>> pkgsMain(slice<ptr<load.Package>> pkgs) 
             res = append(res, p);
         }
     }    return res;
-
 }
 
 private static slice<ptr<load.Package>> pkgsNotMain(slice<ptr<load.Package>> pkgs) {
@@ -373,7 +363,6 @@ private static slice<ptr<load.Package>> pkgsNotMain(slice<ptr<load.Package>> pkg
             res = append(res, p);
         }
     }    return res;
-
 }
 
 private static slice<ptr<load.Package>> oneMainPkg(slice<ptr<load.Package>> pkgs) {
@@ -381,7 +370,6 @@ private static slice<ptr<load.Package>> oneMainPkg(slice<ptr<load.Package>> pkgs
         @base.Fatalf("-buildmode=%s requires exactly one main package", cfg.BuildBuildmode);
     }
     return pkgs;
-
 }
 
 private static Func<slice<ptr<load.Package>>, slice<ptr<load.Package>>> pkgsFilter = pkgs => pkgs;
@@ -465,14 +453,11 @@ private static void runBuild(context.Context ctx, ptr<base.Command> _addr_cmd, s
                 if (len(a.Deps) == 0) {
                     @base.Fatalf("go build: no main packages to build");
                 }
-
                 b.Do(ctx, a);
                 return ;
-
             }
 
         }
-
         if (len(pkgs) > 1) {
             @base.Fatalf("go build: cannot write multiple packages to non-directory %s", cfg.BuildO);
         }
@@ -486,7 +471,6 @@ private static void runBuild(context.Context ctx, ptr<base.Command> _addr_cmd, s
         a = b.AutoAction(ModeInstall, depMode, p);
         b.Do(ctx, a);
         return ;
-
     }
     a = addr(new Action(Mode:"go build"));
     {
@@ -503,7 +487,6 @@ private static void runBuild(context.Context ctx, ptr<base.Command> _addr_cmd, s
         a = b.buildmodeShared(ModeBuild, depMode, args, pkgs, a);
     }
     b.Do(ctx, a);
-
 }
 
 public static ptr<base.Command> CmdInstall = addr(new base.Command(UsageLine:"go install [build flags] [packages]",Short:"compile and install packages and dependencies",Long:`
@@ -599,7 +582,6 @@ private static (@string, error) libname(slice<@string> args, slice<ptr<load.Pack
  {
                 haveNonMeta = true;
             }
-
         }
         arg = arg__prev1;
     }
@@ -615,9 +597,7 @@ private static (@string, error) libname(slice<@string> args, slice<ptr<load.Pack
                     arg = bp.ImportPath;
                 }
             }
-
             appendName(strings.ReplaceAll(arg, "/", "-"));
-
         }
         else
  {
@@ -628,10 +608,8 @@ private static (@string, error) libname(slice<@string> args, slice<ptr<load.Pack
     }
     else if (haveNonMeta) { // have both meta package and a non-meta one
         return ("", error.As(errors.New("mixing of meta and non-meta packages is not allowed"))!);
-
     }
     return ("lib" + libname + ".so", error.As(null!)!);
-
 }
 
 private static void runInstall(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
@@ -673,7 +651,6 @@ private static void runInstall(context.Context ctx, ptr<base.Command> _addr_cmd,
                     }
 
                 }
-
             }
 
             pkg = pkg__prev1;
@@ -710,7 +687,6 @@ private static void runInstall(context.Context ctx, ptr<base.Command> _addr_cmd,
         }
     }
     InstallPackages(ctx, args, pkgs);
-
 }
 
 // omitTestOnly returns pkgs with test-only packages removed.
@@ -724,12 +700,9 @@ private static slice<ptr<load.Package>> omitTestOnly(slice<ptr<load.Package>> pk
             // like ./..., not because it was listed as a literal path on the command line.
             // Ignore it.
             continue;
-
         }
         list = append(list, p);
-
     }    return list;
-
 }
 
 public static void InstallPackages(context.Context ctx, slice<@string> patterns, slice<ptr<load.Package>> pkgs) => func((defer, _, _) => {
@@ -755,9 +728,7 @@ public static void InstallPackages(context.Context ctx, slice<@string> patterns,
                     @base.Errorf("go %s: no install location for %s: hidden by %s", cfg.CmdName, p.Dir, p.ConflictDir);
                 else 
                     @base.Errorf("go %s: no install location for directory %s outside GOPATH\n" + "\tFor more details see: 'go help gopath'", cfg.CmdName, p.Dir);
-                
-            }
-
+                            }
         }
         p = p__prev1;
     }
@@ -787,9 +758,7 @@ public static void InstallPackages(context.Context ctx, slice<@string> patterns,
                 tools = append(tools, a1);
                 continue;
             }
-
             a.Deps = append(a.Deps, a1);
-
         }
         p = p__prev1;
     }
@@ -804,7 +773,6 @@ public static void InstallPackages(context.Context ctx, slice<@string> patterns,
         // with a list of Deps, one per package named in pkgs,
         // the same as in runBuild.
         a = b.buildmodeShared(ModeInstall, ModeInstall, patterns, pkgs, a);
-
     }
     b.Do(ctx, a);
     @base.ExitIfErrors(); 
@@ -830,13 +798,9 @@ public static void InstallPackages(context.Context ctx, slice<@string> patterns,
                 if (m.IsRegular()) {
                     if (m & 0111 != 0 || cfg.Goos == "windows") { // windows never sets executable bit
                         os.Remove(targ);
-
                     }
-
                 }
-
             }
-
         }
     }
 });
@@ -869,7 +833,6 @@ private static void installOutsideModule(context.Context ctx, slice<@string> arg
     foreach (var (i, arg) in args) {
         patterns[i] = arg[..(int)strings.Index(arg, "@")];
     }    InstallPackages(ctx, patterns, pkgs);
-
 }
 
 // ExecCmd is the command to use to run user binaries.
@@ -895,7 +858,6 @@ public static slice<@string> FindExecCmd() {
         ExecCmd = new slice<@string>(new @string[] { path });
     }
     return ExecCmd;
-
 }
 
 } // end work_package

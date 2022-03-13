@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:50 UTC
+//     Generated on 2022 March 13 05:52:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace go
 {
     public static partial class types_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct posSpan
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace go
             public static implicit operator posSpan(NilType nil) => default(posSpan);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static posSpan posSpan_cast(dynamic value)
         {
             return new posSpan(value.start, value.pos, value.end);

@@ -4,21 +4,23 @@
 
 // This file implements scopes and the objects they contain.
 
-// package ast -- go2cs converted at 2022 March 06 22:43:00 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:09 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\scope.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-
 namespace go.go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using token = go.token_package;
+
+
+// A Scope maintains the set of named language entities declared
+// in the scope and a link to the immediately surrounding (outer)
+// scope.
+//
 
 public static partial class ast_package {
 
-    // A Scope maintains the set of named language entities declared
-    // in the scope and a link to the immediately surrounding (outer)
-    // scope.
-    //
 public partial struct Scope {
     public ptr<Scope> Outer;
     public map<@string, ptr<Object>> Objects;
@@ -31,7 +33,6 @@ public static ptr<Scope> NewScope(ptr<Scope> _addr_outer) {
     const nint n = 4; // initial scope capacity
  // initial scope capacity
     return addr(new Scope(outer,make(map[string]*Object,n)));
-
 }
 
 // Lookup returns the object with the given name if it is
@@ -60,7 +61,6 @@ private static ptr<Object> Insert(this ptr<Scope> _addr_s, ptr<Object> _addr_obj
         s.Objects[obj.Name] = obj;
     }
     return ;
-
 }
 
 // Debugging support
@@ -77,7 +77,6 @@ private static @string String(this ptr<Scope> _addr_s) {
     }
     fmt.Fprintf(_addr_buf, "}\n");
     return buf.String();
-
 }
 
 // ----------------------------------------------------------------------------
@@ -169,14 +168,12 @@ private static token.Pos Pos(this ptr<Object> _addr_obj) {
                     }
 
                 }
-
             }
             break;
         case ptr<Scope> d:
             break;
     }
     return token.NoPos;
-
 }
 
 // ObjKind describes what an object represents.

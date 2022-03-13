@@ -4,19 +4,22 @@
 
 // Package fiat implements prime order fields using formally verified algorithms
 // from the Fiat Cryptography project.
-// package fiat -- go2cs converted at 2022 March 06 22:19:11 UTC
+
+// package fiat -- go2cs converted at 2022 March 13 05:34:07 UTC
 // import "crypto/elliptic/internal/fiat" ==> using fiat = go.crypto.elliptic.@internal.fiat_package
 // Original source: C:\Program Files\Go\src\crypto\elliptic\internal\fiat\p521.go
-using subtle = go.crypto.subtle_package;
-using errors = go.errors_package;
-
 namespace go.crypto.elliptic.@internal;
+
+using subtle = crypto.subtle_package;
+using errors = errors_package;
+
+
+// P521Element is an integer modulo 2^521 - 1.
+//
+// The zero value is a valid zero element.
 
 public static partial class fiat_package {
 
-    // P521Element is an integer modulo 2^521 - 1.
-    //
-    // The zero value is a valid zero element.
 public partial struct P521Element {
     public array<ulong> x;
 }
@@ -68,7 +71,6 @@ private static slice<byte> Bytes(this ptr<P521Element> _addr_e) {
     ref array<byte> @out = ref heap(new array<byte>(66), out ptr<array<byte>> _addr_@out);
     p521ToBytes(_addr_out, _addr_e.x);
     return out[..];
-
 }
 
 // SetBytes sets e = v, where v is a little-endian 66-byte encoding, and returns
@@ -86,7 +88,6 @@ private static (ptr<P521Element>, error) SetBytes(this ptr<P521Element> _addr_e,
     copy(in[..], v);
     p521FromBytes(_addr_e.x, _addr_in);
     return (_addr_e!, error.As(null!)!);
-
 }
 
 // Add sets e = t1 + t2, and returns e.
@@ -275,7 +276,6 @@ private static ptr<P521Element> Invert(this ptr<P521Element> _addr_e, ptr<P521El
     t1.Square(t1);
     t1.Square(t1);
     return _addr_e.Mul(t1, t)!;
-
 }
 
 } // end fiat_package

@@ -45,26 +45,28 @@
 //
 // See https://blog.golang.org/context for example code for a server that uses
 // Contexts.
-// package context -- go2cs converted at 2022 March 06 22:14:03 UTC
+
+// package context -- go2cs converted at 2022 March 13 05:28:13 UTC
 // import "context" ==> using context = go.context_package
 // Original source: C:\Program Files\Go\src\context\context.go
-using errors = go.errors_package;
-using reflectlite = go.@internal.reflectlite_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using System;
-using System.Threading;
-
-
 namespace go;
 
+using errors = errors_package;
+using reflectlite = @internal.reflectlite_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+
+
+// A Context carries a deadline, a cancellation signal, and other values across
+// API boundaries.
+//
+// Context's methods may be called by multiple goroutines simultaneously.
+
+using System;
+using System.Threading;
 public static partial class context_package {
 
-    // A Context carries a deadline, a cancellation signal, and other values across
-    // API boundaries.
-    //
-    // Context's methods may be called by multiple goroutines simultaneously.
 public partial interface Context {
     void Deadline(); // Done returns a channel that's closed when work done on behalf of this
 // context should be canceled. Done may return nil if this context can
@@ -210,7 +212,6 @@ private static @string String(this ptr<emptyCtx> _addr_e) {
     else if (e == todo) 
         return "context.TODO";
         return "unknown empty Context";
-
 }
 
 private static ptr<emptyCtx> background = @new<emptyCtx>();private static ptr<emptyCtx> todo = @new<emptyCtx>();
@@ -255,7 +256,6 @@ public static (Context, CancelFunc) WithCancel(Context parent) => func((_, panic
     return (_addr_c, () => {
         c.cancel(true, Canceled);
     });
-
 });
 
 // newCancelCtx returns an initialized cancelCtx.
@@ -282,7 +282,6 @@ private static void propagateCancel(Context parent, canceler child) {
             if (p.err != null) { 
                 // parent has already been canceled
                 child.cancel(false, p.err);
-
             }
             else
  {
@@ -291,9 +290,7 @@ private static void propagateCancel(Context parent, canceler child) {
                 }
                 p.children[child] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
             }
-
             p.mu.Unlock();
-
         }
         else
  {
@@ -303,7 +300,6 @@ private static void propagateCancel(Context parent, canceler child) {
             }());
         }
     }
-
 }
 
 // &cancelCtxKey is the key that a cancelCtx returns itself for.
@@ -332,7 +328,6 @@ private static (ptr<cancelCtx>, bool) parentCancelCtx(Context parent) {
         return (_addr_null!, false);
     }
     return (_addr_p!, true);
-
 }
 
 // removeChild removes a context from its parent.
@@ -346,7 +341,6 @@ private static void removeChild(Context parent, canceler child) {
         delete(p.children, child);
     }
     p.mu.Unlock();
-
 }
 
 // A canceler is a context type that can be canceled directly. The
@@ -379,7 +373,6 @@ private static void Value(this ptr<cancelCtx> _addr_c, object key) {
         return c;
     }
     return c.Context.Value(key);
-
 }
 
 private static channel<object> Done(this ptr<cancelCtx> _addr_c) => func((defer, _, _) => {
@@ -397,7 +390,6 @@ private static channel<object> Done(this ptr<cancelCtx> _addr_c) => func((defer,
         c.done.Store(d);
     }
     return d._<channel<object>>();
-
 });
 
 private static error Err(this ptr<cancelCtx> _addr_c) {
@@ -421,9 +413,7 @@ private static @string contextName(Context c) {
             return s.String();
         }
     }
-
     return reflectlite.TypeOf(c).String();
-
 }
 
 private static @string String(this ptr<cancelCtx> _addr_c) {
@@ -457,7 +447,6 @@ private static void cancel(this ptr<cancelCtx> _addr_c, bool removeFromParent, e
     foreach (var (child) in c.children) { 
         // NOTE: acquiring the child's lock while holding parent's lock.
         child.cancel(false, err);
-
     }    c.children = null;
     c.mu.Unlock();
 
@@ -488,10 +477,8 @@ public static (Context, CancelFunc) WithDeadline(Context parent, time.Time d) =>
         if (ok && cur.Before(d)) { 
             // The current deadline is already sooner than the new one.
             return WithCancel(parent);
-
         }
     }
-
     ptr<timerCtx> c = addr(new timerCtx(cancelCtx:newCancelCtx(parent),deadline:d,));
     propagateCancel(parent, c);
     var dur = time.Until(d);
@@ -500,7 +487,6 @@ public static (Context, CancelFunc) WithDeadline(Context parent, time.Time d) =>
         return (c, () => {
             c.cancel(false, Canceled);
         });
-
     }
     c.mu.Lock();
     defer(c.mu.Unlock());
@@ -512,7 +498,6 @@ public static (Context, CancelFunc) WithDeadline(Context parent, time.Time d) =>
     return (c, () => {
         c.cancel(true, Canceled);
     });
-
 });
 
 // A timerCtx carries a timer and a deadline. It embeds a cancelCtx to
@@ -546,7 +531,6 @@ private static void cancel(this ptr<timerCtx> _addr_c, bool removeFromParent, er
     if (removeFromParent) { 
         // Remove this timerCtx from its parent cancelCtx's children.
         removeChild(c.cancelCtx.Context, c);
-
     }
     c.mu.Lock();
     if (c.timer != null) {
@@ -554,7 +538,6 @@ private static void cancel(this ptr<timerCtx> _addr_c, bool removeFromParent, er
         c.timer = null;
     }
     c.mu.Unlock();
-
 }
 
 // WithTimeout returns WithDeadline(parent, time.Now().Add(timeout)).
@@ -598,7 +581,6 @@ public static Context WithValue(Context parent, object key, object val) => func(
         panic("key is not comparable");
     }
     return addr(new valueCtx(parent,key,val));
-
 });
 
 // A valueCtx carries a key-value pair. It implements Value for that key and
@@ -620,7 +602,6 @@ private static @string stringify(object v) {
             break;
     }
     return "<not Stringer>";
-
 }
 
 private static @string String(this ptr<valueCtx> _addr_c) {
@@ -636,7 +617,6 @@ private static void Value(this ptr<valueCtx> _addr_c, object key) {
         return c.val;
     }
     return c.Context.Value(key);
-
 }
 
 } // end context_package

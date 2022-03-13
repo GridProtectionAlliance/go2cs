@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:57 UTC
+//     Generated on 2022 March 13 06:34:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct machoRebaseRecord
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace @internal
             public static implicit operator machoRebaseRecord(NilType nil) => default(machoRebaseRecord);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static machoRebaseRecord machoRebaseRecord_cast(dynamic value)
         {
             return new machoRebaseRecord(value.sym, value.off);

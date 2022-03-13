@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:01 UTC
+//     Generated on 2022 March 13 06:44:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace image
 {
     public static partial class draw_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct floydSteinberg
         {
             // Constructors
@@ -48,7 +48,7 @@ namespace image
             public static implicit operator floydSteinberg(NilType nil) => default(floydSteinberg);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static floydSteinberg floydSteinberg_cast(dynamic value)
         {
             return new floydSteinberg();

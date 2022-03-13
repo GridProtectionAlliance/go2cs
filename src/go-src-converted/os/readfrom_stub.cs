@@ -5,12 +5,12 @@
 //go:build !linux
 // +build !linux
 
-// package os -- go2cs converted at 2022 March 06 22:13:45 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:04 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\readfrom_stub.go
-using io = go.io_package;
-
 namespace go;
+
+using io = io_package;
 
 public static partial class os_package {
 

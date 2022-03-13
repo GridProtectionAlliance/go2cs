@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:24 UTC
+//     Generated on 2022 March 13 05:30:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class edwards25519_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct projP2
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace @internal
             public static implicit operator projP2(NilType nil) => default(projP2);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static projP2 projP2_cast(dynamic value)
         {
             return new projP2(value.X, value.Y, value.Z);

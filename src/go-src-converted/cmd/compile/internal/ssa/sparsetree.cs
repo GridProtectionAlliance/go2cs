@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:44 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:01 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\sparsetree.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using strings = strings_package;
 
 public static partial class ssa_package {
 
@@ -80,10 +80,8 @@ private static SparseTree newSparseTree(ptr<Func> _addr_f, slice<ptr<Block>> par
             }
 
         }
-
     }    t.numberBlock(f.Entry, 1);
     return t;
-
 }
 
 // newSparseOrderedTree creates a SparseTree from a block-to-parent map (array indexed by Block.ID)
@@ -106,10 +104,8 @@ private static SparseTree newSparseOrderedTree(ptr<Func> _addr_f, slice<ptr<Bloc
             }
 
         }
-
     }    t.numberBlock(f.Entry, 1);
     return t;
-
 }
 
 // treestructure provides a string description of the dominator
@@ -129,7 +125,6 @@ public static @string treestructure1(this SparseTree t, ptr<Block> _addr_b, nint
             s += ",";
         }
         s += e.b.String();
-
     }    s += "]";
     {
         var c0 = t[b.ID].child;
@@ -144,19 +139,14 @@ public static @string treestructure1(this SparseTree t, ptr<Block> _addr_b, nint
                         s += " ";
                     c = t[c.ID].sibling;
                     }
-
                     s += t.treestructure1(c, i + 1);
-
                 }
 
             }
             s += ")";
-
         }
     }
-
     return s;
-
 }
 
 // numberBlock assigns entry and exit numbers for b and b's
@@ -208,7 +198,6 @@ public static int numberBlock(this SparseTree t, ptr<Block> _addr_b, int n) {
     t[b.ID].exit = n; 
     // reserve n+1 for exit+1, n+2 is next free number, returned.
     return n + 2;
-
 }
 
 // Sibling returns a sibling of x in the dominator tree (i.e.,
@@ -252,7 +241,6 @@ public static bool IsAncestorEq(this SparseTree t, ptr<Block> _addr_x, ptr<Block
     var xx = _addr_t[x.ID];
     var yy = _addr_t[y.ID];
     return xx.entry <= yy.entry && yy.exit <= xx.exit;
-
 }
 
 // isAncestor reports whether x is a strict ancestor of y.
@@ -266,7 +254,6 @@ public static bool isAncestor(this SparseTree t, ptr<Block> _addr_x, ptr<Block> 
     var xx = _addr_t[x.ID];
     var yy = _addr_t[y.ID];
     return xx.entry < yy.entry && yy.exit < xx.exit;
-
 }
 
 // domorder returns a value for dominator-oriented sorting.
@@ -305,7 +292,6 @@ public static int domorder(this SparseTree t, ptr<Block> _addr_x) {
     // y-then-z requires exit(y) < entry(z), but we have entry(z) < exit(y).
     // We have a contradiction, so x does not dominate z, as required.
     return t[x.ID].entry;
-
 }
 
 } // end ssa_package

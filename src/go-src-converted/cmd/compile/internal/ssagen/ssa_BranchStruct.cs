@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:10:38 UTC
+//     Generated on 2022 March 13 06:23:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace @internal
 {
     public static partial class ssagen_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Branch
         {
             // Constructors
@@ -81,7 +81,7 @@ namespace @internal
             public static implicit operator Branch(NilType nil) => default(Branch);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Branch Branch_cast(dynamic value)
         {
             return new Branch(ref value.P, ref value.B);

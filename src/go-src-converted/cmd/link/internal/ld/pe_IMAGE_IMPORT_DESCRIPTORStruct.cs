@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:19 UTC
+//     Generated on 2022 March 13 06:35:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct IMAGE_IMPORT_DESCRIPTOR
         {
             // Constructors
@@ -73,7 +73,7 @@ namespace @internal
             public static implicit operator IMAGE_IMPORT_DESCRIPTOR(NilType nil) => default(IMAGE_IMPORT_DESCRIPTOR);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static IMAGE_IMPORT_DESCRIPTOR IMAGE_IMPORT_DESCRIPTOR_cast(dynamic value)
         {
             return new IMAGE_IMPORT_DESCRIPTOR(value.OriginalFirstThunk, value.TimeDateStamp, value.ForwarderChain, value.Name, value.FirstThunk);

@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:24 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:46 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\check.go
-using s390x = go.cmd.@internal.obj.s390x_package;
-using math = go.math_package;
-using bits = go.math.bits_package;
-
 namespace go.cmd.compile.@internal;
+
+using s390x = cmd.@internal.obj.s390x_package;
+using math = math_package;
+using bits = math.bits_package;
+
+
+// checkFunc checks invariants of f.
 
 public static partial class ssa_package {
 
-    // checkFunc checks invariants of f.
 private static void checkFunc(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
 
@@ -46,7 +48,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
                             f.Fatalf("block pred/succ not crosslinked correctly %d:%s %d:%s", i, b, se.i, se.b);
                         }
                     }
-
                 }
                 i = i__prev2;
                 e = e__prev2;
@@ -66,7 +67,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
                             f.Fatalf("block succ/pred not crosslinked correctly %d:%s %d:%s", i, b, pe.i, pe.b);
                         }
                     }
-
                 }
                 i = i__prev2;
                 e = e__prev2;
@@ -239,7 +239,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
                                 f.Fatalf("value %v has Aux type %T, want string", v, v.Aux);
                             }
                         }
-
                         canHaveAux = true;
                         goto __switch_break0;
                     }
@@ -263,7 +262,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
                                 f.Fatalf("value %v has Aux type %T, want *AuxCall", v, v.Aux);
                             }
                         }
-
                         canHaveAux = true;
                         goto __switch_break0;
                     }
@@ -276,7 +274,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
                                 f.Fatalf("value %v has Aux type %T, want *AuxNameOffset", v, v.Aux);
                             }
                         }
-
                         canHaveAux = true;
                         canHaveAuxInt = true;
                         goto __switch_break0;
@@ -309,7 +306,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
                                 f.Fatalf("bad type %T for S390XCCMask in %v", v.Aux, v);
                             }
                         }
-
                         canHaveAux = true;
                         goto __switch_break0;
                     }
@@ -322,7 +318,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
                                 f.Fatalf("bad type %T for S390XRotateParams in %v", v.Aux, v);
                             }
                         }
-
                         canHaveAux = true;
                         goto __switch_break0;
                     }
@@ -691,7 +686,6 @@ private static void checkFunc(ptr<Func> _addr_f) {
     }
 
     memCheck(_addr_f);
-
 }
 
 private static void memCheck(ptr<Func> _addr_f) {
@@ -740,7 +734,6 @@ private static void memCheck(ptr<Func> _addr_f) {
             if (b != f.Entry && len(b.Preds) == 0) {
                 return ;
             }
-
         }
         b = b__prev1;
     }
@@ -775,7 +768,6 @@ private static void memCheck(ptr<Func> _addr_f) {
                         m = m__prev1;
 
                     }
-
                 } 
                 // There should be at most one remaining unoverwritten memory value.
 
@@ -826,7 +818,6 @@ private static void memCheck(ptr<Func> _addr_f) {
                     v = v__prev2;
                 }
             }
-
         }
         b = b__prev1;
     }
@@ -884,7 +875,6 @@ private static void memCheck(ptr<Func> _addr_f) {
                             a = a__prev3;
                         }
                     }
-
                 }
 
                 v = v__prev2;
@@ -914,9 +904,7 @@ private static void memCheck(ptr<Func> _addr_f) {
                         if (mem == null && len(b.Preds) > 0) { 
                             // If no mem phi, take mem of any predecessor.
                             mem = lastmem[b.Preds[0].b.ID];
-
                         }
-
                         {
                             var a__prev3 = a;
 
@@ -933,7 +921,6 @@ private static void memCheck(ptr<Func> _addr_f) {
                         if (v.Type.IsMemory()) {
                             mem = v;
                         }
-
                     }
 
                     v = v__prev2;
@@ -962,8 +949,7 @@ private static void memCheck(ptr<Func> _addr_f) {
                             }
                         else 
                             seenNonPhi = true;
-                        
-                    }
+                                            }
 
                     v = v__prev2;
                 }
@@ -983,10 +969,8 @@ private static bool domCheck(ptr<Func> _addr_f, SparseTree sdom, ptr<Block> _add
     if (!sdom.IsAncestorEq(f.Entry, y)) { 
         // unreachable - ignore
         return true;
-
     }
     return sdom.IsAncestorEq(x, y);
-
 }
 
 // isExactFloat32 reports whether x can be exactly represented as a float32.
@@ -996,7 +980,6 @@ private static bool isExactFloat32(double x) {
         return false;
     }
     return math.IsNaN(x) || x == float64(float32(x));
-
 }
 
 } // end ssa_package

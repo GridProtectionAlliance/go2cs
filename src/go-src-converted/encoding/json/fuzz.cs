@@ -5,14 +5,13 @@
 //go:build gofuzz
 // +build gofuzz
 
-// package json -- go2cs converted at 2022 March 06 22:25:19 UTC
+// package json -- go2cs converted at 2022 March 13 05:39:52 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\fuzz.go
-using fmt = go.fmt_package;
-using System;
-
-
 namespace go.encoding;
+
+using fmt = fmt_package;
+using System;
 
 public static partial class json_package {
 
@@ -40,7 +39,6 @@ public static nint Fuzz(slice<byte> data) => func((_, panic, _) => {
             panic(err);
         }
     }    return ;
-
 });
 
 } // end json_package

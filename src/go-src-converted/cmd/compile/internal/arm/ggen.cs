@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm -- go2cs converted at 2022 March 06 23:14:40 UTC
+// package arm -- go2cs converted at 2022 March 13 06:28:10 UTC
 // import "cmd/compile/internal/arm" ==> using arm = go.cmd.compile.@internal.arm_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\arm\ggen.go
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using arm = go.cmd.@internal.obj.arm_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using arm = cmd.@internal.obj.arm_package;
 
 public static partial class arm_package {
 
@@ -36,7 +36,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
                 i += int64(types.PtrSize);
             }
         }
-
     }
     else if (cnt <= int64(128 * types.PtrSize)) {
         p = pp.Append(p, arm.AADD, obj.TYPE_CONST, 0, 4 + off, obj.TYPE_REG, arm.REG_R1, 0);
@@ -61,7 +60,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
         p.To.SetTarget(p1);
     }
     return _addr_p!;
-
 }
 
 private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {

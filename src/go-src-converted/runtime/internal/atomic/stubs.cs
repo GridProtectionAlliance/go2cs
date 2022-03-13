@@ -5,16 +5,16 @@
 //go:build !wasm
 // +build !wasm
 
-// package atomic -- go2cs converted at 2022 March 06 22:08:20 UTC
+// package atomic -- go2cs converted at 2022 March 13 05:24:09 UTC
 // import "runtime/internal/atomic" ==> using atomic = go.runtime.@internal.atomic_package
 // Original source: C:\Program Files\Go\src\runtime\internal\atomic\stubs.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.runtime.@internal;
+
+using @unsafe = @unsafe_package;
 
 public static partial class atomic_package {
 
-    //go:noescape
+//go:noescape
 public static bool Cas(ptr<uint> ptr, uint old, uint @new);
 
 // NO go:noescape annotation; see atomic_pointer.go.

@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package imports -- go2cs converted at 2022 March 06 23:16:54 UTC
+// package imports -- go2cs converted at 2022 March 13 06:30:12 UTC
 // import "cmd/go/internal/imports" ==> using imports = go.cmd.go.@internal.imports_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\imports\scan.go
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using filepath = go.path.filepath_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using fsys = go.cmd.go.@internal.fsys_package;
-
 namespace go.cmd.go.@internal;
+
+using fmt = fmt_package;
+using fs = io.fs_package;
+using filepath = path.filepath_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using fsys = cmd.go.@internal.fsys_package;
 
 public static partial class imports_package {
 
@@ -43,7 +43,6 @@ public static (slice<@string>, slice<@string>, error) ScanDir(@string dir, map<@
             files = append(files, filepath.Join(dir, name));
         }
     }    return scanFiles(files, tags, false);
-
 }
 
 public static (slice<@string>, slice<@string>, error) ScanFiles(slice<@string> files, map<@string, bool> tags) {
@@ -79,7 +78,6 @@ Files:
                 _continueFiles = true;
                 break;
             }
-
         }        if (!explicitFiles && !ShouldBuild(data, tags)) {
             continue;
         }
@@ -99,7 +97,6 @@ Files:
         return (null, null, error.As(ErrNoGo)!);
     }
     return (keys(imports), keys(testImports), error.As(null!)!);
-
 }
 
 public static var ErrNoGo = fmt.Errorf("no Go source files");

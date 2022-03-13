@@ -4,29 +4,30 @@
 
 // This file contains the exported entry points for invoking the parser.
 
-// package parser -- go2cs converted at 2022 March 06 22:41:17 UTC
+// package parser -- go2cs converted at 2022 March 13 05:52:22 UTC
 // import "go/parser" ==> using parser = go.go.parser_package
 // Original source: C:\Program Files\Go\src\go\parser\interface.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.go;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// If src != nil, readSource converts src to a []byte if possible;
+// otherwise it returns an error. If src == nil, readSource returns
+// the result of reading the file specified by filename.
+//
+
+using System;
 public static partial class parser_package {
 
-    // If src != nil, readSource converts src to a []byte if possible;
-    // otherwise it returns an error. If src == nil, readSource returns
-    // the result of reading the file specified by filename.
-    //
 private static (slice<byte>, error) readSource(@string filename, object src) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -49,10 +50,8 @@ private static (slice<byte>, error) readSource(@string filename, object src) {
                 break;
         }
         return (null, error.As(errors.New("invalid source"))!);
-
     }
     return os.ReadFile(filename);
-
 }
 
 // A Mode value is a set of flags (or 0).
@@ -120,7 +119,6 @@ public static (ptr<ast.File>, error) ParseFile(ptr<token.FileSet> _addr_fset, @s
                     }
 
                 }
-
             } 
 
             // set result values
@@ -133,11 +131,9 @@ public static (ptr<ast.File>, error) ParseFile(ptr<token.FileSet> _addr_fset, @s
             // ParseFile API and return a valid (but) empty
             // *ast.File
             f = addr(new ast.File(Name:new(ast.Ident),Scope:ast.NewScope(nil),));
-
         }
         p.errors.Sort();
         err = p.errors.Err();
-
     }()); 
 
     // parse source
@@ -145,7 +141,6 @@ public static (ptr<ast.File>, error) ParseFile(ptr<token.FileSet> _addr_fset, @s
     f = p.parseFile();
 
     return ;
-
 });
 
 // ParseDir calls ParseFile for all files with names ending in ".go" in the
@@ -201,11 +196,8 @@ public static (map<@string, ptr<ast.Package>>, error) ParseDir(ptr<token.FileSet
                 first = err;
             }
 
-
         }
-
     }    return ;
-
 }
 
 // ParseExprFrom is a convenience function for parsing an expression.
@@ -246,14 +238,11 @@ public static (ast.Expr, error) ParseExprFrom(ptr<token.FileSet> _addr_fset, @st
                     }
 
                 }
-
             }
 
         }
-
         p.errors.Sort();
         err = p.errors.Err();
-
     }()); 
 
     // parse expr
@@ -268,7 +257,6 @@ public static (ast.Expr, error) ParseExprFrom(ptr<token.FileSet> _addr_fset, @st
     p.expect(token.EOF);
 
     return ;
-
 });
 
 // ParseExpr is a convenience function for obtaining the AST of an expression x.

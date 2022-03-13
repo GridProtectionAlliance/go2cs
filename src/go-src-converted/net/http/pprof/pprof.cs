@@ -54,31 +54,31 @@
 //
 //    https://blog.golang.org/2011/06/profiling-go-programs.html
 //
-// package pprof -- go2cs converted at 2022 March 06 22:24:07 UTC
+
+// package pprof -- go2cs converted at 2022 March 13 05:38:33 UTC
 // import "net/http/pprof" ==> using pprof = go.net.http.pprof_package
 // Original source: C:\Program Files\Go\src\net\http\pprof\pprof.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using context = go.context_package;
-using fmt = go.fmt_package;
-using html = go.html_package;
-using profile = go.@internal.profile_package;
-using io = go.io_package;
-using log = go.log_package;
-using http = go.net.http_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using pprof = go.runtime.pprof_package;
-using trace = go.runtime.trace_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.net.http;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using context = context_package;
+using fmt = fmt_package;
+using html = html_package;
+using profile = @internal.profile_package;
+using io = io_package;
+using log = log_package;
+using http = net.http_package;
+using url = net.url_package;
+using os = os_package;
+using runtime = runtime_package;
+using pprof = runtime.pprof_package;
+using trace = runtime.trace_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+using System;
 
 public static partial class pprof_package {
 
@@ -145,13 +145,10 @@ public static void Profile(http.ResponseWriter w, ptr<http.Request> _addr_r) {
             // StartCPUProfile failed, so no writes yet.
             serveError(w, http.StatusInternalServerError, fmt.Sprintf("Could not enable CPU profiling: %s", err));
             return ;
-
         }
     }
-
     sleep(_addr_r, time.Duration(sec) * time.Second);
     pprof.StopCPUProfile();
-
 }
 
 // Trace responds with the execution trace in binary form.
@@ -178,13 +175,10 @@ public static void Trace(http.ResponseWriter w, ptr<http.Request> _addr_r) {
             // trace.Start failed, so no writes yet.
             serveError(w, http.StatusInternalServerError, fmt.Sprintf("Could not enable tracing: %s", err));
             return ;
-
         }
     }
-
     sleep(_addr_r, time.Duration(sec * float64(time.Second)));
     trace.Stop();
-
 }
 
 // Symbol looks up the program counters listed in the request,
@@ -234,7 +228,6 @@ public static void Symbol(http.ResponseWriter w, ptr<http.Request> _addr_r) {
     }
 
     w.Write(buf.Bytes());
-
 }
 
 // Handler returns an HTTP handler that serves the named profile.
@@ -262,7 +255,6 @@ private static void ServeHTTP(this handler name, http.ResponseWriter w, ptr<http
             return ;
         }
     }
-
     var (gc, _) = strconv.Atoi(r.FormValue("gc"));
     if (name == "heap" && gc > 0) {
         runtime.GC();
@@ -277,7 +269,6 @@ private static void ServeHTTP(this handler name, http.ResponseWriter w, ptr<http
         w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", name));
     }
     p.WriteTo(w, debug);
-
 }
 
 private static void serveDeltaProfile(this handler name, http.ResponseWriter w, ptr<http.Request> _addr_r, ptr<pprof.Profile> _addr_p, @string secStr) => func((defer, _, _) => {
@@ -317,7 +308,6 @@ private static void serveDeltaProfile(this handler name, http.ResponseWriter w, 
     else
  { // TODO: what's a good status code for canceled requests? 400?
         serveError(w, http.StatusInternalServerError, err.Error());
-
     }
     return ;
     var (p1, err) = collectProfile(_addr_p);
@@ -341,7 +331,6 @@ private static void serveDeltaProfile(this handler name, http.ResponseWriter w, 
     w.Header().Set("Content-Type", "application/octet-stream");
     w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s-delta\"", name));
     p1.Write(w);
-
 });
 
 private static (ptr<profile.Profile>, error) collectProfile(ptr<pprof.Profile> _addr_p) {
@@ -357,7 +346,6 @@ private static (ptr<profile.Profile>, error) collectProfile(ptr<pprof.Profile> _
             return (_addr_null!, error.As(err)!);
         }
     }
-
     var ts = time.Now().UnixNano();
     var (p0, err) = profile.Parse(_addr_buf);
     if (err != null) {
@@ -365,7 +353,6 @@ private static (ptr<profile.Profile>, error) collectProfile(ptr<pprof.Profile> _
     }
     p0.TimeNanos = ts;
     return (_addr_p0!, error.As(null!)!);
-
 }
 
 private static map profileSupportsDelta = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<handler, bool>{"allocs":true,"block":true,"goroutine":true,"heap":true,"mutex":true,"threadcreate":true,};
@@ -417,9 +404,7 @@ public static void Index(http.ResponseWriter w, ptr<http.Request> _addr_r) {
         p = p__prev1;
     }
 
-    sort.Slice(profiles, (i, j) => {
-        return profiles[i].Name < profiles[j].Name;
-    });
+    sort.Slice(profiles, (i, j) => profiles[i].Name < profiles[j].Name);
 
     {
         var err = indexTmplExecute(w, profiles);
@@ -428,7 +413,6 @@ public static void Index(http.ResponseWriter w, ptr<http.Request> _addr_r) {
             log.Print(err);
         }
     }
-
 }
 
 private static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles) {
@@ -464,7 +448,6 @@ private static error indexTmplExecute(io.Writer w, slice<profileEntry> profiles)
 
     var (_, err) = w.Write(b.Bytes());
     return error.As(err)!;
-
 }
 
 } // end pprof_package

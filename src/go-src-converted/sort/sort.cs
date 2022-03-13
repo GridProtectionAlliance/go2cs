@@ -5,19 +5,17 @@
 //go:generate go run genzfunc.go
 
 // Package sort provides primitives for sorting slices and user-defined collections.
-// package sort -- go2cs converted at 2022 March 06 22:12:37 UTC
+
+// package sort -- go2cs converted at 2022 March 13 05:27:40 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Program Files\Go\src\sort\sort.go
-
-using System;
-
-
 namespace go;
 
+using System;
 public static partial class sort_package {
 
-    // An implementation of Interface can be sorted by the routines in this package.
-    // The methods refer to elements of the underlying collection by integer index.
+// An implementation of Interface can be sorted by the routines in this package.
+// The methods refer to elements of the underlying collection by integer index.
 public partial interface Interface {
     bool Len(); // Less reports whether the element with index i
 // must sort before the element with index j.
@@ -64,9 +62,7 @@ private static void siftDown(Interface data, nint lo, nint hi, nint first) {
         }
         data.Swap(first + root, first + child);
         root = child;
-
     }
-
 }
 
 private static void heapSort(Interface data, nint a, nint b) {
@@ -96,7 +92,6 @@ private static void heapSort(Interface data, nint a, nint b) {
 
         i = i__prev1;
     }
-
 }
 
 // Quicksort, loosely following Bentley and McIlroy,
@@ -134,7 +129,6 @@ private static (nint, nint) doPivot(Interface data, nint lo, nint hi) {
         medianOfThree(data, lo, lo + s, lo + 2 * s);
         medianOfThree(data, m, m - s, m + s);
         medianOfThree(data, hi - 1, hi - 1 - s, hi - 1 - 2 * s);
-
     }
     medianOfThree(data, lo, m, hi - 1); 
 
@@ -166,7 +160,6 @@ private static (nint, nint) doPivot(Interface data, nint lo, nint hi) {
         data.Swap(b, c - 1);
         b++;
         c--;
-
     } 
     // If hi-c<3 then there are duplicates (by property of median of nine).
     // Let's be a bit more conservative, and set border to 5.
@@ -178,21 +171,17 @@ private static (nint, nint) doPivot(Interface data, nint lo, nint hi) {
             data.Swap(c, hi - 1);
             c++;
             dups++;
-
         }
         if (!data.Less(b - 1, pivot)) { // data[b-1] = pivot
             b--;
             dups++;
-
         }
         if (!data.Less(m, pivot)) { // data[m] = pivot
             data.Swap(m, b - 1);
             b--;
             dups++;
-
         }
         protect = dups > 1;
-
     }
     if (protect) { 
         // Protect against a lot of duplicates
@@ -215,13 +204,10 @@ private static (nint, nint) doPivot(Interface data, nint lo, nint hi) {
             data.Swap(a, b - 1);
             a++;
             b--;
-
         }
-
     }
     data.Swap(pivot, b - 1);
     return (b - 1, c);
-
 }
 
 private static void quickSort(Interface data, nint a, nint b, nint maxDepth) {
@@ -253,7 +239,6 @@ private static void quickSort(Interface data, nint a, nint b, nint maxDepth) {
             }
         }
         insertionSort(data, a, b);
-
     }
 }
 
@@ -278,7 +263,6 @@ private static nint maxDepth(nint n) {
         }
     }
     return depth * 2;
-
 }
 
 // lessSwap is a pair of Less and Swap function for use with the
@@ -312,7 +296,6 @@ public static bool IsSorted(Interface data) {
         }
     }
     return true;
-
 }
 
 // Convenience types for common cases
@@ -481,11 +464,8 @@ private static void stable(Interface data, nint n) {
             }
 
         }
-
         blockSize *= 2;
-
     }
-
 }
 
 // symMerge merges the two sorted subsequences data[a:m] and data[m:b] using
@@ -526,7 +506,6 @@ private static void symMerge(Interface data, nint a, nint m, nint b) {
  {
                 j = h;
             }
-
         } 
         // Swap values until data[a] reaches the position before i.
         {
@@ -540,7 +519,6 @@ private static void symMerge(Interface data, nint a, nint m, nint b) {
             k = k__prev1;
         }
         return ;
-
     }
     if (b - m == 1) { 
         // Use binary search to find the lowest index i
@@ -557,7 +535,6 @@ private static void symMerge(Interface data, nint a, nint m, nint b) {
  {
                 j = h;
             }
-
         } 
         // Swap values until data[m] reaches the position i.
         {
@@ -571,7 +548,6 @@ private static void symMerge(Interface data, nint a, nint m, nint b) {
             k = k__prev1;
         }
         return ;
-
     }
     var mid = int(uint(a + b) >> 1);
     var n = mid + m;
@@ -632,7 +608,6 @@ private static void rotate(Interface data, nint a, nint m, nint b) {
     } 
     // i == j
     swapRange(data, m - i, m, i);
-
 }
 
 /*

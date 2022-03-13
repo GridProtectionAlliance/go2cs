@@ -5,18 +5,17 @@
 //go:build !go1.13
 // +build !go1.13
 
-// package poly1305 -- go2cs converted at 2022 March 06 23:36:52 UTC
+// package poly1305 -- go2cs converted at 2022 March 13 06:44:59 UTC
 // import "vendor/golang.org/x/crypto/poly1305" ==> using poly1305 = go.vendor.golang.org.x.crypto.poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\poly1305\bits_compat.go
-
-
 namespace go.vendor.golang.org.x.crypto;
 
 public static partial class poly1305_package {
 
-    // Generic fallbacks for the math/bits intrinsics, copied from
-    // src/math/bits/bits.go. They were added in Go 1.12, but Add64 and Sum64 had
-    // variable time fallbacks until Go 1.13.
+// Generic fallbacks for the math/bits intrinsics, copied from
+// src/math/bits/bits.go. They were added in Go 1.12, but Add64 and Sum64 had
+// variable time fallbacks until Go 1.13.
+
 private static (ulong, ulong) bitsAdd64(ulong x, ulong y, ulong carry) {
     ulong sum = default;
     ulong carryOut = default;

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:10 UTC
+//     Generated on 2022 March 13 06:42:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace types
 {
     public static partial class typeutil_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Map
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace types
             public static implicit operator Map(NilType nil) => default(Map);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Map Map_cast(dynamic value)
         {
             return new Map(value.hasher, value.table, value.length);

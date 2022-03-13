@@ -28,30 +28,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package s390x -- go2cs converted at 2022 March 06 23:20:19 UTC
+// package s390x -- go2cs converted at 2022 March 13 06:33:11 UTC
 // import "cmd/link/internal/s390x" ==> using s390x = go.cmd.link.@internal.s390x_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\s390x\asm.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+
+
+// gentext generates assembly to append the local moduledata to the global
+// moduledata linked list at initialization time. This is only done if the runtime
+// is in a different module.
+//
+// <go.link.addmoduledata>:
+//     larl  %r2, <local.moduledata>
+//     jg    <runtime.addmoduledata@plt>
+//    undef
+//
+// The job of appending the moduledata is delegated to runtime.addmoduledata.
 
 public static partial class s390x_package {
 
-    // gentext generates assembly to append the local moduledata to the global
-    // moduledata linked list at initialization time. This is only done if the runtime
-    // is in a different module.
-    //
-    // <go.link.addmoduledata>:
-    //     larl  %r2, <local.moduledata>
-    //     jg    <runtime.addmoduledata@plt>
-    //    undef
-    //
-    // The job of appending the moduledata is delegated to runtime.addmoduledata.
 private static void gentext(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr) {
     ref ld.Link ctxt = ref _addr_ctxt.val;
     ref loader.Loader ldr = ref _addr_ldr.val;
@@ -75,7 +77,6 @@ private static void gentext(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ld
 
     // undef (for debugging)
     initfunc.AddUint32(ctxt.Arch, 0);
-
 }
 
 private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, loader.Sym s, loader.Reloc r, nint rIdx) {
@@ -193,7 +194,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         return true;
     }
     return false;
-
 }
 
 private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, nint ri, long sectoff) {
@@ -268,7 +268,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
                         elfrel = elf.R_390_PLT32DBL;
                         break;
                 }
-
             }
             else
  {
@@ -280,9 +279,7 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
                         elfrel = elf.R_390_PLT64;
                         break;
                 }
-
             }
-
         }
         else
  {
@@ -295,7 +292,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
                         elfrel = elf.R_390_PC32DBL;
                         break;
                 }
-
             }
             else
  {
@@ -310,9 +306,7 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
                         elfrel = elf.R_390_PC64;
                         break;
                 }
-
             }
-
         }
         if (elfrel == elf.R_390_NONE) {
             return false; // unsupported size/dbl combination
@@ -322,7 +316,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
         return false;
         @out.Write64(uint64(r.Xadd));
     return true;
-
 }
 
 private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_got, loader.Sym dynamic) {
@@ -374,7 +367,6 @@ private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilde
 
         got.AddUint64(ctxt.Arch, 0);
         got.AddUint64(ctxt.Arch, 0);
-
     }
 }
 
@@ -412,8 +404,7 @@ private static long archrelocvariant(ptr<ld.Target> _addr_target, ptr<loader.Loa
     else 
         ldr.Errorf(s, "unexpected relocation variant %d", rv);
         return t;
-    
-}
+    }
 
 private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, loader.Sym s) => func((_, panic, _) => {
     ref ld.Target target = ref _addr_target.val;
@@ -476,8 +467,6 @@ private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         rela.AddUint64(target.Arch, 0);
 
         ldr.SetPlt(s, int32(plt.Size() - 32));
-
-
     }
     else
  {

@@ -2,24 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflect -- go2cs converted at 2022 March 06 22:31:01 UTC
+// package reflect -- go2cs converted at 2022 March 13 05:41:53 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Program Files\Go\src\reflect\visiblefields.go
-
-
 namespace go;
 
 public static partial class reflect_package {
 
-    // VisibleFields returns all the visible fields in t, which must be a
-    // struct type. A field is defined as visible if it's accessible
-    // directly with a FieldByName call. The returned fields include fields
-    // inside anonymous struct members and unexported fields. They follow
-    // the same order found in the struct, with anonymous fields followed
-    // immediately by their promoted fields.
-    //
-    // For each element e of the returned slice, the corresponding field
-    // can be retrieved from a value v of type t by calling v.FieldByIndex(e.Index).
+// VisibleFields returns all the visible fields in t, which must be a
+// struct type. A field is defined as visible if it's accessible
+// directly with a FieldByName call. The returned fields include fields
+// inside anonymous struct members and unexported fields. They follow
+// the same order found in the struct, with anonymous fields followed
+// immediately by their promoted fields.
+//
+// For each element e of the returned slice, the corresponding field
+// can be retrieved from a value v of type t by calling v.FieldByIndex(e.Index).
 public static slice<StructField> VisibleFields(Type t) => func((_, panic, _) => {
     if (t == null) {
         panic("reflect: VisibleFields(nil)");
@@ -42,12 +40,9 @@ public static slice<StructField> VisibleFields(Type t) => func((_, panic, _) => 
             // A field has been removed. We need to shuffle
             // all the subsequent elements up.
             w.fields[j] = f.val;
-
         }
         j++;
-
     }    return w.fields[..(int)j];
-
 });
 
 private partial struct visibleFieldsWalker {
@@ -85,31 +80,25 @@ private static void walk(this ptr<visibleFieldsWalker> _addr_w, Type t) {
                     // there's no need to add this field.
                     old.Name = "";
                     add = false;
-
                 }
                 else if (len(w.index) < len(old.Index)) { 
                     // The old field loses because it's deeper than the new one.
                     old.Name = "";
-
                 }
                 else
  { 
                     // The old field wins because it's shallower than the new one.
                     add = false;
-
                 }
-
             }
 
         }
-
         if (add) { 
             // Copy the index so that it's not overwritten
             // by the other appends.
             f.Index = append((slice<nint>)null, w.index);
             w.byName[f.Name] = len(w.fields);
             w.fields = append(w.fields, f);
-
         }
         if (f.Anonymous) {
             if (f.Type.Kind() == Ptr) {
@@ -120,10 +109,8 @@ private static void walk(this ptr<visibleFieldsWalker> _addr_w, Type t) {
             }
         }
         w.index = w.index[..(int)len(w.index) - 1];
-
     }
     delete(w.visiting, t);
-
 }
 
 } // end reflect_package

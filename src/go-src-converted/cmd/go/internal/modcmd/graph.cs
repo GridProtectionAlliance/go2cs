@@ -4,21 +4,20 @@
 
 // go mod graph
 
-// package modcmd -- go2cs converted at 2022 March 06 23:19:36 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:32:24 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\graph.go
-using bufio = go.bufio_package;
-using context = go.context_package;
-using os = go.os_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using modload = go.cmd.go.@internal.modload_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using bufio = bufio_package;
+using context = context_package;
+using os = os_package;
+
+using @base = cmd.go.@internal.@base_package;
+using modload = cmd.go.@internal.modload_package;
+
+using module = golang.org.x.mod.module_package;
+using System;
 
 public static partial class modcmd_package {
 
@@ -72,7 +71,6 @@ private static void runGraph(context.Context ctx, ptr<base.Command> _addr_cmd, s
             w.WriteByte('\n');
         }
     });
-
 });
 
 } // end modcmd_package

@@ -5,22 +5,23 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:15:18 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:36 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\conf.go
-using bytealg = go.@internal.bytealg_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
 
+using bytealg = @internal.bytealg_package;
+using os = os_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using syscall = syscall_package;
+
+
+// conf represents a system's network configuration.
+
+using System;
 public static partial class net_package {
 
-    // conf represents a system's network configuration.
 private partial struct conf {
     public bool forceCgoLookupHost;
     public bool netGo; // go DNS resolution forced
@@ -59,14 +60,11 @@ private static void initConfVal() => func((defer, _, _) => {
  {
                     println("go package net: GODEBUG setting forcing use of Go's resolver");
                 }
-
             else if (confVal.forceCgoLookupHost) 
                 println("go package net: using cgo DNS resolver");
             else 
                 println("go package net: dynamic selection of DNS resolver");
-            
-        }());
-
+                    }());
     }
     if (runtime.GOOS == "darwin" || runtime.GOOS == "ios") {
         confVal.forceCgoLookupHost = true;
@@ -91,7 +89,6 @@ private static void initConfVal() => func((defer, _, _) => {
         // libc's resolver might then fail too, but at least
         // it wasn't our fault.
         confVal.forceCgoLookupHost = true;
-
     }
     {
         var (_, err) = os.Stat("/etc/mdns.allow");
@@ -100,7 +97,6 @@ private static void initConfVal() => func((defer, _, _) => {
             confVal.hasMDNSAllow = true;
         }
     }
-
 });
 
 // canUseCgo reports whether calling cgo functions is allowed
@@ -134,7 +130,6 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
         // Don't deal with special form hostnames with backslashes
         // or '%'.
         return fallbackOrder;
-
     }
     if (c.goos == "openbsd") { 
         // OpenBSD's resolv.conf manpage says that a non-existent
@@ -150,7 +145,6 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
             // system's resolv.conf file then the assumed
             // order is 'bind file'"
             return hostLookupDNSFiles;
-
         }
         if (len(lookup) < 1 || len(lookup) > 2) {
             return fallbackOrder;
@@ -178,7 +172,6 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
                 return fallbackOrder;
                 break;
         }
-
     }
     if (stringsHasSuffix(hostname, ".")) {
         hostname = hostname[..(int)len(hostname) - 1];
@@ -189,7 +182,6 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
         // similar local resolution mechanisms, assume that
         // libc might (via Avahi, etc) and use cgo.
         return fallbackOrder;
-
     }
     var nss = c.nss;
     var srcs = nss.sources["hosts"]; 
@@ -199,17 +191,14 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
         if (c.goos == "solaris") { 
             // illumos defaults to "nis [NOTFOUND=return] files"
             return fallbackOrder;
-
         }
         return hostLookupFilesDNS;
-
     }
     if (nss.err != null) { 
         // We failed to parse or open nsswitch.conf, so
         // conservatively assume we should use cgo if it's
         // available.
         return fallbackOrder;
-
     }
     bool mdnsSource = default;    bool filesSource = default;    bool dnsSource = default;
 
@@ -229,20 +218,16 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
             if (!src.standardCriteria()) {
                 return fallbackOrder; // non-standard; let libc deal with it.
             }
-
             if (src.source == "files") {
                 filesSource = true;
             }
             else if (src.source == "dns") {
                 dnsSource = true;
             }
-
             if (first == "") {
                 first = src.source;
             }
-
             continue;
-
         }
         if (stringsHasPrefix(src.source, "mdns")) { 
             // e.g. "mdns4", "mdns4_minimal"
@@ -250,10 +235,8 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
             // libc wouldn't have found a hit on this anyway.
             mdnsSource = true;
             continue;
-
         }
         return fallbackOrder;
-
     }    if (mdnsSource && c.hasMDNSAllow) {
         return fallbackOrder;
     }
@@ -272,7 +255,6 @@ private static hostLookupOrder hostLookupOrder(this ptr<conf> _addr_c, ptr<Resol
         return hostLookupDNS;
     // Something weird. Let libc deal with it.
     return fallbackOrder;
-
 });
 
 // goDebugNetDNS parses the value of the GODEBUG "netdns" value.
@@ -311,10 +293,8 @@ private static (@string, nint) goDebugNetDNS() {
             return ;
         }
     }
-
     parsePart(goDebug);
     return ;
-
 }
 
 // isLocalhost reports whether h should be considered a "localhost"

@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package aes -- go2cs converted at 2022 March 06 22:18:17 UTC
+// package aes -- go2cs converted at 2022 March 13 05:32:27 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Program Files\Go\src\crypto\aes\modes.go
-using cipher = go.crypto.cipher_package;
-
 namespace go.crypto;
+
+using cipher = crypto.cipher_package;
+
+
+// gcmAble is implemented by cipher.Blocks that can provide an optimized
+// implementation of GCM through the AEAD interface.
+// See crypto/cipher/gcm.go.
 
 public static partial class aes_package {
 
-    // gcmAble is implemented by cipher.Blocks that can provide an optimized
-    // implementation of GCM through the AEAD interface.
-    // See crypto/cipher/gcm.go.
 private partial interface gcmAble {
     (cipher.AEAD, error) NewGCM(nint nonceSize, nint tagSize);
 }

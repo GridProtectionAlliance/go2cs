@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:28 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:32 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\flamegraph.go
-using json = go.encoding.json_package;
-using template = go.html.template_package;
-using http = go.net.http_package;
-using strings = go.strings_package;
+namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
-using graph = go.github.com.google.pprof.@internal.graph_package;
-using measurement = go.github.com.google.pprof.@internal.measurement_package;
-using report = go.github.com.google.pprof.@internal.report_package;
+using json = encoding.json_package;
+using template = html.template_package;
+using http = net.http_package;
+using strings = strings_package;
+
+using graph = github.com.google.pprof.@internal.graph_package;
+using measurement = github.com.google.pprof.@internal.measurement_package;
+using report = github.com.google.pprof.@internal.report_package;
 using System.ComponentModel;
 using System;
-
-
-namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
 public static partial class driver_package {
 
@@ -83,7 +82,6 @@ private static void flamegraph(this ptr<webInterface> _addr_ui, http.ResponseWri
             nodeMap[n] = node; 
             // Get all node names into an array.
             nodeArr = append(nodeArr, n.Info.Name);
-
         }
         n = n__prev1;
     }
@@ -111,7 +109,6 @@ private static void flamegraph(this ptr<webInterface> _addr_ui, http.ResponseWri
         return ;
     }
     ui.render(w, req, "flamegraph", rpt, errList, config.Labels, new webArgs(FlameGraph:template.JS(b),Nodes:nodeArr,));
-
 }
 
 } // end driver_package

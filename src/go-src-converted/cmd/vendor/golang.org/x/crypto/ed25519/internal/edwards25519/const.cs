@@ -2,19 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package edwards25519 -- go2cs converted at 2022 March 06 23:25:47 UTC
+// package edwards25519 -- go2cs converted at 2022 March 13 06:39:01 UTC
 // import "cmd/vendor/golang.org/x/crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.cmd.vendor.golang.org.x.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\crypto\ed25519\internal\edwards25519\const.go
-
-
 namespace go.cmd.vendor.golang.org.x.crypto.ed25519.@internal;
 
 public static partial class edwards25519_package {
 
-    // These values are from the public domain, “ref10” implementation of ed25519
-    // from SUPERCOP.
+// These values are from the public domain, “ref10” implementation of ed25519
+// from SUPERCOP.
 
-    // d is a constant in the Edwards curve equation.
+// d is a constant in the Edwards curve equation.
 private static FieldElement d = new FieldElement(-10913610,13857413,-15372611,6949391,114729,-8787816,-6275908,-3247719,-18696448,-12055116,);
 
 // d2 is 2*d.

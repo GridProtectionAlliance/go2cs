@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:19:48 UTC
+// package main -- go2cs converted at 2022 March 13 06:32:36 UTC
 // Original source: C:\Program Files\Go\src\cmd\gofmt\simplify.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using reflect = go.reflect_package;
-
 namespace go;
+
+using ast = go.ast_package;
+using token = go.token_package;
+using reflect = reflect_package;
 
 public static partial class main_package {
 
@@ -53,23 +53,17 @@ private static ast.Visitor Visit(this simplifier s, ast.Node node) {
                         }
 
                     }
-
                     s.simplifyLiteral(typ, eltType, x, px);
-
                 } 
                 // node was simplified - stop walk (there are no subnodes to simplify)
                 return null;
-
             }
-
             break;
         case ptr<ast.SliceExpr> n:
             if (n.Max != null) { 
                 // - 3-index slices always require the 2nd and 3rd index
                 break;
-
             }
-
             {
                 ptr<ast.Ident> (s, _) = n.X._<ptr<ast.Ident>>();
 
@@ -92,19 +86,15 @@ private static ast.Visitor Visit(this simplifier s, ast.Node node) {
                                         if (arg != null && arg.Obj == s.Obj) { 
                                             // the len argument is the array/slice object
                                             n.High = null;
-
                                         }
 
                                     }
-
                                 }
 
                             }
-
                         }
 
                     }
-
                 } 
                 // Note: We could also simplify slice expressions of the form s[0:b] to s[:b]
                 //       but we leave them as is since sometimes we want to be very explicit
@@ -135,7 +125,6 @@ private static ast.Visitor Visit(this simplifier s, ast.Node node) {
     }
 
     return s;
-
 }
 
 private static void simplifyLiteral(this simplifier s, reflect.Value typ, ast.Expr astType, ast.Expr x, ptr<ast.Expr> _addr_px) {
@@ -180,20 +169,16 @@ private static void simplifyLiteral(this simplifier s, reflect.Value typ, ast.Ex
                                 inner.Type = null; // drop T
                                 px = inner; // drop &
                             }
-
                         }
 
                         inner = inner__prev3;
 
                     }
-
                 }
 
             }
-
         }
     }
-
 }
 
 private static bool isBlank(ast.Expr x) {
@@ -209,7 +194,6 @@ private static void simplify(ptr<ast.File> _addr_f) {
 
     simplifier s = default;
     ast.Walk(s, f);
-
 }
 
 private static void removeEmptyDeclGroups(ptr<ast.File> _addr_f) {
@@ -226,9 +210,7 @@ private static void removeEmptyDeclGroups(ptr<ast.File> _addr_f) {
             }
 
         }
-
     }    f.Decls = f.Decls[..(int)i];
-
 }
 
 private static bool isEmpty(ptr<ast.File> _addr_f, ptr<ast.GenDecl> _addr_g) {
@@ -244,7 +226,6 @@ private static bool isEmpty(ptr<ast.File> _addr_f, ptr<ast.GenDecl> _addr_g) {
             return false;
         }
     }    return true;
-
 }
 
 } // end main_package

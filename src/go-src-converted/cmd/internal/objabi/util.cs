@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:23 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\util.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.@internal;
+
+using fmt = fmt_package;
+using strings = strings_package;
+
+using buildcfg = @internal.buildcfg_package;
 
 public static partial class objabi_package {
 

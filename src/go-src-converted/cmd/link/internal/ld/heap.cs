@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:21:26 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:24 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\heap.go
-using loader = go.cmd.link.@internal.loader_package;
-
 namespace go.cmd.link.@internal;
+
+using loader = cmd.link.@internal.loader_package;
 
 public static partial class ld_package {
 
-    // Min-heap implementation, for the deadcode pass.
-    // Specialized for loader.Sym elements.
+// Min-heap implementation, for the deadcode pass.
+// Specialized for loader.Sym elements.
+
 private partial struct heap { // : slice<loader.Sym>
 }
 
@@ -28,9 +29,7 @@ private static void push(this ptr<heap> _addr_h, loader.Sym s) {
             break;
         }
         ((h.val)[n], (h.val)[p]) = ((h.val)[p], (h.val)[n]);        n = p;
-
     }
-
 }
 
 private static loader.Sym pop(this ptr<heap> _addr_h) {
@@ -56,16 +55,13 @@ private static loader.Sym pop(this ptr<heap> _addr_h) {
             }
 
         }
-
         if ((h.val)[i] <= (h.val)[c]) {
             break;
         }
         ((h.val)[i], (h.val)[c]) = ((h.val)[c], (h.val)[i]);        i = c;
-
     }
 
     return r;
-
 }
 
 private static bool empty(this ptr<heap> _addr_h) {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:13:00 UTC
+//     Generated on 2022 March 13 05:27:50 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace @internal
 {
     public static partial class poll_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct fdMutex
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace @internal
             public static implicit operator fdMutex(NilType nil) => default(fdMutex);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static fdMutex fdMutex_cast(dynamic value)
         {
             return new fdMutex(value.state, value.rsema, value.wsema);

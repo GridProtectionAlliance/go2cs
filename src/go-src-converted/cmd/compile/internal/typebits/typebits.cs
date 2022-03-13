@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typebits -- go2cs converted at 2022 March 06 23:09:20 UTC
+// package typebits -- go2cs converted at 2022 March 13 06:22:39 UTC
 // import "cmd/compile/internal/typebits" ==> using typebits = go.cmd.compile.@internal.typebits_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typebits\typebits.go
-using @base = go.cmd.compile.@internal.@base_package;
-using bitvec = go.cmd.compile.@internal.bitvec_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using bitvec = cmd.compile.@internal.bitvec_package;
+using types = cmd.compile.@internal.types_package;
+
+
+// NOTE: The bitmap for a specific type t could be cached in t after
+// the first run and then simply copied into bv at the correct offset
+// on future calls with the same type t.
 
 public static partial class typebits_package {
 
-    // NOTE: The bitmap for a specific type t could be cached in t after
-    // the first run and then simply copied into bv at the correct offset
-    // on future calls with the same type t.
 public static void Set(ptr<types.Type> _addr_t, long off, bitvec.BitVec bv) {
     ref types.Type t = ref _addr_t.val;
 
@@ -26,7 +28,6 @@ public static void Set(ptr<types.Type> _addr_t, long off, bitvec.BitVec bv) {
         // Note: this case ensures that pointers to go:notinheap types
         // are not considered pointers by garbage collection and stack copying.
         return ;
-
     }
 
     if (t.Kind() == types.TPTR || t.Kind() == types.TUNSAFEPTR || t.Kind() == types.TFUNC || t.Kind() == types.TCHAN || t.Kind() == types.TMAP) 
@@ -59,7 +60,6 @@ public static void Set(ptr<types.Type> _addr_t, long off, bitvec.BitVec bv) {
         if (elt.Width == 0) { 
             // Short-circuit for #20739.
             break;
-
         }
         for (var i = int64(0); i < t.NumElem(); i++) {
             Set(_addr_elt, off, bv);
@@ -70,7 +70,6 @@ public static void Set(ptr<types.Type> _addr_t, long off, bitvec.BitVec bv) {
             Set(_addr_f.Type, off + f.Offset, bv);
         }    else 
         @base.Fatalf("typebits.Set: unexpected type, %v", t);
-    
-}
+    }
 
 } // end typebits_package

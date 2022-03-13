@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:42 UTC
+//     Generated on 2022 March 13 06:32:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace modfetch
 {
     public static partial class codehost_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct notExistError
         {
             // Constructors
@@ -73,7 +73,7 @@ namespace modfetch
             public static implicit operator notExistError(NilType nil) => default(notExistError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static notExistError notExistError_cast(dynamic value)
         {
             return new notExistError(value.err);

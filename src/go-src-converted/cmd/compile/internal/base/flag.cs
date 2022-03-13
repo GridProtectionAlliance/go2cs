@@ -2,27 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 23:14:30 UTC
+// package @base -- go2cs converted at 2022 March 13 06:27:59 UTC
 // import "cmd/compile/internal/base" ==> using @base = go.cmd.compile.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\base\flag.go
-using json = go.encoding.json_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
+namespace go.cmd.compile.@internal;
 
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
+using json = encoding.json_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
 using System;
 using System.ComponentModel;
-
-
-namespace go.cmd.compile.@internal;
 
 public static partial class @base_package {
 
@@ -256,7 +255,6 @@ public static void ParseFlags() {
             i = i__prev2;
 
         }
-
         if (runtime.GOOS == "windows") {
             {
                 var i__prev3 = i;
@@ -270,7 +268,6 @@ public static void ParseFlags() {
                 i = i__prev3;
 
             }
-
         }
         {
             var i__prev2 = i;
@@ -284,13 +281,11 @@ public static void ParseFlags() {
             i = i__prev2;
 
         }
-
         @string suffix = ".o";
         if (Flag.Pack) {
             suffix = ".a";
         }
         Flag.LowerO = p + suffix;
-
     }
     if (Flag.Race && Flag.MSan) {
         log.Fatal("cannot use both -race and -msan");
@@ -299,7 +294,6 @@ public static void ParseFlags() {
         // -race and -msan imply -d=checkptr for now.
         if (Debug.Checkptr == -1) { // if not set explicitly
             Debug.Checkptr = 1;
-
         }
     }
     if (Flag.CompilingRuntime && Flag.N != 0) {
@@ -317,14 +311,11 @@ public static void ParseFlags() {
 
         // Fuzzing the runtime isn't interesting either.
         Debug.Libfuzzer = 0;
-
     }
     if (Debug.Checkptr == -1) { // if not set explicitly
         Debug.Checkptr = 0;
-
     }
     Ctxt.Debugpcln = Debug.PCTab;
-
 }
 
 // registerFlags adds flag registrations for all the fields in Flag.
@@ -359,7 +350,6 @@ private static void registerFlags() => func((_, panic, _) => {
 
         }
 
-
         var help = f.Tag.Get("help");
         if (help == "") {
             panic(fmt.Sprintf("base.Flag.%s is missing help text", f.Name));
@@ -372,7 +362,6 @@ private static void registerFlags() => func((_, panic, _) => {
             }
 
         }
-
 
 
         if (f.Type == boolType) 
@@ -399,9 +388,7 @@ private static void registerFlags() => func((_, panic, _) => {
         else if (f.Type == funcType) 
             f = v.Field(i).Interface()._<Action<@string>>();
             objabi.Flagfn1(name, help, f);
-        
-    }
-
+            }
 });
 
 // concurrentFlagOk reports whether the current compiler flags
@@ -409,7 +396,6 @@ private static void registerFlags() => func((_, panic, _) => {
 private static bool concurrentFlagOk() { 
     // TODO(rsc): Many of these are fine. Remove them.
     return Flag.Percent == 0 && Flag.E == 0 && Flag.K == 0 && Flag.L == 0 && Flag.LowerH == 0 && Flag.LowerJ == 0 && Flag.LowerM == 0 && Flag.LowerR == 0;
-
 }
 
 private static bool concurrentBackendAllowed() {
@@ -426,7 +412,6 @@ private static bool concurrentBackendAllowed() {
         return false;
     }
     return true;
-
 }
 
 private static void addImportDir(@string dir) {
@@ -449,7 +434,6 @@ private static void addImportMap(@string s) {
         log.Fatal("-importmap argument must be of the form source=actual; source and actual must be non-empty");
     }
     Flag.Cfg.ImportMap[source] = actual;
-
 }
 
 private static void readImportCfg(@string file) {
@@ -485,7 +469,6 @@ private static void readImportCfg(@string file) {
             i = i__prev1;
 
         }
-
         @string before = default;        @string after = default;
 
         {
@@ -500,7 +483,6 @@ private static void readImportCfg(@string file) {
             i = i__prev1;
 
         }
-
         switch (verb) {
             case "importmap": 
                 if (before == "" || after == "") {
@@ -518,7 +500,6 @@ private static void readImportCfg(@string file) {
                 log.Fatalf("%s:%d: unknown directive %q", file, lineNum, verb);
                 break;
         }
-
     }
 }
 
@@ -534,7 +515,6 @@ private static void readEmbedCfg(@string file) {
             log.Fatalf("%s: %v", file, err);
         }
     }
-
     if (Flag.Cfg.Embed.Patterns == null) {
         log.Fatalf("%s: invalid embedcfg: missing Patterns", file);
     }
@@ -565,7 +545,6 @@ private static void parseSpectre(@string s) {
                 log.Fatalf("unknown setting -spectre=%s", f);
                 break;
         }
-
     }    if (Flag.Cfg.SpectreIndex) {
         switch (buildcfg.GOARCH) {
             case "amd64": 
@@ -575,7 +554,6 @@ private static void parseSpectre(@string s) {
                 log.Fatalf("GOARCH=%s does not support -spectre=index", buildcfg.GOARCH);
                 break;
         }
-
     }
 }
 

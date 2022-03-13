@@ -4,24 +4,25 @@
 
 // “Abstract” syntax representation.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:09 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:31 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\node.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using sort = go.sort_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using constant = go.constant_package;
+using sort = sort_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// A Node is the abstract interface to an IR node.
+
+using System;
 public static partial class ir_package {
 
-    // A Node is the abstract interface to an IR node.
 public partial interface Node {
     bool Format(fmt.State s, int verb); // Source position.
     bool Pos();
@@ -69,7 +70,6 @@ public static bool IsAutoTmp(Node n) {
         return false;
     }
     return n.Name().AutoTemp();
-
 }
 
 // MayBeShared reports whether n may occur in multiple places in the AST.
@@ -79,7 +79,6 @@ public static bool MayBeShared(Node n) {
     if (n.Op() == ONAME || n.Op() == OLITERAL || n.Op() == ONIL || n.Op() == OTYPE) 
         return true;
         return false;
-
 }
 
 public partial interface InitNode {
@@ -93,7 +92,6 @@ public static Nodes TakeInit(Node n) {
         n._<InitNode>().SetInit(null);
     }
     return init;
-
 }
 
 //go:generate stringer -type=Op -trimprefix=O node.go
@@ -315,7 +313,6 @@ public static readonly var OGETG = 152; // runtime.getg() (read g pointer)
 
 public static readonly var OEND = 153;
 
-
 // Nodes is a pointer to a slice of *Node.
 // For fields that are not used in most nodes, this is used instead of
 // a slice to save space.
@@ -331,7 +328,6 @@ private static void Append(this ptr<Nodes> _addr_n, params Node[] a) {
         return ;
     }
     n.val = append(n.val, a);
-
 }
 
 // Prepend prepends entries to Nodes.
@@ -344,7 +340,6 @@ private static void Prepend(this ptr<Nodes> _addr_n, params Node[] a) {
         return ;
     }
     n.val = append(a, n.val);
-
 }
 
 // Take clears n, returning its former contents.
@@ -364,7 +359,6 @@ public static Nodes Copy(this Nodes n) {
     var c = make(Nodes, len(n));
     copy(c, n);
     return c;
-
 }
 
 // NameQueue is a FIFO queue of *Name. The zero value of NameQueue is
@@ -408,7 +402,6 @@ private static void PushRight(this ptr<NameQueue> _addr_q, ptr<Name> _addr_n) {
     }
     q.ring[q.tail % len(q.ring)] = n;
     q.tail++;
-
 }
 
 // PopLeft pops a Name from the left of the queue. It panics if q is
@@ -422,7 +415,6 @@ private static ptr<Name> PopLeft(this ptr<NameQueue> _addr_q) => func((_, panic,
     var n = q.ring[q.head % len(q.ring)];
     q.head++;
     return _addr_n!;
-
 });
 
 // NameSet is a set of Names.
@@ -442,7 +434,6 @@ private static void Add(this ptr<NameSet> _addr_s, ptr<Name> _addr_n) {
         s.val = make();
     }
     (s.val)[n] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
-
 }
 
 // Sorted returns s sorted according to less.
@@ -489,7 +480,6 @@ public static Node AsNode(types.Object n) {
         return null;
     }
     return n._<Node>();
-
 }
 
 public static Node BlankNode = default!;
@@ -503,7 +493,6 @@ public static bool IsNil(Node n) {
     // Check n.Orig because constant propagation may produce typed nil constants,
     // which don't exist in the Go spec.
     return n != null && Orig(n).Op() == ONIL;
-
 }
 
 public static bool IsBlank(Node n) {
@@ -511,7 +500,6 @@ public static bool IsBlank(Node n) {
         return false;
     }
     return n.Sym().IsBlank();
-
 }
 
 // IsMethod reports whether n is a method.
@@ -546,10 +534,8 @@ public static bool HasUniquePos(Node n) {
             @base.Warn("setlineno: unknown position (line 0)");
         }
         return false;
-
     }
     return true;
-
 }
 
 public static src.XPos SetPos(Node n) {
@@ -558,7 +544,6 @@ public static src.XPos SetPos(Node n) {
         @base.Pos = n.Pos();
     }
     return lno;
-
 }
 
 // The result of InitExpr MUST be assigned back to n, e.g.
@@ -573,11 +558,9 @@ public static Node InitExpr(slice<Node> init, Node expr) {
         n = NewConvExpr(@base.Pos, OCONVNOP, null, expr);
         n.SetType(expr.Type());
         n.SetTypecheck(1);
-
     }
     n.PtrInit().Prepend(init);
     return n;
-
 }
 
 // what's the outer value that a write to n affects?
@@ -619,9 +602,7 @@ public static Node OuterValue(Node n) {
         }
 
         return n;
-
     }
-
 }
 
 public static readonly var EscUnknown = iota;

@@ -5,14 +5,14 @@
 //go:build gofuzz
 // +build gofuzz
 
-// package csv -- go2cs converted at 2022 March 06 22:24:54 UTC
+// package csv -- go2cs converted at 2022 March 13 05:39:25 UTC
 // import "encoding/csv" ==> using csv = go.encoding.csv_package
 // Original source: C:\Program Files\Go\src\encoding\csv\fuzz.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-
 namespace go.encoding;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using reflect = reflect_package;
 
 public static partial class csv_package {
 
@@ -59,7 +59,6 @@ public static nint Fuzz(slice<byte> data) => func((_, panic, _) => {
             panic("not equal");
         }
     }    return score;
-
 });
 
 } // end csv_package

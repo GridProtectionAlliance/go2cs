@@ -6,19 +6,17 @@
 // +build linux
 // +build ppc64 ppc64le
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:06 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:37 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\syscall_linux_ppc64x.go
-
-
 namespace go;
 
 public static partial class syscall_package {
 
-    // archHonorsR2 captures the fact that r2 is honored by the
-    // runtime.GOARCH.  Syscall conventions are generally r1, r2, err :=
-    // syscall(trap, ...).  Not all architectures define r2 in their
-    // ABI. See "man syscall".
+// archHonorsR2 captures the fact that r2 is honored by the
+// runtime.GOARCH.  Syscall conventions are generally r1, r2, err :=
+// syscall(trap, ...).  Not all architectures define r2 in their
+// ABI. See "man syscall".
 private static readonly var archHonorsR2 = false;
 
 
@@ -162,7 +160,6 @@ public static error Pipe(slice<nint> p) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 //sysnb pipe2(p *[2]_C_int, flags int) (err error)
@@ -178,7 +175,6 @@ public static error Pipe2(slice<nint> p, nint flags) {
     p[0] = int(pp[0]);
     p[1] = int(pp[1]);
     return ;
-
 }
 
 private static ulong PC(this ptr<PtraceRegs> _addr_r) {
@@ -219,7 +215,6 @@ public static error SyncFileRange(nint fd, long off, long n, nint flags) {
     // The sync_file_range and sync_file_range2 syscalls differ only in the
     // order of their arguments.
     return error.As(syncFileRange2(fd, flags, off, n))!;
-
 }
 
 } // end syscall_package

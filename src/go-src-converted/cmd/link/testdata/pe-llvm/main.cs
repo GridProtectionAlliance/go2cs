@@ -38,10 +38,8 @@
 //     OFFSET           TYPE                     VALUE
 //     0000000000000048 IMAGE_REL_AMD64_ADDR32NB $R000000
 
-// package main -- go2cs converted at 2022 March 06 23:22:35 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:39 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\testdata\pe-llvm\main.go
-
-
 namespace go;
 
 public static partial class main_package {

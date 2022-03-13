@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tlog -- go2cs converted at 2022 March 06 23:26:16 UTC
+// package tlog -- go2cs converted at 2022 March 13 06:41:08 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/tlog" ==> using tlog = go.cmd.vendor.golang.org.x.mod.sumdb.tlog_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\tlog\note.go
-using bytes = go.bytes_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.cmd.vendor.golang.org.x.mod.sumdb;
+
+using bytes = bytes_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+
+// A Tree is a tree description, to be signed by a go.sum database server.
 
 public static partial class tlog_package {
 
-    // A Tree is a tree description, to be signed by a go.sum database server.
 public partial struct Tree {
     public long N;
     public Hash Hash;
@@ -71,7 +73,6 @@ public static (Tree, error) ParseTree(slice<byte> text) {
     Hash hash = default;
     copy(hash[..], h);
     return (new Tree(n,hash), error.As(null!)!);
-
 }
 
 private static var errMalformedRecord = errors.New("malformed record data");
@@ -95,7 +96,6 @@ public static (slice<byte>, error) FormatRecord(long id, slice<byte> text) {
     msg = append(msg, text);
     msg = append(msg, '\n');
     return (msg, error.As(null!)!);
-
 }
 
 // isValidRecordText reports whether text is syntactically valid record text.
@@ -117,7 +117,6 @@ private static bool isValidRecordText(slice<byte> text) {
         return false;
     }
     return true;
-
 }
 
 // ParseRecord parses a record description at the start of text,
@@ -149,7 +148,6 @@ public static (long, slice<byte>, slice<byte>, error) ParseRecord(slice<byte> ms
         return (0, null, null, error.As(errMalformedRecord)!);
     }
     return (id, text, rest, error.As(null!)!);
-
 }
 
 } // end tlog_package

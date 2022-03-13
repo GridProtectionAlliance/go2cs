@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2022 March 06 23:38:49 UTC
+// package norm -- go2cs converted at 2022 March 13 06:47:03 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\composition.go
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class norm_package {
 
@@ -34,7 +33,6 @@ private static readonly ssState ssSuccess = iota;
 private static readonly var ssStarter = 0; 
 // Indicates a rune caused a segment overflow and a CGJ should be inserted.
 private static readonly var ssOverflow = 1;
-
 
 // streamSafe implements the policy of when a CGJ should be inserted.
 private partial struct streamSafe { // : byte
@@ -68,7 +66,6 @@ private static ssState next(this ptr<streamSafe> _addr_ss, Properties p) => func
         return ssStarter;
     }
     return ssSuccess;
-
 });
 
 // backwards is used for checking for overflow and segment starts
@@ -90,7 +87,6 @@ private static ssState backwards(this ptr<streamSafe> _addr_ss, Properties p) =>
         return ssStarter;
     }
     return ssSuccess;
-
 });
 
 private static bool isMax(this streamSafe ss) {
@@ -168,7 +164,6 @@ private static bool doFlush(this ptr<reorderBuffer> _addr_rb) {
     var res = rb.flushF(rb);
     rb.reset();
     return res;
-
 }
 
 // appendFlush appends the normalized segment to rb.out.
@@ -226,18 +221,14 @@ private static void insertOrdered(this ptr<reorderBuffer> _addr_rb, Properties i
                 break;
             n--;
             }
-
             b[n] = b[n - 1];
-
         }
-
     }
     rb.nrune += 1;
     var pos = uint8(rb.nbyte);
     rb.nbyte += utf8.UTFMax;
     info.pos = pos;
     b[n] = info;
-
 }
 
 // insertErr is an error code returned by insert. Using this type instead
@@ -248,7 +239,6 @@ private partial struct insertErr { // : nint
 private static readonly insertErr iSuccess = -iota;
 private static readonly var iShortDst = 0;
 private static readonly var iShortSrc = 1;
-
 
 // insertFlush inserts the given rune in the buffer ordered by CCC.
 // If a decomposition with multiple segments are encountered, they leading
@@ -265,13 +255,11 @@ private static insertErr insertFlush(this ptr<reorderBuffer> _addr_rb, input src
             return iSuccess;
         }
     }
-
     if (info.hasDecomposition()) {
         return rb.insertDecomposed(info.Decomposition());
     }
     rb.insertSingle(src, i, info);
     return iSuccess;
-
 }
 
 // insertUnsafe inserts the given rune in the buffer ordered by CCC.
@@ -288,11 +276,9 @@ private static void insertUnsafe(this ptr<reorderBuffer> _addr_rb, input src, ni
             rb.decomposeHangul(rune);
         }
     }
-
     if (info.hasDecomposition()) { 
         // TODO: inline.
         rb.insertDecomposed(info.Decomposition());
-
     }
     else
  {
@@ -323,7 +309,6 @@ private static insertErr insertDecomposed(this ptr<reorderBuffer> _addr_rb, slic
         }
     }
     return iSuccess;
-
 }
 
 // insertSingle inserts an entry in the reorderBuffer for the rune at
@@ -405,7 +390,6 @@ private static readonly nint jamoVCount = 21;
 private static readonly nint jamoVTCount = 21 * 28;
 private static readonly nint jamoLVTCount = 19 * 21 * 28;
 
-
 private static readonly nint hangulUTF8Size = 3;
 
 
@@ -429,7 +413,6 @@ private static bool isHangul(slice<byte> b) {
     else if (b1 < hangulEnd1) 
         return true;
         return b1 == hangulEnd1 && b[2] < hangulEnd2;
-
 }
 
 private static bool isHangulString(@string b) {
@@ -451,14 +434,12 @@ private static bool isHangulString(@string b) {
     else if (b1 < hangulEnd1) 
         return true;
         return b1 == hangulEnd1 && b[2] < hangulEnd2;
-
 }
 
 // Caller must ensure len(b) >= 2.
 private static bool isJamoVT(slice<byte> b) { 
     // True if (rune & 0xff00) == jamoLBase
     return b[0] == jamoLBase0 && (b[1] & 0xFC) == jamoLBase1;
-
 }
 
 private static bool isHangulWithoutJamoT(slice<byte> b) {
@@ -482,7 +463,6 @@ private static nint decomposeHangul(slice<byte> buf, int r) {
         return 3 * JamoUTF8Len;
     }
     return 2 * JamoUTF8Len;
-
 }
 
 // decomposeHangul algorithmically decomposes a Hangul rune into
@@ -519,7 +499,6 @@ private static void combineHangul(this ptr<reorderBuffer> _addr_rb, nint s, nint
             // b[i] is blocked by greater-equal cccX below it
             b[k] = b[i];
             k++;
-
         }
         else
  {
@@ -535,11 +514,9 @@ private static void combineHangul(this ptr<reorderBuffer> _addr_rb, nint s, nint
             else 
                 b[k] = b[i];
                 k++;
-            
-        }
+                    }
     }
     rb.nrune = k;
-
 }
 
 // compose recombines the runes in the buffer.
@@ -570,7 +547,6 @@ private static void compose(this ptr<reorderBuffer> _addr_rb) {
             // U+320E..U+321E in NFKC mode.
             rb.combineHangul(s, i, k);
             return ;
-
         }
         var ii = b[i]; 
         // We can only use combineForward as a filter if we later
@@ -588,7 +564,6 @@ private static void compose(this ptr<reorderBuffer> _addr_rb) {
  {
                 blocked = s != k - 1 && cccB >= cccC;
             }
-
             if (!blocked) {
                 var combined = combine(rb.runeAt(s), rb.runeAt(i));
                 if (combined != 0) {
@@ -596,14 +571,11 @@ private static void compose(this ptr<reorderBuffer> _addr_rb) {
                     continue;
                 }
             }
-
         }
         b[k] = b[i];
         k++;
-
     }
     rb.nrune = k;
-
 }
 
 } // end norm_package

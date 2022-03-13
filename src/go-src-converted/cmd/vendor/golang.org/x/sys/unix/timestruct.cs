@@ -5,16 +5,16 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || zos
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris zos
 
-// package unix -- go2cs converted at 2022 March 06 23:27:26 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:26 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\timestruct.go
-using time = go.time_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using time = time_package;
 
 public static partial class unix_package {
 
-    // TimespecToNSec returns the time stored in ts as nanoseconds.
+// TimespecToNSec returns the time stored in ts as nanoseconds.
 public static long TimespecToNsec(Timespec ts) {
     return ts.Nano();
 }
@@ -28,7 +28,6 @@ public static Timespec NsecToTimespec(long nsec) {
         sec--;
     }
     return setTimespec(sec, nsec);
-
 }
 
 // TimeToTimespec converts t into a Timespec.
@@ -50,7 +49,6 @@ public static (Timespec, error) TimeToTimespec(time.Time t) {
         return (new Timespec(), error.As(ERANGE)!);
     }
     return (ts, error.As(null!)!);
-
 }
 
 // TimevalToNsec returns the time stored in tv as nanoseconds.
@@ -68,7 +66,6 @@ public static Timeval NsecToTimeval(long nsec) {
         sec--;
     }
     return setTimeval(sec, usec);
-
 }
 
 // Unix returns the time stored in ts as seconds plus nanoseconds.

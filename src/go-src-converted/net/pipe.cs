@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:30 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:03 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\pipe.go
-using io = go.io_package;
-using os = go.os_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
 
+using io = io_package;
+using os = os_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// pipeDeadline is an abstraction for handling timeouts.
+
+using System;
 public static partial class net_package {
 
-    // pipeDeadline is an abstraction for handling timeouts.
 private partial struct pipeDeadline {
     public sync.Mutex mu; // Guards timer and cancel
     public ptr<time.Timer> timer;
@@ -51,7 +52,6 @@ private static void set(this ptr<pipeDeadline> _addr_d, time.Time t) => func((de
             d.cancel = make_channel<object>();
         }
         return ;
-
     }
     {
         var dur = time.Until(t);
@@ -156,7 +156,6 @@ private static (nint, error) Read(this ptr<pipe> _addr_p, slice<byte> b) {
         err = addr(new OpError(Op:"read",Net:"pipe",Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 private static (nint, error) read(this ptr<pipe> _addr_p, slice<byte> b) {
@@ -177,7 +176,6 @@ private static (nint, error) read(this ptr<pipe> _addr_p, slice<byte> b) {
     return (0, error.As(io.ErrClosedPipe)!);
     return (0, error.As(io.EOF)!);
     return (0, error.As(os.ErrDeadlineExceeded)!);
-
 }
 
 private static (nint, error) Write(this ptr<pipe> _addr_p, slice<byte> b) {
@@ -190,7 +188,6 @@ private static (nint, error) Write(this ptr<pipe> _addr_p, slice<byte> b) {
         err = addr(new OpError(Op:"write",Net:"pipe",Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 private static (nint, error) write(this ptr<pipe> _addr_p, slice<byte> b) => func((defer, _, _) => {
@@ -221,7 +218,6 @@ private static (nint, error) write(this ptr<pipe> _addr_p, slice<byte> b) => fun
         }
     }
     return (n, error.As(null!)!);
-
 });
 
 private static error SetDeadline(this ptr<pipe> _addr_p, time.Time t) {
@@ -233,7 +229,6 @@ private static error SetDeadline(this ptr<pipe> _addr_p, time.Time t) {
     p.readDeadline.set(t);
     p.writeDeadline.set(t);
     return error.As(null!)!;
-
 }
 
 private static error SetReadDeadline(this ptr<pipe> _addr_p, time.Time t) {
@@ -244,7 +239,6 @@ private static error SetReadDeadline(this ptr<pipe> _addr_p, time.Time t) {
     }
     p.readDeadline.set(t);
     return error.As(null!)!;
-
 }
 
 private static error SetWriteDeadline(this ptr<pipe> _addr_p, time.Time t) {
@@ -255,7 +249,6 @@ private static error SetWriteDeadline(this ptr<pipe> _addr_p, time.Time t) {
     }
     p.writeDeadline.set(t);
     return error.As(null!)!;
-
 }
 
 private static error Close(this ptr<pipe> _addr_p) {
@@ -265,7 +258,6 @@ private static error Close(this ptr<pipe> _addr_p) {
         close(p.localDone);
     });
     return error.As(null!)!;
-
 }
 
 } // end net_package

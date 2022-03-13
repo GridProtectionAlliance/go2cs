@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:20 UTC
+//     Generated on 2022 March 13 05:52:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace build
 {
     public static partial class constraint_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct AndExpr
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace build
             public static implicit operator AndExpr(NilType nil) => default(AndExpr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static AndExpr AndExpr_cast(dynamic value)
         {
             return new AndExpr(value.X, value.Y);

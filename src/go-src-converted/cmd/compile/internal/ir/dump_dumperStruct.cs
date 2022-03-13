@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:48:58 UTC
+//     Generated on 2022 March 13 06:00:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct dumper
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace @internal
             public static implicit operator dumper(NilType nil) => default(dumper);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static dumper dumper_cast(dynamic value)
         {
             return new dumper(value.output, ref value.fieldrx, value.ptrmap, value.lastadr, value.indent, value.last, value.line);

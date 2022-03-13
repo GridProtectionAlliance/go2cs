@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:31 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:20 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\eisel_lemire.go
+namespace go;
 // This file implements the Eisel-Lemire ParseFloat algorithm, published in
 // 2020 and discussed extensively at
 // https://nigeltao.github.io/blog/2020/eisel-lemire.html
@@ -18,10 +19,9 @@
 // Additional testing (on over several million test strings) is done by
 // https://github.com/nigeltao/parse-number-fxx-test-data/blob/5280dcfccf6d0b02a65ae282dad0b6d9de50e039/script/test-go-strconv.go
 
-using math = go.math_package;
-using bits = go.math.bits_package;
 
-namespace go;
+using math = math_package;
+using bits = math.bits_package;
 
 public static partial class strconv_package {
 
@@ -38,7 +38,6 @@ private static (double, bool) eiselLemire64(ulong man, nint exp10, bool neg) {
             f = math.Float64frombits(0x8000000000000000); // Negative zero.
         }
         return (f, true);
-
     }
     if (exp10 < detailedPowersOfTenMinExp10 || detailedPowersOfTenMaxExp10 < exp10) {
         return (0, false);
@@ -87,7 +86,6 @@ private static (double, bool) eiselLemire64(ulong man, nint exp10, bool neg) {
         retBits |= 0x8000000000000000;
     }
     return (math.Float64frombits(retBits), true);
-
 }
 
 private static (float, bool) eiselLemire32(ulong man, nint exp10, bool neg) {
@@ -109,7 +107,6 @@ private static (float, bool) eiselLemire32(ulong man, nint exp10, bool neg) {
             f = math.Float32frombits(0x80000000); // Negative zero.
         }
         return (f, true);
-
     }
     if (exp10 < detailedPowersOfTenMinExp10 || detailedPowersOfTenMaxExp10 < exp10) {
         return (0, false);
@@ -158,14 +155,12 @@ private static (float, bool) eiselLemire32(ulong man, nint exp10, bool neg) {
         retBits |= 0x80000000;
     }
     return (math.Float32frombits(uint32(retBits)), true);
-
 }
 
 // detailedPowersOfTen{Min,Max}Exp10 is the power of 10 represented by the
 // first and last rows of detailedPowersOfTen. Both bounds are inclusive.
 private static readonly nint detailedPowersOfTenMinExp10 = -348;
 private static readonly nint detailedPowersOfTenMaxExp10 = +347;
-
 
 // detailedPowersOfTen contains 128-bit mantissa approximations (rounded down)
 // to the powers of 10. For example:

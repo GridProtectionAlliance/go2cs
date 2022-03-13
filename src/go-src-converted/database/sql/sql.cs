@@ -13,26 +13,26 @@
 //
 // For usage examples, see the wiki page at
 // https://golang.org/s/sqlwiki.
-// package sql -- go2cs converted at 2022 March 06 23:35:40 UTC
+
+// package sql -- go2cs converted at 2022 March 13 06:43:37 UTC
 // import "database/sql" ==> using sql = go.database.sql_package
 // Original source: C:\Program Files\Go\src\database\sql\sql.go
-using context = go.context_package;
-using driver = go.database.sql.driver_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
+namespace go.database;
+
+using context = context_package;
+using driver = database.sql.driver_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go.database;
 
 public static partial class sql_package {
 
@@ -57,9 +57,7 @@ public static void Register(@string name, driver.Driver driver) => func((defer, 
             panic("sql: Register called twice for driver " + name);
         }
     }
-
     drivers[name] = driver;
-
 });
 
 private static void unregisterAllDrivers() => func((defer, _, _) => {
@@ -67,7 +65,6 @@ private static void unregisterAllDrivers() => func((defer, _, _) => {
     defer(driversMu.Unlock()); 
     // For tests.
     drivers = make_map<@string, driver.Driver>();
-
 });
 
 // Drivers returns a sorted list of the names of the registered drivers.
@@ -111,7 +108,6 @@ public static NamedArg Named(@string name, object value) {
     // so unkeyed struct literals are a vet error. Thus, we don't
     // want to allow sql.NamedArg{name, value}.
     return new NamedArg(Name:name,Value:value);
-
 }
 
 // IsolationLevel is the transaction isolation level used in TxOptions.
@@ -130,7 +126,6 @@ public static readonly var LevelRepeatableRead = 3;
 public static readonly var LevelSnapshot = 4;
 public static readonly var LevelSerializable = 5;
 public static readonly var LevelLinearizable = 6;
-
 
 // String returns the name of the transaction isolation level.
 public static @string String(this IsolationLevel i) {
@@ -153,8 +148,7 @@ public static @string String(this IsolationLevel i) {
         return "Linearizable";
     else 
         return "IsolationLevel(" + strconv.Itoa(int(i)) + ")";
-    
-}
+    }
 
 private static fmt.Stringer _ = LevelDefault;
 
@@ -197,7 +191,6 @@ private static error Scan(this ptr<NullString> _addr_ns, object value) {
     }
     ns.Valid = true;
     return error.As(convertAssign(_addr_ns.String, value))!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -209,7 +202,6 @@ public static (driver.Value, error) Value(this NullString ns) {
         return (null, error.As(null!)!);
     }
     return (ns.String, error.As(null!)!);
-
 }
 
 // NullInt64 represents an int64 that may be null.
@@ -229,7 +221,6 @@ private static error Scan(this ptr<NullInt64> _addr_n, object value) {
     }
     n.Valid = true;
     return error.As(convertAssign(_addr_n.Int64, value))!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -241,7 +232,6 @@ public static (driver.Value, error) Value(this NullInt64 n) {
         return (null, error.As(null!)!);
     }
     return (n.Int64, error.As(null!)!);
-
 }
 
 // NullInt32 represents an int32 that may be null.
@@ -261,7 +251,6 @@ private static error Scan(this ptr<NullInt32> _addr_n, object value) {
     }
     n.Valid = true;
     return error.As(convertAssign(_addr_n.Int32, value))!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -273,7 +262,6 @@ public static (driver.Value, error) Value(this NullInt32 n) {
         return (null, error.As(null!)!);
     }
     return (int64(n.Int32), error.As(null!)!);
-
 }
 
 // NullInt16 represents an int16 that may be null.
@@ -294,7 +282,6 @@ private static error Scan(this ptr<NullInt16> _addr_n, object value) {
     var err = convertAssign(_addr_n.Int16, value);
     n.Valid = err == null;
     return error.As(err)!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -306,7 +293,6 @@ public static (driver.Value, error) Value(this NullInt16 n) {
         return (null, error.As(null!)!);
     }
     return (int64(n.Int16), error.As(null!)!);
-
 }
 
 // NullByte represents a byte that may be null.
@@ -327,7 +313,6 @@ private static error Scan(this ptr<NullByte> _addr_n, object value) {
     var err = convertAssign(_addr_n.Byte, value);
     n.Valid = err == null;
     return error.As(err)!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -339,7 +324,6 @@ public static (driver.Value, error) Value(this NullByte n) {
         return (null, error.As(null!)!);
     }
     return (int64(n.Byte), error.As(null!)!);
-
 }
 
 // NullFloat64 represents a float64 that may be null.
@@ -359,7 +343,6 @@ private static error Scan(this ptr<NullFloat64> _addr_n, object value) {
     }
     n.Valid = true;
     return error.As(convertAssign(_addr_n.Float64, value))!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -371,7 +354,6 @@ public static (driver.Value, error) Value(this NullFloat64 n) {
         return (null, error.As(null!)!);
     }
     return (n.Float64, error.As(null!)!);
-
 }
 
 // NullBool represents a bool that may be null.
@@ -391,7 +373,6 @@ private static error Scan(this ptr<NullBool> _addr_n, object value) {
     }
     n.Valid = true;
     return error.As(convertAssign(_addr_n.Bool, value))!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -403,7 +384,6 @@ public static (driver.Value, error) Value(this NullBool n) {
         return (null, error.As(null!)!);
     }
     return (n.Bool, error.As(null!)!);
-
 }
 
 // NullTime represents a time.Time that may be null.
@@ -423,7 +403,6 @@ private static error Scan(this ptr<NullTime> _addr_n, object value) {
     }
     n.Valid = true;
     return error.As(convertAssign(_addr_n.Time, value))!;
-
 }
 
 // Value implements the driver Valuer interface.
@@ -435,7 +414,6 @@ public static (driver.Value, error) Value(this NullTime n) {
         return (null, error.As(null!)!);
     }
     return (n.Time, error.As(null!)!);
-
 }
 
 // Scanner is an interface used by Scan.
@@ -518,7 +496,6 @@ private static readonly connReuseStrategy alwaysNewConn = iota;
 // creates a new database connection.
 private static readonly var cachedOrNewConn = 0;
 
-
 // driverConn wraps a driver.Conn with a mutex, to
 // be held during all calls into the Conn. (including any calls onto
 // interfaces returned via that Conn, such as calls on Tx, Stmt,
@@ -560,7 +537,6 @@ private static bool expired(this ptr<driverConn> _addr_dc, time.Duration timeout
         return false;
     }
     return dc.createdAt.Add(timeout).Before(nowFunc());
-
 }
 
 // resetSession checks if the driver connection needs the
@@ -581,9 +557,7 @@ private static error resetSession(this ptr<driverConn> _addr_dc, context.Context
             return error.As(cr.ResetSession(ctx))!;
         }
     }
-
     return error.As(null!)!;
-
 });
 
 // validateConnection checks if the connection is valid and can
@@ -604,9 +578,7 @@ private static bool validateConnection(this ptr<driverConn> _addr_dc, bool needs
             return cv.IsValid();
         }
     }
-
     return true;
-
 });
 
 // prepareLocked prepares the query on dc. When cg == nil the dc must keep track of
@@ -631,7 +603,6 @@ private static (ptr<driverStmt>, error) prepareLocked(this ptr<driverConn> _addr
     }
     dc.openStmt[ds] = true;
     return (_addr_ds!, error.As(null!)!);
-
 }
 
 // the dc.db's Mutex is held.
@@ -645,7 +616,6 @@ private static Func<error> closeDBLocked(this ptr<driverConn> _addr_dc) => func(
     }
     dc.closed = true;
     return dc.db.removeDepLocked(dc, dc);
-
 });
 
 private static error Close(this ptr<driverConn> _addr_dc) {
@@ -665,7 +635,6 @@ private static error Close(this ptr<driverConn> _addr_dc) {
     var fn = dc.db.removeDepLocked(dc, dc);
     dc.db.mu.Unlock();
     return error.As(fn())!;
-
 }
 
 private static error finalClose(this ptr<driverConn> _addr_dc) {
@@ -690,7 +659,6 @@ private static error finalClose(this ptr<driverConn> _addr_dc) {
         }
 
         dc.openStmt = null;
-
     });
     {
         var ds__prev1 = ds;
@@ -715,7 +683,6 @@ private static error finalClose(this ptr<driverConn> _addr_dc) {
 
     atomic.AddUint64(_addr_dc.db.numClosed, 1);
     return error.As(err)!;
-
 }
 
 // driverStmt associates a driver.Stmt with the
@@ -741,7 +708,6 @@ private static error Close(this ptr<driverStmt> _addr_ds) => func((defer, _, _) 
     ds.closed = true;
     ds.closeErr = ds.si.Close();
     return error.As(ds.closeErr)!;
-
 });
 
 // depSet is a finalCloser's outstanding dependencies
@@ -771,7 +737,6 @@ private static void addDepLocked(this ptr<DB> _addr_db, finalCloser x, object de
         db.dep[x] = xdep;
     }
     xdep[dep] = true;
-
 }
 
 // removeDep notes that x no longer depends on dep.
@@ -808,8 +773,7 @@ private static Func<error> removeDepLocked(this ptr<DB> _addr_db, finalCloser x,
     else 
         // Dependencies remain.
         return () => null;
-    
-});
+    });
 
 // This is the size of the connectionOpener request chan (DB.openerCh).
 // This value should be larger than the maximum typical value
@@ -898,9 +862,7 @@ public static (ptr<DB>, error) Open(@string driverName, @string dataSourceName) 
         }
     }
 
-
     return (_addr_OpenDB(new dsnConnector(dsn:dataSourceName,driver:driveri))!, error.As(null!)!);
-
 }
 
 private static error pingDC(this ptr<DB> _addr_db, context.Context ctx, ptr<driverConn> _addr_dc, Action<error> release) {
@@ -917,10 +879,8 @@ private static error pingDC(this ptr<DB> _addr_db, context.Context ctx, ptr<driv
             });
         }
     }
-
     release(err);
     return error.As(err)!;
-
 }
 
 // PingContext verifies a connection to the database is still alive,
@@ -944,7 +904,6 @@ private static error PingContext(this ptr<DB> _addr_db, context.Context ctx) {
         return error.As(err)!;
     }
     return error.As(db.pingDC(ctx, dc, dc.releaseConn))!;
-
 }
 
 // Ping verifies a connection to the database is still alive,
@@ -971,7 +930,6 @@ private static error Close(this ptr<DB> _addr_db) {
     if (db.closed) { // Make DB.Close idempotent
         db.mu.Unlock();
         return error.As(null!)!;
-
     }
     if (db.cleanerCh != null) {
         close(db.cleanerCh);
@@ -1001,9 +959,7 @@ private static error Close(this ptr<DB> _addr_db) {
             }
         }
     }
-
     return error.As(err)!;
-
 }
 
 private static readonly nint defaultMaxIdleConns = 2;
@@ -1022,8 +978,7 @@ private static nint maxIdleConnsLocked(this ptr<DB> _addr_db) {
         return 0;
     else 
         return n;
-    
-}
+    }
 
 private static time.Duration shortestIdleTimeLocked(this ptr<DB> _addr_db) {
     ref DB db = ref _addr_db.val;
@@ -1039,7 +994,6 @@ private static time.Duration shortestIdleTimeLocked(this ptr<DB> _addr_db) {
         min = db.maxLifetime;
     }
     return min;
-
 }
 
 // SetMaxIdleConns sets the maximum number of connections in the idle
@@ -1063,7 +1017,6 @@ private static void SetMaxIdleConns(this ptr<DB> _addr_db, nint n) {
  { 
         // No idle connections.
         db.maxIdleCount = -1;
-
     }
     if (db.maxOpen > 0 && db.maxIdleConnsLocked() > db.maxOpen) {
         db.maxIdleCount = db.maxOpen;
@@ -1118,11 +1071,11 @@ private static void SetConnMaxLifetime(this ptr<DB> _addr_db, time.Duration d) {
     }
     db.mu.Lock(); 
     // Wake cleaner up when lifetime is shortened.
-    if (d > 0 && d < db.maxLifetime && db.cleanerCh != null)     }
+    if (d > 0 && d < db.maxLifetime && db.cleanerCh != null) {
+    }
     db.maxLifetime = d;
     db.startCleanerLocked();
     db.mu.Unlock();
-
 }
 
 // SetConnMaxIdleTime sets the maximum amount of time a connection may be idle.
@@ -1140,10 +1093,10 @@ private static void SetConnMaxIdleTime(this ptr<DB> _addr_db, time.Duration d) =
     defer(db.mu.Unlock()); 
 
     // Wake cleaner up when idle time is shortened.
-    if (d > 0 && d < db.maxIdleTime && db.cleanerCh != null)     }
+    if (d > 0 && d < db.maxIdleTime && db.cleanerCh != null) {
+    }
     db.maxIdleTime = d;
     db.startCleanerLocked();
-
 });
 
 // startCleanerLocked starts connectionCleaner if needed.
@@ -1185,9 +1138,7 @@ private static void connectionCleaner(this ptr<DB> _addr_db, time.Duration d) {
             d = minInterval;
         }
         t.Reset(d);
-
     }
-
 }
 
 private static slice<ptr<driverConn>> connectionCleanerRunLocked(this ptr<DB> _addr_db) {
@@ -1215,7 +1166,6 @@ private static slice<ptr<driverConn>> connectionCleanerRunLocked(this ptr<DB> _a
             i = i__prev1;
         }
         db.maxLifetimeClosed += int64(len(closing));
-
     }
     if (db.maxIdleTime > 0) {
         expiredSince = nowFunc().Add(-db.maxIdleTime);
@@ -1240,10 +1190,8 @@ private static slice<ptr<driverConn>> connectionCleanerRunLocked(this ptr<DB> _a
             i = i__prev1;
         }
         db.maxIdleTimeClosed += expiredCount;
-
     }
     return ;
-
 }
 
 // DBStats contains database statistics.
@@ -1296,9 +1244,7 @@ private static void maybeOpenNewConnections(this ptr<DB> _addr_db) {
             return ;
         }
         db.openerCh.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
-
     }
-
 }
 
 // Runs in a separate goroutine, opens new connections when requested.
@@ -1327,7 +1273,6 @@ private static void openNewConnection(this ptr<DB> _addr_db, context.Context ctx
         }
         db.numOpen--;
         return ;
-
     }
     if (err != null) {
         db.numOpen--;
@@ -1411,9 +1356,7 @@ private static (ptr<driverConn>, error) conn(this ptr<DB> _addr_db, context.Cont
 
         }
 
-
         return (_addr_conn!, error.As(null!)!);
-
     }
     if (db.maxOpen > 0 && db.numOpen >= db.maxOpen) { 
         // Make the connRequest channel. It's buffered so that the
@@ -1465,9 +1408,7 @@ private static (ptr<driverConn>, error) conn(this ptr<DB> _addr_db, context.Cont
             err = err__prev2;
 
         }
-
         return (_addr_ret.conn!, error.As(ret.err)!);
-
     }
     db.numOpen++; // optimistically
     db.mu.Unlock();
@@ -1478,14 +1419,12 @@ private static (ptr<driverConn>, error) conn(this ptr<DB> _addr_db, context.Cont
         db.maybeOpenNewConnections();
         db.mu.Unlock();
         return (_addr_null!, error.As(err)!);
-
     }
     db.mu.Lock();
     ptr<driverConn> dc = addr(new driverConn(db:db,createdAt:nowFunc(),returnedAt:nowFunc(),ci:ci,inUse:true,));
     db.addDepLocked(dc, dc);
     db.mu.Unlock();
     return (_addr_dc!, error.As(null!)!);
-
 }
 
 // putConnHook is a hook for testing.
@@ -1507,7 +1446,6 @@ private static void noteUnusedDriverStatement(this ptr<DB> _addr_db, ptr<driverC
         }
     else
 );
-
     } {
         c.Lock();
         var fc = c.finalClosed;
@@ -1544,7 +1482,6 @@ private static void putConn(this ptr<DB> _addr_db, ptr<driverConn> _addr_dc, err
             fmt.Printf("putConn(%v) DUPLICATE was: %s\n\nPREVIOUS was: %s", dc, stack(), db.lastPut[dc]);
         }
         panic("sql: connection returned that was never out");
-
     }
     if (err != driver.ErrBadConn && dc.expired(db.maxLifetime)) {
         db.maxLifetimeClosed++;
@@ -1569,7 +1506,6 @@ private static void putConn(this ptr<DB> _addr_db, ptr<driverConn> _addr_dc, err
         db.mu.Unlock();
         dc.Close();
         return ;
-
     }
     if (putConnHook != null) {
         putConnHook(db, dc);
@@ -1618,10 +1554,8 @@ private static bool putConnDBLocked(this ptr<DB> _addr_db, ptr<driverConn> _addr
             if (err == null) {
                 dc.inUse = true;
             }
-
             req.Send(new connRequest(conn:dc,err:err,));
             return true;
-
         }
         else if (err == null && !db.closed) {
             if (db.maxIdleConnsLocked() > len(db.freeConn)) {
@@ -1633,9 +1567,7 @@ private static bool putConnDBLocked(this ptr<DB> _addr_db, ptr<driverConn> _addr
         }
 
     }
-
     return false;
-
 }
 
 // maxBadConnRetries is the number of maximum retries if the driver returns
@@ -1678,7 +1610,6 @@ private static (ptr<Stmt>, error) PrepareContext(this ptr<DB> _addr_db, context.
         return _addr_db.prepare(ctx, query, alwaysNewConn)!;
     }
     return (_addr_stmt!, error.As(err)!);
-
 }
 
 // Prepare creates a prepared statement for later queries or executions.
@@ -1713,7 +1644,6 @@ private static (ptr<Stmt>, error) prepare(this ptr<DB> _addr_db, context.Context
         return (_addr_null!, error.As(err)!);
     }
     return _addr_db.prepareDC(ctx, dc, dc.releaseConn, null, query)!;
-
 }
 
 // prepareDC prepares a query on the driverConn and calls release before
@@ -1747,7 +1677,6 @@ private static (ptr<Stmt>, error) prepareDC(this ptr<DB> _addr_db, context.Conte
         db.addDep(stmt, stmt);
     }
     return (_addr_stmt!, error.As(null!)!);
-
 });
 
 // ExecContext executes a query without returning any rows.
@@ -1770,7 +1699,6 @@ private static (Result, error) ExecContext(this ptr<DB> _addr_db, context.Contex
         return db.exec(ctx, query, args, alwaysNewConn);
     }
     return (res, error.As(err)!);
-
 }
 
 // Exec executes a query without returning any rows.
@@ -1797,7 +1725,6 @@ private static (Result, error) exec(this ptr<DB> _addr_db, context.Context ctx, 
         return (null, error.As(err)!);
     }
     return db.execDC(ctx, dc, dc.releaseConn, query, args);
-
 }
 
 private static (Result, error) execDC(this ptr<DB> _addr_db, context.Context ctx, ptr<driverConn> _addr_dc, Action<error> release, @string query, slice<object> args) => func((defer, _, _) => {
@@ -1841,7 +1768,6 @@ private static (Result, error) execDC(this ptr<DB> _addr_db, context.Context ctx
     ptr<driverStmt> ds = addr(new driverStmt(Locker:dc,si:si));
     defer(ds.Close());
     return resultFromStatement(ctx, dc.ci, ds, args);
-
 });
 
 // QueryContext executes a query that returns rows, typically a SELECT.
@@ -1864,7 +1790,6 @@ private static (ptr<Rows>, error) QueryContext(this ptr<DB> _addr_db, context.Co
         return _addr_db.query(ctx, query, args, alwaysNewConn)!;
     }
     return (_addr_rows!, error.As(err)!);
-
 }
 
 // Query executes a query that returns rows, typically a SELECT.
@@ -1891,7 +1816,6 @@ private static (ptr<Rows>, error) query(this ptr<DB> _addr_db, context.Context c
         return (_addr_null!, error.As(err)!);
     }
     return _addr_db.queryDC(ctx, null, dc, dc.releaseConn, query, args)!;
-
 }
 
 // queryDC executes a query on the given connection.
@@ -1930,7 +1854,6 @@ private static (ptr<Rows>, error) queryDC(this ptr<DB> _addr_db, context.Context
             ptr<Rows> rows = addr(new Rows(dc:dc,releaseConn:releaseConn,rowsi:rowsi,));
             rows.initContextClose(ctx, txctx);
             return (_addr_rows!, error.As(null!)!);
-
         }
     }
     driver.Stmt si = default;
@@ -1952,7 +1875,6 @@ private static (ptr<Rows>, error) queryDC(this ptr<DB> _addr_db, context.Context
     rows = addr(new Rows(dc:dc,releaseConn:releaseConn,rowsi:rowsi,closeStmt:ds,));
     rows.initContextClose(ctx, txctx);
     return (_addr_rows!, error.As(null!)!);
-
 }
 
 // QueryRowContext executes a query that is expected to return at most one row.
@@ -2013,7 +1935,6 @@ private static (ptr<Tx>, error) BeginTx(this ptr<DB> _addr_db, context.Context c
         return _addr_db.begin(ctx, opts, alwaysNewConn)!;
     }
     return (_addr_tx!, error.As(err)!);
-
 }
 
 // Begin starts a transaction. The default isolation level is dependent on
@@ -2040,7 +1961,6 @@ private static (ptr<Tx>, error) begin(this ptr<DB> _addr_db, context.Context ctx
         return (_addr_null!, error.As(err)!);
     }
     return _addr_db.beginDC(ctx, dc, dc.releaseConn, opts)!;
-
 }
 
 // beginDC starts a transaction. The provided dc must be valid and ready to use.
@@ -2067,7 +1987,6 @@ private static (ptr<Tx>, error) beginDC(this ptr<DB> _addr_db, context.Context c
     tx = addr(new Tx(db:db,dc:dc,releaseConn:release,txi:txi,cancel:cancel,keepConnOnRollback:keepConnOnRollback,ctx:ctx,));
     go_(() => tx.awaitDone());
     return (_addr_tx!, error.As(null!)!);
-
 }
 
 // Driver returns the database's underlying driver.
@@ -2109,7 +2028,6 @@ private static (ptr<Conn>, error) Conn(this ptr<DB> _addr_db, context.Context ct
     }
     ptr<Conn> conn = addr(new Conn(db:db,dc:dc,));
     return (_addr_conn!, error.As(null!)!);
-
 }
 
 public delegate void releaseConn(error);
@@ -2148,7 +2066,6 @@ private static (ptr<driverConn>, releaseConn, error) grabConn(this ptr<Conn> _ad
     }
     c.closemu.RLock();
     return (_addr_c.dc!, c.closemuRUnlockCondReleaseConn, error.As(null!)!);
-
 }
 
 // PingContext verifies the connection to the database is still alive.
@@ -2160,7 +2077,6 @@ private static error PingContext(this ptr<Conn> _addr_c, context.Context ctx) {
         return error.As(err)!;
     }
     return error.As(c.db.pingDC(ctx, dc, release))!;
-
 }
 
 // ExecContext executes a query without returning any rows.
@@ -2176,7 +2092,6 @@ private static (Result, error) ExecContext(this ptr<Conn> _addr_c, context.Conte
         return (null, error.As(err)!);
     }
     return c.db.execDC(ctx, dc, release, query, args);
-
 }
 
 // QueryContext executes a query that returns rows, typically a SELECT.
@@ -2192,7 +2107,6 @@ private static (ptr<Rows>, error) QueryContext(this ptr<Conn> _addr_c, context.C
         return (_addr_null!, error.As(err)!);
     }
     return _addr_c.db.queryDC(ctx, null, dc, release, query, args)!;
-
 }
 
 // QueryRowContext executes a query that is expected to return at most one row.
@@ -2227,7 +2141,6 @@ private static (ptr<Stmt>, error) PrepareContext(this ptr<Conn> _addr_c, context
         return (_addr_null!, error.As(err)!);
     }
     return _addr_c.db.prepareDC(ctx, dc, release, c, query)!;
-
 }
 
 // Raw executes f exposing the underlying driver connection for the
@@ -2259,13 +2172,11 @@ private static error Raw(this ptr<Conn> _addr_c, Func<object, error> f) => func(
             err = driver.ErrBadConn;
         }
         release(err);
-
     }());
     err = f(dc.ci);
     fPanic = false;
 
     return ;
-
 });
 
 // BeginTx starts a transaction.
@@ -2289,7 +2200,6 @@ private static (ptr<Tx>, error) BeginTx(this ptr<Conn> _addr_c, context.Context 
         return (_addr_null!, error.As(err)!);
     }
     return _addr_c.db.beginDC(ctx, dc, release, opts)!;
-
 }
 
 // closemuRUnlockCondReleaseConn read unlocks closemu
@@ -2322,7 +2232,6 @@ private static error close(this ptr<Conn> _addr_c, error err) => func((defer, _,
     c.dc = null;
     c.db = null;
     return error.As(err)!;
-
 });
 
 // Close returns the connection to the connection pool.
@@ -2385,7 +2294,6 @@ private static void awaitDone(this ptr<Tx> _addr_tx) {
     // how to reset the session.
     var discardConnection = !tx.keepConnOnRollback;
     tx.rollback(discardConnection);
-
 }
 
 private static bool isDone(this ptr<Tx> _addr_tx) {
@@ -2427,10 +2335,8 @@ private static (ptr<driverConn>, releaseConn, error) grabConn(this ptr<Tx> _addr
     }
     if (hookTxGrabConn != null) { // test hook
         hookTxGrabConn();
-
     }
     return (_addr_tx.dc!, tx.closemuRUnlockRelease, error.As(null!)!);
-
 }
 
 private static context.Context txCtx(this ptr<Tx> _addr_tx) {
@@ -2487,7 +2393,6 @@ private static error Commit(this ptr<Tx> _addr_tx) {
     }
     tx.close(err);
     return error.As(err)!;
-
 }
 
 private static Action rollbackHook = default;
@@ -2519,7 +2424,6 @@ private static error rollback(this ptr<Tx> _addr_tx, bool discardConn) {
     }
     tx.close(err);
     return error.As(err)!;
-
 }
 
 // Rollback aborts the transaction.
@@ -2556,7 +2460,6 @@ private static (ptr<Stmt>, error) PrepareContext(this ptr<Tx> _addr_tx, context.
     tx.stmts.v = append(tx.stmts.v, stmt);
     tx.stmts.Unlock();
     return (_addr_stmt!, error.As(null!)!);
-
 }
 
 // Prepare creates a prepared statement for use within a transaction.
@@ -2645,7 +2548,6 @@ private static ptr<Stmt> StmtContext(this ptr<Tx> _addr_tx, context.Context ctx,
             si = ds.si;
         }
         parentStmt = stmt;
-
     }
     ptr<Stmt> txs = addr(new Stmt(db:tx.db,cg:tx,cgds:&driverStmt{Locker:dc,si:si,},parentStmt:parentStmt,query:stmt.query,));
     if (parentStmt != null) {
@@ -2655,7 +2557,6 @@ private static ptr<Stmt> StmtContext(this ptr<Tx> _addr_tx, context.Context ctx,
     tx.stmts.v = append(tx.stmts.v, txs);
     tx.stmts.Unlock();
     return _addr_txs!;
-
 });
 
 // Stmt returns a transaction-specific prepared statement from
@@ -2693,7 +2594,6 @@ private static (Result, error) ExecContext(this ptr<Tx> _addr_tx, context.Contex
         return (null, error.As(err)!);
     }
     return tx.db.execDC(ctx, dc, release, query, args);
-
 }
 
 // Exec executes a query that doesn't return rows.
@@ -2722,7 +2622,6 @@ private static (ptr<Rows>, error) QueryContext(this ptr<Tx> _addr_tx, context.Co
         return (_addr_null!, error.As(err)!);
     }
     return _addr_tx.db.queryDC(ctx, tx.ctx, dc, release, query, args)!;
-
 }
 
 // Query executes a query that returns rows, typically a SELECT.
@@ -2855,7 +2754,6 @@ private static (Result, error) ExecContext(this ptr<Stmt> _addr_s, context.Conte
         }
     }
     return (null, error.As(driver.ErrBadConn)!);
-
 });
 
 // Exec executes a prepared statement with the given arguments and
@@ -2890,7 +2788,6 @@ private static (Result, error) resultFromStatement(context.Context ctx, driver.C
         return (null, error.As(err)!);
     }
     return (new driverResult(ds.Locker,resi), error.As(null!)!);
-
 });
 
 // removeClosedStmtLocked removes closed conns in s.css.
@@ -2918,7 +2815,6 @@ private static void removeClosedStmtLocked(this ptr<Stmt> _addr_s) {
     }
     s.db.mu.Unlock();
     s.lastNumClosed = dbClosed;
-
 }
 
 // connStmt returns a free driver connection on which to execute the
@@ -2949,7 +2845,6 @@ private static (ptr<driverConn>, Action<error>, ptr<driverStmt>, error) connStmt
             return ;
         }
         return (_addr_dc!, releaseConn, _addr_s.cgds!, error.As(null!)!);
-
     }
     s.removeClosedStmtLocked();
     s.mu.Unlock();
@@ -2975,7 +2870,6 @@ private static (ptr<driverConn>, Action<error>, ptr<driverStmt>, error) connStmt
         return (_addr_null!, null, _addr_null!, error.As(err)!);
     }
     return (_addr_dc!, dc.releaseConn, _addr_ds!, error.As(null!)!);
-
 }
 
 // prepareOnConnLocked prepares the query in Stmt s on dc and adds it to the list of
@@ -2995,7 +2889,6 @@ private static (ptr<driverStmt>, error) prepareOnConnLocked(this ptr<Stmt> _addr
     s.css = append(s.css, cs);
     s.mu.Unlock();
     return (_addr_cs.ds!, error.As(null!)!);
-
 }
 
 // QueryContext executes a prepared query statement with the given arguments
@@ -3042,10 +2935,8 @@ private static (ptr<Rows>, error) QueryContext(this ptr<Stmt> _addr_s, context.C
             if (s.cg != null) {
                 txctx = s.cg.txCtx();
             }
-
             rows.initContextClose(ctx, txctx);
             return (_addr_rows!, error.As(null!)!);
-
         }
         releaseConn(err);
         if (err != driver.ErrBadConn) {
@@ -3053,7 +2944,6 @@ private static (ptr<Rows>, error) QueryContext(this ptr<Stmt> _addr_s, context.C
         }
     }
     return (_addr_null!, error.As(driver.ErrBadConn)!);
-
 });
 
 // Query executes a prepared query statement with the given arguments
@@ -3083,7 +2973,6 @@ private static (driver.Rows, error) rowsiFromStatement(context.Context ctx, driv
         return (null, error.As(err)!);
     }
     return ctxDriverStmtQuery(ctx, ds.si, dargs);
-
 });
 
 // QueryRowContext executes a prepared query statement with the given arguments.
@@ -3101,7 +2990,6 @@ private static ptr<Row> QueryRowContext(this ptr<Stmt> _addr_s, context.Context 
         return addr(new Row(err:err));
     }
     return addr(new Row(rows:rows));
-
 }
 
 // QueryRow executes a prepared query statement with the given arguments.
@@ -3153,10 +3041,8 @@ private static error Close(this ptr<Stmt> _addr_s) => func((defer, _, _) => {
         // If parentStmt is set, we must not close s.txds since it's stored
         // in the css array of the parentStmt.
         return error.As(s.db.removeDep(s.parentStmt, s))!;
-
     }
     return error.As(txds.Close())!;
-
 });
 
 private static error finalClose(this ptr<Stmt> _addr_s) => func((defer, _, _) => {
@@ -3171,7 +3057,6 @@ private static error finalClose(this ptr<Stmt> _addr_s) => func((defer, _, _) =>
         }        s.css = null;
     }
     return error.As(null!)!;
-
 });
 
 // Rows is the result of a query. Its cursor starts before the first row
@@ -3206,7 +3091,6 @@ private static error lasterrOrErrLocked(this ptr<Rows> _addr_rs, error err) {
         return error.As(rs.lasterr)!;
     }
     return error.As(err)!;
-
 }
 
 // bypassRowsAwaitDone is only used for testing.
@@ -3224,7 +3108,6 @@ private static void initContextClose(this ptr<Rows> _addr_rs, context.Context ct
     }
     ctx, rs.cancel = context.WithCancel(ctx);
     go_(() => rs.awaitDone(ctx, txctx));
-
 }
 
 // awaitDone blocks until either ctx or txctx is canceled. The ctx is provided
@@ -3239,7 +3122,6 @@ private static void awaitDone(this ptr<Rows> _addr_rs, context.Context ctx, cont
         txctxDone = txctx.Done();
     }
     rs.close(ctx.Err());
-
 }
 
 // Next prepares the next result row for reading with the Scan method. It
@@ -3260,7 +3142,6 @@ private static bool Next(this ptr<Rows> _addr_rs) {
         rs.Close();
     }
     return ok;
-
 }
 
 private static (bool, bool) nextLocked(this ptr<Rows> _addr_rs) => func((defer, _, _) => {
@@ -3291,10 +3172,8 @@ private static (bool, bool) nextLocked(this ptr<Rows> _addr_rs) => func((defer, 
             doClose = true;
         }
         return (doClose, false);
-
     }
     return (false, true);
-
 });
 
 // NextResultSet prepares the next result set for reading. It reports whether
@@ -3335,7 +3214,6 @@ private static bool NextResultSet(this ptr<Rows> _addr_rs) => func((defer, _, _)
         return false;
     }
     return true;
-
 });
 
 // Err returns the error, if any, that was encountered during iteration.
@@ -3370,7 +3248,6 @@ private static (slice<@string>, error) Columns(this ptr<Rows> _addr_rs) => func(
     defer(rs.dc.Unlock());
 
     return (rs.rowsi.Columns(), error.As(null!)!);
-
 });
 
 // ColumnTypes returns column information such as column type, length,
@@ -3392,7 +3269,6 @@ private static (slice<ptr<ColumnType>>, error) ColumnTypes(this ptr<Rows> _addr_
     defer(rs.dc.Unlock());
 
     return (rowsColumnInfoSetupConnLocked(rs.rowsi), error.As(null!)!);
-
 });
 
 // ColumnType contains the name and type of a column.
@@ -3495,7 +3371,6 @@ private static slice<ptr<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
             prop = prop__prev1;
 
         }
-
         {
             driver.RowsColumnTypeScanType prop__prev1 = prop;
 
@@ -3508,7 +3383,6 @@ private static slice<ptr<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
             prop = prop__prev1;
 
         }
-
         {
             driver.RowsColumnTypeScanType prop__prev1 = prop;
 
@@ -3521,7 +3395,6 @@ private static slice<ptr<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
             prop = prop__prev1;
 
         }
-
         {
             driver.RowsColumnTypeScanType prop__prev1 = prop;
 
@@ -3534,7 +3407,6 @@ private static slice<ptr<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
             prop = prop__prev1;
 
         }
-
         {
             driver.RowsColumnTypeScanType prop__prev1 = prop;
 
@@ -3547,9 +3419,7 @@ private static slice<ptr<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
             prop = prop__prev1;
 
         }
-
     }    return list;
-
 }
 
 // Scan copies the columns in the current row into the values pointed
@@ -3641,7 +3511,6 @@ private static error Scan(this ptr<Rows> _addr_rs, params object[] dest) {
             return error.As(fmt.Errorf("sql: Scan error on column index %d, name %q: %w", i, rs.rowsi.Columns()[i], err))!;
         }
     }    return error.As(null!)!;
-
 }
 
 // rowsCloseHook returns a function so tests may install the
@@ -3682,7 +3551,6 @@ private static error close(this ptr<Rows> _addr_rs, error err) => func((defer, _
             fn(rs, _addr_err);
         }
     }
-
     if (rs.cancel != null) {
         rs.cancel();
     }
@@ -3691,7 +3559,6 @@ private static error close(this ptr<Rows> _addr_rs, error err) => func((defer, _
     }
     rs.releaseConn(err);
     return error.As(err)!;
-
 });
 
 // Row is the result of calling QueryRow to select a single row.
@@ -3722,7 +3589,6 @@ private static error Scan(this ptr<Row> _addr_r, params object[] dest) => func((
             }
 
         }
-
     }    if (!r.rows.Next()) {
         {
             var err__prev2 = err;
@@ -3736,16 +3602,13 @@ private static error Scan(this ptr<Row> _addr_r, params object[] dest) => func((
             err = err__prev2;
 
         }
-
         return error.As(ErrNoRows)!;
-
     }
     err = r.rows.Scan(dest);
     if (err != null) {
         return error.As(err)!;
     }
     return error.As(r.rows.Close())!;
-
 });
 
 // Err provides a way for wrapping packages to check for
@@ -3799,7 +3662,6 @@ private static void withLock(sync.Locker lk, Action fn) => func((defer, _, _) =>
     lk.Lock();
     defer(lk.Unlock()); // in case fn panics
     fn();
-
 });
 
 } // end sql_package

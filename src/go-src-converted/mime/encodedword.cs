@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mime -- go2cs converted at 2022 March 06 22:21:14 UTC
+// package mime -- go2cs converted at 2022 March 13 05:36:22 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Program Files\Go\src\mime\encodedword.go
-using bytes = go.bytes_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
 
+using bytes = bytes_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// A WordEncoder is an RFC 2047 encoded-word encoder.
+
+using System;
 public static partial class mime_package {
 
-    // A WordEncoder is an RFC 2047 encoded-word encoder.
 public partial struct WordEncoder { // : byte
 }
 
@@ -29,7 +30,6 @@ public partial struct WordEncoder { // : byte
 public static readonly var BEncoding = WordEncoder('b'); 
 // QEncoding represents the Q-encoding scheme as defined by RFC 2047.
 public static readonly var QEncoding = WordEncoder('q');
-
 
 private static var errInvalidWord = errors.New("mime: invalid RFC 2047 encoded-word");
 
@@ -41,7 +41,6 @@ public static @string Encode(this WordEncoder e, @string charset, @string s) {
         return s;
     }
     return e.encodeWord(charset, s);
-
 }
 
 private static bool needsEncoding(@string s) {
@@ -50,7 +49,6 @@ private static bool needsEncoding(@string s) {
             return true;
         }
     }    return false;
-
 }
 
 // encodeWord encodes a string into an encoded-word.
@@ -72,7 +70,6 @@ public static @string encodeWord(this WordEncoder e, @string charset, @string s)
     closeWord(_addr_buf);
 
     return buf.String();
-
 }
 
  
@@ -82,7 +79,6 @@ private static readonly nint maxEncodedWordLen = 75;
 // maxContentLen is how much content can be encoded, ignoring the header and
 // 2-byte footer.
 private static readonly var maxContentLen = maxEncodedWordLen - len("=?UTF-8?q?") - len("?=");
-
 
 private static var maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen);
 
@@ -120,12 +116,10 @@ public static void bEncode(this WordEncoder e, ptr<strings.Builder> _addr_buf, @
                 last = i;
                 currentLen = runeLen;
             }
-
         }
     }
     io.WriteString(w, s[(int)last..]);
     w.Close();
-
 }
 
 // qEncode encodes s using Q encoding and writes it to buf. It splits the
@@ -156,18 +150,14 @@ public static void qEncode(this WordEncoder e, ptr<strings.Builder> _addr_buf, @
                 _, runeLen = utf8.DecodeRuneInString(s[(int)i..]);
                 encLen = 3 * runeLen;
             }
-
             if (currentLen + encLen > maxContentLen) {
                 e.splitWord(buf, charset);
                 currentLen = 0;
             }
-
             writeQString(_addr_buf, s[(int)i..(int)i + runeLen]);
             currentLen += encLen;
-
         }
     }
-
 }
 
 // writeQString encodes s using Q encoding and writes it to buf.
@@ -189,9 +179,7 @@ private static void writeQString(ptr<strings.Builder> _addr_buf, @string s) {
                 buf.WriteByte(upperhex[b & 0x0f]);
 
         }
-
     }
-
 }
 
 // openWord writes the beginning of an encoded-word into buf.
@@ -280,9 +268,7 @@ private static (@string, error) Decode(this ptr<WordDecoder> _addr_d, @string wo
         }
     }
 
-
     return (buf.String(), error.As(null!)!);
-
 }
 
 // DecodeHeader decodes all encoded-words of the given string. It returns an
@@ -354,17 +340,14 @@ private static (@string, error) DecodeHeader(this ptr<WordDecoder> _addr_d, @str
 
         }
 
-
         header = header[(int)end..];
         betweenWords = true;
-
     }
 
     if (len(header) > 0) {
         buf.WriteString(header);
     }
     return (buf.String(), error.As(null!)!);
-
 }
 
 private static (slice<byte>, error) decode(byte encoding, @string text) {
@@ -386,7 +369,6 @@ private static (slice<byte>, error) decode(byte encoding, @string text) {
             return (null, error.As(errInvalidWord)!);
             break;
     }
-
 }
 
 private static error convert(this ptr<WordDecoder> _addr_d, ptr<strings.Builder> _addr_buf, @string charset, slice<byte> content) {
@@ -420,7 +402,6 @@ private static error convert(this ptr<WordDecoder> _addr_d, ptr<strings.Builder>
  {
                     buf.WriteByte(c);
                 }
-
             }
 
             c = c__prev1;
@@ -439,7 +420,6 @@ private static error convert(this ptr<WordDecoder> _addr_d, ptr<strings.Builder>
             return error.As(err)!;
         }
         return error.As(null!)!;
-
 }
 
 // hasNonWhitespace reports whether s (assumed to be ASCII) contains at least
@@ -462,9 +442,7 @@ private static bool hasNonWhitespace(@string s) {
                 return true;
                 break;
         }
-
     }    return false;
-
 }
 
 // qDecode decodes a Q encoded string.
@@ -498,11 +476,9 @@ private static (slice<byte>, error) qDecode(@string s) {
 
         }
         n++;
-
     }
 
     return (dec[..(int)n], error.As(null!)!);
-
 }
 
 // readHexByte returns the byte from its quoted-printable representation.
@@ -524,7 +500,6 @@ private static (byte, error) readHexByte(byte a, byte b) {
         return (0, error.As(err)!);
     }
     return (hb << 4 | lb, error.As(null!)!);
-
 }
 
 private static (byte, error) fromHex(byte b) {
@@ -540,7 +515,6 @@ private static (byte, error) fromHex(byte b) {
     else if (b >= 'a' && b <= 'f') 
         return (b - 'a' + 10, error.As(null!)!);
         return (0, error.As(fmt.Errorf("mime: invalid hex byte %#02x", b))!);
-
 }
 
 } // end mime_package

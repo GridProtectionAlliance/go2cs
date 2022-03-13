@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:17 UTC
+//     Generated on 2022 March 13 05:38:45 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class profile_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct sampleKey
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace @internal
             public static implicit operator sampleKey(NilType nil) => default(sampleKey);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static sampleKey sampleKey_cast(dynamic value)
         {
             return new sampleKey(value.locations, value.labels, value.numlabels);

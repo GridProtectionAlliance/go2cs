@@ -31,13 +31,13 @@
 //
 // There is no support for groups, message sets, or "has" bits.
 
-// package profile -- go2cs converted at 2022 March 06 23:24:05 UTC
+// package profile -- go2cs converted at 2022 March 13 06:37:12 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\proto.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.vendor.github.com.google.pprof;
+
+using errors = errors_package;
+using fmt = fmt_package;
 
 public static partial class profile_package {
 
@@ -85,7 +85,6 @@ private static void encodeUint64(ptr<buffer> _addr_b, nint tag, ulong x) {
     // append varint to b.data
     encodeVarint(_addr_b, uint64(tag) << 3);
     encodeVarint(_addr_b, x);
-
 }
 
 private static void encodeUint64s(ptr<buffer> _addr_b, nint tag, slice<ulong> x) {
@@ -112,7 +111,6 @@ private static void encodeUint64s(ptr<buffer> _addr_b, nint tag, slice<ulong> x)
         copy(b.data[(int)n1 + (n3 - n2)..], b.data[(int)n1..(int)n2]);
         copy(b.data[(int)n1..], b.tmp[..(int)n3 - n2]);
         return ;
-
     }
     {
         var u__prev1 = u;
@@ -132,7 +130,6 @@ private static void encodeUint64Opt(ptr<buffer> _addr_b, nint tag, ulong x) {
         return ;
     }
     encodeUint64(_addr_b, tag, x);
-
 }
 
 private static void encodeInt64(ptr<buffer> _addr_b, nint tag, long x) {
@@ -166,7 +163,6 @@ private static void encodeInt64s(ptr<buffer> _addr_b, nint tag, slice<long> x) {
         copy(b.data[(int)n1 + (n3 - n2)..], b.data[(int)n1..(int)n2]);
         copy(b.data[(int)n1..], b.tmp[..(int)n3 - n2]);
         return ;
-
     }
     {
         var u__prev1 = u;
@@ -186,7 +182,6 @@ private static void encodeInt64Opt(ptr<buffer> _addr_b, nint tag, long x) {
         return ;
     }
     encodeInt64(_addr_b, tag, x);
-
 }
 
 private static void encodeString(ptr<buffer> _addr_b, nint tag, @string x) {
@@ -258,7 +253,7 @@ private static (ulong, slice<byte>, error) decodeVarint(slice<byte> data) {
     error _p0 = default!;
 
     ulong u = default;
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         if (i >= 10 || i >= len(data)) {
             return (0, null, error.As(errors.New("bad varint"))!);
         }
@@ -267,7 +262,6 @@ private static (ulong, slice<byte>, error) decodeVarint(slice<byte> data) {
             return (u, data[(int)i + 1..], error.As(null!)!);
         }
     }
-
 }
 
 private static (slice<byte>, error) decodeField(ptr<buffer> _addr_b, slice<byte> data) {
@@ -296,7 +290,6 @@ private static (slice<byte>, error) decodeField(ptr<buffer> _addr_b, slice<byte>
             }
             b.u64 = le64(data[..(int)8]);
             data = data[(int)8..];
-
             break;
         case 2: 
             ulong n = default;
@@ -309,7 +302,6 @@ private static (slice<byte>, error) decodeField(ptr<buffer> _addr_b, slice<byte>
             }
             b.data = data[..(int)n];
             data = data[(int)n..];
-
             break;
         case 5: 
             if (len(data) < 4) {
@@ -317,7 +309,6 @@ private static (slice<byte>, error) decodeField(ptr<buffer> _addr_b, slice<byte>
             }
             b.u64 = uint64(le32(data[..(int)4]));
             data = data[(int)4..];
-
             break;
         default: 
             return (null, error.As(fmt.Errorf("unknown wire type: %d", b.typ))!);
@@ -325,7 +316,6 @@ private static (slice<byte>, error) decodeField(ptr<buffer> _addr_b, slice<byte>
     }
 
     return (data, error.As(null!)!);
-
 }
 
 private static error checkType(ptr<buffer> _addr_b, nint typ) {
@@ -335,7 +325,6 @@ private static error checkType(ptr<buffer> _addr_b, nint typ) {
         return error.As(errors.New("type mismatch"))!;
     }
     return error.As(null!)!;
-
 }
 
 private static error decodeMessage(ptr<buffer> _addr_b, message m) {
@@ -352,7 +341,6 @@ private static error decodeMessage(ptr<buffer> _addr_b, message m) {
         err = err__prev1;
 
     }
-
     var dec = m.decoder();
     var data = b.data;
     while (len(data) > 0) { 
@@ -377,10 +365,8 @@ private static error decodeMessage(ptr<buffer> _addr_b, message m) {
             err = err__prev1;
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 private static error decodeInt64(ptr<buffer> _addr_b, ptr<long> _addr_x) {
@@ -394,10 +380,8 @@ private static error decodeInt64(ptr<buffer> _addr_b, ptr<long> _addr_x) {
             return error.As(err)!;
         }
     }
-
     x = int64(b.u64);
     return error.As(null!)!;
-
 }
 
 private static error decodeInt64s(ptr<buffer> _addr_b, ptr<slice<long>> _addr_x) {
@@ -417,13 +401,10 @@ private static error decodeInt64s(ptr<buffer> _addr_b, ptr<slice<long>> _addr_x)
             if (err != null) {
                 return error.As(err)!;
             }
-
             tmp = append(tmp, int64(u));
-
         }
         x = append(x, tmp);
         return error.As(null!)!;
-
     }
     ref long i = ref heap(out ptr<long> _addr_i);
     {
@@ -437,10 +418,8 @@ private static error decodeInt64s(ptr<buffer> _addr_b, ptr<slice<long>> _addr_x)
         err = err__prev1;
 
     }
-
     x = append(x, i);
     return error.As(null!)!;
-
 }
 
 private static error decodeUint64(ptr<buffer> _addr_b, ptr<ulong> _addr_x) {
@@ -454,10 +433,8 @@ private static error decodeUint64(ptr<buffer> _addr_b, ptr<ulong> _addr_x) {
             return error.As(err)!;
         }
     }
-
     x = b.u64;
     return error.As(null!)!;
-
 }
 
 private static error decodeUint64s(ptr<buffer> _addr_b, ptr<slice<ulong>> _addr_x) {
@@ -477,13 +454,10 @@ private static error decodeUint64s(ptr<buffer> _addr_b, ptr<slice<ulong>> _addr_
             if (err != null) {
                 return error.As(err)!;
             }
-
             tmp = append(tmp, u);
-
         }
         x = append(x, tmp);
         return error.As(null!)!;
-
     }
     u = default;
     {
@@ -497,10 +471,8 @@ private static error decodeUint64s(ptr<buffer> _addr_b, ptr<slice<ulong>> _addr_
         err = err__prev1;
 
     }
-
     x = append(x, u);
     return error.As(null!)!;
-
 }
 
 private static error decodeString(ptr<buffer> _addr_b, ptr<@string> _addr_x) {
@@ -514,10 +486,8 @@ private static error decodeString(ptr<buffer> _addr_b, ptr<@string> _addr_x) {
             return error.As(err)!;
         }
     }
-
     x = string(b.data);
     return error.As(null!)!;
-
 }
 
 private static error decodeStrings(ptr<buffer> _addr_b, ptr<slice<@string>> _addr_x) {
@@ -532,10 +502,8 @@ private static error decodeStrings(ptr<buffer> _addr_b, ptr<slice<@string>> _add
             return error.As(err)!;
         }
     }
-
     x = append(x, s);
     return error.As(null!)!;
-
 }
 
 private static error decodeBool(ptr<buffer> _addr_b, ptr<bool> _addr_x) {
@@ -549,7 +517,6 @@ private static error decodeBool(ptr<buffer> _addr_b, ptr<bool> _addr_x) {
             return error.As(err)!;
         }
     }
-
     if (int64(b.u64) == 0) {
         x = false;
     }
@@ -558,7 +525,6 @@ private static error decodeBool(ptr<buffer> _addr_b, ptr<bool> _addr_x) {
         x = true;
     }
     return error.As(null!)!;
-
 }
 
 } // end profile_package

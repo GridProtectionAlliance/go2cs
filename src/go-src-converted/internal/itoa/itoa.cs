@@ -4,29 +4,25 @@
 
 // Simple conversions to avoid depending on strconv.
 
-// package itoa -- go2cs converted at 2022 March 06 22:08:12 UTC
+// package itoa -- go2cs converted at 2022 March 13 05:27:55 UTC
 // import "internal/itoa" ==> using itoa = go.@internal.itoa_package
 // Original source: C:\Program Files\Go\src\internal\itoa\itoa.go
-
-
 namespace go.@internal;
 
 public static partial class itoa_package {
 
-    // Itoa converts val to a decimal string.
+// Itoa converts val to a decimal string.
 public static @string Itoa(nint val) {
     if (val < 0) {
         return "-" + Uitoa(uint(-val));
     }
     return Uitoa(uint(val));
-
 }
 
 // Uitoa converts val to a decimal string.
 public static @string Uitoa(nuint val) {
     if (val == 0) { // avoid string allocation
         return "0";
-
     }
     array<byte> buf = new array<byte>(20); // big enough for 64bit value base 10
     var i = len(buf) - 1;
@@ -39,7 +35,6 @@ public static @string Uitoa(nuint val) {
     // val < 10
     buf[i] = byte('0' + val);
     return string(buf[(int)i..]);
-
 }
 
 } // end itoa_package

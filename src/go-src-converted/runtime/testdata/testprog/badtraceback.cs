@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:25:57 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:18 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\badtraceback.go
-using runtime = go.runtime_package;
-using debug = go.runtime.debug_package;
-using @unsafe = go.@unsafe_package;
-using System.Threading;
-
-
 namespace go;
+
+using runtime = runtime_package;
+using debug = runtime.debug_package;
+using @unsafe = @unsafe_package;
+using System.Threading;
 
 public static partial class main_package {
 
@@ -25,7 +24,6 @@ public static void BadTraceback() {
     // Run badLR1 on its own stack to minimize the stack size and
     // exercise the stack bounds logic in the hex dump.
     go_(() => badLR1());
-
 }
 
 //go:noinline
@@ -33,7 +31,6 @@ private static void badLR1() {
     // We need two frames on LR machines because we'll smash this
     // frame's saved LR.
     badLR2(0);
-
 }
 
 //go:noinline
@@ -49,7 +46,6 @@ private static void badLR2(nint arg) => func((_, panic, _) => {
     // Print a backtrace. This should include diagnostics for the
     // bad return PC and a hex dump.
     panic("backtrace");
-
 });
 
 } // end main_package

@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:44 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:12 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\cftype.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go;
+
+using ast = go.ast_package;
+using token = go.token_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using System;
 
 public static partial class main_package {
 
@@ -30,9 +29,7 @@ private static fix cftypeFix = new fix(name:"cftype",date:"2017-09-27",f:cftypef
 private static bool cftypefix(ptr<ast.File> _addr_f) {
     ref ast.File f = ref _addr_f.val;
 
-    return typefix(_addr_f, s => {
-        return strings.HasPrefix(s, "C.") && strings.HasSuffix(s, "Ref") && s != "C.CFAllocatorRef";
-    });
+    return typefix(_addr_f, s => strings.HasPrefix(s, "C.") && strings.HasSuffix(s, "Ref") && s != "C.CFAllocatorRef");
 }
 
 // typefix replaces nil with 0 for all nils whose type, when passed to badType, returns true.
@@ -60,7 +57,6 @@ private static bool typefix(ptr<ast.File> _addr_f, Func<@string, bool> badType) 
             i = i__prev1;
 
         }
-
     }); 
 
     // step 2: find all uses of the bad nils, replace them with 0.
@@ -103,9 +99,7 @@ private static bool typefix(ptr<ast.File> _addr_f, Func<@string, bool> badType) 
                             r = r__prev3;
 
                         }
-
                     }
-
                     if (f.Type() == exprSliceType) {
                         for (nint j = 0; j < f.Len(); j++) {
                             var e = f.Index(j);
@@ -122,20 +116,14 @@ private static bool typefix(ptr<ast.File> _addr_f, Func<@string, bool> badType) 
                                 r = r__prev3;
 
                             }
-
                         }
-
-
                     }
-
                 }
 
 
                 i = i__prev1;
             }
-
         });
-
     }
     walk(f, n => {
         if (n == null) {
@@ -173,7 +161,6 @@ private static bool typefix(ptr<ast.File> _addr_f, Func<@string, bool> badType) 
     });
 
     return changed;
-
 }
 
 } // end main_package

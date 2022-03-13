@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2022 March 06 22:14:35 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:28:34 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\elf.go
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-
 namespace go.runtime;
+
+using binary = encoding.binary_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
 
 public static partial class pprof_package {
 
@@ -65,7 +65,6 @@ private static (@string, error) elfBuildID(@string file) => func((defer, _, _) =
                 return ("", error.As(errBadELF)!);
             }
             shnum = int(byteOrder.Uint16(buf[(int)48..]));
-
             break;
         case 2: // 64-bit file header
             shoff = int64(byteOrder.Uint64(buf[(int)40..]));
@@ -74,7 +73,6 @@ private static (@string, error) elfBuildID(@string file) => func((defer, _, _) =
                 return ("", error.As(errBadELF)!);
             }
             shnum = int(byteOrder.Uint16(buf[(int)60..]));
-
             break;
         default: 
             return ("", error.As(errBadELF)!);
@@ -90,31 +88,26 @@ private static (@string, error) elfBuildID(@string file) => func((defer, _, _) =
             }
 
         }
-
         {
             var typ = byteOrder.Uint32(buf[(int)4..]);
 
             if (typ != 7) { // SHT_NOTE
                 continue;
-
             }
 
         }
-
         long off = default;        long size = default;
 
         if (shentsize == 40) { 
             // 32-bit section header
             off = int64(byteOrder.Uint32(buf[(int)16..]));
             size = int64(byteOrder.Uint32(buf[(int)20..]));
-
         }
         else
  { 
             // 64-bit section header
             off = int64(byteOrder.Uint64(buf[(int)24..]));
             size = int64(byteOrder.Uint64(buf[(int)32..]));
-
         }
         size += off;
         while (off < size) {
@@ -123,11 +116,9 @@ private static (@string, error) elfBuildID(@string file) => func((defer, _, _) =
 
                 if (err != null) { // room for header + name GNU\x00
                     return ("", error.As(err)!);
-
                 }
 
             }
-
             var nameSize = int(byteOrder.Uint32(buf[(int)0..]));
             var descSize = int(byteOrder.Uint32(buf[(int)4..]));
             var noteType = int(byteOrder.Uint32(buf[(int)8..]));
@@ -135,13 +126,10 @@ private static (@string, error) elfBuildID(@string file) => func((defer, _, _) =
             off = descOff + int64((descSize + 3) & ~3);
             if (nameSize != 4 || noteType != 3 || buf[12] != 'G' || buf[13] != 'N' || buf[14] != 'U' || buf[15] != '\x00') { // want name GNU\x00 type 3 (NT_GNU_BUILD_ID)
                 continue;
-
             }
-
             if (descSize > len(buf)) {
                 return ("", error.As(errBadELF)!);
             }
-
             {
                 (_, err) = f.ReadAt(buf[..(int)descSize], descOff);
 
@@ -150,14 +138,10 @@ private static (@string, error) elfBuildID(@string file) => func((defer, _, _) =
                 }
 
             }
-
             return (fmt.Sprintf("%x", buf[..(int)descSize]), error.As(null!)!);
-
         }
-
     }
     return ("", error.As(errNoBuildID)!);
-
 });
 
 } // end pprof_package

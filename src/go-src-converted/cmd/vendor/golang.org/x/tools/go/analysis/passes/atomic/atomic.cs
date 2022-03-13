@@ -4,21 +4,21 @@
 
 // Package atomic defines an Analyzer that checks for common mistakes
 // using the sync/atomic package.
-// package atomic -- go2cs converted at 2022 March 06 23:34:28 UTC
+
+// package atomic -- go2cs converted at 2022 March 13 06:41:45 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/atomic" ==> using atomic = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.atomic_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\atomic\atomic.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class atomic_package {
 
@@ -73,11 +73,9 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     checkAtomicAddAssignment(_addr_pass, n.Lhs[i], call);
                     break;
             }
-
         }
     });
     return (null, error.As(null!)!);
-
 }
 
 // checkAtomicAddAssignment walks the atomic.Add* method calls checking
@@ -111,9 +109,7 @@ private static void checkAtomicAddAssignment(ptr<analysis.Pass> _addr_pass, ast.
         }
 
 
-
     }
-
 
     if (broken) {
         pass.ReportRangef(left, "direct assignment to atomic value");

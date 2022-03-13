@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package html -- go2cs converted at 2022 March 06 22:24:08 UTC
+// package html -- go2cs converted at 2022 March 13 05:38:34 UTC
 // import "html" ==> using html = go.html_package
 // Original source: C:\Program Files\Go\src\html\entity.go
-using sync = go.sync_package;
-
 namespace go;
+
+using sync = sync_package;
 
 public static partial class html_package {
 
-    // All entities that do not end with ';' are 6 or fewer bytes long.
+// All entities that do not end with ';' are 6 or fewer bytes long.
 private static readonly nint longestEntityWithoutSemicolon = 6;
 
 // entity is a map from HTML entity names to their values. The semicolon matters:

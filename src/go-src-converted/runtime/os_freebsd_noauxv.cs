@@ -5,11 +5,9 @@
 //go:build freebsd && !arm
 // +build freebsd,!arm
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:28 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\os_freebsd_noauxv.go
-
-
 namespace go;
 
 public static partial class runtime_package {

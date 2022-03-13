@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:49 UTC
+//     Generated on 2022 March 13 05:28:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace compress
 {
     public static partial class gzip_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(Header))]
         public partial struct Reader
         {
@@ -89,7 +89,7 @@ namespace compress
             public static implicit operator Reader(NilType nil) => default(Reader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Reader Reader_cast(dynamic value)
         {
             return new Reader(value.Header, value.r, value.decompressor, value.digest, value.size, value.buf, value.err, value.multistream);

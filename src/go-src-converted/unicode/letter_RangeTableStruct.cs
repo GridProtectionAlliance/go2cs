@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:12 UTC
+//     Generated on 2022 March 13 05:28:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class unicode_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct RangeTable
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator RangeTable(NilType nil) => default(RangeTable);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static RangeTable RangeTable_cast(dynamic value)
         {
             return new RangeTable(value.R16, value.R32, value.LatinOffset);

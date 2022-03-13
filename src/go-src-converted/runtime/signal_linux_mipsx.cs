@@ -6,12 +6,12 @@
 // +build linux
 // +build mips mipsle
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:32 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:53 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\signal_linux_mipsx.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 

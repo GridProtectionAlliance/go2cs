@@ -2,23 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package loader -- go2cs converted at 2022 March 06 23:20:37 UTC
+// package loader -- go2cs converted at 2022 March 13 06:33:32 UTC
 // import "cmd/link/internal/loader" ==> using loader = go.cmd.link.@internal.loader_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\loader\symbolbuilder.go
-using goobj = go.cmd.@internal.goobj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using sym = go.cmd.link.@internal.sym_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
 
+using goobj = cmd.@internal.goobj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using sym = cmd.link.@internal.sym_package;
+using sort = sort_package;
+
+
+// SymbolBuilder is a helper designed to help with the construction
+// of new symbol contents.
+
+using System;
 public static partial class loader_package {
 
-    // SymbolBuilder is a helper designed to help with the construction
-    // of new symbol contents.
 public partial struct SymbolBuilder {
     public ref ptr<extSymPayload> ptr<extSymPayload> => ref ptr<extSymPayload>_ptr; // points to payload being updated
     public Sym symIdx; // index of symbol being updated/constructed
@@ -35,7 +36,6 @@ private static ptr<SymbolBuilder> MakeSymbolBuilder(this ptr<Loader> _addr_l, @s
     ptr<SymbolBuilder> sb = addr(new SymbolBuilder(l:l,symIdx:symIdx));
     sb.extSymPayload = l.getPayload(symIdx);
     return _addr_sb!;
-
 }
 
 // MakeSymbolUpdater creates a symbol builder helper for an existing
@@ -52,12 +52,10 @@ private static ptr<SymbolBuilder> MakeSymbolUpdater(this ptr<Loader> _addr_l, Sy
     if (!l.IsExternal(symIdx)) { 
         // Create a clone with the same name/version/kind etc.
         l.cloneToExternal(symIdx);
-
     }
     ptr<SymbolBuilder> sb = addr(new SymbolBuilder(l:l,symIdx:symIdx));
     sb.extSymPayload = l.getPayload(symIdx);
     return _addr_sb!;
-
 });
 
 // CreateSymForUpdate creates a symbol with given name and version,
@@ -271,7 +269,6 @@ private static void AddBytes(this ptr<SymbolBuilder> _addr_sb, slice<byte> data)
     }
     sb.data = append(sb.data, data);
     sb.size = int64(len(sb.data));
-
 }
 
 private static Relocs Relocs(this ptr<SymbolBuilder> _addr_sb) {
@@ -433,7 +430,6 @@ private static long AddUint8(this ptr<SymbolBuilder> _addr_sb, byte v) {
     sb.size++;
     sb.data = append(sb.data, v);
     return off;
-
 }
 
 private static long AddUintXX(this ptr<SymbolBuilder> _addr_sb, ptr<sys.Arch> _addr_arch, ulong v, nint wid) {
@@ -472,7 +468,6 @@ private static long setUintXX(this ptr<SymbolBuilder> _addr_sb, ptr<sys.Arch> _a
     }
 
     return off + wid;
-
 }
 
 private static long AddUint16(this ptr<SymbolBuilder> _addr_sb, ptr<sys.Arch> _addr_arch, ushort v) {
@@ -555,7 +550,6 @@ private static long SetAddrPlus(this ptr<SymbolBuilder> _addr_sb, ptr<sys.Arch> 
     r.SetSiz(uint8(arch.PtrSize));
     r.SetAdd(add);
     return off + int64(r.Siz());
-
 }
 
 private static long SetAddr(this ptr<SymbolBuilder> _addr_sb, ptr<sys.Arch> _addr_arch, long off, Sym tgt) {
@@ -575,7 +569,6 @@ private static long AddStringAt(this ptr<SymbolBuilder> _addr_sb, long off, @str
     copy(sb.data[(int)off..(int)off + strLen], str);
     sb.data[off + strLen] = 0;
     return off + strLen + 1;
-
 });
 
 private static long Addstring(this ptr<SymbolBuilder> _addr_sb, @string str) {
@@ -588,13 +581,11 @@ private static long Addstring(this ptr<SymbolBuilder> _addr_sb, @string str) {
     if (sb.name == ".shstrtab") { 
         // FIXME: find a better mechanism for this
         sb.l.elfsetstring(str, int(r));
-
     }
     sb.data = append(sb.data, str);
     sb.data = append(sb.data, 0);
     sb.size = int64(len(sb.data));
     return r;
-
 }
 
 private static long SetBytesAt(this ptr<SymbolBuilder> _addr_sb, long off, slice<byte> b) => func((_, panic, _) => {
@@ -606,7 +597,6 @@ private static long SetBytesAt(this ptr<SymbolBuilder> _addr_sb, long off, slice
     }
     copy(sb.data[(int)off..(int)off + datLen], b);
     return off + datLen;
-
 });
 
 private static long addSymRef(this ptr<SymbolBuilder> _addr_sb, Sym tgt, long add, objabi.RelocType typ, nint rsize) {
@@ -627,7 +617,6 @@ private static long addSymRef(this ptr<SymbolBuilder> _addr_sb, Sym tgt, long ad
     r.SetAdd(add);
 
     return i + int64(rsize);
-
 }
 
 // Add a symbol reference (relocation) with given type, addend, and size
@@ -700,12 +689,9 @@ public static Func<ptr<SymbolBuilder>, ptr<sys.Arch>, Sym, long, long> GenAddAdd
                 }
 
             }
-
             return s.AddAddrPlus(arch, tgt, add);
-
         }
     else;
-
     } {
         return (SymbolBuilder.val).AddAddrPlus;
     }
@@ -726,7 +712,6 @@ private static void AddUleb(this ptr<SymbolBuilder> _addr_sb, ulong v) {
     if (v < 128) { // common case: 1 byte
         sb.AddUint8(uint8(v));
         return ;
-
     }
     while (true) {
         var c = uint8(v & 0x7f);
@@ -739,7 +724,6 @@ private static void AddUleb(this ptr<SymbolBuilder> _addr_sb, ulong v) {
             break;
         }
     }
-
 }
 
 } // end loader_package

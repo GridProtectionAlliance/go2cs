@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:22 UTC
+//     Generated on 2022 March 13 06:29:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class trace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Span
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace @internal
             public static implicit operator Span(NilType nil) => default(Span);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Span Span_cast(dynamic value)
         {
             return new Span(ref value.t, value.name, value.tid, value.start, value.end);

@@ -5,17 +5,15 @@
 //go:build arm64 && linux
 // +build arm64,linux
 
-// package cpu -- go2cs converted at 2022 March 06 22:29:51 UTC
+// package cpu -- go2cs converted at 2022 March 13 05:40:41 UTC
 // import "internal/cpu" ==> using cpu = go.@internal.cpu_package
 // Original source: C:\Program Files\Go\src\internal\cpu\cpu_arm64_hwcap.go
-
-
 namespace go.@internal;
 
 public static partial class cpu_package {
 
-    // HWCap may be initialized by archauxv and
-    // should not be changed after it was initialized.
+// HWCap may be initialized by archauxv and
+// should not be changed after it was initialized.
 public static nuint HWCap = default;
 
 // HWCAP bits. These are exposed by Linux.
@@ -26,7 +24,6 @@ private static readonly nint hwcap_SHA2 = 1 << 6;
 private static readonly nint hwcap_CRC32 = 1 << 7;
 private static readonly nint hwcap_ATOMICS = 1 << 8;
 private static readonly nint hwcap_CPUID = 1 << 11;
-
 
 private static void hwcapInit(@string os) { 
     // HWCap was populated by the runtime from the auxiliary vector.

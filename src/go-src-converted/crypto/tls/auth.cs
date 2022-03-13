@@ -2,26 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:17:06 UTC
+// package tls -- go2cs converted at 2022 March 13 05:30:27 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\auth.go
-using bytes = go.bytes_package;
-using crypto = go.crypto_package;
-using ecdsa = go.crypto.ecdsa_package;
-using ed25519 = go.crypto.ed25519_package;
-using elliptic = go.crypto.elliptic_package;
-using rsa = go.crypto.rsa_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using io = go.io_package;
-
 namespace go.crypto;
+
+using bytes = bytes_package;
+using crypto = crypto_package;
+using ecdsa = crypto.ecdsa_package;
+using ed25519 = crypto.ed25519_package;
+using elliptic = crypto.elliptic_package;
+using rsa = crypto.rsa_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using io = io_package;
+
+
+// verifyHandshakeSignature verifies a signature against pre-hashed
+// (if required) handshake contents.
 
 public static partial class tls_package {
 
-    // verifyHandshakeSignature verifies a signature against pre-hashed
-    // (if required) handshake contents.
 private static error verifyHandshakeSignature(byte sigType, crypto.PublicKey pubkey, crypto.Hash hashFunc, slice<byte> signed, slice<byte> sig) {
 
     if (sigType == signatureECDSA) 
@@ -56,7 +58,6 @@ private static error verifyHandshakeSignature(byte sigType, crypto.PublicKey pub
             err = err__prev1;
 
         }
-
     else if (sigType == signatureRSAPSS) 
         (pubKey, ok) = pubkey._<ptr<rsa.PublicKey>>();
         if (!ok) {
@@ -74,16 +75,13 @@ private static error verifyHandshakeSignature(byte sigType, crypto.PublicKey pub
             err = err__prev1;
 
         }
-
     else 
         return error.As(errors.New("internal error: unknown signature type"))!;
         return error.As(null!)!;
-
 }
 
 private static readonly @string serverSignatureContext = "TLS 1.3, server CertificateVerify\x00";
 private static readonly @string clientSignatureContext = "TLS 1.3, client CertificateVerify\x00";
-
 
 private static byte signaturePadding = new slice<byte>(new byte[] { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 });
 
@@ -102,7 +100,6 @@ private static slice<byte> signedMessage(crypto.Hash sigHash, @string context, h
     io.WriteString(h, context);
     h.Write(transcript.Sum(null));
     return h.Sum(null);
-
 }
 
 // typeAndHashFromSignatureScheme returns the corresponding signature type and
@@ -137,7 +134,6 @@ private static (byte, crypto.Hash, error) typeAndHashFromSignatureScheme(Signatu
     else 
         return (0, 0, error.As(fmt.Errorf("unsupported signature algorithm: %v", signatureAlgorithm))!);
         return (sigType, hash, error.As(null!)!);
-
 }
 
 // legacyTypeAndHashFromPublicKey returns the fixed signature type and crypto.Hash for
@@ -164,7 +160,6 @@ private static (byte, crypto.Hash, error) legacyTypeAndHashFromPublicKey(crypto.
             break;
         }
     }
-
 }
 
 
@@ -189,9 +184,7 @@ private static slice<SignatureScheme> signatureSchemesForCertificate(ushort vers
                 // constrained to a single curve.
                 sigAlgs = new slice<SignatureScheme>(new SignatureScheme[] { ECDSAWithP256AndSHA256, ECDSAWithP384AndSHA384, ECDSAWithP521AndSHA512, ECDSAWithSHA1 });
                 break;
-
             }
-
 
             if (pub.Curve == elliptic.P256()) 
                 sigAlgs = new slice<SignatureScheme>(new SignatureScheme[] { ECDSAWithP256AndSHA256 });
@@ -232,7 +225,6 @@ private static slice<SignatureScheme> signatureSchemesForCertificate(ushort vers
         }        return filteredSigAlgs;
     }
     return sigAlgs;
-
 }
 
 // selectSignatureScheme picks a SignatureScheme from the peer's preference list
@@ -251,14 +243,12 @@ private static (SignatureScheme, error) selectSignatureScheme(ushort vers, ptr<C
         // For TLS 1.2, if the client didn't send signature_algorithms then we
         // can assume that it supports SHA1. See RFC 5246, Section 7.4.1.4.1.
         peerAlgs = new slice<SignatureScheme>(new SignatureScheme[] { PKCS1WithSHA1, ECDSAWithSHA1 });
-
     }
     foreach (var (_, preferredAlg) in peerAlgs) {
         if (isSupportedSignatureAlgorithm(preferredAlg, supportedAlgs)) {
             return (preferredAlg, error.As(null!)!);
         }
     }    return (0, error.As(errors.New("tls: peer doesn't support any of the certificate's signature algorithms"))!);
-
 }
 
 // unsupportedCertificateError returns a helpful error for certificates with
@@ -307,7 +297,6 @@ private static error unsupportedCertificateError(ptr<Certificate> _addr_cert) {
         return error.As(fmt.Errorf("tls: peer doesn't support the certificate custom signature algorithms"))!;
     }
     return error.As(fmt.Errorf("tls: internal error: unsupported key (%T)", cert.PrivateKey))!;
-
 }
 
 } // end tls_package

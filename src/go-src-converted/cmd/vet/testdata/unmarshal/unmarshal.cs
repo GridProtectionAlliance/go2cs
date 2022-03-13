@@ -4,12 +4,12 @@
 
 // This file contains tests for the unmarshal checker.
 
-// package unmarshal -- go2cs converted at 2022 March 06 23:35:21 UTC
+// package unmarshal -- go2cs converted at 2022 March 13 06:43:18 UTC
 // import "cmd/vet/testdata/unmarshal" ==> using unmarshal = go.cmd.vet.testdata.unmarshal_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\unmarshal\unmarshal.go
-using json = go.encoding.json_package;
-
 namespace go.cmd.vet.testdata;
+
+using json = encoding.json_package;
 
 public static partial class unmarshal_package {
 

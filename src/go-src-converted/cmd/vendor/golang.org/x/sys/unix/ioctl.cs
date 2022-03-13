@@ -5,21 +5,23 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package unix -- go2cs converted at 2022 March 06 23:26:36 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:18 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\ioctl.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
+
+
+// ioctl itself should not be exposed directly, but additional get/set
+// functions for specific types are permissible.
+
+// IoctlSetInt performs an ioctl operation which sets an integer value
+// on fd, using the specified request number.
 
 public static partial class unix_package {
 
-    // ioctl itself should not be exposed directly, but additional get/set
-    // functions for specific types are permissible.
-
-    // IoctlSetInt performs an ioctl operation which sets an integer value
-    // on fd, using the specified request number.
 public static error IoctlSetInt(nint fd, nuint req, nint value) {
     return error.As(ioctl(fd, req, uintptr(value)))!;
 }
@@ -44,7 +46,6 @@ public static error IoctlSetWinsize(nint fd, nuint req, ptr<Winsize> _addr_value
     var err = ioctl(fd, req, uintptr(@unsafe.Pointer(value)));
     runtime.KeepAlive(value);
     return error.As(err)!;
-
 }
 
 // IoctlSetTermios performs an ioctl on fd with a *Termios.
@@ -57,7 +58,6 @@ public static error IoctlSetTermios(nint fd, nuint req, ptr<Termios> _addr_value
     var err = ioctl(fd, req, uintptr(@unsafe.Pointer(value)));
     runtime.KeepAlive(value);
     return error.As(err)!;
-
 }
 
 // IoctlGetInt performs an ioctl operation which gets an integer value

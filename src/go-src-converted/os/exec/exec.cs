@@ -18,31 +18,33 @@
 // Note that the examples in this package assume a Unix system.
 // They may not run on Windows, and they do not run in the Go Playground
 // used by golang.org and godoc.org.
-// package exec -- go2cs converted at 2022 March 06 22:14:00 UTC
+
+// package exec -- go2cs converted at 2022 March 13 05:28:09 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Program Files\Go\src\os\exec\exec.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using errors = go.errors_package;
-using execenv = go.@internal.syscall.execenv_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using System;
-using System.Threading;
-
-
 namespace go.os;
 
+using bytes = bytes_package;
+using context = context_package;
+using errors = errors_package;
+using execenv = @internal.syscall.execenv_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using syscall = syscall_package;
+
+
+// Error is returned by LookPath when it fails to classify a file as an
+// executable.
+
+using System;
+using System.Threading;
 public static partial class exec_package {
 
-    // Error is returned by LookPath when it fails to classify a file as an
-    // executable.
 public partial struct Error {
     public @string Name; // Err is the underlying error.
     public error Err;
@@ -169,10 +171,8 @@ public static ptr<Cmd> Command(@string name, params @string[] arg) {
             }
 
         }
-
     }
     return _addr_cmd!;
-
 }
 
 // CommandContext is like Command but includes a context.
@@ -189,7 +189,6 @@ public static ptr<Cmd> CommandContext(context.Context ctx, @string name, params 
     var cmd = Command(name, arg);
     cmd.ctx = ctx;
     return _addr_cmd!;
-
 });
 
 // String returns a human-readable description of c.
@@ -202,7 +201,6 @@ private static @string String(this ptr<Cmd> _addr_c) {
     if (c.lookPathErr != null) { 
         // failed to resolve path; report the original requested path (plus args)
         return strings.Join(c.Args, " ");
-
     }
     ptr<object> b = @new<strings.Builder>();
     b.WriteString(c.Path);
@@ -210,7 +208,6 @@ private static @string String(this ptr<Cmd> _addr_c) {
         b.WriteByte(' ');
         b.WriteString(a);
     }    return b.String();
-
 }
 
 // interfaceEqual protects against panics from doing equality tests on
@@ -231,7 +228,6 @@ private static (slice<@string>, error) envv(this ptr<Cmd> _addr_c) {
         return (c.Env, error.As(null!)!);
     }
     return execenv.Default(c.SysProcAttr);
-
 }
 
 private static slice<@string> argv(this ptr<Cmd> _addr_c) {
@@ -241,7 +237,6 @@ private static slice<@string> argv(this ptr<Cmd> _addr_c) {
         return c.Args;
     }
     return new slice<@string>(new @string[] { c.Path });
-
 }
 
 // skipStdinCopyError optionally specifies a function which reports
@@ -260,7 +255,6 @@ private static (ptr<os.File>, error) stdin(this ptr<Cmd> _addr_c) {
         }
         c.closeAfterStart = append(c.closeAfterStart, f);
         return ;
-
     }
     {
         ptr<os.File> (f, ok) = c.Stdin._<ptr<os.File>>();
@@ -269,7 +263,6 @@ private static (ptr<os.File>, error) stdin(this ptr<Cmd> _addr_c) {
             return (_addr_f!, error.As(null!)!);
         }
     }
-
 
     var (pr, pw, err) = os.Pipe();
     if (err != null) {
@@ -287,7 +280,6 @@ private static (ptr<os.File>, error) stdin(this ptr<Cmd> _addr_c) {
             }
 
         }
-
         {
             var err1 = pw.Close();
 
@@ -296,12 +288,9 @@ private static (ptr<os.File>, error) stdin(this ptr<Cmd> _addr_c) {
             }
 
         }
-
         return _addr_err!;
-
     });
     return (_addr_pr!, error.As(null!)!);
-
 }
 
 private static (ptr<os.File>, error) stdout(this ptr<Cmd> _addr_c) {
@@ -321,7 +310,6 @@ private static (ptr<os.File>, error) stderr(this ptr<Cmd> _addr_c) {
         return (_addr_c.childFiles[1]!, error.As(null!)!);
     }
     return _addr_c.writerDescriptor(c.Stderr)!;
-
 }
 
 private static (ptr<os.File>, error) writerDescriptor(this ptr<Cmd> _addr_c, io.Writer w) {
@@ -336,7 +324,6 @@ private static (ptr<os.File>, error) writerDescriptor(this ptr<Cmd> _addr_c, io.
         }
         c.closeAfterStart = append(c.closeAfterStart, f);
         return ;
-
     }
     {
         ptr<os.File> (f, ok) = w._<ptr<os.File>>();
@@ -345,7 +332,6 @@ private static (ptr<os.File>, error) writerDescriptor(this ptr<Cmd> _addr_c, io.
             return (_addr_f!, error.As(null!)!);
         }
     }
-
 
     var (pr, pw, err) = os.Pipe();
     if (err != null) {
@@ -357,10 +343,8 @@ private static (ptr<os.File>, error) writerDescriptor(this ptr<Cmd> _addr_c, io.
         var (_, err) = io.Copy(w, pr);
         pr.Close(); // in case io.Copy stopped due to write error
         return _addr_err!;
-
     });
     return (_addr_pw!, error.As(null!)!);
-
 }
 
 private static void closeDescriptors(this ptr<Cmd> _addr_c, slice<io.Closer> closers) {
@@ -394,9 +378,7 @@ private static error Run(this ptr<Cmd> _addr_c) {
             return error.As(err)!;
         }
     }
-
     return error.As(c.Wait())!;
-
 }
 
 // lookExtensions finds windows executable by its dir and path.
@@ -426,7 +408,6 @@ private static (@string, error) lookExtensions(@string path, @string dir) {
     }
     var ext = strings.TrimPrefix(lp, dirandpath);
     return (path + ext, error.As(null!)!);
-
 }
 
 // Start starts the specified command but does not wait for it to complete.
@@ -451,7 +432,6 @@ private static error Start(this ptr<Cmd> _addr_c) {
             return error.As(err)!;
         }
         c.Path = lp;
-
     }
     if (c.Process != null) {
         return error.As(errors.New("exec: already started"))!;
@@ -471,7 +451,6 @@ private static error Start(this ptr<Cmd> _addr_c) {
             return error.As(err)!;
         }
         c.childFiles = append(c.childFiles, fd);
-
     }    c.childFiles = append(c.childFiles, c.ExtraFiles);
 
     var (envv, err) = c.envv();
@@ -502,7 +481,6 @@ private static error Start(this ptr<Cmd> _addr_c) {
         }());
     }
     return error.As(null!)!;
-
 }
 
 // An ExitError reports an unsuccessful exit by a command.
@@ -570,7 +548,6 @@ private static error Wait(this ptr<Cmd> _addr_c) {
             }
 
         }
-
     }    c.closeDescriptors(c.closeAfterWait);
 
     if (err != null) {
@@ -580,7 +557,6 @@ private static error Wait(this ptr<Cmd> _addr_c) {
         return error.As(addr(new ExitError(ProcessState:state))!)!;
     }
     return error.As(copyError)!;
-
 }
 
 // Output runs the command and returns its standard output.
@@ -612,10 +588,8 @@ private static (slice<byte>, error) Output(this ptr<Cmd> _addr_c) {
             }
 
         }
-
     }
     return (stdout.Bytes(), error.As(err)!);
-
 }
 
 // CombinedOutput runs the command and returns its combined standard
@@ -638,7 +612,6 @@ private static (slice<byte>, error) CombinedOutput(this ptr<Cmd> _addr_c) {
     c.Stderr = ref _addr_c.Stderr.val;
     var err = c.Run();
     return (b.Bytes(), error.As(err)!);
-
 }
 
 // StdinPipe returns a pipe that will be connected to the command's
@@ -667,7 +640,6 @@ private static (io.WriteCloser, error) StdinPipe(this ptr<Cmd> _addr_c) {
     ptr<closeOnce> wc = addr(new closeOnce(File:pw));
     c.closeAfterWait = append(c.closeAfterWait, wc);
     return (wc, error.As(null!)!);
-
 }
 
 private partial struct closeOnce {
@@ -716,7 +688,6 @@ private static (io.ReadCloser, error) StdoutPipe(this ptr<Cmd> _addr_c) {
     c.closeAfterStart = append(c.closeAfterStart, pw);
     c.closeAfterWait = append(c.closeAfterWait, pr);
     return (pr, error.As(null!)!);
-
 }
 
 // StderrPipe returns a pipe that will be connected to the command's
@@ -746,7 +717,6 @@ private static (io.ReadCloser, error) StderrPipe(this ptr<Cmd> _addr_c) {
     c.closeAfterStart = append(c.closeAfterStart, pw);
     c.closeAfterWait = append(c.closeAfterWait, pr);
     return (pr, error.As(null!)!);
-
 }
 
 // prefixSuffixSaver is an io.Writer which retains the first N bytes
@@ -781,7 +751,6 @@ private static (nint, error) Write(this ptr<prefixSuffixSaver> _addr_w, slice<by
             w.skipped += int64(overage);
         }
     }
-
     p = w.fill(_addr_w.suffix, p); 
 
     // w.suffix is full now if p is non-empty. Overwrite it in a circle.
@@ -795,7 +764,6 @@ private static (nint, error) Write(this ptr<prefixSuffixSaver> _addr_w, slice<by
         }
     }
     return (lenp, error.As(null!)!);
-
 }
 
 // fill appends up to len(p) bytes of p to *dst, such that *dst does not
@@ -814,9 +782,7 @@ private static slice<byte> fill(this ptr<prefixSuffixSaver> _addr_w, ptr<slice<b
             p = p[(int)add..];
         }
     }
-
     return p;
-
 }
 
 private static slice<byte> Bytes(this ptr<prefixSuffixSaver> _addr_w) {
@@ -837,7 +803,6 @@ private static slice<byte> Bytes(this ptr<prefixSuffixSaver> _addr_w) {
     buf.Write(w.suffix[(int)w.suffixOff..]);
     buf.Write(w.suffix[..(int)w.suffixOff]);
     return buf.Bytes();
-
 }
 
 private static nint minInt(nint a, nint b) {
@@ -845,7 +810,6 @@ private static nint minInt(nint a, nint b) {
         return a;
     }
     return b;
-
 }
 
 // dedupEnv returns a copy of env with any duplicates removed, in favor of
@@ -879,12 +843,9 @@ private static slice<@string> dedupEnvCase(bool caseInsensitive, slice<@string> 
             }
 
         }
-
         saw[k] = len(out);
         out = append(out, kv);
-
     }    return out;
-
 }
 
 // addCriticalEnv adds any critical environment variables that are required
@@ -903,10 +864,8 @@ private static slice<@string> addCriticalEnv(slice<@string> env) {
         if (strings.EqualFold(k, "SYSTEMROOT")) { 
             // We already have it.
             return env;
-
         }
     }    return append(env, "SYSTEMROOT=" + os.Getenv("SYSTEMROOT"));
-
 }
 
 } // end exec_package

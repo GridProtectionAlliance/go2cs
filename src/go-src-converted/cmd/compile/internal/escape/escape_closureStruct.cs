@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:09:14 UTC
+//     Generated on 2022 March 13 06:22:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace @internal
 {
     public static partial class escape_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct closure
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace @internal
             public static implicit operator closure(NilType nil) => default(closure);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static closure closure_cast(dynamic value)
         {
             return new closure(value.k, ref value.clo);

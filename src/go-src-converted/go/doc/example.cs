@@ -4,26 +4,27 @@
 
 // Extract example functions from file ASTs.
 
-// package doc -- go2cs converted at 2022 March 06 22:41:29 UTC
+// package doc -- go2cs converted at 2022 March 13 05:52:34 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Program Files\Go\src\go\doc\example.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using path = go.path_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go;
 
+using ast = go.ast_package;
+using token = go.token_package;
+using lazyregexp = @internal.lazyregexp_package;
+using path = path_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// An Example represents an example function found in a test source file.
+
+using System;
 public static partial class doc_package {
 
-    // An Example represents an example function found in a test source file.
 public partial struct Example {
     public @string Name; // name of the item being exemplified (including optional suffix)
     public @string Suffix; // example suffix, without leading '_' (only populated by NewFromFiles)
@@ -71,23 +72,19 @@ public static slice<ptr<Example>> Examples(params ptr<ptr<ast.File>>[] _addr_tes
                 }
 
             }
-
             ptr<ast.FuncDecl> (f, ok) = decl._<ptr<ast.FuncDecl>>();
             if (!ok || f.Recv != null) {
                 continue;
             }
-
             numDecl++;
             var name = f.Name.Name;
             if (isTest(name, "Test") || isTest(name, "Benchmark")) {
                 hasTests = true;
                 continue;
             }
-
             if (!isTest(name, "Example")) {
                 continue;
             }
-
             {
                 var @params = f.Type.Params;
 
@@ -96,35 +93,25 @@ public static slice<ptr<Example>> Examples(params ptr<ptr<ast.File>>[] _addr_tes
                 }
 
             }
-
             if (f.Body == null) { // ast.File.Body nil dereference (see issue 28044)
                 continue;
-
             }
-
             @string doc = default;
             if (f.Doc != null) {
                 doc = f.Doc.Text();
             }
-
             var (output, unordered, hasOutput) = exampleOutput(_addr_f.Body, file.Comments);
             flist = append(flist, addr(new Example(Name:name[len("Example"):],Doc:doc,Code:f.Body,Play:playExample(file,f),Comments:file.Comments,Output:output,Unordered:unordered,EmptyOutput:output==""&&hasOutput,Order:len(flist),)));
-
         }        if (!hasTests && numDecl > 1 && len(flist) == 1) { 
             // If this file only has one example function, some
             // other top-level declarations, and no tests or
             // benchmarks, use the whole file as the example.
             flist[0].Code = file;
             flist[0].Play = playExampleFile(_addr_file);
-
         }
         list = append(list, flist);
-
-    }    sort.Slice(list, (i, j) => {
-        return list[i].Name < list[j].Name;
-    });
+    }    sort.Slice(list, (i, j) => list[i].Name < list[j].Name);
     return list;
-
 }
 
 private static var outputPrefix = lazyregexp.New("(?i)^[[:space:]]*(unordered )?output:");
@@ -155,16 +142,12 @@ private static (@string, bool, bool) exampleOutput(ptr<ast.BlockStmt> _addr_b, s
                     if (len(text) > 0 && text[0] == '\n') {
                         text = text[(int)1..];
                     }
-
                     return (text, unordered, true);
-
                 }
 
             }
-
         }
     }
-
     return ("", false, false); // no suitable comment found
 }
 
@@ -177,11 +160,9 @@ private static bool isTest(@string name, @string prefix) {
     }
     if (len(name) == len(prefix)) { // "Test" is ok
         return true;
-
     }
     var (rune, _) = utf8.DecodeRuneInString(name[(int)len(prefix)..]);
     return !unicode.IsLower(rune);
-
 }
 
 // playExample synthesizes a new *ast.File based on the provided
@@ -196,7 +177,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
         // We don't support examples that are part of the
         // greater package (yet).
         return _addr_null!;
-
     }
     var topDecls = make_map<ptr<ast.Object>, ast.Decl>();
     var typMethods = make_map<@string, slice<ast.Decl>>();
@@ -215,7 +195,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                         typMethods[tname] = append(typMethods[tname], d);
                     }
                 }
-
                 break;
             case ptr<ast.GenDecl> d:
                 {
@@ -233,14 +212,12 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                                 }
                                 break;
                         }
-
                     }
 
                     spec = spec__prev2;
                 }
                 break;
         }
-
     }    var unresolved = make_map<@string, bool>();
     slice<ast.Decl> depDecls = default;
     var hasDepDecls = make_map<ast.Decl, bool>();
@@ -267,7 +244,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                     d = d__prev2;
 
                 }
-
                 return _addr_true!;
                 break;
             case ptr<ast.SelectorExpr> e:
@@ -280,7 +256,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                 break;
         }
         return _addr_true!;
-
     };
     ast.Inspect(body, inspectFunc);
     for (nint i = 0; i < len(depDecls); i++) {
@@ -298,7 +273,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                         p = p__prev2;
                     }
                 }
-
                 if (d.Type.Results != null) {
                     foreach (var (_, r) in d.Type.Results.List) {
                         ast.Inspect(r.Type, inspectFunc);
@@ -309,7 +283,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                 if (d.Body != null) {
                     ast.Inspect(d.Body, inspectFunc);
                 }
-
                 break;
             case ptr<ast.GenDecl> d:
                 {
@@ -332,14 +305,12 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                                 }
                                 break;
                         }
-
                     }
 
                     spec = spec__prev2;
                 }
                 break;
         }
-
     } 
 
     // Remove predeclared identifiers from unresolved list.
@@ -370,9 +341,7 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                 // We don't support examples that import syscall/js,
                 // because the package syscall/js is not available in the playground.
                 return _addr_null!;
-
             }
-
             var n = path.Base(p);
             if (s.Name != null) {
                 n = s.Name.Name;
@@ -386,14 +355,11 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                         return _addr_null!;
                         break;
                 }
-
             }
-
             if (unresolved[n]) {
                 namedImports[n] = p;
                 delete(unresolved, n);
             }
-
         }
         s = s__prev1;
     }
@@ -419,7 +385,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                 c = c__prev1;
 
             }
-
         }
         s = s__prev1;
     }
@@ -456,7 +421,6 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
                     }
                     break;
             }
-
         }
         d = d__prev1;
     }
@@ -489,17 +453,12 @@ private static ptr<ast.File> playExample(ptr<ast.File> _addr_file, ptr<ast.FuncD
     decls = append(decls, depDecls);
     decls = append(decls, funcDecl);
 
-    sort.Slice(decls, (i, j) => {
-        return _addr_decls[i].Pos() < decls[j].Pos()!;
-    });
+    sort.Slice(decls, (i, j) => _addr_decls[i].Pos() < decls[j].Pos()!);
 
-    sort.Slice(comments, (i, j) => {
-        return _addr_comments[i].Pos() < comments[j].Pos()!;
-    }); 
+    sort.Slice(comments, (i, j) => _addr_comments[i].Pos() < comments[j].Pos()!); 
 
     // Synthesize file.
     return addr(new ast.File(Name:ast.NewIdent("main"),Decls:decls,Comments:comments,));
-
 }
 
 // playExampleFile takes a whole file example and synthesizes a new *ast.File
@@ -526,21 +485,17 @@ private static ptr<ast.File> playExampleFile(ptr<ast.File> _addr_file) {
                 newF.Body, comments = stripOutputComment(_addr_f.Body, comments);
                 _addr_d = _addr_newF;
                 d = ref _addr_d.val;
-
             }
 
             f = f__prev1;
 
         }
-
         decls = append(decls, d);
-
     }    ref ast.File f = ref heap(file, out ptr<ast.File> _addr_f);
     f.Name = ast.NewIdent("main");
     f.Decls = decls;
     f.Comments = comments;
     return _addr__addr_f!;
-
 }
 
 // stripOutputComment finds and removes the "Output:" or "Unordered output:"
@@ -560,7 +515,6 @@ private static (ptr<ast.BlockStmt>, slice<ptr<ast.CommentGroup>>) stripOutputCom
     copy(newComments, comments[..(int)i]);
     copy(newComments[(int)i..], comments[(int)i + 1..]);
     return (_addr_newBody!, newComments);
-
 }
 
 // lastComment returns the last comment inside the provided block.
@@ -583,7 +537,6 @@ private static (nint, ptr<ast.CommentGroup>) lastComment(ptr<ast.BlockStmt> _add
         }
         (i, last) = (j, cg);
     }    return ;
-
 }
 
 // classifyExamples classifies examples and assigns them to the Examples field
@@ -660,28 +613,22 @@ private static void classifyExamples(ptr<Package> _addr_p, slice<ptr<Example>> e
                     continue;
                 i = strings.LastIndexByte(ex.Name[..(int)i], '_');
                 }
-
                 var (exs, ok) = ids[prefix];
                 if (!ok) {
                     continue;
                 }
-
                 ex.Suffix = suffix;
                 exs.val = append(exs.val, ex);
                 break;
-
             }
 
         }
-
     }    {
         var exs__prev1 = exs;
 
         foreach (var (_, __exs) in ids) {
             exs = __exs;
-            sort.Slice((exs.val), (i, j) => {
-                return (exs.val)[i].Suffix < (exs.val)[j].Suffix;
-            });
+            sort.Slice((exs.val), (i, j) => (exs.val)[i].Suffix < (exs.val)[j].Suffix);
         }
         exs = exs__prev1;
     }
@@ -705,7 +652,6 @@ private static (@string, @string, bool) splitExampleName(@string s, nint i) {
         return ("", "", false);
     }
     (prefix, suffix) = (s[..(int)i], s[(int)i + 1..]);    return (prefix, suffix, isExampleSuffix(suffix));
-
 }
 
 private static bool isExampleSuffix(@string s) {

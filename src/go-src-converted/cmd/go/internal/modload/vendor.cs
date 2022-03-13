@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:33 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:55 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\vendor.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using fs = io.fs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using @base = cmd.go.@internal.@base_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using System;
 
 public static partial class modload_package {
 
@@ -59,13 +58,11 @@ private static void readVendorList() {
                     // only included to indicate a replacement.
                     mod = new module.Version(Path:f[1],Version:f[2]);
                     f = f[(int)3..];
-
                 }
                 else if (f[2] == "=>") { 
                     // A wildcard replacement found in the main module's go.mod file.
                     mod = new module.Version(Path:f[1]);
                     f = f[(int)2..];
-
                 }
                 else
  { 
@@ -73,34 +70,26 @@ private static void readVendorList() {
                     // We don't know how to interpret this module line, so ignore it.
                     mod = new module.Version();
                     continue;
-
                 }
-
                 if (len(f) >= 2 && f[0] == "=>") {
                     var meta = vendorMeta[mod];
                     if (len(f) == 2) { 
                         // File replacement.
                         meta.Replacement = new module.Version(Path:f[1]);
                         vendorReplaced = append(vendorReplaced, mod);
-
                     }
                     else if (len(f) == 3 && semver.IsValid(f[2])) { 
                         // Path and version replacement.
                         meta.Replacement = new module.Version(Path:f[1],Version:f[2]);
                         vendorReplaced = append(vendorReplaced, mod);
-
                     }
                     else
  { 
                         // We don't understand this replacement. Ignore it.
                     }
-
                     vendorMeta[mod] = meta;
-
                 }
-
                 continue;
-
             } 
 
             // Not a module line. Must be a package within a module or a metadata
@@ -108,7 +97,6 @@ private static void readVendorList() {
             if (mod.Path == "") {
                 continue;
             }
-
             if (strings.HasPrefix(line, "## ")) { 
                 // Metadata. Take the union of annotations across multiple lines, if present.
                 meta = vendorMeta[mod];
@@ -125,9 +113,7 @@ private static void readVendorList() {
                 }
                 vendorMeta[mod] = meta;
                 continue;
-
             }
-
             {
                 var f__prev1 = f;
 
@@ -149,16 +135,13 @@ private static void readVendorList() {
                         }
 
                     }
-
                 }
 
                 f = f__prev1;
 
             }
-
         }
     });
-
 }
 
 // checkVendorConsistency verifies that the vendor/modules.txt file matches (if
@@ -173,7 +156,6 @@ private static void checkVendorConsistency() {
         // vendor/modules.txt to check for consistency.
         // If we know that we're on an earlier version, relax the consistency check.
         pre114 = true;
-
     }
     ptr<object> vendErrors = @new<strings.Builder>();
     Action<module.Version, @string, object[]> vendErrorf = (mod, format, args) => {
@@ -208,15 +190,12 @@ private static void checkVendorConsistency() {
                         }
 
                     }
-
                 }
                 else
  {
                     vendErrorf(r.Mod, "is explicitly required in go.mod, but not marked as explicit in vendor/modules.txt");
                 }
-
             }
-
         }
         r = r__prev1;
     }
@@ -226,7 +205,6 @@ private static void checkVendorConsistency() {
             return m.Path;
         }
         return m.Path + "@" + m.Version;
-
     }; 
 
     // We need to verify *all* replacements that occur in modfile: even if they
@@ -248,12 +226,10 @@ private static void checkVendorConsistency() {
  {
                     vendErrorf(r.Old, "is replaced in go.mod, but not marked as replaced in vendor/modules.txt");
                 }
-
             }
             else if (vr != r.New) {
                 vendErrorf(r.Old, "is replaced by %s in go.mod, but marked as replaced by %s in vendor/modules.txt", describe(r.New), describe(vr));
             }
-
         }
         r = r__prev1;
     }
@@ -273,9 +249,7 @@ private static void checkVendorConsistency() {
                     }
 
                 }
-
             }
-
         }
         mod = mod__prev1;
     }
@@ -302,7 +276,6 @@ private static void checkVendorConsistency() {
                 meta = meta__prev1;
 
             }
-
         }
         mod = mod__prev1;
     }

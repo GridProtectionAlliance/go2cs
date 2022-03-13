@@ -28,19 +28,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package sym -- go2cs converted at 2022 March 06 23:20:35 UTC
+// package sym -- go2cs converted at 2022 March 13 06:33:29 UTC
 // import "cmd/link/internal/sym" ==> using sym = go.cmd.link.@internal.sym_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\sym\segment.go
-
-
 namespace go.cmd.link.@internal;
 
 public static partial class sym_package {
 
-    // Terrible but standard terminology.
-    // A segment describes a block of file to load into memory.
-    // A section further describes the pieces of that block for
-    // use in debuggers and such.
+// Terrible but standard terminology.
+// A segment describes a block of file to load into memory.
+// A section further describes the pieces of that block for
+// use in debuggers and such.
+
 public partial struct Segment {
     public byte Rwx; // permission as usual unix bits (5 = r-x etc)
     public ulong Vaddr; // virtual address

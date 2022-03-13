@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:41 UTC
+//     Generated on 2022 March 13 05:38:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class regexp_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct onePassMachine
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator onePassMachine(NilType nil) => default(onePassMachine);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static onePassMachine onePassMachine_cast(dynamic value)
         {
             return new onePassMachine(value.inputs, value.matchcap);

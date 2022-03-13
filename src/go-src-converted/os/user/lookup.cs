@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package user -- go2cs converted at 2022 March 06 22:14:28 UTC
+// package user -- go2cs converted at 2022 March 13 05:28:33 UTC
 // import "os/user" ==> using user = go.os.user_package
 // Original source: C:\Program Files\Go\src\os\user\lookup.go
-using sync = go.sync_package;
-using System;
-
-
 namespace go.os;
+
+using sync = sync_package;
+using System;
 
 public static partial class user_package {
 
-    // Current returns the current user.
-    //
-    // The first call will cache the current user information.
-    // Subsequent calls will return the cached value and will not reflect
-    // changes to the current user.
+// Current returns the current user.
+//
+// The first call will cache the current user information.
+// Subsequent calls will return the cached value and will not reflect
+// changes to the current user.
 public static (ptr<User>, error) Current() {
     ptr<User> _p0 = default!;
     error _p0 = default!;
@@ -30,7 +29,6 @@ public static (ptr<User>, error) Current() {
     }
     ref var u = ref heap(cache.u.val, out ptr<var> _addr_u); // copy
     return (_addr__addr_u!, error.As(null!)!);
-
 }
 
 // cache of the current user
@@ -49,9 +47,7 @@ public static (ptr<User>, error) Lookup(@string username) {
             return (_addr_u!, error.As(err)!);
         }
     }
-
     return _addr_lookupUser(username)!;
-
 }
 
 // LookupId looks up a user by userid. If the user cannot be found, the
@@ -67,9 +63,7 @@ public static (ptr<User>, error) LookupId(@string uid) {
             return (_addr_u!, error.As(err)!);
         }
     }
-
     return _addr_lookupUserId(uid)!;
-
 }
 
 // LookupGroup looks up a group by name. If the group cannot be found, the

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:03 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:24 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\map.go
-using runtime = go.runtime_package;
+namespace go;
+
+using runtime = runtime_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -35,7 +34,6 @@ private static void concurrentMapWrites() {
             i = i__prev1;
         }
         c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
-
     }());
     go_(() => () => {
         {
@@ -50,10 +48,8 @@ private static void concurrentMapWrites() {
             i = i__prev1;
         }
         c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
-
     }());
     c.Receive().Send(c);
-
 }
 
 private static void concurrentMapReadWrite() {
@@ -72,7 +68,6 @@ private static void concurrentMapReadWrite() {
             i = i__prev1;
         }
         c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
-
     }());
     go_(() => () => {
         {
@@ -87,10 +82,8 @@ private static void concurrentMapReadWrite() {
             i = i__prev1;
         }
         c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
-
     }());
     c.Receive().Send(c);
-
 }
 
 private static void concurrentMapIterateWrite() {
@@ -109,7 +102,6 @@ private static void concurrentMapIterateWrite() {
             i = i__prev1;
         }
         c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
-
     }());
     go_(() => () => {
         {
@@ -125,10 +117,8 @@ private static void concurrentMapIterateWrite() {
             i = i__prev1;
         }
         c.Send(/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{});
-
     }());
     c.Receive().Send(c);
-
 }
 
 } // end main_package

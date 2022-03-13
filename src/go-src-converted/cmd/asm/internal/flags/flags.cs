@@ -3,17 +3,18 @@
 // license that can be found in the LICENSE file.
 
 // Package flags implements top-level flags and the usage message for the assembler.
-// package flags -- go2cs converted at 2022 March 06 22:43:10 UTC
+
+// package flags -- go2cs converted at 2022 March 13 05:54:20 UTC
 // import "cmd/asm/internal/flags" ==> using flags = go.cmd.asm.@internal.flags_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\flags\flags.go
-using objabi = go.cmd.@internal.objabi_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go.cmd.asm.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
 
 public static partial class flags_package {
 
@@ -27,7 +28,6 @@ private static void init() {
     flag.BoolVar(_addr_DebugV, "v", false, "print debug output");
     objabi.AddVersionFlag(); // -V
     objabi.Flagcount("S", "print assembly and machine code", _addr_PrintOut);
-
 }
 
 // MultiFlag allows setting a value multiple times to collect a list, as in -I=dir1 -I=dir2.
@@ -41,7 +41,6 @@ private static @string String(this ptr<MultiFlag> _addr_m) {
         return "";
     }
     return fmt.Sprint(m.val);
-
 }
 
 private static error Set(this ptr<MultiFlag> _addr_m, @string val) {
@@ -73,7 +72,6 @@ public static void Parse() {
             input = input[..(int)len(input) - 2];
         }
         OutputFile.val = fmt.Sprintf("%s.o", input);
-
     }
 }
 

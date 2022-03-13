@@ -4,24 +4,23 @@
 
 // +build solaris
 
-// package lif -- go2cs converted at 2022 March 06 23:38:05 UTC
+// package lif -- go2cs converted at 2022 March 13 06:46:23 UTC
 // import "vendor/golang.org/x/net/lif" ==> using lif = go.vendor.golang.org.x.net.lif_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\lif\link.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.net;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class lif_package {
 
-    // A Link represents logical data link information.
-    //
-    // It also represents base information for logical network interface.
-    // On Solaris, each logical network interface represents network layer
-    // adjacency information and the interface has a only single network
-    // address or address pair for tunneling. It's usual that multiple
-    // logical network interfaces share the same logical data link.
+// A Link represents logical data link information.
+//
+// It also represents base information for logical network interface.
+// On Solaris, each logical network interface represents network layer
+// adjacency information and the interface has a only single network
+// address or address pair for tunneling. It's usual that multiple
+// logical network interfaces share the same logical data link.
 public partial struct Link {
     public @string Name; // name, equivalent to IP interface name
     public nint Index; // index, equivalent to IP interface index
@@ -50,7 +49,6 @@ private static void fetch(this ptr<Link> _addr_ll, System.UIntPtr s) {
         err = err__prev1;
 
     }
-
     ioc = int64(sysSIOCGLIFFLAGS);
     {
         var err__prev1 = err;
@@ -63,7 +61,6 @@ private static void fetch(this ptr<Link> _addr_ll, System.UIntPtr s) {
         err = err__prev1;
 
     }
-
     ioc = int64(sysSIOCGLIFMTU);
     {
         var err__prev1 = err;
@@ -76,7 +73,6 @@ private static void fetch(this ptr<Link> _addr_ll, System.UIntPtr s) {
         err = err__prev1;
 
     }
-
 
     if (ll.Type == sysIFT_IPV4 || ll.Type == sysIFT_IPV6 || ll.Type == sysIFT_6TO4)     else 
         ioc = int64(sysSIOCGLIFHWADDR);
@@ -92,7 +88,6 @@ private static void fetch(this ptr<Link> _addr_ll, System.UIntPtr s) {
             err = err__prev1;
 
         }
-
     }
 
 // Links returns a list of logical data links.
@@ -113,7 +108,6 @@ public static (slice<Link>, error) Links(nint af, @string name) => func((defer, 
         }
     }());
     return links(eps, name);
-
 });
 
 private static (slice<Link>, error) links(slice<endpoint> eps, @string name) {
@@ -138,7 +132,6 @@ private static (slice<Link>, error) links(slice<endpoint> eps, @string name) {
             err = err__prev1;
 
         }
-
         if (lifn.Count == 0) {
             continue;
         }
@@ -165,7 +158,6 @@ private static (slice<Link>, error) links(slice<endpoint> eps, @string name) {
             err = err__prev1;
 
         }
-
         var nb = make_slice<byte>(32); // see LIFNAMSIZ in net/if.h
         {
             nint i__prev2 = i;
@@ -191,19 +183,15 @@ private static (slice<Link>, error) links(slice<endpoint> eps, @string name) {
                 if (isDupLink(lls, llname) || name != "" && name != llname) {
                     continue;
                 }
-
                 Link ll = new Link(Name:llname,Type:int(lifr.Type));
                 ll.fetch(ep.s);
                 lls = append(lls, ll);
-
             }
 
 
             i = i__prev2;
         }
-
     }    return (lls, error.As(null!)!);
-
 }
 
 private static bool isDupLink(slice<Link> lls, @string name) {
@@ -212,7 +200,6 @@ private static bool isDupLink(slice<Link> lls, @string name) {
             return true;
         }
     }    return false;
-
 }
 
 } // end lif_package

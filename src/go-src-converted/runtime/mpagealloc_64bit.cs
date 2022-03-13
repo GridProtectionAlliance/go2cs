@@ -7,14 +7,13 @@
 
 // See mpagealloc_32bit.go for why ios/arm64 is excluded here.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:01 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:49 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mpagealloc_64bit.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -32,7 +31,6 @@ private static readonly nint pageAlloc64Bit = 1;
 // See (*pageAlloc).chunks for more details. Update the documentation
 // there should this number change.
 private static readonly nint pallocChunksL1Bits = 13;
-
 
 // levelBits is the number of bits in the radix for a given level in the super summary
 // structure.
@@ -73,7 +71,6 @@ private static void sysInit(this ptr<pageAlloc> _addr_p) {
         }
         ref notInHeapSlice sl = ref heap(new notInHeapSlice((*notInHeap)(r),0,entries), out ptr<notInHeapSlice> _addr_sl);
         p.summary[l] = new ptr<ptr<ptr<slice<pallocSum>>>>(@unsafe.Pointer(_addr_sl));
-
     }
 }
 
@@ -157,7 +154,6 @@ private static void sysGrow(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, S
         }
         sysMap(@unsafe.Pointer(need.@base.addr()), need.size(), p.sysStat);
         sysUsed(@unsafe.Pointer(need.@base.addr()), need.size());
-
     }
 }
 

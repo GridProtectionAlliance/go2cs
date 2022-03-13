@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:12:17 UTC
+// package noder -- go2cs converted at 2022 March 13 06:25:38 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\decl.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using types2 = go.cmd.compile.@internal.types2_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using types2 = cmd.compile.@internal.types2_package;
+
+
+// TODO(mdempsky): Skip blank declarations? Probably only safe
+// for declarations without pragmas.
 
 public static partial class noder_package {
 
-    // TODO(mdempsky): Skip blank declarations? Probably only safe
-    // for declarations without pragmas.
 private static slice<ir.Node> decls(this ptr<irgen> _addr_g, slice<syntax.Decl> decls) {
     ref irgen g = ref _addr_g.val;
 
@@ -52,13 +54,11 @@ private static slice<ir.Node> decls(this ptr<irgen> _addr_g, slice<syntax.Decl> 
                     break;
                 }
             }
-
         }
         decl = decl__prev1;
     }
 
     return res;
-
 }
 
 private static void importDecl(this ptr<irgen> _addr_g, ptr<noder> _addr_p, ptr<syntax.ImportDecl> _addr_decl) {
@@ -109,7 +109,6 @@ private static void constDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out,
                         name.SetVal(val);
 
             @out.Append(ir.NewDecl(g.pos(decl), ir.ODCLCONST, name));
-
         }
         name = name__prev1;
     }
@@ -135,7 +134,6 @@ private static void funcDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, 
     g.funcBody(fn, decl.Recv, decl.Type, decl.Body);
 
     @out.Append(fn);
-
 }
 
 private static void typeDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, ptr<syntax.TypeDecl> _addr_decl) {
@@ -155,7 +153,6 @@ private static void typeDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, 
         }
         @out.Append(ir.NewDecl(g.pos(decl), ir.ODCLTYPE, name));
         return ;
-
     }
     types.DeferCheckSize();
 
@@ -178,7 +175,6 @@ private static void typeDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, 
         // used in the type itself (e.g., if it is an empty struct, or no
         // fields in the struct use the tparam).
         ntyp.SetHasTParam(true);
-
     }
     types.ResumeCheckSize();
 
@@ -201,9 +197,7 @@ private static void typeDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, 
 
     }
 
-
     @out.Append(ir.NewDecl(g.pos(decl), ir.ODCLTYPE, name));
-
 }
 
 private static void varDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, ptr<syntax.VarDecl> _addr_decl) {
@@ -233,7 +227,6 @@ private static void varDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, p
         // TODO(mdempsky): Plumb noder.importedEmbed through to here.
         varEmbed(g.makeXPos, names[0], decl, pragma, true);
         g.reportUnused(pragma);
-
     }
     ptr<ir.AssignListStmt> as2;
     if (len(values) != 0 && len(names) != len(values)) {
@@ -263,24 +256,19 @@ private static void varDecl(this ptr<irgen> _addr_g, ptr<ir.Nodes> _addr_@out, p
                 else if (ir.CurFunc == null) {
                     name.Defn = as;
                 }
-
                 ir.Node lhs = new slice<ir.Node>(new ir.Node[] { as.X });
                 ir.Node rhs = new slice<ir.Node>(new ir.Node[] {  });
                 if (@as.Y != null) {
                     rhs = new slice<ir.Node>(new ir.Node[] { as.Y });
                 }
-
                 transformAssign(as, lhs, rhs);
                 @as.X = lhs[0];
                 if (@as.Y != null) {
                     @as.Y = rhs[0];
                 }
-
                 @as.SetTypecheck(1);
                 @out.Append(as);
-
             }
-
         }
         i = i__prev1;
         name = name__prev1;
@@ -306,7 +294,6 @@ private static ir.PragmaFlag pragmaFlags(this ptr<irgen> _addr_g, syntax.Pragma 
     p.Flag &= allowed;
     g.reportUnused(p);
     return present;
-
 }
 
 // reportUnused reports errors about any unused pragmas.

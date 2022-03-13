@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:09 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:27 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\timeprof.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using pprof = go.runtime.pprof_package;
-using time = go.time_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using pprof = runtime.pprof_package;
+using time = time_package;
 
 public static partial class main_package {
 
@@ -36,11 +36,11 @@ public static void TimeProf() {
 
     }
 
-
     var t0 = time.Now(); 
     // We should get a profiling signal 100 times a second,
     // so running for 1/10 second should be sufficient.
-    while (time.Since(t0) < time.Second / 10)     }
+    while (time.Since(t0) < time.Second / 10) {
+    }
 
     pprof.StopCPUProfile();
 
@@ -58,9 +58,7 @@ public static void TimeProf() {
 
     }
 
-
     fmt.Println(name);
-
 }
 
 } // end main_package

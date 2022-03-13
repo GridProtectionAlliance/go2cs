@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:10 UTC
+//     Generated on 2022 March 13 06:44:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace image
 {
     public static partial class jpeg_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct bits
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace image
             public static implicit operator bits(NilType nil) => default(bits);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static bits bits_cast(dynamic value)
         {
             return new bits(value.a, value.m, value.n);

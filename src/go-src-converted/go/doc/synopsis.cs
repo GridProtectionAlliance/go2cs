@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package doc -- go2cs converted at 2022 March 06 22:41:33 UTC
+// package doc -- go2cs converted at 2022 March 13 05:52:38 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Program Files\Go\src\go\doc\synopsis.go
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
 namespace go.go;
+
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// firstSentenceLen returns the length of the first sentence in s.
+// The sentence ends after the first period followed by space and
+// not preceded by exactly one uppercase letter.
+//
 
 public static partial class doc_package {
 
-    // firstSentenceLen returns the length of the first sentence in s.
-    // The sentence ends after the first period followed by space and
-    // not preceded by exactly one uppercase letter.
-    //
 private static nint firstSentenceLen(@string s) {
     int ppp = default;    int pp = default;    int p = default;
 
@@ -31,11 +33,9 @@ private static nint firstSentenceLen(@string s) {
         }
         (ppp, pp, p) = (pp, p, q);
     }    return len(s);
-
 }
 
 private static readonly nint keepNL = 1 << (int)(iota);
-
 
 // clean replaces each sequence of space, \n, \r, or \t characters
 // with a single space and removes any trailing and leading spaces.
@@ -62,9 +62,7 @@ private static @string clean(@string s, nint flags) {
             b = b[(int)0..(int)n - 1];
         }
     }
-
     return string(b);
-
 }
 
 // Synopsis returns a cleaned version of the first sentence in s.
@@ -82,7 +80,6 @@ public static @string Synopsis(@string s) {
         }
     }    s = convertQuotes(s);
     return s;
-
 }
 
 public static @string IllegalPrefixes = new slice<@string>(new @string[] { "copyright", "all rights", "author" });

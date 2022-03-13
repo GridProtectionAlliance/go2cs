@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:44 UTC
+//     Generated on 2022 March 13 06:30:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class modinfo_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ModulePublic
         {
             // Constructors
@@ -81,7 +81,7 @@ namespace @internal
             public static implicit operator ModulePublic(NilType nil) => default(ModulePublic);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ModulePublic ModulePublic_cast(dynamic value)
         {
             return new ModulePublic(value.Path, value.Version, value.Versions, ref value.Replace, ref value.Time, ref value.Update, value.Main, value.Indirect, value.Dir, value.GoMod, value.GoVersion, value.Retracted, value.Deprecated, ref value.Error);

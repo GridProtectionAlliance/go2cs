@@ -5,19 +5,18 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:15:44 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:45 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\fd_unix.go
-using context = go.context_package;
-using poll = go.@internal.poll_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
+namespace go;
+
+using context = context_package;
+using poll = @internal.poll_package;
+using os = os_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class net_package {
 
@@ -27,7 +26,6 @@ private static readonly @string readMsgSyscallName = "recvmsg";
 private static readonly @string writeSyscallName = "write";
 private static readonly @string writeToSyscallName = "sendto";
 private static readonly @string writeMsgSyscallName = "sendmsg";
-
 
 private static (ptr<netFD>, error) newFD(nint sysfd, nint family, nint sotype, @string net) {
     ptr<netFD> _p0 = default!;
@@ -55,7 +53,6 @@ private static @string name(this ptr<netFD> _addr_fd) {
         rs = fd.raddr.String();
     }
     return fd.net + ":" + ls + "->" + rs;
-
 }
 
 private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) => func((defer, _, _) => {
@@ -91,7 +88,6 @@ private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, conte
                 err = err__prev1;
 
             }
-
             runtime.KeepAlive(fd);
             return (null, error.As(null!)!);
             goto __switch_break0;
@@ -125,7 +121,6 @@ private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, conte
         err = err__prev1;
 
     }
-
     {
         var (deadline, hasDeadline) = ctx.Deadline();
 
@@ -163,7 +158,6 @@ private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, conte
                 }
 
             }
-
         }());
         go_(() => () => {
             fd.pfd.SetWriteDeadline(aLongTimeAgo);
@@ -171,7 +165,6 @@ private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, conte
             interruptRes.Send(ctx.Err());
             interruptRes.Send(null);
         }());
-
     }
     while (true) { 
         // Performing multiple connect system calls on a
@@ -195,7 +188,6 @@ private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, conte
             err = err__prev1;
 
         }
-
         var (nerr, err) = getsockoptIntFunc(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_ERROR);
         if (err != null) {
             return (null, error.As(os.NewSyscallError("getsockopt", err))!);
@@ -224,7 +216,6 @@ private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, conte
                     err = err__prev1;
 
                 }
-
             else 
                 return (null, error.As(os.NewSyscallError("connect", err))!);
 
@@ -232,9 +223,7 @@ private static (syscall.Sockaddr, error) connect(this ptr<netFD> _addr_fd, conte
             err = err__prev1;
         }
         runtime.KeepAlive(fd);
-
     }
-
 });
 
 private static (ptr<netFD>, error) accept(this ptr<netFD> _addr_fd) {
@@ -248,7 +237,6 @@ private static (ptr<netFD>, error) accept(this ptr<netFD> _addr_fd) {
             err = wrapSyscallError(errcall, err);
         }
         return (_addr_null!, error.As(err)!);
-
     }
     netfd, err = newFD(d, fd.family, fd.sotype, fd.net);
 
@@ -265,7 +253,6 @@ private static (ptr<netFD>, error) accept(this ptr<netFD> _addr_fd) {
     var (lsa, _) = syscall.Getsockname(netfd.pfd.Sysfd);
     netfd.setAddr(netfd.addrFunc()(lsa), netfd.addrFunc()(rsa));
     return (_addr_netfd!, error.As(null!)!);
-
 }
 
 private static (ptr<os.File>, error) dup(this ptr<netFD> _addr_fd) {
@@ -279,10 +266,8 @@ private static (ptr<os.File>, error) dup(this ptr<netFD> _addr_fd) {
             err = os.NewSyscallError(call, err);
         }
         return (_addr_null!, error.As(err)!);
-
     }
     return (_addr_os.NewFile(uintptr(ns), fd.name())!, error.As(null!)!);
-
 }
 
 } // end net_package

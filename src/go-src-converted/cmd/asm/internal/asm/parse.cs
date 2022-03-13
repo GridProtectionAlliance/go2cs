@@ -4,26 +4,27 @@
 
 // Package asm implements the parser and instruction generator for the assembler.
 // TODO: Split apart?
-// package asm -- go2cs converted at 2022 March 06 22:46:36 UTC
+
+// package asm -- go2cs converted at 2022 March 13 05:57:48 UTC
 // import "cmd/asm/internal/asm" ==> using asm = go.cmd.asm.@internal.asm_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\asm\parse.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using scanner = go.text.scanner_package;
-using utf8 = go.unicode.utf8_package;
-
-using arch = go.cmd.asm.@internal.arch_package;
-using flags = go.cmd.asm.@internal.flags_package;
-using lex = go.cmd.asm.@internal.lex_package;
-using obj = go.cmd.@internal.obj_package;
-using x86 = go.cmd.@internal.obj.x86_package;
-using src = go.cmd.@internal.src_package;
-using sys = go.cmd.@internal.sys_package;
-
 namespace go.cmd.asm.@internal;
+
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using os = os_package;
+using strconv = strconv_package;
+using scanner = text.scanner_package;
+using utf8 = unicode.utf8_package;
+
+using arch = cmd.asm.@internal.arch_package;
+using flags = cmd.asm.@internal.flags_package;
+using lex = cmd.asm.@internal.lex_package;
+using obj = cmd.@internal.obj_package;
+using x86 = cmd.@internal.obj.x86_package;
+using src = cmd.@internal.src_package;
+using sys = cmd.@internal.sys_package;
 
 public static partial class asm_package {
 
@@ -76,14 +77,12 @@ private static void errorf(this ptr<Parser> _addr_p, @string format, params obje
     if (p.lineNum == p.errorLine) { 
         // Only one error per line.
         return ;
-
     }
     p.errorLine = p.lineNum;
     if (p.lex != null) { 
         // Put file and line information on head of message.
         format = "%s:%d: " + format + "\n";
         args = append(args);
-
     }
     fmt.Fprintf(p.errorWriter, format, args);
     p.errorCount++;
@@ -120,14 +119,12 @@ private static (ptr<obj.Prog>, bool) Parse(this ptr<Parser> _addr_p) {
             continue;
         }
         p.errorf("unrecognized instruction %q", word);
-
     }
     if (p.errorCount > 0) {
         return (_addr_null!, false);
     }
     p.patch();
     return (_addr_p.firstProg!, true);
-
 }
 
 // ParseSymABIs parses p's assembly code to find text symbol
@@ -144,10 +141,8 @@ private static bool ParseSymABIs(this ptr<Parser> _addr_p, io.Writer w) {
         operands = operands1;
 
         p.symDefRef(w, word, operands);
-
     }
     return p.errorCount == 0;
-
 }
 
 // nextToken returns the next non-build-comment token from the lexer.
@@ -171,12 +166,9 @@ private static lex.ScanToken nextToken(this ptr<Parser> _addr_p) {
             // to let us know that p.sawCode should be true now.
             // Otherwise ignored.
             continue;
-
         }
         return tok;
-
     }
-
 }
 
 // line consumes a single assembly line from p.lex of the form
@@ -209,7 +201,6 @@ next:
         else if (tok == scanner.EOF) 
             return ("", "", null, false);
                 break;
-
     } 
     // First item must be an identifier.
     if (tok != scanner.Ident) {
@@ -226,7 +217,6 @@ next:
         if (cap(operands) > len(operands)) { 
             // Reuse scratch items slice.
             items = operands[..(int)cap(operands)][len(operands)][..(int)0];
-
         }
         else
  {
@@ -242,21 +232,15 @@ next:
                     if (tok != scanner.Ident) {
                         p.errorf("instruction suffix expected identifier, found %s", str);
                     }
-
                     cond = cond + "." + str;
                     continue;
-
                 }
-
                 if (tok == ':') { 
                     // Labels.
                     p.pendingLabels = append(p.pendingLabels, word);
                     goto next;
-
                 }
-
             }
-
             if (tok == scanner.EOF) {
                 p.errorf("unexpected EOF");
                 return ("", "", null, false);
@@ -270,43 +254,31 @@ next:
                         p.errorf("invalid ':' in operand");
                         return (word, cond, operands, true);
                     }
-
                     colon = len(operands);
-
                 }
-
                 break;
-
             }
-
             if (tok == '(' || tok == '[') {
                 nesting++;
             }
-
             if (tok == ')' || tok == ']') {
                 nesting--;
             }
-
             items = append(items, lex.Make(tok, p.lex.Text()));
-
         }
         if (len(items) > 0) {
             operands = append(operands, items);
             if (colon >= 0 && len(operands) == colon + 2) { 
                 // AX:DX becomes DX, AX.
                 (operands[colon], operands[colon + 1]) = (operands[colon + 1], operands[colon]);                colon = -1;
-
             }
-
         }
         else if (len(operands) > 0 || tok == ',' || colon >= 0) { 
             // Had a separator with nothing after.
             p.errorf("missing operand");
-
         }
     }
     return (word, cond, operands, true);
-
 }
 
 private static void instruction(this ptr<Parser> _addr_p, obj.As op, @string word, @string cond, slice<slice<lex.Token>> operands) {
@@ -318,16 +290,13 @@ private static void instruction(this ptr<Parser> _addr_p, obj.As op, @string wor
         var addr = p.address(op);
         if (!p.isJump && addr.Reg < 0) { // Jumps refer to PC, a pseudo.
             p.errorf("illegal use of pseudo-register in %s", word);
-
         }
         p.addr = append(p.addr, addr);
-
     }    if (p.isJump) {
         p.asmJump(op, cond, p.addr);
         return ;
     }
     p.asmInstruction(op, cond, p.addr);
-
 }
 
 private static bool pseudo(this ptr<Parser> _addr_p, @string word, slice<slice<lex.Token>> operands) {
@@ -357,7 +326,6 @@ private static bool pseudo(this ptr<Parser> _addr_p, @string word, slice<slice<l
             break;
     }
     return true;
-
 }
 
 // symDefRef scans a line for potential text symbol definitions and
@@ -385,10 +353,8 @@ private static void symDefRef(this ptr<Parser> _addr_p, io.Writer w, @string wor
                     name = name__prev2;
 
                 }
-
             }
             return ;
-
             break;
         case "GLOBL": 
 
@@ -408,7 +374,6 @@ private static void symDefRef(this ptr<Parser> _addr_p, io.Writer w, @string wor
                 return ;
             }
             operands = operands[(int)1..];
-
             break;
     } 
     // Search for symbol references.
@@ -426,7 +391,6 @@ private static void symDefRef(this ptr<Parser> _addr_p, io.Writer w, @string wor
             name = name__prev1;
 
         }
-
     }
 }
 
@@ -464,7 +428,6 @@ private static sbyte parseScale(this ptr<Parser> _addr_p, @string s) {
     }
     p.errorf("bad scale: %s", s);
     return 0;
-
 }
 
 // operand parses a general operand and stores the result in *a.
@@ -513,7 +476,6 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
         p.registerList(a);
         p.expectOperandEnd();
         return ;
-
     }
     if (tok.ScanToken == scanner.Ident && p.atStartOfRegister(name)) {
         if (p.atRegisterShift()) { 
@@ -528,12 +490,9 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
                 if (!p.atStartOfRegister(name)) {
                     p.errorf("expected register; found %s", name);
                 }
-
                 a.Reg, _ = p.registerReference(name);
                 p.get(')');
-
             }
-
         }
         else if (p.atRegisterExtension()) {
             a.Type = obj.TYPE_REG;
@@ -554,9 +513,7 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
                     // Form is R1:R2. It is on RHS and the second register
                     // needs to go into the LHS.
                     panic("cannot happen (Addr.Reg2)");
-
                 }
-
             } 
             // fmt.Printf("REG %s\n", obj.Dconv(&emptyProg, 0, a))
 
@@ -564,7 +521,6 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
         // fmt.Printf("REG %s\n", obj.Dconv(&emptyProg, 0, a))
         p.expectOperandEnd();
         return ;
-
     }
     var haveConstant = false;
 
@@ -594,7 +550,6 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
             // fmt.Printf("FCONST %s\n", obj.Dconv(&emptyProg, 0, a))
             p.expectOperandEnd();
             return ;
-
         }
         if (p.have(scanner.String)) {
             if (prefix != '$') {
@@ -610,7 +565,6 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
             // fmt.Printf("SCONST %s\n", obj.Dconv(&emptyProg, 0, a))
             p.expectOperandEnd();
             return ;
-
         }
         a.Offset = int64(p.expr());
         if (p.peek() != '(') {
@@ -628,7 +582,6 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
             // fmt.Printf("CONST %d %s\n", a.Offset, obj.Dconv(&emptyProg, 0, a))
             p.expectOperandEnd();
             return ;
-
         }
     }
     p.registerIndirect(a, prefix); 
@@ -636,7 +589,6 @@ private static void operand(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) => 
 
     p.expectOperandEnd();
     return ;
-
 });
 
 // atStartOfRegister reports whether the parser is at the start of a register definition.
@@ -649,7 +601,6 @@ private static bool atStartOfRegister(this ptr<Parser> _addr_p, @string name) {
         return true;
     }
     return p.arch.RegisterPrefix[name] && p.peek() == '(';
-
 }
 
 // atRegisterShift reports whether we are at the start of an ARM shifted register.
@@ -668,7 +619,6 @@ private static bool atRegisterShift(this ptr<Parser> _addr_p) {
         return false;
     }
     return p.at('(', scanner.Int, ')') && lex.IsRegisterShift(p.input[p.inputPos + 3].ScanToken);
-
 }
 
 // atRegisterExtension reports whether we are at the start of an ARM64 extended register.
@@ -684,7 +634,6 @@ private static bool atRegisterExtension(this ptr<Parser> _addr_p) {
         return true;
     }
     return false;
-
 }
 
 // registerReference parses a register given either the name, R10, or a parenthesized form, SPR(10).
@@ -715,7 +664,6 @@ private static (short, bool) registerReference(this ptr<Parser> _addr_p, @string
         return (0, false);
     }
     return (r, true);
-
 }
 
 // register parses a full register reference where there is no symbol present (as in 4(R0) or R(10) but not sym(SB))
@@ -734,7 +682,6 @@ private static (short, short, sbyte, bool) register(this ptr<Parser> _addr_p, @s
     }
     if (prefix != 0 && prefix != '*') { // *AX is OK.
         p.errorf("prefix %c not allowed for register: %c%s", prefix, prefix, name);
-
     }
     var c = p.peek();
     if (c == ':' || c == ',' || c == '+') { 
@@ -764,10 +711,8 @@ private static (short, short, sbyte, bool) register(this ptr<Parser> _addr_p, @s
         // Scale
         p.next();
         scale = p.parseScale(p.next().String());
-
     }
     return (r1, r2, scale, true);
-
 }
 
 // registerShift parses an ARM/ARM64 shifted register reference and returns the encoded representation.
@@ -834,7 +779,6 @@ private static long registerShift(this ptr<Parser> _addr_p, @string name, int pr
             p.errorf(err.Error());
         }
         return off;
-
     }
     else
  {
@@ -863,7 +807,6 @@ private static void registerExtension(this ptr<Parser> _addr_p, ptr<obj.Addr> _a
     if (p.peek() == lex.LSH) { 
         // (Rn)(Rm<<2), the shifted offset register.
         ext = "LSL";
-
     }
     else
  { 
@@ -872,7 +815,6 @@ private static void registerExtension(this ptr<Parser> _addr_p, ptr<obj.Addr> _a
         p.get('.');
         var tok = p.next();
         ext = tok.String();
-
     }
     if (p.peek() == lex.LSH) { 
         // parses left shift amount applied after extension: <<Amount
@@ -883,7 +825,6 @@ private static void registerExtension(this ptr<Parser> _addr_p, ptr<obj.Addr> _a
             p.errorf("parsing left shift amount: %s", err);
         }
         num = int16(amount);
-
     }
     else if (p.peek() == '[') { 
         // parses an element: [Index]
@@ -897,7 +838,6 @@ private static void registerExtension(this ptr<Parser> _addr_p, ptr<obj.Addr> _a
         isIndex = true;
         isAmount = false;
         num = int16(index);
-
     }
 
     if (p.arch.Family == sys.ARM64) 
@@ -907,8 +847,7 @@ private static void registerExtension(this ptr<Parser> _addr_p, ptr<obj.Addr> _a
         }
     else 
         p.errorf("register extension not supported on this architecture");
-    
-}
+    }
 
 // symbolReference parses a symbol that is known not to be a register.
 private static void symbolReference(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a, @string name, int prefix) {
@@ -947,17 +886,14 @@ private static void symbolReference(this ptr<Parser> _addr_p, ptr<obj.Addr> _add
         if (prefix == 0 && p.isJump) { 
             // Symbols without prefix or suffix are jump labels.
             return ;
-
         }
         p.errorf("illegal or missing addressing mode for symbol %s", name);
         return ;
-
     }
     p.get('(');
     var reg = p.get(scanner.Ident).String();
     p.get(')');
     p.setPseudoRegister(a, reg, isStatic, prefix);
-
 }
 
 // setPseudoRegister sets the NAME field of addr for a pseudo-register reference such as (SB).
@@ -1046,12 +982,10 @@ private static (bool, obj.ABI) symRefAttrs(this ptr<Parser> _addr_p, @string nam
  {
                 abi = theabi;
             }
-
         }
     }
     p.get('>');
     return (isStatic, abi);
-
 }
 
 // funcAddress parses an external function address. This is a
@@ -1091,7 +1025,6 @@ private static (@string, obj.ABI, bool) funcAddress(this ptr<Parser> _addr_p) {
             return ("", obj.ABI0, false);
         }
         tok = p.next();
-
     }
     if (tok.ScanToken != '(') {
         return ("", obj.ABI0, false);
@@ -1103,12 +1036,10 @@ private static (@string, obj.ABI, bool) funcAddress(this ptr<Parser> _addr_p) {
             return ("", obj.ABI0, false);
         }
     }
-
     if (p.next().ScanToken != ')' || p.peek() != scanner.EOF) {
         return ("", obj.ABI0, false);
     }
     return (name, abi, true);
-
 }
 
 // registerIndirect parses the general form of a register indirection.
@@ -1140,7 +1071,6 @@ private static void registerIndirect(this ptr<Parser> _addr_p, ptr<obj.Addr> _ad
         }
         p.setPseudoRegister(a, name, false, prefix);
         return ;
-
     }
     a.Reg = r1;
     if (r2 != 0) { 
@@ -1153,12 +1083,10 @@ private static void registerIndirect(this ptr<Parser> _addr_p, ptr<obj.Addr> _ad
                 p.errorf("illegal address mode for register pair");
                 return ;
             }
-
             a.Type = obj.TYPE_REGREG;
             a.Offset = int64(r2); 
             // Nothing may follow
             return ;
-
         }
         if (p.arch.Family == sys.PPC64) { 
             // Special form for PPC64: (R1+R2); alias for (R1)(R2*1).
@@ -1166,13 +1094,11 @@ private static void registerIndirect(this ptr<Parser> _addr_p, ptr<obj.Addr> _ad
                 p.errorf("illegal address mode for register+register");
                 return ;
             }
-
             a.Type = obj.TYPE_MEM;
             a.Scale = 1;
             a.Index = r2; 
             // Nothing may follow.
             return ;
-
         }
     }
     if (r2 != 0) {
@@ -1194,7 +1120,6 @@ private static void registerIndirect(this ptr<Parser> _addr_p, ptr<obj.Addr> _ad
         else if (p.atRegisterShift()) { 
             // (R1)(R2<<3)
             p.registerExtension(a, tok.String(), prefix);
-
         }
         else
  {
@@ -1209,16 +1134,13 @@ private static void registerIndirect(this ptr<Parser> _addr_p, ptr<obj.Addr> _ad
             if (scale != 0 && scale != 1 && p.arch.Family == sys.ARM64) { 
                 // Support (R1)(R2) (no scaling) and (R1)(R2*1).
                 p.errorf("arm64 doesn't support scaled register format");
-
             }
             else
  {
                 a.Scale = int16(scale);
             }
-
         }
         p.get(')');
-
     }
     else if (scale != 0) {
         if (p.arch.Family == sys.ARM64) {
@@ -1227,7 +1149,6 @@ private static void registerIndirect(this ptr<Parser> _addr_p, ptr<obj.Addr> _ad
         a.Reg = 0;
         a.Index = r1;
         a.Scale = int16(scale);
-
     }
 }
 
@@ -1308,7 +1229,6 @@ ListLoop:
                 firstReg = int(reg);
                 nextReg = firstReg;
                 arrangement = curArrangement;
-
             }
             else if (curArrangement != arrangement) {
                 p.errorf("inconsistent arrangement in ARM64 register list");
@@ -1316,7 +1236,6 @@ ListLoop:
             else if (nextReg != int(reg)) {
                 p.errorf("incontiguous register in ARM64 register list: %s", name);
             }
-
             regCnt++;
             nextReg = (nextReg + 1) % 32;
         else if (p.arch.Family == sys.ARM) 
@@ -1356,8 +1275,7 @@ ListLoop:
         a.Offset = offset;
     else 
         p.errorf("register list not supported on this architecuture");
-    
-}
+    }
 
 private static void registerListX86(this ptr<Parser> _addr_p, ptr<obj.Addr> _addr_a) {
     ref Parser p = ref _addr_p.val;
@@ -1377,7 +1295,6 @@ private static void registerListX86(this ptr<Parser> _addr_p, ptr<obj.Addr> _add
             p.errorf("register list: bad low register in `[%s`", loName);
         }
         return ;
-
     }
     {
         var tok__prev1 = tok;
@@ -1391,7 +1308,6 @@ private static void registerListX86(this ptr<Parser> _addr_p, ptr<obj.Addr> _add
         tok = tok__prev1;
 
     }
-
     var hiName = p.next().String();
     var (hi, ok) = p.arch.Register[hiName];
     if (!ok) {
@@ -1410,11 +1326,9 @@ private static void registerListX86(this ptr<Parser> _addr_p, ptr<obj.Addr> _add
 
     }
 
-
     a.Type = obj.TYPE_REGLIST;
     a.Reg = lo;
     a.Offset = x86.EncodeRegisterRange(lo, hi);
-
 }
 
 // register number is ARM-specific. It returns the number of the specified register.
@@ -1437,10 +1351,8 @@ private static ushort registerNumber(this ptr<Parser> _addr_p, @string name) {
         // Could happen for an architecture having other registers prefixed by R
         p.errorf("expected g or R0 through R15; found %s", name);
         return 0;
-
     }
     return uint16(reg);
-
 }
 
 // Note: There are two changes in the expression handling here
@@ -1478,9 +1390,7 @@ private static ulong expr(this ptr<Parser> _addr_p) {
                 return value;
                 break;
         }
-
     }
-
 }
 
 // floatExpr = fconst | '-' floatExpr | '+' floatExpr | '(' floatExpr ')'
@@ -1503,7 +1413,6 @@ private static double floatExpr(this ptr<Parser> _addr_p) {
         return p.atof(tok.String());
         p.errorf("unexpected %s evaluating float expression", tok);
     return 0;
-
 }
 
 // term = factor | factor ('*' | '/' | '%' | '>>' | '<<' | '&') factor
@@ -1529,7 +1438,6 @@ private static ulong term(this ptr<Parser> _addr_p) {
  {
                 value /= divisor;
             }
-
         else if (p.peek() == '%') 
             p.next();
             divisor = p.factor();
@@ -1543,7 +1451,6 @@ private static ulong term(this ptr<Parser> _addr_p) {
  {
                 value %= divisor;
             }
-
         else if (p.peek() == lex.LSH) 
             p.next();
             var shift = p.factor();
@@ -1566,9 +1473,7 @@ private static ulong term(this ptr<Parser> _addr_p) {
             value &= p.factor();
         else 
             return value;
-        
-    }
-
+            }
 }
 
 // factor = const | '+' factor | '-' factor | '~' factor | '(' expr ')'
@@ -1603,7 +1508,6 @@ private static ulong factor(this ptr<Parser> _addr_p) {
         return v;
         p.errorf("unexpected %s evaluating expression", tok);
     return 0;
-
 }
 
 // positiveAtoi returns an int64 that must be >= 0.
@@ -1618,7 +1522,6 @@ private static long positiveAtoi(this ptr<Parser> _addr_p, @string str) {
         p.errorf("%s overflows int64", str);
     }
     return value;
-
 }
 
 private static ulong atoi(this ptr<Parser> _addr_p, @string str) {
@@ -1629,7 +1532,6 @@ private static ulong atoi(this ptr<Parser> _addr_p, @string str) {
         p.errorf("%s", err);
     }
     return value;
-
 }
 
 private static double atof(this ptr<Parser> _addr_p, @string str) {
@@ -1640,7 +1542,6 @@ private static double atof(this ptr<Parser> _addr_p, @string str) {
         p.errorf("%s", err);
     }
     return value;
-
 }
 
 // EOF represents the end of input.
@@ -1655,7 +1556,6 @@ private static lex.Token next(this ptr<Parser> _addr_p) {
     var tok = p.input[p.inputPos];
     p.inputPos++;
     return tok;
-
 }
 
 private static void back(this ptr<Parser> _addr_p) {
@@ -1677,7 +1577,6 @@ private static lex.ScanToken peek(this ptr<Parser> _addr_p) {
         return p.input[p.inputPos].ScanToken;
     }
     return scanner.EOF;
-
 }
 
 private static bool more(this ptr<Parser> _addr_p) {
@@ -1720,7 +1619,6 @@ private static bool have(this ptr<Parser> _addr_p, lex.ScanToken token) {
         }
     }
     return false;
-
 }
 
 // at reports whether the next tokens are as requested.
@@ -1736,7 +1634,6 @@ private static bool at(this ptr<Parser> _addr_p, params lex.ScanToken[] next) {
             return false;
         }
     }    return true;
-
 }
 
 } // end asm_package

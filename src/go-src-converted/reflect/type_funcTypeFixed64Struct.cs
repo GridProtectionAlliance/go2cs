@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:48 UTC
+//     Generated on 2022 March 13 05:41:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace go
 {
     public static partial class reflect_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(funcType))]
         private partial struct funcTypeFixed64
         {
@@ -68,7 +68,7 @@ namespace go
             public static implicit operator funcTypeFixed64(NilType nil) => default(funcTypeFixed64);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static funcTypeFixed64 funcTypeFixed64_cast(dynamic value)
         {
             return new funcTypeFixed64(value.funcType, value.args);

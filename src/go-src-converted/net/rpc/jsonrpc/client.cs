@@ -5,19 +5,19 @@
 // Package jsonrpc implements a JSON-RPC 1.0 ClientCodec and ServerCodec
 // for the rpc package.
 // For JSON-RPC 2.0 support, see https://godoc.org/?q=json-rpc+2.0
-// package jsonrpc -- go2cs converted at 2022 March 06 22:25:54 UTC
+
+// package jsonrpc -- go2cs converted at 2022 March 13 05:40:25 UTC
 // import "net/rpc/jsonrpc" ==> using jsonrpc = go.net.rpc.jsonrpc_package
 // Original source: C:\Program Files\Go\src\net\rpc\jsonrpc\client.go
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using net = go.net_package;
-using rpc = go.net.rpc_package;
-using sync = go.sync_package;
-using System.ComponentModel;
-
-
 namespace go.net.rpc;
+
+using json = encoding.json_package;
+using fmt = fmt_package;
+using io = io_package;
+using net = net_package;
+using rpc = net.rpc_package;
+using sync = sync_package;
+using System.ComponentModel;
 
 public static partial class jsonrpc_package {
 
@@ -87,7 +87,6 @@ private static error ReadResponseHeader(this ptr<clientCodec> _addr_c, ptr<rpc.R
         }
     }
 
-
     c.mutex.Lock();
     r.ServiceMethod = c.pending[c.resp.Id];
     delete(c.pending, c.resp.Id);
@@ -104,10 +103,8 @@ private static error ReadResponseHeader(this ptr<clientCodec> _addr_c, ptr<rpc.R
             x = "unspecified error";
         }
         r.Error = x;
-
     }
     return error.As(null!)!;
-
 }
 
 private static error ReadResponseBody(this ptr<clientCodec> _addr_c, object x) {
@@ -117,7 +114,6 @@ private static error ReadResponseBody(this ptr<clientCodec> _addr_c, object x) {
         return error.As(null!)!;
     }
     return error.As(json.Unmarshal(c.resp.Result.val, x))!;
-
 }
 
 private static error Close(this ptr<clientCodec> _addr_c) {
@@ -142,7 +138,6 @@ public static (ptr<rpc.Client>, error) Dial(@string network, @string address) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_NewClient(conn)!, error.As(err)!);
-
 }
 
 } // end jsonrpc_package

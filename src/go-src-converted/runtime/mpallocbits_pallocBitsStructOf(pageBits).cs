@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:10:03 UTC
+//     Generated on 2022 March 13 05:25:51 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,7 +18,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pallocBits
         {
             // Value of the pallocBits struct

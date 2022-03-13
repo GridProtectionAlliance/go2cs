@@ -9,22 +9,24 @@
 // The parser is being included in Go 1.16 to allow tools that need to process Go 1.17 source code
 // to still be built against the Go 1.16 release.
 // See https://golang.org/design/draft-gobuild for details about the “//go:build” syntax.
-// package constraint -- go2cs converted at 2022 March 06 22:41:20 UTC
+
+// package constraint -- go2cs converted at 2022 March 13 05:52:25 UTC
 // import "go/build/constraint" ==> using constraint = go.go.build.constraint_package
 // Original source: C:\Program Files\Go\src\go\build\constraint\expr.go
-using errors = go.errors_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go.build;
 
+using errors = errors_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// An Expr is a build tag constraint expression.
+// The underlying concrete type is *AndExpr, *OrExpr, *NotExpr, or *TagExpr.
+
+using System;
 public static partial class constraint_package {
 
-    // An Expr is a build tag constraint expression.
-    // The underlying concrete type is *AndExpr, *OrExpr, *NotExpr, or *TagExpr.
 public partial interface Expr {
     bool String(); // Eval reports whether the expression evaluates to true.
 // It calls ok(tag) as needed to find out whether a given build tag
@@ -89,7 +91,6 @@ private static @string String(this ptr<NotExpr> _addr_x) {
             break;
     }
     return "!" + s;
-
 }
 
 private static Expr not(Expr x) {
@@ -114,7 +115,6 @@ private static bool Eval(this ptr<AndExpr> _addr_x, Func<@string, bool> ok) {
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok && yok;
-
 }
 
 private static @string String(this ptr<AndExpr> _addr_x) {
@@ -132,9 +132,7 @@ private static @string andArg(Expr x) {
             s = "(" + s + ")";
         }
     }
-
     return s;
-
 }
 
 private static Expr and(Expr x, Expr y) {
@@ -159,7 +157,6 @@ private static bool Eval(this ptr<OrExpr> _addr_x, Func<@string, bool> ok) {
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok || yok;
-
 }
 
 private static @string String(this ptr<OrExpr> _addr_x) {
@@ -177,9 +174,7 @@ private static @string orArg(Expr x) {
             s = "(" + s + ")";
         }
     }
-
     return s;
-
 }
 
 private static Expr or(Expr x, Expr y) {
@@ -217,7 +212,6 @@ public static (Expr, error) Parse(@string line) {
         text = text__prev1;
 
     }
-
     {
         var text__prev1 = text;
 
@@ -229,9 +223,7 @@ public static (Expr, error) Parse(@string line) {
         text = text__prev1;
 
     }
-
     return (null, error.As(errNotConstraint)!);
-
 }
 
 // IsGoBuild reports whether the line of text is a “//go:build” constraint.
@@ -269,7 +261,6 @@ private static (@string, bool) splitGoBuild(@string line) {
         return ("", false);
     }
     return (trim, true);
-
 }
 
 // An exprParser holds state for parsing a build expression.
@@ -307,14 +298,12 @@ private static (Expr, error) parseExpr(@string text) => func((defer, panic, _) =
                     e = e__prev2;
 
                 }
-
                 panic(e); // unreachable unless parser has a bug
             }
 
             e = e__prev1;
 
         }
-
     }());
 
     ptr<exprParser> p = addr(new exprParser(s:text));
@@ -323,7 +312,6 @@ private static (Expr, error) parseExpr(@string text) => func((defer, panic, _) =
         panic(addr(new SyntaxError(Offset:p.pos,Err:"unexpected token "+p.tok)));
     }
     return (x, error.As(null!)!);
-
 });
 
 // or parses a sequence of || expressions.
@@ -365,10 +353,8 @@ private static Expr not(this ptr<exprParser> _addr_p) => func((_, panic, _) => {
             panic(addr(new SyntaxError(Offset:p.pos,Err:"double negation not allowed")));
         }
         return not(p.atom());
-
     }
     return p.atom();
-
 });
 
 // atom parses a tag or a parenthesized expression.
@@ -399,15 +385,12 @@ private static Expr atom(this ptr<exprParser> _addr_p) => func((defer, panic, _)
                         e = e__prev3;
 
                     }
-
                     panic(e);
-
                 }
 
                 e = e__prev2;
 
             }
-
         }());
         var x = p.or();
         if (p.tok != ")") {
@@ -415,19 +398,16 @@ private static Expr atom(this ptr<exprParser> _addr_p) => func((defer, panic, _)
         }
         p.lex();
         return x;
-
     }
     if (!p.isTag) {
         if (p.tok == "") {
             panic(addr(new SyntaxError(Offset:p.pos,Err:"unexpected end of expression")));
         }
         panic(addr(new SyntaxError(Offset:p.pos,Err:"unexpected token "+p.tok)));
-
     }
     var tok = p.tok;
     p.lex();
     return tag(tok);
-
 });
 
 // lex finds and consumes the next token in the input stream.
@@ -469,7 +449,6 @@ private static void lex(this ptr<exprParser> _addr_p) => func((_, panic, _) => {
             p.i += 2;
             p.tok = p.s[(int)p.pos..(int)p.i];
             return ;
-
             break;
     }
 
@@ -497,7 +476,6 @@ private static void lex(this ptr<exprParser> _addr_p) => func((_, panic, _) => {
     p.tok = p.s[(int)p.pos..(int)p.i];
     p.isTag = true;
     return ;
-
 });
 
 // IsPlusBuild reports whether the line of text is a “// +build” constraint.
@@ -541,7 +519,6 @@ private static (@string, bool) splitPlusBuild(@string line) {
         return ("", false);
     }
     return (trim, true);
-
 }
 
 // parsePlusBuildExpr parses a legacy build tag expression (as used with “// +build”).
@@ -568,13 +545,10 @@ private static Expr parsePlusBuildExpr(@string text) {
  {
                     z = Expr.As(tag("ignore"))!;
                 }
-
                 if (neg) {
                     z = Expr.As(not(z))!;
                 }
-
             }
-
             if (y == null) {
                 y = Expr.As(z)!;
             }
@@ -582,7 +556,6 @@ private static Expr parsePlusBuildExpr(@string text) {
  {
                 y = Expr.As(and(y, z))!;
             }
-
         }        if (x == null) {
             x = Expr.As(y)!;
         }
@@ -594,7 +567,6 @@ private static Expr parsePlusBuildExpr(@string text) {
         x = Expr.As(tag("ignore"))!;
     }
     return x;
-
 }
 
 // isValidTag reports whether the word is a valid build tag.
@@ -609,7 +581,6 @@ private static bool isValidTag(@string word) {
             return false;
         }
     }    return true;
-
 }
 
 private static var errComplex = errors.New("expression too complex for // +build lines");
@@ -657,21 +628,18 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
                                     break;
                                 }
                             }
-
                         }
 
                         lit = lit__prev3;
                     }
 
                     ands = append(ands, lits);
-
                 }
 
                 and = and__prev2;
             }
 
             split = append(split, ands);
-
         }
         or = or__prev1;
     }
@@ -703,7 +671,6 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
         }
 
         split = new slice<slice<slice<Expr>>>(new slice<slice<Expr>>[] { {lits} });
-
     }
     slice<@string> lines = default;
     {
@@ -734,20 +701,17 @@ public static (slice<@string>, error) PlusBuildLines(Expr x) {
                     }
 
                     line += " " + clause;
-
                 }
 
                 and = and__prev2;
             }
 
             lines = append(lines, line);
-
         }
         or = or__prev1;
     }
 
     return (lines, error.As(null!)!);
-
 }
 
 // pushNot applies DeMorgan's law to push negations down the expression,
@@ -764,7 +728,6 @@ private static Expr pushNot(Expr x, bool not) {
                 }
 
             }
-
             return pushNot(x.X, !not);
             break;
         case ptr<TagExpr> x:
@@ -802,7 +765,6 @@ private static Expr pushNot(Expr x, bool not) {
             break;
         }
     }
-
 }
 
 // appendSplitAnd appends x to list while splitting apart any top-level && expressions.
@@ -817,9 +779,7 @@ private static slice<Expr> appendSplitAnd(slice<Expr> list, Expr x) {
             return list;
         }
     }
-
     return append(list, x);
-
 }
 
 // appendSplitOr appends x to list while splitting apart any top-level || expressions.
@@ -834,9 +794,7 @@ private static slice<Expr> appendSplitOr(slice<Expr> list, Expr x) {
             return list;
         }
     }
-
     return append(list, x);
-
 }
 
 } // end constraint_package

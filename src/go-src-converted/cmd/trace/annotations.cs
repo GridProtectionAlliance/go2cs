@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:22:49 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:53 UTC
 // Original source: C:\Program Files\Go\src\cmd\trace\annotations.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using template = go.html.template_package;
-using trace = go.@internal.trace_package;
-using log = go.log_package;
-using math = go.math_package;
-using http = go.net.http_package;
-using url = go.net.url_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using template = html.template_package;
+using trace = @internal.trace_package;
+using log = log_package;
+using math = math_package;
+using http = net.http_package;
+using url = net.url_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+using System;
 
 public static partial class main_package {
 
@@ -49,7 +48,6 @@ private static void httpUserTasks(http.ResponseWriter w, ptr<http.Request> _addr
         }
         stats.add(task);
         summary[task.name] = stats;
-
     }    var userTasks = make_slice<taskStats>(0, len(summary));
     {
         var stats__prev1 = stats;
@@ -61,9 +59,7 @@ private static void httpUserTasks(http.ResponseWriter w, ptr<http.Request> _addr
         stats = stats__prev1;
     }
 
-    sort.Slice(userTasks, (i, j) => {
-        return userTasks[i].Type < userTasks[j].Type;
-    }); 
+    sort.Slice(userTasks, (i, j) => userTasks[i].Type < userTasks[j].Type); 
 
     // Emit table.
     err = templUserTaskTypes.Execute(w, userTasks);
@@ -92,7 +88,6 @@ private static void httpUserRegions(http.ResponseWriter w, ptr<http.Request> _ad
         foreach (var (_, s) in regions) {
             stats.add(s);
         }        summary[id] = stats;
-
     }    var userRegions = make_slice<regionStats>(0, len(summary));
     {
         var stats__prev1 = stats;
@@ -109,7 +104,6 @@ private static void httpUserRegions(http.ResponseWriter w, ptr<http.Request> _ad
             return userRegions[i].Type < userRegions[j].Type;
         }
         return userRegions[i].Frame.PC < userRegions[j].Frame.PC;
-
     }); 
     // Emit table.
     err = templUserRegionTypes.Execute(w, userRegions);
@@ -148,9 +142,7 @@ private static void httpUserRegion(http.ResponseWriter w, ptr<http.Request> _add
             }
         }
     }    var sortby = r.FormValue("sortby");
-    var (_, ok) = reflect.TypeOf(new regionDesc()).FieldByNameFunc(s => {
-        return s == sortby;
-    });
+    var (_, ok) = reflect.TypeOf(new regionDesc()).FieldByNameFunc(s => s == sortby);
     if (!ok) {
         sortby = "TotalTime";
     }
@@ -229,10 +221,7 @@ private static void httpUserTask(http.ResponseWriter w, ptr<http.Request> _addr_
                 last = time.Duration(ev.Ts) * time.Nanosecond;
             }
         }        data = append(data, new entry(WhenString:fmt.Sprintf("%2.9fs",(time.Duration(task.firstTimestamp())*time.Nanosecond-base).Seconds()),Duration:task.duration(),ID:task.id,Complete:task.complete(),Events:events,Start:time.Duration(task.firstTimestamp())*time.Nanosecond,End:time.Duration(task.endTimestamp())*time.Nanosecond,GCTime:task.overlappingGCDuration(res.gcEvents),));
-
-    }    sort.Slice(data, (i, j) => {
-        return data[i].Duration < data[j].Duration;
-    }); 
+    }    sort.Slice(data, (i, j) => data[i].Duration < data[j].Duration); 
 
     // Emit table.
     err = templUserTaskType.Execute(w, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{NamestringEntry[]entry}{Name:filter.name,Entry:data,});
@@ -296,14 +285,11 @@ private static (annotationAnalysisResult, error) analyzeAnnotations() {
                         }
 
                     }
-
                 }
-
             else if (typ == trace.EvGCStart) 
                 gcEvents = append(gcEvents, ev);
 
         }
-
     }    analyzeGoroutines(events);
     foreach (var (goid, stats) in gs) { 
         // gs is a global var defined in goroutines.go as a result
@@ -333,17 +319,13 @@ private static (annotationAnalysisResult, error) analyzeAnnotations() {
                 if (si != sj) {
                     return si < sj;
                 }
-
                 return task.regions[i].lastTimestamp() < task.regions[j].lastTimestamp();
-
             });
-
         }
         task = task__prev1;
     }
 
     return (new annotationAnalysisResult(tasks:tasks,regions:regions,gcEvents:gcEvents), error.As(null!)!);
-
 }
 
 // taskDesc represents a task.
@@ -383,7 +365,6 @@ private static @string String(this ptr<taskDesc> _addr_task) {
     foreach (var (_, c) in task.children) {
         fmt.Fprintf(wb, "\t\t%s\n", c.name);
     }    return wb.String();
-
 }
 
 // regionDesc represents a region.
@@ -406,7 +387,6 @@ private static ptr<taskDesc> task(this allTasks tasks, ulong taskID) {
     t = addr(new taskDesc(id:taskID,goroutines:make(map[uint64]struct{}),));
     tasks[taskID] = t;
     return _addr_t!;
-
 }
 
 private static void addEvent(this ptr<taskDesc> _addr_task, ptr<trace.Event> _addr_ev) {
@@ -430,7 +410,6 @@ private static void addEvent(this ptr<taskDesc> _addr_task, ptr<trace.Event> _ad
             task.end = ev;
 
     }
-
 }
 
 // complete is true only if both start and end events of this task
@@ -442,7 +421,6 @@ private static bool complete(this ptr<taskDesc> _addr_task) {
         return false;
     }
     return task.create != null && task.end != null;
-
 }
 
 // descendants returns all the task nodes in the subtree rooted from this task.
@@ -460,7 +438,6 @@ private static slice<ptr<taskDesc>> descendants(this ptr<taskDesc> _addr_task) {
         }
     }
     return res;
-
 }
 
 // firstTimestamp returns the first timestamp of this task found in
@@ -473,7 +450,6 @@ private static long firstTimestamp(this ptr<taskDesc> _addr_task) {
         return task.create.Ts;
     }
     return firstTimestamp();
-
 }
 
 // lastTimestamp returns the last timestamp of this task in this
@@ -490,9 +466,7 @@ private static long lastTimestamp(this ptr<taskDesc> _addr_task) {
             return last.Ts;
         }
     }
-
     return endTs;
-
 }
 
 // endTimestamp returns the timestamp of this task's end event.
@@ -505,7 +479,6 @@ private static long endTimestamp(this ptr<taskDesc> _addr_task) {
         return task.end.Ts;
     }
     return lastTimestamp();
-
 }
 
 private static time.Duration duration(this ptr<taskDesc> _addr_task) {
@@ -536,7 +509,6 @@ private static time.Duration overlappingGCDuration(this ptr<taskDesc> _addr_task
 
         }
 
-
         {
             var (o, overlapped) = task.overlappingDuration(ev);
 
@@ -545,9 +517,7 @@ private static time.Duration overlappingGCDuration(this ptr<taskDesc> _addr_task
             }
 
         }
-
     }    return overlapping;
-
 }
 
 // overlappingInstant reports whether the instantaneous event, ev, occurred during
@@ -564,7 +534,6 @@ private static bool overlappingInstant(this ptr<taskDesc> _addr_task, ptr<trace.
             return false; // not this task's user event.
         }
     }
-
 
     var ts = ev.Ts;
     var taskStart = task.firstTimestamp();
@@ -584,7 +553,6 @@ private static bool overlappingInstant(this ptr<taskDesc> _addr_task, ptr<trace.
             return true;
         }
     }    return false;
-
 }
 
 // overlappingDuration reports whether the durational event, ev, overlaps with
@@ -626,7 +594,6 @@ private static (time.Duration, bool) overlappingDuration(this ptr<taskDesc> _add
         var regionEnd = region.lastTimestamp();
         if (regionStart < lastRegionEnd) { // skip nested regions
             continue;
-
         }
         {
             var o__prev1 = o;
@@ -637,15 +604,12 @@ private static (time.Duration, bool) overlappingDuration(this ptr<taskDesc> _add
                 // overlapping.
                 lastRegionEnd = regionEnd;
                 overlapping += o;
-
             }
 
             o = o__prev1;
 
         }
-
     }    return (overlapping, overlapping > 0);
-
 }
 
 // overlappingDuration returns the overlapping time duration between
@@ -658,14 +622,11 @@ private static time.Duration overlappingDuration(long start1, long end1, long st
     }
     if (start1 < start2) { // choose the later one
         start1 = start2;
-
     }
     if (end1 > end2) { // choose the earlier one
         end1 = end2;
-
     }
     return time.Duration(end1 - start1);
-
 }
 
 private static ptr<trace.Event> lastEvent(this ptr<taskDesc> _addr_task) {
@@ -681,9 +642,7 @@ private static ptr<trace.Event> lastEvent(this ptr<taskDesc> _addr_task) {
             return _addr_task.events[n - 1]!;
         }
     }
-
     return _addr_null!;
-
 }
 
 // firstTimestamp returns the timestamp of region start event.
@@ -696,7 +655,6 @@ private static long firstTimestamp(this ptr<regionDesc> _addr_region) {
         return region.Start.Ts;
     }
     return firstTimestamp();
-
 }
 
 // lastTimestamp returns the timestamp of region end event.
@@ -709,7 +667,6 @@ private static long lastTimestamp(this ptr<regionDesc> _addr_region) {
         return region.End.Ts;
     }
     return lastTimestamp();
-
 }
 
 // RelatedGoroutines returns IDs of goroutines related to the task. A goroutine
@@ -741,7 +698,6 @@ private static map<ulong, bool> RelatedGoroutines(this ptr<taskDesc> _addr_task,
     }
     gmap[0] = true; // for GC events (goroutine id = 0)
     return gmap;
-
 }
 
 private partial struct taskFilter {
@@ -761,7 +717,6 @@ private static bool match(this ptr<taskFilter> _addr_f, ptr<taskDesc> _addr_t) {
             return false;
         }
     }    return true;
-
 }
 
 private static (ptr<taskFilter>, error) newTaskFilter(ptr<http.Request> _addr_r) {
@@ -777,7 +732,6 @@ private static (ptr<taskFilter>, error) newTaskFilter(ptr<http.Request> _addr_r)
         }
     }
 
-
     slice<@string> name = default;
     slice<Func<ptr<taskDesc>, bool>> conditions = default;
 
@@ -787,30 +741,22 @@ private static (ptr<taskFilter>, error) newTaskFilter(ptr<http.Request> _addr_r)
 
         if (ok && len(typ) > 0) {
             name = append(name, "type=" + typ[0]);
-            conditions = append(conditions, t => {
-                return _addr_t.name == typ[0]!;
-            });
+            conditions = append(conditions, t => _addr_t.name == typ[0]!);
         }
     }
-
     {
         var complete = r.FormValue("complete");
 
         if (complete == "1") {
             name = append(name, "complete");
-            conditions = append(conditions, t => {
-                return _addr_t.complete()!;
-            });
+            conditions = append(conditions, t => _addr_t.complete()!);
         }
         else if (complete == "0") {
             name = append(name, "incomplete");
-            conditions = append(conditions, t => {
-                return _addr_!t.complete()!;
-            });
+            conditions = append(conditions, t => _addr_!t.complete()!);
         }
 
     }
-
     {
         var lat__prev1 = lat;
 
@@ -818,14 +764,11 @@ private static (ptr<taskFilter>, error) newTaskFilter(ptr<http.Request> _addr_r)
 
         if (err == null) {
             name = append(name, fmt.Sprintf("latency >= %s", lat));
-            conditions = append(conditions, t => {
-                return _addr_t.complete() && t.duration() >= lat!;
-            });
+            conditions = append(conditions, t => _addr_t.complete() && t.duration() >= lat!);
         }
         lat = lat__prev1;
 
     }
-
     {
         var lat__prev1 = lat;
 
@@ -833,28 +776,21 @@ private static (ptr<taskFilter>, error) newTaskFilter(ptr<http.Request> _addr_r)
 
         if (err == null) {
             name = append(name, fmt.Sprintf("latency <= %s", lat));
-            conditions = append(conditions, t => {
-                return _addr_t.complete() && t.duration() <= lat!;
-            });
+            conditions = append(conditions, t => _addr_t.complete() && t.duration() <= lat!);
         }
         lat = lat__prev1;
 
     }
-
     {
         var text = r.FormValue("logtext");
 
         if (text != "") {
             name = append(name, fmt.Sprintf("log contains %q", text));
-            conditions = append(conditions, t => {
-                return _addr_taskMatches(_addr_t, text)!;
-            });
+            conditions = append(conditions, t => _addr_taskMatches(_addr_t, text)!);
         }
     }
 
-
     return (addr(new taskFilter(name:strings.Join(name,","),cond:conditions)), error.As(null!)!);
-
 }
 
 private static bool taskMatches(ptr<taskDesc> _addr_t, @string text) {
@@ -868,9 +804,7 @@ private static bool taskMatches(ptr<taskDesc> _addr_t, @string text) {
                     return true;
                 }
             }
-        
-    }    return false;
-
+            }    return false;
 }
 
 private partial struct regionFilter {
@@ -887,7 +821,6 @@ private static bool match(this ptr<regionFilter> _addr_f, regionTypeID id, regio
             return false;
         }
     }    return true;
-
 }
 
 private static (ptr<regionFilter>, error) newRegionFilter(ptr<http.Request> _addr_r) {
@@ -903,7 +836,6 @@ private static (ptr<regionFilter>, error) newRegionFilter(ptr<http.Request> _add
         }
     }
 
-
     slice<@string> name = default;
     slice<Func<regionTypeID, regionDesc, bool>> conditions = default;
     var filterParams = make(url.Values);
@@ -914,26 +846,20 @@ private static (ptr<regionFilter>, error) newRegionFilter(ptr<http.Request> _add
 
         if (ok && len(typ) > 0) {
             name = append(name, "type=" + typ[0]);
-            conditions = append(conditions, (id, s) => {
-                return _addr_id.Type == typ[0]!;
-            });
+            conditions = append(conditions, (id, s) => _addr_id.Type == typ[0]!);
             filterParams.Add("type", typ[0]);
         }
     }
-
     {
         var (pc, err) = strconv.ParseUint(r.FormValue("pc"), 16, 64);
 
         if (err == null) {
             var encPC = fmt.Sprintf("%x", pc);
             name = append(name, "pc=" + encPC);
-            conditions = append(conditions, (id, s) => {
-                return _addr_id.Frame.PC == pc!;
-            });
+            conditions = append(conditions, (id, s) => _addr_id.Frame.PC == pc!);
             filterParams.Add("pc", encPC);
         }
     }
-
 
     {
         var lat__prev1 = lat;
@@ -942,15 +868,12 @@ private static (ptr<regionFilter>, error) newRegionFilter(ptr<http.Request> _add
 
         if (err == null) {
             name = append(name, fmt.Sprintf("latency >= %s", lat));
-            conditions = append(conditions, (_, s) => {
-                return _addr_s.duration() >= lat!;
-            });
+            conditions = append(conditions, (_, s) => _addr_s.duration() >= lat!);
             filterParams.Add("latmin", lat.String());
         }
         lat = lat__prev1;
 
     }
-
     {
         var lat__prev1 = lat;
 
@@ -958,18 +881,14 @@ private static (ptr<regionFilter>, error) newRegionFilter(ptr<http.Request> _add
 
         if (err == null) {
             name = append(name, fmt.Sprintf("latency <= %s", lat));
-            conditions = append(conditions, (_, s) => {
-                return _addr_s.duration() <= lat!;
-            });
+            conditions = append(conditions, (_, s) => _addr_s.duration() <= lat!);
             filterParams.Add("latmax", lat.String());
         }
         lat = lat__prev1;
 
     }
 
-
     return (addr(new regionFilter(name:strings.Join(name,","),cond:conditions,params:filterParams,)), error.As(null!)!);
-
 }
 
 private partial struct durationHistogram {
@@ -1001,7 +920,6 @@ private static void add(this ptr<durationHistogram> _addr_h, time.Duration d) {
         h.MaxBucket = bucket;
     }
     h.Count++;
-
 }
 
 private static time.Duration BucketMin(this ptr<durationHistogram> _addr_h, nint bucket) {
@@ -1019,7 +937,6 @@ private static @string niceDuration(time.Duration d) {
         (rnd, unit) = (time.Microsecond, "µs");    else if (d < 10 * time.Second) 
         (rnd, unit) = (time.Millisecond, "ms");    else 
         (rnd, unit) = (time.Second, "s ");        return fmt.Sprintf("%d%s", d / rnd, unit);
-
 }
 
 private static template.HTML ToHTML(this ptr<durationHistogram> _addr_h, Func<time.Duration, time.Duration, @string> urlmaker) {
@@ -1053,14 +970,11 @@ private static template.HTML ToHTML(this ptr<durationHistogram> _addr_h, Func<ti
         // Bucket count.
         fmt.Fprintf(w, "<td align=\"right\"><div style=\"position:relative\">%d</div></td>", h.Buckets[i]);
         fmt.Fprintf(w, "</tr>\n");
-
-
     } 
     // Final tick label.
     fmt.Fprintf(w, "<tr><td align=\"right\">%s</td></tr>", niceDuration(h.BucketMin(h.MaxBucket + 1)));
     fmt.Fprintf(w, "</table>");
     return template.HTML(w.String());
-
 }
 
 private static @string String(this ptr<durationHistogram> _addr_h) {
@@ -1083,12 +997,10 @@ private static @string String(this ptr<durationHistogram> _addr_h) {
             if (len(label) > maxLabel) {
                 maxLabel = len(label);
             }
-
             var count = h.Buckets[i];
             if (count > maxCount) {
                 maxCount = count;
             }
-
         }
 
         i = i__prev1;
@@ -1107,7 +1019,6 @@ private static @string String(this ptr<durationHistogram> _addr_h) {
         i = i__prev1;
     }
     return w.String();
-
 }
 
 private partial struct regionStats {
@@ -1118,9 +1029,7 @@ private partial struct regionStats {
 private static Func<time.Duration, time.Duration, @string> UserRegionURL(this ptr<regionStats> _addr_s) {
     ref regionStats s = ref _addr_s.val;
 
-    return (min, max) => {
-        return fmt.Sprintf("/userregion?type=%s&pc=%x&latmin=%v&latmax=%v", template.URLQueryEscaper(s.Type), s.Frame.PC, template.URLQueryEscaper(min), template.URLQueryEscaper(max));
-    };
+    return (min, max) => fmt.Sprintf("/userregion?type=%s&pc=%x&latmin=%v&latmax=%v", template.URLQueryEscaper(s.Type), s.Frame.PC, template.URLQueryEscaper(min), template.URLQueryEscaper(max));
 }
 
 private static void add(this ptr<regionStats> _addr_s, regionDesc region) {
@@ -1166,9 +1075,7 @@ private partial struct taskStats {
 private static Func<time.Duration, time.Duration, @string> UserTaskURL(this ptr<taskStats> _addr_s, bool complete) {
     ref taskStats s = ref _addr_s.val;
 
-    return (min, max) => {
-        return fmt.Sprintf("/usertask?type=%s&complete=%v&latmin=%v&latmax=%v", template.URLQueryEscaper(s.Type), template.URLQueryEscaper(complete), template.URLQueryEscaper(min), template.URLQueryEscaper(max));
-    };
+    return (min, max) => fmt.Sprintf("/usertask?type=%s&complete=%v&latmin=%v&latmax=%v", template.URLQueryEscaper(s.Type), template.URLQueryEscaper(complete), template.URLQueryEscaper(min), template.URLQueryEscaper(max));
 }
 
 private static void add(this ptr<taskStats> _addr_s, ptr<taskDesc> _addr_task) {
@@ -1270,16 +1177,13 @@ private static @string elapsed(time.Duration d) {
  {
                     break;
                 }
-
             }
 
 
             i = i__prev1;
         }
-
     }
     return string(b);
-
 }
 
 private static double asMillisecond(time.Duration d) {
@@ -1298,7 +1202,6 @@ private static @string formatUserLog(ptr<trace.Event> _addr_ev) {
         return k;
     }
     return fmt.Sprintf("%v=%v", k, v);
-
 }
 
 private static @string describeEvent(ptr<trace.Event> _addr_ev) {
@@ -1327,7 +1230,6 @@ private static @string describeEvent(ptr<trace.Event> _addr_ev) {
     else if (ev.Type == trace.EvUserTaskEnd) 
         return "task end";
         return "";
-
 }
 
 private static (ulong, bool) isUserAnnotationEvent(ptr<trace.Event> _addr_ev) {
@@ -1339,7 +1241,6 @@ private static (ulong, bool) isUserAnnotationEvent(ptr<trace.Event> _addr_ev) {
     if (ev.Type == trace.EvUserLog || ev.Type == trace.EvUserRegion || ev.Type == trace.EvUserTaskCreate || ev.Type == trace.EvUserTaskEnd) 
         return (ev.Args[0], true);
         return (0, false);
-
 }
 
 private static var templUserRegionType = template.Must(template.New("").Funcs(new template.FuncMap("prettyDuration":func(nsecint64)template.HTML{d:=time.Duration(nsec)*time.Nanosecondreturntemplate.HTML(niceDuration(d))},"percent":func(dividend,divisorint64)template.HTML{ifdivisor==0{return""}returntemplate.HTML(fmt.Sprintf("(%.1f%%)",float64(dividend)/float64(divisor)*100))},"barLen":func(dividend,divisorint64)template.HTML{ifdivisor==0{return"0"}returntemplate.HTML(fmt.Sprintf("%.2f%%",float64(dividend)/float64(divisor)*100))},"unknownTime":func(descregionDesc)int64{sum:=desc.ExecTime+desc.IOTime+desc.BlockTime+desc.SyscallTime+desc.SchedWaitTimeifsum<desc.TotalTime{returndesc.TotalTime-sum}return0},"filterParams":func(f*regionFilter)template.URL{returntemplate.URL(f.params.Encode())},)).Parse("\n<!DOCTYPE html>\n<title>User Region {{.Name}}</title>\n<style>\nth {\n  background-c" +

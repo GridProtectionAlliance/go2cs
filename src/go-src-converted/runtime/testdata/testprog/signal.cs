@@ -4,12 +4,12 @@
 
 // +build !windows,!plan9
 
-// package main -- go2cs converted at 2022 March 06 22:26:06 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:26 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\signal.go
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go;
+
+using syscall = syscall_package;
+using time = time_package;
 
 public static partial class main_package {
 
@@ -28,7 +28,6 @@ public static void SignalExitStatus() {
     // before we return and exit the program. The time here
     // shouldn't matter--we'll never really sleep this long.
     time.Sleep(time.Second);
-
 }
 
 } // end main_package

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:08:25 UTC
+// package math -- go2cs converted at 2022 March 13 05:24:14 UTC
 // import "runtime/internal/math" ==> using math = go.runtime.@internal.math_package
 // Original source: C:\Program Files\Go\src\runtime\internal\math\math.go
-using sys = go.runtime.@internal.sys_package;
-
 namespace go.runtime.@internal;
+
+using sys = runtime.@internal.sys_package;
 
 public static partial class math_package {
 
@@ -28,7 +28,6 @@ public static (System.UIntPtr, bool) MulUintptr(System.UIntPtr a, System.UIntPtr
     }
     var overflow = b > MaxUintptr / a;
     return (a * b, overflow);
-
 }
 
 // Mul64 returns the 128-bit product of x and y: (hi, lo) = x * y

@@ -2,46 +2,46 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
+// package cgo -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Program Files\Go\src\runtime\cgo\callbacks.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.runtime;
+
+using @unsafe = @unsafe_package;
 
 public static partial class cgo_package {
 
-    // These utility functions are available to be called from code
-    // compiled with gcc via crosscall2.
+// These utility functions are available to be called from code
+// compiled with gcc via crosscall2.
 
-    // The declaration of crosscall2 is:
-    //   void crosscall2(void (*fn)(void *), void *, int);
-    //
-    // We need to export the symbol crosscall2 in order to support
-    // callbacks from shared libraries. This applies regardless of
-    // linking mode.
-    //
-    // Compatibility note: SWIG uses crosscall2 in exactly one situation:
-    // to call _cgo_panic using the pattern shown below. We need to keep
-    // that pattern working. In particular, crosscall2 actually takes four
-    // arguments, but it works to call it with three arguments when
-    // calling _cgo_panic.
-    //go:cgo_export_static crosscall2
-    //go:cgo_export_dynamic crosscall2
+// The declaration of crosscall2 is:
+//   void crosscall2(void (*fn)(void *), void *, int);
+//
+// We need to export the symbol crosscall2 in order to support
+// callbacks from shared libraries. This applies regardless of
+// linking mode.
+//
+// Compatibility note: SWIG uses crosscall2 in exactly one situation:
+// to call _cgo_panic using the pattern shown below. We need to keep
+// that pattern working. In particular, crosscall2 actually takes four
+// arguments, but it works to call it with three arguments when
+// calling _cgo_panic.
+//go:cgo_export_static crosscall2
+//go:cgo_export_dynamic crosscall2
 
-    // Panic. The argument is converted into a Go string.
+// Panic. The argument is converted into a Go string.
 
-    // Call like this in code compiled with gcc:
-    //   struct { const char *p; } a;
-    //   a.p = /* string to pass to panic */;
-    //   crosscall2(_cgo_panic, &a, sizeof a);
-    //   /* The function call will not return.  */
+// Call like this in code compiled with gcc:
+//   struct { const char *p; } a;
+//   a.p = /* string to pass to panic */;
+//   crosscall2(_cgo_panic, &a, sizeof a);
+//   /* The function call will not return.  */
 
-    // TODO: We should export a regular C function to panic, change SWIG
-    // to use that instead of the above pattern, and then we can drop
-    // backwards-compatibility from crosscall2 and stop exporting it.
+// TODO: We should export a regular C function to panic, change SWIG
+// to use that instead of the above pattern, and then we can drop
+// backwards-compatibility from crosscall2 and stop exporting it.
 
-    //go:linkname _runtime_cgo_panic_internal runtime._cgo_panic_internal
+//go:linkname _runtime_cgo_panic_internal runtime._cgo_panic_internal
 private static void _runtime_cgo_panic_internal(ptr<byte> p);
 
 //go:linkname _cgo_panic _cgo_panic

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:29 UTC
+//     Generated on 2022 March 13 06:36:34 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct stdUI
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace @internal
             public static implicit operator stdUI(NilType nil) => default(stdUI);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static stdUI stdUI_cast(dynamic value)
         {
             return new stdUI(ref value.r);

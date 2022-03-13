@@ -5,13 +5,13 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package net -- go2cs converted at 2022 March 06 22:16:39 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:06 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sock_bsd.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -40,7 +40,6 @@ private static nint maxListenerBacklog() {
         n = 1 << 16 - 1;
     }
     return int(n);
-
 }
 
 } // end net_package

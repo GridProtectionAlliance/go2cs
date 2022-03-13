@@ -5,11 +5,9 @@
 //go:build 386 || amd64
 // +build 386 amd64
 
-// package cpu -- go2cs converted at 2022 March 06 22:29:52 UTC
+// package cpu -- go2cs converted at 2022 March 13 05:40:41 UTC
 // import "internal/cpu" ==> using cpu = go.@internal.cpu_package
 // Original source: C:\Program Files\Go\src\internal\cpu\cpu_x86.go
-
-
 namespace go.@internal;
 
 public static partial class cpu_package {
@@ -47,7 +45,6 @@ private static readonly nint cpuid_AVX2 = 1 << 5;
 private static readonly nint cpuid_BMI2 = 1 << 8;
 private static readonly nint cpuid_ERMS = 1 << 9;
 private static readonly nint cpuid_ADX = 1 << 19;
-
 
 private static uint maxExtendedFunctionInformation = default;
 
@@ -89,7 +86,6 @@ private static void doinit() {
         var (eax, _) = xgetbv(); 
         // Check if XMM and YMM registers have OS support.
         osSupportsAVX = isSet(eax, 1 << 1) && isSet(eax, 1 << 2);
-
     }
     X86.HasAVX = isSet(ecx1, cpuid_AVX) && osSupportsAVX;
 
@@ -102,7 +98,6 @@ private static void doinit() {
     X86.HasBMI2 = isSet(ebx7, cpuid_BMI2);
     X86.HasERMS = isSet(ebx7, cpuid_ERMS);
     X86.HasADX = isSet(ebx7, cpuid_ADX);
-
 }
 
 private static bool isSet(uint hwc, uint value) {
@@ -139,7 +134,6 @@ public static @string Name() {
             break;
         }
     }    return string(data);
-
 }
 
 private static slice<byte> appendBytes(slice<byte> b, params uint[] args) {

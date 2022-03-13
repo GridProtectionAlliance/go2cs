@@ -13,23 +13,22 @@
 //    Random UDP source port (net.Dial should do that for us).
 //    Random request IDs.
 
-// package net -- go2cs converted at 2022 March 06 22:15:41 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:43 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\dnsclient_unix.go
-using context = go.context_package;
-using errors = go.errors_package;
-using itoa = go.@internal.itoa_package;
-using io = go.io_package;
-using os = go.os_package;
-using sync = go.sync_package;
-using time = go.time_package;
+namespace go;
 
-using dnsmessage = go.golang.org.x.net.dns.dnsmessage_package;
+using context = context_package;
+using errors = errors_package;
+using itoa = @internal.itoa_package;
+using io = io_package;
+using os = os_package;
+using sync = sync_package;
+using time = time_package;
+
+using dnsmessage = golang.org.x.net.dns.dnsmessage_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class net_package {
 
@@ -37,7 +36,6 @@ public static partial class net_package {
 // to be used as a useTCP parameter to exchange
 private static readonly var useTCPOnly = true;
 private static readonly var useUDPOrTCP = false;
-
 
 private static var errLameReferral = errors.New("lame referral");private static var errCannotUnmarshalDNSMessage = errors.New("cannot unmarshal DNS message");private static var errCannotMarshalDNSMessage = errors.New("cannot marshal DNS message");private static var errServerMisbehaving = errors.New("server misbehaving");private static var errInvalidDNSResponse = errors.New("invalid DNS response");private static var errNoAnswerFromDNSServer = errors.New("no answer from DNS server");private static var errServerTemporarilyMisbehaving = errors.New("server misbehaving");
 
@@ -61,7 +59,6 @@ private static (ushort, slice<byte>, slice<byte>, error) newRequest(dnsmessage.Q
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -73,14 +70,12 @@ private static (ushort, slice<byte>, slice<byte>, error) newRequest(dnsmessage.Q
         err = err__prev1;
 
     }
-
     tcpReq, err = b.Finish();
     udpReq = tcpReq[(int)2..];
     var l = len(tcpReq) - 2;
     tcpReq[0] = byte(l >> 8);
     tcpReq[1] = byte(l);
     return (id, udpReq, tcpReq, error.As(err)!);
-
 }
 
 private static bool checkResponse(ushort reqID, dnsmessage.Question reqQues, dnsmessage.Header respHdr, dnsmessage.Question respQues) {
@@ -94,7 +89,6 @@ private static bool checkResponse(ushort reqID, dnsmessage.Question reqQues, dns
         return false;
     }
     return true;
-
 }
 
 private static (dnsmessage.Parser, dnsmessage.Header, error) dnsPacketRoundTrip(Conn c, ushort id, dnsmessage.Question query, slice<byte> b) {
@@ -109,7 +103,6 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) dnsPacketRoundTrip(
             return (new dnsmessage.Parser(), new dnsmessage.Header(), error.As(err)!);
         }
     }
-
 
     b = make_slice<byte>(512); // see RFC 1035
     while (true) {
@@ -130,9 +123,7 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) dnsPacketRoundTrip(
             continue;
         }
         return (p, h, error.As(null!)!);
-
     }
-
 }
 
 private static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip(Conn c, ushort id, dnsmessage.Question query, slice<byte> b) {
@@ -148,7 +139,6 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip(
         }
     }
 
-
     b = make_slice<byte>(1280); // 1280 is a reasonable initial size for IP over Ethernet, see RFC 4035
     {
         (_, err) = io.ReadFull(c, b[..(int)2]);
@@ -157,7 +147,6 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip(
             return (new dnsmessage.Parser(), new dnsmessage.Header(), error.As(err)!);
         }
     }
-
     var l = int(b[0]) << 8 | int(b[1]);
     if (l > len(b)) {
         b = make_slice<byte>(l);
@@ -179,7 +168,6 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip(
         return (new dnsmessage.Parser(), new dnsmessage.Header(), error.As(errInvalidDNSResponse)!);
     }
     return (p, h, error.As(null!)!);
-
 }
 
 // exchange sends a query on the connection and hopes for a response.
@@ -218,7 +206,6 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ptr<R
             }
 
         }
-
         dnsmessage.Parser p = default;
         dnsmessage.Header h = default;
         {
@@ -233,7 +220,6 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ptr<R
             }
 
         }
-
         c.Close();
         if (err != null) {
             return (new dnsmessage.Parser(), new dnsmessage.Header(), error.As(mapErr(err))!);
@@ -246,15 +232,11 @@ private static (dnsmessage.Parser, dnsmessage.Header, error) exchange(this ptr<R
             }
 
         }
-
         if (h.Truncated) { // see RFC 5966
             continue;
-
         }
         return (p, h, error.As(null!)!);
-
     }    return (new dnsmessage.Parser(), new dnsmessage.Header(), error.As(errNoAnswerFromDNSServer)!);
-
 });
 
 // checkHeader performs basic sanity checks on the header.
@@ -281,10 +263,8 @@ private static error checkHeader(ptr<dnsmessage.Parser> _addr_p, dnsmessage.Head
             return error.As(errServerTemporarilyMisbehaving)!;
         }
         return error.As(errServerMisbehaving)!;
-
     }
     return error.As(null!)!;
-
 }
 
 private static error skipToAnswer(ptr<dnsmessage.Parser> _addr_p, dnsmessage.Type qtype) {
@@ -309,9 +289,7 @@ private static error skipToAnswer(ptr<dnsmessage.Parser> _addr_p, dnsmessage.Typ
             }
 
         }
-
     }
-
 }
 
 // Do a lookup for a single name, which must be rooted
@@ -360,12 +338,9 @@ private static (dnsmessage.Parser, @string, error) tryOneName(this ptr<Resolver>
                     }
 
                 }
-
                 lastErr = error.As(dnsErr)!;
                 continue;
-
             }
-
             {
                 var err = checkHeader(_addr_p, h);
 
@@ -380,22 +355,17 @@ private static (dnsmessage.Parser, @string, error) tryOneName(this ptr<Resolver>
 
                         dnsErr.IsNotFound = true;
                         return (p, server, error.As(dnsErr)!);
-
                     }
-
                     lastErr = error.As(dnsErr)!;
                     continue;
-
                 }
 
             }
-
 
             err = skipToAnswer(_addr_p, qtype);
             if (err == null) {
                 return (p, server, error.As(null!)!);
             }
-
             lastErr = error.As(addr(new DNSError(Err:err.Error(),Name:name,Server:server,)))!;
             if (err == errNoSuchHost) { 
                 // The name does not exist, so trying another
@@ -403,14 +373,10 @@ private static (dnsmessage.Parser, @string, error) tryOneName(this ptr<Resolver>
 
                 lastErr._<ptr<DNSError>>().IsNotFound = true;
                 return (p, server, error.As(lastErr)!);
-
             }
-
         }
-
     }
     return (new dnsmessage.Parser(), "", error.As(lastErr)!);
-
 }
 
 // A resolverConfig represents a DNS stub resolver configuration.
@@ -443,7 +409,6 @@ private static void init(this ptr<resolverConfig> _addr_conf) {
     // Prepare ch so that only one update of resolverConfig may
     // run at once.
     conf.ch = make_channel<object>(1);
-
 }
 
 // tryUpdate tries to update conf with the named resolv.conf file.
@@ -474,7 +439,6 @@ private static void tryUpdate(this ptr<resolverConfig> _addr_conf, @string name)
             mtime = fi.ModTime();
         }
     }
-
     if (mtime.Equal(conf.dnsConfig.mtime)) {
         return ;
     }
@@ -482,7 +446,6 @@ private static void tryUpdate(this ptr<resolverConfig> _addr_conf, @string name)
     conf.mu.Lock();
     conf.dnsConfig = dnsConf;
     conf.mu.Unlock();
-
 });
 
 private static bool tryAcquireSema(this ptr<resolverConfig> _addr_conf) {
@@ -511,7 +474,6 @@ private static (dnsmessage.Parser, @string, error) lookup(this ptr<Resolver> _ad
         // (for example Multicast DNS allows UTF-8; see RFC 6762).
         // For consistency with libc resolvers, report no such host.
         return (new dnsmessage.Parser(), "", error.As(addr(new DNSError(Err:errNoSuchHost.Error(),Name:name,IsNotFound:true))!)!);
-
     }
     resolvConf.tryUpdate("/etc/resolv.conf");
     resolvConf.mu.RLock();
@@ -530,11 +492,9 @@ private static (dnsmessage.Parser, @string, error) lookup(this ptr<Resolver> _ad
                 // If we hit a temporary error with StrictErrors enabled,
                 // stop immediately instead of trying more names.
                 break;
-
             }
 
         }
-
     }    if (err == null) {
         return (p, server, error.As(null!)!);
     }
@@ -548,14 +508,11 @@ private static (dnsmessage.Parser, @string, error) lookup(this ptr<Resolver> _ad
             // In general we might have tried many suffixes; showing
             // just one is misleading. See also golang.org/issue/6324.
             err.Name = name;
-
         }
         err = err__prev1;
 
     }
-
     return (new dnsmessage.Parser(), "", error.As(err)!);
-
 }
 
 // avoidDNS reports whether this is a hostname for which we should not
@@ -570,7 +527,6 @@ private static bool avoidDNS(@string name) {
         name = name[..(int)len(name) - 1];
     }
     return stringsHasSuffixFold(name, ".onion");
-
 }
 
 // nameList returns a list of names for sequential DNS queries.
@@ -606,7 +562,6 @@ private static slice<@string> nameList(this ptr<dnsConfig> _addr_conf, @string n
         names = append(names, name);
     }
     return names;
-
 }
 
 // hostLookupOrder specifies the order of LookupHost lookup strategies.
@@ -633,9 +588,7 @@ private static @string String(this hostLookupOrder o) {
             return s;
         }
     }
-
     return "hostLookupOrder=" + itoa.Itoa(int(o)) + "??";
-
 }
 
 // goLookupHost is the native Go implementation of LookupHost.
@@ -672,7 +625,6 @@ private static (slice<@string>, error) goLookupHostOrder(this ptr<Resolver> _add
     foreach (var (_, ip) in ips) {
         addrs = append(addrs, ip.String());
     }    return ;
-
 }
 
 // lookup entries from /etc/hosts
@@ -694,14 +646,12 @@ private static slice<IPAddr> goLookupIPFiles(@string name) {
                 }
 
             }
-
         }
         haddr = haddr__prev1;
     }
 
     sortByRFC6724(addrs);
     return ;
-
 }
 
 // goLookupIP is the native Go implementation of LookupIP.
@@ -731,7 +681,6 @@ private static (slice<IPAddr>, dnsmessage.Name, error) goLookupIPCNAMEOrder(this
     if (!isDomainName(name)) { 
         // See comment in func lookup above about use of errNoSuchHost.
         return (null, new dnsmessage.Name(), error.As(addr(new DNSError(Err:errNoSuchHost.Error(),Name:name,IsNotFound:true))!)!);
-
     }
     resolvConf.tryUpdate("/etc/resolv.conf");
     resolvConf.mu.RLock();
@@ -765,7 +714,6 @@ private static (slice<IPAddr>, dnsmessage.Name, error) goLookupIPCNAMEOrder(this
             var (p, server, err) = r.tryOneName(ctx, conf, fqdn, qtype);
             return new result(p,server,err);
         };
-
     } {
         queryFn = (fqdn, qtype) => {
             dnsWaitGroup.Add(1);
@@ -775,9 +723,7 @@ private static (slice<IPAddr>, dnsmessage.Name, error) goLookupIPCNAMEOrder(this
                 dnsWaitGroup.Done();
             }(qtype));
         };
-        responseFn = (fqdn, qtype) => {
-            return lane.Receive();
-        };
+        responseFn = (fqdn, qtype) => lane.Receive();
     }
     error lastErr = default!;
     foreach (var (_, fqdn) in conf.nameList(name)) {
@@ -807,19 +753,14 @@ private static (slice<IPAddr>, dnsmessage.Name, error) goLookupIPCNAMEOrder(this
                             // This error will abort the nameList loop.
                             hitStrictError = true;
                             lastErr = error.As(result.error)!;
-
                         }
                         else if (lastErr == null || fqdn == name + ".") { 
                             // Prefer error for original name.
                             lastErr = error.As(result.error)!;
-
                         }
 
-
                     }
-
                     continue;
-
                 } 
 
                 // Presotto says it's okay to assume that servers listed in
@@ -853,7 +794,6 @@ loop:
                             _breakloop = true;
                             break;
                         }
-
                         addrs = append(addrs, new IPAddr(IP:IP(a.A[:])));
                     else if (h.Type == dnsmessage.TypeAAAA) 
                         var (aaaa, err) = result.p.AAAAResource();
@@ -862,7 +802,6 @@ loop:
                             _breakloop = true;
                             break;
                         }
-
                         addrs = append(addrs, new IPAddr(IP:IP(aaaa.AAAA[:])));
                     else 
                         {
@@ -875,14 +814,11 @@ loop:
                             }
 
                         }
-
                         continue;
                                         if (cname.Length == 0 && h.Name.Length != 0) {
                         cname = h.Name;
                     }
-
                 }
-
             }
 
             qtype = qtype__prev2;
@@ -894,7 +830,6 @@ loop:
             // cannot turn a dualstack hostname IPv4/IPv6-only.
             addrs = null;
             break;
-
         }
         if (len(addrs) > 0) {
             break;
@@ -909,12 +844,10 @@ loop:
             // In general we might have tried many suffixes; showing
             // just one is misleading. See also golang.org/issue/6324.
             lastErr.Name = name;
-
         }
         lastErr = lastErr__prev1;
 
     }
-
     sortByRFC6724(addrs);
     if (len(addrs) == 0) {
         if (order == hostLookupDNSFiles) {
@@ -925,7 +858,6 @@ loop:
         }
     }
     return (addrs, cname, error.As(null!)!);
-
 });
 
 // goLookupCNAME is the native Go (non-cgo) implementation of LookupCNAME.
@@ -982,11 +914,8 @@ private static (slice<@string>, error) goLookupPTR(this ptr<Resolver> _addr_r, c
             return (null, error.As(addr(new DNSError(Err:"cannot marshal DNS message",Name:addr,Server:server,))!)!);
         }
         ptrs = append(ptrs, ptr.PTR.String());
-
-
     }
     return (ptrs, error.As(null!)!);
-
 }
 
 } // end net_package

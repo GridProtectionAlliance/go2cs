@@ -8,8 +8,9 @@
 // This failed to be true on arm and arm64, which was the root cause
 // of issue 13881.
 
-// package main -- go2cs converted at 2022 March 06 22:26:11 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:29 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\dropm.go
+namespace go;
 /*
 #include <stddef.h>
 #include <pthread.h>
@@ -29,55 +30,7 @@ static void CheckM() {
     pthread_join(tid, NULL);
 }
 */
-using C = go.C_package;/*
-#include <stddef.h>
-#include <pthread.h>
-
-extern void GoCheckM();
-
-static void* thread(void* arg __attribute__ ((unused))) {
-    GoCheckM();
-    return NULL;
-}
-
-static void CheckM() {
-    pthread_t tid;
-    pthread_create(&tid, NULL, thread, NULL);
-    pthread_join(tid, NULL);
-    pthread_create(&tid, NULL, thread, NULL);
-    pthread_join(tid, NULL);
-}
-*/
 
 
-using fmt = go.fmt_package;
-using os = go.os_package;
-
-namespace go;
-
-public static partial class main_package {
-
-private static void init() {
-    register("EnsureDropM", EnsureDropM);
-}
-
-private static System.UIntPtr savedM = default;
-
-//export GoCheckM
-public static void GoCheckM() {
-    var m = runtime_getm_for_test();
-    if (savedM == 0) {
-        savedM = m;
-    }
-    else if (savedM != m) {
-        fmt.Printf("m == %x want %x\n", m, savedM);
-        os.Exit(1);
-    }
-}
-
-public static void EnsureDropM() {
-    C.CheckM();
-    fmt.Println("OK");
-}
 
 } // end main_package

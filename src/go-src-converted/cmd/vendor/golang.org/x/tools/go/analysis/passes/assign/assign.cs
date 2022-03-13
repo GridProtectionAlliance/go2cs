@@ -3,25 +3,25 @@
 // license that can be found in the LICENSE file.
 
 // Package assign defines an Analyzer that detects useless assignments.
-// package assign -- go2cs converted at 2022 March 06 23:34:28 UTC
+
+// package assign -- go2cs converted at 2022 March 13 06:41:44 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/assign" ==> using assign = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.assign_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\assign\assign.go
+namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 // TODO(adonovan): check also for assignments to struct fields inside
 // methods that are on T instead of *T.
 
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using reflect = go.reflect_package;
 
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using reflect = reflect_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
 
 public static partial class assign_package {
 
@@ -49,29 +49,24 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         if (len(stmt.Lhs) != len(stmt.Rhs)) { 
             // If LHS and RHS have different cardinality, they can't be the same.
             return ;
-
         }
         foreach (var (i, lhs) in stmt.Lhs) {
             var rhs = stmt.Rhs[i];
             if (analysisutil.HasSideEffects(pass.TypesInfo, lhs) || analysisutil.HasSideEffects(pass.TypesInfo, rhs)) {
                 continue; // expressions may not be equal
             }
-
             if (reflect.TypeOf(lhs) != reflect.TypeOf(rhs)) {
                 continue; // short-circuit the heavy-weight gofmt check
             }
-
             var le = analysisutil.Format(pass.Fset, lhs);
             var re = analysisutil.Format(pass.Fset, rhs);
             if (le == re) {
                 pass.Report(new analysis.Diagnostic(Pos:stmt.Pos(),Message:fmt.Sprintf("self-assignment of %s to %s",re,le),SuggestedFixes:[]analysis.SuggestedFix{{Message:"Remove",TextEdits:[]analysis.TextEdit{{Pos:stmt.Pos(),End:stmt.End(),NewText:[]byte{}},}},},));
             }
-
         }
     });
 
     return (null, error.As(null!)!);
-
 }
 
 } // end assign_package

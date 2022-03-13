@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package hpack -- go2cs converted at 2022 March 06 23:37:14 UTC
+// package hpack -- go2cs converted at 2022 March 13 06:45:30 UTC
 // import "vendor/golang.org/x/net/http2/hpack" ==> using hpack = go.vendor.golang.org.x.net.http2.hpack_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\http2\hpack\huffman.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.net.http2;
+
+using bytes = bytes_package;
+using errors = errors_package;
+using io = io_package;
+using sync = sync_package;
+using System;
 
 public static partial class hpack_package {
 
@@ -35,9 +34,7 @@ public static (nint, error) HuffmanDecode(io.Writer w, slice<byte> v) => func((d
             return (0, error.As(err)!);
         }
     }
-
     return w.Write(buf.Bytes());
-
 });
 
 // HuffmanDecodeToString decodes the string in v.
@@ -55,9 +52,7 @@ public static (@string, error) HuffmanDecodeToString(slice<byte> v) => func((def
             return ("", error.As(err)!);
         }
     }
-
     return (buf.String(), error.As(null!)!);
-
 });
 
 // ErrInvalidHuffman is returned for errors found decoding
@@ -101,9 +96,7 @@ private static error huffmanDecode(ptr<bytes.Buffer> _addr_buf, nint maxLen, sli
  {
                 cbits -= 8;
             }
-
         }
-
     }    while (cbits > 0) {
         n = n.children[byte(cur << (int)((8 - cbits)))];
         if (n == null) {
@@ -119,13 +112,11 @@ private static error huffmanDecode(ptr<bytes.Buffer> _addr_buf, nint maxLen, sli
         cbits -= n.codeLen;
         n = rootHuffmanNode;
         sbits = cbits;
-
     }
     if (sbits > 7) { 
         // Either there was an incomplete symbol, or overlong padding.
         // Both are decoding errors per RFC 7541 section 5.2.
         return error.As(ErrInvalidHuffman)!;
-
     }
     {
         var mask = uint(1 << (int)(cbits) - 1);
@@ -133,13 +124,10 @@ private static error huffmanDecode(ptr<bytes.Buffer> _addr_buf, nint maxLen, sli
         if (cur & mask != mask) { 
             // Trailing bits must be a prefix of EOS per RFC 7541 section 5.2.
             return error.As(ErrInvalidHuffman)!;
-
         }
     }
 
-
     return error.As(null!)!;
-
 }
 
 // incomparable is a zero-width, non-comparable type. Adding it to a struct
@@ -185,7 +173,6 @@ private static void addDecoderNode(byte sym, uint code, byte codeLen) {
             cur.children[i] = newInternalNode();
         }
         cur = cur.children[i];
-
     }
     nint shift = 8 - codeLen;
     var start = int(uint8(code << (int)(shift)));
@@ -199,7 +186,6 @@ private static void addDecoderNode(byte sym, uint code, byte codeLen) {
 
         i = i__prev1;
     }
-
 }
 
 // AppendHuffmanString appends s, as encoded in Huffman codes, to dst
@@ -212,7 +198,6 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
             dst = append(dst, 0);
         }
         dst, rembits = appendByteToHuffmanCode(dst, rembits, s[i]);
-
     }
 
     if (rembits < 8) { 
@@ -222,10 +207,8 @@ public static slice<byte> AppendHuffmanString(slice<byte> dst, @string s) {
 
         var t = uint8(code >> (int)((nbits - rembits)));
         dst[len(dst) - 1] |= t;
-
     }
     return dst;
-
 }
 
 // HuffmanEncodeLength returns the number of bytes required to encode
@@ -266,11 +249,9 @@ private static (slice<byte>, byte) appendByteToHuffmanCode(slice<byte> dst, byte
             break;
         }
         dst = append(dst, 0);
-
     }
 
     return (dst, rembits);
-
 }
 
 } // end hpack_package

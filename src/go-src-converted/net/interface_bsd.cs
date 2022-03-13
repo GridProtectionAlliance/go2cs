@@ -5,20 +5,22 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package net -- go2cs converted at 2022 March 06 22:15:52 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:48 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\interface_bsd.go
-using syscall = go.syscall_package;
-
-using route = go.golang.org.x.net.route_package;
-
 namespace go;
+
+using syscall = syscall_package;
+
+using route = golang.org.x.net.route_package;
+
+
+// If the ifindex is zero, interfaceTable returns mappings of all
+// network interfaces. Otherwise it returns a mapping of a specific
+// interface.
 
 public static partial class net_package {
 
-    // If the ifindex is zero, interfaceTable returns mappings of all
-    // network interfaces. Otherwise it returns a mapping of a specific
-    // interface.
 private static (slice<Interface>, error) interfaceTable(nint ifindex) {
     slice<Interface> _p0 = default;
     error _p0 = default!;
@@ -54,7 +56,6 @@ private static (slice<Interface>, error) interfaceTable(nint ifindex) {
                             copy(ift[n].HardwareAddr, sa.Addr);
                         }
                     }
-
                     foreach (var (_, sys) in m.Sys()) {
                         {
                             ptr<route.InterfaceMetrics> (imx, ok) = sys._<ptr<route.InterfaceMetrics>>();
@@ -64,20 +65,17 @@ private static (slice<Interface>, error) interfaceTable(nint ifindex) {
                                 break;
                             }
                         }
-
                     }                    n++;
                     if (ifindex == m.Index) {
                         return (ift[..(int)n], error.As(null!)!);
                     }
                     break;
             }
-
         }
         m = m__prev1;
     }
 
     return (ift[..(int)n], error.As(null!)!);
-
 }
 
 private static Flags linkFlags(nint rawFlags) {
@@ -98,7 +96,6 @@ private static Flags linkFlags(nint rawFlags) {
         f |= FlagMulticast;
     }
     return f;
-
 }
 
 // If the ifi is nil, interfaceAddrTable returns addresses for all
@@ -150,18 +147,14 @@ private static (slice<Addr>, error) interfaceAddrTable(ptr<Interface> _addr_ifi)
                     }
                     if (ip != null && mask != null) { // NetBSD may contain route.LinkAddr
                         ifat = append(ifat, addr(new IPNet(IP:ip,Mask:mask)));
-
                     }
-
                     break;
             }
-
         }
         m = m__prev1;
     }
 
     return (ifat, error.As(null!)!);
-
 }
 
 } // end net_package

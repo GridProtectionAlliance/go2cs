@@ -4,25 +4,25 @@
 
 // Package cgocall defines an Analyzer that detects some violations of
 // the cgo pointer passing rules.
-// package cgocall -- go2cs converted at 2022 March 06 23:34:32 UTC
+
+// package cgocall -- go2cs converted at 2022 March 13 06:41:49 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/cgocall" ==> using cgocall = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.cgocall_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\cgocall\cgocall.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using format = go.go.format_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using log = go.log_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using format = go.format_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using types = go.types_package;
+using log = log_package;
+using os = os_package;
+using strconv = strconv_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using System;
 
 public static partial class cgocall_package {
 
@@ -58,7 +58,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
     foreach (var (_, f) in cgofiles) {
         checkCgo(_addr_pass.Fset, _addr_f, _addr_info, pass.Reportf);
     }    return (null, error.As(null!)!);
-
 }
 
 private static void checkCgo(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_f, ptr<types.Info> _addr_info, params Action<token.Pos, @string, object>[] reportf) {
@@ -85,11 +84,9 @@ private static void checkCgo(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_
                     }
 
                 }
-
             }
 
         }
-
         if (name == "") {
             return true; // not a call we need to check
         }
@@ -114,7 +111,6 @@ private static void checkCgo(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_
                 }
 
             }
-
             {
                 ptr<ast.UnaryExpr> (u, ok) = arg._<ptr<ast.UnaryExpr>>();
 
@@ -126,11 +122,8 @@ private static void checkCgo(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_
                 }
 
             }
-
         }        return true;
-
     });
-
 }
 
 // typeCheckCgoSourceFiles returns type-checked syntax trees for the raw
@@ -300,11 +293,9 @@ private static (slice<ptr<ast.File>>, ptr<types.Info>, error) typeCheckCgoSource
                             decl.Type.Params.List = params;
                             decl.Recv = null;
                         }
-
                         break;
                 }
                 decls = append(decls, decl);
-
             }
 
             decl = decl__prev2;
@@ -315,7 +306,6 @@ private static (slice<ptr<ast.File>>, ptr<types.Info>, error) typeCheckCgoSource
             format.Node(os.Stderr, fset, f); // debugging
         }
         cgoFiles = append(cgoFiles, f);
-
     }    if (cgoFiles == null) {
         return (null, _addr_null!, error.As(null!)!); // nothing to do (can't happen?)
     }
@@ -327,7 +317,6 @@ private static (slice<ptr<ast.File>>, ptr<types.Info>, error) typeCheckCgoSource
     tc.Check(pkg.Path(), fset, cgoFiles, altInfo);
 
     return (cgoFiles, _addr_altInfo!, error.As(null!)!);
-
 }
 
 // cgoBaseType tries to look through type conversions involving
@@ -353,7 +342,6 @@ private static types.Type cgoBaseType(ptr<types.Info> _addr_info, ast.Expr arg) 
             if (t == null) {
                 break;
             }
-
             ptr<types.Pointer> (ptr, ok) = t.Underlying()._<ptr<types.Pointer>>();
             if (!ok) {
                 break;
@@ -384,7 +372,6 @@ private static types.Type cgoBaseType(ptr<types.Info> _addr_info, ast.Expr arg) 
     }
 
     return info.Types[arg].Type;
-
 }
 
 // typeOKForCgoCall reports whether the type of arg is OK to pass to a
@@ -423,7 +410,6 @@ private static bool typeOKForCgoCall(types.Type t, map<types.Type, bool> m) {
             break;
     }
     return true;
-
 }
 
 private static bool isUnsafePointer(ptr<types.Info> _addr_info, ast.Expr e) {
@@ -452,7 +438,6 @@ private static ptr<types.Package> imported(ptr<types.Info> _addr_info, ptr<ast.I
         obj = info.Defs[spec.Name]; // renaming import
     }
     return obj._<ptr<types.PkgName>>().Imported();
-
 }
 
 } // end cgocall_package

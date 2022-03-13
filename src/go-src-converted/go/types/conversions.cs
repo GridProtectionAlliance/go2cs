@@ -4,18 +4,20 @@
 
 // This file implements typechecking of conversions.
 
-// package types -- go2cs converted at 2022 March 06 22:41:45 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:51 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\conversions.go
-using constant = go.go.constant_package;
-using unicode = go.unicode_package;
-
 namespace go.go;
+
+using constant = go.constant_package;
+using unicode = unicode_package;
+
+
+// Conversion type-checks the conversion T(x).
+// The result is in x.
 
 public static partial class types_package {
 
-    // Conversion type-checks the conversion T(x).
-    // The result is in x.
 private static void conversion(this ptr<Checker> _addr_check, ptr<operand> _addr_x, Type T) {
     ref Checker check = ref _addr_check.val;
     ref operand x = ref _addr_x.val;
@@ -42,7 +44,6 @@ private static void conversion(this ptr<Checker> _addr_check, ptr<operand> _addr
                         codepoint = rune(i);
                     }
                 }
-
                 x.val = constant.MakeString(string(codepoint));
                 ok = true;
 
@@ -61,7 +62,6 @@ private static void conversion(this ptr<Checker> _addr_check, ptr<operand> _addr
         }
         x.mode = invalid;
         return ;
-
     }
     if (isUntyped(x.typ)) {
         var final = T; 
@@ -79,10 +79,8 @@ private static void conversion(this ptr<Checker> _addr_check, ptr<operand> _addr
             final = x.typ;
         }
         check.updateExprType(x.expr, final, true);
-
     }
     x.typ = T;
-
 }
 
 // TODO(gri) convertibleTo checks if T(x) is valid. It assumes that the type
@@ -135,7 +133,6 @@ private static bool convertibleTo(this ptr<operand> _addr_x, ptr<Checker> _addr_
                 }
 
             }
-
         }
         V = V__prev1;
 
@@ -183,17 +180,13 @@ private static bool convertibleTo(this ptr<operand> _addr_x, ptr<Checker> _addr_
                         }
 
                     }
-
                 }
 
             }
-
         }
     }
 
-
     return false;
-
 }
 
 private static bool isUintptr(Type typ) {
@@ -208,7 +201,6 @@ private static bool isUnsafePointer(Type typ) {
     //            issue 6326.
     var t = asBasic(typ);
     return t != null && t.kind == UnsafePointer;
-
 }
 
 private static bool isPointer(Type typ) {
@@ -224,9 +216,7 @@ private static bool isBytesOrRunes(Type typ) {
             return t != null && (t.kind == Byte || t.kind == Rune);
         }
     }
-
     return false;
-
 }
 
 } // end types_package

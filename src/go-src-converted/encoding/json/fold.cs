@@ -2,22 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package json -- go2cs converted at 2022 March 06 22:25:19 UTC
+// package json -- go2cs converted at 2022 March 13 05:39:52 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\fold.go
-using bytes = go.bytes_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.encoding;
+
+using bytes = bytes_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class json_package {
 
 private static readonly var caseMask = ~byte(0x20); // Mask to ignore case in ASCII.
 private static readonly char kelvin = '\u212a';
 private static readonly char smallLongEss = '\u017f';
-
 
 // foldFunc returns one of four different case folding equivalence
 // functions, from most general (and slow) to fastest:
@@ -48,7 +46,6 @@ private static Func<slice<byte>, slice<byte>, bool> foldFunc(slice<byte> s) {
         else if (upper == 'K' || upper == 'S') { 
             // See above for why these letters are special.
             special = true;
-
         }
     }    if (special) {
         return equalFoldRight;
@@ -57,7 +54,6 @@ private static Func<slice<byte>, slice<byte>, bool> foldFunc(slice<byte> s) {
         return asciiEqualFold;
     }
     return simpleLetterEqualFold;
-
 }
 
 // equalFoldRight is a specialization of bytes.EqualFold when s is
@@ -82,12 +78,9 @@ private static bool equalFoldRight(slice<byte> s, slice<byte> t) {
  {
                     return false;
                 }
-
             }
-
             t = t[(int)1..];
             continue;
-
         }
         var (tr, size) = utf8.DecodeRune(t);
         switch (sb) {
@@ -110,13 +103,10 @@ private static bool equalFoldRight(slice<byte> s, slice<byte> t) {
                 break;
         }
         t = t[(int)size..];
-
-
     }    if (len(t) > 0) {
         return false;
     }
     return true;
-
 }
 
 // asciiEqualFold is a specialization of bytes.EqualFold for use when
@@ -142,7 +132,6 @@ private static bool asciiEqualFold(slice<byte> s, slice<byte> t) {
             return false;
         }
     }    return true;
-
 }
 
 // simpleLetterEqualFold is a specialization of bytes.EqualFold for
@@ -158,7 +147,6 @@ private static bool simpleLetterEqualFold(slice<byte> s, slice<byte> t) {
             return false;
         }
     }    return true;
-
 }
 
 } // end json_package

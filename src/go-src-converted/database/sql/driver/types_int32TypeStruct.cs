@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:29 UTC
+//     Generated on 2022 March 13 06:43:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace sql
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct int32Type
         {
             // Constructors
@@ -50,7 +50,7 @@ namespace sql
             public static implicit operator int32Type(NilType nil) => default(int32Type);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static int32Type int32Type_cast(dynamic value)
         {
             return new int32Type();

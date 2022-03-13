@@ -5,11 +5,9 @@
 //go:build 386
 // +build 386
 
-// package sys -- go2cs converted at 2022 March 06 22:08:18 UTC
+// package sys -- go2cs converted at 2022 March 13 05:24:03 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Program Files\Go\src\runtime\internal\sys\intrinsics_stubs.go
-
-
 namespace go.runtime.@internal;
 
 public static partial class sys_package {

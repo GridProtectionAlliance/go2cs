@@ -5,17 +5,19 @@
 //go:build openbsd && mips64
 // +build openbsd,mips64
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:33 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\os_openbsd_syscall.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+//go:noescape
 
 public static partial class runtime_package {
 
-    //go:noescape
 private static int tfork(ptr<tforkt> param, System.UIntPtr psize, ptr<m> mm, ptr<g> gg, System.UIntPtr fn);
 
 // May run with m.p==nil, so write barriers are not allowed.
@@ -40,7 +42,6 @@ private static void newosproc(ptr<m> _addr_mp) {
             println("runtime: may need to increase max user processes (ulimit -p)");
         }
         throw("runtime.newosproc");
-
     }
 }
 

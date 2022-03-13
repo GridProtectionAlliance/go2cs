@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:02 UTC
+//     Generated on 2022 March 13 06:46:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace net
 {
     public static partial class idna_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct sparseBlocks
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace net
             public static implicit operator sparseBlocks(NilType nil) => default(sparseBlocks);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static sparseBlocks sparseBlocks_cast(dynamic value)
         {
             return new sparseBlocks(value.values, value.offset);

@@ -5,12 +5,12 @@
 //go:build !windows && !darwin
 // +build !windows,!darwin
 
-// package robustio -- go2cs converted at 2022 March 06 23:18:39 UTC
+// package robustio -- go2cs converted at 2022 March 13 06:32:02 UTC
 // import "cmd/go/internal/robustio" ==> using robustio = go.cmd.go.@internal.robustio_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\robustio\robustio_other.go
-using os = go.os_package;
-
 namespace go.cmd.go.@internal;
+
+using os = os_package;
 
 public static partial class robustio_package {
 

@@ -6,46 +6,49 @@
 //
 // This package is under development. The API may change without notice and
 // without preserving backward compatibility.
-// package bidirule -- go2cs converted at 2022 March 06 23:38:22 UTC
+
+// package bidirule -- go2cs converted at 2022 March 13 06:46:35 UTC
 // import "vendor/golang.org/x/text/secure/bidirule" ==> using bidirule = go.vendor.golang.org.x.text.secure.bidirule_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\secure\bidirule\bidirule.go
-using errors = go.errors_package;
-using utf8 = go.unicode.utf8_package;
-
-using transform = go.golang.org.x.text.transform_package;
-using bidi = go.golang.org.x.text.unicode.bidi_package;
-
 namespace go.vendor.golang.org.x.text.secure;
+
+using errors = errors_package;
+using utf8 = unicode.utf8_package;
+
+using transform = golang.org.x.text.transform_package;
+using bidi = golang.org.x.text.unicode.bidi_package;
+
+
+// This file contains an implementation of RFC 5893: Right-to-Left Scripts for
+// Internationalized Domain Names for Applications (IDNA)
+//
+// A label is an individual component of a domain name.  Labels are usually
+// shown separated by dots; for example, the domain name "www.example.com" is
+// composed of three labels: "www", "example", and "com".
+//
+// An RTL label is a label that contains at least one character of class R, AL,
+// or AN. An LTR label is any label that is not an RTL label.
+//
+// A "Bidi domain name" is a domain name that contains at least one RTL label.
+//
+//  The following guarantees can be made based on the above:
+//
+//  o  In a domain name consisting of only labels that satisfy the rule,
+//     the requirements of Section 3 are satisfied.  Note that even LTR
+//     labels and pure ASCII labels have to be tested.
+//
+//  o  In a domain name consisting of only LDH labels (as defined in the
+//     Definitions document [RFC5890]) and labels that satisfy the rule,
+//     the requirements of Section 3 are satisfied as long as a label
+//     that starts with an ASCII digit does not come after a
+//     right-to-left label.
+//
+//  No guarantee is given for other combinations.
+
+// ErrInvalid indicates a label is invalid according to the Bidi Rule.
 
 public static partial class bidirule_package {
 
-    // This file contains an implementation of RFC 5893: Right-to-Left Scripts for
-    // Internationalized Domain Names for Applications (IDNA)
-    //
-    // A label is an individual component of a domain name.  Labels are usually
-    // shown separated by dots; for example, the domain name "www.example.com" is
-    // composed of three labels: "www", "example", and "com".
-    //
-    // An RTL label is a label that contains at least one character of class R, AL,
-    // or AN. An LTR label is any label that is not an RTL label.
-    //
-    // A "Bidi domain name" is a domain name that contains at least one RTL label.
-    //
-    //  The following guarantees can be made based on the above:
-    //
-    //  o  In a domain name consisting of only labels that satisfy the rule,
-    //     the requirements of Section 3 are satisfied.  Note that even LTR
-    //     labels and pure ASCII labels have to be tested.
-    //
-    //  o  In a domain name consisting of only LDH labels (as defined in the
-    //     Definitions document [RFC5890]) and labels that satisfy the rule,
-    //     the requirements of Section 3 are satisfied as long as a label
-    //     that starts with an ASCII digit does not come after a
-    //     right-to-left label.
-    //
-    //  No guarantee is given for other combinations.
-
-    // ErrInvalid indicates a label is invalid according to the Bidi Rule.
 public static var ErrInvalid = errors.New("bidirule: failed Bidi Rule");
 
 private partial struct ruleState { // : byte
@@ -57,7 +60,6 @@ private static readonly var ruleLTRFinal = 1;
 private static readonly var ruleRTL = 2;
 private static readonly var ruleRTLFinal = 3;
 private static readonly var ruleInvalid = 4;
-
 
 private partial struct ruleTransition {
     public ruleState next;
@@ -107,7 +109,6 @@ public static bidi.Direction Direction(slice<byte> b) {
         }
     }
     return bidi.LeftToRight;
-
 }
 
 // DirectionString reports the direction of the given label as defined by RFC
@@ -131,7 +132,6 @@ public static bidi.Direction DirectionString(@string s) {
         }
     }
     return bidi.LeftToRight;
-
 }
 
 // Valid reports whether b conforms to the BiDi rule.
@@ -144,9 +144,7 @@ public static bool Valid(slice<byte> b) {
             return false;
         }
     }
-
     return t.isFinal();
-
 }
 
 // ValidString reports whether s conforms to the BiDi rule.
@@ -159,9 +157,7 @@ public static bool ValidString(@string s) {
             return false;
         }
     }
-
     return t.isFinal();
-
 }
 
 // New returns a Transformer that verifies that input adheres to the Bidi Rule.
@@ -212,7 +208,6 @@ private static (nint, nint, error) Transform(this ptr<Transformer> _addr_t, slic
         err = err1;
     }
     return (n, n, error.As(err)!);
-
 }
 
 // Span returns the first n bytes of src that conform to the Bidi rule.
@@ -237,7 +232,6 @@ private static (nint, error) Span(this ptr<Transformer> _addr_t, slice<byte> src
     else if (!t.isFinal()) 
         err = ErrInvalid;
         return (n, error.As(err)!);
-
 }
 
 // Precomputing the ASCII values decreases running time for the ASCII fast path
@@ -271,12 +265,9 @@ private static (nint, bool) advance(this ptr<Transformer> _addr_t, slice<byte> s
                     // the string has not yet been determined to be RTL.
                     // TODO: is this correct?
                     return (n, false);
-
                 }
-
                 return (n, true); // incomplete UTF-8 encoding
             }
-
         }
         var c = uint16(1 << (int)(e.Class()));
         t.seen |= c;
@@ -300,10 +291,8 @@ private static (nint, bool) advance(this ptr<Transformer> _addr_t, slice<byte> s
 
         }
         n += sz;
-
     }
     return (n, true);
-
 }
 
 private static (nint, bool) advanceString(this ptr<Transformer> _addr_t, @string s) {
@@ -324,10 +313,8 @@ private static (nint, bool) advanceString(this ptr<Transformer> _addr_t, @string
                 if (sz == 1) {
                     return (n, false); // invalid UTF-8
                 }
-
                 return (n, true); // incomplete UTF-8 encoding
             }
-
         }
         var c = uint16(1 << (int)(e.Class()));
         t.seen |= c;
@@ -351,10 +338,8 @@ private static (nint, bool) advanceString(this ptr<Transformer> _addr_t, @string
 
         }
         n += sz;
-
     }
     return (n, true);
-
 }
 
 } // end bidirule_package

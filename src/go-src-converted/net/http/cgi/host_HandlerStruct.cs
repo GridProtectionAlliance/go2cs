@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:27 UTC
+//     Generated on 2022 March 13 05:37:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace http
 {
     public static partial class cgi_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Handler
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace http
             public static implicit operator Handler(NilType nil) => default(Handler);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Handler Handler_cast(dynamic value)
         {
             return new Handler(value.Path, value.Root, value.Dir, value.Env, value.InheritEnv, ref value.Logger, value.Args, value.Stderr, value.PathLocationHandler);

@@ -5,29 +5,31 @@
 // This file implements CGI from the perspective of a child
 // process.
 
-// package cgi -- go2cs converted at 2022 March 06 22:23:25 UTC
+// package cgi -- go2cs converted at 2022 March 13 05:37:50 UTC
 // import "net/http/cgi" ==> using cgi = go.net.http.cgi_package
 // Original source: C:\Program Files\Go\src\net\http\cgi\child.go
-using bufio = go.bufio_package;
-using tls = go.crypto.tls_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.net.http;
+
+using bufio = bufio_package;
+using tls = crypto.tls_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using net = net_package;
+using http = net.http_package;
+using url = net.url_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// Request returns the HTTP request as represented in the current
+// environment. This assumes the current program is being run
+// by a web server in a CGI environment.
+// The returned Request's Body is populated, if applicable.
 
 public static partial class cgi_package {
 
-    // Request returns the HTTP request as represented in the current
-    // environment. This assumes the current program is being run
-    // by a web server in a CGI environment.
-    // The returned Request's Body is populated, if applicable.
 public static (ptr<http.Request>, error) Request() {
     ptr<http.Request> _p0 = default!;
     error _p0 = default!;
@@ -40,7 +42,6 @@ public static (ptr<http.Request>, error) Request() {
         r.Body = io.NopCloser(io.LimitReader(os.Stdin, r.ContentLength));
     }
     return (_addr_r!, error.As(null!)!);
-
 }
 
 private static map<@string, @string> envMap(slice<@string> env) {
@@ -54,9 +55,7 @@ private static map<@string, @string> envMap(slice<@string> env) {
             }
 
         }
-
     }    return m;
-
 }
 
 // RequestFromMap creates an http.Request from CGI variables.
@@ -94,7 +93,6 @@ public static (ptr<http.Request>, error) RequestFromMap(map<@string, @string> @p
         }
     }
 
-
     {
         var ct = params["CONTENT_TYPE"];
 
@@ -109,7 +107,6 @@ public static (ptr<http.Request>, error) RequestFromMap(map<@string, @string> @p
             continue;
         }
         r.Header.Add(strings.ReplaceAll(k[(int)5..], "_", "-"), v);
-
     }    var uriStr = params["REQUEST_URI"];
     if (uriStr == "") { 
         // Fallback to SCRIPT_NAME, PATH_INFO and QUERY_STRING.
@@ -131,7 +128,6 @@ public static (ptr<http.Request>, error) RequestFromMap(map<@string, @string> @p
 
     }
 
-
     if (r.Host != "") { 
         // Hostname is provided, so we can reasonably construct a URL.
         var rawurl = r.Host + uriStr;
@@ -147,7 +143,6 @@ public static (ptr<http.Request>, error) RequestFromMap(map<@string, @string> @p
             return (_addr_null!, error.As(errors.New("cgi: failed to parse host and REQUEST_URI into a URL: " + rawurl))!);
         }
         r.URL = url;
-
     }
     if (r.URL == null) {
         (url, err) = url.Parse(uriStr);
@@ -155,13 +150,11 @@ public static (ptr<http.Request>, error) RequestFromMap(map<@string, @string> @p
             return (_addr_null!, error.As(errors.New("cgi: failed to parse REQUEST_URI into a URL: " + uriStr))!);
         }
         r.URL = url;
-
     }
     var (remotePort, _) = strconv.Atoi(params["REMOTE_PORT"]); // zero if unset or invalid
     r.RemoteAddr = net.JoinHostPort(params["REMOTE_ADDR"], strconv.Itoa(remotePort));
 
     return (_addr_r!, error.As(null!)!);
-
 }
 
 // Serve executes the provided Handler on the currently active CGI
@@ -188,7 +181,6 @@ public static error Serve(http.Handler handler) {
         return error.As(err)!;
     }
     return error.As(null!)!;
-
 }
 
 private partial struct response {
@@ -224,7 +216,6 @@ private static (nint, error) Write(this ptr<response> _addr_r, slice<byte> p) {
         r.writeCGIHeader(p);
     }
     return r.bufw.Write(p);
-
 }
 
 private static void WriteHeader(this ptr<response> _addr_r, nint code) {
@@ -234,11 +225,9 @@ private static void WriteHeader(this ptr<response> _addr_r, nint code) {
         // Note: explicitly using Stderr, as Stdout is our HTTP output.
         fmt.Fprintf(os.Stderr, "CGI attempted to write header twice on request for %s", r.req.URL);
         return ;
-
     }
     r.wroteHeader = true;
     r.code = code;
-
 }
 
 // writeCGIHeader finalizes the header sent to the client and writes it to the output.
@@ -260,11 +249,9 @@ private static void writeCGIHeader(this ptr<response> _addr_r, slice<byte> p) {
             r.header.Set("Content-Type", http.DetectContentType(p));
         }
     }
-
     r.header.Write(r.bufw);
     r.bufw.WriteString("\r\n");
     r.bufw.Flush();
-
 }
 
 } // end cgi_package

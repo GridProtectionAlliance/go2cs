@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:13:38 UTC
+//     Generated on 2022 March 13 05:28:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class os_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct unixDirent
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace go
             public static implicit operator unixDirent(NilType nil) => default(unixDirent);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static unixDirent unixDirent_cast(dynamic value)
         {
             return new unixDirent(value.parent, value.name, value.typ, value.info);

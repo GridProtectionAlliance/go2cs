@@ -8,28 +8,30 @@
 // HKDF is a cryptographic key derivation function (KDF) with the goal of
 // expanding limited input keying material into one or more cryptographically
 // strong secret keys.
-// package hkdf -- go2cs converted at 2022 March 06 23:36:50 UTC
+
+// package hkdf -- go2cs converted at 2022 March 13 06:44:57 UTC
 // import "vendor/golang.org/x/crypto/hkdf" ==> using hkdf = go.vendor.golang.org.x.crypto.hkdf_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\hkdf\hkdf.go
+namespace go.vendor.golang.org.x.crypto;
 // import "golang.org/x/crypto/hkdf"
 
-using hmac = go.crypto.hmac_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-using io = go.io_package;
+
+using hmac = crypto.hmac_package;
+using errors = errors_package;
+using hash = hash_package;
+using io = io_package;
+
+
+// Extract generates a pseudorandom key for use with Expand from an input secret
+// and an optional independent salt.
+//
+// Only use this function if you need to reuse the extracted key with multiple
+// Expand invocations and different context values. Most common scenarios,
+// including the generation of multiple keys, should use New instead.
+
 using System;
-
-
-namespace go.vendor.golang.org.x.crypto;
-
 public static partial class hkdf_package {
 
-    // Extract generates a pseudorandom key for use with Expand from an input secret
-    // and an optional independent salt.
-    //
-    // Only use this function if you need to reuse the extracted key with multiple
-    // Expand invocations and different context values. Most common scenarios,
-    // including the generation of multiple keys, should use New instead.
 public static slice<byte> Extract(Func<hash.Hash> hash, slice<byte> secret, slice<byte> salt) {
     if (salt == null) {
         salt = make_slice<byte>(hash().Size());
@@ -37,7 +39,6 @@ public static slice<byte> Extract(Func<hash.Hash> hash, slice<byte> secret, slic
     var extractor = hmac.New(hash, salt);
     extractor.Write(secret);
     return extractor.Sum(null);
-
 }
 
 private partial struct hkdf {
@@ -76,13 +77,11 @@ private static (nint, error) Read(this ptr<hkdf> _addr_f, slice<byte> p) {
         f.buf = f.prev;
         n = copy(p, f.buf);
         p = p[(int)n..];
-
     } 
     // Save leftovers for next run
     f.buf = f.buf[(int)n..];
 
     return (need, error.As(null!)!);
-
 }
 
 // Expand returns a Reader, from which keys can be read, using the given

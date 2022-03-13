@@ -22,15 +22,14 @@
 // Both algorithms ultimately call mspan.sweep, which sweeps a single
 // heap span.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:49 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:37 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mgcsweep.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -60,7 +59,6 @@ private partial struct sweepClass { // : uint
 
 private static readonly var numSweepClasses = numSpanClasses * 2;
 private static readonly sweepClass sweepClassDone = sweepClass(~uint32(0));
-
 
 private static sweepClass load(this ptr<sweepClass> _addr_s) {
     ref sweepClass s = ref _addr_s.val;
@@ -124,13 +122,11 @@ private static ptr<mspan> nextSpanForSweep(this ptr<mheap> _addr_h) {
             // can start from here.
             sweep.centralIndex.update(sc);
             return _addr_s!;
-
         }
     } 
     // Write down that we found nothing.
     sweep.centralIndex.update(sweepClassDone);
     return _addr_null!;
-
 }
 
 // finishsweep_m ensures that all spans are swept.
@@ -163,7 +159,6 @@ private static void finishsweep_m() {
     }    wakeScavenger();
 
     nextMarkBitArenaEpoch();
-
 }
 
 private static void bgsweep() {
@@ -190,13 +185,10 @@ private static void bgsweep() {
             // and the lock being acquired.
             unlock(_addr_sweep.@lock);
             continue;
-
         }
         sweep.parked = true;
         goparkunlock(_addr_sweep.@lock, waitReasonGCSweepWait, traceEvGoBlock, 1);
-
     }
-
 }
 
 // sweepLocker acquires sweep ownership of spans and blocks sweep
@@ -235,7 +227,6 @@ private static (sweepLocked, bool) tryAcquire(this ptr<sweepLocker> _addr_l, ptr
         return (new sweepLocked(), false);
     }
     return (new sweepLocked(s), true);
-
 }
 
 // blockCompletion blocks sweep completion without acquiring any
@@ -303,13 +294,10 @@ private static System.UIntPtr sweepone() {
                     print("runtime: bad span s.state=", state, " s.sweepgen=", s.sweepgen, " sweepgen=", sl.sweepGen, "\n");
                     throw("non in-use span in unswept list");
                 }
-
                 continue;
-
             }
 
         }
-
         {
             var s__prev1 = s;
 
@@ -323,7 +311,6 @@ private static System.UIntPtr sweepone() {
                     // page reclaimer credit since these pages can
                     // now be used for span allocation.
                     atomic.Xadduintptr(_addr_mheap_.reclaimCredit, npages);
-
                 }
                 else
  { 
@@ -331,17 +318,13 @@ private static System.UIntPtr sweepone() {
                     // pages to the heap and the span needs to
                     // move to the swept in-use list.
                     npages = 0;
-
                 }
-
                 break;
-
             }
 
             s = s__prev1;
 
         }
-
     }
 
     sl.dispose();
@@ -371,11 +354,9 @@ private static System.UIntPtr sweepone() {
         // for us to wake the scavenger directly via wakeScavenger, since
         // it could allocate. Ask sysmon to do it for us instead.
         readyForScavenger();
-
     }
     _g_.m.locks--;
     return npages;
-
 }
 
 // isSweepDone reports whether all spans are swept.
@@ -389,7 +370,6 @@ private static bool isSweepDone() {
     // are no active sweepers. If both are true, then all spans
     // have finished sweeping.
     return atomic.Load(_addr_mheap_.sweepDrained) != 0 && atomic.Load(_addr_mheap_.sweepers) == 0;
-
 }
 
 // Returns only when span s has been swept.
@@ -415,7 +395,6 @@ private static void ensureSwept(this ptr<mspan> _addr_s) {
             return ;
         }
     }
-
     sl.dispose(); 
 
     // unfortunate condition, and we don't have efficient means to wait
@@ -425,9 +404,7 @@ private static void ensureSwept(this ptr<mspan> _addr_s) {
             break;
         }
         osyield();
-
     }
-
 }
 
 // Sweep frees or collects finalizers for blocks not marked in the mark phase.
@@ -449,7 +426,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
         // We'll release ownership of this span. Nil it out to
         // prevent the caller from accidentally using it.
         sl.mspan = null;
-
     }
     var sweepgen = mheap_.sweepgen;
     {
@@ -464,7 +440,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
         state = state__prev1;
 
     }
-
 
     if (trace.enabled) {
         traceGCSweepSpan(s.npages * _PageSize);
@@ -513,7 +488,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
                         break;
                     tmp = tmp.next;
                     }
-
                 }
         else
  
@@ -536,28 +510,21 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
                     // All other specials only apply when an object is freed,
                     // so just keep the special record.
                     siter.next();
-
                 }
-
             }
-
-
         } { 
             // object is still live
             if (siter.s.kind == _KindSpecialReachable) {
-                special = siter.unlinkAndNext()(specialReachable.val)(@unsafe.Pointer(special)).reachable;
+                special = siter.unlinkAndNext()(specialReachable.val);
 
-                true;
+                (@unsafe.Pointer(special)).reachable = true;
                 freeSpecial(special, @unsafe.Pointer(p), size);
-
             }
             else
  { 
                 // keep special record
                 siter.next();
-
             }
-
         }
     }
     if (hadSpecials && s.specials == null) {
@@ -594,7 +561,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
 
             i = i__prev1;
         }
-
     }
     if (s.freeindex < s.nelems) { 
         // Everything < freeindex is allocated and hence
@@ -618,7 +584,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
 
             i = i__prev1;
         }
-
     }
     var nalloc = uint16(s.countAlloc());
     var nfreed = s.allocCount - nalloc;
@@ -627,7 +592,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
         // more detail.
         print("runtime: nelems=", s.nelems, " nalloc=", nalloc, " previous allocCount=", s.allocCount, " nfreed=", nfreed, "\n");
         throw("sweep increased allocation count");
-
     }
     s.allocCount = nalloc;
     s.freeindex = 0; // reset allocation index to start of span.
@@ -654,7 +618,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
         state = state__prev1;
 
     }
-
     if (s.sweepgen == sweepgen + 1 || s.sweepgen == sweepgen + 3) {
         throw("swept cached span");
     }
@@ -671,7 +634,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
             var stats = memstats.heapStats.acquire();
             atomic.Xadduintptr(_addr_stats.smallFreeCount[spc.sizeclass()], uintptr(nfreed));
             memstats.heapStats.release();
-
         }
         if (!preserve) { 
             // The caller may not have removed this span from whatever
@@ -683,7 +645,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
                 // Free totally free span directly back to the heap.
                 mheap_.freeSpan(s);
                 return true;
-
             } 
             // Return span back to the right mcentral list.
             if (uintptr(nalloc) == s.nelems) {
@@ -693,7 +654,6 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
  {
                 mheap_.central[spc].mcentral.partialSwept(sweepgen).push(s);
             }
-
         }
     }
     else if (!preserve) { 
@@ -718,25 +678,20 @@ private static bool sweep(this ptr<sweepLocked> _addr_sl, bool preserve) {
             if (debug.efence > 0) {
                 s.limit = 0; // prevent mlookup from finding this span
                 sysFault(@unsafe.Pointer(s.@base()), size);
-
             }
             else
  {
                 mheap_.freeSpan(s);
             }
-
             stats = memstats.heapStats.acquire();
             atomic.Xadduintptr(_addr_stats.largeFreeCount, 1);
             atomic.Xadduintptr(_addr_stats.largeFree, size);
             memstats.heapStats.release();
             return true;
-
         }
         mheap_.central[spc].mcentral.fullSwept(sweepgen).push(s);
-
     }
     return false;
-
 }
 
 // reportZombies reports any marked but free objects in s and throws.
@@ -792,10 +747,8 @@ private static void reportZombies(this ptr<mspan> _addr_s) {
         }
         mbits.advance();
         abits.advance();
-
     }
     throw("found pointer to free object");
-
 }
 
 // deductSweepCredit deducts sweep credit for allocating a span of
@@ -819,7 +772,6 @@ private static void deductSweepCredit(System.UIntPtr spanBytes, System.UIntPtr c
     if (mheap_.sweepPagesPerByte == 0) { 
         // Proportional sweep is done or disabled.
         return ;
-
     }
     if (trace.enabled) {
         traceGCSweepStart();
@@ -840,7 +792,6 @@ retry:
         if (atomic.Load64(_addr_mheap_.pagesSweptBasis) != sweptBasis) { 
             // Sweep pacing changed. Recompute debt.
             goto retry;
-
         }
     }
 
@@ -857,13 +808,12 @@ private static void clobberfree(unsafe.Pointer x, System.UIntPtr size) {
         var i = uintptr(0);
 
         while (i < size) {
-            (uint32.val)(add(x, i)).val;
+            (uint32.val).val;
 
-            0xdeadbeef;
+            (add(x, i)) = 0xdeadbeef;
             i += 4;
         }
     }
-
 }
 
 } // end runtime_package

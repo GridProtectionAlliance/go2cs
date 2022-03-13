@@ -3,12 +3,13 @@
 // license that can be found in the LICENSE file.
 
 // Package modcmd implements the ``go mod'' command.
-// package modcmd -- go2cs converted at 2022 March 06 23:19:36 UTC
+
+// package modcmd -- go2cs converted at 2022 March 13 06:32:24 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\mod.go
-using @base = go.cmd.go.@internal.@base_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
 
 public static partial class modcmd_package {
 

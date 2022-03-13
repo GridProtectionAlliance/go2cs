@@ -4,28 +4,30 @@
 
 // Package lockedfile creates and manipulates files whose contents should only
 // change atomically.
-// package lockedfile -- go2cs converted at 2022 March 06 23:16:36 UTC
+
+// package lockedfile -- go2cs converted at 2022 March 13 06:30:05 UTC
 // import "cmd/go/internal/lockedfile" ==> using lockedfile = go.cmd.go.@internal.lockedfile_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\lockedfile\lockedfile.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using runtime = runtime_package;
+
+
+// A File is a locked *os.File.
+//
+// Closing the file releases the lock.
+//
+// If the program exits while a file is locked, the operating system releases
+// the lock but may not do so promptly: callers must ensure that all locked
+// files are closed before exiting.
+
+using System;
 public static partial class lockedfile_package {
 
-    // A File is a locked *os.File.
-    //
-    // Closing the file releases the lock.
-    //
-    // If the program exits while a file is locked, the operating system releases
-    // the lock but may not do so promptly: callers must ensure that all locked
-    // files are closed before exiting.
 public partial struct File {
     public ref osFile osFile => ref osFile_val;
     public bool closed;
@@ -54,7 +56,6 @@ public static (ptr<File>, error) OpenFile(@string name, nint flag, fs.FileMode p
     });
 
     return (_addr_f!, error.As(null!)!);
-
 });
 
 // Open is like os.Open, but returns a read-locked file.
@@ -100,7 +101,6 @@ private static error Close(this ptr<File> _addr_f) {
     var err = closeFile(f.osFile.File);
     runtime.SetFinalizer(f, null);
     return error.As(err)!;
-
 }
 
 // Read opens the named file with a read-lock and returns its contents.
@@ -115,7 +115,6 @@ public static (slice<byte>, error) Read(@string name) => func((defer, _, _) => {
     defer(f.Close());
 
     return io.ReadAll(f);
-
 });
 
 // Write opens the named file (creating it with the given permissions if needed),
@@ -135,9 +134,7 @@ public static error Write(@string name, io.Reader content, fs.FileMode perm) {
             err = closeErr;
         }
     }
-
     return error.As(err)!;
-
 }
 
 // Transform invokes t with the result of reading the named file, with its lock
@@ -175,11 +172,9 @@ public static error Transform(@string name, Func<slice<byte>, (slice<byte>, erro
                 // Make a best effort to remove the incomplete tail.
                 f.Truncate(int64(len(old)));
                 return error.As(err)!;
-
             }
 
         }
-
     }
     defer(() => {
         if (err != null) {
@@ -191,7 +186,6 @@ public static error Transform(@string name, Func<slice<byte>, (slice<byte>, erro
                 }
 
             }
-
         }
     }());
 
@@ -204,7 +198,6 @@ public static error Transform(@string name, Func<slice<byte>, (slice<byte>, erro
             }
 
         }
-
     }
     else
  {
@@ -232,10 +225,8 @@ public static error Transform(@string name, Func<slice<byte>, (slice<byte>, erro
             }
 
         }
-
     }
     return error.As(null!)!;
-
 });
 
 } // end lockedfile_package

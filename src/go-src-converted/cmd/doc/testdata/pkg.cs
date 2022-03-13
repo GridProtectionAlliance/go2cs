@@ -3,18 +3,19 @@
 // license that can be found in the LICENSE file.
 
 // Package comment.
-// package pkg -- go2cs converted at 2022 March 06 23:15:42 UTC
+
+// package pkg -- go2cs converted at 2022 March 13 06:29:10 UTC
 // import "cmd/doc.pkg" ==> using pkg = go.cmd.doc.pkg_package
 // Original source: C:\Program Files\Go\src\cmd\doc\testdata\pkg.go
-using io = go.io_package;
-
 namespace go.cmd;
+
+using io = io_package;
 
 public static partial class pkg_package {
 
-    // Constants
+// Constants
 
-    // Comment about exported constant.
+// Comment about exported constant.
 public static readonly nint ExportedConstant = 1;
 
 // Comment about internal constant.
@@ -37,7 +38,6 @@ private static readonly nint constThree = 3; // Comment on line with constThree.
 private static readonly var constFour = iota;
 public static readonly var ConstFive = 0;
 public static readonly var ConstSix = 1;
-
 
 // Variables
 
@@ -100,7 +100,6 @@ public partial struct ExportedStructOneField {
 // but it parses and that's all we need.)
 public static readonly ExportedType ExportedTypedConstant = iota;
 
-
 // Comment about constructor for exported type.
 public static ptr<ExportedType> ExportedTypeConstructor() {
     return _addr_null!;
@@ -131,7 +130,6 @@ private static bool unexportedMethod(this unexportedType _p0) {
 
 // Constants tied to unexportedType.
 public static readonly unexportedType ExportedTypedConstant_unexported = iota;
-
 
 private static readonly unexportedType unexportedTypedConstant = 1; // In a separate section to test -u.
 
@@ -175,11 +173,9 @@ public static readonly var ConstRight3 = 5;
 public static readonly var ConstLeft4 = 6;
 public static readonly var ConstRight4 = 7;
 
-
 public static readonly unexportedType ConstGroup1 = iota;
 public static readonly var ConstGroup2 = 0;
 public static readonly var ConstGroup3 = 1;
-
 
 public static readonly ExportedType ConstGroup4 = new ExportedType();
 
@@ -197,7 +193,6 @@ public partial struct T1 { // : T2
 
 public static readonly var Duplicate = iota;
 private static readonly var duplicate = 0;
-
 
 // Comment about exported function with formatting.
 //

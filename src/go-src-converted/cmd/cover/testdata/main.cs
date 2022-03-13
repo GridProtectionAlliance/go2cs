@@ -6,12 +6,12 @@
 // It knows the coverage counter is called
 // "thisNameMustBeVeryLongToCauseOverflowOfCounterIncrementStatementOntoNextLineForTest".
 
-// package main -- go2cs converted at 2022 March 06 23:15:12 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:40 UTC
 // Original source: C:\Program Files\Go\src\cmd\cover\testdata\main.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
 
 public static partial class main_package {
 
@@ -71,7 +71,6 @@ private static void verifyPanic() {
         // Sanity check for test before panic.
         fmt.Fprintf(os.Stderr, "bad before panic");
         PASS = false;
-
     }
     if (coverTest.Count[panicIndex] != 0) {
         fmt.Fprintf(os.Stderr, "bad at panic: %d should be 0\n", coverTest.Count[panicIndex]);
@@ -111,7 +110,6 @@ private static (uint, nint) count(uint line) {
         return (0, 0);
     }
     return (coverTest.Count[index], index);
-
 }
 
 } // end main_package

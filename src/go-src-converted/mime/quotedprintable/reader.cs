@@ -4,19 +4,22 @@
 
 // Package quotedprintable implements quoted-printable encoding as specified by
 // RFC 2045.
-// package quotedprintable -- go2cs converted at 2022 March 06 22:21:14 UTC
+
+// package quotedprintable -- go2cs converted at 2022 March 13 05:36:22 UTC
 // import "mime/quotedprintable" ==> using quotedprintable = go.mime.quotedprintable_package
 // Original source: C:\Program Files\Go\src\mime\quotedprintable\reader.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.mime;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// Reader is a quoted-printable decoder.
 
 public static partial class quotedprintable_package {
 
-    // Reader is a quoted-printable decoder.
 public partial struct Reader {
     public ptr<bufio.Reader> br;
     public error rerr; // last read error
@@ -41,7 +44,6 @@ private static (byte, error) fromHex(byte b) {
     else if (b >= 'a' && b <= 'f') 
         return (b - 'a' + 10, error.As(null!)!);
         return (0, error.As(fmt.Errorf("quotedprintable: invalid hex byte 0x%02x", b))!);
-
 }
 
 private static (byte, error) readHexByte(slice<byte> v) {
@@ -64,7 +66,6 @@ private static (byte, error) readHexByte(slice<byte> v) {
         return (0, error.As(err)!);
     }
     return (hb << 4 | lb, error.As(null!)!);
-
 }
 
 private static bool isQPDiscardWhitespace(int r) {
@@ -80,7 +81,6 @@ private static bool isQPDiscardWhitespace(int r) {
             break;
     }
     return false;
-
 }
 
 private static slice<byte> crlf = (slice<byte>)"\r\n";private static slice<byte> lf = (slice<byte>)"\n";private static slice<byte> softSuffix = (slice<byte>)"=";
@@ -127,11 +127,8 @@ private static (nint, error) Read(this ptr<Reader> _addr_r, slice<byte> p) {
  {
                     r.line = append(r.line, '\n');
                 }
-
             }
-
             continue;
-
         }
         var b = r.line[0];
 
@@ -143,13 +140,9 @@ private static (nint, error) Read(this ptr<Reader> _addr_r, slice<byte> p) {
                     // Take the = as a literal =.
                     b = '=';
                     break;
-
                 }
-
                 return (n, error.As(err)!);
-
             }
-
             r.line = r.line[(int)2..]; // 2 of the 3; other 1 is done below
         else if (b == '\t' || b == '\r' || b == '\n') 
             break;
@@ -163,10 +156,8 @@ private static (nint, error) Read(this ptr<Reader> _addr_r, slice<byte> p) {
         p = p[(int)1..];
         r.line = r.line[(int)1..];
         n++;
-
     }
     return (n, error.As(null!)!);
-
 }
 
 } // end quotedprintable_package

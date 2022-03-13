@@ -4,18 +4,20 @@
 
 // This file sets up the universe scope and the unsafe package.
 
-// package types2 -- go2cs converted at 2022 March 06 23:13:09 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:35 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\universe.go
-using constant = go.go.constant_package;
-using strings = go.strings_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+using strings = strings_package;
+
+
+// The Universe scope contains all predeclared objects of Go.
+// It is the outermost scope of any chain of nested scopes.
 
 public static partial class types2_package {
 
-    // The Universe scope contains all predeclared objects of Go.
-    // It is the outermost scope of any chain of nested scopes.
 public static ptr<Scope> Universe;
 
 // The Unsafe package is the package returned by an importer
@@ -115,7 +117,6 @@ private static readonly var _Trace = 20;
 
 
 
-
 private static void defPredeclaredFuncs() {
     foreach (var (i) in predeclaredFuncs) {
         var id = builtinId(i);
@@ -123,7 +124,6 @@ private static void defPredeclaredFuncs() {
             continue; // only define these in testing environment
         }
         def(newBuiltin(id));
-
     }
 }
 
@@ -136,7 +136,6 @@ public static void DefPredeclaredTestFuncs() {
     }
     def(newBuiltin(_Assert));
     def(newBuiltin(_Trace));
-
 }
 
 private static void defPredeclaredComparable() { 
@@ -164,7 +163,6 @@ private static void defPredeclaredComparable() {
     sig.recv = NewVar(nopos, null, "", named); // complete == signature
 
     def(obj);
-
 }
 
 private static void init() {
@@ -186,7 +184,6 @@ private static void init() {
 
     // "any" is only visible as constraint in a type parameter list
     delete(Universe.elems, "any");
-
 }
 
 // Objects with names containing blanks are internal and not entered into
@@ -225,7 +222,6 @@ private static void def(Object obj) => func((_, panic, _) => {
                 break;
             }
         }
-
     }
     if (scope.Insert(obj) != null) {
         panic("internal error: double declaration");

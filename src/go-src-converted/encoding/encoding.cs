@@ -9,19 +9,18 @@
 // interface once can make a type useful in multiple encodings.
 // Standard types that implement these interfaces include time.Time and net.IP.
 // The interfaces come in pairs that produce and consume encoded data.
-// package encoding -- go2cs converted at 2022 March 06 22:24:51 UTC
+
+// package encoding -- go2cs converted at 2022 March 13 05:39:22 UTC
 // import "encoding" ==> using encoding = go.encoding_package
 // Original source: C:\Program Files\Go\src\encoding\encoding.go
-
-
 namespace go;
 
 public static partial class encoding_package {
 
-    // BinaryMarshaler is the interface implemented by an object that can
-    // marshal itself into a binary form.
-    //
-    // MarshalBinary encodes the receiver into a binary form and returns the result.
+// BinaryMarshaler is the interface implemented by an object that can
+// marshal itself into a binary form.
+//
+// MarshalBinary encodes the receiver into a binary form and returns the result.
 public partial interface BinaryMarshaler {
     (slice<byte>, error) MarshalBinary();
 }

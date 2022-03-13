@@ -2,33 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2022 March 06 23:18:58 UTC
+// package modfetch -- go2cs converted at 2022 March 13 06:32:18 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\proxy.go
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using url = go.net.url_package;
-using path = go.path_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using codehost = go.cmd.go.@internal.modfetch.codehost_package;
-using web = go.cmd.go.@internal.web_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using url = net.url_package;
+using path = path_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using codehost = cmd.go.@internal.modfetch.codehost_package;
+using web = cmd.go.@internal.web_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using System;
 
 public static partial class modfetch_package {
 
@@ -80,26 +79,21 @@ private static (slice<proxySpec>, error) proxyList() {
 
             }
 
-
             url = strings.TrimSpace(url);
             if (url == "") {
                 continue;
             }
-
             if (url == "off") { 
                 // "off" always fails hard, so can stop walking list.
                 proxyOnce.list = append(proxyOnce.list, new proxySpec(url:"off"));
                 break;
-
             }
-
             if (url == "direct") {
                 proxyOnce.list = append(proxyOnce.list, new proxySpec(url:"direct")); 
                 // For now, "direct" is the end of the line. We may decide to add some
                 // sort of fallback behavior for them in the future, so ignore
                 // subsequent entries for forward-compatibility.
                 break;
-
             } 
 
             // Single-word tokens are reserved for built-in behaviors, and anything
@@ -121,9 +115,7 @@ private static (slice<proxySpec>, error) proxyList() {
 
             }
 
-
             proxyOnce.list = append(proxyOnce.list, new proxySpec(url:url,fallBackOnError:fallBackOnError,));
-
         }
 
         if (len(proxyOnce.list) == 0 || len(proxyOnce.list) == 1 && proxyOnce.list[0].url == "noproxy") { 
@@ -131,12 +123,10 @@ private static (slice<proxySpec>, error) proxyList() {
             // GONOPROXY is set. This can happen if GOPROXY is a non-empty string
             // like "," or " ".
             proxyOnce.err = fmt.Errorf("GOPROXY list is not the empty string, but contains no entries");
-
         }
     });
 
     return (proxyOnce.list, error.As(proxyOnce.err)!);
-
 }
 
 // TryProxies iterates f over each configured proxy (including "noproxy" and
@@ -159,7 +149,6 @@ public static error TryProxies(Func<@string, error> f) => func((_, panic, _) => 
     const var notExistRank = iota;
     const var proxyRank = 0;
     const var directRank = 1;
-
     error bestErr = default!;
     var bestErrRank = notExistRank;
     foreach (var (_, proxy) in proxies) {
@@ -184,7 +173,6 @@ public static error TryProxies(Func<@string, error> f) => func((_, panic, _) => 
             break;
         }
     }    return error.As(bestErr)!;
-
 });
 
 private partial struct proxyRepo {
@@ -228,7 +216,6 @@ private static (Repo, error) newProxyRepo(@string baseURL, @string path) {
     @base.Path = strings.TrimSuffix(@base.Path, "/") + "/" + enc;
     @base.RawPath = strings.TrimSuffix(@base.RawPath, "/") + "/" + pathEscape(enc);
     return (addr(new proxyRepo(base,path,redactedURL)), error.As(null!)!);
-
 }
 
 private static @string ModulePath(this ptr<proxyRepo> _addr_p) {
@@ -245,7 +232,6 @@ private static error versionError(this ptr<proxyRepo> _addr_p, @string version, 
         return error.As(addr(new module.ModuleError(Path:p.path,Err:&module.InvalidVersionError{Version:version,Pseudo:module.IsPseudoVersion(version),Err:err,},))!)!;
     }
     return error.As(addr(new module.ModuleError(Path:p.path,Version:version,Err:err,))!)!;
-
 }
 
 private static (slice<byte>, error) getBytes(this ptr<proxyRepo> _addr_p, @string path) => func((defer, _, _) => {
@@ -259,7 +245,6 @@ private static (slice<byte>, error) getBytes(this ptr<proxyRepo> _addr_p, @strin
     }
     defer(body.Close());
     return io.ReadAll(body);
-
 });
 
 private static (io.ReadCloser, error) getBody(this ptr<proxyRepo> _addr_p, @string path) {
@@ -285,9 +270,7 @@ private static (io.ReadCloser, error) getBody(this ptr<proxyRepo> _addr_p, @stri
             return (null, error.As(err)!);
         }
     }
-
     return (resp.Body, error.As(null!)!);
-
 }
 
 private static (slice<@string>, error) Versions(this ptr<proxyRepo> _addr_p, @string prefix) {
@@ -307,7 +290,6 @@ private static (slice<@string>, error) Versions(this ptr<proxyRepo> _addr_p, @st
         }
     }    semver.Sort(list);
     return (list, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) latest(this ptr<proxyRepo> _addr_p) {
@@ -340,15 +322,12 @@ private static (ptr<RevInfo>, error) latest(this ptr<proxyRepo> _addr_p) {
                 // no tagged versions. Ignore any tagged versions that were added in the
                 // meantime.
                 continue;
-
             }
-
             if (bestTime.Before(ft)) {
                 bestTime = ft;
                 bestTimeIsFromPseudo = ftIsFromPseudo;
                 bestVersion = f[0];
             }
-
         }
     }    if (bestVersion == "") {
         return (_addr_null!, error.As(p.versionError("", codehost.ErrNoCommits))!);
@@ -361,10 +340,8 @@ private static (ptr<RevInfo>, error) latest(this ptr<proxyRepo> _addr_p) {
         // TODO(bcmills): Should we also stat other versions to ensure that we
         // report the correct Name and Short for the revision?
         return _addr_p.Stat(bestVersion)!;
-
     }
     return (addr(new RevInfo(Version:bestVersion,Name:bestVersion,Short:bestVersion,Time:bestTime,)), error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) Stat(this ptr<proxyRepo> _addr_p, @string rev) {
@@ -388,16 +365,13 @@ private static (ptr<RevInfo>, error) Stat(this ptr<proxyRepo> _addr_p, @string r
             return (_addr_null!, error.As(p.versionError(rev, fmt.Errorf("invalid response from proxy %q: %w", p.redactedURL, err)))!);
         }
     }
-
     if (info.Version != rev && rev == module.CanonicalVersion(rev) && module.Check(p.path, rev) == null) { 
         // If we request a correct, appropriate version for the module path, the
         // proxy must return either exactly that version or an error — not some
         // arbitrary other version.
         return (_addr_null!, error.As(p.versionError(rev, fmt.Errorf("proxy returned info for version %s instead of requested version", info.Version)))!);
-
     }
     return (_addr_info!, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) Latest(this ptr<proxyRepo> _addr_p) {
@@ -411,7 +385,6 @@ private static (ptr<RevInfo>, error) Latest(this ptr<proxyRepo> _addr_p) {
             return (_addr_null!, error.As(p.versionError("", err))!);
         }
         return _addr_p.latest()!;
-
     }
     ptr<RevInfo> info = @new<RevInfo>();
     {
@@ -421,9 +394,7 @@ private static (ptr<RevInfo>, error) Latest(this ptr<proxyRepo> _addr_p) {
             return (_addr_null!, error.As(p.versionError("", fmt.Errorf("invalid response from proxy %q: %w", p.redactedURL, err)))!);
         }
     }
-
     return (_addr_info!, error.As(null!)!);
-
 }
 
 private static (slice<byte>, error) GoMod(this ptr<proxyRepo> _addr_p, @string version) {
@@ -443,7 +414,6 @@ private static (slice<byte>, error) GoMod(this ptr<proxyRepo> _addr_p, @string v
         return (null, error.As(p.versionError(version, err))!);
     }
     return (data, error.As(null!)!);
-
 }
 
 private static error Zip(this ptr<proxyRepo> _addr_p, io.Writer dst, @string version) => func((defer, _, _) => {
@@ -470,12 +440,10 @@ private static error Zip(this ptr<proxyRepo> _addr_p, io.Writer dst, @string ver
             return error.As(p.versionError(version, err))!;
         }
     }
-
     if (lr.N <= 0) {
         return error.As(p.versionError(version, fmt.Errorf("downloaded zip file too large")))!;
     }
     return error.As(null!)!;
-
 });
 
 // pathEscape escapes s so it can be used in a path.

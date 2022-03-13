@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:29 UTC
+//     Generated on 2022 March 13 06:44:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class plugin_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Plugin
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator Plugin(NilType nil) => default(Plugin);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Plugin Plugin_cast(dynamic value)
         {
             return new Plugin(value.pluginpath, value.err, value.loaded);

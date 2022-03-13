@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2022 March 06 22:30:23 UTC
+// package strings -- go2cs converted at 2022 March 13 05:41:12 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Program Files\Go\src\strings\replace.go
-using io = go.io_package;
-using sync = go.sync_package;
-
 namespace go;
+
+using io = io_package;
+using sync = sync_package;
+
+
+// Replacer replaces a list of strings with replacements.
+// It is safe for concurrent use by multiple goroutines.
 
 public static partial class strings_package {
 
-    // Replacer replaces a list of strings with replacements.
-    // It is safe for concurrent use by multiple goroutines.
 public partial struct Replacer {
     public sync.Once once; // guards buildOnce method
     public replacer r;
@@ -39,7 +41,6 @@ public static ptr<Replacer> NewReplacer(params @string[] oldnew) => func((_, pan
         panic("strings.NewReplacer: odd argument count");
     }
     return addr(new Replacer(oldnew:append([]string(nil),oldnew...)));
-
 });
 
 private static void buildOnce(this ptr<Replacer> _addr_r) {
@@ -67,11 +68,9 @@ private static replacer build(this ptr<Replacer> _addr_b) {
                 return makeGenericReplacer(oldnew);
             i += 2;
             }
-
             if (len(oldnew[i + 1]) != 1) {
                 allNewBytes = false;
             }
-
         }
 
         i = i__prev1;
@@ -108,7 +107,6 @@ private static replacer build(this ptr<Replacer> _addr_b) {
             i = i__prev1;
         }
         return _addr_r;
-
     }
     r = new byteStringReplacer(toReplace:make([]string,0,len(oldnew)/2)); 
     // The first occurrence of old->new map takes precedence
@@ -129,16 +127,12 @@ private static replacer build(this ptr<Replacer> _addr_b) {
                 r.toReplace = append(r.toReplace, string(new slice<byte>(new byte[] { o })));
             i -= 2;
             }
-
             r.replacements[o] = (slice<byte>)n;
-
-
         }
 
         i = i__prev1;
     }
     return _addr_r;
-
 }
 
 // Replace returns a copy of s with all replacements performed.
@@ -214,7 +208,6 @@ private static void add(this ptr<trieNode> _addr_t, @string key, @string val, ni
             t.priority = priority;
         }
         return ;
-
     }
     if (t.prefix != "") { 
         // Need to split the prefix among multiple nodes.
@@ -224,7 +217,6 @@ private static void add(this ptr<trieNode> _addr_t, @string key, @string val, ni
                 break;
             n++;
             }
-
         }
         if (n == len(t.prefix)) {
             t.next.add(key[(int)n..], val, priority, r);
@@ -241,7 +233,6 @@ private static void add(this ptr<trieNode> _addr_t, @string key, @string val, ni
  {
                 prefixNode = addr(new trieNode(prefix:t.prefix[1:],next:t.next,));
             }
-
             ptr<trieNode> keyNode = @new<trieNode>();
             t.table = make_slice<ptr<trieNode>>(r.tableSize);
             t.table[r.mapping[t.prefix[0]]] = prefixNode;
@@ -249,7 +240,6 @@ private static void add(this ptr<trieNode> _addr_t, @string key, @string val, ni
             t.prefix = "";
             t.next = null;
             keyNode.add(key[(int)1..], val, priority, r);
-
         }
         else
  { 
@@ -258,7 +248,6 @@ private static void add(this ptr<trieNode> _addr_t, @string key, @string val, ni
             t.prefix = t.prefix[..(int)n];
             t.next = next;
             next.add(key[(int)n..], val, priority, r);
-
         }
     }
     else if (t.table != null) { 
@@ -268,7 +257,6 @@ private static void add(this ptr<trieNode> _addr_t, @string key, @string val, ni
             t.table[m] = @new<trieNode>();
         }
         t.table[m].add(key[(int)1..], val, priority, r);
-
     }
     else
  {
@@ -319,7 +307,6 @@ private static (@string, nint, bool) lookup(this ptr<genericReplacer> _addr_r, @
         }
     }
     return ;
-
 }
 
 // genericReplacer is the fully generic algorithm.
@@ -377,7 +364,6 @@ private static ptr<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
                 r.mapping[i] = index;
                 index++;
             }
-
         }
         i = i__prev1;
         b = b__prev1;
@@ -398,7 +384,6 @@ private static ptr<genericReplacer> makeGenericReplacer(slice<@string> oldnew) {
         i = i__prev1;
     }
     return _addr_r!;
-
 }
 
 private partial struct appendSliceWriter { // : slice<byte>
@@ -441,7 +426,6 @@ private static io.StringWriter getStringWriter(io.Writer w) {
         sw = new stringWriter(w);
     }
     return sw;
-
 }
 
 private static @string Replace(this ptr<genericReplacer> _addr_r, @string s) {
@@ -492,9 +476,7 @@ private static (nint, error) WriteString(this ptr<genericReplacer> _addr_r, io.W
                 last = i;
                 continue;
             }
-
             i++;
-
         }
     }
     if (last != len(s)) {
@@ -502,7 +484,6 @@ private static (nint, error) WriteString(this ptr<genericReplacer> _addr_r, io.W
         n += wn;
     }
     return ;
-
 }
 
 // singleStringReplacer is the implementation that's used when there is only
@@ -531,14 +512,12 @@ private static @string Replace(this ptr<singleStringReplacer> _addr_r, @string s
         buf = append(buf, s[(int)i..(int)i + match]);
         buf = append(buf, r.value);
         i += match + len(r.finder.pattern);
-
     }
     if (!matched) {
         return s;
     }
     buf = append(buf, s[(int)i..]);
     return string(buf);
-
 }
 
 private static (nint, error) WriteString(this ptr<singleStringReplacer> _addr_r, io.Writer w, @string s) {
@@ -565,12 +544,10 @@ private static (nint, error) WriteString(this ptr<singleStringReplacer> _addr_r,
             return ;
         }
         i += match + len(r.finder.pattern);
-
     }
     wn, err = sw.WriteString(s[(int)i..]);
     n += wn;
     return ;
-
 }
 
 // byteReplacer is the implementation that's used when all the "old"
@@ -596,7 +573,6 @@ private static @string Replace(this ptr<byteReplacer> _addr_r, @string s) {
         return s;
     }
     return string(buf);
-
 }
 
 private static (nint, error) WriteString(this ptr<byteReplacer> _addr_r, io.Writer w, @string s) {
@@ -623,7 +599,6 @@ private static (nint, error) WriteString(this ptr<byteReplacer> _addr_r, io.Writ
         }
     }
     return (n, error.As(null!)!);
-
 }
 
 // byteStringReplacer is the implementation that's used when all the
@@ -661,12 +636,9 @@ private static @string Replace(this ptr<byteStringReplacer> _addr_r, @string s) 
                     // The -1 is because we are replacing 1 byte with len(replacements[b]) bytes.
                     newSize += c * (len(r.replacements[x[0]]) - 1);
                     anyChanges = true;
-
                 }
 
             }
-
-
         }
     else
     } {
@@ -679,15 +651,12 @@ private static @string Replace(this ptr<byteStringReplacer> _addr_r, @string s) 
                     // See above for explanation of -1
                     newSize += len(r.replacements[b]) - 1;
                     anyChanges = true;
-
                 }
-
             }
 
 
             i = i__prev1;
         }
-
     }
     if (!anyChanges) {
         return s;
@@ -707,13 +676,11 @@ private static @string Replace(this ptr<byteStringReplacer> _addr_r, @string s) 
                 buf[j] = b;
                 j++;
             }
-
         }
 
         i = i__prev1;
     }
     return string(buf);
-
 }
 
 private static (nint, error) WriteString(this ptr<byteStringReplacer> _addr_r, io.Writer w, @string s) {
@@ -748,7 +715,6 @@ private static (nint, error) WriteString(this ptr<byteStringReplacer> _addr_r, i
         n += nw;
     }
     return ;
-
 }
 
 } // end strings_package

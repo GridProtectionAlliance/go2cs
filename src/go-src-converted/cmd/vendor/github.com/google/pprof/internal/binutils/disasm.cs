@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2022 March 06 23:23:19 UTC
+// package binutils -- go2cs converted at 2022 March 13 06:36:23 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\disasm.go
-using bytes = go.bytes_package;
-using io = go.io_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using demangle = go.github.com.ianlancetaylor.demangle_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using bytes = bytes_package;
+using io = io_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using demangle = github.com.ianlancetaylor.demangle_package;
 
 public static partial class binutils_package {
 
@@ -64,17 +64,14 @@ private static (slice<ptr<plugin.Sym>>, error) findSymbols(slice<byte> syms, @st
                     match = match__prev3;
 
                 }
-
             } 
 
             // And return the symbols.
             return (symbols, error.As(null!)!);
-
         }
         if (err != null) { 
             // There was some kind of serious error reading nm's output.
             return (null, error.As(err)!);
-
         }
         if (symAddr == start) {
             names = append(names, name);
@@ -98,7 +95,6 @@ private static (slice<ptr<plugin.Sym>>, error) findSymbols(slice<byte> syms, @st
         // And start a new group.
         (names, start) = (new slice<@string>(new @string[] { name }), symAddr);
     }
-
 }
 
 // matchSymbol checks if a symbol is to be selected by checking its
@@ -123,10 +119,8 @@ private static slice<@string> matchSymbol(slice<@string> names, ulong start, ulo
                 }
 
             }
-
         }
     }    return null;
-
 }
 
 // disassemble parses the output of the objdump command and returns
@@ -167,13 +161,11 @@ private static (slice<plugin.Inst>, error) disassemble(slice<byte> asm) {
                     }
 
                 }
-
             }
 
             fields = fields__prev1;
 
         }
-
         {
             var fields__prev1 = fields;
 
@@ -188,15 +180,12 @@ private static (slice<plugin.Inst>, error) disassemble(slice<byte> asm) {
                     }
 
                 }
-
                 continue;
-
             }
 
             fields = fields__prev1;
 
         }
-
         {
             var fields__prev1 = fields;
 
@@ -221,7 +210,6 @@ private static (slice<plugin.Inst>, error) disassemble(slice<byte> asm) {
                     fields = fields__prev2;
 
                 }
-
             } 
             // Reset on unrecognized lines.
 
@@ -233,7 +221,6 @@ private static (slice<plugin.Inst>, error) disassemble(slice<byte> asm) {
     }
 
     return (assembly, error.As(null!)!);
-
 }
 
 // nextSymbol parses the nm output to find the next symbol listed.
@@ -265,13 +252,10 @@ private static (ulong, @string, error) nextSymbol(ptr<bytes.Buffer> _addr_buf) {
                     }
 
                 }
-
             }
 
         }
-
     }
-
 }
 
 } // end binutils_package

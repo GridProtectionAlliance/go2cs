@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:45 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:05 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\convert.go
-using binary = go.encoding.binary_package;
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using sys = go.cmd.@internal.sys_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using binary = encoding.binary_package;
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using sys = cmd.@internal.sys_package;
+
+
+// walkConv walks an OCONV or OCONVNOP (but not OCONVIFACE) node.
+
+using System;
 public static partial class walk_package {
 
-    // walkConv walks an OCONV or OCONVNOP (but not OCONVIFACE) node.
 private static ir.Node walkConv(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
     ref ir.ConvExpr n = ref _addr_n.val;
     ref ir.Nodes init = ref _addr_init.val;
@@ -34,11 +35,9 @@ private static ir.Node walkConv(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes> _addr_in
     if (n.Op() == ir.OCONVNOP && ir.ShouldCheckPtr(ir.CurFunc, 1)) {
         if (n.Type().IsPtr() && n.X.Type().IsUnsafePtr()) { // unsafe.Pointer to *T
             return walkCheckPtrAlignment(_addr_n, _addr_init, null);
-
         }
         if (n.Type().IsUnsafePtr() && n.X.Type().IsUintptr()) { // uintptr to unsafe.Pointer
             return walkCheckPtrArithmetic(_addr_n, _addr_init);
-
         }
     }
     var (param, result) = rtconvfn(_addr_n.X.Type(), _addr_n.Type());
@@ -47,7 +46,6 @@ private static ir.Node walkConv(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes> _addr_in
     }
     var fn = types.BasicTypeNames[param] + "to" + types.BasicTypeNames[result];
     return typecheck.Conv(mkcall(fn, types.Types[result], init, typecheck.Conv(n.X, types.Types[param])), n.Type());
-
 }
 
 // walkConvInterface walks an OCONVIFACE node.
@@ -62,14 +60,12 @@ private static ir.Node walkConvInterface(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
 
     if (!fromType.IsInterface() && !ir.IsBlank(ir.CurFunc.Nname)) { // skip unnamed functions (func _())
         reflectdata.MarkTypeUsedInInterface(fromType, ir.CurFunc.LSym);
-
     }
     Func<ir.Node> typeword = () => {
         if (toType.IsEmptyInterface()) {
             return reflectdata.TypePtr(fromType);
         }
         return reflectdata.ITabAddr(fromType, toType);
-
     }; 
 
     // Optimize convT2E or convT2I as a two-word copy when T is pointer-shaped.
@@ -112,7 +108,6 @@ private static ir.Node walkConvInterface(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
         l.SetType(toType);
         l.SetTypecheck(n.Typecheck());
         return l;
-
     }
     if (toType.IsEmptyInterface() && fromType.IsInterface() && !fromType.IsEmptyInterface()) { 
         // Evaluate the input interface.
@@ -133,7 +128,6 @@ private static ir.Node walkConvInterface(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
         e.SetType(toType); // assign type manually, typecheck doesn't understand OEFACE.
         e.SetTypecheck(1);
         return e;
-
     }
     var (fnname, argType, needsaddr) = convFuncName(_addr_fromType, _addr_toType);
 
@@ -165,19 +159,16 @@ private static ir.Node walkConvInterface(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
         e.SetType(toType);
         e.SetTypecheck(1);
         return e;
-
     }
     ir.Node tab = default;
     if (fromType.IsInterface()) { 
         // convI2I
         tab = reflectdata.TypePtr(toType);
-
     }
     else
  { 
         // convT2x
         tab = typeword();
-
     }
     var v = n.X;
     if (needsaddr) { 
@@ -191,7 +182,6 @@ private static ir.Node walkConvInterface(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
             v = copyExpr(v, v.Type(), init);
         }
         v = typecheck.NodAddr(v);
-
     }
     types.CalcSize(fromType);
     fn = typecheck.LookupRuntime(fnname);
@@ -200,7 +190,6 @@ private static ir.Node walkConvInterface(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
     call = ir.NewCallExpr(@base.Pos, ir.OCALL, fn, null);
     call.Args = new slice<ir.Node>(new ir.Node[] { tab, v });
     return walkExpr(typecheck.Expr(call), init);
-
 }
 
 // walkBytesRunesToString walks an OBYTES2STR or ORUNES2STR node.
@@ -212,17 +201,14 @@ private static ir.Node walkBytesRunesToString(ptr<ir.ConvExpr> _addr_n, ptr<ir.N
     if (n.Esc() == ir.EscNone) { 
         // Create temporary buffer for string on stack.
         a = stackBufAddr(tmpstringbufsize, types.Types[types.TUINT8]);
-
     }
     if (n.Op() == ir.ORUNES2STR) { 
         // slicerunetostring(*[32]byte, []rune) string
         return mkcall("slicerunetostring", n.Type(), init, a, n.X);
-
     }
     n.X = cheapExpr(n.X, init);
     var (ptr, len) = backingArrayPtrLen(n.X);
     return mkcall("slicebytetostring", n.Type(), init, a, ptr, len);
-
 }
 
 // walkBytesToStringTemp walks an OBYTES2STRTMP node.
@@ -235,12 +221,10 @@ private static ir.Node walkBytesToStringTemp(ptr<ir.ConvExpr> _addr_n, ptr<ir.No
         // Let the backend handle OBYTES2STRTMP directly
         // to avoid a function call to slicebytetostringtmp.
         return n;
-
     }
     n.X = cheapExpr(n.X, init);
     var (ptr, len) = backingArrayPtrLen(n.X);
     return mkcall("slicebytetostringtmp", n.Type(), init, ptr, len);
-
 }
 
 // walkRuneToString walks an ORUNESTR node.
@@ -253,7 +237,6 @@ private static ir.Node walkRuneToString(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes> 
         a = stackBufAddr(4, types.Types[types.TUINT8]);
     }
     return mkcall("intstring", n.Type(), init, a, typecheck.Conv(n.X, types.Types[types.TINT64]));
-
 }
 
 // walkStringToBytes walks an OSTR2BYTES node.
@@ -291,16 +274,13 @@ private static ir.Node walkStringToBytes(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
         slice.SetType(n.Type());
         slice.SetTypecheck(1);
         return walkExpr(slice, init);
-
     }
     a = typecheck.NodNil();
     if (n.Esc() == ir.EscNone) { 
         // Create temporary buffer for slice on stack.
         a = stackBufAddr(tmpstringbufsize, types.Types[types.TUINT8]);
-
     }
     return mkcall("stringtoslicebyte", n.Type(), init, a, typecheck.Conv(s, types.Types[types.TSTRING]));
-
 }
 
 // walkStringToBytesTemp walks an OSTR2BYTESTMP node.
@@ -317,7 +297,6 @@ private static ir.Node walkStringToBytesTemp(ptr<ir.ConvExpr> _addr_n, ptr<ir.No
     // for i, c := range []byte(string)
     n.X = walkExpr(n.X, init);
     return n;
-
 }
 
 // walkStringToRunes walks an OSTR2RUNES node.
@@ -329,10 +308,8 @@ private static ir.Node walkStringToRunes(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes>
     if (n.Esc() == ir.EscNone) { 
         // Create temporary buffer for slice on stack.
         a = stackBufAddr(tmpstringbufsize, types.Types[types.TINT32]);
-
     }
     return mkcall("stringtoslicerune", n.Type(), init, a, typecheck.Conv(n.X, types.Types[types.TSTRING]));
-
 }
 
 // convFuncName builds the runtime function name for interface conversion.
@@ -374,7 +351,6 @@ private static (@string, ptr<types.Type>, bool) convFuncName(ptr<types.Type> _ad
 
             }
 
-
             switch (tkind) {
                 case 'E': 
                     if (!from.HasPointers()) {
@@ -389,12 +365,10 @@ private static (@string, ptr<types.Type>, bool) convFuncName(ptr<types.Type> _ad
                     return ("convT2I", _addr_types.Types[types.TUNSAFEPTR]!, true);
                     break;
             }
-
             break;
     }
     @base.Fatalf("unknown conv func %c2%c", from.Tie(), to.Tie());
     panic("unreachable");
-
 });
 
 // rtconvfn returns the parameter and result types that will be used by a
@@ -417,14 +391,12 @@ private static (types.Kind, types.Kind) rtconvfn(ptr<types.Type> _addr_src, ptr<
 
             if (dst.Kind() == types.TINT64 || dst.Kind() == types.TUINT64) 
                 return (types.TFLOAT64, dst.Kind());
-            
-        }
+                    }
         if (dst.IsFloat()) {
 
             if (src.Kind() == types.TINT64 || src.Kind() == types.TUINT64) 
                 return (src.Kind(), types.TFLOAT64);
-            
-        }
+                    }
     else if (ssagen.Arch.LinkArch.Family == sys.I386) 
         if (src.IsFloat()) {
 
@@ -432,18 +404,15 @@ private static (types.Kind, types.Kind) rtconvfn(ptr<types.Type> _addr_src, ptr<
                 return (types.TFLOAT64, dst.Kind());
             else if (dst.Kind() == types.TUINT32 || dst.Kind() == types.TUINT || dst.Kind() == types.TUINTPTR) 
                 return (types.TFLOAT64, types.TUINT32);
-            
-        }
+                    }
         if (dst.IsFloat()) {
 
             if (src.Kind() == types.TINT64 || src.Kind() == types.TUINT64) 
                 return (src.Kind(), types.TFLOAT64);
             else if (src.Kind() == types.TUINT32 || src.Kind() == types.TUINT || src.Kind() == types.TUINTPTR) 
                 return (types.TUINT32, types.TFLOAT64);
-            
-        }
+                    }
         return (types.Txxx, types.Txxx);
-
 }
 
 // byteindex converts n, which is byte-sized, to an int used to index into an array.
@@ -463,7 +432,6 @@ private static ir.Node byteindex(ir.Node n) {
     n.SetType(types.Types[types.TINT]);
     n.SetTypecheck(1);
     return n;
-
 }
 
 private static ir.Node walkCheckPtrAlignment(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes> _addr_init, ir.Node count) {
@@ -479,7 +447,6 @@ private static ir.Node walkCheckPtrAlignment(ptr<ir.ConvExpr> _addr_n, ptr<ir.No
             @base.Fatalf("expected array type: %v", elem);
         }
         elem = elem.Elem();
-
     }
     var size = elem.Size();
     if (elem.Alignment() == 1 && (size == 0 || size == 1 && count == null)) {
@@ -491,7 +458,6 @@ private static ir.Node walkCheckPtrAlignment(ptr<ir.ConvExpr> _addr_n, ptr<ir.No
     n.X = cheapExpr(n.X, init);
     init.Append(mkcall("checkptrAlignment", null, init, typecheck.ConvNop(n.X, types.Types[types.TUNSAFEPTR]), reflectdata.TypePtr(elem), typecheck.Conv(count, types.Types[types.TUINTPTR])));
     return n;
-
 }
 
 private static ir.Node walkCheckPtrArithmetic(ptr<ir.ConvExpr> _addr_n, ptr<ir.Nodes> _addr_init) => func((defer, _, _) => {
@@ -532,8 +498,7 @@ private static ir.Node walkCheckPtrArithmetic(ptr<ir.ConvExpr> _addr_n, ptr<ir.N
                 n.X = cheapExpr(n.X, init);
                 originals = append(originals, typecheck.ConvNop(n.X, types.Types[types.TUNSAFEPTR]));
             }
-        
-    };
+            };
     walk(n.X);
 
     var cheap = cheapExpr(n, init);
@@ -546,7 +511,6 @@ private static ir.Node walkCheckPtrArithmetic(ptr<ir.ConvExpr> _addr_n, ptr<ir.N
     // the backing store for multiple calls to checkptrArithmetic.
 
     return cheap;
-
 });
 
 } // end walk_package

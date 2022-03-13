@@ -2,20 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2022 March 06 22:30:08 UTC
+// package time -- go2cs converted at 2022 March 13 05:40:57 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\sleep.go
+namespace go;
 
 using System;
 using System.Threading;
-
-
-namespace go;
-
 public static partial class time_package {
 
-    // Sleep pauses the current goroutine for at least the duration d.
-    // A negative or zero duration causes Sleep to return immediately.
+// Sleep pauses the current goroutine for at least the duration d.
+// A negative or zero duration causes Sleep to return immediately.
 public static void Sleep(Duration d);
 
 // Interface to timers implemented in package runtime.
@@ -45,7 +42,6 @@ private static long when(Duration d) {
         t = 1 << 63 - 1; // math.MaxInt64
     }
     return t;
-
 }
 
 private static void startTimer(ptr<runtimeTimer> _p0);
@@ -91,7 +87,6 @@ private static bool Stop(this ptr<Timer> _addr_t) => func((_, panic, _) => {
         panic("time: Stop called on uninitialized Timer");
     }
     return stopTimer(_addr_t.r);
-
 });
 
 // NewTimer creates a new Timer that will send
@@ -145,7 +140,6 @@ private static bool Reset(this ptr<Timer> _addr_t, Duration d) => func((_, panic
     }
     var w = when(d);
     return resetTimer(_addr_t.r, w);
-
 });
 
 private static void sendTime(object c, System.UIntPtr seq) { 

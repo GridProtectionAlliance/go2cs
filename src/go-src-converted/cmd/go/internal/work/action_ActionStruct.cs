@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:29 UTC
+//     Generated on 2022 March 13 06:29:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace @internal
 {
     public static partial class work_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Action
         {
             // Constructors
@@ -123,7 +123,7 @@ namespace @internal
             public static implicit operator Action(NilType nil) => default(Action);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Action Action_cast(dynamic value)
         {
             return new Action(value.Mode, ref value.Package, value.Deps, value.Func, value.IgnoreFail, ref value.TestOutput, value.Args, value.triggers, value.buggyInstall, value.TryCache, value.Objdir, value.Target, value.built, value.actionID, value.buildID, value.VetxOnly, value.needVet, value.needBuild, ref value.vetCfg, value.output, value.pending, value.priority, value.Failed, ref value.json, value.nonGoOverlay, ref value.traceSpan);

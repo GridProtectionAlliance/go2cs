@@ -8,158 +8,160 @@
 //
 // See "JSON and Go" for an introduction to this package:
 // https://golang.org/doc/articles/json_and_go.html
-// package json -- go2cs converted at 2022 March 06 22:25:19 UTC
+
+// package json -- go2cs converted at 2022 March 13 05:39:52 UTC
 // import "encoding/json" ==> using json = go.encoding.json_package
 // Original source: C:\Program Files\Go\src\encoding\json\encode.go
-using bytes = go.bytes_package;
-using encoding = go.encoding_package;
-using base64 = go.encoding.base64_package;
-using fmt = go.fmt_package;
-using math = go.math_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.encoding;
 
+using bytes = bytes_package;
+using encoding = encoding_package;
+using base64 = encoding.base64_package;
+using fmt = fmt_package;
+using math = math_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Marshal returns the JSON encoding of v.
+//
+// Marshal traverses the value v recursively.
+// If an encountered value implements the Marshaler interface
+// and is not a nil pointer, Marshal calls its MarshalJSON method
+// to produce JSON. If no MarshalJSON method is present but the
+// value implements encoding.TextMarshaler instead, Marshal calls
+// its MarshalText method and encodes the result as a JSON string.
+// The nil pointer exception is not strictly necessary
+// but mimics a similar, necessary exception in the behavior of
+// UnmarshalJSON.
+//
+// Otherwise, Marshal uses the following type-dependent default encodings:
+//
+// Boolean values encode as JSON booleans.
+//
+// Floating point, integer, and Number values encode as JSON numbers.
+//
+// String values encode as JSON strings coerced to valid UTF-8,
+// replacing invalid bytes with the Unicode replacement rune.
+// So that the JSON will be safe to embed inside HTML <script> tags,
+// the string is encoded using HTMLEscape,
+// which replaces "<", ">", "&", U+2028, and U+2029 are escaped
+// to "\u003c","\u003e", "\u0026", "\u2028", and "\u2029".
+// This replacement can be disabled when using an Encoder,
+// by calling SetEscapeHTML(false).
+//
+// Array and slice values encode as JSON arrays, except that
+// []byte encodes as a base64-encoded string, and a nil slice
+// encodes as the null JSON value.
+//
+// Struct values encode as JSON objects.
+// Each exported struct field becomes a member of the object, using the
+// field name as the object key, unless the field is omitted for one of the
+// reasons given below.
+//
+// The encoding of each struct field can be customized by the format string
+// stored under the "json" key in the struct field's tag.
+// The format string gives the name of the field, possibly followed by a
+// comma-separated list of options. The name may be empty in order to
+// specify options without overriding the default field name.
+//
+// The "omitempty" option specifies that the field should be omitted
+// from the encoding if the field has an empty value, defined as
+// false, 0, a nil pointer, a nil interface value, and any empty array,
+// slice, map, or string.
+//
+// As a special case, if the field tag is "-", the field is always omitted.
+// Note that a field with name "-" can still be generated using the tag "-,".
+//
+// Examples of struct field tags and their meanings:
+//
+//   // Field appears in JSON as key "myName".
+//   Field int `json:"myName"`
+//
+//   // Field appears in JSON as key "myName" and
+//   // the field is omitted from the object if its value is empty,
+//   // as defined above.
+//   Field int `json:"myName,omitempty"`
+//
+//   // Field appears in JSON as key "Field" (the default), but
+//   // the field is skipped if empty.
+//   // Note the leading comma.
+//   Field int `json:",omitempty"`
+//
+//   // Field is ignored by this package.
+//   Field int `json:"-"`
+//
+//   // Field appears in JSON as key "-".
+//   Field int `json:"-,"`
+//
+// The "string" option signals that a field is stored as JSON inside a
+// JSON-encoded string. It applies only to fields of string, floating point,
+// integer, or boolean types. This extra level of encoding is sometimes used
+// when communicating with JavaScript programs:
+//
+//    Int64String int64 `json:",string"`
+//
+// The key name will be used if it's a non-empty string consisting of
+// only Unicode letters, digits, and ASCII punctuation except quotation
+// marks, backslash, and comma.
+//
+// Anonymous struct fields are usually marshaled as if their inner exported fields
+// were fields in the outer struct, subject to the usual Go visibility rules amended
+// as described in the next paragraph.
+// An anonymous struct field with a name given in its JSON tag is treated as
+// having that name, rather than being anonymous.
+// An anonymous struct field of interface type is treated the same as having
+// that type as its name, rather than being anonymous.
+//
+// The Go visibility rules for struct fields are amended for JSON when
+// deciding which field to marshal or unmarshal. If there are
+// multiple fields at the same level, and that level is the least
+// nested (and would therefore be the nesting level selected by the
+// usual Go rules), the following extra rules apply:
+//
+// 1) Of those fields, if any are JSON-tagged, only tagged fields are considered,
+// even if there are multiple untagged fields that would otherwise conflict.
+//
+// 2) If there is exactly one field (tagged or not according to the first rule), that is selected.
+//
+// 3) Otherwise there are multiple fields, and all are ignored; no error occurs.
+//
+// Handling of anonymous struct fields is new in Go 1.1.
+// Prior to Go 1.1, anonymous struct fields were ignored. To force ignoring of
+// an anonymous struct field in both current and earlier versions, give the field
+// a JSON tag of "-".
+//
+// Map values encode as JSON objects. The map's key type must either be a
+// string, an integer type, or implement encoding.TextMarshaler. The map keys
+// are sorted and used as JSON object keys by applying the following rules,
+// subject to the UTF-8 coercion described for string values above:
+//   - keys of any string type are used directly
+//   - encoding.TextMarshalers are marshaled
+//   - integer keys are converted to strings
+//
+// Pointer values encode as the value pointed to.
+// A nil pointer encodes as the null JSON value.
+//
+// Interface values encode as the value contained in the interface.
+// A nil interface value encodes as the null JSON value.
+//
+// Channel, complex, and function values cannot be encoded in JSON.
+// Attempting to encode such a value causes Marshal to return
+// an UnsupportedTypeError.
+//
+// JSON cannot represent cyclic data structures and Marshal does not
+// handle them. Passing cyclic structures to Marshal will result in
+// an error.
+//
+
+using System;
 public static partial class json_package {
 
-    // Marshal returns the JSON encoding of v.
-    //
-    // Marshal traverses the value v recursively.
-    // If an encountered value implements the Marshaler interface
-    // and is not a nil pointer, Marshal calls its MarshalJSON method
-    // to produce JSON. If no MarshalJSON method is present but the
-    // value implements encoding.TextMarshaler instead, Marshal calls
-    // its MarshalText method and encodes the result as a JSON string.
-    // The nil pointer exception is not strictly necessary
-    // but mimics a similar, necessary exception in the behavior of
-    // UnmarshalJSON.
-    //
-    // Otherwise, Marshal uses the following type-dependent default encodings:
-    //
-    // Boolean values encode as JSON booleans.
-    //
-    // Floating point, integer, and Number values encode as JSON numbers.
-    //
-    // String values encode as JSON strings coerced to valid UTF-8,
-    // replacing invalid bytes with the Unicode replacement rune.
-    // So that the JSON will be safe to embed inside HTML <script> tags,
-    // the string is encoded using HTMLEscape,
-    // which replaces "<", ">", "&", U+2028, and U+2029 are escaped
-    // to "\u003c","\u003e", "\u0026", "\u2028", and "\u2029".
-    // This replacement can be disabled when using an Encoder,
-    // by calling SetEscapeHTML(false).
-    //
-    // Array and slice values encode as JSON arrays, except that
-    // []byte encodes as a base64-encoded string, and a nil slice
-    // encodes as the null JSON value.
-    //
-    // Struct values encode as JSON objects.
-    // Each exported struct field becomes a member of the object, using the
-    // field name as the object key, unless the field is omitted for one of the
-    // reasons given below.
-    //
-    // The encoding of each struct field can be customized by the format string
-    // stored under the "json" key in the struct field's tag.
-    // The format string gives the name of the field, possibly followed by a
-    // comma-separated list of options. The name may be empty in order to
-    // specify options without overriding the default field name.
-    //
-    // The "omitempty" option specifies that the field should be omitted
-    // from the encoding if the field has an empty value, defined as
-    // false, 0, a nil pointer, a nil interface value, and any empty array,
-    // slice, map, or string.
-    //
-    // As a special case, if the field tag is "-", the field is always omitted.
-    // Note that a field with name "-" can still be generated using the tag "-,".
-    //
-    // Examples of struct field tags and their meanings:
-    //
-    //   // Field appears in JSON as key "myName".
-    //   Field int `json:"myName"`
-    //
-    //   // Field appears in JSON as key "myName" and
-    //   // the field is omitted from the object if its value is empty,
-    //   // as defined above.
-    //   Field int `json:"myName,omitempty"`
-    //
-    //   // Field appears in JSON as key "Field" (the default), but
-    //   // the field is skipped if empty.
-    //   // Note the leading comma.
-    //   Field int `json:",omitempty"`
-    //
-    //   // Field is ignored by this package.
-    //   Field int `json:"-"`
-    //
-    //   // Field appears in JSON as key "-".
-    //   Field int `json:"-,"`
-    //
-    // The "string" option signals that a field is stored as JSON inside a
-    // JSON-encoded string. It applies only to fields of string, floating point,
-    // integer, or boolean types. This extra level of encoding is sometimes used
-    // when communicating with JavaScript programs:
-    //
-    //    Int64String int64 `json:",string"`
-    //
-    // The key name will be used if it's a non-empty string consisting of
-    // only Unicode letters, digits, and ASCII punctuation except quotation
-    // marks, backslash, and comma.
-    //
-    // Anonymous struct fields are usually marshaled as if their inner exported fields
-    // were fields in the outer struct, subject to the usual Go visibility rules amended
-    // as described in the next paragraph.
-    // An anonymous struct field with a name given in its JSON tag is treated as
-    // having that name, rather than being anonymous.
-    // An anonymous struct field of interface type is treated the same as having
-    // that type as its name, rather than being anonymous.
-    //
-    // The Go visibility rules for struct fields are amended for JSON when
-    // deciding which field to marshal or unmarshal. If there are
-    // multiple fields at the same level, and that level is the least
-    // nested (and would therefore be the nesting level selected by the
-    // usual Go rules), the following extra rules apply:
-    //
-    // 1) Of those fields, if any are JSON-tagged, only tagged fields are considered,
-    // even if there are multiple untagged fields that would otherwise conflict.
-    //
-    // 2) If there is exactly one field (tagged or not according to the first rule), that is selected.
-    //
-    // 3) Otherwise there are multiple fields, and all are ignored; no error occurs.
-    //
-    // Handling of anonymous struct fields is new in Go 1.1.
-    // Prior to Go 1.1, anonymous struct fields were ignored. To force ignoring of
-    // an anonymous struct field in both current and earlier versions, give the field
-    // a JSON tag of "-".
-    //
-    // Map values encode as JSON objects. The map's key type must either be a
-    // string, an integer type, or implement encoding.TextMarshaler. The map keys
-    // are sorted and used as JSON object keys by applying the following rules,
-    // subject to the UTF-8 coercion described for string values above:
-    //   - keys of any string type are used directly
-    //   - encoding.TextMarshalers are marshaled
-    //   - integer keys are converted to strings
-    //
-    // Pointer values encode as the value pointed to.
-    // A nil pointer encodes as the null JSON value.
-    //
-    // Interface values encode as the value contained in the interface.
-    // A nil interface value encodes as the null JSON value.
-    //
-    // Channel, complex, and function values cannot be encoded in JSON.
-    // Attempting to encode such a value causes Marshal to return
-    // an UnsupportedTypeError.
-    //
-    // JSON cannot represent cyclic data structures and Marshal does not
-    // handle them. Passing cyclic structures to Marshal will result in
-    // an error.
-    //
 public static (slice<byte>, error) Marshal(object v) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -175,7 +177,6 @@ public static (slice<byte>, error) Marshal(object v) {
     encodeStatePool.Put(e);
 
     return (buf, error.As(null!)!);
-
 }
 
 // MarshalIndent is like Marshal but applies Indent to format the output.
@@ -195,7 +196,6 @@ public static (slice<byte>, error) MarshalIndent(object v, @string prefix, @stri
         return (null, error.As(err)!);
     }
     return (buf.Bytes(), error.As(null!)!);
-
 }
 
 // HTMLEscape appends to dst the JSON-encoded src with <, >, &, U+2028 and U+2029
@@ -295,7 +295,6 @@ private static @string Error(this ptr<MarshalerError> _addr_e) {
         srcFunc = "MarshalJSON";
     }
     return "json: error calling " + srcFunc + " for type " + e.Type.String() + ": " + e.Err.Error();
-
 }
 
 // Unwrap returns the underlying error.
@@ -338,9 +337,7 @@ private static ptr<encodeState> newEncodeState() => func((_, panic, _) => {
             return _addr_e!;
         }
     }
-
     return addr(new encodeState(ptrSeen:make(map[interface{}]struct{})));
-
 });
 
 // jsonError is an error wrapper type for internal use only.
@@ -371,15 +368,12 @@ private static error marshal(this ptr<encodeState> _addr_e, object v, encOpts op
                     }
 
                 }
-
             }
 
         }
-
     }());
     e.reflectValue(reflect.ValueOf(v), opts);
     return error.As(null!)!;
-
 });
 
 // error aborts the encoding by panicking with err wrapped in jsonError.
@@ -404,7 +398,6 @@ private static bool isEmptyValue(reflect.Value v) {
     else if (v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr) 
         return v.IsNil();
         return false;
-
 }
 
 private static void reflectValue(this ptr<encodeState> _addr_e, reflect.Value v, encOpts opts) {
@@ -427,7 +420,6 @@ private static encoderFunc valueEncoder(reflect.Value v) {
         return invalidValueEncoder;
     }
     return typeEncoder(v.Type());
-
 }
 
 private static encoderFunc typeEncoder(reflect.Type t) {
@@ -460,7 +452,6 @@ private static encoderFunc typeEncoder(reflect.Type t) {
     wg.Done();
     encoderCache.Store(t, f);
     return f;
-
 }
 
 private static var marshalerType = reflect.TypeOf((Marshaler.val)(null)).Elem();private static var textMarshalerType = reflect.TypeOf((encoding.TextMarshaler.val)(null)).Elem();
@@ -511,8 +502,7 @@ private static encoderFunc newTypeEncoder(reflect.Type t, bool allowAddr) {
         return newPtrEncoder(t);
     else 
         return unsupportedTypeEncoder;
-    
-}
+    }
 
 private static void invalidValueEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts _) {
     ref encodeState e = ref _addr_e.val;
@@ -536,7 +526,6 @@ private static void marshalerEncoder(ptr<encodeState> _addr_e, reflect.Value v, 
     if (err == null) { 
         // copy JSON into buffer, checking validity.
         err = compact(_addr_e.Buffer, b, opts.escapeHTML);
-
     }
     if (err != null) {
         e.error(addr(new MarshalerError(v.Type(),err,"MarshalJSON")));
@@ -556,7 +545,6 @@ private static void addrMarshalerEncoder(ptr<encodeState> _addr_e, reflect.Value
     if (err == null) { 
         // copy JSON into buffer, checking validity.
         err = compact(_addr_e.Buffer, b, opts.escapeHTML);
-
     }
     if (err != null) {
         e.error(addr(new MarshalerError(v.Type(),err,"MarshalJSON")));
@@ -580,7 +568,6 @@ private static void textMarshalerEncoder(ptr<encodeState> _addr_e, reflect.Value
         e.error(addr(new MarshalerError(v.Type(),err,"MarshalText")));
     }
     e.stringBytes(b, opts.escapeHTML);
-
 }
 
 private static void addrTextMarshalerEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts) {
@@ -597,7 +584,6 @@ private static void addrTextMarshalerEncoder(ptr<encodeState> _addr_e, reflect.V
         e.error(addr(new MarshalerError(v.Type(),err,"MarshalText")));
     }
     e.stringBytes(b, opts.escapeHTML);
-
 }
 
 private static void boolEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts) {
@@ -704,7 +690,6 @@ private static void stringEncoder(ptr<encodeState> _addr_e, reflect.Value v, enc
             e.WriteByte('"');
         }
         return ;
-
     }
     if (opts.quoted) {
         var e2 = newEncodeState(); 
@@ -713,7 +698,6 @@ private static void stringEncoder(ptr<encodeState> _addr_e, reflect.Value v, enc
         e2.@string(v.String(), opts.escapeHTML);
         e.stringBytes(e2.Bytes(), false);
         encodeStatePool.Put(e2);
-
     }
     else
  {
@@ -764,10 +748,8 @@ private static bool isValidNumber(@string s) {
         while (len(s) > 0 && '0' <= s[0] && s[0] <= '9') {
             s = s[(int)1..];
         }
-
     }
     return s == "";
-
 }
 
 private static void interfaceEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts opts) {
@@ -778,7 +760,6 @@ private static void interfaceEncoder(ptr<encodeState> _addr_e, reflect.Value v, 
         return ;
     }
     e.reflectValue(v.Elem(), opts);
-
 }
 
 private static void unsupportedTypeEncoder(ptr<encodeState> _addr_e, reflect.Value v, encOpts _) {
@@ -820,13 +801,9 @@ FieldLoop:
                             _continueFieldLoop = true;
                             break;
                         }
-
                         fv = fv.Elem();
-
                     }
-
                     fv = fv.Field(i);
-
                 }
 
                 i = i__prev2;
@@ -835,7 +812,6 @@ FieldLoop:
             if (f.omitEmpty && isEmptyValue(fv)) {
                 continue;
             }
-
             e.WriteByte(next);
             next = ',';
             if (opts.escapeHTML) {
@@ -845,10 +821,8 @@ FieldLoop:
  {
                 e.WriteString(f.nameNonEsc);
             }
-
             opts.quoted = f.quoted;
             f.encoder(e, fv, opts);
-
         }
         i = i__prev1;
     }
@@ -891,10 +865,8 @@ private static void encode(this mapEncoder me, ptr<encodeState> _addr_e, reflect
             }
 
         }
-
         e.ptrSeen[ptr] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
         defer(delete(e.ptrSeen, ptr));
-
     }
     e.WriteByte('{'); 
 
@@ -915,7 +887,6 @@ private static void encode(this mapEncoder me, ptr<encodeState> _addr_e, reflect
                 }
 
             }
-
         }
 
         i = i__prev1;
@@ -940,7 +911,6 @@ private static void encode(this mapEncoder me, ptr<encodeState> _addr_e, reflect
 
     e.WriteByte('}');
     e.ptrLevel--;
-
 });
 
 private static encoderFunc newMapEncoder(reflect.Type t) {
@@ -951,7 +921,6 @@ private static encoderFunc newMapEncoder(reflect.Type t) {
         }
         mapEncoder me = new mapEncoder(typeEncoder(t.Elem()));
     return me.encode;
-
 }
 
 private static void encodeByteSlice(ptr<encodeState> _addr_e, reflect.Value v, encOpts _) {
@@ -970,7 +939,6 @@ private static void encodeByteSlice(ptr<encodeState> _addr_e, reflect.Value v, e
         var dst = e.scratch[..(int)encodedLen];
         base64.StdEncoding.Encode(dst, s);
         e.Write(dst);
-
     }
     else if (encodedLen <= 1024) { 
         // The encoded bytes are short enough to allocate for, and
@@ -978,7 +946,6 @@ private static void encodeByteSlice(ptr<encodeState> _addr_e, reflect.Value v, e
         dst = make_slice<byte>(encodedLen);
         base64.StdEncoding.Encode(dst, s);
         e.Write(dst);
-
     }
     else
  { 
@@ -987,10 +954,8 @@ private static void encodeByteSlice(ptr<encodeState> _addr_e, reflect.Value v, e
         var enc = base64.NewEncoder(base64.StdEncoding, e);
         enc.Write(s);
         enc.Close();
-
     }
     e.WriteByte('"');
-
 }
 
 // sliceEncoder just wraps an arrayEncoder, checking to make sure the value isn't nil.
@@ -1021,14 +986,11 @@ private static void encode(this sliceEncoder se, ptr<encodeState> _addr_e, refle
             }
 
         }
-
         e.ptrSeen[ptr] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
         defer(delete(e.ptrSeen, ptr));
-
     }
     se.arrayEnc(e, v, opts);
     e.ptrLevel--;
-
 });
 
 private static encoderFunc newSliceEncoder(reflect.Type t) { 
@@ -1041,7 +1003,6 @@ private static encoderFunc newSliceEncoder(reflect.Type t) {
     }
     sliceEncoder enc = new sliceEncoder(newArrayEncoder(t));
     return enc.encode;
-
 }
 
 private partial struct arrayEncoder {
@@ -1058,10 +1019,8 @@ private static void encode(this arrayEncoder ae, ptr<encodeState> _addr_e, refle
             e.WriteByte(',');
         }
         ae.elemEnc(e, v.Index(i), opts);
-
     }
     e.WriteByte(']');
-
 }
 
 private static encoderFunc newArrayEncoder(reflect.Type t) {
@@ -1094,14 +1053,11 @@ private static void encode(this ptrEncoder pe, ptr<encodeState> _addr_e, reflect
             }
 
         }
-
         e.ptrSeen[ptr] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
         defer(delete(e.ptrSeen, ptr));
-
     }
     pe.elemEnc(e, v.Elem(), opts);
     e.ptrLevel--;
-
 });
 
 private static encoderFunc newPtrEncoder(reflect.Type t) {
@@ -1141,9 +1097,7 @@ private static bool isValidTag(@string s) {
 
         if (strings.ContainsRune("!#$%&()*+-./:;<=>?@[]^_{|}~ ", c))         else if (!unicode.IsLetter(c) && !unicode.IsDigit(c)) 
             return false;
-        
-    }    return true;
-
+            }    return true;
 }
 
 private static reflect.Type typeByIndex(reflect.Type t, slice<nint> index) {
@@ -1152,9 +1106,7 @@ private static reflect.Type typeByIndex(reflect.Type t, slice<nint> index) {
             t = t.Elem();
         }
         t = t.Field(i).Type;
-
     }    return t;
-
 }
 
 private partial struct reflectWithString {
@@ -1183,7 +1135,6 @@ private static error resolve(this ptr<reflectWithString> _addr_w) => func((_, pa
         }
     }
 
-
     if (w.k.Kind() == reflect.Int || w.k.Kind() == reflect.Int8 || w.k.Kind() == reflect.Int16 || w.k.Kind() == reflect.Int32 || w.k.Kind() == reflect.Int64) 
         w.ks = strconv.FormatInt(w.k.Int(), 10);
         return error.As(null!)!;
@@ -1191,7 +1142,6 @@ private static error resolve(this ptr<reflectWithString> _addr_w) => func((_, pa
         w.ks = strconv.FormatUint(w.k.Uint(), 10);
         return error.As(null!)!;
         panic("unexpected map key type");
-
 });
 
 // NOTE: keep in sync with stringBytes below.
@@ -1245,11 +1195,9 @@ private static void @string(this ptr<encodeState> _addr_e, @string s, bool escap
                     i++;
                     start = i;
                     continue;
-
                 }
 
             }
-
             var (c, size) = utf8.DecodeRuneInString(s[(int)i..]);
             if (c == utf8.RuneError && size == 1) {
                 if (start < i) {
@@ -1277,16 +1225,13 @@ private static void @string(this ptr<encodeState> _addr_e, @string s, bool escap
                 start = i;
                 continue;
             }
-
             i += size;
-
         }
     }
     if (start < len(s)) {
         e.WriteString(s[(int)start..]);
     }
     e.WriteByte('"');
-
 }
 
 // NOTE: keep in sync with string above.
@@ -1340,11 +1285,9 @@ private static void stringBytes(this ptr<encodeState> _addr_e, slice<byte> s, bo
                     i++;
                     start = i;
                     continue;
-
                 }
 
             }
-
             var (c, size) = utf8.DecodeRune(s[(int)i..]);
             if (c == utf8.RuneError && size == 1) {
                 if (start < i) {
@@ -1372,16 +1315,13 @@ private static void stringBytes(this ptr<encodeState> _addr_e, slice<byte> s, bo
                 start = i;
                 continue;
             }
-
             i += size;
-
         }
     }
     if (start < len(s)) {
         e.Write(s[(int)start..]);
     }
     e.WriteByte('"');
-
 }
 
 // A field represents a single field found in a struct.
@@ -1422,7 +1362,6 @@ private static bool Less(this byIndex x, nint i, nint j) {
             return xik < x[j].index[k];
         }
     }    return len(x[i].index) < len(x[j].index);
-
 }
 
 // typeFields returns a list of fields that JSON should recognize for the given type.
@@ -1473,7 +1412,6 @@ private static structFields typeFields(reflect.Type t) {
                             if (!sf.IsExported() && t.Kind() != reflect.Struct) { 
                                 // Ignore embedded fields of unexported non-struct types.
                                 continue;
-
                             } 
                             // Do not ignore embedded fields of unexported struct types
                             // since they may have exported fields.
@@ -1481,19 +1419,15 @@ private static structFields typeFields(reflect.Type t) {
                         else if (!sf.IsExported()) { 
                             // Ignore unexported non-embedded fields.
                             continue;
-
                         }
-
                         var tag = sf.Tag.Get("json");
                         if (tag == "-") {
                             continue;
                         }
-
                         var (name, opts) = parseTag(tag);
                         if (!isValidTag(name)) {
                             name = "";
                         }
-
                         var index = make_slice<nint>(len(f.index) + 1);
                         copy(index, f.index);
                         index[len(f.index)] = i;
@@ -1502,7 +1436,6 @@ private static structFields typeFields(reflect.Type t) {
                         if (ft.Name() == "" && ft.Kind() == reflect.Ptr) { 
                             // Follow pointer.
                             ft = ft.Elem();
-
                         } 
 
                         // Only strings, floats, integers, and booleans can be quoted.
@@ -1511,8 +1444,7 @@ private static structFields typeFields(reflect.Type t) {
 
                             if (ft.Kind() == reflect.Bool || ft.Kind() == reflect.Int || ft.Kind() == reflect.Int8 || ft.Kind() == reflect.Int16 || ft.Kind() == reflect.Int32 || ft.Kind() == reflect.Int64 || ft.Kind() == reflect.Uint || ft.Kind() == reflect.Uint8 || ft.Kind() == reflect.Uint16 || ft.Kind() == reflect.Uint32 || ft.Kind() == reflect.Uint64 || ft.Kind() == reflect.Uintptr || ft.Kind() == reflect.Float32 || ft.Kind() == reflect.Float64 || ft.Kind() == reflect.String) 
                                 quoted = true;
-                            
-                        } 
+                                                    } 
 
                         // Record found field and index sequence.
                         if (name != "" || !sf.Anonymous || ft.Kind() != reflect.Struct) {
@@ -1539,11 +1471,8 @@ private static structFields typeFields(reflect.Type t) {
                                 // It only cares about the distinction between 1 or 2,
                                 // so don't bother generating any more copies.
                                 fields = append(fields, fields[len(fields) - 1]);
-
                             }
-
                             continue;
-
                         } 
 
                         // Record new anonymous struct to explore in next round.
@@ -1551,13 +1480,11 @@ private static structFields typeFields(reflect.Type t) {
                         if (nextCount[ft] == 1) {
                             next = append(next, new field(name:ft.Name(),index:index,typ:ft));
                         }
-
                     }
 
 
                     i = i__prev3;
                 }
-
             }
 
             f = f__prev2;
@@ -1579,7 +1506,6 @@ private static structFields typeFields(reflect.Type t) {
             return x[i].tag;
         }
         return byIndex(x).Less(i, j);
-
     }); 
 
     // Delete all fields that are hidden by the Go rules for embedded fields,
@@ -1611,14 +1537,11 @@ private static structFields typeFields(reflect.Type t) {
             if (advance == 1) { // Only one field with this name
                 out = append(out, fi);
                 continue;
-
             }
-
             var (dominant, ok) = dominantField(fields[(int)i..(int)i + advance]);
             if (ok) {
                 out = append(out, dominant);
             }
-
         }
 
         i = i__prev1;
@@ -1653,7 +1576,6 @@ private static structFields typeFields(reflect.Type t) {
     }
 
     return new structFields(fields,nameIndex);
-
 }
 
 // dominantField looks through the fields, all of which are known to
@@ -1673,7 +1595,6 @@ private static (field, bool) dominantField(slice<field> fields) {
         return (new field(), false);
     }
     return (fields[0], true);
-
 }
 
 private static sync.Map fieldCache = default; // map[reflect.Type]structFields
@@ -1691,10 +1612,8 @@ private static structFields cachedTypeFields(reflect.Type t) {
         f = f__prev1;
 
     }
-
     var (f, _) = fieldCache.LoadOrStore(t, typeFields(t));
     return f._<structFields>();
-
 }
 
 } // end json_package

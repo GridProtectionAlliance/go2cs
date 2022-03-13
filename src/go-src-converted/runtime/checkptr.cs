@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:25 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\checkptr.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -41,7 +41,6 @@ private static bool checkptrStraddles(unsafe.Pointer ptr, System.UIntPtr size) {
     // but neither ptr nor end point into one themselves.
 
     return checkptrBase(ptr) != checkptrBase(end);
-
 }
 
 private static void checkptrArithmetic(unsafe.Pointer p, slice<unsafe.Pointer> originals) {
@@ -57,7 +56,6 @@ private static void checkptrArithmetic(unsafe.Pointer p, slice<unsafe.Pointer> o
             return ;
         }
     }    throw("checkptr: pointer arithmetic result points to invalid allocation");
-
 }
 
 // checkptrBase returns the base address for the allocation containing
@@ -82,7 +80,6 @@ private static System.UIntPtr checkptrBase(unsafe.Pointer p) {
             // all platforms, so it's guaranteed to be distinct
             // from any of the addresses we might return below.
             return 1;
-
         }
     } 
 
@@ -104,7 +101,6 @@ private static System.UIntPtr checkptrBase(unsafe.Pointer p) {
             return datap.bss;
         }
     }    return 0;
-
 }
 
 } // end runtime_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:24:40 UTC
+//     Generated on 2022 March 13 05:39:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace @internal
 {
     public static partial class fmtsort_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SortedMap
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace @internal
             public static implicit operator SortedMap(NilType nil) => default(SortedMap);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SortedMap SortedMap_cast(dynamic value)
         {
             return new SortedMap(value.Key, value.Value);

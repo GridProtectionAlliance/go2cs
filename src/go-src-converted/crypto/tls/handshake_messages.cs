@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:20:49 UTC
+// package tls -- go2cs converted at 2022 March 13 05:35:55 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\handshake_messages.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
-using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
-using System;
-
-
 namespace go.crypto;
 
+using fmt = fmt_package;
+using strings = strings_package;
+
+using cryptobyte = golang.org.x.crypto.cryptobyte_package;
+
+
+// The marshalingFunction type is an adapter to allow the use of ordinary
+// functions as cryptobyte.MarshalingValue.
+
+using System;
 public static partial class tls_package {
 
-    // The marshalingFunction type is an adapter to allow the use of ordinary
-    // functions as cryptobyte.MarshalingValue.
 public delegate  error marshalingFunction(ptr<cryptobyte.Builder>);
 
 private static error Marshal(this marshalingFunction f, ptr<cryptobyte.Builder> _addr_b) {
@@ -37,9 +38,7 @@ private static void addBytesWithLength(ptr<cryptobyte.Builder> _addr_b, slice<by
         }
         b.AddBytes(v);
         return null;
-
     }));
-
 }
 
 // addUint64 appends a big-endian, 64-bit value to the cryptobyte.Builder.
@@ -63,7 +62,6 @@ private static bool readUint64(ptr<cryptobyte.String> _addr_s, ptr<ulong> _addr_
     }
     out.val = uint64(hi) << 32 | uint64(lo);
     return true;
-
 }
 
 // readUint8LengthPrefixed acts like s.ReadUint8LengthPrefixed, but targets a
@@ -158,13 +156,9 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         b.AddUint16LengthPrefixed(b => {
                             b.AddBytes((slice<byte>)m.serverName);
                         });
-
                     });
-
                 });
-
             }
-
             if (m.ocspStapling) { 
                 // RFC 4366, Section 3.6
                 b.AddUint16(extensionStatusRequest);
@@ -173,9 +167,7 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                     b.AddUint16(0); // empty responder_id_list
                     b.AddUint16(0); // empty request_extensions
                 });
-
             }
-
             if (len(m.supportedCurves) > 0) { 
                 // RFC 4492, sections 5.1.1 and RFC 8446, Section 4.2.7
                 b.AddUint16(extensionSupportedCurves);
@@ -186,9 +178,7 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         }
                     });
                 });
-
             }
-
             if (len(m.supportedPoints) > 0) { 
                 // RFC 4492, Section 5.1.2
                 b.AddUint16(extensionSupportedPoints);
@@ -197,18 +187,14 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         b.AddBytes(m.supportedPoints);
                     });
                 });
-
             }
-
             if (m.ticketSupported) { 
                 // RFC 5077, Section 3.2
                 b.AddUint16(extensionSessionTicket);
                 b.AddUint16LengthPrefixed(b => {
                     b.AddBytes(m.sessionTicket);
                 });
-
             }
-
             if (len(m.supportedSignatureAlgorithms) > 0) { 
                 // RFC 5246, Section 7.4.1.4.1
                 b.AddUint16(extensionSignatureAlgorithms);
@@ -225,11 +211,8 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                             sigAlgo = sigAlgo__prev1;
                         }
                     });
-
                 });
-
             }
-
             if (len(m.supportedSignatureAlgorithmsCert) > 0) { 
                 // RFC 8446, Section 4.2.3
                 b.AddUint16(extensionSignatureAlgorithmsCert);
@@ -246,11 +229,8 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                             sigAlgo = sigAlgo__prev1;
                         }
                     });
-
                 });
-
             }
-
             if (m.secureRenegotiationSupported) { 
                 // RFC 5746, Section 3.2
                 b.AddUint16(extensionRenegotiationInfo);
@@ -259,9 +239,7 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         b.AddBytes(m.secureRenegotiation);
                     });
                 });
-
             }
-
             if (len(m.alpnProtocols) > 0) { 
                 // RFC 7301, Section 3.1
                 b.AddUint16(extensionALPN);
@@ -274,15 +252,12 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         }
                     });
                 });
-
             }
-
             if (m.scts) { 
                 // RFC 6962, Section 3.3.1
                 b.AddUint16(extensionSCT);
                 b.AddUint16(0); // empty extension_data
             }
-
             if (len(m.supportedVersions) > 0) { 
                 // RFC 8446, Section 4.2.1
                 b.AddUint16(extensionSupportedVersions);
@@ -293,9 +268,7 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         }
                     });
                 });
-
             }
-
             if (len(m.cookie) > 0) { 
                 // RFC 8446, Section 4.2.2
                 b.AddUint16(extensionCookie);
@@ -304,9 +277,7 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         b.AddBytes(m.cookie);
                     });
                 });
-
             }
-
             if (len(m.keyShares) > 0) { 
                 // RFC 8446, Section 4.2.8
                 b.AddUint16(extensionKeyShare);
@@ -320,15 +291,12 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         }
                     });
                 });
-
             }
-
             if (m.earlyData) { 
                 // RFC 8446, Section 4.2.10
                 b.AddUint16(extensionEarlyData);
                 b.AddUint16(0); // empty extension_data
             }
-
             if (len(m.pskModes) > 0) { 
                 // RFC 8446, Section 4.2.9
                 b.AddUint16(extensionPSKModes);
@@ -337,9 +305,7 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         b.AddBytes(m.pskModes);
                     });
                 });
-
             }
-
             if (len(m.pskIdentities) > 0) { // pre_shared_key must be the last extension
                 // RFC 8446, Section 4.2.11
                 b.AddUint16(extensionPreSharedKey);
@@ -360,11 +326,8 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
                         }
                     });
                 });
-
             }
-
             extensionsPresent = len(b.BytesOrPanic()) > 2;
-
         });
 
         if (!extensionsPresent) {
@@ -374,7 +337,6 @@ private static slice<byte> marshal(this ptr<clientHelloMsg> _addr_m) {
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 // marshalWithoutBinders returns the ClientHello through the
@@ -387,10 +349,8 @@ private static slice<byte> marshalWithoutBinders(this ptr<clientHelloMsg> _addr_
     foreach (var (_, binder) in m.pskBinders) {
         bindersLen += 1; // uint8 length prefix
         bindersLen += len(binder);
-
     }    var fullMessage = m.marshal();
     return fullMessage[..(int)len(fullMessage) - bindersLen];
-
 }
 
 // updateBinders updates the m.pskBinders field, if necessary updating the
@@ -448,7 +408,6 @@ private static bool unmarshal(this ptr<clientHelloMsg> _addr_m, slice<byte> data
             m.secureRenegotiationSupported = true;
         }
         m.cipherSuites = append(m.cipherSuites, suite);
-
     }
 
     if (!readUint8LengthPrefixed(_addr_s, _addr_m.compressionMethods)) {
@@ -457,7 +416,6 @@ private static bool unmarshal(this ptr<clientHelloMsg> _addr_m, slice<byte> data
     if (s.Empty()) { 
         // ClientHello is optionally followed by extension data
         return true;
-
     }
     ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
     if (!s.ReadUint16LengthPrefixed(_addr_extensions) || !s.Empty()) {
@@ -488,15 +446,12 @@ private static bool unmarshal(this ptr<clientHelloMsg> _addr_m, slice<byte> data
                 if (len(m.serverName) != 0) { 
                     // Multiple names of the same name_type are prohibited.
                     return false;
-
                 }
-
                 m.serverName = string(serverName); 
                 // An SNI value may not include a trailing dot.
                 if (strings.HasSuffix(m.serverName, ".")) {
                     return false;
                 }
-
             }
         else if (extension == extensionStatusRequest) 
             // RFC 4366, Section 3.6
@@ -620,12 +575,10 @@ private static bool unmarshal(this ptr<clientHelloMsg> _addr_m, slice<byte> data
             if (!extensions.Empty()) {
                 return false; // pre_shared_key must be the last extension
             }
-
             ref cryptobyte.String identities = ref heap(out ptr<cryptobyte.String> _addr_identities);
             if (!extData.ReadUint16LengthPrefixed(_addr_identities) || identities.Empty()) {
                 return false;
             }
-
             while (!identities.Empty()) {
                 pskIdentity psk = default;
                 if (!readUint16LengthPrefixed(_addr_identities, _addr_psk.label) || !identities.ReadUint32(_addr_psk.obfuscatedTicketAge) || len(psk.label) == 0) {
@@ -638,7 +591,6 @@ private static bool unmarshal(this ptr<clientHelloMsg> _addr_m, slice<byte> data
             if (!extData.ReadUint16LengthPrefixed(_addr_binders) || binders.Empty()) {
                 return false;
             }
-
             while (!binders.Empty()) {
                 ref slice<byte> binder = ref heap(out ptr<slice<byte>> _addr_binder);
                 if (!readUint8LengthPrefixed(_addr_binders, _addr_binder) || len(binder) == 0) {
@@ -655,7 +607,6 @@ private static bool unmarshal(this ptr<clientHelloMsg> _addr_m, slice<byte> data
     }
 
     return true;
-
 }
 
 private partial struct serverHelloMsg {
@@ -706,12 +657,10 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
                 b.AddUint16(extensionStatusRequest);
                 b.AddUint16(0); // empty extension_data
             }
-
             if (m.ticketSupported) {
                 b.AddUint16(extensionSessionTicket);
                 b.AddUint16(0); // empty extension_data
             }
-
             if (m.secureRenegotiationSupported) {
                 b.AddUint16(extensionRenegotiationInfo);
                 b.AddUint16LengthPrefixed(b => {
@@ -720,7 +669,6 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
                     });
                 });
             }
-
             if (len(m.alpnProtocol) > 0) {
                 b.AddUint16(extensionALPN);
                 b.AddUint16LengthPrefixed(b => {
@@ -731,7 +679,6 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
                     });
                 });
             }
-
             if (len(m.scts) > 0) {
                 b.AddUint16(extensionSCT);
                 b.AddUint16LengthPrefixed(b => {
@@ -744,14 +691,12 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
                     });
                 });
             }
-
             if (m.supportedVersion != 0) {
                 b.AddUint16(extensionSupportedVersions);
                 b.AddUint16LengthPrefixed(b => {
                     b.AddUint16(m.supportedVersion);
                 });
             }
-
             if (m.serverShare.group != 0) {
                 b.AddUint16(extensionKeyShare);
                 b.AddUint16LengthPrefixed(b => {
@@ -761,14 +706,12 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
                     });
                 });
             }
-
             if (m.selectedIdentityPresent) {
                 b.AddUint16(extensionPreSharedKey);
                 b.AddUint16LengthPrefixed(b => {
                     b.AddUint16(m.selectedIdentity);
                 });
             }
-
             if (len(m.cookie) > 0) {
                 b.AddUint16(extensionCookie);
                 b.AddUint16LengthPrefixed(b => {
@@ -777,14 +720,12 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
                     });
                 });
             }
-
             if (m.selectedGroup != 0) {
                 b.AddUint16(extensionKeyShare);
                 b.AddUint16LengthPrefixed(b => {
                     b.AddUint16(uint16(m.selectedGroup));
                 });
             }
-
             if (len(m.supportedPoints) > 0) {
                 b.AddUint16(extensionSupportedPoints);
                 b.AddUint16LengthPrefixed(b => {
@@ -793,9 +734,7 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
                     });
                 });
             }
-
             extensionsPresent = len(b.BytesOrPanic()) > 2;
-
         });
 
         if (!extensionsPresent) {
@@ -805,7 +744,6 @@ private static slice<byte> marshal(this ptr<serverHelloMsg> _addr_m) {
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<serverHelloMsg> _addr_m, slice<byte> data) {
@@ -820,7 +758,6 @@ private static bool unmarshal(this ptr<serverHelloMsg> _addr_m, slice<byte> data
     if (s.Empty()) { 
         // ServerHello is optionally followed by extension data
         return true;
-
     }
     ref cryptobyte.String extensions = ref heap(out ptr<cryptobyte.String> _addr_extensions);
     if (!s.ReadUint16LengthPrefixed(_addr_extensions) || !s.Empty()) {
@@ -886,7 +823,6 @@ private static bool unmarshal(this ptr<serverHelloMsg> _addr_m, slice<byte> data
                     return false;
                 }
             }
-
         else if (extension == extensionPreSharedKey) 
             m.selectedIdentityPresent = true;
             if (!extData.ReadUint16(_addr_m.selectedIdentity)) {
@@ -906,7 +842,6 @@ private static bool unmarshal(this ptr<serverHelloMsg> _addr_m, slice<byte> data
     }
 
     return true;
-
 }
 
 private partial struct encryptedExtensionsMsg {
@@ -939,7 +874,6 @@ private static slice<byte> marshal(this ptr<encryptedExtensionsMsg> _addr_m) {
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<encryptedExtensionsMsg> _addr_m, slice<byte> data) {
@@ -978,7 +912,6 @@ private static bool unmarshal(this ptr<encryptedExtensionsMsg> _addr_m, slice<by
     }
 
     return true;
-
 }
 
 private partial struct endOfEarlyDataMsg {
@@ -1023,7 +956,6 @@ private static slice<byte> marshal(this ptr<keyUpdateMsg> _addr_m) {
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<keyUpdateMsg> _addr_m, slice<byte> data) {
@@ -1048,7 +980,6 @@ private static bool unmarshal(this ptr<keyUpdateMsg> _addr_m, slice<byte> data) 
             break;
     }
     return true;
-
 }
 
 private partial struct newSessionTicketMsgTLS13 {
@@ -1090,7 +1021,6 @@ private static slice<byte> marshal(this ptr<newSessionTicketMsgTLS13> _addr_m) {
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<newSessionTicketMsgTLS13> _addr_m, slice<byte> data) {
@@ -1123,7 +1053,6 @@ private static bool unmarshal(this ptr<newSessionTicketMsgTLS13> _addr_m, slice<
     }
 
     return true;
-
 }
 
 private partial struct certificateRequestMsgTLS13 {
@@ -1153,7 +1082,6 @@ private static slice<byte> marshal(this ptr<certificateRequestMsgTLS13> _addr_m)
                 b.AddUint16(extensionStatusRequest);
                 b.AddUint16(0); // empty extension_data
             }
-
             if (m.scts) { 
                 // RFC 8446, Section 4.4.2.1 makes no mention of
                 // signed_certificate_timestamp in CertificateRequest, but
@@ -1163,7 +1091,6 @@ private static slice<byte> marshal(this ptr<certificateRequestMsgTLS13> _addr_m)
                 b.AddUint16(extensionSCT);
                 b.AddUint16(0); // empty extension_data
             }
-
             if (len(m.supportedSignatureAlgorithms) > 0) {
                 b.AddUint16(extensionSignatureAlgorithms);
                 b.AddUint16LengthPrefixed(b => {
@@ -1179,11 +1106,8 @@ private static slice<byte> marshal(this ptr<certificateRequestMsgTLS13> _addr_m)
                             sigAlgo = sigAlgo__prev1;
                         }
                     });
-
                 });
-
             }
-
             if (len(m.supportedSignatureAlgorithmsCert) > 0) {
                 b.AddUint16(extensionSignatureAlgorithmsCert);
                 b.AddUint16LengthPrefixed(b => {
@@ -1199,11 +1123,8 @@ private static slice<byte> marshal(this ptr<certificateRequestMsgTLS13> _addr_m)
                             sigAlgo = sigAlgo__prev1;
                         }
                     });
-
                 });
-
             }
-
             if (len(m.certificateAuthorities) > 0) {
                 b.AddUint16(extensionCertificateAuthorities);
                 b.AddUint16LengthPrefixed(b => {
@@ -1216,14 +1137,11 @@ private static slice<byte> marshal(this ptr<certificateRequestMsgTLS13> _addr_m)
                     });
                 });
             }
-
         });
-
     });
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<certificateRequestMsgTLS13> _addr_m, slice<byte> data) {
@@ -1293,7 +1211,6 @@ private static bool unmarshal(this ptr<certificateRequestMsgTLS13> _addr_m, slic
     }
 
     return true;
-
 }
 
 private partial struct certificateMsg {
@@ -1348,7 +1265,6 @@ private static slice<byte> marshal(this ptr<certificateMsg> _addr_m) {
 
     m.raw = x;
     return ;
-
 }
 
 private static bool unmarshal(this ptr<certificateMsg> _addr_m, slice<byte> data) {
@@ -1375,7 +1291,6 @@ private static bool unmarshal(this ptr<certificateMsg> _addr_m, slice<byte> data
         d = d[(int)3 + certLen..];
         certsLen -= 3 + certLen;
         numCerts++;
-
     }
 
     m.certificates = make_slice<slice<byte>>(numCerts);
@@ -1387,7 +1302,6 @@ private static bool unmarshal(this ptr<certificateMsg> _addr_m, slice<byte> data
     }
 
     return true;
-
 }
 
 private partial struct certificateMsgTLS13 {
@@ -1416,12 +1330,10 @@ private static slice<byte> marshal(this ptr<certificateMsgTLS13> _addr_m) {
             certificate.SignedCertificateTimestamps = null;
         }
         marshalCertificate(_addr_b, certificate);
-
     });
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static void marshalCertificate(ptr<cryptobyte.Builder> _addr_b, Certificate certificate) {
@@ -1436,9 +1348,7 @@ private static void marshalCertificate(ptr<cryptobyte.Builder> _addr_b, Certific
                 if (i > 0) { 
                     // This library only supports OCSP and SCT for leaf certificates.
                     return ;
-
                 }
-
                 if (certificate.OCSPStaple != null) {
                     b.AddUint16(extensionStatusRequest);
                     b.AddUint16LengthPrefixed(b => {
@@ -1448,7 +1358,6 @@ private static void marshalCertificate(ptr<cryptobyte.Builder> _addr_b, Certific
                         });
                     });
                 }
-
                 if (certificate.SignedCertificateTimestamps != null) {
                     b.AddUint16(extensionSCT);
                     b.AddUint16LengthPrefixed(b => {
@@ -1461,12 +1370,9 @@ private static void marshalCertificate(ptr<cryptobyte.Builder> _addr_b, Certific
                         });
                     });
                 }
-
             });
-
         }
     });
-
 }
 
 private static bool unmarshal(this ptr<certificateMsgTLS13> _addr_m, slice<byte> data) {
@@ -1483,7 +1389,6 @@ private static bool unmarshal(this ptr<certificateMsgTLS13> _addr_m, slice<byte>
     m.ocspStapling = m.certificate.OCSPStaple != null;
 
     return true;
-
 }
 
 private static bool unmarshalCertificate(ptr<cryptobyte.String> _addr_s, ptr<Certificate> _addr_certificate) {
@@ -1510,9 +1415,7 @@ private static bool unmarshalCertificate(ptr<cryptobyte.String> _addr_s, ptr<Cer
             if (len(certificate.Certificate) > 1) { 
                 // This library only supports OCSP and SCT for leaf certificates.
                 continue;
-
             }
-
 
             if (extension == extensionStatusRequest) 
                 ref byte statusType = ref heap(out ptr<byte> _addr_statusType);
@@ -1537,12 +1440,9 @@ private static bool unmarshalCertificate(ptr<cryptobyte.String> _addr_s, ptr<Cer
                         if (!extData.Empty()) {
                 return false;
             }
-
         }
-
     }
     return true;
-
 }
 
 private partial struct serverKeyExchangeMsg {
@@ -1566,7 +1466,6 @@ private static slice<byte> marshal(this ptr<serverKeyExchangeMsg> _addr_m) {
 
     m.raw = x;
     return x;
-
 }
 
 private static bool unmarshal(this ptr<serverKeyExchangeMsg> _addr_m, slice<byte> data) {
@@ -1578,7 +1477,6 @@ private static bool unmarshal(this ptr<serverKeyExchangeMsg> _addr_m, slice<byte
     }
     m.key = data[(int)4..];
     return true;
-
 }
 
 private partial struct certificateStatusMsg {
@@ -1603,7 +1501,6 @@ private static slice<byte> marshal(this ptr<certificateStatusMsg> _addr_m) {
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<certificateStatusMsg> _addr_m, slice<byte> data) {
@@ -1617,7 +1514,6 @@ private static bool unmarshal(this ptr<certificateStatusMsg> _addr_m, slice<byte
         return false;
     }
     return true;
-
 }
 
 private partial struct serverHelloDoneMsg {
@@ -1658,7 +1554,6 @@ private static slice<byte> marshal(this ptr<clientKeyExchangeMsg> _addr_m) {
 
     m.raw = x;
     return x;
-
 }
 
 private static bool unmarshal(this ptr<clientKeyExchangeMsg> _addr_m, slice<byte> data) {
@@ -1674,7 +1569,6 @@ private static bool unmarshal(this ptr<clientKeyExchangeMsg> _addr_m, slice<byte
     }
     m.ciphertext = data[(int)4..];
     return true;
-
 }
 
 private partial struct finishedMsg {
@@ -1696,7 +1590,6 @@ private static slice<byte> marshal(this ptr<finishedMsg> _addr_m) {
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<finishedMsg> _addr_m, slice<byte> data) {
@@ -1781,7 +1674,6 @@ private static slice<byte> marshal(this ptr<certificateRequestMsg> _addr_m) {
 
     m.raw = x;
     return ;
-
 }
 
 private static bool unmarshal(this ptr<certificateRequestMsg> _addr_m, slice<byte> data) {
@@ -1851,11 +1743,9 @@ private static bool unmarshal(this ptr<certificateRequestMsg> _addr_m, slice<byt
         }
         m.certificateAuthorities = append(m.certificateAuthorities, cas[..(int)caLen]);
         cas = cas[(int)caLen..];
-
     }
 
     return len(data) == 0;
-
 }
 
 private partial struct certificateVerifyMsg {
@@ -1881,12 +1771,10 @@ private static slice<byte> marshal(this ptr<certificateVerifyMsg> _addr_m) {
         b.AddUint16LengthPrefixed(b => {
             b.AddBytes(m.signature);
         });
-
     });
 
     m.raw = b.BytesOrPanic();
     return m.raw;
-
 }
 
 private static bool unmarshal(this ptr<certificateVerifyMsg> _addr_m, slice<byte> data) {
@@ -1897,7 +1785,6 @@ private static bool unmarshal(this ptr<certificateVerifyMsg> _addr_m, slice<byte
 
     if (!s.Skip(4)) { // message type and uint24 length field
         return false;
-
     }
     if (m.hasSignatureAlgorithm) {
         if (!s.ReadUint16((uint16.val)(_addr_m.signatureAlgorithm))) {
@@ -1905,7 +1792,6 @@ private static bool unmarshal(this ptr<certificateVerifyMsg> _addr_m, slice<byte
         }
     }
     return readUint16LengthPrefixed(_addr_s, _addr_m.signature) && s.Empty();
-
 }
 
 private partial struct newSessionTicketMsg {
@@ -1934,7 +1820,6 @@ private static slice<byte> marshal(this ptr<newSessionTicketMsg> _addr_m) {
     m.raw = x;
 
     return ;
-
 }
 
 private static bool unmarshal(this ptr<newSessionTicketMsg> _addr_m, slice<byte> data) {
@@ -1956,7 +1841,6 @@ private static bool unmarshal(this ptr<newSessionTicketMsg> _addr_m, slice<byte>
     m.ticket = data[(int)10..];
 
     return true;
-
 }
 
 private partial struct helloRequestMsg {

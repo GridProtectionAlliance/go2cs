@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:01 UTC
+//     Generated on 2022 March 13 05:28:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class bytes_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Buffer
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace go
             public static implicit operator Buffer(NilType nil) => default(Buffer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Buffer Buffer_cast(dynamic value)
         {
             return new Buffer(value.buf, value.off, value.lastRead);

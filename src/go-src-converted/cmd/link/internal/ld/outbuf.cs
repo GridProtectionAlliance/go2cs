@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:03 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:06 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\outbuf.go
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using log = go.log_package;
-using os = go.os_package;
-
 namespace go.cmd.link.@internal;
+
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using log = log_package;
+using os = os_package;
+
+
+// If fallocate is not supported on this platform, return this error. The error
+// is ignored where needed, and OutBuf writes to heap memory.
 
 public static partial class ld_package {
 
-    // If fallocate is not supported on this platform, return this error. The error
-    // is ignored where needed, and OutBuf writes to heap memory.
 private static var errNoFallocate = errors.New("operation not supported");
 
 private static readonly nint outbufMode = 0775;
@@ -130,7 +132,6 @@ private static error Open(this ptr<OutBuf> _addr_@out, @string name) {
     @out.name = name;
     @out.f = f;
     return error.As(null!)!;
-
 }
 
 public static ptr<OutBuf> NewOutBuf(ptr<sys.Arch> _addr_arch) {
@@ -174,7 +175,6 @@ private static error Close(this ptr<OutBuf> _addr_@out) {
             }
 
         }
-
     }
     {
         var err = @out.f.Close();
@@ -183,10 +183,8 @@ private static error Close(this ptr<OutBuf> _addr_@out) {
             return error.As(err)!;
         }
     }
-
     @out.f = null;
     return error.As(null!)!;
-
 }
 
 // isMmapped returns true if the OutBuf is mmaped.
@@ -205,7 +203,6 @@ private static slice<byte> Data(this ptr<OutBuf> _addr_@out) {
         return @out.buf;
     }
     return @out.heap;
-
 }
 
 // copyHeap copies the heap to the mmapped section of memory, returning true if
@@ -215,7 +212,6 @@ private static bool copyHeap(this ptr<OutBuf> _addr_@out) => func((_, panic, _) 
 
     if (!@out.isMmapped()) { // only valuable for mmapped OutBufs.
         return false;
-
     }
     if (@out.isView) {
         panic("can't copyHeap a view");
@@ -229,14 +225,11 @@ private static bool copyHeap(this ptr<OutBuf> _addr_@out) => func((_, panic, _) 
 
             if (err != null) { // Mmap will copy out.heap over to out.buf
                 Exitf("mapping output file failed: %v", err);
-
             }
 
         }
-
     }
     return true;
-
 });
 
 // maxOutBufHeapLen limits the growth of the heap area.
@@ -277,10 +270,8 @@ private static (long, slice<byte>) writeLoc(this ptr<OutBuf> _addr_@out, long le
             heapLen = 0;
         }
         @out.heap = append(@out.heap, make_slice<byte>(lenNeeded - heapLen));
-
     }
     return (heapPos, @out.heap);
-
 });
 
 private static void SeekSet(this ptr<OutBuf> _addr_@out, long p) {
@@ -368,7 +359,6 @@ private static void WriteString(this ptr<OutBuf> _addr_@out, @string s) {
         log.Fatalf("WriteString truncated. buffer size: %d, offset: %d, len(s)=%d", len(@out.buf), @out.off, len(s));
     }
     @out.off += int64(n);
-
 }
 
 // WriteStringN writes the first n bytes of s.

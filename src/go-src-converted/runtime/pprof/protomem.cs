@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package pprof -- go2cs converted at 2022 March 06 22:15:10 UTC
+// package pprof -- go2cs converted at 2022 March 13 05:29:17 UTC
 // import "runtime/pprof" ==> using pprof = go.runtime.pprof_package
 // Original source: C:\Program Files\Go\src\runtime\pprof\protomem.go
-using io = go.io_package;
-using math = go.math_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.runtime;
 
+using io = io_package;
+using math = math_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+
+// writeHeapProto writes the current heap profile in protobuf format to w.
+
+using System;
 public static partial class pprof_package {
 
-    // writeHeapProto writes the current heap profile in protobuf format to w.
 private static error writeHeapProto(io.Writer w, slice<runtime.MemProfileRecord> p, long rate, @string defaultSampleType) {
     var b = newProfileBuilder(w);
     b.pbValueType(tagProfile_PeriodType, "space", "bytes");
@@ -49,7 +50,6 @@ private static error writeHeapProto(io.Writer w, slice<runtime.MemProfileRecord>
                     // Found non-runtime. Show any runtime uses above it.
                     stk = stk[(int)i..];
                     break;
-
                 }
             }
             locs = b.appendLocsForStack(locs[..(int)0], stk);
@@ -70,10 +70,8 @@ private static error writeHeapProto(io.Writer w, slice<runtime.MemProfileRecord>
                 b.pbLabel(tagSample_Label, "bytes", "", blockSize);
             }
         });
-
     }    b.build();
     return error.As(null!)!;
-
 }
 
 // scaleHeapSample adjusts the data from a heap Sample to
@@ -96,13 +94,11 @@ private static (long, long) scaleHeapSample(long count, long size, long rate) {
         // if rate==1 all samples were collected so no adjustment is needed.
         // if rate<1 treat as unknown and skip scaling.
         return (count, size);
-
     }
     var avgSize = float64(size) / float64(count);
     nint scale = 1 / (1 - math.Exp(-avgSize / float64(rate)));
 
     return (int64(float64(count) * scale), int64(float64(size) * scale));
-
 }
 
 } // end pprof_package

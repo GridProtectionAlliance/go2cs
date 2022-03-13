@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:57 UTC
+//     Generated on 2022 March 13 06:01:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct expandState
         {
             // Constructors
@@ -97,7 +97,7 @@ namespace @internal
             public static implicit operator expandState(NilType nil) => default(expandState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static expandState expandState_cast(dynamic value)
         {
             return new expandState(ref value.f, ref value.abi1, value.debug, value.canSSAType, value.regSize, ref value.sp, ref value.typs, value.ptrSize, value.hiOffset, value.lowOffset, value.hiRo, value.loRo, value.namedSelects, value.sdom, value.commonSelectors, value.commonArgs, value.memForCall, value.transformedSelects, value.indentLevel);

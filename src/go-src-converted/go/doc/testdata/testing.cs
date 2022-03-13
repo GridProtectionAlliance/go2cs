@@ -36,22 +36,22 @@
 //             big.Len()
 //         }
 //     }
-// package testing -- go2cs converted at 2022 March 06 22:41:37 UTC
+
+// package testing -- go2cs converted at 2022 March 13 05:52:42 UTC
 // import "go/doc.testing" ==> using testing = go.go.doc.testing_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\testing.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using pprof = go.runtime.pprof_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
+namespace go.go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using pprof = runtime.pprof_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go.go;
 
 public static partial class testing_package {
 
@@ -97,9 +97,7 @@ private static @string decorate(@string s, bool addFileLine) {
                     file = file[(int)index + 1..];
                 }
 
-
             }
-
         }
         else
  {
@@ -107,7 +105,6 @@ private static @string decorate(@string s, bool addFileLine) {
             line = 1;
         }
         s = fmt.Sprintf("%s:%d: %s", file, line, s);
-
     }
     s = "\t" + s; // Every line is indented at least one tab.
     var n = len(s);
@@ -119,11 +116,9 @@ private static @string decorate(@string s, bool addFileLine) {
         if (s[i] == '\n') { 
             // Second and subsequent lines are indented an extra tab.
             return s[(int)0..(int)i + 1] + "\t" + decorate(s[(int)i + 1..(int)n], false);
-
         }
     }
     return s;
-
 }
 
 // T is a type passed to Test functions to manage test state and support formatted test logs.
@@ -175,7 +170,6 @@ private static void FailNow(this ptr<common> _addr_c) {
     // a top-of-stack deferred function now, we know that the send
     // only happens after any other stacked defers have completed.
     runtime.Goexit();
-
 }
 
 // log generates the output. It's always at the same stack depth.
@@ -271,7 +265,6 @@ private static void tRunner(ptr<T> _addr_t, ptr<InternalTest> _addr_test) => fun
     }());
 
     test.F(t);
-
 });
 
 // An internal function but exported because it is cross-package; part of the implementation
@@ -295,7 +288,6 @@ public static (bool, error) Main(Func<@string, @string, (bool, error)> matchStri
     stopAlarm();
     RunBenchmarks(matchString, benchmarks);
     after();
-
 }
 
 private static void report(this ptr<T> _addr_t) {
@@ -357,12 +349,9 @@ public static bool RunTests(Func<@string, @string, (bool, error)> matchString, s
                 }());
                 numParallel++;
                 continue;
-
             }
-
             t.report();
             ok = ok && !@out.failed;
-
         }
 
         nint running = 0;
@@ -378,9 +367,7 @@ public static bool RunTests(Func<@string, @string, (bool, error)> matchString, s
             ok = ok && !t.failed;
             running--;
         }
-
     }    return ;
-
 }
 
 // before runs before all testing.
@@ -426,7 +413,6 @@ private static void after() {
             fmt.Fprintf(os.Stderr, "testing: can't write %s: %s", memProfile.val, err);
         }
         f.Close();
-
     }
 }
 

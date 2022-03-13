@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:52 UTC
+//     Generated on 2022 March 13 05:28:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace compress
 {
     public static partial class flate_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct compressionLevel
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace compress
             public static implicit operator compressionLevel(NilType nil) => default(compressionLevel);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static compressionLevel compressionLevel_cast(dynamic value)
         {
             return new compressionLevel(value.level, value.good, value.lazy, value.nice, value.chain, value.fastSkipHashing);

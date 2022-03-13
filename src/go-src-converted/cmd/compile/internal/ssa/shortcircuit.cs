@@ -2,21 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:42 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:21:59 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\shortcircuit.go
-
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using System;
 public static partial class ssa_package {
 
-    // Shortcircuit finds situations where branch directions
-    // are always correlated and rewrites the CFG to take
-    // advantage of that fact.
-    // This optimization is useful for compiling && and || expressions.
+// Shortcircuit finds situations where branch directions
+// are always correlated and rewrites the CFG to take
+// advantage of that fact.
+// This optimization is useful for compiling && and || expressions.
 private static void shortcircuit(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
  
@@ -52,7 +49,6 @@ private static void shortcircuit(ptr<Func> _addr_f) {
                         ct = f.ConstBool(f.Config.Types.Bool, true);
                     }
                     v.SetArg(i, ct);
-
                 }
                 else
  {
@@ -60,12 +56,10 @@ private static void shortcircuit(ptr<Func> _addr_f) {
                         cf = f.ConstBool(f.Config.Types.Bool, false);
                     }
                     v.SetArg(i, cf);
-
                 }
             }
         }
     }    fuse(f, fuseTypePlain | fuseTypeShortCircuit);
-
 }
 
 // shortcircuitBlock checks for a CFG in which an If block
@@ -139,7 +133,6 @@ private static bool shortcircuitBlock(ptr<Block> _addr_b) {
         // We rely on b having exactly two preds in shortcircuitPhiPlan
         // to reason about the values of phis.
         return false;
-
     }
     if (len(b.Values) != nval + nOtherPhi) {
         return false;
@@ -215,7 +208,6 @@ private static bool shortcircuitBlock(ptr<Block> _addr_b) {
     if (p == b || t == b) { 
         // This is an infinite loop; we can't remove it. See issue 33903.
         return false;
-
     }
     Action<ptr<Value>, nint> fixPhi = default;
     if (nOtherPhi > 0) {
@@ -303,7 +295,6 @@ private static bool shortcircuitBlock(ptr<Block> _addr_b) {
  {
                     phi.reset(OpInvalid);
                 }
-
                 i--; // v.moveTo put a new value at index i; reprocess
             } 
 
@@ -332,11 +323,9 @@ private static bool shortcircuitBlock(ptr<Block> _addr_b) {
     if (len(b.Preds) == 0) { 
         // Block is now dead.
         b.Kind = BlockInvalid;
-
     }
     phielimValue(ctl);
     return true;
-
 }
 
 // shortcircuitPhiPlan returns a function to handle non-ctl phi values in b,
@@ -411,7 +400,6 @@ private static Action<ptr<Value>, nint> shortcircuitPhiPlan(ptr<Block> _addr_b, 
             if (v.Uses == 0) {
                 return ;
             }
-
             v.moveTo(m, i); 
             // The phi in m belongs to whichever pred idx corresponds to t.
             if (m.Preds[0].b == t) {
@@ -421,9 +409,7 @@ private static Action<ptr<Value>, nint> shortcircuitPhiPlan(ptr<Block> _addr_b, 
  {
                 v.SetArgs2(argQ, phi);
             }
-
         };
-
     }
     if (len(t.Preds) == 2 && len(u.Preds) == 1 && len(u.Succs) == 1 && u.Succs[0].b == t) { 
         // p   q
@@ -452,9 +438,7 @@ private static Action<ptr<Value>, nint> shortcircuitPhiPlan(ptr<Block> _addr_b, 
             u.replaceUses(v, argQ);
             v.moveTo(t, i);
             v.SetArgs3(argQ, argQ, argP);
-
         };
-
     }
     if (len(u.Preds) == 2 && len(t.Preds) == 1 && len(t.Succs) == 1 && t.Succs[0].b == u) { 
         // p   q
@@ -486,12 +470,9 @@ private static Action<ptr<Value>, nint> shortcircuitPhiPlan(ptr<Block> _addr_b, 
             if (v.Uses == 0) {
                 return ;
             }
-
             v.moveTo(u, i);
             v.SetArgs2(argQ, phi);
-
         };
-
     }
     if (len(t.Preds) == 1 && len(u.Preds) == 1 && len(t.Succs) == 0) { 
         // p   q
@@ -523,12 +504,9 @@ private static Action<ptr<Value>, nint> shortcircuitPhiPlan(ptr<Block> _addr_b, 
             if (v.Uses == 0) {
                 return ;
             }
-
             v.moveTo(u, i);
             v.SetArgs1(argQ);
-
         };
-
     }
     if (len(u.Preds) == 1 && len(t.Preds) == 1 && len(u.Succs) == 0) { 
         // p   q
@@ -555,12 +533,9 @@ private static Action<ptr<Value>, nint> shortcircuitPhiPlan(ptr<Block> _addr_b, 
             u.replaceUses(v, argQ);
             v.moveTo(t, i);
             v.SetArgs2(argQ, argP);
-
         };
-
     }
     return null;
-
 }
 
 // replaceUses replaces all uses of old in b with new.
@@ -630,7 +605,6 @@ private static void moveTo(this ptr<Value> _addr_v, ptr<Block> _addr_dst, nint i
     src.Values[i] = src.Values[last];
     src.Values[last] = null;
     src.Values = src.Values[..(int)last];
-
 }
 
 } // end ssa_package

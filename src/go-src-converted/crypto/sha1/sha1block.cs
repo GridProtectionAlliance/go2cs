@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sha1 -- go2cs converted at 2022 March 06 22:19:26 UTC
+// package sha1 -- go2cs converted at 2022 March 13 05:34:23 UTC
 // import "crypto/sha1" ==> using sha1 = go.crypto.sha1_package
 // Original source: C:\Program Files\Go\src\crypto\sha1\sha1block.go
-using bits = go.math.bits_package;
-
 namespace go.crypto;
+
+using bits = math.bits_package;
 
 public static partial class sha1_package {
 
@@ -15,7 +15,6 @@ private static readonly nuint _K0 = 0x5A827999;
 private static readonly nuint _K1 = 0x6ED9EBA1;
 private static readonly nuint _K2 = 0x8F1BBCDC;
 private static readonly nuint _K3 = 0xCA62C1D6;
-
 
 // blockGeneric is a portable, pure Go version of the SHA-1 block step.
 // It's used by sha1block_generic.go and tests.
@@ -96,7 +95,6 @@ private static void blockGeneric(ptr<digest> _addr_dig, slice<byte> p) {
         h4 += e;
 
         p = p[(int)chunk..];
-
     }
 
     (dig.h[0], dig.h[1], dig.h[2], dig.h[3], dig.h[4]) = (h0, h1, h2, h3, h4);

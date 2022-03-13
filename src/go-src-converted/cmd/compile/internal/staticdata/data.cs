@@ -2,37 +2,38 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package staticdata -- go2cs converted at 2022 March 06 22:47:43 UTC
+// package staticdata -- go2cs converted at 2022 March 13 05:58:59 UTC
 // import "cmd/compile/internal/staticdata" ==> using staticdata = go.cmd.compile.@internal.staticdata_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\staticdata\data.go
-using sha256 = go.crypto.sha256_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using sha256 = crypto.sha256_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using os = os_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using sync = sync_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+
+
+// InitAddrOffset writes the static name symbol lsym to n, it does not modify n.
+// It's the caller responsibility to make sure lsym is from ONAME/PEXTERN node.
+
+using System;
 public static partial class staticdata_package {
 
-    // InitAddrOffset writes the static name symbol lsym to n, it does not modify n.
-    // It's the caller responsibility to make sure lsym is from ONAME/PEXTERN node.
 public static void InitAddrOffset(ptr<ir.Name> _addr_n, long noff, ptr<obj.LSym> _addr_lsym, long off) {
     ref ir.Name n = ref _addr_n.val;
     ref obj.LSym lsym = ref _addr_lsym.val;
@@ -45,7 +46,6 @@ public static void InitAddrOffset(ptr<ir.Name> _addr_n, long noff, ptr<obj.LSym>
     }
     var s = n.Linksym();
     s.WriteAddr(@base.Ctxt, noff, types.PtrSize, lsym, off);
-
 }
 
 // InitAddr is InitAddrOffset, with offset fixed to 0.
@@ -75,12 +75,10 @@ public static void InitSliceBytes(ptr<ir.Name> _addr_nam, long off, @string s) {
         @base.Fatalf("InitSliceBytes %v", nam);
     }
     InitSlice(_addr_nam, off, _addr_slicedata(nam.Pos(), s).Linksym(), int64(len(s)));
-
 }
 
 private static readonly @string stringSymPrefix = "go.string.";
 private static readonly @string stringSymPattern = ".gostring.%d.%x";
-
 
 // StringSym returns a symbol containing the string s.
 // The symbol contains the string data, not a string header.
@@ -96,13 +94,11 @@ public static ptr<obj.LSym> StringSym(src.XPos pos, @string s) {
         var h = sha256.New();
         io.WriteString(h, s);
         symname = fmt.Sprintf(stringSymPattern, len(s), h.Sum(null));
-
     }
     else
  { 
         // Small strings get named directly by their contents.
         symname = strconv.Quote(s);
-
     }
     var symdata = @base.Ctxt.Lookup(stringSymPrefix + symname);
     if (!symdata.OnList()) {
@@ -111,7 +107,6 @@ public static ptr<obj.LSym> StringSym(src.XPos pos, @string s) {
         symdata.Set(obj.AttrContentAddressable, true);
     }
     return _addr_symdata!;
-
 }
 
 // fileStringSym returns a symbol for the contents and the size of file.
@@ -160,7 +155,6 @@ private static (ptr<obj.LSym>, long, error) fileStringSym(src.XPos pos, @string 
             copy(hash, sum[..]);
         }
         return (_addr_sym!, size, error.As(null!)!);
-
     }
     if (size > 2e9F) { 
         // ggloblsym takes an int32,
@@ -168,7 +162,6 @@ private static (ptr<obj.LSym>, long, error) fileStringSym(src.XPos pos, @string 
         // can't handle such big symbols either.
         // See golang.org/issue/9862.
         return (_addr_null!, 0, error.As(fmt.Errorf("file too large"))!);
-
     }
     sum = default;
     if (readonly || len(hash) > 0) {
@@ -182,7 +175,6 @@ private static (ptr<obj.LSym>, long, error) fileStringSym(src.XPos pos, @string 
         }
         sum = h.Sum(null);
         copy(hash, sum);
-
     }
     ptr<obj.LSym> symdata;
     if (readonly) {
@@ -208,10 +200,8 @@ private static (ptr<obj.LSym>, long, error) fileStringSym(src.XPos pos, @string 
         info = symdata.NewFileInfo();
         info.Name = file;
         info.Size = size;
-
     }
     return (_addr_symdata!, size, error.As(null!)!);
-
 });
 
 private static nint slicedataGen = default;
@@ -242,7 +232,6 @@ private static nint dstringdata(ptr<obj.LSym> _addr_s, nint off, @string t, src.
     }
     s.WriteString(@base.Ctxt, int64(off), len(t), t);
     return off + len(t);
-
 }
 
 private static sync.Mutex funcsymsmu = default;private static slice<ptr<ir.Name>> funcsyms = default;
@@ -277,7 +266,6 @@ public static ptr<obj.LSym> FuncLinksym(ptr<ir.Name> _addr_n) {
     funcsymsmu.Unlock();
 
     return _addr_sf.Linksym()!;
-
 }
 
 public static ptr<obj.LSym> GlobalLinksym(ptr<ir.Name> _addr_n) {
@@ -287,7 +275,6 @@ public static ptr<obj.LSym> GlobalLinksym(ptr<ir.Name> _addr_n) {
         @base.Fatalf("expected global variable: %v", n);
     }
     return _addr_n.Linksym()!;
-
 }
 
 // NeedFuncSym ensures that fn·f is exported, if needed.
@@ -306,7 +293,6 @@ public static void NeedFuncSym(ptr<ir.Func> _addr_fn) {
         // The append below probably just needs to lock
         // funcsymsmu, like in FuncSym.
         @base.Fatalf("NeedFuncSym must be called in serial");
-
     }
     if (fn.ABI != obj.ABIInternal && buildcfg.Experiment.RegabiWrappers) { 
         // Function values must always reference ABIInternal
@@ -315,13 +301,11 @@ public static void NeedFuncSym(ptr<ir.Func> _addr_fn) {
         //
         // (If we're using ABI aliases, it doesn't matter.)
         @base.Fatalf("expected ABIInternal: %v has %v", fn.Nname, fn.ABI);
-
     }
     if (ir.IsBlank(fn.Nname)) { 
         // Blank functions aren't unique, so we can't make a
         // funcsym for them.
         @base.Fatalf("NeedFuncSym called for _");
-
     }
     if (!@base.Ctxt.Flag_dynlink) {
         return ;
@@ -332,16 +316,12 @@ public static void NeedFuncSym(ptr<ir.Func> _addr_fn) {
         // and internal/abi.FuncPCABIxxx() are not real functions and so
         // do not get funcsyms.
         return ;
-
     }
     funcsyms = append(funcsyms, fn.Nname);
-
 }
 
 public static void WriteFuncSyms() {
-    sort.Slice(funcsyms, (i, j) => {
-        return funcsyms[i].Linksym().Name < funcsyms[j].Linksym().Name;
-    });
+    sort.Slice(funcsyms, (i, j) => funcsyms[i].Linksym().Name < funcsyms[j].Linksym().Name);
     foreach (var (_, nam) in funcsyms) {
         var s = nam.Sym();
         var sf = s.Pkg.Lookup(ir.FuncSymName(s)).Linksym(); 
@@ -353,7 +333,6 @@ public static void WriteFuncSyms() {
         }
         objw.SymPtr(sf, 0, target, 0);
         objw.Global(sf, int32(types.PtrSize), obj.DUPOK | obj.RODATA);
-
     }
 }
 
@@ -410,7 +389,6 @@ public static void InitConst(ptr<ir.Name> _addr_n, long noff, ir.Node c, nint wi
             @base.Fatalf("InitConst unhandled OLITERAL %v", c);
 
     }
-
 }
 
 } // end staticdata_package

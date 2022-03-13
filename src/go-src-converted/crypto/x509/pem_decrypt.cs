@@ -2,26 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:48 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:46 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\pem_decrypt.go
+namespace go.crypto;
 // RFC 1423 describes the encryption of PEM blocks. The algorithm used to
 // generate a key from the password was derived by looking at the OpenSSL
 // implementation.
 
-using aes = go.crypto.aes_package;
-using cipher = go.crypto.cipher_package;
-using des = go.crypto.des_package;
-using md5 = go.crypto.md5_package;
-using hex = go.encoding.hex_package;
-using pem = go.encoding.pem_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using strings = go.strings_package;
+
+using aes = crypto.aes_package;
+using cipher = crypto.cipher_package;
+using des = crypto.des_package;
+using md5 = crypto.md5_package;
+using hex = encoding.hex_package;
+using pem = encoding.pem_package;
+using errors = errors_package;
+using io = io_package;
+using strings = strings_package;
 using System;
-
-
-namespace go.crypto;
 
 public static partial class x509_package {
 
@@ -35,7 +34,6 @@ public static readonly var PEMCipher3DES = 1;
 public static readonly var PEMCipherAES128 = 2;
 public static readonly var PEMCipherAES192 = 3;
 public static readonly var PEMCipherAES256 = 4;
-
 
 // rfc1423Algo holds a method for enciphering a PEM block.
 private partial struct rfc1423Algo {
@@ -72,7 +70,6 @@ private static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, s
         }
     }
     return out;
-
 }
 
 // IsEncryptedPEMBlock returns whether the PEM block is password encrypted
@@ -163,7 +160,6 @@ public static (slice<byte>, error) DecryptPEMBlock(ptr<pem.Block> _addr_b, slice
             return (null, error.As(IncorrectPasswordError)!);
         }
     }    return (data[..(int)dlen - last], error.As(null!)!);
-
 }
 
 // EncryptPEMBlock returns a PEM block of the specified type holding the
@@ -210,7 +206,6 @@ public static (ptr<pem.Block>, error) EncryptPEMBlock(io.Reader rand, @string bl
     enc.CryptBlocks(encrypted, encrypted);
 
     return (addr(new pem.Block(Type:blockType,Headers:map[string]string{"Proc-Type":"4,ENCRYPTED","DEK-Info":ciph.name+","+hex.EncodeToString(iv),},Bytes:encrypted,)), error.As(null!)!);
-
 }
 
 private static ptr<rfc1423Algo> cipherByName(@string name) {
@@ -220,7 +215,6 @@ private static ptr<rfc1423Algo> cipherByName(@string name) {
             return _addr_alg!;
         }
     }    return _addr_null!;
-
 }
 
 private static ptr<rfc1423Algo> cipherByKey(PEMCipher key) {
@@ -230,7 +224,6 @@ private static ptr<rfc1423Algo> cipherByKey(PEMCipher key) {
             return _addr_alg!;
         }
     }    return _addr_null!;
-
 }
 
 } // end x509_package

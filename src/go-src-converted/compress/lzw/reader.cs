@@ -13,24 +13,26 @@
 // The TIFF file format uses a similar but incompatible version of the LZW
 // algorithm. See the golang.org/x/image/tiff/lzw package for an
 // implementation.
-// package lzw -- go2cs converted at 2022 March 06 23:35:25 UTC
+
+// package lzw -- go2cs converted at 2022 March 13 06:43:22 UTC
 // import "compress/lzw" ==> using lzw = go.compress.lzw_package
 // Original source: C:\Program Files\Go\src\compress\lzw\reader.go
+namespace go.compress;
 // TODO(nigeltao): check that PDF uses LZW in the same way as GIF,
 // modulo LSB/MSB packing order.
 
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
+
+using bufio = bufio_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// Order specifies the bit ordering in an LZW data stream.
+
 using System;
-
-
-namespace go.compress;
-
 public static partial class lzw_package {
 
-    // Order specifies the bit ordering in an LZW data stream.
 public partial struct Order { // : nint
 }
 
@@ -41,11 +43,9 @@ public static readonly Order LSB = iota;
 // file formats.
 public static readonly var MSB = 0;
 
-
 private static readonly nint maxWidth = 12;
 private static readonly nuint decoderInvalidCode = 0xffff;
 private static readonly nint flushBuffer = 1 << (int)(maxWidth);
-
 
 // Reader is an io.Reader which can be used to read compressed data in the
 // LZW format.
@@ -118,13 +118,11 @@ private static (ushort, error) readLSB(this ptr<Reader> _addr_r) {
         }
         r.bits |= uint32(x) << (int)(r.nBits);
         r.nBits += 8;
-
     }
     var code = uint16(r.bits & (1 << (int)(r.width) - 1));
     r.bits>>=r.width;
     r.nBits -= r.width;
     return (code, error.As(null!)!);
-
 }
 
 // readMSB returns the next code for "Most Significant Bits first" data.
@@ -140,13 +138,11 @@ private static (ushort, error) readMSB(this ptr<Reader> _addr_r) {
         }
         r.bits |= uint32(x) << (int)((24 - r.nBits));
         r.nBits += 8;
-
     }
     var code = uint16(r.bits >> (int)((32 - r.width)));
     r.bits<<=r.width;
     r.nBits -= r.width;
     return (code, error.As(null!)!);
-
 }
 
 // Read implements io.Reader, reading uncompressed bytes from its underlying Reader.
@@ -165,9 +161,7 @@ private static (nint, error) Read(this ptr<Reader> _addr_r, slice<byte> b) {
             return (0, error.As(r.err)!);
         }
         r.decode();
-
     }
-
 }
 
 // decode decompresses bytes from r and leaves them in d.toRead.
@@ -197,9 +191,7 @@ loop:
                 // Save what the hi code expands to.
                 r.suffix[r.hi] = uint8(code);
                 r.prefix[r.hi] = r.last;
-
             }
-
         else if (code == r.clear) 
             r.width = 1 + uint(r.litWidth);
             r.hi = r.eof;
@@ -225,7 +217,6 @@ loop:
                 r.output[i] = uint8(c);
                 i--;
                 c = r.last;
-
             } 
             // Copy the suffix chain into output and then write that to w.
             while (c >= r.clear) {
@@ -240,9 +231,7 @@ loop:
                 // Save what the hi code expands to.
                 r.suffix[r.hi] = uint8(c);
                 r.prefix[r.hi] = r.last;
-
             }
-
         else 
             r.err = errors.New("lzw: invalid code");
             _breakloop = true;
@@ -257,14 +246,12 @@ loop:
                 // the invariant that d.hi < d.overflow, and (2) d.hi does not
                 // eventually overflow a uint16.
                 r.hi--;
-
             }
             else
  {
                 r.width++;
                 r.overflow = 1 << (int)(r.width);
             }
-
         }
         if (r.o >= flushBuffer) {
             break;
@@ -273,7 +260,6 @@ loop:
     // Flush pending output.
     r.toRead = r.output[..(int)r.o];
     r.o = 0;
-
 });
 
 private static var errClosed = errors.New("lzw: reader/writer is closed");
@@ -285,7 +271,6 @@ private static error Close(this ptr<Reader> _addr_r) {
 
     r.err = errClosed; // in case any Reads come along
     return error.As(null!)!;
-
 }
 
 // Reset clears the Reader's state and allows it to be reused again
@@ -344,7 +329,6 @@ private static void init(this ptr<Reader> _addr_r, io.Reader src, Order order, n
     r.clear = uint16(1) << (int)(uint(litWidth));
     (r.eof, r.hi) = (r.clear + 1, r.clear + 1);    r.overflow = uint16(1) << (int)(r.width);
     r.last = decoderInvalidCode;
-
 }
 
 } // end lzw_package

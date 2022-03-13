@@ -9,24 +9,27 @@
 // http://nickgravgaard.com/elastictabstops/index.html.
 //
 // The text/tabwriter package is frozen and is not accepting new features.
-// package tabwriter -- go2cs converted at 2022 March 06 22:14:45 UTC
+
+// package tabwriter -- go2cs converted at 2022 March 13 05:28:47 UTC
 // import "text/tabwriter" ==> using tabwriter = go.text.tabwriter_package
 // Original source: C:\Program Files\Go\src\text\tabwriter\tabwriter.go
-using io = go.io_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.text;
+
+using io = io_package;
+using utf8 = unicode.utf8_package;
+
+
+// ----------------------------------------------------------------------------
+// Filter implementation
+
+// A cell represents a segment of text terminated by tabs or line breaks.
+// The text itself is stored in a separate buffer; cell only describes the
+// segment's size in bytes, its width in runes, and whether it's an htab
+// ('\t') terminated cell.
+//
 
 public static partial class tabwriter_package {
 
-    // ----------------------------------------------------------------------------
-    // Filter implementation
-
-    // A cell represents a segment of text terminated by tabs or line breaks.
-    // The text itself is stored in a separate buffer; cell only describes the
-    // segment's size in bytes, its width in runes, and whether it's an htab
-    // ('\t') terminated cell.
-    //
 private partial struct cell {
     public nint size; // cell size in bytes
     public nint width; // cell width in runes
@@ -132,7 +135,6 @@ private static void addLine(this ptr<Writer> _addr_b, bool flushed) {
 
     }
 
-
     if (!flushed) { 
         // The previous line is probably a good indicator
         // of how many cells the current line will have.
@@ -152,13 +154,11 @@ private static void addLine(this ptr<Writer> _addr_b, bool flushed) {
                     }
 
                 }
-
             }
 
             n = n__prev2;
 
         }
-
     }
 }
 
@@ -224,7 +224,6 @@ public static readonly var TabIndent = 3;
 // Discarded columns appear as zero-width columns ("||").
 public static readonly var Debug = 4;
 
-
 // A Writer must be initialized with a call to Init. The first parameter (output)
 // specifies the filter output. The remaining parameters control the formatting:
 //
@@ -254,14 +253,12 @@ private static ptr<Writer> Init(this ptr<Writer> _addr_b, io.Writer output, nint
     }    if (padchar == '\t') { 
         // tab padding enforces left-alignment
         flags &= AlignRight;
-
     }
     b.flags = flags;
 
     b.reset();
 
     return _addr_b!;
-
 });
 
 // debugging support (keep code around)
@@ -323,10 +320,8 @@ private static void writePadding(this ptr<Writer> _addr_b, nint textw, nint cell
         }
         b.writeN(tabs, (n + b.tabwidth - 1) / b.tabwidth);
         return ;
-
     }
     b.writeN(b.padbytes[(int)0..], cellw - textw);
-
 });
 
 private static byte vbar = new slice<byte>(new byte[] { '|' });
@@ -346,15 +341,12 @@ private static nint writeLines(this ptr<Writer> _addr_b, nint pos0, nint line0, 
             if (j > 0 && b.flags & Debug != 0) { 
                 // indicate column break
                 b.write0(vbar);
-
             }
-
             if (c.size == 0) { 
                 // empty cell
                 if (j < len(b.widths)) {
                     b.writePadding(c.width, b.widths[j], useTabs);
                 }
-
             }
             else
  { 
@@ -366,37 +358,29 @@ private static nint writeLines(this ptr<Writer> _addr_b, nint pos0, nint line0, 
                     if (j < len(b.widths)) {
                         b.writePadding(c.width, b.widths[j], false);
                     }
-
                 }
                 else
  { // align right
                     if (j < len(b.widths)) {
                         b.writePadding(c.width, b.widths[j], false);
                     }
-
                     b.write0(b.buf[(int)pos..(int)pos + c.size]);
                     pos += c.size;
-
                 }
-
             }
-
         }        if (i + 1 == len(b.lines)) { 
             // last buffered line - we don't have a newline, so just write
             // any outstanding buffered data
             b.write0(b.buf[(int)pos..(int)pos + b.cell.size]);
             pos += b.cell.size;
-
         }
         else
  { 
             // not the last line - write newline
             b.write0(newline);
-
         }
     }
     return ;
-
 }
 
 // Format the text between line0 and line1 (excluding line1); pos
@@ -444,7 +428,6 @@ private static nint format(this ptr<Writer> _addr_b, nint pos0, nint line0, nint
             if (c.width > 0 || c.htab) {
                 discardable = false;
             }
-
         } 
         // column block end
 
@@ -456,12 +439,10 @@ private static nint format(this ptr<Writer> _addr_b, nint pos0, nint line0, nint
         pos = b.format(pos, line0, this);
         b.widths = b.widths[(int)0..(int)len(b.widths) - 1]; // pop width
         line0 = this;
-
     } 
 
     // print unprinted lines until end
     return b.writeLines(pos, line0, line1);
-
 }
 
 // Append text to current cell.
@@ -503,8 +484,7 @@ private static void startEscape(this ptr<Writer> _addr_b, byte ch) {
         b.endChar = '>';
     else if (ch == '&') 
         b.endChar = ';';
-    
-}
+    }
 
 // Terminate escaped mode. If the escaped text was an HTML tag, its width
 // is assumed to be zero for formatting purposes; if it was an HTML entity,
@@ -524,7 +504,6 @@ private static void endEscape(this ptr<Writer> _addr_b) {
         b.cell.width++; // entity, count as one rune
         b.pos = len(b.buf);
     b.endChar = 0;
-
 }
 
 // Terminate the current cell by adding it to the list of cells of the
@@ -551,9 +530,7 @@ private static void handlePanic(this ptr<Writer> _addr_b, ptr<error> _addr_err, 
             if (op == "Flush") { 
                 // If Flush ran into a panic, we still need to reset.
                 b.reset();
-
             }
-
             {
                 osError (nerr, ok) = e._<osError>();
 
@@ -563,12 +540,9 @@ private static void handlePanic(this ptr<Writer> _addr_b, ptr<error> _addr_err, 
                 }
 
             }
-
             panic("tabwriter: panic during " + op);
-
         }
     }
-
 });
 
 // Flush should be called after the last call to Write to ensure
@@ -603,14 +577,11 @@ private static void flushNoDefers(this ptr<Writer> _addr_b) {
         if (b.endChar != 0) { 
             // inside escape - terminate it even if incomplete
             b.endEscape();
-
         }
         b.terminateCell(false);
-
     }
     b.format(0, 0, len(b.lines));
     b.reset();
-
 }
 
 private static slice<byte> hbar = (slice<byte>)"---\n";
@@ -651,13 +622,9 @@ private static (nint, error) Write(this ptr<Writer> _addr_b, slice<byte> buf) =>
                         if (ch == '\f' && b.flags & Debug != 0) { 
                             // indicate section break
                             b.write0(hbar);
-
                         }
-
                     }
-
                 }
-
             else if (ch == Escape) 
                 // start of escaped sequence
                 b.append(buf[(int)n..(int)i]);
@@ -666,7 +633,6 @@ private static (nint, error) Write(this ptr<Writer> _addr_b, slice<byte> buf) =>
                 if (b.flags & StripEscape != 0) {
                     n++; // strip Escape
                 }
-
                 b.startEscape(Escape);
             else if (ch == '<' || ch == '&') 
                 // possibly an html tag/entity
@@ -676,9 +642,7 @@ private static (nint, error) Write(this ptr<Writer> _addr_b, slice<byte> buf) =>
                     b.updateWidth();
                     n = i;
                     b.startEscape(ch);
-
                 }
-
                     }
         else
  { 
@@ -689,18 +653,14 @@ private static (nint, error) Write(this ptr<Writer> _addr_b, slice<byte> buf) =>
                 if (ch == Escape && b.flags & StripEscape != 0) {
                     j = i; // strip Escape
                 }
-
                 b.append(buf[(int)n..(int)j]);
                 n = i + 1; // ch consumed
                 b.endEscape();
-
             }
-
         }
     }    b.append(buf[(int)n..]);
     n = len(buf);
     return ;
-
 });
 
 // NewWriter allocates and initializes a new tabwriter.Writer.

@@ -5,18 +5,21 @@
 // Package token defines constants representing the lexical tokens of the Go
 // programming language and basic operations on tokens (printing, predicates).
 //
-// package token -- go2cs converted at 2022 March 06 22:25:54 UTC
+
+// package token -- go2cs converted at 2022 March 13 05:40:25 UTC
 // import "go/token" ==> using token = go.go.token_package
 // Original source: C:\Program Files\Go\src\go\token\token.go
-using strconv = go.strconv_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.go;
+
+using strconv = strconv_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Token is the set of lexical tokens of the Go programming language.
 
 public static partial class token_package {
 
-    // Token is the set of lexical tokens of the Go programming language.
 public partial struct Token { // : nint
 }
 
@@ -130,7 +133,6 @@ public static readonly var TYPE = 83;
 public static readonly var VAR = 84;
 private static readonly var keyword_end = 85;
 
-
 private static array<@string> tokens = new array<@string>(InitKeyedValues<@string>((ILLEGAL, "ILLEGAL"), (EOF, "EOF"), (COMMENT, "COMMENT"), (IDENT, "IDENT"), (INT, "INT"), (FLOAT, "FLOAT"), (IMAG, "IMAG"), (CHAR, "CHAR"), (STRING, "STRING"), (ADD, "+"), (SUB, "-"), (MUL, "*"), (QUO, "/"), (REM, "%"), (AND, "&"), (OR, "|"), (XOR, "^"), (SHL, "<<"), (SHR, ">>"), (AND_NOT, "&^"), (ADD_ASSIGN, "+="), (SUB_ASSIGN, "-="), (MUL_ASSIGN, "*="), (QUO_ASSIGN, "/="), (REM_ASSIGN, "%="), (AND_ASSIGN, "&="), (OR_ASSIGN, "|="), (XOR_ASSIGN, "^="), (SHL_ASSIGN, "<<="), (SHR_ASSIGN, ">>="), (AND_NOT_ASSIGN, "&^="), (LAND, "&&"), (LOR, "||"), (ARROW, "<-"), (INC, "++"), (DEC, "--"), (EQL, "=="), (LSS, "<"), (GTR, ">"), (ASSIGN, "="), (NOT, "!"), (NEQ, "!="), (LEQ, "<="), (GEQ, ">="), (DEFINE, ":="), (ELLIPSIS, "..."), (LPAREN, "("), (LBRACK, "["), (LBRACE, "{"), (COMMA, ","), (PERIOD, "."), (RPAREN, ")"), (RBRACK, "]"), (RBRACE, "}"), (SEMICOLON, ";"), (COLON, ":"), (BREAK, "break"), (CASE, "case"), (CHAN, "chan"), (CONST, "const"), (CONTINUE, "continue"), (DEFAULT, "default"), (DEFER, "defer"), (ELSE, "else"), (FALLTHROUGH, "fallthrough"), (FOR, "for"), (FUNC, "func"), (GO, "go"), (GOTO, "goto"), (IF, "if"), (IMPORT, "import"), (INTERFACE, "interface"), (MAP, "map"), (PACKAGE, "package"), (RANGE, "range"), (RETURN, "return"), (SELECT, "select"), (STRUCT, "struct"), (SWITCH, "switch"), (TYPE, "type"), (VAR, "var")));
 
 // String returns the string corresponding to the token tok.
@@ -148,7 +150,6 @@ public static @string String(this Token tok) {
         s = "token(" + strconv.Itoa(int(tok)) + ")";
     }
     return s;
-
 }
 
 // A set of constants for precedence-based expression parsing.
@@ -160,7 +161,6 @@ public static @string String(this Token tok) {
 public static readonly nint LowestPrec = 0; // non-operators
 public static readonly nint UnaryPrec = 6;
 public static readonly nint HighestPrec = 7;
-
 
 // Precedence returns the operator precedence of the binary
 // operator op. If op is not a binary operator, the result
@@ -179,7 +179,6 @@ public static nint Precedence(this Token op) {
     else if (op == MUL || op == QUO || op == REM || op == SHL || op == SHR || op == AND || op == AND_NOT) 
         return 5;
         return LowestPrec;
-
 }
 
 private static map<@string, Token> keywords = default;
@@ -201,9 +200,7 @@ public static Token Lookup(@string ident) {
             return tok;
         }
     }
-
     return IDENT;
-
 }
 
 // Predicates
@@ -242,7 +239,6 @@ public static bool IsKeyword(@string name) {
     // TODO: opt: use a perfect hash function instead of a global map.
     var (_, ok) = keywords[name];
     return ok;
-
 }
 
 // IsIdentifier reports whether name is a Go identifier, that is, a non-empty
@@ -255,7 +251,6 @@ public static bool IsIdentifier(@string name) {
             return false;
         }
     }    return name != "" && !IsKeyword(name);
-
 }
 
 } // end token_package

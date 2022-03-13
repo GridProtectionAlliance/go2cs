@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package analysisflags -- go2cs converted at 2022 March 06 23:34:22 UTC
+// package analysisflags -- go2cs converted at 2022 March 13 06:41:38 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/internal/analysisflags" ==> using analysisflags = go.cmd.vendor.golang.org.x.tools.go.analysis.@internal.analysisflags_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\internal\analysisflags\help.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.@internal;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using System;
 
 public static partial class analysisflags_package {
 
@@ -42,9 +41,7 @@ public static void Help(@string progname, slice<ptr<analysis.Analyzer>> analyzer
         fmt.Println(strings.Replace(help, "PROGNAME", progname, -1));
         fmt.Println("Registered analyzers:");
         fmt.Println();
-        sort.Slice(analyzers, (i, j) => {
-            return analyzers[i].Name < analyzers[j].Name;
-        });
+        sort.Slice(analyzers, (i, j) => analyzers[i].Name < analyzers[j].Name);
         {
             var a__prev1 = a;
 
@@ -76,7 +73,6 @@ public static void Help(@string progname, slice<ptr<analysis.Analyzer>> analyzer
         fmt.Printf("\nTo see details and flags of a specific analyzer, run '%s help name'.\n", progname);
 
         return ;
-
     }
 outer:
     foreach (var (_, arg) in args) {
@@ -108,18 +104,15 @@ outer:
                     if (len(paras) > 1) {
                         fmt.Printf("\n%s\n", strings.Join(paras[(int)1..], "\n\n"));
                     }
-
                     _continueouter = true;
                     break;
                 }
-
             }
 
             a = a__prev2;
         }
 
         log.Fatalf("Analyzer %q not registered", arg);
-
     }
 }
 

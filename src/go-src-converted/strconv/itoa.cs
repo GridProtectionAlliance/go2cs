@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:35 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:24 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\itoa.go
-using bits = go.math.bits_package;
-
 namespace go;
+
+using bits = math.bits_package;
 
 public static partial class strconv_package {
 
@@ -27,7 +27,6 @@ public static @string FormatUint(ulong i, nint @base) {
     }
     var (_, s) = formatBits(null, i, base, false, false);
     return s;
-
 }
 
 // FormatInt returns the string representation of i in the given base,
@@ -39,7 +38,6 @@ public static @string FormatInt(long i, nint @base) {
     }
     var (_, s) = formatBits(null, uint64(i), base, i < 0, false);
     return s;
-
 }
 
 // Itoa is equivalent to FormatInt(int64(i), 10).
@@ -55,7 +53,6 @@ public static slice<byte> AppendInt(slice<byte> dst, long i, nint @base) {
     }
     dst, _ = formatBits(dst, uint64(i), base, i < 0, true);
     return dst;
-
 }
 
 // AppendUint appends the string form of the unsigned integer i,
@@ -66,7 +63,6 @@ public static slice<byte> AppendUint(slice<byte> dst, ulong i, nint @base) {
     }
     dst, _ = formatBits(dst, i, base, false, true);
     return dst;
-
 }
 
 // small returns the string for an i with 0 <= i < nSmalls.
@@ -75,7 +71,6 @@ private static @string small(nint i) {
         return digits[(int)i..(int)i + 1];
     }
     return smallsString[(int)i * 2..(int)i * 2 + 2];
-
 }
 
 private static readonly nint nSmalls = 100;
@@ -149,7 +144,6 @@ private static (slice<byte>, @string) formatBits(slice<byte> dst, ulong u, nint 
                 a[i] = smallsString[us * 2 + 1];
 
                 u = q;
-
             } 
             // u < 1e9
  
@@ -194,7 +188,6 @@ private static (slice<byte>, @string) formatBits(slice<byte> dst, ulong u, nint 
         // u < base
         i--;
         a[i] = digits[uint(u)];
-
     } { 
         // general case
         b = uint64(base);
@@ -206,12 +199,10 @@ private static (slice<byte>, @string) formatBits(slice<byte> dst, ulong u, nint 
             q = u / b;
             a[i] = digits[uint(u - q * b)];
             u = q;
-
         } 
         // u < base
         i--;
         a[i] = digits[uint(u)];
-
     }
     if (neg) {
         i--;
@@ -223,7 +214,6 @@ private static (slice<byte>, @string) formatBits(slice<byte> dst, ulong u, nint 
     }
     s = string(a[(int)i..]);
     return ;
-
 });
 
 private static bool isPowerOfTwo(nint x) {

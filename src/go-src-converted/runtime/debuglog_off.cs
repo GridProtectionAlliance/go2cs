@@ -5,11 +5,9 @@
 //go:build !debuglog
 // +build !debuglog
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:32 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:23 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\debuglog_off.go
-
-
 namespace go;
 
 public static partial class runtime_package {

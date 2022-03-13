@@ -14,21 +14,21 @@
 
 // Package transport provides a mechanism to send requests with https cert,
 // key, and CA.
-// package transport -- go2cs converted at 2022 March 06 23:23:51 UTC
+
+// package transport -- go2cs converted at 2022 March 13 06:36:56 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/transport" ==> using transport = go.cmd.vendor.github.com.google.pprof.@internal.transport_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\transport\transport.go
-using tls = go.crypto.tls_package;
-using x509 = go.crypto.x509_package;
-using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
-using http = go.net.http_package;
-using sync = go.sync_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using tls = crypto.tls_package;
+using x509 = crypto.x509_package;
+using fmt = fmt_package;
+using ioutil = io.ioutil_package;
+using http = net.http_package;
+using sync = sync_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using System;
 
 public static partial class transport_package {
 
@@ -65,7 +65,6 @@ public static http.RoundTripper New(plugin.FlagSet flagset) {
     }
     flagset.AddExtraUsage(extraUsage);
     return addr(new transport(cert:flagset.String("tls_cert","","TLS client certificate file for fetching profile and symbols"),key:flagset.String("tls_key","","TLS private key file for fetching profile and symbols"),ca:flagset.String("tls_ca","","TLS CA certs file for fetching profile and symbols"),));
-
 }
 
 // initialize uses the cert, key, and ca to initialize the certs
@@ -90,7 +89,6 @@ private static error initialize(this ptr<transport> _addr_tr) {
             return error.As(fmt.Errorf("could not load certificate/key pair specified by -tls_cert and -tls_key: %v", err))!;
         }
         tr.certs = new slice<tls.Certificate>(new tls.Certificate[] { tlsCert });
-
     }
     else if (cert == "" && key != "") {
         return error.As(fmt.Errorf("-tls_key is specified, so -tls_cert must also be specified"))!;
@@ -106,10 +104,8 @@ private static error initialize(this ptr<transport> _addr_tr) {
         }
         caCertPool.AppendCertsFromPEM(caCert);
         tr.caCertPool = caCertPool;
-
     }
     return error.As(null!)!;
-
 }
 
 // RoundTrip executes a single HTTP transaction, returning
@@ -137,12 +133,10 @@ private static (ptr<http.Response>, error) RoundTrip(this ptr<transport> _addr_t
         req = ref _addr_req.val;
         tlsConfig.InsecureSkipVerify = true;
         req.URL.Scheme = "https";
-
     }
     http.Transport transport = new http.Transport(Proxy:http.ProxyFromEnvironment,TLSClientConfig:tlsConfig,);
 
     return _addr_transport.RoundTrip(req)!;
-
 }
 
 } // end transport_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:08 UTC
+//     Generated on 2022 March 13 05:37:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct onceCloseListener
         {
             // Listener.Accept function promotion
@@ -145,7 +145,7 @@ namespace net
             public static implicit operator onceCloseListener(NilType nil) => default(onceCloseListener);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static onceCloseListener onceCloseListener_cast(dynamic value)
         {
             return new onceCloseListener(value.Listener, value.once, value.closeErr);

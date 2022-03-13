@@ -4,26 +4,27 @@
 
 // Package bytes implements functions for the manipulation of byte slices.
 // It is analogous to the facilities of the strings package.
-// package bytes -- go2cs converted at 2022 March 06 22:14:11 UTC
+
+// package bytes -- go2cs converted at 2022 March 13 05:28:20 UTC
 // import "bytes" ==> using bytes = go.bytes_package
 // Original source: C:\Program Files\Go\src\bytes\bytes.go
-using bytealg = go.@internal.bytealg_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
 
+using bytealg = @internal.bytealg_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Equal reports whether a and b
+// are the same length and contain the same bytes.
+// A nil argument is equivalent to an empty slice.
+
+using System;
 public static partial class bytes_package {
 
-    // Equal reports whether a and b
-    // are the same length and contain the same bytes.
-    // A nil argument is equivalent to an empty slice.
 public static bool Equal(slice<byte> a, slice<byte> b) { 
     // Neither cmd/compile nor gccgo allocates for these string conversions.
     return string(a) == string(b);
-
 }
 
 // Compare returns an integer comparing two byte slices lexicographically.
@@ -52,10 +53,8 @@ private static slice<slice<byte>> explode(slice<byte> s, nint n) {
         a[na] = s.slice(0, size, size);
         s = s[(int)size..];
         na++;
-
     }
     return a[(int)0..(int)na];
-
 }
 
 // Count counts the number of non-overlapping instances of sep in s.
@@ -76,9 +75,7 @@ public static nint Count(slice<byte> s, slice<byte> sep) {
         }
         n++;
         s = s[(int)i + len(sep)..];
-
     }
-
 }
 
 // Contains reports whether subslice is within b.
@@ -107,7 +104,6 @@ private static nint indexBytePortable(slice<byte> s, byte c) {
             return i;
         }
     }    return -1;
-
 }
 
 // LastIndex returns the index of the last instance of sep in s, or -1 if sep is not present in s.
@@ -156,7 +152,6 @@ public static nint LastIndex(slice<byte> s, slice<byte> sep) {
         i = i__prev1;
     }
     return -1;
-
 }
 
 // LastIndexByte returns the index of the last instance of c in s, or -1 if c is not present in s.
@@ -167,7 +162,6 @@ public static nint LastIndexByte(slice<byte> s, byte c) {
         }
     }
     return -1;
-
 }
 
 // IndexRune interprets s as a sequence of UTF-8-encoded code points.
@@ -199,8 +193,7 @@ public static nint IndexRune(slice<byte> s, int r) {
         array<byte> b = new array<byte>(utf8.UTFMax);
         var n = utf8.EncodeRune(b[..], r);
         return Index(s, b[..(int)n]);
-    
-}
+    }
 
 // IndexAny interprets s as a sequence of UTF-8-encoded Unicode code points.
 // It returns the byte index of the first occurrence in s of any of the Unicode
@@ -210,7 +203,6 @@ public static nint IndexAny(slice<byte> s, @string chars) {
     if (chars == "") { 
         // Avoid scanning all of s.
         return -1;
-
     }
     if (len(s) == 1) {
         var r = rune(s[0]);
@@ -224,13 +216,11 @@ public static nint IndexAny(slice<byte> s, @string chars) {
             }
 
             return -1;
-
         }
         if (bytealg.IndexByteString(chars, s[0]) >= 0) {
             return 0;
         }
         return -1;
-
     }
     if (len(chars) == 1) {
         r = rune(chars[0]);
@@ -238,7 +228,6 @@ public static nint IndexAny(slice<byte> s, @string chars) {
             r = utf8.RuneError;
         }
         return IndexRune(s, r);
-
     }
     if (len(s) > 8) {
         {
@@ -260,11 +249,9 @@ public static nint IndexAny(slice<byte> s, @string chars) {
                 }
 
                 return -1;
-
             }
 
         }
-
     }
     nint width = default;
     {
@@ -279,12 +266,9 @@ public static nint IndexAny(slice<byte> s, @string chars) {
                     return i;
             i += width;
                 }
-
                 width = 1;
                 continue;
-
             }
-
             r, width = utf8.DecodeRune(s[(int)i..]);
             if (r != utf8.RuneError) { 
                 // r is 2 to 4 bytes
@@ -301,21 +285,17 @@ public static nint IndexAny(slice<byte> s, @string chars) {
                     }
                     continue;
                 }
-
             }
-
             foreach (var (_, ch) in chars) {
                 if (r == ch) {
                     return i;
                 }
             }
-
         }
 
         i = i__prev1;
     }
     return -1;
-
 }
 
 // LastIndexAny interprets s as a sequence of UTF-8-encoded Unicode code
@@ -326,7 +306,6 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
     if (chars == "") { 
         // Avoid scanning all of s.
         return -1;
-
     }
     if (len(s) > 8) {
         {
@@ -346,11 +325,9 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
                     i = i__prev1;
                 }
                 return -1;
-
             }
 
         }
-
     }
     if (len(s) == 1) {
         var r = rune(s[0]);
@@ -363,13 +340,11 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
             }
 
             return -1;
-
         }
         if (bytealg.IndexByteString(chars, s[0]) >= 0) {
             return 0;
         }
         return -1;
-
     }
     if (len(chars) == 1) {
         var cr = rune(chars[0]);
@@ -393,7 +368,6 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
             i = i__prev1;
         }
         return -1;
-
     }
     {
         var i__prev1 = i;
@@ -426,21 +400,17 @@ public static nint LastIndexAny(slice<byte> s, @string chars) {
                     }
                     continue;
                 }
-
             }
-
             foreach (var (_, ch) in chars) {
                 if (r == ch) {
                     return i;
                 }
             }
-
         }
 
         i = i__prev1;
     }
     return -1;
-
 }
 
 // Generic split: splits after each instance of sep,
@@ -466,11 +436,9 @@ private static slice<slice<byte>> genSplit(slice<byte> s, slice<byte> sep, nint 
         a[i] = s.slice(-1, m + sepSave, m + sepSave);
         s = s[(int)m + len(sep)..];
         i++;
-
     }
     a[i] = s;
     return a[..(int)i + 1];
-
 }
 
 // SplitN slices s into subslices separated by sep and returns a slice of
@@ -541,7 +509,6 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
     if (setBits >= utf8.RuneSelf) { 
         // Some runes in the input slice are not ASCII.
         return FieldsFunc(s, unicode.IsSpace);
-
     }
     var a = make_slice<slice<byte>>(n);
     nint na = 0;
@@ -565,14 +532,11 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
             i++;
         }
         fieldStart = i;
-
     }
     if (fieldStart < len(s)) { // Last field might end at EOF.
         a[na] = s.slice(fieldStart, len(s), len(s));
-
     }
     return a;
-
 }
 
 // FieldsFunc interprets s as a sequence of UTF-8-encoded code points.
@@ -619,9 +583,7 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<int, bool> f) {
                     start = i;
                 }
             }
-
             i += size;
-
         }
 
         i = i__prev1;
@@ -644,7 +606,6 @@ public static slice<slice<byte>> FieldsFunc(slice<byte> s, Func<int, bool> f) {
     }
 
     return a;
-
 }
 
 // Join concatenates the elements of s to create a new byte slice. The separator
@@ -656,7 +617,6 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
     if (len(s) == 1) { 
         // Just return a copy.
         return append((slice<byte>)null, s[0]);
-
     }
     var n = len(sep) * (len(s) - 1);
     {
@@ -683,7 +643,6 @@ public static slice<byte> Join(slice<slice<byte>> s, slice<byte> sep) {
     }
 
     return b;
-
 }
 
 // HasPrefix tests whether the byte slice s begins with prefix.
@@ -728,19 +687,13 @@ public static slice<byte> Map(Func<int, int> mapping, slice<byte> s) {
                     var nb = make_slice<byte>(maxbytes);
                     copy(nb, b[(int)0..(int)nbytes]);
                     b = nb;
-
                 }
-
                 nbytes += utf8.EncodeRune(b[(int)nbytes..(int)maxbytes], r);
-
             }
-
             i += wid;
-
         }
     }
     return b[(int)0..(int)nbytes];
-
 }
 
 // Repeat returns a new byte slice consisting of count copies of b.
@@ -764,7 +717,6 @@ public static slice<byte> Repeat(slice<byte> b, nint count) => func((_, panic, _
         bp *= 2;
     }
     return nb;
-
 });
 
 // ToUpper returns a copy of the byte slice s with all Unicode letters mapped to
@@ -791,7 +743,6 @@ public static slice<byte> ToUpper(slice<byte> s) {
         if (!hasLower) { 
             // Just return a copy.
             return append((slice<byte>)"", s);
-
         }
         var b = make_slice<byte>(len(s));
         {
@@ -809,10 +760,8 @@ public static slice<byte> ToUpper(slice<byte> s) {
             i = i__prev1;
         }
         return b;
-
     }
     return Map(unicode.ToUpper, s);
-
 }
 
 // ToLower returns a copy of the byte slice s with all Unicode letters mapped to
@@ -855,10 +804,8 @@ public static slice<byte> ToLower(slice<byte> s) {
             i = i__prev1;
         }
         return b;
-
     }
     return Map(unicode.ToLower, s);
-
 }
 
 // ToTitle treats s as UTF-8-encoded bytes and returns a copy with all the Unicode letters mapped to their title case.
@@ -915,7 +862,6 @@ public static slice<byte> ToValidUTF8(slice<byte> s, slice<byte> replacement) {
         }
     }
     return b;
-
 }
 
 // isSeparator reports whether the rune could mark a word boundary.
@@ -933,13 +879,11 @@ private static bool isSeparator(int r) {
         else if (r == '_') 
             return false;
                 return true;
-
     }
     if (unicode.IsLetter(r) || unicode.IsDigit(r)) {
         return false;
     }
     return unicode.IsSpace(r);
-
 }
 
 // Title treats s as UTF-8-encoded bytes and returns a copy with all Unicode letters that begin
@@ -958,9 +902,7 @@ public static slice<byte> Title(slice<byte> s) {
         }
         prev = r;
         return r;
-
     }, s);
-
 }
 
 // TrimLeftFunc treats s as UTF-8-encoded bytes and returns a subslice of s by slicing off
@@ -971,7 +913,6 @@ public static slice<byte> TrimLeftFunc(slice<byte> s, Func<int, bool> f) {
         return null;
     }
     return s[(int)i..];
-
 }
 
 // TrimRightFunc returns a subslice of s by slicing off all trailing
@@ -987,7 +928,6 @@ public static slice<byte> TrimRightFunc(slice<byte> s, Func<int, bool> f) {
         i++;
     }
     return s[(int)0..(int)i];
-
 }
 
 // TrimFunc returns a subslice of s by slicing off all leading and trailing
@@ -1003,7 +943,6 @@ public static slice<byte> TrimPrefix(slice<byte> s, slice<byte> prefix) {
         return s[(int)len(prefix)..];
     }
     return s;
-
 }
 
 // TrimSuffix returns s without the provided trailing suffix string.
@@ -1013,7 +952,6 @@ public static slice<byte> TrimSuffix(slice<byte> s, slice<byte> suffix) {
         return s[..(int)len(s) - len(suffix)];
     }
     return s;
-
 }
 
 // IndexFunc interprets s as a sequence of UTF-8-encoded code points.
@@ -1045,10 +983,8 @@ private static nint indexFunc(slice<byte> s, Func<int, bool> f, bool truth) {
             return start;
         }
         start += wid;
-
     }
     return -1;
-
 }
 
 // lastIndexFunc is the same as LastIndexFunc except that if
@@ -1064,16 +1000,13 @@ private static nint lastIndexFunc(slice<byte> s, Func<int, bool> f, bool truth) 
             if (r >= utf8.RuneSelf) {
                 r, size = utf8.DecodeLastRune(s[(int)0..(int)i]);
             }
-
             i -= size;
             if (f(r) == truth) {
                 return i;
             }
-
         }
     }
     return -1;
-
 }
 
 // asciiSet is a 32-byte value, where each bit represents the presence of a
@@ -1097,10 +1030,8 @@ private static (asciiSet, bool) makeASCIISet(@string chars) {
             return (as, false);
         }
         as[c >> 5] |= 1 << (int)(uint(c & 31));
-
     }
     return (as, true);
-
 }
 
 // contains reports whether c is inside the set.
@@ -1112,20 +1043,15 @@ private static bool contains(this ptr<asciiSet> _addr_@as, byte c) {
 
 private static Func<int, bool> makeCutsetFunc(@string cutset) {
     if (len(cutset) == 1 && cutset[0] < utf8.RuneSelf) {
-        return r => {
-            return r == rune(cutset[0]);
-        };
+        return r => r == rune(cutset[0]);
     }
     {
         var (as, isASCII) = makeASCIISet(cutset);
 
         if (isASCII) {
-            return r => {
-                return r < utf8.RuneSelf && @as.contains(byte(r));
-            };
+            return r => r < utf8.RuneSelf && @as.contains(byte(r));
         }
     }
-
     return r => {
         foreach (var (_, c) in cutset) {
             if (c == r) {
@@ -1133,7 +1059,6 @@ private static Func<int, bool> makeCutsetFunc(@string cutset) {
             }
         }        return false;
     };
-
 }
 
 // Trim returns a subslice of s by slicing off all leading and
@@ -1192,10 +1117,8 @@ public static slice<byte> TrimSpace(slice<byte> s) {
         // Special case to preserve previous TrimLeftFunc behavior,
         // returning nil instead of empty slice if all spaces.
         return null;
-
     }
     return s[(int)start..(int)stop];
-
 }
 
 // Runes interprets s as a sequence of UTF-8-encoded code points.
@@ -1223,12 +1146,10 @@ public static slice<byte> Replace(slice<byte> s, slice<byte> old, slice<byte> @n
     if (n != 0) { 
         // Compute number of replacements.
         m = Count(s, old);
-
     }
     if (m == 0) { 
         // Just return a copy.
         return append((slice<byte>)null, s);
-
     }
     if (n < 0 || m < n) {
         n = m;
@@ -1251,11 +1172,9 @@ public static slice<byte> Replace(slice<byte> s, slice<byte> old, slice<byte> @n
         w += copy(t[(int)w..], s[(int)start..(int)j]);
         w += copy(t[(int)w..], new);
         start = j + len(old);
-
     }
     w += copy(t[(int)w..], s[(int)start..]);
     return t[(int)0..(int)w];
-
 }
 
 // ReplaceAll returns a copy of the slice s with all
@@ -1302,9 +1221,7 @@ public static bool EqualFold(slice<byte> s, slice<byte> t) {
             if ('A' <= sr && sr <= 'Z' && tr == sr + 'a' - 'A') {
                 continue;
             }
-
             return false;
-
         }
         var r = unicode.SimpleFold(sr);
         while (r != sr && r < tr) {
@@ -1314,12 +1231,10 @@ public static bool EqualFold(slice<byte> s, slice<byte> t) {
             continue;
         }
         return false;
-
     } 
 
     // One string is empty. Are both?
     return len(s) == len(t);
-
 }
 
 // Index returns the index of the first instance of sep in s, or -1 if sep is not present in s.
@@ -1355,15 +1270,11 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
                 if (o < 0) {
                     return -1;
                 }
-
                 i += o + 1;
-
             }
-
             if (s[i + 1] == c1 && Equal(s[(int)i..(int)i + n], sep)) {
                 return i;
             }
-
             fails++;
             i++; 
             // Switch to bytealg.Index when IndexByte produces too many false positives.
@@ -1374,7 +1285,6 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
                 }
                 return -1;
             }
-
         }
         return -1;
         c0 = sep[0];
@@ -1408,13 +1318,10 @@ public static nint Index(slice<byte> s, slice<byte> sep) {
             if (j < 0) {
                 return -1;
             }
-
             return i + j;
-
         }
     }
     return -1;
-
 }
 
 } // end bytes_package

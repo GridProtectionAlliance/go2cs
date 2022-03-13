@@ -5,13 +5,13 @@
 //go:build dragonfly || freebsd || netbsd || openbsd
 // +build dragonfly freebsd netbsd openbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:15 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:32 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\syscall.go
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
 
 public static partial class route_package {
 
@@ -35,7 +35,6 @@ private static error sysctl(slice<int> mib, ptr<byte> _addr_old, ptr<System.UInt
         return error.As(error(errno))!;
     }
     return error.As(null!)!;
-
 }
 
 } // end route_package

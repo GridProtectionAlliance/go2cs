@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package imports -- go2cs converted at 2022 March 06 23:16:55 UTC
+// package imports -- go2cs converted at 2022 March 13 06:30:13 UTC
 // import "cmd/go/internal/imports" ==> using imports = go.cmd.go.@internal.imports_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\imports\tags.go
-using cfg = go.cmd.go.@internal.cfg_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using cfg = cmd.go.@internal.cfg_package;
+using sync = sync_package;
+using System;
 
 public static partial class imports_package {
 
@@ -52,7 +51,6 @@ private static map<@string, bool> loadTags() {
     }
 
     return tags;
-
 }
 
 private static map<@string, bool> anyTags = default;private static sync.Once anyTagsOnce = default;

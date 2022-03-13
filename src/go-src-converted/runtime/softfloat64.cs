@@ -6,11 +6,9 @@
 // Only referred to (and thus linked in) by arm port
 // and by tests in this directory.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:52 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\softfloat64.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -31,7 +29,6 @@ private static readonly uint nan32 = (1 << (int)(expbits32) - 1) << (int)(mantbi
 private static readonly uint inf32 = (1 << (int)(expbits32) - 1) << (int)(mantbits32);
 private static readonly uint neg32 = 1 << (int)((expbits32 + mantbits32));
 
-
 private static (ulong, ulong, nint, bool, bool) funpack64(ulong f) {
     ulong sign = default;
     ulong mant = default;
@@ -51,7 +48,6 @@ private static (ulong, ulong, nint, bool, bool) funpack64(ulong f) {
             }
             inf = true;
             return ;
-
             break;
         case 0: 
             // denormalized
@@ -70,7 +66,6 @@ private static (ulong, ulong, nint, bool, bool) funpack64(ulong f) {
             break;
     }
     return ;
-
 }
 
 private static (uint, uint, nint, bool, bool) funpack32(uint f) {
@@ -92,7 +87,6 @@ private static (uint, uint, nint, bool, bool) funpack32(uint f) {
             }
             inf = true;
             return ;
-
             break;
         case 0: 
             // denormalized
@@ -111,7 +105,6 @@ private static (uint, uint, nint, bool, bool) funpack32(uint f) {
             break;
     }
     return ;
-
 }
 
 private static ulong fpack64(ulong sign, ulong mant, nint exp, ulong trunc) {
@@ -140,7 +133,6 @@ private static ulong fpack64(ulong sign, ulong mant, nint exp, ulong trunc) {
         }
         mant>>=1;
         exp++;
-
     }
     if (exp >= 1 << (int)(expbits64) - 1 + bias64) {
         return sign ^ inf64;
@@ -164,7 +156,6 @@ private static ulong fpack64(ulong sign, ulong mant, nint exp, ulong trunc) {
         }
     }
     return sign | uint64(exp - bias64) << (int)(mantbits64) | mant & (1 << (int)(mantbits64) - 1);
-
 }
 
 private static uint fpack32(uint sign, uint mant, nint exp, uint trunc) {
@@ -193,7 +184,6 @@ private static uint fpack32(uint sign, uint mant, nint exp, uint trunc) {
         }
         mant>>=1;
         exp++;
-
     }
     if (exp >= 1 << (int)(expbits32) - 1 + bias32) {
         return sign ^ inf32;
@@ -217,7 +207,6 @@ private static uint fpack32(uint sign, uint mant, nint exp, uint trunc) {
         }
     }
     return sign | uint32(exp - bias32) << (int)(mantbits32) | mant & (1 << (int)(mantbits32) - 1);
-
 }
 
 private static ulong fadd64(ulong f, ulong g) {
@@ -265,7 +254,6 @@ private static ulong fadd64(ulong f, ulong g) {
         fs = 0;
     }
     return fpack64(fs, fm, fe - 2, trunc);
-
 }
 
 private static ulong fsub64(ulong f, ulong g) {
@@ -298,7 +286,6 @@ private static ulong fmul64(ulong f, ulong g) {
     var trunc = lo & (1 << (int)(shift) - 1);
     var mant = hi << (int)((64 - shift)) | lo >> (int)(shift);
     return fpack64(fs ^ gs, mant, fe + ge - 1, trunc);
-
 }
 
 private static ulong fdiv64(ulong f, ulong g) {
@@ -320,7 +307,6 @@ private static ulong fdiv64(ulong f, ulong g) {
         (_, _, _, _) = (fi, fn, gi, gn);    var shift = mantbits64 + 2;
     var (q, r) = divlu(fm >> (int)((64 - shift)), fm << (int)(shift), gm);
     return fpack64(fs ^ gs, q, fe - ge - 2, r);
-
 }
 
 private static uint f64to32(ulong f) {
@@ -335,7 +321,6 @@ private static uint f64to32(ulong f) {
     const var d = mantbits64 - mantbits32 - 1;
 
     return fpack32(fs32, uint32(fm >> (int)(d)), fe - 1, uint32(fm & (1 << (int)(d) - 1)));
-
 }
 
 private static ulong f32to64(uint f) {
@@ -350,7 +335,6 @@ private static ulong f32to64(uint f) {
         return fs64 ^ inf64;
     }
     return fpack64(fs64, uint64(fm) << (int)(d), fe, 0);
-
 }
 
 private static (int, bool) fcmp64(ulong f, ulong g) {
@@ -379,7 +363,6 @@ private static (int, bool) fcmp64(ulong f, ulong g) {
         return (+1, false);
     // f == g
     return (0, false);
-
 }
 
 private static (long, bool) f64toint(ulong f) {
@@ -396,7 +379,6 @@ private static (long, bool) f64toint(ulong f) {
     else if (fe > 63) // f >= 2^63
         if (fs != 0 && fm == 0) { // f == -2^63
             return (-1 << 63, true);
-
         }
         if (fs != 0) {
             return (0, false);
@@ -415,7 +397,6 @@ private static (long, bool) f64toint(ulong f) {
         val = -val;
     }
     return (val, true);
-
 }
 
 private static ulong fintto64(long val) {
@@ -427,7 +408,6 @@ private static ulong fintto64(long val) {
         mant = -mant;
     }
     return fpack64(fs, mant, int(mantbits64), 0);
-
 }
 
 // 64x64 -> 128 multiply.
@@ -501,7 +481,6 @@ again2:
         }
     }
     return (q1 * b + q0, (un21 * b + un0 - q0 * v) >> (int)(s));
-
 }
 
 private static uint fadd32(uint x, uint y) {
@@ -589,7 +568,6 @@ private static ulong f64touint64(double x) {
     var y = x - float64(1 << 63);
     var z = uint64(int64(y));
     return z | (1 << 63);
-
 }
 
 private static ulong f32touint64(float x) {
@@ -599,7 +577,6 @@ private static ulong f32touint64(float x) {
     var y = x - float32(1 << 63);
     var z = uint64(int64(y));
     return z | (1 << 63);
-
 }
 
 private static double fuint64to64(ulong x) {
@@ -611,7 +588,6 @@ private static double fuint64to64(ulong x) {
     z = z | y;
     var r = float64(int64(z));
     return r + r;
-
 }
 
 private static float fuint64to32(ulong x) {

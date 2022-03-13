@@ -4,12 +4,12 @@
 
 // Input for TestIssue13566
 
-// package b -- go2cs converted at 2022 March 06 23:32:40 UTC
+// package b -- go2cs converted at 2022 March 13 06:42:20 UTC
 // import "go/internal/gcimporter.b" ==> using b = go.go.@internal.gcimporter.b_package
 // Original source: C:\Program Files\Go\src\go\internal\gcimporter\testdata\b.go
-using a = go...a_package;
-
 namespace go.go.@internal;
+
+using a = ..a_package;
 
 public static partial class b_package {
 

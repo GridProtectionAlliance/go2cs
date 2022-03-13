@@ -9,19 +9,18 @@
 // slashes, such as the paths in URLs. This package does not deal with
 // Windows paths with drive letters or backslashes; to manipulate
 // operating system paths, use the path/filepath package.
-// package path -- go2cs converted at 2022 March 06 22:31:02 UTC
+
+// package path -- go2cs converted at 2022 March 13 05:41:54 UTC
 // import "path" ==> using path = go.path_package
 // Original source: C:\Program Files\Go\src\path\path.go
-
-
 namespace go;
 
 public static partial class path_package {
 
-    // A lazybuf is a lazily constructed path buffer.
-    // It supports append, reading previously appended bytes,
-    // and retrieving the final string. It does not allocate a buffer
-    // to hold the output until that output diverges from s.
+// A lazybuf is a lazily constructed path buffer.
+// It supports append, reading previously appended bytes,
+// and retrieving the final string. It does not allocate a buffer
+// to hold the output until that output diverges from s.
 private partial struct lazybuf {
     public @string s;
     public slice<byte> buf;
@@ -35,7 +34,6 @@ private static byte index(this ptr<lazybuf> _addr_b, nint i) {
         return b.buf[i];
     }
     return b.s[i];
-
 }
 
 private static void append(this ptr<lazybuf> _addr_b, byte c) {
@@ -48,11 +46,9 @@ private static void append(this ptr<lazybuf> _addr_b, byte c) {
         }
         b.buf = make_slice<byte>(len(b.s));
         copy(b.buf, b.s[..(int)b.w]);
-
     }
     b.buf[b.w] = c;
     b.w++;
-
 }
 
 private static @string @string(this ptr<lazybuf> _addr_b) {
@@ -62,7 +58,6 @@ private static @string @string(this ptr<lazybuf> _addr_b) {
         return b.s[..(int)b.w];
     }
     return string(b.buf[..(int)b.w]);
-
 }
 
 // Clean returns the shortest path name equivalent to path
@@ -140,15 +135,13 @@ public static @string Clean(@string path) {
                 @out.append(path[r]);
                 r++;
             }
-        
-    } 
+            } 
 
     // Turn empty string into "."
     if (@out.w == 0) {
         return ".";
     }
     return @out.@string();
-
 }
 
 // lastSlash(s) is strings.LastIndex(s, "/") but we can't import strings.
@@ -212,7 +205,6 @@ public static @string Join(params @string[] elem) {
     }
 
     return Clean(string(buf));
-
 }
 
 // Ext returns the file name extension used by path.
@@ -226,7 +218,6 @@ public static @string Ext(@string path) {
         }
     }
     return "";
-
 }
 
 // Base returns the last element of path.
@@ -253,7 +244,6 @@ public static @string Base(@string path) {
         return "/";
     }
     return path;
-
 }
 
 // IsAbs reports whether the path is absolute.

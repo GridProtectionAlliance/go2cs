@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fs -- go2cs converted at 2022 March 06 22:12:44 UTC
+// package fs -- go2cs converted at 2022 March 13 05:27:46 UTC
 // import "io/fs" ==> using fs = go.io.fs_package
 // Original source: C:\Program Files\Go\src\io\fs\glob.go
-using path = go.path_package;
-
 namespace go.io;
+
+using path = path_package;
+
+
+// A GlobFS is a file system with a Glob method.
 
 public static partial class fs_package {
 
-    // A GlobFS is a file system with a Glob method.
 public partial interface GlobFS {
     (slice<@string>, error) Glob(@string pattern);
 }
@@ -48,7 +50,6 @@ public static (slice<@string>, error) Glob(FS fsys, @string pattern) {
             return (null, error.As(err)!);
         }
     }
-
     if (!hasMeta(pattern)) {
         _, err = Stat(fsys, pattern);
 
@@ -56,7 +57,6 @@ public static (slice<@string>, error) Glob(FS fsys, @string pattern) {
             return (null, error.As(null!)!);
         }
         return (new slice<@string>(new @string[] { pattern }), error.As(null!)!);
-
     }
     var (dir, file) = path.Split(pattern);
     dir = cleanGlobPath(dir);
@@ -78,7 +78,6 @@ public static (slice<@string>, error) Glob(FS fsys, @string pattern) {
             return ;
         }
     }    return ;
-
 }
 
 // cleanGlobPath prepares path for glob matching.
@@ -91,7 +90,6 @@ private static @string cleanGlobPath(@string path) {
             return path[(int)0..(int)len(path) - 1]; // chop off trailing separator
             break;
     }
-
 }
 
 // glob searches for files matching pattern in the directory dir
@@ -117,7 +115,6 @@ private static (slice<@string>, error) glob(FS fs, @string dir, @string pattern,
             m = append(m, path.Join(dir, n));
         }
     }    return ;
-
 }
 
 // hasMeta reports whether path contains any of the magic characters
@@ -135,10 +132,8 @@ private static bool hasMeta(@string path) {
                 return true;
                 break;
         }
-
     }
     return false;
-
 }
 
 } // end fs_package

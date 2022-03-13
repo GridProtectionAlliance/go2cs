@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:01 UTC
+//     Generated on 2022 March 13 06:00:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct miniExpr
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace @internal
             public static implicit operator miniExpr(NilType nil) => default(miniExpr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static miniExpr miniExpr_cast(dynamic value)
         {
             return new miniExpr(value.miniNode, ref value.typ, value.init, value.flags);

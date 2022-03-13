@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:47:44 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:58:59 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\bexport.go
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
 
 public static partial class typecheck_package {
 
-    // ----------------------------------------------------------------------------
-    // Export format
+// ----------------------------------------------------------------------------
+// Export format
 
-    // Tags. Must be < 0.
+// Tags. Must be < 0.
  
 // Objects
 private static readonly var packageTag = -(iota + 1);
@@ -50,7 +50,6 @@ private static readonly var unknownTag = 23; // not used by gc (only appears in 
 // Type aliases
 private static readonly var aliasTag = 24;
 
-
 private static slice<ptr<types.Type>> predecl = default; // initialized lazily
 
 private static slice<ptr<types.Type>> predeclared() {
@@ -58,10 +57,8 @@ private static slice<ptr<types.Type>> predeclared() {
         // initialize lazily to be sure that all
         // elements have been initialized before
         predecl = new slice<ptr<types.Type>>(new ptr<types.Type>[] { types.Types[types.TBOOL], types.Types[types.TINT], types.Types[types.TINT8], types.Types[types.TINT16], types.Types[types.TINT32], types.Types[types.TINT64], types.Types[types.TUINT], types.Types[types.TUINT8], types.Types[types.TUINT16], types.Types[types.TUINT32], types.Types[types.TUINT64], types.Types[types.TUINTPTR], types.Types[types.TFLOAT32], types.Types[types.TFLOAT64], types.Types[types.TCOMPLEX64], types.Types[types.TCOMPLEX128], types.Types[types.TSTRING], types.ByteType, types.RuneType, types.ErrorType, types.UntypedBool, types.UntypedInt, types.UntypedRune, types.UntypedFloat, types.UntypedComplex, types.UntypedString, types.Types[types.TNIL], types.Types[types.TUNSAFEPTR], types.Types[types.Txxx], types.Types[types.TANY] });
-
     }
     return predecl;
-
 }
 
 } // end typecheck_package

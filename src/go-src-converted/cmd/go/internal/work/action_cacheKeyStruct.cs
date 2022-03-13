@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:29 UTC
+//     Generated on 2022 March 13 06:29:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -42,7 +42,7 @@ namespace @internal
 {
     public static partial class work_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct cacheKey
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace @internal
             public static implicit operator cacheKey(NilType nil) => default(cacheKey);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static cacheKey cacheKey_cast(dynamic value)
         {
             return new cacheKey(value.mode, ref value.p);

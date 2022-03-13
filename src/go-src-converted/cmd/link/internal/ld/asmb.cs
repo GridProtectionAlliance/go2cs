@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:20:40 UTC
+// package ld -- go2cs converted at 2022 March 13 06:33:34 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\asmb.go
-using objabi = go.cmd.@internal.objabi_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using fmt = go.fmt_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.link.@internal;
 
+using objabi = cmd.@internal.objabi_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using fmt = fmt_package;
+using runtime = runtime_package;
+using sync = sync_package;
+
+
+// Assembling the binary is broken into two steps:
+//  - writing out the code/data/dwarf Segments, applying relocations on the fly
+//  - writing out the architecture specific pieces.
+// This function handles the first part.
+
+using System;
+using System.Threading;
 public static partial class ld_package {
 
-    // Assembling the binary is broken into two steps:
-    //  - writing out the code/data/dwarf Segments, applying relocations on the fly
-    //  - writing out the architecture specific pieces.
-    // This function handles the first part.
 private static void asmb(ptr<Link> _addr_ctxt) {
     ref Link ctxt = ref _addr_ctxt.val;
  
@@ -41,7 +42,6 @@ private static void asmb(ptr<Link> _addr_ctxt) {
             pad = zeros[..];
         }
         CodeblkPad(ctxt, out, start, length, pad);
-
     };
 
     foreach (var (_, sect) in Segtext.Sections) {
@@ -65,7 +65,6 @@ private static void asmb(ptr<Link> _addr_ctxt) {
     writeParallel(_addr_wg, dwarfblk, ctxt, Segdwarf.Fileoff, Segdwarf.Vaddr, Segdwarf.Filelen);
 
     wg.Wait();
-
 }
 
 // Assembling the binary is broken into two steps:
@@ -155,7 +154,6 @@ private static void asmbPlan9(ptr<Link> _addr_ctxt) {
     }
     ctxt.Out.SeekSet(0);
     writePlan9Header(_addr_ctxt.Out, thearch.Plan9Magic, Entryvalue(ctxt), thearch.Plan9_64Bit);
-
 }
 
 // sizeExtRelocs precomputes the size needed for the reloc records,
@@ -208,18 +206,14 @@ private static (Action<ptr<Link>, ptr<sym.Section>, slice<loader.Sym>>, ptr<sync
             }
     else
 ());
-
         };
-
     } { 
         // We cannot Mmap. Write sequentially.
         fn = (ctxt, sect, syms) => {
             relocSect(ctxt, ctxt.Out, sect, syms);
         };
-
     }
     return (fn, _addr__addr_wg!);
-
 });
 
 } // end ld_package

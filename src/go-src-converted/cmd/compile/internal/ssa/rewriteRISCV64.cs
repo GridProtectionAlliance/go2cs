@@ -1,13 +1,13 @@
 // Code generated from gen/RISCV64.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:06:28 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:19:31 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewriteRISCV64.go
-using math = go.math_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using math = math_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -677,7 +677,6 @@ private static bool rewriteValueRISCV64(ptr<Value> _addr_v) {
         v.Op = OpRISCV64MOVBUreg;
         return true;
         return false;
-
 }
 private static bool rewriteValueRISCV64_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -694,7 +693,6 @@ private static bool rewriteValueRISCV64_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpAtomicAnd8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -732,7 +730,6 @@ private static bool rewriteValueRISCV64_OpAtomicAnd8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, mem);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpAtomicOr8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -765,7 +762,6 @@ private static bool rewriteValueRISCV64_OpAtomicOr8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, mem);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpAvg64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -796,7 +792,6 @@ private static bool rewriteValueRISCV64_OpAvg64u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -809,7 +804,6 @@ private static bool rewriteValueRISCV64_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConst32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -822,7 +816,6 @@ private static bool rewriteValueRISCV64_OpConst32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConst32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -839,7 +832,6 @@ private static bool rewriteValueRISCV64_OpConst32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConst64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -852,7 +844,6 @@ private static bool rewriteValueRISCV64_OpConst64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConst64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -869,7 +860,6 @@ private static bool rewriteValueRISCV64_OpConst64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -882,7 +872,6 @@ private static bool rewriteValueRISCV64_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -895,7 +884,6 @@ private static bool rewriteValueRISCV64_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(b2i(val)));
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -907,7 +895,6 @@ private static bool rewriteValueRISCV64_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -931,10 +918,8 @@ private static bool rewriteValueRISCV64_OpDiv16(ptr<Value> _addr_v) {
         v1.AddArg(y);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -956,7 +941,6 @@ private static bool rewriteValueRISCV64_OpDiv16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -974,10 +958,8 @@ private static bool rewriteValueRISCV64_OpDiv32(ptr<Value> _addr_v) {
         v.reset(OpRISCV64DIVW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpDiv64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -995,10 +977,8 @@ private static bool rewriteValueRISCV64_OpDiv64(ptr<Value> _addr_v) {
         v.reset(OpRISCV64DIV);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1020,7 +1000,6 @@ private static bool rewriteValueRISCV64_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1042,7 +1021,6 @@ private static bool rewriteValueRISCV64_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1066,7 +1044,6 @@ private static bool rewriteValueRISCV64_OpEq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1090,7 +1067,6 @@ private static bool rewriteValueRISCV64_OpEq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpEq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1109,7 +1085,6 @@ private static bool rewriteValueRISCV64_OpEq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1133,7 +1108,6 @@ private static bool rewriteValueRISCV64_OpEq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1153,7 +1127,6 @@ private static bool rewriteValueRISCV64_OpEqB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1172,7 +1145,6 @@ private static bool rewriteValueRISCV64_OpEqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpHmul32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1197,7 +1169,6 @@ private static bool rewriteValueRISCV64_OpHmul32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpHmul32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1222,7 +1193,6 @@ private static bool rewriteValueRISCV64_OpHmul32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1242,7 +1212,6 @@ private static bool rewriteValueRISCV64_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1262,7 +1231,6 @@ private static bool rewriteValueRISCV64_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1282,7 +1250,6 @@ private static bool rewriteValueRISCV64_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1302,7 +1269,6 @@ private static bool rewriteValueRISCV64_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1322,7 +1288,6 @@ private static bool rewriteValueRISCV64_OpLeq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1342,7 +1307,6 @@ private static bool rewriteValueRISCV64_OpLeq64U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1362,7 +1326,6 @@ private static bool rewriteValueRISCV64_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1382,7 +1345,6 @@ private static bool rewriteValueRISCV64_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1404,7 +1366,6 @@ private static bool rewriteValueRISCV64_OpLess16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1426,7 +1387,6 @@ private static bool rewriteValueRISCV64_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1448,7 +1408,6 @@ private static bool rewriteValueRISCV64_OpLess32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1470,7 +1429,6 @@ private static bool rewriteValueRISCV64_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1492,7 +1450,6 @@ private static bool rewriteValueRISCV64_OpLess8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1514,7 +1471,6 @@ private static bool rewriteValueRISCV64_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1534,7 +1490,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVBUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: ( is8BitInt(t) && isSigned(t))
@@ -1549,7 +1504,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVBload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: ( is8BitInt(t) && !isSigned(t))
@@ -1564,7 +1518,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVBUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is16BitInt(t) && isSigned(t))
@@ -1579,7 +1532,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVHload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is16BitInt(t) && !isSigned(t))
@@ -1594,7 +1546,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVHUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is32BitInt(t) && isSigned(t))
@@ -1609,7 +1560,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is32BitInt(t) && !isSigned(t))
@@ -1624,7 +1574,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVWUload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (is64BitInt(t) || isPtr(t))
@@ -1639,7 +1588,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitFloat(t)
@@ -1654,7 +1602,6 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64FMOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -1669,10 +1616,8 @@ private static bool rewriteValueRISCV64_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpRISCV64FMOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1688,7 +1633,6 @@ private static bool rewriteValueRISCV64_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1716,7 +1660,6 @@ private static bool rewriteValueRISCV64_OpLsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1744,7 +1687,6 @@ private static bool rewriteValueRISCV64_OpLsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1769,7 +1711,6 @@ private static bool rewriteValueRISCV64_OpLsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1797,7 +1738,6 @@ private static bool rewriteValueRISCV64_OpLsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1825,7 +1765,6 @@ private static bool rewriteValueRISCV64_OpLsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1853,7 +1792,6 @@ private static bool rewriteValueRISCV64_OpLsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1878,7 +1816,6 @@ private static bool rewriteValueRISCV64_OpLsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1906,7 +1843,6 @@ private static bool rewriteValueRISCV64_OpLsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1934,7 +1870,6 @@ private static bool rewriteValueRISCV64_OpLsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1962,7 +1897,6 @@ private static bool rewriteValueRISCV64_OpLsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1987,7 +1921,6 @@ private static bool rewriteValueRISCV64_OpLsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2015,7 +1948,6 @@ private static bool rewriteValueRISCV64_OpLsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2043,7 +1975,6 @@ private static bool rewriteValueRISCV64_OpLsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2071,7 +2002,6 @@ private static bool rewriteValueRISCV64_OpLsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2096,7 +2026,6 @@ private static bool rewriteValueRISCV64_OpLsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2124,7 +2053,6 @@ private static bool rewriteValueRISCV64_OpLsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2148,10 +2076,8 @@ private static bool rewriteValueRISCV64_OpMod16(ptr<Value> _addr_v) {
         v1.AddArg(y);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2173,7 +2099,6 @@ private static bool rewriteValueRISCV64_OpMod16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2191,10 +2116,8 @@ private static bool rewriteValueRISCV64_OpMod32(ptr<Value> _addr_v) {
         v.reset(OpRISCV64REMW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpMod64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2212,10 +2135,8 @@ private static bool rewriteValueRISCV64_OpMod64(ptr<Value> _addr_v) {
         v.reset(OpRISCV64REM);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2237,7 +2158,6 @@ private static bool rewriteValueRISCV64_OpMod8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2259,7 +2179,6 @@ private static bool rewriteValueRISCV64_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2279,7 +2198,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (MOVBstore dst (MOVBload src mem) mem)
@@ -2295,7 +2213,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -2316,7 +2233,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (MOVBstore [1] dst (MOVBload [1] src mem) (MOVBstore dst (MOVBload src mem) mem))
@@ -2338,7 +2254,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [4] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -2359,7 +2274,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -2386,7 +2300,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (MOVBstore [3] dst (MOVBload [3] src mem) (MOVBstore [2] dst (MOVBload [2] src mem) (MOVBstore [1] dst (MOVBload [1] src mem) (MOVBstore dst (MOVBload src mem) mem))))
@@ -2420,7 +2333,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [8] {t} dst src mem)
     // cond: t.Alignment()%8 == 0
@@ -2441,7 +2353,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [8] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -2468,7 +2379,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [8] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -2507,7 +2417,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (MOVBstore [2] dst (MOVBload [2] src mem) (MOVBstore [1] dst (MOVBload [1] src mem) (MOVBstore dst (MOVBload src mem) mem)))
@@ -2535,7 +2444,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [6] {t} dst src mem)
     // cond: t.Alignment()%2 == 0
@@ -2568,7 +2476,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [12] {t} dst src mem)
     // cond: t.Alignment()%4 == 0
@@ -2601,7 +2508,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [16] {t} dst src mem)
     // cond: t.Alignment()%8 == 0
@@ -2628,7 +2534,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [24] {t} dst src mem)
     // cond: t.Alignment()%8 == 0
@@ -2661,7 +2566,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [32] {t} dst src mem)
     // cond: t.Alignment()%8 == 0
@@ -2700,7 +2604,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] {t} dst src mem)
     // cond: s%8 == 0 && s <= 8*128 && t.Alignment()%8 == 0 && !config.noDuffDevice && logLargeCopy(v, s)
@@ -2718,7 +2621,6 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(16 * (128 - s / 8));
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Move [s] {t} dst src mem)
     // cond: (s <= 16 || logLargeCopy(v, s))
@@ -2739,10 +2641,8 @@ private static bool rewriteValueRISCV64_OpMove(ptr<Value> _addr_v) {
         v0.AddArg(src);
         v.AddArg4(dst, src, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpMul16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2764,7 +2664,6 @@ private static bool rewriteValueRISCV64_OpMul16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpMul8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2786,7 +2685,6 @@ private static bool rewriteValueRISCV64_OpMul8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2810,7 +2708,6 @@ private static bool rewriteValueRISCV64_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2834,7 +2731,6 @@ private static bool rewriteValueRISCV64_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpNeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2853,7 +2749,6 @@ private static bool rewriteValueRISCV64_OpNeq64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2877,7 +2772,6 @@ private static bool rewriteValueRISCV64_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2896,7 +2790,6 @@ private static bool rewriteValueRISCV64_OpNeqPtr(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2917,7 +2810,6 @@ private static bool rewriteValueRISCV64_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(off));
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (OffPtr [off] ptr)
     // cond: is32Bit(off)
@@ -2932,7 +2824,6 @@ private static bool rewriteValueRISCV64_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(off);
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (OffPtr [off] ptr)
     // result: (ADD (MOVDconst [off]) ptr)
@@ -2945,7 +2836,6 @@ private static bool rewriteValueRISCV64_OpOffPtr(ptr<Value> _addr_v) {
         v.AddArg2(v0, ptr);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpPanicBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2968,7 +2858,6 @@ private static bool rewriteValueRISCV64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 1
@@ -2985,7 +2874,6 @@ private static bool rewriteValueRISCV64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 2
@@ -3002,10 +2890,8 @@ private static bool rewriteValueRISCV64_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64ADD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3024,26 +2910,21 @@ private static bool rewriteValueRISCV64_OpRISCV64ADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var val = auxIntToInt64(v_0.AuxInt);
                 var x = v_1;
                 if (!(is32Bit(val))) {
                     continue;
                 }
-
                 v.reset(OpRISCV64ADDI);
                 v.AuxInt = int64ToAuxInt(val);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64ADDI(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3068,7 +2949,6 @@ private static bool rewriteValueRISCV64_OpRISCV64ADDI(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDI [0] x)
     // result: x
@@ -3079,10 +2959,8 @@ private static bool rewriteValueRISCV64_OpRISCV64ADDI(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64AND(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3101,26 +2979,21 @@ private static bool rewriteValueRISCV64_OpRISCV64AND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var val = auxIntToInt64(v_0.AuxInt);
                 var x = v_1;
                 if (!(is32Bit(val))) {
                     continue;
                 }
-
                 v.reset(OpRISCV64ANDI);
                 v.AuxInt = int64ToAuxInt(val);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVBUload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3148,7 +3021,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVBUload [off1] {sym} (ADDI [off2] base) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3170,10 +3042,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVBUreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3190,7 +3060,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint8(c)));
         return true;
-
     } 
     // match: (MOVBUreg x:(MOVBUload _ _))
     // result: (MOVDreg x)
@@ -3202,7 +3071,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg x:(MOVBUreg _))
     // result: (MOVDreg x)
@@ -3214,7 +3082,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBUreg <t> x:(MOVBload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -3239,10 +3106,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBUreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3270,7 +3135,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym} (ADDI [off2] base) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3292,10 +3156,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVBreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3312,7 +3174,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int8(c)));
         return true;
-
     } 
     // match: (MOVBreg x:(MOVBload _ _))
     // result: (MOVDreg x)
@@ -3324,7 +3185,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg x:(MOVBreg _))
     // result: (MOVDreg x)
@@ -3336,7 +3196,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg <t> x:(MOVBUload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -3361,10 +3220,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3394,7 +3251,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym} (ADDI [off2] base) val mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3417,7 +3273,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVBstorezero [off] {sym} ptr mem)
@@ -3434,7 +3289,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3452,7 +3306,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3470,7 +3323,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3488,7 +3340,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBUreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3506,7 +3357,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVHUreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3524,7 +3374,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVWUreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -3542,10 +3391,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVBstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3573,7 +3420,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstorezero(ptr<Value> _addr_
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstorezero [off1] {sym} (ADDI [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3595,10 +3441,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVBstorezero(ptr<Value> _addr_
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3626,7 +3470,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym} (ADDI [off2] base) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3648,10 +3491,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVDnop(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3667,10 +3508,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDnop(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDconst);
         v.AuxInt = int64ToAuxInt(c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVDreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3687,10 +3526,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDnop);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3720,7 +3557,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off1] {sym} (ADDI [off2] base) val mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3743,7 +3579,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVDstorezero [off] {sym} ptr mem)
@@ -3760,10 +3595,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVDstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3791,7 +3624,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDstorezero(ptr<Value> _addr_
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDstorezero [off1] {sym} (ADDI [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3813,10 +3645,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVDstorezero(ptr<Value> _addr_
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVHUload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3844,7 +3674,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVHUload [off1] {sym} (ADDI [off2] base) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -3866,10 +3695,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVHUreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3886,7 +3713,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint16(c)));
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVBUload _ _))
     // result: (MOVDreg x)
@@ -3898,7 +3724,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVHUload _ _))
     // result: (MOVDreg x)
@@ -3910,7 +3735,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVBUreg _))
     // result: (MOVDreg x)
@@ -3922,7 +3746,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg x:(MOVHUreg _))
     // result: (MOVDreg x)
@@ -3934,7 +3757,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHUreg <t> x:(MOVHload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -3959,10 +3781,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHUreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVHload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3990,7 +3810,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVHload [off1] {sym} (ADDI [off2] base) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -4012,10 +3831,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4032,7 +3849,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int16(c)));
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBload _ _))
     // result: (MOVDreg x)
@@ -4044,7 +3860,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBUload _ _))
     // result: (MOVDreg x)
@@ -4056,7 +3871,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHload _ _))
     // result: (MOVDreg x)
@@ -4068,7 +3882,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBreg _))
     // result: (MOVDreg x)
@@ -4080,7 +3893,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBUreg _))
     // result: (MOVDreg x)
@@ -4092,7 +3904,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHreg _))
     // result: (MOVDreg x)
@@ -4104,7 +3915,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg <t> x:(MOVHUload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4129,10 +3939,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4162,7 +3970,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off1] {sym} (ADDI [off2] base) val mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -4185,7 +3992,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVHstorezero [off] {sym} ptr mem)
@@ -4202,7 +4008,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -4220,7 +4025,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -4238,7 +4042,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHUreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -4256,7 +4059,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVWUreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -4274,10 +4076,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVHstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4305,7 +4105,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstorezero(ptr<Value> _addr_
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstorezero [off1] {sym} (ADDI [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -4327,10 +4126,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVHstorezero(ptr<Value> _addr_
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVWUload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4358,7 +4155,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVWUload [off1] {sym} (ADDI [off2] base) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -4380,10 +4176,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4400,7 +4194,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint32(c)));
         return true;
-
     } 
     // match: (MOVWUreg x:(MOVBUload _ _))
     // result: (MOVDreg x)
@@ -4412,7 +4205,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWUreg x:(MOVHUload _ _))
     // result: (MOVDreg x)
@@ -4424,7 +4216,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWUreg x:(MOVWUload _ _))
     // result: (MOVDreg x)
@@ -4436,7 +4227,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWUreg x:(MOVBUreg _))
     // result: (MOVDreg x)
@@ -4448,7 +4238,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWUreg x:(MOVHUreg _))
     // result: (MOVDreg x)
@@ -4460,7 +4249,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWUreg x:(MOVWUreg _))
     // result: (MOVDreg x)
@@ -4472,7 +4260,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWUreg <t> x:(MOVWload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4497,10 +4284,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWUreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4528,7 +4313,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym} (ADDI [off2] base) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -4550,10 +4334,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4570,7 +4352,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int32(c)));
         return true;
-
     } 
     // match: (MOVWreg x:(MOVBload _ _))
     // result: (MOVDreg x)
@@ -4582,7 +4363,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVBUload _ _))
     // result: (MOVDreg x)
@@ -4594,7 +4374,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVHload _ _))
     // result: (MOVDreg x)
@@ -4606,7 +4385,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVHUload _ _))
     // result: (MOVDreg x)
@@ -4618,7 +4396,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVWload _ _))
     // result: (MOVDreg x)
@@ -4630,7 +4407,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVBreg _))
     // result: (MOVDreg x)
@@ -4642,7 +4418,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVBUreg _))
     // result: (MOVDreg x)
@@ -4654,7 +4429,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVHreg _))
     // result: (MOVDreg x)
@@ -4666,7 +4440,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVWreg _))
     // result: (MOVDreg x)
@@ -4678,7 +4451,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg <t> x:(MOVWUload [off] {sym} ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -4703,10 +4475,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(sym);
         v0.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVWstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4736,7 +4506,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym} (ADDI [off2] base) val mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -4759,7 +4528,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVDconst [0]) mem)
     // result: (MOVWstorezero [off] {sym} ptr mem)
@@ -4776,7 +4544,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWreg x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -4794,7 +4561,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWUreg x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -4812,10 +4578,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64MOVWstorezero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4843,7 +4607,6 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWstorezero(ptr<Value> _addr_
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstorezero [off1] {sym} (ADDI [off2] ptr) mem)
     // cond: is32Bit(int64(off1)+off2)
@@ -4865,10 +4628,8 @@ private static bool rewriteValueRISCV64_OpRISCV64MOVWstorezero(ptr<Value> _addr_
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64OR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4887,26 +4648,21 @@ private static bool rewriteValueRISCV64_OpRISCV64OR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var val = auxIntToInt64(v_0.AuxInt);
                 var x = v_1;
                 if (!(is32Bit(val))) {
                     continue;
                 }
-
                 v.reset(OpRISCV64ORI);
                 v.AuxInt = int64ToAuxInt(val);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64SLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4925,10 +4681,8 @@ private static bool rewriteValueRISCV64_OpRISCV64SLL(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val & 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64SRA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4947,10 +4701,8 @@ private static bool rewriteValueRISCV64_OpRISCV64SRA(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val & 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64SRL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4969,10 +4721,8 @@ private static bool rewriteValueRISCV64_OpRISCV64SRL(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val & 63));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64SUB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4995,7 +4745,6 @@ private static bool rewriteValueRISCV64_OpRISCV64SUB(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(-val);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUB x (MOVDconst [0]))
     // result: x
@@ -5006,7 +4755,6 @@ private static bool rewriteValueRISCV64_OpRISCV64SUB(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUB (MOVDconst [0]) x)
     // result: (NEG x)
@@ -5018,10 +4766,8 @@ private static bool rewriteValueRISCV64_OpRISCV64SUB(ptr<Value> _addr_v) {
         v.reset(OpRISCV64NEG);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64SUBW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5039,7 +4785,6 @@ private static bool rewriteValueRISCV64_OpRISCV64SUBW(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(0);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBW (MOVDconst [0]) x)
     // result: (NEGW x)
@@ -5051,10 +4796,8 @@ private static bool rewriteValueRISCV64_OpRISCV64SUBW(ptr<Value> _addr_v) {
         v.reset(OpRISCV64NEGW);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRISCV64XOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5073,26 +4816,21 @@ private static bool rewriteValueRISCV64_OpRISCV64XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var val = auxIntToInt64(v_0.AuxInt);
                 var x = v_1;
                 if (!(is32Bit(val))) {
                     continue;
                 }
-
                 v.reset(OpRISCV64XORI);
                 v.AuxInt = int64ToAuxInt(val);
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5121,10 +4859,8 @@ private static bool rewriteValueRISCV64_OpRotateLeft16(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRotateLeft32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5153,10 +4889,8 @@ private static bool rewriteValueRISCV64_OpRotateLeft32(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRotateLeft64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5185,10 +4919,8 @@ private static bool rewriteValueRISCV64_OpRotateLeft64(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5217,10 +4949,8 @@ private static bool rewriteValueRISCV64_OpRotateLeft8(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5250,7 +4980,6 @@ private static bool rewriteValueRISCV64_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5280,7 +5009,6 @@ private static bool rewriteValueRISCV64_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5308,7 +5036,6 @@ private static bool rewriteValueRISCV64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5338,7 +5065,6 @@ private static bool rewriteValueRISCV64_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5370,7 +5096,6 @@ private static bool rewriteValueRISCV64_OpRsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5402,7 +5127,6 @@ private static bool rewriteValueRISCV64_OpRsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5432,7 +5156,6 @@ private static bool rewriteValueRISCV64_OpRsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5464,7 +5187,6 @@ private static bool rewriteValueRISCV64_OpRsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5494,7 +5216,6 @@ private static bool rewriteValueRISCV64_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5524,7 +5245,6 @@ private static bool rewriteValueRISCV64_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5552,7 +5272,6 @@ private static bool rewriteValueRISCV64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5582,7 +5301,6 @@ private static bool rewriteValueRISCV64_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5614,7 +5332,6 @@ private static bool rewriteValueRISCV64_OpRsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5646,7 +5363,6 @@ private static bool rewriteValueRISCV64_OpRsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5676,7 +5392,6 @@ private static bool rewriteValueRISCV64_OpRsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5708,7 +5423,6 @@ private static bool rewriteValueRISCV64_OpRsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5736,7 +5450,6 @@ private static bool rewriteValueRISCV64_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5764,7 +5477,6 @@ private static bool rewriteValueRISCV64_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5789,7 +5501,6 @@ private static bool rewriteValueRISCV64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5817,7 +5528,6 @@ private static bool rewriteValueRISCV64_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5847,7 +5557,6 @@ private static bool rewriteValueRISCV64_OpRsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5877,7 +5586,6 @@ private static bool rewriteValueRISCV64_OpRsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5904,7 +5612,6 @@ private static bool rewriteValueRISCV64_OpRsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5934,7 +5641,6 @@ private static bool rewriteValueRISCV64_OpRsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5964,7 +5670,6 @@ private static bool rewriteValueRISCV64_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5994,7 +5699,6 @@ private static bool rewriteValueRISCV64_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6022,7 +5726,6 @@ private static bool rewriteValueRISCV64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6052,7 +5755,6 @@ private static bool rewriteValueRISCV64_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6084,7 +5786,6 @@ private static bool rewriteValueRISCV64_OpRsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6116,7 +5817,6 @@ private static bool rewriteValueRISCV64_OpRsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6146,7 +5846,6 @@ private static bool rewriteValueRISCV64_OpRsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6178,7 +5877,6 @@ private static bool rewriteValueRISCV64_OpRsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6200,7 +5898,6 @@ private static bool rewriteValueRISCV64_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueRISCV64_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6222,7 +5919,6 @@ private static bool rewriteValueRISCV64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVBstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -6238,7 +5934,6 @@ private static bool rewriteValueRISCV64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVHstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && !is32BitFloat(val.Type)
@@ -6254,7 +5949,6 @@ private static bool rewriteValueRISCV64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8 && !is64BitFloat(val.Type)
@@ -6270,7 +5964,6 @@ private static bool rewriteValueRISCV64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpRISCV64MOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitFloat(val.Type)
@@ -6286,7 +5979,6 @@ private static bool rewriteValueRISCV64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpRISCV64FMOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8 && is64BitFloat(val.Type)
@@ -6302,10 +5994,8 @@ private static bool rewriteValueRISCV64_OpStore(ptr<Value> _addr_v) {
         v.reset(OpRISCV64FMOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6324,7 +6014,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] ptr mem)
     // result: (MOVBstore ptr (MOVDconst [0]) mem)
@@ -6339,7 +6028,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [2] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -6359,7 +6047,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [2] ptr mem)
     // result: (MOVBstore [1] ptr (MOVDconst [0]) (MOVBstore ptr (MOVDconst [0]) mem))
@@ -6377,7 +6064,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [4] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -6397,7 +6083,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [4] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -6420,7 +6105,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [4] ptr mem)
     // result: (MOVBstore [3] ptr (MOVDconst [0]) (MOVBstore [2] ptr (MOVDconst [0]) (MOVBstore [1] ptr (MOVDconst [0]) (MOVBstore ptr (MOVDconst [0]) mem))))
@@ -6444,7 +6128,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [8] {t} ptr mem)
     // cond: t.Alignment()%8 == 0
@@ -6464,7 +6147,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v0.AuxInt = int64ToAuxInt(0);
         v.AddArg3(ptr, v0, mem);
         return true;
-
     } 
     // match: (Zero [8] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -6487,7 +6169,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [8] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -6516,7 +6197,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [3] ptr mem)
     // result: (MOVBstore [2] ptr (MOVDconst [0]) (MOVBstore [1] ptr (MOVDconst [0]) (MOVBstore ptr (MOVDconst [0]) mem)))
@@ -6537,7 +6217,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [6] {t} ptr mem)
     // cond: t.Alignment()%2 == 0
@@ -6563,7 +6242,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [12] {t} ptr mem)
     // cond: t.Alignment()%4 == 0
@@ -6589,7 +6267,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [16] {t} ptr mem)
     // cond: t.Alignment()%8 == 0
@@ -6612,7 +6289,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, mem);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [24] {t} ptr mem)
     // cond: t.Alignment()%8 == 0
@@ -6638,7 +6314,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [32] {t} ptr mem)
     // cond: t.Alignment()%8 == 0
@@ -6667,7 +6342,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v1.AddArg3(ptr, v0, v2);
         v.AddArg3(ptr, v0, v1);
         return true;
-
     } 
     // match: (Zero [s] {t} ptr mem)
     // cond: s%8 == 0 && s <= 8*128 && t.Alignment()%8 == 0 && !config.noDuffDevice
@@ -6684,7 +6358,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(8 * (128 - s / 8));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Zero [s] {t} ptr mem)
     // result: (LoweredZero [t.Alignment()] ptr (ADD <ptr.Type> ptr (MOVDconst [s-moveSize(t.Alignment(), config)])) mem)
@@ -6702,7 +6375,6 @@ private static bool rewriteValueRISCV64_OpZero(ptr<Value> _addr_v) {
         v.AddArg3(ptr, v0, mem);
         return true;
     }
-
 }
 private static bool rewriteBlockRISCV64(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -6851,7 +6523,6 @@ private static bool rewriteBlockRISCV64(ptr<Block> _addr_b) {
             return true;
         }
         return false;
-
 }
 
 } // end ssa_package

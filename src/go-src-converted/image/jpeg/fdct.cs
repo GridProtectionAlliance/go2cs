@@ -2,71 +2,69 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2022 March 06 23:36:06 UTC
+// package jpeg -- go2cs converted at 2022 March 13 06:44:06 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Program Files\Go\src\image\jpeg\fdct.go
-
-
 namespace go.image;
 
 public static partial class jpeg_package {
 
-    // This file implements a Forward Discrete Cosine Transformation.
+// This file implements a Forward Discrete Cosine Transformation.
 
-    /*
-    It is based on the code in jfdctint.c from the Independent JPEG Group,
-    found at http://www.ijg.org/files/jpegsrc.v8c.tar.gz.
+/*
+It is based on the code in jfdctint.c from the Independent JPEG Group,
+found at http://www.ijg.org/files/jpegsrc.v8c.tar.gz.
 
-    The "LEGAL ISSUES" section of the README in that archive says:
+The "LEGAL ISSUES" section of the README in that archive says:
 
-    In plain English:
+In plain English:
 
-    1. We don't promise that this software works.  (But if you find any bugs,
-       please let us know!)
-    2. You can use this software for whatever you want.  You don't have to pay us.
-    3. You may not pretend that you wrote this software.  If you use it in a
-       program, you must acknowledge somewhere in your documentation that
-       you've used the IJG code.
+1. We don't promise that this software works.  (But if you find any bugs,
+   please let us know!)
+2. You can use this software for whatever you want.  You don't have to pay us.
+3. You may not pretend that you wrote this software.  If you use it in a
+   program, you must acknowledge somewhere in your documentation that
+   you've used the IJG code.
 
-    In legalese:
+In legalese:
 
-    The authors make NO WARRANTY or representation, either express or implied,
-    with respect to this software, its quality, accuracy, merchantability, or
-    fitness for a particular purpose.  This software is provided "AS IS", and you,
-    its user, assume the entire risk as to its quality and accuracy.
+The authors make NO WARRANTY or representation, either express or implied,
+with respect to this software, its quality, accuracy, merchantability, or
+fitness for a particular purpose.  This software is provided "AS IS", and you,
+its user, assume the entire risk as to its quality and accuracy.
 
-    This software is copyright (C) 1991-2011, Thomas G. Lane, Guido Vollbeding.
-    All Rights Reserved except as specified below.
+This software is copyright (C) 1991-2011, Thomas G. Lane, Guido Vollbeding.
+All Rights Reserved except as specified below.
 
-    Permission is hereby granted to use, copy, modify, and distribute this
-    software (or portions thereof) for any purpose, without fee, subject to these
-    conditions:
-    (1) If any part of the source code for this software is distributed, then this
-    README file must be included, with this copyright and no-warranty notice
-    unaltered; and any additions, deletions, or changes to the original files
-    must be clearly indicated in accompanying documentation.
-    (2) If only executable code is distributed, then the accompanying
-    documentation must state that "this software is based in part on the work of
-    the Independent JPEG Group".
-    (3) Permission for use of this software is granted only if the user accepts
-    full responsibility for any undesirable consequences; the authors accept
-    NO LIABILITY for damages of any kind.
+Permission is hereby granted to use, copy, modify, and distribute this
+software (or portions thereof) for any purpose, without fee, subject to these
+conditions:
+(1) If any part of the source code for this software is distributed, then this
+README file must be included, with this copyright and no-warranty notice
+unaltered; and any additions, deletions, or changes to the original files
+must be clearly indicated in accompanying documentation.
+(2) If only executable code is distributed, then the accompanying
+documentation must state that "this software is based in part on the work of
+the Independent JPEG Group".
+(3) Permission for use of this software is granted only if the user accepts
+full responsibility for any undesirable consequences; the authors accept
+NO LIABILITY for damages of any kind.
 
-    These conditions apply to any software derived from or based on the IJG code,
-    not just to the unmodified library.  If you use our work, you ought to
-    acknowledge us.
+These conditions apply to any software derived from or based on the IJG code,
+not just to the unmodified library.  If you use our work, you ought to
+acknowledge us.
 
-    Permission is NOT granted for the use of any IJG author's name or company name
-    in advertising or publicity relating to this software or products derived from
-    it.  This software may be referred to only as "the Independent JPEG Group's
-    software".
+Permission is NOT granted for the use of any IJG author's name or company name
+in advertising or publicity relating to this software or products derived from
+it.  This software may be referred to only as "the Independent JPEG Group's
+software".
 
-    We specifically permit and encourage the use of this software as the basis of
-    commercial products, provided that all warranty or liability claims are
-    assumed by the product vendor.
-    */
+We specifically permit and encourage the use of this software as the basis of
+commercial products, provided that all warranty or liability claims are
+assumed by the product vendor.
+*/
 
-    // Trigonometric constants in 13-bit fixed point format.
+// Trigonometric constants in 13-bit fixed point format.
 private static readonly nint fix_0_298631336 = 2446;
 private static readonly nint fix_0_390180644 = 3196;
 private static readonly nint fix_0_541196100 = 4433;
@@ -80,11 +78,9 @@ private static readonly nint fix_2_053119869 = 16819;
 private static readonly nint fix_2_562915447 = 20995;
 private static readonly nint fix_3_072711026 = 25172;
 
-
 private static readonly nint constBits = 13;
 private static readonly nint pass1Bits = 2;
 private static readonly nint centerJSample = 128;
-
 
 // fdct performs a forward DCT on an 8x8 block of coefficients, including a
 // level shift.
@@ -147,7 +143,6 @@ private static void fdct(ptr<block> _addr_b) {
         s[3] = (tmp1 + tmp11 + tmp13) >> (int)((constBits - pass1Bits));
         s[5] = (tmp2 + tmp11 + tmp12) >> (int)((constBits - pass1Bits));
         s[7] = (tmp3 + tmp10 + tmp13) >> (int)((constBits - pass1Bits));
-
     } 
     // Pass 2: process columns.
     // We remove pass1Bits scaling, but leave results scaled up by an overall factor of 8.
@@ -197,7 +192,6 @@ private static void fdct(ptr<block> _addr_b) {
         b[5 * 8 + x] = (tmp2 + tmp11 + tmp12) >> (int)((constBits + pass1Bits));
         b[7 * 8 + x] = (tmp3 + tmp10 + tmp13) >> (int)((constBits + pass1Bits));
     }
-
 }
 
 } // end jpeg_package

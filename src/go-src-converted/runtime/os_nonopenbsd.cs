@@ -5,17 +5,15 @@
 //go:build !openbsd
 // +build !openbsd
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:32 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\os_nonopenbsd.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // osStackAlloc performs OS-specific initialization before s is used
-    // as stack memory.
+// osStackAlloc performs OS-specific initialization before s is used
+// as stack memory.
 private static void osStackAlloc(ptr<mspan> _addr_s) {
     ref mspan s = ref _addr_s.val;
 

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:08 UTC
+//     Generated on 2022 March 13 05:37:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -43,7 +43,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ServeMux
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace net
             public static implicit operator ServeMux(NilType nil) => default(ServeMux);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ServeMux ServeMux_cast(dynamic value)
         {
             return new ServeMux(value.mu, value.m, value.es, value.hosts);

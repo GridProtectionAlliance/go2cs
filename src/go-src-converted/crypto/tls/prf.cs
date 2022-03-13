@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:21:06 UTC
+// package tls -- go2cs converted at 2022 March 13 05:36:13 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\prf.go
-using crypto = go.crypto_package;
-using hmac = go.crypto.hmac_package;
-using md5 = go.crypto.md5_package;
-using sha1 = go.crypto.sha1_package;
-using sha256 = go.crypto.sha256_package;
-using sha512 = go.crypto.sha512_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using System;
-
-
 namespace go.crypto;
 
+using crypto = crypto_package;
+using hmac = crypto.hmac_package;
+using md5 = crypto.md5_package;
+using sha1 = crypto.sha1_package;
+using sha256 = crypto.sha256_package;
+using sha512 = crypto.sha512_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using hash = hash_package;
+
+
+// Split a premaster secret in two as specified in RFC 4346, Section 5.
+
+using System;
 public static partial class tls_package {
 
-    // Split a premaster secret in two as specified in RFC 4346, Section 5.
 private static (slice<byte>, slice<byte>) splitPreMasterSecret(slice<byte> secret) {
     slice<byte> s1 = default;
     slice<byte> s2 = default;
@@ -105,8 +106,7 @@ private static (Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>>, cryp
         return (prf12(sha256.New), crypto.SHA256);
     else 
         panic("unknown version");
-    
-});
+    });
 
 private static Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>> prfForVersion(ushort version, ptr<cipherSuite> _addr_suite) {
     ref cipherSuite suite = ref _addr_suite.val;
@@ -174,7 +174,6 @@ private static finishedHash newFinishedHash(ushort version, ptr<cipherSuite> _ad
         return new finishedHash(hash.New(),hash.New(),nil,nil,buffer,version,prf);
     }
     return new finishedHash(sha1.New(),sha1.New(),md5.New(),md5.New(),buffer,version,prf);
-
 }
 
 // A finishedHash calculates the hash of a set of handshake messages suitable
@@ -205,7 +204,6 @@ private static (nint, error) Write(this ptr<finishedHash> _addr_h, slice<byte> m
         h.buffer = append(h.buffer, msg);
     }
     return (len(msg), error.As(null!)!);
-
 }
 
 private static slice<byte> Sum(this finishedHash h) {
@@ -215,7 +213,6 @@ private static slice<byte> Sum(this finishedHash h) {
     var @out = make_slice<byte>(0, md5.Size + sha1.Size);
     out = h.clientMD5.Sum(out);
     return h.client.Sum(out);
-
 }
 
 // clientSum returns the contents of the verify_data member of a client's
@@ -252,7 +249,6 @@ private static slice<byte> hashForClientCertificate(this finishedHash h, byte si
         return h.server.Sum(null);
     }
     return h.Sum();
-
 });
 
 // discardHandshakeBuffer is called when there is no more need to
@@ -313,9 +309,7 @@ private static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMas
         var keyMaterial = make_slice<byte>(length);
         prfForVersion(version, _addr_suite)(keyMaterial, masterSecret, (slice<byte>)label, seed);
         return (keyMaterial, null);
-
     };
-
 }
 
 } // end tls_package

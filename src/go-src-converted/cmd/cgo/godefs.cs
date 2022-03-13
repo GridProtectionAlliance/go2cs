@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:46:57 UTC
+// package main -- go2cs converted at 2022 March 13 05:58:11 UTC
 // Original source: C:\Program Files\Go\src\cmd\cgo\godefs.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+
+// godefs returns the output for -godefs mode.
 
 public static partial class main_package {
 
-    // godefs returns the output for -godefs mode.
 private static @string godefs(this ptr<Package> _addr_p, ptr<File> _addr_f) {
     ref Package p = ref _addr_p.val;
     ref File f = ref _addr_f.val;
@@ -52,7 +54,6 @@ private static @string godefs(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                 continue;
             }
             override["_Ctype_" + strings.TrimSpace(s[..(int)i])] = strings.TrimSpace(s[(int)i..]);
-
         }
     }    {
         var n__prev1 = n;
@@ -70,7 +71,6 @@ private static @string godefs(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                 s = s__prev1;
 
             }
-
         }
         n = n__prev1;
     }
@@ -127,12 +127,10 @@ private static @string godefs(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                         id = id__prev2;
 
                     }
-
                 }
                 new = new__prev1;
 
             }
-
         }
         def = def__prev1;
     }
@@ -154,7 +152,6 @@ private static @string godefs(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                 id = id__prev1;
 
             }
-
         }
         new = new__prev1;
     }
@@ -177,7 +174,6 @@ private static @string godefs(this ptr<Package> _addr_p, ptr<File> _addr_f) {
                     def = def__prev2;
 
                 }
-
             }
         }
         id = id__prev1;
@@ -186,7 +182,6 @@ private static @string godefs(this ptr<Package> _addr_p, ptr<File> _addr_f) {
     conf.Fprint(_addr_buf, fset, f.AST);
 
     return buf.String();
-
 }
 
 private static bytes.Buffer gofmtBuf = default;
@@ -199,7 +194,6 @@ private static @string gofmt(object n) {
         return "<" + err.Error() + ">";
     }
     return gofmtBuf.String();
-
 }
 
 // gofmtLineReplacer is used to put a gofmt-formatted string for an

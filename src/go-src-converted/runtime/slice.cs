@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:51 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:02 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\slice.go
-using math = go.runtime.@internal.math_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using math = runtime.@internal.math_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -48,7 +48,6 @@ private static unsafe.Pointer makeslicecopy(ptr<_type> _addr_et, nint tolen, nin
             panicmakeslicelen();
         }
         copymem = et.size * uintptr(fromlen);
-
     }
     else
  { 
@@ -57,7 +56,6 @@ private static unsafe.Pointer makeslicecopy(ptr<_type> _addr_et, nint tolen, nin
         // same element width.
         tomem = et.size * uintptr(tolen);
         copymem = tomem;
-
     }
     unsafe.Pointer to = default;
     if (et.ptrdata == 0) {
@@ -74,7 +72,6 @@ private static unsafe.Pointer makeslicecopy(ptr<_type> _addr_et, nint tolen, nin
             // Only shade the pointers in old.array since we know the destination slice to
             // only contains nil pointers because it has been cleared during alloc.
             bulkBarrierPreWriteSrcOnly(uintptr(to), uintptr(from), copymem);
-
         }
     }
     if (raceenabled) {
@@ -88,7 +85,6 @@ private static unsafe.Pointer makeslicecopy(ptr<_type> _addr_et, nint tolen, nin
     memmove(to, from, copymem);
 
     return to;
-
 }
 
 private static unsafe.Pointer makeslice(ptr<_type> _addr_et, nint len, nint cap) {
@@ -106,10 +102,8 @@ private static unsafe.Pointer makeslice(ptr<_type> _addr_et, nint len, nint cap)
             panicmakeslicelen();
         }
         panicmakeslicecap();
-
     }
     return mallocgc(mem, et, true);
-
 }
 
 private static unsafe.Pointer makeslice64(ptr<_type> _addr_et, long len64, long cap64) {
@@ -124,7 +118,6 @@ private static unsafe.Pointer makeslice64(ptr<_type> _addr_et, long len64, long 
         panicmakeslicecap();
     }
     return makeslice(_addr_et, len, cap);
-
 }
 
 private static void unsafeslice(ptr<_type> _addr_et, unsafe.Pointer ptr, nint len) => func((_, panic, _) => {
@@ -150,7 +143,6 @@ private static void unsafeslice64(ptr<_type> _addr_et, unsafe.Pointer ptr, long 
         panicunsafeslicelen();
     }
     unsafeslice(_addr_et, ptr, len);
-
 }
 
 private static void unsafeslicecheckptr(ptr<_type> _addr_et, unsafe.Pointer ptr, long len64) {
@@ -196,7 +188,6 @@ private static slice growslice(ptr<_type> _addr_et, slice old, nint cap) => func
         // append should not create a slice with nil pointer but non-zero len.
         // We assume that append doesn't need to preserve old.array in this case.
         return new slice(unsafe.Pointer(&zerobase),old.len,cap);
-
     }
     var newcap = old.cap;
     var doublecap = newcap + newcap;
@@ -223,7 +214,6 @@ private static slice growslice(ptr<_type> _addr_et, slice old, nint cap) => func
             if (newcap <= 0) {
                 newcap = cap;
             }
-
         }
     }
     bool overflow = default;
@@ -255,7 +245,6 @@ private static slice growslice(ptr<_type> _addr_et, slice old, nint cap) => func
         if (sys.PtrSize == 8) { 
             // Mask shift for better code generation.
             shift = uintptr(sys.Ctz64(uint64(et.size))) & 63;
-
         }
         else
  {
@@ -294,7 +283,6 @@ private static slice growslice(ptr<_type> _addr_et, slice old, nint cap) => func
         // The append() that calls growslice is going to overwrite from old.len to cap (which will be the new length).
         // Only clear the part that will not be overwritten.
         memclrNoHeapPointers(add(p, newlenmem), capmem - newlenmem);
-
     }
     else
  { 
@@ -304,13 +292,11 @@ private static slice growslice(ptr<_type> _addr_et, slice old, nint cap) => func
             // Only shade the pointers in old.array since we know the destination slice p
             // only contains nil pointers because it has been cleared during alloc.
             bulkBarrierPreWriteSrcOnly(uintptr(p), uintptr(old.array), lenmem - et.size + et.ptrdata);
-
         }
     }
     memmove(p, old.array, lenmem);
 
     return new slice(p,old.len,newcap);
-
 });
 
 private static bool isPowerOfTwo(System.UIntPtr x) {
@@ -342,16 +328,15 @@ private static nint slicecopy(unsafe.Pointer toPtr, nint toLen, unsafe.Pointer f
     }
     if (size == 1) { // common case worth about 2x to do here
         // TODO: is this still worth it with new memmove impl?
-        (byte.val)(toPtr).val;
+        (byte.val).val;
 
-        new ptr<ptr<ptr<byte>>>(fromPtr); // known to be a byte pointer
+        (toPtr) = new ptr<ptr<ptr<byte>>>(fromPtr); // known to be a byte pointer
     }
     else
  {
         memmove(toPtr, fromPtr, size);
     }
     return n;
-
 }
 
 } // end runtime_package

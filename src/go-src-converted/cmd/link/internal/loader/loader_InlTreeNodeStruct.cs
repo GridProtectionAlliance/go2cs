@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:34 UTC
+//     Generated on 2022 March 13 06:33:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
 {
     public static partial class loader_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct InlTreeNode
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace @internal
             public static implicit operator InlTreeNode(NilType nil) => default(InlTreeNode);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static InlTreeNode InlTreeNode_cast(dynamic value)
         {
             return new InlTreeNode(value.Parent, value.File, value.Line, value.Func, value.ParentPC);

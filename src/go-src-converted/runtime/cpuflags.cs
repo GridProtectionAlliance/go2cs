@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:26 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\cpuflags.go
-using cpu = go.@internal.cpu_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using cpu = @internal.cpu_package;
+using @unsafe = @unsafe_package;
+
+
+// Offsets into internal/cpu records for use in assembly.
 
 public static partial class runtime_package {
 
-    // Offsets into internal/cpu records for use in assembly.
 private static readonly var offsetX86HasAVX = @unsafe.Offsetof(cpu.X86.HasAVX);
 private static readonly var offsetX86HasAVX2 = @unsafe.Offsetof(cpu.X86.HasAVX2);
 private static readonly var offsetX86HasERMS = @unsafe.Offsetof(cpu.X86.HasERMS);
@@ -21,7 +23,6 @@ private static readonly var offsetX86HasSSE2 = @unsafe.Offsetof(cpu.X86.HasSSE2)
 private static readonly var offsetARMHasIDIVA = @unsafe.Offsetof(cpu.ARM.HasIDIVA);
 
 private static readonly var offsetMIPS64XHasMSA = @unsafe.Offsetof(cpu.MIPS64X.HasMSA);
-
 
  
 // Set in runtime.cpuinit.

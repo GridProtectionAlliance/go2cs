@@ -4,20 +4,20 @@
 
 // Package httpresponse defines an Analyzer that checks for mistakes
 // using HTTP responses.
-// package httpresponse -- go2cs converted at 2022 March 06 23:34:36 UTC
+
+// package httpresponse -- go2cs converted at 2022 March 13 06:41:52 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/httpresponse" ==> using httpresponse = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.httpresponse_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\httpresponse\httpresponse.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class httpresponse_package {
 
@@ -86,10 +86,8 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             pass.ReportRangef(root, "using %s before checking for errors", resp.Name);
         }
         return true;
-
     });
     return (null, error.As(null!)!);
-
 }
 
 // isHTTPFuncOrMethodOnClient checks whether the given call expression is on
@@ -119,7 +117,6 @@ private static bool isHTTPFuncOrMethodOnClient(ptr<types.Info> _addr_info, ptr<a
         ptr = ptr__prev1;
 
     }
-
 
     var errorType = types.Universe.Lookup("error").Type();
     if (!types.Identical(res.At(1).Type(), errorType)) {
@@ -155,10 +152,8 @@ private static slice<ast.Stmt> restOfBlock(slice<ast.Node> stack) {
             }
 
         }
-
     }
     return null;
-
 }
 
 // rootIdent finds the root identifier x in a chain of selections x.y.z, or nil if not found.
@@ -177,7 +172,6 @@ private static ptr<ast.Ident> rootIdent(ast.Node n) {
             break;
         }
     }
-
 }
 
 // isNamedType reports whether t is the named type path.name.
@@ -188,7 +182,6 @@ private static bool isNamedType(types.Type t, @string path, @string name) {
     }
     var obj = n.Obj();
     return obj.Name() == name && obj.Pkg() != null && obj.Pkg().Path() == path;
-
 }
 
 } // end httpresponse_package

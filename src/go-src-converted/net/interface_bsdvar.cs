@@ -5,14 +5,14 @@
 //go:build dragonfly || netbsd || openbsd
 // +build dragonfly netbsd openbsd
 
-// package net -- go2cs converted at 2022 March 06 22:16:00 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:48 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\interface_bsdvar.go
-using syscall = go.syscall_package;
-
-using route = go.golang.org.x.net.route_package;
-
 namespace go;
+
+using syscall = syscall_package;
+
+using route = golang.org.x.net.route_package;
 
 public static partial class net_package {
 
@@ -25,7 +25,6 @@ private static (slice<route.Message>, error) interfaceMessages(nint ifindex) {
         return (null, error.As(err)!);
     }
     return route.ParseRIB(syscall.NET_RT_IFLIST, rib);
-
 }
 
 // interfaceMulticastAddrTable returns addresses for a specific
@@ -37,7 +36,6 @@ private static (slice<Addr>, error) interfaceMulticastAddrTable(ptr<Interface> _
  
     // TODO(mikio): Implement this like other platforms.
     return (null, error.As(null!)!);
-
 }
 
 } // end net_package

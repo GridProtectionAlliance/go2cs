@@ -4,21 +4,21 @@
 
 // Package unsafeptr defines an Analyzer that checks for invalid
 // conversions of uintptr to unsafe.Pointer.
-// package unsafeptr -- go2cs converted at 2022 March 06 23:34:52 UTC
+
+// package unsafeptr -- go2cs converted at 2022 March 13 06:42:09 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/unsafeptr" ==> using unsafeptr = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.unsafeptr_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\unsafeptr\unsafeptr.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class unsafeptr_package {
 
@@ -62,7 +62,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     t = t__prev1;
 
                 }
-
                 break;
             case ptr<ast.UnaryExpr> x:
                 if (x.Op != token.AND) {
@@ -80,13 +79,10 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     t = t__prev1;
 
                 }
-
                 break;
         }
-
     });
     return (null, error.As(null!)!);
-
 }
 
 // isSafeUintptr reports whether x - already known to be a uintptr -
@@ -118,7 +114,6 @@ private static bool isSafeUintptr(ptr<types.Info> _addr_info, ast.Expr x) {
             if (ok && isReflectHeader(pt.Elem())) {
                 return true;
             }
-
             break;
         case ptr<ast.CallExpr> x:
             if (len(x.Args) != 0) {
@@ -145,7 +140,6 @@ private static bool isSafeUintptr(ptr<types.Info> _addr_info, ast.Expr x) {
 
     // "(3) Conversion of a Pointer to a uintptr and back, with arithmetic."
     return isSafeArith(_addr_info, x);
-
 }
 
 // isSafeArith reports whether x is a pointer arithmetic expression that is safe
@@ -169,7 +163,6 @@ private static bool isSafeArith(ptr<types.Info> _addr_info, ast.Expr x) {
     }
 
     return false;
-
 }
 
 // hasBasicType reports whether x's type is a types.Basic with the given kind.
@@ -182,7 +175,6 @@ private static bool hasBasicType(ptr<types.Info> _addr_info, ast.Expr x, types.B
     }
     ptr<types.Basic> (b, ok) = t._<ptr<types.Basic>>();
     return ok && b.Kind() == kind;
-
 }
 
 // isReflectHeader reports whether t is reflect.SliceHeader or reflect.StringHeader.
@@ -202,16 +194,12 @@ private static bool isReflectHeader(types.Type t) {
                             return true;
                             break;
                     }
-
                 }
 
             }
-
         }
     }
-
     return false;
-
 }
 
 } // end unsafeptr_package

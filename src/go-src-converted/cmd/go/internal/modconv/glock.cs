@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modconv -- go2cs converted at 2022 March 06 23:18:11 UTC
+// package modconv -- go2cs converted at 2022 March 13 06:31:34 UTC
 // import "cmd/go/internal/modconv" ==> using modconv = go.cmd.go.@internal.modconv_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modconv\glock.go
-using strings = go.strings_package;
-
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
-
 namespace go.cmd.go.@internal;
+
+using strings = strings_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
 
 public static partial class modconv_package {
 
@@ -25,7 +25,6 @@ public static (ptr<modfile.File>, error) ParseGLOCKFILE(@string file, slice<byte
             mf.Require = append(mf.Require, addr(new modfile.Require(Mod:module.Version{Path:f[0],Version:f[1]})));
         }
     }    return (_addr_mf!, error.As(null!)!);
-
 }
 
 } // end modconv_package

@@ -2,41 +2,38 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:03 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:27 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\fuse_comparisons.go
-
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using System;
 public static partial class ssa_package {
 
-    // fuseIntegerComparisons optimizes inequalities such as '1 <= x && x < 5',
-    // which can be optimized to 'unsigned(x-1) < 4'.
-    //
-    // Look for branch structure like:
-    //
-    //   p
-    //   |\
-    //   | b
-    //   |/ \
-    //   s0 s1
-    //
-    // In our example, p has control '1 <= x', b has control 'x < 5',
-    // and s0 and s1 are the if and else results of the comparison.
-    //
-    // This will be optimized into:
-    //
-    //   p
-    //    \
-    //     b
-    //    / \
-    //   s0 s1
-    //
-    // where b has the combined control value 'unsigned(x-1) < 4'.
-    // Later passes will then fuse p and b.
+// fuseIntegerComparisons optimizes inequalities such as '1 <= x && x < 5',
+// which can be optimized to 'unsigned(x-1) < 4'.
+//
+// Look for branch structure like:
+//
+//   p
+//   |\
+//   | b
+//   |/ \
+//   s0 s1
+//
+// In our example, p has control '1 <= x', b has control 'x < 5',
+// and s0 and s1 are the if and else results of the comparison.
+//
+// This will be optimized into:
+//
+//   p
+//    \
+//     b
+//    / \
+//   s0 s1
+//
+// where b has the combined control value 'unsigned(x-1) < 4'.
+// Later passes will then fuse p and b.
 private static bool fuseIntegerComparisons(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
 
@@ -79,9 +76,7 @@ private static bool fuseIntegerComparisons(ptr<Block> _addr_b) {
         p.ResetControls();
 
         return true;
-
     }    return false;
-
 }
 
 // getConstIntArgIndex returns the index of the first argument that is a
@@ -93,9 +88,7 @@ private static nint getConstIntArgIndex(ptr<Value> _addr_v) {
 
         if (a.Op == OpConst8 || a.Op == OpConst16 || a.Op == OpConst32 || a.Op == OpConst64) 
             return i;
-        
-    }    return -1;
-
+            }    return -1;
 }
 
 // isSignedInequality reports whether op represents the inequality < or ≤
@@ -107,7 +100,6 @@ private static bool isSignedInequality(ptr<Value> _addr_v) {
     if (v.Op == OpLess64 || v.Op == OpLess32 || v.Op == OpLess16 || v.Op == OpLess8 || v.Op == OpLeq64 || v.Op == OpLeq32 || v.Op == OpLeq16 || v.Op == OpLeq8) 
         return true;
         return false;
-
 }
 
 // isUnsignedInequality reports whether op represents the inequality < or ≤
@@ -119,7 +111,6 @@ private static bool isUnsignedInequality(ptr<Value> _addr_v) {
     if (v.Op == OpLess64U || v.Op == OpLess32U || v.Op == OpLess16U || v.Op == OpLess8U || v.Op == OpLeq64U || v.Op == OpLeq32U || v.Op == OpLeq16U || v.Op == OpLeq8U) 
         return true;
         return false;
-
 }
 
 private static bool areMergeableInequalities(ptr<Value> _addr_x, ptr<Value> _addr_y) {
@@ -144,9 +135,7 @@ private static bool areMergeableInequalities(ptr<Value> _addr_x, ptr<Value> _add
             return false;
         }
         return x.Args[xi ^ 1] == y.Args[yi ^ 1];
-
     }    return false;
-
 }
 
 } // end ssa_package

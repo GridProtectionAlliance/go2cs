@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:43:17 UTC
+//     Generated on 2022 March 13 05:54:27 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace text
 {
     public static partial class scanner_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Position
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace text
             public static implicit operator Position(NilType nil) => default(Position);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Position Position_cast(dynamic value)
         {
             return new Position(value.Filename, value.Offset, value.Line, value.Column);

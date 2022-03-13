@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:12:19 UTC
+//     Generated on 2022 March 13 06:25:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class syntax_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct labelScope
         {
             // Constructors
@@ -57,7 +57,7 @@ namespace @internal
             public static implicit operator labelScope(NilType nil) => default(labelScope);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static labelScope labelScope_cast(dynamic value)
         {
             return new labelScope(value.errh, value.labels);

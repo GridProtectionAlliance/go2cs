@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:22 UTC
+// package template -- go2cs converted at 2022 March 13 05:38:50 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\content.go
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-
 namespace go.html;
+
+using fmt = fmt_package;
+using reflect = reflect_package;
+
+
+// Strings of content from a trusted source.
 
 public static partial class template_package {
 
-    // Strings of content from a trusted source.
  
 // CSS encapsulates known safe content that matches any of:
 //   1. The CSS3 stylesheet production, such as `p { color: purple }`.
@@ -100,8 +102,7 @@ public partial struct URL { // : @string
 // the encapsulated content should come from a trusted source,
 // as it will be included verbatim in the template output.
 public partial struct Srcset { // : @string
-}
-private partial struct contentType { // : byte
+}private partial struct contentType { // : byte
 }
 
 private static readonly contentType contentTypePlain = iota;
@@ -117,7 +118,6 @@ private static readonly var contentTypeSrcset = 6;
 // or interpreted; or which credentials network messages carry.
 private static readonly var contentTypeUnsafe = 7;
 
-
 // indirect returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil).
 private static void indirect(object a) {
@@ -130,16 +130,13 @@ private static void indirect(object a) {
         if (t.Kind() != reflect.Ptr) { 
             // Avoid creating a reflect.Value if it's not a pointer.
             return a;
-
         }
     }
-
     var v = reflect.ValueOf(a);
     while (v.Kind() == reflect.Ptr && !v.IsNil()) {
         v = v.Elem();
     }
     return v.Interface();
-
 }
 
 private static var errorType = reflect.TypeOf((error.val)(null)).Elem();private static var fmtStringerType = reflect.TypeOf((fmt.Stringer.val)(null)).Elem();
@@ -156,7 +153,6 @@ private static void indirectToStringerOrError(object a) {
         v = v.Elem();
     }
     return v.Interface();
-
 }
 
 // stringify converts its arguments to a string and the type of the content.
@@ -193,7 +189,6 @@ private static (@string, contentType) stringify(params object[] args) {
                 return (string(s), contentTypeSrcset);
                 break;
         }
-
     }
     nint i = 0;
     foreach (var (_, arg) in args) { 
@@ -205,9 +200,7 @@ private static (@string, contentType) stringify(params object[] args) {
         }
         args[i] = indirectToStringerOrError(arg);
         i++;
-
     }    return (fmt.Sprint(args[..(int)i]), contentTypePlain);
-
 }
 
 } // end template_package

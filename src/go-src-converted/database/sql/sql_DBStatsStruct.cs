@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:40 UTC
+//     Generated on 2022 March 13 06:43:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace database
 {
     public static partial class sql_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct DBStats
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace database
             public static implicit operator DBStats(NilType nil) => default(DBStats);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static DBStats DBStats_cast(dynamic value)
         {
             return new DBStats(value.MaxOpenConnections, value.OpenConnections, value.InUse, value.Idle, value.WaitCount, value.WaitDuration, value.MaxIdleClosed, value.MaxIdleTimeClosed, value.MaxLifetimeClosed);

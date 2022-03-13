@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:16:11 UTC
+//     Generated on 2022 March 13 05:29:52 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct IPAddr
         {
             // Constructors
@@ -54,7 +54,7 @@ namespace go
             public static implicit operator IPAddr(NilType nil) => default(IPAddr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static IPAddr IPAddr_cast(dynamic value)
         {
             return new IPAddr(value.IP, value.Zone);

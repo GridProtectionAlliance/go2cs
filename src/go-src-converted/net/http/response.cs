@@ -4,23 +4,23 @@
 
 // HTTP Response reading and parsing.
 
-// package http -- go2cs converted at 2022 March 06 22:22:53 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:20 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\response.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using tls = go.crypto.tls_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using textproto = go.net.textproto_package;
-using url = go.net.url_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using httpguts = go.golang.org.x.net.http.httpguts_package;
-
 namespace go.net;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using tls = crypto.tls_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using textproto = net.textproto_package;
+using url = net.url_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using httpguts = golang.org.x.net.http.httpguts_package;
 
 public static partial class http_package {
 
@@ -132,7 +132,6 @@ private static (ptr<url.URL>, error) Location(this ptr<Response> _addr_r) {
         return _addr_r.Request.URL.Parse(lv)!;
     }
     return _addr_url.Parse(lv)!;
-
 }
 
 // ReadResponse reads and returns an HTTP response from r.
@@ -157,7 +156,6 @@ public static (ptr<Response>, error) ReadResponse(ptr<bufio.Reader> _addr_r, ptr
             err = io.ErrUnexpectedEOF;
         }
         return (_addr_null!, error.As(err)!);
-
     }
     {
         var i__prev1 = i;
@@ -175,7 +173,6 @@ public static (ptr<Response>, error) ReadResponse(ptr<bufio.Reader> _addr_r, ptr
         i = i__prev1;
 
     }
-
     var statusCode = resp.Status;
     {
         var i__prev1 = i;
@@ -188,7 +185,6 @@ public static (ptr<Response>, error) ReadResponse(ptr<bufio.Reader> _addr_r, ptr
         i = i__prev1;
 
     }
-
     if (len(statusCode) != 3) {
         return (_addr_null!, error.As(badStringError("malformed HTTP status code", statusCode))!);
     }
@@ -208,7 +204,6 @@ public static (ptr<Response>, error) ReadResponse(ptr<bufio.Reader> _addr_r, ptr
             err = io.ErrUnexpectedEOF;
         }
         return (_addr_null!, error.As(err)!);
-
     }
     resp.Header = Header(mimeHeader);
 
@@ -219,7 +214,6 @@ public static (ptr<Response>, error) ReadResponse(ptr<bufio.Reader> _addr_r, ptr
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_resp!, error.As(null!)!);
-
 }
 
 // RFC 7234, section 5.4: Should treat
@@ -239,10 +233,8 @@ private static void fixPragmaCacheControl(Header header) {
                 }
 
             }
-
         }
     }
-
 }
 
 // ProtoAtLeast reports whether the HTTP protocol used
@@ -286,7 +278,6 @@ private static error Write(this ptr<Response> _addr_r, io.Writer w) {
         // Just to reduce stutter, if user set r.Status to "200 OK" and StatusCode to 200.
         // Not important.
         text = strings.TrimPrefix(text, strconv.Itoa(r.StatusCode) + " ");
-
     }
     {
         var (_, err) = fmt.Fprintf(w, "HTTP/%d.%d %03d %s\r\n", r.ProtoMajor, r.ProtoMinor, r.StatusCode, text);
@@ -310,7 +301,6 @@ private static error Write(this ptr<Response> _addr_r, io.Writer w) {
             // Reset it to a known zero reader, in case underlying one
             // is unhappy being read repeatedly.
             r1.Body = NoBody;
-
         }
         else
  {
@@ -343,7 +333,6 @@ private static error Write(this ptr<Response> _addr_r, io.Writer w) {
             }
 
         }
-
     }
     {
         (_, err) = io.WriteString(w, "\r\n");
@@ -359,7 +348,6 @@ private static error Write(this ptr<Response> _addr_r, io.Writer w) {
         return error.As(err)!;
     }
     return error.As(null!)!;
-
 }
 
 private static void closeBody(this ptr<Response> _addr_r) {

@@ -4,16 +4,16 @@
 
 // This file implements rat-to-string conversion functions.
 
-// package big -- go2cs converted at 2022 March 06 22:18:06 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:19 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\ratconv.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.math;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class big_package {
 
@@ -43,9 +43,7 @@ private static error Scan(this ptr<Rat> _addr_z, fmt.ScanState s, int ch) {
             return error.As(errors.New("Rat.Scan: invalid syntax"))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // SetString sets z to the value of s and returns z and a boolean indicating
@@ -86,7 +84,6 @@ private static (ptr<Rat>, bool) SetString(this ptr<Rat> _addr_z, @string s) => f
                 }
 
             }
-
             var r = strings.NewReader(s[(int)sep + 1..]);
             error err = default!;
             z.b.abs, _, _, err = z.b.abs.scan(r, 0, false);
@@ -100,13 +97,10 @@ private static (ptr<Rat>, bool) SetString(this ptr<Rat> _addr_z, @string s) => f
             if (err != io.EOF) {
                 return (_addr_null!, false);
             }
-
             if (len(z.b.abs) == 0) {
                 return (_addr_null!, false);
             }
-
             return (_addr_z.norm()!, true);
-
         }
     } 
 
@@ -225,7 +219,6 @@ private static (ptr<Rat>, bool) SetString(this ptr<Rat> _addr_z, @string s) => f
     z.a.neg = neg && len(z.a.abs) > 0; // 0 has no sign
 
     return (_addr_z.norm()!, true);
-
 });
 
 // scanExponent scans the longest possible prefix of r representing a base 10
@@ -256,7 +249,6 @@ private static (long, nint, error) scanExponent(io.ByteScanner r, bool base2ok, 
             err = null;
         }
         return (0, 10, error.As(err)!);
-
     }
 
     if (ch == 'e' || ch == 'E')
@@ -285,7 +277,6 @@ private static (long, nint, error) scanExponent(io.ByteScanner r, bool base2ok, 
             digits = append(digits, '-');
         }
         ch, err = r.ReadByte();
-
     }
     char prev = '.';
     var invalSep = false; 
@@ -308,10 +299,8 @@ private static (long, nint, error) scanExponent(io.ByteScanner r, bool base2ok, 
  {
             r.UnreadByte(); // ch does not belong to number anymore
             break;
-
         }
         ch, err = r.ReadByte();
-
     }
 
     if (err == io.EOF) {
@@ -327,7 +316,6 @@ private static (long, nint, error) scanExponent(io.ByteScanner r, bool base2ok, 
         err = errInvalSep;
     }
     return ;
-
 }
 
 // String returns a string representation of x in the form "a/b" (even if b == 1).
@@ -352,7 +340,6 @@ private static slice<byte> marshal(this ptr<Rat> _addr_x) {
         buf = append(buf, '1');
     }
     return buf;
-
 }
 
 // RatString returns a string representation of x in the form "a/b" if b != 1,
@@ -364,7 +351,6 @@ private static @string RatString(this ptr<Rat> _addr_x) {
         return x.a.String();
     }
     return x.String();
-
 }
 
 // FloatString returns a string representation of x in decimal form with prec
@@ -389,10 +375,8 @@ private static @string FloatString(this ptr<Rat> _addr_x, nint prec) {
 
                 i = i__prev1;
             }
-
         }
         return string(buf);
-
     }
     var (q, r) = nat(null).div(nat(null), x.a.abs, x.b.abs);
 
@@ -431,10 +415,8 @@ private static @string FloatString(this ptr<Rat> _addr_x, nint prec) {
             i = i__prev1;
         }
         buf = append(buf, rs);
-
     }
     return string(buf);
-
 }
 
 } // end big_package

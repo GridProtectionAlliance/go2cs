@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:33 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:00:56 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\cse.go
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using sort = sort_package;
+
+
+// cse does common-subexpression elimination on the Function.
+// Values are just relinked, nothing is deleted. A subsequent deadcode
+// pass is required to actually remove duplicate expressions.
 
 public static partial class ssa_package {
 
-    // cse does common-subexpression elimination on the Function.
-    // Values are just relinked, nothing is deleted. A subsequent deadcode
-    // pass is required to actually remove duplicate expressions.
 private static void cse(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
  
@@ -57,7 +59,6 @@ private static void cse(ptr<Func> _addr_f) {
                         f.auxmap[v.Aux] = int32(len(f.auxmap)) + 1;
                     }
                     a = append(a, v);
-
                 }
                 v = v__prev2;
             }
@@ -81,7 +82,6 @@ private static void cse(ptr<Func> _addr_f) {
                     v = __v; 
                     // Use negative equivalence class #s for unique values.
                     valueEqClass[v.ID] = -v.ID;
-
                 }
                 v = v__prev2;
             }
@@ -107,7 +107,6 @@ private static void cse(ptr<Func> _addr_f) {
                     j = j__prev2;
                 }
                 fmt.Println();
-
             }
             {
                 var v__prev2 = v;
@@ -132,10 +131,8 @@ private static void cse(ptr<Func> _addr_f) {
                 }
 
                 fmt.Printf("\n");
-
             }
             pNum++;
-
         }
         e = e__prev1;
     }
@@ -221,7 +218,6 @@ private static void cse(ptr<Func> _addr_f) {
                             // Don't add singletons.
                             valueEqClass[f[0].ID] = -f[0].ID;
                             continue;
-
                         }
                         {
                             var v__prev4 = v;
@@ -235,13 +231,11 @@ private static void cse(ptr<Func> _addr_f) {
 
                         pNum++;
                         partition = append(partition, f);
-
                     }
 
                     j = j__prev3;
                 }
                 changed = true;
-
             }
 
             i = i__prev2;
@@ -293,18 +287,15 @@ private static void cse(ptr<Func> _addr_f) {
  { 
                                 // e is sorted by domorder, so v.Block doesn't dominate any subsequent blocks in e
                                 break;
-
                             }
                         }
 
                         j = j__prev3;
                     }
-
                 }
 
                 i = i__prev2;
             }
-
         }
         e = e__prev1;
     }
@@ -346,12 +337,10 @@ private static void cse(ptr<Func> _addr_f) {
                                     }
                                     v.SetArg(i, x);
                                     rewrites++;
-
                                 }
                                 x = x__prev1;
 
                             }
-
                         }
                         i = i__prev3;
                         w = w__prev3;
@@ -377,15 +366,12 @@ private static void cse(ptr<Func> _addr_f) {
                                 // nilcheck pass will remove the nil checks and log
                                 // them appropriately, so don't mess with them here.
                                 continue;
-
                             }
                             b.ReplaceControl(i, x);
-
                         }
                         x = x__prev1;
 
                     }
-
                 }
                 i = i__prev2;
                 v = v__prev2;
@@ -432,24 +418,20 @@ private static slice<eqclass> partitionValues(slice<ptr<Value>> a, auxmap auxIDs
                 break;
             j++;
             }
-
         }
         if (j > 1) {
             partition = append(partition, a[..(int)j]);
         }
         a = a[(int)j..];
-
     }
 
     return partition;
-
 }
 private static types.Cmp lt2Cmp(bool isLt) {
     if (isLt) {
         return types.CMPlt;
     }
     return types.CMPgt;
-
 }
 
 private partial struct auxmap { // : map<Aux, int>
@@ -476,7 +458,6 @@ private static types.Cmp cmpVal(ptr<Value> _addr_v, ptr<Value> _addr_w, auxmap a
         // We will never be able to CSE two values
         // that generate memory.
         return lt2Cmp(v.ID < w.ID);
-
     }
     if (v.Op != OpSelect0 && v.Op != OpSelect1 && v.Op != OpSelectN) {
         {
@@ -487,7 +468,6 @@ private static types.Cmp cmpVal(ptr<Value> _addr_v, ptr<Value> _addr_w, auxmap a
             }
 
         }
-
     }
     if (v.Aux != w.Aux) {
         if (v.Aux == null) {
@@ -497,10 +477,8 @@ private static types.Cmp cmpVal(ptr<Value> _addr_v, ptr<Value> _addr_w, auxmap a
             return types.CMPgt;
         }
         return lt2Cmp(auxIDs[v.Aux] < auxIDs[w.Aux]);
-
     }
     return types.CMPeq;
-
 }
 
 // Sort values to make the initial partition.
@@ -528,7 +506,6 @@ private static bool Less(this sortvalues sv, nint i, nint j) {
 
     // Sort by value ID last to keep the sort result deterministic.
     return v.ID < w.ID;
-
 }
 
 private partial struct partitionByDom {
@@ -571,7 +548,6 @@ private static bool Less(this partitionByArgClass sv, nint i, nint j) {
             return false;
         }
     }    return false;
-
 }
 
 } // end ssa_package

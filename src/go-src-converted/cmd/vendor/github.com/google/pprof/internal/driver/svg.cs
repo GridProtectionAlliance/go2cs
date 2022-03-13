@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:30 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:35 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\svg.go
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-
-using svgpan = go.github.com.google.pprof.third_party.svgpan_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using regexp = regexp_package;
+using strings = strings_package;
+
+using svgpan = github.com.google.pprof.third_party.svgpan_package;
 
 public static partial class driver_package {
 
@@ -68,7 +68,6 @@ private static @string massageSVG(@string svg) {
 
     }
 
-
     {
         var loc__prev1 = loc;
 
@@ -80,7 +79,6 @@ private static @string massageSVG(@string svg) {
         loc = loc__prev1;
 
     }
-
 
     {
         var loc__prev1 = loc;
@@ -94,9 +92,7 @@ private static @string massageSVG(@string svg) {
 
     }
 
-
     return svg;
-
 }
 
 } // end driver_package

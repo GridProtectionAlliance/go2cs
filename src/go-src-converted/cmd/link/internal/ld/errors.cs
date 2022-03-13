@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:21:23 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:22 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\errors.go
-using obj = go.cmd.@internal.obj_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using obj = cmd.@internal.obj_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using sync = sync_package;
+using System;
 
 public static partial class ld_package {
 
@@ -67,10 +66,7 @@ private static void errorUnresolved(this ptr<ErrorReporter> _addr_reporter, ptr<
                     }
 
                 }
-
             }
-
-
         }
         if (name == "main.main") {
             reporter.Errorf(s, "function main is undeclared in the main package");

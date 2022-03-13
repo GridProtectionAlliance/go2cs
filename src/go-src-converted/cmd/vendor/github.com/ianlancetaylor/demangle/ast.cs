@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package demangle -- go2cs converted at 2022 March 06 23:24:17 UTC
+// package demangle -- go2cs converted at 2022 March 13 06:37:25 UTC
 // import "cmd/vendor/github.com/ianlancetaylor/demangle" ==> using demangle = go.cmd.vendor.github.com.ianlancetaylor.demangle_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\ianlancetaylor\demangle\ast.go
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.ianlancetaylor;
 
+using fmt = fmt_package;
+using strings = strings_package;
+
+
+// AST is an abstract syntax tree representing a C++ declaration.
+// This is sufficient for the demangler but is by no means a general C++ AST.
+
+using System;
 public static partial class demangle_package {
 
-    // AST is an abstract syntax tree representing a C++ declaration.
-    // This is sufficient for the demangler but is by no means a general C++ AST.
 public partial interface AST {
     @string print(ptr<printState> _p0); // Traverse each element of an AST.  If the function returns
 // false, traversal of children of that element is skipped.
@@ -41,11 +42,9 @@ public static @string ASTToString(AST a, params Option[] options) {
 
         if (o == NoTemplateParams) 
             tparams = false;
-        
-    }    ref printState ps = ref heap(new printState(tparams:tparams), out ptr<printState> _addr_ps);
+            }    ref printState ps = ref heap(new printState(tparams:tparams), out ptr<printState> _addr_ps);
     a.print(_addr_ps);
     return ps.buf.String();
-
 }
 
 // The printState type holds information needed to print an AST.
@@ -80,7 +79,6 @@ private static void writeString(this ptr<printState> _addr_ps, @string s) {
         ps.last = s[len(s) - 1];
     }
     ps.buf.WriteString(s);
-
 }
 
 // Print an AST.
@@ -101,14 +99,12 @@ private static void print(this ptr<printState> _addr_ps, AST a) {
             if (c > 1) {
                 return ;
             }
-
         }
     }    ps.printing = append(ps.printing, a);
 
     a.print(ps);
 
     ps.printing = ps.printing[..(int)len(ps.printing) - 1];
-
 }
 
 // Name is an unqualified name.
@@ -136,7 +132,6 @@ private static AST Copy(this ptr<Name> _addr_n, Func<AST, AST> fn, Func<AST, boo
         return null;
     }
     return fn(n);
-
 }
 
 private static @string GoString(this ptr<Name> _addr_n) {
@@ -175,7 +170,6 @@ private static void print(this ptr<Typed> _addr_t, ptr<printState> _addr_ps) => 
         // the default location.
         ps.writeByte(' ');
         ps.print(t.Name);
-
     }
 });
 
@@ -220,9 +214,7 @@ private static AST Copy(this ptr<Typed> _addr_t, Func<AST, AST> fn, Func<AST, bo
             return r;
         }
     }
-
     return t;
-
 }
 
 private static @string GoString(this ptr<Typed> _addr_t) {
@@ -291,9 +283,7 @@ private static AST Copy(this ptr<Qualified> _addr_q, Func<AST, AST> fn, Func<AST
             return r;
         }
     }
-
     return q;
-
 }
 
 private static @string GoString(this ptr<Qualified> _addr_q) {
@@ -310,7 +300,6 @@ private static @string goString(this ptr<Qualified> _addr_q, nint indent, @strin
         s = " LocalName: true";
     }
     return fmt.Sprintf("%*s%sQualified:%s\n%s\n%s", indent, "", field, s, q.Scope.goString(indent + 2, "Scope: "), q.Name.goString(indent + 2, "Name: "));
-
 }
 
 // Template is a template with arguments.
@@ -336,7 +325,6 @@ private static void print(this ptr<Template> _addr_t, ptr<printState> _addr_ps) 
     if (!ps.tparams) { 
         // Do not print template parameters.
         return ;
-
     }
     if (ps.last == '<') {
         ps.writeByte(' ');
@@ -352,14 +340,11 @@ private static void print(this ptr<Template> _addr_t, ptr<printState> _addr_ps) 
         }
         ps.print(a);
         first = false;
-
     }    if (ps.last == '>') { 
         // Avoid syntactic ambiguity in old versions of C++.
         ps.writeByte(' ');
-
     }
     ps.writeByte('>');
-
 });
 
 private static bool Traverse(this ptr<Template> _addr_t, Func<AST, bool> fn) {
@@ -406,9 +391,7 @@ private static AST Copy(this ptr<Template> _addr_t, Func<AST, AST> fn, Func<AST,
             return r;
         }
     }
-
     return t;
-
 }
 
 private static @string GoString(this ptr<Template> _addr_t) {
@@ -433,7 +416,6 @@ private static @string goString(this ptr<Template> _addr_t, nint indent, @string
         }
     }
     return fmt.Sprintf("%*s%sTemplate (%p):\n%s\n%s", indent, "", field, t, t.Name.goString(indent + 2, "Name: "), args);
-
 }
 
 // TemplateParam is a template parameter.  The Template field is
@@ -456,7 +438,6 @@ private static void print(this ptr<TemplateParam> _addr_tp, ptr<printState> _add
         panic("TemplateParam Index out of bounds");
     }
     ps.print(tp.Template.Args[tp.Index]);
-
 });
 
 private static bool Traverse(this ptr<TemplateParam> _addr_tp, Func<AST, bool> fn) {
@@ -473,7 +454,6 @@ private static AST Copy(this ptr<TemplateParam> _addr_tp, Func<AST, AST> fn, Fun
         return null;
     }
     return fn(tp);
-
 }
 
 private static @string GoString(this ptr<TemplateParam> _addr_tp) {
@@ -500,7 +480,6 @@ private static void print(this ptr<LambdaAuto> _addr_la, ptr<printState> _addr_p
     // We print the index plus 1 because that is what the standard
     // demangler does.
     fmt.Fprintf(_addr_ps.buf, "auto:%d", la.Index + 1);
-
 }
 
 private static bool Traverse(this ptr<LambdaAuto> _addr_la, Func<AST, bool> fn) {
@@ -516,7 +495,6 @@ private static AST Copy(this ptr<LambdaAuto> _addr_la, Func<AST, AST> fn, Func<A
         return null;
     }
     return fn(la);
-
 }
 
 private static @string GoString(this ptr<LambdaAuto> _addr_la) {
@@ -547,7 +525,6 @@ private static void print(this ptr<Qualifiers> _addr_qs, ptr<printState> _addr_p
         }
         q.print(ps);
         first = false;
-
     }
 }
 
@@ -590,9 +567,7 @@ private static AST Copy(this ptr<Qualifiers> _addr_qs, Func<AST, AST> fn, Func<A
             return r;
         }
     }
-
     return qs;
-
 }
 
 private static @string GoString(this ptr<Qualifiers> _addr_qs) {
@@ -674,9 +649,7 @@ private static AST Copy(this ptr<Qualifier> _addr_q, Func<AST, AST> fn, Func<AST
             return r;
         }
     }
-
     return q;
-
 }
 
 private static @string GoString(this ptr<Qualifier> _addr_q) {
@@ -696,7 +669,6 @@ private static @string goString(this ptr<Qualifier> _addr_q, nint indent, @strin
         }
     }
     return qs;
-
 }
 
 // TypeWithQualifiers is a type with standard qualifiers.
@@ -717,7 +689,6 @@ private static void print(this ptr<TypeWithQualifiers> _addr_twq, ptr<printState
         ps.writeByte(' ');
         ps.print(twq.Qualifiers);
         ps.inner = ps.inner[..(int)len(ps.inner) - 1];
-
     }
 }
 
@@ -763,9 +734,7 @@ private static AST Copy(this ptr<TypeWithQualifiers> _addr_twq, Func<AST, AST> f
             return r;
         }
     }
-
     return twq;
-
 }
 
 private static @string GoString(this ptr<TypeWithQualifiers> _addr_twq) {
@@ -804,7 +773,6 @@ private static void print(this ptr<MethodWithQualifiers> _addr_mwq, ptr<printSta
             ps.writeString(mwq.RefQualifier);
         }
         ps.inner = ps.inner[..(int)len(ps.inner) - 1];
-
     }
 }
 
@@ -858,9 +826,7 @@ private static AST Copy(this ptr<MethodWithQualifiers> _addr_mwq, Func<AST, AST>
             return r;
         }
     }
-
     return mwq;
-
 }
 
 private static @string GoString(this ptr<MethodWithQualifiers> _addr_mwq) {
@@ -881,10 +847,8 @@ private static @string goString(this ptr<MethodWithQualifiers> _addr_mwq, nint i
             q += "\n";
         }
         q += fmt.Sprintf("%*s%s%s", indent + 2, "", "RefQualifier: ", mwq.RefQualifier);
-
     }
     return fmt.Sprintf("%*s%sMethodWithQualifiers:%s\n%s", indent, "", field, q, mwq.Method.goString(indent + 2, "Method: "));
-
 }
 
 // BuiltinType is a builtin type, like "int".
@@ -912,7 +876,6 @@ private static AST Copy(this ptr<BuiltinType> _addr_bt, Func<AST, AST> fn, Func<
         return null;
     }
     return fn(bt);
-
 }
 
 private static @string GoString(this ptr<BuiltinType> _addr_bt) {
@@ -985,9 +948,7 @@ private static AST Copy(this ptr<PointerType> _addr_pt, Func<AST, AST> fn, Func<
             return r;
         }
     }
-
     return pt;
-
 }
 
 private static @string GoString(this ptr<PointerType> _addr_pt) {
@@ -1047,9 +1008,7 @@ private static AST Copy(this ptr<ReferenceType> _addr_rt, Func<AST, AST> fn, Fun
             return r;
         }
     }
-
     return rt;
-
 }
 
 private static @string GoString(this ptr<ReferenceType> _addr_rt) {
@@ -1109,9 +1068,7 @@ private static AST Copy(this ptr<RvalueReferenceType> _addr_rt, Func<AST, AST> f
             return r;
         }
     }
-
     return rt;
-
 }
 
 private static @string GoString(this ptr<RvalueReferenceType> _addr_rt) {
@@ -1171,9 +1128,7 @@ private static AST Copy(this ptr<ComplexType> _addr_ct, Func<AST, AST> fn, Func<
             return r;
         }
     }
-
     return ct;
-
 }
 
 private static @string GoString(this ptr<ComplexType> _addr_ct) {
@@ -1233,9 +1188,7 @@ private static AST Copy(this ptr<ImaginaryType> _addr_it, Func<AST, AST> fn, Fun
             return r;
         }
     }
-
     return it;
-
 }
 
 private static @string GoString(this ptr<ImaginaryType> _addr_it) {
@@ -1309,9 +1262,7 @@ private static AST Copy(this ptr<VendorQualifier> _addr_vq, Func<AST, AST> fn, F
             return r;
         }
     }
-
     return vq;
-
 }
 
 private static @string GoString(this ptr<VendorQualifier> _addr_vq) {
@@ -1348,7 +1299,6 @@ private static void print(this ptr<ArrayType> _addr_at, ptr<printState> _addr_ps
             at.printDimension(ps);
         }
     }
-
 }
 
 private static void printInner(this ptr<ArrayType> _addr_at, ptr<printState> _addr_ps) {
@@ -1378,7 +1328,6 @@ private static void printDimension(this ptr<ArrayType> _addr_at, ptr<printState>
             }
 
         }
-
         {
             ptr<ArrayType> (_, ok) = in._<ptr<ArrayType>>();
 
@@ -1396,13 +1345,11 @@ private static void printDimension(this ptr<ArrayType> _addr_at, ptr<printState>
             }
 
         }
-
     }
     ps.writeString(space);
     ps.writeByte('[');
     ps.print(at.Dimension);
     ps.writeByte(']');
-
 }
 
 private static bool Traverse(this ptr<ArrayType> _addr_at, Func<AST, bool> fn) {
@@ -1439,9 +1386,7 @@ private static AST Copy(this ptr<ArrayType> _addr_at, Func<AST, AST> fn, Func<AS
             return r;
         }
     }
-
     return at;
-
 }
 
 private static @string GoString(this ptr<ArrayType> _addr_at) {
@@ -1475,14 +1420,11 @@ private static void print(this ptr<FunctionType> _addr_ft, ptr<printState> _addr
         if (len(ps.inner) == 0) { 
             // Everything was printed.
             return ;
-
         }
         ps.inner = ps.inner[..(int)len(ps.inner) - 1];
         ps.writeByte(' ');
-
     }
     ft.printArgs(ps);
-
 }
 
 private static void printInner(this ptr<FunctionType> _addr_ft, ptr<printState> _addr_ps) {
@@ -1541,7 +1483,6 @@ private static void printArgs(this ptr<FunctionType> _addr_ft, ptr<printState> _
             ps.writeByte(' ');
         }
         ps.writeByte('(');
-
     }
     var save = ps.printInner(true);
 
@@ -1559,12 +1500,10 @@ private static void printArgs(this ptr<FunctionType> _addr_ft, ptr<printState> _
         }
         ps.print(a);
         first = false;
-
     }    ps.writeByte(')');
 
     ps.inner = save;
     ps.printInner(false);
-
 }
 
 private static bool Traverse(this ptr<FunctionType> _addr_ft, Func<AST, bool> fn) {
@@ -1620,9 +1559,7 @@ private static AST Copy(this ptr<FunctionType> _addr_ft, Func<AST, AST> fn, Func
             return r;
         }
     }
-
     return ft;
-
 }
 
 private static @string GoString(this ptr<FunctionType> _addr_ft) {
@@ -1655,7 +1592,6 @@ private static @string goString(this ptr<FunctionType> _addr_ft, nint indent, @s
         }
     }
     return fmt.Sprintf("%*s%sFunctionType:\n%s\n%s", indent, "", field, r, args);
-
 }
 
 // FunctionParam is a parameter of a function, used for last-specified
@@ -1690,7 +1626,6 @@ private static AST Copy(this ptr<FunctionParam> _addr_fp, Func<AST, AST> fn, Fun
         return null;
     }
     return fn(fp);
-
 }
 
 private static @string GoString(this ptr<FunctionParam> _addr_fp) {
@@ -1731,7 +1666,6 @@ private static void printInner(this ptr<PtrMem> _addr_pm, ptr<printState> _addr_
     }
     ps.print(pm.Class);
     ps.writeString("::*");
-
 }
 
 private static bool Traverse(this ptr<PtrMem> _addr_pm, Func<AST, bool> fn) {
@@ -1768,9 +1702,7 @@ private static AST Copy(this ptr<PtrMem> _addr_pm, Func<AST, AST> fn, Func<AST, 
             return r;
         }
     }
-
     return pm;
-
 }
 
 private static @string GoString(this ptr<PtrMem> _addr_pm) {
@@ -1811,7 +1743,6 @@ private static void print(this ptr<FixedType> _addr_ft, ptr<printState> _addr_ps
             ps.writeByte(' ');
         }
     }
-
     if (ft.Accum) {
         ps.writeString("_Accum");
     }
@@ -1847,9 +1778,7 @@ private static AST Copy(this ptr<FixedType> _addr_ft, Func<AST, AST> fn, Func<AS
             return r;
         }
     }
-
     return ft;
-
 }
 
 private static @string GoString(this ptr<FixedType> _addr_ft) {
@@ -1924,9 +1853,7 @@ private static AST Copy(this ptr<VectorType> _addr_vt, Func<AST, AST> fn, Func<A
             return r;
         }
     }
-
     return vt;
-
 }
 
 private static @string GoString(this ptr<VectorType> _addr_vt) {
@@ -1981,9 +1908,7 @@ private static AST Copy(this ptr<Decltype> _addr_dt, Func<AST, AST> fn, Func<AST
             return r;
         }
     }
-
     return dt;
-
 }
 
 private static @string GoString(this ptr<Decltype> _addr_dt) {
@@ -2014,7 +1939,6 @@ private static void print(this ptr<Operator> _addr_op, ptr<printState> _addr_ps)
     var n = op.Name;
     n = strings.TrimSuffix(n, " ");
     ps.writeString(n);
-
 }
 
 private static bool Traverse(this ptr<Operator> _addr_op, Func<AST, bool> fn) {
@@ -2030,7 +1954,6 @@ private static AST Copy(this ptr<Operator> _addr_op, Func<AST, AST> fn, Func<AST
         return null;
     }
     return fn(op);
-
 }
 
 private static @string GoString(this ptr<Operator> _addr_op) {
@@ -2083,9 +2006,7 @@ private static AST Copy(this ptr<Constructor> _addr_c, Func<AST, AST> fn, Func<A
             return r;
         }
     }
-
     return c;
-
 }
 
 private static @string GoString(this ptr<Constructor> _addr_c) {
@@ -2139,9 +2060,7 @@ private static AST Copy(this ptr<Destructor> _addr_d, Func<AST, AST> fn, Func<AS
             return r;
         }
     }
-
     return d;
-
 }
 
 private static @string GoString(this ptr<Destructor> _addr_d) {
@@ -2176,7 +2095,6 @@ private static void print(this ptr<GlobalCDtor> _addr_gcd, ptr<printState> _addr
     }
     ps.writeString(" keyed to ");
     ps.print(gcd.Key);
-
 }
 
 private static bool Traverse(this ptr<GlobalCDtor> _addr_gcd, Func<AST, bool> fn) {
@@ -2205,9 +2123,7 @@ private static AST Copy(this ptr<GlobalCDtor> _addr_gcd, Func<AST, AST> fn, Func
             return r;
         }
     }
-
     return gcd;
-
 }
 
 private static @string GoString(this ptr<GlobalCDtor> _addr_gcd) {
@@ -2272,9 +2188,7 @@ private static AST Copy(this ptr<TaggedName> _addr_t, Func<AST, AST> fn, Func<AS
             return r;
         }
     }
-
     return t;
-
 }
 
 private static @string GoString(this ptr<TaggedName> _addr_t) {
@@ -2338,9 +2252,7 @@ private static AST Copy(this ptr<PackExpansion> _addr_pe, Func<AST, AST> fn, Fun
             return r;
         }
     }
-
     return pe;
-
 }
 
 private static @string GoString(this ptr<PackExpansion> _addr_pe) {
@@ -2369,7 +2281,6 @@ private static void print(this ptr<ArgumentPack> _addr_ap, ptr<printState> _addr
             ps.writeString(", ");
         }
         ps.print(a);
-
     }
 }
 
@@ -2412,9 +2323,7 @@ private static AST Copy(this ptr<ArgumentPack> _addr_ap, Func<AST, AST> fn, Func
             return r;
         }
     }
-
     return ap;
-
 }
 
 private static @string GoString(this ptr<ArgumentPack> _addr_ap) {
@@ -2434,7 +2343,6 @@ private static @string goString(this ptr<ArgumentPack> _addr_ap, nint indent, @s
         s += "\n";
         s += a.goString(indent + 2, fmt.Sprintf("%d: ", i));
     }    return s;
-
 }
 
 // SizeofPack is the sizeof operator applied to an argument pack.
@@ -2470,9 +2378,7 @@ private static AST Copy(this ptr<SizeofPack> _addr_sp, Func<AST, AST> fn, Func<A
             return r;
         }
     }
-
     return sp;
-
 }
 
 private static @string GoString(this ptr<SizeofPack> _addr_sp) {
@@ -2518,11 +2424,8 @@ private static void print(this ptr<SizeofArgs> _addr_sa, ptr<printState> _addr_p
 
             }
 
-
         }
-
     }    ps.writeString(fmt.Sprintf("%d", c));
-
 }
 
 private static bool Traverse(this ptr<SizeofArgs> _addr_sa, Func<AST, bool> fn) {
@@ -2564,9 +2467,7 @@ private static AST Copy(this ptr<SizeofArgs> _addr_sa, Func<AST, AST> fn, Func<A
             return r;
         }
     }
-
     return sa;
-
 }
 
 private static @string GoString(this ptr<SizeofArgs> _addr_sa) {
@@ -2591,7 +2492,6 @@ private static @string goString(this ptr<SizeofArgs> _addr_sa, nint indent, @str
         }
     }
     return fmt.Sprintf("%*s%sSizeofArgs:\n%s", indent, "", field, args);
-
 }
 
 // Cast is a type cast.
@@ -2633,9 +2533,7 @@ private static AST Copy(this ptr<Cast> _addr_c, Func<AST, AST> fn, Func<AST, boo
             return r;
         }
     }
-
     return c;
-
 }
 
 private static @string GoString(this ptr<Cast> _addr_c) {
@@ -2705,7 +2603,6 @@ private static void print(this ptr<Nullary> _addr_n, ptr<printState> _addr_ps) {
             ps.print(n.Op);
         }
     }
-
 }
 
 private static bool Traverse(this ptr<Nullary> _addr_n, Func<AST, bool> fn) {
@@ -2734,9 +2631,7 @@ private static AST Copy(this ptr<Nullary> _addr_n, Func<AST, AST> fn, Func<AST, 
             return r;
         }
     }
-
     return n;
-
 }
 
 private static @string GoString(this ptr<Nullary> _addr_n) {
@@ -2785,16 +2680,13 @@ private static void print(this ptr<Unary> _addr_u, ptr<printState> _addr_ps) {
                         }
 
                     }
-
                 }
 
             }
-
         }
         op = op__prev1;
 
     }
-
 
     if (u.Suffix) {
         parenthesize(_addr_ps, expr);
@@ -2823,11 +2715,9 @@ private static void print(this ptr<Unary> _addr_u, ptr<printState> _addr_ps) {
         }
 
 
-
         op = op__prev1;
 
     }
-
 
     if (!u.Suffix) {
         {
@@ -2838,25 +2728,21 @@ private static void print(this ptr<Unary> _addr_u, ptr<printState> _addr_ps) {
             if (ok && op.Name == "::") { 
                 // Don't use parentheses after ::.
                 ps.print(expr);
-
             }
             else if (u.SizeofType) { 
                 // Always use parentheses for sizeof argument.
                 ps.writeByte('(');
                 ps.print(expr);
                 ps.writeByte(')');
-
             }
             else
  {
                 parenthesize(_addr_ps, expr);
             }
 
-
             op = op__prev2;
 
         }
-
     }
 }
 
@@ -2894,9 +2780,7 @@ private static AST Copy(this ptr<Unary> _addr_u, Func<AST, AST> fn, Func<AST, bo
             return r;
         }
     }
-
     return u;
-
 }
 
 private static @string GoString(this ptr<Unary> _addr_u) {
@@ -2916,7 +2800,6 @@ private static @string goString(this ptr<Unary> _addr_u, nint indent, @string fi
         s += " SizeofType: true";
     }
     return fmt.Sprintf("%*s%sUnary:%s\n%s\n%s", indent, "", field, s, u.Op.goString(indent + 2, "Op: "), u.Expr.goString(indent + 2, "Expr: "));
-
 }
 
 // isDesignatedInitializer reports whether x is a designated
@@ -2936,7 +2819,6 @@ private static bool isDesignatedInitializer(AST x) {
                 op = op__prev1;
 
             }
-
             break;
         case ptr<Trinary> x:
             {
@@ -2951,11 +2833,9 @@ private static bool isDesignatedInitializer(AST x) {
                 op = op__prev1;
 
             }
-
             break;
     }
     return false;
-
 }
 
 // Binary is a binary operation in an expression.
@@ -2996,7 +2876,6 @@ private static void print(this ptr<Binary> _addr_b, ptr<printState> _addr_ps) {
             // Don't add anything between designated
             // initializer chains.
             ps.print(b.Right);
-
         }
         else
  {
@@ -3004,7 +2883,6 @@ private static void print(this ptr<Binary> _addr_b, ptr<printState> _addr_ps) {
             parenthesize(_addr_ps, b.Right);
         }
         return ;
-
     }
     if (op != null && op.Name == ">") {
         ps.writeByte('(');
@@ -3030,7 +2908,6 @@ private static void print(this ptr<Binary> _addr_b, ptr<printState> _addr_ps) {
  {
                             skipParens = true;
                         }
-
                     }
                     else
  {
@@ -3038,11 +2915,9 @@ private static void print(this ptr<Binary> _addr_b, ptr<printState> _addr_ps) {
                     }
 
                 }
-
             }
 
         }
-
     }
     if (skipParens) {
         ps.print(left);
@@ -3112,9 +2987,7 @@ private static AST Copy(this ptr<Binary> _addr_b, Func<AST, AST> fn, Func<AST, b
             return r;
         }
     }
-
     return b;
-
 }
 
 private static @string GoString(this ptr<Binary> _addr_b) {
@@ -3151,7 +3024,6 @@ private static void print(this ptr<Trinary> _addr_t, ptr<printState> _addr_ps) {
             // Don't add anything between designated
             // initializer chains.
             ps.print(t.Third);
-
         }
         else
  {
@@ -3159,14 +3031,12 @@ private static void print(this ptr<Trinary> _addr_t, ptr<printState> _addr_ps) {
             parenthesize(_addr_ps, t.Third);
         }
         return ;
-
     }
     parenthesize(_addr_ps, t.First);
     ps.writeByte('?');
     parenthesize(_addr_ps, t.Second);
     ps.writeString(" : ");
     parenthesize(_addr_ps, t.Third);
-
 }
 
 private static bool Traverse(this ptr<Trinary> _addr_t, Func<AST, bool> fn) {
@@ -3213,9 +3083,7 @@ private static AST Copy(this ptr<Trinary> _addr_t, Func<AST, AST> fn, Func<AST, 
             return r;
         }
     }
-
     return t;
-
 }
 
 private static @string GoString(this ptr<Trinary> _addr_t) {
@@ -3324,9 +3192,7 @@ private static AST Copy(this ptr<Fold> _addr_f, Func<AST, AST> fn, Func<AST, boo
             return r;
         }
     }
-
     return f;
-
 }
 
 private static @string GoString(this ptr<Fold> _addr_f) {
@@ -3425,9 +3291,7 @@ private static AST Copy(this ptr<New> _addr_n, Func<AST, AST> fn, Func<AST, bool
             return r;
         }
     }
-
     return n;
-
 }
 
 private static @string GoString(this ptr<New> _addr_n) {
@@ -3456,7 +3320,6 @@ private static @string goString(this ptr<New> _addr_n, nint indent, @string fiel
         ini = n.Init.goString(indent + 2, "Init: ");
     }
     return fmt.Sprintf("%*s%sNew:\n%s\n%s\n%s\n%s", indent, "", field, n.Op.goString(indent + 2, "Op: "), place, n.Type.goString(indent + 2, "Type: "), ini);
-
 }
 
 // Literal is a literal in an expression.
@@ -3503,7 +3366,6 @@ private static void print(this ptr<Literal> _addr_l, ptr<printState> _addr_ps) {
                             return ;
                             break;
                     }
-
                 }
                 else if (b.Name == "decltype(nullptr)" && l.Val == "") {
                     ps.print(l.Type);
@@ -3514,12 +3376,9 @@ private static void print(this ptr<Literal> _addr_l, ptr<printState> _addr_ps) {
                     isFloat = builtinTypeFloat[b.Name];
                 }
 
-
             }
-
         }
     }
-
 
     ps.writeByte('(');
     ps.print(l.Type);
@@ -3563,9 +3422,7 @@ private static AST Copy(this ptr<Literal> _addr_l, Func<AST, AST> fn, Func<AST, 
             return r;
         }
     }
-
     return l;
-
 }
 
 private static @string GoString(this ptr<Literal> _addr_l) {
@@ -3582,7 +3439,6 @@ private static @string goString(this ptr<Literal> _addr_l, nint indent, @string 
         neg = " Neg: true";
     }
     return fmt.Sprintf("%*s%sLiteral:%s\n%s\n%*sVal: %s", indent, "", field, neg, l.Type.goString(indent + 2, "Type: "), indent + 2, "", l.Val);
-
 }
 
 // ExprList is a list of expressions, typically arguments to a
@@ -3600,7 +3456,6 @@ private static void print(this ptr<ExprList> _addr_el, ptr<printState> _addr_ps)
             ps.writeString(", ");
         }
         ps.print(e);
-
     }
 }
 
@@ -3643,9 +3498,7 @@ private static AST Copy(this ptr<ExprList> _addr_el, Func<AST, AST> fn, Func<AST
             return r;
         }
     }
-
     return el;
-
 }
 
 private static @string GoString(this ptr<ExprList> _addr_el) {
@@ -3665,7 +3518,6 @@ private static @string goString(this ptr<ExprList> _addr_el, nint indent, @strin
         s += "\n";
         s += e.goString(indent + 2, fmt.Sprintf("%d: ", i));
     }    return s;
-
 }
 
 // InitializerList is an initializer list: an optional type with a
@@ -3685,7 +3537,6 @@ private static void print(this ptr<InitializerList> _addr_il, ptr<printState> _a
     ps.writeByte('{');
     ps.print(il.Exprs);
     ps.writeByte('}');
-
 }
 
 private static bool Traverse(this ptr<InitializerList> _addr_il, Func<AST, bool> fn) {
@@ -3696,7 +3547,6 @@ private static bool Traverse(this ptr<InitializerList> _addr_il, Func<AST, bool>
             il.Type.Traverse(fn);
         }
         il.Exprs.Traverse(fn);
-
     }
 }
 
@@ -3728,9 +3578,7 @@ private static AST Copy(this ptr<InitializerList> _addr_il, Func<AST, AST> fn, F
             return r;
         }
     }
-
     return il;
-
 }
 
 private static @string GoString(this ptr<InitializerList> _addr_il) {
@@ -3751,7 +3599,6 @@ private static @string goString(this ptr<InitializerList> _addr_il, nint indent,
         t = il.Type.goString(indent + 2, "Type: ");
     }
     return fmt.Sprintf("%*s%sInitializerList:\n%s\n%s", indent, "", field, t, il.Exprs.goString(indent + 2, "Exprs: "));
-
 }
 
 // DefaultArg holds a default argument for a local name.
@@ -3794,9 +3641,7 @@ private static AST Copy(this ptr<DefaultArg> _addr_da, Func<AST, AST> fn, Func<A
             return r;
         }
     }
-
     return da;
-
 }
 
 private static @string GoString(this ptr<DefaultArg> _addr_da) {
@@ -3827,9 +3672,7 @@ private static void print(this ptr<Closure> _addr_cl, ptr<printState> _addr_ps) 
             ps.writeString(", ");
         }
         ps.print(t);
-
     }    ps.writeString(fmt.Sprintf(")#%d}", cl.Num + 1));
-
 }
 
 private static bool Traverse(this ptr<Closure> _addr_cl, Func<AST, bool> fn) {
@@ -3871,9 +3714,7 @@ private static AST Copy(this ptr<Closure> _addr_cl, Func<AST, AST> fn, Func<AST,
             return r;
         }
     }
-
     return cl;
-
 }
 
 private static @string GoString(this ptr<Closure> _addr_cl) {
@@ -3898,7 +3739,6 @@ private static @string goString(this ptr<Closure> _addr_cl, nint indent, @string
         }
     }
     return fmt.Sprintf("%*s%sClosure: Num: %d\n%s", indent, "", field, cl.Num, types);
-
 }
 
 // UnnamedType is an unnamed type, that just has an index.
@@ -3926,7 +3766,6 @@ private static AST Copy(this ptr<UnnamedType> _addr_ut, Func<AST, AST> fn, Func<
         return null;
     }
     return fn(ut);
-
 }
 
 private static @string GoString(this ptr<UnnamedType> _addr_ut) {
@@ -3981,9 +3820,7 @@ private static AST Copy(this ptr<Clone> _addr_c, Func<AST, AST> fn, Func<AST, bo
             return r;
         }
     }
-
     return c;
-
 }
 
 private static @string GoString(this ptr<Clone> _addr_c) {
@@ -4039,9 +3876,7 @@ private static AST Copy(this ptr<Special> _addr_s, Func<AST, AST> fn, Func<AST, 
             return r;
         }
     }
-
     return s;
-
 }
 
 private static @string GoString(this ptr<Special> _addr_s) {
@@ -4108,9 +3943,7 @@ private static AST Copy(this ptr<Special2> _addr_s, Func<AST, AST> fn, Func<AST,
             return r;
         }
     }
-
     return s;
-
 }
 
 private static @string GoString(this ptr<Special2> _addr_s) {
@@ -4144,9 +3977,7 @@ private static void print(this ptr<EnableIf> _addr_ei, ptr<printState> _addr_ps)
         }
         ps.print(a);
         first = false;
-
     }    ps.writeString("]");
-
 }
 
 private static bool Traverse(this ptr<EnableIf> _addr_ei, Func<AST, bool> fn) {
@@ -4193,9 +4024,7 @@ private static AST Copy(this ptr<EnableIf> _addr_ei, Func<AST, AST> fn, Func<AST
             return r;
         }
     }
-
     return ei;
-
 }
 
 private static @string GoString(this ptr<EnableIf> _addr_ei) {
@@ -4220,7 +4049,6 @@ private static @string goString(this ptr<EnableIf> _addr_ei, nint indent, @strin
         }
     }
     return fmt.Sprintf("%*s%sEnableIf:\n%s\n%s", indent, "", field, ei.Type.goString(indent + 2, "Type: "), args);
-
 }
 
 // Print the inner types.
@@ -4236,7 +4064,6 @@ private static slice<AST> printInner(this ptr<printState> _addr_ps, bool prefixO
         ps.printOneInner(psave);
     }
     return save;
-
 }
 
 // innerPrinter is an interface for types that can print themselves as
@@ -4268,7 +4095,6 @@ private static void printOneInner(this ptr<printState> _addr_ps, ptr<slice<AST>>
             }
 
         }
-
     }
     {
         innerPrinter (ip, ok) = innerPrinter.As(a._<innerPrinter>())!;
@@ -4281,7 +4107,6 @@ private static void printOneInner(this ptr<printState> _addr_ps, ptr<slice<AST>>
             ps.print(a);
         }
     }
-
 });
 
 // isEmpty returns whether printing a will not print anything.
@@ -4305,7 +4130,6 @@ private static bool isEmpty(this ptr<printState> _addr_ps, AST a) {
             break;
         }
     }
-
 }
 
 } // end demangle_package

@@ -5,18 +5,19 @@
 //go:build !plan9
 // +build !plan9
 
-// package os -- go2cs converted at 2022 March 06 22:13:44 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:03 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\rawconn.go
-using runtime = go.runtime_package;
-using System;
-
-
 namespace go;
 
+using runtime = runtime_package;
+
+
+// rawConn implements syscall.RawConn.
+
+using System;
 public static partial class os_package {
 
-    // rawConn implements syscall.RawConn.
 private partial struct rawConn {
     public ptr<File> file;
 }
@@ -35,11 +36,9 @@ private static error Control(this ptr<rawConn> _addr_c, Action<System.UIntPtr> f
         err = err__prev1;
 
     }
-
     err = c.file.pfd.RawControl(f);
     runtime.KeepAlive(c.file);
     return error.As(err)!;
-
 }
 
 private static error Read(this ptr<rawConn> _addr_c, Func<System.UIntPtr, bool> f) {
@@ -56,11 +55,9 @@ private static error Read(this ptr<rawConn> _addr_c, Func<System.UIntPtr, bool> 
         err = err__prev1;
 
     }
-
     err = c.file.pfd.RawRead(f);
     runtime.KeepAlive(c.file);
     return error.As(err)!;
-
 }
 
 private static error Write(this ptr<rawConn> _addr_c, Func<System.UIntPtr, bool> f) {
@@ -77,11 +74,9 @@ private static error Write(this ptr<rawConn> _addr_c, Func<System.UIntPtr, bool>
         err = err__prev1;
 
     }
-
     err = c.file.pfd.RawWrite(f);
     runtime.KeepAlive(c.file);
     return error.As(err)!;
-
 }
 
 private static (ptr<rawConn>, error) newRawConn(ptr<File> _addr_file) {

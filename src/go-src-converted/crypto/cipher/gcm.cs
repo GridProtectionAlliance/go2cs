@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cipher -- go2cs converted at 2022 March 06 22:18:10 UTC
+// package cipher -- go2cs converted at 2022 March 13 05:32:23 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Program Files\Go\src\crypto\cipher\gcm.go
-using subtleoverlap = go.crypto.@internal.subtle_package;
-using subtle = go.crypto.subtle_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-
 namespace go.crypto;
+
+using subtleoverlap = crypto.@internal.subtle_package;
+using subtle = crypto.subtle_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+
+
+// AEAD is a cipher mode providing authenticated encryption with associated
+// data. For a description of the methodology, see
+//    https://en.wikipedia.org/wiki/Authenticated_encryption
 
 public static partial class cipher_package {
 
-    // AEAD is a cipher mode providing authenticated encryption with associated
-    // data. For a description of the methodology, see
-    //    https://en.wikipedia.org/wiki/Authenticated_encryption
 public partial interface AEAD {
     (slice<byte>, error) NonceSize(); // Overhead returns the maximum difference between the lengths of a
 // plaintext and its ciphertext.
@@ -130,7 +132,6 @@ private static (AEAD, error) newGCMWithNonceAndTagSize(Block cipher, nint nonceS
         }
     }
 
-
     if (cipher.BlockSize() != gcmBlockSize) {
         return (null, error.As(errors.New("cipher: NewGCM requires 128-bit block cipher"))!);
     }
@@ -158,14 +159,12 @@ private static (AEAD, error) newGCMWithNonceAndTagSize(Block cipher, nint nonceS
     }
 
     return (g, error.As(null!)!);
-
 }
 
 private static readonly nint gcmBlockSize = 16;
 private static readonly nint gcmTagSize = 16;
 private static readonly nint gcmMinimumTagSize = 12; // NIST SP 800-38D recommends tags with 12 or more bytes.
 private static readonly nint gcmStandardNonceSize = 12;
-
 
 private static nint NonceSize(this ptr<gcm> _addr_g) {
     ref gcm g = ref _addr_g.val;
@@ -206,7 +205,6 @@ private static slice<byte> Seal(this ptr<gcm> _addr_g, slice<byte> dst, slice<by
     copy(out[(int)len(plaintext)..], tag[..]);
 
     return ret;
-
 });
 
 private static var errOpen = errors.New("cipher: message authentication failed");
@@ -253,12 +251,10 @@ private static (slice<byte>, error) Open(this ptr<gcm> _addr_g, slice<byte> dst,
         foreach (var (i) in out) {
             out[i] = 0;
         }        return (null, error.As(errOpen)!);
-
     }
     g.counterCrypt(out, ciphertext, _addr_counter);
 
     return (ret, error.As(null!)!);
-
 });
 
 // reverseBits reverses the order of the bits of 4-bit number in i.
@@ -275,7 +271,6 @@ private static gcmFieldElement gcmAdd(ptr<gcmFieldElement> _addr_x, ptr<gcmField
  
     // Addition in a characteristic 2 field is just XOR.
     return new gcmFieldElement(x.low^y.low,x.high^y.high);
-
 }
 
 // gcmDouble returns the result of doubling an element of GF(2¹²⁸).
@@ -301,7 +296,6 @@ private static gcmFieldElement gcmDouble(ptr<gcmFieldElement> _addr_x) {
         @double.low ^= 0xe100000000000000;
     }
     return ;
-
 }
 
 private static ushort gcmReductionTable = new slice<ushort>(new ushort[] { 0x0000, 0x1c20, 0x3840, 0x2460, 0x7080, 0x6ca0, 0x48c0, 0x54e0, 0xe100, 0xfd20, 0xd940, 0xc560, 0x9180, 0x8da0, 0xa9c0, 0xb5e0 });
@@ -340,11 +334,9 @@ private static void mul(this ptr<gcm> _addr_g, ptr<gcmFieldElement> _addr_y) {
             }
 
         }
-
     }
 
     y = z;
-
 }
 
 // updateBlocks extends y with more polynomial terms from blocks, based on
@@ -406,10 +398,8 @@ private static (slice<byte>, slice<byte>) sliceForAppend(slice<byte> @in, nint n
             copy(head, in);
         }
     }
-
     tail = head[(int)len(in)..];
     return ;
-
 }
 
 // counterCrypt crypts in to out using g.cipher in counter mode.

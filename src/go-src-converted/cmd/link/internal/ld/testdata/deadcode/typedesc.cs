@@ -5,10 +5,8 @@
 // Test that a live variable doesn't bring its type
 // descriptor live.
 
-// package main -- go2cs converted at 2022 March 06 23:22:34 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:38 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\deadcode\typedesc.go
-
-
 namespace go;
 
 public static partial class main_package {

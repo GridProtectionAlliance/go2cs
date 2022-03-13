@@ -2,36 +2,38 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:34 UTC
+// package walk -- go2cs converted at 2022 March 13 06:24:54 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\closure.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// directClosureCall rewrites a direct call of a function literal into
+// a normal function call with closure variables passed as arguments.
+// This avoids allocation of a closure object.
+//
+// For illustration, the following call:
+//
+//    func(a int) {
+//        println(byval)
+//        byref++
+//    }(42)
+//
+// becomes:
+//
+//    func(byval int, &byref *int, a int) {
+//        println(byval)
+//        (*&byref)++
+//    }(byval, &byref, 42)
 
 public static partial class walk_package {
 
-    // directClosureCall rewrites a direct call of a function literal into
-    // a normal function call with closure variables passed as arguments.
-    // This avoids allocation of a closure object.
-    //
-    // For illustration, the following call:
-    //
-    //    func(a int) {
-    //        println(byval)
-    //        byref++
-    //    }(42)
-    //
-    // becomes:
-    //
-    //    func(byval int, &byref *int, a int) {
-    //        println(byval)
-    //        (*&byref)++
-    //    }(byval, &byref, 42)
 private static void directClosureCall(ptr<ir.CallExpr> _addr_n) {
     ref ir.CallExpr n = ref _addr_n.val;
 
@@ -58,7 +60,6 @@ private static void directClosureCall(ptr<ir.CallExpr> _addr_n) {
             addr.SetType(types.NewPtr(v.Type()));
             v.Heapaddr = addr;
             v = addr;
-
         }
         v.Class = ir.PPARAM;
         decls = append(decls, v);
@@ -66,7 +67,6 @@ private static void directClosureCall(ptr<ir.CallExpr> _addr_n) {
         var fld = types.NewField(src.NoXPos, v.Sym(), v.Type());
         fld.Nname = v;
         params = append(params, fld);
-
     }    var f = clofn.Nname;
     var typ = f.Type(); 
 
@@ -92,7 +92,6 @@ private static void directClosureCall(ptr<ir.CallExpr> _addr_n) {
         n.SetType(typ.Results());
     }
     ir.CurFunc.Closures = append(ir.CurFunc.Closures, clofn);
-
 }
 
 private static ir.Node walkClosure(ptr<ir.ClosureExpr> _addr_clo, ptr<ir.Nodes> _addr_init) => func((_, panic, _) => {
@@ -107,7 +106,6 @@ private static ir.Node walkClosure(ptr<ir.ClosureExpr> _addr_clo, ptr<ir.Nodes> 
             @base.WarnfAt(clo.Pos(), "closure converted to global");
         }
         return clofn.Nname;
-
     }
     ir.ClosureDebugRuntimeCheck(clo);
     clofn.SetNeedctxt(true);
@@ -138,9 +136,7 @@ private static ir.Node walkClosure(ptr<ir.ClosureExpr> _addr_clo, ptr<ir.Nodes> 
         }
     }
 
-
     return walkExpr(cfn, init);
-
 });
 
 // closureArgs returns a slice of expressions that an be used to
@@ -161,9 +157,7 @@ private static slice<ir.Node> closureArgs(ptr<ir.ClosureExpr> _addr_clo) {
             outer = typecheck.NodAddrAt(fn.Pos(), outer);
         }
         args[i] = typecheck.Expr(outer);
-
     }    return args;
-
 }
 
 private static ir.Node walkCallPart(ptr<ir.SelectorExpr> _addr_n, ptr<ir.Nodes> _addr_init) => func((_, panic, _) => {
@@ -188,7 +182,6 @@ private static ir.Node walkCallPart(ptr<ir.SelectorExpr> _addr_n, ptr<ir.Nodes> 
         var c = ir.NewUnaryExpr(@base.Pos, ir.OCHECKNIL, tab);
         c.SetTypecheck(1);
         init.Append(c);
-
     }
     var typ = typecheck.PartialCallType(n);
 
@@ -215,9 +208,7 @@ private static ir.Node walkCallPart(ptr<ir.SelectorExpr> _addr_n, ptr<ir.Nodes> 
         }
     }
 
-
     return walkExpr(cfn, init);
-
 });
 
 } // end walk_package

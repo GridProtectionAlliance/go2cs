@@ -8,19 +8,18 @@
 // launch with `go run cmpConstGen.go` a file called cmpConst.go
 // will be written into the parent directory containing the tests
 
-// package main -- go2cs converted at 2022 March 06 23:15:02 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:31 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\test\testdata\gen\cmpConstGen.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using format = go.go.format_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using big = go.math.big_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using format = go.format_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using big = math.big_package;
+using sort = sort_package;
+using System;
 
 public static partial class main_package {
 
@@ -39,7 +38,6 @@ private static readonly nint minI32 = -(1 << 31);
 private static readonly nint minI16 = -(1 << 15);
 private static readonly nint minI8 = -(1 << 7);
 
-
 private static bool cmp(ptr<big.Int> _addr_left, @string op, ptr<big.Int> _addr_right) => func((_, panic, _) => {
     ref big.Int left = ref _addr_left.val;
     ref big.Int right = ref _addr_right.val;
@@ -56,7 +54,6 @@ private static bool cmp(ptr<big.Int> _addr_left, @string op, ptr<big.Int> _addr_
             break;
     }
     panic("unexpected comparison value");
-
 });
 
 private static bool inRange(@string typ, ptr<big.Int> _addr_val) => func((_, panic, _) => {
@@ -98,7 +95,6 @@ private static bool inRange(@string typ, ptr<big.Int> _addr_val) => func((_, pan
             break;
     }
     return cmp(min, "<=", _addr_val) && cmp(_addr_val, "<=", max);
-
 });
 
 private static slice<ptr<big.Int>> getValues(@string typ) {
@@ -112,9 +108,7 @@ private static slice<ptr<big.Int>> getValues(@string typ) {
             continue;
         }
         ret = append(ret, val);
-
     }    return ret;
-
 }
 
 private static @string sigString(ptr<big.Int> _addr_v) {
@@ -126,7 +120,6 @@ private static @string sigString(ptr<big.Int> _addr_v) {
         return "neg" + t.String();
     }
     return t.String();
-
 }
 
 private static void Main() => func((_, panic, _) => {
@@ -176,7 +169,6 @@ private static void Main() => func((_, panic, _) => {
                             op = __op; 
                             // no need for go:noinline because the function is called indirectly
                             fmt.Fprintf(w, "func %v_%v_%v(x %v) bool { return x %v %v; }\n", op.name, sig, typ, typ, op.op, r.String());
-
                         }
 
                         op = op__prev3;
@@ -218,7 +210,6 @@ private static void Main() => func((_, panic, _) => {
             }
 
             fmt.Fprintf(w, "}\n");
-
         }
         typ = typ__prev1;
     }

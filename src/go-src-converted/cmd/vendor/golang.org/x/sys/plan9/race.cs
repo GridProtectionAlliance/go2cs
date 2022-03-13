@@ -4,13 +4,13 @@
 
 // +build plan9,race
 
-// package plan9 -- go2cs converted at 2022 March 06 23:26:24 UTC
+// package plan9 -- go2cs converted at 2022 March 13 06:41:15 UTC
 // import "cmd/vendor/golang.org/x/sys/plan9" ==> using plan9 = go.cmd.vendor.golang.org.x.sys.plan9_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\plan9\race.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
 
 public static partial class plan9_package {
 

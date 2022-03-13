@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:31:49 UTC
+//     Generated on 2022 March 13 05:42:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class src_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PosBase
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace @internal
             public static implicit operator PosBase(NilType nil) => default(PosBase);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static PosBase PosBase_cast(dynamic value)
         {
             return new PosBase(value.pos, value.filename, value.absFilename, value.symFilename, value.line, value.col, value.inl);

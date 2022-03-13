@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ascii -- go2cs converted at 2022 March 06 22:17:01 UTC
+// package ascii -- go2cs converted at 2022 March 13 05:30:22 UTC
 // import "net/http/internal/ascii" ==> using ascii = go.net.http.@internal.ascii_package
 // Original source: C:\Program Files\Go\src\net\http\internal\ascii\print.go
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
 namespace go.net.http.@internal;
+
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// EqualFold is strings.EqualFold, ASCII only. It reports whether s and t
+// are equal, ASCII-case-insensitively.
 
 public static partial class ascii_package {
 
-    // EqualFold is strings.EqualFold, ASCII only. It reports whether s and t
-    // are equal, ASCII-case-insensitively.
 public static bool EqualFold(@string s, @string t) {
     if (len(s) != len(t)) {
         return false;
@@ -24,7 +26,6 @@ public static bool EqualFold(@string s, @string t) {
         }
     }
     return true;
-
 }
 
 // lower returns the ASCII lowercase version of b.
@@ -33,7 +34,6 @@ private static byte lower(byte b) {
         return b + ('a' - 'A');
     }
     return b;
-
 }
 
 // IsPrint returns whether s is ASCII and printable according to
@@ -45,7 +45,6 @@ public static bool IsPrint(@string s) {
         }
     }
     return true;
-
 }
 
 // Is returns whether s is ASCII.
@@ -56,7 +55,6 @@ public static bool Is(@string s) {
         }
     }
     return true;
-
 }
 
 // ToLower returns the lowercase version of s if s is ASCII and printable.
@@ -68,7 +66,6 @@ public static (@string, bool) ToLower(@string s) {
         return ("", false);
     }
     return (strings.ToLower(s), true);
-
 }
 
 } // end ascii_package

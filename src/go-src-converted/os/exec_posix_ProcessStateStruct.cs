@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:13:29 UTC
+//     Generated on 2022 March 13 05:27:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class os_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct ProcessState
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace go
             public static implicit operator ProcessState(NilType nil) => default(ProcessState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static ProcessState ProcessState_cast(dynamic value)
         {
             return new ProcessState(value.pid, value.status, ref value.rusage);

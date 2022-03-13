@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:22 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\path.go
-using strings = go.strings_package;
-
 namespace go.cmd.@internal;
+
+using strings = strings_package;
 
 public static partial class objabi_package {
 
-    // PathToPrefix converts raw string to the prefix that will be used in the
-    // symbol table. All control characters, space, '%' and '"', as well as
-    // non-7-bit clean bytes turn into %xx. The period needs escaping only in the
-    // last segment of the path, and it makes for happier users if we escape that as
-    // little as possible.
+// PathToPrefix converts raw string to the prefix that will be used in the
+// symbol table. All control characters, space, '%' and '"', as well as
+// non-7-bit clean bytes turn into %xx. The period needs escaping only in the
+// last segment of the path, and it makes for happier users if we escape that as
+// little as possible.
 public static @string PathToPrefix(@string s) {
     var slash = strings.LastIndex(s, "/"); 
     // check for chars that need escaping
@@ -35,7 +35,6 @@ public static @string PathToPrefix(@string s) {
                 c = c__prev1;
 
             }
-
         }
 
         r = r__prev1;
@@ -67,14 +66,12 @@ public static @string PathToPrefix(@string s) {
                 c = c__prev1;
 
             }
-
         }
 
         r = r__prev1;
     }
 
     return string(p);
-
 }
 
 // IsRuntimePackagePath examines 'pkgpath' and returns TRUE if it
@@ -106,7 +103,6 @@ public static bool IsRuntimePackagePath(@string pkgpath) {
             break;
     }
     return rval;
-
 }
 
 } // end objabi_package

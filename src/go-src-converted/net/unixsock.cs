@@ -2,26 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:16:54 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:13 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\unixsock.go
-using context = go.context_package;
-using os = go.os_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-
 namespace go;
+
+using context = context_package;
+using os = os_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using time = time_package;
+
+
+// BUG(mikio): On JS and Plan 9, methods and functions related
+// to UnixConn and UnixListener are not implemented.
+
+// BUG(mikio): On Windows, methods and functions related to UnixConn
+// and UnixListener don't work for "unixgram" and "unixpacket".
+
+// UnixAddr represents the address of a Unix domain socket end point.
 
 public static partial class net_package {
 
-    // BUG(mikio): On JS and Plan 9, methods and functions related
-    // to UnixConn and UnixListener are not implemented.
-
-    // BUG(mikio): On Windows, methods and functions related to UnixConn
-    // and UnixListener don't work for "unixgram" and "unixpacket".
-
-    // UnixAddr represents the address of a Unix domain socket end point.
 public partial struct UnixAddr {
     public @string Name;
     public @string Net;
@@ -42,7 +44,6 @@ private static @string String(this ptr<UnixAddr> _addr_a) {
         return "<nil>";
     }
     return a.Name;
-
 }
 
 private static bool isWildcard(this ptr<UnixAddr> _addr_a) {
@@ -58,7 +59,6 @@ private static Addr opAddr(this ptr<UnixAddr> _addr_a) {
         return null;
     }
     return a;
-
 }
 
 // ResolveUnixAddr returns an address of Unix domain socket end point.
@@ -83,7 +83,6 @@ public static (ptr<UnixAddr>, error) ResolveUnixAddr(@string network, @string ad
             return (_addr_null!, error.As(UnknownNetworkError(network))!);
             break;
     }
-
 }
 
 // UnixConn is an implementation of the Conn interface for connections
@@ -103,7 +102,6 @@ private static (syscall.RawConn, error) SyscallConn(this ptr<UnixConn> _addr_c) 
         return (null, error.As(syscall.EINVAL)!);
     }
     return newRawConn(c.fd);
-
 }
 
 // CloseRead shuts down the reading side of the Unix domain connection.
@@ -121,9 +119,7 @@ private static error CloseRead(this ptr<UnixConn> _addr_c) {
             return error.As(addr(new OpError(Op:"close",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // CloseWrite shuts down the writing side of the Unix domain connection.
@@ -141,9 +137,7 @@ private static error CloseWrite(this ptr<UnixConn> _addr_c) {
             return error.As(addr(new OpError(Op:"close",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // ReadFromUnix acts like ReadFrom but returns a UnixAddr.
@@ -161,7 +155,6 @@ private static (nint, ptr<UnixAddr>, error) ReadFromUnix(this ptr<UnixConn> _add
         err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return (n, _addr_addr!, error.As(err)!);
-
 }
 
 // ReadFrom implements the PacketConn ReadFrom method.
@@ -182,7 +175,6 @@ private static (nint, Addr, error) ReadFrom(this ptr<UnixConn> _addr_c, slice<by
         return (n, null, error.As(err)!);
     }
     return (n, addr, error.As(err)!);
-
 }
 
 // ReadMsgUnix reads a message from c, copying the payload into b and
@@ -208,7 +200,6 @@ private static (nint, nint, nint, ptr<UnixAddr>, error) ReadMsgUnix(this ptr<Uni
         err = addr(new OpError(Op:"read",Net:c.fd.net,Source:c.fd.laddr,Addr:c.fd.raddr,Err:err));
     }
     return ;
-
 }
 
 // WriteToUnix acts like WriteTo but takes a UnixAddr.
@@ -226,7 +217,6 @@ private static (nint, error) WriteToUnix(this ptr<UnixConn> _addr_c, slice<byte>
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // WriteTo implements the PacketConn WriteTo method.
@@ -247,7 +237,6 @@ private static (nint, error) WriteTo(this ptr<UnixConn> _addr_c, slice<byte> b, 
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:a.opAddr(),Err:err));
     }
     return (n, error.As(err)!);
-
 }
 
 // WriteMsgUnix writes a message to addr via c, copying the payload
@@ -271,7 +260,6 @@ private static (nint, nint, error) WriteMsgUnix(this ptr<UnixConn> _addr_c, slic
         err = addr(new OpError(Op:"write",Net:c.fd.net,Source:c.fd.laddr,Addr:addr.opAddr(),Err:err));
     }
     return ;
-
 }
 
 private static ptr<UnixConn> newUnixConn(ptr<netFD> _addr_fd) {
@@ -310,7 +298,6 @@ public static (ptr<UnixConn>, error) DialUnix(@string network, ptr<UnixAddr> _ad
         return (_addr_null!, error.As(addr(new OpError(Op:"dial",Net:network,Source:laddr.opAddr(),Addr:raddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // UnixListener is a Unix domain socket listener. Clients should
@@ -343,7 +330,6 @@ private static (syscall.RawConn, error) SyscallConn(this ptr<UnixListener> _addr
         return (null, error.As(syscall.EINVAL)!);
     }
     return newRawListener(l.fd);
-
 }
 
 // AcceptUnix accepts the next incoming call and returns the new
@@ -361,7 +347,6 @@ private static (ptr<UnixConn>, error) AcceptUnix(this ptr<UnixListener> _addr_l)
         return (_addr_null!, error.As(addr(new OpError(Op:"accept",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 // Accept implements the Accept method in the Listener interface.
@@ -379,7 +364,6 @@ private static (Conn, error) Accept(this ptr<UnixListener> _addr_l) {
         return (null, error.As(addr(new OpError(Op:"accept",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!);
     }
     return (c, error.As(null!)!);
-
 }
 
 // Close stops listening on the Unix address. Already accepted
@@ -397,9 +381,7 @@ private static error Close(this ptr<UnixListener> _addr_l) {
             return error.As(addr(new OpError(Op:"close",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Addr returns the listener's network address.
@@ -426,9 +408,7 @@ private static error SetDeadline(this ptr<UnixListener> _addr_l, time.Time t) {
             return error.As(addr(new OpError(Op:"set",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // File returns a copy of the underlying os.File.
@@ -451,7 +431,6 @@ private static (ptr<os.File>, error) File(this ptr<UnixListener> _addr_l) {
         err = addr(new OpError(Op:"file",Net:l.fd.net,Source:nil,Addr:l.fd.laddr,Err:err));
     }
     return ;
-
 }
 
 // ListenUnix acts like Listen for Unix networks.
@@ -481,7 +460,6 @@ public static (ptr<UnixListener>, error) ListenUnix(@string network, ptr<UnixAdd
         return (_addr_null!, error.As(addr(new OpError(Op:"listen",Net:network,Source:nil,Addr:laddr.opAddr(),Err:err))!)!);
     }
     return (_addr_ln!, error.As(null!)!);
-
 }
 
 // ListenUnixgram acts like ListenPacket for Unix networks.
@@ -509,7 +487,6 @@ public static (ptr<UnixConn>, error) ListenUnixgram(@string network, ptr<UnixAdd
         return (_addr_null!, error.As(addr(new OpError(Op:"listen",Net:network,Source:nil,Addr:laddr.opAddr(),Err:err))!)!);
     }
     return (_addr_c!, error.As(null!)!);
-
 }
 
 } // end net_package

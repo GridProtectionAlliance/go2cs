@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2022 March 06 23:19:15 UTC
+// package testing -- go2cs converted at 2022 March 13 06:43:01 UTC
 // import "testing" ==> using testing = go.testing_package
 // Original source: C:\Program Files\Go\src\testing\example.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+using time = time_package;
+using System;
 
 public static partial class testing_package {
 
@@ -57,7 +56,6 @@ private static (bool, bool) runExamples(Func<@string, @string, (bool, error)> ma
         }
     }
     return (ran, ok);
-
 }
 
 private static @string sortLines(@string output) {
@@ -105,13 +103,11 @@ private static bool processRunResult(this ptr<InternalExample> _addr_eg, @string
     if (recovered != null) { 
         // Propagate the previously recovered result, by panicking.
         panic(recovered);
-
     }
     if (!finished && recovered == null) {
         panic(errNilPanicOrGoexit);
     }
     return ;
-
 });
 
 } // end testing_package

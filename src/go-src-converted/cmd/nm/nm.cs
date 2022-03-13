@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:22:36 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:40 UTC
 // Original source: C:\Program Files\Go\src\cmd\nm\nm.go
-using bufio = go.bufio_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using sort = go.sort_package;
-
-using objfile = go.cmd.@internal.objfile_package;
-using System;
-
-
 namespace go;
+
+using bufio = bufio_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using sort = sort_package;
+
+using objfile = cmd.@internal.objfile_package;
+using System;
 
 public static partial class main_package {
 
@@ -57,7 +56,6 @@ private static error Set(this nflag _p0, @string value) {
         sortOrder.val = "address";
     }
     return error.As(null!)!;
-
 }
 
 private static @string String(this nflag _p0) {
@@ -65,7 +63,6 @@ private static @string String(this nflag _p0) {
         return "true";
     }
     return "false";
-
 }
 
 private static void Main() {
@@ -97,7 +94,6 @@ private static void Main() {
     foreach (var (_, file) in args) {
         nm(file);
     }    os.Exit(exitCode);
-
 }
 
 private static nint exitCode = 0;
@@ -155,12 +151,10 @@ private static void nm(@string file) => func((defer, _, _) => {
  {
                     fmt.Fprintf(w, "%s(%s):\t", file, name);
                 }
-
             }
             else if (filePrefix) {
                 fmt.Fprintf(w, "%s:\t", file);
             }
-
             if (sym.Code == 'U') {
                 fmt.Fprintf(w, "%8s", "");
             }
@@ -168,24 +162,19 @@ private static void nm(@string file) => func((defer, _, _) => {
  {
                 fmt.Fprintf(w, "%8x", sym.Addr);
             }
-
             if (printSize.val) {
                 fmt.Fprintf(w, " %10d", sym.Size);
             }
-
             fmt.Fprintf(w, " %c %s", sym.Code, sym.Name);
             if (printType && sym.Type != "".val) {
                 fmt.Fprintf(w, " %s", sym.Type);
             }
-
             fmt.Fprintf(w, "\n");
-
         }
     }    if (!found) {
         errorf("reading %s: no symbols", file);
     }
     w.Flush();
-
 });
 
 } // end main_package

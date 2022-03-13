@@ -2,28 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:41:50 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:57 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\eval.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using token = go.token_package;
+
+
+// Eval returns the type and, if constant, the value for the
+// expression expr, evaluated at position pos of package pkg,
+// which must have been derived from type-checking an AST with
+// complete position information relative to the provided file
+// set.
+//
+// The meaning of the parameters fset, pkg, and pos is the
+// same as in CheckExpr. An error is returned if expr cannot
+// be parsed successfully, or the resulting expr AST cannot be
+// type-checked.
 
 public static partial class types_package {
 
-    // Eval returns the type and, if constant, the value for the
-    // expression expr, evaluated at position pos of package pkg,
-    // which must have been derived from type-checking an AST with
-    // complete position information relative to the provided file
-    // set.
-    //
-    // The meaning of the parameters fset, pkg, and pos is the
-    // same as in CheckExpr. An error is returned if expr cannot
-    // be parsed successfully, or the resulting expr AST cannot be
-    // type-checked.
 public static (TypeAndValue, error) Eval(ptr<token.FileSet> _addr_fset, ptr<Package> _addr_pkg, token.Pos pos, @string expr) {
     TypeAndValue _ = default;
     error err = default!;
@@ -38,7 +40,6 @@ public static (TypeAndValue, error) Eval(ptr<token.FileSet> _addr_fset, ptr<Pack
     ptr<Info> info = addr(new Info(Types:make(map[ast.Expr]TypeAndValue),));
     err = CheckExpr(_addr_fset, _addr_pkg, pos, node, info);
     return (info.Types[node], error.As(err)!);
-
 }
 
 // CheckExpr type checks the expression expr as if it had appeared at
@@ -86,7 +87,6 @@ public static error CheckExpr(ptr<token.FileSet> _addr_fset, ptr<Package> _addr_
             if (scope != null) {
                 break;
             }
-
         }        if (scope == null || debug) {
             var s = scope;
             while (s != null && s != pkg.scope) {
@@ -98,7 +98,6 @@ public static error CheckExpr(ptr<token.FileSet> _addr_fset, ptr<Package> _addr_
             if (s == null) {
                 return error.As(fmt.Errorf("no position %s found in package %s", fset.Position(pos), pkg.name))!;
             }
-
         }
     }
     var check = NewChecker(null, fset, pkg, info);
@@ -113,7 +112,6 @@ public static error CheckExpr(ptr<token.FileSet> _addr_fset, ptr<Package> _addr_
     check.recordUntyped();
 
     return error.As(null!)!;
-
 });
 
 } // end types_package

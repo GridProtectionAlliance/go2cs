@@ -4,21 +4,20 @@
 
 // Deep equality test via reflection
 
-// package reflect -- go2cs converted at 2022 March 06 22:30:37 UTC
+// package reflect -- go2cs converted at 2022 March 13 05:41:27 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Program Files\Go\src\reflect\deepequal.go
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class reflect_package {
 
-    // During deepValueEqual, must keep track of checks that are
-    // in progress. The comparison algorithm assumes that all
-    // checks in progress are true when it reencounters them.
-    // Visited comparisons are stored in a map indexed by visit.
+// During deepValueEqual, must keep track of checks that are
+// in progress. The comparison algorithm assumes that all
+// checks in progress are true when it reencounters them.
+// Visited comparisons are stored in a map indexed by visit.
 private partial struct visit {
     public unsafe.Pointer a1;
     public unsafe.Pointer a2;
@@ -46,9 +45,7 @@ private static bool deepValueEqual(Value v1, Value v2, map<visit, bool> visited)
                 // DeepEqual on them anyway), and the cgo-generated ones are
                 // all empty structs.
                 return false;
-
             }
-
             fallthrough = true;
         }
         if (fallthrough || v1.Kind() == Map || v1.Kind() == Slice || v1.Kind() == Interface) 
@@ -60,7 +57,6 @@ private static bool deepValueEqual(Value v1, Value v2, map<visit, bool> visited)
 
         __switch_break0:;
         return false;
-
     };
 
     if (hard(v1, v2)) { 
@@ -74,8 +70,7 @@ private static bool deepValueEqual(Value v1, Value v2, map<visit, bool> visited)
                 return v.pointer();
             else 
                 return v.ptr;
-            
-        };
+                    };
         var addr1 = ptrval(v1);
         var addr2 = ptrval(v2);
         if (uintptr(addr1) > uintptr(addr2)) { 
@@ -89,7 +84,6 @@ private static bool deepValueEqual(Value v1, Value v2, map<visit, bool> visited)
             return true;
         }
         visited[v] = true;
-
     }
 
     if (v1.Kind() == Array) 
@@ -179,8 +173,7 @@ private static bool deepValueEqual(Value v1, Value v2, map<visit, bool> visited)
     else 
         // Normal equality suffices
         return valueInterface(v1, false) == valueInterface(v2, false);
-    
-}
+    }
 
 // DeepEqual reports whether x and y are ``deeply equal,'' defined as follows.
 // Two values of identical type are deeply equal if one of the following cases applies.
@@ -243,7 +236,6 @@ public static bool DeepEqual(object x, object y) {
         return false;
     }
     return deepValueEqual(v1, v2, make_map<visit, bool>());
-
 }
 
 } // end reflect_package

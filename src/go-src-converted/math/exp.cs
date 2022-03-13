@@ -2,28 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:04 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:56 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\exp.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Exp returns e**x, the base-e exponential of x.
-    //
-    // Special cases are:
-    //    Exp(+Inf) = +Inf
-    //    Exp(NaN) = NaN
-    // Very large values overflow to 0 or +Inf.
-    // Very small values underflow to 1.
+// Exp returns e**x, the base-e exponential of x.
+//
+// Special cases are:
+//    Exp(+Inf) = +Inf
+//    Exp(NaN) = NaN
+// Very large values overflow to 0 or +Inf.
+// Very small values underflow to 1.
 public static double Exp(double x) {
     if (haveArchExp) {
         return archExp(x);
     }
     return exp(x);
-
 }
 
 // The original C code, the long comment, and the constants
@@ -135,7 +132,6 @@ private static double exp(double x) {
 
     // compute
     return expmulti(hi, lo, k);
-
 }
 
 // Exp2 returns 2**x, the base-2 exponential of x.
@@ -146,7 +142,6 @@ public static double Exp2(double x) {
         return archExp2(x);
     }
     return exp2(x);
-
 }
 
 private static double exp2(double x) {
@@ -180,7 +175,6 @@ private static double exp2(double x) {
 
     // compute
     return expmulti(hi, lo, k);
-
 }
 
 // exp1 returns e**r × 2**k where r = hi - lo and |r| ≤ ln(2)/2.
@@ -197,7 +191,6 @@ private static double expmulti(double hi, double lo, nint k) {
     nint y = 1 - ((lo - (r * c) / (2 - c)) - hi); 
     // TODO(rsc): make sure Ldexp can handle boundary k
     return Ldexp(y, k);
-
 }
 
 } // end math_package

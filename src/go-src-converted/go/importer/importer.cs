@@ -3,24 +3,27 @@
 // license that can be found in the LICENSE file.
 
 // Package importer provides access to export data importers.
-// package importer -- go2cs converted at 2022 March 06 23:32:34 UTC
+
+// package importer -- go2cs converted at 2022 March 13 06:42:14 UTC
 // import "go/importer" ==> using importer = go.go.importer_package
 // Original source: C:\Program Files\Go\src\go\importer\importer.go
-using build = go.go.build_package;
-using gccgoimporter = go.go.@internal.gccgoimporter_package;
-using gcimporter = go.go.@internal.gcimporter_package;
-using srcimporter = go.go.@internal.srcimporter_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using io = go.io_package;
-using runtime = go.runtime_package;
-
 namespace go.go;
+
+using build = go.build_package;
+using gccgoimporter = go.@internal.gccgoimporter_package;
+using gcimporter = go.@internal.gcimporter_package;
+using srcimporter = go.@internal.srcimporter_package;
+using token = go.token_package;
+using types = go.types_package;
+using io = io_package;
+using runtime = runtime_package;
+
+
+// A Lookup function returns a reader to access package data for
+// a given import path, or an error if no matching package is found.
 
 public static partial class importer_package {
 
-    // A Lookup function returns a reader to access package data for
-    // a given import path, or an error if no matching package is found.
 public delegate  error) Lookup(@string,  (io.ReadCloser);
 
 // ForCompiler returns an Importer for importing from installed packages
@@ -57,22 +60,18 @@ public static types.Importer ForCompiler(ptr<token.FileSet> _addr_fset, @string 
                 }
 
             }
-
             return addr(new gccgoimports(packages:make(map[string]*types.Package),importer:inst.GetImporter(nil,nil),lookup:lookup,));
-
             break;
         case "source": 
             if (lookup != null) {
                 panic("source importer for custom import path lookup not supported (issue #13847).");
             }
             return srcimporter.New(_addr_build.Default, fset, make_map<@string, ptr<types.Package>>());
-
             break;
     } 
 
     // compiler not supported
     return null;
-
 });
 
 // For calls ForCompiler with a new FileSet.
@@ -114,7 +113,6 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<gcimports> _addr_
         panic("mode must be 0");
     }
     return _addr_gcimporter.Import(m.fset, m.packages, path, srcDir, m.lookup)!;
-
 });
 
 // gccgo importer
@@ -142,7 +140,6 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<gccgoimports> _ad
         panic("mode must be 0");
     }
     return _addr_m.importer(m.packages, path, srcDir, m.lookup)!;
-
 });
 
 } // end importer_package

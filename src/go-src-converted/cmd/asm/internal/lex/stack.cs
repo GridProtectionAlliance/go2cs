@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package lex -- go2cs converted at 2022 March 06 22:46:28 UTC
+// package lex -- go2cs converted at 2022 March 13 05:57:41 UTC
 // import "cmd/asm/internal/lex" ==> using lex = go.cmd.asm.@internal.lex_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\lex\stack.go
-using scanner = go.text.scanner_package;
-
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.asm.@internal;
+
+using scanner = text.scanner_package;
+
+using src = cmd.@internal.src_package;
+
+
+// A Stack is a stack of TokenReaders. As the top TokenReader hits EOF,
+// it resumes reading the next one down.
 
 public static partial class lex_package {
 
-    // A Stack is a stack of TokenReaders. As the top TokenReader hits EOF,
-    // it resumes reading the next one down.
 public partial struct Stack {
     public slice<TokenReader> tr;
 }
@@ -36,10 +38,8 @@ private static ScanToken Next(this ptr<Stack> _addr_s) {
         // Pop the topmost item from the stack and resume with the next one down.
         s.tr = s.tr[..(int)len(s.tr) - 1];
         tok = s.Next();
-
     }
     return tok;
-
 }
 
 private static @string Text(this ptr<Stack> _addr_s) {

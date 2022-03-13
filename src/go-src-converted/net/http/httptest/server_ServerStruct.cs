@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:56 UTC
+//     Generated on 2022 March 13 05:38:21 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace http
 {
     public static partial class httptest_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Server
         {
             // Constructors
@@ -85,7 +85,7 @@ namespace http
             public static implicit operator Server(NilType nil) => default(Server);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Server Server_cast(dynamic value)
         {
             return new Server(value.URL, value.Listener, value.EnableHTTP2, ref value.TLS, ref value.Config, ref value.certificate, value.wg, value.mu, value.closed, value.conns, ref value.client);

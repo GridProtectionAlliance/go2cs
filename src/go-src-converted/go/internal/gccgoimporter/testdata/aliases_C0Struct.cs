@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:32:49 UTC
+//     Generated on 2022 March 13 06:42:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace @internal
 {
     public static partial class aliases_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct C0
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace @internal
             public static implicit operator C0(NilType nil) => default(C0);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static C0 C0_cast(dynamic value)
         {
             return new C0(value.f1, value.f2);

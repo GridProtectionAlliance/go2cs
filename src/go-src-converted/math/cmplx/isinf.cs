@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cmplx -- go2cs converted at 2022 March 06 22:31:13 UTC
+// package cmplx -- go2cs converted at 2022 March 13 05:42:07 UTC
 // import "math/cmplx" ==> using cmplx = go.math.cmplx_package
 // Original source: C:\Program Files\Go\src\math\cmplx\isinf.go
-using math = go.math_package;
-
 namespace go.math;
+
+using math = math_package;
 
 public static partial class cmplx_package {
 
-    // IsInf reports whether either real(x) or imag(x) is an infinity.
+// IsInf reports whether either real(x) or imag(x) is an infinity.
 public static bool IsInf(System.Numerics.Complex128 x) {
     if (math.IsInf(real(x), 0) || math.IsInf(imag(x), 0)) {
         return true;
     }
     return false;
-
 }
 
 // Inf returns a complex infinity, complex(+Inf, +Inf).

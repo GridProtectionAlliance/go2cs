@@ -111,22 +111,21 @@
 // will have no use (so don't run deadcode after regalloc!).
 // TODO: maybe we should introduce these extra phis?
 
-// package ssa -- go2cs converted at 2022 March 06 22:51:05 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:02:30 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\regalloc.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using sys = go.cmd.@internal.sys_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using bits = go.math.bits_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using sys = cmd.@internal.sys_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using bits = math.bits_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -135,13 +134,11 @@ private static readonly var logSpills = 0;
 private static readonly var regDebug = 1;
 private static readonly var stackDebug = 2;
 
-
 // distance is a measure of how far into the future values are used.
 // distance is measured in units of instructions.
 private static readonly nint likelyDistance = 1;
 private static readonly nint normalDistance = 10;
 private static readonly nint unlikelyDistance = 100;
-
 
 // regalloc performs register allocation on f. It sets f.RegAlloc
 // to the resulting allocation.
@@ -180,10 +177,8 @@ private static @string String(this regMask m) {
             s += " ";
         }
         s += fmt.Sprintf("r%d", r);
-
     }
     return s;
-
 }
 
 private static @string RegMaskString(this ptr<regAllocState> _addr_s, regMask m) {
@@ -199,10 +194,8 @@ private static @string RegMaskString(this ptr<regAllocState> _addr_s, regMask m)
             str += " ";
         }
         str += s.registers[r].String();
-
     }
     return str;
-
 }
 
 // countRegs returns the number of set bits in the register mask.
@@ -216,7 +209,6 @@ private static register pickReg(regMask r) => func((_, panic, _) => {
         panic("can't pick a register from an empty set");
     }
     return register(bits.TrailingZeros64(uint64(r)));
-
 });
 
 private partial struct use {
@@ -310,7 +302,6 @@ private static void freeReg(this ptr<regAllocState> _addr_s, register r) {
     s.regs[r] = new regState();
     s.values[v.ID].regs &= regMask(1) << (int)(r);
     s.used &= regMask(1) << (int)(r);
-
 }
 
 // freeRegs frees up all registers listed in m.
@@ -333,7 +324,6 @@ private static void clobberRegs(this ptr<regAllocState> _addr_s, regMask m) {
         var x = s.curBlock.NewValue0(src.NoXPos, OpClobberReg, types.TypeVoid);
         s.f.setHome(x, _addr_s.registers[r]);
     }
-
 }
 
 // setOrig records that c's original value is the same as
@@ -350,7 +340,6 @@ private static void setOrig(this ptr<regAllocState> _addr_s, ptr<Value> _addr_c,
         s.f.Fatalf("orig value set twice %s %s", c, v);
     }
     s.orig[c.ID] = s.orig[v.ID];
-
 }
 
 // assignReg assigns register r to hold c, a copy of v.
@@ -370,7 +359,6 @@ private static void assignReg(this ptr<regAllocState> _addr_s, register r, ptr<V
     s.values[v.ID].regs |= regMask(1) << (int)(r);
     s.used |= regMask(1) << (int)(r);
     s.f.setHome(c, _addr_s.registers[r]);
-
 }
 
 // allocReg chooses a register from the set of registers in mask.
@@ -406,11 +394,9 @@ private static register allocReg(this ptr<regAllocState> _addr_s, regMask mask, 
                 // we've seen so far. A new best spill candidate.
                 r = t;
                 maxuse = n;
-
             }
 
         }
-
     }
     if (maxuse == -1) {
         s.f.Fatalf("couldn't find register to spill");
@@ -421,7 +407,6 @@ private static register allocReg(this ptr<regAllocState> _addr_s, regMask mask, 
         // trying to kick some other value out. In practice, this case does happen and it breaks the stack optimization.
         s.freeReg(r);
         return r;
-
     }
     var v2 = s.regs[r].v;
     var m = s.compatRegs(v2.Type) & ~s.used & ~s.tmpused & ~(regMask(1) << (int)(r));
@@ -434,11 +419,9 @@ private static register allocReg(this ptr<regAllocState> _addr_s, regMask mask, 
         }
         s.setOrig(c, v2);
         s.assignReg(r2, v2, c);
-
     }
     s.freeReg(r);
     return r;
-
 }
 
 // makeSpill returns a Value which represents the spilled value of v.
@@ -454,7 +437,6 @@ private static ptr<Value> makeSpill(this ptr<regAllocState> _addr_s, ptr<Value> 
         vi.restoreMin = min32(vi.restoreMin, s.sdom[b.ID].entry);
         vi.restoreMax = max32(vi.restoreMax, s.sdom[b.ID].exit);
         return _addr_vi.spill!;
-
     }
     var spill = s.f.newValueNoBlock(OpStoreReg, v.Type, v.Pos); 
     // We also don't know what the spill's arg will be.
@@ -464,7 +446,6 @@ private static ptr<Value> makeSpill(this ptr<regAllocState> _addr_s, ptr<Value> 
     vi.restoreMin = s.sdom[b.ID].entry;
     vi.restoreMax = s.sdom[b.ID].exit;
     return _addr_spill!;
-
 }
 
 // allocValToReg allocates v to a register selected from regMask and
@@ -498,7 +479,6 @@ private static ptr<Value> allocValToReg(this ptr<regAllocState> _addr_s, ptr<Val
             s.nospill |= regMask(1) << (int)(r);
         }
         return _addr_s.regs[r].c!;
-
     }
     r = default; 
     // If nospill is set, the value is used immediately, so it can live on the WebAssembly stack.
@@ -506,7 +486,6 @@ private static ptr<Value> allocValToReg(this ptr<regAllocState> _addr_s, ptr<Val
     if (!onWasmStack) { 
         // Allocate a register.
         r = s.allocReg(mask, v);
-
     }
     c = ;
     if (vi.regs != 0) { 
@@ -516,12 +495,10 @@ private static ptr<Value> allocValToReg(this ptr<regAllocState> _addr_s, ptr<Val
             panic("bad register state");
         }
         c = s.curBlock.NewValue1(pos, OpCopy, v.Type, s.regs[r2].c);
-
     }
     else if (v.rematerializeable()) { 
         // Rematerialize instead of loading from the spill location.
         c = v.copyIntoWithXPos(s.curBlock, pos);
-
     }
     else
  { 
@@ -531,7 +508,6 @@ private static ptr<Value> allocValToReg(this ptr<regAllocState> _addr_s, ptr<Val
             s.f.Warnl(vi.spill.Pos, "load spill for %v from %v", v, spill);
         }
         c = s.curBlock.NewValue1(pos, OpLoadReg, v.Type, spill);
-
     }
     s.setOrig(c, v);
 
@@ -547,7 +523,6 @@ private static ptr<Value> allocValToReg(this ptr<regAllocState> _addr_s, ptr<Val
         s.nospill |= regMask(1) << (int)(r);
     }
     return _addr_c!;
-
 });
 
 // isLeaf reports whether f performs any calls.
@@ -561,7 +536,6 @@ private static bool isLeaf(ptr<Func> _addr_f) {
             }
         }
     }    return true;
-
 }
 
 private static void init(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f) => func((defer, _, _) => {
@@ -598,7 +572,6 @@ private static void init(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f) => 
                 s.GReg = r;
                 break;
         }
-
     } 
     // Make sure we found all required registers.
 
@@ -624,7 +597,6 @@ private static void init(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f) => 
         if (isLeaf(_addr_f)) { 
             // Leaf functions don't save/restore the link register.
             s.allocatable &= 1 << (int)(uint(s.f.Config.LinkReg));
-
         }
     }
     if (s.f.Config.ctxt.Flag_dynlink) {
@@ -651,7 +623,6 @@ private static void init(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f) => 
                 s.f.fe.Fatalf(src.NoXPos, "arch %s not implemented", s.f.Config.arch);
                 break;
         }
-
     }
     s.visitOrder = layoutRegallocOrder(f); 
 
@@ -744,9 +715,7 @@ private static void init(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f) => 
  { 
                             // Value can not live on stack. Values are not allowed to be reordered, so clear candidate set.
                             canLiveOnStack.clear();
-
                         }
-
                         foreach (var (_, arg) in v.Args) { 
                             // Value can live on the stack if:
                             // - it is only used once
@@ -756,15 +725,12 @@ private static void init(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f) => 
                             if (arg.Uses == 1 && arg.Block == v.Block && !arg.Type.IsMemory() && !opcodeTable[arg.Op].generic) {
                                 canLiveOnStack.add(arg.ID);
                             }
-
                         }
-
                     }
 
 
                     i = i__prev2;
                 }
-
             }
 
             b = b__prev1;
@@ -773,7 +739,6 @@ private static void init(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f) => 
     if (@base.Flag.ClobberDeadReg && len(s.f.Blocks) <= 10000) { 
         // TODO: honor GOCLOBBERDEADHASH, or maybe GOSSAHASH.
         s.doClobber = true;
-
     }
 });
 
@@ -815,11 +780,9 @@ private static void advanceUses(this ptr<regAllocState> _addr_s, ptr<Value> _add
         if (r.next == null) { 
             // Value is dead, free all registers that hold it.
             s.freeRegs(ai.regs);
-
         }
         r.next = s.freeUseRecords;
         s.freeUseRecords = r;
-
     }
 }
 
@@ -839,7 +802,6 @@ private static bool liveAfterCurrentInstruction(this ptr<regAllocState> _addr_s,
         u = u.next;
     }
     return u != null && u.dist > d;
-
 });
 
 // Sets the state of the registers to that encoded in regs.
@@ -878,7 +840,6 @@ private static regMask compatRegs(this ptr<regAllocState> _addr_s, ptr<types.Typ
         m = s.f.Config.gpRegMask;
     }
     return m & s.allocatable;
-
 }
 
 // regspec returns the regInfo for operation op.
@@ -893,7 +854,6 @@ private static regInfo regspec(this ptr<regAllocState> _addr_s, ptr<Value> _addr
         // allocatable integer register.
         var m = s.allocatable & s.f.Config.gpRegMask;
         return new regInfo(inputs:[]inputInfo{{regs:m}},outputs:[]outputInfo{{regs:m}});
-
     }
     if (op == OpArgIntReg) {
         var reg = v.Block.Func.Config.intParamRegs[v.AuxInt8()];
@@ -912,13 +872,11 @@ private static regInfo regspec(this ptr<regAllocState> _addr_s, ptr<Value> _addr
             }
 
         }
-
     }
     if (op == OpMakeResult && s.f.OwnAux.reg != null) {
         return s.f.OwnAux.ResultReg(s.f.Config).val;
     }
     return opcodeTable[op].reg;
-
 }
 
 private static bool isGReg(this ptr<regAllocState> _addr_s, register r) {
@@ -971,7 +929,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                     e = __e;
                     s.addUse(e.ID, int32(len(b.Values)) + e.dist, e.pos); // pseudo-uses from beyond end of block
                     regValLiveSet.add(e.ID);
-
                 }
 
                 e = e__prev2;
@@ -985,9 +942,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                     if (s.values[v.ID].needReg) {
                         s.addUse(v.ID, int32(len(b.Values)), b.Pos); // pseudo-use by control values
                         regValLiveSet.add(v.ID);
-
                     }
-
                 }
 
                 v = v__prev2;
@@ -1004,22 +959,17 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                         // any inputs. This is the state the len(b.Preds)>1
                         // case below desires; it wants to process phis specially.
                         continue;
-
                     }
-
                     if (opcodeTable[v.Op].call) { 
                         // Function call clobbers all the registers but SP and SB.
                         regValLiveSet.clear();
                         if (s.sp != 0 && s.values[s.sp].uses != null) {
                             regValLiveSet.add(s.sp);
                         }
-
                         if (s.sb != 0 && s.values[s.sb].uses != null) {
                             regValLiveSet.add(s.sb);
                         }
-
                     }
-
                     {
                         var a__prev3 = a;
 
@@ -1091,7 +1041,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                 if (nphi > 0) {
                     f.Fatalf("phis in entry block");
                 }
-
             }
             else if (len(b.Preds) == 1) { 
                 // Start regalloc state with the end state of the previous block.
@@ -1116,7 +1065,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
 
                     r = r__prev2;
                 }
-
             } { 
                 // This is the complicated case. We have more than one predecessor,
                 // which means we may have Phi ops.
@@ -1145,12 +1093,10 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                         if (s.blockOrder[pb.ID] >= s.blockOrder[b.ID]) {
                             continue;
                         }
-
                         if (idx == -1) {
                             idx = i;
                             continue;
                         }
-
                         var pSel = b.Preds[idx].b;
                         if (len(s.spillLive[pb.ID]) < len(s.spillLive[pSel.ID])) {
                             idx = i;
@@ -1169,9 +1115,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                             if (pb.likelyBranch() && !pSel.likelyBranch() || s.blockOrder[pb.ID] < s.blockOrder[pSel.ID]) {
                                 idx = i;
                             }
-
                         }
-
                     }
 
                     i = i__prev2;
@@ -1181,7 +1125,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                 if (idx < 0) {
                     f.Fatalf("bad visitOrder, no predecessor of %s has been visited before it", b);
                 }
-
                 var p = b.Preds[idx].b;
                 s.setState(s.endRegs[p.ID]);
 
@@ -1228,7 +1171,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
  {
                             phiRegs = append(phiRegs, noRegister);
                         }
-
                     } 
 
                     // Second pass - deallocate all in-register phi inputs.
@@ -1272,11 +1214,8 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 s.assignReg(r2, a, c);
                                 s.endRegs[p.ID] = append(s.endRegs[p.ID], new endReg(r2,a,c));
                             }
-
                         }
-
                         s.freeReg(r);
-
                     } 
 
                     // Copy phi ops into new schedule.
@@ -1335,7 +1274,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                             phiRegs[i] = r;
                             phiUsed |= regMask(1) << (int)(r);
                         }
-
                     } 
 
                     // Set registers for phis. Add phi spill code.
@@ -1360,11 +1298,9 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                             // Spills will be inserted in all the predecessors below.
                             s.values[v.ID].spill = v; // v starts life spilled
                             continue;
-
                         } 
                         // register-based phi
                         s.assignReg(r, v, v);
-
                     } 
 
                     // Deallocate any values which are no longer live. Phis are excluded.
@@ -1412,11 +1348,8 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                             // Skip registers that phis used, we'll handle those
                             // specially during merge edge processing.
                             continue;
-
                         }
-
                         regList = append(regList, new startReg(r,v,s.regs[r].c,s.values[v.ID].uses.pos));
-
                     }
 
 
@@ -1438,7 +1371,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                         x = x__prev2;
                     }
                 }
-
             } 
 
             // Allocate space to record the desired registers for each value.
@@ -1529,11 +1461,8 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 if (!ok) {
                                     continue;
                                 }
-
                             }
-
                             desired.add(v.Args[pidx].ID, register(rp.num));
-
                         }
 
                         v = v__prev3;
@@ -1642,28 +1571,21 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 }
                                 s.assignReg(register(s.f.getHome(v.Args[0].ID)._<LocPair>()[i]._<ptr<Register>>().num), v, v);
                             }
-
                         }
-
                         b.Values = append(b.Values, v);
                         s.advanceUses(v);
                         goto issueSpill;
-
                     }
-
                     if (v.Op == OpGetG && s.f.Config.hasGReg) { 
                         // use hardware g register
                         if (s.regs[s.GReg].v != null) {
                             s.freeReg(s.GReg); // kick out the old value
                         }
-
                         s.assignReg(s.GReg, v, v);
                         b.Values = append(b.Values, v);
                         s.advanceUses(v);
                         goto issueSpill;
-
                     }
-
                     if (v.Op == OpArg) { 
                         // Args are "pre-spilled" values. We don't allocate
                         // any register here. We just set up the spill pointer to
@@ -1672,9 +1594,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                         b.Values = append(b.Values, v);
                         s.advanceUses(v);
                         continue;
-
                     }
-
                     if (v.Op == OpKeepAlive) { 
                         // Make sure the argument to v is still live here.
                         s.advanceUses(v);
@@ -1685,7 +1605,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                             // This forces later liveness analysis to make the
                             // value live at this point.
                             v.SetArg(0, s.makeSpill(a, b));
-
                         }                        {
                             ptr<ir.Name> (_, ok) = a.Aux._<ptr<ir.Name>>();
 
@@ -1697,7 +1616,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 v.Op = OpVarLive;
                                 v.SetArgs1(v.Args[1]);
                                 v.Aux = a.Aux;
-
                             }
                             else
  { 
@@ -1706,29 +1624,22 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 // or values of a variable that were modified since the last call.
                                 v.Op = OpCopy;
                                 v.SetArgs1(v.Args[1]);
-
                             }
 
                         }
-
                         b.Values = append(b.Values, v);
                         continue;
-
                     }
-
                     if (len(regspec.inputs) == 0 && len(regspec.outputs) == 0) { 
                         // No register allocation required (or none specified yet)
                         if (s.doClobber && v.Op.IsCall()) {
                             s.clobberRegs(regspec.clobbers);
                         }
-
                         s.freeRegs(regspec.clobbers);
                         b.Values = append(b.Values, v);
                         s.advanceUses(v);
                         continue;
-
                     }
-
                     if (s.values[v.ID].rematerializeable) { 
                         // Value is rematerializeable, don't issue it here.
                         // It will get issued just before each use (see
@@ -1746,9 +1657,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
 
                         s.advanceUses(v);
                         continue;
-
                     }
-
                     if (s.f.pass.debug > regDebug) {
                         fmt.Printf("value %s\n", v.LongString());
                         fmt.Printf("  out:");
@@ -1785,13 +1694,11 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 }
 
                                 fmt.Println();
-
                             }
 
 
                             i = i__prev3;
                         }
-
                     } 
 
                     // Move arguments to registers.
@@ -1844,7 +1751,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 if (args[i.idx] != null) {
                                     continue; // already allocated
                                 }
-
                                 mask = i.regs;
                                 if (countRegs(mask) == 1 && mask & ~s.used != 0) {
                                     args[i.idx] = s.allocValToReg(v.Args[i.idx], mask, true, v.Pos); 
@@ -1856,9 +1762,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                         s.freeRegs(oldregs & ~mask & ~s.nospill);
                                         freed = true;
                                     }
-
                                 }
-
                             }
 
                             i = i__prev4;
@@ -1867,7 +1771,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                         if (!freed) {
                             break;
                         }
-
                     } 
                     // Last, allocate remaining ones, in an ordering defined
                     // by the register specification (most constrained first).
@@ -1882,7 +1785,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                             if (args[i.idx] != null) {
                                 continue; // already allocated
                             }
-
                             mask = i.regs;
                             if (mask & s.values[v.Args[i.idx].ID].regs == 0) { 
                                 // Need a new register for the input.
@@ -1899,9 +1801,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                                 // Desired register is allowed and unused.
                                                 mask = regMask(1) << (int)(r);
                                                 break;
-
                                             }
-
                                         }
 
                                         r = r__prev4;
@@ -1911,11 +1811,8 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                 if (mask & ~desired.avoid != 0) {
                                     mask &= desired.avoid;
                                 }
-
                             }
-
                             args[i.idx] = s.allocValToReg(v.Args[i.idx], mask, true, v.Pos);
-
                         } 
 
                         // If the output clobbers the input register, make sure we have
@@ -1930,29 +1827,21 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                         if (!s.liveAfterCurrentInstruction(v.Args[0])) { 
                             // arg0 is dead.  We can clobber its register.
                             goto ok;
-
                         }
-
                         if (opcodeTable[v.Op].commutative && !s.liveAfterCurrentInstruction(v.Args[1])) {
                             (args[0], args[1]) = (args[1], args[0]);                            goto ok;
                         }
-
                         if (s.values[v.Args[0].ID].rematerializeable) { 
                             // We can rematerialize the input, don't worry about clobbering it.
                             goto ok;
-
                         }
-
                         if (opcodeTable[v.Op].commutative && s.values[v.Args[1].ID].rematerializeable) {
                             (args[0], args[1]) = (args[1], args[0]);                            goto ok;
                         }
-
                         if (countRegs(s.values[v.Args[0].ID].regs) >= 2) { 
                             // we have at least 2 copies of arg0.  We can afford to clobber one.
                             goto ok;
-
                         }
-
                         if (opcodeTable[v.Op].commutative && countRegs(s.values[v.Args[1].ID].regs) >= 2) {
                             (args[0], args[1]) = (args[1], args[0]);                            goto ok;
                         } 
@@ -1968,7 +1857,6 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                             // TODO(khr): We should really do this like allocReg does it,
                             // spilling the value with the most distant next use.
                             goto ok;
-
                         } 
 
                         // Try to move an input to the desired output, if allowed.
@@ -1983,9 +1871,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                     // Note: we update args[0] so the instruction will
                                     // use the register copy we just made.
                                     goto ok;
-
                                 }
-
                             } 
                             // Try to copy input to its desired location & use its old
                             // location as the result register.
@@ -2005,9 +1891,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                                     // Note: no update to args[0] so the instruction will
                                     // use the original copy.
                                     goto ok;
-
                                 }
-
                             }
 
                             r = r__prev3;
@@ -2037,9 +1921,7 @@ private static void regalloc(this ptr<regAllocState> _addr_s, ptr<Func> _addr_f)
                         // Save input 0 to a new register so we can clobber it.
                         c = s.allocValToReg(v.Args[0], m, true, v.Pos);
                         s.copies[c] = false;
-
                     }
-
 ok: 
 
                     // Dump any registers which will be clobbered
@@ -2054,9 +1936,7 @@ ok:
                         // clobber registers that are marked as clobber in regmask, but
                         // don't clobber inputs.
                         s.clobberRegs(regspec.clobbers & ~s.tmpused & ~s.nospill);
-
                     }
-
                     s.freeRegs(regspec.clobbers);
                     s.tmpused |= regspec.clobbers; 
 
@@ -2077,9 +1957,7 @@ ok:
                                     if (mask >> (int)(r) & 1 == 0) {
                                         s.f.Fatalf("resultInArg0 value's input %v cannot be an output of %s", s.f.getHome(args[0].ID)._<ptr<Register>>(), v.LongString());
                                     }
-
                                     mask = regMask(1) << (int)(r);
-
                                 }
                                 else
  { 
@@ -2099,11 +1977,8 @@ ok:
                                                 if (r == r1) {
                                                     (args[0], args[1]) = (args[1], args[0]);
                                                 }
-
                                                 break;
-
                                             }
-
                                         }
 
                                         r = r__prev4;
@@ -2112,13 +1987,9 @@ ok:
                                     if (!found) { 
                                         // Neither are desired, pick r0.
                                         mask = regMask(1) << (int)(r0);
-
                                     }
-
                                 }
-
                             }
-
                             {
                                 var r__prev4 = r;
 
@@ -2128,9 +1999,7 @@ ok:
                                         // Desired register is allowed and unused.
                                         mask = regMask(1) << (int)(r);
                                         break;
-
                                     }
-
                                 } 
                                 // Avoid registers we're saving for other values.
 
@@ -2140,16 +2009,13 @@ ok:
                             if (mask & ~desired.avoid & ~s.nospill != 0) {
                                 mask &= desired.avoid;
                             }
-
                             r = s.allocReg(mask, v);
                             if (@out.idx > maxOutIdx) {
                                 maxOutIdx = @out.idx;
                             }
-
                             outRegs[@out.idx] = r;
                             used |= regMask(1) << (int)(r);
                             s.tmpused |= regMask(1) << (int)(r);
-
                         } 
                         // Record register choices
                         if (v.Type.IsTuple()) {
@@ -2166,7 +2032,6 @@ ok:
                                 r = r__prev2;
 
                             }
-
                             {
                                 var r__prev2 = r;
 
@@ -2179,7 +2044,6 @@ ok:
                                 r = r__prev2;
 
                             }
-
                             s.f.setHome(v, outLocs); 
                             // Note that subsequent SelectX instructions will do the assignReg calls.
                         }
@@ -2202,7 +2066,6 @@ ok:
                                         r = r__prev3;
 
                                     }
-
                                 }
                         else
 
@@ -2210,7 +2073,6 @@ ok:
                                 i = i__prev3;
                             }
                             s.f.setHome(v, outLocs);
-
                         } {
                             {
                                 var r__prev3 = r;
@@ -2224,9 +2086,7 @@ ok:
                                 r = r__prev3;
 
                             }
-
                         }
-
                     } 
 
                     // deallocate dead args, if we have not done so
@@ -2234,7 +2094,6 @@ ok:
                         s.nospill = 0;
                         s.advanceUses(v); // frees any registers holding args that are no longer live
                     }
-
                     s.tmpused = 0; 
 
                     // Issue the Value itself.
@@ -2255,7 +2114,6 @@ ok:
                     b.Values = append(b.Values, v);
 
 issueSpill:
-
                 } 
 
                 // Copy the control values - we need this so we can reduce the
@@ -2285,7 +2143,6 @@ issueSpill:
                     // type-compatible register. If this turns out not to be true,
                     // we'll need to introduce a regspec for a block's control value.
                     b.ReplaceControl(i, s.allocValToReg(v, s.compatRegs(v.Type), false, b.Pos));
-
                 } 
 
                 // Reduce the uses of the control values once registers have been loaded.
@@ -2310,10 +2167,8 @@ issueSpill:
                     if (u.next == null) {
                         s.freeRegs(vi.regs); // value is dead
                     }
-
                     u.next = s.freeUseRecords;
                     s.freeUseRecords = u;
-
                 } 
 
                 // If we are approaching a merge point and we are the primary
@@ -2339,19 +2194,15 @@ issueSpill:
                     if (live.dist >= unlikelyDistance) { 
                         // Don't preload anything live after the loop.
                         continue;
-
                     }
-
                     var vid = live.ID;
                     vi = _addr_s.values[vid];
                     if (vi.regs != 0) {
                         continue;
                     }
-
                     if (vi.rematerializeable) {
                         continue;
                     }
-
                     v = s.orig[vid];
                     m = s.compatRegs(v.Type) & ~s.used; 
                     // Used desired register if available.
@@ -2374,7 +2225,6 @@ outerloop:
                                         _breakouterloop = true;
                                         break;
                                     }
-
                                 }
 
                                 r = r__prev4;
@@ -2386,15 +2236,11 @@ outerloop:
                     if (m & ~desired.avoid != 0) {
                         m &= desired.avoid;
                     }
-
                     if (m != 0) {
                         s.allocValToReg(v, m, false, b.Pos);
                     }
-
                 }
-
             }
-
 badloop: 
 
             // Save end-of-block register state.
@@ -2460,7 +2306,6 @@ badloop:
 
                     r = r__prev2;
                 }
-
             } 
 
             // If a value is live at the end of the block and
@@ -2476,22 +2321,16 @@ badloop:
                     if (vi.regs != 0) { 
                         // in a register, we'll use that source for the merge.
                         continue;
-
                     }
-
                     if (vi.rematerializeable) { 
                         // we'll rematerialize during the merge.
                         continue;
-
                     }
-
                     if (s.f.pass.debug > regDebug) {
                         fmt.Printf("live-at-end spill for %s at %s\n", s.orig[e.ID], b);
                     }
-
                     var spill = s.makeSpill(s.orig[e.ID], b);
                     s.spillLive[b.ID] = append(s.spillLive[b.ID], spill.ID);
-
                 } 
 
                 // Clear any final uses.
@@ -2587,7 +2426,6 @@ badloop:
             }
 
             b.Values = b.Values[..(int)i];
-
         }
         b = b__prev1;
     }
@@ -2622,21 +2460,17 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
                         }
 
                     }
-
                 }
 
                 v = v__prev2;
             }
 
             phiRegs[b.ID] = m;
-
         }
         b = b__prev1;
     }
 
-    Func<Op, bool> mustBeFirst = op => {
-        return op.isLoweredGetClosurePtr() || op == OpPhi || op == OpArgIntReg || op == OpArgFloatReg;
-    }; 
+    Func<Op, bool> mustBeFirst = op => op.isLoweredGetClosurePtr() || op == OpPhi || op == OpArgIntReg || op == OpArgFloatReg; 
 
     // Start maps block IDs to the list of spills
     // that go at the start of the block (but after any phis).
@@ -2659,9 +2493,7 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
                 // Some spills are already fully set up,
                 // like OpArgs and stack-based phis.
                 continue;
-
             }
-
             var v = s.orig[i]; 
 
             // Walk down the dominator tree looking for a good place to
@@ -2671,7 +2503,6 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
             if (v == null) {
                 panic(fmt.Errorf("nil v, s.orig[%d], vi = %v, spill = %s", i, vi, spill.LongString()));
             }
-
             var best = v.Block;
             var bestArg = v;
             short bestDepth = default;
@@ -2687,7 +2518,6 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
                 l = l__prev1;
 
             }
-
             var b = best;
             const nint maxSpillSearch = 100;
 
@@ -2709,16 +2539,13 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
                                 break;
                             (c, i) = (s.sdom.Sibling(c), i + 1);
                             }
-
                         }
 
                     }
                     if (b == null) { 
                         // Ran out of blocks which dominate all restores.
                         break;
-
                     }
-
                     short depth = default;
                     {
                         var l__prev1 = l;
@@ -2732,11 +2559,9 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
                         l = l__prev1;
 
                     }
-
                     if (depth > bestDepth) { 
                         // Don't push the spill into a deeper loop.
                         continue;
-
                     } 
 
                     // If v is in a register at the start of b, we can
@@ -2753,9 +2578,7 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
                                     bestArg = e.c;
                                     bestDepth = depth;
                                     break;
-
                                 }
-
                             }
                     else
 
@@ -2773,15 +2596,12 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
                                     bestArg = e.c;
                                     bestDepth = depth;
                                     break;
-
                                 }
-
                             }
 
                             e = e__prev3;
                         }
                     }
-
                 } 
 
                 // Put the spill in the best block we found.
@@ -2796,15 +2616,12 @@ private static void placeSpills(this ptr<regAllocState> _addr_s) => func((_, pan
             if (best == v.Block && !mustBeFirst(v.Op)) { 
                 // Place immediately after v.
                 after[v.ID] = append(after[v.ID], spill);
-
             }
             else
  { 
                 // Place at the start of best block.
                 start[best.ID] = append(start[best.ID], spill);
-
             }
-
         }
         i = i__prev1;
     }
@@ -2962,7 +2779,6 @@ private static void setup(this ptr<edgeState> _addr_e, nint idx, slice<endReg> s
             // makeSpill for every value not in a register at the start
             // of an edge).
             continue;
-
         }
         e.set(e.s.f.getHome(spillID), v.ID, spill, false, src.NoXPos); // don't care the position of the source
     }    var dsts = e.destinations[..(int)0];
@@ -3034,9 +2850,7 @@ private static void process(this ptr<edgeState> _addr_e) {
                     // Failed - save for next iteration.
                     dsts[i] = d;
                     i++;
-
                 }
-
             }
 
             d = d__prev2;
@@ -3050,7 +2864,6 @@ private static void process(this ptr<edgeState> _addr_e) {
             dsts = append(dsts, e.extra);
             e.extra = e.extra[..(int)0];
             continue;
-
         }
         var d = dsts[0];
         var loc = d.loc;
@@ -3074,13 +2887,11 @@ private static void process(this ptr<edgeState> _addr_e) {
             }
 
         }
-
         e.set(r, vid, c, false, pos);
         if (c.Op == OpLoadReg && e.s.isGReg(register(r._<ptr<Register>>().num))) {
             e.s.f.Fatalf("process.OpLoadReg targeting g: " + c.LongString());
         }
     }
-
 }
 
 // processDest generates code to put value vid into location loc. Returns true
@@ -3105,19 +2916,15 @@ private static bool processDest(this ptr<edgeState> _addr_e, Location loc, ID vi
             if (ok) { 
                 // The copy at occupant.c was used to avoid spill.
                 e.s.copies[occupant.c] = true;
-
             }
 
         }
-
         return true;
-
     }
     if (len(e.cache[occupant.vid]) == 1 && !e.s.values[occupant.vid].rematerializeable) { 
         // We can't overwrite the last copy
         // of a value that needs to survive.
         return false;
-
     }
     var v = e.s.orig[vid];
     ptr<Value> c;
@@ -3178,7 +2985,6 @@ private static bool processDest(this ptr<edgeState> _addr_e, Location loc, ID vi
             // size of x (which might be wider due to our dropping
             // of narrowing conversions).
             x = e.p.NewValue1(pos, OpStoreReg, loc._<LocalSlot>().Type, x);
-
         }
     }
     else
@@ -3193,7 +2999,6 @@ private static bool processDest(this ptr<edgeState> _addr_e, Location loc, ID vi
  {
                 x = e.p.NewValue1(pos, OpStoreReg, loc._<LocalSlot>().Type, c);
             }
-
         }
         else
  {
@@ -3208,9 +3013,7 @@ private static bool processDest(this ptr<edgeState> _addr_e, Location loc, ID vi
                 var t = e.p.NewValue1(pos, OpLoadReg, c.Type, c);
                 e.set(r, vid, t, false, pos);
                 x = e.p.NewValue1(pos, OpStoreReg, loc._<LocalSlot>().Type, t);
-
             }
-
         }
     }
     e.set(loc, vid, x, true, pos);
@@ -3223,7 +3026,6 @@ private static bool processDest(this ptr<edgeState> _addr_e, Location loc, ID vi
         x.Uses++;
     }
     return true;
-
 }
 
 // set changes the contents of location loc to hold the given value and its cached representative.
@@ -3262,16 +3064,12 @@ private static void set(this ptr<edgeState> _addr_e, Location loc, ID vid, ptr<V
                     }
 
                 }
-
             }
-
             if (e.s.values[vid].rematerializeable) {
                 e.rematerializeableRegs |= regMask(1) << (int)(uint(r.num));
             }
-
         }
     }
-
     if (e.s.f.pass.debug > regDebug) {
         fmt.Printf("%s\n", c.LongString());
         fmt.Printf("v%d now available in %s:%s\n", vid, loc, c);
@@ -3293,7 +3091,6 @@ private static void erase(this ptr<edgeState> _addr_e, Location loc) {
         // Make sure it gets added to the tail of the destination queue
         // so we make progress on other moves first.
         e.extra = append(e.extra, new dstRecord(loc,cr.vid,nil,cr.pos));
-
     }
     var a = e.cache[vid];
     foreach (var (i, c) in a) {
@@ -3321,7 +3118,6 @@ private static void erase(this ptr<edgeState> _addr_e, Location loc) {
         r = r__prev1;
 
     }
-
     if (len(a) == 1) {
         {
             ptr<Register> r__prev2 = r;
@@ -3335,7 +3131,6 @@ private static void erase(this ptr<edgeState> _addr_e, Location loc) {
             r = r__prev2;
 
         }
-
     }
 }
 
@@ -3395,17 +3190,14 @@ private static Location findRegFor(this ptr<edgeState> _addr_e, ptr<types.Type> 
                                 if (e.s.f.pass.debug > regDebug) {
                                     fmt.Printf("  SPILL %s->%s %s\n", r, t, x.LongString());
                                 }
-
                             } 
                             // r will now be overwritten by the caller. At some point
                             // later, the newly saved value will be moved back to its
                             // final destination in processDest.
                             return r;
-
                         }
 
                     }
-
                 }
 
                 c = c__prev2;
@@ -3437,7 +3229,6 @@ private static Location findRegFor(this ptr<edgeState> _addr_e, ptr<types.Type> 
 
     e.s.f.Fatalf("can't find empty register on edge %s->%s", e.p, e.b);
     return null;
-
 }
 
 // rematerializeable reports whether the register allocator should recompute
@@ -3454,7 +3245,6 @@ private static bool rematerializeable(this ptr<Value> _addr_v) {
             return false;
         }
     }    return true;
-
 }
 
 private partial struct liveInfo {
@@ -3551,9 +3341,7 @@ private static void computeLive(this ptr<regAllocState> _addr_s) => func((defer,
                             // save phi ops for later
                             phis = append(phis, v);
                             continue;
-
                         }
-
                         if (opcodeTable[v.Op].call) {
                             var c = live.contents();
                             {
@@ -3567,13 +3355,11 @@ private static void computeLive(this ptr<regAllocState> _addr_s) => func((defer,
                                 i = i__prev4;
                             }
                         }
-
                         foreach (var (_, a) in v.Args) {
                             if (s.values[a.ID].needReg) {
                                 live.set(a.ID, int32(i), v.Pos);
                             }
                         }
-
                     } 
                     // Propagate desired registers backwards.
 
@@ -3593,9 +3379,7 @@ private static void computeLive(this ptr<regAllocState> _addr_s) => func((defer,
                             // For now, we just drop it and don't propagate
                             // desired registers back though phi nodes.
                             continue;
-
                         }
-
                         var regspec = s.regspec(v); 
                         // Cancel desired registers if they get clobbered.
                         desired.clobber(regspec.clobbers); 
@@ -3614,7 +3398,6 @@ private static void computeLive(this ptr<regAllocState> _addr_s) => func((defer,
                             }
                             desired.addList(v.Args[0].ID, prefs);
                         }
-
                     } 
 
                     // For each predecessor of b, expand its list of live-at-end values.
@@ -3707,7 +3490,6 @@ private static void computeLive(this ptr<regAllocState> _addr_s) => func((defer,
                         if (cap(l) < t.size()) {
                             l = make_slice<liveInfo>(0, t.size());
                         }
-
                         {
                             var e__prev4 = e;
 
@@ -3721,7 +3503,6 @@ private static void computeLive(this ptr<regAllocState> _addr_s) => func((defer,
 
                         s.live[p.ID] = l;
                         changed = true;
-
                     }
 
                     i = i__prev3;
@@ -3780,9 +3561,7 @@ private static void computeLive(this ptr<regAllocState> _addr_s) => func((defer,
                     }
 
                 }
-
                 fmt.Println();
-
             }
 
             b = b__prev1;
@@ -3820,7 +3599,6 @@ private static array<register> get(this ptr<desiredState> _addr_d, ID vid) {
             return e.regs;
         }
     }    return new array<register>(new register[] { noRegister, noRegister, noRegister, noRegister });
-
 }
 
 // add records that we'd like value vid to be in register r.
@@ -3836,7 +3614,6 @@ private static void add(this ptr<desiredState> _addr_d, ID vid, register r) {
         if (e.regs[0] == r) { 
             // Already known and highest priority
             return ;
-
         }
         for (nint j = 1; j < len(e.regs); j++) {
             if (e.regs[j] == r) { 
@@ -3844,16 +3621,12 @@ private static void add(this ptr<desiredState> _addr_d, ID vid, register r) {
                 copy(e.regs[(int)1..], e.regs[..(int)j]);
                 e.regs[0] = r;
                 return ;
-
             }
-
         }
         copy(e.regs[(int)1..], e.regs[..]);
         e.regs[0] = r;
         return ;
-
     }    d.entries = append(d.entries, new desiredStateEntry(vid,[4]register{r,noRegister,noRegister,noRegister}));
-
 }
 
 private static void addList(this ptr<desiredState> _addr_d, ID vid, array<register> regs) {
@@ -3867,7 +3640,6 @@ private static void addList(this ptr<desiredState> _addr_d, ID vid, array<regist
             d.add(vid, r);
         }
     }
-
 }
 
 // clobber erases any desired registers in the set m.
@@ -3891,20 +3663,16 @@ private static void clobber(this ptr<desiredState> _addr_d, regMask m) {
                 d.entries[i] = d.entries[len(d.entries) - 1];
                 d.entries = d.entries[..(int)len(d.entries) - 1];
                 continue;
-
             }
-
             while (j < len(e.regs)) {
                 e.regs[j] = noRegister;
                 j++;
             }
 
             i++;
-
         }
     }
     d.avoid &= m;
-
 }
 
 // copy copies a desired state from another desiredState x.
@@ -3928,7 +3696,6 @@ private static array<register> remove(this ptr<desiredState> _addr_d, ID vid) {
             return regs;
         }
     }    return new array<register>(new register[] { noRegister, noRegister, noRegister, noRegister });
-
 }
 
 // merge merges another desired state x into d.
@@ -3949,14 +3716,12 @@ private static int min32(int x, int y) {
         return x;
     }
     return y;
-
 }
 private static int max32(int x, int y) {
     if (x > y) {
         return x;
     }
     return y;
-
 }
 
 } // end ssa_package

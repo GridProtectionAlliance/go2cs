@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:07 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:31 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\lca.go
-using bits = go.math.bits_package;
-
 namespace go.cmd.compile.@internal;
+
+using bits = math.bits_package;
+
+
+// Code to compute lowest common ancestors in the dominator tree.
+// https://en.wikipedia.org/wiki/Lowest_common_ancestor
+// https://en.wikipedia.org/wiki/Range_minimum_query#Solution_using_constant_time_and_linearithmic_space
+
+// lcaRange is a data structure that can compute lowest common ancestor queries
+// in O(n lg n) precomputed space and O(1) time per query.
 
 public static partial class ssa_package {
 
-    // Code to compute lowest common ancestors in the dominator tree.
-    // https://en.wikipedia.org/wiki/Lowest_common_ancestor
-    // https://en.wikipedia.org/wiki/Range_minimum_query#Solution_using_constant_time_and_linearithmic_space
-
-    // lcaRange is a data structure that can compute lowest common ancestor queries
-    // in O(n lg n) precomputed space and O(1) time per query.
 private partial struct lcaRange {
     public slice<lcaRangeBlock> blocks; // Data structure for range minimum queries.
 // rangeMin[k][i] contains the ID of the minimum depth block
@@ -49,7 +51,6 @@ private static ptr<lcaRange> makeLCArange(ptr<Func> _addr_f) {
         blocks[b.ID].parent = parent;
         blocks[b.ID].sibling = blocks[parent].firstChild;
         blocks[parent].firstChild = b.ID;
-
     }    var tour = make_slice<ID>(0, f.NumBlocks() * 2 - 1);
     private partial struct queueEntry {
         public ID bid; // block to work on
@@ -72,13 +73,11 @@ private static ptr<lcaRange> makeLCArange(ptr<Func> _addr_f) {
             blocks[bid].depth = blocks[blocks[bid].parent].depth + 1; 
             // Then explore its first child.
             cid = blocks[bid].firstChild;
-
         }
         else
  { 
             // We've seen b before. Explore the next child.
             cid = blocks[cid].sibling;
-
         }
         if (cid != 0) {
             q = append(q, new queueEntry(bid,cid), new queueEntry(cid,0));
@@ -105,12 +104,10 @@ private static ptr<lcaRange> makeLCArange(ptr<Func> _addr_f) {
             }
 
             rangeMin = append(rangeMin, r);
-
         }
     }
 
     return addr(new lcaRange(blocks:blocks,rangeMin:rangeMin));
-
 }
 
 // find returns the lowest common ancestor of a and b.
@@ -134,7 +131,6 @@ private static ptr<Block> find(this ptr<lcaRange> _addr_lca, ptr<Block> _addr_a,
         return _addr_lca.blocks[bid1].b!;
     }
     return _addr_lca.blocks[bid2].b!;
-
 }
 
 } // end ssa_package

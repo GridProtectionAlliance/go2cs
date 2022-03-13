@@ -2,25 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:08 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:37 UTC
 // Original source: C:\Program Files\Go\src\cmd\cover\cover.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using log = go.log_package;
-using os = go.os_package;
-using sort = go.sort_package;
-
-using edit = go.cmd.@internal.edit_package;
-using objabi = go.cmd.@internal.objabi_package;
-using System;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using io = io_package;
+using log = log_package;
+using os = os_package;
+using sort = sort_package;
+
+using edit = cmd.@internal.edit_package;
+using objabi = cmd.@internal.objabi_package;
+using System;
 
 public static partial class main_package {
 
@@ -60,7 +59,6 @@ private static Func<ptr<File>, @string, @string> counterStmt = default;
 
 private static readonly @string atomicPackagePath = "sync/atomic";
 private static readonly @string atomicPackageName = "_cover_atomic_";
-
 
 private static void Main() {
     objabi.AddVersionFlag();
@@ -102,7 +100,6 @@ private static error parseFlags() {
             return error.As(fmt.Errorf("too many options"))!;
         }
         profile = funcOut.val;
-
     }
     if ((profile == "") == (mode == "".val)) {
         return error.As(fmt.Errorf("too many options"))!;
@@ -137,7 +134,6 @@ private static error parseFlags() {
         return error.As(null!)!;
     }
     return error.As(fmt.Errorf("too many arguments"))!;
-
 }
 
 // Block represents the information about a basic block to be recorded in the analysis.
@@ -183,7 +179,7 @@ private static nint findText(this ptr<File> _addr_f, token.Pos pos, @string text
             continue;
         }
         if (i + 2 <= len(s) && s[i] == '/' && s[i + 1] == '*') {
-            for (i += 2; >>MARKER:FOREXPRESSION_LEVEL_2<<; i++) {
+            for (i += 2; ; i++) {
                 if (i + 2 > len(s)) {
                     return 0;
                 }
@@ -196,10 +192,8 @@ private static nint findText(this ptr<File> _addr_f, token.Pos pos, @string text
             continue;
         }
         i++;
-
     }
     return -1;
-
 }
 
 // Visit implements the ast.Visitor interface.
@@ -241,9 +235,7 @@ private static ast.Visitor Visit(this ptr<File> _addr_f, ast.Node node) => func(
                         return f;
                         break;
                 }
-
             }
-
             f.addCounters(n.Lbrace, n.Lbrace + 1, n.Rbrace + 1, n.List, true); // +1 to step past closing brace.
             break;
         case ptr<ast.IfStmt> n:
@@ -270,7 +262,6 @@ private static ast.Visitor Visit(this ptr<File> _addr_f, ast.Node node) => func(
             if (elseOffset < 0) {
                 panic("lost else");
             }
-
             f.edit.Insert(elseOffset + 4, "{");
             f.edit.Insert(f.offset(n.Else.End()), "}"); 
 
@@ -329,7 +320,6 @@ private static ast.Visitor Visit(this ptr<File> _addr_f, ast.Node node) => func(
             break;
     }
     return f;
-
 });
 
 private static void annotate(@string name) {
@@ -350,7 +340,6 @@ private static void annotate(@string name) {
         // to refer to it, and our name (_cover_atomic_) is less likely to
         // be shadowed.
         file.edit.Insert(file.offset(file.astFile.Name.End()), fmt.Sprintf("; import %s %q", atomicPackageName, atomicPackagePath));
-
     }
     ast.Walk(file, file.astFile);
     var newContent = file.edit.Bytes();
@@ -369,7 +358,6 @@ private static void annotate(@string name) {
     // After printing the source tree, add some declarations for the counters etc.
     // We could do this by adding to the tree, but it's easier just to print the text.
     file.addVariables(fd);
-
 }
 
 // setCounterStmt returns the expression: __count[23] = 1.
@@ -459,24 +447,19 @@ private static void addCounters(this ptr<File> _addr_f, token.Pos pos, token.Pos
                         list = append(list, null);
                         copy(list[(int)last + 1..], list[(int)last..]);
                         list[last + 1] = label.Stmt;
-
                     }
 
                 }
-
                 last++;
                 extendToClosingBrace = false; // Block is broken up now.
                 break;
-
             }
-
         }
         if (extendToClosingBrace) {
             end = blockEnd;
         }
         if (pos != end) { // Can have no source to cover if e.g. blocks abut.
             f.edit.Insert(f.offset(insertPos), f.newCounter(pos, end, last) + ";");
-
         }
         list = list[(int)last..];
         if (len(list) == 0) {
@@ -484,9 +467,7 @@ private static void addCounters(this ptr<File> _addr_f, token.Pos pos, token.Pos
         }
         pos = list[0].Pos();
         insertPos = pos;
-
     }
-
 }
 
 // hasFuncLiteral reports the existence and position of the first func literal
@@ -504,7 +485,6 @@ private static (bool, token.Pos) hasFuncLiteral(ast.Node n) {
     ref funcLitFinder literal = ref heap(out ptr<funcLitFinder> _addr_literal);
     ast.Walk(_addr_literal, n);
     return (literal.found(), token.Pos(literal));
-
 }
 
 // statementBoundary finds the location in s that terminates the current basic
@@ -588,7 +568,6 @@ private static token.Pos statementBoundary(this ptr<File> _addr_f, ast.Stmt s) {
         return pos;
     }
     return s.End();
-
 }
 
 // endsBasicSourceBlock reports whether s changes the flow of control: break, if, etc.,
@@ -638,16 +617,13 @@ private static bool endsBasicSourceBlock(this ptr<File> _addr_f, ast.Stmt s) {
                         }
 
                     }
-
                 }
 
             }
-
             break;
     }
     var (found, _) = hasFuncLiteral(s);
     return found;
-
 }
 
 // isControl reports whether s is a control statement that, if labeled, cannot be
@@ -673,7 +649,6 @@ private static bool isControl(this ptr<File> _addr_f, ast.Stmt s) {
             break;
     }
     return false;
-
 }
 
 // funcLitFinder implements the ast.Visitor pattern to find the location of any
@@ -695,7 +670,6 @@ private static ast.Visitor Visit(this ptr<funcLitFinder> _addr_f, ast.Node node)
             break;
     }
     return f;
-
 }
 
 private static bool found(this ptr<funcLitFinder> _addr_f) {
@@ -757,9 +731,7 @@ private static void addVariables(this ptr<File> _addr_f, io.Writer w) {
                 fmt.Fprintf(os.Stderr, "cover: internal error: block %d overlaps block %d\n", t[i - 1].index, t[i].index); 
                 // Note: error message is in byte positions, not token positions.
                 fmt.Fprintf(os.Stderr, "\t%s:#%d,#%d %s:#%d,#%d\n", f.name, f.offset(t[i - 1].startByte), f.offset(t[i - 1].endByte), f.name, f.offset(t[i].startByte), f.offset(t[i].endByte));
-
             }
-
         }
 
         i = i__prev1;
@@ -870,7 +842,6 @@ private static (token.Position, token.Position) dedup(token.Position p1, token.P
     seenPos2[key] = true;
 
     return (key.p1, key.p2);
-
 }
 
 } // end main_package

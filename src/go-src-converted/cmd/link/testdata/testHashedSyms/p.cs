@@ -9,10 +9,8 @@
 // is not a requirement for correctness and not checked in this test.
 // We do check the emitted symbol contents are correct, though.
 
-// package main -- go2cs converted at 2022 March 06 23:22:35 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:39 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\testdata\testHashedSyms\p.go
-
-
 namespace go;
 
 public static partial class main_package {

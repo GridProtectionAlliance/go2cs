@@ -5,20 +5,19 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:14 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:38 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\syscall_unix.go
-using itoa = go.@internal.itoa_package;
-using oserror = go.@internal.oserror_package;
-using race = go.@internal.race_package;
-using unsafeheader = go.@internal.unsafeheader_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using itoa = @internal.itoa_package;
+using oserror = @internal.oserror_package;
+using race = @internal.race_package;
+using unsafeheader = @internal.unsafeheader_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class syscall_package {
 
@@ -26,7 +25,6 @@ public static nint Stdin = 0;public static nint Stdout = 1;public static nint St
 
 private static readonly var darwin64Bit = (runtime.GOOS == "darwin" || runtime.GOOS == "ios") && sizeofPtr == 8;
 private static readonly var netbsd32Bit = runtime.GOOS == "netbsd" && sizeofPtr == 4;
-
 
 public static (System.UIntPtr, System.UIntPtr, Errno) Syscall(System.UIntPtr trap, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3);
 public static (System.UIntPtr, System.UIntPtr, Errno) Syscall6(System.UIntPtr trap, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3, System.UIntPtr a4, System.UIntPtr a5, System.UIntPtr a6);
@@ -41,7 +39,6 @@ private static nint clen(slice<byte> n) {
         }
     }
     return len(n);
-
 }
 
 // Mmap manager, for use by operating system-specific implementations.
@@ -77,7 +74,6 @@ private static (slice<byte>, error) Mmap(this ptr<mmapper> _addr_m, nint fd, lon
     defer(m.Unlock());
     m.active[p] = b;
     return (b, error.As(null!)!);
-
 });
 
 private static error Munmap(this ptr<mmapper> _addr_m, slice<byte> data) => func((defer, _, _) => {
@@ -101,10 +97,8 @@ private static error Munmap(this ptr<mmapper> _addr_m, slice<byte> data) => func
             return error.As(errno)!;
         }
     }
-
     delete(m.active, p);
     return error.As(null!)!;
-
 });
 
 // An Errno is an unsigned number describing an error condition.
@@ -131,7 +125,6 @@ public static @string Error(this Errno e) {
         }
     }
     return "errno " + itoa.Itoa(int(e));
-
 }
 
 public static bool Is(this Errno e, error target) {
@@ -143,7 +136,6 @@ public static bool Is(this Errno e, error target) {
     else if (target == oserror.ErrNotExist) 
         return e == ENOENT;
         return false;
-
 }
 
 public static bool Temporary(this Errno e) {
@@ -171,7 +163,6 @@ private static error errnoErr(Errno e) {
     else if (e == ENOENT) 
         return error.As(errENOENT)!;
         return error.As(e)!;
-
 }
 
 // A Signal is a number describing a process signal.
@@ -190,7 +181,6 @@ public static @string String(this Signal s) {
         }
     }
     return "signal " + itoa.Itoa(int(s));
-
 }
 
 public static (nint, error) Read(nint fd, slice<byte> p) {
@@ -210,7 +200,6 @@ public static (nint, error) Read(nint fd, slice<byte> p) {
         msanWrite(@unsafe.Pointer(_addr_p[0]), n);
     }
     return ;
-
 }
 
 public static (nint, error) Write(nint fd, slice<byte> p) {
@@ -237,7 +226,6 @@ public static (nint, error) Write(nint fd, slice<byte> p) {
         msanRead(@unsafe.Pointer(_addr_p[0]), n);
     }
     return ;
-
 }
 
 // For testing: clients can set this flag to force
@@ -274,7 +262,6 @@ public static error Bind(nint fd, Sockaddr sa) {
         return error.As(err)!;
     }
     return error.As(bind(fd, ptr, n))!;
-
 }
 
 public static error Connect(nint fd, Sockaddr sa) {
@@ -285,7 +272,6 @@ public static error Connect(nint fd, Sockaddr sa) {
         return error.As(err)!;
     }
     return error.As(connect(fd, ptr, n))!;
-
 }
 
 public static (Sockaddr, error) Getpeername(nint fd) {
@@ -300,7 +286,6 @@ public static (Sockaddr, error) Getpeername(nint fd) {
         return ;
     }
     return anyToSockaddr(_addr_rsa);
-
 }
 
 public static (nint, error) GetsockoptInt(nint fd, nint level, nint opt) {
@@ -329,7 +314,6 @@ public static (nint, Sockaddr, error) Recvfrom(nint fd, slice<byte> p, nint flag
         from, err = anyToSockaddr(_addr_rsa);
     }
     return ;
-
 }
 
 public static error Sendto(nint fd, slice<byte> p, nint flags, Sockaddr to) {
@@ -340,7 +324,6 @@ public static error Sendto(nint fd, slice<byte> p, nint flags, Sockaddr to) {
         return error.As(err)!;
     }
     return error.As(sendto(fd, p, flags, ptr, n))!;
-
 }
 
 public static error SetsockoptByte(nint fd, nint level, nint opt, byte value) {
@@ -398,7 +381,6 @@ public static error SetsockoptString(nint fd, nint level, nint opt, @string s) {
         p = @unsafe.Pointer(_addr_(slice<byte>)s[0]);
     }
     return error.As(setsockopt(fd, level, opt, p, uintptr(len(s))))!;
-
 }
 
 public static error SetsockoptTimeval(nint fd, nint level, nint opt, ptr<Timeval> _addr_tv) {
@@ -417,7 +399,6 @@ public static (nint, error) Socket(nint domain, nint typ, nint proto) {
     }
     fd, err = socket(domain, typ, proto);
     return ;
-
 }
 
 public static (array<nint>, error) Socketpair(nint domain, nint typ, nint proto) {
@@ -431,7 +412,6 @@ public static (array<nint>, error) Socketpair(nint domain, nint typ, nint proto)
         fd[1] = int(fdx[1]);
     }
     return ;
-
 }
 
 public static (nint, error) Sendfile(nint outfd, nint infd, ptr<long> _addr_offset, nint count) {
@@ -443,7 +423,6 @@ public static (nint, error) Sendfile(nint outfd, nint infd, ptr<long> _addr_offs
         race.ReleaseMerge(@unsafe.Pointer(_addr_ioSync));
     }
     return sendfile(outfd, infd, offset, count);
-
 }
 
 private static long ioSync = default;

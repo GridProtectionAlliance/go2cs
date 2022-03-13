@@ -2,68 +2,70 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:57 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:09 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\stack.go
-using abi = go.@internal.abi_package;
-using cpu = go.@internal.cpu_package;
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using abi = @internal.abi_package;
+using cpu = @internal.cpu_package;
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+/*
+Stack layout parameters.
+Included both by runtime (compiled via 6c) and linkers (compiled via gcc).
+
+The per-goroutine g->stackguard is set to point StackGuard bytes
+above the bottom of the stack.  Each function compares its stack
+pointer against g->stackguard to check for overflow.  To cut one
+instruction from the check sequence for functions with tiny frames,
+the stack is allowed to protrude StackSmall bytes below the stack
+guard.  Functions with large frames don't bother with the check and
+always call morestack.  The sequences are (for amd64, others are
+similar):
+
+    guard = g->stackguard
+    frame = function's stack frame size
+    argsize = size of function arguments (call + return)
+
+    stack frame size <= StackSmall:
+        CMPQ guard, SP
+        JHI 3(PC)
+        MOVQ m->morearg, $(argsize << 32)
+        CALL morestack(SB)
+
+    stack frame size > StackSmall but < StackBig
+        LEAQ (frame-StackSmall)(SP), R0
+        CMPQ guard, R0
+        JHI 3(PC)
+        MOVQ m->morearg, $(argsize << 32)
+        CALL morestack(SB)
+
+    stack frame size >= StackBig:
+        MOVQ m->morearg, $((argsize << 32) | frame)
+        CALL morestack(SB)
+
+The bottom StackGuard - StackSmall bytes are important: there has
+to be enough room to execute functions that refuse to check for
+stack overflow, either because they need to be adjacent to the
+actual caller's frame (deferproc) or because they handle the imminent
+stack overflow (morestack).
+
+For example, deferproc might call malloc, which does one of the
+above checks (without allocating a full frame), which might trigger
+a call to morestack.  This sequence needs to fit in the bottom
+section of the stack.  On amd64, morestack's frame is 40 bytes, and
+deferproc's frame is 56 bytes.  That fits well within the
+StackGuard - StackSmall bytes at the bottom.
+The linkers explore all possible call traces involving non-splitting
+functions to make sure that this limit cannot be violated.
+*/
 
 public static partial class runtime_package {
 
-    /*
-    Stack layout parameters.
-    Included both by runtime (compiled via 6c) and linkers (compiled via gcc).
-
-    The per-goroutine g->stackguard is set to point StackGuard bytes
-    above the bottom of the stack.  Each function compares its stack
-    pointer against g->stackguard to check for overflow.  To cut one
-    instruction from the check sequence for functions with tiny frames,
-    the stack is allowed to protrude StackSmall bytes below the stack
-    guard.  Functions with large frames don't bother with the check and
-    always call morestack.  The sequences are (for amd64, others are
-    similar):
-
-        guard = g->stackguard
-        frame = function's stack frame size
-        argsize = size of function arguments (call + return)
-
-        stack frame size <= StackSmall:
-            CMPQ guard, SP
-            JHI 3(PC)
-            MOVQ m->morearg, $(argsize << 32)
-            CALL morestack(SB)
-
-        stack frame size > StackSmall but < StackBig
-            LEAQ (frame-StackSmall)(SP), R0
-            CMPQ guard, R0
-            JHI 3(PC)
-            MOVQ m->morearg, $(argsize << 32)
-            CALL morestack(SB)
-
-        stack frame size >= StackBig:
-            MOVQ m->morearg, $((argsize << 32) | frame)
-            CALL morestack(SB)
-
-    The bottom StackGuard - StackSmall bytes are important: there has
-    to be enough room to execute functions that refuse to check for
-    stack overflow, either because they need to be adjacent to the
-    actual caller's frame (deferproc) or because they handle the imminent
-    stack overflow (morestack).
-
-    For example, deferproc might call malloc, which does one of the
-    above checks (without allocating a full frame), which might trigger
-    a call to morestack.  This sequence needs to fit in the bottom
-    section of the stack.  On amd64, morestack's frame is 40 bytes, and
-    deferproc's frame is 56 bytes.  That fits well within the
-    StackGuard - StackSmall bytes at the bottom.
-    The linkers explore all possible call traces involving non-splitting
-    functions to make sure that this limit cannot be violated.
-    */
  
 // StackSystem is a number of additional bytes to add
 // to each stack below the usual guard area for OS-specific
@@ -109,7 +111,6 @@ private static readonly nint _StackSmall = 128;
 // functions can use.
 private static readonly var _StackLimit = _StackGuard - _StackSystem - _StackSmall;
 
-
  
 // stackDebug == 0: no logging
 //            == 1: logging of per-stack operations
@@ -124,7 +125,6 @@ private static readonly nint stackNoCache = 0; // disable per-P small stack cach
 
 // check the BP links during traceback.
 private static readonly var debugCheckBP = false;
-
 
 private static readonly nint uintptrMask = 1 << (int)((8 * sys.PtrSize)) - 1; 
 
@@ -143,7 +143,6 @@ private static readonly var stackFork = uintptrMask & -1234;
 // Force a stack movement. Used for debugging.
 // 0xfffffeed in hex.
 private static readonly var stackForceMove = uintptrMask & -275;
-
 
 // Global pool of spans that have free stacks.
 // Stacks are assigned an order according to size.
@@ -229,7 +228,6 @@ private static gclinkptr stackpoolalloc(byte order) {
 
         }
         list.insert(s);
-
     }
     x = s.manualFreeList;
     if (x.ptr() == null) {
@@ -240,10 +238,8 @@ private static gclinkptr stackpoolalloc(byte order) {
     if (s.manualFreeList.ptr() == null) { 
         // all stacks in s are allocated.
         list.remove(s);
-
     }
     return x;
-
 }
 
 // Adds stack x to the free pool. Must be called with stackpool[order].item.mu held.
@@ -255,7 +251,6 @@ private static void stackpoolfree(gclinkptr x, byte order) {
     if (s.manualFreeList.ptr() == null) { 
         // s will now have a free stack
         stackpool[order].item.span.insert(s);
-
     }
     x.ptr().next = s.manualFreeList;
     s.manualFreeList = x;
@@ -280,7 +275,6 @@ private static void stackpoolfree(gclinkptr x, byte order) {
         s.manualFreeList = 0;
         osStackFree(s);
         mheap_.freeManual(s, spanAllocStack);
-
     }
 }
 
@@ -306,7 +300,6 @@ private static void stackcacherefill(ptr<mcache> _addr_c, byte order) {
     unlock(_addr_stackpool[order].item.mu);
     c.stackcache[order].list = list;
     c.stackcache[order].size = size;
-
 }
 
 //go:systemstack
@@ -328,7 +321,6 @@ private static void stackcacherelease(ptr<mcache> _addr_c, byte order) {
     unlock(_addr_stackpool[order].item.mu);
     c.stackcache[order].list = x;
     c.stackcache[order].size = size;
-
 }
 
 //go:systemstack
@@ -350,7 +342,6 @@ private static void stackcache_clear(ptr<mcache> _addr_c) {
         c.stackcache[order].size = 0;
         unlock(_addr_stackpool[order].item.mu);
     }
-
 }
 
 // stackalloc allocates an n byte stack.
@@ -380,7 +371,6 @@ private static stack @stackalloc(uint n) {
             throw("out of memory (stackalloc)");
         }
         return new stack(uintptr(v),uintptr(v)+uintptr(n));
-
     }
     v = default;
     if (n < _FixedStack << (int)(_NumStackOrders) && n < _StackCacheSize) {
@@ -401,7 +391,6 @@ private static stack @stackalloc(uint n) {
             lock(_addr_stackpool[order].item.mu);
             x = stackpoolalloc(order);
             unlock(_addr_stackpool[order].item.mu);
-
         }
         else
  {
@@ -415,7 +404,6 @@ private static stack @stackalloc(uint n) {
             c.stackcache[order].size -= uintptr(n);
         }
         v = @unsafe.Pointer(x);
-
     } {
         ptr<mspan> s;
         var npage = uintptr(n) >> (int)(_PageShift);
@@ -437,13 +425,10 @@ private static stack @stackalloc(uint n) {
             if (s == null) {
                 throw("out of memory");
             }
-
             osStackAlloc(s);
             s.elemsize = uintptr(n);
-
         }
         v = @unsafe.Pointer(s.@base());
-
     }
     if (raceenabled) {
         racemalloc(v, uintptr(n));
@@ -455,7 +440,6 @@ private static stack @stackalloc(uint n) {
         print("  allocated ", v, "\n");
     }
     return new stack(uintptr(v),uintptr(v)+uintptr(n));
-
 }
 
 // stackfree frees an n byte stack allocation at stk.
@@ -487,7 +471,6 @@ private static void stackfree(stack stk) {
             sysFree(v, n, _addr_memstats.stacks_sys);
         }
         return ;
-
     }
     if (msanenabled) {
         msanfree(v, n);
@@ -528,7 +511,6 @@ private static void stackfree(stack stk) {
             // sweeping.
             osStackFree(s);
             mheap_.freeManual(s, spanAllocStack);
-
         }
         else
  { 
@@ -541,7 +523,6 @@ private static void stackfree(stack stk) {
             lock(_addr_stackLarge.@lock);
             stackLarge.free[log2npage].insert(s);
             unlock(_addr_stackLarge.@lock);
-
         }
     }
 }
@@ -656,7 +637,6 @@ private static void adjustpointers(unsafe.Pointer scanp, ptr<bitvector> _addr_bv
                 }
             i += 8;
             }
-
             var b = (addb(bv.bytedata, i / 8)).val;
             while (b != 0) {
                 j = uintptr(sys.Ctz8(b));
@@ -670,9 +650,7 @@ retry:
                     getg().m.traceback = 2;
                     print("runtime: bad pointer in frame ", funcname(f), " at ", pp, ": ", hex(p), "\n");
                     throw("invalid pointer found on stack");
-
                 }
-
                 if (minp <= p && p < maxp) {
                     if (stackDebug >= 3) {
                         print("adjust ptr ", hex(p), " ", funcname(f), "\n");
@@ -687,15 +665,10 @@ retry:
  {
                         pp.val = p + delta;
                     }
-
                 }
-
             }
-
-
         }
     }
-
 }
 
 // Note: the argument/return area is adjusted by the callee.
@@ -706,7 +679,6 @@ private static bool adjustframe(ptr<stkframe> _addr_frame, unsafe.Pointer arg) {
     if (frame.continpc == 0) { 
         // Frame is dead.
         return true;
-
     }
     var f = frame.fn;
     if (stackDebug >= 2) {
@@ -717,7 +689,6 @@ private static bool adjustframe(ptr<stkframe> _addr_frame, unsafe.Pointer arg) {
         // We will allow it to be copied even though we don't
         // have full GC info for it (because it is written in asm).
         return true;
-
     }
     var (locals, args, objs) = getStackMap(_addr_frame, _addr_adjinfo.cache, true); 
 
@@ -739,17 +710,14 @@ private static bool adjustframe(ptr<stkframe> _addr_frame, unsafe.Pointer arg) {
                 print("bp=", hex(bp), " min=", hex(adjinfo.old.lo), " max=", hex(adjinfo.old.hi), "\n");
                 throw("bad frame pointer");
             }
-
         }
         adjustpointer(_addr_adjinfo, @unsafe.Pointer(frame.varp));
-
     }
     if (args.n > 0) {
         if (stackDebug >= 3) {
             print("      args\n");
         }
         adjustpointers(@unsafe.Pointer(frame.argp), _addr_args, _addr_adjinfo, new funcInfo());
-
     }
     if (frame.varp != 0) {
         foreach (var (_, obj) in objs) {
@@ -758,16 +726,13 @@ private static bool adjustframe(ptr<stkframe> _addr_frame, unsafe.Pointer arg) {
             if (off >= 0) {
                 base = frame.argp; // arguments and return values base pointer
             }
-
             var p = base + uintptr(off);
             if (p < frame.sp) { 
                 // Object hasn't been allocated in the frame yet.
                 // (Happens when the stack bounds check fails and
                 // we call into morestack.)
                 continue;
-
             }
-
             var ptrdata = obj.ptrdata();
             var gcdata = obj.gcdata;
             ptr<mspan> s;
@@ -775,9 +740,7 @@ private static bool adjustframe(ptr<stkframe> _addr_frame, unsafe.Pointer arg) {
                 // See comments in mgcmark.go:scanstack
                 s = materializeGCProg(ptrdata, gcdata);
                 gcdata = (byte.val)(@unsafe.Pointer(s.startAddr));
-
             }
-
             {
                 var i = uintptr(0);
 
@@ -786,18 +749,15 @@ private static bool adjustframe(ptr<stkframe> _addr_frame, unsafe.Pointer arg) {
                         adjustpointer(_addr_adjinfo, @unsafe.Pointer(p + i));
                     i += sys.PtrSize;
                     }
-
                 }
 
             }
             if (s != null) {
                 dematerializeGCProg(s);
             }
-
         }
     }
     return true;
-
 }
 
 private static void adjustctxt(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo) {
@@ -817,7 +777,6 @@ private static void adjustctxt(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo) {
         }
     }
     adjustpointer(_addr_adjinfo, @unsafe.Pointer(_addr_gp.sched.bp));
-
 }
 
 private static void adjustdefers(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo) {
@@ -846,7 +805,6 @@ private static void adjustdefers(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo)
     // Note: this code is after the loop above, so that if a defer record is
     // stack allocated, we work on the copy in the new stack.
     tracebackdefers(gp, adjustframe, noescape(@unsafe.Pointer(adjinfo)));
-
 }
 
 private static void adjustpanics(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo) {
@@ -856,7 +814,6 @@ private static void adjustpanics(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo)
     // Panics are on stack and already adjusted.
     // Update pointer to head of list in G.
     adjustpointer(_addr_adjinfo, @unsafe.Pointer(_addr_gp._panic));
-
 }
 
 private static void adjustsudogs(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo) {
@@ -873,17 +830,14 @@ private static void adjustsudogs(ptr<g> _addr_gp, ptr<adjustinfo> _addr_adjinfo)
             s = s.waitlink;
         }
     }
-
 }
 
 private static void fillstack(stack stk, byte b) {
     for (var p = stk.lo; p < stk.hi; p++) {
-        (byte.val)(@unsafe.Pointer(p)).val;
+        (byte.val).val;
 
-        b;
-
+        (@unsafe.Pointer(p)) = b;
     }
-
 }
 
 private static System.UIntPtr findsghi(ptr<g> _addr_gp, stack stk) {
@@ -899,11 +853,9 @@ private static System.UIntPtr findsghi(ptr<g> _addr_gp, stack stk) {
                 sghi = p;
             sg = sg.waitlink;
             }
-
         }
     }
     return sghi;
-
 }
 
 // syncadjustsudogs adjusts gp's sudogs and copies the part of gp's
@@ -936,9 +888,7 @@ private static System.UIntPtr syncadjustsudogs(ptr<g> _addr_gp, System.UIntPtr u
                 lockWithRank(_addr_sg.c.@lock, lockRankHchanLeaf);
             sg = sg.waitlink;
             }
-
             lastc = sg.c;
-
         }
 
         sg = sg__prev1;
@@ -968,16 +918,13 @@ private static System.UIntPtr syncadjustsudogs(ptr<g> _addr_gp, System.UIntPtr u
                 unlock(_addr_sg.c.@lock);
             sg = sg.waitlink;
             }
-
             lastc = sg.c;
-
         }
 
         sg = sg__prev1;
     }
 
     return sgsize;
-
 }
 
 // Copies gp's stack to a new stack of a different size.
@@ -1015,10 +962,8 @@ private static void copystack(ptr<g> _addr_gp, System.UIntPtr newsize) {
             // ourselves and explicitly don't want to synchronize with channels
             // since we could self-deadlock.
             throw("racy sudog adjustment due to parking on channel");
-
         }
         adjustsudogs(_addr_gp, _addr_adjinfo);
-
     }
     else
  { 
@@ -1034,7 +979,6 @@ private static void copystack(ptr<g> _addr_gp, System.UIntPtr newsize) {
         // Synchronize with channel ops and copy the part of
         // the stack they may interact with.
         ncopy -= syncadjustsudogs(_addr_gp, used, _addr_adjinfo);
-
     }
     memmove(@unsafe.Pointer(@new.hi - ncopy), @unsafe.Pointer(old.hi - ncopy), ncopy); 
 
@@ -1060,7 +1004,6 @@ private static void copystack(ptr<g> _addr_gp, System.UIntPtr newsize) {
         fillstack(old, 0xfc);
     }
     stackfree(old);
-
 }
 
 // round x up to a power of 2.
@@ -1115,7 +1058,6 @@ private static void newstack() {
         thisg.m.traceback = 2; // Include runtime frames
         traceback(morebuf.pc, morebuf.sp, morebuf.lr, gp);
         throw("runtime: stack split at bad time");
-
     }
     morebuf = thisg.m.morebuf;
     thisg.m.morebuf.pc = 0;
@@ -1155,7 +1097,6 @@ private static void newstack() {
     if (sys.ArchFamily == sys.AMD64 || sys.ArchFamily == sys.I386 || sys.ArchFamily == sys.WASM) { 
         // The call to morestack cost a word.
         sp -= sys.PtrSize;
-
     }
     if (stackDebug >= 1 || sp < gp.stack.lo) {
         print("runtime: newstack sp=", hex(sp), " stack=[", hex(gp.stack.lo), ", ", hex(gp.stack.hi), "]\n", "\tmorebuf={pc:", hex(morebuf.pc), " sp:", hex(morebuf.sp), " lr:", hex(morebuf.lr), "}\n", "\tsched={pc:", hex(gp.sched.pc), " sp:", hex(gp.sched.sp), " lr:", hex(gp.sched.lr), " ctxt:", gp.sched.ctxt, "}\n");
@@ -1177,7 +1118,6 @@ private static void newstack() {
             // do the pending stack shrink.
             gp.preemptShrink = false;
             shrinkstack(_addr_gp);
-
         }
         if (gp.preemptStop) {
             preemptPark(gp); // never returns
@@ -1207,13 +1147,11 @@ private static void newstack() {
 
     }
 
-
     if (gp.stackguard0 == stackForceMove) { 
         // Forced stack movement used for debugging.
         // Don't double the stack (or we may quickly run out
         // if this is done repeatedly).
         newsize = oldsize;
-
     }
     if (newsize > maxstacksize || newsize > maxstackceiling) {
         if (maxstacksize < maxstackceiling) {
@@ -1225,7 +1163,6 @@ private static void newstack() {
         }
         print("runtime: sp=", hex(sp), " stack=[", hex(gp.stack.lo), ", ", hex(gp.stack.hi), "]\n");
         throw("stack overflow");
-
     }
     casgstatus(gp, _Grunning, _Gcopystack); 
 
@@ -1237,15 +1174,13 @@ private static void newstack() {
     }
     casgstatus(gp, _Gcopystack, _Grunning);
     gogo(_addr_gp.sched);
-
 }
 
 //go:nosplit
 private static void nilfunc() {
-    (uint8.val)(null).val;
+    (uint8.val).val;
 
-    0;
-
+    (null) = 0;
 }
 
 // adjust Gobuf as if it executed a call to fn
@@ -1263,7 +1198,6 @@ private static void gostartcallfn(ptr<gobuf> _addr_gobuf, ptr<funcval> _addr_fv)
         fn = @unsafe.Pointer(funcPC(nilfunc));
     }
     gostartcall(gobuf, fn, @unsafe.Pointer(fv));
-
 }
 
 // isShrinkStackSafe returns whether it's safe to attempt to shrink
@@ -1285,7 +1219,6 @@ private static bool isShrinkStackSafe(ptr<g> _addr_gp) {
     // goroutine calling gopark to park on a channel and
     // gp.activeStackChans being set.
     return gp.syscallsp == 0 && !gp.asyncSafePoint && atomic.Load8(_addr_gp.parkingOnChan) == 0;
-
 }
 
 // Maybe shrink the stack being used by gp.
@@ -1308,12 +1241,9 @@ private static void shrinkstack(ptr<g> _addr_gp) {
             if (!(gp == getg().m.curg && getg() != getg().m.curg && s == _Grunning)) { 
                 // We don't own the stack.
                 throw("bad status in shrinkstack");
-
             }
-
         }
     }
-
     if (!isShrinkStackSafe(_addr_gp)) {
         throw("shrinkstack at bad time");
     }
@@ -1328,7 +1258,6 @@ private static void shrinkstack(ptr<g> _addr_gp) {
         // We're not allowed to shrink the gcBgMarkWorker
         // stack (see gcBgMarkWorker for explanation).
         return ;
-
     }
     var oldsize = gp.stack.hi - gp.stack.lo;
     var newsize = oldsize / 2; 
@@ -1346,12 +1275,10 @@ private static void shrinkstack(ptr<g> _addr_gp) {
         }
     }
 
-
     if (stackDebug > 0) {
         print("shrinking stack ", oldsize, "->", newsize, "\n");
     }
     copystack(_addr_gp, newsize);
-
 }
 
 // freeStackSpans frees unused stack spans at the end of GC.
@@ -1380,7 +1307,6 @@ private static void freeStackSpans() {
             s = s__prev2;
         }
         unlock(_addr_stackpool[order].item.mu);
-
     }    lock(_addr_stackLarge.@lock);
     foreach (var (i) in stackLarge.free) {
         {
@@ -1399,9 +1325,7 @@ private static void freeStackSpans() {
 
             s = s__prev2;
         }
-
     }    unlock(_addr_stackLarge.@lock);
-
 }
 
 // getStackMap returns the locals and arguments live pointer maps, and
@@ -1417,7 +1341,6 @@ private static (bitvector, bitvector, slice<stackObjectRecord>) getStackMap(ptr<
     if (targetpc == 0) { 
         // Frame is dead. Return empty bitvectors.
         return ;
-
     }
     var f = frame.fn;
     var pcdata = int32(-1);
@@ -1428,14 +1351,12 @@ private static (bitvector, bitvector, slice<stackObjectRecord>) getStackMap(ptr<
         // stack map.
         targetpc--;
         pcdata = pcdatavalue(f, _PCDATA_StackMapIndex, targetpc, cache);
-
     }
     if (pcdata == -1) { 
         // We do not have a valid pcdata value but there might be a
         // stackmap for this function. It is likely that we are looking
         // at the function prologue, assume so and hope for the best.
         pcdata = 0;
-
     }
     var size = frame.varp - frame.sp;
     System.UIntPtr minsize = default;
@@ -1456,14 +1377,11 @@ private static (bitvector, bitvector, slice<stackObjectRecord>) getStackMap(ptr<
                 // don't know where we are
                 print("runtime: pcdata is ", stackid, " and ", stkmap.n, " locals stack map entries for ", funcname(f), " (targetpc=", hex(targetpc), ")\n");
                 throw("bad symbol table");
-
             }
-
             locals = stackmapdata(stkmap, stackid);
             if (stackDebug >= 3 && debug) {
                 print("      locals ", stackid, "/", stkmap.n, " ", locals.n, " words ", locals.bytedata, "\n");
             }
-
         }
         else if (stackDebug >= 3 && debug) {
             print("      no locals to adjust\n");
@@ -1479,7 +1397,6 @@ private static (bitvector, bitvector, slice<stackObjectRecord>) getStackMap(ptr<
             if (n < args.n) {
                 args.n = n; // Don't use more of the arguments than arglen.
             }
-
         }
         else
  {
@@ -1492,13 +1409,10 @@ private static (bitvector, bitvector, slice<stackObjectRecord>) getStackMap(ptr<
                 // don't know where we are
                 print("runtime: pcdata is ", pcdata, " and ", stackmap.n, " args stack map entries for ", funcname(f), " (targetpc=", hex(targetpc), ")\n");
                 throw("bad symbol table");
-
             }
-
             if (stackmap.nbit > 0) {
                 args = stackmapdata(stackmap, pcdata);
             }
-
         }
     }
     if (GOARCH == "amd64" && @unsafe.Sizeof(new abi.RegArgs()) > 0 && frame.argmap != null) { 
@@ -1507,16 +1421,15 @@ private static (bitvector, bitvector, slice<stackObjectRecord>) getStackMap(ptr<
         // record for these frames which contain an internal/abi.RegArgs at a hard-coded offset
         // on amd64.
         objs = methodValueCallFrameObjs;
-
     }
     else
  {
         var p = funcdata(f, _FUNCDATA_StackObjects);
         if (p != null) {
             n = new ptr<ptr<ptr<System.UIntPtr>>>(p);
-            p = add(p, sys.PtrSize) * (slice.val)(@unsafe.Pointer(_addr_objs));
+            p = add(p, sys.PtrSize) * (slice.val);
 
-            new slice(array:noescape(p),len:int(n),cap:int(n)); 
+            (@unsafe.Pointer(_addr_objs)) = new slice(array:noescape(p),len:int(n),cap:int(n)); 
             // Note: the noescape above is needed to keep
             // getStackMap from "leaking param content:
             // frame".  That leak propagates up to getgcmask, then
@@ -1525,7 +1438,6 @@ private static (bitvector, bitvector, slice<stackObjectRecord>) getStackMap(ptr<
         }
     }
     return ;
-
 }
 
 private static abi.RegArgs abiRegArgsEface = new abi.RegArgs();private static ptr<_type> abiRegArgsTypeefaceOf(_addr_abiRegArgsEface)._type;private static stackObjectRecord methodValueCallFrameObjs = new slice<stackObjectRecord>(new stackObjectRecord[] { {off:-int32(alignUp(abiRegArgsType.size,8)),size:int32(abiRegArgsType.size),_ptrdata:int32(abiRegArgsType.ptrdata),gcdata:abiRegArgsType.gcdata,} });
@@ -1559,7 +1471,6 @@ private static System.UIntPtr ptrdata(this ptr<stackObjectRecord> _addr_r) {
         return uintptr(-x);
     }
     return uintptr(x);
-
 }
 
 // This is exported as ABI0 via linkname so obj can call it.

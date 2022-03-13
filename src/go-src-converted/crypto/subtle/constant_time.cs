@@ -4,18 +4,17 @@
 
 // Package subtle implements functions that are often useful in cryptographic
 // code but require careful thought to use correctly.
-// package subtle -- go2cs converted at 2022 March 06 22:17:16 UTC
+
+// package subtle -- go2cs converted at 2022 March 13 05:30:38 UTC
 // import "crypto/subtle" ==> using subtle = go.crypto.subtle_package
 // Original source: C:\Program Files\Go\src\crypto\subtle\constant_time.go
-
-
 namespace go.crypto;
 
 public static partial class subtle_package {
 
-    // ConstantTimeCompare returns 1 if the two slices, x and y, have equal contents
-    // and 0 otherwise. The time taken is a function of the length of the slices and
-    // is independent of the contents.
+// ConstantTimeCompare returns 1 if the two slices, x and y, have equal contents
+// and 0 otherwise. The time taken is a function of the length of the slices and
+// is independent of the contents.
 public static nint ConstantTimeCompare(slice<byte> x, slice<byte> y) {
     if (len(x) != len(y)) {
         return 0;
@@ -27,7 +26,6 @@ public static nint ConstantTimeCompare(slice<byte> x, slice<byte> y) {
     }
 
     return ConstantTimeByteEq(v, 0);
-
 }
 
 // ConstantTimeSelect returns x if v == 1 and y if v == 0.
@@ -58,7 +56,6 @@ public static void ConstantTimeCopy(nint v, slice<byte> x, slice<byte> y) => fun
     for (nint i = 0; i < len(x); i++) {
         x[i] = x[i] & xmask | y[i] & ymask;
     }
-
 });
 
 // ConstantTimeLessOrEq returns 1 if x <= y and 0 otherwise.

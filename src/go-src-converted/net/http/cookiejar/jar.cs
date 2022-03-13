@@ -3,40 +3,42 @@
 // license that can be found in the LICENSE file.
 
 // Package cookiejar implements an in-memory RFC 6265-compliant http.CookieJar.
-// package cookiejar -- go2cs converted at 2022 March 06 22:23:50 UTC
+
+// package cookiejar -- go2cs converted at 2022 March 13 05:38:15 UTC
 // import "net/http/cookiejar" ==> using cookiejar = go.net.http.cookiejar_package
 // Original source: C:\Program Files\Go\src\net\http\cookiejar\jar.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using net = go.net_package;
-using http = go.net.http_package;
-using ascii = go.net.http.@internal.ascii_package;
-using url = go.net.url_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.net.http;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using net = net_package;
+using http = net.http_package;
+using ascii = net.http.@internal.ascii_package;
+using url = net.url_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// PublicSuffixList provides the public suffix of a domain. For example:
+//      - the public suffix of "example.com" is "com",
+//      - the public suffix of "foo1.foo2.foo3.co.uk" is "co.uk", and
+//      - the public suffix of "bar.pvt.k12.ma.us" is "pvt.k12.ma.us".
+//
+// Implementations of PublicSuffixList must be safe for concurrent use by
+// multiple goroutines.
+//
+// An implementation that always returns "" is valid and may be useful for
+// testing but it is not secure: it means that the HTTP server for foo.com can
+// set a cookie for bar.com.
+//
+// A public suffix list implementation is in the package
+// golang.org/x/net/publicsuffix.
+
+using System;
 public static partial class cookiejar_package {
 
-    // PublicSuffixList provides the public suffix of a domain. For example:
-    //      - the public suffix of "example.com" is "com",
-    //      - the public suffix of "foo1.foo2.foo3.co.uk" is "co.uk", and
-    //      - the public suffix of "bar.pvt.k12.ma.us" is "pvt.k12.ma.us".
-    //
-    // Implementations of PublicSuffixList must be safe for concurrent use by
-    // multiple goroutines.
-    //
-    // An implementation that always returns "" is valid and may be useful for
-    // testing but it is not secure: it means that the HTTP server for foo.com can
-    // set a cookie for bar.com.
-    //
-    // A public suffix list implementation is in the package
-    // golang.org/x/net/publicsuffix.
 public partial interface PublicSuffixList {
     @string PublicSuffix(@string domain); // String returns a description of the source of this public suffix
 // list. The description will typically contain something like a time
@@ -71,7 +73,6 @@ public static (ptr<Jar>, error) New(ptr<Options> _addr_o) {
         jar.psList = o.PublicSuffixList;
     }
     return (_addr_jar!, error.As(null!)!);
-
 }
 
 // entry is the internal representation of a cookie.
@@ -120,7 +121,6 @@ private static bool domainMatch(this ptr<entry> _addr_e, @string host) {
         return true;
     }
     return !e.HostOnly && hasDotSuffix(host, e.Domain);
-
 }
 
 // pathMatch implements "path-match" according to RFC 6265 section 5.1.4.
@@ -139,7 +139,6 @@ private static bool pathMatch(this ptr<entry> _addr_e, @string requestPath) {
         }
     }
     return false;
-
 }
 
 // hasDotSuffix reports whether s ends in "."+suffix.
@@ -227,7 +226,6 @@ private static slice<ptr<http.Cookie>> cookies(this ptr<Jar> _addr_j, ptr<url.UR
             return s[i].Creation.Before(s[j].Creation);
         }
         return s[i].seqNum < s[j].seqNum;
-
     });
     {
         var e__prev1 = e;
@@ -240,7 +238,6 @@ private static slice<ptr<http.Cookie>> cookies(this ptr<Jar> _addr_j, ptr<url.UR
     }
 
     return cookies;
-
 });
 
 // SetCookies implements the SetCookies method of the http.CookieJar interface.
@@ -294,11 +291,8 @@ private static void setCookies(this ptr<Jar> _addr_j, ptr<url.URL> _addr_u, slic
                     }
 
                 }
-
             }
-
             continue;
-
         }
         if (submap == null) {
             submap = make_map<@string, entry>();
@@ -318,11 +312,9 @@ private static void setCookies(this ptr<Jar> _addr_j, ptr<url.URL> _addr_u, slic
             }
 
         }
-
         e.LastAccess = now;
         submap[id] = e;
         modified = true;
-
     }    if (modified) {
         if (len(submap) == 0) {
             delete(j.entries, key);
@@ -350,7 +342,6 @@ private static (@string, error) canonicalHost(@string host) {
     if (strings.HasSuffix(host, ".")) { 
         // Strip trailing dot from fully qualified domain names.
         host = host[..(int)len(host) - 1];
-
     }
     var (encoded, err) = toASCII(host);
     if (err != null) {
@@ -358,7 +349,6 @@ private static (@string, error) canonicalHost(@string host) {
     }
     var (lower, _) = ascii.ToLower(encoded);
     return (lower, error.As(null!)!);
-
 }
 
 // hasPort reports whether host contains a port number. host may be a host
@@ -372,7 +362,6 @@ private static bool hasPort(@string host) {
         return true;
     }
     return host[0] == '[' && strings.Contains(host, "]:");
-
 }
 
 // jarKey returns the key to use for a jar.
@@ -398,12 +387,10 @@ private static @string jarKey(@string host, PublicSuffixList psl) {
             // The provided public suffix list psl is broken.
             // Storing cookies under host is a safe stopgap.
             return host;
-
         }
     }
     var prevDot = strings.LastIndex(host[..(int)i - 1], ".");
     return host[(int)prevDot + 1..];
-
 }
 
 // isIP reports whether host is an IP address.
@@ -487,7 +474,6 @@ private static (entry, bool, error) newEntry(this ptr<Jar> _addr_j, ptr<http.Coo
     else if (c.SameSite == http.SameSiteLaxMode) 
         e.SameSite = "SameSite=Lax";
         return (e, false, error.As(null!)!);
-
 }
 
 private static var errIllegalDomain = errors.New("cookiejar: illegal cookie domain attribute");private static var errMalformedDomain = errors.New("cookiejar: malformed cookie domain attribute");private static var errNoHostname = errors.New("cookiejar: no host name available (IP only)");
@@ -508,14 +494,12 @@ private static (@string, bool, error) domainAndType(this ptr<Jar> _addr_j, @stri
         // No domain attribute in the SetCookie header indicates a
         // host cookie.
         return (host, true, error.As(null!)!);
-
     }
     if (isIP(host)) { 
         // According to RFC 6265 domain-matching includes not being
         // an IP address.
         // TODO: This might be relaxed as in common browsers.
         return ("", false, error.As(errNoHostname)!);
-
     }
     if (domain[0] == '.') {
         domain = domain[(int)1..];
@@ -524,13 +508,11 @@ private static (@string, bool, error) domainAndType(this ptr<Jar> _addr_j, @stri
         // Received either "Domain=." or "Domain=..some.thing",
         // both are illegal.
         return ("", false, error.As(errMalformedDomain)!);
-
     }
     var (domain, isASCII) = ascii.ToLower(domain);
     if (!isASCII) { 
         // Received non-ASCII domain, e.g. "perché.com" instead of "xn--perch-fsa.com"
         return ("", false, error.As(errMalformedDomain)!);
-
     }
     if (domain[len(domain) - 1] == '.') { 
         // We received stuff like "Domain=www.example.com.".
@@ -540,7 +522,6 @@ private static (@string, bool, error) domainAndType(this ptr<Jar> _addr_j, @stri
         // "Domain Matching" (5.1.3) and "Canonicalized Host Names"
         // (5.1.2) are.
         return ("", false, error.As(errMalformedDomain)!);
-
     }
     if (j.psList != null) {
         {
@@ -551,21 +532,16 @@ private static (@string, bool, error) domainAndType(this ptr<Jar> _addr_j, @stri
                     // This is the one exception in which a cookie
                     // with a domain attribute is a host cookie.
                     return (host, true, error.As(null!)!);
-
                 }
-
                 return ("", false, error.As(errIllegalDomain)!);
-
             }
 
         }
-
     }
     if (host != domain && !hasDotSuffix(host, domain)) {
         return ("", false, error.As(errIllegalDomain)!);
     }
     return (domain, false, error.As(null!)!);
-
 }
 
 } // end cookiejar_package

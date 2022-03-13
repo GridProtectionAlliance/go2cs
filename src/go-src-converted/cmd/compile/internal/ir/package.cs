@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:15 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:37 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\package.go
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ir_package {
 
-    // A Package holds information about the package being compiled.
+// A Package holds information about the package being compiled.
 public partial struct Package {
     public slice<ptr<types.Pkg>> Imports; // Init functions, listed in source order.
     public slice<ptr<Func>> Inits; // Top-level declarations.

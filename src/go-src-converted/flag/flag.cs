@@ -65,27 +65,29 @@
     analogous to the top-level functions for the command-line
     flag set.
 */
-// package flag -- go2cs converted at 2022 March 06 22:23:59 UTC
+
+// package flag -- go2cs converted at 2022 March 13 05:38:24 UTC
 // import "flag" ==> using flag = go.flag_package
 // Original source: C:\Program Files\Go\src\flag\flag.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+
+// ErrHelp is the error returned if the -help or -h flag is invoked
+// but no such flag is defined.
+
+using System;
 public static partial class flag_package {
 
-    // ErrHelp is the error returned if the -help or -h flag is invoked
-    // but no such flag is defined.
 public static var ErrHelp = errors.New("flag: help requested");
 
 // errParse is returned by Set if a flag's value fails to parse, such as with an invalid integer for Int.
@@ -108,7 +110,6 @@ private static error numError(error err) {
         return error.As(errRange)!;
     }
     return error.As(err)!;
-
 }
 
 // -- bool Value
@@ -131,7 +132,6 @@ private static error Set(this ptr<boolValue> _addr_b, @string s) {
     }
     b.val = boolValue(v);
     return error.As(err)!;
-
 }
 
 private static void Get(this ptr<boolValue> _addr_b) {
@@ -178,7 +178,6 @@ private static error Set(this ptr<intValue> _addr_i, @string s) {
     }
     i.val = intValue(v);
     return error.As(err)!;
-
 }
 
 private static void Get(this ptr<intValue> _addr_i) {
@@ -213,7 +212,6 @@ private static error Set(this ptr<int64Value> _addr_i, @string s) {
     }
     i.val = int64Value(v);
     return error.As(err)!;
-
 }
 
 private static void Get(this ptr<int64Value> _addr_i) {
@@ -248,7 +246,6 @@ private static error Set(this ptr<uintValue> _addr_i, @string s) {
     }
     i.val = uintValue(v);
     return error.As(err)!;
-
 }
 
 private static void Get(this ptr<uintValue> _addr_i) {
@@ -283,7 +280,6 @@ private static error Set(this ptr<uint64Value> _addr_i, @string s) {
     }
     i.val = uint64Value(v);
     return error.As(err)!;
-
 }
 
 private static void Get(this ptr<uint64Value> _addr_i) {
@@ -348,7 +344,6 @@ private static error Set(this ptr<float64Value> _addr_f, @string s) {
     }
     f.val = float64Value(v);
     return error.As(err)!;
-
 }
 
 private static void Get(this ptr<float64Value> _addr_f) {
@@ -383,7 +378,6 @@ private static error Set(this ptr<durationValue> _addr_d, @string s) {
     }
     d.val = durationValue(v);
     return error.As(err)!;
-
 }
 
 private static void Get(this ptr<durationValue> _addr_d) {
@@ -471,9 +465,7 @@ private static slice<ptr<Flag>> sortFlags(map<@string, ptr<Flag>> flags) {
     foreach (var (_, f) in flags) {
         result[i] = f;
         i++;
-    }    sort.Slice(result, (i, j) => {
-        return result[i].Name < result[j].Name;
-    });
+    }    sort.Slice(result, (i, j) => result[i].Name < result[j].Name);
     return result;
 }
 
@@ -486,7 +478,6 @@ private static io.Writer Output(this ptr<FlagSet> _addr_f) {
         return os.Stderr;
     }
     return f.output;
-
 }
 
 // Name returns the name of the flag set.
@@ -573,7 +564,6 @@ private static error Set(this ptr<FlagSet> _addr_f, @string name, @string value)
     }
     f.actual[name] = flag;
     return error.As(null!)!;
-
 }
 
 // Set sets the value of the named command-line flag.
@@ -599,7 +589,6 @@ private static bool isZeroValue(ptr<Flag> _addr_flag, @string value) {
         z = reflect.Zero(typ);
     }
     return value == z.Interface()._<Value>().String();
-
 }
 
 // UnquoteUsage extracts a back-quoted name from the usage
@@ -656,7 +645,6 @@ public static (@string, @string) UnquoteUsage(ptr<Flag> _addr_flag) {
             break;
     }
     return ;
-
 }
 
 // PrintDefaults prints, to standard error unless configured otherwise, the
@@ -675,14 +663,12 @@ private static void PrintDefaults(this ptr<FlagSet> _addr_f) {
         }
         if (b.Len() <= 4) { // space, space, '-', 'x'.
             b.WriteString("\t");
-
         }
         else
  { 
             // Four spaces before the tab triggers good alignment
             // for both 4- and 8-space tab stops.
             b.WriteString("\n    \t");
-
         }
         b.WriteString(strings.ReplaceAll(usage, "\n", "\n    \t"));
 
@@ -693,7 +679,6 @@ private static void PrintDefaults(this ptr<FlagSet> _addr_f) {
                 if (ok) { 
                     // put quotes on the value
                     fmt.Fprintf(_addr_b, " (default %q)", flag.DefValue);
-
                 }
                 else
  {
@@ -701,12 +686,9 @@ private static void PrintDefaults(this ptr<FlagSet> _addr_f) {
                 }
 
             }
-
         }
         fmt.Fprint(f.Output(), b.String(), "\n");
-
     });
-
 }
 
 // PrintDefaults prints, to standard error unless configured otherwise,
@@ -746,7 +728,6 @@ private static void defaultUsage(this ptr<FlagSet> _addr_f) {
         fmt.Fprintf(f.Output(), "Usage of %s:\n", f.name);
     }
     f.PrintDefaults();
-
 }
 
 // NOTE: Usage is not just defaultUsage(CommandLine)
@@ -789,7 +770,6 @@ private static @string Arg(this ptr<FlagSet> _addr_f, nint i) {
         return "";
     }
     return f.args[i];
-
 }
 
 // Arg returns the i'th command-line argument. Arg(0) is the first remaining argument
@@ -1140,7 +1120,6 @@ private static void Var(this ptr<FlagSet> _addr_f, Value value, @string name, @s
         f.formal = make_map<@string, ptr<Flag>>();
     }
     f.formal[name] = flag;
-
 });
 
 // Var defines a flag with the specified name and usage string. The type and
@@ -1207,7 +1186,6 @@ private static (bool, error) parseOne(this ptr<FlagSet> _addr_f) {
         if (len(s) == 2) { // "--" terminates the flags
             f.args = f.args[(int)1..];
             return (false, error.As(null!)!);
-
         }
     }
     var name = s[(int)numMinuses..];
@@ -1231,10 +1209,8 @@ private static (bool, error) parseOne(this ptr<FlagSet> _addr_f) {
         if (name == "help" || name == "h") { // special case for nice help message.
             f.usage();
             return (false, error.As(ErrHelp)!);
-
         }
         return (false, error.As(f.failf("flag provided but not defined: -%s", name))!);
-
     }
     {
         boolFlag (fv, ok) = boolFlag.As(flag.Value._<boolFlag>())!;
@@ -1253,7 +1229,6 @@ private static (bool, error) parseOne(this ptr<FlagSet> _addr_f) {
                     err = err__prev3;
 
                 }
-
             }
             else
  {
@@ -1269,9 +1244,7 @@ private static (bool, error) parseOne(this ptr<FlagSet> _addr_f) {
                     err = err__prev3;
 
                 }
-
             }
-
         }
         else
  { 
@@ -1281,11 +1254,9 @@ private static (bool, error) parseOne(this ptr<FlagSet> _addr_f) {
                 hasValue = true;
                 (value, f.args) = (f.args[0], f.args[(int)1..]);
             }
-
             if (!hasValue) {
                 return (false, error.As(f.failf("flag needs an argument: -%s", name))!);
             }
-
             {
                 var err__prev2 = err;
 
@@ -1298,16 +1269,13 @@ private static (bool, error) parseOne(this ptr<FlagSet> _addr_f) {
                 err = err__prev2;
 
             }
-
         }
     }
-
     if (f.actual == null) {
         f.actual = make_map<@string, ptr<Flag>>();
     }
     f.actual[name] = flag;
     return (true, error.As(null!)!);
-
 }
 
 // Parse parses flag definitions from the argument list, which should not
@@ -1337,10 +1305,8 @@ private static error Parse(this ptr<FlagSet> _addr_f, slice<@string> arguments) 
             os.Exit(2);
         else if (f.errorHandling == PanicOnError) 
             panic(err);
-        
-    }
+            }
     return error.As(null!)!;
-
 });
 
 // Parsed reports whether f.Parse has been called.
@@ -1355,7 +1321,6 @@ private static bool Parsed(this ptr<FlagSet> _addr_f) {
 public static void Parse() { 
     // Ignore errors; CommandLine is set for ExitOnError.
     CommandLine.Parse(os.Args[(int)1..]);
-
 }
 
 // Parsed reports whether the command-line flags have been parsed.
@@ -1374,7 +1339,6 @@ private static void init() {
     // because we want any eventual call to use any updated value of Usage,
     // not the value it has when this line is run.
     CommandLine.Usage = commandLineUsage;
-
 }
 
 private static void commandLineUsage() {

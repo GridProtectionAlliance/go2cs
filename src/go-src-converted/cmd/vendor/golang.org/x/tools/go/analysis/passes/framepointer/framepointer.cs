@@ -4,17 +4,18 @@
 
 // Package framepointer defines an Analyzer that reports assembly code
 // that clobbers the frame pointer before saving it.
-// package framepointer -- go2cs converted at 2022 March 06 23:34:35 UTC
+
+// package framepointer -- go2cs converted at 2022 March 13 06:41:51 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/framepointer" ==> using framepointer = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.framepointer_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\framepointer\framepointer.go
-using build = go.go.build_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using build = go.build_package;
+using regexp = regexp_package;
+using strings = strings_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
 
 public static partial class framepointer_package {
 
@@ -33,7 +34,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
 
     if (build.Default.GOARCH != "amd64") { // TODO: arm64 also?
         return (null, error.As(null!)!);
-
     }
     if (build.Default.GOOS != "linux" && build.Default.GOOS != "darwin") {
         return (null, error.As(null!)!);
@@ -74,7 +74,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     }
 
                 }
-
                 line = strings.TrimSpace(line); 
 
                 // We start checking code at a TEXT line for a frameless function.
@@ -82,38 +81,28 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     active = true;
                     continue;
                 }
-
                 if (!active) {
                     continue;
                 }
-
                 if (asmWriteBP.MatchString(line)) { // clobber of BP, function is not OK
                     pass.Reportf(analysisutil.LineStart(tf, lineno), "frame pointer is clobbered before saving");
                     active = false;
                     continue;
-
                 }
-
                 if (asmMentionBP.MatchString(line)) { // any other use of BP might be a read, so function is OK
                     active = false;
                     continue;
-
                 }
-
                 if (asmControlFlow.MatchString(line)) { // give up after any branch instruction
                     active = false;
                     continue;
-
                 }
-
             }
-
         }
         fname = fname__prev1;
     }
 
     return (null, error.As(null!)!);
-
 }
 
 } // end framepointer_package

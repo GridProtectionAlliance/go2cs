@@ -5,12 +5,12 @@
 //go:build typeparams
 // +build typeparams
 
-// package ast -- go2cs converted at 2022 March 06 22:42:55 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:04 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\ast_typeparams.go
-using token = go.go.token_package;
-
 namespace go.go;
+
+using token = go.token_package;
 
 public static partial class ast_package {
 
@@ -38,8 +38,7 @@ public partial struct TypeSpec {
 // or function instantiations with more than one type argument.
 public partial struct ListExpr {
     public slice<Expr> ElemList;
-}
-private static void exprNode(this ptr<ListExpr> _addr__p0) {
+}private static void exprNode(this ptr<ListExpr> _addr__p0) {
     ref ListExpr _p0 = ref _addr__p0.val;
 
 }
@@ -50,7 +49,6 @@ private static token.Pos Pos(this ptr<ListExpr> _addr_x) {
         return x.ElemList[0].Pos();
     }
     return token.NoPos;
-
 }
 private static token.Pos End(this ptr<ListExpr> _addr_x) {
     ref ListExpr x = ref _addr_x.val;
@@ -59,7 +57,6 @@ private static token.Pos End(this ptr<ListExpr> _addr_x) {
         return x.ElemList[len(x.ElemList) - 1].End();
     }
     return token.NoPos;
-
 }
 
 } // end ast_package

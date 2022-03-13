@@ -8,8 +8,9 @@
 // +build !plan9,!windows
 // +build threadprof
 
-// package main -- go2cs converted at 2022 March 06 22:26:18 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:34 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprogcgo\threadprof.go
+namespace go;
 /*
 #include <stdint.h>
 #include <signal.h>
@@ -43,91 +44,7 @@ int start_crashing_thread(void) {
     return pthread_create(&tid, 0, crash, 0);
 }
 */
-using C = go.C_package;/*
-#include <stdint.h>
-#include <signal.h>
-#include <pthread.h>
-
-volatile int32_t spinlock;
-
-static void *thread1(void *p) {
-    (void)p;
-    while (spinlock == 0)
-        ;
-    pthread_kill(pthread_self(), SIGPROF);
-    spinlock = 0;
-    return NULL;
-}
-
-__attribute__((constructor)) void issue9456() {
-    pthread_t tid;
-    pthread_create(&tid, 0, thread1, NULL);
-}
-
-void **nullptr;
-
-void *crash(void *p) {
-    *nullptr = p;
-    return 0;
-}
-
-int start_crashing_thread(void) {
-    pthread_t tid;
-    return pthread_create(&tid, 0, crash, 0);
-}
-*/
 
 
-using fmt = go.fmt_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using runtime = go.runtime_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using @unsafe = go.@unsafe_package;
-
-namespace go;
-
-public static partial class main_package {
-
-private static void init() {
-    register("CgoExternalThreadSIGPROF", CgoExternalThreadSIGPROF);
-    register("CgoExternalThreadSignal", CgoExternalThreadSignal);
-}
-
-public static void CgoExternalThreadSIGPROF() { 
-    // This test intends to test that sending SIGPROF to foreign threads
-    // before we make any cgo call will not abort the whole process, so
-    // we cannot make any cgo call here. See https://golang.org/issue/9456.
-    atomic.StoreInt32((int32.val)(@unsafe.Pointer(_addr_C.spinlock)), 1);
-    while (atomic.LoadInt32((int32.val)(@unsafe.Pointer(_addr_C.spinlock))) == 1) {
-        runtime.Gosched();
-    }
-    println("OK");
-
-}
-
-public static void CgoExternalThreadSignal() {
-    if (len(os.Args) > 2 && os.Args[2] == "crash") {
-        var i = C.start_crashing_thread();
-        if (i != 0) {
-            fmt.Println("pthread_create failed:", i); 
-            // Exit with 0 because parent expects us to crash.
-            return ;
-
-        }
-        time.Sleep(5 * time.Second);
-        return ;
-
-    }
-    var (out, err) = exec.Command(os.Args[0], "CgoExternalThreadSignal", "crash").CombinedOutput();
-    if (err == null) {
-        fmt.Println("C signal did not crash as expected");
-        fmt.Printf("\n%s\n", out);
-        os.Exit(1);
-    }
-    fmt.Println("OK");
-
-}
 
 } // end main_package

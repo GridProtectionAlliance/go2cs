@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64 -- go2cs converted at 2022 March 06 23:14:32 UTC
+// package arm64 -- go2cs converted at 2022 March 13 06:28:01 UTC
 // import "cmd/compile/internal/arm64" ==> using arm64 = go.cmd.compile.@internal.arm64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\arm64\ggen.go
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using arm64 = go.cmd.@internal.obj.arm64_package;
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using arm64 = cmd.@internal.obj.arm64_package;
+using buildcfg = @internal.buildcfg_package;
 
 public static partial class arm64_package {
 
@@ -25,7 +25,6 @@ private static long padframe(long frame) {
         frame += 16 - (frame % 16);
     }
     return frame;
-
 }
 
 private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _addr_p, long off, long cnt, ptr<uint> _addr__) {
@@ -46,7 +45,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
             }
 
         }
-
     }
     else if (cnt <= int64(128 * types.PtrSize) && !darwin) { // darwin ld64 cannot handle BR26 reloc with non-zero addend
         if (cnt % (2 * int64(types.PtrSize)) != 0) {
@@ -61,7 +59,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
         p.To.Name = obj.NAME_EXTERN;
         p.To.Sym = ir.Syms.Duffzero;
         p.To.Offset = 4 * (64 - cnt / (2 * int64(types.PtrSize)));
-
     }
     else
  { 
@@ -84,10 +81,8 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
         p.Reg = arm64.REGRT2;
         p = pp.Append(p, arm64.ABNE, obj.TYPE_NONE, 0, 0, obj.TYPE_BRANCH, 0, 0);
         p.To.SetTarget(p1);
-
     }
     return _addr_p!;
-
 }
 
 private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:04 UTC
+//     Generated on 2022 March 13 05:52:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class xcoff_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SectionHeader
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace @internal
             public static implicit operator SectionHeader(NilType nil) => default(SectionHeader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SectionHeader SectionHeader_cast(dynamic value)
         {
             return new SectionHeader(value.Name, value.VirtualAddress, value.Size, value.Type, value.Relptr, value.Nreloc);

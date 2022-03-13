@@ -2,24 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:05 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:58 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\frexp.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Frexp breaks f into a normalized fraction
-    // and an integral power of two.
-    // It returns frac and exp satisfying f == frac × 2**exp,
-    // with the absolute value of frac in the interval [½, 1).
-    //
-    // Special cases are:
-    //    Frexp(±0) = ±0, 0
-    //    Frexp(±Inf) = ±Inf, 0
-    //    Frexp(NaN) = NaN, 0
+// Frexp breaks f into a normalized fraction
+// and an integral power of two.
+// It returns frac and exp satisfying f == frac × 2**exp,
+// with the absolute value of frac in the interval [½, 1).
+//
+// Special cases are:
+//    Frexp(±0) = ±0, 0
+//    Frexp(±Inf) = ±Inf, 0
+//    Frexp(NaN) = NaN, 0
 public static (double, nint) Frexp(double f) {
     double frac = default;
     nint exp = default;
@@ -28,7 +26,6 @@ public static (double, nint) Frexp(double f) {
         return archFrexp(f);
     }
     return frexp(f);
-
 }
 
 private static (double, nint) frexp(double f) {
@@ -48,7 +45,6 @@ private static (double, nint) frexp(double f) {
     x |= (-1 + bias) << (int)(shift);
     frac = Float64frombits(x);
     return ;
-
 }
 
 } // end math_package

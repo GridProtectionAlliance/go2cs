@@ -14,11 +14,9 @@
 // ftp://ftp.iana.org/tz/code/tz-link.htm
 // http://tools.ietf.org/html/rfc6557
 
-// package tzdata -- go2cs converted at 2022 March 06 22:29:53 UTC
+// package tzdata -- go2cs converted at 2022 March 13 05:40:42 UTC
 // import "time/tzdata" ==> using tzdata = go.time.tzdata_package
 // Original source: C:\Program Files\Go\src\time\tzdata\zipdata.go
-
-
 namespace go.time;
 
 public static partial class tzdata_package {

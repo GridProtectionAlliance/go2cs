@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:46:39 UTC
+// package main -- go2cs converted at 2022 March 13 05:57:52 UTC
 // Original source: C:\Program Files\Go\src\cmd\buildid\buildid.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using strings = go.strings_package;
-
-using buildid = go.cmd.@internal.buildid_package;
-
 namespace go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using strings = strings_package;
+
+using buildid = cmd.@internal.buildid_package;
 
 public static partial class main_package {
 
@@ -72,7 +72,6 @@ private static void Main() {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -84,7 +83,6 @@ private static void Main() {
         err = err__prev1;
 
     }
-
 }
 
 } // end main_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:22 UTC
+//     Generated on 2022 March 13 06:41:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace mod
 {
     public static partial class zip_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pathInfo
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace mod
             public static implicit operator pathInfo(NilType nil) => default(pathInfo);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pathInfo pathInfo_cast(dynamic value)
         {
             return new pathInfo(value.path, value.isDir);

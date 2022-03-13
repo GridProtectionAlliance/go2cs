@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package mime -- go2cs converted at 2022 March 06 22:21:16 UTC
+// package mime -- go2cs converted at 2022 March 13 05:36:24 UTC
 // import "mime" ==> using mime = go.mime_package
 // Original source: C:\Program Files\Go\src\mime\mediatype.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
 namespace go;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using sort = sort_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// FormatMediaType serializes mediatype t and the parameters
+// param as a media type conforming to RFC 2045 and RFC 2616.
+// The type and parameter names are written in lower-case.
+// When any of the arguments result in a standard violation then
+// FormatMediaType returns the empty string.
 
 public static partial class mime_package {
 
-    // FormatMediaType serializes mediatype t and the parameters
-    // param as a media type conforming to RFC 2045 and RFC 2616.
-    // The type and parameter names are written in lower-case.
-    // When any of the arguments result in a standard violation then
-    // FormatMediaType returns the empty string.
 public static @string FormatMediaType(@string t, map<@string, @string> param) {
     strings.Builder b = default;
     {
@@ -30,7 +32,6 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
                 return "";
             }
             b.WriteString(strings.ToLower(t));
-
         }
         else
  {
@@ -42,10 +43,8 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             b.WriteString(strings.ToLower(major));
             b.WriteByte('/');
             b.WriteString(strings.ToLower(sub));
-
         }
     }
-
 
     var attrs = make_slice<@string>(0, len(param));
     foreach (var (a) in param) {
@@ -65,7 +64,6 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
         if (needEnc) { 
             // RFC 2231 section 4
             b.WriteByte('*');
-
         }
         b.WriteByte('=');
 
@@ -94,7 +92,6 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
             }
             b.WriteString(value[(int)offset..]);
             continue;
-
         }
         if (isToken(value)) {
             b.WriteString(value);
@@ -118,9 +115,7 @@ public static @string FormatMediaType(@string t, map<@string, @string> param) {
         }
         b.WriteString(value[(int)offset..]);
         b.WriteByte('"');
-
     }    return b.String();
-
 }
 
 private static error checkMediaTypeDisposition(@string s) {
@@ -142,7 +137,6 @@ private static error checkMediaTypeDisposition(@string s) {
         return error.As(errors.New("mime: unexpected content after media subtype"))!;
     }
     return error.As(null!)!;
-
 }
 
 // ErrInvalidMediaParameter is returned by ParseMediaType if
@@ -194,11 +188,9 @@ public static (@string, map<@string, @string>, error) ParseMediaType(@string v) 
                 // Ignore trailing semicolons.
                 // Not an error.
                 return ;
-
             } 
             // Parse error.
             return (mediatype, null, error.As(ErrInvalidMediaParameter)!);
-
         }
         var pmap = params;
         {
@@ -216,25 +208,20 @@ public static (@string, map<@string, @string>, error) ParseMediaType(@string v) 
                     continuation[baseName] = make_map<@string, @string>();
                     pmap = continuation[baseName];
                 }
-
             }
 
         }
-
         {
             var (_, exists) = pmap[key];
 
             if (exists) { 
                 // Duplicate parameter name is bogus.
                 return ("", null, error.As(errors.New("mime: duplicate parameter name"))!);
-
             }
 
         }
-
         pmap[key] = value;
         v = rest;
-
     } 
 
     // Stitch together any continuations or things with stars
@@ -265,19 +252,16 @@ public static (@string, map<@string, @string>, error) ParseMediaType(@string v) 
                         decv = decv__prev2;
 
                     }
-
                     continue;
-
                 }
 
                 v = v__prev1;
 
             }
 
-
             buf.Reset();
             var valid = false;
-            for (nint n = 0; >>MARKER:FOREXPRESSION_LEVEL_2<<; n++) {
+            for (nint n = 0; ; n++) {
                 var simplePart = fmt.Sprintf("%s*%d", key, n);
                 {
                     var v__prev1 = v;
@@ -293,13 +277,11 @@ public static (@string, map<@string, @string>, error) ParseMediaType(@string v) 
                     v = v__prev1;
 
                 }
-
                 var encodedPart = simplePart + "*";
                 (v, ok) = pieceMap[encodedPart];
                 if (!ok) {
                     break;
                 }
-
                 valid = true;
                 if (n == 0) {
                     {
@@ -314,26 +296,22 @@ public static (@string, map<@string, @string>, error) ParseMediaType(@string v) 
                         decv = decv__prev2;
 
                     }
-
                 }
                 else
  {
                     var (decv, _) = percentHexUnescape(v);
                     buf.WriteString(decv);
                 }
-
             }
 
             if (valid) {
                 params[key] = buf.String();
             }
-
         }
         key = key__prev1;
     }
 
     return ;
-
 }
 
 private static (@string, bool) decode2231Enc(@string v) {
@@ -351,14 +329,12 @@ private static (@string, bool) decode2231Enc(@string v) {
     if (charset != "us-ascii" && charset != "utf-8") { 
         // TODO: unsupported encoding
         return ("", false);
-
     }
     var (encv, err) = percentHexUnescape(sv[2]);
     if (err != null) {
         return ("", false);
     }
     return (encv, true);
-
 }
 
 private static bool isNotTokenChar(int r) {
@@ -381,7 +357,6 @@ private static (@string, @string) consumeToken(@string v) {
         return ("", v);
     }
     return (v[(int)0..(int)notPos], v[(int)notPos..]);
-
 }
 
 // consumeValue consumes a "value" per RFC 2045, where a value is
@@ -414,11 +389,9 @@ private static (@string, @string) consumeValue(@string v) {
             return ("", v);
         }
         buffer.WriteByte(v[i]);
-
     } 
     // Did not find end quote.
     return ("", v);
-
 }
 
 private static (@string, @string, @string) consumeMediaParam(@string v) {
@@ -449,7 +422,6 @@ private static (@string, @string, @string) consumeMediaParam(@string v) {
     }
     rest = rest2;
     return (param, value, rest);
-
 }
 
 private static (@string, error) percentHexUnescape(@string s) {
@@ -504,13 +476,11 @@ private static (@string, error) percentHexUnescape(@string s) {
                     i++;
                     break;
             }
-
         }
 
         i = i__prev1;
     }
     return (string(t), error.As(null!)!);
-
 }
 
 private static bool ishex(byte c) {
@@ -522,7 +492,6 @@ private static bool ishex(byte c) {
     else if ('A' <= c && c <= 'F') 
         return true;
         return false;
-
 }
 
 private static byte unhex(byte c) {
@@ -534,7 +503,6 @@ private static byte unhex(byte c) {
     else if ('A' <= c && c <= 'F') 
         return c - 'A' + 10;
         return 0;
-
 }
 
 } // end mime_package

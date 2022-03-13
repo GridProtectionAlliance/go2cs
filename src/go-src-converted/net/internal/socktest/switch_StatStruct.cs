@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:41 UTC
+//     Generated on 2022 March 13 05:40:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class socktest_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Stat
         {
             // Constructors
@@ -79,7 +79,7 @@ namespace @internal
             public static implicit operator Stat(NilType nil) => default(Stat);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Stat Stat_cast(dynamic value)
         {
             return new Stat(value.Family, value.Type, value.Protocol, value.Opened, value.Connected, value.Listened, value.Accepted, value.Closed, value.OpenFailed, value.ConnectFailed, value.ListenFailed, value.AcceptFailed, value.CloseFailed);

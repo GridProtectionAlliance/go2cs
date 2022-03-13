@@ -6,14 +6,14 @@
 // instruction set, to minimize its interaction with the core of the
 // assembler.
 
-// package arch -- go2cs converted at 2022 March 06 22:46:38 UTC
+// package arch -- go2cs converted at 2022 March 13 05:57:51 UTC
 // import "cmd/asm/internal/arch" ==> using arch = go.cmd.asm.@internal.arch_package
 // Original source: C:\Program Files\Go\src\cmd\asm\internal\arch\arm64.go
-using obj = go.cmd.@internal.obj_package;
-using arm64 = go.cmd.@internal.obj.arm64_package;
-using errors = go.errors_package;
-
 namespace go.cmd.asm.@internal;
+
+using obj = cmd.@internal.obj_package;
+using arm64 = cmd.@internal.obj.arm64_package;
+using errors = errors_package;
 
 public static partial class arch_package {
 
@@ -32,7 +32,6 @@ public static bool IsARM64CMP(obj.As op) {
     if (op == arm64.ACMN || op == arm64.ACMP || op == arm64.ATST || op == arm64.ACMNW || op == arm64.ACMPW || op == arm64.ATSTW || op == arm64.AFCMPS || op == arm64.AFCMPD || op == arm64.AFCMPES || op == arm64.AFCMPED) 
         return true;
         return false;
-
 }
 
 // IsARM64STLXR reports whether the op (as defined by an arm64.A*
@@ -47,7 +46,6 @@ public static bool IsARM64STLXR(obj.As op) {
         return true;
     }
     return false;
-
 }
 
 // IsARM64TBL reports whether the op (as defined by an arm64.A*
@@ -58,7 +56,6 @@ public static bool IsARM64TBL(obj.As op) {
     if (op == arm64.AVTBL || op == arm64.AVMOVQ) 
         return true;
         return false;
-
 }
 
 // IsARM64CASP reports whether the op (as defined by an arm64.A*
@@ -69,7 +66,6 @@ public static bool IsARM64CASP(obj.As op) {
     if (op == arm64.ACASPD || op == arm64.ACASPW) 
         return true;
         return false;
-
 }
 
 // ARM64Suffix handles the special suffix for the ARM64.
@@ -87,7 +83,6 @@ public static bool ARM64Suffix(ptr<obj.Prog> _addr_prog, @string cond) {
     }
     prog.Scond = bits;
     return true;
-
 }
 
 // parseARM64Suffix parses the suffix attached to an ARM64 instruction.
@@ -101,7 +96,6 @@ private static (byte, bool) parseARM64Suffix(@string cond) {
         return (0, true);
     }
     return parseARMCondition(cond, arm64LS, null);
-
 }
 
 private static (short, bool) arm64RegisterNumber(@string name, short n) {
@@ -117,7 +111,6 @@ private static (short, bool) arm64RegisterNumber(@string name, short n) {
         case "R": 
             if (0 <= n && n <= 30) { // not 31
                 return (arm64.REG_R0 + n, true);
-
             }
             break;
         case "V": 
@@ -127,7 +120,6 @@ private static (short, bool) arm64RegisterNumber(@string name, short n) {
             break;
     }
     return (0, false);
-
 }
 
 // ARM64RegisterShift constructs an ARM64 register with shift operation.
@@ -140,7 +132,6 @@ public static (long, error) ARM64RegisterShift(short reg, short op, short count)
         return (0, error.As(errors.New("invalid register for shift operation"))!);
     }
     return (int64(reg & 31) << 16 | int64(op) << 22 | int64(uint16(count)), error.As(null!)!);
-
 }
 
 // ARM64RegisterExtension constructs an ARM64 register with extension or arrangement.
@@ -185,7 +176,6 @@ public static error ARM64RegisterExtension(ptr<obj.Addr> _addr_a, @string ext, s
                 {
                                a.Reg = arm64.REG_UXTW + Rnum;
                            }
-
                 break;
             case "UXTX": 
                 if (!isAmount) {
@@ -222,7 +212,6 @@ public static error ARM64RegisterExtension(ptr<obj.Addr> _addr_a, @string ext, s
                 {
                                a.Reg = arm64.REG_SXTW + Rnum;
                            }
-
                 break;
             case "SXTX": 
                            if (!isAmount) {
@@ -235,7 +224,6 @@ public static error ARM64RegisterExtension(ptr<obj.Addr> _addr_a, @string ext, s
                 {
                                a.Reg = arm64.REG_SXTX + Rnum;
                            }
-
                 break;
             case "LSL": 
                 if (!isAmount) {
@@ -247,7 +235,6 @@ public static error ARM64RegisterExtension(ptr<obj.Addr> _addr_a, @string ext, s
                 return error.As(errors.New("unsupported general register extension type: " + ext))!;
                 break;
         }
-
     }
     else if (reg <= arm64.REG_V31 && reg >= arm64.REG_V0) {
         switch (ext) {
@@ -337,14 +324,12 @@ public static error ARM64RegisterExtension(ptr<obj.Addr> _addr_a, @string ext, s
                 return error.As(errors.New("unsupported simd register extension type: " + ext))!;
                 break;
         }
-
     }
     else
  {
         return error.As(errors.New("invalid register and extension combination"))!;
     }
     return error.As(null!)!;
-
 }
 
 // ARM64RegisterArrangement constructs an ARM64 vector register arrangement.
@@ -398,7 +383,6 @@ public static (long, error) ARM64RegisterArrangement(short reg, @string name, @s
             break;
     }
     return ((int64(curQ) & 1 << 30) | (int64(curSize & 3) << 10), error.As(null!)!);
-
 }
 
 // ARM64RegisterListOffset generates offset encoding according to AArch64 specification.
@@ -429,7 +413,6 @@ public static (long, error) ARM64RegisterListOffset(nint firstReg, nint regCnt, 
     // For more details, refer to: obj/arm64/list7.go
     offset |= 1 << 60;
     return (offset, error.As(null!)!);
-
 }
 
 } // end arch_package

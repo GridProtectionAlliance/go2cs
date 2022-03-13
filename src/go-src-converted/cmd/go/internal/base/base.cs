@@ -4,29 +4,31 @@
 
 // Package base defines shared basic pieces of the go command,
 // in particular logging and the Command structure.
-// package @base -- go2cs converted at 2022 March 06 23:15:55 UTC
+
+// package @base -- go2cs converted at 2022 March 13 06:29:23 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\base\base.go
-using context = go.context_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using log = go.log_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-using str = go.cmd.go.@internal.str_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using context = context_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using log = log_package;
+using os = os_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using cfg = cmd.go.@internal.cfg_package;
+using str = cmd.go.@internal.str_package;
+
+
+// A Command is an implementation of a go command
+// like go build or go fix.
+
+using System;
 public static partial class @base_package {
 
-    // A Command is an implementation of a go command
-    // like go build or go fix.
 public partial struct Command {
     public Action<context.Context, ptr<Command>, slice<@string>> Run; // UsageLine is the one-line usage message.
 // The words between "go" and the first flag or argument in the line are taken to be the command name.
@@ -55,13 +57,11 @@ private static bool hasFlag(ptr<Command> _addr_c, @string name) {
             return true;
         }
     }
-
     foreach (var (_, sub) in c.Commands) {
         if (hasFlag(_addr_sub, name)) {
             return true;
         }
     }    return false;
-
 }
 
 // LongName returns the command's long name: all the words in the usage line between "go" and a flag or argument,
@@ -76,12 +76,10 @@ private static @string LongName(this ptr<Command> _addr_c) {
             name = name[..(int)i];
         }
     }
-
     if (name == "go") {
         return "";
     }
     return strings.TrimPrefix(name, "go ");
-
 }
 
 // Name returns the command's short name: the last word in the usage line before a flag or argument.
@@ -96,9 +94,7 @@ private static @string Name(this ptr<Command> _addr_c) {
             name = name[(int)i + 1..];
         }
     }
-
     return name;
-
 }
 
 private static void Usage(this ptr<Command> _addr_c) {
@@ -159,7 +155,6 @@ public static void SetExitStatus(nint n) {
         exitStatus = n;
     }
     exitMu.Unlock();
-
 }
 
 public static nint GetExitStatus() {
@@ -189,7 +184,6 @@ public static void Run(params object[] cmdargs) {
             Errorf("%v", err);
         }
     }
-
 }
 
 // RunStdin is like run but connects Stdin.
@@ -207,7 +201,6 @@ public static void RunStdin(slice<@string> cmdline) {
             Errorf("%v", err);
         }
     }
-
 }
 
 // Usage is the usage-reporting function, filled in by package main

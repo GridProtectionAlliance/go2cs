@@ -4,14 +4,14 @@
 
 // go mod init
 
-// package modcmd -- go2cs converted at 2022 March 06 23:19:36 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:32:24 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\init.go
-using @base = go.cmd.go.@internal.@base_package;
-using modload = go.cmd.go.@internal.modload_package;
-using context = go.context_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
+using modload = cmd.go.@internal.modload_package;
+using context = context_package;
 
 public static partial class modcmd_package {
 

@@ -4,31 +4,32 @@
 
 // This file implements printing of types.
 
-// package types -- go2cs converted at 2022 March 06 22:42:24 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:33 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\typestring.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using token = go.token_package;
+using utf8 = unicode.utf8_package;
+
+
+// A Qualifier controls how named package-level objects are printed in
+// calls to TypeString, ObjectString, and SelectionString.
+//
+// These three formatting routines call the Qualifier for each
+// package-level object O, and if the Qualifier returns a non-empty
+// string p, the object is printed in the form p.O.
+// If it returns an empty string, only the object name O is printed.
+//
+// Using a nil Qualifier is equivalent to using (*Package).Path: the
+// object is qualified by the import path, e.g., "encoding/json.Marshal".
+//
+
+using System;
 public static partial class types_package {
 
-    // A Qualifier controls how named package-level objects are printed in
-    // calls to TypeString, ObjectString, and SelectionString.
-    //
-    // These three formatting routines call the Qualifier for each
-    // package-level object O, and if the Qualifier returns a non-empty
-    // string p, the object is printed in the form p.O.
-    // If it returns an empty string, only the object name O is printed.
-    //
-    // Using a nil Qualifier is equivalent to using (*Package).Path: the
-    // object is qualified by the import path, e.g., "encoding/json.Marshal".
-    //
 public delegate  @string Qualifier(ptr<Package>);
 
 // RelativeTo returns a Qualifier that fully qualifies members of
@@ -44,9 +45,7 @@ public static Qualifier RelativeTo(ptr<Package> _addr_pkg) {
             return ""; // same package; unqualified
         }
         return other.Path();
-
     };
-
 }
 
 // If gcCompatibilityMode is set, printing of types is modified
@@ -109,9 +108,7 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
             if (t == typ) {
                 fmt.Fprintf(buf, "○%T", goTypeName(typ)); // cycle to typ
                 return ;
-
             }
-
         }
         t = t__prev1;
     }
@@ -133,9 +130,7 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                     }
 
                 }
-
             }
-
             if (gcCompatibilityMode) { 
                 // forget the alias names
 
@@ -143,9 +138,7 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                     t = Typ[Uint8];
                 else if (t.kind == Rune) 
                     t = Typ[Int32];
-                
-            }
-
+                            }
             buf.WriteString(t.name);
             break;
         case ptr<Array> t:
@@ -174,7 +167,6 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                         buf.WriteString(f.name);
                         buf.WriteByte(' ');
                     }
-
                     writeType(_addr_buf, f.typ, qf, visited);
                     {
                         var tag = t.Tag(i);
@@ -184,7 +176,6 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                         }
 
                     }
-
                 }
 
                 i = i__prev1;
@@ -250,12 +241,10 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                 if (!empty && t.allTypes != null) {
                     buf.WriteString("; ");
                 }
-
                 if (t.allTypes != null) {
                     buf.WriteString("type ");
                     writeType(_addr_buf, t.allTypes, qf, visited);
                 }
-
             } { 
                 // print explicit interface methods and embedded types
                 {
@@ -280,17 +269,14 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                 if (!empty && t.types != null) {
                     buf.WriteString("; ");
                 }
-
                 if (t.types != null) {
                     buf.WriteString("type ");
                     writeType(_addr_buf, t.types, qf, visited);
                     empty = false;
                 }
-
                 if (!empty && len(t.embeddeds) > 0) {
                     buf.WriteString("; ");
                 }
-
                 {
                     var i__prev1 = i;
 
@@ -307,14 +293,12 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                     i = i__prev1;
                 }
             }
-
             if (t.allMethods == null || len(t.methods) > len(t.allMethods)) {
                 if (!empty) {
                     buf.WriteByte(' ');
                 }
                 buf.WriteString("/* incomplete */");
             }
-
             buf.WriteByte('}');
             break;
         case ptr<Map> t:
@@ -338,7 +322,6 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                     }
 
                 }
-
             else if (t.dir == SendOnly) 
                 s = "chan<- ";
             else if (t.dir == RecvOnly) 
@@ -349,12 +332,10 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
             if (parens) {
                 buf.WriteByte('(');
             }
-
             writeType(_addr_buf, t.elem, qf, visited);
             if (parens) {
                 buf.WriteByte(')');
             }
-
             break;
         case ptr<Named> t:
             writeTypeName(_addr_buf, _addr_t.obj, qf);
@@ -363,14 +344,11 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
                 buf.WriteByte('[');
                 writeTypeList(_addr_buf, t.targs, qf, visited);
                 buf.WriteByte(']');
-
             }
             else if (t.tparams != null) { 
                 // parameterized type
                 writeTParamList(_addr_buf, t.tparams, qf, visited);
-
             }
-
             break;
         case ptr<_TypeParam> t:
             s = "?";
@@ -399,7 +377,6 @@ private static void writeType(ptr<bytes.Buffer> _addr_buf, Type typ, Qualifier q
             break;
         }
     }
-
 });
 
 private static void writeTypeList(ptr<bytes.Buffer> _addr_buf, slice<Type> list, Qualifier qf, slice<Type> visited) {
@@ -410,7 +387,6 @@ private static void writeTypeList(ptr<bytes.Buffer> _addr_buf, slice<Type> list,
             buf.WriteString(", ");
         }
         writeType(_addr_buf, typ, qf, visited);
-
     }
 }
 
@@ -435,17 +411,13 @@ private static void writeTParamList(ptr<bytes.Buffer> _addr_buf, slice<ptr<TypeN
             t = t__prev1;
 
         }
-
         if (i > 0) {
             if (b != prev) { 
                 // type bound changed - write previous one before advancing
                 buf.WriteByte(' ');
                 writeType(_addr_buf, prev, qf, visited);
-
             }
-
             buf.WriteString(", ");
-
         }
         prev = b;
 
@@ -465,13 +437,11 @@ private static void writeTParamList(ptr<bytes.Buffer> _addr_buf, slice<ptr<TypeN
             t = t__prev1;
 
         }
-
     }    if (prev != null) {
         buf.WriteByte(' ');
         writeType(_addr_buf, prev, qf, visited);
     }
     buf.WriteByte(']');
-
 }
 
 private static void writeTypeName(ptr<bytes.Buffer> _addr_buf, ptr<TypeName> _addr_obj, Qualifier qf) {
@@ -484,10 +454,8 @@ private static void writeTypeName(ptr<bytes.Buffer> _addr_buf, ptr<TypeName> _ad
             writePackage(buf, obj.pkg, qf);
         }
         s = obj.name;
-
     }
     buf.WriteString(s);
-
 }
 
 private static void writeTuple(ptr<bytes.Buffer> _addr_buf, ptr<Tuple> _addr_tup, bool variadic, Qualifier qf, slice<Type> visited) => func((_, panic, _) => {
@@ -525,23 +493,17 @@ private static void writeTuple(ptr<bytes.Buffer> _addr_buf, ptr<Tuple> _addr_tup
                             }
 
                         }
-
                         writeType(_addr_buf, typ, qf, visited);
                         buf.WriteString("...");
                         continue;
-
                     }
 
                 }
-
             }
-
             writeType(_addr_buf, typ, qf, visited);
-
         }
     }
     buf.WriteByte(')');
-
 });
 
 // WriteSignature writes the representation of the signature sig to buf,
@@ -568,17 +530,14 @@ private static void writeSignature(ptr<bytes.Buffer> _addr_buf, ptr<Signature> _
     if (n == 0) { 
         // no result
         return ;
-
     }
     buf.WriteByte(' ');
     if (n == 1 && sig.results.vars[0].name == "") { 
         // single unnamed result
         writeType(_addr_buf, sig.results.vars[0].typ, qf, visited);
         return ;
-
     }
     writeTuple(_addr_buf, _addr_sig.results, false, qf, visited);
-
 }
 
 // subscript returns the decimal (utf8) representation of x using subscript digits.
@@ -596,7 +555,6 @@ private static @string subscript(ulong x) {
         }
     }
     return string(buf[(int)i..]);
-
 }
 
 } // end types_package

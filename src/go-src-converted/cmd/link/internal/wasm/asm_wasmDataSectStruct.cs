@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:21 UTC
+//     Generated on 2022 March 13 06:33:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class wasm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct wasmDataSect
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator wasmDataSect(NilType nil) => default(wasmDataSect);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static wasmDataSect wasmDataSect_cast(dynamic value)
         {
             return new wasmDataSect(ref value.sect, value.data);

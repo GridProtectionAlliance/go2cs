@@ -8,12 +8,12 @@
 //go:build (linux && 386) || (linux && arm) || (linux && mips) || (linux && mipsle)
 // +build linux,386 linux,arm linux,mips linux,mipsle
 
-// package unix -- go2cs converted at 2022 March 06 22:12:54 UTC
+// package unix -- go2cs converted at 2022 March 13 05:27:49 UTC
 // import "internal/syscall/unix" ==> using unix = go.@internal.syscall.unix_package
 // Original source: C:\Program Files\Go\src\internal\syscall\unix\fcntl_linux_32bit.go
-using syscall = go.syscall_package;
-
 namespace go.@internal.syscall;
+
+using syscall = syscall_package;
 
 public static partial class unix_package {
 

@@ -2,36 +2,37 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2022 March 06 23:17:40 UTC
+// package work -- go2cs converted at 2022 March 13 06:31:01 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\gc.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using log = go.log_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using load = go.cmd.go.@internal.load_package;
-using str = go.cmd.go.@internal.str_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using sha1 = go.crypto.sha1_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using log = log_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using load = cmd.go.@internal.load_package;
+using str = cmd.go.@internal.str_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using sha1 = crypto.sha1_package;
+
+
+// The 'path' used for GOROOT_FINAL when -trimpath is specified
+
+using System;
 public static partial class work_package {
 
-    // The 'path' used for GOROOT_FINAL when -trimpath is specified
 private static readonly @string trimPathGoRootFinal = "go";
 
 // The Go toolchain.
@@ -63,7 +64,6 @@ private static @string pkgPath(ptr<Action> _addr_a) {
         ppath = "main";
     }
     return ppath;
-
 }
 
 private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string archive, slice<byte> importcfg, slice<byte> embedcfg, @string symabis, bool asmhdr, slice<@string> gofiles) {
@@ -101,7 +101,6 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
             // any spurious errors — we will only mask errors, and not particularly
             // important ones at that.
             v = "1.16";
-
         }
         if (allowedVersion(v)) {
             gcargs = append(gcargs, "-lang=go" + v);
@@ -120,7 +119,6 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
         // memory allocations that are invalid in the runtime package,
         // and to implement some special compiler pragmas.
         gcargs = append(gcargs, "-+");
-
     }
     var extFiles = len(p.CgoFiles) + len(p.CFiles) + len(p.CXXFiles) + len(p.MFiles) + len(p.FFiles) + len(p.SFiles) + len(p.SysoFiles) + len(p.SwigFiles) + len(p.SwigCXXFiles);
     if (p.Standard) {
@@ -140,7 +138,6 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
         }
 
         __switch_break0:;
-
     }
     if (extFiles == 0) {
         gcargs = append(gcargs, "-complete");
@@ -172,12 +169,10 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
                 i--;
             }
         }
-
     }
     if (p.Internal.LocalPrefix != "") { 
         // Workaround #43883.
         args = append(args, "-D", p.Internal.LocalPrefix);
-
     }
     if (importcfg != null) {
         {
@@ -192,9 +187,7 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
             err = err__prev2;
 
         }
-
         args = append(args, "-importcfg", objdir + "importcfg");
-
     }
     if (embedcfg != null) {
         {
@@ -209,9 +202,7 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
             err = err__prev2;
 
         }
-
         args = append(args, "-embedcfg", objdir + "embedcfg");
-
     }
     if (ofile == archive) {
         args = append(args, "-pack");
@@ -226,7 +217,6 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
             args = append(args, fmt.Sprintf("-c=%d", c));
         }
     }
-
 
     {
         var f__prev1 = f;
@@ -250,14 +240,12 @@ private static (@string, slice<byte>, error) gc(this gcToolchain _p0, ptr<Builde
             f, _ = fsys.OverlayPath(f);
 
             args = append(args, f);
-
         }
         f = f__prev1;
     }
 
     output, err = b.runOut(a, @base.Cwd(), null, args);
     return (ofile, output, error.As(err)!);
-
 }
 
 // gcBackendConcurrency returns the backend compiler concurrency level for a package compilation.
@@ -311,7 +299,6 @@ CheckFlags:
                 break;
                 break;
         }
-
     }    if (buildcfg.Experiment.FieldTrack || buildcfg.Experiment.PreemptibleLoops) {
         canDashC = false;
     }
@@ -322,13 +309,11 @@ CheckFlags:
     if (cfg.BuildP == 1) { 
         // No process parallelism, do not cap compiler parallelism.
         return c;
-
     }
     if (c > 4) {
         c = 4;
     }
     return c;
-
 }
 
 // trimpath returns the -trimpath argument to use
@@ -362,9 +347,7 @@ private static @string trimpath(this ptr<Action> _addr_a) {
             }
 
         }
-
         rewrite += a.Package.Dir + "=>" + rewriteDir + ";";
-
     }
     var cgoFiles = make_map<@string, bool>();
     foreach (var (_, f) in a.Package.CgoFiles) {
@@ -392,15 +375,12 @@ private static @string trimpath(this ptr<Action> _addr_a) {
                 if (filepath.Dir(path) == a.Package.Dir) { 
                     // This is a file copied to objdir.
                     overlayNonGoRewrites += filepath.Join(objdir, base) + "=>" + filepath.Join(rewriteDir, base) + ";";
-
                 }
-
             }
             else
  { 
                 // Non-overlay Go files are covered by the a.Package.Dir rewrite rule above.
             }
-
         }
     }
     if (hasCgoOverlay) {
@@ -409,7 +389,6 @@ private static @string trimpath(this ptr<Action> _addr_a) {
     rewrite += objdir + "=>";
 
     return rewrite;
-
 }
 
 private static slice<object> asmArgs(ptr<Action> _addr_a, ptr<load.Package> _addr_p) {
@@ -432,15 +411,12 @@ private static slice<object> asmArgs(ptr<Action> _addr_a, ptr<load.Package> _add
     if (cfg.Goarch == "mips" || cfg.Goarch == "mipsle") { 
         // Define GOMIPS_value from cfg.GOMIPS.
         args = append(args, "-D", "GOMIPS_" + cfg.GOMIPS);
-
     }
     if (cfg.Goarch == "mips64" || cfg.Goarch == "mips64le") { 
         // Define GOMIPS64_value from cfg.GOMIPS64.
         args = append(args, "-D", "GOMIPS64_" + cfg.GOMIPS64);
-
     }
     return args;
-
 }
 
 private static (slice<@string>, error) asm(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_a, slice<@string> sfiles) {
@@ -466,9 +442,7 @@ private static (slice<@string>, error) asm(this gcToolchain _p0, ptr<Builder> _a
             }
 
         }
-
     }    return (ofiles, error.As(null!)!);
-
 }
 
 private static (@string, error) symabis(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_a, slice<@string> sfiles) {
@@ -499,9 +473,7 @@ private static (@string, error) symabis(this gcToolchain _p0, ptr<Builder> _addr
 
         }
 
-
         return b.run(a, p.Dir, p.ImportPath, null, args);
-
     };
 
     @string symabis = default; // Only set if we actually create the file
@@ -520,10 +492,8 @@ private static (@string, error) symabis(this gcToolchain _p0, ptr<Builder> _addr
             err = err__prev2;
 
         }
-
     }
     return (symabis, error.As(null!)!);
-
 }
 
 // toolVerify checks that the command line args writes the same output file
@@ -545,7 +515,6 @@ private static error toolVerify(ptr<Action> _addr_a, ptr<Builder> _addr_b, ptr<l
             return error.As(err)!;
         }
     }
-
     var (data1, err) = os.ReadFile(ofile);
     if (err != null) {
         return error.As(err)!;
@@ -559,7 +528,6 @@ private static error toolVerify(ptr<Action> _addr_a, ptr<Builder> _addr_b, ptr<l
     }
     os.Remove(ofile + ".new");
     return error.As(null!)!;
-
 }
 
 private static error pack(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string afile, slice<@string> ofiles) {
@@ -582,7 +550,6 @@ private static error pack(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action
             }
 
         }
-
     }
     var p = a.Package;
     if (cfg.BuildN || cfg.BuildX) {
@@ -600,9 +567,7 @@ private static error pack(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action
             return error.As(errPrintedOutput)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 private static error packInternal(@string afile, slice<@string> ofiles) => func((defer, _, _) => {
@@ -654,9 +619,7 @@ private static error packInternal(@string afile, slice<@string> ofiles) => func(
             return error.As(err)!;
         }
     }
-
     return error.As(dst.Close())!;
-
 });
 
 // setextld sets the appropriate linker flags for the specified compiler.
@@ -669,9 +632,7 @@ private static slice<@string> setextld(slice<@string> ldflags, slice<@string> co
             if (f == "-extld" || strings.HasPrefix(f, "-extld=")) { 
                 // don't override -extld if supplied
                 return ldflags;
-
             }
-
         }
         f = f__prev1;
     }
@@ -696,7 +657,6 @@ private static slice<@string> setextld(slice<@string> ldflags, slice<@string> co
                     extldflags = true;
                     break;
                 }
-
             }
 
             f = f__prev1;
@@ -707,7 +667,6 @@ private static slice<@string> setextld(slice<@string> ldflags, slice<@string> co
         }
     }
     return ldflags;
-
 }
 
 // pluginPath computes the package path for a plugin main package.
@@ -738,7 +697,6 @@ private static @string pluginPath(ptr<Action> _addr_a) {
         // We need to use the same import path when compiling and linking.
         var id = strings.Split(buildID, buildIDSeparator);
         buildID = id[1] + buildIDSeparator + id[1];
-
     }
     fmt.Fprintf(h, "build ID: %s\n", buildID);
     foreach (var (_, file) in str.StringList(p.GoFiles, p.CgoFiles, p.SFiles)) {
@@ -747,9 +705,7 @@ private static @string pluginPath(ptr<Action> _addr_a) {
             @base.Fatalf("go: %s", err);
         }
         h.Write(data);
-
     }    return fmt.Sprintf("plugin/unnamed-%x", h.Sum(null));
-
 }
 
 private static error ld(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_root, @string @out, @string importcfg, @string mainpkg) {
@@ -814,7 +770,6 @@ private static error ld(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> 
         env = append(env, "GOROOT_FINAL=" + trimPathGoRootFinal);
     }
     return error.As(b.run(root, dir, root.Package.ImportPath, env, cfg.BuildToolexec, @base.Tool("link"), "-o", out, "-importcfg", importcfg, ldflags, mainpkg))!;
-
 }
 
 private static error ldShared(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_root, slice<ptr<Action>> toplevelactions, @string @out, @string importcfg, slice<ptr<Action>> allactions) {
@@ -842,12 +797,9 @@ private static error ldShared(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Ac
     foreach (var (_, d) in toplevelactions) {
         if (!strings.HasSuffix(d.Target, ".a")) { // omit unsafe etc and actions for other shared libraries
             continue;
-
         }
         ldflags = append(ldflags, d.Package.ImportPath + "=" + d.Target);
-
     }    return error.As(b.run(root, ".", out, null, cfg.BuildToolexec, @base.Tool("link"), "-o", out, "-importcfg", importcfg, ldflags))!;
-
 }
 
 private static error cc(this gcToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string ofile, @string cfile) {

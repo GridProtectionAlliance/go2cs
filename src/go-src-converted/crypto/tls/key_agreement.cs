@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:21:03 UTC
+// package tls -- go2cs converted at 2022 March 13 05:36:10 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\key_agreement.go
-using crypto = go.crypto_package;
-using md5 = go.crypto.md5_package;
-using rsa = go.crypto.rsa_package;
-using sha1 = go.crypto.sha1_package;
-using x509 = go.crypto.x509_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.crypto;
+
+using crypto = crypto_package;
+using md5 = crypto.md5_package;
+using rsa = crypto.rsa_package;
+using sha1 = crypto.sha1_package;
+using x509 = crypto.x509_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+
+
+// a keyAgreement implements the client and server side of a TLS key agreement
+// protocol by generating and processing key exchange messages.
 
 public static partial class tls_package {
 
-    // a keyAgreement implements the client and server side of a TLS key agreement
-    // protocol by generating and processing key exchange messages.
 private partial interface keyAgreement {
     (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateServerKeyExchange(ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientHelloMsg> _p0, ptr<serverHelloMsg> _p0);
     (slice<byte>, ptr<clientKeyExchangeMsg>, error) processClientKeyExchange(ptr<Config> _p0, ptr<Certificate> _p0, ptr<clientKeyExchangeMsg> _p0, ushort _p0); // On the client side, the next two methods are called in order.
@@ -74,7 +76,6 @@ private static (slice<byte>, error) processClientKeyExchange(this rsaKeyAgreemen
         return (null, error.As(err)!);
     }
     return (preMasterSecret, error.As(null!)!);
-
 }
 
 private static error processServerKeyExchange(this rsaKeyAgreement ka, ptr<Config> _addr_config, ptr<clientHelloMsg> _addr_clientHello, ptr<serverHelloMsg> _addr_serverHello, ptr<x509.Certificate> _addr_cert, ptr<serverKeyExchangeMsg> _addr_skx) {
@@ -116,7 +117,6 @@ private static (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKey
     ckx.ciphertext[1] = byte(len(encrypted));
     copy(ckx.ciphertext[(int)2..], encrypted);
     return (preMasterSecret, _addr_ckx!, error.As(null!)!);
-
 }
 
 // sha1Hash calculates a SHA1 hash over the given byte slices.
@@ -160,7 +160,6 @@ private static slice<byte> hashForServerKeyExchange(byte sigType, crypto.Hash ha
         }
 
         return signed;
-
     }
     if (version >= VersionTLS12) {
         var h = hashFunc.New();
@@ -177,13 +176,11 @@ private static slice<byte> hashForServerKeyExchange(byte sigType, crypto.Hash ha
 
         var digest = h.Sum(null);
         return digest;
-
     }
     if (sigType == signatureECDSA) {
         return sha1Hash(slices);
     }
     return md5SHA1Hash(slices);
-
 }
 
 // ecdheKeyAgreement implements a TLS key agreement where the server
@@ -224,7 +221,6 @@ private static (ptr<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
             return (_addr_null!, error.As(errors.New("tls: CurvePreferences includes unsupported curve"))!);
         }
     }
-
 
     var (params, err) = generateECDHEParameters(config.rand(), curveID);
     if (err != null) {
@@ -296,7 +292,6 @@ private static (ptr<serverKeyExchangeMsg>, error) generateServerKeyExchange(this
     copy(k[(int)2..], sig);
 
     return (_addr_skx!, error.As(null!)!);
-
 }
 
 private static (slice<byte>, error) processClientKeyExchange(this ptr<ecdheKeyAgreement> _addr_ka, ptr<Config> _addr_config, ptr<Certificate> _addr_cert, ptr<clientKeyExchangeMsg> _addr_ckx, ushort version) {
@@ -315,7 +310,6 @@ private static (slice<byte>, error) processClientKeyExchange(this ptr<ecdheKeyAg
         return (null, error.As(errClientKeyExchange)!);
     }
     return (preMasterSecret, error.As(null!)!);
-
 }
 
 private static error processServerKeyExchange(this ptr<ecdheKeyAgreement> _addr_ka, ptr<Config> _addr_config, ptr<clientHelloMsg> _addr_clientHello, ptr<serverHelloMsg> _addr_serverHello, ptr<x509.Certificate> _addr_cert, ptr<serverKeyExchangeMsg> _addr_skx) {
@@ -331,7 +325,6 @@ private static error processServerKeyExchange(this ptr<ecdheKeyAgreement> _addr_
     }
     if (skx.key[0] != 3) { // named curve
         return error.As(errors.New("tls: server selected unsupported curve"))!;
-
     }
     var curveID = CurveID(skx.key[1]) << 8 | CurveID(skx.key[2]);
 
@@ -353,7 +346,6 @@ private static error processServerKeyExchange(this ptr<ecdheKeyAgreement> _addr_
             return error.As(errors.New("tls: server selected unsupported curve"))!;
         }
     }
-
 
     var (params, err) = generateECDHEParameters(config.rand(), curveID);
     if (err != null) {
@@ -411,9 +403,7 @@ private static error processServerKeyExchange(this ptr<ecdheKeyAgreement> _addr_
             return error.As(errors.New("tls: invalid signature by the server certificate: " + err.Error()))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 private static (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKeyExchange(this ptr<ecdheKeyAgreement> _addr_ka, ptr<Config> _addr_config, ptr<clientHelloMsg> _addr_clientHello, ptr<x509.Certificate> _addr_cert) {
@@ -429,7 +419,6 @@ private static (slice<byte>, ptr<clientKeyExchangeMsg>, error) generateClientKey
         return (null, _addr_null!, error.As(errors.New("tls: missing ServerKeyExchange message"))!);
     }
     return (ka.preMasterSecret, _addr_ka.ckx!, error.As(null!)!);
-
 }
 
 } // end tls_package

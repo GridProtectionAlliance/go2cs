@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2022 March 06 23:35:17 UTC
+// package xerrors -- go2cs converted at 2022 March 13 06:42:51 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\xerrors\format.go
-
-
 namespace go.cmd.vendor.golang.org.x;
 
 public static partial class xerrors_package {
 
-    // A Formatter formats error messages.
+// A Formatter formats error messages.
 public partial interface Formatter {
     error FormatError(Printer p);
 }

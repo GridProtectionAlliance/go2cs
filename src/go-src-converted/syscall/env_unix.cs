@@ -7,13 +7,13 @@
 
 // Unix environment variables.
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:25 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:23:59 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\env_unix.go
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using sync = sync_package;
 
 public static partial class syscall_package {
 
@@ -47,17 +47,12 @@ private static void copyenv() {
                         // worrying about unshadowing a later one,
                         // which might be a security problem.
                         envs[i] = "";
-
                     }
 
                 }
-
                 break;
-
             }
-
         }
-
     }
 }
 
@@ -75,10 +70,8 @@ public static error Unsetenv(@string key) => func((defer, _, _) => {
             delete(env, key);
         }
     }
-
     unsetenv_c(key);
     return error.As(null!)!;
-
 });
 
 public static (@string, bool) Getenv(@string key) => func((defer, _, _) => {
@@ -109,7 +102,6 @@ public static (@string, bool) Getenv(@string key) => func((defer, _, _) => {
         i = i__prev1;
     }
     return ("", false);
-
 });
 
 public static error Setenv(@string key, @string value) => func((defer, _, _) => {
@@ -142,7 +134,6 @@ public static error Setenv(@string key, @string value) => func((defer, _, _) => 
 
             i = i__prev1;
         }
-
     }
     envLock.Lock();
     defer(envLock.Unlock());
@@ -160,7 +151,6 @@ public static error Setenv(@string key, @string value) => func((defer, _, _) => 
     env[key] = i;
     setenv_c(key, value);
     return error.As(null!)!;
-
 });
 
 public static void Clearenv() => func((defer, _, _) => {
@@ -173,7 +163,6 @@ public static void Clearenv() => func((defer, _, _) => {
         unsetenv_c(k);
     }    env = make_map<@string, nint>();
     envs = new slice<@string>(new @string[] {  });
-
 });
 
 public static slice<@string> Environ() => func((defer, _, _) => {
@@ -186,7 +175,6 @@ public static slice<@string> Environ() => func((defer, _, _) => {
             a = append(a, env);
         }
     }    return a;
-
 });
 
 } // end syscall_package

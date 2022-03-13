@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testing -- go2cs converted at 2022 March 06 22:41:35 UTC
+// package testing -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.testing" ==> using testing = go.go.doc.testing_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\example.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using time = go.time_package;
+namespace go.go;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go.go;
 
 public static partial class testing_package {
 
@@ -48,7 +47,6 @@ public static bool RunExamples(slice<InternalExample> examples) => func((defer, 
             e = e__prev1;
 
         }
-
     }());
 
     foreach (var (_, __eg) in examples) {
@@ -97,14 +95,11 @@ public static bool RunExamples(slice<InternalExample> examples) => func((defer, 
                 fmt.Printf("--- PASS: %s %s\n", eg.Name, tstr);
             }
 
-
             e = e__prev1;
 
         }
-
     }
     return ;
-
 });
 
 } // end testing_package

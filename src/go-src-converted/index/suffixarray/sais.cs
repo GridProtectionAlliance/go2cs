@@ -120,24 +120,21 @@
 
 //go:generate go run gen.go
 
-// package suffixarray -- go2cs converted at 2022 March 06 23:36:23 UTC
+// package suffixarray -- go2cs converted at 2022 March 13 06:44:24 UTC
 // import "index/suffixarray" ==> using suffixarray = go.index.suffixarray_package
 // Original source: C:\Program Files\Go\src\index\suffixarray\sais.go
-
-
 namespace go.index;
 
 public static partial class suffixarray_package {
 
-    // text_32 returns the suffix array for the input text.
-    // It requires that len(text) fit in an int32
-    // and that the caller zero sa.
+// text_32 returns the suffix array for the input text.
+// It requires that len(text) fit in an int32
+// and that the caller zero sa.
 private static void text_32(slice<byte> text, slice<int> sa) => func((_, panic, _) => {
     if (int(int32(len(text))) != len(text) || len(text) != len(sa)) {
         panic("suffixarray: misuse of text_32");
     }
     sais_8_32(text, 256, sa, make_slice<int>(2 * 256));
-
 });
 
 // sais_8_32 computes the suffix array of text.
@@ -193,17 +190,14 @@ private static void sais_8_32(slice<byte> text, nint textMax, slice<int> sa, sli
             // Copy the original LMS-substring order into the
             // suffix array destination.
             copy(sa, sa[(int)len(sa) - numLMS..]);
-
         }
         expand_8_32(text, freq, bucket, sa, numLMS);
-
     }
     induceL_8_32(text, sa, freq, bucket);
     induceS_8_32(text, sa, freq, bucket); 
 
     // Mark for caller that we overwrote tmp.
     tmp[0] = -1;
-
 });
 
 // freq_8_32 returns the character frequencies
@@ -227,7 +221,6 @@ private static slice<int> freq_8_32(slice<byte> text, slice<int> freq, slice<int
     }    foreach (var (_, c) in text) {
         freq[c]++;
     }    return freq;
-
 }
 
 // bucketMin_8_32 stores into bucket[c] the minimum index
@@ -327,7 +320,6 @@ private static nint placeLMS_8_32(slice<byte> text, slice<int> sa, slice<int> fr
             sa[b] = int32(i + 1);
             lastB = b;
             numLMS++;
-
         }
     } 
 
@@ -346,7 +338,6 @@ private static nint placeLMS_8_32(slice<byte> text, slice<int> sa, slice<int> fr
         sa[lastB] = 0;
     }
     return numLMS;
-
 }
 
 // induceSubL_8_32 inserts the L-type text indexes of LMS-substrings
@@ -404,13 +395,11 @@ private static void induceSubL_8_32(slice<byte> text, slice<int> sa, slice<int> 
         if (j == 0) { 
             // Skip empty entry.
             continue;
-
         }
         if (j < 0) { 
             // Leave discovered type-S index for caller.
             sa[i] = int32(-j);
             continue;
-
         }
         sa[i] = 0; 
 
@@ -431,9 +420,7 @@ private static void induceSubL_8_32(slice<byte> text, slice<int> sa, slice<int> 
         }
         sa[b] = int32(k);
         b++;
-
     }
-
 }
 
 // induceSubS_8_32 inserts the S-type text indexes of LMS-substrings
@@ -482,7 +469,6 @@ private static void induceSubS_8_32(slice<byte> text, slice<int> sa, slice<int> 
         if (j == 0) { 
             // Skip empty entry.
             continue;
-
         }
         sa[i] = 0;
         if (j < 0) { 
@@ -490,7 +476,6 @@ private static void induceSubS_8_32(slice<byte> text, slice<int> sa, slice<int> 
             top--;
             sa[top] = int32(-j);
             continue;
-
         }
         var k = j - 1;
         var c1 = text[k];
@@ -505,9 +490,7 @@ private static void induceSubS_8_32(slice<byte> text, slice<int> sa, slice<int> 
         }
         b--;
         sa[b] = int32(k);
-
     }
-
 }
 
 // length_8_32 computes and records the length of each LMS-substring in text.
@@ -579,13 +562,11 @@ private static void length_8_32(slice<byte> text, slice<int> sa, nint numLMS) {
                     code = int32(~cx); // byte-only
                 } // byte-only
             }
-
             sa[j >> 1] = code;
             end = j + 1;
             cx = uint32(c1 + 1); // byte-only
         }
     }
-
 }
 
 // assignID_8_32 assigns a dense ID numbering to the
@@ -611,7 +592,6 @@ private static nint assignID_8_32(slice<byte> text, slice<int> sa, nint numLMS) 
         if (uint32(n) >= uint32(len(text))) { 
             // “Length” is really encoded full text, and they match.
             goto Same;
-
         }
  { 
             // Compare actual texts.
@@ -625,16 +605,13 @@ private static nint assignID_8_32(slice<byte> text, slice<int> sa, nint numLMS) 
             }
 
             goto Same;
-
         }New:
         id++;
         lastPos = j;
         lastLen = n;
 Same:
         sa[j / 2] = int32(id);
-
     }    return id;
-
 }
 
 // map_32 maps the LMS-substrings in text to their new IDs,
@@ -657,7 +634,6 @@ private static void map_32(slice<int> sa, nint numLMS) {
             sa[w] = j - 1;
         }
     }
-
 }
 
 // recurse_32 calls sais_32 recursively to solve the subproblem we've built.
@@ -719,12 +695,10 @@ private static void recurse_32(slice<int> sa, slice<int> oldTmp, nint numLMS, ni
             n = numLMS / 2;
         }
         tmp = make_slice<int>(n);
-
     }
     foreach (var (i) in dst) {
         dst[i] = 0;
     }    sais_32(text, maxID, dst, tmp);
-
 }
 
 // unmap_8_32 unmaps the subproblem back to the original.
@@ -756,9 +730,7 @@ private static void unmap_8_32(slice<byte> text, slice<int> sa, nint numLMS) {
                 // Populate inverse map.
                 j--;
                 unmap[j] = int32(i + 1);
-
             }
-
         }
 
         i = i__prev1;
@@ -775,7 +747,6 @@ private static void unmap_8_32(slice<byte> text, slice<int> sa, nint numLMS) {
 
         i = i__prev1;
     }
-
 }
 
 // expand_8_32 distributes the compacted, sorted LMS-suffix indexes
@@ -810,10 +781,8 @@ private static void expand_8_32(slice<byte> text, slice<int> freq, slice<int> bu
             c = text[saX];
             b = bucket[c] - 1;
             bucket[c] = b;
-
         }
     }
-
 }
 
 // induceL_8_32 inserts L-type text indexes into sa,
@@ -853,7 +822,6 @@ private static void induceL_8_32(slice<byte> text, slice<int> sa, slice<int> fre
         if (j <= 0) { 
             // Skip empty or negated entry (including negated zero).
             continue;
-
         }
         k = j - 1;
         c1 = text[k];
@@ -870,7 +838,6 @@ private static void induceL_8_32(slice<byte> text, slice<int> sa, slice<int> fre
                 c0 = c0__prev2;
 
             }
-
         }
         if (cB != c1) {
             bucket[cB] = b;
@@ -879,9 +846,7 @@ private static void induceL_8_32(slice<byte> text, slice<int> sa, slice<int> fre
         }
         sa[b] = int32(k);
         b++;
-
     }
-
 }
 
 private static void induceS_8_32(slice<byte> text, slice<int> sa, slice<int> freq, slice<int> bucket) { 
@@ -898,7 +863,6 @@ private static void induceS_8_32(slice<byte> text, slice<int> sa, slice<int> fre
             // Skip non-flagged entry.
             // (This loop can't see an empty entry; 0 means the real zero index.)
             continue;
-
         }
         j = -j;
         sa[i] = int32(j); 
@@ -921,7 +885,6 @@ private static void induceS_8_32(slice<byte> text, slice<int> sa, slice<int> fre
                 }
 
             }
-
         }
         if (cB != c1) {
             bucket[cB] = b;
@@ -930,9 +893,7 @@ private static void induceS_8_32(slice<byte> text, slice<int> sa, slice<int> fre
         }
         b--;
         sa[b] = int32(k);
-
     }
-
 }
 
 } // end suffixarray_package

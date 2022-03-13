@@ -38,27 +38,29 @@
 // the OS or the system. The number should be high, but exceeding it may degrade
 // performance or cause other issues.
 //
-// package os -- go2cs converted at 2022 March 06 22:13:33 UTC
+
+// package os -- go2cs converted at 2022 March 13 05:27:58 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\file.go
-using errors = go.errors_package;
-using poll = go.@internal.poll_package;
-using testlog = go.@internal.testlog_package;
-using unsafeheader = go.@internal.unsafeheader_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using poll = @internal.poll_package;
+using testlog = @internal.testlog_package;
+using unsafeheader = @internal.unsafeheader_package;
+using io = io_package;
+using fs = io.fs_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+using time = time_package;
+using @unsafe = @unsafe_package;
+
+
+// Name returns the name of the file as presented to Open.
+
+using System;
 public static partial class os_package {
 
-    // Name returns the name of the file as presented to Open.
 private static @string Name(this ptr<File> _addr_f) {
     ref File f = ref _addr_f.val;
 
@@ -130,10 +132,8 @@ private static (nint, error) Read(this ptr<File> _addr_f, slice<byte> b) {
             return (0, error.As(err)!);
         }
     }
-
     var (n, e) = f.read(b);
     return (n, error.As(f.wrapErr("read", e))!);
-
 }
 
 // ReadAt reads len(b) bytes from the File starting at byte offset off.
@@ -153,7 +153,6 @@ private static (nint, error) ReadAt(this ptr<File> _addr_f, slice<byte> b, long 
         }
     }
 
-
     if (off < 0) {
         return (0, error.As(addr(new PathError(Op:"readat",Path:f.name,Err:errors.New("negative offset")))!)!);
     }
@@ -166,10 +165,8 @@ private static (nint, error) ReadAt(this ptr<File> _addr_f, slice<byte> b, long 
         n += m;
         b = b[(int)m..];
         off += int64(m);
-
     }
     return ;
-
 }
 
 // ReadFrom implements io.ReaderFrom.
@@ -185,13 +182,11 @@ private static (long, error) ReadFrom(this ptr<File> _addr_f, io.Reader r) {
             return (0, error.As(err)!);
         }
     }
-
     var (n, handled, e) = f.readFrom(r);
     if (!handled) {
         return genericReadFrom(_addr_f, r); // without wrapping
     }
     return (n, error.As(f.wrapErr("write", e))!);
-
 }
 
 private static (long, error) genericReadFrom(ptr<File> _addr_f, io.Reader r) {
@@ -221,7 +216,6 @@ private static (nint, error) Write(this ptr<File> _addr_f, slice<byte> b) {
             return (0, error.As(err)!);
         }
     }
-
     var (n, e) = f.write(b);
     if (n < 0) {
         n = 0;
@@ -235,7 +229,6 @@ private static (nint, error) Write(this ptr<File> _addr_f, slice<byte> b) {
         err = f.wrapErr("write", e);
     }
     return (n, error.As(err)!);
-
 }
 
 private static var errWriteAtInAppendMode = errors.New("os: invalid use of WriteAt on file opened with O_APPEND");
@@ -257,7 +250,6 @@ private static (nint, error) WriteAt(this ptr<File> _addr_f, slice<byte> b, long
             return (0, error.As(err)!);
         }
     }
-
     if (f.appendMode) {
         return (0, error.As(errWriteAtInAppendMode)!);
     }
@@ -273,10 +265,8 @@ private static (nint, error) WriteAt(this ptr<File> _addr_f, slice<byte> b, long
         n += m;
         b = b[(int)m..];
         off += int64(m);
-
     }
     return ;
-
 }
 
 // Seek sets the offset for the next Read or Write on file to offset, interpreted
@@ -300,7 +290,6 @@ private static (long, error) Seek(this ptr<File> _addr_f, long offset, nint when
             return (0, error.As(err)!);
         }
     }
-
     var (r, e) = f.seek(offset, whence);
     if (e == null && f.dirinfo != null && r != 0) {
         e = syscall.EISDIR;
@@ -309,7 +298,6 @@ private static (long, error) Seek(this ptr<File> _addr_f, long offset, nint when
         return (0, error.As(f.wrapErr("seek", e))!);
     }
     return (r, error.As(null!)!);
-
 }
 
 // WriteString is like Write, but writes the contents of string s rather than
@@ -335,9 +323,7 @@ public static error Mkdir(@string name, FileMode perm) {
         return error.As(addr(new PathError(Op:"mkdir",Path:name,Err:syscall.ENOTDIR))!)!;
     }
     var longName = fixLongPath(name);
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Mkdir(longName, syscallMode(perm)))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Mkdir(longName, syscallMode(perm)))!);
 
     if (e != null) {
         return error.As(addr(new PathError(Op:"mkdir",Path:name,Err:e))!)!;
@@ -351,7 +337,6 @@ public static error Mkdir(@string name, FileMode perm) {
         }
     }
     return error.As(null!)!;
-
 }
 
 // setStickyBit adds ModeSticky to the permission bits of path, non atomic.
@@ -361,7 +346,6 @@ private static error setStickyBit(@string name) {
         return error.As(err)!;
     }
     return error.As(Chmod(name, fi.Mode() | ModeSticky))!;
-
 }
 
 // Chdir changes the current working directory to the named directory.
@@ -373,10 +357,8 @@ public static error Chdir(@string dir) {
         if (e != null) {
             testlog.Open(dir); // observe likely non-existent directory
             return error.As(addr(new PathError(Op:"chdir",Path:dir,Err:e))!)!;
-
         }
     }
-
     {
         var log = testlog.Logger();
 
@@ -387,9 +369,7 @@ public static error Chdir(@string dir) {
             }
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Open opens the named file for reading. If successful, methods on
@@ -433,7 +413,6 @@ public static (ptr<File>, error) OpenFile(@string name, nint flag, FileMode perm
     f.appendMode = flag & O_APPEND != 0;
 
     return (_addr_f!, error.As(null!)!);
-
 }
 
 // lstat is overridden in tests.
@@ -457,7 +436,6 @@ private static (nint, error) fixCount(nint n, error err) {
         n = 0;
     }
     return (n, error.As(err)!);
-
 }
 
 // wrapErr wraps an error that occurred during an operation on an open file.
@@ -473,7 +451,6 @@ private static error wrapErr(this ptr<File> _addr_f, @string op, error err) {
         err = ErrClosed;
     }
     return error.As(addr(new PathError(Op:op,Path:f.name,Err:err))!)!;
-
 }
 
 // TempDir returns the default directory to use for temporary files.
@@ -523,7 +500,6 @@ public static (@string, error) UserCacheDir() {
                 return ("", error.As(errors.New("$HOME is not defined"))!);
             }
             dir += "/Library/Caches";
-
             break;
         case "plan9": 
             dir = Getenv("home");
@@ -531,7 +507,6 @@ public static (@string, error) UserCacheDir() {
                 return ("", error.As(errors.New("$home is not defined"))!);
             }
             dir += "/lib/cache";
-
             break;
         default: // Unix
             dir = Getenv("XDG_CACHE_HOME");
@@ -546,7 +521,6 @@ public static (@string, error) UserCacheDir() {
     }
 
     return (dir, error.As(null!)!);
-
 }
 
 // UserConfigDir returns the default root directory to use for user-specific
@@ -583,7 +557,6 @@ public static (@string, error) UserConfigDir() {
                 return ("", error.As(errors.New("$HOME is not defined"))!);
             }
             dir += "/Library/Application Support";
-
             break;
         case "plan9": 
             dir = Getenv("home");
@@ -591,7 +564,6 @@ public static (@string, error) UserConfigDir() {
                 return ("", error.As(errors.New("$home is not defined"))!);
             }
             dir += "/lib";
-
             break;
         default: // Unix
             dir = Getenv("XDG_CONFIG_HOME");
@@ -606,7 +578,6 @@ public static (@string, error) UserConfigDir() {
     }
 
     return (dir, error.As(null!)!);
-
 }
 
 // UserHomeDir returns the current user's home directory.
@@ -645,7 +616,6 @@ public static (@string, error) UserHomeDir() {
             break;
     }
     return ("", error.As(errors.New(enverr + " is not defined"))!);
-
 }
 
 // Chmod changes the mode of the named file to mode.
@@ -744,9 +714,7 @@ private static (syscall.RawConn, error) SyscallConn(this ptr<File> _addr_f) {
             return (null, error.As(err)!);
         }
     }
-
     return newRawConn(f);
-
 }
 
 // isWindowsNulName reports whether name is os.DevNull ('NUL') on Windows.
@@ -765,7 +733,6 @@ private static bool isWindowsNulName(@string name) {
         return false;
     }
     return true;
-
 }
 
 // DirFS returns a file system (an fs.FS) for the tree of files rooted at the directory dir.
@@ -806,7 +773,6 @@ private static (fs.File, error) Open(this dirFS dir, @string name) {
         return (null, error.As(err)!); // nil fs.File
     }
     return (f, error.As(null!)!);
-
 }
 
 private static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
@@ -821,7 +787,6 @@ private static (fs.FileInfo, error) Stat(this dirFS dir, @string name) {
         return (null, error.As(err)!);
     }
     return (f, error.As(null!)!);
-
 }
 
 // ReadFile reads the named file and returns the contents.
@@ -849,7 +814,6 @@ public static (slice<byte>, error) ReadFile(@string name) => func((defer, _, _) 
             }
         }
     }
-
     size++; // one byte for final read at EOF
 
     // If a file claims a small size, read at least 512 bytes.
@@ -874,7 +838,6 @@ public static (slice<byte>, error) ReadFile(@string name) => func((defer, _, _) 
             return (data, error.As(err)!);
         }
     }
-
 });
 
 // WriteFile writes data to the named file, creating it if necessary.
@@ -893,9 +856,7 @@ public static error WriteFile(@string name, slice<byte> data, FileMode perm) {
             err = err1;
         }
     }
-
     return error.As(err)!;
-
 }
 
 } // end os_package

@@ -2,23 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2022 March 06 22:31:15 UTC
+// package fmt -- go2cs converted at 2022 March 13 05:42:09 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Program Files\Go\src\fmt\errors.go
-using errors = go.errors_package;
-
 namespace go;
+
+using errors = errors_package;
 
 public static partial class fmt_package {
 
-    // Errorf formats according to a format specifier and returns the string as a
-    // value that satisfies error.
-    //
-    // If the format specifier includes a %w verb with an error operand,
-    // the returned error will implement an Unwrap method returning the operand. It is
-    // invalid to include more than one %w verb or to supply it with an operand
-    // that does not implement the error interface. The %w verb is otherwise
-    // a synonym for %v.
+// Errorf formats according to a format specifier and returns the string as a
+// value that satisfies error.
+//
+// If the format specifier includes a %w verb with an error operand,
+// the returned error will implement an Unwrap method returning the operand. It is
+// invalid to include more than one %w verb or to supply it with an operand
+// that does not implement the error interface. The %w verb is otherwise
+// a synonym for %v.
 public static error Errorf(@string format, params object[] a) {
     a = a.Clone();
 
@@ -36,7 +36,6 @@ public static error Errorf(@string format, params object[] a) {
     }
     p.free();
     return error.As(err)!;
-
 }
 
 private partial struct wrapError {

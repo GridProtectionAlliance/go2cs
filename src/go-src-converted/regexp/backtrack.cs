@@ -12,18 +12,20 @@
 // backtrack is a fast replacement for the NFA code on small
 // regexps when onepass cannot be used.
 
-// package regexp -- go2cs converted at 2022 March 06 22:23:28 UTC
+// package regexp -- go2cs converted at 2022 March 13 05:37:53 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Program Files\Go\src\regexp\backtrack.go
-using syntax = go.regexp.syntax_package;
-using sync = go.sync_package;
-
 namespace go;
+
+using syntax = regexp.syntax_package;
+using sync = sync_package;
+
+
+// A job is an entry on the backtracker's job stack. It holds
+// the instruction pc and the position in the input.
 
 public static partial class regexp_package {
 
-    // A job is an entry on the backtracker's job stack. It holds
-    // the instruction pc and the position in the input.
 private partial struct job {
     public uint pc;
     public bool arg;
@@ -52,7 +54,6 @@ private static ptr<bitState> newBitState() {
         b = @new<bitState>();
     }
     return _addr_b!;
-
 }
 
 private static void freeBitState(ptr<bitState> _addr_b) {
@@ -71,7 +72,6 @@ private static nint maxBitStateLen(ptr<syntax.Prog> _addr_prog) {
         return 0;
     }
     return maxBacktrackVector / len(prog.Inst);
-
 }
 
 // shouldBacktrack reports whether the program is too
@@ -162,7 +162,6 @@ private static bool shouldVisit(this ptr<bitState> _addr_b, uint pc, nint pos) {
     }
     b.visited[n / visitedBits] |= 1 << (int)((n & (visitedBits - 1)));
     return true;
-
 }
 
 // push pushes (pc, pos, arg) onto the job stack if it should be
@@ -226,7 +225,6 @@ Skip:
                 arg = false;
                 pc = inst.Arg;
                 goto CheckAndLoop;
-
             }
             else
  {
@@ -234,7 +232,6 @@ Skip:
                 pc = inst.Out;
                 goto CheckAndLoop;
             }
-
         else if (inst.Op == syntax.InstAltMatch) 
             // One opcode consumes runes; the other leads to match.
 
@@ -285,7 +282,6 @@ Skip:
                 // Finished inst.Out; restore the old value.
                 b.cap[inst.Arg] = pos;
                 continue;
-
             }
             else
  {
@@ -293,14 +289,10 @@ Skip:
                     // Capture pos to register, but save old value.
                     b.push(re, pc, b.cap[inst.Arg], true); // come back when we're done.
                     b.cap[inst.Arg] = pos;
-
                 }
-
                 pc = inst.Out;
                 goto CheckAndLoop;
-
             }
-
         else if (inst.Op == syntax.InstEmptyWidth) 
             var flag = i.context(pos);
             if (!flag.match(syntax.EmptyOp(inst.Arg))) {
@@ -324,7 +316,6 @@ Skip:
             if (len(b.cap) > 1) {
                 b.cap[1] = pos;
             }
-
             {
                 var old = b.matchcap[1];
 
@@ -350,11 +341,9 @@ Skip:
             continue;
         else 
             panic("bad inst");
-        
-    }
+            }
 
     return longest && len(b.matchcap) > 1 && b.matchcap[1] >= 0;
-
 });
 
 // backtrack runs a backtracking search of prog on the input starting at pos.
@@ -364,12 +353,10 @@ private static slice<nint> backtrack(this ptr<Regexp> _addr_re, slice<byte> ib, 
     var startCond = re.cond;
     if (startCond == ~syntax.EmptyOp(0)) { // impossible
         return null;
-
     }
     if (startCond & syntax.EmptyBeginText != 0 && pos != 0) { 
         // Anchored match, past beginning of text.
         return null;
-
     }
     var b = newBitState();
     var (i, end) = b.inputs.init(null, ib, is);
@@ -403,33 +390,24 @@ private static slice<nint> backtrack(this ptr<Regexp> _addr_re, slice<byte> ib, 
                     return null;
             pos += width;
                 }
-
                 pos += advance;
-
             }
-
             if (len(b.cap) > 0) {
                 b.cap[0] = pos;
             }
-
             if (re.tryBacktrack(b, i, uint32(re.prog.Start), pos)) { 
                 // Match must be leftmost; done.
                 goto Match;
-
             }
-
             _, width = i.step(pos);
-
         }
         freeBitState(_addr_b);
         return null;
-
     }
 Match:
     dstCap = append(dstCap, b.matchcap);
     freeBitState(_addr_b);
     return dstCap;
-
 }
 
 } // end regexp_package

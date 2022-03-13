@@ -6,23 +6,23 @@
 // control-flow graph (CFG) for the body of a function.
 // It records whether a function cannot return.
 // By itself, it does not report any diagnostics.
-// package ctrlflow -- go2cs converted at 2022 March 06 23:34:35 UTC
+
+// package ctrlflow -- go2cs converted at 2022 March 13 06:41:51 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/ctrlflow" ==> using ctrlflow = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.ctrlflow_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\ctrlflow\ctrlflow.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-using log = go.log_package;
-using reflect = go.reflect_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using cfg = go.golang.org.x.tools.go.cfg_package;
-using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+using log = log_package;
+using reflect = reflect_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using cfg = golang.org.x.tools.go.cfg_package;
+using typeutil = golang.org.x.tools.go.types.typeutil_package;
+using System;
 
 public static partial class ctrlflow_package {
 
@@ -81,7 +81,6 @@ private static ptr<cfg.CFG> FuncDecl(this ptr<CFGs> _addr_c, ptr<ast.FuncDecl> _
     }
     ptr<types.Func> fn = c.defs[decl.Name]._<ptr<types.Func>>();
     return _addr_c.funcDecls[fn].cfg!;
-
 }
 
 // FuncLit returns the control-flow graph for a literal function.
@@ -129,14 +128,12 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     fn = fn__prev1;
 
                 }
-
                 break;
             case ptr<ast.FuncLit> n:
                 funcLits[n] = @new<litInfo>();
                 lits = append(lits, n);
                 break;
         }
-
     });
 
     ptr<CFGs> c = addr(new CFGs(defs:pass.TypesInfo.Defs,funcDecls:funcDecls,funcLits:funcLits,pass:pass,)); 
@@ -168,7 +165,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
     }    c.pass = null;
 
     return (c, error.As(null!)!);
-
 }
 
 // di.cfg may be nil on return.
@@ -236,7 +232,6 @@ private static bool callMayReturn(this ptr<CFGs> _addr_c, ptr<ast.CallExpr> _add
     // Not declared in this package.
     // Is there a fact from another package?
     return !c.pass.ImportObjectFact(fn, @new<noReturn>());
-
 }
 
 private static ptr<types.Builtin> panicBuiltin = types.Universe.Lookup("panic")._<ptr<types.Builtin>>();
@@ -249,7 +244,6 @@ private static bool hasReachableReturn(ptr<cfg.CFG> _addr_g) {
             return true;
         }
     }    return false;
-
 }
 
 // isIntrinsicNoReturn reports whether a function intrinsically never
@@ -262,7 +256,6 @@ private static bool isIntrinsicNoReturn(ptr<types.Func> _addr_fn) {
     var path = fn.Pkg().Path();
     var name = fn.Name();
     return path == "syscall" && (name == "Exit" || name == "ExitProcess" || name == "ExitThread") || path == "runtime" && name == "Goexit";
-
 }
 
 } // end ctrlflow_package

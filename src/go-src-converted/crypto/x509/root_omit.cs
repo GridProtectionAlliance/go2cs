@@ -14,12 +14,12 @@
 // environments can construct minimal x509 root CertPools on the fly
 // in the crypto/tls.Config.VerifyPeerCertificate hook.
 
-// package x509 -- go2cs converted at 2022 March 06 22:19:51 UTC
+// package x509 -- go2cs converted at 2022 March 13 05:34:48 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\root_omit.go
-using errors = go.errors_package;
-
 namespace go.crypto;
+
+using errors = errors_package;
 
 public static partial class x509_package {
 

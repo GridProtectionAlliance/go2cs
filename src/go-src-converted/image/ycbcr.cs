@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package image -- go2cs converted at 2022 March 06 23:35:57 UTC
+// package image -- go2cs converted at 2022 March 13 06:43:56 UTC
 // import "image" ==> using image = go.image_package
 // Original source: C:\Program Files\Go\src\image\ycbcr.go
-using color = go.image.color_package;
-
 namespace go;
+
+using color = image.color_package;
+
+
+// YCbCrSubsampleRatio is the chroma subsample ratio used in a YCbCr image.
 
 public static partial class image_package {
 
-    // YCbCrSubsampleRatio is the chroma subsample ratio used in a YCbCr image.
 public partial struct YCbCrSubsampleRatio { // : nint
 }
 
@@ -21,7 +23,6 @@ public static readonly var YCbCrSubsampleRatio420 = 1;
 public static readonly var YCbCrSubsampleRatio440 = 2;
 public static readonly var YCbCrSubsampleRatio411 = 3;
 public static readonly var YCbCrSubsampleRatio410 = 4;
-
 
 public static @string String(this YCbCrSubsampleRatio s) {
 
@@ -38,7 +39,6 @@ public static @string String(this YCbCrSubsampleRatio s) {
     else if (s == YCbCrSubsampleRatio410) 
         return "YCbCrSubsampleRatio410";
         return "YCbCrSubsampleRatioUnknown";
-
 }
 
 // YCbCr is an in-memory image of Y'CbCr colors. There is one Y sample per
@@ -98,7 +98,6 @@ private static color.YCbCr YCbCrAt(this ptr<YCbCr> _addr_p, nint x, nint y) {
     var yi = p.YOffset(x, y);
     var ci = p.COffset(x, y);
     return new color.YCbCr(p.Y[yi],p.Cb[ci],p.Cr[ci],);
-
 }
 
 // YOffset returns the index of the first element of Y that corresponds to
@@ -127,7 +126,6 @@ private static nint COffset(this ptr<YCbCr> _addr_p, nint x, nint y) {
         return (y / 2 - p.Rect.Min.Y / 2) * p.CStride + (x / 4 - p.Rect.Min.X / 4);
     // Default to 4:4:4 subsampling.
     return (y - p.Rect.Min.Y) * p.CStride + (x - p.Rect.Min.X);
-
 }
 
 // SubImage returns an image representing the portion of the image p visible
@@ -145,7 +143,6 @@ private static Image SubImage(this ptr<YCbCr> _addr_p, Rectangle r) {
     var yi = p.YOffset(r.Min.X, r.Min.Y);
     var ci = p.COffset(r.Min.X, r.Min.Y);
     return addr(new YCbCr(Y:p.Y[yi:],Cb:p.Cb[ci:],Cr:p.Cr[ci:],SubsampleRatio:p.SubsampleRatio,YStride:p.YStride,CStride:p.CStride,Rect:r,));
-
 }
 
 private static bool Opaque(this ptr<YCbCr> _addr_p) {
@@ -181,7 +178,6 @@ private static (nint, nint, nint, nint) yCbCrSize(Rectangle r, YCbCrSubsampleRat
         cw = w;
         ch = h;
         return ;
-
 }
 
 // NewYCbCr returns a new YCbCr image with the given bounds and subsample
@@ -199,7 +195,6 @@ public static ptr<YCbCr> NewYCbCr(Rectangle r, YCbCrSubsampleRatio subsampleRati
     var i2 = w * h + 2 * cw * ch;
     var b = make_slice<byte>(i2);
     return addr(new YCbCr(Y:b[:i0:i0],Cb:b[i0:i1:i1],Cr:b[i1:i2:i2],SubsampleRatio:subsampleRatio,YStride:w,CStride:cw,Rect:r,));
-
 });
 
 // NYCbCrA is an in-memory image of non-alpha-premultiplied Y'CbCr-with-alpha
@@ -240,7 +235,6 @@ private static color.NYCbCrA NYCbCrAAt(this ptr<NYCbCrA> _addr_p, nint x, nint y
     var ci = p.COffset(x, y);
     var ai = p.AOffset(x, y);
     return new color.NYCbCrA(color.YCbCr{Y:p.Y[yi],Cb:p.Cb[ci],Cr:p.Cr[ci],},p.A[ai],);
-
 }
 
 // AOffset returns the index of the first element of A that corresponds to the
@@ -267,7 +261,6 @@ private static Image SubImage(this ptr<NYCbCrA> _addr_p, Rectangle r) {
     var ci = p.COffset(r.Min.X, r.Min.Y);
     var ai = p.AOffset(r.Min.X, r.Min.Y);
     return addr(new NYCbCrA(YCbCr:YCbCr{Y:p.Y[yi:],Cb:p.Cb[ci:],Cr:p.Cr[ci:],SubsampleRatio:p.SubsampleRatio,YStride:p.YStride,CStride:p.CStride,Rect:r,},A:p.A[ai:],AStride:p.AStride,));
-
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
@@ -288,7 +281,6 @@ private static bool Opaque(this ptr<NYCbCrA> _addr_p) {
         i1 += p.AStride;
     }
     return true;
-
 }
 
 // NewNYCbCrA returns a new NYCbCrA image with the given bounds and subsample
@@ -307,7 +299,6 @@ public static ptr<NYCbCrA> NewNYCbCrA(Rectangle r, YCbCrSubsampleRatio subsample
     nint i3 = 2 * w * h + 2 * cw * ch;
     var b = make_slice<byte>(i3);
     return addr(new NYCbCrA(YCbCr:YCbCr{Y:b[:i0:i0],Cb:b[i0:i1:i1],Cr:b[i1:i2:i2],SubsampleRatio:subsampleRatio,YStride:w,CStride:cw,Rect:r,},A:b[i2:],AStride:w,));
-
 });
 
 } // end image_package

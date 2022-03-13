@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:34:48 UTC
+//     Generated on 2022 March 13 06:42:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -39,7 +39,7 @@ namespace passes
 {
     public static partial class structtag_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct uniqueName
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace passes
             public static implicit operator uniqueName(NilType nil) => default(uniqueName);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static uniqueName uniqueName_cast(dynamic value)
         {
             return new uniqueName(value.key, value.name, value.level);

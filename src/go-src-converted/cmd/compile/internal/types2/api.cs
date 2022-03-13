@@ -22,24 +22,26 @@
 // and checks for compliance with the language specification.
 // Use Info.Types[expr].Type for the results of type inference.
 //
-// package types2 -- go2cs converted at 2022 March 06 23:12:19 UTC
+
+// package types2 -- go2cs converted at 2022 March 13 06:25:41 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\api.go
-using bytes = go.bytes_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+
+
+// An Error describes a type-checking error; it implements the error interface.
+// A "soft" error is an error that still permits a valid interpretation of a
+// package (such as "unused variable"); "hard" errors may lead to unpredictable
+// behavior if ignored.
+
+using System;
 public static partial class types2_package {
 
-    // An Error describes a type-checking error; it implements the error interface.
-    // A "soft" error is an error that still permits a valid interpretation of a
-    // package (such as "unused variable"); "hard" errors may lead to unpredictable
-    // behavior if ignored.
 public partial struct Error {
     public syntax.Pos Pos; // error position
     public @string Msg; // default error message, user-friendly
@@ -207,7 +209,6 @@ private static Type TypeOf(this ptr<Info> _addr_info, syntax.Expr e) {
             return t.Type;
         }
     }
-
     {
         ptr<syntax.Name> (id, _) = e._<ptr<syntax.Name>>();
 
@@ -220,12 +221,9 @@ private static Type TypeOf(this ptr<Info> _addr_info, syntax.Expr e) {
                 }
 
             }
-
         }
     }
-
     return null;
-
 }
 
 // ObjectOf returns the object denoted by the specified id,
@@ -247,9 +245,7 @@ private static Object ObjectOf(this ptr<Info> _addr_info, ptr<syntax.Name> _addr
             return obj;
         }
     }
-
     return info.Uses[id];
-
 }
 
 // TypeAndValue reports the type and value (for constants)
@@ -285,7 +281,6 @@ public static bool IsValue(this TypeAndValue tv) {
     if (tv.mode == constant_ || tv.mode == variable || tv.mode == mapindex || tv.mode == value || tv.mode == nilvalue || tv.mode == commaok || tv.mode == commaerr) 
         return true;
         return false;
-
 }
 
 // IsNil reports whether the corresponding expression denotes the
@@ -337,11 +332,9 @@ private static @string String(this ptr<Initializer> _addr_init) {
             buf.WriteString(", ");
         }
         buf.WriteString(lhs.Name());
-
     }    buf.WriteString(" = ");
     syntax.Fprint(_addr_buf, init.Rhs, syntax.ShortForm);
     return buf.String();
-
 }
 
 // Check type-checks a package and returns the resulting package object and
@@ -378,7 +371,6 @@ public static bool AssignableTo(Type V, Type T) {
     operand x = new operand(mode:value,typ:V);
     var (ok, _) = x.assignableTo(null, T, null); // check not needed for non-constant x
     return ok;
-
 }
 
 // ConvertibleTo reports whether a value of type V is convertible to a value of type T.

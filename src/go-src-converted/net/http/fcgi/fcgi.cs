@@ -8,25 +8,28 @@
 // original documentation.
 //
 // Currently only the responder role is supported.
-// package fcgi -- go2cs converted at 2022 March 06 22:23:53 UTC
+
+// package fcgi -- go2cs converted at 2022 March 13 05:38:18 UTC
 // import "net/http/fcgi" ==> using fcgi = go.net.http.fcgi_package
 // Original source: C:\Program Files\Go\src\net\http\fcgi\fcgi.go
+namespace go.net.http;
 // This file defines the raw protocol and some utilities used by the child and
 // the host.
 
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using sync = go.sync_package;
 
-namespace go.net.http;
+using bufio = bufio_package;
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using io = io_package;
+using sync = sync_package;
+
+
+// recType is a record type, as defined by
+// https://web.archive.org/web/20150420080736/http://www.fastcgi.com/drupal/node/6?q=node/22#S8
 
 public static partial class fcgi_package {
 
-    // recType is a record type, as defined by
-    // https://web.archive.org/web/20150420080736/http://www.fastcgi.com/drupal/node/6?q=node/22#S8
 private partial struct recType { // : byte
 }
 
@@ -42,7 +45,6 @@ private static readonly recType typeGetValues = 9;
 private static readonly recType typeGetValuesResult = 10;
 private static readonly recType typeUnknownType = 11;
 
-
 // keep the connection between web-server and responder open after request
 private static readonly nint flagKeepConn = 1;
 
@@ -51,17 +53,14 @@ private static readonly nint flagKeepConn = 1;
 private static readonly nint maxWrite = 65535; // maximum record body
 private static readonly nint maxPad = 255;
 
-
 private static readonly var roleResponder = iota + 1; // only Responders are implemented.
 private static readonly var roleAuthorizer = 0;
 private static readonly var roleFilter = 1;
-
 
 private static readonly var statusRequestComplete = iota;
 private static readonly var statusCantMultiplex = 0;
 private static readonly var statusOverloaded = 1;
 private static readonly var statusUnknownRole = 2;
-
 
 private partial struct header {
     public byte Version;
@@ -87,7 +86,6 @@ private static error read(this ptr<beginRequest> _addr_br, slice<byte> content) 
     br.role = binary.BigEndian.Uint16(content);
     br.flags = content[2];
     return error.As(null!)!;
-
 }
 
 // for padding so we don't have to allocate all the time
@@ -148,7 +146,6 @@ private static error read(this ptr<record> _addr_rec, io.Reader r) {
         return error.As(err)!;
     }
     return error.As(null!)!;
-
 }
 
 private static slice<byte> content(this ptr<record> _addr_r) {
@@ -172,7 +169,6 @@ private static error writeRecord(this ptr<conn> _addr_c, recType recType, ushort
             return error.As(err)!;
         }
     }
-
     {
         var (_, err) = c.buf.Write(b);
 
@@ -180,7 +176,6 @@ private static error writeRecord(this ptr<conn> _addr_c, recType recType, ushort
             return error.As(err)!;
         }
     }
-
     {
         (_, err) = c.buf.Write(pad[..(int)c.h.PaddingLength]);
 
@@ -188,10 +183,8 @@ private static error writeRecord(this ptr<conn> _addr_c, recType recType, ushort
             return error.As(err)!;
         }
     }
-
     (_, err) = c.rwc.Write(c.buf.Bytes());
     return error.As(err)!;
-
 });
 
 private static error writeEndRequest(this ptr<conn> _addr_c, ushort reqId, nint appStatus, byte protocolStatus) {
@@ -219,7 +212,6 @@ private static error writePairs(this ptr<conn> _addr_c, recType recType, ushort 
             }
 
         }
-
         {
             (_, err) = w.WriteString(k);
 
@@ -228,7 +220,6 @@ private static error writePairs(this ptr<conn> _addr_c, recType recType, ushort 
             }
 
         }
-
         {
             (_, err) = w.WriteString(v);
 
@@ -237,10 +228,8 @@ private static error writePairs(this ptr<conn> _addr_c, recType recType, ushort 
             }
 
         }
-
     }    w.Close();
     return error.As(null!)!;
-
 }
 
 private static (uint, nint) readSize(slice<byte> s) {
@@ -259,10 +248,8 @@ private static (uint, nint) readSize(slice<byte> s) {
         n = 4;
         size = binary.BigEndian.Uint32(s);
         size &= 1 << 31;
-
     }
     return (size, n);
-
 }
 
 private static @string readString(slice<byte> s, uint size) {
@@ -270,7 +257,6 @@ private static @string readString(slice<byte> s, uint size) {
         return "";
     }
     return string(s[..(int)size]);
-
 }
 
 private static nint encodeSize(slice<byte> b, uint size) {
@@ -281,7 +267,6 @@ private static nint encodeSize(slice<byte> b, uint size) {
     }
     b[0] = byte(size);
     return 1;
-
 }
 
 // bufWriter encapsulates bufio.Writer but also closes the underlying stream when
@@ -302,9 +287,7 @@ private static error Close(this ptr<bufWriter> _addr_w) {
             return error.As(err)!;
         }
     }
-
     return error.As(w.closer.Close())!;
-
 }
 
 private static ptr<bufWriter> newWriter(ptr<conn> _addr_c, recType recType, ushort reqId) {
@@ -342,13 +325,10 @@ private static (nint, error) Write(this ptr<streamWriter> _addr_w, slice<byte> p
             }
 
         }
-
         nn += n;
         p = p[(int)n..];
-
     }
     return (nn, error.As(null!)!);
-
 }
 
 private static error Close(this ptr<streamWriter> _addr_w) {
@@ -356,7 +336,6 @@ private static error Close(this ptr<streamWriter> _addr_w) {
  
     // send empty record to close the stream
     return error.As(w.c.writeRecord(w.recType, w.reqId, null))!;
-
 }
 
 } // end fcgi_package

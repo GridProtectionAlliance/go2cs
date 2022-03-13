@@ -4,15 +4,16 @@
 
 // Package sha256 implements the SHA224 and SHA256 hash algorithms as defined
 // in FIPS 180-4.
-// package sha256 -- go2cs converted at 2022 March 06 22:19:27 UTC
+
+// package sha256 -- go2cs converted at 2022 March 13 05:34:25 UTC
 // import "crypto/sha256" ==> using sha256 = go.crypto.sha256_package
 // Original source: C:\Program Files\Go\src\crypto\sha256\sha256.go
-using crypto = go.crypto_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-
 namespace go.crypto;
+
+using crypto = crypto_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using hash = hash_package;
 
 public static partial class sha256_package {
 
@@ -56,7 +57,6 @@ private static readonly nuint init5_224 = 0x68581511;
 private static readonly nuint init6_224 = 0x64F98FA7;
 private static readonly nuint init7_224 = 0xBEFA4FA4;
 
-
 // digest represents the partial evaluation of a checksum.
 private partial struct digest {
     public array<uint> h;
@@ -69,7 +69,6 @@ private partial struct digest {
 private static readonly @string magic224 = "sha\x02";
 private static readonly @string magic256 = "sha\x03";
 private static readonly var marshaledSize = len(magic256) + 8 * 4 + chunk + 8;
-
 
 private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     slice<byte> _p0 = default;
@@ -96,7 +95,6 @@ private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     b = b[..(int)len(b) + len(d.x) - int(d.nx)]; // already zero
     b = appendUint64(b, d.len);
     return (b, error.As(null!)!);
-
 }
 
 private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
@@ -121,7 +119,6 @@ private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
     b, d.len = consumeUint64(b);
     d.nx = int(d.len % chunk);
     return error.As(null!)!;
-
 }
 
 private static slice<byte> appendUint64(slice<byte> b, ulong x) {
@@ -180,7 +177,6 @@ private static void Reset(this ptr<digest> _addr_d) {
     }
     d.nx = 0;
     d.len = 0;
-
 }
 
 // New returns a new hash.Hash computing the SHA256 checksum. The Hash
@@ -208,7 +204,6 @@ private static nint Size(this ptr<digest> _addr_d) {
         return Size;
     }
     return Size224;
-
 }
 
 private static nint BlockSize(this ptr<digest> _addr_d) {
@@ -232,7 +227,6 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
             d.nx = 0;
         }
         p = p[(int)n..];
-
     }
     if (len(p) >= chunk) {
         n = len(p) & ~(chunk - 1);
@@ -243,7 +237,6 @@ private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {
         d.nx = copy(d.x[..], p);
     }
     return ;
-
 }
 
 private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
@@ -256,7 +249,6 @@ private static slice<byte> Sum(this ptr<digest> _addr_d, slice<byte> @in) {
         return append(in, hash[..(int)Size224]);
     }
     return append(in, hash[..]);
-
 }
 
 private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic, _) => {
@@ -293,7 +285,6 @@ private static array<byte> checkSum(this ptr<digest> _addr_d) => func((_, panic,
         binary.BigEndian.PutUint32(digest[(int)28..], d.h[7]);
     }
     return digest;
-
 });
 
 // Sum256 returns the SHA256 checksum of the data.

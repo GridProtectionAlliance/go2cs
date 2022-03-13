@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:22 UTC
+// package template -- go2cs converted at 2022 March 13 05:38:50 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\context.go
-using fmt = go.fmt_package;
-
 namespace go.html;
+
+using fmt = fmt_package;
+
+
+// context describes the state an HTML parser must be in when it reaches the
+// portion of HTML produced by evaluating a particular template node.
+//
+// The zero value of type context is the start context for a template that
+// produces an HTML fragment as defined at
+// https://www.w3.org/TR/html5/syntax.html#the-end
+// where the context element is null.
 
 public static partial class template_package {
 
-    // context describes the state an HTML parser must be in when it reaches the
-    // portion of HTML produced by evaluating a particular template node.
-    //
-    // The zero value of type context is the start context for a template that
-    // produces an HTML fragment as defined at
-    // https://www.w3.org/TR/html5/syntax.html#the-end
-    // where the context element is null.
 private partial struct context {
     public state state;
     public delim delim;
@@ -34,7 +36,6 @@ private static @string String(this context c) {
         err = error.As(c.err)!;
     }
     return fmt.Sprintf("{%v %v %v %v %v %v %v}", c.state, c.delim, c.urlPart, c.jsCtx, c.attr, c.element, err);
-
 }
 
 // eq reports whether two contexts are equal.
@@ -66,7 +67,6 @@ private static @string mangle(this context c, @string templateName) {
         s += "_" + c.element.String();
     }
     return s;
-
 }
 
 // state describes a high-level HTML parser state.
@@ -142,7 +142,6 @@ private static readonly var stateCSSLineCmt = 22;
 // HTML/CSS/JS construct.
 private static readonly var stateError = 23;
 
-
 // isComment is true for any state that contains content meant for template
 // authors & maintainers, not for end-users or machines.
 private static bool isComment(state s) {
@@ -150,7 +149,6 @@ private static bool isComment(state s) {
     if (s == stateHTMLCmt || s == stateJSBlockCmt || s == stateJSLineCmt || s == stateCSSBlockCmt || s == stateCSSLineCmt) 
         return true;
         return false;
-
 }
 
 // isInTag return whether s occurs solely inside an HTML tag.
@@ -159,7 +157,6 @@ private static bool isInTag(state s) {
     if (s == stateTag || s == stateAttrName || s == stateAfterName || s == stateBeforeValue || s == stateAttr) 
         return true;
         return false;
-
 }
 
 // delim is the delimiter that will end the current HTML attribute.
@@ -178,7 +175,6 @@ private static readonly var delimSingleQuote = 1;
 // delimSpaceOrTagEnd occurs when a space or right angle bracket (>)
 // closes the attribute.
 private static readonly var delimSpaceOrTagEnd = 2;
-
 
 // urlPart identifies a part in an RFC 3986 hierarchical URL to allow different
 // encoding strategies.
@@ -201,7 +197,6 @@ private static readonly var urlPartQueryOrFrag = 1;
 // after the query separator.
 private static readonly var urlPartUnknown = 2;
 
-
 // jsCtx determines whether a '/' starts a regular expression literal or a
 // division operator.
 private partial struct jsCtx { // : byte
@@ -216,7 +211,6 @@ private static readonly jsCtx jsCtxRegexp = iota;
 private static readonly var jsCtxDivOp = 0; 
 // jsCtxUnknown occurs where a '/' is ambiguous due to context joining.
 private static readonly var jsCtxUnknown = 1;
-
 
 // element identifies the HTML element when inside a start tag or special body.
 // Certain HTML element (for example <script> and <style>) have bodies that are
@@ -241,7 +235,6 @@ private static readonly var elementTextarea = 2;
 // elementTitle corresponds to the RCDATA <title> element.
 private static readonly var elementTitle = 3;
 
-
 //go:generate stringer -type attr
 
 // attr identifies the current HTML attribute when inside the attribute,
@@ -262,6 +255,5 @@ private static readonly var attrStyle = 2;
 private static readonly var attrURL = 3; 
 // attrSrcset corresponds to a srcset attribute.
 private static readonly var attrSrcset = 4;
-
 
 } // end template_package

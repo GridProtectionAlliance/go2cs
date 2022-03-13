@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:19:47 UTC
+// package main -- go2cs converted at 2022 March 13 06:32:36 UTC
 // Original source: C:\Program Files\Go\src\cmd\gofmt\rewrite.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using os = os_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class main_package {
 
@@ -24,7 +23,6 @@ private static void initRewrite() {
     if (rewriteRule == "".val) {
         rewrite = null; // disable any previous rewrite
         return ;
-
     }
     var f = strings.Split(rewriteRule.val, "->");
     if (len(f) != 2) {
@@ -34,7 +32,6 @@ private static void initRewrite() {
     var pattern = parseExpr(f[0], "pattern");
     var replace = parseExpr(f[1], "replacement");
     rewrite = p => rewriteFile(pattern, replace, _addr_p);
-
 }
 
 // parseExpr parses s as an expression.
@@ -48,7 +45,6 @@ private static ast.Expr parseExpr(@string s, @string what) {
         os.Exit(2);
     }
     return x;
-
 }
 
 // Keep this function for debugging.
@@ -82,13 +78,11 @@ private static ptr<ast.File> rewriteFile(ast.Expr pattern, ast.Expr replace, ptr
             val = subst(m, repl, reflect.ValueOf(val.Interface()._<ast.Node>().Pos()));
         }
         return _addr_val!;
-
     };
 
     ptr<ast.File> r = apply(rewriteVal, reflect.ValueOf(p)).Interface()._<ptr<ast.File>>();
     r.Comments = cmap.Filter(r).Comments(); // recreate comments list
     return _addr_r!;
-
 }
 
 // set is a wrapper for x.Set(y); it protects the caller from panics if x cannot be changed to y.
@@ -108,20 +102,15 @@ private static void set(reflect.Value x, reflect.Value y) => func((defer, panic,
                     if (ok && (strings.Contains(s, "type mismatch") || strings.Contains(s, "not assignable"))) { 
                         // x cannot be set to y - ignore this rewrite
                         return ;
-
                     }
 
                 }
-
                 panic(x);
-
             }
 
         }
-
     }());
     x.Set(y);
-
 });
 
 // Values/types for special cases.
@@ -173,7 +162,6 @@ private static reflect.Value apply(Func<reflect.Value, reflect.Value> f, reflect
 
     }
     return val;
-
 }
 
 private static bool isWildcard(@string s) {
@@ -204,14 +192,11 @@ private static bool match(map<@string, reflect.Value> m, reflect.Value pattern, 
                         }
 
                     }
-
                     m[name] = val;
                     return true;
-
                 }
 
             }
-
         }
     }
     if (!pattern.IsValid() || !val.IsValid()) {
@@ -282,7 +267,6 @@ private static bool match(map<@string, reflect.Value> m, reflect.Value pattern, 
         return match(m, p.Elem(), v.Elem());
     // Handle token integers, etc.
     return p.Interface() == v.Interface();
-
 }
 
 // subst returns a copy of pattern with values from m substituted in place
@@ -308,7 +292,6 @@ private static reflect.Value subst(map<@string, reflect.Value> m, reflect.Value 
                 old = old__prev3;
 
             }
-
         }
     }
     if (pos.IsValid() && pattern.Type() == positionType) { 
@@ -325,9 +308,7 @@ private static reflect.Value subst(map<@string, reflect.Value> m, reflect.Value 
             old = old__prev2;
 
         }
-
         return pos;
-
     }
     {
         var p = pattern;
@@ -339,9 +320,7 @@ private static reflect.Value subst(map<@string, reflect.Value> m, reflect.Value 
                 // guarantees that certain lists will be nil if not
                 // populated.
                 return reflect.Zero(p.Type());
-
             }
-
             var v = reflect.MakeSlice(p.Type(), p.Len(), p.Len());
             {
                 nint i__prev1 = i;
@@ -381,7 +360,6 @@ private static reflect.Value subst(map<@string, reflect.Value> m, reflect.Value 
                 elem = elem__prev1;
 
             }
-
             return v;
         else if (p.Kind() == reflect.Interface) 
             v = reflect.New(p.Type()).Elem();
@@ -397,13 +375,11 @@ private static reflect.Value subst(map<@string, reflect.Value> m, reflect.Value 
                 elem = elem__prev1;
 
             }
-
             return v;
 
     }
 
     return pattern;
-
 }
 
 } // end main_package

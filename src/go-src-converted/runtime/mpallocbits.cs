@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:03 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:51 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mpallocbits.go
-using sys = go.runtime.@internal.sys_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+
+
+// pageBits is a bitmap representing one bit per page in a palloc chunk.
 
 public static partial class runtime_package {
 
-    // pageBits is a bitmap representing one bit per page in a palloc chunk.
 private partial struct pageBits { // : array<ulong>
 }
 
@@ -45,7 +47,6 @@ private static void setRange(this ptr<pageBits> _addr_b, nuint i, nuint n) {
         // Fast path for the n == 1 case.
         b.set(i);
         return ;
-
     }
     var j = i + n - 1;
     if (i / 64 == j / 64) {
@@ -60,7 +61,6 @@ private static void setRange(this ptr<pageBits> _addr_b, nuint i, nuint n) {
     } 
     // Set trailing bits.
     b[j / 64] |= (uint64(1) << (int)((j % 64 + 1))) - 1;
-
 }
 
 // setAll sets all the bits of b.
@@ -88,7 +88,6 @@ private static void clearRange(this ptr<pageBits> _addr_b, nuint i, nuint n) {
         // Fast path for the n == 1 case.
         b.clear(i);
         return ;
-
     }
     var j = i + n - 1;
     if (i / 64 == j / 64) {
@@ -103,7 +102,6 @@ private static void clearRange(this ptr<pageBits> _addr_b, nuint i, nuint n) {
     } 
     // Clear trailing bits.
     b[j / 64] &= (uint64(1) << (int)((j % 64 + 1))) - 1;
-
 }
 
 // clearAll frees all the bits of b.
@@ -136,7 +134,6 @@ private static nuint popcntRange(this ptr<pageBits> _addr_b, nuint i, nuint n) {
     }
     s += uint(sys.OnesCount64(b[j / 64] & ((1 << (int)((j % 64 + 1))) - 1)));
     return ;
-
 }
 
 // pallocBits is a bitmap that tracks page allocations for at most one
@@ -173,13 +170,11 @@ private static pallocSum summarize(this ptr<pallocBits> _addr_b) {
             if (start == notSetYet) {
                 start = cur;
             }
-
             if (cur > max) {
                 max = cur;
             } 
             // Final region that might span to next uint64
             cur = l;
-
         }
 
         i = i__prev1;
@@ -189,7 +184,6 @@ private static pallocSum summarize(this ptr<pallocBits> _addr_b) {
         const var n = uint(64 * len(b));
 
         return packPallocSum(n, n, n);
-
     }
     if (cur > max) {
         max = cur;
@@ -197,7 +191,6 @@ private static pallocSum summarize(this ptr<pallocBits> _addr_b) {
     if (max >= 64 - 2) { 
         // There is no way an internal run of zeros could beat max.
         return packPallocSum(start, max, cur);
-
     }
 outer:
     {
@@ -215,7 +208,6 @@ outer:
             x>>=sys.TrailingZeros64(x) & 63;
             if (x & (x + 1) == 0) { // no more zeros (except at the top).
                 continue;
-
             } 
 
             // Strategy: shrink all runs of zeros by max. If any runs of zero
@@ -232,9 +224,7 @@ outer:
                             _continueouter = true;
                             break;
                         }
-
                         break;
-
                     } 
                     // Shift k ones down into the top of each run of zeros.
                     x |= x >> (int)((k & 63));
@@ -242,12 +232,10 @@ outer:
                         _continueouter = true;
                         break;
                     }
-
                     p -= k; 
                     // We've just doubled the minimum length of 1-runs.
                     // This allows us to shift farther in the next iteration.
                     k *= 2;
-
                 } 
 
                 // The length of the lowest-order zero run is an increment to our maximum.
@@ -263,17 +251,13 @@ outer:
                     _continueouter = true;
                     break;
                 }
-
                 p = j; // remove j more zeros from each zero run.
             }
-
-
         }
 
         i = i__prev1;
     }
     return packPallocSum(start, max, cur);
-
 }
 
 // find searches for npages contiguous free pages in pallocBits and returns
@@ -298,7 +282,6 @@ private static (nuint, nuint) find(this ptr<pallocBits> _addr_b, System.UIntPtr 
         return b.findSmallN(npages, searchIdx);
     }
     return b.findLargeN(npages, searchIdx);
-
 }
 
 // find1 is a helper for find which searches for a single free page
@@ -315,10 +298,8 @@ private static nuint find1(this ptr<pallocBits> _addr_b, nuint searchIdx) {
             continue;
         }
         return i * 64 + uint(sys.TrailingZeros64(~x));
-
     }
     return ~uint(0);
-
 }
 
 // findSmallN is a helper for find which searches for npages contiguous free pages
@@ -348,7 +329,6 @@ private static (nuint, nuint) findSmallN(this ptr<pallocBits> _addr_b, System.UI
             // The new searchIdx is going to be at these 64 bits after any
             // 1s we file, so count trailing 1s.
             newSearchIdx = i * 64 + uint(sys.TrailingZeros64(~bi));
-
         }
         var start = uint(sys.TrailingZeros64(bi));
         if (end + start >= uint(npages)) {
@@ -359,10 +339,8 @@ private static (nuint, nuint) findSmallN(this ptr<pallocBits> _addr_b, System.UI
             return (i * 64 + j, newSearchIdx);
         }
         end = uint(sys.LeadingZeros64(bi));
-
     }
     return (~uint(0), newSearchIdx);
-
 }
 
 // findLargeN is a helper for find which searches for npages contiguous free pages
@@ -393,7 +371,6 @@ private static (nuint, nuint) findLargeN(this ptr<pallocBits> _addr_b, System.UI
             // The new searchIdx is going to be at these 64 bits after any
             // 1s we file, so count trailing 1s.
             newSearchIdx = i * 64 + uint(sys.TrailingZeros64(~x));
-
         }
         if (size == 0) {
             size = uint(sys.LeadingZeros64(x));
@@ -411,13 +388,11 @@ private static (nuint, nuint) findLargeN(this ptr<pallocBits> _addr_b, System.UI
             continue;
         }
         size += 64;
-
     }
     if (size < uint(npages)) {
         return (~uint(0), newSearchIdx);
     }
     return (start, newSearchIdx);
-
 }
 
 // allocRange allocates the range [i, i+n).
@@ -479,7 +454,6 @@ private static nuint findBitRange64(ulong c, nuint n) {
             // Shift p 0s down into the top of each run of 1s.
             c &= c >> (int)((p & 63));
             break;
-
         }
         c &= c >> (int)((k & 63));
         if (c == 0) {
@@ -489,13 +463,11 @@ private static nuint findBitRange64(ulong c, nuint n) {
         // We've just doubled the minimum length of 0-runs.
         // This allows us to shift farther in the next iteration.
         k *= 2;
-
     } 
     // Find first remaining 1.
     // Since we shrunk from the top down, the first 1 is in
     // its correct original position.
     return uint(sys.TrailingZeros64(c));
-
 }
 
 // pallocData encapsulates pallocBits and a bitmap for
@@ -518,7 +490,6 @@ private static void allocRange(this ptr<pallocData> _addr_m, nuint i, nuint n) {
     // Clear the scavenged bits when we alloc the range.
     m.pallocBits.allocRange(i, n);
     m.scavenged.clearRange(i, n);
-
 }
 
 // allocAll sets every bit in the bitmap to 1 and updates
@@ -529,7 +500,6 @@ private static void allocAll(this ptr<pallocData> _addr_m) {
     // Clear the scavenged bits when we alloc the range.
     m.pallocBits.allocAll();
     m.scavenged.clearAll();
-
 }
 
 } // end runtime_package

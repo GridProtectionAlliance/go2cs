@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:37:16 UTC
+//     Generated on 2022 March 13 06:45:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace net
 {
     public static partial class idna_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct labelError
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace net
             public static implicit operator labelError(NilType nil) => default(labelError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static labelError labelError_cast(dynamic value)
         {
             return new labelError(value.label, value.code_);

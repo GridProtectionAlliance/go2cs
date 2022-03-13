@@ -6,11 +6,11 @@
 // if the type is "indirectly" converted to an interface
 // using reflection with a method descriptor as intermediate.
 
-// package main -- go2cs converted at 2022 March 06 23:22:34 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:37 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\deadcode\ifacemethod3.go
-using reflect = go.reflect_package;
-
 namespace go;
+
+using reflect = reflect_package;
 
 public static partial class main_package {
 

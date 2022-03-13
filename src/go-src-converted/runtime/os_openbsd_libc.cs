@@ -5,12 +5,12 @@
 //go:build openbsd && !mips64
 // +build openbsd,!mips64
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:33 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\os_openbsd_libc.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -63,7 +63,6 @@ private static void newosproc(ptr<m> _addr_mp) {
         exit(1);
     }
     pthread_attr_destroy(_addr_attr);
-
 }
 
 } // end runtime_package

@@ -1,39 +1,41 @@
 // Copyright 2021 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-// package x509 -- go2cs converted at 2022 March 06 22:19:39 UTC
+
+// package x509 -- go2cs converted at 2022 March 13 05:34:37 UTC
 // import "crypto/x509" ==> using x509 = go.crypto.x509_package
 // Original source: C:\Program Files\Go\src\crypto\x509\parser.go
-using bytes = go.bytes_package;
-using dsa = go.crypto.dsa_package;
-using ecdsa = go.crypto.ecdsa_package;
-using ed25519 = go.crypto.ed25519_package;
-using elliptic = go.crypto.elliptic_package;
-using rsa = go.crypto.rsa_package;
-using pkix = go.crypto.x509.pkix_package;
-using asn1 = go.encoding.asn1_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using big = go.math.big_package;
-using net = go.net_package;
-using url = go.net.url_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using utf16 = go.unicode.utf16_package;
-using utf8 = go.unicode.utf8_package;
-
-using cryptobyte = go.golang.org.x.crypto.cryptobyte_package;
-using cryptobyte_asn1 = go.golang.org.x.crypto.cryptobyte.asn1_package;
-using System;
-
-
 namespace go.crypto;
 
+using bytes = bytes_package;
+using dsa = crypto.dsa_package;
+using ecdsa = crypto.ecdsa_package;
+using ed25519 = crypto.ed25519_package;
+using elliptic = crypto.elliptic_package;
+using rsa = crypto.rsa_package;
+using pkix = crypto.x509.pkix_package;
+using asn1 = encoding.asn1_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using big = math.big_package;
+using net = net_package;
+using url = net.url_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+using utf16 = unicode.utf16_package;
+using utf8 = unicode.utf8_package;
+
+using cryptobyte = golang.org.x.crypto.cryptobyte_package;
+using cryptobyte_asn1 = golang.org.x.crypto.cryptobyte.asn1_package;
+
+
+// isPrintable reports whether the given b is in the ASN.1 PrintableString set.
+// This is a simplified version of encoding/asn1.isPrintable.
+
+using System;
 public static partial class x509_package {
 
-    // isPrintable reports whether the given b is in the ASN.1 PrintableString set.
-    // This is a simplified version of encoding/asn1.isPrintable.
 private static bool isPrintable(byte b) {
     return 'a' <= b && b <= 'z' || 'A' <= b && b <= 'Z' || '0' <= b && b <= '9' || '\'' <= b && b <= ')' || '+' <= b && b <= '/' || b == ' ' || b == ':' || b == '=' || b == '?' || b == '*' || b == '&';
 }
@@ -73,7 +75,6 @@ private static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<b
 
         }
 
-
         var s = make_slice<ushort>(0, len(value) / 2);
         while (len(value) > 0) {
             s = append(s, uint16(value[0]) << 8 + uint16(value[1]));
@@ -88,7 +89,6 @@ private static (@string, error) parseASN1String(cryptobyte_asn1.Tag tag, slice<b
         }
         return (s, error.As(null!)!);
         return ("", error.As(fmt.Errorf("unsupported string type: %v", tag))!);
-
 }
 
 // parseName parses a DER encoded Name as defined in RFC 5280. We may
@@ -130,11 +130,9 @@ private static (ptr<pkix.RDNSequence>, error) parseName(cryptobyte.String raw) {
         }
 
         rdnSeq = append(rdnSeq, rdnSet);
-
     }
 
     return (_addr__addr_rdnSeq!, error.As(null!)!);
-
 }
 
 private static (pkix.AlgorithmIdentifier, error) parseAI(cryptobyte.String der) {
@@ -156,7 +154,6 @@ private static (pkix.AlgorithmIdentifier, error) parseAI(cryptobyte.String der) 
     ai.Parameters.Tag = int(tag);
     ai.Parameters.FullBytes = params;
     return (ai, error.As(null!)!);
-
 }
 
 private static (time.Time, time.Time, error) parseValidity(cryptobyte.String der) {
@@ -195,13 +192,10 @@ private static (time.Time, time.Time, error) parseValidity(cryptobyte.String der
 
             }
 
-
             if (t.Year() >= 2050) { 
                 // UTCTime only encodes times prior to 2050. See https://tools.ietf.org/html/rfc5280#section-4.1.2.5.1
                 t = t.AddDate(-100, 0, 0);
-
             }
-
         else if (der.PeekASN1Tag(cryptobyte_asn1.GeneralizedTime)) 
             if (!der.ReadASN1GeneralizedTime(_addr_t)) {
                 return (t, errors.New("x509: malformed GeneralizedTime"));
@@ -209,7 +203,6 @@ private static (time.Time, time.Time, error) parseValidity(cryptobyte.String der
         else 
             return (t, errors.New("x509: unsupported time format"));
                 return (t, null);
-
     };
 
     var (notBefore, err) = extract();
@@ -221,7 +214,6 @@ private static (time.Time, time.Time, error) parseValidity(cryptobyte.String der
         return (new time.Time(), new time.Time(), error.As(err)!);
     }
     return (notBefore, notAfter, error.As(null!)!);
-
 }
 
 private static (pkix.Extension, error) parseExtension(cryptobyte.String der) {
@@ -243,7 +235,6 @@ private static (pkix.Extension, error) parseExtension(cryptobyte.String der) {
     }
     ext.Value = val;
     return (ext, error.As(null!)!);
-
 }
 
 private static (object, error) parsePublicKey(PublicKeyAlgorithm algo, ptr<publicKeyInfo> _addr_keyData) {
@@ -319,8 +310,7 @@ private static (object, error) parsePublicKey(PublicKeyAlgorithm algo, ptr<publi
         return (pub, error.As(null!)!);
     else 
         return (null, error.As(null!)!);
-    
-}
+    }
 
 private static (KeyUsage, error) parseKeyUsageExtension(cryptobyte.String der) {
     KeyUsage _p0 = default;
@@ -337,7 +327,6 @@ private static (KeyUsage, error) parseKeyUsageExtension(cryptobyte.String der) {
         }
     }
     return (KeyUsage(usage), error.As(null!)!);
-
 }
 
 private static (bool, nint, error) parseBasicConstraintsExtension(cryptobyte.String der) {
@@ -361,7 +350,6 @@ private static (bool, nint, error) parseBasicConstraintsExtension(cryptobyte.Str
         }
     }
     return (isCA, maxPathLen, error.As(null!)!);
-
 }
 
 private static error forEachSAN(cryptobyte.String der, Func<nint, slice<byte>, error> callback) {
@@ -382,11 +370,9 @@ private static error forEachSAN(cryptobyte.String der, Func<nint, slice<byte>, e
             }
 
         }
-
     }
 
     return error.As(null!)!;
-
 }
 
 private static (slice<@string>, slice<@string>, slice<net.IP>, slice<ptr<url.URL>>, error) parseSANExtension(cryptobyte.String der) {
@@ -412,7 +398,6 @@ private static (slice<@string>, slice<@string>, slice<net.IP>, slice<ptr<url.URL
                 err = err__prev1;
 
             }
-
             emailAddresses = append(emailAddresses, email);
         else if (tag == nameTypeDNS) 
             var name = string(data);
@@ -428,7 +413,6 @@ private static (slice<@string>, slice<@string>, slice<net.IP>, slice<ptr<url.URL
                 err = err__prev1;
 
             }
-
             dnsNames = append(dnsNames, string(name));
         else if (tag == nameTypeURI) 
             var uriStr = string(data);
@@ -444,12 +428,10 @@ private static (slice<@string>, slice<@string>, slice<net.IP>, slice<ptr<url.URL
                 err = err__prev1;
 
             }
-
             var (uri, err) = url.Parse(uriStr);
             if (err != null) {
                 return fmt.Errorf("x509: cannot parse URI %q: %s", uriStr, err);
             }
-
             if (len(uri.Host) > 0) {
                 {
                     var (_, ok) = domainToReverseLabels(uri.Host);
@@ -459,9 +441,7 @@ private static (slice<@string>, slice<@string>, slice<net.IP>, slice<ptr<url.URL
                     }
 
                 }
-
             }
-
             uris = append(uris, uri);
         else if (tag == nameTypeIP) 
 
@@ -470,11 +450,9 @@ private static (slice<@string>, slice<@string>, slice<net.IP>, slice<ptr<url.URL
             else 
                 return errors.New("x509: cannot parse IP address of length " + strconv.Itoa(len(data)));
                             return null;
-
     });
 
     return ;
-
 }
 
 private static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseExtKeyUsageExtension(cryptobyte.String der) {
@@ -504,10 +482,8 @@ private static (slice<ExtKeyUsage>, slice<asn1.ObjectIdentifier>, error) parseEx
             }
 
         }
-
     }
     return (extKeyUsages, unknownUsages, error.As(null!)!);
-
 }
 
 private static (slice<asn1.ObjectIdentifier>, error) parseCertificatePoliciesExtension(cryptobyte.String der) {
@@ -528,11 +504,9 @@ private static (slice<asn1.ObjectIdentifier>, error) parseCertificatePoliciesExt
             return (null, error.As(errors.New("x509: invalid certificate policies"))!);
         }
         oids = append(oids, oid);
-
     }
 
     return (oids, error.As(null!)!);
-
 }
 
 // isValidIPMask reports whether mask consists of zero or more 1 bits, followed by zero bits.
@@ -571,9 +545,7 @@ private static bool isValidIPMask(slice<byte> mask) {
                 return false;
                 break;
         }
-
     }    return true;
-
 }
 
 private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _addr_@out, pkix.Extension e) {
@@ -610,7 +582,6 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
         //   or the excludedSubtrees MUST be
         //   present”
         return (false, error.As(errors.New("x509: empty name constraints extension"))!);
-
     }
     Func<cryptobyte.String, (slice<@string>, slice<ptr<net.IPNet>>, slice<@string>, slice<@string>, error)> getValues = subtrees => {
         while (!subtrees.Empty()) {
@@ -638,7 +609,6 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
 
                 }
 
-
                 var trimmedDomain = domain;
                 if (len(trimmedDomain) > 0 && trimmedDomain[0] == '.') { 
                     // constraints can have a leading
@@ -646,9 +616,7 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                     // itself, but that's not valid in a
                     // normal domain name.
                     trimmedDomain = trimmedDomain[(int)1..];
-
                 }
-
                 {
                     var (_, ok) = domainToReverseLabels(trimmedDomain);
 
@@ -657,7 +625,6 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                     }
 
                 }
-
                 dnsNames = append(dnsNames, domain);
             else if (tag == ipTag) 
                 var l = len(value);
@@ -682,7 +649,6 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                 if (!isValidIPMask(mask)) {
                     return (null, error.As(null!)!, null, null, fmt.Errorf("x509: IP constraint contained invalid mask %x", mask));
                 }
-
                 ips = append(ips, addr(new net.IPNet(IP:net.IP(ip),Mask:net.IPMask(mask))));
             else if (tag == emailTag) 
                 var constraint = string(value);
@@ -713,7 +679,6 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                         }
 
                     }
-
                 }
                 else
  { 
@@ -722,7 +687,6 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                     if (len(domain) > 0 && domain[0] == '.') {
                         domain = domain[(int)1..];
                     }
-
                     {
                         (_, ok) = domainToReverseLabels(domain);
 
@@ -731,9 +695,7 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                         }
 
                     }
-
                 }
-
                 emails = append(emails, constraint);
             else if (tag == uriTag) 
                 domain = string(value);
@@ -750,11 +712,9 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
 
                 }
 
-
                 if (net.ParseIP(domain) != null) {
                     return (null, error.As(null!)!, null, null, fmt.Errorf("x509: failed to parse URI constraint %q: cannot be IP address", domain));
                 }
-
                 trimmedDomain = domain;
                 if (len(trimmedDomain) > 0 && trimmedDomain[0] == '.') { 
                     // constraints can have a leading
@@ -762,9 +722,7 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                     // but that's not valid in a normal
                     // domain name.
                     trimmedDomain = trimmedDomain[(int)1..];
-
                 }
-
                 {
                     (_, ok) = domainToReverseLabels(trimmedDomain);
 
@@ -773,15 +731,12 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
                     }
 
                 }
-
                 uriDomains = append(uriDomains, domain);
             else 
                 unhandled = true;
-            
-        }
+                    }
 
         return (dnsNames, error.As(ips)!, emails, uriDomains, null);
-
     };
 
     @out.PermittedDNSDomains, @out.PermittedIPRanges, @out.PermittedEmailAddresses, @out.PermittedURIDomains, err = getValues(permitted);
@@ -797,7 +752,6 @@ private static (bool, error) parseNameConstraintsExtension(ptr<Certificate> _add
     @out.PermittedDNSDomainsCritical = e.Critical;
 
     return (unhandled, error.As(null!)!);
-
 }
 
 private static error processExtensions(ptr<Certificate> _addr_@out) {
@@ -831,9 +785,7 @@ private static error processExtensions(ptr<Certificate> _addr_@out) {
                     if (len(@out.DNSNames) == 0 && len(@out.EmailAddresses) == 0 && len(@out.IPAddresses) == 0 && len(@out.URIs) == 0) { 
                         // If we didn't parse anything then we do the critical check, below.
                         unhandled = true;
-
                     }
-
                     break;
                 case 30: 
                     unhandled, err = parseNameConstraintsExtension(_addr_out, e);
@@ -927,7 +879,6 @@ private static error processExtensions(ptr<Certificate> _addr_@out) {
                     unhandled = true;
                     break;
             }
-
         }
         else if (e.Id.Equal(oidExtensionAuthorityInfoAccess)) { 
             // RFC 5280 4.2.2.1: Authority Information Access
@@ -935,7 +886,6 @@ private static error processExtensions(ptr<Certificate> _addr_@out) {
             if (!val.ReadASN1(_addr_val, cryptobyte_asn1.SEQUENCE)) {
                 return error.As(errors.New("x509: invalid authority info access"))!;
             }
-
             while (!val.Empty()) {
                 ref cryptobyte.String aiaDER = ref heap(out ptr<cryptobyte.String> _addr_aiaDER);
                 if (!val.ReadASN1(_addr_aiaDER, cryptobyte_asn1.SEQUENCE)) {
@@ -956,21 +906,16 @@ private static error processExtensions(ptr<Certificate> _addr_@out) {
                     @out.OCSPServer = append(@out.OCSPServer, string(aiaDER));
                 else if (method.Equal(oidAuthorityInfoAccessIssuers)) 
                     @out.IssuingCertificateURL = append(@out.IssuingCertificateURL, string(aiaDER));
-                
-            }
+                            }
         else
-
-
         } { 
             // Unknown extensions are recorded if critical.
             unhandled = true;
-
         }
         if (e.Critical && unhandled) {
             @out.UnhandledCriticalExtensions = append(@out.UnhandledCriticalExtensions, e.Id);
         }
     }    return error.As(null!)!;
-
 }
 
 private static (ptr<Certificate>, error) parseCertificate(slice<byte> der) {
@@ -1131,7 +1076,6 @@ private static (ptr<Certificate>, error) parseCertificate(slice<byte> der) {
     cert.Signature = signature.RightAlign();
 
     return (_addr_cert!, error.As(null!)!);
-
 }
 
 // ParseCertificate parses a single certificate from the given ASN.1 DER data.
@@ -1147,7 +1091,6 @@ public static (ptr<Certificate>, error) ParseCertificate(slice<byte> der) {
         return (_addr_null!, error.As(errors.New("x509: trailing data"))!);
     }
     return (_addr_cert!, error.As(err)!);
-
 }
 
 // ParseCertificates parses one or more certificates from the given ASN.1 DER
@@ -1164,10 +1107,8 @@ public static (slice<ptr<Certificate>>, error) ParseCertificates(slice<byte> der
         }
         certs = append(certs, cert);
         der = der[(int)len(cert.Raw)..];
-
     }
     return (certs, error.As(null!)!);
-
 }
 
 } // end x509_package

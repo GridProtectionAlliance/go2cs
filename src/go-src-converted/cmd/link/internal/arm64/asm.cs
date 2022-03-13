@@ -28,21 +28,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package arm64 -- go2cs converted at 2022 March 06 23:20:05 UTC
+// package arm64 -- go2cs converted at 2022 March 13 06:32:56 UTC
 // import "cmd/link/internal/arm64" ==> using arm64 = go.cmd.link.@internal.arm64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\arm64\asm.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using fmt = fmt_package;
+using log = log_package;
+using System;
 
 public static partial class arm64_package {
 
@@ -76,7 +75,6 @@ private static void gentext(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ld
     rel2.SetOff(8);
     rel2.SetSiz(4);
     rel2.SetSym(addmoduledata);
-
 }
 
 private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, loader.Sym s, loader.Reloc r, nint rIdx) {
@@ -159,7 +157,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             // be resolved statically. We need to generate a dynamic
             // relocation. Let the code below handle it.
             break;
-
         }
         return true;
     else if (r.Type() == objabi.ElfRelocOffset + objabi.RelocType(elf.R_AARCH64_LDST8_ABS_LO12_NC)) 
@@ -211,7 +208,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             // be resolved statically. We need to generate a dynamic
             // relocation. Let the code below handle it.
             break;
-
         }
         return true;
     else if (r.Type() == objabi.MachoRelocOffset + ld.MACHO_ARM64_RELOC_BRANCH26 * 2 + pcrel) 
@@ -240,7 +236,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                 ldr.Errorf(s, "unexpected GOT_LOAD reloc for non-dynamic symbol %s", ldr.SymName(targ));
                 return false;
             }
-
             var o = target.Arch.ByteOrder.Uint32(data[(int)off..]);
             su = ldr.MakeSymbolUpdater(s);
 
@@ -254,7 +249,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                 return false;
                         su.SetRelocType(rIdx, objabi.R_ARM64_PCREL);
             return true;
-
         }
         ld.AddGotSym(target, ldr, syms, targ, 0);
         su = ldr.MakeSymbolUpdater(s);
@@ -276,12 +270,10 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         if (targType != sym.SDYNIMPORT) { 
             // nothing to do, the relocation will be laid out in reloc
             return true;
-
         }
         if (target.IsExternal()) { 
             // External linker will do this relocation.
             return true;
-
         }
         if (r.Add() != 0) {
             ldr.Errorf(s, "PLT call with non-zero addend (%v)", r.Add());
@@ -301,7 +293,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             su.SetRelocSym(rIdx, syms.GOT);
             su.SetRelocAdd(rIdx, r.Add() + int64(ldr.SymGot(targ)));
             return true;
-
         }
         if (target.IsPIE() && target.IsInternal()) { 
             // When internally linking, generate dynamic relocations
@@ -348,7 +339,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
                     return false;
                     break;
             }
-
         }
         else
  { 
@@ -361,7 +351,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             if (ldr.SymType(s) != sym.SDATA && ldr.SymType(s) != sym.SRODATA) {
                 break;
             }
-
         }
         if (target.IsElf()) { 
             // Generate R_AARCH64_RELATIVE relocations for best
@@ -390,14 +379,12 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
  {
                 ldr.Errorf(s, "unexpected relocation for dynamic symbol %s", ldr.SymName(targ));
             }
-
             rela.AddAddrPlus(target.Arch, targ, int64(r.Add())); 
             // Not mark r done here. So we still apply it statically,
             // so in the file content we'll also have the right offset
             // to the relocation target. So it can be examined statically
             // (e.g. go version).
             return true;
-
         }
         if (target.IsDarwin()) { 
             // Mach-O relocations are a royal pain to lay out.
@@ -409,13 +396,11 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
             // to the relocation target. So it can be examined statically
             // (e.g. go version).
             return true;
-
         }
     else if (r.Type() == objabi.R_ARM64_GOTPCREL) 
         if (target.IsExternal()) { 
             // External linker will do this relocation.
             return true;
-
         }
         if (targType != sym.SDYNIMPORT) {
             ldr.Errorf(s, "R_ARM64_GOTPCREL target is not SDYNIMPORT symbol: %v", ldr.SymName(targ));
@@ -442,7 +427,6 @@ private static bool adddynrel(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         r2.SetAdd(int64(ldr.SymGot(targ)));
         return true;
         return false;
-
 }
 
 private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, nint ri, long sectoff) {
@@ -495,7 +479,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
         @out.Write64(uint64(r.Xadd));
 
     return true;
-
 }
 
 // sign-extends from 21, 24-bit.
@@ -610,7 +593,6 @@ private static bool machoreloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@
     @out.Write32(uint32(sectoff));
     @out.Write32(v);
     return true;
-
 }
 
 private static bool pereloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out, ptr<loader.Loader> _addr_ldr, loader.Sym s, loader.ExtReloc r, long sectoff) {
@@ -630,7 +612,6 @@ private static bool pereloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out
             return false;
         }
         rs = label;
-
     }
     if (rt == objabi.R_CALLARM64 && r.Xadd != 0) {
         label = ldr.Lookup(offsetLabelName(_addr_ldr, rs, r.Xadd), ldr.SymVersion(rs));
@@ -639,7 +620,6 @@ private static bool pereloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out
             return false;
         }
         rs = label;
-
     }
     var symdynid = ldr.SymDynid(rs);
     if (symdynid < 0) {
@@ -678,7 +658,6 @@ private static bool pereloc1(ptr<sys.Arch> _addr_arch, ptr<ld.OutBuf> _addr_@out
     else 
         return false;
         return true;
-
 }
 
 private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loader.Loader> _addr_ldr, ptr<ld.ArchSyms> _addr_syms, loader.Reloc r, loader.Sym s, long val) {
@@ -716,7 +695,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
                 if (target.IsDarwin() && xadd != 0) {
                     nExtReloc = 4; // need another two relocations for non-zero addend
                 }
-
                 if (target.IsWindows()) {
                     uint o0 = default;                    uint o1 = default;
 
@@ -750,16 +728,13 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
  {
                         val = int64(o1) << 32 | int64(o0);
                     }
-
                 }
-
                 return (val, nExtReloc, isOk);
             else if (rt == objabi.R_CALLARM64 || rt == objabi.R_ARM64_TLS_LE || rt == objabi.R_ARM64_TLS_IE) 
                 nExtReloc = 1;
                 if (rt == objabi.R_ARM64_TLS_IE) {
                     nExtReloc = 2; // need two ELF relocations. see elfreloc1
                 }
-
                 return (val, nExtReloc, isOk);
             else if (rt == objabi.R_ADDR) 
                 if (target.IsWindows() && r.Add() != 0) {
@@ -773,14 +748,10 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
  {
                         val = val >> 32 << 32 | int64(uint32(r.Add()));
                     }
-
                     return (val, 1, true);
-
                 }
-
             else 
         }
-
     }
 
     if (r.Type() == objabi.R_ADDRARM64) 
@@ -833,7 +804,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             if (v < 0 || v >= 32678) {
                 ldr.Errorf(s, "TLS offset out of range %d", v);
             }
-
             o0 = default;            o1 = default;
 
             if (target.IsBigEndian()) {
@@ -854,16 +824,13 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             if (v & 3 != 0) {
                 ldr.Errorf(s, "invalid address: %x for relocation type: R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC", v);
             }
-
             o1 = 0xf2800000 | uint32(o1 & 0x1f) | (uint32(v & 0xffff) << 5); 
 
             // when laid out, the instruction order must always be o0, o1.
             if (target.IsBigEndian()) {
                 return (int64(o0) << 32 | int64(o1), noExtReloc, isOk);
             }
-
             return (int64(o1) << 32 | int64(o0), noExtReloc, isOk);
-
         }
         else
  {
@@ -890,11 +857,9 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             if (t >= 1 << 32 || t < -1 << 32) {
                 ldr.Errorf(s, "program too large, address relocation distance = %d", t);
             }
-
             o0 = default;
             o0 |= (uint32((t >> 12) & 3) << 29) | (uint32((t >> 12 >> 2) & 0x7ffff) << 5);
             return (val | int64(o0), noExtReloc, isOk);
-
         }
         else if (val >> 24 == 0xf9) { 
             // R_AARCH64_LD64_GOT_LO12_NC
@@ -903,11 +868,9 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             if (t & 7 != 0) {
                 ldr.Errorf(s, "invalid address: %x for relocation type: R_AARCH64_LD64_GOT_LO12_NC", t);
             }
-
             o1 = default;
             o1 |= uint32(t & 0xfff) << (int)((10 - 3));
             return (val | int64(uint64(o1)), noExtReloc, isOk);
-
         }
         else
  {
@@ -921,10 +884,8 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             if (t >= 1 << 32 || t < -1 << 32) {
                 ldr.Errorf(s, "program too large, address relocation distance = %d", t);
             }
-
             o0 = (uint32((t >> 12) & 3) << 29) | (uint32((t >> 12 >> 2) & 0x7ffff) << 5);
             return (val | int64(o0), noExtReloc, isOk);
-
         }
         else if ((val >> 24) & 0x9f == 0x91) { 
             // ELF R_AARCH64_ADD_ABS_LO12_NC or Mach-O ARM64_RELOC_PAGEOFF12
@@ -932,7 +893,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             t = ldr.SymAddr(rs) + r.Add() - ((ldr.SymValue(s) + int64(r.Off())) & ~0xfff);
             o1 = uint32(t & 0xfff) << 10;
             return (val | int64(o1), noExtReloc, isOk);
-
         }
         else if ((val >> 24) & 0x3b == 0x39) { 
             // Mach-O ARM64_RELOC_PAGEOFF12
@@ -941,17 +901,13 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             var shift = uint32(val) >> 30;
             if (shift == 0 && (val >> 20) & 0x048 == 0x048) { // 128-bit vector load
                 shift = 4;
-
             }
-
             t = ldr.SymAddr(rs) + r.Add() - ((ldr.SymValue(s) + int64(r.Off())) & ~0xfff);
             if (t & (1 << (int)(shift) - 1) != 0) {
                 ldr.Errorf(s, "invalid address: %x for relocation type: ARM64_RELOC_PAGEOFF12", t);
             }
-
             o1 = (uint32(t & 0xfff) >> (int)(shift)) << 10;
             return (val | int64(o1), noExtReloc, isOk);
-
         }
         else
  {
@@ -990,7 +946,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
         o0 = (uint32(t & 0xfff) >> 4) << 10;
         return (val | int64(o0), noExtReloc, true);
         return (val, 0, false);
-
 }
 
 private static long archrelocvariant(ptr<ld.Target> _addr__p0, ptr<loader.Loader> _addr__p0, loader.Reloc _p0, sym.RelocVariant _p0, loader.Sym _p0, long _p0, slice<byte> _p0) {
@@ -1026,16 +981,13 @@ private static (loader.ExtReloc, bool) extreloc(ptr<ld.Target> _addr_target, ptr
                 // supports 33-bit of signed addend, so we always encode the
                 // addend in place.
                 rr.Xadd = 0;
-
             }
-
             return (rr, true);
         else if (rt == objabi.R_CALLARM64 || rt == objabi.R_ARM64_TLS_LE || rt == objabi.R_ARM64_TLS_IE) 
             return (ld.ExtrelocSimple(ldr, r), true);
 
     }
     return (new loader.ExtReloc(), false);
-
 }
 
 private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_gotplt, loader.Sym dynamic) {
@@ -1078,7 +1030,6 @@ private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilde
 
         gotplt.AddUint64(ctxt.Arch, 0);
         gotplt.AddUint64(ctxt.Arch, 0);
-
     }
 }
 
@@ -1131,7 +1082,6 @@ private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
         rela.AddUint64(target.Arch, 0);
 
         ldr.SetPlt(s, int32(plt.Size() - 16));
-
     }
     else if (target.IsDarwin()) {
         ld.AddGotSym(target, ldr, syms, s, 0);
@@ -1161,7 +1111,6 @@ private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
 
         // br x17
         plt.AddUint32(target.Arch, 0xd61f0220);
-
     }
     else
  {
@@ -1171,7 +1120,6 @@ private static void addpltsym(ptr<ld.Target> _addr_target, ptr<loader.Loader> _a
 
 private static readonly nint machoRelocLimit = 1 << 23;
 private static readonly nint peRelocLimit = 1 << 20;
-
 
 private static void gensymlate(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr) => func((_, panic, _) => {
     ref ld.Link ctxt = ref _addr_ctxt.val;
@@ -1224,7 +1172,6 @@ private static void gensymlate(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
             }
 
         }
-
     };
 
     for (var s = loader.Sym(1);
@@ -1244,9 +1191,7 @@ private static void gensymlate(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
                         addLabelSyms(s, 4, 4 * 64);
                         break;
                 }
-
             }
-
             continue; // we don't target the middle of other functions
         }
         var sz = ldr.SymSize(s);
@@ -1254,7 +1199,6 @@ private static void gensymlate(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
             continue;
         }
         addLabelSyms(s, limit, sz);
-
     } 
 
     // Also for carrier symbols (for which SymSize is 0)
@@ -1275,7 +1219,6 @@ private static @string offsetLabelName(ptr<loader.Loader> _addr_ldr, loader.Sym 
         return fmt.Sprintf("%s+%dMB", ldr.SymExtname(s), off >> 20);
     }
     return fmt.Sprintf("%s+%d", ldr.SymExtname(s), off);
-
 }
 
 // Convert the direct jump relocation r to refer to a trampoline if the target is too far
@@ -1308,7 +1251,7 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
             // look up existing trampolines first. if we found one within the range
             // of direct call, we can reuse it. otherwise create a new one.
             loader.Sym tramp = default;
-            for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+            for (nint i = 0; ; i++) {
                 var oName = ldr.SymName(rs);
                 var name = oName + fmt.Sprintf("%+x-tramp%d", r.Add(), i);
                 tramp = ldr.LookupOrCreateSym(name, int(ldr.SymVersion(rs)));
@@ -1316,29 +1259,22 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
                 if (ldr.SymType(tramp) == sym.SDYNIMPORT) { 
                     // don't reuse trampoline defined in other module
                     continue;
-
                 }
-
                 if (oName == "runtime.deferreturn") {
                     ldr.SetIsDeferReturnTramp(tramp, true);
                 }
-
                 if (ldr.SymValue(tramp) == 0) { 
                     // either the trampoline does not exist -- we need to create one,
                     // or found one the address which is not assigned -- this will be
                     // laid down immediately after the current function. use this one.
                     break;
-
                 }
-
                 t = ldr.SymValue(tramp) - (ldr.SymValue(s) + int64(r.Off()));
                 if (t >= -1 << 27 && t < 1 << 27) { 
                     // found an existing trampoline that is not too far
                     // we can just use it
                     break;
-
                 }
-
             }
 
             if (ldr.SymType(tramp) == 0) { 
@@ -1355,7 +1291,6 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
  {
                     gentramp(_addr_ctxt, _addr_ldr, _addr_trampb, rs, r.Add());
                 }
-
             } 
             // modify reloc to point to tramp, which will be resolved later
             var sb = ldr.MakeSymbolUpdater(s);
@@ -1370,7 +1305,6 @@ private static void trampoline(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr
         ctxt.Errorf(s, "trampoline called with non-jump reloc: %d (%s)", r.Type(), sym.RelocName(ctxt.Arch, r.Type()));
 
     __switch_break0:;
-
 }
 
 // generate a trampoline to target+offset.
@@ -1393,7 +1327,6 @@ private static void gentramp(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_l
     r.SetSiz(8);
     r.SetSym(target);
     r.SetAdd(offset);
-
 }
 
 // generate a trampoline to target+offset for a DYNIMPORT symbol via GOT.
@@ -1415,7 +1348,6 @@ private static void gentrampgot(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _add
     var (r, _) = tramp.AddRel(objabi.R_ARM64_GOTPCREL);
     r.SetSiz(8);
     r.SetSym(target);
-
 }
 
 } // end arm64_package

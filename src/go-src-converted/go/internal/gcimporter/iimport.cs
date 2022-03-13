@@ -5,23 +5,22 @@
 // Indexed package import.
 // See cmd/compile/internal/gc/iexport.go for the export data format.
 
-// package gcimporter -- go2cs converted at 2022 March 06 23:32:39 UTC
+// package gcimporter -- go2cs converted at 2022 March 13 06:42:19 UTC
 // import "go/internal/gcimporter" ==> using gcimporter = go.go.@internal.gcimporter_package
 // Original source: C:\Program Files\Go\src\go\internal\gcimporter\iimport.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using io = go.io_package;
-using big = go.math.big_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.go.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using types = go.types_package;
+using io = io_package;
+using big = math.big_package;
+using sort = sort_package;
+using System;
 
 public static partial class gcimporter_package {
 
@@ -38,7 +37,6 @@ private static long int64(this ptr<intReader> _addr_r) {
         errorf("import %q: read varint error: %v", r.path, err);
     }
     return i;
-
 }
 
 private static ulong uint64(this ptr<intReader> _addr_r) {
@@ -49,7 +47,6 @@ private static ulong uint64(this ptr<intReader> _addr_r) {
         errorf("import %q: read varint error: %v", r.path, err);
     }
     return i;
-
 }
 
 private static readonly nint predeclReserved = 32;
@@ -70,7 +67,6 @@ private static readonly var mapType = 4;
 private static readonly var signatureType = 5;
 private static readonly var structType = 6;
 private static readonly var interfaceType = 7;
-
 
 // iImportData imports a package from the serialized package data
 // and returns the number of bytes consumed and a reference to the package.
@@ -97,11 +93,9 @@ private static (ptr<types.Package>, error) iImportData(ptr<token.FileSet> _addr_
  {
                     err = fmt.Errorf("cannot import %q (%v), possibly version skew - reinstall package", path, e);
                 }
-
             }
 
         }
-
     }());
 
     ptr<intReader> r = addr(new intReader(dataReader,path));
@@ -121,7 +115,6 @@ private static (ptr<types.Package>, error) iImportData(ptr<token.FileSet> _addr_
             errorf("cannot read %d bytes of stringData and declData: %s", len(data), err);
         }
     }
-
     var stringData = data[..(int)sLen];
     var declData = data[(int)sLen..];
 
@@ -152,7 +145,6 @@ private static (ptr<types.Package>, error) iImportData(ptr<token.FileSet> _addr_
             if (pkgPath == "") {
                 pkgPath = path;
             }
-
             var pkg = imports[pkgPath];
             if (pkg == null) {
                 pkg = types.NewPackage(pkgPath, pkgName);
@@ -161,7 +153,6 @@ private static (ptr<types.Package>, error) iImportData(ptr<token.FileSet> _addr_
             else if (pkg.Name() != pkgName) {
                 errorf("conflicting names %s and %s for package %q", pkg.Name(), pkgName, path);
             }
-
             p.pkgCache[pkgPathOff] = pkg;
 
             var nameIndex = make_map<@string, ulong>();
@@ -173,7 +164,6 @@ private static (ptr<types.Package>, error) iImportData(ptr<token.FileSet> _addr_
 
             p.pkgIndex[pkg] = nameIndex;
             pkgList[i] = pkg;
-
         }
         i = i__prev1;
     }
@@ -211,7 +201,6 @@ private static (ptr<types.Package>, error) iImportData(ptr<token.FileSet> _addr_
     // package was imported completely and without errors
     localpkg.MarkComplete();
     return (_addr_localpkg!, error.As(null!)!);
-
 });
 
 private partial struct iimporter {
@@ -240,7 +229,6 @@ private static void doDecl(this ptr<iimporter> _addr_p, ptr<types.Package> _addr
         }
     }
 
-
     var (off, ok) = p.pkgIndex[pkg][name];
     if (!ok) {
         errorf("%v.%v not in index", pkg, name);
@@ -249,7 +237,6 @@ private static void doDecl(this ptr<iimporter> _addr_p, ptr<types.Package> _addr
     r.declReader.Reset(p.declData[(int)off..]);
 
     r.obj(name);
-
 }
 
 private static @string stringAt(this ptr<iimporter> _addr_p, ulong off) {
@@ -267,7 +254,6 @@ private static @string stringAt(this ptr<iimporter> _addr_p, ulong off) {
 
     }
 
-
     var (slen, n) = binary.Uvarint(p.stringData[(int)off..]);
     if (n <= 0) {
         errorf("varint failed");
@@ -276,7 +262,6 @@ private static @string stringAt(this ptr<iimporter> _addr_p, ulong off) {
     var s = string(p.stringData[(int)spos..(int)spos + slen]);
     p.stringCache[off] = s;
     return s;
-
 }
 
 private static ptr<types.Package> pkgAt(this ptr<iimporter> _addr_p, ulong off) {
@@ -289,11 +274,9 @@ private static ptr<types.Package> pkgAt(this ptr<iimporter> _addr_p, ulong off) 
             return _addr_pkg!;
         }
     }
-
     var path = p.stringAt(off);
     errorf("missing package %q in %q", path, p.ipath);
     return _addr_null!;
-
 }
 
 private static types.Type typAt(this ptr<iimporter> _addr_p, ulong off, ptr<types.Named> _addr_@base) {
@@ -312,7 +295,6 @@ private static types.Type typAt(this ptr<iimporter> _addr_p, ulong off, ptr<type
 
     }
 
-
     if (off < predeclReserved) {
         errorf("predeclared type missing from cache: %v", off);
     }
@@ -324,7 +306,6 @@ private static types.Type typAt(this ptr<iimporter> _addr_p, ulong off, ptr<type
         p.typCache[off] = t;
     }
     return t;
-
 }
 
 private partial struct importReader {
@@ -388,7 +369,6 @@ private static void obj(this ptr<importReader> _addr_r, @string name) {
             errorf("unexpected tag: %v", tag);
             break;
     }
-
 }
 
 private static void declare(this ptr<importReader> _addr_r, types.Object obj) {
@@ -429,7 +409,6 @@ private static (types.Type, constant.Value) value(this ptr<importReader> _addr_r
     }
 
     return ;
-
 });
 
 private static (bool, nuint) intSize(ptr<types.Basic> _addr_b) {
@@ -456,7 +435,6 @@ private static (bool, nuint) intSize(ptr<types.Basic> _addr_b) {
     else 
         maxBytes = 8;
         return ;
-
 }
 
 private static void mpint(this ptr<importReader> _addr_r, ptr<big.Int> _addr_x, ptr<types.Basic> _addr_typ) {
@@ -484,7 +462,6 @@ private static void mpint(this ptr<importReader> _addr_r, ptr<big.Int> _addr_x, 
         }
         x.SetInt64(v);
         return ;
-
     }
     v = -n;
     if (signed) {
@@ -513,7 +490,6 @@ private static constant.Value mpfloat(this ptr<importReader> _addr_r, ptr<types.
         f.SetMantExp(_addr_f, int(r.int64()));
     }
     return constant.Make(_addr_f);
-
 }
 
 private static @string ident(this ptr<importReader> _addr_r) {
@@ -546,7 +522,6 @@ private static token.Pos pos(this ptr<importReader> _addr_r) {
         return token.NoPos;
     }
     return r.p.fake.pos(r.prevFile, int(r.prevLine), int(r.prevColumn));
-
 }
 
 private static void posv0(this ptr<importReader> _addr_r) {
@@ -568,7 +543,6 @@ private static void posv0(this ptr<importReader> _addr_r) {
             r.prevLine = l;
         }
     }
-
 }
 
 private static void posv1(this ptr<importReader> _addr_r) {
@@ -689,10 +663,8 @@ private static types.Type doType(this ptr<importReader> _addr_r, ptr<types.Named
                     if (base != null) {
                         recv = types.NewVar(token.NoPos, r.currPkg, "", base);
                     }
-
                     var msig = r.signature(recv);
                     methods[i] = types.NewFunc(mpos, r.currPkg, mname, msig);
-
                 }
 
                 i = i__prev1;
@@ -706,7 +678,6 @@ private static types.Type doType(this ptr<importReader> _addr_r, ptr<types.Named
             return null;
 
     }
-
 }
 
 private static itag kind(this ptr<importReader> _addr_r) {
@@ -757,7 +728,6 @@ private static long int64(this ptr<importReader> _addr_r) {
         errorf("readVarint: %v", err);
     }
     return n;
-
 }
 
 private static ulong uint64(this ptr<importReader> _addr_r) {
@@ -768,7 +738,6 @@ private static ulong uint64(this ptr<importReader> _addr_r) {
         errorf("readUvarint: %v", err);
     }
     return n;
-
 }
 
 private static byte @byte(this ptr<importReader> _addr_r) {
@@ -779,7 +748,6 @@ private static byte @byte(this ptr<importReader> _addr_r) {
         errorf("declReader.ReadByte: %v", err);
     }
     return x;
-
 }
 
 } // end gcimporter_package

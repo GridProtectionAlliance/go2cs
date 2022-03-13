@@ -8,28 +8,30 @@
 // can be read and written in a streaming manner.
 // This package aims to cover most variations of the format,
 // including those produced by GNU and BSD tar tools.
-// package tar -- go2cs converted at 2022 March 06 22:08:00 UTC
+
+// package tar -- go2cs converted at 2022 March 13 05:23:49 UTC
 // import "archive/tar" ==> using tar = go.archive.tar_package
 // Original source: C:\Program Files\Go\src\archive\tar\common.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using fs = go.io.fs_package;
-using math = go.math_package;
-using path = go.path_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.archive;
 
-public static partial class tar_package {
+using errors = errors_package;
+using fmt = fmt_package;
+using fs = io.fs_package;
+using math = math_package;
+using path = path_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
 
-    // BUG: Use of the Uid and Gid fields in Header could overflow on 32-bit
-    // architectures. If a large value is encountered when decoding, the result
-    // stored in Header will be the truncated version.
+
+// BUG: Use of the Uid and Gid fields in Header could overflow on 32-bit
+// architectures. If a large value is encountered when decoding, the result
+// stored in Header will be the truncated version.
+
+
+using System;public static partial class tar_package {
+
 public static var ErrHeader = errors.New("archive/tar: invalid tar header");public static var ErrWriteTooLong = errors.New("archive/tar: write too long");public static var ErrFieldTooLong = errors.New("archive/tar: header field too long");public static var ErrWriteAfterClose = errors.New("archive/tar: write after close");private static var errMissData = errors.New("archive/tar: sparse file references non-existent data");private static var errUnrefData = errors.New("archive/tar: sparse file contains unreferenced data");private static var errWriteHole = errors.New("archive/tar: write non-NUL byte in sparse hole");
 
 private partial struct headerError { // : slice<@string>
@@ -47,7 +49,6 @@ private static @string Error(this headerError he) {
         return prefix;
     }
     return fmt.Sprintf("%s: %v", prefix, strings.Join(ss, "; and "));
-
 }
 
 // Type flags for Header.Typeflag.
@@ -87,7 +88,6 @@ public static readonly char TypeGNUSparse = 'S';
 public static readonly char TypeGNULongName = 'L';
 public static readonly char TypeGNULongLink = 'K';
 
-
 // Keywords for PAX extended header records.
 private static readonly @string paxNone = ""; // Indicates that no PAX key is suitable
 private static readonly @string paxPath = "path";
@@ -116,7 +116,6 @@ private static readonly @string paxGNUSparseMajor = "GNU.sparse.major";
 private static readonly @string paxGNUSparseMinor = "GNU.sparse.minor";
 private static readonly @string paxGNUSparseSize = "GNU.sparse.size";
 private static readonly @string paxGNUSparseRealSize = "GNU.sparse.realsize";
-
 
 // basicKeys is a set of the PAX keys for which we have built-in support.
 // This does not contain "charset" or "comment", which are both PAX-specific,
@@ -230,8 +229,7 @@ private static long endOffset(this sparseEntry s) {
 private partial struct sparseDatas { // : slice<sparseEntry>
 }
 private partial struct sparseHoles { // : slice<sparseEntry>
-}
-private static bool validateSparseEntries(slice<sparseEntry> sp, long size) { 
+}private static bool validateSparseEntries(slice<sparseEntry> sp, long size) { 
     // Validate all sparse entries. These are the same checks as performed by
     // the BSD tar utility.
     if (size < 0) {
@@ -249,9 +247,7 @@ private static bool validateSparseEntries(slice<sparseEntry> sp, long size) {
         else if (pre.endOffset() > cur.Offset) 
             return false; // Regions cannot overlap and must be in order
                 pre = cur;
-
     }    return true;
-
 }
 
 // alignSparseEntries mutates src and returns dst where each fragment's
@@ -274,7 +270,6 @@ private static slice<sparseEntry> alignSparseEntries(slice<sparseEntry> src, lon
             dst = append(dst, new sparseEntry(Offset:pos,Length:end-pos));
         }
     }    return dst;
-
 }
 
 // invertSparseEntries converts a sparse map from one form to the other.
@@ -297,10 +292,8 @@ private static slice<sparseEntry> invertSparseEntries(slice<sparseEntry> src, lo
             dst = append(dst, pre); // Only add non-empty fragments
         }
         pre.Offset = cur.endOffset();
-
     }    pre.Length = size - pre.Offset; // Possibly the only empty fragment
     return append(dst, pre);
-
 }
 
 // fileState tracks the number of logical (includes sparse holes) and physical
@@ -352,7 +345,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
                 }
 
             }
-
             if (paxKey == paxNone) {
                 whyNoPAX = fmt.Sprintf("PAX cannot encode %s=%q", name, s);
                 format.mustNotBe(FormatPAX);
@@ -361,7 +353,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
  {
                 paxHdrs[paxKey] = s;
             }
-
         }
         {
             var v__prev1 = v;
@@ -375,7 +366,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
             v = v__prev1;
 
         }
-
     };
     Action<long, nint, @string, @string> verifyNumeric = (n, size, name, paxKey) => {
         if (!fitsInBase256(size, n)) {
@@ -393,7 +383,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
  {
                 paxHdrs[paxKey] = strconv.FormatInt(n, 10);
             }
-
         }
         {
             var v__prev1 = v;
@@ -407,7 +396,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
             v = v__prev1;
 
         }
-
     };
     Action<time.Time, nint, @string, @string> verifyTime = (ts, size, name, paxKey) => {
         if (ts.IsZero()) {
@@ -434,7 +422,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
  {
                 paxHdrs[paxKey] = formatPAXTime(ts);
             }
-
         }
         {
             var v__prev1 = v;
@@ -448,7 +435,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
             v = v__prev1;
 
         }
-
     }; 
 
     // Check basic fields.
@@ -508,7 +494,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
 
         whyOnlyPAX = "only PAX supports Xattrs";
         format.mayOnlyBe(FormatPAX);
-
     }
     if (len(h.PAXRecords) > 0) {
         {
@@ -530,7 +515,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
                         paxHdrs[k] = v; // Ignore local records that may conflict
 
                 }
-
             }
 
             k = k__prev1;
@@ -539,7 +523,6 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
 
         whyOnlyPAX = "only PAX supports PAXRecords";
         format.mayOnlyBe(FormatPAX);
-
     }
     {
         var k__prev1 = k;
@@ -563,11 +546,9 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
             if (wantFormat.has(FormatPAX) && !preferPAX) {
                 wantFormat.mayBe(FormatUSTAR); // PAX implies USTAR allowed too
             }
-
             format.mayOnlyBe(wantFormat); // Set union of formats allowed and format wanted
         }
     }
-
     if (format == FormatUnknown) {
 
         if (h.Format == FormatUSTAR) 
@@ -578,10 +559,8 @@ public static (Format, map<@string, @string>, error) allowedFormats(this Header 
             err = new headerError("Format specifies GNU",whyNoGNU,whyOnlyPAX);
         else 
             err = new headerError(whyNoUSTAR,whyNoPAX,whyNoGNU,whyOnlyPAX,whyOnlyGNU);
-        
-    }
+            }
     return (format, paxHdrs, error.As(err)!);
-
 }
 
 // FileInfo returns an fs.FileInfo for the Header.
@@ -615,7 +594,6 @@ private static @string Name(this headerFileInfo fi) {
         return path.Base(path.Clean(fi.h.Name));
     }
     return path.Base(fi.h.Name);
-
 }
 
 // Mode returns the permission and mode bits for the headerFileInfo.
@@ -668,7 +646,6 @@ private static fs.FileMode Mode(this headerFileInfo fi) {
     else if (fi.h.Typeflag == TypeFifo) 
         mode |= fs.ModeNamedPipe;
         return mode;
-
 }
 
 // sysStat, if non-nil, populates h from system-dependent fields of fi.
@@ -768,15 +745,12 @@ public static (ptr<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) 
                     v = v__prev1;
                 }
             }
-
             if (sys.Typeflag == TypeLink) { 
                 // hard link
                 h.Typeflag = TypeLink;
                 h.Size = 0;
                 h.Linkname = sys.Linkname;
-
             }
-
             if (sys.PAXRecords != null) {
                 h.PAXRecords = make_map<@string, @string>();
                 {
@@ -793,15 +767,12 @@ public static (ptr<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) 
                     v = v__prev1;
                 }
             }
-
         }
     }
-
     if (sysStat != null) {
         return (_addr_h!, error.As(sysStat(fi, h))!);
     }
     return (_addr_h!, error.As(null!)!);
-
 }
 
 // isHeaderOnlyType checks if the given type flag is of the type that has no
@@ -812,15 +783,13 @@ private static bool isHeaderOnlyType(byte flag) {
         return true;
     else 
         return false;
-    
-}
+    }
 
 private static long min(long a, long b) {
     if (a < b) {
         return a;
     }
     return b;
-
 }
 
 } // end tar_package

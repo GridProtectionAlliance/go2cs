@@ -7,67 +7,68 @@
 
 // Fork, exec, wait, etc.
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:32 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:31 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\exec_unix.go
-using errorspkg = go.errors_package;
-using bytealg = go.@internal.bytealg_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
-public static partial class syscall_package {
+using errorspkg = errors_package;
+using bytealg = @internal.bytealg_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using @unsafe = @unsafe_package;
 
-    // Lock synchronizing creation of new file descriptors with fork.
-    //
-    // We want the child in a fork/exec sequence to inherit only the
-    // file descriptors we intend. To do that, we mark all file
-    // descriptors close-on-exec and then, in the child, explicitly
-    // unmark the ones we want the exec'ed program to keep.
-    // Unix doesn't make this easy: there is, in general, no way to
-    // allocate a new file descriptor close-on-exec. Instead you
-    // have to allocate the descriptor and then mark it close-on-exec.
-    // If a fork happens between those two events, the child's exec
-    // will inherit an unwanted file descriptor.
-    //
-    // This lock solves that race: the create new fd/mark close-on-exec
-    // operation is done holding ForkLock for reading, and the fork itself
-    // is done holding ForkLock for writing. At least, that's the idea.
-    // There are some complications.
-    //
-    // Some system calls that create new file descriptors can block
-    // for arbitrarily long times: open on a hung NFS server or named
-    // pipe, accept on a socket, and so on. We can't reasonably grab
-    // the lock across those operations.
-    //
-    // It is worse to inherit some file descriptors than others.
-    // If a non-malicious child accidentally inherits an open ordinary file,
-    // that's not a big deal. On the other hand, if a long-lived child
-    // accidentally inherits the write end of a pipe, then the reader
-    // of that pipe will not see EOF until that child exits, potentially
-    // causing the parent program to hang. This is a common problem
-    // in threaded C programs that use popen.
-    //
-    // Luckily, the file descriptors that are most important not to
-    // inherit are not the ones that can take an arbitrarily long time
-    // to create: pipe returns instantly, and the net package uses
-    // non-blocking I/O to accept on a listening socket.
-    // The rules for which file descriptor-creating operations use the
-    // ForkLock are as follows:
-    //
-    // 1) Pipe. Does not block. Use the ForkLock.
-    // 2) Socket. Does not block. Use the ForkLock.
-    // 3) Accept. If using non-blocking mode, use the ForkLock.
-    //             Otherwise, live with the race.
-    // 4) Open. Can block. Use O_CLOEXEC if available (Linux).
-    //             Otherwise, live with the race.
-    // 5) Dup. Does not block. Use the ForkLock.
-    //             On Linux, could use fcntl F_DUPFD_CLOEXEC
-    //             instead of the ForkLock, but only for dup(fd, -1).
+
+// Lock synchronizing creation of new file descriptors with fork.
+//
+// We want the child in a fork/exec sequence to inherit only the
+// file descriptors we intend. To do that, we mark all file
+// descriptors close-on-exec and then, in the child, explicitly
+// unmark the ones we want the exec'ed program to keep.
+// Unix doesn't make this easy: there is, in general, no way to
+// allocate a new file descriptor close-on-exec. Instead you
+// have to allocate the descriptor and then mark it close-on-exec.
+// If a fork happens between those two events, the child's exec
+// will inherit an unwanted file descriptor.
+//
+// This lock solves that race: the create new fd/mark close-on-exec
+// operation is done holding ForkLock for reading, and the fork itself
+// is done holding ForkLock for writing. At least, that's the idea.
+// There are some complications.
+//
+// Some system calls that create new file descriptors can block
+// for arbitrarily long times: open on a hung NFS server or named
+// pipe, accept on a socket, and so on. We can't reasonably grab
+// the lock across those operations.
+//
+// It is worse to inherit some file descriptors than others.
+// If a non-malicious child accidentally inherits an open ordinary file,
+// that's not a big deal. On the other hand, if a long-lived child
+// accidentally inherits the write end of a pipe, then the reader
+// of that pipe will not see EOF until that child exits, potentially
+// causing the parent program to hang. This is a common problem
+// in threaded C programs that use popen.
+//
+// Luckily, the file descriptors that are most important not to
+// inherit are not the ones that can take an arbitrarily long time
+// to create: pipe returns instantly, and the net package uses
+// non-blocking I/O to accept on a listening socket.
+// The rules for which file descriptor-creating operations use the
+// ForkLock are as follows:
+//
+// 1) Pipe. Does not block. Use the ForkLock.
+// 2) Socket. Does not block. Use the ForkLock.
+// 3) Accept. If using non-blocking mode, use the ForkLock.
+//             Otherwise, live with the race.
+// 4) Open. Can block. Use O_CLOEXEC if available (Linux).
+//             Otherwise, live with the race.
+// 5) Dup. Does not block. Use the ForkLock.
+//             On Linux, could use fcntl F_DUPFD_CLOEXEC
+//             instead of the ForkLock, but only for dup(fd, -1).
+
+
+using System;public static partial class syscall_package {
+
 public static sync.RWMutex ForkLock = default;
 
 // StringSlicePtr converts a slice of strings to a slice of pointers
@@ -122,7 +123,6 @@ public static (slice<ptr<byte>>, error) SlicePtrFromStrings(slice<@string> ss) {
     }
 
     return (bb, error.As(null!)!);
-
 }
 
 public static void CloseOnExec(nint fd) {
@@ -145,7 +145,6 @@ public static error SetNonblock(nint fd, bool nonblocking) {
     }
     _, err = fcntl(fd, F_SETFL, flag);
     return error.As(err)!;
-
 }
 
 // Credential holds user and group identities to be assumed
@@ -261,7 +260,6 @@ private static (nint, error) forkExec(@string argv0, slice<@string> argv, ptr<Pr
             _, err1 = Wait4(pid, _addr_wstatus, 0, null);
         }
         return (0, error.As(err)!);
-
     }
     return (pid, error.As(null!)!);
 
@@ -272,7 +270,6 @@ error:
     }
     ForkLock.Unlock();
     return (0, error.As(err)!);
-
 }
 
 // Combination of fork and exec, careful to be thread safe.
@@ -327,17 +324,14 @@ public static error Exec(@string argv0, slice<@string> argv, slice<@string> envv
     if (runtime.GOOS == "solaris" || runtime.GOOS == "illumos" || runtime.GOOS == "aix") { 
         // RawSyscall should never be used on Solaris, illumos, or AIX.
         err1 = error.As(execveLibc(uintptr(@unsafe.Pointer(argv0p)), uintptr(@unsafe.Pointer(_addr_argvp[0])), uintptr(@unsafe.Pointer(_addr_envvp[0]))))!;
-
     }
     else if (runtime.GOOS == "darwin" || runtime.GOOS == "ios") { 
         // Similarly on Darwin.
         err1 = error.As(execveDarwin(argv0p, _addr_argvp[0], _addr_envvp[0]))!;
-
     }
     else if (runtime.GOOS == "openbsd" && (runtime.GOARCH == "386" || runtime.GOARCH == "amd64" || runtime.GOARCH == "arm" || runtime.GOARCH == "arm64")) { 
         // Similarly on OpenBSD.
         err1 = error.As(execveOpenBSD(argv0p, _addr_argvp[0], _addr_envvp[0]))!;
-
     }
     else
  {
@@ -345,7 +339,6 @@ public static error Exec(@string argv0, slice<@string> argv, slice<@string> envv
     }
     runtime_AfterExec();
     return error.As(err1)!;
-
 }
 
 } // end syscall_package

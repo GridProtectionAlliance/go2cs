@@ -2,29 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:21:57 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:59 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\macho.go
-using bytes = go.bytes_package;
-using codesign = go.cmd.@internal.codesign_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using macho = go.debug.macho_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using bytes = bytes_package;
+using codesign = cmd.@internal.codesign_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using macho = debug.macho_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class ld_package {
 
@@ -83,7 +82,6 @@ public partial struct MachoPlatform { // : nint
  */
 public static readonly nint INITIAL_MACHO_HEADR = 4 * 1024;
 
-
 public static readonly nint MACHO_CPU_AMD64 = 1 << 24 | 7;
 public static readonly nint MACHO_CPU_386 = 7;
 public static readonly nint MACHO_SUBCPU_X86 = 3;
@@ -119,7 +117,6 @@ public static readonly nint MACHO_ARM64_RELOC_ADDEND = 10;
 public static readonly nint MACHO_GENERIC_RELOC_VANILLA = 0;
 public static readonly nint MACHO_FAKE_GOTPCREL = 100;
 
-
 public static readonly nuint MH_MAGIC = 0xfeedface;
 public static readonly nuint MH_MAGIC_64 = 0xfeedfacf;
 
@@ -129,7 +126,6 @@ public static readonly nuint MH_EXECUTE = 0x2;
 public static readonly nuint MH_NOUNDEFS = 0x1;
 public static readonly nuint MH_DYLDLINK = 0x4;
 public static readonly nuint MH_PIE = 0x200000;
-
 
 public static readonly nuint LC_SEGMENT = 0x1;
 public static readonly nuint LC_SYMTAB = 0x2;
@@ -185,7 +181,6 @@ public static readonly nuint LC_BUILD_VERSION = 0x32;
 public static readonly nuint LC_DYLD_EXPORTS_TRIE = 0x80000033;
 public static readonly nuint LC_DYLD_CHAINED_FIXUPS = 0x80000034;
 
-
 public static readonly nuint S_REGULAR = 0x0;
 public static readonly nuint S_ZEROFILL = 0x1;
 public static readonly nuint S_NON_LAZY_SYMBOL_POINTERS = 0x6;
@@ -195,13 +190,11 @@ public static readonly nuint S_ATTR_PURE_INSTRUCTIONS = 0x80000000;
 public static readonly nuint S_ATTR_DEBUG = 0x02000000;
 public static readonly nuint S_ATTR_SOME_INSTRUCTIONS = 0x00000400;
 
-
 public static readonly MachoPlatform PLATFORM_MACOS = 1;
 public static readonly MachoPlatform PLATFORM_IOS = 2;
 public static readonly MachoPlatform PLATFORM_TVOS = 3;
 public static readonly MachoPlatform PLATFORM_WATCHOS = 4;
 public static readonly MachoPlatform PLATFORM_BRIDGEOS = 5;
-
 
 // rebase table opcode
 public static readonly nint REBASE_TYPE_POINTER = 1;
@@ -219,7 +212,6 @@ public static readonly nuint REBASE_OPCODE_DO_REBASE_IMM_TIMES = 0x50;
 public static readonly nuint REBASE_OPCODE_DO_REBASE_ULEB_TIMES = 0x60;
 public static readonly nuint REBASE_OPCODE_DO_REBASE_ADD_ADDR_ULEB = 0x70;
 public static readonly nuint REBASE_OPCODE_DO_REBASE_ULEB_TIMES_SKIPPING_ULEB = 0x80;
-
 
 // bind table opcode
 public static readonly nint BIND_TYPE_POINTER = 1;
@@ -250,7 +242,6 @@ public static readonly nuint BIND_OPCODE_THREADED = 0xD0;
 public static readonly nuint BIND_SUBOPCODE_THREADED_SET_BIND_ORDINAL_TABLE_SIZE_ULEB = 0x00;
 public static readonly nuint BIND_SUBOPCODE_THREADED_APPLY = 0x01;
 
-
 private static readonly nint machoHeaderSize64 = 8 * 4; // size of 64-bit Mach-O header
 
 // Mach-O file writing
@@ -279,7 +270,6 @@ public static readonly nint SymKindLocal = 0 + iota;
 public static readonly var SymKindExtdef = 0;
 public static readonly var SymKindUndef = 1;
 public static readonly var NumSymKind = 2;
-
 
 private static array<nint> nkind = new array<nint>(NumSymKind);
 
@@ -310,7 +300,6 @@ private static ptr<MachoLoad> newMachoLoad(ptr<sys.Arch> _addr_arch, uint type_,
     l.type_ = type_;
     l.data = make_slice<uint>(ndata);
     return _addr_l!;
-
 }
 
 private static ptr<MachoSeg> newMachoSeg(@string name, nint msect) {
@@ -323,7 +312,6 @@ private static ptr<MachoSeg> newMachoSeg(@string name, nint msect) {
     s.msect = uint32(msect);
     s.sect = make_slice<MachoSect>(msect);
     return _addr_s!;
-
 }
 
 private static ptr<MachoSect> newMachoSect(ptr<MachoSeg> _addr_seg, @string name, @string segname) {
@@ -338,7 +326,6 @@ private static ptr<MachoSect> newMachoSect(ptr<MachoSeg> _addr_seg, @string name
     s.segname = segname;
     nsect++;
     return _addr_s!;
-
 }
 
 // Generic linking code.
@@ -435,7 +422,6 @@ private static nint machowrite(ptr<Link> _addr_ctxt, ptr<sys.Arch> _addr_arch, p
                 @out.Write32(s.nsect);
                 @out.Write32(s.flag);
             }
-
             {
                 var j__prev2 = j;
 
@@ -469,13 +455,11 @@ private static nint machowrite(ptr<Link> _addr_ctxt, ptr<sys.Arch> _addr_arch, p
                         @out.Write32(t.res1); /* reserved */
                         @out.Write32(t.res2); /* reserved */
                     }
-
                 }
 
 
                 j = j__prev2;
             }
-
         }
 
         i = i__prev1;
@@ -499,13 +483,11 @@ private static nint machowrite(ptr<Link> _addr_ctxt, ptr<sys.Arch> _addr_arch, p
 
                 j = j__prev2;
             }
-
         }
         i = i__prev1;
     }
 
     return int(@out.Offset() - o1);
-
 }
 
 private static void domacho(this ptr<Link> _addr_ctxt) {
@@ -579,7 +561,6 @@ private static void domacho(this ptr<Link> _addr_ctxt) {
         sb = ctxt.loader.MakeSymbolUpdater(s);
         sb.SetType(sym.SMACHOINDIRECTGOT);
         sb.SetReachable(true);
-
     }
     if (ctxt.IsExternal()) {
         s = ctxt.loader.LookupOrCreateSym(".llvmasm", 0);
@@ -597,12 +578,10 @@ private static void domacho(this ptr<Link> _addr_ctxt) {
             if (name == "_cgo_panic") {
                 ver = sym.ABIToVersion(obj.ABIInternal);
             }
-
             s = ctxt.loader.Lookup(name, ver);
             if (s != 0) {
                 ctxt.loader.SetAttrCgoExportDynamic(s, false);
             }
-
         }
     }
 }
@@ -625,7 +604,6 @@ private static void machoadddynlib(@string lib, LinkMode linkmode) {
         loadBudget += 4096;
     }
     dylib = append(dylib, lib);
-
 }
 
 private static void machoshbits(ptr<Link> _addr_ctxt, ptr<MachoSeg> _addr_mseg, ptr<sym.Section> _addr_sect, @string segname) {
@@ -653,7 +631,6 @@ private static void machoshbits(ptr<Link> _addr_ctxt, ptr<MachoSeg> _addr_mseg, 
             Errorf(null, "macho cannot represent section %s crossing data and bss", sect.Name);
         }
         msect.off = uint32(sect.Seg.Fileoff + sect.Vaddr - sect.Seg.Vaddr);
-
     }
     else
  {
@@ -671,7 +648,6 @@ private static void machoshbits(ptr<Link> _addr_ctxt, ptr<MachoSeg> _addr_mseg, 
         msect.flag = S_ATTR_PURE_INSTRUCTIONS | S_ATTR_SOME_INSTRUCTIONS | S_SYMBOL_STUBS;
         msect.res1 = 0; //nkind[SymKindLocal];
         msect.res2 = 6;
-
     }
     if (sect.Name == ".got") {
         msect.name = "__nl_symbol_ptr";
@@ -725,7 +701,6 @@ private static void asmbMacho(ptr<Link> _addr_ctxt) => func((_, panic, _) => {
         ms.fileoffset = Segtext.Fileoff;
         ms.filesize = Segdwarf.Fileoff + Segdwarf.Filelen - Segtext.Fileoff;
         ms.vsize = Segdwarf.Vaddr + Segdwarf.Length - Segtext.Vaddr;
-
     }
     if (ctxt.LinkMode != LinkExternal) {
         ms = newMachoSeg("__PAGEZERO", 0);
@@ -824,8 +799,7 @@ private static void asmbMacho(ptr<Link> _addr_ctxt) => func((_, panic, _) => {
             ml.data[1] = uint32((uint64(Entryvalue(ctxt)) - (Segtext.Vaddr - uint64(HEADR))) >> 32);
         else 
             Exitf("unknown macho architecture: %v", ctxt.Arch.Family);
-        
-    }
+            }
     long codesigOff = default;
     if (!FlagD.val) { 
         // must match doMachoLink below
@@ -881,9 +855,7 @@ private static void asmbMacho(ptr<Link> _addr_ctxt) => func((_, panic, _) => {
                 ml.data[2] = 0; /* version */
                 ml.data[3] = 0; /* compatibility version */
                 stringtouint32(ml.data[(int)4..], lib);
-
             }
-
         }
         if (ctxt.IsInternal() && ctxt.NeedCodeSign()) {
             ml = newMachoLoad(_addr_ctxt.Arch, LC_CODE_SIGNATURE, 2);
@@ -904,7 +876,6 @@ private static void asmbMacho(ptr<Link> _addr_ctxt) => func((_, panic, _) => {
         codesign.Sign(ldr.Data(cs), bytes.NewReader(data), "a.out", codesigOff, int64(Segtext.Fileoff), int64(Segtext.Filelen), ctxt.IsExe() || ctxt.IsPIE());
         ctxt.Out.SeekSet(codesigOff);
         ctxt.Out.Write(ldr.Data(cs));
-
     }
 });
 
@@ -918,7 +889,6 @@ private static nint symkind(ptr<loader.Loader> _addr_ldr, loader.Sym s) {
         return SymKindExtdef;
     }
     return SymKindLocal;
-
 }
 
 private static void collectmachosyms(ptr<Link> _addr_ctxt) {
@@ -963,7 +933,6 @@ private static void collectmachosyms(ptr<Link> _addr_ctxt) {
             return false;
         }
         return true;
-
     }; 
 
     // Add data symbols and external references.
@@ -979,17 +948,12 @@ private static void collectmachosyms(ptr<Link> _addr_ctxt) {
                 if (t == sym.STLSBSS) { 
                     // TLSBSS is not used on darwin. See data.go:allocateDataSections
                     continue;
-
                 }
-
                 if (!shouldBeInSymbolTable(s)) {
                     continue;
                 }
-
                 addsym(s);
-
             }
-
 
             if (t == sym.SDYNIMPORT || t == sym.SHOSTOBJ || t == sym.SUNDEFEXT) 
                 addsym(s);
@@ -1007,7 +971,6 @@ private static void collectmachosyms(ptr<Link> _addr_ctxt) {
                                         ldr.SetSymExtname(s, n + "$INODE64");
                                         break;
                                 }
-
                                 break;
                             case "readdir_r": 
 
@@ -1017,22 +980,17 @@ private static void collectmachosyms(ptr<Link> _addr_ctxt) {
                                         ldr.SetSymExtname(s, n + "$INODE64");
                                         break;
                                 }
-
                                 break;
                         }
                     }
-
                 }
-
             }
-
         }
 
         s = s__prev1;
     }
 
     nsortsym = len(sortsym);
-
 }
 
 private static void machosymorder(ptr<Link> _addr_ctxt) => func((_, panic, _) => {
@@ -1112,7 +1070,6 @@ private static bool machoShouldExport(ptr<Link> _addr_ctxt, ptr<loader.Loader> _
         // export alg functions (type..*), as these
         // appear in pclntable.
         return true;
-
     }
     if (strings.HasPrefix(name, "go.link.pkghash")) {
         return true;
@@ -1166,7 +1123,6 @@ private static void machosymtab(ptr<Link> _addr_ctxt) {
  {
                     symtab.AddUint8(0x0e); // N_SECT
                 }
-
                 var o = s;
                 {
                     var outer = ldr.OuterSym(o);
@@ -1176,7 +1132,6 @@ private static void machosymtab(ptr<Link> _addr_ctxt) {
                     }
 
                 }
-
                 if (ldr.SymSect(o) == null) {
                     ldr.Errorf(s, "missing section for symbol");
                     symtab.AddUint8(0);
@@ -1185,14 +1140,11 @@ private static void machosymtab(ptr<Link> _addr_ctxt) {
  {
                     symtab.AddUint8(uint8(ldr.SymSect(o).Extnum));
                 }
-
                 symtab.AddUint16(ctxt.Arch, 0); // desc
                 symtab.AddUintXX(ctxt.Arch, uint64(ldr.SymAddr(s)), ctxt.Arch.PtrSize);
-
             }
 
         }
-
     }
 }
 
@@ -1291,10 +1243,8 @@ private static long doMachoLink(ptr<Link> _addr_ctxt) {
         // Add code signature if necessary. This must be the last.
         var s7 = machoCodeSigSym(_addr_ctxt, linkoff + size);
         size += ldr.SymSize(s7);
-
     }
     return Rnd(size, int64(FlagRound.val));
-
 }
 
 private static void machorelocsect(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out, ptr<sym.Section> _addr_sect, slice<loader.Sym> syms) => func((_, panic, _) => {
@@ -1358,8 +1308,6 @@ private static void machorelocsect(ptr<Link> _addr_ctxt, ptr<OutBuf> _addr_@out,
                     ldr.Errorf(s, "unsupported obj reloc %d (%s)/%d to %s", r.Type(), sym.RelocName(ctxt.Arch, r.Type()), r.Siz(), ldr.SymName(r.Sym()));
                 }
             }
-
-
         }
         s = s__prev1;
     }
@@ -1392,7 +1340,6 @@ private static void machoEmitReloc(ptr<Link> _addr_ctxt) => func((_, panic, _) =
  {
                 relocSect(ctxt, sect, ctxt.datap);
             }
-
         }
         sect = sect__prev1;
     }
@@ -1424,10 +1371,8 @@ private static void machoEmitReloc(ptr<Link> _addr_ctxt) => func((_, panic, _) =
             panic("inconsistency between dwarfp and Segdwarf");
         }
         relocSect(ctxt, sect, si.syms);
-
     }
     wg.Wait();
-
 });
 
 // hostobjMachoPlatform returns the first platform load command found
@@ -1447,10 +1392,8 @@ private static (ptr<MachoPlatformLoad>, error) hostobjMachoPlatform(ptr<Hostobj>
     if (err != null) { 
         // Not a valid Mach-O file.
         return (_addr_null!, error.As(null!)!);
-
     }
     return _addr_peekMachoPlatform(_addr_m)!;
-
 });
 
 // peekMachoPlatform returns the first LC_VERSION_MIN_* or LC_BUILD_VERSION
@@ -1489,11 +1432,8 @@ private static (ptr<MachoPlatformLoad>, error) peekMachoPlatform(ptr<macho.File>
             }
 
         }
-
         return (addr(new MachoPlatformLoad(platform:p,cmd:ml,)), error.As(null!)!);
-
     }    return (_addr_null!, error.As(null!)!);
-
 }
 
 // A rebase entry tells the dynamic linker the data at sym+off needs to be
@@ -1556,7 +1496,6 @@ private static void machoDyldInfo(ptr<Link> _addr_ctxt) => func((_, panic, _) =>
             }
             return 2;
                 panic("unknown segment");
-
     };
 
     Func<loader.Sym, nint> dylibId = s => {
@@ -1619,16 +1558,13 @@ private static void machoDyldInfo(ptr<Link> _addr_ctxt) => func((_, panic, _) =>
             else
  { // d <= 0
                 bind.AddUint8(BIND_OPCODE_SET_DYLIB_SPECIAL_IMM | uint8(d) & 0xf);
-
             }
-
             bind.AddUint8(BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM); 
             // target symbol name as a C string, with _ prefix
             bind.AddUint8('_');
             bind.Addstring(ldr.SymExtname(r.targ));
 
             bind.AddUint8(BIND_OPCODE_DO_BIND);
-
         }
         r = r__prev1;
     }
@@ -1661,7 +1597,6 @@ private static loader.Sym machoCodeSigSym(ptr<Link> _addr_ctxt, long codeSize) {
     cs.Grow(sz);
     cs.SetSize(sz);
     return cs.Sym();
-
 }
 
 // machoCodeSign code-signs Mach-O file fname with an ad-hoc signature.
@@ -1710,18 +1645,14 @@ private static error machoCodeSign(ptr<Link> _addr_ctxt, @string fname) => func(
                         textSeg = seg;
                         break;
                 }
-
             }
 
         }
-
         loadOff += int64(sz);
-
     }    if (sigOff == 0) { 
         // The C linker doesn't generate a signed binary, for some reason.
         // Skip.
         return error.As(null!)!;
-
     }
     var (fi, err) = f.Stat();
     if (err != null) {
@@ -1731,7 +1662,6 @@ private static error machoCodeSign(ptr<Link> _addr_ctxt, @string fname) => func(
         // We don't expect anything after the signature (this will invalidate
         // the signature anyway.)
         return error.As(fmt.Errorf("unexpected content after code signature"))!;
-
     }
     sz = codesign.Size(sigOff, "a.out");
     if (sz != sigSz) { 
@@ -1761,7 +1691,6 @@ private static error machoCodeSign(ptr<Link> _addr_ctxt, @string fname) => func(
     }
     err = f.Truncate(sigOff + sz);
     return error.As(err)!;
-
 });
 
 } // end ld_package

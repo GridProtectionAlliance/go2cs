@@ -2,21 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package wasm -- go2cs converted at 2022 March 06 22:47:39 UTC
+// package wasm -- go2cs converted at 2022 March 13 05:58:55 UTC
 // import "cmd/compile/internal/wasm" ==> using wasm = go.cmd.compile.@internal.wasm_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\wasm\ssa.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using wasm = go.cmd.@internal.obj.wasm_package;
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using objw = cmd.compile.@internal.objw_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using wasm = cmd.@internal.obj.wasm_package;
+using buildcfg = @internal.buildcfg_package;
 
 public static partial class wasm_package {
 
@@ -59,7 +59,6 @@ private static ptr<obj.Prog> zeroRange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
     }
 
     return _addr_p!;
-
 }
 
 private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {
@@ -149,13 +148,11 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             if (ok && call.Fn == ir.Syms.Deferreturn) { 
                 // add a resume point before call to deferreturn so it can be called again via jmpdefer
                 s.Prog(wasm.ARESUMEPOINT);
-
             }
 
             call = call__prev1;
 
         }
-
         if (v.Op == ssa.OpWasmLoweredClosureCall) {
             getValue64(_addr_s, _addr_v.Args[1]);
             setReg(_addr_s, wasm.REG_CTXT);
@@ -182,8 +179,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             call = call__prev1;
 
         }
-
-
     else if (v.Op == ssa.OpWasmLoweredMove) 
         getValue32(_addr_s, _addr_v.Args[0]);
         getValue32(_addr_s, _addr_v.Args[1]);
@@ -207,7 +202,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         }
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Pos.Line()==1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
     else if (v.Op == ssa.OpWasmLoweredWB) 
         getValue64(_addr_s, _addr_v.Args[0]);
@@ -233,15 +227,13 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             // If a Value is marked OnWasmStack, we don't generate the value and store it to a register now.
             // Instead, we delay the generation to when the value is used and then directly generate it on the WebAssembly stack.
             return ;
-
         }
         ssaGenValueOnStack(_addr_s, _addr_v, true);
         if (s.OnWasmStackSkipped != 0) {
             panic("wasm: bad stack");
         }
         setReg(_addr_s, v.Reg());
-    
-});
+    });
 
 private static void ssaGenValueOnStack(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_v, bool extend) => func((_, panic, _) => {
     ref ssagen.State s = ref _addr_s.val;
@@ -264,7 +256,6 @@ private static void ssaGenValueOnStack(ptr<ssagen.State> _addr_s, ptr<ssa.Value>
             i64Const(_addr_s, v.AuxInt);
             s.Prog(wasm.AI64Add);
             break;
-
         }
         p = s.Prog(wasm.AGet);
         p.From.Type = obj.TYPE_ADDR;
@@ -334,7 +325,6 @@ private static void ssaGenValueOnStack(ptr<ssagen.State> _addr_s, ptr<ssa.Value>
             p = s.Prog(wasm.ACall);
             p.To = new obj.Addr(Type:obj.TYPE_MEM,Name:obj.NAME_EXTERN,Sym:ir.Syms.WasmDiv);
             break;
-
         }
         s.Prog(wasm.AI64DivS);
     else if (v.Op == ssa.OpWasmI64TruncSatF32S || v.Op == ssa.OpWasmI64TruncSatF64S) 
@@ -379,8 +369,7 @@ private static void ssaGenValueOnStack(ptr<ssagen.State> _addr_s, ptr<ssa.Value>
         getValue64(_addr_s, _addr_v.Args[0]);
     else 
         v.Fatalf("unexpected op: %s", v.Op);
-    
-});
+    });
 
 private static bool isCmp(ptr<ssa.Value> _addr_v) {
     ref ssa.Value v = ref _addr_v.val;
@@ -390,8 +379,7 @@ private static bool isCmp(ptr<ssa.Value> _addr_v) {
         return true;
     else 
         return false;
-    
-}
+    }
 
 private static void getValue32(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_v) {
     ref ssagen.State s = ref _addr_s.val;
@@ -404,7 +392,6 @@ private static void getValue32(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_v
             s.Prog(wasm.AI32WrapI64);
         }
         return ;
-
     }
     var reg = v.Reg();
     getReg(_addr_s, reg);
@@ -486,7 +473,6 @@ private static obj.As loadOp(ptr<types.Type> _addr_t) => func((_, panic, _) => {
                 panic("bad load type");
                 break;
         }
-
     }
     switch (t.Size()) {
         case 1: 
@@ -494,21 +480,18 @@ private static obj.As loadOp(ptr<types.Type> _addr_t) => func((_, panic, _) => {
                 return wasm.AI64Load8S;
             }
             return wasm.AI64Load8U;
-
             break;
         case 2: 
             if (t.IsSigned()) {
                 return wasm.AI64Load16S;
             }
             return wasm.AI64Load16U;
-
             break;
         case 4: 
             if (t.IsSigned()) {
                 return wasm.AI64Load32S;
             }
             return wasm.AI64Load32U;
-
             break;
         case 8: 
             return wasm.AI64Load;
@@ -517,7 +500,6 @@ private static obj.As loadOp(ptr<types.Type> _addr_t) => func((_, panic, _) => {
             panic("bad load type");
             break;
     }
-
 });
 
 private static obj.As storeOp(ptr<types.Type> _addr_t) => func((_, panic, _) => {
@@ -535,7 +517,6 @@ private static obj.As storeOp(ptr<types.Type> _addr_t) => func((_, panic, _) => 
                 panic("bad store type");
                 break;
         }
-
     }
     switch (t.Size()) {
         case 1: 
@@ -554,7 +535,6 @@ private static obj.As storeOp(ptr<types.Type> _addr_t) => func((_, panic, _) => 
             panic("bad store type");
             break;
     }
-
 });
 
 } // end wasm_package

@@ -5,28 +5,31 @@
 // Package pem implements the PEM data encoding, which originated in Privacy
 // Enhanced Mail. The most common use of PEM encoding today is in TLS keys and
 // certificates. See RFC 1421.
-// package pem -- go2cs converted at 2022 March 06 22:19:34 UTC
+
+// package pem -- go2cs converted at 2022 March 13 05:34:32 UTC
 // import "encoding/pem" ==> using pem = go.encoding.pem_package
 // Original source: C:\Program Files\Go\src\encoding\pem\pem.go
-using bytes = go.bytes_package;
-using base64 = go.encoding.base64_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
 namespace go.encoding;
+
+using bytes = bytes_package;
+using base64 = encoding.base64_package;
+using errors = errors_package;
+using io = io_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// A Block represents a PEM encoded structure.
+//
+// The encoded form is:
+//    -----BEGIN Type-----
+//    Headers
+//    base64-encoded Bytes
+//    -----END Type-----
+// where Headers is a possibly empty sequence of Key: Value lines.
 
 public static partial class pem_package {
 
-    // A Block represents a PEM encoded structure.
-    //
-    // The encoded form is:
-    //    -----BEGIN Type-----
-    //    Headers
-    //    base64-encoded Bytes
-    //    -----END Type-----
-    // where Headers is a possibly empty sequence of Key: Value lines.
 public partial struct Block {
     public @string Type; // The type, taken from the preamble (i.e. "RSA PRIVATE KEY").
     public map<@string, @string> Headers; // Optional headers.
@@ -56,7 +59,6 @@ private static (slice<byte>, slice<byte>) getLine(slice<byte> data) {
         }
     }
     return (bytes.TrimRight(data[(int)0..(int)i], " \t"), data[(int)j..]);
-
 }
 
 // removeSpacesAndTabs returns a copy of its input with all spaces and tabs
@@ -69,7 +71,6 @@ private static slice<byte> removeSpacesAndTabs(slice<byte> data) {
         // Fast path; most base64 data within PEM contains newlines, but
         // no spaces nor tabs. Skip the extra alloc and work.
         return data;
-
     }
     var result = make_slice<byte>(len(data));
     nint n = 0;
@@ -80,9 +81,7 @@ private static slice<byte> removeSpacesAndTabs(slice<byte> data) {
         }
         result[n] = b;
         n++;
-
     }    return result[(int)0..(int)n];
-
 }
 
 private static slice<byte> pemStart = (slice<byte>)"\n-----BEGIN ";
@@ -119,7 +118,6 @@ public static (ptr<Block>, slice<byte>) Decode(slice<byte> data) {
 
     }
 
-
     var (typeLine, rest) = getLine(rest);
     if (!bytes.HasSuffix(typeLine, pemEndOfLine)) {
         return _addr_decodeError(data, rest)!;
@@ -146,7 +144,6 @@ public static (ptr<Block>, slice<byte>) Decode(slice<byte> data) {
         val = bytes.TrimSpace(val);
         p.Headers[string(key)] = string(val);
         rest = next;
-
     }
 
     nint endIndex = default;    nint endTrailerIndex = default; 
@@ -187,7 +184,6 @@ public static (ptr<Block>, slice<byte>) Decode(slice<byte> data) {
         }
     }
 
-
     var base64Data = removeSpacesAndTabs(rest[..(int)endIndex]);
     p.Bytes = make_slice<byte>(base64.StdEncoding.DecodedLen(len(base64Data)));
     var (n, err) = base64.StdEncoding.Decode(p.Bytes, base64Data);
@@ -201,7 +197,6 @@ public static (ptr<Block>, slice<byte>) Decode(slice<byte> data) {
     _, rest = getLine(rest[(int)endIndex + len(pemEnd) - 1..]);
 
     return ;
-
 }
 
 private static (ptr<Block>, slice<byte>) decodeError(slice<byte> data, slice<byte> rest) {
@@ -233,7 +228,6 @@ private static (ptr<Block>, slice<byte>) decodeError(slice<byte> data, slice<byt
         rest = data;
     }
     return (_addr_p!, rest);
-
 }
 
 private static readonly nint pemLineLength = 64;
@@ -274,7 +268,6 @@ private static (nint, error) Write(this ptr<lineBreaker> _addr_l, slice<byte> b)
         return ;
     }
     return l.Write(b[(int)excess..]);
-
 }
 
 private static error Close(this ptr<lineBreaker> _addr_l) {
@@ -287,10 +280,8 @@ private static error Close(this ptr<lineBreaker> _addr_l) {
             return ;
         }
         _, err = l.@out.Write(nl);
-
     }
     return ;
-
 }
 
 private static error writeHeader(io.Writer @out, @string k, @string v) {
@@ -326,7 +317,6 @@ public static error Encode(io.Writer @out, ptr<Block> _addr_b) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -338,7 +328,6 @@ public static error Encode(io.Writer @out, ptr<Block> _addr_b) {
         err = err__prev1;
 
     }
-
 
     if (len(b.Headers) > 0) {
         const @string procType = "Proc-Type";
@@ -375,7 +364,6 @@ public static error Encode(io.Writer @out, ptr<Block> _addr_b) {
                 err = err__prev3;
 
             }
-
         }
         sort.Strings(h);
         {
@@ -395,7 +383,6 @@ public static error Encode(io.Writer @out, ptr<Block> _addr_b) {
                     err = err__prev2;
 
                 }
-
             }
 
             k = k__prev1;
@@ -413,7 +400,6 @@ public static error Encode(io.Writer @out, ptr<Block> _addr_b) {
             err = err__prev2;
 
         }
-
     }
     ref lineBreaker breaker = ref heap(out ptr<lineBreaker> _addr_breaker);
     breaker.@out = out;
@@ -430,7 +416,6 @@ public static error Encode(io.Writer @out, ptr<Block> _addr_b) {
         err = err__prev1;
 
     }
-
     b64.Close();
     breaker.Close();
 
@@ -445,10 +430,8 @@ public static error Encode(io.Writer @out, ptr<Block> _addr_b) {
         err = err__prev1;
 
     }
-
     (_, err) = @out.Write((slice<byte>)b.Type + "-----\n");
     return error.As(err)!;
-
 }
 
 // EncodeToMemory returns the PEM encoding of b.
@@ -467,9 +450,7 @@ public static slice<byte> EncodeToMemory(ptr<Block> _addr_b) {
             return null;
         }
     }
-
     return buf.Bytes();
-
 }
 
 } // end pem_package

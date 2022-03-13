@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:55 UTC
+//     Generated on 2022 March 13 06:32:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace @internal
 {
     public static partial class modfetch_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct modSum
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator modSum(NilType nil) => default(modSum);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static modSum modSum_cast(dynamic value)
         {
             return new modSum(value.mod, value.sum);

@@ -5,17 +5,19 @@
 //go:build gc
 // +build gc
 
-// package build -- go2cs converted at 2022 March 06 22:42:52 UTC
+// package build -- go2cs converted at 2022 March 13 05:54:01 UTC
 // import "go/build" ==> using build = go.go.build_package
 // Original source: C:\Program Files\Go\src\go\build\gc.go
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-
 namespace go.go;
+
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+
+
+// getToolDir returns the default value of ToolDir.
 
 public static partial class build_package {
 
-    // getToolDir returns the default value of ToolDir.
 private static @string getToolDir() {
     return filepath.Join(runtime.GOROOT(), "pkg/tool/" + runtime.GOOS + "_" + runtime.GOARCH);
 }

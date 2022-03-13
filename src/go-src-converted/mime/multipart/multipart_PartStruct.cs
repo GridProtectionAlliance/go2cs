@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:13 UTC
+//     Generated on 2022 March 13 05:36:20 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace mime
 {
     public static partial class multipart_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Part
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace mime
             public static implicit operator Part(NilType nil) => default(Part);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Part Part_cast(dynamic value)
         {
             return new Part(value.Header, ref value.mr, value.disposition, value.dispositionParams, value.r, value.n, value.total, value.err, value.readErr);

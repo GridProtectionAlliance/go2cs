@@ -5,16 +5,15 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package os -- go2cs converted at 2022 March 06 22:13:36 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:59 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\file_posix.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
-using System;
-
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
+using time = time_package;
+using System;
 
 public static partial class os_package {
 
@@ -31,7 +30,6 @@ private static error Close(this ptr<File> _addr_f) {
         return error.As(ErrInvalid)!;
     }
     return error.As(f.file.close())!;
-
 }
 
 // read reads up to len(b) bytes from the File.
@@ -98,20 +96,16 @@ private static uint syscallMode(FileMode i) {
         o |= syscall.S_ISVTX;
     }
     return ;
-
 }
 
 // See docs in file.go:Chmod.
 private static error chmod(@string name, FileMode mode) {
     var longName = fixLongPath(name);
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Chmod(longName, syscallMode(mode)))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Chmod(longName, syscallMode(mode)))!);
     if (e != null) {
         return error.As(addr(new PathError(Op:"chmod",Path:name,Err:e))!)!;
     }
     return error.As(null!)!;
-
 }
 
 // See docs in file.go:(*File).Chmod.
@@ -125,7 +119,6 @@ private static error chmod(this ptr<File> _addr_f, FileMode mode) {
             return error.As(err)!;
         }
     }
-
     {
         var e = f.pfd.Fchmod(syscallMode(mode));
 
@@ -133,9 +126,7 @@ private static error chmod(this ptr<File> _addr_f, FileMode mode) {
             return error.As(f.wrapErr("chmod", e))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Chown changes the numeric uid and gid of the named file.
@@ -146,14 +137,11 @@ private static error chmod(this ptr<File> _addr_f, FileMode mode) {
 // On Windows or Plan 9, Chown always returns the syscall.EWINDOWS or
 // EPLAN9 error, wrapped in *PathError.
 public static error Chown(@string name, nint uid, nint gid) {
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Chown(name, uid, gid))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Chown(name, uid, gid))!);
     if (e != null) {
         return error.As(addr(new PathError(Op:"chown",Path:name,Err:e))!)!;
     }
     return error.As(null!)!;
-
 }
 
 // Lchown changes the numeric uid and gid of the named file.
@@ -163,14 +151,11 @@ public static error Chown(@string name, nint uid, nint gid) {
 // On Windows, it always returns the syscall.EWINDOWS error, wrapped
 // in *PathError.
 public static error Lchown(@string name, nint uid, nint gid) {
-    var e = ignoringEINTR(() => {
-        return error.As(syscall.Lchown(name, uid, gid))!;
-    });
+    var e = ignoringEINTR(() => error.As(syscall.Lchown(name, uid, gid))!);
     if (e != null) {
         return error.As(addr(new PathError(Op:"lchown",Path:name,Err:e))!)!;
     }
     return error.As(null!)!;
-
 }
 
 // Chown changes the numeric uid and gid of the named file.
@@ -188,7 +173,6 @@ private static error Chown(this ptr<File> _addr_f, nint uid, nint gid) {
             return error.As(err)!;
         }
     }
-
     {
         var e = f.pfd.Fchown(uid, gid);
 
@@ -196,9 +180,7 @@ private static error Chown(this ptr<File> _addr_f, nint uid, nint gid) {
             return error.As(f.wrapErr("chown", e))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Truncate changes the size of the file.
@@ -214,7 +196,6 @@ private static error Truncate(this ptr<File> _addr_f, long size) {
             return error.As(err)!;
         }
     }
-
     {
         var e = f.pfd.Ftruncate(size);
 
@@ -222,9 +203,7 @@ private static error Truncate(this ptr<File> _addr_f, long size) {
             return error.As(f.wrapErr("truncate", e))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Sync commits the current contents of the file to stable storage.
@@ -240,7 +219,6 @@ private static error Sync(this ptr<File> _addr_f) {
             return error.As(err)!;
         }
     }
-
     {
         var e = f.pfd.Fsync();
 
@@ -248,9 +226,7 @@ private static error Sync(this ptr<File> _addr_f) {
             return error.As(f.wrapErr("sync", e))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Chtimes changes the access and modification times of the named
@@ -270,9 +246,7 @@ public static error Chtimes(@string name, time.Time atime, time.Time mtime) {
             return error.As(addr(new PathError(Op:"chtimes",Path:name,Err:e))!)!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // Chdir changes the current working directory to the file,
@@ -288,7 +262,6 @@ private static error Chdir(this ptr<File> _addr_f) {
             return error.As(err)!;
         }
     }
-
     {
         var e = f.pfd.Fchdir();
 
@@ -296,9 +269,7 @@ private static error Chdir(this ptr<File> _addr_f) {
             return error.As(f.wrapErr("chdir", e))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // setDeadline sets the read and write deadline.
@@ -312,9 +283,7 @@ private static error setDeadline(this ptr<File> _addr_f, time.Time t) {
             return error.As(err)!;
         }
     }
-
     return error.As(f.pfd.SetDeadline(t))!;
-
 }
 
 // setReadDeadline sets the read deadline.
@@ -328,9 +297,7 @@ private static error setReadDeadline(this ptr<File> _addr_f, time.Time t) {
             return error.As(err)!;
         }
     }
-
     return error.As(f.pfd.SetReadDeadline(t))!;
-
 }
 
 // setWriteDeadline sets the write deadline.
@@ -344,9 +311,7 @@ private static error setWriteDeadline(this ptr<File> _addr_f, time.Time t) {
             return error.As(err)!;
         }
     }
-
     return error.As(f.pfd.SetWriteDeadline(t))!;
-
 }
 
 // checkValid checks whether f is valid for use.
@@ -358,7 +323,6 @@ private static error checkValid(this ptr<File> _addr_f, @string op) {
         return error.As(ErrInvalid)!;
     }
     return error.As(null!)!;
-
 }
 
 // ignoringEINTR makes a function call and repeats it if it returns an
@@ -375,7 +339,6 @@ private static error ignoringEINTR(Func<error> fn) {
             return error.As(err)!;
         }
     }
-
 }
 
 } // end os_package

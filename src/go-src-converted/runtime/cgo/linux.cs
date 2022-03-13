@@ -8,26 +8,26 @@
 //go:build linux
 // +build linux
 
-// package cgo -- go2cs converted at 2022 March 06 22:12:30 UTC
+// package cgo -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime/cgo" ==> using cgo = go.runtime.cgo_package
 // Original source: C:\Program Files\Go\src\runtime\cgo\linux.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.runtime;
+
+using @unsafe = @unsafe_package;
 
 public static partial class cgo_package {
 
-    // Each of the following entries is needed to ensure that the
-    // syscall.syscall_linux code can conditionally call these
-    // function pointers:
-    //
-    //  1. find the C-defined function start
-    //  2. force the local byte alias to be mapped to that location
-    //  3. map the Go pointer to the function to the syscall package
+// Each of the following entries is needed to ensure that the
+// syscall.syscall_linux code can conditionally call these
+// function pointers:
+//
+//  1. find the C-defined function start
+//  2. force the local byte alias to be mapped to that location
+//  3. map the Go pointer to the function to the syscall package
 
-    //go:cgo_import_static _cgo_libc_setegid
-    //go:linkname _cgo_libc_setegid _cgo_libc_setegid
-    //go:linkname cgo_libc_setegid syscall.cgo_libc_setegid
+//go:cgo_import_static _cgo_libc_setegid
+//go:linkname _cgo_libc_setegid _cgo_libc_setegid
+//go:linkname cgo_libc_setegid syscall.cgo_libc_setegid
 private static byte _cgo_libc_setegid = default;
 private static var cgo_libc_setegid = @unsafe.Pointer(_addr__cgo_libc_setegid);
 

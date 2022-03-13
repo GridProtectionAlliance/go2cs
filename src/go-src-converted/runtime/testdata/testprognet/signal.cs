@@ -8,12 +8,12 @@
 // must not import anything (like net, but also like os/signal)
 // that kicks off background goroutines during init.
 
-// package main -- go2cs converted at 2022 March 06 22:26:21 UTC
+// package main -- go2cs converted at 2022 March 13 05:40:28 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprognet\signal.go
-using signal = go.os.signal_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using signal = os.signal_package;
+using syscall = syscall_package;
 
 public static partial class main_package {
 

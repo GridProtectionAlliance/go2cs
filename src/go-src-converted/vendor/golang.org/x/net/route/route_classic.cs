@@ -5,13 +5,13 @@
 //go:build darwin || dragonfly || freebsd || netbsd
 // +build darwin dragonfly freebsd netbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:14 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:32 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\route_classic.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class route_package {
 
@@ -29,7 +29,6 @@ private static (slice<byte>, error) marshal(this ptr<RouteMessage> _addr_m) {
         // Fix stray pointer writes on macOS.
         // See golang.org/issue/22456.
         l += 1024;
-
     }
     var b = make_slice<byte>(l);
     nativeEndian.PutUint16(b[..(int)2], uint16(l));
@@ -53,7 +52,6 @@ private static (slice<byte>, error) marshal(this ptr<RouteMessage> _addr_m) {
         nativeEndian.PutUint32(b[(int)12..(int)16], uint32(attrs));
     }
     return (b, error.As(null!)!);
-
 }
 
 private static (Message, error) parseRouteMessage(this ptr<wireFormat> _addr_w, RIBType typ, slice<byte> b) {
@@ -79,7 +77,6 @@ private static (Message, error) parseRouteMessage(this ptr<wireFormat> _addr_w, 
         return (null, error.As(err)!);
     }
     return (m, error.As(null!)!);
-
 }
 
 } // end route_package

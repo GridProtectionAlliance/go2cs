@@ -2,20 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:57 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:21 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\expand_calls.go
-using abi = go.cmd.compile.@internal.abi_package;
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using abi = cmd.compile.@internal.abi_package;
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using sort = sort_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -62,10 +61,8 @@ private static ptr<types.Type> removeTrivialWrapperTypes(ptr<types.Type> _addr_t
             continue;
         }
         break;
-
     }
     return _addr_t!;
-
 }
 
 // A registerCursor tracks which register is used for an Arg or regValues, or a piece of such.
@@ -95,7 +92,6 @@ private static @string String(this ptr<registerCursor> _addr_rc) {
         }
     }
     return fmt.Sprintf("RCSR{storeDest=%v, regsLen=%d, nextSlice=%d, regValues=[%s]}", dest, rc.regsLen, rc.nextSlice, regs);
-
 }
 
 // next effectively post-increments the register cursor; the receiver is advanced,
@@ -110,7 +106,6 @@ private static registerCursor next(this ptr<registerCursor> _addr_c, ptr<types.T
         c.nextSlice += Abi1RO(w);
     }
     return rc;
-
 }
 
 // plus returns a register cursor offset from the original, without modifying the original.
@@ -129,7 +124,6 @@ public static readonly nint RO_string_len = 1;
 public static readonly nint RO_slice_len = 1;
 public static readonly nint RO_slice_cap = 2;
 public static readonly nint RO_iface_data = 1;
-
 
 private static Abi1RO regWidth(this ptr<expandState> _addr_x, ptr<types.Type> _addr_t) {
     ref expandState x = ref _addr_x.val;
@@ -158,7 +152,6 @@ private static Abi1RO regOffset(this ptr<expandState> _addr_x, ptr<types.Type> _
         return k;
     }
     panic("Haven't implemented this case yet, do I need to?");
-
 });
 
 // at returns the register cursor for component i of t, where the first
@@ -183,7 +176,6 @@ private static registerCursor at(this ptr<registerCursor> _addr_c, ptr<types.Typ
         return rc;
     }
     panic("Haven't implemented this case yet, do I need to?");
-
 });
 
 private static void init(this ptr<registerCursor> _addr_c, slice<abi.RegIndex> regs, ptr<abi.ABIParamResultInfo> _addr_info, ptr<slice<ptr<Value>>> _addr_result, ptr<Value> _addr_storeDest) {
@@ -197,11 +189,9 @@ private static void init(this ptr<registerCursor> _addr_c, slice<abi.RegIndex> r
     if (len(regs) == 0) {
         c.storeDest = storeDest; // only save this if there are no registers, will explode if misused.
         return ;
-
     }
     c.config = info.Config();
     c.regValues = result;
-
 }
 
 private static void addArg(this ptr<registerCursor> _addr_c, ptr<Value> _addr_v) {
@@ -252,7 +242,6 @@ private static (ptr<types.Type>, ptr<types.Type>) intPairTypes(this ptr<expandSt
     }
     tLo = x.typs.UInt32;
     return ;
-
 }
 
 // isAlreadyExpandedAggregateType returns whether a type is an SSA-able "aggregate" (multiple register) type
@@ -267,7 +256,6 @@ private static bool isAlreadyExpandedAggregateType(this ptr<expandState> _addr_x
         return false;
     }
     return t.IsStruct() || t.IsArray() || t.IsComplex() || t.IsInterface() || t.IsString() || t.IsSlice() || t.Size() > x.regSize && t.IsInteger();
-
 }
 
 // offsetFrom creates an offset from a pointer, simplifying chained offsets and offsets from SP
@@ -295,7 +283,6 @@ private static ptr<Value> offsetFrom(this ptr<expandState> _addr_x, ptr<Block> _
         return _addr_x.f.ConstOffPtrSP(pt, offset, x.sp)!;
     }
     return _addr_b.NewValue1I(from.Pos.WithNotStmt(), OpOffPtr, pt, offset, from)!;
-
 }
 
 // splitSlots splits one "field" (specified by sfx, offset, and ty) out of the LocalSlots in ls and returns the new LocalSlots this generates.
@@ -318,7 +305,6 @@ private static ptr<abi.ABIParamAssignment> prAssignForArg(this ptr<expandState> 
         panic(badVal("Wanted OpArg, instead saw", _addr_v));
     }
     return _addr_ParamAssignmentForArgName(_addr_x.f, v.Aux._<ptr<ir.Name>>())!;
-
 });
 
 // ParamAssignmentForArgName returns the ABIParamAssignment for f's arg with matching name.
@@ -333,7 +319,6 @@ public static ptr<abi.ABIParamAssignment> ParamAssignmentForArgName(ptr<Func> _a
             return _addr__addr_ip[i]!;
         }
     }    panic(fmt.Errorf("Did not match param %v in prInfo %+v", name, abiInfo.InParams()));
-
 });
 
 // indent increments (or decrements) the indentation.
@@ -354,7 +339,6 @@ private static (nint, error) Printf(this ptr<expandState> _addr_x, @string forma
         fmt.Printf("%[1]*s", x.indentLevel, "");
     }
     return fmt.Printf(format, a);
-
 }
 
 // Calls that need lowering have some number of inputs, including a memory input,
@@ -400,7 +384,6 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
     if (selector.Op == OpArgIntReg || selector.Op == OpArgFloatReg) 
         if (leafType == selector.Type) { // OpIData leads us here, sometimes.
             leaf.copyOf(selector);
-
         }
         else
  {
@@ -413,19 +396,15 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
         if (!x.isAlreadyExpandedAggregateType(selector.Type)) {
             if (leafType == selector.Type) { // OpIData leads us here, sometimes.
                 x.newArgToMemOrRegs(selector, leaf, offset, regOffset, leafType, leaf.Pos);
-
             }
             else
  {
                 x.f.Fatalf("Unexpected OpArg type, selector=%s, leaf=%s\n", selector.LongString(), leaf.LongString());
             }
-
             if (x.debug) {
                 x.Printf("---OpArg, break\n");
             }
-
             break;
-
         }
 
         if (leaf.Op == OpIData || leaf.Op == OpStructSelect || leaf.Op == OpArraySelect) 
@@ -499,18 +478,15 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
             // This can occur with chains of selection/indexing from single field/element aggregates.
             leaf.copyOf(selector);
             break;
-
         }
         if (which == aux.NResults()) { // mem is after the results.
             // rewrite v as a Copy of call -- the replacement call will produce a mem.
             if (leaf != selector) {
                 panic(fmt.Errorf("Unexpected selector of memory, selector=%s, call=%s, leaf=%s", selector.LongString(), call.LongString(), leaf.LongString()));
             }
-
             if (aux.abiInfo == null) {
                 panic(badVal("aux.abiInfo nil for call", _addr_call));
             }
-
             {
                 var existing = x.memForCall[call.ID];
 
@@ -525,8 +501,6 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
                 }
 
             }
-
-
         }
         else
  {
@@ -550,11 +524,9 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
                         x.transformedSelects[mem.ID] = true; // select uses post-expansion indexing
                         x.memForCall[call.ID] = mem;
                         call = mem;
-
                     }
 
                 }
-
                 var outParam = aux.abiInfo.OutParam(int(which));
                 if (len(outParam.Registers) > 0) {
                     var firstReg = uint32(0);
@@ -576,9 +548,7 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
                         w = call.Block.NewValue1I(leaf.Pos, OpSelectN, leafType, reg, call0);
                         x.transformedSelects[w.ID] = true; // select, using post-expansion indexing.
                         leaf.copyOf(w);
-
                     }
-
                 } {
                     var off = x.offsetFrom(x.f.Entry, x.sp, offset + aux.OffsetOfResult(which), pt);
                     if (leaf.Block == call.Block) {
@@ -594,7 +564,6 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
                             x.Printf("---new %s\n", w.LongString());
                         }
                     }
-
                 }
             else
                 {
@@ -610,14 +579,12 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
             } {
                 x.f.Fatalf("Should not have non-SSA-able OpSelectN, selector=%s", selector.LongString());
             }
-
         }
     else if (selector.Op == OpStructSelect) 
         w = selector.Args[0];
         slice<ptr<LocalSlot>> ls = default;
         if (w.Type.Kind() != types.TSTRUCT) { // IData artifact
             ls = x.rewriteSelect(leaf, w, offset, regOffset);
-
         }
         else
  {
@@ -680,13 +647,11 @@ private static slice<ptr<LocalSlot>> rewriteSelect(this ptr<expandState> _addr_x
                 s = __s; 
                 // this copy may have had its own name, preserve that, too.
                 locs = append(locs, x.f.Names[s.locIndex]);
-
             }
 
             s = s__prev1;
         }
     else         return locs;
-
 });
 
 private static ptr<Value> rewriteDereference(this ptr<expandState> _addr_x, ptr<Block> _addr_b, ptr<Value> _addr_@base, ptr<Value> _addr_a, ptr<Value> _addr_mem, long offset, long size, ptr<types.Type> _addr_typ, src.XPos pos) {
@@ -714,7 +679,6 @@ private static ptr<Value> rewriteDereference(this ptr<expandState> _addr_x, ptr<
         mem.AuxInt = size;
     }
     return _addr_mem!;
-
 }
 
 private static array<@string> indexNames = new array<@string>(new @string[] { "[0]" });
@@ -761,7 +725,6 @@ outer:
                         _continueouter = true;
                         break;
                     }
-
                 }
 
 
@@ -818,9 +781,7 @@ outer:
 
         __switch_break0:;
         return path;
-
     }
-
 }
 
 // decomposeArg is a helper for storeArgOrLoad.
@@ -866,7 +827,6 @@ private static ptr<Value> decomposeArg(this ptr<expandState> _addr_x, src.XPos p
                 i = i__prev1;
             }
             panic(fmt.Errorf("offset %d of requested register %d should be zero, source=%s", offs[loadRegOffset], loadRegOffset, source.LongString()));
-
         }
         if (x.debug) {
             x.Printf("decompose arg %s has %d locs\n", source.LongString(), len(locs));
@@ -891,20 +851,15 @@ private static ptr<Value> decomposeArg(this ptr<expandState> _addr_x, src.XPos p
                     if (rt.Width != t.Width || len(pa.Registers) != 1 || i != loadRegOffset) {
                         b.Func.Fatalf("incompatible store type %v and %v, i=%d", t, rt, i);
                     }
-
                     rt = t;
-
                 }
-
                 mem = x.storeArgOrLoad(pos, b, w, mem, rt, storeOffset + off, i, storeRc.next(rt));
-
             }
 
 
             i = i__prev1;
         }
         return _addr_mem!;
-
     }
     var u = source.Type;
 
@@ -964,7 +919,6 @@ private static ptr<Value> decomposeArg(this ptr<expandState> _addr_x, src.XPos p
         mem = storeOneArg(_addr_x, pos, _addr_b, locs, ".ptr", _addr_source, _addr_mem, _addr_x.typs.BytePtr, 0, storeOffset, loadRegOffset, storeRc.next(x.typs.BytePtr));
         return _addr_storeTwoArg(_addr_x, pos, _addr_b, locs, ".len", ".cap", _addr_source, _addr_mem, _addr_x.typs.Int, _addr_x.typs.Int, x.ptrSize, storeOffset + x.ptrSize, loadRegOffset + RO_slice_len, storeRc)!;
         return _addr_null!;
-
 });
 
 private static void splitSlotsIntoNames(this ptr<expandState> _addr_x, slice<ptr<LocalSlot>> locs, @string suffix, long off, ptr<types.Type> _addr_rt, ptr<Value> _addr_w) {
@@ -1058,7 +1012,6 @@ private static ptr<Value> decomposeLoad(this ptr<expandState> _addr_x, src.XPos 
         mem = storeOneLoad(_addr_x, pos, _addr_b, _addr_source, _addr_mem, _addr_x.typs.BytePtr, 0, storeOffset, loadRegOffset, storeRc.next(x.typs.BytePtr));
         return _addr_storeTwoLoad(_addr_x, pos, _addr_b, _addr_source, _addr_mem, _addr_x.typs.Int, _addr_x.typs.Int, x.ptrSize, storeOffset + x.ptrSize, loadRegOffset + RO_slice_len, storeRc)!;
         return _addr_null!;
-
 }
 
 // storeOneArg creates a decomposed (one step) arg that is then stored.
@@ -1082,7 +1035,6 @@ private static ptr<Value> storeOneArg(ptr<expandState> _addr_x, src.XPos pos, pt
         x.splitSlotsIntoNames(locs, suffix, argOffset, t, w);
     }
     return _addr_x.storeArgOrLoad(pos, b, w, mem, t, storeOffset, loadRegOffset, storeRc)!;
-
 });
 
 // storeOneLoad creates a decomposed (one step) load that is then stored.
@@ -1210,7 +1162,6 @@ private static ptr<Value> storeArgOrLoad(this ptr<expandState> _addr_x, src.XPos
             t = removeTrivialWrapperTypes(_addr_t); 
             // it could be a leaf type, but the "leaf" could be complex64 (for example)
             return _addr_x.storeArgOrLoad(pos, b, source, mem, t, storeOffset, loadRegOffset, storeRc)!;
-
         }
         var eltRO = x.regWidth(elt);
         {
@@ -1250,7 +1201,6 @@ private static ptr<Value> storeArgOrLoad(this ptr<expandState> _addr_x, src.XPos
             t = removeTrivialWrapperTypes(_addr_t); 
             // it could be a leaf type, but the "leaf" could be complex64 (for example)
             return _addr_x.storeArgOrLoad(pos, b, source, mem, t, storeOffset, loadRegOffset, storeRc)!;
-
         }
         {
             nint i__prev1 = i;
@@ -1326,7 +1276,6 @@ private static ptr<Value> storeArgOrLoad(this ptr<expandState> _addr_x, src.XPos
         x.Printf("-->storeArg returns %s, storeRc=%s\n", s.LongString(), storeRc.String());
     }
     return _addr_s!;
-
 });
 
 // rewriteArgs replaces all the call-parameter Args to a call with their register translation (if any).
@@ -1366,7 +1315,6 @@ private static void rewriteArgs(this ptr<expandState> _addr_x, ptr<Value> _addr_
                 // "Dereference" of addressed (probably not-SSA-eligible) value becomes Move
                 // TODO(register args) this will be more complicated with registers in the picture.
                 mem = x.rewriteDereference(v.Block, x.sp, a, mem, aOffset, aux.SizeOfArg(auxI), aType, pos);
-
             }
             else
  {
@@ -1380,16 +1328,12 @@ private static void rewriteArgs(this ptr<expandState> _addr_x, ptr<Value> _addr_
  {
                     aOffset = aux.OffsetOfArg(auxI);
                 }
-
                 if (x.debug) {
                     x.Printf("...storeArg %s, %v, %d\n", a.LongString(), aType, aOffset);
                 }
-
                 rc.init(aRegs, aux.abiInfo, result, x.sp);
                 mem = x.storeArgOrLoad(pos, v.Block, a, mem, aType, aOffset, 0, rc);
-
             }
-
         }
         a = a__prev1;
     }
@@ -1416,7 +1360,6 @@ private static void rewriteArgs(this ptr<expandState> _addr_x, ptr<Value> _addr_
     }
 
     return ;
-
 });
 
 // expandCalls converts LE (Late Expansion) calls that act like they receive value args into a lower-level form
@@ -1475,7 +1418,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                     v = v__prev2;
                 }
             }
-
         }
         i = i__prev1;
         name = name__prev1;
@@ -1500,7 +1442,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                     else 
                         continue;
                                         x.rewriteArgs(v, firstArg);
-
                 }
 
                 v = v__prev2;
@@ -1518,7 +1459,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                 if (x.debug) {
                     x.Printf("multiValueExit rewriting %s\n", v.LongString());
                 }
-
                 slice<ptr<Value>> oldArgs = default;
                 {
                     var j__prev2 = j;
@@ -1544,15 +1484,11 @@ private static void expandCalls(ptr<Func> _addr_f) {
                                     if (dMem.Op == OpVarDef && dMem.Aux == dAddr.Aux) {
                                         dMem.copyOf(dMem.MemoryArg()); // elide the VarDef
                                     }
-
                                     continue;
-
                                 }
 
                             }
-
                             mem = x.rewriteDereference(v.Block, auxBase, a, mem, auxOffset, auxSize, auxType, pos);
-
                         }
                         else
  {
@@ -1561,20 +1497,15 @@ private static void expandCalls(ptr<Func> _addr_f) {
                                 if (addr.MemoryArg() == a.MemoryArg() && addr.Aux == aux.NameOfResult(i)) {
                                     continue;
                                 }
-
                             }
-
                             registerCursor rc = default;
                             ptr<slice<ptr<Value>>> result;
                             if (len(aRegs) > 0) {
                                 result = _addr_allResults;
                             }
-
                             rc.init(aRegs, aux.abiInfo, result, auxBase);
                             mem = x.storeArgOrLoad(v.Pos, b, a, mem, aux.TypeOfResult(i), auxOffset, 0, rc);
-
                         }
-
                     }
 
                     j = j__prev2;
@@ -1605,11 +1536,8 @@ private static void expandCalls(ptr<Func> _addr_f) {
                 if (x.debug) {
                     x.Printf("...multiValueExit new result %s\n", v.LongString());
                 }
-
                 x.indent(-3);
-
             }
-
         }
         b = b__prev1;
     }
@@ -1637,16 +1565,12 @@ private static void expandCalls(ptr<Func> _addr_f) {
                             if (iAEATt) {
                                 t = tSrc;
                             }
-
                         }
-
                         var dst = v.Args[0];
                         mem = v.Args[2];
                         mem = x.storeArgOrLoad(v.Pos, b, source, mem, t, 0, 0, new registerCursor(storeDest:dst));
                         v.copyOf(mem);
-
                     }
-
                 }
 
                 v = v__prev2;
@@ -1700,8 +1624,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                             }
 
                         }
-
-
                         goto __switch_break1;
                     }
                     if (v.Op == OpArg)
@@ -1720,8 +1642,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                             }
 
                         }
-
-
                         goto __switch_break1;
                     }
                     if (v.Op == OpSelectNAddr) 
@@ -1737,7 +1657,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                     }
 
                     __switch_break1:;
-
                 }
 
                 v = v__prev2;
@@ -1789,21 +1708,17 @@ private static void expandCalls(ptr<Func> _addr_f) {
                 if (v.Op == OpArg) {
                     continue; // no Args[0], hence done.
                 }
-
                 w = v.Args[0];
                 var (n, ok) = val2Preds[w];
                 if (!ok) {
                     continue;
                 }
-
                 if (n == 1) {
                     allOrdered = append(allOrdered, w);
                     delete(val2Preds, w);
                     continue;
                 }
-
                 val2Preds[w] = n - 1;
-
             }
 
             v = v__prev2;
@@ -1832,7 +1747,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
             if (typ.IsMemory()) {
                 continue; // handled elsewhere, not an indexable result
             }
-
             var size = typ.Width;
             var offset = int64(0);
 
@@ -1843,9 +1757,7 @@ private static void expandCalls(ptr<Func> _addr_f) {
                 else
  { // Immediate interface data artifact, offset is zero.
                     f.Fatalf("Expand calls interface data problem, func %s, v=%s, w=%s\n", f.Name, v.LongString(), w.LongString());
-
                 }
-
             else if (v.Op == OpArraySelect) 
                 offset = size * v.AuxInt;
             else if (v.Op == OpSelectN) 
@@ -1876,9 +1788,7 @@ private static void expandCalls(ptr<Func> _addr_f) {
                 // Because values are processed in dominator order, the old common[s] will never dominate after a miss is seen.
                 // Installing the new value might match some future values.
                 x.commonSelectors[sk] = v;
-
             }
-
         }
 
         i = i__prev1;
@@ -1922,14 +1832,10 @@ private static void expandCalls(ptr<Func> _addr_f) {
                         }
 
                     }
-
                     f.NamedValues[l.val] = append(f.NamedValues[l.val], v);
-
                 }
                 continue;
-
             }
-
             {
                 var ns__prev1 = ns;
 
@@ -1939,13 +1845,11 @@ private static void expandCalls(ptr<Func> _addr_f) {
                     // Not-leaf types that had debug locations need to lose them.
 
                     toDelete = append(toDelete, ns);
-
                 }
 
                 ns = ns__prev1;
 
             }
-
         }
         i = i__prev1;
         v = v__prev1;
@@ -1979,8 +1883,7 @@ private static void expandCalls(ptr<Func> _addr_f) {
                         v.Op = OpInterCall;
                         rts = abi.RegisterTypes(v.Aux._<ptr<AuxCall>>().abiInfo.OutParams());
                         v.Type = types.NewResults(append(rts, types.TypeMem));
-                    
-                }
+                                    }
 
                 v = v__prev2;
             }
@@ -2010,11 +1913,9 @@ private static void expandCalls(ptr<Func> _addr_f) {
                         if (w.Type.IsUnsafePtr() && !v.Type.IsUnsafePtr()) { 
                             // Update unsafe.Pointer type if we know the actual pointer type.
                             w.Type = v.Type;
-
                         } 
                         // TODO: don't dedup pointer and scalar? Rewrite to OpConvert? Can it happen?
                         v.copyOf(w);
-
                     }
                     else
  {
@@ -2024,7 +1925,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                     w = w__prev1;
 
                 }
-
             else if (v.Op == OpArgFloatReg) 
                 i = v.AuxInt;
                 {
@@ -2046,7 +1946,6 @@ private static void expandCalls(ptr<Func> _addr_f) {
                     w = w__prev1;
 
                 }
-
                     }
         v = v__prev1;
     }
@@ -2152,8 +2051,7 @@ private static void expandCalls(ptr<Func> _addr_f) {
                             if (a.Op == OpArgIntReg || a.Op == OpArgFloatReg || a.Op == OpSelectN) 
                                 v.Pos = v.Pos.WithIsStmt();
                                 a.Pos = a.Pos.WithDefaultStmt();
-                            
-                        }
+                                                    }
 
                         a = a__prev3;
                     }
@@ -2199,7 +2097,6 @@ private static ptr<Value> rewriteArgToMemOrRegs(this ptr<expandState> _addr_x, p
             v.Aux = addr(new AuxNameOffset(v.Aux.(*ir.Name),0));
             v.AuxInt = i;
             x.commonArgs[key] = v;
-
             break;
         default: 
             panic(badVal("Saw unexpanded OpArg", _addr_v));
@@ -2209,7 +2106,6 @@ private static ptr<Value> rewriteArgToMemOrRegs(this ptr<expandState> _addr_x, p
         x.Printf("-->%s\n", v.LongString());
     }
     return _addr_v!;
-
 });
 
 // newArgToMemOrRegs either rewrites toReplace into an OpArg referencing memory or into an OpArgXXXReg to a register,
@@ -2233,7 +2129,6 @@ private static ptr<Value> newArgToMemOrRegs(this ptr<expandState> _addr_x, ptr<V
             toReplace.copyOf(w);
         }
         return _addr_w!;
-
     }
     var pa = x.prAssignForArg(baseArg);
     if (len(pa.Registers) == 0) { // Arg is on stack
@@ -2262,7 +2157,6 @@ private static ptr<Value> newArgToMemOrRegs(this ptr<expandState> _addr_x, ptr<V
             x.Printf("-->%s\n", w.LongString());
         }
         return _addr_w!;
-
     }
     var r = pa.Registers[regOffset];
     var (op, auxInt) = ArgOpAndRegisterFor(r, _addr_x.f.ABISelf);
@@ -2293,8 +2187,6 @@ private static ptr<Value> newArgToMemOrRegs(this ptr<expandState> _addr_x, ptr<V
         x.Printf("-->%s\n", w.LongString());
     }
     return _addr_w!;
-
-
 });
 
 // argOpAndRegisterFor converts an abi register index into an ssa Op and corresponding
@@ -2307,10 +2199,8 @@ public static (Op, long) ArgOpAndRegisterFor(abi.RegIndex r, ptr<abi.ABIConfig> 
     var i = abiConfig.FloatIndexFor(r);
     if (i >= 0) { // float PR
         return (OpArgFloatReg, i);
-
     }
     return (OpArgIntReg, int64(r));
-
 }
 
 } // end ssa_package

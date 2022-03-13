@@ -1,18 +1,16 @@
 // SVG pan and zoom library.
 // See copyright notice in string constant below.
 
-// package svgpan -- go2cs converted at 2022 March 06 23:24:05 UTC
+// package svgpan -- go2cs converted at 2022 March 13 06:37:12 UTC
 // import "cmd/vendor/github.com/google/pprof/third_party/svgpan" ==> using svgpan = go.cmd.vendor.github.com.google.pprof.third_party.svgpan_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\third_party\svgpan\svgpan.go
-
-
 namespace go.cmd.vendor.github.com.google.pprof.third_party;
 
 public static partial class svgpan_package {
 
-    // https://github.com/aleofreddi/svgpan
+// https://github.com/aleofreddi/svgpan
 
-    // JSSource returns the svgpan.js file
+// JSSource returns the svgpan.js file
 public static readonly @string JSSource = "\n/**\n *  SVGPan library 1.2.2\n * ======================\n *\n * Given an unique exi" +
     "sting element with id \"viewport\" (or when missing, the\n * first g-element), incl" +
     "uding the library into any SVG adds the following\n * capabilities:\n *\n *  - Mous" +

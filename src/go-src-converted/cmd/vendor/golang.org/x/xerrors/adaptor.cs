@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xerrors -- go2cs converted at 2022 March 06 23:35:16 UTC
+// package xerrors -- go2cs converted at 2022 March 13 06:42:50 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\xerrors\adaptor.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-
 namespace go.cmd.vendor.golang.org.x;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+
+
+// FormatError calls the FormatError method of f with an errors.Printer
+// configured according to s and verb, and writes the result to s.
 
 public static partial class xerrors_package {
 
-    // FormatError calls the FormatError method of f with an errors.Printer
-    // configured according to s and verb, and writes the result to s.
 public static void FormatError(Formatter f, fmt.State s, int verb) { 
     // Assuming this function is only called from the Format method, and given
     // that FormatError takes precedence over Format, it cannot be called from
@@ -82,7 +84,6 @@ public static void FormatError(Formatter f, fmt.State s, int verb) {
                     p.buf.WriteByte(')');
             io.Copy(s, _addr_p.buf);
             return ;
-
             break;
     }
 
@@ -117,7 +118,6 @@ loop:
         p.buf.WriteString(sep);
         p.inDetail = false;
         p.needNewline = false;
-
     }
 exit:
     var (width, okW) = s.Width();
@@ -144,7 +144,6 @@ exit:
         }
         format = append(format, string(verb));
         fmt.Fprintf(s, string(format), p.buf.String());
-
     }
     else
  {
@@ -203,7 +202,6 @@ private static (nint, error) Write(this ptr<state> _addr_s, slice<byte> b) {
         s.buf.Write(b);
     }
     return (len(b), error.As(null!)!);
-
 }
 
 // printer wraps a state to implement an xerrors.Printer.

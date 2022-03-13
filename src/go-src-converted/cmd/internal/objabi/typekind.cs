@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:23 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\typekind.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class objabi_package {
 
-    // Must match runtime and reflect.
-    // Included by cmd/gc.
+// Must match runtime and reflect.
+// Included by cmd/gc.
+
 public static readonly nint KindBool = 1 + iota;
 public static readonly var KindInt = 0;
 public static readonly var KindInt8 = 1;
@@ -41,6 +40,5 @@ public static readonly var KindStruct = 23;
 public static readonly KindDirectIface KindUnsafePointer = 1 << 5;
 public static readonly nint KindGCProg = 1 << 6;
 public static readonly nint KindMask = (1 << 5) - 1;
-
 
 } // end objabi_package

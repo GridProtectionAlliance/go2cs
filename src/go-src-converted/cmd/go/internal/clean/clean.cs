@@ -3,30 +3,30 @@
 // license that can be found in the LICENSE file.
 
 // Package clean implements the ``go clean'' command.
-// package clean -- go2cs converted at 2022 March 06 23:15:58 UTC
+
+// package clean -- go2cs converted at 2022 March 13 06:29:27 UTC
 // import "cmd/go/internal/clean" ==> using clean = go.cmd.go.@internal.clean_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\clean\clean.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using time = go.time_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cache = go.cmd.go.@internal.cache_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using modload = go.cmd.go.@internal.modload_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cache = cmd.go.@internal.cache_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using modload = cmd.go.@internal.modload_package;
+using work = cmd.go.@internal.work_package;
+using System;
 
 public static partial class clean_package {
 
@@ -99,7 +99,6 @@ private static void init() {
     // are part of the build flags.
 
     work.AddBuildFlags(CmdClean, work.DefaultBuildFlags);
-
 }
 
 private static void runClean(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
@@ -150,18 +149,13 @@ private static void runClean(context.Context ctx, ptr<base.Command> _addr_cmd, s
                             err = err__prev5;
 
                         }
-
                     }
-
                 }
-
             }
-
             var logFile = filepath.Join(dir, "log.txt");
             if (cfg.BuildN || cfg.BuildX) {
                 b.Showcmd("", "rm -f %s", logFile);
             }
-
             if (!cfg.BuildN) {
                 {
                     var err__prev4 = err;
@@ -176,9 +170,7 @@ private static void runClean(context.Context ctx, ptr<base.Command> _addr_cmd, s
                     err = err__prev4;
 
                 }
-
             }
-
         }
     }
     if (cleanTestcache && !cleanCache) { 
@@ -201,11 +193,8 @@ private static void runClean(context.Context ctx, ptr<base.Command> _addr_cmd, s
                         if (err == null) {
                             _, err = fmt.Fprintf(f, "%d\n", now);
                         }
-
                     }
-
                 }
-
                 {
                     var closeErr = f.Close();
 
@@ -214,9 +203,7 @@ private static void runClean(context.Context ctx, ptr<base.Command> _addr_cmd, s
                     }
 
                 }
-
             }
-
             if (err != null) {
                 {
                     var (_, statErr) = os.Stat(dir);
@@ -226,9 +213,7 @@ private static void runClean(context.Context ctx, ptr<base.Command> _addr_cmd, s
                     }
 
                 }
-
             }
-
         }
     }
     if (cleanModcache) {
@@ -251,7 +236,6 @@ private static void runClean(context.Context ctx, ptr<base.Command> _addr_cmd, s
                 err = err__prev3;
 
             }
-
         }
     }
 }
@@ -299,7 +283,6 @@ private static void clean(ptr<load.Package> _addr_p) {
         keep(p.CgoFiles);
         keep(p.TestGoFiles);
         keep(p.XTestGoFiles);
-
     }
     var (_, elem) = filepath.Split(p.Dir);
     slice<@string> allRemove = default; 
@@ -334,9 +317,7 @@ private static void clean(ptr<load.Package> _addr_p) {
                 // to an executable file.
                 @base = name[..(int)len(name) - len(".go")];
                 allRemove = append(allRemove, base, base + ".exe");
-
             }
-
         }
         dir = dir__prev1;
     }
@@ -378,21 +359,15 @@ private static void clean(ptr<load.Package> _addr_p) {
                         }
 
                     }
-
                 }
-
                 continue;
-
             }
-
             if (cfg.BuildN) {
                 continue;
             }
-
             if (cleanFile[name] || cleanExt[filepath.Ext(name)] || toRemove[name]) {
                 removeFile(filepath.Join(p.Dir, name));
             }
-
         }
         dir = dir__prev1;
     }
@@ -444,10 +419,8 @@ private static void removeFile(@string f) {
             }
 
         }
-
     }
     @base.Errorf("go clean: %v", err);
-
 }
 
 } // end clean_package

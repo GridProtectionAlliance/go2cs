@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package iotest -- go2cs converted at 2022 March 06 23:19:29 UTC
+// package iotest -- go2cs converted at 2022 March 13 06:43:14 UTC
 // import "testing/iotest" ==> using iotest = go.testing.iotest_package
 // Original source: C:\Program Files\Go\src\testing\iotest\logger.go
-using io = go.io_package;
-using log = go.log_package;
-
 namespace go.testing;
+
+using io = io_package;
+using log = log_package;
 
 public static partial class iotest_package {
 
@@ -31,7 +31,6 @@ private static (nint, error) Write(this ptr<writeLogger> _addr_l, slice<byte> p)
         log.Printf("%s %x", l.prefix, p[(int)0..(int)n]);
     }
     return ;
-
 }
 
 // NewWriteLogger returns a writer that behaves like w except
@@ -60,7 +59,6 @@ private static (nint, error) Read(this ptr<readLogger> _addr_l, slice<byte> p) {
         log.Printf("%s %x", l.prefix, p[(int)0..(int)n]);
     }
     return ;
-
 }
 
 // NewReadLogger returns a reader that behaves like r except

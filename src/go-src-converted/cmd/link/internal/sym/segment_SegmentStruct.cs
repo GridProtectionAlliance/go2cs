@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:35 UTC
+//     Generated on 2022 March 13 06:33:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class sym_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Segment
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace @internal
             public static implicit operator Segment(NilType nil) => default(Segment);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Segment Segment_cast(dynamic value)
         {
             return new Segment(value.Rwx, value.Vaddr, value.Length, value.Fileoff, value.Filelen, value.Sections);

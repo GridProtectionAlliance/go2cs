@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:17 UTC
+//     Generated on 2022 March 13 05:26:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct sudog
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace go
             public static implicit operator sudog(NilType nil) => default(sudog);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static sudog sudog_cast(dynamic value)
         {
             return new sudog(ref value.g, ref value.next, ref value.prev, value.elem, value.acquiretime, value.releasetime, value.ticket, value.isSelect, value.success, ref value.parent, ref value.waitlink, ref value.waittail, ref value.c);

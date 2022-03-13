@@ -5,12 +5,12 @@
 //go:build go1.12
 // +build go1.12
 
-// package unitchecker -- go2cs converted at 2022 March 06 23:34:57 UTC
+// package unitchecker -- go2cs converted at 2022 March 13 06:42:30 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/unitchecker" ==> using unitchecker = go.cmd.vendor.golang.org.x.tools.go.analysis.unitchecker_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\unitchecker\unitchecker112.go
-using importer = go.go.importer_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis;
+
+using importer = go.importer_package;
 
 public static partial class unitchecker_package {
 

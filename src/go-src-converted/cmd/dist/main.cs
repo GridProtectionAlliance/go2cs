@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:22 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:51 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\main.go
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go;
+
+using flag = flag_package;
+using fmt = fmt_package;
+using os = os_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using System;
 
 public static partial class main_package {
 
@@ -47,7 +46,6 @@ private static void Main() {
         useARMv6K(); // might fail with SIGILL
         println("ARMv6K supported.");
         os.Exit(0);
-
     }
     gohostos = runtime.GOOS;
     switch (gohostos) {
@@ -111,9 +109,7 @@ private static void Main() {
                 // Even on 64-bit platform, some versions of macOS uname -m prints i386.
                 // We don't support any of the OS X versions that run on 32-bit-only hardware anymore.
                 gohostarch = "amd64";
-
             }
-
         else if (strings.Contains(out, "aarch64") || strings.Contains(out, "arm64")) 
             gohostarch = "arm64";
         else if (strings.Contains(out, "arm")) 
@@ -149,8 +145,7 @@ private static void Main() {
             }
         else 
             fatalf("unknown architecture: %s", out);
-        
-    }
+            }
     if (gohostarch == "arm" || gohostarch == "mips64" || gohostarch == "mips64le") {
         maxbg = min(maxbg, runtime.NumCPU());
     }
@@ -162,12 +157,10 @@ private static void Main() {
         useVFPv3(); // might fail with SIGILL
         println("VFPv3 OK.");
         os.Exit(0);
-
     }
     xinit();
     xmain();
     xexit(0);
-
 }
 
 // The OS-specific main calls into the portable code here.
@@ -194,7 +187,6 @@ private static void xmain() {
             usage();
         }
     }
-
 }
 
 } // end main_package

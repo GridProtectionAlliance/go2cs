@@ -3,25 +3,28 @@
 // license that can be found in the LICENSE file.
 
 // Package url parses URLs and implements query escaping.
-// package url -- go2cs converted at 2022 March 06 22:17:04 UTC
+
+// package url -- go2cs converted at 2022 March 13 05:30:25 UTC
 // import "net/url" ==> using url = go.net.url_package
 // Original source: C:\Program Files\Go\src\net\url\url.go
+namespace go.net;
 // See RFC 3986. This package generally follows RFC 3986, except where
 // it deviates for compatibility reasons. When sending changes, first
 // search old issues for history on decisions. Unit tests should also
 // contain references to issue numbers with details.
 
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
 
-namespace go.net;
+using errors = errors_package;
+using fmt = fmt_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// Error reports an error and the operation and URL that caused it.
 
 public static partial class url_package {
 
-    // Error reports an error and the operation and URL that caused it.
 public partial struct Error {
     public @string Op;
     public @string URL;
@@ -64,7 +67,6 @@ private static bool ishex(byte c) {
     else if ('A' <= c && c <= 'F') 
         return true;
         return false;
-
 }
 
 private static byte unhex(byte c) {
@@ -76,7 +78,6 @@ private static byte unhex(byte c) {
     else if ('A' <= c && c <= 'F') 
         return c - 'A' + 10;
         return 0;
-
 }
 
 private partial struct encoding { // : nint
@@ -89,7 +90,6 @@ private static readonly var encodeZone = 2;
 private static readonly var encodeUserPassword = 3;
 private static readonly var encodeQueryComponent = 4;
 private static readonly var encodeFragment = 5;
-
 
 public partial struct EscapeError { // : @string
 }
@@ -162,7 +162,6 @@ private static bool shouldEscape(byte c, encoding mode) {
                 return false;
                 break;
         }
-
     }
     switch (c) {
         case '-': // §2.3 Unreserved characters (mark)
@@ -237,7 +236,6 @@ private static bool shouldEscape(byte c, encoding mode) {
                 // The RFC text is silent but the grammar allows
                 // everything, so escape nothing.
                 return false;
-
             break;
     }
 
@@ -259,10 +257,8 @@ private static bool shouldEscape(byte c, encoding mode) {
                 return false;
                 break;
         }
-
     }
     return true;
-
 }
 
 // QueryUnescape does the inverse transformation of QueryEscape,
@@ -325,7 +321,6 @@ private static (@string, error) unescape(@string s, encoding mode) {
                     if (mode == encodeHost && unhex(s[i + 1]) < 8 && s[(int)i..(int)i + 3] != "%25") {
                         return ("", error.As(EscapeError(s[(int)i..(int)i + 3]))!);
                     }
-
                     if (mode == encodeZone) { 
                         // RFC 6874 says basically "anything goes" for zone identifiers
                         // and that even non-ASCII can be redundantly escaped,
@@ -338,11 +333,8 @@ private static (@string, error) unescape(@string s, encoding mode) {
                         if (s[(int)i..(int)i + 3] != "%25" && v != ' ' && shouldEscape(v, encodeHost)) {
                             return ("", error.As(EscapeError(s[(int)i..(int)i + 3]))!);
                         }
-
                     }
-
                     i += 3;
-
                     break;
                 case '+': 
                     hasPlus = mode == encodeQueryComponent;
@@ -355,7 +347,6 @@ private static (@string, error) unescape(@string s, encoding mode) {
                     i++;
                     break;
             }
-
         }
 
         i = i__prev1;
@@ -383,19 +374,16 @@ private static (@string, error) unescape(@string s, encoding mode) {
                     {
                                        t.WriteByte('+');
                                    }
-
                     break;
                 default: 
                     t.WriteByte(s[i]);
                     break;
             }
-
         }
 
         i = i__prev1;
     }
     return (t.String(), error.As(null!)!);
-
 }
 
 // QueryEscape escapes the string so it can be safely placed
@@ -426,9 +414,7 @@ private static @string escape(@string s, encoding mode) {
  {
                     hexCount++;
                 }
-
             }
-
         }
 
         i = i__prev1;
@@ -463,7 +449,6 @@ private static @string escape(@string s, encoding mode) {
             i = i__prev1;
         }
         return string(t);
-
     }
     nint j = 0;
     {
@@ -491,13 +476,11 @@ private static @string escape(@string s, encoding mode) {
 
                 c = c__prev1;
             }
-
         }
 
         i = i__prev1;
     }
     return string(t);
-
 }
 
 // A URL represents a parsed URL (technically, a URI reference).
@@ -567,7 +550,6 @@ private static @string Username(this ptr<Userinfo> _addr_u) {
         return "";
     }
     return u.username;
-
 }
 
 // Password returns the password in case it is set, and whether it is set.
@@ -580,7 +562,6 @@ private static (@string, bool) Password(this ptr<Userinfo> _addr_u) {
         return ("", false);
     }
     return (u.password, u.passwordSet);
-
 }
 
 // String returns the encoded userinfo information in the standard form
@@ -596,7 +577,6 @@ private static @string String(this ptr<Userinfo> _addr_u) {
         s += ":" + escape(u.password, encodeUserPassword);
     }
     return s;
-
 }
 
 // Maybe rawURL is of the form scheme:path.
@@ -623,10 +603,8 @@ private static (@string, @string, error) getScheme(@string rawURL) {
             // we have encountered an invalid character,
             // so there is no valid scheme
             return ("", rawURL, error.As(null!)!);
-        
-    }
+            }
     return ("", rawURL, error.As(null!)!);
-
 }
 
 // split slices s into two substrings separated by the first occurrence of
@@ -644,7 +622,6 @@ private static (@string, @string) split(@string s, byte sep, bool cutc) {
         return (s[..(int)i], s[(int)i + 1..]);
     }
     return (s[..(int)i], s[(int)i..]);
-
 }
 
 // Parse parses a raw url into a URL structure.
@@ -672,7 +649,6 @@ public static (ptr<URL>, error) Parse(@string rawURL) {
         return (_addr_null!, error.As(addr(new Error("parse",rawURL,err))!)!);
     }
     return (_addr_url!, error.As(null!)!);
-
 }
 
 // ParseRequestURI parses a raw url into a URL structure. It assumes that
@@ -689,7 +665,6 @@ public static (ptr<URL>, error) ParseRequestURI(@string rawURL) {
         return (_addr_null!, error.As(addr(new Error("parse",rawURL,err))!)!);
     }
     return (_addr_url!, error.As(null!)!);
-
 }
 
 // parse parses a URL from a string in one of two contexts. If
@@ -735,7 +710,6 @@ private static (ptr<URL>, error) parse(@string rawURL, bool viaRequest) {
             // We consider rootless paths per RFC 3986 as opaque.
             url.Opaque = rest;
             return (_addr_url!, error.As(null!)!);
-
         }
         if (viaRequest) {
             return (_addr_null!, error.As(errors.New("invalid URI for request"))!);
@@ -745,7 +719,6 @@ private static (ptr<URL>, error) parse(@string rawURL, bool viaRequest) {
         if (colon >= 0 && (slash < 0 || colon < slash)) { 
             // First path segment has colon. Not allowed in relative URL.
             return (_addr_null!, error.As(errors.New("first path segment in URL cannot contain colon"))!);
-
         }
     }
     if ((url.Scheme != "" || !viaRequest && !strings.HasPrefix(rest, "///")) && strings.HasPrefix(rest, "//")) {
@@ -767,9 +740,7 @@ private static (ptr<URL>, error) parse(@string rawURL, bool viaRequest) {
         err = err__prev1;
 
     }
-
     return (_addr_url!, error.As(null!)!);
-
 }
 
 private static (ptr<Userinfo>, @string, error) parseAuthority(@string authority) {
@@ -802,7 +773,6 @@ private static (ptr<Userinfo>, @string, error) parseAuthority(@string authority)
             return (_addr_null!, "", error.As(err)!);
         }
         user = User(userinfo);
-
     }
     else
  {
@@ -818,10 +788,8 @@ private static (ptr<Userinfo>, @string, error) parseAuthority(@string authority)
             return (_addr_null!, "", error.As(err)!);
         }
         user = UserPassword(username, password);
-
     }
     return (_addr_user!, host, error.As(null!)!);
-
 }
 
 // parseHost parses host as an authority without user
@@ -873,7 +841,6 @@ private static (@string, error) parseHost(@string host) {
 
     }
 
-
     error err = default!;
     host, err = unescape(host, encodeHost);
 
@@ -881,7 +848,6 @@ private static (@string, error) parseHost(@string host) {
         return ("", error.As(err)!);
     }
     return (host, error.As(null!)!);
-
 }
 
 // setPath sets the Path and RawPath fields of the URL based on the provided
@@ -906,16 +872,13 @@ private static error setPath(this ptr<URL> _addr_u, @string p) {
         if (p == escp) { 
             // Default encoding is fine.
             u.RawPath = "";
-
         }
         else
  {
             u.RawPath = p;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // EscapedPath returns the escaped form of u.Path.
@@ -940,7 +903,6 @@ private static @string EscapedPath(this ptr<URL> _addr_u) {
         return "*"; // don't escape (Issue 11202)
     }
     return escape(u.Path, encodePath);
-
 }
 
 // validEncoded reports whether s is a valid encoded path or fragment,
@@ -995,10 +957,8 @@ private static bool validEncoded(@string s, encoding mode) {
                 }
                 break;
         }
-
     }
     return true;
-
 }
 
 // setFragment is like setPath but for Fragment/RawFragment.
@@ -1016,16 +976,13 @@ private static error setFragment(this ptr<URL> _addr_u, @string f) {
         if (f == escf) { 
             // Default encoding is fine.
             u.RawFragment = "";
-
         }
         else
  {
             u.RawFragment = f;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // EscapedFragment returns the escaped form of u.Fragment.
@@ -1046,7 +1003,6 @@ private static @string EscapedFragment(this ptr<URL> _addr_u) {
         }
     }
     return escape(u.Fragment, encodeFragment);
-
 }
 
 // validOptionalPort reports whether port is either an empty string
@@ -1063,7 +1019,6 @@ private static bool validOptionalPort(@string port) {
             return false;
         }
     }    return true;
-
 }
 
 // String reassembles the URL into a valid URL string.
@@ -1113,7 +1068,6 @@ private static @string String(this ptr<URL> _addr_u) {
                 }
 
             }
-
             {
                 var h = u.Host;
 
@@ -1122,7 +1076,6 @@ private static @string String(this ptr<URL> _addr_u) {
                 }
 
             }
-
         }
         var path = u.EscapedPath();
         if (path != "" && path[0] != '/' && u.Host != "") {
@@ -1143,10 +1096,8 @@ private static @string String(this ptr<URL> _addr_u) {
                 }
 
             }
-
         }
         buf.WriteString(path);
-
     }
     if (u.ForceQuery || u.RawQuery != "") {
         buf.WriteByte('?');
@@ -1157,7 +1108,6 @@ private static @string String(this ptr<URL> _addr_u) {
         buf.WriteString(u.EscapedFragment());
     }
     return buf.String();
-
 }
 
 // Redacted is like String but replaces any password with "xxxxx".
@@ -1176,9 +1126,7 @@ private static @string Redacted(this ptr<URL> _addr_u) {
             ru.User = UserPassword(ru.User.Username(), "xxxxx");
         }
     }
-
     return ru.String();
-
 }
 
 // Values maps a string key to a list of values.
@@ -1201,7 +1149,6 @@ public static @string Get(this Values v, @string key) {
         return "";
     }
     return vs[0];
-
 }
 
 // Set sets the key to value. It replaces any existing
@@ -1267,7 +1214,6 @@ private static error parseQuery(Values m, @string query) {
             i = i__prev1;
 
         }
-
         if (strings.Contains(key, ";")) {
             err = fmt.Errorf("invalid semicolon separator in query");
             continue;
@@ -1288,7 +1234,6 @@ private static error parseQuery(Values m, @string query) {
             i = i__prev1;
 
         }
-
         var (key, err1) = QueryUnescape(key);
         if (err1 != null) {
             if (err == null) {
@@ -1304,10 +1249,8 @@ private static error parseQuery(Values m, @string query) {
             continue;
         }
         m[key] = append(m[key], value);
-
     }
     return error.As(err)!;
-
 }
 
 // Encode encodes the values into ``URL encoded'' form
@@ -1349,7 +1292,6 @@ public static @string Encode(this Values v) {
     }
 
     return buf.String();
-
 }
 
 // resolvePath applies special path segments from refs and applies
@@ -1388,7 +1330,6 @@ private static @string resolvePath(@string @base, @string @ref) {
             first = false; 
             // drop
             continue;
-
         }
         if (elem == "..") { 
             // Ignore the leading '/' we already wrote.
@@ -1404,7 +1345,6 @@ private static @string resolvePath(@string @base, @string @ref) {
  {
                 dst.WriteString(str[..(int)index]);
             }
-
         }
         else
  {
@@ -1424,7 +1364,6 @@ private static @string resolvePath(@string @base, @string @ref) {
         r = r[(int)1..];
     }
     return r;
-
 }
 
 // IsAbs reports whether the URL is absolute.
@@ -1448,7 +1387,6 @@ private static (ptr<URL>, error) Parse(this ptr<URL> _addr_u, @string @ref) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_u.ResolveReference(refURL)!, error.As(null!)!);
-
 }
 
 // ResolveReference resolves a URI reference to an absolute URI from
@@ -1471,7 +1409,6 @@ private static ptr<URL> ResolveReference(this ptr<URL> _addr_u, ptr<URL> _addr_@
         // validly-escaped path.
         url.setPath(resolvePath(@ref.EscapedPath(), ""));
         return _addr__addr_url!;
-
     }
     if (@ref.Opaque != "") {
         url.User = null;
@@ -1490,7 +1427,6 @@ private static ptr<URL> ResolveReference(this ptr<URL> _addr_u, ptr<URL> _addr_@
     url.User = u.User;
     url.setPath(resolvePath(u.EscapedPath(), @ref.EscapedPath()));
     return _addr__addr_url!;
-
 }
 
 // Query parses RawQuery and returns the corresponding values.
@@ -1525,7 +1461,6 @@ private static @string RequestURI(this ptr<URL> _addr_u) {
         result += "?" + u.RawQuery;
     }
     return result;
-
 }
 
 // Hostname returns u.Host, stripping any valid port number if present.
@@ -1566,7 +1501,6 @@ private static (@string, @string) splitHostPort(@string hostPort) {
         host = host[(int)1..(int)len(host) - 1];
     }
     return ;
-
 }
 
 // Marshaling interface implementations.
@@ -1589,7 +1523,6 @@ private static error UnmarshalBinary(this ptr<URL> _addr_u, slice<byte> text) {
     }
     u.val = u1.val;
     return error.As(null!)!;
-
 }
 
 // validUserinfo reports whether s is a valid userinfo string per RFC 3986
@@ -1653,9 +1586,7 @@ private static bool validUserinfo(@string s) {
                 return false;
                 break;
         }
-
     }    return true;
-
 }
 
 // stringContainsCTLByte reports whether s contains any ASCII control character.
@@ -1667,7 +1598,6 @@ private static bool stringContainsCTLByte(@string s) {
         }
     }
     return false;
-
 }
 
 } // end url_package

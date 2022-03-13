@@ -16,12 +16,12 @@
 // to 64 bits because there are too many summary levels to fit in just 33
 // bits.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:01 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:48 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mpagealloc_32bit.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -39,7 +39,6 @@ private static readonly nint pageAlloc64Bit = 0;
 // See (*pageAlloc).chunks for more details. Update the documentation
 // there should this number change.
 private static readonly nint pallocChunksL1Bits = 0;
-
 
 // See comment in mpagealloc_64bit.go.
 private static array<nuint> levelBits = new array<nuint>(new nuint[] { summaryL0Bits, summaryLevelBits, summaryLevelBits, summaryLevelBits });
@@ -94,7 +93,6 @@ private static void sysInit(this ptr<pageAlloc> _addr_p) {
             p.summary[l] = new ptr<ptr<ptr<slice<pallocSum>>>>(@unsafe.Pointer(_addr_sl));
 
             reservation = add(reservation, uintptr(entries) * pallocSumBytes);
-
         }
         l = l__prev1;
     }
@@ -119,7 +117,6 @@ private static void sysGrow(this ptr<pageAlloc> _addr_p, System.UIntPtr @base, S
             p.summary[l] = p.summary[l][..(int)hi];
         }
     }
-
 }
 
 } // end runtime_package

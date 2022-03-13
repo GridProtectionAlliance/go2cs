@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:14:35 UTC
+//     Generated on 2022 March 13 05:28:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace runtime
 {
     public static partial class metrics_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Description
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace runtime
             public static implicit operator Description(NilType nil) => default(Description);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Description Description_cast(dynamic value)
         {
             return new Description(value.Name, value.Description, value.Kind, value.Cumulative);

@@ -2,35 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modfetch -- go2cs converted at 2022 March 06 23:18:37 UTC
+// package modfetch -- go2cs converted at 2022 March 13 06:32:00 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\cache.go
-using bytes = go.bytes_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using rand = go.math.rand_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using codehost = go.cmd.go.@internal.modfetch.codehost_package;
-using par = go.cmd.go.@internal.par_package;
-using robustio = go.cmd.go.@internal.robustio_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using rand = math.rand_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using codehost = cmd.go.@internal.modfetch.codehost_package;
+using par = cmd.go.@internal.par_package;
+using robustio = cmd.go.@internal.robustio_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using System;
 
 public static partial class modfetch_package {
 
@@ -45,13 +44,11 @@ private static (@string, error) cacheDir(@string path) {
             return ("", error.As(err)!);
         }
     }
-
     var (enc, err) = module.EscapePath(path);
     if (err != null) {
         return ("", error.As(err)!);
     }
     return (filepath.Join(cfg.GOMODCACHE, "cache/download", enc, "/@v"), error.As(null!)!);
-
 }
 
 public static (@string, error) CachePath(module.Version m, @string suffix) {
@@ -73,7 +70,6 @@ public static (@string, error) CachePath(module.Version m, @string suffix) {
         return ("", error.As(err)!);
     }
     return (filepath.Join(dir, encVer + "." + suffix), error.As(null!)!);
-
 }
 
 // DownloadDir returns the directory to which m should have been downloaded.
@@ -92,7 +88,6 @@ public static (@string, error) DownloadDir(module.Version m) {
             return ("", error.As(err)!);
         }
     }
-
     var (enc, err) = module.EscapePath(m.Path);
     if (err != null) {
         return ("", error.As(err)!);
@@ -161,9 +156,7 @@ public static (@string, error) DownloadDir(module.Version m) {
         }
 
     }
-
     return (dir, error.As(null!)!);
-
 }
 
 // DownloadDirPartialError is returned by DownloadDir if a module directory
@@ -203,9 +196,7 @@ private static (Action, error) lockVersion(module.Version mod) {
             return (null, error.As(err)!);
         }
     }
-
     return lockedfile.MutexAt(path).Lock();
-
 }
 
 // SideLock locks a file within the module cache that previously guarded
@@ -228,7 +219,6 @@ public static (Action, error) SideLock() {
 
     }
 
-
     var path = filepath.Join(cfg.GOMODCACHE, "cache", "lock");
     {
         var err__prev1 = err;
@@ -242,9 +232,7 @@ public static (Action, error) SideLock() {
 
     }
 
-
     return lockedfile.MutexAt(path).Lock();
-
 }
 
 // A cachingRepo is a cache around an underlying Repo,
@@ -276,7 +264,6 @@ private static Repo repo(this ptr<cachingRepo> _addr_r) {
         }
     });
     return r.r;
-
 }
 
 private static @string ModulePath(this ptr<cachingRepo> _addr_r) {
@@ -303,7 +290,6 @@ private static (slice<@string>, error) Versions(this ptr<cachingRepo> _addr_r, @
         return (null, error.As(c.err)!);
     }
     return (append((slice<@string>)null, c.list), error.As(null!)!);
-
 }
 
 private partial struct cachedInfo {
@@ -327,11 +313,8 @@ private static (ptr<RevInfo>, error) Stat(this ptr<cachingRepo> _addr_r, @string
             // then save the information under the proper version, for future use.
             if (info.Version != rev) {
                 file, _ = CachePath(new module.Version(Path:r.path,Version:info.Version), "info");
-                r.cache.Do("stat:" + info.Version, () => {
-                    return _addr_new cachedInfo(info,err)!;
-                });
+                r.cache.Do("stat:" + info.Version, () => _addr_new cachedInfo(info,err)!);
             }
-
             {
                 var err = writeDiskStat(file, _addr_info);
 
@@ -340,10 +323,8 @@ private static (ptr<RevInfo>, error) Stat(this ptr<cachingRepo> _addr_r, @string
                 }
 
             }
-
         }
         return _addr_new cachedInfo(info,err)!;
-
     })._<cachedInfo>();
 
     if (c.err != null) {
@@ -351,7 +332,6 @@ private static (ptr<RevInfo>, error) Stat(this ptr<cachingRepo> _addr_r, @string
     }
     ref var info = ref heap(c.info.val, out ptr<var> _addr_info);
     return (_addr__addr_info!, error.As(null!)!);
-
 }
 
 private static (ptr<RevInfo>, error) Latest(this ptr<cachingRepo> _addr_r) {
@@ -364,9 +344,7 @@ private static (ptr<RevInfo>, error) Latest(this ptr<cachingRepo> _addr_r) {
 
         // Save info for likely future Stat call.
         if (err == null) {
-            r.cache.Do("stat:" + info.Version, () => {
-                return _addr_new cachedInfo(info,err)!;
-            });
+            r.cache.Do("stat:" + info.Version, () => _addr_new cachedInfo(info,err)!);
             {
                 var (file, _, err) = readDiskStat(r.path, info.Version);
 
@@ -375,10 +353,8 @@ private static (ptr<RevInfo>, error) Latest(this ptr<cachingRepo> _addr_r) {
                 }
 
             }
-
         }
         return _addr_new cachedInfo(info,err)!;
-
     })._<cachedInfo>();
 
     if (c.err != null) {
@@ -386,7 +362,6 @@ private static (ptr<RevInfo>, error) Latest(this ptr<cachingRepo> _addr_r) {
     }
     ref var info = ref heap(c.info.val, out ptr<var> _addr_info);
     return (_addr__addr_info!, error.As(null!)!);
-
 }
 
 private static (slice<byte>, error) GoMod(this ptr<cachingRepo> _addr_r, @string version) {
@@ -403,7 +378,6 @@ private static (slice<byte>, error) GoMod(this ptr<cachingRepo> _addr_r, @string
         if (err == null) { 
             // Note: readDiskGoMod already called checkGoMod.
             return new cached(text,nil);
-
         }
         text, err = r.repo().GoMod(version);
         if (err == null) {
@@ -419,7 +393,6 @@ private static (slice<byte>, error) GoMod(this ptr<cachingRepo> _addr_r, @string
                 err = err__prev2;
 
             }
-
             {
                 var err__prev2 = err;
 
@@ -432,17 +405,14 @@ private static (slice<byte>, error) GoMod(this ptr<cachingRepo> _addr_r, @string
                 err = err__prev2;
 
             }
-
         }
         return new cached(text,err);
-
     })._<cached>();
 
     if (c.err != null) {
         return (null, error.As(c.err)!);
     }
     return (append((slice<byte>)null, c.text), error.As(null!)!);
-
 }
 
 private static error Zip(this ptr<cachingRepo> _addr_r, io.Writer dst, @string version) {
@@ -472,7 +442,6 @@ public static (@string, error) InfoFile(@string path, @string version) {
 
     }
 
-
     var err = TryProxies(proxy => {
         var (_, err) = Lookup(proxy, path).Stat(version);
         return err;
@@ -485,7 +454,6 @@ public static (@string, error) InfoFile(@string path, @string version) {
         return ("", error.As(err)!);
     }
     return (file, error.As(null!)!);
-
 }
 
 // GoMod is like Lookup(path).GoMod(rev) but avoids the
@@ -522,7 +490,6 @@ public static (slice<byte>, error) GoMod(@string path, @string rev) {
             }
 
         }
-
     }
     var (_, data, err) = readDiskGoMod(path, rev);
     if (err == null) {
@@ -533,7 +500,6 @@ public static (slice<byte>, error) GoMod(@string path, @string rev) {
         return err;
     });
     return (data, error.As(err)!);
-
 }
 
 // GoModFile is like GoMod but returns the name of the file containing
@@ -558,7 +524,6 @@ public static (@string, error) GoModFile(@string path, @string version) {
         return ("", error.As(err)!);
     }
     return (file, error.As(null!)!);
-
 }
 
 // GoModSum returns the go.sum entry for the module version's go.mod file.
@@ -579,7 +544,6 @@ public static (@string, error) GoModSum(@string path, @string version) {
         return ("", error.As(err)!);
     }
     return (sum, error.As(null!)!);
-
 }
 
 private static var errNotCached = fmt.Errorf("not in cache");
@@ -627,10 +591,8 @@ private static (@string, ptr<RevInfo>, error) readDiskStat(@string path, @string
                 file = file__prev3;
 
             }
-
         }
         return (file, _addr_null!, error.As(err)!);
-
     }
     info = @new<RevInfo>();
     {
@@ -648,7 +610,6 @@ private static (@string, ptr<RevInfo>, error) readDiskStat(@string path, @string
         writeDiskCache(file, data);
     }
     return (file, _addr_info!, error.As(null!)!);
-
 }
 
 // readDiskStatByHash is a fallback for readDiskStat for the case
@@ -668,7 +629,6 @@ private static (@string, ptr<RevInfo>, error) readDiskStatByHash(@string path, @
     if (cfg.GOMODCACHE == "") { 
         // Do not download to current directory.
         return ("", _addr_null!, error.As(errNotCached)!);
-
     }
     if (!codehost.AllHex(rev) || len(rev) < 12) {
         return ("", _addr_null!, error.As(errNotCached)!);
@@ -699,7 +659,6 @@ private static (@string, ptr<RevInfo>, error) readDiskStatByHash(@string path, @
             }
         }
     }    return (file, _addr_info!, error.As(err)!);
-
 }
 
 // oldVgoPrefix is the prefix in the old auto-generated cached go.mod files.
@@ -734,10 +693,8 @@ private static (@string, slice<byte>, error) readDiskGoMod(@string path, @string
             }
 
         }
-
     }
     return (file, data, error.As(err)!);
-
 }
 
 // readDiskCache is the generic "read from a cache file" implementation.
@@ -759,7 +716,6 @@ private static (@string, slice<byte>, error) readDiskCache(@string path, @string
         return (file, null, error.As(errNotCached)!);
     }
     return (file, data, error.As(null!)!);
-
 }
 
 // writeDiskStat writes a stat result cache entry.
@@ -775,7 +731,6 @@ private static error writeDiskStat(@string file, ptr<RevInfo> _addr_info) {
         return error.As(err)!;
     }
     return error.As(writeDiskCache(file, js))!;
-
 }
 
 // writeDiskGoMod writes a go.mod cache entry.
@@ -829,7 +784,6 @@ private static error writeDiskCache(@string file, slice<byte> data) => func((def
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -841,7 +795,6 @@ private static error writeDiskCache(@string file, slice<byte> data) => func((def
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -854,12 +807,10 @@ private static error writeDiskCache(@string file, slice<byte> data) => func((def
 
     }
 
-
     if (strings.HasSuffix(file, ".mod")) {
         rewriteVersionList(filepath.Dir(file));
     }
     return error.As(null!)!;
-
 });
 
 // tempFile creates a new temporary file with given permission bits.
@@ -874,10 +825,8 @@ private static (ptr<os.File>, error) tempFile(@string dir, @string prefix, fs.Fi
             continue;
         }
         break;
-
     }
     return ;
-
 }
 
 // rewriteVersionList rewrites the version list in dir
@@ -912,7 +861,6 @@ private static error rewriteVersionList(@string dir) => func((defer, _, _) => {
             }
 
         }
-
     }());
     var (infos, err) = os.ReadDir(dir);
     if (err != null) {
@@ -966,7 +914,6 @@ private static error rewriteVersionList(@string dir) => func((defer, _, _) => {
                 err = err__prev2;
 
             }
-
         }
         err = err__prev1;
 
@@ -1011,9 +958,7 @@ private static error rewriteVersionList(@string dir) => func((defer, _, _) => {
 
     }
 
-
     return error.As(null!)!;
-
 });
 
 private static sync.Once statCacheOnce = default;private static error statCacheErr = default!;
@@ -1025,7 +970,6 @@ private static error checkCacheDir() {
         // modload.Init exits if GOPATH[0] is empty, and cfg.GOMODCACHE
         // is set to GOPATH[0]/pkg/mod if GOMODCACHE is empty, so this should never happen.
         return error.As(fmt.Errorf("internal error: cfg.GOMODCACHE not set"))!;
-
     }
     if (!filepath.IsAbs(cfg.GOMODCACHE)) {
         return error.As(fmt.Errorf("GOMODCACHE entry is relative; must be absolute path: %q.\n", cfg.GOMODCACHE))!;
@@ -1046,9 +990,7 @@ private static error checkCacheDir() {
                 }
 
             }
-
             return ;
-
         }
         if (!fi.IsDir()) {
             statCacheErr = fmt.Errorf("could not create module cache: %q is not a directory", cfg.GOMODCACHE);
@@ -1056,7 +998,6 @@ private static error checkCacheDir() {
         }
     });
     return error.As(statCacheErr)!;
-
 }
 
 } // end modfetch_package

@@ -15,18 +15,18 @@
 // used with a fixed key in order to generate one-time keys from an nonce.
 // However, in this package AES isn't used and the one-time key is specified
 // directly.
-// package poly1305 -- go2cs converted at 2022 March 06 23:36:52 UTC
+
+// package poly1305 -- go2cs converted at 2022 March 13 06:44:59 UTC
 // import "vendor/golang.org/x/crypto/poly1305" ==> using poly1305 = go.vendor.golang.org.x.crypto.poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\poly1305\poly1305.go
+namespace go.vendor.golang.org.x.crypto;
 // import "golang.org/x/crypto/poly1305"
 
-using subtle = go.crypto.subtle_package;
-
-namespace go.vendor.golang.org.x.crypto;
+using subtle = crypto.subtle_package;
 
 public static partial class poly1305_package {
 
-    // TagSize is the size, in bytes, of a poly1305 authenticator.
+// TagSize is the size, in bytes, of a poly1305 authenticator.
 public static readonly nint TagSize = 16;
 
 // Sum generates an authenticator for msg using a one-time key and puts the
@@ -106,7 +106,6 @@ private static (nint, error) Write(this ptr<MAC> _addr_h, slice<byte> p) => func
         panic("poly1305: write to MAC after Sum or Verify");
     }
     return h.mac.Write(p);
-
 });
 
 // Sum computes the authenticator of all data written to the

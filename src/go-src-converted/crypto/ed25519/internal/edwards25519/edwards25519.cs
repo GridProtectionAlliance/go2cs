@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package edwards25519 -- go2cs converted at 2022 March 06 22:17:24 UTC
+// package edwards25519 -- go2cs converted at 2022 March 13 05:30:44 UTC
 // import "crypto/ed25519/internal/edwards25519" ==> using edwards25519 = go.crypto.ed25519.@internal.edwards25519_package
 // Original source: C:\Program Files\Go\src\crypto\ed25519\internal\edwards25519\edwards25519.go
-using field = go.crypto.ed25519.@internal.edwards25519.field_package;
-using errors = go.errors_package;
-using System;
-
-
 namespace go.crypto.ed25519.@internal;
 
-public static partial class edwards25519_package {
+using field = crypto.ed25519.@internal.edwards25519.field_package;
+using errors = errors_package;
 
-    // Point types.
+
+// Point types.
+
+
+using System;public static partial class edwards25519_package {
+
 private partial struct projP1xP1 {
     public field.Element X;
     public field.Element Y;
@@ -142,7 +143,6 @@ private static slice<byte> Bytes(this ptr<Point> _addr_v) {
     // rather than happen on the heap.
     ref array<byte> buf = ref heap(new array<byte>(32), out ptr<array<byte>> _addr_buf);
     return v.bytes(_addr_buf);
-
 }
 
 private static slice<byte> bytes(this ptr<Point> _addr_v, ptr<array<byte>> _addr_buf) {
@@ -160,7 +160,6 @@ private static slice<byte> bytes(this ptr<Point> _addr_v, ptr<array<byte>> _addr
     var @out = copyFieldElement(_addr_buf, _addr_y);
     out[31] |= byte(x.IsNegative() << 7);
     return out;
-
 }
 
 private static ptr<field.Element> feOne = @new<field.Element>().One();
@@ -217,7 +216,6 @@ private static (ptr<Point>, error) SetBytes(this ptr<Point> _addr_v, slice<byte>
     v.t.Multiply(xx, y); // xy = T / Z
 
     return (_addr_v!, error.As(null!)!);
-
 }
 
 private static slice<byte> copyFieldElement(ptr<array<byte>> _addr_buf, ptr<field.Element> _addr_v) {
@@ -379,7 +377,6 @@ private static ptr<projP1xP1> Sub(this ptr<projP1xP1> _addr_v, ptr<Point> _addr_
     v.Z.Subtract(_addr_ZZ2, _addr_TT2d); // flipped sign
     v.T.Add(_addr_ZZ2, _addr_TT2d); // flipped sign
     return _addr_v!;
-
 }
 
 private static ptr<projP1xP1> AddAffine(this ptr<projP1xP1> _addr_v, ptr<Point> _addr_p, ptr<affineCached> _addr_q) {
@@ -430,7 +427,6 @@ private static ptr<projP1xP1> SubAffine(this ptr<projP1xP1> _addr_v, ptr<Point> 
     v.Z.Subtract(_addr_Z2, _addr_TT2d); // flipped sign
     v.T.Add(_addr_Z2, _addr_TT2d); // flipped sign
     return _addr_v!;
-
 }
 
 // Doubling.

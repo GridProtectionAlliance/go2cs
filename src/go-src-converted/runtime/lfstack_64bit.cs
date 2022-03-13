@@ -5,12 +5,12 @@
 //go:build amd64 || arm64 || mips64 || mips64le || ppc64 || ppc64le || riscv64 || s390x || wasm
 // +build amd64 arm64 mips64 mips64le ppc64 ppc64le riscv64 s390x wasm
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:48 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:34 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\lfstack_64bit.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -43,7 +43,6 @@ private static readonly nint cntBits = 64 - addrBits + 3;
 private static readonly nint aixAddrBits = 57;
 private static readonly nint aixCntBits = 64 - aixAddrBits + 3;
 
-
 private static ulong lfstackPack(ptr<lfnode> _addr_node, System.UIntPtr cnt) {
     ref lfnode node = ref _addr_node.val;
 
@@ -51,7 +50,6 @@ private static ulong lfstackPack(ptr<lfnode> _addr_node, System.UIntPtr cnt) {
         return uint64(uintptr(@unsafe.Pointer(node))) << (int)((64 - aixAddrBits)) | uint64(cnt & (1 << (int)(aixCntBits) - 1));
     }
     return uint64(uintptr(@unsafe.Pointer(node))) << (int)((64 - addrBits)) | uint64(cnt & (1 << (int)(cntBits) - 1));
-
 }
 
 private static ptr<lfnode> lfstackUnpack(ulong val) {
@@ -59,13 +57,11 @@ private static ptr<lfnode> lfstackUnpack(ulong val) {
         // amd64 systems can place the stack above the VA hole, so we need to sign extend
         // val before unpacking.
         return _addr_(lfnode.val)(@unsafe.Pointer(uintptr(int64(val) >> (int)(cntBits) << 3)))!;
-
     }
     if (GOARCH == "ppc64" && GOOS == "aix") {
         return _addr_(lfnode.val)(@unsafe.Pointer(uintptr((val >> (int)(aixCntBits) << 3) | 0xa << 56)))!;
     }
     return _addr_(lfnode.val)(@unsafe.Pointer(uintptr(val >> (int)(cntBits) << 3)))!;
-
 }
 
 } // end runtime_package

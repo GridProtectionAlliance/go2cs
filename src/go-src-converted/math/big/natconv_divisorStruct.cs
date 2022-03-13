@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:18:01 UTC
+//     Generated on 2022 March 13 05:32:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace math
 {
     public static partial class big_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct divisor
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace math
             public static implicit operator divisor(NilType nil) => default(divisor);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static divisor divisor_cast(dynamic value)
         {
             return new divisor(value.bbb, value.nbits, value.ndigits);

@@ -199,35 +199,36 @@
 // they're expected to change much more rapidly, so they're omitted
 // here. See exportWriter's varExt/funcExt/etc methods for details.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:30 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:49 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\iexport.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using md5 = go.crypto.md5_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using io = go.io_package;
-using big = go.math.big_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using goobj = go.cmd.@internal.goobj_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using md5 = crypto.md5_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using io = io_package;
+using big = math.big_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+using goobj = cmd.@internal.goobj_package;
+using src = cmd.@internal.src_package;
+
+
+// Current indexed export format version. Increase with each format change.
+// 1: added column details to Pos
+// 0: Go1.11 encoding
+
+using System;
 public static partial class typecheck_package {
 
-    // Current indexed export format version. Increase with each format change.
-    // 1: added column details to Pos
-    // 0: Go1.11 encoding
 private static readonly nint iexportVersion = 1;
 
 // predeclReserved is the number of type offsets reserved for types
@@ -259,10 +260,8 @@ private static readonly var signatureType = 5;
 private static readonly var structType = 6;
 private static readonly var interfaceType = 7;
 
-
 private static readonly var debug = false;
 private static readonly nuint magic = 0x6742937dc293105;
-
 
 public static void WriteExports(ptr<bufio.Writer> _addr_@out) {
     ref bufio.Writer @out = ref _addr_@out.val;
@@ -307,7 +306,6 @@ public static void WriteExports(ptr<bufio.Writer> _addr_@out) {
     // Attach this to the end, so tools (e.g. gcimporter) don't care.
     copy(@base.Ctxt.Fingerprint[..], h.Sum(null)[..]);
     @out.Write(@base.Ctxt.Fingerprint[..]);
-
 }
 
 // writeIndex writes out a symbol index. mainIndex indicates whether
@@ -357,9 +355,7 @@ private static void writeIndex(this ptr<exportWriter> _addr_w, map<ptr<types.Sym
         pkg = pkg__prev1;
     }
 
-    sort.Slice(pkgs, (i, j) => {
-        return pkgs[i].Path < pkgs[j].Path;
-    });
+    sort.Slice(pkgs, (i, j) => pkgs[i].Path < pkgs[j].Path);
 
     w.uint64(uint64(len(pkgs)));
     {
@@ -375,9 +371,7 @@ private static void writeIndex(this ptr<exportWriter> _addr_w, map<ptr<types.Sym
 
             // Sort symbols within a package by name.
             var syms = pkgSyms[pkg];
-            sort.Slice(syms, (i, j) => {
-                return syms[i].Name < syms[j].Name;
-            });
+            sort.Slice(syms, (i, j) => syms[i].Name < syms[j].Name);
 
             w.uint64(uint64(len(syms)));
             {
@@ -422,10 +416,8 @@ private static ulong stringOff(this ptr<iexporter> _addr_p, @string s) {
         }
         p.strings.uint64(uint64(len(s)));
         p.strings.WriteString(s);
-
     }
     return off;
-
 }
 
 // pushDecl adds n to the declaration work queue, if not already present.
@@ -447,10 +439,8 @@ private static void pushDecl(this ptr<iexporter> _addr_p, ptr<ir.Name> _addr_n) 
         }
     }
 
-
     p.declIndex[n.Sym()] = ~uint64(0); // mark n present in work queue
     p.declTodo.PushRight(n);
-
 }
 
 // exportWriter handles writing out individual data section chunks.
@@ -513,7 +503,6 @@ private static void doDecl(this ptr<iexporter> _addr_p, ptr<ir.Name> _addr_n) {
             w.pos(n.Pos());
             w.typ(n.Type());
             break;
-
         }
         w.tag('T');
         w.pos(n.Pos());
@@ -527,7 +516,6 @@ private static void doDecl(this ptr<iexporter> _addr_p, ptr<ir.Name> _addr_n) {
             // declare error (e.g., go/types uses nil Pkg
             // for predeclared objects).
             underlying = types.ErrorType;
-
         }
         w.typ(underlying);
 
@@ -566,7 +554,6 @@ private static void doDecl(this ptr<iexporter> _addr_p, ptr<ir.Name> _addr_n) {
     else 
         @base.Fatalf("unexpected node: %v", n);
         w.finish("dcl", p.declIndex, n.Sym());
-
 }
 
 private static void tag(this ptr<exportWriter> _addr_w, byte tag) {
@@ -584,7 +571,6 @@ private static void finish(this ptr<exportWriter> _addr_w, @string what, map<ptr
         fmt.Printf("export: %v %v %v\n", what, off, sym);
     }
     index[sym] = off;
-
 }
 
 private static void doInline(this ptr<iexporter> _addr_p, ptr<ir.Name> _addr_f) {
@@ -637,7 +623,6 @@ private static void pos(this ptr<exportWriter> _addr_w, src.XPos pos) {
     w.prevFile = file;
     w.prevLine = line;
     w.prevColumn = column;
-
 }
 
 private static void pkg(this ptr<exportWriter> _addr_w, ptr<types.Pkg> _addr_pkg) {
@@ -651,7 +636,6 @@ private static void pkg(this ptr<exportWriter> _addr_w, ptr<types.Pkg> _addr_pkg
     w.p.allPkgs[pkg] = true;
 
     w.@string(pkg.Path);
-
 }
 
 private static void qualifiedIdent(this ptr<exportWriter> _addr_w, ptr<ir.Name> _addr_n) {
@@ -664,7 +648,6 @@ private static void qualifiedIdent(this ptr<exportWriter> _addr_w, ptr<ir.Name> 
     var s = n.Sym();
     w.@string(s.Name);
     w.pkg(s.Pkg);
-
 }
 
 private static void selector(this ptr<exportWriter> _addr_w, ptr<types.Sym> _addr_s) {
@@ -682,7 +665,6 @@ private static void selector(this ptr<exportWriter> _addr_w, ptr<types.Sym> _add
         @base.Fatalf("package mismatch in selector: %v in package %q, but want %q", s, s.Pkg.Path, pkg.Path);
     }
     w.@string(s.Name);
-
 }
 
 private static void typ(this ptr<exportWriter> _addr_w, ptr<types.Type> _addr_t) {
@@ -733,12 +715,10 @@ private static void exoticType(this ptr<exportWriter> _addr_w, ptr<types.Type> _
                 w.pkg(s.Pkg);
                 w.@string(s.Name);
             }
-
             w.typ(f.Type);
             if (f.Embedded != 0 || f.Note != "") {
                 panic("extra info in funarg struct field");
             }
-
         }    else if (t.Kind() == types.TFUNC && t.Recv() != null) 
         w.data.uint64(exoticTypeRecv); 
         // interface method types have a fake receiver type.
@@ -752,18 +732,15 @@ private static void exoticType(this ptr<exportWriter> _addr_w, ptr<types.Type> _
         // A regular type.
         w.data.uint64(exoticTypeRegular);
         w.typ(t);
-    
-});
+    });
 
 private static readonly var exoticTypeNil = iota;
 private static readonly var exoticTypeTuple = 0;
 private static readonly var exoticTypeRecv = 1;
 private static readonly var exoticTypeRegular = 2;
-
 private static readonly var exoticTypeSymNil = iota;
 private static readonly var exoticTypeSymNoPkg = 0;
 private static readonly var exoticTypeSymWithPkg = 1;
-
 
 // Export a selector, but one whose package may not match
 // the package being compiled. This is a separate function
@@ -800,7 +777,6 @@ private static void exoticSignature(this ptr<exportWriter> _addr_w, ptr<types.Ty
     }
     w.exoticParamList(t.Params().FieldSlice());
     w.exoticParamList(t.Results().FieldSlice());
-
 }
 
 private static void exoticParamList(this ptr<exportWriter> _addr_w, slice<ptr<types.Field>> fs) {
@@ -878,10 +854,8 @@ private static ulong typOff(this ptr<iexporter> _addr_p, ptr<types.Type> _addr_t
         }
         off = predeclReserved + rawOff;
         p.typIndex[t] = off;
-
     }
     return off;
-
 }
 
 private static void startType(this ptr<exportWriter> _addr_w, itag k) {
@@ -901,7 +875,6 @@ private static void doTyp(this ptr<exportWriter> _addr_w, ptr<types.Type> _addr_
         w.startType(definedType);
         w.qualifiedIdent(t.Obj()._<ptr<ir.Name>>());
         return ;
-
     }
 
     if (t.Kind() == types.TPTR) 
@@ -956,7 +929,6 @@ private static void doTyp(this ptr<exportWriter> _addr_w, ptr<types.Type> _addr_
  {
                 embeddeds = append(embeddeds, m);
             }
-
         }        w.startType(interfaceType);
         w.setPkg(t.Pkg(), true);
 
@@ -988,8 +960,7 @@ private static void doTyp(this ptr<exportWriter> _addr_w, ptr<types.Type> _addr_
         }
     else 
         @base.Fatalf("unexpected type: %v", t);
-    
-}
+    }
 
 private static void setPkg(this ptr<exportWriter> _addr_w, ptr<types.Pkg> _addr_pkg, bool write) {
     ref exportWriter w = ref _addr_w.val;
@@ -1002,7 +973,6 @@ private static void setPkg(this ptr<exportWriter> _addr_w, ptr<types.Pkg> _addr_
         w.pkg(pkg);
     }
     w.currPkg = pkg;
-
 }
 
 private static void signature(this ptr<exportWriter> _addr_w, ptr<types.Type> _addr_t) {
@@ -1018,7 +988,6 @@ private static void signature(this ptr<exportWriter> _addr_w, ptr<types.Type> _a
             w.@bool(t.Params().Field(n - 1).IsDDD());
         }
     }
-
 }
 
 private static void paramList(this ptr<exportWriter> _addr_w, slice<ptr<types.Field>> fs) {
@@ -1062,7 +1031,6 @@ private static constant.Kind constTypeOf(ptr<types.Type> _addr_typ) {
         return constant.Complex;
         @base.Fatalf("unexpected constant type: %v", typ);
     return 0;
-
 }
 
 private static void value(this ptr<exportWriter> _addr_w, ptr<types.Type> _addr_typ, constant.Value v) {
@@ -1089,8 +1057,7 @@ private static void value(this ptr<exportWriter> _addr_w, ptr<types.Type> _addr_
     else if (constTypeOf(_addr_typ) == constant.Complex) 
         w.mpfloat(constant.Real(v), typ);
         w.mpfloat(constant.Imag(v), typ);
-    
-}
+    }
 
 private static (bool, nuint) intSize(ptr<types.Type> _addr_typ) {
     bool signed = default;
@@ -1114,7 +1081,6 @@ private static (bool, nuint) intSize(ptr<types.Type> _addr_typ) {
     if (typ.Kind() == types.TINT || typ.Kind() == types.TUINT || typ.Kind() == types.TUINTPTR) 
         maxBytes = 8;
         return ;
-
 }
 
 // mpint exports a multi-precision integer.
@@ -1196,7 +1162,6 @@ private static void mpint(this ptr<exportWriter> _addr_w, constant.Value x, ptr<
     }
     w.data.WriteByte(byte(n));
     w.data.Write(b);
-
 }
 
 // mpfloat exports a multi-precision floating point number.
@@ -1239,7 +1204,6 @@ private static void mprat(this ptr<exportWriter> _addr_w, constant.Value v) {
         return ;
     }
     w.@string(r.String());
-
 }
 
 private static bool @bool(this ptr<exportWriter> _addr_w, bool b) {
@@ -1251,7 +1215,6 @@ private static bool @bool(this ptr<exportWriter> _addr_w, bool b) {
     }
     w.uint64(x);
     return b;
-
 }
 
 private static void int64(this ptr<exportWriter> _addr_w, long x) {
@@ -1302,8 +1265,7 @@ private static void constExt(this ptr<exportWriter> _addr_w, ptr<ir.Name> _addr_
         var v = n.Val();
         w.mprat(constant.Real(v));
         w.mprat(constant.Imag(v));
-    
-}
+    }
 
 private static void varExt(this ptr<exportWriter> _addr_w, ptr<ir.Name> _addr_n) {
     ref exportWriter w = ref _addr_w.val;
@@ -1338,7 +1300,6 @@ private static void funcExt(this ptr<exportWriter> _addr_w, ptr<ir.Name> _addr_n
             w.p.doInline(n);
         }
         w.pos(n.Func.Endlineno);
-
     }
     else
  {
@@ -1371,14 +1332,12 @@ private static void symIdx(this ptr<exportWriter> _addr_w, ptr<types.Sym> _addr_
         // and symbols without an index. They can only be referenced by
         // name.
         w.int64(-1);
-
     }
     else
  { 
         // For a defined symbol, export its index.
         // For re-exporting an imported symbol, pass its index through.
         w.int64(int64(lsym.SymIdx));
-
     }
 }
 
@@ -1398,10 +1357,8 @@ private static void typeExt(this ptr<exportWriter> _addr_w, ptr<types.Type> _add
             return ;
         }
     }
-
     w.symIdx(types.TypeSym(t));
     w.symIdx(types.TypeSym(t.PtrTo()));
-
 }
 
 // Inline bodies.
@@ -1426,7 +1383,6 @@ private static void funcBody(this ptr<exportWriter> _addr_w, ptr<ir.Func> _addr_
     w.writeNames(fn.Inl.Dcl);
 
     w.stmtList(fn.Inl.Body);
-
 }
 
 private static void stmtList(this ptr<exportWriter> _addr_w, slice<ir.Node> list) {
@@ -1592,12 +1548,10 @@ private static void stmt(this ptr<exportWriter> _addr_w, ir.Node n) {
             }
 
         }
-
         w.@string(label);
     else 
         @base.Fatalf("exporter: CANNOT EXPORT: %v\nPlease notify gri@\n", n.Op());
-    
-}
+    }
 
 private static bool isNamedTypeSwitch(ir.Node x) {
     ptr<ir.TypeSwitchGuard> (guard, ok) = x._<ptr<ir.TypeSwitchGuard>>();
@@ -1615,7 +1569,6 @@ private static void caseList(this ptr<exportWriter> _addr_w, slice<ptr<ir.CaseCl
             w.localName(cas.Var);
         }
         w.stmtList(cas.Body);
-
     }
 }
 
@@ -1644,7 +1597,6 @@ private static ir.Node simplifyForExport(ir.Node n) {
         ptr<ir.ParenExpr> n = n._<ptr<ir.ParenExpr>>();
         return simplifyForExport(n.X);
         return n;
-
 }
 
 private static void expr(this ptr<exportWriter> _addr_w, ir.Node n) {
@@ -1719,7 +1671,6 @@ private static void expr(this ptr<exportWriter> _addr_w, ir.Node n) {
             // which is used to refer to it later in the function
             // during export. -1 represents blanks.
             w.dclIndex[cv] = -(i + 2) - w.maxClosureVarIndex;
-
         }        w.maxClosureVarIndex += len(n.Func.ClosureVars); 
 
         // like w.funcBody(n.Func), but not for .Inl
@@ -2014,8 +1965,7 @@ private static void expr(this ptr<exportWriter> _addr_w, ir.Node n) {
         }
     else if (n.Op() == ir.ODCLCONST)     else 
         @base.Fatalf("cannot export %v (%d) node\n" + "\t==> please file an issue and assign to gri@", n.Op(), int(n.Op()));
-    
-}
+    }
 
 private static void op(this ptr<exportWriter> _addr_w, ir.Op op) {
     ref exportWriter w = ref _addr_w.val;
@@ -2024,7 +1974,6 @@ private static void op(this ptr<exportWriter> _addr_w, ir.Op op) {
         w.uint64(magic);
     }
     w.uint64(uint64(op));
-
 }
 
 private static void exprsOrNil(this ptr<exportWriter> _addr_w, ir.Node a, ir.Node b) {
@@ -2080,7 +2029,6 @@ private static void localName(this ptr<exportWriter> _addr_w, ptr<ir.Name> _addr
         @base.FatalfAt(n.Pos(), "missing from dclIndex: %+v", n);
     }
     w.int64(int64(i));
-
 }
 
 private static void localIdent(this ptr<exportWriter> _addr_w, ptr<types.Sym> _addr_s) {
@@ -2107,12 +2055,10 @@ private static void localIdent(this ptr<exportWriter> _addr_w, ptr<types.Sym> _a
         }
     }
 
-
     if (s.Pkg != w.currPkg) {
         @base.Fatalf("weird package in name: %v => %v from %q, not %q", s, name, s.Pkg.Path, w.currPkg.Path);
     }
     w.@string(name);
-
 }
 
 private partial struct intWriter {

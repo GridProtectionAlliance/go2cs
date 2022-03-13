@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package buildid -- go2cs converted at 2022 March 06 22:46:41 UTC
+// package buildid -- go2cs converted at 2022 March 13 05:57:54 UTC
 // import "cmd/internal/buildid" ==> using buildid = go.cmd.@internal.buildid_package
 // Original source: C:\Program Files\Go\src\cmd\internal\buildid\note.go
-using bytes = go.bytes_package;
-using elf = go.debug.elf_package;
-using macho = go.debug.macho_package;
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-
 namespace go.cmd.@internal;
+
+using bytes = bytes_package;
+using elf = debug.elf_package;
+using macho = debug.macho_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
 
 public static partial class buildid_package {
 
@@ -30,7 +30,6 @@ private static (slice<byte>, error) readAligned4(io.Reader r, int sz) {
     }
     data = data[..(int)sz];
     return (data, error.As(null!)!);
-
 }
 
 public static (slice<byte>, error) ReadELFNote(@string filename, @string name, int typ) => func((defer, _, _) => {
@@ -77,9 +76,7 @@ public static (slice<byte>, error) ReadELFNote(@string filename, @string name, i
                 return (desc, error.As(null!)!);
             }
         }
-
     }    return (null, error.As(null!)!);
-
 });
 
 private static slice<byte> elfGoNote = (slice<byte>)"Go\x00\x00";
@@ -137,13 +134,11 @@ private static (@string, error) readELF(@string name, ptr<os.File> _addr_f, slic
             if (err != null) {
                 return ("", error.As(err)!);
             }
-
             note = make_slice<byte>(p.Filesz);
             _, err = io.ReadFull(f, note);
             if (err != null) {
                 return ("", error.As(err)!);
             }
-
         }
         var filesz = p.Filesz;
         var off = p.Off;
@@ -172,12 +167,10 @@ private static (@string, error) readELF(@string name, ptr<os.File> _addr_f, slic
             filesz -= notesz;
             note = note[(int)notesz..];
         }
-
     }    if (gnu != "") {
         return (gnu, error.As(null!)!);
     }
     return ("", error.As(null!)!);
-
 }
 
 // The Go build ID is stored at the beginning of the Mach-O __text segment.
@@ -200,7 +193,6 @@ private static (@string, error) readMacho(@string name, ptr<os.File> _addr_f, sl
         }
     }
 
-
     var (mf, err) = macho.NewFile(f);
     if (err != null) {
         return ("", error.As(addr(new fs.PathError(Path:name,Op:"parse",Err:err))!)!);
@@ -209,7 +201,6 @@ private static (@string, error) readMacho(@string name, ptr<os.File> _addr_f, sl
     if (sect == null) { 
         // Every binary has a __text section. Something is wrong.
         return ("", error.As(addr(new fs.PathError(Path:name,Op:"parse",Err:fmt.Errorf("cannot find __text section")))!)!);
-
     }
     var n = sect.Size;
     if (n > uint64(readSize)) {
@@ -224,9 +215,7 @@ private static (@string, error) readMacho(@string name, ptr<os.File> _addr_f, sl
         }
     }
 
-
     return readRaw(name, buf);
-
 }
 
 } // end buildid_package

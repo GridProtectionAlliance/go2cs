@@ -5,14 +5,14 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package os -- go2cs converted at 2022 March 06 22:13:45 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:04 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\removeall_at.go
-using unix = go.@internal.syscall.unix_package;
-using io = go.io_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using unix = @internal.syscall.unix_package;
+using io = io_package;
+using syscall = syscall_package;
 
 public static partial class os_package {
 
@@ -21,7 +21,6 @@ private static error removeAll(@string path) => func((defer, _, _) => {
         // fail silently to retain compatibility with previous behavior
         // of RemoveAll. See issue 28830.
         return error.As(null!)!;
-
     }
     if (endsWithDot(path)) {
         return error.As(addr(new PathError(Op:"RemoveAll",Path:path,Err:syscall.EINVAL))!)!;
@@ -36,7 +35,6 @@ private static error removeAll(@string path) => func((defer, _, _) => {
     if (IsNotExist(err)) { 
         // If parent does not exist, base cannot exist. Fail silently
         return error.As(null!)!;
-
     }
     if (err != null) {
         return error.As(err)!;
@@ -57,16 +55,12 @@ private static error removeAll(@string path) => func((defer, _, _) => {
                     err = pathErr;
                 }
             }
-
             return error.As(err)!;
-
         }
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 });
 
 private static error removeAllFrom(ptr<File> _addr_parent, @string @base) {
@@ -88,12 +82,10 @@ private static error removeAllFrom(ptr<File> _addr_parent, @string @base) {
             return error.As(null!)!;
         }
         return error.As(addr(new PathError(Op:"fstatat",Path:base,Err:statErr))!)!;
-
     }
     if (statInfo.Mode & syscall.S_IFMT != syscall.S_IFDIR) { 
         // Not a directory; return the error from the unix.Unlinkat.
         return error.As(addr(new PathError(Op:"unlinkat",Path:base,Err:err))!)!;
-
     }
     error recurseErr = default!;
     while (true) {
@@ -122,7 +114,6 @@ private static error removeAllFrom(ptr<File> _addr_parent, @string @base) {
                 }
                 return error.As(addr(new PathError(Op:"readdirnames",Path:base,Err:readErr))!)!;
             }
-
             respSize = len(names);
             foreach (var (_, name) in names) {
                 err = removeAllFrom(_addr_file, name);
@@ -135,14 +126,11 @@ private static error removeAllFrom(ptr<File> _addr_parent, @string @base) {
                         }
 
                     }
-
                     numErr++;
                     if (recurseErr == null) {
                         recurseErr = error.As(err)!;
                     }
-
                 }
-
             } 
 
             // If we can delete any entry, break to start new iteration.
@@ -150,7 +138,6 @@ private static error removeAllFrom(ptr<File> _addr_parent, @string @base) {
             if (numErr != reqSize) {
                 break;
             }
-
         } 
 
         // Removing files from the directory may have caused
@@ -175,7 +162,6 @@ private static error removeAllFrom(ptr<File> _addr_parent, @string @base) {
         return error.As(recurseErr)!;
     }
     return error.As(addr(new PathError(Op:"unlinkat",Path:base,Err:unlinkError))!)!;
-
 }
 
 // openFdAt opens path relative to the directory in fd.
@@ -198,14 +184,12 @@ private static (ptr<File>, error) openFdAt(nint dirfd, @string name) {
             continue;
         }
         return (_addr_null!, error.As(e)!);
-
     }
 
     if (!supportsCloseOnExec) {
         syscall.CloseOnExec(r);
     }
     return (_addr_newFile(uintptr(r), name, kindOpenFile)!, error.As(null!)!);
-
 }
 
 } // end os_package

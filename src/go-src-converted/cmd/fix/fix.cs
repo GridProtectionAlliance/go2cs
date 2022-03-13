@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:46 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:14 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\fix.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using path = go.path_package;
-using strconv = go.strconv_package;
-using System;
-
-
 namespace go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using path = path_package;
+using strconv = strconv_package;
+using System;
 
 public static partial class main_package {
 
@@ -408,7 +407,6 @@ private static void walkBeforeAfter(object x, Action<object> before, Action<obje
         }
     }
     after(x);
-
 });
 
 // imports reports whether f imports path.
@@ -428,7 +426,6 @@ private static ptr<ast.ImportSpec> importSpec(ptr<ast.File> _addr_f, @string pat
             return _addr_s!;
         }
     }    return _addr_null!;
-
 }
 
 // importPath returns the unquoted import path of s,
@@ -441,7 +438,6 @@ private static @string importPath(ptr<ast.ImportSpec> _addr_s) {
         return t;
     }
     return "";
-
 }
 
 // declImports reports whether gen contains an import of path.
@@ -457,7 +453,6 @@ private static bool declImports(ptr<ast.GenDecl> _addr_gen, @string path) {
             return true;
         }
     }    return false;
-
 }
 
 // isTopName reports whether n is a top-level unresolved identifier with the given name.
@@ -494,7 +489,6 @@ private static bool renameTop(ptr<ast.File> _addr_f, @string old, @string @new) 
                     fixed = true;
                 }
             }
-
         }
         s = s__prev1;
     }
@@ -536,14 +530,12 @@ private static bool renameTop(ptr<ast.File> _addr_f, @string old, @string @new) 
                                     }
                                     break;
                             }
-
                         }
 
                         s = s__prev2;
                     }
                     break;
             }
-
         }
         d = d__prev1;
     }
@@ -561,7 +553,6 @@ private static bool renameTop(ptr<ast.File> _addr_f, @string old, @string @new) 
     });
 
     return fixed;
-
 }
 
 // matchLen returns the length of the longest prefix shared by x and y.
@@ -610,7 +601,6 @@ private static bool addImport(ptr<ast.File> _addr_f, @string ipath) {
                     impIndex = j;
                 }
             }
-
         }
     }    if (impDecl == null) {
         impDecl = addr(new ast.GenDecl(Tok:token.IMPORT,));
@@ -634,11 +624,9 @@ private static bool addImport(ptr<ast.File> _addr_f, @string ipath) {
         var prev = impDecl.Specs[insertAt - 1];
         newImport.Path.ValuePos = prev.Pos();
         newImport.EndPos = prev.Pos();
-
     }
     f.Imports = append(f.Imports, newImport);
     return true;
-
 }
 
 // deleteImport deletes the import path from the file f, if present.
@@ -680,20 +668,15 @@ private static bool deleteImport(ptr<ast.File> _addr_f, @string path) {
                 else if (len(gen.Specs) == 1) {
                     gen.Lparen = token.NoPos; // drop parens
                 }
-
                 if (j > 0) { 
                     // We deleted an entry but now there will be
                     // a blank line-sized hole where the import was.
                     // Close the hole by making the previous
                     // import appear to "end" where this one did.
                     gen.Specs[j - 1]._<ptr<ast.ImportSpec>>().EndPos = impspec.End();
-
                 }
-
                 break;
-
             }
-
         }
         i = i__prev1;
     }
@@ -714,7 +697,6 @@ private static bool deleteImport(ptr<ast.File> _addr_f, @string path) {
     }
 
     return ;
-
 }
 
 // rewriteImport rewrites any import of path oldPath to path newPath.
@@ -729,10 +711,8 @@ private static bool rewriteImport(ptr<ast.File> _addr_f, @string oldPath, @strin
             // it using the length of imp.Path.Value.
             imp.EndPos = imp.End();
             imp.Path.Value = strconv.Quote(newPath);
-
         }
     }    return ;
-
 }
 
 } // end main_package

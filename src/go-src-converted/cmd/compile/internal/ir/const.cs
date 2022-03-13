@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:48:57 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:18 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\const.go
-using constant = go.go.constant_package;
-using math = go.math_package;
-using big = go.math.big_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using constant = go.constant_package;
+using math = math_package;
+using big = math.big_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ir_package {
 
@@ -32,7 +32,6 @@ public static Node NewString(@string s) {
 // Maximum size in bits for big.Ints before signalling
 // overflow and also mantissa precision for big.Floats.
 public static readonly nint ConstPrec = 512;
-
 
 public static ptr<big.Float> BigFloat(constant.Value v) {
     ptr<big.Float> f = @new<big.Float>();
@@ -58,7 +57,6 @@ public static ptr<big.Float> BigFloat(constant.Value v) {
         }
     }
     return _addr_f!;
-
 }
 
 // ConstOverflow reports whether constant value v is too large
@@ -94,7 +92,6 @@ public static bool ConstOverflow(constant.Value v, ptr<types.Type> _addr_t) => f
         return ConstOverflow(constant.Real(v), _addr_ft) || ConstOverflow(constant.Imag(v), _addr_ft);
         @base.Fatalf("ConstOverflow: %v, %v", v, t);
     panic("unreachable");
-
 });
 
 // IsConstNode reports whether n is a Go language constant (as opposed to a
@@ -112,7 +109,6 @@ public static bool IsSmallIntConst(Node n) {
         return ok && int64(int32(v)) == v;
     }
     return false;
-
 }
 
 } // end ir_package

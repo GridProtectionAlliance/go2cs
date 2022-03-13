@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:41:49 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:56 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\errorcodes.go
-
-
 namespace go.go;
 
 public static partial class types_package {
@@ -1320,6 +1318,5 @@ private static readonly var _InvalidUnsafeSlice = 133;
 // _Todo is a placeholder for error codes that have not been decided.
 // TODO(rFindley) remove this error code after deciding on errors for generics code.
 private static readonly var _Todo = 134;
-
 
 } // end types_package

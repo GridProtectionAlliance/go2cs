@@ -7,13 +7,13 @@
 
 // Read system port mappings from /etc/services
 
-// package net -- go2cs converted at 2022 March 06 22:16:31 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:04 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\port_unix.go
-using bytealg = go.@internal.bytealg_package;
-using sync = go.sync_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using sync = sync_package;
 
 public static partial class net_package {
 
@@ -44,43 +44,35 @@ private static void readServices() => func((defer, _, _) => {
                 i = i__prev1;
 
             }
-
             var f = getFields(line);
             if (len(f) < 2) {
                 continue;
             }
-
             var portnet = f[1]; // "80/tcp"
             var (port, j, ok) = dtoi(portnet);
             if (!ok || port <= 0 || j >= len(portnet) || portnet[j] != '/') {
                 continue;
             }
-
             var netw = portnet[(int)j + 1..]; // "tcp"
             var (m, ok1) = services[netw];
             if (!ok1) {
                 m = make_map<@string, nint>();
                 services[netw] = m;
             }
-
             {
                 var i__prev2 = i;
 
                 for (i = 0; i < len(f); i++) {
                     if (i != 1) { // f[1] was port/net
                         m[f[i]] = port;
-
                     }
-
                 }
 
 
                 i = i__prev2;
             }
-
         }
     }
-
 });
 
 // goLookupPort is the native Go implementation of LookupPort.

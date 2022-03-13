@@ -3,19 +3,20 @@
 // license that can be found in the LICENSE file.
 
 // Package testcert contains a test-only localhost certificate.
-// package testcert -- go2cs converted at 2022 March 06 22:23:15 UTC
+
+// package testcert -- go2cs converted at 2022 March 13 05:37:40 UTC
 // import "net/http/internal/testcert" ==> using testcert = go.net.http.@internal.testcert_package
 // Original source: C:\Program Files\Go\src\net\http\internal\testcert\testcert.go
-using strings = go.strings_package;
-
 namespace go.net.http.@internal;
+
+using strings = strings_package;
 
 public static partial class testcert_package {
 
-    // LocalhostCert is a PEM-encoded TLS cert with SAN IPs
-    // "127.0.0.1" and "[::1]", expiring at Jan 29 16:00:00 2084 GMT.
-    // generated from src/crypto/tls:
-    // go run generate_cert.go  --rsa-bits 1024 --host 127.0.0.1,::1,example.com --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
+// LocalhostCert is a PEM-encoded TLS cert with SAN IPs
+// "127.0.0.1" and "[::1]", expiring at Jan 29 16:00:00 2084 GMT.
+// generated from src/crypto/tls:
+// go run generate_cert.go  --rsa-bits 1024 --host 127.0.0.1,::1,example.com --ca --start-date "Jan 1 00:00:00 1970" --duration=1000000h
 public static slice<byte> LocalhostCert = (slice<byte>)@"-----BEGIN CERTIFICATE-----
 MIICEzCCAXygAwIBAgIQMIMChMLGrR+QvmQvpwAU6zANBgkqhkiG9w0BAQsFADAS
 MRAwDgYDVQQKEwdBY21lIENvMCAXDTcwMDEwMTAwMDAwMFoYDzIwODQwMTI5MTYw

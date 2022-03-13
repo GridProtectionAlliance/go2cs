@@ -15,21 +15,20 @@
 // This file implements parsers to convert legacy profiles into the
 // profile.proto format.
 
-// package profile -- go2cs converted at 2022 March 06 23:23:59 UTC
+// package profile -- go2cs converted at 2022 March 13 06:37:06 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\legacy_profile.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using regexp = go.regexp_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using regexp = regexp_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class profile_package {
 
@@ -48,7 +47,8 @@ private static (ptr<Profile>, error) parseGoCount(slice<byte> b) {
 
     var s = bufio.NewScanner(bytes.NewBuffer(b)); 
     // Skip comments at the beginning of the file.
-    while (s.Scan() && isSpaceOrComment(s.Text()))     }
+    while (s.Scan() && isSpaceOrComment(s.Text())) {
+    }
     {
         var err__prev1 = err;
 
@@ -60,7 +60,6 @@ private static (ptr<Profile>, error) parseGoCount(slice<byte> b) {
         err = err__prev1;
 
     }
-
     var m = countStartRE.FindStringSubmatch(s.Text());
     if (m == null) {
         return (_addr_null!, error.As(errUnrecognized)!);
@@ -99,11 +98,8 @@ private static (ptr<Profile>, error) parseGoCount(slice<byte> b) {
                 locations[addr] = loc;
                 p.Location = append(p.Location, loc);
             }
-
             locs = append(locs, loc);
-
         }        p.Sample = append(p.Sample, addr(new Sample(Location:locs,Value:[]int64{n},)));
-
     }
     {
         var err__prev1 = err;
@@ -117,7 +113,6 @@ private static (ptr<Profile>, error) parseGoCount(slice<byte> b) {
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -129,9 +124,7 @@ private static (ptr<Profile>, error) parseGoCount(slice<byte> b) {
         err = err__prev1;
 
     }
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // remapLocationIDs ensures there is a location for each address
@@ -153,7 +146,6 @@ private static void remapLocationIDs(this ptr<Profile> _addr_p) {
             seen[l] = true;
         }
     }    p.Location = locs;
-
 }
 
 private static void remapFunctionIDs(this ptr<Profile> _addr_p) {
@@ -173,7 +165,6 @@ private static void remapFunctionIDs(this ptr<Profile> _addr_p) {
             seen[fn] = true;
         }
     }    p.Function = fns;
-
 }
 
 // remapMappingIDs matches location addresses with existing mappings
@@ -203,7 +194,6 @@ private static void remapMappingIDs(this ptr<Profile> _addr_p) {
             m = m__prev2;
 
         }
-
     }
     if (len(p.Mapping) > 0) {
         const nuint expectedStart = 0x400000;
@@ -221,7 +211,6 @@ private static void remapMappingIDs(this ptr<Profile> _addr_p) {
             m = m__prev2;
 
         }
-
     }
     ptr<Mapping> fake;
 nextLocation: 
@@ -242,7 +231,6 @@ nextLocation:
                     _continuenextLocation = true;
                     break;
                 }
-
             } 
             // Work around legacy handlers failing to encode the first
             // part of mappings split into adjacent ranges.
@@ -262,7 +250,6 @@ nextLocation:
                     _continuenextLocation = true;
                     break;
                 }
-
             } 
             // If there is still no mapping, create a fake one.
             // This is important for the Go legacy handler, which produced
@@ -276,7 +263,6 @@ nextLocation:
             p.Mapping = append(p.Mapping, fake);
         }
         l.Mapping = fake;
-
     }    {
         var m__prev1 = m;
 
@@ -299,7 +285,6 @@ private static (ulong, slice<byte>) get32l(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24, b[(int)4..]);
-
 }
 
 private static (ulong, slice<byte>) get32b(slice<byte> b) {
@@ -310,7 +295,6 @@ private static (ulong, slice<byte>) get32b(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[3]) | uint64(b[2]) << 8 | uint64(b[1]) << 16 | uint64(b[0]) << 24, b[(int)4..]);
-
 }
 
 private static (ulong, slice<byte>) get64l(slice<byte> b) {
@@ -321,7 +305,6 @@ private static (ulong, slice<byte>) get64l(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[0]) | uint64(b[1]) << 8 | uint64(b[2]) << 16 | uint64(b[3]) << 24 | uint64(b[4]) << 32 | uint64(b[5]) << 40 | uint64(b[6]) << 48 | uint64(b[7]) << 56, b[(int)8..]);
-
 }
 
 private static (ulong, slice<byte>) get64b(slice<byte> b) {
@@ -332,7 +315,6 @@ private static (ulong, slice<byte>) get64b(slice<byte> b) {
         return (0, null);
     }
     return (uint64(b[7]) | uint64(b[6]) << 8 | uint64(b[5]) << 16 | uint64(b[4]) << 24 | uint64(b[3]) << 32 | uint64(b[2]) << 40 | uint64(b[1]) << 48 | uint64(b[0]) << 56, b[(int)8..]);
-
 }
 
 // parseCPU parses a profilez legacy profile and returns a newly
@@ -371,7 +353,6 @@ private static (ptr<Profile>, error) parseCPU(slice<byte> b) {
         }
     }
     return (_addr_null!, error.As(errUnrecognized)!);
-
 }
 
 // cpuProfile returns a new Profile from C++ profilez data.
@@ -428,9 +409,7 @@ private static (ptr<Profile>, error) cpuProfile(slice<byte> b, long period, Func
                 }
 
                 break;
-
             }
-
         }
     }
 
@@ -446,10 +425,8 @@ private static (ptr<Profile>, error) cpuProfile(slice<byte> b, long period, Func
 
     }
 
-
     cleanupDuplicateLocations(p);
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static void cleanupDuplicateLocations(ptr<Profile> _addr_p) {
@@ -516,7 +493,6 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseCPUSamples(s
         if (count == 0 && nstk == 1 && addrs[0] == 0) { 
             // End of data marker
             break;
-
         }
         {
             nint i__prev2 = i;
@@ -540,11 +516,9 @@ private static (slice<byte>, map<ulong, ptr<Location>>, error) parseCPUSamples(s
         }
 
         p.Sample = append(p.Sample, addr(new Sample(Value:[]int64{int64(count),int64(count)*p.Period},Location:sloc,)));
-
     } 
     // Reached the end without finding the EOD marker.
     return (b, locs, error.As(null!)!);
-
 }
 
 // parseHeap parses a heapz legacy or a growthz profile and
@@ -567,9 +541,7 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
             err = err__prev2;
 
         }
-
         return (_addr_null!, error.As(errUnrecognized)!);
-
     }
     p = addr(new Profile());
 
@@ -604,12 +576,10 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
 
     }
 
-
     if (hasAlloc) { 
         // Put alloc before inuse so that default pprof selection
         // will prefer inuse_space.
         p.SampleType = new slice<ptr<ValueType>>(new ptr<ValueType>[] { {Type:"alloc_objects",Unit:"count"}, {Type:"alloc_space",Unit:"bytes"}, {Type:"inuse_objects",Unit:"count"}, {Type:"inuse_space",Unit:"bytes"} });
-
     }
     else
  {
@@ -640,11 +610,8 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
                 p.Location = append(p.Location, loc);
                 locs[addr] = loc;
             }
-
             sloc = append(sloc, loc);
-
         }        p.Sample = append(p.Sample, addr(new Sample(Value:value,Location:sloc,NumLabel:map[string][]int64{"bytes":{blocksize}},)));
-
     }
     {
         var err__prev1 = err;
@@ -657,7 +624,6 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -669,9 +635,7 @@ private static (ptr<Profile>, error) parseHeap(slice<byte> b) {
         err = err__prev1;
 
     }
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static (@string, long, bool, error) parseHeapHeader(@string line) {
@@ -710,7 +674,6 @@ private static (@string, long, bool, error) parseHeapHeader(@string line) {
             return ("", 0, false, error.As(errUnrecognized)!);
             break;
     }
-
 }
 
 // parseHeapSample parses a single row from a heap profile into a new Sample.
@@ -744,7 +707,6 @@ private static (slice<long>, long, slice<ulong>, error) parseHeapSample(@string 
         }
         value = append(value, count, size);
         return null;
-
     };
 
     if (includeAlloc) {
@@ -760,7 +722,6 @@ private static (slice<long>, long, slice<ulong>, error) parseHeapSample(@string 
             err = err__prev2;
 
         }
-
     }
     {
         var err__prev1 = err;
@@ -774,13 +735,11 @@ private static (slice<long>, long, slice<ulong>, error) parseHeapSample(@string 
 
     }
 
-
     addrs, err = parseHexAddresses(sampleData[5]);
     if (err != null) {
         return (null, 0, null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
     }
     return (value, blocksize, addrs, error.As(null!)!);
-
 }
 
 // parseHexAddresses extracts hex numbers from a string, attempts to convert
@@ -806,9 +765,7 @@ private static (slice<ulong>, error) parseHexAddresses(@string s) {
             }
 
         }
-
     }    return (addrs, error.As(null!)!);
-
 }
 
 // scaleHeapSample adjusts the data from a heapz Sample to
@@ -831,13 +788,11 @@ private static (long, long) scaleHeapSample(long count, long size, long rate) {
         // if rate==1 all samples were collected so no adjustment is needed.
         // if rate<1 treat as unknown and skip scaling.
         return (count, size);
-
     }
     var avgSize = float64(size) / float64(count);
     nint scale = 1 / (1 - math.Exp(-avgSize / float64(rate)));
 
     return (int64(float64(count) * scale), int64(float64(size) * scale));
-
 }
 
 // parseContention parses a mutex or contention profile. There are 2 cases:
@@ -861,9 +816,7 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
             err = err__prev2;
 
         }
-
         return (_addr_null!, error.As(errUnrecognized)!);
-
     }
     {
         var l = s.Text();
@@ -904,7 +857,6 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
                 if (err != null) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                 }
-
                 break;
             case "sampling period": 
                 p.Period, err = strconv.ParseInt(val, 0, 64);
@@ -912,7 +864,6 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
                 if (err != null) {
                     return (_addr_null!, error.As(errUnrecognized)!);
                 }
-
                 break;
             case "ms since reset": 
                 var (ms, err) = strconv.ParseInt(val, 0, 64);
@@ -936,7 +887,6 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
                 return (_addr_null!, error.As(errUnrecognized)!);
                 break;
         }
-
     }
     {
         var err__prev1 = err;
@@ -949,7 +899,6 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
         err = err__prev1;
 
     }
-
 
     var locs = make_map<ulong, ptr<Location>>();
     while (true) {
@@ -973,12 +922,9 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
                     p.Location = append(p.Location, loc);
                     locs[addr] = loc;
                 }
-
                 sloc = append(sloc, loc);
-
             }
             p.Sample = append(p.Sample, addr(new Sample(Value:value,Location:sloc,)));
-
         }
         if (!s.Scan()) {
             break;
@@ -996,7 +942,6 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -1009,9 +954,7 @@ private static (ptr<Profile>, error) parseContention(slice<byte> b) {
 
     }
 
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseContentionSample parses a single row from a contention profile
@@ -1039,7 +982,6 @@ private static (slice<long>, slice<ulong>, error) parseContentionSample(@string 
             v1 = int64(float64(v1) * float64(period) / cpuGHz);
         }
         v2 = v2 * period;
-
     }
     value = new slice<long>(new long[] { v2, v1 });
     addrs, err = parseHexAddresses(sampleData[3]);
@@ -1047,7 +989,6 @@ private static (slice<long>, slice<ulong>, error) parseContentionSample(@string 
         return (null, null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
     }
     return (value, addrs, error.As(null!)!);
-
 }
 
 // parseThread parses a Threadz profile and returns a new Profile.
@@ -1057,7 +998,8 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
 
     var s = bufio.NewScanner(bytes.NewBuffer(b)); 
     // Skip past comments and empty lines seeking a real header.
-    while (s.Scan() && isSpaceOrComment(s.Text()))     }
+    while (s.Scan() && isSpaceOrComment(s.Text())) {
+    }
 
     var line = s.Text();
     {
@@ -1071,10 +1013,7 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
                 if (isMemoryMapSentinel(line) || strings.HasPrefix(line, "-")) {
                     break;
                 }
-
             }
-
-
         }        {
             var t__prev2 = t;
 
@@ -1090,9 +1029,7 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
         }
 
 
-
     }
-
 
     ptr<Profile> p = addr(new Profile(SampleType:[]*ValueType{{Type:"thread",Unit:"count"}},PeriodType:&ValueType{Type:"thread",Unit:"count"},Period:1,));
 
@@ -1116,7 +1053,6 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
 
         }
 
-
         slice<ulong> addrs = default;
         error err = default!;
         line, addrs, err = parseThreadSample(_addr_s);
@@ -1129,9 +1065,7 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
                 s = p.Sample[len(p.Sample) - 1];
                 s.Value[0]++;
             }
-
             continue;
-
         }
         slice<ptr<Location>> sloc = default;
         foreach (var (i, addr) in addrs) { 
@@ -1141,18 +1075,14 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
             if (i > 0) {
                 addr--;
             }
-
             var loc = locs[addr];
             if (locs[addr] == null) {
                 loc = addr(new Location(Address:addr,));
                 p.Location = append(p.Location, loc);
                 locs[addr] = loc;
             }
-
             sloc = append(sloc, loc);
-
         }        p.Sample = append(p.Sample, addr(new Sample(Value:[]int64{1},Location:sloc,)));
-
     }
 
     {
@@ -1167,10 +1097,8 @@ private static (ptr<Profile>, error) parseThread(slice<byte> b) {
 
     }
 
-
     cleanupDuplicateLocations(p);
     return (_addr_p!, error.As(null!)!);
-
 }
 
 // parseThreadSample parses a symbolized or unsymbolized stack trace.
@@ -1201,7 +1129,6 @@ private static (@string, slice<ulong>, error) parseThreadSample(ptr<bufio.Scanne
             return ("", null, error.As(fmt.Errorf("malformed sample: %s: %v", line, err))!);
         }
         addrs = append(addrs, curAddrs);
-
     }
     {
         var err = s.Err();
@@ -1210,12 +1137,10 @@ private static (@string, slice<ulong>, error) parseThreadSample(ptr<bufio.Scanne
             return ("", null, error.As(err)!);
         }
     }
-
     if (sameAsPrevious) {
         return (line, null, error.As(null!)!);
     }
     return (line, addrs, error.As(null!)!);
-
 }
 
 // parseAdditionalSections parses any additional sections in the
@@ -1224,7 +1149,8 @@ private static error parseAdditionalSections(ptr<bufio.Scanner> _addr_s, ptr<Pro
     ref bufio.Scanner s = ref _addr_s.val;
     ref Profile p = ref _addr_p.val;
 
-    while (!isMemoryMapSentinel(s.Text()) && s.Scan())     }
+    while (!isMemoryMapSentinel(s.Text()) && s.Scan()) {
+    }
     {
         var err = s.Err();
 
@@ -1232,9 +1158,7 @@ private static error parseAdditionalSections(ptr<bufio.Scanner> _addr_s, ptr<Pro
             return error.As(err)!;
         }
     }
-
     return error.As(p.ParseMemoryMapFromScanner(s))!;
-
 }
 
 // ParseProcMaps parses a memory map in the format of /proc/self/maps.
@@ -1279,17 +1203,13 @@ private static (slice<ptr<Mapping>>, error) parseProcMapsFromScanner(ptr<bufio.S
                 } 
                 // Ignore any unrecognized entries
                 continue;
-
             }
-
             return (null, error.As(err)!);
-
         }
         if (m == null) {
             continue;
         }
         mapping = append(mapping, m);
-
     }
     {
         var err = s.Err();
@@ -1298,9 +1218,7 @@ private static (slice<ptr<Mapping>>, error) parseProcMapsFromScanner(ptr<bufio.S
             return (null, error.As(err)!);
         }
     }
-
     return (mapping, error.As(null!)!);
-
 }
 
 // removeLoggingInfo detects and removes log prefix entries generated
@@ -1314,9 +1232,7 @@ private static @string removeLoggingInfo(@string line) {
             return line[(int)match[1]..];
         }
     }
-
     return line;
-
 }
 
 // ParseMemoryMap parses a memory map in the format of
@@ -1346,7 +1262,6 @@ private static error ParseMemoryMapFromScanner(this ptr<Profile> _addr_p, ptr<bu
     p.remapFunctionIDs();
     p.remapMappingIDs();
     return error.As(null!)!;
-
 }
 
 private static (ptr<Mapping>, error) parseMappingEntry(@string l) {
@@ -1381,18 +1296,15 @@ private static (ptr<Mapping>, error) parseMappingEntry(@string l) {
         }
 
 
-
         me = me__prev1;
 
     }
-
 
     error err = default!;
     ptr<Mapping> mapping = addr(new Mapping(File:file,BuildID:buildID,));
     if (perm != "" && !strings.Contains(perm, "x")) { 
         // Skip non-executable entries.
         return (_addr_null!, error.As(null!)!);
-
     }
     mapping.Start, err = strconv.ParseUint(start, 16, 64);
 
@@ -1412,7 +1324,6 @@ private static (ptr<Mapping>, error) parseMappingEntry(@string l) {
         }
     }
     return (_addr_mapping!, error.As(null!)!);
-
 }
 
 private static @string memoryMapSentinels = new slice<@string>(new @string[] { "--- Memory map: ---", "MAPPED_LIBRARIES:" });
@@ -1425,7 +1336,6 @@ private static bool isMemoryMapSentinel(@string line) {
             return true;
         }
     }    return false;
-
 }
 
 private static void addLegacyFrameInfo(this ptr<Profile> _addr_p) {
@@ -1455,11 +1365,8 @@ nextType:
                 _continuenextType = true;
                 break;
             }
-
         }        return true;
-
     }    return false;
-
 }
 
 private static var allocRxStr = strings.Join(new slice<@string>(new @string[] { `calloc`, `cfree`, `malloc`, `free`, `memalign`, `do_memalign`, `(__)?posix_memalign`, `pvalloc`, `valloc`, `realloc`, `tcmalloc::.*`, `tc_calloc`, `tc_cfree`, `tc_malloc`, `tc_free`, `tc_memalign`, `tc_posix_memalign`, `tc_pvalloc`, `tc_valloc`, `tc_realloc`, `tc_new`, `tc_delete`, `tc_newarray`, `tc_deletearray`, `tc_new_nothrow`, `tc_newarray_nothrow`, `malloc_zone_malloc`, `malloc_zone_calloc`, `malloc_zone_valloc`, `malloc_zone_realloc`, `malloc_zone_memalign`, `malloc_zone_free`, `runtime\..*`, `BaseArena::.*`, `(::)?do_malloc_no_errno`, `(::)?do_malloc_pages`, `(::)?do_malloc`, `DoSampledAllocation`, `MallocedMemBlock::MallocedMemBlock`, `_M_allocate`, `__builtin_(vec_)?delete`, `__builtin_(vec_)?new`, `__gnu_cxx::new_allocator::allocate`, `__libc_malloc`, `__malloc_alloc_template::allocate`, `allocate`, `cpp_alloc`, `operator new(\[\])?`, `simple_alloc::allocate` }), "|");

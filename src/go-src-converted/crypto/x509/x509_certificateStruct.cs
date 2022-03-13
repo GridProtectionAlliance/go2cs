@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:20:02 UTC
+//     Generated on 2022 March 13 05:34:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -44,7 +44,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Certificate
         {
             // Constructors
@@ -159,7 +159,7 @@ namespace crypto
             public static implicit operator Certificate(NilType nil) => default(Certificate);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Certificate Certificate_cast(dynamic value)
         {
             return new Certificate(value.Raw, value.RawTBSCertificate, value.RawSubjectPublicKeyInfo, value.RawSubject, value.RawIssuer, value.Signature, value.SignatureAlgorithm, value.PublicKeyAlgorithm, value.Version, ref value.SerialNumber, value.Issuer, value.Subject, value.NotBefore, value.NotAfter, value.KeyUsage, value.Extensions, value.ExtraExtensions, value.UnhandledCriticalExtensions, value.ExtKeyUsage, value.UnknownExtKeyUsage, value.BasicConstraintsValid, value.IsCA, value.MaxPathLen, value.MaxPathLenZero, value.SubjectKeyId, value.AuthorityKeyId, value.OCSPServer, value.IssuingCertificateURL, value.DNSNames, value.EmailAddresses, value.IPAddresses, value.URIs, value.PermittedDNSDomainsCritical, value.PermittedDNSDomains, value.ExcludedDNSDomains, value.PermittedIPRanges, value.ExcludedIPRanges, value.PermittedEmailAddresses, value.ExcludedEmailAddresses, value.PermittedURIDomains, value.ExcludedURIDomains, value.CRLDistributionPoints, value.PolicyIdentifiers);

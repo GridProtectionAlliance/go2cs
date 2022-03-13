@@ -5,16 +5,16 @@
 //go:build darwin
 // +build darwin
 
-// package unix -- go2cs converted at 2022 March 06 23:26:39 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:19 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\readdirent_getdirentries.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 
-    // ReadDirent reads directory entries from fd and writes them into buf.
+// ReadDirent reads directory entries from fd and writes them into buf.
 public static (nint, error) ReadDirent(nint fd, slice<byte> buf) {
     nint n = default;
     error err = default!;
@@ -25,7 +25,6 @@ public static (nint, error) ReadDirent(nint fd, slice<byte> buf) {
     // TODO(rsc): Can we use a single global basep for all calls?
     var @base = (uintptr.val)(@unsafe.Pointer(@new<uint64>()));
     return Getdirentries(fd, buf, base);
-
 }
 
 } // end unix_package

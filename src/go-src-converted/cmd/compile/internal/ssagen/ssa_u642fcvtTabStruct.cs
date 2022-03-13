@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:10:38 UTC
+//     Generated on 2022 March 13 06:23:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -48,7 +48,7 @@ namespace @internal
 {
     public static partial class ssagen_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct u642fcvtTab
         {
             // Constructors
@@ -91,7 +91,7 @@ namespace @internal
             public static implicit operator u642fcvtTab(NilType nil) => default(u642fcvtTab);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static u642fcvtTab u642fcvtTab_cast(dynamic value)
         {
             return new u642fcvtTab(value.leq, value.cvt2F, value.and, value.rsh, value.or, value.add, value.one);

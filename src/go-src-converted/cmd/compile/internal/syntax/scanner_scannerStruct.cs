@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:13:41 UTC
+//     Generated on 2022 March 13 06:27:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class syntax_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct scanner
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator scanner(NilType nil) => default(scanner);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static scanner scanner_cast(dynamic value)
         {
             return new scanner(value.source, value.mode, value.nlsemi, value.line, value.col, value.blank, value.tok, value.lit, value.bad, value.kind, value.op, value.prec);

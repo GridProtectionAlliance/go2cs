@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:06 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:30 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\html.go
-using bytes = go.bytes_package;
-using src = go.cmd.@internal.src_package;
-using fmt = go.fmt_package;
-using html = go.html_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using src = cmd.@internal.src_package;
+using fmt = fmt_package;
+using html = html_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class ssa_package {
 
@@ -47,12 +46,10 @@ public static ptr<HTMLWriter> NewHTMLWriter(@string path, ptr<Func> _addr_f, @st
             f.Fatalf("%v", err);
         }
         reportPath = filepath.Join(pwd, path);
-
     }
     ref HTMLWriter html = ref heap(new HTMLWriter(w:out,Func:f,path:reportPath,dot:newDotWriter(cfgMask),), out ptr<HTMLWriter> _addr_html);
     html.start();
     return _addr__addr_html!;
-
 }
 
 // Fatalf reports an error and exits.
@@ -341,7 +338,6 @@ Edge with a dot means that this edge follows the order in which blocks were laid
 ");
     w.WriteString("<table>");
     w.WriteString("<tr>");
-
 }
 
 private static void Close(this ptr<HTMLWriter> _addr_w) {
@@ -356,7 +352,6 @@ private static void Close(this ptr<HTMLWriter> _addr_w) {
     io.WriteString(w.w, "</html>");
     w.w.Close();
     fmt.Printf("dumped SSA to %v\n", w.path);
-
 }
 
 // WritePhase writes f in a column headed by title.
@@ -374,7 +369,6 @@ private static void WritePhase(this ptr<HTMLWriter> _addr_w, @string phase, @str
         w.flushPhases();
     }
     w.prevHash = hash;
-
 }
 
 // flushPhases collects any pending phases and titles, writes them to the html, and resets the pending slices.
@@ -389,7 +383,6 @@ private static void flushPhases(this ptr<HTMLWriter> _addr_w) {
     w.WriteMultiTitleColumn(phases, w.pendingTitles, fmt.Sprintf("hash-%x", w.prevHash), w.Func.HTML(w.pendingPhases[phaseLen - 1], w.dot));
     w.pendingPhases = w.pendingPhases[..(int)0];
     w.pendingTitles = w.pendingTitles[..(int)0];
-
 }
 
 // FuncLines contains source code for a function to be displayed
@@ -418,7 +411,6 @@ public static bool Less(this ByTopo x, nint i, nint j) {
         return a.StartLineno < b.StartLineno;
     }
     return a.Filename < b.Filename;
-
 }
 
 // WriteSources writes lines as source code in a column headed by title.
@@ -484,9 +476,7 @@ private static void WriteSources(this ptr<HTMLWriter> _addr_w, @string phase, sl
  {
                         escaped = html.EscapeString(line);
                     }
-
                     fmt.Fprintf(_addr_buf, "<div class=\"l%v line-number\">%v</div>", ln, escaped);
-
                 }
 
                 i = i__prev2;
@@ -497,7 +487,6 @@ private static void WriteSources(this ptr<HTMLWriter> _addr_w, @string phase, sl
 
     fmt.Fprint(_addr_buf, "</pre></div>");
     w.WriteColumn(phase, phase, "allow-x-scroll", buf.String());
-
 }
 
 private static void WriteAST(this ptr<HTMLWriter> _addr_w, @string phase, ptr<bytes.Buffer> _addr_buf) {
@@ -539,15 +528,10 @@ private static void WriteAST(this ptr<HTMLWriter> _addr_w, @string phase, ptr<by
                             }
 
                         }
-
                     }
-
                 }
-
                 escaped = html.EscapeString(l);
-
             }
-
         }
         if (lineNo != "") {
             fmt.Fprintf(_addr_out, "<div class=\"l%v line-number ast\">%v</div>", lineNo, escaped);
@@ -558,7 +542,6 @@ private static void WriteAST(this ptr<HTMLWriter> _addr_w, @string phase, ptr<by
         }
     }    fmt.Fprint(_addr_out, "</div>");
     w.WriteColumn(phase, phase, "allow-x-scroll", @out.String());
-
 }
 
 // WriteColumn writes raw HTML in a column headed by title.
@@ -590,7 +573,6 @@ private static void WriteMultiTitleColumn(this ptr<HTMLWriter> _addr_w, @string 
         w.WriteString("<h2>" + title + "</h2>");
     }    w.WriteString(html);
     w.WriteString("</td>\n");
-
 }
 
 private static void Printf(this ptr<HTMLWriter> _addr_w, @string msg, params object[] v) {
@@ -604,7 +586,6 @@ private static void Printf(this ptr<HTMLWriter> _addr_w, @string msg, params obj
             w.Fatalf("%v", err);
         }
     }
-
 }
 
 private static void WriteString(this ptr<HTMLWriter> _addr_w, @string s) {
@@ -617,7 +598,6 @@ private static void WriteString(this ptr<HTMLWriter> _addr_w, @string s) {
             w.Fatalf("%v", err);
         }
     }
-
 }
 
 private static @string HTML(this ptr<Value> _addr_v) {
@@ -628,7 +608,6 @@ private static @string HTML(this ptr<Value> _addr_v) {
     // are transmuted into other values.
     var s = v.String();
     return fmt.Sprintf("<span class=\"%s ssa-value\">%s</span>", s, s);
-
 }
 
 private static @string LongHTML(this ptr<Value> _addr_v) {
@@ -662,14 +641,12 @@ private static @string LongHTML(this ptr<Value> _addr_v) {
                 names = append(names, name.String());
                 break; // drop duplicates.
             }
-
         }
     }    if (len(names) != 0) {
         s += " (" + strings.Join(names, ", ") + ")";
     }
     s += "</span>";
     return s;
-
 }
 
 private static @string HTML(this ptr<Block> _addr_b) {
@@ -680,7 +657,6 @@ private static @string HTML(this ptr<Block> _addr_b) {
     // are transmuted into other values.
     var s = html.EscapeString(b.String());
     return fmt.Sprintf("<span class=\"%s ssa-block\">%s</span>", s, s);
-
 }
 
 private static @string LongHTML(this ptr<Block> _addr_b) {
@@ -698,7 +674,6 @@ private static @string LongHTML(this ptr<Block> _addr_b) {
             s += html.EscapeString(fmt.Sprintf(" [%v]", t));
         }
     }
-
     {
         var c__prev1 = c;
 
@@ -725,10 +700,8 @@ private static @string LongHTML(this ptr<Block> _addr_b) {
         // TODO does not begin to deal with the full complexity of line numbers.
         // Maybe we want a string/slice instead, of outer-inner when inlining.
         s += fmt.Sprintf(" <span class=\"l%v line-number\">(%s)</span>", b.Pos.LineNumber(), b.Pos.LineNumberHTML());
-
     }
     return s;
-
 }
 
 private static @string HTML(this ptr<Func> _addr_f, @string phase, ptr<dotWriter> _addr_dot) {
@@ -746,7 +719,6 @@ private static @string HTML(this ptr<Func> _addr_f, @string phase, ptr<dotWriter
     // fprintFunc(&buf, f) // TODO: HTML, not text, <br> for line breaks, etc.
     fmt.Fprint(buf, "</code>");
     return buf.String();
-
 }
 
 private static void writeFuncSVG(this ptr<dotWriter> _addr_d, io.Writer w, @string phase, ptr<Func> _addr_f) {
@@ -763,7 +735,6 @@ private static void writeFuncSVG(this ptr<dotWriter> _addr_d, io.Writer w, @stri
             return ;
         }
     }
-
     var cmd = exec.Command(d.path, "-Tsvg");
     var (pipe, err) = cmd.StdinPipe();
     if (err != null) {
@@ -825,9 +796,7 @@ private static void writeFuncSVG(this ptr<dotWriter> _addr_d, io.Writer w, @stri
 
     var ponums = make_slice<int>(f.NumBlocks());
     _ = postorderWithNumbering(f, ponums);
-    Func<ID, ID, bool> isBackEdge = (from, to) => {
-        return ponums[from] <= ponums[to];
-    };
+    Func<ID, ID, bool> isBackEdge = (from, to) => ponums[from] <= ponums[to];
 
     {
         var b__prev1 = b;
@@ -850,14 +819,11 @@ private static void writeFuncSVG(this ptr<dotWriter> _addr_d, io.Writer w, @stri
                         // Red color means ordered edge. It overrides other colors.
                         arrow = "dotvee";
                         layoutDrawn[s.b.ID] = true;
-
                     }
                     else if (isBackEdge(b.ID, s.b.ID)) {
                         color = "#2893ff";
                     }
-
                     fmt.Fprintf(pipe, "%v -> %v [label=\" %d \",style=\"%s\",color=\"%s\",arrowhead=\"%s\"];", b, s.b, i, style, color, arrow);
-
                 }
 
                 i = i__prev2;
@@ -884,7 +850,6 @@ private static void writeFuncSVG(this ptr<dotWriter> _addr_d, io.Writer w, @stri
 
             i = i__prev1;
         }
-
     }
     fmt.Fprint(pipe, "}");
     pipe.Close();
@@ -906,7 +871,6 @@ private static void writeFuncSVG(this ptr<dotWriter> _addr_d, io.Writer w, @stri
     }
     fmt.Fprintf(w, " id=\"%s\" onload=\"makeDraggable(evt)\" ", svgID);
     io.Copy(w, buf);
-
 }
 
 private static nint unlikelyIndex(this ptr<Block> _addr_b) {
@@ -918,7 +882,6 @@ private static nint unlikelyIndex(this ptr<Block> _addr_b) {
     else if (b.Likely == BranchUnlikely) 
         return 0;
         return -1;
-
 }
 
 private static error copyUntil(this ptr<dotWriter> _addr_d, io.Writer w, ptr<bytes.Buffer> _addr_buf, @string sep) {
@@ -931,7 +894,6 @@ private static error copyUntil(this ptr<dotWriter> _addr_d, io.Writer w, ptr<byt
     }
     var (_, err) = io.CopyN(w, buf, int64(i + len(sep)));
     return error.As(err)!;
-
 }
 
 private partial struct htmlFuncPrinter {
@@ -966,7 +928,6 @@ private static void startBlock(this htmlFuncPrinter p, ptr<Block> _addr_b, bool 
     if (len(b.Values) > 0) { // start list of values
         io.WriteString(p.w, "<li class=\"ssa-value-list\">");
         io.WriteString(p.w, "<ul>");
-
     }
 }
 
@@ -976,13 +937,11 @@ private static void endBlock(this htmlFuncPrinter p, ptr<Block> _addr_b) {
     if (len(b.Values) > 0) { // end list of values
         io.WriteString(p.w, "</ul>");
         io.WriteString(p.w, "</li>");
-
     }
     io.WriteString(p.w, "<li class=\"ssa-end-block\">");
     fmt.Fprint(p.w, b.LongHTML());
     io.WriteString(p.w, "</li>");
     io.WriteString(p.w, "</ul>");
-
 }
 
 private static void value(this htmlFuncPrinter p, ptr<Value> _addr_v, bool live) {
@@ -995,7 +954,6 @@ private static void value(this htmlFuncPrinter p, ptr<Value> _addr_v, bool live)
     fmt.Fprintf(p.w, "<li class=\"ssa-long-value %s\">", dead);
     fmt.Fprint(p.w, v.LongHTML());
     io.WriteString(p.w, "</li>");
-
 }
 
 private static void startDepCycle(this htmlFuncPrinter p) {
@@ -1056,14 +1014,12 @@ private static ptr<dotWriter> newDotWriter(@string mask) {
         for (var p = first; p <= last; p++) {
             ph[passes[p].name] = true;
         }
-
     }    var (path, err) = exec.LookPath("dot");
     if (err != null) {
         fmt.Println(err);
         return _addr_null!;
     }
     return addr(new dotWriter(path:path,phases:ph));
-
 }
 
 private static nint passIdxByName(@string name) {
@@ -1072,7 +1028,6 @@ private static nint passIdxByName(@string name) {
             return i;
         }
     }    return -1;
-
 }
 
 } // end ssa_package

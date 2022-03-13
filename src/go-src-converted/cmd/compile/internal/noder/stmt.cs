@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package noder -- go2cs converted at 2022 March 06 23:14:15 UTC
+// package noder -- go2cs converted at 2022 March 13 06:27:42 UTC
 // import "cmd/compile/internal/noder" ==> using noder = go.cmd.compile.@internal.noder_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\noder\stmt.go
-using ir = go.cmd.compile.@internal.ir_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
 
 public static partial class noder_package {
 
@@ -33,9 +33,7 @@ private static slice<ir.Node> stmts(this ptr<irgen> _addr_g, slice<syntax.Stmt> 
                 break;
             }
         }
-
     }    return nodes;
-
 }
 
 private static ir.Node stmt(this ptr<irgen> _addr_g, syntax.Stmt stmt) => func((_, panic, _) => {
@@ -61,7 +59,6 @@ private static ir.Node stmt(this ptr<irgen> _addr_g, syntax.Stmt stmt) => func((
                 }
 
             }
-
             return x;
             break;
         case ptr<syntax.SendStmt> stmt:
@@ -71,9 +68,7 @@ private static ir.Node stmt(this ptr<irgen> _addr_g, syntax.Stmt stmt) => func((
                 // have a type param.
                 n.SetTypecheck(3);
                 return n;
-
             }
-
             transformSend(n);
             n.SetTypecheck(1);
             return n;
@@ -92,18 +87,14 @@ private static ir.Node stmt(this ptr<irgen> _addr_g, syntax.Stmt stmt) => func((
  {
                     n = ir.NewAssignOpStmt(g.pos(stmt), op, g.expr(stmt.Lhs), g.expr(stmt.Rhs));
                 }
-
                 if (n.X.Typecheck() == 3) {
                     n.SetTypecheck(3);
                     return n;
                 }
-
                 transformAsOp(n);
                 n.SetTypecheck(1);
                 return n;
-
             }
-
             var (names, lhs) = g.assignList(stmt.Lhs, stmt.Op == syntax.Def);
             var rhs = g.exprList(stmt.Rhs); 
 
@@ -152,16 +143,13 @@ private static ir.Node stmt(this ptr<irgen> _addr_g, syntax.Stmt stmt) => func((
                 transformAssign(n, lhs, rhs);
                 (n.X, n.Y) = (lhs[0], rhs[0]);                n.SetTypecheck(1);
                 return n;
-
             }
-
             n = ir.NewAssignListStmt(g.pos(stmt), ir.OAS2, lhs, rhs);
             n.Def = initDefn(n, names);
             if (delay) {
                 n.SetTypecheck(3);
                 return n;
             }
-
             transformAssign(n, n.Lhs, n.Rhs);
             n.SetTypecheck(1);
             return n;
@@ -184,9 +172,7 @@ private static ir.Node stmt(this ptr<irgen> _addr_g, syntax.Stmt stmt) => func((
                         // return values have a type param.
                         n.SetTypecheck(3);
                         return n;
-
                     }
-
                 }
 
                 e = e__prev1;
@@ -219,7 +205,6 @@ private static ir.Node stmt(this ptr<irgen> _addr_g, syntax.Stmt stmt) => func((
             break;
         }
     }
-
 });
 
 // TODO(mdempsky): Investigate replacing with switch statements or dense arrays.
@@ -233,7 +218,6 @@ private static ir.Op tokOp(this ptr<irgen> _addr_g, nint tok, slice<ir.Op> ops) 
  
     // TODO(mdempsky): Validate.
     return ops[tok];
-
 }
 
 private static ir.Op op(this ptr<irgen> _addr_g, syntax.Operator op, slice<ir.Op> ops) {
@@ -241,7 +225,6 @@ private static ir.Op op(this ptr<irgen> _addr_g, syntax.Operator op, slice<ir.Op
  
     // TODO(mdempsky): Validate.
     return ops[op];
-
 }
 
 private static (slice<ptr<ir.Name>>, slice<ir.Node>) assignList(this ptr<irgen> _addr_g, syntax.Expr expr, bool def) {
@@ -264,7 +247,6 @@ private static (slice<ptr<ir.Name>>, slice<ir.Node>) assignList(this ptr<irgen> 
             exprs = new slice<syntax.Expr>(new syntax.Expr[] { expr });
         }
     }
-
 
     slice<ptr<ir.Name>> names = default;
     var res = make_slice<ir.Node>(len(exprs));
@@ -289,17 +271,14 @@ private static (slice<ptr<ir.Name>>, slice<ir.Node>) assignList(this ptr<irgen> 
 
             }
 
-
             var (name, _) = g.def(expr);
             names = append(names, name);
             res[i] = name;
-
         }
         expr = expr__prev1;
     }
 
     return (names, res);
-
 }
 
 // initDefn marks the given names as declared by defn and populates
@@ -315,7 +294,6 @@ private static bool initDefn(ir.InitNode defn, slice<ptr<ir.Name>> names) {
         init[i] = ir.NewDecl(name.Pos(), ir.ODCL, name);
     }    defn.SetInit(init);
     return true;
-
 }
 
 private static slice<ir.Node> blockStmt(this ptr<irgen> _addr_g, ptr<syntax.BlockStmt> _addr_stmt) {
@@ -343,7 +321,6 @@ private static ir.Node ifStmt(this ptr<irgen> _addr_g, ptr<syntax.IfStmt> _addr_
         }
     }
     return g.init(init, n);
-
 }
 
 // unpackTwo returns the first two nodes in list. If list has fewer
@@ -363,7 +340,6 @@ private static (ir.Node, ir.Node) unpackTwo(slice<ir.Node> list) {
             return (list[0], list[1]);
             break;
     }
-
 }
 
 private static ir.Node forStmt(this ptr<irgen> _addr_g, ptr<syntax.ForStmt> _addr_stmt) {
@@ -382,9 +358,7 @@ private static ir.Node forStmt(this ptr<irgen> _addr_g, ptr<syntax.ForStmt> _add
         }
     }
 
-
     return ir.NewForStmt(g.pos(stmt), g.stmt(stmt.Init), g.expr(stmt.Cond), g.stmt(stmt.Post), g.blockStmt(stmt.Body));
-
 }
 
 private static ir.Node selectStmt(this ptr<irgen> _addr_g, ptr<syntax.SelectStmt> _addr_stmt) {
@@ -443,12 +417,9 @@ private static ir.Node switchStmt(this ptr<irgen> _addr_g, ptr<syntax.SwitchStmt
             }
 
         }
-
         body[i] = ir.NewCaseStmt(g.pos(clause), g.exprList(clause.Cases), g.stmts(clause.Body));
         body[i].Var = cv;
-
     }    return g.init(init, ir.NewSwitchStmt(pos, expr, body));
-
 }
 
 private static ir.Node labeledStmt(this ptr<irgen> _addr_g, ptr<syntax.LabeledStmt> _addr_label) {
@@ -488,7 +459,6 @@ private static ir.Node labeledStmt(this ptr<irgen> _addr_g, ptr<syntax.LabeledSt
         }
     }
     return ir.NewBlockStmt(src.NoXPos, l);
-
 }
 
 private static ir.InitNode init(this ptr<irgen> _addr_g, ir.Node init, ir.InitNode stmt) {
@@ -498,7 +468,6 @@ private static ir.InitNode init(this ptr<irgen> _addr_g, ir.Node init, ir.InitNo
         stmt.SetInit(new slice<ir.Node>(new ir.Node[] { init }));
     }
     return stmt;
-
 }
 
 private static ptr<types.Sym> name(this ptr<irgen> _addr_g, ptr<syntax.Name> _addr_name) {
@@ -509,7 +478,6 @@ private static ptr<types.Sym> name(this ptr<irgen> _addr_g, ptr<syntax.Name> _ad
         return _addr_null!;
     }
     return _addr_typecheck.Lookup(name.Value)!;
-
 }
 
 } // end noder_package

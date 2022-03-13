@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package strings -- go2cs converted at 2022 March 06 22:08:03 UTC
+// package strings -- go2cs converted at 2022 March 13 05:23:51 UTC
 // import "strings" ==> using strings = go.strings_package
 // Original source: C:\Program Files\Go\src\strings\builder.go
-using utf8 = go.unicode.utf8_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using utf8 = unicode.utf8_package;
+using @unsafe = @unsafe_package;
+
+
+// A Builder is used to efficiently build a string using Write methods.
+// It minimizes memory copying. The zero value is ready to use.
+// Do not copy a non-zero Builder.
 
 public static partial class strings_package {
 
-    // A Builder is used to efficiently build a string using Write methods.
-    // It minimizes memory copying. The zero value is ready to use.
-    // Do not copy a non-zero Builder.
 public partial struct Builder {
     public ptr<Builder> addr; // of receiver, to detect copies by value
     public slice<byte> buf;
@@ -43,7 +45,6 @@ private static void copyCheck(this ptr<Builder> _addr_b) => func((_, panic, _) =
         // TODO: once issue 7921 is fixed, this should be reverted to
         // just "b.addr = b".
         b.addr = (Builder.val)(noescape(@unsafe.Pointer(b)));
-
     }
     else if (b.addr != b) {
         panic("strings: illegal use of non-zero Builder copied by value");
@@ -148,7 +149,6 @@ private static (nint, error) WriteRune(this ptr<Builder> _addr_b, int r) {
     var n = utf8.EncodeRune(b.buf[(int)l..(int)l + utf8.UTFMax], r);
     b.buf = b.buf[..(int)l + n];
     return (n, error.As(null!)!);
-
 }
 
 // WriteString appends the contents of s to b's buffer.

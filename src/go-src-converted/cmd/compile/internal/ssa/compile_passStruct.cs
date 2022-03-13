@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:27 UTC
+//     Generated on 2022 March 13 06:00:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -36,7 +36,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pass
         {
             // Constructors
@@ -85,7 +85,7 @@ namespace @internal
             public static implicit operator pass(NilType nil) => default(pass);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pass pass_cast(dynamic value)
         {
             return new pass(value.name, value.fn, value.required, value.disabled, value.time, value.mem, value.stats, value.debug, value.test, value.dump);

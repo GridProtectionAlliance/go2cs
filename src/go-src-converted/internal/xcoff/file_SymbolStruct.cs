@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:41:04 UTC
+//     Generated on 2022 March 13 05:52:08 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class xcoff_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Symbol
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace @internal
             public static implicit operator Symbol(NilType nil) => default(Symbol);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Symbol Symbol_cast(dynamic value)
         {
             return new Symbol(value.Name, value.Value, value.SectionNumber, value.StorageClass, value.AuxFcn, value.AuxCSect);

@@ -2,19 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:49 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:02:13 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\poset.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using os = os_package;
+
+
+// If true, check poset integrity after every mutation
+
+using System;
 public static partial class ssa_package {
 
-    // If true, check poset integrity after every mutation
 private static var debugPoset = false;
 
 private static readonly nint uintSize = 32 << (int)((~uint(0) >> 63)); // 32 or 64
@@ -78,7 +79,6 @@ private partial struct posetUndo {
 // Make poset handle constants as unsigned numbers.
 private static readonly nint posetFlagUnsigned = 1 << (int)(iota);
 
-
 // A poset edge. The zero value is the null/empty edge.
 // Packs target node index (31 bits) and strict flag (1 bit).
 private partial struct posetEdge { // : uint
@@ -90,7 +90,6 @@ private static posetEdge newedge(uint t, bool strict) {
         s = 1;
     }
     return posetEdge(t << 1 | s);
-
 }
 private static uint Target(this posetEdge e) {
     return uint32(e) >> 1;
@@ -104,7 +103,6 @@ private static @string String(this posetEdge e) {
         s += "*";
     }
     return s;
-
 }
 
 // posetNode is a node of a DAG within the poset.
@@ -289,7 +287,6 @@ private static void addchild(this ptr<poset> _addr_po, uint i1, uint i2, bool st
             po.setchr(extra, e2);
             po.setchr(i1, newedge(extra, false));
             po.upush(undoSetChr, i1, i1r);
-
         }
         else
  {
@@ -316,14 +313,12 @@ private static uint newnode(this ptr<poset> _addr_po, ptr<Value> _addr_n) => fun
         }
         po.values[n.ID] = i;
         po.upushnew(n.ID, i);
-
     }
     else
  {
         po.upushnew(0, i);
     }
     return i;
-
 });
 
 // lookup searches for a SSA value into the forest of DAGS, and return its node.
@@ -340,7 +335,6 @@ private static (uint, bool) lookup(this ptr<poset> _addr_po, ptr<Value> _addr_n)
         i, f = po.values[n.ID];
     }
     return (i, f);
-
 }
 
 // newconst creates a node for a constant. It links it to other constants, so
@@ -410,7 +404,6 @@ private static void newconst(this ptr<poset> _addr_po, ptr<Value> _addr_n) => fu
                     higher = val2;
                     higherptr = ptr;
                 }
-
             }
     else
 
@@ -439,7 +432,6 @@ private static void newconst(this ptr<poset> _addr_po, ptr<Value> _addr_n) => fu
                     higher = val2;
                     higherptr = ptr;
                 }
-
             }
 
             val2 = val2__prev1;
@@ -450,7 +442,6 @@ private static void newconst(this ptr<poset> _addr_po, ptr<Value> _addr_n) => fu
         // This should not happen, as at least one
         // other constant must exist if we get here.
         panic("no constant found");
-
     }
 
     if (lowerptr != 0 && higherptr != 0) 
@@ -476,7 +467,6 @@ private static void newconst(this ptr<poset> _addr_po, ptr<Value> _addr_n) => fu
         var r2 = po.findroot(i2);
         if (r2 != po.roots[0]) { // all constants should be in root #0
             panic("constant not in root #0");
-
         }
         var extra = po.newnode(null);
         po.changeroot(r2, extra);
@@ -486,7 +476,6 @@ private static void newconst(this ptr<poset> _addr_po, ptr<Value> _addr_n) => fu
         po.addchild(i, i2, true);
         po.constants[val] = i;
     po.upushconst(i, 0);
-
 });
 
 // aliasnewnode records that a single node n2 (not in the poset yet) is an alias
@@ -503,7 +492,6 @@ private static void aliasnewnode(this ptr<poset> _addr_po, ptr<Value> _addr_n1, 
     }
     po.values[n2.ID] = i1;
     po.upushalias(n2.ID, 0);
-
 });
 
 // aliasnodes records that all the nodes i2s are aliases of a single master node n1.
@@ -532,7 +520,6 @@ private static void aliasnodes(this ptr<poset> _addr_po, ptr<Value> _addr_n1, bi
             if (uint32(idx) == i1) {
                 continue;
             }
-
             var l = n.l;
             var r = n.r; 
 
@@ -541,7 +528,6 @@ private static void aliasnodes(this ptr<poset> _addr_po, ptr<Value> _addr_n1, bi
                 po.setchl(uint32(idx), newedge(i1, l.Strict()));
                 po.upush(undoSetChl, uint32(idx), l);
             }
-
             if (i2s.Test(r.Target())) {
                 po.setchr(uint32(idx), newedge(i1, r.Strict()));
                 po.upush(undoSetChr, uint32(idx), r);
@@ -561,7 +547,6 @@ private static void aliasnodes(this ptr<poset> _addr_po, ptr<Value> _addr_n1, bi
                 po.upush(undoSetChl, uint32(idx), l);
                 po.upush(undoSetChr, uint32(idx), r);
             }
-
         }
         idx = idx__prev1;
     }
@@ -594,7 +579,6 @@ private static bool isroot(this ptr<poset> _addr_po, uint r) {
             return true;
         }
     }    return false;
-
 }
 
 private static void changeroot(this ptr<poset> _addr_po, uint oldr, uint newr) => func((_, panic, _) => {
@@ -606,7 +590,6 @@ private static void changeroot(this ptr<poset> _addr_po, uint oldr, uint newr) =
             return ;
         }
     }    panic("changeroot on non-root");
-
 });
 
 private static void removeroot(this ptr<poset> _addr_po, uint r) => func((_, panic, _) => {
@@ -618,7 +601,6 @@ private static void removeroot(this ptr<poset> _addr_po, uint r) => func((_, pan
             return ;
         }
     }    panic("removeroot on non-root");
-
 });
 
 // dfs performs a depth-first search within the DAG whose root is r.
@@ -662,9 +644,7 @@ private static bool dfs(this ptr<poset> _addr_po, uint r, bool strict, Func<uint
  {
                         open = append(open, l.Target());
                     }
-
                 }
-
                 if (r != 0) {
                     if (r.Strict()) {
                         next = append(next, r.Target());
@@ -673,15 +653,11 @@ private static bool dfs(this ptr<poset> _addr_po, uint r, bool strict, Func<uint
  {
                         open = append(open, r.Target());
                     }
-
                 }
-
             }
-
         }
         open = next;
         closed.Reset();
-
     }
     while (len(open) > 0) {
         i = open[len(open) - 1];
@@ -702,7 +678,6 @@ private static bool dfs(this ptr<poset> _addr_po, uint r, bool strict, Func<uint
         }
     }
     return false;
-
 }
 
 // Returns true if there is a path from i1 to i2.
@@ -712,9 +687,7 @@ private static bool dfs(this ptr<poset> _addr_po, uint r, bool strict, Func<uint
 private static bool reaches(this ptr<poset> _addr_po, uint i1, uint i2, bool strict) {
     ref poset po = ref _addr_po.val;
 
-    return po.dfs(i1, strict, n => {
-        return n == i2;
-    });
+    return po.dfs(i1, strict, n => n == i2);
 }
 
 // findroot finds i's root, that is which DAG contains i.
@@ -731,7 +704,6 @@ private static uint findroot(this ptr<poset> _addr_po, uint i) => func((_, panic
             return r;
         }
     }    panic("findroot didn't find any root");
-
 });
 
 // mergeroot merges two DAGs into one DAG by creating a new extra root
@@ -751,7 +723,6 @@ private static uint mergeroot(this ptr<poset> _addr_po, uint r1, uint r2) {
     po.removeroot(r2);
     po.upush(undoMergeRoot, r, 0);
     return r;
-
 }
 
 // collapsepath marks n1 and n2 as equal and collapses as equal all
@@ -774,7 +745,6 @@ private static bool collapsepath(this ptr<poset> _addr_po, ptr<Value> _addr_n1, 
     paths.Clear(i1);
     po.aliasnodes(n1, paths);
     return true;
-
 }
 
 // findpaths is a recursive function that calculates all paths from cur to dst
@@ -830,9 +800,7 @@ private static bool isnoneq(this ptr<poset> _addr_po, uint i1, uint i2) {
             return true;
         }
     }
-
     return false;
-
 }
 
 // Record that i1!=i2
@@ -871,16 +839,13 @@ private static void setnoneq(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<
         // a small bitset and lazily grow it when higher indices arrive.
         bs = newBitset(int(i1));
         po.noneq[i1] = bs;
-
     }
     else if (bs.Test(i2)) { 
         // Already recorded
         return ;
-
     }
     bs.Set(i2);
     po.upushneq(i1, i2);
-
 });
 
 // CheckIntegrity verifies internal integrity of a poset. It is intended
@@ -909,7 +874,6 @@ private static void CheckIntegrity(this ptr<poset> _addr_po) => func((_, panic, 
             }
             return false;
         });
-
     }    foreach (var (id, idx) in po.values) {
         if (!seen.Test(idx)) {
             panic(fmt.Errorf("spurious value [%d]=%d", id, idx));
@@ -957,7 +921,6 @@ private static error CheckEmpty(this ptr<poset> _addr_po) {
             }
         }
     }    return error.As(null!)!;
-
 }
 
 // DotDump dumps the poset in graphviz format to file fn, with the specified title.
@@ -982,7 +945,6 @@ private static error DotDump(this ptr<poset> _addr_po, @string fn, @string title
             s += fmt.Sprintf(", v%d", id);
         }
         names[i] = s;
-
     }    var consts = make_map<uint, long>();
     {
         var val__prev1 = val;
@@ -1015,21 +977,17 @@ private static error DotDump(this ptr<poset> _addr_po, @string fn, @string title
  {
                         vals = fmt.Sprint(int64(val));
                     }
-
                     fmt.Fprintf(f, "\t\tnode%d [shape=box style=filled fillcolor=cadetblue1 label=<%s <font point-size=\"6\">%s [%d]</font>>]\n", i, vals, names[i], i);
-
                 }
                 else
  { 
                     // Normal SSA value
                     fmt.Fprintf(f, "\t\tnode%d [label=<%s <font point-size=\"6\">[%d]</font>>]\n", i, names[i], i);
-
                 }
 
                 val = val__prev1;
 
             }
-
             var (chl, chr) = po.children(i);
             foreach (var (_, ch) in new slice<posetEdge>(new posetEdge[] { chl, chr })) {
                 if (ch != 0) {
@@ -1040,21 +998,16 @@ private static error DotDump(this ptr<poset> _addr_po, @string fn, @string title
  {
                         fmt.Fprintf(f, "\t\tnode%d -> node%d [label=\" <=\" color=\"green\"]\n", i, ch.Target());
                     }
-
                 }
-
             }
             return error.As(false)!;
-
         });
         fmt.Fprintf(f, "\t}\n");
-
     }    fmt.Fprintf(f, "\tlabelloc=\"t\"\n");
     fmt.Fprintf(f, "\tlabeldistance=\"3.0\"\n");
     fmt.Fprintf(f, "\tlabel=%q\n", title);
     fmt.Fprintf(f, "}\n");
     return error.As(null!)!;
-
 });
 
 // Ordered reports whether n1<n2. It returns false either when it is
@@ -1078,7 +1031,6 @@ private static bool Ordered(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<V
         return false;
     }
     return i1 != i2 && po.reaches(i1, i2, true);
-
 });
 
 // Ordered reports whether n1<=n2. It returns false either when it is
@@ -1102,7 +1054,6 @@ private static bool OrderedOrEqual(this ptr<poset> _addr_po, ptr<Value> _addr_n1
         return false;
     }
     return i1 == i2 || po.reaches(i1, i2, false);
-
 });
 
 // Equal reports whether n1==n2. It returns false either when it is
@@ -1123,7 +1074,6 @@ private static bool Equal(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<Val
     var (i1, f1) = po.lookup(n1);
     var (i2, f2) = po.lookup(n2);
     return f1 && f2 && i1 == i2;
-
 });
 
 // NonEqual reports whether n1!=n2. It returns false either when it is
@@ -1154,7 +1104,6 @@ private static bool NonEqual(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<
         return true;
     }
     return false;
-
 });
 
 // setOrder records that n1<n2 or n1<=n2 (depending on strict). Returns false
@@ -1236,7 +1185,6 @@ private static bool setOrder(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<
 
             // Case #1, #3 o #4: nothing to do
             return true;
-
         }
         if (po.reaches(i2, i1, false)) { 
             // This is the table of all cases we need to handle:
@@ -1251,24 +1199,20 @@ private static bool setOrder(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<
             if (strict) { 
                 // Cases #6 and #8: contradiction
                 return false;
-
             } 
 
             // We're in case #5 or #7. Try to collapse path, and that will
             // fail if it realizes that we are in case #7.
             return po.collapsepath(n2, n1);
-
         }
         var r1 = po.findroot(i1);
         var r2 = po.findroot(i2);
         if (r1 != r2) { 
             // We need to merge the two DAGs to record a relation between the nodes
             po.mergeroot(r1, r2);
-
         }
         po.addchild(i1, i2, strict);
         return true;
-
 }
 
 // SetOrder records that n1<n2. Returns false if this is a contradiction
@@ -1285,7 +1229,6 @@ private static bool SetOrder(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<
         panic("should not call SetOrder with n1==n2");
     }
     return po.setOrder(n1, n2, true);
-
 });
 
 // SetOrderOrEqual records that n1<=n2. Returns false if this is a contradiction
@@ -1302,7 +1245,6 @@ private static bool SetOrderOrEqual(this ptr<poset> _addr_po, ptr<Value> _addr_n
         panic("should not call SetOrder with n1==n2");
     }
     return po.setOrder(n1, n2, false);
-
 });
 
 // SetEqual records that n1==n2. Returns false if this is a contradiction
@@ -1336,7 +1278,6 @@ private static bool SetEqual(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<
         if (i1 == i2) { 
             // Already aliased, ignore
             return true;
-
         }
         if (po.isnoneq(i1, i2)) {
             return false;
@@ -1352,13 +1293,11 @@ private static bool SetEqual(this ptr<poset> _addr_po, ptr<Value> _addr_n1, ptr<
         if (r1 != r2) { 
             // Merge the two DAGs so we can record relations between the nodes
             po.mergeroot(r1, r2);
-
         }
         var i2s = newBitset(int(po.lastidx) + 1);
         i2s.Set(i2);
         po.aliasnodes(n1, i2s);
         return true;
-
 });
 
 // SetNonEqual records that n1!=n2. Returns false if this is a contradiction
@@ -1403,7 +1342,6 @@ private static bool SetNonEqual(this ptr<poset> _addr_po, ptr<Value> _addr_n1, p
         po.addchild(i2, i1, true);
     }
     return true;
-
 });
 
 // Checkpoint saves the current state of the DAG so that it's possible
@@ -1470,7 +1408,6 @@ private static void Undo(this ptr<poset> _addr_po) => func((defer, panic, _) => 
             if (i != pass.idx) {
                 panic("constant not found in undo pass");
             }
-
             if (pass.ID == 0) {
                 delete(po.constants, val);
             }
@@ -1480,9 +1417,7 @@ private static void Undo(this ptr<poset> _addr_po) => func((defer, panic, _) => 
                 // (also restoring the invariant on correct bounds)
                 var oldidx = uint32(pass.ID);
                 po.constants[val] = oldidx;
-
             }
-
         else if (pass.typ == undoAliasNode) 
             var ID = pass.ID;
             var prev = pass.idx;
@@ -1490,7 +1425,6 @@ private static void Undo(this ptr<poset> _addr_po) => func((defer, panic, _) => 
             if (prev == 0) { 
                 // Born as an alias, die as an alias
                 delete(po.values, ID);
-
             }
             else
  {
@@ -1499,9 +1433,7 @@ private static void Undo(this ptr<poset> _addr_po) => func((defer, panic, _) => 
                 } 
                 // Give it back previous value
                 po.values[ID] = prev;
-
             }
-
         else if (pass.typ == undoNewRoot) 
             i = pass.idx;
             var (l, r) = po.children(i);
@@ -1523,8 +1455,7 @@ private static void Undo(this ptr<poset> _addr_po) => func((defer, panic, _) => 
             po.roots = append(po.roots, r.Target());
         else 
             panic(pass.typ);
-        
-    }
+            }
 
     if (debugPoset && po.CheckEmpty() != null) {
         panic("poset not empty at the end of undo");

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:32:48 UTC
+//     Generated on 2022 March 13 06:42:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class gccgoimporter_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct parser
         {
             // Constructors
@@ -88,7 +88,7 @@ namespace @internal
             public static implicit operator parser(NilType nil) => default(parser);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static parser parser_cast(dynamic value)
         {
             return new parser(ref value.scanner, value.version, value.tok, value.lit, value.pkgpath, value.pkgname, ref value.pkg, value.imports, value.typeList, value.typeData, value.fixups, value.initdata, value.aliases);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:32 UTC
+//     Generated on 2022 March 13 05:24:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(debugLogReader))]
         private partial struct readState
         {
@@ -74,7 +74,7 @@ namespace go
             public static implicit operator readState(NilType nil) => default(readState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static readState readState_cast(dynamic value)
         {
             return new readState(value.debugLogReader, value.first, value.lost, value.nextTick);

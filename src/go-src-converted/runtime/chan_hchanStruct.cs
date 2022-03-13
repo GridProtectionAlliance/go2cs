@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:08:25 UTC
+//     Generated on 2022 March 13 05:24:14 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct hchan
         {
             // Constructors
@@ -73,7 +73,7 @@ namespace go
             public static implicit operator hchan(NilType nil) => default(hchan);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static hchan hchan_cast(dynamic value)
         {
             return new hchan(value.qcount, value.dataqsiz, value.buf, value.elemsize, value.closed, ref value.elemtype, value.sendx, value.recvx, value.recvq, value.sendq, value.@lock);

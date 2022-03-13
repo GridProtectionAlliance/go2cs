@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:43 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:22:00 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\sparseset.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
 
-    // from https://research.swtch.com/sparse
-    // in turn, from Briggs and Torczon
+// from https://research.swtch.com/sparse
+// in turn, from Briggs and Torczon
+
 private partial struct sparseSet {
     public slice<ID> dense;
     public slice<int> sparse;
@@ -52,7 +51,6 @@ private static void add(this ptr<sparseSet> _addr_s, ID x) {
     }
     s.dense = append(s.dense, x);
     s.sparse[x] = int32(len(s.dense)) - 1;
-
 }
 
 private static void addAll(this ptr<sparseSet> _addr_s, slice<ID> a) {

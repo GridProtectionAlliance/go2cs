@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:42 UTC
+//     Generated on 2022 March 13 06:43:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace go
 {
     public static partial class embed_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct openFile
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace go
             public static implicit operator openFile(NilType nil) => default(openFile);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static openFile openFile_cast(dynamic value)
         {
             return new openFile(ref value.f, value.offset);

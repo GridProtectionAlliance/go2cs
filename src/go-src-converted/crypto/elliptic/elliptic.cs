@@ -4,9 +4,11 @@
 
 // Package elliptic implements several standard elliptic curves over prime
 // fields.
-// package elliptic -- go2cs converted at 2022 March 06 22:17:12 UTC
+
+// package elliptic -- go2cs converted at 2022 March 13 05:30:33 UTC
 // import "crypto/elliptic" ==> using elliptic = go.crypto.elliptic_package
 // Original source: C:\Program Files\Go\src\crypto\elliptic\elliptic.go
+namespace go.crypto;
 // This package operates, internally, on Jacobian coordinates. For a given
 // (x, y) position on the curve, the Jacobian coordinates are (x1, y1, z1)
 // where x = x1/z1² and y = y1/z1³. The greatest speedups come when the whole
@@ -14,19 +16,20 @@
 // ScalarBaseMult). But even for Add and Double, it's faster to apply and
 // reverse the transform than to operate in affine coordinates.
 
-using io = go.io_package;
-using big = go.math.big_package;
-using sync = go.sync_package;
 
-namespace go.crypto;
+using io = io_package;
+using big = math.big_package;
+using sync = sync_package;
+
+
+// A Curve represents a short-form Weierstrass curve with a=-3.
+//
+// Note that the point at infinity (0, 0) is not considered on the curve, and
+// although it can be returned by Add, Double, ScalarMult, or ScalarBaseMult, it
+// can't be marshaled or unmarshaled, and IsOnCurve will return false for it.
 
 public static partial class elliptic_package {
 
-    // A Curve represents a short-form Weierstrass curve with a=-3.
-    //
-    // Note that the point at infinity (0, 0) is not considered on the curve, and
-    // although it can be returned by Add, Double, ScalarMult, or ScalarBaseMult, it
-    // can't be marshaled or unmarshaled, and IsOnCurve will return false for it.
 public partial interface Curve {
     (ptr<big.Int>, ptr<big.Int>) Params(); // IsOnCurve reports whether the given (x,y) lies on the curve.
     (ptr<big.Int>, ptr<big.Int>) IsOnCurve(ptr<big.Int> x, ptr<big.Int> y); // Add returns the sum of (x1,y1) and (x2,y2)
@@ -48,7 +51,6 @@ private static (Curve, bool) matchesSpecificCurve(ptr<CurveParams> _addr_@params
             return (c, true);
         }
     }    return (null, false);
-
 }
 
 // CurveParams contains the parameters of an elliptic curve and also provides
@@ -107,7 +109,6 @@ private static bool IsOnCurve(this ptr<CurveParams> _addr_curve, ptr<big.Int> _a
     y2.Mod(y2, curve.P);
 
     return curve.polynomial(x).Cmp(y2) == 0;
-
 }
 
 // zForAffine returns a Jacobian Z value for the affine point (x, y). If x and
@@ -122,7 +123,6 @@ private static ptr<big.Int> zForAffine(ptr<big.Int> _addr_x, ptr<big.Int> _addr_
         z.SetInt64(1);
     }
     return _addr_z!;
-
 }
 
 // affineFromJacobian reverses the Jacobian transform. See the comment at the
@@ -147,7 +147,6 @@ private static (ptr<big.Int>, ptr<big.Int>) affineFromJacobian(this ptr<CurvePar
     yOut = @new<big.Int>().Mul(y, zinvsq);
     yOut.Mod(yOut, curve.P);
     return ;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) Add(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1, ptr<big.Int> _addr_x2, ptr<big.Int> _addr_y2) {
@@ -169,11 +168,9 @@ private static (ptr<big.Int>, ptr<big.Int>) Add(this ptr<CurveParams> _addr_curv
         }
     }
 
-
     var z1 = zForAffine(_addr_x1, _addr_y1);
     var z2 = zForAffine(_addr_x2, _addr_y2);
     return _addr_curve.affineFromJacobian(curve.addJacobian(x1, y1, z1, x2, y2, z2))!;
-
 }
 
 // addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
@@ -264,7 +261,6 @@ private static (ptr<big.Int>, ptr<big.Int>, ptr<big.Int>) addJacobian(this ptr<C
     z3.Mod(z3, curve.P);
 
     return (_addr_x3!, _addr_y3!, _addr_z3!);
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) Double(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_x1, ptr<big.Int> _addr_y1) {
@@ -284,10 +280,8 @@ private static (ptr<big.Int>, ptr<big.Int>) Double(this ptr<CurveParams> _addr_c
         }
     }
 
-
     var z1 = zForAffine(_addr_x1, _addr_y1);
     return _addr_curve.affineFromJacobian(curve.doubleJacobian(x1, y1, z1))!;
-
 }
 
 // doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
@@ -357,7 +351,6 @@ private static (ptr<big.Int>, ptr<big.Int>, ptr<big.Int>) doubleJacobian(this pt
     y3.Mod(y3, curve.P);
 
     return (_addr_x3!, _addr_y3!, _addr_z3!);
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this ptr<CurveParams> _addr_curve, ptr<big.Int> _addr_Bx, ptr<big.Int> _addr_By, slice<byte> k) {
@@ -377,7 +370,6 @@ private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this ptr<CurveParams> _ad
         }
     }
 
-
     ptr<big.Int> Bz = @new<big.Int>().SetInt64(1);
     ptr<big.Int> x = @new<big.Int>();
     ptr<big.Int> y = @new<big.Int>();
@@ -392,7 +384,6 @@ private static (ptr<big.Int>, ptr<big.Int>) ScalarMult(this ptr<CurveParams> _ad
             byte<<=1;
         }
     }    return _addr_curve.affineFromJacobian(x, y, z)!;
-
 }
 
 private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this ptr<CurveParams> _addr_curve, slice<byte> k) {
@@ -410,9 +401,7 @@ private static (ptr<big.Int>, ptr<big.Int>) ScalarBaseMult(this ptr<CurveParams>
         }
     }
 
-
     return _addr_curve.ScalarMult(curve.Gx, curve.Gy, k)!;
-
 }
 
 private static byte mask = new slice<byte>(new byte[] { 0xff, 0x1, 0x3, 0x7, 0xf, 0x1f, 0x3f, 0x7f });
@@ -445,10 +434,8 @@ public static (slice<byte>, ptr<big.Int>, ptr<big.Int>, error) GenerateKey(Curve
             continue;
         }
         x, y = curve.ScalarBaseMult(priv);
-
     }
     return ;
-
 }
 
 // Marshal converts a point on the curve into the uncompressed form specified in
@@ -466,7 +453,6 @@ public static slice<byte> Marshal(Curve curve, ptr<big.Int> _addr_x, ptr<big.Int
     y.FillBytes(ret[(int)1 + byteLen..(int)1 + 2 * byteLen]);
 
     return ret;
-
 }
 
 // MarshalCompressed converts a point on the curve into the compressed form
@@ -495,7 +481,6 @@ public static (ptr<big.Int>, ptr<big.Int>) Unmarshal(Curve curve, slice<byte> da
     }
     if (data[0] != 4) { // uncompressed form
         return (_addr_null!, _addr_null!);
-
     }
     var p = curve.Params().P;
     x = @new<big.Int>().SetBytes(data[(int)1..(int)1 + byteLen]);
@@ -507,7 +492,6 @@ public static (ptr<big.Int>, ptr<big.Int>) Unmarshal(Curve curve, slice<byte> da
         return (_addr_null!, _addr_null!);
     }
     return ;
-
 }
 
 // UnmarshalCompressed converts a point, serialized by MarshalCompressed, into an x, y pair.
@@ -523,7 +507,6 @@ public static (ptr<big.Int>, ptr<big.Int>) UnmarshalCompressed(Curve curve, slic
     }
     if (data[0] != 2 && data[0] != 3) { // compressed form
         return (_addr_null!, _addr_null!);
-
     }
     var p = curve.Params().P;
     x = @new<big.Int>().SetBytes(data[(int)1..]);
@@ -542,7 +525,6 @@ public static (ptr<big.Int>, ptr<big.Int>) UnmarshalCompressed(Curve curve, slic
         return (_addr_null!, _addr_null!);
     }
     return ;
-
 }
 
 private static sync.Once initonce = default;
@@ -564,7 +546,6 @@ private static void initP384() {
     p384.Gx, _ = @new<big.Int>().SetString("aa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7", 16);
     p384.Gy, _ = @new<big.Int>().SetString("3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f", 16);
     p384.BitSize = 384;
-
 }
 
 // P256 returns a Curve which implements NIST P-256 (FIPS 186-3, section D.2.3),

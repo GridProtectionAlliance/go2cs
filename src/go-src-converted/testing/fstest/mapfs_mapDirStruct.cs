@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:26 UTC
+//     Generated on 2022 March 13 06:43:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace testing
 {
     public static partial class fstest_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(mapFileInfo))]
         private partial struct mapDir
         {
@@ -74,7 +74,7 @@ namespace testing
             public static implicit operator mapDir(NilType nil) => default(mapDir);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static mapDir mapDir_cast(dynamic value)
         {
             return new mapDir(value.path, value.mapFileInfo, value.entry, value.offset);

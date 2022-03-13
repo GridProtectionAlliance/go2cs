@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package staticdata -- go2cs converted at 2022 March 06 22:48:56 UTC
+// package staticdata -- go2cs converted at 2022 March 13 06:00:17 UTC
 // import "cmd/compile/internal/staticdata" ==> using staticdata = go.cmd.compile.@internal.staticdata_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\staticdata\embed.go
-using path = go.path_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using path = path_package;
+using sort = sort_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using System;
 
 public static partial class staticdata_package {
 
@@ -25,7 +24,6 @@ private static readonly var embedUnknown = iota;
 private static readonly var embedBytes = 0;
 private static readonly var embedString = 1;
 private static readonly var embedFiles = 2;
-
 
 private static slice<@string> embedFileList(ptr<ir.Name> _addr_v, nint kind) {
     ref ir.Name v = ref _addr_v.val;
@@ -59,15 +57,10 @@ private static slice<@string> embedFileList(ptr<ir.Name> _addr_v, nint kind) {
                         }
 
                     }
-
                 }
-
             }
-
         }
-    }    sort.Slice(list, (i, j) => {
-        return embedFileLess(list[i], list[j]);
-    });
+    }    sort.Slice(list, (i, j) => embedFileLess(list[i], list[j]));
 
     if (kind == embedString || kind == embedBytes) {
         if (len(list) > 1) {
@@ -76,7 +69,6 @@ private static slice<@string> embedFileList(ptr<ir.Name> _addr_v, nint kind) {
         }
     }
     return list;
-
 }
 
 // embedKind determines the kind of embedding variable.
@@ -93,7 +85,6 @@ private static nint embedKind(ptr<types.Type> _addr_typ) {
         return embedBytes;
     }
     return embedUnknown;
-
 }
 
 private static (@string, @string, bool) embedFileNameSplit(@string name) {
@@ -113,7 +104,6 @@ private static (@string, @string, bool) embedFileNameSplit(@string name) {
         return (".", name, isDir);
     }
     return (name[..(int)i], name[(int)i + 1..], isDir);
-
 }
 
 // embedFileLess implements the sort order for a list of embedded files.
@@ -191,7 +181,6 @@ public static void WriteEmbed(ptr<ir.Name> _addr_v) {
                     off = objw.Uintptr(slicedata, off, 0);
                     off = objw.Uintptr(slicedata, off, 0);
                     off += hashSize;
-
                 }
                 else
  {
@@ -202,9 +191,7 @@ public static void WriteEmbed(ptr<ir.Name> _addr_v) {
                     off = objw.SymPtr(slicedata, off, fsym, 0); // data string
                     off = objw.Uintptr(slicedata, off, uint64(size));
                     off = int(slicedata.WriteBytes(@base.Ctxt, int64(off), hash));
-
                 }
-
             }
 
             file = file__prev1;
@@ -213,7 +200,6 @@ public static void WriteEmbed(ptr<ir.Name> _addr_v) {
         objw.Global(slicedata, int32(off), obj.RODATA | obj.LOCAL);
         sym = v.Linksym();
         objw.SymPtr(sym, 0, slicedata, 0);
-    
-}
+    }
 
 } // end staticdata_package

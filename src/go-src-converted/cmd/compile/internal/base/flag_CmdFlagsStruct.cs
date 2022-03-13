@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:14:30 UTC
+//     Generated on 2022 March 13 06:27:59 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace @internal
 {
     public static partial class @base_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CmdFlags
         {
             // Constructors
@@ -192,7 +192,7 @@ namespace @internal
             public static implicit operator CmdFlags(NilType nil) => default(CmdFlags);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CmdFlags CmdFlags_cast(dynamic value)
         {
             return new CmdFlags(value.B, value.C, value.D, value.E, value.G, value.I, value.K, value.L, value.N, value.S, value.W, value.LowerC, value.LowerD, value.LowerE, value.LowerH, value.LowerJ, value.LowerL, value.LowerM, value.LowerO, ref value.LowerP, value.LowerR, value.LowerT, value.LowerW, ref value.LowerV, value.Percent, value.CompilingRuntime, value.AsmHdr, value.Bench, value.BlockProfile, value.BuildID, value.CPUProfile, value.Complete, value.ClobberDead, value.ClobberDeadReg, value.Dwarf, ref value.DwarfBASEntries, ref value.DwarfLocationLists, ref value.Dynlink, value.EmbedCfg, value.GenDwarfInl, value.GoVersion, value.ImportCfg, value.ImportMap, value.InstallSuffix, value.JSON, value.Lang, value.LinkObj, ref value.LinkShared, value.Live, value.MSan, value.MemProfile, value.MemProfileRate, value.MutexProfile, value.NoLocalImports, value.Pack, value.Race, ref value.Shared, value.SmallFrames, value.Spectre, value.Std, value.SymABIs, value.TraceProfile, value.TrimPath, value.WB);

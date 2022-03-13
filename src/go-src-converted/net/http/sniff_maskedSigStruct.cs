@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:09 UTC
+//     Generated on 2022 March 13 05:37:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -23,7 +23,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct maskedSig
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace net
             public static implicit operator maskedSig(NilType nil) => default(maskedSig);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static maskedSig maskedSig_cast(dynamic value)
         {
             return new maskedSig(value.mask, value.pat, value.skipWS, value.ct);

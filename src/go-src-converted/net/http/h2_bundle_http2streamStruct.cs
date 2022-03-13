@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:59 UTC
+//     Generated on 2022 March 13 05:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct http2stream
         {
             // Constructors
@@ -114,7 +114,7 @@ namespace net
             public static implicit operator http2stream(NilType nil) => default(http2stream);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static http2stream http2stream_cast(dynamic value)
         {
             return new http2stream(ref value.sc, value.id, ref value.body, value.cw, value.ctx, value.cancelCtx, value.bodyBytes, value.declBodyBytes, value.flow, value.inflow, value.state, value.resetQueued, value.gotTrailerHeader, value.wroteHeaders, ref value.writeDeadline, value.trailer, value.reqTrailer);

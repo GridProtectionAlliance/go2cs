@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package load -- go2cs converted at 2022 March 06 23:16:35 UTC
+// package load -- go2cs converted at 2022 March 13 06:30:04 UTC
 // import "cmd/go/internal/load" ==> using load = go.cmd.go.@internal.load_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\load\flag.go
-using @base = go.cmd.go.@internal.@base_package;
-using str = go.cmd.go.@internal.str_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
+using str = cmd.go.@internal.str_package;
+using fmt = fmt_package;
+using strings = strings_package;
+using System;
 
 public static partial class load_package {
 
@@ -52,7 +51,6 @@ private static error set(this ptr<PerPackageFlag> _addr_f, @string v, @string cw
         // (overrides previous -gcflags="-whatever").
         f.values = append(f.values, new ppfValue(match,[]string{}));
         return error.As(null!)!;
-
     }
     if (!strings.HasPrefix(v, "-")) {
         var i = strings.Index(v, "=");
@@ -65,7 +63,6 @@ private static error set(this ptr<PerPackageFlag> _addr_f, @string v, @string cw
         var pattern = strings.TrimSpace(v[..(int)i]);
         match = MatchPackage(pattern, cwd);
         v = v[(int)i + 1..];
-
     }
     var (flags, err) = str.SplitQuotedFields(v);
     if (err != null) {
@@ -76,7 +73,6 @@ private static error set(this ptr<PerPackageFlag> _addr_f, @string v, @string cw
     }
     f.values = append(f.values, new ppfValue(match,flags));
     return error.As(null!)!;
-
 }
 
 // String is required to implement flag.Value.
@@ -105,7 +101,6 @@ private static slice<@string> For(this ptr<PerPackageFlag> _addr_f, ptr<Package>
             flags = v.flags;
         }
     }    return flags;
-
 }
 
 } // end load_package

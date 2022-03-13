@@ -28,25 +28,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:01 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:04 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\main.go
-using bufio = go.bufio_package;
-using goobj = go.cmd.@internal.goobj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using benchmark = go.cmd.link.@internal.benchmark_package;
-using flag = go.flag_package;
-using buildcfg = go.@internal.buildcfg_package;
-using log = go.log_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using pprof = go.runtime.pprof_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using bufio = bufio_package;
+using goobj = cmd.@internal.goobj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using benchmark = cmd.link.@internal.benchmark_package;
+using flag = flag_package;
+using buildcfg = @internal.buildcfg_package;
+using log = log_package;
+using os = os_package;
+using runtime = runtime_package;
+using pprof = runtime.pprof_package;
+using strings = strings_package;
+using System;
 
 public static partial class ld_package {
 
@@ -94,7 +93,6 @@ public static void Main(ptr<sys.Arch> _addr_arch, Arch theArch) => func((defer, 
             buildVersion += " X:" + goexperiment;
         }
     }
-
     addstrdata1(ctxt, "runtime.buildVersion=" + buildVersion); 
 
     // TODO(matloob): define these above and then check flag values here
@@ -124,7 +122,6 @@ public static void Main(ptr<sys.Arch> _addr_arch, Arch theArch) => func((defer, 
         defer(() => {
             ctxt.loader.Dump();
         }());
-
     }
     switch (flagHeadType.val) {
         case "": 
@@ -148,7 +145,6 @@ public static void Main(ptr<sys.Arch> _addr_arch, Arch theArch) => func((defer, 
                 err = err__prev1;
 
             }
-
             break;
     }
     if (ctxt.HeadType == objabi.Hunknown) {
@@ -181,7 +177,6 @@ public static void Main(ptr<sys.Arch> _addr_arch, Arch theArch) => func((defer, 
         // dynamically linked binary unless it identifies the binary
         // contains a .note.go.buildid ELF note. See issue #36435.
         flagBuildid.val = "go-openbsd";
-
     }
     ptr<benchmark.Metrics> bench;
     if (len(benchmarkFlag.val) != 0) {
@@ -225,11 +220,9 @@ public static void Main(ptr<sys.Arch> _addr_arch, Arch theArch) => func((defer, 
  {
                 (pkgpath, file) = (parts[0], parts[1]);
             }
-
             pkglistfornote = append(pkglistfornote, pkgpath);
             pkglistfornote = append(pkglistfornote, '\n');
             addlibpath(ctxt, "command line", "command line", file, pkgpath, "", zerofp);
-
         }
     else if (ctxt.BuildMode == BuildModePlugin) 
         addlibpath(ctxt, "command line", "command line", flag.Arg(0), flagPluginPath.val, "", zerofp);
@@ -333,7 +326,6 @@ public static void Main(ptr<sys.Arch> _addr_arch, Arch theArch) => func((defer, 
             err = err__prev2;
 
         }
-
     }
     bench.Start("Asmb");
     asmb(ctxt);
@@ -365,7 +357,6 @@ public static void Main(ptr<sys.Arch> _addr_arch, Arch theArch) => func((defer, 
     bench.Report(os.Stdout);
 
     errorexit();
-
 });
 
 public partial struct Rpath {
@@ -405,9 +396,7 @@ private static void startProfile() {
             err = err__prev2;
 
         }
-
         AtExit(pprof.StopCPUProfile);
-
     }
     if (memprofile != "".val) {
         if (memprofilerate != 0.val) {
@@ -437,9 +426,7 @@ private static void startProfile() {
                 err = err__prev2;
 
             }
-
         });
-
     }
 }
 

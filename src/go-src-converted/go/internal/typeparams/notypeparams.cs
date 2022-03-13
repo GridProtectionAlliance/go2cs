@@ -5,12 +5,12 @@
 //go:build !typeparams
 // +build !typeparams
 
-// package typeparams -- go2cs converted at 2022 March 06 22:41:43 UTC
+// package typeparams -- go2cs converted at 2022 March 13 05:52:49 UTC
 // import "go/internal/typeparams" ==> using typeparams = go.go.@internal.typeparams_package
 // Original source: C:\Program Files\Go\src\go\internal\typeparams\notypeparams.go
-using ast = go.go.ast_package;
-
 namespace go.go.@internal;
+
+using ast = go.ast_package;
 
 public static partial class typeparams_package {
 
@@ -29,7 +29,6 @@ public static ast.Expr PackExpr(slice<ast.Expr> list) => func((_, panic, _) => {
             panic("multiple index expressions are unsupported without type params");
             break;
     }
-
 });
 
 public static slice<ast.Expr> UnpackExpr(ast.Expr expr) {

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:50:50 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:02:14 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\print.go
-using bytes = go.bytes_package;
-using sha256 = go.crypto.sha256_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using sha256 = crypto.sha256_package;
+using fmt = fmt_package;
+using io = io_package;
 
 public static partial class ssa_package {
 
@@ -75,7 +75,6 @@ private static void startBlock(this stringFuncPrinter p, ptr<Block> _addr_b, boo
         fmt.Fprint(p.w, " DEAD");
     }
     io.WriteString(p.w, "\n");
-
 }
 
 private static void endBlock(this stringFuncPrinter p, ptr<Block> _addr_b) {
@@ -95,7 +94,6 @@ private static void value(this stringFuncPrinter p, ptr<Value> _addr_v, bool liv
         fmt.Fprint(p.w, " DEAD");
     }
     fmt.Fprintln(p.w);
-
 }
 
 private static void startDepCycle(this stringFuncPrinter p) {
@@ -135,7 +133,6 @@ private static void fprintFunc(funcPrinter p, ptr<Func> _addr_f) => func((defer,
 
             p.endBlock(b);
             continue;
-
         }
         nint n = 0;
         {
@@ -174,12 +171,10 @@ outer:
                             _continueouter = true;
                             break;
                         }
-
                     }
                     p.value(v, live[v.ID]);
                     printed[v.ID] = true;
                     n++;
-
                 }
 
                 v = v__prev3;
@@ -203,13 +198,10 @@ outer:
                 }
 
                 p.endDepCycle();
-
             }
-
         }
 
         p.endBlock(b);
-
     }    foreach (var (_, name) in f.Names) {
         p.named(name.val, f.NamedValues[name.val]);
     }

@@ -22,24 +22,27 @@
 // These calls return err == nil to indicate success; otherwise
 // err represents an operating system error describing the failure and
 // holds a value of type syscall.ErrorString.
-// package plan9 -- go2cs converted at 2022 March 06 23:26:25 UTC
+
+// package plan9 -- go2cs converted at 2022 March 13 06:41:16 UTC
 // import "cmd/vendor/golang.org/x/sys/plan9" ==> using plan9 = go.cmd.vendor.golang.org.x.sys.plan9_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\plan9\syscall.go
+namespace go.cmd.vendor.golang.org.x.sys;
 // import "golang.org/x/sys/plan9"
 
-using bytes = go.bytes_package;
-using strings = go.strings_package;
-using @unsafe = go.@unsafe_package;
 
-using unsafeheader = go.golang.org.x.sys.@internal.unsafeheader_package;
+using bytes = bytes_package;
+using strings = strings_package;
+using @unsafe = @unsafe_package;
 
-namespace go.cmd.vendor.golang.org.x.sys;
+using unsafeheader = golang.org.x.sys.@internal.unsafeheader_package;
+
+
+// ByteSliceFromString returns a NUL-terminated slice of bytes
+// containing the text of s. If s contains a NUL byte at any
+// location, it returns (nil, EINVAL).
 
 public static partial class plan9_package {
 
-    // ByteSliceFromString returns a NUL-terminated slice of bytes
-    // containing the text of s. If s contains a NUL byte at any
-    // location, it returns (nil, EINVAL).
 public static (slice<byte>, error) ByteSliceFromString(@string s) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -50,7 +53,6 @@ public static (slice<byte>, error) ByteSliceFromString(@string s) {
     var a = make_slice<byte>(len(s) + 1);
     copy(a, s);
     return (a, error.As(null!)!);
-
 }
 
 // BytePtrFromString returns a pointer to a NUL-terminated array of
@@ -65,7 +67,6 @@ public static (ptr<byte>, error) BytePtrFromString(@string s) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr__addr_a[0]!, error.As(null!)!);
-
 }
 
 // ByteSliceToString returns a string form of the text represented by the slice s, with a terminating NUL and any
@@ -78,9 +79,7 @@ public static @string ByteSliceToString(slice<byte> s) {
             s = s[..(int)i];
         }
     }
-
     return string(s);
-
 }
 
 // BytePtrToString takes a pointer to a sequence of text and returns the corresponding string.
@@ -107,7 +106,6 @@ public static @string BytePtrToString(ptr<byte> _addr_p) {
     h.Cap = n;
 
     return string(s);
-
 }
 
 // Single-word zero for use when we need a valid pointer to 0 bytes.

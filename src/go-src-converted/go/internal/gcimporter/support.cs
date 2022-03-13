@@ -4,17 +4,16 @@
 
 // This file implements support functionality for iimport.go.
 
-// package gcimporter -- go2cs converted at 2022 March 06 23:32:40 UTC
+// package gcimporter -- go2cs converted at 2022 March 13 06:42:20 UTC
 // import "go/internal/gcimporter" ==> using gcimporter = go.go.@internal.gcimporter_package
 // Original source: C:\Program Files\Go\src\go\internal\gcimporter\support.go
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.go.@internal;
+
+using fmt = fmt_package;
+using token = go.token_package;
+using types = go.types_package;
+using sync = sync_package;
+using System;
 
 public static partial class gcimporter_package {
 
@@ -60,13 +59,11 @@ private static token.Pos pos(this ptr<fakeFileSet> _addr_s, @string file, nint l
             }
         });
         f.SetLines(fakeLines);
-
     }
     if (line > maxlines) {
         line = 1;
     }
     return f.Pos(line - 1);
-
 }
 
 private static slice<nint> fakeLines = default;private static sync.Once fakeLinesOnce = default;
@@ -88,7 +85,6 @@ private static types.ChanDir chanDir(nint d) {
             return 0;
             break;
     }
-
 }
 
 private static types.Type predeclared = new slice<types.Type>(new types.Type[] { types.Typ[types.Bool], types.Typ[types.Int], types.Typ[types.Int8], types.Typ[types.Int16], types.Typ[types.Int32], types.Typ[types.Int64], types.Typ[types.Uint], types.Typ[types.Uint8], types.Typ[types.Uint16], types.Typ[types.Uint32], types.Typ[types.Uint64], types.Typ[types.Uintptr], types.Typ[types.Float32], types.Typ[types.Float64], types.Typ[types.Complex64], types.Typ[types.Complex128], types.Typ[types.String], types.Universe.Lookup("byte").Type(), types.Universe.Lookup("rune").Type(), types.Universe.Lookup("error").Type(), types.Typ[types.UntypedBool], types.Typ[types.UntypedInt], types.Typ[types.UntypedRune], types.Typ[types.UntypedFloat], types.Typ[types.UntypedComplex], types.Typ[types.UntypedString], types.Typ[types.UntypedNil], types.Typ[types.UnsafePointer], types.Typ[types.Invalid], anyType{} });

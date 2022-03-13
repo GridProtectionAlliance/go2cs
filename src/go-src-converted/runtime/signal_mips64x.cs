@@ -6,13 +6,13 @@
 // +build linux openbsd
 // +build mips64 mips64le
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:35 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:55 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\signal_mips64x.go
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -93,22 +93,20 @@ private static void preparePanic(this ptr<sigctxt> _addr_c, uint sig, ptr<g> _ad
     // the stack frame but we're not going back there
     // anyway.
     var sp = c.sp() - sys.PtrSize;
-    c.set_sp(sp) * (uint64.val)(@unsafe.Pointer(uintptr(sp)));
+    c.set_sp(sp) * (uint64.val);
 
-    c.link();
+    (@unsafe.Pointer(uintptr(sp))) = c.link();
 
     var pc = gp.sigpc;
 
     if (shouldPushSigpanic(gp, pc, uintptr(c.link()))) { 
         // Make it look the like faulting PC called sigpanic.
         c.set_link(uint64(pc));
-
     }
     var sigpanicPC = uint64(funcPC(sigpanic));
     c.set_r28(sigpanicPC >> 32 << 32); // RSB register
     c.set_r30(uint64(uintptr(@unsafe.Pointer(gp))));
     c.set_pc(sigpanicPC);
-
 }
 
 private static void pushCall(this ptr<sigctxt> _addr_c, System.UIntPtr targetPC, System.UIntPtr resumePC) {
@@ -119,14 +117,13 @@ private static void pushCall(this ptr<sigctxt> _addr_c, System.UIntPtr targetPC,
     // for restoring the LR and setting the SP back.
     // This extra slot is known to gentraceback.
     var sp = c.sp() - 8;
-    c.set_sp(sp) * (uint64.val)(@unsafe.Pointer(uintptr(sp)));
+    c.set_sp(sp) * (uint64.val);
 
-    c.link(); 
+    (@unsafe.Pointer(uintptr(sp))) = c.link(); 
     // Set up PC and LR to pretend the function being signaled
     // calls targetPC at resumePC.
     c.set_link(uint64(resumePC));
     c.set_pc(uint64(targetPC));
-
 }
 
 } // end runtime_package

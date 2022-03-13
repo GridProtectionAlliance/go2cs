@@ -26,12 +26,12 @@
 //
 //   balance = [0x7fffffffffffffe, 0x7fffffffffffffe, 0x7fffffffffffffe, 0x7fffffffffffffe, 0x7fffffffffffffe, 0x7fffffffffffffe, 0x7fffffffffffffe, 0x7fffffffffffffe, 0x3fffffffffffffe]
 
-// package fiat -- go2cs converted at 2022 March 06 22:19:17 UTC
+// package fiat -- go2cs converted at 2022 March 13 05:34:13 UTC
 // import "crypto/elliptic/internal/fiat" ==> using fiat = go.crypto.elliptic.@internal.fiat_package
 // Original source: C:\Program Files\Go\src\crypto\elliptic\internal\fiat\p521_fiat64.go
-using bits = go.math.bits_package;
-
 namespace go.crypto.elliptic.@internal;
+
+using bits = math.bits_package;
 
 public static partial class fiat_package {
 

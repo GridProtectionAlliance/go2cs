@@ -3,19 +3,20 @@
 // license that can be found in the LICENSE file.
 
 // Package fix implements the ``go fix'' command.
-// package fix -- go2cs converted at 2022 March 06 23:16:01 UTC
+
+// package fix -- go2cs converted at 2022 March 13 06:29:31 UTC
 // import "cmd/go/internal/fix" ==> using fix = go.cmd.go.@internal.fix_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\fix\fix.go
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using str = go.cmd.go.@internal.str_package;
-using context = go.context_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-
 namespace go.cmd.go.@internal;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using str = cmd.go.@internal.str_package;
+using context = context_package;
+using fmt = fmt_package;
+using os = os_package;
 
 public static partial class fix_package {
 
@@ -70,7 +71,6 @@ private static void runFix(context.Context ctx, ptr<base.Command> _addr_cmd, sli
             // not to packages in subdirectories.
             var files = @base.RelPaths(pkg.InternalAllGoFiles());
             @base.Run(str.StringList(cfg.BuildToolexec, @base.Tool("fix"), files));
-
         }
         pkg = pkg__prev1;
     }

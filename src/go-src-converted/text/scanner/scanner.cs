@@ -12,24 +12,26 @@
 // literals as defined by the Go language specification. It may be
 // customized to recognize only a subset of those literals and to recognize
 // different identifier and white space characters.
-// package scanner -- go2cs converted at 2022 March 06 22:43:17 UTC
+
+// package scanner -- go2cs converted at 2022 March 13 05:54:26 UTC
 // import "text/scanner" ==> using scanner = go.text.scanner_package
 // Original source: C:\Program Files\Go\src\text\scanner\scanner.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.text;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Position is a value that represents a source position.
+// A position is valid if Line > 0.
+
+using System;
 public static partial class scanner_package {
 
-    // Position is a value that represents a source position.
-    // A position is valid if Line > 0.
 public partial struct Position {
     public @string Filename; // filename, if any
     public nint Offset; // byte offset, starting at 0
@@ -53,7 +55,6 @@ public static @string String(this Position pos) {
         s += fmt.Sprintf(":%d:%d", pos.Line, pos.Column);
     }
     return s;
-
 }
 
 // Predefined mode bits to control recognition of tokens. For instance,
@@ -81,7 +82,6 @@ public static readonly nint ScanComments = 1 << (int)(-Comment);
 public static readonly nint SkipComments = 1 << (int)(-skipComment); // if set with ScanComments, comments become white space
 public static readonly var GoTokens = ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanRawStrings | ScanComments | SkipComments;
 
-
 // The result of Scan is one of these tokens or a Unicode character.
 public static readonly var EOF = -(iota + 1);
 public static readonly var Ident = 0;
@@ -95,7 +95,6 @@ public static readonly var Comment = 6;
 // internal use only
 private static readonly var skipComment = 7;
 
-
 private static map tokenString = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<int, @string>{EOF:"EOF",Ident:"Ident",Int:"Int",Float:"Float",Char:"Char",String:"String",RawString:"RawString",Comment:"Comment",};
 
 // TokenString returns a printable string for a token or Unicode character.
@@ -107,9 +106,7 @@ public static @string TokenString(int tok) {
             return s;
         }
     }
-
     return fmt.Sprintf("%q", string(tok));
-
 }
 
 // GoWhitespace is the default value for the Scanner's Whitespace field.
@@ -209,7 +206,6 @@ private static ptr<Scanner> Init(this ptr<Scanner> _addr_s, io.Reader src) {
     s.Line = 0; // invalidate token position
 
     return _addr_s!;
-
 }
 
 // next reads and returns the next Unicode character. It is designed such
@@ -253,21 +249,16 @@ private static int next(this ptr<Scanner> _addr_s) {
                     if (s.lastCharLen > 0) { 
                         // previous character was not EOF
                         s.column++;
-
                     }
-
                     s.lastCharLen = 0;
                     return EOF;
-
                 } 
                 // If err == EOF, we won't be getting more
                 // bytes; break to avoid infinite loop. If
                 // err is something else, we don't know if
                 // we can get more bytes; thus also break.
                 break;
-
             }
-
         } 
         // at least one byte
         ch = rune(s.srcBuf[s.srcPos]);
@@ -281,9 +272,7 @@ private static int next(this ptr<Scanner> _addr_s) {
                 s.column++;
                 s.error("invalid UTF-8 encoding");
                 return ch;
-
             }
-
         }
     }
     s.srcPos += width;
@@ -304,7 +293,6 @@ private static int next(this ptr<Scanner> _addr_s) {
     }
 
     return ch;
-
 }
 
 // Next reads and returns the next Unicode character.
@@ -323,7 +311,6 @@ private static int Next(this ptr<Scanner> _addr_s) {
         s.ch = s.next();
     }
     return ch;
-
 }
 
 // Peek returns the next Unicode character in the source without advancing
@@ -340,7 +327,6 @@ private static int Peek(this ptr<Scanner> _addr_s) {
         }
     }
     return s.ch;
-
 }
 
 private static void error(this ptr<Scanner> _addr_s, @string msg) {
@@ -357,7 +343,6 @@ private static void error(this ptr<Scanner> _addr_s, @string msg) {
         pos = s.Pos();
     }
     fmt.Fprintf(os.Stderr, "%s: %s\n", pos, msg);
-
 }
 
 private static void errorf(this ptr<Scanner> _addr_s, @string format, params object[] args) {
@@ -374,7 +359,6 @@ private static bool isIdentRune(this ptr<Scanner> _addr_s, int ch, nint i) {
         return s.IsIdentRune(ch, i);
     }
     return ch == '_' || unicode.IsLetter(ch) || unicode.IsDigit(ch) && i > 0;
-
 }
 
 private static int scanIdentifier(this ptr<Scanner> _addr_s) {
@@ -386,7 +370,6 @@ private static int scanIdentifier(this ptr<Scanner> _addr_s) {
         ch = s.next();
     }
     return ch;
-
 }
 
 private static int lower(int ch) {
@@ -422,14 +405,10 @@ private static (int, nint) digits(this ptr<Scanner> _addr_s, int ch0, nint @base
             else if (ch >= max && invalid == 0.val) {
                 invalid = ch;
             }
-
             digsep |= ds;
             ch = s.next();
-
         }
     else
-
-
     } {
         while (isHex(ch) || ch == '_') {
             ds = 1;
@@ -441,7 +420,6 @@ private static (int, nint) digits(this ptr<Scanner> _addr_s, int ch0, nint @base
         }
     }
     return ;
-
 }
 
 private static (int, int) scanNumber(this ptr<Scanner> _addr_s, int ch, bool seenDot) {
@@ -478,7 +456,6 @@ private static (int, int) scanNumber(this ptr<Scanner> _addr_s, int ch, bool see
                     (base, prefix) = (8, '0');                digsep = 1; // leading 0
                     break;
             }
-
         }
         ch, ds = s.digits(ch, base, _addr_invalid);
         digsep |= ds;
@@ -494,7 +471,6 @@ private static (int, int) scanNumber(this ptr<Scanner> _addr_s, int ch, bool see
         }
         ch, ds = s.digits(ch, base, _addr_invalid);
         digsep |= ds;
-
     }
     if (digsep & 1 == 0) {
         s.error(litname(prefix) + " has no digits");
@@ -513,20 +489,17 @@ private static (int, int) scanNumber(this ptr<Scanner> _addr_s, int ch, bool see
             if (ch == '+' || ch == '-') {
                 ch = s.next();
             }
-
             ch, ds = s.digits(ch, 10, null);
             digsep |= ds;
             if (ds & 1 == 0) {
                 s.error("exponent has no digits");
             }
-
         }
         else if (prefix == 'x' && tok == Float) {
             s.error("hexadecimal mantissa requires a 'p' exponent");
         }
 
     }
-
 
     if (tok == Int && invalid != 0) {
         s.errorf("invalid digit %q in %s", invalid, litname(prefix));
@@ -541,10 +514,8 @@ private static (int, int) scanNumber(this ptr<Scanner> _addr_s, int ch, bool see
             }
 
         }
-
     }
     return (tok, ch);
-
 }
 
 private static @string litname(int prefix) {
@@ -564,7 +535,6 @@ private static @string litname(int prefix) {
             return "decimal literal";
             break;
     }
-
 }
 
 // invalidSep returns the index of the first invalid separator in x, or -1.
@@ -590,7 +560,6 @@ private static nint invalidSep(@string x) {
                 return i;
         i++;
             }
-
         else if (isDecimal(d) || x1 == 'x' && isHex(d)) 
             d = '0';
         else 
@@ -598,13 +567,11 @@ private static nint invalidSep(@string x) {
                 return i - 1;
             }
             d = '.';
-        
-    }
+            }
     if (d == '_') {
         return len(x) - 1;
     }
     return -1;
-
 }
 
 private static nint digitVal(int ch) {
@@ -627,7 +594,6 @@ private static int scanDigits(this ptr<Scanner> _addr_s, int ch, nint @base, nin
         s.error("invalid char escape");
     }
     return ch;
-
 }
 
 private static int scanEscape(this ptr<Scanner> _addr_s, int quote) {
@@ -649,7 +615,6 @@ private static int scanEscape(this ptr<Scanner> _addr_s, int quote) {
     else 
         s.error("invalid char escape");
         return ch;
-
 }
 
 private static nint scanString(this ptr<Scanner> _addr_s, int quote) {
@@ -670,10 +635,8 @@ private static nint scanString(this ptr<Scanner> _addr_s, int quote) {
             ch = s.next();
         }
         n++;
-
     }
     return ;
-
 }
 
 private static void scanRawString(this ptr<Scanner> _addr_s) {
@@ -686,9 +649,7 @@ private static void scanRawString(this ptr<Scanner> _addr_s) {
             return ;
         }
         ch = s.next();
-
     }
-
 }
 
 private static void scanChar(this ptr<Scanner> _addr_s) {
@@ -710,7 +671,6 @@ private static int scanComment(this ptr<Scanner> _addr_s, int ch) {
             ch = s.next();
         }
         return ch;
-
     }
     ch = s.next(); // read character after "/*"
     while (true) {
@@ -726,7 +686,6 @@ private static int scanComment(this ptr<Scanner> _addr_s, int ch) {
         }
     }
     return ch;
-
 }
 
 // Scan reads the next token or Unicode character from source and returns it.
@@ -761,7 +720,6 @@ redo:
         // common case: last character was not a '\n'
         s.Line = s.line;
         s.Column = s.column;
-
     }
     else
  { 
@@ -770,7 +728,6 @@ redo:
         // since we have called next() at least once)
         s.Line = s.line - 1;
         s.Column = s.lastLineLen;
-
     }
     var tok = ch;
 
@@ -819,14 +776,10 @@ redo:
                     s.tokPos = -1; // don't collect token text
                     ch = s.scanComment(ch);
                     goto redo;
-
                 }
-
                 ch = s.scanComment(ch);
                 tok = Comment;
-
             }
-
         else if (ch == '`') 
             if (s.Mode & ScanRawStrings != 0) {
                 s.scanRawString();
@@ -840,7 +793,6 @@ redo:
 
     s.ch = ch;
     return tok;
-
 }
 
 // Pos returns the position of the character immediately after
@@ -867,7 +819,6 @@ private static Position Pos(this ptr<Scanner> _addr_s) {
         pos.Line = 1;
         pos.Column = 1;
         return ;
-
 }
 
 // TokenText returns the string corresponding to the most recently scanned token.
@@ -878,22 +829,18 @@ private static @string TokenText(this ptr<Scanner> _addr_s) {
     if (s.tokPos < 0) { 
         // no token text
         return "";
-
     }
     if (s.tokEnd < s.tokPos) { 
         // if EOF was reached, s.tokEnd is set to -1 (s.srcPos == 0)
         s.tokEnd = s.tokPos;
-
     }
     if (s.tokBuf.Len() == 0) { 
         // common case: the entire token text is still in srcBuf
         return string(s.srcBuf[(int)s.tokPos..(int)s.tokEnd]);
-
     }
     s.tokBuf.Write(s.srcBuf[(int)s.tokPos..(int)s.tokEnd]);
     s.tokPos = s.tokEnd; // ensure idempotency of TokenText() call
     return s.tokBuf.String();
-
 }
 
 } // end scanner_package

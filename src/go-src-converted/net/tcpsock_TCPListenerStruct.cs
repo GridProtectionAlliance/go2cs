@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:16:44 UTC
+//     Generated on 2022 March 13 05:30:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct TCPListener
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace go
             public static implicit operator TCPListener(NilType nil) => default(TCPListener);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static TCPListener TCPListener_cast(dynamic value)
         {
             return new TCPListener(ref value.fd, value.lc);

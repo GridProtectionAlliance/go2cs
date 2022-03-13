@@ -5,15 +5,14 @@
 //go:build !plan9 && !windows
 // +build !plan9,!windows
 
-// package exec -- go2cs converted at 2022 March 06 22:14:22 UTC
+// package exec -- go2cs converted at 2022 March 13 05:28:32 UTC
 // import "os/exec" ==> using exec = go.os.exec_package
 // Original source: C:\Program Files\Go\src\os\exec\exec_unix.go
-using fs = go.io.fs_package;
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go.os;
+
+using fs = io.fs_package;
+using syscall = syscall_package;
+using System;
 
 public static partial class exec_package {
 
@@ -24,9 +23,7 @@ private static void init() {
         // See Issue 9173.
         ptr<fs.PathError> (pe, ok) = err._<ptr<fs.PathError>>();
         return ok && pe.Op == "write" && pe.Path == "|1" && pe.Err == syscall.EPIPE;
-
     };
-
 }
 
 } // end exec_package

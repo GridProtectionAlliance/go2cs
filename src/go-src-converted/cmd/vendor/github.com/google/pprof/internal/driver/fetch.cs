@@ -12,39 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:27 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:31 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\fetch.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using http = go.net.http_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using measurement = go.github.com.google.pprof.@internal.measurement_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using http = net.http_package;
+using url = net.url_package;
+using os = os_package;
+using exec = os.exec_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using measurement = github.com.google.pprof.@internal.measurement_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using profile = github.com.google.pprof.profile_package;
+
+
+// fetchProfiles fetches and symbolizes the profiles specified by s.
+// It will merge all the profiles it is able to retrieve, even if
+// there are some failures. It will return an error if it is unable to
+// fetch any profiles.
+
+using System;
+using System.Threading;
 public static partial class driver_package {
 
-    // fetchProfiles fetches and symbolizes the profiles specified by s.
-    // It will merge all the profiles it is able to retrieve, even if
-    // there are some failures. It will return an error if it is unable to
-    // fetch any profiles.
 private static (ptr<profile.Profile>, error) fetchProfiles(ptr<source> _addr_s, ptr<plugin.Options> _addr_o) {
     ptr<profile.Profile> _p0 = default!;
     error _p0 = default!;
@@ -104,7 +105,6 @@ private static (ptr<profile.Profile>, error) fetchProfiles(ptr<source> _addr_s, 
         err = err__prev1;
 
     }
-
     p.RemoveUninteresting();
     unsourceMappings(_addr_p);
 
@@ -146,9 +146,7 @@ private static (ptr<profile.Profile>, error) fetchProfiles(ptr<source> _addr_s, 
 
     }
 
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static (ptr<profile.Profile>, ptr<profile.Profile>, plugin.MappingSources, plugin.MappingSources, bool, error) grabSourcesAndBases(slice<profileSource> sources, slice<profileSource> bases, plugin.Fetcher fetch, plugin.ObjTool obj, plugin.UI ui, http.RoundTripper tr) => func((defer, _, _) => {
@@ -208,7 +206,6 @@ private static (ptr<profile.Profile>, ptr<profile.Profile>, plugin.MappingSource
         got = got__prev1;
 
     }
-
     {
         var want__prev1 = want;
         var got__prev1 = got;
@@ -224,9 +221,7 @@ private static (ptr<profile.Profile>, ptr<profile.Profile>, plugin.MappingSource
 
     }
 
-
     return (_addr_psrc!, _addr_pbase!, msrc, mbase, save, error.As(null!)!);
-
 });
 
 // chunkedGrab fetches the profiles described in source and merges them into
@@ -257,7 +252,6 @@ private static (ptr<profile.Profile>, plugin.MappingSources, bool, nint, error) 
                 end = len(sources);
             start += chunkSize;
             }
-
             var (chunkP, chunkMsrc, chunkSave, chunkCount, chunkErr) = concurrentGrab(sources[(int)start..(int)end], fetch, obj, ui, tr);
 
             if (chunkErr != null) 
@@ -274,12 +268,10 @@ private static (ptr<profile.Profile>, plugin.MappingSources, bool, nint, error) 
                     save = true;
                 }
                 count += chunkCount;
-            
-        }
+                    }
     }
 
     return (_addr_p!, msrc, save, count, error.As(null!)!);
-
 }
 
 // concurrentGrab fetches multiple profiles concurrently
@@ -325,12 +317,10 @@ private static (ptr<profile.Profile>, plugin.MappingSources, bool, nint, error) 
                 }
 
             }
-
             save = save || s.remote;
             profiles = append(profiles, s.p);
             msrcs = append(msrcs, s.msrc);
             s.val = new profileSource();
-
         }
         i = i__prev1;
     }
@@ -343,7 +333,6 @@ private static (ptr<profile.Profile>, plugin.MappingSources, bool, nint, error) 
         return (_addr_null!, null, false, 0, error.As(err)!);
     }
     return (_addr_p!, msrc, save, len(profiles), error.As(null!)!);
-
 });
 
 private static (ptr<profile.Profile>, plugin.MappingSources, error) combineProfiles(slice<ptr<profile.Profile>> profiles, slice<plugin.MappingSources> msrcs) {
@@ -360,7 +349,6 @@ private static (ptr<profile.Profile>, plugin.MappingSources, error) combineProfi
         }
     }
 
-
     var (p, err) = profile.Merge(profiles);
     if (err != null) {
         return (_addr_null!, null, error.As(err)!);
@@ -371,7 +359,6 @@ private static (ptr<profile.Profile>, plugin.MappingSources, error) combineProfi
             msrc[m] = append(msrc[m], s);
         }
     }    return (_addr_p!, msrc, error.As(null!)!);
-
 }
 
 private partial struct profileSource {
@@ -395,7 +382,6 @@ private static @string homeEnv() {
             return "HOME";
             break;
     }
-
 }
 
 // setTmpDir prepares the directory to use to save profiles retrieved
@@ -413,7 +399,6 @@ private static (@string, error) setTmpDir(plugin.UI ui) {
             dirs = append(dirs, profileDir);
         }
     }
-
     {
         var homeDir = os.Getenv(homeEnv());
 
@@ -421,7 +406,6 @@ private static (@string, error) setTmpDir(plugin.UI ui) {
             dirs = append(dirs, filepath.Join(homeDir, "pprof"));
         }
     }
-
     dirs = append(dirs, os.TempDir());
     foreach (var (_, tmpDir) in dirs) {
         {
@@ -433,11 +417,8 @@ private static (@string, error) setTmpDir(plugin.UI ui) {
             }
 
         }
-
         return (tmpDir, error.As(null!)!);
-
     }    return ("", error.As(fmt.Errorf("failed to identify temp dir"))!);
-
 }
 
 private static readonly @string testSourceAddress = "pproftest.local";
@@ -488,11 +469,9 @@ private static (ptr<profile.Profile>, plugin.MappingSources, bool, error) grabPr
             // Treat test inputs as local to avoid saving
             // testcase profiles during driver testing.
             remote = false;
-
         }
     }
     return ;
-
 }
 
 // collectMappingSources saves the mapping sources of a profile.
@@ -514,12 +493,9 @@ private static plugin.MappingSources collectMappingSources(ptr<profile.Profile> 
             // which is called after symbolization is finished.
             m.File = source;
             key = source;
-
         }
         ms[key] = append(ms[key], src);
-
     }    return ms;
-
 }
 
 // unsourceMappings iterates over the mappings in a profile and replaces file
@@ -537,7 +513,6 @@ private static void unsourceMappings(ptr<profile.Profile> _addr_p) {
                 }
 
             }
-
         }
     }
 }
@@ -553,7 +528,6 @@ private static void locateBinaries(ptr<profile.Profile> _addr_p, ptr<source> _ad
     if (searchPath == "") { 
         // Use $HOME/pprof/binaries as default directory for local symbolization binaries
         searchPath = filepath.Join(os.Getenv(homeEnv()), "pprof", "binaries");
-
     }
 mapping:
     {
@@ -577,21 +551,16 @@ mapping:
                         }
 
                     }
-
                     fileNames = append(fileNames, filepath.Join(path, m.File, m.BuildID)); // perf path format
                 }
-
                 if (m.File != "") { 
                     // Try both the basename and the full path, to support the same directory
                     // structure as the perf symfs option.
                     if (baseName != "") {
                         fileNames = append(fileNames, filepath.Join(path, baseName));
                     }
-
                     fileNames = append(fileNames, filepath.Join(path, m.File));
-
                 }
-
                 foreach (var (_, name) in fileNames) {
                     {
                         var (f, err) = obj.Open(name, m.Start, m.Limit, m.Offset);
@@ -608,15 +577,11 @@ mapping:
                                 _continuemapping = true;
                                 break;
                             }
-
                         }
 
                     }
-
                 }
-
             }
-
         }
         m = m__prev1;
     }
@@ -645,7 +610,6 @@ mapping:
             }
         }
     }
-
 });
 
 // fetch fetches a profile from source, within the timeout specified,
@@ -678,13 +642,11 @@ private static (ptr<profile.Profile>, @string, error) fetch(@string source, time
         }
 
     }
-
     if (err == null) {
         defer(f.Close());
         p, err = profile.Parse(f);
     }
     return ;
-
 });
 
 // fetchURL fetches a profile from a URL using HTTP.
@@ -702,7 +664,6 @@ private static (io.ReadCloser, error) fetchURL(@string source, time.Duration tim
         return (null, error.As(statusCodeError(_addr_resp))!);
     }
     return (resp.Body, error.As(null!)!);
-
 });
 
 private static error statusCodeError(ptr<http.Response> _addr_resp) {
@@ -718,10 +679,8 @@ private static error statusCodeError(ptr<http.Response> _addr_resp) {
             }
 
         }
-
     }
     return error.As(fmt.Errorf("server response: %s", resp.Status))!;
-
 }
 
 // isPerfFile checks if a file is in perf.data format. It also returns false
@@ -744,9 +703,7 @@ private static bool isPerfFile(@string path) => func((defer, _, _) => {
             return false;
         }
     }
-
     return bytes.Equal(actualHeader, perfHeader);
-
 });
 
 // convertPerfData converts the file at path which should be in perf.data format
@@ -771,9 +728,7 @@ private static (ptr<os.File>, error) convertPerfData(@string perfPath, plugin.UI
             return (_addr_null!, error.As(fmt.Errorf("failed to convert perf.data file. Try github.com/google/perf_data_converter: %v", err))!);
         }
     }
-
     return (_addr_profile!, error.As(null!)!);
-
 }
 
 // adjustURL validates if a profile source is a URL and returns an
@@ -788,7 +743,6 @@ private static (@string, time.Duration) adjustURL(@string source, time.Duration 
         // Try adding http:// to catch sources of the form hostname:port/path.
         // url.Parse treats "hostname" as the scheme.
         u, err = url.Parse("http://" + source);
-
     }
     if (err != null || u.Host == "") {
         return ("", 0);
@@ -811,11 +765,9 @@ private static (@string, time.Duration) adjustURL(@string source, time.Duration 
                     }
 
                 }
-
             }
 
         }
-
     }
     if (timeout <= 0) {
         if (duration > 0) {
@@ -828,7 +780,6 @@ private static (@string, time.Duration) adjustURL(@string source, time.Duration 
     }
     u.RawQuery = values.Encode();
     return (u.String(), timeout);
-
 }
 
 } // end driver_package

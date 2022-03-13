@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:09:50 UTC
+//     Generated on 2022 March 13 06:23:05 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class ssagen_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct phiState
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace @internal
             public static implicit operator phiState(NilType nil) => default(phiState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static phiState phiState_cast(dynamic value)
         {
             return new phiState(ref value.s, ref value.f, value.defvars, value.varnum, value.idom, value.tree, value.level, value.priq, value.q, ref value.queued, ref value.hasPhi, ref value.hasDef, ref value.placeholder);

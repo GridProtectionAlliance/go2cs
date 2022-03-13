@@ -5,12 +5,12 @@
 //go:build darwin || dragonfly || netbsd
 // +build darwin dragonfly netbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:13 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:31 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\interface_classic.go
-using runtime = go.runtime_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using runtime = runtime_package;
 
 public static partial class route_package {
 
@@ -38,7 +38,6 @@ private static (Message, error) parseInterfaceMessage(this ptr<wireFormat> _addr
     m.Addrs[sysRTAX_IFP] = a;
     m.Name = a._<ptr<LinkAddr>>().Name;
     return (m, error.As(null!)!);
-
 }
 
 private static (Message, error) parseInterfaceAddrMessage(this ptr<wireFormat> _addr_w, RIBType _, slice<byte> b) {
@@ -67,7 +66,6 @@ private static (Message, error) parseInterfaceAddrMessage(this ptr<wireFormat> _
         return (null, error.As(err)!);
     }
     return (m, error.As(null!)!);
-
 }
 
 } // end route_package

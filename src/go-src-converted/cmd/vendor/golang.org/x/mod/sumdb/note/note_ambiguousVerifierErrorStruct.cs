@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:16 UTC
+//     Generated on 2022 March 13 06:41:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace sumdb
 {
     public static partial class note_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct ambiguousVerifierError
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace sumdb
             public static implicit operator ambiguousVerifierError(NilType nil) => default(ambiguousVerifierError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ambiguousVerifierError ambiguousVerifierError_cast(dynamic value)
         {
             return new ambiguousVerifierError(value.name, value.hash);

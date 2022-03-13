@@ -3,20 +3,20 @@
 // license that can be found in the LICENSE file.
 
 // Package objfile implements portable access to OS-specific executable files.
-// package objfile -- go2cs converted at 2022 March 06 22:32:33 UTC
+
+// package objfile -- go2cs converted at 2022 March 13 05:43:33 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\objfile.go
-using archive = go.cmd.@internal.archive_package;
-using dwarf = go.debug.dwarf_package;
-using gosym = go.debug.gosym_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.@internal;
+
+using archive = cmd.@internal.archive_package;
+using dwarf = debug.dwarf_package;
+using gosym = debug.gosym_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using sort = sort_package;
+using System;
 
 public static partial class objfile_package {
 
@@ -87,9 +87,7 @@ public static (ptr<File>, error) Open(@string name) {
 
         }
 
-
     }
-
     foreach (var (_, try) in openers) {
         {
             var (raw, err) = try(r);
@@ -99,10 +97,8 @@ public static (ptr<File>, error) Open(@string name) {
             }
 
         }
-
     }    r.Close();
     return (_addr_null!, error.As(fmt.Errorf("open %s: unrecognized object file", name))!);
-
 }
 
 private static error Close(this ptr<File> _addr_f) {
@@ -189,7 +185,6 @@ private static (slice<Sym>, error) Symbols(this ptr<Entry> _addr_e) {
     }
     sort.Sort(byAddr(syms));
     return (syms, error.As(null!)!);
-
 }
 
 private partial struct byAddr { // : slice<Sym>
@@ -225,7 +220,6 @@ private static (Liner, error) PCLineTable(this ptr<Entry> _addr_e) {
         return (null, error.As(err)!);
     }
     return gosym.NewTable(symtab, gosym.NewLineTable(pclntab, textStart));
-
 }
 
 private static (ulong, slice<byte>, error) Text(this ptr<Entry> _addr_e) {

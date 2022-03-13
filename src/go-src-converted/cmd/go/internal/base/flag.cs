@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 23:19:42 UTC
+// package @base -- go2cs converted at 2022 March 13 06:32:31 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\base\flag.go
-using flag = go.flag_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using str = go.cmd.go.@internal.str_package;
-
 namespace go.cmd.go.@internal;
+
+using flag = flag_package;
+
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using str = cmd.go.@internal.str_package;
+
+
+// A StringsFlag is a command-line flag that interprets its argument
+// as a space-separated list of possibly-quoted strings.
 
 public static partial class @base_package {
 
-    // A StringsFlag is a command-line flag that interprets its argument
-    // as a space-separated list of possibly-quoted strings.
 public partial struct StringsFlag { // : slice<@string>
 }
 
@@ -29,7 +31,6 @@ private static error Set(this ptr<StringsFlag> _addr_v, @string s) {
         v.val = new slice<@string>(new @string[] {  });
     }
     return error.As(err)!;
-
 }
 
 private static @string String(this ptr<StringsFlag> _addr_v) {
@@ -50,7 +51,6 @@ private static @string String(this explicitStringFlag f) {
         return "";
     }
     return f.value.val;
-
 }
 
 private static error Set(this explicitStringFlag f, @string v) {
@@ -59,7 +59,6 @@ private static error Set(this explicitStringFlag f, @string v) {
         f.@explicit.val = true;
     }
     return error.As(null!)!;
-
 }
 
 // AddBuildFlagsNX adds the -n and -x build flags to the flag set.

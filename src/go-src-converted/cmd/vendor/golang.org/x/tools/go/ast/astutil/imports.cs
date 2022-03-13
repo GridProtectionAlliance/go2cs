@@ -3,24 +3,26 @@
 // license that can be found in the LICENSE file.
 
 // Package astutil contains common utilities for working with the Go AST.
-// package astutil -- go2cs converted at 2022 March 06 23:34:59 UTC
+
+// package astutil -- go2cs converted at 2022 March 13 06:42:33 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/astutil" ==> using astutil = go.cmd.vendor.golang.org.x.tools.go.ast.astutil_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\ast\astutil\imports.go
+namespace go.cmd.vendor.golang.org.x.tools.go.ast;
 // import "golang.org/x/tools/go/ast/astutil"
 
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// AddImport adds the import path to the file f, if absent.
+
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.ast;
-
 public static partial class astutil_package {
 
-    // AddImport adds the import path to the file f, if absent.
 public static bool AddImport(ptr<token.FileSet> _addr_fset, ptr<ast.File> _addr_f, @string path) {
     bool added = default;
     ref token.FileSet fset = ref _addr_fset.val;
@@ -101,7 +103,6 @@ public static bool AddNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File> _
                     spec = spec__prev2;
                 }
             }
-
         }
         i = i__prev1;
         decl = decl__prev1;
@@ -128,20 +129,16 @@ public static bool AddNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File> _
                 } 
                 // +2 for a blank line
                 impDecl.TokPos = c.End() + 2;
-
             }
-
         }
         f.Decls = append(f.Decls, null);
         copy(f.Decls[(int)lastImport + 2..], f.Decls[(int)lastImport + 1..]);
         f.Decls[lastImport + 1] = impDecl;
-
     }
     nint insertAt = 0;
     if (impIndex >= 0) { 
         // insert after the found import
         insertAt = impIndex + 1;
-
     }
     impDecl.Specs = append(impDecl.Specs, null);
     copy(impDecl.Specs[(int)insertAt + 1..], impDecl.Specs[(int)insertAt..]);
@@ -163,13 +160,11 @@ public static bool AddNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File> _
                 // Assign same position as the previous import,
                 // so that the sorter sees it as being in the same block.
                 pos = impDecl.Specs[insertAt - 1].Pos();
-
             }
 
             spec = spec__prev2;
 
         }
-
     }
     if (newImport.Name != null) {
         newImport.Name.NamePos = pos;
@@ -181,12 +176,10 @@ public static bool AddNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File> _
     if (len(impDecl.Specs) == 1) { 
         // Remove unneeded parens.
         impDecl.Lparen = token.NoPos;
-
     }
     else if (!impDecl.Lparen.IsValid()) { 
         // impDecl needs parens added.
         impDecl.Lparen = impDecl.Specs[0].Pos();
-
     }
     f.Imports = append(f.Imports, newImport);
 
@@ -225,21 +218,18 @@ public static bool AddNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File> _
 
             f.Decls = append(f.Decls[..(int)i], f.Decls[(int)i + 1..]);
             i--;
-
         }
 
         i = i__prev1;
     }
 
     return true;
-
 }
 
 private static bool isThirdParty(@string importPath) { 
     // Third party package import path usually contains "." (".com", ".org", ...)
     // This logic is taken from golang.org/x/tools/imports package.
     return strings.Contains(importPath, ".");
-
 }
 
 // DeleteImport deletes the import path from the file f, if present.
@@ -314,7 +304,6 @@ public static bool DeleteNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File
                                     delcomments = append(delcomments, cg);
                                     break;
                                 }
-
                             }
 
                             cg = cg__prev3;
@@ -328,7 +317,6 @@ public static bool DeleteNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File
                                 fset.File(gen.TokPos).MergeLine(fset.Position(gen.TokPos).Line);
                             }
                         }
-
                         {
                             var cg__prev3 = cg;
 
@@ -346,7 +334,6 @@ public static bool DeleteNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File
                             cg = cg__prev3;
                         }
                     }
-
                     if (j > 0) {
                         ptr<ast.ImportSpec> lastImpspec = gen.Specs[j - 1]._<ptr<ast.ImportSpec>>();
                         var lastLine = fset.Position(lastImpspec.Path.ValuePos).Line;
@@ -363,19 +350,14 @@ public static bool DeleteNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File
                         else if (line != fset.File(gen.Rparen).LineCount()) { 
                             // There was no blank line. Close the hole.
                             fset.File(gen.Rparen).MergeLine(line);
-
                         }
-
                     }
-
                     j--;
-
                 }
 
 
                 j = j__prev2;
             }
-
         }
 
         i = i__prev1;
@@ -447,7 +429,6 @@ public static bool DeleteNamedImport(ptr<token.FileSet> _addr_fset, ptr<ast.File
         panic(fmt.Sprintf("deleted specs from Decls but not Imports: %v", delspecs));
     }
     return ;
-
 });
 
 // RewriteImport rewrites any import of path oldPath to path newPath.
@@ -463,10 +444,8 @@ public static bool RewriteImport(ptr<token.FileSet> _addr_fset, ptr<ast.File> _a
             // it using the length of imp.Path.Value.
             imp.EndPos = imp.End();
             imp.Path.Value = strconv.Quote(newPath);
-
         }
     }    return ;
-
 }
 
 // UsesImport reports whether a given import is used.
@@ -509,7 +488,6 @@ public static bool UsesImport(ptr<ast.File> _addr_f, @string path) {
     }), f);
 
     return ;
-
 }
 
 public delegate void visitFn(ast.Node);
@@ -528,7 +506,6 @@ private static bool imports(ptr<ast.File> _addr_f, @string name, @string path) {
             return true;
         }
     }    return false;
-
 }
 
 // importSpec returns the import spec if f imports path,
@@ -541,7 +518,6 @@ private static ptr<ast.ImportSpec> importSpec(ptr<ast.File> _addr_f, @string pat
             return _addr_s!;
         }
     }    return _addr_null!;
-
 }
 
 // importName returns the name of s,
@@ -553,7 +529,6 @@ private static @string importName(ptr<ast.ImportSpec> _addr_s) {
         return "";
     }
     return s.Name.Name;
-
 }
 
 // importPath returns the unquoted import path of s,
@@ -566,7 +541,6 @@ private static @string importPath(ptr<ast.ImportSpec> _addr_s) {
         return "";
     }
     return t;
-
 }
 
 // declImports reports whether gen contains an import of path.
@@ -582,7 +556,6 @@ private static bool declImports(ptr<ast.GenDecl> _addr_gen, @string path) {
             return true;
         }
     }    return false;
-
 }
 
 // matchLen returns the length of the longest path segment prefix shared by x and y.
@@ -594,7 +567,6 @@ private static nint matchLen(@string x, @string y) {
         }
     }
     return n;
-
 }
 
 // isTopName returns true if n is a top-level unresolved identifier with the given name.
@@ -629,9 +601,7 @@ public static slice<slice<ptr<ast.ImportSpec>>> Imports(ptr<token.FileSet> _addr
             group = append(group, importSpec);
             lastLine = line;
         }        groups = append(groups, group);
-
     }    return groups;
-
 }
 
 } // end astutil_package

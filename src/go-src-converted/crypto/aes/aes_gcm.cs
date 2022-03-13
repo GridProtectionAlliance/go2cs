@@ -5,21 +5,23 @@
 //go:build amd64 || arm64
 // +build amd64 arm64
 
-// package aes -- go2cs converted at 2022 March 06 22:17:13 UTC
+// package aes -- go2cs converted at 2022 March 13 05:30:34 UTC
 // import "crypto/aes" ==> using aes = go.crypto.aes_package
 // Original source: C:\Program Files\Go\src\crypto\aes\aes_gcm.go
-using cipher = go.crypto.cipher_package;
-using subtleoverlap = go.crypto.@internal.subtle_package;
-using subtle = go.crypto.subtle_package;
-using errors = go.errors_package;
-
 namespace go.crypto;
+
+using cipher = crypto.cipher_package;
+using subtleoverlap = crypto.@internal.subtle_package;
+using subtle = crypto.subtle_package;
+using errors = errors_package;
+
+
+// The following functions are defined in gcm_*.s.
+
+//go:noescape
 
 public static partial class aes_package {
 
-    // The following functions are defined in gcm_*.s.
-
-    //go:noescape
 private static void gcmAesInit(ptr<array<byte>> productTable, slice<uint> ks);
 
 //go:noescape
@@ -38,7 +40,6 @@ private static readonly nint gcmBlockSize = 16;
 private static readonly nint gcmTagSize = 16;
 private static readonly nint gcmMinimumTagSize = 12; // NIST SP 800-38D recommends tags with 12 or more bytes.
 private static readonly nint gcmStandardNonceSize = 12;
-
 
 private static var errOpen = errors.New("cipher: message authentication failed");
 
@@ -104,10 +105,8 @@ private static (slice<byte>, slice<byte>) sliceForAppend(slice<byte> @in, nint n
             copy(head, in);
         }
     }
-
     tail = head[(int)len(in)..];
     return ;
-
 }
 
 // Seal encrypts and authenticates plaintext. See the cipher.AEAD interface for
@@ -129,14 +128,12 @@ private static slice<byte> Seal(this ptr<gcmAsm> _addr_g, slice<byte> dst, slice
         // Init counter to nonce||1
         copy(counter[..], nonce);
         counter[gcmBlockSize - 1] = 1;
-
     }
     else
  { 
         // Otherwise counter = GHASH(nonce)
         gcmAesData(_addr_g.productTable, nonce, _addr_counter);
         gcmAesFinish(_addr_g.productTable, _addr_tagMask, _addr_counter, uint64(len(nonce)), uint64(0));
-
     }
     encryptBlockAsm(len(g.ks) / 4 - 1, _addr_g.ks[0], _addr_tagMask[0], _addr_counter[0]);
 
@@ -154,7 +151,6 @@ private static slice<byte> Seal(this ptr<gcmAsm> _addr_g, slice<byte> dst, slice
     copy(out[(int)len(plaintext)..], tagOut[..]);
 
     return ret;
-
 });
 
 // Open authenticates and decrypts ciphertext. See the cipher.AEAD interface
@@ -188,14 +184,12 @@ private static (slice<byte>, error) Open(this ptr<gcmAsm> _addr_g, slice<byte> d
         // Init counter to nonce||1
         copy(counter[..], nonce);
         counter[gcmBlockSize - 1] = 1;
-
     }
     else
  { 
         // Otherwise counter = GHASH(nonce)
         gcmAesData(_addr_g.productTable, nonce, _addr_counter);
         gcmAesFinish(_addr_g.productTable, _addr_tagMask, _addr_counter, uint64(len(nonce)), uint64(0));
-
     }
     encryptBlockAsm(len(g.ks) / 4 - 1, _addr_g.ks[0], _addr_tagMask[0], _addr_counter[0]);
 
@@ -217,7 +211,6 @@ private static (slice<byte>, error) Open(this ptr<gcmAsm> _addr_g, slice<byte> d
         }        return (null, error.As(errOpen)!);
     }
     return (ret, error.As(null!)!);
-
 });
 
 } // end aes_package

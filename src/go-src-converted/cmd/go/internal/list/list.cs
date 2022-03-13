@@ -3,32 +3,32 @@
 // license that can be found in the LICENSE file.
 
 // Package list implements the ``go list'' command.
-// package list -- go2cs converted at 2022 March 06 23:19:42 UTC
+
+// package list -- go2cs converted at 2022 March 13 06:32:30 UTC
 // import "cmd/go/internal/list" ==> using list = go.cmd.go.@internal.list_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\list\list.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using context = go.context_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using template = go.text.template_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cache = go.cmd.go.@internal.cache_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using modinfo = go.cmd.go.@internal.modinfo_package;
-using modload = go.cmd.go.@internal.modload_package;
-using str = go.cmd.go.@internal.str_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using context = context_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using sort = sort_package;
+using strings = strings_package;
+using template = text.template_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cache = cmd.go.@internal.cache_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using modinfo = cmd.go.@internal.modinfo_package;
+using modload = cmd.go.@internal.modload_package;
+using str = cmd.go.@internal.str_package;
+using work = cmd.go.@internal.work_package;
+using System;
 
 public static partial class list_package {
 
@@ -315,7 +315,6 @@ For more about modules, see https://golang.org/ref/mod.
 private static void init() {
     CmdList.Run = runList; // break init cycle
     work.AddBuildFlags(CmdList, work.DefaultBuildFlags);
-
 }
 
 private static var listCompiled = CmdList.Flag.Bool("compiled", false, "");private static var listDeps = CmdList.Flag.Bool("deps", false, "");private static var listE = CmdList.Flag.Bool("e", false, "");private static var listExport = CmdList.Flag.Bool("export", false, "");private static var listFmt = CmdList.Flag.String("f", "", "");private static var listFind = CmdList.Flag.Bool("find", false, "");private static var listJson = CmdList.Flag.Bool("json", false, "");private static var listM = CmdList.Flag.Bool("m", false, "");private static var listRetracted = CmdList.Flag.Bool("retracted", false, "");private static var listTest = CmdList.Flag.Bool("test", false, "");private static var listU = CmdList.Flag.Bool("u", false, "");private static var listVersions = CmdList.Flag.Bool("versions", false, "");
@@ -357,7 +356,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
         }
     else
 ;
-
     } {
         ptr<Context> cachedCtxt;
         Func<ptr<Context>> context = () => {
@@ -385,13 +383,10 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                 err = err__prev2;
 
             }
-
             if (@out.NeedNL()) {
                 @out.Write(nl);
             }
-
         };
-
     }
     modload.Init();
     if (listRetracted.val) {
@@ -410,7 +405,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
         if (listDeps.val) { 
             // TODO(rsc): Could make this mean something with -m.
             @base.Fatalf("go list -deps cannot be used with -m");
-
         }
         if (listExport.val) {
             @base.Fatalf("go list -export cannot be used with -m");
@@ -449,11 +443,9 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                     if (arg == "all") {
                         @base.Fatalf(actionDisabledFormat, "compute 'all'");
                     }
-
                     if (strings.Contains(arg, "...")) {
                         @base.Fatalf(actionDisabledFormat, "match module patterns");
                     }
-
                 }
 
                 arg = arg__prev1;
@@ -490,9 +482,7 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
             if (err != null) {
                 @base.Errorf("go list -m: %v", err);
             }
-
             @base.ExitIfErrors();
-
         }
         {
             var m__prev1 = m;
@@ -506,7 +496,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
         }
 
         return ;
-
     }
     if (listU.val) {
         @base.Fatalf("go list -u can only be used with -m");
@@ -569,7 +558,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                             @base.Errorf("can't load test package: %s", err);
                         }
                     }
-
                     if (pmain != null) {
                         pkgs = append(pkgs, pmain);
                         var data = pmain.Internal.TestmainGo.val;
@@ -582,17 +570,13 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                         }
                         pmain.GoFiles[0] = c.OutputFile(out);
                     }
-
                     if (ptest != null && ptest != p) {
                         pkgs = append(pkgs, ptest);
                     }
-
                     if (pxtest != null) {
                         pkgs = append(pkgs, pxtest);
                     }
-
                 }
-
             }
 
             p = p__prev1;
@@ -619,7 +603,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
         // so that you only get descriptions of tests for the things named
         // explicitly on the command line, not for all dependencies.
         pkgs = loadPackageList(pkgs);
-
     }
     var needStale = listJson || strings.Contains(listFmt.val, ".Stale").val;
     if (needStale || listExport || listCompiled.val) {
@@ -644,7 +627,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
         }
 
         b.Do(ctx, a);
-
     }
     {
         var p__prev1 = p;
@@ -659,7 +641,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
             if (listCompiled.val) {
                 p.Imports = str.StringList(p.Imports, p.Internal.CompiledImports);
             }
-
         }
         p = p__prev1;
     }
@@ -725,7 +706,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                             new = new__prev2;
 
                         }
-
                     }
 
                     i = i__prev2;
@@ -788,7 +768,6 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                 }
 
                 sort.Strings(p.Deps);
-
             }
 
             p = p__prev1;
@@ -884,16 +863,13 @@ private static void runList(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                         // found only within CompiledGoFiles. Those paths are found in
                         // CompiledImports.
                         srcPath = p.Internal.CompiledImports[i - nRaw];
-
                     }
-
                     if (path != srcPath) {
                         if (p.ImportMap == null) {
                             p.ImportMap = make_map<@string, @string>();
                         }
                         p.ImportMap[srcPath] = path;
                     }
-
                 }
 
                 i = i__prev2;
@@ -927,7 +903,6 @@ private static slice<ptr<load.Package>> loadPackageList(slice<ptr<load.Package>>
         }
     }
     return pkgs;
-
 }
 
 // TrackingWriter tracks the last byte written on every write so
@@ -952,7 +927,6 @@ private static (nint, error) Write(this ptr<TrackingWriter> _addr_t, slice<byte>
         t.last = p[n - 1];
     }
     return ;
-
 }
 
 private static void Flush(this ptr<TrackingWriter> _addr_t) {

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:17:36 UTC
+//     Generated on 2022 March 13 06:30:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace @internal
 {
     public static partial class work_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct vetConfig
         {
             // Constructors
@@ -108,7 +108,7 @@ namespace @internal
             public static implicit operator vetConfig(NilType nil) => default(vetConfig);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static vetConfig vetConfig_cast(dynamic value)
         {
             return new vetConfig(value.ID, value.Compiler, value.Dir, value.ImportPath, value.GoFiles, value.NonGoFiles, value.IgnoredFiles, value.ImportMap, value.PackageFile, value.Standard, value.PackageVetx, value.VetxOnly, value.VetxOutput, value.SucceedOnTypecheckFailure);

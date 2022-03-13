@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:28 UTC
+//     Generated on 2022 March 13 06:44:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace index
 {
     public static partial class suffixarray_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct ints
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace index
             public static implicit operator ints(NilType nil) => default(ints);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ints ints_cast(dynamic value)
         {
             return new ints(value.int32, value.int64);

@@ -5,11 +5,9 @@
 //go:build !mips && !mipsle && !mips64 && !mips64le && !s390x && !ppc64 && linux
 // +build !mips,!mipsle,!mips64,!mips64le,!s390x,!ppc64,linux
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:30 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:05 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\os_linux_generic.go
-
-
 namespace go;
 
 public static partial class runtime_package {
@@ -20,7 +18,6 @@ private static readonly nint _SI_USER = 0;
 private static readonly nint _SIG_BLOCK = 0;
 private static readonly nint _SIG_UNBLOCK = 1;
 private static readonly nint _SIG_SETMASK = 2;
-
 
 // It's hard to tease out exactly how big a Sigset is, but
 // rt_sigprocmask crashes if we get it wrong, so if binaries

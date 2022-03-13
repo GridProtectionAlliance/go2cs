@@ -5,17 +5,19 @@
 //go:build freebsd || netbsd
 // +build freebsd netbsd
 
-// package unix -- go2cs converted at 2022 March 06 23:27:27 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:27 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\xattr_bsd.go
-using strings = go.strings_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using strings = strings_package;
+using @unsafe = @unsafe_package;
+
+
+// Derive extattr namespace and attribute name
 
 public static partial class unix_package {
 
-    // Derive extattr namespace and attribute name
 private static (nint, @string, error) xattrnamespace(@string fullattr) {
     nint ns = default;
     @string attr = default;
@@ -39,7 +41,6 @@ private static (nint, @string, error) xattrnamespace(@string fullattr) {
             return (-1, "", error.As(ENOATTR)!);
             break;
     }
-
 }
 
 private static unsafe.Pointer initxattrdest(slice<byte> dest, nint idx) {
@@ -68,7 +69,6 @@ public static (nint, error) Getxattr(@string file, @string attr, slice<byte> des
         return (-1, error.As(err)!);
     }
     return ExtattrGetFile(file, nsid, a, uintptr(d), destsize);
-
 }
 
 public static (nint, error) Fgetxattr(nint fd, @string attr, slice<byte> dest) {
@@ -83,7 +83,6 @@ public static (nint, error) Fgetxattr(nint fd, @string attr, slice<byte> dest) {
         return (-1, error.As(err)!);
     }
     return ExtattrGetFd(fd, nsid, a, uintptr(d), destsize);
-
 }
 
 public static (nint, error) Lgetxattr(@string link, @string attr, slice<byte> dest) {
@@ -98,7 +97,6 @@ public static (nint, error) Lgetxattr(@string link, @string attr, slice<byte> de
         return (-1, error.As(err)!);
     }
     return ExtattrGetLink(link, nsid, a, uintptr(d), destsize);
-
 }
 
 // flags are unused on FreeBSD
@@ -118,7 +116,6 @@ public static error Fsetxattr(nint fd, @string attr, slice<byte> data, nint flag
     }
     _, err = ExtattrSetFd(fd, nsid, a, uintptr(d), datasiz);
     return ;
-
 }
 
 public static error Setxattr(@string file, @string attr, slice<byte> data, nint flags) {
@@ -136,7 +133,6 @@ public static error Setxattr(@string file, @string attr, slice<byte> data, nint 
     }
     _, err = ExtattrSetFile(file, nsid, a, uintptr(d), datasiz);
     return ;
-
 }
 
 public static error Lsetxattr(@string link, @string attr, slice<byte> data, nint flags) {
@@ -154,7 +150,6 @@ public static error Lsetxattr(@string link, @string attr, slice<byte> data, nint
     }
     _, err = ExtattrSetLink(link, nsid, a, uintptr(d), datasiz);
     return ;
-
 }
 
 public static error Removexattr(@string file, @string attr) {
@@ -166,7 +161,6 @@ public static error Removexattr(@string file, @string attr) {
     }
     err = ExtattrDeleteFile(file, nsid, a);
     return ;
-
 }
 
 public static error Fremovexattr(nint fd, @string attr) {
@@ -178,7 +172,6 @@ public static error Fremovexattr(nint fd, @string attr) {
     }
     err = ExtattrDeleteFd(fd, nsid, a);
     return ;
-
 }
 
 public static error Lremovexattr(@string link, @string attr) {
@@ -190,7 +183,6 @@ public static error Lremovexattr(@string link, @string attr) {
     }
     err = ExtattrDeleteLink(link, nsid, a);
     return ;
-
 }
 
 public static (nint, error) Listxattr(@string file, slice<byte> dest) {
@@ -224,9 +216,7 @@ public static (nint, error) Listxattr(@string file, slice<byte> dest) {
             destsiz = 0;
         }
         d = initxattrdest(dest, s);
-
     }    return (s, error.As(null!)!);
-
 }
 
 public static (nint, error) Flistxattr(nint fd, slice<byte> dest) {
@@ -251,9 +241,7 @@ public static (nint, error) Flistxattr(nint fd, slice<byte> dest) {
             destsiz = 0;
         }
         d = initxattrdest(dest, s);
-
     }    return (s, error.As(null!)!);
-
 }
 
 public static (nint, error) Llistxattr(@string link, slice<byte> dest) {
@@ -278,9 +266,7 @@ public static (nint, error) Llistxattr(@string link, slice<byte> dest) {
             destsiz = 0;
         }
         d = initxattrdest(dest, s);
-
     }    return (s, error.As(null!)!);
-
 }
 
 } // end unix_package

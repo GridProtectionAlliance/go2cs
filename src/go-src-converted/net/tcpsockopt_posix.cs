@@ -5,13 +5,13 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:46 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:09 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\tcpsockopt_posix.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 

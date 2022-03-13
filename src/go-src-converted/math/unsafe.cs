@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:12 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:06 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\unsafe.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class math_package {
 
-    // Float32bits returns the IEEE 754 binary representation of f,
-    // with the sign bit of f and the result in the same bit position.
-    // Float32bits(Float32frombits(x)) == x.
+// Float32bits returns the IEEE 754 binary representation of f,
+// with the sign bit of f and the result in the same bit position.
+// Float32bits(Float32frombits(x)) == x.
 public static uint Float32bits(float f) {
     return new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(_addr_f));
 }

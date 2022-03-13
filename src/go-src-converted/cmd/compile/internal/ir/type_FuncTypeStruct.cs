@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:17 UTC
+//     Generated on 2022 March 13 06:00:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(miniType))]
         public partial struct FuncType
         {
@@ -72,7 +72,7 @@ namespace @internal
             public static implicit operator FuncType(NilType nil) => default(FuncType);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static FuncType FuncType_cast(dynamic value)
         {
             return new FuncType(value.miniType, ref value.Recv, value.Params, value.Results);

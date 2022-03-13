@@ -5,13 +5,13 @@
 //go:build !darwin && !dragonfly && !freebsd && !linux && !netbsd && !openbsd
 // +build !darwin,!dragonfly,!freebsd,!linux,!netbsd,!openbsd
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:38 UTC
+// package typecheck -- go2cs converted at 2022 March 13 05:59:58 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\mapfile_read.go
-using io = go.io_package;
-using os = go.os_package;
-
 namespace go.cmd.compile.@internal;
+
+using io = io_package;
+using os = os_package;
 
 public static partial class typecheck_package {
 
@@ -26,7 +26,6 @@ private static (@string, error) mapFile(ptr<os.File> _addr_f, long offset, long 
         return ("", error.As(err)!);
     }
     return (string(buf), error.As(null!)!);
-
 }
 
 } // end typecheck_package

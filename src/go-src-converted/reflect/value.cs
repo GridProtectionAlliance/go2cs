@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflect -- go2cs converted at 2022 March 06 22:31:00 UTC
+// package reflect -- go2cs converted at 2022 March 13 05:41:52 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Program Files\Go\src\reflect\value.go
-using abi = go.@internal.abi_package;
-using itoa = go.@internal.itoa_package;
-using unsafeheader = go.@internal.unsafeheader_package;
-using math = go.math_package;
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using abi = @internal.abi_package;
+using itoa = @internal.itoa_package;
+using unsafeheader = @internal.unsafeheader_package;
+using math = math_package;
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class reflect_package {
 
@@ -99,7 +98,6 @@ private static readonly flag flagMethod = 1 << 9;
 private static readonly nint flagMethodShift = 10;
 private static readonly flag flagRO = flagStickyRO | flagEmbedRO;
 
-
 private static Kind kind(this flag f) {
     return Kind(f & flagKindMask);
 }
@@ -109,7 +107,6 @@ private static flag ro(this flag f) {
         return flagStickyRO;
     }
     return 0;
-
 }
 
 // pointer returns the underlying pointer represented by v.
@@ -123,7 +120,6 @@ public static unsafe.Pointer pointer(this Value v) => func((_, panic, _) => {
         return new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
     }
     return v.ptr;
-
 });
 
 // packEface converts v to the empty interface.
@@ -144,7 +140,6 @@ private static void packEface(Value v) => func((_, panic, _) => {
             var c = unsafe_New(_addr_t);
             typedmemmove(_addr_t, c, ptr);
             ptr = c;
-
         }
         e.word = ptr;
     else if (v.flag & flagIndir != 0) 
@@ -160,7 +155,6 @@ private static void packEface(Value v) => func((_, panic, _) => {
     // interface value.
     e.typ = t;
     return i;
-
 });
 
 // unpackEface converts the empty interface i to a Value.
@@ -176,7 +170,6 @@ private static Value unpackEface(object i) {
         f |= flagIndir;
     }
     return new Value(t,e.word,f);
-
 }
 
 // A ValueError occurs when a Value method is invoked on
@@ -194,7 +187,6 @@ private static @string Error(this ptr<ValueError> _addr_e) {
         return "reflect: call of " + e.Method + " on zero Value";
     }
     return "reflect: call of " + e.Method + " on " + e.Kind.String() + " Value";
-
 }
 
 // methodName returns the name of the calling method,
@@ -206,7 +198,6 @@ private static @string methodName() {
         return "unknown method";
     }
     return f.Name();
-
 }
 
 // methodNameSkip is like methodName, but skips another stack frame.
@@ -218,7 +209,6 @@ private static @string methodNameSkip() {
         return "unknown method";
     }
     return f.Name();
-
 }
 
 // emptyInterface is the header for an interface{} value.
@@ -294,7 +284,6 @@ public static Value Addr(this Value v) => func((_, panic, _) => {
     }
     var fl = v.flag & flagRO;
     return new Value(v.typ.ptrTo(),v.ptr,fl|flag(Ptr));
-
 });
 
 // Bool returns v's underlying value.
@@ -312,7 +301,6 @@ public static slice<byte> Bytes(this Value v) => func((_, panic, _) => {
         panic("reflect.Value.Bytes of non-byte slice");
     }
     return new ptr<ptr<ptr<slice<byte>>>>(v.ptr);
-
 });
 
 // runes returns v's underlying value.
@@ -323,7 +311,6 @@ public static slice<int> runes(this Value v) => func((_, panic, _) => {
         panic("reflect.Value.Bytes of non-rune slice");
     }
     return new ptr<ptr<ptr<slice<int>>>>(v.ptr);
-
 });
 
 // CanAddr reports whether the value's address can be obtained with Addr.
@@ -452,7 +439,6 @@ public static slice<Value> call(this Value v, @string op, slice<Value> @in) => f
                 targ = targ__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -479,9 +465,7 @@ public static slice<Value> call(this Value v, @string op, slice<Value> @in) => f
                     xt = xt__prev2;
 
                 }
-
                 slice.Index(i).Set(x);
-
             }
 
 
@@ -491,7 +475,6 @@ public static slice<Value> call(this Value v, @string op, slice<Value> @in) => f
         in = make_slice<Value>(n + 1);
         copy(in[..(int)n], origIn);
         in[n] = slice;
-
     }
     var nin = len(in);
     if (nin != t.NumIn()) {
@@ -516,7 +499,6 @@ public static slice<Value> call(this Value v, @string op, slice<Value> @in) => f
             // Can't use pool if the function has return values.
             // We will leak pointer to args in ret, so its lifetime is not scoped.
             stackArgs = unsafe_New(_addr_frametype);
-
         }
     }
     var frameSize = frametype.size;
@@ -553,7 +535,6 @@ public static slice<Value> call(this Value v, @string op, slice<Value> @in) => f
             st = st__prev1;
         }
         inStart = 1;
-
     }
     {
         nint i__prev1 = i;
@@ -582,10 +563,9 @@ stepsLoop:
                         }
                         else
  {
-                            (@unsafe.Pointer.val)(addr).val;
+                            (@unsafe.Pointer.val).val;
 
-                            v.ptr;
-
+                            (addr) = v.ptr;
                         } 
                         // There's only one step for a stack-allocated value.
                         _breakstepsLoop = true;
@@ -603,13 +583,9 @@ stepsLoop:
                                 // register space. Otherwise, there's the potential for
                                 // this to be the last reference to v.ptr.
                                 regArgs.Ptrs[st.ireg] = v.ptr;
-
                             }
-
                             regArgs.Ints[st.ireg] = uintptr(v.ptr);
-
                         }
-
                     else if (st.kind == abiStepFloatReg) 
                         // Copy values to "float registers."
                         if (v.flag & flagIndir == 0) {
@@ -619,8 +595,7 @@ stepsLoop:
                         memmove(@unsafe.Pointer(_addr_regArgs.Floats[st.freg]), offset, st.size);
                     else 
                         panic("unknown ABI part kind");
-                    
-                }
+                                    }
 
                 st = st__prev2;
             }
@@ -655,7 +630,6 @@ stepsLoop:
             // because the Values returned by this function contain pointers to the args object,
             // and will thus keep the args object alive indefinitely.
             typedmemclrpartial(_addr_frametype, stackArgs, 0, abi.retOffset);
-
         }
         ret = make_slice<Value>(nout);
         {
@@ -668,9 +642,7 @@ stepsLoop:
                     // In this case, return the zero value instead.
                     ret[i] = Zero(tv);
                     continue;
-
                 }
-
                 var steps = abi.ret.stepsForValue(i);
                 {
                     var st__prev2 = st;
@@ -688,7 +660,6 @@ stepsLoop:
                         // (And the space for the args is live as well, but as we've
                         // cleared that space it isn't as big a deal.)
                         continue;
-
                     } 
 
                     // Handle pointers passed in registers.
@@ -705,10 +676,8 @@ stepsLoop:
                         print("kind=", steps[0].kind, ", type=", tv.String(), "\n");
                         panic("mismatch between ABI description and types");
                     }
-
                     ret[i] = new Value(tv.common(),regArgs.Ptrs[steps[0].ireg],flag(tv.Kind()));
                     continue;
-
                 } 
 
                 // All that's left is values passed in registers that we need to
@@ -740,23 +709,19 @@ stepsLoop:
                             panic("register-based return value has stack component");
                         else 
                             panic("unknown ABI part kind");
-                        
-                    }
+                                            }
 
                     st = st__prev2;
                 }
 
                 ret[i] = new Value(tv.common(),s,flagIndir|flag(tv.Kind()));
-
             }
 
 
             i = i__prev1;
         }
-
     }
     return ret;
-
 });
 
 // callReflect is the call implementation used by a function
@@ -791,7 +756,6 @@ private static void callReflect(ptr<makeFuncImpl> _addr_ctxt, unsafe.Pointer fra
         // pointer to a value in regs' pointer space, in which case it
         // won't be visible to the GC.
         runtime.GC();
-
     }
     var ftyp = ctxt.ftyp;
     var f = ctxt.fn;
@@ -829,15 +793,12 @@ private static void callReflect(ptr<makeFuncImpl> _addr_ctxt, unsafe.Pointer fra
                         if (typ.size > 0) {
                             typedmemmove(_addr_typ, v.ptr, add(ptr, st.stkOff, "typ.size > 0"));
                         }
-
                         v.flag |= flagIndir;
-
                     }
                     else
  {
                         v.ptr = new ptr<ptr<ptr<unsafe.Pointer>>>(add(ptr, st.stkOff, "1-ptr"));
                     }
-
                 }
                 else
  {
@@ -865,8 +826,7 @@ private static void callReflect(ptr<makeFuncImpl> _addr_ctxt, unsafe.Pointer fra
                                     panic("register-based return value has stack component");
                                 else 
                                     panic("unknown ABI part kind");
-                                
-                            }
+                                                            }
                     else
 
                             st = st__prev2;
@@ -878,19 +838,14 @@ private static void callReflect(ptr<makeFuncImpl> _addr_ctxt, unsafe.Pointer fra
                             print("kind=", steps[0].kind, ", type=", typ.String(), "\n");
                             panic("mismatch between ABI description and types");
                         }
-
                         v.ptr = regs.Ptrs[steps[0].ireg];
-
                     }
-
                 }
 
                 st = st__prev1;
 
             }
-
             in = append(in, v);
-
         }
         i = i__prev1;
         typ = typ__prev1;
@@ -955,10 +910,9 @@ stepsLoop:
                             else
  { 
                                 // This case must be a pointer type.
-                                (uintptr.val)(addr).val;
+                                (uintptr.val).val;
 
-                                uintptr(v.ptr);
-
+                                (addr) = uintptr(v.ptr);
                             } 
                             // There's only one step for a stack-allocated value.
                             _breakstepsLoop = true;
@@ -977,9 +931,7 @@ stepsLoop:
                                 // makeFuncStub has no preemption, so these pointers
                                 // are always visible to the GC.
                                 regs.Ints[st.ireg] = uintptr(v.ptr);
-
                             }
-
                         else if (st.kind == abiStepFloatReg) 
                             // Copy values to "float registers."
                             if (v.flag & flagIndir == 0) {
@@ -989,8 +941,7 @@ stepsLoop:
                             memmove(@unsafe.Pointer(_addr_regs.Floats[st.freg]), offset, st.size);
                         else 
                             panic("unknown ABI part kind");
-                        
-                    }
+                                            }
 
                     st = st__prev2;
                 }
@@ -1012,7 +963,6 @@ stepsLoop:
     // stack when it finds our caller, makeFuncStub. Make sure it
     // doesn't get garbage collected.
     runtime.KeepAlive(ctxt);
-
 });
 
 // methodReceiver returns information about the receiver
@@ -1044,7 +994,6 @@ private static (ptr<rtype>, ptr<funcType>, unsafe.Pointer) methodReceiver(@strin
         rcvrtype = iface.itab.typ;
         fn = @unsafe.Pointer(_addr_iface.itab.fun[i]);
         t = (funcType.val)(@unsafe.Pointer(tt.typeOff(m.typ)));
-
     }
     else
  {
@@ -1060,10 +1009,8 @@ private static (ptr<rtype>, ptr<funcType>, unsafe.Pointer) methodReceiver(@strin
         ref var ifn = ref heap(v.typ.textOff(m.ifn), out ptr<var> _addr_ifn);
         fn = @unsafe.Pointer(_addr_ifn);
         t = (funcType.val)(@unsafe.Pointer(v.typ.typeOff(m.mtyp)));
-
     }
     return ;
-
 });
 
 // v is a method receiver. Store at p the word which is used to
@@ -1074,23 +1021,20 @@ private static void storeRcvr(Value v, unsafe.Pointer p) {
     var t = v.typ;
     if (t.Kind() == Interface) { 
         // the interface data word becomes the receiver word
-        var iface = (nonEmptyInterface.val)(v.ptr) * (@unsafe.Pointer.val)(p);
+        var iface = (nonEmptyInterface.val)(v.ptr) * (@unsafe.Pointer.val);
 
-        iface.word;
-
+        (p) = iface.word;
     }
     else if (v.flag & flagIndir != 0 && !ifaceIndir(t)) {
-        (@unsafe.Pointer.val)(p).val;
+        (@unsafe.Pointer.val).val;
 
-        new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
-
+        (p) = new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr);
     }
     else
  {
-        (@unsafe.Pointer.val)(p).val;
+        (@unsafe.Pointer.val).val;
 
-        v.ptr;
-
+        (p) = v.ptr;
     }
 }
 
@@ -1153,13 +1097,11 @@ private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame
             // Only copy the reciever to the stack if the ABI says so.
             // Otherwise, it'll be in a register already.
             storeRcvr(rcvr, methodFrame);
-
         }
         else
  { 
             // Put the receiver in a register.
             storeRcvr(rcvr, @unsafe.Pointer(_addr_methodRegs.Ints));
-
         }
     } 
 
@@ -1237,14 +1179,12 @@ private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame
                                 panic("unexpected method step");
 
                             __switch_break0:;
-
                         }
 
                         mStep = mStep__prev2;
                     }
 
                     continue;
-
                 } 
                 // Handle register -> stack translation.
 
@@ -1267,23 +1207,21 @@ private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame
 
                             if (vStep.kind == abiStepPointer) 
                                 // Do the pointer copy directly so we get a write barrier.
-                                (@unsafe.Pointer.val)(to).val;
+                                (@unsafe.Pointer.val).val;
 
-                                valueRegs.Ptrs[vStep.ireg];
+                                (to) = valueRegs.Ptrs[vStep.ireg];
                             else if (vStep.kind == abiStepIntReg) 
                                 memmove(to, @unsafe.Pointer(_addr_valueRegs.Ints[vStep.ireg]), vStep.size);
                             else if (vStep.kind == abiStepFloatReg) 
                                 memmove(to, @unsafe.Pointer(_addr_valueRegs.Floats[vStep.freg]), vStep.size);
                             else 
                                 panic("unexpected value step");
-                            
-                        }
+                                                    }
 
                         vStep = vStep__prev2;
                     }
 
                     continue;
-
                 } 
                 // Handle register -> register translation.
 
@@ -1296,9 +1234,7 @@ private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame
                 // to registers both times, it should always take up the same
                 // number of registers for each ABI.
                 panic("method ABI and value ABI don't align");
-
             }
-
             {
                 var i__prev2 = i;
                 var vStep__prev2 = vStep;
@@ -1331,7 +1267,6 @@ private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame
                         panic("unexpected value step");
 
                     __switch_break1:;
-
                 }
 
                 i = i__prev2;
@@ -1375,7 +1310,6 @@ private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame
             var methodRet = add(methodFrame, methodABI.retOffset, "methodFrame's size > retOffset"); 
             // This copies to the stack. Write barriers are not needed.
             memmove(valueRet, methodRet, retSize);
-
         }
     } 
 
@@ -1396,7 +1330,6 @@ private static void callMethod(ptr<methodValue> _addr_ctxt, unsafe.Pointer frame
     // The caller (methodValueCall) has it as a stack object, which is only
     // scanned when there is a reference to it.
     runtime.KeepAlive(valueRegs);
-
 });
 
 // funcName returns the name of f, for use in error messages.
@@ -1407,7 +1340,6 @@ private static @string funcName(Func<slice<Value>, slice<Value>> f) {
         return rf.Name();
     }
     return "closure";
-
 }
 
 // Cap returns v's capacity.
@@ -1423,7 +1355,6 @@ public static nint Cap(this Value v) => func((_, panic, _) => {
         // Slice is always bigger than a word; assume flagIndir.
         return (unsafeheader.Slice.val)(v.ptr).Cap;
         panic(addr(new ValueError("reflect.Value.Cap",v.kind())));
-
 });
 
 // Close closes the channel v.
@@ -1444,7 +1375,6 @@ public static System.Numerics.Complex128 Complex(this Value v) => func((_, panic
     else if (k == Complex128) 
         return new ptr<ptr<ptr<System.Numerics.Complex128>>>(v.ptr);
         panic(addr(new ValueError("reflect.Value.Complex",v.kind())));
-
 });
 
 // Elem returns the value that the interface v contains
@@ -1456,9 +1386,11 @@ public static Value Elem(this Value v) => func((_, panic, _) => {
 
     if (k == Interface) 
         var eface = default;
-        if (v.typ.NumMethod() == 0)         }
+        if (v.typ.NumMethod() == 0) {
+        }
         else
-         }
+ {
+        }
         var x = unpackEface(eface);
         if (x.flag != 0) {
             x.flag |= v.flag.ro();
@@ -1478,7 +1410,6 @@ public static Value Elem(this Value v) => func((_, panic, _) => {
         fl |= flag(typ.Kind());
         return new Value(typ,ptr,fl);
         panic(addr(new ValueError("reflect.Value.Elem",v.kind())));
-
 });
 
 // Field returns the i'th field of the struct v.
@@ -1508,7 +1439,6 @@ public static Value Field(this Value v, nint i) => func((_, panic, _) => {
     }
     var ptr = add(v.ptr, field.offset(), "same as non-reflect &v.field");
     return new Value(typ,ptr,fl);
-
 });
 
 // FieldByIndex returns the nested field corresponding to index.
@@ -1528,9 +1458,7 @@ public static Value FieldByIndex(this Value v, slice<nint> index) => func((_, pa
             }
         }
         v = v.Field(x);
-
     }    return v;
-
 });
 
 // FieldByName returns the struct field with the given name.
@@ -1545,9 +1473,7 @@ public static Value FieldByName(this Value v, @string name) {
             return v.FieldByIndex(f.Index);
         }
     }
-
     return new Value();
-
 }
 
 // FieldByNameFunc returns the struct field with a name
@@ -1562,9 +1488,7 @@ public static Value FieldByNameFunc(this Value v, Func<@string, bool> match) {
             return v.FieldByIndex(f.Index);
         }
     }
-
     return new Value();
-
 }
 
 // Float returns v's underlying value, as a float64.
@@ -1577,7 +1501,6 @@ public static double Float(this Value v) => func((_, panic, _) => {
     else if (k == Float64) 
         return new ptr<ptr<ptr<double>>>(v.ptr);
         panic(addr(new ValueError("reflect.Value.Float",v.kind())));
-
 });
 
 private static ptr<rtype> uint8Type = TypeOf(uint8(0))._<ptr<rtype>>();
@@ -1623,7 +1546,6 @@ public static Value Index(this Value v, nint i) => func((_, panic, _) => {
         fl = v.flag.ro() | flag(Uint8) | flagIndir;
         return new Value(uint8Type,p,fl);
         panic(addr(new ValueError("reflect.Value.Index",v.kind())));
-
 });
 
 // Int returns v's underlying value, as an int64.
@@ -1643,7 +1565,6 @@ public static long Int(this Value v) => func((_, panic, _) => {
     else if (k == Int64) 
         return new ptr<ptr<ptr<long>>>(p);
         panic(addr(new ValueError("reflect.Value.Int",v.kind())));
-
 });
 
 // CanInterface reports whether Interface can be used without panicking.
@@ -1652,7 +1573,6 @@ public static bool CanInterface(this Value v) => func((_, panic, _) => {
         panic(addr(new ValueError("reflect.Value.CanInterface",Invalid)));
     }
     return v.flag & flagRO == 0;
-
 });
 
 // Interface returns v's current value as an interface{}.
@@ -1675,7 +1595,6 @@ private static void valueInterface(Value v, bool safe) => func((_, panic, _) => 
         // because they might be pointers that should not be
         // writable or methods or function that should not be callable.
         panic("reflect.Value.Interface: cannot return value obtained from unexported field or method");
-
     }
     if (v.flag & flagMethod != 0) {
         v = makeMethodValue("Interface", v);
@@ -1688,10 +1607,8 @@ private static void valueInterface(Value v, bool safe) => func((_, panic, _) => 
             return ;
         }
         return ;
-
     }
     return packEface(v);
-
 });
 
 // InterfaceData returns a pair of unspecified uintptr values.
@@ -1711,7 +1628,6 @@ public static array<System.UIntPtr> InterfaceData(this Value v) {
     // that can be abused.
     // Interface value is always bigger than a word; assume flagIndir.
     return new ptr<ptr<ptr<array<System.UIntPtr>>>>(v.ptr);
-
 }
 
 // IsNil reports whether its argument v is nil. The argument must be
@@ -1738,7 +1654,6 @@ public static bool IsNil(this Value v) => func((_, panic, _) => {
         // Both are always bigger than a word; assume flagIndir.
         return new ptr<ptr<ptr<unsafe.Pointer>>>(v.ptr) == null;
         panic(addr(new ValueError("reflect.Value.IsNil",v.kind())));
-
 });
 
 // IsValid reports whether v represents a value.
@@ -1801,8 +1716,7 @@ public static bool IsZero(this Value v) => func((_, panic, _) => {
         // This should never happens, but will act as a safeguard for
         // later, as a default value doesn't makes sense here.
         panic(addr(new ValueError("reflect.Value.IsZero",v.Kind())));
-    
-});
+    });
 
 // Kind returns v's Kind.
 // If v is the zero Value (IsValid returns false), Kind returns Invalid.
@@ -1829,7 +1743,6 @@ public static nint Len(this Value v) => func((_, panic, _) => {
         // String is bigger than a word; assume flagIndir.
         return (unsafeheader.String.val)(v.ptr).Len;
         panic(addr(new ValueError("reflect.Value.Len",v.kind())));
-
 });
 
 // MapIndex returns the value associated with key in the map v.
@@ -1865,7 +1778,6 @@ public static Value MapIndex(this Value v, Value key) {
     var fl = (v.flag | key.flag).ro();
     fl |= flag(typ.Kind());
     return copyVal(_addr_typ, fl, e);
-
 }
 
 // MapKeys returns a slice containing all the keys present in the map,
@@ -1894,14 +1806,11 @@ public static slice<Value> MapKeys(this Value v) {
             // called maplen above. It's a data race, but nothing
             // we can do about it.
             break;
-
         }
         a[i] = copyVal(_addr_keyType, fl, key);
         mapiternext(it);
-
     }
     return a[..(int)i];
-
 }
 
 // A MapIter is an iterator for ranging over a map.
@@ -1924,7 +1833,6 @@ private static Value Key(this ptr<MapIter> _addr_it) => func((_, panic, _) => {
     var t = (mapType.val)(@unsafe.Pointer(it.m.typ));
     var ktype = t.key;
     return copyVal(_addr_ktype, it.m.flag.ro() | flag(ktype.Kind()), mapiterkey(it.it));
-
 });
 
 // Value returns the value of the iterator's current map entry.
@@ -1940,7 +1848,6 @@ private static Value Value(this ptr<MapIter> _addr_it) => func((_, panic, _) => 
     var t = (mapType.val)(@unsafe.Pointer(it.m.typ));
     var vtype = t.elem;
     return copyVal(_addr_vtype, it.m.flag.ro() | flag(vtype.Kind()), mapiterelem(it.it));
-
 });
 
 // Next advances the map iterator and reports whether there is another
@@ -1958,10 +1865,8 @@ private static bool Next(this ptr<MapIter> _addr_it) => func((_, panic, _) => {
             panic("MapIter.Next called on exhausted iterator");
         }
         mapiternext(it.it);
-
     }
     return mapiterkey(it.it) != null;
-
 });
 
 // MapRange returns a range iterator for a map.
@@ -1996,10 +1901,8 @@ private static Value copyVal(ptr<rtype> _addr_typ, flag fl, unsafe.Pointer ptr) 
         var c = unsafe_New(_addr_typ);
         typedmemmove(_addr_typ, c, ptr);
         return new Value(typ,c,fl|flagIndir);
-
     }
     return new Value(typ,*(*unsafe.Pointer)(ptr),fl);
-
 }
 
 // Method returns a function value corresponding to v's i'th method.
@@ -2020,7 +1923,6 @@ public static Value Method(this Value v, nint i) => func((_, panic, _) => {
     fl |= flag(Func);
     fl |= flag(i) << (int)(flagMethodShift) | flagMethod;
     return new Value(v.typ,v.ptr,fl);
-
 });
 
 // NumMethod returns the number of exported methods in the value's method set.
@@ -2032,7 +1934,6 @@ public static nint NumMethod(this Value v) => func((_, panic, _) => {
         return 0;
     }
     return v.typ.NumMethod();
-
 });
 
 // MethodByName returns a function value corresponding to the method
@@ -2052,7 +1953,6 @@ public static Value MethodByName(this Value v, @string name) => func((_, panic, 
         return new Value();
     }
     return v.Method(m.Index);
-
 });
 
 // NumField returns the number of fields in the struct v.
@@ -2073,7 +1973,6 @@ public static bool OverflowComplex(this Value v, System.Numerics.Complex128 x) =
     else if (k == Complex128) 
         return false;
         panic(addr(new ValueError("reflect.Value.OverflowComplex",v.kind())));
-
 });
 
 // OverflowFloat reports whether the float64 x cannot be represented by v's type.
@@ -2086,7 +1985,6 @@ public static bool OverflowFloat(this Value v, double x) => func((_, panic, _) =
     else if (k == Float64) 
         return false;
         panic(addr(new ValueError("reflect.Value.OverflowFloat",v.kind())));
-
 });
 
 private static bool overflowFloat32(double x) {
@@ -2094,7 +1992,6 @@ private static bool overflowFloat32(double x) {
         x = -x;
     }
     return math.MaxFloat32 < x && x <= math.MaxFloat64;
-
 }
 
 // OverflowInt reports whether the int64 x cannot be represented by v's type.
@@ -2107,7 +2004,6 @@ public static bool OverflowInt(this Value v, long x) => func((_, panic, _) => {
         var trunc = (x << (int)((64 - bitSize))) >> (int)((64 - bitSize));
         return x != trunc;
         panic(addr(new ValueError("reflect.Value.OverflowInt",v.kind())));
-
 });
 
 // OverflowUint reports whether the uint64 x cannot be represented by v's type.
@@ -2120,7 +2016,6 @@ public static bool OverflowUint(this Value v, ulong x) => func((_, panic, _) => 
         var trunc = (x << (int)((64 - bitSize))) >> (int)((64 - bitSize));
         return x != trunc;
         panic(addr(new ValueError("reflect.Value.OverflowUint",v.kind())));
-
 });
 
 //go:nocheckptr
@@ -2154,7 +2049,6 @@ public static System.UIntPtr Pointer(this Value v) => func((_, panic, _) => {
             // unsafe.Pointer. (Such pointers are always indirect.)
             // See issue 42076.
             return new ptr<ptr<ptr<System.UIntPtr>>>(v.ptr);
-
         }
         fallthrough = true;
     }
@@ -2174,7 +2068,6 @@ public static System.UIntPtr Pointer(this Value v) => func((_, panic, _) => {
             // match the one used in makeMethodValue.
             ref var f = ref heap(methodValueCall, out ptr<var> _addr_f);
             return new ptr<ptr<ptr<ptr<ptr<System.UIntPtr>>>>>(@unsafe.Pointer(_addr_f));
-
         }
         var p = v.pointer(); 
         // Non-nil func value points at data block.
@@ -2193,7 +2086,6 @@ public static System.UIntPtr Pointer(this Value v) => func((_, panic, _) => {
 
     __switch_break2:;
     panic(addr(new ValueError("reflect.Value.Pointer",v.kind())));
-
 });
 
 // Recv receives and returns a value from the channel v.
@@ -2237,7 +2129,6 @@ public static (Value, bool) recv(this Value v, bool nb) => func((_, panic, _) =>
         val = new Value();
     }
     return ;
-
 });
 
 // Send sends x on the channel v.
@@ -2269,7 +2160,6 @@ public static bool send(this Value v, Value x, bool nb) => func((_, panic, _) =>
         p = @unsafe.Pointer(_addr_x.ptr);
     }
     return chansend(v.pointer(), p, nb);
-
 });
 
 // Set assigns x to the value v.
@@ -2294,10 +2184,9 @@ public static void Set(this Value v, Value x) {
     }
     else
  {
-        (@unsafe.Pointer.val)(v.ptr).val;
+        (@unsafe.Pointer.val).val;
 
-        x.ptr;
-
+        (v.ptr) = x.ptr;
     }
 }
 
@@ -2305,10 +2194,9 @@ public static void Set(this Value v, Value x) {
 // It panics if v's Kind is not Bool or if CanSet() is false.
 public static void SetBool(this Value v, bool x) {
     v.mustBeAssignable();
-    v.mustBe(Bool) * (bool.val)(v.ptr);
+    v.mustBe(Bool) * (bool.val);
 
-    x;
-
+    (v.ptr) = x;
 }
 
 // SetBytes sets v's underlying value.
@@ -2320,7 +2208,6 @@ public static void SetBytes(this Value v, slice<byte> x) => func((_, panic, _) =
         panic("reflect.Value.SetBytes of non-byte slice");
     }
     new ptr<ptr<ptr<slice<byte>>>>(v.ptr) = x;
-
 });
 
 // setRunes sets v's underlying value.
@@ -2332,7 +2219,6 @@ public static void setRunes(this Value v, slice<int> x) => func((_, panic, _) =>
         panic("reflect.Value.setRunes of non-rune slice");
     }
     new ptr<ptr<ptr<slice<int>>>>(v.ptr) = x;
-
 });
 
 // SetComplex sets v's underlying value to x.
@@ -2344,18 +2230,17 @@ public static void SetComplex(this Value v, System.Numerics.Complex128 x) => fun
 
 
         if (k == Complex64) 
-            (complex64.val)(v.ptr).val;
+            (complex64.val).val;
 
-            complex64(x);
+            (v.ptr) = complex64(x);
         else if (k == Complex128) 
-            (complex128.val)(v.ptr).val;
+            (complex128.val).val;
 
-            x;
+            (v.ptr) = x;
         else 
             panic(addr(new ValueError("reflect.Value.SetComplex",v.kind())));
 
     }
-
 });
 
 // SetFloat sets v's underlying value to x.
@@ -2367,18 +2252,17 @@ public static void SetFloat(this Value v, double x) => func((_, panic, _) => {
 
 
         if (k == Float32) 
-            (float32.val)(v.ptr).val;
+            (float32.val).val;
 
-            float32(x);
+            (v.ptr) = float32(x);
         else if (k == Float64) 
-            (float64.val)(v.ptr).val;
+            (float64.val).val;
 
-            x;
+            (v.ptr) = x;
         else 
             panic(addr(new ValueError("reflect.Value.SetFloat",v.kind())));
 
     }
-
 });
 
 // SetInt sets v's underlying value to x.
@@ -2390,30 +2274,29 @@ public static void SetInt(this Value v, long x) => func((_, panic, _) => {
 
 
         if (k == Int) 
-            (int.val)(v.ptr).val;
+            (int.val).val;
 
-            int(x);
+            (v.ptr) = int(x);
         else if (k == Int8) 
-            (int8.val)(v.ptr).val;
+            (int8.val).val;
 
-            int8(x);
+            (v.ptr) = int8(x);
         else if (k == Int16) 
-            (int16.val)(v.ptr).val;
+            (int16.val).val;
 
-            int16(x);
+            (v.ptr) = int16(x);
         else if (k == Int32) 
-            (int32.val)(v.ptr).val;
+            (int32.val).val;
 
-            int32(x);
+            (v.ptr) = int32(x);
         else if (k == Int64) 
-            (int64.val)(v.ptr).val;
+            (int64.val).val;
 
-            x;
+            (v.ptr) = x;
         else 
             panic(addr(new ValueError("reflect.Value.SetInt",v.kind())));
 
     }
-
 });
 
 // SetLen sets v's length to n.
@@ -2427,7 +2310,6 @@ public static void SetLen(this Value v, nint n) => func((_, panic, _) => {
         panic("reflect: slice length out of range in SetLen");
     }
     s.Len = n;
-
 });
 
 // SetCap sets v's capacity to n.
@@ -2441,7 +2323,6 @@ public static void SetCap(this Value v, nint n) => func((_, panic, _) => {
         panic("reflect: slice capacity out of range in SetCap");
     }
     s.Cap = n;
-
 });
 
 // SetMapIndex sets the element associated with key in the map v to elem.
@@ -2479,7 +2360,6 @@ public static void SetMapIndex(this Value v, Value key, Value elem) {
         e = @unsafe.Pointer(_addr_elem.ptr);
     }
     mapassign(_addr_v.typ, v.pointer(), k, e);
-
 }
 
 // SetUint sets v's underlying value to x.
@@ -2491,54 +2371,51 @@ public static void SetUint(this Value v, ulong x) => func((_, panic, _) => {
 
 
         if (k == Uint) 
-            (uint.val)(v.ptr).val;
+            (uint.val).val;
 
-            uint(x);
+            (v.ptr) = uint(x);
         else if (k == Uint8) 
-            (uint8.val)(v.ptr).val;
+            (uint8.val).val;
 
-            uint8(x);
+            (v.ptr) = uint8(x);
         else if (k == Uint16) 
-            (uint16.val)(v.ptr).val;
+            (uint16.val).val;
 
-            uint16(x);
+            (v.ptr) = uint16(x);
         else if (k == Uint32) 
-            (uint32.val)(v.ptr).val;
+            (uint32.val).val;
 
-            uint32(x);
+            (v.ptr) = uint32(x);
         else if (k == Uint64) 
-            (uint64.val)(v.ptr).val;
+            (uint64.val).val;
 
-            x;
+            (v.ptr) = x;
         else if (k == Uintptr) 
-            (uintptr.val)(v.ptr).val;
+            (uintptr.val).val;
 
-            uintptr(x);
+            (v.ptr) = uintptr(x);
         else 
             panic(addr(new ValueError("reflect.Value.SetUint",v.kind())));
 
     }
-
 });
 
 // SetPointer sets the unsafe.Pointer value v to x.
 // It panics if v's Kind is not UnsafePointer.
 public static void SetPointer(this Value v, unsafe.Pointer x) {
     v.mustBeAssignable();
-    v.mustBe(UnsafePointer) * (@unsafe.Pointer.val)(v.ptr);
+    v.mustBe(UnsafePointer) * (@unsafe.Pointer.val);
 
-    x;
-
+    (v.ptr) = x;
 }
 
 // SetString sets v's underlying value to x.
 // It panics if v's Kind is not String or if CanSet() is false.
 public static void SetString(this Value v, @string x) {
     v.mustBeAssignable();
-    v.mustBe(String) * (string.val)(v.ptr);
+    v.mustBe(String) * (string.val);
 
-    x;
-
+    (v.ptr) = x;
 }
 
 // Slice returns v[i:j].
@@ -2594,11 +2471,9 @@ public static Value Slice(this Value v, nint i, nint j) => func((_, panic, _) =>
  { 
         // do not advance pointer, to avoid pointing beyond end of slice
         s.Data = base;
-
     }
     var fl = v.flag.ro() | flagIndir | flag(Slice);
     return new Value(typ.common(),unsafe.Pointer(&x),fl);
-
 });
 
 // Slice3 is the 3-index form of the slice operation: it returns v[i:j:k].
@@ -2644,11 +2519,9 @@ public static Value Slice3(this Value v, nint i, nint j, nint k) => func((_, pan
  { 
         // do not advance pointer, to avoid pointing beyond end of slice
         s.Data = base;
-
     }
     var fl = v.flag.ro() | flagIndir | flag(Slice);
     return new Value(typ.common(),unsafe.Pointer(&x),fl);
-
 });
 
 // String returns the string v's underlying value, as a string.
@@ -2671,7 +2544,6 @@ public static @string String(this Value v) {
     // If you call String on a reflect.Value of other type, it's better to
     // print something than to panic. Useful in debugging.
     return "<" + v.Type().String() + " Value>";
-
 }
 
 // TryRecv attempts to receive a value from the channel v but will not block.
@@ -2707,7 +2579,6 @@ public static Type Type(this Value v) => func((_, panic, _) => {
     if (f & flagMethod == 0) { 
         // Easy case
         return v.typ;
-
     }
     var i = int(v.flag) >> (int)(flagMethodShift);
     if (v.typ.Kind() == Interface) { 
@@ -2718,7 +2589,6 @@ public static Type Type(this Value v) => func((_, panic, _) => {
         }
         var m = _addr_tt.methods[i];
         return v.typ.typeOff(m.typ);
-
     }
     var ms = v.typ.exportedMethods();
     if (uint(i) >= uint(len(ms))) {
@@ -2726,7 +2596,6 @@ public static Type Type(this Value v) => func((_, panic, _) => {
     }
     m = ms[i];
     return v.typ.typeOff(m.mtyp);
-
 });
 
 // Uint returns v's underlying value, as a uint64.
@@ -2748,7 +2617,6 @@ public static ulong Uint(this Value v) => func((_, panic, _) => {
     else if (k == Uintptr) 
         return uint64(new ptr<ptr<ptr<System.UIntPtr>>>(p));
         panic(addr(new ValueError("reflect.Value.Uint",v.kind())));
-
 });
 
 //go:nocheckptr
@@ -2768,7 +2636,6 @@ public static System.UIntPtr UnsafeAddr(this Value v) => func((_, panic, _) => {
         panic("reflect.Value.UnsafeAddr of unaddressable value");
     }
     return uintptr(v.ptr);
-
 });
 
 // StringHeader is the runtime representation of a string.
@@ -2840,14 +2707,11 @@ private static (Value, nint, nint) grow(Value s, nint extra) => func((_, panic, 
  {
                 m += m / 4;
             }
-
         }
-
     }
     var t = MakeSlice(s.Type(), i1, m);
     Copy(t, s);
     return (t, i0, i1);
-
 });
 
 // Append appends the values x to a slice s and returns the resulting slice.
@@ -2867,7 +2731,6 @@ public static Value Append(Value s, params Value[] x) {
         }
     }
     return s;
-
 }
 
 // AppendSlice appends a slice t to a slice s and returns the resulting slice.
@@ -2940,7 +2803,6 @@ public static nint Copy(Value dst, Value src) => func((_, panic, _) => {
         ss.Cap = sh.Len;
     }
     return typedslicecopy(_addr_de.common(), ds, ss);
-
 });
 
 // A runtimeSelect is a single case passed to rselect.
@@ -3013,13 +2875,11 @@ public static (nint, Value, bool) Select(slice<SelectCase> cases) => func((_, pa
     if (len(cases) > 4) { 
         // Slice is heap allocated due to runtime dependent capacity.
         runcases = make_slice<runtimeSelect>(len(cases));
-
     }
     else
  { 
         // Slice can be stack allocated due to constant capacity.
         runcases = make_slice<runtimeSelect>(len(cases), 4);
-
     }
     var haveDefault = false;
     foreach (var (i, c) in cases) {
@@ -3063,7 +2923,6 @@ public static (nint, Value, bool) Select(slice<SelectCase> cases) => func((_, pa
  {
                 rc.val = @unsafe.Pointer(_addr_v.ptr);
             }
-
         else if (c.Dir == SelectRecv) 
             if (c.Send.IsValid()) {
                 panic("reflect.Select: RecvDir case has Send value");
@@ -3083,8 +2942,7 @@ public static (nint, Value, bool) Select(slice<SelectCase> cases) => func((_, pa
             rc.val = unsafe_New(_addr_tt.elem);
         else 
             panic("reflect.Select: invalid Dir");
-        
-    }    chosen, recvOK = rselect(runcases);
+            }    chosen, recvOK = rselect(runcases);
     if (runcases[chosen].dir == SelectRecv) {
         tt = (chanType.val)(@unsafe.Pointer(runcases[chosen].typ));
         var t = tt.elem;
@@ -3099,7 +2957,6 @@ public static (nint, Value, bool) Select(slice<SelectCase> cases) => func((_, pa
         }
     }
     return (chosen, recv, recvOK);
-
 });
 
 /*
@@ -3127,7 +2984,6 @@ public static Value MakeSlice(Type typ, nint len, nint cap) => func((_, panic, _
     }
     ref unsafeheader.Slice s = ref heap(new unsafeheader.Slice(Data:unsafe_NewArray(typ.Elem().(*rtype),cap),Len:len,Cap:cap), out ptr<unsafeheader.Slice> _addr_s);
     return new Value(typ.(*rtype),unsafe.Pointer(&s),flagIndir|flag(Slice));
-
 });
 
 // MakeChan creates a new channel with the specified type and buffer size.
@@ -3144,7 +3000,6 @@ public static Value MakeChan(Type typ, nint buffer) => func((_, panic, _) => {
     ptr<rtype> t = typ._<ptr<rtype>>();
     var ch = makechan(t, buffer);
     return new Value(t,ch,flag(Chan));
-
 });
 
 // MakeMap creates a new map with the specified type.
@@ -3161,7 +3016,6 @@ public static Value MakeMapWithSize(Type typ, nint n) => func((_, panic, _) => {
     ptr<rtype> t = typ._<ptr<rtype>>();
     var m = makemap(t, n);
     return new Value(t,m,flag(Map));
-
 });
 
 // Indirect returns the value that v points to.
@@ -3172,7 +3026,6 @@ public static Value Indirect(Value v) {
         return v;
     }
     return v.Elem();
-
 }
 
 // ValueOf returns a new Value initialized to the concrete value
@@ -3184,7 +3037,6 @@ public static Value ValueOf(object i) {
     escapes(i);
 
     return unpackEface(i);
-
 }
 
 // Zero returns a Value representing the zero value for the specified type.
@@ -3208,10 +3060,8 @@ public static Value Zero(Type typ) => func((_, panic, _) => {
             p = unsafe_New(t);
         }
         return new Value(t,p,fl|flagIndir);
-
     }
     return new Value(t,nil,fl);
-
 });
 
 // must match declarations in runtime/map.go.
@@ -3234,12 +3084,10 @@ public static Value New(Type typ) => func((_, panic, _) => {
     if (ifaceIndir(pt)) { 
         // This is a pointer to a go:notinheap type.
         panic("reflect: New of type that may not be allocated in heap (possibly undefined cgo C type)");
-
     }
     var ptr = unsafe_New(t);
     var fl = flag(Ptr);
     return new Value(pt,ptr,fl);
-
 });
 
 // NewAt returns a Value representing a pointer to a value of the
@@ -3276,10 +3124,10 @@ public static Value assignTo(this Value v, @string context, ptr<rtype> _addr_dst
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
             return new Value(dst,nil,flag(Interface));
-
         }
         var x = valueInterface(v, false);
-        if (dst.NumMethod() == 0)         }
+        if (dst.NumMethod() == 0) {
+        }
         else
  {
             ifaceE2I(_addr_dst, x, target);
@@ -3287,7 +3135,6 @@ public static Value assignTo(this Value v, @string context, ptr<rtype> _addr_dst
         return new Value(dst,target,flagIndir|flag(Interface));
     // Failed.
     panic(context + ": value of type " + v.typ.String() + " is not assignable to type " + dst.String());
-
 });
 
 // Convert returns the value v converted to type t.
@@ -3302,7 +3149,6 @@ public static Value Convert(this Value v, Type t) => func((_, panic, _) => {
         panic("reflect.Value.Convert: value of type " + v.typ.String() + " cannot be converted to type " + t.String());
     }
     return op(v, t);
-
 });
 
 // CanConvert reports whether the value v can be converted to type t.
@@ -3320,7 +3166,6 @@ public static bool CanConvert(this Value v, Type t) {
         }
     }
     return true;
-
 }
 
 // convertOp returns the function to convert a value of type src
@@ -3365,8 +3210,7 @@ private static Func<Value, Type, Value> convertOp(ptr<rtype> _addr_dst, ptr<rtyp
                 return cvtStringBytes;
             else if (dst.Elem().Kind() == Int32) 
                 return cvtStringRunes;
-            
-        }
+                    }
     else if (src.Kind() == Slice) 
         if (dst.Kind() == String && src.Elem().PkgPath() == "") {
 
@@ -3374,8 +3218,7 @@ private static Func<Value, Type, Value> convertOp(ptr<rtype> _addr_dst, ptr<rtyp
                 return cvtBytesString;
             else if (src.Elem().Kind() == Int32) 
                 return cvtRunesString;
-            
-        }
+                    }
         if (dst.Kind() == Ptr && dst.Elem().Kind() == Array && src.Elem() == dst.Elem().Elem()) {
             return cvtSliceArrayPtr;
         }
@@ -3395,10 +3238,8 @@ private static Func<Value, Type, Value> convertOp(ptr<rtype> _addr_dst, ptr<rtyp
             return cvtI2I;
         }
         return cvtT2I;
-
     }
     return null;
-
 }
 
 // makeInt returns a Value of type t equal to bits (possibly truncated),
@@ -3408,32 +3249,27 @@ private static Value makeInt(flag f, ulong bits, Type t) {
     var ptr = unsafe_New(_addr_typ);
     switch (typ.size) {
         case 1: 
-            (uint8.val)(ptr).val;
+            (uint8.val).val;
 
-            uint8(bits);
-
+            (ptr) = uint8(bits);
             break;
         case 2: 
-            (uint16.val)(ptr).val;
+            (uint16.val).val;
 
-            uint16(bits);
-
+            (ptr) = uint16(bits);
             break;
         case 4: 
-            (uint32.val)(ptr).val;
+            (uint32.val).val;
 
-            uint32(bits);
-
+            (ptr) = uint32(bits);
             break;
         case 8: 
-            (uint64.val)(ptr).val;
+            (uint64.val).val;
 
-            bits;
-
+            (ptr) = bits;
             break;
     }
     return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
-
 }
 
 // makeFloat returns a Value of type t equal to v (possibly truncated to float32),
@@ -3443,30 +3279,26 @@ private static Value makeFloat(flag f, double v, Type t) {
     var ptr = unsafe_New(_addr_typ);
     switch (typ.size) {
         case 4: 
-            (float32.val)(ptr).val;
+            (float32.val).val;
 
-            float32(v);
-
+            (ptr) = float32(v);
             break;
         case 8: 
-            (float64.val)(ptr).val;
+            (float64.val).val;
 
-            v;
-
+            (ptr) = v;
             break;
     }
     return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
-
 }
 
 // makeFloat returns a Value of type t equal to v, where t is a float32 type.
 private static Value makeFloat32(flag f, float v, Type t) {
     var typ = t.common();
-    var ptr = unsafe_New(_addr_typ) * (float32.val)(ptr);
+    var ptr = unsafe_New(_addr_typ) * (float32.val);
 
-    v;
+    (ptr) = v;
     return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
-
 }
 
 // makeComplex returns a Value of type t equal to v (possibly truncated to complex64),
@@ -3476,20 +3308,17 @@ private static Value makeComplex(flag f, System.Numerics.Complex128 v, Type t) {
     var ptr = unsafe_New(_addr_typ);
     switch (typ.size) {
         case 8: 
-            (complex64.val)(ptr).val;
+            (complex64.val).val;
 
-            complex64(v);
-
+            (ptr) = complex64(v);
             break;
         case 16: 
-            (complex128.val)(ptr).val;
+            (complex128.val).val;
 
-            v;
-
+            (ptr) = v;
             break;
     }
     return new Value(typ,ptr,f|flagIndir|flag(typ.Kind()));
-
 }
 
 private static Value makeString(flag f, @string v, Type t) {
@@ -3555,10 +3384,8 @@ private static Value cvtFloat(Value v, Type t) {
         // This avoids converting to float64 and back, which will
         // convert a signaling NaN to a quiet NaN. See issue 36400.
         return makeFloat32(v.flag.ro(), new ptr<ptr<ptr<float>>>(v.ptr), t);
-
     }
     return makeFloat(v.flag.ro(), v.Float(), t);
-
 }
 
 // convertOp: complexXX -> complexXX
@@ -3576,9 +3403,7 @@ private static Value cvtIntString(Value v, Type t) {
             s = string(rune(x));
         }
     }
-
     return makeString(v.flag.ro(), s, t);
-
 }
 
 // convertOp: uintXX -> string
@@ -3591,9 +3416,7 @@ private static Value cvtUintString(Value v, Type t) {
             s = string(rune(x));
         }
     }
-
     return makeString(v.flag.ro(), s, t);
-
 }
 
 // convertOp: []byte -> string
@@ -3624,7 +3447,6 @@ private static Value cvtSliceArrayPtr(Value v, Type t) => func((_, panic, _) => 
         panic("reflect: cannot convert slice with length " + itoa.Itoa(h.Len) + " to pointer to array with length " + itoa.Itoa(n));
     }
     return new Value(t.common(),h.Data,v.flag&^(flagIndir|flagAddr|flagKindMask)|flag(Ptr));
-
 });
 
 // convertOp: direct copy
@@ -3638,7 +3460,6 @@ private static Value cvtDirect(Value v, Type typ) {
         typedmemmove(_addr_t, c, ptr);
         ptr = c;
         f &= flagAddr;
-
     }
     return new Value(t,ptr,v.flag.ro()|f); // v.flag.ro()|f == f?
 }
@@ -3647,13 +3468,13 @@ private static Value cvtDirect(Value v, Type typ) {
 private static Value cvtT2I(Value v, Type typ) {
     var target = unsafe_New(_addr_typ.common());
     var x = valueInterface(v, false);
-    if (typ.NumMethod() == 0)     }
+    if (typ.NumMethod() == 0) {
+    }
     else
  {
         ifaceE2I(typ._<ptr<rtype>>(), x, target);
     }
     return new Value(typ.common(),target,v.flag.ro()|flagIndir|flag(Interface));
-
 }
 
 // convertOp: interface -> interface
@@ -3664,7 +3485,6 @@ private static Value cvtI2I(Value v, Type typ) {
         return ret;
     }
     return cvtT2I(v.Elem(), typ);
-
 }
 
 // implemented in ../runtime

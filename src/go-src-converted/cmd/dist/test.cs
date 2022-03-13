@@ -2,29 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:33 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:02 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\test.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using regexp = go.regexp_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
+namespace go;
+
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using os = os_package;
+using exec = os.exec_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using regexp = regexp_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -46,7 +45,6 @@ private static void cmdtest() {
         t.rebuild = false;
     }
     t.run();
-
 }
 
 // tester executes cmdtest.
@@ -111,7 +109,6 @@ private static void run(this ptr<tester> _addr_t) {
 
     }
 
-
     var cmd = exec.Command("go", "env", "CGO_ENABLED");
     cmd.Stderr = @new<bytes.Buffer>();
     var (slurp, err) = cmd.Output();
@@ -137,7 +134,6 @@ private static void run(this ptr<tester> _addr_t) {
             err = err__prev2;
 
         }
-
     }
     {
         var ok = isEnvSet("GOTRACEBACK");
@@ -156,22 +152,18 @@ private static void run(this ptr<tester> _addr_t) {
  {
                         fatalf("Failed to set GOTRACEBACK: %v", err);
                     }
-
                 }
 
                 err = err__prev2;
 
             }
-
         }
     }
-
 
     if (t.rebuild) {
         t.@out("Building packages and commands."); 
         // Force rebuild the whole toolchain.
         goInstall("go", append(new slice<@string>(new @string[] { "-a", "-i" }), toolchain));
-
     }
     if (!t.listMode && os.Getenv("GO_BUILDER_NAME") == "") {
         goInstall("go", append(new slice<@string>(new @string[] { "-i" }), toolchain));
@@ -205,7 +197,6 @@ private static void run(this ptr<tester> _addr_t) {
         }
     }
 
-
     if (t.runRxStr != "") {
         if (t.runRxStr[0] == '!') {
             t.runRxWant = false;
@@ -216,7 +207,6 @@ private static void run(this ptr<tester> _addr_t) {
             t.runRxWant = true;
         }
         t.runRx = regexp.MustCompile(t.runRxStr);
-
     }
     t.registerTests();
     if (t.listMode) {
@@ -263,13 +253,11 @@ private static void run(this ptr<tester> _addr_t) {
  {
                         fatalf("Failed: %v", err);
                     }
-
                 }
 
                 err = err__prev1;
 
             }
-
         }
         dt = dt__prev1;
     }
@@ -287,7 +275,6 @@ private static void run(this ptr<tester> _addr_t) {
         // port is complete.
         fmt.Println("\nFAILED (incomplete port)");
         xexit(1);
-
     }
     else if (t.partial) {
         fmt.Println("\nALL TESTS PASSED (some were excluded)");
@@ -312,7 +299,6 @@ private static bool shouldRunTest(this ptr<tester> _addr_t, @string name) {
             return true;
         }
     }    return false;
-
 }
 
 // short returns a -short flag value to use with 'go test'
@@ -338,9 +324,7 @@ private static @string @short() {
             }
         }
     }
-
     return "true";
-
 }
 
 // goTest returns the beginning of the go test command line.
@@ -359,7 +343,6 @@ private static @string tags(this ptr<tester> _addr_t) {
         return "-tags=lldb";
     }
     return "-tags=";
-
 }
 
 // timeoutDuration converts the provided number of seconds into a
@@ -403,7 +386,6 @@ private static void registerStdTest(this ptr<tester> _addr_t, @string pkg, bool 
         stdMatches = append(stdMatches, pkg);
     }
     t.tests = append(t.tests, new distTest(name:testName,heading:heading,fn:func(dt*distTest)error{ifranGoTest{returnnil}t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)ranGoTest=truetimeoutSec:=180for_,pkg:=rangestdMatches{ifpkg=="cmd/go"{timeoutSec*=3break}}ift.shouldUsePrecompiledStdTest(){returnt.runPrecompiledStdTest(t.timeoutDuration(timeoutSec))}args:=[]string{"test","-short="+short(),t.tags(),t.timeout(timeoutSec),"-gcflags=all="+gcflags,}ift.race{args=append(args,"-race")}ift.compileOnly{args=append(args,"-run=^$")}args=append(args,stdMatches...)cmd:=exec.Command("go",args...)cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrreturncmd.Run()},));
-
 });
 
 private static void registerRaceBenchTest(this ptr<tester> _addr_t, @string pkg) => func((defer, _, _) => {
@@ -414,7 +396,6 @@ private static void registerRaceBenchTest(this ptr<tester> _addr_t, @string pkg)
         benchMatches = append(benchMatches, pkg);
     }
     t.tests = append(t.tests, new distTest(name:testName,heading:"Running benchmarks briefly.",fn:func(dt*distTest)error{ifranGoBench{returnnil}t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)ranGoBench=trueargs:=[]string{"test","-short="+short(),"-race",t.timeout(1200),"-run=^$","-benchtime=.1s","-cpu=4",}if!t.compileOnly{args=append(args,"-bench=.*")}args=append(args,benchMatches...)cmd:=exec.Command("go",args...)cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrreturncmd.Run()},));
-
 });
 
 // stdOutErrAreTerminals is defined in test_linux.go, to report
@@ -516,7 +497,6 @@ private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, _
     if (!t.compileOnly && goos != "js") { // js can't handle -cpu != 1
         @string testName = "runtime:cpu124";
         t.tests = append(t.tests, new distTest(name:testName,heading:"GOMAXPROCS=2 runtime -cpu=1,2,4 -quick",fn:func(dt*distTest)error{cmd:=t.addCmd(dt,"src",t.goTest(),t.timeout(300),"runtime","-cpu=1,2,4","-quick")cmd.Env=append(os.Environ(),"GOMAXPROCS=2")returnnil},));
-
     }
     if (goos == "linux") {
         t.tests = append(t.tests, new distTest(name:"cmd_go_test_terminal",heading:"cmd/go terminal test",fn:func(dt*distTest)error{t.runPending(dt)timelog("start",dt.name)defertimelog("end",dt.name)if!stdOutErrAreTerminals(){fmt.Println("skipping terminal test; stdout/stderr not terminals")returnnil}cmd:=exec.Command("go","test")cmd.Dir=filepath.Join(os.Getenv("GOROOT"),"src/cmd/go/testdata/testterminal18153")cmd.Stdout=os.Stdoutcmd.Stderr=os.Stderrreturncmd.Run()},));
@@ -537,15 +517,12 @@ private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, _
             if (goarch == "arm") {
                 break;
             }
-
             var pkg = pkg;
             @string run = default;
             if (pkg == "net") {
                 run = "TestTCPStress";
             }
-
             t.tests = append(t.tests, new distTest(name:"nolibgcc:"+pkg,heading:"Testing without libgcc.",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"-ldflags=-linkmode=internal -libgcc=none","-run=^Test[^CS]",pkg,t.runFlag(run))returnnil},));
-
         }
         pkg = pkg__prev1;
     }
@@ -559,7 +536,6 @@ private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, _
     }
     if (goos != "js") { // js doesn't support -cpu=10
         t.tests = append(t.tests, new distTest(name:"sync_cpu",heading:"sync -cpu=10",fn:func(dt*distTest)error{t.addCmd(dt,"src",t.goTest(),"sync",t.timeout(120),"-cpu=10",t.runFlag(""))returnnil},));
-
     }
     if (t.raceDetectorSupported()) {
         t.tests = append(t.tests, new distTest(name:"race",heading:"Testing race detector",fn:t.raceTest,));
@@ -609,7 +585,6 @@ private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, _
             // because syscall.SysProcAttr struct used in misc/cgo/testsanitizers is only built on linux.
             // Some inconsistent failures happen on ppc64le so disable for now.
             t.registerHostTest("testsanitizers", "../misc/cgo/testsanitizers", "misc/cgo/testsanitizers", ".");
-
         }
         if (t.hasBash() && goos != "android" && !t.iOS() && gohostos != "windows") {
             t.registerHostTest("cgo_errors", "../misc/cgo/errors", "misc/cgo/errors", ".");
@@ -623,7 +598,6 @@ private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, _
         // Check that the test binary builds but don't bother running it.
         // (It has init-time work to set up for the benchmarks that is not worth doing unnecessarily.)
         t.registerTest("bench_go1", "../test/bench/go1", t.goTest(), "-c", "-o=" + os.DevNull);
-
     }
     if (goos != "android" && !t.iOS()) { 
         // Only start multiple test dir shards on builders,
@@ -645,7 +619,6 @@ private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, _
             err = err__prev2;
 
         }
-
         {
             nint shard__prev1 = shard;
 
@@ -657,7 +630,6 @@ private static void registerTests(this ptr<tester> _addr_t) => func((defer, _, _
 
             shard = shard__prev1;
         }
-
     }
     if (goos != "android" && !t.iOS() && goos != "js" && goos != "plan9") {
         t.tests = append(t.tests, new distTest(name:"api",heading:"API check",fn:func(dt*distTest)error{ift.compileOnly{t.addCmd(dt,"src","go","build","-o",os.DevNull,filepath.Join(goroot,"src/cmd/api/run.go"))returnnil}t.addCmd(dt,"src","go","run",filepath.Join(goroot,"src/cmd/api/run.go"))returnnil},));
@@ -677,7 +649,6 @@ private static bool isRegisteredTestName(this ptr<tester> _addr_t, @string testN
             return true;
         }
     }    return false;
-
 }
 
 private static void registerTest1(this ptr<tester> _addr_t, bool seq, @string name, @string dirBanner, params object[] cmdline) => func((defer, panic, _) => {
@@ -692,7 +663,6 @@ private static void registerTest1(this ptr<tester> _addr_t, bool seq, @string na
         panic("duplicate registered test name " + name);
     }
     t.tests = append(t.tests, new distTest(name:name,heading:dirBanner,fn:func(dt*distTest)error{ifseq{t.runPending(dt)timelog("start",name)defertimelog("end",name)returnt.dirCmd(filepath.Join(goroot,"src",dirBanner),bin,args).Run()}t.addCmd(dt,filepath.Join(goroot,"src",dirBanner),bin,args)returnnil},));
-
 });
 
 private static void registerTest(this ptr<tester> _addr_t, @string name, @string dirBanner, params object[] cmdline) {
@@ -722,7 +692,6 @@ private static ptr<exec.Cmd> bgDirCmd(this ptr<tester> _addr_t, @string dir, @st
         cmd.Dir = filepath.Join(goroot, dir);
     }
     return _addr_cmd!;
-
 }
 
 private static ptr<exec.Cmd> dirCmd(this ptr<tester> _addr_t, @string dir, params object[] cmdline) {
@@ -737,7 +706,6 @@ private static ptr<exec.Cmd> dirCmd(this ptr<tester> _addr_t, @string dir, param
         errprintf("%s\n", strings.Join(cmd.Args, " "));
     }
     return _addr_cmd!;
-
 }
 
 // flattenCmdline flattens a mixture of string and []string as single list
@@ -766,7 +734,6 @@ private static (@string, slice<@string>) flattenCmdline(slice<object> cmdline) =
                     break;
                 }
             }
-
         }
         x = x__prev1;
     }
@@ -792,7 +759,6 @@ private static (@string, slice<@string>) flattenCmdline(slice<object> cmdline) =
                     have[flag] = i;
                     break;
             }
-
         }
 
         i = i__prev1;
@@ -816,7 +782,6 @@ private static (@string, slice<@string>) flattenCmdline(slice<object> cmdline) =
     list = out;
 
     return (list[0], list[(int)1..]);
-
 });
 
 private static ptr<exec.Cmd> addCmd(this ptr<tester> _addr_t, ptr<distTest> _addr_dt, @string dir, params object[] cmdline) {
@@ -843,7 +808,6 @@ private static void @out(this ptr<tester> _addr_t, @string v) {
         return ;
     }
     fmt.Println("\n" + t.banner + v);
-
 }
 
 private static bool extLink(this ptr<tester> _addr_t) {
@@ -906,7 +870,6 @@ private static bool extLink(this ptr<tester> _addr_t) {
             break;
     }
     return false;
-
 }
 
 private static bool internalLink(this ptr<tester> _addr_t) {
@@ -915,13 +878,11 @@ private static bool internalLink(this ptr<tester> _addr_t) {
     if (gohostos == "dragonfly") { 
         // linkmode=internal fails on dragonfly since errno is a TLS relocation.
         return false;
-
     }
     if (gohostarch == "ppc64le") { 
         // linkmode=internal fails on ppc64le because cmd/link doesn't
         // handle the TOC correctly (issue 15409).
         return false;
-
     }
     if (goos == "android") {
         return false;
@@ -938,10 +899,8 @@ private static bool internalLink(this ptr<tester> _addr_t) {
     if (goos == "aix") { 
         // linkmode=internal isn't supported.
         return false;
-
     }
     return true;
-
 }
 
 private static bool internalLinkPIE(this ptr<tester> _addr_t) {
@@ -967,7 +926,6 @@ private static bool internalLinkPIE(this ptr<tester> _addr_t) {
             break;
     }
     return false;
-
 }
 
 private static bool supportedBuildmode(this ptr<tester> _addr_t, @string mode) {
@@ -1005,7 +963,6 @@ private static bool supportedBuildmode(this ptr<tester> _addr_t, @string mode) {
                     break;
             }
             return false;
-
             break;
         case "c-shared": 
             switch (pair) {
@@ -1042,7 +999,6 @@ private static bool supportedBuildmode(this ptr<tester> _addr_t, @string mode) {
                     break;
             }
             return false;
-
             break;
         case "shared": 
             switch (pair) {
@@ -1061,7 +1017,6 @@ private static bool supportedBuildmode(this ptr<tester> _addr_t, @string mode) {
                     break;
             }
             return false;
-
             break;
         case "plugin": 
             // linux-arm64 is missing because it causes the external linker
@@ -1088,7 +1043,6 @@ private static bool supportedBuildmode(this ptr<tester> _addr_t, @string mode) {
                     break;
             }
             return false;
-
             break;
         case "pie": 
             switch (pair) {
@@ -1131,14 +1085,12 @@ private static bool supportedBuildmode(this ptr<tester> _addr_t, @string mode) {
                     break;
             }
             return false;
-
             break;
         default: 
             fatalf("internal error: unknown buildmode %s", mode);
             return false;
             break;
     }
-
 }
 
 private static void registerHostTest(this ptr<tester> _addr_t, @string name, @string heading, @string dir, @string pkg) => func((defer, _, _) => {
@@ -1177,9 +1129,7 @@ private static error runHostTest(this ptr<tester> _addr_t, @string dir, @string 
             return error.As(err)!;
         }
     }
-
     return error.As(t.dirCmd(dir, f.Name(), "-test.short=" + short()).Run())!;
-
 });
 
 private static error cgoTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt) {
@@ -1331,13 +1281,10 @@ private static error cgoTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt) {
                                            // See issue #16651.
                                            cmd = t.addCmd(dt, "misc/cgo/test", t.goTest(), "-tags=static");
                                            cmd.Env = append(os.Environ(), "CGO_LDFLAGS=-static -pthread");
-
                                        }
-
                                    }
 
                                }
-
 
                                if (t.supportedBuildmode("pie")) {
                                    t.addCmd(dt, "misc/cgo/test", t.goTest(), "-buildmode=pie");
@@ -1347,15 +1294,12 @@ private static error cgoTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt) {
                                    t.addCmd(dt, "misc/cgo/testtls", t.goTest(), "-buildmode=pie");
                                    t.addCmd(dt, "misc/cgo/nocgo", t.goTest(), "-buildmode=pie");
                                }
-
                     break;
             }
-
             break;
     }
 
     return error.As(null!)!;
-
 }
 
 // run pending test commands, in parallel, emitting headers as appropriate.
@@ -1395,12 +1339,9 @@ private static void runPending(this ptr<tester> _addr_t, ptr<distTest> _addr_nex
                         }
                     }
                 }
-
                 timelog("end", w.dt.name);
                 w.end.Send(true);
-
             }(w));
-
         }
         w = w__prev1;
     }
@@ -1426,7 +1367,6 @@ private static void runPending(this ptr<tester> _addr_t, ptr<distTest> _addr_nex
             if (vflag > 0) {
                 fmt.Printf("# go tool dist test -run=^%s$\n", dt.name);
             }
-
         }
         if (vflag > 1) {
             errprintf("%s\n", strings.Join(w.cmd.Args, " "));
@@ -1439,7 +1379,6 @@ private static void runPending(this ptr<tester> _addr_t, ptr<distTest> _addr_nex
             t.failed = true;
         }
         checkNotStale("go", "std");
-
     }
     if (t.failed && !t.keepGoing) {
         fatalf("FAILED");
@@ -1461,7 +1400,6 @@ private static void runPending(this ptr<tester> _addr_t, ptr<distTest> _addr_nex
         dt = dt__prev1;
 
     }
-
 }
 
 private static bool hasBash(this ptr<tester> _addr_t) {
@@ -1475,7 +1413,6 @@ private static bool hasBash(this ptr<tester> _addr_t) {
             break;
     }
     return true;
-
 }
 
 private static bool hasCxx(this ptr<tester> _addr_t) {
@@ -1511,13 +1448,11 @@ private static bool hasSwig(this ptr<tester> _addr_t) {
     if (matches == null) { 
         // Can't find version number; hope for the best.
         return true;
-
     }
     var (major, err) = strconv.Atoi(string(matches[1]));
     if (err != null) { 
         // Can't find version number; hope for the best.
         return true;
-
     }
     if (major < 3) {
         return false;
@@ -1525,7 +1460,6 @@ private static bool hasSwig(this ptr<tester> _addr_t) {
     if (major > 3) { 
         // 4.0 or later
         return true;
-
     }
     if (len(matches[2]) > 0) {
         var (minor, err) = strconv.Atoi(string(matches[2][(int)1..]));
@@ -1535,7 +1469,6 @@ private static bool hasSwig(this ptr<tester> _addr_t) {
         if (minor > 0) { 
             // 3.1 or later
             return true;
-
         }
     }
     if (len(matches[3]) > 0) {
@@ -1546,11 +1479,9 @@ private static bool hasSwig(this ptr<tester> _addr_t) {
         if (patch < 6) { 
             // Before 3.0.6.
             return false;
-
         }
     }
     return true;
-
 }
 
 private static bool raceDetectorSupported(this ptr<tester> _addr_t) {
@@ -1572,7 +1503,6 @@ private static bool raceDetectorSupported(this ptr<tester> _addr_t) {
         return false;
     }
     return true;
-
 }
 
 private static bool isAlpineLinux() {
@@ -1581,7 +1511,6 @@ private static bool isAlpineLinux() {
     }
     var (fi, err) = os.Lstat("/etc/alpine-release");
     return err == null && fi.Mode().IsRegular();
-
 }
 
 private static @string runFlag(this ptr<tester> _addr_t, @string rx) {
@@ -1591,7 +1520,6 @@ private static @string runFlag(this ptr<tester> _addr_t, @string rx) {
         return "-run=^$";
     }
     return "-run=" + rx;
-
 }
 
 private static error raceTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt) {
@@ -1616,10 +1544,8 @@ private static error raceTest(this ptr<tester> _addr_t, ptr<distTest> _addr_dt) 
     if (t.extLink()) { 
         // Test with external linking; see issue 9133.
         t.addCmd(dt, "src", t.goTest(), "-race", "-ldflags=-linkmode=external", t.runFlag("TestParse|TestEcho|TestStdinCloseRace"), "flag", "os/exec");
-
     }
     return error.As(null!)!;
-
 }
 
 private static var runtest = default;
@@ -1644,7 +1570,6 @@ private static error testDirTest(this ptr<tester> _addr_t, ptr<distTest> _addr_d
         var cmd = t.dirCmd("test", "go", "build", "-o", runtest.exe, "run.go");
         cmd.Env = append(os.Environ(), "GOOS=" + gohostos, "GOARCH=" + gohostarch);
         runtest.err = cmd.Run();
-
     });
     if (runtest.err != null) {
         return error.As(runtest.err)!;
@@ -1654,7 +1579,6 @@ private static error testDirTest(this ptr<tester> _addr_t, ptr<distTest> _addr_d
     }
     t.addCmd(dt, "test", runtest.exe, fmt.Sprintf("--shard=%d", shard), fmt.Sprintf("--shards=%d", shards));
     return error.As(null!)!;
-
 }
 
 // cgoPackages is the standard packages that use cgo.
@@ -1694,7 +1618,6 @@ private static bool packageHasBenchmarks(this ptr<tester> _addr_t, @string pkg) 
             return true;
         }
     }    return false;
-
 });
 
 // makeGOROOTUnwritable makes all $GOROOT files & directories non-writable to
@@ -1741,21 +1664,16 @@ private static Action makeGOROOTUnwritable(this ptr<tester> _addr_t) => func((_,
                 if (suffix == gocacheSubdir) { 
                     // Leave GOCACHE writable: we may need to write test binaries into it.
                     return filepath.SkipDir;
-
                 }
-
                 if (suffix == ".git") { 
                     // Leave Git metadata in whatever state it was in. It may contain a lot
                     // of files, and it is highly unlikely that a test will try to modify
                     // anything within that directory.
                     return filepath.SkipDir;
-
                 }
-
             }
 
         }
-
         if (err == null) {
             var mode = info.Mode();
             if (mode & 0222 != 0 && (mode.IsDir() || mode.IsRegular())) {
@@ -1763,7 +1681,6 @@ private static Action makeGOROOTUnwritable(this ptr<tester> _addr_t) => func((_,
             }
         }
         return null;
-
     }); 
 
     // Run over list backward to chmod children before parents.
@@ -1776,16 +1693,13 @@ private static Action makeGOROOTUnwritable(this ptr<tester> _addr_t) => func((_,
                 dirs = dirs[(int)i..]; // Only undo what we did so far.
                 undo();
                 fatalf("failed to make GOROOT read-only: %v", err);
-
             }
-
         }
 
         i = i__prev1;
     }
 
     return undo;
-
 });
 
 // shouldUsePrecompiledStdTest reports whether "dist test" should use
@@ -1807,7 +1721,6 @@ private static bool shouldUsePrecompiledStdTest(this ptr<tester> _addr_t) {
     }
     var (_, err) = os.Stat(bin);
     return err == null;
-
 }
 
 private static bool shouldTestCmd(this ptr<tester> _addr_t) {
@@ -1816,10 +1729,8 @@ private static bool shouldTestCmd(this ptr<tester> _addr_t) {
     if (goos == "js" && goarch == "wasm") { 
         // Issues 25911, 35220
         return false;
-
     }
     return true;
-
 }
 
 // prebuiltGoPackageTestBinary returns the path where we'd expect
@@ -1834,7 +1745,6 @@ private static @string prebuiltGoPackageTestBinary(this ptr<tester> _addr_t) {
     }
     var pkg = stdMatches[0];
     return filepath.Join(os.Getenv("GOROOT"), "src", pkg, path.Base(pkg) + ".test");
-
 }
 
 // runPrecompiledStdTest runs the pre-compiled standard library package test binary.
@@ -1865,7 +1775,6 @@ private static error runPrecompiledStdTest(this ptr<tester> _addr_t, time.Durati
     });
     defer(timer.Stop());
     return error.As(cmd.Wait())!;
-
 });
 
 // raceDetectorSupported is a copy of the function
@@ -1897,7 +1806,6 @@ private static bool raceDetectorSupported(@string goos, @string goarch) {
             return false;
             break;
     }
-
 }
 
 // isUnsupportedVMASize reports whether the failure is caused by an unsupported
@@ -1919,7 +1827,6 @@ private static bool isEnvSet(@string evar) {
             return true;
         }
     }    return false;
-
 }
 
 } // end main_package

@@ -3,27 +3,28 @@
 // license that can be found in the LICENSE file.
 
 // Package bug implements the ``go bug'' command.
-// package bug -- go2cs converted at 2022 March 06 23:15:56 UTC
+
+// package bug -- go2cs converted at 2022 March 13 06:29:24 UTC
 // import "cmd/go/internal/bug" ==> using bug = go.cmd.go.@internal.bug_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\bug\bug.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using urlpkg = go.net.url_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using envcmd = go.cmd.go.@internal.envcmd_package;
-using web = go.cmd.go.@internal.web_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using context = context_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using urlpkg = net.url_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using runtime = runtime_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using envcmd = cmd.go.@internal.envcmd_package;
+using web = cmd.go.@internal.web_package;
 
 public static partial class bug_package {
 
@@ -137,7 +138,6 @@ private static void printOSDetails(io.Writer w) {
                    }
             break;
     }
-
 }
 
 private static void printCDetails(io.Writer w) {
@@ -149,7 +149,6 @@ private static void printCDetails(io.Writer w) {
         // to get gdb to spit out its version without the license and warranty.
         // Print up to the first newline.
         fmt.Fprintf(w, "gdb --version: %s\n", firstLine(out));
-
     }
     else
  {
@@ -171,10 +170,8 @@ private static void printCmdOut(io.Writer w, @string prefix, @string path, param
             fmt.Printf("%s %s: %v\n", path, strings.Join(args, " "), err);
         }
         return ;
-
     }
     fmt.Fprintf(w, "%s%s\n", prefix, bytes.TrimSpace(out));
-
 }
 
 // firstLine returns the first line of a given byte slice.
@@ -184,7 +181,6 @@ private static slice<byte> firstLine(slice<byte> buf) {
         buf = buf[..(int)idx];
     }
     return bytes.TrimSpace(buf);
-
 }
 
 // printGlibcVersion prints information about the glibc version.
@@ -235,7 +231,6 @@ private static void printGlibcVersion(io.Writer w) => func((defer, _, _) => {
             fmt.Fprintf(w, "%s\n", firstLine(out[(int)idx + 1..]));
         }
     }
-
 });
 
 } // end bug_package

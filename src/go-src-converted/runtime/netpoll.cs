@@ -5,43 +5,45 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:14 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:03 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\netpoll.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// Integrated network poller (platform-independent part).
+// A particular implementation (epoll/kqueue/port/AIX/Windows)
+// must define the following functions:
+//
+// func netpollinit()
+//     Initialize the poller. Only called once.
+//
+// func netpollopen(fd uintptr, pd *pollDesc) int32
+//     Arm edge-triggered notifications for fd. The pd argument is to pass
+//     back to netpollready when fd is ready. Return an errno value.
+//
+// func netpollclose(fd uintptr) int32
+//     Disable notifications for fd. Return an errno value.
+//
+// func netpoll(delta int64) gList
+//     Poll the network. If delta < 0, block indefinitely. If delta == 0,
+//     poll without blocking. If delta > 0, block for up to delta nanoseconds.
+//     Return a list of goroutines built by calling netpollready.
+//
+// func netpollBreak()
+//     Wake up the network poller, assumed to be blocked in netpoll.
+//
+// func netpollIsPollDescriptor(fd uintptr) bool
+//     Reports whether fd is a file descriptor used by the poller.
+
+// Error codes returned by runtime_pollReset and runtime_pollWait.
+// These must match the values in internal/poll/fd_poll_runtime.go.
 
 public static partial class runtime_package {
 
-    // Integrated network poller (platform-independent part).
-    // A particular implementation (epoll/kqueue/port/AIX/Windows)
-    // must define the following functions:
-    //
-    // func netpollinit()
-    //     Initialize the poller. Only called once.
-    //
-    // func netpollopen(fd uintptr, pd *pollDesc) int32
-    //     Arm edge-triggered notifications for fd. The pd argument is to pass
-    //     back to netpollready when fd is ready. Return an errno value.
-    //
-    // func netpollclose(fd uintptr) int32
-    //     Disable notifications for fd. Return an errno value.
-    //
-    // func netpoll(delta int64) gList
-    //     Poll the network. If delta < 0, block indefinitely. If delta == 0,
-    //     poll without blocking. If delta > 0, block for up to delta nanoseconds.
-    //     Return a list of goroutines built by calling netpollready.
-    //
-    // func netpollBreak()
-    //     Wake up the network poller, assumed to be blocked in netpoll.
-    //
-    // func netpollIsPollDescriptor(fd uintptr) bool
-    //     Reports whether fd is a file descriptor used by the poller.
-
-    // Error codes returned by runtime_pollReset and runtime_pollWait.
-    // These must match the values in internal/poll/fd_poll_runtime.go.
 private static readonly nint pollNoError = 0; // no error
 private static readonly nint pollErrClosing = 1; // descriptor is closed
 private static readonly nint pollErrTimeout = 2; // I/O timeout
@@ -61,7 +63,6 @@ private static readonly nint pollErrNotPollable = 3; // general error polling de
 // nil - none of the above.
 private static readonly System.UIntPtr pdReady = 1;
 private static readonly System.UIntPtr pdWait = 2;
-
 
 private static readonly nint pollBlockSize = 4 * 1024;
 
@@ -129,7 +130,6 @@ private static void netpollGenericInit() {
             atomic.Store(_addr_netpollInited, 1);
         }
         unlock(_addr_netpollInitLock);
-
     }
 }
 
@@ -178,7 +178,6 @@ private static (ptr<pollDesc>, nint) poll_runtime_pollOpen(System.UIntPtr fd) {
         return (_addr_null!, int(errno));
     }
     return (_addr_pd!, 0);
-
 }
 
 //go:linkname poll_runtime_pollClose internal/poll.runtime_pollClose
@@ -198,7 +197,6 @@ private static void poll_runtime_pollClose(ptr<pollDesc> _addr_pd) {
     }
     netpollclose(pd.fd);
     pollcache.free(pd);
-
 }
 
 private static void free(this ptr<pollCache> _addr_c, ptr<pollDesc> _addr_pd) {
@@ -229,7 +227,6 @@ private static nint poll_runtime_pollReset(ptr<pollDesc> _addr_pd, nint mode) {
         atomic.Storeuintptr(_addr_pd.wg, 0);
     }
     return pollNoError;
-
 }
 
 // poll_runtime_pollWait, which is internal/poll.runtime_pollWait,
@@ -254,7 +251,6 @@ private static nint poll_runtime_pollWait(ptr<pollDesc> _addr_pd, nint mode) {
         }
     }
     return pollNoError;
-
 }
 
 //go:linkname poll_runtime_pollWaitCanceled internal/poll.runtime_pollWaitCanceled
@@ -263,8 +259,8 @@ private static void poll_runtime_pollWaitCanceled(ptr<pollDesc> _addr_pd, nint m
  
     // This function is used only on windows after a failed attempt to cancel
     // a pending async IO operation. Wait for ioready, ignore closing or timeouts.
-    while (!netpollblock(_addr_pd, int32(mode), true))     }
-
+    while (!netpollblock(_addr_pd, int32(mode), true)) {
+    }
 }
 
 //go:linkname poll_runtime_pollSetDeadline internal/poll.runtime_pollSetDeadline
@@ -285,7 +281,6 @@ private static void poll_runtime_pollSetDeadline(ptr<pollDesc> _addr_pd, long d,
             // If the user has a deadline in the future, but the delay calculation
             // overflows, then set the deadline to the maximum possible value.
             d = 1 << 63 - 1;
-
         }
     }
     if (mode == 'r' || mode == 'r' + 'w') {
@@ -308,7 +303,6 @@ private static void poll_runtime_pollSetDeadline(ptr<pollDesc> _addr_pd, long d,
             pd.rt.arg = pd.makeArg();
             pd.rt.seq = pd.rseq;
             resettimer(_addr_pd.rt, pd.rd);
-
         }
     }
     else if (pd.rd != rd0 || combo != combo0) {
@@ -435,7 +429,6 @@ private static nint netpollcheckerr(ptr<pollDesc> _addr_pd, int mode) {
         return pollErrNotPollable;
     }
     return pollNoError;
-
 }
 
 private static bool netpollblockcommit(ptr<g> _addr_gp, unsafe.Pointer gpp) {
@@ -447,10 +440,8 @@ private static bool netpollblockcommit(ptr<g> _addr_gp, unsafe.Pointer gpp) {
         // The scheduler uses this to decide whether to block
         // waiting for the poller if there is nothing else to do.
         atomic.Xadd(_addr_netpollWaiters, 1);
-
     }
     return r;
-
 }
 
 private static void netpollgoready(ptr<g> _addr_gp, nint traceskip) {
@@ -487,7 +478,6 @@ private static bool netpollblock(ptr<pollDesc> _addr_pd, int mode, bool waitio) 
             }
 
         }
-
     } 
 
     // need to recheck error states after setting gpp to pdWait
@@ -501,7 +491,6 @@ private static bool netpollblock(ptr<pollDesc> _addr_pd, int mode, bool waitio) 
         throw("runtime: corrupted polldesc");
     }
     return old == pdReady;
-
 }
 
 private static ptr<g> netpollunblock(ptr<pollDesc> _addr_pd, int mode, bool ioready) {
@@ -520,7 +509,6 @@ private static ptr<g> netpollunblock(ptr<pollDesc> _addr_pd, int mode, bool iore
             // Only set pdReady for ioready. runtime_pollWait
             // will check for timeout/cancel before waiting.
             return _addr_null!;
-
         }
         System.UIntPtr @new = default;
         if (ioready) {
@@ -533,7 +521,6 @@ private static ptr<g> netpollunblock(ptr<pollDesc> _addr_pd, int mode, bool iore
             return _addr_(g.val)(@unsafe.Pointer(old))!;
         }
     }
-
 }
 
 private static void netpolldeadlineimpl(ptr<pollDesc> _addr_pd, System.UIntPtr seq, bool read, bool write) {
@@ -550,7 +537,6 @@ private static void netpolldeadlineimpl(ptr<pollDesc> _addr_pd, System.UIntPtr s
         // The descriptor was reused or timers were reset.
         unlock(_addr_pd.@lock);
         return ;
-
     }
     ptr<g> rg;
     if (read) {
@@ -560,7 +546,6 @@ private static void netpolldeadlineimpl(ptr<pollDesc> _addr_pd, System.UIntPtr s
         pd.rd = -1;
         atomic.StorepNoWB(@unsafe.Pointer(_addr_pd.rt.f), null); // full memory barrier between store to rd and load of rg in netpollunblock
         rg = netpollunblock(_addr_pd, 'r', false);
-
     }
     ptr<g> wg;
     if (write) {
@@ -570,7 +555,6 @@ private static void netpolldeadlineimpl(ptr<pollDesc> _addr_pd, System.UIntPtr s
         pd.wd = -1;
         atomic.StorepNoWB(@unsafe.Pointer(_addr_pd.wt.f), null); // full memory barrier between store to wd and load of wg in netpollunblock
         wg = netpollunblock(_addr_pd, 'w', false);
-
     }
     unlock(_addr_pd.@lock);
     if (rg != null) {
@@ -610,14 +594,12 @@ private static ptr<pollDesc> alloc(this ptr<pollCache> _addr_c) {
             pd.link = c.first;
             c.first = pd;
         }
-
     }
     pd = c.first;
     c.first = pd.link;
     lockInit(_addr_pd.@lock, lockRankPollDesc);
     unlock(_addr_c.@lock);
     return _addr_pd!;
-
 }
 
 // makeArg converts pd to an interface{}.

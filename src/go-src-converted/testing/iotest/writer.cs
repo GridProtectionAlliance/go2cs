@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package iotest -- go2cs converted at 2022 March 06 23:19:30 UTC
+// package iotest -- go2cs converted at 2022 March 13 06:43:15 UTC
 // import "testing/iotest" ==> using iotest = go.testing.iotest_package
 // Original source: C:\Program Files\Go\src\testing\iotest\writer.go
-using io = go.io_package;
-
 namespace go.testing;
+
+using io = io_package;
 
 public static partial class iotest_package {
 
-    // TruncateWriter returns a Writer that writes to w
-    // but stops silently after n bytes.
+// TruncateWriter returns a Writer that writes to w
+// but stops silently after n bytes.
 public static io.Writer TruncateWriter(io.Writer w, long n) {
     return addr(new truncateWriter(w,n));
 }
@@ -40,7 +40,6 @@ private static (nint, error) Write(this ptr<truncateWriter> _addr_t, slice<byte>
         n = len(p);
     }
     return ;
-
 }
 
 } // end iotest_package

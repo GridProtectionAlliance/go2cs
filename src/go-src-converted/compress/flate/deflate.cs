@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2022 March 06 22:14:52 UTC
+// package flate -- go2cs converted at 2022 March 13 05:28:55 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Program Files\Go\src\compress\flate\deflate.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using math = go.math_package;
-using System;
-
-
 namespace go.compress;
+
+using fmt = fmt_package;
+using io = io_package;
+using math = math_package;
+using System;
 
 public static partial class flate_package {
 
@@ -30,7 +29,6 @@ public static readonly nint DefaultCompression = -1;
 // RFC 1951 compliant. That is, any valid DEFLATE decompressor will
 // continue to be able to decompress this output.
 public static readonly nint HuffmanOnly = -2;
-
 
 private static readonly nint logWindowSize = 15;
 private static readonly nint windowSize = 1 << (int)(logWindowSize);
@@ -58,7 +56,6 @@ private static readonly nint hashMask = (1 << (int)(hashBits)) - 1;
 private static readonly nint maxHashOffset = 1 << 24;
 
 private static readonly var skipNever = math.MaxInt32;
-
 
 private partial struct compressionLevel {
     public nint level;
@@ -142,7 +139,6 @@ private static nint fillDeflate(this ptr<compressor> _addr_d, slice<byte> b) {
  {
                         d.hashPrev[i] = 0;
                     }
-
                 }
 
                 i = i__prev1;
@@ -163,7 +159,6 @@ private static nint fillDeflate(this ptr<compressor> _addr_d, slice<byte> b) {
  {
                         d.hashHead[i] = 0;
                     }
-
                 }
 
                 i = i__prev1;
@@ -174,7 +169,6 @@ private static nint fillDeflate(this ptr<compressor> _addr_d, slice<byte> b) {
     var n = copy(d.window[(int)d.windowEnd..], b);
     d.windowEnd += n;
     return n;
-
 }
 
 private static error writeBlock(this ptr<compressor> _addr_d, slice<token> tokens, nint index) {
@@ -188,10 +182,8 @@ private static error writeBlock(this ptr<compressor> _addr_d, slice<token> token
         d.blockStart = index;
         d.w.writeBlock(tokens, false, window);
         return error.As(d.w.err)!;
-
     }
     return error.As(null!)!;
-
 }
 
 // fillWindow will fill the current window with the supplied
@@ -239,14 +231,11 @@ private static void fillWindow(this ptr<compressor> _addr_d, slice<byte> b) => f
             d.hashPrev[di & windowMask] = hh.val; 
             // Set the head of the hash chain to us.
             hh.val = uint32(di + d.hashOffset);
-
         }        d.hash = newH;
-
     } 
     // Update window information.
     d.windowEnd = n;
     d.index = n;
-
 });
 
 // Try to find a match starting at index whose length is greater than prevSize.
@@ -288,18 +277,13 @@ private static (nint, nint, bool) findMatch(this ptr<compressor> _addr_d, nint p
                 if (n >= nice) { 
                     // The match is good enough that we don't try to find a better one.
                     break;
-
                 }
-
                 wEnd = win[pos + n];
-
             }
-
         }
         if (i == minIndex) { 
             // hashPrev[i & windowMask] has already been overwritten, so stop now.
             break;
-
         }
         i = int(d.hashPrev[i & windowMask]) - d.hashOffset;
         if (i < minIndex || i < 0) {
@@ -307,7 +291,6 @@ private static (nint, nint, bool) findMatch(this ptr<compressor> _addr_d, nint p
         }
     }
     return ;
-
 }
 
 private static error writeStoredBlock(this ptr<compressor> _addr_d, slice<byte> buf) {
@@ -320,7 +303,6 @@ private static error writeStoredBlock(this ptr<compressor> _addr_d, slice<byte> 
     }
     d.w.writeBytes(buf);
     return error.As(d.w.err)!;
-
 }
 
 private static readonly nuint hashmul = 0x1e35a7bd;
@@ -350,7 +332,6 @@ private static void bulkHash4(slice<byte> b, slice<uint> dst) {
         hb = (hb << 8) | uint32(b[i + 3]);
         dst[i] = (hb * hashmul) >> (int)((32 - hashBits));
     }
-
 }
 
 // matchLen returns the number of matching bytes in a and b
@@ -364,7 +345,6 @@ private static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
             return i;
         }
     }    return max;
-
 }
 
 // encSpeed will compress and store the currently added data,
@@ -390,7 +370,6 @@ private static void encSpeed(this ptr<compressor> _addr_d) {
                         d.windowEnd = 0;
             d.bestSpeed.reset();
             return ;
-
         }
     }
     d.tokens = d.bestSpeed.encode(d.tokens[..(int)0], d.window[..(int)d.windowEnd]); 
@@ -405,7 +384,6 @@ private static void encSpeed(this ptr<compressor> _addr_d) {
     }
     d.err = d.w.err;
     d.windowEnd = 0;
-
 }
 
 private static void initDeflate(this ptr<compressor> _addr_d) {
@@ -444,35 +422,27 @@ Loop:
                 _breakLoop = true;
                 break;
             }
-
             if (d.index > d.windowEnd) {
                 panic("index > windowEnd");
             }
-
             if (lookahead == 0) { 
                 // Flush current output block if any.
                 if (d.byteAvailable) { 
                     // There is still one pending token that needs to be flushed
                     d.tokens = append(d.tokens, literalToken(uint32(d.window[d.index - 1])));
                     d.byteAvailable = false;
-
                 }
-
                 if (len(d.tokens) > 0) {
                     d.err = d.writeBlock(d.tokens, d.index);
 
                     if (d.err != null) {
                         return ;
                     }
-
                     d.tokens = d.tokens[..(int)0];
-
                 }
-
                 _breakLoop = true;
                 break;
             }
-
         }
         if (d.index < d.maxInsertIndex) { 
             // Update the hash
@@ -481,7 +451,6 @@ Loop:
             d.chainHead = int(hh.val);
             d.hashPrev[d.index & windowMask] = uint32(d.chainHead);
             hh.val = uint32(d.index + d.hashOffset);
-
         }
         var prevLength = d.length;
         var prevOffset = d.offset;
@@ -501,7 +470,6 @@ Loop:
                 }
 
             }
-
         }
         if (d.fastSkipHashing != skipNever && d.length >= minMatchLength || d.fastSkipHashing == skipNever && prevLength >= minMatchLength && d.length <= prevLength) { 
             // There was a match at the previous step, and the current match is
@@ -526,7 +494,6 @@ Loop:
  {
                     newIndex = d.index + prevLength - 1;
                 }
-
                 var index = d.index;
                 index++;
 
@@ -541,7 +508,6 @@ Loop:
                         hh.val = uint32(index + d.hashOffset);
                     index++;
                     }
-
                 }
             else
 
@@ -551,7 +517,6 @@ Loop:
                     d.byteAvailable = false;
                     d.length = minMatchLength - 1;
                 }
-
             } { 
                 // For matches this long, we don't bother inserting each individual
                 // item into the table.
@@ -559,7 +524,6 @@ Loop:
                 if (d.index < d.maxInsertIndex) {
                     d.hash = hash4(d.window[(int)d.index..(int)d.index + minMatchLength]);
                 }
-
             }
         else
             if (len(d.tokens) == maxFlateBlockTokens) { 
@@ -569,11 +533,8 @@ Loop:
                 if (d.err != null) {
                     return ;
                 }
-
                 d.tokens = d.tokens[..(int)0];
-
             }
-
         } {
             if (d.fastSkipHashing != skipNever || d.byteAvailable) {
                 var i = d.index - 1;
@@ -587,21 +548,15 @@ Loop:
                     if (d.err != null) {
                         return ;
                     }
-
                     d.tokens = d.tokens[..(int)0];
-
                 }
-
             }
-
             d.index++;
             if (d.fastSkipHashing == skipNever) {
                 d.byteAvailable = true;
             }
-
         }
     }
-
 });
 
 private static nint fillStore(this ptr<compressor> _addr_d, slice<byte> b) {
@@ -633,7 +588,6 @@ private static void storeHuff(this ptr<compressor> _addr_d) {
     d.w.writeBlockHuff(false, d.window[..(int)d.windowEnd]);
     d.err = d.w.err;
     d.windowEnd = 0;
-
 }
 
 private static (nint, error) write(this ptr<compressor> _addr_d, slice<byte> b) {
@@ -653,7 +607,6 @@ private static (nint, error) write(this ptr<compressor> _addr_d, slice<byte> b) 
         }
     }
     return (n, error.As(null!)!);
-
 }
 
 private static error syncFlush(this ptr<compressor> _addr_d) {
@@ -671,7 +624,6 @@ private static error syncFlush(this ptr<compressor> _addr_d) {
     }
     d.sync = false;
     return error.As(d.err)!;
-
 }
 
 private static error init(this ptr<compressor> _addr_d, io.Writer w, nint level) {
@@ -723,7 +675,6 @@ private static error init(this ptr<compressor> _addr_d, io.Writer w, nint level)
 
     __switch_break0:;
     return error.As(null!)!;
-
 }
 
 private static void reset(this ptr<compressor> _addr_d, io.Writer w) {
@@ -769,8 +720,7 @@ private static void reset(this ptr<compressor> _addr_d, io.Writer w) {
         d.offset = 0;
         d.hash = 0;
         d.maxInsertIndex = 0;
-    
-}
+    }
 
 private static error close(this ptr<compressor> _addr_d) {
     ref compressor d = ref _addr_d.val;
@@ -790,7 +740,6 @@ private static error close(this ptr<compressor> _addr_d) {
     }
     d.w.flush();
     return error.As(d.w.err)!;
-
 }
 
 // NewWriter returns a new Writer compressing data at the given level.
@@ -817,9 +766,7 @@ public static (ptr<Writer>, error) NewWriter(io.Writer w, nint level) {
             return (_addr_null!, error.As(err)!);
         }
     }
-
     return (_addr__addr_dw!, error.As(null!)!);
-
 }
 
 // NewWriterDict is like NewWriter but initializes the new
@@ -840,7 +787,6 @@ public static (ptr<Writer>, error) NewWriterDict(io.Writer w, nint level, slice<
     zw.d.fillWindow(dict);
     zw.dict = append(zw.dict, dict); // duplicate dictionary for Reset method.
     return (_addr_zw!, error.As(err)!);
-
 }
 
 private partial struct dictWriter {
@@ -887,7 +833,6 @@ private static error Flush(this ptr<Writer> _addr_w) {
     // For more about flushing:
     // https://www.bolet.org/~pornin/deflate-flush.html
     return error.As(w.d.syncFlush())!;
-
 }
 
 // Close flushes and closes the writer.
@@ -911,16 +856,13 @@ private static void Reset(this ptr<Writer> _addr_w, io.Writer dst) {
             dw.w = dst;
             w.d.reset(dw);
             w.d.fillWindow(w.dict);
-
         }
         else
  { 
             // w was created with NewWriter
             w.d.reset(dst);
-
         }
     }
-
 }
 
 } // end flate_package

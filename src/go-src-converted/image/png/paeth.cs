@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package png -- go2cs converted at 2022 March 06 23:36:15 UTC
+// package png -- go2cs converted at 2022 March 13 06:44:15 UTC
 // import "image/png" ==> using png = go.image.png_package
 // Original source: C:\Program Files\Go\src\image\png\paeth.go
-
-
 namespace go.image;
 
 public static partial class png_package {
 
-    // intSize is either 32 or 64.
+// intSize is either 32 or 64.
 private static readonly nint intSize = 32 << (int)((~uint(0) >> 63));
 
 
@@ -26,7 +24,6 @@ private static nint abs(nint x) {
     // code with a branch.
     // See Hacker's Delight, section 2-4.
     return (x ^ m) - m;
-
 }
 
 // paeth implements the Paeth filter function, as per the PNG specification.
@@ -51,7 +48,6 @@ private static byte paeth(byte a, byte b, byte c) {
         return b;
     }
     return c;
-
 }
 
 // filterPaeth applies the Paeth filter to the cdat slice.
@@ -81,18 +77,14 @@ private static void filterPaeth(slice<byte> cdat, slice<byte> pdat, nint bytesPe
  {
                     a = c;
                 }
-
                 a += int(cdat[j]);
                 a &= 0xff;
                 cdat[j] = uint8(a);
                 c = b;
-
             }
 
         }
-
     }
-
 }
 
 } // end png_package

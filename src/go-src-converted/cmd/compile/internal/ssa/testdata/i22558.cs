@@ -1,9 +1,9 @@
-// package main -- go2cs converted at 2022 March 06 23:09:37 UTC
+// package main -- go2cs converted at 2022 March 13 06:22:53 UTC
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\testdata\i22558.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
 
 public static partial class main_package {
 
@@ -48,7 +48,6 @@ private static void Main() {
     ptr<thing> t = addr(new thing(name:"t",self:nil,next:nil,stuff:make([]big,1)));
     ref thing u = ref heap(new thing(name:"u",self:t,next:t,stuff:make([]big,1)), out ptr<thing> _addr_u);
     test(t, _addr_u);
-
 }
 
 private static @string snk = default;

@@ -5,12 +5,12 @@
 //go:build !android
 // +build !android
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:29 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\write_err.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 

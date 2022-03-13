@@ -5,11 +5,9 @@
 // This is a copy of the file generated during the gccgo build process.
 // Last update 2019-01-22.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:37 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:00 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\gccgosizes.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class types2_package {

@@ -4,33 +4,35 @@
 
 // Package srcimporter implements importing directly
 // from source files rather than installed packages.
-// package srcimporter -- go2cs converted at 2022 March 06 23:32:36 UTC
+
+// package srcimporter -- go2cs converted at 2022 March 13 06:42:16 UTC
 // import "go/internal/srcimporter" ==> using srcimporter = go.go.@internal.srcimporter_package
 // Original source: C:\Program Files\Go\src\go\internal\srcimporter\srcimporter.go
+namespace go.go.@internal;
 // import "go/internal/srcimporter"
 
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using build = go.go.build_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using _@unsafe_ = go.@unsafe_package;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using build = go.build_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using types = go.types_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+using _@unsafe_ = @unsafe_package; // for go:linkname
+
+
+// An Importer provides the context for importing packages from source code.
+
 using System;
 using System.Threading;
-
-
-namespace go.go.@internal;
-
 public static partial class srcimporter_package {
 
-    // An Importer provides the context for importing packages from source code.
 public partial struct Importer {
     public ptr<build.Context> ctxt;
     public ptr<token.FileSet> fset;
@@ -83,10 +85,8 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Importer> _addr_p
 
         if (err == null) { // see issue #14282
             srcDir = abs;
-
         }
     }
-
     var (bp, err) = p.ctxt.Import(path, srcDir, 0);
     if (err != null) {
         return (_addr_null!, error.As(err)!); // err may be *build.NoGoError - return as is
@@ -105,10 +105,8 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Importer> _addr_p
             // wholesale rather than augmenting it (see #19337 for details).
             // Return incomplete package with error (see #16088).
             return (_addr_pkg!, error.As(fmt.Errorf("reimported partially imported package %q", bp.ImportPath))!);
-
         }
         return (_addr_pkg!, error.As(null!)!);
-
     }
     p.packages[bp.ImportPath] = _addr_importing;
     defer(() => { 
@@ -136,7 +134,6 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Importer> _addr_p
             // cgo, gcc, pkg-config, etc. do not support
             // build.Context's VFS.
             conf.FakeImportC = true;
-
         }
         else
  {
@@ -158,16 +155,13 @@ private static (ptr<types.Package>, error) ImportFrom(this ptr<Importer> _addr_p
             err = firstHardErr; // give preference to first hard error over any soft error
         }
         return (_addr_pkg!, error.As(fmt.Errorf("type-checking package %q failed (%v)", bp.ImportPath, err))!);
-
     }
     if (firstHardErr != null) { 
         // this can only happen if we have a bug in go/types
         panic("package is not safe yet no error was returned");
-
     }
     p.packages[bp.ImportPath] = pkg;
     return (_addr_pkg!, error.As(null!)!);
-
 });
 
 private static (slice<ptr<ast.File>>, error) parseFiles(this ptr<Importer> _addr_p, @string dir, slice<@string> filenames) => func((defer, _, _) => {
@@ -192,13 +186,10 @@ private static (slice<ptr<ast.File>>, error) parseFiles(this ptr<Importer> _addr
             if (err != null) {
                 errors[i] = err; // open provides operation and filename in error
                 return ;
-
             }
-
             files[i], errors[i] = parser.ParseFile(p.fset, filepath, src, 0);
             src.Close(); // ignore Close error - parsing may have succeeded which is all we need
         }(i, p.joinPath(dir, filename)));
-
     }    wg.Wait(); 
 
     // if there are errors, return the first one for deterministic results
@@ -207,7 +198,6 @@ private static (slice<ptr<ast.File>>, error) parseFiles(this ptr<Importer> _addr
             return (null, error.As(err)!);
         }
     }    return (files, error.As(null!)!);
-
 });
 
 private static (ptr<ast.File>, error) cgo(this ptr<Importer> _addr_p, ptr<build.Package> _addr_bp) => func((defer, _, _) => {
@@ -232,7 +222,6 @@ private static (ptr<ast.File>, error) cgo(this ptr<Importer> _addr_p, ptr<build.
                 args = append(args, "-import_syscall=false");
                 break;
         }
-
     }
     args = append(args, "--");
     args = append(args, strings.Fields(os.Getenv("CGO_CPPFLAGS")));
@@ -244,7 +233,6 @@ private static (ptr<ast.File>, error) cgo(this ptr<Importer> _addr_p, ptr<build.
             return (_addr_null!, error.As(err)!);
         }
         args = append(args, strings.Fields(string(out)));
-
     }
     args = append(args, "-I", tmpdir);
     args = append(args, strings.Fields(os.Getenv("CGO_CFLAGS")));
@@ -261,9 +249,7 @@ private static (ptr<ast.File>, error) cgo(this ptr<Importer> _addr_p, ptr<build.
         }
     }
 
-
     return _addr_parser.ParseFile(p.fset, filepath.Join(tmpdir, "_cgo_gotypes.go"), null, 0)!;
-
 });
 
 // context-controlled file system operations
@@ -276,7 +262,6 @@ private static (@string, error) absPath(this ptr<Importer> _addr_p, @string path
     // TODO(gri) This should be using p.ctxt.AbsPath which doesn't
     // exist but probably should. See also issue #14282.
     return filepath.Abs(path);
-
 }
 
 private static bool isAbsPath(this ptr<Importer> _addr_p, @string path) {
@@ -289,9 +274,7 @@ private static bool isAbsPath(this ptr<Importer> _addr_p, @string path) {
             return f(path);
         }
     }
-
     return filepath.IsAbs(path);
-
 }
 
 private static @string joinPath(this ptr<Importer> _addr_p, params @string[] elem) {
@@ -305,9 +288,7 @@ private static @string joinPath(this ptr<Importer> _addr_p, params @string[] ele
             return f(elem);
         }
     }
-
     return filepath.Join(elem);
-
 }
 
 //go:linkname setUsesCgo go/types.srcimporter_setUsesCgo

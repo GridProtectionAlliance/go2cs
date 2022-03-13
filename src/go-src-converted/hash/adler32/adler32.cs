@@ -10,13 +10,14 @@
 //    are done modulo 65521. s1 is initialized to 1, s2 to zero.  The
 //    Adler-32 checksum is stored as s2*65536 + s1 in most-
 //    significant-byte first (network) order.
-// package adler32 -- go2cs converted at 2022 March 06 22:14:53 UTC
+
+// package adler32 -- go2cs converted at 2022 March 13 05:28:57 UTC
 // import "hash/adler32" ==> using adler32 = go.hash.adler32_package
 // Original source: C:\Program Files\Go\src\hash\adler32\adler32.go
-using errors = go.errors_package;
-using hash = go.hash_package;
-
 namespace go.hash;
+
+using errors = errors_package;
+using hash = hash_package;
 
 public static partial class adler32_package {
 
@@ -27,7 +28,6 @@ private static readonly nint mod = 65521;
 // 255 * n * (n+1) / 2 + (n+1) * (mod-1) <= 2^32-1.
 // It is mentioned in RFC 1950 (search for "5552").
 private static readonly nint nmax = 5552;
-
 
 // The size of an Adler-32 checksum in bytes.
 public static readonly nint Size = 4;
@@ -73,7 +73,6 @@ private static nint BlockSize(this ptr<digest> _addr_d) {
 private static readonly @string magic = "adl\x01";
 private static readonly var marshaledSize = len(magic) + 4;
 
-
 private static (slice<byte>, error) MarshalBinary(this ptr<digest> _addr_d) {
     slice<byte> _p0 = default;
     error _p0 = default!;
@@ -96,7 +95,6 @@ private static error UnmarshalBinary(this ptr<digest> _addr_d, slice<byte> b) {
     }
     d.val = digest(readUint32(b[(int)len(magic)..]));
     return error.As(null!)!;
-
 }
 
 private static slice<byte> appendUint32(slice<byte> b, uint x) {
@@ -135,10 +133,8 @@ private static digest update(digest d, slice<byte> p) {
         }        s1 %= mod;
         s2 %= mod;
         p = q;
-
     }
     return digest(s2 << 16 | s1);
-
 }
 
 private static (nint, error) Write(this ptr<digest> _addr_d, slice<byte> p) {

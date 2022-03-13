@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:37 UTC
+//     Generated on 2022 March 13 06:34:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Arch
         {
             // Constructors
@@ -150,7 +150,7 @@ namespace @internal
             public static implicit operator Arch(NilType nil) => default(Arch);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Arch Arch_cast(dynamic value)
         {
             return new Arch(value.Funcalign, value.Maxalign, value.Minalign, value.Dwarfregsp, value.Dwarfreglr, value.TrampLimit, value.Androiddynld, value.Linuxdynld, value.Freebsddynld, value.Netbsddynld, value.Openbsddynld, value.Dragonflydynld, value.Solarisdynld, value.CodePad, value.Plan9Magic, value.Plan9_64Bit, value.Adddynrel, value.Archinit, value.Archreloc, value.Archrelocvariant, value.Trampoline, value.Asmb, value.Asmb2, value.Extreloc, value.Elfreloc1, value.ElfrelocSize, value.Elfsetupplt, value.Gentext, value.Machoreloc1, value.MachorelocSize, value.PEreloc1, value.Xcoffreloc1, value.GenSymsLate, value.TLSIEtoLE, value.AssignAddress);

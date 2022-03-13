@@ -4,18 +4,18 @@
 
 // Implements methods to filter samples from profiles.
 
-// package profile -- go2cs converted at 2022 March 06 22:24:12 UTC
+// package profile -- go2cs converted at 2022 March 13 05:38:38 UTC
 // import "internal/profile" ==> using profile = go.@internal.profile_package
 // Original source: C:\Program Files\Go\src\internal\profile\filter.go
-using regexp = go.regexp_package;
-
 namespace go.@internal;
+
+using regexp = regexp_package;
 
 public static partial class profile_package {
 
-    // FilterSamplesByName filters the samples in a profile and only keeps
-    // samples where at least one frame matches focus but none match ignore.
-    // Returns true is the corresponding regexp matched at least one sample.
+// FilterSamplesByName filters the samples in a profile and only keeps
+// samples where at least one frame matches focus but none match ignore.
+// Returns true is the corresponding regexp matched at least one sample.
 private static (bool, bool, bool) FilterSamplesByName(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_focus, ptr<regexp.Regexp> _addr_ignore, ptr<regexp.Regexp> _addr_hide) {
     bool fm = default;
     bool im = default;
@@ -55,18 +55,14 @@ private static (bool, bool, bool) FilterSamplesByName(this ptr<Profile> _addr_p,
                 }                if (len(locs) == 0) { 
                     // Remove sample with no locations (by not adding it to s).
                     continue;
-
                 }
                 sample.Location = locs;
-
             }
             s = append(s, sample);
-
         }
     }    p.Sample = s;
 
     return ;
-
 }
 
 // matchesName reports whether the function name or file in the
@@ -89,9 +85,7 @@ private static bool matchesName(this ptr<Location> _addr_loc, ptr<regexp.Regexp>
             }
 
         }
-
     }    return false;
-
 }
 
 // unmatchedLines returns the lines in the location that do not match
@@ -115,11 +109,8 @@ private static slice<Line> unmatchedLines(this ptr<Location> _addr_loc, ptr<rege
             }
 
         }
-
         lines = append(lines, ln);
-
     }    return lines;
-
 }
 
 // focusedAndNotIgnored looks up a slice of ids against a map of
@@ -137,21 +128,16 @@ private static bool focusedAndNotIgnored(slice<ptr<Location>> locs, map<ulong, b
                     // Found focused location. Must keep searching in case there
                     // is an ignored one as well.
                     f = true;
-
                 }
                 else
  { 
                     // Found ignored location. Can return false right away.
                     return false;
-
                 }
-
             }
 
         }
-
     }    return f;
-
 }
 
 // TagMatch selects tags for filtering
@@ -175,7 +161,6 @@ private static (bool, bool) FilterSamplesByTag(this ptr<Profile> _addr_p, TagMat
         }
     }    p.Sample = samples;
     return ;
-
 }
 
 // focusedTag checks a sample against focus and ignore regexps.
@@ -241,7 +226,6 @@ private static (bool, bool) focusedSample(ptr<Sample> _addr_s, TagMatch focus, T
     }
 
     return (fm, im);
-
 }
 
 } // end profile_package

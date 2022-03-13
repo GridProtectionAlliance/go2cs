@@ -7,23 +7,24 @@
 // one without the other. Determine if we can factor out functionality
 // in a public API. See also #11844 for context.
 
-// package main -- go2cs converted at 2022 March 06 23:19:46 UTC
+// package main -- go2cs converted at 2022 March 13 06:32:34 UTC
 // Original source: C:\Program Files\Go\src\cmd\gofmt\internal.go
-using bytes = go.bytes_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go;
 
+using bytes = bytes_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using strings = strings_package;
+
+
+// parse parses src, which was read from the named file,
+// as a Go source file, declaration, or statement list.
+
+using System;
 public static partial class main_package {
 
-    // parse parses src, which was read from the named file,
-    // as a Go source file, declaration, or statement list.
 private static (ptr<ast.File>, Func<slice<byte>, nint, slice<byte>>, nint, error) parse(ptr<token.FileSet> _addr_fset, @string filename, slice<byte> src, bool fragmentOk) {
     ptr<ast.File> file = default!;
     Func<slice<byte>, nint, slice<byte>> sourceAdj = default;
@@ -47,10 +48,8 @@ private static (ptr<ast.File>, Func<slice<byte>, nint, slice<byte>>, nint, error
             // Gofmt has turned the ';' into a '\n'.
             src = src[(int)indent + len("package p\n")..];
             return _addr_bytes.TrimSpace(src)!;
-
         };
         return ;
-
     }
     if (!strings.Contains(err.Error(), "expected declaration")) {
         return ;
@@ -67,15 +66,12 @@ private static (ptr<ast.File>, Func<slice<byte>, nint, slice<byte>>, nint, error
             // Remove only the "}\n" suffix: remaining whitespaces will be trimmed anyway
             src = src[..(int)len(src) - len("}\n")];
             return _addr_bytes.TrimSpace(src)!;
-
         }; 
         // Gofmt has also indented the function body one level.
         // Adjust that with indentAdj.
         indentAdj = -1;
-
     }
     return ;
-
 }
 
 // format formats the given package file originally obtained from src
@@ -95,7 +91,6 @@ private static (slice<byte>, error) format(ptr<token.FileSet> _addr_fset, ptr<as
             return (null, error.As(err)!);
         }
         return (buf.Bytes(), error.As(null!)!);
-
     }
     nint i = 0;
     nint j = 0;
@@ -104,7 +99,6 @@ private static (slice<byte>, error) format(ptr<token.FileSet> _addr_fset, ptr<as
             i = j + 1; // byte offset of last line in leading space
         }
         j++;
-
     }
     slice<byte> res = default;
     res = append(res, src[..(int)i]); 
@@ -123,7 +117,6 @@ private static (slice<byte>, error) format(ptr<token.FileSet> _addr_fset, ptr<as
                 indent++;
                 break;
         }
-
     }    if (indent == 0 && hasSpace) {
         indent = 1;
     }
@@ -161,7 +154,6 @@ private static (slice<byte>, error) format(ptr<token.FileSet> _addr_fset, ptr<as
         i--;
     }
     return (append(res, src[(int)i..]), error.As(null!)!);
-
 }
 
 // isSpace reports whether the byte is a space character.

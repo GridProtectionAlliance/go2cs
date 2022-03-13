@@ -2,73 +2,72 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:06 UTC
+// package math -- go2cs converted at 2022 March 13 05:41:58 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\gamma.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // The original C code, the long comment, and the constants
-    // below are from http://netlib.sandia.gov/cephes/cprob/gamma.c.
-    // The go code is a simplified version of the original C.
-    //
-    //      tgamma.c
-    //
-    //      Gamma function
-    //
-    // SYNOPSIS:
-    //
-    // double x, y, tgamma();
-    // extern int signgam;
-    //
-    // y = tgamma( x );
-    //
-    // DESCRIPTION:
-    //
-    // Returns gamma function of the argument. The result is
-    // correctly signed, and the sign (+1 or -1) is also
-    // returned in a global (extern) variable named signgam.
-    // This variable is also filled in by the logarithmic gamma
-    // function lgamma().
-    //
-    // Arguments |x| <= 34 are reduced by recurrence and the function
-    // approximated by a rational function of degree 6/7 in the
-    // interval (2,3).  Large arguments are handled by Stirling's
-    // formula. Large negative arguments are made positive using
-    // a reflection formula.
-    //
-    // ACCURACY:
-    //
-    //                      Relative error:
-    // arithmetic   domain     # trials      peak         rms
-    //    DEC      -34, 34      10000       1.3e-16     2.5e-17
-    //    IEEE    -170,-33      20000       2.3e-15     3.3e-16
-    //    IEEE     -33,  33     20000       9.4e-16     2.2e-16
-    //    IEEE      33, 171.6   20000       2.3e-15     3.2e-16
-    //
-    // Error for arguments outside the test range will be larger
-    // owing to error amplification by the exponential function.
-    //
-    // Cephes Math Library Release 2.8:  June, 2000
-    // Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
-    //
-    // The readme file at http://netlib.sandia.gov/cephes/ says:
-    //    Some software in this archive may be from the book _Methods and
-    // Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
-    // International, 1989) or from the Cephes Mathematical Library, a
-    // commercial product. In either event, it is copyrighted by the author.
-    // What you see here may be used freely but it comes with no support or
-    // guarantee.
-    //
-    //   The two known misprints in the book are repaired here in the
-    // source listings for the gamma function and the incomplete beta
-    // integral.
-    //
-    //   Stephen L. Moshier
-    //   moshier@na-net.ornl.gov
+// The original C code, the long comment, and the constants
+// below are from http://netlib.sandia.gov/cephes/cprob/gamma.c.
+// The go code is a simplified version of the original C.
+//
+//      tgamma.c
+//
+//      Gamma function
+//
+// SYNOPSIS:
+//
+// double x, y, tgamma();
+// extern int signgam;
+//
+// y = tgamma( x );
+//
+// DESCRIPTION:
+//
+// Returns gamma function of the argument. The result is
+// correctly signed, and the sign (+1 or -1) is also
+// returned in a global (extern) variable named signgam.
+// This variable is also filled in by the logarithmic gamma
+// function lgamma().
+//
+// Arguments |x| <= 34 are reduced by recurrence and the function
+// approximated by a rational function of degree 6/7 in the
+// interval (2,3).  Large arguments are handled by Stirling's
+// formula. Large negative arguments are made positive using
+// a reflection formula.
+//
+// ACCURACY:
+//
+//                      Relative error:
+// arithmetic   domain     # trials      peak         rms
+//    DEC      -34, 34      10000       1.3e-16     2.5e-17
+//    IEEE    -170,-33      20000       2.3e-15     3.3e-16
+//    IEEE     -33,  33     20000       9.4e-16     2.2e-16
+//    IEEE      33, 171.6   20000       2.3e-15     3.2e-16
+//
+// Error for arguments outside the test range will be larger
+// owing to error amplification by the exponential function.
+//
+// Cephes Math Library Release 2.8:  June, 2000
+// Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
+//
+// The readme file at http://netlib.sandia.gov/cephes/ says:
+//    Some software in this archive may be from the book _Methods and
+// Programs for Mathematical Functions_ (Prentice-Hall or Simon & Schuster
+// International, 1989) or from the Cephes Mathematical Library, a
+// commercial product. In either event, it is copyrighted by the author.
+// What you see here may be used freely but it comes with no support or
+// guarantee.
+//
+//   The two known misprints in the book are repaired here in the
+// source listings for the gamma function and the incomplete beta
+// integral.
+//
+//   Stephen L. Moshier
+//   moshier@na-net.ornl.gov
+
 private static array<double> _gamP = new array<double>(new double[] { 1.60119522476751861407e-04, 1.19135147006586384913e-03, 1.04213797561761569935e-02, 4.76367800457137231464e-02, 2.07448227648435975150e-01, 4.94214826801497100753e-01, 9.99999999999999996796e-01 });
 private static array<double> _gamQ = new array<double>(new double[] { -2.31581873324120129819e-05, 5.39605580493303397842e-04, -4.45641913851797240494e-03, 1.18139785222060435552e-02, 3.58236398605498653373e-02, -2.34591795718243348568e-01, 7.14304917030273074085e-02, 1.00000000000000000320e+00 });
 private static array<double> _gamS = new array<double>(new double[] { 7.87311395793093628397e-04, -2.29549961613378126380e-04, -2.68132617805781232825e-03, 3.47222221605458667310e-03, 8.33333333333482257126e-02 });
@@ -89,7 +88,6 @@ private static (double, double) stirling(double x) {
     }
     const float SqrtTwoPi = 2.506628274631000502417F;
     const float MaxStirling = 143.01608F;
-
     nint w = 1 / x;
     w = 1 + w * ((((_gamS[0] * w + _gamS[1]) * w + _gamS[2]) * w + _gamS[3]) * w + _gamS[4]);
     var y1 = Exp(x);
@@ -103,7 +101,6 @@ private static (double, double) stirling(double x) {
         y1 = Pow(x, x - 0.5F) / y1;
     }
     return (y1, SqrtTwoPi * w * y2);
-
 }
 
 // Gamma returns the Gamma function of x.
@@ -146,7 +143,6 @@ public static double Gamma(double x) {
             }
 
         }
-
         var z = q - p;
         if (z > 0.5F) {
             p = p + 1;
@@ -167,7 +163,6 @@ public static double Gamma(double x) {
             z = Pi / d;
         }
         return float64(signgam) * z;
-
     }
     z = 1.0F;
     while (x >= 3) {
@@ -180,7 +175,6 @@ public static double Gamma(double x) {
         }
         z = z / x;
         x = x + 1;
-
     }
     while (x < 2) {
         if (x < 1e-09F) {
@@ -188,7 +182,6 @@ public static double Gamma(double x) {
         }
         z = z / x;
         x = x + 1;
-
     }
 
     if (x == 2) {
@@ -204,7 +197,6 @@ small:
         return Inf(1);
     }
     return z / ((1 + Euler * x) * x);
-
 }
 
 private static bool isNegInt(double x) {
@@ -213,7 +205,6 @@ private static bool isNegInt(double x) {
         return xf == 0;
     }
     return false;
-
 }
 
 } // end math_package

@@ -5,12 +5,12 @@
 //go:build (darwin && !ios) || openbsd
 // +build darwin,!ios openbsd
 
-// package rand -- go2cs converted at 2022 March 06 22:17:18 UTC
+// package rand -- go2cs converted at 2022 March 13 05:30:40 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Program Files\Go\src\crypto\rand\rand_getentropy.go
-using unix = go.@internal.syscall.unix_package;
-
 namespace go.crypto;
+
+using unix = @internal.syscall.unix_package;
 
 public static partial class rand_package {
 
@@ -31,16 +31,13 @@ private static bool getEntropy(slice<byte> p) {
                 end = len(p);
             i += 256;
             }
-
             var err = unix.GetEntropy(p[(int)i..(int)end]);
             if (err != null) {
                 return false;
             }
-
         }
     }
     return true;
-
 }
 
 } // end rand_package

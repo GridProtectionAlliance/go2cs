@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:14:28 UTC
+//     Generated on 2022 March 13 06:27:57 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class @base_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct DebugFlags
         {
             // Constructors
@@ -106,7 +106,7 @@ namespace @internal
             public static implicit operator DebugFlags(NilType nil) => default(DebugFlags);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static DebugFlags DebugFlags_cast(dynamic value)
         {
             return new DebugFlags(value.Append, value.Checkptr, value.Closure, value.DclStack, value.Defer, value.DisableNil, value.DumpPtrs, value.DwarfInl, value.Export, value.GCProg, value.InlFuncsWithClosures, value.Libfuzzer, value.LocationLists, value.Nil, value.NoOpenDefer, value.PCTab, value.Panic, value.Slice, value.SoftFloat, value.TypeAssert, value.TypecheckInl, value.WB, value.ABIWrap, value.any);

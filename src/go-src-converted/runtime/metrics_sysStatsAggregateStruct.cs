@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:09:28 UTC
+//     Generated on 2022 March 13 05:25:13 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct sysStatsAggregate
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace go
             public static implicit operator sysStatsAggregate(NilType nil) => default(sysStatsAggregate);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static sysStatsAggregate sysStatsAggregate_cast(dynamic value)
         {
             return new sysStatsAggregate(value.stacksSys, value.mSpanSys, value.mSpanInUse, value.mCacheSys, value.mCacheInUse, value.buckHashSys, value.gcMiscSys, value.otherSys, value.heapGoal, value.gcCyclesDone, value.gcCyclesForced);

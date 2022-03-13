@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:31:42 UTC
+//     Generated on 2022 March 13 05:42:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace archive
 {
     public static partial class zip_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pooledFlateWriter
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace archive
             public static implicit operator pooledFlateWriter(NilType nil) => default(pooledFlateWriter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pooledFlateWriter pooledFlateWriter_cast(dynamic value)
         {
             return new pooledFlateWriter(value.mu, ref value.fw);

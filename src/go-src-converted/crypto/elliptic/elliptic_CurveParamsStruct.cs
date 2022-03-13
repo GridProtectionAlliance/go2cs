@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:12 UTC
+//     Generated on 2022 March 13 05:30:33 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace crypto
 {
     public static partial class elliptic_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CurveParams
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace crypto
             public static implicit operator CurveParams(NilType nil) => default(CurveParams);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CurveParams CurveParams_cast(dynamic value)
         {
             return new CurveParams(ref value.P, ref value.N, ref value.B, ref value.Gx, ref value.Gy, value.BitSize, value.Name);

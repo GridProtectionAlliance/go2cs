@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:08 UTC
+//     Generated on 2022 March 13 05:36:16 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct timeoutError
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace crypto
             public static implicit operator timeoutError(NilType nil) => default(timeoutError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static timeoutError timeoutError_cast(dynamic value)
         {
             return new timeoutError();

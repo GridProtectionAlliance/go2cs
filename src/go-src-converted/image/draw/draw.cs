@@ -6,20 +6,22 @@
 //
 // See "The Go image/draw package" for an introduction to this package:
 // https://golang.org/doc/articles/image_draw.html
-// package draw -- go2cs converted at 2022 March 06 23:36:01 UTC
+
+// package draw -- go2cs converted at 2022 March 13 06:44:00 UTC
 // import "image/draw" ==> using draw = go.image.draw_package
 // Original source: C:\Program Files\Go\src\image\draw\draw.go
-using image = go.image_package;
-using color = go.image.color_package;
-using imageutil = go.image.@internal.imageutil_package;
-using System;
-
-
 namespace go.image;
 
+using image = image_package;
+using color = image.color_package;
+using imageutil = image.@internal.imageutil_package;
+
+
+// m is the maximum color value returned by image.Color.RGBA.
+
+using System;
 public static partial class draw_package {
 
-    // m is the maximum color value returned by image.Color.RGBA.
 private static readonly nint m = 1 << 16 - 1;
 
 // Image is an image.Image with a Set method to change a single pixel.
@@ -54,7 +56,6 @@ public static readonly Op Over = iota;
 // Src specifies ``src in mask''.
 public static readonly var Src = 0;
 
-
 // Draw implements the Drawer interface by calling the Draw function with this
 // Op.
 public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
@@ -79,7 +80,6 @@ private static void Draw(this floydSteinberg _p0, Image dst, image.Rectangle r, 
         return ;
     }
     drawPaletted(dst, r, src, sp, true);
-
 }
 
 // clip clips r against each image's bounds (after translating into the
@@ -139,7 +139,6 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
  {
                                 drawFillOver(_addr_dst0, r, sr, sg, sb, sa);
                             }
-
                             return ;
                             break;
                         case ptr<image.RGBA> src0:
@@ -164,7 +163,6 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
                             return ;
                             break;
                     }
-
                 }                {
                     ptr<image.Alpha> (mask0, ok) = mask._<ptr<image.Alpha>>();
 
@@ -176,11 +174,9 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
                                 return ;
                                 break;
                         }
-
                     }
 
                 }
-
             }
             else
  {
@@ -213,11 +209,8 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
                             return ;
                             break;
                     }
-
                 }
-
             }
-
             drawRGBA(_addr_dst0, r, src, sp, mask, mp, op);
             return ;
             break;
@@ -250,20 +243,16 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
                             y = y__prev1;
                         }
                         return ;
-
                     }
                     else if (!processBackward(dst, r, src, sp)) {
                         drawPaletted(dst0, r, src, sp, false);
                         return ;
                     }
 
-
                     src0 = src0__prev2;
 
                 }
-
             }
-
             break;
 
     }
@@ -298,7 +287,6 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
                     (x, sx, mx) = (x + dx, sx + dx, mx + dx);
                     }
 
-
                     if (ma == 0) 
                         if (op == Over) { 
                             // No-op.
@@ -308,7 +296,6 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
  {
                             dst.Set(x, y, color.Transparent);
                         }
-
                     else if (ma == m && op == Src) 
                         dst.Set(x, y, src.At(sx, sy));
                     else 
@@ -333,16 +320,13 @@ public static void DrawMask(Image dst, image.Rectangle r, image.Image src, image
                         // conversion to color.Color here allocating memory in the
                         // inner loop if sizeof(color.RGBA64) > sizeof(uintptr).
                         dst.Set(x, y, _addr_out);
-                    
-                }
+                                    }
 
             }
-
         }
 
         y = y__prev1;
     }
-
 }
 
 private static void drawFillOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, uint sr, uint sg, uint sb, uint sa) {
@@ -372,9 +356,7 @@ private static void drawFillOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, u
         }
         i0 += dst.Stride;
         i1 += dst.Stride;
-
     }
-
 }
 
 private static void drawFillSrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, uint sr, uint sg, uint sb, uint sa) {
@@ -406,7 +388,6 @@ private static void drawFillSrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, ui
         i1 += dst.Stride;
         copy(dst.Pix[(int)i0..(int)i1], firstRow);
     }
-
 }
 
 private static void drawCopyOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.RGBA> _addr_src, image.Point sp) {
@@ -419,7 +400,6 @@ private static void drawCopyOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, p
     var s0 = src.PixOffset(sp.X, sp.Y);
     nint ddelta = default;    nint sdelta = default;
     nint i0 = default;    nint i1 = default;    nint idelta = default;
-
     if (r.Min.Y < sp.Y || r.Min.Y == sp.Y && r.Min.X <= sp.X) {
         ddelta = dst.Stride;
         sdelta = src.Stride;
@@ -464,7 +444,6 @@ private static void drawCopyOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, p
         s0 += sdelta;
         dy--;
     }
-
 }
 
 private static void drawCopySrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.RGBA> _addr_src, image.Point sp) {
@@ -492,7 +471,6 @@ private static void drawCopySrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, pt
         s0 += (dy - 1) * src.Stride;
         ddelta = -dst.Stride;
         sdelta = -src.Stride;
-
     }
     while (dy > 0) {
         copy(dst.Pix[(int)d0..(int)d0 + n], src.Pix[(int)s0..(int)s0 + n]);
@@ -500,7 +478,6 @@ private static void drawCopySrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, pt
         s0 += sdelta;
         dy--;
     }
-
 }
 
 private static void drawNRGBAOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.NRGBA> _addr_src, image.Point sp) {
@@ -549,7 +526,6 @@ private static void drawNRGBAOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, 
         }
         (y, sy) = (y + 1, sy + 1);
     }
-
 }
 
 private static void drawNRGBASrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.NRGBA> _addr_src, image.Point sp) {
@@ -590,7 +566,6 @@ private static void drawNRGBASrc(ptr<image.RGBA> _addr_dst, image.Rectangle r, p
         }
         (y, sy) = (y + 1, sy + 1);
     }
-
 }
 
 private static void drawGray(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.Gray> _addr_src, image.Point sp) {
@@ -625,7 +600,6 @@ private static void drawGray(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<i
         }
         (y, sy) = (y + 1, sy + 1);
     }
-
 }
 
 private static void drawCMYK(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.CMYK> _addr_src, image.Point sp) {
@@ -658,7 +632,6 @@ private static void drawCMYK(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<i
         }
         (y, sy) = (y + 1, sy + 1);
     }
-
 }
 
 private static void drawGlyphOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, ptr<image.Uniform> _addr_src, ptr<image.Alpha> _addr_mask, image.Point mp) {
@@ -685,7 +658,6 @@ private static void drawGlyphOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, 
                         continue;
                     (i, mi) = (i + 4, mi + 1);
                     }
-
                     ma |= ma << 8; 
 
                     // The 0x101 is here for the same reason as in drawRGBA.
@@ -703,10 +675,8 @@ private static void drawGlyphOver(ptr<image.RGBA> _addr_dst, image.Rectangle r, 
             i0 += dst.Stride;
             i1 += dst.Stride;
             mi0 += mask.Stride;
-
         }
     }
-
 }
 
 private static void drawRGBA(ptr<image.RGBA> _addr_dst, image.Rectangle r, image.Image src, image.Point sp, image.Image mask, image.Point mp, Op op) {
@@ -745,7 +715,6 @@ private static void drawRGBA(ptr<image.RGBA> _addr_dst, image.Rectangle r, image
                         _, _, _, ma = mask.At(mx, my).RGBA();
                     (i, sx, mx) = (i + di, sx + dx, mx + dx);
                     }
-
                     var (sr, sg, sb, sa) = src.At(sx, sy).RGBA();
                     var d = dst.Pix.slice(i, i + 4, i + 4); // Small cap improves performance, see https://golang.org/issue/27857
                     if (op == Over) {
@@ -776,15 +745,12 @@ private static void drawRGBA(ptr<image.RGBA> _addr_dst, image.Rectangle r, image
                         d[2] = uint8(sb * ma / m >> 8);
                         d[3] = uint8(sa * ma / m >> 8);
                     }
-
                 }
 
             }
             i0 += dy * dst.Stride;
-
         }
     }
-
 }
 
 // clamp clamps i to the interval [0, 0xffff].
@@ -796,7 +762,6 @@ private static int clamp(int i) {
         return 0xffff;
     }
     return i;
-
 }
 
 // sqDiff returns the squared-difference of x and y, shifted by 2 so that
@@ -809,7 +774,6 @@ private static uint sqDiff(int x, int y) {
     // spec. See sqDiff from the image/color package for more details.
     var d = uint32(x - y);
     return (d * d) >> 2;
-
 }
 
 private static void drawPaletted(Image dst, image.Rectangle r, image.Image src, image.Point sp, bool floydSteinberg) { 
@@ -897,7 +861,6 @@ private static void drawPaletted(Image dst, image.Rectangle r, image.Image src, 
                 eb = clamp(eb + quantErrorCurr[x + 1][2] / 16);
                 ea = clamp(ea + quantErrorCurr[x + 1][3] / 16);
             }
-
             if (palette != null) { 
                 // Find the closest palette color in Euclidean R,G,B,A space:
                 // the one that minimizes sum-squared-difference.
@@ -927,13 +890,10 @@ private static void drawPaletted(Image dst, image.Rectangle r, image.Image src, 
                 if (!floydSteinberg) {
                     continue;
                 }
-
                 er -= palette[bestIndex][0];
                 eg -= palette[bestIndex][1];
                 eb -= palette[bestIndex][2];
                 ea -= palette[bestIndex][3];
-
-
             } {
                 @out.R = uint16(er);
                 @out.G = uint16(eg);
@@ -948,13 +908,11 @@ private static void drawPaletted(Image dst, image.Rectangle r, image.Image src, 
                 if (!floydSteinberg) {
                     continue;
                 }
-
                 sr, sg, sb, sa = dst.At(r.Min.X + x, r.Min.Y + y).RGBA();
                 er -= int32(sr);
                 eg -= int32(sg);
                 eb -= int32(sb);
                 ea -= int32(sa);
-
             } 
 
             // Propagate the Floyd-Steinberg quantization error.
@@ -974,7 +932,6 @@ private static void drawPaletted(Image dst, image.Rectangle r, image.Image src, 
             quantErrorCurr[x + 2][1] += eg * 7;
             quantErrorCurr[x + 2][2] += eb * 7;
             quantErrorCurr[x + 2][3] += ea * 7;
-
         } 
 
         // Recycle the quantization error buffers.
@@ -991,7 +948,6 @@ private static void drawPaletted(Image dst, image.Rectangle r, image.Image src, 
             }
         }
     }
-
 }
 
 } // end draw_package

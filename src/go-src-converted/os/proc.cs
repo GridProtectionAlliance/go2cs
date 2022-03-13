@@ -4,28 +4,28 @@
 
 // Process etc.
 
-// package os -- go2cs converted at 2022 March 06 22:13:44 UTC
+// package os -- go2cs converted at 2022 March 13 05:28:03 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\proc.go
-using testlog = go.@internal.testlog_package;
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using testlog = @internal.testlog_package;
+using runtime = runtime_package;
+using syscall = syscall_package;
+
+
+// Args hold the command-line arguments, starting with the program name.
 
 public static partial class os_package {
 
-    // Args hold the command-line arguments, starting with the program name.
 public static slice<@string> Args = default;
 
 private static void init() {
     if (runtime.GOOS == "windows") { 
         // Initialized in exec_windows.go.
         return ;
-
     }
     Args = runtime_args();
-
 }
 
 private static slice<@string> runtime_args(); // in package runtime
@@ -82,13 +82,10 @@ public static void Exit(nint code) => func((_, panic, _) => {
             // This is used to fail tests that make an early
             // unexpected call to os.Exit(0).
             panic("unexpected call to os.Exit(0) during test");
-
         }
         runtime_beforeExit();
-
     }
     syscall.Exit(code);
-
 });
 
 private static void runtime_beforeExit(); // implemented in runtime

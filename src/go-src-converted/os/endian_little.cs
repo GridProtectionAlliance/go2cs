@@ -5,11 +5,9 @@
 //go:build 386 || amd64 || arm || arm64 || ppc64le || mips64le || mipsle || riscv64 || wasm
 // +build 386 amd64 arm arm64 ppc64le mips64le mipsle riscv64 wasm
 
-// package os -- go2cs converted at 2022 March 06 22:12:48 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:48 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\endian_little.go
-
-
 namespace go;
 
 public static partial class os_package {

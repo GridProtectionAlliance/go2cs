@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:31 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:35 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\webhtml.go
-using template = go.html.template_package;
-
-using d3 = go.github.com.google.pprof.third_party.d3_package;
-using d3flamegraph = go.github.com.google.pprof.third_party.d3flamegraph_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using template = html.template_package;
+
+using d3 = github.com.google.pprof.third_party.d3_package;
+using d3flamegraph = github.com.google.pprof.third_party.d3flamegraph_package;
+
+
+// addTemplates adds a set of template definitions to templates.
 
 public static partial class driver_package {
 
-    // addTemplates adds a set of template definitions to templates.
 private static void addTemplates(ptr<template.Template> _addr_templates) {
     ref template.Template templates = ref _addr_templates.val;
 
@@ -483,7 +485,6 @@ private static void addTemplates(ptr<template.Template> _addr_templates) {
     "Alarm);\n      }\n      searchAlarm = setTimeout(selectMatching, 300);\n    }\n\n    " +
     "search.addEventListener(\'input\', handleSearch);\n  </script>\n</body>\n</html>\n{{en" +
     "d}}\n"));
-
 }
 
 } // end driver_package

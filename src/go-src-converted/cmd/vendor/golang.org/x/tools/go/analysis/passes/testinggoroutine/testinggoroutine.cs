@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package testinggoroutine -- go2cs converted at 2022 March 06 23:34:49 UTC
+// package testinggoroutine -- go2cs converted at 2022 March 13 06:42:06 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/testinggoroutine" ==> using testinggoroutine = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.testinggoroutine_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\testinggoroutine\testinggoroutine.go
-using ast = go.go.ast_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class testinggoroutine_package {
 
@@ -68,15 +67,12 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             // No need to further traverse the GoStmt since right
             // above we manually traversed it in the ast.Inspect(goStmt, ...)
             return false;
-
         });
 
         return false;
-
     });
 
     return (null, error.As(null!)!);
-
 }
 
 private static bool hasBenchmarkOrTestParams(ptr<ast.FuncDecl> _addr_fnDecl) {
@@ -94,9 +90,7 @@ private static bool hasBenchmarkOrTestParams(ptr<ast.FuncDecl> _addr_fnDecl) {
             }
 
         }
-
     }    return false;
-
 }
 
 private static (@string, bool) typeIsTestingDotTOrB(ast.Expr expr) {
@@ -118,7 +112,6 @@ private static (@string, bool) typeIsTestingDotTOrB(ast.Expr expr) {
     var varTypeName = selExpr.Sel.Name;
     ok = varTypeName == "B" || varTypeName == "T";
     return (varTypeName, ok);
-
 }
 
 // checkGoStmt traverses the goroutine and checks for the
@@ -156,11 +149,8 @@ private static void checkGoStmt(ptr<analysis.Pass> _addr_pass, ptr<ast.GoStmt> _
             }
 
         }
-
         return true;
-
     });
-
 }
 
 } // end testinggoroutine_package

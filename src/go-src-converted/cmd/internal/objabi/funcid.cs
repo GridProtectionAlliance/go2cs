@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:23 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:21 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\funcid.go
-using strings = go.strings_package;
-
 namespace go.cmd.@internal;
+
+using strings = strings_package;
 
 public static partial class objabi_package {
 
-    // A FuncFlag records bits about a function, passed to the runtime.
+// A FuncFlag records bits about a function, passed to the runtime.
 public partial struct FuncFlag { // : byte
 }
 
 // Note: This list must match the list in runtime/symtab.go.
 public static readonly nint FuncFlag_TOPFRAME = 1 << (int)(iota);
 public static readonly var FuncFlag_SPWRITE = 0;
-
 
 // A FuncID identifies particular functions that need to be treated
 // specially by the runtime.
@@ -69,10 +68,8 @@ public static FuncID GetFuncID(@string name, bool isWrapper) {
             }
 
         }
-
     }
     return FuncID_normal;
-
 }
 
 } // end objabi_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:17:04 UTC
+//     Generated on 2022 March 13 05:30:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace net
 {
     public static partial class url_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct URL
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace net
             public static implicit operator URL(NilType nil) => default(URL);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static URL URL_cast(dynamic value)
         {
             return new URL(value.Scheme, value.Opaque, ref value.User, value.Host, value.Path, value.RawPath, value.ForceQuery, value.RawQuery, value.Fragment, value.RawFragment);

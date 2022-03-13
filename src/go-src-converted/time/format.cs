@@ -2,97 +2,97 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package time -- go2cs converted at 2022 March 06 22:30:08 UTC
+// package time -- go2cs converted at 2022 March 13 05:40:57 UTC
 // import "time" ==> using time = go.time_package
 // Original source: C:\Program Files\Go\src\time\format.go
-using errors = go.errors_package;
-
 namespace go;
+
+using errors = errors_package;
 
 public static partial class time_package {
 
-    // These are predefined layouts for use in Time.Format and time.Parse.
-    // The reference time used in these layouts is the specific time stamp:
-    //    01/02 03:04:05PM '06 -0700
-    // (January 2, 15:04:05, 2006, in time zone seven hours west of GMT).
-    // That value is recorded as the constant named Layout, listed below. As a Unix
-    // time, this is 1136239445. Since MST is GMT-0700, the reference would be
-    // printed by the Unix date command as:
-    //    Mon Jan 2 15:04:05 MST 2006
-    // It is a regrettable historic error that the date uses the American convention
-    // of putting the numerical month before the day.
-    //
-    // The example for Time.Format demonstrates the working of the layout string
-    // in detail and is a good reference.
-    //
-    // Note that the RFC822, RFC850, and RFC1123 formats should be applied
-    // only to local times. Applying them to UTC times will use "UTC" as the
-    // time zone abbreviation, while strictly speaking those RFCs require the
-    // use of "GMT" in that case.
-    // In general RFC1123Z should be used instead of RFC1123 for servers
-    // that insist on that format, and RFC3339 should be preferred for new protocols.
-    // RFC3339, RFC822, RFC822Z, RFC1123, and RFC1123Z are useful for formatting;
-    // when used with time.Parse they do not accept all the time formats
-    // permitted by the RFCs and they do accept time formats not formally defined.
-    // The RFC3339Nano format removes trailing zeros from the seconds field
-    // and thus may not sort correctly once formatted.
-    //
-    // Most programs can use one of the defined constants as the layout passed to
-    // Format or Parse. The rest of this comment can be ignored unless you are
-    // creating a custom layout string.
-    //
-    // To define your own format, write down what the reference time would look like
-    // formatted your way; see the values of constants like ANSIC, StampMicro or
-    // Kitchen for examples. The model is to demonstrate what the reference time
-    // looks like so that the Format and Parse methods can apply the same
-    // transformation to a general time value.
-    //
-    // Here is a summary of the components of a layout string. Each element shows by
-    // example the formatting of an element of the reference time. Only these values
-    // are recognized. Text in the layout string that is not recognized as part of
-    // the reference time is echoed verbatim during Format and expected to appear
-    // verbatim in the input to Parse.
-    //
-    //    Year: "2006" "06"
-    //    Month: "Jan" "January"
-    //    Textual day of the week: "Mon" "Monday"
-    //    Numeric day of the month: "2" "_2" "02"
-    //    Numeric day of the year: "__2" "002"
-    //    Hour: "15" "3" "03" (PM or AM)
-    //    Minute: "4" "04"
-    //    Second: "5" "05"
-    //    AM/PM mark: "PM"
-    //
-    // Numeric time zone offsets format as follows:
-    //    "-0700"  ±hhmm
-    //    "-07:00" ±hh:mm
-    //    "-07"    ±hh
-    // Replacing the sign in the format with a Z triggers
-    // the ISO 8601 behavior of printing Z instead of an
-    // offset for the UTC zone. Thus:
-    //    "Z0700"  Z or ±hhmm
-    //    "Z07:00" Z or ±hh:mm
-    //    "Z07"    Z or ±hh
-    //
-    // Within the format string, the underscores in "_2" and "__2" represent spaces
-    // that may be replaced by digits if the following number has multiple digits,
-    // for compatibility with fixed-width Unix time formats. A leading zero represents
-    // a zero-padded value.
-    //
-    // The formats  and 002 are space-padded and zero-padded
-    // three-character day of year; there is no unpadded day of year format.
-    //
-    // A comma or decimal point followed by one or more zeros represents
-    // a fractional second, printed to the given number of decimal places.
-    // A comma or decimal point followed by one or more nines represents
-    // a fractional second, printed to the given number of decimal places, with
-    // trailing zeros removed.
-    // For example "15:04:05,000" or "15:04:05.000" formats or parses with
-    // millisecond precision.
-    //
-    // Some valid layouts are invalid time values for time.Parse, due to formats
-    // such as _ for space padding and Z for zone information.
-    //
+// These are predefined layouts for use in Time.Format and time.Parse.
+// The reference time used in these layouts is the specific time stamp:
+//    01/02 03:04:05PM '06 -0700
+// (January 2, 15:04:05, 2006, in time zone seven hours west of GMT).
+// That value is recorded as the constant named Layout, listed below. As a Unix
+// time, this is 1136239445. Since MST is GMT-0700, the reference would be
+// printed by the Unix date command as:
+//    Mon Jan 2 15:04:05 MST 2006
+// It is a regrettable historic error that the date uses the American convention
+// of putting the numerical month before the day.
+//
+// The example for Time.Format demonstrates the working of the layout string
+// in detail and is a good reference.
+//
+// Note that the RFC822, RFC850, and RFC1123 formats should be applied
+// only to local times. Applying them to UTC times will use "UTC" as the
+// time zone abbreviation, while strictly speaking those RFCs require the
+// use of "GMT" in that case.
+// In general RFC1123Z should be used instead of RFC1123 for servers
+// that insist on that format, and RFC3339 should be preferred for new protocols.
+// RFC3339, RFC822, RFC822Z, RFC1123, and RFC1123Z are useful for formatting;
+// when used with time.Parse they do not accept all the time formats
+// permitted by the RFCs and they do accept time formats not formally defined.
+// The RFC3339Nano format removes trailing zeros from the seconds field
+// and thus may not sort correctly once formatted.
+//
+// Most programs can use one of the defined constants as the layout passed to
+// Format or Parse. The rest of this comment can be ignored unless you are
+// creating a custom layout string.
+//
+// To define your own format, write down what the reference time would look like
+// formatted your way; see the values of constants like ANSIC, StampMicro or
+// Kitchen for examples. The model is to demonstrate what the reference time
+// looks like so that the Format and Parse methods can apply the same
+// transformation to a general time value.
+//
+// Here is a summary of the components of a layout string. Each element shows by
+// example the formatting of an element of the reference time. Only these values
+// are recognized. Text in the layout string that is not recognized as part of
+// the reference time is echoed verbatim during Format and expected to appear
+// verbatim in the input to Parse.
+//
+//    Year: "2006" "06"
+//    Month: "Jan" "January"
+//    Textual day of the week: "Mon" "Monday"
+//    Numeric day of the month: "2" "_2" "02"
+//    Numeric day of the year: "__2" "002"
+//    Hour: "15" "3" "03" (PM or AM)
+//    Minute: "4" "04"
+//    Second: "5" "05"
+//    AM/PM mark: "PM"
+//
+// Numeric time zone offsets format as follows:
+//    "-0700"  ±hhmm
+//    "-07:00" ±hh:mm
+//    "-07"    ±hh
+// Replacing the sign in the format with a Z triggers
+// the ISO 8601 behavior of printing Z instead of an
+// offset for the UTC zone. Thus:
+//    "Z0700"  Z or ±hhmm
+//    "Z07:00" Z or ±hh:mm
+//    "Z07"    Z or ±hh
+//
+// Within the format string, the underscores in "_2" and "__2" represent spaces
+// that may be replaced by digits if the following number has multiple digits,
+// for compatibility with fixed-width Unix time formats. A leading zero represents
+// a zero-padded value.
+//
+// The formats  and 002 are space-padded and zero-padded
+// three-character day of year; there is no unpadded day of year format.
+//
+// A comma or decimal point followed by one or more zeros represents
+// a fractional second, printed to the given number of decimal places.
+// A comma or decimal point followed by one or more nines represents
+// a fractional second, printed to the given number of decimal places, with
+// trailing zeros removed.
+// For example "15:04:05,000" or "15:04:05.000" formats or parses with
+// millisecond precision.
+//
+// Some valid layouts are invalid time values for time.Parse, due to formats
+// such as _ for space padding and Z for zone information.
+//
 public static readonly @string Layout = "01/02 03:04:05PM '06 -0700"; // The reference time, in numerical order.
 public static readonly @string ANSIC = "Mon Jan _2 15:04:05 2006";
 public static readonly @string UnixDate = "Mon Jan _2 15:04:05 MST 2006";
@@ -110,7 +110,6 @@ public static readonly @string Stamp = "Jan _2 15:04:05";
 public static readonly @string StampMilli = "Jan _2 15:04:05.000";
 public static readonly @string StampMicro = "Jan _2 15:04:05.000000";
 public static readonly @string StampNano = "Jan _2 15:04:05.000000000";
-
 
 private static readonly var _ = iota;
 private static readonly var stdLongMonth = iota + stdNeedDate; // "January"
@@ -160,7 +159,6 @@ private static bool startsWithLowerCase(@string str) {
     }
     var c = str[0];
     return 'a' <= c && c <= 'z';
-
 }
 
 // nextStdChunk finds the first occurrence of a std string in
@@ -226,15 +224,11 @@ private static (@string, nint, @string) nextStdChunk(@string layout) {
                         if (len(layout) >= i + 5 && layout[(int)i + 1..(int)i + 5] == "2006") {
                             return (layout[(int)0..(int)i + 1], stdLongYear, layout[(int)i + 5..]);
                         }
-
                         return (layout[(int)0..(int)i], stdUnderDay, layout[(int)i + 2..]);
-
                     }
-
                     if (len(layout) >= i + 3 && layout[i + 1] == '_' && layout[i + 2] == '2') {
                         return (layout[(int)0..(int)i], stdUnderYearDay, layout[(int)i + 3..]);
                     }
-
                     break;
                 case '3': 
                     return (layout[(int)0..(int)i], stdHour12, layout[(int)i + 1..]);
@@ -309,16 +303,12 @@ private static (@string, nint, @string) nextStdChunk(@string layout) {
                             var std = stdFracSecond(code, j - (i + 1), c);
                             return (layout[(int)0..(int)i], std, layout[(int)j..]);
                         }
-
                     }
-
                     break;
             }
         }
-
     }
     return (layout, 0, "");
-
 }
 
 private static @string longDayNames = new slice<@string>(new @string[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" });
@@ -342,11 +332,9 @@ private static bool match(@string s1, @string s2) {
             if (c1 != c2 || c1 < 'a' || c1 > 'z') {
                 return false;
             }
-
         }
     }
     return true;
-
 }
 
 private static (nint, @string, error) lookup(slice<@string> tab, @string val) {
@@ -359,7 +347,6 @@ private static (nint, @string, error) lookup(slice<@string> tab, @string val) {
             return (i, val[(int)len(v)..], error.As(null!)!);
         }
     }    return (-1, val, error.As(errBad)!);
-
 }
 
 // appendInt appends the decimal form of x to b and returns the result.
@@ -388,7 +375,6 @@ private static slice<byte> appendInt(slice<byte> b, nint x, nint width) {
     }
 
     return append(b, buf[(int)i..]);
-
 }
 
 // Never printed, just needs to be non-nil for return by atoi.
@@ -413,7 +399,6 @@ private static (nint, error) atoi(@string s) {
         x = -x;
     }
     return (x, error.As(null!)!);
-
 }
 
 // The "std" value passed to formatNano contains two packed fields: the number of
@@ -425,7 +410,6 @@ private static nint stdFracSecond(nint code, nint n, nint c) {
         return code | ((n & 0xfff) << (int)(stdArgShift));
     }
     return code | ((n & 0xfff) << (int)(stdArgShift)) | 1 << (int)(stdSeparatorShift);
-
 }
 
 private static nint digitsLen(nint std) {
@@ -437,7 +421,6 @@ private static byte separator(nint std) {
         return '.';
     }
     return ',';
-
 }
 
 // formatNano appends a fractional second, as nanoseconds, to b
@@ -469,7 +452,6 @@ private static slice<byte> formatNano(slice<byte> b, nuint nanosec, nint std) {
     }
     b = append(b, separator);
     return append(b, buf[..(int)n]);
-
 }
 
 // String returns the time formatted using the format string
@@ -509,10 +491,8 @@ public static @string String(this Time t) {
         buf = append(buf, '.');
         buf = appendInt(buf, int(m2), 9);
         s += string(buf);
-
     }
     return s;
-
 }
 
 // GoString implements fmt.GoStringer and formats t to be printed in Go source
@@ -530,7 +510,6 @@ public static @string GoString(this Time t) {
         // It's difficult to construct a time.Time with a date outside the
         // standard range but we might as well try to handle the case.
         buf = appendInt(buf, int(month), 0);
-
     }
     buf = append(buf, ", ");
     buf = appendInt(buf, t.Day(), 0);
@@ -574,7 +553,6 @@ public static @string GoString(this Time t) {
     }
     buf = append(buf, ')');
     return string(buf);
-
 }
 
 // Format returns a textual representation of the time value formatted according
@@ -598,7 +576,6 @@ public static @string Format(this Time t, @string layout) {
     }
     b = t.AppendFormat(b, layout);
     return string(b);
-
 }
 
 // AppendFormat is like Format but appends the textual
@@ -699,7 +676,6 @@ public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layou
  {
                 b = append(b, "AM");
             }
-
         else if (std & stdMask == stdpm) 
             if (hour >= 12) {
                 b = append(b, "pm");
@@ -708,7 +684,6 @@ public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layou
  {
                 b = append(b, "am");
             }
-
         else if (std & stdMask == stdISO8601TZ || std & stdMask == stdISO8601ColonTZ || std & stdMask == stdISO8601SecondsTZ || std & stdMask == stdISO8601ShortTZ || std & stdMask == stdISO8601ColonSecondsTZ || std & stdMask == stdNumTZ || std & stdMask == stdNumColonTZ || std & stdMask == stdNumSecondsTz || std & stdMask == stdNumShortTZ || std & stdMask == stdNumColonSecondsTZ) 
             // Ugly special case. We cheat and take the "Z" variants
             // to mean "the time zone as formatted for ISO 8601".
@@ -727,12 +702,10 @@ public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layou
  {
                 b = append(b, '+');
             }
-
             b = appendInt(b, zone / 60, 2);
             if (std == stdISO8601ColonTZ || std == stdNumColonTZ || std == stdISO8601ColonSecondsTZ || std == stdNumColonSecondsTZ) {
                 b = append(b, ':');
             }
-
             if (std != stdNumShortTZ && std != stdISO8601ShortTZ) {
                 b = appendInt(b, zone % 60, 2);
             } 
@@ -744,7 +717,6 @@ public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layou
                 }
                 b = appendInt(b, absoffset % 60, 2);
             }
-
         else if (std & stdMask == stdTZ) 
             if (name != "") {
                 b = append(b, name);
@@ -761,15 +733,12 @@ public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layou
  {
                 b = append(b, '+');
             }
-
             b = appendInt(b, zone / 60, 2);
             b = appendInt(b, zone % 60, 2);
         else if (std & stdMask == stdFracSecond0 || std & stdMask == stdFracSecond9) 
             b = formatNano(b, uint(t.Nanosecond()), std);
-        
-    }
+            }
     return b;
-
 }
 
 private static var errBad = errors.New("bad value for field"); // placeholder not passed to user
@@ -788,7 +757,6 @@ public partial struct ParseError {
 private static readonly @string lowerhex = "0123456789abcdef";
 private static readonly nuint runeSelf = 0x80;
 private static readonly char runeError = '\uFFFD';
-
 
 private static @string quote(@string s) {
     var buf = make_slice<byte>(1, len(s) + 2); // slice will be at least len(s) + quotes
@@ -812,15 +780,12 @@ private static @string quote(@string s) {
  {
                 width = len(string(c));
             }
-
             for (nint j = 0; j < width; j++) {
                 buf = append(buf, "\\x");
                 buf = append(buf, lowerhex[s[i + j] >> 4]);
                 buf = append(buf, lowerhex[s[i + j] & 0xF]);
             }
         else
-
-
         } {
             if (c == '"' || c == '\\') {
                 buf = append(buf, '\\');
@@ -829,7 +794,6 @@ private static @string quote(@string s) {
         }
     }    buf = append(buf, '"');
     return string(buf);
-
 }
 
 // Error returns the string representation of a ParseError.
@@ -840,7 +804,6 @@ private static @string Error(this ptr<ParseError> _addr_e) {
         return "parsing time " + quote(e.Value) + " as " + quote(e.Layout) + ": cannot parse " + quote(e.ValueElem) + " as " + quote(e.LayoutElem);
     }
     return "parsing time " + quote(e.Value) + e.Message;
-
 }
 
 // isDigit reports whether s[i] is in range and is a decimal digit.
@@ -850,7 +813,6 @@ private static bool isDigit(@string s, nint i) {
     }
     var c = s[i];
     return '0' <= c && c <= '9';
-
 }
 
 // getnum parses s[0:1] or s[0:2] (fixed forces s[0:2])
@@ -869,10 +831,8 @@ private static (nint, @string, error) getnum(@string s, bool @fixed) {
             return (0, s, error.As(errBad)!);
         }
         return (int(s[0] - '0'), s[(int)1..], error.As(null!)!);
-
     }
     return (int(s[0] - '0') * 10 + int(s[1] - '0'), s[(int)2..], error.As(null!)!);
-
 }
 
 // getnum3 parses s[0:1], s[0:2], or s[0:3] (fixed forces s[0:3])
@@ -892,7 +852,6 @@ private static (nint, @string, error) getnum3(@string s, bool @fixed) {
         return (0, s, error.As(errBad)!);
     }
     return (n, s[(int)i..], error.As(null!)!);
-
 }
 
 private static @string cutspace(@string s) {
@@ -922,10 +881,8 @@ private static (@string, error) skip(@string value, @string prefix) {
         }
         prefix = prefix[(int)1..];
         value = value[(int)1..];
-
     }
     return (value, error.As(null!)!);
-
 }
 
 // Parse parses a formatted string and returns the time value it represents.
@@ -1034,13 +991,11 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
             }
             else if (year >= 69) { // Unix time starts Dec 31 1969 in some time zones
                 year += 1900;
-
             }
             else
  {
                 year += 2000;
             }
-
         else if (std & stdMask == stdLongYear) 
             if (len(value) < 4 || !isDigit(value, 0)) {
                 err = error.As(errBad)!;
@@ -1115,7 +1070,6 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
                 if (std == stdFracSecond0 || std == stdFracSecond9) { 
                     // Fractional second in the layout; proceed normally
                     break;
-
                 } 
                 // No fractional second in the layout but we have one in the input.
                 nint n = 2;
@@ -1125,9 +1079,7 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
 
                 nsec, rangeErrString, err = parseNanoseconds(value, n);
                 value = value[(int)n..];
-
             }
-
         else if (std & stdMask == stdPM) 
             if (len(value) < 2) {
                 err = error.As(errBad)!;
@@ -1212,18 +1164,15 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
                 }
                 (sign, hour, min, seconds, value) = (value[(int)0..(int)1], value[(int)1..(int)3], value[(int)3..(int)5], "00", value[(int)5..]);
             }
-
             nint hr = default;            nint mm = default;            nint ss = default;
 
             hr, err = atoi(hour);
             if (err == null) {
                 mm, err = atoi(min);
             }
-
             if (err == null) {
                 ss, err = atoi(seconds);
             }
-
             zoneOffset = (hr * 60 + mm) * 60 + ss; // offset is in seconds
             switch (sign[0]) {
                 case '+': 
@@ -1262,7 +1211,6 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
             if (len(value) < 2 || !commaOrPeriod(value[0]) || value[1] < '0' || '9' < value[1]) { 
                 // Fractional second omitted.
                 break;
-
             } 
             // Take any number of digits, even more than asked for,
             // because it is what the stdSecond case would do.
@@ -1297,7 +1245,6 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
             else if (yday > 31 + 29) {
                 yday--;
             }
-
         }
         if (yday < 1 || yday > 365) {
             return (new Time(), error.As(addr(new ParseError(alayout,avalue,"",value,": day-of-year out of range"))!)!);
@@ -1317,7 +1264,6 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
             return (new Time(), error.As(addr(new ParseError(alayout,avalue,"",value,": day-of-year does not match day"))!)!);
         }
         day = d;
-
     }
     else
  {
@@ -1347,7 +1293,6 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
         }
         t.setLoc(FixedZone(zoneName, zoneOffset));
         return (t, error.As(null!)!);
-
     }
     if (zoneName != "") {
         t = Date(year, Month(month), day, hour, min, sec, nsec, UTC); 
@@ -1362,14 +1307,11 @@ private static (Time, error) parse(@string layout, @string value, ptr<Location> 
         if (len(zoneName) > 3 && zoneName[..(int)3] == "GMT") {
             offset, _ = atoi(zoneName[(int)3..]); // Guaranteed OK by parseGMT.
             offset *= 3600;
-
         }
         t.setLoc(FixedZone(zoneName, offset));
         return (t, error.As(null!)!);
-
     }
     return (Date(year, Month(month), day, hour, min, sec, nsec, defaultLocation), error.As(null!)!);
-
 }
 
 // parseTimeZone parses a time zone string and returns its length. Time zones
@@ -1400,7 +1342,6 @@ private static (nint, bool) parseTimeZone(@string value) {
         length = parseSignedOffset(value);
         var ok = length > 0; // parseSignedOffset returns 0 in case of bad input
         return (length, ok);
-
     }
     nint nUpper = default;
     for (nUpper = 0; nUpper < 6; nUpper++) {
@@ -1415,7 +1356,6 @@ private static (nint, bool) parseTimeZone(@string value) {
             }
 
         }
-
     }
     switch (nUpper) {
         case 0: 
@@ -1443,7 +1383,6 @@ private static (nint, bool) parseTimeZone(@string value) {
             break;
     }
     return (0, false);
-
 }
 
 // parseGMT parses a GMT time zone. The input string is known to start "GMT".
@@ -1455,7 +1394,6 @@ private static nint parseGMT(@string value) {
         return 3;
     }
     return 3 + parseSignedOffset(value);
-
 }
 
 // parseSignedOffset parses a signed timezone offset (e.g. "+03" or "-04").
@@ -1479,7 +1417,6 @@ private static nint parseSignedOffset(@string value) {
         return 0;
     }
     return len(value) - len(rem);
-
 }
 
 private static bool commaOrPeriod(byte b) {
@@ -1509,7 +1446,6 @@ private static (nint, @string, error) parseNanoseconds(@string value, nint nbyte
         ns *= 10;
     }
     return ;
-
 }
 
 private static var errLeadingInt = errors.New("time: bad [0-9]*"); // never printed
@@ -1530,17 +1466,14 @@ private static (long, @string, error) leadingInt(@string s) {
         if (x > (1 << 63 - 1) / 10) { 
             // overflow
             return (0, "", error.As(errLeadingInt)!);
-
         }
         x = x * 10 + int64(c) - '0';
         if (x < 0) { 
             // overflow
             return (0, "", error.As(errLeadingInt)!);
-
         }
     }
     return (x, s[(int)i..], error.As(null!)!);
-
 }
 
 // leadingFraction consumes the leading [0-9]* from s.
@@ -1567,7 +1500,6 @@ private static (long, double, @string) leadingFraction(@string s) {
             // It's possible for overflow to give a positive number, so take care.
             overflow = true;
             continue;
-
         }
         var y = x * 10 + int64(c) - '0';
         if (y < 0) {
@@ -1576,10 +1508,8 @@ private static (long, double, @string) leadingFraction(@string s) {
         }
         x = y;
         scale *= 10;
-
     }
     return (x, scale, s[(int)i..]);
-
 }
 
 private static map unitMap = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, long>{"ns":int64(Nanosecond),"us":int64(Microsecond),"µs":int64(Microsecond),"μs":int64(Microsecond),"ms":int64(Millisecond),"s":int64(Second),"m":int64(Minute),"h":int64(Hour),};
@@ -1640,7 +1570,6 @@ public static (Duration, error) ParseDuration(@string s) {
         if (!pre && !post) { 
             // no digits (e.g. ".s" or "-.s")
             return (0, error.As(errors.New("time: invalid duration " + quote(orig)))!);
-
         }
         nint i = 0;
         while (i < len(s)) {
@@ -1649,7 +1578,6 @@ public static (Duration, error) ParseDuration(@string s) {
                 break;
             i++;
             }
-
         }
         if (i == 0) {
             return (0, error.As(errors.New("time: missing unit in duration " + quote(orig)))!);
@@ -1663,7 +1591,6 @@ public static (Duration, error) ParseDuration(@string s) {
         if (v > (1 << 63 - 1) / unit) { 
             // overflow
             return (0, error.As(errors.New("time: invalid duration " + quote(orig)))!);
-
         }
         v *= unit;
         if (f > 0) { 
@@ -1673,15 +1600,12 @@ public static (Duration, error) ParseDuration(@string s) {
             if (v < 0) { 
                 // overflow
                 return (0, error.As(errors.New("time: invalid duration " + quote(orig)))!);
-
             }
-
         }
         d += v;
         if (d < 0) { 
             // overflow
             return (0, error.As(errors.New("time: invalid duration " + quote(orig)))!);
-
         }
     }
 
@@ -1689,7 +1613,6 @@ public static (Duration, error) ParseDuration(@string s) {
         d = -d;
     }
     return (Duration(d), error.As(null!)!);
-
 }
 
 } // end time_package

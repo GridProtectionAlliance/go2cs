@@ -4,12 +4,12 @@
 
 // This file contains the code to check canonical methods.
 
-// package method -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package method -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata/method" ==> using method = go.cmd.vet.testdata.method_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\method\method.go
-using fmt = go.fmt_package;
-
 namespace go.cmd.vet.testdata;
+
+using fmt = fmt_package;
 
 public static partial class method_package {
 

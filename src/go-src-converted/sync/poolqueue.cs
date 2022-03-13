@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2022 March 06 22:26:23 UTC
+// package sync -- go2cs converted at 2022 March 13 05:24:07 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\poolqueue.go
-using atomic = go.sync.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = sync.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// poolDequeue is a lock-free fixed-size single-producer,
+// multi-consumer queue. The single producer can both push and pop
+// from the head, and consumers can pop from the tail.
+//
+// It has the added feature that it nils out unused slots to avoid
+// unnecessary retention of objects. This is important for sync.Pool,
+// but not typically a property considered in the literature.
 
 public static partial class sync_package {
 
-    // poolDequeue is a lock-free fixed-size single-producer,
-    // multi-consumer queue. The single producer can both push and pop
-    // from the head, and consumers can pop from the tail.
-    //
-    // It has the added feature that it nils out unused slots to avoid
-    // unnecessary retention of objects. This is important for sync.Pool,
-    // but not typically a property considered in the literature.
 private partial struct poolDequeue {
     public ulong headTail; // vals is a ring buffer of interface{} values stored in this
 // dequeue. The size of this must be a power of 2.
@@ -90,7 +92,6 @@ private static bool pushHead(this ptr<poolDequeue> _addr_d, object val) {
     if ((tail + uint32(len(d.vals))) & (1 << (int)(dequeueBits) - 1) == head) { 
         // Queue is full.
         return false;
-
     }
     var slot = _addr_d.vals[head & uint32(len(d.vals) - 1)]; 
 
@@ -100,14 +101,12 @@ private static bool pushHead(this ptr<poolDequeue> _addr_d, object val) {
         // Another goroutine is still cleaning up the tail, so
         // the queue is actually still full.
         return false;
-
     }
     if (val == null) {
         val = dequeueNil(null);
     }
     atomic.AddUint64(_addr_d.headTail, 1 << (int)(dequeueBits));
     return true;
-
 }
 
 // popHead removes and returns the element at the head of the queue.
@@ -125,7 +124,6 @@ private static (object, bool) popHead(this ptr<poolDequeue> _addr_d) {
         if (tail == head) { 
             // Queue is empty.
             return (null, false);
-
         }
         head--;
         var ptrs2 = d.pack(head, tail);
@@ -133,7 +131,6 @@ private static (object, bool) popHead(this ptr<poolDequeue> _addr_d) {
             // We successfully took back slot.
             slot = _addr_d.vals[head & uint32(len(d.vals) - 1)];
             break;
-
         }
     }
 
@@ -142,7 +139,6 @@ private static (object, bool) popHead(this ptr<poolDequeue> _addr_d) {
     }
     slot.val = new eface();
     return (val, true);
-
 }
 
 // popTail removes and returns the element at the tail of the queue.
@@ -160,14 +156,12 @@ private static (object, bool) popTail(this ptr<poolDequeue> _addr_d) {
         if (tail == head) { 
             // Queue is empty.
             return (null, false);
-
         }
         var ptrs2 = d.pack(head, tail + 1);
         if (atomic.CompareAndSwapUint64(_addr_d.headTail, ptrs, ptrs2)) { 
             // Success.
             slot = _addr_d.vals[tail & uint32(len(d.vals) - 1)];
             break;
-
         }
     } 
 
@@ -180,7 +174,6 @@ private static (object, bool) popTail(this ptr<poolDequeue> _addr_d) {
     // At this point pushHead owns the slot.
 
     return (val, true);
-
 }
 
 // poolChain is a dynamically-sized version of poolDequeue.
@@ -236,7 +229,6 @@ private static void pushHead(this ptr<poolChain> _addr_c, object val) {
         d.vals = make_slice<eface>(initSize);
         c.head = d;
         storePoolChainElt(_addr_c.tail, _addr_d);
-
     }
     if (d.pushHead(val)) {
         return ;
@@ -245,14 +237,12 @@ private static void pushHead(this ptr<poolChain> _addr_c, object val) {
     if (newSize >= dequeueLimit) { 
         // Can't make it any bigger.
         newSize = dequeueLimit;
-
     }
     ptr<poolChainElt> d2 = addr(new poolChainElt(prev:d));
     d2.vals = make_slice<eface>(newSize);
     c.head = d2;
     storePoolChainElt(_addr_d.next, d2);
     d2.pushHead(val);
-
 }
 
 private static (object, bool) popHead(this ptr<poolChain> _addr_c) {
@@ -275,10 +265,8 @@ private static (object, bool) popHead(this ptr<poolChain> _addr_c) {
         // There may still be unconsumed elements in the
         // previous dequeue, so try backing up.
         d = loadPoolChainElt(_addr_d.prev);
-
     }
     return (null, false);
-
 }
 
 private static (object, bool) popTail(this ptr<poolChain> _addr_c) {
@@ -308,12 +296,10 @@ private static (object, bool) popTail(this ptr<poolChain> _addr_c) {
 
         }
 
-
         if (d2 == null) { 
             // This is the only dequeue. It's empty right
             // now, but could be pushed to in the future.
             return (null, false);
-
         }
         if (atomic.CompareAndSwapPointer((@unsafe.Pointer.val)(@unsafe.Pointer(_addr_c.tail)), @unsafe.Pointer(d), @unsafe.Pointer(d2))) { 
             // We won the race. Clear the prev pointer so
@@ -321,12 +307,9 @@ private static (object, bool) popTail(this ptr<poolChain> _addr_c) {
             // dequeue and so popHead doesn't back up
             // further than necessary.
             storePoolChainElt(_addr_d2.prev, _addr_null);
-
         }
         d = d2;
-
     }
-
 }
 
 } // end sync_package

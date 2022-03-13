@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:22:19 UTC
+//     Generated on 2022 March 13 06:35:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct IMAGE_EXPORT_DIRECTORY
         {
             // Constructors
@@ -85,7 +85,7 @@ namespace @internal
             public static implicit operator IMAGE_EXPORT_DIRECTORY(NilType nil) => default(IMAGE_EXPORT_DIRECTORY);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static IMAGE_EXPORT_DIRECTORY IMAGE_EXPORT_DIRECTORY_cast(dynamic value)
         {
             return new IMAGE_EXPORT_DIRECTORY(value.Characteristics, value.TimeDateStamp, value.MajorVersion, value.MinorVersion, value.Name, value.Base, value.NumberOfFunctions, value.NumberOfNames, value.AddressOfFunctions, value.AddressOfNames, value.AddressOfNameOrdinals);

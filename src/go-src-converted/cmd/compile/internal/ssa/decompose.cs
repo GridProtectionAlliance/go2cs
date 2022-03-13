@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssa -- go2cs converted at 2022 March 06 22:49:46 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:01:10 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\decompose.go
-using types = go.cmd.compile.@internal.types_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using types = cmd.compile.@internal.types_package;
+using sort = sort_package;
+
+
+// decompose converts phi ops on compound builtin types into phi
+// ops on simple types, then invokes rewrite rules to decompose
+// other ops on those types.
+
+using System;
 public static partial class ssa_package {
 
-    // decompose converts phi ops on compound builtin types into phi
-    // ops on simple types, then invokes rewrite rules to decompose
-    // other ops on those types.
 private static void decomposeBuiltIn(ptr<Func> _addr_f) {
     ref Func f = ref _addr_f.val;
  
@@ -31,7 +32,6 @@ private static void decomposeBuiltIn(ptr<Func> _addr_f) {
                     continue;
                 }
                 decomposeBuiltInPhi(_addr_v);
-
             }
             v = v__prev2;
         }
@@ -60,7 +60,6 @@ private static void decomposeBuiltIn(ptr<Func> _addr_f) {
                     f.NamedValues[hiName.val] = append(f.NamedValues[hiName.val], v.Args[0]);
                     f.NamedValues[loName.val] = append(f.NamedValues[loName.val], v.Args[1]);
                     toDelete = append(toDelete, new namedVal(i,j));
-
                 }
                 j = j__prev2;
                 v = v__prev2;
@@ -81,7 +80,6 @@ private static void decomposeBuiltIn(ptr<Func> _addr_f) {
                     f.NamedValues[rName.val] = append(f.NamedValues[rName.val], v.Args[0]);
                     f.NamedValues[iName.val] = append(f.NamedValues[iName.val], v.Args[1]);
                     toDelete = append(toDelete, new namedVal(i,j));
-
                 }
                 j = j__prev2;
                 v = v__prev2;
@@ -102,7 +100,6 @@ private static void decomposeBuiltIn(ptr<Func> _addr_f) {
                     f.NamedValues[ptrName.val] = append(f.NamedValues[ptrName.val], v.Args[0]);
                     f.NamedValues[lenName.val] = append(f.NamedValues[lenName.val], v.Args[1]);
                     toDelete = append(toDelete, new namedVal(i,j));
-
                 }
                 j = j__prev2;
                 v = v__prev2;
@@ -125,7 +122,6 @@ private static void decomposeBuiltIn(ptr<Func> _addr_f) {
                     f.NamedValues[lenName.val] = append(f.NamedValues[lenName.val], v.Args[1]);
                     f.NamedValues[capName.val] = append(f.NamedValues[capName.val], v.Args[2]);
                     toDelete = append(toDelete, new namedVal(i,j));
-
                 }
                 j = j__prev2;
                 v = v__prev2;
@@ -146,17 +142,14 @@ private static void decomposeBuiltIn(ptr<Func> _addr_f) {
                     f.NamedValues[typeName.val] = append(f.NamedValues[typeName.val], v.Args[0]);
                     f.NamedValues[dataName.val] = append(f.NamedValues[dataName.val], v.Args[1]);
                     toDelete = append(toDelete, new namedVal(i,j));
-
                 }
                 j = j__prev2;
                 v = v__prev2;
             }
         else if (t.IsFloat())         else if (t.Size() > f.Config.RegSize) 
             f.Fatalf("undecomposed named type %s %v", name, t);
-        
-    }    deleteNamedVals(_addr_f, toDelete);
+            }    deleteNamedVals(_addr_f, toDelete);
     f.Names = append(f.Names, newNames);
-
 }
 
 private static slice<ptr<LocalSlot>> maybeAppend(ptr<Func> _addr_f, slice<ptr<LocalSlot>> ss, ptr<LocalSlot> _addr_s) {
@@ -171,9 +164,7 @@ private static slice<ptr<LocalSlot>> maybeAppend(ptr<Func> _addr_f, slice<ptr<Lo
             return append(ss, s);
         }
     }
-
     return ss;
-
 }
 
 private static slice<ptr<LocalSlot>> maybeAppend2(ptr<Func> _addr_f, slice<ptr<LocalSlot>> ss, ptr<LocalSlot> _addr_s1, ptr<LocalSlot> _addr_s2) {
@@ -200,8 +191,7 @@ private static void decomposeBuiltInPhi(ptr<Value> _addr_v) {
         decomposeInterfacePhi(_addr_v);
     else if (v.Type.IsFloat())     else if (v.Type.Size() > v.Block.Func.Config.RegSize) 
         v.Fatalf("undecomposed type %s", v.Type);
-    
-}
+    }
 
 private static void decomposeStringPhi(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -260,7 +250,6 @@ private static void decomposeInt64Phi(ptr<Value> _addr_v) {
     }    v.reset(OpInt64Make);
     v.AddArg(hi);
     v.AddArg(lo);
-
 }
 
 private static void decomposeComplexPhi(ptr<Value> _addr_v) {
@@ -292,7 +281,6 @@ private static void decomposeComplexPhi(ptr<Value> _addr_v) {
     }    v.reset(OpComplexMake);
     v.AddArg(real);
     v.AddArg(imag);
-
 }
 
 private static void decomposeInterfacePhi(ptr<Value> _addr_v) {
@@ -333,10 +321,8 @@ private static void decomposeUser(ptr<Func> _addr_f) {
         else 
             f.Names[i] = name;
             i++;
-        
-    }    f.Names = f.Names[..(int)i];
+            }    f.Names = f.Names[..(int)i];
     f.Names = append(f.Names, newNames);
-
 }
 
 // decomposeUserArrayInto creates names for the element(s) of arrays referenced
@@ -351,12 +337,10 @@ private static slice<ptr<LocalSlot>> decomposeUserArrayInto(ptr<Func> _addr_f, p
         // TODO(khr): Not sure what to do here.  Probably nothing.
         // Names for empty arrays aren't important.
         return slots;
-
     }
     if (t.NumElem() != 1) { 
         // shouldn't get here due to CanSSA
         f.Fatalf("array not of size 1");
-
     }
     var elemName = f.SplitArray(name);
     slice<ptr<Value>> keep = default;
@@ -366,11 +350,9 @@ private static slice<ptr<LocalSlot>> decomposeUserArrayInto(ptr<Func> _addr_f, p
             continue;
         }
         f.NamedValues[elemName.val] = append(f.NamedValues[elemName.val], v.Args[0]);
-
     }    if (len(keep) == 0) { 
         // delete the name for the array as a whole
         delete(f.NamedValues, name);
-
     }
     else
  {
@@ -383,7 +365,6 @@ private static slice<ptr<LocalSlot>> decomposeUserArrayInto(ptr<Func> _addr_f, p
         return decomposeUserStructInto(_addr_f, _addr_elemName, slots);
     }
     return append(slots, elemName);
-
 }
 
 // decomposeUserStructInto creates names for the fields(s) of structs referenced
@@ -408,7 +389,6 @@ private static slice<ptr<LocalSlot>> decomposeUserStructInto(ptr<Func> _addr_f, 
             if (!fs.Type.IsArray() && !fs.Type.IsStruct()) {
                 slots = maybeAppend(_addr_f, slots, _addr_fs);
             }
-
         }
 
         i = i__prev1;
@@ -432,11 +412,9 @@ private static slice<ptr<LocalSlot>> decomposeUserStructInto(ptr<Func> _addr_f, 
 
             i = i__prev2;
         }
-
     }    if (len(keep) == 0) { 
         // delete the name for the struct as a whole
         delete(f.NamedValues, name);
-
     }
     else
  {
@@ -454,13 +432,11 @@ private static slice<ptr<LocalSlot>> decomposeUserStructInto(ptr<Func> _addr_f, 
                 slots = decomposeUserArrayInto(_addr_f, _addr_fnames[i], slots);
                 delete(f.NamedValues, fnames[i].val);
             }
-
         }
 
         i = i__prev1;
     }
     return slots;
-
 }
 private static void decomposeUserPhi(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -470,8 +446,7 @@ private static void decomposeUserPhi(ptr<Value> _addr_v) {
         decomposeStructPhi(_addr_v);
     else if (v.Type.IsArray()) 
         decomposeArrayPhi(_addr_v);
-    
-}
+    }
 
 // decomposeStructPhi replaces phi-of-struct with structmake(phi-for-each-field),
 // and then recursively decomposes the phis for each field.
@@ -501,7 +476,6 @@ private static void decomposeStructPhi(ptr<Value> _addr_v) {
 
             i = i__prev2;
         }
-
     }    v.reset(StructMakeOp(n));
     v.AddArgs(fields[..(int)n]); 
 
@@ -532,7 +506,6 @@ private static void decomposeArrayPhi(ptr<Value> _addr_v) {
 
     // Recursively decompose elem phi.
     decomposeUserPhi(_addr_elem);
-
 }
 
 // MaxStruct is the maximum number of fields a struct
@@ -564,7 +537,6 @@ public static Op StructMakeOp(nint nf) => func((_, panic, _) => {
             break;
     }
     panic("too many fields in an SSAable struct");
-
 });
 
 private partial struct namedVal {
@@ -583,8 +555,6 @@ private static void deleteNamedVals(ptr<Func> _addr_f, slice<namedVal> toDelete)
             return toDelete[i].locIndex > toDelete[j].locIndex;
         }
         return toDelete[i].valIndex > toDelete[j].valIndex;
-
-
     }); 
 
     // Get rid of obsolete names
@@ -597,7 +567,6 @@ private static void deleteNamedVals(ptr<Func> _addr_f, slice<namedVal> toDelete)
         }
         vals[l] = null;
         f.NamedValues[loc.val] = vals[..(int)l];
-
     }    var end = len(f.Names);
     for (var i = len(f.Names) - 1; i >= 0; i--) {
         loc = f.Names[i];
@@ -621,7 +590,6 @@ private static void deleteNamedVals(ptr<Func> _addr_f, slice<namedVal> toDelete)
         }
     }
     f.Names = f.Names[..(int)end];
-
 }
 
 } // end ssa_package

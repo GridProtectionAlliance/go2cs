@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:13:55 UTC
+//     Generated on 2022 March 13 06:27:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class exports_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct T9
         {
             // Constructors
@@ -61,7 +61,7 @@ namespace @internal
             public static implicit operator T9(NilType nil) => default(T9);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static T9 T9_cast(dynamic value)
         {
             return new T9(value.a, value.b, value.c, value.d);

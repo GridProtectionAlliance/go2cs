@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package typecheck -- go2cs converted at 2022 March 06 22:48:46 UTC
+// package typecheck -- go2cs converted at 2022 March 13 06:00:06 UTC
 // import "cmd/compile/internal/typecheck" ==> using typecheck = go.cmd.compile.@internal.typecheck_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\typecheck\type.go
-using constant = go.go.constant_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using types = go.cmd.compile.@internal.types_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using constant = go.constant_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using types = cmd.compile.@internal.types_package;
+
+
+// tcArrayType typechecks an OTARRAY node.
+
+using System;
 public static partial class typecheck_package {
 
-    // tcArrayType typechecks an OTARRAY node.
 private static ir.Node tcArrayType(ptr<ir.ArrayType> _addr_n) {
     ref ir.ArrayType n = ref _addr_n.val;
 
@@ -31,7 +32,6 @@ private static ir.Node tcArrayType(ptr<ir.ArrayType> _addr_n) {
             @base.Errorf("use of [...] array outside of array literal");
         }
         return n;
-
     }
     n.Len = indexlit(Expr(n.Len));
     var size = n.Len;
@@ -42,7 +42,6 @@ private static ir.Node tcArrayType(ptr<ir.ArrayType> _addr_n) {
         else 
             @base.Errorf("invalid array bound %v", size);
                 return n;
-
     }
     var v = size.Val();
     if (ir.ConstOverflow(v, types.Types[types.TINT])) {
@@ -58,7 +57,6 @@ private static ir.Node tcArrayType(ptr<ir.ArrayType> _addr_n) {
     n.SetOTYPE(t);
     types.CheckSize(t);
     return n;
-
 }
 
 // tcChanType typechecks an OTCHAN node.
@@ -75,7 +73,6 @@ private static ir.Node tcChanType(ptr<ir.ChanType> _addr_n) {
     }
     n.SetOTYPE(types.NewChan(l.Type(), n.Dir));
     return n;
-
 }
 
 // tcFuncType typechecks an OTFUNC node.
@@ -103,7 +100,6 @@ private static ir.Node tcFuncType(ptr<ir.FuncType> _addr_n) {
 
     n.SetOTYPE(t);
     return n;
-
 }
 
 // tcInterfaceType typechecks an OTINTER node.
@@ -120,7 +116,6 @@ private static ir.Node tcInterfaceType(ptr<ir.InterfaceType> _addr_n) {
 
     n.SetOTYPE(types.NewInterface(types.LocalPkg, methods));
     return n;
-
 }
 
 // tcMapType typechecks an OTMAP node.
@@ -143,7 +138,6 @@ private static ir.Node tcMapType(ptr<ir.MapType> _addr_n) {
     n.SetOTYPE(types.NewMap(l.Type(), r.Type()));
     mapqueue = append(mapqueue, n); // check map keys when all types are settled
     return n;
-
 }
 
 // tcSliceType typechecks an OTSLICE node.
@@ -158,7 +152,6 @@ private static ir.Node tcSliceType(ptr<ir.SliceType> _addr_n) {
     n.SetOTYPE(t);
     types.CheckSize(t);
     return n;
-
 }
 
 // tcStructType typechecks an OTSTRUCT node.
@@ -173,14 +166,12 @@ private static ir.Node tcStructType(ptr<ir.StructType> _addr_n) {
             f.Embedded = 1;
         }
         f.Note = nf.Note;
-
     });
     checkdupfields("field", fields);
 
     @base.Pos = lno;
     n.SetOTYPE(types.NewStruct(types.LocalPkg, fields));
     return n;
-
 }
 
 // tcField typechecks a generic Field.
@@ -198,7 +189,6 @@ private static ptr<types.Field> tcField(ptr<ir.Field> _addr_n, Action<ptr<types.
         misc(f, n);
     }
     return _addr_f!;
-
 }
 
 // tcFields typechecks a slice of generic Fields.

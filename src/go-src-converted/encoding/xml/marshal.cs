@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xml -- go2cs converted at 2022 March 06 22:25:27 UTC
+// package xml -- go2cs converted at 2022 March 13 05:40:00 UTC
 // import "encoding/xml" ==> using xml = go.encoding.xml_package
 // Original source: C:\Program Files\Go\src\encoding\xml\marshal.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using encoding = go.encoding_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.encoding;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using encoding = encoding_package;
+using fmt = fmt_package;
+using io = io_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using strings = strings_package;
 
 public static partial class xml_package {
 
@@ -23,7 +23,6 @@ public static partial class xml_package {
 // This is not automatically added to any output of this package,
 // it is provided as a convenience.
 public static readonly @string Header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n";
-
 
 // Marshal returns the XML encoding of v.
 //
@@ -91,9 +90,7 @@ public static (slice<byte>, error) Marshal(object v) {
             return (null, error.As(err)!);
         }
     }
-
     return (b.Bytes(), error.As(null!)!);
-
 }
 
 // Marshaler is the interface implemented by objects that can marshal
@@ -148,9 +145,7 @@ public static (slice<byte>, error) MarshalIndent(object v, @string prefix, @stri
             return (null, error.As(err)!);
         }
     }
-
     return (b.Bytes(), error.As(null!)!);
-
 }
 
 // An Encoder writes XML data to an output stream.
@@ -189,7 +184,6 @@ private static error Encode(this ptr<Encoder> _addr_enc, object v) {
         return error.As(err)!;
     }
     return error.As(enc.p.Flush())!;
-
 }
 
 // EncodeElement writes the XML encoding of v to the stream,
@@ -207,7 +201,6 @@ private static error EncodeElement(this ptr<Encoder> _addr_enc, object v, StartE
         return error.As(err)!;
     }
     return error.As(enc.p.Flush())!;
-
 }
 
 private static slice<byte> begComment = (slice<byte>)"<!--";private static slice<byte> endComment = (slice<byte>)"-->";private static slice<byte> endProcInst = (slice<byte>)"?>";
@@ -242,7 +235,6 @@ private static error EncodeToken(this ptr<Encoder> _addr_enc, Token t) {
                 err = err__prev1;
 
             }
-
             break;
         case EndElement t:
             {
@@ -257,7 +249,6 @@ private static error EncodeToken(this ptr<Encoder> _addr_enc, Token t) {
                 err = err__prev1;
 
             }
-
             break;
         case CharData t:
             escapeText(p, t, false);
@@ -305,7 +296,6 @@ private static error EncodeToken(this ptr<Encoder> _addr_enc, Token t) {
         }
     }
     return error.As(p.cachedWriteError())!;
-
 }
 
 // isValidDirective reports whether dir is a valid directive text,
@@ -324,7 +314,6 @@ private static bool isValidDirective(Directive dir) {
                     }
 
                 }
-
             } 
             // Just ignore anything in comment
         else if (inquote != 0) 
@@ -342,15 +331,12 @@ private static bool isValidDirective(Directive dir) {
  {
                 depth++;
             }
-
         else if (c == '>') 
             if (depth == 0) {
                 return false;
             }
             depth--;
-        
-    }    return depth == 0 && inquote == 0 && !incomment;
-
+            }    return depth == 0 && inquote == 0 && !incomment;
 }
 
 // Flush flushes any buffered XML to the underlying writer.
@@ -412,7 +398,6 @@ private static @string createAttrPrefix(this ptr<printer> _addr_p, @string url) 
             prefix = prefix[(int)i + 1..];
         }
     }
-
     if (prefix == "" || !isName((slice<byte>)prefix) || strings.Contains(prefix, ":")) {
         prefix = "_";
     }
@@ -423,7 +408,7 @@ private static @string createAttrPrefix(this ptr<printer> _addr_p, @string url) 
         // Name is taken. Find a better one.
         p.seq++;
 
-        while (>>MARKER:FOREXPRESSION_LEVEL_1<<) {
+        while () {
             {
                 var id = prefix + "_" + strconv.Itoa(p.seq);
 
@@ -434,9 +419,7 @@ private static @string createAttrPrefix(this ptr<printer> _addr_p, @string url) 
                 }
 
             }
-
         }
-
     }
     p.attrPrefix[url] = prefix;
     p.attrNS[prefix] = url;
@@ -450,7 +433,6 @@ private static @string createAttrPrefix(this ptr<printer> _addr_p, @string url) 
     p.prefixes = append(p.prefixes, prefix);
 
     return prefix;
-
 }
 
 // deleteAttrPrefix removes an attribute name space prefix.
@@ -477,9 +459,7 @@ private static void popPrefix(this ptr<printer> _addr_p) {
             break;
         }
         p.deleteAttrPrefix(prefix);
-
     }
-
 }
 
 private static var marshalerType = reflect.TypeOf((Marshaler.val)(null)).Elem();private static var marshalerAttrType = reflect.TypeOf((MarshalerAttr.val)(null)).Elem();private static var textMarshalerType = reflect.TypeOf((encoding.TextMarshaler.val)(null)).Elem();
@@ -505,7 +485,6 @@ private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, 
             return error.As(null!)!;
         }
         val = val.Elem();
-
     }
 
     var kind = val.Kind();
@@ -548,14 +527,12 @@ private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, 
                     err = err__prev2;
 
                 }
-
             }
 
 
             i = i__prev1;
         }
         return error.As(null!)!;
-
     }
     var (tinfo, err) = getTypeInfo(typ);
     if (err != null) {
@@ -583,7 +560,6 @@ private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, 
                 }
 
             }
-
         }
     }
     if (start.Name.Local == "" && finfo != null) {
@@ -595,7 +571,6 @@ private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, 
             return error.As(addr(new UnsupportedTypeError(typ))!)!;
         }
         start.Name.Local = name;
-
     }
     {
         nint i__prev1 = i;
@@ -627,7 +602,6 @@ private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, 
                 err = err__prev1;
 
             }
-
         }
         i = i__prev1;
     }
@@ -643,7 +617,6 @@ private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, 
         err = err__prev1;
 
     }
-
 
     if (val.Kind() == reflect.Struct) {
         err = p.marshalStruct(tinfo, val);
@@ -677,9 +650,7 @@ private static error marshalValue(this ptr<printer> _addr_p, reflect.Value val, 
 
     }
 
-
     return error.As(p.cachedWriteError())!;
-
 }
 
 // marshalAttr marshals an attribute with the given name and value, adding to start.Attr.
@@ -696,7 +667,6 @@ private static error marshalAttr(this ptr<printer> _addr_p, ptr<StartElement> _a
             start.Attr = append(start.Attr, attr);
         }
         return error.As(null!)!;
-
     }
     if (val.CanAddr()) {
         var pv = val.Addr();
@@ -718,7 +688,6 @@ private static error marshalAttr(this ptr<printer> _addr_p, ptr<StartElement> _a
         }
         start.Attr = append(start.Attr, new Attr(name,string(text)));
         return error.As(null!)!;
-
     }
     if (val.CanAddr()) {
         pv = val.Addr();
@@ -749,10 +718,8 @@ private static error marshalAttr(this ptr<printer> _addr_p, ptr<StartElement> _a
                 }
 
             }
-
         }
         return error.As(null!)!;
-
     }
     if (val.Type() == attrType) {
         start.Attr = append(start.Attr, val.Interface()._<Attr>());
@@ -767,7 +734,6 @@ private static error marshalAttr(this ptr<printer> _addr_p, ptr<StartElement> _a
     }
     start.Attr = append(start.Attr, new Attr(name,s));
     return error.As(null!)!;
-
 }
 
 // defaultStart returns the default start element to use,
@@ -795,10 +761,8 @@ private static StartElement defaultStart(reflect.Type typ, ptr<fieldInfo> _addr_
         // Must be a pointer to a named type,
         // since it has the Marshaler methods.
         start.Name.Local = typ.Elem().Name();
-
     }
     return start;
-
 }
 
 // marshalInterface marshals a Marshaler interface value.
@@ -819,7 +783,6 @@ private static error marshalInterface(this ptr<printer> _addr_p, Marshaler val, 
     }
     p.tags = p.tags[..(int)n - 1];
     return error.As(null!)!;
-
 }
 
 // marshalTextInterface marshals a TextMarshaler interface value.
@@ -833,14 +796,12 @@ private static error marshalTextInterface(this ptr<printer> _addr_p, encoding.Te
             return error.As(err)!;
         }
     }
-
     var (text, err) = val.MarshalText();
     if (err != null) {
         return error.As(err)!;
     }
     EscapeText(p, text);
     return error.As(p.writeEnd(start.Name))!;
-
 }
 
 // writeStart writes the given start element.
@@ -877,10 +838,8 @@ private static error writeStart(this ptr<printer> _addr_p, ptr<StartElement> _ad
         p.WriteString("=\"");
         p.EscapeString(attr.Value);
         p.WriteByte('"');
-
     }    p.WriteByte('>');
     return error.As(null!)!;
-
 }
 
 private static error writeEnd(this ptr<printer> _addr_p, Name name) {
@@ -902,7 +861,6 @@ private static error writeEnd(this ptr<printer> _addr_p, Name name) {
             return error.As(fmt.Errorf("xml: end tag </%s> in namespace %s does not match start tag <%s> in namespace %s", name.Local, name.Space, top.Local, top.Space))!;
         }
     }
-
     p.tags = p.tags[..(int)len(p.tags) - 1];
 
     p.writeIndent(-1);
@@ -912,7 +870,6 @@ private static error writeEnd(this ptr<printer> _addr_p, Name name) {
     p.WriteByte('>');
     p.popPrefix();
     return error.As(null!)!;
-
 }
 
 private static (@string, slice<byte>, error) marshalSimple(this ptr<printer> _addr_p, reflect.Type typ, reflect.Value val) {
@@ -952,7 +909,6 @@ private static (@string, slice<byte>, error) marshalSimple(this ptr<printer> _ad
         }
         return ("", val.Bytes(), error.As(null!)!);
         return ("", null, error.As(addr(new UnsupportedTypeError(typ))!)!);
-
 }
 
 private static slice<byte> ddBytes = (slice<byte>)"--";
@@ -967,10 +923,8 @@ private static reflect.Value indirect(reflect.Value vf) {
             return vf;
         }
         vf = vf.Elem();
-
     }
     return vf;
-
 }
 
 private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _addr_tinfo, reflect.Value val) => func((_, panic, _) => {
@@ -988,7 +942,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
             // The field is behind an anonymous struct field that's
             // nil. Skip it.
             continue;
-
         }
 
         if (finfo.flags & fMode == fCDATA || finfo.flags & fMode == fCharData) 
@@ -1008,7 +961,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                 err = err__prev1;
 
             }
-
             if (vf.CanInterface() && vf.Type().Implements(textMarshalerType)) {
                 encoding.TextMarshaler (data, err) = vf.Interface()._<encoding.TextMarshaler>().MarshalText();
                 if (err != null) {
@@ -1026,11 +978,8 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                     err = err__prev2;
 
                 }
-
                 continue;
-
             }
-
             if (vf.CanAddr()) {
                 var pv = vf.Addr();
                 if (pv.CanInterface() && pv.Type().Implements(textMarshalerType)) {
@@ -1050,13 +999,9 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                         err = err__prev3;
 
                     }
-
                     continue;
-
                 }
-
             }
-
             array<byte> scratch = new array<byte>(64);
             vf = indirect(vf);
 
@@ -1073,7 +1018,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                     err = err__prev1;
 
                 }
-
             else if (vf.Kind() == reflect.Uint || vf.Kind() == reflect.Uint8 || vf.Kind() == reflect.Uint16 || vf.Kind() == reflect.Uint32 || vf.Kind() == reflect.Uint64 || vf.Kind() == reflect.Uintptr) 
                 {
                     var err__prev1 = err;
@@ -1087,7 +1031,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                     err = err__prev1;
 
                 }
-
             else if (vf.Kind() == reflect.Float32 || vf.Kind() == reflect.Float64) 
                 {
                     var err__prev1 = err;
@@ -1101,7 +1044,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                     err = err__prev1;
 
                 }
-
             else if (vf.Kind() == reflect.Bool) 
                 {
                     var err__prev1 = err;
@@ -1115,7 +1057,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                     err = err__prev1;
 
                 }
-
             else if (vf.Kind() == reflect.String) 
                 {
                     var err__prev1 = err;
@@ -1129,7 +1070,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                     err = err__prev1;
 
                 }
-
             else if (vf.Kind() == reflect.Slice) 
                 {
                     slice<byte> (elem, ok) = vf.Interface()._<slice<byte>>();
@@ -1147,11 +1087,9 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                             err = err__prev2;
 
                         }
-
                     }
 
                 }
-
                         continue;
         else if (finfo.flags & fMode == fComment) 
             {
@@ -1166,17 +1104,14 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                 err = err__prev1;
 
             }
-
             vf = indirect(vf);
             var k = vf.Kind();
             if (!(k == reflect.String || k == reflect.Slice && vf.Type().Elem().Kind() == reflect.Uint8)) {
                 return error.As(fmt.Errorf("xml: bad type for comment field of %s", val.Type()))!;
             }
-
             if (vf.Len() == 0) {
                 continue;
             }
-
             p.writeIndent(0);
             p.WriteString("<!--");
             var dashDash = false;
@@ -1201,13 +1136,10 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                         if (dashDash) {
                 return error.As(fmt.Errorf("xml: comments must not contain \"--\""))!;
             }
-
             if (dashLast) { 
                 // "--->" is invalid grammar. Make it "- -->"
                 p.WriteByte(' ');
-
             }
-
             p.WriteString("-->");
             continue;
         else if (finfo.flags & fMode == fInnerXML) 
@@ -1237,7 +1169,6 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                 err = err__prev1;
 
             }
-
             if (len(finfo.parents) > len(s.stack)) {
                 if (vf.Kind() != reflect.Ptr && vf.Kind() != reflect.Interface || !vf.IsNil()) {
                     {
@@ -1252,11 +1183,8 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
                         err = err__prev3;
 
                     }
-
                 }
-
             }
-
                 {
             var err__prev1 = err;
 
@@ -1269,10 +1197,8 @@ private static error marshalStruct(this ptr<printer> _addr_p, ptr<typeInfo> _add
             err = err__prev1;
 
         }
-
     }    s.trim(null);
     return error.As(p.cachedWriteError())!;
-
 });
 
 // return the bufio Writer's cached write error
@@ -1296,7 +1222,6 @@ private static void writeIndent(this ptr<printer> _addr_p, nint depthDelta) {
             return ;
         }
         p.indentedIn = false;
-
     }
     if (p.putNewline) {
         p.WriteByte('\n');
@@ -1346,11 +1271,9 @@ private static error trim(this ptr<parentStack> _addr_s, slice<@string> parents)
             }
 
         }
-
     }
     s.stack = s.stack[..(int)split];
     return error.As(null!)!;
-
 }
 
 // push adds parent elements to the stack and writes open tags.
@@ -1366,11 +1289,9 @@ private static error push(this ptr<parentStack> _addr_s, slice<@string> parents)
             }
 
         }
-
     }
     s.stack = append(s.stack, parents);
     return error.As(null!)!;
-
 }
 
 // UnsupportedTypeError is returned when Marshal encounters a type
@@ -1400,7 +1321,6 @@ private static bool isEmptyValue(reflect.Value v) {
     else if (v.Kind() == reflect.Interface || v.Kind() == reflect.Ptr) 
         return v.IsNil();
         return false;
-
 }
 
 } // end xml_package

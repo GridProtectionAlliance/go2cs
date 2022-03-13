@@ -2,40 +2,41 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package vcs -- go2cs converted at 2022 March 06 23:16:59 UTC
+// package vcs -- go2cs converted at 2022 March 13 06:30:17 UTC
 // import "cmd/go/internal/vcs" ==> using vcs = go.cmd.go.@internal.vcs_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\vcs\vcs.go
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using singleflight = go.@internal.singleflight_package;
-using fs = go.io.fs_package;
-using log = go.log_package;
-using urlpkg = go.net.url_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using search = go.cmd.go.@internal.search_package;
-using str = go.cmd.go.@internal.str_package;
-using web = go.cmd.go.@internal.web_package;
-
-using module = go.golang.org.x.mod.module_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using json = encoding.json_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using lazyregexp = @internal.lazyregexp_package;
+using singleflight = @internal.singleflight_package;
+using fs = io.fs_package;
+using log = log_package;
+using urlpkg = net.url_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using search = cmd.go.@internal.search_package;
+using str = cmd.go.@internal.str_package;
+using web = cmd.go.@internal.web_package;
+
+using module = golang.org.x.mod.module_package;
+
+
+// A vcsCmd describes how to use a version control system
+// like Mercurial, Git, or Subversion.
+
+using System;
 public static partial class vcs_package {
 
-    // A vcsCmd describes how to use a version control system
-    // like Mercurial, Git, or Subversion.
 public partial struct Cmd {
     public @string Name;
     public @string Cmd; // name of binary to invoke command
@@ -63,10 +64,8 @@ private static bool IsSecure(this ptr<Cmd> _addr_v, @string repo) {
     if (err != null) { 
         // If repo is not a URL, it's not secure.
         return false;
-
     }
     return v.isSecureScheme(u.Scheme);
-
 }
 
 private static bool isSecureScheme(this ptr<Cmd> _addr_v, @string scheme) {
@@ -90,11 +89,9 @@ private static bool isSecureScheme(this ptr<Cmd> _addr_v, @string scheme) {
                 }
 
             }
-
             break;
     }
     return defaultSecureScheme[scheme];
-
 }
 
 // A tagCmd describes a command to list available tags
@@ -119,7 +116,6 @@ private static ptr<Cmd> vcsByCmd(@string cmd) {
             return _addr_vcs!;
         }
     }    return _addr_null!;
-
 }
 
 // vcsHg describes how to use Mercurial.
@@ -135,7 +131,6 @@ private static (@string, error) hgRemoteRepo(ptr<Cmd> _addr_vcsHg, @string rootD
         return ("", error.As(err)!);
     }
     return (strings.TrimSpace(string(out)), error.As(null!)!);
-
 }
 
 // vcsGit describes how to use Git.
@@ -161,7 +156,6 @@ private static (@string, error) gitRemoteRepo(ptr<Cmd> _addr_vcsGit, @string roo
             return ("", error.As(errRemoteOriginNotFound)!);
         }
         return ("", error.As(err)!);
-
     }
     var @out = strings.TrimSpace(string(outb));
 
@@ -174,7 +168,6 @@ private static (@string, error) gitRemoteRepo(ptr<Cmd> _addr_vcsGit, @string roo
             // Eg, "git@github.com:user/repo" becomes
             // "ssh://git@github.com/user/repo".
             repoURL = addr(new urlpkg.URL(Scheme:"ssh",User:urlpkg.User(m[1]),Host:m[2],Path:m[3],));
-
         }
         else
  {
@@ -193,7 +186,6 @@ private static (@string, error) gitRemoteRepo(ptr<Cmd> _addr_vcsGit, @string roo
             return (repoURL.String(), error.As(null!)!);
         }
     }    return ("", error.As(errParse)!);
-
 }
 
 // vcsBzr describes how to use Bazaar.
@@ -209,7 +201,6 @@ private static (@string, error) bzrRemoteRepo(ptr<Cmd> _addr_vcsBzr, @string roo
         return ("", error.As(err)!);
     }
     return (strings.TrimSpace(string(outb)), error.As(null!)!);
-
 }
 
 private static (@string, error) bzrResolveRepo(ptr<Cmd> _addr_vcsBzr, @string rootDir, @string remoteRepo) {
@@ -245,7 +236,6 @@ private static (@string, error) bzrResolveRepo(ptr<Cmd> _addr_vcsBzr, @string ro
     }
     out = out[..(int)i];
     return (strings.TrimSpace(out), error.As(null!)!);
-
 }
 
 // vcsSvn describes how to use Subversion.
@@ -283,7 +273,6 @@ private static (@string, error) svnRemoteRepo(ptr<Cmd> _addr_vcsSvn, @string roo
     }
     out = out[..(int)i];
     return (strings.TrimSpace(out), error.As(null!)!);
-
 }
 
 // fossilRepoName is the name go get associates with a fossil repository. In the
@@ -306,7 +295,6 @@ private static (@string, error) fossilRemoteRepo(ptr<Cmd> _addr_vcsFossil, @stri
         return ("", error.As(err)!);
     }
     return (strings.TrimSpace(string(out)), error.As(null!)!);
-
 }
 
 private static @string String(this ptr<Cmd> _addr_v) {
@@ -393,7 +381,6 @@ private static (slice<byte>, error) run1(this ptr<Cmd> _addr_v, @string dir, @st
             return (null, error.As(err)!);
         }
         args = args[(int)2..];
-
     }
     if (len(args) >= 2 && args[0] == "-go-internal-cd") {
         if (filepath.IsAbs(args[1])) {
@@ -404,7 +391,6 @@ private static (slice<byte>, error) run1(this ptr<Cmd> _addr_v, @string dir, @st
             dir = filepath.Join(dir, args[1]);
         }
         args = args[(int)2..];
-
     }
     var (_, err) = exec.LookPath(v.Cmd);
     if (err != null) {
@@ -434,11 +420,9 @@ private static (slice<byte>, error) run1(this ptr<Cmd> _addr_v, @string dir, @st
                 }
 
             }
-
         }
     }
     return (out, error.As(err)!);
-
 }
 
 // Ping pings to determine scheme to use.
@@ -462,9 +446,7 @@ private static error Create(this ptr<Cmd> _addr_v, @string dir, @string repo) {
             }
 
         }
-
     }    return error.As(null!)!;
-
 }
 
 // Download downloads any new changes for the repo in dir.
@@ -480,9 +462,7 @@ private static error Download(this ptr<Cmd> _addr_v, @string dir) {
             }
 
         }
-
     }    return error.As(null!)!;
-
 }
 
 // Tags returns the list of available tags for the repo in dir.
@@ -502,7 +482,6 @@ private static (slice<@string>, error) Tags(this ptr<Cmd> _addr_v, @string dir) 
             tags = append(tags, m[1]);
         }
     }    return (tags, error.As(null!)!);
-
 }
 
 // tagSync syncs the repo in dir to the named tag,
@@ -545,14 +524,12 @@ private static error TagSync(this ptr<Cmd> _addr_v, @string dir, @string tag) {
                     err = err__prev2;
 
                 }
-
             }
 
             cmd = cmd__prev1;
         }
 
         return error.As(null!)!;
-
     }
     {
         var cmd__prev1 = cmd;
@@ -571,13 +548,11 @@ private static error TagSync(this ptr<Cmd> _addr_v, @string dir, @string tag) {
                 err = err__prev1;
 
             }
-
         }
         cmd = cmd__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 // A vcsPath describes how to convert an import path into a
@@ -630,19 +605,15 @@ public static (ptr<Cmd>, @string, error) FromDir(@string dir, @string srcRoot) {
                     } 
                     // Otherwise, we have one VCS inside a different VCS.
                     return (_addr_null!, "", error.As(fmt.Errorf("directory %q uses %s, but parent %q uses %s", filepath.Join(srcRoot, rootRet), vcsRet.Cmd, filepath.Join(srcRoot, root), vcs.Cmd))!);
-
                 }
 
             }
-
         }        var ndir = filepath.Dir(dir);
         if (len(ndir) >= len(dir)) { 
             // Shouldn't happen, but just in case, stop.
             break;
-
         }
         dir = ndir;
-
     }
 
     if (vcsRet != null) {
@@ -654,12 +625,9 @@ public static (ptr<Cmd>, @string, error) FromDir(@string dir, @string srcRoot) {
             }
 
         }
-
         return (_addr_vcsRet!, rootRet, error.As(null!)!);
-
     }
     return (_addr_null!, "", error.As(fmt.Errorf("directory %q is not using a known version control system", origDir))!);
-
 }
 
 // A govcsRule is a single GOVCS rule like private:hg|svn.
@@ -710,7 +678,6 @@ private static (govcsConfig, error) parseGOVCS(@string s) {
             }
 
         }
-
         have[pattern] = item;
         var allowed = strings.Split(list, "|");
         {
@@ -730,9 +697,7 @@ private static (govcsConfig, error) parseGOVCS(@string s) {
         }
 
         cfg = append(cfg, new govcsRule(pattern,allowed));
-
     }    return (cfg, error.As(null!)!);
-
 }
 
 private static bool allow(this ptr<govcsConfig> _addr_c, @string path, bool @private, @string vcs) {
@@ -761,9 +726,7 @@ private static bool allow(this ptr<govcsConfig> _addr_c, @string path, bool @pri
                 return true;
             }
         }        return false;
-
     }    return false;
-
 }
 
 private static govcsConfig govcs = default;private static error govcsErr = default!;private static sync.Once govcsOnce = default;
@@ -790,7 +753,6 @@ private static error checkGOVCS(ptr<Cmd> _addr_vcs, @string root) {
         // involve an external version control system
         // and are always allowed.
         return error.As(null!)!;
-
     }
     govcsOnce.Do(() => {
         govcs, govcsErr = parseGOVCS(os.Getenv("GOVCS"));
@@ -806,10 +768,8 @@ private static error checkGOVCS(ptr<Cmd> _addr_vcs, @string root) {
             what = "private";
         }
         return error.As(fmt.Errorf("GOVCS disallows using %s for %s %s; see 'go help vcs'", vcs.Cmd, what, root))!;
-
     }
     return error.As(null!)!;
-
 }
 
 // CheckNested checks for an incorrectly-nested VCS-inside-VCS
@@ -837,23 +797,18 @@ public static error CheckNested(ptr<Cmd> _addr_vcs, @string dir, @string srcRoot
                     } 
                     // Otherwise, we have one VCS inside a different VCS.
                     return error.As(fmt.Errorf("directory %q uses %s, but parent %q uses %s", dir, vcs.Cmd, otherDir, otherVCS.Cmd))!;
-
                 }
 
             }
-
         }        var newDir = filepath.Dir(otherDir);
         if (len(newDir) >= len(otherDir)) { 
             // Shouldn't happen, but just in case, stop.
             break;
-
         }
         otherDir = newDir;
-
     }
 
     return error.As(null!)!;
-
 }
 
 // RepoRoot describes the repository root for a tree of source code.
@@ -870,7 +825,6 @@ private static @string httpPrefix(@string s) {
             return prefix;
         }
     }    return "";
-
 }
 
 // ModuleMode specifies whether to prefer modules when looking up code sources.
@@ -879,7 +833,6 @@ public partial struct ModuleMode { // : nint
 
 public static readonly ModuleMode IgnoreMod = iota;
 public static readonly var PreferMod = 0;
-
 
 // RepoRootForImportPath analyzes importPath to determine the
 // version control system, and code repository to use.
@@ -905,10 +858,8 @@ public static (ptr<RepoRoot>, error) RepoRootForImportPath(@string importPath, M
         // Do not allow wildcards in the repo root.
         rr = null;
         err = importErrorf(importPath, "cannot expand ... in %q", importPath);
-
     }
     return (_addr_rr!, error.As(err)!);
-
 }
 
 private static var errUnknownSite = errors.New("dynamic lookup required to find mapping");
@@ -925,7 +876,6 @@ private static (ptr<RepoRoot>, error) repoRootFromVCSPaths(@string importPath, w
         // That script has everything it needs in the replacement set, but it is still
         // doing network calls.
         return (_addr_null!, error.As(fmt.Errorf("no modules on example.net"))!);
-
     }
     if (importPath == "rsc.io") { 
         // This special case allows tests like ../../testdata/script/govcs.txt
@@ -933,7 +883,6 @@ private static (ptr<RepoRoot>, error) repoRootFromVCSPaths(@string importPath, w
         // like rsc.io/nonexist.svn/foo needs to not make a network call for
         // a lookup on rsc.io.
         return (_addr_null!, error.As(fmt.Errorf("rsc.io is not a module"))!);
-
     }
     {
         var prefix = httpPrefix(importPath);
@@ -942,10 +891,8 @@ private static (ptr<RepoRoot>, error) repoRootFromVCSPaths(@string importPath, w
             // The importPath has been cleaned, so has only one slash. The pattern
             // ignores the slashes; the error message puts them back on the RHS at least.
             return (_addr_null!, error.As(fmt.Errorf("%q not allowed in import path", prefix + "//"))!);
-
         }
     }
-
     foreach (var (_, srv) in vcsPaths) {
         if (!str.HasPathPrefix(importPath, srv.pathPrefix)) {
             continue;
@@ -981,7 +928,6 @@ private static (ptr<RepoRoot>, error) repoRootFromVCSPaths(@string importPath, w
                 err = err__prev2;
 
             }
-
         }
         var vcs = vcsByCmd(match["vcs"]);
         if (vcs == null) {
@@ -999,7 +945,6 @@ private static (ptr<RepoRoot>, error) repoRootFromVCSPaths(@string importPath, w
             err = err__prev1;
 
         }
-
         @string repoURL = default;
         if (!srv.schemelessRepo) {
             repoURL = match["repo"];
@@ -1019,17 +964,12 @@ private static (ptr<RepoRoot>, error) repoRootFromVCSPaths(@string importPath, w
                         break;
                     }
                 }
-
             }
-
             repoURL = scheme + "://" + repo;
-
         }
         ptr<RepoRoot> rr = addr(new RepoRoot(Repo:repoURL,Root:match["root"],VCS:vcs,));
         return (_addr_rr!, error.As(null!)!);
-
     }    return (_addr_null!, error.As(errUnknownSite)!);
-
 }
 
 // urlForImportPath returns a partially-populated URL for the given Go import path.
@@ -1053,7 +993,6 @@ private static (ptr<urlpkg.URL>, error) urlForImportPath(@string importPath) {
         path = "/";
     }
     return (addr(new urlpkg.URL(Host:host,Path:path,RawQuery:"go-get=1")), error.As(null!)!);
-
 }
 
 // repoRootForImportDynamic finds a *RepoRoot for a custom domain that's not
@@ -1075,7 +1014,6 @@ private static (ptr<RepoRoot>, error) repoRootForImportDynamic(@string importPat
             msg = "http/" + msg;
         }
         return (_addr_null!, error.As(fmt.Errorf(msg, err))!);
-
     }
     var body = resp.Body;
     defer(body.Close());
@@ -1088,11 +1026,9 @@ private static (ptr<RepoRoot>, error) repoRootForImportDynamic(@string importPat
                 // If the server's status was not OK, prefer to report that instead of
                 // an XML parse error.
                 return (_addr_null!, error.As(respErr)!);
-
             }
 
         }
-
     }
     if (err != null) {
         return (_addr_null!, error.As(fmt.Errorf("parsing %s: %v", importPath, err))!);
@@ -1107,9 +1043,7 @@ private static (ptr<RepoRoot>, error) repoRootForImportDynamic(@string importPat
             }
 
         }
-
         return (_addr_null!, error.As(fmt.Errorf("parse %s: no go-import meta tags (%s)", resp.URL, err))!);
-
     }
     if (cfg.BuildV) {
         log.Printf("get %q: found meta tag %#v at %s", importPath, mmi, url);
@@ -1139,7 +1073,6 @@ private static (ptr<RepoRoot>, error) repoRootForImportDynamic(@string importPat
         err = err__prev1;
 
     }
-
     ptr<Cmd> vcs;
     if (mmi.VCS == "mod") {
         vcs = vcsMod;
@@ -1163,10 +1096,8 @@ private static (ptr<RepoRoot>, error) repoRootForImportDynamic(@string importPat
 
     }
 
-
     ptr<RepoRoot> rr = addr(new RepoRoot(Repo:mmi.RepoRoot,Root:mmi.Prefix,IsCustom:true,VCS:vcs,));
     return (_addr_rr!, error.As(null!)!);
-
 });
 
 // validateRepoRoot returns an error if repoRoot does not seem to be
@@ -1183,7 +1114,6 @@ private static error validateRepoRoot(@string repoRoot) {
         return error.As(errors.New("file scheme disallowed"))!;
     }
     return error.As(null!)!;
-
 }
 
 private static singleflight.Group fetchGroup = default;
@@ -1224,7 +1154,6 @@ private static (ptr<urlpkg.URL>, slice<metaImport>, error) metaImportsForPrefix(
             res = res__prev1;
 
         }
-
         fetchCacheMu.Unlock();
 
         var (url, err) = urlForImportPath(importPrefix);
@@ -1246,11 +1175,9 @@ private static (ptr<urlpkg.URL>, slice<metaImport>, error) metaImportsForPrefix(
                     // If the server's status was not OK, prefer to report that instead of
                     // an XML parse error.
                     return _addr_setCache(new fetchResult(url:url,err:respErr))!;
-
                 }
 
             }
-
         }
         if (err != null) {
             return _addr_setCache(new fetchResult(url:url,err:fmt.Errorf("parsing %s: %v",resp.URL,err)))!;
@@ -1259,11 +1186,9 @@ private static (ptr<urlpkg.URL>, slice<metaImport>, error) metaImportsForPrefix(
             err = fmt.Errorf("fetching %s: no go-import meta tag found in %s", importPrefix, resp.URL);
         }
         return _addr_setCache(new fetchResult(url:url,imports:imports,err:err))!;
-
     });
     fetchResult res = resi._<fetchResult>();
     return (_addr_res.url!, res.imports, error.As(res.err)!);
-
 });
 
 private partial struct fetchResult {
@@ -1315,19 +1240,14 @@ private static (metaImport, error) matchGoImport(slice<metaImport> imports, @str
                 // We have a mod entry and don't care about the rest,
                 // matching or not.
                 break;
-
             }
-
             return (new metaImport(), error.As(fmt.Errorf("multiple meta tags match import path %q", importPath))!);
-
         }
         match = i;
-
     }    if (match == -1) {
         return (new metaImport(), error.As(errImportMismatch)!);
     }
     return (imports[match], error.As(null!)!);
-
 }
 
 // expand rewrites s to replace {k} with match[k] for each key k in match.
@@ -1339,7 +1259,6 @@ private static @string expand(map<@string, @string> match, @string s) {
     foreach (var (k, v) in match) {
         oldNew = append(oldNew, "{" + k + "}", v);
     }    return strings.NewReplacer(oldNew).Replace(s);
-
 }
 
 // vcsPaths defines the meaning of import paths referring to
@@ -1364,7 +1283,6 @@ private static error noVCSSuffix(map<@string, @string> match) {
             return error.As(fmt.Errorf("invalid version control suffix in %s path", match["prefix"]))!;
         }
     }    return error.As(null!)!;
-
 }
 
 // bitbucketVCS determines the version control system for a
@@ -1381,7 +1299,6 @@ private static error bitbucketVCS(map<@string, @string> match) {
         err = err__prev1;
 
     }
-
 
     ref var resp = ref heap(out ptr<var> _addr_resp);
     ptr<urlpkg.URL> url = addr(new urlpkg.URL(Scheme:"https",Host:"api.bitbucket.org",Path:expand(match,"/2.0/repositories/{bitname}"),RawQuery:"fields=scm",));
@@ -1400,13 +1317,11 @@ private static error bitbucketVCS(map<@string, @string> match) {
                         break;
                     }
                 }
-
             }
     else
 
 
         }
-
 
         if (resp.SCM == "") {
             return error.As(err)!;
@@ -1424,7 +1339,6 @@ private static error bitbucketVCS(map<@string, @string> match) {
             err = err__prev2;
 
         }
-
     }
     if (vcsByCmd(resp.SCM) != null) {
         match["vcs"] = resp.SCM;
@@ -1432,10 +1346,8 @@ private static error bitbucketVCS(map<@string, @string> match) {
             match["repo"] += ".git";
         }
         return error.As(null!)!;
-
     }
     return error.As(fmt.Errorf("unable to detect version control system for bitbucket.org/ path"))!;
-
 }
 
 // launchpadVCS solves the ambiguity for "lp.net/project/foo". In this case,
@@ -1453,7 +1365,6 @@ private static error launchpadVCS(map<@string, @string> match) {
         match["repo"] = expand(match, "https://{root}");
     }
     return error.As(null!)!;
-
 }
 
 // importError is a copy of load.importError, made to avoid a dependency cycle
@@ -1474,9 +1385,7 @@ private static error importErrorf(@string path, @string format, params object[] 
             panic(fmt.Sprintf("path %q not in error %q", path, errStr));
         }
     }
-
     return error.As(err)!;
-
 });
 
 private static @string Error(this ptr<importError> _addr_e) {
@@ -1491,7 +1400,6 @@ private static error Unwrap(this ptr<importError> _addr_e) {
     // Don't return e.err directly, since we're only wrapping an error if %w
     // was passed to ImportErrorf.
     return error.As(errors.Unwrap(e.err))!;
-
 }
 
 private static @string ImportPath(this ptr<importError> _addr_e) {

@@ -1,11 +1,9 @@
 // Code generated from gen/386splitload.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 22:52:22 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:03:56 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewrite386splitload.go
-
-
 namespace go.cmd.compile.@internal;
 
 public static partial class ssa_package {
@@ -27,7 +25,6 @@ private static bool rewriteValue386splitload(ptr<Value> _addr_v) {
     else if (v.Op == Op386CMPWload) 
         return rewriteValue386splitload_Op386CMPWload(_addr_v);
         return false;
-
 }
 private static bool rewriteValue386splitload_Op386CMPBconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -52,7 +49,6 @@ private static bool rewriteValue386splitload_Op386CMPBconstload(ptr<Value> _addr
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386splitload_Op386CMPBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -78,7 +74,6 @@ private static bool rewriteValue386splitload_Op386CMPBload(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValue386splitload_Op386CMPLconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -103,7 +98,6 @@ private static bool rewriteValue386splitload_Op386CMPLconstload(ptr<Value> _addr
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386splitload_Op386CMPLload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -129,7 +123,6 @@ private static bool rewriteValue386splitload_Op386CMPLload(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValue386splitload_Op386CMPWconstload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -154,7 +147,6 @@ private static bool rewriteValue386splitload_Op386CMPWconstload(ptr<Value> _addr
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValue386splitload_Op386CMPWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -180,7 +172,6 @@ private static bool rewriteValue386splitload_Op386CMPWload(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteBlock386splitload(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;

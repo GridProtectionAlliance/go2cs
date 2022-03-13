@@ -5,182 +5,181 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64asm -- go2cs converted at 2022 March 06 23:24:39 UTC
+// package arm64asm -- go2cs converted at 2022 March 13 06:37:48 UTC
 // import "cmd/vendor/golang.org/x/arch/arm64/arm64asm" ==> using arm64asm = go.cmd.vendor.golang.org.x.arch.arm64.arm64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm64\arm64asm\arg.go
-
-
 namespace go.cmd.vendor.golang.org.x.arch.arm64;
 
 public static partial class arm64asm_package {
 
-    // Naming for Go decoder arguments:
-    //
-    // - arg_Wd: a W register encoded in the Rd[4:0] field (31 is wzr)
-    //
-    // - arg_Xd: a X register encoded in the Rd[4:0] field (31 is xzr)
-    //
-    // - arg_Wds: a W register encoded in the Rd[4:0] field (31 is wsp)
-    //
-    // - arg_Xds: a X register encoded in the Rd[4:0] field (31 is sp)
-    //
-    // - arg_Wn: encoded in Rn[9:5]
-    //
-    // - arg_Wm: encoded in Rm[20:16]
-    //
-    // - arg_Wm_extend__UXTB_0__UXTH_1__LSL_UXTW_2__UXTX_3__SXTB_4__SXTH_5__SXTW_6__SXTX_7__0_4:
-    //     a W register encoded in Rm with an extend encoded in option[15:13] and an amount
-    //     encoded in imm3[12:10] in the range [0,4].
-    //
-    // - arg_Rm_extend__UXTB_0__UXTH_1__UXTW_2__LSL_UXTX_3__SXTB_4__SXTH_5__SXTW_6__SXTX_7__0_4:
-    //     a W or X register encoded in Rm with an extend encoded in option[15:13] and an
-    //     amount encoded in imm3[12:10] in the range [0,4]. If the extend is UXTX or SXTX,
-    //     it's an X register else, it's a W register.
-    //
-    // - arg_Wm_shift__LSL_0__LSR_1__ASR_2__0_31:
-    //     a W register encoded in Rm with a shift encoded in shift[23:22] and an amount
-    //     encoded in imm6[15:10] in the range [0,31].
-    //
-    // - arg_IAddSub:
-    //     An immediate for a add/sub instruction encoded in imm12[21:10] with an optional
-    //     left shift of 12 encoded in shift[23:22].
-    //
-    // - arg_Rt_31_1__W_0__X_1:
-    //     a W or X register encoded in Rt[4:0]. The width specifier is encoded in the field
-    //     [31:31] (offset 31, bit count 1) and the register is W for 0 and X for 1.
-    //
-    // - arg_[s|u]label_FIELDS_POWER:
-    //     a program label encoded as "FIELDS" times 2^POWER in the range [MIN, MAX] (determined
-    //     by signd/unsigned, FIELDS and POWER), e.g.
-    //       arg_slabel_imm14_2
-    //       arg_slabel_imm19_2
-    //       arg_slabel_imm26_2
-    //       arg_slabel_immhi_immlo_0
-    //       arg_slabel_immhi_immlo_12
-    //
-    // - arg_Xns_mem_post_imm7_8_signed:
-    //     addressing mode of post-index with a base register: Xns and a signed offset encoded
-    //     in the "imm7" field times 8
-    //
-    // - arg_Xns_mem_extend_m__UXTW_2__LSL_3__SXTW_6__SXTX_7__0_0__3_1:
-    //     addressing mode of extended register with a base register: Xns, an offset register
-    //     (<Wm>|<Xm>) with an extend encoded in option[15:13] and a shift amount encoded in
-    //     S[12:12] in the range [0,3] (S=0:0, S=1:3).
-    //
-    // - arg_Xns_mem_optional_imm12_4_unsigned:
-    //     addressing mode of unsigned offset with a base register: Xns and an optional unsigned
-    //     offset encoded in the "imm12" field times 4
-    //
-    // - arg_Xns_mem_wb_imm7_4_signed:
-    //     addressing mode of pre-index with a base register: Xns and the signed offset encoded
-    //     in the "imm7" field times 4
-    //
-    // - arg_Xns_mem_post_size_1_8_unsigned__4_0__8_1__16_2__32_3:
-    //     a post-index immediate offset, encoded in the "size" field. It can have the following values:
-    //       #4 when size = 00
-    //       #8 when size = 01
-    //       #16 when size = 10
-    //       #32 when size = 11
-    //
-    // - arg_immediate_0_127_CRm_op2:
-    //     an immediate encoded in "CRm:op2" in the range 0 to 127
-    //
-    // - arg_immediate_bitmask_64_N_imms_immr:
-    //     a bitmask immediate for 64-bit variant and encoded in "N:imms:immr"
-    //
-    // - arg_immediate_SBFX_SBFM_64M_bitfield_width_64_imms:
-    //     an immediate for the <width> bitfield of SBFX 64-bit variant
-    //
-    // - arg_immediate_shift_32_implicit_inverse_imm16_hw:
-    //     a 32-bit immediate of the bitwise inverse of which can be encoded in "imm16:hw"
-    //
-    // - arg_cond_[Not]AllowALNV_[Invert|Normal]:
-    //     a standard condition, encoded in the "cond" field, excluding (NotAllow) AL and NV with
-    //     its least significant bit [Yes|No] inverted, e.g.
-    //       arg_cond_AllowALNV_Normal
-    //       arg_cond_NotAllowALNV_Invert
-    //
-    // - arg_immediate_OptLSL_amount_16_0_48:
-    //     An immediate for MOV[KNZ] instruction encoded in imm16[20:5] with an optional
-    //     left shift of 16 in the range [0, 48] encoded in hw[22, 21]
-    //
-    // - arg_immediate_0_width_m1_immh_immb__UIntimmhimmb8_1__UIntimmhimmb16_2__UIntimmhimmb32_4__UIntimmhimmb64_8:
-    //     the left shift amount, in the range 0 to the operand width in bits minus 1,
-    //     encoded in the "immh:immb" field. It can have the following values:
-    //       (UInt(immh:immb)-8) when immh = 0001
-    //       (UInt(immh:immb)-16) when immh = 001x
-    //       (UInt(immh:immb)-32) when immh = 01xx
-    //       (UInt(immh:immb)-64) when immh = 1xxx
-    //
-    // - arg_immediate_1_width_immh_immb__16UIntimmhimmb_1__32UIntimmhimmb_2__64UIntimmhimmb_4:
-    //     the right shift amount, in the range 1 to the destination operand width in
-    //     bits, encoded in the "immh:immb" field. It can have the following values:
-    //       (16-UInt(immh:immb)) when immh = 0001
-    //       (32-UInt(immh:immb)) when immh = 001x
-    //       (64-UInt(immh:immb)) when immh = 01xx
-    //
-    // - arg_immediate_8x8_a_b_c_d_e_f_g_h:
-    //     a 64-bit immediate 'aaaaaaaabbbbbbbbccccccccddddddddeeeeeeeeffffffffgggggggghhhhhhhh',
-    //     encoded in "a:b:c:d:e:f:g:h".
-    //
-    // - arg_immediate_fbits_min_1_max_32_sub_64_scale:
-    //     the number of bits after the binary point in the fixed-point destination,
-    //     in the range 1 to 32, encoded as 64 minus "scale".
-    //
-    // - arg_immediate_floatzero: #0.0
-    //
-    // - arg_immediate_exp_3_pre_4_a_b_c_d_e_f_g_h:
-    //     a signed floating-point constant with 3-bit exponent and normalized 4 bits of precision,
-    //     encoded in "a:b:c:d:e:f:g:h"
-    //
-    // - arg_immediate_fbits_min_1_max_0_sub_0_immh_immb__64UIntimmhimmb_4__128UIntimmhimmb_8:
-    //     the number of fractional bits, in the range 1 to the operand width, encoded
-    //     in the "immh:immb" field. It can have the following values:
-    //       (64-UInt(immh:immb)) when immh = 01xx
-    //       (128-UInt(immh:immb)) when immh = 1xxx
-    //
-    // - arg_immediate_index_Q_imm4__imm4lt20gt_00__imm4_10:
-    //     the lowest numbered byte element to be extracted, encoded in the "Q:imm4" field.
-    //     It can have the following values:
-    //       imm4<2:0> when Q = 0, imm4<3> = 0
-    //       imm4 when Q = 1, imm4<3> = x
-    //
-    // - arg_sysop_AT_SYS_CR_system:
-    //     system operation for system instruction: AT encoded in the "op1:CRm<0>:op2" field
-    //
-    // - arg_prfop_Rt:
-    //     prefectch operation encoded in the "Rt"
-    //
-    // - arg_sysreg_o0_op1_CRn_CRm_op2:
-    //     system register name encoded in the "o0:op1:CRn:CRm:op2"
-    //
-    // - arg_pstatefield_op1_op2__SPSel_05__DAIFSet_36__DAIFClr_37:
-    //     PSTATE field name encoded in the "op1:op2" field
-    //
-    // - arg_Vd_arrangement_size_Q___8B_00__16B_01__4H_10__8H_11__2S_20__4S_21__2D_31:
-    //     one register with arrangement specifier encoded in the "size:Q" field which can have the following values:
-    //       8B when size = 00, Q = 0
-    //       16B when size = 00, Q = 1
-    //       4H when size = 01, Q = 0
-    //       8H when size = 01, Q = 1
-    //       2S when size = 10, Q = 0
-    //       4S when size = 10, Q = 1
-    //       2D when size = 11, Q = 1
-    //       The encoding size = 11, Q = 0 is reserved.
-    //
-    // - arg_Vt_3_arrangement_size_Q___8B_00__16B_01__4H_10__8H_11__2S_20__4S_21__1D_30__2D_31:
-    //     three registers with arrangement specifier encoded in the "size:Q" field which can have the following values:
-    //       8B when size = 00, Q = 0
-    //       16B when size = 00, Q = 1
-    //       4H when size = 01, Q = 0
-    //       8H when size = 01, Q = 1
-    //       2S when size = 10, Q = 0
-    //       4S when size = 10, Q = 1
-    //       2D when size = 11, Q = 1
-    //       The encoding size = 11, Q = 0 is reserved.
-    //
-    // - arg_Vt_1_arrangement_H_index__Q_S_size_1:
-    //     one register with arrangement:H and element index encoded in "Q:S:size<1>".
+// Naming for Go decoder arguments:
+//
+// - arg_Wd: a W register encoded in the Rd[4:0] field (31 is wzr)
+//
+// - arg_Xd: a X register encoded in the Rd[4:0] field (31 is xzr)
+//
+// - arg_Wds: a W register encoded in the Rd[4:0] field (31 is wsp)
+//
+// - arg_Xds: a X register encoded in the Rd[4:0] field (31 is sp)
+//
+// - arg_Wn: encoded in Rn[9:5]
+//
+// - arg_Wm: encoded in Rm[20:16]
+//
+// - arg_Wm_extend__UXTB_0__UXTH_1__LSL_UXTW_2__UXTX_3__SXTB_4__SXTH_5__SXTW_6__SXTX_7__0_4:
+//     a W register encoded in Rm with an extend encoded in option[15:13] and an amount
+//     encoded in imm3[12:10] in the range [0,4].
+//
+// - arg_Rm_extend__UXTB_0__UXTH_1__UXTW_2__LSL_UXTX_3__SXTB_4__SXTH_5__SXTW_6__SXTX_7__0_4:
+//     a W or X register encoded in Rm with an extend encoded in option[15:13] and an
+//     amount encoded in imm3[12:10] in the range [0,4]. If the extend is UXTX or SXTX,
+//     it's an X register else, it's a W register.
+//
+// - arg_Wm_shift__LSL_0__LSR_1__ASR_2__0_31:
+//     a W register encoded in Rm with a shift encoded in shift[23:22] and an amount
+//     encoded in imm6[15:10] in the range [0,31].
+//
+// - arg_IAddSub:
+//     An immediate for a add/sub instruction encoded in imm12[21:10] with an optional
+//     left shift of 12 encoded in shift[23:22].
+//
+// - arg_Rt_31_1__W_0__X_1:
+//     a W or X register encoded in Rt[4:0]. The width specifier is encoded in the field
+//     [31:31] (offset 31, bit count 1) and the register is W for 0 and X for 1.
+//
+// - arg_[s|u]label_FIELDS_POWER:
+//     a program label encoded as "FIELDS" times 2^POWER in the range [MIN, MAX] (determined
+//     by signd/unsigned, FIELDS and POWER), e.g.
+//       arg_slabel_imm14_2
+//       arg_slabel_imm19_2
+//       arg_slabel_imm26_2
+//       arg_slabel_immhi_immlo_0
+//       arg_slabel_immhi_immlo_12
+//
+// - arg_Xns_mem_post_imm7_8_signed:
+//     addressing mode of post-index with a base register: Xns and a signed offset encoded
+//     in the "imm7" field times 8
+//
+// - arg_Xns_mem_extend_m__UXTW_2__LSL_3__SXTW_6__SXTX_7__0_0__3_1:
+//     addressing mode of extended register with a base register: Xns, an offset register
+//     (<Wm>|<Xm>) with an extend encoded in option[15:13] and a shift amount encoded in
+//     S[12:12] in the range [0,3] (S=0:0, S=1:3).
+//
+// - arg_Xns_mem_optional_imm12_4_unsigned:
+//     addressing mode of unsigned offset with a base register: Xns and an optional unsigned
+//     offset encoded in the "imm12" field times 4
+//
+// - arg_Xns_mem_wb_imm7_4_signed:
+//     addressing mode of pre-index with a base register: Xns and the signed offset encoded
+//     in the "imm7" field times 4
+//
+// - arg_Xns_mem_post_size_1_8_unsigned__4_0__8_1__16_2__32_3:
+//     a post-index immediate offset, encoded in the "size" field. It can have the following values:
+//       #4 when size = 00
+//       #8 when size = 01
+//       #16 when size = 10
+//       #32 when size = 11
+//
+// - arg_immediate_0_127_CRm_op2:
+//     an immediate encoded in "CRm:op2" in the range 0 to 127
+//
+// - arg_immediate_bitmask_64_N_imms_immr:
+//     a bitmask immediate for 64-bit variant and encoded in "N:imms:immr"
+//
+// - arg_immediate_SBFX_SBFM_64M_bitfield_width_64_imms:
+//     an immediate for the <width> bitfield of SBFX 64-bit variant
+//
+// - arg_immediate_shift_32_implicit_inverse_imm16_hw:
+//     a 32-bit immediate of the bitwise inverse of which can be encoded in "imm16:hw"
+//
+// - arg_cond_[Not]AllowALNV_[Invert|Normal]:
+//     a standard condition, encoded in the "cond" field, excluding (NotAllow) AL and NV with
+//     its least significant bit [Yes|No] inverted, e.g.
+//       arg_cond_AllowALNV_Normal
+//       arg_cond_NotAllowALNV_Invert
+//
+// - arg_immediate_OptLSL_amount_16_0_48:
+//     An immediate for MOV[KNZ] instruction encoded in imm16[20:5] with an optional
+//     left shift of 16 in the range [0, 48] encoded in hw[22, 21]
+//
+// - arg_immediate_0_width_m1_immh_immb__UIntimmhimmb8_1__UIntimmhimmb16_2__UIntimmhimmb32_4__UIntimmhimmb64_8:
+//     the left shift amount, in the range 0 to the operand width in bits minus 1,
+//     encoded in the "immh:immb" field. It can have the following values:
+//       (UInt(immh:immb)-8) when immh = 0001
+//       (UInt(immh:immb)-16) when immh = 001x
+//       (UInt(immh:immb)-32) when immh = 01xx
+//       (UInt(immh:immb)-64) when immh = 1xxx
+//
+// - arg_immediate_1_width_immh_immb__16UIntimmhimmb_1__32UIntimmhimmb_2__64UIntimmhimmb_4:
+//     the right shift amount, in the range 1 to the destination operand width in
+//     bits, encoded in the "immh:immb" field. It can have the following values:
+//       (16-UInt(immh:immb)) when immh = 0001
+//       (32-UInt(immh:immb)) when immh = 001x
+//       (64-UInt(immh:immb)) when immh = 01xx
+//
+// - arg_immediate_8x8_a_b_c_d_e_f_g_h:
+//     a 64-bit immediate 'aaaaaaaabbbbbbbbccccccccddddddddeeeeeeeeffffffffgggggggghhhhhhhh',
+//     encoded in "a:b:c:d:e:f:g:h".
+//
+// - arg_immediate_fbits_min_1_max_32_sub_64_scale:
+//     the number of bits after the binary point in the fixed-point destination,
+//     in the range 1 to 32, encoded as 64 minus "scale".
+//
+// - arg_immediate_floatzero: #0.0
+//
+// - arg_immediate_exp_3_pre_4_a_b_c_d_e_f_g_h:
+//     a signed floating-point constant with 3-bit exponent and normalized 4 bits of precision,
+//     encoded in "a:b:c:d:e:f:g:h"
+//
+// - arg_immediate_fbits_min_1_max_0_sub_0_immh_immb__64UIntimmhimmb_4__128UIntimmhimmb_8:
+//     the number of fractional bits, in the range 1 to the operand width, encoded
+//     in the "immh:immb" field. It can have the following values:
+//       (64-UInt(immh:immb)) when immh = 01xx
+//       (128-UInt(immh:immb)) when immh = 1xxx
+//
+// - arg_immediate_index_Q_imm4__imm4lt20gt_00__imm4_10:
+//     the lowest numbered byte element to be extracted, encoded in the "Q:imm4" field.
+//     It can have the following values:
+//       imm4<2:0> when Q = 0, imm4<3> = 0
+//       imm4 when Q = 1, imm4<3> = x
+//
+// - arg_sysop_AT_SYS_CR_system:
+//     system operation for system instruction: AT encoded in the "op1:CRm<0>:op2" field
+//
+// - arg_prfop_Rt:
+//     prefectch operation encoded in the "Rt"
+//
+// - arg_sysreg_o0_op1_CRn_CRm_op2:
+//     system register name encoded in the "o0:op1:CRn:CRm:op2"
+//
+// - arg_pstatefield_op1_op2__SPSel_05__DAIFSet_36__DAIFClr_37:
+//     PSTATE field name encoded in the "op1:op2" field
+//
+// - arg_Vd_arrangement_size_Q___8B_00__16B_01__4H_10__8H_11__2S_20__4S_21__2D_31:
+//     one register with arrangement specifier encoded in the "size:Q" field which can have the following values:
+//       8B when size = 00, Q = 0
+//       16B when size = 00, Q = 1
+//       4H when size = 01, Q = 0
+//       8H when size = 01, Q = 1
+//       2S when size = 10, Q = 0
+//       4S when size = 10, Q = 1
+//       2D when size = 11, Q = 1
+//       The encoding size = 11, Q = 0 is reserved.
+//
+// - arg_Vt_3_arrangement_size_Q___8B_00__16B_01__4H_10__8H_11__2S_20__4S_21__1D_30__2D_31:
+//     three registers with arrangement specifier encoded in the "size:Q" field which can have the following values:
+//       8B when size = 00, Q = 0
+//       16B when size = 00, Q = 1
+//       4H when size = 01, Q = 0
+//       8H when size = 01, Q = 1
+//       2S when size = 10, Q = 0
+//       4S when size = 10, Q = 1
+//       2D when size = 11, Q = 1
+//       The encoding size = 11, Q = 0 is reserved.
+//
+// - arg_Vt_1_arrangement_H_index__Q_S_size_1:
+//     one register with arrangement:H and element index encoded in "Q:S:size<1>".
+
 private partial struct instArg { // : ushort
 }
 
@@ -497,6 +496,5 @@ private static readonly var arg_Xns_mem_wb_imm9_1_signed = 308;
 private static readonly var arg_Xs = 309;
 private static readonly var arg_Xt = 310;
 private static readonly var arg_Xt2 = 311;
-
 
 } // end arm64asm_package

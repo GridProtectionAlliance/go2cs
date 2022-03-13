@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:48 UTC
+//     Generated on 2022 March 13 05:40:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace net
 {
     public static partial class mail_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Address
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace net
             public static implicit operator Address(NilType nil) => default(Address);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Address Address_cast(dynamic value)
         {
             return new Address(value.Name, value.Address);

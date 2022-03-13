@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:48 UTC
+//     Generated on 2022 March 13 06:47:02 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace unicode
 {
     public static partial class bidi_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct bidiTrie
         {
             // Constructors
@@ -50,7 +50,7 @@ namespace unicode
             public static implicit operator bidiTrie(NilType nil) => default(bidiTrie);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static bidiTrie bidiTrie_cast(dynamic value)
         {
             return new bidiTrie();

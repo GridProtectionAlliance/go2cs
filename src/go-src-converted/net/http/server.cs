@@ -4,42 +4,43 @@
 
 // HTTP server. See RFC 7230 through 7235.
 
-// package http -- go2cs converted at 2022 March 06 22:23:08 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:31 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\server.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using context = go.context_package;
-using tls = go.crypto.tls_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using log = go.log_package;
-using rand = go.math.rand_package;
-using net = go.net_package;
-using textproto = go.net.textproto_package;
-using url = go.net.url_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using path = go.path_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-
-using httpguts = go.golang.org.x.net.http.httpguts_package;
-using System.Threading;
-using System;
-
-
 namespace go.net;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using context = context_package;
+using tls = crypto.tls_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using log = log_package;
+using rand = math.rand_package;
+using net = net_package;
+using textproto = net.textproto_package;
+using url = net.url_package;
+using url = net.url_package;
+using os = os_package;
+using path = path_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+
+using httpguts = golang.org.x.net.http.httpguts_package;
+
+
+// Errors used by the HTTP server.
+
+using System.Threading;
+using System;
 public static partial class http_package {
 
-    // Errors used by the HTTP server.
  
 // ErrBodyNotAllowed is returned by ResponseWriter.Write calls
 // when the HTTP method or response code does not permit a
@@ -227,11 +228,9 @@ private static (net.Conn, ptr<bufio.ReadWriter>, error) hijackLocked(this ptr<co
             }
 
         }
-
     }
     c.setState(rwc, StateHijacked, runHooks);
     return ;
-
 }
 
 // This should be >= 512 bytes for DetectContentType,
@@ -284,7 +283,6 @@ private static (nint, error) Write(this ptr<chunkWriter> _addr_cw, slice<byte> p
     if (cw.res.req.Method == "HEAD") { 
         // Eat writes.
         return (len(p), error.As(null!)!);
-
     }
     if (cw.chunking) {
         _, err = fmt.Fprintf(cw.res.conn.bufw, "%x\r\n", len(p));
@@ -301,7 +299,6 @@ private static (nint, error) Write(this ptr<chunkWriter> _addr_cw, slice<byte> p
         cw.res.conn.rwc.Close();
     }
     return ;
-
 }
 
 private static void flush(this ptr<chunkWriter> _addr_cw) {
@@ -311,7 +308,6 @@ private static void flush(this ptr<chunkWriter> _addr_cw) {
         cw.writeHeader(null);
     }
     cw.res.conn.bufw.Flush();
-
 }
 
 private static void close(this ptr<chunkWriter> _addr_cw) {
@@ -337,7 +333,6 @@ private static void close(this ptr<chunkWriter> _addr_cw) {
         // final blank line after the trailers (whether
         // present or not)
         bw.WriteString("\r\n");
-
     }
 }
 
@@ -457,7 +452,6 @@ private static Header finalTrailers(this ptr<response> _addr_w) {
     }
 
     return t;
-
 }
 
 private partial struct atomicBool { // : int
@@ -489,10 +483,8 @@ private static void declareTrailer(this ptr<response> _addr_w, @string k) {
     if (!httpguts.ValidTrailerHeader(k)) { 
         // Forbidden by RFC 7230, section 4.1.2
         return ;
-
     }
     w.trailers = append(w.trailers, k);
-
 }
 
 // requestTooLarge is called by maxBytesReader when too much input has
@@ -560,7 +552,6 @@ private static (long, error) ReadFrom(this ptr<response> _addr_w, io.Reader src)
     (n0, err) = io.CopyBuffer(new writerOnly(w), src, buf);
     n += n0;
     return (n, error.As(err)!);
-
 });
 
 // debugServerConnections controls whether all server connections are wrapped
@@ -579,7 +570,6 @@ private static ptr<conn> newConn(this ptr<Server> _addr_srv, net.Conn rwc) {
         c.rwc = newLoggingConn("server", c.rwc);
     }
     return _addr_c!;
-
 }
 
 private partial struct readResult {
@@ -634,7 +624,6 @@ private static void startBackgroundRead(this ptr<connReader> _addr_cr) => func((
     cr.inRead = true;
     cr.conn.rwc.SetReadDeadline(new time.Time());
     go_(() => cr.backgroundRead());
-
 });
 
 private static void backgroundRead(this ptr<connReader> _addr_cr) {
@@ -679,12 +668,10 @@ private static void backgroundRead(this ptr<connReader> _addr_cr) {
         }
 
     }
-
     cr.aborted = false;
     cr.inRead = false;
     cr.unlock();
     cr.cond.Broadcast();
-
 }
 
 private static void abortPendingRead(this ptr<connReader> _addr_cr) => func((defer, _, _) => {
@@ -701,7 +688,6 @@ private static void abortPendingRead(this ptr<connReader> _addr_cr) => func((def
         cr.cond.Wait();
     }
     cr.conn.rwc.SetReadDeadline(new time.Time());
-
 });
 
 private static void setReadLimit(this ptr<connReader> _addr_cr, long remain) {
@@ -759,7 +745,6 @@ private static (nint, error) Read(this ptr<connReader> _addr_cr, slice<byte> p) 
             panic("invalid Body.Read call. After hijacked, the original Request must not be used");
         }
         panic("invalid concurrent Body.Read call");
-
     }
     if (cr.hitReadLimit()) {
         cr.unlock();
@@ -792,7 +777,6 @@ private static (nint, error) Read(this ptr<connReader> _addr_cr, slice<byte> p) 
 
     cr.cond.Broadcast();
     return (n, error.As(err)!);
-
 });
 
 private static sync.Pool bufioReaderPool = default;private static sync.Pool bufioWriter2kPool = default;private static sync.Pool bufioWriter4kPool = default;
@@ -809,7 +793,6 @@ private static ptr<sync.Pool> bufioWriterPool(nint size) {
             break;
     }
     return _addr_null!;
-
 }
 
 private static ptr<bufio.Reader> newBufioReader(io.Reader r) {
@@ -825,7 +808,6 @@ private static ptr<bufio.Reader> newBufioReader(io.Reader r) {
     // Note: if this reader size is ever changed, update
     // TestHandlerBodyClose's assumptions.
     return _addr_bufio.NewReader(r)!;
-
 }
 
 private static void putBufioReader(ptr<bufio.Reader> _addr_br) {
@@ -848,10 +830,8 @@ private static ptr<bufio.Writer> newBufioWriterSize(io.Writer w, nint size) {
             }
 
         }
-
     }
     return _addr_bufio.NewWriterSize(w, size)!;
-
 }
 
 private static void putBufioWriter(ptr<bufio.Writer> _addr_bw) {
@@ -865,7 +845,6 @@ private static void putBufioWriter(ptr<bufio.Writer> _addr_bw) {
             pool.Put(bw);
         }
     }
-
 }
 
 // DefaultMaxHeaderBytes is the maximum permitted size of the headers
@@ -882,7 +861,6 @@ private static nint maxHeaderBytes(this ptr<Server> _addr_srv) {
         return srv.MaxHeaderBytes;
     }
     return DefaultMaxHeaderBytes;
-
 }
 
 private static long initialReadLimitSize(this ptr<Server> _addr_srv) {
@@ -918,14 +896,12 @@ private static (nint, error) Read(this ptr<expectContinueReader> _addr_ecr, slic
             w.canWriteContinue.setFalse();
         }
         w.writeContinueMu.Unlock();
-
     }
     n, err = ecr.readCloser.Read(p);
     if (err == io.EOF) {
         ecr.sawEOF.setTrue();
     }
     return ;
-
 }
 
 private static error Close(this ptr<expectContinueReader> _addr_ecr) {
@@ -987,7 +963,6 @@ private static (ptr<response>, error) readRequest(this ptr<conn> _addr_c, contex
         d = d__prev1;
 
     }
-
     {
         var d__prev1 = d;
 
@@ -999,7 +974,6 @@ private static (ptr<response>, error) readRequest(this ptr<conn> _addr_c, contex
         d = d__prev1;
 
     }
-
     c.rwc.SetReadDeadline(hdrDeadline);
     {
         var d__prev1 = d;
@@ -1015,13 +989,11 @@ private static (ptr<response>, error) readRequest(this ptr<conn> _addr_c, contex
 
     }
 
-
     c.r.setReadLimit(c.server.initialReadLimitSize());
     if (c.lastMethod == "POST") { 
         // RFC 7230 section 3 tolerance for old buggy clients.
         var (peek, _) = c.bufr.Peek(4); // ReadRequest will get err below
         c.bufr.Discard(numLeadingCRorLF(peek));
-
     }
     var (req, err) = readRequest(c.bufr);
     if (err != null) {
@@ -1029,7 +1001,6 @@ private static (ptr<response>, error) readRequest(this ptr<conn> _addr_c, contex
             return (_addr_null!, error.As(errTooLarge)!);
         }
         return (_addr_null!, error.As(err)!);
-
     }
     if (!http1ServerSupportsRequest(_addr_req)) {
         return (_addr_null!, error.As(new statusError(StatusHTTPVersionNotSupported,"unsupported protocol version"))!);
@@ -1079,7 +1050,6 @@ private static (ptr<response>, error) readRequest(this ptr<conn> _addr_c, contex
     w.cw.res = w;
     w.w = newBufioWriterSize(_addr_w.cw, bufferBeforeChunkingSize);
     return (_addr_w!, error.As(null!)!);
-
 });
 
 // http1ServerSupportsRequest reports whether Go's HTTP/1.x server
@@ -1094,7 +1064,6 @@ private static bool http1ServerSupportsRequest(ptr<Request> _addr_req) {
         return true;
     }
     return false;
-
 }
 
 private static Header Header(this ptr<response> _addr_w) {
@@ -1105,11 +1074,9 @@ private static Header Header(this ptr<response> _addr_w) {
         // and physically writing it means we need to allocate
         // a clone to snapshot the logically written state.
         w.cw.header = w.handlerHeader.Clone();
-
     }
     w.calledHeader = true;
     return w.handlerHeader;
-
 }
 
 // maxPostHandlerReadBytes is the max number of Request.Body bytes not
@@ -1159,7 +1126,6 @@ private static runtime.Frame relevantCaller() {
         }
     }
     return frame;
-
 }
 
 private static void WriteHeader(this ptr<response> _addr_w, nint code) {
@@ -1195,10 +1161,8 @@ private static void WriteHeader(this ptr<response> _addr_w, nint code) {
                 w.conn.server.logf("http: invalid Content-Length of %q", cl);
                 w.handlerHeader.Del("Content-Length");
             }
-
         }
     }
-
 }
 
 // extraHeader is the set of headers sometimes added by chunkWriter.writeHeader.
@@ -1289,12 +1253,10 @@ private static void writeHeader(this ptr<chunkWriter> _addr_cw, slice<byte> p) {
             }
 
         }
-
         if (excludeHeader == null) {
             excludeHeader = make_map<@string, bool>();
         }
         excludeHeader[key] = true;
-
     };
     extraHeader setHeader = default; 
 
@@ -1393,9 +1355,7 @@ private static void writeHeader(this ptr<chunkWriter> _addr_cw, slice<byte> p) {
                     if (!bdy.sawEOF) { 
                         // Body was closed in handler with non-EOF error.
                         w.closeAfterReply = true;
-
                     }
-
                 else if (bdy.unreadDataSizeLocked() >= maxPostHandlerReadBytes) 
                     tooBig = true;
                 else 
@@ -1428,8 +1388,7 @@ private static void writeHeader(this ptr<chunkWriter> _addr_cw, slice<byte> p) {
                 // corrupt chunked encoding. In any case, whatever remains
                 // on the wire must not be parsed as another HTTP request.
                 w.closeAfterReply = true;
-            
-        }
+                    }
         if (tooBig) {
             w.requestTooLarge();
             delHeader("Connection");
@@ -1471,7 +1430,6 @@ private static void writeHeader(this ptr<chunkWriter> _addr_cw, slice<byte> p) {
         w.conn.server.logf("http: WriteHeader called with both Transfer-Encoding of %q and a Content-Length of %d", te, w.contentLength);
         delHeader("Content-Length");
         hasCL = false;
-
     }
     if (w.req.Method == "HEAD" || !bodyAllowedForStatus(code)) { 
         // do nothing
@@ -1501,9 +1459,7 @@ private static void writeHeader(this ptr<chunkWriter> _addr_cw, slice<byte> p) {
             if (hasTE && te == "chunked") { 
                 // We will send the chunked Transfer-Encoding header later.
                 delHeader("Transfer-Encoding");
-
             }
-
         }
     }
     else
@@ -1531,7 +1487,6 @@ private static void writeHeader(this ptr<chunkWriter> _addr_cw, slice<byte> p) {
     cw.header.WriteSubset(w.conn.bufw, excludeHeader);
     setHeader.Write(w.conn.bufw);
     w.conn.bufw.Write(crlf);
-
 }
 
 // foreachHeaderElement splits v according to the "#rule" construction
@@ -1581,10 +1536,8 @@ private static void writeStatusLine(ptr<bufio.Writer> _addr_bw, bool is11, nint 
  { 
             // don't worry about performance
             fmt.Fprintf(bw, "%03d status code %d\r\n", code, code);
-
         }
     }
-
 }
 
 // bodyAllowed reports whether a Write is allowed for this response type.
@@ -1596,7 +1549,6 @@ private static bool bodyAllowed(this ptr<response> _addr_w) => func((_, panic, _
         panic("");
     }
     return bodyAllowedForStatus(w.status);
-
 });
 
 // The Life Of A Write is like this:
@@ -1661,7 +1613,6 @@ private static (nint, error) write(this ptr<response> _addr_w, nint lenData, sli
             w.conn.server.logf("http: response.Write on hijacked connection from %s (%s:%d)", caller.Function, path.Base(caller.File), caller.Line);
         }
         return (0, error.As(ErrHijacked)!);
-
     }
     if (w.canWriteContinue.isSet()) { 
         // Body reader wants to write 100 Continue but hasn't yet.
@@ -1671,7 +1622,6 @@ private static (nint, error) write(this ptr<response> _addr_w, nint lenData, sli
         w.writeContinueMu.Lock();
         w.canWriteContinue.setFalse();
         w.writeContinueMu.Unlock();
-
     }
     if (!w.wroteHeader) {
         w.WriteHeader(StatusOK);
@@ -1729,12 +1679,10 @@ private static bool shouldReuseConnection(this ptr<response> _addr_w) {
         // handler indicated we shouldn't reuse this
         // connection.
         return false;
-
     }
     if (w.req.Method != "HEAD" && w.contentLength != -1 && w.bodyAllowed() && w.contentLength != w.written) { 
         // Did not write enough. Avoid getting out of sync.
         return false;
-
     }
     if (w.conn.werr != null) {
         return false;
@@ -1743,7 +1691,6 @@ private static bool shouldReuseConnection(this ptr<response> _addr_w) {
         return false;
     }
     return true;
-
 }
 
 private static bool closedRequestBodyEarly(this ptr<response> _addr_w) {
@@ -1761,7 +1708,6 @@ private static void Flush(this ptr<response> _addr_w) {
     }
     w.w.Flush();
     w.cw.flush();
-
 }
 
 private static void finalFlush(this ptr<conn> _addr_c) {
@@ -1772,7 +1718,6 @@ private static void finalFlush(this ptr<conn> _addr_c) {
         // reader for a future connection.
         putBufioReader(_addr_c.bufr);
         c.bufr = null;
-
     }
     if (c.bufw != null) {
         c.bufw.Flush(); 
@@ -1780,7 +1725,6 @@ private static void finalFlush(this ptr<conn> _addr_c) {
         // writer for a future connection.
         putBufioWriter(_addr_c.bufw);
         c.bufw = null;
-
     }
 }
 
@@ -1826,9 +1770,7 @@ private static void closeWriteAndWait(this ptr<conn> _addr_c) {
             tcp.CloseWrite();
         }
     }
-
     time.Sleep(rstAvoidanceDelay);
-
 }
 
 // validNextProto reports whether the proto is a valid ALPN protocol name.
@@ -1845,12 +1787,10 @@ private static bool validNextProto(@string proto) {
             break;
     }
     return true;
-
 }
 
 private static readonly var runHooks = true;
 private static readonly var skipHooks = false;
-
 
 private static void setState(this ptr<conn> _addr_c, net.Conn nc, ConnState state, bool runHook) => func((_, panic, _) => {
     ref conn c = ref _addr_c.val;
@@ -1876,7 +1816,6 @@ private static void setState(this ptr<conn> _addr_c, net.Conn nc, ConnState stat
             hook(nc, state);
         }
     }
-
 });
 
 private static (ConnState, long) getState(this ptr<conn> _addr_c) {
@@ -1927,7 +1866,6 @@ private static bool isCommonNetReadError(error err) {
             return true;
         }
     }
-
     {
         ptr<net.OpError> (oe, ok) = err._<ptr<net.OpError>>();
 
@@ -1935,9 +1873,7 @@ private static bool isCommonNetReadError(error err) {
             return true;
         }
     }
-
     return false;
-
 }
 
 // Serve a new connection.
@@ -1963,7 +1899,6 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
             err = err__prev1;
 
         }
-
         if (!c.hijacked()) {
             c.close();
             c.setState(c.rwc, StateClosed, runHooks);
@@ -1986,7 +1921,6 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
                 d = d__prev2;
 
             }
-
             {
                 var d__prev2 = d;
 
@@ -1999,7 +1933,6 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
                 d = d__prev2;
 
             }
-
             {
                 var err__prev2 = err;
 
@@ -2019,16 +1952,13 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
                         }
 
                     }
-
                     c.server.logf("http: TLS handshake error from %s: %v", c.rwc.RemoteAddr(), err);
                     return ;
-
                 }
 
                 err = err__prev2;
 
             }
-
             c.tlsState = @new<tls.ConnectionState>();
             c.tlsState.val = tlsConn.ConnectionState();
             {
@@ -2045,17 +1975,13 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
                             // closing such connections. See issue https://golang.org/issue/39776.
                             c.setState(c.rwc, StateActive, skipHooks);
                             fn(c.server, tlsConn, h);
-
                         }
 
                     }
-
                     return ;
-
                 }
 
             }
-
         }
     } 
 
@@ -2074,7 +2000,6 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
         if (c.r.remain != c.server.initialReadLimitSize()) { 
             // If we read any bytes off the wire, we're active.
             c.setState(c.rwc, StateActive, runHooks);
-
         }
         if (err != null) {
             const @string errorHeaders = "\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n";
@@ -2116,21 +2041,17 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
                     }
 
                 }
-
                 @string publicErr = "400 Bad Request";
                 fmt.Fprintf(c.rwc, "HTTP/1.1 " + publicErr + errorHeaders + publicErr);
                 return ;
-            
-        }
+                    }
         var req = w.req;
         if (req.expectsContinue()) {
             if (req.ProtoAtLeast(1, 1) && req.ContentLength != 0) { 
                 // Wrap the Body reader with one that replies on the connection
                 req.Body = addr(new expectContinueReader(readCloser:req.Body,resp:w));
                 w.canWriteContinue.setTrue();
-
             }
-
         }
         else if (req.Header.get("Expect") != "") {
             w.sendExpectationFailed();
@@ -2166,7 +2087,6 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
             // they might think they can send another
             // request, but such is life with HTTP/1.1.
             return ;
-
         }
         {
             var d__prev1 = d;
@@ -2187,17 +2107,13 @@ private static void serve(this ptr<conn> _addr_c, context.Context ctx) => func((
                     err = err__prev2;
 
                 }
-
             }
 
             d = d__prev1;
 
         }
-
         c.rwc.SetReadDeadline(new time.Time());
-
     }
-
 });
 
 private static void sendExpectationFailed(this ptr<response> _addr_w) {
@@ -2218,7 +2134,6 @@ private static void sendExpectationFailed(this ptr<response> _addr_w) {
     w.Header().Set("Connection", "close");
     w.WriteHeader(StatusExpectationFailed);
     w.finishRequest();
-
 }
 
 // Hijack implements the Hijacker.Hijack method. Our response is both a ResponseWriter
@@ -2247,7 +2162,6 @@ private static (net.Conn, ptr<bufio.ReadWriter>, error) Hijack(this ptr<response
         w.w = null;
     }
     return (rwc, _addr_buf!, error.As(err)!);
-
 });
 
 private static channel<bool> CloseNotify(this ptr<response> _addr_w) => func((_, panic, _) => {
@@ -2257,7 +2171,6 @@ private static channel<bool> CloseNotify(this ptr<response> _addr_w) => func((_,
         panic("net/http: CloseNotify called after ServeHTTP finished");
     }
     return w.closeNotifyCh;
-
 });
 
 private static void registerOnHitEOF(io.ReadCloser rc, Action fn) => func((_, panic, _) => {
@@ -2275,7 +2188,6 @@ private static void registerOnHitEOF(io.ReadCloser rc, Action fn) => func((_, pa
             break;
         }
     }
-
 });
 
 // requestBodyRemains reports whether future calls to Read
@@ -2298,7 +2210,6 @@ private static bool requestBodyRemains(io.ReadCloser rc) => func((_, panic, _) =
             break;
         }
     }
-
 });
 
 // The HandlerFunc type is an adapter to allow the use of
@@ -2367,7 +2278,6 @@ public static Handler StripPrefix(@string prefix, Handler h) {
             NotFound(w, _addr_r);
         }
     });
-
 }
 
 // Redirect replies to the request with a redirect to url,
@@ -2396,7 +2306,6 @@ public static void Redirect(ResponseWriter w, ptr<Request> _addr_r, @string url,
                 var oldpath = r.URL.Path;
                 if (oldpath == "") { // should not happen, but avoid a crash if it does
                     oldpath = "/";
-
                 } 
 
                 // no leading http://server
@@ -2404,9 +2313,7 @@ public static void Redirect(ResponseWriter w, ptr<Request> _addr_r, @string url,
                     // make relative path absolute
                     var (olddir, _) = path.Split(oldpath);
                     url = olddir + url;
-
                 }
-
                 @string query = default;
                 {
                     var i = strings.Index(url, "?");
@@ -2425,14 +2332,10 @@ public static void Redirect(ResponseWriter w, ptr<Request> _addr_r, @string url,
                 if (trailing && !strings.HasSuffix(url, "/")) {
                     url += "/";
                 }
-
                 url += query;
-
             }
-
         }
     }
-
 
     var h = w.Header(); 
 
@@ -2562,7 +2465,6 @@ private static @string cleanPath(@string p) {
         }
     }
     return np;
-
 }
 
 // stripHostPort returns h without any trailing ":<port>".
@@ -2576,7 +2478,6 @@ private static @string stripHostPort(@string h) {
         return h; // on error, return unchanged
     }
     return host;
-
 }
 
 // Find a handler on a handler map given a path string.
@@ -2596,7 +2497,6 @@ private static (Handler, @string) match(this ptr<ServeMux> _addr_mux, @string pa
             return (e.h, e.pattern);
         }
     }    return (null, "");
-
 }
 
 // redirectToPathSlash determines if the given path needs appending "/" to it.
@@ -2618,7 +2518,6 @@ private static (ptr<url.URL>, bool) redirectToPathSlash(this ptr<ServeMux> _addr
     path = path + "/";
     u = addr(new url.URL(Path:path,RawQuery:u.RawQuery));
     return (_addr_u!, true);
-
 }
 
 // shouldRedirectRLocked reports whether the given path and host should be redirected to
@@ -2642,7 +2541,6 @@ private static bool shouldRedirectRLocked(this ptr<ServeMux> _addr_mux, @string 
                 }
 
             }
-
         }
         c = c__prev1;
     }
@@ -2664,13 +2562,11 @@ private static bool shouldRedirectRLocked(this ptr<ServeMux> _addr_mux, @string 
                 }
 
             }
-
         }
         c = c__prev1;
     }
 
     return false;
-
 }
 
 // Handler returns the handler to use for the given request,
@@ -2712,9 +2608,7 @@ private static (Handler, @string) Handler(this ptr<ServeMux> _addr_mux, ptr<Requ
 
         }
 
-
         return mux.handler(r.Host, r.URL.Path);
-
     }
     var host = stripHostPort(r.Host);
     var path = cleanPath(r.URL.Path); 
@@ -2733,14 +2627,12 @@ private static (Handler, @string) Handler(this ptr<ServeMux> _addr_mux, ptr<Requ
 
     }
 
-
     if (path != r.URL.Path) {
         _, pattern = mux.handler(host, path);
         ptr<url.URL> u = addr(new url.URL(Path:path,RawQuery:r.URL.RawQuery));
         return (RedirectHandler(u.String(), StatusMovedPermanently), pattern);
     }
     return mux.handler(host, r.URL.Path);
-
 }
 
 // handler is the main implementation of Handler.
@@ -2764,7 +2656,6 @@ private static (Handler, @string) handler(this ptr<ServeMux> _addr_mux, @string 
         (h, pattern) = (NotFoundHandler(), "");
     }
     return ;
-
 });
 
 // ServeHTTP dispatches the request to the handler whose
@@ -2779,11 +2670,9 @@ private static void ServeHTTP(this ptr<ServeMux> _addr_mux, ResponseWriter w, pt
         }
         w.WriteHeader(StatusBadRequest);
         return ;
-
     }
     var (h, _) = mux.Handler(r);
     h.ServeHTTP(w, r);
-
 }
 
 // Handle registers the handler for the given pattern.
@@ -2808,7 +2697,6 @@ private static void Handle(this ptr<ServeMux> _addr_mux, @string pattern, Handle
         }
     }
 
-
     if (mux.m == null) {
         mux.m = make_map<@string, muxEntry>();
     }
@@ -2824,9 +2712,7 @@ private static void Handle(this ptr<ServeMux> _addr_mux, @string pattern, Handle
 
 private static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     var n = len(es);
-    var i = sort.Search(n, i => {
-        return len(es[i].pattern) < len(e.pattern);
-    });
+    var i = sort.Search(n, i => len(es[i].pattern) < len(e.pattern));
     if (i == n) {
         return append(es, e);
     }
@@ -2834,7 +2720,6 @@ private static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
     copy(es[(int)i + 1..], es[(int)i..]); // Move shorter entries down
     es[i] = e;
     return es;
-
 }
 
 // HandleFunc registers the handler function for the given pattern.
@@ -2845,7 +2730,6 @@ private static void HandleFunc(this ptr<ServeMux> _addr_mux, @string pattern, Ac
         panic("http: nil handler");
     }
     mux.Handle(pattern, HandlerFunc(handler));
-
 });
 
 // Handle registers the handler for the given pattern
@@ -2989,7 +2873,6 @@ private static channel<object> getDoneChanLocked(this ptr<Server> _addr_s) {
         s.doneChan = make_channel<object>();
     }
     return s.doneChan;
-
 }
 
 private static void closeDoneChanLocked(this ptr<Server> _addr_s) {
@@ -3095,7 +2978,6 @@ private static error Shutdown(this ptr<Server> _addr_srv, context.Context ctx) =
             pollIntervalBase = shutdownPollIntervalMax;
         }
         return error.As(interval)!;
-
     };
 
     var timer = time.NewTimer(nextPollInterval());
@@ -3106,9 +2988,7 @@ private static error Shutdown(this ptr<Server> _addr_srv, context.Context ctx) =
         }
         return error.As(ctx.Err())!;
         timer.Reset(nextPollInterval());
-
     }
-
 });
 
 // RegisterOnShutdown registers a function to call on Shutdown.
@@ -3153,13 +3033,10 @@ private static bool closeIdleConns(this ptr<Server> _addr_s) => func((defer, _, 
             // connection, without state set yet.
             quiescent = false;
             continue;
-
         }
         c.rwc.Close();
         delete(s.activeConn, c);
-
     }    return quiescent;
-
 });
 
 private static error closeListenersLocked(this ptr<Server> _addr_s) {
@@ -3175,9 +3052,7 @@ private static error closeListenersLocked(this ptr<Server> _addr_s) {
             }
 
         }
-
     }    return error.As(err)!;
-
 }
 
 // A ConnState represents the state of a client connection to a server.
@@ -3220,7 +3095,6 @@ public static readonly var StateHijacked = 2;
 // transition to StateClosed.
 public static readonly var StateClosed = 3;
 
-
 private static map stateName = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ConnState, @string>{StateNew:"new",StateActive:"active",StateIdle:"idle",StateHijacked:"hijacked",StateClosed:"closed",};
 
 public static @string String(this ConnState c) {
@@ -3255,7 +3129,6 @@ private static void ServeHTTP(this serverHandler sh, ResponseWriter rw, ptr<Requ
         }());
     }
     handler.ServeHTTP(rw, req);
-
 });
 
 private static ptr<contextKey> silenceSemWarnContextKey = addr(new contextKey("silence-semicolons"));
@@ -3279,7 +3152,6 @@ public static Handler AllowQuerySemicolons(Handler h) {
             }
 
         }
-
         if (strings.Contains(r.URL.RawQuery, ";")) {
             ptr<Request> r2 = @new<Request>();
             r2.val = r.val;
@@ -3293,7 +3165,6 @@ public static Handler AllowQuerySemicolons(Handler h) {
             h.ServeHTTP(w, r);
         }
     });
-
 }
 
 // ListenAndServe listens on the TCP network address srv.Addr and then
@@ -3319,7 +3190,6 @@ private static error ListenAndServe(this ptr<Server> _addr_srv) {
         return error.As(err)!;
     }
     return error.As(srv.Serve(ln))!;
-
 }
 
 private static Action<ptr<Server>, net.Listener> testHookServerServe = default; // used if non-nil
@@ -3337,10 +3207,8 @@ private static bool shouldConfigureHTTP2ForServe(this ptr<Server> _addr_srv) {
         // So we should configure HTTP/2 (to set up srv.TLSNextProto)
         // in case the listener returns an "h2" *tls.Conn.
         return true;
-
     }
     return strSliceContains(srv.TLSConfig.NextProtos, http2NextProtoTLS);
-
 }
 
 // ErrServerClosed is returned by the Server's Serve, ServeTLS, ListenAndServe,
@@ -3368,7 +3236,6 @@ private static error Serve(this ptr<Server> _addr_srv, net.Listener l) => func((
         }
     }
 
-
     var origListener = l;
     l = addr(new onceCloseListener(Listener:l));
     defer(l.Close());
@@ -3380,7 +3247,6 @@ private static error Serve(this ptr<Server> _addr_srv, net.Listener l) => func((
             return error.As(err)!;
         }
     }
-
 
     if (!srv.trackListener(_addr_l, true)) {
         return error.As(ErrServerClosed)!;
@@ -3412,7 +3278,6 @@ private static error Serve(this ptr<Server> _addr_srv, net.Listener l) => func((
  {
                         tempDelay *= 2;
                     }
-
                     {
                         nint max = 1 * time.Second;
 
@@ -3421,17 +3286,13 @@ private static error Serve(this ptr<Server> _addr_srv, net.Listener l) => func((
                         }
 
                     }
-
                     srv.logf("http: Accept error: %v; retrying in %v", err, tempDelay);
                     time.Sleep(tempDelay);
                     continue;
-
                 }
 
             }
-
             return error.As(err)!;
-
         }
         var connCtx = ctx;
         {
@@ -3445,14 +3306,11 @@ private static error Serve(this ptr<Server> _addr_srv, net.Listener l) => func((
             }
 
         }
-
         tempDelay = 0;
         var c = srv.newConn(rw);
         c.setState(c.rwc, StateNew, runHooks); // before Serve can return
         go_(() => c.serve(connCtx));
-
     }
-
 });
 
 // ServeTLS accepts incoming connections on the Listener l, creating a
@@ -3485,7 +3343,6 @@ private static error ServeTLS(this ptr<Server> _addr_srv, net.Listener l, @strin
 
     }
 
-
     var config = cloneTLSConfig(srv.TLSConfig);
     if (!strSliceContains(config.NextProtos, "http/1.1")) {
         config.NextProtos = append(config.NextProtos, "http/1.1");
@@ -3501,7 +3358,6 @@ private static error ServeTLS(this ptr<Server> _addr_srv, net.Listener l, @strin
     }
     var tlsListener = tls.NewListener(l, config);
     return error.As(srv.Serve(tlsListener))!;
-
 }
 
 // trackListener adds or removes a net.Listener to the set of tracked
@@ -3528,14 +3384,12 @@ private static bool trackListener(this ptr<Server> _addr_s, ptr<net.Listener> _a
             return false;
         }
         s.listeners[ln] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
-
     }
     else
  {
         delete(s.listeners, ln);
     }
     return true;
-
 });
 
 private static void trackConn(this ptr<Server> _addr_s, ptr<conn> _addr_c, bool add) => func((defer, _, _) => {
@@ -3563,7 +3417,6 @@ private static time.Duration idleTimeout(this ptr<Server> _addr_s) {
         return s.IdleTimeout;
     }
     return s.ReadTimeout;
-
 }
 
 private static time.Duration readHeaderTimeout(this ptr<Server> _addr_s) {
@@ -3573,7 +3426,6 @@ private static time.Duration readHeaderTimeout(this ptr<Server> _addr_s) {
         return s.ReadHeaderTimeout;
     }
     return s.ReadTimeout;
-
 }
 
 private static bool doKeepAlives(this ptr<Server> _addr_s) {
@@ -3691,7 +3543,6 @@ private static error ListenAndServeTLS(this ptr<Server> _addr_srv, @string certF
     defer(ln.Close());
 
     return error.As(srv.ServeTLS(ln, certFile, keyFile))!;
-
 });
 
 // setupHTTP2_ServeTLS conditionally configures HTTP/2 on
@@ -3776,7 +3627,6 @@ private static @string errorBody(this ptr<timeoutHandler> _addr_h) {
         return h.body;
     }
     return "<html><head><title>Timeout</title></head><body><h1>Timeout</h1></body></html>";
-
 }
 
 private static void ServeHTTP(this ptr<timeoutHandler> _addr_h, ResponseWriter w, ptr<Request> _addr_r) => func((defer, panic, _) => {
@@ -3807,11 +3657,9 @@ private static void ServeHTTP(this ptr<timeoutHandler> _addr_h, ResponseWriter w
                 p = p__prev1;
 
             }
-
         }());
         h.handler.ServeHTTP(tw, r);
         close(done);
-
     }());
     panic(p);
     tw.mu.Lock();
@@ -3829,7 +3677,6 @@ private static void ServeHTTP(this ptr<timeoutHandler> _addr_h, ResponseWriter w
     w.WriteHeader(StatusServiceUnavailable);
     io.WriteString(w, h.errorBody());
     tw.timedOut = true;
-
 });
 
 private partial struct timeoutWriter {
@@ -3857,9 +3704,7 @@ private static error Push(this ptr<timeoutWriter> _addr_tw, @string target, ptr<
             return error.As(pusher.Push(target, opts))!;
         }
     }
-
     return error.As(ErrNotSupported)!;
-
 }
 
 private static Header Header(this ptr<timeoutWriter> _addr_tw) {
@@ -3882,7 +3727,6 @@ private static (nint, error) Write(this ptr<timeoutWriter> _addr_tw, slice<byte>
         tw.writeHeaderLocked(StatusOK);
     }
     return tw.wbuf.Write(p);
-
 });
 
 private static void writeHeaderLocked(this ptr<timeoutWriter> _addr_tw, nint code) {
@@ -3901,8 +3745,7 @@ private static void writeHeaderLocked(this ptr<timeoutWriter> _addr_tw, nint cod
     else 
         tw.wroteHeader = true;
         tw.code = code;
-    
-}
+    }
 
 private static void WriteHeader(this ptr<timeoutWriter> _addr_tw, nint code) => func((defer, _, _) => {
     ref timeoutWriter tw = ref _addr_tw.val;
@@ -3949,7 +3792,6 @@ private static void ServeHTTP(this globalOptionsHandler _p0, ResponseWriter w, p
         // courtesy of MaxBytesReader's EOF behavior.
         var mb = MaxBytesReader(w, r.Body, 4 << 10);
         io.Copy(io.Discard, mb);
-
     }
 }
 
@@ -3984,7 +3826,6 @@ private static void ServeHTTP(this initALPNRequest h, ResponseWriter rw, ptr<Req
         req.RemoteAddr = h.c.RemoteAddr().String();
     }
     h.h.ServeHTTP(rw, req);
-
 }
 
 // loggingConn is used for debugging.
@@ -4051,7 +3892,6 @@ private static (nint, error) Write(this checkConnErrorWriter w, slice<byte> p) {
         w.c.cancelCtx();
     }
     return ;
-
 }
 
 private static nint numLeadingCRorLF(slice<byte> v) {
@@ -4063,10 +3903,7 @@ private static nint numLeadingCRorLF(slice<byte> v) {
             continue;
         }
         break;
-
     }    return ;
-
-
 }
 
 private static bool strSliceContains(slice<@string> ss, @string s) {
@@ -4075,7 +3912,6 @@ private static bool strSliceContains(slice<@string> ss, @string s) {
             return true;
         }
     }    return false;
-
 }
 
 // tlsRecordHeaderLooksLikeHTTP reports whether a TLS record header
@@ -4097,7 +3933,6 @@ private static bool tlsRecordHeaderLooksLikeHTTP(array<byte> hdr) {
             break;
     }
     return false;
-
 }
 
 } // end http_package

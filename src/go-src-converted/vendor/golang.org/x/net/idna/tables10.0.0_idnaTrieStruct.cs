@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:37:27 UTC
+//     Generated on 2022 March 13 06:45:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace net
 {
     public static partial class idna_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct idnaTrie
         {
             // Constructors
@@ -49,7 +49,7 @@ namespace net
             public static implicit operator idnaTrie(NilType nil) => default(idnaTrie);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static idnaTrie idnaTrie_cast(dynamic value)
         {
             return new idnaTrie();

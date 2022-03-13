@@ -2,24 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package abi -- go2cs converted at 2022 March 06 22:08:05 UTC
+// package abi -- go2cs converted at 2022 March 13 05:23:55 UTC
 // import "internal/abi" ==> using abi = go.@internal.abi_package
 // Original source: C:\Program Files\Go\src\internal\abi\abi.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal;
+
+using @unsafe = @unsafe_package;
 
 public static partial class abi_package {
 
-    // RegArgs is a struct that has space for each argument
-    // and return value register on the current architecture.
-    //
-    // Assembly code knows the layout of the first two fields
-    // of RegArgs.
-    //
-    // RegArgs also contains additional space to hold pointers
-    // when it may not be safe to keep them only in the integer
-    // register space otherwise.
+// RegArgs is a struct that has space for each argument
+// and return value register on the current architecture.
+//
+// Assembly code knows the layout of the first two fields
+// of RegArgs.
+//
+// RegArgs also contains additional space to hold pointers
+// when it may not be safe to keep them only in the integer
+// register space otherwise.
 public partial struct RegArgs {
     public array<System.UIntPtr> Ints; // untyped integer registers
     public array<ulong> Floats; // untyped float registers

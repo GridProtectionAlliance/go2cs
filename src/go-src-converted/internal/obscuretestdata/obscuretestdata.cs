@@ -5,20 +5,23 @@
 // Package obscuretestdata contains functionality used by tests to more easily
 // work with testdata that must be obscured primarily due to
 // golang.org/issue/34986.
-// package obscuretestdata -- go2cs converted at 2022 March 06 23:36:28 UTC
+
+// package obscuretestdata -- go2cs converted at 2022 March 13 06:44:31 UTC
 // import "internal/obscuretestdata" ==> using obscuretestdata = go.@internal.obscuretestdata_package
 // Original source: C:\Program Files\Go\src\internal\obscuretestdata\obscuretestdata.go
-using base64 = go.encoding.base64_package;
-using io = go.io_package;
-using os = go.os_package;
-
 namespace go.@internal;
+
+using base64 = encoding.base64_package;
+using io = io_package;
+using os = os_package;
+
+
+// DecodeToTempFile decodes the named file to a temporary location.
+// If successful, it returns the path of the decoded file.
+// The caller is responsible for ensuring that the temporary file is removed.
 
 public static partial class obscuretestdata_package {
 
-    // DecodeToTempFile decodes the named file to a temporary location.
-    // If successful, it returns the path of the decoded file.
-    // The caller is responsible for ensuring that the temporary file is removed.
 public static (@string, error) DecodeToTempFile(@string name) => func((defer, _, _) => {
     @string path = default;
     error err = default!;
@@ -42,7 +45,6 @@ public static (@string, error) DecodeToTempFile(@string name) => func((defer, _,
             return ("", error.As(err)!);
         }
     }
-
     {
         var err = tmp.Close();
 
@@ -51,9 +53,7 @@ public static (@string, error) DecodeToTempFile(@string name) => func((defer, _,
             return ("", error.As(err)!);
         }
     }
-
     return (tmp.Name(), error.As(null!)!);
-
 });
 
 // ReadFile reads the named file and returns its decoded contents.
@@ -67,7 +67,6 @@ public static (slice<byte>, error) ReadFile(@string name) => func((defer, _, _) 
     }
     defer(f.Close());
     return io.ReadAll(base64.NewDecoder(base64.StdEncoding, f));
-
 });
 
 } // end obscuretestdata_package

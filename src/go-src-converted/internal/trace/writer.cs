@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2022 March 06 23:22:59 UTC
+// package trace -- go2cs converted at 2022 March 13 06:36:03 UTC
 // import "internal/trace" ==> using trace = go.@internal.trace_package
 // Original source: C:\Program Files\Go\src\internal\trace\writer.go
-using bytes = go.bytes_package;
-
 namespace go.@internal;
+
+using bytes = bytes_package;
 
 public static partial class trace_package {
 
-    // Writer is a test trace writer.
+// Writer is a test trace writer.
 public partial struct Writer {
     public ref bytes.Buffer Buffer => ref Buffer_val;
 }
@@ -54,7 +54,6 @@ private static slice<byte> appendVarint(slice<byte> buf, ulong v) {
     }
     buf = append(buf, byte(v));
     return buf;
-
 }
 
 } // end trace_package

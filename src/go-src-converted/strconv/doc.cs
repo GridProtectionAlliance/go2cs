@@ -54,8 +54,10 @@
 //
 // Unquote and UnquoteChar unquote Go string and rune literals.
 //
-// package strconv -- go2cs converted at 2022 March 06 22:30:30 UTC
+
+// package strconv -- go2cs converted at 2022 March 13 05:41:19 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\doc.go
+namespace go;
 
 } // end strconv_package

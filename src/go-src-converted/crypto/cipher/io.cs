@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cipher -- go2cs converted at 2022 March 06 22:18:10 UTC
+// package cipher -- go2cs converted at 2022 March 13 05:32:23 UTC
 // import "crypto/cipher" ==> using cipher = go.crypto.cipher_package
 // Original source: C:\Program Files\Go\src\crypto\cipher\io.go
-using io = go.io_package;
-
 namespace go.crypto;
+
+using io = io_package;
 
 public static partial class cipher_package {
 
-    // The Stream* objects are so simple that all their members are public. Users
-    // can create them themselves.
+// The Stream* objects are so simple that all their members are public. Users
+// can create them themselves.
 
-    // StreamReader wraps a Stream into an io.Reader. It calls XORKeyStream
-    // to process each slice of data which passes through.
+// StreamReader wraps a Stream into an io.Reader. It calls XORKeyStream
+// to process each slice of data which passes through.
 public partial struct StreamReader {
     public Stream S;
     public io.Reader R;
@@ -50,10 +50,8 @@ public static (nint, error) Write(this StreamWriter w, slice<byte> src) {
     n, err = w.W.Write(c);
     if (n != len(src) && err == null) { // should never happen
         err = io.ErrShortWrite;
-
     }
     return ;
-
 }
 
 // Close closes the underlying Writer and returns its Close return value, if the Writer
@@ -66,9 +64,7 @@ public static error Close(this StreamWriter w) {
             return error.As(c.Close())!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 } // end cipher_package

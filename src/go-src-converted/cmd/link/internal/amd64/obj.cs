@@ -28,14 +28,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package amd64 -- go2cs converted at 2022 March 06 23:22:35 UTC
+// package amd64 -- go2cs converted at 2022 March 13 06:35:39 UTC
 // import "cmd/link/internal/amd64" ==> using amd64 = go.cmd.link.@internal.amd64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\amd64\obj.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
 
 public static partial class amd64_package {
 
@@ -86,7 +86,6 @@ private static void archinit(ptr<ld.Link> _addr_ctxt) {
         return ;
     else 
         ld.Exitf("unknown -H option: %v", ctxt.HeadType);
-    
-}
+    }
 
 } // end amd64_package

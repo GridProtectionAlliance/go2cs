@@ -5,14 +5,14 @@
 //go:build !s390x
 // +build !s390x
 
-// package ecdsa -- go2cs converted at 2022 March 06 22:19:17 UTC
+// package ecdsa -- go2cs converted at 2022 March 13 05:34:13 UTC
 // import "crypto/ecdsa" ==> using ecdsa = go.crypto.ecdsa_package
 // Original source: C:\Program Files\Go\src\crypto\ecdsa\ecdsa_noasm.go
-using cipher = go.crypto.cipher_package;
-using elliptic = go.crypto.elliptic_package;
-using big = go.math.big_package;
-
 namespace go.crypto;
+
+using cipher = crypto.cipher_package;
+using elliptic = crypto.elliptic_package;
+using big = math.big_package;
 
 public static partial class ecdsa_package {
 

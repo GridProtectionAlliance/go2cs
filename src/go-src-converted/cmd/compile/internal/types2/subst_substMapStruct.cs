@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:12:57 UTC
+//     Generated on 2022 March 13 06:26:22 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class types2_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct substMap
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator substMap(NilType nil) => default(substMap);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static substMap substMap_cast(dynamic value)
         {
             return new substMap(value.targs, value.proj);

@@ -5,17 +5,15 @@
 //go:build !goexperiment.staticlockranking
 // +build !goexperiment.staticlockranking
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:48 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:34 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\lockrank_off.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // // lockRankStruct is embedded in mutex, but is empty when staticklockranking is
-    // disabled (the default)
+// // lockRankStruct is embedded in mutex, but is empty when staticklockranking is
+// disabled (the default)
 private partial struct lockRankStruct {
 }
 

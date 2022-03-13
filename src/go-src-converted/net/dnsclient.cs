@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package net -- go2cs converted at 2022 March 06 22:15:22 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:40 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\dnsclient.go
-using itoa = go.@internal.itoa_package;
-using sort = go.sort_package;
-
-using dnsmessage = go.golang.org.x.net.dns.dnsmessage_package;
-
 namespace go;
+
+using itoa = @internal.itoa_package;
+using sort = sort_package;
+
+using dnsmessage = golang.org.x.net.dns.dnsmessage_package;
+
+
+// provided by runtime
 
 public static partial class net_package {
 
-    // provided by runtime
 private static uint fastrand();
 
 private static nint randInt() {
@@ -23,7 +25,6 @@ private static nint randInt() {
     var u = uint(x) << 31 ^ uint(int32(y)); // full uint, even on 64-bit systems; avoid 32-bit shift on 32-bit systems
     var i = int(u >> 1); // clear sign bit, even on 32-bit systems
     return i;
-
 }
 
 private static nint randIntn(nint n) {
@@ -53,7 +54,6 @@ private static (@string, error) reverseaddr(@string addr) {
     // Append "ip6.arpa." and return (buf already has the final .)
     buf = append(buf, "ip6.arpa.");
     return (string(buf), error.As(null!)!);
-
 }
 
 private static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {
@@ -74,7 +74,6 @@ private static bool equalASCIIName(dnsmessage.Name x, dnsmessage.Name y) {
         }
     }
     return true;
-
 }
 
 // isDomainName checks if a string is a presentation-format domain name
@@ -124,13 +123,11 @@ private static bool isDomainName(@string s) {
         else 
             return false;
                 last = c;
-
     }
     if (last == '-' || partlen > 63) {
         return false;
     }
     return nonNumeric;
-
 }
 
 // absDomainName returns an absolute domain name which ends with a
@@ -152,7 +149,6 @@ private static @string absDomainName(slice<byte> b) {
         b = append(b, '.');
     }
     return string(b);
-
 }
 
 // An SRV represents a single DNS SRV record.
@@ -192,16 +188,11 @@ private static void shuffleByWeight(this byPriorityWeight addrs) {
                 if (i > 0) {
                     (addrs[0], addrs[i]) = (addrs[i], addrs[0]);
                 }
-
                 break;
-
             }
-
         }        sum -= int(addrs[0].Weight);
         addrs = addrs[(int)1..];
-
     }
-
 }
 
 // sort reorders SRV records as specified in RFC 2782.
@@ -215,7 +206,6 @@ private static void sort(this byPriorityWeight addrs) {
         }
     }
     addrs[(int)i..].shuffleByWeight();
-
 }
 
 // An MX represents a single DNS MX record.
@@ -244,7 +234,6 @@ private static void sort(this byPref s) {
         var j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
     }    sort.Sort(s);
-
 }
 
 // An NS represents a single DNS NS record.

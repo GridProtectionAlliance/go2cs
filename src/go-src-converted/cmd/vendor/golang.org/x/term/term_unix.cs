@@ -5,12 +5,12 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris || zos
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris zos
 
-// package term -- go2cs converted at 2022 March 06 23:31:04 UTC
+// package term -- go2cs converted at 2022 March 13 06:41:33 UTC
 // import "cmd/vendor/golang.org/x/term" ==> using term = go.cmd.vendor.golang.org.x.term_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\term\term_unix.go
-using unix = go.golang.org.x.sys.unix_package;
-
 namespace go.cmd.vendor.golang.org.x;
+
+using unix = golang.org.x.sys.unix_package;
 
 public static partial class term_package {
 
@@ -50,9 +50,7 @@ private static (ptr<State>, error) makeRaw(nint fd) {
         }
     }
 
-
     return (_addr__addr_oldState!, error.As(null!)!);
-
 }
 
 private static (ptr<State>, error) getState(nint fd) {
@@ -64,7 +62,6 @@ private static (ptr<State>, error) getState(nint fd) {
         return (_addr_null!, error.As(err)!);
     }
     return (addr(new State(state{termios:*termios})), error.As(null!)!);
-
 }
 
 private static error restore(nint fd, ptr<State> _addr_state) {
@@ -83,7 +80,6 @@ private static (nint, nint, error) getSize(nint fd) {
         return (-1, -1, error.As(err)!);
     }
     return (int(ws.Col), int(ws.Row), error.As(null!)!);
-
 }
 
 // passwordReader is an io.Reader that reads from a specific file descriptor.
@@ -117,11 +113,9 @@ private static (slice<byte>, error) readPassword(nint fd) => func((defer, _, _) 
         }
     }
 
-
     defer(unix.IoctlSetTermios(fd, ioctlWriteTermios, termios));
 
     return readPasswordLine(passwordReader(fd));
-
 });
 
 } // end term_package

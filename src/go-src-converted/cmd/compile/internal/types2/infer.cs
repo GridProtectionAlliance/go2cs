@@ -4,15 +4,14 @@
 
 // This file implements type parameter inference.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:40 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:03 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\infer.go
-using bytes = go.bytes_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using System;
 
 public static partial class types2_package {
 
@@ -70,7 +69,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, syntax.Pos pos, 
                 targ = targ__prev1;
             }
         }());
-
     }
     var n = len(tparams);
     assert(n > 0 && len(targs) <= n); 
@@ -146,7 +144,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, syntax.Pos pos, 
                 check.errorf(arg, "%s %s of %s does not match %s (cannot infer %s)", kind, targ, arg.expr, tpar, typeNamesString(tparams));
                 return ;
             }
-
         }
         smap = makeSubstMap(tparams, targs);
         var inferred = check.subst(arg.Pos(), tpar, smap);
@@ -178,9 +175,7 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, syntax.Pos pos, 
                     // and continue, we may still be able to infer all
                     // targs resulting in fewer follon-on errors.
                     continue;
-
                 }
-
                 {
                     var targ__prev2 = targ;
 
@@ -194,7 +189,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, syntax.Pos pos, 
                             errorf("type", par.typ, targ, arg);
                             return null;
                         }
-
                     }
                     else
  {
@@ -204,9 +198,7 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, syntax.Pos pos, 
                     targ = targ__prev2;
 
                 }
-
             }
-
         }
         i = i__prev1;
         arg = arg__prev1;
@@ -249,13 +241,11 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, syntax.Pos pos, 
                         errorf("default type", par.typ, targ, arg);
                         return null;
                     }
-
                 }
 
                 tpar = tpar__prev1;
 
             }
-
         }
         i = i__prev1;
     }
@@ -276,7 +266,6 @@ private static slice<Type> infer(this ptr<Checker> _addr_check, syntax.Pos pos, 
         check.errorf(pos, "cannot infer %s (%s) (%s)", tpar.name, tpar.pos, targs);
     }
     return null;
-
 });
 
 // typeNamesString produces a string containing all the
@@ -304,11 +293,9 @@ private static @string typeNamesString(slice<ptr<TypeName>> list) {
             b.WriteString(", ");
         }
         b.WriteString(tname.name);
-
     }    b.WriteString(", and ");
     b.WriteString(list[n - 1].name);
     return b.String();
-
 }
 
 // IsParameterized reports whether typ contains any of the type parameters of tparams.
@@ -334,7 +321,6 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
             return x;
         }
     }
-
     w.seen[typ] = false;
     defer(() => {
         w.seen[typ] = res;
@@ -392,9 +378,7 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
                 }
 
                 return w.isParameterizedList(unpack(t.allTypes));
-
             }
-
             return t.iterate(t => {
                 {
                     var m__prev1 = m;
@@ -410,7 +394,6 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
                 }
 
                 return w.isParameterizedList(unpack(t.types));
-
             }, null);
             break;
         case ptr<Map> t:
@@ -438,7 +421,6 @@ private static bool isParameterized(this ptr<tpWalker> _addr_w, Type typ) => fun
     }
 
     return false;
-
 });
 
 private static bool isParameterizedList(this ptr<tpWalker> _addr_w, slice<Type> list) {
@@ -449,7 +431,6 @@ private static bool isParameterizedList(this ptr<tpWalker> _addr_w, slice<Type> 
             return true;
         }
     }    return false;
-
 }
 
 // inferB returns the list of actual type arguments inferred from the type parameters'
@@ -550,9 +531,7 @@ private static (slice<Type>, nint) inferB(this ptr<Checker> _addr_check, slice<p
                 }
 
             }
-
         }        dirty = dirty[..(int)n];
-
     } 
 
     // Once nothing changes anymore, we may still have type parameters left;
@@ -592,7 +571,6 @@ private static (slice<Type>, nint) inferB(this ptr<Checker> _addr_check, slice<p
     }
 
     return ;
-
 }
 
 // structuralType returns the structural type of a constraint, if any.
@@ -611,9 +589,7 @@ private static Type structuralType(this ptr<Checker> _addr_check, Type constrain
             return null;
         }
     }
-
     return constraint;
-
 }
 
 } // end types2_package

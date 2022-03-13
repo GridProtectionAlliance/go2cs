@@ -34,25 +34,25 @@
 // defined as interface{f()}. Exported thus means "described in export
 // data".
 //
-// package facts -- go2cs converted at 2022 March 06 23:34:23 UTC
+
+// package facts -- go2cs converted at 2022 March 13 06:41:40 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/internal/facts" ==> using facts = go.cmd.vendor.golang.org.x.tools.go.analysis.@internal.facts_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\internal\facts\facts.go
-using bytes = go.bytes_package;
-using gob = go.encoding.gob_package;
-using fmt = go.fmt_package;
-using types = go.go.types_package;
-using ioutil = go.io.ioutil_package;
-using log = go.log_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-using sync = go.sync_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using objectpath = go.golang.org.x.tools.go.types.objectpath_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.@internal;
+
+using bytes = bytes_package;
+using gob = encoding.gob_package;
+using fmt = fmt_package;
+using types = go.types_package;
+using ioutil = io.ioutil_package;
+using log = log_package;
+using reflect = reflect_package;
+using sort = sort_package;
+using sync = sync_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using objectpath = golang.org.x.tools.go.types.objectpath_package;
+using System;
 
 public static partial class facts_package {
 
@@ -104,9 +104,7 @@ private static bool ImportObjectFact(this ptr<Set> _addr_s, types.Object obj, an
             return true;
         }
     }
-
     return false;
-
 });
 
 // ExportObjectFact implements analysis.Pass.ExportObjectFact.
@@ -120,7 +118,6 @@ private static void ExportObjectFact(this ptr<Set> _addr_s, types.Object obj, an
     s.mu.Lock();
     s.m[key] = fact; // clobber any existing entry
     s.mu.Unlock();
-
 }
 
 private static slice<analysis.ObjectFact> AllObjectFacts(this ptr<Set> _addr_s, map<reflect.Type, bool> filter) {
@@ -134,7 +131,6 @@ private static slice<analysis.ObjectFact> AllObjectFacts(this ptr<Set> _addr_s, 
         }
     }    s.mu.Unlock();
     return facts;
-
 }
 
 // ImportPackageFact implements analysis.Pass.ImportPackageFact.
@@ -156,9 +152,7 @@ private static bool ImportPackageFact(this ptr<Set> _addr_s, ptr<types.Package> 
             return true;
         }
     }
-
     return false;
-
 });
 
 // ExportPackageFact implements analysis.Pass.ExportPackageFact.
@@ -169,7 +163,6 @@ private static void ExportPackageFact(this ptr<Set> _addr_s, analysis.Fact fact)
     s.mu.Lock();
     s.m[key] = fact; // clobber any existing entry
     s.mu.Unlock();
-
 }
 
 private static slice<analysis.PackageFact> AllPackageFacts(this ptr<Set> _addr_s, map<reflect.Type, bool> filter) {
@@ -183,7 +176,6 @@ private static slice<analysis.PackageFact> AllPackageFacts(this ptr<Set> _addr_s
         }
     }    s.mu.Unlock();
     return facts;
-
 }
 
 // gobFact is the Gob declaration of a serialized fact.
@@ -237,7 +229,6 @@ public static (ptr<Set>, error) Decode(ptr<types.Package> _addr_pkg, Func<@strin
             }
 
         }
-
         if (debug) {
             logf("decoded %d facts: %v", len(gobFacts), gobFacts);
         }
@@ -248,9 +239,7 @@ public static (ptr<Set>, error) Decode(ptr<types.Package> _addr_pkg, Func<@strin
                 // unused in this translation unit. Skip.
                 logf("no package %q; discarding %v", f.PkgPath, f.Fact);
                 continue;
-
             }
-
             key key = new key(pkg:factPkg,t:reflect.TypeOf(f.Fact));
             if (f.Object != "") { 
                 // object fact
@@ -260,25 +249,18 @@ public static (ptr<Set>, error) Decode(ptr<types.Package> _addr_pkg, Func<@strin
                     // TODO(adonovan): audit for other possibilities.
                     logf("no object for path: %v; discarding %s", err, f.Fact);
                     continue;
-
                 }
-
                 key.obj = obj;
                 logf("read %T fact %s for %v", f.Fact, f.Fact, key.obj);
-
             }
             else
  { 
                 // package fact
                 logf("read %T fact %s for %v", f.Fact, f.Fact, factPkg);
-
             }
-
             m[key] = f.Fact;
-
         }
     }    return (addr(new Set(pkg:pkg,m:m)), error.As(null!)!);
-
 }
 
 // Encode encodes a set of facts to a memory buffer.
@@ -313,13 +295,9 @@ private static slice<byte> Encode(this ptr<Set> _addr_s) {
                     }
                     continue; // object not accessible from package API; discard fact
                 }
-
                 object = path;
-
             }
-
             gobFacts = append(gobFacts, new gobFact(PkgPath:k.pkg.Path(),Object:object,Fact:fact,));
-
         }
         fact = fact__prev1;
     }
@@ -368,21 +346,17 @@ private static slice<byte> Encode(this ptr<Set> _addr_s) {
                         err = err__prev3;
 
                     }
-
                 }
-
             }
 
             err = err__prev2;
 
         }
-
     }
     if (debug) {
         log.Printf("package %q: encode %d facts, %d bytes\n", s.pkg.Path(), len(gobFacts), buf.Len());
     }
     return buf.Bytes();
-
 }
 
 // String is provided only for debugging, and must not be called
@@ -404,10 +378,8 @@ private static @string String(this ptr<Set> _addr_s) {
             buf.WriteString(k.pkg.Path());
         }
         fmt.Fprintf(_addr_buf, ": %v", f);
-
     }    buf.WriteString("}");
     return buf.String();
-
 }
 
 } // end facts_package

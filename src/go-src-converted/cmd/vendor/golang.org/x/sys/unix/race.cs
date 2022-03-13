@@ -5,13 +5,13 @@
 //go:build (darwin && race) || (linux && race) || (freebsd && race)
 // +build darwin,race linux,race freebsd,race
 
-// package unix -- go2cs converted at 2022 March 06 23:26:38 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:18 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\race.go
-using runtime = go.runtime_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using runtime = runtime_package;
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 

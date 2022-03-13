@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:46:42 UTC
+//     Generated on 2022 March 13 05:57:56 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace @internal
 {
     public static partial class codesign_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CodeDirectory
         {
             // Constructors
@@ -97,7 +97,7 @@ namespace @internal
             public static implicit operator CodeDirectory(NilType nil) => default(CodeDirectory);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CodeDirectory CodeDirectory_cast(dynamic value)
         {
             return new CodeDirectory(value.magic, value.length, value.version, value.flags, value.hashOffset, value.identOffset, value.nSpecialSlots, value.nCodeSlots, value.codeLimit, value.hashSize, value.hashType, value._pad1, value.pageSize, value._pad2, value.scatterOffset, value.teamOffset, value._pad3, value.codeLimit64, value.execSegBase, value.execSegLimit, value.execSegFlags);

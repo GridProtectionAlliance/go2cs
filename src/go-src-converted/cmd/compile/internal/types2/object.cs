@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:45 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:08 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\object.go
-using bytes = go.bytes_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// An Object describes a named language entity such as a package,
+// constant, type, variable, function (incl. methods), or label.
+// All objects implement the Object interface.
+//
 
 public static partial class types2_package {
 
-    // An Object describes a named language entity such as a package,
-    // constant, type, variable, function (incl. methods), or label.
-    // All objects implement the Object interface.
-    //
 public partial interface Object {
     syntax.Pos Parent(); // scope in which this object is declared; nil for methods and struct fields
     syntax.Pos Pos(); // position of object identifier in declaration
@@ -65,7 +67,6 @@ public static @string Id(ptr<Package> _addr_pkg, @string name) {
         path = pkg.path;
     }
     return path + "." + name;
-
 }
 
 // An object implements the common parts of an Object.
@@ -98,8 +99,7 @@ private static @string String(this color c) {
         return "black";
     else 
         return "grey";
-    
-}
+    }
 
 // colorFor returns the (initial) color for an object depending on
 // whether its type t is known or not.
@@ -108,7 +108,6 @@ private static color colorFor(Type t) {
         return black;
     }
     return white;
-
 }
 
 // Parent returns the scope in which the object is declared.
@@ -234,7 +233,6 @@ private static bool sameId(this ptr<object> _addr_obj, ptr<Package> _addr_pkg, @
         return pkg == obj.pkg;
     }
     return pkg.path == obj.pkg.path;
-
 }
 
 // A PkgName represents an imported Go package.
@@ -336,7 +334,6 @@ private static bool IsAlias(this ptr<TypeName> _addr_obj) {
             break;
         }
     }
-
 }
 
 // A Variable represents a declared variable (including function parameters and results, and struct fields).
@@ -418,7 +415,6 @@ public static ptr<Func> NewFunc(syntax.Pos pos, ptr<Package> _addr_pkg, @string 
         typ = sig;
     }
     return addr(new Func(object{nil,pos,pkg,name,typ,0,colorFor(typ),nopos},false));
-
 }
 
 // FullName returns the package- or receiver-type-qualified name of
@@ -464,7 +460,6 @@ private static bool less(this ptr<Func> _addr_a, ptr<Func> _addr_b) {
         return a.pkg.path < b.pkg.path;
     }
     return false;
-
 }
 
 private static void isDependency(this ptr<Func> _addr__p0) {
@@ -519,7 +514,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
                 }
 
             }
-
             return ;
             break;
         case ptr<Const> obj:
@@ -537,7 +531,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
  {
                 buf.WriteString("var");
             }
-
             break;
         case ptr<Func> obj:
             buf.WriteString("func ");
@@ -591,7 +584,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
             }
 
         }
-
         if (tname.IsAlias()) {
             buf.WriteString(" =");
         }
@@ -602,7 +594,6 @@ private static void writeObject(ptr<bytes.Buffer> _addr_buf, Object obj, Qualifi
     }
     buf.WriteByte(' ');
     WriteType(buf, typ, qf);
-
 });
 
 private static void writePackage(ptr<bytes.Buffer> _addr_buf, ptr<Package> _addr_pkg, Qualifier qf) {
@@ -696,7 +687,6 @@ private static void writeFuncName(ptr<bytes.Buffer> _addr_buf, ptr<Func> _addr_f
                         // (not the named type) as the receiver.
                         // Don't print it in full.
                         buf.WriteString("interface");
-
                     }
                     else
  {
@@ -704,21 +694,16 @@ private static void writeFuncName(ptr<bytes.Buffer> _addr_buf, ptr<Func> _addr_f
                     }
 
                 }
-
                 buf.WriteByte(')');
                 buf.WriteByte('.');
-
             }
             else if (f.pkg != null) {
                 writePackage(_addr_buf, _addr_f.pkg, qf);
             }
 
-
         }
-
     }
     buf.WriteString(f.name);
-
 }
 
 } // end types2_package

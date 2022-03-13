@@ -4,40 +4,40 @@
 
 // This file implements type unification.
 
-// package types2 -- go2cs converted at 2022 March 06 23:13:08 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:34 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\unify.go
-using bytes = go.bytes_package;
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
 
 public static partial class types2_package {
 
-    // The unifier maintains two separate sets of type parameters x and y
-    // which are used to resolve type parameters in the x and y arguments
-    // provided to the unify call. For unidirectional unification, only
-    // one of these sets (say x) is provided, and then type parameters are
-    // only resolved for the x argument passed to unify, not the y argument
-    // (even if that also contains possibly the same type parameters). This
-    // is crucial to infer the type parameters of self-recursive calls:
-    //
-    //    func f[P any](a P) { f(a) }
-    //
-    // For the call f(a) we want to infer that the type argument for P is P.
-    // During unification, the parameter type P must be resolved to the type
-    // parameter P ("x" side), but the argument type P must be left alone so
-    // that unification resolves the type parameter P to P.
-    //
-    // For bidirection unification, both sets are provided. This enables
-    // unification to go from argument to parameter type and vice versa.
-    // For constraint type inference, we use bidirectional unification
-    // where both the x and y type parameters are identical. This is done
-    // by setting up one of them (using init) and then assigning its value
-    // to the other.
+// The unifier maintains two separate sets of type parameters x and y
+// which are used to resolve type parameters in the x and y arguments
+// provided to the unify call. For unidirectional unification, only
+// one of these sets (say x) is provided, and then type parameters are
+// only resolved for the x argument passed to unify, not the y argument
+// (even if that also contains possibly the same type parameters). This
+// is crucial to infer the type parameters of self-recursive calls:
+//
+//    func f[P any](a P) { f(a) }
+//
+// For the call f(a) we want to infer that the type argument for P is P.
+// During unification, the parameter type P must be resolved to the type
+// parameter P ("x" side), but the argument type P must be left alone so
+// that unification resolves the type parameter P to P.
+//
+// For bidirection unification, both sets are provided. This enables
+// unification to go from argument to parameter type and vice versa.
+// For constraint type inference, we use bidirectional unification
+// where both the x and y type parameters are identical. This is done
+// by setting up one of them (using init) and then assigning its value
+// to the other.
 
-    // A unifier maintains the current type parameters for x and y
-    // and the respective types inferred for each type parameter.
-    // A unifier is created by calling newUnifier.
+// A unifier maintains the current type parameters for x and y
+// and the respective types inferred for each type parameter.
+// A unifier is created by calling newUnifier.
 private partial struct unifier {
     public ptr<Checker> check;
     public bool exact;
@@ -93,10 +93,8 @@ private static @string String(this ptr<tparamsList> _addr_d) {
         writeType(_addr_buf, tname.typ, null, null);
         buf.WriteString(": ");
         writeType(_addr_buf, d.at(i), null, null);
-
     }    buf.WriteByte(']');
     return buf.String();
-
 }
 
 // init initializes d with the given type parameters.
@@ -115,7 +113,6 @@ private static void init(this ptr<tparamsList> _addr_d, slice<ptr<TypeName>> tpa
     }
     d.tparams = tparams;
     d.indices = make_slice<nint>(len(tparams));
-
 }
 
 // join unifies the i'th type parameter of x with the j'th type parameter of y.
@@ -159,7 +156,6 @@ private static bool join(this ptr<unifier> _addr_u, nint i, nint j) {
         // (or x slot for y, it doesn't matter).
         u.x.setIndex(i, tj);
         return true;
-
 }
 
 // If typ is a type parameter of d, index returns the type parameter index.
@@ -179,12 +175,9 @@ private static nint index(this ptr<tparamsList> _addr_d, Type typ) {
                 }
 
             }
-
         }
     }
-
     return -1;
-
 }
 
 // setIndex sets the type slot index for the i'th type parameter
@@ -213,9 +206,7 @@ private static Type at(this ptr<tparamsList> _addr_d, nint i) {
             return d.unifier.types[ti - 1];
         }
     }
-
     return null;
-
 }
 
 // set sets the type typ for the i'th type parameter;
@@ -239,7 +230,6 @@ private static void set(this ptr<tparamsList> _addr_d, nint i, Type typ) => func
             panic("type already set");
 
     }
-
 });
 
 // types returns the list of inferred types (via unification) for the type parameters
@@ -260,7 +250,6 @@ private static (slice<Type>, nint) types(this ptr<tparamsList> _addr_d) {
             index = i;
         }
     }    return ;
-
 }
 
 private static bool nifyEq(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePair> _addr_p) {
@@ -294,8 +283,7 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
             return u.nify(x, under(y), p);
         else if (x != null && asNamed(x) != null && !isNamed(y)) 
             return u.nify(under(x), y, p);
-        
-    }
+            }
     {
         var i__prev1 = i;
 
@@ -362,8 +350,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Array> x:
             {
@@ -375,14 +361,11 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                     // If one or both array lengths are unknown (< 0) due to some error,
                     // assume they are the same to avoid spurious follow-on errors.
                     return (x.len < 0 || y.len < 0 || x.len == y.len) && u.nify(x.elem, y.elem, p);
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Slice> x:
             {
@@ -397,8 +380,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Struct> x:
             {
@@ -426,16 +407,12 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                         }
 
                         return true;
-
                     }
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Pointer> x:
             {
@@ -450,8 +427,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Tuple> x:
             {
@@ -477,18 +452,13 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                                 i = i__prev1;
                             }
                         }
-
                         return true;
-
                     }
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Signature> x:
             {
@@ -503,8 +473,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Sum> x:
             panic("type inference across sum types not implemented");
@@ -524,7 +492,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                         u.check.completeInterface(nopos, x);
                         u.check.completeInterface(nopos, y);
                     }
-
                     var a = x.allMethods;
                     var b = y.allMethods;
                     if (len(a) == len(b)) { 
@@ -555,16 +522,13 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                             if (p.identical(q)) {
                                 return true; // same pair was compared before
                             }
-
                             p = p.prev;
-
                         }
 
                         if (debug) {
                             assertSortedMethods(a);
                             assertSortedMethods(b);
                         }
-
                         {
                             var i__prev1 = i;
                             var f__prev1 = f;
@@ -583,16 +547,12 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                         }
 
                         return true;
-
                     }
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Map> x:
             {
@@ -607,8 +567,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Chan> x:
             {
@@ -623,8 +581,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<Named> x:
             {
@@ -655,16 +611,12 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
                         }
 
                         return true;
-
                     }
-
                 }
 
                 y = y__prev1;
 
             }
-
-
             break;
         case ptr<TypeParam> x:
             return x == y; 
@@ -685,7 +637,6 @@ private static bool nify(this ptr<unifier> _addr_u, Type x, Type y, ptr<ifacePai
     }
 
     return false;
-
 });
 
 } // end types2_package

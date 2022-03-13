@@ -8,16 +8,15 @@
 // TODO finish intrinsifying 386, deadcode the assembly, remove build tags, merge w/ intrinsics_common
 // TODO replace all uses of CtzXX with TrailingZerosXX; they are the same.
 
-// package sys -- go2cs converted at 2022 March 06 22:08:17 UTC
+// package sys -- go2cs converted at 2022 March 13 05:24:03 UTC
 // import "runtime/internal/sys" ==> using sys = go.runtime.@internal.sys_package
 // Original source: C:\Program Files\Go\src\runtime\internal\sys\intrinsics.go
-
-
 namespace go.runtime.@internal;
 
 public static partial class sys_package {
 
-    // Using techniques from http://supertech.csail.mit.edu/papers/debruijn.pdf
+// Using techniques from http://supertech.csail.mit.edu/papers/debruijn.pdf
+
 private static readonly nuint deBruijn64ctz = 0x0218a392cd3d5dbf;
 
 
@@ -38,7 +37,6 @@ public static nint Ctz64(ulong x) {
     var i = int(deBruijnIdx64ctz[y]); // convert to bit index
     var z = int((x - 1) >> 57 & 64); // adjustment if zero
     return i + z;
-
 }
 
 // Ctz32 counts trailing (low-order) zeroes,
@@ -49,7 +47,6 @@ public static nint Ctz32(uint x) {
     var i = int(deBruijnIdx32ctz[y]); // convert to bit index
     var z = int((x - 1) >> 26 & 32); // adjustment if zero
     return i + z;
-
 }
 
 // Ctz8 returns the number of trailing zero bits in x; the result is 8 for x == 0.

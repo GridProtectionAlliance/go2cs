@@ -19,29 +19,31 @@
 // this way, link this package into your program:
 //    import _ "expvar"
 //
-// package expvar -- go2cs converted at 2022 March 06 23:35:43 UTC
+
+// package expvar -- go2cs converted at 2022 March 13 06:43:41 UTC
 // import "expvar" ==> using expvar = go.expvar_package
 // Original source: C:\Program Files\Go\src\expvar\expvar.go
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using math = go.math_package;
-using http = go.net.http_package;
-using os = go.os_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using atomic = go.sync.atomic_package;
-using System;
-
-
 namespace go;
 
+using json = encoding.json_package;
+using fmt = fmt_package;
+using log = log_package;
+using math = math_package;
+using http = net.http_package;
+using os = os_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using atomic = sync.atomic_package;
+
+
+// Var is an abstract type for all exported variables.
+
+using System;
 public static partial class expvar_package {
 
-    // Var is an abstract type for all exported variables.
 public partial interface Var {
     @string String();
 }
@@ -105,7 +107,6 @@ private static void Add(this ptr<Float> _addr_v, double delta) {
             return ;
         }
     }
-
 }
 
 // Set sets v to value.
@@ -140,11 +141,9 @@ private static @string String(this ptr<Map> _addr_v) {
         }
         fmt.Fprintf(_addr_b, "%q: %v", kv.Key, kv.Value);
         first = false;
-
     });
     fmt.Fprintf(_addr_b, "}");
     return b.String();
-
 }
 
 // Init removes all keys from the map.
@@ -181,7 +180,6 @@ private static void addKey(this ptr<Map> _addr_v, @string key) => func((defer, _
         }
 
     }
-
 });
 
 private static Var Get(this ptr<Map> _addr_v, @string key) {
@@ -211,13 +209,10 @@ private static void Set(this ptr<Map> _addr_v, @string key, Var av) {
                 }
 
             }
-
         }
     }
 
-
     v.m.Store(key, av);
-
 }
 
 // Add adds delta to the *Int value stored under the given map key.
@@ -239,7 +234,6 @@ private static void Add(this ptr<Map> _addr_v, @string key, long delta) {
             iv.Add(delta);
         }
     }
-
 }
 
 // AddFloat adds delta to the *Float value stored under the given map key.
@@ -261,7 +255,6 @@ private static void AddFloat(this ptr<Map> _addr_v, @string key, double delta) {
             iv.Add(delta);
         }
     }
-
 }
 
 // Delete deletes the given key from the map.
@@ -346,12 +339,10 @@ public static void Publish(@string name, Var v) => func((defer, _, _) => {
             log.Panicln("Reuse of exported var name:", name);
         }
     }
-
     varKeysMu.Lock();
     defer(varKeysMu.Unlock());
     varKeys = append(varKeys, name);
     sort.Strings(varKeys);
-
 });
 
 // Get retrieves a named exported variable. It returns nil if the name has
@@ -412,10 +403,8 @@ private static void expvarHandler(http.ResponseWriter w, ptr<http.Request> _addr
         }
         first = false;
         fmt.Fprintf(w, "%q: %s", kv.Key, kv.Value);
-
     });
     fmt.Fprintf(w, "\n}\n");
-
 }
 
 // Handler returns the expvar HTTP Handler.

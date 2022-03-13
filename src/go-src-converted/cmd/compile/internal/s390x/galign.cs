@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package s390x -- go2cs converted at 2022 March 06 22:47:35 UTC
+// package s390x -- go2cs converted at 2022 March 13 05:58:50 UTC
 // import "cmd/compile/internal/s390x" ==> using s390x = go.cmd.compile.@internal.s390x_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\s390x\galign.go
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using s390x = go.cmd.@internal.obj.s390x_package;
-
 namespace go.cmd.compile.@internal;
+
+using ssagen = cmd.compile.@internal.ssagen_package;
+using s390x = cmd.@internal.obj.s390x_package;
 
 public static partial class s390x_package {
 

@@ -4,22 +4,23 @@
 
 // This file implements testing support.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:42 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:27:07 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\testing.go
-using io = go.io_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using io = io_package;
+using regexp = regexp_package;
+using strings = strings_package;
+
+
+// CommentsDo parses the given source and calls the provided handler for each
+// comment or error. If the text provided to handler starts with a '/' it is
+// the comment text; otherwise it is the error message.
+
+using System;
 public static partial class syntax_package {
 
-    // CommentsDo parses the given source and calls the provided handler for each
-    // comment or error. If the text provided to handler starts with a '/' it is
-    // the comment text; otherwise it is the error message.
 public static void CommentsDo(io.Reader src, Action<nuint, nuint, @string> handler) {
     scanner s = default;
     s.init(src, handler, comments);
@@ -74,7 +75,6 @@ public static map<nuint, slice<Error>> ErrorMap(io.Reader src) {
             s = s__prev1;
 
         }
-
     }, comments);
 
     while (s.tok != _EOF) {
@@ -86,7 +86,6 @@ public static map<nuint, slice<Error>> ErrorMap(io.Reader src) {
     }
 
     return ;
-
 }
 
 } // end syntax_package

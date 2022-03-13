@@ -5,16 +5,16 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package socktest -- go2cs converted at 2022 March 06 22:25:43 UTC
+// package socktest -- go2cs converted at 2022 March 13 05:40:15 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Program Files\Go\src\net\internal\socktest\sys_unix.go
-using syscall = go.syscall_package;
-
 namespace go.net.@internal;
+
+using syscall = syscall_package;
 
 public static partial class socktest_package {
 
-    // Socket wraps syscall.Socket.
+// Socket wraps syscall.Socket.
 private static (nint, error) Socket(this ptr<Switch> _addr_sw, nint family, nint sotype, nint proto) => func((defer, _, _) => {
     nint s = default;
     error err = default!;
@@ -39,21 +39,20 @@ private static (nint, error) Socket(this ptr<Switch> _addr_sw, nint family, nint
             syscall.Close(s);
         }
         return (-1, error.As(err)!);
-
     }
     sw.smu.Lock();
     defer(sw.smu.Unlock());
     if (so.Err != null) {
-        sw.stats.getLocked(so.Cookie).OpenFailed;
+        sw.stats.getLocked;
 
+        (so.Cookie).OpenFailed++;
         return (-1, error.As(so.Err)!);
-
     }
     var nso = sw.addLocked(s, family, sotype, proto);
-    sw.stats.getLocked(nso.Cookie).Opened;
+    sw.stats.getLocked;
 
+    (nso.Cookie).Opened++;
     return (s, error.As(null!)!);
-
 });
 
 // Close wraps syscall.Close.
@@ -82,16 +81,16 @@ private static error Close(this ptr<Switch> _addr_sw, nint s) => func((defer, _,
     sw.smu.Lock();
     defer(sw.smu.Unlock());
     if (so.Err != null) {
-        sw.stats.getLocked(so.Cookie).CloseFailed;
+        sw.stats.getLocked;
 
+        (so.Cookie).CloseFailed++;
         return error.As(so.Err)!;
-
     }
     delete(sw.sotab, s);
-    sw.stats.getLocked(so.Cookie).Closed;
+    sw.stats.getLocked;
 
+    (so.Cookie).Closed++;
     return error.As(null!)!;
-
 });
 
 // Connect wraps syscall.Connect.
@@ -120,15 +119,15 @@ private static error Connect(this ptr<Switch> _addr_sw, nint s, syscall.Sockaddr
     sw.smu.Lock();
     defer(sw.smu.Unlock());
     if (so.Err != null) {
-        sw.stats.getLocked(so.Cookie).ConnectFailed;
+        sw.stats.getLocked;
 
+        (so.Cookie).ConnectFailed++;
         return error.As(so.Err)!;
-
     }
-    sw.stats.getLocked(so.Cookie).Connected;
+    sw.stats.getLocked;
 
+    (so.Cookie).Connected++;
     return error.As(null!)!;
-
 });
 
 // Listen wraps syscall.Listen.
@@ -157,15 +156,15 @@ private static error Listen(this ptr<Switch> _addr_sw, nint s, nint backlog) => 
     sw.smu.Lock();
     defer(sw.smu.Unlock());
     if (so.Err != null) {
-        sw.stats.getLocked(so.Cookie).ListenFailed;
+        sw.stats.getLocked;
 
+        (so.Cookie).ListenFailed++;
         return error.As(so.Err)!;
-
     }
-    sw.stats.getLocked(so.Cookie).Listened;
+    sw.stats.getLocked;
 
+    (so.Cookie).Listened++;
     return error.As(null!)!;
-
 });
 
 // Accept wraps syscall.Accept.
@@ -195,21 +194,20 @@ private static (nint, syscall.Sockaddr, error) Accept(this ptr<Switch> _addr_sw,
             syscall.Close(ns);
         }
         return (-1, null, error.As(err)!);
-
     }
     sw.smu.Lock();
     defer(sw.smu.Unlock());
     if (so.Err != null) {
-        sw.stats.getLocked(so.Cookie).AcceptFailed;
+        sw.stats.getLocked;
 
+        (so.Cookie).AcceptFailed++;
         return (-1, null, error.As(so.Err)!);
-
     }
     var nso = sw.addLocked(ns, so.Cookie.Family(), so.Cookie.Type(), so.Cookie.Protocol());
-    sw.stats.getLocked(nso.Cookie).Accepted;
+    sw.stats.getLocked;
 
+    (nso.Cookie).Accepted++;
     return (ns, sa, error.As(null!)!);
-
 });
 
 // GetsockoptInt wraps syscall.GetsockoptInt.
@@ -242,13 +240,12 @@ private static (nint, error) GetsockoptInt(this ptr<Switch> _addr_sw, nint s, ni
     }
     if (opt == syscall.SO_ERROR && (so.SocketErr == syscall.Errno(0) || so.SocketErr == syscall.EISCONN)) {
         sw.smu.Lock();
-        sw.stats.getLocked(so.Cookie).Connected;
+        sw.stats.getLocked;
 
+        (so.Cookie).Connected++;
         sw.smu.Unlock();
-
     }
     return (soerr, error.As(null!)!);
-
 }
 
 } // end socktest_package

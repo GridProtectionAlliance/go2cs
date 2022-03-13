@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:48 UTC
+//     Generated on 2022 March 13 06:34:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class loadxcoff_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(xcoff.Section))]
         private partial struct ldSection
         {
@@ -74,7 +74,7 @@ namespace @internal
             public static implicit operator ldSection(NilType nil) => default(ldSection);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ldSection ldSection_cast(dynamic value)
         {
             return new ldSection(value.Section, value.sym);

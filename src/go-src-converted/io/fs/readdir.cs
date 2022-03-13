@@ -2,20 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fs -- go2cs converted at 2022 March 06 22:12:44 UTC
+// package fs -- go2cs converted at 2022 March 13 05:27:46 UTC
 // import "io/fs" ==> using fs = go.io.fs_package
 // Original source: C:\Program Files\Go\src\io\fs\readdir.go
-using errors = go.errors_package;
-using sort = go.sort_package;
-using System;
-
-
 namespace go.io;
 
+using errors = errors_package;
+using sort = sort_package;
+
+
+// ReadDirFS is the interface implemented by a file system
+// that provides an optimized implementation of ReadDir.
+
+using System;
 public static partial class fs_package {
 
-    // ReadDirFS is the interface implemented by a file system
-    // that provides an optimized implementation of ReadDir.
 public partial interface ReadDirFS {
     (slice<DirEntry>, error) ReadDir(@string name);
 }
@@ -38,7 +39,6 @@ public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) => func((d
         }
     }
 
-
     var (file, err) = fsys.Open(name);
     if (err != null) {
         return (null, error.As(err)!);
@@ -52,7 +52,6 @@ public static (slice<DirEntry>, error) ReadDir(FS fsys, @string name) => func((d
     var (list, err) = dir.ReadDir(-1);
     sort.Slice(list, (i, j) => list[i].Name() < list[j].Name());
     return (list, error.As(err)!);
-
 });
 
 // dirInfo is a DirEntry based on a FileInfo.
@@ -86,7 +85,6 @@ public static DirEntry FileInfoToDirEntry(FileInfo info) {
         return null;
     }
     return new dirInfo(fileInfo:info);
-
 }
 
 } // end fs_package

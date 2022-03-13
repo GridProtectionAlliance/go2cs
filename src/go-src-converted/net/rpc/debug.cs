@@ -2,22 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rpc -- go2cs converted at 2022 March 06 22:25:49 UTC
+// package rpc -- go2cs converted at 2022 March 13 05:40:20 UTC
 // import "net/rpc" ==> using rpc = go.net.rpc_package
 // Original source: C:\Program Files\Go\src\net\rpc\debug.go
+namespace go.net;
 /*
     Some HTML presented at http://machine:port/debug/rpc
     Lists services, their methods, and some statistics, still rudimentary.
 */
 
-using fmt = go.fmt_package;
-using template = go.html.template_package;
-using http = go.net.http_package;
-using sort = go.sort_package;
+
+using fmt = fmt_package;
+using template = html.template_package;
+using http = net.http_package;
+using sort = sort_package;
 using System;
-
-
-namespace go.net;
 
 public static partial class rpc_package {
 

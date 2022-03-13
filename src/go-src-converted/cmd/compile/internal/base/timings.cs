@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 23:14:31 UTC
+// package @base -- go2cs converted at 2022 March 13 06:28:01 UTC
 // import "cmd/compile/internal/base" ==> using @base = go.cmd.compile.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\base\timings.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using io = io_package;
+using strings = strings_package;
+using time = time_package;
+using System;
 
 public static partial class @base_package {
 
@@ -78,7 +77,6 @@ private static void AddEvent(this ptr<Timings> _addr_t, long size, @string unit)
         i--;
     }
     m[i] = append(m[i], addr(new event(size,unit)));
-
 }
 
 // Write prints the phase times to w.
@@ -126,9 +124,7 @@ private static void Write(this ptr<Timings> _addr_t, io.Writer w, @string prefix
                         }
 
                     }
-
                 }
-
             }
             else
  { 
@@ -136,18 +132,14 @@ private static void Write(this ptr<Timings> _addr_t, io.Writer w, @string prefix
                 if (qt.start) { 
                     // between a stopped and started phase; unaccounted time
                     unaccounted += dt;
-
                 }
                 else
  { 
                     // previous stop implicitly started current phase
                     label = qt.label;
                     events = t.events[i];
-
                 }
-
             }
-
             if (label != "") { 
                 // add phase to existing group, or start a new group
                 var l = commonPrefix(group.label, label);
@@ -156,7 +148,6 @@ private static void Write(this ptr<Timings> _addr_t, io.Writer w, @string prefix
                     group.label = l;
                     group.tot += dt;
                     group.size++;
-
                 }
                 else
  { 
@@ -164,20 +155,15 @@ private static void Write(this ptr<Timings> _addr_t, io.Writer w, @string prefix
                     if (group.size > 1) {
                         lines.add(prefix + group.label + "subtotal", 1, group.tot, tot, null);
                     }
-
                     group.label = label;
                     group.tot = dt;
                     group.size = 1;
-
                 } 
 
                 // write phase
                 lines.add(prefix + label, 1, dt, tot, events);
-
             }
-
             pt = qt;
-
         }
 
         if (group.size > 1) {
@@ -189,7 +175,6 @@ private static void Write(this ptr<Timings> _addr_t, io.Writer w, @string prefix
         lines.add(prefix + "total", 1, tot, tot, null);
 
         lines.write(w);
-
     }
 }
 
@@ -251,7 +236,6 @@ private static void write(this lines lines, io.Writer w) {
                         widths = append(widths, len(col));
                         number = append(number, isnumber(col)); // first line determines column contents
                     }
-
                 }
 
                 i = i__prev2;
@@ -293,9 +277,7 @@ private static void write(this lines lines, io.Writer w) {
                     if (number[i]) {
                         format = "%*s"; // numbers are right-aligned
                     }
-
                     fmt.Fprintf(w, format, widths[i], col);
-
                 }
 
                 i = i__prev2;
@@ -303,7 +285,6 @@ private static void write(this lines lines, io.Writer w) {
             }
 
             fmt.Fprintln(w);
-
         }
         line = line__prev1;
     }
@@ -315,9 +296,7 @@ private static bool isnumber(@string s) {
             continue; // ignore leading whitespace
         }
         return '0' <= ch && ch <= '9' || ch == '.' || ch == '-' || ch == '+';
-
     }    return false;
-
 }
 
 } // end @base_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:21:20 UTC
+//     Generated on 2022 March 13 05:36:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Cookie
         {
             // Constructors
@@ -81,7 +81,7 @@ namespace net
             public static implicit operator Cookie(NilType nil) => default(Cookie);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Cookie Cookie_cast(dynamic value)
         {
             return new Cookie(value.Name, value.Value, value.Path, value.Domain, value.Expires, value.RawExpires, value.MaxAge, value.Secure, value.HttpOnly, value.SameSite, value.Raw, value.Unparsed);

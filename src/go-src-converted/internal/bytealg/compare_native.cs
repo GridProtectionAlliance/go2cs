@@ -5,17 +5,16 @@
 //go:build 386 || amd64 || s390x || arm || arm64 || ppc64 || ppc64le || mips || mipsle || wasm || mips64 || mips64le
 // +build 386 amd64 s390x arm arm64 ppc64 ppc64le mips mipsle wasm mips64 mips64le
 
-// package bytealg -- go2cs converted at 2022 March 06 22:30:04 UTC
+// package bytealg -- go2cs converted at 2022 March 13 05:40:51 UTC
 // import "internal/bytealg" ==> using bytealg = go.@internal.bytealg_package
 // Original source: C:\Program Files\Go\src\internal\bytealg\compare_native.go
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go.@internal;
 
-public static partial class bytealg_package {
- // For go:linkname
+using _@unsafe_ = @unsafe_package;
 
-    //go:noescape
+public static partial class bytealg_package { // For go:linkname
+
+//go:noescape
 public static nint Compare(slice<byte> a, slice<byte> b);
 
 // The declaration below generates ABI wrappers for functions

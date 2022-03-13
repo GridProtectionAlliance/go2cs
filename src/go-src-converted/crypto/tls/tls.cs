@@ -4,38 +4,40 @@
 
 // Package tls partially implements TLS 1.2, as specified in RFC 5246,
 // and TLS 1.3, as specified in RFC 8446.
-// package tls -- go2cs converted at 2022 March 06 22:21:08 UTC
+
+// package tls -- go2cs converted at 2022 March 13 05:36:15 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\tls.go
+namespace go.crypto;
 // BUG(agl): The crypto/tls package only implements some countermeasures
 // against Lucky13 attacks on CBC-mode encryption, and only on SHA1
 // variants. See http://www.isg.rhul.ac.uk/tls/TLStiming.pdf and
 // https://www.imperialviolet.org/2013/02/04/luckythirteen.html.
 
-using bytes = go.bytes_package;
-using context = go.context_package;
-using crypto = go.crypto_package;
-using ecdsa = go.crypto.ecdsa_package;
-using ed25519 = go.crypto.ed25519_package;
-using rsa = go.crypto.rsa_package;
-using x509 = go.crypto.x509_package;
-using pem = go.encoding.pem_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using net = go.net_package;
-using os = go.os_package;
-using strings = go.strings_package;
+
+using bytes = bytes_package;
+using context = context_package;
+using crypto = crypto_package;
+using ecdsa = crypto.ecdsa_package;
+using ed25519 = crypto.ed25519_package;
+using rsa = crypto.rsa_package;
+using x509 = crypto.x509_package;
+using pem = encoding.pem_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using net = net_package;
+using os = os_package;
+using strings = strings_package;
+
+
+// Server returns a new TLS server side connection
+// using conn as the underlying transport.
+// The configuration config must be non-nil and must include
+// at least one certificate or else set GetCertificate.
+
 using System;
-
-
-namespace go.crypto;
-
 public static partial class tls_package {
 
-    // Server returns a new TLS server side connection
-    // using conn as the underlying transport.
-    // The configuration config must be non-nil and must include
-    // at least one certificate or else set GetCertificate.
 public static ptr<Conn> Server(net.Conn conn, ptr<Config> _addr_config) {
     ref Config config = ref _addr_config.val;
 
@@ -74,7 +76,6 @@ private static (net.Conn, error) Accept(this ptr<listener> _addr_l) {
         return (null, error.As(err)!);
     }
     return (Server(c, _addr_l.config), error.As(null!)!);
-
 }
 
 // NewListener creates a Listener which accepts connections from an inner
@@ -107,7 +108,6 @@ public static (net.Listener, error) Listen(@string network, @string laddr, ptr<C
         return (null, error.As(err)!);
     }
     return (NewListener(l, _addr_config), error.As(null!)!);
-
 }
 
 private partial struct timeoutError {
@@ -176,7 +176,6 @@ private static (ptr<Conn>, error) dial(context.Context ctx, ptr<net.Dialer> _add
         var c = config.Clone();
         c.ServerName = hostname;
         config = c;
-
     }
     var conn = Client(rawConn, _addr_config);
     {
@@ -187,9 +186,7 @@ private static (ptr<Conn>, error) dial(context.Context ctx, ptr<net.Dialer> _add
             return (_addr_null!, error.As(err)!);
         }
     }
-
     return (_addr_conn!, error.As(null!)!);
-
 });
 
 // Dial connects to the given network address using net.Dial
@@ -238,7 +235,6 @@ private static ptr<net.Dialer> netDialer(this ptr<Dialer> _addr_d) {
         return _addr_d.NetDialer!;
     }
     return @new<net.Dialer>();
-
 }
 
 // DialContext connects to the given network address and initiates a TLS
@@ -259,10 +255,8 @@ private static (net.Conn, error) DialContext(this ptr<Dialer> _addr_d, context.C
     if (err != null) { 
         // Don't return c (a typed nil) in an interface.
         return (null, error.As(err)!);
-
     }
     return (c, error.As(null!)!);
-
 }
 
 // LoadX509KeyPair reads and parses a public/private key pair from a pair
@@ -283,7 +277,6 @@ public static (Certificate, error) LoadX509KeyPair(@string certFile, @string key
         return (new Certificate(), error.As(err)!);
     }
     return X509KeyPair(certPEMBlock, keyPEMBlock);
-
 }
 
 // X509KeyPair parses a public/private key pair from a pair of
@@ -320,7 +313,6 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
             return fail(errors.New("tls: failed to find certificate PEM data in certificate input, but did find a private key; PEM inputs may have been switched"));
         }
         return fail(fmt.Errorf("tls: failed to find \"CERTIFICATE\" PEM block in certificate input after skipping PEM blocks of the following types: %v", skippedBlockTypes));
-
     }
     skippedBlockTypes = skippedBlockTypes[..(int)0];
     ptr<pem.Block> keyDERBlock;
@@ -339,7 +331,6 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
             break;
         }
         skippedBlockTypes = append(skippedBlockTypes, keyDERBlock.Type);
-
     } 
 
     // We don't need to parse the public key for TLS, but we so do anyway
@@ -390,7 +381,6 @@ public static (Certificate, error) X509KeyPair(slice<byte> certPEMBlock, slice<b
     }
 
     return (cert, error.As(null!)!);
-
 }
 
 // Attempt to parse the given private key DER block. OpenSSL 0.9.8 generates
@@ -411,7 +401,6 @@ private static (crypto.PrivateKey, error) parsePrivateKey(slice<byte> der) {
         key = key__prev1;
 
     }
-
     {
         var key__prev1 = key;
 
@@ -435,12 +424,10 @@ private static (crypto.PrivateKey, error) parsePrivateKey(slice<byte> der) {
                     break;
                 }
             }
-
         }
         key = key__prev1;
 
     }
-
     {
         var key__prev1 = key;
 
@@ -453,9 +440,7 @@ private static (crypto.PrivateKey, error) parsePrivateKey(slice<byte> der) {
 
     }
 
-
     return (null, error.As(errors.New("tls: failed to parse private key"))!);
-
 }
 
 } // end tls_package

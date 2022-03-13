@@ -4,16 +4,16 @@
 
 // Parsing of XCOFF executable (AIX)
 
-// package objfile -- go2cs converted at 2022 March 06 22:41:01 UTC
+// package objfile -- go2cs converted at 2022 March 13 05:52:05 UTC
 // import "cmd/internal/objfile" ==> using objfile = go.cmd.@internal.objfile_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objfile\xcoff.go
-using dwarf = go.debug.dwarf_package;
-using fmt = go.fmt_package;
-using xcoff = go.@internal.xcoff_package;
-using io = go.io_package;
-using unicode = go.unicode_package;
-
 namespace go.cmd.@internal;
+
+using dwarf = debug.dwarf_package;
+using fmt = fmt_package;
+using xcoff = @internal.xcoff_package;
+using io = io_package;
+using unicode = unicode_package;
 
 public static partial class objfile_package {
 
@@ -30,7 +30,6 @@ private static (rawFile, error) openXcoff(io.ReaderAt r) {
         return (null, error.As(err)!);
     }
     return (addr(new xcoffFile(f)), error.As(null!)!);
-
 }
 
 private static (slice<Sym>, error) symbols(this ptr<xcoffFile> _addr_f) {
@@ -65,13 +64,11 @@ private static (slice<Sym>, error) symbols(this ptr<xcoffFile> _addr_f) {
                 // The size of a function is contained in the
                 // AUX_FCN entry
                 sym.Size = s.AuxFcn.Size;
-
             }
             else
  {
                 sym.Size = s.AuxCSect.Length;
             }
-
             sym.Size = s.AuxCSect.Length;
 
 
@@ -83,7 +80,6 @@ private static (slice<Sym>, error) symbols(this ptr<xcoffFile> _addr_f) {
  {
                     sym.Code = 'T';
                 }
-
             else if (sect.Type == xcoff.STYP_DATA) 
                 sym.Code = 'D';
             else if (sect.Type == xcoff.STYP_BSS) 
@@ -91,13 +87,9 @@ private static (slice<Sym>, error) symbols(this ptr<xcoffFile> _addr_f) {
                         if (s.StorageClass == xcoff.C_HIDEXT) { 
                 // Local symbol
                 sym.Code = unicode.ToLower(sym.Code);
-
             }
-
                 syms = append(syms, sym);
-
     }    return (syms, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<xcoffFile> _addr_f) {
@@ -114,7 +106,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<xcoffFile>
             textStart = sect.VirtualAddress;
         }
     }
-
     pclntab, err = loadXCOFFTable(_addr_f.xcoff, "runtime.pclntab", "runtime.epclntab");
 
     if (err != null) {
@@ -122,7 +113,6 @@ private static (ulong, slice<byte>, slice<byte>, error) pcln(this ptr<xcoffFile>
     }
     symtab, _ = loadXCOFFTable(_addr_f.xcoff, "runtime.symtab", "runtime.esymtab"); // ignore error, this symbol is not useful anyway
     return (textStart, symtab, pclntab, error.As(null!)!);
-
 }
 
 private static (ulong, slice<byte>, error) text(this ptr<xcoffFile> _addr_f) {
@@ -138,7 +128,6 @@ private static (ulong, slice<byte>, error) text(this ptr<xcoffFile> _addr_f) {
     textStart = sect.VirtualAddress;
     text, err = sect.Data();
     return ;
-
 }
 
 private static (ptr<xcoff.Symbol>, error) findXCOFFSymbol(ptr<xcoff.File> _addr_f, @string name) {
@@ -157,9 +146,7 @@ private static (ptr<xcoff.Symbol>, error) findXCOFFSymbol(ptr<xcoff.File> _addr_
             return (_addr_null!, error.As(fmt.Errorf("symbol %s: section number %d is larger than max %d", name, s.SectionNumber, len(f.Sections)))!);
         }
         return (_addr_s!, error.As(null!)!);
-
     }    return (_addr_null!, error.As(fmt.Errorf("no %s symbol found", name))!);
-
 }
 
 private static (slice<byte>, error) loadXCOFFTable(ptr<xcoff.File> _addr_f, @string sname, @string ename) {
@@ -184,7 +171,6 @@ private static (slice<byte>, error) loadXCOFFTable(ptr<xcoff.File> _addr_f, @str
         return (null, error.As(err)!);
     }
     return (data[(int)ssym.Value..(int)esym.Value], error.As(null!)!);
-
 }
 
 private static @string goarch(this ptr<xcoffFile> _addr_f) {
@@ -196,7 +182,6 @@ private static @string goarch(this ptr<xcoffFile> _addr_f) {
     else if (f.xcoff.TargetMachine == xcoff.U64_TOCMAGIC) 
         return "ppc64";
         return "";
-
 }
 
 private static (ulong, error) loadAddress(this ptr<xcoffFile> _addr_f) {

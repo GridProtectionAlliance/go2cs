@@ -2,24 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cookiejar -- go2cs converted at 2022 March 06 22:23:51 UTC
+// package cookiejar -- go2cs converted at 2022 March 13 05:38:15 UTC
 // import "net/http/cookiejar" ==> using cookiejar = go.net.http.cookiejar_package
 // Original source: C:\Program Files\Go\src\net\http\cookiejar\punycode.go
+namespace go.net.http;
 // This file implements the Punycode algorithm from RFC 3492.
 
-using fmt = go.fmt_package;
-using ascii = go.net.http.@internal.ascii_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
 
-namespace go.net.http;
+using fmt = fmt_package;
+using ascii = net.http.@internal.ascii_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+
+// These parameter values are specified in section 5.
+//
+// All computation is done with int32s, so that overflow behavior is identical
+// regardless of whether int is 32-bit or 64-bit.
 
 public static partial class cookiejar_package {
 
-    // These parameter values are specified in section 5.
-    //
-    // All computation is done with int32s, so that overflow behavior is identical
-    // regardless of whether int is 32-bit or 64-bit.
 private static readonly int base = 36;
 private static readonly int damp = 700;
 private static readonly int initialBias = 72;
@@ -27,7 +29,6 @@ private static readonly int initialN = 128;
 private static readonly int skew = 38;
 private static readonly int tmax = 26;
 private static readonly int tmin = 1;
-
 
 // encode encodes a string as specified in section 6.3 and prepends prefix to
 // the result.
@@ -58,7 +59,6 @@ private static (@string, error) encode(@string prefix, @string s) {
  {
                 remaining++;
             }
-
         }
         r = r__prev1;
     }
@@ -106,7 +106,7 @@ private static (@string, error) encode(@string prefix, @string s) {
                 {
                     var k = base;
 
-                    while (>>MARKER:FOREXPRESSION_LEVEL_3<<) {
+                    while () {
                         var t = k - bias;
                         if (t < tmin) {
                             t = tmin;
@@ -115,14 +115,11 @@ private static (@string, error) encode(@string prefix, @string s) {
                         else if (t > tmax) {
                             t = tmax;
                         }
-
                         if (q < t) {
                             break;
                         }
-
                         output = append(output, encodeDigit(t + (q - t) % (base - t)));
                         q = (q - t) / (base - t);
-
                     }
 
                 }
@@ -131,7 +128,6 @@ private static (@string, error) encode(@string prefix, @string s) {
                 delta = 0;
                 h++;
                 remaining--;
-
             }
 
             r = r__prev2;
@@ -139,10 +135,8 @@ private static (@string, error) encode(@string prefix, @string s) {
 
         delta++;
         n++;
-
     }
     return (string(output), error.As(null!)!);
-
 }
 
 private static byte encodeDigit(int digit) => func((_, panic, _) => {
@@ -152,7 +146,6 @@ private static byte encodeDigit(int digit) => func((_, panic, _) => {
     else if (26 <= digit && digit < 36) 
         return byte(digit + ('0' - 26));
         panic("cookiejar: internal error in punycode encoding");
-
 });
 
 // adapt is the bias adaptation function specified in section 6.1.
@@ -171,7 +164,6 @@ private static int adapt(int delta, int numPoints, bool firstTime) {
         k += base;
     }
     return k + (base - tmin + 1) * delta / (delta + skew);
-
 }
 
 // Strictly speaking, the remaining code below deals with IDNA (RFC 5890 and
@@ -205,7 +197,6 @@ private static (@string, error) toASCII(@string s) {
             labels[i] = a;
         }
     }    return (strings.Join(labels, "."), error.As(null!)!);
-
 }
 
 } // end cookiejar_package

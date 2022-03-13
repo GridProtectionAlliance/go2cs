@@ -1,12 +1,9 @@
-// package a -- go2cs converted at 2022 March 06 23:22:34 UTC
+// package a -- go2cs converted at 2022 March 13 06:35:38 UTC
 // import "cmd/link/internal/ld/testdata/issue25459/a" ==> using a = go.cmd.link.@internal.ld.testdata.issue25459.a_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\issue25459\a\a.go
-
-using System;
-
-
 namespace go.cmd.link.@internal.ld.testdata.issue25459;
 
+using System;
 public static partial class a_package {
 
 public static readonly var Always = true;
@@ -26,7 +23,6 @@ public static nint ConstIf() {
     array<nint> imdead = new array<nint>(4);
     imdead[Count] = 1;
     return imdead[0];
-
 }
 
 public static nint CallConstIf() {
@@ -40,7 +36,6 @@ public static void Another() => func((defer, _, _) => {
 
         Count += 1;
     }());
-
 });
 
 } // end a_package

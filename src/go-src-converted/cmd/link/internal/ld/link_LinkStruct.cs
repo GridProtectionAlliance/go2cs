@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:48 UTC
+//     Generated on 2022 March 13 06:34:48 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(ErrorReporter))]
         public partial struct Link
         {
@@ -123,7 +123,7 @@ namespace @internal
             public static implicit operator Link(NilType nil) => default(Link);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Link Link_cast(dynamic value)
         {
             return new Link(value.Target, value.ErrorReporter, value.ArchSyms, value.outSem, ref value.Out, value.version, value.Debugvlog, ref value.Bso, value.Loaded, value.compressDWARF, value.Libdir, value.Library, value.LibraryByPkg, value.Shlibs, value.Textp, value.Moduledata, value.PackageFile, value.PackageShlib, value.tramps, value.compUnits, ref value.runtimeCU, ref value.loader, value.cgodata, value.datap, value.dynexp, value.numelfsym, value.generatorSyms);

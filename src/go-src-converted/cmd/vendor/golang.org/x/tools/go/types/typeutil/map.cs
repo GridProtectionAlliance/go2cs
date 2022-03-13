@@ -4,32 +4,34 @@
 
 // Package typeutil defines various utilities for types, such as Map,
 // a mapping from types.Type to interface{} values.
-// package typeutil -- go2cs converted at 2022 March 06 23:35:09 UTC
+
+// package typeutil -- go2cs converted at 2022 March 13 06:42:44 UTC
 // import "cmd/vendor/golang.org/x/tools/go/types/typeutil" ==> using typeutil = go.cmd.vendor.golang.org.x.tools.go.types.typeutil_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\types\typeutil\map.go
+namespace go.cmd.vendor.golang.org.x.tools.go.types;
 // import "golang.org/x/tools/go/types/typeutil"
 
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using types = go.go.types_package;
-using reflect = go.reflect_package;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using types = go.types_package;
+using reflect = reflect_package;
+
+
+// Map is a hash-table-based mapping from types (types.Type) to
+// arbitrary interface{} values.  The concrete types that implement
+// the Type interface are pointers.  Since they are not canonicalized,
+// == cannot be used to check for equivalence, and thus we cannot
+// simply use a Go map.
+//
+// Just as with map[K]V, a nil *Map is a valid empty map.
+//
+// Not thread-safe.
+//
+
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.types;
-
 public static partial class typeutil_package {
 
-    // Map is a hash-table-based mapping from types (types.Type) to
-    // arbitrary interface{} values.  The concrete types that implement
-    // the Type interface are pointers.  Since they are not canonicalized,
-    // == cannot be used to check for equivalence, and thus we cannot
-    // simply use a Go map.
-    //
-    // Just as with map[K]V, a nil *Map is a valid empty map.
-    //
-    // Not thread-safe.
-    //
 public partial struct Map {
     public Hasher hasher; // shared by many Maps
     public map<uint, slice<entry>> table; // maps hash to bucket; entry.key==nil means unused
@@ -84,13 +86,10 @@ private static bool Delete(this ptr<Map> _addr_m, types.Type key) {
                 bucket[i] = new entry();
                 m.length--;
                 return true;
-
             }
-
         }
     }
     return false;
-
 }
 
 // At returns the map entry for the given key.
@@ -107,7 +106,6 @@ private static void At(this ptr<Map> _addr_m, types.Type key) {
         }
     }
     return null;
-
 }
 
 // Set sets the map entry for key to val,
@@ -129,7 +127,6 @@ private static object Set(this ptr<Map> _addr_m, types.Type key, object value) {
                 bucket[i].value = value;
                 return ;
             }
-
         }
     else
         if (hole != null) {
@@ -145,11 +142,9 @@ private static object Set(this ptr<Map> _addr_m, types.Type key, object value) {
         }
         hash = m.hasher.Hash(key);
         m.table = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<uint, slice<entry>>{hash:{entry{key,value}}};
-
     }
     m.length++;
     return ;
-
 }
 
 // Len returns the number of map entries.
@@ -160,7 +155,6 @@ private static nint Len(this ptr<Map> _addr_m) {
         return m.length;
     }
     return 0;
-
 }
 
 // Iterate calls function f on each entry in the map in unspecified order.
@@ -216,7 +210,6 @@ private static @string toString(this ptr<Map> _addr_m, bool values) {
     });
     fmt.Fprint(_addr_buf, "}");
     return buf.String();
-
 }
 
 // String returns a string representation of the map's entries.
@@ -265,7 +258,6 @@ public static uint Hash(this Hasher h, types.Type t) {
         h.memo[t] = hash;
     }
     return hash;
-
 }
 
 // hashString computes the Fowler–Noll–Vo hash of s.
@@ -306,7 +298,6 @@ public static uint hashFor(this Hasher h, types.Type t) => func((_, panic, _) =>
                     hash += hashString(t.Tag(i));
                     hash += hashString(f.Name()); // (ignore f.Pkg)
                     hash += h.Hash(f.Type());
-
                 }
 
 
@@ -338,7 +329,6 @@ public static uint hashFor(this Hasher h, types.Type t) => func((_, panic, _) =>
                     // Ignore m.Pkg().
                     var m = t.Method(i);
                     hash += 3 * hashString(m.Name()) + 5 * h.Hash(m.Type());
-
                 }
 
 
@@ -361,7 +351,6 @@ public static uint hashFor(this Hasher h, types.Type t) => func((_, panic, _) =>
             break;
     }
     panic(t);
-
 });
 
 public static uint hashTuple(this Hasher h, ptr<types.Tuple> _addr_tuple) {
@@ -374,7 +363,6 @@ public static uint hashTuple(this Hasher h, ptr<types.Tuple> _addr_tuple) {
         hash += 3 * h.Hash(tuple.At(i).Type());
     }
     return hash;
-
 }
 
 } // end typeutil_package

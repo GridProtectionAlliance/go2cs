@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:00 UTC
+//     Generated on 2022 March 13 05:29:06 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace compress
 {
     public static partial class flate_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct tableEntry
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace compress
             public static implicit operator tableEntry(NilType nil) => default(tableEntry);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static tableEntry tableEntry_cast(dynamic value)
         {
             return new tableEntry(value.val, value.offset);

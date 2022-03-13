@@ -27,18 +27,18 @@
 // So out of paranoia, we reject @ at the beginning of every
 // flag argument that might be split into its own argument.
 
-// package work -- go2cs converted at 2022 March 06 23:17:45 UTC
+// package work -- go2cs converted at 2022 March 13 06:31:05 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\security.go
-using fmt = go.fmt_package;
-using lazyregexp = go.@internal.lazyregexp_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-
 namespace go.cmd.go.@internal;
+
+using fmt = fmt_package;
+using lazyregexp = @internal.lazyregexp_package;
+using regexp = regexp_package;
+using strings = strings_package;
+
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
 
 public static partial class work_package {
 
@@ -78,7 +78,6 @@ private static error checkFlags(@string name, @string source, slice<@string> lis
         env = env__prev1;
 
     }
-
     {
         var env__prev1 = env;
 
@@ -95,7 +94,6 @@ private static error checkFlags(@string name, @string source, slice<@string> lis
 
     }
 
-
 Args:
     for (nint i = 0; i < len(list); i++) {
         var arg = list[i];
@@ -111,7 +109,6 @@ Args:
                 _continueArgs = true;
                 break;
             }
-
         }        foreach (var (_, x) in validNext) {
             if (arg == x) {
                 if (i + 1 < len(list) && load.SafeArg(list[i + 1])) {
@@ -134,23 +131,16 @@ Args:
                         _continueArgs = true;
                         break;
                     }
-
                 }
-
                 if (i + 1 < len(list)) {
                     return error.As(fmt.Errorf("invalid flag in %s: %s %s (see https://golang.org/s/invalidflag)", source, arg, list[i + 1]))!;
                 }
-
                 return error.As(fmt.Errorf("invalid flag in %s: %s without argument (see https://golang.org/s/invalidflag)", source, arg))!;
-
             }
-
         }Bad:
         return error.As(fmt.Errorf("invalid flag in %s: %s", source, arg))!;
-
     }
     return error.As(null!)!;
-
 }
 
 } // end work_package

@@ -5,19 +5,19 @@
 //go:build !typeparams
 // +build !typeparams
 
-// package types -- go2cs converted at 2022 March 06 22:41:37 UTC
+// package types -- go2cs converted at 2022 March 13 05:52:42 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\api_notypeparams.go
-using ast = go.go.ast_package;
-
 namespace go.go;
+
+using ast = go.ast_package;
 
 public static partial class types_package {
 
-    // Info holds result type information for a type-checked package.
-    // Only the information for which a map is provided is collected.
-    // If the package has type errors, the collected information may
-    // be incomplete.
+// Info holds result type information for a type-checked package.
+// Only the information for which a map is provided is collected.
+// If the package has type errors, the collected information may
+// be incomplete.
 public partial struct Info {
     public map<ast.Expr, TypeAndValue> Types; // Defs maps identifiers to the objects they define (including
 // package names, dots "." of dot-imports, and blank "_" identifiers).

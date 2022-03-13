@@ -4,15 +4,12 @@
 
 // This file contains tests for the bool checker.
 
-// package @bool -- go2cs converted at 2022 March 06 23:35:18 UTC
+// package @bool -- go2cs converted at 2022 March 13 06:42:52 UTC
 // import "cmd/vet/testdata/bool" ==> using @bool = go.cmd.vet.testdata.@bool_package
 // Original source: C:\Program Files\Go\src\cmd\vet\testdata\bool\bool.go
-
-using System;
-
-
 namespace go.cmd.vet.testdata;
 
+using System;
 public static partial class @bool_package {
 
 private static void _() {
@@ -27,7 +24,6 @@ private static void _() {
         if (v == w || v == w) { // ERROR "redundant or: v == w || v == w"
         }
     }
-
 }
 
 } // end @bool_package

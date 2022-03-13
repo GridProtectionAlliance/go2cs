@@ -8,19 +8,21 @@
 //go:build aix || darwin || (solaris && !illumos)
 // +build aix darwin solaris,!illumos
 
-// package net -- go2cs converted at 2022 March 06 22:16:43 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:08 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sys_cloexec.go
-using poll = go.@internal.poll_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using poll = @internal.poll_package;
+using os = os_package;
+using syscall = syscall_package;
+
+
+// Wrapper around the socket system call that marks the returned file
+// descriptor as nonblocking and close-on-exec.
 
 public static partial class net_package {
 
-    // Wrapper around the socket system call that marks the returned file
-    // descriptor as nonblocking and close-on-exec.
 private static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
     nint _p0 = default;
     error _p0 = default!;
@@ -42,7 +44,6 @@ private static (nint, error) sysSocket(nint family, nint sotype, nint proto) {
         return (-1, error.As(os.NewSyscallError("setnonblock", err))!);
     }
     return (s, error.As(null!)!);
-
 }
 
 } // end net_package

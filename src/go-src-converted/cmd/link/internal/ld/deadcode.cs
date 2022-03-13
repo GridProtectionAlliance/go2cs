@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:20:56 UTC
+// package ld -- go2cs converted at 2022 March 13 06:33:52 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\deadcode.go
-using goobj = go.cmd.@internal.goobj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using unicode = go.unicode_package;
-
 namespace go.cmd.link.@internal;
+
+using goobj = cmd.@internal.goobj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using unicode = unicode_package;
 
 public static partial class ld_package {
 
@@ -58,7 +58,6 @@ private static void init(this ptr<deadcodePass> _addr_d) {
             i = i__prev1;
         }
         return ;
-
     }
     slice<@string> names = default; 
 
@@ -78,10 +77,8 @@ private static void init(this ptr<deadcodePass> _addr_d) {
  {
                 flagEntrySymbol.val = "main";
             }
-
         }
         names = append(names, flagEntrySymbol.val);
-
     }
     names = append(names, "runtime.unreachableMethod");
     if (!d.ctxt.linkShared && d.ctxt.BuildMode != BuildModePlugin) { 
@@ -89,7 +86,6 @@ private static void init(this ptr<deadcodePass> _addr_d) {
         // (see function buildinfo in data.go). They should normally be reachable from the
         // runtime. Just make it explicit, in case.
         names = append(names, "runtime.buildVersion", "runtime.modinfo");
-
     }
     if (d.ctxt.BuildMode == BuildModePlugin) {
         names = append(names, objabi.PathToPrefix(flagPluginPath.val) + "..inittask", objabi.PathToPrefix(flagPluginPath.val) + ".main", "go.plugin.tabs"); 
@@ -109,7 +105,6 @@ private static void init(this ptr<deadcodePass> _addr_d) {
 
                 i = i__prev1;
             }
-
         }
     }
     if (d.ctxt.Debugvlog > 1) {
@@ -120,7 +115,6 @@ private static void init(this ptr<deadcodePass> _addr_d) {
         d.mark(d.ldr.Lookup(name, 0), 0); 
         // Also mark any Go functions (internal ABI).
         d.mark(d.ldr.Lookup(name, sym.SymVerABIInternal), 0);
-
     }    {
         var s__prev1 = s;
 
@@ -153,11 +147,8 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
                 // When dynamic linking, a type may be passed across DSO
                 // boundary and get converted to interface at the other side.
                 d.ldr.SetAttrUsedInIface(symIdx, true);
-
             }
-
             usedInIface = d.ldr.AttrUsedInIface(symIdx);
-
         }
         methods = methods[..(int)0];
         {
@@ -170,7 +161,6 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
                 if (r.Weak() && !(d.ctxt.linkShared && d.ldr.IsItab(symIdx))) {
                     continue;
                 }
-
                 var t = r.Type();
 
                 if (t == objabi.R_METHODOFF) 
@@ -192,9 +182,7 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
                                 d.mark(rs, symIdx);
                             }
                         }
-
                     }
-
                     i += 2;
                     continue;
                 else if (t == objabi.R_USETYPE) 
@@ -224,14 +212,11 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
                         // We check for both SDYNIMPORT and Sxxx because name-mangled symbols haven't
                         // been resolved at this point.
                         continue;
-
                     }
-
                     var m = d.decodeIfaceMethod(d.ldr, d.ctxt.Arch, rs, r.Add());
                     if (d.ctxt.Debugvlog > 1) {
                         d.ctxt.Logf("reached iface method: %v\n", m);
                     }
-
                     d.ifaceMethod[m] = true;
                     continue;
                                 rs = r.Sym();
@@ -249,11 +234,8 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
                     // UsedInIface and one with. So termination is still guaranteed.
                     d.ldr.SetAttrUsedInIface(rs, true);
                     d.ldr.SetAttrReachable(rs, false);
-
                 }
-
                 d.mark(rs, symIdx);
-
             }
 
 
@@ -269,11 +251,8 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
                     // A symbol being reachable doesn't imply we need its
                     // type descriptor. Don't mark it.
                     continue;
-
                 }
-
                 d.mark(a.Sym(), symIdx);
-
             } 
             // Some host object symbols have an outer object, which acts like a
             // "carrier" symbol, or it holds all the symbols for a particular
@@ -306,7 +285,6 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
             if (len(methods) != len(methodsigs)) {
                 panic(fmt.Sprintf("%q has %d method relocations for %d methods", d.ldr.SymName(symIdx), len(methods), len(methodsigs)));
             }
-
             {
                 nint i__prev2 = i;
                 var m__prev2 = m;
@@ -325,10 +303,8 @@ private static void flood(this ptr<deadcodePass> _addr_d) => func((_, panic, _) 
             }
 
             d.markableMethods = append(d.markableMethods, methods);
-
         }
     }
-
 });
 
 private static void mark(this ptr<deadcodePass> _addr_d, loader.Sym symIdx, loader.Sym parent) {
@@ -416,7 +392,6 @@ private static void deadcode(ptr<Link> _addr_ctxt) {
         // Exported methods may satisfy interfaces we don't know
         // about yet when dynamically linking.
         d.reflectSeen = true;
-
     }
     while (true) { 
         // Methods might be called via reflection. Give up on
@@ -437,18 +412,14 @@ private static void deadcode(ptr<Link> _addr_ctxt) {
  {
                 rem = append(rem, m);
             }
-
         }        d.markableMethods = rem;
 
         if (d.wq.empty()) { 
             // No new work was discovered. Done.
             break;
-
         }
         d.flood();
-
     }
-
 }
 
 // methodsig is a typed method signature (name + type).
@@ -494,7 +465,6 @@ private static slice<methodsig> decodeMethodSig(this ptr<deadcodePass> _addr_d, 
         off += size;
     }
     return methods;
-
 }
 
 // Decode the method of interface type symbol symIdx at offset off.
@@ -512,7 +482,6 @@ private static methodsig decodeIfaceMethod(this ptr<deadcodePass> _addr_d, ptr<l
     m.name = decodetypeName(ldr, symIdx, _addr_relocs, int(off));
     m.typ = decodeRelocSym(ldr, symIdx, _addr_relocs, int32(off + 4));
     return m;
-
 });
 
 private static slice<methodsig> decodetypeMethods(this ptr<deadcodePass> _addr_d, ptr<loader.Loader> _addr_ldr, ptr<sys.Arch> _addr_arch, loader.Sym symIdx, ptr<loader.Relocs> _addr_relocs) => func((_, panic, _) => {
@@ -549,7 +518,6 @@ private static slice<methodsig> decodetypeMethods(this ptr<deadcodePass> _addr_d
     const nint sizeofMethod = 4 * 4; // sizeof reflect.method in program
  // sizeof reflect.method in program
     return d.decodeMethodSig(ldr, arch, symIdx, relocs, off, sizeofMethod, mcount);
-
 });
 
 } // end ld_package

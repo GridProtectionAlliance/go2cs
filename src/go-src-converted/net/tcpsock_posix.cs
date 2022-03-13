@@ -5,15 +5,15 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris || windows
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris windows
 
-// package net -- go2cs converted at 2022 March 06 22:16:50 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:10 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\tcpsock_posix.go
-using context = go.context_package;
-using io = go.io_package;
-using os = go.os_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using context = context_package;
+using io = io_package;
+using os = os_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -27,7 +27,6 @@ private static Addr sockaddrToTCP(syscall.Sockaddr sa) {
             break;
     }
     return null;
-
 }
 
 private static nint family(this ptr<TCPAddr> _addr_a) {
@@ -40,7 +39,6 @@ private static nint family(this ptr<TCPAddr> _addr_a) {
         return syscall.AF_INET;
     }
     return syscall.AF_INET6;
-
 }
 
 private static (syscall.Sockaddr, error) sockaddr(this ptr<TCPAddr> _addr_a, nint family) {
@@ -52,7 +50,6 @@ private static (syscall.Sockaddr, error) sockaddr(this ptr<TCPAddr> _addr_a, nin
         return (null, error.As(null!)!);
     }
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
-
 }
 
 private static sockaddr toLocal(this ptr<TCPAddr> _addr_a, @string net) {
@@ -77,7 +74,6 @@ private static (long, error) readFrom(this ptr<TCPConn> _addr_c, io.Reader r) {
         n = n__prev1;
 
     }
-
     {
         var n__prev1 = n;
 
@@ -89,9 +85,7 @@ private static (long, error) readFrom(this ptr<TCPConn> _addr_c, io.Reader r) {
         n = n__prev1;
 
     }
-
     return genericReadFrom(c, r);
-
 }
 
 private static (ptr<TCPConn>, error) dialTCP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<TCPAddr> _addr_laddr, ptr<TCPAddr> _addr_raddr) {
@@ -105,7 +99,6 @@ private static (ptr<TCPConn>, error) dialTCP(this ptr<sysDialer> _addr_sd, conte
         return _addr_testHookDialTCP(ctx, sd.network, laddr, raddr)!;
     }
     return _addr_sd.doDialTCP(ctx, laddr, raddr)!;
-
 }
 
 private static (ptr<TCPConn>, error) doDialTCP(this ptr<sysDialer> _addr_sd, context.Context ctx, ptr<TCPAddr> _addr_laddr, ptr<TCPAddr> _addr_raddr) {
@@ -146,14 +139,12 @@ private static (ptr<TCPConn>, error) doDialTCP(this ptr<sysDialer> _addr_sd, con
             fd.Close();
         }
         fd, err = internetSocket(ctx, sd.network, laddr, raddr, syscall.SOCK_STREAM, 0, "dial", sd.Dialer.Control);
-
     }
 
     if (err != null) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_newTCPConn(fd)!, error.As(null!)!);
-
 }
 
 private static bool selfConnect(ptr<netFD> _addr_fd, error err) {
@@ -169,7 +160,6 @@ private static bool selfConnect(ptr<netFD> _addr_fd, error err) {
     ptr<TCPAddr> l = fd.laddr._<ptr<TCPAddr>>();
     ptr<TCPAddr> r = fd.raddr._<ptr<TCPAddr>>();
     return l.Port == r.Port && l.IP.Equal(r.IP);
-
 }
 
 private static bool spuriousENOTAVAIL(error err) {
@@ -180,7 +170,6 @@ private static bool spuriousENOTAVAIL(error err) {
             err = op.Err;
         }
     }
-
     {
         ptr<os.SyscallError> (sys, ok) = err._<ptr<os.SyscallError>>();
 
@@ -188,9 +177,7 @@ private static bool spuriousENOTAVAIL(error err) {
             err = sys.Err;
         }
     }
-
     return err == syscall.EADDRNOTAVAIL;
-
 }
 
 private static bool ok(this ptr<TCPListener> _addr_ln) {
@@ -216,10 +203,8 @@ private static (ptr<TCPConn>, error) accept(this ptr<TCPListener> _addr_ln) {
             ka = defaultTCPKeepAlive;
         }
         setKeepAlivePeriod(fd, ka);
-
     }
     return (_addr_tc!, error.As(null!)!);
-
 }
 
 private static error close(this ptr<TCPListener> _addr_ln) {
@@ -238,7 +223,6 @@ private static (ptr<os.File>, error) file(this ptr<TCPListener> _addr_ln) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr_f!, error.As(null!)!);
-
 }
 
 private static (ptr<TCPListener>, error) listenTCP(this ptr<sysListener> _addr_sl, context.Context ctx, ptr<TCPAddr> _addr_laddr) {
@@ -252,7 +236,6 @@ private static (ptr<TCPListener>, error) listenTCP(this ptr<sysListener> _addr_s
         return (_addr_null!, error.As(err)!);
     }
     return (addr(new TCPListener(fd:fd,lc:sl.ListenConfig)), error.As(null!)!);
-
 }
 
 } // end net_package

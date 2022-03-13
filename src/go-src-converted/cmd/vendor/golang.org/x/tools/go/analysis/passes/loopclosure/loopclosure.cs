@@ -4,20 +4,20 @@
 
 // Package loopclosure defines an Analyzer that checks for references to
 // enclosing loop variables from within nested functions.
-// package loopclosure -- go2cs converted at 2022 March 06 23:34:38 UTC
+
+// package loopclosure -- go2cs converted at 2022 March 13 06:41:55 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/loopclosure" ==> using loopclosure = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.loopclosure_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\loopclosure\loopclosure.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using typeutil = golang.org.x.tools.go.types.typeutil_package;
+using System;
 
 public static partial class loopclosure_package {
 
@@ -67,7 +67,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 id = id__prev1;
 
             }
-
         };
         ptr<ast.BlockStmt> body;
         switch (n.type()) {
@@ -113,7 +112,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                     }
 
                 }
-
                 break;
         }
         ptr<ast.FuncLit> (lit, ok) = fun._<ptr<ast.FuncLit>>();
@@ -128,21 +126,16 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             if (pass.TypesInfo.Types[id].Type == null) { 
                 // Not referring to a variable (e.g. struct field name)
                 return true;
-
             }
-
             foreach (var (_, v) in vars) {
                 if (v.Obj == id.Obj) {
                     pass.ReportRangef(id, "loop variable %s captured by func literal", id.Name);
                 }
             }
             return true;
-
         });
-
     });
     return (null, error.As(null!)!);
-
 }
 
 // goInvokes returns a function expression that would be called asynchronously
@@ -186,7 +179,6 @@ private static ast.Expr goInvokes(ptr<types.Info> _addr_info, ptr<ast.CallExpr> 
         return null;
     }
     return call.Args[0];
-
 }
 
 } // end loopclosure_package

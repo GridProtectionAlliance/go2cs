@@ -3,25 +3,25 @@
 // license that can be found in the LICENSE file.
 
 // Package loadpe implements a PE/COFF file reader.
-// package loadpe -- go2cs converted at 2022 March 06 23:21:47 UTC
+
+// package loadpe -- go2cs converted at 2022 March 13 06:34:47 UTC
 // import "cmd/link/internal/loadpe" ==> using loadpe = go.cmd.link.@internal.loadpe_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\loadpe\ldpe.go
-using bytes = go.bytes_package;
-using bio = go.cmd.@internal.bio_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using pe = go.debug.pe_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.link.@internal;
+
+using bytes = bytes_package;
+using bio = cmd.@internal.bio_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using pe = debug.pe_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using strings = strings_package;
+using System;
 
 public static partial class loadpe_package {
 
@@ -139,7 +139,6 @@ public static readonly nuint IMAGE_REL_ARM64_BRANCH19 = 0x000F;
 public static readonly nuint IMAGE_REL_ARM64_BRANCH14 = 0x0010;
 public static readonly nuint IMAGE_REL_ARM64_REL32 = 0x0011;
 
-
 // TODO(crawshaw): de-duplicate these symbols with cmd/internal/ld, ideally in debug/pe.
 public static readonly nuint IMAGE_SCN_CNT_CODE = 0x00000020;
 public static readonly nuint IMAGE_SCN_CNT_INITIALIZED_DATA = 0x00000040;
@@ -148,7 +147,6 @@ public static readonly nuint IMAGE_SCN_MEM_DISCARDABLE = 0x02000000;
 public static readonly nuint IMAGE_SCN_MEM_EXECUTE = 0x20000000;
 public static readonly nuint IMAGE_SCN_MEM_READ = 0x40000000;
 public static readonly nuint IMAGE_SCN_MEM_WRITE = 0x80000000;
-
 
 // TODO(brainman): maybe just add ReadAt method to bio.Reader instead of creating peBiobuf
 
@@ -170,7 +168,6 @@ private static (nint, error) ReadAt(this ptr<peBiobuf> _addr_f, slice<byte> p, l
         return (0, error.As(err)!);
     }
     return (n, error.As(null!)!);
-
 }
 
 // makeUpdater creates a loader.SymbolBuilder if one hasn't been created previously.
@@ -184,7 +181,6 @@ private static ptr<loader.SymbolBuilder> makeUpdater(ptr<loader.Loader> _addr_l,
     }
     bld = l.MakeSymbolUpdater(s);
     return _addr_bld!;
-
 }
 
 // Load loads the PE file pn from input.
@@ -231,9 +227,7 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                 // This has been seen for .idata sections, which we
                 // want to ignore. See issues 5106 and 5273.
                 continue;
-
             }
-
             var name = fmt.Sprintf("%s(%s)", pkg, sect.Name);
             var s = lookup(name, localSymVersion);
             var bld = l.MakeSymbolUpdater(s);
@@ -257,13 +251,11 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                 sectdata[sect] = data;
                 bld.SetData(data);
             }
-
             bld.SetSize(int64(sect.Size));
             sectsyms[sect] = s;
             if (sect.Name == ".rsrc" || strings.HasPrefix(sect.Name, ".rsrc$")) {
                 rsrc = append(rsrc, s);
             }
-
         }
         sect = sect__prev1;
     }
@@ -277,7 +269,6 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
             }
 
         }
-
         if (rsect.NumberOfRelocations == 0) {
             continue;
         }
@@ -288,7 +279,6 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
             // This has been seen for .idata sections, which we
             // want to ignore. See issues 5106 and 5273.
             continue;
-
         }
         var splitResources = strings.HasPrefix(rsect.Name, ".rsrc$");
         var sb = l.MakeSymbolUpdater(sectsyms[rsect]);
@@ -367,15 +357,12 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
             if (issect(_addr_pesym) || splitResources) {
                 rAdd += int64(pesym.Value);
             }
-
             var (rel, _) = sb.AddRel(rType);
             rel.SetOff(rOff);
             rel.SetSiz(rSize);
             rel.SetSym(rSym);
             rel.SetAdd(rAdd);
-
         }        sb.SortRelocs();
-
     }    {
         nint i = 0;
         nint numaux = 0;
@@ -390,23 +377,18 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                 return (null, null, error.As(err)!);
             i += numaux + 1;
             }
-
             if (name == "") {
                 continue;
             }
-
             if (issect(_addr_pesym)) {
                 continue;
             }
-
             if (int(pesym.SectionNumber) > len(f.Sections)) {
                 continue;
             }
-
             if (pesym.SectionNumber == IMAGE_SYM_DEBUG) {
                 continue;
             }
-
             if (pesym.SectionNumber == IMAGE_SYM_ABSOLUTE && bytes.Equal(pesym.Name[..], (slice<byte>)"@feat.00")) { 
                 // Microsoft's linker looks at whether all input objects have an empty
                 // section called @feat.00. If all of them do, then it enables SEH;
@@ -420,9 +402,7 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                 // @feat.00 is just a marking anyway, skip IMAGE_SYM_ABSOLUTE sections that
                 // are called @feat.00.
                 continue;
-
             }
-
             ptr<pe.Section> sect;
             if (pesym.SectionNumber > 0) {
                 sect = f.Sections[pesym.SectionNumber - 1];
@@ -434,29 +414,22 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                     }
 
                 }
-
             }
-
             var (bld, s, err) = readpesym(_addr_l, _addr_arch, lookup, _addr_f, _addr_pesym, sectsyms, localSymVersion);
             if (err != null) {
                 return (null, null, error.As(err)!);
             }
-
             if (pesym.SectionNumber == 0) { // extern
                 if (l.SymType(s) == sym.SDYNIMPORT) {
                     bld = makeUpdater(_addr_l, _addr_bld, s);
                     bld.SetPlt(-2); // flag for dynimport in PE object files.
                 }
-
                 if (l.SymType(s) == sym.SXREF && pesym.Value > 0) { // global data
                     bld = makeUpdater(_addr_l, _addr_bld, s);
                     bld.SetType(sym.SNOPTRDATA);
                     bld.SetSize(int64(pesym.Value));
-
                 }
-
                 continue;
-
             }
             else if (pesym.SectionNumber > 0 && int(pesym.SectionNumber) <= len(f.Sections)) {
                 sect = f.Sections[pesym.SectionNumber - 1];
@@ -468,17 +441,14 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                     }
 
                 }
-
             }
             else
  {
                 return (null, null, error.As(fmt.Errorf("%s: %v: sectnum < 0!", pn, s))!);
             }
-
             if (sect == null) {
                 return (null, null, error.As(null!)!);
             }
-
             if (l.OuterSym(s) != 0) {
                 if (l.AttrDuplicateOK(s)) {
                     continue;
@@ -487,7 +457,6 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                 var sectName = l.SymName(sectsyms[sect]);
                 return (null, null, error.As(fmt.Errorf("%s: duplicate symbol reference: %s in both %s and %s", pn, l.SymName(s), outerName, sectName))!);
             }
-
             bld = makeUpdater(_addr_l, _addr_bld, s);
             var sectsym = sectsyms[sect];
             bld.SetType(l.SymType(sectsym));
@@ -500,7 +469,6 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                 }
                 bld.SetExternal(true);
             }
-
         }
     } 
 
@@ -522,21 +490,15 @@ public static (slice<loader.Sym>, slice<loader.Sym>, error) Load(ptr<loader.Load
                         return (null, null, error.As(fmt.Errorf("symbol %s listed multiple times", l.SymName(s)))!);
                     s = l.SubSym(s);
                     }
-
                     l.SetAttrOnList(s, true);
                     textp = append(textp, s);
-
                 }
-
-
             }
-
         }
         sect = sect__prev1;
     }
 
     return (textp, rsrc, error.As(null!)!);
-
 });
 
 private static bool issect(ptr<pe.COFFSymbol> _addr_s) {
@@ -576,7 +538,6 @@ private static (ptr<loader.SymbolBuilder>, loader.Sym, error) readpesym(ptr<load
  {
                 name = strings.TrimPrefix(name, "__imp_"); // __imp_Name => Name
             }
-
         else if (arch.Family == sys.I386) 
             if (name == "__imp____acrt_iob_func") { 
                 // Do not rename __imp____acrt_iob_func into ___acrt_iob_func,
@@ -587,11 +548,9 @@ private static (ptr<loader.SymbolBuilder>, loader.Sym, error) readpesym(ptr<load
  {
                 name = strings.TrimPrefix(name, "__imp_"); // __imp_Name => Name
             }
-
             if (name[0] == '_') {
                 name = name[(int)1..]; // _Name => Name
             }
-
             }
     {
         var i = strings.LastIndex(name, "@");
@@ -600,7 +559,6 @@ private static (ptr<loader.SymbolBuilder>, loader.Sym, error) readpesym(ptr<load
             name = name[..(int)i];
         }
     }
-
 
     loader.Sym s = default;
     ptr<loader.SymbolBuilder> bld;
@@ -626,7 +584,6 @@ private static (ptr<loader.SymbolBuilder>, loader.Sym, error) readpesym(ptr<load
         bld.SetGot(-2); // flag for __imp_
     }
     return (_addr_bld!, s, error.As(null!)!);
-
 }
 
 } // end loadpe_package

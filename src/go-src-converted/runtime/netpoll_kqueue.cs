@@ -5,15 +5,15 @@
 //go:build darwin || dragonfly || freebsd || netbsd || openbsd
 // +build darwin dragonfly freebsd netbsd openbsd
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:16 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:04 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\netpoll_kqueue.go
+namespace go;
 // Integrated network poller (kqueue-based implementation).
 
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
 
-namespace go;
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
@@ -33,9 +33,9 @@ private static void netpollinit() {
         println("runtime: pipe failed with", -errno);
         throw("runtime: pipe failed");
     }
-    ref keventt ev = ref heap(new keventt(filter:_EVFILT_READ,flags:_EV_ADD,) * (uintptr.val)(@unsafe.Pointer(_addr_ev.ident)), out ptr<keventt> _addr_ev);
+    ref keventt ev = ref heap(new keventt(filter:_EVFILT_READ,flags:_EV_ADD,) * (uintptr.val), out ptr<keventt> _addr_ev);
 
-    uintptr(r);
+    (@unsafe.Pointer(_addr_ev.ident)) = uintptr(r);
     var n = kevent(kq, _addr_ev, 1, null, 0, null);
     if (n < 0) {
         println("runtime: kevent failed with", -n);
@@ -43,7 +43,6 @@ private static void netpollinit() {
     }
     netpollBreakRd = uintptr(r);
     netpollBreakWr = uintptr(w);
-
 }
 
 private static bool netpollIsPollDescriptor(System.UIntPtr fd) {
@@ -57,9 +56,9 @@ private static int netpollopen(System.UIntPtr fd, ptr<pollDesc> _addr_pd) {
     // for the whole fd lifetime. The notifications are automatically unregistered
     // when fd is closed.
     array<keventt> ev = new array<keventt>(2);
-    (uintptr.val)(@unsafe.Pointer(_addr_ev[0].ident)).val;
+    (uintptr.val).val;
 
-    fd;
+    (@unsafe.Pointer(_addr_ev[0].ident)) = fd;
     ev[0].filter = _EVFILT_READ;
     ev[0].flags = _EV_ADD | _EV_CLEAR;
     ev[0].fflags = 0;
@@ -72,14 +71,12 @@ private static int netpollopen(System.UIntPtr fd, ptr<pollDesc> _addr_pd) {
         return -n;
     }
     return 0;
-
 }
 
 private static int netpollclose(System.UIntPtr fd) { 
     // Don't need to unregister because calling close()
     // on fd will remove any kevents that reference the descriptor.
     return 0;
-
 }
 
 private static void netpollarm(ptr<pollDesc> _addr_pd, nint mode) {
@@ -129,10 +126,8 @@ private static gList netpoll(long delay) {
         if (ts.tv_sec > 1e6F) { 
             // Darwin returns EINVAL if the sleep time is too long.
             ts.tv_sec = 1e6F;
-
         }
         tp = _addr_ts;
-
     }
     array<keventt> events = new array<keventt>(64);
 retry:
@@ -146,7 +141,6 @@ retry:
             return new gList();
         }
         goto retry;
-
     }
     ref gList toRun = ref heap(out ptr<gList> _addr_toRun);
     for (nint i = 0; i < int(n); i++) {
@@ -164,11 +158,8 @@ retry:
                 array<byte> tmp = new array<byte>(16);
                 read(int32(netpollBreakRd), noescape(@unsafe.Pointer(_addr_tmp[0])), int32(len(tmp)));
                 atomic.Store(_addr_netpollWakeSig, 0);
-
             }
-
             continue;
-
         }
         int mode = default;
 
@@ -187,7 +178,6 @@ retry:
             if (ev.flags & _EV_EOF != 0) {
                 mode += 'w';
             }
-
         else if (ev.filter == _EVFILT_WRITE) 
             mode += 'w';
                 if (mode != 0) {
@@ -200,7 +190,6 @@ retry:
         }
     }
     return toRun;
-
 }
 
 } // end runtime_package

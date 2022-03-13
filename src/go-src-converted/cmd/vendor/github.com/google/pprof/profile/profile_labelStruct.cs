@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:24:03 UTC
+//     Generated on 2022 March 13 06:37:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace pprof
 {
     public static partial class profile_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct label
         {
             // Constructors
@@ -74,7 +74,7 @@ namespace pprof
             public static implicit operator label(NilType nil) => default(label);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static label label_cast(dynamic value)
         {
             return new label(value.keyX, value.strX, value.numX, value.unitX);

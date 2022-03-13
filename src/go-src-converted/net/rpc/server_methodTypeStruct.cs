@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:25:52 UTC
+//     Generated on 2022 March 13 05:40:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace net
 {
     public static partial class rpc_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(sync.Mutex))]
         private partial struct methodType
         {
@@ -81,7 +81,7 @@ namespace net
             public static implicit operator methodType(NilType nil) => default(methodType);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static methodType methodType_cast(dynamic value)
         {
             return new methodType(value.Mutex, value.method, value.ArgType, value.ReplyType, value.numCalls);

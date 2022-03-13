@@ -4,22 +4,23 @@
 
 // This file contains printing support for ASTs.
 
-// package ast -- go2cs converted at 2022 March 06 22:42:59 UTC
+// package ast -- go2cs converted at 2022 March 13 05:54:08 UTC
 // import "go/ast" ==> using ast = go.go.ast_package
 // Original source: C:\Program Files\Go\src\go\ast\print.go
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using io = go.io_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using System;
-
-
 namespace go.go;
 
+using fmt = fmt_package;
+using token = go.token_package;
+using io = io_package;
+using os = os_package;
+using reflect = reflect_package;
+
+
+// A FieldFilter may be provided to Fprint to control the output.
+
+using System;
 public static partial class ast_package {
 
-    // A FieldFilter may be provided to Fprint to control the output.
 public delegate  bool FieldFilter(@string,  reflect.Value);
 
 // NotNilFilter returns true for field values that are not nil;
@@ -29,7 +30,6 @@ public static bool NotNilFilter(@string _, reflect.Value v) {
     if (v.Kind() == reflect.Chan || v.Kind() == reflect.Func || v.Kind() == reflect.Interface || v.Kind() == reflect.Map || v.Kind() == reflect.Ptr || v.Kind() == reflect.Slice) 
         return !v.IsNil();
         return true;
-
 }
 
 // Fprint prints the (sub-)tree starting at AST node x to w.
@@ -64,7 +64,6 @@ private static error fprint(io.Writer w, ptr<token.FileSet> _addr_fset, object x
             }
 
         }
-
     }()); 
 
     // print x
@@ -76,7 +75,6 @@ private static error fprint(io.Writer w, ptr<token.FileSet> _addr_fset, object x
     p.printf("\n");
 
     return ;
-
 });
 
 // Print prints x to standard output, skipping nil fields.
@@ -127,13 +125,11 @@ private static (nint, error) Write(this ptr<printer> _addr_p, slice<byte> data) 
             }
         }
         p.last = b;
-
     }    if (len(data) > n) {
         m, err = p.output.Write(data[(int)n..]);
         n += m;
     }
     return ;
-
 }
 
 // localError wraps locally caught errors so we can distinguish
@@ -154,7 +150,6 @@ private static void printf(this ptr<printer> _addr_p, @string format, params obj
             panic(new localError(err));
         }
     }
-
 });
 
 // Implementation note: Print is written for AST nodes but could be
@@ -209,8 +204,6 @@ private static void print(this ptr<printer> _addr_p, reflect.Value x) {
             }
 
         }
-
-
     else if (x.Kind() == reflect.Array) 
         p.printf("%s {", x.Type());
         if (x.Len() > 0) {
@@ -232,7 +225,6 @@ private static void print(this ptr<printer> _addr_p, reflect.Value x) {
                 n = n__prev1;
             }
             p.indent--;
-
         }
         p.printf("}");
     else if (x.Kind() == reflect.Slice) 
@@ -245,7 +237,6 @@ private static void print(this ptr<printer> _addr_p, reflect.Value x) {
             }
 
         }
-
         p.printf("%s (len = %d) {", x.Type(), x.Len());
         if (x.Len() > 0) {
             p.indent++;
@@ -266,7 +257,6 @@ private static void print(this ptr<printer> _addr_p, reflect.Value x) {
                 n = n__prev1;
             }
             p.indent--;
-
         }
         p.printf("}");
     else if (x.Kind() == reflect.Struct) 
@@ -299,7 +289,6 @@ private static void print(this ptr<printer> _addr_p, reflect.Value x) {
                     }
 
                 }
-
             }
 
 
@@ -325,7 +314,6 @@ private static void print(this ptr<printer> _addr_p, reflect.Value x) {
         } 
         // default
         p.printf("%v", v);
-    
-}
+    }
 
 } // end ast_package

@@ -4,18 +4,20 @@
 
 // This file implements Selections.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:51 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:16 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\selection.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+
+
+// SelectionKind describes the kind of a selector expression x.f
+// (excluding qualified identifiers).
 
 public static partial class types2_package {
 
-    // SelectionKind describes the kind of a selector expression x.f
-    // (excluding qualified identifiers).
 public partial struct SelectionKind { // : nint
 }
 
@@ -101,7 +103,6 @@ private static Type Type(this ptr<Selection> _addr_s) {
         return _addr_sig;
     // In all other cases, the type of x.f is the type of x.
     return s.obj.Type();
-
 }
 
 // Index describes the path from x to f in x.f.
@@ -173,9 +174,7 @@ public static @string SelectionString(ptr<Selection> _addr_s, Qualifier qf) {
             WriteSignature(_addr_buf, T._<ptr<Signature>>(), qf);
         }
     }
-
     return buf.String();
-
 }
 
 } // end types2_package

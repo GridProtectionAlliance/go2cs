@@ -6,12 +6,13 @@
 // that returns multiple types.
 // See golang.org/issue/12839.
 // (See also golang.org/issue/27928.)
-// package issue12839 -- go2cs converted at 2022 March 06 22:41:35 UTC
+
+// package issue12839 -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.issue12839" ==> using issue12839 = go.go.doc.issue12839_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\issue12839.go
-using p = go.p_package;
-
 namespace go.go;
+
+using p = p_package;
 
 public static partial class issue12839_package {
 

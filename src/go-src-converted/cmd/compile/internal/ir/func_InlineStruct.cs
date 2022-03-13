@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:07 UTC
+//     Generated on 2022 March 13 06:00:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Inline
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace @internal
             public static implicit operator Inline(NilType nil) => default(Inline);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Inline Inline_cast(dynamic value)
         {
             return new Inline(value.Cost, value.Dcl, value.Body);

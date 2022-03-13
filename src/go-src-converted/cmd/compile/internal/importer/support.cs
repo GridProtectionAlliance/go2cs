@@ -5,17 +5,16 @@
 
 // This file implements support functionality for iimport.go.
 
-// package importer -- go2cs converted at 2022 March 06 23:13:55 UTC
+// package importer -- go2cs converted at 2022 March 13 06:27:22 UTC
 // import "cmd/compile/internal/importer" ==> using importer = go.cmd.compile.@internal.importer_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\importer\support.go
-using types2 = go.cmd.compile.@internal.types2_package;
-using fmt = go.fmt_package;
-using token = go.go.token_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using types2 = cmd.compile.@internal.types2_package;
+using fmt = fmt_package;
+using token = go.token_package;
+using sync = sync_package;
+using System;
 
 public static partial class importer_package {
 
@@ -58,13 +57,11 @@ private static token.Pos pos(this ptr<fakeFileSet> _addr_s, @string file, nint l
             }
         });
         f.SetLines(fakeLines);
-
     }
     if (line > maxlines) {
         line = 1;
     }
     return f.Pos(line - 1);
-
 }
 
 private static slice<nint> fakeLines = default;private static sync.Once fakeLinesOnce = default;
@@ -86,7 +83,6 @@ private static types2.ChanDir chanDir(nint d) {
             return 0;
             break;
     }
-
 }
 
 private static types2.Type predeclared = new slice<types2.Type>(new types2.Type[] { types2.Typ[types2.Bool], types2.Typ[types2.Int], types2.Typ[types2.Int8], types2.Typ[types2.Int16], types2.Typ[types2.Int32], types2.Typ[types2.Int64], types2.Typ[types2.Uint], types2.Typ[types2.Uint8], types2.Typ[types2.Uint16], types2.Typ[types2.Uint32], types2.Typ[types2.Uint64], types2.Typ[types2.Uintptr], types2.Typ[types2.Float32], types2.Typ[types2.Float64], types2.Typ[types2.Complex64], types2.Typ[types2.Complex128], types2.Typ[types2.String], types2.Universe.Lookup("byte").Type(), types2.Universe.Lookup("rune").Type(), types2.Universe.Lookup("error").Type(), types2.Typ[types2.UntypedBool], types2.Typ[types2.UntypedInt], types2.Typ[types2.UntypedRune], types2.Typ[types2.UntypedFloat], types2.Typ[types2.UntypedComplex], types2.Typ[types2.UntypedString], types2.Typ[types2.UntypedNil], types2.Typ[types2.UnsafePointer], types2.Typ[types2.Invalid], anyType{} });

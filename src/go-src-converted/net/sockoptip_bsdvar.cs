@@ -5,13 +5,13 @@
 //go:build aix || darwin || dragonfly || freebsd || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd netbsd openbsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:16:33 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:05 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\sockoptip_bsdvar.go
-using runtime = go.runtime_package;
-using syscall = go.syscall_package;
-
 namespace go;
+
+using runtime = runtime_package;
+using syscall = syscall_package;
 
 public static partial class net_package {
 
@@ -28,7 +28,6 @@ private static error setIPv4MulticastInterface(ptr<netFD> _addr_fd, ptr<Interfac
     err = fd.pfd.SetsockoptInet4Addr(syscall.IPPROTO_IP, syscall.IP_MULTICAST_IF, a);
     runtime.KeepAlive(fd);
     return error.As(wrapSyscallError("setsockopt", err))!;
-
 }
 
 private static error setIPv4MulticastLoopback(ptr<netFD> _addr_fd, bool v) {

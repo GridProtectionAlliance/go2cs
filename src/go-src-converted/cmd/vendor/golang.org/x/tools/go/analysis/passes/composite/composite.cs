@@ -4,20 +4,20 @@
 
 // Package composite defines an Analyzer that checks for unkeyed
 // composite literals.
-// package composite -- go2cs converted at 2022 March 06 23:34:33 UTC
+
+// package composite -- go2cs converted at 2022 March 13 06:41:49 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/composite" ==> using composite = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.composite_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\composite\composite.go
-using ast = go.go.ast_package;
-using types = go.go.types_package;
-using strings = go.strings_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using types = go.types_package;
+using strings = strings_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class composite_package {
 
@@ -64,13 +64,11 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         if (typ == null) { 
             // cannot determine composite literals' type, skip it
             return ;
-
         }
         var typeName = typ.String();
         if (whitelist && unkeyedLiteral[typeName]) { 
             // skip whitelisted types
             return ;
-
         }
         var under = typ.Underlying();
         while (true) {
@@ -86,15 +84,12 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
             if (!ok) { 
                 // skip non-struct composite literals
                 return ;
-
             }
 
         }
-
         if (isLocalType(_addr_pass, typ)) { 
             // allow unkeyed locally defined composite literal
             return ;
-
         }
         var allKeyValue = true;
         foreach (var (_, e) in cl.Elts) {
@@ -107,17 +102,13 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
                 }
 
             }
-
         }        if (allKeyValue) { 
             // all the composite literal fields are keyed
             return ;
-
         }
         pass.ReportRangef(cl, "%s composite literal uses unkeyed fields", typeName);
-
     });
     return (null, error.As(null!)!);
-
 }
 
 private static bool isLocalType(ptr<analysis.Pass> _addr_pass, types.Type typ) {
@@ -135,7 +126,6 @@ private static bool isLocalType(ptr<analysis.Pass> _addr_pass, types.Type typ) {
             break;
     }
     return false;
-
 }
 
 } // end composite_package

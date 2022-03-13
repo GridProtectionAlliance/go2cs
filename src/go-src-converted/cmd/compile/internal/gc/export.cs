@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2022 March 06 23:12:10 UTC
+// package gc -- go2cs converted at 2022 March 13 06:25:31 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\gc\export.go
-using @base = go.cmd.compile.@internal.@base_package;
-using inline = go.cmd.compile.@internal.inline_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using bio = go.cmd.@internal.bio_package;
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using inline = cmd.compile.@internal.inline_package;
+using ir = cmd.compile.@internal.ir_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using bio = cmd.@internal.bio_package;
+using fmt = fmt_package;
+using constant = go.constant_package;
 
 public static partial class gc_package {
 
@@ -39,7 +39,6 @@ private static void dumpexport(ptr<bio.Writer> _addr_bout) {
             @base.Fatalf("Cannot (yet) export a generic type: %v", n);
         }
         p.markObject(n);
-
     }    exportf(_addr_bout, "\n$$B\n"); // indicate binary export format
     var off = bout.Offset();
     typecheck.WriteExports(bout.Writer);
@@ -79,9 +78,7 @@ private static void dumpasmhdr() {
                     fmt.Fprintf(b, "#define %s_%s %d\n", n.Sym().Name, f.Sym.Name, int(f.Offset));
                 }
             }
-        
-    }    b.Close();
-
+            }    b.Close();
 }
 
 private partial struct exporter {
@@ -99,7 +96,6 @@ private static void markObject(this ptr<exporter> _addr_p, ir.Node n) {
         }
     }
     p.markType(n.Type());
-
 }
 
 // markType recursively visits types reachable from t to identify

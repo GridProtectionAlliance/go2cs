@@ -5,20 +5,19 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package unix -- go2cs converted at 2022 March 06 23:27:19 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:25 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\syscall_unix.go
-using bytes = go.bytes_package;
-using sort = go.sort_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using @unsafe = go.@unsafe_package;
-
-using unsafeheader = go.golang.org.x.sys.@internal.unsafeheader_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using bytes = bytes_package;
+using sort = sort_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using @unsafe = @unsafe_package;
+
+using unsafeheader = golang.org.x.sys.@internal.unsafeheader_package;
+using System;
 
 public static partial class unix_package {
 
@@ -43,31 +42,24 @@ private static error errnoErr(syscall.Errno e) {
     else if (e == ENOENT) 
         return error.As(errENOENT)!;
         return error.As(e)!;
-
 }
 
 // ErrnoName returns the error name for error number e.
 public static @string ErrnoName(syscall.Errno e) {
-    var i = sort.Search(len(errorList), i => {
-        return errorList[i].num >= e;
-    });
+    var i = sort.Search(len(errorList), i => errorList[i].num >= e);
     if (i < len(errorList) && errorList[i].num == e) {
         return errorList[i].name;
     }
     return "";
-
 }
 
 // SignalName returns the signal name for signal number s.
 public static @string SignalName(syscall.Signal s) {
-    var i = sort.Search(len(signalList), i => {
-        return signalList[i].num >= s;
-    });
+    var i = sort.Search(len(signalList), i => signalList[i].num >= s);
     if (i < len(signalList) && signalList[i].num == s) {
         return signalList[i].name;
     }
     return "";
-
 }
 
 // SignalNum returns the syscall.Signal for signal named s,
@@ -81,7 +73,6 @@ public static syscall.Signal SignalNum(@string s) {
         }
     });
     return signalNameMap[s];
-
 }
 
 // clen returns the index of the first NULL byte in n or len(n) if n contains no NULL byte.
@@ -91,7 +82,6 @@ private static nint clen(slice<byte> n) {
         i = len(n);
     }
     return i;
-
 }
 
 // Mmap manager, for use by operating system-specific implementations.
@@ -127,7 +117,6 @@ private static (slice<byte>, error) Mmap(this ptr<mmapper> _addr_m, nint fd, lon
     defer(m.Unlock());
     m.active[p] = b;
     return (b, error.As(null!)!);
-
 });
 
 private static error Munmap(this ptr<mmapper> _addr_m, slice<byte> data) => func((defer, _, _) => {
@@ -151,10 +140,8 @@ private static error Munmap(this ptr<mmapper> _addr_m, slice<byte> data) => func
             return error.As(errno)!;
         }
     }
-
     delete(m.active, p);
     return error.As(null!)!;
-
 });
 
 public static (nint, error) Read(nint fd, slice<byte> p) {
@@ -171,7 +158,6 @@ public static (nint, error) Read(nint fd, slice<byte> p) {
         }
     }
     return ;
-
 }
 
 public static (nint, error) Write(nint fd, slice<byte> p) {
@@ -186,7 +172,6 @@ public static (nint, error) Write(nint fd, slice<byte> p) {
         raceReadRange(@unsafe.Pointer(_addr_p[0]), n);
     }
     return ;
-
 }
 
 // For testing: clients can set this flag to force
@@ -227,7 +212,6 @@ public static error Bind(nint fd, Sockaddr sa) {
         return error.As(err)!;
     }
     return error.As(bind(fd, ptr, n))!;
-
 }
 
 public static error Connect(nint fd, Sockaddr sa) {
@@ -238,7 +222,6 @@ public static error Connect(nint fd, Sockaddr sa) {
         return error.As(err)!;
     }
     return error.As(connect(fd, ptr, n))!;
-
 }
 
 public static (Sockaddr, error) Getpeername(nint fd) {
@@ -253,7 +236,6 @@ public static (Sockaddr, error) Getpeername(nint fd) {
         return ;
     }
     return anyToSockaddr(fd, _addr_rsa);
-
 }
 
 public static (byte, error) GetsockoptByte(nint fd, nint level, nint opt) {
@@ -371,7 +353,6 @@ public static (nint, Sockaddr, error) Recvfrom(nint fd, slice<byte> p, nint flag
         from, err = anyToSockaddr(fd, _addr_rsa);
     }
     return ;
-
 }
 
 public static error Sendto(nint fd, slice<byte> p, nint flags, Sockaddr to) {
@@ -382,7 +363,6 @@ public static error Sendto(nint fd, slice<byte> p, nint flags, Sockaddr to) {
         return error.As(err)!;
     }
     return error.As(sendto(fd, p, flags, ptr, n))!;
-
 }
 
 public static error SetsockoptByte(nint fd, nint level, nint opt, byte value) {
@@ -440,7 +420,6 @@ public static error SetsockoptString(nint fd, nint level, nint opt, @string s) {
         p = @unsafe.Pointer(_addr_(slice<byte>)s[0]);
     }
     return error.As(setsockopt(fd, level, opt, p, uintptr(len(s))))!;
-
 }
 
 public static error SetsockoptTimeval(nint fd, nint level, nint opt, ptr<Timeval> _addr_tv) {
@@ -465,7 +444,6 @@ public static (nint, error) Socket(nint domain, nint typ, nint proto) {
     }
     fd, err = socket(domain, typ, proto);
     return ;
-
 }
 
 public static (array<nint>, error) Socketpair(nint domain, nint typ, nint proto) {
@@ -479,7 +457,6 @@ public static (array<nint>, error) Socketpair(nint domain, nint typ, nint proto)
         fd[1] = int(fdx[1]);
     }
     return ;
-
 }
 
 private static long ioSync = default;
@@ -504,7 +481,6 @@ public static error SetNonblock(nint fd, bool nonblocking) {
     }
     _, err = fcntl(fd, F_SETFL, flag);
     return error.As(err)!;
-
 }
 
 // Exec calls execve(2), which replaces the calling executable in the process
@@ -530,7 +506,6 @@ public static error Lutimes(@string path, slice<Timeval> tv) {
     }
     Timespec ts = new slice<Timespec>(new Timespec[] { NsecToTimespec(TimevalToNsec(tv[0])), NsecToTimespec(TimevalToNsec(tv[1])) });
     return error.As(UtimesNanoAt(AT_FDCWD, path, ts, AT_SYMLINK_NOFOLLOW))!;
-
 }
 
 } // end unix_package

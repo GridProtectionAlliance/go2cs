@@ -5,13 +5,13 @@
 //go:build !aix && !darwin && !dragonfly && !freebsd && !linux && !netbsd && !openbsd && !zos && !windows && !solaris && !plan9
 // +build !aix,!darwin,!dragonfly,!freebsd,!linux,!netbsd,!openbsd,!zos,!windows,!solaris,!plan9
 
-// package term -- go2cs converted at 2022 March 06 23:31:04 UTC
+// package term -- go2cs converted at 2022 March 13 06:41:33 UTC
 // import "cmd/vendor/golang.org/x/term" ==> using term = go.cmd.vendor.golang.org.x.term_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\term\term_unsupported.go
-using fmt = go.fmt_package;
-using runtime = go.runtime_package;
-
 namespace go.cmd.vendor.golang.org.x;
+
+using fmt = fmt_package;
+using runtime = runtime_package;
 
 public static partial class term_package {
 

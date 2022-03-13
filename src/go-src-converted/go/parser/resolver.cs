@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package parser -- go2cs converted at 2022 March 06 22:42:52 UTC
+// package parser -- go2cs converted at 2022 March 13 05:54:01 UTC
 // import "go/parser" ==> using parser = go.go.parser_package
 // Original source: C:\Program Files\Go\src\go\parser\resolver.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using typeparams = go.go.@internal.typeparams_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using typeparams = go.@internal.typeparams_package;
+using token = go.token_package;
+using System;
 
 public static partial class parser_package {
 
@@ -59,7 +58,6 @@ private static void resolveFile(ptr<ast.File> _addr_file, ptr<token.File> _addr_
         }
     }    file.Scope = r.pkgScope;
     file.Unresolved = r.unresolved[(int)0..(int)i];
-
 }
 
 private partial struct resolver {
@@ -97,13 +95,11 @@ private static @string sprintf(this ptr<resolver> _addr_r, @string format, param
                     args[i] = r.handle.Position(arg);
                     break;
             }
-
         }
         arg = arg__prev1;
     }
 
     return fmt.Sprintf(format, args);
-
 }
 
 private static void openScope(this ptr<resolver> _addr_r, token.Pos pos) {
@@ -113,7 +109,6 @@ private static void openScope(this ptr<resolver> _addr_r, token.Pos pos) {
         r.dump("opening scope @%v", pos);
     }
     r.topScope = ast.NewScope(r.topScope);
-
 }
 
 private static void closeScope(this ptr<resolver> _addr_r) {
@@ -123,7 +118,6 @@ private static void closeScope(this ptr<resolver> _addr_r) {
         r.dump("closing scope");
     }
     r.topScope = r.topScope.Outer;
-
 }
 
 private static void openLabelScope(this ptr<resolver> _addr_r) {
@@ -146,7 +140,6 @@ private static void closeLabelScope(this ptr<resolver> _addr_r) {
         }
     }    r.targetStack = r.targetStack[(int)0..(int)n];
     r.labelScope = r.labelScope.Outer;
-
 }
 
 private static void declare(this ptr<resolver> _addr_r, object decl, object data, ptr<ast.Scope> _addr_scope, ast.ObjKind kind, params ptr<ptr<ast.Ident>>[] _addr_idents) {
@@ -186,13 +179,10 @@ private static void declare(this ptr<resolver> _addr_r, object decl, object data
                         }
 
                     }
-
                     r.declErr(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s", ident.Name, prevDecl));
-
                 }
 
             }
-
         }
     }
 }
@@ -231,13 +221,10 @@ private static void shortVarDecl(this ptr<resolver> _addr_r, ptr<ast.AssignStmt>
                         }
 
                     }
-
                 }
-
             }
 
         }
-
     }    if (n == 0 && r.declErr != null) {
         r.declErr(decl.Lhs[0].Pos(), "no new variables on left side of :=");
     }
@@ -278,7 +265,6 @@ private static void resolve(this ptr<resolver> _addr_r, ptr<ast.Ident> _addr_ide
                 }
 
             }
-
         }
     } 
     // all local scopes are known, so any unresolved identifier
@@ -316,7 +302,6 @@ private static void walkLHS(this ptr<resolver> _addr_r, slice<ast.Expr> list) {
                 }
 
             }
-
         }
         expr = expr__prev1;
     }
@@ -385,9 +370,7 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
                             }
 
                         }
-
                         ast.Walk(r, kv.Value);
-
                     }
                     else
  {
@@ -395,7 +378,6 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
                     }
 
                 }
-
             }
             break;
         case ptr<ast.InterfaceType> n:
@@ -418,7 +400,6 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
  {
                 r.walkExprs(n.Lhs);
             }
-
             break;
         case ptr<ast.BranchStmt> n:
             if (n.Tok != token.FALLTHROUGH && n.Label != null) {
@@ -464,15 +445,11 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
                     r.openScope(n.Tag.Pos());
                     defer(r.closeScope());
                 }
-
                 ast.Walk(r, n.Tag);
-
             }
-
             if (n.Body != null) {
                 r.walkStmts(n.Body.List);
             }
-
             break;
         case ptr<ast.TypeSwitchStmt> n:
             if (n.Init != null) {
@@ -488,7 +465,6 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
             if (n.Body != null) {
                 r.walkStmts(n.Body.List);
             }
-
             break;
         case ptr<ast.CommClause> n:
             r.openScope(n.Pos());
@@ -540,15 +516,12 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
                     // walk the LHS in case there is an invalid identifier list.
                     r.walkLHS(lhs);
                     r.shortVarDecl(as);
-
                 }
                 else
  {
                     r.walkExprs(lhs);
                 }
-
             }
-
             ast.Walk(r, n.Body); 
 
             // Declarations
@@ -601,9 +574,7 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
                             tparams = tparams__prev1;
 
                         }
-
                         ast.Walk(r, spec.Type);
-
                     }
 
                     spec = spec__prev1;
@@ -647,7 +618,6 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
             if (n.Recv == null && n.Name.Name != "init") {
                 r.declare(n, null, r.pkgScope, ast.Fun, n.Name);
             }
-
             break;
         default:
         {
@@ -659,7 +629,6 @@ private static ast.Visitor Visit(this ptr<resolver> _addr_r, ast.Node node) => f
     }
 
     return null;
-
 });
 
 private static void walkFuncType(this ptr<resolver> _addr_r, ptr<ast.FuncType> _addr_typ) {
@@ -671,7 +640,6 @@ private static void walkFuncType(this ptr<resolver> _addr_r, ptr<ast.FuncType> _
     r.resolveList(typ.Results);
     r.declareList(typ.Params, ast.Var);
     r.declareList(typ.Results, ast.Var);
-
 }
 
 private static void resolveList(this ptr<resolver> _addr_r, ptr<ast.FieldList> _addr_list) {
@@ -709,7 +677,6 @@ private static void walkFieldList(this ptr<resolver> _addr_r, ptr<ast.FieldList>
     }
     r.resolveList(list);
     r.declareList(list, kind);
-
 }
 
 // walkTParams is like walkFieldList, but declares type parameters eagerly so
@@ -724,7 +691,6 @@ private static void walkTParams(this ptr<resolver> _addr_r, ptr<ast.FieldList> _
     }
     r.declareList(list, ast.Typ);
     r.resolveList(list);
-
 }
 
 private static void walkBody(this ptr<resolver> _addr_r, ptr<ast.BlockStmt> _addr_body) => func((defer, _, _) => {
@@ -737,7 +703,6 @@ private static void walkBody(this ptr<resolver> _addr_r, ptr<ast.BlockStmt> _add
     r.openLabelScope();
     defer(r.closeLabelScope());
     r.walkStmts(body.List);
-
 });
 
 } // end parser_package

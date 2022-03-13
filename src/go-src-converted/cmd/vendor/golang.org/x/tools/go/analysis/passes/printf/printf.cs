@@ -4,31 +4,31 @@
 
 // Package printf defines an Analyzer that checks consistency
 // of Printf format strings and arguments.
-// package printf -- go2cs converted at 2022 March 06 23:34:43 UTC
+
+// package printf -- go2cs converted at 2022 March 13 06:42:00 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/printf" ==> using printf = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.printf_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\printf\printf.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-using reflect = go.reflect_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using typeutil = go.golang.org.x.tools.go.types.typeutil_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using types = go.types_package;
+using reflect = reflect_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using typeutil = golang.org.x.tools.go.types.typeutil_package;
+using System;
 
 public static partial class printf_package {
 
@@ -87,7 +87,6 @@ public static @string String(this Kind kind) {
     else if (kind == KindErrorf) 
         return "errorf";
         return "";
-
 }
 
 // Result is the printf analyzer's result type. Clients may query the result
@@ -105,7 +104,6 @@ private static Kind Kind(this ptr<Result> _addr_r, ptr<types.Func> _addr_fn) {
     if (!ok) { 
         // Next look up just "printf", for use with -printf.funcs.
         _, ok = isPrint[strings.ToLower(fn.Name())];
-
     }
     if (ok) {
         if (strings.HasSuffix(fn.Name(), "f")) {
@@ -117,7 +115,6 @@ private static Kind Kind(this ptr<Result> _addr_r, ptr<types.Func> _addr_fn) {
         }
     }
     return r.funcs[fn];
-
 }
 
 // isWrapper is a fact indicating that a function is a print or printf wrapper.
@@ -142,8 +139,7 @@ private static @string String(this ptr<isWrapper> _addr_f) {
         return "errorfWrapper";
     else 
         return "unknownWrapper";
-    
-}
+    }
 
 private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
     object _p0 = default;
@@ -212,10 +208,8 @@ private static ptr<printfWrapper> maybePrintfWrapper(ptr<types.Info> _addr_info,
             }
 
         }
-
     }
     return addr(new printfWrapper(obj:fn,fdecl:fdecl,format:format,args:args,));
-
 }
 
 // findPrintfLike scans the entire package to find printf-like functions.
@@ -261,15 +255,11 @@ private static (object, error) findPrintfLike(ptr<analysis.Pass> _addr_pass, ptr
                                 // simple wrapper.
                                 w.failed = true;
                                 return false;
-
                             }
-
                         }
-
                     }
 
                 }
-
                 {
                     ptr<ast.UnaryExpr> (un, ok) = n._<ptr<ast.UnaryExpr>>();
 
@@ -280,19 +270,15 @@ private static (object, error) findPrintfLike(ptr<analysis.Pass> _addr_pass, ptr
                             // so not a simple wrapper.
                             w.failed = true;
                             return false;
-
                         }
-
                     }
 
                 }
-
 
                 ptr<ast.CallExpr> (call, ok) = n._<ptr<ast.CallExpr>>();
                 if (!ok || len(call.Args) == 0 || !match(_addr_pass.TypesInfo, call.Args[len(call.Args) - 1], _addr_w.args)) {
                     return true;
                 }
-
                 var (fn, kind) = printfNameAndKind(_addr_pass, call);
                 if (kind != 0) {
                     checkPrintfFwd(_addr_pass, _addr_w, call, kind, _addr_res);
@@ -306,17 +292,13 @@ private static (object, error) findPrintfLike(ptr<analysis.Pass> _addr_pass, ptr
                     var callee = byObj[fn];
                     callee.callers = append(callee.callers, new printfCaller(w,call));
                 }
-
                 return true;
-
             });
-
         }
         w = w__prev1;
     }
 
     return (null, error.As(null!)!);
-
 }
 
 private static bool match(ptr<types.Info> _addr_info, ast.Expr arg, ptr<types.Var> _addr_param) {
@@ -353,7 +335,6 @@ private static void checkPrintfFwd(ptr<analysis.Pass> _addr_pass, ptr<printfWrap
             //       fmt.Printf("%s %v", arg1, arg2)
             //   }
             return ;
-
         }
         @string desc = "printf";
         if (kind == KindPrint) {
@@ -361,7 +342,6 @@ private static void checkPrintfFwd(ptr<analysis.Pass> _addr_pass, ptr<printfWrap
         }
         pass.ReportRangef(call, "missing ... in args forwarded to %s-like function", desc);
         return ;
-
     }
     var fn = w.obj;
     ref isWrapper fact = ref heap(out ptr<isWrapper> _addr_fact);
@@ -418,30 +398,22 @@ private static (@string, nint) formatString(ptr<analysis.Pass> _addr_pass, ptr<a
                 if (!sig.Variadic()) { 
                     // Skip checking non-variadic functions.
                     return ("", -1);
-
                 }
-
                 var idx = sig.Params().Len() - 2;
                 if (idx < 0) { 
                     // Skip checking variadic functions without
                     // fixed arguments.
                     return ("", -1);
-
                 }
-
                 var (s, ok) = stringConstantArg(_addr_pass, _addr_call, idx);
                 if (!ok) { 
                     // The last argument before variadic args isn't a string.
                     return ("", -1);
-
                 }
-
                 return (s, idx);
-
             }
 
         }
-
     }
     {
         var idx__prev1 = idx;
@@ -460,21 +432,17 @@ private static (@string, nint) formatString(ptr<analysis.Pass> _addr_pass, ptr<a
                 s = s__prev1;
 
             }
-
             if (pass.TypesInfo.Types[call.Args[idx]].Type == types.Typ[types.String]) { 
                 // Skip checking a call with a non-constant format
                 // string argument, since its contents are unavailable
                 // for validation.
                 return ("", -1);
-
             }
-
         }
         idx = idx__prev1;
     }
 
     return ("", -1);
-
 }
 
 // stringConstantArg returns call's string constant argument at the index idx.
@@ -496,7 +464,6 @@ private static (@string, bool) stringConstantArg(ptr<analysis.Pass> _addr_pass, 
         return (constant.StringVal(lit), true);
     }
     return ("", false);
-
 }
 
 // checkCall triggers the print-specific checks if the call invokes a print function.
@@ -513,9 +480,7 @@ private static void checkCall(ptr<analysis.Pass> _addr_pass) {
             checkPrintf(_addr_pass, kind, call, _addr_fn);
         else if (kind == KindPrint) 
             checkPrint(_addr_pass, call, _addr_fn);
-        
-    });
-
+            });
 }
 
 private static (ptr<types.Func>, Kind) printfNameAndKind(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> _addr_call) {
@@ -532,7 +497,6 @@ private static (ptr<types.Func>, Kind) printfNameAndKind(ptr<analysis.Pass> _add
     if (!ok) { 
         // Next look up just "printf", for use with -printf.funcs.
         _, ok = isPrint[strings.ToLower(fn.Name())];
-
     }
     if (ok) {
         if (fn.Name() == "Errorf") {
@@ -546,14 +510,12 @@ private static (ptr<types.Func>, Kind) printfNameAndKind(ptr<analysis.Pass> _add
             kind = KindPrint;
         }
         return (_addr_fn!, kind);
-
     }
     ref isWrapper fact = ref heap(out ptr<isWrapper> _addr_fact);
     if (pass.ImportObjectFact(fn, _addr_fact)) {
         return (_addr_fn!, fact.Kind);
     }
     return (_addr_fn!, KindNone);
-
 }
 
 // isFormatter reports whether t could satisfy fmt.Formatter.
@@ -567,7 +529,6 @@ private static bool isFormatter(types.Type typ) {
             return true;
         }
     }
-
     var (obj, _, _) = types.LookupFieldOrMethod(typ, false, null, "Format");
     ptr<types.Func> (fn, ok) = obj._<ptr<types.Func>>();
     if (!ok) {
@@ -575,7 +536,6 @@ private static bool isFormatter(types.Type typ) {
     }
     ptr<types.Signature> sig = fn.Type()._<ptr<types.Signature>>();
     return sig.Params().Len() == 2 && sig.Results().Len() == 0 && isNamed(sig.Params().At(0).Type(), "fmt", "State") && types.Identical(sig.Params().At(1).Type(), types.Typ[types.Rune]);
-
 }
 
 private static bool isNamed(types.Type T, @string pkgpath, @string name) {
@@ -613,7 +573,6 @@ private static void checkPrintf(ptr<analysis.Pass> _addr_pass, Kind kind, ptr<as
             pass.Reportf(call.Lparen, "can't check non-constant format in call to %s", fn.Name());
         }
         return ;
-
     }
     var firstArg = idx + 1; // Arguments are immediately after format string.
     if (!strings.Contains(format, "%")) {
@@ -621,7 +580,6 @@ private static void checkPrintf(ptr<analysis.Pass> _addr_pass, Kind kind, ptr<as
             pass.Reportf(call.Lparen, "%s call has arguments but no formatting directives", fn.Name());
         }
         return ;
-
     }
     var argNum = firstArg;
     var maxArgNum = firstArg;
@@ -637,22 +595,17 @@ private static void checkPrintf(ptr<analysis.Pass> _addr_pass, Kind kind, ptr<as
                 continue;
             i += w;
             }
-
             var state = parsePrintfVerb(_addr_pass, _addr_call, fn.Name(), format[(int)i..], firstArg, argNum);
             if (state == null) {
                 return ;
             }
-
             w = len(state.format);
             if (!okPrintfArg(_addr_pass, _addr_call, _addr_state)) { // One error per format is enough.
                 return ;
-
             }
-
             if (state.hasIndex) {
                 anyIndex = true;
             }
-
             if (state.verb == 'w') {
                 if (kind != KindErrorf) {
                     pass.Reportf(call.Pos(), "%s call has error-wrapping directive %%w, which is only supported by Errorf", state.name);
@@ -664,19 +617,15 @@ private static void checkPrintf(ptr<analysis.Pass> _addr_pass, Kind kind, ptr<as
                 }
                 anyW = true;
             }
-
             if (len(state.argNums) > 0) { 
                 // Continue with the next sequential argument.
                 argNum = state.argNums[len(state.argNums) - 1] + 1;
-
             }
-
             foreach (var (_, n) in state.argNums) {
                 if (n >= maxArgNum) {
                     maxArgNum = n + 1;
                 }
             }
-
         }
     } 
     // Dotdotdot is hard.
@@ -719,9 +668,7 @@ private static void parseFlags(this ptr<formatState> _addr_s) {
                     break;
             }
         }
-
     }
-
 }
 
 // scanNum advances through a decimal number if present.
@@ -735,7 +682,6 @@ private static void scanNum(this ptr<formatState> _addr_s) {
         s.nbytes++;
         }
     }
-
 }
 
 // parseIndex scans an index expression. It returns false if there is a syntax error.
@@ -769,7 +715,6 @@ private static bool parseIndex(this ptr<formatState> _addr_s) {
     s.hasIndex = true;
     s.indexPending = true;
     return true;
-
 }
 
 // parseNum scans a width or precision (or *). It returns false if there's a bad index expression.
@@ -779,19 +724,16 @@ private static bool parseNum(this ptr<formatState> _addr_s) {
     if (s.nbytes < len(s.format) && s.format[s.nbytes] == '*') {
         if (s.indexPending) { // Absorb it.
             s.indexPending = false;
-
         }
         s.nbytes++;
         s.argNums = append(s.argNums, s.argNum);
         s.argNum++;
-
     }
     else
  {
         s.scanNum();
     }
     return true;
-
 }
 
 // parsePrecision scans for a precision. It returns false if there's a bad index expression.
@@ -810,7 +752,6 @@ private static bool parsePrecision(this ptr<formatState> _addr_s) {
         }
     }
     return true;
-
 }
 
 // parsePrintfVerb looks the formatting directive that begins the format string
@@ -848,7 +789,6 @@ private static ptr<formatState> parsePrintfVerb(ptr<analysis.Pass> _addr_pass, p
     }
     state.format = state.format[..(int)state.nbytes];
     return _addr_state!;
-
 }
 
 // printfArgType encodes the types of expressions a printf verb accepts. It is a bitmask.
@@ -865,7 +805,6 @@ private static readonly var argPointer = 5;
 private static readonly var argError = 6;
 private static readonly printfArgType anyType = ~0;
 
-
 private partial struct printVerb {
     public int verb; // User may provide verb through Formatter; could be a rune.
     public @string flags; // known flags are all ASCII
@@ -877,7 +816,6 @@ private static readonly @string noFlag = "";
 private static readonly @string numFlag = " -+.0";
 private static readonly @string sharpNumFlag = " -+.0#";
 private static readonly @string allFlags = " -+.0#";
-
 
 // printVerbs identifies which flags are known to printf for each verb.
 private static printVerb printVerbs = new slice<printVerb>(new printVerb[] { {'%',noFlag,0}, {'b',sharpNumFlag,argInt|argFloat|argComplex|argPointer}, {'c',"-",argRune|argInt}, {'d',numFlag,argInt|argPointer}, {'e',sharpNumFlag,argFloat|argComplex}, {'E',sharpNumFlag,argFloat|argComplex}, {'f',sharpNumFlag,argFloat|argComplex}, {'F',sharpNumFlag,argFloat|argComplex}, {'g',sharpNumFlag,argFloat|argComplex}, {'G',sharpNumFlag,argFloat|argComplex}, {'o',sharpNumFlag,argInt|argPointer}, {'O',sharpNumFlag,argInt|argPointer}, {'p',"-#",argPointer}, {'q'," -+.0#",argRune|argInt|argString}, {'s'," -+.0",argString}, {'t',"-",argBool}, {'T',"-",anyType}, {'U',"-#",argRune|argInt}, {'v',allFlags,anyType}, {'w',allFlags,argError}, {'x',sharpNumFlag,argRune|argInt|argString|argPointer|argFloat|argComplex}, {'X',sharpNumFlag,argRune|argInt|argString|argPointer|argFloat|argComplex} });
@@ -911,7 +849,6 @@ private static bool okPrintfArg(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr>
             }
 
         }
-
     }
     if (!formatter) {
         if (!found) {
@@ -924,12 +861,10 @@ private static bool okPrintfArg(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr>
             if (flag == '0') {
                 continue;
             }
-
             if (!strings.ContainsRune(v.flags, rune(flag))) {
                 pass.ReportRangef(call, "%s format %s has unrecognized flag %c", state.name, state.format, flag);
                 return false;
             }
-
         }
     }
     nint trueArgs = 1;
@@ -971,10 +906,8 @@ private static bool okPrintfArg(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr>
             }
 
         }
-
         pass.ReportRangef(call, "%s format %s has arg %s of wrong type %s", state.name, state.format, analysisutil.Format(pass.Fset, arg), typeString);
         return false;
-
     }
     if (v.typ & argString != 0 && v.verb != 'T' && !bytes.Contains(state.flags, new slice<byte>(new byte[] { '#' }))) {
         {
@@ -986,10 +919,8 @@ private static bool okPrintfArg(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr>
             }
 
         }
-
     }
     return true;
-
 }
 
 // recursiveStringer reports whether the argument e is a potential
@@ -1038,7 +969,6 @@ private static (@string, bool) recursiveStringer(ptr<analysis.Pass> _addr_pass, 
             e = u.X; // strip off & from &r
         }
     }
-
     {
         ptr<ast.Ident> (id, ok) = e._<ptr<ast.Ident>>();
 
@@ -1048,9 +978,7 @@ private static (@string, bool) recursiveStringer(ptr<analysis.Pass> _addr_pass, 
             }
         }
     }
-
     return ("", false);
-
 }
 
 // isStringer reports whether the method signature matches the String() definition in fmt.Stringer.
@@ -1073,9 +1001,7 @@ private static bool isFunctionValue(ptr<analysis.Pass> _addr_pass, ast.Expr e) {
             return ok;
         }
     }
-
     return false;
-
 }
 
 // argCanBeChecked reports whether the specified argument is statically present;
@@ -1090,7 +1016,6 @@ private static bool argCanBeChecked(ptr<analysis.Pass> _addr_pass, ptr<ast.CallE
     if (argNum <= 0) { 
         // Shouldn't happen, so catch it with prejudice.
         panic("negative arg num");
-
     }
     if (argNum < len(call.Args) - 1) {
         return true; // Always OK.
@@ -1104,7 +1029,6 @@ private static bool argCanBeChecked(ptr<analysis.Pass> _addr_pass, ptr<ast.CallE
     var arg = argNum - state.firstArg + 1; // People think of arguments as 1-indexed.
     pass.ReportRangef(call, "%s format %s reads arg #%d, but call has %v", state.name, state.format, arg, count(len(call.Args) - state.firstArg, "arg"));
     return false;
-
 });
 
 // printFormatRE is the regexp we match and report as a possible format string
@@ -1117,7 +1041,6 @@ private static readonly @string indexOptRE = "(\\[[0-9]+\\])?";
 private static readonly @string numOptRE = "([0-9]+|" + indexOptRE + "\\*)?";
 private static readonly @string verbRE = "[bcdefgopqstvxEFGTUX]";
 
-
 // checkPrint checks a call to an unformatted print routine such as Println.
 private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> _addr_call, ptr<types.Func> _addr_fn) {
     ref analysis.Pass pass = ref _addr_pass.val;
@@ -1129,7 +1052,6 @@ private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> 
     if (typ == null) { 
         // Skip checking functions with unknown type.
         return ;
-
     }
     {
         ptr<types.Signature> (sig, ok) = typ._<ptr<types.Signature>>();
@@ -1138,9 +1060,7 @@ private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> 
             if (!sig.Variadic()) { 
                 // Skip checking non-variadic functions.
                 return ;
-
             }
-
             var @params = sig.Params();
             firstArg = @params.Len() - 1;
 
@@ -1150,17 +1070,13 @@ private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> 
             if (!ok || !it.Empty()) { 
                 // Skip variadic functions accepting non-interface{} args.
                 return ;
-
             }
-
         }
     }
-
     var args = call.Args;
     if (len(args) <= firstArg) { 
         // Skip calls without variadic args.
         return ;
-
     }
     args = args[(int)firstArg..];
 
@@ -1179,11 +1095,9 @@ private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> 
                     }
 
                 }
-
             }
 
         }
-
     }
     var arg = args[0];
     {
@@ -1201,12 +1115,10 @@ private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> 
                     pass.ReportRangef(call, "%s call has possible formatting directive %s", fn.Name(), m[0]);
                 }
             }
-
         }
         lit = lit__prev1;
 
     }
-
     if (strings.HasSuffix(fn.Name(), "ln")) { 
         // The last item, if a string, should not have a newline.
         arg = args[len(args) - 1];
@@ -1225,7 +1137,6 @@ private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> 
             lit = lit__prev2;
 
         }
-
     }
     {
         var arg__prev1 = arg;
@@ -1243,7 +1154,6 @@ private static void checkPrint(ptr<analysis.Pass> _addr_pass, ptr<ast.CallExpr> 
                 }
 
             }
-
         }
         arg = arg__prev1;
     }
@@ -1256,7 +1166,6 @@ private static @string count(nint n, @string what) {
         return "1 " + what;
     }
     return fmt.Sprintf("%d %ss", n, what);
-
 }
 
 // stringSet is a set-of-nonempty-strings-valued flag.
@@ -1281,9 +1190,7 @@ private static error Set(this stringSet ss, @string flag) {
             name = strings.ToLower(name);
         }
         ss[name] = true;
-
     }    return error.As(null!)!;
-
 }
 
 } // end printf_package

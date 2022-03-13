@@ -28,16 +28,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package objabi -- go2cs converted at 2022 March 06 22:32:24 UTC
+// package objabi -- go2cs converted at 2022 March 13 05:43:22 UTC
 // import "cmd/internal/objabi" ==> using objabi = go.cmd.@internal.objabi_package
 // Original source: C:\Program Files\Go\src\cmd\internal\objabi\symkind.go
-
-
 namespace go.cmd.@internal;
 
 public static partial class objabi_package {
 
-    // A SymKind describes the kind of memory represented by a symbol.
+// A SymKind describes the kind of memory represented by a symbol.
 public partial struct SymKind { // : byte
 }
 

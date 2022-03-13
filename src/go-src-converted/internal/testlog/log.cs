@@ -5,19 +5,20 @@
 // Package testlog provides a back-channel communication path
 // between tests and package os, so that cmd/go can see which
 // environment variables and files a test consults.
-// package testlog -- go2cs converted at 2022 March 06 22:12:49 UTC
+
+// package testlog -- go2cs converted at 2022 March 13 05:27:48 UTC
 // import "internal/testlog" ==> using testlog = go.@internal.testlog_package
 // Original source: C:\Program Files\Go\src\internal\testlog\log.go
-using atomic = go.sync.atomic_package;
-
 namespace go.@internal;
+
+using atomic = sync.atomic_package;
 
 public static partial class testlog_package {
 
-    // Interface is the interface required of test loggers.
-    // The os package will invoke the interface's methods to indicate that
-    // it is inspecting the given environment variables or files.
-    // Multiple goroutines may call these methods simultaneously.
+// Interface is the interface required of test loggers.
+// The os package will invoke the interface's methods to indicate that
+// it is inspecting the given environment variables or files.
+// Multiple goroutines may call these methods simultaneously.
 public partial interface Interface {
     void Getenv(@string key);
     void Stat(@string file);
@@ -40,7 +41,6 @@ public static void SetLogger(Interface impl) => func((_, panic, _) => {
         panic("testlog: SetLogger must be called only once");
     }
     logger.Store(_addr_impl);
-
 });
 
 // Logger returns the current test logger implementation.
@@ -51,7 +51,6 @@ public static Interface Logger() {
         return null;
     }
     return impl._<ptr<Interface>>().val;
-
 }
 
 // Getenv calls Logger().Getenv, if a logger has been set.
@@ -63,7 +62,6 @@ public static void Getenv(@string name) {
             log.Getenv(name);
         }
     }
-
 }
 
 // Open calls Logger().Open, if a logger has been set.
@@ -75,7 +73,6 @@ public static void Open(@string name) {
             log.Open(name);
         }
     }
-
 }
 
 // Stat calls Logger().Stat, if a logger has been set.
@@ -87,7 +84,6 @@ public static void Stat(@string name) {
             log.Stat(name);
         }
     }
-
 }
 
 } // end testlog_package

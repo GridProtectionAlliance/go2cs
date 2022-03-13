@@ -5,24 +5,24 @@
 //go:build openbsd && !mips64
 // +build openbsd,!mips64
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:09 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sys_openbsd3.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
 
 public static partial class runtime_package {
 
-    // The X versions of syscall expect the libc call to return a 64-bit result.
-    // Otherwise (the non-X version) expects a 32-bit result.
-    // This distinction is required because an error is indicated by returning -1,
-    // and we need to know whether to check 32 or 64 bits of the result.
-    // (Some libc functions that return 32 bits put junk in the upper 32 bits of AX.)
+// The X versions of syscall expect the libc call to return a 64-bit result.
+// Otherwise (the non-X version) expects a 32-bit result.
+// This distinction is required because an error is indicated by returning -1,
+// and we need to know whether to check 32 or 64 bits of the result.
+// (Some libc functions that return 32 bits put junk in the upper 32 bits of AX.)
 
-    //go:linkname syscall_syscall syscall.syscall
-    //go:nosplit
-    //go:cgo_unsafe_args
+//go:linkname syscall_syscall syscall.syscall
+//go:nosplit
+//go:cgo_unsafe_args
 private static (System.UIntPtr, System.UIntPtr, System.UIntPtr) syscall_syscall(System.UIntPtr fn, System.UIntPtr a1, System.UIntPtr a2, System.UIntPtr a3) {
     System.UIntPtr r1 = default;
     System.UIntPtr r2 = default;

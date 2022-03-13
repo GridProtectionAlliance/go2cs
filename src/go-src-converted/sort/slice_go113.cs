@@ -5,12 +5,12 @@
 //go:build go1.13
 // +build go1.13
 
-// package sort -- go2cs converted at 2022 March 06 22:12:31 UTC
+// package sort -- go2cs converted at 2022 March 13 05:27:34 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Program Files\Go\src\sort\slice_go113.go
-using reflectlite = go.@internal.reflectlite_package;
-
 namespace go;
+
+using reflectlite = @internal.reflectlite_package;
 
 public static partial class sort_package {
 

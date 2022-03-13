@@ -2,34 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package trace -- go2cs converted at 2022 March 06 23:16:22 UTC
+// package trace -- go2cs converted at 2022 March 13 06:29:52 UTC
 // import "cmd/go/internal/trace" ==> using trace = go.cmd.go.@internal.trace_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\trace\trace.go
-using traceviewer = go.cmd.@internal.traceviewer_package;
-using context = go.context_package;
-using json = go.encoding.json_package;
-using errors = go.errors_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using traceviewer = cmd.@internal.traceviewer_package;
+using context = context_package;
+using json = encoding.json_package;
+using errors = errors_package;
+using os = os_package;
+using strings = strings_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+
+
+// Constants used in event fields.
+// See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
+// for more details.
+
+using System;
 public static partial class trace_package {
 
-    // Constants used in event fields.
-    // See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
-    // for more details.
 private static readonly @string phaseDurationBegin = "B";
 private static readonly @string phaseDurationEnd = "E";
 private static readonly @string phaseFlowStart = "s";
 private static readonly @string phaseFlowEnd = "f";
 
 private static readonly @string bindEnclosingSlice = "e";
-
 
 private static int traceStarted = default;
 
@@ -45,7 +45,6 @@ private static (traceContext, bool) getTraceContext(context.Context ctx) {
         return (new traceContext(), false);
     }
     return (v._<traceContext>(), true);
-
 }
 
 // StartSpan starts a trace event with the given name. The Span ends when its Done method is called.
@@ -61,7 +60,6 @@ public static (context.Context, ptr<Span>) StartSpan(context.Context ctx, @strin
     tc.t.writeEvent(addr(new traceviewer.Event(Name:childSpan.name,Time:float64(childSpan.start.UnixNano())/float64(time.Microsecond),TID:childSpan.tid,Phase:phaseDurationBegin,)));
     ctx = context.WithValue(ctx, new traceKey(), new traceContext(tc.t,tc.tid));
     return (ctx, _addr_childSpan!);
-
 }
 
 // StartGoroutine associates the context with a new Thread ID. The Chrome trace viewer associates each
@@ -73,7 +71,6 @@ public static context.Context StartGoroutine(context.Context ctx) {
         return ctx;
     }
     return context.WithValue(ctx, new traceKey(), new traceContext(tc.t,tc.t.getNextTID()));
-
 }
 
 // Flow marks a flow indicating that the 'to' span depends on the 'from' span.
@@ -89,7 +86,6 @@ public static void Flow(context.Context ctx, ptr<Span> _addr_from, ptr<Span> _ad
     var id = tc.t.getNextFlowID();
     tc.t.writeEvent(addr(new traceviewer.Event(Name:from.name+" -> "+to.name,Category:"flow",ID:id,Time:float64(from.end.UnixNano())/float64(time.Microsecond),Phase:phaseFlowStart,TID:from.tid,)));
     tc.t.writeEvent(addr(new traceviewer.Event(Name:from.name+" -> "+to.name,Category:"flow",ID:id,Time:float64(to.start.UnixNano())/float64(time.Microsecond),Phase:phaseFlowEnd,TID:to.tid,BindPoint:bindEnclosingSlice,)));
-
 }
 
 public partial struct Span {
@@ -108,7 +104,6 @@ private static void Done(this ptr<Span> _addr_s) {
     }
     s.end = time.Now();
     s.t.writeEvent(addr(new traceviewer.Event(Name:s.name,Time:float64(s.end.UnixNano())/float64(time.Microsecond),TID:s.tid,Phase:phaseDurationEnd,)));
-
 }
 
 private partial struct tracer {
@@ -154,7 +149,6 @@ private static error writeEvent(this ptr<tracer> _addr_t, ptr<traceviewer.Event>
     _, err = f.f.WriteString(f.sb.String());
     f.sb.Reset();
     return error.As(err)!;
-
 });
 
 private static error Close(this ptr<tracer> _addr_t) => func((defer, _, _) => {
@@ -173,9 +167,7 @@ private static error Close(this ptr<tracer> _addr_t) => func((defer, _, _) => {
             firstErr = err;
         }
     }
-
     return error.As(firstErr)!;
-
 });
 
 private static ulong getNextTID(this ptr<tracer> _addr_t) {
@@ -219,7 +211,6 @@ public static (context.Context, Func<error>, error) Start(context.Context ctx, @
     t.file.Send(new traceFile(f:f,sb:sb,enc:json.NewEncoder(sb),));
     ctx = context.WithValue(ctx, new traceKey(), new traceContext(t:t));
     return (ctx, t.Close, error.As(null!)!);
-
 }
 
 private partial struct traceFile {

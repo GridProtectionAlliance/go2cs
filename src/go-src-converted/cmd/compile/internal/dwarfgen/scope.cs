@@ -2,37 +2,35 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package dwarfgen -- go2cs converted at 2022 March 06 23:14:25 UTC
+// package dwarfgen -- go2cs converted at 2022 March 13 06:27:54 UTC
 // import "cmd/compile/internal/dwarfgen" ==> using dwarfgen = go.cmd.compile.@internal.dwarfgen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\dwarfgen\scope.go
-using sort = go.sort_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using dwarf = go.cmd.@internal.dwarf_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using sort = sort_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using dwarf = cmd.@internal.dwarf_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+
+
+// See golang.org/issue/20390.
+
+using System;
 public static partial class dwarfgen_package {
 
-    // See golang.org/issue/20390.
 private static bool xposBefore(src.XPos p, src.XPos q) {
     return @base.Ctxt.PosTable.Pos(p).Before(@base.Ctxt.PosTable.Pos(q));
 }
 
 private static ir.ScopeID findScope(slice<ir.Mark> marks, src.XPos pos) {
-    var i = sort.Search(len(marks), i => {
-        return xposBefore(pos, marks[i].Pos);
-    });
+    var i = sort.Search(len(marks), i => xposBefore(pos, marks[i].Pos));
     if (i == 0) {
         return 0;
     }
     return marks[i - 1].Scope;
-
 }
 
 private static slice<dwarf.Scope> assembleScopes(ptr<obj.LSym> _addr_fnsym, ptr<ir.Func> _addr_fn, slice<ptr<dwarf.Var>> dwarfVars, slice<ir.ScopeID> varScopes) {
@@ -48,7 +46,6 @@ private static slice<dwarf.Scope> assembleScopes(ptr<obj.LSym> _addr_fnsym, ptr<
         scopePCs(_addr_fnsym, fn.Marks, dwarfScopes);
     }
     return compactScopes(dwarfScopes);
-
 }
 
 // scopeVariables assigns DWARF variable records to their scopes.
@@ -67,7 +64,6 @@ private static void scopeVariables(slice<ptr<dwarf.Var>> dwarfVars, slice<ir.Sco
         }
         dwarfScopes[varScopes[i0]].Vars = dwarfVars[(int)i0..(int)i];
         i0 = i;
-
     }    if (i0 < len(dwarfVars)) {
         dwarfScopes[varScopes[i0]].Vars = dwarfVars[(int)i0..];
     }
@@ -92,11 +88,9 @@ private static void scopePCs(ptr<obj.LSym> _addr_fnsym, slice<ir.Mark> marks, sl
                 continue;
             p = p.Link;
             }
-
             dwarfScopes[scope].AppendRange(new dwarf.Range(Start:p0.Pc,End:p.Pc));
             p0 = p;
             scope = findScope(marks, p0.Pos);
-
         }
     }
     if (p0.Pc < fnsym.Size) {
@@ -112,7 +106,6 @@ private static slice<dwarf.Scope> compactScopes(slice<dwarf.Scope> dwarfScopes) 
     }
 
     return dwarfScopes;
-
 }
 
 private partial struct varsByScopeAndOffset {
@@ -129,7 +122,6 @@ private static bool Less(this varsByScopeAndOffset v, nint i, nint j) {
         return v.scopes[i] < v.scopes[j];
     }
     return v.vars[i].StackOffset < v.vars[j].StackOffset;
-
 }
 
 private static void Swap(this varsByScopeAndOffset v, nint i, nint j) {

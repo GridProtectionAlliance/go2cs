@@ -5,18 +5,20 @@
 //go:build dragonfly || freebsd || netbsd || openbsd || solaris
 // +build dragonfly freebsd netbsd openbsd solaris
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:20 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:06 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mem_bsd.go
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using @unsafe = @unsafe_package;
+
+
+// Don't split the stack as this function may be invoked without a valid G,
+// which prevents us from allocating more stack.
+//go:nosplit
 
 public static partial class runtime_package {
 
-    // Don't split the stack as this function may be invoked without a valid G,
-    // which prevents us from allocating more stack.
-    //go:nosplit
 private static unsafe.Pointer sysAlloc(System.UIntPtr n, ptr<sysMemStat> _addr_sysStat) {
     ref sysMemStat sysStat = ref _addr_sysStat.val;
 
@@ -26,7 +28,6 @@ private static unsafe.Pointer sysAlloc(System.UIntPtr n, ptr<sysMemStat> _addr_s
     }
     sysStat.add(int64(n));
     return v;
-
 }
 
 private static void sysUnused(unsafe.Pointer v, System.UIntPtr n) {
@@ -65,14 +66,12 @@ private static unsafe.Pointer sysReserve(unsafe.Pointer v, System.UIntPtr n) {
         // for PROT_NONE anonymous mappings. This avoids an issue
         // wherein large mappings can cause fork to fail.
         flags |= _sunosMAP_NORESERVE;
-
     }
     var (p, err) = mmap(v, n, _PROT_NONE, flags, -1, 0);
     if (err != 0) {
         return null;
     }
     return p;
-
 }
 
 private static readonly nint _sunosEAGAIN = 11;

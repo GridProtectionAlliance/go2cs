@@ -20,16 +20,17 @@
 // with two exceptions. First, it requires the "v" prefix. Second, it recognizes
 // vMAJOR and vMAJOR.MINOR (with no prerelease or build suffixes)
 // as shorthands for vMAJOR.0.0 and vMAJOR.MINOR.0.
-// package semver -- go2cs converted at 2022 March 06 23:26:09 UTC
+
+// package semver -- go2cs converted at 2022 March 13 06:41:00 UTC
 // import "cmd/vendor/golang.org/x/mod/semver" ==> using semver = go.cmd.vendor.golang.org.x.mod.semver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\semver\semver.go
-using sort = go.sort_package;
-
 namespace go.cmd.vendor.golang.org.x.mod;
+
+using sort = sort_package;
 
 public static partial class semver_package {
 
-    // parsed returns the parsed form of a semantic version string.
+// parsed returns the parsed form of a semantic version string.
 private partial struct parsed {
     public @string major;
     public @string minor;
@@ -63,7 +64,6 @@ public static @string Canonical(@string v) {
         return v + p.@short;
     }
     return v;
-
 }
 
 // Major returns the major version prefix of the semantic version v.
@@ -75,7 +75,6 @@ public static @string Major(@string v) {
         return "";
     }
     return v[..(int)1 + len(pv.major)];
-
 }
 
 // MajorMinor returns the major.minor version prefix of the semantic version v.
@@ -94,9 +93,7 @@ public static @string MajorMinor(@string v) {
             return v[..(int)j];
         }
     }
-
     return v[..(int)i] + "." + pv.minor;
-
 }
 
 // Prerelease returns the prerelease suffix of the semantic version v.
@@ -108,7 +105,6 @@ public static @string Prerelease(@string v) {
         return "";
     }
     return pv.prerelease;
-
 }
 
 // Build returns the build suffix of the semantic version v.
@@ -120,7 +116,6 @@ public static @string Build(@string v) {
         return "";
     }
     return pv.build;
-
 }
 
 // Compare returns an integer comparing two versions according to
@@ -152,7 +147,6 @@ public static nint Compare(@string v, @string w) {
         c = c__prev1;
 
     }
-
     {
         var c__prev1 = c;
 
@@ -164,7 +158,6 @@ public static nint Compare(@string v, @string w) {
         c = c__prev1;
 
     }
-
     {
         var c__prev1 = c;
 
@@ -176,9 +169,7 @@ public static nint Compare(@string v, @string w) {
         c = c__prev1;
 
     }
-
     return comparePrerelease(pv.prerelease, pw.prerelease);
-
 }
 
 // Max canonicalizes its arguments and then returns the version string
@@ -193,7 +184,6 @@ public static @string Max(@string v, @string w) {
         return v;
     }
     return w;
-
 }
 
 // ByVersion implements sort.Interface for sorting semantic version strings.
@@ -212,7 +202,6 @@ public static bool Less(this ByVersion vs, nint i, nint j) {
         return cmp < 0;
     }
     return vs[i] < vs[j];
-
 }
 
 // Sort sorts a list of semantic version strings using ByVersion.
@@ -285,7 +274,6 @@ private static (parsed, bool) parse(@string v) {
     }
     ok = true;
     return ;
-
 }
 
 private static (@string, @string, bool) parseInt(@string v) {
@@ -307,7 +295,6 @@ private static (@string, @string, bool) parseInt(@string v) {
         return ;
     }
     return (v[..(int)i], v[(int)i..], true);
-
 }
 
 private static (@string, @string, bool) parsePrerelease(@string v) {
@@ -335,13 +322,11 @@ private static (@string, @string, bool) parsePrerelease(@string v) {
             start = i + 1;
         }
         i++;
-
     }
     if (start == i || isBadNum(v[(int)start..(int)i])) {
         return ;
     }
     return (v[..(int)i], v[(int)i..], true);
-
 }
 
 private static (@string, @string, bool) parseBuild(@string v) {
@@ -365,13 +350,11 @@ private static (@string, @string, bool) parseBuild(@string v) {
             start = i + 1;
         }
         i++;
-
     }
     if (start == i) {
         return ;
     }
     return (v[..(int)i], v[(int)i..], true);
-
 }
 
 private static bool isIdentChar(byte c) {
@@ -455,9 +438,7 @@ private static nint comparePrerelease(@string x, @string y) {
  {
                     return +1;
                 }
-
             }
-
             if (ix) {
                 if (len(dx) < len(dy)) {
                     return -1;
@@ -466,7 +447,6 @@ private static nint comparePrerelease(@string x, @string y) {
                     return +1;
                 }
             }
-
             if (dx < dy) {
                 return -1;
             }
@@ -474,7 +454,6 @@ private static nint comparePrerelease(@string x, @string y) {
  {
                 return +1;
             }
-
         }
     }
     if (x == "") {

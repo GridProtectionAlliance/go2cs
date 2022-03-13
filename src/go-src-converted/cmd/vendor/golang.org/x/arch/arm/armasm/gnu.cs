@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2022 March 06 23:24:33 UTC
+// package armasm -- go2cs converted at 2022 March 13 06:37:43 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\gnu.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.arm;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strings = strings_package;
 
 public static partial class armasm_package {
 
@@ -37,9 +37,7 @@ public static @string GNUSyntax(Inst inst) {
         buf.WriteString(sep);
         sep = ", ";
         buf.WriteString(text);
-
     }    return buf.String();
-
 }
 
 private static @string gnuArg(ptr<Inst> _addr_inst, nint argIndex, Arg arg) {
@@ -50,13 +48,11 @@ private static @string gnuArg(ptr<Inst> _addr_inst, nint argIndex, Arg arg) {
         if (argIndex == 1) { 
             // second argument in consecutive pair not printed
             return "";
-
         }
     else if (inst.Op & ~15 == STREXD_EQ) 
         if (argIndex == 2) { 
             // second argument in consecutive pair not printed
             return "";
-
         }
         switch (arg.type()) {
         case Imm arg:
@@ -89,13 +85,11 @@ private static @string gnuArg(ptr<Inst> _addr_inst, nint argIndex, Arg arg) {
  {
                     X += fmt.Sprintf(", %s #%d", strings.ToLower(arg.Shift.String()), arg.Count);
                 }
-
             }
             else
  {
                 X = fmt.Sprintf("#%d", arg.Offset);
             }
-
 
             if (arg.Mode == AddrOffset) 
                 if (X == "#0") {
@@ -161,7 +155,6 @@ private static @string gnuArg(ptr<Inst> _addr_inst, nint argIndex, Arg arg) {
             break;
     }
     return strings.ToLower(arg.String());
-
 }
 
 } // end armasm_package

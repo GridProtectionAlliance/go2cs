@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:13:10 UTC
+//     Generated on 2022 March 13 06:26:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class syntax_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         [PromotedStruct(typeof(expr))]
         public partial struct InterfaceType
         {
@@ -63,7 +63,7 @@ namespace @internal
             public static implicit operator InterfaceType(NilType nil) => default(InterfaceType);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static InterfaceType InterfaceType_cast(dynamic value)
         {
             return new InterfaceType(value.MethodList, value.expr);

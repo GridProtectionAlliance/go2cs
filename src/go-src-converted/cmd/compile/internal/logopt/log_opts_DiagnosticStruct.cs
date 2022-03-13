@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:47:48 UTC
+//     Generated on 2022 March 13 05:59:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -38,7 +38,7 @@ namespace @internal
 {
     public static partial class logopt_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Diagnostic
         {
             // Constructors
@@ -81,7 +81,7 @@ namespace @internal
             public static implicit operator Diagnostic(NilType nil) => default(Diagnostic);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Diagnostic Diagnostic_cast(dynamic value)
         {
             return new Diagnostic(value.Range, value.Severity, value.Code, value.Source, value.Message, value.Tags, value.RelatedInformation);

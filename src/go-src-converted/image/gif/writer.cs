@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gif -- go2cs converted at 2022 March 06 23:36:06 UTC
+// package gif -- go2cs converted at 2022 March 13 06:44:06 UTC
 // import "image/gif" ==> using gif = go.image.gif_package
 // Original source: C:\Program Files\Go\src\image\gif\writer.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using lzw = go.compress.lzw_package;
-using errors = go.errors_package;
-using image = go.image_package;
-using color = go.image.color_package;
-using palette = go.image.color.palette_package;
-using draw = go.image.draw_package;
-using io = go.io_package;
-
 namespace go.image;
+
+using bufio = bufio_package;
+using bytes = bytes_package;
+using lzw = compress.lzw_package;
+using errors = errors_package;
+using image = image_package;
+using color = image.color_package;
+using palette = image.color.palette_package;
+using draw = image.draw_package;
+using io = io_package;
+
+
+// Graphic control extension fields.
 
 public static partial class gif_package {
 
-    // Graphic control extension fields.
 private static readonly nuint gcLabel = 0xF9;
 private static readonly nuint gcBlockSize = 0x04;
-
 
 private static array<nint> log2Lookup = new array<nint>(new nint[] { 2, 4, 8, 16, 32, 64, 128, 256 });
 
@@ -32,7 +33,6 @@ private static nint log2(nint x) {
             return i;
         }
     }    return -1;
-
 }
 
 // Little-endian.
@@ -85,7 +85,6 @@ private static error WriteByte(this blockWriter b, byte c) {
     b.e.write(b.e.buf[..(int)256]);
     b.e.buf[0] = 0;
     return error.As(b.e.err)!;
-
 }
 
 // blockWriter must be an io.Writer for lzw.NewWriter, but this is never
@@ -103,9 +102,7 @@ private static (nint, error) Write(this blockWriter b, slice<byte> data) {
             }
 
         }
-
     }    return (len(data), error.As(null!)!);
-
 }
 
 private static void close(this blockWriter b) { 
@@ -121,7 +118,6 @@ private static void close(this blockWriter b) {
         b.e.write(b.e.buf[..(int)n + 2]);
     }
     b.e.flush();
-
 }
 
 private static void flush(this ptr<encoder> _addr_e) {
@@ -131,7 +127,6 @@ private static void flush(this ptr<encoder> _addr_e) {
         return ;
     }
     e.err = e.w.Flush();
-
 }
 
 private static void write(this ptr<encoder> _addr_e, slice<byte> p) {
@@ -141,7 +136,6 @@ private static void write(this ptr<encoder> _addr_e, slice<byte> p) {
         return ;
     }
     _, e.err = e.w.Write(p);
-
 }
 
 private static void writeByte(this ptr<encoder> _addr_e, byte b) {
@@ -151,7 +145,6 @@ private static void writeByte(this ptr<encoder> _addr_e, byte b) {
         return ;
     }
     e.err = e.w.WriteByte(b);
-
 }
 
 private static void writeHeader(this ptr<encoder> _addr_e) {
@@ -183,9 +176,7 @@ private static void writeHeader(this ptr<encoder> _addr_e) {
                 e.err = err;
                 return ;
             }
-
             e.write(e.globalColorTable[..(int)e.globalCT]);
-
         }
         else
  { 
@@ -195,7 +186,6 @@ private static void writeHeader(this ptr<encoder> _addr_e) {
             e.buf[1] = 0x00; // Background Color Index.
             e.buf[2] = 0x00; // Pixel Aspect Ratio.
             e.write(e.buf[..(int)3]);
-
         }
     } 
 
@@ -215,7 +205,6 @@ private static void writeHeader(this ptr<encoder> _addr_e) {
         writeUint16(e.buf[(int)2..(int)4], uint16(e.g.LoopCount));
         e.buf[4] = 0x00; // Block Terminator.
         e.write(e.buf[..(int)5]);
-
     }
 }
 
@@ -254,11 +243,9 @@ private static (nint, error) encodeColorTable(slice<byte> dst, color.Palette p, 
                 }
 
             }
-
             dst[3 * i + 0] = r;
             dst[3 * i + 1] = g;
             dst[3 * i + 2] = b;
-
         }
         i = i__prev1;
     }
@@ -279,7 +266,6 @@ private static (nint, error) encodeColorTable(slice<byte> dst, color.Palette p, 
         }
     }
     return (3 * n, error.As(null!)!);
-
 }
 
 private static bool colorTablesMatch(this ptr<encoder> _addr_e, nint localLen, nint transparentIndex) {
@@ -291,7 +277,6 @@ private static bool colorTablesMatch(this ptr<encoder> _addr_e, nint localLen, n
         return bytes.Equal(e.globalColorTable[..(int)trOff], e.localColorTable[..(int)trOff]) && bytes.Equal(e.globalColorTable[(int)trOff + 3..(int)localSize], e.localColorTable[(int)trOff + 3..(int)localSize]);
     }
     return bytes.Equal(e.globalColorTable[..(int)localSize], e.localColorTable[..(int)localSize]);
-
 }
 
 private static void writeImageBlock(this ptr<encoder> _addr_e, ptr<image.Paletted> _addr_pm, nint delay, byte disposal) {
@@ -334,7 +319,6 @@ private static void writeImageBlock(this ptr<encoder> _addr_e, ptr<image.Palette
                 }
 
             }
-
         }
         i = i__prev1;
     }
@@ -362,7 +346,6 @@ private static void writeImageBlock(this ptr<encoder> _addr_e, ptr<image.Palette
         }
         e.buf[7] = 0x00; // Block Terminator.
         e.write(e.buf[..(int)8]);
-
     }
     e.buf[0] = sImageDescriptor;
     writeUint16(e.buf[(int)1..(int)3], uint16(b.Min.X));
@@ -402,12 +385,9 @@ private static void writeImageBlock(this ptr<encoder> _addr_e, ptr<image.Palette
                 // Use a local color table.
                 e.writeByte(fColorTable | uint8(paddedSize));
                 e.write(e.localColorTable[..(int)ct]);
-
             }
-
         }
     }
-
 
     var litWidth = paddedSize + 1;
     if (litWidth < 2) {
@@ -443,16 +423,13 @@ private static void writeImageBlock(this ptr<encoder> _addr_e, ptr<image.Palette
                         return ;
                     (i, y) = (i + pm.Stride, y + 1);
                     }
-
                 }
 
 
                 i = i__prev1;
             }
-
         }
     }
-
     lzww.Close(); // flush to bw
     bw.close(); // flush to e.w
 }
@@ -498,7 +475,6 @@ public static error EncodeAll(io.Writer w, ptr<GIF> _addr_g) {
             }
 
         }
-
     }
     {
         writer (ww, ok) = writer.As(w._<writer>())!;
@@ -512,7 +488,6 @@ public static error EncodeAll(io.Writer w, ptr<GIF> _addr_g) {
         }
     }
 
-
     e.writeHeader();
     foreach (var (i, pm) in g.Image) {
         var disposal = uint8(0);
@@ -520,11 +495,9 @@ public static error EncodeAll(io.Writer w, ptr<GIF> _addr_g) {
             disposal = g.Disposal[i];
         }
         e.writeImageBlock(pm, g.Delay[i], disposal);
-
     }    e.writeByte(sTrailer);
     e.flush();
     return error.As(e.err)!;
-
 }
 
 // Encode writes the Image m to w in GIF format.
@@ -561,7 +534,6 @@ public static error Encode(io.Writer w, image.Image m, ptr<Options> _addr_o) {
             }
 
         }
-
     }
     if (pm == null || len(pm.Palette) > opts.NumColors) { 
         // Set pm to be a palettedized copy of m, including its bounds, which
@@ -573,17 +545,14 @@ public static error Encode(io.Writer w, image.Image m, ptr<Options> _addr_o) {
             pm.Palette = opts.Quantizer.Quantize(make(color.Palette, 0, opts.NumColors), m);
         }
         opts.Drawer.Draw(pm, b, m, b.Min);
-
     }
     if (pm.Rect.Min != (new image.Point())) {
         ref var dup = ref heap(pm.val, out ptr<var> _addr_dup);
         dup.Rect = dup.Rect.Sub(dup.Rect.Min);
         _addr_pm = _addr_dup;
         pm = ref _addr_pm.val;
-
     }
     return error.As(EncodeAll(w, addr(new GIF(Image:[]*image.Paletted{pm},Delay:[]int{0},Config:image.Config{ColorModel:pm.Palette,Width:b.Dx(),Height:b.Dy(),},))))!;
-
 }
 
 } // end gif_package

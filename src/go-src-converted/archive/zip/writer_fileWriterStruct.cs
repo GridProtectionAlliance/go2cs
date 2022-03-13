@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:31:45 UTC
+//     Generated on 2022 March 13 05:42:40 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace archive
 {
     public static partial class zip_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct fileWriter
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace archive
             public static implicit operator fileWriter(NilType nil) => default(fileWriter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static fileWriter fileWriter_cast(dynamic value)
         {
             return new fileWriter(ref value.ptr<header>, value.zipw, ref value.rawCount, value.comp, ref value.compCount, value.crc32, value.closed);

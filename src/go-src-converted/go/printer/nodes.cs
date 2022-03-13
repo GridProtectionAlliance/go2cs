@@ -6,51 +6,52 @@
 // expressions, statements, declarations, and files. It uses
 // the print functionality implemented in printer.go.
 
-// package printer -- go2cs converted at 2022 March 06 22:47:06 UTC
+// package printer -- go2cs converted at 2022 March 13 05:58:21 UTC
 // import "go/printer" ==> using printer = go.go.printer_package
 // Original source: C:\Program Files\Go\src\go\printer\nodes.go
-using bytes = go.bytes_package;
-using ast = go.go.ast_package;
-using typeparams = go.go.@internal.typeparams_package;
-using token = go.go.token_package;
-using math = go.math_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.go;
 
+using bytes = bytes_package;
+using ast = go.ast_package;
+using typeparams = go.@internal.typeparams_package;
+using token = go.token_package;
+using math = math_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Formatting issues:
+// - better comment formatting for /*-style comments at the end of a line (e.g. a declaration)
+//   when the comment spans multiple lines; if such a comment is just two lines, formatting is
+//   not idempotent
+// - formatting of expression lists
+// - should use blank instead of tab to separate one-line function bodies from
+//   the function header unless there is a group of consecutive one-liners
+
+// ----------------------------------------------------------------------------
+// Common AST nodes.
+
+// Print as many newlines as necessary (but at least min newlines) to get to
+// the current line. ws is printed before the first line break. If newSection
+// is set, the first line break is printed as formfeed. Returns 0 if no line
+// breaks were printed, returns 1 if there was exactly one newline printed,
+// and returns a value > 1 if there was a formfeed or more than one newline
+// printed.
+//
+// TODO(gri): linebreak may add too many lines if the next statement at "line"
+//            is preceded by comments because the computation of n assumes
+//            the current position before the comment and the target position
+//            after the comment. Thus, after interspersing such comments, the
+//            space taken up by them is not considered to reduce the number of
+//            linebreaks. At the moment there is no easy way to know about
+//            future (not yet interspersed) comments in this function.
+//
+
+using System;
 public static partial class printer_package {
 
-    // Formatting issues:
-    // - better comment formatting for /*-style comments at the end of a line (e.g. a declaration)
-    //   when the comment spans multiple lines; if such a comment is just two lines, formatting is
-    //   not idempotent
-    // - formatting of expression lists
-    // - should use blank instead of tab to separate one-line function bodies from
-    //   the function header unless there is a group of consecutive one-liners
-
-    // ----------------------------------------------------------------------------
-    // Common AST nodes.
-
-    // Print as many newlines as necessary (but at least min newlines) to get to
-    // the current line. ws is printed before the first line break. If newSection
-    // is set, the first line break is printed as formfeed. Returns 0 if no line
-    // breaks were printed, returns 1 if there was exactly one newline printed,
-    // and returns a value > 1 if there was a formfeed or more than one newline
-    // printed.
-    //
-    // TODO(gri): linebreak may add too many lines if the next statement at "line"
-    //            is preceded by comments because the computation of n assumes
-    //            the current position before the comment and the target position
-    //            after the comment. Thus, after interspersing such comments, the
-    //            space taken up by them is not considered to reduce the number of
-    //            linebreaks. At the moment there is no easy way to know about
-    //            future (not yet interspersed) comments in this function.
-    //
 private static nint linebreak(this ptr<printer> _addr_p, nint line, nint min, whiteSpace ws, bool newSection) {
     nint nbreaks = default;
     ref printer p = ref _addr_p.val;
@@ -71,10 +72,8 @@ private static nint linebreak(this ptr<printer> _addr_p, nint line, nint min, wh
             p.print(newline);
             n--;
         }
-
     }
     return ;
-
 }
 
 // setComment sets g as the next comment if g != nil and if node comments
@@ -91,7 +90,6 @@ private static void setComment(this ptr<printer> _addr_p, ptr<ast.CommentGroup> 
     if (p.comments == null) { 
         // initialize p.comments lazily
         p.comments = make_slice<ptr<ast.CommentGroup>>(1);
-
     }
     else if (p.cindex < len(p.comments)) { 
         // for some reason there are pending comments; this
@@ -101,7 +99,6 @@ private static void setComment(this ptr<printer> _addr_p, ptr<ast.CommentGroup> 
         p.comments = p.comments[(int)0..(int)1]; 
         // in debug mode, report error
         p.internalError("setComment found pending comments");
-
     }
     p.comments[0] = g;
     p.cindex = 0; 
@@ -134,7 +131,6 @@ private static void identList(this ptr<printer> _addr_p, slice<ptr<ast.Ident>> l
         mode = noIndent;
     }
     p.exprList(token.NoPos, xlist, 1, mode, token.NoPos, false);
-
 }
 
 private static readonly @string filteredMsg = "contains filtered or unexported fields";
@@ -170,10 +166,8 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
                 p.print(newline);
                 p.print(indent, "// " + filteredMsg, unindent, newline);
             }
-
         }
         return ;
-
     }
     prev = p.posFor(prev0);
     next = p.posFor(next0);
@@ -193,11 +187,8 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
                     // use position of expression following the comma as
                     // comma position for correct comment placement
                     p.print(x.Pos(), token.COMMA, blank);
-
                 }
-
                 p.expr0(x, depth);
-
             }
 
             i = i__prev1;
@@ -208,7 +199,6 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
             p.print(token.COMMA, blank, "/* " + filteredMsg + " */");
         }
         return ;
-
     }
     var ws = ignore;
     if (mode & noIndent == 0) {
@@ -260,13 +250,11 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
                 if (isPair) {
                     size = p.nodeSize(pair.Key, infinity); // size <= infinity
                 }
-
             }
             else
  { 
                 // size too large or we don't have good layout information
                 size = 0;
-
             } 
 
             // If the previous line and the current line had single-
@@ -287,11 +275,8 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
                     var geomean = math.Exp(lnsum / float64(count)); // count > 0
                     var ratio = float64(size) / geomean;
                     useFF = r * ratio <= 1 || r <= ratio;
-
                 }
-
             }
-
             nint needsLinebreak = 0 < prevLine && prevLine < line;
             if (i > 0) { 
                 // Use position of expression following the comma as
@@ -300,7 +285,6 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
                 if (!needsLinebreak) {
                     p.print(x.Pos());
                 }
-
                 p.print(token.COMMA);
                 var needsBlank = true;
                 if (needsLinebreak) { 
@@ -321,15 +305,11 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
                         lnsum = 0;
                         count = 0;
                     }
-
                 }
-
                 if (needsBlank) {
                     p.print(blank);
                 }
-
             }
-
             if (len(list) > 1 && isPair && size > 0 && needsLinebreak) { 
                 // We have a key:value expression that fits onto one line
                 // and it's not on the same line as the prior expression:
@@ -339,20 +319,16 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
                 p.expr(pair.Key);
                 p.print(pair.Colon, token.COLON, vtab);
                 p.expr(pair.Value);
-
             }
             else
  {
                 p.expr0(x, depth);
             }
-
             if (size > 0) {
                 lnsum += math.Log(float64(size));
                 count++;
             }
-
             prevLine = line;
-
         }
         i = i__prev1;
         x = x__prev1;
@@ -368,11 +344,9 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
         if (ws == ignore && mode & noIndent == 0) { 
             // unindent if we indented
             p.print(unindent);
-
         }
         p.print(formfeed); // terminating comma needs a line break to look good
         return ;
-
     }
     if (isIncomplete) {
         p.print(token.COMMA, newline);
@@ -381,7 +355,6 @@ private static void exprList(this ptr<printer> _addr_p, token.Pos prev0, slice<a
     if (ws == ignore && mode & noIndent == 0) { 
         // unindent if we indented
         p.print(unindent);
-
     }
 }
 
@@ -413,15 +386,12 @@ private static void parameters(this ptr<printer> _addr_p, ptr<ast.FieldList> _ad
                 if (!needsLinebreak) {
                     p.print(par.Pos());
                 }
-
                 p.print(token.COMMA);
-
             } 
             // separator if needed (linebreak or blank)
             if (needsLinebreak && p.linebreak(parLineBeg, 0, ws, true) > 0) { 
                 // break line if the opening "(" or previous parameter ended on a different line
                 ws = ignore;
-
             }
             else if (i > 0) {
                 p.print(blank);
@@ -436,12 +406,10 @@ private static void parameters(this ptr<printer> _addr_p, ptr<ast.FieldList> _ad
                 // will do the right thing.
                 p.identList(par.Names, ws == indent);
                 p.print(blank);
-
             } 
             // parameter type
             p.expr(stripParensAlways(par.Type));
             prevLine = parLineEnd;
-
         }        {
             var closing = p.lineFor(fields.Closing);
 
@@ -458,7 +426,6 @@ private static void parameters(this ptr<printer> _addr_p, ptr<ast.FieldList> _ad
         }
     }
     p.print(fields.Closing, closeTok);
-
 }
 
 private static void signature(this ptr<printer> _addr_p, ptr<ast.FuncType> _addr_sig) {
@@ -472,7 +439,6 @@ private static void signature(this ptr<printer> _addr_p, ptr<ast.FuncType> _addr
             p.parameters(tparams, true);
         }
     }
-
     if (sig.Params != null) {
         p.parameters(sig.Params, false);
     }
@@ -489,10 +455,8 @@ private static void signature(this ptr<printer> _addr_p, ptr<ast.FuncType> _addr
             // single anonymous res; no ()'s
             p.expr(stripParensAlways(res.List[0].Type));
             return ;
-
         }
         p.parameters(res, false);
-
     }
 }
 
@@ -508,7 +472,6 @@ private static nint identListSize(slice<ptr<ast.Ident>> list, nint maxSize) {
             break;
         }
     }    return ;
-
 }
 
 private static bool isOneLineFieldList(this ptr<printer> _addr_p, slice<ptr<ast.Field>> list) {
@@ -529,7 +492,6 @@ private static bool isOneLineFieldList(this ptr<printer> _addr_p, slice<ptr<ast.
     }
     var typeSize = p.nodeSize(f.Type, maxSize);
     return namesSize + typeSize <= maxSize;
-
 }
 
 private static void setLineComment(this ptr<printer> _addr_p, @string text) {
@@ -554,7 +516,6 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
             // no blank between keyword and {} in this case
             p.print(lbrace, token.LBRACE, rbrace, token.RBRACE);
             return ;
-
         }
         else if (p.isOneLineFieldList(list)) { 
             // small enough - print on one line
@@ -571,11 +532,8 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                         if (i > 0) { 
                             // no comments so no need for comma position
                             p.print(token.COMMA, blank);
-
                         }
-
                         p.expr(x);
-
                     }
             else
 
@@ -585,9 +543,7 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                 if (len(f.Names) > 0) {
                     p.print(blank);
                 }
-
                 p.expr(f.Type);
-
             } { // interface
                 if (len(f.Names) > 0) { 
                     // type list type or method
@@ -597,27 +553,21 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                         // type list type
                         p.print(blank);
                         p.expr(f.Type);
-
                     }
                     else
  { 
                         // method
                         p.signature(f.Type._<ptr<ast.FuncType>>()); // don't print "func"
                     }
-
                 }
                 else
  { 
                     // embedded interface
                     p.expr(f.Type);
-
                 }
-
             }
-
             p.print(blank, rbrace, token.RBRACE);
             return ;
-
         }
     }
     p.print(blank, lbrace, token.LBRACE, indent);
@@ -649,16 +599,13 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                     p.print(sep);
                     p.expr(f.Type);
                     extraTabs = 1;
-
                 }
                 else
  { 
                     // anonymous field
                     p.expr(f.Type);
                     extraTabs = 2;
-
                 }
-
                 if (f.Tag != null) {
                     if (len(f.Names) > 0 && sep == vtab) {
                         p.print(sep);
@@ -667,7 +614,6 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                     p.expr(f.Tag);
                     extraTabs = 0;
                 }
-
                 if (f.Comment != null) {
                     while (extraTabs > 0) {
                         p.print(sep);
@@ -675,7 +621,6 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                     }
 
                     p.setComment(f.Comment);
-
                 }
     else
             }
@@ -690,7 +635,6 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
             }
             p.flush(p.posFor(rbrace), token.RBRACE); // make sure we don't lose the last line comment
             p.setLineComment("// " + filteredMsg);
-
         }
     } { // interface
 
@@ -707,7 +651,6 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                 if (len(f.Names) > 0) {
                     name = f.Names[0];
                 }
-
                 if (i > 0) { 
                     // don't do a line break (min == 0) if we are printing a list of types
                     // TODO(gri) this doesn't work quite right if the list of types is
@@ -716,11 +659,8 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                     if (prev != null && name == prev) {
                         min = 0;
                     }
-
                     p.linebreak(p.lineFor(f.Pos()), min, ignore, p.linesFrom(line) > 0);
-
                 }
-
                 p.setComment(f.Doc);
                 p.recordLine(_addr_line);
                 if (name != null) { 
@@ -730,18 +670,14 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                         if (name == prev) { 
                             // type is part of a list of types
                             p.print(token.COMMA, blank);
-
                         }
                         else
  { 
                             // type starts a new list of types
                             p.print(name, blank);
-
                         }
-
                         p.expr(f.Type);
                         prev = name;
-
                     }
                     else
  { 
@@ -749,20 +685,15 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
                         p.expr(name);
                         p.signature(f.Type._<ptr<ast.FuncType>>()); // don't print "func"
                         prev = null;
-
                     }
-
                 }
                 else
  { 
                     // embedded interface
                     p.expr(f.Type);
                     prev = null;
-
                 }
-
                 p.setComment(f.Comment);
-
             }
 
             i = i__prev1;
@@ -775,11 +706,9 @@ private static void fieldList(this ptr<printer> _addr_p, ptr<ast.FieldList> _add
             }
             p.flush(p.posFor(rbrace), token.RBRACE); // make sure we don't lose the last line comment
             p.setLineComment("// contains filtered or unexported methods");
-
         }
     }
     p.print(unindent, formfeed, rbrace, token.RBRACE);
-
 }
 
 // ----------------------------------------------------------------------------
@@ -806,16 +735,13 @@ private static (bool, bool, nint) walkBinary(ptr<ast.BinaryExpr> _addr_e) {
                 // parens will be inserted.
                 // pretend this is an *ast.ParenExpr and do nothing.
                 break;
-
             }
-
             var (h4, h5, mp) = walkBinary(_addr_l);
             has4 = has4 || h4;
             has5 = has5 || h5;
             if (maxProblem < mp) {
                 maxProblem = mp;
             }
-
             break;
 
     }
@@ -826,23 +752,18 @@ private static (bool, bool, nint) walkBinary(ptr<ast.BinaryExpr> _addr_e) {
                 // parens will be inserted.
                 // pretend this is an *ast.ParenExpr and do nothing.
                 break;
-
             }
-
             (h4, h5, mp) = walkBinary(_addr_r);
             has4 = has4 || h4;
             has5 = has5 || h5;
             if (maxProblem < mp) {
                 maxProblem = mp;
             }
-
             break;
         case ptr<ast.StarExpr> r:
             if (e.Op == token.QUO) { // `*/`
                 maxProblem = 5;
-
             }
-
             break;
         case ptr<ast.UnaryExpr> r:
             switch (e.Op.String() + r.Op.String()) {
@@ -864,7 +785,6 @@ private static (bool, bool, nint) walkBinary(ptr<ast.BinaryExpr> _addr_e) {
             break;
     }
     return ;
-
 }
 
 private static nint cutoff(ptr<ast.BinaryExpr> _addr_e, nint depth) {
@@ -879,13 +799,11 @@ private static nint cutoff(ptr<ast.BinaryExpr> _addr_e, nint depth) {
             return 5;
         }
         return 4;
-
     }
     if (depth == 1) {
         return 6;
     }
     return 4;
-
 }
 
 private static nint diffPrec(ast.Expr expr, nint prec) {
@@ -894,7 +812,6 @@ private static nint diffPrec(ast.Expr expr, nint prec) {
         return 1;
     }
     return 0;
-
 }
 
 private static nint reduceDepth(nint depth) {
@@ -903,7 +820,6 @@ private static nint reduceDepth(nint depth) {
         depth = 1;
     }
     return depth;
-
 }
 
 // Format the binary expression: decide the cutoff and then format.
@@ -955,7 +871,6 @@ private static void binaryExpr(this ptr<printer> _addr_p, ptr<ast.BinaryExpr> _a
         p.expr0(x, reduceDepth(depth)); // parentheses undo one level of depth
         p.print(token.RPAREN);
         return ;
-
     }
     var printBlank = prec < cutoff;
 
@@ -1022,16 +937,13 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                 p.print(token.MUL);
                 p.expr(x.X);
                 p.print(token.RPAREN);
-
             }
             else
  { 
                 // no parenthesis needed
                 p.print(token.MUL);
                 p.expr(x.X);
-
             }
-
             break;
         case ptr<ast.UnaryExpr> x:
             const var prec = token.UnaryPrec;
@@ -1041,7 +953,6 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                 p.print(token.LPAREN);
                 p.expr(x);
                 p.print(token.RPAREN);
-
             }
             else
  { 
@@ -1050,13 +961,9 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                 if (x.Op == token.RANGE) { 
                     // TODO(gri) Remove this code if it cannot be reached.
                     p.print(blank);
-
                 }
-
                 p.expr1(x.X, prec, depth);
-
             }
-
             break;
         case ptr<ast.BasicLit> x:
             if (p.Config.Mode & normalizeNumbers != 0) {
@@ -1079,19 +986,15 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                     // don't print parentheses around an already parenthesized expression
                     // TODO(gri) consider making this more general and incorporate precedence levels
                     p.expr0(x.X, depth);
-
                 }
                 else
  {
                     p.print(token.LPAREN);
                     p.expr0(x.X, reduceDepth(depth)); // parentheses undo one level of depth
                     p.print(x.Rparen, token.RPAREN);
-
                 }
 
             }
-
-
             break;
         case ptr<ast.SelectorExpr> x:
             p.selectorExpr(x, depth, false);
@@ -1106,7 +1009,6 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
  {
                 p.print(token.TYPE);
             }
-
             p.print(x.Rparen, token.RPAREN);
             break;
         case ptr<ast.IndexExpr> x:
@@ -1125,7 +1027,6 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
  {
                         p.expr0(list[0], depth + 1);
                     }
-
                 }
                 else
  {
@@ -1133,7 +1034,6 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                 }
 
             }
-
             p.print(x.Rbrack, token.RBRACK);
             break;
         case ptr<ast.SliceExpr> x:
@@ -1167,9 +1067,7 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                 if (indexCount > 1 && hasBinaries) {
                     needsBlanks = true;
                 }
-
             }
-
             {
                 var x__prev1 = x;
 
@@ -1208,7 +1106,6 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                     p.print(token.LPAREN);
                     wasIndented = p.possibleSelectorExpr(x.Fun, token.HighestPrec, depth);
                     p.print(token.RPAREN);
-
                 }
                 else
  {
@@ -1216,7 +1113,6 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
                 }
 
             }
-
             p.print(x.Lparen, token.LPAREN);
             if (x.Ellipsis.IsValid()) {
                 p.exprList(x.Lparen, x.Args, depth, 0, x.Ellipsis, false);
@@ -1229,12 +1125,10 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
  {
                 p.exprList(x.Lparen, x.Args, depth, commaTerm, x.Rparen, false);
             }
-
             p.print(x.Rparen, token.RPAREN);
             if (wasIndented) {
                 p.print(unindent);
             }
-
             break;
         case ptr<ast.CompositeLit> x:
             if (x.Type != null) {
@@ -1307,7 +1201,6 @@ private static void expr1(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, 
             break;
         }
     }
-
 });
 
 // normalizedNumber rewrites base prefixes and exponents
@@ -1344,7 +1237,6 @@ private static ptr<ast.BasicLit> normalizedNumber(ptr<ast.BasicLit> _addr_lit) {
                 i = i__prev1;
 
             }
-
             break;
         case "0x": 
             // possibly a hexadecimal float
@@ -1353,7 +1245,6 @@ private static ptr<ast.BasicLit> normalizedNumber(ptr<ast.BasicLit> _addr_lit) {
                 return _addr_lit!; // nothing to do
             }
             x = x[..(int)i] + "p" + x[(int)i + 1..];
-
             break;
         case "0O": 
             x = "0o" + x[(int)2..];
@@ -1394,7 +1285,6 @@ private static ptr<ast.BasicLit> normalizedNumber(ptr<ast.BasicLit> _addr_lit) {
     }
 
     return addr(new ast.BasicLit(ValuePos:lit.ValuePos,Kind:lit.Kind,Value:x));
-
 }
 
 private static bool possibleSelectorExpr(this ptr<printer> _addr_p, ast.Expr expr, nint prec1, nint depth) {
@@ -1407,10 +1297,8 @@ private static bool possibleSelectorExpr(this ptr<printer> _addr_p, ast.Expr exp
             return p.selectorExpr(x, depth, true);
         }
     }
-
     p.expr1(expr, prec1, depth);
     return false;
-
 }
 
 // selectorExpr handles an *ast.SelectorExpr node and reports whether x spans
@@ -1432,10 +1320,8 @@ private static bool selectorExpr(this ptr<printer> _addr_p, ptr<ast.SelectorExpr
             return true;
         }
     }
-
     p.print(x.Sel.Pos(), x.Sel);
     return false;
-
 }
 
 private static void expr0(this ptr<printer> _addr_p, ast.Expr x, nint depth) {
@@ -1478,9 +1364,7 @@ private static void stmtList(this ptr<printer> _addr_p, slice<ast.Stmt> list, ni
                     // only print line break if we are not at the beginning of the output
                     // (i.e., we are not printing only a partial program)
                     p.linebreak(p.lineFor(s.Pos()), 1, ignore, i == 0 || nindent == 0 || p.linesFrom(line) > 0);
-
                 }
-
                 p.recordLine(_addr_line);
                 p.stmt(s, nextIsRBrace && i == len(list) - 1); 
                 // labeled statements put labels on a separate line, but here
@@ -1489,7 +1373,7 @@ private static void stmtList(this ptr<printer> _addr_p, slice<ast.Stmt> list, ni
                 {
                     var t = s;
 
-                    while (>>MARKER:FOREXPRESSION_LEVEL_2<<) {
+                    while () {
                         ptr<ast.LabeledStmt> (lt, _) = t._<ptr<ast.LabeledStmt>>();
                         if (lt == null) {
                             break;
@@ -1500,11 +1384,9 @@ private static void stmtList(this ptr<printer> _addr_p, slice<ast.Stmt> list, ni
 
                 }
                 i++;
-
             }
 
         }
-
     }    if (nindent > 0) {
         p.print(unindent);
     }
@@ -1531,7 +1413,6 @@ private static bool isTypeName(ast.Expr x) {
             break;
     }
     return false;
-
 }
 
 private static ast.Expr stripParens(ast.Expr x) {
@@ -1551,24 +1432,19 @@ private static ast.Expr stripParens(ast.Expr x) {
                         if (isTypeName(x.Type)) {
                             strip = false; // do not strip parentheses
                         }
-
                         return false;
                         break; 
                     // in all other cases, keep inspecting
                 } 
                 // in all other cases, keep inspecting
                 return true;
-
             });
             if (strip) {
                 return stripParens(px.X);
             }
-
         }
     }
-
     return x;
-
 }
 
 private static ast.Expr stripParensAlways(ast.Expr x) {
@@ -1579,9 +1455,7 @@ private static ast.Expr stripParensAlways(ast.Expr x) {
             return stripParensAlways(x.X);
         }
     }
-
     return x;
-
 }
 
 private static void controlClause(this ptr<printer> _addr_p, bool isForStmt, ast.Stmt init, ast.Expr expr, ast.Stmt post) {
@@ -1646,24 +1520,17 @@ private static bool indentList(this ptr<printer> _addr_p, slice<ast.Expr> list) 
                     // x is not starting on the same
                     // line as the previous one ended
                     return true;
-
                 }
-
                 if (xb < xe) { 
                     // x is a multi-line element
                     n++;
-
                 }
-
                 line = xe;
-
             }
             return n > 1;
-
         }
     }
     return false;
-
 }
 
 private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRBrace) => func((_, panic, _) => {
@@ -1699,7 +1566,6 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
                 }
 
             }
-
             p.stmt(s.Stmt, nextIsRBrace);
             break;
         case ptr<ast.ExprStmt> s:
@@ -1752,15 +1618,12 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
                     // the results (see issue #32854).
                     p.exprList(token.NoPos, s.Results, 1, noIndent, token.NoPos, false);
                     p.print(unindent);
-
                 }
                 else
  {
                     p.exprList(token.NoPos, s.Results, 1, 0, token.NoPos, false);
                 }
-
             }
-
             break;
         case ptr<ast.BranchStmt> s:
             p.print(s.Tok);
@@ -1793,9 +1656,7 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
                         break;
                     }
                 }
-
             }
-
             break;
         case ptr<ast.CaseClause> s:
             if (s.List != null) {
@@ -1806,7 +1667,6 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
  {
                 p.print(token.DEFAULT);
             }
-
             p.print(s.Colon, token.COLON);
             p.stmtList(s.Body, 1, nextIsRBrace);
             break;
@@ -1836,7 +1696,6 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
  {
                 p.print(token.DEFAULT);
             }
-
             p.print(s.Colon, token.COLON);
             p.stmtList(s.Body, 1, nextIsRBrace);
             break;
@@ -1846,13 +1705,11 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
             if (len(body.List) == 0 && !p.commentBefore(p.posFor(body.Rbrace))) { 
                 // print empty select statement w/o comments on one line
                 p.print(body.Lbrace, token.LBRACE, body.Rbrace, token.RBRACE);
-
             }
             else
  {
                 p.block(body, 0);
             }
-
             break;
         case ptr<ast.ForStmt> s:
             p.print(token.FOR);
@@ -1868,13 +1725,9 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
                     // comma position for correct comment placement
                     p.print(s.Value.Pos(), token.COMMA, blank);
                     p.expr(s.Value);
-
                 }
-
                 p.print(blank, s.TokPos, s.Tok, blank);
-
             }
-
             p.print(token.RANGE, blank);
             p.expr(stripParens(s.X));
             p.print(blank);
@@ -1887,7 +1740,6 @@ private static void stmt(this ptr<printer> _addr_p, ast.Stmt stmt, bool nextIsRB
             break;
         }
     }
-
 });
 
 // ----------------------------------------------------------------------------
@@ -1927,8 +1779,6 @@ private static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
                 m[i] = true;
                 i++;
             }
-
-
         }
     };
 
@@ -1941,9 +1791,7 @@ private static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
                 // start of a run of ValueSpecs with non-nil Values
                 i0 = i;
                 keepType = false;
-
             }
-
         }
         else
  {
@@ -1951,9 +1799,7 @@ private static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
                 // end of a run
                 populate(i0, i, keepType);
                 i0 = -1;
-
             }
-
         }
         if (t.Type != null) {
             keepType = true;
@@ -1961,10 +1807,8 @@ private static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
     }    if (i0 >= 0) { 
         // end of a run
         populate(i0, len(specs), keepType);
-
     }
     return m;
-
 }
 
 private static void valueSpec(this ptr<printer> _addr_p, ptr<ast.ValueSpec> _addr_s, bool keepType) {
@@ -1992,7 +1836,6 @@ private static void valueSpec(this ptr<printer> _addr_p, ptr<ast.ValueSpec> _add
             extraTabs--;
         }
         p.setComment(s.Comment);
-
     }
 }
 
@@ -2028,7 +1871,6 @@ private static ptr<ast.BasicLit> sanitizeImportPath(ptr<ast.BasicLit> _addr_lit)
         return _addr_lit!; // nothing wrong with lit
     }
     return addr(new ast.BasicLit(ValuePos:lit.ValuePos,Kind:token.STRING,Value:s));
-
 }
 
 // The parameter n is the number of specs in the group. If doIndent is set,
@@ -2059,12 +1901,10 @@ private static void spec(this ptr<printer> _addr_p, ast.Spec spec, nint n, bool 
                 p.print(blank);
                 p.expr(s.Type);
             }
-
             if (s.Values != null) {
                 p.print(blank, token.ASSIGN, blank);
                 p.exprList(token.NoPos, s.Values, 1, 0, token.NoPos, false);
             }
-
             p.setComment(s.Comment);
             break;
         case ptr<ast.TypeSpec> s:
@@ -2078,7 +1918,6 @@ private static void spec(this ptr<printer> _addr_p, ast.Spec spec, nint n, bool 
                 }
 
             }
-
             if (n == 1) {
                 p.print(blank);
             }
@@ -2086,11 +1925,9 @@ private static void spec(this ptr<printer> _addr_p, ast.Spec spec, nint n, bool 
  {
                 p.print(vtab);
             }
-
             if (s.Assign.IsValid()) {
                 p.print(token.ASSIGN, blank);
             }
-
             p.expr(s.Type);
             p.setComment(s.Comment);
             break;
@@ -2101,7 +1938,6 @@ private static void spec(this ptr<printer> _addr_p, ast.Spec spec, nint n, bool 
             break;
         }
     }
-
 });
 
 private static void genDecl(this ptr<printer> _addr_p, ptr<ast.GenDecl> _addr_d) {
@@ -2162,21 +1998,15 @@ private static void genDecl(this ptr<printer> _addr_p, ptr<ast.GenDecl> _addr_d)
                         s = s__prev1;
                     }
                 }
-
                 p.print(unindent, formfeed);
-
             }
 
         }
-
         p.print(d.Rparen, token.RPAREN);
-
-
     }
     else if (len(d.Specs) > 0) { 
         // single declaration
         p.spec(d.Specs[0], 1, true);
-
     }
 }
 
@@ -2201,7 +2031,6 @@ private static nint nodeSize(this ptr<printer> _addr_p, ast.Node n, nint maxSize
         }
     }
 
-
     size = maxSize + 1; // assume n doesn't fit
     p.nodeSizes[n] = size; 
 
@@ -2217,7 +2046,6 @@ private static nint nodeSize(this ptr<printer> _addr_p, ast.Node n, nint maxSize
             return ;
         }
     }
-
     if (buf.Len() <= maxSize) {
         foreach (var (_, ch) in buf.Bytes()) {
             if (ch < ' ') {
@@ -2225,10 +2053,8 @@ private static nint nodeSize(this ptr<printer> _addr_p, ast.Node n, nint maxSize
             }
         }        size = buf.Len(); // n fits
         p.nodeSizes[n] = size;
-
     }
     return ;
-
 }
 
 // numLines returns the number of lines spanned by node n in the original source.
@@ -2247,12 +2073,9 @@ private static nint numLines(this ptr<printer> _addr_p, ast.Node n) {
                 }
 
             }
-
         }
     }
-
     return infinity;
-
 }
 
 // bodySize is like nodeSize but it is specialized for *ast.BlockStmt's.
@@ -2265,12 +2088,10 @@ private static nint bodySize(this ptr<printer> _addr_p, ptr<ast.BlockStmt> _addr
     if (pos1.IsValid() && pos2.IsValid() && p.lineFor(pos1) != p.lineFor(pos2)) { 
         // opening and closing brace are on different lines - don't make it a one-liner
         return maxSize + 1;
-
     }
     if (len(b.List) > 5) { 
         // too many statements - don't make it a one-liner
         return maxSize + 1;
-
     }
     var bodySize = p.commentSizeBefore(p.posFor(pos2));
     foreach (var (i, s) in b.List) {
@@ -2281,9 +2102,7 @@ private static nint bodySize(this ptr<printer> _addr_p, ptr<ast.BlockStmt> _addr
             bodySize += 2; // space for a semicolon and blank
         }
         bodySize += p.nodeSize(s, maxSize);
-
     }    return bodySize;
-
 }
 
 // funcBody prints a function body following a function header of given headerSize.
@@ -2320,13 +2139,11 @@ private static void funcBody(this ptr<printer> _addr_p, nint headerSize, whiteSp
         }
         p.print(noExtraLinebreak, b.Rbrace, token.RBRACE, noExtraLinebreak);
         return ;
-
     }
     if (sep != ignore) {
         p.print(blank); // always use blank
     }
     p.block(b, 1);
-
 });
 
 // distanceFrom returns the column difference between p.out (the current output
@@ -2339,7 +2156,6 @@ private static nint distanceFrom(this ptr<printer> _addr_p, token.Pos startPos, 
         return p.@out.Column - startOutCol;
     }
     return infinity;
-
 }
 
 private static void funcDecl(this ptr<printer> _addr_p, ptr<ast.FuncDecl> _addr_d) {
@@ -2355,12 +2171,10 @@ private static void funcDecl(this ptr<printer> _addr_p, ptr<ast.FuncDecl> _addr_
     if (d.Recv != null) {
         p.parameters(d.Recv, false); // method: print receiver
         p.print(blank);
-
     }
     p.expr(d.Name);
     p.signature(d.Type);
     p.funcBody(p.distanceFrom(d.Pos(), startCol), vtab, d.Body);
-
 }
 
 private static void decl(this ptr<printer> _addr_p, ast.Decl decl) => func((_, panic, _) => {
@@ -2383,7 +2197,6 @@ private static void decl(this ptr<printer> _addr_p, ast.Decl decl) => func((_, p
             break;
         }
     }
-
 });
 
 // ----------------------------------------------------------------------------
@@ -2402,7 +2215,6 @@ private static token.Token declToken(ast.Decl decl) {
             break;
     }
     return ;
-
 }
 
 private static void declList(this ptr<printer> _addr_p, slice<ast.Decl> list) {
@@ -2429,10 +2241,8 @@ private static void declList(this ptr<printer> _addr_p, slice<ast.Decl> list) {
             // start a new section if the next declaration is a function
             // that spans multiple lines (see also issue #19544)
             p.linebreak(p.lineFor(d.Pos()), min, ignore, tok == token.FUNC && p.numLines(d) > 1);
-
         }
         p.decl(d);
-
     }
 }
 

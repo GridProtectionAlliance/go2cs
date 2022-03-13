@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gob -- go2cs converted at 2022 March 06 22:25:02 UTC
+// package gob -- go2cs converted at 2022 March 13 05:39:34 UTC
 // import "encoding/gob" ==> using gob = go.encoding.gob_package
 // Original source: C:\Program Files\Go\src\encoding\gob\decoder.go
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using io = go.io_package;
-using reflect = go.reflect_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.encoding;
 
+using bufio = bufio_package;
+using errors = errors_package;
+using io = io_package;
+using reflect = reflect_package;
+using sync = sync_package;
+
+
+// tooBig provides a sanity check for sizes; used in several places. Upper limit
+// of is 1GB on 32-bit systems, 8GB on 64-bit, allowing room to grow a little
+// without overflow.
+
+using System;
 public static partial class gob_package {
 
-    // tooBig provides a sanity check for sizes; used in several places. Upper limit
-    // of is 1GB on 32-bit systems, 8GB on 64-bit, allowing room to grow a little
-    // without overflow.
 private static readonly nint tooBig = (1 << 30) << (int)((~uint(0) >> 62));
 
 // A Decoder manages the receipt of type and data information read from the
@@ -63,7 +64,6 @@ public static ptr<Decoder> NewDecoder(io.Reader r) {
             r = bufio.NewReader(r);
         }
     }
-
     dec.r = r;
     dec.wireType = make_map<typeId, ptr<wireType>>();
     dec.decoderCache = make_map<reflect.Type, map<typeId, ptr<ptr<decEngine>>>>();
@@ -71,7 +71,6 @@ public static ptr<Decoder> NewDecoder(io.Reader r) {
     dec.countBuf = make_slice<byte>(9); // counts may be uint64s (unlikely!), require 9 bytes
 
     return _addr_dec!;
-
 }
 
 // recvType loads the definition of a type.
@@ -89,7 +88,6 @@ private static void recvType(this ptr<Decoder> _addr_dec, typeId id) {
         return ;
     }
     dec.wireType[id] = wire;
-
 }
 
 private static var errBadCount = errors.New("invalid message length");
@@ -111,7 +109,6 @@ private static bool recvMessage(this ptr<Decoder> _addr_dec) {
     }
     dec.readMessage(int(nbytes));
     return dec.err == null;
-
 }
 
 // readMessage reads the next nbytes bytes from the input.
@@ -121,7 +118,6 @@ private static void readMessage(this ptr<Decoder> _addr_dec, nint nbytes) => fun
     if (dec.buf.Len() != 0) { 
         // The buffer should always be empty now.
         panic("non-empty decoder buffer");
-
     }
     dec.buf.Size(nbytes);
     _, dec.err = io.ReadFull(dec.r, dec.buf.Bytes());
@@ -137,7 +133,6 @@ private static long toInt(ulong x) {
         i = ~i;
     }
     return i;
-
 }
 
 private static long nextInt(this ptr<Decoder> _addr_dec) {
@@ -148,7 +143,6 @@ private static long nextInt(this ptr<Decoder> _addr_dec) {
         dec.err = err;
     }
     return toInt(n);
-
 }
 
 private static ulong nextUint(this ptr<Decoder> _addr_dec) {
@@ -159,7 +153,6 @@ private static ulong nextUint(this ptr<Decoder> _addr_dec) {
         dec.err = err;
     }
     return n;
-
 }
 
 // decodeTypeSequence parses:
@@ -182,7 +175,6 @@ private static typeId decodeTypeSequence(this ptr<Decoder> _addr_dec, bool isInt
         if (id >= 0) { 
             // Value follows.
             return id;
-
         }
         dec.recvType(-id);
         if (dec.err != null) {
@@ -197,7 +189,6 @@ private static typeId decodeTypeSequence(this ptr<Decoder> _addr_dec, bool isInt
         }
     }
     return -1;
-
 }
 
 // Decode reads the next value from the input stream and stores
@@ -221,7 +212,6 @@ private static error Decode(this ptr<Decoder> _addr_dec, object e) {
         return error.As(dec.err)!;
     }
     return error.As(dec.DecodeValue(value))!;
-
 }
 
 // DecodeValue reads the next value from the input stream.
@@ -251,7 +241,6 @@ private static error DecodeValue(this ptr<Decoder> _addr_dec, reflect.Value v) =
         dec.decodeValue(id, v);
     }
     return error.As(dec.err)!;
-
 });
 
 // If debug.go is compiled into the program, debugFunc prints a human-readable

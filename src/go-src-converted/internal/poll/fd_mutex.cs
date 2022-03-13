@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package poll -- go2cs converted at 2022 March 06 22:13:00 UTC
+// package poll -- go2cs converted at 2022 March 13 05:27:50 UTC
 // import "internal/poll" ==> using poll = go.@internal.poll_package
 // Original source: C:\Program Files\Go\src\internal\poll\fd_mutex.go
-using atomic = go.sync.atomic_package;
-
 namespace go.@internal;
+
+using atomic = sync.atomic_package;
 
 public static partial class poll_package {
 
-    // fdMutex is a specialized synchronization primitive that manages
-    // lifetime of an fd and serializes access to Read, Write and Close
-    // methods on FD.
+// fdMutex is a specialized synchronization primitive that manages
+// lifetime of an fd and serializes access to Read, Write and Close
+// methods on FD.
 private partial struct fdMutex {
     public ulong state;
     public uint rsema;
@@ -36,7 +36,6 @@ private static readonly nint mutexRWait = 1 << 23;
 private static readonly nint mutexRMask = (1 << 20 - 1) << 23;
 private static readonly nint mutexWWait = 1 << 43;
 private static readonly nint mutexWMask = (1 << 20 - 1) << 43;
-
 
 private static readonly @string overflowMsg = "too many concurrent operations on a single file or socket (max 1048575)";
 
@@ -86,7 +85,6 @@ private static bool incref(this ptr<fdMutex> _addr_mu) => func((_, panic, _) => 
             return true;
         }
     }
-
 });
 
 // increfAndClose sets the state of mu to closed.
@@ -118,10 +116,8 @@ private static bool increfAndClose(this ptr<fdMutex> _addr_mu) => func((_, panic
             }
 
             return true;
-
         }
     }
-
 });
 
 // decref removes a reference from mu.
@@ -139,7 +135,6 @@ private static bool decref(this ptr<fdMutex> _addr_mu) => func((_, panic, _) => 
             return new & (mutexClosed | mutexRefMask) == mutexClosed;
         }
     }
-
 });
 
 // lock adds a reference to mu and locks mu.
@@ -175,7 +170,6 @@ private static bool rwlock(this ptr<fdMutex> _addr_mu, bool read) => func((_, pa
             if (new & mutexRefMask == 0) {
                 panic(overflowMsg);
             }
-
         }
         else
  { 
@@ -184,7 +178,6 @@ private static bool rwlock(this ptr<fdMutex> _addr_mu, bool read) => func((_, pa
             if (new & mutexMask == 0) {
                 panic(overflowMsg);
             }
-
         }
         if (atomic.CompareAndSwapUint64(_addr_mu.state, old, new)) {
             if (old & mutexBit == 0) {
@@ -194,7 +187,6 @@ private static bool rwlock(this ptr<fdMutex> _addr_mu, bool read) => func((_, pa
             // The signaller has subtracted mutexWait.
         }
     }
-
 });
 
 // unlock removes a reference from mu and unlocks mu.
@@ -234,7 +226,6 @@ private static bool rwunlock(this ptr<fdMutex> _addr_mu, bool read) => func((_, 
             return new & (mutexClosed | mutexRefMask) == mutexClosed;
         }
     }
-
 });
 
 // Implemented in runtime package.
@@ -250,7 +241,6 @@ private static error incref(this ptr<FD> _addr_fd) {
         return error.As(errClosing(fd.isFile))!;
     }
     return error.As(null!)!;
-
 }
 
 // decref removes a reference from fd.
@@ -263,7 +253,6 @@ private static error decref(this ptr<FD> _addr_fd) {
         return error.As(fd.destroy())!;
     }
     return error.As(null!)!;
-
 }
 
 // readLock adds a reference to fd and locks fd for reading.
@@ -275,7 +264,6 @@ private static error readLock(this ptr<FD> _addr_fd) {
         return error.As(errClosing(fd.isFile))!;
     }
     return error.As(null!)!;
-
 }
 
 // readUnlock removes a reference from fd and unlocks fd for reading.
@@ -298,7 +286,6 @@ private static error writeLock(this ptr<FD> _addr_fd) {
         return error.As(errClosing(fd.isFile))!;
     }
     return error.As(null!)!;
-
 }
 
 // writeUnlock removes a reference from fd and unlocks fd for writing.

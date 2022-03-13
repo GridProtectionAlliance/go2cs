@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:16:23 UTC
+//     Generated on 2022 March 13 06:29:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class version_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct peExe
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator peExe(NilType nil) => default(peExe);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static peExe peExe_cast(dynamic value)
         {
             return new peExe(ref value.os, ref value.f);

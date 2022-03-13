@@ -2,46 +2,48 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:32 UTC
+// package walk -- go2cs converted at 2022 March 13 06:24:53 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\builtin.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using token = go.go.token_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using escape = go.cmd.compile.@internal.escape_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using fmt = fmt_package;
+using constant = go.constant_package;
+using token = go.token_package;
+using strings = strings_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using escape = cmd.compile.@internal.escape_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+
+
+// Rewrite append(src, x, y, z) so that any side effects in
+// x, y, z (including runtime panics) are evaluated in
+// initialization statements before the append.
+// For normal code generation, stop there and leave the
+// rest to cgen_append.
+//
+// For race detector, expand append(src, a [, b]* ) to
+//
+//   init {
+//     s := src
+//     const argc = len(args) - 1
+//     if cap(s) - len(s) < argc {
+//        s = growslice(s, len(s)+argc)
+//     }
+//     n := len(s)
+//     s = s[:n+argc]
+//     s[n] = a
+//     s[n+1] = b
+//     ...
+//   }
+//   s
 
 public static partial class walk_package {
 
-    // Rewrite append(src, x, y, z) so that any side effects in
-    // x, y, z (including runtime panics) are evaluated in
-    // initialization statements before the append.
-    // For normal code generation, stop there and leave the
-    // rest to cgen_append.
-    //
-    // For race detector, expand append(src, a [, b]* ) to
-    //
-    //   init {
-    //     s := src
-    //     const argc = len(args) - 1
-    //     if cap(s) - len(s) < argc {
-    //        s = growslice(s, len(s)+argc)
-    //     }
-    //     n := len(s)
-    //     s = s[:n+argc]
-    //     s[n] = a
-    //     s[n+1] = b
-    //     ...
-    //   }
-    //   s
 private static ir.Node walkAppend(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_init, ir.Node dst) {
     ref ir.CallExpr n = ref _addr_n.val;
     ref ir.Nodes init = ref _addr_init.val;
@@ -74,7 +76,6 @@ private static ir.Node walkAppend(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_
                 n = walkExpr(n, init);
             }
             ls[i] = n;
-
         }
         i = i__prev1;
         n = n__prev1;
@@ -133,7 +134,6 @@ private static ir.Node walkAppend(ptr<ir.CallExpr> _addr_n, ptr<ir.Nodes> _addr_
     walkStmtList(l);
     init.Append(l);
     return ns;
-
 }
 
 // walkClose walks an OCLOSE node.
@@ -145,7 +145,6 @@ private static ir.Node walkClose(ptr<ir.UnaryExpr> _addr_n, ptr<ir.Nodes> _addr_
     var fn = typecheck.LookupRuntime("closechan");
     fn = typecheck.SubstArgTypes(fn, n.X.Type());
     return mkcall1(fn, null, init, n.X);
-
 }
 
 // Lower copy(a, b) to a memmove call or a runtime call.
@@ -186,7 +185,6 @@ private static ir.Node walkCopy(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _addr_
         fn = typecheck.SubstArgTypes(fn, ptrL.Type().Elem(), ptrR.Type().Elem());
 
         return mkcall1(fn, n.Type(), init, ptrL, lenL, ptrR, lenR, ir.NewInt(n.X.Type().Elem().Width));
-
     }
     n.X = walkExpr(n.X, init);
     n.Y = walkExpr(n.Y, init);
@@ -229,7 +227,6 @@ private static ir.Node walkCopy(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _addr_
     walkStmtList(l);
     init.Append(l);
     return nlen;
-
 }
 
 // walkDelete walks an ODELETE node.
@@ -257,7 +254,6 @@ private static ir.Node walkLenCap(ptr<ir.UnaryExpr> _addr_n, ptr<ir.Nodes> _addr
     if (isRuneCount(n)) { 
         // Replace len([]rune(string)) with runtime.countrunes(string).
         return mkcall("countrunes", n.Type(), init, typecheck.Conv(n.X._<ptr<ir.ConvExpr>>().X, types.Types[types.TSTRING]));
-
     }
     n.X = walkExpr(n.X, init); 
 
@@ -275,7 +271,6 @@ private static ir.Node walkLenCap(ptr<ir.UnaryExpr> _addr_n, ptr<ir.Nodes> _addr
         return con;
     }
     return n;
-
 }
 
 // walkMakeChan walks an OMAKECHAN node.
@@ -297,7 +292,6 @@ private static ir.Node walkMakeChan(ptr<ir.MakeExpr> _addr_n, ptr<ir.Nodes> _add
         argtype = types.Types[types.TINT];
     }
     return mkcall1(chanfn(fnname, 1, n.Type()), n.Type(), init, reflectdata.TypePtr(n.Type()), typecheck.Conv(size, argtype));
-
 }
 
 // walkMakeMap walks an OMAKEMAP node.
@@ -345,7 +339,6 @@ private static ir.Node walkMakeMap(ptr<ir.MakeExpr> _addr_n, ptr<ir.Nodes> _addr
             var na = ir.NewAssignStmt(@base.Pos, ir.NewSelectorExpr(@base.Pos, ir.ODOT, h, bsym), b);
             nif.Body.Append(na);
             appendWalkStmt(init, nif);
-
         }
     }
     if (ir.IsConst(hint, constant.Int) && constant.Compare(hint.Val(), token.LEQ, constant.MakeInt64(reflectdata.BUCKETSIZE))) { 
@@ -364,12 +357,10 @@ private static ir.Node walkMakeMap(ptr<ir.MakeExpr> _addr_n, ptr<ir.Nodes> _addr
             var hashsym = hmapType.Field(4).Sym; // hmap.hash0 see reflect.go:hmap
             appendWalkStmt(init, ir.NewAssignStmt(@base.Pos, ir.NewSelectorExpr(@base.Pos, ir.ODOT, h, hashsym), rand));
             return typecheck.ConvNop(h, t);
-
         }
         var fn = typecheck.LookupRuntime("makemap_small");
         fn = typecheck.SubstArgTypes(fn, t.Key(), t.Elem());
         return mkcall1(fn, n.Type(), init);
-
     }
     if (n.Esc() != ir.EscNone) {
         h = typecheck.NodNil();
@@ -388,7 +379,6 @@ private static ir.Node walkMakeMap(ptr<ir.MakeExpr> _addr_n, ptr<ir.Nodes> _addr
     fn = typecheck.LookupRuntime(fnname);
     fn = typecheck.SubstArgTypes(fn, hmapType, t.Key(), t.Elem());
     return mkcall1(fn, n.Type(), init, reflectdata.TypePtr(n.Type()), typecheck.Conv(hint, argtype), h);
-
 }
 
 // walkMakeSlice walks an OMAKESLICE node.
@@ -435,7 +425,6 @@ private static ir.Node walkMakeSlice(ptr<ir.MakeExpr> _addr_n, ptr<ir.Nodes> _ad
         r = ir.NewSliceExpr(@base.Pos, ir.OSLICE, var_, null, l, null); // arr[:l]
         // The conv is necessary in case n.Type is named.
         return walkExpr(typecheck.Expr(typecheck.Conv(r, n.Type())), init);
-
     }
     var len = l;
     var cap = r;
@@ -457,7 +446,6 @@ private static ir.Node walkMakeSlice(ptr<ir.MakeExpr> _addr_n, ptr<ir.Nodes> _ad
     cap = typecheck.Conv(cap, types.Types[types.TINT]);
     var sh = ir.NewSliceHeaderExpr(@base.Pos, t, ptr, len, cap);
     return walkExpr(typecheck.Expr(sh), init);
-
 }
 
 // walkMakeSliceCopy walks an OMAKESLICECOPY node.
@@ -503,14 +491,12 @@ private static ir.Node walkMakeSliceCopy(ptr<ir.MakeExpr> _addr_n, ptr<ir.Nodes>
         init.Append(walkExpr(typecheck.Stmt(ncopy), init));
 
         return s;
-
     }
     fn = typecheck.LookupRuntime("makeslicecopy");
     ptr = mkcall1(fn, types.Types[types.TUNSAFEPTR], init, reflectdata.TypePtr(t.Elem()), length, copylen, typecheck.Conv(copyptr, types.Types[types.TUNSAFEPTR]));
     ptr.MarkNonNil();
     sh = ir.NewSliceHeaderExpr(@base.Pos, t, ptr, length, length);
     return walkExpr(typecheck.Expr(sh), init);
-
 }
 
 // walkNew walks an ONEW node.
@@ -527,12 +513,10 @@ private static ir.Node walkNew(ptr<ir.UnaryExpr> _addr_n, ptr<ir.Nodes> _addr_in
             @base.Fatalf("large ONEW with EscNone: %v", n);
         }
         return stackTempAddr(init, t);
-
     }
     types.CalcSize(t);
     n.MarkNonNil();
     return n;
-
 }
 
 // generate code for print
@@ -566,7 +550,6 @@ private static ir.Node walkPrint(ptr<ir.CallExpr> _addr_nn, ptr<ir.Nodes> _addr_
 
         t = append(t, ir.NewString("\n"));
         nn.Args = t;
-
     }
     s = nn.Args;
     t = make_slice<ir.Node>(0, len(s));
@@ -612,19 +595,15 @@ private static ir.Node walkPrint(ptr<ir.CallExpr> _addr_nn, ptr<ir.Nodes> _addr_
                     n = typecheck.DefaultLit(n, types.Types[types.TINT64]);
                 else if (n.Val().Kind() == constant.Float) 
                     n = typecheck.DefaultLit(n, types.Types[types.TFLOAT64]);
-                
-            }
-
+                            }
             if (n.Op() != ir.OLITERAL && n.Type() != null && n.Type().Kind() == types.TIDEAL) {
                 n = typecheck.DefaultLit(n, types.Types[types.TINT64]);
             }
-
             n = typecheck.DefaultLit(n, null);
             nn.Args[i] = n;
             if (n.Type() == null || n.Type().Kind() == types.TFORW) {
                 continue;
             }
-
             ptr<ir.Name> on;
 
             if (n.Type().Kind() == types.TINTER)
@@ -636,7 +615,6 @@ private static ir.Node walkPrint(ptr<ir.CallExpr> _addr_nn, ptr<ir.Nodes> _addr_
  {
                     on = typecheck.LookupRuntime("printiface");
                 }
-
                 on = typecheck.SubstArgTypes(on, n.Type()); // any-1
                 goto __switch_break0;
             }
@@ -673,7 +651,6 @@ private static ir.Node walkPrint(ptr<ir.CallExpr> _addr_nn, ptr<ir.Nodes> _addr_
  {
                     on = typecheck.LookupRuntime("printuint");
                 }
-
                 goto __switch_break0;
             }
             if (n.Type().Kind() == types.TINT || n.Type().Kind() == types.TINT8 || n.Type().Kind() == types.TINT16 || n.Type().Kind() == types.TINT32 || n.Type().Kind() == types.TINT64)
@@ -735,9 +712,7 @@ private static ir.Node walkPrint(ptr<ir.CallExpr> _addr_nn, ptr<ir.Nodes> _addr_
                 }
 
             }
-
             calls = append(calls, r);
-
         }
         i = i__prev1;
         n = n__prev1;
@@ -751,7 +726,6 @@ private static ir.Node walkPrint(ptr<ir.CallExpr> _addr_nn, ptr<ir.Nodes> _addr_
     r = ir.NewBlockStmt(@base.Pos, null);
     r.List = calls;
     return walkStmt(typecheck.Stmt(r));
-
 }
 
 // walkRecover walks an ORECOVER node.
@@ -769,10 +743,8 @@ private static ir.Node walkRecover(ptr<ir.CallExpr> _addr_nn, ptr<ir.Nodes> _add
             fp = ir.NewBinaryExpr(fp.Pos(), ir.OADD, fp, ir.NewInt(off));
         }
     }
-
     fp = ir.NewConvExpr(fp.Pos(), ir.OCONVNOP, types.NewPtr(types.Types[types.TINT32]), fp);
     return mkcall("gorecover", nn.Type(), init, fp);
-
 }
 
 private static ir.Node walkUnsafeSlice(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes> _addr_init) {
@@ -804,7 +776,6 @@ private static ir.Node walkUnsafeSlice(ptr<ir.BinaryExpr> _addr_n, ptr<ir.Nodes>
 
     var h = ir.NewSliceHeaderExpr(n.Pos(), t, typecheck.Conv(ptr, types.Types[types.TUNSAFEPTR]), typecheck.Conv(len, types.Types[types.TINT]), typecheck.Conv(len, types.Types[types.TINT]));
     return walkExpr(typecheck.Expr(h), init);
-
 }
 
 private static void badtype(ir.Op op, ptr<types.Type> _addr_tl, ptr<types.Type> _addr_tr) {
@@ -827,7 +798,6 @@ private static void badtype(ir.Op op, ptr<types.Type> _addr_tl, ptr<types.Type> 
         }
     }
     @base.Errorf("illegal types for operand: %v%s", op, s);
-
 }
 
 private static ir.Node writebarrierfn(@string name, ptr<types.Type> _addr_l, ptr<types.Type> _addr_r) {

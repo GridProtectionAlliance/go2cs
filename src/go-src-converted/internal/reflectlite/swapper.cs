@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package reflectlite -- go2cs converted at 2022 March 06 22:12:32 UTC
+// package reflectlite -- go2cs converted at 2022 March 13 05:27:35 UTC
 // import "internal/reflectlite" ==> using reflectlite = go.@internal.reflectlite_package
 // Original source: C:\Program Files\Go\src\internal\reflectlite\swapper.go
-using unsafeheader = go.@internal.unsafeheader_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go.@internal;
 
+using unsafeheader = @internal.unsafeheader_package;
+using @unsafe = @unsafe_package;
+
+
+// Swapper returns a function that swaps the elements in the provided
+// slice.
+//
+// Swapper panics if the provided interface is not a slice.
+
+using System;
 public static partial class reflectlite_package {
 
-    // Swapper returns a function that swaps the elements in the provided
-    // slice.
-    //
-    // Swapper panics if the provided interface is not a slice.
 public static Action<nint, nint> Swapper(object slice) => func((_, panic, _) => {
     var v = ValueOf(slice);
     if (v.Kind() != Slice) {
@@ -28,7 +29,6 @@ public static Action<nint, nint> Swapper(object slice) => func((_, panic, _) => 
             return (i, j) => {
                 panic("reflect: slice index out of range");
             };
-
             break;
         case 1: 
             return (i, j) => {
@@ -36,7 +36,6 @@ public static Action<nint, nint> Swapper(object slice) => func((_, panic, _) => 
                     panic("reflect: slice index out of range");
                 }
             };
-
             break;
     }
 
@@ -51,7 +50,6 @@ public static Action<nint, nint> Swapper(object slice) => func((_, panic, _) => 
             return (i, j) => {
                 (ps[i], ps[j]) = (ps[j], ps[i]);
             };
-
         }
     else
         if (typ.Kind() == String) {
@@ -59,7 +57,6 @@ public static Action<nint, nint> Swapper(object slice) => func((_, panic, _) => 
             return (i, j) => {
                 (ss[i], ss[j]) = (ss[j], ss[i]);
             };
-
         }
     } {
         switch (size) {
@@ -68,31 +65,26 @@ public static Action<nint, nint> Swapper(object slice) => func((_, panic, _) => 
                 return (i, j) => {
                     (is[i], is[j]) = (is[j], is[i]);
                 };
-
                 break;
             case 4: 
                 @is = new ptr<ptr<ptr<slice<int>>>>(v.ptr);
                 return (i, j) => {
                     (is[i], is[j]) = (is[j], is[i]);
                 };
-
                 break;
             case 2: 
                 @is = new ptr<ptr<ptr<slice<short>>>>(v.ptr);
                 return (i, j) => {
                     (is[i], is[j]) = (is[j], is[i]);
                 };
-
                 break;
             case 1: 
                 @is = new ptr<ptr<ptr<slice<sbyte>>>>(v.ptr);
                 return (i, j) => {
                     (is[i], is[j]) = (is[j], is[i]);
                 };
-
                 break;
         }
-
     }
     var s = (unsafeheader.Slice.val)(v.ptr);
     var tmp = unsafe_New(typ); // swap scratch space
@@ -106,9 +98,7 @@ public static Action<nint, nint> Swapper(object slice) => func((_, panic, _) => 
         typedmemmove(typ, tmp, val1);
         typedmemmove(typ, val1, val2);
         typedmemmove(typ, val2, tmp);
-
     };
-
 });
 
 } // end reflectlite_package

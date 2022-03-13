@@ -14,31 +14,33 @@
 
 // Package report summarizes a performance profile into a
 // human-readable report.
-// package report -- go2cs converted at 2022 March 06 23:23:45 UTC
+
+// package report -- go2cs converted at 2022 March 13 06:36:50 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\report\report.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using tabwriter = go.text.tabwriter_package;
-using time = go.time_package;
-
-using graph = go.github.com.google.pprof.@internal.graph_package;
-using measurement = go.github.com.google.pprof.@internal.measurement_package;
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
 
+using fmt = fmt_package;
+using io = io_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using tabwriter = text.tabwriter_package;
+using time = time_package;
+
+using graph = github.com.google.pprof.@internal.graph_package;
+using measurement = github.com.google.pprof.@internal.measurement_package;
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using profile = github.com.google.pprof.profile_package;
+
+
+// Output formats.
+
+using System;
 public static partial class report_package {
 
-    // Output formats.
 public static readonly var Callgrind = iota;
 public static readonly var Comments = 0;
 public static readonly var Dis = 1;
@@ -52,7 +54,6 @@ public static readonly var TopProto = 8;
 public static readonly var Traces = 9;
 public static readonly var Tree = 10;
 public static readonly var WebList = 11;
-
 
 // Options are the formatting and filtering options used to generate a
 // profile.
@@ -119,7 +120,6 @@ public static error Generate(io.Writer w, ptr<Report> _addr_rpt, plugin.ObjTool 
     else if (o.OutputFormat == Callgrind) 
         return error.As(printCallgrind(w, _addr_rpt))!;
         return error.As(fmt.Errorf("unexpected output format"))!;
-
 }
 
 // newTrimmedGraph creates a graph for this report, trimmed according
@@ -163,7 +163,6 @@ private static (ptr<graph.Graph>, nint, nint, nint) newTrimmedGraph(this ptr<Rep
                 nodesKept = nodesKept__prev3;
 
             }
-
         }
         else
  {
@@ -180,7 +179,6 @@ private static (ptr<graph.Graph>, nint, nint, nint) newTrimmedGraph(this ptr<Rep
                 nodesKept = nodesKept__prev3;
 
             }
-
         }
     }
     origCount = len(g.Nodes); 
@@ -209,7 +207,6 @@ private static (ptr<graph.Graph>, nint, nint, nint) newTrimmedGraph(this ptr<Rep
                     nodesKept = nodesKept__prev3;
 
                 }
-
             }
             else
  {
@@ -226,9 +223,7 @@ private static (ptr<graph.Graph>, nint, nint, nint) newTrimmedGraph(this ptr<Rep
                     nodesKept = nodesKept__prev3;
 
                 }
-
             }
-
         }
     } 
 
@@ -240,7 +235,6 @@ private static (ptr<graph.Graph>, nint, nint, nint) newTrimmedGraph(this ptr<Rep
         g.RemoveRedundantEdges();
     }
     return ;
-
 }
 
 private static void selectOutputUnit(this ptr<Report> _addr_rpt, ptr<graph.Graph> _addr_g) {
@@ -277,7 +271,6 @@ private static void selectOutputUnit(this ptr<Report> _addr_rpt, ptr<graph.Graph
         }
     }
 
-
     var (_, minUnit) = measurement.Scale(minValue, o.SampleUnit, "minimum");
     var (_, maxUnit) = measurement.Scale(maxValue, o.SampleUnit, "minimum");
 
@@ -288,7 +281,6 @@ private static void selectOutputUnit(this ptr<Report> _addr_rpt, ptr<graph.Graph
         // be scaled down to 0.01, except for callgrind reports since
         // they can only represent integer values.
         _, unit = measurement.Scale(100 * minValue, o.SampleUnit, "minimum");
-
     }
     if (unit != "") {
         o.OutputUnit = unit;
@@ -330,9 +322,7 @@ private static ptr<graph.Graph> newGraph(this ptr<Report> _addr_rpt, graph.NodeS
         s.NumUnit = numUnits;
     }    prof.RemoveLabel("pprof::base");
 
-    Func<long, @string, @string> formatTag = (v, key) => {
-        return _addr_measurement.ScaledLabel(v, key, o.OutputUnit)!;
-    };
+    Func<long, @string, @string> formatTag = (v, key) => _addr_measurement.ScaledLabel(v, key, o.OutputUnit)!;
 
     ptr<graph.Options> gopt = addr(new graph.Options(SampleValue:o.SampleValue,SampleMeanDivisor:o.SampleMeanDivisor,FormatTag:formatTag,CallTree:o.CallTree&&(o.OutputFormat==Dot||o.OutputFormat==Callgrind),DropNegative:o.DropNegative,KeptNodes:nodes,)); 
 
@@ -342,7 +332,6 @@ private static ptr<graph.Graph> newGraph(this ptr<Report> _addr_rpt, graph.NodeS
     if (o.OutputFormat == Raw || o.OutputFormat == List || o.OutputFormat == WebList || o.OutputFormat == Dis || o.OutputFormat == Callgrind) 
         gopt.ObjNames = true;
         return _addr_graph.New(rpt.prof, gopt)!;
-
 }
 
 // printProto writes the incoming proto via thw writer w.
@@ -365,9 +354,7 @@ private static error printProto(io.Writer w, ptr<Report> _addr_rpt) {
             }
         }
     }
-
     return error.As(p.Write(w))!;
-
 }
 
 // printTopProto writes a list of the hottest routines in a profile as a profile.proto.
@@ -395,9 +382,7 @@ private static error printTopProto(io.Writer w, ptr<Report> _addr_rpt) {
         ptr<profile.Sample> s = addr(new profile.Sample(Location:[]*profile.Location{l},Value:[]int64{int64(cv),int64(fv)},));
         @out.Location = append(@out.Location, l);
         @out.Sample = append(@out.Sample, s);
-
     }    return error.As(@out.Write(w))!;
-
 }
 
 private partial struct functionMap { // : map<@string, ptr<profile.Function>>
@@ -425,11 +410,9 @@ private static (ptr<profile.Function>, bool) findOrAdd(this functionMap fm, grap
 
     }
 
-
     f = addr(new profile.Function(ID:uint64(len(fm)+1),Name:ni.Name,SystemName:ni.OrigName,Filename:ni.File,StartLine:int64(ni.StartLine),));
     fm[fName] = f;
     return (_addr_f!, true);
-
 }
 
 // printAssembly prints an annotated assembly listing.
@@ -459,7 +442,6 @@ public static error PrintAssembly(io.Writer w, ptr<Report> _addr_rpt, plugin.Obj
         }
     }
 
-
     fmt.Fprintln(w, "Total:", rpt.formatValue(rpt.total));
     var symbols = symbolsFromBinaries(_addr_prof, _addr_g, _addr_o.Symbol, address, obj);
     var symNodes = nodesPerSymbol(g.Nodes, symbols); 
@@ -486,9 +468,7 @@ public static error PrintAssembly(io.Writer w, ptr<Report> _addr_rpt, plugin.Obj
             }
 
         }
-
         return error.As(a.sym.Start < b.sym.Start)!;
-
     };
     if (maxFuncs < 0) {
         sort.Sort(new orderSyms(syms,byName));
@@ -523,7 +503,6 @@ public static error PrintAssembly(io.Writer w, ptr<Report> _addr_rpt, plugin.Obj
             if (err != null) {
                 return error.As(err)!;
             }
-
             var ns = annotateAssembly(insts, sns, s.file);
 
             fmt.Fprintf(w, "ROUTINE ======================== %s\n", s.sym.Name[0]);
@@ -550,7 +529,6 @@ public static error PrintAssembly(io.Writer w, ptr<Report> _addr_rpt, plugin.Obj
                     }
                 }
 
-
                 if (locStr == "") 
                     // No location info, just print the instruction.
                     fmt.Fprintf(w, "%10s %10s %10x: %s\n", valueOrDot(n.flatValue(), _addr_rpt), valueOrDot(n.cumValue(), _addr_rpt), n.address, n.instruction);
@@ -561,15 +539,12 @@ public static error PrintAssembly(io.Writer w, ptr<Report> _addr_rpt, plugin.Obj
                     // Long instruction, print loc on a separate line.
                     fmt.Fprintf(w, "%74s;%s\n", "", locStr);
                     fmt.Fprintf(w, "%10s %10s %10x: %s\n", valueOrDot(n.flatValue(), _addr_rpt), valueOrDot(n.cumValue(), _addr_rpt), n.address, n.instruction);
-                
-            }
-
+                            }
         }
         s = s__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 // symbolsFromBinaries examines the binaries listed on the profile
@@ -592,7 +567,6 @@ private static slice<ptr<objSymbol>> symbolsFromBinaries(ptr<profile.Profile> _a
             }
 
         }
-
     }    slice<ptr<objSymbol>> objSyms = default;
     foreach (var (_, m) in prof.Mapping) {
         if (!hasSamples[m.File]) {
@@ -618,7 +592,6 @@ private static slice<ptr<objSymbol>> symbolsFromBinaries(ptr<profile.Profile> _a
             objSyms = append(objSyms, addr(new objSymbol(sym:ms,file:f,)));
         }
     }    return objSyms;
-
 }
 
 // objSym represents a symbol identified from a binary. It includes
@@ -659,10 +632,8 @@ private static map<ptr<objSymbol>, graph.Nodes> nodesPerSymbol(graph.Nodes ns, s
                 }
 
             }
-
         }
     }    return symNodes;
-
 }
 
 private partial struct assemblyInstruction {
@@ -691,7 +662,6 @@ private static long flatValue(this ptr<assemblyInstruction> _addr_a) {
         return a.flat / a.flatDiv;
     }
     return a.flat;
-
 }
 
 private static long cumValue(this ptr<assemblyInstruction> _addr_a) {
@@ -701,7 +671,6 @@ private static long cumValue(this ptr<assemblyInstruction> _addr_a) {
         return a.cum / a.cumDiv;
     }
     return a.cum;
-
 }
 
 // annotateAssembly annotates a set of assembly instructions with a
@@ -730,7 +699,6 @@ private static slice<assemblyInstruction> annotateAssembly(slice<plugin.Inst> in
                 }
 
             }
-
             var sample = samples[s];
             n.flatDiv += sample.FlatDiv;
             n.flat += sample.Flat;
@@ -748,7 +716,6 @@ private static slice<assemblyInstruction> annotateAssembly(slice<plugin.Inst> in
                 f = f__prev1;
 
             }
-
             {
                 var ln = sample.Info.Lineno;
 
@@ -757,7 +724,6 @@ private static slice<assemblyInstruction> annotateAssembly(slice<plugin.Inst> in
                 }
 
             }
-
             {
                 var f__prev1 = f;
 
@@ -770,12 +736,9 @@ private static slice<assemblyInstruction> annotateAssembly(slice<plugin.Inst> in
                 f = f__prev1;
 
             }
-
         }
         asm = append(asm, n);
-
     }    return asm;
-
 }
 
 // valueOrDot formats a value according to a report, intercepting zero
@@ -787,7 +750,6 @@ private static @string valueOrDot(long value, ptr<Report> _addr_rpt) {
         return ".";
     }
     return rpt.formatValue(value);
-
 }
 
 // printTags collects all tags referenced in the profile and prints
@@ -798,9 +760,7 @@ private static error printTags(io.Writer w, ptr<Report> _addr_rpt) {
     var p = rpt.prof;
 
     var o = rpt.options;
-    Func<long, @string, @string> formatTag = (v, key) => {
-        return error.As(measurement.ScaledLabel(v, key, o.OutputUnit))!;
-    }; 
+    Func<long, @string, @string> formatTag = (v, key) => error.As(measurement.ScaledLabel(v, key, o.OutputUnit))!; 
 
     // Hashtable to keep accumulate tags as key,value,count.
     var tagMap = make_map<@string, map<@string, long>>();
@@ -899,16 +859,13 @@ private static error printTags(io.Writer w, ptr<Report> _addr_rpt) {
  {
                     fmt.Fprintf(tabw, " \t%.1f%s:\t %s\n", f, u, t.Name);
                 }
-
             }
 
             t = t__prev2;
         }
 
         fmt.Fprintln(tabw);
-
     }    return error.As(tabw.Flush())!;
-
 }
 
 // printComments prints all freeform comments in the profile.
@@ -960,7 +917,6 @@ public static (slice<TextItem>, slice<@string>) TextItems(ptr<Report> _addr_rpt)
  {
                 noinline = true;
             }
-
         }        @string inl = default;
         if (inline) {
             if (noinline) {
@@ -970,13 +926,10 @@ public static (slice<TextItem>, slice<@string>) TextItems(ptr<Report> _addr_rpt)
  {
                 inl = "(inline)";
             }
-
         }
         flatSum += flat;
         items = append(items, new TextItem(Name:name,InlineLabel:inl,Flat:flat,Cum:cum,FlatFormat:rpt.formatValue(flat),CumFormat:rpt.formatValue(cum),));
-
     }    return (items, labels);
-
 }
 
 // printText prints a flat text report for a profile.
@@ -994,9 +947,7 @@ private static error printText(io.Writer w, ptr<Report> _addr_rpt) {
         }
         flatSum += item.Flat;
         fmt.Fprintf(w, "%10s %s %s %10s %s  %s%s\n", item.FlatFormat, measurement.Percentage(item.Flat, rpt.total), measurement.Percentage(flatSum, rpt.total), item.CumFormat, measurement.Percentage(item.Cum, rpt.total), item.Name, inl);
-
     }    return error.As(null!)!;
-
 }
 
 // printTraces prints all traces from a profile.
@@ -1031,7 +982,6 @@ private static error printTraces(io.Writer w, ptr<Report> _addr_rpt) {
                     // used. See https://github.com/google/pprof/issues/511.
                     var inline = i != len(nodes) - 1;
                     stack = append(stack, new stk(&n.Info,inline));
-
                 }
 
                 i = i__prev3;
@@ -1077,7 +1027,6 @@ private static error printTraces(io.Writer w, ptr<Report> _addr_rpt) {
             }
 
             numLabels = append(numLabels, fmt.Sprintf("%10s:  %s\n", key, strings.Join(numValues, " ")));
-
         }        sort.Strings(numLabels);
         fmt.Fprint(w, strings.Join(numLabels, ""));
 
@@ -1113,7 +1062,6 @@ private static error printTraces(io.Writer w, ptr<Report> _addr_rpt) {
         }
     }    fmt.Fprintln(w, separator);
     return error.As(null!)!;
-
 }
 
 // printCallgrind prints a graph for a profile on callgrind format.
@@ -1164,11 +1112,8 @@ private static error printCallgrind(io.Writer w, ptr<Report> _addr_rpt) {
             // of the instruction, but the tools seem to handle
             // this OK.
             fmt.Fprintf(w, "* * %d\n", int64(c));
-
         }        prevInfo = _addr_n.Info;
-
     }    return error.As(null!)!;
-
 }
 
 // getDisambiguatedNames returns a map from each node in the graph to
@@ -1212,7 +1157,6 @@ private static map<ptr<graph.Node>, @string> getDisambiguatedNames(ptr<graph.Gra
                 }
 
             }
-
         }
         n = n__prev1;
     }
@@ -1232,19 +1176,16 @@ private static map<ptr<graph.Node>, @string> getDisambiguatedNames(ptr<graph.Gra
                 if (len(p) > 1) { 
                     // If there is more than one function, add suffix to disambiguate.
                     nodeName[n] += fmt.Sprintf(" [%d/%d]", p[n.Function] + 1, len(p));
-
                 }
 
                 p = p__prev1;
 
             }
-
         }
         n = n__prev1;
     }
 
     return nodeName;
-
 }
 
 // callgrindName implements the callgrind naming compression scheme.
@@ -1266,11 +1207,9 @@ private static @string callgrindName(map<@string, nint> names, @string name) {
         id = id__prev1;
 
     }
-
     var id = len(names) + 1;
     names[name] = id;
     return fmt.Sprintf("(%d) %s", id, name);
-
 }
 
 // callgrindAddress implements the callgrind subposition compression scheme if
@@ -1296,7 +1235,6 @@ private static @string callgrindAddress(ptr<graph.NodeInfo> _addr_prevInfo, ulon
         return relative;
     }
     return abs;
-
 }
 
 // printTree prints a tree-based report in text form.
@@ -1353,7 +1291,6 @@ private static error printTree(io.Writer w, ptr<Report> _addr_rpt) {
         fmt.Fprintln(w, separator);
     }
     return error.As(null!)!;
-
 }
 
 // GetDOT returns a graph suitable for dot processing along with some
@@ -1415,10 +1352,8 @@ public static slice<@string> ProfileLabels(ptr<Report> _addr_rpt) {
             ratio = "(" + measurement.Percentage(int64(totalNanos), prof.DurationNanos) + ")";
         }
         label = append(label, fmt.Sprintf("Duration: %s, Total samples = %s %s", duration, rpt.formatValue(rpt.total), ratio));
-
     }
     return label;
-
 }
 
 // reportLabels returns printable labels for a report. Includes
@@ -1462,7 +1397,6 @@ private static slice<@string> reportLabels(ptr<Report> _addr_rpt, ptr<graph.Grap
         label = append(label, "\nSee https://git.io/JfYMW for how to read the graph");
     }
     return label;
-
 }
 
 private static slice<@string> legendActiveFilters(slice<@string> activeFilters) {
@@ -1473,9 +1407,7 @@ private static slice<@string> legendActiveFilters(slice<@string> activeFilters) 
             s = s[..(int)80] + "…";
         }
         legendActiveFilters[i + 1] = "   " + s;
-
     }    return legendActiveFilters;
-
 }
 
 private static @string genLabel(nint d, @string n, @string l, @string f) {
@@ -1483,7 +1415,6 @@ private static @string genLabel(nint d, @string n, @string l, @string f) {
         n = n + "s";
     }
     return fmt.Sprintf("Dropped %d %s (%s <= %s)", d, n, l, f);
-
 }
 
 // New builds a new report indexing the sample values interpreting the
@@ -1502,12 +1433,9 @@ public static ptr<Report> New(ptr<profile.Profile> _addr_prof, ptr<Options> _add
             }
 
         }
-
         return _addr_measurement.ScaledLabel(v, o.SampleUnit, o.OutputUnit)!;
-
     };
     return addr(new Report(prof,computeTotal(prof,o.SampleValue,o.SampleMeanDivisor),o,format));
-
 }
 
 // NewDefault builds a new report indexing the last sample value
@@ -1522,11 +1450,8 @@ public static ptr<Report> NewDefault(ptr<profile.Profile> _addr_prof, Options op
     }
     o.SampleType = prof.SampleType[index].Type;
     o.SampleUnit = strings.ToLower(prof.SampleType[index].Unit);
-    o.SampleValue = v => {
-        return _addr_v[index]!;
-    };
+    o.SampleValue = v => _addr_v[index]!;
     return _addr_New(_addr_prof, _addr_o)!;
-
 }
 
 // computeTotal computes the sum of the absolute value of all sample values.
@@ -1561,7 +1486,6 @@ private static long computeTotal(ptr<profile.Profile> _addr_prof, Func<slice<lon
         return total / div;
     }
     return total;
-
 }
 
 // Report contains the data and associated routines to extract a
@@ -1585,7 +1509,6 @@ private static long abs64(long i) {
         return -i;
     }
     return i;
-
 }
 
 } // end report_package

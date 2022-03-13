@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package types -- go2cs converted at 2022 March 06 22:47:52 UTC
+// package types -- go2cs converted at 2022 March 13 05:59:08 UTC
 // import "cmd/compile/internal/types" ==> using types = go.cmd.compile.@internal.types_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types\pkg.go
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using fmt = go.fmt_package;
-using sort = go.sort_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using fmt = fmt_package;
+using sort = sort_package;
+using sync = sync_package;
+
+
+// pkgMap maps a package path to a package.
+
+using System;
 public static partial class types_package {
 
-    // pkgMap maps a package path to a package.
 private static var pkgMap = make_map<@string, ptr<Pkg>>();
 
 // MaxPkgHeight is a height greater than any likely package height.
@@ -57,7 +58,6 @@ public static ptr<Pkg> NewPkg(@string path, @string name) => func((_, panic, _) 
 
     }
 
-
     p = @new<Pkg>();
     p.Path = path;
     p.Name = name;
@@ -66,7 +66,6 @@ public static ptr<Pkg> NewPkg(@string path, @string name) => func((_, panic, _) 
     pkgMap[path] = p;
 
     return _addr_p!;
-
 });
 
 // ImportedPkgList returns the list of directly imported packages.
@@ -79,7 +78,6 @@ public static slice<ptr<Pkg>> ImportedPkgList() {
         }
     }    sort.Sort(byPath(list));
     return list;
-
 }
 
 private partial struct byPath { // : slice<ptr<Pkg>>
@@ -122,11 +120,9 @@ private static (ptr<Sym>, bool) LookupOK(this ptr<Pkg> _addr_pkg, @string name) 
         }
     }
 
-
     s = addr(new Sym(Name:name,Pkg:pkg,));
     pkg.Syms[name] = s;
     return (_addr_s!, false);
-
 }
 
 private static ptr<Sym> LookupBytes(this ptr<Pkg> _addr_pkg, slice<byte> name) {
@@ -143,10 +139,8 @@ private static ptr<Sym> LookupBytes(this ptr<Pkg> _addr_pkg, slice<byte> name) {
             return _addr_s!;
         }
     }
-
     var str = InternString(name);
     return _addr_pkg.Lookup(str)!;
-
 }
 
 private static sync.Mutex internedStringsmu = default;private static map internedStrings = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, @string>{};
@@ -160,7 +154,6 @@ public static @string InternString(slice<byte> b) {
     }
     internedStringsmu.Unlock();
     return s;
-
 }
 
 // CleanroomDo invokes f in an environment with no preexisting packages.

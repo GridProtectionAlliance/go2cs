@@ -2,25 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package arm64 -- go2cs converted at 2022 March 06 23:14:40 UTC
+// package arm64 -- go2cs converted at 2022 March 13 06:28:10 UTC
 // import "cmd/compile/internal/arm64" ==> using arm64 = go.cmd.compile.@internal.arm64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\arm64\ssa.go
-using math = go.math_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using logopt = go.cmd.compile.@internal.logopt_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using arm64 = go.cmd.@internal.obj.arm64_package;
-
 namespace go.cmd.compile.@internal;
+
+using math = math_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using logopt = cmd.compile.@internal.logopt_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using arm64 = cmd.@internal.obj.arm64_package;
+
+
+// loadByType returns the load instruction of the given type.
 
 public static partial class arm64_package {
 
-    // loadByType returns the load instruction of the given type.
 private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) => {
     ref types.Type t = ref _addr_t.val;
 
@@ -33,7 +35,6 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 return arm64.AFMOVD;
                 break;
         }
-
     }
     else
  {
@@ -69,10 +70,8 @@ private static obj.As loadByType(ptr<types.Type> _addr_t) => func((_, panic, _) 
                 return arm64.AMOVD;
                 break;
         }
-
     }
     panic("bad load type");
-
 });
 
 // storeByType returns the store instruction of the given type.
@@ -88,7 +87,6 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return arm64.AFMOVD;
                 break;
         }
-
     }
     else
  {
@@ -106,10 +104,8 @@ private static obj.As storeByType(ptr<types.Type> _addr_t) => func((_, panic, _)
                 return arm64.AMOVD;
                 break;
         }
-
     }
     panic("bad store type");
-
 });
 
 // makeshift encodes a register shifted by a constant, used as an Offset in Prog
@@ -130,7 +126,6 @@ private static ptr<obj.Prog> genshift(ptr<ssagen.State> _addr_s, obj.As @as, sho
         p.To.Reg = r;
     }
     return _addr_p!;
-
 }
 
 // generate the memory operand for the indexed load/store instructions
@@ -149,7 +144,6 @@ private static obj.Addr genIndexedOperand(ptr<ssa.Value> _addr_v) {
     else // not shifted
         mop.Index = v.Args[1].Reg();
         return mop;
-
 }
 
 private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_v) => func((_, panic, _) => {
@@ -180,7 +174,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
                     panic("bad float size");
                     break;
             }
-
         }
         var p = s.Prog(as);
         p.From.Type = obj.TYPE_REG;
@@ -445,7 +438,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
             }
 
         }
-
         goto __switch_break0;
     }
     if (v.Op == ssa.OpARM64MOVBload || v.Op == ssa.OpARM64MOVBUload || v.Op == ssa.OpARM64MOVHload || v.Op == ssa.OpARM64MOVHUload || v.Op == ssa.OpARM64MOVWload || v.Op == ssa.OpARM64MOVWUload || v.Op == ssa.OpARM64MOVDload || v.Op == ssa.OpARM64FMOVSload || v.Op == ssa.OpARM64FMOVDload)
@@ -1083,7 +1075,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         }
         if (@base.Debug.Nil != 0 && v.Pos.Line() > 1) { // v.Line==1 in generated wrappers
             @base.WarnfAt(v.Pos, "generated nil check");
-
         }
         goto __switch_break0;
     }
@@ -1139,7 +1130,6 @@ private static void ssaGenValue(ptr<ssagen.State> _addr_s, ptr<ssa.Value> _addr_
         v.Fatalf("genValue not implemented: %s", v.LongString());
 
     __switch_break0:;
-
 });
 
 private static map condBits = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ssa.Op, short>{ssa.OpARM64Equal:arm64.COND_EQ,ssa.OpARM64NotEqual:arm64.COND_NE,ssa.OpARM64LessThan:arm64.COND_LT,ssa.OpARM64LessThanU:arm64.COND_LO,ssa.OpARM64LessEqual:arm64.COND_LE,ssa.OpARM64LessEqualU:arm64.COND_LS,ssa.OpARM64GreaterThan:arm64.COND_GT,ssa.OpARM64GreaterThanU:arm64.COND_HI,ssa.OpARM64GreaterEqual:arm64.COND_GE,ssa.OpARM64GreaterEqualU:arm64.COND_HS,ssa.OpARM64LessThanF:arm64.COND_MI,ssa.OpARM64LessEqualF:arm64.COND_LS,ssa.OpARM64GreaterThanF:arm64.COND_GT,ssa.OpARM64GreaterEqualF:arm64.COND_GE,ssa.OpARM64NotLessThanF:arm64.COND_PL,ssa.OpARM64NotLessEqualF:arm64.COND_HI,ssa.OpARM64NotGreaterThanF:arm64.COND_LE,ssa.OpARM64NotGreaterEqualF:arm64.COND_LT,};
@@ -1205,7 +1195,6 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
                 p = s.Br(jmp.invasm, b.Succs[1].Block());
                 s.Br(obj.AJMP, b.Succs[0].Block());
             }
-
                 if (!b.Controls[0].Type.IsFlags()) {
             p.From.Type = obj.TYPE_REG;
             p.From.Reg = b.Controls[0].Reg();
@@ -1228,7 +1217,6 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
                 p = s.Br(jmp.invasm, b.Succs[1].Block());
                 s.Br(obj.AJMP, b.Succs[0].Block());
             }
-
                 p.From.Offset = b.AuxInt;
         p.From.Type = obj.TYPE_CONST;
         p.Reg = b.Controls[0].Reg();
@@ -1238,7 +1226,6 @@ private static void ssaGenBlock(ptr<ssagen.State> _addr_s, ptr<ssa.Block> _addr_
         s.CombJump(b, next, _addr_gtJumps);
     else 
         b.Fatalf("branch not implemented: %s", b.LongString());
-    
-}
+    }
 
 } // end arm64_package

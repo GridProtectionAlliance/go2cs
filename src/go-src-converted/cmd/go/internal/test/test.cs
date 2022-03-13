@@ -2,47 +2,48 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package test -- go2cs converted at 2022 March 06 23:17:52 UTC
+// package test -- go2cs converted at 2022 March 13 06:31:14 UTC
 // import "cmd/go/internal/test" ==> using test = go.cmd.go.@internal.test_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\test\test.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using sha256 = go.crypto.sha256_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using exec = go.@internal.execabs_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cache = go.cmd.go.@internal.cache_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using search = go.cmd.go.@internal.search_package;
-using str = go.cmd.go.@internal.str_package;
-using trace = go.cmd.go.@internal.trace_package;
-using work = go.cmd.go.@internal.work_package;
-using test2json = go.cmd.@internal.test2json_package;
-using System;
-using System.Threading;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using context = context_package;
+using sha256 = crypto.sha256_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using exec = @internal.execabs_package;
+using io = io_package;
+using fs = io.fs_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cache = cmd.go.@internal.cache_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using search = cmd.go.@internal.search_package;
+using str = cmd.go.@internal.str_package;
+using trace = cmd.go.@internal.trace_package;
+using work = cmd.go.@internal.work_package;
+using test2json = cmd.@internal.test2json_package;
+
+
+// Break init loop.
+
+using System;
+using System.Threading;
 public static partial class test_package {
 
-    // Break init loop.
 private static void init() {
     CmdTest.Run = runTest;
 }
@@ -490,8 +491,7 @@ private static @string testProfile() {
         return "-trace";
     else 
         return "";
-    
-}
+    }
 
 // testNeedBinary reports whether the test needs to keep the binary around.
 private static bool testNeedBinary() {
@@ -508,8 +508,7 @@ private static bool testNeedBinary() {
         return true;
     else 
         return false;
-    
-}
+    }
 
 // testShowPass reports whether the output for a passing test should be shown.
 private static bool testShowPass() {
@@ -543,9 +542,7 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                 err = err__prev2;
 
             }
-
         }());
-
     }
     var (ctx, span) = trace.StartSpan(ctx, fmt.Sprint("Running ", cmd.Name(), " command"));
     defer(span.Done());
@@ -604,14 +601,11 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                         err = err__prev3;
 
                     }
-
                 }
 
             }
-
         }
     }
-
 
     ref work.Builder b = ref heap(out ptr<work.Builder> _addr_b);
     b.Init();
@@ -702,11 +696,8 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                     // gccgo's standard library packages
                     // can not be reinstalled.
                     continue;
-
                 }
-
                 a.Deps = append(a.Deps, b.CompileAction(work.ModeInstall, work.ModeInstall, p));
-
             }
 
             p = p__prev1;
@@ -717,7 +708,6 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
             return ;
         }
         b.Init();
-
     }
     slice<ptr<work.Action>> builds = default;    slice<ptr<work.Action>> runs = default;    slice<ptr<work.Action>> prints = default;
 
@@ -781,11 +771,9 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                 if (cfg.BuildRace && p.Standard && (p.ImportPath == "runtime" || strings.HasPrefix(p.ImportPath, "runtime/internal"))) {
                     continue;
                 }
-
                 if (haveMatch) {
                     testCoverPkgs = append(testCoverPkgs, p);
                 }
-
             } 
 
             // Warn about -coverpkg arguments that are not actually used.
@@ -817,7 +805,6 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                 if (p.ImportPath == "unsafe") {
                     continue;
                 }
-
                 p.Internal.CoverMode = testCoverMode;
                 slice<@string> coverFiles = default;
                 coverFiles = append(coverFiles, p.GoFiles);
@@ -827,7 +814,6 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
                 if (testCover && testCoverMode == "atomic") {
                     ensureImport(_addr_p, "sync/atomic");
                 }
-
             }
 
             p = p__prev1;
@@ -842,7 +828,6 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
             if (testCover && testCoverMode == "atomic") {
                 ensureImport(_addr_p, "sync/atomic");
             }
-
             var (buildTest, runTest, printTest, err) = builderTest(_addr_b, ctx, pkgOpts, _addr_p);
             if (err != null) {
                 var str = err.Error();
@@ -854,16 +839,12 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
  {
                     @base.Errorf("%s", str);
                 }
-
                 fmt.Printf("FAIL\t%s [setup failed]\n", p.ImportPath);
                 continue;
-
             }
-
             builds = append(builds, buildTest);
             runs = append(runs, runTest);
             prints = append(prints, printTest);
-
         }
         p = p__prev1;
     }
@@ -903,14 +884,12 @@ private static void runTest(context.Context ctx, ptr<base.Command> _addr_cmd, sl
  {
                     run.Deps = append(run.Deps, prints[i - 1]);
                 }
-
             }
 
             i = i__prev1;
         }
     }
     b.Do(ctx, root);
-
 });
 
 // ensures that package p imports the named package
@@ -926,7 +905,6 @@ private static void ensureImport(ptr<load.Package> _addr_p, @string pkg) {
         @base.Fatalf("load %s: %v", pkg, p1.Error);
     }
     p.Internal.Imports = append(p.Internal.Imports, p1);
-
 }
 
 private static @string windowsBadWords = new slice<@string>(new @string[] { "install", "patch", "setup", "update" });
@@ -977,7 +955,6 @@ private static (ptr<work.Action>, ptr<work.Action>, ptr<work.Action>, error) bui
 
     }
 
-
     pmain.Dir = testDir;
     pmain.Internal.OmitDebug = !testC && !testNeedBinary();
 
@@ -996,7 +973,6 @@ private static (ptr<work.Action>, ptr<work.Action>, ptr<work.Action>, error) bui
             err = err__prev2;
 
         }
-
     }
     b.CompileAction(work.ModeBuild, work.ModeBuild, pmain).Objdir = testDir;
 
@@ -1058,7 +1034,6 @@ private static (ptr<work.Action>, ptr<work.Action>, ptr<work.Action>, error) bui
     if (testC) {
         printAction = addr(new work.Action(Mode:"test print (nop)",Package:p,Deps:[]*work.Action{runAction})); // nop
         vetRunAction = printAction;
-
     }
     else
  { 
@@ -1068,7 +1043,6 @@ private static (ptr<work.Action>, ptr<work.Action>, ptr<work.Action>, error) bui
         vetRunAction = runAction;
         cleanAction = addr(new work.Action(Mode:"test clean",Func:builderCleanTest,Deps:[]*work.Action{runAction},Package:p,IgnoreFail:true,Objdir:testDir,));
         printAction = addr(new work.Action(Mode:"test print",Func:builderPrintTest,Deps:[]*work.Action{cleanAction},Package:p,IgnoreFail:true,));
-
     }
     if (len(ptest.GoFiles) + len(ptest.CgoFiles) > 0) {
         addTestVet(_addr_b, _addr_ptest, vetRunAction, installAction);
@@ -1085,7 +1059,6 @@ private static (ptr<work.Action>, ptr<work.Action>, ptr<work.Action>, error) bui
         }
     }
     return (_addr_buildAction!, _addr_runAction!, _addr_printAction!, error.As(null!)!);
-
 }
 
 private static void addTestVet(ptr<work.Builder> _addr_b, ptr<load.Package> _addr_p, ptr<work.Action> _addr_runAction, ptr<work.Action> _addr_installAction) {
@@ -1113,7 +1086,6 @@ private static void addTestVet(ptr<work.Builder> _addr_b, ptr<load.Package> _add
 private static bool isTestFile(@string file) { 
     // We don't cover tests, only the code they test.
     return strings.HasSuffix(file, "_test.go");
-
 }
 
 // declareCoverVars attaches the required cover variables names
@@ -1146,9 +1118,7 @@ private static map<@string, ptr<load.CoverVar>> declareCoverVars(ptr<load.Packag
         }
         coverVars[file] = addr(new load.CoverVar(File:longFile,Var:fmt.Sprintf("GoCover_%d_%x",coverIndex,h),));
         coverIndex++;
-
     }    return coverVars;
-
 }
 
 private static slice<byte> noTestsToRun = (slice<byte>)"\ntesting: warning: no tests to run\n";
@@ -1193,7 +1163,6 @@ private static error builderRunTest(this ptr<runCache> _addr_c, ptr<work.Builder
         fmt.Fprintf(a.TestOutput, "FAIL\t%s [build failed]\n", a.Package.ImportPath);
         @base.SetExitStatus(1);
         return error.As(null!)!;
-
     }
     io.Writer stdout = os.Stdout;
     error err = default!;
@@ -1232,13 +1201,11 @@ private static error builderRunTest(this ptr<runCache> _addr_c, ptr<work.Builder
             // Write both to stdout and buf, for possible saving
             // to cache, and for looking for the "no tests to run" message.
             stdout = io.MultiWriter(stdout, _addr_buf);
-
         }
         else
  {
             _addr_stdout = _addr_buf;
             stdout = ref _addr_stdout.val;
-
         }
     }
     if (c.buf == null) { 
@@ -1252,7 +1219,6 @@ private static error builderRunTest(this ptr<runCache> _addr_c, ptr<work.Builder
         // we still reuse the cached test result.
         // c.saveOutput will store the result under both IDs.
         c.tryCacheWithID(b, a, a.Deps[0].BuildContentID());
-
     }
     if (c.buf != null) {
         if (stdout != _addr_buf) {
@@ -1261,7 +1227,6 @@ private static error builderRunTest(this ptr<runCache> _addr_c, ptr<work.Builder
         }
         a.TestOutput = c.buf;
         return error.As(null!)!;
-
     }
     var execCmd = work.FindExecCmd();
     @string testlogArg = new slice<@string>(new @string[] {  });
@@ -1325,7 +1290,6 @@ private static error builderRunTest(this ptr<runCache> _addr_c, ptr<work.Builder
             env = append(env, "LD_LIBRARY_PATH=.");
         }
         cmd.Env = env;
-
     }
     var t0 = time.Now();
     err = error.As(cmd.Start())!; 
@@ -1354,7 +1318,6 @@ Outer:
         err = error.As(done.Receive())!;
         fmt.Fprintf(cmd.Stdout, "*** Test killed: ran too long (%v).\n", testKillTimeout);
         tick.Stop();
-
     }
     var @out = buf.Bytes();
     _addr_a.TestOutput = _addr_buf;
@@ -1373,7 +1336,6 @@ Outer:
         }
         fmt.Fprintf(cmd.Stdout, "ok  \t%s\t%s%s%s\n", a.Package.ImportPath, t, coveragePercentage(out), norun);
         c.saveOutput(a);
-
     }
     else
  {
@@ -1384,13 +1346,11 @@ Outer:
             fmt.Fprintf(cmd.Stdout, "%s\n", err);
         }
         fmt.Fprintf(cmd.Stdout, "FAIL\t%s\t%s\n", a.Package.ImportPath, t);
-
     }
     if (cmd.Stdout != _addr_buf) {
         buf.Reset(); // cmd.Stdout was going to os.Stdout already
     }
     return error.As(null!)!;
-
 });
 
 // tryCache is called just before the link attempt,
@@ -1417,7 +1377,6 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
         }
         c.disableCache = true;
         return false;
-
     }
     if (a.Package.Root == "") { 
         // Caching does not apply to tests outside of any module, GOPATH, or GOROOT.
@@ -1426,7 +1385,6 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
         }
         c.disableCache = true;
         return false;
-
     }
     slice<@string> cacheArgs = default;
     foreach (var (_, arg) in testArgs) {
@@ -1489,14 +1447,12 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
                 return false;
                 break;
         }
-
     }    if (cache.Default() == null) {
         if (cache.DebugTest) {
             fmt.Fprintf(os.Stderr, "testcache: GOCACHE=off\n");
         }
         c.disableCache = true;
         return false;
-
     }
     var h = cache.NewHash("testResult");
     fmt.Fprintf(h, "test binary %s args %q execcmd %q", id, cacheArgs, work.ExecCmd);
@@ -1521,10 +1477,8 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
  {
                 fmt.Fprintf(os.Stderr, "testcache: %s: input list malformed\n", a.Package.ImportPath);
             }
-
         }
         return false;
-
     }
     var (testInputsID, err) = computeTestInputsID(_addr_a, data);
     if (err != null) {
@@ -1543,17 +1497,14 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
  {
                 fmt.Fprintf(os.Stderr, "testcache: %s: test output malformed\n", a.Package.ImportPath);
             }
-
         }
         return false;
-
     }
     if (entry.Time.Before(testCacheExpire)) {
         if (cache.DebugTest) {
             fmt.Fprintf(os.Stderr, "testcache: %s: test output expired due to go clean -testcache\n", a.Package.ImportPath);
         }
         return false;
-
     }
     i = bytes.LastIndexByte(data[..(int)len(data) - 1], '\n') + 1;
     if (!bytes.HasPrefix(data[(int)i..], (slice<byte>)"ok  \t")) {
@@ -1561,7 +1512,6 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
             fmt.Fprintf(os.Stderr, "testcache: %s: test output malformed\n", a.Package.ImportPath);
         }
         return false;
-
     }
     var j = bytes.IndexByte(data[(int)i + len("ok  \t")..], '\t');
     if (j < 0) {
@@ -1569,7 +1519,6 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
             fmt.Fprintf(os.Stderr, "testcache: %s: test output malformed\n", a.Package.ImportPath);
         }
         return false;
-
     }
     j += i + len("ok  \t") + 1; 
 
@@ -1582,7 +1531,6 @@ private static bool tryCacheWithID(this ptr<runCache> _addr_c, ptr<work.Builder>
     }
     c.buf.Write(data[(int)j..]);
     return true;
-
 }
 
 private static var errBadTestInputs = errors.New("error parsing test inputs");
@@ -1620,7 +1568,6 @@ private static (cache.ActionID, error) computeTestInputsID(ptr<work.Action> _add
             case "chdir": 
                 pwd = name; // always absolute
                 fmt.Fprintf(h, "chdir %s %x\n", name, hashStat(name));
-
                 break;
             case "stat": 
                 if (!filepath.IsAbs(name)) {
@@ -1629,11 +1576,8 @@ private static (cache.ActionID, error) computeTestInputsID(ptr<work.Action> _add
                 if (a.Package.Root == "" || search.InDir(name, a.Package.Root) == "") { 
                     // Do not recheck files outside the module, GOPATH, or GOROOT root.
                     break;
-
                 }
-
                 fmt.Fprintf(h, "stat %s %x\n", name, hashStat(name));
-
                 break;
             case "open": 
                 if (!filepath.IsAbs(name)) {
@@ -1642,9 +1586,7 @@ private static (cache.ActionID, error) computeTestInputsID(ptr<work.Action> _add
                 if (a.Package.Root == "" || search.InDir(name, a.Package.Root) == "") { 
                     // Do not recheck files outside the module, GOPATH, or GOROOT root.
                     break;
-
                 }
-
                 var (fh, err) = hashOpen(name);
                 if (err != null) {
                     if (cache.DebugTest) {
@@ -1652,9 +1594,7 @@ private static (cache.ActionID, error) computeTestInputsID(ptr<work.Action> _add
                     }
                     return (new cache.ActionID(), error.As(err)!);
                 }
-
                 fmt.Fprintf(h, "open %s %x\n", name, fh);
-
                 break;
             default: 
                 if (cache.DebugTest) {
@@ -1663,10 +1603,8 @@ private static (cache.ActionID, error) computeTestInputsID(ptr<work.Action> _add
                 return (new cache.ActionID(), error.As(errBadTestInputs)!);
                 break;
         }
-
     }    var sum = h.Sum();
     return (sum, error.As(null!)!);
-
 }
 
 private static cache.ActionID hashGetenv(@string name) {
@@ -1681,7 +1619,6 @@ private static cache.ActionID hashGetenv(@string name) {
         h.Write((slice<byte>)v);
     }
     return h.Sum();
-
 }
 
 private static readonly nint modTimeCutoff = 2 * time.Second;
@@ -1716,7 +1653,6 @@ private static (cache.ActionID, error) hashOpen(@string name) {
  {
                 hashWriteStat(h, finfo);
             }
-
         }
     }
     else if (info.Mode().IsRegular()) { 
@@ -1734,7 +1670,6 @@ private static (cache.ActionID, error) hashOpen(@string name) {
         }
     }
     return (h.Sum(), error.As(null!)!);
-
 }
 
 private static cache.ActionID hashStat(@string name) {
@@ -1754,7 +1689,6 @@ private static cache.ActionID hashStat(@string name) {
         info = info__prev1;
 
     }
-
     {
         var info__prev1 = info;
 
@@ -1770,9 +1704,7 @@ private static cache.ActionID hashStat(@string name) {
         info = info__prev1;
 
     }
-
     return h.Sum();
-
 }
 
 private static void hashWriteStat(io.Writer h, fs.FileInfo info) {
@@ -1801,10 +1733,8 @@ private static void saveOutput(this ptr<runCache> _addr_c, ptr<work.Action> _add
  {
                 fmt.Fprintf(os.Stderr, "testcache: %s: reading testlog: malformed\n", a.Package.ImportPath);
             }
-
         }
         return ;
-
     }
     var (testInputsID, err) = computeTestInputsID(_addr_a, testlog);
     if (err != null) {
@@ -1816,7 +1746,6 @@ private static void saveOutput(this ptr<runCache> _addr_c, ptr<work.Action> _add
         }
         cache.Default().PutNoVerify(c.id1, bytes.NewReader(testlog));
         cache.Default().PutNoVerify(testAndInputKey(c.id1, testInputsID), bytes.NewReader(a.TestOutput.Bytes()));
-
     }
     if (c.id2 != (new cache.ActionID())) {
         if (cache.DebugTest) {
@@ -1824,7 +1753,6 @@ private static void saveOutput(this ptr<runCache> _addr_c, ptr<work.Action> _add
         }
         cache.Default().PutNoVerify(c.id2, bytes.NewReader(testlog));
         cache.Default().PutNoVerify(testAndInputKey(c.id2, testInputsID), bytes.NewReader(a.TestOutput.Bytes()));
-
     }
 }
 
@@ -1840,10 +1768,8 @@ private static @string coveragePercentage(slice<byte> @out) {
         // Probably running "go test -cover" not "go test -cover fmt".
         // The coverage output will appear in the output directly.
         return "";
-
     }
     return fmt.Sprintf("\tcoverage: %s", matches[1]);
-
 }
 
 // builderCleanTest is the action for cleaning up after a test.
@@ -1859,7 +1785,6 @@ private static error builderCleanTest(ptr<work.Builder> _addr_b, context.Context
     }
     os.RemoveAll(a.Objdir);
     return error.As(null!)!;
-
 }
 
 // builderPrintTest is the action for printing a test result.
@@ -1874,7 +1799,6 @@ private static error builderPrintTest(ptr<work.Builder> _addr_b, context.Context
         run.TestOutput = null;
     }
     return error.As(null!)!;
-
 }
 
 // builderNoTest is the action for testing a package with no test files.
@@ -1890,7 +1814,6 @@ private static error builderNoTest(ptr<work.Builder> _addr_b, context.Context ct
     }
     fmt.Fprintf(stdout, "?   \t%s\t[no test files]\n", a.Package.ImportPath);
     return error.As(null!)!;
-
 });
 
 // printExitStatus is the action for printing the exit status
@@ -1905,7 +1828,6 @@ private static error printExitStatus(ptr<work.Builder> _addr_b, context.Context 
         }
     }
     return error.As(null!)!;
-
 }
 
 } // end test_package

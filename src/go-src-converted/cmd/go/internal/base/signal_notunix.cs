@@ -5,12 +5,12 @@
 //go:build plan9 || windows
 // +build plan9 windows
 
-// package @base -- go2cs converted at 2022 March 06 23:19:43 UTC
+// package @base -- go2cs converted at 2022 March 13 06:32:32 UTC
 // import "cmd/go/internal/base" ==> using @base = go.cmd.go.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\base\signal_notunix.go
-using os = go.os_package;
-
 namespace go.cmd.go.@internal;
+
+using os = os_package;
 
 public static partial class @base_package {
 

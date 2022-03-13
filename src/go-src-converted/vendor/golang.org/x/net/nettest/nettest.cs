@@ -3,22 +3,23 @@
 // license that can be found in the LICENSE file.
 
 // Package nettest provides utilities for network testing.
-// package nettest -- go2cs converted at 2022 March 06 23:38:09 UTC
+
+// package nettest -- go2cs converted at 2022 March 13 06:46:27 UTC
 // import "vendor/golang.org/x/net/nettest" ==> using nettest = go.vendor.golang.org.x.net.nettest_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\nettest\nettest.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using ioutil = go.io.ioutil_package;
-using net = go.net_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using runtime = go.runtime_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using errors = errors_package;
+using fmt = fmt_package;
+using ioutil = io.ioutil_package;
+using net = net_package;
+using os = os_package;
+using exec = os.exec_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
 
 public static partial class nettest_package {
 
@@ -37,7 +38,6 @@ private static void probeStack() {
         ln = ln__prev1;
 
     }
-
     {
         var ln__prev1 = ln;
 
@@ -50,7 +50,6 @@ private static void probeStack() {
         ln = ln__prev1;
 
     }
-
     rawSocketSess = supportsRawSocket();
     switch (runtime.GOOS) {
         case "aix": 
@@ -61,14 +60,12 @@ private static void probeStack() {
                 var ver = string(out[..(int)4]);
                 var (tl, _) = strconv.Atoi(string(out[(int)5..(int)7]));
                 unStrmDgramEnabled = ver > "7200" || (ver == "7200" && tl >= 2);
-
             }
             break;
         default: 
             unStrmDgramEnabled = true;
             break;
     }
-
 }
 
 private static bool unixStrmDgramEnabled() {
@@ -133,7 +130,6 @@ public static bool TestableNetwork(@string network) {
                     }
                     break;
             }
-
             break;
         case "ip": 
 
@@ -158,7 +154,6 @@ public static bool TestableNetwork(@string network) {
                     }
                     break;
             }
-
             break;
         case "unix": 
 
@@ -192,7 +187,6 @@ public static bool TestableNetwork(@string network) {
                     }
                     break;
             }
-
             break;
         case "unixpacket": 
             switch (runtime.GOOS) {
@@ -227,7 +221,6 @@ public static bool TestableNetwork(@string network) {
                     }
                     break;
             }
-
             break;
     }
     switch (ss[0]) {
@@ -247,7 +240,6 @@ public static bool TestableNetwork(@string network) {
             break;
     }
     return true;
-
 }
 
 // TestableAddress reports whether address of network is testable on
@@ -272,7 +264,6 @@ public static bool TestableAddress(@string network, @string address) {
         }
     }
     return true;
-
 }
 
 // NewLocalListener returns a listener which listens to a loopback IP
@@ -295,7 +286,6 @@ public static (net.Listener, error) NewLocalListener(@string network) {
                     }
 
                 }
-
             }
             if (SupportsIPv6()) {
                 return net.Listen("tcp6", "[::1]:0");
@@ -319,11 +309,9 @@ public static (net.Listener, error) NewLocalListener(@string network) {
                 return (null, error.As(err)!);
             }
             return net.Listen(network, path);
-
             break;
     }
     return (null, error.As(fmt.Errorf("%s is not supported on %s/%s", network, runtime.GOOS, runtime.GOARCH))!);
-
 }
 
 // NewLocalPacketListener returns a packet listener which listens to a
@@ -345,7 +333,6 @@ public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
                     }
 
                 }
-
             }
             if (SupportsIPv6()) {
                 return net.ListenPacket("udp6", "[::1]:0");
@@ -367,11 +354,9 @@ public static (net.PacketConn, error) NewLocalPacketListener(@string network) {
                 return (null, error.As(err)!);
             }
             return net.ListenPacket(network, path);
-
             break;
     }
     return (null, error.As(fmt.Errorf("%s is not supported on %s/%s", network, runtime.GOOS, runtime.GOARCH))!);
-
 }
 
 // LocalPath returns a local path that can be used for Unix-domain
@@ -388,7 +373,6 @@ public static (@string, error) LocalPath() {
     f.Close();
     os.Remove(path);
     return (path, error.As(null!)!);
-
 }
 
 // MulticastSource returns a unicast IP address on ifi when ifi is an
@@ -420,7 +404,6 @@ public static (net.IP, error) MulticastSource(@string network, ptr<net.Interface
         return (null, error.As(errNoAvailableAddress)!);
     }
     return (ip, error.As(null!)!);
-
 }
 
 // LoopbackInterface returns an available logical network interface
@@ -438,7 +421,6 @@ public static (ptr<net.Interface>, error) LoopbackInterface() {
             return (_addr__addr_ifi!, error.As(null!)!);
         }
     }    return (_addr_null!, error.As(errNoAvailableInterface)!);
-
 }
 
 // RoutedInterface returns a network interface that can route IP
@@ -477,11 +459,8 @@ public static (ptr<net.Interface>, error) RoutedInterface(@string network, net.F
             }
 
         }
-
         return (_addr__addr_ifi!, error.As(null!)!);
-
     }    return (_addr_null!, error.As(errNoAvailableInterface)!);
-
 }
 
 private static (net.IP, bool) hasRoutableIP(@string network, ptr<net.Interface> _addr_ifi) {
@@ -512,7 +491,6 @@ private static (net.IP, bool) hasRoutableIP(@string network, ptr<net.Interface> 
                         ip = ip__prev1;
 
                     }
-
                     break;
                 case ptr<net.IPNet> ifa:
                     {
@@ -527,16 +505,13 @@ private static (net.IP, bool) hasRoutableIP(@string network, ptr<net.Interface> 
                         ip = ip__prev1;
 
                     }
-
                     break;
             }
-
         }
         ifa = ifa__prev1;
     }
 
     return (null, false);
-
 }
 
 private static (net.IP, bool) routableIP(@string network, net.IP ip) {
@@ -560,12 +535,10 @@ private static (net.IP, bool) routableIP(@string network, net.IP ip) {
                 ip = ip__prev1;
 
             }
-
             break;
         case "ip6": 
             if (ip.IsLoopback()) { // addressing scope of the loopback address depends on each implementation
                 return (null, false);
-
             }
             {
                 var ip__prev1 = ip;
@@ -579,7 +552,6 @@ private static (net.IP, bool) routableIP(@string network, net.IP ip) {
                 ip = ip__prev1;
 
             }
-
             break;
         default: 
             {
@@ -594,7 +566,6 @@ private static (net.IP, bool) routableIP(@string network, net.IP ip) {
                 ip = ip__prev1;
 
             }
-
             {
                 var ip__prev1 = ip;
 
@@ -607,11 +578,9 @@ private static (net.IP, bool) routableIP(@string network, net.IP ip) {
                 ip = ip__prev1;
 
             }
-
             break;
     }
     return (null, false);
-
 }
 
 } // end nettest_package

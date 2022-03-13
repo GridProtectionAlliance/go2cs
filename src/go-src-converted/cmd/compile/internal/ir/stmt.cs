@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:16 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:38 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\stmt.go
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// A Decl is a declaration of a const, type, or var. (A declared func is a Func.)
 
 public static partial class ir_package {
 
-    // A Decl is a declaration of a const, type, or var. (A declared func is a Func.)
 public partial struct Decl {
     public ref miniNode miniNode => ref miniNode_val;
     public ptr<Name> X; // the thing being declared
@@ -30,7 +32,6 @@ public static ptr<Decl> NewDecl(src.XPos pos, Op op, ptr<Name> _addr_x) => func(
     else 
         panic("invalid Decl op " + op.String());
         return _addr_n!;
-
 });
 
 private static void isStmt(this ptr<Decl> _addr__p0) {
@@ -103,8 +104,7 @@ private static void SetOp(this ptr<AssignListStmt> _addr_n, Op op) => func((_, p
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // An AssignStmt is a simple assignment statement: X = Y.
 // If Def is true, the assignment is a :=.
@@ -130,8 +130,7 @@ private static void SetOp(this ptr<AssignStmt> _addr_n, Op op) => func((_, panic
         n.op = op;
     else 
         panic(n.no("SetOp " + op.String()));
-    
-});
+    });
 
 // An AssignOpStmt is an AsOp= assignment statement: X AsOp= Y.
 public partial struct AssignOpStmt {
@@ -167,7 +166,6 @@ public static ptr<BlockStmt> NewBlockStmt(src.XPos pos, slice<Node> list) {
     n.op = OBLOCK;
     n.List = list;
     return _addr_n!;
-
 }
 
 // A BranchStmt is a break, continue, fallthrough, or goto statement.
@@ -186,7 +184,6 @@ public static ptr<BranchStmt> NewBranchStmt(src.XPos pos, Op op, ptr<types.Sym> 
     n.pos = pos;
     n.op = op;
     return _addr_n!;
-
 });
 
 private static ptr<types.Sym> Sym(this ptr<BranchStmt> _addr_n) {
@@ -244,7 +241,6 @@ public static ptr<ForStmt> NewForStmt(src.XPos pos, Node init, Node cond, Node p
     }
     n.Body = body;
     return _addr_n!;
-
 }
 
 private static void SetOp(this ptr<ForStmt> _addr_n, Op op) => func((_, panic, _) => {
@@ -254,7 +250,6 @@ private static void SetOp(this ptr<ForStmt> _addr_n, Op op) => func((_, panic, _
         panic(n.no("SetOp " + op.String()));
     }
     n.op = op;
-
 });
 
 // A GoDeferStmt is a go or defer statement: go Call / defer Call.
@@ -276,7 +271,6 @@ public static ptr<GoDeferStmt> NewGoDeferStmt(src.XPos pos, Op op, Node call) =>
     else 
         panic("NewGoDeferStmt " + op.String());
         return _addr_n!;
-
 });
 
 // A IfStmt is a return statement: if Init; Cond { Then } else { Else }.
@@ -443,7 +437,6 @@ public static ptr<TailCallStmt> NewTailCallStmt(src.XPos pos, ptr<Name> _addr_ta
     n.pos = pos;
     n.op = OTAILCALL;
     return _addr_n!;
-
 }
 
 // A TypeSwitchGuard is the [Name :=] X.(type) in a type switch.

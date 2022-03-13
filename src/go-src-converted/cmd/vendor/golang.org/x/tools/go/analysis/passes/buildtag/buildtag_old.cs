@@ -8,20 +8,21 @@
 // +build !go1.16
 
 // Package buildtag defines an Analyzer that checks build tags.
-// package buildtag -- go2cs converted at 2022 March 06 23:34:31 UTC
+
+// package buildtag -- go2cs converted at 2022 March 13 06:41:47 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/buildtag" ==> using buildtag = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.buildtag_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\buildtag\buildtag_old.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
 
 public static partial class buildtag_package {
 
@@ -63,7 +64,6 @@ private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass) {
                 err = err__prev1;
 
             }
-
         }
         name = name__prev1;
     }
@@ -78,11 +78,8 @@ private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass) {
                 if (err != null) { 
                     // Not valid Go source code - not our job to diagnose, so ignore.
                     return (null, error.As(null!)!);
-
                 }
-
                 checkGoFile(_addr_pass, _addr_f);
-
             }
             else
  {
@@ -98,15 +95,12 @@ private static (object, error) runBuildTag(ptr<analysis.Pass> _addr_pass) {
                     err = err__prev2;
 
                 }
-
             }
-
         }
         name = name__prev1;
     }
 
     return (null, error.As(null!)!);
-
 }
 
 private static void checkGoFile(ptr<analysis.Pass> _addr_pass, ptr<ast.File> _addr_f) {
@@ -135,7 +129,6 @@ private static void checkGoFile(ptr<analysis.Pass> _addr_pass, ptr<ast.File> _ad
                 }
 
             }
-
         }
     }
 }
@@ -198,14 +191,12 @@ private static error checkOtherFile(ptr<analysis.Pass> _addr_pass, @string filen
                 }
 
             }
-
         }
         i = i__prev1;
         line = line__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 // checkLine checks a line that starts with "//" and contains "+build".
@@ -218,7 +209,6 @@ private static error checkLine(@string line, bool pastCutoff) {
         if (fields[0] != "+build") { 
             // Comment is something like +buildasdf not +build.
             return error.As(fmt.Errorf("possible malformed +build comment"))!;
-
         }
         if (pastCutoff) {
             return error.As(fmt.Errorf("+build comment must appear before package clause and be followed by a blank line"))!;
@@ -231,7 +221,6 @@ private static error checkLine(@string line, bool pastCutoff) {
             }
 
         }
-
     }
     else
  { 
@@ -241,7 +230,6 @@ private static error checkLine(@string line, bool pastCutoff) {
         }
     }
     return error.As(null!)!;
-
 }
 
 private static error checkArguments(slice<@string> fields) {
@@ -258,7 +246,6 @@ private static error checkArguments(slice<@string> fields) {
             }
         }
     }    return error.As(null!)!;
-
 }
 
 private static slice<byte> nl = (slice<byte>)"\n";private static slice<byte> slashSlash = (slice<byte>)"//";

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:18 UTC
+//     Generated on 2022 March 13 05:29:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace go
 {
     public static partial class net_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct conf
         {
             // Constructors
@@ -69,7 +69,7 @@ namespace go
             public static implicit operator conf(NilType nil) => default(conf);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static conf conf_cast(dynamic value)
         {
             return new conf(value.forceCgoLookupHost, value.netGo, value.netCgo, value.hasMDNSAllow, value.goos, value.dnsDebugLevel, ref value.nss, ref value.resolv);

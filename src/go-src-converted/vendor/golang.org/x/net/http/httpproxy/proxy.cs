@@ -8,27 +8,29 @@
 //
 // The API is not subject to the Go 1 compatibility promise and may change at
 // any time.
-// package httpproxy -- go2cs converted at 2022 March 06 23:37:11 UTC
+
+// package httpproxy -- go2cs converted at 2022 March 13 06:45:26 UTC
 // import "vendor/golang.org/x/net/http/httpproxy" ==> using httpproxy = go.vendor.golang.org.x.net.http.httpproxy_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\http\httpproxy\proxy.go
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using net = go.net_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
-using idna = go.golang.org.x.net.idna_package;
-using System;
-
-
 namespace go.vendor.golang.org.x.net.http;
 
+using errors = errors_package;
+using fmt = fmt_package;
+using net = net_package;
+using url = net.url_package;
+using os = os_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+using idna = golang.org.x.net.idna_package;
+
+
+// Config holds configuration for HTTP proxy settings. See
+// FromEnvironment for details.
+
+using System;
 public static partial class httpproxy_package {
 
-    // Config holds configuration for HTTP proxy settings. See
-    // FromEnvironment for details.
 public partial struct Config {
     public @string HTTPProxy; // HTTPSProxy represents the HTTPS_PROXY or https_proxy
 // environment variable. It will be used as the proxy URL for
@@ -90,9 +92,7 @@ private static @string getEnvAny(params @string[] names) {
             }
 
         }
-
     }    return "";
-
 }
 
 // ProxyFunc returns a function that determines the proxy URL to use for
@@ -112,7 +112,6 @@ private static Func<ptr<url.URL>, (ptr<url.URL>, error)> ProxyFunc(this ptr<Conf
     ptr<config> cfg1 = addr(new config(Config:*cfg,));
     cfg1.init();
     return cfg1.proxyForURL;
-
 }
 
 private static (ptr<url.URL>, error) proxyForURL(this ptr<config> _addr_cfg, ptr<url.URL> _addr_reqURL) {
@@ -138,7 +137,6 @@ private static (ptr<url.URL>, error) proxyForURL(this ptr<config> _addr_cfg, ptr
         return (_addr_null!, error.As(null!)!);
     }
     return (_addr_proxy!, error.As(null!)!);
-
 }
 
 private static (ptr<url.URL>, error) parseProxy(@string proxy) {
@@ -165,13 +163,11 @@ private static (ptr<url.URL>, error) parseProxy(@string proxy) {
             proxyURL = proxyURL__prev2;
 
         }
-
     }
     if (err != null) {
         return (_addr_null!, error.As(fmt.Errorf("invalid proxy address %q: %v", proxy, err))!);
     }
     return (_addr_proxyURL!, error.As(null!)!);
-
 }
 
 // useProxy reports whether requests to addr should use a proxy,
@@ -225,7 +221,6 @@ private static bool useProxy(this ptr<config> _addr_cfg, @string addr) {
     }
 
     return true;
-
 }
 
 private static void init(this ptr<config> _addr_c) {
@@ -242,7 +237,6 @@ private static void init(this ptr<config> _addr_c) {
         parsed = parsed__prev1;
 
     }
-
     {
         var parsed__prev1 = parsed;
 
@@ -254,7 +248,6 @@ private static void init(this ptr<config> _addr_c) {
         parsed = parsed__prev1;
 
     }
-
 
     foreach (var (_, p) in strings.Split(c.NoProxy, ",")) {
         p = strings.ToLower(strings.TrimSpace(p));
@@ -284,13 +277,10 @@ private static void init(this ptr<config> _addr_c) {
             if (len(phost) == 0) { 
                 // There is no host part, likely the entry is malformed; ignore.
                 continue;
-
             }
-
             if (phost[0] == '[' && phost[len(phost) - 1] == ']') {
                 phost = phost[(int)1..(int)len(phost) - 1];
             }
-
         }
         else
  {
@@ -306,11 +296,9 @@ private static void init(this ptr<config> _addr_c) {
 
         }
 
-
         if (len(phost) == 0) { 
             // There is no host part, likely the entry is malformed; ignore.
             continue;
-
         }
         if (strings.HasPrefix(phost, "*.")) {
             phost = phost[(int)1..];
@@ -321,7 +309,6 @@ private static void init(this ptr<config> _addr_c) {
             phost = "." + phost;
         }
         c.domainMatchers = append(c.domainMatchers, new domainMatch(host:phost,port:pport,matchHost:matchHost));
-
     }
 }
 
@@ -339,13 +326,11 @@ private static @string canonicalAddr(ptr<url.URL> _addr_url) {
             addr = v;
         }
     }
-
     var port = url.Port();
     if (port == "") {
         port = portMap[url.Scheme];
     }
     return net.JoinHostPort(addr, port);
-
 }
 
 // Given a string of the form "host", "host:port", or "[ipv6::address]:port",
@@ -371,7 +356,6 @@ private static (@string, error) idnaASCII(@string v) {
         return (v, error.As(null!)!);
     }
     return idna.Lookup.ToASCII(v);
-
 }
 
 private static bool isASCII(@string s) {
@@ -381,7 +365,6 @@ private static bool isASCII(@string s) {
         }
     }
     return true;
-
 }
 
 // matcher represents the matching rule for a given value in the NO_PROXY list
@@ -415,7 +398,6 @@ private static bool match(this ipMatch m, @string host, @string port, net.IP ip)
         return m.port == "" || m.port == port;
     }
     return false;
-
 }
 
 private partial struct domainMatch {
@@ -429,7 +411,6 @@ private static bool match(this domainMatch m, @string host, @string port, net.IP
         return m.port == "" || m.port == port;
     }
     return false;
-
 }
 
 } // end httpproxy_package

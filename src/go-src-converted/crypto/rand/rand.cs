@@ -4,23 +4,24 @@
 
 // Package rand implements a cryptographically secure
 // random number generator.
-// package rand -- go2cs converted at 2022 March 06 22:17:18 UTC
+
+// package rand -- go2cs converted at 2022 March 13 05:30:40 UTC
 // import "crypto/rand" ==> using rand = go.crypto.rand_package
 // Original source: C:\Program Files\Go\src\crypto\rand\rand.go
-using io = go.io_package;
-
 namespace go.crypto;
+
+using io = io_package;
 
 public static partial class rand_package {
 
-    // Reader is a global, shared instance of a cryptographically
-    // secure random number generator.
-    //
-    // On Linux and FreeBSD, Reader uses getrandom(2) if available, /dev/urandom otherwise.
-    // On OpenBSD, Reader uses getentropy(2).
-    // On other Unix-like systems, Reader reads from /dev/urandom.
-    // On Windows systems, Reader uses the RtlGenRandom API.
-    // On Wasm, Reader uses the Web Crypto API.
+// Reader is a global, shared instance of a cryptographically
+// secure random number generator.
+//
+// On Linux and FreeBSD, Reader uses getrandom(2) if available, /dev/urandom otherwise.
+// On OpenBSD, Reader uses getentropy(2).
+// On other Unix-like systems, Reader reads from /dev/urandom.
+// On Windows systems, Reader uses the RtlGenRandom API.
+// On Wasm, Reader uses the Web Crypto API.
 public static io.Reader Reader = default;
 
 // Read is a helper function that calls Reader.Read using io.ReadFull.

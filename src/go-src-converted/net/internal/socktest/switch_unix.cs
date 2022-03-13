@@ -5,16 +5,14 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package socktest -- go2cs converted at 2022 March 06 22:25:41 UTC
+// package socktest -- go2cs converted at 2022 March 13 05:40:14 UTC
 // import "net/internal/socktest" ==> using socktest = go.net.@internal.socktest_package
 // Original source: C:\Program Files\Go\src\net\internal\socktest\switch_unix.go
-
-
 namespace go.net.@internal;
 
 public static partial class socktest_package {
 
-    // Sockets maps a socket descriptor to the status of socket.
+// Sockets maps a socket descriptor to the status of socket.
 public partial struct Sockets { // : map<nint, Status>
 }
 
@@ -28,7 +26,6 @@ private static ptr<Status> sockso(this ptr<Switch> _addr_sw, nint s) => func((de
         return _addr_null!;
     }
     return _addr__addr_so!;
-
 });
 
 // addLocked returns a new Status without locking.

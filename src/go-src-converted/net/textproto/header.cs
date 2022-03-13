@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2022 March 06 22:21:09 UTC
+// package textproto -- go2cs converted at 2022 March 13 05:36:17 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Program Files\Go\src\net\textproto\header.go
-
-
 namespace go.net;
 
 public static partial class textproto_package {
 
-    // A MIMEHeader represents a MIME-style header mapping
-    // keys to sets of values.
+// A MIMEHeader represents a MIME-style header mapping
+// keys to sets of values.
 public partial struct MIMEHeader { // : map<@string, slice<@string>>
 }
 
@@ -44,7 +42,6 @@ public static @string Get(this MIMEHeader h, @string key) {
         return "";
     }
     return v[0];
-
 }
 
 // Values returns all values associated with the given key.
@@ -57,7 +54,6 @@ public static slice<@string> Values(this MIMEHeader h, @string key) {
         return null;
     }
     return h[CanonicalMIMEHeaderKey(key)];
-
 }
 
 // Del deletes the values associated with key.

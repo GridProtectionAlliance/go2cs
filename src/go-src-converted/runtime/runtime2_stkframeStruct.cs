@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:17 UTC
+//     Generated on 2022 March 13 05:26:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct stkframe
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace go
             public static implicit operator stkframe(NilType nil) => default(stkframe);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static stkframe stkframe_cast(dynamic value)
         {
             return new stkframe(value.fn, value.pc, value.continpc, value.lr, value.sp, value.fp, value.varp, value.argp, value.arglen, ref value.argmap);

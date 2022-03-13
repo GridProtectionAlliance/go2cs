@@ -5,15 +5,15 @@
 //go:build !wasm && !windows
 // +build !wasm,!windows
 
-// package ld -- go2cs converted at 2022 March 06 23:21:23 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:22 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\execarchive.go
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using syscall = go.syscall_package;
-
 namespace go.cmd.link.@internal;
+
+using exec = @internal.execabs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using syscall = syscall_package;
 
 public static partial class ld_package {
 

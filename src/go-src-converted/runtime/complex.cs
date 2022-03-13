@@ -2,24 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:26 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:15 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\complex.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // inf2one returns a signed 1 if f is an infinity and a signed 0 otherwise.
-    // The sign of the result is the sign of f.
+// inf2one returns a signed 1 if f is an infinity and a signed 0 otherwise.
+// The sign of the result is the sign of f.
 private static double inf2one(double f) {
     float g = 0.0F;
     if (isInf(f)) {
         g = 1.0F;
     }
     return copysign(g, f);
-
 }
 
 private static System.Numerics.Complex128 complex128div(System.Numerics.Complex128 n, System.Numerics.Complex128 m) {
@@ -67,10 +64,8 @@ private static System.Numerics.Complex128 complex128div(System.Numerics.Complex1
             d = inf2one(d);
             e = 0 * (a * c + b * d);
             f = 0 * (b * c - a * d);
-        
-    }
+            }
     return complex(e, f);
-
 }
 
 } // end runtime_package

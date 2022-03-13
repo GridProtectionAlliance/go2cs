@@ -2,30 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:47:31 UTC
+// package main -- go2cs converted at 2022 March 13 05:58:47 UTC
 // Original source: C:\Program Files\Go\src\cmd\cgo\out.go
-using bytes = go.bytes_package;
-using pkgpath = go.cmd.@internal.pkgpath_package;
-using elf = go.debug.elf_package;
-using macho = go.debug.macho_package;
-using pe = go.debug.pe_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using printer = go.go.printer_package;
-using token = go.go.token_package;
-using exec = go.@internal.execabs_package;
-using xcoff = go.@internal.xcoff_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using System;
-
-
 namespace go;
+
+using bytes = bytes_package;
+using pkgpath = cmd.@internal.pkgpath_package;
+using elf = debug.elf_package;
+using macho = debug.macho_package;
+using pe = debug.pe_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using printer = go.printer_package;
+using token = go.token_package;
+using exec = @internal.execabs_package;
+using xcoff = @internal.xcoff_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using System;
 
 public static partial class main_package {
 
@@ -74,7 +73,6 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
         fmt.Fprintf(fm, "void crosscall2(void(*fn)(void*), void *a, int c, __SIZE_TYPE__ ctxt);\n");
         fmt.Fprintf(fm, "__SIZE_TYPE__ _cgo_wait_runtime_init_done(void);\n");
         fmt.Fprintf(fm, "void _cgo_release_context(__SIZE_TYPE__);\n");
-
     }
     fmt.Fprintf(fm, "void _cgo_allocate(void *a, int c) { }\n");
     fmt.Fprintf(fm, "void _cgo_panic(void *a, int c) { }\n");
@@ -111,11 +109,8 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
                 // We provide an appropriate declaration for
                 // _Ctype_void below (#39877).
                 continue;
-
             }
-
             typedefNames = append(typedefNames, name);
-
         }
         name = name__prev1;
     }
@@ -148,12 +143,9 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
             if (bytes.HasPrefix(buf.Bytes(), (slice<byte>)"_Ctype_") || strings.HasPrefix(name, "_Ctype_enum_") || strings.HasPrefix(name, "_Ctype_union_")) { 
                 // This typedef is of the form `typedef a b` and should be an alias.
                 fmt.Fprintf(fgo2, "= ");
-
             }
-
             fmt.Fprintf(fgo2, "%s", buf.Bytes());
             fmt.Fprintf(fgo2, "\n\n");
-
         }
         name = name__prev1;
     }
@@ -211,17 +203,12 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
                         fmt.Fprintf(fm, "extern char %s[];\n", n.C);
                         fmt.Fprintf(fm, "void *_cgohack_%s = %s;\n\n", n.C, n.C);
                     }
-
                     fmt.Fprintf(fgo2, "//go:linkname __cgo_%s %s\n", n.C, n.C);
                     fmt.Fprintf(fgo2, "//go:cgo_import_static %s\n", n.C);
                     fmt.Fprintf(fgo2, "var __cgo_%s byte\n", n.C);
-
                 }
-
                 cVars[n.C] = true;
-
             }
-
             ast.Node node = default;
             if (n.Kind == "var") {
                 node = addr(new ast.StarExpr(X:n.Type.Go));
@@ -233,13 +220,11 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
  {
                 panic(fmt.Errorf("invalid var kind %q", n.Kind));
             }
-
             if (gccgo.val) {
                 fmt.Fprintf(fc, "extern void *%s __asm__(\"%s.%s\");", n.Mangle, gccgoSymbolPrefix, gccgoToSymbol(n.Mangle));
                 fmt.Fprintf(_addr_gccgoInit, "\t%s = &%s;\n", n.Mangle, n.C);
                 fmt.Fprintf(fc, "\n");
             }
-
             fmt.Fprintf(fgo2, "var %s ", n.Mangle);
             conf.Fprint(fgo2, fset, node);
             if (!gccgo.val) {
@@ -247,9 +232,7 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
                 conf.Fprint(fgo2, fset, node);
                 fmt.Fprintf(fgo2, ")(unsafe.Pointer(&__cgo_%s))", n.C);
             }
-
             fmt.Fprintf(fgo2, "\n");
-
         }
         key = key__prev1;
     }
@@ -310,7 +293,6 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -322,7 +304,6 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
         err = err__prev1;
 
     }
-
 
     if (exportHeader != "" && len(p.ExpFunc) > 0.val) {
         var fexp = creat(exportHeader.val);
@@ -362,7 +343,6 @@ private static void writeDefs(this ptr<Package> _addr_p) => func((defer, panic, 
         fmt.Fprintln(fc, "static void init(void) {");
         fmt.Fprint(fc, init);
         fmt.Fprintln(fc, "}");
-
     }
 });
 
@@ -390,7 +370,6 @@ private static slice<elf.ImportedSymbol> elfImportedSymbols(ptr<elf.File> _addr_
             imports = append(imports, new elf.ImportedSymbol(Name:s.Name,Library:s.Library,Version:s.Version,));
         }
     }    return imports;
-
 }
 
 private static void dynimport(@string obj) {
@@ -401,7 +380,6 @@ private static void dynimport(@string obj) {
             fatalf("%s", err);
         }
         stdout = f;
-
     }
     fmt.Fprintf(stdout, "package %s\n", dynpackage.val);
 
@@ -423,17 +401,13 @@ private static void dynimport(@string obj) {
                             if (err == null && len(data) > 1) { 
                                 // skip trailing \0 in data
                                 fmt.Fprintf(stdout, "//go:cgo_dynamic_linker %q\n", string(data[..(int)len(data) - 1]));
-
                             }
 
                         }
-
                     }
 
                 }
-
             }
-
             var sym = elfImportedSymbols(_addr_f);
             {
                 var s__prev1 = s;
@@ -465,12 +439,10 @@ private static void dynimport(@string obj) {
             }
 
             return ;
-
         }
         f = f__prev1;
 
     }
-
 
     {
         var f__prev1 = f;
@@ -507,12 +479,10 @@ private static void dynimport(@string obj) {
             }
 
             return ;
-
         }
         f = f__prev1;
 
     }
-
 
     {
         var f__prev1 = f;
@@ -537,12 +507,10 @@ private static void dynimport(@string obj) {
             }
 
             return ;
-
         }
         f = f__prev1;
 
     }
-
 
     {
         var f__prev1 = f;
@@ -564,12 +532,9 @@ private static void dynimport(@string obj) {
                         // must not be added to _cgo_import.go as there are
                         // Go symbols.
                         continue;
-
                     }
-
                     checkImportSymName(s.Name);
                     fmt.Fprintf(stdout, "//go:cgo_import_dynamic %s %s %q\n", s.Name, s.Name, s.Library);
-
                 }
 
                 s = s__prev1;
@@ -579,7 +544,6 @@ private static void dynimport(@string obj) {
             if (err != null) {
                 fatalf("cannot load imported libraries from XCOFF file %s: %v", obj, err);
             }
-
             {
                 var l__prev1 = l;
 
@@ -592,15 +556,12 @@ private static void dynimport(@string obj) {
             }
 
             return ;
-
         }
         f = f__prev1;
 
     }
 
-
     fatalf("cannot parse %s as ELF, Mach-O, PE or XCOFF", obj);
-
 }
 
 // checkImportSymName checks a symbol name we are going to emit as part
@@ -676,7 +637,6 @@ private static (@string, long) structType(this ptr<Package> _addr_p, ptr<Name> _
         t = t__prev1;
 
     }
-
     if (off % p.PtrSize != 0) {
         pad = p.PtrSize - off % p.PtrSize;
         fmt.Fprintf(_addr_buf, "\t\tchar __pad%d[%d];\n", off, pad);
@@ -687,7 +647,6 @@ private static (@string, long) structType(this ptr<Package> _addr_p, ptr<Name> _
     }
     fmt.Fprintf(_addr_buf, "\t}");
     return (buf.String(), off);
-
 }
 
 private static void writeDefsFunc(this ptr<Package> _addr_p, io.Writer fgo2, ptr<Name> _addr_n, ptr<bool> _addr_callsMalloc) {
@@ -714,7 +673,6 @@ private static void writeDefsFunc(this ptr<Package> _addr_p, io.Writer fgo2, ptr
         t.val = gtype.val;
         t.Results = addr(new ast.FieldList(List:l));
         gtype = t;
-
     }
     ptr<ast.FuncDecl> d = addr(new ast.FuncDecl(Name:ast.NewIdent(n.Mangle),Type:gtype,)); 
 
@@ -786,7 +744,6 @@ private static void writeDefsFunc(this ptr<Package> _addr_p, io.Writer fgo2, ptr
         fmt.Fprint(fgo2, "\n");
 
         return ;
-
     }
     if (inProlog) {
         fmt.Fprint(fgo2, builtinDefs[name]);
@@ -794,7 +751,6 @@ private static void writeDefsFunc(this ptr<Package> _addr_p, io.Writer fgo2, ptr
             callsMalloc = true;
         }
         return ;
-
     }
     fmt.Fprintf(fgo2, "//go:cgo_import_static %s\n", cname);
     fmt.Fprintf(fgo2, "//go:linkname __cgofn_%s %s\n", cname, cname);
@@ -846,7 +802,6 @@ private static void writeDefsFunc(this ptr<Package> _addr_p, io.Writer fgo2, ptr
     fmt.Fprintf(fgo2, "\t}\n");
     fmt.Fprintf(fgo2, "\treturn\n");
     fmt.Fprintf(fgo2, "}\n");
-
 }
 
 // writeOutput creates stubs for a specific source file to be compiled by gc
@@ -885,7 +840,6 @@ private static void writeOutput(this ptr<Package> _addr_p, ptr<File> _addr_f, @s
         }
     }    fgo1.Close();
     fgcc.Close();
-
 }
 
 // fixGo converts the internal Name.Go field into the name we should show
@@ -896,7 +850,6 @@ private static @string fixGo(@string name) {
         return "malloc";
     }
     return name;
-
 }
 
 private static map isBuiltin = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, bool>{"_Cfunc_CString":true,"_Cfunc_CBytes":true,"_Cfunc_GoString":true,"_Cfunc_GoStringN":true,"_Cfunc_GoBytes":true,"_Cfunc__CMalloc":true,};
@@ -911,7 +864,6 @@ private static void writeOutputFunc(this ptr<Package> _addr_p, ptr<os.File> _add
         // The builtins are already defined in the C prolog, and we don't
         // want to duplicate function definitions we've already done.
         return ;
-
     }
     p.Written[name] = true;
 
@@ -940,7 +892,6 @@ private static void writeOutputFunc(this ptr<Package> _addr_p, ptr<os.File> _add
     if (n.FuncType.Result != null) { 
         // Save the stack top for use below.
         fmt.Fprintf(fgcc, "\tchar *_cgo_stktop = _cgo_topofstack();\n");
-
     }
     var tr = n.FuncType.Result;
     if (tr != null) {
@@ -961,7 +912,6 @@ private static void writeOutputFunc(this ptr<Package> _addr_p, ptr<os.File> _add
             }
 
         }
-
     }
     if (n.Kind == "macro") {
         fmt.Fprintf(fgcc, "%s;\n", n.C);
@@ -996,14 +946,12 @@ private static void writeOutputFunc(this ptr<Package> _addr_p, ptr<os.File> _add
         // Mark the stack space as written, to avoid this problem.
         // See issue 26209.
         fmt.Fprintf(fgcc, "\t_cgo_msan_write(&_cgo_a->r, sizeof(_cgo_a->r));\n");
-
     }
     if (n.AddError) {
         fmt.Fprintf(fgcc, "\treturn _cgo_errno;\n");
     }
     fmt.Fprintf(fgcc, "}\n");
     fmt.Fprintf(fgcc, "\n");
-
 }
 
 // Write out a wrapper for a function when using gccgo. This is a
@@ -1032,7 +980,6 @@ private static void writeGccgoOutputFunc(this ptr<Package> _addr_p, ptr<os.File>
         t = t__prev1;
 
     }
-
     fmt.Fprintf(fgcc, "_cgo%s%s(", cPrefix, n.Mangle);
     {
         var i__prev1 = i;
@@ -1067,7 +1014,6 @@ private static void writeGccgoOutputFunc(this ptr<Package> _addr_p, ptr<os.File>
         t = t__prev1;
 
     }
-
     fmt.Fprintf(fgcc, "\t_cgo_tsan_acquire();\n");
     fmt.Fprintf(fgcc, "\t");
     {
@@ -1090,12 +1036,10 @@ private static void writeGccgoOutputFunc(this ptr<Package> _addr_p, ptr<os.File>
                 c = c__prev2;
 
             }
-
         }
         t = t__prev1;
 
     }
-
     if (n.Kind == "macro") {
         fmt.Fprintf(fgcc, "%s;\n", n.C);
     }
@@ -1117,7 +1061,6 @@ private static void writeGccgoOutputFunc(this ptr<Package> _addr_p, ptr<os.File>
         }
 
         fmt.Fprintf(fgcc, ");\n");
-
     }
     fmt.Fprintf(fgcc, "\t_cgo_tsan_release();\n");
     {
@@ -1141,17 +1084,13 @@ private static void writeGccgoOutputFunc(this ptr<Package> _addr_p, ptr<os.File>
                 c = c__prev2;
 
             }
-
             fmt.Fprintf(fgcc, "_cgo_r;\n");
-
         }
         t = t__prev1;
 
     }
-
     fmt.Fprintf(fgcc, "}\n");
     fmt.Fprintf(fgcc, "\n");
-
 }
 
 // packedAttribute returns host compiler struct attribute that will be
@@ -1167,7 +1106,6 @@ private static @string packedAttribute(this ptr<Package> _addr_p) {
         s += ", __gcc_struct__";
     }
     return s + "))";
-
 }
 
 // exportParamName returns the value of param as it should be
@@ -1189,7 +1127,6 @@ private static @string exportParamName(@string param, nint position) {
     }
 
     return pname;
-
 }
 
 // Write out the various stubs we need to support functions exported
@@ -1350,7 +1287,6 @@ private static void writeExports(this ptr<Package> _addr_p, io.Writer fgo2, io.W
                 });
                 fmt.Fprintf(fgcc, "\treturn r;\n");
             }
-
         }
         fmt.Fprintf(fgcc, "}\n"); 
 
@@ -1387,7 +1323,6 @@ private static void writeExports(this ptr<Package> _addr_p, io.Writer fgo2, io.W
                 fmt.Fprintf(fgo2, "a.r%d", i);
             });
             fmt.Fprintf(fgo2, " = ");
-
         }
         if (fn.Recv != null) {
             fmt.Fprintf(fgo2, "a.recv.");
@@ -1409,12 +1344,9 @@ private static void writeExports(this ptr<Package> _addr_p, io.Writer fgo2, io.W
                 }
                 fmt.Fprintf(fgo2, "\t_cgoCheckResult(a.r%d)\n", i);
             });
-
         }
         fmt.Fprint(fgo2, "}\n");
-
     }    fmt.Fprintf(fgcch, "%s", gccExportHeaderEpilog);
-
 }
 
 // Write out the C header allowing C code to call exported gccgo functions.
@@ -1580,9 +1512,7 @@ private static void writeGccgoExports(this ptr<Package> _addr_p, io.Writer fgo2,
         });
         fmt.Fprint(fgo2, ")\n");
         fmt.Fprint(fgo2, "}\n");
-
     }    fmt.Fprintf(fgcch, "%s", gccExportHeaderEpilog);
-
 }
 
 // writeExportHeader writes out the start of the _cgo_export.h file.
@@ -1609,7 +1539,6 @@ private static void writeExportHeader(this ptr<Package> _addr_p, io.Writer fgcch
     fmt.Fprintf(fgcch, "\n/* End of preamble from import \"C\" comments.  */\n\n");
 
     fmt.Fprintf(fgcch, "%s\n", p.gccExportHeaderProlog());
-
 }
 
 // gccgoToSymbol converts a name to a mangled symbol for gccgo.
@@ -1629,7 +1558,6 @@ private static @string gccgoToSymbol(@string ppath) {
         }
     }
     return gccgoMangler(ppath);
-
 }
 
 // Return the package prefix when using gccgo.
@@ -1650,7 +1578,6 @@ private static @string gccgoSymbolPrefix(this ptr<Package> _addr_p) {
         prefix = "go";
     }
     return prefix + "." + p.PackageName;
-
 }
 
 // Call a function for each entry in an ast.FieldList, passing the
@@ -1699,7 +1626,6 @@ private static ptr<Type> cgoType(this ptr<Package> _addr_p, ast.Expr e) {
             if (t.Len == null) { 
                 // Slice: pointer, len, cap.
                 return addr(new Type(Size:p.PtrSize*3,Align:p.PtrSize,C:c("GoSlice")));
-
             } 
             // Non-slice array types are not supported.
             break;
@@ -1741,21 +1667,16 @@ private static ptr<Type> cgoType(this ptr<Package> _addr_p, ast.Expr e) {
                 }
 
             }
-
             if (t.Name == "uintptr") {
                 return addr(new Type(Size:p.PtrSize,Align:p.PtrSize,C:c("GoUintptr")));
             }
-
             if (t.Name == "string") { 
                 // The string data is 1 pointer + 1 (pointer-sized) int.
                 return addr(new Type(Size:2*p.PtrSize,Align:p.PtrSize,C:c("GoString")));
-
             }
-
             if (t.Name == "error") {
                 return addr(new Type(Size:2*p.PtrSize,Align:p.PtrSize,C:c("GoInterface")));
             }
-
             {
                 var (r, ok) = goTypes[t.Name];
 
@@ -1766,19 +1687,14 @@ private static ptr<Type> cgoType(this ptr<Package> _addr_p, ast.Expr e) {
                         rr.Size = p.IntSize;
                         rr.Align = p.IntSize;
                         r = rr;
-
                     }
-
                     if (r.Align > p.PtrSize) {
                         r.Align = p.PtrSize;
                     }
-
                     return _addr_r!;
-
                 }
 
             }
-
             error_(e.Pos(), "unrecognized Go type %s", t.Name);
             return addr(new Type(Size:4,Align:4,C:c("int")));
             break;
@@ -1791,7 +1707,6 @@ private static ptr<Type> cgoType(this ptr<Package> _addr_p, ast.Expr e) {
     }
     error_(e.Pos(), "Go type not supported in export: %s", gofmt(e));
     return addr(new Type(Size:4,Align:4,C:c("int")));
-
 }
 
 private static readonly @string gccProlog = @"

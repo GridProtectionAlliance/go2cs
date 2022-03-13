@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:07 UTC
+//     Generated on 2022 March 13 06:00:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace @internal
 {
     public static partial class ir_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Func
         {
             // Constructors
@@ -108,7 +108,7 @@ namespace @internal
             public static implicit operator Func(NilType nil) => default(Func);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Func Func_cast(dynamic value)
         {
             return new Func(value.miniNode, value.Body, value.Iota, ref value.Nname, ref value.OClosure, ref value.Shortname, value.Enter, value.Exit, value.Dcl, value.ClosureVars, value.Closures, value.Parents, value.Marks, ref value.LSym, ref value.Inl, value.Closgen, value.Label, value.Endlineno, value.WBPos, value.Pragma, value.flags, value.ABI, value.ABIRefs, value.NumDefers, value.NumReturns, ref value.NWBRCalls);

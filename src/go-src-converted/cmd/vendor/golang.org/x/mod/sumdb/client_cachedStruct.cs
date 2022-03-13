@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:26:12 UTC
+//     Generated on 2022 March 13 06:41:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace mod
 {
     public static partial class sumdb_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct cached
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace mod
             public static implicit operator cached(NilType nil) => default(cached);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static cached cached_cast(dynamic value)
         {
             return new cached(value.data, value.err);

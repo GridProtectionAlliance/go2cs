@@ -2,33 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:23 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:45 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\modfile.go
-using context = go.context_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using unicode = go.unicode_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using modfetch = go.cmd.go.@internal.modfetch_package;
-using par = go.cmd.go.@internal.par_package;
-using trace = go.cmd.go.@internal.trace_package;
-
-using modfile = go.golang.org.x.mod.modfile_package;
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+using unicode = unicode_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using modfetch = cmd.go.@internal.modfetch_package;
+using par = cmd.go.@internal.par_package;
+using trace = cmd.go.@internal.trace_package;
+
+using modfile = golang.org.x.mod.modfile_package;
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+using System;
 
 public static partial class modload_package {
 
@@ -48,7 +47,6 @@ private static readonly @string lazyLoadingVersionV = "v1.17";
 // ones. See https://golang.org/issue/45965.
 private static readonly @string separateIndirectVersionV = "v1.17";
 
-
  
 // go117EnableLazyLoading toggles whether lazy-loading code paths should be
 // active. It will be removed once the lazy loading implementation is stable
@@ -59,7 +57,6 @@ private static readonly var go117EnableLazyLoading = true;
 // implemented. Its use indicates a condition that will need to change if the
 // main module is lazy.
 private static readonly var go117LazyTODO = false;
-
 
 private static ptr<modfile.File> modFile;
 
@@ -80,10 +77,8 @@ private static @string modFileGoVersion() {
         // go.mod file without a 'go' directive is theoretically a Go 1.11 file,
         // scripts may assume that it ends up as a Go 1.16 module.
         return "1.16";
-
     }
     return modFile.Go.Version;
-
 }
 
 // A modFileIndex is an index of data corresponding to a modFile
@@ -121,7 +116,6 @@ private static modDepth modDepthFromGoVersion(@string goVersion) {
         return eager;
     }
     return lazy;
-
 }
 
 // CheckAllowed returns an error equivalent to ErrDisallowed if m is excluded by
@@ -139,7 +133,6 @@ public static error CheckAllowed(context.Context ctx, module.Version m) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -151,9 +144,7 @@ public static error CheckAllowed(context.Context ctx, module.Version m) {
         err = err__prev1;
 
     }
-
     return error.As(null!)!;
-
 }
 
 // ErrDisallowed is returned by version predicates passed to Query and similar
@@ -167,7 +158,6 @@ public static error CheckExclusions(context.Context ctx, module.Version m) {
         return error.As(module.VersionError(m, errExcluded))!;
     }
     return error.As(null!)!;
-
 }
 
 private static ptr<excludedError> errExcluded = addr(new excludedError());
@@ -212,16 +202,13 @@ public static error CheckRetractions(context.Context ctx, module.Version m) => f
             }
 
         }
-
         err = addr(new retractionLoadingError(m:m,err:err));
-
     }());
 
     if (m.Version == "") { 
         // Main module, standard library, or file replacement module.
         // Cannot be retracted.
         return error.As(null!)!;
-
     }
     {
         var repl = Replacement(new module.Version(Path:m.Path));
@@ -230,7 +217,6 @@ public static error CheckRetractions(context.Context ctx, module.Version m) => f
             // All versions of the module were replaced.
             // Don't load retractions, since we'd just load the replacement.
             return error.As(null!)!;
-
         }
     } 
 
@@ -266,7 +252,6 @@ public static error CheckRetractions(context.Context ctx, module.Version m) => f
         return error.As(module.VersionError(m, addr(new ModuleRetractedError(Rationale:rationale))))!;
     }
     return error.As(null!)!;
-
 });
 
 public partial struct ModuleRetractedError {
@@ -281,10 +266,8 @@ private static @string Error(this ptr<ModuleRetractedError> _addr_e) {
         // This is meant to be a short error printed on a terminal, so just
         // print the first rationale.
         msg += ": " + ShortMessage(e.Rationale[0], "retracted by module author");
-
     }
     return msg;
-
 }
 
 private static bool Is(this ptr<ModuleRetractedError> _addr_e, error err) {
@@ -326,7 +309,6 @@ public static @string ShortMessage(@string message, @string emptyDefault) {
             message = message[..(int)i];
         }
     }
-
     message = strings.TrimSpace(message);
     if (message == "") {
         return emptyDefault;
@@ -339,7 +321,6 @@ public static @string ShortMessage(@string message, @string emptyDefault) {
             return "(message omitted: contains non-printable characters)";
         }
     }    return message;
-
 }
 
 // CheckDeprecation returns a deprecation message from the go.mod file of the
@@ -363,7 +344,6 @@ public static (@string, error) CheckDeprecation(context.Context ctx, module.Vers
         // Main module, standard library, or file replacement module.
         // Don't look up deprecation.
         return ("", error.As(null!)!);
-
     }
     {
         var repl = Replacement(new module.Version(Path:m.Path));
@@ -372,10 +352,8 @@ public static (@string, error) CheckDeprecation(context.Context ctx, module.Vers
             // All versions of the module were replaced.
             // We'll look up deprecation separately for the replacement.
             return ("", error.As(null!)!);
-
         }
     }
-
 
     var (latest, err) = queryLatestVersionIgnoringRetractions(ctx, m.Path);
     if (err != null) {
@@ -386,7 +364,6 @@ public static (@string, error) CheckDeprecation(context.Context ctx, module.Vers
         return ("", error.As(err)!);
     }
     return (summary.deprecated, error.As(null!)!);
-
 });
 
 // Replacement returns the replacement for mod, if any, from go.mod.
@@ -406,7 +383,6 @@ public static module.Version Replacement(module.Version mod) {
             r = r__prev2;
 
         }
-
         {
             var r__prev2 = r;
 
@@ -419,10 +395,8 @@ public static module.Version Replacement(module.Version mod) {
             r = r__prev2;
 
         }
-
     }
     return new module.Version();
-
 }
 
 // resolveReplacement returns the module actually used to load the source code
@@ -435,9 +409,7 @@ private static module.Version resolveReplacement(module.Version m) {
             return r;
         }
     }
-
     return m;
-
 }
 
 // indexModFile rebuilds the index of modFile.
@@ -464,7 +436,6 @@ private static ptr<modFileIndex> indexModFile(slice<byte> data, ptr<modfile.File
         // and add the "v" prefix it expects once instead of every time.
         i.goVersionV = "v" + modFile.Go.Version;
         rawGoVersion.Store(Target, modFile.Go.Version);
-
     }
     i.require = make_map<module.Version, requireMeta>(len(modFile.Require));
     {
@@ -491,9 +462,7 @@ private static ptr<modFileIndex> indexModFile(slice<byte> data, ptr<modfile.File
                 }
 
             }
-
             i.replace[r.Old] = r.New;
-
         }
         r = r__prev1;
     }
@@ -516,7 +485,6 @@ private static ptr<modFileIndex> indexModFile(slice<byte> data, ptr<modfile.File
     foreach (var (_, x) in modFile.Exclude) {
         i.exclude[x.Mod] = true;
     }    return _addr_i!;
-
 }
 
 // modFileIsDirty reports whether the go.mod file differs meaningfully
@@ -582,12 +550,9 @@ private static bool modFileIsDirty(this ptr<modFileIndex> _addr_i, ptr<modfile.F
  {
                         return true;
                     }
-
                 }
 
-
             }
-
         }
         r = r__prev1;
     }
@@ -609,7 +574,6 @@ private static bool modFileIsDirty(this ptr<modFileIndex> _addr_i, ptr<modfile.F
             return true;
         }
     }    return false;
-
 }
 
 // rawGoVersion records the Go version parsed from each module's go.mod file.
@@ -661,7 +625,6 @@ private static (ptr<modFileSummary>, error) goModSummary(module.Version m) => fu
             // This module is not vendored, so packages cannot be loaded from it and
             // it cannot be relevant to the build.
             return (_addr_summary!, error.As(null!)!);
-
         }
         readVendorList(); 
 
@@ -669,7 +632,6 @@ private static (ptr<modFileSummary>, error) goModSummary(module.Version m) => fu
         // so assume that it requires everything.
         summary.require = vendorList;
         return (_addr_summary!, error.As(null!)!);
-
     }
     var actual = resolveReplacement(m);
     if (HasModRoot() && cfg.BuildMod == "readonly" && actual.Version != "") {
@@ -702,11 +664,9 @@ private static (ptr<modFileSummary>, error) goModSummary(module.Version m) => fu
             if (mpath != m.Path && mpath != actual.Path) {
                 return (_addr_null!, error.As(module.VersionError(actual, fmt.Errorf("parsing go.mod:\n\tmodule declares its path as: %s\n\t        but was required as: %s" +
     "", mpath, m.Path)))!);
-
             }
 
         }
-
     }
     if (index != null && len(index.exclude) > 0) { 
         // Drop any requirements on excluded versions.
@@ -745,11 +705,9 @@ private static (ptr<modFileSummary>, error) goModSummary(module.Version m) => fu
             }
 
             summary = addr(s);
-
         }
     }
     return (_addr_summary!, error.As(null!)!);
-
 });
 
 // rawGoModSummary returns a new summary of the go.mod file for module m,
@@ -804,11 +762,9 @@ private static (ptr<modFileSummary>, error) rawGoModSummary(module.Version m) =>
             }
         }
         return _addr_new cached(summary,nil)!;
-
     })._<cached>();
 
     return (_addr_c.summary!, error.As(c.err)!);
-
 });
 
 private static par.Cache rawGoModSummaryCache = default; // module.Version → rawGoModSummary result
@@ -840,7 +796,6 @@ private static (@string, slice<byte>, error) rawGoModData(module.Version m) {
                 // On Plan 9, locking requires chmod, and we don't want to modify any file
                 // in the overlay. See #44700.
                 data, err = os.ReadFile(gomodActual);
-
             }
             else
  {
@@ -848,7 +803,6 @@ private static (@string, slice<byte>, error) rawGoModData(module.Version m) {
             }
 
         }
-
         if (err != null) {
             return ("", null, error.As(module.VersionError(m, fmt.Errorf("reading %s: %v", @base.ShortPath(name), err)))!);
         }
@@ -858,14 +812,11 @@ private static (@string, slice<byte>, error) rawGoModData(module.Version m) {
         if (!semver.IsValid(m.Version)) { 
             // Disallow the broader queries supported by fetch.Lookup.
             @base.Fatalf("go: internal error: %s@%s: unexpected invalid semantic version", m.Path, m.Version);
-
         }
         name = "go.mod";
         data, err = modfetch.GoMod(m.Path, m.Version);
-
     }
     return (name, data, error.As(err)!);
-
 }
 
 // queryLatestVersionIgnoringRetractions looks up the latest version of the
@@ -899,7 +850,6 @@ private static (module.Version, error) queryLatestVersionIgnoringRetractions(con
                 // All versions of the module were replaced.
                 // No need to query.
                 return addr(new entry(latest:repl));
-
             } 
 
             // Find the latest version of the module.
@@ -931,12 +881,9 @@ private static (module.Version, error) queryLatestVersionIgnoringRetractions(con
             repl = repl__prev1;
 
         }
-
         return addr(new entry(latest:latest));
-
     })._<ptr<entry>>();
     return (e.latest, error.As(e.err)!);
-
 });
 
 private static par.Cache latestVersionIgnoringRetractionsCache = default; // path → queryLatestVersionIgnoringRetractions result

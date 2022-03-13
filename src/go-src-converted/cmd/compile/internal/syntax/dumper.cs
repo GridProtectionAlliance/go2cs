@@ -4,24 +4,25 @@
 
 // This file implements printing of syntax tree structures.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:10 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:26:36 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\dumper.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using reflect = go.reflect_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using io = io_package;
+using reflect = reflect_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// Fdump dumps the structure of the syntax tree rooted at n to w.
+// It is intended for debugging purposes; no specific output format
+// is guaranteed.
+
+using System;
 public static partial class syntax_package {
 
-    // Fdump dumps the structure of the syntax tree rooted at n to w.
-    // It is intended for debugging purposes; no specific output format
-    // is guaranteed.
 public static error Fdump(io.Writer w, Node n) => func((defer, _, _) => {
     error err = default!;
 
@@ -35,7 +36,6 @@ public static error Fdump(io.Writer w, Node n) => func((defer, _, _) => {
                 err = e._<writeError>().err; // re-panics if it's not a writeError
             }
         }
-
     }());
 
     if (n == null) {
@@ -46,7 +46,6 @@ public static error Fdump(io.Writer w, Node n) => func((defer, _, _) => {
     p.printf("\n");
 
     return ;
-
 });
 
 private partial struct dumper {
@@ -88,13 +87,11 @@ private static (nint, error) Write(this ptr<dumper> _addr_p, slice<byte> data) {
             }
         }
         p.last = b;
-
     }    if (len(data) > n) {
         m, err = p.output.Write(data[(int)n..]);
         n += m;
     }
     return ;
-
 }
 
 // writeError wraps locally caught write errors so we can distinguish
@@ -115,7 +112,6 @@ private static void printf(this ptr<dumper> _addr_p, @string format, params obje
             panic(new writeError(err));
         }
     }
-
 });
 
 // dump prints the contents of x.
@@ -154,7 +150,6 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, Node n) {
 
         }
 
-
         p.printf("*"); 
         // Fields may share type expressions, and declarations
         // may share the same group - use ptrmap to keep track
@@ -172,14 +167,11 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, Node n) {
                     }
 
                 }
-
                 p.ptrmap[ptr] = p.line;
                 n = ptr;
-
             }
 
         }
-
         p.dump(x.Elem(), n);
     else if (x.Kind() == reflect.Slice) 
         if (x.IsNil()) {
@@ -206,7 +198,6 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, Node n) {
                 n = n__prev1;
             }
             p.indent--;
-
         }
         p.printf("}");
     else if (x.Kind() == reflect.Struct) 
@@ -253,7 +244,6 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, Node n) {
                     }
 
                 }
-
             }
 
 
@@ -275,8 +265,7 @@ private static void dump(this ptr<dumper> _addr_p, reflect.Value x, Node n) {
                 break;
             }
         }
-    
-}
+    }
 
 private static bool isExported(@string name) {
     var (ch, _) = utf8.DecodeRuneInString(name);

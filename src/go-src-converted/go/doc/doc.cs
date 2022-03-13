@@ -3,19 +3,22 @@
 // license that can be found in the LICENSE file.
 
 // Package doc extracts source code documentation from a Go AST.
-// package doc -- go2cs converted at 2022 March 06 22:41:27 UTC
+
+// package doc -- go2cs converted at 2022 March 13 05:52:32 UTC
 // import "go/doc" ==> using doc = go.go.doc_package
 // Original source: C:\Program Files\Go\src\go\doc\doc.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using strings = go.strings_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using token = go.token_package;
+using strings = strings_package;
+
+
+// Package is the documentation for an entire package.
 
 public static partial class doc_package {
 
-    // Package is the documentation for an entire package.
 public partial struct Package {
     public @string Doc;
     public @string Name;
@@ -103,7 +106,6 @@ public static readonly var AllMethods = 0;
 // godoc, but not all programs want that behavior.
 public static readonly var PreserveAST = 1;
 
-
 // New computes the package documentation for the given package AST.
 // New takes ownership of the AST pkg and may edit or overwrite it.
 // To have the Examples fields populated, use NewFromFiles and include
@@ -162,7 +164,6 @@ public static (ptr<Package>, error) NewFromFiles(ptr<token.FileSet> _addr_fset, 
                 panic(fmt.Errorf("doc.NewFromFiles: option argument type must be doc.Mode"));
             }
             mode = m;
-
             break;
         default: 
             panic(fmt.Errorf("doc.NewFromFiles: there must not be more than 1 option argument"));
@@ -188,12 +189,10 @@ public static (ptr<Package>, error) NewFromFiles(ptr<token.FileSet> _addr_fset, 
                 return (_addr_null!, error.As(fmt.Errorf("file files[%d] filename %q does not have a .go extension", i, name))!);
 
         }
-
     }    var (pkg, _) = ast.NewPackage(fset, goFiles, simpleImporter, null); // Ignore errors that can happen due to unresolved identifiers.
     var p = New(_addr_pkg, importPath, mode);
     classifyExamples(p, Examples(testGoFiles));
     return (_addr_p!, error.As(null!)!);
-
 });
 
 // simpleImporter returns a (dummy) package object named by the last path
@@ -210,10 +209,8 @@ private static (ptr<ast.Object>, error) simpleImporter(map<@string, ptr<ast.Obje
         pkg = ast.NewObj(ast.Pkg, path[(int)strings.LastIndex(path, "/") + 1..]);
         pkg.Data = ast.NewScope(null); // required by ast.NewPackage for dot-import
         imports[path] = pkg;
-
     }
     return (_addr_pkg!, error.As(null!)!);
-
 }
 
 } // end doc_package

@@ -9,16 +9,15 @@
 //        // do something with e.Value
 //    }
 //
-// package list -- go2cs converted at 2022 March 06 22:19:32 UTC
+
+// package list -- go2cs converted at 2022 March 13 05:34:30 UTC
 // import "container/list" ==> using list = go.container.list_package
 // Original source: C:\Program Files\Go\src\container\list\list.go
-
-
 namespace go.container;
 
 public static partial class list_package {
 
-    // Element is an element of a linked list.
+// Element is an element of a linked list.
 public partial struct Element {
     public ptr<Element> next; // The list to which this element belongs.
     public ptr<Element> prev; // The list to which this element belongs.
@@ -36,9 +35,7 @@ private static ptr<Element> Next(this ptr<Element> _addr_e) {
             return _addr_p!;
         }
     }
-
     return _addr_null!;
-
 }
 
 // Prev returns the previous list element or nil.
@@ -52,9 +49,7 @@ private static ptr<Element> Prev(this ptr<Element> _addr_e) {
             return _addr_p!;
         }
     }
-
     return _addr_null!;
-
 }
 
 // List represents a doubly linked list.
@@ -95,7 +90,6 @@ private static ptr<Element> Front(this ptr<List> _addr_l) {
         return _addr_null!;
     }
     return _addr_l.root.next!;
-
 }
 
 // Back returns the last element of list l or nil if the list is empty.
@@ -106,7 +100,6 @@ private static ptr<Element> Back(this ptr<List> _addr_l) {
         return _addr_null!;
     }
     return _addr_l.root.prev!;
-
 }
 
 // lazyInit lazily initializes a zero List value.
@@ -153,7 +146,6 @@ private static ptr<Element> remove(this ptr<List> _addr_l, ptr<Element> _addr_e)
     e.list = null;
     l.len--;
     return _addr_e!;
-
 }
 
 // move moves e to next to at and returns e.
@@ -174,7 +166,6 @@ private static ptr<Element> move(this ptr<List> _addr_l, ptr<Element> _addr_e, p
     e.next.prev = e;
 
     return _addr_e!;
-
 }
 
 // Remove removes e from l if e is an element of list l.
@@ -188,10 +179,8 @@ private static void Remove(this ptr<List> _addr_l, ptr<Element> _addr_e) {
         // if e.list == l, l must have been initialized when e was inserted
         // in l or l == nil (e is a zero Element) and l.remove will crash
         l.remove(e);
-
     }
     return e.Value;
-
 }
 
 // PushFront inserts a new element e with value v at the front of list l and returns e.
@@ -221,7 +210,6 @@ private static ptr<Element> InsertBefore(this ptr<List> _addr_l, object v, ptr<E
         return _addr_null!;
     }
     return _addr_l.insertValue(v, mark.prev)!;
-
 }
 
 // InsertAfter inserts a new element e with value v immediately after mark and returns e.
@@ -235,7 +223,6 @@ private static ptr<Element> InsertAfter(this ptr<List> _addr_l, object v, ptr<El
         return _addr_null!;
     }
     return _addr_l.insertValue(v, mark)!;
-
 }
 
 // MoveToFront moves element e to the front of list l.
@@ -249,7 +236,6 @@ private static void MoveToFront(this ptr<List> _addr_l, ptr<Element> _addr_e) {
         return ;
     }
     l.move(e, _addr_l.root);
-
 }
 
 // MoveToBack moves element e to the back of list l.
@@ -263,7 +249,6 @@ private static void MoveToBack(this ptr<List> _addr_l, ptr<Element> _addr_e) {
         return ;
     }
     l.move(e, l.root.prev);
-
 }
 
 // MoveBefore moves element e to its new position before mark.
@@ -278,7 +263,6 @@ private static void MoveBefore(this ptr<List> _addr_l, ptr<Element> _addr_e, ptr
         return ;
     }
     l.move(e, mark.prev);
-
 }
 
 // MoveAfter moves element e to its new position after mark.
@@ -293,7 +277,6 @@ private static void MoveAfter(this ptr<List> _addr_l, ptr<Element> _addr_e, ptr<
         return ;
     }
     l.move(e, mark);
-
 }
 
 // PushBackList inserts a copy of another list at the back of list l.
@@ -312,7 +295,6 @@ private static void PushBackList(this ptr<List> _addr_l, ptr<List> _addr_other) 
             (i, e) = (i - 1, e.Next());
         }
     }
-
 }
 
 // PushFrontList inserts a copy of another list at the front of list l.
@@ -331,7 +313,6 @@ private static void PushFrontList(this ptr<List> _addr_l, ptr<List> _addr_other)
             (i, e) = (i - 1, e.Prev());
         }
     }
-
 }
 
 } // end list_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:50:06 UTC
+//     Generated on 2022 March 13 06:01:30 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -33,7 +33,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct FuncLines
         {
             // Constructors
@@ -68,7 +68,7 @@ namespace @internal
             public static implicit operator FuncLines(NilType nil) => default(FuncLines);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static FuncLines FuncLines_cast(dynamic value)
         {
             return new FuncLines(value.Filename, value.StartLineno, value.Lines);

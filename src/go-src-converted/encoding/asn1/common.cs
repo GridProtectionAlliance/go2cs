@@ -2,26 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package asn1 -- go2cs converted at 2022 March 06 22:19:44 UTC
+// package asn1 -- go2cs converted at 2022 March 13 05:34:43 UTC
 // import "encoding/asn1" ==> using asn1 = go.encoding.asn1_package
 // Original source: C:\Program Files\Go\src\encoding\asn1\common.go
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.encoding;
+
+using reflect = reflect_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// ASN.1 objects have metadata preceding them:
+//   the tag: the type of the object
+//   a flag denoting if this object is compound or not
+//   the class type: the namespace of the tag
+//   the length of the object, in bytes
+
+// Here are some standard tags and classes
+
+// ASN.1 tags represent the type of the following object.
 
 public static partial class asn1_package {
 
-    // ASN.1 objects have metadata preceding them:
-    //   the tag: the type of the object
-    //   a flag denoting if this object is compound or not
-    //   the class type: the namespace of the tag
-    //   the length of the object, in bytes
-
-    // Here are some standard tags and classes
-
-    // ASN.1 tags represent the type of the following object.
 public static readonly nint TagBoolean = 1;
 public static readonly nint TagInteger = 2;
 public static readonly nint TagBitString = 3;
@@ -41,13 +43,11 @@ public static readonly nint TagGeneralizedTime = 24;
 public static readonly nint TagGeneralString = 27;
 public static readonly nint TagBMPString = 30;
 
-
 // ASN.1 class types represent the namespace of the tag.
 public static readonly nint ClassUniversal = 0;
 public static readonly nint ClassApplication = 1;
 public static readonly nint ClassContextSpecific = 2;
 public static readonly nint ClassPrivate = 3;
-
 
 private partial struct tagAndLength {
     public nint @class;
@@ -155,10 +155,8 @@ private static fieldParameters parseFieldParameters(@string str) {
             }
         else if (part == "omitempty") 
             ret.omitEmpty = true;
-        
-    }
+            }
     return ;
-
 }
 
 // Given a reflected Go type, getUniversalType returns the default tag number
@@ -200,7 +198,6 @@ private static (bool, nint, bool, bool) getUniversalType(reflect.Type t) {
     else if (t.Kind() == reflect.String) 
         return (false, TagPrintableString, false, true);
         return (false, 0, false, false);
-
 }
 
 } // end asn1_package

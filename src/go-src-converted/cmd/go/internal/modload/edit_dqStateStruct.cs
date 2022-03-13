@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:18:04 UTC
+//     Generated on 2022 March 13 06:31:26 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class modload_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct dqState
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace @internal
             public static implicit operator dqState(NilType nil) => default(dqState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static dqState dqState_cast(dynamic value)
         {
             return new dqState(value.err, value.conflict);

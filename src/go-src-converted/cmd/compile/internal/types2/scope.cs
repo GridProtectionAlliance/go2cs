@@ -4,26 +4,27 @@
 
 // This file implements Scopes.
 
-// package types2 -- go2cs converted at 2022 March 06 23:12:50 UTC
+// package types2 -- go2cs converted at 2022 March 13 06:26:15 UTC
 // import "cmd/compile/internal/types2" ==> using types2 = go.cmd.compile.@internal.types2_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\types2\scope.go
-using bytes = go.bytes_package;
-using syntax = go.cmd.compile.@internal.syntax_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using bytes = bytes_package;
+using syntax = cmd.compile.@internal.syntax_package;
+using fmt = fmt_package;
+using io = io_package;
+using sort = sort_package;
+using strings = strings_package;
+
+
+// A Scope maintains a set of objects and links to its containing
+// (parent) and contained (children) scopes. Objects may be inserted
+// and looked up by name. The zero value for Scope is a ready-to-use
+// empty scope.
+
+using System;
 public static partial class types2_package {
 
-    // A Scope maintains a set of objects and links to its containing
-    // (parent) and contained (children) scopes. Objects may be inserted
-    // and looked up by name. The zero value for Scope is a ready-to-use
-    // empty scope.
 public partial struct Scope {
     public ptr<Scope> parent;
     public slice<ptr<Scope>> children;
@@ -45,7 +46,6 @@ public static ptr<Scope> NewScope(ptr<Scope> _addr_parent, syntax.Pos pos, synta
         parent.children = append(parent.children, s);
     }
     return _addr_s!;
-
 }
 
 // Parent returns the scope's containing (parent) scope.
@@ -122,10 +122,8 @@ private static (ptr<Scope>, Object) LookupParent(this ptr<Scope> _addr_s, @strin
             }
 
         }
-
     }
     return (_addr_null!, null);
-
 }
 
 // Insert attempts to insert an object obj into scope s.
@@ -144,7 +142,6 @@ private static Object Insert(this ptr<Scope> _addr_s, Object obj) {
             return alt;
         }
     }
-
     if (s.elems == null) {
         s.elems = make_map<@string, Object>();
     }
@@ -153,7 +150,6 @@ private static Object Insert(this ptr<Scope> _addr_s, Object obj) {
         obj.setParent(s);
     }
     return null;
-
 }
 
 // Squash merges s with its parent scope p by adding all
@@ -177,7 +173,6 @@ private static void Squash(this ptr<Scope> _addr_s, Action<Object, Object> err) 
             }
 
         }
-
     }    nint j = -1; // index of s in p.children
     foreach (var (i, ch) in p.children) {
         if (ch == s) {
@@ -193,7 +188,6 @@ private static void Squash(this ptr<Scope> _addr_s, Action<Object, Object> err) 
 
     s.children = null;
     s.elems = null;
-
 }
 
 // Pos and End describe the scope's source code extent [pos, end).
@@ -244,7 +238,6 @@ private static ptr<Scope> Innermost(this ptr<Scope> _addr_s, syntax.Pos pos) {
                     }
 
                 }
-
             }
 
             s = s__prev1;
@@ -265,10 +258,8 @@ private static ptr<Scope> Innermost(this ptr<Scope> _addr_s, syntax.Pos pos) {
         }
 
         return _addr_s!;
-
     }
     return _addr_null!;
-
 }
 
 // WriteTo writes a string representation of the scope to w,
@@ -294,7 +285,6 @@ private static void WriteTo(this ptr<Scope> _addr_s, io.Writer w, nint n, bool r
         }
     }
     fmt.Fprintf(w, "%s}\n", indn);
-
 }
 
 // String returns a string representation of the scope, for debugging.

@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package chacha20poly1305 -- go2cs converted at 2022 March 06 23:36:33 UTC
+// package chacha20poly1305 -- go2cs converted at 2022 March 13 06:44:36 UTC
 // import "vendor/golang.org/x/crypto/chacha20poly1305" ==> using chacha20poly1305 = go.vendor.golang.org.x.crypto.chacha20poly1305_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\crypto\chacha20poly1305\chacha20poly1305_generic.go
-using binary = go.encoding.binary_package;
-
-using chacha20 = go.golang.org.x.crypto.chacha20_package;
-using subtle = go.golang.org.x.crypto.@internal.subtle_package;
-using poly1305 = go.golang.org.x.crypto.poly1305_package;
-
 namespace go.vendor.golang.org.x.crypto;
+
+using binary = encoding.binary_package;
+
+using chacha20 = golang.org.x.crypto.chacha20_package;
+using subtle = golang.org.x.crypto.@internal.subtle_package;
+using poly1305 = golang.org.x.crypto.poly1305_package;
 
 public static partial class chacha20poly1305_package {
 
@@ -28,7 +28,6 @@ private static void writeWithPadding(ptr<poly1305.MAC> _addr_p, slice<byte> b) {
             p.Write(buf[..(int)padLen]);
         }
     }
-
 }
 
 private static void writeUint64(ptr<poly1305.MAC> _addr_p, nint n) {
@@ -62,7 +61,6 @@ private static slice<byte> sealGeneric(this ptr<chacha20poly1305> _addr_c, slice
     p.Sum(tag[..(int)0]);
 
     return ret;
-
 });
 
 private static (slice<byte>, error) openGeneric(this ptr<chacha20poly1305> _addr_c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => func((_, panic, _) => {
@@ -95,7 +93,6 @@ private static (slice<byte>, error) openGeneric(this ptr<chacha20poly1305> _addr
     }
     s.XORKeyStream(out, ciphertext);
     return (ret, error.As(null!)!);
-
 });
 
 } // end chacha20poly1305_package

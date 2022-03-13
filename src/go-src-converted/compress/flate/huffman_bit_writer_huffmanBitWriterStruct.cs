@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:04 UTC
+//     Generated on 2022 March 13 05:29:10 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace compress
 {
     public static partial class flate_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct huffmanBitWriter
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace compress
             public static implicit operator huffmanBitWriter(NilType nil) => default(huffmanBitWriter);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static huffmanBitWriter huffmanBitWriter_cast(dynamic value)
         {
             return new huffmanBitWriter(value.writer, value.bits, value.nbits, value.bytes, value.codegenFreq, value.nbytes, value.literalFreq, value.offsetFreq, value.codegen, ref value.literalEncoding, ref value.offsetEncoding, ref value.codegenEncoding, value.err);

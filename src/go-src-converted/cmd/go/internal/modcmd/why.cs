@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modcmd -- go2cs converted at 2022 March 06 23:19:39 UTC
+// package modcmd -- go2cs converted at 2022 March 13 06:32:28 UTC
 // import "cmd/go/internal/modcmd" ==> using modcmd = go.cmd.go.@internal.modcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modcmd\why.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using imports = go.cmd.go.@internal.imports_package;
-using modload = go.cmd.go.@internal.modload_package;
-
-using module = go.golang.org.x.mod.module_package;
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using fmt = fmt_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using imports = cmd.go.@internal.imports_package;
+using modload = cmd.go.@internal.modload_package;
+
+using module = golang.org.x.mod.module_package;
 
 public static partial class modcmd_package {
 
@@ -57,7 +57,6 @@ private static var whyM = cmdWhy.Flag.Bool("m", false, "");private static var wh
 private static void init() {
     cmdWhy.Run = runWhy; // break init cycle
     @base.AddModCommonFlags(_addr_cmdWhy.Flag);
-
 }
 
 private static void runWhy(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
@@ -126,10 +125,8 @@ private static void runWhy(context.Context ctx, ptr<base.Command> _addr_cmd, sli
                     }
                     why = "(main module does not need" + vendoring + " module " + m.Path + ")\n";
                 }
-
                 fmt.Printf("%s# %s\n%s", sep, m.Path, why);
                 sep = "\n";
-
             }
 
             m = m__prev1;

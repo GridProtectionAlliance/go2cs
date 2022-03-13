@@ -7,37 +7,38 @@
 //go:build !cmd_go_bootstrap
 // +build !cmd_go_bootstrap
 
-// package modfetch -- go2cs converted at 2022 March 06 23:19:00 UTC
+// package modfetch -- go2cs converted at 2022 March 13 06:32:20 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\sumdb.go
-using bytes = go.bytes_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using fs = go.io.fs_package;
-using url = go.net.url_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using lockedfile = go.cmd.go.@internal.lockedfile_package;
-using web = go.cmd.go.@internal.web_package;
-
-using module = go.golang.org.x.mod.module_package;
-using sumdb = go.golang.org.x.mod.sumdb_package;
-using note = go.golang.org.x.mod.sumdb.note_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using fs = io.fs_package;
+using url = net.url_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using lockedfile = cmd.go.@internal.lockedfile_package;
+using web = cmd.go.@internal.web_package;
+
+using module = golang.org.x.mod.module_package;
+using sumdb = golang.org.x.mod.sumdb_package;
+using note = golang.org.x.mod.sumdb.note_package;
+
+
+// useSumDB reports whether to use the Go checksum database for the given module.
+
+using System;
 public static partial class modfetch_package {
 
-    // useSumDB reports whether to use the Go checksum database for the given module.
 private static bool useSumDB(module.Version mod) {
     return cfg.GOSUMDB != "off" && !module.MatchPrefixPatterns(cfg.GONOSUMDB, mod.Path);
 }
@@ -57,7 +58,6 @@ private static (@string, slice<@string>, error) lookupSumDB(module.Version mod) 
     }
     lines, err = db.Lookup(mod.Path, mod.Version);
     return (dbName, lines, error.As(err)!);
-
 }
 
 private static sync.Once dbOnce = default;private static @string dbName = default;private static ptr<sumdb.Client> db;private static error dbErr = default!;
@@ -89,7 +89,6 @@ private static (@string, ptr<sumdb.Client>, error) dbDial() {
             }
 
         }
-
     }
     if (len(key) == 0) {
         return ("", _addr_null!, error.As(fmt.Errorf("missing GOSUMDB"))!);
@@ -117,10 +116,8 @@ private static (@string, ptr<sumdb.Client>, error) dbDial() {
             return ("", _addr_null!, error.As(fmt.Errorf("invalid GOSUMDB URL: %v", err))!);
         }
         base = u;
-
     }
     return (name, _addr_sumdb.NewClient(addr(new dbClient(key:key[0],name:name,direct:direct,base:base)))!, error.As(null!)!);
-
 }
 
 private partial struct dbClient {
@@ -149,7 +146,6 @@ private static (slice<byte>, error) ReadRemote(this ptr<dbClient> _addr_c, @stri
         fmt.Fprintf(os.Stderr, "%.3fs %s\n", time.Since(start).Seconds(), targ.Redacted());
     }
     return (data, error.As(err)!);
-
 }
 
 // initBase determines the base URL for connecting to the database.
@@ -190,16 +186,13 @@ private static void initBase(this ptr<dbClient> _addr_c) {
                 // Success! This proxy will help us.
                 c.@base = web.Join(proxyURL, "sumdb/" + c.name);
                 return null;
-
                 break;
         }
-
     });
     if (errors.Is(err, fs.ErrNotExist)) { 
         // No proxies, or all proxies failed (with 404, 410, or were allowed
         // to fall back), or we reached an explicit "direct" or "off".
         c.@base = c.direct;
-
     }
     else if (err != null) {
         c.baseErr = err;
@@ -225,10 +218,8 @@ private static (slice<byte>, error) ReadConfig(this ptr<dbClient> _addr_c, @stri
         // Treat non-existent as empty, to bootstrap the "latest" file
         // the first time we connect to a given database.
         return (new slice<byte>(new byte[] {  }), error.As(null!)!);
-
     }
     return (data, error.As(err)!);
-
 }
 
 // WriteConfig rewrites the latest tree head.
@@ -238,7 +229,6 @@ private static error WriteConfig(this ptr<dbClient> _addr__p0, @string file, sli
     if (file == "key") { 
         // Should not happen.
         return error.As(fmt.Errorf("cannot write key"))!;
-
     }
     if (cfg.SumdbDir == "") {
         return error.As(errors.New("could not locate sumdb file: missing $GOPATH"))!;
@@ -264,7 +254,6 @@ private static error WriteConfig(this ptr<dbClient> _addr__p0, @string file, sli
             return error.As(err)!;
         }
     }
-
     {
         var err = f.Truncate(0);
 
@@ -272,7 +261,6 @@ private static error WriteConfig(this ptr<dbClient> _addr__p0, @string file, sli
             return error.As(err)!;
         }
     }
-
     {
         (_, err) = f.Write(new);
 
@@ -280,9 +268,7 @@ private static error WriteConfig(this ptr<dbClient> _addr__p0, @string file, sli
             return error.As(err)!;
         }
     }
-
     return error.As(f.Close())!;
-
 });
 
 // ReadCache reads cached lookups or tiles from
@@ -303,7 +289,6 @@ private static (slice<byte>, error) ReadCache(this ptr<dbClient> _addr__p0, @str
         err = addr(new fs.PathError(Op:"read",Path:targ,Err:fs.ErrNotExist));
     }
     return (data, error.As(err)!);
-
 }
 
 // WriteCache updates cached lookups or tiles.

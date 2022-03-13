@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:20:34 UTC
+//     Generated on 2022 March 13 06:33:28 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace @internal
 {
     public static partial class sym_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CompilationUnit
         {
             // Constructors
@@ -75,7 +75,7 @@ namespace @internal
             public static implicit operator CompilationUnit(NilType nil) => default(CompilationUnit);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CompilationUnit CompilationUnit_cast(dynamic value)
         {
             return new CompilationUnit(ref value.Lib, value.PclnIndex, value.PCs, ref value.DWInfo, value.FileTable, value.Consts, value.FuncDIEs, value.VarDIEs, value.AbsFnDIEs, value.RangeSyms, value.Textp);

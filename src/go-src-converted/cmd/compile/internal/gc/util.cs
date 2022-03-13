@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package gc -- go2cs converted at 2022 March 06 23:14:27 UTC
+// package gc -- go2cs converted at 2022 March 13 06:27:56 UTC
 // import "cmd/compile/internal/gc" ==> using gc = go.cmd.compile.@internal.gc_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\gc\util.go
-using os = go.os_package;
-using runtime = go.runtime_package;
-using pprof = go.runtime.pprof_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using os = os_package;
+using runtime = runtime_package;
+using pprof = runtime.pprof_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using System;
 
 public static partial class gc_package {
 
@@ -37,9 +36,7 @@ private static void startProfile() {
             err = err__prev2;
 
         }
-
         @base.AtExit(pprof.StopCPUProfile);
-
     }
     if (@base.Flag.MemProfile != "") {
         if (memprofilerate != 0) {
@@ -69,15 +66,12 @@ private static void startProfile() {
                 err = err__prev2;
 
             }
-
         }
     else
 );
-
     } { 
         // Not doing memory profiling; disable it entirely.
         runtime.MemProfileRate = 0;
-
     }
     if (@base.Flag.BlockProfile != "") {
         (f, err) = os.Create(@base.Flag.BlockProfile);
@@ -89,7 +83,6 @@ private static void startProfile() {
             pprof.Lookup("block").WriteTo(f, 0);
             f.Close();
         });
-
     }
     if (@base.Flag.MutexProfile != "") {
         (f, err) = os.Create(@base.Flag.MutexProfile);
@@ -101,7 +94,6 @@ private static void startProfile() {
             pprof.Lookup("mutex").WriteTo(f, 0);
             f.Close();
         });
-
     }
     if (@base.Flag.TraceProfile != "" && traceHandler != null) {
         traceHandler(@base.Flag.TraceProfile);

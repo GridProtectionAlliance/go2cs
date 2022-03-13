@@ -7,22 +7,24 @@
 // output is an abstract syntax tree (AST) representing the Go source. The
 // parser is invoked through one of the Parse* functions.
 
-// package parser -- go2cs converted at 2022 March 06 22:47:20 UTC
+// package parser -- go2cs converted at 2022 March 13 05:58:35 UTC
 // import "go/printer.parser" ==> using parser = go.go.printer.parser_package
 // Original source: C:\Program Files\Go\src\go\printer\testdata\parser.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using scanner = go.go.scanner_package;
-using token = go.go.token_package;
-
 namespace go.go;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
+using scanner = go.scanner_package;
+using token = go.token_package;
+
+
+// The mode parameter to the Parse* functions is a set of flags (or 0).
+// They control the amount of source code parsed and other optional
+// parser functionality.
+//
 
 public static partial class parser_package {
 
-    // The mode parameter to the Parse* functions is a set of flags (or 0).
-    // They control the amount of source code parsed and other optional
-    // parser functionality.
-    //
 public static readonly nuint PackageClauseOnly = 1 << (int)(iota); // parsing stops after package clause
 public static readonly var ImportsOnly = 0; // parsing stops after import declarations
 public static readonly var ParseComments = 1; // parse comments and add them to AST
@@ -70,7 +72,6 @@ private static nuint scannerMode(nuint mode) {
         m |= scanner.ScanComments;
     }
     return m;
-
 }
 
 private static void init(this ptr<parser> _addr_p, ptr<token.FileSet> _addr_fset, @string filename, slice<byte> src, nuint mode) {
@@ -92,7 +93,6 @@ private static void init(this ptr<parser> _addr_p, ptr<token.FileSet> _addr_fset
 
     // for the same reason, set up a label scope
     p.openLabelScope();
-
 }
 
 // ----------------------------------------------------------------------------
@@ -130,7 +130,6 @@ private static void closeLabelScope(this ptr<parser> _addr_p) {
         }
     }    p.targetStack = p.targetStack[(int)0..(int)n];
     p.labelScope = p.labelScope.Outer;
-
 }
 
 private static void declare(this ptr<parser> _addr_p, object decl, ptr<ast.Scope> _addr_scope, ast.ObjKind kind, params ptr<ptr<ast.Ident>>[] _addr_idents) {
@@ -159,15 +158,11 @@ private static void declare(this ptr<parser> _addr_p, object decl, ptr<ast.Scope
                         }
 
                     }
-
                     p.error(ident.Pos(), fmt.Sprintf("%s redeclared in this block%s", ident.Name, prevDecl));
-
                 }
 
             }
-
             ident.Obj = obj;
-
         }
     }
 }
@@ -190,11 +185,8 @@ private static void shortVarDecl(this ptr<parser> _addr_p, slice<ptr<ast.Ident>>
             if (alt == null) {
                 n++; // new declaration
                 alt = obj;
-
             }
-
             ident.Obj = alt;
-
         }
     }    if (n == 0 && p.mode & DeclarationErrors != 0) {
         p.error(idents[0].Pos(), "no new variables on left side of :=");
@@ -232,7 +224,6 @@ private static void resolve(this ptr<parser> _addr_p, ast.Expr x) {
                 }
 
             }
-
         }
     } 
     // all local scopes are known, so any unresolved identifier
@@ -241,7 +232,6 @@ private static void resolve(this ptr<parser> _addr_p, ast.Expr x) {
     // them so that they can be resolved later
     ident.Obj = unresolved;
     p.unresolved = append(p.unresolved, ident);
-
 }
 
 // ----------------------------------------------------------------------------
@@ -264,7 +254,6 @@ private static void printTrace(this ptr<parser> _addr_p, params object[] a) {
     }
     fmt.Print(dots[(int)0..(int)i]);
     fmt.Println(a);
-
 }
 
 private static ptr<parser> trace(ptr<parser> _addr_p, @string msg) {
@@ -300,10 +289,8 @@ private static void next0(this ptr<parser> _addr_p) {
             p.printTrace("\"" + s + "\"");
         else 
             p.printTrace(s);
-        
-    }
+            }
     p.pos, p.tok, p.lit = p.scanner.Scan();
-
 }
 
 // Consume a comment and return it and the line on which it ends.
@@ -322,13 +309,11 @@ private static (ptr<ast.Comment>, nint) consumeComment(this ptr<parser> _addr_p)
                 endline++;
             }
         }
-
     }
     comment = addr(new ast.Comment(p.pos,p.lit));
     p.next0();
 
     return ;
-
 }
 
 // Consume a group of adjacent comments, add it to the parser's
@@ -354,7 +339,6 @@ private static (ptr<ast.CommentGroup>, nint) consumeCommentGroup(this ptr<parser
     p.comments = append(p.comments, comments);
 
     return ;
-
 }
 
 // Advance to the next non-comment token. In the process, collect
@@ -392,9 +376,7 @@ private static void next(this ptr<parser> _addr_p) {
                 // The next token is on a different line, thus
                 // the last comment group is a line comment.
                 p.lineComment = comment;
-
             }
-
         }
         endline = -1;
         while (p.tok == token.COMMENT) {
@@ -405,7 +387,6 @@ private static void next(this ptr<parser> _addr_p) {
             // The next token is following on the line immediately after the
             // comment group, thus the last comment group is a lead comment.
             p.leadComment = comment;
-
         }
     }
 }
@@ -435,7 +416,6 @@ private static void errorExpected(this ptr<parser> _addr_p, token.Pos pos, @stri
         }
     }
     p.error(pos, msg);
-
 }
 
 private static token.Pos expect(this ptr<parser> _addr_p, token.Token tok) {
@@ -447,7 +427,6 @@ private static token.Pos expect(this ptr<parser> _addr_p, token.Token tok) {
     }
     p.next(); // make progress
     return pos;
-
 }
 
 private static void expectSemi(this ptr<parser> _addr_p) {
@@ -481,7 +460,6 @@ private static ptr<ast.Ident> parseIdent(this ptr<parser> _addr_p) {
         p.expect(token.IDENT); // use expect() error handling
     }
     return addr(new ast.Ident(pos,name,nil));
-
 }
 
 private static slice<ptr<ast.Ident>> parseIdentList(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -498,7 +476,6 @@ private static slice<ptr<ast.Ident>> parseIdentList(this ptr<parser> _addr_p) =>
     }
 
     return ;
-
 });
 
 // ----------------------------------------------------------------------------
@@ -519,7 +496,6 @@ private static slice<ast.Expr> parseExprList(this ptr<parser> _addr_p, bool lhs)
     }
 
     return ;
-
 });
 
 private static slice<ast.Expr> parseLhsList(this ptr<parser> _addr_p) {
@@ -535,7 +511,6 @@ private static slice<ast.Expr> parseLhsList(this ptr<parser> _addr_p) {
         foreach (var (_, x) in list) {
             p.resolve(x);
         }        return list;
-
 }
 
 private static slice<ast.Expr> parseRhsList(this ptr<parser> _addr_p) {
@@ -560,10 +535,8 @@ private static ast.Expr parseType(this ptr<parser> _addr_p) => func((defer, _, _
         p.errorExpected(pos, "type");
         p.next(); // make progress
         return addr(new ast.BadExpr(pos,p.pos));
-
     }
     return typ;
-
 });
 
 // If the result is an identifier, it is not resolved.
@@ -582,10 +555,8 @@ private static ast.Expr parseTypeName(this ptr<parser> _addr_p) => func((defer, 
         p.resolve(ident);
         var sel = p.parseIdent();
         return addr(new ast.SelectorExpr(ident,sel));
-
     }
     return ident;
-
 });
 
 private static ast.Expr parseArrayType(this ptr<parser> _addr_p, bool ellipsisOk) => func((defer, _, _) => {
@@ -607,7 +578,6 @@ private static ast.Expr parseArrayType(this ptr<parser> _addr_p, bool ellipsisOk
     var elt = p.parseType();
 
     return addr(new ast.ArrayType(lbrack,len,elt));
-
 });
 
 private static slice<ptr<ast.Ident>> makeIdentList(this ptr<parser> _addr_p, slice<ast.Expr> list) {
@@ -622,9 +592,7 @@ private static slice<ptr<ast.Ident>> makeIdentList(this ptr<parser> _addr_p, sli
             ident = addr(new ast.Ident(pos,"_",nil));
         }
         idents[i] = ident;
-
     }    return idents;
-
 }
 
 private static ptr<ast.Field> parseFieldDecl(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, _) => {
@@ -649,7 +617,6 @@ private static ptr<ast.Field> parseFieldDecl(this ptr<parser> _addr_p, ptr<ast.S
     if (typ != null) { 
         // IdentifierList Type
         idents = p.makeIdentList(list);
-
     }
     else
  { 
@@ -666,7 +633,6 @@ private static ptr<ast.Field> parseFieldDecl(this ptr<parser> _addr_p, ptr<ast.S
             }
 
         }
-
     }
     p.expectSemi(); // call before accessing p.linecomment
 
@@ -674,7 +640,6 @@ private static ptr<ast.Field> parseFieldDecl(this ptr<parser> _addr_p, ptr<ast.S
     p.declare(field, scope, ast.Var, idents);
 
     return _addr_field!;
-
 });
 
 private static ptr<ast.StructType> parseStructType(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -692,13 +657,11 @@ private static ptr<ast.StructType> parseStructType(this ptr<parser> _addr_p) => 
         // it here for more robust parsing and better error messages
         // (parseFieldDecl will check and complain if necessary)
         list = append(list, p.parseFieldDecl(scope));
-
     }
     var rbrace = p.expect(token.RBRACE); 
 
     // TODO(gri): store struct scope in AST
     return addr(new ast.StructType(pos,&ast.FieldList{lbrace,list,rbrace},false));
-
 });
 
 private static ptr<ast.StarExpr> parsePointerType(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -711,7 +674,6 @@ private static ptr<ast.StarExpr> parsePointerType(this ptr<parser> _addr_p) => f
     var @base = p.parseType();
 
     return addr(new ast.StarExpr(star,base));
-
 });
 
 private static ast.Expr tryVarType(this ptr<parser> _addr_p, bool isParam) {
@@ -729,10 +691,8 @@ private static ast.Expr tryVarType(this ptr<parser> _addr_p, bool isParam) {
             p.error(pos, "can use '...' with last parameter type only");
         }
         return addr(new ast.Ellipsis(pos,typ));
-
     }
     return p.tryIdentOrType(false);
-
 }
 
 private static ast.Expr parseVarType(this ptr<parser> _addr_p, bool isParam) {
@@ -744,10 +704,8 @@ private static ast.Expr parseVarType(this ptr<parser> _addr_p, bool isParam) {
         p.errorExpected(pos, "type");
         p.next(); // make progress
         typ = addr(new ast.BadExpr(pos,p.pos));
-
     }
     return typ;
-
 }
 
 private static (slice<ast.Expr>, ast.Expr) parseVarList(this ptr<parser> _addr_p, bool isParam) => func((defer, _, _) => {
@@ -768,7 +726,6 @@ private static (slice<ast.Expr>, ast.Expr) parseVarList(this ptr<parser> _addr_p
             break;
         }
         p.next();
-
     } 
 
     // if we had a list of identifiers, it must be followed by a type
@@ -777,7 +734,6 @@ private static (slice<ast.Expr>, ast.Expr) parseVarList(this ptr<parser> _addr_p
         p.resolve(typ);
     }
     return ;
-
 });
 
 private static slice<ptr<ast.Field>> parseParameterList(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope, bool ellipsisOk) => func((defer, _, _) => {
@@ -811,13 +767,9 @@ private static slice<ptr<ast.Field>> parseParameterList(this ptr<parser> _addr_p
             if (p.tok != token.COMMA) {
                 break;
             }
-
             p.next();
-
         }
     else
-
-
 
     } { 
         // Type { "," Type } (anonymous parameters)
@@ -828,7 +780,6 @@ private static slice<ptr<ast.Field>> parseParameterList(this ptr<parser> _addr_p
         }
     }
     return ;
-
 });
 
 private static ptr<ast.FieldList> parseParameters(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope, bool ellipsisOk) => func((defer, _, _) => {
@@ -846,7 +797,6 @@ private static ptr<ast.FieldList> parseParameters(this ptr<parser> _addr_p, ptr<
     var rparen = p.expect(token.RPAREN);
 
     return addr(new ast.FieldList(lparen,params,rparen));
-
 });
 
 private static ptr<ast.FieldList> parseResult(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, _) => {
@@ -866,7 +816,6 @@ private static ptr<ast.FieldList> parseResult(this ptr<parser> _addr_p, ptr<ast.
         return addr(new ast.FieldList(List:list));
     }
     return _addr_null!;
-
 });
 
 private static (ptr<ast.FieldList>, ptr<ast.FieldList>) parseSignature(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, _) => {
@@ -882,7 +831,6 @@ private static (ptr<ast.FieldList>, ptr<ast.FieldList>) parseSignature(this ptr<
     results = p.parseResult(scope);
 
     return ;
-
 });
 
 private static (ptr<ast.FuncType>, ptr<ast.Scope>) parseFuncType(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -898,7 +846,6 @@ private static (ptr<ast.FuncType>, ptr<ast.Scope>) parseFuncType(this ptr<parser
     var (params, results) = p.parseSignature(scope);
 
     return (addr(new ast.FuncType(pos,params,results)), _addr_scope!);
-
 });
 
 private static ptr<ast.Field> parseMethodSpec(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, _) => {
@@ -921,23 +868,19 @@ private static ptr<ast.Field> parseMethodSpec(this ptr<parser> _addr_p, ptr<ast.
             var scope = ast.NewScope(null); // method scope
             var (params, results) = p.parseSignature(scope);
             typ = addr(new ast.FuncType(token.NoPos,params,results));
-
         }
         else
  { 
             // embedded interface
             typ = x;
-
         }
     }
-
     p.expectSemi(); // call before accessing p.linecomment
 
     ptr<ast.Field> spec = addr(new ast.Field(doc,idents,typ,nil,p.lineComment));
     p.declare(spec, scope, ast.Fun, idents);
 
     return _addr_spec!;
-
 });
 
 private static ptr<ast.InterfaceType> parseInterfaceType(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -957,7 +900,6 @@ private static ptr<ast.InterfaceType> parseInterfaceType(this ptr<parser> _addr_
 
     // TODO(gri): store interface scope in AST
     return addr(new ast.InterfaceType(pos,&ast.FieldList{lbrace,list,rbrace},false));
-
 });
 
 private static ptr<ast.MapType> parseMapType(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -973,7 +915,6 @@ private static ptr<ast.MapType> parseMapType(this ptr<parser> _addr_p) => func((
     var value = p.parseType();
 
     return addr(new ast.MapType(pos,key,value));
-
 });
 
 private static ptr<ast.ChanType> parseChanType(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1000,7 +941,6 @@ private static ptr<ast.ChanType> parseChanType(this ptr<parser> _addr_p) => func
     var value = p.parseType();
 
     return addr(new ast.ChanType(pos,dir,value));
-
 });
 
 // If the result is an identifier, it is not resolved.
@@ -1033,7 +973,6 @@ private static ast.Expr tryIdentOrType(this ptr<parser> _addr_p, bool ellipsisOk
         return addr(new ast.ParenExpr(lparen,typ,rparen));
     // no type found
     return null;
-
 }
 
 private static ast.Expr tryType(this ptr<parser> _addr_p) {
@@ -1044,7 +983,6 @@ private static ast.Expr tryType(this ptr<parser> _addr_p) {
         p.resolve(typ);
     }
     return typ;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -1062,7 +1000,6 @@ private static slice<ast.Stmt> parseStmtList(this ptr<parser> _addr_p) => func((
     }
 
     return ;
-
 });
 
 private static ptr<ast.BlockStmt> parseBody(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, _) => {
@@ -1081,7 +1018,6 @@ private static ptr<ast.BlockStmt> parseBody(this ptr<parser> _addr_p, ptr<ast.Sc
     var rbrace = p.expect(token.RBRACE);
 
     return addr(new ast.BlockStmt(lbrace,list,rbrace));
-
 });
 
 private static ptr<ast.BlockStmt> parseBlockStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1097,7 +1033,6 @@ private static ptr<ast.BlockStmt> parseBlockStmt(this ptr<parser> _addr_p) => fu
     var rbrace = p.expect(token.RBRACE);
 
     return addr(new ast.BlockStmt(lbrace,list,rbrace));
-
 });
 
 // ----------------------------------------------------------------------------
@@ -1113,14 +1048,12 @@ private static ast.Expr parseFuncTypeOrLit(this ptr<parser> _addr_p) => func((de
     if (p.tok != token.LBRACE) { 
         // function type only
         return typ;
-
     }
     p.exprLev++;
     var body = p.parseBody(scope);
     p.exprLev--;
 
     return addr(new ast.FuncLit(typ,body));
-
 });
 
 // parseOperand may return an expression or a raw type (incl. array
@@ -1163,16 +1096,13 @@ private static ast.Expr parseOperand(this ptr<parser> _addr_p, bool lhs) => func
                 ptr<ast.Ident> (_, isIdent) = typ._<ptr<ast.Ident>>();
                 assert(!isIdent, "type cannot be identifier");
                 return typ;
-
             }
 
         }
-
         var pos = p.pos;
     p.errorExpected(pos, "operand");
     p.next(); // make progress
     return addr(new ast.BadExpr(pos,p.pos));
-
 });
 
 private static ast.Expr parseSelector(this ptr<parser> _addr_p, ast.Expr x) => func((defer, _, _) => {
@@ -1184,7 +1114,6 @@ private static ast.Expr parseSelector(this ptr<parser> _addr_p, ast.Expr x) => f
     var sel = p.parseIdent();
 
     return addr(new ast.SelectorExpr(x,sel));
-
 });
 
 private static ast.Expr parseTypeAssertion(this ptr<parser> _addr_p, ast.Expr x) => func((defer, _, _) => {
@@ -1198,7 +1127,6 @@ private static ast.Expr parseTypeAssertion(this ptr<parser> _addr_p, ast.Expr x)
     if (p.tok == token.TYPE) { 
         // type switch: typ == nil
         p.next();
-
     }
     else
  {
@@ -1207,7 +1135,6 @@ private static ast.Expr parseTypeAssertion(this ptr<parser> _addr_p, ast.Expr x)
     p.expect(token.RPAREN);
 
     return addr(new ast.TypeAssertExpr(x,typ));
-
 });
 
 private static ast.Expr parseIndexOrSlice(this ptr<parser> _addr_p, ast.Expr x) => func((defer, _, _) => {
@@ -1238,7 +1165,6 @@ private static ast.Expr parseIndexOrSlice(this ptr<parser> _addr_p, ast.Expr x) 
         return addr(new ast.SliceExpr(x,lbrack,low,high,rbrack));
     }
     return addr(new ast.IndexExpr(x,lbrack,low,rbrack));
-
 });
 
 private static ptr<ast.CallExpr> parseCallOrConversion(this ptr<parser> _addr_p, ast.Expr fun) => func((defer, _, _) => {
@@ -1261,13 +1187,11 @@ private static ptr<ast.CallExpr> parseCallOrConversion(this ptr<parser> _addr_p,
             break;
         }
         p.next();
-
     }
     p.exprLev--;
     var rparen = p.expect(token.RPAREN);
 
     return addr(new ast.CallExpr(fun,lparen,list,ellipsis,rparen));
-
 });
 
 private static ast.Expr parseElement(this ptr<parser> _addr_p, bool keyOk) => func((defer, _, _) => {
@@ -1289,7 +1213,6 @@ private static ast.Expr parseElement(this ptr<parser> _addr_p, bool keyOk) => fu
         p.resolve(x); // not a map key
     }
     return x;
-
 });
 
 private static slice<ast.Expr> parseElementList(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1305,11 +1228,9 @@ private static slice<ast.Expr> parseElementList(this ptr<parser> _addr_p) => fun
             break;
         }
         p.next();
-
     }
 
     return ;
-
 });
 
 private static ast.Expr parseLiteralValue(this ptr<parser> _addr_p, ast.Expr typ) => func((defer, _, _) => {
@@ -1327,7 +1248,6 @@ private static ast.Expr parseLiteralValue(this ptr<parser> _addr_p, ast.Expr typ
     p.exprLev--;
     var rbrace = p.expect(token.RBRACE);
     return addr(new ast.CompositeLit(typ,lbrace,elts,rbrace));
-
 });
 
 // checkExpr checks that x is an expression (and not a type).
@@ -1359,9 +1279,7 @@ private static ast.Expr checkExpr(this ptr<parser> _addr_p, ast.Expr x) => func(
                 // the form X.(type) is only allowed in type switch expressions
                 p.errorExpected(x.Pos(), "expression");
                 x = addr(new ast.BadExpr(x.Pos(),x.End()));
-
             }
-
             break;
         case ptr<ast.CallExpr> t:
             break;
@@ -1372,9 +1290,7 @@ private static ast.Expr checkExpr(this ptr<parser> _addr_p, ast.Expr x) => func(
                 // the range operator is only allowed at the top of a for statement
                 p.errorExpected(x.Pos(), "expression");
                 x = addr(new ast.BadExpr(x.Pos(),x.End()));
-
             }
-
             break;
         case ptr<ast.BinaryExpr> t:
             break;
@@ -1387,7 +1303,6 @@ private static ast.Expr checkExpr(this ptr<parser> _addr_p, ast.Expr x) => func(
         }
     }
     return x;
-
 });
 
 // isTypeName reports whether x is a (qualified) TypeName.
@@ -1409,7 +1324,6 @@ private static bool isTypeName(ast.Expr x) {
         }
     }
     return true;
-
 }
 
 // isLiteralType reports whether x is a legal composite literal type.
@@ -1437,7 +1351,6 @@ private static bool isLiteralType(ast.Expr x) {
         }
     }
     return true;
-
 }
 
 // If x is of the form *T, deref returns T, otherwise it returns x.
@@ -1449,9 +1362,7 @@ private static ast.Expr deref(ast.Expr x) {
             x = p.X;
         }
     }
-
     return x;
-
 }
 
 // If x is of the form (T), unparen returns unparen(T), otherwise it returns x.
@@ -1463,9 +1374,7 @@ private static ast.Expr unparen(ast.Expr x) {
             x = unparen(p.X);
         }
     }
-
     return x;
-
 }
 
 // checkExprOrType checks that x is an expression or a type
@@ -1483,9 +1392,7 @@ private static ast.Expr checkExprOrType(this ptr<parser> _addr_p, ast.Expr x) =>
                 // the range operator is only allowed at the top of a for statement
                 p.errorExpected(x.Pos(), "expression");
                 x = addr(new ast.BadExpr(x.Pos(),x.End()));
-
             }
-
             break;
         case ptr<ast.ArrayType> t:
             {
@@ -1497,7 +1404,6 @@ private static ast.Expr checkExprOrType(this ptr<parser> _addr_p, ast.Expr x) =>
                 }
 
             }
-
             break; 
 
         // all other nodes are expressions or types
@@ -1505,7 +1411,6 @@ private static ast.Expr checkExprOrType(this ptr<parser> _addr_p, ast.Expr x) =>
 
     // all other nodes are expressions or types
     return x;
-
 });
 
 // If lhs is set and the result is an identifier, it is not resolved.
@@ -1557,14 +1462,12 @@ L:
                 _breakL = true;
                 break;
             }
-
         else 
             _breakL = true;
             break;
                 lhs = false; // no need to try to resolve again
     }
     return x;
-
 });
 
 // If lhs is set and the result is an identifier, it is not resolved.
@@ -1599,7 +1502,6 @@ private static ast.Expr parseUnaryExpr(this ptr<parser> _addr_p, bool lhs) => fu
         x = p.parseUnaryExpr(false);
         return addr(new ast.StarExpr(pos,p.checkExprOrType(x)));
         return p.parsePrimaryExpr(lhs);
-
 });
 
 // If lhs is set and the result is an identifier, it is not resolved.
@@ -1619,16 +1521,12 @@ private static ast.Expr parseBinaryExpr(this ptr<parser> _addr_p, bool lhs, nint
                 p.resolve(x);
                 lhs = false;
             }
-
             var y = p.parseBinaryExpr(false, prec + 1);
             x = addr(new ast.BinaryExpr(p.checkExpr(x),pos,op,p.checkExpr(y)));
-
         }
-
     }
 
     return x;
-
 });
 
 // If lhs is set and the result is an identifier, it is not resolved.
@@ -1641,7 +1539,6 @@ private static ast.Expr parseExpr(this ptr<parser> _addr_p, bool lhs) => func((d
         defer(un(_addr_trace(_addr_p, "Expression")));
     }
     return p.parseBinaryExpr(lhs, token.LowestPrec + 1);
-
 });
 
 private static ast.Expr parseRhs(this ptr<parser> _addr_p) {
@@ -1688,11 +1585,9 @@ private static ast.Stmt parseSimpleStmt(this ptr<parser> _addr_p, bool labelOk) 
                 ptr<ast.LabeledStmt> stmt = addr(new ast.LabeledStmt(label,colon,p.parseStmt()));
                 p.declare(stmt, p.labelScope, ast.Lbl, label);
                 return stmt;
-
             }
 
         }
-
         p.error(x[0].Pos(), "illegal label declaration");
         return addr(new ast.BadStmt(x[0].Pos(),colon+1));
     else if (p.tok == token.ARROW) 
@@ -1708,7 +1603,6 @@ private static ast.Stmt parseSimpleStmt(this ptr<parser> _addr_p, bool labelOk) 
         return s;
     // expression
     return addr(new ast.ExprStmt(x[0]));
-
 });
 
 private static ptr<ast.CallExpr> parseCallExpr(this ptr<parser> _addr_p) {
@@ -1722,10 +1616,8 @@ private static ptr<ast.CallExpr> parseCallExpr(this ptr<parser> _addr_p) {
             return _addr_call!;
         }
     }
-
     p.errorExpected(x.Pos(), "function/method call");
     return _addr_null!;
-
 }
 
 private static ast.Stmt parseGoStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1741,7 +1633,6 @@ private static ast.Stmt parseGoStmt(this ptr<parser> _addr_p) => func((defer, _,
         return addr(new ast.BadStmt(pos,pos+2)); // len("go")
     }
     return addr(new ast.GoStmt(pos,call));
-
 });
 
 private static ast.Stmt parseDeferStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1757,7 +1648,6 @@ private static ast.Stmt parseDeferStmt(this ptr<parser> _addr_p) => func((defer,
         return addr(new ast.BadStmt(pos,pos+5)); // len("defer")
     }
     return addr(new ast.DeferStmt(pos,call));
-
 });
 
 private static ptr<ast.ReturnStmt> parseReturnStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1775,7 +1665,6 @@ private static ptr<ast.ReturnStmt> parseReturnStmt(this ptr<parser> _addr_p) => 
     p.expectSemi();
 
     return addr(new ast.ReturnStmt(pos,x));
-
 });
 
 private static ptr<ast.BranchStmt> parseBranchStmt(this ptr<parser> _addr_p, token.Token tok) => func((defer, _, _) => {
@@ -1791,12 +1680,10 @@ private static ptr<ast.BranchStmt> parseBranchStmt(this ptr<parser> _addr_p, tok
         // add to list of unresolved targets
         var n = len(p.targetStack) - 1;
         p.targetStack[n] = append(p.targetStack[n], label);
-
     }
     p.expectSemi();
 
     return addr(new ast.BranchStmt(pos,tok,label));
-
 });
 
 private static ast.Expr makeExpr(this ptr<parser> _addr_p, ast.Stmt s) {
@@ -1812,10 +1699,8 @@ private static ast.Expr makeExpr(this ptr<parser> _addr_p, ast.Stmt s) {
             return p.checkExpr(es.X);
         }
     }
-
     p.error(s.Pos(), "expected condition, found simple statement");
     return addr(new ast.BadExpr(s.Pos(),s.End()));
-
 }
 
 private static ptr<ast.IfStmt> parseIfStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1849,10 +1734,8 @@ private static ptr<ast.IfStmt> parseIfStmt(this ptr<parser> _addr_p) => func((de
                 x = p.makeExpr(s);
                 s = null;
             }
-
         }
         p.exprLev = prevLev;
-
     }    var body = p.parseBlockStmt();
     ast.Stmt else_ = default;
     if (p.tok == token.ELSE) {
@@ -1864,7 +1747,6 @@ private static ptr<ast.IfStmt> parseIfStmt(this ptr<parser> _addr_p) => func((de
         p.expectSemi();
     }
     return addr(new ast.IfStmt(pos,s,x,body,else_));
-
 });
 
 private static slice<ast.Expr> parseTypeList(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1881,7 +1763,6 @@ private static slice<ast.Expr> parseTypeList(this ptr<parser> _addr_p) => func((
     }
 
     return ;
-
 });
 
 private static ptr<ast.CaseClause> parseCaseClause(this ptr<parser> _addr_p, bool exprSwitch) => func((defer, _, _) => {
@@ -1912,7 +1793,6 @@ private static ptr<ast.CaseClause> parseCaseClause(this ptr<parser> _addr_p, boo
     p.closeScope();
 
     return addr(new ast.CaseClause(pos,list,colon,body));
-
 });
 
 private static bool isExprSwitch(ast.Stmt s) {
@@ -1931,14 +1811,10 @@ private static bool isExprSwitch(ast.Stmt s) {
                 }
 
             }
-
             return true;
-
         }
     }
-
     return false;
-
 }
 
 private static ast.Stmt parseSwitchStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -1968,7 +1844,6 @@ private static ast.Stmt parseSwitchStmt(this ptr<parser> _addr_p) => func((defer
             }
         }
         p.exprLev = prevLev;
-
     }
     var exprSwitch = isExprSwitch(s2);
     var lbrace = p.expect(token.LBRACE);
@@ -1984,7 +1859,6 @@ private static ast.Stmt parseSwitchStmt(this ptr<parser> _addr_p) => func((defer
         return addr(new ast.SwitchStmt(pos,s1,p.makeExpr(s2),body));
     }
     return addr(new ast.TypeSwitchStmt(pos,s1,s2,body));
-
 });
 
 private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2005,12 +1879,10 @@ private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => 
                 p.errorExpected(lhs[0].Pos(), "1 expression"); 
                 // continue with first expression
             }
-
             var arrow = p.pos;
             p.next();
             var rhs = p.parseRhs();
             comm = addr(new ast.SendStmt(lhs[0],arrow,rhs));
-
         }
         else
  { 
@@ -2024,12 +1896,9 @@ private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => 
                     p.errorExpected(lhs[0].Pos(), "1 or 2 expressions"); 
                     // continue with first two expressions
                     lhs = lhs[(int)0..(int)2];
-
                 }
-
                 p.next();
                 rhs = p.parseRhs();
-
             }
             else
  { 
@@ -2038,11 +1907,9 @@ private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => 
                     p.errorExpected(lhs[0].Pos(), "1 expression"); 
                     // continue with first expression
                 }
-
                 rhs = lhs[0];
                 lhs = null; // there is no lhs
             }
-
             {
                 ptr<ast.UnaryExpr> (x, isUnary) = rhs._<ptr<ast.UnaryExpr>>();
 
@@ -2052,7 +1919,6 @@ private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => 
                 }
 
             }
-
             if (lhs != null) {
                 comm = addr(new ast.AssignStmt(lhs,pos,tok,[]ast.Expr{rhs}));
             }
@@ -2060,7 +1926,6 @@ private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => 
  {
                 comm = addr(new ast.ExprStmt(rhs));
             }
-
         }
     }
     else
@@ -2072,7 +1937,6 @@ private static ptr<ast.CommClause> parseCommClause(this ptr<parser> _addr_p) => 
     p.closeScope();
 
     return addr(new ast.CommClause(pos,comm,colon,body));
-
 });
 
 private static ptr<ast.SelectStmt> parseSelectStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2092,7 +1956,6 @@ private static ptr<ast.SelectStmt> parseSelectStmt(this ptr<parser> _addr_p) => 
     ptr<ast.BlockStmt> body = addr(new ast.BlockStmt(lbrace,list,rbrace));
 
     return addr(new ast.SelectStmt(pos,body));
-
 });
 
 private static ast.Stmt parseForStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2126,7 +1989,6 @@ private static ast.Stmt parseForStmt(this ptr<parser> _addr_p) => func((defer, _
             }
         }
         p.exprLev = prevLev;
-
     }
     var body = p.parseBlockStmt();
     p.expectSemi();
@@ -2160,7 +2022,6 @@ private static ast.Stmt parseForStmt(this ptr<parser> _addr_p) => func((defer, _
                 p.errorExpected(@as.Rhs[0].Pos(), "1 expression");
                 return addr(new ast.BadStmt(pos,body.End()));
             }
-
             {
                 ptr<ast.UnaryExpr> (rhs, isUnary) = @as.Rhs[0]._<ptr<ast.UnaryExpr>>();
 
@@ -2168,20 +2029,16 @@ private static ast.Stmt parseForStmt(this ptr<parser> _addr_p) => func((defer, _
                     // rhs is range expression
                     // (any short variable declaration was handled by parseSimpleStat above)
                     return addr(new ast.RangeStmt(pos,key,value,as.TokPos,as.Tok,rhs.X,body));
-
                 }
 
             }
-
             p.errorExpected(s2.Pos(), "range clause");
             return addr(new ast.BadStmt(pos,body.End()));
-
         }
     } 
 
     // regular for statement
     return addr(new ast.ForStmt(pos,s1,p.makeExpr(s2),s3,body));
-
 });
 
 private static ast.Stmt parseStmt(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2207,7 +2064,6 @@ private static ast.Stmt parseStmt(this ptr<parser> _addr_p) => func((defer, _, _
             }
 
         }
-
     else if (p.tok == token.GO) 
         s = p.parseGoStmt();
     else if (p.tok == token.DEFER) 
@@ -2240,7 +2096,6 @@ private static ast.Stmt parseStmt(this ptr<parser> _addr_p) => func((defer, _, _
         p.next(); // make progress
         s = addr(new ast.BadStmt(pos,p.pos));
         return ;
-
 });
 
 // ----------------------------------------------------------------------------
@@ -2278,7 +2133,6 @@ private static ast.Spec parseImportSpec(ptr<parser> _addr_p, ptr<ast.CommentGrou
     p.imports = append(p.imports, spec);
 
     return spec;
-
 });
 
 private static ast.Spec parseConstSpec(ptr<parser> _addr_p, ptr<ast.CommentGroup> _addr_doc, nint iota) => func((defer, _, _) => {
@@ -2305,7 +2159,6 @@ private static ast.Spec parseConstSpec(ptr<parser> _addr_p, ptr<ast.CommentGroup
     p.declare(spec, p.topScope, ast.Con, idents);
 
     return spec;
-
 });
 
 private static ast.Spec parseTypeSpec(ptr<parser> _addr_p, ptr<ast.CommentGroup> _addr_doc, nint _) => func((defer, _, _) => {
@@ -2329,7 +2182,6 @@ private static ast.Spec parseTypeSpec(ptr<parser> _addr_p, ptr<ast.CommentGroup>
     spec.Comment = p.lineComment;
 
     return spec;
-
 });
 
 private static ast.Spec parseVarSpec(ptr<parser> _addr_p, ptr<ast.CommentGroup> _addr_doc, nint _) => func((defer, _, _) => {
@@ -2356,7 +2208,6 @@ private static ast.Spec parseVarSpec(ptr<parser> _addr_p, ptr<ast.CommentGroup> 
     p.declare(spec, p.topScope, ast.Var, idents);
 
     return spec;
-
 });
 
 private static ptr<ast.GenDecl> parseGenDecl(this ptr<parser> _addr_p, token.Token keyword, parseSpecFunction f) => func((defer, _, _) => {
@@ -2380,12 +2231,10 @@ private static ptr<ast.GenDecl> parseGenDecl(this ptr<parser> _addr_p, token.Tok
 
         rparen = p.expect(token.RPAREN);
         p.expectSemi();
-
     } {
         list = append(list, f(p, null, 0));
     }
     return addr(new ast.GenDecl(doc,pos,keyword,lparen,list,rparen));
-
 });
 
 private static ptr<ast.FieldList> parseReceiver(this ptr<parser> _addr_p, ptr<ast.Scope> _addr_scope) => func((defer, _, _) => {
@@ -2404,7 +2253,6 @@ private static ptr<ast.FieldList> parseReceiver(this ptr<parser> _addr_p, ptr<as
         // TODO determine a better range for BadExpr below
         par.List = new slice<ptr<ast.Field>>(new ptr<ast.Field>[] { {Type:&ast.BadExpr{pos,pos}} });
         return _addr_par!;
-
     }
     var recv = par.List[0];
     var @base = deref(recv.Type);
@@ -2417,9 +2265,7 @@ private static ptr<ast.FieldList> parseReceiver(this ptr<parser> _addr_p, ptr<as
         }
     }
 
-
     return _addr_par!;
-
 });
 
 private static ptr<ast.FuncDecl> parseFuncDecl(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2459,7 +2305,6 @@ private static ptr<ast.FuncDecl> parseFuncDecl(this ptr<parser> _addr_p) => func
         }
     }
     return _addr_decl!;
-
 });
 
 private static ast.Decl parseDecl(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2485,7 +2330,6 @@ private static ast.Decl parseDecl(this ptr<parser> _addr_p) => func((defer, _, _
         ptr<ast.BadDecl> decl = addr(new ast.BadDecl(pos,p.pos));
         return decl;
         return p.parseGenDecl(p.tok, f);
-
 });
 
 private static slice<ast.Decl> parseDeclList(this ptr<parser> _addr_p) => func((defer, _, _) => {
@@ -2500,7 +2344,6 @@ private static slice<ast.Decl> parseDeclList(this ptr<parser> _addr_p) => func((
     }
 
     return ;
-
 });
 
 // ----------------------------------------------------------------------------
@@ -2538,8 +2381,6 @@ private static ptr<ast.File> parseFile(this ptr<parser> _addr_p) => func((defer,
             while (p.tok != token.EOF) {
                 decls = append(decls, p.parseDecl());
             }
-
-
         }
     }
     assert(p.topScope == p.pkgScope, "imbalanced scopes"); 
@@ -2558,13 +2399,11 @@ private static ptr<ast.File> parseFile(this ptr<parser> _addr_p) => func((defer,
                 p.unresolved[i] = ident;
                 i++;
             }
-
         }
         ident = ident__prev1;
     }
 
     return addr(new ast.File(doc,pos,ident,decls,p.pkgScope,p.imports,p.unresolved[0:i],p.comments));
-
 });
 
 } // end parser_package

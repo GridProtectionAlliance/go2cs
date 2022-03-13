@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package buildcfg -- go2cs converted at 2022 March 06 22:32:23 UTC
+// package buildcfg -- go2cs converted at 2022 March 13 05:43:21 UTC
 // import "internal/buildcfg" ==> using buildcfg = go.@internal.buildcfg_package
 // Original source: C:\Program Files\Go\src\internal\buildcfg\exp.go
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-using strings = go.strings_package;
-
-using goexperiment = go.@internal.goexperiment_package;
-using System;
-
-
 namespace go.@internal;
 
+using fmt = fmt_package;
+using reflect = reflect_package;
+using strings = strings_package;
+
+using goexperiment = @internal.goexperiment_package;
+
+
+// Experiment contains the toolchain experiments enabled for the
+// current build.
+//
+// (This is not necessarily the set of experiments the compiler itself
+// was built with.)
+//
+// experimentBaseline specifies the experiment flags that are enabled by
+// default in the current toolchain. This is, in effect, the "control"
+// configuration and any variation from this is an experiment.
+
+using System;
 public static partial class buildcfg_package {
 
-    // Experiment contains the toolchain experiments enabled for the
-    // current build.
-    //
-    // (This is not necessarily the set of experiments the compiler itself
-    // was built with.)
-    //
-    // experimentBaseline specifies the experiment flags that are enabled by
-    // default in the current toolchain. This is, in effect, the "control"
-    // configuration and any variation from this is an experiment.
 
 
 public static readonly var DefaultGOEXPERIMENT = defaultGOEXPERIMENT;
@@ -101,22 +102,17 @@ public static (goexperiment.Flags, goexperiment.Flags, error) ParseGOEXPERIMENT(
                 // to build with any experiment flags.
                 flags = new goexperiment.Flags();
                 continue;
-
             }
-
             var val = true;
             if (strings.HasPrefix(f, "no")) {
                 (f, val) = (f[(int)2..], false);
             }
-
             var (set, ok) = names[f];
             if (!ok) {
                 err = fmt.Errorf("unknown GOEXPERIMENT %s", f);
                 return ;
             }
-
             set(val);
-
         }
     }
     if (goarch != "amd64") {
@@ -133,7 +129,6 @@ public static (goexperiment.Flags, goexperiment.Flags, error) ParseGOEXPERIMENT(
         err = fmt.Errorf("GOEXPERIMENT regabiargs requires regabiwrappers,regabig,regabireflect,regabidefer");
     }
     return ;
-
 }
 
 // expList returns the list of lower-cased experiment names for
@@ -166,11 +161,9 @@ private static slice<@string> expList(ptr<goexperiment.Flags> _addr_exp, ptr<goe
  {
                 list = append(list, "no" + name);
             }
-
         }
     }
     return list;
-
 }
 
 // GOEXPERIMENT is a comma-separated list of enabled or disabled

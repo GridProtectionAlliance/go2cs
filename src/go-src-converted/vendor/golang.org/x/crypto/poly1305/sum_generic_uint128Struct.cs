@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:36:53 UTC
+//     Generated on 2022 March 13 06:45:00 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace crypto
 {
     public static partial class poly1305_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct uint128
         {
             // Constructors
@@ -58,7 +58,7 @@ namespace crypto
             public static implicit operator uint128(NilType nil) => default(uint128);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static uint128 uint128_cast(dynamic value)
         {
             return new uint128(value.lo, value.hi);

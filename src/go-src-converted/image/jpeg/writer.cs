@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2022 March 06 23:36:14 UTC
+// package jpeg -- go2cs converted at 2022 March 13 06:44:15 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Program Files\Go\src\image\jpeg\writer.go
-using bufio = go.bufio_package;
-using errors = go.errors_package;
-using image = go.image_package;
-using color = go.image.color_package;
-using io = go.io_package;
-
 namespace go.image;
+
+using bufio = bufio_package;
+using errors = errors_package;
+using image = image_package;
+using color = image.color_package;
+using io = io_package;
+
+
+// min returns the minimum of two integers.
 
 public static partial class jpeg_package {
 
-    // min returns the minimum of two integers.
 private static nint min(nint x, nint y) {
     if (x < y) {
         return x;
     }
     return y;
-
 }
 
 // div returns a/b rounded to the nearest integer, instead of rounded to zero.
@@ -30,7 +31,6 @@ private static int div(int a, int b) {
         return (a + (b >> 1)) / b;
     }
     return -((-a + (b >> 1)) / b);
-
 }
 
 // bitCount counts the number of bits needed to hold an integer.
@@ -42,7 +42,6 @@ private partial struct quantIndex { // : nint
 private static readonly quantIndex quantIndexLuminance = iota;
 private static readonly var quantIndexChrominance = 0;
 private static readonly var nQuantIndex = 1;
-
 
 // unscaledQuant are the unscaled quantization tables in zig-zag order. Each
 // encoder copies and scales the tables according to its quality parameter.
@@ -58,7 +57,6 @@ private static readonly var huffIndexLuminanceAC = 0;
 private static readonly var huffIndexChrominanceDC = 1;
 private static readonly var huffIndexChrominanceAC = 2;
 private static readonly var nHuffIndex = 3;
-
 
 // huffmanSpec specifies a Huffman encoding.
 private partial struct huffmanSpec {
@@ -97,7 +95,6 @@ private static void init(this ptr<huffmanLUT> _addr_h, huffmanSpec s) {
         }
         code<<=1;
     }
-
 }
 
 // theHuffmanLUT are compiled representations of theHuffmanSpec.
@@ -131,7 +128,6 @@ private static void flush(this ptr<encoder> _addr_e) {
         return ;
     }
     e.err = e.w.Flush();
-
 }
 
 private static void write(this ptr<encoder> _addr_e, slice<byte> p) {
@@ -141,7 +137,6 @@ private static void write(this ptr<encoder> _addr_e, slice<byte> p) {
         return ;
     }
     _, e.err = e.w.Write(p);
-
 }
 
 private static void writeByte(this ptr<encoder> _addr_e, byte b) {
@@ -151,7 +146,6 @@ private static void writeByte(this ptr<encoder> _addr_e, byte b) {
         return ;
     }
     e.err = e.w.WriteByte(b);
-
 }
 
 // emit emits the least significant nBits bits of bits to the bit-stream.
@@ -170,7 +164,6 @@ private static void emit(this ptr<encoder> _addr_e, uint bits, uint nBits) {
         }
         bits<<=8;
         nBits -= 8;
-
     }
     (e.bits, e.nBits) = (bits, nBits);
 }
@@ -248,7 +241,6 @@ private static void writeSOF0(this ptr<encoder> _addr_e, image.Point size, nint 
         // No subsampling for grayscale image.
         e.buf[7] = 0x11;
         e.buf[8] = 0x00;
-
     }
     else
  {
@@ -257,12 +249,9 @@ private static void writeSOF0(this ptr<encoder> _addr_e, image.Point size, nint 
             // We use 4:2:0 chroma subsampling.
             e.buf[3 * i + 7] = "\x22\x11\x11"[i];
             e.buf[3 * i + 8] = "\x00\x01\x01"[i];
-
         }
-
     }
     e.write(e.buf[..(int)3 * (nComponent - 1) + 9]);
-
 }
 
 // writeDHT writes the Define Huffman Table marker.
@@ -274,7 +263,6 @@ private static void writeDHT(this ptr<encoder> _addr_e, nint nComponent) {
     if (nComponent == 1) { 
         // Drop the Chrominance tables.
         specs = specs[..(int)2];
-
     }
     {
         var s__prev1 = s;
@@ -335,7 +323,6 @@ private static int writeBlock(this ptr<encoder> _addr_e, ptr<block> _addr_b, qua
         e.emitHuff(h, 0x00);
     }
     return dc;
-
 }
 
 // toYCbCr converts the 8x8 region of m whose top-left corner is p to its
@@ -403,9 +390,7 @@ private static void rgbaToYCbCr(ptr<image.RGBA> _addr_m, image.Point p, ptr<bloc
             cbBlock[8 * j + i] = int32(cb);
             crBlock[8 * j + i] = int32(cr);
         }
-
     }
-
 }
 
 // yCbCrToYCbCr is a specialized version of toYCbCr for image.YCbCr images.
@@ -434,9 +419,7 @@ private static void yCbCrToYCbCr(ptr<image.YCbCr> _addr_m, image.Point p, ptr<bl
             cbBlock[8 * j + i] = int32(m.Cb[ci]);
             crBlock[8 * j + i] = int32(m.Cr[ci]);
         }
-
     }
-
 }
 
 // scale scales the 16x16 region represented by the 4 src blocks to the 8x8
@@ -497,7 +480,6 @@ private static void writeSOS(this ptr<encoder> _addr_e, image.Image m) {
     ref block b = ref heap(out ptr<block> _addr_b);    ref array<block> cb = ref heap(new array<block>(4), out ptr<array<block>> _addr_cb);    ref array<block> cr = ref heap(new array<block>(4), out ptr<array<block>> _addr_cr); 
     // DC components are delta-encoded.
     int prevDCY = default;    int prevDCCb = default;    int prevDCCr = default;
-
     var bounds = m.Bounds();
     switch (m.type()) {
         case ptr<image.Gray> m:
@@ -562,22 +544,18 @@ private static void writeSOS(this ptr<encoder> _addr_e, image.Image m) {
                                     toYCbCr(m, p, _addr_b, _addr_cb[i], _addr_cr[i]);
                     y += 16;
                                 }
-
                                 prevDCY = e.writeBlock(_addr_b, 0, prevDCY);
-
                             }
 
                             scale(_addr_b, _addr_cb);
                             prevDCCb = e.writeBlock(_addr_b, 1, prevDCCb);
                             scale(_addr_b, _addr_cr);
                             prevDCCr = e.writeBlock(_addr_b, 1, prevDCCr);
-
                         }
 
 
                         x = x__prev2;
                     }
-
                 }
 
 
@@ -589,7 +567,6 @@ private static void writeSOS(this ptr<encoder> _addr_e, image.Image m) {
     } 
     // Pad the last byte with 1's.
     e.emit(0x7f, 7);
-
 }
 
 // DefaultQuality is the default quality encoding parameter.
@@ -655,9 +632,7 @@ public static error Encode(io.Writer w, image.Image m, ptr<Options> _addr_o) {
             else if (x > 255) {
                 x = 255;
             }
-
             e.quant[i][j] = uint8(x);
-
         }
     }    nint nComponent = 3;
     switch (m.type()) {
@@ -684,7 +659,6 @@ public static error Encode(io.Writer w, image.Image m, ptr<Options> _addr_o) {
     e.write(e.buf[..(int)2]);
     e.flush();
     return error.As(e.err)!;
-
 }
 
 } // end jpeg_package

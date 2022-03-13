@@ -4,32 +4,34 @@
 
 // go-specific code shared across loaders (5l, 6l, 8l).
 
-// package ld -- go2cs converted at 2022 March 06 23:21:25 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:24 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\go.go
-using bytes = go.bytes_package;
-using bio = go.cmd.@internal.bio_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
 namespace go.cmd.link.@internal;
+
+using bytes = bytes_package;
+using bio = cmd.@internal.bio_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+
+// go-specific code shared across loaders (5l, 6l, 8l).
+
+// replace all "". with pkg.
 
 public static partial class ld_package {
 
-    // go-specific code shared across loaders (5l, 6l, 8l).
-
-    // replace all "". with pkg.
 private static @string expandpkg(@string t0, @string pkg) {
     return strings.Replace(t0, "\"\".", pkg + ".", -1);
 }
@@ -60,7 +62,6 @@ private static void ldpkg(ptr<Link> _addr_ctxt, ptr<bio.Reader> _addr_f, ptr<sym
             return ;
         }
     }
-
     var data = string(bdata); 
 
     // process header lines
@@ -82,7 +83,6 @@ private static void ldpkg(ptr<Link> _addr_ctxt, ptr<bio.Reader> _addr_f, ptr<sym
             i = i__prev1;
 
         }
-
         if (line == "main") {
             lib.Main = true;
         }
@@ -113,7 +113,6 @@ private static void ldpkg(ptr<Link> _addr_ctxt, ptr<bio.Reader> _addr_f, ptr<sym
         }
         p1 += p0;
         loadcgo(_addr_ctxt, filename, objabi.PathToPrefix(lib.Pkg), data[(int)p0..(int)p1]);
-
     }
 }
 
@@ -133,7 +132,6 @@ private static void loadcgo(ptr<Link> _addr_ctxt, @string file, @string pkg, @st
 
     // Record the directives. We'll process them later after Symbols are created.
     ctxt.cgodata = append(ctxt.cgodata, new cgodata(file,pkg,directives));
-
 }
 
 // Set symbol attributes or flags based on cgo directives.
@@ -174,11 +172,8 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                 {
                                    dynlib = append(dynlib, lib);
                                }
-
                                continue;
-
                            }
-
                            local = expandpkg(local, pkg);
                            @string q = "";
                            {
@@ -189,7 +184,6 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                                }
 
                            }
-
                            var s = l.LookupOrCreateSym(local, 0);
                            var st = l.SymType(s);
                            if (st == 0 || st == sym.SXREF || st == sym.SBSS || st == sym.SNOPTRBSS || st == sym.SHOSTOBJ) {
@@ -204,16 +198,12 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                 {
                                    hostObjSyms[s] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
                                }
-
                                havedynamic = 1;
                                if (lib != "" && ctxt.IsDarwin()) {
                                    machoadddynlib(lib, ctxt.LinkMode);
                                }
-
                            }
-
                            continue;
-
                 break;
             case "cgo_import_static": 
                 if (len(f) != 2) {
@@ -252,13 +242,11 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                                    return ;
                                }
                            }
-
                            s = l.LookupOrCreateSym(local, sym.ABIToVersion(abi));
 
                            if (l.SymType(s) == sym.SHOSTOBJ) {
                                hostObjSyms[s] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
                            }
-
 
                            if (ctxt.BuildMode == BuildModeCShared || ctxt.BuildMode == BuildModeCArchive || ctxt.BuildMode == BuildModePlugin) 
                                if (s == l.Lookup("main", 0)) {
@@ -274,7 +262,6 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                                su = l.MakeSymbolUpdater(s);
                                su.SetType(0);
                            }
-
                            if (!(l.AttrCgoExportStatic(s) || l.AttrCgoExportDynamic(s))) {
                                l.SetSymExtname(s, remote);
                            }
@@ -291,9 +278,7 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                                    // Static cgo exports appear
                                    // in the exported symbol table.
                                    ctxt.dynexp = append(ctxt.dynexp, s);
-
                                }
-
                                if (ctxt.LinkMode == LinkInternal) { 
                                    // For internal linking, we're
                                    // responsible for resolving
@@ -301,11 +286,8 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                                    // Record the right Go symbol
                                    // version to use.
                                    l.AddCgoExport(s);
-
                                }
-
                                l.SetAttrCgoExportStatic(s, true);
-
                            }
                            else
                 {
@@ -313,15 +295,10 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
                                    // Dynamic cgo exports appear
                                    // in the exported symbol table.
                                    ctxt.dynexp = append(ctxt.dynexp, s);
-
                                }
-
                                l.SetAttrCgoExportDynamic(s, true);
-
                            }
-
                            continue;
-
                 break;
             case "cgo_dynamic_linker": 
                 if (len(f) != 2) {
@@ -348,9 +325,7 @@ private static void setCgoAttr(ptr<Link> _addr_ctxt, @string file, @string pkg, 
 
         fmt.Fprintf(os.Stderr, "%s: %s: invalid cgo directive: %q\n", os.Args[0], file, f);
         nerrors++;
-
     }    return ;
-
 }
 
 // openbsdTrimLibVersion indicates whether a shared library is
@@ -374,7 +349,6 @@ private static (@string, bool) openbsdTrimLibVersion(@string lib) {
             return ("", false);
         }
     }
-
     {
         (_, err) = strconv.Atoi(parts[3]);
 
@@ -382,9 +356,7 @@ private static (@string, bool) openbsdTrimLibVersion(@string lib) {
             return ("", false);
         }
     }
-
     return (fmt.Sprintf("%s.%s", parts[0], parts[1]), true);
-
 }
 
 // dedupLibrariesOpenBSD dedups a list of shared libraries, treating versioned
@@ -411,7 +383,6 @@ private static slice<@string> dedupLibrariesOpenBSD(ptr<Link> _addr_ctxt, slice<
                     // Record unversioned name as seen.
                     seenlib[name] = true;
                     libraries[name] = lib;
-
                 }                {
                     var (_, ok) = libraries[lib];
 
@@ -422,9 +393,7 @@ private static slice<@string> dedupLibrariesOpenBSD(ptr<Link> _addr_ctxt, slice<
 
                 }
 
-
             }
-
         }
         lib = lib__prev1;
     }
@@ -443,7 +412,6 @@ private static slice<@string> dedupLibrariesOpenBSD(ptr<Link> _addr_ctxt, slice<
     sort.Strings(libs);
 
     return libs;
-
 }
 
 private static slice<@string> dedupLibraries(ptr<Link> _addr_ctxt, slice<@string> libs) {
@@ -453,7 +421,6 @@ private static slice<@string> dedupLibraries(ptr<Link> _addr_ctxt, slice<@string
         return dedupLibrariesOpenBSD(_addr_ctxt, libs);
     }
     return libs;
-
 }
 
 private static var seenlib = make_map<@string, bool>();
@@ -473,7 +440,6 @@ private static void adddynlib(ptr<Link> _addr_ctxt, @string lib) {
         }
         var du = ctxt.loader.MakeSymbolUpdater(ctxt.Dynamic);
         Elfwritedynent(ctxt.Arch, du, elf.DT_NEEDED, uint64(dsu.Addstring(lib)));
-
     }
     else
  {
@@ -529,13 +495,10 @@ private static void fieldtrack(ptr<sys.Arch> _addr_arch, ptr<loader.Loader> _add
 
                     }
                     buf.WriteString("\n");
-
                 }
-
             }
 
         }
-
     }
     l.Reachparent = null; // we are done with it
     if (flagFieldTrack == "".val) {
@@ -548,7 +511,6 @@ private static void fieldtrack(ptr<sys.Arch> _addr_arch, ptr<loader.Loader> _add
     var bld = l.MakeSymbolUpdater(s);
     bld.SetType(sym.SDATA);
     addstrdata(arch, l, flagFieldTrack.val, buf.String());
-
 }
 
 private static void addexport(this ptr<Link> _addr_ctxt) => func((_, panic, _) => {
@@ -575,19 +537,13 @@ private static void addexport(this ptr<Link> _addr_ctxt) => func((_, panic, _) =
                                 if (len(ctxt.loader.Data(rs)) != 0) {
                                     panic("expected no data on undef symbol");
                                 }
-
                                 var su = ctxt.loader.MakeSymbolUpdater(rs);
                                 su.SetType(sym.SUNDEFEXT);
-
                             }
-
                         }
 
                     }
-
                 }
-
-
             }
 
             s = s__prev1;
@@ -605,9 +561,7 @@ private static void addexport(this ptr<Link> _addr_ctxt) => func((_, panic, _) =
             if (!ctxt.loader.AttrReachable(s)) {
                 panic("dynexp entry not reachable");
             }
-
             Adddynsym(_addr_ctxt.loader, _addr_ctxt.Target, _addr_ctxt.ArchSyms, s);
-
         }
         s = s__prev1;
     }
@@ -654,11 +608,9 @@ private static ptr<Pkg> cycle(this ptr<Pkg> _addr_p) {
             }
 
         }
-
     }    p.@checked = true;
     p.mark = false;
     return _addr_null!;
-
 }
 
 private static void importcycles() {

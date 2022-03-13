@@ -3,25 +3,26 @@
 // license that can be found in the LICENSE file.
 
 // Package run implements the ``go run'' command.
-// package run -- go2cs converted at 2022 March 06 23:16:20 UTC
+
+// package run -- go2cs converted at 2022 March 13 06:29:51 UTC
 // import "cmd/go/internal/run" ==> using run = go.cmd.go.@internal.run_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\run\run.go
-using context = go.context_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using os = go.os_package;
-using path = go.path_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using str = go.cmd.go.@internal.str_package;
-using work = go.cmd.go.@internal.work_package;
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using os = os_package;
+using path = path_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using str = cmd.go.@internal.str_package;
+using work = cmd.go.@internal.work_package;
 
 public static partial class run_package {
 
@@ -65,7 +66,6 @@ private static void init() {
 
     work.AddBuildFlags(CmdRun, work.DefaultBuildFlags);
     CmdRun.Flag.Var((@base.StringsFlag.val)(_addr_work.ExecCmd), "exec", "");
-
 }
 
 private static (nint, error) printStderr(params object[] args) {
@@ -88,7 +88,6 @@ private static void runRun(context.Context ctx, ptr<base.Command> _addr_cmd, sli
         modload.RootMode = modload.NoRoot;
         modload.AllowMissingModuleImports();
         modload.Init();
-
     }
     work.BuildInit();
     work.Builder b = default;
@@ -108,11 +107,8 @@ private static void runRun(context.Context ctx, ptr<base.Command> _addr_cmd, sli
                 // GoFilesPackage is going to assign this to TestGoFiles.
                 // Reject since it won't be part of the build.
                 @base.Fatalf("go run: cannot run *_test.go files (%s)", file);
-
             }
-
         }        p = load.GoFilesPackage(ctx, pkgOpts, files);
-
     }
     else if (len(args) > 0 && !strings.HasPrefix(args[0], "-")) {
         var arg = args[0];
@@ -145,12 +141,10 @@ private static void runRun(context.Context ctx, ptr<base.Command> _addr_cmd, sli
             }
 
             @base.Fatalf("go run: pattern %s matches multiple packages:\n\t%s", arg, strings.Join(names, "\n\t"));
-
         }
     else
         p = pkgs[0];
         i++;
-
     } {
         @base.Fatalf("go run: no go files listed");
     }
@@ -176,12 +170,9 @@ private static void runRun(context.Context ctx, ptr<base.Command> _addr_cmd, sli
             if (!cfg.BuildContext.CgoEnabled) {
                 hint = " (cgo is disabled)";
             }
-
             @base.Fatalf("go run: no suitable source files%s", hint);
-
         }
         p.Internal.ExeName = src[..(int)len(src) - len(".go")];
-
     }
     else
  {
@@ -190,7 +181,6 @@ private static void runRun(context.Context ctx, ptr<base.Command> _addr_cmd, sli
     var a1 = b.LinkAction(work.ModeBuild, work.ModeBuild, p);
     ptr<work.Action> a = addr(new work.Action(Mode:"go run",Func:buildRunProgram,Args:cmdArgs,Deps:[]*work.Action{a1}));
     b.Do(ctx, a);
-
 }
 
 // shouldUseOutsideModuleMode returns whether 'go run' will load packages in
@@ -208,7 +198,6 @@ private static bool shouldUseOutsideModuleMode(slice<@string> args) {
     // NOTE: "@" not allowed in import paths, but it is allowed in non-canonical
     // versions.
     return len(args) > 0 && !strings.HasSuffix(args[0], ".go") && !strings.HasPrefix(args[0], "-") && strings.Contains(args[0], "@") && !build.IsLocalImport(args[0]) && !filepath.IsAbs(args[0]);
-
 }
 
 // buildRunProgram is the action for running a binary that has already
@@ -226,7 +215,6 @@ private static error buildRunProgram(ptr<work.Builder> _addr_b, context.Context 
     }
     @base.RunStdin(cmdline);
     return error.As(null!)!;
-
 }
 
 } // end run_package

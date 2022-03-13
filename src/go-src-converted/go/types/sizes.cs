@@ -4,16 +4,14 @@
 
 // This file implements Sizes.
 
-// package types -- go2cs converted at 2022 March 06 22:42:15 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:23 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\sizes.go
-
-
 namespace go.go;
 
 public static partial class types_package {
 
-    // Sizes defines the sizing functions for package unsafe.
+// Sizes defines the sizing functions for package unsafe.
 public partial interface Sizes {
     long Alignof(Type T); // Offsetsof returns the offsets of the given struct fields, in bytes.
 // Offsetsof must implement the offset guarantees required by the spec.
@@ -70,7 +68,6 @@ private static long Alignof(this ptr<StdSizes> _addr_s, Type T) {
                     a = a__prev1;
 
                 }
-
             }
             return max;
             break;
@@ -98,7 +95,6 @@ private static long Alignof(this ptr<StdSizes> _addr_s, Type T) {
         return s.MaxAlign;
     }
     return a;
-
 }
 
 private static slice<long> Offsetsof(this ptr<StdSizes> _addr_s, slice<ptr<Var>> fields) {
@@ -132,13 +128,10 @@ private static long Sizeof(this ptr<StdSizes> _addr_s, Type T) => func((_, panic
                     }
 
                 }
-
             }
-
             if (k == String) {
                 return s.WordSize * 2;
             }
-
             break;
         case ptr<Array> t:
             var n = t.len;
@@ -198,7 +191,6 @@ public static Sizes SizesFor(@string compiler, @string arch) {
         return null;
     }
     return s;
-
 }
 
 // stdSizes is used if Config.Sizes == nil.
@@ -219,14 +211,10 @@ private static long alignof(this ptr<Config> _addr_conf, Type T) => func((_, pan
                 }
 
             }
-
             panic("Config.Sizes.Alignof returned an alignment < 1");
-
         }
     }
-
     return stdSizes.Alignof(T);
-
 });
 
 private static slice<long> offsetsof(this ptr<Config> _addr_conf, ptr<Struct> _addr_T) => func((_, panic, _) => {
@@ -245,7 +233,6 @@ private static slice<long> offsetsof(this ptr<Config> _addr_conf, ptr<Struct> _a
                 if (len(offsets) != T.NumFields()) {
                     panic("Config.Sizes.Offsetsof returned the wrong number of offsets");
                 }
-
                 foreach (var (_, o) in offsets) {
                     if (o < 0) {
                         panic("Config.Sizes.Offsetsof returned an offset < 0");
@@ -257,10 +244,8 @@ private static slice<long> offsetsof(this ptr<Config> _addr_conf, ptr<Struct> _a
             }
 
         }
-
     }
     return offsets;
-
 });
 
 // offsetof returns the offset of the field specified via
@@ -292,14 +277,10 @@ private static long @sizeof(this ptr<Config> _addr_conf, Type T) => func((_, pan
                 }
 
             }
-
             panic("Config.Sizes.Sizeof returned a size < 0");
-
         }
     }
-
     return stdSizes.Sizeof(T);
-
 });
 
 // align returns the smallest y >= x such that y % a == 0.

@@ -14,29 +14,31 @@
 
 // Package profile provides a representation of profile.proto and
 // methods to encode/decode profiles in this format.
-// package profile -- go2cs converted at 2022 March 06 23:24:03 UTC
+
+// package profile -- go2cs converted at 2022 March 13 06:37:10 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\profile.go
-using bytes = go.bytes_package;
-using gzip = go.compress.gzip_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using ioutil = go.io.ioutil_package;
-using math = go.math_package;
-using filepath = go.path.filepath_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof;
 
+using bytes = bytes_package;
+using gzip = compress.gzip_package;
+using fmt = fmt_package;
+using io = io_package;
+using ioutil = io.ioutil_package;
+using math = math_package;
+using filepath = path.filepath_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// Profile is an in-memory representation of profile.proto.
+
+using System;
 public static partial class profile_package {
 
-    // Profile is an in-memory representation of profile.proto.
 public partial struct Profile {
     public slice<ptr<ValueType>> SampleType;
     public @string DefaultSampleType;
@@ -146,7 +148,6 @@ public static (ptr<Profile>, error) Parse(io.Reader r) {
         return (_addr_null!, error.As(err)!);
     }
     return _addr_ParseData(data)!;
-
 }
 
 // ParseData parses a profile from a buffer and checks for its
@@ -185,9 +186,7 @@ public static (ptr<Profile>, error) ParseData(slice<byte> data) {
         err = err__prev1;
 
     }
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static var errUnrecognized = fmt.Errorf("unrecognized profile format");
@@ -211,7 +210,6 @@ private static (ptr<Profile>, error) parseLegacy(slice<byte> data) {
             return (_addr_null!, error.As(err)!);
         }
     }    return (_addr_null!, error.As(errUnrecognized)!);
-
 }
 
 // ParseUncompressed parses an uncompressed protobuf into a profile.
@@ -235,7 +233,6 @@ public static (ptr<Profile>, error) ParseUncompressed(slice<byte> data) {
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -248,9 +245,7 @@ public static (ptr<Profile>, error) ParseUncompressed(slice<byte> data) {
 
     }
 
-
     return (_addr_p!, error.As(null!)!);
-
 }
 
 private static var libRx = regexp.MustCompile("([.]so$|[.]so[._][0-9]+)");
@@ -287,7 +282,6 @@ private static void massageMappings(this ptr<Profile> _addr_p) {
         }
 
         p.Mapping = mappings;
-
     }
     {
         var i__prev1 = i;
@@ -308,7 +302,6 @@ private static void massageMappings(this ptr<Profile> _addr_p) {
             } 
             // Swap what we guess is main to position 0.
             (p.Mapping[0], p.Mapping[i]) = (p.Mapping[i], p.Mapping[0]);            break;
-
         }
         i = i__prev1;
         m = m__prev1;
@@ -355,7 +348,6 @@ private static bool adjacent(ptr<Mapping> _addr_m1, ptr<Mapping> _addr_m2) {
         }
     }
     return true;
-
 }
 
 private static void updateLocationMapping(this ptr<Profile> _addr_p, ptr<Mapping> _addr_from, ptr<Mapping> _addr_to) {
@@ -499,7 +491,6 @@ private static error CheckValid(this ptr<Profile> _addr_p) {
                 m = m__prev1;
 
             }
-
             foreach (var (_, ln) in l.Line) {
                 var f = ln.Function;
                 if (f == null) {
@@ -509,13 +500,11 @@ private static error CheckValid(this ptr<Profile> _addr_p) {
                     return error.As(fmt.Errorf("inconsistent function %p: %d", f, f.ID))!;
                 }
             }
-
         }
         l = l__prev1;
     }
 
     return error.As(null!)!;
-
 }
 
 // Aggregate merges the locations in the profile into equivalence
@@ -556,7 +545,6 @@ private static error Aggregate(this ptr<Profile> _addr_p, bool inlineFrame, bool
         }
     }
     return error.As(p.CheckValid())!;
-
 }
 
 // NumLabelUnits returns a map of numeric label keys to the units
@@ -608,12 +596,9 @@ private static (map<@string, @string>, map<@string, slice<@string>>) NumLabelUni
                                 }
 
                             }
-
                         }
 
-
                     }
-
                 }
 
                 unit = unit__prev3;
@@ -636,9 +621,7 @@ private static (map<@string, @string>, map<@string, slice<@string>>) NumLabelUni
                         numLabelUnits[key] = key;
                         break;
                 }
-
             }
-
         }
         key = key__prev1;
     }
@@ -666,13 +649,11 @@ private static (map<@string, @string>, map<@string, slice<@string>>) NumLabelUni
 
             sort.Strings(units);
             unitsIgnored[key] = units;
-
         }
         key = key__prev1;
     }
 
     return (numLabelUnits, unitsIgnored);
-
 }
 
 // String dumps a text representation of a profile. Intended mainly
@@ -690,7 +671,6 @@ private static @string String(this ptr<Profile> _addr_p) {
             ss = append(ss, fmt.Sprintf("PeriodType: %s %s", pt.Type, pt.Unit));
         }
     }
-
     ss = append(ss, fmt.Sprintf("Period: %d", p.Period));
     if (p.TimeNanos != 0) {
         ss = append(ss, fmt.Sprintf("Time: %v", time.Unix(0, p.TimeNanos)));
@@ -732,7 +712,6 @@ private static @string String(this ptr<Profile> _addr_p) {
     foreach (var (_, m) in p.Mapping) {
         ss = append(ss, m.@string());
     }    return strings.Join(ss, "\n") + "\n";
-
 }
 
 // string dumps a text representation of a mapping. Intended mainly
@@ -754,7 +733,6 @@ private static @string @string(this ptr<Mapping> _addr_m) {
         bits = bits + "[IN]";
     }
     return fmt.Sprintf("%d: %#x/%#x/%#x %s %s %s", m.ID, m.Start, m.Limit, m.Offset, m.File, m.BuildID, bits);
-
 }
 
 // string dumps a text representation of a location. Intended mainly
@@ -771,7 +749,6 @@ private static @string @string(this ptr<Location> _addr_l) {
             locStr = locStr + fmt.Sprintf("M=%d ", m.ID);
         }
     }
-
     if (l.IsFolded) {
         locStr = locStr + "[F] ";
     }
@@ -791,13 +768,10 @@ private static @string @string(this ptr<Location> _addr_l) {
             }
 
         }
-
         ss = append(ss, locStr + lnStr); 
         // Do not print location details past the first line
         locStr = "             ";
-
     }    return strings.Join(ss, "\n");
-
 }
 
 // string dumps a text representation of a sample. Intended mainly
@@ -822,7 +796,6 @@ private static @string @string(this ptr<Sample> _addr_s) {
         ss = append(ss, labelHeader + numLabelsToString(s.NumLabel, s.NumUnit));
     }
     return strings.Join(ss, "\n");
-
 }
 
 // labelsToString returns a string representation of a
@@ -849,15 +822,12 @@ private static @string numLabelsToString(map<@string, slice<long>> numLabels, ma
             }
         else
             labelString = fmt.Sprintf("%s:%v", k, values);
-
         } {
             labelString = fmt.Sprintf("%s:%v", k, v);
         }
         ls = append(ls, labelString);
-
     }    sort.Strings(ls);
     return strings.Join(ls, " ");
-
 }
 
 // SetLabel sets the specified key to the specified value for all samples in the
@@ -895,7 +865,6 @@ private static bool HasLabel(this ptr<Sample> _addr_s, @string key, @string valu
             return true;
         }
     }    return false;
-
 }
 
 // DiffBaseSample returns true if a sample belongs to the diff base and false
@@ -918,7 +887,6 @@ private static void Scale(this ptr<Profile> _addr_p, double ratio) {
     foreach (var (i) in p.SampleType) {
         ratios[i] = ratio;
     }    p.ScaleN(ratios);
-
 }
 
 // ScaleN multiplies each sample values in a sample by a different amount
@@ -953,7 +921,6 @@ private static error ScaleN(this ptr<Profile> _addr_p, slice<double> ratios) {
         }
     }    p.Sample = p.Sample[..(int)fillIdx];
     return error.As(null!)!;
-
 }
 
 // HasFunctions determines if all locations in this profile have
@@ -966,7 +933,6 @@ private static bool HasFunctions(this ptr<Profile> _addr_p) {
             return false;
         }
     }    return true;
-
 }
 
 // HasFileLines determines if all locations in this profile have
@@ -979,7 +945,6 @@ private static bool HasFileLines(this ptr<Profile> _addr_p) {
             return false;
         }
     }    return true;
-
 }
 
 // Unsymbolizable returns true if a mapping points to a binary for which
@@ -1008,7 +973,6 @@ private static ptr<Profile> Copy(this ptr<Profile> _addr_p) => func((_, panic, _
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -1021,9 +985,7 @@ private static ptr<Profile> Copy(this ptr<Profile> _addr_p) => func((_, panic, _
 
     }
 
-
     return _addr_pp!;
-
 });
 
 } // end profile_package

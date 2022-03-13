@@ -5,17 +5,17 @@
 //go:build dragonfly || freebsd || linux || netbsd || openbsd
 // +build dragonfly freebsd linux netbsd openbsd
 
-// package unix -- go2cs converted at 2022 March 06 23:26:33 UTC
+// package unix -- go2cs converted at 2022 March 13 06:41:18 UTC
 // import "cmd/vendor/golang.org/x/sys/unix" ==> using unix = go.cmd.vendor.golang.org.x.sys.unix_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\sys\unix\fcntl.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.cmd.vendor.golang.org.x.sys;
+
+using @unsafe = @unsafe_package;
 
 public static partial class unix_package {
 
-    // fcntl64Syscall is usually SYS_FCNTL, but is overridden on 32-bit Linux
-    // systems by fcntl_linux_32bit.go to be SYS_FCNTL64.
+// fcntl64Syscall is usually SYS_FCNTL, but is overridden on 32-bit Linux
+// systems by fcntl_linux_32bit.go to be SYS_FCNTL64.
 private static System.UIntPtr fcntl64Syscall = SYS_FCNTL;
 
 private static (nint, error) fcntl(nint fd, nint cmd, nint arg) {
@@ -28,7 +28,6 @@ private static (nint, error) fcntl(nint fd, nint cmd, nint arg) {
         err = error.As(errno)!;
     }
     return (int(valptr), error.As(err)!);
-
 }
 
 // FcntlInt performs a fcntl syscall on fd with the provided command and argument.
@@ -48,7 +47,6 @@ public static error FcntlFlock(System.UIntPtr fd, nint cmd, ptr<Flock_t> _addr_l
         return error.As(null!)!;
     }
     return error.As(errno)!;
-
 }
 
 } // end unix_package

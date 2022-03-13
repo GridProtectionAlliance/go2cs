@@ -2,12 +2,12 @@
 // nothing special about net/http here, this is just a convenient way
 // to pull in a lot of code.
 
-// package main -- go2cs converted at 2022 March 06 23:22:34 UTC
+// package main -- go2cs converted at 2022 March 13 06:35:38 UTC
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\testdata\httptest\main\main.go
-using http = go.net.http_package;
-using httptest = go.net.http.httptest_package;
-
 namespace go;
+
+using http = net.http_package;
+using httptest = net.http.httptest_package;
 
 public static partial class main_package {
 

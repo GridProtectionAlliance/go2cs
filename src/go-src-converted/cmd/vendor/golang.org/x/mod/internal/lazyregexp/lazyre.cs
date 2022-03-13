@@ -4,20 +4,23 @@
 
 // Package lazyregexp is a thin wrapper over regexp, allowing the use of global
 // regexp variables without forcing them to be compiled at init.
-// package lazyregexp -- go2cs converted at 2022 March 06 23:25:57 UTC
+
+// package lazyregexp -- go2cs converted at 2022 March 13 06:40:47 UTC
 // import "cmd/vendor/golang.org/x/mod/internal/lazyregexp" ==> using lazyregexp = go.cmd.vendor.golang.org.x.mod.@internal.lazyregexp_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\internal\lazyregexp\lazyre.go
-using os = go.os_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
 namespace go.cmd.vendor.golang.org.x.mod.@internal;
+
+using os = os_package;
+using regexp = regexp_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// Regexp is a wrapper around regexp.Regexp, where the underlying regexp will be
+// compiled the first time it is needed.
 
 public static partial class lazyregexp_package {
 
-    // Regexp is a wrapper around regexp.Regexp, where the underlying regexp will be
-    // compiled the first time it is needed.
 public partial struct Regexp {
     public @string str;
     public sync.Once once;
@@ -96,10 +99,8 @@ public static ptr<Regexp> New(@string str) {
     if (inTest) { 
         // In tests, always compile the regexps early.
         lr.re();
-
     }
     return _addr_lr!;
-
 }
 
 } // end lazyregexp_package

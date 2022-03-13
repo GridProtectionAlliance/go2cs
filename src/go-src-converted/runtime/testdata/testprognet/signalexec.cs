@@ -8,20 +8,19 @@
 // must not import anything (like net, but also like os/signal)
 // that kicks off background goroutines during init.
 
-// package main -- go2cs converted at 2022 March 06 22:26:21 UTC
+// package main -- go2cs converted at 2022 March 13 05:40:28 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprognet\signalexec.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using exec = go.os.exec_package;
-using signal = go.os.signal_package;
-using sync = go.sync_package;
-using syscall = go.syscall_package;
-using time = go.time_package;
+namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using exec = os.exec_package;
+using signal = os.signal_package;
+using sync = sync_package;
+using syscall = syscall_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -63,13 +62,11 @@ public static void SignalDuringExec() => func((defer, _, _) => {
                 }
 
             }
-
         }());
         go_(() => () => {
             defer(wg.Done());
             syscall.Kill(-pgrp, syscall.SIGWINCH);
         }());
-
     }
 
     signal.Stop(c);
@@ -77,7 +74,6 @@ public static void SignalDuringExec() => func((defer, _, _) => {
     wg.Wait();
 
     fmt.Println("OK");
-
 });
 
 public static void Nop() { 

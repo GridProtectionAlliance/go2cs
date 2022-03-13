@@ -2,29 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package tls -- go2cs converted at 2022 March 06 22:20:12 UTC
+// package tls -- go2cs converted at 2022 March 13 05:35:11 UTC
 // import "crypto/tls" ==> using tls = go.crypto.tls_package
 // Original source: C:\Program Files\Go\src\crypto\tls\handshake_client.go
-using bytes = go.bytes_package;
-using context = go.context_package;
-using crypto = go.crypto_package;
-using ecdsa = go.crypto.ecdsa_package;
-using ed25519 = go.crypto.ed25519_package;
-using rsa = go.crypto.rsa_package;
-using subtle = go.crypto.subtle_package;
-using x509 = go.crypto.x509_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using net = go.net_package;
-using strings = go.strings_package;
-using atomic = go.sync.atomic_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.crypto;
+
+using bytes = bytes_package;
+using context = context_package;
+using crypto = crypto_package;
+using ecdsa = crypto.ecdsa_package;
+using ed25519 = crypto.ed25519_package;
+using rsa = crypto.rsa_package;
+using subtle = crypto.subtle_package;
+using x509 = crypto.x509_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using io = io_package;
+using net = net_package;
+using strings = strings_package;
+using atomic = sync.atomic_package;
+using time = time_package;
+using System;
 
 public static partial class tls_package {
 
@@ -63,7 +62,6 @@ private static (ptr<clientHelloMsg>, ecdheParameters, error) makeClientHello(thi
             }
 
         }
-
     }    if (nextProtosLength > 0xffff) {
         return (_addr_null!, null, error.As(errors.New("tls: NextProtos values too large"))!);
     }
@@ -99,7 +97,6 @@ private static (ptr<clientHelloMsg>, ecdheParameters, error) makeClientHello(thi
             continue;
         }
         hello.cipherSuites = append(hello.cipherSuites, suiteId);
-
     }    var (_, err) = io.ReadFull(config.rand(), hello.random);
     if (err != null) {
         return (_addr_null!, null, error.As(errors.New("tls: short read from Rand: " + err.Error()))!);
@@ -111,7 +108,6 @@ private static (ptr<clientHelloMsg>, ecdheParameters, error) makeClientHello(thi
             return (_addr_null!, null, error.As(errors.New("tls: short read from Rand: " + err.Error()))!);
         }
     }
-
 
     if (hello.vers >= VersionTLS12) {
         hello.supportedSignatureAlgorithms = supportedSignatureAlgorithms;
@@ -134,16 +130,13 @@ private static (ptr<clientHelloMsg>, ecdheParameters, error) makeClientHello(thi
             }
 
         }
-
         params, err = generateECDHEParameters(config.rand(), curveID);
         if (err != null) {
             return (_addr_null!, null, error.As(err)!);
         }
         hello.keyShares = new slice<keyShare>(new keyShare[] { {group:curveID,data:params.PublicKey()} });
-
     }
     return (_addr_hello!, params, error.As(null!)!);
-
 }
 
 private static error clientHandshake(this ptr<Conn> _addr_c, context.Context ctx) => func((defer, _, _) => {
@@ -173,9 +166,7 @@ private static error clientHandshake(this ptr<Conn> _addr_c, context.Context ctx
             if (err != null) {
                 c.config.ClientSessionCache.Put(cacheKey, null);
             }
-
         }());
-
     }
     {
         var err__prev1 = err;
@@ -188,7 +179,6 @@ private static error clientHandshake(this ptr<Conn> _addr_c, context.Context ctx
         err = err__prev1;
 
     }
-
 
     var (msg, err) = c.readHandshake();
     if (err != null) {
@@ -226,7 +216,6 @@ private static error clientHandshake(this ptr<Conn> _addr_c, context.Context ctx
 
         // In TLS 1.3, session tickets are delivered after the handshake.
         return error.As(hs.handshake())!;
-
     }
     hs = addr(new clientHandshakeState(c:c,ctx:ctx,serverHello:serverHello,hello:hello,session:session,));
 
@@ -248,7 +237,6 @@ private static error clientHandshake(this ptr<Conn> _addr_c, context.Context ctx
         c.config.ClientSessionCache.Put(cacheKey, hs.session);
     }
     return error.As(null!)!;
-
 });
 
 private static (@string, ptr<ClientSessionState>, slice<byte>, slice<byte>) loadSession(this ptr<Conn> _addr_c, ptr<clientHelloMsg> _addr_hello) {
@@ -268,7 +256,6 @@ private static (@string, ptr<ClientSessionState>, slice<byte>, slice<byte>) load
         // Require DHE on resumption as it guarantees forward secrecy against
         // compromise of the session ticket key. See RFC 8446, Section 4.2.9.
         hello.pskModes = new slice<byte>(new byte[] { pskModeDHE });
-
     }
     if (c.handshakes != 0) {
         return ("", _addr_null!, null, null);
@@ -291,14 +278,12 @@ private static (@string, ptr<ClientSessionState>, slice<byte>, slice<byte>) load
         if (len(session.verifiedChains) == 0) { 
             // The original connection had InsecureSkipVerify, while this doesn't.
             return (cacheKey, _addr_null!, null, null);
-
         }
         var serverCert = session.serverCertificates[0];
         if (c.config.time().After(serverCert.NotAfter)) { 
             // Expired certificate, delete the entry.
             c.config.ClientSessionCache.Put(cacheKey, null);
             return (cacheKey, _addr_null!, null, null);
-
         }
         {
             var err = serverCert.VerifyHostname(c.config.ServerName);
@@ -308,7 +293,6 @@ private static (@string, ptr<ClientSessionState>, slice<byte>, slice<byte>) load
             }
 
         }
-
     }
     if (session.vers != VersionTLS13) { 
         // In TLS 1.2 the cipher suite must match the resumed session. Ensure we
@@ -318,7 +302,6 @@ private static (@string, ptr<ClientSessionState>, slice<byte>, slice<byte>) load
         }
         hello.sessionTicket = session.sessionTicket;
         return ;
-
     }
     if (c.config.time().After(session.useBy)) {
         c.config.ClientSessionCache.Put(cacheKey, null);
@@ -353,7 +336,6 @@ private static (@string, ptr<ClientSessionState>, slice<byte>, slice<byte>) load
     hello.updateBinders(pskBinders);
 
     return ;
-
 }
 
 private static error pickTLSVersion(this ptr<Conn> _addr_c, ptr<serverHelloMsg> _addr_serverHello) {
@@ -375,7 +357,6 @@ private static error pickTLSVersion(this ptr<Conn> _addr_c, ptr<serverHelloMsg> 
     c.@out.version = vers;
 
     return error.As(null!)!;
-
 }
 
 // Does the handshake, either a full one or resumes old session. Requires hs.c,
@@ -416,7 +397,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -429,7 +409,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -442,7 +421,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         c.clientFinishedIsFirst = false; 
         // Make sure the connection is still being verified whether or not this
         // is a resumption. Resumptions currently don't reverify certificates so
@@ -461,7 +439,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
                 err = err__prev3;
 
             }
-
         }
         {
             var err__prev2 = err;
@@ -475,7 +452,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -488,7 +464,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     else
  {
@@ -504,7 +479,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -517,7 +491,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -530,7 +503,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -543,7 +515,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         c.clientFinishedIsFirst = true;
         {
             var err__prev2 = err;
@@ -557,7 +528,6 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
         {
             var err__prev2 = err;
 
@@ -570,13 +540,11 @@ private static error handshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     c.ekm = ekmFromMasterSecret(c.vers, hs.suite, hs.masterSecret, hs.hello.random, hs.serverHello.random);
     atomic.StoreUint32(_addr_c.handshakeStatus, 1);
 
     return error.As(null!)!;
-
 }
 
 private static error pickCipherSuite(this ptr<clientHandshakeState> _addr_hs) {
@@ -590,7 +558,6 @@ private static error pickCipherSuite(this ptr<clientHandshakeState> _addr_hs) {
     }
     hs.c.cipherSuite = hs.suite.id;
     return error.As(null!)!;
-
 }
 
 private static error doFullHandshake(this ptr<clientHandshakeState> _addr_hs) {
@@ -625,7 +592,6 @@ private static error doFullHandshake(this ptr<clientHandshakeState> _addr_hs) {
 
             c.sendAlert(alertUnexpectedMessage);
             return error.As(errors.New("tls: received unexpected CertificateStatus message"))!;
-
         }
         hs.finishedHash.Write(cs.marshal());
 
@@ -651,7 +617,6 @@ private static error doFullHandshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     else
  { 
@@ -726,7 +691,6 @@ private static error doFullHandshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     var (preMasterSecret, ckx, err) = keyAgreement.generateClientKeyExchange(c.config, hs.hello, c.peerCertificates[0]);
     if (err != null) {
@@ -747,7 +711,6 @@ private static error doFullHandshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     if (chainToSend != null && len(chainToSend.Certificate) > 0) {
         ptr<certificateVerifyMsg> certVerify = addr(new certificateVerifyMsg());
@@ -803,7 +766,6 @@ private static error doFullHandshake(this ptr<clientHandshakeState> _addr_hs) {
             err = err__prev2;
 
         }
-
     }
     hs.masterSecret = masterFromPreMasterSecret(c.vers, hs.suite, preMasterSecret, hs.hello.random, hs.serverHello.random);
     {
@@ -819,11 +781,9 @@ private static error doFullHandshake(this ptr<clientHandshakeState> _addr_hs) {
 
     }
 
-
     hs.finishedHash.discardHandshakeBuffer();
 
     return error.As(null!)!;
-
 }
 
 private static error establishKeys(this ptr<clientHandshakeState> _addr_hs) {
@@ -850,7 +810,6 @@ private static error establishKeys(this ptr<clientHandshakeState> _addr_hs) {
     c.@in.prepareCipherSpec(c.vers, serverCipher, serverHash);
     c.@out.prepareCipherSpec(c.vers, clientCipher, clientHash);
     return error.As(null!)!;
-
 }
 
 private static bool serverResumedSession(this ptr<clientHandshakeState> _addr_hs) {
@@ -859,7 +818,6 @@ private static bool serverResumedSession(this ptr<clientHandshakeState> _addr_hs
     // If the server responded with the same sessionId then it means the
     // sessionTicket is being used to resume a TLS session.
     return hs.session != null && hs.hello.sessionId != null && bytes.Equal(hs.serverHello.sessionId, hs.hello.sessionId);
-
 }
 
 private static (bool, error) processServerHello(this ptr<clientHandshakeState> _addr_hs) {
@@ -880,7 +838,6 @@ private static (bool, error) processServerHello(this ptr<clientHandshakeState> _
         err = err__prev1;
 
     }
-
 
     if (hs.serverHello.compressionMethod != compressionNone) {
         c.sendAlert(alertUnexpectedMessage);
@@ -914,7 +871,6 @@ private static (bool, error) processServerHello(this ptr<clientHandshakeState> _
         err = err__prev1;
 
     }
-
     c.clientProtocol = hs.serverHello.alpnProtocol;
 
     c.scts = hs.serverHello.scts;
@@ -940,7 +896,6 @@ private static (bool, error) processServerHello(this ptr<clientHandshakeState> _
         c.scts = hs.session.scts;
     }
     return (true, error.As(null!)!);
-
 }
 
 // checkALPN ensure that the server's choice of ALPN protocol is compatible with
@@ -957,7 +912,6 @@ private static error checkALPN(slice<@string> clientProtos, @string serverProto)
             return error.As(null!)!;
         }
     }    return error.As(errors.New("tls: server selected unadvertised ALPN protocol"))!;
-
 }
 
 private static error readFinished(this ptr<clientHandshakeState> _addr_hs, slice<byte> @out) {
@@ -972,7 +926,6 @@ private static error readFinished(this ptr<clientHandshakeState> _addr_hs, slice
             return error.As(err)!;
         }
     }
-
 
     var (msg, err) = c.readHandshake();
     if (err != null) {
@@ -991,7 +944,6 @@ private static error readFinished(this ptr<clientHandshakeState> _addr_hs, slice
     hs.finishedHash.Write(serverFinished.marshal());
     copy(out, verify);
     return error.As(null!)!;
-
 }
 
 private static error readSessionTicket(this ptr<clientHandshakeState> _addr_hs) {
@@ -1015,7 +967,6 @@ private static error readSessionTicket(this ptr<clientHandshakeState> _addr_hs) 
     hs.session = addr(new ClientSessionState(sessionTicket:sessionTicketMsg.ticket,vers:c.vers,cipherSuite:hs.suite.id,masterSecret:hs.masterSecret,serverCertificates:c.peerCertificates,verifiedChains:c.verifiedChains,receivedAt:c.config.time(),ocspResponse:c.ocspResponse,scts:c.scts,));
 
     return error.As(null!)!;
-
 }
 
 private static error sendFinished(this ptr<clientHandshakeState> _addr_hs, slice<byte> @out) {
@@ -1031,7 +982,6 @@ private static error sendFinished(this ptr<clientHandshakeState> _addr_hs, slice
         }
     }
 
-
     ptr<finishedMsg> finished = @new<finishedMsg>();
     finished.verifyData = hs.finishedHash.clientSum(hs.masterSecret);
     hs.finishedHash.Write(finished.marshal());
@@ -1042,10 +992,8 @@ private static error sendFinished(this ptr<clientHandshakeState> _addr_hs, slice
             return error.As(err)!;
         }
     }
-
     copy(out, finished.verifyData);
     return error.As(null!)!;
-
 }
 
 // verifyServerCertificate parses and verifies the provided chain, setting
@@ -1061,7 +1009,6 @@ private static error verifyServerCertificate(this ptr<Conn> _addr_c, slice<slice
             return error.As(errors.New("tls: failed to parse certificate from server: " + err.Error()))!;
         }
         certs[i] = cert;
-
     }    if (!c.config.InsecureSkipVerify) {
         x509.VerifyOptions opts = new x509.VerifyOptions(Roots:c.config.RootCAs,CurrentTime:c.config.time(),DNSName:c.config.ServerName,Intermediates:x509.NewCertPool(),);
         {
@@ -1117,7 +1064,6 @@ private static error verifyServerCertificate(this ptr<Conn> _addr_c, slice<slice
             err = err__prev2;
 
         }
-
     }
     if (c.config.VerifyConnection != null) {
         {
@@ -1133,10 +1079,8 @@ private static error verifyServerCertificate(this ptr<Conn> _addr_c, slice<slice
             err = err__prev2;
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 // certificateRequestInfoFromMsg generates a CertificateRequestInfo from a TLS
@@ -1154,8 +1098,7 @@ private static ptr<CertificateRequestInfo> certificateRequestInfoFromMsg(context
             rsaAvail = true;
         else if (certType == certTypeECDSASign) 
             ecAvail = true;
-        
-    }    if (!certReq.hasSignatureAlgorithm) { 
+            }    if (!certReq.hasSignatureAlgorithm) { 
         // Prior to TLS 1.2, signature schemes did not exist. In this case we
         // make up a list based on the acceptable certificate types, to help
         // GetClientCertificate and SupportsCertificate select the right certificate.
@@ -1169,7 +1112,6 @@ private static ptr<CertificateRequestInfo> certificateRequestInfoFromMsg(context
         else if (ecAvail) 
             cri.SignatureSchemes = new slice<SignatureScheme>(new SignatureScheme[] { ECDSAWithP256AndSHA256, ECDSAWithP384AndSHA384, ECDSAWithP521AndSHA512 });
                 return _addr_cri!;
-
     }
     cri.SignatureSchemes = make_slice<SignatureScheme>(0, len(certReq.supportedSignatureAlgorithms));
     foreach (var (_, sigScheme) in certReq.supportedSignatureAlgorithms) {
@@ -1186,9 +1128,7 @@ private static ptr<CertificateRequestInfo> certificateRequestInfoFromMsg(context
             if (rsaAvail) {
                 cri.SignatureSchemes = append(cri.SignatureSchemes, sigScheme);
             }
-        
-    }    return _addr_cri!;
-
+            }    return _addr_cri!;
 }
 
 private static (ptr<Certificate>, error) getClientCertificate(this ptr<Conn> _addr_c, ptr<CertificateRequestInfo> _addr_cri) {
@@ -1209,11 +1149,8 @@ private static (ptr<Certificate>, error) getClientCertificate(this ptr<Conn> _ad
             }
 
         }
-
         return (_addr__addr_chain!, error.As(null!)!);
-
     }    return (@new<Certificate>(), error.As(null!)!);
-
 }
 
 // clientSessionCacheKey returns a key used to cache sessionTickets that could
@@ -1225,7 +1162,6 @@ private static @string clientSessionCacheKey(net.Addr serverAddr, ptr<Config> _a
         return config.ServerName;
     }
     return serverAddr.String();
-
 }
 
 // hostnameInSNI converts name into an appropriate hostname for SNI.
@@ -1243,7 +1179,6 @@ private static @string hostnameInSNI(@string name) {
             host = host[..(int)i];
         }
     }
-
     if (net.ParseIP(host) != null) {
         return "";
     }
@@ -1251,7 +1186,6 @@ private static @string hostnameInSNI(@string name) {
         name = name[..(int)len(name) - 1];
     }
     return name;
-
 }
 
 } // end tls_package

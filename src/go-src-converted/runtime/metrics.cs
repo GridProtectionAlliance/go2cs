@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:28 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:13 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\metrics.go
+namespace go;
 // Metrics implementation exported to runtime/metrics.
 
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
 using System;
-
-
-namespace go;
 
 public static partial class runtime_package {
 
@@ -56,7 +55,6 @@ private static void initMetrics() {
             // (nowhere near 2^48 even) so this will give us exact
             // boundaries.
             sizeClassBuckets[i] = float64(class_to_size[i] + 1);
-
         }
 
         i = i__prev1;
@@ -66,7 +64,6 @@ private static void initMetrics() {
     timeHistBuckets = timeHistogramMetricsBuckets();
     metrics = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, metricData>{"/gc/cycles/automatic:gc-cycles":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.gcCyclesDone-in.sysStats.gcCyclesForced},},"/gc/cycles/forced:gc-cycles":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.gcCyclesForced},},"/gc/cycles/total:gc-cycles":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.gcCyclesDone},},"/gc/heap/allocs-by-size:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){hist:=out.float64HistOrInit(sizeClassBuckets)hist.counts[len(hist.counts)-1]=uint64(in.heapStats.largeAllocCount)fori,count:=rangein.heapStats.smallAllocCount[1:]{hist.counts[i]=uint64(count)}},},"/gc/heap/allocs:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.heapStats.totalAllocated},},"/gc/heap/allocs:objects":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.heapStats.totalAllocs},},"/gc/heap/frees-by-size:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){hist:=out.float64HistOrInit(sizeClassBuckets)hist.counts[len(hist.counts)-1]=uint64(in.heapStats.largeFreeCount)fori,count:=rangein.heapStats.smallFreeCount[1:]{hist.counts[i]=uint64(count)}},},"/gc/heap/frees:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.heapStats.totalFreed},},"/gc/heap/frees:objects":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.heapStats.totalFrees},},"/gc/heap/goal:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.heapGoal},},"/gc/heap/objects:objects":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.heapStats.numObjects},},"/gc/heap/tiny/allocs:objects":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(in.heapStats.tinyAllocCount)},},"/gc/pauses:seconds":{compute:func(_*statAggregate,out*metricValue){hist:=out.float64HistOrInit(timeHistBuckets)hist.counts[0]=atomic.Load64(&memstats.gcPauseDist.underflow)fori:=rangememstats.gcPauseDist.counts{hist.counts[i+1]=atomic.Load64(&memstats.gcPauseDist.counts[i])}},},"/memory/classes/heap/free:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(in.heapStats.committed-in.heapStats.inHeap-in.heapStats.inStacks-in.heapStats.inWorkBufs-in.heapStats.inPtrScalarBits)},},"/memory/classes/heap/objects:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.heapStats.inObjects},},"/memory/classes/heap/released:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(in.heapStats.released)},},"/memory/classes/heap/stacks:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(in.heapStats.inStacks)},},"/memory/classes/heap/unused:bytes":{deps:makeStatDepSet(heapStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(in.heapStats.inHeap)-in.heapStats.inObjects},},"/memory/classes/metadata/mcache/free:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.mCacheSys-in.sysStats.mCacheInUse},},"/memory/classes/metadata/mcache/inuse:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.mCacheInUse},},"/memory/classes/metadata/mspan/free:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.mSpanSys-in.sysStats.mSpanInUse},},"/memory/classes/metadata/mspan/inuse:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.mSpanInUse},},"/memory/classes/metadata/other:bytes":{deps:makeStatDepSet(heapStatsDep,sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(in.heapStats.inWorkBufs+in.heapStats.inPtrScalarBits)+in.sysStats.gcMiscSys},},"/memory/classes/os-stacks:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.stacksSys},},"/memory/classes/other:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.otherSys},},"/memory/classes/profiling/buckets:bytes":{deps:makeStatDepSet(sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=in.sysStats.buckHashSys},},"/memory/classes/total:bytes":{deps:makeStatDepSet(heapStatsDep,sysStatsDep),compute:func(in*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(in.heapStats.committed+in.heapStats.released)+in.sysStats.stacksSys+in.sysStats.mSpanSys+in.sysStats.mCacheSys+in.sysStats.buckHashSys+in.sysStats.gcMiscSys+in.sysStats.otherSys},},"/sched/goroutines:goroutines":{compute:func(_*statAggregate,out*metricValue){out.kind=metricKindUint64out.scalar=uint64(gcount())},},"/sched/latencies:seconds":{compute:func(_*statAggregate,out*metricValue){hist:=out.float64HistOrInit(timeHistBuckets)hist.counts[0]=atomic.Load64(&sched.timeToRun.underflow)fori:=rangesched.timeToRun.counts{hist.counts[i+1]=atomic.Load64(&sched.timeToRun.counts[i])}},},};
     metricsInit = true;
-
 }
 
 // statDep is a dependency on a group of statistics
@@ -77,7 +74,6 @@ private partial struct statDep { // : nuint
 private static readonly statDep heapStatsDep = iota; // corresponds to heapStatsAggregate
 private static readonly var sysStatsDep = 0; // corresponds to sysStatsAggregate
 private static readonly var numStatsDeps = 1;
-
 
 // statDepSet represents a set of statDeps.
 //
@@ -120,7 +116,6 @@ private static bool empty(this ptr<statDepSet> _addr_s) {
             return false;
         }
     }    return true;
-
 }
 
 // has returns true if the set contains a given statDep.
@@ -171,7 +166,6 @@ private static void compute(this ptr<heapStatsAggregate> _addr_a) {
         a.totalFreed += nf * uint64(class_to_size[i]);
     }    a.inObjects = a.totalAllocated - a.totalFreed;
     a.numObjects = a.totalAllocs - a.totalFrees;
-
 }
 
 // sysStatsAggregate represents system memory stats obtained
@@ -247,10 +241,8 @@ private static void ensure(this ptr<statAggregate> _addr_a, ptr<statDepSet> _add
             a.heapStats.compute();
         else if (i == sysStatsDep) 
             a.sysStats.compute();
-        
-    }
+            }
     a.ensured = a.ensured.union(missing);
-
 }
 
 // metricValidKind is a runtime copy of runtime/metrics.ValueKind and
@@ -265,7 +257,6 @@ private static readonly metricKind metricKindBad = iota;
 private static readonly var metricKindUint64 = 0;
 private static readonly var metricKindFloat64 = 1;
 private static readonly var metricKindFloat64Histogram = 2;
-
 
 // metricSample is a runtime copy of runtime/metrics.Sample and
 // must be kept structurally identical to that type.
@@ -303,7 +294,6 @@ private static ptr<metricFloat64Histogram> float64HistOrInit(this ptr<metricValu
         hist.counts = make_slice<ulong>(len(buckets) - 1);
     }
     return _addr_hist!;
-
 }
 
 // metricFloat64Histogram is a runtime copy of runtime/metrics.Float64Histogram
@@ -351,9 +341,7 @@ private static void readMetrics(unsafe.Pointer samplesp, nint len, nint cap) {
 
         // Compute the value based on the stats we have.
         data.compute(_addr_agg, _addr_sample.value);
-
     }    semrelease(_addr_metricsSema);
-
 }
 
 } // end runtime_package

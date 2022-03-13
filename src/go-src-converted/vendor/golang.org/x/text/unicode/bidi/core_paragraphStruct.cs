@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:27 UTC
+//     Generated on 2022 March 13 06:46:41 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace unicode
 {
     public static partial class bidi_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct paragraph
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace unicode
             public static implicit operator paragraph(NilType nil) => default(paragraph);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static paragraph paragraph_cast(dynamic value)
         {
             return new paragraph(value.initialTypes, value.pairTypes, value.pairValues, value.embeddingLevel, value.resultTypes, value.resultLevels, value.matchingPDI, value.matchingIsolateInitiator);

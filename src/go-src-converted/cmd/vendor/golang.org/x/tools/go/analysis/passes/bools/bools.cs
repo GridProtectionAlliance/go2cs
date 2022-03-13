@@ -4,21 +4,21 @@
 
 // Package bools defines an Analyzer that detects common mistakes
 // involving boolean operators.
-// package bools -- go2cs converted at 2022 March 06 23:34:29 UTC
+
+// package bools -- go2cs converted at 2022 March 13 06:41:45 UTC
 // import "cmd/vendor/golang.org/x/tools/go/analysis/passes/bools" ==> using bools = go.cmd.vendor.golang.org.x.tools.go.analysis.passes.bools_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\analysis\passes\bools\bools.go
-using ast = go.go.ast_package;
-using token = go.go.token_package;
-using types = go.go.types_package;
-
-using analysis = go.golang.org.x.tools.go.analysis_package;
-using inspect = go.golang.org.x.tools.go.analysis.passes.inspect_package;
-using analysisutil = go.golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
-using inspector = go.golang.org.x.tools.go.ast.inspector_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go.analysis.passes;
+
+using ast = go.ast_package;
+using token = go.token_package;
+using types = go.types_package;
+
+using analysis = golang.org.x.tools.go.analysis_package;
+using inspect = golang.org.x.tools.go.analysis.passes.inspect_package;
+using analysisutil = golang.org.x.tools.go.analysis.passes.@internal.analysisutil_package;
+using inspector = golang.org.x.tools.go.ast.inspector_package;
+using System;
 
 public static partial class bools_package {
 
@@ -42,7 +42,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         if (seen[e]) { 
             // Already processed as a subexpression of an earlier node.
             return ;
-
         }
         boolOp op = default;
 
@@ -59,7 +58,6 @@ private static (object, error) run(ptr<analysis.Pass> _addr_pass) {
         }
     });
     return (null, error.As(null!)!);
-
 }
 
 private partial struct boolOp {
@@ -94,7 +92,6 @@ private static slice<slice<ast.Expr>> commutativeSets(this boolOp op, ptr<types.
     }
 
     return sets;
-
 }
 
 // checkRedundant checks for expressions of the form
@@ -154,7 +151,6 @@ private static void checkSuspect(this boolOp op, ptr<analysis.Pass> _addr_pass, 
                 if (efmt != prev) {
                     pass.ReportRangef(e, "suspect %s: %s %s %s", op.name, efmt, op.tok, prev);
                 }
-
             }
             else
  {
@@ -162,7 +158,6 @@ private static void checkSuspect(this boolOp op, ptr<analysis.Pass> _addr_pass, 
             }
 
         }
-
     }
 }
 
@@ -196,10 +191,8 @@ private static bool hasSideEffects(ptr<types.Info> _addr_info, ast.Expr e) {
                 break;
         }
         return true;
-
     });
     return !safe;
-
 }
 
 // split returns a slice of all subexpressions in e that are connected by op.
@@ -226,10 +219,8 @@ private static slice<ast.Expr> split(this boolOp op, ast.Expr e, map<ptr<ast.Bin
             }
 
         }
-
     }
     return ;
-
 }
 
 // unparen returns e with any enclosing parentheses stripped.
@@ -240,9 +231,7 @@ private static ast.Expr unparen(ast.Expr e) {
             return e;
         }
         e = p.X;
-
     }
-
 }
 
 } // end bools_package

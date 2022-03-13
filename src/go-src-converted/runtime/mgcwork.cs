@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:09:50 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:25:38 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\mgcwork.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+using System;
 
 public static partial class runtime_package {
 
@@ -24,7 +23,6 @@ private static readonly nint _WorkbufSize = 2048; // in bytes; larger values res
 // Larger values reduce workbuf allocation overhead. Smaller
 // values reduce heap fragmentation.
 private static readonly nint workbufAlloc = 32 << 10;
-
 
 private static void init() {
     if (workbufAlloc % pageSize != 0 || workbufAlloc % _WorkbufSize != 0) {
@@ -86,7 +84,6 @@ private static void init(this ptr<gcWork> _addr_w) {
         wbuf2 = getempty();
     }
     w.wbuf2 = wbuf2;
-
 }
 
 // put enqueues a pointer for the garbage collector to trace.
@@ -144,7 +141,6 @@ private static bool putFast(this ptr<gcWork> _addr_w, System.UIntPtr obj) {
     wbuf.obj[wbuf.nobj] = obj;
     wbuf.nobj++;
     return true;
-
 }
 
 // putBatch performs a put on every pointer in obj. See put for
@@ -209,7 +205,6 @@ private static System.UIntPtr tryGet(this ptr<gcWork> _addr_w) {
     }
     wbuf.nobj--;
     return wbuf.obj[wbuf.nobj];
-
 }
 
 // tryGetFast dequeues a pointer for the garbage collector to trace
@@ -228,7 +223,6 @@ private static System.UIntPtr tryGetFast(this ptr<gcWork> _addr_w) {
     }
     wbuf.nobj--;
     return wbuf.obj[wbuf.nobj];
-
 }
 
 // dispose returns any cached pointers to the global queue.
@@ -253,7 +247,6 @@ private static void dispose(this ptr<gcWork> _addr_w) {
                 putfull(_addr_wbuf);
                 w.flushedWork = true;
             }
-
             w.wbuf1 = null;
 
             wbuf = w.wbuf2;
@@ -265,12 +258,9 @@ private static void dispose(this ptr<gcWork> _addr_w) {
                 putfull(_addr_wbuf);
                 w.flushedWork = true;
             }
-
             w.wbuf2 = null;
-
         }
     }
-
     if (w.bytesMarked != 0) { 
         // dispose happens relatively infrequently. If this
         // atomic becomes a problem, we should first try to
@@ -278,7 +268,6 @@ private static void dispose(this ptr<gcWork> _addr_w) {
         // counter.
         atomic.Xadd64(_addr_work.bytesMarked, int64(w.bytesMarked));
         w.bytesMarked = 0;
-
     }
     if (w.scanWork != 0) {
         atomic.Xaddint64(_addr_gcController.scanWork, w.scanWork);
@@ -414,7 +403,6 @@ private static ptr<workbuf> getempty() {
             lock(_addr_work.wbufSpans.@lock);
             work.wbufSpans.busy.insert(s);
             unlock(_addr_work.wbufSpans.@lock);
-
         }
         {
             var i = uintptr(0);
@@ -431,14 +419,11 @@ private static ptr<workbuf> getempty() {
  {
                     putempty(_addr_newb);
                 }
-
             }
 
         }
-
     }
     return _addr_b!;
-
 }
 
 // putempty puts a workbuf onto the work.empty list.
@@ -472,7 +457,6 @@ private static ptr<workbuf> trygetfull() {
         return _addr_b!;
     }
     return _addr_b!;
-
 }
 
 //go:nowritebarrier
@@ -489,7 +473,6 @@ private static ptr<workbuf> handoff(ptr<workbuf> _addr_b) {
     // Put b on full list - let first half of b get stolen.
     putfull(_addr_b);
     return _addr_b1!;
-
 }
 
 // prepareFreeWorkbufs moves busy workbuf spans to free list so they
@@ -503,7 +486,6 @@ private static void prepareFreeWorkbufs() {
     work.empty = 0;
     work.wbufSpans.free.takeAll(_addr_work.wbufSpans.busy);
     unlock(_addr_work.wbufSpans.@lock);
-
 }
 
 // freeSomeWbufs frees some workbufs back to the heap and returns
@@ -530,7 +512,6 @@ private static bool freeSomeWbufs(bool preemptible) {
     var more = !work.wbufSpans.free.isEmpty();
     unlock(_addr_work.wbufSpans.@lock);
     return more;
-
 }
 
 } // end runtime_package

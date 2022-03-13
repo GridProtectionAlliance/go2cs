@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:11:58 UTC
+//     Generated on 2022 March 13 05:27:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class runtime_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct stringStructDWARF
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator stringStructDWARF(NilType nil) => default(stringStructDWARF);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static stringStructDWARF stringStructDWARF_cast(dynamic value)
         {
             return new stringStructDWARF(ref value.str, value.len);

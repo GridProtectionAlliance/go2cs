@@ -2,25 +2,26 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package textproto -- go2cs converted at 2022 March 06 22:21:11 UTC
+// package textproto -- go2cs converted at 2022 March 13 05:36:18 UTC
 // import "net/textproto" ==> using textproto = go.net.textproto_package
 // Original source: C:\Program Files\Go\src\net\textproto\reader.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using System;
-
-
 namespace go.net;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using fmt = fmt_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+
+// A Reader implements convenience methods for reading requests
+// or responses from a text protocol network connection.
+
+using System;
 public static partial class textproto_package {
 
-    // A Reader implements convenience methods for reading requests
-    // or responses from a text protocol network connection.
 public partial struct Reader {
     public ptr<bufio.Reader> R;
     public ptr<dotReader> dot;
@@ -63,7 +64,6 @@ private static (slice<byte>, error) ReadLineBytes(this ptr<Reader> _addr_r) {
         line = buf;
     }
     return (line, error.As(err)!);
-
 }
 
 private static (slice<byte>, error) readLineSlice(this ptr<Reader> _addr_r) {
@@ -87,7 +87,6 @@ private static (slice<byte>, error) readLineSlice(this ptr<Reader> _addr_r) {
         }
     }
     return (line, error.As(null!)!);
-
 }
 
 // ReadContinuedLine reads a possibly continued line from r,
@@ -146,7 +145,6 @@ private static (slice<byte>, error) ReadContinuedLineBytes(this ptr<Reader> _add
         line = buf;
     }
     return (line, error.As(err)!);
-
 }
 
 // readContinuedLineSlice reads continued lines from the reader buffer,
@@ -167,7 +165,6 @@ private static (slice<byte>, error) readContinuedLineSlice(this ptr<Reader> _add
     }
     if (len(line) == 0) { // blank line - no continuation
         return (line, error.As(null!)!);
-
     }
     {
         var err = validateFirstLine(line);
@@ -197,10 +194,8 @@ private static (slice<byte>, error) readContinuedLineSlice(this ptr<Reader> _add
         }
         r.buf = append(r.buf, ' ');
         r.buf = append(r.buf, trim(line));
-
     }
     return (r.buf, error.As(null!)!);
-
 }
 
 // skipSpace skips R over all spaces and returns the number of bytes skipped.
@@ -213,17 +208,14 @@ private static nint skipSpace(this ptr<Reader> _addr_r) {
         if (err != null) { 
             // Bufio will keep err until next read.
             break;
-
         }
         if (c != ' ' && c != '\t') {
             r.R.UnreadByte();
             break;
         }
         n++;
-
     }
     return n;
-
 }
 
 private static (nint, bool, @string, error) readCodeLine(this ptr<Reader> _addr_r, nint expectCode) {
@@ -238,7 +230,6 @@ private static (nint, bool, @string, error) readCodeLine(this ptr<Reader> _addr_
         return ;
     }
     return parseCodeLine(line, expectCode);
-
 }
 
 private static (nint, bool, @string, error) parseCodeLine(@string line, nint expectCode) {
@@ -262,7 +253,6 @@ private static (nint, bool, @string, error) parseCodeLine(@string line, nint exp
         err = addr(new Error(code,message));
     }
     return ;
-
 }
 
 // ReadCodeLine reads a response code line of the form
@@ -291,7 +281,6 @@ private static (nint, @string, error) ReadCodeLine(this ptr<Reader> _addr_r, nin
         err = ProtocolError("unexpected multi-line response: " + message);
     }
     return ;
-
 }
 
 // ReadResponse reads a multi-line response of the form:
@@ -343,15 +332,12 @@ private static (nint, @string, error) ReadResponse(this ptr<Reader> _addr_r, nin
             continue;
         }
         message += "\n" + moreMessage;
-
     }
     if (err != null && multi && message != "") { 
         // replace one line error message with all lines (full message)
         err = addr(new Error(code,message));
-
     }
     return ;
-
 }
 
 // DotReader returns a new Reader that satisfies Reads using the
@@ -458,7 +444,6 @@ private static (nint, error) Read(this ptr<dotReader> _addr_d, slice<byte> b) {
             }
                 b[n] = c;
         n++;
-
     }
     if (err == null && d.state == stateEOF) {
         err = io.EOF;
@@ -467,7 +452,6 @@ private static (nint, error) Read(this ptr<dotReader> _addr_d, slice<byte> b) {
         d.r.dot = null;
     }
     return ;
-
 }
 
 // closeDot drains the current DotReader if any,
@@ -483,9 +467,7 @@ private static void closeDot(this ptr<Reader> _addr_r) {
         // When Read reaches EOF or an error,
         // it will set r.dot == nil.
         r.dot.Read(buf);
-
     }
-
 }
 
 // ReadDotBytes reads a dot-encoding and returns the decoded data.
@@ -529,10 +511,8 @@ private static (slice<@string>, error) ReadDotLines(this ptr<Reader> _addr_r) {
             line = line[(int)1..];
         }
         v = append(v, line);
-
     }
     return (v, error.As(err)!);
-
 }
 
 // ReadMIMEHeader reads a MIME-style header from r.
@@ -583,7 +563,6 @@ private static (MIMEHeader, error) ReadMIMEHeader(this ptr<Reader> _addr_r) {
         }
     }
 
-
     while (true) {
         var (kv, err) = r.readContinuedLineSlice(mustHaveFieldNameColon);
         if (len(kv) == 0) {
@@ -615,7 +594,6 @@ private static (MIMEHeader, error) ReadMIMEHeader(this ptr<Reader> _addr_r) {
             // won't extend the slice into the other strings.
             (vv, strs) = (strs.slice(-1, 1, 1), strs[(int)1..]);            vv[0] = value;
             m[key] = vv;
-
         }
         else
  {
@@ -625,7 +603,6 @@ private static (MIMEHeader, error) ReadMIMEHeader(this ptr<Reader> _addr_r) {
             return (m, error.As(err)!);
         }
     }
-
 }
 
 // noValidation is a no-op validation func for readContinuedLineSlice
@@ -642,7 +619,6 @@ private static error mustHaveFieldNameColon(slice<byte> line) {
         return error.As(ProtocolError(fmt.Sprintf("malformed MIME header: missing colon: %q", line)))!;
     }
     return error.As(null!)!;
-
 }
 
 // upcomingHeaderNewlines returns an approximation of the number of newlines
@@ -664,14 +640,11 @@ private static nint upcomingHeaderNewlines(this ptr<Reader> _addr_r) {
             // Not present (-1) or found within the next few bytes,
             // implying we're at the end ("\r\n\r\n" or "\n\n")
             return ;
-
         }
         n++;
         peek = peek[(int)i + 1..];
-
     }
     return ;
-
 }
 
 // CanonicalMIMEHeaderKey returns the canonical format of the
@@ -699,10 +672,8 @@ public static @string CanonicalMIMEHeaderKey(@string s) {
             return canonicalMIMEHeaderKey((slice<byte>)s);
         }
         upper = c == '-';
-
     }
     return s;
-
 }
 
 private static readonly char toLower = 'a' - 'A';
@@ -745,7 +716,6 @@ private static @string canonicalMIMEHeaderKey(slice<byte> a) {
             } 
             // Don't canonicalize.
             return string(a);
-
         }
         c = c__prev1;
     }
@@ -767,7 +737,6 @@ private static @string canonicalMIMEHeaderKey(slice<byte> a) {
             else if (!upper && 'A' <= c && c <= 'Z') {
                 c += toLower;
             }
-
             a[i] = c;
             upper = c == '-'; // for next time
         }
@@ -781,9 +750,7 @@ private static @string canonicalMIMEHeaderKey(slice<byte> a) {
             return v;
         }
     }
-
     return string(a);
-
 }
 
 // commonHeader interns common header strings.

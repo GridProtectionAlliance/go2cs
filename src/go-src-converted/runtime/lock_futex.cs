@@ -5,26 +5,28 @@
 //go:build dragonfly || freebsd || linux
 // +build dragonfly freebsd linux
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:51 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:38 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\lock_futex.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// This implementation depends on OS-specific implementations of
+//
+//    futexsleep(addr *uint32, val uint32, ns int64)
+//        Atomically,
+//            if *addr == val { sleep }
+//        Might be woken up spuriously; that's allowed.
+//        Don't sleep longer than ns; ns < 0 means forever.
+//
+//    futexwakeup(addr *uint32, cnt uint32)
+//        If any procs are sleeping on addr, wake up at most cnt.
 
 public static partial class runtime_package {
 
-    // This implementation depends on OS-specific implementations of
-    //
-    //    futexsleep(addr *uint32, val uint32, ns int64)
-    //        Atomically,
-    //            if *addr == val { sleep }
-    //        Might be woken up spuriously; that's allowed.
-    //        Don't sleep longer than ns; ns < 0 means forever.
-    //
-    //    futexwakeup(addr *uint32, cnt uint32)
-    //        If any procs are sleeping on addr, wake up at most cnt.
 private static readonly nint mutex_unlocked = 0;
 private static readonly nint mutex_locked = 1;
 private static readonly nint mutex_sleeping = 2;
@@ -32,7 +34,6 @@ private static readonly nint mutex_sleeping = 2;
 private static readonly nint active_spin = 4;
 private static readonly nint active_spin_cnt = 30;
 private static readonly nint passive_spin = 1;
-
 
 // Possible lock states are mutex_unlocked, mutex_locked and mutex_sleeping.
 // mutex_sleeping means that there is presumably at least one sleeping thread.
@@ -124,9 +125,7 @@ private static void lock2(ptr<mutex> _addr_l) {
         }
         wait = mutex_sleeping;
         futexsleep(key32(_addr_l.key), mutex_sleeping, -1);
-
     }
-
 }
 
 private static void unlock(ptr<mutex> _addr_l) {
@@ -152,7 +151,6 @@ private static void unlock2(ptr<mutex> _addr_l) {
     }
     if (gp.m.locks == 0 && gp.preempt) { // restore the preemption request in case we've cleared it in newstack
         gp.stackguard0 = stackPreempt;
-
     }
 }
 
@@ -172,7 +170,6 @@ private static void notewakeup(ptr<note> _addr_n) {
         throw("notewakeup - double wakeup");
     }
     futexwakeup(key32(_addr_n.key), 1);
-
 }
 
 private static void notesleep(ptr<note> _addr_n) {
@@ -186,7 +183,6 @@ private static void notesleep(ptr<note> _addr_n) {
     if (cgo_yield != null.val) { 
         // Sleep for an arbitrary-but-moderate interval to poll libc interceptors.
         ns = 10e6F;
-
     }
     while (atomic.Load(key32(_addr_n.key)) == 0) {
         gp.m.blocked = true;
@@ -195,9 +191,7 @@ private static void notesleep(ptr<note> _addr_n) {
             asmcgocall(cgo_yield.val, null);
         }
         gp.m.blocked = false;
-
     }
-
 }
 
 // May run with m.p==nil if called from notetsleep, so write barriers
@@ -214,7 +208,6 @@ private static bool notetsleep_internal(ptr<note> _addr_n, long ns) {
         if (cgo_yield != null.val) { 
             // Sleep for an arbitrary-but-moderate interval to poll libc interceptors.
             ns = 10e6F;
-
         }
         while (atomic.Load(key32(_addr_n.key)) == 0) {
             gp.m.blocked = true;
@@ -225,7 +218,6 @@ private static bool notetsleep_internal(ptr<note> _addr_n, long ns) {
             gp.m.blocked = false;
         }
         return true;
-
     }
     if (atomic.Load(key32(_addr_n.key)) != 0) {
         return true;
@@ -249,10 +241,8 @@ private static bool notetsleep_internal(ptr<note> _addr_n, long ns) {
             break;
         }
         ns = deadline - now;
-
     }
     return atomic.Load(key32(_addr_n.key)) != 0;
-
 }
 
 private static bool notetsleep(ptr<note> _addr_n, long ns) {
@@ -263,7 +253,6 @@ private static bool notetsleep(ptr<note> _addr_n, long ns) {
         throw("notetsleep not on g0");
     }
     return notetsleep_internal(_addr_n, ns);
-
 }
 
 // same as runtime·notetsleep, but called on user g (not g0)
@@ -279,7 +268,6 @@ private static bool notetsleepg(ptr<note> _addr_n, long ns) {
     var ok = notetsleep_internal(_addr_n, ns);
     exitsyscall();
     return ok;
-
 }
 
 private static (ptr<g>, bool) beforeIdle(long _p0, long _p0) {

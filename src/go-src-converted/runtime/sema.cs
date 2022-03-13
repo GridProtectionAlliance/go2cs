@@ -17,29 +17,31 @@
 // See Mullender and Cox, ``Semaphores in Plan 9,''
 // https://swtch.com/semaphore.pdf
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:22 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:52 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\sema.go
-using cpu = go.@internal.cpu_package;
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using cpu = @internal.cpu_package;
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// Asynchronous semaphore for sync.Mutex.
+
+// A semaRoot holds a balanced tree of sudog with distinct addresses (s.elem).
+// Each of those sudog may in turn point (through s.waitlink) to a list
+// of other sudogs waiting on the same address.
+// The operations on the inner lists of sudogs with the same address
+// are all O(1). The scanning of the top-level semaRoot list is O(log n),
+// where n is the number of distinct addresses with goroutines blocked
+// on them that hash to the given semaRoot.
+// See golang.org/issue/17953 for a program that worked badly
+// before we introduced the second level of list, and test/locklinear.go
+// for a test that exercises this.
 
 public static partial class runtime_package {
 
-    // Asynchronous semaphore for sync.Mutex.
-
-    // A semaRoot holds a balanced tree of sudog with distinct addresses (s.elem).
-    // Each of those sudog may in turn point (through s.waitlink) to a list
-    // of other sudogs waiting on the same address.
-    // The operations on the inner lists of sudogs with the same address
-    // are all O(1). The scanning of the top-level semaRoot list is O(log n),
-    // where n is the number of distinct addresses with goroutines blocked
-    // on them that hash to the given semaRoot.
-    // See golang.org/issue/17953 for a program that worked badly
-    // before we introduced the second level of list, and test/locklinear.go
-    // for a test that exercises this.
 private partial struct semaRoot {
     public mutex @lock;
     public ptr<sudog> treap; // root of balanced tree of unique waiters.
@@ -95,7 +97,6 @@ private static void readyWithTime(ptr<sudog> _addr_s, nint traceskip) {
         s.releasetime = cputicks();
     }
     goready(s.g, traceskip);
-
 }
 
 private partial struct semaProfileFlags { // : nint
@@ -103,7 +104,6 @@ private partial struct semaProfileFlags { // : nint
 
 private static readonly semaProfileFlags semaBlockProfile = 1 << (int)(iota);
 private static readonly var semaMutexProfile = 0;
-
 
 // Called from runtime.
 private static void semacquire(ptr<uint> _addr_addr) {
@@ -137,7 +137,6 @@ private static void semacquire1(ptr<uint> _addr_addr, bool lifo, semaProfileFlag
             t0 = cputicks();
         }
         s.acquiretime = t0;
-
     }
     while (true) {
         lockWithRank(_addr_root.@lock, lockRankRoot); 
@@ -159,7 +158,6 @@ private static void semacquire1(ptr<uint> _addr_addr, bool lifo, semaProfileFlag
         blockevent(s.releasetime - t0, 3 + skipframes);
     }
     releaseSudog(s);
-
 }
 
 private static void semrelease(ptr<uint> _addr_addr) {
@@ -186,7 +184,6 @@ private static void semrelease1(ptr<uint> _addr_addr, bool handoff, nint skipfra
         // so no need to wake up another goroutine.
         unlock(_addr_root.@lock);
         return ;
-
     }
     var (s, t0) = root.dequeue(addr);
     if (s != null) {
@@ -223,7 +220,6 @@ private static void semrelease1(ptr<uint> _addr_addr, bool handoff, nint skipfra
             // P.
             // See issue 33747 for discussion.
             goyield();
-
         }
     }
 }
@@ -246,7 +242,6 @@ private static bool cansemacquire(ptr<uint> _addr_addr) {
             return true;
         }
     }
-
 }
 
 // queue adds s to the blocked goroutines in semaRoot.
@@ -280,7 +275,6 @@ private static void queue(this ptr<semaRoot> _addr_root, ptr<uint> _addr_addr, p
                         s.prev.parent = s;
             t = pt.val;
                     }
-
                     if (s.next != null) {
                         s.next.parent = s;
                     } 
@@ -290,12 +284,10 @@ private static void queue(this ptr<semaRoot> _addr_root, ptr<uint> _addr_addr, p
                     if (s.waittail == null) {
                         s.waittail = t;
                     }
-
                     t.parent = null;
                     t.prev = null;
                     t.next = null;
                     t.waittail = null;
-
                 }
                 else
  { 
@@ -307,16 +299,11 @@ private static void queue(this ptr<semaRoot> _addr_root, ptr<uint> _addr_addr, p
  {
                         t.waittail.waitlink = s;
                     }
-
                     t.waittail = s;
                     s.waitlink = null;
-
                 }
-
                 return ;
-
             }
-
             last = t;
             if (uintptr(@unsafe.Pointer(addr)) < uintptr(t.elem)) {
                 pt = _addr_t.prev;
@@ -325,7 +312,6 @@ private static void queue(this ptr<semaRoot> _addr_root, ptr<uint> _addr_addr, p
  {
                 pt = _addr_t.next;
             }
-
         }
     } 
 
@@ -357,7 +343,6 @@ private static void queue(this ptr<semaRoot> _addr_root, ptr<uint> _addr_addr, p
             root.rotateLeft(s.parent);
         }
     }
-
 });
 
 // dequeue searches for and finds the first goroutine
@@ -404,12 +389,10 @@ Found:
             if (t.prev != null) {
                 t.prev.parent = t;
             }
-
             t.next = s.next;
             if (t.next != null) {
                 t.next.parent = t;
             }
-
             if (t.waitlink != null) {
                 t.waittail = s.waittail;
             }
@@ -417,11 +400,9 @@ Found:
  {
                 t.waittail = null;
             }
-
             t.acquiretime = now;
             s.waitlink = null;
             s.waittail = null;
-
         }
         else
  { 
@@ -434,7 +415,6 @@ Found:
  {
                     root.rotateLeft(s);
                 }
-
             } 
             // Remove s, now a leaf.
  
@@ -447,23 +427,19 @@ Found:
  {
                     s.parent.next = null;
                 }
-
             }
             else
  {
                 root.treap = null;
             }
-
         }
     }
-
     s.parent = null;
     s.elem = null;
     s.next = null;
     s.prev = null;
     s.ticket = 0;
     return (_addr_s!, now);
-
 }
 
 // rotateLeft rotates the tree rooted at node x.
@@ -496,7 +472,6 @@ private static void rotateLeft(this ptr<semaRoot> _addr_root, ptr<sudog> _addr_x
             throw("semaRoot rotateLeft");
         }
         p.next = y;
-
     }
 }
 
@@ -530,7 +505,6 @@ private static void rotateRight(this ptr<semaRoot> _addr_root, ptr<sudog> _addr_
             throw("semaRoot rotateRight");
         }
         p.next = x;
-
     }
 }
 
@@ -567,7 +541,6 @@ private static uint notifyListAdd(ptr<notifyList> _addr_l) {
     // This may be called concurrently, for example, when called from
     // sync.Cond.Wait while holding a RWMutex in read mode.
     return atomic.Xadd(_addr_l.wait, 1) - 1;
-
 }
 
 // notifyListWait waits for a notification. If one has been sent since
@@ -605,7 +578,6 @@ private static void notifyListWait(ptr<notifyList> _addr_l, uint t) {
         blockevent(s.releasetime - t0, 2);
     }
     releaseSudog(s);
-
 }
 
 // notifyListNotifyAll notifies all entries in the list.
@@ -637,7 +609,6 @@ private static void notifyListNotifyAll(ptr<notifyList> _addr_l) {
         readyWithTime(_addr_s, 4);
         s = next;
     }
-
 }
 
 // notifyListNotifyOne notifies one entry in the list.
@@ -688,22 +659,17 @@ private static void notifyListNotifyOne(ptr<notifyList> _addr_l) {
  {
                     l.head = n;
                 }
-
                 if (n == null) {
                     l.tail = p;
                 }
-
                 unlock(_addr_l.@lock);
                 s.next = null;
                 readyWithTime(_addr_s, 4);
                 return ;
-
             }
-
         }
     }
     unlock(_addr_l.@lock);
-
 }
 
 //go:linkname notifyListCheck sync.runtime_notifyListCheck

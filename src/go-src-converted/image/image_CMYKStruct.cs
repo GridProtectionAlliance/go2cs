@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:56 UTC
+//     Generated on 2022 March 13 06:43:54 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class image_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CMYK
         {
             // Constructors
@@ -55,7 +55,7 @@ namespace go
             public static implicit operator CMYK(NilType nil) => default(CMYK);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CMYK CMYK_cast(dynamic value)
         {
             return new CMYK(value.Pix, value.Stride, value.Rect);

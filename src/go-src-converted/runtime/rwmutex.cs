@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:18 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:48 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\rwmutex.go
-using atomic = go.runtime.@internal.atomic_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+
+
+// This is a copy of sync/rwmutex.go rewritten to work in the runtime.
+
+// A rwmutex is a reader/writer mutual exclusion lock.
+// The lock can be held by an arbitrary number of readers or a single writer.
+// This is a variant of sync.RWMutex, for the runtime package.
+// Like mutex, rwmutex blocks the calling M.
+// It does not interact with the goroutine scheduler.
+
+using System;
 public static partial class runtime_package {
 
-    // This is a copy of sync/rwmutex.go rewritten to work in the runtime.
-
-    // A rwmutex is a reader/writer mutual exclusion lock.
-    // The lock can be held by an arbitrary number of readers or a single writer.
-    // This is a variant of sync.RWMutex, for the runtime package.
-    // Like mutex, rwmutex blocks the calling M.
-    // It does not interact with the goroutine scheduler.
 private partial struct rwmutex {
     public mutex rLock; // protects readers, readerPass, writer
     public muintptr readers; // list of pending readers
@@ -54,7 +55,6 @@ private static void rlock(this ptr<rwmutex> _addr_rw) {
                 // Writer finished.
                 rw.readerPass -= 1;
                 unlock(_addr_rw.rLock);
-
             }
             else
  { 
@@ -66,11 +66,8 @@ private static void rlock(this ptr<rwmutex> _addr_rw) {
                 unlock(_addr_rw.rLock);
                 notesleep(_addr_m.park);
                 noteclear(_addr_m.park);
-
             }
-
         });
-
     }
 }
 
@@ -93,16 +90,11 @@ private static void runlock(this ptr<rwmutex> _addr_rw) {
                 if (w != null) {
                     notewakeup(_addr_w.park);
                 }
-
                 unlock(_addr_rw.rLock);
-
             }
-
         }
     }
-
     releasem(getg().m);
-
 }
 
 // lock locks rw for writing.
@@ -126,7 +118,6 @@ private static void @lock(this ptr<rwmutex> _addr_rw) {
         }
     else
 );
-
     } {
         unlock(_addr_rw.rLock);
     }
@@ -155,7 +146,6 @@ private static void unlock(this ptr<rwmutex> _addr_rw) {
     unlock(_addr_rw.rLock); 
     // Allow other writers to proceed.
     unlock(_addr_rw.wLock);
-
 }
 
 } // end runtime_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:11:58 UTC
+//     Generated on 2022 March 13 06:25:19 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace @internal
 {
     public static partial class walk_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct orderState
         {
             // Constructors
@@ -71,7 +71,7 @@ namespace @internal
             public static implicit operator orderState(NilType nil) => default(orderState);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static orderState orderState_cast(dynamic value)
         {
             return new orderState(value.@out, value.temp, value.free, value.edit);

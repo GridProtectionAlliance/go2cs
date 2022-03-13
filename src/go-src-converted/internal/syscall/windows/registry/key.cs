@@ -23,12 +23,13 @@
 // NOTE: This package is a copy of golang.org/x/sys/windows/registry
 // with KeyInfo.ModTime removed to prevent dependency cycles.
 //
-// package registry -- go2cs converted at 2022 March 06 22:13:14 UTC
+
+// package registry -- go2cs converted at 2022 March 13 06:44:31 UTC
 // import "internal/syscall/windows/registry" ==> using registry = go.@internal.syscall.windows.registry_package
 // Original source: C:\Program Files\Go\src\internal\syscall\windows\registry\key.go
-using syscall = go.syscall_package;
-
 namespace go.@internal.syscall.windows;
+
+using syscall = syscall_package;
 
 public static partial class registry_package {
 
@@ -49,7 +50,6 @@ public static readonly nuint WOW64_32KEY = 0x00200;
 public static readonly nuint WOW64_64KEY = 0x00100;
 public static readonly nuint WRITE = 0x20006;
 
-
 // Key is a handle to an open Windows registry key.
 // Keys can be obtained by calling OpenKey; there are
 // also some predefined root keys such as CURRENT_USER.
@@ -67,7 +67,6 @@ public static readonly var CURRENT_USER = Key(syscall.HKEY_CURRENT_USER);
 public static readonly var LOCAL_MACHINE = Key(syscall.HKEY_LOCAL_MACHINE);
 public static readonly var USERS = Key(syscall.HKEY_USERS);
 public static readonly var CURRENT_CONFIG = Key(syscall.HKEY_CURRENT_CONFIG);
-
 
 // Close closes open key k.
 public static error Close(this Key k) {
@@ -93,7 +92,6 @@ public static (Key, error) OpenKey(Key k, @string path, uint access) {
         return (0, error.As(err)!);
     }
     return (Key(subkey), error.As(null!)!);
-
 }
 
 // ReadSubKeyNames returns the names of subkeys of key k.
@@ -106,7 +104,7 @@ public static (slice<@string>, error) ReadSubKeyNames(this Key k) {
     // https://msdn.microsoft.com/library/windows/desktop/ms724872.aspx
     var buf = make_slice<ushort>(256); //plus extra room for terminating zero byte
 loopItems:
-    for (var i = uint32(0); >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (var i = uint32(0); ; i++) {
         ref var l = ref heap(uint32(len(buf)), out ptr<var> _addr_l);
         while (true) {
             var err = syscall.RegEnumKeyEx(syscall.Handle(k), i, _addr_buf[0], _addr_l, null, null, null, null);
@@ -118,22 +116,16 @@ loopItems:
                 l = uint32(2 * len(buf));
                 buf = make_slice<ushort>(l);
                 continue;
-
             }
-
             if (err == _ERROR_NO_MORE_ITEMS) {
                 _breakloopItems = true;
                 break;
             }
-
             return (names, error.As(err)!);
-
         }
         names = append(names, syscall.UTF16ToString(buf[..(int)l]));
-
     }
     return (names, error.As(null!)!);
-
 }
 
 // CreateKey creates a key named path under open key k.
@@ -153,7 +145,6 @@ public static (Key, bool, error) CreateKey(Key k, @string path, uint access) {
         return (0, false, error.As(err)!);
     }
     return (Key(h), d == _REG_OPENED_EXISTING_KEY, error.As(null!)!);
-
 }
 
 // DeleteKey deletes the subkey path of key k and its values.
@@ -182,7 +173,6 @@ public static (ptr<KeyInfo>, error) Stat(this Key k) {
         return (_addr_null!, error.As(err)!);
     }
     return (_addr__addr_ki!, error.As(null!)!);
-
 }
 
 } // end registry_package

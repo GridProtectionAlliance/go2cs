@@ -4,25 +4,27 @@
 
 // Lock-free stack.
 
-// package runtime -- go2cs converted at 2022 March 06 22:08:47 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:24:33 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\lfstack.go
-using atomic = go.runtime.@internal.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// lfstack is the head of a lock-free stack.
+//
+// The zero value of lfstack is an empty list.
+//
+// This stack is intrusive. Nodes must embed lfnode as the first field.
+//
+// The stack does not keep GC-visible pointers to nodes, so the caller
+// is responsible for ensuring the nodes are not garbage collected
+// (typically by allocating them from manually-managed memory).
 
 public static partial class runtime_package {
 
-    // lfstack is the head of a lock-free stack.
-    //
-    // The zero value of lfstack is an empty list.
-    //
-    // This stack is intrusive. Nodes must embed lfnode as the first field.
-    //
-    // The stack does not keep GC-visible pointers to nodes, so the caller
-    // is responsible for ensuring the nodes are not garbage collected
-    // (typically by allocating them from manually-managed memory).
 private partial struct lfstack { // : ulong
 }
 
@@ -40,7 +42,6 @@ private static void push(this ptr<lfstack> _addr_head, ptr<lfnode> _addr_node) {
             throw("lfstack.push");
         }
     }
-
     while (true) {
         var old = atomic.Load64((uint64.val)(head));
         node.next = old;
@@ -48,7 +49,6 @@ private static void push(this ptr<lfstack> _addr_head, ptr<lfnode> _addr_node) {
             break;
         }
     }
-
 }
 
 private static unsafe.Pointer pop(this ptr<lfstack> _addr_head) {
@@ -65,7 +65,6 @@ private static unsafe.Pointer pop(this ptr<lfstack> _addr_head) {
             return @unsafe.Pointer(node);
         }
     }
-
 }
 
 private static bool empty(this ptr<lfstack> _addr_head) {

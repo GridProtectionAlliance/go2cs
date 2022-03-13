@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:26:27 UTC
+//     Generated on 2022 March 13 05:40:29 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -20,7 +20,7 @@ namespace go
 {
     public static partial class syscall_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SysProcAttr
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace go
             public static implicit operator SysProcAttr(NilType nil) => default(SysProcAttr);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SysProcAttr SysProcAttr_cast(dynamic value)
         {
             return new SysProcAttr(value.Chroot, ref value.Credential, value.Setsid, value.Setpgid, value.Setctty, value.Noctty, value.Ctty, value.Foreground, value.Pgid);

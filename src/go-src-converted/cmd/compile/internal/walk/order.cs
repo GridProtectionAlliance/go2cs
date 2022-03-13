@@ -2,59 +2,60 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package walk -- go2cs converted at 2022 March 06 23:11:57 UTC
+// package walk -- go2cs converted at 2022 March 13 06:25:18 UTC
 // import "cmd/compile/internal/walk" ==> using walk = go.cmd.compile.@internal.walk_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\walk\order.go
-using fmt = go.fmt_package;
-using constant = go.go.constant_package;
-using buildcfg = go.@internal.buildcfg_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using escape = go.cmd.compile.@internal.escape_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using staticinit = go.cmd.compile.@internal.staticinit_package;
-using typecheck = go.cmd.compile.@internal.typecheck_package;
-using types = go.cmd.compile.@internal.types_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using constant = go.constant_package;
+using buildcfg = @internal.buildcfg_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using escape = cmd.compile.@internal.escape_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using staticinit = cmd.compile.@internal.staticinit_package;
+using typecheck = cmd.compile.@internal.typecheck_package;
+using types = cmd.compile.@internal.types_package;
+using src = cmd.@internal.src_package;
+
+
+// Rewrite tree to use separate statements to enforce
+// order of evaluation. Makes walk easier, because it
+// can (after this runs) reorder at will within an expression.
+//
+// Rewrite m[k] op= r into m[k] = m[k] op r if op is / or %.
+//
+// Introduce temporaries as needed by runtime routines.
+// For example, the map runtime routines take the map key
+// by reference, so make sure all map keys are addressable
+// by copying them to temporaries as needed.
+// The same is true for channel operations.
+//
+// Arrange that map index expressions only appear in direct
+// assignments x = m[k] or m[k] = x, never in larger expressions.
+//
+// Arrange that receive expressions only appear in direct assignments
+// x = <-c or as standalone statements <-c, never in larger expressions.
+
+// TODO(rsc): The temporary introduction during multiple assignments
+// should be moved into this file, so that the temporaries can be cleaned
+// and so that conversions implicit in the OAS2FUNC and OAS2RECV
+// nodes can be made explicit and then have their temporaries cleaned.
+
+// TODO(rsc): Goto and multilevel break/continue can jump over
+// inserted VARKILL annotations. Work out a way to handle these.
+// The current implementation is safe, in that it will execute correctly.
+// But it won't reuse temporaries as aggressively as it might, and
+// it can result in unnecessary zeroing of those variables in the function
+// prologue.
+
+// orderState holds state during the ordering process.
+
+using System;
 public static partial class walk_package {
 
-    // Rewrite tree to use separate statements to enforce
-    // order of evaluation. Makes walk easier, because it
-    // can (after this runs) reorder at will within an expression.
-    //
-    // Rewrite m[k] op= r into m[k] = m[k] op r if op is / or %.
-    //
-    // Introduce temporaries as needed by runtime routines.
-    // For example, the map runtime routines take the map key
-    // by reference, so make sure all map keys are addressable
-    // by copying them to temporaries as needed.
-    // The same is true for channel operations.
-    //
-    // Arrange that map index expressions only appear in direct
-    // assignments x = m[k] or m[k] = x, never in larger expressions.
-    //
-    // Arrange that receive expressions only appear in direct assignments
-    // x = <-c or as standalone statements <-c, never in larger expressions.
-
-    // TODO(rsc): The temporary introduction during multiple assignments
-    // should be moved into this file, so that the temporaries can be cleaned
-    // and so that conversions implicit in the OAS2FUNC and OAS2RECV
-    // nodes can be made explicit and then have their temporaries cleaned.
-
-    // TODO(rsc): Goto and multilevel break/continue can jump over
-    // inserted VARKILL annotations. Work out a way to handle these.
-    // The current implementation is safe, in that it will execute correctly.
-    // But it won't reuse temporaries as aggressively as it might, and
-    // it can result in unnecessary zeroing of those variables in the function
-    // prologue.
-
-    // orderState holds state during the ordering process.
 private partial struct orderState {
     public slice<ir.Node> @out; // list of generated statements
     public slice<ptr<ir.Name>> temp; // stack of temporary variables
@@ -72,7 +73,6 @@ private static void order(ptr<ir.Func> _addr_fn) {
         ir.DumpList(s, fn.Body);
     }
     orderBlock(_addr_fn.Body, /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<@string, slice<ptr<ir.Name>>>{});
-
 }
 
 // append typechecks stmt and appends it to out.
@@ -110,7 +110,6 @@ private static ptr<ir.Name> newTemp(this ptr<orderState> _addr_o, ptr<types.Type
     }
     o.temp = append(o.temp, v);
     return _addr_v!;
-
 }
 
 // copyExpr behaves like newTemp but also emits
@@ -169,7 +168,6 @@ private static ir.Node cheapExpr(this ptr<orderState> _addr_o, ir.Node n) {
         a.X = l;
         return typecheck.Expr(a);
         return o.copyExpr(n);
-
 }
 
 // safeExpr returns a safe version of n.
@@ -274,13 +272,11 @@ private static ir.Node addrTemp(this ptr<orderState> _addr_o, ir.Node n) {
         }
         vstat = typecheck.Expr(vstat)._<ptr<ir.Name>>();
         return vstat;
-
     }
     if (isaddrokay(n)) {
         return n;
     }
     return o.copyExpr(n);
-
 }
 
 // mapKeyTemp prepares n to be a key in a map runtime call and returns n.
@@ -319,7 +315,6 @@ private static ir.Node mapKeyTemp(this ptr<orderState> _addr_o, ptr<types.Type> 
             n = ir.NewConstExpr(constant.MakeUint64(uint64(ir.Int64Val(n))), n);
             n.SetType(kt);
             return n;
-
         }
         return typecheck.Expr(ir.NewConvExpr(n.Pos(), ir.OCONV, kt, n));
     else 
@@ -336,8 +331,7 @@ private static ir.Node mapKeyTemp(this ptr<orderState> _addr_o, ptr<types.Type> 
         e = ir.NewStarExpr(n.Pos(), e);
         o.append(ir.NewAssignStmt(@base.Pos, e, n));
         return tmp;
-    
-}
+    }
 
 // mapKeyReplaceStrConv replaces OBYTES2STR by OBYTES2STRTMP
 // in n to avoid string allocations for keys in map lookups.
@@ -393,7 +387,6 @@ private static bool mapKeyReplaceStrConv(ir.Node n) {
             elem = elem__prev1;
         }
         return replaced;
-
 }
 
 private partial struct ordermarker { // : nint
@@ -469,7 +462,6 @@ private static void orderMakeSliceCopy(slice<ir.Node> s) {
         // we want as.X and cp.X to be the same name,
         // but we want the initial data to be coming from a different name.
         return ;
-
     }
     ptr<ir.MakeExpr> mk = @as.Y._<ptr<ir.MakeExpr>>();
     if (mk.Esc() == ir.EscNone || mk.Len == null || mk.Cap != null) {
@@ -496,7 +488,6 @@ private static void edge(this ptr<orderState> _addr_o) {
     // counter += 1
     var incr = ir.NewAssignOpStmt(@base.Pos, ir.OADD, counter, ir.NewInt(1));
     o.append(incr);
-
 }
 
 // orderBlock orders the block of statements in n into a new slice,
@@ -530,7 +521,6 @@ private static ir.Node exprInPlace(this ptr<orderState> _addr_o, ir.Node n) {
     // at head of outer list.
     o.temp = append(o.temp, order.temp);
     return n;
-
 }
 
 // orderStmtInPlace orders the side effects of the single statement *np
@@ -558,10 +548,8 @@ private static void init(this ptr<orderState> _addr_o, ir.Node n) {
             @base.Fatalf("order.init shared node with ninit");
         }
         return ;
-
     }
     o.stmtList(ir.TakeInit(n));
-
 }
 
 // call orders the call expression n.
@@ -572,7 +560,6 @@ private static void call(this ptr<orderState> _addr_o, ir.Node nn) {
     if (len(nn.Init()) > 0) { 
         // Caller should have already called o.init(nn).
         @base.Fatalf("%v with unexpected ninit", nn.Op());
-
     }
     if (nn.Op() != ir.OCALLFUNC && nn.Op() != ir.OCALLMETH && nn.Op() != ir.OCALLINTER) {
         switch (nn.type()) {
@@ -601,7 +588,6 @@ private static void call(this ptr<orderState> _addr_o, ir.Node nn) {
             }
         }
         return ;
-
     }
     ptr<ir.CallExpr> n = nn._<ptr<ir.CallExpr>>();
     typecheck.FixVariadicCall(n);
@@ -611,7 +597,6 @@ private static void call(this ptr<orderState> _addr_o, ir.Node nn) {
         // do not introduce temporaries here, so it is easier to rewrite it
         // to symbol address reference later in walk.
         return ;
-
     }
     n.X = o.expr(n.X, null);
     o.exprList(n.Args);
@@ -631,9 +616,7 @@ private static void call(this ptr<orderState> _addr_o, ir.Node nn) {
                 arg.X = x;
                 x.SetAddrtaken(true); // ensure SSA keeps the x variable
                 n.KeepAlive = append(n.KeepAlive, x);
-
             }
-
         }
     }; 
 
@@ -658,7 +641,6 @@ private static void call(this ptr<orderState> _addr_o, ir.Node nn) {
                 arg = arg__prev2;
 
             }
-
         }
     }
 }
@@ -682,8 +664,7 @@ private static void mapAssign(this ptr<orderState> _addr_o, ir.Node n) {
         o.@out = append(o.@out, n);
     else 
         @base.Fatalf("order.mapAssign %v", n.Op());
-    
-}
+    }
 
 private static ir.Node safeMapRHS(this ptr<orderState> _addr_o, ir.Node r) {
     ref orderState o = ref _addr_o.val;
@@ -698,7 +679,6 @@ private static ir.Node safeMapRHS(this ptr<orderState> _addr_o, ir.Node r) {
         }        return r;
     }
     return o.cheapExpr(r);
-
 }
 
 // stmt orders the statement n, appending to o.out.
@@ -742,14 +722,12 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
                 l2 = l2._<ptr<ir.IndexExpr>>();
                 l2.Assigned = false;
             }
-
             l2 = o.copyExpr(l2);
             var r = o.expr(typecheck.Expr(ir.NewBinaryExpr(n.Pos(), n.AsOp, l2, n.Y)), null);
             var @as = typecheck.Stmt(ir.NewAssignStmt(n.Pos(), l1, r));
             o.mapAssign(as);
             o.cleanTemp(t);
             return ;
-
         }
         o.mapAssign(n);
         o.cleanTemp(t);
@@ -859,7 +837,6 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
             ref ir.Nodes init = ref heap(out ptr<ir.Nodes> _addr_init);
             n.Call = walkRecover(n.Call._<ptr<ir.CallExpr>>(), _addr_init);
             o.stmtList(init);
-
         }
         if (buildcfg.Experiment.RegabiDefer) {
             o.wrapGoDefer(n);
@@ -938,9 +915,7 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
                 // for i := range x will only use x once, to compute len(x).
                 // No need to copy it.
                 break;
-
             }
-
             fallthrough = true;
 
         }
@@ -966,7 +941,6 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
                 // when optimizing away the range loop to a runtime call.
                 orderBody = false;
                 break;
-
             } 
 
             // copy the map value in case it is a map literal.
@@ -1021,11 +995,9 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
                 if (len(ncas.Init()) != 0) {
                     @base.Fatalf("order select ninit");
                 }
-
                 if (r == null) {
                     continue;
                 }
-
 
                 if (r.Op() == ir.OSELRECV2) 
                     // case x, ok = <-c
@@ -1054,12 +1026,10 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
                             var dcl = typecheck.Stmt(ir.NewDecl(@base.Pos, ir.ODCL, n._<ptr<ir.Name>>()));
                             ncas.PtrInit().Append(dcl);
                         }
-
                         var tmp = o.newTemp(t, t.HasPointers());
                         @as = typecheck.Stmt(ir.NewAssignStmt(@base.Pos, n, typecheck.Conv(tmp, n.Type())));
                         ncas.PtrInit().Append(as);
                         r.Lhs[i] = tmp;
-
                     }
 ;
                     do(0, recv.X.Type().Elem());
@@ -1068,7 +1038,6 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
                         ir.DumpList("ninit", r.Init());
                         @base.Fatalf("ninit on select recv");
                     }
-
                     orderBlock(_addr_ncas.PtrInit(), o.free);
                 else if (r.Op() == ir.OSEND) 
                     r = r._<ptr<ir.SendStmt>>();
@@ -1084,17 +1053,14 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
                     if (!ir.IsAutoTmp(r.Chan)) {
                         r.Chan = o.copyExpr(r.Chan);
                     }
-
                     r.Value = o.expr(r.Value, null);
                     if (!ir.IsAutoTmp(r.Value)) {
                         r.Value = o.copyExpr(r.Value);
                     }
-
                 else 
                     ir.Dump("select case", r);
                     @base.Fatalf("unknown op in select %v", r.Op());
-                
-            } 
+                            } 
             // Now that we have accumulated all the temporaries, clean them.
             // Also insert any ninit queued during the previous loop.
             // (The temporary cleaning must follow that ninit work.)
@@ -1109,7 +1075,6 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
             // TODO(mdempsky): Is this actually necessary?
             // walkSelect appears to walk Ninit.
             cas.Body.Prepend(ir.TakeInit(cas));
-
         }        o.@out = append(o.@out, n);
         o.popTemp(t); 
 
@@ -1123,7 +1088,6 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
             // Force copying to the stack so that (chan T)(nil) <- x
             // is still instrumented as a read of x.
             n.Value = o.copyExpr(n.Value);
-
         }
         else
  {
@@ -1144,7 +1108,6 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
         if (@base.Debug.Libfuzzer != 0 && !hasDefaultCase(n)) { 
             // Add empty "default:" case for instrumentation.
             n.Cases = append(n.Cases, ir.NewCaseStmt(@base.Pos, null, null));
-
         }
         t = o.markTemp();
         n.Tag = o.expr(n.Tag, null);
@@ -1165,7 +1128,6 @@ private static void stmt(this ptr<orderState> _addr_o, ir.Node n) {
     else 
         @base.Fatalf("order.stmt %v", n.Op());
         @base.Pos = lno;
-
 }
 
 private static bool hasDefaultCase(ptr<ir.SwitchStmt> _addr_n) {
@@ -1176,7 +1138,6 @@ private static bool hasDefaultCase(ptr<ir.SwitchStmt> _addr_n) {
             return true;
         }
     }    return false;
-
 }
 
 // exprList orders the expression list l into o.
@@ -1223,7 +1184,6 @@ private static ir.Node expr(this ptr<orderState> _addr_o, ir.Node n, ir.Node lhs
     n = o.expr1(n, lhs);
     @base.Pos = lno;
     return n;
-
 }
 
 private static ir.Node expr1(this ptr<orderState> _addr_o, ir.Node n, ir.Node lhs) {
@@ -1278,9 +1238,7 @@ private static ir.Node expr1(this ptr<orderState> _addr_o, ir.Node n, ir.Node lh
             if (@base.Flag.Cfg.Instrumenting) { 
                 // Race detector needs the copy.
                 needCopy = true;
-
             }
-
         }
         n.Index = o.mapKeyTemp(n.X.Type(), n.Index);
         if (needCopy) {
@@ -1304,11 +1262,9 @@ private static ir.Node expr1(this ptr<orderState> _addr_o, ir.Node n, ir.Node lh
                 // We also process static composite literal node here, making a named static global
                 // whose address we can put directly in an interface (see OCONVIFACE case in walk).
                 n.X = o.addrTemp(n.X);
-
             }
 
         }
-
         return n;
     else if (n.Op() == ir.OCONVNOP) 
         n = n._<ptr<ir.ConvExpr>>();
@@ -1322,7 +1278,6 @@ private static ir.Node expr1(this ptr<orderState> _addr_o, ir.Node n, ir.Node lh
             if (lhs == null || lhs.Op() != ir.ONAME || @base.Flag.Cfg.Instrumenting) {
                 return o.copyExpr(n);
             }
-
         }
         else
  {
@@ -1374,7 +1329,6 @@ private static ir.Node expr1(this ptr<orderState> _addr_o, ir.Node n, ir.Node lh
             // len([]rune(s)) is rewritten to runtime.countrunes(s) later.
             ptr<ir.ConvExpr> conv = n._<ptr<ir.UnaryExpr>>().X._<ptr<ir.ConvExpr>>();
             conv.X = o.expr(conv.X, null);
-
         }
         else
  {
@@ -1505,9 +1459,7 @@ private static ir.Node expr1(this ptr<orderState> _addr_o, ir.Node n, ir.Node lh
                     dynamics = append(dynamics, r);
                     continue;
                 }
-
                 statics = append(statics, r);
-
             }
 
             r = r__prev1;
@@ -1532,7 +1484,6 @@ private static ir.Node expr1(this ptr<orderState> _addr_o, ir.Node n, ir.Node lh
                 @as = ir.NewAssignStmt(@base.Pos, ir.NewIndexExpr(@base.Pos, m, r.Key), r.Value);
                 typecheck.Stmt(as); // Note: this converts the OINDEX to an OINDEXMAP
                 o.stmt(as);
-
             }
 
             r = r__prev1;
@@ -1576,7 +1527,6 @@ private static void as2func(this ptr<orderState> _addr_o, ptr<ir.AssignListStmt>
         }
     }    o.@out = append(o.@out, n);
     o.stmt(typecheck.Stmt(as));
-
 }
 
 // as2ok orders OAS2XXX with ok.
@@ -1600,15 +1550,11 @@ private static void as2ok(this ptr<orderState> _addr_o, ptr<ir.AssignListStmt> _
                     // spec. We need to explicitly convert it to the LHS type in
                     // case the latter is a defined boolean type (#8475).
                     tmp = typecheck.Conv(tmp, nl.Type());
-
                 }
-
                 @as.Rhs = append(@as.Rhs, tmp);
-
             }
 
         }
-
     };
 
     do(0, n.Rhs[0].Type());
@@ -1616,7 +1562,6 @@ private static void as2ok(this ptr<orderState> _addr_o, ptr<ir.AssignListStmt> _
 
     o.@out = append(o.@out, n);
     o.stmt(typecheck.Stmt(as));
-
 }
 
 private static nint wrapGoDefer_prgen = default;
@@ -1731,9 +1676,7 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
             c = c__prev2;
 
         }
-
         return ;
-
     }
     {
         ptr<ir.CallExpr> c__prev1 = c;
@@ -1747,7 +1690,6 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
             undoVariadic(c);
             callX = c.X;
             callArgs = c.Args;
-
         }
         c = c__prev1;
 
@@ -1759,10 +1701,8 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
         if (n.Op() == ir.OGO) { 
             // For "go", assume that all closures escape.
             return true;
-
         }
         return n.Esc() != ir.EscNever;
-
     }(); 
 
     // A helper for making a copy of an argument. Note that it is
@@ -1786,7 +1726,6 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
         }
         argCopy.SetByval(byval);
         return argCopy;
-
     }; 
 
     // getUnsafeArg looks for an unsafe.Pointer arg that has been
@@ -1822,7 +1761,6 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
         }
 
         return null;
-
     }; 
 
     // Copy the arguments to the function into temps.
@@ -1845,15 +1783,12 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
                 // arg has been copied already, use keepalive copy
                 argname = unsafeArgName;
                 unsafeArgs[i] = unsafeArgName;
-
             }
             else
  {
                 argname = mkArgCopy(arg);
             }
-
             newNames = append(newNames, argname);
-
         }
         i = i__prev1;
     }
@@ -1877,9 +1812,7 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
                 var c = ir.NewUnaryExpr(n.Pos(), ir.OCHECKNIL, tab);
                 c.SetTypecheck(1);
                 o.append(c);
-
             }
-
         else if (!(callX.Op() == ir.ONAME && callX._<ptr<ir.Name>>().Class == ir.PFUNC)) 
             // Deal with "defer returnsafunc()(x, y)" (for
             // example) by copying the callee expression.
@@ -1889,9 +1822,7 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
                 // closure into a temp, mark it as no longer directly
                 // called.
                 callX._<ptr<ir.ClosureExpr>>().Func.SetClosureCalled(false);
-
             }
-
             }
     slice<ptr<ir.Field>> noFuncArgs = default;
     var noargst = ir.NewFuncType(@base.Pos, null, noFuncArgs, null);
@@ -1993,7 +1924,6 @@ private static void wrapGoDefer(this ptr<orderState> _addr_o, ptr<ir.GoDeferStmt
 
     // Finally, point the defer statement at the newly generated call.
     n.Call = topcall;
-
 });
 
 // isFuncPCIntrinsic returns whether n is a direct call of internal/abi.FuncPCABIxxx functions.
@@ -2005,7 +1935,6 @@ private static bool isFuncPCIntrinsic(ptr<ir.CallExpr> _addr_n) {
     }
     ptr<ir.Name> fn = n.X._<ptr<ir.Name>>().Sym();
     return (fn.Name == "FuncPCABI0" || fn.Name == "FuncPCABIInternal") && (fn.Pkg.Path == "internal/abi" || fn.Pkg == types.LocalPkg && @base.Ctxt.Pkgpath == "internal/abi");
-
 }
 
 // isIfaceOfFunc returns whether n is an interface conversion from a direct reference of a func.

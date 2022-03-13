@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:20:49 UTC
+//     Generated on 2022 March 13 05:35:55 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct serverHelloMsg
         {
             // Constructors
@@ -91,7 +91,7 @@ namespace crypto
             public static implicit operator serverHelloMsg(NilType nil) => default(serverHelloMsg);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static serverHelloMsg serverHelloMsg_cast(dynamic value)
         {
             return new serverHelloMsg(value.raw, value.vers, value.random, value.sessionId, value.cipherSuite, value.compressionMethod, value.ocspStapling, value.ticketSupported, value.secureRenegotiationSupported, value.secureRenegotiation, value.alpnProtocol, value.scts, value.supportedVersion, value.serverShare, value.selectedIdentityPresent, value.selectedIdentity, value.supportedPoints, value.cookie, value.selectedGroup);

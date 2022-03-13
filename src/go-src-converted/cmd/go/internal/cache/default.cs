@@ -2,24 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package cache -- go2cs converted at 2022 March 06 23:17:16 UTC
+// package cache -- go2cs converted at 2022 March 13 06:30:34 UTC
 // import "cmd/go/internal/cache" ==> using cache = go.cmd.go.@internal.cache_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\cache\default.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using sync = sync_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+
+
+// Default returns the default cache to use, or nil if no cache should be used.
+
+using System;
 public static partial class cache_package {
 
-    // Default returns the default cache to use, or nil if no cache should be used.
 public static ptr<Cache> Default() {
     defaultOnce.Do(initDefaultCache);
     return _addr_defaultCache!;
@@ -47,7 +48,6 @@ private static void initDefaultCache() {
             @base.Fatalf("build cache is required, but could not be located: %v", defaultDirErr);
         }
         @base.Fatalf("build cache is disabled by GOCACHE=off, but required as of Go 1.12");
-
     }
     {
         var err = os.MkdirAll(dir, 0777);
@@ -56,24 +56,20 @@ private static void initDefaultCache() {
             @base.Fatalf("failed to initialize build cache at %s: %s\n", dir, err);
         }
     }
-
     {
         var (_, err) = os.Stat(filepath.Join(dir, "README"));
 
         if (err != null) { 
             // Best effort.
             os.WriteFile(filepath.Join(dir, "README"), (slice<byte>)cacheREADME, 0666);
-
         }
     }
-
 
     var (c, err) = Open(dir);
     if (err != null) {
         @base.Fatalf("failed to initialize build cache at %s: %s\n", dir, err);
     }
     defaultCache = c;
-
 }
 
 private static sync.Once defaultDirOnce = default;private static @string defaultDir = default;private static error defaultDirErr = default!;
@@ -103,11 +99,9 @@ public static @string DefaultDir() {
             return ;
         }
         defaultDir = filepath.Join(dir, "go-build");
-
     });
 
     return defaultDir;
-
 }
 
 } // end cache_package

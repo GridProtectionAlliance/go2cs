@@ -5,10 +5,8 @@
 //go:build !windows
 // +build !windows
 
-// package main -- go2cs converted at 2022 March 06 23:15:22 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:51 UTC
 // Original source: C:\Program Files\Go\src\cmd\dist\sys_default.go
-
-
 namespace go;
 
 public static partial class main_package {

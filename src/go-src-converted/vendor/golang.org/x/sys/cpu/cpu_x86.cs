@@ -5,12 +5,12 @@
 //go:build 386 || amd64 || amd64p32
 // +build 386 amd64 amd64p32
 
-// package cpu -- go2cs converted at 2022 March 06 23:38:21 UTC
+// package cpu -- go2cs converted at 2022 March 13 06:46:35 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\cpu_x86.go
-using runtime = go.runtime_package;
-
 namespace go.vendor.golang.org.x.sys;
+
+using runtime = runtime_package;
 
 public static partial class cpu_package {
 
@@ -57,13 +57,11 @@ private static void archInit() {
             // Check darwin commpage for AVX512 support. Necessary because:
             // https://github.com/apple/darwin-xnu/blob/0a798f6738bc1db01281fc08ae024145e84df927/osfmk/i386/fpu.c#L175-L201
             osSupportsAVX512 = osSupportsAVX && darwinSupportsAVX512();
-
         }
         else
  { 
             // Check if OPMASK and ZMM registers have OS support.
             osSupportsAVX512 = osSupportsAVX && isSet(5, eax) && isSet(6, eax) && isSet(7, eax);
-
         }
     }
     X86.HasAVX = isSet(28, ecx1) && osSupportsAVX;

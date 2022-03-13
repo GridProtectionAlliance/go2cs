@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:47:20 UTC
+//     Generated on 2022 March 13 05:58:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace go
 {
     public static partial class parser_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct parser
         {
             // Constructors
@@ -92,7 +92,7 @@ namespace go
             public static implicit operator parser(NilType nil) => default(parser);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static parser parser_cast(dynamic value)
         {
             return new parser(ref value.file, value.ErrorVector, value.scanner, value.mode, value.trace, value.indent, value.comments, ref value.leadComment, ref value.lineComment, value.pos, value.tok, value.lit, value.exprLev, ref value.pkgScope, ref value.topScope, value.unresolved, value.imports, ref value.labelScope, value.targetStack);

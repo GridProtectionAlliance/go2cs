@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package goobj -- go2cs converted at 2022 March 06 22:32:26 UTC
+// package goobj -- go2cs converted at 2022 March 13 05:43:24 UTC
 // import "cmd/internal/goobj" ==> using goobj = go.cmd.@internal.goobj_package
 // Original source: C:\Program Files\Go\src\cmd\internal\goobj\funcinfo.go
-using bytes = go.bytes_package;
-using objabi = go.cmd.@internal.objabi_package;
-using binary = go.encoding.binary_package;
-using System;
-
-
 namespace go.cmd.@internal;
 
+using bytes = bytes_package;
+using objabi = cmd.@internal.objabi_package;
+using binary = encoding.binary_package;
+
+
+// CUFileIndex is used to index the filenames that are stored in the
+// per-package/per-CU FileList.
+
+using System;
 public static partial class goobj_package {
 
-    // CUFileIndex is used to index the filenames that are stored in the
-    // per-package/per-CU FileList.
 public partial struct CUFileIndex { // : uint
 }
 
@@ -125,7 +126,6 @@ private static FuncInfoLengths ReadFuncInfoLengths(this ptr<FuncInfo> _addr__p0,
     result.Initialized = true;
 
     return result;
-
 }
 
 private static uint ReadArgs(this ptr<FuncInfo> _addr__p0, slice<byte> b) {

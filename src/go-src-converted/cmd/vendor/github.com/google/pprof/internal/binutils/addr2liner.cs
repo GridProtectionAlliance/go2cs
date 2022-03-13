@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package binutils -- go2cs converted at 2022 March 06 23:23:15 UTC
+// package binutils -- go2cs converted at 2022 March 13 06:36:19 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/binutils" ==> using binutils = go.cmd.vendor.github.com.google.pprof.@internal.binutils_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\binutils\addr2liner.go
-using bufio = go.bufio_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using exec = go.os.exec_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using bufio = bufio_package;
+using fmt = fmt_package;
+using io = io_package;
+using exec = os.exec_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using sync = sync_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
 
 public static partial class binutils_package {
 
@@ -34,7 +34,6 @@ private static readonly @string defaultAddr2line = "addr2line";
 // addr2line may produce multiple lines of output. We
 // use this sentinel to identify the end of the output.
 private static readonly var sentinel = ~uint64(0);
-
 
 // addr2Liner is a connection to an addr2line command for obtaining
 // address and line number information from a binary.
@@ -81,7 +80,6 @@ private static (@string, error) readLine(this ptr<addr2LinerJob> _addr_a) {
         return ("", error.As(err)!);
     }
     return (strings.TrimSpace(s), error.As(null!)!);
-
 }
 
 // close releases any resources used by the addr2liner object.
@@ -128,11 +126,9 @@ private static (ptr<addr2Liner>, error) newAddr2Liner(@string cmd, @string file,
 
     }
 
-
     ptr<addr2Liner> a = addr(new addr2Liner(rw:j,base:base,));
 
     return (_addr_a!, error.As(null!)!);
-
 }
 
 // readFrame parses the addr2line output for a single address. It
@@ -154,7 +150,6 @@ private static (plugin.Frame, bool) readFrame(this ptr<addr2Liner> _addr_d) {
         d.rw.readLine();
         d.rw.readLine();
         return (new plugin.Frame(), true);
-
     }
     var (fileline, err) = d.rw.readLine();
     if (err != null) {
@@ -196,14 +191,11 @@ private static (plugin.Frame, bool) readFrame(this ptr<addr2Liner> _addr_d) {
                     }
 
                 }
-
             }
 
         }
-
     }
     return (new plugin.Frame(Func:funcname,File:fileline,Line:linenumber), false);
-
 }
 
 private static (slice<plugin.Frame>, error) rawAddrInfo(this ptr<addr2Liner> _addr_d, ulong addr) => func((defer, _, _) => {
@@ -226,7 +218,6 @@ private static (slice<plugin.Frame>, error) rawAddrInfo(this ptr<addr2Liner> _ad
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -238,7 +229,6 @@ private static (slice<plugin.Frame>, error) rawAddrInfo(this ptr<addr2Liner> _ad
         err = err__prev1;
 
     }
-
 
     var (resp, err) = d.rw.readLine();
     if (err != null) {
@@ -258,7 +248,6 @@ private static (slice<plugin.Frame>, error) rawAddrInfo(this ptr<addr2Liner> _ad
         }
     }
     return (stack, error.As(err)!);
-
 });
 
 // addrInfo returns the stack frame information for a specific program
@@ -287,11 +276,9 @@ private static (slice<plugin.Frame>, error) addrInfo(this ptr<addr2Liner> _addr_
             if (len(nmName) > len(a2lName) + 1) {
                 stack[len(stack) - 1].Func = nmName;
             }
-
         }
     }
     return (stack, error.As(null!)!);
-
 }
 
 } // end binutils_package

@@ -16,9 +16,11 @@
 // benefit to amortize the inspector's construction cost.
 // If efficiency is the primary concern, do not use Inspector for
 // one-off traversals.
-// package inspector -- go2cs converted at 2022 March 06 23:35:02 UTC
+
+// package inspector -- go2cs converted at 2022 March 13 06:42:36 UTC
 // import "cmd/vendor/golang.org/x/tools/go/ast/inspector" ==> using inspector = go.cmd.vendor.golang.org.x.tools.go.ast.inspector_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\ast\inspector\inspector.go
+namespace go.cmd.vendor.golang.org.x.tools.go.ast;
 // There are four orthogonal features in a traversal:
 //  1 type filtering
 //  2 pruning
@@ -35,16 +37,16 @@
 // wrappers around a more generic traversal, but this was measured
 // and found to degrade performance significantly (30%).
 
-using ast = go.go.ast_package;
+
+using ast = go.ast_package;
+
+
+// An Inspector provides methods for inspecting
+// (traversing) the syntax trees of a package.
+
 using System;
-
-
-namespace go.cmd.vendor.golang.org.x.tools.go.ast;
-
 public static partial class inspector_package {
 
-    // An Inspector provides methods for inspecting
-    // (traversing) the syntax trees of a package.
 public partial struct Inspector {
     public slice<event> events;
 }
@@ -90,7 +92,6 @@ private static void Preorder(this ptr<Inspector> _addr_@in, slice<ast.Node> type
             i++;
         }
     }
-
 }
 
 // Nodes visits the nodes of the files supplied to New in depth-first
@@ -118,24 +119,17 @@ private static bool Nodes(this ptr<Inspector> _addr_@in, slice<ast.Node> types, 
                     if (!f(ev.node, true)) {
                         i = ev.index; // jump to corresponding pop + 1
                         continue;
-
                     }
-
                 }
                 else
  { 
                     // pop
                     f(ev.node, false);
-
                 }
-
             }
-
             i++;
-
         }
     }
-
 }
 
 // WithStack visits nodes in a similar manner to Nodes, but it
@@ -163,7 +157,6 @@ private static bool WithStack(this ptr<Inspector> _addr_@in, slice<ast.Node> typ
                         continue;
                     }
                 }
-
             }
             else
  { 
@@ -171,16 +164,11 @@ private static bool WithStack(this ptr<Inspector> _addr_@in, slice<ast.Node> typ
                 if (ev.typ & mask != 0) {
                     f(ev.node, false, stack);
                 }
-
                 stack = stack[..(int)len(stack) - 1];
-
             }
-
             i++;
-
         }
     }
-
 }
 
 // traverse builds the table of events representing a traversal.
@@ -217,7 +205,6 @@ private static slice<event> traverse(slice<ptr<ast.File>> files) {
                     event ev = new event(node:n,typ:typeOf(n),index:len(events),);
                     stack = append(stack, ev);
                     events = append(events, ev);
-
                 }
                 else
  { 
@@ -229,19 +216,14 @@ private static slice<event> traverse(slice<ptr<ast.File>> files) {
 
                     ev.index = 0; // turn ev into a pop event
                     events = append(events, ev);
-
                 }
-
                 return true;
-
             });
-
         }
         f = f__prev1;
     }
 
     return events;
-
 }
 
 } // end inspector_package

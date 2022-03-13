@@ -5,14 +5,13 @@
 //go:build !go1.8
 // +build !go1.8
 
-// package sort -- go2cs converted at 2022 March 06 22:12:36 UTC
+// package sort -- go2cs converted at 2022 March 13 05:27:39 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Program Files\Go\src\sort\slice_go14.go
-using reflect = go.reflect_package;
-using System;
-
-
 namespace go;
+
+using reflect = reflect_package;
+using System;
 
 public static partial class sort_package {
 
@@ -27,9 +26,7 @@ private static Action<nint, nint> reflectSwapper(object x) {
         tmp.Set(a);
         a.Set(b);
         b.Set(tmp);
-
     };
-
 }
 
 } // end sort_package

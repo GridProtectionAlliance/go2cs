@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:20:16 UTC
+//     Generated on 2022 March 13 05:35:15 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -30,7 +30,7 @@ namespace crypto
 {
     public static partial class tls_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct clientHandshakeStateTLS13
         {
             // Constructors
@@ -89,7 +89,7 @@ namespace crypto
             public static implicit operator clientHandshakeStateTLS13(NilType nil) => default(clientHandshakeStateTLS13);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static clientHandshakeStateTLS13 clientHandshakeStateTLS13_cast(dynamic value)
         {
             return new clientHandshakeStateTLS13(ref value.c, value.ctx, ref value.serverHello, ref value.hello, value.ecdheParams, ref value.session, value.earlySecret, value.binderKey, ref value.certReq, value.usingPSK, value.sentDummyCCS, ref value.suite, value.transcript, value.masterSecret, value.trafficSecret);

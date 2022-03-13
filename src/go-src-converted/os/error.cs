@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package os -- go2cs converted at 2022 March 06 22:12:49 UTC
+// package os -- go2cs converted at 2022 March 13 05:27:48 UTC
 // import "os" ==> using os = go.os_package
 // Original source: C:\Program Files\Go\src\os\error.go
-using oserror = go.@internal.oserror_package;
-using poll = go.@internal.poll_package;
-using fs = go.io.fs_package;
-
 namespace go;
+
+using oserror = @internal.oserror_package;
+using poll = @internal.poll_package;
+using fs = io.fs_package;
+
+
+// Portable analogs of some common system call errors.
+//
+// Errors returned from this package may be tested against these errors
+// with errors.Is.
 
 public static partial class os_package {
 
-    // Portable analogs of some common system call errors.
-    //
-    // Errors returned from this package may be tested against these errors
-    // with errors.Is.
  
 // ErrInvalid indicates an invalid argument.
 // Methods on File will return this error when the receiver is nil.
@@ -82,7 +84,6 @@ public static error NewSyscallError(@string syscall, error err) {
         return error.As(null!)!;
     }
     return error.As(addr(new SyscallError(syscall,err))!)!;
-
 }
 
 // IsExist returns a boolean indicating whether the error is known to report
@@ -138,7 +139,6 @@ private static bool underlyingErrorIs(error err, error target) {
     }
     syscallErrorType (e, ok) = err._<syscallErrorType>();
     return ok && e.Is(target);
-
 }
 
 // underlyingError returns the underlying error for known os error types.
@@ -155,7 +155,6 @@ private static error underlyingError(error err) {
             break;
     }
     return error.As(err)!;
-
 }
 
 } // end os_package

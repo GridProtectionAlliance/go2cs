@@ -5,12 +5,12 @@
 //go:build cmd_go_bootstrap
 // +build cmd_go_bootstrap
 
-// package modfetch -- go2cs converted at 2022 March 06 23:16:08 UTC
+// package modfetch -- go2cs converted at 2022 March 13 06:29:37 UTC
 // import "cmd/go/internal/modfetch" ==> using modfetch = go.cmd.go.@internal.modfetch_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modfetch\bootstrap.go
-using module = go.golang.org.x.mod.module_package;
-
 namespace go.cmd.go.@internal;
+
+using module = golang.org.x.mod.module_package;
 
 public static partial class modfetch_package {
 

@@ -2,61 +2,62 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:53 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:21 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\typecheck.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using parser = go.go.parser_package;
-using token = go.go.token_package;
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using reflect = go.reflect_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go;
 
-public static partial class main_package {
+using fmt = fmt_package;
+using ast = go.ast_package;
+using parser = go.parser_package;
+using token = go.token_package;
+using exec = @internal.execabs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using strings = strings_package;
 
-    // Partial type checker.
-    //
-    // The fact that it is partial is very important: the input is
-    // an AST and a description of some type information to
-    // assume about one or more packages, but not all the
-    // packages that the program imports. The checker is
-    // expected to do as much as it can with what it has been
-    // given. There is not enough information supplied to do
-    // a full type check, but the type checker is expected to
-    // apply information that can be derived from variable
-    // declarations, function and method returns, and type switches
-    // as far as it can, so that the caller can still tell the types
-    // of expression relevant to a particular fix.
-    //
-    // TODO(rsc,gri): Replace with go/typechecker.
-    // Doing that could be an interesting test case for go/typechecker:
-    // the constraints about working with partial information will
-    // likely exercise it in interesting ways. The ideal interface would
-    // be to pass typecheck a map from importpath to package API text
-    // (Go source code), but for now we use data structures (TypeConfig, Type).
-    //
-    // The strings mostly use gofmt form.
-    //
-    // A Field or FieldList has as its type a comma-separated list
-    // of the types of the fields. For example, the field list
-    //    x, y, z int
-    // has type "int, int, int".
 
-    // The prefix "type " is the type of a type.
-    // For example, given
-    //    var x int
-    //    type T int
-    // x's type is "int" but T's type is "type int".
-    // mkType inserts the "type " prefix.
-    // getType removes it.
-    // isType tests for it.
+// Partial type checker.
+//
+// The fact that it is partial is very important: the input is
+// an AST and a description of some type information to
+// assume about one or more packages, but not all the
+// packages that the program imports. The checker is
+// expected to do as much as it can with what it has been
+// given. There is not enough information supplied to do
+// a full type check, but the type checker is expected to
+// apply information that can be derived from variable
+// declarations, function and method returns, and type switches
+// as far as it can, so that the caller can still tell the types
+// of expression relevant to a particular fix.
+//
+// TODO(rsc,gri): Replace with go/typechecker.
+// Doing that could be an interesting test case for go/typechecker:
+// the constraints about working with partial information will
+// likely exercise it in interesting ways. The ideal interface would
+// be to pass typecheck a map from importpath to package API text
+// (Go source code), but for now we use data structures (TypeConfig, Type).
+//
+// The strings mostly use gofmt form.
+//
+// A Field or FieldList has as its type a comma-separated list
+// of the types of the fields. For example, the field list
+//    x, y, z int
+// has type "int, int, int".
+
+// The prefix "type " is the type of a type.
+// For example, given
+//    var x int
+//    type T int
+// x's type is "int" but T's type is "type int".
+// mkType inserts the "type " prefix.
+// getType removes it.
+// isType tests for it.
+
+
+using System;public static partial class main_package {
+
 private static @string mkType(@string t) {
     return "type " + t;
 }
@@ -66,7 +67,6 @@ private static @string getType(@string t) {
         return "";
     }
     return t[(int)len("type ")..];
-
 }
 
 private static bool isType(@string t) {
@@ -105,7 +105,6 @@ private static @string @typeof(this ptr<TypeConfig> _addr_cfg, @string name) {
             t = t__prev2;
 
         }
-
     }
     if (cfg.Func != null) {
         {
@@ -120,10 +119,8 @@ private static @string @typeof(this ptr<TypeConfig> _addr_cfg, @string name) {
             t = t__prev2;
 
         }
-
     }
     return "";
-
 }
 
 // Type describes the Fields and Methods of a type.
@@ -155,7 +152,6 @@ private static @string dot(this ptr<Type> _addr_typ, ptr<TypeConfig> _addr_cfg, 
             t = t__prev2;
 
         }
-
     }
     if (typ.Method != null) {
         {
@@ -170,7 +166,6 @@ private static @string dot(this ptr<Type> _addr_typ, ptr<TypeConfig> _addr_cfg, 
             t = t__prev2;
 
         }
-
     }
     foreach (var (_, e) in typ.Embed) {
         var etyp = cfg.Type[e];
@@ -187,10 +182,8 @@ private static @string dot(this ptr<Type> _addr_typ, ptr<TypeConfig> _addr_cfg, 
                 t = t__prev2;
 
             }
-
         }
     }    return "";
-
 }
 
 // typecheck type checks the AST f assuming the information in cfg.
@@ -274,7 +267,6 @@ private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _
             }
 
             return null;
-
         }();
         if (err != null) {
             fmt.Fprintf(os.Stderr, "go fix: warning: no cgo types: %s\n", err);
@@ -301,14 +293,11 @@ private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _
                     rcvr = mkType(gofmt(fn.Recv.List[0].Type));
                     typeof[fn.Recv.List[0].Type] = rcvr;
                 }
-
                 rcvr = getType(rcvr);
                 if (rcvr != "" && rcvr[0] == '*') {
                     rcvr = rcvr[(int)1..];
                 }
-
                 typeof[rcvr + "." + fn.Name.Name] = t;
-
             }
             else
  {
@@ -319,14 +308,11 @@ private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _
  {
                     t = gofmt(fn.Type);
                 }
-
                 typeof[fn.Name] = t; 
 
                 // Record typeof[fn.Name.Obj] for future references to fn.Name.
                 typeof[fn.Name.Obj] = t;
-
             }
-
         }
         decl = decl__prev1;
     }
@@ -355,9 +341,7 @@ private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _
                                     foreach (var (k, v) in cfg.Type) {
                                         cfg1.Type[k] = v;
                                     }
-
                                 }
-
                                 t = addr(new Type(Field:map[string]string{}));
                                 cfg1.Type[s.Name.Name] = t;
                                 switch (s.Type.type()) {
@@ -380,20 +364,17 @@ private static (object, map<@string, slice<object>>) typecheck(ptr<TypeConfig> _
                                 }
                                 break;
                         }
-
                     }
 
                     s = s__prev2;
                 }
             }
-
         }
         decl = decl__prev1;
     }
 
     typecheck1(cfg1, f, typeof, assign);
     return (typeof, assign);
-
 });
 
 private static slice<ast.Expr> makeExprList(slice<ptr<ast.Ident>> a) {
@@ -438,7 +419,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
             id = id__prev1;
 
         }
-
     }; 
 
     // Type-check an assignment lhs = rhs.
@@ -463,21 +443,17 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                         i = i__prev1;
                     }
                     return ;
-
                 }
 
             }
-
         }
         if (len(lhs) == 1 && len(rhs) == 2) { 
             // x = y, ok
             rhs = rhs[..(int)1];
-
         }
         else if (len(lhs) == 2 && len(rhs) == 1) { 
             // x, ok = y
             lhs = lhs[..(int)1];
-
         }
         {
             nint i__prev1 = i;
@@ -492,13 +468,11 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
  {
                     set(y, typeof[x], false);
                 }
-
             }
 
 
             i = i__prev1;
         }
-
     };
 
     Func<@string, @string> expand = s => {
@@ -507,7 +481,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
             return typ.Def;
         }
         return s;
-
     }; 
 
     // The main type check is a recursive algorithm implemented
@@ -528,7 +501,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                 curfn = append(curfn, n.Type);
                 break;
         }
-
     }; 
 
     // After is the real type checker.
@@ -551,9 +523,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                     t = t__prev2;
 
                 }
-
             }());
-
         }
         switch (n.type()) {
             case ptr<ast.FuncDecl> n:
@@ -583,9 +553,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                     // and we might care about that type.
                     t = mkType(gofmt(n.Type));
                     typeof[n.Type] = t;
-
                 }
-
                 t = getType(t);
                 if (len(n.Names) == 0) {
                     all = t;
@@ -608,7 +576,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                         id = id__prev1;
                     }
                 }
-
                 typeof[n] = all;
                 break;
             case ptr<ast.ValueSpec> n:
@@ -649,8 +616,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                     t = t__prev1;
 
                 }
-
-
                 break;
             case ptr<ast.SelectorExpr> n:
                 var name = n.Sel.Name;
@@ -680,19 +645,16 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                                     t = t__prev3;
 
                                 }
-
                             }
 
                             typ = typ__prev2;
 
                         }
-
                         var tt = typeof[t + "." + name];
                         if (isType(tt)) {
                             typeof[n] = getType(tt);
                             return ;
                         }
-
                     } 
                     // Package selector.
 
@@ -724,14 +686,11 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                             t = t__prev2;
 
                         }
-
                     }
 
                     x = x__prev1;
 
                 }
-
-
                 break;
             case ptr<ast.CallExpr> n:
                 if (isTopName(n.Fun, "make") && len(n.Args) >= 1) {
@@ -748,12 +707,10 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                 if (t == "") {
                     t = cfg.External[gofmt(n.Fun)];
                 }
-
                 var (in, out) = splitFunc(t);
                 if (in == null && out == null) {
                     return ;
                 }
-
                 typeof[n] = join(out);
                 {
                     nint i__prev1 = i;
@@ -794,8 +751,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                     t = t__prev1;
 
                 }
-
-
                 break;
             case ptr<ast.SliceExpr> n:
                 typeof[n] = typeof[n.X];
@@ -817,9 +772,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                         i = i__prev2;
 
                     }
-
                 }
-
                 break;
             case ptr<ast.StarExpr> n:
                 t = expand(typeof[n.X]);
@@ -829,7 +782,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                 else if (strings.HasPrefix(t, "*")) {
                     typeof[n] = t[(int)len("*")..];
                 }
-
                 break;
             case ptr<ast.UnaryExpr> n:
                 t = typeof[n.X];
@@ -868,11 +820,9 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                                         kv = kv__prev3;
 
                                     }
-
                                     if (typeof[e] == "") {
                                         typeof[e] = et;
                                     }
-
                                 }
 
                                 e = e__prev1;
@@ -882,9 +832,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                         i = i__prev2;
 
                     }
-
                 }
-
                 if (strings.HasPrefix(t, "map[")) { // map
                     // Lazy: assume there are no nested [] in the map key type.
                     {
@@ -917,7 +865,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                                         kv = kv__prev3;
 
                                     }
-
                                 }
 
                                 e = e__prev1;
@@ -927,9 +874,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                         i = i__prev2;
 
                     }
-
                 }
-
                 {
                     var typ__prev1 = typ;
 
@@ -957,13 +902,11 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                                             }
 
                                         }
-
                                     }
 
                                     kv = kv__prev2;
 
                                 }
-
                             }
 
                             e = e__prev1;
@@ -973,8 +916,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                     typ = typ__prev1;
 
                 }
-
-
                 break;
             case ptr<ast.ParenExpr> n:
                 typeof[n] = typeof[n.X];
@@ -1003,7 +944,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                         i = i__prev3;
 
                     }
-
                 }
                 else if (strings.HasPrefix(t, "map[")) {
                     {
@@ -1018,15 +958,12 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                         i = i__prev4;
 
                     }
-
                 }
-
                 var changed = false;
                 if (n.Key != null && key != "") {
                     changed = true;
                     set(n.Key, key, n.Tok == token.DEFINE);
                 }
-
                 if (n.Value != null && value != "") {
                     changed = true;
                     set(n.Value, value, n.Tok == token.DEFINE);
@@ -1036,7 +973,6 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                 if (changed) {
                     typecheck1(_addr_cfg, n.Body, typeof, assign);
                 }
-
                 break;
             case ptr<ast.TypeSwitchStmt> n:
                 ptr<ast.AssignStmt> (as, ok) = n.Assign._<ptr<ast.AssignStmt>>();
@@ -1072,9 +1008,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                                 tt = tt__prev2;
 
                             }
-
                         }
-
                     } 
                     // Restore t.
 
@@ -1088,9 +1022,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                 if (len(curfn) == 0) { 
                     // Probably can't happen.
                     return ;
-
                 }
-
                 var f = curfn[len(curfn) - 1];
                 var res = n.Results;
                 if (f.Results != null) {
@@ -1105,9 +1037,7 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
 
                         i = i__prev1;
                     }
-
                 }
-
                 break;
             case ptr<ast.BinaryExpr> n:
 
@@ -1120,10 +1050,8 @@ private static void typecheck1(ptr<TypeConfig> _addr_cfg, object f, object @type
                     }
                                 break;
         }
-
     };
     walkBeforeAfter(f, before, after);
-
 });
 
 // Convert between function type strings and lists of types.
@@ -1154,17 +1082,12 @@ private static (slice<@string>, slice<@string>) splitFunc(@string s) {
                     if (len(out) >= 2 && out[0] == '(' && out[len(out) - 1] == ')') {
                         out = out[(int)1..(int)len(out) - 1];
                     }
-
                     return (split(s[(int)i..(int)j]), split(out));
-
                 }
-
                 break;
         }
-
     }
     return (null, null);
-
 }
 
 // joinFunc is the inverse of splitFunc.
@@ -1177,7 +1100,6 @@ private static @string joinFunc(slice<@string> @in, slice<@string> @out) {
         outs = " (" + join(out) + ")";
     }
     return "func(" + join(in) + ")" + outs;
-
 }
 
 // split splits "int, float" into ["int", "float"] and splits "" into [].
@@ -1200,9 +1122,7 @@ private static slice<@string> split(@string s) {
                 if (nparen < 0) { 
                     // probably can't happen
                     return null;
-
                 }
-
                 break;
             case ',': 
                 if (nparen == 0) {
@@ -1213,18 +1133,15 @@ private static slice<@string> split(@string s) {
                 }
                 break;
         }
-
     }
     if (nparen != 0) { 
         // probably can't happen
         return null;
-
     }
     if (i < len(s)) {
         out = append(out, s[(int)i..]);
     }
     return out;
-
 }
 
 // join is the inverse of split.

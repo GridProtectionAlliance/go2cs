@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 23:15:44 UTC
+// package main -- go2cs converted at 2022 March 13 06:29:13 UTC
 // Original source: C:\Program Files\Go\src\cmd\fix\egltype.go
-using ast = go.go.ast_package;
-using System;
-
-
 namespace go;
+
+using ast = go.ast_package;
+using System;
 
 public static partial class main_package {
 
@@ -27,9 +26,7 @@ private static fix eglFixDisplay = new fix(name:"egl",date:"2018-12-15",f:eglfix
 private static bool eglfixDisp(ptr<ast.File> _addr_f) {
     ref ast.File f = ref _addr_f.val;
 
-    return typefix(f, s => {
-        return s == "C.EGLDisplay";
-    });
+    return typefix(f, s => s == "C.EGLDisplay");
 }
 
 private static fix eglFixConfig = new fix(name:"eglconf",date:"2020-05-30",f:eglfixConfig,desc:`Fixes initializers of EGLConfig`,disabled:false,);
@@ -42,9 +39,7 @@ private static fix eglFixConfig = new fix(name:"eglconf",date:"2020-05-30",f:egl
 private static bool eglfixConfig(ptr<ast.File> _addr_f) {
     ref ast.File f = ref _addr_f.val;
 
-    return typefix(f, s => {
-        return s == "C.EGLConfig";
-    });
+    return typefix(f, s => s == "C.EGLConfig");
 }
 
 } // end main_package

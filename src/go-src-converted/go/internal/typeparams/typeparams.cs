@@ -5,13 +5,13 @@
 //go:build typeparams
 // +build typeparams
 
-// package typeparams -- go2cs converted at 2022 March 06 22:41:44 UTC
+// package typeparams -- go2cs converted at 2022 March 13 05:52:50 UTC
 // import "go/internal/typeparams" ==> using typeparams = go.go.@internal.typeparams_package
 // Original source: C:\Program Files\Go\src\go\internal\typeparams\typeparams.go
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-
 namespace go.go.@internal;
+
+using fmt = fmt_package;
+using ast = go.ast_package;
 
 public static partial class typeparams_package {
 
@@ -34,7 +34,6 @@ public static ast.Expr PackExpr(slice<ast.Expr> list) {
             return addr(new ast.ListExpr(ElemList:list));
             break;
     }
-
 }
 
 // TODO(gri) Should find a more efficient solution that doesn't
@@ -48,12 +47,10 @@ public static slice<ast.Expr> UnpackExpr(ast.Expr x) {
             return x.ElemList;
         }
     }
-
     if (x != null) {
         return new slice<ast.Expr>(new ast.Expr[] { x });
     }
     return null;
-
 }
 
 public static bool IsListExpr(ast.Node n) {
@@ -76,7 +73,6 @@ public static ptr<ast.FieldList> Get(ast.Node n) => func((_, panic, _) => {
             break;
         }
     }
-
 });
 
 public static void Set(ast.Node n, ptr<ast.FieldList> _addr_@params) => func((_, panic, _) => {
@@ -96,7 +92,6 @@ public static void Set(ast.Node n, ptr<ast.FieldList> _addr_@params) => func((_,
             break;
         }
     }
-
 });
 
 } // end typeparams_package

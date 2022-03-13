@@ -2,18 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ld -- go2cs converted at 2022 March 06 23:22:25 UTC
+// package ld -- go2cs converted at 2022 March 13 06:35:28 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\target.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using binary = go.encoding.binary_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using binary = encoding.binary_package;
+
+
+// Target holds the configuration we're building for.
 
 public static partial class ld_package {
 
-    // Target holds the configuration we're building for.
 public partial struct Target {
     public ptr<sys.Arch> Arch;
     public objabi.HeadType HeadType;
@@ -101,11 +103,9 @@ private static bool UseRelro(this ptr<Target> _addr_t) {
         if (t.HeadType == objabi.Hdarwin && t.IsARM64()) { 
             // On darwin/ARM64, everything is PIE.
             return true;
-
         }
         return t.linkShared || (t.HeadType == objabi.Haix && t.LinkMode == LinkExternal);
-    
-}
+    }
 
 //
 // Processor functions

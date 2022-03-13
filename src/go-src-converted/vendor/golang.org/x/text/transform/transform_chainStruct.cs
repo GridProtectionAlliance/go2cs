@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:24 UTC
+//     Generated on 2022 March 13 06:46:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace text
 {
     public static partial class transform_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct chain
         {
             // Constructors
@@ -63,7 +63,7 @@ namespace text
             public static implicit operator chain(NilType nil) => default(chain);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static chain chain_cast(dynamic value)
         {
             return new chain(value.link, value.err, value.errStart);

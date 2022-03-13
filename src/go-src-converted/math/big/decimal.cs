@@ -17,20 +17,18 @@
 // In contrast to strconv/decimal.go, only right shift is implemented in
 // decimal format - left shift can be done precisely in binary format.
 
-// package big -- go2cs converted at 2022 March 06 22:17:37 UTC
+// package big -- go2cs converted at 2022 March 13 05:31:45 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\decimal.go
-
-
 namespace go.math;
 
 public static partial class big_package {
 
-    // A decimal represents an unsigned floating-point number in decimal representation.
-    // The value of a non-zero decimal d is d.mant * 10**d.exp with 0.1 <= d.mant < 1,
-    // with the most-significant mantissa digit at index 0. For the zero decimal, the
-    // mantissa length and exponent are 0.
-    // The zero value for decimal represents a ready-to-use 0.0.
+// A decimal represents an unsigned floating-point number in decimal representation.
+// The value of a non-zero decimal d is d.mant * 10**d.exp with 0.1 <= d.mant < 1,
+// with the most-significant mantissa digit at index 0. For the zero decimal, the
+// mantissa length and exponent are 0.
+// The zero value for decimal represents a ready-to-use 0.0.
 private partial struct @decimal {
     public slice<byte> mant; // mantissa ASCII digits, big-endian
     public nint exp; // exponent
@@ -44,7 +42,6 @@ private static byte at(this ptr<decimal> _addr_d, nint i) {
         return d.mant[i];
     }
     return '0';
-
 }
 
 // Maximum shift amount that can be done in one pass without overflow.
@@ -92,7 +89,6 @@ private static void init(this ptr<decimal> _addr_x, nat m, nint shift) {
         }
         m = nat(null).shr(m, s);
         shift += int(s);
-
     }
     if (shift > 0) {
         m = nat(null).shl(m, uint(shift));
@@ -136,7 +132,6 @@ private static void shr(ptr<decimal> _addr_x, nuint s) {
         // x == 0; shouldn't get here, but handle anyway
         x.mant = x.mant[..(int)0];
         return ;
-
     }
     while (n >> (int)(s) == 0) {
         r++;
@@ -155,7 +150,6 @@ private static void shr(ptr<decimal> _addr_x, nuint s) {
         x.mant[w] = byte(d + '0');
         w++;
         n = n * 10 + ch - '0';
-
     } 
 
     // write extra digits that still fit
@@ -177,7 +171,6 @@ private static void shr(ptr<decimal> _addr_x, nuint s) {
     }
 
     trim(_addr_x);
-
 }
 
 private static @string String(this ptr<decimal> _addr_x) {
@@ -206,7 +199,6 @@ private static @string String(this ptr<decimal> _addr_x) {
         buf = append(buf, x.mant);
         buf = appendZeros(buf, x.exp - len(x.mant));
         return string(buf);
-
 }
 
 // appendZeros appends n 0 digits to buf and returns buf.
@@ -216,7 +208,6 @@ private static slice<byte> appendZeros(slice<byte> buf, nint n) {
         n--;
     }
     return buf;
-
 }
 
 // shouldRoundUp reports if x should be rounded up
@@ -228,10 +219,8 @@ private static bool shouldRoundUp(ptr<decimal> _addr_x, nint n) {
     if (x.mant[n] == '5' && n + 1 == len(x.mant)) { 
         // exactly halfway - round to even
         return n > 0 && (x.mant[n - 1] - '0') & 1 != 0;
-
     }
     return x.mant[n] >= '5';
-
 }
 
 // round sets x to (at most) n mantissa digits by rounding it
@@ -268,7 +257,6 @@ private static void roundUp(this ptr<decimal> _addr_x, nint n) {
         x.mant = x.mant[..(int)1];
         x.exp++;
         return ;
-
     }
     x.mant[n - 1]++;
     x.mant = x.mant[..(int)n]; 
@@ -283,7 +271,6 @@ private static void roundDown(this ptr<decimal> _addr_x, nint n) {
     }
     x.mant = x.mant[..(int)n];
     trim(_addr_x);
-
 }
 
 // trim cuts off any trailing zeros from x's mantissa;

@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package metrics -- go2cs converted at 2022 March 06 22:14:35 UTC
+// package metrics -- go2cs converted at 2022 March 13 05:28:33 UTC
 // import "runtime/metrics" ==> using metrics = go.runtime.metrics_package
 // Original source: C:\Program Files\Go\src\runtime\metrics\histogram.go
-
-
 namespace go.runtime;
 
 public static partial class metrics_package {
 
-    // Float64Histogram represents a distribution of float64 values.
+// Float64Histogram represents a distribution of float64 values.
 public partial struct Float64Histogram {
     public slice<ulong> Counts; // Buckets contains the boundaries of the histogram buckets, in increasing order.
 //

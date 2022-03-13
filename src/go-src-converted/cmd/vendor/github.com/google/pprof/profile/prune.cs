@@ -14,16 +14,15 @@
 
 // Implements methods to remove frames from profiles.
 
-// package profile -- go2cs converted at 2022 March 06 23:24:05 UTC
+// package profile -- go2cs converted at 2022 March 13 06:37:12 UTC
 // import "cmd/vendor/github.com/google/pprof/profile" ==> using profile = go.cmd.vendor.github.com.google.pprof.profile_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\profile\prune.go
-using fmt = go.fmt_package;
-using regexp = go.regexp_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof;
+
+using fmt = fmt_package;
+using regexp = regexp_package;
+using strings = strings_package;
+using System;
 
 public static partial class profile_package {
 
@@ -52,7 +51,6 @@ private static @string simplifyFunc(@string f) {
             break;
         }
     }    return funcName;
-
 }
 
 // Prune removes all nodes beneath a node matching dropRx, and not
@@ -82,7 +80,6 @@ private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dr
                 }
 
             }
-
         }
 
         if (i >= 0) { 
@@ -93,13 +90,11 @@ private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dr
             if (i == len(loc.Line) - 1) { 
                 // Matched the top entry: prune the whole location.
                 prune[loc.ID] = true;
-
             }
             else
  {
                 loc.Line = loc.Line[(int)i + 1..];
             }
-
         }
     }    foreach (var (_, sample) in p.Sample) { 
         // Scan from the root to the leaves to find the prune location.
@@ -131,7 +126,6 @@ private static void Prune(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _addr_dr
 
             i = i__prev2;
         }
-
     }
 }
 
@@ -156,13 +150,10 @@ private static error RemoveUninteresting(this ptr<Profile> _addr_p) {
             if (err != null) {
                 return error.As(fmt.Errorf("failed to compile regexp %s: %v", p.KeepFrames, err))!;
             }
-
         }
         p.Prune(drop, keep);
-
     }
     return error.As(null!)!;
-
 }
 
 // PruneFrom removes all nodes beneath the lowest node matching dropRx, not including itself.
@@ -202,19 +193,15 @@ private static void PruneFrom(this ptr<Profile> _addr_p, ptr<regexp.Regexp> _add
                                 pruneBeneath[loc.ID] = true;
                                 loc.Line = loc.Line[(int)i..];
                                 break;
-
                             }
-
                         }
 
                     }
-
                 }
 
 
                 i = i__prev2;
             }
-
         }
         loc = loc__prev1;
     }

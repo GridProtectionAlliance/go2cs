@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2022 March 06 22:22:48 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:14 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\header.go
-using io = go.io_package;
-using httptrace = go.net.http.httptrace_package;
-using ascii = go.net.http.@internal.ascii_package;
-using textproto = go.net.textproto_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-using System;
-
-
 namespace go.net;
 
+using io = io_package;
+using httptrace = net.http.httptrace_package;
+using ascii = net.http.@internal.ascii_package;
+using textproto = net.textproto_package;
+using sort = sort_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+
+// A Header represents the key-value pairs in an HTTP header.
+//
+// The keys should be in canonical form, as returned by
+// CanonicalHeaderKey.
+
+using System;
 public static partial class http_package {
 
-    // A Header represents the key-value pairs in an HTTP header.
-    //
-    // The keys should be in canonical form, as returned by
-    // CanonicalHeaderKey.
 public partial struct Header { // : map<@string, slice<@string>>
 }
 
@@ -71,9 +72,7 @@ public static @string get(this Header h, @string key) {
             return v[0];
         }
     }
-
     return "";
-
 }
 
 // has reports whether h has the provided key defined, even if it's
@@ -133,7 +132,6 @@ public static Header Clone(this Header h) {
     }
 
     return h2;
-
 }
 
 private static @string timeFormats = new slice<@string>(new @string[] { TimeFormat, time.RFC850, time.ANSIC });
@@ -151,7 +149,6 @@ public static (time.Time, error) ParseTime(@string text) {
             return ;
         }
     }    return ;
-
 }
 
 private static var headerNewlineToSpace = strings.NewReplacer("\n", " ", "\r", " ");
@@ -217,7 +214,6 @@ public static (slice<keyValues>, ptr<headerSorter>) sortedKeyValues(this Header 
     }    hs.kvs = kvs;
     sort.Sort(hs);
     return (kvs, _addr_hs!);
-
 }
 
 // WriteSubset writes a header in wire format.
@@ -250,19 +246,16 @@ public static error writeSubset(this Header h, io.Writer w, map<@string, bool> e
                     }
 
                 }
-
             }
             if (trace != null && trace.WroteHeaderField != null) {
                 formattedVals = append(formattedVals, v);
             }
-
         }        if (trace != null && trace.WroteHeaderField != null) {
             trace.WroteHeaderField(kv.key, formattedVals);
             formattedVals = null;
         }
     }    headerSorterPool.Put(sorter);
     return error.As(null!)!;
-
 }
 
 // CanonicalHeaderKey returns the canonical format of the
@@ -315,13 +308,11 @@ private static bool hasToken(@string v, @string token) {
             }
 
         }
-
         if (ascii.EqualFold(v[(int)sp..(int)sp + len(token)], token)) {
             return true;
         }
     }
     return false;
-
 }
 
 private static bool isTokenBoundary(byte b) {

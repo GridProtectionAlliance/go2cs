@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:49 UTC
+//     Generated on 2022 March 13 05:34:47 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pkcs1AdditionalRSAPrime
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace crypto
             public static implicit operator pkcs1AdditionalRSAPrime(NilType nil) => default(pkcs1AdditionalRSAPrime);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pkcs1AdditionalRSAPrime pkcs1AdditionalRSAPrime_cast(dynamic value)
         {
             return new pkcs1AdditionalRSAPrime(ref value.Prime, ref value.Exp, ref value.Coeff);

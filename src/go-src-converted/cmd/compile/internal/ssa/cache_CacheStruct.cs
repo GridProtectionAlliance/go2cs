@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:49:22 UTC
+//     Generated on 2022 March 13 06:00:44 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Cache
         {
             // Constructors
@@ -76,7 +76,7 @@ namespace @internal
             public static implicit operator Cache(NilType nil) => default(Cache);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Cache Cache_cast(dynamic value)
         {
             return new Cache(value.values, value.blocks, value.locs, ref value.stackAllocState, value.domblockstore, value.scrSparseSet, value.scrSparseMap, value.scrPoset, value.regallocValues, value.ValueToProgAfter, value.debugState);

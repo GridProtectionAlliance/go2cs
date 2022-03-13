@@ -5,11 +5,9 @@
 //go:build wasm || windows
 // +build wasm windows
 
-// package ld -- go2cs converted at 2022 March 06 23:21:24 UTC
+// package ld -- go2cs converted at 2022 March 13 06:34:22 UTC
 // import "cmd/link/internal/ld" ==> using ld = go.cmd.link.@internal.ld_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\ld\execarchive_noexec.go
-
-
 namespace go.cmd.link.@internal;
 
 public static partial class ld_package {

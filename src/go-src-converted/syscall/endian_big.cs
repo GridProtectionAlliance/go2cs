@@ -5,11 +5,9 @@
 //go:build ppc64 || s390x || mips || mips64
 // +build ppc64 s390x mips mips64
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:25 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:23:58 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\endian_big.go
-
-
 namespace go;
 
 public static partial class syscall_package {

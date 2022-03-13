@@ -176,30 +176,32 @@
 //    — PeterNeumann x08go/ZJkuBS9UG/SffcvIAQxVBtiFupLLr8pAcElZInNIuGUgYN1FFYC2pZSNXgKvqfqdngotpRZb6KE6RyyBwJnAM=
 //    — EnochRoot rwz+eBzmZa0SO3NbfRGzPCpDckykFXSdeX+MNtCOXm2/5n2tiOHp+vAF1aGrQ5ovTG01oOTGwnWLox33WWd1RvMc+QQ=
 //
-// package note -- go2cs converted at 2022 March 06 23:26:16 UTC
+
+// package note -- go2cs converted at 2022 March 13 06:41:07 UTC
 // import "cmd/vendor/golang.org/x/mod/sumdb/note" ==> using note = go.cmd.vendor.golang.org.x.mod.sumdb.note_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\mod\sumdb\note\note.go
-using bytes = go.bytes_package;
-using sha256 = go.crypto.sha256_package;
-using base64 = go.encoding.base64_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
-using ed25519 = go.golang.org.x.crypto.ed25519_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.mod.sumdb;
 
+using bytes = bytes_package;
+using sha256 = crypto.sha256_package;
+using base64 = encoding.base64_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+using ed25519 = golang.org.x.crypto.ed25519_package;
+
+
+// A Verifier verifies messages signed with a specific key.
+
+using System;
 public static partial class note_package {
 
-    // A Verifier verifies messages signed with a specific key.
 public partial interface Verifier {
     bool Name(); // KeyHash returns the key hash.
     bool KeyHash(); // Verify reports whether sig is a valid signature of msg.
@@ -226,7 +228,6 @@ private static uint keyHash(@string name, slice<byte> key) {
 private static var errVerifierID = errors.New("malformed verifier id");private static var errVerifierAlg = errors.New("unknown verifier algorithm");private static var errVerifierHash = errors.New("invalid verifier hash");
 
 private static readonly nint algEd25519 = 1;
-
 
 // isValidName reports whether name is valid.
 // It must be non-empty and not have any Unicode spaces or pluses.
@@ -258,13 +259,10 @@ public static (Verifier, error) NewVerifier(@string vkey) {
         if (len(key) != 32) {
             return (null, error.As(errVerifierID)!);
         }
-        v.verify = (msg, sig) => {
-            return ed25519.Verify(key, msg, sig);
-        };
+        v.verify = (msg, sig) => ed25519.Verify(key, msg, sig);
     else 
         return (null, error.As(errVerifierAlg)!);
         return (v, error.As(null!)!);
-
 }
 
 // chop chops s at the first instance of sep, if any,
@@ -279,7 +277,6 @@ private static (@string, @string) chop(@string s, @string sep) {
         return (s, "");
     }
     return (s[..(int)i], s[(int)i + len(sep)..]);
-
 }
 
 // verifier is a trivial Verifier implementation.
@@ -332,16 +329,13 @@ public static (Signer, error) NewSigner(@string skey) {
         }
         key = ed25519.NewKeyFromSeed(key);
         pubkey = append(new slice<byte>(new byte[] { algEd25519 }), key[(int)32..]);
-        s.sign = msg => {
-            return (ed25519.Sign(key, msg), error.As(null!)!);
-        };
+        s.sign = msg => (ed25519.Sign(key, msg), error.As(null!)!);
     else 
         return (null, error.As(errSignerAlg)!);
         if (uint32(hash) != keyHash(name, pubkey)) {
         return (null, error.As(errSignerHash)!);
     }
     return (s, error.As(null!)!);
-
 }
 
 private static var errSignerID = errors.New("malformed verifier id");private static var errSignerAlg = errors.New("unknown verifier algorithm");private static var errSignerHash = errors.New("invalid verifier hash");
@@ -389,7 +383,6 @@ public static (@string, @string, error) GenerateKey(io.Reader rand, @string name
     skey = fmt.Sprintf("PRIVATE+KEY+%s+%08x+%s", name, h, base64.StdEncoding.EncodeToString(privkey));
     vkey = fmt.Sprintf("%s+%08x+%s", name, h, base64.StdEncoding.EncodeToString(pubkey));
     return (skey, vkey, error.As(null!)!);
-
 }
 
 // NewEd25519VerifierKey returns an encoded verifier key using the given name
@@ -406,7 +399,6 @@ public static (@string, error) NewEd25519VerifierKey(@string name, ed25519.Publi
 
     var b64Key = base64.StdEncoding.EncodeToString(pubkey);
     return (fmt.Sprintf("%s+%08x+%s", name, hash, b64Key), error.As(null!)!);
-
 }
 
 // A Verifiers is a collection of known verifier keys.
@@ -475,7 +467,6 @@ private static (Verifier, error) Verifier(this verifierMap m, @string name, uint
         return (null, error.As(addr(new ambiguousVerifierError(name,hash))!)!);
     }
     return (v[0], error.As(null!)!);
-
 }
 
 // A Note is a text and signatures.
@@ -540,7 +531,6 @@ public static (ptr<Note>, error) Open(slice<byte> msg, Verifiers known) {
     if (known == null) { 
         // Treat nil Verifiers as empty list, to produce useful error instead of crash.
         known = VerifierList();
-
     }
     {
         nint i__prev1 = i;
@@ -599,7 +589,6 @@ public static (ptr<Note>, error) Open(slice<byte> msg, Verifiers known) {
         if (numSig > 100) { 
             // Avoid spending forever parsing a note with many signatures.
             return (_addr_null!, error.As(errMalformedNote)!);
-
         }
         var (v, err) = known.Verifier(name, hash);
         {
@@ -610,15 +599,12 @@ public static (ptr<Note>, error) Open(slice<byte> msg, Verifiers known) {
                 if (seenUnverified[string(line)]) {
                     continue;
                 }
-
                 seenUnverified[string(line)] = true;
                 n.UnverifiedSigs = append(n.UnverifiedSigs, new Signature(Name:name,Hash:hash,Base64:b64));
                 continue;
-
             }
 
         }
-
         if (err != null) {
             return (_addr_null!, error.As(err)!);
         }
@@ -632,7 +618,6 @@ public static (ptr<Note>, error) Open(slice<byte> msg, Verifiers known) {
             return (_addr_null!, error.As(addr(new InvalidSignatureError(name,hash))!)!);
         }
         n.Sigs = append(n.Sigs, new Signature(Name:name,Hash:hash,Base64:b64));
-
     } 
 
     // Parsed and verified all the signatures.
@@ -640,7 +625,6 @@ public static (ptr<Note>, error) Open(slice<byte> msg, Verifiers known) {
         return (_addr_null!, error.As(addr(new UnverifiedNoteError(n))!)!);
     }
     return (_addr_n!, error.As(null!)!);
-
 }
 
 // Sign signs the note with the given signers and returns the encoded message.
@@ -682,7 +666,6 @@ public static (slice<byte>, error) Sign(ptr<Note> _addr_n, params Signer[] signe
         sigs.WriteString(" ");
         sigs.WriteString(b64);
         sigs.WriteString("\n");
-
     }    buf.WriteString("\n"); 
 
     // Emit existing signatures not replaced by new ones.
@@ -697,7 +680,6 @@ public static (slice<byte>, error) Sign(ptr<Note> _addr_n, params Signer[] signe
                 if (!isValidName(name)) {
                     return (null, error.As(errMalformedNote)!);
                 }
-
                 if (have[new nameHash(name,hash)]) {
                     continue;
                 } 
@@ -706,13 +688,11 @@ public static (slice<byte>, error) Sign(ptr<Note> _addr_n, params Signer[] signe
                 if (err != null || len(raw) < 4 || binary.BigEndian.Uint32(raw) != hash) {
                     return (null, error.As(errMalformedNote)!);
                 }
-
                 buf.WriteString("— ");
                 buf.WriteString(sig.Name);
                 buf.WriteString(" ");
                 buf.WriteString(sig.Base64);
                 buf.WriteString("\n");
-
             }
 
             sig = sig__prev2;
@@ -720,7 +700,6 @@ public static (slice<byte>, error) Sign(ptr<Note> _addr_n, params Signer[] signe
     }    buf.Write(sigs.Bytes());
 
     return (buf.Bytes(), error.As(null!)!);
-
 }
 
 } // end note_package

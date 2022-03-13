@@ -2,21 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:51 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:17 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\print.go
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// The compiler knows that a print of a value of this type
+// should use printhex instead of printuint (decimal).
+
+using System;
 public static partial class runtime_package {
 
-    // The compiler knows that a print of a value of this type
-    // should use printhex instead of printuint (decimal).
 private partial struct hex { // : ulong
 }
 
@@ -59,10 +60,8 @@ private static void recordForPanic(slice<byte> b) {
             }
 
         }
-
     }
     printunlock();
-
 }
 
 private static mutex debuglock = default;
@@ -112,7 +111,6 @@ private static void gwrite(slice<byte> b) {
     }
     var n = copy(gp.writebuf[(int)len(gp.writebuf)..(int)cap(gp.writebuf)], b);
     gp.writebuf = gp.writebuf[..(int)len(gp.writebuf) + n];
-
 }
 
 private static void printsp() {
@@ -212,7 +210,6 @@ private static void printfloat(double v) {
     buf[n + 5] = byte(e / 10) % 10 + '0';
     buf[n + 6] = byte(e % 10) + '0';
     gwrite(buf[..]);
-
 }
 
 private static void printcomplex(System.Numerics.Complex128 c) {
@@ -231,10 +228,8 @@ private static void printuint(ulong v) {
         i--;
         }
         v /= 10;
-
     }
     gwrite(buf[(int)i..]);
-
 }
 
 private static void printint(long v) {
@@ -243,7 +238,6 @@ private static void printint(long v) {
         v = -v;
     }
     printuint(uint64(v));
-
 }
 
 private static nint minhexdigits = 0; // protected by printlock
@@ -262,14 +256,12 @@ private static void printhex(ulong v) {
         i--;
         }
         v /= 16;
-
     }
     i--;
     buf[i] = 'x';
     i--;
     buf[i] = '0';
     gwrite(buf[(int)i..]);
-
 }
 
 private static void printpointer(unsafe.Pointer p) {
@@ -316,18 +308,14 @@ private static byte hexdumpWords(System.UIntPtr p, System.UIntPtr end, Func<Syst
                     println();
             i += sys.PtrSize;
                 }
-
                 print(hex(p + i), ": ");
-
             }
-
             if (mark != null) {
                 markbuf[0] = mark(p + i);
                 if (markbuf[0] == 0) {
                     markbuf[0] = ' ';
                 }
             }
-
             gwrite(markbuf[..]);
             ptr<ptr<System.UIntPtr>> val = new ptr<ptr<ptr<System.UIntPtr>>>(@unsafe.Pointer(p + i));
             print(hex(val));
@@ -338,13 +326,11 @@ private static byte hexdumpWords(System.UIntPtr p, System.UIntPtr end, Func<Syst
             if (fn.valid()) {
                 print("<", funcname(fn), "+", hex(val - fn.entry), "> ");
             }
-
         }
     }
     minhexdigits = 0;
     println();
     printunlock();
-
 }
 
 } // end runtime_package

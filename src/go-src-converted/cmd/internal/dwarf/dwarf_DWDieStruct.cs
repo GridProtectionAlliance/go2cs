@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:46:11 UTC
+//     Generated on 2022 March 13 05:57:23 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class dwarf_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct DWDie
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace @internal
             public static implicit operator DWDie(NilType nil) => default(DWDie);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static DWDie DWDie_cast(dynamic value)
         {
             return new DWDie(value.Abbrev, ref value.Link, ref value.Child, ref value.Attr, value.Sym);

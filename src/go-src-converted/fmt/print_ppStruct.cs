@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:31:23 UTC
+//     Generated on 2022 March 13 05:42:17 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace go
 {
     public static partial class fmt_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct pp
         {
             // Constructors
@@ -72,7 +72,7 @@ namespace go
             public static implicit operator pp(NilType nil) => default(pp);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static pp pp_cast(dynamic value)
         {
             return new pp(value.buf, value.value, value.fmt, value.reordered, value.goodArgNum, value.panicking, value.erroring, value.wrapErrs, value.wrappedErr);

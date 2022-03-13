@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package main -- go2cs converted at 2022 March 06 22:26:03 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:23 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\lockosthread.go
-using os = go.os_package;
-using runtime = go.runtime_package;
-using sync = go.sync_package;
-using time = go.time_package;
+namespace go;
+
+using os = os_package;
+using runtime = runtime_package;
+using sync = sync_package;
+using time = time_package;
 using System;
 using System.Threading;
-
-
-namespace go;
 
 public static partial class main_package {
 
@@ -22,25 +21,21 @@ private static void init() {
     registerInit("LockOSThreadMain", () => { 
         // init is guaranteed to run on the main thread.
         mainTID = gettid();
-
     });
     register("LockOSThreadMain", LockOSThreadMain);
 
     registerInit("LockOSThreadAlt", () => { 
         // Lock the OS thread now so main runs on the main thread.
         runtime.LockOSThread();
-
     });
     register("LockOSThreadAlt", LockOSThreadAlt);
 
     registerInit("LockOSThreadAvoidsStatePropagation", () => { 
         // Lock the OS thread now so main runs on the main thread.
         runtime.LockOSThread();
-
     });
     register("LockOSThreadAvoidsStatePropagation", LockOSThreadAvoidsStatePropagation);
     register("LockOSThreadTemplateThreadRace", LockOSThreadTemplateThreadRace);
-
 }
 
 public static void LockOSThreadMain() { 
@@ -63,7 +58,6 @@ public static void LockOSThreadMain() {
             os.Exit(1);
         }
         ready.Send(true);
-
     }());
     ready.Receive();
     time.Sleep(1 * time.Millisecond); 
@@ -74,7 +68,6 @@ public static void LockOSThreadMain() {
         os.Exit(1);
     }
     println("OK");
-
 }
 
 public static void LockOSThreadAlt() { 
@@ -107,7 +100,6 @@ public static void LockOSThreadAlt() {
     return ;
 ok:
     println("OK");
-
 }
 
 public static void LockOSThreadAvoidsStatePropagation() { 
@@ -230,12 +222,10 @@ public static void LockOSThreadAvoidsStatePropagation() {
         done.Receive();
 
         runtime.UnlockOSThread();
-
     }());
     done.Send(true);
     runtime.UnlockOSThread();
     println("OK");
-
 }
 
 public static void LockOSThreadTemplateThreadRace() { 
@@ -257,7 +247,6 @@ public static void LockOSThreadTemplateThreadRace() {
         while (true) {
             runtime.ReadMemStats(_addr_m);
         }
-
     }()); 
 
     // Try to synchronize both LockOSThreads.
@@ -268,7 +257,8 @@ public static void LockOSThreadTemplateThreadRace() {
 
     for (nint i = 0; i < 2; i++) {
         go_(() => () => {
-            while (time.Now().Before(start))             } 
+            while (time.Now().Before(start)) {
+            } 
 
             // Add work to the local runq to trigger early startm
             // in handoffp.
@@ -282,15 +272,12 @@ public static void LockOSThreadTemplateThreadRace() {
             runtime.LockOSThread();
             runtime.Gosched(); // add a preemption point.
             wg.Done();
-
         }());
-
     }
 
     wg.Wait(); 
     // If both LockOSThreads completed then we did not hit the race.
     println("OK");
-
 }
 
 } // end main_package

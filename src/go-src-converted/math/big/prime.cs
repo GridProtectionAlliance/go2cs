@@ -2,32 +2,32 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package big -- go2cs converted at 2022 March 06 22:18:03 UTC
+// package big -- go2cs converted at 2022 March 13 05:32:16 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\prime.go
-using rand = go.math.rand_package;
-
 namespace go.math;
+
+using rand = math.rand_package;
 
 public static partial class big_package {
 
-    // ProbablyPrime reports whether x is probably prime,
-    // applying the Miller-Rabin test with n pseudorandomly chosen bases
-    // as well as a Baillie-PSW test.
-    //
-    // If x is prime, ProbablyPrime returns true.
-    // If x is chosen randomly and not prime, ProbablyPrime probably returns false.
-    // The probability of returning true for a randomly chosen non-prime is at most ¼ⁿ.
-    //
-    // ProbablyPrime is 100% accurate for inputs less than 2⁶⁴.
-    // See Menezes et al., Handbook of Applied Cryptography, 1997, pp. 145-149,
-    // and FIPS 186-4 Appendix F for further discussion of the error probabilities.
-    //
-    // ProbablyPrime is not suitable for judging primes that an adversary may
-    // have crafted to fool the test.
-    //
-    // As of Go 1.8, ProbablyPrime(0) is allowed and applies only a Baillie-PSW test.
-    // Before Go 1.8, ProbablyPrime applied only the Miller-Rabin tests, and ProbablyPrime(0) panicked.
+// ProbablyPrime reports whether x is probably prime,
+// applying the Miller-Rabin test with n pseudorandomly chosen bases
+// as well as a Baillie-PSW test.
+//
+// If x is prime, ProbablyPrime returns true.
+// If x is chosen randomly and not prime, ProbablyPrime probably returns false.
+// The probability of returning true for a randomly chosen non-prime is at most ¼ⁿ.
+//
+// ProbablyPrime is 100% accurate for inputs less than 2⁶⁴.
+// See Menezes et al., Handbook of Applied Cryptography, 1997, pp. 145-149,
+// and FIPS 186-4 Appendix F for further discussion of the error probabilities.
+//
+// ProbablyPrime is not suitable for judging primes that an adversary may
+// have crafted to fool the test.
+//
+// As of Go 1.8, ProbablyPrime(0) is allowed and applies only a Baillie-PSW test.
+// Before Go 1.8, ProbablyPrime applied only the Miller-Rabin tests, and ProbablyPrime(0) panicked.
 private static bool ProbablyPrime(this ptr<Int> _addr_x, nint n) => func((_, panic, _) => {
     ref Int x = ref _addr_x.val;
  
@@ -84,7 +84,6 @@ private static bool ProbablyPrime(this ptr<Int> _addr_x, nint n) => func((_, pan
         return false;
     }
     return x.abs.probablyPrimeMillerRabin(n + 1, true) && x.abs.probablyPrimeLucas();
-
 });
 
 // probablyPrimeMillerRabin reports whether n passes reps rounds of the
@@ -127,17 +126,13 @@ NextRandom:
                 _continueNextRandom = true;
                 break;
             }
-
             if (y.cmp(natOne) == 0) {
                 return false;
             }
-
         }
         return false;
-
     }
     return true;
-
 }
 
 // probablyPrimeLucas reports whether n passes the "almost extra strong" Lucas probable prime test,
@@ -177,7 +172,7 @@ private static bool probablyPrimeLucas(this nat n) => func((_, panic, _) => {
     var t1 = nat(null); // temp
     ptr<Int> intD = addr(new Int(abs:d));
     ptr<Int> intN = addr(new Int(abs:n));
-    while (i >= 0) {
+    while () {
         if (p > 10000) { 
             // This is widely believed to be impossible.
             // If we get a report, we'll want the exact number n.
@@ -196,7 +191,6 @@ private static bool probablyPrimeLucas(this nat n) => func((_, panic, _) => {
             // the shared prime factor must be p+2.
             // If p+2 == n, then n is prime; otherwise p+2 is a proper factor of n.
             return len(n) == 1 && n[0] == p + 2;
-
         }
         if (p == 40) { 
             // We'll never find (d/n) = -1 if n is a square.
@@ -207,7 +201,6 @@ private static bool probablyPrimeLucas(this nat n) => func((_, panic, _) => {
             if (t1.cmp(n) == 0) {
                 return false;
             }
-
         }
     } 
 
@@ -272,7 +265,6 @@ private static bool probablyPrimeLucas(this nat n) => func((_, panic, _) => {
             t1 = t1.sqr(vk1);
             t1 = t1.add(t1, nm2);
             t2, vk1 = t2.div(vk1, t1, n);
-
         }
         else
  { 
@@ -286,7 +278,6 @@ private static bool probablyPrimeLucas(this nat n) => func((_, panic, _) => {
             t1 = t1.sqr(vk);
             t1 = t1.add(t1, nm2);
             t2, vk = t2.div(vk, t1, n);
-
         }
     } 
 
@@ -316,19 +307,15 @@ private static bool probablyPrimeLucas(this nat n) => func((_, panic, _) => {
     for (nint t = 0; t < r - 1; t++) {
         if (len(vk) == 0) { // vk == 0
             return true;
-
         }
         if (len(vk) == 1 && vk[0] == 2) { // vk == 2
             return false;
-
         }
         t1 = t1.sqr(vk);
         t1 = t1.sub(t1, natTwo);
         t2, vk = t2.div(vk, t1, n);
-
     }
     return false;
-
 });
 
 } // end big_package

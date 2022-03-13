@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:24:58 UTC
+//     Generated on 2022 March 13 06:38:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -28,7 +28,7 @@ namespace arm64
 {
     public static partial class arm64asm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Systemreg
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace arm64
             public static implicit operator Systemreg(NilType nil) => default(Systemreg);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Systemreg Systemreg_cast(dynamic value)
         {
             return new Systemreg(value.op0, value.op1, value.cn, value.cm, value.op2);

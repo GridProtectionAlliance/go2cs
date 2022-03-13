@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:35:28 UTC
+//     Generated on 2022 March 13 06:43:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace database
 {
     public static partial class sql_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct ccChecker
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace database
             public static implicit operator ccChecker(NilType nil) => default(ccChecker);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static ccChecker ccChecker_cast(dynamic value)
         {
             return new ccChecker(value.cci, value.want);

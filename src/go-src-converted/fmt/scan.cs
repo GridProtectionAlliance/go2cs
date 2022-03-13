@@ -2,27 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fmt -- go2cs converted at 2022 March 06 22:31:27 UTC
+// package fmt -- go2cs converted at 2022 March 13 05:42:22 UTC
 // import "fmt" ==> using fmt = go.fmt_package
 // Original source: C:\Program Files\Go\src\fmt\scan.go
-using errors = go.errors_package;
-using io = go.io_package;
-using math = go.math_package;
-using os = go.os_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using io = io_package;
+using math = math_package;
+using os = os_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using sync = sync_package;
+using utf8 = unicode.utf8_package;
+
+
+// ScanState represents the scanner state passed to custom scanners.
+// Scanners may do rune-at-a-time scanning or ask the ScanState
+// to discover the next space-delimited token.
+
+using System;
 public static partial class fmt_package {
 
-    // ScanState represents the scanner state passed to custom scanners.
-    // Scanners may do rune-at-a-time scanning or ask the ScanState
-    // to discover the next space-delimited token.
 public partial interface ScanState {
     (nint, error) ReadRune(); // UnreadRune causes the next call to ReadRune to return the same rune.
     (nint, error) UnreadRune(); // SkipSpace skips space in the input. Newlines are treated appropriately
@@ -103,7 +104,6 @@ private static (nint, error) Read(this ptr<stringReader> _addr_r, slice<byte> b)
         err = io.EOF;
     }
     return ;
-
 }
 
 // Sscan scans the argument string, storing successive space-separated
@@ -246,7 +246,6 @@ private static (int, nint, error) ReadRune(this ptr<ss> _addr_s) {
         s.atEOF = true;
     }
     return ;
-
 }
 
 private static (nint, bool) Width(this ptr<ss> _addr_s) {
@@ -258,7 +257,6 @@ private static (nint, bool) Width(this ptr<ss> _addr_s) {
         return (0, false);
     }
     return (s.maxWid, true);
-
 }
 
 // The public method returns an error; this private one panics.
@@ -273,10 +271,8 @@ private static int getRune(this ptr<ss> _addr_s) {
             return eof;
         }
         s.error(err);
-
     }
     return ;
-
 }
 
 // mustReadRune turns io.EOF into a panic(io.ErrUnexpectedEOF).
@@ -291,7 +287,6 @@ private static int mustReadRune(this ptr<ss> _addr_s) {
         s.error(io.ErrUnexpectedEOF);
     }
     return ;
-
 }
 
 private static error UnreadRune(this ptr<ss> _addr_s) {
@@ -337,11 +332,9 @@ private static (slice<byte>, error) Token(this ptr<ss> _addr_s, bool skipSpace, 
                     }
 
                 }
-
             }
 
         }
-
     }());
     if (f == null) {
         f = notSpace;
@@ -349,7 +342,6 @@ private static (slice<byte>, error) Token(this ptr<ss> _addr_s, bool skipSpace, 
     s.buf = s.buf[..(int)0];
     tok = s.token(skipSpace, f);
     return ;
-
 });
 
 // space is a copy of the unicode.White_Space ranges,
@@ -369,7 +361,6 @@ private static bool isSpace(int r) {
             return true;
         }
     }    return false;
-
 }
 
 // notSpace is the default scanning function used in Token.
@@ -406,7 +397,6 @@ private static (byte, error) readByte(this ptr<readRune> _addr_r) {
         return (0, error.As(err)!);
     }
     return (r.pendBuf[0], error.As(err)!);
-
 }
 
 // ReadRune returns the next UTF-8 encoded code point from the
@@ -433,7 +423,6 @@ private static (int, nint, error) ReadRune(this ptr<readRune> _addr_r) {
         // Flip the bits of the rune so it's available to UnreadRune.
         r.peekRune = ~rr;
         return ;
-
     }
     nint n = default;
     for (n = 1; !utf8.FullRune(r.buf[..(int)n]); n++) {
@@ -450,11 +439,9 @@ private static (int, nint, error) ReadRune(this ptr<readRune> _addr_r) {
     if (size < n) { // an error, save the bytes for the next read
         copy(r.pendBuf[(int)r.pending..], r.buf[(int)size..(int)n]);
         r.pending += n - size;
-
     }
     r.peekRune = ~rr;
     return ;
-
 }
 
 private static error UnreadRune(this ptr<readRune> _addr_r) {
@@ -465,7 +452,6 @@ private static error UnreadRune(this ptr<readRune> _addr_r) {
     }
     r.peekRune = ~r.peekRune;
     return error.As(null!)!;
-
 }
 
 private static sync.Pool ssFree = new sync.Pool(New:func()interface{}{returnnew(ss)},);
@@ -487,7 +473,6 @@ private static (ptr<ss>, ssave) newScanState(io.Reader r, bool nlIsSpace, bool n
             s.rs = addr(new readRune(reader:r,peekRune:-1));
         }
     }
-
     s.nlIsSpace = nlIsSpace;
     s.nlIsEnd = nlIsEnd;
     s.atEOF = false;
@@ -497,7 +482,6 @@ private static (ptr<ss>, ssave) newScanState(io.Reader r, bool nlIsSpace, bool n
     s.validSave = true;
     s.count = 0;
     return ;
-
 }
 
 // free saves used ss structs in ssFree; avoid an allocation per invocation.
@@ -515,7 +499,6 @@ private static void free(this ptr<ss> _addr_s, ssave old) {
     s.buf = s.buf[..(int)0];
     s.rs = null;
     ssFree.Put(s);
-
 }
 
 // SkipSpace provides Scan methods the ability to skip space and newline
@@ -544,7 +527,6 @@ private static void SkipSpace(this ptr<ss> _addr_s) {
             break;
         }
     }
-
 }
 
 // token returns the next space-delimited string from the input. It
@@ -566,10 +548,8 @@ private static slice<byte> token(this ptr<ss> _addr_s, bool skipSpace, Func<int,
             break;
         }
         s.buf.writeRune(r);
-
     }
     return s.buf;
-
 }
 
 private static var complexError = errors.New("syntax error scanning complex number");
@@ -581,7 +561,6 @@ private static nint indexRune(@string s, int r) {
             return i;
         }
     }    return -1;
-
 }
 
 // consume reads the next rune in the input and reports whether it is in the ok string.
@@ -598,13 +577,11 @@ private static bool consume(this ptr<ss> _addr_s, @string ok, bool accept) {
             s.buf.writeRune(r);
         }
         return true;
-
     }
     if (r != eof && accept) {
         s.UnreadRune();
     }
     return false;
-
 }
 
 // peek reports whether the next character is in the ok string, without consuming it.
@@ -616,7 +593,6 @@ private static bool peek(this ptr<ss> _addr_s, @string ok) {
         s.UnreadRune();
     }
     return indexRune(ok, r) >= 0;
-
 }
 
 private static void notEOF(this ptr<ss> _addr_s) => func((_, panic, _) => {
@@ -630,9 +606,7 @@ private static void notEOF(this ptr<ss> _addr_s) => func((_, panic, _) => {
             panic(io.EOF);
         }
     }
-
     s.UnreadRune();
-
 });
 
 // accept checks the next rune in the input. If it's a byte (sic) in the string, it puts it in the
@@ -653,7 +627,6 @@ private static bool okVerb(this ptr<ss> _addr_s, int verb, @string okVerbs, @str
         }
     }    s.errorString("bad verb '%" + string(verb) + "' for " + typ);
     return false;
-
 }
 
 // scanBool returns the value of the boolean represented by the next token.
@@ -679,7 +652,6 @@ private static bool scanBool(this ptr<ss> _addr_s, int verb) {
                 s.error(boolError);
             }
             return true;
-
             break;
         case 'f': 
 
@@ -688,11 +660,9 @@ private static bool scanBool(this ptr<ss> _addr_s, int verb) {
                 s.error(boolError);
             }
             return false;
-
             break;
     }
     return false;
-
 }
 
 // Numerical elements
@@ -703,7 +673,6 @@ private static readonly @string hexadecimalDigits = "0123456789aAbBcCdDeEfF";
 private static readonly @string sign = "+-";
 private static readonly @string period = ".";
 private static readonly @string exponent = "eEpP";
-
 
 // getBase returns the numeric base represented by the verb and its digit string.
 private static (nint, @string) getBase(this ptr<ss> _addr_s, int verb) {
@@ -733,7 +702,6 @@ private static (nint, @string) getBase(this ptr<ss> _addr_s, int verb) {
             break;
     }
     return ;
-
 }
 
 // scanNumber returns the numerical string with specified digits starting here.
@@ -746,9 +714,9 @@ private static @string scanNumber(this ptr<ss> _addr_s, @string digits, bool hav
             s.errorString("expected integer");
         }
     }
-    while (s.accept(digits))     }
+    while (s.accept(digits)) {
+    }
     return string(s.buf);
-
 }
 
 // scanRune returns the next rune value in the input.
@@ -763,7 +731,6 @@ private static long scanRune(this ptr<ss> _addr_s, nint bitSize) {
         s.errorString("overflow on character value " + string(r));
     }
     return int64(r);
-
 }
 
 // scanBasePrefix reports whether the integer begins with a base prefix
@@ -792,8 +759,7 @@ private static (nint, @string, bool) scanBasePrefix(this ptr<ss> _addr_s) {
         return (0, hexadecimalDigits + "_", true);
     else 
         return (0, octalDigits + "_", true);
-    
-}
+    }
 
 // scanInt returns the value of the integer represented by the next
 // token, checking for overflow. Any error is stored in s.err.
@@ -830,7 +796,6 @@ private static long scanInt(this ptr<ss> _addr_s, int verb, nint bitSize) {
         s.errorString("integer overflow on token " + tok);
     }
     return i;
-
 }
 
 // scanUint returns the value of the unsigned integer represented
@@ -864,7 +829,6 @@ private static ulong scanUint(this ptr<ss> _addr_s, int verb, nint bitSize) {
         s.errorString("unsigned integer overflow on token " + tok);
     }
     return i;
-
 }
 
 // floatToken returns the floating-point number starting here, no longer than swid
@@ -889,22 +853,22 @@ private static @string floatToken(this ptr<ss> _addr_s) {
         digits = hexadecimalDigits + "_";
         exp = "pP";
     }
-    while (s.accept(digits))     } 
+    while (s.accept(digits)) {
+    } 
     // decimal point?
     if (s.accept(period)) { 
         // fraction?
-        while (s.accept(digits))         }
-
+        while (s.accept(digits)) {
+        }
     }
     if (s.accept(exp)) { 
         // leading sign?
         s.accept(sign); 
         // digits?
-        while (s.accept(decimalDigits + "_"))         }
-
+        while (s.accept(decimalDigits + "_")) {
+        }
     }
     return string(s.buf);
-
 }
 
 // complexTokens returns the real and imaginary parts of the complex number starting here.
@@ -932,7 +896,6 @@ private static (@string, @string) complexTokens(this ptr<ss> _addr_s) {
         s.error(complexError);
     }
     return (real, imagSign + imag);
-
 }
 
 private static bool hasX(@string s) {
@@ -942,7 +905,6 @@ private static bool hasX(@string s) {
         }
     }
     return false;
-
 }
 
 // convertFloat converts the string to a float64value.
@@ -973,11 +935,8 @@ private static double convertFloat(this ptr<ss> _addr_s, @string str, nint n) {
                     e = e__prev3;
 
                 }
-
                 s.error(err);
-
             }
-
             var (m, err) = strconv.Atoi(str[(int)p + 1..]);
             if (err != null) { 
                 // Put full string into error.
@@ -993,22 +952,16 @@ private static double convertFloat(this ptr<ss> _addr_s, @string str, nint n) {
                     e = e__prev3;
 
                 }
-
                 s.error(err);
-
             }
-
             return math.Ldexp(f, m);
-
         }
     }
-
     (f, err) = strconv.ParseFloat(str, n);
     if (err != null) {
         s.error(err);
     }
     return f;
-
 }
 
 // convertComplex converts the next token to a complex128 value.
@@ -1027,7 +980,6 @@ private static System.Numerics.Complex128 scanComplex(this ptr<ss> _addr_s, int 
     var real = s.convertFloat(sreal, n / 2);
     var imag = s.convertFloat(simag, n / 2);
     return complex(real, imag);
-
 }
 
 // convertString returns the string represented by the next input characters.
@@ -1055,7 +1007,6 @@ private static @string convertString(this ptr<ss> _addr_s, int verb) {
             break;
     }
     return ;
-
 }
 
 // quotedString returns the double- or back-quoted string represented by the next input characters.
@@ -1087,26 +1038,22 @@ private static @string quotedString(this ptr<ss> _addr_s) {
                     // immediately after the escape can itself be a backslash or quote.
                     // Thus we only need to protect the first character after the backslash.
                     s.buf.writeRune(s.mustReadRune());
-
                 }
                 else if (r == '"') {
                     break;
                 }
-
             }
             var (result, err) = strconv.Unquote(string(s.buf));
             if (err != null) {
                 s.error(err);
             }
             return result;
-
             break;
         default: 
             s.errorString("expected quoted string");
             break;
     }
     return "";
-
 }
 
 // hexDigit returns the value of the hexadecimal digit.
@@ -1165,7 +1112,6 @@ private static (nint, bool) hexDigit(int d) {
             break;
     }
     return (-1, false);
-
 }
 
 // hexByte returns the next hex-encoded (two-character) byte from the input.
@@ -1191,7 +1137,6 @@ private static (byte, bool) hexByte(this ptr<ss> _addr_s) {
         return ;
     }
     return (byte(value1 << 4 | value2), true);
-
 }
 
 // hexString returns the space-delimited hexpair-encoded string.
@@ -1205,14 +1150,12 @@ private static @string hexString(this ptr<ss> _addr_s) {
             break;
         }
         s.buf.writeByte(b);
-
     }
     if (len(s.buf) == 0) {
         s.errorString("no hex data for %x string");
         return "";
     }
     return string(s.buf);
-
 }
 
 private static readonly @string floatVerbs = "beEfFgGv";
@@ -1221,7 +1164,6 @@ private static readonly nint hugeWid = 1 << 30;
 
 private static readonly nint intBits = 32 << (int)((~uint(0) >> 63));
 private static readonly nint uintptrBits = 32 << (int)((~uintptr(0) >> 63));
-
 
 // scanPercent scans a literal percent character.
 private static void scanPercent(this ptr<ss> _addr_s) {
@@ -1259,7 +1201,6 @@ private static void scanOne(this ptr<ss> _addr_s, int verb, object arg) {
         v = v__prev1;
 
     }
-
 
     switch (arg.type()) {
         case ptr<bool> v:
@@ -1375,7 +1316,6 @@ private static void scanOne(this ptr<ss> _addr_s, int verb, object arg) {
             break;
         }
     }
-
 }
 
 // errorHandler turns local panics into error returns.
@@ -1391,14 +1331,12 @@ private static void errorHandler(ptr<error> _addr_errp) => func((_, panic, _) =>
 
                 if (ok) { // catch local error
                     errp = error.As(se.err)!;
-
                 }                {
                     error (eof, ok) = error.As(e._<error>())!;
 
 
                     else if (ok && eof == io.EOF) { // out of input
                         errp = error.As(eof)!;
-
                     }
                     else
  {
@@ -1407,12 +1345,9 @@ private static void errorHandler(ptr<error> _addr_errp) => func((_, panic, _) =>
 
                 }
 
-
             }
-
         }
     }
-
 });
 
 // doScan does the real work for scanning without a format string.
@@ -1438,7 +1373,6 @@ private static (nint, error) doScan(this ptr<ss> _addr_s, slice<object> a) => fu
         }
     }
     return ;
-
 });
 
 // advance determines whether the next characters in the input match
@@ -1474,10 +1408,8 @@ private static nint advance(this ptr<ss> _addr_s, @string format) {
  {
                     trailingSpace = true;
                 }
-
                 i += w;
                 fmtc, w = utf8.DecodeRuneInString(format[(int)i..]);
-
             }
 
             for (nint j = 0; j < newlines; j++) {
@@ -1499,13 +1431,10 @@ private static nint advance(this ptr<ss> _addr_s, @string format) {
                     if (!isSpace(inputc) && inputc != eof) {
                         s.errorString("expected space in input to match format");
                     }
-
                     if (inputc == '\n') {
                         s.errorString("newline in input does not match format");
                     }
-
                 }
-
                 while (isSpace(inputc) && inputc != '\n') {
                     inputc = s.getRune();
                 }
@@ -1513,11 +1442,8 @@ private static nint advance(this ptr<ss> _addr_s, @string format) {
                 if (inputc != eof) {
                     s.UnreadRune();
                 }
-
             }
-
             continue;
-
         }
         if (fmtc == '%') { 
             // % at end of string is an error.
@@ -1529,7 +1455,6 @@ private static nint advance(this ptr<ss> _addr_s, @string format) {
             if (nextc != '%') {
                 return ;
             }
-
             i += w; // skip the first %
         }
         inputc = s.mustReadRune();
@@ -1538,10 +1463,8 @@ private static nint advance(this ptr<ss> _addr_s, @string format) {
             return -1;
         }
         i += w;
-
     }
     return ;
-
 }
 
 // doScanf does the real work when scanning with a format string.
@@ -1571,9 +1494,7 @@ private static (nint, error) doScanf(this ptr<ss> _addr_s, @string format, slice
                 } 
                 // Otherwise at EOF; "too many operands" error handled below
                 break;
-
             }
-
             i++; // % is one byte
 
             // do we have 20 (width)?
@@ -1582,19 +1503,16 @@ private static (nint, error) doScanf(this ptr<ss> _addr_s, @string format, slice
             if (!widPresent) {
                 s.maxWid = hugeWid;
             }
-
             var (c, w) = utf8.DecodeRuneInString(format[(int)i..]);
             i += w;
 
             if (c != 'c') {
                 s.SkipSpace();
             }
-
             if (c == '%') {
                 s.scanPercent();
                 continue; // Do not consume an argument.
             }
-
             s.argLimit = s.limit;
             {
                 var f = s.count + s.maxWid;
@@ -1605,26 +1523,21 @@ private static (nint, error) doScanf(this ptr<ss> _addr_s, @string format, slice
 
             }
 
-
             if (numProcessed >= len(a)) { // out of operands
                 s.errorString("too few operands for format '%" + format[(int)i - w..] + "'");
                 break;
-
             }
-
             var arg = a[numProcessed];
 
             s.scanOne(c, arg);
             numProcessed++;
             s.argLimit = s.limit;
-
         }
     }
     if (numProcessed < len(a)) {
         s.errorString("too many operands");
     }
     return ;
-
 });
 
 } // end fmt_package

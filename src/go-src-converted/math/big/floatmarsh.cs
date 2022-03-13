@@ -4,17 +4,19 @@
 
 // This file implements encoding/decoding of Floats.
 
-// package big -- go2cs converted at 2022 March 06 22:17:44 UTC
+// package big -- go2cs converted at 2022 March 13 05:31:54 UTC
 // import "math/big" ==> using big = go.math.big_package
 // Original source: C:\Program Files\Go\src\math\big\floatmarsh.go
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-
 namespace go.math;
+
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+
+
+// Gob codec version. Permits backward-compatible changes to the encoding.
 
 public static partial class big_package {
 
-    // Gob codec version. Permits backward-compatible changes to the encoding.
 private static readonly byte floatGobVersion = 1;
 
 // GobEncode implements the gob.GobEncoder interface.
@@ -63,7 +65,6 @@ private static (slice<byte>, error) GobEncode(this ptr<Float> _addr_x) {
         x.mant[(int)len(x.mant) - n..].bytes(buf[(int)10..]); // cut off unused trailing words
     }
     return (buf, error.As(null!)!);
-
 }
 
 // GobDecode implements the gob.GobDecoder interface.
@@ -77,7 +78,6 @@ private static error GobDecode(this ptr<Float> _addr_z, slice<byte> buf) {
         // Other side sent a nil or default value.
         z.val = new Float();
         return error.As(null!)!;
-
     }
     if (buf[0] != floatGobVersion) {
         return error.As(fmt.Errorf("Float.GobDecode: encoding version %d not supported", buf[0]))!;
@@ -101,7 +101,6 @@ private static error GobDecode(this ptr<Float> _addr_z, slice<byte> buf) {
         z.SetPrec(uint(oldPrec));
     }
     return error.As(null!)!;
-
 }
 
 // MarshalText implements the encoding.TextMarshaler interface.
@@ -117,7 +116,6 @@ private static (slice<byte>, error) MarshalText(this ptr<Float> _addr_x) {
     }
     slice<byte> buf = default;
     return (x.Append(buf, 'g', -1), error.As(null!)!);
-
 }
 
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
@@ -133,7 +131,6 @@ private static error UnmarshalText(this ptr<Float> _addr_z, slice<byte> text) {
         err = fmt.Errorf("math/big: cannot unmarshal %q into a *big.Float (%v)", text, err);
     }
     return error.As(err)!;
-
 }
 
 } // end big_package

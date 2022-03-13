@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:11 UTC
+//     Generated on 2022 March 13 05:34:07 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class fiat_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct P521Element
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace @internal
             public static implicit operator P521Element(NilType nil) => default(P521Element);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static P521Element P521Element_cast(dynamic value)
         {
             return new P521Element(value.x);

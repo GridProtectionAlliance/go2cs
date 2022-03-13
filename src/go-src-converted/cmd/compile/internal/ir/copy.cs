@@ -2,29 +2,30 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:48:57 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:18 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\copy.go
-using @base = go.cmd.compile.@internal.@base_package;
-using src = go.cmd.@internal.src_package;
-using System.ComponentModel;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using src = cmd.@internal.src_package;
+
+
+// A Node may implement the Orig and SetOrig method to
+// maintain a pointer to the "unrewritten" form of a Node.
+// If a Node does not implement OrigNode, it is its own Orig.
+//
+// Note that both SepCopy and Copy have definitions compatible
+// with a Node that does not implement OrigNode: such a Node
+// is its own Orig, and in that case, that's what both want to return
+// anyway (SepCopy unconditionally, and Copy only when the input
+// is its own Orig as well, but if the output does not implement
+// OrigNode, then neither does the input, making the condition true).
+
+using System.ComponentModel;
+using System;
 public static partial class ir_package {
 
-    // A Node may implement the Orig and SetOrig method to
-    // maintain a pointer to the "unrewritten" form of a Node.
-    // If a Node does not implement OrigNode, it is its own Orig.
-    //
-    // Note that both SepCopy and Copy have definitions compatible
-    // with a Node that does not implement OrigNode: such a Node
-    // is its own Orig, and in that case, that's what both want to return
-    // anyway (SepCopy unconditionally, and Copy only when the input
-    // is its own Orig as well, but if the output does not implement
-    // OrigNode, then neither does the input, making the condition true).
 public partial interface OrigNode {
     Node Orig();
     Node SetOrig(Node _p0);
@@ -63,9 +64,7 @@ public static Node Orig(Node n) {
             return o;
         }
     }
-
     return n;
-
 }
 
 // SepCopy returns a separate shallow copy of n,
@@ -79,9 +78,7 @@ public static Node SepCopy(Node n) {
             n.SetOrig(n);
         }
     }
-
     return n;
-
 }
 
 // Copy returns a shallow copy of n.
@@ -99,9 +96,7 @@ public static Node Copy(Node n) {
             c._<OrigNode>().SetOrig(c);
         }
     }
-
     return c;
-
 }
 
 // DeepCopy returns a “deep” copy of n, with its entire structure copied
@@ -119,10 +114,8 @@ public static Node DeepCopy(src.XPos pos, Node n) {
         }
         EditChildren(x, edit);
         return x;
-
     };
     return edit(n);
-
 }
 
 // DeepCopyList returns a list of deep copies (using DeepCopy) of the nodes in list.

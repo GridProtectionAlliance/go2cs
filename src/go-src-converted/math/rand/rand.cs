@@ -15,19 +15,19 @@
 // This package's outputs might be easily predictable regardless of how it's
 // seeded. For random numbers suitable for security-sensitive work, see the
 // crypto/rand package.
-// package rand -- go2cs converted at 2022 March 06 22:17:53 UTC
+
+// package rand -- go2cs converted at 2022 March 13 05:32:04 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Program Files\Go\src\math\rand\rand.go
-using sync = go.sync_package;
-using System;
-
-
 namespace go.math;
+
+using sync = sync_package;
+using System;
 
 public static partial class rand_package {
 
-    // A Source represents a source of uniformly-distributed
-    // pseudo-random int64 values in the range [0, 1<<63).
+// A Source represents a source of uniformly-distributed
+// pseudo-random int64 values in the range [0, 1<<63).
 public partial interface Source {
     long Int63();
     long Seed(long seed);
@@ -87,10 +87,8 @@ private static void Seed(this ptr<Rand> _addr_r, long seed) {
         }
     }
 
-
     r.src.Seed(seed);
     r.readPos = 0;
-
 }
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
@@ -115,7 +113,6 @@ private static ulong Uint64(this ptr<Rand> _addr_r) {
         return r.s64.Uint64();
     }
     return uint64(r.Int63()) >> 31 | uint64(r.Int63()) << 32;
-
 }
 
 // Int31 returns a non-negative pseudo-random 31-bit integer as an int32.
@@ -143,7 +140,6 @@ private static long Int63n(this ptr<Rand> _addr_r, long n) => func((_, panic, _)
     }
     if (n & (n - 1) == 0) { // n is power of two, can mask
         return r.Int63() & (n - 1);
-
     }
     var max = int64((1 << 63) - 1 - (1 << 63) % uint64(n));
     var v = r.Int63();
@@ -151,7 +147,6 @@ private static long Int63n(this ptr<Rand> _addr_r, long n) => func((_, panic, _)
         v = r.Int63();
     }
     return v % n;
-
 });
 
 // Int31n returns, as an int32, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -164,7 +159,6 @@ private static int Int31n(this ptr<Rand> _addr_r, int n) => func((_, panic, _) =
     }
     if (n & (n - 1) == 0) { // n is power of two, can mask
         return r.Int31() & (n - 1);
-
     }
     var max = int32((1 << 31) - 1 - (1 << 31) % uint32(n));
     var v = r.Int31();
@@ -172,7 +166,6 @@ private static int Int31n(this ptr<Rand> _addr_r, int n) => func((_, panic, _) =
         v = r.Int31();
     }
     return v % n;
-
 });
 
 // int31n returns, as an int32, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -199,7 +192,6 @@ private static int int31n(this ptr<Rand> _addr_r, int n) {
         }
     }
     return int32(prod >> 32);
-
 }
 
 // Intn returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
@@ -214,7 +206,6 @@ private static nint Intn(this ptr<Rand> _addr_r, nint n) => func((_, panic, _) =
         return int(r.Int31n(int32(n)));
     }
     return int(r.Int63n(int64(n)));
-
 });
 
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
@@ -243,7 +234,6 @@ again:
         goto again; // resample; this branch is taken O(never)
     }
     return f;
-
 }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0).
@@ -259,7 +249,6 @@ again:
         goto again; // resample; this branch is taken O(very rarely)
     }
     return f;
-
 }
 
 // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers
@@ -279,7 +268,6 @@ private static slice<nint> Perm(this ptr<Rand> _addr_r, nint n) {
         m[j] = i;
     }
     return m;
-
 }
 
 // Shuffle pseudo-randomizes the order of elements.
@@ -302,7 +290,6 @@ private static void Shuffle(this ptr<Rand> _addr_r, nint n, Action<nint, nint> s
         swap(i, j);
         i--;
     }
-
 });
 
 // Read generates len(p) random bytes and writes them into p. It
@@ -320,9 +307,7 @@ private static (nint, error) Read(this ptr<Rand> _addr_r, slice<byte> p) {
             return lk.read(p, _addr_r.readVal, _addr_r.readPos);
         }
     }
-
     return read(p, r.src, _addr_r.readVal, _addr_r.readPos);
-
 }
 
 private static (nint, error) read(slice<byte> p, Source src, ptr<long> _addr_readVal, ptr<sbyte> _addr_readPos) {
@@ -343,19 +328,15 @@ private static (nint, error) read(slice<byte> p, Source src, ptr<long> _addr_rea
  {
                 val = src.Int63();
             }
-
             pos = 7;
-
         }
         p[n] = byte(val);
         val>>=8;
         pos--;
-
     }
     readPos = pos;
     readVal = val;
     return ;
-
 }
 
 /*

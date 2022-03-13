@@ -2,27 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package syntax -- go2cs converted at 2022 March 06 23:13:41 UTC
+// package syntax -- go2cs converted at 2022 March 13 06:27:07 UTC
 // import "cmd/compile/internal/syntax" ==> using syntax = go.cmd.compile.@internal.syntax_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\syntax\syntax.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+
+
+// Mode describes the parser mode.
+
+using System;
 public static partial class syntax_package {
 
-    // Mode describes the parser mode.
 public partial struct Mode { // : nuint
 }
 
 // Modes supported by the parser.
 public static readonly Mode CheckBranches = 1 << (int)(iota); // check correct use of labels, break, continue, and goto statements
 public static readonly var AllowGenerics = 0;
-
 
 // Error describes a syntax error. Error implements the error interface.
 public partial struct Error {
@@ -92,22 +92,18 @@ public static (ptr<File>, error) Parse(ptr<PosBase> _addr_@base, io.Reader src, 
                     }
 
                 }
-
                 panic(p);
-
             }
 
             p = p__prev1;
 
         }
-
     }());
 
     p = default;
     p.init(base, src, errh, pragh, mode);
     p.next();
     return (_addr_p.fileOrNil()!, error.As(p.first)!);
-
 });
 
 // ParseFile behaves like Parse but it reads the source from the named file.
@@ -121,11 +117,9 @@ public static (ptr<File>, error) ParseFile(@string filename, ErrorHandler errh, 
             errh(err);
         }
         return (_addr_null!, error.As(err)!);
-
     }
     defer(f.Close());
     return _addr_Parse(_addr_NewFileBase(filename), f, errh, pragh, mode)!;
-
 });
 
 } // end syntax_package

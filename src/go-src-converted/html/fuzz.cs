@@ -5,12 +5,12 @@
 //go:build gofuzz
 // +build gofuzz
 
-// package html -- go2cs converted at 2022 March 06 22:24:21 UTC
+// package html -- go2cs converted at 2022 March 13 05:38:49 UTC
 // import "html" ==> using html = go.html_package
 // Original source: C:\Program Files\Go\src\html\fuzz.go
-using fmt = go.fmt_package;
-
 namespace go;
+
+using fmt = fmt_package;
 
 public static partial class html_package {
 
@@ -28,7 +28,6 @@ public static nint Fuzz(slice<byte> data) => func((_, panic, _) => {
     EscapeString(UnescapeString(v));
 
     return 0;
-
 });
 
 } // end html_package

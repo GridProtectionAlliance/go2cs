@@ -5,19 +5,17 @@
 //go:build 386 || arm || mips || mipsle
 // +build 386 arm mips mipsle
 
-// package runtime -- go2cs converted at 2022 March 06 22:10:49 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:14 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\panic32.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // Additional index/slice error paths for 32-bit platforms.
-    // Used when the high word of a 64-bit index is not zero.
+// Additional index/slice error paths for 32-bit platforms.
+// Used when the high word of a 64-bit index is not zero.
 
-    // failures in the comparisons for s[x], 0 <= x < y (y == len(s))
+// failures in the comparisons for s[x], 0 <= x < y (y == len(s))
 private static void goPanicExtendIndex(nint hi, nuint lo, nint y) => func((_, panic, _) => {
     panicCheck1(getcallerpc(), "index out of range");
     panic(new boundsError(x:int64(hi)<<32+int64(lo),signed:true,y:y,code:boundsIndex));

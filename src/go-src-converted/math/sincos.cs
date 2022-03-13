@@ -2,23 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package math -- go2cs converted at 2022 March 06 22:31:11 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:05 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\sincos.go
-
-
 namespace go;
 
 public static partial class math_package {
 
-    // Coefficients _sin[] and _cos[] are found in pkg/math/sin.go.
+// Coefficients _sin[] and _cos[] are found in pkg/math/sin.go.
 
-    // Sincos returns Sin(x), Cos(x).
-    //
-    // Special cases are:
-    //    Sincos(±0) = ±0, 1
-    //    Sincos(±Inf) = NaN, NaN
-    //    Sincos(NaN) = NaN, NaN
+// Sincos returns Sin(x), Cos(x).
+//
+// Special cases are:
+//    Sincos(±0) = ±0, 1
+//    Sincos(±Inf) = NaN, NaN
+//    Sincos(NaN) = NaN, NaN
 public static (double, double) Sincos(double x) {
     double sin = default;
     double cos = default;
@@ -53,7 +51,6 @@ public static (double, double) Sincos(double x) {
         if (j & 1 == 1) { // map zeros to origin
             j++;
             y++;
-
         }
         j &= 7; // octant modulo 2Pi radians (360 degrees)
         z = ((x - y * PI4A) - y * PI4B) - y * PI4C; // Extended precision modular arithmetic
@@ -78,7 +75,6 @@ public static (double, double) Sincos(double x) {
         sin = -sin;
     }
     return ;
-
 }
 
 } // end math_package

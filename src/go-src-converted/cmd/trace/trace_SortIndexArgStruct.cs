@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:14 UTC
+//     Generated on 2022 March 13 06:36:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -34,7 +34,7 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct SortIndexArg
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace go
             public static implicit operator SortIndexArg(NilType nil) => default(SortIndexArg);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static SortIndexArg SortIndexArg_cast(dynamic value)
         {
             return new SortIndexArg(value.Index);

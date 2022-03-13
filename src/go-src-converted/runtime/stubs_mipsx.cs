@@ -5,16 +5,14 @@
 //go:build mips || mipsle
 // +build mips mipsle
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:00 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\stubs_mipsx.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // Called from assembly only; declared for go vet.
+// Called from assembly only; declared for go vet.
 private static void load_g();
 private static void save_g();
 

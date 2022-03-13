@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:15 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:44 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\runtime.go
-using atomic = go.runtime.@internal.atomic_package;
-using _@unsafe_ = go.@unsafe_package;
-
 namespace go;
+
+using atomic = runtime.@internal.atomic_package;
+using _@unsafe_ = @unsafe_package; // for go:linkname
+
+
+//go:generate go run wincallback.go
+//go:generate go run mkduff.go
+//go:generate go run mkfastlog2table.go
 
 public static partial class runtime_package {
 
-    //go:generate go run wincallback.go
-    //go:generate go run mkduff.go
-    //go:generate go run mkfastlog2table.go
 private static var ticks = default;
 
 // Note: Called by runtime/pprof in addition to runtime code.
@@ -39,11 +41,9 @@ private static long tickspersecond() {
             r++;
         }
         atomic.Store64(_addr_ticks.val, uint64(r));
-
     }
     unlock(_addr_ticks.@lock);
     return r;
-
 }
 
 private static slice<@string> envs = default;

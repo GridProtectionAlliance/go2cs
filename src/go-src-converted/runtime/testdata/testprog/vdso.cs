@@ -4,14 +4,14 @@
 
 // Invoke signal hander in the VDSO context (see issue 32912).
 
-// package main -- go2cs converted at 2022 March 06 22:26:09 UTC
+// package main -- go2cs converted at 2022 March 13 05:29:28 UTC
 // Original source: C:\Program Files\Go\src\runtime\testdata\testprog\vdso.go
-using fmt = go.fmt_package;
-using os = go.os_package;
-using pprof = go.runtime.pprof_package;
-using time = go.time_package;
-
 namespace go;
+
+using fmt = fmt_package;
+using os = os_package;
+using pprof = runtime.pprof_package;
+using time = time_package;
 
 public static partial class main_package {
 
@@ -38,7 +38,6 @@ private static void signalInVDSO() {
 
     }
 
-
     var t0 = time.Now();
     var t1 = t0; 
     // We should get a profiling signal 100 times a second,
@@ -63,7 +62,6 @@ private static void signalInVDSO() {
 
     }
 
-
     {
         var err__prev1 = err;
 
@@ -77,9 +75,7 @@ private static void signalInVDSO() {
 
     }
 
-
     fmt.Println("success");
-
 }
 
 } // end main_package

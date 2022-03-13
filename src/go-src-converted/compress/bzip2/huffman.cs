@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bzip2 -- go2cs converted at 2022 March 06 23:35:24 UTC
+// package bzip2 -- go2cs converted at 2022 March 13 06:43:20 UTC
 // import "compress/bzip2" ==> using bzip2 = go.compress.bzip2_package
 // Original source: C:\Program Files\Go\src\compress\bzip2\huffman.go
-using sort = go.sort_package;
-using System;
-
-
 namespace go.compress;
+
+using sort = sort_package;
+using System;
 
 public static partial class bzip2_package {
 
-    // A huffmanTree is a binary tree which is navigated, bit-by-bit to reach a
-    // symbol.
+// A huffmanTree is a binary tree which is navigated, bit-by-bit to reach a
+// symbol.
 private partial struct huffmanTree {
     public slice<huffmanNode> nodes;
     public nint nextNode;
@@ -58,7 +57,6 @@ private static ushort Decode(this ptr<huffmanTree> _addr_t, ptr<bitReader> _addr
             // Get next bit - fast path.
             br.bits--;
             bit = uint16(br.n >> (int)((br.bits & 63))) & 1;
-
         }
         else
  { 
@@ -66,7 +64,6 @@ private static ushort Decode(this ptr<huffmanTree> _addr_t, ptr<bitReader> _addr
             // Use ReadBits to retrieve a single bit
             // from the underling io.ByteReader.
             bit = uint16(br.ReadBits(1));
-
         }
         var l = node.left;
         var r = node.right;
@@ -90,12 +87,9 @@ private static ushort Decode(this ptr<huffmanTree> _addr_t, ptr<bitReader> _addr
  {
                 v = r;
             }
-
             return ;
-
         }
     }
-
 }
 
 // newHuffmanTree builds a Huffman tree from a slice containing the code
@@ -145,7 +139,6 @@ private static (huffmanTree, error) newHuffmanTree(slice<byte> lengths) => func(
             return true;
         }
         return false;
-
     }); 
 
     // Now we assign codes to the symbols, starting with the longest code.
@@ -169,7 +162,6 @@ private static (huffmanTree, error) newHuffmanTree(slice<byte> lengths) => func(
             // We need to 'increment' the code, which means treating |code|
             // like a |length| bit number.
             code += 1 << (int)((32 - length));
-
         }
 
         i = i__prev1;
@@ -177,14 +169,11 @@ private static (huffmanTree, error) newHuffmanTree(slice<byte> lengths) => func(
 
     // Now we can sort by the code so that the left half of each branch are
     // grouped together, recursively.
-    sort.Slice(codes, (i, j) => {
-        return codes[i].code < codes[j].code;
-    });
+    sort.Slice(codes, (i, j) => codes[i].code < codes[j].code);
 
     t.nodes = make_slice<huffmanNode>(len(codes));
     var (_, err) = buildHuffmanNode(_addr_t, codes, 0);
     return (t, error.As(err)!);
-
 });
 
 // huffmanSymbolLengthPair contains a symbol and its code length.
@@ -242,13 +231,11 @@ private static (ushort, error) buildHuffmanNode(ptr<huffmanTree> _addr_t, slice<
             // is invalid. This ensures that we never enter
             // infinite recursion.
             return (0, error.As(StructuralError("equal symbols in Huffman tree"))!);
-
         }
         if (len(left) == 0) {
             return buildHuffmanNode(_addr_t, right, level + 1);
         }
         return buildHuffmanNode(_addr_t, left, level + 1);
-
     }
     nodeIndex = uint16(t.nextNode);
     var node = _addr_t.nodes[t.nextNode];
@@ -258,7 +245,6 @@ private static (ushort, error) buildHuffmanNode(ptr<huffmanTree> _addr_t, slice<
         // leaf node
         node.left = invalidNodeValue;
         node.leftValue = left[0].value;
-
     }
     else
  {
@@ -271,14 +257,12 @@ private static (ushort, error) buildHuffmanNode(ptr<huffmanTree> _addr_t, slice<
         // leaf node
         node.right = invalidNodeValue;
         node.rightValue = right[0].value;
-
     }
     else
  {
         node.right, err = buildHuffmanNode(_addr_t, right, level + 1);
     }
     return ;
-
 }
 
 } // end bzip2_package

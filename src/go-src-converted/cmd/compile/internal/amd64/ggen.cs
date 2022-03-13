@@ -2,22 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package amd64 -- go2cs converted at 2022 March 06 23:14:47 UTC
+// package amd64 -- go2cs converted at 2022 March 13 06:28:17 UTC
 // import "cmd/compile/internal/amd64" ==> using amd64 = go.cmd.compile.@internal.amd64_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\amd64\ggen.go
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using x86 = go.cmd.@internal.obj.x86_package;
-using buildcfg = go.@internal.buildcfg_package;
-
 namespace go.cmd.compile.@internal;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using x86 = cmd.@internal.obj.x86_package;
+using buildcfg = @internal.buildcfg_package;
+
+
+// no floating point in note handlers on Plan 9
 
 public static partial class amd64_package {
 
-    // no floating point in note handlers on Plan 9
 private static var isPlan9 = buildcfg.GOOS == "plan9";
 
 // DUFFZERO consists of repeated blocks of 4 MOVUPSs + LEAQ,
@@ -32,7 +34,6 @@ private static readonly nint dzClearStep = 16; // number of bytes cleared by eac
 private static readonly var dzClearLen = dzClearStep * dzBlockLen; // bytes cleared by one block
 private static readonly var dzSize = dzBlocks * dzBlockSize;
 
-
 // dzOff returns the offset for a jump into DUFFZERO.
 // b is the number of bytes to zero.
 private static long dzOff(long b) {
@@ -43,7 +44,6 @@ private static long dzOff(long b) {
         off -= dzLeaqSize + dzMovSize * (tailLen / dzClearStep);
     }
     return off;
-
 }
 
 // duffzeroDI returns the pre-adjustment to DI for a call to DUFFZERO.
@@ -55,7 +55,6 @@ private static long dzDI(long b) {
     }
     var tailSteps = tailLen / dzClearStep;
     return -dzClearStep * (dzBlockLen - tailSteps);
-
 }
 
 private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _addr_p, long off, long cnt, ptr<uint> _addr_state) {
@@ -81,7 +80,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
         p = pp.Append(p, x86.AMOVL, obj.TYPE_REG, x86.REG_R13, 0, obj.TYPE_MEM, x86.REG_SP, off);
         off += int64(types.PtrSize);
         cnt -= int64(types.PtrSize);
-
     }
     if (cnt == 8) {
         if (state & r13 == 0.val) {
@@ -89,7 +87,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
             state |= r13;
         }
         p = pp.Append(p, x86.AMOVQ, obj.TYPE_REG, x86.REG_R13, 0, obj.TYPE_MEM, x86.REG_SP, off);
-
     }
     else if (!isPlan9 && cnt <= int64(8 * types.RegSize)) {
         if (!buildcfg.Experiment.RegabiG && state & x15 == 0.val) {
@@ -118,8 +115,6 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
             p = pp.Append(p, x86.AMOVUPS, obj.TYPE_REG, x86.REG_X15, 0, obj.TYPE_MEM, x86.REG_DI, -int64(8));
         }
         p = pp.Append(p, x86.AMOVQ, obj.TYPE_REG, x86.REG_R12, 0, obj.TYPE_REG, x86.REG_DI, 0);
-
-
     }
     else
  { 
@@ -150,10 +145,8 @@ private static ptr<obj.Prog> zerorange(ptr<objw.Progs> _addr_pp, ptr<obj.Prog> _
 
         // Record the fact that r13 is no longer zero.
         state &= ~uint32(r13);
-
     }
     return _addr_p!;
-
 }
 
 private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {
@@ -171,7 +164,6 @@ private static ptr<obj.Prog> ginsnop(ptr<objw.Progs> _addr_pp) {
     p.To.Type = obj.TYPE_REG;
     p.To.Reg = x86.REG_AX;
     return _addr_p!;
-
 }
 
 } // end amd64_package

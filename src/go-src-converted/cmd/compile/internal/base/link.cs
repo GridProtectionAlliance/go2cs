@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package @base -- go2cs converted at 2022 March 06 23:14:30 UTC
+// package @base -- go2cs converted at 2022 March 13 06:27:59 UTC
 // import "cmd/compile/internal/base" ==> using @base = go.cmd.compile.@internal.@base_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\base\link.go
-using obj = go.cmd.@internal.obj_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using obj = cmd.@internal.obj_package;
+using System;
 
 public static partial class @base_package {
 
@@ -24,10 +23,8 @@ public static ptr<obj.LSym> PkgLinksym(@string prefix, @string name, obj.ABI abi
     if (name == "_") { 
         // TODO(mdempsky): Cleanup callers and Fatalf instead.
         return _addr_linksym(prefix, "_", abi)!;
-
     }
     return _addr_linksym(prefix, prefix + "." + name, abi)!;
-
 }
 
 // Linkname returns the linker symbol for the given name as it might
@@ -42,7 +39,6 @@ private static ptr<obj.LSym> linksym(@string pkg, @string name, obj.ABI abi) {
     return _addr_Ctxt.LookupABIInit(name, abi, r => {
         r.Pkg = pkg;
     })!;
-
 }
 
 } // end @base_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:50:14 UTC
+//     Generated on 2022 March 13 06:01:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace @internal
 {
     public static partial class ssa_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct udivisibleData
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace @internal
             public static implicit operator udivisibleData(NilType nil) => default(udivisibleData);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static udivisibleData udivisibleData_cast(dynamic value)
         {
             return new udivisibleData(value.k, value.m, value.max);

@@ -68,7 +68,9 @@ Core flags:
         emit analysis diagnostics (and errors) in JSON format
 
 */
-// package main -- go2cs converted at 2022 March 06 23:35:17 UTC
+
+// package main -- go2cs converted at 2022 March 13 06:42:52 UTC
 // Original source: C:\Program Files\Go\src\cmd\vet\doc.go
+namespace go;
 
 } // end main_package

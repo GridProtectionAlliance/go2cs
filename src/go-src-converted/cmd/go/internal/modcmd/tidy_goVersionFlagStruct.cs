@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:19:36 UTC
+//     Generated on 2022 March 13 06:32:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace @internal
 {
     public static partial class modcmd_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct goVersionFlag
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace @internal
             public static implicit operator goVersionFlag(NilType nil) => default(goVersionFlag);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static goVersionFlag goVersionFlag_cast(dynamic value)
         {
             return new goVersionFlag(value.v);

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:31:09 UTC
+//     Generated on 2022 March 13 06:41:37 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace @internal
 {
     public static partial class analysisflags_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct versionFlag
         {
             // Constructors
@@ -65,7 +65,7 @@ namespace @internal
             public static implicit operator versionFlag(NilType nil) => default(versionFlag);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static versionFlag versionFlag_cast(dynamic value)
         {
             return new versionFlag();

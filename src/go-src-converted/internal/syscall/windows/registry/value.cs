@@ -4,15 +4,15 @@
 
 // +build windows
 
-// package registry -- go2cs converted at 2022 March 06 22:13:16 UTC
+// package registry -- go2cs converted at 2022 March 13 06:44:32 UTC
 // import "internal/syscall/windows/registry" ==> using registry = go.@internal.syscall.windows.registry_package
 // Original source: C:\Program Files\Go\src\internal\syscall\windows\registry\value.go
-using errors = go.errors_package;
-using syscall = go.syscall_package;
-using utf16 = go.unicode.utf16_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go.@internal.syscall.windows;
+
+using errors = errors_package;
+using syscall = syscall_package;
+using utf16 = unicode.utf16_package;
+using @unsafe = @unsafe_package;
 
 public static partial class registry_package {
 
@@ -30,7 +30,6 @@ public static readonly nint RESOURCE_LIST = 8;
 public static readonly nint FULL_RESOURCE_DESCRIPTOR = 9;
 public static readonly nint RESOURCE_REQUIREMENTS_LIST = 10;
 public static readonly nint QWORD = 11;
-
 
  
 // ErrShortBuffer is returned when the buffer was too short for the operation.
@@ -65,7 +64,6 @@ public static (nint, uint, error) GetValue(this Key k, @string name, slice<byte>
         return (int(l), valtype, error.As(err)!);
     }
     return (int(l), valtype, error.As(null!)!);
-
 }
 
 public static (slice<byte>, uint, error) getValue(this Key k, @string name, slice<byte> buf) {
@@ -91,9 +89,7 @@ public static (slice<byte>, uint, error) getValue(this Key k, @string name, slic
             return (null, 0, error.As(err)!);
         }
         buf = make_slice<byte>(n);
-
     }
-
 }
 
 // GetStringValue retrieves the string value for the specified
@@ -118,7 +114,6 @@ public static (@string, uint, error) GetStringValue(this Key k, @string name) {
     }
     ptr<array<ushort>> u = new ptr<ptr<array<ushort>>>(@unsafe.Pointer(_addr_data[0])).slice(-1, len(data) / 2, len(data) / 2);
     return (syscall.UTF16ToString(u), typ, error.As(null!)!);
-
 }
 
 // GetMUIStringValue retrieves the localized string value for
@@ -160,7 +155,6 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
             return ("", error.As(err)!);
         }
         err = regLoadMUIString(syscall.Handle(k), pname, _addr_buf[0], uint32(len(buf)), _addr_buflen, 0, pdir);
-
     }
     while (err == syscall.ERROR_MORE_DATA) { // Grow buffer if needed
         if (buflen <= uint32(len(buf))) {
@@ -168,14 +162,12 @@ public static (@string, error) GetMUIStringValue(this Key k, @string name) {
         }
         buf = make_slice<ushort>(buflen);
         err = regLoadMUIString(syscall.Handle(k), pname, _addr_buf[0], uint32(len(buf)), _addr_buflen, 0, pdir);
-
     }
 
     if (err != null) {
         return ("", error.As(err)!);
     }
     return (syscall.UTF16ToString(buf), error.As(null!)!);
-
 }
 
 // ExpandString expands environment-variable strings and replaces
@@ -202,9 +194,7 @@ public static (@string, error) ExpandString(@string value) {
             return (syscall.UTF16ToString(r[..(int)n]), error.As(null!)!);
         }
         r = make_slice<ushort>(n);
-
     }
-
 }
 
 // GetStringsValue retrieves the []string value for the specified
@@ -242,7 +232,6 @@ public static (slice<@string>, uint, error) GetStringsValue(this Key k, @string 
             from = i + 1;
         }
     }    return (val, typ, error.As(null!)!);
-
 }
 
 // GetIntegerValue retrieves the integer value for the specified
@@ -272,8 +261,7 @@ public static (ulong, uint, error) GetIntegerValue(this Key k, @string name) {
         return (uint64(new ptr<ptr<ptr<ulong>>>(@unsafe.Pointer(_addr_data[0]))), QWORD, error.As(null!)!);
     else 
         return (0, typ, error.As(ErrUnexpectedType)!);
-    
-}
+    }
 
 // GetBinaryValue retrieves the binary value for the specified
 // value name associated with an open key k. It also returns the value's type.
@@ -293,7 +281,6 @@ public static (slice<byte>, uint, error) GetBinaryValue(this Key k, @string name
         return (null, typ, error.As(ErrUnexpectedType)!);
     }
     return (data, typ, error.As(null!)!);
-
 }
 
 public static error setValue(this Key k, @string name, uint valtype, slice<byte> data) {
@@ -305,7 +292,6 @@ public static error setValue(this Key k, @string name, uint valtype, slice<byte>
         return error.As(regSetValueEx(syscall.Handle(k), p, 0, valtype, null, 0))!;
     }
     return error.As(regSetValueEx(syscall.Handle(k), p, 0, valtype, _addr_data[0], uint32(len(data))))!;
-
 }
 
 // SetDWordValue sets the data and type of a name value
@@ -327,7 +313,6 @@ public static error setStringValue(this Key k, @string name, uint valtype, @stri
     }
     ptr<array<byte>> buf = new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_v[0])).slice(-1, len(v) * 2, len(v) * 2);
     return error.As(k.setValue(name, valtype, buf))!;
-
 }
 
 // SetStringValue sets the data and type of a name value
@@ -382,7 +367,7 @@ public static (slice<@string>, error) ReadValueNames(this Key k) {
     var names = make_slice<@string>(0, ki.ValueCount);
     var buf = make_slice<ushort>(ki.MaxValueNameLen + 1); // extra room for terminating null character
 loopItems:
-    for (var i = uint32(0); >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (var i = uint32(0); ; i++) {
         ref var l = ref heap(uint32(len(buf)), out ptr<var> _addr_l);
         while (true) {
             var err = regEnumValue(syscall.Handle(k), i, _addr_buf[0], _addr_l, null, null, null, null);
@@ -394,22 +379,16 @@ loopItems:
                 l = uint32(2 * len(buf));
                 buf = make_slice<ushort>(l);
                 continue;
-
             }
-
             if (err == _ERROR_NO_MORE_ITEMS) {
                 _breakloopItems = true;
                 break;
             }
-
             return (names, error.As(err)!);
-
         }
         names = append(names, syscall.UTF16ToString(buf[..(int)l]));
-
     }
     return (names, error.As(null!)!);
-
 }
 
 } // end registry_package

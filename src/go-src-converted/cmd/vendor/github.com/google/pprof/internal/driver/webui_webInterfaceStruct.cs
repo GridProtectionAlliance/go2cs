@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:23:33 UTC
+//     Generated on 2022 March 13 06:36:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -41,7 +41,7 @@ namespace @internal
 {
     public static partial class driver_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct webInterface
         {
             // Constructors
@@ -80,7 +80,7 @@ namespace @internal
             public static implicit operator webInterface(NilType nil) => default(webInterface);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static webInterface webInterface_cast(dynamic value)
         {
             return new webInterface(ref value.prof, ref value.options, value.help, ref value.templates, value.settingsFile);

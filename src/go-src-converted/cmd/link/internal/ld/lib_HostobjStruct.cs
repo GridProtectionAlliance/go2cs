@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:21:37 UTC
+//     Generated on 2022 March 13 06:34:36 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -51,7 +51,7 @@ namespace @internal
 {
     public static partial class ld_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Hostobj
         {
             // Constructors
@@ -92,7 +92,7 @@ namespace @internal
             public static implicit operator Hostobj(NilType nil) => default(Hostobj);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Hostobj Hostobj_cast(dynamic value)
         {
             return new Hostobj(value.ld, value.pkg, value.pn, value.file, value.off, value.length);

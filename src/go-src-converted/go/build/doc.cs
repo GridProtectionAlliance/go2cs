@@ -95,8 +95,10 @@
 // Import and ImportDir will still set the BinaryOnly flag in packages
 // containing these comments for use in tools and error messages.
 //
-// package build -- go2cs converted at 2022 March 06 22:42:52 UTC
+
+// package build -- go2cs converted at 2022 March 13 05:54:01 UTC
 // import "go/build" ==> using build = go.go.build_package
 // Original source: C:\Program Files\Go\src\go\build\doc.go
+namespace go.go;
 
 } // end build_package

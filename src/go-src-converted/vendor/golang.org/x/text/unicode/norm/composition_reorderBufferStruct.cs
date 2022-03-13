@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:49 UTC
+//     Generated on 2022 March 13 06:47:04 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace unicode
 {
     public static partial class norm_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct reorderBuffer
         {
             // Constructors
@@ -77,7 +77,7 @@ namespace unicode
             public static implicit operator reorderBuffer(NilType nil) => default(reorderBuffer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static reorderBuffer reorderBuffer_cast(dynamic value)
         {
             return new reorderBuffer(value.rune, value.@byte, value.nbyte, value.ss, value.nrune, value.f, value.src, value.nsrc, value.tmpBytes, value.@out, value.flushF);

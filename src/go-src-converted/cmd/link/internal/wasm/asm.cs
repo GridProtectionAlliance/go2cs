@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package wasm -- go2cs converted at 2022 March 06 23:20:21 UTC
+// package wasm -- go2cs converted at 2022 March 13 06:33:13 UTC
 // import "cmd/link/internal/wasm" ==> using wasm = go.cmd.link.@internal.wasm_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\wasm\asm.go
-using bytes = go.bytes_package;
-using objabi = go.cmd.@internal.objabi_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using regexp = go.regexp_package;
-
 namespace go.cmd.link.@internal;
+
+using bytes = bytes_package;
+using objabi = cmd.@internal.objabi_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using regexp = regexp_package;
 
 public static partial class wasm_package {
 
@@ -22,7 +22,6 @@ public static readonly nuint I32 = 0x7F;
 public static readonly nuint I64 = 0x7E;
 public static readonly nuint F32 = 0x7D;
 public static readonly nuint F64 = 0x7C;
-
 
 private static readonly nint sectionCustom = 0;
 private static readonly nint sectionType = 1;
@@ -36,7 +35,6 @@ private static readonly nint sectionStart = 8;
 private static readonly nint sectionElement = 9;
 private static readonly nint sectionCode = 10;
 private static readonly nint sectionData = 11;
-
 
 // funcValueOffset is the offset between the PC_F value of a function and the index of the function in WebAssembly
 private static readonly nuint funcValueOffset = 0x1000; // TODO(neelance): make function addresses play nice with heap addresses
@@ -87,7 +85,6 @@ private static (ptr<sym.Section>, nint, ulong) assignAddress(ptr<loader.Loader> 
     ldr.SetSymValue(s, int64(funcValueOffset + va / ld.MINFUNC) << 16); // va starts at zero
     va += uint64(ld.MINFUNC);
     return (_addr_sect!, n, va);
-
 }
 
 private partial struct wasmDataSect {
@@ -141,7 +138,6 @@ private static void asmb2(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr)
 
                 ri = ri__prev2;
             }
-
         }
         fn = fn__prev1;
     }
@@ -160,7 +156,6 @@ private static void asmb2(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr)
                 writeI32Const(wfn, 0);
                 wfn.WriteByte(0x0b); // end
                 buildid = ldr.Data(fn);
-
             }
             else
  { 
@@ -176,7 +171,6 @@ private static void asmb2(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr)
                         if (r.Siz() == 0) {
                             continue; // skip marker relocations
                         }
-
                         wfn.Write(P[(int)off..(int)r.Off()]);
                         off = r.Off();
                         var rs = ldr.ResolveABIAlias(r.Sym());
@@ -190,16 +184,13 @@ private static void asmb2(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr)
                         else 
                             ldr.Errorf(fn, "bad reloc type %d (%s)", r.Type(), sym.RelocName(ctxt.Arch, r.Type()));
                             continue;
-                        
-                    }
+                                            }
 
 
                     ri = ri__prev2;
                 }
                 wfn.Write(P[(int)off..]);
-
             }
-
             var typ = uint32(0);
             {
                 var (sig, ok) = wasmFuncTypes[ldr.SymName(fn)];
@@ -210,10 +201,8 @@ private static void asmb2(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _addr_ldr)
 
             }
 
-
             var name = nameRegexp.ReplaceAllString(ldr.SymName(fn), "_");
             fns[i] = addr(new wasmFunc(Name:name,Type:typ,Code:wfn.Bytes()));
-
         }
         fn = fn__prev1;
     }
@@ -251,7 +240,6 @@ private static uint lookupType(ptr<wasmFuncType> _addr_sig, ptr<slice<ptr<wasmFu
         }
     }    types.val = append(types.val, sig);
     return uint32(len(types.val) - 1);
-
 }
 
 private static long writeSecHeader(ptr<ld.Link> _addr_ctxt, byte id) {
@@ -261,7 +249,6 @@ private static long writeSecHeader(ptr<ld.Link> _addr_ctxt, byte id) {
     var sizeOffset = ctxt.Out.Offset();
     ctxt.Out.Write(make_slice<byte>(5)); // placeholder for length
     return sizeOffset;
-
 }
 
 private static void writeSecSize(ptr<ld.Link> _addr_ctxt, long sizeOffset) {
@@ -317,7 +304,6 @@ private static void writeTypeSec(ptr<ld.Link> _addr_ctxt, slice<ptr<wasmFuncType
             v = v__prev2;
         }
     }    writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeImportSec writes the section that lists the functions that get
@@ -333,9 +319,7 @@ private static void writeImportSec(ptr<ld.Link> _addr_ctxt, slice<ptr<wasmFunc>>
         writeName(ctxt.Out, fn.Name);
         ctxt.Out.WriteByte(0x00); // func import
         writeUleb128(ctxt.Out, uint64(fn.Type));
-
     }    writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeFunctionSec writes the section that declares the types of functions.
@@ -366,7 +350,6 @@ private static void writeTableSec(ptr<ld.Link> _addr_ctxt, slice<ptr<wasmFunc>> 
     writeUleb128(ctxt.Out, numElements); // min
 
     writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeMemorySec writes the section that declares linear memories. Currently one linear memory is being used.
@@ -390,7 +373,6 @@ private static void writeMemorySec(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _
     writeUleb128(ctxt.Out, initialSize / wasmPageSize); // minimum (initial) memory size
 
     writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeGlobalSec writes the section that declares global variables.
@@ -413,7 +395,6 @@ private static void writeGlobalSec(ptr<ld.Link> _addr_ctxt) {
             writeI64Const(ctxt.Out, 0);
                 ctxt.Out.WriteByte(0x0b); // end
     }    writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeExportSec writes the section that declares exports.
@@ -438,7 +419,6 @@ private static void writeExportSec(ptr<ld.Link> _addr_ctxt, ptr<loader.Loader> _
     writeUleb128(ctxt.Out, 0); // memidx
 
     writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeElementSec writes the section that initializes the tables declared by the "table" section.
@@ -461,7 +441,6 @@ private static void writeElementSec(ptr<ld.Link> _addr_ctxt, ulong numImports, u
     }
 
     writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeElementSec writes the section that provides the function bodies for the functions
@@ -476,7 +455,6 @@ private static void writeCodeSec(ptr<ld.Link> _addr_ctxt, slice<ptr<wasmFunc>> f
         writeUleb128(ctxt.Out, uint64(len(fn.Code)));
         ctxt.Out.Write(fn.Code);
     }    writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeDataSec writes the section that provides data that will be used to initialize the linear memory.
@@ -542,20 +520,13 @@ private static void writeDataSec(ptr<ld.Link> _addr_ctxt) {
                     if (zeroEnd - segmentEnd >= segmentOverhead || zeroEnd == dataLen) {
                         break;
                     }
-
                     segmentEnd = zeroEnd;
-
                 }
-
-
             }
-
             segments = append(segments, addr(new dataSegment(offset:offset,data:data[:segmentEnd],)));
             data = data[(int)zeroEnd..];
             offset += zeroEnd;
-
         }
-
     }    writeUleb128(ctxt.Out, uint64(len(segments))); // number of data entries
     foreach (var (_, seg) in segments) {
         writeUleb128(ctxt.Out, 0); // memidx
@@ -563,9 +534,7 @@ private static void writeDataSec(ptr<ld.Link> _addr_ctxt) {
         ctxt.Out.WriteByte(0x0b); // end
         writeUleb128(ctxt.Out, uint64(len(seg.data)));
         ctxt.Out.Write(seg.data);
-
     }    writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 // writeProducerSec writes an optional section that reports the source language and compiler version.
@@ -588,7 +557,6 @@ private static void writeProducerSec(ptr<ld.Link> _addr_ctxt) {
     writeName(ctxt.Out, buildcfg.Version); // value: version
 
     writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 private static var nameRegexp = regexp.MustCompile("[^\\w\\.]");
@@ -610,7 +578,6 @@ private static void writeNameSec(ptr<ld.Link> _addr_ctxt, nint firstFnIndex, sli
     }    writeSecSize(_addr_ctxt, sizeOffset2);
 
     writeSecSize(_addr_ctxt, sizeOffset);
-
 }
 
 private partial interface nameWriter {
@@ -619,13 +586,11 @@ private partial interface nameWriter {
 private static void writeI32Const(io.ByteWriter w, int v) {
     w.WriteByte(0x41); // i32.const
     writeSleb128(w, int64(v));
-
 }
 
 private static void writeI64Const(io.ByteWriter w, long v) {
     w.WriteByte(0x42); // i64.const
     writeSleb128(w, v);
-
 }
 
 private static void writeName(nameWriter w, @string name) {
@@ -647,9 +612,7 @@ private static void writeUleb128(io.ByteWriter w, ulong v) {
             c |= 0x80;
         }
         w.WriteByte(c);
-
     }
-
 }
 
 private static void writeUleb128FixedLength(io.ByteWriter w, ulong v, nint length) => func((_, panic, _) => {
@@ -660,7 +623,6 @@ private static void writeUleb128FixedLength(io.ByteWriter w, ulong v, nint lengt
             c |= 0x80;
         }
         w.WriteByte(c);
-
     }
     if (v != 0) {
         panic("writeUleb128FixedLength: length too small");
@@ -678,9 +640,7 @@ private static void writeSleb128(io.ByteWriter w, long v) {
             c |= 0x80;
         }
         w.WriteByte(c);
-
     }
-
 }
 
 } // end wasm_package

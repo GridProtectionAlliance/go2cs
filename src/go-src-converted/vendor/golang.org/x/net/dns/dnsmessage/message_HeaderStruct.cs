@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:37:10 UTC
+//     Generated on 2022 March 13 06:45:25 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -26,7 +26,7 @@ namespace dns
 {
     public static partial class dnsmessage_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct header
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace dns
             public static implicit operator header(NilType nil) => default(header);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static header header_cast(dynamic value)
         {
             return new header(value.id, value.bits, value.questions, value.answers, value.authorities, value.additionals);

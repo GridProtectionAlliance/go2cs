@@ -2,26 +2,27 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package runtime -- go2cs converted at 2022 March 06 22:11:17 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:26:46 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\runtime1.go
-using bytealg = go.@internal.bytealg_package;
-using atomic = go.runtime.@internal.atomic_package;
-using sys = go.runtime.@internal.sys_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using bytealg = @internal.bytealg_package;
+using atomic = runtime.@internal.atomic_package;
+using sys = runtime.@internal.sys_package;
+using @unsafe = @unsafe_package;
+
+
+// Keep a cached value to make gotraceback fast,
+// since we call it on every call to gentraceback.
+// The cached value is a uint32 in which the low bits
+// are the "crash" and "all" settings and the remaining
+// bits are the traceback value (0 off, 1 on, 2 include system).
 
 public static partial class runtime_package {
 
-    // Keep a cached value to make gotraceback fast,
-    // since we call it on every call to gentraceback.
-    // The cached value is a uint32 in which the low bits
-    // are the "crash" and "all" settings and the remaining
-    // bits are the traceback value (0 off, 1 on, 2 include system).
 private static readonly nint tracebackCrash = 1 << (int)(iota);
 private static readonly tracebackShift tracebackAll = iota;
-
 
 private static uint traceback_cache = 2 << (int)(tracebackShift);
 private static uint traceback_env = default;
@@ -52,7 +53,6 @@ private static (int, bool, bool) gotraceback() {
         level = int32(t >> (int)(tracebackShift));
     }
     return ;
-
 }
 
 private static int argc = default;private static ptr<ptr<byte>> argv;
@@ -81,7 +81,6 @@ private static void goargs() {
     for (var i = int32(0); i < argc; i++) {
         argslice[i] = gostringnocopy(argv_index(_addr_argv, i));
     }
-
 }
 
 private static void goenvs_unix() { 
@@ -97,7 +96,6 @@ private static void goenvs_unix() {
     for (var i = int32(0); i < n; i++) {
         envs[i] = gostring(argv_index(_addr_argv, argc + 1 + i));
     }
-
 }
 
 private static slice<@string> environ() {
@@ -241,36 +239,36 @@ private static void check() {
     if (m[0] != 0xff || m[1] != 0x1 || m[2] != 0xff || m[3] != 0xff) {
         throw("atomicand8");
     }
-    (uint64.val)(@unsafe.Pointer(_addr_j)).val;
+    (uint64.val).val;
 
-    ~uint64(0);
+    (@unsafe.Pointer(_addr_j)) = ~uint64(0);
     if (j == j) {
         throw("float64nan");
     }
     if (!(j != j)) {
         throw("float64nan1");
     }
-    (uint64.val)(@unsafe.Pointer(_addr_j1)).val;
+    (uint64.val).val;
 
-    ~uint64(1);
+    (@unsafe.Pointer(_addr_j1)) = ~uint64(1);
     if (j == j1) {
         throw("float64nan2");
     }
     if (!(j != j1)) {
         throw("float64nan3");
     }
-    (uint32.val)(@unsafe.Pointer(_addr_i)).val;
+    (uint32.val).val;
 
-    ~uint32(0);
+    (@unsafe.Pointer(_addr_i)) = ~uint32(0);
     if (i == i) {
         throw("float32nan");
     }
     if (i == i) {
         throw("float32nan1");
     }
-    (uint32.val)(@unsafe.Pointer(_addr_i1)).val;
+    (uint32.val).val;
 
-    ~uint32(1);
+    (@unsafe.Pointer(_addr_i1)) = ~uint32(1);
     if (i == i1) {
         throw("float32nan2");
     }
@@ -314,7 +312,6 @@ private static void parsedebugvars() {
         // management systems that respond to memory usage.
         // Hence, default to MADV_DONTNEED.
         debug.madvdontneed = 1;
-
     }
     {
         var p = gogetenv("GODEBUG");
@@ -329,12 +326,10 @@ private static void parsedebugvars() {
  {
                 (field, p) = (p[..(int)i], p[(int)i + 1..]);
             }
-
             i = bytealg.IndexByteString(field, '=');
             if (i < 0) {
                 continue;
             }
-
             var key = field[..(int)i];
             var value = field[(int)i + 1..]; 
 
@@ -354,7 +349,6 @@ private static void parsedebugvars() {
                     n = n__prev2;
 
                 }
-
             }
             else
  {
@@ -372,13 +366,9 @@ private static void parsedebugvars() {
                             n = n__prev3;
 
                         }
-
                     }
-
                 }
-
             }
-
         }
     }
 
@@ -386,7 +376,6 @@ private static void parsedebugvars() {
 
     setTraceback(gogetenv("GOTRACEBACK"));
     traceback_env = traceback_cache;
-
 }
 
 //go:linkname setTraceback runtime/debug.SetTraceback
@@ -420,7 +409,6 @@ private static void setTraceback(@string level) {
                 }
 
             }
-
             break;
     } 
     // when C owns the process, simply exit'ing the process on fatal errors
@@ -431,7 +419,6 @@ private static void setTraceback(@string level) {
     t |= traceback_env;
 
     atomic.Store(_addr_traceback_cache, t);
-
 }
 
 // Poor mans 64-bit division.
@@ -450,7 +437,6 @@ private static int timediv(long v, int div, ptr<int> _addr_rem) {
             // Before this for loop, res was 0, thus all these
             // power of 2 increments are now just bitsets.
             res |= 1 << (int)(uint(bit));
-
         }
     }
     if (v >= int64(div)) {
@@ -458,13 +444,11 @@ private static int timediv(long v, int div, ptr<int> _addr_rem) {
             rem = 0;
         }
         return 0x7fffffff;
-
     }
     if (rem != null) {
         rem = int32(v);
     }
     return res;
-
 }
 
 // Helpers for Go. Must be NOSPLIT, must only call NOSPLIT functions, and must not block.
@@ -485,7 +469,6 @@ private static void releasem(ptr<m> _addr_mp) {
     if (mp.locks == 0 && _g_.preempt) { 
         // restore the preemption request in case we've cleared it in newstack
         _g_.stackguard0 = stackPreempt;
-
     }
 }
 
@@ -548,11 +531,9 @@ private static int reflect_addReflectOff(unsafe.Pointer ptr) {
         reflectOffs.next--; // use negative offsets as IDs to aid debugging
         reflectOffs.m[id] = ptr;
         reflectOffs.minv[ptr] = id;
-
     }
     reflectOffsUnlock();
     return id;
-
 }
 
 } // end runtime_package

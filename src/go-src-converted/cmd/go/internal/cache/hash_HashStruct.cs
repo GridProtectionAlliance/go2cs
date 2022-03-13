@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:17:17 UTC
+//     Generated on 2022 March 13 06:30:35 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -32,7 +32,7 @@ namespace @internal
 {
     public static partial class cache_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Hash
         {
             // Constructors
@@ -67,7 +67,7 @@ namespace @internal
             public static implicit operator Hash(NilType nil) => default(Hash);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Hash Hash_cast(dynamic value)
         {
             return new Hash(value.h, value.name, ref value.buf);

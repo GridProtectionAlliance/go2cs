@@ -37,24 +37,26 @@
 // nor abnormal control flow caused by panic.  If you need this
 // information, use golang.org/x/tools/go/ssa instead.
 //
-// package cfg -- go2cs converted at 2022 March 06 23:35:06 UTC
+
+// package cfg -- go2cs converted at 2022 March 13 06:42:40 UTC
 // import "cmd/vendor/golang.org/x/tools/go/cfg" ==> using cfg = go.cmd.vendor.golang.org.x.tools.go.cfg_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\tools\go\cfg\cfg.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using ast = go.go.ast_package;
-using format = go.go.format_package;
-using token = go.go.token_package;
-using System;
-
-
 namespace go.cmd.vendor.golang.org.x.tools.go;
 
+using bytes = bytes_package;
+using fmt = fmt_package;
+using ast = go.ast_package;
+using format = go.format_package;
+using token = go.token_package;
+
+
+// A CFG represents the control-flow graph of a single function.
+//
+// The entry point is Blocks[0]; there may be multiple return blocks.
+
+using System;
 public static partial class cfg_package {
 
-    // A CFG represents the control-flow graph of a single function.
-    //
-    // The entry point is Blocks[0]; there may be multiple return blocks.
 public partial struct CFG {
     public slice<ptr<Block>> Blocks; // block[0] is entry; order otherwise undefined
 }
@@ -109,7 +111,6 @@ public static ptr<CFG> New(ptr<ast.BlockStmt> _addr_body, Func<ptr<ast.CallExpr>
         b.add(addr(new ast.ReturnStmt(Return:body.End()-1,)));
     }
     return _addr_b.cfg!;
-
 }
 
 private static @string String(this ptr<Block> _addr_b) {
@@ -127,7 +128,6 @@ private static ptr<ast.ReturnStmt> Return(this ptr<Block> _addr_b) {
         ret, _ = b.Nodes[len(b.Nodes) - 1]._<ptr<ast.ReturnStmt>>();
     }
     return ;
-
 }
 
 // Format formats the control-flow graph for ease of debugging.
@@ -148,9 +148,7 @@ private static @string Format(this ptr<CFG> _addr_g, ptr<token.FileSet> _addr_fs
             buf.WriteByte('\n');
         }
         buf.WriteByte('\n');
-
     }    return buf.String();
-
 }
 
 private static @string formatNode(ptr<token.FileSet> _addr_fset, ast.Node n) {
@@ -160,7 +158,6 @@ private static @string formatNode(ptr<token.FileSet> _addr_fset, ast.Node n) {
     format.Node(_addr_buf, fset, n); 
     // Indent secondary lines by a tab.
     return string(bytes.Replace(buf.Bytes(), (slice<byte>)"\n", (slice<byte>)"\n\t", -1));
-
 }
 
 } // end cfg_package

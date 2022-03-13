@@ -19,8 +19,10 @@
 //
 // No other features of this package were included in Go 1.13, and at present
 // there are no plans to include any of them.
-// package xerrors -- go2cs converted at 2022 March 06 23:35:16 UTC
+
+// package xerrors -- go2cs converted at 2022 March 13 06:42:51 UTC
 // import "cmd/vendor/golang.org/x/xerrors" ==> using xerrors = go.cmd.vendor.golang.org.x.xerrors_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\xerrors\doc.go
+namespace go.cmd.vendor.golang.org.x;
 
 } // end xerrors_package

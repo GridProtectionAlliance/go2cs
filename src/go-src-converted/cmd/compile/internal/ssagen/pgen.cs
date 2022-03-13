@@ -2,41 +2,42 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssagen -- go2cs converted at 2022 March 06 23:09:47 UTC
+// package ssagen -- go2cs converted at 2022 March 13 06:23:02 UTC
 // import "cmd/compile/internal/ssagen" ==> using ssagen = go.cmd.compile.@internal.ssagen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssagen\pgen.go
-using buildcfg = go.@internal.buildcfg_package;
-using race = go.@internal.race_package;
-using rand = go.math.rand_package;
-using sort = go.sort_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using buildcfg = @internal.buildcfg_package;
+using race = @internal.race_package;
+using rand = math.rand_package;
+using sort = sort_package;
+using sync = sync_package;
+using time = time_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+
+
+// cmpstackvarlt reports whether the stack variable a sorts before b.
+//
+// Sort the list of stack variables. Autos after anything else,
+// within autos, unused after used, within used, things with
+// pointers first, zeroed things first, and then decreasing size.
+// Because autos are laid out in decreasing addresses
+// on the stack, pointers first, zeroed things first and decreasing size
+// really means, in memory, things with pointers needing zeroing at
+// the top of the stack and increasing in size.
+// Non-autos sort on offset.
+
+using System;
 public static partial class ssagen_package {
 
-    // cmpstackvarlt reports whether the stack variable a sorts before b.
-    //
-    // Sort the list of stack variables. Autos after anything else,
-    // within autos, unused after used, within used, things with
-    // pointers first, zeroed things first, and then decreasing size.
-    // Because autos are laid out in decreasing addresses
-    // on the stack, pointers first, zeroed things first and decreasing size
-    // really means, in memory, things with pointers needing zeroing at
-    // the top of the stack and increasing in size.
-    // Non-autos sort on offset.
 private static bool cmpstackvarlt(ptr<ir.Name> _addr_a, ptr<ir.Name> _addr_b) {
     ref ir.Name a = ref _addr_a.val;
     ref ir.Name b = ref _addr_b.val;
@@ -64,7 +65,6 @@ private static bool cmpstackvarlt(ptr<ir.Name> _addr_a, ptr<ir.Name> _addr_b) {
         return a.Type().Width > b.Type().Width;
     }
     return a.Sym().Name < b.Sym().Name;
-
 }
 
 // byStackvar implements sort.Interface for []*Node using cmpstackvarlt.
@@ -112,7 +112,6 @@ private static void AllocFrame(this ptr<ssafn> _addr_s, ptr<ssa.Func> _addr_f) {
             }
 
         }
-
     }    foreach (var (_, b) in f.Blocks) {
         foreach (var (_, v) in b.Values) {
             {
@@ -128,9 +127,7 @@ private static void AllocFrame(this ptr<ssafn> _addr_s, ptr<ssa.Func> _addr_f) {
                             // ignore VarDef, look for "real" uses.
                             // TODO: maybe do this for PAUTO as well?
                             continue;
-
                         }
-
                         fallthrough = true;
                     }
                     if (fallthrough || n.Class == ir.PPARAM || n.Class == ir.PAUTO)
@@ -140,13 +137,11 @@ private static void AllocFrame(this ptr<ssafn> _addr_s, ptr<ssa.Func> _addr_f) {
                     }
 
                     __switch_break0:;
-
                 }
 
                 n = n__prev1;
 
             }
-
         }
     }    sort.Sort(byStackVar(fn.Dcl)); 
 
@@ -161,29 +156,23 @@ private static void AllocFrame(this ptr<ssafn> _addr_s, ptr<ssa.Func> _addr_f) {
             if (n.Op() != ir.ONAME || n.Class != ir.PAUTO && !(n.Class == ir.PPARAMOUT && n.IsOutputParamInRegisters())) { 
                 // i.e., stack assign if AUTO, or if PARAMOUT in registers (which has no predefined spill locations)
                 continue;
-
             }
-
             if (!n.Used()) {
                 fn.Dcl = fn.Dcl[..(int)i];
                 break;
             }
-
             types.CalcSize(n.Type());
             var w = n.Type().Width;
             if (w >= types.MaxWidth || w < 0) {
                 @base.Fatalf("bad width");
             }
-
             if (w == 0 && lastHasPtr) { 
                 // Pad between a pointer-containing object and a zero-sized object.
                 // This prevents a pointer to the zero-sized object from being interpreted
                 // as a pointer to the pointer-containing object (and causing it
                 // to be scanned when it shouldn't be). See issue 24993.
                 w = 1;
-
             }
-
             s.stksize += w;
             s.stksize = types.Rnd(s.stksize, int64(n.Type().Align));
             if (n.Type().HasPointers()) {
@@ -194,16 +183,13 @@ private static void AllocFrame(this ptr<ssafn> _addr_s, ptr<ssa.Func> _addr_f) {
  {
                 lastHasPtr = false;
             }
-
             n.SetFrameOffset(-s.stksize);
-
         }
         n = n__prev1;
     }
 
     s.stksize = types.Rnd(s.stksize, int64(types.RegSize));
     s.stkptrsize = types.Rnd(s.stkptrsize, int64(types.RegSize));
-
 }
 
 private static readonly nint maxStackSize = 1 << 30;
@@ -248,7 +234,6 @@ public static void Compile(ptr<ir.Func> _addr_fn, nint worker) => func((defer, _
     pp.Flush(); // assemble, fill in boilerplate, etc.
     // fieldtrack must be called after pp.Flush. See issue 20014.
     fieldtrack(_addr_pp.Text.From.Sym, fn.FieldTrack);
-
 });
 
 private static void init() {
@@ -286,7 +271,6 @@ public static int StackOffset(ssa.LocalSlot slot) {
 
     __switch_break1:;
     return int32(off + slot.Off);
-
 }
 
 // fieldtrack adds R_USEFIELD relocations to fnsym to record any
@@ -337,9 +321,7 @@ private static sync.Mutex largeStackFramesMu = default;private static slice<larg
 
 public static void CheckLargeStacks() { 
     // Check whether any of the functions we have compiled have gigantic stack frames.
-    sort.Slice(largeStackFrames, (i, j) => {
-        return largeStackFrames[i].pos.Before(largeStackFrames[j].pos);
-    });
+    sort.Slice(largeStackFrames, (i, j) => largeStackFrames[i].pos.Before(largeStackFrames[j].pos));
     foreach (var (_, large) in largeStackFrames) {
         if (large.callee != 0) {
             @base.ErrorfAt(large.pos, "stack frame too large (>1GB): %d MB locals + %d MB args + %d MB callee", large.locals >> 20, large.args >> 20, large.callee >> 20);

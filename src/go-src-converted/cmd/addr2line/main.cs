@@ -15,19 +15,20 @@
 //
 // This tool is intended for use only by pprof; its interface may change or
 // it may be deleted entirely in future releases.
-// package main -- go2cs converted at 2022 March 06 22:31:46 UTC
+
+// package main -- go2cs converted at 2022 March 13 05:42:40 UTC
 // Original source: C:\Program Files\Go\src\cmd\addr2line\main.go
-using bufio = go.bufio_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using log = go.log_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using objfile = go.cmd.@internal.objfile_package;
-
 namespace go;
+
+using bufio = bufio_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using log = log_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using objfile = cmd.@internal.objfile_package;
 
 public static partial class main_package {
 
@@ -81,7 +82,6 @@ private static void Main() => func((defer, _, _) => {
             // We don't have an implementation.
             fmt.Fprintf(stdout, "!reverse translation not implemented\n");
             continue;
-
         }
         var (pc, _) = strconv.ParseUint(strings.TrimPrefix(p, "0x"), 16, 64);
         var (file, line, fn) = tab.PCToLine(pc);
@@ -95,10 +95,8 @@ private static void Main() => func((defer, _, _) => {
             line = 0;
         }
         fmt.Fprintf(stdout, "%s\n%s:%d\n", name, file, line);
-
     }
     stdout.Flush();
-
 });
 
 } // end main_package

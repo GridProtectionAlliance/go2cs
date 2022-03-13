@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package http -- go2cs converted at 2022 March 06 22:23:09 UTC
+// package http -- go2cs converted at 2022 March 13 05:37:33 UTC
 // import "net/http" ==> using http = go.net.http_package
 // Original source: C:\Program Files\Go\src\net\http\sniff.go
-using bytes = go.bytes_package;
-using binary = go.encoding.binary_package;
-
 namespace go.net;
+
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+
+
+// The algorithm uses at most sniffLen bytes to make its decision.
 
 public static partial class http_package {
 
-    // The algorithm uses at most sniffLen bytes to make its decision.
 private static readonly nint sniffLen = 512;
 
 // DetectContentType implements the algorithm described
@@ -47,7 +49,6 @@ public static @string DetectContentType(slice<byte> data) {
             }
 
         }
-
     }    return "application/octet-stream"; // fallback
 }
 
@@ -68,7 +69,6 @@ private static bool isWS(byte b) {
             break;
     }
     return false;
-
 }
 
 // isTT reports whether the provided byte is a tag-terminating byte (0xTT)
@@ -82,7 +82,6 @@ private static bool isTT(byte b) {
             break;
     }
     return false;
-
 }
 
 private partial interface sniffSig {
@@ -104,7 +103,6 @@ private static @string match(this ptr<exactSig> _addr_e, slice<byte> data, nint 
         return e.ct;
     }
     return "";
-
 }
 
 private partial struct maskedSig {
@@ -135,7 +133,6 @@ private static @string match(this ptr<maskedSig> _addr_m, slice<byte> data, nint
             return "";
         }
     }    return m.ct;
-
 }
 
 private partial struct htmlSig { // : slice<byte>
@@ -158,7 +155,6 @@ private static @string match(this htmlSig h, slice<byte> data, nint firstNonWS) 
         return "";
     }
     return "text/html; charset=utf-8";
-
 }
 
 private static slice<byte> mp4ftype = (slice<byte>)"ftyp";
@@ -189,15 +185,12 @@ private static @string match(this mp4Sig _p0, slice<byte> data, nint firstNonWS)
                 continue;
             st += 4;
             }
-
             if (bytes.Equal(data[(int)st..(int)st + 3], mp4)) {
                 return "video/mp4";
             }
-
         }
     }
     return "";
-
 }
 
 private partial struct textSig {
@@ -209,9 +202,7 @@ private static @string match(this textSig _p0, slice<byte> data, nint firstNonWS
 
         if (b <= 0x08 || b == 0x0B || 0x0E <= b && b <= 0x1A || 0x1C <= b && b <= 0x1F) 
             return "";
-        
-    }    return "text/plain; charset=utf-8";
-
+            }    return "text/plain; charset=utf-8";
 }
 
 } // end http_package

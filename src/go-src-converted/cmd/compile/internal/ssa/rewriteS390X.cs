@@ -1,14 +1,14 @@
 // Code generated from gen/S390X.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:08:08 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:21:23 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewriteS390X.go
-using math = go.math_package;
-using types = go.cmd.compile.@internal.types_package;
-using s390x = go.cmd.@internal.obj.s390x_package;
-
 namespace go.cmd.compile.@internal;
+
+using math = math_package;
+using types = cmd.compile.@internal.types_package;
+using s390x = cmd.@internal.obj.s390x_package;
 
 public static partial class ssa_package {
 
@@ -882,7 +882,6 @@ private static bool rewriteValueS390X(ptr<Value> _addr_v) {
         v.Op = OpS390XMOVBZreg;
         return true;
         return false;
-
 }
 private static bool rewriteValueS390X_OpAdd32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -902,7 +901,6 @@ private static bool rewriteValueS390X_OpAdd32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAdd64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -922,7 +920,6 @@ private static bool rewriteValueS390X_OpAdd64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -938,7 +935,6 @@ private static bool rewriteValueS390X_OpAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicAdd32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -960,7 +956,6 @@ private static bool rewriteValueS390X_OpAtomicAdd32(ptr<Value> _addr_v) {
         v.AddArg2(val, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicAdd64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -982,7 +977,6 @@ private static bool rewriteValueS390X_OpAtomicAdd64(ptr<Value> _addr_v) {
         v.AddArg2(val, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicAnd8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1012,7 +1006,6 @@ private static bool rewriteValueS390X_OpAtomicAnd8(ptr<Value> _addr_v) {
         v.AddArg3(ptr, v0, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicCompareAndSwap32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1032,7 +1025,6 @@ private static bool rewriteValueS390X_OpAtomicCompareAndSwap32(ptr<Value> _addr_
         v.AddArg4(ptr, old, new_, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicCompareAndSwap64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1052,7 +1044,6 @@ private static bool rewriteValueS390X_OpAtomicCompareAndSwap64(ptr<Value> _addr_
         v.AddArg4(ptr, old, new_, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicExchange32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1070,7 +1061,6 @@ private static bool rewriteValueS390X_OpAtomicExchange32(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicExchange64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1088,7 +1078,6 @@ private static bool rewriteValueS390X_OpAtomicExchange64(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicLoad32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1104,7 +1093,6 @@ private static bool rewriteValueS390X_OpAtomicLoad32(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicLoad64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1120,7 +1108,6 @@ private static bool rewriteValueS390X_OpAtomicLoad64(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicLoad8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1136,7 +1123,6 @@ private static bool rewriteValueS390X_OpAtomicLoad8(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicLoadAcq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1152,7 +1138,6 @@ private static bool rewriteValueS390X_OpAtomicLoadAcq32(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicLoadPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1168,7 +1153,6 @@ private static bool rewriteValueS390X_OpAtomicLoadPtr(ptr<Value> _addr_v) {
         v.AddArg2(ptr, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicOr8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1197,7 +1181,6 @@ private static bool rewriteValueS390X_OpAtomicOr8(ptr<Value> _addr_v) {
         v.AddArg3(ptr, v0, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicStore32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1218,7 +1201,6 @@ private static bool rewriteValueS390X_OpAtomicStore32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicStore64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1239,7 +1221,6 @@ private static bool rewriteValueS390X_OpAtomicStore64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicStore8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1260,7 +1241,6 @@ private static bool rewriteValueS390X_OpAtomicStore8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicStorePtrNoWB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1281,7 +1261,6 @@ private static bool rewriteValueS390X_OpAtomicStorePtrNoWB(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAtomicStoreRel32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1299,7 +1278,6 @@ private static bool rewriteValueS390X_OpAtomicStoreRel32(ptr<Value> _addr_v) {
         v.AddArg3(ptr, val, mem);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpAvg64u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1322,7 +1300,6 @@ private static bool rewriteValueS390X_OpAvg64u(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpBitLen64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1342,7 +1319,6 @@ private static bool rewriteValueS390X_OpBitLen64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpCeil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1357,7 +1333,6 @@ private static bool rewriteValueS390X_OpCeil(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpConst16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1370,7 +1345,6 @@ private static bool rewriteValueS390X_OpConst16(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpConst32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1383,7 +1357,6 @@ private static bool rewriteValueS390X_OpConst32(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpConst64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1396,7 +1369,6 @@ private static bool rewriteValueS390X_OpConst64(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpConst8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1409,7 +1381,6 @@ private static bool rewriteValueS390X_OpConst8(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(int64(val));
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpConstBool(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1422,7 +1393,6 @@ private static bool rewriteValueS390X_OpConstBool(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(b2i(t));
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpConstNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1434,7 +1404,6 @@ private static bool rewriteValueS390X_OpConstNil(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpCtz32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1464,7 +1433,6 @@ private static bool rewriteValueS390X_OpCtz32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpCtz64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1492,7 +1460,6 @@ private static bool rewriteValueS390X_OpCtz64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpDiv16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1514,7 +1481,6 @@ private static bool rewriteValueS390X_OpDiv16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpDiv16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1536,7 +1502,6 @@ private static bool rewriteValueS390X_OpDiv16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpDiv32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1556,7 +1521,6 @@ private static bool rewriteValueS390X_OpDiv32(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpDiv32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1576,7 +1540,6 @@ private static bool rewriteValueS390X_OpDiv32u(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpDiv64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1592,7 +1555,6 @@ private static bool rewriteValueS390X_OpDiv64(ptr<Value> _addr_v) {
         v.AddArg2(x, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpDiv8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1614,7 +1576,6 @@ private static bool rewriteValueS390X_OpDiv8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpDiv8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1636,7 +1597,6 @@ private static bool rewriteValueS390X_OpDiv8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1665,7 +1625,6 @@ private static bool rewriteValueS390X_OpEq16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1690,7 +1649,6 @@ private static bool rewriteValueS390X_OpEq32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1715,7 +1673,6 @@ private static bool rewriteValueS390X_OpEq32F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1740,7 +1697,6 @@ private static bool rewriteValueS390X_OpEq64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1765,7 +1721,6 @@ private static bool rewriteValueS390X_OpEq64F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1794,7 +1749,6 @@ private static bool rewriteValueS390X_OpEq8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1823,7 +1777,6 @@ private static bool rewriteValueS390X_OpEqB(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpEqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1848,7 +1801,6 @@ private static bool rewriteValueS390X_OpEqPtr(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpFMA(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1866,7 +1818,6 @@ private static bool rewriteValueS390X_OpFMA(ptr<Value> _addr_v) {
         v.AddArg3(z, x, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpFloor(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1881,7 +1832,6 @@ private static bool rewriteValueS390X_OpFloor(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpHmul32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1906,7 +1856,6 @@ private static bool rewriteValueS390X_OpHmul32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpHmul32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1931,7 +1880,6 @@ private static bool rewriteValueS390X_OpHmul32u(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpITab(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1948,10 +1896,8 @@ private static bool rewriteValueS390X_OpITab(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpIsInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1976,7 +1922,6 @@ private static bool rewriteValueS390X_OpIsInBounds(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpIsNonNil(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2000,7 +1945,6 @@ private static bool rewriteValueS390X_OpIsNonNil(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpIsSliceInBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2025,7 +1969,6 @@ private static bool rewriteValueS390X_OpIsSliceInBounds(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2054,7 +1997,6 @@ private static bool rewriteValueS390X_OpLeq16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2083,7 +2025,6 @@ private static bool rewriteValueS390X_OpLeq16U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2108,7 +2049,6 @@ private static bool rewriteValueS390X_OpLeq32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2133,7 +2073,6 @@ private static bool rewriteValueS390X_OpLeq32F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2158,7 +2097,6 @@ private static bool rewriteValueS390X_OpLeq32U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2183,7 +2121,6 @@ private static bool rewriteValueS390X_OpLeq64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2208,7 +2145,6 @@ private static bool rewriteValueS390X_OpLeq64F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2233,7 +2169,6 @@ private static bool rewriteValueS390X_OpLeq64U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2262,7 +2197,6 @@ private static bool rewriteValueS390X_OpLeq8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLeq8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2291,7 +2225,6 @@ private static bool rewriteValueS390X_OpLeq8U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2320,7 +2253,6 @@ private static bool rewriteValueS390X_OpLess16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess16U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2349,7 +2281,6 @@ private static bool rewriteValueS390X_OpLess16U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2374,7 +2305,6 @@ private static bool rewriteValueS390X_OpLess32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2399,7 +2329,6 @@ private static bool rewriteValueS390X_OpLess32F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess32U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2424,7 +2353,6 @@ private static bool rewriteValueS390X_OpLess32U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2449,7 +2377,6 @@ private static bool rewriteValueS390X_OpLess64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2474,7 +2401,6 @@ private static bool rewriteValueS390X_OpLess64F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2499,7 +2425,6 @@ private static bool rewriteValueS390X_OpLess64U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2528,7 +2453,6 @@ private static bool rewriteValueS390X_OpLess8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLess8U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2557,7 +2481,6 @@ private static bool rewriteValueS390X_OpLess8U(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2577,7 +2500,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitInt(t) && isSigned(t)
@@ -2592,7 +2514,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitInt(t) && !isSigned(t)
@@ -2607,7 +2528,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWZload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is16BitInt(t) && isSigned(t)
@@ -2622,7 +2542,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is16BitInt(t) && !isSigned(t)
@@ -2637,7 +2556,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is8BitInt(t) && isSigned(t)
@@ -2652,7 +2570,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: (t.IsBoolean() || (is8BitInt(t) && !isSigned(t)))
@@ -2667,7 +2584,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is32BitFloat(t)
@@ -2682,7 +2598,6 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XFMOVSload);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitFloat(t)
@@ -2697,10 +2612,8 @@ private static bool rewriteValueS390X_OpLoad(ptr<Value> _addr_v) {
         v.reset(OpS390XFMOVDload);
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpLocalAddr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2716,7 +2629,6 @@ private static bool rewriteValueS390X_OpLocalAddr(ptr<Value> _addr_v) {
         v.AddArg(base);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2737,7 +2649,6 @@ private static bool rewriteValueS390X_OpLsh16x16(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -2760,7 +2671,6 @@ private static bool rewriteValueS390X_OpLsh16x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2781,7 +2691,6 @@ private static bool rewriteValueS390X_OpLsh16x32(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -2802,7 +2711,6 @@ private static bool rewriteValueS390X_OpLsh16x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2823,7 +2731,6 @@ private static bool rewriteValueS390X_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -2844,7 +2751,6 @@ private static bool rewriteValueS390X_OpLsh16x64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2865,7 +2771,6 @@ private static bool rewriteValueS390X_OpLsh16x8(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh16x8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -2888,7 +2793,6 @@ private static bool rewriteValueS390X_OpLsh16x8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2909,7 +2813,6 @@ private static bool rewriteValueS390X_OpLsh32x16(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -2932,7 +2835,6 @@ private static bool rewriteValueS390X_OpLsh32x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2953,7 +2855,6 @@ private static bool rewriteValueS390X_OpLsh32x32(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -2974,7 +2875,6 @@ private static bool rewriteValueS390X_OpLsh32x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2995,7 +2895,6 @@ private static bool rewriteValueS390X_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -3016,7 +2915,6 @@ private static bool rewriteValueS390X_OpLsh32x64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3037,7 +2935,6 @@ private static bool rewriteValueS390X_OpLsh32x8(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh32x8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -3060,7 +2957,6 @@ private static bool rewriteValueS390X_OpLsh32x8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3081,7 +2977,6 @@ private static bool rewriteValueS390X_OpLsh64x16(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLD <t> x y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -3104,7 +2999,6 @@ private static bool rewriteValueS390X_OpLsh64x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3125,7 +3019,6 @@ private static bool rewriteValueS390X_OpLsh64x32(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLD <t> x y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -3146,7 +3039,6 @@ private static bool rewriteValueS390X_OpLsh64x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3167,7 +3059,6 @@ private static bool rewriteValueS390X_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLD <t> x y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -3188,7 +3079,6 @@ private static bool rewriteValueS390X_OpLsh64x64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3209,7 +3099,6 @@ private static bool rewriteValueS390X_OpLsh64x8(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh64x8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLD <t> x y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -3232,7 +3121,6 @@ private static bool rewriteValueS390X_OpLsh64x8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3253,7 +3141,6 @@ private static bool rewriteValueS390X_OpLsh8x16(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -3276,7 +3163,6 @@ private static bool rewriteValueS390X_OpLsh8x16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3297,7 +3183,6 @@ private static bool rewriteValueS390X_OpLsh8x32(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -3318,7 +3203,6 @@ private static bool rewriteValueS390X_OpLsh8x32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3339,7 +3223,6 @@ private static bool rewriteValueS390X_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -3360,7 +3243,6 @@ private static bool rewriteValueS390X_OpLsh8x64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpLsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3381,7 +3263,6 @@ private static bool rewriteValueS390X_OpLsh8x8(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Lsh8x8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SLW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -3404,7 +3285,6 @@ private static bool rewriteValueS390X_OpLsh8x8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMod16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3426,7 +3306,6 @@ private static bool rewriteValueS390X_OpMod16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMod16u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3448,7 +3327,6 @@ private static bool rewriteValueS390X_OpMod16u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMod32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3468,7 +3346,6 @@ private static bool rewriteValueS390X_OpMod32(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMod32u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3488,7 +3365,6 @@ private static bool rewriteValueS390X_OpMod32u(ptr<Value> _addr_v) {
         v.AddArg2(v0, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMod64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3504,7 +3380,6 @@ private static bool rewriteValueS390X_OpMod64(ptr<Value> _addr_v) {
         v.AddArg2(x, y);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMod8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3526,7 +3401,6 @@ private static bool rewriteValueS390X_OpMod8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMod8u(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3548,7 +3422,6 @@ private static bool rewriteValueS390X_OpMod8u(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3567,7 +3440,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         var mem = v_2;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Move [1] dst src mem)
     // result: (MOVBstore dst (MOVBZload src mem) mem)
@@ -3583,7 +3455,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [2] dst src mem)
     // result: (MOVHstore dst (MOVHZload src mem) mem)
@@ -3599,7 +3470,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [4] dst src mem)
     // result: (MOVWstore dst (MOVWZload src mem) mem)
@@ -3615,7 +3485,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [8] dst src mem)
     // result: (MOVDstore dst (MOVDload src mem) mem)
@@ -3631,7 +3500,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, mem);
         v.AddArg3(dst, v0, mem);
         return true;
-
     } 
     // match: (Move [16] dst src mem)
     // result: (MOVDstore [8] dst (MOVDload [8] src mem) (MOVDstore dst (MOVDload src mem) mem))
@@ -3653,7 +3521,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [24] dst src mem)
     // result: (MOVDstore [16] dst (MOVDload [16] src mem) (MOVDstore [8] dst (MOVDload [8] src mem) (MOVDstore dst (MOVDload src mem) mem)))
@@ -3681,7 +3548,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [3] dst src mem)
     // result: (MOVBstore [2] dst (MOVBZload [2] src mem) (MOVHstore dst (MOVHZload src mem) mem))
@@ -3703,7 +3569,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [5] dst src mem)
     // result: (MOVBstore [4] dst (MOVBZload [4] src mem) (MOVWstore dst (MOVWZload src mem) mem))
@@ -3725,7 +3590,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [6] dst src mem)
     // result: (MOVHstore [4] dst (MOVHZload [4] src mem) (MOVWstore dst (MOVWZload src mem) mem))
@@ -3747,7 +3611,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, mem);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [7] dst src mem)
     // result: (MOVBstore [6] dst (MOVBZload [6] src mem) (MOVHstore [4] dst (MOVHZload [4] src mem) (MOVWstore dst (MOVWZload src mem) mem)))
@@ -3775,7 +3638,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v1.AddArg3(dst, v2, v3);
         v.AddArg3(dst, v0, v1);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 0 && s <= 256 && logLargeCopy(v, s)
@@ -3792,7 +3654,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(makeValAndOff(int32(s), 0));
         v.AddArg3(dst, src, mem);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 256 && s <= 512 && logLargeCopy(v, s)
@@ -3812,7 +3673,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg3(dst, src, mem);
         v.AddArg3(dst, src, v0);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 512 && s <= 768 && logLargeCopy(v, s)
@@ -3835,7 +3695,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg3(dst, src, v1);
         v.AddArg3(dst, src, v0);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 768 && s <= 1024 && logLargeCopy(v, s)
@@ -3861,7 +3720,6 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg3(dst, src, v1);
         v.AddArg3(dst, src, v0);
         return true;
-
     } 
     // match: (Move [s] dst src mem)
     // cond: s > 1024 && logLargeCopy(v, s)
@@ -3882,10 +3740,8 @@ private static bool rewriteValueS390X_OpMove(ptr<Value> _addr_v) {
         v0.AddArg2(src, v1);
         v.AddArg4(dst, src, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpNeq16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3914,7 +3770,6 @@ private static bool rewriteValueS390X_OpNeq16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNeq32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3939,7 +3794,6 @@ private static bool rewriteValueS390X_OpNeq32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNeq32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3964,7 +3818,6 @@ private static bool rewriteValueS390X_OpNeq32F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -3989,7 +3842,6 @@ private static bool rewriteValueS390X_OpNeq64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNeq64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4014,7 +3866,6 @@ private static bool rewriteValueS390X_OpNeq64F(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNeq8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4043,7 +3894,6 @@ private static bool rewriteValueS390X_OpNeq8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNeqB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4072,7 +3922,6 @@ private static bool rewriteValueS390X_OpNeqB(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNeqPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4097,7 +3946,6 @@ private static bool rewriteValueS390X_OpNeqPtr(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpNot(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4112,7 +3960,6 @@ private static bool rewriteValueS390X_OpNot(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpOffPtr(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4132,7 +3979,6 @@ private static bool rewriteValueS390X_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(off));
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (OffPtr [off] ptr)
     // cond: is32Bit(off)
@@ -4147,7 +3993,6 @@ private static bool rewriteValueS390X_OpOffPtr(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(off));
         v.AddArg(ptr);
         return true;
-
     } 
     // match: (OffPtr [off] ptr)
     // result: (ADD (MOVDconst [off]) ptr)
@@ -4160,7 +4005,6 @@ private static bool rewriteValueS390X_OpOffPtr(ptr<Value> _addr_v) {
         v.AddArg2(v0, ptr);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpPanicBounds(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4183,7 +4027,6 @@ private static bool rewriteValueS390X_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 1
@@ -4200,7 +4043,6 @@ private static bool rewriteValueS390X_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     } 
     // match: (PanicBounds [kind] x y mem)
     // cond: boundsABI(kind) == 2
@@ -4217,10 +4059,8 @@ private static bool rewriteValueS390X_OpPanicBounds(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(kind);
         v.AddArg3(x, y, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpPopCount16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4240,7 +4080,6 @@ private static bool rewriteValueS390X_OpPopCount16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpPopCount32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4260,7 +4099,6 @@ private static bool rewriteValueS390X_OpPopCount32(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpPopCount64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4280,7 +4118,6 @@ private static bool rewriteValueS390X_OpPopCount64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpPopCount8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4298,7 +4135,6 @@ private static bool rewriteValueS390X_OpPopCount8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRotateLeft16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4327,10 +4163,8 @@ private static bool rewriteValueS390X_OpRotateLeft16(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpRotateLeft8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4359,10 +4193,8 @@ private static bool rewriteValueS390X_OpRotateLeft8(ptr<Value> _addr_v) {
         v2.AddArg2(x, v3);
         v.AddArg2(v0, v2);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpRound(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4377,7 +4209,6 @@ private static bool rewriteValueS390X_OpRound(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRoundToEven(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4392,7 +4223,6 @@ private static bool rewriteValueS390X_OpRoundToEven(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4415,7 +4245,6 @@ private static bool rewriteValueS390X_OpRsh16Ux16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVHZreg x) y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -4440,7 +4269,6 @@ private static bool rewriteValueS390X_OpRsh16Ux16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4463,7 +4291,6 @@ private static bool rewriteValueS390X_OpRsh16Ux32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVHZreg x) y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -4486,7 +4313,6 @@ private static bool rewriteValueS390X_OpRsh16Ux32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4509,7 +4335,6 @@ private static bool rewriteValueS390X_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVHZreg x) y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -4532,7 +4357,6 @@ private static bool rewriteValueS390X_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4555,7 +4379,6 @@ private static bool rewriteValueS390X_OpRsh16Ux8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16Ux8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVHZreg x) y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -4580,7 +4403,6 @@ private static bool rewriteValueS390X_OpRsh16Ux8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4603,7 +4425,6 @@ private static bool rewriteValueS390X_OpRsh16x16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x16 x y)
     // result: (SRAW (MOVHreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVHZreg y) [64])))
@@ -4626,7 +4447,6 @@ private static bool rewriteValueS390X_OpRsh16x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4649,7 +4469,6 @@ private static bool rewriteValueS390X_OpRsh16x32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x32 x y)
     // result: (SRAW (MOVHreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst y [64])))
@@ -4670,7 +4489,6 @@ private static bool rewriteValueS390X_OpRsh16x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4693,7 +4511,6 @@ private static bool rewriteValueS390X_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x64 x y)
     // result: (SRAW (MOVHreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPUconst y [64])))
@@ -4714,7 +4531,6 @@ private static bool rewriteValueS390X_OpRsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh16x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4737,7 +4553,6 @@ private static bool rewriteValueS390X_OpRsh16x8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh16x8 x y)
     // result: (SRAW (MOVHreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVBZreg y) [64])))
@@ -4760,7 +4575,6 @@ private static bool rewriteValueS390X_OpRsh16x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4781,7 +4595,6 @@ private static bool rewriteValueS390X_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -4804,7 +4617,6 @@ private static bool rewriteValueS390X_OpRsh32Ux16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4825,7 +4637,6 @@ private static bool rewriteValueS390X_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> x y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -4846,7 +4657,6 @@ private static bool rewriteValueS390X_OpRsh32Ux32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4867,7 +4677,6 @@ private static bool rewriteValueS390X_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> x y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -4888,7 +4697,6 @@ private static bool rewriteValueS390X_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4909,7 +4717,6 @@ private static bool rewriteValueS390X_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32Ux8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> x y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -4932,7 +4739,6 @@ private static bool rewriteValueS390X_OpRsh32Ux8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4953,7 +4759,6 @@ private static bool rewriteValueS390X_OpRsh32x16(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x16 x y)
     // result: (SRAW x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVHZreg y) [64])))
@@ -4974,7 +4779,6 @@ private static bool rewriteValueS390X_OpRsh32x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -4994,7 +4798,6 @@ private static bool rewriteValueS390X_OpRsh32x32(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x32 x y)
     // result: (SRAW x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst y [64])))
@@ -5013,7 +4816,6 @@ private static bool rewriteValueS390X_OpRsh32x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5033,7 +4835,6 @@ private static bool rewriteValueS390X_OpRsh32x64(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x64 x y)
     // result: (SRAW x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPUconst y [64])))
@@ -5052,7 +4853,6 @@ private static bool rewriteValueS390X_OpRsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh32x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5073,7 +4873,6 @@ private static bool rewriteValueS390X_OpRsh32x8(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh32x8 x y)
     // result: (SRAW x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVBZreg y) [64])))
@@ -5094,7 +4893,6 @@ private static bool rewriteValueS390X_OpRsh32x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5115,7 +4913,6 @@ private static bool rewriteValueS390X_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRD <t> x y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -5138,7 +4935,6 @@ private static bool rewriteValueS390X_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5159,7 +4955,6 @@ private static bool rewriteValueS390X_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRD <t> x y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -5180,7 +4975,6 @@ private static bool rewriteValueS390X_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5201,7 +4995,6 @@ private static bool rewriteValueS390X_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRD <t> x y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -5222,7 +5015,6 @@ private static bool rewriteValueS390X_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5243,7 +5035,6 @@ private static bool rewriteValueS390X_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64Ux8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRD <t> x y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -5266,7 +5057,6 @@ private static bool rewriteValueS390X_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v1, v2);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5287,7 +5077,6 @@ private static bool rewriteValueS390X_OpRsh64x16(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x16 x y)
     // result: (SRAD x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVHZreg y) [64])))
@@ -5308,7 +5097,6 @@ private static bool rewriteValueS390X_OpRsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5328,7 +5116,6 @@ private static bool rewriteValueS390X_OpRsh64x32(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x32 x y)
     // result: (SRAD x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst y [64])))
@@ -5347,7 +5134,6 @@ private static bool rewriteValueS390X_OpRsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5367,7 +5153,6 @@ private static bool rewriteValueS390X_OpRsh64x64(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x64 x y)
     // result: (SRAD x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPUconst y [64])))
@@ -5386,7 +5171,6 @@ private static bool rewriteValueS390X_OpRsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5407,7 +5191,6 @@ private static bool rewriteValueS390X_OpRsh64x8(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (Rsh64x8 x y)
     // result: (SRAD x (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVBZreg y) [64])))
@@ -5428,7 +5211,6 @@ private static bool rewriteValueS390X_OpRsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5451,7 +5233,6 @@ private static bool rewriteValueS390X_OpRsh8Ux16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux16 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVBZreg x) y) (MOVDconst [0]) (CMPWUconst (MOVHZreg y) [64]))
@@ -5476,7 +5257,6 @@ private static bool rewriteValueS390X_OpRsh8Ux16(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5499,7 +5279,6 @@ private static bool rewriteValueS390X_OpRsh8Ux32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux32 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVBZreg x) y) (MOVDconst [0]) (CMPWUconst y [64]))
@@ -5522,7 +5301,6 @@ private static bool rewriteValueS390X_OpRsh8Ux32(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5545,7 +5323,6 @@ private static bool rewriteValueS390X_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux64 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVBZreg x) y) (MOVDconst [0]) (CMPUconst y [64]))
@@ -5568,7 +5345,6 @@ private static bool rewriteValueS390X_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5591,7 +5367,6 @@ private static bool rewriteValueS390X_OpRsh8Ux8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8Ux8 <t> x y)
     // result: (LOCGR {s390x.GreaterOrEqual} <t> (SRW <t> (MOVBZreg x) y) (MOVDconst [0]) (CMPWUconst (MOVBZreg y) [64]))
@@ -5616,7 +5391,6 @@ private static bool rewriteValueS390X_OpRsh8Ux8(ptr<Value> _addr_v) {
         v.AddArg3(v0, v2, v3);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5639,7 +5413,6 @@ private static bool rewriteValueS390X_OpRsh8x16(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x16 x y)
     // result: (SRAW (MOVBreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVHZreg y) [64])))
@@ -5662,7 +5435,6 @@ private static bool rewriteValueS390X_OpRsh8x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5685,7 +5457,6 @@ private static bool rewriteValueS390X_OpRsh8x32(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x32 x y)
     // result: (SRAW (MOVBreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst y [64])))
@@ -5706,7 +5477,6 @@ private static bool rewriteValueS390X_OpRsh8x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5729,7 +5499,6 @@ private static bool rewriteValueS390X_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x64 x y)
     // result: (SRAW (MOVBreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPUconst y [64])))
@@ -5750,7 +5519,6 @@ private static bool rewriteValueS390X_OpRsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpRsh8x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5773,7 +5541,6 @@ private static bool rewriteValueS390X_OpRsh8x8(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg2(v0, y);
         return true;
-
     } 
     // match: (Rsh8x8 x y)
     // result: (SRAW (MOVBreg x) (LOCGR {s390x.GreaterOrEqual} <y.Type> y (MOVDconst <y.Type> [63]) (CMPWUconst (MOVBZreg y) [64])))
@@ -5796,7 +5563,6 @@ private static bool rewriteValueS390X_OpRsh8x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v1);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpS390XADD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5818,24 +5584,20 @@ private static bool rewriteValueS390X_OpS390XADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpS390XADDconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD (SLDconst x [c]) (SRDconst x [64-c]))
     // result: (RISBGZ x {s390x.NewRotateParams(0, 63, c)})
@@ -5850,25 +5612,21 @@ private static bool rewriteValueS390X_OpS390XADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToUint8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpS390XSRDconst || auxIntToUint8(v_1.AuxInt) != 64 - c || x != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpS390XRISBGZ);
                 v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(0, 63, c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD idx (MOVDaddr [c] {s} ptr))
     // cond: ptr.Op != OpSB
@@ -5885,27 +5643,23 @@ private static bool rewriteValueS390X_OpS390XADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt32(v_1.AuxInt);
                 var s = auxToSym(v_1.Aux);
                 var ptr = v_1.Args[0];
                 if (!(ptr.Op != OpSB)) {
                     continue;
                 }
-
                 v.reset(OpS390XMOVDaddridx);
                 v.AuxInt = int32ToAuxInt(c);
                 v.Aux = symToAux(s);
                 v.AddArg2(ptr, idx);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD x (NEG y))
     // result: (SUB x y)
@@ -5921,19 +5675,16 @@ private static bool rewriteValueS390X_OpS390XADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpS390XSUB);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADD <t> x g:(MOVDload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -5952,7 +5703,6 @@ private static bool rewriteValueS390X_OpS390XADD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -5960,24 +5710,20 @@ private static bool rewriteValueS390X_OpS390XADD(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XADDload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XADDC(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -5997,25 +5743,20 @@ private static bool rewriteValueS390X_OpS390XADDC(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is16Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpS390XADDCconst);
                 v.AuxInt = int16ToAuxInt(int16(c));
                 v.AddArg(x);
                 return true;
-
             }
 
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XADDE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6034,7 +5775,6 @@ private static bool rewriteValueS390X_OpS390XADDE(ptr<Value> _addr_v) {
         v.reset(OpS390XADDC);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDE x y (FlagLT))
     // result: (ADDC x y)
@@ -6047,7 +5787,6 @@ private static bool rewriteValueS390X_OpS390XADDE(ptr<Value> _addr_v) {
         v.reset(OpS390XADDC);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDE x y (Select1 (ADDCconst [-1] (Select0 (ADDE (MOVDconst [0]) (MOVDconst [0]) c)))))
     // result: (ADDE x y c)
@@ -6081,10 +5820,8 @@ private static bool rewriteValueS390X_OpS390XADDE(ptr<Value> _addr_v) {
         v.reset(OpS390XADDE);
         v.AddArg3(x, y, c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6105,20 +5842,17 @@ private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XADDWconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDW (SLWconst x [c]) (SRWconst x [32-c]))
     // result: (RLLconst x [c])
@@ -6133,25 +5867,21 @@ private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToUint8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpS390XSRWconst || auxIntToUint8(v_1.AuxInt) != 32 - c || x != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpS390XRLLconst);
                 v.AuxInt = uint8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDW x (NEGW y))
     // result: (SUBW x y)
@@ -6167,19 +5897,16 @@ private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var y = v_1.Args[0];
                 v.reset(OpS390XSUBW);
                 v.AddArg2(x, y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDW <t> x g:(MOVWload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -6198,7 +5925,6 @@ private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -6206,21 +5932,18 @@ private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XADDWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ADDW <t> x g:(MOVWZload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -6239,7 +5962,6 @@ private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off = auxIntToInt32(g.AuxInt);
                 sym = auxToSym(g.Aux);
                 mem = g.Args[1];
@@ -6247,24 +5969,20 @@ private static bool rewriteValueS390X_OpS390XADDW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XADDWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XADDWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6281,7 +5999,6 @@ private static bool rewriteValueS390X_OpS390XADDWconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDWconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(c)+d])
@@ -6294,7 +6011,6 @@ private static bool rewriteValueS390X_OpS390XADDWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(c) + d);
         return true;
-
     } 
     // match: (ADDWconst [c] (ADDWconst [d] x))
     // result: (ADDWconst [int32(c+d)] x)
@@ -6309,10 +6025,8 @@ private static bool rewriteValueS390X_OpS390XADDWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c + d));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XADDWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6341,7 +6055,6 @@ private static bool rewriteValueS390X_OpS390XADDWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (ADDWload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -6365,10 +6078,8 @@ private static bool rewriteValueS390X_OpS390XADDWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XADDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6393,7 +6104,6 @@ private static bool rewriteValueS390X_OpS390XADDconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] (MOVDaddr [d] {s} x))
     // cond: x.Op != OpSB && is20Bit(int64(c)+int64(d))
@@ -6414,7 +6124,6 @@ private static bool rewriteValueS390X_OpS390XADDconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ADDconst [c] (MOVDaddridx [d] {s} x y))
     // cond: is20Bit(int64(c)+int64(d))
@@ -6436,7 +6145,6 @@ private static bool rewriteValueS390X_OpS390XADDconst(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (ADDconst [0] x)
     // result: x
@@ -6447,7 +6155,6 @@ private static bool rewriteValueS390X_OpS390XADDconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ADDconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(c)+d])
@@ -6460,7 +6167,6 @@ private static bool rewriteValueS390X_OpS390XADDconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(c) + d);
         return true;
-
     } 
     // match: (ADDconst [c] (ADDconst [d] x))
     // cond: is32Bit(int64(c)+int64(d))
@@ -6479,10 +6185,8 @@ private static bool rewriteValueS390X_OpS390XADDconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c + d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XADDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6513,7 +6217,6 @@ private static bool rewriteValueS390X_OpS390XADDload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (ADDload [off1] {sym} x (ADDconst [off2] ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(off1)+int64(off2))
@@ -6536,7 +6239,6 @@ private static bool rewriteValueS390X_OpS390XADDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (ADDload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -6560,10 +6262,8 @@ private static bool rewriteValueS390X_OpS390XADDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6587,24 +6287,20 @@ private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(s390x.NewRotateParams(0, 63, 0).OutMerge(uint64(c)) != null)) {
                     continue;
                 }
-
                 v.reset(OpS390XRISBGZ);
                 v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(0, 63, 0).OutMerge(uint64(c)).val);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (MOVDconst [c]))
     // cond: is32Bit(c) && c < 0
@@ -6621,24 +6317,20 @@ private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c) && c < 0)) {
                     continue;
                 }
-
                 v.reset(OpS390XANDconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x (MOVDconst [c]))
     // cond: is32Bit(c) && c >= 0
@@ -6655,26 +6347,22 @@ private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c) && c >= 0)) {
                     continue;
                 }
-
                 v.reset(OpS390XMOVWZreg);
                 var v0 = b.NewValue0(v.Pos, OpS390XANDWconst, typ.UInt32);
                 v0.AuxInt = int32ToAuxInt(int32(c));
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND (MOVDconst [c]) (MOVDconst [d]))
     // result: (MOVDconst [c&d])
@@ -6689,24 +6377,20 @@ private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpS390XMOVDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XMOVDconst);
                 v.AuxInt = int64ToAuxInt(c & d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (AND x x)
     // result: x
@@ -6717,7 +6401,6 @@ private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (AND <t> x g:(MOVDload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -6736,7 +6419,6 @@ private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -6744,24 +6426,20 @@ private static bool rewriteValueS390X_OpS390XAND(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XANDload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XANDW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6782,20 +6460,17 @@ private static bool rewriteValueS390X_OpS390XANDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XANDWconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDW x x)
     // result: x
@@ -6806,7 +6481,6 @@ private static bool rewriteValueS390X_OpS390XANDW(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDW <t> x g:(MOVWload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -6825,7 +6499,6 @@ private static bool rewriteValueS390X_OpS390XANDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -6833,21 +6506,18 @@ private static bool rewriteValueS390X_OpS390XANDW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XANDWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ANDW <t> x g:(MOVWZload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -6866,7 +6536,6 @@ private static bool rewriteValueS390X_OpS390XANDW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off = auxIntToInt32(g.AuxInt);
                 sym = auxToSym(g.Aux);
                 mem = g.Args[1];
@@ -6874,24 +6543,20 @@ private static bool rewriteValueS390X_OpS390XANDW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XANDWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XANDWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -6910,7 +6575,6 @@ private static bool rewriteValueS390X_OpS390XANDWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDWconst [0x00ff] x)
     // result: (MOVBZreg x)
@@ -6922,7 +6586,6 @@ private static bool rewriteValueS390X_OpS390XANDWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDWconst [0xffff] x)
     // result: (MOVHZreg x)
@@ -6934,7 +6597,6 @@ private static bool rewriteValueS390X_OpS390XANDWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDWconst [c] _)
     // cond: int32(c)==0
@@ -6947,7 +6609,6 @@ private static bool rewriteValueS390X_OpS390XANDWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDWconst [c] x)
     // cond: int32(c)==-1
@@ -6960,7 +6621,6 @@ private static bool rewriteValueS390X_OpS390XANDWconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDWconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(c)&d])
@@ -6973,10 +6633,8 @@ private static bool rewriteValueS390X_OpS390XANDWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(c) & d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XANDWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7005,7 +6663,6 @@ private static bool rewriteValueS390X_OpS390XANDWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (ANDWload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -7029,10 +6686,8 @@ private static bool rewriteValueS390X_OpS390XANDWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XANDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7051,7 +6706,6 @@ private static bool rewriteValueS390X_OpS390XANDconst(ptr<Value> _addr_v) {
         v.AuxInt = int64ToAuxInt(c & d);
         v.AddArg(x);
         return true;
-
     } 
     // match: (ANDconst [0] _)
     // result: (MOVDconst [0])
@@ -7062,7 +6716,6 @@ private static bool rewriteValueS390X_OpS390XANDconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (ANDconst [-1] x)
     // result: x
@@ -7073,7 +6726,6 @@ private static bool rewriteValueS390X_OpS390XANDconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ANDconst [c] (MOVDconst [d]))
     // result: (MOVDconst [c&d])
@@ -7086,10 +6738,8 @@ private static bool rewriteValueS390X_OpS390XANDconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(c & d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XANDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7120,7 +6770,6 @@ private static bool rewriteValueS390X_OpS390XANDload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (ANDload [off1] {sym} x (ADDconst [off2] ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(off1)+int64(off2))
@@ -7143,7 +6792,6 @@ private static bool rewriteValueS390X_OpS390XANDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (ANDload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -7167,10 +6815,8 @@ private static bool rewriteValueS390X_OpS390XANDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMP(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7194,7 +6840,6 @@ private static bool rewriteValueS390X_OpS390XCMP(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMP (MOVDconst [c]) x)
     // cond: is32Bit(c)
@@ -7214,7 +6859,6 @@ private static bool rewriteValueS390X_OpS390XCMP(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMP x y)
     // cond: canonLessThan(x,y)
@@ -7230,10 +6874,8 @@ private static bool rewriteValueS390X_OpS390XCMP(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMPU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7257,7 +6899,6 @@ private static bool rewriteValueS390X_OpS390XCMPU(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPU (MOVDconst [c]) x)
     // cond: isU32Bit(c)
@@ -7277,7 +6918,6 @@ private static bool rewriteValueS390X_OpS390XCMPU(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPU x y)
     // cond: canonLessThan(x,y)
@@ -7293,10 +6933,8 @@ private static bool rewriteValueS390X_OpS390XCMPU(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7316,7 +6954,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagEQ);
         return true;
-
     } 
     // match: (CMPUconst (MOVDconst [x]) [y])
     // cond: uint64(x)<uint64(y)
@@ -7332,7 +6969,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPUconst (MOVDconst [x]) [y])
     // cond: uint64(x)>uint64(y)
@@ -7348,7 +6984,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagGT);
         return true;
-
     } 
     // match: (CMPUconst (SRDconst _ [c]) [n])
     // cond: c > 0 && c < 64 && (1<<uint(64-c)) <= uint64(n)
@@ -7364,7 +6999,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPUconst (RISBGZ x {r}) [c])
     // cond: r.OutMask() < uint64(uint32(c))
@@ -7380,7 +7014,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPUconst (MOVWZreg x) [c])
     // result: (CMPWUconst x [c])
@@ -7394,7 +7027,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPUconst x:(MOVHreg _) [c])
     // result: (CMPWUconst x [c])
@@ -7408,7 +7040,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPUconst x:(MOVHZreg _) [c])
     // result: (CMPWUconst x [c])
@@ -7422,7 +7053,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPUconst x:(MOVBreg _) [c])
     // result: (CMPWUconst x [c])
@@ -7436,7 +7066,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPUconst x:(MOVBZreg _) [c])
     // result: (CMPWUconst x [c])
@@ -7450,7 +7079,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPUconst (MOVWZreg x:(ANDWconst [m] _)) [c])
     // cond: int32(m) >= 0
@@ -7472,7 +7100,6 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPUconst (MOVWreg x:(ANDWconst [m] _)) [c])
     // cond: int32(m) >= 0
@@ -7494,10 +7121,8 @@ private static bool rewriteValueS390X_OpS390XCMPUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7517,7 +7142,6 @@ private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPW (MOVDconst [c]) x)
     // result: (InvertFlags (CMPWconst x [int32(c)]))
@@ -7533,7 +7157,6 @@ private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPW x y)
     // cond: canonLessThan(x,y)
@@ -7549,7 +7172,6 @@ private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPW x (MOVWreg y))
     // result: (CMPW x y)
@@ -7562,7 +7184,6 @@ private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPW x (MOVWZreg y))
     // result: (CMPW x y)
@@ -7575,7 +7196,6 @@ private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPW (MOVWreg x) y)
     // result: (CMPW x y)
@@ -7588,7 +7208,6 @@ private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPW (MOVWZreg x) y)
     // result: (CMPW x y)
@@ -7601,10 +7220,8 @@ private static bool rewriteValueS390X_OpS390XCMPW(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7624,7 +7241,6 @@ private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPWU (MOVDconst [c]) x)
     // result: (InvertFlags (CMPWUconst x [int32(c)]))
@@ -7640,7 +7256,6 @@ private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPWU x y)
     // cond: canonLessThan(x,y)
@@ -7656,7 +7271,6 @@ private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
         v0.AddArg2(y, x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (CMPWU x (MOVWreg y))
     // result: (CMPWU x y)
@@ -7669,7 +7283,6 @@ private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPWU);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPWU x (MOVWZreg y))
     // result: (CMPWU x y)
@@ -7682,7 +7295,6 @@ private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPWU);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPWU (MOVWreg x) y)
     // result: (CMPWU x y)
@@ -7695,7 +7307,6 @@ private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPWU);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (CMPWU (MOVWZreg x) y)
     // result: (CMPWU x y)
@@ -7708,10 +7319,8 @@ private static bool rewriteValueS390X_OpS390XCMPWU(ptr<Value> _addr_v) {
         v.reset(OpS390XCMPWU);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7731,7 +7340,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagEQ);
         return true;
-
     } 
     // match: (CMPWUconst (MOVDconst [x]) [y])
     // cond: uint32(x)<uint32(y)
@@ -7747,7 +7355,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWUconst (MOVDconst [x]) [y])
     // cond: uint32(x)>uint32(y)
@@ -7763,7 +7370,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagGT);
         return true;
-
     } 
     // match: (CMPWUconst (MOVBZreg _) [c])
     // cond: 0xff < c
@@ -7775,7 +7381,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWUconst (MOVHZreg _) [c])
     // cond: 0xffff < c
@@ -7787,7 +7392,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWUconst (SRWconst _ [c]) [n])
     // cond: c > 0 && c < 32 && (1<<uint(32-c)) <= uint32(n)
@@ -7803,7 +7407,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWUconst (ANDWconst _ [m]) [n])
     // cond: uint32(m) < uint32(n)
@@ -7819,7 +7422,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWUconst (MOVWreg x) [c])
     // result: (CMPWUconst x [c])
@@ -7833,7 +7435,6 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPWUconst (MOVWZreg x) [c])
     // result: (CMPWUconst x [c])
@@ -7847,10 +7448,8 @@ private static bool rewriteValueS390X_OpS390XCMPWUconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -7870,7 +7469,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagEQ);
         return true;
-
     } 
     // match: (CMPWconst (MOVDconst [x]) [y])
     // cond: int32(x)<int32(y)
@@ -7886,7 +7484,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWconst (MOVDconst [x]) [y])
     // cond: int32(x)>int32(y)
@@ -7902,7 +7499,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagGT);
         return true;
-
     } 
     // match: (CMPWconst (MOVBZreg _) [c])
     // cond: 0xff < c
@@ -7914,7 +7510,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWconst (MOVHZreg _) [c])
     // cond: 0xffff < c
@@ -7926,7 +7521,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWconst (SRWconst _ [c]) [n])
     // cond: c > 0 && n < 0
@@ -7942,7 +7536,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagGT);
         return true;
-
     } 
     // match: (CMPWconst (ANDWconst _ [m]) [n])
     // cond: int32(m) >= 0 && int32(m) < int32(n)
@@ -7958,7 +7551,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPWconst x:(SRWconst _ [c]) [n])
     // cond: c > 0 && n >= 0
@@ -7977,7 +7569,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(n);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPWconst (MOVWreg x) [c])
     // result: (CMPWconst x [c])
@@ -7991,7 +7582,6 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPWconst (MOVWZreg x) [c])
     // result: (CMPWconst x [c])
@@ -8005,10 +7595,8 @@ private static bool rewriteValueS390X_OpS390XCMPWconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8028,7 +7616,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagEQ);
         return true;
-
     } 
     // match: (CMPconst (MOVDconst [x]) [y])
     // cond: x<int64(y)
@@ -8044,7 +7631,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPconst (MOVDconst [x]) [y])
     // cond: x>int64(y)
@@ -8060,7 +7646,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagGT);
         return true;
-
     } 
     // match: (CMPconst (SRDconst _ [c]) [n])
     // cond: c > 0 && n < 0
@@ -8076,7 +7661,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagGT);
         return true;
-
     } 
     // match: (CMPconst (RISBGZ x {r}) [c])
     // cond: c > 0 && r.OutMask() < uint64(c)
@@ -8092,7 +7676,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (CMPconst (MOVWreg x) [c])
     // result: (CMPWconst x [c])
@@ -8106,7 +7689,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPconst x:(MOVHreg _) [c])
     // result: (CMPWconst x [c])
@@ -8120,7 +7702,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPconst x:(MOVHZreg _) [c])
     // result: (CMPWconst x [c])
@@ -8134,7 +7715,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPconst x:(MOVBreg _) [c])
     // result: (CMPWconst x [c])
@@ -8148,7 +7728,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPconst x:(MOVBZreg _) [c])
     // result: (CMPWconst x [c])
@@ -8162,7 +7741,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPconst (MOVWZreg x:(ANDWconst [m] _)) [c])
     // cond: int32(m) >= 0 && c >= 0
@@ -8184,7 +7762,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPconst (MOVWreg x:(ANDWconst [m] _)) [c])
     // cond: int32(m) >= 0 && c >= 0
@@ -8206,7 +7783,6 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (CMPconst x:(SRDconst _ [c]) [n])
     // cond: c > 0 && n >= 0
@@ -8225,10 +7801,8 @@ private static bool rewriteValueS390X_OpS390XCMPconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(n);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XCPSDR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8250,7 +7824,6 @@ private static bool rewriteValueS390X_OpS390XCPSDR(ptr<Value> _addr_v) {
         v.reset(OpS390XLPDFR);
         v.AddArg(y);
         return true;
-
     } 
     // match: (CPSDR y (FMOVDconst [c]))
     // cond: math.Signbit(c)
@@ -8267,10 +7840,8 @@ private static bool rewriteValueS390X_OpS390XCPSDR(ptr<Value> _addr_v) {
         v.reset(OpS390XLNDFR);
         v.AddArg(y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFCMP(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8288,7 +7859,6 @@ private static bool rewriteValueS390X_OpS390XFCMP(ptr<Value> _addr_v) {
         v.reset(OpS390XLTDBR);
         v.AddArg(x);
         return true;
-
     } 
     // match: (FCMP (FMOVDconst [0.0]) x)
     // result: (InvertFlags (LTDBR <v.Type> x))
@@ -8302,10 +7872,8 @@ private static bool rewriteValueS390X_OpS390XFCMP(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFCMPS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8323,7 +7891,6 @@ private static bool rewriteValueS390X_OpS390XFCMPS(ptr<Value> _addr_v) {
         v.reset(OpS390XLTEBR);
         v.AddArg(x);
         return true;
-
     } 
     // match: (FCMPS (FMOVSconst [0.0]) x)
     // result: (InvertFlags (LTEBR <v.Type> x))
@@ -8337,10 +7904,8 @@ private static bool rewriteValueS390X_OpS390XFCMPS(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFMOVDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8365,7 +7930,6 @@ private static bool rewriteValueS390X_OpS390XFMOVDload(ptr<Value> _addr_v) {
         v.reset(OpS390XLDGR);
         v.AddArg(x);
         return true;
-
     } 
     // match: (FMOVDload [off] {sym} ptr1 (FMOVDstore [off] {sym} ptr2 x _))
     // cond: isSamePtr(ptr1, ptr2)
@@ -8384,7 +7948,6 @@ private static bool rewriteValueS390X_OpS390XFMOVDload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (FMOVDload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -8406,7 +7969,6 @@ private static bool rewriteValueS390X_OpS390XFMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (FMOVDload [off1] {sym1} (MOVDaddr [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -8429,10 +7991,8 @@ private static bool rewriteValueS390X_OpS390XFMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFMOVDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8461,7 +8021,6 @@ private static bool rewriteValueS390X_OpS390XFMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (FMOVDstore [off1] {sym1} (MOVDaddr [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -8485,10 +8044,8 @@ private static bool rewriteValueS390X_OpS390XFMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFMOVSload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8512,7 +8069,6 @@ private static bool rewriteValueS390X_OpS390XFMOVSload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (FMOVSload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -8534,7 +8090,6 @@ private static bool rewriteValueS390X_OpS390XFMOVSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (FMOVSload [off1] {sym1} (MOVDaddr [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -8557,10 +8112,8 @@ private static bool rewriteValueS390X_OpS390XFMOVSload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFMOVSstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8589,7 +8142,6 @@ private static bool rewriteValueS390X_OpS390XFMOVSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (FMOVSstore [off1] {sym1} (MOVDaddr [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -8613,10 +8165,8 @@ private static bool rewriteValueS390X_OpS390XFMOVSstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFNEG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8632,7 +8182,6 @@ private static bool rewriteValueS390X_OpS390XFNEG(ptr<Value> _addr_v) {
         v.reset(OpS390XLNDFR);
         v.AddArg(x);
         return true;
-
     } 
     // match: (FNEG (LNDFR x))
     // result: (LPDFR x)
@@ -8644,10 +8193,8 @@ private static bool rewriteValueS390X_OpS390XFNEG(ptr<Value> _addr_v) {
         v.reset(OpS390XLPDFR);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XFNEGS(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8663,7 +8210,6 @@ private static bool rewriteValueS390X_OpS390XFNEGS(ptr<Value> _addr_v) {
         v.reset(OpS390XLNDFR);
         v.AddArg(x);
         return true;
-
     } 
     // match: (FNEGS (LNDFR x))
     // result: (LPDFR x)
@@ -8675,10 +8221,8 @@ private static bool rewriteValueS390X_OpS390XFNEGS(ptr<Value> _addr_v) {
         v.reset(OpS390XLPDFR);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLDGR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8703,7 +8247,6 @@ private static bool rewriteValueS390X_OpS390XLDGR(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (LDGR <t> (OR (MOVDconst [-1<<63]) x))
     // result: (LNDFR (LDGR <t> x))
@@ -8723,19 +8266,16 @@ private static bool rewriteValueS390X_OpS390XLDGR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 x = v_0_1;
                 v.reset(OpS390XLNDFR);
                 v0 = b.NewValue0(v.Pos, OpS390XLDGR, t);
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (LDGR <t> x:(ORload <t1> [off] {sym} (MOVDconst [-1<<63]) ptr mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -8769,7 +8309,6 @@ private static bool rewriteValueS390X_OpS390XLDGR(ptr<Value> _addr_v) {
         v1.AddArg(v2);
         v0.AddArg(v1);
         return true;
-
     } 
     // match: (LDGR (LGDR x))
     // result: x
@@ -8780,10 +8319,8 @@ private static bool rewriteValueS390X_OpS390XLDGR(ptr<Value> _addr_v) {
         x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLEDBR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8803,7 +8340,6 @@ private static bool rewriteValueS390X_OpS390XLEDBR(ptr<Value> _addr_v) {
         v.reset(OpS390XLPDFR);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LEDBR (LNDFR (LDEBR x)))
     // result: (LNDFR x)
@@ -8819,10 +8355,8 @@ private static bool rewriteValueS390X_OpS390XLEDBR(ptr<Value> _addr_v) {
         v.reset(OpS390XLNDFR);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLGDR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8837,10 +8371,8 @@ private static bool rewriteValueS390X_OpS390XLGDR(ptr<Value> _addr_v) {
         var x = v_0.Args[0];
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8862,7 +8394,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         v.Aux = s390xCCMaskToAux(c.ReverseComparison());
         v.AddArg3(x, y, cmp);
         return true;
-
     } 
     // match: (LOCGR {c} _ x (FlagEQ))
     // cond: c&s390x.Equal != 0
@@ -8875,7 +8406,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (LOCGR {c} _ x (FlagLT))
     // cond: c&s390x.Less != 0
@@ -8888,7 +8418,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (LOCGR {c} _ x (FlagGT))
     // cond: c&s390x.Greater != 0
@@ -8901,7 +8430,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (LOCGR {c} _ x (FlagOV))
     // cond: c&s390x.Unordered != 0
@@ -8914,7 +8442,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (LOCGR {c} x _ (FlagEQ))
     // cond: c&s390x.Equal == 0
@@ -8927,7 +8454,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (LOCGR {c} x _ (FlagLT))
     // cond: c&s390x.Less == 0
@@ -8940,7 +8466,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (LOCGR {c} x _ (FlagGT))
     // cond: c&s390x.Greater == 0
@@ -8953,7 +8478,6 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (LOCGR {c} x _ (FlagOV))
     // cond: c&s390x.Unordered == 0
@@ -8966,10 +8490,8 @@ private static bool rewriteValueS390X_OpS390XLOCGR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLTDBR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -8990,7 +8512,6 @@ private static bool rewriteValueS390X_OpS390XLTDBR(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LTDBR (Select0 x:(FSUB _ _)))
     // cond: b == x.Block
@@ -9006,10 +8527,8 @@ private static bool rewriteValueS390X_OpS390XLTDBR(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLTEBR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9030,7 +8549,6 @@ private static bool rewriteValueS390X_OpS390XLTEBR(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(x);
         return true;
-
     } 
     // match: (LTEBR (Select0 x:(FSUBS _ _)))
     // cond: b == x.Block
@@ -9046,10 +8564,8 @@ private static bool rewriteValueS390X_OpS390XLTEBR(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLoweredRound32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9064,10 +8580,8 @@ private static bool rewriteValueS390X_OpS390XLoweredRound32F(ptr<Value> _addr_v)
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XLoweredRound64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9082,10 +8596,8 @@ private static bool rewriteValueS390X_OpS390XLoweredRound64F(ptr<Value> _addr_v)
         }
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVBZload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9110,7 +8622,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZload(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -9132,7 +8643,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBZload [off1] {sym1} (MOVDaddr [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9155,10 +8665,8 @@ private static bool rewriteValueS390X_OpS390XMOVBZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9181,7 +8689,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg e:(MOVHreg x))
     // cond: clobberIfDead(e)
@@ -9198,7 +8705,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg e:(MOVWreg x))
     // cond: clobberIfDead(e)
@@ -9215,7 +8721,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg e:(MOVBZreg x))
     // cond: clobberIfDead(e)
@@ -9232,7 +8737,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg e:(MOVHZreg x))
     // cond: clobberIfDead(e)
@@ -9249,7 +8753,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg e:(MOVWZreg x))
     // cond: clobberIfDead(e)
@@ -9266,7 +8769,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg x:(MOVBZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 1)
@@ -9278,7 +8780,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBZreg <t> x:(MOVBload [o] {s} p mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -9303,7 +8804,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(s);
         v0.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVBZreg x:(Arg <t>))
     // cond: !t.IsSigned() && t.Size() == 1
@@ -9319,7 +8819,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBZreg (MOVDconst [c]))
     // result: (MOVDconst [int64( uint8(c))])
@@ -9331,7 +8830,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint8(c)));
         return true;
-
     } 
     // match: (MOVBZreg x:(LOCGR (MOVDconst [c]) (MOVDconst [d]) _))
     // cond: int64(uint8(c)) == c && int64(uint8(d)) == d && (!x.Type.IsSigned() || x.Type.Size() > 1)
@@ -9357,7 +8855,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBZreg (RISBGZ x {r}))
     // cond: r.OutMerge(0x000000ff) != nil
@@ -9375,7 +8872,6 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(new ptr<ptr<r.OutMerge>>(0x000000ff));
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBZreg (ANDWconst [m] x))
     // result: (MOVWZreg (ANDWconst <typ.UInt32> [int32( uint8(m))] x))
@@ -9391,10 +8887,8 @@ private static bool rewriteValueS390X_OpS390XMOVBZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9419,7 +8913,6 @@ private static bool rewriteValueS390X_OpS390XMOVBload(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -9441,7 +8934,6 @@ private static bool rewriteValueS390X_OpS390XMOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBload [off1] {sym1} (MOVDaddr [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9464,10 +8956,8 @@ private static bool rewriteValueS390X_OpS390XMOVBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9490,7 +8980,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg e:(MOVHreg x))
     // cond: clobberIfDead(e)
@@ -9507,7 +8996,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg e:(MOVWreg x))
     // cond: clobberIfDead(e)
@@ -9524,7 +9012,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg e:(MOVBZreg x))
     // cond: clobberIfDead(e)
@@ -9541,7 +9028,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg e:(MOVHZreg x))
     // cond: clobberIfDead(e)
@@ -9558,7 +9044,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg e:(MOVWZreg x))
     // cond: clobberIfDead(e)
@@ -9575,7 +9060,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVBreg x:(MOVBload _ _))
     // cond: (x.Type.IsSigned() || x.Type.Size() == 8)
@@ -9587,7 +9071,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBreg <t> x:(MOVBZload [o] {s} p mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -9612,7 +9095,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(s);
         v0.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVBreg x:(Arg <t>))
     // cond: t.IsSigned() && t.Size() == 1
@@ -9628,7 +9110,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVBreg (MOVDconst [c]))
     // result: (MOVDconst [int64( int8(c))])
@@ -9640,7 +9121,6 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int8(c)));
         return true;
-
     } 
     // match: (MOVBreg (ANDWconst [m] x))
     // cond: int8(m) >= 0
@@ -9660,10 +9140,8 @@ private static bool rewriteValueS390X_OpS390XMOVBreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -9687,7 +9165,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVBZreg x) mem)
     // result: (MOVBstore [off] {sym} ptr x mem)
@@ -9705,7 +9182,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym} (ADDconst [off2] ptr) val mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -9728,7 +9204,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [off] {sym} ptr (MOVDconst [c]) mem)
     // cond: is20Bit(int64(off)) && ptr.Op != OpSB
@@ -9750,7 +9225,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstore [off1] {sym1} (MOVDaddr [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2)
@@ -9774,7 +9248,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x:(MOVBstore [i-1] {s} p (SRDconst [8] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -9801,7 +9274,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w0:(SRDconst [j] w) x:(MOVBstore [i-1] {s} p (SRDconst [j+8] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -9833,7 +9305,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w x:(MOVBstore [i-1] {s} p (SRWconst [8] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -9860,7 +9331,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p w0:(SRWconst [j] w) x:(MOVBstore [i-1] {s} p (SRWconst [j+8] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -9892,7 +9362,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SRDconst [8] w) x:(MOVBstore [i-1] {s} p w mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -9918,7 +9387,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SRDconst [j] w) x:(MOVBstore [i-1] {s} p w0:(SRDconst [j-8] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -9949,7 +9417,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SRWconst [8] w) x:(MOVBstore [i-1] {s} p w mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -9975,7 +9442,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVBstore [i] {s} p (SRWconst [j] w) x:(MOVBstore [i-1] {s} p w0:(SRWconst [j-8] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -10006,7 +9472,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVBstore [7] {s} p1 (SRDconst w) x1:(MOVHBRstore [5] {s} p1 (SRDconst w) x2:(MOVWBRstore [1] {s} p1 (SRDconst w) x3:(MOVBstore [0] {s} p1 w mem))))
     // cond: x1.Uses == 1 && x2.Uses == 1 && x3.Uses == 1 && clobber(x1, x2, x3)
@@ -10057,10 +9522,8 @@ private static bool rewriteValueS390X_OpS390XMOVBstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p1, w, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVBstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10087,7 +9550,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [sc] {sym1} (MOVDaddr [off] {sym2} ptr) mem)
     // cond: ptr.Op != OpSB && canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -10110,7 +9572,6 @@ private static bool rewriteValueS390X_OpS390XMOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVBstoreconst [c] {s} p x:(MOVBstoreconst [a] {s} p mem))
     // cond: p.Op != OpSB && x.Uses == 1 && a.Off() + 1 == c.Off() && clobber(x)
@@ -10136,10 +9597,8 @@ private static bool rewriteValueS390X_OpS390XMOVBstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(p, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVDaddridx(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10166,7 +9625,6 @@ private static bool rewriteValueS390X_OpS390XMOVDaddridx(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (MOVDaddridx [c] {s} x (ADDconst [d] y))
     // cond: is20Bit(int64(c)+int64(d))
@@ -10188,7 +9646,6 @@ private static bool rewriteValueS390X_OpS390XMOVDaddridx(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (MOVDaddridx [off1] {sym1} (MOVDaddr [off2] {sym2} x) y)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && x.Op != OpSB
@@ -10211,7 +9668,6 @@ private static bool rewriteValueS390X_OpS390XMOVDaddridx(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (MOVDaddridx [off1] {sym1} x (MOVDaddr [off2] {sym2} y))
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && y.Op != OpSB
@@ -10234,10 +9690,8 @@ private static bool rewriteValueS390X_OpS390XMOVDaddridx(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10261,7 +9715,6 @@ private static bool rewriteValueS390X_OpS390XMOVDload(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVDload [off] {sym} ptr1 (FMOVDstore [off] {sym} ptr2 x _))
     // cond: isSamePtr(ptr1, ptr2)
@@ -10281,7 +9734,6 @@ private static bool rewriteValueS390X_OpS390XMOVDload(ptr<Value> _addr_v) {
         v.reset(OpS390XLGDR);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -10303,7 +9755,6 @@ private static bool rewriteValueS390X_OpS390XMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDload [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%8 == 0 && (off1+off2)%8 == 0))
@@ -10327,10 +9778,8 @@ private static bool rewriteValueS390X_OpS390XMOVDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVDstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10359,7 +9808,6 @@ private static bool rewriteValueS390X_OpS390XMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [off] {sym} ptr (MOVDconst [c]) mem)
     // cond: is16Bit(c) && isU12Bit(int64(off)) && ptr.Op != OpSB
@@ -10381,7 +9829,6 @@ private static bool rewriteValueS390X_OpS390XMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDstore [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%8 == 0 && (off1+off2)%8 == 0))
@@ -10406,7 +9853,6 @@ private static bool rewriteValueS390X_OpS390XMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVDstore [i] {s} p w1 x:(MOVDstore [i-8] {s} p w0 mem))
     // cond: p.Op != OpSB && x.Uses == 1 && is20Bit(int64(i)-8) && clobber(x)
@@ -10433,7 +9879,6 @@ private static bool rewriteValueS390X_OpS390XMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg4(p, w0, w1, mem);
         return true;
-
     } 
     // match: (MOVDstore [i] {s} p w2 x:(STMG2 [i-16] {s} p w0 w1 mem))
     // cond: x.Uses == 1 && is20Bit(int64(i)-16) && clobber(x)
@@ -10461,7 +9906,6 @@ private static bool rewriteValueS390X_OpS390XMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg5(p, w0, w1, w2, mem);
         return true;
-
     } 
     // match: (MOVDstore [i] {s} p w3 x:(STMG3 [i-24] {s} p w0 w1 w2 mem))
     // cond: x.Uses == 1 && is20Bit(int64(i)-24) && clobber(x)
@@ -10490,10 +9934,8 @@ private static bool rewriteValueS390X_OpS390XMOVDstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg6(p, w0, w1, w2, w3, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVDstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10520,7 +9962,6 @@ private static bool rewriteValueS390X_OpS390XMOVDstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVDstoreconst [sc] {sym1} (MOVDaddr [off] {sym2} ptr) mem)
     // cond: ptr.Op != OpSB && canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -10543,10 +9984,8 @@ private static bool rewriteValueS390X_OpS390XMOVDstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVHBRstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10578,7 +10017,6 @@ private static bool rewriteValueS390X_OpS390XMOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVHBRstore [i] {s} p (SRDconst [j] w) x:(MOVHBRstore [i-2] {s} p w0:(SRDconst [j-16] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10609,7 +10047,6 @@ private static bool rewriteValueS390X_OpS390XMOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVHBRstore [i] {s} p (SRWconst [16] w) x:(MOVHBRstore [i-2] {s} p w mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10635,7 +10072,6 @@ private static bool rewriteValueS390X_OpS390XMOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVHBRstore [i] {s} p (SRWconst [j] w) x:(MOVHBRstore [i-2] {s} p w0:(SRWconst [j-16] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10666,10 +10102,8 @@ private static bool rewriteValueS390X_OpS390XMOVHBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVHZload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10694,7 +10128,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZload(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -10716,7 +10149,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHZload [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%2 == 0 && (off1+off2)%2 == 0))
@@ -10740,10 +10172,8 @@ private static bool rewriteValueS390X_OpS390XMOVHZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10766,7 +10196,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg e:(MOVHreg x))
     // cond: clobberIfDead(e)
@@ -10783,7 +10212,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg e:(MOVWreg x))
     // cond: clobberIfDead(e)
@@ -10800,7 +10228,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg e:(MOVHZreg x))
     // cond: clobberIfDead(e)
@@ -10817,7 +10244,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg e:(MOVWZreg x))
     // cond: clobberIfDead(e)
@@ -10834,7 +10260,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg x:(MOVBZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 1)
@@ -10846,7 +10271,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg x:(MOVHZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 2)
@@ -10858,7 +10282,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg <t> x:(MOVHload [o] {s} p mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -10883,7 +10306,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(s);
         v0.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVHZreg x:(Arg <t>))
     // cond: !t.IsSigned() && t.Size() <= 2
@@ -10899,7 +10321,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHZreg (MOVDconst [c]))
     // result: (MOVDconst [int64(uint16(c))])
@@ -10911,7 +10332,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint16(c)));
         return true;
-
     } 
     // match: (MOVHZreg (RISBGZ x {r}))
     // cond: r.OutMerge(0x0000ffff) != nil
@@ -10929,7 +10349,6 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(new ptr<ptr<r.OutMerge>>(0x0000ffff));
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHZreg (ANDWconst [m] x))
     // result: (MOVWZreg (ANDWconst <typ.UInt32> [int32(uint16(m))] x))
@@ -10945,10 +10364,8 @@ private static bool rewriteValueS390X_OpS390XMOVHZreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVHload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -10973,7 +10390,6 @@ private static bool rewriteValueS390X_OpS390XMOVHload(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -10995,7 +10411,6 @@ private static bool rewriteValueS390X_OpS390XMOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHload [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%2 == 0 && (off1+off2)%2 == 0))
@@ -11019,10 +10434,8 @@ private static bool rewriteValueS390X_OpS390XMOVHload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11045,7 +10458,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg e:(MOVHreg x))
     // cond: clobberIfDead(e)
@@ -11062,7 +10474,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg e:(MOVWreg x))
     // cond: clobberIfDead(e)
@@ -11079,7 +10490,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg e:(MOVHZreg x))
     // cond: clobberIfDead(e)
@@ -11096,7 +10506,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg e:(MOVWZreg x))
     // cond: clobberIfDead(e)
@@ -11113,7 +10522,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBload _ _))
     // cond: (x.Type.IsSigned() || x.Type.Size() == 8)
@@ -11125,7 +10533,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVHload _ _))
     // cond: (x.Type.IsSigned() || x.Type.Size() == 8)
@@ -11137,7 +10544,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHreg x:(MOVBZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 1)
@@ -11149,7 +10555,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHreg <t> x:(MOVHZload [o] {s} p mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11174,7 +10579,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(s);
         v0.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVHreg x:(Arg <t>))
     // cond: t.IsSigned() && t.Size() <= 2
@@ -11190,7 +10594,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVHreg (MOVDconst [c]))
     // result: (MOVDconst [int64(int16(c))])
@@ -11202,7 +10605,6 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int16(c)));
         return true;
-
     } 
     // match: (MOVHreg (ANDWconst [m] x))
     // cond: int16(m) >= 0
@@ -11222,10 +10624,8 @@ private static bool rewriteValueS390X_OpS390XMOVHreg(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11249,7 +10649,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVHZreg x) mem)
     // result: (MOVHstore [off] {sym} ptr x mem)
@@ -11267,7 +10666,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVHstore [off1] {sym} (ADDconst [off2] ptr) val mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -11290,7 +10688,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [off] {sym} ptr (MOVDconst [c]) mem)
     // cond: isU12Bit(int64(off)) && ptr.Op != OpSB
@@ -11312,7 +10709,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstore [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%2 == 0 && (off1+off2)%2 == 0))
@@ -11337,7 +10733,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVHstore [i] {s} p w x:(MOVHstore [i-2] {s} p (SRDconst [16] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -11364,7 +10759,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVHstore [i] {s} p w0:(SRDconst [j] w) x:(MOVHstore [i-2] {s} p (SRDconst [j+16] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -11396,7 +10790,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVHstore [i] {s} p w x:(MOVHstore [i-2] {s} p (SRWconst [16] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -11423,7 +10816,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVHstore [i] {s} p w0:(SRWconst [j] w) x:(MOVHstore [i-2] {s} p (SRWconst [j+16] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -11455,10 +10847,8 @@ private static bool rewriteValueS390X_OpS390XMOVHstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVHstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11487,7 +10877,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstoreconst [sc] {sym1} (MOVDaddr [off] {sym2} ptr) mem)
     // cond: ptr.Op != OpSB && canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -11510,7 +10899,6 @@ private static bool rewriteValueS390X_OpS390XMOVHstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVHstoreconst [c] {s} p x:(MOVHstoreconst [a] {s} p mem))
     // cond: p.Op != OpSB && x.Uses == 1 && a.Off() + 2 == c.Off() && clobber(x)
@@ -11538,10 +10926,8 @@ private static bool rewriteValueS390X_OpS390XMOVHstoreconst(ptr<Value> _addr_v) 
         v0.AuxInt = int64ToAuxInt(int64(c.Val() & 0xffff | a.Val() << 16));
         v.AddArg3(p, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVWBRstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11573,7 +10959,6 @@ private static bool rewriteValueS390X_OpS390XMOVWBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVWBRstore [i] {s} p (SRDconst [j] w) x:(MOVWBRstore [i-4] {s} p w0:(SRDconst [j-32] w) mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11604,10 +10989,8 @@ private static bool rewriteValueS390X_OpS390XMOVWBRstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVWZload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11632,7 +11015,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZload(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -11654,7 +11036,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWZload [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%4 == 0 && (off1+off2)%4 == 0))
@@ -11678,10 +11059,8 @@ private static bool rewriteValueS390X_OpS390XMOVWZload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11703,7 +11082,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZreg e:(MOVHZreg x))
     // cond: clobberIfDead(e)
@@ -11720,7 +11098,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZreg e:(MOVWreg x))
     // cond: clobberIfDead(e)
@@ -11737,7 +11114,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZreg e:(MOVWZreg x))
     // cond: clobberIfDead(e)
@@ -11754,7 +11130,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVBZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 1)
@@ -11766,7 +11141,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVHZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 2)
@@ -11778,7 +11152,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg x:(MOVWZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 4)
@@ -11790,7 +11163,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg <t> x:(MOVWload [o] {s} p mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -11815,7 +11187,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(s);
         v0.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVWZreg x:(Arg <t>))
     // cond: !t.IsSigned() && t.Size() <= 4
@@ -11831,7 +11202,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWZreg (MOVDconst [c]))
     // result: (MOVDconst [int64(uint32(c))])
@@ -11843,7 +11213,6 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(uint32(c)));
         return true;
-
     } 
     // match: (MOVWZreg (RISBGZ x {r}))
     // cond: r.OutMerge(0xffffffff) != nil
@@ -11861,10 +11230,8 @@ private static bool rewriteValueS390X_OpS390XMOVWZreg(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(new ptr<ptr<r.OutMerge>>(0xffffffff));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11889,7 +11256,6 @@ private static bool rewriteValueS390X_OpS390XMOVWload(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym} (ADDconst [off2] ptr) mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -11911,7 +11277,6 @@ private static bool rewriteValueS390X_OpS390XMOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWload [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%4 == 0 && (off1+off2)%4 == 0))
@@ -11935,10 +11300,8 @@ private static bool rewriteValueS390X_OpS390XMOVWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(base, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -11960,7 +11323,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg e:(MOVHreg x))
     // cond: clobberIfDead(e)
@@ -11977,7 +11339,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg e:(MOVWreg x))
     // cond: clobberIfDead(e)
@@ -11994,7 +11355,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg e:(MOVWZreg x))
     // cond: clobberIfDead(e)
@@ -12011,7 +11371,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVBload _ _))
     // cond: (x.Type.IsSigned() || x.Type.Size() == 8)
@@ -12023,7 +11382,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVHload _ _))
     // cond: (x.Type.IsSigned() || x.Type.Size() == 8)
@@ -12035,7 +11393,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVWload _ _))
     // cond: (x.Type.IsSigned() || x.Type.Size() == 8)
@@ -12047,7 +11404,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVBZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 1)
@@ -12059,7 +11415,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg x:(MOVHZload _ _))
     // cond: (!x.Type.IsSigned() || x.Type.Size() > 2)
@@ -12071,7 +11426,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg <t> x:(MOVWZload [o] {s} p mem))
     // cond: x.Uses == 1 && clobber(x)
@@ -12096,7 +11450,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         v0.Aux = symToAux(s);
         v0.AddArg2(p, mem);
         return true;
-
     } 
     // match: (MOVWreg x:(Arg <t>))
     // cond: t.IsSigned() && t.Size() <= 4
@@ -12112,7 +11465,6 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (MOVWreg (MOVDconst [c]))
     // result: (MOVDconst [int64(int32(c))])
@@ -12124,10 +11476,8 @@ private static bool rewriteValueS390X_OpS390XMOVWreg(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int32(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12151,7 +11501,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVWZreg x) mem)
     // result: (MOVWstore [off] {sym} ptr x mem)
@@ -12169,7 +11518,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, x, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym} (ADDconst [off2] ptr) val mem)
     // cond: is20Bit(int64(off1)+int64(off2))
@@ -12192,7 +11540,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [off] {sym} ptr (MOVDconst [c]) mem)
     // cond: is16Bit(c) && isU12Bit(int64(off)) && ptr.Op != OpSB
@@ -12214,7 +11561,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstore [off1] {sym1} (MOVDaddr <t> [off2] {sym2} base) val mem)
     // cond: is32Bit(int64(off1)+int64(off2)) && canMergeSym(sym1, sym2) && (base.Op != OpSB || (t.IsPtr() && t.Elem().Alignment()%4 == 0 && (off1+off2)%4 == 0))
@@ -12239,7 +11585,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg3(base, val, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p (SRDconst [32] w) x:(MOVWstore [i-4] {s} p w mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -12265,7 +11610,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p w0:(SRDconst [j] w) x:(MOVWstore [i-4] {s} p (SRDconst [j+32] w) mem))
     // cond: p.Op != OpSB && x.Uses == 1 && clobber(x)
@@ -12297,7 +11641,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, w0, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p w1 x:(MOVWstore [i-4] {s} p w0 mem))
     // cond: p.Op != OpSB && x.Uses == 1 && is20Bit(int64(i)-4) && clobber(x)
@@ -12324,7 +11667,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg4(p, w0, w1, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p w2 x:(STM2 [i-8] {s} p w0 w1 mem))
     // cond: x.Uses == 1 && is20Bit(int64(i)-8) && clobber(x)
@@ -12352,7 +11694,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg5(p, w0, w1, w2, mem);
         return true;
-
     } 
     // match: (MOVWstore [i] {s} p w3 x:(STM3 [i-12] {s} p w0 w1 w2 mem))
     // cond: x.Uses == 1 && is20Bit(int64(i)-12) && clobber(x)
@@ -12381,10 +11722,8 @@ private static bool rewriteValueS390X_OpS390XMOVWstore(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg6(p, w0, w1, w2, w3, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMOVWstoreconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12413,7 +11752,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(s);
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [sc] {sym1} (MOVDaddr [off] {sym2} ptr) mem)
     // cond: ptr.Op != OpSB && canMergeSym(sym1, sym2) && sc.canAdd32(off)
@@ -12436,7 +11774,6 @@ private static bool rewriteValueS390X_OpS390XMOVWstoreconst(ptr<Value> _addr_v) 
         v.Aux = symToAux(mergeSym(sym1, sym2));
         v.AddArg2(ptr, mem);
         return true;
-
     } 
     // match: (MOVWstoreconst [c] {s} p x:(MOVWstoreconst [a] {s} p mem))
     // cond: p.Op != OpSB && x.Uses == 1 && a.Off() + 4 == c.Off() && clobber(x)
@@ -12464,10 +11801,8 @@ private static bool rewriteValueS390X_OpS390XMOVWstoreconst(ptr<Value> _addr_v) 
         v0.AuxInt = int64ToAuxInt(c.Val64() & 0xffffffff | a.Val64() << 32);
         v.AddArg3(p, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMULLD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12489,24 +11824,20 @@ private static bool rewriteValueS390X_OpS390XMULLD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(is32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpS390XMULLDconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MULLD <t> x g:(MOVDload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -12525,7 +11856,6 @@ private static bool rewriteValueS390X_OpS390XMULLD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -12533,24 +11863,20 @@ private static bool rewriteValueS390X_OpS390XMULLD(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XMULLDload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMULLDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12576,7 +11902,6 @@ private static bool rewriteValueS390X_OpS390XMULLDconst(ptr<Value> _addr_v) {
         v1.AddArg(x);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (MULLDconst <t> x [c])
     // cond: isPowerOfTwo32(c+(c&^(c-1)))
@@ -12597,7 +11922,6 @@ private static bool rewriteValueS390X_OpS390XMULLDconst(ptr<Value> _addr_v) {
         v1.AddArg(x);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (MULLDconst <t> x [c])
     // cond: isPowerOfTwo32(-c+(-c&^(-c-1)))
@@ -12618,7 +11942,6 @@ private static bool rewriteValueS390X_OpS390XMULLDconst(ptr<Value> _addr_v) {
         v1.AddArg(x);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (MULLDconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(c)*d])
@@ -12631,10 +11954,8 @@ private static bool rewriteValueS390X_OpS390XMULLDconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(c) * d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMULLDload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12665,7 +11986,6 @@ private static bool rewriteValueS390X_OpS390XMULLDload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (MULLDload [off1] {sym} x (ADDconst [off2] ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(off1)+int64(off2))
@@ -12688,7 +12008,6 @@ private static bool rewriteValueS390X_OpS390XMULLDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (MULLDload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -12712,10 +12031,8 @@ private static bool rewriteValueS390X_OpS390XMULLDload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMULLW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12736,20 +12053,17 @@ private static bool rewriteValueS390X_OpS390XMULLW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XMULLWconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MULLW <t> x g:(MOVWload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -12768,7 +12082,6 @@ private static bool rewriteValueS390X_OpS390XMULLW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -12776,21 +12089,18 @@ private static bool rewriteValueS390X_OpS390XMULLW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XMULLWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (MULLW <t> x g:(MOVWZload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -12809,7 +12119,6 @@ private static bool rewriteValueS390X_OpS390XMULLW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off = auxIntToInt32(g.AuxInt);
                 sym = auxToSym(g.Aux);
                 mem = g.Args[1];
@@ -12817,24 +12126,20 @@ private static bool rewriteValueS390X_OpS390XMULLW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XMULLWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMULLWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12860,7 +12165,6 @@ private static bool rewriteValueS390X_OpS390XMULLWconst(ptr<Value> _addr_v) {
         v1.AddArg(x);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (MULLWconst <t> x [c])
     // cond: isPowerOfTwo32(c+(c&^(c-1)))
@@ -12881,7 +12185,6 @@ private static bool rewriteValueS390X_OpS390XMULLWconst(ptr<Value> _addr_v) {
         v1.AddArg(x);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (MULLWconst <t> x [c])
     // cond: isPowerOfTwo32(-c+(-c&^(-c-1)))
@@ -12902,7 +12205,6 @@ private static bool rewriteValueS390X_OpS390XMULLWconst(ptr<Value> _addr_v) {
         v1.AddArg(x);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (MULLWconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(c*int32(d))])
@@ -12915,10 +12217,8 @@ private static bool rewriteValueS390X_OpS390XMULLWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(c * int32(d)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XMULLWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12947,7 +12247,6 @@ private static bool rewriteValueS390X_OpS390XMULLWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (MULLWload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -12971,10 +12270,8 @@ private static bool rewriteValueS390X_OpS390XMULLWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XNEG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -12990,7 +12287,6 @@ private static bool rewriteValueS390X_OpS390XNEG(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(-c);
         return true;
-
     } 
     // match: (NEG (ADDconst [c] (NEG x)))
     // cond: c != -(1<<31)
@@ -13012,10 +12308,8 @@ private static bool rewriteValueS390X_OpS390XNEG(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XNEGW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13031,10 +12325,8 @@ private static bool rewriteValueS390X_OpS390XNEGW(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int32(-c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XNOT(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13052,7 +12344,6 @@ private static bool rewriteValueS390X_OpS390XNOT(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpS390XNOTW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13067,7 +12358,6 @@ private static bool rewriteValueS390X_OpS390XNOTW(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -13091,24 +12381,20 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(isU32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpS390XORconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR (SLDconst x [c]) (SRDconst x [64-c]))
     // result: (RISBGZ x {s390x.NewRotateParams(0, 63, c)})
@@ -13123,25 +12409,21 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToUint8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpS390XSRDconst || auxIntToUint8(v_1.AuxInt) != 64 - c || x != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpS390XRISBGZ);
                 v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(0, 63, c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR (MOVDconst [-1<<63]) (LGDR <t> x))
     // result: (LGDR <t> (LNDFR <x.Type> x))
@@ -13156,7 +12438,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var t = v_1.Type;
                 x = v_1.Args[0];
                 v.reset(OpS390XLGDR);
@@ -13165,14 +12446,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v0.AddArg(x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR (RISBGZ (LGDR x) {r}) (LGDR (LPDFR <t> y)))
     // cond: r == s390x.NewRotateParams(0, 0, 0)
@@ -13188,42 +12467,35 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var r = auxToS390xRotateParams(v_0.Aux);
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpS390XLGDR) {
                     continue;
                 }
-
                 x = v_0_0.Args[0];
                 if (v_1.Op != OpS390XLGDR) {
                     continue;
                 }
-
                 var v_1_0 = v_1.Args[0];
                 if (v_1_0.Op != OpS390XLPDFR) {
                     continue;
                 }
-
                 t = v_1_0.Type;
                 var y = v_1_0.Args[0];
                 if (!(r == s390x.NewRotateParams(0, 0, 0))) {
                     continue;
                 }
-
                 v.reset(OpS390XLGDR);
                 v0 = b.NewValue0(v.Pos, OpS390XCPSDR, t);
                 v0.AddArg2(y, x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR (RISBGZ (LGDR x) {r}) (MOVDconst [c]))
     // cond: c >= 0 && r == s390x.NewRotateParams(0, 0, 0)
@@ -13239,23 +12511,19 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 r = auxToS390xRotateParams(v_0.Aux);
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpS390XLGDR) {
                     continue;
                 }
-
                 x = v_0_0.Args[0];
                 if (v_1.Op != OpS390XMOVDconst) {
                     continue;
                 }
-
                 c = auxIntToInt64(v_1.AuxInt);
                 if (!(c >= 0 && r == s390x.NewRotateParams(0, 0, 0))) {
                     continue;
                 }
-
                 v.reset(OpS390XLGDR);
                 v0 = b.NewValue0(v.Pos, OpS390XCPSDR, x.Type);
                 var v1 = b.NewValue0(v.Pos, OpS390XFMOVDconst, x.Type);
@@ -13263,14 +12531,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v0.AddArg2(v1, x);
                 v.AddArg(v0);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR (MOVDconst [c]) (MOVDconst [d]))
     // result: (MOVDconst [c|d])
@@ -13285,24 +12551,20 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpS390XMOVDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XMOVDconst);
                 v.AuxInt = int64ToAuxInt(c | d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x x)
     // result: x
@@ -13313,7 +12575,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (OR <t> x g:(MOVDload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -13332,7 +12593,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -13340,21 +12600,18 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XORload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x1:(MOVBZload [i1] {s} p mem) sh:(SLDconst [8] x0:(MOVBZload [i0] {s} p mem)))
     // cond: i1 == i0+1 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -13371,7 +12628,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i1 = auxIntToInt32(x1.AuxInt);
                 var s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -13380,22 +12636,18 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLDconst || auxIntToUint8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 var x0 = sh.Args[0];
                 if (x0.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 var i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 1 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpS390XMOVHZload, typ.UInt16);
                 v.copyOf(v0);
@@ -13403,14 +12655,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x1:(MOVHZload [i1] {s} p mem) sh:(SLDconst [16] x0:(MOVHZload [i0] {s} p mem)))
     // cond: i1 == i0+2 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -13427,7 +12677,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -13436,22 +12685,18 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLDconst || auxIntToUint8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 x0 = sh.Args[0];
                 if (x0.Op != OpS390XMOVHZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 2 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpS390XMOVWZload, typ.UInt32);
                 v.copyOf(v0);
@@ -13459,14 +12704,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x1:(MOVWZload [i1] {s} p mem) sh:(SLDconst [32] x0:(MOVWZload [i0] {s} p mem)))
     // cond: i1 == i0+4 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -13483,7 +12726,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -13492,22 +12734,18 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLDconst || auxIntToUint8(sh.AuxInt) != 32) {
                     continue;
                 }
-
                 x0 = sh.Args[0];
                 if (x0.Op != OpS390XMOVWZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 4 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpS390XMOVDload, typ.UInt64);
                 v.copyOf(v0);
@@ -13515,14 +12753,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR s0:(SLDconst [j0] x0:(MOVBZload [i0] {s} p mem)) or:(OR s1:(SLDconst [j1] x1:(MOVBZload [i1] {s} p mem)) y))
     // cond: i1 == i0+1 && j1 == j0-8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -13539,13 +12775,11 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var j0 = auxIntToUint8(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13554,7 +12788,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (or.Op != OpS390XOR) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 var or_0 = or.Args[0];
                 var or_1 = or.Args[1];
@@ -13569,28 +12802,23 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         var j1 = auxIntToUint8(s1.AuxInt);
                         x1 = s1.Args[0];
                         if (x1.Op != OpS390XMOVBZload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 1 && j1 == j0 - 8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpS390XOR, v.Type);
                         v.copyOf(v0);
@@ -13603,20 +12831,17 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR s0:(SLDconst [j0] x0:(MOVHZload [i0] {s} p mem)) or:(OR s1:(SLDconst [j1] x1:(MOVHZload [i1] {s} p mem)) y))
     // cond: i1 == i0+2 && j1 == j0-16 && j1 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -13633,13 +12858,11 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j0 = auxIntToUint8(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpS390XMOVHZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13648,7 +12871,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (or.Op != OpS390XOR) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -13663,28 +12885,23 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j1 = auxIntToUint8(s1.AuxInt);
                         x1 = s1.Args[0];
                         if (x1.Op != OpS390XMOVHZload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 2 && j1 == j0 - 16 && j1 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpS390XOR, v.Type);
                         v.copyOf(v0);
@@ -13697,20 +12914,17 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR x0:(MOVBZload [i0] {s} p mem) sh:(SLDconst [8] x1:(MOVBZload [i1] {s} p mem)))
     // cond: p.Op != OpSB && i1 == i0+1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -13727,7 +12941,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13736,22 +12949,18 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLDconst || auxIntToUint8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(p.Op != OpSB && i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpS390XMOVHZreg, typ.UInt64);
                 v.copyOf(v0);
@@ -13761,14 +12970,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR r0:(MOVHZreg x0:(MOVHBRload [i0] {s} p mem)) sh:(SLDconst [16] r1:(MOVHZreg x1:(MOVHBRload [i1] {s} p mem))))
     // cond: i1 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -13785,12 +12992,10 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpS390XMOVHBRload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13799,27 +13004,22 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLDconst || auxIntToUint8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 var r1 = sh.Args[0];
                 if (r1.Op != OpS390XMOVHZreg) {
                     continue;
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpS390XMOVHBRload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpS390XMOVWZreg, typ.UInt64);
                 v.copyOf(v0);
@@ -13829,14 +13029,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR r0:(MOVWZreg x0:(MOVWBRload [i0] {s} p mem)) sh:(SLDconst [32] r1:(MOVWZreg x1:(MOVWBRload [i1] {s} p mem))))
     // cond: i1 == i0+4 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -13853,12 +13051,10 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpS390XMOVWBRload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -13867,27 +13063,22 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLDconst || auxIntToUint8(sh.AuxInt) != 32) {
                     continue;
                 }
-
                 r1 = sh.Args[0];
                 if (r1.Op != OpS390XMOVWZreg) {
                     continue;
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpS390XMOVWBRload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 4 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpS390XMOVDBRload, typ.UInt64);
                 v.copyOf(v0);
@@ -13895,14 +13086,12 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR s1:(SLDconst [j1] x1:(MOVBZload [i1] {s} p mem)) or:(OR s0:(SLDconst [j0] x0:(MOVBZload [i0] {s} p mem)) y))
     // cond: p.Op != OpSB && i1 == i0+1 && j1 == j0+8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -13919,13 +13108,11 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j1 = auxIntToUint8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -13934,7 +13121,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (or.Op != OpS390XOR) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -13949,28 +13135,23 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j0 = auxIntToUint8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpS390XMOVBZload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(p.Op != OpSB && i1 == i0 + 1 && j1 == j0 + 8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpS390XOR, v.Type);
                         v.copyOf(v0);
@@ -13985,20 +13166,17 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (OR s1:(SLDconst [j1] r1:(MOVHZreg x1:(MOVHBRload [i1] {s} p mem))) or:(OR s0:(SLDconst [j0] r0:(MOVHZreg x0:(MOVHBRload [i0] {s} p mem))) y))
     // cond: i1 == i0+2 && j1 == j0+16 && j0 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, r0, r1, s0, s1, or)
@@ -14015,18 +13193,15 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j1 = auxIntToUint8(s1.AuxInt);
                 r1 = s1.Args[0];
                 if (r1.Op != OpS390XMOVHZreg) {
                     continue;
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpS390XMOVHBRload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -14035,7 +13210,6 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                 if (or.Op != OpS390XOR) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -14050,33 +13224,27 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j0 = auxIntToUint8(s0.AuxInt);
                         r0 = s0.Args[0];
                         if (r0.Op != OpS390XMOVHZreg) {
                             continue;
                         }
-
                         x0 = r0.Args[0];
                         if (x0.Op != OpS390XMOVHBRload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(i1 == i0 + 2 && j1 == j0 + 16 && j0 % 32 == 0 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, r0, r1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpS390XOR, v.Type);
                         v.copyOf(v0);
@@ -14091,23 +13259,19 @@ private static bool rewriteValueS390X_OpS390XOR(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14130,20 +13294,17 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XORWconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW (SLWconst x [c]) (SRWconst x [32-c]))
     // result: (RLLconst x [c])
@@ -14158,25 +13319,21 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToUint8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpS390XSRWconst || auxIntToUint8(v_1.AuxInt) != 32 - c || x != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpS390XRLLconst);
                 v.AuxInt = uint8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW x x)
     // result: x
@@ -14187,7 +13344,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORW <t> x g:(MOVWload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -14206,7 +13362,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -14214,21 +13369,18 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XORWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW <t> x g:(MOVWZload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -14247,7 +13399,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off = auxIntToInt32(g.AuxInt);
                 sym = auxToSym(g.Aux);
                 mem = g.Args[1];
@@ -14255,21 +13406,18 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XORWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW x1:(MOVBZload [i1] {s} p mem) sh:(SLWconst [8] x0:(MOVBZload [i0] {s} p mem)))
     // cond: i1 == i0+1 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -14286,7 +13434,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var i1 = auxIntToInt32(x1.AuxInt);
                 var s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -14295,22 +13442,18 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLWconst || auxIntToUint8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 var x0 = sh.Args[0];
                 if (x0.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 var i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 1 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 var v0 = b.NewValue0(x0.Pos, OpS390XMOVHZload, typ.UInt16);
                 v.copyOf(v0);
@@ -14318,14 +13461,12 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW x1:(MOVHZload [i1] {s} p mem) sh:(SLWconst [16] x0:(MOVHZload [i0] {s} p mem)))
     // cond: i1 == i0+2 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -14342,7 +13483,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -14351,22 +13491,18 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLWconst || auxIntToUint8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 x0 = sh.Args[0];
                 if (x0.Op != OpS390XMOVHZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 if (auxToSym(x0.Aux) != s) {
                     continue;
                 }
-
                 _ = x0.Args[1];
                 if (p != x0.Args[0] || mem != x0.Args[1] || !(i1 == i0 + 2 && p.Op != OpSB && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x0.Pos, OpS390XMOVWZload, typ.UInt32);
                 v.copyOf(v0);
@@ -14374,14 +13510,12 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW s0:(SLWconst [j0] x0:(MOVBZload [i0] {s} p mem)) or:(ORW s1:(SLWconst [j1] x1:(MOVBZload [i1] {s} p mem)) y))
     // cond: i1 == i0+1 && j1 == j0-8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -14398,13 +13532,11 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var j0 = auxIntToUint8(s0.AuxInt);
                 x0 = s0.Args[0];
                 if (x0.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -14413,7 +13545,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (or.Op != OpS390XORW) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 var or_0 = or.Args[0];
                 var or_1 = or.Args[1];
@@ -14428,28 +13559,23 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         var j1 = auxIntToUint8(s1.AuxInt);
                         x1 = s1.Args[0];
                         if (x1.Op != OpS390XMOVBZload) {
                             continue;
                         }
-
                         i1 = auxIntToInt32(x1.AuxInt);
                         if (auxToSym(x1.Aux) != s) {
                             continue;
                         }
-
                         _ = x1.Args[1];
                         if (p != x1.Args[0] || mem != x1.Args[1]) {
                             continue;
                         }
-
                         var y = or_1;
                         if (!(i1 == i0 + 1 && j1 == j0 - 8 && j1 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x1.Pos, OpS390XORW, v.Type);
                         v.copyOf(v0);
@@ -14462,20 +13588,17 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW x0:(MOVBZload [i0] {s} p mem) sh:(SLWconst [8] x1:(MOVBZload [i1] {s} p mem)))
     // cond: p.Op != OpSB && i1 == i0+1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, sh)
@@ -14492,7 +13615,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -14501,22 +13623,18 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLWconst || auxIntToUint8(sh.AuxInt) != 8) {
                     continue;
                 }
-
                 x1 = sh.Args[0];
                 if (x1.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(p.Op != OpSB && i1 == i0 + 1 && x0.Uses == 1 && x1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpS390XMOVHZreg, typ.UInt64);
                 v.copyOf(v0);
@@ -14526,14 +13644,12 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 v1.AddArg2(p, mem);
                 v0.AddArg(v1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW r0:(MOVHZreg x0:(MOVHBRload [i0] {s} p mem)) sh:(SLWconst [16] r1:(MOVHZreg x1:(MOVHBRload [i1] {s} p mem))))
     // cond: i1 == i0+2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b,x0,x1) != nil && clobber(x0, x1, r0, r1, sh)
@@ -14550,12 +13666,10 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 x0 = r0.Args[0];
                 if (x0.Op != OpS390XMOVHBRload) {
                     continue;
                 }
-
                 i0 = auxIntToInt32(x0.AuxInt);
                 s = auxToSym(x0.Aux);
                 mem = x0.Args[1];
@@ -14564,27 +13678,22 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (sh.Op != OpS390XSLWconst || auxIntToUint8(sh.AuxInt) != 16) {
                     continue;
                 }
-
                 var r1 = sh.Args[0];
                 if (r1.Op != OpS390XMOVHZreg) {
                     continue;
                 }
-
                 x1 = r1.Args[0];
                 if (x1.Op != OpS390XMOVHBRload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 if (auxToSym(x1.Aux) != s) {
                     continue;
                 }
-
                 _ = x1.Args[1];
                 if (p != x1.Args[0] || mem != x1.Args[1] || !(i1 == i0 + 2 && x0.Uses == 1 && x1.Uses == 1 && r0.Uses == 1 && r1.Uses == 1 && sh.Uses == 1 && mergePoint(b, x0, x1) != null && clobber(x0, x1, r0, r1, sh))) {
                     continue;
                 }
-
                 b = mergePoint(b, x0, x1);
                 v0 = b.NewValue0(x1.Pos, OpS390XMOVWBRload, typ.UInt32);
                 v.copyOf(v0);
@@ -14592,14 +13701,12 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 v0.Aux = symToAux(s);
                 v0.AddArg2(p, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (ORW s1:(SLWconst [j1] x1:(MOVBZload [i1] {s} p mem)) or:(ORW s0:(SLWconst [j0] x0:(MOVBZload [i0] {s} p mem)) y))
     // cond: p.Op != OpSB && i1 == i0+1 && j1 == j0+8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b,x0,x1,y) != nil && clobber(x0, x1, s0, s1, or)
@@ -14616,13 +13723,11 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 j1 = auxIntToUint8(s1.AuxInt);
                 x1 = s1.Args[0];
                 if (x1.Op != OpS390XMOVBZload) {
                     continue;
                 }
-
                 i1 = auxIntToInt32(x1.AuxInt);
                 s = auxToSym(x1.Aux);
                 mem = x1.Args[1];
@@ -14631,7 +13736,6 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                 if (or.Op != OpS390XORW) {
                     continue;
                 }
-
                 _ = or.Args[1];
                 or_0 = or.Args[0];
                 or_1 = or.Args[1];
@@ -14646,28 +13750,23 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                             continue;
                         (_i1, or_0, or_1) = (_i1 + 1, or_1, or_0);
                         }
-
                         j0 = auxIntToUint8(s0.AuxInt);
                         x0 = s0.Args[0];
                         if (x0.Op != OpS390XMOVBZload) {
                             continue;
                         }
-
                         i0 = auxIntToInt32(x0.AuxInt);
                         if (auxToSym(x0.Aux) != s) {
                             continue;
                         }
-
                         _ = x0.Args[1];
                         if (p != x0.Args[0] || mem != x0.Args[1]) {
                             continue;
                         }
-
                         y = or_1;
                         if (!(p.Op != OpSB && i1 == i0 + 1 && j1 == j0 + 8 && j0 % 16 == 0 && x0.Uses == 1 && x1.Uses == 1 && s0.Uses == 1 && s1.Uses == 1 && or.Uses == 1 && mergePoint(b, x0, x1, y) != null && clobber(x0, x1, s0, s1, or))) {
                             continue;
                         }
-
                         b = mergePoint(b, x0, x1, y);
                         v0 = b.NewValue0(x0.Pos, OpS390XORW, v.Type);
                         v.copyOf(v0);
@@ -14682,23 +13781,19 @@ private static bool rewriteValueS390X_OpS390XORW(ptr<Value> _addr_v) {
                         v1.AddArg(v2);
                         v0.AddArg2(v1, y);
                         return true;
-
                     }
 
 
                     _i1 = _i1__prev3;
                 }
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XORWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14715,7 +13810,6 @@ private static bool rewriteValueS390X_OpS390XORWconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORWconst [c] _)
     // cond: int32(c)==-1
@@ -14728,7 +13822,6 @@ private static bool rewriteValueS390X_OpS390XORWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORWconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(c)|d])
@@ -14741,10 +13834,8 @@ private static bool rewriteValueS390X_OpS390XORWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(c) | d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XORWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14773,7 +13864,6 @@ private static bool rewriteValueS390X_OpS390XORWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (ORWload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -14797,10 +13887,8 @@ private static bool rewriteValueS390X_OpS390XORWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14815,7 +13903,6 @@ private static bool rewriteValueS390X_OpS390XORconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (ORconst [-1] _)
     // result: (MOVDconst [-1])
@@ -14826,7 +13913,6 @@ private static bool rewriteValueS390X_OpS390XORconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(-1);
         return true;
-
     } 
     // match: (ORconst [c] (MOVDconst [d]))
     // result: (MOVDconst [c|d])
@@ -14839,10 +13925,8 @@ private static bool rewriteValueS390X_OpS390XORconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(c | d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XORload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14873,7 +13957,6 @@ private static bool rewriteValueS390X_OpS390XORload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (ORload [off1] {sym} x (ADDconst [off2] ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(off1)+int64(off2))
@@ -14896,7 +13979,6 @@ private static bool rewriteValueS390X_OpS390XORload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (ORload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -14920,10 +14002,8 @@ private static bool rewriteValueS390X_OpS390XORload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -14946,7 +14026,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(new ptr<ptr<r.InMerge>>(0xffffffff));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ (MOVHZreg x) {r})
     // cond: r.InMerge(0x0000ffff) != nil
@@ -14964,7 +14043,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(new ptr<ptr<r.InMerge>>(0x0000ffff));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ (MOVBZreg x) {r})
     // cond: r.InMerge(0x000000ff) != nil
@@ -14982,7 +14060,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(new ptr<ptr<r.InMerge>>(0x000000ff));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ (SLDconst x [c]) {r})
     // cond: r.InMerge(^uint64(0)<<c) != nil
@@ -15001,7 +14078,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux((new ptr<ptr<r.InMerge>>(~uint64(0) << (int)(c))).RotateLeft(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ (SRDconst x [c]) {r})
     // cond: r.InMerge(^uint64(0)>>c) != nil
@@ -15020,7 +14096,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux((new ptr<ptr<r.InMerge>>(~uint64(0) >> (int)(c))).RotateLeft(-c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ (RISBGZ x {y}) {z})
     // cond: z.InMerge(y.OutMask()) != nil
@@ -15039,7 +14114,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux((new ptr<ptr<z.InMerge>>(y.OutMask())).RotateLeft(y.Amount));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ x {r})
     // cond: r.End == 63 && r.Start == -r.Amount&63
@@ -15054,7 +14128,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(-r.Amount & 63);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ x {r})
     // cond: r.Start == 0 && r.End == 63-r.Amount
@@ -15069,7 +14142,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(r.Amount);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ (SRADconst x [c]) {r})
     // cond: r.Start == r.End && (r.Start+r.Amount)&63 <= c
@@ -15088,7 +14160,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(r.Start, r.Start, -r.Start & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ x {r})
     // cond: r == s390x.NewRotateParams(56, 63, 0)
@@ -15102,7 +14173,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ x {r})
     // cond: r == s390x.NewRotateParams(48, 63, 0)
@@ -15116,7 +14186,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ x {r})
     // cond: r == s390x.NewRotateParams(32, 63, 0)
@@ -15130,7 +14199,6 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWZreg);
         v.AddArg(x);
         return true;
-
     } 
     // match: (RISBGZ (LGDR <t> x) {r})
     // cond: r == s390x.NewRotateParams(1, 63, 0)
@@ -15151,10 +14219,8 @@ private static bool rewriteValueS390X_OpS390XRISBGZ(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XRLL(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15173,10 +14239,8 @@ private static bool rewriteValueS390X_OpS390XRLL(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(uint8(c & 31));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XRLLG(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15195,10 +14259,8 @@ private static bool rewriteValueS390X_OpS390XRLLG(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(0, 63, uint8(c & 63)));
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15219,7 +14281,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(uint8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLD x (RISBGZ y {r}))
     // cond: r.Amount == 0 && r.OutMask()&63 == 63
@@ -15237,7 +14298,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLD x (AND (MOVDconst [c]) y))
     // result: (SLD x (ANDWconst <typ.UInt32> [int32(c&63)] y))
@@ -15257,7 +14317,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 y = v_1_1;
                 v.reset(OpS390XSLD);
@@ -15266,12 +14325,10 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SLD x (ANDWconst [c] y))
     // cond: c&63 == 63
@@ -15289,7 +14346,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLD x (MOVWreg y))
     // result: (SLD x y)
@@ -15302,7 +14358,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLD x (MOVHreg y))
     // result: (SLD x y)
@@ -15315,7 +14370,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLD x (MOVBreg y))
     // result: (SLD x y)
@@ -15328,7 +14382,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLD x (MOVWZreg y))
     // result: (SLD x y)
@@ -15341,7 +14394,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLD x (MOVHZreg y))
     // result: (SLD x y)
@@ -15354,7 +14406,6 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLD x (MOVBZreg y))
     // result: (SLD x y)
@@ -15367,10 +14418,8 @@ private static bool rewriteValueS390X_OpS390XSLD(ptr<Value> _addr_v) {
         v.reset(OpS390XSLD);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSLDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15389,7 +14438,6 @@ private static bool rewriteValueS390X_OpS390XSLDconst(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(uint8(max8(0, int8(c - d))), 63 - d, uint8(int8(d - c) & 63)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLDconst (RISBGZ x {r}) [c])
     // cond: s390x.NewRotateParams(0, 63-c, c).InMerge(r.OutMask()) != nil
@@ -15408,7 +14456,6 @@ private static bool rewriteValueS390X_OpS390XSLDconst(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux((s390x.NewRotateParams(0, 63 - c, c).InMerge(r.OutMask()).val).RotateLeft(r.Amount));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLDconst x [0])
     // result: x
@@ -15419,10 +14466,8 @@ private static bool rewriteValueS390X_OpS390XSLDconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15447,7 +14492,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(uint8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SLW _ (MOVDconst [c]))
     // cond: c&32 != 0
@@ -15463,7 +14507,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SLW x (RISBGZ y {r}))
     // cond: r.Amount == 0 && r.OutMask()&63 == 63
@@ -15481,7 +14524,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLW x (AND (MOVDconst [c]) y))
     // result: (SLW x (ANDWconst <typ.UInt32> [int32(c&63)] y))
@@ -15501,7 +14543,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 y = v_1_1;
                 v.reset(OpS390XSLW);
@@ -15510,12 +14551,10 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SLW x (ANDWconst [c] y))
     // cond: c&63 == 63
@@ -15533,7 +14572,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLW x (MOVWreg y))
     // result: (SLW x y)
@@ -15546,7 +14584,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLW x (MOVHreg y))
     // result: (SLW x y)
@@ -15559,7 +14596,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLW x (MOVBreg y))
     // result: (SLW x y)
@@ -15572,7 +14608,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLW x (MOVWZreg y))
     // result: (SLW x y)
@@ -15585,7 +14620,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLW x (MOVHZreg y))
     // result: (SLW x y)
@@ -15598,7 +14632,6 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SLW x (MOVBZreg y))
     // result: (SLW x y)
@@ -15611,10 +14644,8 @@ private static bool rewriteValueS390X_OpS390XSLW(ptr<Value> _addr_v) {
         v.reset(OpS390XSLW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSLWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15629,10 +14660,8 @@ private static bool rewriteValueS390X_OpS390XSLWconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15653,7 +14682,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(uint8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRAD x (RISBGZ y {r}))
     // cond: r.Amount == 0 && r.OutMask()&63 == 63
@@ -15671,7 +14699,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAD x (AND (MOVDconst [c]) y))
     // result: (SRAD x (ANDWconst <typ.UInt32> [int32(c&63)] y))
@@ -15691,7 +14718,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 y = v_1_1;
                 v.reset(OpS390XSRAD);
@@ -15700,12 +14726,10 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SRAD x (ANDWconst [c] y))
     // cond: c&63 == 63
@@ -15723,7 +14747,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAD x (MOVWreg y))
     // result: (SRAD x y)
@@ -15736,7 +14759,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAD x (MOVHreg y))
     // result: (SRAD x y)
@@ -15749,7 +14771,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAD x (MOVBreg y))
     // result: (SRAD x y)
@@ -15762,7 +14783,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAD x (MOVWZreg y))
     // result: (SRAD x y)
@@ -15775,7 +14795,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAD x (MOVHZreg y))
     // result: (SRAD x y)
@@ -15788,7 +14807,6 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAD x (MOVBZreg y))
     // result: (SRAD x y)
@@ -15801,10 +14819,8 @@ private static bool rewriteValueS390X_OpS390XSRAD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAD);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRADconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15819,7 +14835,6 @@ private static bool rewriteValueS390X_OpS390XSRADconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SRADconst [c] (MOVDconst [d]))
     // result: (MOVDconst [d>>uint64(c)])
@@ -15832,10 +14847,8 @@ private static bool rewriteValueS390X_OpS390XSRADconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(d >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -15860,7 +14873,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(uint8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRAW x (MOVDconst [c]))
     // cond: c&32 != 0
@@ -15878,7 +14890,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(31);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRAW x (RISBGZ y {r}))
     // cond: r.Amount == 0 && r.OutMask()&63 == 63
@@ -15896,7 +14907,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAW x (AND (MOVDconst [c]) y))
     // result: (SRAW x (ANDWconst <typ.UInt32> [int32(c&63)] y))
@@ -15916,7 +14926,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 y = v_1_1;
                 v.reset(OpS390XSRAW);
@@ -15925,12 +14934,10 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SRAW x (ANDWconst [c] y))
     // cond: c&63 == 63
@@ -15948,7 +14955,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAW x (MOVWreg y))
     // result: (SRAW x y)
@@ -15961,7 +14967,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAW x (MOVHreg y))
     // result: (SRAW x y)
@@ -15974,7 +14979,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAW x (MOVBreg y))
     // result: (SRAW x y)
@@ -15987,7 +14991,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAW x (MOVWZreg y))
     // result: (SRAW x y)
@@ -16000,7 +15003,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAW x (MOVHZreg y))
     // result: (SRAW x y)
@@ -16013,7 +15015,6 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRAW x (MOVBZreg y))
     // result: (SRAW x y)
@@ -16026,10 +15027,8 @@ private static bool rewriteValueS390X_OpS390XSRAW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRAW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRAWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16044,7 +15043,6 @@ private static bool rewriteValueS390X_OpS390XSRAWconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SRAWconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(int32(d))>>uint64(c)])
@@ -16057,10 +15055,8 @@ private static bool rewriteValueS390X_OpS390XSRAWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(int32(d)) >> (int)(uint64(c)));
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16081,7 +15077,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(uint8(c & 63));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRD x (RISBGZ y {r}))
     // cond: r.Amount == 0 && r.OutMask()&63 == 63
@@ -16099,7 +15094,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRD x (AND (MOVDconst [c]) y))
     // result: (SRD x (ANDWconst <typ.UInt32> [int32(c&63)] y))
@@ -16119,7 +15113,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 y = v_1_1;
                 v.reset(OpS390XSRD);
@@ -16128,12 +15121,10 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SRD x (ANDWconst [c] y))
     // cond: c&63 == 63
@@ -16151,7 +15142,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRD x (MOVWreg y))
     // result: (SRD x y)
@@ -16164,7 +15154,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRD x (MOVHreg y))
     // result: (SRD x y)
@@ -16177,7 +15166,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRD x (MOVBreg y))
     // result: (SRD x y)
@@ -16190,7 +15178,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRD x (MOVWZreg y))
     // result: (SRD x y)
@@ -16203,7 +15190,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRD x (MOVHZreg y))
     // result: (SRD x y)
@@ -16216,7 +15202,6 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRD x (MOVBZreg y))
     // result: (SRD x y)
@@ -16229,10 +15214,8 @@ private static bool rewriteValueS390X_OpS390XSRD(ptr<Value> _addr_v) {
         v.reset(OpS390XSRD);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRDconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16251,7 +15234,6 @@ private static bool rewriteValueS390X_OpS390XSRDconst(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(d, uint8(min8(63, int8(63 - c + d))), uint8(int8(c - d) & 63)));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRDconst (RISBGZ x {r}) [c])
     // cond: s390x.NewRotateParams(c, 63, -c&63).InMerge(r.OutMask()) != nil
@@ -16270,7 +15252,6 @@ private static bool rewriteValueS390X_OpS390XSRDconst(ptr<Value> _addr_v) {
         v.Aux = s390xRotateParamsToAux((s390x.NewRotateParams(c, 63, -c & 63).InMerge(r.OutMask()).val).RotateLeft(r.Amount));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRDconst x [0])
     // result: x
@@ -16281,10 +15262,8 @@ private static bool rewriteValueS390X_OpS390XSRDconst(ptr<Value> _addr_v) {
         x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16309,7 +15288,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.AuxInt = uint8ToAuxInt(uint8(c & 31));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SRW _ (MOVDconst [c]))
     // cond: c&32 != 0
@@ -16325,7 +15303,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SRW x (RISBGZ y {r}))
     // cond: r.Amount == 0 && r.OutMask()&63 == 63
@@ -16343,7 +15320,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRW x (AND (MOVDconst [c]) y))
     // result: (SRW x (ANDWconst <typ.UInt32> [int32(c&63)] y))
@@ -16363,7 +15339,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_1_0, v_1_1) = (_i0 + 1, v_1_1, v_1_0);
                 }
-
                 c = auxIntToInt64(v_1_0.AuxInt);
                 y = v_1_1;
                 v.reset(OpS390XSRW);
@@ -16372,12 +15347,10 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
                 v0.AddArg(y);
                 v.AddArg2(x, v0);
                 return true;
-
             }
 
         }
         break;
-
     } 
     // match: (SRW x (ANDWconst [c] y))
     // cond: c&63 == 63
@@ -16395,7 +15368,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRW x (MOVWreg y))
     // result: (SRW x y)
@@ -16408,7 +15380,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRW x (MOVHreg y))
     // result: (SRW x y)
@@ -16421,7 +15392,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRW x (MOVBreg y))
     // result: (SRW x y)
@@ -16434,7 +15404,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRW x (MOVWZreg y))
     // result: (SRW x y)
@@ -16447,7 +15416,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRW x (MOVHZreg y))
     // result: (SRW x y)
@@ -16460,7 +15428,6 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SRW x (MOVBZreg y))
     // result: (SRW x y)
@@ -16473,10 +15440,8 @@ private static bool rewriteValueS390X_OpS390XSRW(ptr<Value> _addr_v) {
         v.reset(OpS390XSRW);
         v.AddArg2(x, y);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSRWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16491,10 +15456,8 @@ private static bool rewriteValueS390X_OpS390XSRWconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSTM2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16530,7 +15493,6 @@ private static bool rewriteValueS390X_OpS390XSTM2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg6(p, w0, w1, w2, w3, mem);
         return true;
-
     } 
     // match: (STM2 [i] {s} p (SRDconst [32] x) x mem)
     // result: (MOVDstore [i] {s} p x mem)
@@ -16551,10 +15513,8 @@ private static bool rewriteValueS390X_OpS390XSTM2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg3(p, x, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSTMG2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16590,10 +15550,8 @@ private static bool rewriteValueS390X_OpS390XSTMG2(ptr<Value> _addr_v) {
         v.Aux = symToAux(s);
         v.AddArg6(p, w0, w1, w2, w3, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSUB(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16617,7 +15575,6 @@ private static bool rewriteValueS390X_OpS390XSUB(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUB (MOVDconst [c]) x)
     // cond: is32Bit(c)
@@ -16637,7 +15594,6 @@ private static bool rewriteValueS390X_OpS390XSUB(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUB x x)
     // result: (MOVDconst [0])
@@ -16649,7 +15605,6 @@ private static bool rewriteValueS390X_OpS390XSUB(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SUB <t> x g:(MOVDload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -16674,10 +15629,8 @@ private static bool rewriteValueS390X_OpS390XSUB(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSUBE(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16696,7 +15649,6 @@ private static bool rewriteValueS390X_OpS390XSUBE(ptr<Value> _addr_v) {
         v.reset(OpS390XSUBC);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBE x y (FlagOV))
     // result: (SUBC x y)
@@ -16709,7 +15661,6 @@ private static bool rewriteValueS390X_OpS390XSUBE(ptr<Value> _addr_v) {
         v.reset(OpS390XSUBC);
         v.AddArg2(x, y);
         return true;
-
     } 
     // match: (SUBE x y (Select1 (SUBC (MOVDconst [0]) (NEG (Select0 (SUBE (MOVDconst [0]) (MOVDconst [0]) c))))))
     // result: (SUBE x y c)
@@ -16752,10 +15703,8 @@ private static bool rewriteValueS390X_OpS390XSUBE(ptr<Value> _addr_v) {
         v.reset(OpS390XSUBE);
         v.AddArg3(x, y, c);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSUBW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16775,7 +15724,6 @@ private static bool rewriteValueS390X_OpS390XSUBW(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBW (MOVDconst [c]) x)
     // result: (NEGW (SUBWconst <v.Type> x [int32(c)]))
@@ -16791,7 +15739,6 @@ private static bool rewriteValueS390X_OpS390XSUBW(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (SUBW x x)
     // result: (MOVDconst [0])
@@ -16803,7 +15750,6 @@ private static bool rewriteValueS390X_OpS390XSUBW(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (SUBW <t> x g:(MOVWload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -16828,7 +15774,6 @@ private static bool rewriteValueS390X_OpS390XSUBW(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (SUBW <t> x g:(MOVWZload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -16853,10 +15798,8 @@ private static bool rewriteValueS390X_OpS390XSUBW(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSUBWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16873,7 +15816,6 @@ private static bool rewriteValueS390X_OpS390XSUBWconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUBWconst [c] x)
     // result: (ADDWconst [-int32(c)] x)
@@ -16885,7 +15827,6 @@ private static bool rewriteValueS390X_OpS390XSUBWconst(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpS390XSUBWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16914,7 +15855,6 @@ private static bool rewriteValueS390X_OpS390XSUBWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (SUBWload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -16938,10 +15878,8 @@ private static bool rewriteValueS390X_OpS390XSUBWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSUBconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -16956,7 +15894,6 @@ private static bool rewriteValueS390X_OpS390XSUBconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (SUBconst [c] x)
     // cond: c != -(1<<31)
@@ -16971,7 +15908,6 @@ private static bool rewriteValueS390X_OpS390XSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c);
         v.AddArg(x);
         return true;
-
     } 
     // match: (SUBconst (MOVDconst [d]) [c])
     // result: (MOVDconst [d-int64(c)])
@@ -16984,7 +15920,6 @@ private static bool rewriteValueS390X_OpS390XSUBconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(d - int64(c));
         return true;
-
     } 
     // match: (SUBconst (SUBconst x [d]) [c])
     // cond: is32Bit(-int64(c)-int64(d))
@@ -17003,10 +15938,8 @@ private static bool rewriteValueS390X_OpS390XSUBconst(ptr<Value> _addr_v) {
         v.AuxInt = int32ToAuxInt(-c - d);
         v.AddArg(x);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSUBload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17037,7 +15970,6 @@ private static bool rewriteValueS390X_OpS390XSUBload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (SUBload [off1] {sym} x (ADDconst [off2] ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(off1)+int64(off2))
@@ -17060,7 +15992,6 @@ private static bool rewriteValueS390X_OpS390XSUBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (SUBload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -17084,10 +16015,8 @@ private static bool rewriteValueS390X_OpS390XSUBload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XSumBytes2(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17106,7 +16035,6 @@ private static bool rewriteValueS390X_OpS390XSumBytes2(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpS390XSumBytes4(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17127,7 +16055,6 @@ private static bool rewriteValueS390X_OpS390XSumBytes4(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpS390XSumBytes8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17148,7 +16075,6 @@ private static bool rewriteValueS390X_OpS390XSumBytes8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpS390XXOR(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17170,24 +16096,20 @@ private static bool rewriteValueS390X_OpS390XXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 if (!(isU32Bit(c))) {
                     continue;
                 }
-
                 v.reset(OpS390XXORconst);
                 v.AuxInt = int64ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (SLDconst x [c]) (SRDconst x [64-c]))
     // result: (RISBGZ x {s390x.NewRotateParams(0, 63, c)})
@@ -17202,25 +16124,21 @@ private static bool rewriteValueS390X_OpS390XXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToUint8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpS390XSRDconst || auxIntToUint8(v_1.AuxInt) != 64 - c || x != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpS390XRISBGZ);
                 v.Aux = s390xRotateParamsToAux(s390x.NewRotateParams(0, 63, c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR (MOVDconst [c]) (MOVDconst [d]))
     // result: (MOVDconst [c^d])
@@ -17235,24 +16153,20 @@ private static bool rewriteValueS390X_OpS390XXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToInt64(v_0.AuxInt);
                 if (v_1.Op != OpS390XMOVDconst) {
                     continue;
                 }
-
                 var d = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XMOVDconst);
                 v.AuxInt = int64ToAuxInt(c ^ d);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XOR x x)
     // result: (MOVDconst [0])
@@ -17264,7 +16178,6 @@ private static bool rewriteValueS390X_OpS390XXOR(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (XOR <t> x g:(MOVDload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -17283,7 +16196,6 @@ private static bool rewriteValueS390X_OpS390XXOR(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -17291,24 +16203,20 @@ private static bool rewriteValueS390X_OpS390XXOR(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XXORload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17329,20 +16237,17 @@ private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var c = auxIntToInt64(v_1.AuxInt);
                 v.reset(OpS390XXORWconst);
                 v.AuxInt = int32ToAuxInt(int32(c));
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORW (SLWconst x [c]) (SRWconst x [32-c]))
     // result: (RLLconst x [c])
@@ -17357,25 +16262,21 @@ private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 c = auxIntToUint8(v_0.AuxInt);
                 x = v_0.Args[0];
                 if (v_1.Op != OpS390XSRWconst || auxIntToUint8(v_1.AuxInt) != 32 - c || x != v_1.Args[0]) {
                     continue;
                 }
-
                 v.reset(OpS390XRLLconst);
                 v.AuxInt = uint8ToAuxInt(c);
                 v.AddArg(x);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORW x x)
     // result: (MOVDconst [0])
@@ -17387,7 +16288,6 @@ private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (XORW <t> x g:(MOVWload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -17406,7 +16306,6 @@ private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var off = auxIntToInt32(g.AuxInt);
                 var sym = auxToSym(g.Aux);
                 var mem = g.Args[1];
@@ -17414,21 +16313,18 @@ private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XXORWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (XORW <t> x g:(MOVWZload [off] {sym} ptr mem))
     // cond: ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g)
@@ -17447,7 +16343,6 @@ private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 off = auxIntToInt32(g.AuxInt);
                 sym = auxToSym(g.Aux);
                 mem = g.Args[1];
@@ -17455,24 +16350,20 @@ private static bool rewriteValueS390X_OpS390XXORW(ptr<Value> _addr_v) {
                 if (!(ptr.Op != OpSB && is20Bit(int64(off)) && canMergeLoadClobber(v, g, x) && clobber(g))) {
                     continue;
                 }
-
                 v.reset(OpS390XXORWload);
                 v.Type = t;
                 v.AuxInt = int32ToAuxInt(off);
                 v.Aux = symToAux(sym);
                 v.AddArg3(x, ptr, mem);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XXORWconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17489,7 +16380,6 @@ private static bool rewriteValueS390X_OpS390XXORWconst(ptr<Value> _addr_v) {
         }
         v.copyOf(x);
         return true;
-
     } 
     // match: (XORWconst [c] (MOVDconst [d]))
     // result: (MOVDconst [int64(c)^d])
@@ -17502,10 +16392,8 @@ private static bool rewriteValueS390X_OpS390XXORWconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(int64(c) ^ d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XXORWload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17534,7 +16422,6 @@ private static bool rewriteValueS390X_OpS390XXORWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (XORWload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -17558,10 +16445,8 @@ private static bool rewriteValueS390X_OpS390XXORWload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XXORconst(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17576,7 +16461,6 @@ private static bool rewriteValueS390X_OpS390XXORconst(ptr<Value> _addr_v) {
         var x = v_0;
         v.copyOf(x);
         return true;
-
     } 
     // match: (XORconst [c] (MOVDconst [d]))
     // result: (MOVDconst [c^d])
@@ -17589,10 +16473,8 @@ private static bool rewriteValueS390X_OpS390XXORconst(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(c ^ d);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpS390XXORload(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17623,7 +16505,6 @@ private static bool rewriteValueS390X_OpS390XXORload(ptr<Value> _addr_v) {
         v0.AddArg(y);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (XORload [off1] {sym} x (ADDconst [off2] ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(off1)+int64(off2))
@@ -17646,7 +16527,6 @@ private static bool rewriteValueS390X_OpS390XXORload(ptr<Value> _addr_v) {
         v.Aux = symToAux(sym);
         v.AddArg3(x, ptr, mem);
         return true;
-
     } 
     // match: (XORload [o1] {s1} x (MOVDaddr [o2] {s2} ptr) mem)
     // cond: ptr.Op != OpSB && is20Bit(int64(o1)+int64(o2)) && canMergeSym(s1, s2)
@@ -17670,10 +16550,8 @@ private static bool rewriteValueS390X_OpS390XXORload(ptr<Value> _addr_v) {
         v.Aux = symToAux(mergeSym(s1, s2));
         v.AddArg3(x, ptr, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17701,7 +16579,6 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg3(x, y, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select0 (Sub64borrow x y c))
     // result: (Select0 <typ.UInt64> (SUBE x y (Select1 <types.TypeFlags> (SUBC (MOVDconst [0]) c))))
@@ -17724,7 +16601,6 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg3(x, y, v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select0 <t> (AddTupleFirst32 val tuple))
     // result: (ADDW val (Select0 <t> tuple))
@@ -17740,7 +16616,6 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg(tuple);
         v.AddArg2(val, v0);
         return true;
-
     } 
     // match: (Select0 <t> (AddTupleFirst64 val tuple))
     // result: (ADD val (Select0 <t> tuple))
@@ -17756,7 +16631,6 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v0.AddArg(tuple);
         v.AddArg2(val, v0);
         return true;
-
     } 
     // match: (Select0 (ADDCconst (MOVDconst [c]) [d]))
     // result: (MOVDconst [c+int64(d)])
@@ -17773,7 +16647,6 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(c + int64(d));
         return true;
-
     } 
     // match: (Select0 (SUBC (MOVDconst [c]) (MOVDconst [d])))
     // result: (MOVDconst [c-d])
@@ -17795,7 +16668,6 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDconst);
         v.AuxInt = int64ToAuxInt(c - d);
         return true;
-
     } 
     // match: (Select0 (FADD (FMUL y z) x))
     // result: (FMADD x y z)
@@ -17816,21 +16688,18 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 var z = v_0_0.Args[1];
                 y = v_0_0.Args[0];
                 x = v_0_1;
                 v.reset(OpS390XFMADD);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select0 (FSUB (FMUL y z) x))
     // result: (FMSUB x y z)
@@ -17848,7 +16717,6 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpS390XFMSUB);
         v.AddArg3(x, y, z);
         return true;
-
     } 
     // match: (Select0 (FADDS (FMULS y z) x))
     // result: (FMADDS x y z)
@@ -17869,21 +16737,18 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0_0, v_0_1) = (_i0 + 1, v_0_1, v_0_0);
                 }
-
                 z = v_0_0.Args[1];
                 y = v_0_0.Args[0];
                 x = v_0_1;
                 v.reset(OpS390XFMADDS);
                 v.AddArg3(x, y, z);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Select0 (FSUBS (FMULS y z) x))
     // result: (FMSUBS x y z)
@@ -17901,10 +16766,8 @@ private static bool rewriteValueS390X_OpSelect0(ptr<Value> _addr_v) {
         v.reset(OpS390XFMSUBS);
         v.AddArg3(x, y, z);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -17938,7 +16801,6 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg3(v1, v1, v2);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select1 (Sub64borrow x y c))
     // result: (NEG (Select0 <typ.UInt64> (SUBE (MOVDconst [0]) (MOVDconst [0]) (Select1 <types.TypeFlags> (SUBE x y (Select1 <types.TypeFlags> (SUBC (MOVDconst [0]) c)))))))
@@ -17966,7 +16828,6 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Select1 (AddTupleFirst32 _ tuple))
     // result: (Select1 tuple)
@@ -17978,7 +16839,6 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(tuple);
         return true;
-
     } 
     // match: (Select1 (AddTupleFirst64 _ tuple))
     // result: (Select1 tuple)
@@ -17990,7 +16850,6 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         v.reset(OpSelect1);
         v.AddArg(tuple);
         return true;
-
     } 
     // match: (Select1 (ADDCconst (MOVDconst [c]) [d]))
     // cond: uint64(c+int64(d)) >= uint64(c) && c+int64(d) == 0
@@ -18010,7 +16869,6 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagEQ);
         return true;
-
     } 
     // match: (Select1 (ADDCconst (MOVDconst [c]) [d]))
     // cond: uint64(c+int64(d)) >= uint64(c) && c+int64(d) != 0
@@ -18030,7 +16888,6 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagLT);
         return true;
-
     } 
     // match: (Select1 (SUBC (MOVDconst [c]) (MOVDconst [d])))
     // cond: uint64(d) <= uint64(c) && c-d == 0
@@ -18055,7 +16912,6 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagGT);
         return true;
-
     } 
     // match: (Select1 (SUBC (MOVDconst [c]) (MOVDconst [d])))
     // cond: uint64(d) <= uint64(c) && c-d != 0
@@ -18080,10 +16936,8 @@ private static bool rewriteValueS390X_OpSelect1(ptr<Value> _addr_v) {
         }
         v.reset(OpS390XFlagOV);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpSlicemask(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18102,7 +16956,6 @@ private static bool rewriteValueS390X_OpSlicemask(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18124,7 +16977,6 @@ private static bool rewriteValueS390X_OpStore(ptr<Value> _addr_v) {
         v.reset(OpS390XFMOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4 && is32BitFloat(val.Type)
@@ -18140,7 +16992,6 @@ private static bool rewriteValueS390X_OpStore(ptr<Value> _addr_v) {
         v.reset(OpS390XFMOVSstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 8
@@ -18156,7 +17007,6 @@ private static bool rewriteValueS390X_OpStore(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVDstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 4
@@ -18172,7 +17022,6 @@ private static bool rewriteValueS390X_OpStore(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVWstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 2
@@ -18188,7 +17037,6 @@ private static bool rewriteValueS390X_OpStore(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVHstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     } 
     // match: (Store {t} ptr val mem)
     // cond: t.Size() == 1
@@ -18204,10 +17052,8 @@ private static bool rewriteValueS390X_OpStore(ptr<Value> _addr_v) {
         v.reset(OpS390XMOVBstore);
         v.AddArg3(ptr, val, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValueS390X_OpSub32F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18227,7 +17073,6 @@ private static bool rewriteValueS390X_OpSub32F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpSub64F(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18247,7 +17092,6 @@ private static bool rewriteValueS390X_OpSub64F(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpTrunc(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18262,7 +17106,6 @@ private static bool rewriteValueS390X_OpTrunc(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -18279,7 +17122,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         var mem = v_1;
         v.copyOf(mem);
         return true;
-
     } 
     // match: (Zero [1] destptr mem)
     // result: (MOVBstoreconst [0] destptr mem)
@@ -18293,7 +17135,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(0);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [2] destptr mem)
     // result: (MOVHstoreconst [0] destptr mem)
@@ -18307,7 +17148,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(0);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [4] destptr mem)
     // result: (MOVWstoreconst [0] destptr mem)
@@ -18321,7 +17161,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(0);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [8] destptr mem)
     // result: (MOVDstoreconst [0] destptr mem)
@@ -18335,7 +17174,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(0);
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [3] destptr mem)
     // result: (MOVBstoreconst [makeValAndOff(0,2)] destptr (MOVHstoreconst [0] destptr mem))
@@ -18352,7 +17190,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [5] destptr mem)
     // result: (MOVBstoreconst [makeValAndOff(0,4)] destptr (MOVWstoreconst [0] destptr mem))
@@ -18369,7 +17206,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [6] destptr mem)
     // result: (MOVHstoreconst [makeValAndOff(0,4)] destptr (MOVWstoreconst [0] destptr mem))
@@ -18386,7 +17222,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [7] destptr mem)
     // result: (MOVWstoreconst [makeValAndOff(0,3)] destptr (MOVWstoreconst [0] destptr mem))
@@ -18403,7 +17238,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v0.AddArg2(destptr, mem);
         v.AddArg2(destptr, v0);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s > 0 && s <= 1024
@@ -18419,7 +17253,6 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v.AuxInt = valAndOffToAuxInt(makeValAndOff(int32(s), 0));
         v.AddArg2(destptr, mem);
         return true;
-
     } 
     // match: (Zero [s] destptr mem)
     // cond: s > 1024
@@ -18438,10 +17271,8 @@ private static bool rewriteValueS390X_OpZero(ptr<Value> _addr_v) {
         v0.AddArg(destptr);
         v.AddArg3(destptr, v0, mem);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteBlockS390X(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;
@@ -20337,7 +19168,6 @@ private static bool rewriteBlockS390X(ptr<Block> _addr_b) {
             return true;
         }
         return false;
-
 }
 
 } // end ssa_package

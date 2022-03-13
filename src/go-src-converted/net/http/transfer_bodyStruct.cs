@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:23:14 UTC
+//     Generated on 2022 March 13 05:37:39 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace net
 {
     public static partial class http_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct body
         {
             // Constructors
@@ -84,7 +84,7 @@ namespace net
             public static implicit operator body(NilType nil) => default(body);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static body body_cast(dynamic value)
         {
             return new body(value.src, ref value.r, value.closing, value.doEarlyClose, value.mu, value.sawEOF, value.closed, value.earlyClose, value.onHitEOF);

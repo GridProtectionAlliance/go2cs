@@ -2,30 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package work -- go2cs converted at 2022 March 06 23:17:43 UTC
+// package work -- go2cs converted at 2022 March 13 06:31:03 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\gccgo.go
-using fmt = go.fmt_package;
-using exec = go.@internal.execabs_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using load = go.cmd.go.@internal.load_package;
-using str = go.cmd.go.@internal.str_package;
-using pkgpath = go.cmd.@internal.pkgpath_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
-public static partial class work_package {
+using fmt = fmt_package;
+using exec = @internal.execabs_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = sync_package;
 
-    // The Gccgo toolchain.
+using @base = cmd.go.@internal.@base_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using load = cmd.go.@internal.load_package;
+using str = cmd.go.@internal.str_package;
+using pkgpath = cmd.@internal.pkgpath_package;
+
+
+// The Gccgo toolchain.
+
+
+using System;public static partial class work_package {
+
 private partial struct gccgoToolchain {
 }
 
@@ -39,7 +40,6 @@ private static void init() {
         GccgoName = "gccgo";
     }
     GccgoBin, gccgoErr = exec.LookPath(GccgoName);
-
 }
 
 private static @string compiler(this gccgoToolchain _p0) {
@@ -58,7 +58,6 @@ private static @string ar(this gccgoToolchain _p0) {
         ar = "ar";
     }
     return ar;
-
 }
 
 private static void checkGccgoBin() {
@@ -68,7 +67,6 @@ private static void checkGccgoBin() {
     fmt.Fprintf(os.Stderr, "cmd/go: gccgo: %s\n", gccgoErr);
     @base.SetExitStatus(2);
     @base.Exit();
-
 }
 
 private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string archive, slice<byte> importcfg, slice<byte> embedcfg, @string symabis, bool asmhdr, slice<@string> gofiles) {
@@ -93,7 +91,6 @@ private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<B
             gcargs = append(gcargs, "-fgo-pkgpath=" + pkgpath);
         }
     }
-
     if (p.Internal.LocalPrefix != "") {
         gcargs = append(gcargs, "-fgo-relative-import-path=" + p.Internal.LocalPrefix);
     }
@@ -112,9 +109,7 @@ private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<B
                 err = err__prev3;
 
             }
-
             args = append(args, "-fgo-importcfg=" + objdir + "importcfg");
-
         }
         else
  {
@@ -131,9 +126,7 @@ private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<B
                 err = err__prev3;
 
             }
-
             args = append(args, "-I", root);
-
         }
     }
     if (embedcfg != null && b.gccSupportsFlag(args[..(int)1], "-fgo-embedcfg=/dev/null")) {
@@ -149,9 +142,7 @@ private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<B
             err = err__prev2;
 
         }
-
         args = append(args, "-fgo-embedcfg=" + objdir + "embedcfg");
-
     }
     if (b.gccSupportsFlag(args[..(int)1], "-ffile-prefix-map=a=b")) {
         if (cfg.BuildTrimpath) {
@@ -171,11 +162,8 @@ private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<B
                 if (cfg.BuildTrimpath && str.HasFilePathPrefix(toPath, @base.Cwd())) {
                     toPath = "." + toPath[(int)len(@base.Cwd())..];
                 }
-
                 args = append(args, "-ffile-prefix-map=" + overlayPath + "=" + toPath);
-
             }
-
         }
     }
     args = append(args, a.Package.Internal.Gccgoflags);
@@ -189,14 +177,12 @@ private static (@string, slice<byte>, error) gc(this gccgoToolchain tools, ptr<B
             // See comment on gctoolchain.gc about overlay TODOs
             f, _ = fsys.OverlayPath(f);
             args = append(args, f);
-
         }
         f = f__prev1;
     }
 
     output, err = b.runOut(a, p.Dir, null, args);
     return (ofile, output, error.As(err)!);
-
 }
 
 // buildImportcfgSymlinks builds in root a tree of symlinks
@@ -234,7 +220,6 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
             i = i__prev1;
 
         }
-
         @string before = default;        @string after = default;
 
         {
@@ -249,7 +234,6 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
             i = i__prev1;
 
         }
-
         switch (verb) {
             case "packagefile": 
                 if (before == "" || after == "") {
@@ -268,7 +252,6 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
                     err = err__prev1;
 
                 }
-
                 {
                     var err__prev1 = err;
 
@@ -281,7 +264,6 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
                     err = err__prev1;
 
                 }
-
                 break;
             case "importmap": 
                 if (before == "" || after == "") {
@@ -301,7 +283,6 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
                     err = err__prev1;
 
                 }
-
                 {
                     var err__prev1 = err;
 
@@ -314,7 +295,6 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
                     err = err__prev1;
 
                 }
-
                 {
                     var err__prev1 = err;
 
@@ -327,7 +307,6 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
                     err = err__prev1;
 
                 }
-
                 break;
             case "packageshlib": 
                 return error.As(fmt.Errorf("gccgo -importcfg does not support shared libraries"))!;
@@ -336,9 +315,7 @@ private static error buildImportcfgSymlinks(ptr<Builder> _addr_b, @string root, 
                 @base.Fatalf("importcfg:%d: unknown directive %q", lineNum, verb);
                 break;
         }
-
     }    return error.As(null!)!;
-
 }
 
 private static (slice<@string>, error) asm(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_a, slice<@string> sfiles) {
@@ -363,7 +340,6 @@ private static (slice<@string>, error) asm(this gccgoToolchain tools, ptr<Builde
             }
 
         }
-
         defs = tools.maybePIC(defs);
         defs = append(defs, b.gccArchArgs());
         var err = b.run(a, p.Dir, p.ImportPath, null, tools.compiler(), "-xassembler-with-cpp", "-I", a.Objdir, "-c", "-o", ofile, defs, sfile);
@@ -371,7 +347,6 @@ private static (slice<@string>, error) asm(this gccgoToolchain tools, ptr<Builde
             return (null, error.As(err)!);
         }
     }    return (ofiles, error.As(null!)!);
-
 }
 
 private static (@string, error) symabis(this gccgoToolchain _p0, ptr<Builder> _addr_b, ptr<Action> _addr_a, slice<@string> sfiles) {
@@ -388,7 +363,6 @@ private static @string gccgoArchive(@string basedir, @string imp) {
     var afile = filepath.Join(basedir, end); 
     // add "lib" to the final element
     return filepath.Join(filepath.Dir(afile), "lib" + filepath.Base(afile));
-
 }
 
 private static error pack(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_a, @string afile, slice<@string> ofiles) {
@@ -405,7 +379,6 @@ private static error pack(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
         // AIX puts both 32-bit and 64-bit objects in the same archive.
         // Tell the AIX "ar" command to only care about 64-bit objects.
         arArgs = new slice<@string>(new @string[] { "-X64" });
-
     }
     var absAfile = mkAbs(objdir, afile); 
     // Try with D modifier first, then without if that fails.
@@ -416,10 +389,8 @@ private static error pack(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
     if (len(output) > 0) { 
         // Show the output if there is any even without errors.
         b.showOutput(a, p.Dir, p.ImportPath, b.processOutput(output));
-
     }
     return error.As(null!)!;
-
 }
 
 private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_root, @string @out, @string importcfg, slice<ptr<Action>> allactions, @string buildmode, @string desc) {
@@ -458,13 +429,9 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                     if (flag != "-g" && !strings.HasPrefix(flag, "-O")) {
                         cgoldflags = append(cgoldflags, flag);
                     }
-
                 }
-
             }
-
         }        return error.As(null!)!;
-
     };
 
     slice<@string> arArgs = default;
@@ -472,7 +439,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
         // AIX puts both 32-bit and 64-bit objects in the same archive.
         // Tell the AIX "ar" command to only care about 64-bit objects.
         arArgs = new slice<@string>(new @string[] { "-X64" });
-
     }
     nint newID = 0;
     Func<@string, (@string, error)> readAndRemoveCgoFlags = archive => {
@@ -490,7 +456,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
             err = err__prev1;
 
         }
-
         if (cfg.BuildN || cfg.BuildX) {
             b.Showcmd("", "ar d %s _cgo_flags", newArchive);
             if (cfg.BuildN) { 
@@ -499,9 +464,7 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 // or we're printing commands to build the archive and can
                 // forward the _cgo_flags directly to this step.
                 return (error.As("")!, null);
-
             }
-
         }
         err = b.run(root, root.Objdir, desc, null, tools.ar(), arArgs, "x", newArchive, "_cgo_flags");
         if (err != null) {
@@ -516,7 +479,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
             return (error.As("")!, err);
         }
         return (error.As(newArchive)!, null);
-
     }; 
 
     // If using -linkshared, find the shared library deps.
@@ -541,7 +503,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 if (base != targetBase) {
                     haveShlib[base] = true;
                 }
-
             }
 
             a = a__prev1;
@@ -558,20 +519,15 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 // This is a package linked into a shared
                 // library that we will put into shlibs.
                 continue;
-
             }
-
             if (haveShlib[filepath.Base(a.Target)]) { 
                 // This is a shared library we want to link against.
                 if (!addedShlib[a.Target]) {
                     shlibs = append(shlibs, a.Target);
                     addedShlib[a.Target] = true;
                 }
-
                 continue;
-
             }
-
             if (p != null) {
                 var target = a.built;
                 if (p.UsesCgo() || p.UsesSwig()) {
@@ -583,7 +539,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 }
                 afiles = append(afiles, target);
             }
-
         }
         a = a__prev1;
     }
@@ -600,31 +555,24 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
             if (a.Package == null) {
                 continue;
             }
-
             if (!a.Package.Standard) {
                 cgoldflags = append(cgoldflags, a.Package.CgoLDFLAGS);
             }
-
             if (len(a.Package.CgoFiles) > 0) {
                 usesCgo = true;
             }
-
             if (a.Package.UsesSwig()) {
                 usesCgo = true;
             }
-
             if (len(a.Package.CXXFiles) > 0 || len(a.Package.SwigCXXFiles) > 0) {
                 cxx = true;
             }
-
             if (len(a.Package.MFiles) > 0) {
                 objc = true;
             }
-
             if (len(a.Package.FFiles) > 0) {
                 fortran = true;
             }
-
         }
         a = a__prev1;
     }
@@ -661,7 +609,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 ldflags = append(ldflags, fmt.Sprintf("-Wl,--build-id=0x%x", root.buildID));
                 break;
         }
-
     }
     @string rLibPath = default;
     if (cfg.Goos == "aix") {
@@ -716,7 +663,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
             }
             realOut = out;
             out = out + ".o";
-
             break;
         case "c-shared": 
             ldflags = append(ldflags, "-shared", "-nostdlib");
@@ -728,7 +674,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 ldflags = append(ldflags, "-zdefs");
             }
             ldflags = append(ldflags, "-shared", "-nostdlib", "-lgo", "-lgcc_s", "-lgcc", "-lc");
-
             break;
         default: 
             @base.Fatalf("-buildmode=%s not supported for gccgo", buildmode);
@@ -755,7 +700,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 if (strings.Contains(fc, "gfortran")) {
                     ldflags = append(ldflags, "-lgfortran");
                 }
-
             }
             break;
     }
@@ -772,7 +716,6 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
 
     }
 
-
     switch (buildmode) {
         case "c-archive": 
             {
@@ -787,11 +730,9 @@ private static error link(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<A
                 err = err__prev1;
 
             }
-
             break;
     }
     return error.As(null!)!;
-
 }
 
 private static error ld(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Action> _addr_root, @string @out, @string importcfg, @string mainpkg) {
@@ -824,7 +765,6 @@ private static error cc(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Act
             defs = append(defs, "-D", "GOPKGPATH=\"" + pkgpath + "\"");
         }
     }
-
     var compiler = envList("CC", cfg.DefaultCC(cfg.Goos, cfg.Goarch));
     if (b.gccSupportsFlag(compiler, "-fsplit-stack")) {
         defs = append(defs, "-fsplit-stack");
@@ -841,7 +781,6 @@ private static error cc(this gccgoToolchain tools, ptr<Builder> _addr_b, ptr<Act
         defs = append(defs, "-gno-record-gcc-switches");
     }
     return error.As(b.run(a, p.Dir, p.ImportPath, null, compiler, "-Wall", "-g", "-I", a.Objdir, "-I", inc, "-o", ofile, defs, "-c", cfile))!;
-
 }
 
 // maybePIC adds -fPIC to the list of arguments if needed.
@@ -856,7 +795,6 @@ private static slice<@string> maybePIC(this gccgoToolchain tools, slice<@string>
             break;
     }
     return args;
-
 }
 
 private static @string gccgoPkgpath(ptr<load.Package> _addr_p) {
@@ -866,7 +804,6 @@ private static @string gccgoPkgpath(ptr<load.Package> _addr_p) {
         return "";
     }
     return p.ImportPath;
-
 }
 
 private static sync.Once gccgoToSymbolFuncOnce = default;
@@ -884,11 +821,9 @@ private static @string gccgoCleanPkgpath(this gccgoToolchain tools, ptr<Builder>
             @base.Exit();
         }
         gccgoToSymbolFunc = fn;
-
     });
 
     return gccgoToSymbolFunc(gccgoPkgpath(_addr_p));
-
 }
 
 } // end work_package

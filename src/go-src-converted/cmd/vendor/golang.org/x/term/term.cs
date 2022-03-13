@@ -12,16 +12,15 @@
 //             panic(err)
 //     }
 //     defer term.Restore(int(os.Stdin.Fd()), oldState)
-// package term -- go2cs converted at 2022 March 06 23:31:00 UTC
+
+// package term -- go2cs converted at 2022 March 13 06:41:29 UTC
 // import "cmd/vendor/golang.org/x/term" ==> using term = go.cmd.vendor.golang.org.x.term_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\term\term.go
-
-
 namespace go.cmd.vendor.golang.org.x;
 
 public static partial class term_package {
 
-    // State contains the state of a terminal.
+// State contains the state of a terminal.
 public partial struct State {
     public ref state state => ref state_val;
 }

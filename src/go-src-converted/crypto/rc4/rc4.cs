@@ -7,17 +7,20 @@
 //
 // RC4 is cryptographically broken and should not be used for secure
 // applications.
-// package rc4 -- go2cs converted at 2022 March 06 22:19:24 UTC
+
+// package rc4 -- go2cs converted at 2022 March 13 05:34:20 UTC
 // import "crypto/rc4" ==> using rc4 = go.crypto.rc4_package
 // Original source: C:\Program Files\Go\src\crypto\rc4\rc4.go
-using subtle = go.crypto.@internal.subtle_package;
-using strconv = go.strconv_package;
-
 namespace go.crypto;
+
+using subtle = crypto.@internal.subtle_package;
+using strconv = strconv_package;
+
+
+// A Cipher is an instance of RC4 using a particular key.
 
 public static partial class rc4_package {
 
-    // A Cipher is an instance of RC4 using a particular key.
 public partial struct Cipher {
     public array<uint> s;
     public byte i;
@@ -63,7 +66,6 @@ public static (ptr<Cipher>, error) NewCipher(slice<byte> key) {
         i = i__prev1;
     }
     return (_addr__addr_c!, error.As(null!)!);
-
 }
 
 // Reset zeros the key data and makes the Cipher unusable.

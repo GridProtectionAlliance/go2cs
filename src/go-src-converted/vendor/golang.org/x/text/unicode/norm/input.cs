@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package norm -- go2cs converted at 2022 March 06 23:38:50 UTC
+// package norm -- go2cs converted at 2022 March 13 06:47:05 UTC
 // import "vendor/golang.org/x/text/unicode/norm" ==> using norm = go.vendor.golang.org.x.text.unicode.norm_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\text\unicode\norm\input.go
-using utf8 = go.unicode.utf8_package;
-
 namespace go.vendor.golang.org.x.text.unicode;
+
+using utf8 = unicode.utf8_package;
 
 public static partial class norm_package {
 
@@ -45,7 +45,6 @@ private static byte _byte(this ptr<input> _addr_@in, nint p) {
         return @in.str[p];
     }
     return @in.bytes[p];
-
 }
 
 private static nint skipASCII(this ptr<input> _addr_@in, nint p, nint max) {
@@ -56,16 +55,12 @@ private static nint skipASCII(this ptr<input> _addr_@in, nint p, nint max) {
             p++;
         }
     else
-
-
     } {
         while (p < max && @in.bytes[p] < utf8.RuneSelf) {
             p++;
         }
-
     }
     return p;
-
 }
 
 private static nint skipContinuationBytes(this ptr<input> _addr_@in, nint p) {
@@ -76,16 +71,12 @@ private static nint skipContinuationBytes(this ptr<input> _addr_@in, nint p) {
             p++;
         }
     else
-
-
     } {
         while (p < len(@in.bytes) && !utf8.RuneStart(@in.bytes[p])) {
             p++;
         }
-
     }
     return p;
-
 }
 
 private static slice<byte> appendSlice(this ptr<input> _addr_@in, slice<byte> buf, nint b, nint e) {
@@ -98,7 +89,6 @@ private static slice<byte> appendSlice(this ptr<input> _addr_@in, slice<byte> bu
         buf = append(buf, @in.str[i]);
     }
     return buf;
-
 }
 
 private static nint copySlice(this ptr<input> _addr_@in, slice<byte> buf, nint b, nint e) {
@@ -108,7 +98,6 @@ private static nint copySlice(this ptr<input> _addr_@in, slice<byte> buf, nint b
         return copy(buf, @in.str[(int)b..(int)e]);
     }
     return copy(buf, @in.bytes[(int)b..(int)e]);
-
 }
 
 private static (ushort, nint) charinfoNFC(this ptr<input> _addr_@in, nint p) {
@@ -120,7 +109,6 @@ private static (ushort, nint) charinfoNFC(this ptr<input> _addr_@in, nint p) {
         return nfcData.lookupString(@in.str[(int)p..]);
     }
     return nfcData.lookup(@in.bytes[(int)p..]);
-
 }
 
 private static (ushort, nint) charinfoNFKC(this ptr<input> _addr_@in, nint p) {
@@ -132,7 +120,6 @@ private static (ushort, nint) charinfoNFKC(this ptr<input> _addr_@in, nint p) {
         return nfkcData.lookupString(@in.str[(int)p..]);
     }
     return nfkcData.lookup(@in.bytes[(int)p..]);
-
 }
 
 private static int hangul(this ptr<input> _addr_@in, nint p) {
@@ -145,7 +132,6 @@ private static int hangul(this ptr<input> _addr_@in, nint p) {
             return 0;
         }
         r, size = utf8.DecodeRuneInString(@in.str[(int)p..]);
-
     }
     else
  {
@@ -153,13 +139,11 @@ private static int hangul(this ptr<input> _addr_@in, nint p) {
             return 0;
         }
         r, size = utf8.DecodeRune(@in.bytes[(int)p..]);
-
     }
     if (size != hangulUTF8Size) {
         return 0;
     }
     return r;
-
 }
 
 } // end norm_package

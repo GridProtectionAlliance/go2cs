@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:56 UTC
+//     Generated on 2022 March 13 05:34:53 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -31,7 +31,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CertificateInvalidError
         {
             // Constructors
@@ -66,7 +66,7 @@ namespace crypto
             public static implicit operator CertificateInvalidError(NilType nil) => default(CertificateInvalidError);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CertificateInvalidError CertificateInvalidError_cast(dynamic value)
         {
             return new CertificateInvalidError(ref value.Cert, value.Reason, value.Detail);

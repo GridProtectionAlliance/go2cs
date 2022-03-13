@@ -2,19 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package xcoff -- go2cs converted at 2022 March 06 22:41:01 UTC
+// package xcoff -- go2cs converted at 2022 March 13 05:52:06 UTC
 // import "internal/xcoff" ==> using xcoff = go.@internal.xcoff_package
 // Original source: C:\Program Files\Go\src\internal\xcoff\ar.go
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-using io = go.io_package;
-using os = go.os_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-using System;
-
-
 namespace go.@internal;
+
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using os = os_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using System;
 
 public static partial class xcoff_package {
 
@@ -26,7 +25,6 @@ public static readonly @string AIAMAGBIG = "<bigaf>\n";
 // Sizeof
 public static readonly nuint FL_HSZ_BIG = 0x80;
 public static readonly nuint AR_HSZ_BIG = 0x70;
-
 
 private partial struct bigarFileHeader {
     public array<byte> Flmagic; // Archive magic string
@@ -91,7 +89,6 @@ public static (ptr<Archive>, error) OpenArchive(@string name) {
     }
     arch.closer = f;
     return (_addr_arch!, error.As(null!)!);
-
 }
 
 // Close closes the Archive.
@@ -106,7 +103,6 @@ private static error Close(this ptr<Archive> _addr_a) {
         a.closer = null;
     }
     return error.As(err)!;
-
 }
 
 // NewArchive creates a new Archive for accessing an AIX big archive in an underlying reader.
@@ -114,9 +110,7 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
     ptr<Archive> _p0 = default!;
     error _p0 = default!;
 
-    Func<slice<byte>, (long, error)> parseDecimalBytes = b => {
-        return _addr_strconv.ParseInt(strings.TrimSpace(string(b)), 10, 64)!;
-    };
+    Func<slice<byte>, (long, error)> parseDecimalBytes = b => _addr_strconv.ParseInt(strings.TrimSpace(string(b)), 10, 64)!;
     var sr = io.NewSectionReader(r, 0, 1 << 63 - 1); 
 
     // Read File Header
@@ -132,7 +126,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
         err = err__prev1;
 
     }
-
 
     ptr<Archive> arch = @new<Archive>();
 
@@ -154,7 +147,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
         err = err__prev1;
 
     }
-
     {
         var err__prev1 = err;
 
@@ -167,7 +159,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
 
     }
 
-
     var (off, err) = parseDecimalBytes(fhdr.Flfstmoff[..]);
     if (err != null) {
         return (_addr_null!, error.As(fmt.Errorf("error parsing offset of first member in archive header(%q); %v", fhdr, err))!);
@@ -175,7 +166,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
     if (off == 0) { 
         // Occurs if the archive is empty.
         return (_addr_arch!, error.As(null!)!);
-
     }
     var (lastoff, err) = parseDecimalBytes(fhdr.Fllstmoff[..]);
     if (err != null) {
@@ -199,7 +189,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
 
         }
 
-
         ref bigarMemberHeader mhdr = ref heap(out ptr<bigarMemberHeader> _addr_mhdr);
         {
             var err__prev1 = err;
@@ -213,7 +202,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
             err = err__prev1;
 
         }
-
 
         ptr<Member> member = @new<Member>();
         arch.Members = append(arch.Members, member);
@@ -242,7 +230,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
             err = err__prev1;
 
         }
-
         member.Name = string(name);
 
         var fileoff = off + AR_HSZ_BIG + namlen;
@@ -260,7 +247,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
                 err = err__prev2;
 
             }
-
         }
         ref array<byte> fmag = ref heap(new array<byte>(2), out ptr<array<byte>> _addr_fmag);
         {
@@ -275,7 +261,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
             err = err__prev1;
 
         }
-
         if (string(fmag[..]) != AIAFMAG) {
             return (_addr_null!, error.As(fmt.Errorf("AIAFMAG not found after member header"))!);
         }
@@ -292,8 +277,6 @@ public static (ptr<Archive>, error) NewArchive(io.ReaderAt r) {
     }
 
     return (_addr_arch!, error.As(null!)!);
-
-
 }
 
 // GetFile returns the XCOFF file defined by member name.
@@ -309,8 +292,6 @@ private static (ptr<File>, error) GetFile(this ptr<Archive> _addr_arch, @string 
             return _addr_NewFile(mem.sr)!;
         }
     }    return (_addr_null!, error.As(fmt.Errorf("unknown member %s in archive", name))!);
-
-
 }
 
 } // end xcoff_package

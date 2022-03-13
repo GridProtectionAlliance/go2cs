@@ -2,45 +2,46 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package modload -- go2cs converted at 2022 March 06 23:18:04 UTC
+// package modload -- go2cs converted at 2022 March 13 06:31:26 UTC
 // import "cmd/go/internal/modload" ==> using modload = go.cmd.go.@internal.modload_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\modload\edit.go
-using mvs = go.cmd.go.@internal.mvs_package;
-using context = go.context_package;
-using reflect = go.reflect_package;
-using sort = go.sort_package;
-
-using module = go.golang.org.x.mod.module_package;
-using semver = go.golang.org.x.mod.semver_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
 
+using mvs = cmd.go.@internal.mvs_package;
+using context = context_package;
+using reflect = reflect_package;
+using sort = sort_package;
+
+using module = golang.org.x.mod.module_package;
+using semver = golang.org.x.mod.semver_package;
+
+
+// editRequirements returns an edited version of rs such that:
+//
+//     1. Each module version in mustSelect is selected.
+//
+//     2. Each module version in tryUpgrade is upgraded toward the indicated
+//        version as far as can be done without violating (1).
+//
+//     3. Each module version in rs.rootModules (or rs.graph, if rs.depth is eager)
+//        is downgraded from its original version only to the extent needed to
+//        satisfy (1), or upgraded only to the extent needed to satisfy (1) and
+//        (2).
+//
+//     4. No module is upgraded above the maximum version of its path found in the
+//        dependency graph of rs, the combined dependency graph of the versions in
+//        mustSelect, or the dependencies of each individual module version in
+//        tryUpgrade.
+//
+// Generally, the module versions in mustSelect are due to the module or a
+// package within the module matching an explicit command line argument to 'go
+// get', and the versions in tryUpgrade are transitive dependencies that are
+// either being upgraded by 'go get -u' or being added to satisfy some
+// otherwise-missing package import.
+
+using System;
 public static partial class modload_package {
 
-    // editRequirements returns an edited version of rs such that:
-    //
-    //     1. Each module version in mustSelect is selected.
-    //
-    //     2. Each module version in tryUpgrade is upgraded toward the indicated
-    //        version as far as can be done without violating (1).
-    //
-    //     3. Each module version in rs.rootModules (or rs.graph, if rs.depth is eager)
-    //        is downgraded from its original version only to the extent needed to
-    //        satisfy (1), or upgraded only to the extent needed to satisfy (1) and
-    //        (2).
-    //
-    //     4. No module is upgraded above the maximum version of its path found in the
-    //        dependency graph of rs, the combined dependency graph of the versions in
-    //        mustSelect, or the dependencies of each individual module version in
-    //        tryUpgrade.
-    //
-    // Generally, the module versions in mustSelect are due to the module or a
-    // package within the module matching an explicit command line argument to 'go
-    // get', and the versions in tryUpgrade are transitive dependencies that are
-    // either being upgraded by 'go get -u' or being added to satisfy some
-    // otherwise-missing package import.
 private static (ptr<Requirements>, bool, error) editRequirements(context.Context ctx, ptr<Requirements> _addr_rs, slice<module.Version> tryUpgrade, slice<module.Version> mustSelect) {
     ptr<Requirements> edited = default!;
     bool changed = default;
@@ -99,7 +100,6 @@ private static (ptr<Requirements>, bool, error) editRequirements(context.Context
             // The build list hasn't changed and we have no new roots to add.
             // We don't need to recompute the minimal roots for the module.
             return (_addr_rs!, false, error.As(null!)!);
-
         }
         {
             var m__prev1 = m;
@@ -117,10 +117,8 @@ private static (ptr<Requirements>, bool, error) editRequirements(context.Context
                         // packages and tests in the main module (which we are not doing here),
                         // we can revise the explicit roots at that point.
                         rootPaths = append(rootPaths, m.Path);
-
                     }
                 }
-
             }
             m = m__prev1;
         }
@@ -138,7 +136,6 @@ private static (ptr<Requirements>, bool, error) editRequirements(context.Context
             // be the same as it was before. Save the original rs, since we have
             // probably already loaded its requirement graph.
             return (_addr_rs!, false, error.As(null!)!);
-
         }
     }
     var direct = make_map<@string, bool>(len(rs.direct));
@@ -155,7 +152,6 @@ private static (ptr<Requirements>, bool, error) editRequirements(context.Context
     }
 
     return (_addr_newRequirements(rs.depth, roots, direct)!, changed, error.As(null!)!);
-
 }
 
 // limiterForEdit returns a versionLimiter with its max versions set such that
@@ -239,7 +235,6 @@ private static (ptr<versionLimiter>, error) limiterForEdit(context.Context ctx, 
     }
 
     return (_addr_newVersionLimiter(rs.depth, maxVersion)!, error.As(null!)!);
-
 }
 
 // raiseLimitsForUpgrades increases the module versions in maxVersions to the
@@ -312,25 +307,20 @@ private static error raiseLimitsForUpgrades(context.Context ctx, map<@string, @s
                 // won't be upgrading to it anyway and there is no point scanning its
                 // dependencies.
                 return error.As(null!)!;
-
             }
-
             allow(m);
 
             var (summary, err) = goModSummary(m);
             if (err != null) {
                 return error.As(err)!;
             }
-
             if (summary.depth == eager) { 
                 // For efficiency, we'll load all of the eager upgrades as one big
                 // graph, rather than loading the (potentially-overlapping) subgraph for
                 // each upgrade individually.
                 eagerUpgrades = append(eagerUpgrades, m);
                 return error.As(null!)!;
-
             }
-
             {
                 var r__prev1 = r;
 
@@ -348,23 +338,19 @@ private static error raiseLimitsForUpgrades(context.Context ctx, map<@string, @s
                             }
 
                         }
-
                     }
                     else
  { 
                         // r will not become a root, so its dependencies don't matter.
                         // Allow only r itself.
                         allow(r);
-
                     }
-
                 }
 
                 r = r__prev1;
             }
 
             return error.As(null!)!;
-
         };
 
         {
@@ -393,9 +379,7 @@ private static error raiseLimitsForUpgrades(context.Context ctx, map<@string, @s
                 // tryUpgrade module path. Return a *mvs.BuildListError showing the
                 // concatenation of the paths (with an upgrade in the middle).
             }
-
             return error.As(err)!;
-
         }
         {
             var r__prev1 = r;
@@ -405,7 +389,6 @@ private static error raiseLimitsForUpgrades(context.Context ctx, map<@string, @s
                 // Upgrading to m would upgrade to r, and the caller requested that we
                 // try to upgrade to m, so it's ok to upgrade to r.
                 allow(r);
-
             }
 
             r = r__prev1;
@@ -441,7 +424,6 @@ private static error raiseLimitsForUpgrades(context.Context ctx, map<@string, @s
                             // r is already a root, so its requirements are already included in
                             // the build list.
                             continue;
-
                         } 
 
                         // The dependencies in mustSelect may upgrade (or downgrade) an existing
@@ -462,11 +444,8 @@ private static error raiseLimitsForUpgrades(context.Context ctx, map<@string, @s
                     if (nextRoots == null) {
                         nextRoots = rs.rootModules; // already capped
                     }
-
                     nextRoots = append(nextRoots, r);
-
                 }
-
             }
 
             r = r__prev2;
@@ -474,7 +453,6 @@ private static error raiseLimitsForUpgrades(context.Context ctx, map<@string, @s
     }
 
     return error.As(null!)!;
-
 }
 
 // selectPotentiallyImportedModules increases the limiter-selected version of
@@ -510,7 +488,6 @@ private static (slice<module.Version>, bool, error) selectPotentiallyImportedMod
                 err = err__prev1;
 
             }
-
         }
         m = m__prev1;
     }
@@ -522,7 +499,6 @@ private static (slice<module.Version>, bool, error) selectPotentiallyImportedMod
             return (null, false, error.As(err)!);
         }
         initial = mg.BuildList()[(int)1..];
-
     }
     else
  {
@@ -545,7 +521,6 @@ private static (slice<module.Version>, bool, error) selectPotentiallyImportedMod
                 err = err__prev1;
 
             }
-
         }
         m = m__prev1;
     }
@@ -589,9 +564,7 @@ private static (slice<module.Version>, bool, error) selectPotentiallyImportedMod
                     v = v__prev2;
 
                 }
-
             }
-
         }
         path = path__prev1;
     }
@@ -601,7 +574,6 @@ private static (slice<module.Version>, bool, error) selectPotentiallyImportedMod
     changed = !reflect.DeepEqual(mods, initial);
 
     return (mods, changed, error.As(err)!);
-
 }
 
 // A versionLimiter tracks the versions that may be selected for each module
@@ -678,7 +650,6 @@ private static error UpgradeToward(this ptr<versionLimiter> _addr_l, context.Con
         if (cmpVersion(selected, m.Version) >= 0) { 
             // The selected version is already at least m, so no upgrade is needed.
             return error.As(null!)!;
-
         }
     }
     else
@@ -694,11 +665,8 @@ private static error UpgradeToward(this ptr<versionLimiter> _addr_l, context.Con
             // TODO(golang.org/issue/31730, golang.org/issue/30134):
             // decode what to do based on the actual error.
             return error.As(err)!;
-
         }
-        var i = sort.Search(len(candidates), i => {
-            return error.As(semver.Compare(candidates[i], m.Version) >= 0)!;
-        });
+        var i = sort.Search(len(candidates), i => error.As(semver.Compare(candidates[i], m.Version) >= 0)!);
         candidates = candidates[..(int)i];
 
         while (l.check(m, l.depth).isDisqualified()) {
@@ -707,16 +675,12 @@ private static error UpgradeToward(this ptr<versionLimiter> _addr_l, context.Con
                 // We couldn't find a suitable candidate above the already-selected version.
                 // Retain that version unmodified.
                 return error.As(null!)!;
-
             }
-
             (m.Version, candidates) = (candidates[n - 1], candidates[..(int)n - 1]);
         }
-
     }
     l.selected[m.Path] = m.Version;
     return error.As(null!)!;
-
 }
 
 // Select attempts to set the selected version of m.Path to exactly m.Version.
@@ -730,7 +694,6 @@ private static (module.Version, error) Select(this ptr<versionLimiter> _addr_l, 
         l.selected[m.Path] = m.Version;
     }
     return (dq.conflict, error.As(dq.err)!);
-
 }
 
 // check determines whether m (or its transitive dependencies) would violate l's
@@ -750,7 +713,6 @@ private static dqState check(this ptr<versionLimiter> _addr_l, module.Version m,
         // version "none" has no requirements, and the dependencies of Target are
         // tautological.
         return new dqState();
-
     }
     {
         var dq__prev1 = dq;
@@ -763,7 +725,6 @@ private static dqState check(this ptr<versionLimiter> _addr_l, module.Version m,
         dq = dq__prev1;
 
     }
-
     l.dqReason[m] = new dqState();
 
     {
@@ -773,7 +734,6 @@ private static dqState check(this ptr<versionLimiter> _addr_l, module.Version m,
             return l.disqualify(m, new dqState(conflict:m));
         }
     }
-
 
     var (summary, err) = goModSummary(m);
     if (err != null) { 
@@ -788,7 +748,6 @@ private static dqState check(this ptr<versionLimiter> _addr_l, module.Version m,
         // is transient (we couldn't download go.mod), return the error from
         // Downgrade. Currently, we can't tell what kind of error it is.
         return l.disqualify(m, new dqState(err:err));
-
     }
     if (summary.depth == eager) {
         depth = eager;
@@ -803,11 +762,9 @@ private static dqState check(this ptr<versionLimiter> _addr_l, module.Version m,
                     // selected. We assume that r.Path will not become a root dependency, so
                     // since m is lazy, r's dependencies won't be followed.
                     continue;
-
                 }
 
             }
-
         }
         {
             var dq__prev1 = dq;
@@ -836,9 +793,7 @@ private static dqState check(this ptr<versionLimiter> _addr_l, module.Version m,
         // yet be disqualified by some path we have not yet visited. Remember this edge
         // so that we can disqualify m and its dependents if that occurs.
         l.requiring[r] = append(l.requiring[r], m);
-
     }    return new dqState();
-
 }
 
 // disqualify records that m (or one of its transitive dependencies)
@@ -853,14 +808,12 @@ private static dqState disqualify(this ptr<versionLimiter> _addr_l, module.Versi
             return dq;
         }
     }
-
     l.dqReason[m] = dq;
 
     foreach (var (_, p) in l.requiring[m]) {
         l.disqualify(p, new dqState(conflict:m));
     }    delete(l.requiring, m);
     return dq;
-
 }
 
 } // end modload_package

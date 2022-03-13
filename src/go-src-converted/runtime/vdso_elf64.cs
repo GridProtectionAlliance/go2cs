@@ -6,16 +6,15 @@
 // +build linux
 // +build amd64 arm64 mips64 mips64le ppc64 ppc64le
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:27 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:32 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\vdso_elf64.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // ELF64 structure definitions for use by the vDSO loader
+// ELF64 structure definitions for use by the vDSO loader
+
 private partial struct elfSym {
     public uint st_name;
     public byte st_info;

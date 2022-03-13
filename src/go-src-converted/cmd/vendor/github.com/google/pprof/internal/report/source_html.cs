@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package report -- go2cs converted at 2022 March 06 23:23:48 UTC
+// package report -- go2cs converted at 2022 March 13 06:36:54 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/report" ==> using report = go.cmd.vendor.github.com.google.pprof.@internal.report_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\report\source_html.go
-using template = go.html.template_package;
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using template = html.template_package;
+
+
+// AddSourceTemplates adds templates used by PrintWebList to t.
 
 public static partial class report_package {
 
-    // AddSourceTemplates adds templates used by PrintWebList to t.
 public static void AddSourceTemplates(ptr<template.Template> _addr_t) {
     ref template.Template t = ref _addr_t.val;
 

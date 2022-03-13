@@ -2,33 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package sync -- go2cs converted at 2022 March 06 22:08:14 UTC
+// package sync -- go2cs converted at 2022 March 13 05:24:04 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\map.go
-using atomic = go.sync.atomic_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using atomic = sync.atomic_package;
+using @unsafe = @unsafe_package;
+
+
+// Map is like a Go map[interface{}]interface{} but is safe for concurrent use
+// by multiple goroutines without additional locking or coordination.
+// Loads, stores, and deletes run in amortized constant time.
+//
+// The Map type is specialized. Most code should use a plain Go map instead,
+// with separate locking or coordination, for better type safety and to make it
+// easier to maintain other invariants along with the map content.
+//
+// The Map type is optimized for two common use cases: (1) when the entry for a given
+// key is only ever written once but read many times, as in caches that only grow,
+// or (2) when multiple goroutines read, write, and overwrite entries for disjoint
+// sets of keys. In these two cases, use of a Map may significantly reduce lock
+// contention compared to a Go map paired with a separate Mutex or RWMutex.
+//
+// The zero Map is empty and ready for use. A Map must not be copied after first use.
+
+using System;
 public static partial class sync_package {
 
-    // Map is like a Go map[interface{}]interface{} but is safe for concurrent use
-    // by multiple goroutines without additional locking or coordination.
-    // Loads, stores, and deletes run in amortized constant time.
-    //
-    // The Map type is specialized. Most code should use a plain Go map instead,
-    // with separate locking or coordination, for better type safety and to make it
-    // easier to maintain other invariants along with the map content.
-    //
-    // The Map type is optimized for two common use cases: (1) when the entry for a given
-    // key is only ever written once but read many times, as in caches that only grow,
-    // or (2) when multiple goroutines read, write, and overwrite entries for disjoint
-    // sets of keys. In these two cases, use of a Map may significantly reduce lock
-    // contention compared to a Go map paired with a separate Mutex or RWMutex.
-    //
-    // The zero Map is empty and ready for use. A Map must not be copied after first use.
 public partial struct Map {
     public Mutex mu; // read contains the portion of the map's contents that are safe for
 // concurrent access (with or without mu held).
@@ -95,16 +96,13 @@ private static (object, bool) Load(this ptr<Map> _addr_m, object key) {
             // will take the slow path until the dirty map is promoted to the read
             // map.
             m.missLocked();
-
         }
         m.mu.Unlock();
-
     }
     if (!ok) {
         return (null, false);
     }
     return e.load();
-
 }
 
 private static (object, bool) load(this ptr<entry> _addr_e) {
@@ -117,7 +115,6 @@ private static (object, bool) load(this ptr<entry> _addr_e) {
         return (null, false);
     }
     return true;
-
 }
 
 // Store sets the value for a key.
@@ -137,7 +134,6 @@ private static void Store(this ptr<Map> _addr_m, object key, object value) {
 
     }
 
-
     m.mu.Lock();
     read, _ = m.read.Load()._<readOnly>();
     {
@@ -150,11 +146,8 @@ private static void Store(this ptr<Map> _addr_m, object key, object value) {
                 // The entry was previously expunged, which implies that there is a
                 // non-nil dirty map and this entry is not in it.
                 m.dirty[key] = e;
-
             }
-
             e.storeLocked(_addr_value);
-
         }        {
             var e__prev2 = e;
 
@@ -171,24 +164,18 @@ private static void Store(this ptr<Map> _addr_m, object key, object value) {
                     // Make sure it is allocated and mark the read-only map as incomplete.
                     m.dirtyLocked();
                     m.read.Store(new readOnly(m:read.m,amended:true));
-
                 }
-
                 m.dirty[key] = newEntry(value);
-
             }
 
             e = e__prev2;
 
         }
 
-
         e = e__prev1;
 
     }
-
     m.mu.Unlock();
-
 }
 
 // tryStore stores a value if the entry has not been expunged.
@@ -207,7 +194,6 @@ private static bool tryStore(this ptr<entry> _addr_e, object i) {
             return true;
         }
     }
-
 }
 
 // unexpungeLocked ensures that the entry is not marked as expunged.
@@ -255,7 +241,6 @@ private static (object, bool) LoadOrStore(this ptr<Map> _addr_m, object key, obj
 
     }
 
-
     m.mu.Lock();
     read, _ = m.read.Load()._<readOnly>();
     {
@@ -285,9 +270,7 @@ private static (object, bool) LoadOrStore(this ptr<Map> _addr_m, object key, obj
                     // Make sure it is allocated and mark the read-only map as incomplete.
                     m.dirtyLocked();
                     m.read.Store(new readOnly(m:read.m,amended:true));
-
                 }
-
                 m.dirty[key] = newEntry(value);
                 (actual, loaded) = (value, false);
             }
@@ -296,15 +279,12 @@ private static (object, bool) LoadOrStore(this ptr<Map> _addr_m, object key, obj
 
         }
 
-
         e = e__prev1;
 
     }
-
     m.mu.Unlock();
 
     return (actual, loaded);
-
 }
 
 // tryLoadOrStore atomically loads or stores a value if the entry is not
@@ -338,7 +318,6 @@ private static (object, bool, bool) tryLoadOrStore(this ptr<entry> _addr_e, obje
             return (true, true);
         }
     }
-
 }
 
 // LoadAndDelete deletes the value for a key, returning the previous value if any.
@@ -361,16 +340,13 @@ private static (object, bool) LoadAndDelete(this ptr<Map> _addr_m, object key) {
             // will take the slow path until the dirty map is promoted to the read
             // map.
             m.missLocked();
-
         }
         m.mu.Unlock();
-
     }
     if (ok) {
         return e.delete();
     }
     return (null, false);
-
 }
 
 // Delete deletes the value for a key.
@@ -394,7 +370,6 @@ private static (object, bool) delete(this ptr<entry> _addr_e) {
             return true;
         }
     }
-
 }
 
 // Range calls f sequentially for each key and value present in the map.
@@ -429,7 +404,6 @@ private static bool Range(this ptr<Map> _addr_m, Func<object, object, bool> f) {
             m.misses = 0;
         }
         m.mu.Unlock();
-
     }
     foreach (var (k, e) in read.m) {
         var (v, ok) = e.load();
@@ -452,7 +426,6 @@ private static void missLocked(this ptr<Map> _addr_m) {
     m.read.Store(new readOnly(m:m.dirty));
     m.dirty = null;
     m.misses = 0;
-
 }
 
 private static void dirtyLocked(this ptr<Map> _addr_m) {
@@ -480,10 +453,8 @@ private static bool tryExpungeLocked(this ptr<entry> _addr_e) {
             return true;
         }
         p = atomic.LoadPointer(_addr_e.p);
-
     }
     return p == expunged;
-
 }
 
 } // end sync_package

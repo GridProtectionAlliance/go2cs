@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:48:38 UTC
+//     Generated on 2022 March 13 05:59:58 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -37,7 +37,7 @@ namespace @internal
 {
     public static partial class typecheck_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct intReader
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace @internal
             public static implicit operator intReader(NilType nil) => default(intReader);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static intReader intReader_cast(dynamic value)
         {
             return new intReader(ref value.Reader>, ref value.pkg);

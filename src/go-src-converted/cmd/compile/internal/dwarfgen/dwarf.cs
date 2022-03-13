@@ -2,29 +2,28 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package dwarfgen -- go2cs converted at 2022 March 06 23:12:15 UTC
+// package dwarfgen -- go2cs converted at 2022 March 13 06:25:37 UTC
 // import "cmd/compile/internal/dwarfgen" ==> using dwarfgen = go.cmd.compile.@internal.dwarfgen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\dwarfgen\dwarf.go
-using bytes = go.bytes_package;
-using flag = go.flag_package;
-using fmt = go.fmt_package;
-using buildcfg = go.@internal.buildcfg_package;
-using sort = go.sort_package;
-
-using @base = go.cmd.compile.@internal.@base_package;
-using ir = go.cmd.compile.@internal.ir_package;
-using reflectdata = go.cmd.compile.@internal.reflectdata_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using ssagen = go.cmd.compile.@internal.ssagen_package;
-using types = go.cmd.compile.@internal.types_package;
-using dwarf = go.cmd.@internal.dwarf_package;
-using obj = go.cmd.@internal.obj_package;
-using objabi = go.cmd.@internal.objabi_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using bytes = bytes_package;
+using flag = flag_package;
+using fmt = fmt_package;
+using buildcfg = @internal.buildcfg_package;
+using sort = sort_package;
+
+using @base = cmd.compile.@internal.@base_package;
+using ir = cmd.compile.@internal.ir_package;
+using reflectdata = cmd.compile.@internal.reflectdata_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using ssagen = cmd.compile.@internal.ssagen_package;
+using types = cmd.compile.@internal.types_package;
+using dwarf = cmd.@internal.dwarf_package;
+using obj = cmd.@internal.obj_package;
+using objabi = cmd.@internal.objabi_package;
+using src = cmd.@internal.src_package;
+using System;
 
 public static partial class dwarfgen_package {
 
@@ -53,7 +52,6 @@ public static (slice<dwarf.Scope>, dwarf.InlCalls) Info(ptr<obj.LSym> _addr_fnsy
         foreach (var (_, n) in fn.Dcl) {
             if (n.Op() != ir.ONAME) { // might be OTYPE or OLITERAL
                 continue;
-
             }
 
             if (n.Class == ir.PAUTO) 
@@ -63,13 +61,11 @@ public static (slice<dwarf.Scope>, dwarf.InlCalls) Info(ptr<obj.LSym> _addr_fnsy
                         @base.Fatalf("debuginfo unused node (AllocFrame should truncate fn.Func.Dcl)");
                     }
                     continue;
-
                 }
             else if (n.Class == ir.PPARAM || n.Class == ir.PPARAMOUT)             else 
                 continue;
                         apdecls = append(apdecls, n);
             fnsym.Func().RecordAutoType(reflectdata.TypeLinksym(n.Type()));
-
         }
     }
     var (decls, dwarfVars) = createDwarfVars(_addr_fnsym, isODCLFUNC, fn, apdecls); 
@@ -98,7 +94,6 @@ public static (slice<dwarf.Scope>, dwarf.InlCalls) Info(ptr<obj.LSym> _addr_fnsy
         inlcalls = assembleInlines(fnsym, dwarfVars);
     }
     return (scopes, inlcalls);
-
 }
 
 private static src.XPos declPos(ptr<ir.Name> _addr_decl) {
@@ -153,7 +148,6 @@ private static (slice<ptr<ir.Name>>, slice<ptr<dwarf.Var>>) createDwarfVars(ptr<
             vars = append(vars, createSimpleVar(_addr_fnsym, _addr_n));
             decls = append(decls, n);
             continue;
-
         }
         var typename = dwarf.InfoPrefix + types.TypeSymName(n.Type());
         decls = append(decls, n);
@@ -180,11 +174,9 @@ private static (slice<ptr<ir.Name>>, slice<ptr<dwarf.Var>>) createDwarfVars(ptr<
         vars = append(vars, addr(new dwarf.Var(Name:n.Sym().Name,IsReturnValue:isReturnValue,Abbrev:abbrev,StackOffset:int32(n.FrameOffset()),Type:base.Ctxt.Lookup(typename),DeclFile:declpos.RelFilename(),DeclLine:declpos.RelLine(),DeclCol:declpos.Col(),InlIndex:int32(inlIndex),ChildIndex:-1,))); 
         // Record go type of to insure that it gets emitted by the linker.
         fnsym.Func().RecordAutoType(reflectdata.TypeLinksym(n.Type()));
-
     }    sortDeclsAndVars(_addr_fn, decls, vars);
 
     return (decls, vars);
-
 }
 
 // sortDeclsAndVars sorts the decl and dwarf var lists according to
@@ -210,10 +202,8 @@ private static void sortDeclsAndVars(ptr<ir.Func> _addr_fn, slice<ptr<ir.Name>> 
                 }
 
             }
-
         }
     }    sort.Stable(new varsAndDecls(decls,vars,paramOrder));
-
 }
 
 private partial struct varsAndDecls {
@@ -238,13 +228,10 @@ private static bool Less(this varsAndDecls v, nint i, nint j) {
  {
                 return true;
             }
-
         }
         return false;
-
     };
     return nameLT(v.decls[i], v.decls[j]);
-
 }
 
 private static void Swap(this varsAndDecls v, nint i, nint j) {
@@ -270,9 +257,7 @@ private static slice<ptr<ir.Name>> preInliningDcls(ptr<obj.LSym> _addr_fnsym) {
             continue;
         }
         rdcl = append(rdcl, n);
-
     }    return rdcl;
-
 }
 
 // createSimpleVars creates a DWARF entry for every variable declared in the
@@ -293,9 +278,7 @@ private static (slice<ptr<ir.Name>>, slice<ptr<dwarf.Var>>, ir.NameSet) createSi
         decls = append(decls, n);
         vars = append(vars, createSimpleVar(_addr_fnsym, _addr_n));
         selected.Add(n);
-
     }    return (decls, vars, selected);
-
 }
 
 private static ptr<dwarf.Var> createSimpleVar(ptr<obj.LSym> _addr_fnsym, ptr<ir.Name> _addr_n) {
@@ -314,7 +297,6 @@ private static ptr<dwarf.Var> createSimpleVar(ptr<obj.LSym> _addr_fnsym, ptr<ir.
             offs -= int64(types.PtrSize);
         }
         return _addr_offs!;
-
     };
 
 
@@ -345,7 +327,6 @@ private static ptr<dwarf.Var> createSimpleVar(ptr<obj.LSym> _addr_fnsym, ptr<ir.
     }
     var declpos = @base.Ctxt.InnermostPos(declPos(_addr_n));
     return addr(new dwarf.Var(Name:n.Sym().Name,IsReturnValue:n.Class==ir.PPARAMOUT,IsInlFormal:n.InlFormal(),Abbrev:abbrev,StackOffset:int32(offs),Type:base.Ctxt.Lookup(typename),DeclFile:declpos.RelFilename(),DeclLine:declpos.RelLine(),DeclCol:declpos.Col(),InlIndex:int32(inlIndex),ChildIndex:-1,));
-
 }
 
 // createABIVars creates DWARF variables for functions in which the
@@ -377,18 +358,14 @@ private static (slice<ptr<ir.Name>>, slice<ptr<dwarf.Var>>, ir.NameSet) createAB
             if (ok) { 
                 // already handled
                 continue;
-
             }
 
         }
 
-
         decls = append(decls, n);
         vars = append(vars, createSimpleVar(_addr_fnsym, _addr_n));
         selected.Add(n);
-
     }    return (decls, vars, selected);
-
 }
 
 // createComplexVars creates recomposed DWARF vars with location lists,
@@ -431,13 +408,11 @@ private static (slice<ptr<ir.Name>>, slice<ptr<dwarf.Var>>, ir.NameSet) createCo
                 dvar = dvar__prev1;
 
             }
-
         }
         dvar = dvar__prev1;
     }
 
     return (decls, vars, ssaVars);
-
 }
 
 // createComplexVar builds a single DWARF variable entry and location list.
@@ -477,7 +452,6 @@ private static ptr<dwarf.Var> createComplexVar(ptr<obj.LSym> _addr_fnsym, ptr<ir
         };
     }
     return _addr_dvar!;
-
 }
 
 // RecordFlags records the specified command-line flags to be placed
@@ -489,7 +463,6 @@ public static void RecordFlags(params @string[] flags) {
         // We can't record the flags if we don't know what the
         // package name is.
         return ;
-
     }
     public partial interface BoolFlag {
         bool IsBoolFlag();
@@ -507,7 +480,6 @@ public static void RecordFlags(params @string[] flags) {
         if (getter.String() == f.DefValue) { 
             // Flag has default value, so omit it.
             continue;
-
         }
         {
             BoolFlag (bf, ok) = BoolFlag.As(f.Value._<BoolFlag>())!;
@@ -521,7 +493,6 @@ public static void RecordFlags(params @string[] flags) {
             }
 
         }
-
         {
             CountFlag (cf, ok) = CountFlag.As(f.Value._<CountFlag>())!;
 
@@ -534,9 +505,7 @@ public static void RecordFlags(params @string[] flags) {
             }
 
         }
-
         fmt.Fprintf(_addr_cmd, " -%s=%v", f.Name, getter.Get());
-
     }    if (buildcfg.Experiment.RegabiArgs) {
         cmd.Write((slice<byte>)" regabi");
     }
@@ -550,7 +519,6 @@ public static void RecordFlags(params @string[] flags) {
     s.Set(obj.AttrDuplicateOK, true);
     @base.Ctxt.Data = append(@base.Ctxt.Data, s);
     s.P = cmd.Bytes()[(int)1..];
-
 }
 
 // RecordPackageName records the name of the package being
@@ -563,7 +531,6 @@ public static void RecordPackageName() {
     s.Set(obj.AttrDuplicateOK, true);
     @base.Ctxt.Data = append(@base.Ctxt.Data, s);
     s.P = (slice<byte>)types.LocalPkg.Name;
-
 }
 
 } // end dwarfgen_package

@@ -8,16 +8,16 @@
 //   2) shift decimal by exponent
 //   3) read digits out & format
 
-// package strconv -- go2cs converted at 2022 March 06 22:30:32 UTC
+// package strconv -- go2cs converted at 2022 March 13 05:41:22 UTC
 // import "strconv" ==> using strconv = go.strconv_package
 // Original source: C:\Program Files\Go\src\strconv\ftoa.go
-using math = go.math_package;
-
 namespace go;
+
+using math = math_package;
 
 public static partial class strconv_package {
 
-    // TODO: move elsewhere?
+// TODO: move elsewhere?
 private partial struct floatInfo {
     public nuint mantbits;
     public nuint expbits;
@@ -92,7 +92,6 @@ private static slice<byte> genericFtoa(slice<byte> dst, double val, byte fmt, ni
             else 
                 s = "+Inf";
                     return append(dst, s);
-
             break;
         case 0: 
             // denormalized
@@ -141,7 +140,6 @@ private static slice<byte> genericFtoa(slice<byte> dst, double val, byte fmt, ni
                 prec = digs.nd;
                 break;
         }
-
     }
     else if (fmt != 'f') { 
         // Fixed number of digits.
@@ -177,7 +175,6 @@ private static slice<byte> genericFtoa(slice<byte> dst, double val, byte fmt, ni
         return bigFtoa(dst, prec, fmt, neg, mant, exp, flt);
     }
     return formatDigits(dst, shortest, neg, digs, prec, fmt);
-
 });
 
 // bigFtoa uses multiprecision computations to format a float.
@@ -208,7 +205,6 @@ private static slice<byte> bigFtoa(slice<byte> dst, nint prec, byte fmt, bool ne
                 prec = digs.nd;
                 break;
         }
-
     }
     else
  { 
@@ -232,10 +228,8 @@ private static slice<byte> bigFtoa(slice<byte> dst, nint prec, byte fmt, bool ne
                 break;
         }
         digs = new decimalSlice(d:d.d[:],nd:d.nd,dp:d.dp);
-
     }
     return formatDigits(dst, shortest, neg, digs, prec, fmt);
-
 }
 
 private static slice<byte> formatDigits(slice<byte> dst, bool shortest, bool neg, decimalSlice digs, nint prec, byte fmt) {
@@ -271,13 +265,11 @@ private static slice<byte> formatDigits(slice<byte> dst, bool shortest, bool neg
                 prec = digs.nd;
             }
             return fmtF(dst, neg, digs, max(prec - digs.dp, 0));
-
             break;
     } 
 
     // unknown format
     return append(dst, '%', fmt);
-
 }
 
 // roundShortest rounds d (= mant * 2^exp) to the shortest number of digits
@@ -295,7 +287,6 @@ private static void roundShortest(ptr<decimal> _addr_d, ulong mant, nint exp, pt
     if (exp > minexp && 332 * (d.dp - d.nd) >= 100 * (exp - int(flt.mantbits))) { 
         // The number is already shortest.
         return ;
-
     }
     ptr<decimal> upper = @new<decimal>();
     upper.Assign(mant * 2 + 1);
@@ -342,7 +333,7 @@ private static void roundShortest(ptr<decimal> _addr_d, ulong mant, nint exp, pt
 
     // Now we can figure out the minimum number of digits required.
     // Walk along until d has distinguished itself from upper and lower.
-    for (nint ui = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; ui++) { 
+    for (nint ui = 0; ; ui++) { 
         // lower, d, and upper may have the decimal points at different
         // places. In this case upper is the longest, so we iterate from
         // ui==0 and start li and mi at (possibly) -1.
@@ -397,9 +388,7 @@ private static void roundShortest(ptr<decimal> _addr_d, ulong mant, nint exp, pt
         else if (okup) 
             d.RoundUp(mi + 1);
             return ;
-        
-    }
-
+            }
 }
 
 private partial struct decimalSlice {
@@ -434,13 +423,11 @@ private static slice<byte> fmtE(slice<byte> dst, bool neg, decimalSlice d, nint 
             dst = append(dst, '0');
             i++;
         }
-
     }
     dst = append(dst, fmt);
     var exp = d.dp - 1;
     if (d.nd == 0) { // special case: 0 has exponent 0
         exp = 0;
-
     }
     if (exp < 0) {
         ch = '-';
@@ -461,7 +448,6 @@ private static slice<byte> fmtE(slice<byte> dst, bool neg, decimalSlice d, nint 
     else 
         dst = append(dst, byte(exp / 100) + '0', byte(exp / 10) % 10 + '0', byte(exp % 10) + '0');
         return dst;
-
 }
 
 // %f: -ddddddd.ddddd
@@ -478,8 +464,6 @@ private static slice<byte> fmtF(slice<byte> dst, bool neg, decimalSlice d, nint 
             m++;
         }
     else
-
-
     } {
         dst = append(dst, '0');
     }
@@ -495,14 +479,10 @@ private static slice<byte> fmtF(slice<byte> dst, bool neg, decimalSlice d, nint 
                 }
 
             }
-
             dst = append(dst, ch);
-
         }
-
     }
     return dst;
-
 }
 
 // %b: -ddddddddp±ddd
@@ -526,7 +506,6 @@ private static slice<byte> fmtB(slice<byte> dst, bool neg, ulong mant, nint exp,
     dst, _ = formatBits(dst, uint64(exp), 10, exp < 0, true);
 
     return dst;
-
 }
 
 // %x: -0x1.yyyyyyyyp±ddd or -0x0p+0. (y is hex digit, d is decimal digit)
@@ -555,7 +534,6 @@ private static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg, 
             // Wrapped around.
             mant>>=1;
             exp++;
-
         }
     }
     var hex = lowerhex;
@@ -607,7 +585,6 @@ private static slice<byte> fmtX(slice<byte> dst, nint prec, byte fmt, bool neg, 
     else 
         dst = append(dst, byte(exp / 1000) + '0', byte(exp / 100) % 10 + '0', byte((exp / 10) % 10) + '0', byte(exp % 10) + '0');
         return dst;
-
 }
 
 private static nint min(nint a, nint b) {
@@ -615,7 +592,6 @@ private static nint min(nint a, nint b) {
         return a;
     }
     return b;
-
 }
 
 private static nint max(nint a, nint b) {
@@ -623,7 +599,6 @@ private static nint max(nint a, nint b) {
         return a;
     }
     return b;
-
 }
 
 } // end strconv_package

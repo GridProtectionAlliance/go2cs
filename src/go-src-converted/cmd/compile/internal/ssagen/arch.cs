@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ssagen -- go2cs converted at 2022 March 06 23:09:45 UTC
+// package ssagen -- go2cs converted at 2022 March 13 06:23:00 UTC
 // import "cmd/compile/internal/ssagen" ==> using ssagen = go.cmd.compile.@internal.ssagen_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssagen\arch.go
-using ir = go.cmd.compile.@internal.ir_package;
-using objw = go.cmd.compile.@internal.objw_package;
-using ssa = go.cmd.compile.@internal.ssa_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
+
+using ir = cmd.compile.@internal.ir_package;
+using objw = cmd.compile.@internal.objw_package;
+using ssa = cmd.compile.@internal.ssa_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using System;
 
 public static partial class ssagen_package {
 

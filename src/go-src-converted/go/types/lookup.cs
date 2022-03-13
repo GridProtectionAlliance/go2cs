@@ -4,41 +4,41 @@
 
 // This file implements various field and method lookup functions.
 
-// package types -- go2cs converted at 2022 March 06 22:42:04 UTC
+// package types -- go2cs converted at 2022 March 13 05:53:11 UTC
 // import "go/types" ==> using types = go.go.types_package
 // Original source: C:\Program Files\Go\src\go\types\lookup.go
-using token = go.go.token_package;
-
 namespace go.go;
+
+using token = go.token_package;
 
 public static partial class types_package {
 
-    // LookupFieldOrMethod looks up a field or method with given package and name
-    // in T and returns the corresponding *Var or *Func, an index sequence, and a
-    // bool indicating if there were any pointer indirections on the path to the
-    // field or method. If addressable is set, T is the type of an addressable
-    // variable (only matters for method lookups).
-    //
-    // The last index entry is the field or method index in the (possibly embedded)
-    // type where the entry was found, either:
-    //
-    //    1) the list of declared methods of a named type; or
-    //    2) the list of all methods (method set) of an interface type; or
-    //    3) the list of fields of a struct type.
-    //
-    // The earlier index entries are the indices of the embedded struct fields
-    // traversed to get to the found entry, starting at depth 0.
-    //
-    // If no entry is found, a nil object is returned. In this case, the returned
-    // index and indirect values have the following meaning:
-    //
-    //    - If index != nil, the index sequence points to an ambiguous entry
-    //    (the same name appeared more than once at the same embedding level).
-    //
-    //    - If indirect is set, a method with a pointer receiver type was found
-    //      but there was no pointer on the path from the actual receiver type to
-    //    the method's formal receiver base type, nor was the receiver addressable.
-    //
+// LookupFieldOrMethod looks up a field or method with given package and name
+// in T and returns the corresponding *Var or *Func, an index sequence, and a
+// bool indicating if there were any pointer indirections on the path to the
+// field or method. If addressable is set, T is the type of an addressable
+// variable (only matters for method lookups).
+//
+// The last index entry is the field or method index in the (possibly embedded)
+// type where the entry was found, either:
+//
+//    1) the list of declared methods of a named type; or
+//    2) the list of all methods (method set) of an interface type; or
+//    3) the list of fields of a struct type.
+//
+// The earlier index entries are the indices of the embedded struct fields
+// traversed to get to the found entry, starting at depth 0.
+//
+// If no entry is found, a nil object is returned. In this case, the returned
+// index and indirect values have the following meaning:
+//
+//    - If index != nil, the index sequence points to an ambiguous entry
+//    (the same name appeared more than once at the same embedding level).
+//
+//    - If indirect is set, a method with a pointer receiver type was found
+//      but there was no pointer on the path from the actual receiver type to
+//    the method's formal receiver base type, nor was the receiver addressable.
+//
 public static (Object, slice<nint>, bool) LookupFieldOrMethod(Type T, bool addressable, ptr<Package> _addr_pkg, @string name) {
     Object obj = default;
     slice<nint> index = default;
@@ -88,19 +88,14 @@ private static (Object, slice<nint>, bool) lookupFieldOrMethod(this ptr<Checker>
                         }
 
                     }
-
                     return ;
-
                 }
 
             }
-
         }
     }
 
-
     return check.rawLookupFieldOrMethod(T, addressable, pkg, name);
-
 }
 
 // TODO(gri) The named type consolidation and seen maps below must be
@@ -162,13 +157,10 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                         // this same type at the current depth, so we can ignore
                         // this one.
                         continue;
-
                     }
-
                     if (seen == null) {
                         seen = make_map<ptr<Named>, bool>();
                     }
-
                     seen[named] = true; 
 
                     // look for a matching attached method
@@ -184,7 +176,6 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                             if (obj != null || e.multiples) {
                                 return (null, index, false); // collision
                             }
-
                             obj = m;
                             indirect = e.indirect;
                             continue; // we can't have a matching field or interface method
@@ -207,11 +198,9 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                     if (asTypeParam(typ) != null) {
                         continue;
                     }
-
                 }
 
             }
-
 
             tpar = null;
             switch (typ.type()) {
@@ -229,7 +218,6 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                                 if (obj != null || e.multiples) {
                                     return (null, index, false); // collision
                                 }
-
                                 obj = f;
                                 indirect = e.indirect;
                                 continue; // we can't have a matching interface method
@@ -249,9 +237,7 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                                 // have fields or methods (only Named, Struct, and
                                 // Interface types need to be considered).
                                 next = append(next, new embeddedType(typ,concat(e.index,i),e.indirect||isPtr,e.multiples));
-
                             }
-
                         }
 
                         i = i__prev3;
@@ -271,17 +257,13 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                             if (obj != null || e.multiples) {
                                 return (null, index, false); // collision
                             }
-
                             obj = m;
                             indirect = e.indirect;
-
                         }
 
                         i = i__prev1;
 
                     }
-
-
                     break;
                 case ptr<_TypeParam> t:
                     {
@@ -295,20 +277,16 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                             if (obj != null || e.multiples) {
                                 return (null, index, false); // collision
                             }
-
                             tpar = t;
                             obj = m;
                             indirect = e.indirect;
-
                         }
 
                         i = i__prev1;
 
                     }
-
                     break;
             }
-
         }        if (obj != null) { 
             // found a potential match
             // spec: "A method call x.m() is valid if the method set of (the type of) x
@@ -326,18 +304,14 @@ private static (Object, slice<nint>, bool) rawLookupFieldOrMethod(this ptr<Check
                     if (hasPtrRecv && !indirect && !addressable) {
                         return (null, null, true); // pointer/addressable receiver required
                     }
-
                 }
 
                 f = f__prev2;
 
             }
-
             return ;
-
         }
         current = check.consolidateMultiples(next);
-
     }
 
     return (null, null, false); // not found
@@ -378,9 +352,7 @@ private static slice<embeddedType> consolidateMultiples(this ptr<Checker> _addr_
             }
 
         }
-
     }    return list[..(int)n];
-
 }
 
 private static (nint, bool) lookupType(this ptr<Checker> _addr_check, map<Type, nint> m, Type typ) {
@@ -401,7 +373,6 @@ private static (nint, bool) lookupType(this ptr<Checker> _addr_check, map<Type, 
 
     }
 
-
     {
         var i__prev1 = i;
 
@@ -416,7 +387,6 @@ private static (nint, bool) lookupType(this ptr<Checker> _addr_check, map<Type, 
     }
 
     return (0, false);
-
 }
 
 // MissingMethod returns (nil, false) if V implements T, otherwise it
@@ -477,11 +447,8 @@ private static (ptr<Func>, ptr<Func>) missingMethod(this ptr<Checker> _addr_chec
                         if (m.name == "==" || !static) {
                             continue;
                         }
-
                         return (_addr_m!, _addr_f!);
-
                     }
-
                     ptr<Signature> ftyp = f.typ._<ptr<Signature>>();
                     ptr<Signature> mtyp = m.typ._<ptr<Signature>>();
                     if (len(ftyp.tparams) != len(mtyp.tparams)) {
@@ -498,14 +465,12 @@ private static (ptr<Func>, ptr<Func>) missingMethod(this ptr<Checker> _addr_chec
                     if (!u.unify(ftyp, mtyp)) {
                         return (_addr_m!, _addr_f!);
                     }
-
                 }
 
                 m = m__prev1;
             }
 
             return ;
-
         }
     } 
 
@@ -536,9 +501,7 @@ private static (ptr<Func>, ptr<Func>) missingMethod(this ptr<Checker> _addr_chec
                 if (m.name == "==" && Comparable(V)) {
                     continue;
                 }
-
                 return (_addr_m!, _addr_null!);
-
             } 
 
             // methods may not have a fully set up signature yet
@@ -570,9 +533,7 @@ private static (ptr<Func>, ptr<Func>) missingMethod(this ptr<Checker> _addr_chec
                 if (len(ftyp.rparams) != len(Vn.targs)) {
                     return ;
                 }
-
                 ftyp = check.subst(token.NoPos, ftyp, makeSubstMap(ftyp.rparams, Vn.targs))._<ptr<Signature>>();
-
             } 
 
             // If the methods have type parameters we don't care whether they
@@ -585,13 +546,11 @@ private static (ptr<Func>, ptr<Func>) missingMethod(this ptr<Checker> _addr_chec
             if (!u.unify(ftyp, mtyp)) {
                 return (_addr_m!, _addr_f!);
             }
-
         }
         m = m__prev1;
     }
 
     return ;
-
 }
 
 // assertableTo reports whether a value of type V can be asserted to have type T.
@@ -614,7 +573,6 @@ private static (ptr<Func>, ptr<Func>) assertableTo(this ptr<Checker> _addr_check
         return ;
     }
     return _addr_check.missingMethod(T, V, false)!;
-
 }
 
 // deref dereferences typ if it is a *Pointer and returns its base and true.
@@ -630,9 +588,7 @@ private static (Type, bool) deref(Type typ) {
             return (p.@base, true);
         }
     }
-
     return (typ, false);
-
 }
 
 // derefStructPtr dereferences typ if it is a (named or unnamed) pointer to a
@@ -647,9 +603,7 @@ private static Type derefStructPtr(Type typ) {
             }
         }
     }
-
     return typ;
-
 }
 
 // concat returns the result of concatenating list and i.
@@ -672,7 +626,6 @@ private static nint fieldIndex(slice<ptr<Var>> fields, ptr<Package> _addr_pkg, @
         }
     }
     return -1;
-
 }
 
 // lookupMethod returns the index of and method with matching package and name, or (-1, nil).
@@ -689,7 +642,6 @@ private static (nint, ptr<Func>) lookupMethod(slice<ptr<Func>> methods, ptr<Pack
         }
     }
     return (-1, _addr_null!);
-
 }
 
 } // end types_package

@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:15:20 UTC
+//     Generated on 2022 March 13 05:29:38 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace @internal
 {
     public static partial class nettrace_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Trace
         {
             // Constructors
@@ -59,7 +59,7 @@ namespace @internal
             public static implicit operator Trace(NilType nil) => default(Trace);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Trace Trace_cast(dynamic value)
         {
             return new Trace(value.DNSStart, value.DNSDone, value.ConnectStart, value.ConnectDone);

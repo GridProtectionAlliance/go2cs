@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:13:51 UTC
+//     Generated on 2022 March 13 06:27:18 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -47,7 +47,7 @@ namespace @internal
 {
     public static partial class noder_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct importedPkg
         {
             // Constructors
@@ -82,7 +82,7 @@ namespace @internal
             public static implicit operator importedPkg(NilType nil) => default(importedPkg);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static importedPkg importedPkg_cast(dynamic value)
         {
             return new importedPkg(value.pos, value.path, value.name);

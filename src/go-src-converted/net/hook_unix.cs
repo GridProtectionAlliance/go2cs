@@ -5,14 +5,13 @@
 //go:build aix || darwin || dragonfly || freebsd || (js && wasm) || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd js,wasm linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:15:49 UTC
+// package net -- go2cs converted at 2022 March 13 05:29:46 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\hook_unix.go
-using syscall = go.syscall_package;
-using System;
-
-
 namespace go;
+
+using syscall = syscall_package;
+using System;
 
 public static partial class net_package {
 

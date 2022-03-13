@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:34:29 UTC
+//     Generated on 2022 March 13 06:41:46 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -35,7 +35,7 @@ namespace passes
 {
     public static partial class bools_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct boolOp
         {
             // Constructors
@@ -70,7 +70,7 @@ namespace passes
             public static implicit operator boolOp(NilType nil) => default(boolOp);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static boolOp boolOp_cast(dynamic value)
         {
             return new boolOp(value.name, value.tok, value.badEq);

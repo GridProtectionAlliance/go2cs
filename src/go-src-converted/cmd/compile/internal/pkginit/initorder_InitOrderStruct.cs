@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:13:45 UTC
+//     Generated on 2022 March 13 06:27:11 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -29,7 +29,7 @@ namespace @internal
 {
     public static partial class pkginit_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct InitOrder
         {
             // Constructors
@@ -64,7 +64,7 @@ namespace @internal
             public static implicit operator InitOrder(NilType nil) => default(InitOrder);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static InitOrder InitOrder_cast(dynamic value)
         {
             return new InitOrder(value.blocking, value.ready, value.order);

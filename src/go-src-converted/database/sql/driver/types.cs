@@ -2,34 +2,36 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package driver -- go2cs converted at 2022 March 06 23:35:29 UTC
+// package driver -- go2cs converted at 2022 March 13 06:43:26 UTC
 // import "database/sql/driver" ==> using driver = go.database.sql.driver_package
 // Original source: C:\Program Files\Go\src\database\sql\driver\types.go
-using fmt = go.fmt_package;
-using reflect = go.reflect_package;
-using strconv = go.strconv_package;
-using time = go.time_package;
-
 namespace go.database.sql;
+
+using fmt = fmt_package;
+using reflect = reflect_package;
+using strconv = strconv_package;
+using time = time_package;
+
+
+// ValueConverter is the interface providing the ConvertValue method.
+//
+// Various implementations of ValueConverter are provided by the
+// driver package to provide consistent implementations of conversions
+// between drivers. The ValueConverters have several uses:
+//
+//  * converting from the Value types as provided by the sql package
+//    into a database table's specific column type and making sure it
+//    fits, such as making sure a particular int64 fits in a
+//    table's uint16 column.
+//
+//  * converting a value as given from the database into one of the
+//    driver Value types.
+//
+//  * by the sql package, for converting from a driver's Value type
+//    to a user's type in a scan.
 
 public static partial class driver_package {
 
-    // ValueConverter is the interface providing the ConvertValue method.
-    //
-    // Various implementations of ValueConverter are provided by the
-    // driver package to provide consistent implementations of conversions
-    // between drivers. The ValueConverters have several uses:
-    //
-    //  * converting from the Value types as provided by the sql package
-    //    into a database table's specific column type and making sure it
-    //    fits, such as making sure a particular int64 fits in a
-    //    table's uint16 column.
-    //
-    //  * converting a value as given from the database into one of the
-    //    driver Value types.
-    //
-    //  * by the sql package, for converting from a driver's Value type
-    //    to a user's type in a scan.
 public partial interface ValueConverter {
     (Value, error) ConvertValue(object v);
 }
@@ -103,7 +105,6 @@ private static (Value, error) ConvertValue(this boolType _p0, object src) {
         }
         return (null, error.As(fmt.Errorf("sql/driver: couldn't convert %d into type bool", uv))!);
         return (null, error.As(fmt.Errorf("sql/driver: couldn't convert %v (%T) into type bool", src, src))!);
-
 }
 
 // Int32 is a ValueConverter that converts input values to int64,
@@ -140,7 +141,6 @@ private static (Value, error) ConvertValue(this int32Type _p0, object v) {
         }
         return (int64(i), error.As(null!)!);
         return (null, error.As(fmt.Errorf("sql/driver: unsupported value %v (type %T) converting to int32", v, v))!);
-
 }
 
 // String is a ValueConverter that converts its input to a string.
@@ -165,7 +165,6 @@ private static (Value, error) ConvertValue(this stringType _p0, object v) {
             break;
     }
     return (fmt.Sprintf("%v", v), error.As(null!)!);
-
 }
 
 // Null is a type that implements ValueConverter by allowing nil
@@ -182,7 +181,6 @@ public static (Value, error) ConvertValue(this Null n, object v) {
         return (null, error.As(null!)!);
     }
     return n.Converter.ConvertValue(v);
-
 }
 
 // NotNull is a type that implements ValueConverter by disallowing nil
@@ -199,7 +197,6 @@ public static (Value, error) ConvertValue(this NotNull n, object v) {
         return (null, error.As(fmt.Errorf("nil value not allowed"))!);
     }
     return n.Converter.ConvertValue(v);
-
 }
 
 // IsValue reports whether v is a valid Value parameter type.
@@ -231,7 +228,6 @@ public static bool IsValue(object v) {
             break;
     }
     return false;
-
 }
 
 // IsScanValue is equivalent to IsValue.
@@ -284,9 +280,7 @@ private static (Value, error) callValuerValue(Valuer vr) {
             return (null, error.As(null!)!);
         }
     }
-
     return vr.Value();
-
 }
 
 private static (Value, error) ConvertValue(this defaultConverter _p0, object v) {
@@ -349,7 +343,6 @@ private static (Value, error) ConvertValue(this defaultConverter _p0, object v) 
     else if (rv.Kind() == reflect.String) 
         return (rv.String(), error.As(null!)!);
         return (null, error.As(fmt.Errorf("unsupported type %T, a %s", v, rv.Kind()))!);
-
 }
 
 private partial interface decimalDecompose {

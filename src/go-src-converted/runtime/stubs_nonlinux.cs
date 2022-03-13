@@ -5,16 +5,14 @@
 //go:build !linux
 // +build !linux
 
-// package runtime -- go2cs converted at 2022 March 06 22:12:00 UTC
+// package runtime -- go2cs converted at 2022 March 13 05:27:11 UTC
 // import "runtime" ==> using runtime = go.runtime_package
 // Original source: C:\Program Files\Go\src\runtime\stubs_nonlinux.go
-
-
 namespace go;
 
 public static partial class runtime_package {
 
-    // sbrk0 returns the current process brk, or 0 if not implemented.
+// sbrk0 returns the current process brk, or 0 if not implemented.
 private static System.UIntPtr sbrk0() {
     return 0;
 }

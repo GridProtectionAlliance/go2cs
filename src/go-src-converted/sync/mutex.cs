@@ -8,14 +8,15 @@
 // better done via channels and communication.
 //
 // Values containing the types defined in this package should not be copied.
-// package sync -- go2cs converted at 2022 March 06 22:08:15 UTC
+
+// package sync -- go2cs converted at 2022 March 13 05:24:05 UTC
 // import "sync" ==> using sync = go.sync_package
 // Original source: C:\Program Files\Go\src\sync\mutex.go
-using race = go.@internal.race_package;
-using atomic = go.sync.atomic_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using race = @internal.race_package;
+using atomic = sync.atomic_package;
+using @unsafe = @unsafe_package;
 
 public static partial class sync_package {
 
@@ -66,7 +67,6 @@ private static readonly mutexWaiterShift mutexStarving = iota;
 // Starvation mode is important to prevent pathological cases of tail latency.
 private static readonly float starvationThresholdNs = 1e6F;
 
-
 // Lock locks m.
 // If the lock is already in use, the calling goroutine
 // blocks until the mutex is available.
@@ -79,10 +79,8 @@ private static void Lock(this ptr<Mutex> _addr_m) {
             race.Acquire(@unsafe.Pointer(m));
         }
         return ;
-
     }
     m.lockSlow();
-
 }
 
 private static void lockSlow(this ptr<Mutex> _addr_m) {
@@ -103,12 +101,10 @@ private static void lockSlow(this ptr<Mutex> _addr_m) {
             if (!awoke && old & mutexWoken == 0 && old >> (int)(mutexWaiterShift) != 0 && atomic.CompareAndSwapInt32(_addr_m.state, old, old | mutexWoken)) {
                 awoke = true;
             }
-
             runtime_doSpin();
             iter++;
             old = m.state;
             continue;
-
         }
         var @new = old; 
         // Don't try to acquire starving mutex, new arriving goroutines must queue.
@@ -127,9 +123,7 @@ private static void lockSlow(this ptr<Mutex> _addr_m) {
             if (new & mutexWoken == 0) {
                 throw("sync: inconsistent mutex state");
             }
-
             new &= mutexWoken;
-
         }
         if (atomic.CompareAndSwapInt32(_addr_m.state, old, new)) {
             if (old & (mutexLocked | mutexStarving) == 0) {
@@ -140,7 +134,6 @@ private static void lockSlow(this ptr<Mutex> _addr_m) {
             if (waitStartTime == 0) {
                 waitStartTime = runtime_nanotime();
             }
-
             runtime_SemacquireMutex(_addr_m.sema, queueLifo, 1);
             starving = starving || runtime_nanotime() - waitStartTime > starvationThresholdNs;
             old = m.state;
@@ -152,7 +145,6 @@ private static void lockSlow(this ptr<Mutex> _addr_m) {
                 if (old & (mutexLocked | mutexWoken) != 0 || old >> (int)(mutexWaiterShift) == 0) {
                     throw("sync: inconsistent mutex state");
                 }
-
                 var delta = int32(mutexLocked - 1 << (int)(mutexWaiterShift));
                 if (!starving || old >> (int)(mutexWaiterShift) == 1) { 
                     // Exit starvation mode.
@@ -161,17 +153,12 @@ private static void lockSlow(this ptr<Mutex> _addr_m) {
                     // can go lock-step infinitely once they switch mutex
                     // to starvation mode.
                     delta -= mutexStarving;
-
                 }
-
                 atomic.AddInt32(_addr_m.state, delta);
                 break;
-
             }
-
             awoke = true;
             iter = 0;
-
         }
         else
  {
@@ -202,7 +189,6 @@ private static void Unlock(this ptr<Mutex> _addr_m) {
         // Outlined slow path to allow inlining the fast path.
         // To hide unlockSlow during tracing we skip one extra frame when tracing GoUnblock.
         m.unlockSlow(new);
-
     }
 }
 
@@ -230,13 +216,9 @@ private static void unlockSlow(this ptr<Mutex> _addr_m, int @new) {
                 runtime_Semrelease(_addr_m.sema, false, 1);
                 return ;
             }
-
             old = m.state;
-
         }
     else
-
-
     } { 
         // Starving mode: handoff mutex ownership to the next waiter, and yield
         // our time slice so that the next waiter can start to run immediately.
@@ -244,7 +226,6 @@ private static void unlockSlow(this ptr<Mutex> _addr_m, int @new) {
         // But mutex is still considered locked if mutexStarving is set,
         // so new coming goroutines won't acquire it.
         runtime_Semrelease(_addr_m.sema, true, 1);
-
     }
 }
 

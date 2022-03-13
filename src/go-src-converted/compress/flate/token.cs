@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package flate -- go2cs converted at 2022 March 06 22:15:08 UTC
+// package flate -- go2cs converted at 2022 March 13 05:29:15 UTC
 // import "compress/flate" ==> using flate = go.compress.flate_package
 // Original source: C:\Program Files\Go\src\compress\flate\token.go
-
-
 namespace go.compress;
 
 public static partial class flate_package {
@@ -20,7 +18,6 @@ private static readonly nint offsetMask = 1 << (int)(lengthShift) - 1;
 private static readonly nint typeMask = 3 << 30;
 private static readonly nint literalType = 0 << 30;
 private static readonly nint matchType = 1 << 30;
-
 
 // The length code for length X (MIN_MATCH_LENGTH <= X <= MAX_MATCH_LENGTH)
 // is lengthCodes[length - MIN_MATCH_LENGTH]
@@ -68,7 +65,6 @@ private static uint offsetCode(uint off) {
         return offsetCodes[off >> 7] + 14;
     }
     return offsetCodes[off >> 14] + 28;
-
 }
 
 } // end flate_package

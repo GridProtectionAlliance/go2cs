@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 23:38:15 UTC
+//     Generated on 2022 March 13 06:46:32 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -25,7 +25,7 @@ namespace net
 {
     public static partial class route_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct wireFormat
         {
             // Constructors
@@ -60,7 +60,7 @@ namespace net
             public static implicit operator wireFormat(NilType nil) => default(wireFormat);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static wireFormat wireFormat_cast(dynamic value)
         {
             return new wireFormat(value.extOff, value.bodyOff, value.parse);

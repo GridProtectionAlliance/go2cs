@@ -5,12 +5,12 @@
 //go:build go1.8 && !go1.13
 // +build go1.8,!go1.13
 
-// package sort -- go2cs converted at 2022 March 06 22:12:36 UTC
+// package sort -- go2cs converted at 2022 March 13 05:27:39 UTC
 // import "sort" ==> using sort = go.sort_package
 // Original source: C:\Program Files\Go\src\sort\slice_go18.go
-using reflect = go.reflect_package;
-
 namespace go;
+
+using reflect = reflect_package;
 
 public static partial class sort_package {
 

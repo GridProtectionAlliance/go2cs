@@ -1,12 +1,12 @@
 // Code generated from gen/dec64.rules; DO NOT EDIT.
 // generated with: cd gen; go run *.go
 
-// package ssa -- go2cs converted at 2022 March 06 23:00:32 UTC
+// package ssa -- go2cs converted at 2022 March 13 06:12:58 UTC
 // import "cmd/compile/internal/ssa" ==> using ssa = go.cmd.compile.@internal.ssa_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ssa\rewritedec64.go
-using types = go.cmd.compile.@internal.types_package;
-
 namespace go.cmd.compile.@internal;
+
+using types = cmd.compile.@internal.types_package;
 
 public static partial class ssa_package {
 
@@ -126,7 +126,6 @@ private static bool rewriteValuedec64(ptr<Value> _addr_v) {
     else if (v.Op == OpZeroExt8to64) 
         return rewriteValuedec64_OpZeroExt8to64(_addr_v);
         return false;
-
 }
 private static bool rewriteValuedec64_OpAdd64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -160,7 +159,6 @@ private static bool rewriteValuedec64_OpAdd64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v7);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpAnd64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -190,7 +188,6 @@ private static bool rewriteValuedec64_OpAnd64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpArg(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -216,7 +213,6 @@ private static bool rewriteValuedec64_OpArg(ptr<Value> _addr_v) {
         v1.Aux = symToAux(n);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Arg {n} [off])
     // cond: is64BitInt(v.Type) && !config.BigEndian && !v.Type.IsSigned() && !(b.Func.pass.name == "decompose builtin")
@@ -236,7 +232,6 @@ private static bool rewriteValuedec64_OpArg(ptr<Value> _addr_v) {
         v1.Aux = symToAux(n);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Arg {n} [off])
     // cond: is64BitInt(v.Type) && config.BigEndian && v.Type.IsSigned() && !(b.Func.pass.name == "decompose builtin")
@@ -256,7 +251,6 @@ private static bool rewriteValuedec64_OpArg(ptr<Value> _addr_v) {
         v1.Aux = symToAux(n);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Arg {n} [off])
     // cond: is64BitInt(v.Type) && config.BigEndian && !v.Type.IsSigned() && !(b.Func.pass.name == "decompose builtin")
@@ -276,10 +270,8 @@ private static bool rewriteValuedec64_OpArg(ptr<Value> _addr_v) {
         v1.Aux = symToAux(n);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec64_OpBitLen64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -308,7 +300,6 @@ private static bool rewriteValuedec64_OpBitLen64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpBswap64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -332,7 +323,6 @@ private static bool rewriteValuedec64_OpBswap64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpCom64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -356,7 +346,6 @@ private static bool rewriteValuedec64_OpCom64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpConst64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -379,7 +368,6 @@ private static bool rewriteValuedec64_OpConst64(ptr<Value> _addr_v) {
         v1.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Const64 <t> [c])
     // cond: !t.IsSigned()
@@ -397,10 +385,8 @@ private static bool rewriteValuedec64_OpConst64(ptr<Value> _addr_v) {
         v1.AuxInt = int32ToAuxInt(int32(c));
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec64_OpCtz64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -431,7 +417,6 @@ private static bool rewriteValuedec64_OpCtz64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpEq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -461,7 +446,6 @@ private static bool rewriteValuedec64_OpEq64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpInt64Hi(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -476,10 +460,8 @@ private static bool rewriteValuedec64_OpInt64Hi(ptr<Value> _addr_v) {
         var hi = v_0.Args[0];
         v.copyOf(hi);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec64_OpInt64Lo(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -494,10 +476,8 @@ private static bool rewriteValuedec64_OpInt64Lo(ptr<Value> _addr_v) {
         var lo = v_0.Args[1];
         v.copyOf(lo);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec64_OpLeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -531,7 +511,6 @@ private static bool rewriteValuedec64_OpLeq64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLeq64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -565,7 +544,6 @@ private static bool rewriteValuedec64_OpLeq64U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLess64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -599,7 +577,6 @@ private static bool rewriteValuedec64_OpLess64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLess64U(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -633,7 +610,6 @@ private static bool rewriteValuedec64_OpLess64U(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLoad(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -663,7 +639,6 @@ private static bool rewriteValuedec64_OpLoad(ptr<Value> _addr_v) {
         v2.AddArg2(ptr, mem);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitInt(t) && !config.BigEndian && !t.IsSigned()
@@ -685,7 +660,6 @@ private static bool rewriteValuedec64_OpLoad(ptr<Value> _addr_v) {
         v2.AddArg2(ptr, mem);
         v.AddArg2(v0, v2);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitInt(t) && config.BigEndian && t.IsSigned()
@@ -707,7 +681,6 @@ private static bool rewriteValuedec64_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg2(v2, mem);
         v.AddArg2(v0, v1);
         return true;
-
     } 
     // match: (Load <t> ptr mem)
     // cond: is64BitInt(t) && config.BigEndian && !t.IsSigned()
@@ -729,10 +702,8 @@ private static bool rewriteValuedec64_OpLoad(ptr<Value> _addr_v) {
         v1.AddArg2(v2, mem);
         v.AddArg2(v0, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec64_OpLsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -759,7 +730,6 @@ private static bool rewriteValuedec64_OpLsh16x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh16x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Lsh16x32 [c] x lo)
@@ -778,7 +748,6 @@ private static bool rewriteValuedec64_OpLsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Lsh16x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -800,7 +769,6 @@ private static bool rewriteValuedec64_OpLsh16x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh16x64 x y)
     // result: (Lsh16x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -819,7 +787,6 @@ private static bool rewriteValuedec64_OpLsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -846,7 +813,6 @@ private static bool rewriteValuedec64_OpLsh32x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh32x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Lsh32x32 [c] x lo)
@@ -865,7 +831,6 @@ private static bool rewriteValuedec64_OpLsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Lsh32x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -887,7 +852,6 @@ private static bool rewriteValuedec64_OpLsh32x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh32x64 x y)
     // result: (Lsh32x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -906,7 +870,6 @@ private static bool rewriteValuedec64_OpLsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -946,7 +909,6 @@ private static bool rewriteValuedec64_OpLsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v10);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -986,7 +948,6 @@ private static bool rewriteValuedec64_OpLsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v10);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1013,7 +974,6 @@ private static bool rewriteValuedec64_OpLsh64x64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh64x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Lsh64x32 [c] x lo)
@@ -1032,7 +992,6 @@ private static bool rewriteValuedec64_OpLsh64x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Lsh64x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -1054,7 +1013,6 @@ private static bool rewriteValuedec64_OpLsh64x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh64x64 x y)
     // result: (Lsh64x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -1073,7 +1031,6 @@ private static bool rewriteValuedec64_OpLsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1113,7 +1070,6 @@ private static bool rewriteValuedec64_OpLsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v10);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpLsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1140,7 +1096,6 @@ private static bool rewriteValuedec64_OpLsh8x64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Lsh8x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Lsh8x32 [c] x lo)
@@ -1159,7 +1114,6 @@ private static bool rewriteValuedec64_OpLsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Lsh8x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -1181,7 +1135,6 @@ private static bool rewriteValuedec64_OpLsh8x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Lsh8x64 x y)
     // result: (Lsh8x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -1200,7 +1153,6 @@ private static bool rewriteValuedec64_OpLsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpMul64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1240,7 +1192,6 @@ private static bool rewriteValuedec64_OpMul64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v10);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpNeg64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1258,7 +1209,6 @@ private static bool rewriteValuedec64_OpNeg64(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpNeq64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1288,7 +1238,6 @@ private static bool rewriteValuedec64_OpNeq64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpOr32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1314,28 +1263,23 @@ private static bool rewriteValuedec64_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 var v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 var c = auxIntToInt32(v_0_0.AuxInt);
                 var y = v_1;
                 if (!(c == 0)) {
                     continue;
                 }
-
                 v.copyOf(y);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     } 
     // match: (Or32 <typ.UInt32> (Zeromask (Const32 [c])) y)
     // cond: c != 0
@@ -1354,32 +1298,26 @@ private static bool rewriteValuedec64_OpOr32(ptr<Value> _addr_v) {
                     continue;
                 (_i0, v_0, v_1) = (_i0 + 1, v_1, v_0);
                 }
-
                 v_0_0 = v_0.Args[0];
                 if (v_0_0.Op != OpConst32) {
                     continue;
                 }
-
                 c = auxIntToInt32(v_0_0.AuxInt);
                 if (!(c != 0)) {
                     continue;
                 }
-
                 v.reset(OpConst32);
                 v.Type = typ.UInt32;
                 v.AuxInt = int32ToAuxInt(-1);
                 return true;
-
             }
 
 
             _i0 = _i0__prev2;
         }
         break;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec64_OpOr64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1409,7 +1347,6 @@ private static bool rewriteValuedec64_OpOr64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh16Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1436,7 +1373,6 @@ private static bool rewriteValuedec64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh16Ux64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh16Ux32 [c] x lo)
@@ -1455,7 +1391,6 @@ private static bool rewriteValuedec64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh16Ux64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -1477,7 +1412,6 @@ private static bool rewriteValuedec64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16Ux64 x y)
     // result: (Rsh16Ux32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -1496,7 +1430,6 @@ private static bool rewriteValuedec64_OpRsh16Ux64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh16x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1526,7 +1459,6 @@ private static bool rewriteValuedec64_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh16x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh16x32 [c] x lo)
@@ -1545,7 +1477,6 @@ private static bool rewriteValuedec64_OpRsh16x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh16x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -1567,7 +1498,6 @@ private static bool rewriteValuedec64_OpRsh16x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh16x64 x y)
     // result: (Rsh16x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -1586,7 +1516,6 @@ private static bool rewriteValuedec64_OpRsh16x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh32Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1613,7 +1542,6 @@ private static bool rewriteValuedec64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh32Ux64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh32Ux32 [c] x lo)
@@ -1632,7 +1560,6 @@ private static bool rewriteValuedec64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh32Ux64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -1654,7 +1581,6 @@ private static bool rewriteValuedec64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32Ux64 x y)
     // result: (Rsh32Ux32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -1673,7 +1599,6 @@ private static bool rewriteValuedec64_OpRsh32Ux64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh32x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1701,7 +1626,6 @@ private static bool rewriteValuedec64_OpRsh32x64(ptr<Value> _addr_v) {
         v.reset(OpSignmask);
         v.AddArg(x);
         return true;
-
     } 
     // match: (Rsh32x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh32x32 [c] x lo)
@@ -1720,7 +1644,6 @@ private static bool rewriteValuedec64_OpRsh32x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh32x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -1742,7 +1665,6 @@ private static bool rewriteValuedec64_OpRsh32x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh32x64 x y)
     // result: (Rsh32x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -1761,7 +1683,6 @@ private static bool rewriteValuedec64_OpRsh32x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64Ux16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1801,7 +1722,6 @@ private static bool rewriteValuedec64_OpRsh64Ux16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64Ux32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1841,7 +1761,6 @@ private static bool rewriteValuedec64_OpRsh64Ux32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1868,7 +1787,6 @@ private static bool rewriteValuedec64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst64);
         v.AuxInt = int64ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh64Ux64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh64Ux32 [c] x lo)
@@ -1887,7 +1805,6 @@ private static bool rewriteValuedec64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh64Ux64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -1909,7 +1826,6 @@ private static bool rewriteValuedec64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64Ux64 x y)
     // result: (Rsh64Ux32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -1928,7 +1844,6 @@ private static bool rewriteValuedec64_OpRsh64Ux64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64Ux8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -1968,7 +1883,6 @@ private static bool rewriteValuedec64_OpRsh64Ux8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64x16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2018,7 +1932,6 @@ private static bool rewriteValuedec64_OpRsh64x16(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64x32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2066,7 +1979,6 @@ private static bool rewriteValuedec64_OpRsh64x32(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2098,7 +2010,6 @@ private static bool rewriteValuedec64_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg(v1);
         v.AddArg2(v0, v0);
         return true;
-
     } 
     // match: (Rsh64x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh64x32 [c] x lo)
@@ -2117,7 +2028,6 @@ private static bool rewriteValuedec64_OpRsh64x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh64x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -2139,7 +2049,6 @@ private static bool rewriteValuedec64_OpRsh64x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh64x64 x y)
     // result: (Rsh64x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -2158,7 +2067,6 @@ private static bool rewriteValuedec64_OpRsh64x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh64x8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2208,7 +2116,6 @@ private static bool rewriteValuedec64_OpRsh64x8(ptr<Value> _addr_v) {
         v.AddArg2(v0, v2);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh8Ux64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2235,7 +2142,6 @@ private static bool rewriteValuedec64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.reset(OpConst32);
         v.AuxInt = int32ToAuxInt(0);
         return true;
-
     } 
     // match: (Rsh8Ux64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh8Ux32 [c] x lo)
@@ -2254,7 +2160,6 @@ private static bool rewriteValuedec64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh8Ux64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -2276,7 +2181,6 @@ private static bool rewriteValuedec64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8Ux64 x y)
     // result: (Rsh8Ux32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -2295,7 +2199,6 @@ private static bool rewriteValuedec64_OpRsh8Ux64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpRsh8x64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2325,7 +2228,6 @@ private static bool rewriteValuedec64_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg(x);
         v.AddArg(v0);
         return true;
-
     } 
     // match: (Rsh8x64 [c] x (Int64Make (Const32 [0]) lo))
     // result: (Rsh8x32 [c] x lo)
@@ -2344,7 +2246,6 @@ private static bool rewriteValuedec64_OpRsh8x64(ptr<Value> _addr_v) {
         v.AuxInt = boolToAuxInt(c);
         v.AddArg2(x, lo);
         return true;
-
     } 
     // match: (Rsh8x64 x (Int64Make hi lo))
     // cond: hi.Op != OpConst32
@@ -2366,7 +2267,6 @@ private static bool rewriteValuedec64_OpRsh8x64(ptr<Value> _addr_v) {
         v0.AddArg2(v1, lo);
         v.AddArg2(x, v0);
         return true;
-
     } 
     // match: (Rsh8x64 x y)
     // result: (Rsh8x32 x (Or32 <typ.UInt32> (Zeromask (Int64Hi y)) (Int64Lo y)))
@@ -2385,7 +2285,6 @@ private static bool rewriteValuedec64_OpRsh8x64(ptr<Value> _addr_v) {
         v.AddArg2(x, v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpSignExt16to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2403,7 +2302,6 @@ private static bool rewriteValuedec64_OpSignExt16to64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpSignExt32to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2421,7 +2319,6 @@ private static bool rewriteValuedec64_OpSignExt32to64(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpSignExt8to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2439,7 +2336,6 @@ private static bool rewriteValuedec64_OpSignExt8to64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpStore(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2474,7 +2370,6 @@ private static bool rewriteValuedec64_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(dst, lo, mem);
         v.AddArg3(v0, hi, v1);
         return true;
-
     } 
     // match: (Store {t} dst (Int64Make hi lo) mem)
     // cond: t.Size() == 8 && config.BigEndian
@@ -2501,10 +2396,8 @@ private static bool rewriteValuedec64_OpStore(ptr<Value> _addr_v) {
         v1.AddArg3(dst, hi, mem);
         v.AddArg3(v0, lo, v1);
         return true;
-
     }
     return false;
-
 }
 private static bool rewriteValuedec64_OpSub64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2538,7 +2431,6 @@ private static bool rewriteValuedec64_OpSub64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v7);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpTrunc64to16(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2556,7 +2448,6 @@ private static bool rewriteValuedec64_OpTrunc64to16(ptr<Value> _addr_v) {
         v.reset(OpTrunc32to16);
         v.AddArg(lo);
         return true;
-
     } 
     // match: (Trunc64to16 x)
     // result: (Trunc32to16 (Int64Lo x))
@@ -2568,7 +2459,6 @@ private static bool rewriteValuedec64_OpTrunc64to16(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpTrunc64to32(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2583,7 +2473,6 @@ private static bool rewriteValuedec64_OpTrunc64to32(ptr<Value> _addr_v) {
         var lo = v_0.Args[1];
         v.copyOf(lo);
         return true;
-
     } 
     // match: (Trunc64to32 x)
     // result: (Int64Lo x)
@@ -2593,7 +2482,6 @@ private static bool rewriteValuedec64_OpTrunc64to32(ptr<Value> _addr_v) {
         v.AddArg(x);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpTrunc64to8(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2611,7 +2499,6 @@ private static bool rewriteValuedec64_OpTrunc64to8(ptr<Value> _addr_v) {
         v.reset(OpTrunc32to8);
         v.AddArg(lo);
         return true;
-
     } 
     // match: (Trunc64to8 x)
     // result: (Trunc32to8 (Int64Lo x))
@@ -2623,7 +2510,6 @@ private static bool rewriteValuedec64_OpTrunc64to8(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpXor64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2653,7 +2539,6 @@ private static bool rewriteValuedec64_OpXor64(ptr<Value> _addr_v) {
         v.AddArg2(v0, v3);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpZeroExt16to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2671,7 +2556,6 @@ private static bool rewriteValuedec64_OpZeroExt16to64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpZeroExt32to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2689,7 +2573,6 @@ private static bool rewriteValuedec64_OpZeroExt32to64(ptr<Value> _addr_v) {
         v.AddArg2(v0, x);
         return true;
     }
-
 }
 private static bool rewriteValuedec64_OpZeroExt8to64(ptr<Value> _addr_v) {
     ref Value v = ref _addr_v.val;
@@ -2707,7 +2590,6 @@ private static bool rewriteValuedec64_OpZeroExt8to64(ptr<Value> _addr_v) {
         v.AddArg(v0);
         return true;
     }
-
 }
 private static bool rewriteBlockdec64(ptr<Block> _addr_b) {
     ref Block b = ref _addr_b.val;

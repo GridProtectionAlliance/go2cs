@@ -8,19 +8,18 @@
 // The word LINE is replaced by the line number in this file. When the file is executed,
 // the coverage processing has changed the line numbers, so we can't use runtime.Caller.
 
-// package main -- go2cs converted at 2022 March 06 23:15:12 UTC
+// package main -- go2cs converted at 2022 March 13 06:28:41 UTC
 // Original source: C:\Program Files\Go\src\cmd\cover\testdata\test.go
-using _@unsafe_ = go.@unsafe_package;
+namespace go;
+
+using _@unsafe_ = @unsafe_package;
 using System;
 using System.Threading;
 
+public static partial class main_package { // for go:linkname
 
-namespace go;
+//go:linkname some_name some_name
 
-public static partial class main_package {
- // for go:linkname
-
-    //go:linkname some_name some_name
 private static readonly float anything = 1e9F; // Just some unlikely value that means "we got here, don't care how often"
 
  // Just some unlikely value that means "we got here, don't care how often"
@@ -107,7 +106,6 @@ private static void testIf() {
  {
                 check(LINE, 1);
             }
-
         }
 
         i = i__prev1;
@@ -128,7 +126,6 @@ private static void testIf() {
             else if (checkVal(LINE, 0, i) <= 3) {
                 check(LINE, 0);
             }
-
         }
 
         i = i__prev1;
@@ -146,7 +143,6 @@ private static void testFor() {
     }()) {
         check(LINE, 10);
     }
-
 }
 
 private static void testRange() {
@@ -194,9 +190,7 @@ label2:
                 check(LINE, 2);
                 break;
         }
-
     }
-
 }
 
 private static void testTypeSwitch() {
@@ -208,6 +202,9 @@ private static void testTypeSwitch() {
 
         switch (v.type()) {
             case nint _:
+                check(LINE, 1);
+                break;
+            case int _: /* Matches int literals */
                 check(LINE, 1);
                 break;
             case double _:
@@ -225,7 +222,6 @@ private static void testTypeSwitch() {
                 break;
             }
         }
-
     }
 }
 
@@ -280,7 +276,6 @@ private static void testEmptySwitches() {
     }());
     c.Receive();
     check(LINE, 1);
-
 }
 
 private static void testFunctionLiteral() => func((_, panic, _) => {
@@ -306,9 +301,9 @@ private static void testFunctionLiteral() => func((_, panic, _) => {
             check(LINE, 2);
         });
 
-        if (err != null)         }
+        if (err != null) {
+        }
     }
-
 
     switch (b(() => {
         check(LINE, 2);
@@ -337,8 +332,7 @@ private static void testFunctionLiteral() => func((_, panic, _) => {
         }()) 
         check(LINE, 0);
         panic("2=3");
-    
-});
+    });
 
 private static void testGoto() {
     for (nint i = 0; i < 2; i++) {
@@ -348,7 +342,6 @@ private static void testGoto() {
         check(LINE, 1);
 Label:
         check(LINE, 2);
-
     } 
     // Now test that we don't inject empty statements
     // between a label and a loop.
@@ -358,14 +351,12 @@ loop:
         _breakloop = true;
         break;
     }
-
 }
 
 // This comment didn't appear in generated go code.
 private static void haha() { 
     // Needed for cover to add counter increment here.
     _ = 42;
-
 }
 
 // Some someFunction.

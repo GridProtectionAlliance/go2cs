@@ -5,21 +5,22 @@
 //go:build aix || darwin || dragonfly || freebsd || linux || netbsd || openbsd || solaris
 // +build aix darwin dragonfly freebsd linux netbsd openbsd solaris
 
-// package net -- go2cs converted at 2022 March 06 22:16:28 UTC
+// package net -- go2cs converted at 2022 March 13 05:30:01 UTC
 // import "net" ==> using net = go.net_package
 // Original source: C:\Program Files\Go\src\net\nss.go
-using errors = go.errors_package;
-using bytealg = go.@internal.bytealg_package;
-using io = go.io_package;
-using os = go.os_package;
-using System;
-
-
 namespace go;
 
+using errors = errors_package;
+using bytealg = @internal.bytealg_package;
+using io = io_package;
+using os = os_package;
+
+
+// nssConf represents the state of the machine's /etc/nsswitch.conf file.
+
+using System;
 public static partial class net_package {
 
-    // nssConf represents the state of the machine's /etc/nsswitch.conf file.
 private partial struct nssConf {
     public error err; // any error encountered opening or parsing the file
     public map<@string, slice<nssSource>> sources; // keyed by database (e.g. "hosts")
@@ -38,7 +39,6 @@ private static bool standardCriteria(this nssSource s) {
             return false;
         }
     }    return true;
-
 }
 
 // nssCriterion is the parsed structure of one of the criteria in brackets
@@ -77,7 +77,6 @@ private static bool standardStatusAction(this nssCriterion c, bool last) {
         return true;
     }
     return c.action == def;
-
 }
 
 private static ptr<nssConf> parseNSSConfFile(@string file) => func((defer, _, _) => {
@@ -87,7 +86,6 @@ private static ptr<nssConf> parseNSSConfFile(@string file) => func((defer, _, _)
     }
     defer(f.Close());
     return _addr_parseNSSConf(f)!;
-
 });
 
 private static ptr<nssConf> parseNSSConf(io.Reader r) {
@@ -123,7 +121,6 @@ private static ptr<nssConf> parseNSSConf(io.Reader r) {
                 src = string(srcs[..(int)sp]);
                 srcs = trimSpace(srcs[(int)sp + 1..]);
             }
-
             slice<nssCriterion> criteria = default; 
             // See if there's a criteria block in brackets.
             if (len(srcs) > 0 && srcs[0] == '[') {
@@ -138,19 +135,14 @@ private static ptr<nssConf> parseNSSConf(io.Reader r) {
                 }
                 srcs = srcs[(int)bclose + 1..];
             }
-
             if (conf.sources == null) {
                 conf.sources = make_map<@string, slice<nssSource>>();
             }
-
             conf.sources[db] = append(conf.sources[db], new nssSource(source:src,criteria:criteria,));
-
         }
         return _addr_null!;
-
     });
     return _addr_conf!;
-
 }
 
 // parses "foo=bar !foo=bar"
@@ -174,10 +166,8 @@ private static (slice<nssCriterion>, error) parseCriteria(slice<byte> x) {
         lowerASCIIBytes(f);
         c = append(c, new nssCriterion(negate:not,status:string(f[:eq]),action:string(f[eq+1:]),));
         return null;
-
     });
     return ;
-
 }
 
 } // end net_package

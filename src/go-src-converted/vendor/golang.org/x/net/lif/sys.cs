@@ -4,12 +4,12 @@
 
 // +build solaris
 
-// package lif -- go2cs converted at 2022 March 06 23:38:05 UTC
+// package lif -- go2cs converted at 2022 March 13 06:46:23 UTC
 // import "vendor/golang.org/x/net/lif" ==> using lif = go.vendor.golang.org.x.net.lif_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\lif\sys.go
-using @unsafe = go.@unsafe_package;
-
 namespace go.vendor.golang.org.x.net;
+
+using @unsafe = @unsafe_package;
 
 public static partial class lif_package {
 

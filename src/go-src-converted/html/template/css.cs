@@ -2,38 +2,37 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package template -- go2cs converted at 2022 March 06 22:24:23 UTC
+// package template -- go2cs converted at 2022 March 13 05:38:51 UTC
 // import "html/template" ==> using template = go.html.template_package
 // Original source: C:\Program Files\Go\src\html\template\css.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-
 namespace go.html;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+
+
+// endsWithCSSKeyword reports whether b ends with an ident that
+// case-insensitively matches the lower-case kw.
 
 public static partial class template_package {
 
-    // endsWithCSSKeyword reports whether b ends with an ident that
-    // case-insensitively matches the lower-case kw.
 private static bool endsWithCSSKeyword(slice<byte> b, @string kw) {
     var i = len(b) - len(kw);
     if (i < 0) { 
         // Too short.
         return false;
-
     }
     if (i != 0) {
         var (r, _) = utf8.DecodeLastRune(b[..(int)i]);
         if (isCSSNmchar(r)) { 
             // Too long.
             return false;
-
         }
     }
     return string(bytes.ToLower(b[(int)i..])) == kw;
-
 }
 
 // isCSSNmchar reports whether rune is allowed anywhere in a CSS identifier.
@@ -42,7 +41,6 @@ private static bool isCSSNmchar(int r) {
     // sequences.
     // https://www.w3.org/TR/css3-syntax/#SUBTOK-nmchar
     return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || '0' <= r && r <= '9' || r == '-' || r == '_' || 0x80 <= r && r <= 0xd7ff || 0xe000 <= r && r <= 0xfffd || 0x10000 <= r && r <= 0x10ffff;
-
 }
 
 // decodeCSS decodes CSS3 escapes given a sequence of stringchars.
@@ -76,7 +74,6 @@ private static slice<byte> decodeCSS(slice<byte> s) {
             if (r > unicode.MaxRune) {
                 (r, j) = (r / 16, j - 1);
             }
-
             var n = utf8.EncodeRune(b[(int)len(b)..(int)cap(b)], r); 
             // The optional space at the end allows a hex
             // sequence to be followed by a literal hex.
@@ -89,7 +86,6 @@ private static slice<byte> decodeCSS(slice<byte> s) {
         }
     }
     return b;
-
 }
 
 // isHex reports whether the given character is a hex digit.
@@ -111,9 +107,7 @@ private static int hexDecode(slice<byte> s) => func((_, panic, _) => {
             n |= rune(c - 'A') + 10;
         else 
             panic(fmt.Sprintf("Bad hex digit in %q", s));
-        
-    }    return n;
-
+            }    return n;
 });
 
 // skipCSSSpace returns a suffix of c, skipping over a single space.
@@ -139,11 +133,9 @@ private static slice<byte> skipCSSSpace(slice<byte> c) {
                 return c[(int)2..];
             }
             return c[(int)1..];
-
             break;
     }
     return c;
-
 }
 
 // isCSSSpace reports whether b is a CSS space char as defined in wc.
@@ -162,7 +154,6 @@ private static bool isCSSSpace(byte b) {
             break;
     }
     return false;
-
 }
 
 // cssEscaper escapes HTML and CSS special characters using \<hex>+ escapes.
@@ -190,14 +181,12 @@ private static @string cssEscaper(params object[] args) {
                 b.Grow(len(s));
             i += w;
             }
-
             b.WriteString(s[(int)written..(int)i]);
             b.WriteString(repl);
             written = i + w;
             if (repl != "\\\\" && (written == len(s) || isHex(s[written]) || isCSSSpace(s[written]))) {
                 b.WriteByte(' ');
             }
-
         }
     }
     if (written == 0) {
@@ -205,7 +194,6 @@ private static @string cssEscaper(params object[] args) {
     }
     b.WriteString(s[(int)written..]);
     return b.String();
-
 }
 
 private static @string cssReplacementTable = new slice<@string>(InitKeyedValues<@string>((0, `\0`), ('\t', `\9`), ('\n', `\a`), ('\f', `\c`), ('\r', `\d`), ('"', `\22`), ('&', `\26`), ('\'', `\27`), ('(', `\28`), (')', `\29`), ('+', `\2b`), ('/', `\2f`), (':', `\3a`), (';', `\3b`), ('<', `\3c`), ('>', `\3e`), ('\\', `\\`), ('{', `\7b`), ('}', `\7d`)));
@@ -283,13 +271,11 @@ private static @string cssValueFilter(params object[] args) {
                 }
                 break;
         }
-
     }    id = bytes.ToLower(id);
     if (bytes.Contains(id, expressionBytes) || bytes.Contains(id, mozBindingBytes)) {
         return filterFailsafe;
     }
     return string(b);
-
 }
 
 } // end template_package

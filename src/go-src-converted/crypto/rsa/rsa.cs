@@ -20,21 +20,22 @@
 // Decrypter and Signer interfaces from the crypto package.
 //
 // The RSA operations in this package are not implemented using constant-time algorithms.
-// package rsa -- go2cs converted at 2022 March 06 22:18:20 UTC
+
+// package rsa -- go2cs converted at 2022 March 13 05:32:31 UTC
 // import "crypto/rsa" ==> using rsa = go.crypto.rsa_package
 // Original source: C:\Program Files\Go\src\crypto\rsa\rsa.go
-using crypto = go.crypto_package;
-using rand = go.crypto.rand_package;
-using subtle = go.crypto.subtle_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-using io = go.io_package;
-using math = go.math_package;
-using big = go.math.big_package;
-
-using randutil = go.crypto.@internal.randutil_package;
-
 namespace go.crypto;
+
+using crypto = crypto_package;
+using rand = crypto.rand_package;
+using subtle = crypto.subtle_package;
+using errors = errors_package;
+using hash = hash_package;
+using io = io_package;
+using math = math_package;
+using big = math.big_package;
+
+using randutil = crypto.@internal.randutil_package;
 
 public static partial class rsa_package {
 
@@ -67,7 +68,6 @@ private static bool Equal(this ptr<PublicKey> _addr_pub, crypto.PublicKey x) {
         return false;
     }
     return pub.N.Cmp(xx.N) == 0 && pub.E == xx.E;
-
 }
 
 // OAEPOptions is an interface for passing options to OAEP decryption using the
@@ -98,7 +98,6 @@ private static error checkPub(ptr<PublicKey> _addr_pub) {
         return error.As(errPublicExponentLarge)!;
     }
     return error.As(null!)!;
-
 }
 
 // A PrivateKey represents an RSA key
@@ -139,7 +138,6 @@ private static bool Equal(this ptr<PrivateKey> _addr_priv, crypto.PrivateKey x) 
             return false;
         }
     }    return true;
-
 }
 
 // Sign signs digest with priv, reading randomness from rand. If opts is a
@@ -163,9 +161,7 @@ private static (slice<byte>, error) Sign(this ptr<PrivateKey> _addr_priv, io.Rea
         }
     }
 
-
     return SignPKCS1v15(rand, priv, opts.HashFunc(), digest);
-
 }
 
 // Decrypt decrypts ciphertext with priv. If opts is nil or of type
@@ -197,7 +193,6 @@ private static (slice<byte>, error) Decrypt(this ptr<PrivateKey> _addr_priv, io.
                         }
 
                     }
-
                     {
                         var err = DecryptPKCS1v15SessionKey(rand, priv, ciphertext, plaintext);
 
@@ -206,9 +201,7 @@ private static (slice<byte>, error) Decrypt(this ptr<PrivateKey> _addr_priv, io.
                         }
 
                     }
-
                     return (plaintext, error.As(null!)!);
-
                 }
                 else
  {
@@ -216,8 +209,6 @@ private static (slice<byte>, error) Decrypt(this ptr<PrivateKey> _addr_priv, io.
                 }
 
             }
-
-
             break;
         default:
         {
@@ -226,7 +217,6 @@ private static (slice<byte>, error) Decrypt(this ptr<PrivateKey> _addr_priv, io.
             break;
         }
     }
-
 }
 
 public partial struct PrecomputedValues {
@@ -272,9 +262,7 @@ private static error Validate(this ptr<PrivateKey> _addr_priv) {
             if (prime.Cmp(bigOne) <= 0) {
                 return error.As(errors.New("crypto/rsa: invalid prime value"))!;
             }
-
             modulus.Mul(modulus, prime);
-
         }
         prime = prime__prev1;
     }
@@ -300,7 +288,6 @@ private static error Validate(this ptr<PrivateKey> _addr_priv) {
     }
 
     return error.As(null!)!;
-
 }
 
 // GenerateKey generates an RSA keypair of the given bit size using the
@@ -400,10 +387,7 @@ NextSetOfPrimes:
                         _continueNextSetOfPrimes = true;
                         break;
                     }
-
                 }
-
-
             }
 
             i = i__prev2;
@@ -445,7 +429,6 @@ NextSetOfPrimes:
     }
     priv.Precompute();
     return (_addr_priv!, error.As(null!)!);
-
 }
 
 // incCounter increments a four byte, big-endian counter.
@@ -468,7 +451,6 @@ private static void incCounter(ptr<array<byte>> _addr_c) {
         return ;
     }
     c[0]++;
-
 }
 
 // mgf1XOR XORs the bytes in out with a mask generated using the MGF1 function
@@ -535,7 +517,6 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hash, io.Reader random,
             return (null, error.As(err)!);
         }
     }
-
     hash.Reset();
     var k = pub.Size();
     if (len(msg) > k - 2 * hash.Size() - 2) {
@@ -566,7 +547,6 @@ public static (slice<byte>, error) EncryptOAEP(hash.Hash hash, io.Reader random,
 
     var @out = make_slice<byte>(k);
     return (c.FillBytes(out), error.As(null!)!);
-
 }
 
 // ErrDecryption represents a failure to decrypt a message.
@@ -607,7 +587,6 @@ private static void Precompute(this ptr<PrivateKey> _addr_priv) {
 
         r.Mul(r, prime);
     }
-
 }
 
 // decrypt performs an RSA decryption, resulting in a plaintext integer. If a
@@ -656,7 +635,6 @@ private static (ptr<big.Int>, error) decrypt(io.Reader random, ptr<PrivateKey> _
         cCopy.Mul(cCopy, rpowe);
         cCopy.Mod(cCopy, priv.N);
         c = cCopy;
-
     }
     if (priv.Precomputed.Dp == null) {
         m = @new<big.Int>().Exp(c, priv.D, priv.N);
@@ -692,10 +670,8 @@ private static (ptr<big.Int>, error) decrypt(io.Reader random, ptr<PrivateKey> _
         // Unblind.
         m.Mul(m, ir);
         m.Mod(m, priv.N);
-
     }
     return ;
-
 }
 
 private static (ptr<big.Int>, error) decryptAndCheck(io.Reader random, ptr<PrivateKey> _addr_priv, ptr<big.Int> _addr_c) {
@@ -713,7 +689,6 @@ private static (ptr<big.Int>, error) decryptAndCheck(io.Reader random, ptr<Priva
         return (_addr_null!, error.As(errors.New("rsa: internal error"))!);
     }
     return (_addr_m!, error.As(null!)!);
-
 }
 
 // DecryptOAEP decrypts ciphertext using RSA-OAEP.
@@ -740,7 +715,6 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hash, io.Reader random,
             return (null, error.As(err)!);
         }
     }
-
     var k = priv.Size();
     if (len(ciphertext) > k || k < hash.Size() * 2 + 2) {
         return (null, error.As(ErrDecryption)!);
@@ -797,7 +771,6 @@ public static (slice<byte>, error) DecryptOAEP(hash.Hash hash, io.Reader random,
         return (null, error.As(ErrDecryption)!);
     }
     return (rest[(int)index + 1..], error.As(null!)!);
-
 }
 
 } // end rsa_package

@@ -5,11 +5,9 @@
 //go:build dragonfly || freebsd || netbsd
 // +build dragonfly freebsd netbsd
 
-// package route -- go2cs converted at 2022 March 06 23:38:13 UTC
+// package route -- go2cs converted at 2022 March 13 06:46:31 UTC
 // import "vendor/golang.org/x/net/route" ==> using route = go.vendor.golang.org.x.net.route_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\net\route\interface_announce.go
-
-
 namespace go.vendor.golang.org.x.net;
 
 public static partial class route_package {
@@ -33,10 +31,8 @@ private static (Message, error) parseInterfaceAnnounceMessage(this ptr<wireForma
         }
         m.Name = string(b[(int)6..(int)6 + i]);
         break;
-
     }
     return (m, error.As(null!)!);
-
 }
 
 } // end route_package

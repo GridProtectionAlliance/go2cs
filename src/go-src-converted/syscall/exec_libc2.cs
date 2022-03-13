@@ -5,13 +5,13 @@
 //go:build darwin || (openbsd && !mips64)
 // +build darwin openbsd,!mips64
 
-// package syscall -- go2cs converted at 2022 March 06 22:26:28 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:30 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\exec_libc2.go
-using abi = go.@internal.abi_package;
-using @unsafe = go.@unsafe_package;
-
 namespace go;
+
+using abi = @internal.abi_package;
+using @unsafe = @unsafe_package;
 
 public static partial class syscall_package {
 
@@ -99,7 +99,6 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
         // parent; return PID
         runtime_AfterFork();
         return (int(r1), 0);
-
     }
     if (sys.Ptrace) {
         {
@@ -111,7 +110,6 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
             }
 
         }
-
     }
     if (sys.Setsid) {
         _, _, err1 = rawSyscall(abi.FuncPCABI0(libc_setsid_trampoline), 0, 0, 0);
@@ -190,24 +188,19 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
         rawSyscall(abi.FuncPCABI0(libc_fcntl_trampoline), uintptr(nextfd), F_SETFD, FD_CLOEXEC);
         pipe = nextfd;
         nextfd++;
-
     }
     for (i = 0; i < len(fd); i++) {
         if (fd[i] >= 0 && fd[i] < int(i)) {
             if (nextfd == pipe) { // don't stomp on pipe
                 nextfd++;
-
             }
-
             _, _, err1 = rawSyscall(abi.FuncPCABI0(libc_dup2_trampoline), uintptr(fd[i]), uintptr(nextfd), 0);
             if (err1 != 0) {
                 goto childerror;
             }
-
             rawSyscall(abi.FuncPCABI0(libc_fcntl_trampoline), uintptr(nextfd), F_SETFD, FD_CLOEXEC);
             fd[i] = nextfd;
             nextfd++;
-
         }
     } 
 
@@ -224,9 +217,7 @@ private static (nint, Errno) forkAndExecInChild(ptr<byte> _addr_argv0, slice<ptr
             if (err1 != 0) {
                 goto childerror;
             }
-
             continue;
-
         }
         _, _, err1 = rawSyscall(abi.FuncPCABI0(libc_dup2_trampoline), uintptr(fd[i]), uintptr(i), 0);
         if (err1 != 0) {
@@ -262,7 +253,6 @@ childerror:
     while (true) {
         rawSyscall(abi.FuncPCABI0(libc_exit_trampoline), 253, 0, 0);
     }
-
 }
 
 } // end syscall_package

@@ -2,56 +2,57 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ir -- go2cs converted at 2022 March 06 22:49:07 UTC
+// package ir -- go2cs converted at 2022 March 13 06:00:28 UTC
 // import "cmd/compile/internal/ir" ==> using ir = go.cmd.compile.@internal.ir_package
 // Original source: C:\Program Files\Go\src\cmd\compile\internal\ir\func.go
-using @base = go.cmd.compile.@internal.@base_package;
-using types = go.cmd.compile.@internal.types_package;
-using obj = go.cmd.@internal.obj_package;
-using src = go.cmd.@internal.src_package;
-using System;
-
-
 namespace go.cmd.compile.@internal;
 
+using @base = cmd.compile.@internal.@base_package;
+using types = cmd.compile.@internal.types_package;
+using obj = cmd.@internal.obj_package;
+using src = cmd.@internal.src_package;
+
+
+// A Func corresponds to a single function in a Go program
+// (and vice versa: each function is denoted by exactly one *Func).
+//
+// There are multiple nodes that represent a Func in the IR.
+//
+// The ONAME node (Func.Nname) is used for plain references to it.
+// The ODCLFUNC node (the Func itself) is used for its declaration code.
+// The OCLOSURE node (Func.OClosure) is used for a reference to a
+// function literal.
+//
+// An imported function will have an ONAME node which points to a Func
+// with an empty body.
+// A declared function or method has an ODCLFUNC (the Func itself) and an ONAME.
+// A function literal is represented directly by an OCLOSURE, but it also
+// has an ODCLFUNC (and a matching ONAME) representing the compiled
+// underlying form of the closure, which accesses the captured variables
+// using a special data structure passed in a register.
+//
+// A method declaration is represented like functions, except f.Sym
+// will be the qualified method name (e.g., "T.m") and
+// f.Func.Shortname is the bare method name (e.g., "m").
+//
+// A method expression (T.M) is represented as an OMETHEXPR node,
+// in which n.Left and n.Right point to the type and method, respectively.
+// Each distinct mention of a method expression in the source code
+// constructs a fresh node.
+//
+// A method value (t.M) is represented by ODOTMETH/ODOTINTER
+// when it is called directly and by OCALLPART otherwise.
+// These are like method expressions, except that for ODOTMETH/ODOTINTER,
+// the method name is stored in Sym instead of Right.
+// Each OCALLPART ends up being implemented as a new
+// function, a bit like a closure, with its own ODCLFUNC.
+// The OCALLPART uses n.Func to record the linkage to
+// the generated ODCLFUNC, but there is no
+// pointer from the Func back to the OCALLPART.
+
+using System;
 public static partial class ir_package {
 
-    // A Func corresponds to a single function in a Go program
-    // (and vice versa: each function is denoted by exactly one *Func).
-    //
-    // There are multiple nodes that represent a Func in the IR.
-    //
-    // The ONAME node (Func.Nname) is used for plain references to it.
-    // The ODCLFUNC node (the Func itself) is used for its declaration code.
-    // The OCLOSURE node (Func.OClosure) is used for a reference to a
-    // function literal.
-    //
-    // An imported function will have an ONAME node which points to a Func
-    // with an empty body.
-    // A declared function or method has an ODCLFUNC (the Func itself) and an ONAME.
-    // A function literal is represented directly by an OCLOSURE, but it also
-    // has an ODCLFUNC (and a matching ONAME) representing the compiled
-    // underlying form of the closure, which accesses the captured variables
-    // using a special data structure passed in a register.
-    //
-    // A method declaration is represented like functions, except f.Sym
-    // will be the qualified method name (e.g., "T.m") and
-    // f.Func.Shortname is the bare method name (e.g., "m").
-    //
-    // A method expression (T.M) is represented as an OMETHEXPR node,
-    // in which n.Left and n.Right point to the type and method, respectively.
-    // Each distinct mention of a method expression in the source code
-    // constructs a fresh node.
-    //
-    // A method value (t.M) is represented by ODOTMETH/ODOTINTER
-    // when it is called directly and by OCALLPART otherwise.
-    // These are like method expressions, except that for ODOTMETH/ODOTINTER,
-    // the method name is stored in Sym instead of Right.
-    // Each OCALLPART ends up being implemented as a new
-    // function, a bit like a closure, with its own ODCLFUNC.
-    // The OCALLPART uses n.Func to record the linkage to
-    // the generated ODCLFUNC, but there is no
-    // pointer from the Func back to the OCALLPART.
 public partial struct Func {
     public ref miniNode miniNode => ref miniNode_val;
     public Nodes Body;
@@ -125,7 +126,6 @@ public static ptr<Func> NewFunc(src.XPos pos) {
     // pass may override this.
     f.ABI = obj.ABIInternal;
     return _addr_f!;
-
 }
 
 private static void isStmt(this ptr<Func> _addr_f) {
@@ -364,7 +364,6 @@ public static @string FuncName(ptr<Func> _addr_f) {
         return "<nil>";
     }
     return f.Sym().Name;
-
 }
 
 // PkgFuncName returns the name of the function referenced by n, with package prepended.
@@ -388,7 +387,6 @@ public static @string PkgFuncName(ptr<Func> _addr_f) {
         return s.Name;
     }
     return p + "." + s.Name;
-
 }
 
 public static ptr<Func> CurFunc;
@@ -408,7 +406,6 @@ public static void MarkFunc(ptr<Name> _addr_n) {
     }
     n.Class = PFUNC;
     n.Sym().SetFunc(true);
-
 }
 
 // ClosureDebugRuntimeCheck applies boilerplate checks for debug flags

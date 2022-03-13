@@ -2,28 +2,29 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package regexp -- go2cs converted at 2022 March 06 22:23:45 UTC
+// package regexp -- go2cs converted at 2022 March 13 05:38:09 UTC
 // import "regexp" ==> using regexp = go.regexp_package
 // Original source: C:\Program Files\Go\src\regexp\onepass.go
-using syntax = go.regexp.syntax_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using unicode = go.unicode_package;
-using System;
-
-
 namespace go;
 
+using syntax = regexp.syntax_package;
+using sort = sort_package;
+using strings = strings_package;
+using unicode = unicode_package;
+
+
+// "One-pass" regexp execution.
+// Some regexps can be analyzed to determine that they never need
+// backtracking: they are guaranteed to run in one pass over the string
+// without bothering to save all the usual NFA state.
+// Detect those and execute them more quickly.
+
+// A onePassProg is a compiled one-pass regular expression program.
+// It is the same as syntax.Prog except for the use of onePassInst.
+
+using System;
 public static partial class regexp_package {
 
-    // "One-pass" regexp execution.
-    // Some regexps can be analyzed to determine that they never need
-    // backtracking: they are guaranteed to run in one pass over the string
-    // without bothering to save all the usual NFA state.
-    // Detect those and execute them more quickly.
-
-    // A onePassProg is a compiled one-pass regular expression program.
-    // It is the same as syntax.Prog except for the use of onePassInst.
 private partial struct onePassProg {
     public slice<onePassInst> Inst;
     public nint Start; // index of start instruction
@@ -71,7 +72,6 @@ private static (@string, bool, uint) onePassPrefix(ptr<syntax.Prog> _addr_p) {
         complete = true;
     }
     return (buf.String(), complete, pc);
-
 }
 
 // OnePassNext selects the next actionable state of the prog, based on the input character.
@@ -89,7 +89,6 @@ private static uint onePassNext(ptr<onePassInst> _addr_i, int r) {
         return i.Out;
     }
     return 0;
-
 }
 
 private static syntax.InstOp iop(ptr<syntax.Inst> _addr_i) {
@@ -100,7 +99,6 @@ private static syntax.InstOp iop(ptr<syntax.Inst> _addr_i) {
     if (op == syntax.InstRune1 || op == syntax.InstRuneAny || op == syntax.InstRuneAnyNotNL) 
         op = syntax.InstRune;
         return op;
-
 }
 
 // Sparse Array implementation is used as a queueOnePass.
@@ -140,7 +138,6 @@ private static bool contains(this ptr<queueOnePass> _addr_q, uint u) {
         return false;
     }
     return q.sparse[u] < q.size && q.dense[q.sparse[u]] == u;
-
 }
 
 private static void insert(this ptr<queueOnePass> _addr_q, uint u) {
@@ -160,7 +157,6 @@ private static void insertNew(this ptr<queueOnePass> _addr_q, uint u) {
     q.sparse[u] = q.size;
     q.dense[q.size] = u;
     q.size++;
-
 }
 
 private static ptr<queueOnePass> newQueue(nint size) {
@@ -192,7 +188,6 @@ private static (slice<int>, slice<uint>) mergeRuneSets(ptr<slice<int>> _addr_lef
         panic("mergeRuneSets odd length []rune");
     }
     ref nint lx = ref heap(out ptr<nint> _addr_lx);    ref nint rx = ref heap(out ptr<nint> _addr_rx);
-
     var merged = make_slice<int>(0);
     var next = make_slice<uint>(0);
     var ok = true;
@@ -213,7 +208,6 @@ private static (slice<int>, slice<uint>) mergeRuneSets(ptr<slice<int>> _addr_lef
         ix += 2;
         next = append(next, pc);
         return true;
-
     };
 
     while (lx < leftLen || rx < rightLen) {
@@ -231,7 +225,6 @@ private static (slice<int>, slice<uint>) mergeRuneSets(ptr<slice<int>> _addr_lef
         }
     }
     return (merged, next);
-
 });
 
 // cleanupOnePass drops working memory, and restores certain shortcut instructions.
@@ -246,8 +239,7 @@ private static void cleanupOnePass(ptr<onePassProg> _addr_prog, ptr<syntax.Prog>
         else if (instOriginal.Op == syntax.InstRune1 || instOriginal.Op == syntax.InstRuneAny || instOriginal.Op == syntax.InstRuneAnyNotNL) 
             prog.Inst[ix].Next = null;
             prog.Inst[ix] = new onePassInst(Inst:instOriginal);
-        
-    }
+            }
 }
 
 // onePassCopy creates a copy of the original Prog, as we'll be modifying it
@@ -271,13 +263,11 @@ private static ptr<onePassProg> onePassCopy(ptr<syntax.Prog> _addr_prog) {
                     continue;
                 }
             }
-
             var instOther = p.Inst[p_A_Other.val]; 
             // Analyzing both legs pointing to Alts is for another day
             if (instOther.Op == syntax.InstAlt || instOther.Op == syntax.InstAltMatch) { 
                 // too complicated
                 continue;
-
             } 
             // simple empty transition loop
             // A:BC + B:DA => A:BC + B:DC
@@ -291,7 +281,6 @@ private static ptr<onePassProg> onePassCopy(ptr<syntax.Prog> _addr_prog) {
                 patch = true;
                 (p_B_Alt, p_B_Other) = (p_B_Other, p_B_Alt);
             }
-
             if (patch) {
                 p_B_Alt.val = p_A_Other.val;
             } 
@@ -301,12 +290,9 @@ private static ptr<onePassProg> onePassCopy(ptr<syntax.Prog> _addr_prog) {
             if (p_A_Other == p_B_Alt.val) {
                 p_A_Alt.val = p_B_Other.val;
             }
-
         else 
             continue;
-        
-    }    return _addr_p!;
-
+            }    return _addr_p!;
 }
 
 // runeSlice exists to permit sorting the case-folded rune sets.
@@ -363,7 +349,6 @@ private static ptr<onePassProg> makeOnePass(ptr<onePassProg> _addr_p) {
             if (matchArg) {
                 (inst.Out, inst.Arg) = (inst.Arg, inst.Out);                (matchOut, matchArg) = (matchArg, matchOut);
             }
-
             if (matchOut) {
                 m[pc] = true;
                 inst.Op = syntax.InstAltMatch;
@@ -375,7 +360,6 @@ private static ptr<onePassProg> makeOnePass(ptr<onePassProg> _addr_p) {
                 ok = false;
                 break;
             }
-
         else if (inst.Op == syntax.InstCapture || inst.Op == syntax.InstNop) 
             ok = check(inst.Out, m);
             m[pc] = m[inst.Out]; 
@@ -439,11 +423,9 @@ private static ptr<onePassProg> makeOnePass(ptr<onePassProg> _addr_p) {
                     r1 = r1__prev1;
                 }
                 sort.Sort(runeSlice(runes));
-
             } {
                 runes = append(runes, inst.Rune);
             }
-
             onePassRunes[pc] = runes;
             inst.Next = make_slice<uint>(len(onePassRunes[pc]) / 2 + 1);
             {
@@ -484,11 +466,9 @@ private static ptr<onePassProg> makeOnePass(ptr<onePassProg> _addr_p) {
                     r1 = r1__prev1;
                 }
                 sort.Sort(runeSlice(runes));
-
             } {
                 runes = append(runes, inst.Rune[0], inst.Rune[0]);
             }
-
             onePassRunes[pc] = runes;
             inst.Next = make_slice<uint>(len(onePassRunes[pc]) / 2 + 1);
             {
@@ -530,7 +510,6 @@ private static ptr<onePassProg> makeOnePass(ptr<onePassProg> _addr_p) {
                 i = i__prev1;
             }
                 return ;
-
     };
 
     instQueue.clear();
@@ -557,7 +536,6 @@ private static ptr<onePassProg> makeOnePass(ptr<onePassProg> _addr_p) {
         }
     }
     return _addr_p!;
-
 }
 
 // compileOnePass returns a new *syntax.Prog suitable for onePass execution if the original Prog
@@ -592,8 +570,7 @@ private static ptr<onePassProg> compileOnePass(ptr<syntax.Prog> _addr_prog) {
             if (opOut == syntax.InstMatch) {
                 return _addr_null!;
             }
-        
-    }    p = onePassCopy(_addr_prog); 
+            }    p = onePassCopy(_addr_prog); 
 
     // checkAmbiguity on InstAlts, build onepass Prog if possible
     p = makeOnePass(_addr_p);
@@ -602,7 +579,6 @@ private static ptr<onePassProg> compileOnePass(ptr<syntax.Prog> _addr_prog) {
         cleanupOnePass(_addr_p, _addr_prog);
     }
     return _addr_p!;
-
 }
 
 } // end regexp_package

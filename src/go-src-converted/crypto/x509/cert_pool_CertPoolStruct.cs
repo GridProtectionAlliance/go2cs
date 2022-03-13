@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:19:33 UTC
+//     Generated on 2022 March 13 05:34:31 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -27,7 +27,7 @@ namespace crypto
 {
     public static partial class x509_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct CertPool
         {
             // Constructors
@@ -62,7 +62,7 @@ namespace crypto
             public static implicit operator CertPool(NilType nil) => default(CertPool);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static CertPool CertPool_cast(dynamic value)
         {
             return new CertPool(value.byName, value.lazyCerts, value.haveSum);

@@ -28,17 +28,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// package mips64 -- go2cs converted at 2022 March 06 23:20:08 UTC
+// package mips64 -- go2cs converted at 2022 March 13 06:32:58 UTC
 // import "cmd/link/internal/mips64" ==> using mips64 = go.cmd.link.@internal.mips64_package
 // Original source: C:\Program Files\Go\src\cmd\link\internal\mips64\asm.go
-using objabi = go.cmd.@internal.objabi_package;
-using sys = go.cmd.@internal.sys_package;
-using ld = go.cmd.link.@internal.ld_package;
-using loader = go.cmd.link.@internal.loader_package;
-using sym = go.cmd.link.@internal.sym_package;
-using elf = go.debug.elf_package;
-
 namespace go.cmd.link.@internal;
+
+using objabi = cmd.@internal.objabi_package;
+using sys = cmd.@internal.sys_package;
+using ld = cmd.link.@internal.ld_package;
+using loader = cmd.link.@internal.loader_package;
+using sym = cmd.link.@internal.sym_package;
+using elf = debug.elf_package;
 
 public static partial class mips64_package {
 
@@ -95,7 +95,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
             // as such we need to add this back to get the correct offset
             // via the external linker.
             addend += 0x7000;
-
         }
     else if (r.Type == objabi.R_CALLMIPS || r.Type == objabi.R_JMPMIPS) 
         @out.Write8(uint8(elf.R_MIPS_26));
@@ -104,7 +103,6 @@ private static bool elfreloc1(ptr<ld.Link> _addr_ctxt, ptr<ld.OutBuf> _addr_@out
         @out.Write64(uint64(addend));
 
     return true;
-
 }
 
 private static void elfsetupplt(ptr<ld.Link> _addr_ctxt, ptr<loader.SymbolBuilder> _addr_plt, ptr<loader.SymbolBuilder> _addr_gotplt, loader.Sym dynamic) {
@@ -137,8 +135,7 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             return (val, 1, true);
         else 
             return (val, 0, false);
-        
-    }
+            }
     const var isOk = true;
 
     const nint noExtReloc = 0;
@@ -159,7 +156,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
             // OpenBSD mips64 does not currently offset TLS by 0x7000,
             // as such we need to add this back to get the correct offset.
             t += 0x7000;
-
         }
         if (t < -32768 || t >= 32678) {
             ldr.Errorf(s, "TLS offset out of range %d", t);
@@ -170,7 +166,6 @@ private static (long, nint, bool) archreloc(ptr<ld.Target> _addr_target, ptr<loa
         t = ldr.SymValue(rs) + r.Add();
         return (int64(val & 0xfc000000 | (t >> 2) & ~0xfc000000), noExtReloc, isOk);
         return (val, 0, false);
-
 }
 
 private static long archrelocvariant(ptr<ld.Target> _addr__p0, ptr<loader.Loader> _addr__p0, loader.Reloc _p0, sym.RelocVariant _p0, loader.Sym _p0, long _p0, slice<byte> _p0) {
@@ -192,7 +187,6 @@ private static (loader.ExtReloc, bool) extreloc(ptr<ld.Target> _addr_target, ptr
     else if (r.Type() == objabi.R_ADDRMIPSTLS || r.Type() == objabi.R_CALLMIPS || r.Type() == objabi.R_JMPMIPS) 
         return (ld.ExtrelocSimple(ldr, r), true);
         return (new loader.ExtReloc(), false);
-
 }
 
 } // end mips64_package

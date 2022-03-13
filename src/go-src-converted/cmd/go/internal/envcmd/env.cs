@@ -3,33 +3,33 @@
 // license that can be found in the LICENSE file.
 
 // Package envcmd implements the ``go env'' command.
-// package envcmd -- go2cs converted at 2022 March 06 23:16:01 UTC
+
+// package envcmd -- go2cs converted at 2022 March 13 06:29:30 UTC
 // import "cmd/go/internal/envcmd" ==> using envcmd = go.cmd.go.@internal.envcmd_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\envcmd\env.go
-using context = go.context_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using build = go.go.build_package;
-using buildcfg = go.@internal.buildcfg_package;
-using io = go.io_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using sort = go.sort_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cache = go.cmd.go.@internal.cache_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using fsys = go.cmd.go.@internal.fsys_package;
-using load = go.cmd.go.@internal.load_package;
-using modload = go.cmd.go.@internal.modload_package;
-using work = go.cmd.go.@internal.work_package;
-using System;
-
-
 namespace go.cmd.go.@internal;
+
+using context = context_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+using build = go.build_package;
+using buildcfg = @internal.buildcfg_package;
+using io = io_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using sort = sort_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cache = cmd.go.@internal.cache_package;
+using cfg = cmd.go.@internal.cfg_package;
+using fsys = cmd.go.@internal.fsys_package;
+using load = cmd.go.@internal.load_package;
+using modload = cmd.go.@internal.modload_package;
+using work = cmd.go.@internal.work_package;
+using System;
 
 public static partial class envcmd_package {
 
@@ -88,7 +88,6 @@ public static slice<cfg.EnvVar> MkEnv() {
         env = env__prev1;
 
     }
-
     var cxx = cfg.DefaultCXX(cfg.Goos, cfg.Goarch);
     {
         cfg.EnvVar env__prev1 = env;
@@ -101,7 +100,6 @@ public static slice<cfg.EnvVar> MkEnv() {
         env = env__prev1;
 
     }
-
     env = append(env, new cfg.EnvVar(Name:"AR",Value:envOr("AR","ar")));
     env = append(env, new cfg.EnvVar(Name:"CC",Value:cc));
     env = append(env, new cfg.EnvVar(Name:"CXX",Value:cxx));
@@ -114,7 +112,6 @@ public static slice<cfg.EnvVar> MkEnv() {
         env = append(env, new cfg.EnvVar(Name:"CGO_ENABLED",Value:"0"));
     }
     return env;
-
 }
 
 private static @string envOr(@string name, @string def) {
@@ -123,7 +120,6 @@ private static @string envOr(@string name, @string def) {
         return val;
     }
     return def;
-
 }
 
 private static @string findEnv(slice<cfg.EnvVar> env, @string name) {
@@ -132,7 +128,6 @@ private static @string findEnv(slice<cfg.EnvVar> env, @string name) {
             return e.Value;
         }
     }    return "";
-
 }
 
 // ExtraEnvVars returns environment variables that should not leak into child processes.
@@ -145,7 +140,6 @@ public static slice<cfg.EnvVar> ExtraEnvVars() {
         gomod = os.DevNull;
     }
     return new slice<cfg.EnvVar>(new cfg.EnvVar[] { {Name:"GOMOD",Value:gomod} });
-
 }
 
 // ExtraEnvVarsCostly returns environment variables that should not leak into child processes
@@ -158,12 +152,10 @@ public static slice<cfg.EnvVar> ExtraEnvVarsCostly() {
         // Should not happen - b.CFlags was given an empty package.
         fmt.Fprintf(os.Stderr, "go: invalid cflags: %v\n", err);
         return null;
-
     }
     var cmd = b.GccCmd(".", "");
 
     return new slice<cfg.EnvVar>(new cfg.EnvVar[] { {Name:"CGO_CFLAGS",Value:strings.Join(cflags," ")}, {Name:"CGO_CPPFLAGS",Value:strings.Join(cppflags," ")}, {Name:"CGO_CXXFLAGS",Value:strings.Join(cxxflags," ")}, {Name:"CGO_FFLAGS",Value:strings.Join(fflags," ")}, {Name:"CGO_LDFLAGS",Value:strings.Join(ldflags," ")}, {Name:"PKG_CONFIG",Value:b.PkgconfigCmd()}, {Name:"GOGCCFLAGS",Value:strings.Join(cmd[3:]," ")} });
-
 }
 
 // argKey returns the KEY part of the arg KEY=VAL, or else arg itself.
@@ -173,7 +165,6 @@ private static @string argKey(@string arg) {
         return arg;
     }
     return arg[..(int)i];
-
 }
 
 private static void runEnv(context.Context ctx, ptr<base.Command> _addr_cmd, slice<@string> args) {
@@ -215,7 +206,6 @@ private static void runEnv(context.Context ctx, ptr<base.Command> _addr_cmd, sli
         // We're listing all environment variables ("go env"),
         // including the expensive ones.
         needCostly = true;
-
     }
     else
  {
@@ -241,7 +231,6 @@ checkCostly:
                     break;
                     break;
             }
-
         }
     }
     if (needCostly) {
@@ -264,7 +253,6 @@ checkCostly:
             }
 
             printEnvAsJSON(es);
-
         } {
             {
                 var name__prev1 = name;
@@ -278,14 +266,12 @@ checkCostly:
             }
         }
         return ;
-
     }
     if (envJson.val) {
         printEnvAsJSON(env);
         return ;
     }
     PrintEnv(os.Stdout, env);
-
 }
 
 private static void runEnvW(slice<@string> args) { 
@@ -307,7 +293,6 @@ private static void runEnvW(slice<@string> args) {
             i = i__prev1;
 
         }
-
     }    var add = make_map<@string, @string>();
     foreach (var (_, arg) in args) {
         i = strings.Index(arg, "=");
@@ -328,7 +313,6 @@ private static void runEnvW(slice<@string> args) {
             err = err__prev1;
 
         }
-
         {
             var (_, ok) = add[key];
 
@@ -337,7 +321,6 @@ private static void runEnvW(slice<@string> args) {
             }
 
         }
-
         add[key] = val;
         {
             var osVal = osEnv[key];
@@ -347,7 +330,6 @@ private static void runEnvW(slice<@string> args) {
             }
 
         }
-
     }    {
         var err__prev1 = err;
 
@@ -360,7 +342,6 @@ private static void runEnvW(slice<@string> args) {
 
     }
 
-
     var (gotmp, okGOTMP) = add["GOTMPDIR"];
     if (okGOTMP) {
         if (!filepath.IsAbs(gotmp) && gotmp != "") {
@@ -368,7 +349,6 @@ private static void runEnvW(slice<@string> args) {
         }
     }
     updateEnvFile(add, null);
-
 }
 
 private static void runEnvU(slice<@string> args) { 
@@ -390,9 +370,7 @@ private static void runEnvU(slice<@string> args) {
             err = err__prev1;
 
         }
-
         del[arg] = true;
-
     }    {
         var err__prev1 = err;
 
@@ -405,9 +383,7 @@ private static void runEnvU(slice<@string> args) {
 
     }
 
-
     updateEnvFile(null, del);
-
 }
 
 // checkBuildConfig checks whether the build configuration is valid
@@ -430,7 +406,6 @@ private static error checkBuildConfig(map<@string, @string> add, map<@string, bo
             val = val__prev1;
 
         }
-
         if (del[key]) {
             var val = getOrigEnv(key);
             if (val == "") {
@@ -439,7 +414,6 @@ private static error checkBuildConfig(map<@string, @string> add, map<@string, bo
             return (error.As(val)!, true);
         }
         return (error.As(cur)!, false);
-
     };
 
     var (goos, okGOOS) = get("GOOS", cfg.Goos, build.Default.GOOS);
@@ -453,7 +427,6 @@ private static error checkBuildConfig(map<@string, @string> add, map<@string, bo
             }
 
         }
-
     }
     var (goexperiment, okGOEXPERIMENT) = get("GOEXPERIMENT", buildcfg.GOEXPERIMENT(), "");
     if (okGOEXPERIMENT) {
@@ -465,10 +438,8 @@ private static error checkBuildConfig(map<@string, @string> add, map<@string, bo
             }
 
         }
-
     }
     return error.As(null!)!;
-
 }
 
 // PrintEnv prints the environment variables to w.
@@ -492,7 +463,6 @@ public static void PrintEnv(io.Writer w, slice<cfg.EnvVar> env) {
                                        }
                                        fmt.Fprintf(w, ")\n");
                                    }
-
                     break;
                 case "windows": 
                     fmt.Fprintf(w, "set %s=%s\n", e.Name, e.Value);
@@ -501,7 +471,6 @@ public static void PrintEnv(io.Writer w, slice<cfg.EnvVar> env) {
                     fmt.Fprintf(w, "%s=\"%s\"\n", e.Name, e.Value);
                     break;
             }
-
         }
     }
 }
@@ -513,7 +482,6 @@ private static void printEnvAsJSON(slice<cfg.EnvVar> env) {
             continue;
         }
         m[e.Name] = e.Value;
-
     }    var enc = json.NewEncoder(os.Stdout);
     enc.SetIndent("", "\t");
     {
@@ -523,7 +491,6 @@ private static void printEnvAsJSON(slice<cfg.EnvVar> env) {
             @base.Fatalf("go env -json: %s", err);
         }
     }
-
 }
 
 private static @string getOrigEnv(@string key) {
@@ -532,7 +499,6 @@ private static @string getOrigEnv(@string key) {
             return strings.TrimPrefix(v, key + "=");
         }
     }    return "";
-
 }
 
 private static error checkEnvWrite(@string key, @string val) {
@@ -577,7 +543,6 @@ private static error checkEnvWrite(@string key, @string val) {
                     return error.As(fmt.Errorf("invalid %s value %q", key, val))!;
                     break;
             }
-
             break;
         case "GOPATH": 
             if (strings.HasPrefix(val, "~")) {
@@ -608,7 +573,6 @@ private static error checkEnvWrite(@string key, @string val) {
         return error.As(fmt.Errorf("invalid newline in %s=... value", key))!;
     }
     return error.As(null!)!;
-
 }
 
 private static void updateEnvFile(map<@string, @string> add, map<@string, bool> del) {
@@ -648,15 +612,12 @@ private static void updateEnvFile(map<@string, @string> add, map<@string, bool> 
                     p = p__prev2;
 
                 }
-
                 prev[key] = l;
-
             }
 
             key = key__prev1;
 
         }
-
     }    {
         var key__prev1 = key;
         var val__prev1 = val;
@@ -677,7 +638,6 @@ private static void updateEnvFile(map<@string, @string> add, map<@string, bool> 
                 p = p__prev1;
 
             }
-
         }
         key = key__prev1;
         val = val__prev1;
@@ -713,7 +673,6 @@ private static void updateEnvFile(map<@string, @string> add, map<@string, bool> 
                 p = p__prev1;
 
             }
-
         }
         key = key__prev1;
     }
@@ -745,7 +704,6 @@ private static @string lineToKey(@string line) {
         return "";
     }
     return line[..(int)i];
-
 }
 
 // sortKeyValues sorts a sequence of lines by key.
@@ -754,9 +712,7 @@ private static @string lineToKey(@string line) {
 // (There are no such keys currently. It used to matter for GO386 which was
 // removed in Go 1.16.)
 private static void sortKeyValues(slice<@string> lines) {
-    sort.Slice(lines, (i, j) => {
-        return lineToKey(lines[i]) < lineToKey(lines[j]);
-    });
+    sort.Slice(lines, (i, j) => lineToKey(lines[i]) < lineToKey(lines[j]));
 }
 
 } // end envcmd_package

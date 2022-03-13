@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 06 22:30:23 UTC
+//     Generated on 2022 March 13 05:41:12 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -21,7 +21,7 @@ namespace go
 {
     public static partial class strings_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private partial struct genericReplacer
         {
             // Constructors
@@ -56,7 +56,7 @@ namespace go
             public static implicit operator genericReplacer(NilType nil) => default(genericReplacer);
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         private static genericReplacer genericReplacer_cast(dynamic value)
         {
             return new genericReplacer(value.root, value.tableSize, value.mapping);

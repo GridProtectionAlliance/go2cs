@@ -2,19 +2,21 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package fs -- go2cs converted at 2022 March 06 22:12:45 UTC
+// package fs -- go2cs converted at 2022 March 13 05:27:47 UTC
 // import "io/fs" ==> using fs = go.io.fs_package
 // Original source: C:\Program Files\Go\src\io\fs\walk.go
-using errors = go.errors_package;
-using path = go.path_package;
-
 namespace go.io;
+
+using errors = errors_package;
+using path = path_package;
+
+
+// SkipDir is used as a return value from WalkDirFuncs to indicate that
+// the directory named in the call is to be skipped. It is not returned
+// as an error by any function.
 
 public static partial class fs_package {
 
-    // SkipDir is used as a return value from WalkDirFuncs to indicate that
-    // the directory named in the call is to be skipped. It is not returned
-    // as an error by any function.
 public static var SkipDir = errors.New("skip this directory");
 
 // WalkDirFunc is the type of the function called by WalkDir to visit
@@ -75,16 +77,12 @@ private static error walkDir(FS fsys, @string name, DirEntry d, WalkDirFunc walk
             if (err == SkipDir && d.IsDir()) { 
                 // Successfully skipped directory.
                 err = null;
-
             }
-
             return error.As(err)!;
-
         }
         err = err__prev1;
 
     }
-
 
     var (dirs, err) = ReadDir(fsys, name);
     if (err != null) { 
@@ -111,9 +109,7 @@ private static error walkDir(FS fsys, @string name, DirEntry d, WalkDirFunc walk
             err = err__prev1;
 
         }
-
     }    return error.As(null!)!;
-
 }
 
 // WalkDir walks the file tree rooted at root, calling fn for each file or
@@ -141,7 +137,6 @@ public static error WalkDir(FS fsys, @string root, WalkDirFunc fn) {
         return error.As(null!)!;
     }
     return error.As(err)!;
-
 }
 
 private partial struct statDirEntry {

@@ -2,16 +2,18 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package jpeg -- go2cs converted at 2022 March 06 23:36:12 UTC
+// package jpeg -- go2cs converted at 2022 March 13 06:44:12 UTC
 // import "image/jpeg" ==> using jpeg = go.image.jpeg_package
 // Original source: C:\Program Files\Go\src\image\jpeg\scan.go
-using image = go.image_package;
-
 namespace go.image;
+
+using image = image_package;
+
+
+// makeImg allocates and initializes the destination image.
 
 public static partial class jpeg_package {
 
-    // makeImg allocates and initializes the destination image.
 private static void makeImg(this ptr<decoder> _addr_d, nint mxx, nint myy) => func((_, panic, _) => {
     ref decoder d = ref _addr_d.val;
 
@@ -56,7 +58,6 @@ private static void makeImg(this ptr<decoder> _addr_d, nint mxx, nint myy) => fu
         var v3 = d.comp[3].v;
         d.blackPix = make_slice<byte>(8 * h3 * mxx * 8 * v3 * myy);
         d.blackStride = 8 * h3 * mxx;
-
     }
 });
 
@@ -81,7 +82,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
         err = err__prev1;
 
     }
-
     var nComp = int(d.tmp[0]);
     if (n != 4 + 2 * nComp) {
         return error.As(FormatError("SOS length inconsistent with number of components"))!;
@@ -111,7 +111,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
             if (compIndex < 0) {
                 return error.As(FormatError("unknown component selector"))!;
             }
-
             scan[i].compIndex = uint8(compIndex); 
             // Section B.2.3 states that "the value of Cs_j shall be different from
             // the values of Cs_1 through Cs_(j-1)". Since we have previously
@@ -146,7 +145,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                 t = t__prev1;
 
             }
-
             scan[i].ta = d.tmp[2 + 2 * i] & 0x0f;
             {
                 var t__prev1 = t;
@@ -160,7 +158,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                 t = t__prev1;
 
             }
-
         }
 
         i = i__prev1;
@@ -210,7 +207,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
 
             i = i__prev1;
         }
-
     }
     d.bits = new bits();
     nint mcu = 0;
@@ -280,7 +276,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
  {
                                 b = new block();
                             }
-
                             if (ah != 0) {
                                 {
                                     var err__prev2 = err;
@@ -294,7 +289,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                                     err = err__prev2;
 
                                 }
-
                             }
                             else
  {
@@ -306,21 +300,16 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                                     if (err != null) {
                                         return error.As(err)!;
                                     }
-
                                     if (value > 16) {
                                         return error.As(UnsupportedError("excessive DC component"))!;
                                     }
-
                                     var (dcDelta, err) = d.receiveExtend(value);
                                     if (err != null) {
                                         return error.As(err)!;
                                     }
-
                                     dc[compIndex] += dcDelta;
                                     b[0] = dc[compIndex] << (int)(al);
-
                                 }
-
                                 if (zig <= zigEnd && d.eobRun > 0) {
                                     d.eobRun--;
                                 }
@@ -334,7 +323,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                                             return error.As(err)!;
                                         zig++;
                                         }
-
                                         var val0 = value >> 4;
                                         var val1 = value & 0x0f;
                                         if (val1 != 0) {
@@ -364,14 +352,9 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                                             }
                                             zig += 0x0f;
                                         }
-
                                     }
-
-
                                 }
-
                             }
-
                             if (d.progressive) { 
                                 // Save the coefficients.
                                 d.progCoeffs[compIndex][by * mxx * hi + bx] = b; 
@@ -383,9 +366,7 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                                 // accumulated block by the reconstructProgressiveImage method after all of the
                                 // SOS markers are processed.
                                 continue;
-
                             }
-
                             {
                                 var err__prev1 = err;
 
@@ -398,7 +379,6 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                                 err = err__prev1;
 
                             }
-
                         } // for j
 
 
@@ -464,13 +444,10 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                         err = err__prev3;
 
                     }
-
                 }
-
                 if (d.tmp[0] != 0xff || d.tmp[1] != expectedRST) {
                     return error.As(FormatError("bad RST marker"))!;
                 }
-
                 expectedRST++;
                 if (expectedRST == rst7Marker + 1) {
                     expectedRST = rst0Marker;
@@ -481,14 +458,11 @@ private static error processSOS(this ptr<decoder> _addr_d, nint n) {
                 dc = new array<int>(new int[] {  }); 
                 // Reset the progressive decoder state, as per section G.1.2.2.
                 d.eobRun = 0;
-
             }
-
         } // for mx
     } // for my
 
     return error.As(null!)!;
-
 }
 
 // refine decodes a successive approximation refinement block, as specified in
@@ -511,7 +485,6 @@ private static error refine(this ptr<decoder> _addr_d, ptr<block> _addr_b, ptr<h
             b[0] |= delta;
         }
         return error.As(null!)!;
-
     }
     var zig = zigStart;
     if (d.eobRun == 0) {
@@ -523,7 +496,6 @@ loop:
                 return error.As(err)!;
             zig++;
             }
-
             var val0 = value >> 4;
             var val1 = value & 0x0f;
 
@@ -541,7 +513,6 @@ loop:
                         _breakloop = true;
                         break;
                     }
-
                     break;
                 case 1: 
                     z = delta;
@@ -562,17 +533,13 @@ loop:
             if (err != null) {
                 return error.As(err)!;
             }
-
             if (zig > zigEnd) {
                 return error.As(FormatError("too many coefficients"))!;
             }
-
             if (z != 0) {
                 b[unzig[zig]] = z;
             }
-
         }
-
     }
     if (d.eobRun > 0) {
         d.eobRun--;
@@ -584,10 +551,8 @@ loop:
             }
 
         }
-
     }
     return error.As(null!)!;
-
 });
 
 // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
@@ -605,10 +570,8 @@ private static (int, error) refineNonZeroes(this ptr<decoder> _addr_d, ptr<block
                 break;
         zig++;
             }
-
             nz--;
             continue;
-
         }
         var (bit, err) = d.decodeBit();
         if (err != null) {
@@ -626,7 +589,6 @@ private static (int, error) refineNonZeroes(this ptr<decoder> _addr_d, ptr<block
         }
     }
     return (zig, error.As(null!)!);
-
 }
 
 private static error reconstructProgressiveImage(this ptr<decoder> _addr_d) {
@@ -653,15 +615,10 @@ private static error reconstructProgressiveImage(this ptr<decoder> _addr_d) {
                     }
 
                 }
-
             }
-
-
         }
-
     }
     return error.As(null!)!;
-
 }
 
 // reconstructBlock dequantizes, performs the inverse DCT and stores the block
@@ -699,7 +656,6 @@ private static error reconstructBlock(this ptr<decoder> _addr_d, ptr<block> _add
                 return error.As(UnsupportedError("too many components"))!;
                 break;
         }
-
     }
     for (nint y = 0; y < 8; y++) {
         var y8 = y * 8;
@@ -716,14 +672,10 @@ private static error reconstructBlock(this ptr<decoder> _addr_d, ptr<block> _add
  {
                 c += 128;
             }
-
             dst[yStride + x] = uint8(c);
-
         }
-
     }
     return error.As(null!)!;
-
 }
 
 } // end jpeg_package

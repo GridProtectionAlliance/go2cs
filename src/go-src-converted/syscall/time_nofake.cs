@@ -5,11 +5,9 @@
 //go:build !faketime
 // +build !faketime
 
-// package syscall -- go2cs converted at 2022 March 06 22:27:19 UTC
+// package syscall -- go2cs converted at 2022 March 13 05:40:38 UTC
 // import "syscall" ==> using syscall = go.syscall_package
 // Original source: C:\Program Files\Go\src\syscall\time_nofake.go
-
-
 namespace go;
 
 public static partial class syscall_package {
@@ -21,7 +19,6 @@ private static readonly var faketime = false;
 private static nint faketimeWrite(nint fd, slice<byte> p) => func((_, panic, _) => { 
     // This should never be called since faketime is false.
     panic("not implemented");
-
 });
 
 } // end syscall_package

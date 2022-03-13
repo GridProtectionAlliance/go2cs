@@ -13,33 +13,35 @@
 //
 // See "The Laws of Reflection" for an introduction to reflection in Go:
 // https://golang.org/doc/articles/laws_of_reflection.html
-// package reflect -- go2cs converted at 2022 March 06 22:30:47 UTC
+
+// package reflect -- go2cs converted at 2022 March 13 05:41:39 UTC
 // import "reflect" ==> using reflect = go.reflect_package
 // Original source: C:\Program Files\Go\src\reflect\type.go
-using unsafeheader = go.@internal.unsafeheader_package;
-using strconv = go.strconv_package;
-using sync = go.sync_package;
-using unicode = go.unicode_package;
-using utf8 = go.unicode.utf8_package;
-using @unsafe = go.@unsafe_package;
-using System;
-
-
 namespace go;
 
+using unsafeheader = @internal.unsafeheader_package;
+using strconv = strconv_package;
+using sync = sync_package;
+using unicode = unicode_package;
+using utf8 = unicode.utf8_package;
+using @unsafe = @unsafe_package;
+
+
+// Type is the representation of a Go type.
+//
+// Not all methods apply to all kinds of types. Restrictions,
+// if any, are noted in the documentation for each method.
+// Use the Kind method to find out the kind of type before
+// calling kind-specific methods. Calling a method
+// inappropriate to the kind of type causes a run-time panic.
+//
+// Type values are comparable, such as with the == operator,
+// so they can be used as map keys.
+// Two Type values are equal if they represent identical types.
+
+using System;
 public static partial class reflect_package {
 
-    // Type is the representation of a Go type.
-    //
-    // Not all methods apply to all kinds of types. Restrictions,
-    // if any, are noted in the documentation for each method.
-    // Use the Kind method to find out the kind of type before
-    // calling kind-specific methods. Calling a method
-    // inappropriate to the kind of type causes a run-time panic.
-    //
-    // Type values are comparable, such as with the == operator,
-    // so they can be used as map keys.
-    // Two Type values are equal if they represent identical types.
 public partial interface Type {
     ptr<uncommonType> Align(); // FieldAlign returns the alignment in bytes of a value of
 // this type when used as a field in a struct.
@@ -210,7 +212,6 @@ public static readonly var String = 23;
 public static readonly var Struct = 24;
 public static readonly var UnsafePointer = 25;
 
-
 // tflag is used by an rtype to signal what extra type information is
 // available in the memory directly following the rtype value.
 //
@@ -247,7 +248,6 @@ private static readonly tflag tflagNamed = 1 << 2;
 // tflagRegularMemory means that equal and hash functions can treat
 // this type as a single region of t.size bytes.
 private static readonly tflag tflagRegularMemory = 1 << 3;
-
 
 // rtype is the common implementation of most values.
 // It is embedded in other struct types.
@@ -443,21 +443,20 @@ private static (nint, nint) readVarint(this name n, nint off) {
     nint _p0 = default;
 
     nint v = 0;
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         var x = n.data(off + i, "read varint").val;
         v += int(x & 0x7f) << (int)((7 * i));
         if (x & 0x80 == 0) {
             return (i + 1, v);
         }
     }
-
 }
 
 // writeVarint writes n to buf in varint form. Returns the
 // number of bytes written. n must be nonnegative.
 // Writes at most 10 bytes.
 private static nint writeVarint(slice<byte> buf, nint n) {
-    for (nint i = 0; >>MARKER:FOREXPRESSION_LEVEL_1<<; i++) {
+    for (nint i = 0; ; i++) {
         var b = byte(n & 0x7f);
         n>>=7;
         if (n == 0) {
@@ -465,9 +464,7 @@ private static nint writeVarint(slice<byte> buf, nint n) {
             return i + 1;
         }
         buf[i] = b | 0x80;
-
     }
-
 }
 
 private static @string name(this name n) {
@@ -481,7 +478,6 @@ private static @string name(this name n) {
     hdr.Data = @unsafe.Pointer(n.data(1 + i, "non-empty string"));
     hdr.Len = l;
     return ;
-
 }
 
 private static @string tag(this name n) {
@@ -496,7 +492,6 @@ private static @string tag(this name n) {
     hdr.Data = @unsafe.Pointer(n.data(1 + i + l + i2, "non-empty string"));
     hdr.Len = l2;
     return ;
-
 }
 
 private static @string pkgPath(this name n) {
@@ -515,7 +510,6 @@ private static @string pkgPath(this name n) {
     copy(new ptr<ptr<array<byte>>>(@unsafe.Pointer(_addr_nameOff))[..], new ptr<ptr<array<byte>>>(@unsafe.Pointer(n.data(off, "name offset field")))[..]);
     name pkgPathName = new name((*byte)(resolveTypeOff(unsafe.Pointer(n.bytes),nameOff)));
     return pkgPathName.name();
-
 }
 
 private static name newName(@string n, @string tag, bool exported) => func((_, panic, _) => {
@@ -549,7 +543,6 @@ private static name newName(@string n, @string tag, bool exported) => func((_, p
         copy(tb[(int)tagLenLen..], tag);
     }
     return new name(bytes:&b[0]);
-
 });
 
 /*
@@ -579,14 +572,12 @@ private static readonly nint kindDirectIface = 1 << 5;
 private static readonly nint kindGCProg = 1 << 6; // Type.gc points to GC program
 private static readonly nint kindMask = (1 << 5) - 1;
 
-
 // String returns the name of k.
 public static @string String(this Kind k) {
     if (int(k) < len(kindNames)) {
         return kindNames[k];
     }
     return "kind" + strconv.Itoa(int(k));
-
 }
 
 private static @string kindNames = new slice<@string>(InitKeyedValues<@string>((Invalid, "invalid"), (Bool, "bool"), (Int, "int"), (Int8, "int8"), (Int16, "int16"), (Int32, "int32"), (Int64, "int64"), (Uint, "uint"), (Uint8, "uint8"), (Uint16, "uint16"), (Uint32, "uint32"), (Uint64, "uint64"), (Uintptr, "uintptr"), (Float32, "float32"), (Float64, "float64"), (Complex64, "complex64"), (Complex128, "complex128"), (Array, "array"), (Chan, "chan"), (Func, "func"), (Interface, "interface"), (Map, "map"), (Ptr, "ptr"), (Slice, "slice"), (String, "string"), (Struct, "struct"), (UnsafePointer, "unsafe.Pointer")));
@@ -598,7 +589,6 @@ private static slice<method> methods(this ptr<uncommonType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<method>>>(add(@unsafe.Pointer(t), uintptr(t.moff), "t.mcount > 0")).slice(-1, t.mcount, t.mcount);
-
 }
 
 private static slice<method> exportedMethods(this ptr<uncommonType> _addr_t) {
@@ -608,7 +598,6 @@ private static slice<method> exportedMethods(this ptr<uncommonType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<method>>>(add(@unsafe.Pointer(t), uintptr(t.moff), "t.xcount > 0")).slice(-1, t.xcount, t.xcount);
-
 }
 
 // resolveNameOff resolves a name offset from a base pointer.
@@ -734,8 +723,7 @@ private static ptr<uncommonType> uncommon(this ptr<rtype> _addr_t) {
             public uncommonType u;
         }
         return _addr__addr_(u.val)(@unsafe.Pointer(t)).u!;
-    
-}
+    }
 
 private static @string String(this ptr<rtype> _addr_t) {
     ref rtype t = ref _addr_t.val;
@@ -745,7 +733,6 @@ private static @string String(this ptr<rtype> _addr_t) {
         return s[(int)1..];
     }
     return s;
-
 }
 
 private static System.UIntPtr Size(this ptr<rtype> _addr_t) {
@@ -765,7 +752,6 @@ private static nint Bits(this ptr<rtype> _addr_t) => func((_, panic, _) => {
         panic("reflect: Bits of non-arithmetic Type " + t.String());
     }
     return int(t.size) * 8;
-
 });
 
 private static nint Align(this ptr<rtype> _addr_t) {
@@ -806,7 +792,6 @@ private static slice<method> exportedMethods(this ptr<rtype> _addr_t) {
         return null;
     }
     return ut.exportedMethods();
-
 }
 
 private static nint NumMethod(this ptr<rtype> _addr_t) {
@@ -817,7 +802,6 @@ private static nint NumMethod(this ptr<rtype> _addr_t) {
         return tt.NumMethod();
     }
     return len(t.exportedMethods());
-
 }
 
 private static Method Method(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) => {
@@ -853,7 +837,6 @@ private static Method Method(this ptr<rtype> _addr_t, nint i) => func((_, panic,
 
     m.Index = i;
     return m;
-
 });
 
 private static (Method, bool) MethodByName(this ptr<rtype> _addr_t, @string name) {
@@ -874,7 +857,6 @@ private static (Method, bool) MethodByName(this ptr<rtype> _addr_t, @string name
             return (t.Method(i), true);
         }
     }    return (new Method(), false);
-
 }
 
 private static @string PkgPath(this ptr<rtype> _addr_t) {
@@ -888,7 +870,6 @@ private static @string PkgPath(this ptr<rtype> _addr_t) {
         return "";
     }
     return t.nameOff(ut.pkgPath).name();
-
 }
 
 private static bool hasName(this ptr<rtype> _addr_t) {
@@ -909,7 +890,6 @@ private static @string Name(this ptr<rtype> _addr_t) {
         i--;
     }
     return s[(int)i + 1..];
-
 }
 
 private static ChanDir ChanDir(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -920,7 +900,6 @@ private static ChanDir ChanDir(this ptr<rtype> _addr_t) => func((_, panic, _) =>
     }
     var tt = (chanType.val)(@unsafe.Pointer(t));
     return ChanDir(tt.dir);
-
 });
 
 private static bool IsVariadic(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -931,7 +910,6 @@ private static bool IsVariadic(this ptr<rtype> _addr_t) => func((_, panic, _) =>
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return tt.outCount & (1 << 15) != 0;
-
 });
 
 private static Type Elem(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -954,7 +932,6 @@ private static Type Elem(this ptr<rtype> _addr_t) => func((_, panic, _) => {
         tt = (sliceType.val)(@unsafe.Pointer(t));
         return toType(_addr_tt.elem);
         panic("reflect: Elem of invalid type " + t.String());
-
 });
 
 private static StructField Field(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) => {
@@ -965,7 +942,6 @@ private static StructField Field(this ptr<rtype> _addr_t, nint i) => func((_, pa
     }
     var tt = (structType.val)(@unsafe.Pointer(t));
     return tt.Field(i);
-
 });
 
 private static StructField FieldByIndex(this ptr<rtype> _addr_t, slice<nint> index) => func((_, panic, _) => {
@@ -976,7 +952,6 @@ private static StructField FieldByIndex(this ptr<rtype> _addr_t, slice<nint> ind
     }
     var tt = (structType.val)(@unsafe.Pointer(t));
     return tt.FieldByIndex(index);
-
 });
 
 private static (StructField, bool) FieldByName(this ptr<rtype> _addr_t, @string name) => func((_, panic, _) => {
@@ -989,7 +964,6 @@ private static (StructField, bool) FieldByName(this ptr<rtype> _addr_t, @string 
     }
     var tt = (structType.val)(@unsafe.Pointer(t));
     return tt.FieldByName(name);
-
 });
 
 private static (StructField, bool) FieldByNameFunc(this ptr<rtype> _addr_t, Func<@string, bool> match) => func((_, panic, _) => {
@@ -1002,7 +976,6 @@ private static (StructField, bool) FieldByNameFunc(this ptr<rtype> _addr_t, Func
     }
     var tt = (structType.val)(@unsafe.Pointer(t));
     return tt.FieldByNameFunc(match);
-
 });
 
 private static Type In(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) => {
@@ -1013,7 +986,6 @@ private static Type In(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) =>
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return toType(_addr_tt.@in()[i]);
-
 });
 
 private static Type Key(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -1024,7 +996,6 @@ private static Type Key(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (mapType.val)(@unsafe.Pointer(t));
     return toType(_addr_tt.key);
-
 });
 
 private static nint Len(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -1035,7 +1006,6 @@ private static nint Len(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (arrayType.val)(@unsafe.Pointer(t));
     return int(tt.len);
-
 });
 
 private static nint NumField(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -1046,7 +1016,6 @@ private static nint NumField(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (structType.val)(@unsafe.Pointer(t));
     return len(tt.fields);
-
 });
 
 private static nint NumIn(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -1057,7 +1026,6 @@ private static nint NumIn(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return int(tt.inCount);
-
 });
 
 private static nint NumOut(this ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -1068,7 +1036,6 @@ private static nint NumOut(this ptr<rtype> _addr_t) => func((_, panic, _) => {
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return len(tt.@out());
-
 });
 
 private static Type Out(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) => {
@@ -1079,7 +1046,6 @@ private static Type Out(this ptr<rtype> _addr_t, nint i) => func((_, panic, _) =
     }
     var tt = (funcType.val)(@unsafe.Pointer(t));
     return toType(_addr_tt.@out()[i]);
-
 });
 
 private static slice<ptr<rtype>> @in(this ptr<funcType> _addr_t) {
@@ -1093,7 +1059,6 @@ private static slice<ptr<rtype>> @in(this ptr<funcType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<ptr<rtype>>>>(add(@unsafe.Pointer(t), uadd, "t.inCount > 0")).slice(-1, t.inCount, t.inCount);
-
 }
 
 private static slice<ptr<rtype>> @out(this ptr<funcType> _addr_t) {
@@ -1108,7 +1073,6 @@ private static slice<ptr<rtype>> @out(this ptr<funcType> _addr_t) {
         return null;
     }
     return new ptr<ptr<array<ptr<rtype>>>>(add(@unsafe.Pointer(t), uadd, "outCount > 0")).slice(t.inCount, t.inCount + outCount, t.inCount + outCount);
-
 }
 
 // add returns p+x.
@@ -1131,7 +1095,6 @@ public static @string String(this ChanDir d) {
     else if (d == BothDir) 
         return "chan";
         return "ChanDir" + strconv.Itoa(int(d));
-
 }
 
 // Method returns the i'th method in the type's method set.
@@ -1154,7 +1117,6 @@ private static Method Method(this ptr<interfaceType> _addr_t, nint i) {
     m.Type = toType(_addr_t.typeOff(p.typ));
     m.Index = i;
     return ;
-
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
@@ -1180,7 +1142,6 @@ private static (Method, bool) MethodByName(this ptr<interfaceType> _addr_t, @str
             return (t.Method(i), true);
         }
     }    return ;
-
 }
 
 // A StructField describes a single field in a struct.
@@ -1278,7 +1239,6 @@ public static (@string, bool) Lookup(this StructTag tag, @string key) {
         }
     }
     return ("", false);
-
 }
 
 // Field returns the i'th struct field.
@@ -1303,7 +1263,6 @@ private static StructField Field(this ptr<structType> _addr_t, nint i) => func((
             f.Tag = StructTag(tag);
         }
     }
-
     f.Offset = p.offset(); 
 
     // NOTE(rsc): This is the only allocation in the interface
@@ -1315,7 +1274,6 @@ private static StructField Field(this ptr<structType> _addr_t, nint i) => func((
     // need for the performance. This is issue 2320.
     f.Index = new slice<nint>(new nint[] { i });
     return ;
-
 });
 
 // TODO(gri): Should there be an error/bool indicator if the index
@@ -1336,9 +1294,7 @@ private static StructField FieldByIndex(this ptr<structType> _addr_t, slice<nint
             f.Type = ft;
         }
         f = f.Type.Field(x);
-
     }    return ;
-
 }
 
 // A fieldScan represents an item on the fieldByNameFunc scan work list.
@@ -1395,9 +1351,7 @@ private static (StructField, bool) FieldByNameFunc(this ptr<structType> _addr_t,
                 // That higher level would shadow the lower level we're now at,
                 // so this one can't be useful to us. Ignore it.
                 continue;
-
             }
-
             visited[t] = true;
             foreach (var (i) in t.fields) {
                 var f = _addr_t.fields[i]; 
@@ -1410,7 +1364,6 @@ private static (StructField, bool) FieldByNameFunc(this ptr<structType> _addr_t,
                     if (ntyp.Kind() == Ptr) {
                         ntyp = ntyp.Elem().common();
                     }
-
                 } 
 
                 // Does it match?
@@ -1419,16 +1372,13 @@ private static (StructField, bool) FieldByNameFunc(this ptr<structType> _addr_t,
                     if (count[t] > 1 || ok) { 
                         // Name appeared multiple times at this level: annihilate.
                         return (new StructField(), false);
-
                     }
-
                     result = t.Field(i);
                     result.Index = null;
                     result.Index = append(result.Index, scan.index);
                     result.Index = append(result.Index, i);
                     ok = true;
                     continue;
-
                 } 
 
                 // Queue embedded struct fields for processing with next level,
@@ -1437,36 +1387,28 @@ private static (StructField, bool) FieldByNameFunc(this ptr<structType> _addr_t,
                 if (ok || ntyp == null || ntyp.Kind() != Struct) {
                     continue;
                 }
-
                 var styp = (structType.val)(@unsafe.Pointer(ntyp));
                 if (nextCount[styp] > 0) {
                     nextCount[styp] = 2; // exact multiple doesn't matter
                     continue;
-
                 }
-
                 if (nextCount == null) {
                     nextCount = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ new map<ptr<structType>, nint>{};
                 }
-
                 nextCount[styp] = 1;
                 if (count[t] > 1) {
                     nextCount[styp] = 2; // exact multiple doesn't matter
                 }
-
                 slice<nint> index = default;
                 index = append(index, scan.index);
                 index = append(index, i);
                 next = append(next, new fieldScan(styp,index));
-
             }
-
         }        if (ok) {
             break;
         }
     }
     return ;
-
 }
 
 // FieldByName returns the struct field with the given name
@@ -1493,7 +1435,6 @@ private static (StructField, bool) FieldByName(this ptr<structType> _addr_t, @st
         return ;
     }
     return t.FieldByNameFunc(s => s == name);
-
 }
 
 // TypeOf returns the reflection Type that represents the dynamic type of i.
@@ -1539,7 +1480,6 @@ private static ptr<rtype> ptrTo(this ptr<rtype> _addr_t) {
         }
         var (pi, _) = ptrMap.LoadOrStore(t, p);
         return _addr_pi._<ptr<ptrType>>().rtype;
-
     }    ref var iptr = ref heap((@unsafe.Pointer.val)(null), out ptr<var> _addr_iptr);
     ptr<ptr<ptr<ptrType>>> prototype = new ptr<ptr<ptr<ptr<ptrType>>>>(@unsafe.Pointer(_addr_iptr));
     ref var pp = ref heap(prototype.val, out ptr<var> _addr_pp);
@@ -1558,7 +1498,6 @@ private static ptr<rtype> ptrTo(this ptr<rtype> _addr_t) {
 
     (pi, _) = ptrMap.LoadOrStore(t, _addr_pp);
     return _addr_pi._<ptr<ptrType>>().rtype;
-
 }
 
 // fnv1 incorporates the list of bytes into the hash x using the FNV-1 hash function.
@@ -1580,7 +1519,6 @@ private static bool Implements(this ptr<rtype> _addr_t, Type u) => func((_, pani
         panic("reflect: non-interface type passed to Type.Implements");
     }
     return implements(u._<ptr<rtype>>(), _addr_t);
-
 });
 
 private static bool AssignableTo(this ptr<rtype> _addr_t, Type u) => func((_, panic, _) => {
@@ -1591,7 +1529,6 @@ private static bool AssignableTo(this ptr<rtype> _addr_t, Type u) => func((_, pa
     }
     ptr<rtype> uu = u._<ptr<rtype>>();
     return directlyAssignable(uu, _addr_t) || implements(uu, _addr_t);
-
 });
 
 private static bool ConvertibleTo(this ptr<rtype> _addr_t, Type u) => func((_, panic, _) => {
@@ -1602,7 +1539,6 @@ private static bool ConvertibleTo(this ptr<rtype> _addr_t, Type u) => func((_, p
     }
     ptr<rtype> uu = u._<ptr<rtype>>();
     return convertOp(uu, t) != null;
-
 });
 
 private static bool Comparable(this ptr<rtype> _addr_t) {
@@ -1653,16 +1589,13 @@ private static bool implements(ptr<rtype> _addr_T, ptr<rtype> _addr_V) {
                     if (i >= len(t.methods)) {
                         return true;
                     }
-
                 }
-
             }
 
 
             j = j__prev1;
         }
         return false;
-
     }
     v = V.uncommon();
     if (v == null) {
@@ -1697,15 +1630,12 @@ private static bool implements(ptr<rtype> _addr_T, ptr<rtype> _addr_V) {
                 if (i >= len(t.methods)) {
                     return true;
                 }
-
             }
-
         }
 
         j = j__prev1;
     }
     return false;
-
 }
 
 // specialChannelAssignability reports whether a value x of channel type V
@@ -1721,7 +1651,6 @@ private static bool specialChannelAssignability(ptr<rtype> _addr_T, ptr<rtype> _
     // x's type V and T have identical element types,
     // and at least one of V or T is not a defined type.
     return V.ChanDir() == BothDir && (T.Name() == "" || V.Name() == "") && haveIdenticalType(T.Elem(), V.Elem(), true);
-
 }
 
 // directlyAssignable reports whether a value x of type V can be directly
@@ -1744,7 +1673,6 @@ private static bool directlyAssignable(ptr<rtype> _addr_T, ptr<rtype> _addr_V) {
         return true;
     }
     return haveIdenticalUnderlyingType(_addr_T, _addr_V, true);
-
 }
 
 private static bool haveIdenticalType(Type T, Type V, bool cmpTags) {
@@ -1755,7 +1683,6 @@ private static bool haveIdenticalType(Type T, Type V, bool cmpTags) {
         return false;
     }
     return haveIdenticalUnderlyingType(_addr_T.common(), _addr_V.common(), false);
-
 }
 
 private static bool haveIdenticalUnderlyingType(ptr<rtype> _addr_T, ptr<rtype> _addr_V, bool cmpTags) {
@@ -1854,7 +1781,6 @@ private static bool haveIdenticalUnderlyingType(ptr<rtype> _addr_T, ptr<rtype> _
 
         return true;
         return false;
-
 }
 
 // typelinks is implemented in package runtime.
@@ -1907,7 +1833,6 @@ private static slice<ptr<rtype>> typesByString(@string s) {
  {
                 j = h; // preserves f(j) == true
             }
-
         } 
         // i == j, f(i-1) == false, and f(j) (= f(i)) == true  =>  answer is i.
 
@@ -1928,9 +1853,7 @@ private static slice<ptr<rtype>> typesByString(@string s) {
 
             j = j__prev2;
         }
-
     }    return ret;
-
 }
 
 // The lookupCache caches ArrayOf, ChanOf, MapOf and SliceOf lookups.
@@ -1991,7 +1914,6 @@ public static Type ChanOf(ChanDir dir, Type t) => func((_, panic, _) => {
             // * https://golang.org/ref/spec#Channel_types
             // * https://github.com/golang/go/issues/39897
             s = "chan (" + typeStr + ")";
-
         }
         else
  {
@@ -2016,7 +1938,6 @@ public static Type ChanOf(ChanDir dir, Type t) => func((_, panic, _) => {
 
     (ti, _) = lookupCache.LoadOrStore(ckey, _addr_ch.rtype);
     return ti._<Type>();
-
 });
 
 // MapOf returns the map type with the given key and element types.
@@ -2061,9 +1982,7 @@ public static Type MapOf(Type key, Type elem) => func((_, panic, _) => {
     mt.key = ktyp;
     mt.elem = etyp;
     mt.bucket = bucketOf(ktyp, etyp);
-    mt.hasher = (p, seed) => {
-        return typehash(ktyp, p, seed);
-    };
+    mt.hasher = (p, seed) => typehash(ktyp, p, seed);
     mt.flags = 0;
     if (ktyp.size > maxKeySize) {
         mt.keysize = uint8(ptrSize);
@@ -2095,7 +2014,6 @@ public static Type MapOf(Type key, Type elem) => func((_, panic, _) => {
 
     (ti, _) = lookupCache.LoadOrStore(ckey, _addr_mt.rtype);
     return ti._<Type>();
-
 });
 
 // TODO(crawshaw): as these funcTypeFixedN structs have no methods,
@@ -2244,7 +2162,6 @@ public static Type FuncOf(slice<Type> @in, slice<Type> @out, bool variadic) => f
 
     }
 
-
     Func<ptr<rtype>, Type> addToCache = tt => {
         slice<ptr<rtype>> rts = default;
         {
@@ -2255,10 +2172,8 @@ public static Type FuncOf(slice<Type> @in, slice<Type> @out, bool variadic) => f
             }
 
         }
-
         funcLookupCache.m.Store(hash, append(rts, tt));
         return tt;
-
     }; 
 
     // Look in known types for the same string representation.
@@ -2270,7 +2185,6 @@ public static Type FuncOf(slice<Type> @in, slice<Type> @out, bool variadic) => f
     }    ft.str = resolveReflectName(newName(str, "", false));
     ft.ptrToThis = 0;
     return addToCache(_addr_ft.rtype);
-
 });
 
 // funcStr builds a string representation of a funcType.
@@ -2297,7 +2211,6 @@ private static @string funcStr(ptr<funcType> _addr_ft) {
  {
                 repr = append(repr, t.String());
             }
-
         }
         i = i__prev1;
         t = t__prev1;
@@ -2331,7 +2244,6 @@ private static @string funcStr(ptr<funcType> _addr_ft) {
         repr = append(repr, ')');
     }
     return string(repr);
-
 }
 
 // isReflexive reports whether the == operation on the type is reflexive.
@@ -2357,8 +2269,7 @@ private static bool isReflexive(ptr<rtype> _addr_t) => func((_, panic, _) => {
     else 
         // Func, Map, Slice, Invalid
         panic("isReflexive called on non-key type " + t.String());
-    
-});
+    });
 
 // needKeyUpdate reports whether map overwrites require the key to be copied.
 private static bool needKeyUpdate(ptr<rtype> _addr_t) => func((_, panic, _) => {
@@ -2385,8 +2296,7 @@ private static bool needKeyUpdate(ptr<rtype> _addr_t) => func((_, panic, _) => {
     else 
         // Func, Map, Slice, Invalid
         panic("needKeyUpdate called on non-key type " + t.String());
-    
-});
+    });
 
 // hashMightPanic reports whether the hash of a map key of type t might panic.
 private static bool hashMightPanic(ptr<rtype> _addr_t) {
@@ -2407,8 +2317,7 @@ private static bool hashMightPanic(ptr<rtype> _addr_t) {
         }        return false;
     else 
         return false;
-    
-}
+    }
 
 // Make sure these routines stay in sync with ../../runtime/map.go!
 // These types exist only for GC, so we only fill out GC relevant info.
@@ -2417,7 +2326,6 @@ private static bool hashMightPanic(ptr<rtype> _addr_t) {
 private static readonly System.UIntPtr bucketSize = 8;
 private static readonly System.UIntPtr maxKeySize = 128;
 private static readonly System.UIntPtr maxValSize = 128;
-
 
 private static ptr<rtype> bucketOf(ptr<rtype> _addr_ktyp, ptr<rtype> _addr_etyp) => func((_, panic, _) => {
     ref rtype ktyp = ref _addr_ktyp.val;
@@ -2470,7 +2378,6 @@ private static ptr<rtype> bucketOf(ptr<rtype> _addr_ktyp, ptr<rtype> _addr_etyp)
     @string s = "bucket(" + ktyp.String() + "," + etyp.String() + ")";
     b.str = resolveReflectName(newName(s, "", false));
     return _addr_b!;
-
 });
 
 private static slice<byte> gcSlice(this ptr<rtype> _addr_t, System.UIntPtr begin, System.UIntPtr end) {
@@ -2498,7 +2405,6 @@ private static void emitGCMask(slice<byte> @out, System.UIntPtr @base, ptr<rtype
             }
         }
     }
-
 });
 
 // appendGCProg appends the GC program for the first ptrdata bytes of
@@ -2511,7 +2417,6 @@ private static slice<byte> appendGCProg(slice<byte> dst, ptr<rtype> _addr_typ) {
         var n = uintptr(new ptr<ptr<ptr<uint>>>(@unsafe.Pointer(typ.gcdata)));
         var prog = typ.gcSlice(4, 4 + n - 1);
         return append(dst, prog);
-
     }
     var ptrs = typ.ptrdata / ptrSize;
     var mask = typ.gcSlice(0, (ptrs + 7) / 8); 
@@ -2527,7 +2432,6 @@ private static slice<byte> appendGCProg(slice<byte> dst, ptr<rtype> _addr_typ) {
     dst = append(dst, byte(ptrs));
     dst = append(dst, mask);
     return dst;
-
 }
 
 // SliceOf returns the slice type with element type t.
@@ -2568,7 +2472,6 @@ public static Type SliceOf(Type t) {
 
     (ti, _) = lookupCache.LoadOrStore(ckey, _addr_slice.rtype);
     return ti._<Type>();
-
 }
 
 // The structLookupCache caches StructOf lookups.
@@ -2601,7 +2504,6 @@ private static bool isValidFieldName(@string fieldName) {
             return false;
         }
     }    return len(fieldName) > 0;
-
 }
 
 // StructOf returns the struct type containing fields.
@@ -2644,7 +2546,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                 else if (pkgpath != fpkgpath) {
                     panic("reflect.Struct: fields with different PkgPath " + pkgpath + " and " + fpkgpath);
                 }
-
             } 
 
             // Update string and hash
@@ -2664,9 +2565,7 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                         }
 
                     }
-
                 }
-
 
                 if (f.typ.Kind() == Interface) 
                     var ift = (interfaceType.val)(@unsafe.Pointer(ft));
@@ -2679,9 +2578,7 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                             if (ift.nameOff(m.name).pkgPath() != "") { 
                                 // TODO(sbinet).  Issue 15924.
                                 panic("reflect: embedded interface with unexported method(s) not implemented");
-
                             }
-
                             var mtyp = ift.typeOff(m.typ);                            var ifield = i;                            var imethod = im;                            ref Value ifn = ref heap(out ptr<Value> _addr_ifn);                            ref Value tfn = ref heap(out ptr<Value> _addr_tfn);
 
                             if (ft.kind & kindDirectIface != 0) {
@@ -2703,7 +2600,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                                     }
                                     return recv.Field(ifield).Method(imethod).Call(args);
                                 });
-
                             } {
                                 tfn = MakeFunc(mtyp, @in => {
                                     args = default;
@@ -2722,9 +2618,7 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                                     return recv.Field(ifield).Method(imethod).Call(args);
                                 });
                             }
-
                             methods = append(methods, new method(name:resolveReflectName(ift.nameOff(m.name)),mtyp:resolveReflectType(mtyp),ifn:resolveReflectText(unsafe.Pointer(&ifn)),tfn:resolveReflectText(unsafe.Pointer(&tfn)),));
-
                         }
 
                         m = m__prev2;
@@ -2740,13 +2634,10 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                             if (i > 0 && unt.mcount > 0) { 
                                 // Issue 15924.
                                 panic("reflect: embedded type with methods not implemented if type is not first field");
-
                             }
-
                             if (len(fields) > 1) {
                                 panic("reflect: embedded type with methods not implemented if there is more than one field");
                             }
-
                             {
                                 var m__prev2 = m;
 
@@ -2757,11 +2648,8 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                                         // TODO(sbinet).
                                         // Issue 15924.
                                         panic("reflect: embedded interface with unexported method(s) not implemented");
-
                                     }
-
                                     methods = append(methods, new method(name:resolveReflectName(mname),mtyp:resolveReflectType(ptr.typeOff(m.mtyp)),ifn:resolveReflectText(ptr.textOff(m.ifn)),tfn:resolveReflectText(ptr.textOff(m.tfn)),));
-
                                 }
 
                                 m = m__prev2;
@@ -2771,7 +2659,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                         unt = unt__prev2;
 
                     }
-
                     {
                         var unt__prev2 = unt;
 
@@ -2788,11 +2675,8 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                                         // TODO(sbinet)
                                         // Issue 15924.
                                         panic("reflect: embedded interface with unexported method(s) not implemented");
-
                                     }
-
                                     methods = append(methods, new method(name:resolveReflectName(mname),mtyp:resolveReflectType(ptr.elem.typeOff(m.mtyp)),ifn:resolveReflectText(ptr.elem.textOff(m.ifn)),tfn:resolveReflectText(ptr.elem.textOff(m.tfn)),));
-
                                 }
 
                                 m = m__prev2;
@@ -2802,7 +2686,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                         unt = unt__prev2;
 
                     }
-
                 else 
                     {
                         var unt__prev2 = unt;
@@ -2813,13 +2696,10 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                             if (i > 0 && unt.mcount > 0) { 
                                 // Issue 15924.
                                 panic("reflect: embedded type with methods not implemented if type is not first field");
-
                             }
-
                             if (len(fields) > 1 && ft.kind & kindDirectIface != 0) {
                                 panic("reflect: embedded type with methods not implemented for non-pointer type");
                             }
-
                             {
                                 var m__prev2 = m;
 
@@ -2830,12 +2710,8 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                                         // TODO(sbinet)
                                         // Issue 15924.
                                         panic("reflect: embedded interface with unexported method(s) not implemented");
-
                                     }
-
                                     methods = append(methods, new method(name:resolveReflectName(mname),mtyp:resolveReflectType(ft.typeOff(m.mtyp)),ifn:resolveReflectText(ft.textOff(m.ifn)),tfn:resolveReflectText(ft.textOff(m.tfn)),));
-
-
                                 }
 
                                 m = m__prev2;
@@ -2845,9 +2721,7 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                         unt = unt__prev2;
 
                     }
-
                             }
-
             {
                 var (_, dup) = fset[name];
 
@@ -2856,7 +2730,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                 }
 
             }
-
             fset[name] = /* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ struct{}{};
 
             hash = fnv1(hash, byte(ft.hash >> 24), byte(ft.hash >> 16), byte(ft.hash >> 8), byte(ft.hash));
@@ -2866,27 +2739,22 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                 hash = fnv1(hash, (slice<byte>)f.name.tag());
                 repr = append(repr, (" " + strconv.Quote(f.name.tag())));
             }
-
             if (i < len(fields) - 1) {
                 repr = append(repr, ';');
             }
-
             comparable = comparable && (ft.equal != null);
 
             var offset = align(size, uintptr(ft.align));
             if (ft.align > typalign) {
                 typalign = ft.align;
             }
-
             size = offset + ft.size;
             f.offsetEmbed |= offset << 1;
 
             if (ft.size == 0) {
                 lastzero = size;
             }
-
             fs[i] = f;
-
         }
         i = i__prev1;
     }
@@ -2898,7 +2766,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
         // zero-sized field can't manufacture a pointer to the
         // next object in the heap. See issue 9401.
         size++;
-
     }
     ptr<structType> typ;
     ptr<uncommonType> ut;
@@ -2921,7 +2788,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
         ut = (uncommonType.val)(@unsafe.Pointer(tt.Elem().Field(1).UnsafeAddr()));
 
         copy(tt.Elem().Field(2).Slice(0, len(methods)).Interface()._<slice<method>>(), methods);
-
     }
     ut.mcount = uint16(len(methods));
     ut.xcount = ut.mcount;
@@ -2996,7 +2862,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
 
     }
 
-
     Func<Type, Type> addToCache = t => {
         slice<Type> ts = default;
         {
@@ -3007,10 +2872,8 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
             }
 
         }
-
         structLookupCache.m.Store(hash, append(ts, t));
         return t;
-
     }; 
 
     // Look in known types.
@@ -3024,9 +2887,7 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                 // as the 'u uncommonType' field won't be accessed except when
                 // tflag&tflagUncommon is set.
                 return addToCache(t);
-
             }
-
         }
         t = t__prev1;
     }
@@ -3074,13 +2935,10 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                     // gcprog should not include anything for any field after
                     // the last field that contains pointer data
                     break;
-
                 }
-
                 if (!ft.typ.pointers()) { 
                     // Ignore pointerless fields.
                     continue;
-
                 } 
                 // Pad to start of this field with zeros.
                 if (ft.offset() > off) {
@@ -3090,26 +2948,21 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
                         prog = append(prog, 0x81); // repeat previous bit
                         prog = appendVarint(prog, n - 1); // n-1 times
                     }
-
                     off = ft.offset();
-
                 }
-
                 prog = appendGCProg(prog, _addr_ft.typ);
                 off += ft.typ.ptrdata;
-
             }
 
             i = i__prev1;
             ft = ft__prev1;
         }
 
-        prog = append(prog, 0) * (uint32.val)(@unsafe.Pointer(_addr_prog[0]));
+        prog = append(prog, 0) * (uint32.val);
 
-        uint32(len(prog) - 4);
+        (@unsafe.Pointer(_addr_prog[0])) = uint32(len(prog) - 4);
         typ.kind |= kindGCProg;
         typ.gcdata = _addr_prog[0];
-
     } {
         typ.kind &= kindGCProg;
         ptr<object> bv = @new<bitVector>();
@@ -3137,9 +2990,7 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
             }
 
             return true;
-
         };
-
     }
 
     if (len(fs) == 1 && !ifaceIndir(_addr_fs[0].typ)) 
@@ -3148,7 +2999,6 @@ public static Type StructOf(slice<StructField> fields) => func((defer, panic, _)
     else 
         typ.kind &= kindDirectIface;
         return addToCache(_addr_typ.rtype);
-
 });
 
 // runtimeStructField takes a StructField value passed to StructOf and
@@ -3176,7 +3026,6 @@ private static (structField, @string) runtimeStructField(StructField field) => f
     resolveReflectType(_addr_field.Type.common()); // install in runtime
     structField f = new structField(name:newName(field.Name,string(field.Tag),field.IsExported()),typ:field.Type.common(),offsetEmbed:offsetEmbed,);
     return (f, field.PkgPath);
-
 });
 
 // typeptrdata returns the length in bytes of the prefix of t
@@ -3202,8 +3051,7 @@ private static System.UIntPtr typeptrdata(ptr<rtype> _addr_t) => func((_, panic,
         return f.offset() + f.typ.ptrdata;
     else 
         panic("reflect.typeptrdata: unexpected type, " + t.String());
-    
-});
+    });
 
 // See cmd/compile/internal/reflectdata/reflect.go for derivation of constant.
 private static readonly nint maxPtrmaskBytes = 2048;
@@ -3312,7 +3160,6 @@ public static Type ArrayOf(nint length, Type elem) => func((_, panic, _) => {
                 prog = append(prog, 0x81);
                 prog = appendVarint(prog, elemWords - elemPtrs - 1);
             }
-
         }
         if (elemWords < 0x80) {
             prog = append(prog, byte(elemWords | 0x80));
@@ -3323,9 +3170,9 @@ public static Type ArrayOf(nint length, Type elem) => func((_, panic, _) => {
             prog = appendVarint(prog, elemWords);
         }
         prog = appendVarint(prog, uintptr(length) - 1);
-        prog = append(prog, 0) * (uint32.val)(@unsafe.Pointer(_addr_prog[0]));
+        prog = append(prog, 0) * (uint32.val);
 
-        uint32(len(prog) - 4);
+        (@unsafe.Pointer(_addr_prog[0])) = uint32(len(prog) - 4);
         array.kind |= kindGCProg;
         array.gcdata = _addr_prog[0];
         array.ptrdata = array.size; // overestimate but ok; must match program
@@ -3353,7 +3200,6 @@ public static Type ArrayOf(nint length, Type elem) => func((_, panic, _) => {
     }
 
 
-
     if (length == 1 && !ifaceIndir(typ)) 
         // array of 1 direct iface type can be direct
         array.kind |= kindDirectIface;
@@ -3361,7 +3207,6 @@ public static Type ArrayOf(nint length, Type elem) => func((_, panic, _) => {
         array.kind &= kindDirectIface;
         (ti, _) = lookupCache.LoadOrStore(ckey, _addr_array.rtype);
     return ti._<Type>();
-
 });
 
 private static slice<byte> appendVarint(slice<byte> x, System.UIntPtr v) {
@@ -3371,7 +3216,6 @@ private static slice<byte> appendVarint(slice<byte> x, System.UIntPtr v) {
     }
     x = append(x, byte(v));
     return x;
-
 }
 
 // toType converts from a *rtype to a Type that can be returned
@@ -3386,7 +3230,6 @@ private static Type toType(ptr<rtype> _addr_t) {
         return null;
     }
     return t;
-
 }
 
 private partial struct layoutKey {
@@ -3459,7 +3302,6 @@ private static (ptr<rtype>, ptr<sync.Pool>, abiDesc) funcLayout(ptr<funcType> _a
     var (lti, _) = layoutCache.LoadOrStore(k, new layoutType(t:x,framePool:framePool,abi:abi,));
     lt = lti._<layoutType>();
     return (_addr_lt.t!, _addr_lt.framePool!, lt.abi);
-
 });
 
 // ifaceIndir reports whether t is stored indirectly in an interface value.
@@ -3484,7 +3326,6 @@ private static void append(this ptr<bitVector> _addr_bv, byte bit) {
     }
     bv.data[bv.n / 8] |= bit << (int)((bv.n % 8));
     bv.n++;
-
 }
 
 private static void addTypeBits(ptr<bitVector> _addr_bv, System.UIntPtr offset, ptr<rtype> _addr_t) {

@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package issue22856 -- go2cs converted at 2022 March 06 22:41:35 UTC
+// package issue22856 -- go2cs converted at 2022 March 13 05:52:40 UTC
 // import "go/doc.issue22856" ==> using issue22856 = go.go.doc.issue22856_package
 // Original source: C:\Program Files\Go\src\go\doc\testdata\issue22856.go
-
-
 namespace go.go;
 
 public static partial class issue22856_package {

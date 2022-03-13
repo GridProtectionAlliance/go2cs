@@ -4,21 +4,24 @@
 
 // Package cpu implements processor feature detection for
 // various CPU architectures.
-// package cpu -- go2cs converted at 2022 March 06 23:38:18 UTC
+
+// package cpu -- go2cs converted at 2022 March 13 06:46:34 UTC
 // import "vendor/golang.org/x/sys/cpu" ==> using cpu = go.vendor.golang.org.x.sys.cpu_package
 // Original source: C:\Program Files\Go\src\vendor\golang.org\x\sys\cpu\cpu.go
-using os = go.os_package;
-using strings = go.strings_package;
-
 namespace go.vendor.golang.org.x.sys;
+
+using os = os_package;
+using strings = strings_package;
+
+
+// Initialized reports whether the CPU features were initialized.
+//
+// For some GOOS/GOARCH combinations initialization of the CPU features depends
+// on reading an operating specific file, e.g. /proc/self/auxv on linux/arm
+// Initialized will report false if reading the file fails.
 
 public static partial class cpu_package {
 
-    // Initialized reports whether the CPU features were initialized.
-    //
-    // For some GOOS/GOARCH combinations initialization of the CPU features depends
-    // on reading an operating specific file, e.g. /proc/self/auxv on linux/arm
-    // Initialized will report false if reading the file fails.
 public static bool Initialized = default;
 
 // CacheLinePad is used to pad structs to avoid false sharing.
@@ -157,14 +160,12 @@ field:
                     _continuefield = true;
                     break;
                 }
-
             }
 
             i = i__prev2;
         }
 
         print("GODEBUG sys/cpu: unknown cpu feature \"", key, "\"\n");
-
     }
     foreach (var (_, o) in options) {
         if (!o.Specified) {
@@ -179,7 +180,6 @@ field:
             continue;
         }
         o.Feature.val = o.Enable;
-
     }
 }
 

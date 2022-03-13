@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package ppc64asm -- go2cs converted at 2022 March 06 23:25:06 UTC
+// package ppc64asm -- go2cs converted at 2022 March 13 06:38:20 UTC
 // import "cmd/vendor/golang.org/x/arch/ppc64/ppc64asm" ==> using ppc64asm = go.cmd.vendor.golang.org.x.arch.ppc64.ppc64asm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\ppc64\ppc64asm\gnu.go
-using bytes = go.bytes_package;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.ppc64;
+
+using bytes = bytes_package;
+using fmt = fmt_package;
+using strings = strings_package;
 
 public static partial class ppc64asm_package {
 
@@ -124,9 +124,7 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                            if (opName != "bc" && opName != "bca" && opName != "bcl" && opName != "bcla") {
                                startArg = 2;
                            }
-
                        }
-
                    }
                    else if (bo & 0x04 == 0) { // ctr is decremented
                        if (opName != "bcctr" && opName != "bcctrl") {
@@ -140,7 +138,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                            }
                            sfx = decsfx[(bo >> 1) & 1] + tf + sfx;
                        }
-
                        if (bo & 0x10 == 0x10) {
                            if (opName != "bcctr" && opName != "bcctrl") {
                                startArg = 2;
@@ -148,16 +145,12 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                            if (bi != Cond0LT) { 
                                // A non-zero BI bit was encoded, but ignored by BO
                                startArg = 0;
-
                            }
-
                            at = ((bo & 0x8) >> 2) | (bo & 0x1);
-
                        }
                        else if (bo & 0x4 == 0x4) {
                            at = bo & 0x3;
                        }
-
                    }
                    else if (bo & 0x10 == 0x10) { // BI field is not used
                        if (opName != "bca" && opName != "bc") {
@@ -168,7 +161,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                        if (bo & 0x14 == 0x14) {
                            startArg = 0;
                        }
-
                    }
                    else
             {
@@ -199,7 +191,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                        else if (bh == 0) {
                            startArg = 3;
                        }
-
                    }
                    else
             {
@@ -212,13 +203,11 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
             {
                            buf.WriteString("b" + sfx);
                        }
-
                        if (bh == 0) {
                            str = fmt.Sprintf(" %d,%s", bo, gnuArg(_addr_inst, 1, inst.Args[1], PC));
                            buf.WriteString(str);
                            startArg = 3;
                        }
-
                    }
             break;
         case "mtspr": 
@@ -252,7 +241,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                 }
 
             }
-
             break;
         case "mfspr": 
             opcode = inst.Op.String();
@@ -294,7 +282,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                 }
 
             }
-
             break;
         case "mtfsfi": 
 
@@ -306,7 +293,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                 var asm = fmt.Sprintf(" %s,%s", gnuArg(_addr_inst, 0, inst.Args[0], PC), gnuArg(_addr_inst, 1, inst.Args[1], PC));
                 buf.WriteString(asm);
                 startArg = 3;
-
             }
             break;
         case "paste.": 
@@ -317,7 +303,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                 asm = fmt.Sprintf(" %s,%s", gnuArg(_addr_inst, 0, inst.Args[0], PC), gnuArg(_addr_inst, 1, inst.Args[1], PC));
                 buf.WriteString(asm);
                 startArg = 3;
-
             }
             break;
         case "mtfsf": 
@@ -330,7 +315,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                 asm = fmt.Sprintf(" %s,%s,%s", gnuArg(_addr_inst, 0, inst.Args[0], PC), gnuArg(_addr_inst, 1, inst.Args[1], PC), gnuArg(_addr_inst, 2, inst.Args[2], PC));
                 buf.WriteString(asm);
                 startArg = 4;
-
             }
             break;
         case "sync": 
@@ -348,7 +332,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                     buf.WriteString(opName);
                     break;
             }
-
             break;
         case "lbarx": 
             // If EH == 0, omit printing EH.
@@ -366,7 +349,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                 argList = inst.Args[..(int)3];
             }
             buf.WriteString(inst.Op.String());
-
             break;
         case "paddi": 
             // There are several extended mnemonics.  Notably, "pla" is
@@ -385,7 +367,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                 startArg = 4;
             }
             buf.WriteString(str);
-
             break;
         default: 
             // Prefixed load/stores do not print the displacement register when R==1 (they are PCrel).
@@ -404,7 +385,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
                            buf.WriteString(str);
                            startArg = 4;
                        }
-
                    }
                    else
             {
@@ -436,7 +416,6 @@ public static @string GNUSyntax(Inst inst, ulong pc) {
     }
 
     return buf.String();
-
 }
 
 // gnuArg formats arg (which is the argIndex's arg in inst) according to GNU rules.
@@ -455,7 +434,6 @@ private static @string gnuArg(ptr<Inst> _addr_inst, nint argIndex, Arg arg, ulon
             }
         }
     }
-
     switch (arg.type()) {
         case Reg arg:
             if (isLoadStoreOp(inst.Op) && argIndex == 1 && arg == R0) {
@@ -470,12 +448,10 @@ private static @string gnuArg(ptr<Inst> _addr_inst, nint argIndex, Arg arg, ulon
             else if (arg >= CR0) {
                 return fmt.Sprintf("cr%d", int(arg - CR0));
             }
-
             var bit = condBit[(arg - Cond0LT) % 4];
             if (arg <= Cond0SO) {
                 return bit;
             }
-
             return fmt.Sprintf("4*cr%d+%s", int(arg - Cond0LT) / 4, bit);
             break;
         case Imm arg:
@@ -520,7 +496,6 @@ private static @string gnuArg(ptr<Inst> _addr_inst, nint argIndex, Arg arg, ulon
             break;
     }
     return fmt.Sprintf("???(%v)", arg);
-
 });
 
 // removeArg removes the arg in inst.Args[index].
@@ -536,7 +511,6 @@ private static void removeArg(ptr<Inst> _addr_inst, nint index) {
             inst.Args[i] = null;
         }
     }
-
 }
 
 // isLoadStoreOp returns true if op is a load or store instruction
@@ -571,7 +545,6 @@ private static bool isLoadStoreOp(Op op) {
     else if (op == LBARX || op == LWARX || op == LHARX || op == LDARX) 
         return true;
         return false;
-
 }
 
 } // end ppc64asm_package

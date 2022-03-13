@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package zip -- go2cs converted at 2022 March 06 22:31:45 UTC
+// package zip -- go2cs converted at 2022 March 13 05:42:40 UTC
 // import "archive/zip" ==> using zip = go.archive.zip_package
 // Original source: C:\Program Files\Go\src\archive\zip\writer.go
-using bufio = go.bufio_package;
-using binary = go.encoding.binary_package;
-using errors = go.errors_package;
-using hash = go.hash_package;
-using crc32 = go.hash.crc32_package;
-using io = go.io_package;
-using strings = go.strings_package;
-using utf8 = go.unicode.utf8_package;
-using System;
-
-
 namespace go.archive;
+
+using bufio = bufio_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using hash = hash_package;
+using crc32 = hash.crc32_package;
+using io = io_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+using System;
 
 public static partial class zip_package {
 
@@ -56,7 +55,6 @@ private static void SetOffset(this ptr<Writer> _addr_w, long n) => func((_, pani
         panic("zip: SetOffset called after data was written");
     }
     w.cw.count = n;
-
 });
 
 // Flush flushes any buffered data to the underlying writer.
@@ -77,7 +75,6 @@ private static error SetComment(this ptr<Writer> _addr_w, @string comment) {
     }
     w.comment = comment;
     return error.As(null!)!;
-
 }
 
 // Close finishes writing the zip file by writing the central directory.
@@ -94,9 +91,7 @@ private static error Close(this ptr<Writer> _addr_w) {
             }
 
         }
-
         w.last = null;
-
     }
     if (w.closed) {
         return error.As(errors.New("zip: writer closed twice"))!;
@@ -132,7 +127,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             eb.uint64(h.CompressedSize64);
             eb.uint64(h.offset);
             h.Extra = append(h.Extra, buf[..]);
-
         }
         else
  {
@@ -159,7 +153,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             }
 
         }
-
         {
             (_, err) = io.WriteString(w.cw, h.Name);
 
@@ -168,7 +161,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             }
 
         }
-
         {
             (_, err) = w.cw.Write(h.Extra);
 
@@ -177,7 +169,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             }
 
         }
-
         {
             (_, err) = io.WriteString(w.cw, h.Comment);
 
@@ -186,7 +177,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             }
 
         }
-
     }    var end = w.cw.count;
 
     var records = uint64(len(w.dir));
@@ -200,7 +190,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             f(size, offset);
         }
     }
-
 
     if (records >= uint16max || size >= uint32max || offset >= uint32max) {
         buf = new array<byte>(directory64EndLen + directory64LocLen);
@@ -241,7 +230,6 @@ private static error Close(this ptr<Writer> _addr_w) {
         records = uint16max;
         size = uint32max;
         offset = uint32max;
-
     }
     buf = new array<byte>(directoryEndLen);
     b = writeBuf(buf[..]);
@@ -259,7 +247,6 @@ private static error Close(this ptr<Writer> _addr_w) {
             return error.As(err)!;
         }
     }
-
     {
         (_, err) = io.WriteString(w.cw, w.comment);
 
@@ -268,9 +255,7 @@ private static error Close(this ptr<Writer> _addr_w) {
         }
     }
 
-
     return error.As(w.cw.w._<ptr<bufio.Writer>>().Flush()!)!;
-
 }
 
 // Create adds a file to the zip file using the provided name.
@@ -316,11 +301,9 @@ private static (bool, bool) detectUTF8(@string s) {
                 }
                 require = true;
             }
-
         }
     }
     return (true, require);
-
 }
 
 // prepare performs the bookkeeping operations required at the start of
@@ -338,15 +321,12 @@ private static error prepare(this ptr<Writer> _addr_w, ptr<FileHeader> _addr_fh)
             }
 
         }
-
     }
     if (len(w.dir) > 0 && w.dir[len(w.dir) - 1].FileHeader == fh) { 
         // See https://golang.org/issue/11144 confusion.
         return error.As(errors.New("archive/zip: invalid duplicate FileHeader"))!;
-
     }
     return error.As(null!)!;
-
 }
 
 // CreateHeader adds a file to the zip archive using the provided FileHeader
@@ -426,7 +406,6 @@ private static (io.Writer, error) CreateHeader(this ptr<Writer> _addr_w, ptr<Fil
         eb.uint8(1); // Flags: ModTime
         eb.uint32(mt); // ModTime
         fh.Extra = append(fh.Extra, mbuf[..]);
-
     }
     io.Writer ow = default;    ptr<fileWriter> fw;
     ptr<header> h = addr(new header(FileHeader:fh,offset:uint64(w.cw.count),));
@@ -446,7 +425,6 @@ private static (io.Writer, error) CreateHeader(this ptr<Writer> _addr_w, ptr<Fil
         fh.UncompressedSize64 = 0;
 
         ow = new dirWriter();
-
     }
     else
  {
@@ -465,7 +443,6 @@ private static (io.Writer, error) CreateHeader(this ptr<Writer> _addr_w, ptr<Fil
         fw.rawCount = addr(new countWriter(w:fw.comp));
         fw.header = h;
         ow = fw;
-
     }
     w.dir = append(w.dir, h);
     {
@@ -482,7 +459,6 @@ private static (io.Writer, error) CreateHeader(this ptr<Writer> _addr_w, ptr<Fil
     // If we're creating a directory, fw is nil.
     w.last = fw;
     return (ow, error.As(null!)!);
-
 }
 
 private static error writeHeader(io.Writer w, ptr<header> _addr_h) {
@@ -529,7 +505,6 @@ private static error writeHeader(io.Writer w, ptr<header> _addr_h) {
             return error.As(err)!;
         }
     }
-
     {
         (_, err) = io.WriteString(w, h.Name);
 
@@ -537,10 +512,8 @@ private static error writeHeader(io.Writer w, ptr<header> _addr_h) {
             return error.As(err)!;
         }
     }
-
     (_, err) = w.Write(h.Extra);
     return error.As(err)!;
-
 }
 
 private static ulong min64(ulong x, ulong y) {
@@ -548,7 +521,6 @@ private static ulong min64(ulong x, ulong y) {
         return x;
     }
     return y;
-
 }
 
 // CreateRaw adds a file to the zip archive using the provided FileHeader and
@@ -575,7 +547,6 @@ private static (io.Writer, error) CreateRaw(this ptr<Writer> _addr_w, ptr<FileHe
 
     }
 
-
     fh.CompressedSize = uint32(min64(fh.CompressedSize64, uint32max));
     fh.UncompressedSize = uint32(min64(fh.UncompressedSize64, uint32max));
 
@@ -593,7 +564,6 @@ private static (io.Writer, error) CreateRaw(this ptr<Writer> _addr_w, ptr<FileHe
 
     }
 
-
     if (strings.HasSuffix(fh.Name, "/")) {
         w.last = null;
         return (new dirWriter(), error.As(null!)!);
@@ -601,7 +571,6 @@ private static (io.Writer, error) CreateRaw(this ptr<Writer> _addr_w, ptr<FileHe
     ptr<fileWriter> fw = addr(new fileWriter(header:h,zipw:w.cw,));
     w.last = fw;
     return (fw, error.As(null!)!);
-
 }
 
 // Copy copies the file f (obtained from a Reader) into w. It copies the raw
@@ -620,7 +589,6 @@ private static error Copy(this ptr<Writer> _addr_w, ptr<File> _addr_f) {
     }
     _, err = io.Copy(fw, r);
     return error.As(err)!;
-
 }
 
 // RegisterCompressor registers or overrides a custom compressor for a specific
@@ -633,7 +601,6 @@ private static void RegisterCompressor(this ptr<Writer> _addr_w, ushort method, 
         w.compressors = make_map<ushort, Compressor>();
     }
     w.compressors[method] = comp;
-
 }
 
 private static Compressor compressor(this ptr<Writer> _addr_w, ushort method) {
@@ -644,7 +611,6 @@ private static Compressor compressor(this ptr<Writer> _addr_w, ushort method) {
         comp = compressor(method);
     }
     return comp;
-
 }
 
 private partial struct dirWriter {
@@ -658,7 +624,6 @@ private static (nint, error) Write(this dirWriter _p0, slice<byte> b) {
         return (0, error.As(null!)!);
     }
     return (0, error.As(errors.New("zip: write to directory"))!);
-
 }
 
 private partial struct fileWriter {
@@ -684,7 +649,6 @@ private static (nint, error) Write(this ptr<fileWriter> _addr_w, slice<byte> p) 
     }
     w.crc32.Write(p);
     return w.rawCount.Write(p);
-
 }
 
 private static error close(this ptr<fileWriter> _addr_w) {
@@ -722,7 +686,6 @@ private static error close(this ptr<fileWriter> _addr_w) {
         fh.UncompressedSize = uint32(fh.UncompressedSize64);
     }
     return error.As(w.writeDataDescriptor())!;
-
 }
 
 private static error writeDataDescriptor(this ptr<fileWriter> _addr_w) {
@@ -753,7 +716,6 @@ private static error writeDataDescriptor(this ptr<fileWriter> _addr_w) {
     }
     var (_, err) = w.zipw.Write(buf);
     return error.As(err)!;
-
 }
 
 private partial struct countWriter {

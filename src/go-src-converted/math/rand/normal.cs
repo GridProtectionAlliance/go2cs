@@ -2,31 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package rand -- go2cs converted at 2022 March 06 22:17:52 UTC
+// package rand -- go2cs converted at 2022 March 13 05:32:02 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Program Files\Go\src\math\rand\normal.go
-using math = go.math_package;
-
 namespace go.math;
+
+using math = math_package;
+
+
+/*
+ * Normal distribution
+ *
+ * See "The Ziggurat Method for Generating Random Variables"
+ * (Marsaglia & Tsang, 2000)
+ * http://www.jstatsoft.org/v05/i08/paper [pdf]
+ */
 
 public static partial class rand_package {
 
-    /*
-     * Normal distribution
-     *
-     * See "The Ziggurat Method for Generating Random Variables"
-     * (Marsaglia & Tsang, 2000)
-     * http://www.jstatsoft.org/v05/i08/paper [pdf]
-     */
 private static readonly float rn = 3.442619855899F;
-
 
 private static uint absInt32(int i) {
     if (i < 0) {
         return uint32(-i);
     }
     return uint32(i);
-
 }
 
 // NormFloat64 returns a normally distributed float64 in
@@ -47,7 +47,6 @@ private static double NormFloat64(this ptr<Rand> _addr_r) {
         if (absInt32(j) < kn[i]) { 
             // This case should be hit better than 99% of the time.
             return x;
-
         }
         if (i == 0) { 
             // This extra work is only required for the base strip.
@@ -62,15 +61,12 @@ private static double NormFloat64(this ptr<Rand> _addr_r) {
             if (j > 0) {
                 return rn + x;
             }
-
             return -rn - x;
-
         }
         if (fn[i] + float32(r.Float64()) * (fn[i - 1] - fn[i]) < float32(math.Exp(-.5F * x * x))) {
             return x;
         }
     }
-
 }
 
 private static array<uint> kn = new array<uint>(new uint[] { 0x76ad2212, 0x0, 0x600f1b53, 0x6ce447a6, 0x725b46a2, 0x7560051d, 0x774921eb, 0x789a25bd, 0x799045c3, 0x7a4bce5d, 0x7adf629f, 0x7b5682a6, 0x7bb8a8c6, 0x7c0ae722, 0x7c50cce7, 0x7c8cec5b, 0x7cc12cd6, 0x7ceefed2, 0x7d177e0b, 0x7d3b8883, 0x7d5bce6c, 0x7d78dd64, 0x7d932886, 0x7dab0e57, 0x7dc0dd30, 0x7dd4d688, 0x7de73185, 0x7df81cea, 0x7e07c0a3, 0x7e163efa, 0x7e23b587, 0x7e303dfd, 0x7e3beec2, 0x7e46db77, 0x7e51155d, 0x7e5aabb3, 0x7e63abf7, 0x7e6c222c, 0x7e741906, 0x7e7b9a18, 0x7e82adfa, 0x7e895c63, 0x7e8fac4b, 0x7e95a3fb, 0x7e9b4924, 0x7ea0a0ef, 0x7ea5b00d, 0x7eaa7ac3, 0x7eaf04f3, 0x7eb3522a, 0x7eb765a5, 0x7ebb4259, 0x7ebeeafd, 0x7ec2620a, 0x7ec5a9c4, 0x7ec8c441, 0x7ecbb365, 0x7ece78ed, 0x7ed11671, 0x7ed38d62, 0x7ed5df12, 0x7ed80cb4, 0x7eda175c, 0x7edc0005, 0x7eddc78e, 0x7edf6ebf, 0x7ee0f647, 0x7ee25ebe, 0x7ee3a8a9, 0x7ee4d473, 0x7ee5e276, 0x7ee6d2f5, 0x7ee7a620, 0x7ee85c10, 0x7ee8f4cd, 0x7ee97047, 0x7ee9ce59, 0x7eea0eca, 0x7eea3147, 0x7eea3568, 0x7eea1aab, 0x7ee9e071, 0x7ee98602, 0x7ee90a88, 0x7ee86d08, 0x7ee7ac6a, 0x7ee6c769, 0x7ee5bc9c, 0x7ee48a67, 0x7ee32efc, 0x7ee1a857, 0x7edff42f, 0x7ede0ffa, 0x7edbf8d9, 0x7ed9ab94, 0x7ed7248d, 0x7ed45fae, 0x7ed1585c, 0x7ece095f, 0x7eca6ccb, 0x7ec67be2, 0x7ec22eee, 0x7ebd7d1a, 0x7eb85c35, 0x7eb2c075, 0x7eac9c20, 0x7ea5df27, 0x7e9e769f, 0x7e964c16, 0x7e8d44ba, 0x7e834033, 0x7e781728, 0x7e6b9933, 0x7e5d8a1a, 0x7e4d9ded, 0x7e3b737a, 0x7e268c2f, 0x7e0e3ff5, 0x7df1aa5d, 0x7dcf8c72, 0x7da61a1e, 0x7d72a0fb, 0x7d30e097, 0x7cd9b4ab, 0x7c600f1a, 0x7ba90bdc, 0x7a722176, 0x77d664e5 });

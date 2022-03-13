@@ -7,16 +7,16 @@
 // from Monotone Discrete Distributions"
 // http://eeyore.wu-wien.ac.at/papers/96-04-04.wh-der.ps.gz
 
-// package rand -- go2cs converted at 2022 March 06 22:17:54 UTC
+// package rand -- go2cs converted at 2022 March 13 05:32:05 UTC
 // import "math/rand" ==> using rand = go.math.rand_package
 // Original source: C:\Program Files\Go\src\math\rand\zipf.go
-using math = go.math_package;
-
 namespace go.math;
+
+using math = math_package;
 
 public static partial class rand_package {
 
-    // A Zipf generates Zipf distributed variates.
+// A Zipf generates Zipf distributed variates.
 public partial struct Zipf {
     public ptr<Rand> r;
     public double imax;
@@ -62,7 +62,6 @@ public static ptr<Zipf> NewZipf(ptr<Rand> _addr_r, double s, double v, ulong ima
     z.hx0minusHxm = z.h(0.5F) - math.Exp(math.Log(z.v) * (-z.q)) - z.hxm;
     z.s = 1 - z.hinv(z.h(1.5F) - math.Exp(-z.q * math.Log(z.v + 1.0F)));
     return _addr_z!;
-
 }
 
 // Uint64 returns a value drawn from the Zipf distribution described
@@ -88,7 +87,6 @@ private static ulong Uint64(this ptr<Zipf> _addr_z) => func((_, panic, _) => {
         }
     }
     return uint64(k);
-
 });
 
 } // end rand_package

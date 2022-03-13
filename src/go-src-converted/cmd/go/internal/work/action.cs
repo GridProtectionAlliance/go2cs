@@ -4,40 +4,41 @@
 
 // Action graph creation (planning).
 
-// package work -- go2cs converted at 2022 March 06 23:16:28 UTC
+// package work -- go2cs converted at 2022 March 13 06:29:59 UTC
 // import "cmd/go/internal/work" ==> using work = go.cmd.go.@internal.work_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\work\action.go
-using bufio = go.bufio_package;
-using bytes = go.bytes_package;
-using heap = go.container.heap_package;
-using context = go.context_package;
-using elf = go.debug.elf_package;
-using json = go.encoding.json_package;
-using fmt = go.fmt_package;
-using os = go.os_package;
-using filepath = go.path.filepath_package;
-using runtime = go.runtime_package;
-using strings = go.strings_package;
-using sync = go.sync_package;
-using time = go.time_package;
-
-using @base = go.cmd.go.@internal.@base_package;
-using cache = go.cmd.go.@internal.cache_package;
-using cfg = go.cmd.go.@internal.cfg_package;
-using load = go.cmd.go.@internal.load_package;
-using trace = go.cmd.go.@internal.trace_package;
-using buildid = go.cmd.@internal.buildid_package;
-using System;
-using System.ComponentModel;
-
-
 namespace go.cmd.go.@internal;
 
+using bufio = bufio_package;
+using bytes = bytes_package;
+using heap = container.heap_package;
+using context = context_package;
+using elf = debug.elf_package;
+using json = encoding.json_package;
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using runtime = runtime_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+
+using @base = cmd.go.@internal.@base_package;
+using cache = cmd.go.@internal.cache_package;
+using cfg = cmd.go.@internal.cfg_package;
+using load = cmd.go.@internal.load_package;
+using trace = cmd.go.@internal.trace_package;
+using buildid = cmd.@internal.buildid_package;
+
+
+// A Builder holds global state about a build.
+// It does not hold per-package state, because we
+// build packages in parallel, and the builder is shared.
+
+using System;
+using System.ComponentModel;
 public static partial class work_package {
 
-    // A Builder holds global state about a build.
-    // It does not hold per-package state, because we
-    // build packages in parallel, and the builder is shared.
 public partial struct Builder {
     public @string WorkDir; // the temporary work directory (ends in filepath.Separator)
     public map<cacheKey, ptr<Action>> actionCache; // a cache of already-constructed actions
@@ -174,7 +175,6 @@ private static void push(this ptr<actionQueue> _addr_q, ptr<Action> _addr_a) {
         a.json.TimeReady = time.Now();
     }
     heap.Push(q, a);
-
 }
 
 private static ptr<Action> pop(this ptr<actionQueue> _addr_q) {
@@ -251,10 +251,8 @@ private static @string actionGraphJSON(ptr<Action> _addr_a) {
             }
 
         }
-
         inWorkq[a] = len(workq);
         workq = append(workq, a);
-
     };
     add(a);
 
@@ -271,23 +269,18 @@ private static @string actionGraphJSON(ptr<Action> _addr_a) {
             if (a.Package != null) { 
                 // TODO(rsc): Make this a unique key for a.Package somehow.
                 a.json.Package = a.Package.ImportPath;
-
             }
-
             foreach (var (_, a1) in a.Deps) {
                 a.json.Deps = append(a.json.Deps, inWorkq[a1]);
             }
-
         }
         list = append(list, a.json);
-
     }    var (js, err) = json.MarshalIndent(list, "", "\t");
     if (err != null) {
         fmt.Fprintf(os.Stderr, "go: writing debug action graph: %v\n", err);
         return "";
     }
     return string(js);
-
 }
 
 // BuildMode specifies the build mode:
@@ -299,13 +292,10 @@ public static readonly BuildMode ModeBuild = iota;
 public static readonly var ModeInstall = 0;
 public static readonly ModeVetOnly ModeBuggyInstall = 1 << 8;
 
-
 private static void Init(this ptr<Builder> _addr_b) {
     ref Builder b = ref _addr_b.val;
 
-    b.Print = a => {
-        return fmt.Fprint(os.Stderr, a);
-    };
+    b.Print = a => fmt.Fprint(os.Stderr, a);
     b.actionCache = make_map<cacheKey, ptr<Action>>();
     b.mkdirCache = make_map<@string, bool>();
     b.toolIDCache = make_map<@string, @string>();
@@ -351,14 +341,9 @@ private static void Init(this ptr<Builder> _addr_b) {
                         fmt.Fprintf(os.Stderr, "go: failed to remove work dir: %s\n", err);
                         return ;
                     }
-
                     time.Sleep(5 * time.Millisecond);
-
                 }
-
-
             });
-
         }
     }
     {
@@ -374,7 +359,6 @@ private static void Init(this ptr<Builder> _addr_b) {
         err = err__prev1;
 
     }
-
 
     foreach (var (_, tag) in cfg.BuildContext.BuildTags) {
         if (strings.Contains(tag, ",")) {
@@ -393,9 +377,7 @@ public static error CheckGOOSARCHPair(@string goos, @string goarch) {
             return error.As(fmt.Errorf("unsupported GOOS/GOARCH pair %s/%s", goos, goarch))!;
         }
     }
-
     return error.As(null!)!;
-
 }
 
 // NewObjdir returns the name of a fresh object directory under b.WorkDir.
@@ -435,8 +417,6 @@ private static slice<ptr<load.Package>> readpkglist(@string shlibpath) {
             }
         }
     else
-
-
     } {
         var (pkglistbytes, err) = buildid.ReadELFNote(shlibpath, "Go\x00\x00", 1);
         if (err != null) {
@@ -447,10 +427,8 @@ private static slice<ptr<load.Package>> readpkglist(@string shlibpath) {
             t = scanner.Text();
             pkgs = append(pkgs, load.LoadImportWithFlags(t, @base.Cwd(), null, _addr_stk, null, 0));
         }
-
     }
     return ;
-
 }
 
 // cacheAction looks up {mode, p} in the cache and returns the resulting action.
@@ -467,7 +445,6 @@ private static ptr<Action> cacheAction(this ptr<Builder> _addr_b, @string mode, 
         b.actionCache[new cacheKey(mode,p)] = a;
     }
     return _addr_a!;
-
 }
 
 // AutoAction returns the "right" action for go build or go install of p.
@@ -479,7 +456,6 @@ private static ptr<Action> AutoAction(this ptr<Builder> _addr_b, BuildMode mode,
         return _addr_b.LinkAction(mode, depMode, p)!;
     }
     return _addr_b.CompileAction(mode, depMode, p)!;
-
 }
 
 // CompileAction returns the action for compiling and possibly installing
@@ -497,12 +473,10 @@ private static ptr<Action> CompileAction(this ptr<Builder> _addr_b, BuildMode mo
     if (mode != ModeBuild && (p.Internal.Local || p.Module != null) && p.Target == "") { 
         // Imported via local path or using modules. No permanent target.
         mode = ModeBuild;
-
     }
     if (mode != ModeBuild && p.Name == "main") { 
         // We never install the .a file for a main package.
         mode = ModeBuild;
-
     }
     a = b.cacheAction("build", p, () => {
         ptr<Action> a = addr(new Action(Mode:"build",Package:p,Func:(*Builder).build,Objdir:b.NewObjdir(),));
@@ -532,12 +506,9 @@ private static ptr<Action> CompileAction(this ptr<Builder> _addr_b, BuildMode mo
                 a.Target = p.Target;
                 a.Func = null;
                 return _addr_a!;
-
             }
-
         }
         return _addr_a!;
-
     }); 
 
     // Find the build action; the cache entry may have been replaced
@@ -565,7 +536,6 @@ private static ptr<Action> CompileAction(this ptr<Builder> _addr_b, BuildMode mo
         a = b.installAction(a, mode);
     }
     return _addr_a!;
-
 });
 
 // VetAction returns the action for running go vet on package p.
@@ -603,7 +573,6 @@ private static ptr<Action> vetAction(this ptr<Builder> _addr_b, BuildMode mode, 
             // here then a1 is an install of a shared library,
             // and the real package is a1.Deps[0].
             deps = new slice<ptr<Action>>(new ptr<Action>[] { a1.Deps[0], aFmt, a1 });
-
         }
         else
  {
@@ -624,15 +593,12 @@ private static ptr<Action> vetAction(this ptr<Builder> _addr_b, BuildMode mode, 
         if (a1.Func == null) { 
             // Built-in packages like unsafe.
             return _addr_a!;
-
         }
         deps[0].needVet = true;
         a.Func = (Builder.val).vet;
         return _addr_a!;
-
     });
     return _addr_a!;
-
 }
 
 // LinkAction returns the action for linking p into an executable
@@ -671,7 +637,6 @@ private static ptr<Action> LinkAction(this ptr<Builder> _addr_b, BuildMode mode,
             // On Windows, DLL file name is recorded in PE file
             // export section, so do like on OS X.
             _, name = filepath.Split(p.Target);
-
         }
         a.Target = a.Objdir + filepath.Join("exe", name) + cfg.ExeSuffix;
         a.built = a.Target;
@@ -686,14 +651,12 @@ private static ptr<Action> LinkAction(this ptr<Builder> _addr_b, BuildMode mode,
         // recorded their build IDs.
         a1.Deps = append(a1.Deps, addr(new Action(Mode:"nop",Deps:a.Deps[1:])));
         return _addr_a!;
-
     });
 
     if (mode == ModeInstall || mode == ModeBuggyInstall) {
         a = b.installAction(a, mode);
     }
     return _addr_a!;
-
 }
 
 // installAction returns the action for installing the result of a1.
@@ -708,10 +671,8 @@ private static ptr<Action> installAction(this ptr<Builder> _addr_b, ptr<Action> 
         if (a1.buggyInstall && mode == ModeInstall) { 
             //  Congratulations! The buggy install is now a proper install.
             a1.buggyInstall = false;
-
         }
         return _addr_a1!;
-
     }
     if (a1.Func == null) {
         return _addr_a1!;
@@ -740,9 +701,7 @@ private static ptr<Action> installAction(this ptr<Builder> _addr_b, ptr<Action> 
 
         b.addInstallHeaderAction(a1);
         return _addr_a1!;
-
     })!;
-
 }
 
 // addTransitiveLinkDeps adds to the link action a all packages
@@ -776,15 +735,12 @@ private static void addTransitiveLinkDeps(this ptr<Builder> _addr_b, ptr<Action>
             if (a2.Package == null || (a2.Mode != "build-install" && a2.Mode != "build") || haveDep[a2.Package.ImportPath]) {
                 continue;
             }
-
             haveDep[a2.Package.ImportPath] = true;
             a.Deps = append(a.Deps, a2);
             if (a2.Mode == "build-install") {
                 a2 = a2.Deps[0]; // walk children of "build" action
             }
-
             workq = append(workq, a2);
-
         }
     } 
 
@@ -807,7 +763,6 @@ private static void addTransitiveLinkDeps(this ptr<Builder> _addr_b, ptr<Action>
                 // on other libraries that are out-of-date, which is clearly not good either.
                 // We call it ModeBuggyInstall to make clear that this is not right.
                 a.Deps = append(a.Deps, b.linkSharedAction(ModeBuggyInstall, ModeBuggyInstall, p1.Shlib, null));
-
             }
 
             a1 = a1__prev1;
@@ -834,11 +789,9 @@ private static void addInstallHeaderAction(this ptr<Builder> _addr_b, ptr<Action
             var (dir, file) = filepath.Split(hdrTarget);
             file = strings.TrimPrefix(file, "lib");
             hdrTarget = filepath.Join(dir, file);
-
         }
         ptr<Action> ah = addr(new Action(Mode:"install header",Package:a.Package,Deps:[]*Action{a.Deps[0]},Func:(*Builder).installHeader,Objdir:a.Deps[0].Objdir,Target:hdrTarget,));
         a.Deps = append(a.Deps, ah);
-
     }
 }
 
@@ -853,7 +806,6 @@ private static ptr<Action> buildmodeShared(this ptr<Builder> _addr_b, BuildMode 
         @base.Fatalf("%v", err);
     }
     return _addr_b.linkSharedAction(mode, depMode, name, a1)!;
-
 }
 
 // linkSharedAction takes a grouping action a1 corresponding to a list of built packages
@@ -928,7 +880,6 @@ private static ptr<Action> linkSharedAction(this ptr<Builder> _addr_b, BuildMode
                 if (force || p.Shlib == "" || filepath.Base(p.Shlib) == pkg) {
                     a1.Deps = append(a1.Deps, b.CompileAction(depMode, depMode, p));
                 }
-
             }
 ;
             add(a1, "runtime/cgo", false);
@@ -941,11 +892,9 @@ private static ptr<Action> linkSharedAction(this ptr<Builder> _addr_b, BuildMode
             foreach (var (_, dep) in load.LinkerDeps(null)) {
                 add(a, dep, true);
             }
-
         }
         b.addTransitiveLinkDeps(a, a1, shlib);
         return _addr_a!;
-
     }); 
 
     // Install result.
@@ -973,7 +922,6 @@ private static ptr<Action> linkSharedAction(this ptr<Builder> _addr_b, BuildMode
                         }
 
                     }
-
                 } 
                 // TODO(rsc): Find out and explain here why gccgo is different.
 
@@ -983,7 +931,6 @@ private static ptr<Action> linkSharedAction(this ptr<Builder> _addr_b, BuildMode
             if (cfg.BuildToolchainName == "gccgo") {
                 pkgDir = filepath.Join(pkgDir, "shlibs");
             }
-
             var target = filepath.Join(pkgDir, shlib);
 
             a = addr(new Action(Mode:"go install -buildmode=shared",Objdir:buildAction.Objdir,Func:BuildInstallFunc,Deps:[]*Action{buildAction},Target:target,));
@@ -1003,12 +950,9 @@ private static ptr<Action> linkSharedAction(this ptr<Builder> _addr_b, BuildMode
             }
 
             return _addr_a!;
-
         });
-
     }
     return _addr_a!;
-
 }
 
 } // end work_package

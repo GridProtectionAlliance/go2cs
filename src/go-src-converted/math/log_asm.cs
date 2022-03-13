@@ -5,11 +5,9 @@
 //go:build amd64 || s390x
 // +build amd64 s390x
 
-// package math -- go2cs converted at 2022 March 06 22:31:09 UTC
+// package math -- go2cs converted at 2022 March 13 05:42:03 UTC
 // import "math" ==> using math = go.math_package
 // Original source: C:\Program Files\Go\src\math\log_asm.go
-
-
 namespace go;
 
 public static partial class math_package {

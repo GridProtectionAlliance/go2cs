@@ -2,23 +2,25 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package version -- go2cs converted at 2022 March 06 23:16:23 UTC
+// package version -- go2cs converted at 2022 March 13 06:29:53 UTC
 // import "cmd/go/internal/version" ==> using version = go.cmd.go.@internal.version_package
 // Original source: C:\Program Files\Go\src\cmd\go\internal\version\exe.go
-using bytes = go.bytes_package;
-using elf = go.debug.elf_package;
-using macho = go.debug.macho_package;
-using pe = go.debug.pe_package;
-using fmt = go.fmt_package;
-using xcoff = go.@internal.xcoff_package;
-using io = go.io_package;
-using os = go.os_package;
-
 namespace go.cmd.go.@internal;
+
+using bytes = bytes_package;
+using elf = debug.elf_package;
+using macho = debug.macho_package;
+using pe = debug.pe_package;
+using fmt = fmt_package;
+using xcoff = @internal.xcoff_package;
+using io = io_package;
+using os = os_package;
+
+
+// An exe is a generic interface to an OS executable (ELF, Mach-O, PE, XCOFF).
 
 public static partial class version_package {
 
-    // An exe is a generic interface to an OS executable (ELF, Mach-O, PE, XCOFF).
 private partial interface exe {
     ulong Close(); // ReadData reads and returns up to size byte starting at virtual address addr.
     ulong ReadData(ulong addr, ulong size); // DataStart returns the writable data segment start address.
@@ -42,7 +44,6 @@ private static (exe, error) openExe(@string file) {
             return (null, error.As(err)!);
         }
     }
-
     f.Seek(0, 0);
     if (bytes.HasPrefix(data, (slice<byte>)"\x7FELF")) {
         var (e, err) = elf.NewFile(f);
@@ -51,7 +52,6 @@ private static (exe, error) openExe(@string file) {
             return (null, error.As(err)!);
         }
         return (addr(new elfExe(f,e)), error.As(null!)!);
-
     }
     if (bytes.HasPrefix(data, (slice<byte>)"MZ")) {
         (e, err) = pe.NewFile(f);
@@ -60,7 +60,6 @@ private static (exe, error) openExe(@string file) {
             return (null, error.As(err)!);
         }
         return (addr(new peExe(f,e)), error.As(null!)!);
-
     }
     if (bytes.HasPrefix(data, (slice<byte>)"\xFE\xED\xFA") || bytes.HasPrefix(data[(int)1..], (slice<byte>)"\xFA\xED\xFE")) {
         (e, err) = macho.NewFile(f);
@@ -69,7 +68,6 @@ private static (exe, error) openExe(@string file) {
             return (null, error.As(err)!);
         }
         return (addr(new machoExe(f,e)), error.As(null!)!);
-
     }
     if (bytes.HasPrefix(data, new slice<byte>(new byte[] { 0x01, 0xDF })) || bytes.HasPrefix(data, new slice<byte>(new byte[] { 0x01, 0xF7 }))) {
         (e, err) = xcoff.NewFile(f);
@@ -78,11 +76,8 @@ private static (exe, error) openExe(@string file) {
             return (null, error.As(err)!);
         }
         return (addr(new xcoffExe(f,e)), error.As(null!)!);
-
-
     }
     return (null, error.As(fmt.Errorf("unrecognized executable format"))!);
-
 }
 
 // elfExe is the ELF implementation of the exe interface.
@@ -116,7 +111,6 @@ private static (slice<byte>, error) ReadData(this ptr<elfExe> _addr_x, ulong add
             return (data, error.As(null!)!);
         }
     }    return (null, error.As(fmt.Errorf("address not mapped"))!);
-
 }
 
 private static ulong DataStart(this ptr<elfExe> _addr_x) {
@@ -131,7 +125,6 @@ private static ulong DataStart(this ptr<elfExe> _addr_x) {
             return p.Vaddr;
         }
     }    return 0;
-
 }
 
 // peExe is the PE (Windows Portable Executable) implementation of the exe interface.
@@ -158,7 +151,6 @@ private static ulong imageBase(this ptr<peExe> _addr_x) {
             break;
     }
     return 0;
-
 }
 
 private static (slice<byte>, error) ReadData(this ptr<peExe> _addr_x, ulong addr, ulong size) {
@@ -181,7 +173,6 @@ private static (slice<byte>, error) ReadData(this ptr<peExe> _addr_x, ulong addr
             return (data, error.As(null!)!);
         }
     }    return (null, error.As(fmt.Errorf("address not mapped"))!);
-
 }
 
 private static ulong DataStart(this ptr<peExe> _addr_x) {
@@ -197,13 +188,11 @@ private static ulong DataStart(this ptr<peExe> _addr_x) {
     const nuint IMAGE_SCN_MEM_DISCARDABLE = 0x2000000;
     const nuint IMAGE_SCN_LNK_NRELOC_OVFL = 0x1000000;
     const nuint IMAGE_SCN_ALIGN_32BYTES = 0x600000;
-
     foreach (var (_, sect) in x.f.Sections) {
         if (sect.VirtualAddress != 0 && sect.Size != 0 && sect.Characteristics & ~IMAGE_SCN_ALIGN_32BYTES == IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE) {
             return uint64(sect.VirtualAddress) + x.imageBase();
         }
     }    return 0;
-
 }
 
 // machoExe is the Mach-O (Apple macOS/iOS) implementation of the exe interface.
@@ -244,7 +233,6 @@ private static (slice<byte>, error) ReadData(this ptr<machoExe> _addr_x, ulong a
             return (data, error.As(null!)!);
         }
     }    return (null, error.As(fmt.Errorf("address not mapped"))!);
-
 }
 
 private static ulong DataStart(this ptr<machoExe> _addr_x) {
@@ -263,7 +251,6 @@ private static ulong DataStart(this ptr<machoExe> _addr_x) {
             return seg.Addr;
         }
     }    return 0;
-
 }
 
 // xcoffExe is the XCOFF (AIX eXtended COFF) implementation of the exe interface.
@@ -297,7 +284,6 @@ private static (slice<byte>, error) ReadData(this ptr<xcoffExe> _addr_x, ulong a
             return (data, error.As(null!)!);
         }
     }    return (null, error.As(fmt.Errorf("address not mapped"))!);
-
 }
 
 private static ulong DataStart(this ptr<xcoffExe> _addr_x) {

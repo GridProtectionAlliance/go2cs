@@ -3,11 +3,9 @@
 //go:build goexperiment.regabireflect
 // +build goexperiment.regabireflect
 
-// package goexperiment -- go2cs converted at 2022 March 06 22:30:03 UTC
+// package goexperiment -- go2cs converted at 2022 March 13 05:40:50 UTC
 // import "internal/goexperiment" ==> using goexperiment = go.@internal.goexperiment_package
 // Original source: C:\Program Files\Go\src\internal\goexperiment\exp_regabireflect_on.go
-
-
 namespace go.@internal;
 
 public static partial class goexperiment_package {

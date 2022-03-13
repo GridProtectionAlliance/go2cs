@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package driver -- go2cs converted at 2022 March 06 23:23:29 UTC
+// package driver -- go2cs converted at 2022 March 13 06:36:33 UTC
 // import "cmd/vendor/github.com/google/pprof/internal/driver" ==> using driver = go.cmd.vendor.github.com.google.pprof.@internal.driver_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\github.com\google\pprof\internal\driver\interactive.go
-using fmt = go.fmt_package;
-using io = go.io_package;
-using regexp = go.regexp_package;
-using sort = go.sort_package;
-using strconv = go.strconv_package;
-using strings = go.strings_package;
-
-using plugin = go.github.com.google.pprof.@internal.plugin_package;
-using report = go.github.com.google.pprof.@internal.report_package;
-using profile = go.github.com.google.pprof.profile_package;
-using System;
-
-
 namespace go.cmd.vendor.github.com.google.pprof.@internal;
+
+using fmt = fmt_package;
+using io = io_package;
+using regexp = regexp_package;
+using sort = sort_package;
+using strconv = strconv_package;
+using strings = strings_package;
+
+using plugin = github.com.google.pprof.@internal.plugin_package;
+using report = github.com.google.pprof.@internal.report_package;
+using profile = github.com.google.pprof.profile_package;
+using System;
 
 public static partial class driver_package {
 
@@ -83,18 +82,14 @@ private static error interactive(ptr<profile.Profile> _addr_p, ptr<plugin.Option
                                 }
 
                             }
-
                             value = strings.TrimSpace(value);
-
                         }
-
                         if (isConfigurable(name)) { 
                             // All non-bool options require inputs
                             if (len(s) == 1 && !isBoolConfig(name)) {
                                 o.UI.PrintErr(fmt.Errorf("please specify a value, e.g. %s=<val>", name));
                                 continue;
                             }
-
                             if (name == "sample_index") { 
                                 // Error check sample_index=xxx to ensure xxx is a valid sample type.
                                 var (index, err) = p.SampleIndexByName(value);
@@ -102,16 +97,12 @@ private static error interactive(ptr<profile.Profile> _addr_p, ptr<plugin.Option
                                     o.UI.PrintErr(err);
                                     continue;
                                 }
-
                                 if (index < 0 || index >= len(p.SampleType)) {
                                     o.UI.PrintErr(fmt.Errorf("invalid sample_index %q", value));
                                     continue;
                                 }
-
                                 value = p.SampleType[index].Type;
-
                             }
-
                             {
                                 var err = configure(name, value);
 
@@ -120,21 +111,16 @@ private static error interactive(ptr<profile.Profile> _addr_p, ptr<plugin.Option
                                 }
 
                             }
-
                             continue;
-
                         }
-
                     }
 
                 }
-
 
                 var tokens = strings.Fields(input);
                 if (len(tokens) == 0) {
                     continue;
                 }
-
                 switch (tokens[0]) {
                     case "o": 
 
@@ -159,17 +145,14 @@ private static error interactive(ptr<profile.Profile> _addr_p, ptr<plugin.Option
                 if (err == null) {
                     err = generateReportWrapper(p, args, cfg, o);
                 }
-
                 if (err != null) {
                     o.UI.PrintErr(err);
                 }
-
             }
 
             input = input__prev2;
         }
     }
-
 }
 
 private static var generateReportWrapper = generateReport; // For testing purposes.
@@ -190,7 +173,6 @@ private static void greetings(ptr<profile.Profile> _addr_p, plugin.UI ui) {
         }
     }
     ui.Print("Entering interactive mode (type \"help\" for commands, \"o\" for options)");
-
 }
 
 // shortcuts represents composite commands that expand into a sequence
@@ -209,10 +191,8 @@ private static slice<@string> expand(this shortcuts a, @string input) {
             }
 
         }
-
     }
     return new slice<@string>(new @string[] { input });
-
 }
 
 private static shortcuts pprofShortcuts = new shortcuts(":":[]string{"focus=","ignore=","hide=","tagfocus=","tagignore="},);
@@ -229,7 +209,6 @@ private static shortcuts profileShortcuts(ptr<profile.Profile> _addr_p) {
         s["total_" + st.Type] = new slice<@string>(new @string[] { "mean=0", command });
         s["mean_" + st.Type] = new slice<@string>(new @string[] { "mean=1", command });
     }    return s;
-
 }
 
 private static slice<@string> sampleTypes(ptr<profile.Profile> _addr_p) {
@@ -260,7 +239,6 @@ private static void printCurrentOptions(ptr<profile.Profile> _addr_p, plugin.UI 
             if (v == "") { 
                 // Apply default (last sample index).
                 v = st[len(st) - 1];
-
             } 
             // Add comments for all sample types in profile.
             comment = "[" + strings.Join(st, " | ") + "]";
@@ -275,10 +253,8 @@ private static void printCurrentOptions(ptr<profile.Profile> _addr_p, plugin.UI 
             comment = commentStart + " " + comment;
         }
         args = append(args, fmt.Sprintf("  %-25s = %-20s %s", n, v, comment));
-
     }    sort.Strings(args);
     ui.Print(strings.Join(args, "\n"));
-
 }
 
 // parseCommandLine parses a command and returns the pprof command to
@@ -304,7 +280,6 @@ private static (slice<@string>, config, error) parseCommandLine(slice<@string> i
             }
 
         }
-
     }
     if (c == null) {
         {
@@ -319,9 +294,7 @@ private static (slice<@string>, config, error) parseCommandLine(slice<@string> i
             }
 
         }
-
         return (null, new config(), error.As(fmt.Errorf("unrecognized command: %q", name))!);
-
     }
     if (c.hasParam) {
         if (len(args) == 0) {
@@ -329,7 +302,6 @@ private static (slice<@string>, config, error) parseCommandLine(slice<@string> i
         }
         cmd = append(cmd, args[0]);
         args = args[(int)1..];
-
     }
     var vcopy = currentConfig();
 
@@ -346,7 +318,6 @@ private static (slice<@string>, config, error) parseCommandLine(slice<@string> i
             }
 
         }
-
         switch (t[0]) {
             case '>': 
                 var outputFile = t[(int)1..];
@@ -370,7 +341,6 @@ private static (slice<@string>, config, error) parseCommandLine(slice<@string> i
                 focus = catRegex(focus, t);
                 break;
         }
-
     }
 
     if (name == "tags") {
@@ -394,7 +364,6 @@ private static (slice<@string>, config, error) parseCommandLine(slice<@string> i
         vcopy.NodeCount = 10;
     }
     return (cmd, vcopy, error.As(null!)!);
-
 }
 
 private static @string catRegex(@string a, @string b) {
@@ -402,7 +371,6 @@ private static @string catRegex(@string a, @string b) {
         return a + "|" + b;
     }
     return a + b;
-
 }
 
 // commandHelp displays help and usage information for all Commands
@@ -415,7 +383,6 @@ private static void commandHelp(@string args, plugin.UI ui) {
 
         ui.Print(help);
         return ;
-
     }
     {
         var c = pprofCommands[args];
@@ -425,7 +392,6 @@ private static void commandHelp(@string args, plugin.UI ui) {
             return ;
         }
     }
-
 
     {
         var help__prev1 = help;
@@ -440,9 +406,7 @@ private static void commandHelp(@string args, plugin.UI ui) {
 
     }
 
-
     ui.PrintErr("Unknown command: " + args);
-
 }
 
 // newCompleter creates an autocompletion function for a set of commands.
@@ -471,7 +435,6 @@ private static Func<@string, @string> newCompleter(slice<@string> fns) {
                     match = match__prev1;
 
                 }
-
                 goto __switch_break0;
             }
             if (len(tokens) == 2)
@@ -489,11 +452,8 @@ private static Func<@string, @string> newCompleter(slice<@string> fns) {
                         match = match__prev2;
 
                     }
-
                     return line;
-
                 }
-
             }
             // default: 
                 // Multiple tokens -- complete using functions, except for tags
@@ -510,20 +470,15 @@ private static Func<@string, @string> newCompleter(slice<@string> fns) {
  {
                             lastToken = functionCompleter(lastToken, fns);
                         }
-
                         return strings.Join(append(tokens[..(int)lastTokenIdx], lastToken), " ");
-
                     }
 
                 }
 
-
             __switch_break0:;
         }
         return line;
-
     };
-
 }
 
 // matchVariableOrCommand attempts to match a string token to the prefix of a Command.
@@ -539,7 +494,6 @@ private static @string matchVariableOrCommand(@string token) {
         return matches[0];
     }
     return "";
-
 }
 
 // functionCompleter replaces provided substring with a function
@@ -559,7 +513,6 @@ private static @string functionCompleter(@string substring, slice<@string> fns) 
         return found;
     }
     return substring;
-
 }
 
 private static slice<@string> functionNames(ptr<profile.Profile> _addr_p) {

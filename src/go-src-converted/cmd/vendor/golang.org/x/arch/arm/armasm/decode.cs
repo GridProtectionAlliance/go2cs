@@ -2,29 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package armasm -- go2cs converted at 2022 March 06 23:24:33 UTC
+// package armasm -- go2cs converted at 2022 March 13 06:37:42 UTC
 // import "cmd/vendor/golang.org/x/arch/arm/armasm" ==> using armasm = go.cmd.vendor.golang.org.x.arch.arm.armasm_package
 // Original source: C:\Program Files\Go\src\cmd\vendor\golang.org\x\arch\arm\armasm\decode.go
-using binary = go.encoding.binary_package;
-using fmt = go.fmt_package;
-
 namespace go.cmd.vendor.golang.org.x.arch.arm;
+
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+
+
+// An instFormat describes the format of an instruction encoding.
+// An instruction with 32-bit value x matches the format if x&mask == value
+// and the condition matches.
+// The condition matches if x>>28 == 0xF && value>>28==0xF
+// or if x>>28 != 0xF and value>>28 == 0.
+// If x matches the format, then the rest of the fields describe how to interpret x.
+// The opBits describe bits that should be extracted from x and added to the opcode.
+// For example opBits = 0x1234 means that the value
+//    (2 bits at offset 1) followed by (4 bits at offset 3)
+// should be added to op.
+// Finally the args describe how to decode the instruction arguments.
+// args is stored as a fixed-size array; if there are fewer than len(args) arguments,
+// args[i] == 0 marks the end of the argument list.
 
 public static partial class armasm_package {
 
-    // An instFormat describes the format of an instruction encoding.
-    // An instruction with 32-bit value x matches the format if x&mask == value
-    // and the condition matches.
-    // The condition matches if x>>28 == 0xF && value>>28==0xF
-    // or if x>>28 != 0xF and value>>28 == 0.
-    // If x matches the format, then the rest of the fields describe how to interpret x.
-    // The opBits describe bits that should be extracted from x and added to the opcode.
-    // For example opBits = 0x1234 means that the value
-    //    (2 bits at offset 1) followed by (4 bits at offset 3)
-    // should be added to op.
-    // Finally the args describe how to decode the instruction arguments.
-    // args is stored as a fixed-size array; if there are fewer than len(args) arguments,
-    // args[i] == 0 marks the end of the argument list.
 private partial struct instFormat {
     public uint mask;
     public uint value;
@@ -106,9 +108,7 @@ Search:
                 _continueSearch = true;
                 break;
             }
-
             args[j] = arg;
-
         }        decoderCover[i] = true;
 
         inst = new Inst(Op:op,Args:args,Enc:x,Len:4,);
@@ -119,7 +119,6 @@ Search:
         return (inst, error.As(null!)!);
     }
     return (new Inst(), error.As(errUnknown)!);
-
 }
 
 // An instArg describes the encoding of a single argument.
@@ -196,7 +195,6 @@ private static readonly var arg_satimm5 = 59;
 private static readonly var arg_satimm4m1 = 60;
 private static readonly var arg_satimm5m1 = 61;
 private static readonly var arg_widthm1 = 62;
-
 
 // decodeArg decodes the arg described by aop from the instruction bits x.
 // It returns nil if x cannot be decoded according to aop.
@@ -313,12 +311,10 @@ private static Arg decodeArg(instArg aop, uint x) {
         if (rot > 0 && v & 3 == 0) { 
             // could rotate less
             return new ImmAlt(uint8(v),uint8(rot));
-
         }
         if (rot >= 24 && ((v << (int)((32 - rot))) & 0xFF) >> (int)((32 - rot)) == v) { 
             // could wrap around to rot==0.
             return new ImmAlt(uint8(v),uint8(rot));
-
         }
         return Imm(v >> (int)(rot) | v << (int)((32 - rot)));
     else if (aop == arg_endian) 
@@ -501,8 +497,7 @@ private static Arg decodeArg(instArg aop, uint x) {
         return Imm((x >> 16) & (1 << 5 - 1) + 1);
     else 
         return null;
-    
-}
+    }
 
 // decodeShift decodes the shift-by-immediate encoded in x.
 private static (Shift, byte) decodeShift(uint x) {
@@ -522,7 +517,6 @@ private static (Shift, byte) decodeShift(uint x) {
             count = 1;
         }
         return (typ, uint8(count));
-
 }
 
 } // end armasm_package
